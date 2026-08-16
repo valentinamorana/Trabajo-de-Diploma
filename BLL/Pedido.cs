@@ -240,18 +240,23 @@ namespace BLL
                     "El cliente {0} no tiene plan asignado. Asignale un plan antes de crear un pedido.",
                     cliente.NombreCompleto);
 
-            if (!cliente.SuscripcionVigente())
-                throw new BE.AppException("err.bll.pedido.suscripcion_vencida",
-                    "La suscripción de {0} venció el {1}. Renovar en el módulo de Clientes.",
-                    cliente.NombreCompleto, cliente.FechaVencimiento.Value.ToString("dd/MM/yyyy"));
-
             // PdN6 — venció el período de gracia sin regularizar el cobro (BLL.Manejadores.
             // SuspenderHandler): se bloquean nuevos pedidos hasta que se registre un cobro exitoso.
+            // Va ANTES que el chequeo de vencimiento genérico de abajo a propósito: un cliente
+            // suspendido por pago casi siempre tiene también FechaVencimiento en el pasado (la
+            // gracia solo se abre sobre una suscripción ya vencida/por vencer — DetectarCobroHandler),
+            // así que si el chequeo genérico fuera primero, este nunca se alcanzaría en la práctica
+            // y el usuario vería "Renovar en el módulo de Clientes" en vez del motivo real (pago).
             if (cliente.EstaSuspendidoPorPago)
                 throw new BE.AppException("err.bll.pedido.pago_suspendido",
                     "La suscripción de {0} está suspendida por falta de pago desde el {1}. " +
                     "Regularizar el cobro en el módulo de Suscriptores antes de generar un nuevo pedido.",
                     cliente.NombreCompleto, cliente.FechaLimiteGracia.Value.ToString("dd/MM/yyyy"));
+
+            if (!cliente.SuscripcionVigente())
+                throw new BE.AppException("err.bll.pedido.suscripcion_vencida",
+                    "La suscripción de {0} venció el {1}. Renovar en el módulo de Clientes.",
+                    cliente.NombreCompleto, cliente.FechaVencimiento.Value.ToString("dd/MM/yyyy"));
 
             return cliente;
         }

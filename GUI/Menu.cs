@@ -252,7 +252,8 @@ namespace GUI
             inventarioToolStripMenuItem.Visible = prendasToolStripMenuItem.Visible || Permite("mnuStock");
 
             SetGrupoVisible(suscriptoresToolStripMenuItem,
-                clientesToolStripMenuItem, planesToolStripMenuItem, renovacionSuscripcionToolStripMenuItem);
+                clientesToolStripMenuItem, planesToolStripMenuItem, renovacionSuscripcionToolStripMenuItem,
+                cobroSuscripcionToolStripMenuItem);
 
             SetGrupoVisible(ventasToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem);

@@ -39,6 +39,10 @@ namespace GUI
 
         // ── Visibilidad por rol ───────────────────────────────────────────────
         private readonly bool _verPrendas, _verClientes, _verPedidos, _verBackup, _verStock;
+        // Granulares, para saber a CUÁL de las dos pantallas de pedidos navegar al hacer clic
+        // en una fila de "Pedido" en Tareas Pendientes — _verPedidos por sí solo no alcanza,
+        // porque se activa con cualquiera de las dos patentes, no necesariamente con ambas.
+        private readonly bool _tienePedidosVenta, _tienePedidosRealizados;
         // Actividad reciente = bitácora del sistema (dato sensible de auditoría): solo se muestra
         // a quien tiene permiso de ver la auditoría (Administrador / Auditor), no a roles operativos.
         private readonly bool _verActividad;
@@ -86,6 +90,8 @@ namespace GUI
             _verBackup   = nombres.Contains("mnuUsuarios");
             _verStock    = nombres.Contains("mnuStock");
             _verActividad = nombres.Contains("mnuAuditoria");
+            _tienePedidosVenta      = nombres.Contains("mnuPedidosVenta");
+            _tienePedidosRealizados = nombres.Contains("mnuPedidosRealizados");
 
             this.Text            = "Panel de Control";
             this.Size            = new Size(870, 570);
@@ -690,6 +696,7 @@ namespace GUI
             _dgvTareas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTipo",  HeaderText = "Tipo",        FillWeight = 22 });
             _dgvTareas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDesc",  HeaderText = "Descripción", FillWeight = 56 });
             _dgvTareas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFecha", HeaderText = "Desde",       FillWeight = 22 });
+            _dgvTareas.CellClick += DgvTareas_CellClick;
 
             _panelTareas.Controls.Add(_dgvTareas);
             _panelTareas.Controls.Add(_lblTareasTitulo);
@@ -744,6 +751,7 @@ namespace GUI
                             string desde = dias == 0 ? T("dash.hoy", "hoy") : string.Format(T("dash.hace_dias", "hace {0}d"), dias);
                             var fila = _dgvTareas.Rows[_dgvTareas.Rows.Add(tipoMant, m.NombrePrenda, desde)];
                             fila.DefaultCellStyle.ForeColor = dias >= 3 ? Color.FromArgb(160, 60, 0) : Color.FromArgb(60, 100, 60);
+                            fila.Tag = "mant";
                         }
 
                     if (pedPend != null)
@@ -754,6 +762,7 @@ namespace GUI
                             string desc  = $"#{p.IdPedido} — {p.NombreCliente ?? $"Cliente {p.IdCliente}"}";
                             var fila = _dgvTareas.Rows[_dgvTareas.Rows.Add(tipoPedido, desc, desde)];
                             fila.DefaultCellStyle.ForeColor = dias >= 2 ? Color.FromArgb(160, 40, 40) : Color.FromArgb(160, 100, 0);
+                            fila.Tag = "pedido";
                         }
 
                     if (_dgvTareas.Rows.Count == 0)
@@ -767,6 +776,37 @@ namespace GUI
                         _dgvTareas.Rows.Count == 1 && _dgvTareas.Rows[0].Cells["colTipo"].Value?.ToString() == "—" ? 0 : _dgvTareas.Rows.Count);
                 }));
             });
+        }
+
+        // Clic en una fila de "Mis Tareas Pendientes": navega según el TIPO real de la fila
+        // (guardado en Tag, no en el texto traducido de la celda) y solo si el usuario tiene
+        // el permiso de la pantalla destino — _verPedidos por sí solo no alcanza, porque se
+        // activa con Pedidos de Venta O Pedidos Realizados, no necesariamente con ambas.
+        private void DgvTareas_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _dgvTareas.Rows.Count) return;
+            string tipo = _dgvTareas.Rows[e.RowIndex].Tag as string;
+
+            if (tipo == "mant" && _verPrendas)
+                AbrirPantalla(() => new Prendas());
+            else if (tipo == "pedido")
+            {
+                if (_tienePedidosVenta)               AbrirPantalla(() => new PedidosVenta());
+                else if (_tienePedidosRealizados)      AbrirPantalla(() => new PedidosRealizados());
+            }
+        }
+
+        // Abre (o enfoca si ya está abierta) la pantalla del tipo T. Genérico porque el mismo
+        // patrón de dedup por MdiChildren se repite para cada pantalla destino posible.
+        private void AbrirPantalla<T>(Func<T> crear) where T : Form
+        {
+            var menu = this.MdiParent;
+            if (menu == null) return;
+            foreach (Form hijo in menu.MdiChildren)
+                if (hijo is T existente) { existente.BringToFront(); return; }
+            var nueva = crear();
+            nueva.MdiParent = menu;
+            nueva.Show();
         }
 
         // El texto de cada actividad se guarda en español en la bitácora (BD). Esta tabla lo

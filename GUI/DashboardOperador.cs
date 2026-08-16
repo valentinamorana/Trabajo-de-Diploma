@@ -131,17 +131,26 @@ namespace GUI
                 string tit  = $"Pedido #{p.IdPedido}";
                 string sub  = p.NombreCliente ?? $"Cliente {p.IdCliente}";
 
+                // Las tres columnas abren la misma pantalla (Pedidos Realizados): es el único
+                // permiso que tiene OperadorLogistico, y ahí se despacha, se marca entregado y
+                // se ve el historial — no hay riesgo de exponer una pantalla sin permiso.
                 switch (p.Estado)
                 {
                     case BE.EstadoPedido.Pendiente:
-                        _colPendiente.Controls.Add(CrearCard(tit, sub, dias,
-                            dias >= 2 ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200)));
+                        var cPend = CrearCard(tit, sub, dias,
+                            dias >= 2 ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
+                        HabilitarClicAbrirPedidosRealizados(cPend);
+                        _colPendiente.Controls.Add(cPend);
                         break;
                     case BE.EstadoPedido.Despachado:
-                        _colDespachado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255)));
+                        var cDesp = CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255));
+                        HabilitarClicAbrirPedidosRealizados(cDesp);
+                        _colDespachado.Controls.Add(cDesp);
                         break;
                     case BE.EstadoPedido.Entregado:
-                        _colEntregado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220)));
+                        var cEntr = CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220));
+                        HabilitarClicAbrirPedidosRealizados(cEntr);
+                        _colEntregado.Controls.Add(cEntr);
                         break;
                 }
             }
@@ -161,6 +170,29 @@ namespace GUI
                     _lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
             catch { }
+        }
+
+        // Abre (o enfoca) Pedidos Realizados. Todavía no deja seleccionado el pedido puntual
+        // dentro de la grilla — esa pantalla no tiene esa capacidad hoy.
+        private void HabilitarClicAbrirPedidosRealizados(Panel card)
+        {
+            EventHandler abrir = (s, e) => AbrirPedidosRealizados();
+            card.Cursor = Cursors.Hand;
+            card.Click += abrir;
+            foreach (Control c in card.Controls)
+            {
+                c.Cursor = Cursors.Hand;
+                c.Click += abrir;
+            }
+        }
+
+        private void AbrirPedidosRealizados()
+        {
+            var menu = this.MdiParent;
+            if (menu == null) return;
+            foreach (Form hijo in menu.MdiChildren)
+                if (hijo is PedidosRealizados) { hijo.BringToFront(); return; }
+            new PedidosRealizados { MdiParent = menu }.Show();
         }
 
         private void ConstruirUI()

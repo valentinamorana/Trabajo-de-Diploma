@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
@@ -24,6 +25,7 @@ namespace GUI
         private Label           _numPedidos, _txtPedidos;
         private Label           _numClientes, _txtClientes;
         private Label           _numPlanes,   _txtPlanes;
+        private Label           _numSuscripciones, _txtSuscripciones;
         private FlowLayoutPanel _flowCards;
         private FlowLayoutPanel _colPendiente, _colDespachado, _colEntregado;
         private Label           _lblColPend, _lblColDesp, _lblColEntr;
@@ -83,6 +85,7 @@ namespace GUI
             if (_txtPedidos  != null) _txtPedidos.Text  = Tr("dash.pedidos",  "Pedidos\npendientes");
             if (_txtClientes != null) _txtClientes.Text = Tr("dash.clientes", "Clientes\nregistrados");
             if (_txtPlanes   != null) _txtPlanes.Text   = Tr("dash.planes",   "Planes\nactivos");
+            if (_txtSuscripciones != null) _txtSuscripciones.Text = Tr("dash.suscripciones", "Suscripciones\npor vencer");
             _lblColPend.Text = Tr("dash.kan.pendiente",  "Pendiente");
             _lblColDesp.Text = Tr("dash.kan.despachado", "Despachado");
             _lblColEntr.Text = Tr("dash.kan.entregado",  "Entregado");
@@ -114,6 +117,11 @@ namespace GUI
             if (_numPedidos  != null) _numPedidos.Text  = pedidos.FindAll(p => p.Estado == BE.EstadoPedido.Pendiente).Count.ToString();
             if (_numClientes != null) _numClientes.Text = clientes.Count.ToString();
             if (_numPlanes   != null) _numPlanes.Text   = planes.Count.ToString();
+            // Mismo criterio que BLL.PanelAlertas: vencida o vence en los próximos 7 días.
+            if (_numSuscripciones != null)
+                _numSuscripciones.Text = clientes
+                    .Count(c => c.VencimientoExpirado || c.SuscripcionProximaAVencer(7))
+                    .ToString();
         }
 
         private void ActualizarKanban(List<BE.Pedido> pedidos)
@@ -131,8 +139,15 @@ namespace GUI
                 switch (p.Estado)
                 {
                     case BE.EstadoPedido.Pendiente:
-                        _colPendiente.Controls.Add(CrearCard(tit, sub, dias,
-                            dias >= 2 ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200)));
+                        var cardPendiente = CrearCard(tit, sub, dias,
+                            dias >= 2 ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
+                        // Solo "Pendiente" es clickeable: abre Pedidos de Venta, permiso que el
+                        // Vendedor siempre tiene (es el único rol que ve este dashboard).
+                        // Despachado/Entregado viven en Pedidos Realizados — permiso que un
+                        // Vendedor base NO tiene (solo lo hereda GerenteComercial) — habilitar
+                        // el clic ahí sería un bypass de permisos, así que quedan solo informativas.
+                        HabilitarClicAbrirPedidosVenta(cardPendiente);
+                        _colPendiente.Controls.Add(cardPendiente);
                         break;
                     case BE.EstadoPedido.Despachado:
                         _colDespachado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255)));
@@ -158,6 +173,31 @@ namespace GUI
                     _lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
             catch { }
+        }
+
+        // Pinta la tarjeta como clickeable y, al hacer clic, abre (o enfoca) Pedidos de Venta.
+        // Todavía no deja seleccionado el pedido puntual dentro de la grilla — PedidosVenta no
+        // tiene esa capacidad hoy — pero ya ahorra la navegación por menú (Suscriptores/Ventas
+        // → Pedidos de Venta).
+        private void HabilitarClicAbrirPedidosVenta(Panel card)
+        {
+            EventHandler abrir = (s, e) => AbrirPedidosVenta();
+            card.Cursor = Cursors.Hand;
+            card.Click += abrir;
+            foreach (Control c in card.Controls)
+            {
+                c.Cursor = Cursors.Hand;
+                c.Click += abrir;
+            }
+        }
+
+        private void AbrirPedidosVenta()
+        {
+            var menu = this.MdiParent;
+            if (menu == null) return;
+            foreach (Form hijo in menu.MdiChildren)
+                if (hijo is PedidosVenta) { hijo.BringToFront(); return; }
+            new PedidosVenta { MdiParent = menu }.Show();
         }
 
         private void ConstruirUI()
@@ -187,6 +227,10 @@ namespace GUI
             _flowCards.Controls.Add(CrearTarjeta(Color.FromArgb(252, 228, 235), Color.FromArgb(80, 28, 52),   out _numPedidos,  out _txtPedidos));
             _flowCards.Controls.Add(CrearTarjeta(Color.FromArgb(244, 212, 226), Color.FromArgb(110, 42, 74),  out _numClientes, out _txtClientes));
             _flowCards.Controls.Add(CrearTarjeta(Color.FromArgb(236, 196, 215), Color.FromArgb(176, 62, 96),  out _numPlanes,   out _txtPlanes));
+            // Mismo dato que ya usa BLL.PanelAlertas para el badge de Alertas del menú — acá se
+            // reutiliza directamente sobre los clientes que este dashboard ya carga (rediseño
+            // UX/UI, hallazgo #1: el Vendedor ve "Suscriptores" sin tener que ir a otra pantalla).
+            _flowCards.Controls.Add(CrearTarjeta(Color.FromArgb(255, 235, 210), Color.FromArgb(166, 101, 14), out _numSuscripciones, out _txtSuscripciones));
             _flowCards.Resize += (s, e) =>
             {
                 int cnt  = _flowCards.Controls.Count;

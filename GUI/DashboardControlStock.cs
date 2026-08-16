@@ -140,12 +140,18 @@ namespace GUI
                 string tit   = m.NombrePrenda ?? $"Prenda #{m.IdPrenda}";
                 string sub   = $"Entrada: {m.FechaEntrada:dd/MM/yyyy}";
 
-                if (dias < 2)
-                    _colReciente.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220)));
-                else if (dias <= 7)
-                    _colEnCurso.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(255, 248, 210)));
-                else
-                    _colUrgente.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(255, 205, 200)));
+                // Las tres columnas abren Prendas: OperadorDeInventario siempre tiene ese
+                // permiso (mnuPrendas), así que no hay riesgo de exponer una pantalla sin acceso.
+                Panel card = dias < 2
+                    ? CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220))
+                    : dias <= 7
+                        ? CrearCard(tit, sub, dias, Color.FromArgb(255, 248, 210))
+                        : CrearCard(tit, sub, dias, Color.FromArgb(255, 205, 200));
+                HabilitarClicAbrirPrendas(card);
+
+                if (dias < 2)       _colReciente.Controls.Add(card);
+                else if (dias <= 7) _colEnCurso.Controls.Add(card);
+                else                _colUrgente.Controls.Add(card);
             }
 
             if (_colReciente.Controls.Count == 0) _colReciente.Controls.Add(CrearVacio());
@@ -163,6 +169,29 @@ namespace GUI
                     _lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
             catch { }
+        }
+
+        // Abre (o enfoca) Prendas. Todavía no deja seleccionada la prenda puntual dentro de la
+        // grilla — esa pantalla no tiene esa capacidad hoy.
+        private void HabilitarClicAbrirPrendas(Panel card)
+        {
+            EventHandler abrir = (s, e) => AbrirPrendas();
+            card.Cursor = Cursors.Hand;
+            card.Click += abrir;
+            foreach (Control c in card.Controls)
+            {
+                c.Cursor = Cursors.Hand;
+                c.Click += abrir;
+            }
+        }
+
+        private void AbrirPrendas()
+        {
+            var menu = this.MdiParent;
+            if (menu == null) return;
+            foreach (Form hijo in menu.MdiChildren)
+                if (hijo is Prendas) { hijo.BringToFront(); return; }
+            new Prendas { MdiParent = menu }.Show();
         }
 
         private void ConstruirUI()

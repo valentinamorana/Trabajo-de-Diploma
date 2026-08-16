@@ -214,6 +214,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tema.cs" />
     <Compile Include="ResetClaveDialog.cs">
       <SubType>Form</SubType>
     </Compile>

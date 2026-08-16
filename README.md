@@ -164,10 +164,11 @@ BD/02_Actualizar_BaseDeDatos.sql          -- BD existente: migraciones increment
 BD/03_Permisos_Granulares.sql
 BD/04_Diagnostico_Limpieza_Nodos_Permiso.sql
 BD/05_Renovacion_Suscripcion.sql          -- Tabla y permisos del módulo de Renovación (PdN5)
+BD/06_Rediseno_Menu.sql                   -- Actualiza el texto "Bitácora" → "Analítica" en BD existentes
 ```
 
 - **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql`.
-- **Actualizar una BD existente** → ejecutar `02` a `05` en orden.
+- **Actualizar una BD existente** → ejecutar `02` a `06` en orden.
 
 ### Cadena de conexión
 

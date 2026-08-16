@@ -277,16 +277,21 @@ namespace GUI
         /// La lógica es completamente basada en permisos (NombreMenu), no en roles.
         ///
         /// Mapeo NombreMenu → ToolStripMenuItem:
-        ///   mnuPrendas            → prendasToolStripMenuItem       (bajo Inventario)
-        ///   mnuOutfits            → outfitsToolStripMenuItem        (bajo Inventario)
-        ///   mnuCategorias         → categoriasToolStripMenuItem     (bajo Inventario)
-        ///   mnuStock              → stockToolStripMenuItem          (bajo Inventario — pendiente en Designer)
-        ///   mnuClientes           → clientesToolStripMenuItem       (bajo Ventas)
-        ///   mnuPlanSuscripciones  → planesToolStripMenuItem         (bajo Ventas)
-        ///   mnuPedidosVenta       → pedidosVentaToolStripMenuItem   (bajo Ventas)
-        ///   mnuPedidosRealizados  → pedidosRealizadosToolStripMenuItem (bajo Ventas)
-        ///   mnuUsuarios           → gestionToolStripMenuItem        (bajo Administrar)
-        ///   mnuAuditoria          → bitacoraToolStripMenuItem
+        ///   mnuPrendas               → prendasToolStripMenuItem       (bajo Inventario)
+        ///   mnuOutfits               → outfitsToolStripMenuItem        (bajo Inventario)
+        ///   mnuCategorias            → categoriasToolStripMenuItem     (bajo Inventario)
+        ///   mnuStock                 → stockToolStripMenuItem          (bajo Inventario — pendiente en Designer)
+        ///   mnuClientes              → clientesToolStripMenuItem       (bajo Suscriptores)
+        ///   mnuPlanSuscripciones     → planesToolStripMenuItem         (bajo Suscriptores)
+        ///   mnuRenovacionSuscripcion → renovacionSuscripcionToolStripMenuItem (bajo Suscriptores)
+        ///   mnuPedidosVenta          → pedidosVentaToolStripMenuItem   (bajo Ventas)
+        ///   mnuPedidosRealizados     → pedidosRealizadosToolStripMenuItem (bajo Ventas)
+        ///   mnuUsuarios              → gestionToolStripMenuItem        (bajo Administrar)
+        ///   mnuAuditoria             → bitacoraToolStripMenuItem       (renombrado "Analítica")
+        ///
+        /// Suscriptores se separó de Ventas (rediseño UX/UI, hallazgo #6): Clientes/Planes/
+        /// Renovación tienen ritmo semanal, Pedidos de Venta/Realizados ritmo diario. Ningún
+        /// NombreMenu cambió — solo el ToolStripMenuItem contenedor de cada hoja.
         ///
         /// Administrador tiene los 10 permisos → ve todo el menú.
         /// </summary>
@@ -341,8 +346,10 @@ namespace GUI
             // Inventario suma 'mnuStock' (su ítem propio está pendiente en el Designer).
             inventarioToolStripMenuItem.Visible = prendasToolStripMenuItem.Visible || Permite("mnuStock");
 
+            SetGrupoVisible(suscriptoresToolStripMenuItem,
+                clientesToolStripMenuItem, planesToolStripMenuItem, renovacionSuscripcionToolStripMenuItem);
+
             SetGrupoVisible(ventasToolStripMenuItem,
-                clientesToolStripMenuItem, planesToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem);
 
             // Submenús "Usuarios ▸" / "Sistema ▸" y el menú "Administrar" (todo gobernado por gestión).
@@ -861,6 +868,7 @@ namespace GUI
             Aplicar(panelControlToolStripMenuItem,      t);
             Aplicar(inventarioToolStripMenuItem,        t);
             Aplicar(prendasToolStripMenuItem,           t);
+            Aplicar(suscriptoresToolStripMenuItem,      t);
             Aplicar(ventasToolStripMenuItem,            t);
             Aplicar(clientesToolStripMenuItem,          t);
             Aplicar(planesToolStripMenuItem,            t);
@@ -881,6 +889,7 @@ namespace GUI
             Aplicar(bitNegocioToolStripMenuItem,        t);
             Aplicar(reporteJornadaToolStripMenuItem,    t);
             Aplicar(cerrarSesionToolStripMenuItem,      t);
+            Aplicar(ventanaToolStripMenuItem,           t);
 
             // Ítem de Alertas: tiene icono + badge, se compone aparte (no por Tag directo).
             RefrescarTextoAlertas();

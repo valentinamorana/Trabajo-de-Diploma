@@ -160,6 +160,7 @@ ES	dlg.login.sesion.cierre	La aplicación se cerrará.
 ES	mnu.perfil	Perfil
 ES	mnu.inventario	Inventario
 ES	mnu.prendas	Prendas
+ES	mnu.suscriptores	Suscriptores
 ES	mnu.ventas	Ventas
 ES	mnu.clientes	Clientes
 ES	mnu.planes	Planes de Suscripcion
@@ -168,8 +169,9 @@ ES	mnu.pedidosreal	Pedidos Realizados
 ES	mnu.administrar	Administrar
 ES	mnu.usuarios	Usuarios
 ES	mnu.perfiles	Perfiles y Permisos
-ES	mnu.bitacora	Bitácora
+ES	mnu.bitacora	Analítica
 ES	mnu.cerrarsesion	Cerrar Sesion
+ES	mnu.ventana	Ventana
 ES	mnu.idiomas	Gestión de Idiomas
 ES	frm.clientes	Gestión de Clientes
 ES	lbl.buscar	Buscar:
@@ -659,6 +661,7 @@ ES	frm.dashboard	Panel de Control
 ES	dash.prendas	Prendas\ndisponibles
 ES	dash.clientes	Clientes\nregistrados
 ES	dash.pedidos	Pedidos\npendientes
+ES	dash.suscripciones	Suscripciones\npor vencer
 ES	dash.backup	días sin\nbackup
 ES	dash.ocupacion	ocupación\ndel stock
 ES	dash.ocupacion.detalle	{0} en uso · {1} libres
@@ -1052,6 +1055,7 @@ EN	dlg.login.sesion.cierre	The application will close.
 EN	mnu.perfil	Profile
 EN	mnu.inventario	Inventory
 EN	mnu.prendas	Garments
+EN	mnu.suscriptores	Subscribers
 EN	mnu.ventas	Sales
 EN	mnu.clientes	Clients
 EN	mnu.planes	Subscription Plans
@@ -1060,8 +1064,9 @@ EN	mnu.pedidosreal	Fulfilled Orders
 EN	mnu.administrar	Administration
 EN	mnu.usuarios	Users
 EN	mnu.perfiles	Profiles & Permissions
-EN	mnu.bitacora	Audit Log
+EN	mnu.bitacora	Analytics
 EN	mnu.cerrarsesion	Sign Out
+EN	mnu.ventana	Window
 EN	mnu.idiomas	Language Management
 EN	frm.clientes	Client Management
 EN	lbl.buscar	Search:
@@ -1550,6 +1555,7 @@ EN	frm.dashboard	Control Panel
 EN	dash.prendas	Garments\navailable
 EN	dash.clientes	Clients\nregistered
 EN	dash.pedidos	Orders\npending
+EN	dash.suscripciones	Subscriptions\nexpiring soon
 EN	dash.backup	days without\nbackup
 EN	dash.ocupacion	stock\noccupancy
 EN	dash.ocupacion.detalle	{0} in use · {1} available
@@ -1944,6 +1950,7 @@ RU	dlg.login.sesion.cierre	Приложение будет закрыто.
 RU	mnu.perfil	Профиль
 RU	mnu.inventario	Склад
 RU	mnu.prendas	Одежда
+RU	mnu.suscriptores	Подписчики
 RU	mnu.ventas	Продажи
 RU	mnu.clientes	Клиенты
 RU	mnu.planes	Тарифные планы
@@ -1952,8 +1959,9 @@ RU	mnu.pedidosreal	Выполненные заказы
 RU	mnu.administrar	Администрирование
 RU	mnu.usuarios	Пользователи
 RU	mnu.perfiles	Профили и права
-RU	mnu.bitacora	Журнал аудита
+RU	mnu.bitacora	Аналитика
 RU	mnu.cerrarsesion	Выйти из системы
+RU	mnu.ventana	Окно
 RU	mnu.idiomas	Управление языками
 RU	frm.clientes	Управление клиентами
 RU	lbl.buscar	Поиск:
@@ -2442,6 +2450,7 @@ RU	frm.dashboard	Панель управления
 RU	dash.prendas	Товаров\nдоступно
 RU	dash.clientes	Клиентов\nзарегистрировано
 RU	dash.pedidos	Заказов\nв ожидании
+RU	dash.suscripciones	Подписок\nскоро истекает
 RU	dash.backup	дней без\nрезервной копии
 RU	dash.ocupacion	загрузка\nсклада
 RU	dash.ocupacion.detalle	{0} исп. · {1} свободно
@@ -2877,6 +2886,7 @@ PT	dlg.login.sesion.cierre	O aplicativo será fechado.
 PT	mnu.perfil	Perfil
 PT	mnu.inventario	Estoque
 PT	mnu.prendas	Roupas
+PT	mnu.suscriptores	Assinantes
 PT	mnu.ventas	Vendas
 PT	mnu.clientes	Clientes
 PT	mnu.planes	Planos de Assinatura
@@ -2885,8 +2895,9 @@ PT	mnu.pedidosreal	Pedidos Realizados
 PT	mnu.administrar	Administrar
 PT	mnu.usuarios	Usuários
 PT	mnu.perfiles	Perfis e Permissões
-PT	mnu.bitacora	Registro de Auditoria
+PT	mnu.bitacora	Análise
 PT	mnu.cerrarsesion	Sair do sistema
+PT	mnu.ventana	Janela
 PT	mnu.idiomas	Gerenciamento de Idiomas
 PT	mnu.dashboard	Painel de Controle
 PT	mnu.bitacora.sistema	Registro do Sistema
@@ -3377,6 +3388,7 @@ PT	frm.dashboard	Painel de Controle
 PT	dash.prendas	Roupas\ndisponíveis
 PT	dash.clientes	Clientes\ncadastrados
 PT	dash.pedidos	Pedidos\npendentes
+PT	dash.suscripciones	Assinaturas\na vencer
 PT	dash.backup	dias sem\nbackup
 PT	dash.ocupacion	ocupação\ndo estoque
 PT	dash.ocupacion.detalle	{0} em uso · {1} disponíveis

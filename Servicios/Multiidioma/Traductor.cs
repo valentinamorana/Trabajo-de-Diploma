@@ -30,15 +30,17 @@ namespace Servicios.Multiidioma
     ///   lnk.olvide          → link "¿Olvidaste tu contraseña?"
     ///   mnu.inventario      → menú "Inventario"
     ///   mnu.prendas         → ítem "Prendas"
-    ///   mnu.ventas          → menú "Ventas"
+    ///   mnu.suscriptores    → menú "Suscriptores" (Clientes/Planes/Renovación — separado de Ventas)
+    ///   mnu.ventas          → menú "Ventas" (Pedidos de Venta/Realizados)
     ///   mnu.clientes        → ítem "Clientes"
     ///   mnu.planes          → ítem "Planes de Suscripción"
     ///   mnu.pedidosventa    → ítem "Pedidos de Venta"
     ///   mnu.pedidosreal     → ítem "Pedidos Realizados"
     ///   mnu.administrar     → menú "Administrar"
     ///   mnu.usuarios        → ítem "Usuarios"
-    ///   mnu.bitacora        → ítem "Bitácora"
+    ///   mnu.bitacora        → menú "Analítica" (agrupa Bitácora + reportes futuros del Bloque 3)
     ///   mnu.cerrarsesion    → ítem "Cerrar Sesión"
+    ///   mnu.ventana         → menú "Ventana" (lista nativa de ventanas MDI abiertas)
     /// </summary>
     public static class Traductor
     {

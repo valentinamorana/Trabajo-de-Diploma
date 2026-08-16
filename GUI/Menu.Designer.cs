@@ -39,6 +39,7 @@
             this.prendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.outfitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.categoriasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.suscriptoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.planesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,6 +58,7 @@
             this.bitNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sepBitacoraToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.reporteJornadaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ventanaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -71,10 +73,12 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.usuarioToolStripMenuItem,
             this.panelControlToolStripMenuItem,
+            this.suscriptoresToolStripMenuItem,
             this.inventarioToolStripMenuItem,
             this.ventasToolStripMenuItem,
+            this.bitacoraToolStripMenuItem,
             this.gestionToolStripMenuItem,
-            this.bitacoraToolStripMenuItem});
+            this.ventanaToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1100, 24);
@@ -90,6 +94,9 @@
             this.usuarioToolStripMenuItem.Tag = "mnu.perfil";
             this.usuarioToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
             this.usuarioToolStripMenuItem.Text = "Perfil";
+            // Cuenta (Sesión/Mi Perfil) pasa al costado derecho, junto a Alertas — deja de competir
+            // visualmente con los módulos de negocio (hallazgo #10 del rediseño UX/UI).
+            this.usuarioToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             //
             // panelControlToolStripMenuItem
             //
@@ -139,13 +146,23 @@
             this.categoriasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.categoriasToolStripMenuItem.Text = "Categorias";
             this.categoriasToolStripMenuItem.Click += new System.EventHandler(this.categoriasToolStripMenuItem_Click);
-            // 
-            // ventasToolStripMenuItem
-            // 
-            this.ventasToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            //
+            // suscriptoresToolStripMenuItem
+            //
+            // Se separa de "Ventas": Clientes/Planes/Renovación tienen ritmo semanal, no diario
+            // (hallazgo #6 del rediseño UX/UI) — antes vivían mezclados con Pedidos de Venta.
+            this.suscriptoresToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.clientesToolStripMenuItem,
             this.planesToolStripMenuItem,
-            this.renovacionSuscripcionToolStripMenuItem,
+            this.renovacionSuscripcionToolStripMenuItem});
+            this.suscriptoresToolStripMenuItem.Name = "suscriptoresToolStripMenuItem";
+            this.suscriptoresToolStripMenuItem.Tag = "mnu.suscriptores";
+            this.suscriptoresToolStripMenuItem.Size = new System.Drawing.Size(90, 20);
+            this.suscriptoresToolStripMenuItem.Text = "Suscriptores";
+            //
+            // ventasToolStripMenuItem
+            //
+            this.ventasToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pedidosVentaToolStripMenuItem,
             this.pedidosRealizadosToolStripMenuItem});
             this.ventasToolStripMenuItem.Name = "ventasToolStripMenuItem";
@@ -265,7 +282,10 @@
             this.bitacoraToolStripMenuItem.Name = "bitacoraToolStripMenuItem";
             this.bitacoraToolStripMenuItem.Tag = "mnu.bitacora";
             this.bitacoraToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
-            this.bitacoraToolStripMenuItem.Text = "Bitácora";
+            // Se renombra a "Analítica": agrupa Bitácora con los reportes del Bloque 3 (Idea de
+            // Negocio) a medida que se implementen — misma clave de traducción "mnu.bitacora",
+            // solo cambia el texto que representa (ver rediseño UX/UI, sección 10).
+            this.bitacoraToolStripMenuItem.Text = "Analítica";
             //
             // bitSistemaToolStripMenuItem
             //
@@ -295,7 +315,17 @@
             this.reporteJornadaToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.reporteJornadaToolStripMenuItem.Text = "📊  Reporte de Jornada";
             this.reporteJornadaToolStripMenuItem.Click += new System.EventHandler(this.reporteJornadaToolStripMenuItem_Click);
-            // 
+            //
+            // ventanaToolStripMenuItem
+            //
+            // Lista nativa de ventanas MDI abiertas (hallazgo #2 del rediseño UX/UI: hoy no hay
+            // forma de ver/ordenar las pantallas abiertas más que buscarlas a mano).
+            this.ventanaToolStripMenuItem.Name = "ventanaToolStripMenuItem";
+            this.ventanaToolStripMenuItem.Tag = "mnu.ventana";
+            this.ventanaToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
+            this.ventanaToolStripMenuItem.Text = "Ventana";
+            this.menuStrip1.MdiWindowListItem = this.ventanaToolStripMenuItem;
+            //
             // Menu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -337,6 +367,7 @@
         private System.Windows.Forms.ToolStripMenuItem gestionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem perfilesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem suscriptoresToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ventasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clientesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem planesToolStripMenuItem;
@@ -345,5 +376,6 @@
         private System.Windows.Forms.ToolStripMenuItem pedidosRealizadosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem idiomasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem integridadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ventanaToolStripMenuItem;
     }
 }

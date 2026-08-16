@@ -13,11 +13,17 @@ namespace GUI
     /// <summary>
     /// WardrobeFlow — Formulario de Login para Empleados.
     ///
+    /// Todos los controles visuales están declarados en Login.Designer.cs (InitializeComponent),
+    /// igual que en el resto del proyecto (ClienteForm, Usuarios, PrendaForm, etc.): nada de
+    /// crear controles "a mano" en el constructor. Esto es lo que le permite al Diseñador de
+    /// Windows Forms de Visual Studio mostrar la preview del formulario y navegar al código con
+    /// doble click sobre cada control.
+    ///
     /// PATRÓN OBSERVER — T05 Gestión de Múltiples Idiomas:
     ///   Implementa IIdiomaObserver. Se suscribe al GestorIdioma en Load
     ///   y se desuscribe en FormClosing. Al recibir UpdateLanguage() aplica
     ///   las traducciones del nuevo idioma a todos sus controles.
-    ///   El selector de idioma vive en la franja superior (pnlHeader).
+    ///   El selector de idioma (cmbIdioma) vive en la franja superior (pnlHeader).
     ///   Al cambiar el idioma acá, el Menu ya abre traducido cuando el usuario ingresa.
     ///
     /// Toda la paleta de color usada acá viene de <see cref="Tema"/> — no se agregan
@@ -26,32 +32,8 @@ namespace GUI
     /// </summary>
     public partial class Login : Form, IIdiomaObserver
     {
-        // ── Arrastre de ventana sin borde nativo (FormBorderStyle.None) ──────────────
-        // Reenvía el click a Windows como si hubiera pasado en la barra de título nativa
-        // (HTCAPTION). Es el mecanismo estándar para mover un form sin bordes; no cambia
-        // ningún comportamiento de negocio.
-        [DllImport("user32.dll")] private static extern bool ReleaseCapture();
-        [DllImport("user32.dll")] private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
-        private const int WM_NCLBUTTONDOWN = 0xA1;
-        private const int HT_CAPTION = 0x2;
-
-        private void IniciarArrastreVentana(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left) return;
-            ReleaseCapture();
-            SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
-        }
-
         private readonly Usuario usuarioBLL = new Usuario();
-
-        // Selector de idioma (dropdown) — vive en pnlHeader. Soporta idiomas dinámicos de BD.
-        private ComboBox _cmbIdiomaLogin;
-        private bool _suprimirIdiomaChange = false;
-        // Etiquetas de marca (creadas en código para ser traducibles)
-        private Label _lblTagline;
-        private Label _lblBrandDesc;
-        // RF-10 — link a autodesbloqueo con clave de emergencia (admin bloqueado)
-        private LinkLabel _lnkEmergencia;
+        private bool suprimirIdiomaChange = false;
 
         public Login()
         {
@@ -62,92 +44,31 @@ namespace GUI
             // queda "delante" de pnlCard en el z-order (el primer control agregado al form
             // es el que se pinta al frente), así que sin esto la sombra tapa la card entera.
             pnlCard.Region = new Region(BuildRoundedRect(new Rectangle(0, 0, pnlCard.Width, pnlCard.Height), Tema.RadioCard));
-            pnlCardShadow.Paint += PnlCardShadow_Paint;
             pnlCard.BringToFront();
 
             // ── Botones grandes (Ingresar/Salir) con esquinas redondeadas tipo "pill" ─
             btnIngresar.Region = new Region(BuildRoundedRect(new Rectangle(0, 0, btnIngresar.Width, btnIngresar.Height), Tema.RadioBotonGrande));
             btnSalir.Region    = new Region(BuildRoundedRect(new Rectangle(0, 0, btnSalir.Width, btnSalir.Height), Tema.RadioBotonGrande));
 
-            // ── Arrastre de la ventana desde el área vacía del header (sin borde nativo) ─
-            pnlHeader.MouseDown    += IniciarArrastreVentana;
-            picLogo.MouseDown      += IniciarArrastreVentana;
-            lblSubtitulo.MouseDown += IniciarArrastreVentana;
+            ConstruirComboIdioma(Traductor.ObtenerIdiomas());
+        }
 
-            // ── Decoraciones dibujadas mediante eventos Paint ─────────────────────
-            // Evita BackgroundImage bitmaps y permite que los controles transparentes
-            // muestren correctamente el fondo del panel que los contiene.
-            pnlLeft.Paint += PnlLeft_Paint;
+        // ── Arrastre de ventana sin borde nativo (FormBorderStyle.None) ──────────────
+        // Reenvía el click a Windows como si hubiera pasado en la barra de título nativa
+        // (HTCAPTION). Es el mecanismo estándar para mover un form sin bordes; no cambia
+        // ningún comportamiento de negocio. Enganchado desde el Designer al MouseDown de
+        // pnlHeader, picLogo y lblSubtitulo (el resto del header son controles interactivos
+        // propios — combo/botones — que no deben disparar el arrastre).
+        [DllImport("user32.dll")] private static extern bool ReleaseCapture();
+        [DllImport("user32.dll")] private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+        private const int HT_CAPTION = 0x2;
 
-            // ── Elementos de marca en el panel izquierdo + selector de idioma ─────
-            AgregarBrandElements();
-            AgregarComboIdioma();
-
-            // ── Bordes redondeados propios de las cajas de usuario/contraseña ────
-            pnlUsuarioBox.Paint    += DibujarBordeCampo;
-            pnlContraseñaBox.Paint += DibujarBordeCampo;
-
-            // ── Íconos dentro de los campos (persona / candado) ───────────────────
-            AgregarIconoCampo(pnlUsuarioBox, "👤");
-            AgregarIconoCampo(pnlContraseñaBox, "🔒");
-
-            // ── Ojito mostrar/ocultar contraseña ─────────────────────────────────
-            // Se achica el textbox para que el botón quede en el borde derecho de la caja.
-            txtContraseña.Width -= 24;
-            var btnOjo = new Button
-            {
-                Text      = "👁",
-                Font      = new Font("Segoe UI Emoji", 9f),
-                Size      = new Size(24, txtContraseña.Height + 4),
-                Location  = new Point(txtContraseña.Right + 2, txtContraseña.Top - 2),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Tema.Papel,
-                ForeColor = Tema.TextoMuted,
-                Cursor    = Cursors.Hand,
-                TabStop   = false
-            };
-            btnOjo.FlatAppearance.BorderSize = 0;
-            btnOjo.Click += (s, e) =>
-            {
-                var b = (Button)s;
-                if (txtContraseña.PasswordChar == '\0')
-                {
-                    txtContraseña.PasswordChar = '●';
-                    b.Font = new Font("Segoe UI Emoji", 9f);
-                }
-                else
-                {
-                    txtContraseña.PasswordChar = '\0';
-                    b.Font = new Font("Segoe UI Emoji", 9f, FontStyle.Strikeout);
-                }
-            };
-            pnlContraseñaBox.Controls.Add(btnOjo);
-            btnOjo.BringToFront();
-
-            // ── Líneas del separador "o" dibujadas vía Paint ──────────────────────
-            lblDivider.Paint += LblDivider_Paint;
-
-            // ── Link de autodesbloqueo con clave de emergencia (RF-10) ────────────
-            // Fila propia entre "¿Olvidaste tu contraseña?" y el cartel de error,
-            // para que el link NO se superponga con el mensaje "cuenta bloqueada".
-            _lnkEmergencia = new LinkLabel
-            {
-                Text            = "¿Cuenta bloqueada? Usar clave de emergencia",
-                AutoSize        = false,
-                TextAlign       = ContentAlignment.MiddleLeft,
-                Location        = new Point(lnkOlvidaste.Left, lnkOlvidaste.Bottom + 4),
-                Size            = new Size(lnkOlvidaste.Width, 18),
-                BackColor       = Color.Transparent,
-                Font            = new Font("Segoe UI", 8.25f),
-                LinkColor       = Tema.RosaOscuro,
-                ActiveLinkColor = Tema.RosaOscuro,
-                Tag             = "emg.link"
-            };
-            _lnkEmergencia.LinkClicked += LnkEmergencia_LinkClicked;
-            (lnkOlvidaste.Parent ?? (Control)this).Controls.Add(_lnkEmergencia);
-            _lnkEmergencia.BringToFront();
-
-            this.AcceptButton = btnIngresar;
+        private void PnlHeader_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            ReleaseCapture();
+            SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
         }
 
         // ── Pintura decorativa del panel izquierdo (fondo rosa + textura sutil) ───
@@ -223,90 +144,20 @@ namespace GUI
                 e.Graphics.DrawPath(pen, path);
         }
 
-        // Ícono no interactivo (persona / candado) a la izquierda de una caja de campo.
-        private void AgregarIconoCampo(Panel box, string glifo)
+        // ── Ojito mostrar/ocultar contraseña ──────────────────────────────────────
+
+        private void btnMostrarClave_Click(object sender, EventArgs e)
         {
-            var icono = new Label
+            if (txtContraseña.PasswordChar == '\0')
             {
-                Text      = glifo,
-                Font      = new Font("Segoe UI Emoji", 11f),
-                ForeColor = Tema.TextoMuted,
-                BackColor = Tema.Papel,
-                Location  = new Point(10, 10),
-                Size      = new Size(26, 26),
-                TextAlign = ContentAlignment.MiddleCenter
-            };
-            box.Controls.Add(icono);
-            icono.SendToBack();
-        }
-
-        // ── Elementos de marca en pnlLeft ─────────────────────────────────────────
-
-        private void AgregarBrandElements()
-        {
-            // 1. Isotipo + wordmark "WardrobeFlow" — asset 01 (picLogo, declarado en el Designer).
-            //    Reemplaza al ícono de percha dibujado a mano; lblTitle queda oculto pero intacto.
-            picLogo.BringToFront();
-
-            // 2. Tagline "ORGANIZÁ • GESTIONÁ • POTENCIÁ"
-            _lblTagline = new Label
+                txtContraseña.PasswordChar = '●';
+                btnMostrarClave.Font = new Font("Segoe UI Emoji", 9f);
+            }
+            else
             {
-                Location  = new Point(32, 76),
-                Size      = new Size(340, 20),
-                Font      = new Font("Segoe UI", 10f, FontStyle.Bold),
-                ForeColor = Tema.RosaOscuro,
-                BackColor = Tema.RosaPalido,
-                Text      = "ORGANIZÁ • GESTIONÁ • POTENCIÁ",
-                Tag       = "lbl.tagline"
-            };
-            pnlLeft.Controls.Add(_lblTagline);
-
-            // 3. Wordmark "Wardrobe" / "Flow" en dos líneas y dos colores (labels simples)
-            var lblWordmarkDark = new Label
-            {
-                Location  = new Point(28, 112),
-                Size      = new Size(340, 58),
-                Font      = new Font("Segoe UI", 34f),
-                ForeColor = Tema.Tinta,
-                BackColor = Tema.RosaPalido,
-                Text      = "Wardrobe",
-                AutoSize  = false
-            };
-            var lblWordmarkVino = new Label
-            {
-                Location  = new Point(28, 172),
-                Size      = new Size(340, 58),
-                Font      = new Font("Segoe UI", 34f),
-                ForeColor = Tema.RosaOscuro,
-                BackColor = Tema.RosaPalido,
-                Text      = "Flow",
-                AutoSize  = false
-            };
-            pnlLeft.Controls.Add(lblWordmarkDark);
-            pnlLeft.Controls.Add(lblWordmarkVino);
-            lblWordmarkDark.BringToFront();
-            lblWordmarkVino.BringToFront();
-
-            // 4. Descripción de marca (traducible vía tag)
-            _lblBrandDesc = new Label
-            {
-                Location  = new Point(32, 246),
-                Size      = new Size(340, 66),
-                Font      = new Font("Segoe UI", 11f),
-                ForeColor = Tema.TextoMuted,
-                BackColor = Tema.RosaPalido,
-                Text      = "Gestioná tu flujo de\nprendas e información\nde manera simple y eficiente.",
-                Tag       = "lbl.brand.desc",
-                AutoSize  = false
-            };
-            pnlLeft.Controls.Add(_lblBrandDesc);
-            _lblBrandDesc.BringToFront();
-
-            // 5. Ilustración (percha con prendas, cartel de precio, planta y bolso) — assets
-            //    03/04/05, declarados en el Designer como picClothingRack/picPriceTag/picPlantAndBag.
-            picClothingRack.BringToFront();
-            picPriceTag.BringToFront();
-            picPlantAndBag.BringToFront();
+                txtContraseña.PasswordChar = '\0';
+                btnMostrarClave.Font = new Font("Segoe UI Emoji", 9f, FontStyle.Strikeout);
+            }
         }
 
         // Construye un GraphicsPath de rectángulo redondeado.
@@ -323,48 +174,29 @@ namespace GUI
 
         // ── Selector de idioma (dropdown) en pnlHeader ────────────────────────────
 
-        private void AgregarComboIdioma()
-        {
-            _cmbIdiomaLogin = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Size          = new Size(150, 26),
-                Location      = new Point(729, 19),
-                FlatStyle     = FlatStyle.Flat,
-                Font          = new Font("Segoe UI", 9f),
-                ForeColor     = Tema.RosaOscuro,
-                BackColor     = Tema.Papel,
-                TabStop       = false
-            };
-            _cmbIdiomaLogin.SelectedIndexChanged += CmbIdiomaLogin_Changed;
-            pnlHeader.Controls.Add(_cmbIdiomaLogin);
-            _cmbIdiomaLogin.BringToFront();
-            ConstruirComboIdioma(Traductor.ObtenerIdiomas());
-        }
-
         // Llena el combo con los idiomas (de BD o fallback). Un idioma nuevo aparece solo.
         private void ConstruirComboIdioma(IList<Idioma> idiomas)
         {
-            _suprimirIdiomaChange = true;
-            _cmbIdiomaLogin.DataSource    = null;
-            _cmbIdiomaLogin.DisplayMember = "Nombre";
-            _cmbIdiomaLogin.ValueMember   = "Id";
-            _cmbIdiomaLogin.DataSource    = new List<Idioma>(idiomas);
+            suprimirIdiomaChange = true;
+            cmbIdioma.DataSource    = null;
+            cmbIdioma.DisplayMember = "Nombre";
+            cmbIdioma.ValueMember   = "Id";
+            cmbIdioma.DataSource    = new List<Idioma>(idiomas);
 
             string cod = GestorIdioma.IdiomaActual?.Id ?? "ES";
             for (int i = 0; i < idiomas.Count; i++)
                 if (string.Equals(idiomas[i].Id, cod, StringComparison.OrdinalIgnoreCase))
                 {
-                    _cmbIdiomaLogin.SelectedIndex = i;
+                    cmbIdioma.SelectedIndex = i;
                     break;
                 }
-            _suprimirIdiomaChange = false;
+            suprimirIdiomaChange = false;
         }
 
-        private void CmbIdiomaLogin_Changed(object sender, EventArgs e)
+        private void CmbIdioma_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_suprimirIdiomaChange) return;
-            var idioma = _cmbIdiomaLogin.SelectedItem as Idioma;
+            if (suprimirIdiomaChange) return;
+            var idioma = cmbIdioma.SelectedItem as Idioma;
             if (idioma == null) return;
             try
             {
@@ -432,11 +264,11 @@ namespace GUI
             if (sub != null) lblSubtitulo.Text = sub;
 
             // Panel izquierdo
-            var tagline = Tx(_lblTagline?.Tag?.ToString());
-            if (tagline != null && _lblTagline != null) _lblTagline.Text = tagline;
+            var tagline = Tx(lblTagline.Tag?.ToString());
+            if (tagline != null) lblTagline.Text = tagline;
 
-            var desc = Tx(_lblBrandDesc?.Tag?.ToString());
-            if (desc != null && _lblBrandDesc != null) _lblBrandDesc.Text = desc;
+            var desc = Tx(lblBrandDesc.Tag?.ToString());
+            if (desc != null) lblBrandDesc.Text = desc;
 
             // Panel derecho — título y subtítulo
             var bienvenido = Tx(lblAccent.Tag?.ToString());
@@ -462,8 +294,8 @@ namespace GUI
             var olvide = Tx(lnkOlvidaste.Tag?.ToString());
             if (olvide != null) lnkOlvidaste.Text = olvide;
 
-            var emg = Tx(_lnkEmergencia?.Tag?.ToString());
-            if (emg != null && _lnkEmergencia != null) _lnkEmergencia.Text = emg;
+            var emg = Tx(lnkEmergencia.Tag?.ToString());
+            if (emg != null) lnkEmergencia.Text = emg;
 
             // Separador
             var divider = Tx(lblDivider.Tag?.ToString());

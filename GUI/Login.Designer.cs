@@ -16,38 +16,48 @@ namespace GUI
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Login));
-            this.pnlHeader        = new System.Windows.Forms.Panel();
-            this.picLogo          = new System.Windows.Forms.PictureBox();
-            this.lblTitle         = new System.Windows.Forms.Label();
-            this.lblSubtitulo     = new System.Windows.Forms.Label();
-            this.pnlHeaderDivider = new System.Windows.Forms.Panel();
-            this.btnMinimizar     = new System.Windows.Forms.Button();
-            this.btnCerrarVentana = new System.Windows.Forms.Button();
-            this.pnlLeft          = new System.Windows.Forms.Panel();
-            this.picClothingRack  = new System.Windows.Forms.PictureBox();
-            this.picPriceTag      = new System.Windows.Forms.PictureBox();
-            this.picPlantAndBag   = new System.Windows.Forms.PictureBox();
-            this.pnlCardShadow    = new System.Windows.Forms.Panel();
-            this.pnlCard          = new System.Windows.Forms.Panel();
-            this.lblAccent        = new System.Windows.Forms.Label();
-            this.pnlAccentRule    = new System.Windows.Forms.Panel();
-            this.lblLoginSub      = new System.Windows.Forms.Label();
-            this.lblUsuario       = new System.Windows.Forms.Label();
-            this.pnlUsuarioBox    = new System.Windows.Forms.Panel();
-            this.txtUsuario       = new System.Windows.Forms.TextBox();
-            this.lblContraseña    = new System.Windows.Forms.Label();
-            this.pnlContraseñaBox = new System.Windows.Forms.Panel();
-            this.txtContraseña    = new System.Windows.Forms.TextBox();
-            this.lnkOlvidaste     = new System.Windows.Forms.LinkLabel();
-            this.lblError         = new System.Windows.Forms.Label();
-            this.btnIngresar      = new System.Windows.Forms.Button();
-            this.lblDivider       = new System.Windows.Forms.Label();
-            this.btnSalir         = new System.Windows.Forms.Button();
+            this.pnlHeader          = new System.Windows.Forms.Panel();
+            this.picLogo            = new System.Windows.Forms.PictureBox();
+            this.lblTitle           = new System.Windows.Forms.Label();
+            this.lblSubtitulo       = new System.Windows.Forms.Label();
+            this.cmbIdioma          = new System.Windows.Forms.ComboBox();
+            this.pnlHeaderDivider   = new System.Windows.Forms.Panel();
+            this.btnMinimizar       = new System.Windows.Forms.Button();
+            this.btnCerrarVentana   = new System.Windows.Forms.Button();
+            this.pnlLeft            = new System.Windows.Forms.Panel();
+            this.lblTagline         = new System.Windows.Forms.Label();
+            this.lblWordmarkDark    = new System.Windows.Forms.Label();
+            this.lblWordmarkVino    = new System.Windows.Forms.Label();
+            this.lblBrandDesc       = new System.Windows.Forms.Label();
+            this.picClothingRack    = new System.Windows.Forms.PictureBox();
+            this.picPriceTag        = new System.Windows.Forms.PictureBox();
+            this.picPlantAndBag     = new System.Windows.Forms.PictureBox();
+            this.pnlCardShadow      = new System.Windows.Forms.Panel();
+            this.pnlCard            = new System.Windows.Forms.Panel();
+            this.lblAccent          = new System.Windows.Forms.Label();
+            this.pnlAccentRule      = new System.Windows.Forms.Panel();
+            this.lblLoginSub        = new System.Windows.Forms.Label();
+            this.lblUsuario         = new System.Windows.Forms.Label();
+            this.pnlUsuarioBox      = new System.Windows.Forms.Panel();
+            this.txtUsuario         = new System.Windows.Forms.TextBox();
+            this.lblIconoUsuario    = new System.Windows.Forms.Label();
+            this.lblContraseña      = new System.Windows.Forms.Label();
+            this.pnlContraseñaBox   = new System.Windows.Forms.Panel();
+            this.txtContraseña      = new System.Windows.Forms.TextBox();
+            this.lblIconoContraseña = new System.Windows.Forms.Label();
+            this.btnMostrarClave    = new System.Windows.Forms.Button();
+            this.lnkOlvidaste       = new System.Windows.Forms.LinkLabel();
+            this.lnkEmergencia      = new System.Windows.Forms.LinkLabel();
+            this.lblError           = new System.Windows.Forms.Label();
+            this.btnIngresar        = new System.Windows.Forms.Button();
+            this.lblDivider         = new System.Windows.Forms.Label();
+            this.btnSalir           = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picClothingRack)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPriceTag)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlantAndBag)).BeginInit();
             this.pnlHeader.SuspendLayout();
+            this.pnlLeft.SuspendLayout();
             this.pnlCard.SuspendLayout();
             this.pnlUsuarioBox.SuspendLayout();
             this.pnlContraseñaBox.SuspendLayout();
@@ -60,6 +70,7 @@ namespace GUI
             this.pnlHeader.Controls.Add(this.picLogo);
             this.pnlHeader.Controls.Add(this.lblTitle);
             this.pnlHeader.Controls.Add(this.lblSubtitulo);
+            this.pnlHeader.Controls.Add(this.cmbIdioma);
             this.pnlHeader.Controls.Add(this.pnlHeaderDivider);
             this.pnlHeader.Controls.Add(this.btnMinimizar);
             this.pnlHeader.Controls.Add(this.btnCerrarVentana);
@@ -67,6 +78,7 @@ namespace GUI
             this.pnlHeader.Name      = "pnlHeader";
             this.pnlHeader.Size      = new System.Drawing.Size(1000, 64);
             this.pnlHeader.TabIndex  = 20;
+            this.pnlHeader.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PnlHeader_MouseDown);
 
             // ── picLogo — isotipo + wordmark "WardrobeFlow" (asset 01, transparente) ──
             // Reemplaza visualmente el ícono de percha dibujado a mano + lblTitle (que se
@@ -79,6 +91,7 @@ namespace GUI
             this.picLogo.SizeMode   = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picLogo.TabIndex   = 22;
             this.picLogo.TabStop    = false;
+            this.picLogo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PnlHeader_MouseDown);
 
             // ── lblTitle — nombre de marca junto al ícono (oculto: lo muestra picLogo) ─
             this.lblTitle.AutoSize  = false;
@@ -105,6 +118,20 @@ namespace GUI
             this.lblSubtitulo.Tag       = "lbl.subtitulo";
             this.lblSubtitulo.Text      = "PORTAL DE EMPLEADOS";
             this.lblSubtitulo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblSubtitulo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PnlHeader_MouseDown);
+
+            // ── cmbIdioma — selector de idioma (idiomas dinámicos de BD) ──────
+            this.cmbIdioma.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbIdioma.FlatStyle     = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbIdioma.Font          = new System.Drawing.Font("Segoe UI", 9F);
+            this.cmbIdioma.ForeColor     = GUI.Tema.RosaOscuro;
+            this.cmbIdioma.BackColor     = GUI.Tema.Papel;
+            this.cmbIdioma.Location      = new System.Drawing.Point(729, 19);
+            this.cmbIdioma.Name          = "cmbIdioma";
+            this.cmbIdioma.Size          = new System.Drawing.Size(150, 26);
+            this.cmbIdioma.TabIndex      = 8;
+            this.cmbIdioma.TabStop       = false;
+            this.cmbIdioma.SelectedIndexChanged += new System.EventHandler(this.CmbIdioma_SelectedIndexChanged);
 
             // ── pnlHeaderDivider — línea vertical entre el idioma y minimizar/cerrar ──
             this.pnlHeaderDivider.BackColor = GUI.Tema.Borde;
@@ -154,6 +181,10 @@ namespace GUI
             // Fondo rosa pálido (Tema.RosaPalido); ilustración vía PictureBox (assets 03/04/05,
             // transparentes), textura sutil de fondo vía Paint en Login.cs.
             this.pnlLeft.BackColor = GUI.Tema.RosaPalido;
+            this.pnlLeft.Controls.Add(this.lblTagline);
+            this.pnlLeft.Controls.Add(this.lblWordmarkDark);
+            this.pnlLeft.Controls.Add(this.lblWordmarkVino);
+            this.pnlLeft.Controls.Add(this.lblBrandDesc);
             this.pnlLeft.Controls.Add(this.picClothingRack);
             this.pnlLeft.Controls.Add(this.picPriceTag);
             this.pnlLeft.Controls.Add(this.picPlantAndBag);
@@ -161,6 +192,51 @@ namespace GUI
             this.pnlLeft.Name      = "pnlLeft";
             this.pnlLeft.Size      = new System.Drawing.Size(420, 696);
             this.pnlLeft.TabIndex  = 21;
+            this.pnlLeft.Paint    += new System.Windows.Forms.PaintEventHandler(this.PnlLeft_Paint);
+
+            // ── lblTagline — "ORGANIZÁ • GESTIONÁ • POTENCIÁ" (traducible vía Tag) ──
+            this.lblTagline.BackColor = GUI.Tema.RosaPalido;
+            this.lblTagline.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblTagline.ForeColor = GUI.Tema.RosaOscuro;
+            this.lblTagline.Location  = new System.Drawing.Point(32, 76);
+            this.lblTagline.Name      = "lblTagline";
+            this.lblTagline.Size      = new System.Drawing.Size(340, 20);
+            this.lblTagline.TabIndex  = 30;
+            this.lblTagline.Tag       = "lbl.tagline";
+            this.lblTagline.Text      = "ORGANIZÁ • GESTIONÁ • POTENCIÁ";
+
+            // ── lblWordmarkDark / lblWordmarkVino — "Wardrobe" / "Flow" en dos colores ──
+            this.lblWordmarkDark.AutoSize  = false;
+            this.lblWordmarkDark.BackColor = GUI.Tema.RosaPalido;
+            this.lblWordmarkDark.Font      = new System.Drawing.Font("Segoe UI", 34F);
+            this.lblWordmarkDark.ForeColor = GUI.Tema.Tinta;
+            this.lblWordmarkDark.Location  = new System.Drawing.Point(28, 112);
+            this.lblWordmarkDark.Name      = "lblWordmarkDark";
+            this.lblWordmarkDark.Size      = new System.Drawing.Size(340, 58);
+            this.lblWordmarkDark.TabIndex  = 31;
+            this.lblWordmarkDark.Text      = "Wardrobe";
+
+            this.lblWordmarkVino.AutoSize  = false;
+            this.lblWordmarkVino.BackColor = GUI.Tema.RosaPalido;
+            this.lblWordmarkVino.Font      = new System.Drawing.Font("Segoe UI", 34F);
+            this.lblWordmarkVino.ForeColor = GUI.Tema.RosaOscuro;
+            this.lblWordmarkVino.Location  = new System.Drawing.Point(28, 172);
+            this.lblWordmarkVino.Name      = "lblWordmarkVino";
+            this.lblWordmarkVino.Size      = new System.Drawing.Size(340, 58);
+            this.lblWordmarkVino.TabIndex  = 32;
+            this.lblWordmarkVino.Text      = "Flow";
+
+            // ── lblBrandDesc — descripción de marca (traducible vía Tag) ──────
+            this.lblBrandDesc.AutoSize  = false;
+            this.lblBrandDesc.BackColor = GUI.Tema.RosaPalido;
+            this.lblBrandDesc.Font      = new System.Drawing.Font("Segoe UI", 11F);
+            this.lblBrandDesc.ForeColor = GUI.Tema.TextoMuted;
+            this.lblBrandDesc.Location  = new System.Drawing.Point(32, 246);
+            this.lblBrandDesc.Name      = "lblBrandDesc";
+            this.lblBrandDesc.Size      = new System.Drawing.Size(340, 66);
+            this.lblBrandDesc.TabIndex  = 33;
+            this.lblBrandDesc.Tag       = "lbl.brand.desc";
+            this.lblBrandDesc.Text      = "Gestioná tu flujo de\r\nprendas e información\r\nde manera simple y eficiente.";
 
             // ── picClothingRack — asset 03, percha con prendas ──────────────
             this.picClothingRack.BackColor = GUI.Tema.RosaPalido;
@@ -198,6 +274,7 @@ namespace GUI
             this.pnlCardShadow.Name      = "pnlCardShadow";
             this.pnlCardShadow.Size      = new System.Drawing.Size(540, 648);
             this.pnlCardShadow.TabIndex  = 29;
+            this.pnlCardShadow.Paint    += new System.Windows.Forms.PaintEventHandler(this.PnlCardShadow_Paint);
 
             // ── pnlCard — card blanca flotante con el formulario (500 × 612) ──
             // Esquinas redondeadas vía Region (Login.cs, radio Tema.RadioCard).
@@ -210,6 +287,7 @@ namespace GUI
             this.pnlCard.Controls.Add(this.lblContraseña);
             this.pnlCard.Controls.Add(this.pnlContraseñaBox);
             this.pnlCard.Controls.Add(this.lnkOlvidaste);
+            this.pnlCard.Controls.Add(this.lnkEmergencia);
             this.pnlCard.Controls.Add(this.lblError);
             this.pnlCard.Controls.Add(this.btnIngresar);
             this.pnlCard.Controls.Add(this.lblDivider);
@@ -267,10 +345,12 @@ namespace GUI
             // ── pnlUsuarioBox — caja con borde propio (Paint) que aloja ícono + textbox ─
             this.pnlUsuarioBox.BackColor = GUI.Tema.Papel;
             this.pnlUsuarioBox.Controls.Add(this.txtUsuario);
+            this.pnlUsuarioBox.Controls.Add(this.lblIconoUsuario);
             this.pnlUsuarioBox.Location  = new System.Drawing.Point(48, 226);
             this.pnlUsuarioBox.Name      = "pnlUsuarioBox";
             this.pnlUsuarioBox.Size      = new System.Drawing.Size(404, 44);
             this.pnlUsuarioBox.TabIndex  = 1;
+            this.pnlUsuarioBox.Paint    += new System.Windows.Forms.PaintEventHandler(this.DibujarBordeCampo);
 
             // ── txtUsuario ─────────────────────────────────────────────────
             this.txtUsuario.BackColor   = GUI.Tema.Papel;
@@ -282,6 +362,17 @@ namespace GUI
             this.txtUsuario.Name        = "txtUsuario";
             this.txtUsuario.Size        = new System.Drawing.Size(352, 22);
             this.txtUsuario.TabIndex    = 1;
+
+            // ── lblIconoUsuario — ícono de persona, no interactivo ──────────
+            this.lblIconoUsuario.BackColor  = GUI.Tema.Papel;
+            this.lblIconoUsuario.Font       = new System.Drawing.Font("Segoe UI Emoji", 11F);
+            this.lblIconoUsuario.ForeColor  = GUI.Tema.TextoMuted;
+            this.lblIconoUsuario.Location   = new System.Drawing.Point(10, 10);
+            this.lblIconoUsuario.Name       = "lblIconoUsuario";
+            this.lblIconoUsuario.Size       = new System.Drawing.Size(26, 26);
+            this.lblIconoUsuario.TabIndex   = 34;
+            this.lblIconoUsuario.Text       = "👤";
+            this.lblIconoUsuario.TextAlign  = System.Drawing.ContentAlignment.MiddleCenter;
 
             // ── lblContraseña — etiqueta "CONTRASEÑA" ─────────────────────
             this.lblContraseña.AutoSize  = false;
@@ -299,12 +390,16 @@ namespace GUI
             // ── pnlContraseñaBox ───────────────────────────────────────────
             this.pnlContraseñaBox.BackColor = GUI.Tema.Papel;
             this.pnlContraseñaBox.Controls.Add(this.txtContraseña);
+            this.pnlContraseñaBox.Controls.Add(this.lblIconoContraseña);
+            this.pnlContraseñaBox.Controls.Add(this.btnMostrarClave);
             this.pnlContraseñaBox.Location  = new System.Drawing.Point(48, 302);
             this.pnlContraseñaBox.Name      = "pnlContraseñaBox";
             this.pnlContraseñaBox.Size      = new System.Drawing.Size(404, 44);
             this.pnlContraseñaBox.TabIndex  = 3;
+            this.pnlContraseñaBox.Paint    += new System.Windows.Forms.PaintEventHandler(this.DibujarBordeCampo);
 
             // ── txtContraseña ──────────────────────────────────────────────
+            // Ancho recortado (352 − 24) para dejarle lugar al botón del ojo en el borde derecho.
             this.txtContraseña.BackColor    = GUI.Tema.Papel;
             this.txtContraseña.BorderStyle  = System.Windows.Forms.BorderStyle.None;
             this.txtContraseña.Font         = new System.Drawing.Font("Segoe UI", 11.5F);
@@ -313,8 +408,35 @@ namespace GUI
             this.txtContraseña.MaxLength    = 100;
             this.txtContraseña.Name         = "txtContraseña";
             this.txtContraseña.PasswordChar = '●';
-            this.txtContraseña.Size         = new System.Drawing.Size(352, 22);
+            this.txtContraseña.Size         = new System.Drawing.Size(328, 22);
             this.txtContraseña.TabIndex     = 3;
+
+            // ── lblIconoContraseña — ícono de candado, no interactivo ───────
+            this.lblIconoContraseña.BackColor  = GUI.Tema.Papel;
+            this.lblIconoContraseña.Font       = new System.Drawing.Font("Segoe UI Emoji", 11F);
+            this.lblIconoContraseña.ForeColor  = GUI.Tema.TextoMuted;
+            this.lblIconoContraseña.Location   = new System.Drawing.Point(10, 10);
+            this.lblIconoContraseña.Name       = "lblIconoContraseña";
+            this.lblIconoContraseña.Size       = new System.Drawing.Size(26, 26);
+            this.lblIconoContraseña.TabIndex   = 35;
+            this.lblIconoContraseña.Text       = "🔒";
+            this.lblIconoContraseña.TextAlign  = System.Drawing.ContentAlignment.MiddleCenter;
+
+            // ── btnMostrarClave — ojito mostrar/ocultar contraseña ──────────
+            this.btnMostrarClave.BackColor                 = GUI.Tema.Papel;
+            this.btnMostrarClave.Cursor                    = System.Windows.Forms.Cursors.Hand;
+            this.btnMostrarClave.FlatAppearance.BorderSize = 0;
+            this.btnMostrarClave.FlatStyle                 = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMostrarClave.Font                      = new System.Drawing.Font("Segoe UI Emoji", 9F);
+            this.btnMostrarClave.ForeColor                 = GUI.Tema.TextoMuted;
+            this.btnMostrarClave.Location                  = new System.Drawing.Point(372, 11);
+            this.btnMostrarClave.Name                      = "btnMostrarClave";
+            this.btnMostrarClave.Size                      = new System.Drawing.Size(24, 26);
+            this.btnMostrarClave.TabIndex                  = 36;
+            this.btnMostrarClave.TabStop                   = false;
+            this.btnMostrarClave.Text                      = "👁";
+            this.btnMostrarClave.UseVisualStyleBackColor    = false;
+            this.btnMostrarClave.Click += new System.EventHandler(this.btnMostrarClave_Click);
 
             // ── lnkOlvidaste — link alineado a la derecha bajo contraseña ─
             this.lnkOlvidaste.ActiveLinkColor = GUI.Tema.RosaOscuro;
@@ -331,6 +453,24 @@ namespace GUI
             this.lnkOlvidaste.Text            = "¿Olvidaste tu contraseña?";
             this.lnkOlvidaste.TextAlign       = System.Drawing.ContentAlignment.MiddleRight;
             this.lnkOlvidaste.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkOlvidaste_LinkClicked);
+
+            // ── lnkEmergencia — RF-10, autodesbloqueo con clave de emergencia ─
+            // Fila propia entre "¿Olvidaste tu contraseña?" y el cartel de error, para que
+            // NO se superponga con el mensaje "cuenta bloqueada".
+            this.lnkEmergencia.ActiveLinkColor = GUI.Tema.RosaOscuro;
+            this.lnkEmergencia.AutoSize        = false;
+            this.lnkEmergencia.BackColor       = System.Drawing.Color.Transparent;
+            this.lnkEmergencia.Font            = new System.Drawing.Font("Segoe UI", 8.25F);
+            this.lnkEmergencia.LinkColor       = GUI.Tema.RosaOscuro;
+            this.lnkEmergencia.Location        = new System.Drawing.Point(48, 374);
+            this.lnkEmergencia.Name            = "lnkEmergencia";
+            this.lnkEmergencia.Size            = new System.Drawing.Size(404, 18);
+            this.lnkEmergencia.TabIndex        = 7;
+            this.lnkEmergencia.TabStop         = true;
+            this.lnkEmergencia.Tag             = "emg.link";
+            this.lnkEmergencia.Text            = "¿Cuenta bloqueada? Usar clave de emergencia";
+            this.lnkEmergencia.TextAlign       = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkEmergencia.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkEmergencia_LinkClicked);
 
             // ── lblError ───────────────────────────────────────────────────
             this.lblError.AutoSize  = false;
@@ -354,11 +494,11 @@ namespace GUI
             this.btnIngresar.ForeColor                 = GUI.Tema.Papel;
             this.btnIngresar.Location                  = new System.Drawing.Point(48, 444);
             this.btnIngresar.Name                      = "btnIngresar";
-            this.btnIngresar.Size                      = new System.Drawing.Size(404, 54);
+            this.btnIngresar.Size                       = new System.Drawing.Size(404, 54);
             this.btnIngresar.TabIndex                  = 5;
-            this.btnIngresar.Tag                       = "btn.ingresar";
-            this.btnIngresar.Text                      = "INGRESAR";
-            this.btnIngresar.UseVisualStyleBackColor   = false;
+            this.btnIngresar.Tag                        = "btn.ingresar";
+            this.btnIngresar.Text                       = "INGRESAR";
+            this.btnIngresar.UseVisualStyleBackColor    = false;
             this.btnIngresar.Click += new System.EventHandler(this.btnIngresar_Click);
 
             // ── lblDivider — separador "o" con líneas a los lados ─────────
@@ -370,10 +510,11 @@ namespace GUI
             this.lblDivider.Location  = new System.Drawing.Point(48, 512);
             this.lblDivider.Name      = "lblDivider";
             this.lblDivider.Size      = new System.Drawing.Size(404, 24);
-            this.lblDivider.TabIndex  = 16;
+            this.lblDivider.TabIndex  = 9;
             this.lblDivider.Tag       = "lbl.divider";
             this.lblDivider.Text      = "o";
             this.lblDivider.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblDivider.Paint    += new System.Windows.Forms.PaintEventHandler(this.LblDivider_Paint);
 
             // ── btnSalir — botón secundario ancho completo (blanco bordeado), esquinas redondeadas ─
             this.btnSalir.BackColor                         = GUI.Tema.Papel;
@@ -386,7 +527,7 @@ namespace GUI
             this.btnSalir.Location                          = new System.Drawing.Point(48, 544);
             this.btnSalir.Name                              = "btnSalir";
             this.btnSalir.Size                              = new System.Drawing.Size(404, 40);
-            this.btnSalir.TabIndex                          = 7;
+            this.btnSalir.TabIndex                          = 10;
             this.btnSalir.Tag                               = "btn.salir";
             this.btnSalir.Text                               = "Salir";
             this.btnSalir.UseVisualStyleBackColor            = false;
@@ -397,6 +538,7 @@ namespace GUI
             // pnlHeader (logo + idioma + minimizar/cerrar dibujados a medida, ver Login.cs para
             // el arrastre de ventana y los handlers de los botones). MaximizeBox/MinimizeBox no
             // aplican con None; el tamaño sigue fijo, igual que con FixedSingle antes.
+            this.AcceptButton        = this.btnIngresar;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor           = GUI.Tema.RosaPalido;
@@ -413,6 +555,7 @@ namespace GUI
             this.Tag                 = "frm.login";
             this.Text                = "WardrobeFlow";
             this.pnlHeader.ResumeLayout(false);
+            this.pnlLeft.ResumeLayout(false);
             this.pnlCard.ResumeLayout(false);
             this.pnlUsuarioBox.ResumeLayout(false);
             this.pnlUsuarioBox.PerformLayout();
@@ -431,10 +574,15 @@ namespace GUI
         private System.Windows.Forms.PictureBox picLogo;
         private System.Windows.Forms.Label      lblTitle;
         private System.Windows.Forms.Label      lblSubtitulo;
+        private System.Windows.Forms.ComboBox   cmbIdioma;
         private System.Windows.Forms.Panel      pnlHeaderDivider;
         private System.Windows.Forms.Button     btnMinimizar;
         private System.Windows.Forms.Button     btnCerrarVentana;
         private System.Windows.Forms.Panel      pnlLeft;
+        private System.Windows.Forms.Label      lblTagline;
+        private System.Windows.Forms.Label      lblWordmarkDark;
+        private System.Windows.Forms.Label      lblWordmarkVino;
+        private System.Windows.Forms.Label      lblBrandDesc;
         private System.Windows.Forms.PictureBox picClothingRack;
         private System.Windows.Forms.PictureBox picPriceTag;
         private System.Windows.Forms.PictureBox picPlantAndBag;
@@ -446,13 +594,17 @@ namespace GUI
         private System.Windows.Forms.Label      lblDivider;
         private System.Windows.Forms.Panel      pnlUsuarioBox;
         private System.Windows.Forms.TextBox    txtUsuario;
+        private System.Windows.Forms.Label      lblIconoUsuario;
         private System.Windows.Forms.Panel      pnlContraseñaBox;
         private System.Windows.Forms.TextBox    txtContraseña;
+        private System.Windows.Forms.Label      lblIconoContraseña;
+        private System.Windows.Forms.Button     btnMostrarClave;
         private System.Windows.Forms.Label      lblUsuario;
         private System.Windows.Forms.Label      lblContraseña;
         private System.Windows.Forms.Button     btnIngresar;
         private System.Windows.Forms.Button     btnSalir;
         private System.Windows.Forms.Label      lblError;
         private System.Windows.Forms.LinkLabel  lnkOlvidaste;
+        private System.Windows.Forms.LinkLabel  lnkEmergencia;
     }
 }

@@ -260,6 +260,9 @@
     <Compile Include="MiPerfilForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MiPerfilForm.Designer.cs">
+      <DependentUpon>MiPerfilForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="PreferenciasUI.cs" />
     <Compile Include="Exportacion\ReporteExportable.cs" />
     <Compile Include="Exportacion\Exportador.cs" />
@@ -271,6 +274,9 @@
     <Compile Include="Exportacion\ExportadorCsv.cs" />
     <Compile Include="AlertasForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlertasForm.Designer.cs">
+      <DependentUpon>AlertasForm.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Bitacora.resx">
       <DependentUpon>Bitacora.cs</DependentUpon>

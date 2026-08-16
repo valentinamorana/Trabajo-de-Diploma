@@ -52,6 +52,7 @@ La GUI nunca accede a DAL ni a Seguridad directamente. Toda la lógica de negoci
 | PdN3 | Gestión de pedidos (cancelación, devolución) | **Command** |
 | PdN4 | Transición de estado de prenda asociada a un pedido | **State** |
 | PdN5 | Renovación de suscripción (verificar vencimiento → renovar / cambiar plan / dar de baja) | **Chain of Responsibility** |
+| PdN6 | Cobro y pago de suscripción (detectar cobro → procesar pago / aplicar gracia → suspender pedidos) | **Chain of Responsibility** |
 
 ---
 
@@ -61,7 +62,7 @@ La GUI nunca accede a DAL ni a Seguridad directamente. Toda la lógica de negoci
 |-----|----------|-----------------------|
 | **Administrador** | Acceso total: Inventario, Ventas, Administrar, Bitácora, Perfiles, Backup | — (acceso total) |
 | **Auditor** | Solo Bitácora / Auditoría | rol plano |
-| **Vendedor** | Prendas, Clientes, Planes, Realizar Ventas | rol base comercial |
+| **Vendedor** | Prendas, Clientes, Planes, Renovación, Cobro, Realizar Ventas | rol base comercial |
 | **GerenteComercial** | lo de Vendedor + Ver Pedidos Realizados | ⊃ Vendedor |
 | **OperadorLogistico** | Ver Pedidos Realizados (despacho) | rol base inventario |
 | **OperadorDeInventario** | Ver Prendas + Gestionar Stock (mantenimiento) | rol base inventario |
@@ -86,6 +87,7 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 | **Pedidos de Venta** | Creación de pedidos respetando límite del plan; cancelación y devolución vía **Command** |
 | **Pedidos Realizados** | Ciclo post-venta: Despachar → Marcar Entregado → Registrar Devolución |
 | **Renovación de Suscripción** | Verificación de vencimiento, renovación, cambio de plan o baja resueltos por una cadena de manejadores (**Chain of Responsibility**) |
+| **Cobro de Suscripción** | Detección de cobro pendiente, confirmación de pago (extiende la vigencia), período de gracia ante un pago fallido y suspensión de nuevos pedidos si el plazo vence sin regularizar — cadena de manejadores (**Chain of Responsibility**) |
 | **Bitácora** | Registro de eventos del sistema y de negocio con filtros, criticidad y exportación a PDF |
 | **Historial de Cambios** | Cambios de datos administrativos por usuario a nivel de campo, con rollback (Memento) |
 | **Idiomas** | ABM de traducciones directamente en la BD |
@@ -106,6 +108,7 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 | **State** | `BE.Estados.Estado` (abstracta) + `EstadoDisponible` / `EstadoEnLimpieza` / `EstadoEnUso` / `EstadoBaja`, contexto en `BE.Prenda.ControlarEstado` | Cada estado concreto valida y muta el contexto (`Prenda`) directamente, igual que `Estado`/`Switch` del ejemplo de cátedra |
 | **Command** | `BLL.Comandos.PedidoCommand` (abstracta) + `CancelacionCommand` / `DevolucionCommand`, invocador `InvocadorPedido` | Cola de órdenes (`TomarOrden` / `ProcesarOrdenes`) que se ejecutan en lote, igual que `OrdenCommand`/`EmpresaInvoker` del ejemplo de cátedra — sin pila de deshacer, porque el material tampoco la tiene |
 | **Chain of Responsibility** | `BLL.Manejadores.ManejadorRenovacion` (abstracta) + `VerificarVencimientoHandler` → `IntentarRenovarHandler` → `CambioPlanHandler` → `BajaSuscripcionHandler`, orquestada en `BLL.Renovacion` | Cadena armada de cola a cabeza con `AgregarSiguiente`, cada eslabón decide inline si atiende o delega — igual que `Aprobador`/`Program.cs` del ejemplo de cátedra |
+| **Chain of Responsibility** (PdN6) | `BLL.Manejadores.ManejadorCobro` (abstracta) + `DetectarCobroHandler` → `ProcesarPagoHandler` → `AplicarGraciaHandler` → `SuspenderHandler`, orquestada en `BLL.Cobro` | Misma estructura que la cadena de Renovación (PdN5) — un cobro exitoso confirma la renovación reutilizando el Builder de PdN1; uno fallido abre un período de gracia antes de bloquear pedidos |
 
 ### Base heredada de Ingeniería de Software
 
@@ -125,6 +128,7 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 - **Bloqueo de pedido duplicado despachado:** no se puede crear un nuevo pedido si el cliente ya tiene uno en estado `Despachado` pendiente de entrega.
 - **Bloqueo de desactivación de plan:** no se puede desactivar un plan si tiene clientes activos asignados.
 - **Alerta de suscripción próxima a vencer:** se detecta y propaga en todo el flujo cuando la suscripción vence en ≤ 7 días.
+- **Pedidos bloqueados por falta de pago:** `BLL.Pedido.CrearPedido` rechaza nuevos pedidos si venció el período de gracia otorgado tras un cobro fallido (`Cliente.EstaSuspendidoPorPago`), sin importar que la suscripción en sí siga vigente.
 - **Validación de permisos por operación:** cada servicio BLL valida el permiso del usuario en sesión antes de ejecutar cualquier operación de escritura.
 
 ---
@@ -166,10 +170,11 @@ BD/04_Diagnostico_Limpieza_Nodos_Permiso.sql
 BD/05_Renovacion_Suscripcion.sql          -- Tabla y permisos del módulo de Renovación (PdN5)
 BD/06_Rediseno_Menu.sql                   -- Actualiza el texto "Bitácora" → "Analítica" en BD existentes
 BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos de los 7 roles reales
+BD/08_Cobro_Pago.sql                      -- Tabla y permisos del módulo de Cobro de Suscripción (PdN6)
 ```
 
-- **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql`.
-- **Actualizar una BD existente** → ejecutar `02` a `06` en orden.
+- **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql` y luego `08_Cobro_Pago.sql`.
+- **Actualizar una BD existente** → ejecutar `02` a `08` en orden.
 - **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
 
 ### Cadena de conexión

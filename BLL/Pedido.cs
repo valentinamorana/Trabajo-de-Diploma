@@ -245,6 +245,14 @@ namespace BLL
                     "La suscripción de {0} venció el {1}. Renovar en el módulo de Clientes.",
                     cliente.NombreCompleto, cliente.FechaVencimiento.Value.ToString("dd/MM/yyyy"));
 
+            // PdN6 — venció el período de gracia sin regularizar el cobro (BLL.Manejadores.
+            // SuspenderHandler): se bloquean nuevos pedidos hasta que se registre un cobro exitoso.
+            if (cliente.EstaSuspendidoPorPago)
+                throw new BE.AppException("err.bll.pedido.pago_suspendido",
+                    "La suscripción de {0} está suspendida por falta de pago desde el {1}. " +
+                    "Regularizar el cobro en el módulo de Suscriptores antes de generar un nuevo pedido.",
+                    cliente.NombreCompleto, cliente.FechaLimiteGracia.Value.ToString("dd/MM/yyyy"));
+
             return cliente;
         }
 

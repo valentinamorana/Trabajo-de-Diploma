@@ -44,6 +44,7 @@
             this.clientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.planesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.renovacionSuscripcionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cobroSuscripcionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pedidosVentaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pedidosRealizadosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -154,7 +155,8 @@
             this.suscriptoresToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.clientesToolStripMenuItem,
             this.planesToolStripMenuItem,
-            this.renovacionSuscripcionToolStripMenuItem});
+            this.renovacionSuscripcionToolStripMenuItem,
+            this.cobroSuscripcionToolStripMenuItem});
             this.suscriptoresToolStripMenuItem.Name = "suscriptoresToolStripMenuItem";
             this.suscriptoresToolStripMenuItem.Tag = "mnu.suscriptores";
             this.suscriptoresToolStripMenuItem.Size = new System.Drawing.Size(90, 20);
@@ -193,6 +195,14 @@
             this.renovacionSuscripcionToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.renovacionSuscripcionToolStripMenuItem.Text = "Renovación de Suscripción";
             this.renovacionSuscripcionToolStripMenuItem.Click += new System.EventHandler(this.renovacionSuscripcionToolStripMenuItem_Click);
+            //
+            // cobroSuscripcionToolStripMenuItem
+            //
+            this.cobroSuscripcionToolStripMenuItem.Name = "cobroSuscripcionToolStripMenuItem";
+            this.cobroSuscripcionToolStripMenuItem.Tag = "mnu.cobro";
+            this.cobroSuscripcionToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.cobroSuscripcionToolStripMenuItem.Text = "Cobro de Suscripción";
+            this.cobroSuscripcionToolStripMenuItem.Click += new System.EventHandler(this.cobroSuscripcionToolStripMenuItem_Click);
             //
             // pedidosVentaToolStripMenuItem
             // 
@@ -372,6 +382,7 @@
         private System.Windows.Forms.ToolStripMenuItem clientesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem planesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem renovacionSuscripcionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cobroSuscripcionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pedidosVentaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pedidosRealizadosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem idiomasToolStripMenuItem;

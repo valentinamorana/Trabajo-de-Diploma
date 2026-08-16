@@ -68,6 +68,16 @@
     <Compile Include="Manejadores\CambioPlanHandler.cs" />
     <Compile Include="Manejadores\BajaSuscripcionHandler.cs" />
     <Compile Include="Renovacion.cs" />
+    <Compile Include="Interfaces\ICobroService.cs" />
+    <Compile Include="Manejadores\DecisionCobro.cs" />
+    <Compile Include="Manejadores\ContextoCobro.cs" />
+    <Compile Include="Manejadores\ResultadoCobro.cs" />
+    <Compile Include="Manejadores\ManejadorCobro.cs" />
+    <Compile Include="Manejadores\DetectarCobroHandler.cs" />
+    <Compile Include="Manejadores\ProcesarPagoHandler.cs" />
+    <Compile Include="Manejadores\AplicarGraciaHandler.cs" />
+    <Compile Include="Manejadores\SuspenderHandler.cs" />
+    <Compile Include="Cobro.cs" />
     <Compile Include="Pedido.cs" />
     <Compile Include="PlanSuscripcion.cs" />
     <Compile Include="Preferencia.cs" />

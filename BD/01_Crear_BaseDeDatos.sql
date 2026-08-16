@@ -467,6 +467,7 @@ FROM (VALUES
     ('Gestionar Clientes',          'mnuClientes',           'Ventas'),
     ('Gestionar PlanSuscripciones', 'mnuPlanSuscripciones',  'Ventas'),
     ('Gestionar Renovaciones',      'mnuRenovacionSuscripcion', 'Ventas'),
+    ('Gestionar Cobros',            'mnuCobroSuscripcion',   'Ventas'),
     ('Realizar Ventas',             'mnuPedidosVenta',       'Ventas'),
     ('Ver Pedidos Realizados',      'mnuPedidosRealizados',  'Ventas')
 ) AS v(Nombre, NombreMenu, Tipo)
@@ -486,16 +487,18 @@ FROM (VALUES
     ('Administrador','mnuCategorias'),('Administrador','mnuStock'),
     ('Administrador','mnuClientes'),('Administrador','mnuPlanSuscripciones'),
     ('Administrador','mnuRenovacionSuscripcion'),
+    ('Administrador','mnuCobroSuscripcion'),
     ('Administrador','mnuPedidosVenta'),('Administrador','mnuPedidosRealizados'),
     -- Supervisor: auditoría + mismos permisos que Vendedor
     ('Supervisor','mnuAuditoria'),
     ('Supervisor','mnuPrendas'),('Supervisor','mnuClientes'),
     ('Supervisor','mnuPlanSuscripciones'),('Supervisor','mnuPedidosVenta'),
     -- Vendedor: prendas + clientes + planes + ventas
-    -- (mnuRenovacionSuscripcion NO se lista para Supervisor acá: lo hereda de Vendedor vía
-    --  la arista Composite Supervisor→Vendedor que se arma más abajo)
+    -- (mnuRenovacionSuscripcion/mnuCobroSuscripcion NO se listan para Supervisor acá: los
+    --  hereda de Vendedor vía la arista Composite Supervisor→Vendedor que se arma más abajo)
     ('Vendedor','mnuPrendas'),('Vendedor','mnuClientes'),
     ('Vendedor','mnuPlanSuscripciones'),('Vendedor','mnuRenovacionSuscripcion'),
+    ('Vendedor','mnuCobroSuscripcion'),
     ('Vendedor','mnuPedidosVenta'),
     -- ControladorDeStock: prendas + stock
     ('ControladorDeStock','mnuPrendas'),('ControladorDeStock','mnuStock'),
@@ -859,6 +862,7 @@ FROM (VALUES
     ('mnuClientes',          'Menu', 'clientesToolStripMenuItem'),
     ('mnuPlanSuscripciones', 'Menu', 'planesToolStripMenuItem'),
     ('mnuRenovacionSuscripcion', 'Menu', 'renovacionSuscripcionToolStripMenuItem'),
+    ('mnuCobroSuscripcion',  'Menu', 'cobroSuscripcionToolStripMenuItem'),
     ('mnuPedidosVenta',      'Menu', 'pedidosVentaToolStripMenuItem'),
     ('mnuPedidosRealizados', 'Menu', 'pedidosRealizadosToolStripMenuItem'),
     ('mnuUsuarios',          'Menu', 'usuariosToolStripMenuItem'),
@@ -895,6 +899,38 @@ BEGIN
 END
 ELSE
     PRINT 'FechaVencimiento ya existe en Cliente — sin cambios.';
+GO
+
+-- FechaLimiteGracia en Cliente (PdN6 — período de gracia tras un cobro fallido).
+-- Null = al día. Ver BE.Cliente.EstaEnGracia / EstaSuspendidoPorPago.
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+               WHERE TABLE_NAME = 'Cliente' AND COLUMN_NAME = 'FechaLimiteGracia')
+BEGIN
+    ALTER TABLE Cliente ADD FechaLimiteGracia DATE NULL;
+    PRINT 'Columna FechaLimiteGracia agregada a Cliente.';
+END
+ELSE
+    PRINT 'FechaLimiteGracia ya existe en Cliente — sin cambios.';
+GO
+
+-- HistorialCobro (PdN6 — auditoría del patrón Chain of Responsibility de cobro,
+-- misma estructura que HistorialRenovacion / 05_Renovacion_Suscripcion.sql).
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'HistorialCobro')
+BEGIN
+    CREATE TABLE HistorialCobro (
+        IdCobro         INT           IDENTITY(1,1) PRIMARY KEY,
+        IdCliente       INT           NOT NULL REFERENCES Cliente(IdCliente),
+        Importe         DECIMAL(10,2) NOT NULL DEFAULT 0,
+        FechaDeteccion  DATETIME      NOT NULL DEFAULT GETDATE(),
+        FechaResolucion DATETIME      NULL,
+        -- 0=Pendiente, 1=Cobrado, 2=Gracia, 3=Suspendido (BE.EstadoCobro)
+        Resultado       INT           NOT NULL,
+        Actor           NVARCHAR(100) NULL
+    );
+    PRINT 'Tabla HistorialCobro creada.';
+END
+ELSE
+    PRINT 'Tabla HistorialCobro ya existe — sin cambios.';
 GO
 
 -- FechaNacimiento en Cliente — OBLIGATORIA (NOT NULL) para validar mayoría de edad.

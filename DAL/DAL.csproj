@@ -51,6 +51,7 @@
     <Compile Include="Interfaces\IUsuarioDAL.cs" />
     <Compile Include="Interfaces\IPreferenciaDAL.cs" />
     <Compile Include="Interfaces\IRenovacionDAL.cs" />
+    <Compile Include="Interfaces\ICobroDAL.cs" />
     <Compile Include="Interfaces\IClaveRecuperacionDAL.cs" />
     <Compile Include="Interfaces\IBackupDAL.cs" />
     <Compile Include="Idioma.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="ClaveRecuperacion.cs" />
     <Compile Include="Preferencia.cs" />
     <Compile Include="Renovacion.cs" />
+    <Compile Include="Cobro.cs" />
     <Compile Include="HistorialIntegridad.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="VersionUsuario.cs" />

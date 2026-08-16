@@ -33,8 +33,10 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
                     "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
+                    "       c.FechaLimiteGracia, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
+                    "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
                     "       ISNULL(stock.StockUtilizado, 0) AS StockUtilizado " +
                     "FROM Cliente c " +
                     "LEFT JOIN PlanSuscripcion p ON p.IdPlan = c.IdPlan " +
@@ -71,8 +73,10 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
                     "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
+                    "       c.FechaLimiteGracia, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
+                    "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
                     "       (SELECT COUNT(*) FROM Prenda pr WHERE pr.IdClienteActual = c.IdCliente " +
                     "        AND pr.Estado = @EstadoEnUso) AS StockUtilizado " +
                     "FROM Cliente c " +
@@ -171,12 +175,14 @@ namespace DAL
                 new SqlParameter("@IdPlan",           (object)cliente.IdPlan ?? DBNull.Value),
                 new SqlParameter("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value),
                 new SqlParameter("@FechaNacimiento",  (object)cliente.FechaNacimiento  ?? DBNull.Value),
+                new SqlParameter("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value),
                 new SqlParameter("@IdCliente",        cliente.IdCliente)
             };
             acceso.Escribir(
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
                 "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
-                "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento " +
+                "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
+                "FechaLimiteGracia=@FechaLimiteGracia " +
                 "WHERE IdCliente=@IdCliente",
                 p);
             RecalcularDV();   // T07
@@ -206,12 +212,18 @@ namespace DAL
                 LimitePrendas  = row.Table.Columns.Contains("LimitePrendas")
                                     ? Convert.ToInt32(row["LimitePrendas"])
                                     : 0,
+                PrecioPlan     = row.Table.Columns.Contains("PrecioPlan")
+                                    ? Convert.ToDecimal(row["PrecioPlan"])
+                                    : 0,
                 FechaAlta        = Convert.ToDateTime(row["FechaAlta"]),
                 FechaVencimiento = row.Table.Columns.Contains("FechaVencimiento") && row["FechaVencimiento"] != DBNull.Value
                                       ? (DateTime?)Convert.ToDateTime(row["FechaVencimiento"])
                                       : null,
                 FechaNacimiento  = row.Table.Columns.Contains("FechaNacimiento") && row["FechaNacimiento"] != DBNull.Value
                                       ? (DateTime?)Convert.ToDateTime(row["FechaNacimiento"])
+                                      : null,
+                FechaLimiteGracia = row.Table.Columns.Contains("FechaLimiteGracia") && row["FechaLimiteGracia"] != DBNull.Value
+                                      ? (DateTime?)Convert.ToDateTime(row["FechaLimiteGracia"])
                                       : null,
                 StockUtilizado = Convert.ToInt32(row["StockUtilizado"])
             };

@@ -61,6 +61,8 @@ Cada vista es un ítem de menú (patente) que habilita una pantalla:
   mnuPlanSuscripciones   → Planes de Suscripción     (ABM de planes)
   mnuPedidosVenta        → Realizar Ventas           (alta de pedidos)
   mnuPedidosRealizados   → Ver Pedidos Realizados    (despacho / seguimiento)
+  mnuRenovacionSuscripcion → Gestionar Renovaciones  (PdN5 — renovar / cambiar plan / dar de baja)
+  mnuCobroSuscripcion    → Gestionar Cobros          (PdN6 — cobrar / gracia / suspender pedidos)
 
 
 JERARQUÍA VIGENTE (⊃ = "contiene / hereda de")
@@ -77,7 +79,7 @@ ROLES Y SUS VISTAS EFECTIVAS
 ----------------------------
 
 ▸ Administrador
-    VE: TODO (las 10 vistas) + módulos de seguridad (Backup, Diagnóstico de Integridad, Usuarios).
+    VE: TODO (las 12 vistas) + módulos de seguridad (Backup, Diagnóstico de Integridad, Usuarios).
 
 ▸ Auditor
     Propias:   Ver Auditoría
@@ -85,14 +87,16 @@ ROLES Y SUS VISTAS EFECTIVAS
     (Rol transversal de solo lectura para control/auditoría.)
 
 ▸ Vendedor
-    Propias:   Ver Prendas, Gestionar Clientes, Planes de Suscripción, Realizar Ventas
-    VE: las cuatro de arriba.
+    Propias:   Ver Prendas, Gestionar Clientes, Planes de Suscripción, Gestionar Renovaciones,
+               Gestionar Cobros, Realizar Ventas
+    VE: las seis de arriba.
 
 ▸ GerenteComercial   (⊃ Vendedor)
     Propias:   Ver Pedidos Realizados
-    Heredadas: Ver Prendas, Gestionar Clientes, Planes de Suscripción, Realizar Ventas
-    VE: Ver Prendas, Gestionar Clientes, Planes de Suscripción, Realizar Ventas,
-        Ver Pedidos Realizados
+    Heredadas: Ver Prendas, Gestionar Clientes, Planes de Suscripción, Gestionar Renovaciones,
+               Gestionar Cobros, Realizar Ventas
+    VE: Ver Prendas, Gestionar Clientes, Planes de Suscripción, Gestionar Renovaciones,
+        Gestionar Cobros, Realizar Ventas, Ver Pedidos Realizados
     (Jefe del área comercial.)
 
 ▸ OperadorLogistico

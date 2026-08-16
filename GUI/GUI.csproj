@@ -57,6 +57,9 @@
     <Compile Include="RenovacionSuscripcionForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="CobroSuscripcionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="DashboardControlStock.cs">
       <SubType>Form</SubType>
     </Compile>

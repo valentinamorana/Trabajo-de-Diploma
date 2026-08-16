@@ -285,6 +285,7 @@ namespace GUI
         ///   mnuClientes              → clientesToolStripMenuItem       (bajo Suscriptores)
         ///   mnuPlanSuscripciones     → planesToolStripMenuItem         (bajo Suscriptores)
         ///   mnuRenovacionSuscripcion → renovacionSuscripcionToolStripMenuItem (bajo Suscriptores)
+        ///   mnuCobroSuscripcion      → cobroSuscripcionToolStripMenuItem (bajo Suscriptores)
         ///   mnuPedidosVenta          → pedidosVentaToolStripMenuItem   (bajo Ventas)
         ///   mnuPedidosRealizados     → pedidosRealizadosToolStripMenuItem (bajo Ventas)
         ///   mnuUsuarios              → gestionToolStripMenuItem        (bajo Administrar)
@@ -331,6 +332,7 @@ namespace GUI
                 (clientesToolStripMenuItem,          "mnuClientes"),
                 (planesToolStripMenuItem,            "mnuPlanSuscripciones"),
                 (renovacionSuscripcionToolStripMenuItem, "mnuRenovacionSuscripcion"),
+                (cobroSuscripcionToolStripMenuItem,  "mnuCobroSuscripcion"),
                 (pedidosVentaToolStripMenuItem,      "mnuPedidosVenta"),
                 (pedidosRealizadosToolStripMenuItem, "mnuPedidosRealizados"),
                 // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
@@ -684,6 +686,18 @@ namespace GUI
         }
 
         /// <summary>
+        /// Abre el módulo de Cobro de Suscripción (PdN6) como hijo MDI.
+        /// </summary>
+        private void cobroSuscripcionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is CobroSuscripcionForm) { hijo.BringToFront(); return; }
+            }
+            new CobroSuscripcionForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>
         /// Abre el módulo de Pedidos de Venta como hijo MDI. Accesible para Vendedor.
         /// </summary>
         private void pedidosVentaToolStripMenuItem_Click(object sender, EventArgs e)
@@ -883,6 +897,7 @@ namespace GUI
             Aplicar(ventasToolStripMenuItem,            t);
             Aplicar(clientesToolStripMenuItem,          t);
             Aplicar(planesToolStripMenuItem,            t);
+            Aplicar(cobroSuscripcionToolStripMenuItem,  t);
             Aplicar(pedidosVentaToolStripMenuItem,      t);
             Aplicar(pedidosRealizadosToolStripMenuItem, t);
             Aplicar(gestionToolStripMenuItem,           t);

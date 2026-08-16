@@ -3751,6 +3751,8 @@ ES	err.bll.renovacion.plan_requerido	Debe indicar el nuevo plan para cambiar la 
 ES	err.bll.renovacion.plan_inexistente	El plan indicado no existe.
 ES	err.bll.renovacion.plan_insuficiente	No se puede cambiar al plan '{0}': el cliente tiene {1} prenda(s) en uso y ese plan solo permite {2}.
 ES	err.bll.renovacion.sin_plan	{0} no tiene un plan de suscripción asignado. No corresponde procesar una renovación.
+ES	err.bll.cobro.sin_plan	{0} no tiene un plan de suscripción asignado. No corresponde procesar un cobro.
+ES	err.bll.pedido.pago_suspendido	La suscripción de {0} está suspendida por falta de pago desde el {1}. Regularizar el cobro en el módulo de Suscriptores antes de generar un nuevo pedido.
 ES	err.bll.espejo.no	No hay un espejo de integridad disponible para reparar. Usá «Recalcular» o restaurá un backup.
 ES	err.bll.espejo.norep	El daño detectado no se puede reparar desde el espejo (hay registros eliminados físicamente). Restaurá un backup para recuperarlos.
 ES	err.bll.backup.clave_requerida	Debés ingresar una contraseña para cifrar el backup.
@@ -3777,6 +3779,8 @@ EN	err.bll.renovacion.plan_requerido	You must specify the new plan to change the
 EN	err.bll.renovacion.plan_inexistente	The specified plan does not exist.
 EN	err.bll.renovacion.plan_insuficiente	Cannot switch to plan '{0}': the client has {1} garment(s) in use and that plan only allows {2}.
 EN	err.bll.renovacion.sin_plan	{0} has no subscription plan assigned. A renewal cannot be processed.
+EN	err.bll.cobro.sin_plan	{0} has no subscription plan assigned. A payment cannot be processed.
+EN	err.bll.pedido.pago_suspendido	{0}'s subscription has been suspended for non-payment since {1}. Regularize the payment in the Subscribers module before creating a new order.
 EN	err.bll.espejo.no	No integrity mirror is available to repair from. Use "Recalculate" or restore a backup.
 EN	err.bll.espejo.norep	The detected damage cannot be repaired from the mirror (there are physically deleted records). Restore a backup to recover them.
 EN	err.bll.backup.clave_requerida	You must enter a password to encrypt the backup.
@@ -3803,6 +3807,8 @@ RU	err.bll.renovacion.plan_requerido	Необходимо указать нов�
 RU	err.bll.renovacion.plan_inexistente	Указанный план не существует.
 RU	err.bll.renovacion.plan_insuficiente	Невозможно перейти на план «{0}»: у клиента {1} вещь(ей) в использовании, а этот план допускает только {2}.
 RU	err.bll.renovacion.sin_plan	У {0} не назначен план подписки. Обработка продления невозможна.
+RU	err.bll.cobro.sin_plan	У {0} не назначен план подписки. Обработка платежа невозможна.
+RU	err.bll.pedido.pago_suspendido	Подписка {0} приостановлена из-за неоплаты с {1}. Урегулируйте платёж в модуле «Подписчики» перед созданием нового заказа.
 RU	err.bll.espejo.no	Зеркало целостности для восстановления недоступно. Используйте «Пересчитать» или восстановите из бэкапа.
 RU	err.bll.espejo.norep	Обнаруженное повреждение нельзя восстановить из зеркала (есть физически удалённые записи). Восстановите из бэкапа, чтобы вернуть их.
 RU	err.bll.backup.clave_requerida	Необходимо ввести пароль для шифрования бэкапа.
@@ -3829,6 +3835,8 @@ PT	err.bll.renovacion.plan_requerido	Você deve indicar o novo plano para altera
 PT	err.bll.renovacion.plan_inexistente	O plano indicado não existe.
 PT	err.bll.renovacion.plan_insuficiente	Não é possível mudar para o plano '{0}': o cliente tem {1} peça(s) em uso e esse plano permite apenas {2}.
 PT	err.bll.renovacion.sin_plan	{0} não tem um plano de assinatura atribuído. Não é possível processar uma renovação.
+PT	err.bll.cobro.sin_plan	{0} não tem um plano de assinatura atribuído. Não é possível processar uma cobrança.
+PT	err.bll.pedido.pago_suspendido	A assinatura de {0} está suspensa por falta de pagamento desde {1}. Regularize a cobrança no módulo de Assinantes antes de gerar um novo pedido.
 PT	err.bll.espejo.no	Não há um espelho de integridade disponível para reparo. Use "Recalcular" ou restaure um backup.
 PT	err.bll.espejo.norep	O dano detectado não pode ser reparado a partir do espelho (há registros excluídos fisicamente). Restaure um backup para recuperá-los.
 PT	err.bll.backup.clave_requerida	Você deve digitar uma senha para criptografar o backup.
@@ -3846,6 +3854,13 @@ ES	renov.baja	Dar de baja
 ES	renov.plannuevo	Plan nuevo:
 ES	renov.modalidad	Modalidad de cobro:
 ES	renov.procesar	Procesar
+ES	mnu.cobro	Cobro de Suscripción
+ES	cobro.titulo	Cobro de Suscripción
+ES	cobro.cliente	Cliente:
+ES	cobro.decision	Resultado del cobro
+ES	cobro.cobrado	Cobrado
+ES	cobro.pagofallido	Pago fallido
+ES	cobro.procesar	Procesar
 EN	mnu.renovacion	Subscription Renewal
 EN	renov.titulo	Subscription Renewal
 EN	renov.cliente	Client:
@@ -3856,6 +3871,13 @@ EN	renov.baja	Cancel subscription
 EN	renov.plannuevo	New plan:
 EN	renov.modalidad	Billing method:
 EN	renov.procesar	Process
+EN	mnu.cobro	Subscription Payment
+EN	cobro.titulo	Subscription Payment
+EN	cobro.cliente	Client:
+EN	cobro.decision	Payment outcome
+EN	cobro.cobrado	Paid
+EN	cobro.pagofallido	Payment failed
+EN	cobro.procesar	Process
 RU	mnu.renovacion	Продление подписки
 RU	renov.titulo	Продление подписки
 RU	renov.cliente	Клиент:
@@ -3866,6 +3888,13 @@ RU	renov.baja	Отменить подписку
 RU	renov.plannuevo	Новый план:
 RU	renov.modalidad	Способ оплаты:
 RU	renov.procesar	Обработать
+RU	mnu.cobro	Оплата подписки
+RU	cobro.titulo	Оплата подписки
+RU	cobro.cliente	Клиент:
+RU	cobro.decision	Результат платежа
+RU	cobro.cobrado	Оплачено
+RU	cobro.pagofallido	Платёж не прошёл
+RU	cobro.procesar	Обработать
 PT	mnu.renovacion	Renovação de Assinatura
 PT	renov.titulo	Renovação de Assinatura
 PT	renov.cliente	Cliente:
@@ -3876,6 +3905,13 @@ PT	renov.baja	Cancelar assinatura
 PT	renov.plannuevo	Novo plano:
 PT	renov.modalidad	Modalidade de cobrança:
 PT	renov.procesar	Processar
+PT	mnu.cobro	Cobrança de Assinatura
+PT	cobro.titulo	Cobrança de Assinatura
+PT	cobro.cliente	Cliente:
+PT	cobro.decision	Resultado da cobrança
+PT	cobro.cobrado	Cobrado
+PT	cobro.pagofallido	Pagamento falhou
+PT	cobro.procesar	Processar
 ES	lbl.permisos.modo	Modo:
 ES	rb.permisos.crear	Crear
 ES	rb.permisos.editar	Editar / Eliminar

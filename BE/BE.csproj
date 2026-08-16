@@ -90,6 +90,8 @@
     <Compile Include="Builders\SuscripcionBuilderFactory.cs" />
     <Compile Include="EstadoRenovacion.cs" />
     <Compile Include="Renovacion.cs" />
+    <Compile Include="EstadoCobro.cs" />
+    <Compile Include="Cobro.cs" />
     <Compile Include="HistorialIntegridad.cs" />
     <Compile Include="EstadoComercialCliente.cs" />
     <Compile Include="OcupacionStock.cs" />

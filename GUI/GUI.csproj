@@ -81,8 +81,14 @@
     <Compile Include="InputDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="InputDialog.Designer.cs">
+      <DependentUpon>InputDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="CambioClaveObligatorioForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CambioClaveObligatorioForm.Designer.cs">
+      <DependentUpon>CambioClaveObligatorioForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ManejadorSeguridad.cs" />
     <Compile Include="RegistroControles.cs" />
@@ -238,6 +244,9 @@
     </Compile>
     <Compile Include="DesbloqueoEmergenciaForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DesbloqueoEmergenciaForm.Designer.cs">
+      <DependentUpon>DesbloqueoEmergenciaForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MiPerfilForm.cs">
       <SubType>Form</SubType>

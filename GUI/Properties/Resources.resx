@@ -121,4 +121,16 @@
   <data name="3106921[1]" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\3106921[1].png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="login_logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Login\01_logo_wardrobeflow_transparent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="login_clothing_rack" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Login\03_clothing_rack_transparent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="login_price_tag" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Login\04_price_tag_transparent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="login_plant_and_bag" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Login\05_plant_and_bag_transparent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

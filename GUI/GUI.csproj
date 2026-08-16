@@ -339,6 +339,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\3106921[1].png" />
+    <None Include="Resources\Login\01_logo_wardrobeflow_transparent.png" />
+    <None Include="Resources\Login\03_clothing_rack_transparent.png" />
+    <None Include="Resources\Login\04_price_tag_transparent.png" />
+    <None Include="Resources\Login\05_plant_and_bag_transparent.png" />
     <Content Include="icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

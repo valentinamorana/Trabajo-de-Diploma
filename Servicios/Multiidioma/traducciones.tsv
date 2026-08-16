@@ -1,4 +1,3 @@
-ES	btn.usr.recalculardv	Recalcular integridad (DV)
 ES	btn.usr.eliminar	🗑 Archivar usuario
 ES	btn.usr.verarchivados	Ver archivados
 ES	btn.usr.veractivos	Ver activos
@@ -14,7 +13,6 @@ ES	msg.usr.purga.ninguno	No hay usuarios archivados con más de 1 año para purg
 ES	msg.usr.purga.ok	{0} usuario(s) eliminado(s) definitivamente.
 ES	err.bll.usuario.autobaja	No podés archivar tu propio usuario mientras tenés la sesión abierta.
 ES	err.bll.usuario.ultimo_admin	No se puede archivar al último Administrador activo del sistema. Creá o activá otro Administrador antes de archivar este.
-ES	btn.usr.resetmasivo	Resetear todas las claves a temporal
 ES	mnu.integridad	Diagnóstico de Integridad
 ES	err.bll.sesion_expirada	La sesión expiró. Volvé a iniciar sesión.
 ES	err.seg.sesion_no_iniciada	La sesión no está iniciada. Iniciá sesión primero.
@@ -52,75 +50,20 @@ ES	err.bll.version.no_existe	La versión seleccionada no existe.
 ES	err.bll.prenda.transicion_baja	Una prenda dada de baja no puede cambiar de estado.
 ES	err.bll.prenda.transicion_enuso	No se puede cambiar manualmente el estado de una prenda en uso.\nEl estado se actualiza automáticamente al procesar pedidos.
 ES	err.bll.prenda.transicion_generica	La transición de '{0}' a '{1}' no está permitida.
-ES	lbl.permisos.familias	Lista de Familias (compuestos)
-ES	lbl.permisos.patentes	Lista de Patentes (simples)
-ES	lbl.permisos.composicion	Composición efectiva (recursiva)
-ES	chk.permisos.vertodos	Ver todos los roles
-ES	perm.todoslosroles	Todos los roles
-ES	lbl.permisos.embeber	Embeber rol:
-ES	lbl.permisos.anidar	Anidar en familia:
-ES	btn.permisos.anidar	Anidar selección ➜
-ES	perm.msg.selanidar	Seleccioná en una lista la familia o patente que querés anidar.
-ES	perm.msg.familiadest	Elegí la familia destino donde anidar.
-ES	perm.msg.mismocomp	Una familia no puede anidarse dentro de sí misma.
-ES	perm.ok.anidado	'{0}' anidado dentro de la familia '{1}'.
-ES	perm.err.anidar	No se pudo anidar: {0}
 ES	lbl.permisos.estructura	Estructura del sistema (roles, familias y patentes)
-ES	lbl.permisos.disponibles	Disponibles para agregar
-ES	lbl.permisos.efectivos	Permisos efectivos (recursivo)
-ES	lbl.permisos.miembros	Miembros de: {0}
-ES	lbl.permisos.miembros.vacio	Miembros (seleccioná una Familia o Rol)
-ES	btn.permisos.agregar	Agregar ↓
 ES	btn.permisos.quitar	Quitar ↑
 ES	perm.msg.selpadre	Seleccioná una Familia o Rol para agregarle hijos.
 ES	perm.ok.agregado	'{0}' agregado a '{1}'.
 ES	perm.ok.quitado	'{0}' quitado de '{1}'.
-ES	perm.tipo.rol	el rol
-ES	btn.permisos.crearpatente	➕ Patente
-ES	btn.permisos.crearfamilia	➕ Familia
-ES	btn.permisos.crearrol	➕ Rol
 ES	btn.permisos.actualizar	↻ Actualizar
-ES	lbl.permisos.ayuda	❔ Ayuda
-ES	help.permisos.titulo	¿Patente, Familia o Rol?
-ES	help.permisos.patente	Patente = permiso atómico (una acción o pantalla concreta). Es una hoja: no contiene otros.
-ES	help.permisos.familia	Familia = agrupa permisos para reutilizarlos en varios roles. No se asigna a usuarios.
 ES	help.permisos.rol	Rol = perfil que se asigna a un usuario. Puede contener patentes, familias y otros roles (rol-en-rol).
-ES	help.permisos.general	🔑 PATENTE — permiso atómico: una acción/pantalla concreta (ej. "Ver Prendas"). Es una hoja.\n📁 FAMILIA — agrupa permisos para reutilizar; no se asigna a usuarios.\n👥 ROL — familia que SÍ se asigna a un usuario (su perfil); puede contener patentes, familias y otros roles.\n\nEl usuario tiene un rol y el sistema junta recursivamente todas las patentes que cuelgan de él = sus permisos efectivos.
 ES	lbl.permisos.subtitulo	Gestión de roles, familias y patentes
-ES	btn.permisos.nuevorol	➕ Nuevo rol
-ES	btn.permisos.eliminarrol	🗑 Eliminar rol
-ES	btn.permisos.nuevafamilia	➕ Nueva familia
-ES	btn.permisos.nuevapatente	➕ Nueva patente
-ES	btn.permisos.embeber	Embeber ➜
-ES	btn.permisos.modificar	✏ Modificar selección
 ES	btn.permisos.eliminar	🗑 Eliminar selección
-ES	perm.dlg.rol.t	Nuevo rol
-ES	perm.dlg.rol.p	Nombre del nuevo rol:
-ES	perm.dlg.fam.t	Nueva familia
-ES	perm.dlg.fam.p	Nombre de la familia (permiso compuesto):
-ES	perm.dlg.pat.t	Nueva patente
-ES	perm.dlg.pat.p	Nombre de la patente (permiso simple):
-ES	perm.dlg.pat.menu	NombreMenu asociado (opcional, ej: mnuClientes):
-ES	perm.dlg.mod.t	Modificar componente
-ES	perm.dlg.mod.p	Nuevo nombre:
-ES	perm.dlg.mod.menu	NombreMenu asociado:
 ES	perm.conf.titulo	Confirmar
 ES	perm.conf.elirol	¿Eliminar el rol '{0}'?
-ES	perm.conf.elicomp	¿Eliminar {0} '{1}'? Se quitará de todos los roles.
-ES	perm.tipo.familia	la familia
-ES	perm.tipo.patente	la patente
-ES	perm.msg.selmod	Seleccioná una patente o familia para modificar.
-ES	perm.msg.seleli	Seleccioná una patente o familia para eliminar.
-ES	perm.msg.norol	No se pudo resolver el rol.
-ES	perm.ok.guardado	Cambios guardados para '{0}': {1} agregado(s), {2} quitado(s).
-ES	perm.ok.embebido	Rol '{0}' embebido dentro de '{1}'.
 ES	perm.ok.rolcreado	Rol '{0}' creado.
-ES	perm.ok.roleli	Rol '{0}' eliminado.
-ES	perm.ok.patcreada	Patente '{0}' creada.
-ES	perm.ok.famcreada	Familia '{0}' creada.
 ES	perm.ok.modificado	Componente actualizado a '{0}'.
 ES	perm.ok.eliminado	'{0}' eliminado.
-ES	perm.err.embeber	No se pudo embeber: {0}
 ES	btn.idiomas.nuevo	➕ Nuevo idioma
 ES	btn.idiomas.renombrar	✏ Renombrar
 ES	idiomas.dlg.nuevo.t	Nuevo idioma
@@ -135,7 +78,6 @@ ES	idiomas.conf.incompleto	Este idioma tiene {0} control(es) sin traducir.\nSi l
 ES	idiomas.conf.incompleto.t	Traducciones incompletas
 ES	lbl.idiomas.controles	Controles traducibles
 ES	err.generico.cargar	Error al cargar: {0}
-ES	err.generico.guardar	Error al guardar: {0}
 ES	pedidos.hist.encontrados	{0} registro(s) encontrado(s).
 ES	frm.login	WardrobeFlow
 ES	lbl.usuario	Usuario
@@ -428,7 +370,6 @@ ES	frm.resetclave	Resetear Contraseña
 ES	lbl.nueva.clave	Nueva contraseña (mín. 6 caracteres):
 ES	lbl.confirmar.clave	Confirmar contraseña:
 ES	btn.confirmar.reset	Confirmar Reset
-ES	err.clave.longitud	La contraseña debe tener al menos 6 caracteres.
 ES	err.clave.nomatch	Las contraseñas no coinciden.
 ES	notif.titulo	NOTIFICACIÓN DE PEDIDO
 ES	notif.numero	Pedido #:
@@ -438,10 +379,6 @@ ES	lbl.nuevoestado	Nuevo estado:
 ES	btn.confirmar.cambio	Confirmar Cambio
 ES	err.ped.sinprendas	Seleccioná al menos una prenda.
 ES	err.hist.restaurar	Seleccioná una fila del historial para restaurar.
-ES	err.usr.sinperfil	Seleccioná un perfil/rol.
-ES	err.usr.nombre.req	El nombre de usuario es obligatorio.
-ES	err.usr.nombre.longitud	El nombre de usuario debe tener al menos 3 caracteres.
-ES	err.cli.dni.numeros	✗ El DNI solo puede contener números.
 ES	lbl.ped.detalletitulo	Pedido #{0}  ·  {1}  ·  {2}  ·  {3} {4}
 ES	tevt.todos	Todos
 ES	tevt.venta	Venta
@@ -477,24 +414,6 @@ ES	notif.gen.color	Color
 ES	notif.gen.categoria	Categoría
 ES	notif.gen.footer	Ante cualquier consulta, comuníquese con nosotros.
 ES	notif.gen.slogan	WardrobeFlow — Tu guardarropa, sin límites.
-ES	frm.reparacion	Reparación Manual de Dígitos Verificadores
-ES	lbl.rep.seleccionar	Seleccione las filas a reparar
-ES	lbl.rep.resumen	{0} fila(s) con DVH inválido detectada(s).
-ES	btn.rep.selall	Seleccionar Todas
-ES	btn.rep.deselall	Deseleccionar Todas
-ES	btn.rep.reparar	Reparar Seleccionadas
-ES	col.rep.id	ID
-ES	col.rep.usuario	Usuario
-ES	col.rep.dvh	DVH Almacenado
-ES	col.rep.estado	Estado
-ES	rep.estado.sinDVH	Sin DVH almacenado
-ES	rep.estado.nocoincide	DVH no coincide con datos actuales
-ES	msg.rep.seleccionar	Seleccione al menos una fila para reparar.
-ES	msg.rep.sinseleccion.titulo	Sin selección
-ES	msg.rep.confirmar	¿Reparar los dígitos verificadores de {0} fila(s) seleccionada(s)?\n\nSe recalcularán los DVH individuales y el DVV de la tabla.
-ES	msg.rep.confirmar.titulo	Confirmar Reparación
-ES	msg.rep.exito	Se repararon {0} fila(s) con éxito.\nEl DVV de la tabla fue recalculado.
-ES	msg.rep.exito.titulo	Reparación Exitosa
 ES	perfil.administrador	Administrador
 ES	perfil.supervisor	Supervisor
 ES	perfil.vendedor	Vendedor
@@ -515,27 +434,16 @@ ES	err.recup.nousername	Ingresá tu nombre de usuario.
 ES	err.recup.nousuario	No se encontró el usuario '{0}'.\nVerificá que escribiste tu nombre correctamente.
 ES	msg.recup.exito	Usuario '{0}' encontrado.\nContacta al administrador para que resetee\ntu contrasena desde Administrar -> Usuarios.
 ES	err.recup.verificar	Error al verificar el usuario: {0}
-ES	msg.usr.creado	Usuario '{0}' [{1}] creado correctamente.
 ES	msg.usr.creado.exportado	Usuario '{0}' [{1}] creado.\nCredenciales guardadas en:\n{2}
 ES	msg.usr.clave.exportada	Contraseña de '{0}' regenerada automáticamente.\nCredenciales guardadas en:\n{1}
 ES	err.usr.selecciona	Seleccioná un usuario de la lista.
-ES	dlg.resetclave.prompt	Nueva contraseña para '{0}' (mínimo 6 caracteres):
-ES	msg.usr.clave.reseteada	Contraseña de '{0}' reseteada correctamente.
 ES	err.usr.sel.bloqueado	Seleccioná un usuario bloqueado de la lista.
 ES	conf.desbloquear.body	¿Desbloquear la cuenta de '{0}'?
 ES	conf.desbloquear.titulo	Confirmar Desbloqueo
 ES	msg.usr.desbloqueada	Cuenta '{0}' desbloqueada correctamente.
-ES	conf.resetmasivo.titulo	Resetear todas las claves
-ES	conf.resetmasivo.body	Esto va a resetear la contraseña de TODOS los usuarios a:\n\n   {0}\n\nComunicate con cada empleado para que la cambien.\n\n¿Confirmar?
-ES	conf.resetmasivo.body.generico	Esto va a resetear la contraseña de TODOS los usuarios a una clave temporal.\n\nComunicate con cada empleado para que la cambien.\n\n¿Confirmar?
-ES	msg.usr.resetmasivo	Todas las claves fueron reseteadas a: {0}
 ES	frm.gestorpermisos	Gestor de Perfiles — Permisos
 ES	lbl.permisos.titulo	Perfiles y Permisos
-ES	lbl.permisos.rol	Rol:
-ES	btn.permisos.guardar	Guardar cambios
 ES	btn.permisos.cerrar	Cerrar
-ES	msg.permisos.mostrando	Mostrando permisos del rol '{0}'.
-ES	msg.permisos.guardados	Cambios guardados: {0} permiso(s) asignado(s), {1} quitado(s).
 ES	perm.rol.administrador	Administrador
 ES	perm.rol.vendedor	Vendedor
 ES	perm.rol.operadorlogistico	Operador Logístico
@@ -564,9 +472,6 @@ ES	btn.explorador.cerrar	Cerrar
 ES	btn.explorador.colapsar	⊟ Colapsar todo
 ES	btn.explorador.expandir	⊞ Expandir todo
 ES	err.explorador.cargar	Error al cargar árbol Composite:\n{0}
-ES	lbl.jerarquia.roles	Jerarquía de Roles
-ES	lbl.jerarquia.selecciona	Seleccioná un rol en el árbol izquierdo.
-ES	lbl.permiso.heredado	 (heredado)
 ES	perfil.auditor	Auditor
 ES	perfil.gerentecomercial	Gerente Comercial
 ES	perfil.gerenteinventario	Gerente de Inventario
@@ -638,21 +543,6 @@ ES	msg.backup.restauradatitulo	Restauración Exitosa
 ES	lbl.backup.sincopias	Sin copias de seguridad generadas aún.
 ES	lbl.backup.conteo	{0} copia(s) disponible(s). La más reciente: {1}
 ES	frm.restauracion	Integridad del Sistema
-ES	lbl.rest.titulo	Integridad del Sistema Comprometida
-ES	lbl.rest.subtitulo	Se detectaron discrepancias en los dígitos verificadores. El acceso está bloqueado.
-ES	lbl.rest.detalle	Detalle del error:
-ES	btn.rest.recalcular	Recalcular Dígitos
-ES	btn.rest.backup	Restaurar desde Backup
-ES	btn.rest.salir	Salir
-ES	dv.alerta.titulo	ALERTA DE INTEGRIDAD — Tabla Usuario
-ES	dv.dvh.intro	Se detectaron {0} fila(s) con DVH inválido:
-ES	dv.dvv.intro	El DVV de la tabla no coincide con el valor almacenado.
-ES	dv.dvv.valores	  Almacenado: {0}  |  Calculado: {1}
-ES	dv.causas	Posibles causas: modificación directa en la base de datos,\nrestauración parcial de backup o error en la migración.
-ES	dv.pasos.titulo	Para restaurar la integridad, un Administrador debe:
-ES	dv.pasos.1	  1. Revisar los registros alterados en SQL Server.
-ES	dv.pasos.2	  2. Corregir los valores afectados manualmente.
-ES	dv.pasos.3	  3. Ejecutar el recálculo de DVH/DVV desde Administrar → Usuarios.
 ES	mnu.dashboard	Panel de Control
 ES	mnu.bitacora.sistema	Bitácora del Sistema
 ES	mnu.bitacora.negocio	Bitácora de Negocio
@@ -670,14 +560,12 @@ ES	frm.reportejornada	Reporte de Jornada — WardrobeFlow
 ES	rpt.generar	Generar
 ES	rpt.comparar	Comparar jornadas
 ES	rpt.exportartxt	Exportar TXT
-ES	rpt.exportarpdf	Exportar PDF
 ES	rpt.fecha	Jornada:
 ES	rpt.fecha2	Comparar con:
 ES	rpt.kpi.prendas	Prendas disponibles
 ES	rpt.kpi.clientes	Clientes registrados
 ES	rpt.kpi.eventos	Eventos del día
 ES	rpt.kpi.backup	días sin backup
-ES	rpt.sinDatos	Sin eventos registrados para la jornada seleccionada.
 ES	rpt.limpiar	Limpiar
 ES	rpt.subtitulo	Eventos de negocio por jornada con exportación a TXT
 ES	rpt.txt.titulo	REPORTE DE JORNADA
@@ -740,10 +628,8 @@ ES	frm.historialusr	Historial de Cambios de Usuarios
 ES	lbl.ver.usuario	Usuario:
 ES	btn.ver.cargar	Cargar
 ES	btn.ver.restaurar	Restaurar Versión Seleccionada
-ES	col.ver.id	ID
 ES	col.ver.fecha	Fecha
 ES	col.ver.actor	Modificado por
-ES	col.ver.estado	Estado
 ES	mnu.historialusr	Historial de Cambios
 ES	frm.confirmaradmin	Confirmar Administrador
 ES	lbl.confirmaradmin.subtitulo	Solo un Administrador puede continuar
@@ -755,7 +641,6 @@ ES	msg.confirmar.vacio	Ingrese usuario y contraseña.
 ES	msg.confirmar.invalido	Credenciales inválidas o el usuario no es Administrador.
 ES	msg.historial.sinseleccion	Seleccioná una versión de la grilla.
 ES	msg.historial.atencion	Atención
-ES	msg.historial.confirmar	¿Restaurar al usuario '{0}' al estado del {1}?\n\nDetalle del snapshot: {2}\n\nEsta acción es reversible (se graba un nuevo snapshot antes de restaurar).
 ES	msg.historial.restaurado	Versión restaurada correctamente.
 ES	msg.cli.registrado	Cliente '{0}' registrado correctamente.
 ES	msg.cli.actualizado	Cliente '{0}' actualizado.
@@ -777,13 +662,7 @@ ES	conf.idiomas.desactivar	¿Desactivar este idioma? Los usuarios no podrán sel
 ES	conf.idiomas.titulo	Confirmar
 ES	msg.hist.restaurado	Pedido #{0} restaurado correctamente.
 ES	conf.hist.restaurar.msg	¿Restaurar el pedido #{0} al estado anterior a '{1}' (op. #{2})?\n\n⚠ Nota: esta operación modifica el estado del Pedido en la base de datos.\nEl estado de las Prendas asociadas NO se revierte automáticamente.\n\n¿Confirmar?
-ES	msg.usr.dvrecalculados	DVH y DVV recalculados correctamente para todos los usuarios.
-ES	msg.usr.errordv	Error al recalcular DV: {0}
-ES	msg.rest.dvexito	Dígitos verificadores recalculados con éxito.\nYa puede ingresar al sistema.
-ES	msg.rest.dvtitulo	Integridad restaurada
 ES	conf.rest.sobreescribir	¿Está seguro? Esta operación sobrescribirá todos los datos actuales y reiniciará la aplicación.
-ES	msg.rest.errorrecalcular	Error al recalcular: {0}
-ES	msg.rest.errorrestaurar	Error al restaurar: {0}
 ES	msg.backup.errorgenerar	Error al generar copia de seguridad:\n{0}
 ES	msg.backup.erroreliminar	Error al eliminar:\n{0}
 ES	msg.backup.errorrestaurar	Error al restaurar:\n{0}
@@ -795,7 +674,6 @@ ES	col.cli.vencimiento	Vencimiento
 ES	msg.cli.sinvenc	Sin vencimiento
 ES	msg.cli.vencido	Vencido
 ES	msg.cli.proxvencer	Vence pronto
-ES	msg.cli.vigente	Vigente
 ES	err.ped.suscvencida	⚠ La suscripción de {0} venció el {1}.\nRenovar en el módulo de Clientes.
 ES	lbl.ped.proxvencer	⏰ La suscripción vence en {0} día(s). Avisale al cliente para renovarla.
 ES	lbl.ped.res.linea1	Seleccionadas: {0}  |  Ya en uso: {1}  |  Total: {2}
@@ -839,10 +717,6 @@ ES	err.bll.pedido.descancelar_estado	Solo se pueden des-cancelar pedidos Cancela
 ES	err.bll.pedido.descancelar_prendas	No se puede des-cancelar el Pedido #{0}. Una o más prendas ya no están disponibles.
 ES	err.bll.plan.nombre_requerido	El nombre del plan es obligatorio.
 ES	err.bll.plan.limite_invalido	El límite de prendas debe ser mayor que cero.
-ES	err.bll.plan.precio_negativo	El precio no puede ser negativo.
-ES	err.plan.nombre_requerido	El nombre del plan es obligatorio.
-ES	err.plan.nombre_letras	El nombre solo puede contener letras.
-ES	err.plan.precio_cero	El precio debe ser mayor a cero.
 ES	diag.estado.integro	Estado: INTEGRO
 ES	diag.estado.comprometido	Estado: COMPROMETIDO
 ES	msg.idiomas.cargadas	{0} traducción(es) cargadas.
@@ -857,7 +731,6 @@ ES	diag.tab.diagnostico	Diagnóstico
 ES	diag.tab.historial	Historial de Verificaciones
 ES	diag.lbl.filasrotas	Filas con DVH inválido:
 ES	diag.btn.recalcular	Recalcular Todo
-ES	diag.btn.reparar	Reparar Seleccionadas...
 ES	diag.btn.actualizar	Actualizar
 ES	diag.col.id	ID
 ES	diag.col.usuario	Usuario
@@ -872,8 +745,6 @@ ES	diag.col.filas.corr	Filas Corruptas
 ES	diag.col.resultado	Resultado
 ES	diag.col.origen	Disparado por
 ES	diag.dvv.detalle	DVV almacenado: {0}   |   DVV calculado: {1}   |   Filas con DVH inválido: {2}
-ES	diag.msg.sinproblemas	No hay filas con DVH inválido.
-ES	diag.msg.sinprob.titulo	Sin problemas
 ES	diag.conf.recalcular	¿Recalcular todos los DVH y el DVV de la tabla Usuario?\n\nEsta operación sobreescribirá todos los dígitos verificadores almacenados.
 ES	diag.conf.recalcular.titulo	Confirmar Recálculo Total
 ES	diag.msg.recalc.exito	Dígitos verificadores recalculados con éxito.
@@ -893,7 +764,6 @@ ES	diag.tip.ok	Verificación correcta: los dígitos verificadores coinciden con 
 ES	diag.tabla.corrupta	Tabla '{0}'
 ES	diag.tabla.dvinvalido	DV inválido — usá «Recalcular Todo»
 ES	diag.tablas.corruptas	Tablas con DV inválido: {0}
-EN	btn.usr.recalculardv	Recalculate integrity (DV)
 EN	btn.usr.eliminar	🗑 Archive user
 EN	btn.usr.verarchivados	View archived
 EN	btn.usr.veractivos	View active
@@ -909,7 +779,6 @@ EN	msg.usr.purga.ninguno	There are no users archived more than 1 year ago to pur
 EN	msg.usr.purga.ok	{0} user(s) permanently deleted.
 EN	err.bll.usuario.autobaja	You can't archive your own user while your session is open.
 EN	err.bll.usuario.ultimo_admin	Cannot archive the last active Administrator. Create or activate another Administrator before archiving this one.
-EN	btn.usr.resetmasivo	Reset all passwords to temporary
 EN	mnu.integridad	Integrity Diagnostics
 EN	err.bll.sesion_expirada	Your session expired. Please log in again.
 EN	err.seg.sesion_no_iniciada	No session is active. Please log in first.
@@ -947,75 +816,20 @@ EN	err.bll.version.no_existe	The selected version does not exist.
 EN	err.bll.prenda.transicion_baja	A garment that has been deactivated cannot change state.
 EN	err.bll.prenda.transicion_enuso	The state of a garment in use cannot be changed manually.\nThe state updates automatically when processing orders.
 EN	err.bll.prenda.transicion_generica	The transition from '{0}' to '{1}' is not allowed.
-EN	lbl.permisos.familias	Family List (composite)
-EN	lbl.permisos.patentes	Patent List (simple)
-EN	lbl.permisos.composicion	Effective composition (recursive)
-EN	chk.permisos.vertodos	View all roles
-EN	perm.todoslosroles	All roles
-EN	lbl.permisos.embeber	Embed role:
-EN	lbl.permisos.anidar	Nest into family:
-EN	btn.permisos.anidar	Nest selection ➜
-EN	perm.msg.selanidar	Select in a list the family or patent you want to nest.
-EN	perm.msg.familiadest	Choose the destination family to nest into.
-EN	perm.msg.mismocomp	A family cannot be nested inside itself.
-EN	perm.ok.anidado	'{0}' nested inside family '{1}'.
-EN	perm.err.anidar	Could not nest: {0}
 EN	lbl.permisos.estructura	System structure (roles, families and patents)
-EN	lbl.permisos.disponibles	Available to add
-EN	lbl.permisos.efectivos	Effective permissions (recursive)
-EN	lbl.permisos.miembros	Members of: {0}
-EN	lbl.permisos.miembros.vacio	Members (select a Family or Role)
-EN	btn.permisos.agregar	Add ↓
 EN	btn.permisos.quitar	Remove ↑
 EN	perm.msg.selpadre	Select a Family or Role to add children to.
 EN	perm.ok.agregado	'{0}' added to '{1}'.
 EN	perm.ok.quitado	'{0}' removed from '{1}'.
-EN	perm.tipo.rol	the role
-EN	btn.permisos.crearpatente	➕ Patent
-EN	btn.permisos.crearfamilia	➕ Family
-EN	btn.permisos.crearrol	➕ Role
 EN	btn.permisos.actualizar	↻ Refresh
-EN	lbl.permisos.ayuda	❔ Help
-EN	help.permisos.titulo	Patent, Family or Role?
-EN	help.permisos.patente	Patent = atomic permission (one concrete action or screen). It is a leaf: contains nothing.
-EN	help.permisos.familia	Family = groups permissions to reuse across roles. Not assigned to users.
 EN	help.permisos.rol	Role = profile assigned to a user. Can contain patents, families and other roles (role-in-role).
-EN	help.permisos.general	🔑 PATENT — atomic permission: a concrete action/screen (e.g. "View Garments"). A leaf.\n📁 FAMILY — groups permissions for reuse; not assigned to users.\n👥 ROLE — a family that IS assigned to a user (their profile); can contain patents, families and other roles.\n\nA user has a role and the system recursively collects all patents under it = their effective permissions.
 EN	lbl.permisos.subtitulo	Manage roles, families and patents
-EN	btn.permisos.nuevorol	➕ New role
-EN	btn.permisos.eliminarrol	🗑 Delete role
-EN	btn.permisos.nuevafamilia	➕ New family
-EN	btn.permisos.nuevapatente	➕ New patent
-EN	btn.permisos.embeber	Embed ➜
-EN	btn.permisos.modificar	✏ Edit selection
 EN	btn.permisos.eliminar	🗑 Delete selection
-EN	perm.dlg.rol.t	New role
-EN	perm.dlg.rol.p	Name of the new role:
-EN	perm.dlg.fam.t	New family
-EN	perm.dlg.fam.p	Name of the family (composite permission):
-EN	perm.dlg.pat.t	New patent
-EN	perm.dlg.pat.p	Name of the patent (simple permission):
-EN	perm.dlg.pat.menu	Associated MenuName (optional, e.g.: mnuClientes):
-EN	perm.dlg.mod.t	Edit component
-EN	perm.dlg.mod.p	New name:
-EN	perm.dlg.mod.menu	Associated MenuName:
 EN	perm.conf.titulo	Confirm
 EN	perm.conf.elirol	Delete role '{0}'?
-EN	perm.conf.elicomp	Delete {0} '{1}'? It will be removed from all roles.
-EN	perm.tipo.familia	family
-EN	perm.tipo.patente	patent
-EN	perm.msg.selmod	Select a patent or family to edit.
-EN	perm.msg.seleli	Select a patent or family to delete.
-EN	perm.msg.norol	Could not resolve the role.
-EN	perm.ok.guardado	Changes saved for '{0}': {1} added, {2} removed.
-EN	perm.ok.embebido	Role '{0}' embedded into '{1}'.
 EN	perm.ok.rolcreado	Role '{0}' created.
-EN	perm.ok.roleli	Role '{0}' deleted.
-EN	perm.ok.patcreada	Patent '{0}' created.
-EN	perm.ok.famcreada	Family '{0}' created.
 EN	perm.ok.modificado	Component updated to '{0}'.
 EN	perm.ok.eliminado	'{0}' deleted.
-EN	perm.err.embeber	Could not embed: {0}
 EN	btn.idiomas.nuevo	➕ New language
 EN	btn.idiomas.renombrar	✏ Rename
 EN	idiomas.dlg.nuevo.t	New language
@@ -1030,7 +844,6 @@ EN	idiomas.conf.incompleto	This language has {0} untranslated control(s).\nIf yo
 EN	idiomas.conf.incompleto.t	Incomplete translations
 EN	lbl.idiomas.controles	Translatable controls
 EN	err.generico.cargar	Error loading: {0}
-EN	err.generico.guardar	Error saving: {0}
 EN	pedidos.hist.encontrados	{0} record(s) found.
 EN	frm.login	WardrobeFlow — Login
 EN	lbl.usuario	Username
@@ -1327,7 +1140,6 @@ EN	frm.resetclave	Reset Password
 EN	lbl.nueva.clave	New password (min. 6 chars):
 EN	lbl.confirmar.clave	Confirm password:
 EN	btn.confirmar.reset	Confirm Reset
-EN	err.clave.longitud	Password must be at least 6 characters.
 EN	err.clave.nomatch	Passwords do not match.
 EN	notif.titulo	ORDER NOTIFICATION
 EN	notif.numero	Order #:
@@ -1337,10 +1149,6 @@ EN	lbl.nuevoestado	New status:
 EN	btn.confirmar.cambio	Confirm Change
 EN	err.ped.sinprendas	Select at least one garment.
 EN	err.hist.restaurar	Select a history row to restore.
-EN	err.usr.sinperfil	Select a profile/role.
-EN	err.usr.nombre.req	Username is required.
-EN	err.usr.nombre.longitud	Username must be at least 3 characters.
-EN	err.cli.dni.numeros	✗ DNI can only contain numbers.
 EN	lbl.ped.detalletitulo	Order #{0}  ·  {1}  ·  {2}  ·  {3} {4}
 EN	tevt.todos	All
 EN	tevt.venta	Sale
@@ -1376,24 +1184,6 @@ EN	notif.gen.color	Color
 EN	notif.gen.categoria	Category
 EN	notif.gen.footer	For any questions, please contact us.
 EN	notif.gen.slogan	WardrobeFlow — Your wardrobe, without limits.
-EN	frm.reparacion	Manual Check Digit Repair
-EN	lbl.rep.seleccionar	Select rows to repair
-EN	lbl.rep.resumen	{0} row(s) with invalid DVH detected.
-EN	btn.rep.selall	Select All
-EN	btn.rep.deselall	Deselect All
-EN	btn.rep.reparar	Repair Selected
-EN	col.rep.id	ID
-EN	col.rep.usuario	Username
-EN	col.rep.dvh	Stored DVH
-EN	col.rep.estado	Status
-EN	rep.estado.sinDVH	No DVH stored
-EN	rep.estado.nocoincide	DVH does not match current data
-EN	msg.rep.seleccionar	Select at least one row to repair.
-EN	msg.rep.sinseleccion.titulo	No selection
-EN	msg.rep.confirmar	Repair check digits for {0} selected row(s)?\n\nIndividual DVH and the table DVV will be recalculated.
-EN	msg.rep.confirmar.titulo	Confirm Repair
-EN	msg.rep.exito	{0} row(s) repaired successfully.\nThe table DVV was recalculated.
-EN	msg.rep.exito.titulo	Repair Successful
 EN	perfil.administrador	Administrator
 EN	perfil.supervisor	Supervisor
 EN	perfil.vendedor	Sales Rep
@@ -1410,27 +1200,16 @@ EN	err.pdf.sinDatos	No data to export.
 EN	lbl.exportarpdf	Export PDF
 EN	lbl.ped.infoplan	Client: {0}\nPlan: {1}\nGarments currently in use: {2}\nPayment method: {3}\nSince: {4}
 EN	err.ped.sinplan	⚠ {0} has no plan assigned.\nAssign a plan in the Clients module before creating an order.
-EN	msg.usr.creado	User '{0}' [{1}] created successfully.
 EN	msg.usr.creado.exportado	User '{0}' [{1}] created.\nCredentials saved to:\n{2}
 EN	msg.usr.clave.exportada	Password for '{0}' auto-generated.\nCredentials saved to:\n{1}
 EN	err.usr.selecciona	Select a user from the list.
-EN	dlg.resetclave.prompt	New password for '{0}' (minimum 6 characters):
-EN	msg.usr.clave.reseteada	Password for '{0}' reset successfully.
 EN	err.usr.sel.bloqueado	Select a locked user from the list.
 EN	conf.desbloquear.body	Unlock the account of '{0}'?
 EN	conf.desbloquear.titulo	Confirm Unlock
 EN	msg.usr.desbloqueada	Account '{0}' unlocked successfully.
-EN	conf.resetmasivo.titulo	Reset all passwords
-EN	conf.resetmasivo.body	This will reset the password of ALL users to:\n\n   {0}\n\nNotify each employee to change it.\n\nConfirm?
-EN	conf.resetmasivo.body.generico	This will reset the password of ALL users to a temporary password.\n\nNotify each employee to change it.\n\nConfirm?
-EN	msg.usr.resetmasivo	All passwords have been reset to: {0}
 EN	frm.gestorpermisos	Profile and Permission Manager
 EN	lbl.permisos.titulo	Profiles and Permissions
-EN	lbl.permisos.rol	Role:
-EN	btn.permisos.guardar	Save changes
 EN	btn.permisos.cerrar	Close
-EN	msg.permisos.mostrando	Showing permissions for role '{0}'.
-EN	msg.permisos.guardados	Changes saved: {0} permission(s) assigned, {1} removed.
 EN	perm.rol.administrador	Administrator
 EN	perm.rol.vendedor	Salesperson
 EN	perm.rol.operadorlogistico	Logistics Operator
@@ -1459,9 +1238,6 @@ EN	btn.explorador.cerrar	Close
 EN	btn.explorador.colapsar	⊟ Collapse all
 EN	btn.explorador.expandir	⊞ Expand all
 EN	err.explorador.cargar	Error loading Composite tree:\n{0}
-EN	lbl.jerarquia.roles	Role Hierarchy
-EN	lbl.jerarquia.selecciona	Select a role from the left tree.
-EN	lbl.permiso.heredado	 (inherited)
 EN	perfil.auditor	Auditor
 EN	perfil.gerentecomercial	Sales Manager
 EN	perfil.gerenteinventario	Inventory Manager
@@ -1533,21 +1309,6 @@ EN	msg.backup.restauradatitulo	Restore Successful
 EN	lbl.backup.sincopias	No backups created yet.
 EN	lbl.backup.conteo	{0} backup(s) available. Most recent: {1}
 EN	frm.restauracion	System Integrity
-EN	lbl.rest.titulo	System Integrity Compromised
-EN	lbl.rest.subtitulo	Discrepancies were found in the check digits. Access is blocked.
-EN	lbl.rest.detalle	Error detail:
-EN	btn.rest.recalcular	Recalculate Check Digits
-EN	btn.rest.backup	Restore from Backup
-EN	btn.rest.salir	Exit
-EN	dv.alerta.titulo	INTEGRITY ALERT — Usuario Table
-EN	dv.dvh.intro	{0} row(s) with invalid DVH detected:
-EN	dv.dvv.intro	The table DVV does not match the stored value.
-EN	dv.dvv.valores	  Stored: {0}  |  Calculated: {1}
-EN	dv.causas	Possible causes: direct database modification,\npartial backup restore, or migration error.
-EN	dv.pasos.titulo	To restore integrity, an Administrator must:
-EN	dv.pasos.1	  1. Review altered records in SQL Server.
-EN	dv.pasos.2	  2. Manually correct the affected values.
-EN	dv.pasos.3	  3. Run DVH/DVV recalculation from Manage → Users.
 EN	mnu.dashboard	Dashboard
 EN	mnu.bitacora.sistema	System Log
 EN	mnu.bitacora.negocio	Business Log
@@ -1565,14 +1326,12 @@ EN	frm.reportejornada	Daily Report — WardrobeFlow
 EN	rpt.generar	Generate
 EN	rpt.comparar	Compare shifts
 EN	rpt.exportartxt	Export TXT
-EN	rpt.exportarpdf	Export PDF
 EN	rpt.fecha	Shift:
 EN	rpt.fecha2	Compare with:
 EN	rpt.kpi.prendas	Available garments
 EN	rpt.kpi.clientes	Registered clients
 EN	rpt.kpi.eventos	Events today
 EN	rpt.kpi.backup	days since backup
-EN	rpt.sinDatos	No events recorded for the selected shift.
 EN	rpt.limpiar	Clear
 EN	rpt.subtitulo	Business events per day with TXT export
 EN	rpt.txt.titulo	DAILY REPORT
@@ -1635,10 +1394,8 @@ EN	frm.historialusr	User Change History
 EN	lbl.ver.usuario	User:
 EN	btn.ver.cargar	Load
 EN	btn.ver.restaurar	Restore Selected Version
-EN	col.ver.id	ID
 EN	col.ver.fecha	Date
 EN	col.ver.actor	Modified by
-EN	col.ver.estado	Status
 EN	mnu.historialusr	Change History
 EN	frm.confirmaradmin	Confirm Administrator
 EN	lbl.confirmaradmin.subtitulo	Only an Administrator can continue
@@ -1650,7 +1407,6 @@ EN	msg.confirmar.vacio	Enter username and password.
 EN	msg.confirmar.invalido	Invalid credentials or the user is not an Administrator.
 EN	msg.historial.sinseleccion	Select a version from the grid.
 EN	msg.historial.atencion	Attention
-EN	msg.historial.confirmar	Restore user '{0}' to the state from {1}?\n\nSnapshot detail: {2}\n\nThis action is reversible (a new snapshot is saved before restoring).
 EN	msg.historial.restaurado	Version restored successfully.
 EN	msg.cli.registrado	Client '{0}' registered successfully.
 EN	msg.cli.actualizado	Client '{0}' updated.
@@ -1672,13 +1428,7 @@ EN	conf.idiomas.desactivar	Deactivate this language? Users will no longer be abl
 EN	conf.idiomas.titulo	Confirm
 EN	msg.hist.restaurado	Order #{0} successfully restored.
 EN	conf.hist.restaurar.msg	Restore order #{0} to the state before '{1}' (op. #{2})?\n\n⚠ Note: this operation modifies the Order status in the database.\nThe status of associated Garments is NOT automatically reverted.\n\nConfirm?
-EN	msg.usr.dvrecalculados	DVH and DVV successfully recalculated for all users.
-EN	msg.usr.errordv	Error recalculating DV: {0}
-EN	msg.rest.dvexito	Check digits successfully recalculated.\nYou can now log in to the system.
-EN	msg.rest.dvtitulo	Integrity Restored
 EN	conf.rest.sobreescribir	Are you sure? This operation will overwrite all current data and restart the application.
-EN	msg.rest.errorrecalcular	Error recalculating: {0}
-EN	msg.rest.errorrestaurar	Error restoring: {0}
 EN	msg.backup.errorgenerar	Error creating backup:\n{0}
 EN	msg.backup.erroreliminar	Error deleting:\n{0}
 EN	msg.backup.errorrestaurar	Error restoring:\n{0}
@@ -1690,7 +1440,6 @@ EN	col.cli.vencimiento	Expiry
 EN	msg.cli.sinvenc	No expiry
 EN	msg.cli.vencido	Expired
 EN	msg.cli.proxvencer	Expiring soon
-EN	msg.cli.vigente	Active
 EN	err.ped.suscvencida	⚠ {0}'s subscription expired on {1}.\nUpdate in the Clients module.
 EN	lbl.ped.proxvencer	⏰ Subscription expires in {0} day(s). Remind the client to renew.
 EN	lbl.ped.res.linea1	Selected: {0}  |  Already in use: {1}  |  Total: {2}
@@ -1734,10 +1483,6 @@ EN	err.bll.pedido.descancelar_estado	Only Cancelled orders can be un-cancelled. 
 EN	err.bll.pedido.descancelar_prendas	Cannot un-cancel Order #{0}. One or more garments are no longer available.
 EN	err.bll.plan.nombre_requerido	Plan name is required.
 EN	err.bll.plan.limite_invalido	Garment limit must be greater than zero.
-EN	err.bll.plan.precio_negativo	Price cannot be negative.
-EN	err.plan.nombre_requerido	Plan name is required.
-EN	err.plan.nombre_letras	The name can only contain letters.
-EN	err.plan.precio_cero	Price must be greater than zero.
 EN	diag.estado.integro	Status: INTACT
 EN	diag.estado.comprometido	Status: COMPROMISED
 EN	msg.idiomas.cargadas	{0} translation(s) loaded.
@@ -1752,7 +1497,6 @@ EN	diag.tab.diagnostico	Diagnostics
 EN	diag.tab.historial	Verification History
 EN	diag.lbl.filasrotas	Rows with invalid DVH:
 EN	diag.btn.recalcular	Recalculate All
-EN	diag.btn.reparar	Repair Selected...
 EN	diag.btn.actualizar	Refresh
 EN	diag.col.id	ID
 EN	diag.col.usuario	Username
@@ -1767,8 +1511,6 @@ EN	diag.col.filas.corr	Corrupt Rows
 EN	diag.col.resultado	Result
 EN	diag.col.origen	Triggered by
 EN	diag.dvv.detalle	Stored DVV: {0}   |   Calculated DVV: {1}   |   Rows with invalid DVH: {2}
-EN	diag.msg.sinproblemas	No rows with invalid DVH.
-EN	diag.msg.sinprob.titulo	No issues
 EN	diag.conf.recalcular	Recalculate all DVH and DVV for the Usuario table?\n\nThis will overwrite all stored check digits.
 EN	diag.conf.recalcular.titulo	Confirm Full Recalculation
 EN	diag.msg.recalc.exito	Check digits recalculated successfully.
@@ -1788,7 +1530,6 @@ EN	diag.tip.ok	Verification OK: the check digits match the data.
 EN	diag.tabla.corrupta	Table '{0}'
 EN	diag.tabla.dvinvalido	Invalid CD — use “Recompute All”
 EN	diag.tablas.corruptas	Tables with invalid CD: {0}
-RU	btn.usr.recalculardv	Пересчитать целостность (DV)
 RU	btn.usr.eliminar	🗑 Архивировать
 RU	btn.usr.verarchivados	Архив
 RU	btn.usr.veractivos	Активные
@@ -1804,7 +1545,6 @@ RU	msg.usr.purga.ninguno	Нет пользователей в архиве бо�
 RU	msg.usr.purga.ok	Окончательно удалено пользователей: {0}.
 RU	err.bll.usuario.autobaja	Нельзя архивировать собственную учётную запись при открытой сессии.
 RU	err.bll.usuario.ultimo_admin	Нельзя архивировать последнего активного Администратора. Сначала создайте или активируйте другого Администратора.
-RU	btn.usr.resetmasivo	Сбросить все пароли на временный
 RU	mnu.integridad	Диагностика целостности
 RU	err.bll.sesion_expirada	Сессия истекла. Войдите снова.
 RU	err.seg.sesion_no_iniciada	Сессия не активна. Сначала войдите в систему.
@@ -1842,75 +1582,20 @@ RU	err.bll.version.no_existe	Выбранная версия не существ
 RU	err.bll.prenda.transicion_baja	Списанная вещь не может менять состояние.
 RU	err.bll.prenda.transicion_enuso	Нельзя вручную изменить состояние вещи, находящейся в использовании.\nСостояние обновляется автоматически при обработке заказов.
 RU	err.bll.prenda.transicion_generica	Переход из «{0}» в «{1}» не разрешён.
-RU	lbl.permisos.familias	Список семейств (составные)
-RU	lbl.permisos.patentes	Список патентов (простые)
-RU	lbl.permisos.composicion	Действующий состав (рекурсивно)
-RU	chk.permisos.vertodos	Показать все роли
-RU	perm.todoslosroles	Все роли
-RU	lbl.permisos.embeber	Вложить роль:
-RU	lbl.permisos.anidar	Вложить в семейство:
-RU	btn.permisos.anidar	Вложить выбранное ➜
-RU	perm.msg.selanidar	Выберите в списке семейство или право, которое нужно вложить.
-RU	perm.msg.familiadest	Выберите семейство назначения для вложения.
-RU	perm.msg.mismocomp	Семейство нельзя вложить в самого себя.
-RU	perm.ok.anidado	«{0}» вложено в семейство «{1}».
-RU	perm.err.anidar	Не удалось вложить: {0}
 RU	lbl.permisos.estructura	Структура системы (роли, семейства и права)
-RU	lbl.permisos.disponibles	Доступные для добавления
-RU	lbl.permisos.efectivos	Действующие права (рекурсивно)
-RU	lbl.permisos.miembros	Состав: {0}
-RU	lbl.permisos.miembros.vacio	Состав (выберите семейство или роль)
-RU	btn.permisos.agregar	Добавить ↓
 RU	btn.permisos.quitar	Убрать ↑
 RU	perm.msg.selpadre	Выберите семейство или роль, чтобы добавить потомков.
 RU	perm.ok.agregado	«{0}» добавлено в «{1}».
 RU	perm.ok.quitado	«{0}» убрано из «{1}».
-RU	perm.tipo.rol	роль
-RU	btn.permisos.crearpatente	➕ Право
-RU	btn.permisos.crearfamilia	➕ Семейство
-RU	btn.permisos.crearrol	➕ Роль
 RU	btn.permisos.actualizar	↻ Обновить
-RU	lbl.permisos.ayuda	❔ Справка
-RU	help.permisos.titulo	Право, Семейство или Роль?
-RU	help.permisos.patente	Право — атомарное разрешение (одно конкретное действие/экран). Это лист: ничего не содержит.
-RU	help.permisos.familia	Семейство — группирует права для повторного использования в ролях. Пользователю не назначается.
 RU	help.permisos.rol	Роль — профиль, назначаемый пользователю. Может содержать права, семейства и другие роли (роль в роли).
-RU	help.permisos.general	🔑 ПРАВО — атомарное разрешение: конкретное действие/экран (напр. «Просмотр одежды»). Лист.\n📁 СЕМЕЙСТВО — группирует права для повторного использования; не назначается пользователям.\n👥 РОЛЬ — семейство, которое назначается пользователю (его профиль); может содержать права, семейства и другие роли.\n\nУ пользователя есть роль, и система рекурсивно собирает все права под ней = его действующие разрешения.
 RU	lbl.permisos.subtitulo	Управление ролями, семействами и правами
-RU	btn.permisos.nuevorol	➕ Новая роль
-RU	btn.permisos.eliminarrol	🗑 Удалить роль
-RU	btn.permisos.nuevafamilia	➕ Новое семейство
-RU	btn.permisos.nuevapatente	➕ Новый патент
-RU	btn.permisos.embeber	Вложить ➜
-RU	btn.permisos.modificar	✏ Изменить выбор
 RU	btn.permisos.eliminar	🗑 Удалить выбор
-RU	perm.dlg.rol.t	Новая роль
-RU	perm.dlg.rol.p	Название новой роли:
-RU	perm.dlg.fam.t	Новое семейство
-RU	perm.dlg.fam.p	Название семейства (составное разрешение):
-RU	perm.dlg.pat.t	Новый патент
-RU	perm.dlg.pat.p	Название патента (простое разрешение):
-RU	perm.dlg.pat.menu	Связанное имя меню (необязательно, напр.: mnuClientes):
-RU	perm.dlg.mod.t	Изменить компонент
-RU	perm.dlg.mod.p	Новое название:
-RU	perm.dlg.mod.menu	Связанное имя меню:
 RU	perm.conf.titulo	Подтверждение
 RU	perm.conf.elirol	Удалить роль «{0}»?
-RU	perm.conf.elicomp	Удалить {0} «{1}»? Он будет удалён из всех ролей.
-RU	perm.tipo.familia	семейство
-RU	perm.tipo.patente	патент
-RU	perm.msg.selmod	Выберите патент или семейство для изменения.
-RU	perm.msg.seleli	Выберите патент или семейство для удаления.
-RU	perm.msg.norol	Не удалось определить роль.
-RU	perm.ok.guardado	Изменения сохранены для «{0}»: добавлено {1}, удалено {2}.
-RU	perm.ok.embebido	Роль «{0}» вложена в «{1}».
 RU	perm.ok.rolcreado	Роль «{0}» создана.
-RU	perm.ok.roleli	Роль «{0}» удалена.
-RU	perm.ok.patcreada	Патент «{0}» создан.
-RU	perm.ok.famcreada	Семейство «{0}» создано.
 RU	perm.ok.modificado	Компонент изменён на «{0}».
 RU	perm.ok.eliminado	«{0}» удалён.
-RU	perm.err.embeber	Не удалось вложить: {0}
 RU	btn.idiomas.nuevo	➕ Новый язык
 RU	btn.idiomas.renombrar	✏ Переименовать
 RU	idiomas.dlg.nuevo.t	Новый язык
@@ -1925,7 +1610,6 @@ RU	idiomas.conf.incompleto	В этом языке {0} непереведённы
 RU	idiomas.conf.incompleto.t	Неполные переводы
 RU	lbl.idiomas.controles	Переводимые элементы
 RU	err.generico.cargar	Ошибка загрузки: {0}
-RU	err.generico.guardar	Ошибка сохранения: {0}
 RU	pedidos.hist.encontrados	Найдено записей: {0}.
 RU	frm.login	WardrobeFlow — Вход
 RU	lbl.usuario	Пользователь
@@ -2222,7 +1906,6 @@ RU	frm.resetclave	Сброс пароля
 RU	lbl.nueva.clave	Новый пароль (мин. 6 символов):
 RU	lbl.confirmar.clave	Подтвердить пароль:
 RU	btn.confirmar.reset	Подтвердить сброс
-RU	err.clave.longitud	Пароль должен содержать не менее 6 символов.
 RU	err.clave.nomatch	Пароли не совпадают.
 RU	notif.titulo	УВЕДОМЛЕНИЕ О ЗАКАЗЕ
 RU	notif.numero	Заказ #:
@@ -2232,10 +1915,6 @@ RU	lbl.nuevoestado	Новый статус:
 RU	btn.confirmar.cambio	Подтвердить изменение
 RU	err.ped.sinprendas	Выберите хотя бы одну вещь.
 RU	err.hist.restaurar	Выберите строку истории для восстановления.
-RU	err.usr.sinperfil	Выберите профиль/роль.
-RU	err.usr.nombre.req	Имя пользователя обязательно.
-RU	err.usr.nombre.longitud	Имя пользователя должно содержать минимум 3 символа.
-RU	err.cli.dni.numeros	✗ DNI может содержать только цифры.
 RU	lbl.ped.detalletitulo	Заказ #{0}  ·  {1}  ·  {2}  ·  {3} {4}
 RU	tevt.todos	Все
 RU	tevt.venta	Продажа
@@ -2271,24 +1950,6 @@ RU	notif.gen.color	Цвет
 RU	notif.gen.categoria	Категория
 RU	notif.gen.footer	По любым вопросам обращайтесь к нам.
 RU	notif.gen.slogan	WardrobeFlow — Ваш гардероб без ограничений.
-RU	frm.reparacion	Ручное исправление контрольных цифр
-RU	lbl.rep.seleccionar	Выберите строки для исправления
-RU	lbl.rep.resumen	Обнаружено {0} строк(а/и) с недействительным DVH.
-RU	btn.rep.selall	Выбрать все
-RU	btn.rep.deselall	Снять выбор
-RU	btn.rep.reparar	Исправить выбранные
-RU	col.rep.id	ID
-RU	col.rep.usuario	Пользователь
-RU	col.rep.dvh	Сохранённый DVH
-RU	col.rep.estado	Статус
-RU	rep.estado.sinDVH	DVH не сохранён
-RU	rep.estado.nocoincide	DVH не совпадает с текущими данными
-RU	msg.rep.seleccionar	Выберите хотя бы одну строку для исправления.
-RU	msg.rep.sinseleccion.titulo	Нет выбора
-RU	msg.rep.confirmar	Исправить контрольные цифры {0} строк(а/и)?\n\nИндивидуальные DVH и DVV таблицы будут пересчитаны.
-RU	msg.rep.confirmar.titulo	Подтвердить исправление
-RU	msg.rep.exito	{0} строк(а/и) успешно исправлено.\nDVV таблицы был пересчитан.
-RU	msg.rep.exito.titulo	Исправление выполнено
 RU	perfil.administrador	Администратор
 RU	perfil.supervisor	Supervisor
 RU	perfil.vendedor	Продавец
@@ -2305,27 +1966,16 @@ RU	err.pdf.sinDatos	Нет данных для экспорта.
 RU	lbl.exportarpdf	Экспорт PDF
 RU	lbl.ped.infoplan	Клиент: {0}\nПлан: {1}\nВещей в использовании: {2}\nМетод оплаты: {3}\nС: {4}
 RU	err.ped.sinplan	⚠ У {0} не назначен план.\nНазначьте план в модуле Клиентов перед созданием заказа.
-RU	msg.usr.creado	Пользователь '{0}' [{1}] успешно создан.
 RU	msg.usr.creado.exportado	Пользователь '{0}' [{1}] создан.\nУчётные данные сохранены в:\n{2}
 RU	msg.usr.clave.exportada	Пароль '{0}' сгенерирован автоматически.\nУчётные данные сохранены в:\n{1}
 RU	err.usr.selecciona	Выберите пользователя из списка.
-RU	dlg.resetclave.prompt	Новый пароль для '{0}' (минимум 6 символов):
-RU	msg.usr.clave.reseteada	Пароль для '{0}' успешно сброшен.
 RU	err.usr.sel.bloqueado	Выберите заблокированного пользователя из списка.
 RU	conf.desbloquear.body	Разблокировать аккаунт '{0}'?
 RU	conf.desbloquear.titulo	Подтвердить разблокировку
 RU	msg.usr.desbloqueada	Аккаунт '{0}' разблокирован.
-RU	conf.resetmasivo.titulo	Сбросить все пароли
-RU	conf.resetmasivo.body	Все пароли будут сброшены к:\n\n   {0}\n\nСообщите каждому сотруднику о необходимости их изменить.\n\nПодтвердить?
-RU	conf.resetmasivo.body.generico	Все пароли будут сброшены до временного пароля.\n\nСообщите каждому сотруднику о необходимости изменить его.\n\nПодтвердить?
-RU	msg.usr.resetmasivo	Все пароли сброшены к: {0}
 RU	frm.gestorpermisos	Менеджер профилей — права
 RU	lbl.permisos.titulo	Профили и права
-RU	lbl.permisos.rol	Роль:
-RU	btn.permisos.guardar	Сохранить
 RU	btn.permisos.cerrar	Закрыть
-RU	msg.permisos.mostrando	Показ прав роли '{0}'.
-RU	msg.permisos.guardados	Изменения сохранены: назначено {0}, убрано {1}.
 RU	perm.rol.administrador	Администратор
 RU	perm.rol.vendedor	Продавец
 RU	perm.rol.operadorlogistico	Логист
@@ -2354,9 +2004,6 @@ RU	btn.explorador.cerrar	Закрыть
 RU	btn.explorador.colapsar	⊟ Свернуть всё
 RU	btn.explorador.expandir	⊞ Развернуть всё
 RU	err.explorador.cargar	Ошибка загрузки дерева Composite:\n{0}
-RU	lbl.jerarquia.roles	Иерархия ролей
-RU	lbl.jerarquia.selecciona	Выберите роль в левом дереве.
-RU	lbl.permiso.heredado	 (унаследовано)
 RU	perfil.auditor	Аудитор
 RU	perfil.gerentecomercial	Коммерческий менеджер
 RU	perfil.gerenteinventario	Менеджер склада
@@ -2428,21 +2075,6 @@ RU	msg.backup.restauradatitulo	Восстановление выполнено
 RU	lbl.backup.sincopias	Резервных копий нет.
 RU	lbl.backup.conteo	{0} резервная(ых) копия(й). Последняя: {1}
 RU	frm.restauracion	Целостность системы
-RU	lbl.rest.titulo	Целостность системы нарушена
-RU	lbl.rest.subtitulo	Обнаружены расхождения в контрольных цифрах. Доступ заблокирован.
-RU	lbl.rest.detalle	Детали ошибки:
-RU	btn.rest.recalcular	Пересчитать контрольные цифры
-RU	btn.rest.backup	Восстановить из резервной копии
-RU	btn.rest.salir	Выйти
-RU	dv.alerta.titulo	ПРЕДУПРЕЖДЕНИЕ О ЦЕЛОСТНОСТИ — Таблица Usuario
-RU	dv.dvh.intro	Обнаружено {0} строк(а/и) с недействительным DVH:
-RU	dv.dvv.intro	DVV таблицы не совпадает с сохранённым значением.
-RU	dv.dvv.valores	  Сохранено: {0}  |  Вычислено: {1}
-RU	dv.causas	Возможные причины: прямое изменение базы данных,\nчастичное восстановление резервной копии или ошибка миграции.
-RU	dv.pasos.titulo	Для восстановления целостности Администратор должен:
-RU	dv.pasos.1	  1. Проверить изменённые записи в SQL Server.
-RU	dv.pasos.2	  2. Вручную исправить затронутые значения.
-RU	dv.pasos.3	  3. Запустить пересчёт DVH/DVV из Управление → Пользователи.
 RU	mnu.dashboard	Панель управления
 RU	mnu.bitacora.sistema	Системный журнал
 RU	mnu.bitacora.negocio	Бизнес-журнал
@@ -2460,14 +2092,12 @@ RU	frm.reportejornada	Отчёт за день — WardrobeFlow
 RU	rpt.generar	Создать
 RU	rpt.comparar	Сравнить дни
 RU	rpt.exportartxt	Экспорт TXT
-RU	rpt.exportarpdf	Экспорт PDF
 RU	rpt.fecha	День:
 RU	rpt.fecha2	Сравнить с:
 RU	rpt.kpi.prendas	Доступная одежда
 RU	rpt.kpi.clientes	Клиентов
 RU	rpt.kpi.eventos	Событий за день
 RU	rpt.kpi.backup	дней без резервной копии
-RU	rpt.sinDatos	Нет событий за выбранный день.
 RU	rpt.limpiar	Очистить
 RU	rpt.subtitulo	Бизнес-события за день с экспортом в TXT
 RU	rpt.txt.titulo	ОТЧЁТ ЗА ДЕНЬ
@@ -2530,10 +2160,8 @@ RU	frm.historialusr	История изменений пользователей
 RU	lbl.ver.usuario	Пользователь:
 RU	btn.ver.cargar	Загрузить
 RU	btn.ver.restaurar	Восстановить выбранную версию
-RU	col.ver.id	ID
 RU	col.ver.fecha	Дата
 RU	col.ver.actor	Изменено кем
-RU	col.ver.estado	Состояние
 RU	mnu.historialusr	История изменений
 RU	frm.confirmaradmin	Подтверждение Администратора
 RU	lbl.confirmaradmin.subtitulo	Только Администратор может продолжить
@@ -2545,7 +2173,6 @@ RU	msg.confirmar.vacio	Введите имя пользователя и пар�
 RU	msg.confirmar.invalido	Неверные учётные данные или пользователь не является Администратором.
 RU	msg.historial.sinseleccion	Выберите версию из таблицы.
 RU	msg.historial.atencion	Внимание
-RU	msg.historial.confirmar	Восстановить пользователя '{0}' к состоянию от {1}?\n\nДетали снимка: {2}\n\nЭто действие обратимо (новый снимок сохраняется перед восстановлением).
 RU	msg.historial.restaurado	Версия успешно восстановлена.
 RU	msg.cli.registrado	Клиент '{0}' успешно зарегистрирован.
 RU	msg.cli.actualizado	Клиент '{0}' обновлён.
@@ -2567,13 +2194,7 @@ RU	conf.idiomas.desactivar	Деактивировать этот язык? По�
 RU	conf.idiomas.titulo	Подтверждение
 RU	msg.hist.restaurado	Заказ #{0} успешно восстановлен.
 RU	conf.hist.restaurar.msg	Восстановить заказ #{0} к состоянию до '{1}' (оп. #{2})?\n\n⚠ Примечание: эта операция изменяет статус Заказа в базе данных.\nСтатус связанных Предметов одежды НЕ откатывается автоматически.\n\nПодтвердить?
-RU	msg.usr.dvrecalculados	DVH и DVV успешно пересчитаны для всех пользователей.
-RU	msg.usr.errordv	Ошибка при пересчёте ЦК: {0}
-RU	msg.rest.dvexito	Контрольные цифры успешно пересчитаны.\nТеперь вы можете войти в систему.
-RU	msg.rest.dvtitulo	Целостность восстановлена
 RU	conf.rest.sobreescribir	Вы уверены? Эта операция перезапишет все текущие данные и перезапустит приложение.
-RU	msg.rest.errorrecalcular	Ошибка при пересчёте: {0}
-RU	msg.rest.errorrestaurar	Ошибка при восстановлении: {0}
 RU	msg.backup.errorgenerar	Ошибка при создании резервной копии:\n{0}
 RU	msg.backup.erroreliminar	Ошибка при удалении:\n{0}
 RU	msg.backup.errorrestaurar	Ошибка при восстановлении:\n{0}
@@ -2585,7 +2206,6 @@ RU	col.cli.vencimiento	Истекает
 RU	msg.cli.sinvenc	Без ограничений
 RU	msg.cli.vencido	Истекло
 RU	msg.cli.proxvencer	Истекает скоро
-RU	msg.cli.vigente	Активно
 RU	err.ped.suscvencida	⚠ Подписка {0} истекла {1}.\nОбновите в модуле Клиентов.
 RU	lbl.ped.proxvencer	⏰ Подписка истекает через {0} дн. Напомните клиенту продлить её.
 RU	lbl.ped.res.linea1	Выбрано: {0}  |  Уже в использовании: {1}  |  Всего: {2}
@@ -2629,10 +2249,6 @@ RU	err.bll.pedido.descancelar_estado	Восстановить можно тол�
 RU	err.bll.pedido.descancelar_prendas	Невозможно восстановить Заказ #{0}. Одна или несколько вещей больше недоступны.
 RU	err.bll.plan.nombre_requerido	Название плана обязательно.
 RU	err.bll.plan.limite_invalido	Лимит вещей должен быть больше нуля.
-RU	err.bll.plan.precio_negativo	Цена не может быть отрицательной.
-RU	err.plan.nombre_requerido	Название плана обязательно.
-RU	err.plan.nombre_letras	Название может содержать только буквы.
-RU	err.plan.precio_cero	Цена должна быть больше нуля.
 RU	diag.estado.integro	Статус: ЦЕЛО
 RU	diag.estado.comprometido	Статус: НАРУШЕНО
 RU	msg.idiomas.cargadas	{0} перевод(ов) загружено.
@@ -2647,7 +2263,6 @@ RU	diag.tab.diagnostico	Диагностика
 RU	diag.tab.historial	История проверок
 RU	diag.lbl.filasrotas	Строки с недопустимым DVH:
 RU	diag.btn.recalcular	Пересчитать всё
-RU	diag.btn.reparar	Восстановить выбранные...
 RU	diag.btn.actualizar	Обновить
 RU	diag.col.id	ID
 RU	diag.col.usuario	Пользователь
@@ -2662,8 +2277,6 @@ RU	diag.col.filas.corr	Повреждённых строк
 RU	diag.col.resultado	Результат
 RU	diag.col.origen	Инициатор
 RU	diag.dvv.detalle	DVV сохранённый: {0}   |   DVV вычисленный: {1}   |   Строк с DVH: {2}
-RU	diag.msg.sinproblemas	Строк с недопустимым DVH не обнаружено.
-RU	diag.msg.sinprob.titulo	Проблем нет
 RU	diag.conf.recalcular	Пересчитать все DVH и DVV таблицы Usuario?\n\nЭта операция перезапишет все сохранённые дигиты.
 RU	diag.conf.recalcular.titulo	Подтвердить пересчёт
 RU	diag.msg.recalc.exito	Проверочные цифры успешно пересчитаны.
@@ -2683,7 +2296,6 @@ RU	diag.tip.ok	Проверка пройдена: контрольные циф�
 RU	diag.tabla.corrupta	Таблица «{0}»
 RU	diag.tabla.dvinvalido	Неверный КЦ — нажмите «Пересчитать всё»
 RU	diag.tablas.corruptas	Таблицы с неверным КЦ: {0}
-PT	btn.usr.recalculardv	Recalcular integridade (DV)
 PT	btn.usr.eliminar	🗑 Arquivar usuário
 PT	btn.usr.verarchivados	Ver arquivados
 PT	btn.usr.veractivos	Ver ativos
@@ -2699,7 +2311,6 @@ PT	msg.usr.purga.ninguno	Não há usuários arquivados há mais de 1 ano para pu
 PT	msg.usr.purga.ok	{0} usuário(s) excluído(s) definitivamente.
 PT	err.bll.usuario.autobaja	Você não pode arquivar seu próprio usuário enquanto a sessão está aberta.
 PT	err.bll.usuario.ultimo_admin	Não é possível arquivar o último Administrador ativo. Crie ou ative outro Administrador antes de arquivar este.
-PT	btn.usr.resetmasivo	Redefinir todas as senhas para temporária
 PT	mnu.integridad	Diagnóstico de Integridade
 PT	err.bll.sesion_expirada	A sessão expirou. Faça login novamente.
 PT	err.seg.sesion_no_iniciada	A sessão não está iniciada. Faça login primeiro.
@@ -2737,75 +2348,20 @@ PT	err.bll.version.no_existe	A versão selecionada não existe.
 PT	err.bll.prenda.transicion_baja	Uma peça baixada não pode mudar de estado.
 PT	err.bll.prenda.transicion_enuso	Não é possível alterar manualmente o estado de uma peça em uso.\nO estado é atualizado automaticamente ao processar pedidos.
 PT	err.bll.prenda.transicion_generica	A transição de '{0}' para '{1}' não é permitida.
-PT	lbl.permisos.familias	Lista de Famílias (compostos)
-PT	lbl.permisos.patentes	Lista de Patentes (simples)
-PT	lbl.permisos.composicion	Composição efetiva (recursiva)
-PT	chk.permisos.vertodos	Ver todos os papéis
-PT	perm.todoslosroles	Todos os papéis
-PT	lbl.permisos.embeber	Incorporar papel:
-PT	lbl.permisos.anidar	Aninhar na família:
-PT	btn.permisos.anidar	Aninhar seleção ➜
-PT	perm.msg.selanidar	Selecione numa lista a família ou patente que quer aninhar.
-PT	perm.msg.familiadest	Escolha a família de destino onde aninhar.
-PT	perm.msg.mismocomp	Uma família não pode ser aninhada dentro de si mesma.
-PT	perm.ok.anidado	'{0}' aninhado dentro da família '{1}'.
-PT	perm.err.anidar	Não foi possível aninhar: {0}
 PT	lbl.permisos.estructura	Estrutura do sistema (papéis, famílias e patentes)
-PT	lbl.permisos.disponibles	Disponíveis para adicionar
-PT	lbl.permisos.efectivos	Permissões efetivas (recursivo)
-PT	lbl.permisos.miembros	Membros de: {0}
-PT	lbl.permisos.miembros.vacio	Membros (selecione uma Família ou Papel)
-PT	btn.permisos.agregar	Adicionar ↓
 PT	btn.permisos.quitar	Remover ↑
 PT	perm.msg.selpadre	Selecione uma Família ou Papel para adicionar filhos.
 PT	perm.ok.agregado	'{0}' adicionado a '{1}'.
 PT	perm.ok.quitado	'{0}' removido de '{1}'.
-PT	perm.tipo.rol	o papel
-PT	btn.permisos.crearpatente	➕ Patente
-PT	btn.permisos.crearfamilia	➕ Família
-PT	btn.permisos.crearrol	➕ Papel
 PT	btn.permisos.actualizar	↻ Atualizar
-PT	lbl.permisos.ayuda	❔ Ajuda
-PT	help.permisos.titulo	Patente, Família ou Papel?
-PT	help.permisos.patente	Patente = permissão atômica (uma ação ou tela concreta). É uma folha: não contém outras.
-PT	help.permisos.familia	Família = agrupa permissões para reutilizar em vários papéis. Não é atribuída a usuários.
 PT	help.permisos.rol	Papel = perfil atribuído a um usuário. Pode conter patentes, famílias e outros papéis (papel-em-papel).
-PT	help.permisos.general	🔑 PATENTE — permissão atômica: uma ação/tela concreta (ex. "Ver Roupas"). Uma folha.\n📁 FAMÍLIA — agrupa permissões para reutilizar; não é atribuída a usuários.\n👥 PAPEL — família que É atribuída a um usuário (seu perfil); pode conter patentes, famílias e outros papéis.\n\nO usuário tem um papel e o sistema reúne recursivamente todas as patentes sob ele = suas permissões efetivas.
 PT	lbl.permisos.subtitulo	Gestão de papéis, famílias e patentes
-PT	btn.permisos.nuevorol	➕ Novo papel
-PT	btn.permisos.eliminarrol	🗑 Excluir papel
-PT	btn.permisos.nuevafamilia	➕ Nova família
-PT	btn.permisos.nuevapatente	➕ Nova patente
-PT	btn.permisos.embeber	Incorporar ➜
-PT	btn.permisos.modificar	✏ Modificar seleção
 PT	btn.permisos.eliminar	🗑 Excluir seleção
-PT	perm.dlg.rol.t	Novo papel
-PT	perm.dlg.rol.p	Nome do novo papel:
-PT	perm.dlg.fam.t	Nova família
-PT	perm.dlg.fam.p	Nome da família (permissão composta):
-PT	perm.dlg.pat.t	Nova patente
-PT	perm.dlg.pat.p	Nome da patente (permissão simples):
-PT	perm.dlg.pat.menu	NomeMenu associado (opcional, ex.: mnuClientes):
-PT	perm.dlg.mod.t	Modificar componente
-PT	perm.dlg.mod.p	Novo nome:
-PT	perm.dlg.mod.menu	NomeMenu associado:
 PT	perm.conf.titulo	Confirmar
 PT	perm.conf.elirol	Excluir o papel '{0}'?
-PT	perm.conf.elicomp	Excluir {0} '{1}'? Será removido de todos os papéis.
-PT	perm.tipo.familia	a família
-PT	perm.tipo.patente	a patente
-PT	perm.msg.selmod	Selecione uma patente ou família para modificar.
-PT	perm.msg.seleli	Selecione uma patente ou família para excluir.
-PT	perm.msg.norol	Não foi possível resolver o papel.
-PT	perm.ok.guardado	Alterações salvas para '{0}': {1} adicionado(s), {2} removido(s).
-PT	perm.ok.embebido	Papel '{0}' incorporado em '{1}'.
 PT	perm.ok.rolcreado	Papel '{0}' criado.
-PT	perm.ok.roleli	Papel '{0}' excluído.
-PT	perm.ok.patcreada	Patente '{0}' criada.
-PT	perm.ok.famcreada	Família '{0}' criada.
 PT	perm.ok.modificado	Componente atualizado para '{0}'.
 PT	perm.ok.eliminado	'{0}' excluído.
-PT	perm.err.embeber	Não foi possível incorporar: {0}
 PT	btn.idiomas.nuevo	➕ Novo idioma
 PT	btn.idiomas.renombrar	✏ Renomear
 PT	idiomas.dlg.nuevo.t	Novo idioma
@@ -2820,14 +2376,12 @@ PT	idiomas.conf.incompleto	Este idioma tem {0} controle(s) sem tradução.\nSe v
 PT	idiomas.conf.incompleto.t	Traduções incompletas
 PT	lbl.idiomas.controles	Controles traduzíveis
 PT	err.generico.cargar	Erro ao carregar: {0}
-PT	err.generico.guardar	Erro ao salvar: {0}
 PT	pedidos.hist.encontrados	{0} registro(s) encontrado(s).
 PT	diag.frm.titulo	Diagnóstico de Integridade
 PT	diag.tab.diagnostico	Diagnóstico
 PT	diag.tab.historial	Histórico de Verificações
 PT	diag.lbl.filasrotas	Linhas com DVH inválido:
 PT	diag.btn.recalcular	Recalcular Tudo
-PT	diag.btn.reparar	Reparar Selecionadas...
 PT	diag.btn.actualizar	Atualizar
 PT	diag.col.id	ID
 PT	diag.col.usuario	Usuário
@@ -2842,8 +2396,6 @@ PT	diag.col.filas.corr	Linhas Corrompidas
 PT	diag.col.resultado	Resultado
 PT	diag.col.origen	Disparado por
 PT	diag.dvv.detalle	DVV armazenado: {0}   |   DVV calculado: {1}   |   Linhas com DVH inválido: {2}
-PT	diag.msg.sinproblemas	Não há linhas com DVH inválido.
-PT	diag.msg.sinprob.titulo	Sem problemas
 PT	diag.conf.recalcular	Recalcular todos os DVH e o DVV da tabela Usuário?\n\nEsta operação substituirá todos os dígitos verificadores armazenados.
 PT	diag.conf.recalcular.titulo	Confirmar Recálculo Total
 PT	diag.msg.recalc.exito	Dígitos verificadores recalculados com sucesso.
@@ -3164,7 +2716,6 @@ PT	frm.resetclave	Redefinir Senha
 PT	lbl.nueva.clave	Nova senha (mín. 6 caracteres):
 PT	lbl.confirmar.clave	Confirmar senha:
 PT	btn.confirmar.reset	Confirmar Redefinição
-PT	err.clave.longitud	A senha deve ter pelo menos 6 caracteres.
 PT	err.clave.nomatch	As senhas não coincidem.
 PT	notif.titulo	NOTIFICAÇÃO DE PEDIDO
 PT	notif.numero	Pedido #:
@@ -3174,10 +2725,6 @@ PT	lbl.nuevoestado	Novo estado:
 PT	btn.confirmar.cambio	Confirmar Alteração
 PT	err.ped.sinprendas	Selecione pelo menos uma roupa.
 PT	err.hist.restaurar	Selecione uma linha do histórico para restaurar.
-PT	err.usr.sinperfil	Selecione um perfil/função.
-PT	err.usr.nombre.req	O nome de usuário é obrigatório.
-PT	err.usr.nombre.longitud	O nome de usuário deve ter pelo menos 3 caracteres.
-PT	err.cli.dni.numeros	✗ O CPF só pode conter números.
 PT	lbl.ped.detalletitulo	Pedido #{0}  ·  {1}  ·  {2}  ·  {3} {4}
 PT	tevt.todos	Todos
 PT	tevt.venta	Venda
@@ -3213,24 +2760,6 @@ PT	notif.gen.color	Cor
 PT	notif.gen.categoria	Categoria
 PT	notif.gen.footer	Em caso de dúvidas, entre em contato conosco.
 PT	notif.gen.slogan	WardrobeFlow — Seu guarda-roupa, sem limites.
-PT	frm.reparacion	Reparo Manual de Dígitos Verificadores
-PT	lbl.rep.seleccionar	Selecione as linhas a reparar
-PT	lbl.rep.resumen	{0} linha(s) com DVH inválido detectada(s).
-PT	btn.rep.selall	Selecionar Todas
-PT	btn.rep.deselall	Desmarcar Todas
-PT	btn.rep.reparar	Reparar Selecionadas
-PT	col.rep.id	ID
-PT	col.rep.usuario	Usuário
-PT	col.rep.dvh	DVH Armazenado
-PT	col.rep.estado	Estado
-PT	rep.estado.sinDVH	Sem DVH armazenado
-PT	rep.estado.nocoincide	DVH não coincide com os dados atuais
-PT	msg.rep.seleccionar	Selecione pelo menos uma linha para reparar.
-PT	msg.rep.sinseleccion.titulo	Sem seleção
-PT	msg.rep.confirmar	Reparar dígitos verificadores de {0} linha(s) selecionada(s)?\n\nOs DVH individuais e o DVV da tabela serão recalculados.
-PT	msg.rep.confirmar.titulo	Confirmar Reparo
-PT	msg.rep.exito	{0} linha(s) reparada(s) com sucesso.\nO DVV da tabela foi recalculado.
-PT	msg.rep.exito.titulo	Reparo Bem-sucedido
 PT	perfil.administrador	Administrador
 PT	perfil.supervisor	Supervisor
 PT	perfil.vendedor	Vendedor
@@ -3247,27 +2776,16 @@ PT	err.pdf.sinDatos	Sem dados para exportar.
 PT	lbl.exportarpdf	Exportar PDF
 PT	lbl.ped.infoplan	Cliente: {0}\nPlano: {1}\nRoupas em uso: {2}\nForma de pagamento: {3}\nCadastro: {4}
 PT	err.ped.sinplan	⚠ {0} não tem plano atribuído.\nAtribua um plano no módulo de Clientes antes de criar um pedido.
-PT	msg.usr.creado	Usuário '{0}' [{1}] criado com sucesso.
 PT	msg.usr.creado.exportado	Usuário '{0}' [{1}] criado.\nCredenciais salvas em:\n{2}
 PT	msg.usr.clave.exportada	Senha de '{0}' regenerada automaticamente.\nCredenciais salvas em:\n{1}
 PT	err.usr.selecciona	Selecione um usuário da lista.
-PT	dlg.resetclave.prompt	Nova senha para '{0}' (mínimo 6 caracteres):
-PT	msg.usr.clave.reseteada	Senha de '{0}' redefinida com sucesso.
 PT	err.usr.sel.bloqueado	Selecione um usuário bloqueado da lista.
 PT	conf.desbloquear.body	Desbloquear a conta de '{0}'?
 PT	conf.desbloquear.titulo	Confirmar Desbloqueio
 PT	msg.usr.desbloqueada	Conta '{0}' desbloqueada com sucesso.
-PT	conf.resetmasivo.titulo	Redefinir todas as senhas
-PT	conf.resetmasivo.body	Isso irá redefinir a senha de TODOS os usuários para:\n\n   {0}\n\nComunique cada funcionário para alterá-la.\n\nConfirmar?
-PT	conf.resetmasivo.body.generico	Isso irá redefinir a senha de TODOS os usuários para uma senha temporária.\n\nComunique cada funcionário para alterá-la.\n\nConfirmar?
-PT	msg.usr.resetmasivo	Todas as senhas foram redefinidas para: {0}
 PT	frm.gestorpermisos	Gerenciador de Perfis — Permissões
 PT	lbl.permisos.titulo	Perfis e Permissões
-PT	lbl.permisos.rol	Função:
-PT	btn.permisos.guardar	Salvar alterações
 PT	btn.permisos.cerrar	Fechar
-PT	msg.permisos.mostrando	Mostrando permissões da função '{0}'.
-PT	msg.permisos.guardados	Alterações salvas: {0} permissão(ões) atribuída(s), {1} removida(s).
 PT	perm.rol.administrador	Administrador
 PT	perm.rol.vendedor	Vendedor
 PT	perm.rol.operadorlogistico	Operador Logístico
@@ -3296,9 +2814,6 @@ PT	btn.explorador.cerrar	Fechar
 PT	btn.explorador.colapsar	⊟ Recolher tudo
 PT	btn.explorador.expandir	⊞ Expandir tudo
 PT	err.explorador.cargar	Erro ao carregar árvore Composite:\n{0}
-PT	lbl.jerarquia.roles	Hierarquia de Papéis
-PT	lbl.jerarquia.selecciona	Selecione um papel na árvore esquerda.
-PT	lbl.permiso.heredado	 (herdado)
 PT	perfil.auditor	Auditor
 PT	perfil.gerentecomercial	Gerente Comercial
 PT	perfil.gerenteinventario	Gerente de Estoque
@@ -3369,21 +2884,6 @@ PT	msg.backup.restauradatitulo	Restauração Bem-sucedida
 PT	lbl.backup.sincopias	Nenhum backup gerado ainda.
 PT	lbl.backup.conteo	{0} backup(s) disponível(eis). Mais recente: {1}
 PT	frm.restauracion	Integridade do Sistema
-PT	lbl.rest.titulo	Integridade do Sistema Comprometida
-PT	lbl.rest.subtitulo	Foram detectadas discrepâncias nos dígitos verificadores. O acesso está bloqueado.
-PT	lbl.rest.detalle	Detalhe do erro:
-PT	btn.rest.recalcular	Recalcular Dígitos
-PT	btn.rest.backup	Restaurar a partir de Backup
-PT	btn.rest.salir	Sair
-PT	dv.alerta.titulo	ALERTA DE INTEGRIDADE — Tabela Usuario
-PT	dv.dvh.intro	{0} linha(s) com DVH inválido detectada(s):
-PT	dv.dvv.intro	O DVV da tabela não coincide com o valor armazenado.
-PT	dv.dvv.valores	  Armazenado: {0}  |  Calculado: {1}
-PT	dv.causas	Possíveis causas: modificação direta no banco de dados,\nrestauração parcial de backup ou erro na migração.
-PT	dv.pasos.titulo	Para restaurar a integridade, um Administrador deve:
-PT	dv.pasos.1	  1. Revisar os registros alterados no SQL Server.
-PT	dv.pasos.2	  2. Corrigir manualmente os valores afetados.
-PT	dv.pasos.3	  3. Executar o recálculo de DVH/DVV em Administrar → Usuários.
 PT	frm.dashboard	Painel de Controle
 PT	dash.prendas	Roupas\ndisponíveis
 PT	dash.clientes	Clientes\ncadastrados
@@ -3397,14 +2897,12 @@ PT	frm.reportejornada	Relatório de Jornada — WardrobeFlow
 PT	rpt.generar	Gerar
 PT	rpt.comparar	Comparar jornadas
 PT	rpt.exportartxt	Exportar TXT
-PT	rpt.exportarpdf	Exportar PDF
 PT	rpt.fecha	Jornada:
 PT	rpt.fecha2	Comparar com:
 PT	rpt.kpi.prendas	Roupas disponíveis
 PT	rpt.kpi.clientes	Clientes cadastrados
 PT	rpt.kpi.eventos	Eventos do dia
 PT	rpt.kpi.backup	dias sem backup
-PT	rpt.sinDatos	Sem eventos registrados para a jornada selecionada.
 PT	rpt.limpiar	Limpar
 PT	rpt.subtitulo	Eventos de negócio por jornada com exportação TXT
 PT	rpt.txt.titulo	RELATÓRIO DE JORNADA
@@ -3467,10 +2965,8 @@ PT	frm.historialusr	Histórico de Alterações de Usuários
 PT	lbl.ver.usuario	Usuário:
 PT	btn.ver.cargar	Carregar
 PT	btn.ver.restaurar	Restaurar Versão Selecionada
-PT	col.ver.id	ID
 PT	col.ver.fecha	Data
 PT	col.ver.actor	Modificado por
-PT	col.ver.estado	Estado
 PT	frm.confirmaradmin	Confirmar Administrador
 PT	lbl.confirmaradmin.subtitulo	Somente um Administrador pode continuar
 PT	lbl.confirmaradmin.usuario	Usuário
@@ -3481,7 +2977,6 @@ PT	msg.confirmar.vacio	Informe usuário e senha.
 PT	msg.confirmar.invalido	Credenciais inválidas ou o usuário não é Administrador.
 PT	msg.historial.sinseleccion	Selecione uma versão da grade.
 PT	msg.historial.atencion	Atenção
-PT	msg.historial.confirmar	Restaurar o usuário '{0}' ao estado de {1}?\n\nDetalhe do snapshot: {2}\n\nEsta ação é reversível (um novo snapshot é salvo antes de restaurar).
 PT	msg.historial.restaurado	Versão restaurada com sucesso.
 PT	msg.cli.registrado	Cliente '{0}' cadastrado com sucesso.
 PT	msg.cli.actualizado	Cliente '{0}' atualizado.
@@ -3503,13 +2998,7 @@ PT	conf.idiomas.desactivar	Desativar este idioma? Os usuários não poderão sel
 PT	conf.idiomas.titulo	Confirmar
 PT	msg.hist.restaurado	Pedido #{0} restaurado com sucesso.
 PT	conf.hist.restaurar.msg	Restaurar o pedido #{0} ao estado anterior a '{1}' (op. #{2})?\n\n⚠ Nota: esta operação modifica o estado do Pedido no banco de dados.\nO estado das Roupas associadas NÃO é revertido automaticamente.\n\nConfirmar?
-PT	msg.usr.dvrecalculados	DVH e DVV recalculados com sucesso para todos os usuários.
-PT	msg.usr.errordv	Erro ao recalcular DV: {0}
-PT	msg.rest.dvexito	Dígitos verificadores recalculados com sucesso.\nVocê já pode acessar o sistema.
-PT	msg.rest.dvtitulo	Integridade Restaurada
 PT	conf.rest.sobreescribir	Tem certeza? Esta operação sobrescreverá todos os dados atuais e reiniciará o aplicativo.
-PT	msg.rest.errorrecalcular	Erro ao recalcular: {0}
-PT	msg.rest.errorrestaurar	Erro ao restaurar: {0}
 PT	msg.backup.errorgenerar	Erro ao gerar backup:\n{0}
 PT	msg.backup.erroreliminar	Erro ao excluir:\n{0}
 PT	msg.backup.errorrestaurar	Erro ao restaurar:\n{0}
@@ -3521,7 +3010,6 @@ PT	col.cli.vencimiento	Vencimento
 PT	msg.cli.sinvenc	Sem vencimento
 PT	msg.cli.vencido	Vencido
 PT	msg.cli.proxvencer	Vence em breve
-PT	msg.cli.vigente	Vigente
 PT	err.ped.suscvencida	⚠ A assinatura de {0} venceu em {1}.\nRenovar no módulo de Clientes.
 PT	lbl.ped.proxvencer	⏰ A assinatura vence em {0} dia(s). Avise o cliente para renová-la.
 PT	lbl.ped.res.linea1	Selecionadas: {0}  |  Em uso: {1}  |  Total: {2}
@@ -3565,10 +3053,6 @@ PT	err.bll.pedido.descancelar_estado	Só é possível reativar pedidos Cancelado
 PT	err.bll.pedido.descancelar_prendas	Não é possível reativar o Pedido #{0}. Uma ou mais roupas não estão mais disponíveis.
 PT	err.bll.plan.nombre_requerido	O nome do plano é obrigatório.
 PT	err.bll.plan.limite_invalido	O limite de roupas deve ser maior que zero.
-PT	err.bll.plan.precio_negativo	O preço não pode ser negativo.
-PT	err.plan.nombre_requerido	O nome do plano é obrigatório.
-PT	err.plan.nombre_letras	O nome só pode conter letras.
-PT	err.plan.precio_cero	O preço deve ser maior que zero.
 PT	diag.estado.integro	Estado: ÍNTEGRO
 PT	diag.estado.comprometido	Estado: COMPROMETIDO
 PT	msg.idiomas.cargadas	{0} tradução(ões) carregada(s).
@@ -3603,15 +3087,7 @@ ES	msg.adminusr.cargados	{0} usuario(s).
 ES	msg.adminusr.guardado	Datos del usuario actualizados correctamente.
 ES	msg.adminusr.rolcambiado	Rol del usuario actualizado correctamente.
 ES	err.adminusr.rol_vacio	Seleccioná un rol.
-ES	col.ver.campo	Campo
-ES	col.ver.anterior	Valor anterior
-ES	col.ver.nuevo	Valor nuevo
 ES	col.ver.detalle	Cambios realizados
-ES	col.ver.f.usuario	Usuario
-ES	col.ver.f.nombre	Nombre
-ES	col.ver.f.apellido	Apellido
-ES	col.ver.f.email	Email
-ES	col.ver.f.fechanac	Fecha nac.
 
 EN	msg.error.inesperado	An unexpected error occurred. Please contact the system administrator.
 EN	mnu.adminusuarios	User Administration
@@ -3637,15 +3113,7 @@ EN	msg.adminusr.cargados	{0} user(s).
 EN	msg.adminusr.guardado	User data updated successfully.
 EN	msg.adminusr.rolcambiado	User role updated successfully.
 EN	err.adminusr.rol_vacio	Select a role.
-EN	col.ver.campo	Field
-EN	col.ver.anterior	Previous value
-EN	col.ver.nuevo	New value
 EN	col.ver.detalle	Changes made
-EN	col.ver.f.usuario	Username
-EN	col.ver.f.nombre	Name
-EN	col.ver.f.apellido	Surname
-EN	col.ver.f.email	Email
-EN	col.ver.f.fechanac	Birth date
 PT	msg.error.inesperado	Ocorreu um erro inesperado. Entre em contato com o administrador do sistema.
 PT	mnu.adminusuarios	Administração de Usuários
 PT	frm.adminusuarios	Administração de Usuários
@@ -3670,15 +3138,7 @@ PT	msg.adminusr.cargados	{0} usuário(s).
 PT	msg.adminusr.guardado	Dados do usuário atualizados com sucesso.
 PT	msg.adminusr.rolcambiado	Papel do usuário atualizado com sucesso.
 PT	err.adminusr.rol_vacio	Selecione um papel.
-PT	col.ver.campo	Campo
-PT	col.ver.anterior	Valor anterior
-PT	col.ver.nuevo	Novo valor
 PT	col.ver.detalle	Alterações realizadas
-PT	col.ver.f.usuario	Usuário
-PT	col.ver.f.nombre	Nome
-PT	col.ver.f.apellido	Sobrenome
-PT	col.ver.f.email	Email
-PT	col.ver.f.fechanac	Data nasc.
 
 RU	msg.error.inesperado	Произошла непредвиденная ошибка. Пожалуйста, обратитесь к администратору системы.
 RU	mnu.adminusuarios	Управление пользователями
@@ -3704,15 +3164,7 @@ RU	msg.adminusr.cargados	Пользователей: {0}.
 RU	msg.adminusr.guardado	Данные пользователя успешно обновлены.
 RU	msg.adminusr.rolcambiado	Роль пользователя успешно обновлена.
 RU	err.adminusr.rol_vacio	Выберите роль.
-RU	col.ver.campo	Поле
-RU	col.ver.anterior	Прежнее значение
-RU	col.ver.nuevo	Новое значение
 RU	col.ver.detalle	Внесённые изменения
-RU	col.ver.f.usuario	Имя пользователя
-RU	col.ver.f.nombre	Имя
-RU	col.ver.f.apellido	Фамилия
-RU	col.ver.f.email	Эл. почта
-RU	col.ver.f.fechanac	Дата рожд.
 
 ES	dash.despachados	Pedidos despachados
 ES	dash.entregados	Pedidos entregados
@@ -3806,13 +3258,9 @@ EN	col.ver.registro	User (ID)
 PT	col.ver.registro	Usuário (ID)
 RU	col.ver.registro	Пользователь (ID)
 
-ES	perm.dlg.rol.permisos	Permisos a asignar (catálogo fijo del sistema):
 ES	perm.msg.nombrevacio	El nombre del rol no puede estar vacío.
-EN	perm.dlg.rol.permisos	Permissions to assign (fixed system catalog):
 EN	perm.msg.nombrevacio	The role name cannot be empty.
-PT	perm.dlg.rol.permisos	Permissões a atribuir (catálogo fixo do sistema):
 PT	perm.msg.nombrevacio	O nome do papel não pode estar vazio.
-RU	perm.dlg.rol.permisos	Права для назначения (фиксированный каталог системы):
 RU	perm.msg.nombrevacio	Имя роли не может быть пустым.
 
 ES	mnu.grp.usuarios	Usuarios
@@ -4056,22 +3504,10 @@ ES	hist.rollback	reversión
 EN	hist.rollback	rollback
 RU	hist.rollback	откат
 PT	hist.rollback	reversão
-ES	msg.historial.confirmar.revertir	¿Revertir al estado anterior a este cambio?\n\n«{0}»:  «{2}»  →  «{1}»\n\nEl usuario volverá a los valores previos a esta modificación. Es reversible (queda registrado como un nuevo cambio).
 ES	msg.historial.confirmar.restaurar	¿Restaurar al usuario al estado del {0}?\n\n{1}\n\nEl usuario quedará exactamente en este estado. Es reversible (queda registrado como un nuevo cambio en el historial).
-EN	msg.historial.confirmar.revertir	Revert to the state before this change?\n\n«{0}»:  «{2}»  →  «{1}»\n\nThe user will return to the values prior to this modification. It is reversible (logged as a new change).
 EN	msg.historial.confirmar.restaurar	Restore the user to the state of {0}?\n\n{1}\n\nThe user will be left exactly in this state. It is reversible (logged as a new change in the history).
-RU	msg.historial.confirmar.revertir	Вернуть состояние до этого изменения?\n\n«{0}»:  «{2}»  →  «{1}»\n\nПользователь вернётся к значениям до этого изменения. Действие обратимо (записывается как новое изменение).
 RU	msg.historial.confirmar.restaurar	Восстановить состояние пользователя на {0}?\n\n{1}\n\nПользователь будет приведён точно к этому состоянию. Действие обратимо (записывается как новое изменение в истории).
-PT	msg.historial.confirmar.revertir	Reverter ao estado anterior a esta alteração?\n\n«{0}»:  «{2}»  →  «{1}»\n\nO usuário voltará aos valores anteriores a esta modificação. É reversível (registrado como uma nova alteração).
 PT	msg.historial.confirmar.restaurar	Restaurar o usuário ao estado de {0}?\n\n{1}\n\nO usuário ficará exatamente neste estado. É reversível (registrado como uma nova alteração no histórico).
-ES	perm.tag.directo	directo
-EN	perm.tag.directo	direct
-RU	perm.tag.directo	прямой
-PT	perm.tag.directo	direto
-ES	perm.tag.heredado	heredado
-EN	perm.tag.heredado	inherited
-RU	perm.tag.heredado	унаследовано
-PT	perm.tag.heredado	herdado
 ES	err.bll.familia.sistema_sin_gestion	Esta acción dejaría al sistema SIN NINGÚN usuario con acceso de Gestión de Usuarios. Asigná la gestión a otro rol o usuario antes de continuar.
 EN	err.bll.familia.sistema_sin_gestion	This action would leave the system with NO user able to access User Management. Assign management to another role or user before continuing.
 RU	err.bll.familia.sistema_sin_gestion	Это действие оставит систему БЕЗ единого пользователя с доступом к управлению пользователями. Назначьте управление другой роли или пользователю, прежде чем продолжить.

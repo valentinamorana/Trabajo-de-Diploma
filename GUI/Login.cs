@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
 
@@ -25,6 +26,22 @@ namespace GUI
     /// </summary>
     public partial class Login : Form, IIdiomaObserver
     {
+        // ── Arrastre de ventana sin borde nativo (FormBorderStyle.None) ──────────────
+        // Reenvía el click a Windows como si hubiera pasado en la barra de título nativa
+        // (HTCAPTION). Es el mecanismo estándar para mover un form sin bordes; no cambia
+        // ningún comportamiento de negocio.
+        [DllImport("user32.dll")] private static extern bool ReleaseCapture();
+        [DllImport("user32.dll")] private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+        private const int HT_CAPTION = 0x2;
+
+        private void IniciarArrastreVentana(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            ReleaseCapture();
+            SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+        }
+
         private readonly Usuario usuarioBLL = new Usuario();
 
         // Selector de idioma (dropdown) — vive en pnlHeader. Soporta idiomas dinámicos de BD.
@@ -33,13 +50,29 @@ namespace GUI
         // Etiquetas de marca (creadas en código para ser traducibles)
         private Label _lblTagline;
         private Label _lblBrandDesc;
-        private Label _lblFooter;
         // RF-10 — link a autodesbloqueo con clave de emergencia (admin bloqueado)
         private LinkLabel _lnkEmergencia;
 
         public Login()
         {
             InitializeComponent();
+
+            // ── Card flotante: esquinas redondeadas (Region) + sombra propia ──────
+            // BringToFront es necesario: en el orden de InitializeComponent pnlCardShadow
+            // queda "delante" de pnlCard en el z-order (el primer control agregado al form
+            // es el que se pinta al frente), así que sin esto la sombra tapa la card entera.
+            pnlCard.Region = new Region(BuildRoundedRect(new Rectangle(0, 0, pnlCard.Width, pnlCard.Height), Tema.RadioCard));
+            pnlCardShadow.Paint += PnlCardShadow_Paint;
+            pnlCard.BringToFront();
+
+            // ── Botones grandes (Ingresar/Salir) con esquinas redondeadas tipo "pill" ─
+            btnIngresar.Region = new Region(BuildRoundedRect(new Rectangle(0, 0, btnIngresar.Width, btnIngresar.Height), Tema.RadioBotonGrande));
+            btnSalir.Region    = new Region(BuildRoundedRect(new Rectangle(0, 0, btnSalir.Width, btnSalir.Height), Tema.RadioBotonGrande));
+
+            // ── Arrastre de la ventana desde el área vacía del header (sin borde nativo) ─
+            pnlHeader.MouseDown    += IniciarArrastreVentana;
+            picLogo.MouseDown      += IniciarArrastreVentana;
+            lblSubtitulo.MouseDown += IniciarArrastreVentana;
 
             // ── Decoraciones dibujadas mediante eventos Paint ─────────────────────
             // Evita BackgroundImage bitmaps y permite que los controles transparentes
@@ -126,13 +159,40 @@ namespace GUI
 
             // Manchas circulares suaves, en un tono más oscuro que el fondo rosa pálido.
             using (var b = new SolidBrush(Color.FromArgb(40, Tema.RosaPrimario.R, Tema.RosaPrimario.G, Tema.RosaPrimario.B)))
-                g.FillEllipse(b, 150, -40, 220, 220);
+                g.FillEllipse(b, 210, -50, 300, 300);
 
             using (var b = new SolidBrush(Color.FromArgb(35, Tema.RosaPrimario.R, Tema.RosaPrimario.G, Tema.RosaPrimario.B)))
-                g.FillEllipse(b, -70, 340, 260, 260);
+                g.FillEllipse(b, -90, 460, 340, 340);
 
             using (var pen = new Pen(Color.FromArgb(70, Tema.RosaOscuro.R, Tema.RosaOscuro.G, Tema.RosaOscuro.B), 1f))
-                g.DrawEllipse(pen, 170, 240, 110, 110);
+                g.DrawEllipse(pen, 240, 320, 150, 150);
+        }
+
+        // ── Sombra suave detrás de la card flotante del formulario ───────────────
+        // Varias capas de un rectángulo redondeado, cada vez más grande y más transparente,
+        // desplazadas levemente hacia abajo (luz desde arriba) — truco clásico de GDI+ para
+        // simular blur sin necesitar procesamiento de imagen.
+
+        private void PnlCardShadow_Paint(object sender, PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            int offsetX = pnlCard.Left - pnlCardShadow.Left;
+            int offsetY = pnlCard.Top  - pnlCardShadow.Top;
+            var cardRect = new Rectangle(offsetX, offsetY, pnlCard.Width, pnlCard.Height);
+
+            const int capas = 6;
+            for (int i = capas; i >= 1; i--)
+            {
+                int crecimiento = i * 3;
+                int alpha = 4 + (capas - i) * 2;
+                var rect = Rectangle.Inflate(cardRect, crecimiento, crecimiento);
+                rect.Offset(0, 3);
+                using (var path = BuildRoundedRect(rect, Tema.RadioCard + 10))
+                using (var br = new SolidBrush(Color.FromArgb(alpha, Tema.Tinta.R, Tema.Tinta.G, Tema.Tinta.B)))
+                    g.FillPath(br, path);
+            }
         }
 
         // ── Líneas horizontales del separador "o" ─────────────────────────────────
@@ -158,7 +218,7 @@ namespace GUI
             var panel = (Panel)sender;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var rect = new Rectangle(0, 0, panel.Width - 1, panel.Height - 1);
-            using (var path = BuildRoundedRect(rect, Tema.RadioBoton))
+            using (var path = BuildRoundedRect(rect, Tema.RadioCampo))
             using (var pen = new Pen(Tema.Borde, 1f))
                 e.Graphics.DrawPath(pen, path);
         }
@@ -169,11 +229,11 @@ namespace GUI
             var icono = new Label
             {
                 Text      = glifo,
-                Font      = new Font("Segoe UI Emoji", 10f),
+                Font      = new Font("Segoe UI Emoji", 11f),
                 ForeColor = Tema.TextoMuted,
                 BackColor = Tema.Papel,
-                Location  = new Point(6, 4),
-                Size      = new Size(24, 26),
+                Location  = new Point(10, 10),
+                Size      = new Size(26, 26),
                 TextAlign = ContentAlignment.MiddleCenter
             };
             box.Controls.Add(icono);
@@ -191,9 +251,9 @@ namespace GUI
             // 2. Tagline "ORGANIZÁ • GESTIONÁ • POTENCIÁ"
             _lblTagline = new Label
             {
-                Location  = new Point(24, 24),
-                Size      = new Size(260, 18),
-                Font      = new Font("Segoe UI", 8f, FontStyle.Bold),
+                Location  = new Point(32, 76),
+                Size      = new Size(340, 20),
+                Font      = new Font("Segoe UI", 10f, FontStyle.Bold),
                 ForeColor = Tema.RosaOscuro,
                 BackColor = Tema.RosaPalido,
                 Text      = "ORGANIZÁ • GESTIONÁ • POTENCIÁ",
@@ -204,9 +264,9 @@ namespace GUI
             // 3. Wordmark "Wardrobe" / "Flow" en dos líneas y dos colores (labels simples)
             var lblWordmarkDark = new Label
             {
-                Location  = new Point(20, 50),
-                Size      = new Size(260, 46),
-                Font      = new Font("Segoe UI", 26f),
+                Location  = new Point(28, 112),
+                Size      = new Size(340, 58),
+                Font      = new Font("Segoe UI", 34f),
                 ForeColor = Tema.Tinta,
                 BackColor = Tema.RosaPalido,
                 Text      = "Wardrobe",
@@ -214,9 +274,9 @@ namespace GUI
             };
             var lblWordmarkVino = new Label
             {
-                Location  = new Point(20, 94),
-                Size      = new Size(260, 46),
-                Font      = new Font("Segoe UI", 26f),
+                Location  = new Point(28, 172),
+                Size      = new Size(340, 58),
+                Font      = new Font("Segoe UI", 34f),
                 ForeColor = Tema.RosaOscuro,
                 BackColor = Tema.RosaPalido,
                 Text      = "Flow",
@@ -230,9 +290,9 @@ namespace GUI
             // 4. Descripción de marca (traducible vía tag)
             _lblBrandDesc = new Label
             {
-                Location  = new Point(24, 156),
-                Size      = new Size(250, 54),
-                Font      = new Font("Segoe UI", 9f),
+                Location  = new Point(32, 246),
+                Size      = new Size(340, 66),
+                Font      = new Font("Segoe UI", 11f),
                 ForeColor = Tema.TextoMuted,
                 BackColor = Tema.RosaPalido,
                 Text      = "Gestioná tu flujo de\nprendas e información\nde manera simple y eficiente.",
@@ -247,20 +307,6 @@ namespace GUI
             picClothingRack.BringToFront();
             picPriceTag.BringToFront();
             picPlantAndBag.BringToFront();
-
-            // 6. Copyright al pie
-            _lblFooter = new Label
-            {
-                Location  = new Point(24, 534),
-                Size      = new Size(260, 18),
-                Font      = new Font("Segoe UI", 7.5f),
-                ForeColor = Tema.TextoMuted,
-                BackColor = Tema.RosaPalido,
-                Text      = $"© {DateTime.Now.Year} WardrobeFlow. Todos los derechos reservados.",
-                Tag       = "lbl.footer"
-            };
-            pnlLeft.Controls.Add(_lblFooter);
-            _lblFooter.BringToFront();
         }
 
         // Construye un GraphicsPath de rectángulo redondeado.
@@ -282,10 +328,10 @@ namespace GUI
             _cmbIdiomaLogin = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Size          = new Size(150, 24),
-                Location      = new Point(pnlHeader.Width - 20 - 150, 16),
+                Size          = new Size(150, 26),
+                Location      = new Point(729, 19),
                 FlatStyle     = FlatStyle.Flat,
-                Font          = new Font("Segoe UI", 8.5f),
+                Font          = new Font("Segoe UI", 9f),
                 ForeColor     = Tema.RosaOscuro,
                 BackColor     = Tema.Papel,
                 TabStop       = false
@@ -392,9 +438,6 @@ namespace GUI
             var desc = Tx(_lblBrandDesc?.Tag?.ToString());
             if (desc != null && _lblBrandDesc != null) _lblBrandDesc.Text = desc;
 
-            var footer = Tx(_lblFooter?.Tag?.ToString());
-            if (footer != null && _lblFooter != null) _lblFooter.Text = footer;
-
             // Panel derecho — título y subtítulo
             var bienvenido = Tx(lblAccent.Tag?.ToString());
             if (bienvenido != null) lblAccent.Text = bienvenido;
@@ -411,7 +454,7 @@ namespace GUI
 
             // Botones y link
             var ingresar = Tx(btnIngresar.Tag?.ToString());
-            if (ingresar != null) btnIngresar.Text = ingresar + "          →";
+            if (ingresar != null) btnIngresar.Text = ingresar;
 
             var salir = Tx(btnSalir.Tag?.ToString());
             if (salir != null) btnSalir.Text = salir;
@@ -518,6 +561,22 @@ namespace GUI
         private void btnSalir_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        // ── Controles de ventana propios (FormBorderStyle.None no trae los nativos) ──
+
+        private void btnMinimizar_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        // Mismo resultado que cerrar con la X nativa de un ShowDialog: DialogResult.Cancel,
+        // que Program.cs interpreta como "no continuar" (ver GUI/Program.cs). No es un cambio
+        // de comportamiento, es la reposición del control que se pierde al sacar el borde nativo.
+        private void btnCerrarVentana_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
 
         private void lnkOlvidaste_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

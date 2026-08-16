@@ -88,6 +88,7 @@ ES	lnk.olvide	Olvidé mi contraseña
 ES	lbl.iniciarsesion	Iniciar sesión
 ES	lbl.idioma	Idioma:
 ES	lbl.subtitulo	PORTAL DE EMPLEADOS
+ES	lbl.tagline	ORGANIZÁ • GESTIONÁ • POTENCIÁ
 ES	lbl.bienvenido	Bienvenido de nuevo
 ES	lbl.credenciales	Ingresá tus credenciales para continuar
 ES	lbl.divider	o
@@ -854,6 +855,7 @@ EN	lnk.olvide	Forgot your password?
 EN	lbl.iniciarsesion	Sign In
 EN	lbl.idioma	Language:
 EN	lbl.subtitulo	EMPLOYEE PORTAL
+EN	lbl.tagline	ORGANIZE • MANAGE • EMPOWER
 EN	lbl.bienvenido	Welcome back
 EN	lbl.credenciales	Enter your credentials to continue
 EN	lbl.divider	or
@@ -1620,6 +1622,7 @@ RU	lnk.olvide	Забыли пароль?
 RU	lbl.iniciarsesion	Войти в систему
 RU	lbl.idioma	Язык:
 RU	lbl.subtitulo	ПОРТАЛ СОТРУДНИКОВ
+RU	lbl.tagline	ОРГАНИЗУЙТЕ • УПРАВЛЯЙТЕ • РАЗВИВАЙТЕ
 RU	lbl.bienvenido	Добро пожаловать
 RU	lbl.credenciales	Введите данные для входа
 RU	lbl.divider	или
@@ -2424,6 +2427,7 @@ PT	lnk.olvide	Esqueceu sua senha?
 PT	lbl.iniciarsesion	Entrar no sistema
 PT	lbl.idioma	Idioma:
 PT	lbl.subtitulo	PORTAL DE FUNCIONÁRIOS
+PT	lbl.tagline	ORGANIZE • GERENCIE • POTENCIALIZE
 PT	lbl.bienvenido	Bem-vindo de volta
 PT	lbl.credenciales	Insira suas credenciais para continuar
 PT	lbl.divider	ou

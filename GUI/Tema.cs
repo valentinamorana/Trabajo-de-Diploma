@@ -27,5 +27,14 @@ namespace GUI
 
         /// <summary>Radio de esquina estándar para botones/cards/inputs (sección 15 del rediseño).</summary>
         public const int RadioBoton = 6;
+
+        /// <summary>Radio de esquina para inputs con borde propio (cajas de usuario/contraseña).</summary>
+        public const int RadioCampo = 10;
+
+        /// <summary>Radio de esquina para botones grandes tipo "pill" (Ingresar/Salir del Login).</summary>
+        public const int RadioBotonGrande = 14;
+
+        /// <summary>Radio de esquina para paneles flotantes tipo card (Login, modales).</summary>
+        public const int RadioCard = 22;
     }
 }

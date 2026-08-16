@@ -274,7 +274,8 @@ namespace GUI
 
         /// <summary>
         /// Muestra u oculta los ítems del menú según los permisos del usuario.
-        /// La lógica es completamente basada en permisos (NombreMenu), no en roles.
+        /// La lógica es completamente basada en permisos (NombreMenu), no en roles —
+        /// con una única excepción: Administrador, que tiene bypass total (ver más abajo).
         ///
         /// Mapeo NombreMenu → ToolStripMenuItem:
         ///   mnuPrendas               → prendasToolStripMenuItem       (bajo Inventario)
@@ -293,12 +294,22 @@ namespace GUI
         /// Renovación tienen ritmo semanal, Pedidos de Venta/Realizados ritmo diario. Ningún
         /// NombreMenu cambió — solo el ToolStripMenuItem contenedor de cada hoja.
         ///
-        /// Administrador tiene los 10 permisos → ve todo el menú.
+        /// Administrador ve todo el menú por bypass explícito (esAdmin), no porque la BD
+        /// tenga las 11 patentes bien asignadas — mismo criterio que ManejadorSeguridad y
+        /// BLL.PermisosAccion, para que los 3 puntos donde se chequea permiso sean consistentes.
         /// </summary>
         private void AplicarPermisos(List<BE.Permiso> permisos)
         {
             // Panel de Control visible para todos los usuarios autenticados.
             panelControlToolStripMenuItem.Visible = true;
+
+            // El Administrador ve TODO el menú siempre — bypass explícito, igual que ya
+            // tienen ManejadorSeguridad (controles individuales) y BLL.PermisosAccion
+            // (acciones de escritura). Antes esta era la única de las 3 capas sin bypass:
+            // dependía 100% de que RolPermiso/PermisoRelacion tuviera las 11 patentes bien
+            // asignadas para "Administrador" en la BD — si a una base le faltaba una, el
+            // Admin se quedaba sin ver ese grupo pese a serlo. Ahora no depende de eso.
+            bool esAdmin = _usuarioActivo?.EsAdministrador == true;
 
             // Permisos efectivos del usuario, indexados por NombreMenu (O(1), case-insensitive).
             var nombresMenu = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -306,7 +317,7 @@ namespace GUI
                 foreach (var p in permisos)
                     if (!string.IsNullOrEmpty(p.NombreMenu)) nombresMenu.Add(p.NombreMenu);
 
-            bool Permite(string nm) => nombresMenu.Contains(nm);
+            bool Permite(string nm) => esAdmin || nombresMenu.Contains(nm);
 
             // ── Mapa declarativo HOJA → permiso (ÚNICA fuente de verdad) ─────────────────────────
             // En vez de repetir 'item.Visible = nombresMenu.Contains("mnuX")' por cada control, la

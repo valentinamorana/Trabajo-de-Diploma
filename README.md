@@ -165,10 +165,12 @@ BD/03_Permisos_Granulares.sql
 BD/04_Diagnostico_Limpieza_Nodos_Permiso.sql
 BD/05_Renovacion_Suscripcion.sql          -- Tabla y permisos del módulo de Renovación (PdN5)
 BD/06_Rediseno_Menu.sql                   -- Actualiza el texto "Bitácora" → "Analítica" en BD existentes
+BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos de los 7 roles reales
 ```
 
 - **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql`.
 - **Actualizar una BD existente** → ejecutar `02` a `06` en orden.
+- **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
 
 ### Cadena de conexión
 

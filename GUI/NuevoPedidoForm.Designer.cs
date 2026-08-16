@@ -300,6 +300,7 @@ namespace GUI
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "NuevoPedidoForm";
+            this.Load += new System.EventHandler(this.NuevoPedidoForm_Load);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Tag = "frm.nuevopedido";
             this.Text = "Nuevo Pedido de Venta";

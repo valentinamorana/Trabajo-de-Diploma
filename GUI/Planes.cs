@@ -41,7 +41,6 @@ namespace GUI
         public Planes()
         {
             InitializeComponent();
-            this.Load += new EventHandler(Planes_Load);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────

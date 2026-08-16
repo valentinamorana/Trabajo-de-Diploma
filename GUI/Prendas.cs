@@ -57,8 +57,6 @@ namespace GUI
             btnNueva.Visible        = _tieneStock;
             btnEditar.Visible       = _tieneStock;
             btnCambiarEstado.Visible = _tieneStock;
-
-            this.Load += new EventHandler(Prendas_Load);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────

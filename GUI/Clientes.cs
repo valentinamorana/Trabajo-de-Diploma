@@ -39,7 +39,6 @@ namespace GUI
         public Clientes()
         {
             InitializeComponent();
-            this.Load += new EventHandler(Clientes_Load);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────

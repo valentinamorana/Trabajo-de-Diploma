@@ -31,8 +31,13 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Menu));
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsIdioma = new System.Windows.Forms.ToolStrip();
+            this.lblIdioma = new System.Windows.Forms.ToolStripLabel();
+            this.tsIdiomaSep = new System.Windows.Forms.ToolStripSeparator();
+            this.cmbIdiomaMenu = new System.Windows.Forms.ToolStripComboBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.usuarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.miPerfilItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cerrarSesionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inventarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,8 +53,12 @@
             this.pedidosVentaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pedidosRealizadosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.grpUsuarios = new System.Windows.Forms.ToolStripMenuItem();
+            this.adminUsuariosItem = new System.Windows.Forms.ToolStripMenuItem();
             this.usuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.perfilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sepAdministrarToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.grpSistema = new System.Windows.Forms.ToolStripMenuItem();
             this.idiomasToolStripMenuItem  = new System.Windows.Forms.ToolStripMenuItem();
             this.backupToolStripMenuItem         = new System.Windows.Forms.ToolStripMenuItem();
             this.historialUsuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,14 +69,49 @@
             this.sepBitacoraToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.reporteJornadaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventanaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.alertasItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsIdioma.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // contextMenuStrip1
-            // 
+            //
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
-            // 
+            //
+            // tsIdioma — barra de selección de idioma (debajo del MenuStrip principal).
+            //
+            this.tsIdioma.Dock      = System.Windows.Forms.DockStyle.Top;
+            this.tsIdioma.BackColor = System.Drawing.Color.FromArgb(40, 40, 55);
+            this.tsIdioma.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.tsIdioma.Padding   = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.tsIdioma.Height    = 28;
+            this.tsIdioma.Name      = "tsIdioma";
+            this.tsIdioma.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblIdioma,
+            this.tsIdiomaSep,
+            this.cmbIdiomaMenu});
+            //
+            // lblIdioma
+            //
+            this.lblIdioma.Name      = "lblIdioma";
+            this.lblIdioma.Text      = "Idioma:";
+            this.lblIdioma.ForeColor = System.Drawing.Color.FromArgb(200, 200, 210);
+            this.lblIdioma.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
+            //
+            // tsIdiomaSep
+            //
+            this.tsIdiomaSep.Name = "tsIdiomaSep";
+            //
+            // cmbIdiomaMenu
+            //
+            this.cmbIdiomaMenu.Name          = "cmbIdiomaMenu";
+            this.cmbIdiomaMenu.AutoSize      = false;
+            this.cmbIdiomaMenu.Width         = 140;
+            this.cmbIdiomaMenu.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbIdiomaMenu.Font          = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.cmbIdiomaMenu.SelectedIndexChanged += new System.EventHandler(this.CmbIdiomaMenu_Changed);
+            //
             // menuStrip1
             // 
             this.menuStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
@@ -79,25 +123,34 @@
             this.ventasToolStripMenuItem,
             this.bitacoraToolStripMenuItem,
             this.gestionToolStripMenuItem,
-            this.ventanaToolStripMenuItem});
+            this.ventanaToolStripMenuItem,
+            this.alertasItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1100, 24);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             //
-            // usuarioToolStripMenuItem
+            // usuarioToolStripMenuItem — se renombra "Sesión" (evita confundirlo con "Perfiles y Permisos").
             //
             this.usuarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miPerfilItem,
             this.cerrarSesionToolStripMenuItem});
             this.usuarioToolStripMenuItem.Image = global::GUI.Properties.Resources._3106921_1_;
             this.usuarioToolStripMenuItem.Name = "usuarioToolStripMenuItem";
-            this.usuarioToolStripMenuItem.Tag = "mnu.perfil";
+            this.usuarioToolStripMenuItem.Tag = "mnu.sesion";
             this.usuarioToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
-            this.usuarioToolStripMenuItem.Text = "Perfil";
+            this.usuarioToolStripMenuItem.Text = "Sesión";
             // Cuenta (Sesión/Mi Perfil) pasa al costado derecho, junto a Alertas — deja de competir
             // visualmente con los módulos de negocio (hallazgo #10 del rediseño UX/UI).
             this.usuarioToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            //
+            // miPerfilItem — "Mi Perfil" (preferencias del usuario), disponible para todos.
+            //
+            this.miPerfilItem.Name = "miPerfilItem";
+            this.miPerfilItem.Tag  = "perfil.menu";
+            this.miPerfilItem.Text = "Mi Perfil";
+            this.miPerfilItem.Click += new System.EventHandler(this.MiPerfil_Click);
             //
             // panelControlToolStripMenuItem
             //
@@ -219,28 +272,58 @@
             this.pedidosRealizadosToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.pedidosRealizadosToolStripMenuItem.Text = "Pedidos Realizados";
             this.pedidosRealizadosToolStripMenuItem.Click += new System.EventHandler(this.pedidosRealizadosToolStripMenuItem_Click);
-            // 
-            // gestionToolStripMenuItem
-            // 
+            //
+            // gestionToolStripMenuItem — reorganizado en submenús: Usuarios ▸, Perfiles, ──, Sistema ▸.
+            //
             this.gestionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.usuariosToolStripMenuItem,
+            this.grpUsuarios,
             this.perfilesToolStripMenuItem,
-            this.idiomasToolStripMenuItem,
-            this.historialUsuariosToolStripMenuItem,
-            this.backupToolStripMenuItem,
-            this.integridadToolStripMenuItem});
+            this.sepAdministrarToolStripSeparator,
+            this.grpSistema});
             this.gestionToolStripMenuItem.Name = "gestionToolStripMenuItem";
             this.gestionToolStripMenuItem.Tag = "mnu.administrar";
             this.gestionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.gestionToolStripMenuItem.Text = "Administrar";
             //
-            // usuariosToolStripMenuItem
+            // grpUsuarios — submenú "Usuarios": ABM de datos + cuentas + historial de cambios.
+            //
+            this.grpUsuarios.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.adminUsuariosItem,
+            this.usuariosToolStripMenuItem,
+            this.historialUsuariosToolStripMenuItem});
+            this.grpUsuarios.Name = "grpUsuarios";
+            this.grpUsuarios.Tag  = "mnu.grp.usuarios";
+            this.grpUsuarios.Text = "Usuarios";
+            //
+            // adminUsuariosItem — ABM de datos no sensibles + cambiar rol + historial.
+            //
+            this.adminUsuariosItem.Name = "adminUsuariosItem";
+            this.adminUsuariosItem.Tag  = "mnu.adminusuarios";
+            this.adminUsuariosItem.Text = "Administración de Usuarios";
+            this.adminUsuariosItem.Click += new System.EventHandler(this.AdminUsuarios_Click);
+            //
+            // usuariosToolStripMenuItem — pasa a llamarse "Cuentas de Usuario" (no confundir con
+            // "Administración de Usuarios").
             //
             this.usuariosToolStripMenuItem.Name = "usuariosToolStripMenuItem";
-            this.usuariosToolStripMenuItem.Tag = "mnu.usuarios";
+            this.usuariosToolStripMenuItem.Tag = "mnu.cuentas";
             this.usuariosToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.usuariosToolStripMenuItem.Text = "Usuarios";
+            this.usuariosToolStripMenuItem.Text = "Cuentas de Usuario";
             this.usuariosToolStripMenuItem.Click += new System.EventHandler(this.usuariosToolStripMenuItem_Click);
+            //
+            // sepAdministrarToolStripSeparator
+            //
+            this.sepAdministrarToolStripSeparator.Name = "sepAdministrarToolStripSeparator";
+            //
+            // grpSistema — submenú "Sistema": herramientas transversales.
+            //
+            this.grpSistema.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.idiomasToolStripMenuItem,
+            this.backupToolStripMenuItem,
+            this.integridadToolStripMenuItem});
+            this.grpSistema.Name = "grpSistema";
+            this.grpSistema.Tag  = "mnu.grp.sistema";
+            this.grpSistema.Text = "Sistema";
             //
             // perfilesToolStripMenuItem
             //
@@ -336,6 +419,13 @@
             this.ventanaToolStripMenuItem.Text = "Ventana";
             this.menuStrip1.MdiWindowListItem = this.ventanaToolStripMenuItem;
             //
+            // alertasItem — Centro de Alertas, alineado a la derecha (badge se compone en código).
+            //
+            this.alertasItem.Name      = "alertasItem";
+            this.alertasItem.Tag       = "mnu.alertas";
+            this.alertasItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.alertasItem.Click    += new System.EventHandler(this.AlertasItem_Click);
+            //
             // Menu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -343,12 +433,15 @@
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(228)))), ((int)(((byte)(235)))));
             this.ClientSize = new System.Drawing.Size(1100, 650);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.tsIdioma);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Menu";
             this.Text = "WardrobeFlow";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.tsIdioma.ResumeLayout(false);
+            this.tsIdioma.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -388,5 +481,15 @@
         private System.Windows.Forms.ToolStripMenuItem idiomasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem integridadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ventanaToolStripMenuItem;
+        private System.Windows.Forms.ToolStrip tsIdioma;
+        private System.Windows.Forms.ToolStripLabel lblIdioma;
+        private System.Windows.Forms.ToolStripSeparator tsIdiomaSep;
+        private System.Windows.Forms.ToolStripComboBox cmbIdiomaMenu;
+        private System.Windows.Forms.ToolStripMenuItem miPerfilItem;
+        private System.Windows.Forms.ToolStripMenuItem adminUsuariosItem;
+        private System.Windows.Forms.ToolStripMenuItem grpUsuarios;
+        private System.Windows.Forms.ToolStripMenuItem grpSistema;
+        private System.Windows.Forms.ToolStripSeparator sepAdministrarToolStripSeparator;
+        private System.Windows.Forms.ToolStripMenuItem alertasItem;
     }
 }

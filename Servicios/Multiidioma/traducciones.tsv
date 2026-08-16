@@ -3714,42 +3714,34 @@ RU	col.ver.f.apellido	Фамилия
 RU	col.ver.f.email	Эл. почта
 RU	col.ver.f.fechanac	Дата рожд.
 
-ES	dash.despachados	Pedidos
-despachados
-ES	dash.entregados	Pedidos
-entregados
+ES	dash.despachados	Pedidos despachados
+ES	dash.entregados	Pedidos entregados
 ES	dash.kan.despachado	Despachado
 ES	dash.kan.entregado	Entregado
 ES	dash.kan.pendiente	Pendiente
-ES	dash.mant.activo	En
-mantenimiento
+ES	dash.mant.activo	En mantenimiento
 ES	dash.mant.encurso	En curso (2-7d)
 ES	dash.mant.reciente	Reciente (< 2d)
 ES	dash.mant.urgente	Urgente (> 7d)
 ES	dash.operador.titulo	Panel de Operaciones
-ES	dash.planes	Planes
-activos
+ES	dash.planes	Planes activos
 ES	dash.stock.titulo	Panel de Stock
 ES	dash.sup.bitacora	Actividad reciente
 ES	dash.sup.mant	En mantenimiento
 ES	dash.sup.pedidos	Pedidos pendientes
 ES	dash.supervisor.titulo	Panel de Supervisor
 ES	dash.vendedor.titulo	Panel de Ventas
-EN	dash.despachados	Dispatched
-orders
-EN	dash.entregados	Delivered
-orders
+EN	dash.despachados	Dispatched orders
+EN	dash.entregados	Delivered orders
 EN	dash.kan.despachado	Dispatched
 EN	dash.kan.entregado	Delivered
 EN	dash.kan.pendiente	Pending
-EN	dash.mant.activo	Under
-maintenance
+EN	dash.mant.activo	Under maintenance
 EN	dash.mant.encurso	In progress (2-7d)
 EN	dash.mant.reciente	Recent (< 2d)
 EN	dash.mant.urgente	Urgent (> 7d)
 EN	dash.operador.titulo	Operations Panel
-EN	dash.planes	Active
-plans
+EN	dash.planes	Active plans
 EN	dash.stock.titulo	Stock Panel
 EN	dash.sup.bitacora	Recent activity
 EN	dash.sup.mant	Under maintenance
@@ -3757,42 +3749,34 @@ EN	dash.sup.pedidos	Pending orders
 EN	dash.supervisor.titulo	Supervisor Panel
 EN	dash.vendedor.titulo	Sales Panel
 
-PT	dash.despachados	Pedidos
-despachados
-PT	dash.entregados	Pedidos
-entregues
+PT	dash.despachados	Pedidos despachados
+PT	dash.entregados	Pedidos entregues
 PT	dash.kan.despachado	Despachado
 PT	dash.kan.entregado	Entregue
 PT	dash.kan.pendiente	Pendente
-PT	dash.mant.activo	Em
-manutenção
+PT	dash.mant.activo	Em manutenção
 PT	dash.mant.encurso	Em andamento (2-7d)
 PT	dash.mant.reciente	Recente (< 2d)
 PT	dash.mant.urgente	Urgente (> 7d)
 PT	dash.operador.titulo	Painel de Operações
-PT	dash.planes	Planos
-ativos
+PT	dash.planes	Planos ativos
 PT	dash.stock.titulo	Painel de Estoque
 PT	dash.sup.bitacora	Atividade recente
 PT	dash.sup.mant	Em manutenção
 PT	dash.sup.pedidos	Pedidos pendentes
 PT	dash.supervisor.titulo	Painel de Supervisor
 PT	dash.vendedor.titulo	Painel de Vendas
-RU	dash.despachados	Отгружено
-заказов
-RU	dash.entregados	Доставлено
-заказов
+RU	dash.despachados	Отгружено заказов
+RU	dash.entregados	Доставлено заказов
 RU	dash.kan.despachado	Отгружен
 RU	dash.kan.entregado	Доставлен
 RU	dash.kan.pendiente	В ожидании
-RU	dash.mant.activo	На
-обслуживании
+RU	dash.mant.activo	На обслуживании
 RU	dash.mant.encurso	В процессе (2-7д)
 RU	dash.mant.reciente	Недавно (< 2д)
 RU	dash.mant.urgente	Срочно (> 7д)
 RU	dash.operador.titulo	Панель операций
-RU	dash.planes	Активных
-планов
+RU	dash.planes	Активных планов
 RU	dash.stock.titulo	Панель склада
 RU	dash.sup.bitacora	Недавняя активность
 RU	dash.sup.mant	На обслуживании
@@ -4188,3 +4172,347 @@ RU	dash.act.accountunlock	Разблокировка учётной записи
 RU	dash.act.useradd	Создан пользователь: {0}
 RU	dash.act.userrestore	Восстановление до версии {0}
 RU	dash.act.emergencykeys	Перевыпуск аварийных ключей: {0}
+ES	rec.frm.titulo	Recuperación de Integridad (Espejo)
+ES	rec.col.id	ID
+ES	rec.col.usuario	Usuario
+ES	rec.col.tipo	Tipo
+ES	rec.col.campo	Campo
+ES	rec.col.actual	Actual
+ES	rec.col.esperado	Esperado (espejo)
+ES	rec.btn.cerrar	Cerrar
+ES	rec.btn.backup	Restaurar Backup...
+ES	rec.btn.asumir	Asumir Pérdida
+ES	rec.btn.reparar	Reparar desde Espejo
+ES	rec.estado.integro	Estado: ÍNTEGRO
+ES	rec.estado.comprometido	Estado: COMPROMETIDO
+ES	rec.dvv.detalle	DVV almacenado: {0}  |  DVV calculado: {1}
+ES	rec.tipo.modificada	Modificada
+ES	rec.tipo.dvh	DVH corrupto
+ES	rec.tipo.insertada	Inserción externa
+ES	rec.tipo.eliminada	Eliminada (falta)
+ES	rec.fila.ausente	(ausente en la tabla actual)
+ES	rec.fila.enespejo	(presente en el espejo)
+ES	rec.err.cargar	Error al diagnosticar: {0}
+ES	rec.err.titulo	Error
+ES	rec.backup.seleccionar	Seleccionar Backup para Restaurar
+ES	rec.conf.asumir	ATENCIÓN: se aceptarán los datos ACTUALES como legítimos y se recalcularán todos los dígitos verificadores.\n\nSi hubo manipulación, quedará consolidada. ¿Continuar?
+ES	rec.conf.asumir.titulo	Confirmar Asumir Pérdida
+ES	rec.msg.asumido	Dígitos verificadores recalculados sobre los datos actuales.
+ES	rec.conf.reparar	¿Restaurar la tabla Usuario a los valores legítimos del espejo?\n\nSe revertirán las filas modificadas y se eliminarán las inserciones externas.
+ES	rec.conf.reparar.titulo	Confirmar Reparación
+ES	rec.msg.reparado	Saneamiento completado: se restauraron los datos legítimos del espejo.
+ES	rec.msg.exito.titulo	Éxito
+EN	rec.frm.titulo	Integrity Recovery (Mirror)
+EN	rec.col.id	ID
+EN	rec.col.usuario	Username
+EN	rec.col.tipo	Type
+EN	rec.col.campo	Field
+EN	rec.col.actual	Current
+EN	rec.col.esperado	Expected (mirror)
+EN	rec.btn.cerrar	Close
+EN	rec.btn.backup	Restore Backup...
+EN	rec.btn.asumir	Accept Loss
+EN	rec.btn.reparar	Repair from Mirror
+EN	rec.estado.integro	Status: INTACT
+EN	rec.estado.comprometido	Status: COMPROMISED
+EN	rec.dvv.detalle	Stored DVV: {0}  |  Calculated DVV: {1}
+EN	rec.tipo.modificada	Modified
+EN	rec.tipo.dvh	Corrupt DVH
+EN	rec.tipo.insertada	External insertion
+EN	rec.tipo.eliminada	Deleted (missing)
+EN	rec.fila.ausente	(missing from current table)
+EN	rec.fila.enespejo	(present in mirror)
+EN	rec.err.cargar	Error diagnosing: {0}
+EN	rec.err.titulo	Error
+EN	rec.backup.seleccionar	Select Backup to Restore
+EN	rec.conf.asumir	WARNING: the CURRENT data will be accepted as legitimate and all check digits will be recalculated.\n\nIf there was tampering, it will be consolidated. Continue?
+EN	rec.conf.asumir.titulo	Confirm Accept Loss
+EN	rec.msg.asumido	Check digits recalculated over the current data.
+EN	rec.conf.reparar	Restore the User table to the legitimate mirror values?\n\nModified rows will be reverted and external insertions will be deleted.
+EN	rec.conf.reparar.titulo	Confirm Repair
+EN	rec.msg.reparado	Repair completed: legitimate mirror data was restored.
+EN	rec.msg.exito.titulo	Success
+RU	rec.frm.titulo	Восстановление целостности (Зеркало)
+RU	rec.col.id	ID
+RU	rec.col.usuario	Пользователь
+RU	rec.col.tipo	Тип
+RU	rec.col.campo	Поле
+RU	rec.col.actual	Текущее
+RU	rec.col.esperado	Ожидаемое (зеркало)
+RU	rec.btn.cerrar	Закрыть
+RU	rec.btn.backup	Восстановить из бэкапа...
+RU	rec.btn.asumir	Принять потерю
+RU	rec.btn.reparar	Восстановить из зеркала
+RU	rec.estado.integro	Статус: ЦЕЛО
+RU	rec.estado.comprometido	Статус: НАРУШЕНО
+RU	rec.dvv.detalle	Сохранённый DVV: {0}  |  Вычисленный DVV: {1}
+RU	rec.tipo.modificada	Изменена
+RU	rec.tipo.dvh	Повреждённый DVH
+RU	rec.tipo.insertada	Внешняя вставка
+RU	rec.tipo.eliminada	Удалена (отсутствует)
+RU	rec.fila.ausente	(отсутствует в текущей таблице)
+RU	rec.fila.enespejo	(присутствует в зеркале)
+RU	rec.err.cargar	Ошибка диагностики: {0}
+RU	rec.err.titulo	Ошибка
+RU	rec.backup.seleccionar	Выбрать бэкап для восстановления
+RU	rec.conf.asumir	ВНИМАНИЕ: ТЕКУЩИЕ данные будут приняты как законные, и все контрольные разряды будут пересчитаны.\n\nЕсли имела место фальсификация данных, она будет закреплена. Продолжить?
+RU	rec.conf.asumir.titulo	Подтвердить принятие потери
+RU	rec.msg.asumido	Контрольные разряды пересчитаны на основе текущих данных.
+RU	rec.conf.reparar	Восстановить таблицу Usuario до законных значений из зеркала?\n\nИзменённые строки будут отменены, а внешние вставки — удалены.
+RU	rec.conf.reparar.titulo	Подтвердить восстановление
+RU	rec.msg.reparado	Восстановление завершено: законные данные из зеркала были восстановлены.
+RU	rec.msg.exito.titulo	Успешно
+PT	rec.frm.titulo	Recuperação de Integridade (Espelho)
+PT	rec.col.id	ID
+PT	rec.col.usuario	Usuário
+PT	rec.col.tipo	Tipo
+PT	rec.col.campo	Campo
+PT	rec.col.actual	Atual
+PT	rec.col.esperado	Esperado (espelho)
+PT	rec.btn.cerrar	Fechar
+PT	rec.btn.backup	Restaurar Backup...
+PT	rec.btn.asumir	Assumir Perda
+PT	rec.btn.reparar	Reparar a partir do Espelho
+PT	rec.estado.integro	Estado: ÍNTEGRO
+PT	rec.estado.comprometido	Estado: COMPROMETIDO
+PT	rec.dvv.detalle	DVV armazenado: {0}  |  DVV calculado: {1}
+PT	rec.tipo.modificada	Modificada
+PT	rec.tipo.dvh	DVH corrompido
+PT	rec.tipo.insertada	Inserção externa
+PT	rec.tipo.eliminada	Excluída (ausente)
+PT	rec.fila.ausente	(ausente na tabela atual)
+PT	rec.fila.enespejo	(presente no espelho)
+PT	rec.err.cargar	Erro ao diagnosticar: {0}
+PT	rec.err.titulo	Erro
+PT	rec.backup.seleccionar	Selecionar Backup para Restaurar
+PT	rec.conf.asumir	ATENÇÃO: os dados ATUAIS serão aceitos como legítimos e todos os dígitos verificadores serão recalculados.\n\nSe houve manipulação, ela será consolidada. Continuar?
+PT	rec.conf.asumir.titulo	Confirmar Assumir Perda
+PT	rec.msg.asumido	Dígitos verificadores recalculados sobre os dados atuais.
+PT	rec.conf.reparar	Restaurar a tabela Usuario para os valores legítimos do espelho?\n\nAs linhas modificadas serão revertidas e as inserções externas serão excluídas.
+PT	rec.conf.reparar.titulo	Confirmar Reparo
+PT	rec.msg.reparado	Saneamento concluído: os dados legítimos do espelho foram restaurados.
+PT	rec.msg.exito.titulo	Sucesso
+ES	err.bll.usuario.email_invalido	El correo electrónico no tiene un formato válido.
+ES	err.bll.usuario.fechanac_futura	La fecha de nacimiento no puede ser futura.
+ES	err.bll.usuario.fechanac_menor	El usuario debe ser mayor de edad (18 años).
+ES	err.bll.usuario.username_duplicado	Ya existe un usuario con el nombre '{0}'.
+ES	err.bll.usuario.clave_igual_actual	La nueva contraseña no puede ser igual a la actual.
+ES	err.bll.usuario.ultimo_admin_rol	No se puede quitar el rol de Administrador al último administrador activo. Asigná el rol Administrador a otro usuario antes de cambiar este.
+ES	err.bll.usuario.clave_corta	La contraseña debe tener al menos 8 caracteres.
+ES	err.bll.usuario.clave_sinnumero	La contraseña debe contener al menos un número.
+ES	err.bll.usuario.clave_sinespecial	La contraseña debe contener al menos un carácter especial (!@#$%...).
+ES	err.bll.cliente.plan_inexistente	No se encontró el plan de suscripción indicado.
+ES	err.bll.cliente.plan_requerido	Debe seleccionar un plan de suscripción.
+ES	err.bll.cliente.fechanac_requerida	La fecha de nacimiento es obligatoria.
+ES	err.bll.cliente.menor_edad	El cliente debe ser mayor de 18 años.
+ES	err.bll.plan.nombre_letras	El nombre del plan solo puede contener letras y espacios.
+ES	err.bll.plan.precio_cero	El precio debe ser mayor a cero.
+ES	err.bll.renovacion.plan_requerido	Debe indicar el nuevo plan para cambiar la suscripción.
+ES	err.bll.renovacion.plan_inexistente	El plan indicado no existe.
+ES	err.bll.renovacion.plan_insuficiente	No se puede cambiar al plan '{0}': el cliente tiene {1} prenda(s) en uso y ese plan solo permite {2}.
+ES	err.bll.renovacion.sin_plan	{0} no tiene un plan de suscripción asignado. No corresponde procesar una renovación.
+ES	err.bll.espejo.no	No hay un espejo de integridad disponible para reparar. Usá «Recalcular» o restaurá un backup.
+ES	err.bll.espejo.norep	El daño detectado no se puede reparar desde el espejo (hay registros eliminados físicamente). Restaurá un backup para recuperarlos.
+ES	err.bll.backup.clave_requerida	Debés ingresar una contraseña para cifrar el backup.
+ES	err.bll.backup.clave_invalida	La contraseña del backup es incorrecta o el archivo está dañado.
+ES	err.bll.dv.sin_permiso	No tenés permiso para ejecutar operaciones sobre los Dígitos Verificadores. Esta acción es exclusiva del Administrador y quedó registrada.
+ES	err.bll.pref.nula	No hay preferencias para guardar.
+ES	err.dal.pedido.prenda_tomada	La prenda '{0}' ya no está disponible. Actualizá la selección e intentá de nuevo.
+EN	err.bll.usuario.email_invalido	The email address is not in a valid format.
+EN	err.bll.usuario.fechanac_futura	The date of birth cannot be in the future.
+EN	err.bll.usuario.fechanac_menor	The user must be of legal age (18 years).
+EN	err.bll.usuario.username_duplicado	A user with the name '{0}' already exists.
+EN	err.bll.usuario.clave_igual_actual	The new password cannot be the same as the current one.
+EN	err.bll.usuario.ultimo_admin_rol	You cannot remove the Administrator role from the last active administrator. Assign the Administrator role to another user before changing this one.
+EN	err.bll.usuario.clave_corta	The password must be at least 8 characters long.
+EN	err.bll.usuario.clave_sinnumero	The password must contain at least one number.
+EN	err.bll.usuario.clave_sinespecial	The password must contain at least one special character (!@#$%...).
+EN	err.bll.cliente.plan_inexistente	The specified subscription plan was not found.
+EN	err.bll.cliente.plan_requerido	You must select a subscription plan.
+EN	err.bll.cliente.fechanac_requerida	The date of birth is required.
+EN	err.bll.cliente.menor_edad	The client must be over 18 years old.
+EN	err.bll.plan.nombre_letras	The plan name can only contain letters and spaces.
+EN	err.bll.plan.precio_cero	The price must be greater than zero.
+EN	err.bll.renovacion.plan_requerido	You must specify the new plan to change the subscription.
+EN	err.bll.renovacion.plan_inexistente	The specified plan does not exist.
+EN	err.bll.renovacion.plan_insuficiente	Cannot switch to plan '{0}': the client has {1} garment(s) in use and that plan only allows {2}.
+EN	err.bll.renovacion.sin_plan	{0} has no subscription plan assigned. A renewal cannot be processed.
+EN	err.bll.espejo.no	No integrity mirror is available to repair from. Use "Recalculate" or restore a backup.
+EN	err.bll.espejo.norep	The detected damage cannot be repaired from the mirror (there are physically deleted records). Restore a backup to recover them.
+EN	err.bll.backup.clave_requerida	You must enter a password to encrypt the backup.
+EN	err.bll.backup.clave_invalida	The backup password is incorrect or the file is damaged.
+EN	err.bll.dv.sin_permiso	You do not have permission to perform operations on the Check Digits. This action is exclusive to the Administrator and has been logged.
+EN	err.bll.pref.nula	There are no preferences to save.
+EN	err.dal.pedido.prenda_tomada	The garment '{0}' is no longer available. Refresh the selection and try again.
+RU	err.bll.usuario.email_invalido	Адрес электронной почты имеет неверный формат.
+RU	err.bll.usuario.fechanac_futura	Дата рождения не может быть в будущем.
+RU	err.bll.usuario.fechanac_menor	Пользователь должен быть совершеннолетним (18 лет).
+RU	err.bll.usuario.username_duplicado	Пользователь с именем «{0}» уже существует.
+RU	err.bll.usuario.clave_igual_actual	Новый пароль не может совпадать с текущим.
+RU	err.bll.usuario.ultimo_admin_rol	Нельзя снять роль Администратора с последнего активного администратора. Назначьте роль Администратора другому пользователю перед изменением этой.
+RU	err.bll.usuario.clave_corta	Пароль должен содержать не менее 8 символов.
+RU	err.bll.usuario.clave_sinnumero	Пароль должен содержать хотя бы одну цифру.
+RU	err.bll.usuario.clave_sinespecial	Пароль должен содержать хотя бы один специальный символ (!@#$%...).
+RU	err.bll.cliente.plan_inexistente	Указанный план подписки не найден.
+RU	err.bll.cliente.plan_requerido	Необходимо выбрать план подписки.
+RU	err.bll.cliente.fechanac_requerida	Дата рождения обязательна.
+RU	err.bll.cliente.menor_edad	Клиент должен быть старше 18 лет.
+RU	err.bll.plan.nombre_letras	Название плана может содержать только буквы и пробелы.
+RU	err.bll.plan.precio_cero	Цена должна быть больше нуля.
+RU	err.bll.renovacion.plan_requerido	Необходимо указать новый план для изменения подписки.
+RU	err.bll.renovacion.plan_inexistente	Указанный план не существует.
+RU	err.bll.renovacion.plan_insuficiente	Невозможно перейти на план «{0}»: у клиента {1} вещь(ей) в использовании, а этот план допускает только {2}.
+RU	err.bll.renovacion.sin_plan	У {0} не назначен план подписки. Обработка продления невозможна.
+RU	err.bll.espejo.no	Зеркало целостности для восстановления недоступно. Используйте «Пересчитать» или восстановите из бэкапа.
+RU	err.bll.espejo.norep	Обнаруженное повреждение нельзя восстановить из зеркала (есть физически удалённые записи). Восстановите из бэкапа, чтобы вернуть их.
+RU	err.bll.backup.clave_requerida	Необходимо ввести пароль для шифрования бэкапа.
+RU	err.bll.backup.clave_invalida	Пароль бэкапа неверен или файл повреждён.
+RU	err.bll.dv.sin_permiso	У вас нет прав на операции с контрольными разрядами. Это действие доступно только Администратору и было зафиксировано в журнале.
+RU	err.bll.pref.nula	Нет настроек для сохранения.
+RU	err.dal.pedido.prenda_tomada	Вещь «{0}» больше недоступна. Обновите выбор и попробуйте снова.
+PT	err.bll.usuario.email_invalido	O endereço de e-mail não tem um formato válido.
+PT	err.bll.usuario.fechanac_futura	A data de nascimento não pode ser no futuro.
+PT	err.bll.usuario.fechanac_menor	O usuário deve ser maior de idade (18 anos).
+PT	err.bll.usuario.username_duplicado	Já existe um usuário com o nome '{0}'.
+PT	err.bll.usuario.clave_igual_actual	A nova senha não pode ser igual à atual.
+PT	err.bll.usuario.ultimo_admin_rol	Não é possível remover o papel de Administrador do último administrador ativo. Atribua o papel de Administrador a outro usuário antes de alterar este.
+PT	err.bll.usuario.clave_corta	A senha deve ter pelo menos 8 caracteres.
+PT	err.bll.usuario.clave_sinnumero	A senha deve conter pelo menos um número.
+PT	err.bll.usuario.clave_sinespecial	A senha deve conter pelo menos um caractere especial (!@#$%...).
+PT	err.bll.cliente.plan_inexistente	O plano de assinatura indicado não foi encontrado.
+PT	err.bll.cliente.plan_requerido	Você deve selecionar um plano de assinatura.
+PT	err.bll.cliente.fechanac_requerida	A data de nascimento é obrigatória.
+PT	err.bll.cliente.menor_edad	O cliente deve ter mais de 18 anos.
+PT	err.bll.plan.nombre_letras	O nome do plano só pode conter letras e espaços.
+PT	err.bll.plan.precio_cero	O preço deve ser maior que zero.
+PT	err.bll.renovacion.plan_requerido	Você deve indicar o novo plano para alterar a assinatura.
+PT	err.bll.renovacion.plan_inexistente	O plano indicado não existe.
+PT	err.bll.renovacion.plan_insuficiente	Não é possível mudar para o plano '{0}': o cliente tem {1} peça(s) em uso e esse plano permite apenas {2}.
+PT	err.bll.renovacion.sin_plan	{0} não tem um plano de assinatura atribuído. Não é possível processar uma renovação.
+PT	err.bll.espejo.no	Não há um espelho de integridade disponível para reparo. Use "Recalcular" ou restaure um backup.
+PT	err.bll.espejo.norep	O dano detectado não pode ser reparado a partir do espelho (há registros excluídos fisicamente). Restaure um backup para recuperá-los.
+PT	err.bll.backup.clave_requerida	Você deve digitar uma senha para criptografar o backup.
+PT	err.bll.backup.clave_invalida	A senha do backup está incorreta ou o arquivo está danificado.
+PT	err.bll.dv.sin_permiso	Você não tem permissão para executar operações sobre os Dígitos Verificadores. Esta ação é exclusiva do Administrador e foi registrada.
+PT	err.bll.pref.nula	Não há preferências para salvar.
+PT	err.dal.pedido.prenda_tomada	A peça '{0}' não está mais disponível. Atualize a seleção e tente novamente.
+ES	mnu.renovacion	Renovación de Suscripción
+ES	renov.titulo	Renovación de Suscripción
+ES	renov.cliente	Cliente:
+ES	renov.decision	Decisión (tras contactar al cliente)
+ES	renov.renovar	Renovar mismo plan
+ES	renov.cambiarplan	Cambiar de plan
+ES	renov.baja	Dar de baja
+ES	renov.plannuevo	Plan nuevo:
+ES	renov.modalidad	Modalidad de cobro:
+ES	renov.procesar	Procesar
+EN	mnu.renovacion	Subscription Renewal
+EN	renov.titulo	Subscription Renewal
+EN	renov.cliente	Client:
+EN	renov.decision	Decision (after contacting the client)
+EN	renov.renovar	Renew same plan
+EN	renov.cambiarplan	Change plan
+EN	renov.baja	Cancel subscription
+EN	renov.plannuevo	New plan:
+EN	renov.modalidad	Billing method:
+EN	renov.procesar	Process
+RU	mnu.renovacion	Продление подписки
+RU	renov.titulo	Продление подписки
+RU	renov.cliente	Клиент:
+RU	renov.decision	Решение (после связи с клиентом)
+RU	renov.renovar	Продлить тот же план
+RU	renov.cambiarplan	Сменить план
+RU	renov.baja	Отменить подписку
+RU	renov.plannuevo	Новый план:
+RU	renov.modalidad	Способ оплаты:
+RU	renov.procesar	Обработать
+PT	mnu.renovacion	Renovação de Assinatura
+PT	renov.titulo	Renovação de Assinatura
+PT	renov.cliente	Cliente:
+PT	renov.decision	Decisão (após contatar o cliente)
+PT	renov.renovar	Renovar o mesmo plano
+PT	renov.cambiarplan	Mudar de plano
+PT	renov.baja	Cancelar assinatura
+PT	renov.plannuevo	Novo plano:
+PT	renov.modalidad	Modalidade de cobrança:
+PT	renov.procesar	Processar
+ES	lbl.permisos.modo	Modo:
+ES	rb.permisos.crear	Crear
+ES	rb.permisos.editar	Editar / Eliminar
+ES	lbl.permisos.nombrerol	Nombre del rol:
+ES	grp.permisos.crear	Crear rol
+ES	grp.permisos.editar	Editar rol
+ES	grp.permisos.asignar	Asignar permiso o rol
+ES	btn.permisos.crearraiz	➕ Crear rol raíz
+ES	btn.permisos.crearsub	➕ Crear sub-rol
+ES	btn.permisos.editarnom	✏ Renombrar rol
+ES	btn.permisos.asignar	Asignar ↓
+ES	lbl.permisos.detalle	Detalle: 
+ES	lbl.permisos.detalle.vacio	Detalle: (sin selección)
+ES	perm.msg.selpadrerol	Seleccioná un Rol del árbol para crearle un sub-rol.
+ES	perm.ok.subcreado	Sub-rol '{0}' creado dentro de '{1}'.
+ES	perm.msg.selasignable	Elegí un permiso o rol de la lista para asignar.
+ES	perm.msg.selquitar	Seleccioná un ítem que cuelgue de un rol para quitarlo.
+ES	perm.conf.quitar	¿Quitar '{0}' del rol '{1}'?
+EN	lbl.permisos.modo	Mode:
+EN	rb.permisos.crear	Create
+EN	rb.permisos.editar	Edit / Delete
+EN	lbl.permisos.nombrerol	Role name:
+EN	grp.permisos.crear	Create role
+EN	grp.permisos.editar	Edit role
+EN	grp.permisos.asignar	Assign permission or role
+EN	btn.permisos.crearraiz	➕ Create root role
+EN	btn.permisos.crearsub	➕ Create sub-role
+EN	btn.permisos.editarnom	✏ Rename role
+EN	btn.permisos.asignar	Assign ↓
+EN	lbl.permisos.detalle	Details: 
+EN	lbl.permisos.detalle.vacio	Details: (nothing selected)
+EN	perm.msg.selpadrerol	Select a Role from the tree to create a sub-role under it.
+EN	perm.ok.subcreado	Sub-role '{0}' created inside '{1}'.
+EN	perm.msg.selasignable	Choose a permission or role from the list to assign.
+EN	perm.msg.selquitar	Select an item hanging from a role to remove it.
+EN	perm.conf.quitar	Remove '{0}' from role '{1}'?
+RU	lbl.permisos.modo	Режим:
+RU	rb.permisos.crear	Создать
+RU	rb.permisos.editar	Изменить / Удалить
+RU	lbl.permisos.nombrerol	Название роли:
+RU	grp.permisos.crear	Создать роль
+RU	grp.permisos.editar	Изменить роль
+RU	grp.permisos.asignar	Назначить право или роль
+RU	btn.permisos.crearraiz	➕ Создать корневую роль
+RU	btn.permisos.crearsub	➕ Создать вложенную роль
+RU	btn.permisos.editarnom	✏ Переименовать роль
+RU	btn.permisos.asignar	Назначить ↓
+RU	lbl.permisos.detalle	Детали: 
+RU	lbl.permisos.detalle.vacio	Детали: (ничего не выбрано)
+RU	perm.msg.selpadrerol	Выберите Роль в дереве, чтобы создать вложенную роль.
+RU	perm.ok.subcreado	Вложенная роль «{0}» создана внутри «{1}».
+RU	perm.msg.selasignable	Выберите право или роль из списка для назначения.
+RU	perm.msg.selquitar	Выберите элемент, вложенный в роль, чтобы удалить его.
+RU	perm.conf.quitar	Удалить «{0}» из роли «{1}»?
+PT	lbl.permisos.modo	Modo:
+PT	rb.permisos.crear	Criar
+PT	rb.permisos.editar	Editar / Excluir
+PT	lbl.permisos.nombrerol	Nome do papel:
+PT	grp.permisos.crear	Criar papel
+PT	grp.permisos.editar	Editar papel
+PT	grp.permisos.asignar	Atribuir permissão ou papel
+PT	btn.permisos.crearraiz	➕ Criar papel raiz
+PT	btn.permisos.crearsub	➕ Criar sub-papel
+PT	btn.permisos.editarnom	✏ Renomear papel
+PT	btn.permisos.asignar	Atribuir ↓
+PT	lbl.permisos.detalle	Detalhe: 
+PT	lbl.permisos.detalle.vacio	Detalhe: (nada selecionado)
+PT	perm.msg.selpadrerol	Selecione um Papel na árvore para criar um sub-papel nele.
+PT	perm.ok.subcreado	Sub-papel '{0}' criado dentro de '{1}'.
+PT	perm.msg.selasignable	Escolha uma permissão ou papel na lista para atribuir.
+PT	perm.msg.selquitar	Selecione um item vinculado a um papel para removê-lo.
+PT	perm.conf.quitar	Remover '{0}' do papel '{1}'?
+ES	lbl.cli.modalidad	Modalidad de Cobro *
+ES	diag.btn.espejo	Recuperación (Espejo)...
+EN	lbl.cli.modalidad	Billing Method *
+EN	diag.btn.espejo	Recovery (Mirror)...
+RU	lbl.cli.modalidad	Способ оплаты *
+RU	diag.btn.espejo	Восстановление (Зеркало)...
+PT	lbl.cli.modalidad	Modalidade de Cobrança *
+PT	diag.btn.espejo	Recuperação (Espelho)...

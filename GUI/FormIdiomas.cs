@@ -22,7 +22,6 @@ namespace GUI
         private readonly BLL.IdiomaService  _bllIdioma  = new BLL.IdiomaService();
         private List<BE.Idioma>      _idiomas     = new List<BE.Idioma>();
         private int                  _idIdiomaSeleccionado = 0;
-        private Button               _btnNuevoIdioma, _btnRenombrarIdioma;
 
         public FormIdiomas()
         {
@@ -42,41 +41,11 @@ namespace GUI
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             ConfigurarGrillas();
-            CrearBotonesIdioma();
             CargarIdiomas();
             CargarControles();
         }
 
-        // ── Alta / modificación de idiomas (T05) — botones creados por código ────
-        private void CrearBotonesIdioma()
-        {
-            // Se agregan al MISMO panel que Activar/Desactivar (panelBotonesIdioma), en la misma
-            // fila y con el mismo espaciado, para que no se superpongan (antes iban a panelIdiomas
-            // con coordenadas absolutas y se pisaban con los otros botones al reescalar).
-            //   Activar(0) · Desactivar(140) · Nuevo idioma(280) · Renombrar(420)
-            _btnNuevoIdioma = new Button
-            {
-                Text = Tx("btn.idiomas.nuevo", "➕ Nuevo idioma"), Location = new System.Drawing.Point(280, 4),
-                Size = new System.Drawing.Size(130, 28), FlatStyle = FlatStyle.Flat,
-                BackColor = System.Drawing.Color.FromArgb(210, 100, 135), ForeColor = System.Drawing.Color.White,
-                Cursor = Cursors.Hand
-            };
-            _btnNuevoIdioma.FlatAppearance.BorderSize = 0;
-            _btnNuevoIdioma.Click += BtnNuevoIdioma_Click;
-
-            _btnRenombrarIdioma = new Button
-            {
-                Text = Tx("btn.idiomas.renombrar", "✏ Renombrar"), Location = new System.Drawing.Point(420, 4),
-                Size = new System.Drawing.Size(120, 28), FlatStyle = FlatStyle.Flat,
-                BackColor = System.Drawing.Color.FromArgb(176, 62, 96), ForeColor = System.Drawing.Color.White,
-                Cursor = Cursors.Hand
-            };
-            _btnRenombrarIdioma.FlatAppearance.BorderSize = 0;
-            _btnRenombrarIdioma.Click += BtnRenombrarIdioma_Click;
-
-            this.panelBotonesIdioma.Controls.Add(_btnNuevoIdioma);
-            this.panelBotonesIdioma.Controls.Add(_btnRenombrarIdioma);
-        }
+        // ── Alta / modificación de idiomas (T05) ──────────────────────────────
 
         private void BtnNuevoIdioma_Click(object sender, EventArgs e)
         {
@@ -166,9 +135,8 @@ namespace GUI
             btnActivar.Text         = T("btn.idiomas.activar",    "✔ Activar");
             btnDesactivar.Text      = T("btn.idiomas.desactivar", "✕ Desactivar");
             btnGuardar.Text         = T("btn.idiomas.guardar",    "💾 Guardar cambios");
-            // Botones creados por código (pueden no existir aún en el primer Traducir de OnLoad).
-            if (_btnNuevoIdioma     != null) _btnNuevoIdioma.Text     = T("btn.idiomas.nuevo",     "➕ Nuevo idioma");
-            if (_btnRenombrarIdioma != null) _btnRenombrarIdioma.Text = T("btn.idiomas.renombrar", "✏ Renombrar");
+            btnNuevoIdioma.Text     = T("btn.idiomas.nuevo",      "➕ Nuevo idioma");
+            btnRenombrarIdioma.Text = T("btn.idiomas.renombrar",  "✏ Renombrar");
         }
 
         // ── Configuración inicial de grillas ─────────────────────────────────

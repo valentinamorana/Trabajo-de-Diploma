@@ -36,8 +36,6 @@ namespace GUI
         public PedidosVenta()
         {
             InitializeComponent();
-            AgregarBotonHistorial();
-            this.Load += new EventHandler(PedidosVenta_Load);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -72,9 +70,7 @@ namespace GUI
             Aplicar(btnCancelar,      t);
             Aplicar(btnDesCancelar,   t);
             Aplicar(lblDetalleTitulo, t);
-            // Botón Historial (dinámico, sin Tag en Designer)
-            if (_btnHistorial != null && t.ContainsKey("btn.historial"))
-                _btnHistorial.Text = t["btn.historial"].Texto;
+            Aplicar(btnHistorial,     t);
         }
 
         private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
@@ -209,7 +205,7 @@ namespace GUI
             {
                 btnCancelar.Enabled    = false;
                 btnDesCancelar.Enabled = false;
-                if (_btnHistorial != null) _btnHistorial.Enabled = false;
+                btnHistorial.Enabled   = false;
                 return;
             }
 
@@ -218,7 +214,7 @@ namespace GUI
 
             btnCancelar.Enabled    = pedido.Estado == BE.EstadoPedido.Pendiente;
             btnDesCancelar.Enabled = pedido.Estado == BE.EstadoPedido.Cancelado;
-            if (_btnHistorial != null) _btnHistorial.Enabled = true;
+            btnHistorial.Enabled   = true;
 
             // Cargar detalle de prendas del pedido seleccionado
             CargarDetallePrendas(pedido.IdPedido);
@@ -448,35 +444,6 @@ namespace GUI
         }
 
         // ── Historial de cambios ──────────────────────────────────────────────
-
-        private Button _btnHistorial;
-
-        /// <summary>
-        /// Agrega el botón "📋 Historial" a panelTop en tiempo de ejecución
-        /// (el control no está en el Designer para no alterar el layout existente).
-        /// </summary>
-        private void AgregarBotonHistorial()
-        {
-            var tH = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string histText = tH.ContainsKey("btn.historial") ? tH["btn.historial"].Texto : "📋 Historial";
-            _btnHistorial = new Button
-            {
-                Text      = histText,
-                Size      = new Size(110, 28),
-                BackColor = Color.FromArgb(100, 80, 160),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor    = Cursors.Hand,
-                Enabled   = false
-            };
-            _btnHistorial.FlatAppearance.BorderSize = 0;
-            // Botón entre btnRefrescar (x=412, w=32) y lblConteo (x=452).
-            // Se inserta en x=452 y se desplaza lblConteo para que no solapen.
-            _btnHistorial.Location = new Point(452, 11);
-            lblConteo.Location     = new Point(570, lblConteo.Location.Y);
-            _btnHistorial.Click   += BtnHistorial_Click;
-            panelTop.Controls.Add(_btnHistorial);
-        }
 
         private void BtnHistorial_Click(object sender, EventArgs e)
         {

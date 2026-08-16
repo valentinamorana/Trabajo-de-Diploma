@@ -15,6 +15,24 @@ namespace GUI
 
         private void InitializeComponent()
         {
+            this.components          = new System.ComponentModel.Container();
+            this.menuExportar        = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuGuardarTxt       = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuImprimir         = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuGuardarCsv       = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuExportarComp    = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuGuardarComp      = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuImprimirComp     = new System.Windows.Forms.ToolStripMenuItem();
+            this.panelKpiBanner      = new System.Windows.Forms.Panel();
+            this.kpiPrendasVal       = new System.Windows.Forms.Label();
+            this.kpiClientesVal      = new System.Windows.Forms.Label();
+            this.kpiEventosVal       = new System.Windows.Forms.Label();
+            this.kpiBackupVal        = new System.Windows.Forms.Label();
+            this.kpiPrendasLbl       = new System.Windows.Forms.Label();
+            this.kpiClientesLbl      = new System.Windows.Forms.Label();
+            this.kpiEventosLbl       = new System.Windows.Forms.Label();
+            this.kpiBackupLbl        = new System.Windows.Forms.Label();
+            this.btnTendencia        = new System.Windows.Forms.Button();
             this.panelTop       = new System.Windows.Forms.Panel();
             this.lblTitulo      = new System.Windows.Forms.Label();
             this.lblSubtitulo   = new System.Windows.Forms.Label();
@@ -34,7 +52,182 @@ namespace GUI
             this.panelTop.SuspendLayout();
             this.panelControles.SuspendLayout();
             this.panelStatus.SuspendLayout();
+            this.panelKpiBanner.SuspendLayout();
+            this.menuExportar.SuspendLayout();
+            this.menuExportarComp.SuspendLayout();
             this.SuspendLayout();
+            //
+            // menuExportar
+            //
+            this.menuExportar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.mnuGuardarTxt, this.mnuImprimir, this.mnuGuardarCsv});
+            this.menuExportar.Name = "menuExportar";
+            this.menuExportar.Size = new System.Drawing.Size(220, 70);
+            //
+            // mnuGuardarTxt
+            //
+            this.mnuGuardarTxt.Name = "mnuGuardarTxt";
+            this.mnuGuardarTxt.Text = "Guardar como .TXT";
+            this.mnuGuardarTxt.Click += new System.EventHandler(this.MnuGuardarTxt_Click);
+            //
+            // mnuImprimir
+            //
+            this.mnuImprimir.Name = "mnuImprimir";
+            this.mnuImprimir.Text = "Imprimir / Exportar PDF";
+            this.mnuImprimir.Click += new System.EventHandler(this.MnuImprimir_Click);
+            //
+            // mnuGuardarCsv
+            //
+            this.mnuGuardarCsv.Name = "mnuGuardarCsv";
+            this.mnuGuardarCsv.Text = "Guardar eventos como .CSV";
+            this.mnuGuardarCsv.Click += new System.EventHandler(this.MnuGuardarCsv_Click);
+            //
+            // menuExportarComp
+            //
+            this.menuExportarComp.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.mnuGuardarComp, this.mnuImprimirComp});
+            this.menuExportarComp.Name = "menuExportarComp";
+            this.menuExportarComp.Size = new System.Drawing.Size(220, 48);
+            //
+            // mnuGuardarComp
+            //
+            this.mnuGuardarComp.Name = "mnuGuardarComp";
+            this.mnuGuardarComp.Text = "Guardar comparación como .TXT";
+            this.mnuGuardarComp.Click += new System.EventHandler(this.MnuGuardarComp_Click);
+            //
+            // mnuImprimirComp
+            //
+            this.mnuImprimirComp.Name = "mnuImprimirComp";
+            this.mnuImprimirComp.Text = "Imprimir / Exportar PDF";
+            this.mnuImprimirComp.Click += new System.EventHandler(this.MnuImprimir_Click);
+            //
+            // panelKpiBanner — banner de 4 KPIs entre panelControles y rtbReporte.
+            //
+            this.panelKpiBanner.BackColor = System.Drawing.Color.FromArgb(250, 236, 244);
+            this.panelKpiBanner.Controls.Add(this.kpiPrendasVal);
+            this.panelKpiBanner.Controls.Add(this.kpiClientesVal);
+            this.panelKpiBanner.Controls.Add(this.kpiEventosVal);
+            this.panelKpiBanner.Controls.Add(this.kpiBackupVal);
+            this.panelKpiBanner.Controls.Add(this.kpiPrendasLbl);
+            this.panelKpiBanner.Controls.Add(this.kpiClientesLbl);
+            this.panelKpiBanner.Controls.Add(this.kpiEventosLbl);
+            this.panelKpiBanner.Controls.Add(this.kpiBackupLbl);
+            this.panelKpiBanner.Location = new System.Drawing.Point(10, 160);
+            this.panelKpiBanner.Name = "panelKpiBanner";
+            this.panelKpiBanner.Size = new System.Drawing.Size(940, 66);
+            this.panelKpiBanner.TabIndex = 9;
+            this.panelKpiBanner.Paint += new System.Windows.Forms.PaintEventHandler(this.PanelKpiBanner_Paint);
+            //
+            // kpiPrendasVal
+            //
+            this.kpiPrendasVal.BackColor = System.Drawing.Color.Transparent;
+            this.kpiPrendasVal.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
+            this.kpiPrendasVal.ForeColor = System.Drawing.Color.FromArgb(80, 28, 52);
+            this.kpiPrendasVal.Location = new System.Drawing.Point(0, 5);
+            this.kpiPrendasVal.Name = "kpiPrendasVal";
+            this.kpiPrendasVal.Size = new System.Drawing.Size(235, 34);
+            this.kpiPrendasVal.TabIndex = 0;
+            this.kpiPrendasVal.Text = "—";
+            this.kpiPrendasVal.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // kpiClientesVal
+            //
+            this.kpiClientesVal.BackColor = System.Drawing.Color.Transparent;
+            this.kpiClientesVal.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
+            this.kpiClientesVal.ForeColor = System.Drawing.Color.FromArgb(80, 28, 52);
+            this.kpiClientesVal.Location = new System.Drawing.Point(235, 5);
+            this.kpiClientesVal.Name = "kpiClientesVal";
+            this.kpiClientesVal.Size = new System.Drawing.Size(235, 34);
+            this.kpiClientesVal.TabIndex = 1;
+            this.kpiClientesVal.Text = "—";
+            this.kpiClientesVal.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // kpiEventosVal
+            //
+            this.kpiEventosVal.BackColor = System.Drawing.Color.Transparent;
+            this.kpiEventosVal.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
+            this.kpiEventosVal.ForeColor = System.Drawing.Color.FromArgb(80, 28, 52);
+            this.kpiEventosVal.Location = new System.Drawing.Point(470, 5);
+            this.kpiEventosVal.Name = "kpiEventosVal";
+            this.kpiEventosVal.Size = new System.Drawing.Size(235, 34);
+            this.kpiEventosVal.TabIndex = 2;
+            this.kpiEventosVal.Text = "—";
+            this.kpiEventosVal.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // kpiBackupVal
+            //
+            this.kpiBackupVal.BackColor = System.Drawing.Color.Transparent;
+            this.kpiBackupVal.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
+            this.kpiBackupVal.ForeColor = System.Drawing.Color.FromArgb(80, 28, 52);
+            this.kpiBackupVal.Location = new System.Drawing.Point(705, 5);
+            this.kpiBackupVal.Name = "kpiBackupVal";
+            this.kpiBackupVal.Size = new System.Drawing.Size(235, 34);
+            this.kpiBackupVal.TabIndex = 3;
+            this.kpiBackupVal.Text = "—";
+            this.kpiBackupVal.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // kpiPrendasLbl
+            //
+            this.kpiPrendasLbl.BackColor = System.Drawing.Color.Transparent;
+            this.kpiPrendasLbl.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.kpiPrendasLbl.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.kpiPrendasLbl.Location = new System.Drawing.Point(0, 39);
+            this.kpiPrendasLbl.Name = "kpiPrendasLbl";
+            this.kpiPrendasLbl.Size = new System.Drawing.Size(235, 20);
+            this.kpiPrendasLbl.TabIndex = 4;
+            this.kpiPrendasLbl.Text = "Prendas disponibles";
+            this.kpiPrendasLbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // kpiClientesLbl
+            //
+            this.kpiClientesLbl.BackColor = System.Drawing.Color.Transparent;
+            this.kpiClientesLbl.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.kpiClientesLbl.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.kpiClientesLbl.Location = new System.Drawing.Point(235, 39);
+            this.kpiClientesLbl.Name = "kpiClientesLbl";
+            this.kpiClientesLbl.Size = new System.Drawing.Size(235, 20);
+            this.kpiClientesLbl.TabIndex = 5;
+            this.kpiClientesLbl.Text = "Clientes registrados";
+            this.kpiClientesLbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // kpiEventosLbl
+            //
+            this.kpiEventosLbl.BackColor = System.Drawing.Color.Transparent;
+            this.kpiEventosLbl.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.kpiEventosLbl.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.kpiEventosLbl.Location = new System.Drawing.Point(470, 39);
+            this.kpiEventosLbl.Name = "kpiEventosLbl";
+            this.kpiEventosLbl.Size = new System.Drawing.Size(235, 20);
+            this.kpiEventosLbl.TabIndex = 6;
+            this.kpiEventosLbl.Text = "Eventos del día";
+            this.kpiEventosLbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // kpiBackupLbl
+            //
+            this.kpiBackupLbl.BackColor = System.Drawing.Color.Transparent;
+            this.kpiBackupLbl.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.kpiBackupLbl.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.kpiBackupLbl.Location = new System.Drawing.Point(705, 39);
+            this.kpiBackupLbl.Name = "kpiBackupLbl";
+            this.kpiBackupLbl.Size = new System.Drawing.Size(235, 20);
+            this.kpiBackupLbl.TabIndex = 7;
+            this.kpiBackupLbl.Text = "días sin backup";
+            this.kpiBackupLbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // btnTendencia
+            //
+            this.btnTendencia.BackColor = System.Drawing.Color.FromArgb(150, 70, 105);
+            this.btnTendencia.FlatAppearance.BorderSize = 0;
+            this.btnTendencia.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnTendencia.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnTendencia.ForeColor = System.Drawing.Color.White;
+            this.btnTendencia.Location = new System.Drawing.Point(545, 12);
+            this.btnTendencia.Name = "btnTendencia";
+            this.btnTendencia.Size = new System.Drawing.Size(175, 28);
+            this.btnTendencia.TabIndex = 9;
+            this.btnTendencia.Text = "📈  Tendencia (rango)";
+            this.btnTendencia.UseVisualStyleBackColor = false;
+            this.btnTendencia.Click += new System.EventHandler(this.BtnTendencia_Click);
             //
             // panelTop
             //
@@ -46,6 +239,7 @@ namespace GUI
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(960, 56);
             this.panelTop.TabIndex = 0;
+            this.panelTop.Paint += new System.Windows.Forms.PaintEventHandler(this.PanelTop_Paint);
             //
             // lblTitulo
             //
@@ -81,6 +275,7 @@ namespace GUI
             this.panelControles.Controls.Add(this.btnComparar);
             this.panelControles.Controls.Add(this.btnExportarComp);
             this.panelControles.Controls.Add(this.btnLimpiar);
+            this.panelControles.Controls.Add(this.btnTendencia);
             this.panelControles.Location = new System.Drawing.Point(10, 66);
             this.panelControles.Name = "panelControles";
             this.panelControles.Size = new System.Drawing.Size(940, 90);
@@ -213,11 +408,11 @@ namespace GUI
                 System.Windows.Forms.AnchorStyles.Bottom |
                 System.Windows.Forms.AnchorStyles.Left   |
                 System.Windows.Forms.AnchorStyles.Right));
-            this.rtbReporte.Location = new System.Drawing.Point(10, 168);
+            this.rtbReporte.Location = new System.Drawing.Point(10, 230);
             this.rtbReporte.Name = "rtbReporte";
             this.rtbReporte.ReadOnly = true;
             this.rtbReporte.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.rtbReporte.Size = new System.Drawing.Size(940, 390);
+            this.rtbReporte.Size = new System.Drawing.Size(940, 330);
             this.rtbReporte.TabIndex = 0;
             this.rtbReporte.Text = "";
             //
@@ -248,6 +443,7 @@ namespace GUI
             this.BackColor = System.Drawing.Color.FromArgb(250, 240, 246);
             this.ClientSize = new System.Drawing.Size(960, 592);
             this.Controls.Add(this.rtbReporte);
+            this.Controls.Add(this.panelKpiBanner);
             this.Controls.Add(this.panelControles);
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.panelTop);
@@ -259,6 +455,9 @@ namespace GUI
             this.panelControles.PerformLayout();
             this.panelStatus.ResumeLayout(false);
             this.panelStatus.PerformLayout();
+            this.panelKpiBanner.ResumeLayout(false);
+            this.menuExportar.ResumeLayout(false);
+            this.menuExportarComp.ResumeLayout(false);
             this.ResumeLayout(false);
         }
 
@@ -280,5 +479,22 @@ namespace GUI
         private System.Windows.Forms.RichTextBox    rtbReporte;
         private System.Windows.Forms.Panel          panelStatus;
         private System.Windows.Forms.Label          lblStatus;
+        private System.Windows.Forms.ContextMenuStrip menuExportar;
+        private System.Windows.Forms.ToolStripMenuItem mnuGuardarTxt;
+        private System.Windows.Forms.ToolStripMenuItem mnuImprimir;
+        private System.Windows.Forms.ToolStripMenuItem mnuGuardarCsv;
+        private System.Windows.Forms.ContextMenuStrip menuExportarComp;
+        private System.Windows.Forms.ToolStripMenuItem mnuGuardarComp;
+        private System.Windows.Forms.ToolStripMenuItem mnuImprimirComp;
+        private System.Windows.Forms.Panel          panelKpiBanner;
+        private System.Windows.Forms.Label          kpiPrendasVal;
+        private System.Windows.Forms.Label          kpiClientesVal;
+        private System.Windows.Forms.Label          kpiEventosVal;
+        private System.Windows.Forms.Label          kpiBackupVal;
+        private System.Windows.Forms.Label          kpiPrendasLbl;
+        private System.Windows.Forms.Label          kpiClientesLbl;
+        private System.Windows.Forms.Label          kpiEventosLbl;
+        private System.Windows.Forms.Label          kpiBackupLbl;
+        private System.Windows.Forms.Button         btnTendencia;
     }
 }

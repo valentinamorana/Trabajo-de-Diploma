@@ -15,17 +15,6 @@ namespace GUI
     {
         private readonly ReporteJornada _servicio = new ReporteJornada();
 
-        // KPI banner value labels (created in code, like the primer parcial)
-        private Label _kpiPrendasVal, _kpiClientesVal, _kpiEventosVal, _kpiBackupVal;
-        private Label _kpiPrendasLbl, _kpiClientesLbl, _kpiEventosLbl, _kpiBackupLbl;
-
-        // Context menus for export buttons
-        private ContextMenuStrip _menuExportar;
-        private ContextMenuStrip _menuExportarComp;
-
-        // Botón "Tendencia" creado por código (no se toca el Designer).
-        private Button _btnTendencia;
-
         private bool _esComparacion = false;
 
         public ReporteJornadaForm(List<BE.Permiso> permisos)
@@ -36,17 +25,6 @@ namespace GUI
         private void ReporteJornadaForm_Load(object sender, EventArgs e)
         {
             try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
-            // Gradient on header panel
-            panelTop.Paint += (s, pe) =>
-            {
-                using (var br = new System.Drawing.Drawing2D.LinearGradientBrush(
-                    panelTop.ClientRectangle,
-                    System.Drawing.Color.FromArgb(176, 62, 96),
-                    System.Drawing.Color.FromArgb(242, 114, 153),
-                    System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
-                    pe.Graphics.FillRectangle(br, panelTop.ClientRectangle);
-            };
-            panelTop.Invalidate();
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
 
@@ -54,34 +32,35 @@ namespace GUI
             dtpJornada2.Value = DateTime.Today.AddDays(-1);
 
             btnExportarComp.Visible = false;
-            CrearBannerKPIs();
-            ConfigurarMenusExportar();
-            CrearBotonTendencia();
             GenerarReporte();
         }
 
-        // Crea el botón "Tendencia" por código y lo ubica en el espacio libre de la
-        // primera fila del panel (a la derecha de "Exportar"). No se modifica el Designer.
-        private void CrearBotonTendencia()
+        // Degradado del panel superior.
+        private void PanelTop_Paint(object sender, PaintEventArgs e)
         {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string Tv(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
-            _btnTendencia = new Button
-            {
-                Text      = "📈  " + Tv("rpt.tendencia", "Tendencia (rango)"),
-                Location  = new Point(545, 12),
-                Size      = new Size(175, 28),
-                BackColor = Color.FromArgb(150, 70, 105),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
-                UseVisualStyleBackColor = false
-            };
-            _btnTendencia.FlatAppearance.BorderSize = 0;
-            _btnTendencia.Click += (s, e) => MostrarTendencia();
-            panelControles.Controls.Add(_btnTendencia);
+            using (var br = new System.Drawing.Drawing2D.LinearGradientBrush(
+                panelTop.ClientRectangle,
+                Color.FromArgb(176, 62, 96),
+                Color.FromArgb(242, 114, 153),
+                System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
+                e.Graphics.FillRectangle(br, panelTop.ClientRectangle);
         }
+
+        // Línea inferior + separadores verticales del banner de KPIs.
+        private void PanelKpiBanner_Paint(object sender, PaintEventArgs e)
+        {
+            const int panelH = 66;
+            const int n      = 4;
+            int cellW = panelKpiBanner.Width / n;
+
+            using (var br = new SolidBrush(Color.FromArgb(176, 62, 96)))
+                e.Graphics.FillRectangle(br, 0, panelH - 3, panelKpiBanner.Width, 3);
+            using (var pen = new Pen(Color.FromArgb(220, 180, 200), 1))
+                for (int i = 1; i < n; i++)
+                    e.Graphics.DrawLine(pen, i * cellW, 8, i * cellW, panelH - 10);
+        }
+
+        private void BtnTendencia_Click(object sender, EventArgs e) => MostrarTendencia();
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
@@ -115,137 +94,45 @@ namespace GUI
             btnExportar.Text   = "⬇  " + T("rpt.exportartxt", "Exportar TXT") + "...";
             btnExportarComp.Text = "⬇  " + T("rpt.exportartxt", "Exportar TXT") + "...";
             btnLimpiar.Text    = "↩  " + T("rpt.limpiar",     "Limpiar");
-            if (_btnTendencia != null) _btnTendencia.Text = "📈  " + T("rpt.tendencia", "Tendencia (rango)");
+            btnTendencia.Text  = "📈  " + T("rpt.tendencia", "Tendencia (rango)");
 
-            if (_kpiPrendasLbl != null) _kpiPrendasLbl.Text = T("rpt.kpi.prendas",  "Prendas disponibles");
-            if (_kpiClientesLbl != null) _kpiClientesLbl.Text = T("rpt.kpi.clientes", "Clientes registrados");
-            if (_kpiEventosLbl != null) _kpiEventosLbl.Text = T("rpt.kpi.eventos",  "Eventos del día");
-            if (_kpiBackupLbl != null) _kpiBackupLbl.Text = T("rpt.kpi.backup",   "días sin backup");
+            kpiPrendasLbl.Text  = T("rpt.kpi.prendas",  "Prendas disponibles");
+            kpiClientesLbl.Text = T("rpt.kpi.clientes", "Clientes registrados");
+            kpiEventosLbl.Text  = T("rpt.kpi.eventos",  "Eventos del día");
+            kpiBackupLbl.Text   = T("rpt.kpi.backup",   "días sin backup");
 
-            if (_menuExportar != null && _menuExportar.Items.Count >= 3)
-            {
-                _menuExportar.Items[0].Text = T("rpt.menu.guardartxt",  "Guardar como .TXT");
-                _menuExportar.Items[1].Text = T("rpt.menu.imprimir",    "Imprimir / Exportar PDF");
-                _menuExportar.Items[2].Text = T("rpt.menu.guardarcsv",  "Guardar eventos como .CSV");
-            }
-            if (_menuExportarComp != null && _menuExportarComp.Items.Count >= 2)
-            {
-                _menuExportarComp.Items[0].Text = T("rpt.menu.guardarcmp", "Guardar comparación como .TXT");
-                _menuExportarComp.Items[1].Text = T("rpt.menu.imprimir",   "Imprimir / Exportar PDF");
-            }
+            mnuGuardarTxt.Text  = T("rpt.menu.guardartxt",  "Guardar como .TXT");
+            mnuImprimir.Text    = T("rpt.menu.imprimir",    "Imprimir / Exportar PDF");
+            mnuGuardarCsv.Text  = T("rpt.menu.guardarcsv",  "Guardar eventos como .CSV");
+            mnuGuardarComp.Text = T("rpt.menu.guardarcmp",  "Guardar comparación como .TXT");
+            mnuImprimirComp.Text = T("rpt.menu.imprimir",   "Imprimir / Exportar PDF");
         }
 
         // ── KPI Banner ────────────────────────────────────────────────────────
-
-        private void CrearBannerKPIs()
-        {
-            const int panelH = 66;
-            const int n      = 4;
-            int cellW = panelControles.Width / n;
-
-            var banner = new Panel
-            {
-                Location  = new Point(panelControles.Left, panelControles.Bottom + 4),
-                Size      = new Size(panelControles.Width, panelH),
-                BackColor = Color.FromArgb(250, 236, 244)
-            };
-
-            banner.Paint += (s, pe) =>
-            {
-                using (var br = new SolidBrush(Color.FromArgb(176, 62, 96)))
-                    pe.Graphics.FillRectangle(br, 0, panelH - 3, banner.Width, 3);
-                using (var pen = new Pen(Color.FromArgb(220, 180, 200), 1))
-                    for (int i = 1; i < n; i++)
-                        pe.Graphics.DrawLine(pen, i * cellW, 8, i * cellW, panelH - 10);
-            };
-
-            var valLabels = new Label[n];
-            var titLabels = new Label[n];
-
-            for (int i = 0; i < n; i++)
-            {
-                int x = i * cellW;
-
-                var lblVal = new Label
-                {
-                    Text      = "—",
-                    Location  = new Point(x, 5),
-                    Size      = new Size(cellW, 34),
-                    Font      = new Font("Segoe UI", 15F, FontStyle.Bold),
-                    ForeColor = Color.FromArgb(80, 28, 52),
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    BackColor = Color.Transparent
-                };
-                var lblTit = new Label
-                {
-                    Text      = "",
-                    Location  = new Point(x, 39),
-                    Size      = new Size(cellW, 20),
-                    Font      = new Font("Segoe UI", 7.5F, FontStyle.Regular),
-                    ForeColor = Color.FromArgb(176, 62, 96),
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    BackColor = Color.Transparent
-                };
-
-                banner.Controls.Add(lblVal);
-                banner.Controls.Add(lblTit);
-                valLabels[i] = lblVal;
-                titLabels[i] = lblTit;
-            }
-
-            _kpiPrendasVal  = valLabels[0];  _kpiPrendasLbl  = titLabels[0];
-            _kpiClientesVal = valLabels[1];  _kpiClientesLbl = titLabels[1];
-            _kpiEventosVal  = valLabels[2];  _kpiEventosLbl  = titLabels[2];
-            _kpiBackupVal   = valLabels[3];  _kpiBackupLbl   = titLabels[3];
-
-            _kpiPrendasLbl.Text  = "Prendas disponibles";
-            _kpiClientesLbl.Text = "Clientes registrados";
-            _kpiEventosLbl.Text  = "Eventos del día";
-            _kpiBackupLbl.Text   = "días sin backup";
-
-            this.Controls.Add(banner);
-            banner.BringToFront();
-
-            // Push rtbReporte down to make room for the banner
-            rtbReporte.Top    = banner.Bottom + 4;
-            rtbReporte.Height = panelStatus.Top - rtbReporte.Top - 4;
-        }
 
         private void ActualizarKPIs(DateTime fecha)
         {
             try
             {
-                _kpiPrendasVal.Text  = _servicio.ContarPrendasDisponibles().ToString();
-                _kpiClientesVal.Text = _servicio.ContarClientes().ToString();
-                _kpiEventosVal.Text  = _servicio.ContarEventosDia(fecha).ToString();
+                kpiPrendasVal.Text  = _servicio.ContarPrendasDisponibles().ToString();
+                kpiClientesVal.Text = _servicio.ContarClientes().ToString();
+                kpiEventosVal.Text  = _servicio.ContarEventosDia(fecha).ToString();
 
                 int dias = _servicio.ObtenerDiasSinBackup();
-                _kpiBackupVal.Text = dias < 0 ? "!" : dias.ToString();
+                kpiBackupVal.Text = dias < 0 ? "!" : dias.ToString();
             }
             catch { /* no interrumpir el reporte */ }
         }
 
         // ── Menús de exportación ──────────────────────────────────────────────
 
-        private void ConfigurarMenusExportar()
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string Tv(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+        private void MnuGuardarTxt_Click(object sender, EventArgs e) => ExportarContenido(esComparacion: false);
 
-            _menuExportar = new ContextMenuStrip();
-            _menuExportar.Items.Add(Tv("rpt.menu.guardartxt", "Guardar como .TXT"), null,
-                (s, e) => ExportarContenido(esComparacion: false));
-            _menuExportar.Items.Add(Tv("rpt.menu.imprimir", "Imprimir / Exportar PDF"), null,
-                (s, e) => ImprimirReporte());
-            _menuExportar.Items.Add(Tv("rpt.menu.guardarcsv", "Guardar eventos como .CSV"), null,
-                (s, e) => ExportarEventosCsv());
+        private void MnuImprimir_Click(object sender, EventArgs e) => ImprimirReporte();
 
-            _menuExportarComp = new ContextMenuStrip();
-            _menuExportarComp.Items.Add(Tv("rpt.menu.guardarcmp", "Guardar comparación como .TXT"), null,
-                (s, e) => ExportarContenido(esComparacion: true));
-            _menuExportarComp.Items.Add(Tv("rpt.menu.imprimir", "Imprimir / Exportar PDF"), null,
-                (s, e) => ImprimirReporte());
-        }
+        private void MnuGuardarCsv_Click(object sender, EventArgs e) => ExportarEventosCsv();
+
+        private void MnuGuardarComp_Click(object sender, EventArgs e) => ExportarContenido(esComparacion: true);
 
         private void ExportarContenido(bool esComparacion)
         {
@@ -375,12 +262,12 @@ namespace GUI
 
         private void btnExportar_Click(object sender, EventArgs e)
         {
-            _menuExportar?.Show(btnExportar, new Point(0, btnExportar.Height));
+            menuExportar.Show(btnExportar, new Point(0, btnExportar.Height));
         }
 
         private void btnExportarComp_Click(object sender, EventArgs e)
         {
-            _menuExportarComp?.Show(btnExportarComp, new Point(0, btnExportarComp.Height));
+            menuExportarComp.Show(btnExportarComp, new Point(0, btnExportarComp.Height));
         }
 
         private void btnLimpiar_Click(object sender, EventArgs e) => GenerarReporte();
@@ -453,7 +340,7 @@ namespace GUI
                 lblStatus.Text  = $"{lbl["rptoegenerado"]} — {DateTime.Now:HH:mm:ss}";
                 _esComparacion = false;
                 btnExportarComp.Visible = false;
-                if (_kpiPrendasVal != null) ActualizarKPIs(fecha);
+                ActualizarKPIs(fecha);
             }
             catch (Exception ex)
             {

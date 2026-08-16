@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5487EF5A-F8F3-46E2-B31D-19A5D0A8C050}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BE</RootNamespace>
+    <AssemblyName>BE</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Alerta.cs" />
+    <Compile Include="AppException.cs" />
+    <Compile Include="LoginException.cs" />
+    <Compile Include="Bitacora.cs" />
+    <Compile Include="BitacoraNegocio.cs" />
+    <Compile Include="FilaTraduccion.cs" />
+    <Compile Include="Control.cs" />
+    <Compile Include="Idioma.cs" />
+    <Compile Include="Cliente.cs" />
+    <Compile Include="CambioPosterior.cs" />
+    <Compile Include="SesionException.cs" />
+    <Compile Include="Componente.cs" />
+    <Compile Include="ControlMapeado.cs" />
+    <Compile Include="Familia.cs" />
+    <Compile Include="Rol.cs" />
+    <Compile Include="Patente.cs" />
+    <Compile Include="Criticidad.cs" />
+    <Compile Include="Empleado.cs" />
+    <Compile Include="EstadoPedido.cs" />
+    <Compile Include="MantenimientoPrenda.cs" />
+    <Compile Include="NivelUrgencia.cs" />
+    <Compile Include="EstadoPrenda.cs" />
+    <Compile Include="Pedido.cs" />
+    <Compile Include="PedidoHistorial.cs" />
+    <Compile Include="Permiso.cs" />
+    <Compile Include="Preferencia.cs" />
+    <Compile Include="PlanSuscripcion.cs" />
+    <Compile Include="Prenda.cs" />
+    <Compile Include="TipoEventoNegocio.cs" />
+    <Compile Include="TipoPermiso.cs" />
+    <Compile Include="Usuario.cs" />
+    <Compile Include="VersionUsuario.cs" />
+    <Compile Include="Memento\IMemento.cs" />
+    <Compile Include="Memento\IOriginator.cs" />
+    <Compile Include="Estados\Estado.cs" />
+    <Compile Include="Estados\EstadoDisponible.cs" />
+    <Compile Include="Estados\EstadoEnLimpieza.cs" />
+    <Compile Include="Estados\EstadoEnUso.cs" />
+    <Compile Include="Estados\EstadoBaja.cs" />
+    <Compile Include="Builders\ModalidadCobro.cs" />
+    <Compile Include="Builders\Suscripcion.cs" />
+    <Compile Include="Builders\SuscripcionBuilder.cs" />
+    <Compile Include="Builders\SuscripcionMensualBuilder.cs" />
+    <Compile Include="Builders\SuscripcionTrimestralBuilder.cs" />
+    <Compile Include="Builders\SuscripcionAnualBuilder.cs" />
+    <Compile Include="Builders\DirectorSuscripcion.cs" />
+    <Compile Include="Builders\SuscripcionBuilderFactory.cs" />
+    <Compile Include="EstadoRenovacion.cs" />
+    <Compile Include="Renovacion.cs" />
+    <Compile Include="HistorialIntegridad.cs" />
+    <Compile Include="EstadoComercialCliente.cs" />
+    <Compile Include="OcupacionStock.cs" />
+    <Compile Include="FilaUsuarioDV.cs" />
+    <Compile Include="FilaDV.cs" />
+    <Compile Include="Roles.cs" />
+    <Compile Include="Patentes.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

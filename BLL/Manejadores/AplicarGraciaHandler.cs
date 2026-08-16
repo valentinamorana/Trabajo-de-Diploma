@@ -61,7 +61,9 @@ namespace BLL.Manejadores
                 Estado = BE.EstadoCobro.Gracia,
                 IdCobro = idCobro,
                 Mensaje = $"Cobro fallido. Período de gracia hasta {cliente.FechaLimiteGracia:d} " +
-                          "para regularizar antes de suspender nuevos pedidos."
+                          "para regularizar antes de suspender nuevos pedidos.",
+                Clave = "cobro.msg.gracia",
+                Args = new object[] { cliente.FechaLimiteGracia }
             };
         }
     }

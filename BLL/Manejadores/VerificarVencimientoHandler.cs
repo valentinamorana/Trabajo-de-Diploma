@@ -22,7 +22,9 @@ namespace BLL.Manejadores
                     Resuelto = true,
                     Estado = BE.EstadoRenovacion.Pendiente,
                     Mensaje = $"La suscripción de {cliente.NombreCompleto} no está vencida ni próxima a vencer. " +
-                              $"No se procesó la decisión '{contexto.Decision}': todavía no corresponde renovar."
+                              $"No se procesó la decisión '{contexto.Decision}': todavía no corresponde renovar.",
+                    Clave = "renov.msg.pendiente",
+                    Args = new object[] { cliente.NombreCompleto, contexto.Decision }
                 };
             }
 

@@ -65,6 +65,18 @@ namespace GUI
             return t.ContainsKey(k) ? t[k].Texto : fb;
         }
 
+        // Resuelve una clave de traducción con argumentos (mismo criterio que
+        // FormBase.MostrarError(Exception) para AppException.Clave/Args): si la clave no
+        // está en el corpus del idioma activo, cae al mensaje ya formateado en español.
+        private string T(string clave, string fallback, object[] args)
+        {
+            if (string.IsNullOrEmpty(clave)) return fallback;
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            if (!t.ContainsKey(clave)) return fallback;
+            string texto = t[clave].Texto;
+            return (args != null && args.Length > 0) ? string.Format(texto, args) : texto;
+        }
+
         private void Traducir(Idioma idioma)
         {
             var t = Traductor.ObtenerTraducciones(idioma);
@@ -143,9 +155,12 @@ namespace GUI
         {
             if (!(_cmbCliente.SelectedItem is ClienteItem item)) { _lblEstadoActual.Text = string.Empty; return; }
             var c = item.Cliente;
-            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : "sin fecha";
-            string estado = c.VencimientoExpirado ? "VENCIDA" : (c.SuscripcionProximaAVencer() ? "próxima a vencer" : "vigente");
-            _lblEstadoActual.Text = $"Plan actual: {c.NombrePlan ?? "sin plan"} — Vencimiento: {vencimiento} ({estado})";
+            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : T("susc.sinfecha", "sin fecha");
+            string estado = c.VencimientoExpirado ? T("renov.estado.vencida", "VENCIDA")
+                           : c.SuscripcionProximaAVencer() ? T("renov.estado.porvencer", "próxima a vencer")
+                                                            : T("renov.estado.vigente", "vigente");
+            _lblEstadoActual.Text = T("renov.estado.resumen", "Plan actual: {0} — Vencimiento: {1} ({2})",
+                new object[] { c.NombrePlan ?? T("susc.sinplan", "sin plan"), vencimiento, estado });
         }
 
         private void BtnProcesar_Click(object sender, EventArgs e)
@@ -177,15 +192,14 @@ namespace GUI
                 var resultado = _bllRenovacion.Procesar(this.Text, cliente, decision, idPlanNuevo, modalidad, actor);
 
                 _lblResultado.ForeColor = resultado.Estado == BE.EstadoRenovacion.Pendiente ? Color.DarkOrange : Color.DarkGreen;
-                _lblResultado.Text = resultado.Mensaje;
+                _lblResultado.Text = T(resultado.Clave, resultado.Mensaje, resultado.Args);
 
                 MostrarEstadoActual();
             }
             catch (BE.AppException ex)
             {
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
                 _lblResultado.ForeColor = Color.DarkRed;
-                _lblResultado.Text = t.ContainsKey(ex.Clave) ? t[ex.Clave].Texto : ex.Message;
+                _lblResultado.Text = T(ex.Clave, ex.Message, ex.Args);
             }
             catch (Exception ex)
             {

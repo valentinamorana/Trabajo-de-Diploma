@@ -55,6 +55,18 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
+        // Resuelve una clave de traducción con argumentos (mismo criterio que
+        // FormBase.MostrarError(Exception) para AppException.Clave/Args): si la clave no
+        // está en el corpus del idioma activo, cae al mensaje ya formateado en español.
+        private string T(string clave, string fallback, object[] args = null)
+        {
+            if (string.IsNullOrEmpty(clave)) return fallback;
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            if (!t.ContainsKey(clave)) return fallback;
+            string texto = t[clave].Texto;
+            return (args != null && args.Length > 0) ? string.Format(texto, args) : texto;
+        }
+
         private void Traducir(Idioma idioma)
         {
             var t = Traductor.ObtenerTraducciones(idioma);
@@ -121,11 +133,12 @@ namespace GUI
         {
             if (!(_cmbCliente.SelectedItem is ClienteItem item)) { _lblEstadoActual.Text = string.Empty; return; }
             var c = item.Cliente;
-            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : "sin fecha";
-            string estadoPago = c.EstaSuspendidoPorPago ? "SUSPENDIDO por falta de pago"
-                               : c.EstaEnGracia          ? $"en gracia hasta {c.FechaLimiteGracia:dd/MM/yyyy}"
-                                                          : "al día";
-            _lblEstadoActual.Text = $"Plan: {c.NombrePlan ?? "sin plan"} — Vencimiento: {vencimiento}\nEstado de pago: {estadoPago}";
+            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : T("susc.sinfecha", "sin fecha");
+            string estadoPago = c.EstaSuspendidoPorPago ? T("cobro.estado.suspendido", "SUSPENDIDO por falta de pago")
+                               : c.EstaEnGracia          ? T("cobro.estado.engracia", "en gracia hasta {0:dd/MM/yyyy}", new object[] { c.FechaLimiteGracia })
+                                                          : T("cobro.estado.aldia", "al día");
+            _lblEstadoActual.Text = T("cobro.estado.resumen", "Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}",
+                new object[] { c.NombrePlan ?? T("susc.sinplan", "sin plan"), vencimiento, estadoPago });
         }
 
         private void BtnProcesar_Click(object sender, EventArgs e)
@@ -155,15 +168,14 @@ namespace GUI
                                          : resultado.Estado == BE.EstadoCobro.Suspendido ? Color.DarkRed
                                          : resultado.Estado == BE.EstadoCobro.Gracia ? Color.DarkOrange
                                          : Color.DarkGreen;
-                _lblResultado.Text = resultado.Mensaje;
+                _lblResultado.Text = T(resultado.Clave, resultado.Mensaje, resultado.Args);
 
                 CargarClientes();
             }
             catch (BE.AppException ex)
             {
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
                 _lblResultado.ForeColor = Color.DarkRed;
-                _lblResultado.Text = t.ContainsKey(ex.Clave) ? t[ex.Clave].Texto : ex.Message;
+                _lblResultado.Text = T(ex.Clave, ex.Message, ex.Args);
             }
             catch (Exception ex)
             {

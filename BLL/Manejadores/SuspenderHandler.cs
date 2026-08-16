@@ -42,7 +42,9 @@ namespace BLL.Manejadores
                 Estado = BE.EstadoCobro.Suspendido,
                 IdCobro = idCobro,
                 Mensaje = "Venció el período de gracia sin regularizar el cobro. " +
-                          "El cliente no podrá generar nuevos pedidos hasta registrar un cobro exitoso."
+                          "El cliente no podrá generar nuevos pedidos hasta registrar un cobro exitoso.",
+                Clave = "cobro.msg.suspendido",
+                Args = null
             };
         }
     }

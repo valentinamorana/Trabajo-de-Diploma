@@ -55,7 +55,9 @@ namespace BLL.Manejadores
                 Resuelto = true,
                 Estado = BE.EstadoRenovacion.Renovada,
                 IdRenovacion = idRenovacion,
-                Mensaje = $"Suscripción renovada. Nueva vigencia hasta {suscripcion.FechaVencimiento:d}."
+                Mensaje = $"Suscripción renovada. Nueva vigencia hasta {suscripcion.FechaVencimiento:d}.",
+                Clave = "renov.msg.renovada",
+                Args = new object[] { suscripcion.FechaVencimiento }
             };
         }
     }

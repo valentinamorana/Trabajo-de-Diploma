@@ -20,7 +20,9 @@ namespace BLL.Manejadores
                     Resuelto = true,
                     Estado = BE.EstadoCobro.Pendiente,
                     Mensaje = $"La suscripción de {cliente.NombreCompleto} no está vencida ni próxima a vencer. " +
-                              "Todavía no corresponde procesar el cobro."
+                              "Todavía no corresponde procesar el cobro.",
+                    Clave = "cobro.msg.pendiente",
+                    Args = new object[] { cliente.NombreCompleto }
                 };
             }
 

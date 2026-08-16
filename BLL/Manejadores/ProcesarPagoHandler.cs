@@ -59,7 +59,9 @@ namespace BLL.Manejadores
                 Resuelto = true,
                 Estado = BE.EstadoCobro.Cobrado,
                 IdCobro = idCobro,
-                Mensaje = $"Cobro registrado (${plan.Precio}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}."
+                Mensaje = $"Cobro registrado (${plan.Precio}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}.",
+                Clave = "cobro.msg.cobrado",
+                Args = new object[] { plan.Precio, suscripcion.FechaVencimiento }
             };
         }
     }

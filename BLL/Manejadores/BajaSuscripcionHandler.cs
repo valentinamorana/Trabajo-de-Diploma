@@ -53,12 +53,15 @@ namespace BLL.Manejadores
             if (prendasEnUso.Count > 0)
                 mensaje += $" Tiene {prendasEnUso.Count} prenda(s) en uso — solicitar la devolución.";
 
+            bool conPrendas = prendasEnUso.Count > 0;
             return new ResultadoRenovacion
             {
                 Resuelto = true,
                 Estado = BE.EstadoRenovacion.Baja,
                 IdRenovacion = idRenovacion,
-                Mensaje = mensaje
+                Mensaje = mensaje,
+                Clave = conPrendas ? "renov.msg.baja_conprendas" : "renov.msg.baja",
+                Args = conPrendas ? new object[] { prendasEnUso.Count } : null
             };
         }
     }

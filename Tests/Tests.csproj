@@ -63,6 +63,7 @@
     <Compile Include="TraductorI18nTests.cs" />
     <Compile Include="SerializadorCsvTests.cs" />
     <Compile Include="PanelAlertasTests.cs" />
+    <Compile Include="MenuVisibilidadTests.cs" />
     <Compile Include="ReporteTendenciaTests.cs" />
     <Compile Include="Fakes\FakeBackupDAL.cs" />
     <Compile Include="Fakes\FakePermisoDAL.cs" />

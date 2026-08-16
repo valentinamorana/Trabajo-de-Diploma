@@ -3861,6 +3861,25 @@ ES	cobro.decision	Resultado del cobro
 ES	cobro.cobrado	Cobrado
 ES	cobro.pagofallido	Pago fallido
 ES	cobro.procesar	Procesar
+ES	susc.sinfecha	sin fecha
+ES	susc.sinplan	sin plan
+ES	renov.estado.vencida	VENCIDA
+ES	renov.estado.porvencer	próxima a vencer
+ES	renov.estado.vigente	vigente
+ES	renov.estado.resumen	Plan actual: {0} — Vencimiento: {1} ({2})
+ES	renov.msg.pendiente	La suscripción de {0} no está vencida ni próxima a vencer. No se procesó la decisión '{1}': todavía no corresponde renovar.
+ES	renov.msg.renovada	Suscripción renovada. Nueva vigencia hasta {0:d}.
+ES	renov.msg.cambioplan	Plan cambiado a '{0}'. Nueva vigencia hasta {1:d}.
+ES	renov.msg.baja	Suscripción dada de baja. El cliente no podrá generar nuevos pedidos.
+ES	renov.msg.baja_conprendas	Suscripción dada de baja. El cliente no podrá generar nuevos pedidos. Tiene {0} prenda(s) en uso — solicitar la devolución.
+ES	cobro.estado.suspendido	SUSPENDIDO por falta de pago
+ES	cobro.estado.engracia	en gracia hasta {0:dd/MM/yyyy}
+ES	cobro.estado.aldia	al día
+ES	cobro.estado.resumen	Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}
+ES	cobro.msg.pendiente	La suscripción de {0} no está vencida ni próxima a vencer. Todavía no corresponde procesar el cobro.
+ES	cobro.msg.cobrado	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}.
+ES	cobro.msg.gracia	Cobro fallido. Período de gracia hasta {0:d} para regularizar antes de suspender nuevos pedidos.
+ES	cobro.msg.suspendido	Venció el período de gracia sin regularizar el cobro. El cliente no podrá generar nuevos pedidos hasta registrar un cobro exitoso.
 EN	mnu.renovacion	Subscription Renewal
 EN	renov.titulo	Subscription Renewal
 EN	renov.cliente	Client:
@@ -3878,6 +3897,25 @@ EN	cobro.decision	Payment outcome
 EN	cobro.cobrado	Paid
 EN	cobro.pagofallido	Payment failed
 EN	cobro.procesar	Process
+EN	susc.sinfecha	no date
+EN	susc.sinplan	no plan
+EN	renov.estado.vencida	EXPIRED
+EN	renov.estado.porvencer	about to expire
+EN	renov.estado.vigente	active
+EN	renov.estado.resumen	Current plan: {0} — Expiration: {1} ({2})
+EN	renov.msg.pendiente	{0}'s subscription is not expired or about to expire. Decision '{1}' was not processed: it's not due for renewal yet.
+EN	renov.msg.renovada	Subscription renewed. New validity until {0:d}.
+EN	renov.msg.cambioplan	Plan changed to '{0}'. New validity until {1:d}.
+EN	renov.msg.baja	Subscription cancelled. The client won't be able to place new orders.
+EN	renov.msg.baja_conprendas	Subscription cancelled. The client won't be able to place new orders. They have {0} garment(s) in use — request the return.
+EN	cobro.estado.suspendido	SUSPENDED for non-payment
+EN	cobro.estado.engracia	in grace period until {0:dd/MM/yyyy}
+EN	cobro.estado.aldia	up to date
+EN	cobro.estado.resumen	Plan: {0} — Expiration: {1}\nPayment status: {2}
+EN	cobro.msg.pendiente	{0}'s subscription is not expired or about to expire. Payment doesn't need to be processed yet.
+EN	cobro.msg.cobrado	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}.
+EN	cobro.msg.gracia	Payment failed. Grace period until {0:d} to regularize before suspending new orders.
+EN	cobro.msg.suspendido	The grace period expired without regularizing the payment. The client won't be able to place new orders until a successful payment is recorded.
 RU	mnu.renovacion	Продление подписки
 RU	renov.titulo	Продление подписки
 RU	renov.cliente	Клиент:
@@ -3895,6 +3933,25 @@ RU	cobro.decision	Результат платежа
 RU	cobro.cobrado	Оплачено
 RU	cobro.pagofallido	Платёж не прошёл
 RU	cobro.procesar	Обработать
+RU	susc.sinfecha	без даты
+RU	susc.sinplan	без плана
+RU	renov.estado.vencida	ПРОСРОЧЕНА
+RU	renov.estado.porvencer	скоро истекает
+RU	renov.estado.vigente	действует
+RU	renov.estado.resumen	Текущий план: {0} — Срок действия: {1} ({2})
+RU	renov.msg.pendiente	Подписка {0} не просрочена и не истекает в ближайшее время. Решение «{1}» не обработано: продление пока не требуется.
+RU	renov.msg.renovada	Подписка продлена. Новый срок действия до {0:d}.
+RU	renov.msg.cambioplan	План изменён на «{0}». Новый срок действия до {1:d}.
+RU	renov.msg.baja	Подписка отменена. Клиент не сможет оформлять новые заказы.
+RU	renov.msg.baja_conprendas	Подписка отменена. Клиент не сможет оформлять новые заказы. У него {0} вещь(ей) в использовании — запросите возврат.
+RU	cobro.estado.suspendido	ПРИОСТАНОВЛЕНО из-за неоплаты
+RU	cobro.estado.engracia	льготный период до {0:dd/MM/yyyy}
+RU	cobro.estado.aldia	оплачено
+RU	cobro.estado.resumen	План: {0} — Срок действия: {1}\nСтатус оплаты: {2}
+RU	cobro.msg.pendiente	Подписка {0} не просрочена и не истекает в ближайшее время. Обрабатывать платёж пока не требуется.
+RU	cobro.msg.cobrado	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}.
+RU	cobro.msg.gracia	Платёж не прошёл. Льготный период до {0:d}, чтобы урегулировать оплату до приостановки новых заказов.
+RU	cobro.msg.suspendido	Льготный период истёк без урегулирования платежа. Клиент не сможет оформлять новые заказы, пока не будет зафиксирован успешный платёж.
 PT	mnu.renovacion	Renovação de Assinatura
 PT	renov.titulo	Renovação de Assinatura
 PT	renov.cliente	Cliente:
@@ -3912,6 +3969,25 @@ PT	cobro.decision	Resultado da cobrança
 PT	cobro.cobrado	Cobrado
 PT	cobro.pagofallido	Pagamento falhou
 PT	cobro.procesar	Processar
+PT	susc.sinfecha	sem data
+PT	susc.sinplan	sem plano
+PT	renov.estado.vencida	VENCIDA
+PT	renov.estado.porvencer	prestes a vencer
+PT	renov.estado.vigente	vigente
+PT	renov.estado.resumen	Plano atual: {0} — Vencimento: {1} ({2})
+PT	renov.msg.pendiente	A assinatura de {0} não está vencida nem prestes a vencer. A decisão '{1}' não foi processada: ainda não é hora de renovar.
+PT	renov.msg.renovada	Assinatura renovada. Nova vigência até {0:d}.
+PT	renov.msg.cambioplan	Plano alterado para '{0}'. Nova vigência até {1:d}.
+PT	renov.msg.baja	Assinatura cancelada. O cliente não poderá fazer novos pedidos.
+PT	renov.msg.baja_conprendas	Assinatura cancelada. O cliente não poderá fazer novos pedidos. Ele tem {0} peça(s) em uso — solicite a devolução.
+PT	cobro.estado.suspendido	SUSPENSO por falta de pagamento
+PT	cobro.estado.engracia	em carência até {0:dd/MM/yyyy}
+PT	cobro.estado.aldia	em dia
+PT	cobro.estado.resumen	Plano: {0} — Vencimento: {1}\nStatus de pagamento: {2}
+PT	cobro.msg.pendiente	A assinatura de {0} não está vencida nem prestes a vencer. Ainda não é necessário processar a cobrança.
+PT	cobro.msg.cobrado	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}.
+PT	cobro.msg.gracia	Cobrança falhou. Período de carência até {0:d} para regularizar antes de suspender novos pedidos.
+PT	cobro.msg.suspendido	O período de carência venceu sem regularizar a cobrança. O cliente não poderá fazer novos pedidos até que uma cobrança seja registrada com sucesso.
 ES	lbl.permisos.modo	Modo:
 ES	rb.permisos.crear	Crear
 ES	rb.permisos.editar	Editar / Eliminar

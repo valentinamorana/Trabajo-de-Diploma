@@ -165,117 +165,44 @@ namespace GUI
         }
 
         /// <summary>
-        /// Muestra u oculta los ítems del menú según los permisos del usuario.
-        /// La lógica es completamente basada en permisos (NombreMenu), no en roles —
-        /// con una única excepción: Administrador, que tiene bypass total (ver más abajo).
-        ///
-        /// Mapeo NombreMenu → ToolStripMenuItem:
-        ///   mnuPrendas               → prendasToolStripMenuItem       (bajo Inventario)
-        ///   mnuOutfits               → outfitsToolStripMenuItem        (bajo Inventario)
-        ///   mnuCategorias            → categoriasToolStripMenuItem     (bajo Inventario)
-        ///   mnuStock                 → stockToolStripMenuItem          (bajo Inventario — pendiente en Designer)
-        ///   mnuClientes              → clientesToolStripMenuItem       (bajo Suscriptores)
-        ///   mnuPlanSuscripciones     → planesToolStripMenuItem         (bajo Suscriptores)
-        ///   mnuRenovacionSuscripcion → renovacionSuscripcionToolStripMenuItem (bajo Suscriptores)
-        ///   mnuCobroSuscripcion      → cobroSuscripcionToolStripMenuItem (bajo Suscriptores)
-        ///   mnuPedidosVenta          → pedidosVentaToolStripMenuItem   (bajo Ventas)
-        ///   mnuPedidosRealizados     → pedidosRealizadosToolStripMenuItem (bajo Ventas)
-        ///   mnuUsuarios              → gestionToolStripMenuItem        (bajo Administrar)
-        ///   mnuAuditoria             → bitacoraToolStripMenuItem       (renombrado "Analítica")
-        ///
-        /// Suscriptores se separó de Ventas (rediseño UX/UI, hallazgo #6): Clientes/Planes/
-        /// Renovación tienen ritmo semanal, Pedidos de Venta/Realizados ritmo diario. Ningún
-        /// NombreMenu cambió — solo el ToolStripMenuItem contenedor de cada hoja.
+        /// Muestra u oculta los ítems del menú según los permisos del usuario. La DECISIÓN
+        /// (qué .Name queda visible) vive en BLL.MenuVisibilidad.Resolver — pura, testeable
+        /// sin instanciar esta UI (Tests/MenuVisibilidadTests.cs) — este método solo la
+        /// APLICA a los ToolStripMenuItem reales, buscándolos por .Name. Mismo criterio de
+        /// separación que BLL.PanelAlertas (EvaluarAlertas puro / ObtenerAlertas con BD).
         ///
         /// Administrador ve todo el menú por bypass explícito (esAdmin), no porque la BD
-        /// tenga las 11 patentes bien asignadas — mismo criterio que ManejadorSeguridad y
+        /// tenga las 12 patentes bien asignadas — mismo criterio que ManejadorSeguridad y
         /// BLL.PermisosAccion, para que los 3 puntos donde se chequea permiso sean consistentes.
         /// </summary>
         private void AplicarPermisos(List<BE.Permiso> permisos)
         {
-            // Panel de Control visible para todos los usuarios autenticados.
-            panelControlToolStripMenuItem.Visible = true;
-
-            // El Administrador ve TODO el menú siempre — bypass explícito, igual que ya
-            // tienen ManejadorSeguridad (controles individuales) y BLL.PermisosAccion
-            // (acciones de escritura). Antes esta era la única de las 3 capas sin bypass:
-            // dependía 100% de que RolPermiso/PermisoRelacion tuviera las 11 patentes bien
-            // asignadas para "Administrador" en la BD — si a una base le faltaba una, el
-            // Admin se quedaba sin ver ese grupo pese a serlo. Ahora no depende de eso.
             bool esAdmin = _usuarioActivo?.EsAdministrador == true;
+            var nombresMenu = (permisos ?? new List<BE.Permiso>())
+                .Where(p => !string.IsNullOrEmpty(p.NombreMenu))
+                .Select(p => p.NombreMenu);
 
-            // Permisos efectivos del usuario, indexados por NombreMenu (O(1), case-insensitive).
-            var nombresMenu = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (permisos != null)
-                foreach (var p in permisos)
-                    if (!string.IsNullOrEmpty(p.NombreMenu)) nombresMenu.Add(p.NombreMenu);
+            var visibilidad = BLL.MenuVisibilidad.Resolver(nombresMenu, esAdmin);
 
-            bool Permite(string nm) => esAdmin || nombresMenu.Contains(nm);
-
-            // ── Mapa declarativo HOJA → permiso (ÚNICA fuente de verdad) ─────────────────────────
-            // En vez de repetir 'item.Visible = nombresMenu.Contains("mnuX")' por cada control, la
-            // relación se declara UNA sola vez. Agregar un módulo nuevo = una línea acá. (Enfoque
-            // data-driven inspirado en el ManejadorSeguridad de Stach, resuelto en código para
-            // conservar la semántica de "grupo visible si ALGÚN hijo lo está", que un mapeo plano
-            // en tabla no expresa por sí solo.)
-            var hojas = new (ToolStripItem Item, string Permiso)[]
+            // Todo ToolStripMenuItem que BLL.MenuVisibilidad conoce por nombre — se busca por
+            // .Name para no duplicar acá el mapeo patente→ítem (única fuente de verdad).
+            var items = new ToolStripMenuItem[]
             {
-                (prendasToolStripMenuItem,           "mnuPrendas"),
-                (clientesToolStripMenuItem,          "mnuClientes"),
-                (planesToolStripMenuItem,            "mnuPlanSuscripciones"),
-                (renovacionSuscripcionToolStripMenuItem, "mnuRenovacionSuscripcion"),
-                (cobroSuscripcionToolStripMenuItem,  "mnuCobroSuscripcion"),
-                (pedidosVentaToolStripMenuItem,      "mnuPedidosVenta"),
-                (pedidosRealizadosToolStripMenuItem, "mnuPedidosRealizados"),
-                // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
-                (usuariosToolStripMenuItem,          "mnuUsuarios"),
-                (perfilesToolStripMenuItem,          "mnuUsuarios"),
-                (idiomasToolStripMenuItem,           "mnuUsuarios"),
-                (historialUsuariosToolStripMenuItem, "mnuUsuarios"),
-                (backupToolStripMenuItem,            "mnuUsuarios"),
-                (integridadToolStripMenuItem,        "mnuUsuarios"),
-                (adminUsuariosItem,                  "mnuUsuarios"),
-                // Bitácora.
-                (bitSistemaToolStripMenuItem,        "mnuAuditoria"),
-                (bitNegocioToolStripMenuItem,        "mnuAuditoria"),
-                (reporteJornadaToolStripMenuItem,    "mnuAuditoria"),
+                panelControlToolStripMenuItem, inventarioToolStripMenuItem,
+                prendasToolStripMenuItem, outfitsToolStripMenuItem, categoriasToolStripMenuItem,
+                clientesToolStripMenuItem, planesToolStripMenuItem,
+                renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
+                pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
+                usuariosToolStripMenuItem, perfilesToolStripMenuItem, idiomasToolStripMenuItem,
+                historialUsuariosToolStripMenuItem, backupToolStripMenuItem, integridadToolStripMenuItem,
+                adminUsuariosItem,
+                bitSistemaToolStripMenuItem, bitNegocioToolStripMenuItem, reporteJornadaToolStripMenuItem,
+                suscriptoresToolStripMenuItem, ventasToolStripMenuItem, bitacoraToolStripMenuItem,
+                grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
-            foreach (var h in hojas)
-                if (h.Item != null) h.Item.Visible = Permite(h.Permiso);
-
-            // Ítems retirados de la interfaz (módulos no implementados): siempre ocultos.
-            outfitsToolStripMenuItem.Visible    = false;
-            categoriasToolStripMenuItem.Visible = false;
-
-            // ── Grupos: visibles si AL MENOS un hijo está visible (OR genérico, no hardcodeado) ──
-            // Inventario suma 'mnuStock' (su ítem propio está pendiente en el Designer).
-            inventarioToolStripMenuItem.Visible = prendasToolStripMenuItem.Visible || Permite("mnuStock");
-
-            SetGrupoVisible(suscriptoresToolStripMenuItem,
-                clientesToolStripMenuItem, planesToolStripMenuItem, renovacionSuscripcionToolStripMenuItem,
-                cobroSuscripcionToolStripMenuItem);
-
-            SetGrupoVisible(ventasToolStripMenuItem,
-                pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem);
-
-            // Submenús "Usuarios ▸" / "Sistema ▸" y el menú "Administrar" (todo gobernado por gestión).
-            bool tieneUsuarios = Permite("mnuUsuarios");
-            grpUsuarios.Visible = tieneUsuarios;
-            grpSistema.Visible  = tieneUsuarios;
-            gestionToolStripMenuItem.Visible = tieneUsuarios;
-
-            SetGrupoVisible(bitacoraToolStripMenuItem,
-                bitSistemaToolStripMenuItem, bitNegocioToolStripMenuItem, reporteJornadaToolStripMenuItem);
-        }
-
-        // Un grupo (menú contenedor) es visible si alguno de sus ítems hijo está visible.
-        private static void SetGrupoVisible(ToolStripMenuItem grupo, params ToolStripItem[] hijos)
-        {
-            if (grupo == null) return;
-            bool algunoVisible = false;
-            foreach (var h in hijos)
-                if (h != null && h.Visible) { algunoVisible = true; break; }
-            grupo.Visible = algunoVisible;
+            foreach (var item in items)
+                if (item != null && visibilidad.TryGetValue(item.Name, out bool v))
+                    item.Visible = v;
         }
 
         // ── Etapa 2 — Re-aplicación de seguridad EN VIVO (patrón ManejadorSeguridad de Stach) ──

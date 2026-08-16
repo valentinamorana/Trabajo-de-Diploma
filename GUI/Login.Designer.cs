@@ -80,38 +80,35 @@ namespace GUI
             this.pnlHeader.TabIndex  = 20;
             this.pnlHeader.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PnlHeader_MouseDown);
 
-            // ── picLogo — isotipo + wordmark "WardrobeFlow" (asset 01, transparente) ──
-            // Reemplaza visualmente el ícono de percha dibujado a mano + lblTitle (que se
-            // oculta, no se elimina, para no perder el control ni su Tag/eventos futuros).
+            // ── picLogo — isotipo de percha (icon.png del proyecto, transparente) ──
             this.picLogo.BackColor  = GUI.Tema.Papel;
-            this.picLogo.Image      = global::GUI.Properties.Resources.login_logo;
-            this.picLogo.Location   = new System.Drawing.Point(28, 12);
+            this.picLogo.Image      = global::GUI.Properties.Resources.login_icono_percha;
+            this.picLogo.Location   = new System.Drawing.Point(26, 13);
             this.picLogo.Name       = "picLogo";
-            this.picLogo.Size       = new System.Drawing.Size(175, 40);
+            this.picLogo.Size       = new System.Drawing.Size(38, 38);
             this.picLogo.SizeMode   = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picLogo.TabIndex   = 22;
             this.picLogo.TabStop    = false;
             this.picLogo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PnlHeader_MouseDown);
 
-            // ── lblTitle — nombre de marca junto al ícono (oculto: lo muestra picLogo) ─
+            // ── lblTitle — nombre de marca "WardrobeFlow" junto al ícono ─────
             this.lblTitle.AutoSize  = false;
             this.lblTitle.BackColor = GUI.Tema.Papel;
-            this.lblTitle.Font      = new System.Drawing.Font("Segoe UI", 11.5F);
+            this.lblTitle.Font      = new System.Drawing.Font("Segoe UI", 13F);
             this.lblTitle.ForeColor = GUI.Tema.Tinta;
-            this.lblTitle.Location  = new System.Drawing.Point(70, 10);
+            this.lblTitle.Location  = new System.Drawing.Point(74, 19);
             this.lblTitle.Name      = "lblTitle";
-            this.lblTitle.Size      = new System.Drawing.Size(190, 20);
+            this.lblTitle.Size      = new System.Drawing.Size(150, 26);
             this.lblTitle.TabIndex  = 11;
             this.lblTitle.Text      = "WardrobeFlow";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblTitle.Visible   = false;
 
             // ── lblSubtitulo — "PORTAL DE EMPLEADOS" ─────────────────────
             this.lblSubtitulo.AutoSize  = false;
             this.lblSubtitulo.BackColor = GUI.Tema.Papel;
             this.lblSubtitulo.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
             this.lblSubtitulo.ForeColor = GUI.Tema.TextoMuted;
-            this.lblSubtitulo.Location  = new System.Drawing.Point(219, 24);
+            this.lblSubtitulo.Location  = new System.Drawing.Point(228, 24);
             this.lblSubtitulo.Name      = "lblSubtitulo";
             this.lblSubtitulo.Size      = new System.Drawing.Size(230, 18);
             this.lblSubtitulo.TabIndex  = 12;

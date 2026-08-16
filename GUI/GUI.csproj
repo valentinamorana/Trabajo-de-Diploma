@@ -78,6 +78,9 @@
     <Compile Include="AdministracionUsuariosForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="AdministracionUsuariosForm.Designer.cs">
+      <DependentUpon>AdministracionUsuariosForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="InputDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -94,6 +97,9 @@
     <Compile Include="RegistroControles.cs" />
     <Compile Include="MapeoControlesForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MapeoControlesForm.Designer.cs">
+      <DependentUpon>MapeoControlesForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ExploradorCompositeForm.cs">
       <SubType>Form</SubType>
@@ -244,6 +250,9 @@
     </Compile>
     <Compile Include="DiagnosticoIntegridadForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DiagnosticoIntegridadForm.Designer.cs">
+      <DependentUpon>DiagnosticoIntegridadForm.cs</DependentUpon>
     </Compile>
     <Compile Include="RecuperacionEspejoForm.cs">
       <SubType>Form</SubType>

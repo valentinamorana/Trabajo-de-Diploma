@@ -57,6 +57,9 @@
     <Compile Include="RenovacionSuscripcionForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="RenovacionSuscripcionForm.Designer.cs">
+      <DependentUpon>RenovacionSuscripcionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="CobroSuscripcionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,6 +77,9 @@
     </Compile>
     <Compile Include="GestorPermisos.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestorPermisos.Designer.cs">
+      <DependentUpon>GestorPermisos.cs</DependentUpon>
     </Compile>
     <Compile Include="AdministracionUsuariosForm.cs">
       <SubType>Form</SubType>

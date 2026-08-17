@@ -171,10 +171,11 @@ BD/05_Renovacion_Suscripcion.sql          -- Tabla y permisos del módulo de Ren
 BD/06_Rediseno_Menu.sql                   -- Actualiza el texto "Bitácora" → "Analítica" en BD existentes
 BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos de los 7 roles reales
 BD/08_Cobro_Pago.sql                      -- Tabla y permisos del módulo de Cobro de Suscripción (PdN6)
+BD/09_Analisis_Abandono.sql               -- Permisos del módulo de Análisis de Abandono (PdN10) — sin tablas nuevas
 ```
 
-- **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql` y luego `08_Cobro_Pago.sql`.
-- **Actualizar una BD existente** → ejecutar `02` a `08` en orden.
+- **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql` y luego `08_Cobro_Pago.sql` y `09_Analisis_Abandono.sql`.
+- **Actualizar una BD existente** → ejecutar `02` a `09` en orden.
 - **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
 
 ### Cadena de conexión

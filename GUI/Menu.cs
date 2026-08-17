@@ -200,9 +200,13 @@ namespace GUI
                 suscriptoresToolStripMenuItem, ventasToolStripMenuItem, bitacoraToolStripMenuItem,
                 grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
+            // Fail-closed: si un .Name no está en la resolución (typo, ítem renombrado por el
+            // Designer sin actualizar BLL.MenuVisibilidad), se OCULTA en vez de quedar con el
+            // Visible=true default de WinForms — un ítem gobernado por permiso que desaparece
+            // por error se nota enseguida; uno que queda expuesto sin permiso, no.
             foreach (var item in items)
-                if (item != null && visibilidad.TryGetValue(item.Name, out bool v))
-                    item.Visible = v;
+                if (item != null)
+                    item.Visible = visibilidad.TryGetValue(item.Name, out bool v) && v;
         }
 
         // ── Etapa 2 — Re-aplicación de seguridad EN VIVO (patrón ManejadorSeguridad de Stach) ──

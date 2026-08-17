@@ -38,23 +38,10 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
-        private string T(string k, string fb)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(k) ? t[k].Texto : fb;
-        }
+        private string T(string k, string fb) => T(k, fb, null);
 
-        // Resuelve una clave de traducción con argumentos (mismo criterio que
-        // FormBase.MostrarError(Exception) para AppException.Clave/Args): si la clave no
-        // está en el corpus del idioma activo, cae al mensaje ya formateado en español.
         private string T(string clave, string fallback, object[] args)
-        {
-            if (string.IsNullOrEmpty(clave)) return fallback;
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            if (!t.ContainsKey(clave)) return fallback;
-            string texto = t[clave].Texto;
-            return (args != null && args.Length > 0) ? string.Format(texto, args) : texto;
-        }
+            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
 
         private void Traducir(Idioma idioma)
         {
@@ -96,12 +83,18 @@ namespace GUI
         {
             if (!(cmbCliente.SelectedItem is ClienteItem item)) { lblEstadoActual.Text = string.Empty; return; }
             var c = item.Cliente;
-            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : T("susc.sinfecha", "sin fecha");
-            string estado = c.VencimientoExpirado ? T("renov.estado.vencida", "VENCIDA")
-                           : c.SuscripcionProximaAVencer() ? T("renov.estado.porvencer", "próxima a vencer")
-                                                            : T("renov.estado.vigente", "vigente");
-            lblEstadoActual.Text = T("renov.estado.resumen", "Plan actual: {0} — Vencimiento: {1} ({2})",
-                new object[] { c.NombrePlan ?? T("susc.sinplan", "sin plan"), vencimiento, estado });
+
+            // Un solo fetch del diccionario mergeado (BD + corpus) para las 5 sub-resoluciones,
+            // en vez de que cada T(...) lo reconstruya desde cero (Traductor.ObtenerTraducciones).
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string Tr(string clave, string fallback, object[] args = null) => Traductor.Resolver(clave, fallback, args, t);
+
+            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : Tr("susc.sinfecha", "sin fecha");
+            string estado = c.VencimientoExpirado ? Tr("renov.estado.vencida", "VENCIDA")
+                           : c.SuscripcionProximaAVencer() ? Tr("renov.estado.porvencer", "próxima a vencer")
+                                                            : Tr("renov.estado.vigente", "vigente");
+            lblEstadoActual.Text = Tr("renov.estado.resumen", "Plan actual: {0} — Vencimiento: {1} ({2})",
+                new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estado });
         }
 
         private void BtnProcesar_Click(object sender, EventArgs e)

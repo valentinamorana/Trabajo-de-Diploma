@@ -55,17 +55,8 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
-        // Resuelve una clave de traducción con argumentos (mismo criterio que
-        // FormBase.MostrarError(Exception) para AppException.Clave/Args): si la clave no
-        // está en el corpus del idioma activo, cae al mensaje ya formateado en español.
         private string T(string clave, string fallback, object[] args = null)
-        {
-            if (string.IsNullOrEmpty(clave)) return fallback;
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            if (!t.ContainsKey(clave)) return fallback;
-            string texto = t[clave].Texto;
-            return (args != null && args.Length > 0) ? string.Format(texto, args) : texto;
-        }
+            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
 
         private void Traducir(Idioma idioma)
         {
@@ -133,12 +124,18 @@ namespace GUI
         {
             if (!(_cmbCliente.SelectedItem is ClienteItem item)) { _lblEstadoActual.Text = string.Empty; return; }
             var c = item.Cliente;
-            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : T("susc.sinfecha", "sin fecha");
-            string estadoPago = c.EstaSuspendidoPorPago ? T("cobro.estado.suspendido", "SUSPENDIDO por falta de pago")
-                               : c.EstaEnGracia          ? T("cobro.estado.engracia", "en gracia hasta {0:dd/MM/yyyy}", new object[] { c.FechaLimiteGracia })
-                                                          : T("cobro.estado.aldia", "al día");
-            _lblEstadoActual.Text = T("cobro.estado.resumen", "Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}",
-                new object[] { c.NombrePlan ?? T("susc.sinplan", "sin plan"), vencimiento, estadoPago });
+
+            // Un solo fetch del diccionario mergeado (BD + corpus) para las 5 sub-resoluciones,
+            // en vez de que cada T(...) lo reconstruya desde cero (Traductor.ObtenerTraducciones).
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string Tr(string clave, string fallback, object[] args = null) => Traductor.Resolver(clave, fallback, args, t);
+
+            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : Tr("susc.sinfecha", "sin fecha");
+            string estadoPago = c.EstaSuspendidoPorPago ? Tr("cobro.estado.suspendido", "SUSPENDIDO por falta de pago")
+                               : c.EstaEnGracia          ? Tr("cobro.estado.engracia", "en gracia hasta {0:dd/MM/yyyy}", new object[] { c.FechaLimiteGracia })
+                                                          : Tr("cobro.estado.aldia", "al día");
+            _lblEstadoActual.Text = Tr("cobro.estado.resumen", "Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}",
+                new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estadoPago });
         }
 
         private void BtnProcesar_Click(object sender, EventArgs e)

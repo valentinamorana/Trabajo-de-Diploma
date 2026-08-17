@@ -118,6 +118,28 @@ namespace Servicios.Multiidioma
             return ObtenerTraduccionesHardcode(idioma);
         }
 
+        /// <summary>
+        /// Resuelve una clave de traducción con argumentos para string.Format, con fallback si la
+        /// clave no está en el corpus. ÚNICA implementación de este patrón (antes triplicada entre
+        /// FormBase.MostrarError, RenovacionSuscripcionForm.T y CobroSuscripcionForm.T) — el fallback
+        /// también se formatea con los mismos argumentos, así una clave faltante en el corpus no deja
+        /// placeholders "{0}" sin resolver en pantalla cuando el fallback es una plantilla sin sustituir.
+        /// </summary>
+        public static string Resolver(string clave, string fallback, object[] args, IDictionary<string, Traduccion> traducciones)
+        {
+            string texto = fallback;
+            if (!string.IsNullOrEmpty(clave) && traducciones != null && traducciones.ContainsKey(clave))
+                texto = traducciones[clave].Texto;
+            return (args != null && args.Length > 0) ? string.Format(texto, args) : texto;
+        }
+
+        /// <summary>Sobrecarga de conveniencia: resuelve las traducciones del idioma en un solo paso.
+        /// Para resolver varias claves seguidas (ej. un resumen con 3 sub-textos), preferir obtener el
+        /// diccionario una sola vez con ObtenerTraducciones() y llamar a la sobrecarga que lo recibe —
+        /// evita reconstruir el diccionario mergeado (BD + corpus embebido) en cada sub-resolución.</summary>
+        public static string Resolver(string clave, string fallback, object[] args, Idioma idioma)
+            => Resolver(clave, fallback, args, ObtenerTraducciones(idioma));
+
         // Corpus de traducciones del idioma pedido, leído del recurso embebido (traducciones.tsv).
         // Lo usa BLL.Idioma en el auto-seed y este mismo Traductor como fallback offline.
         // Si el idioma no está en el corpus, cae al idioma default; si tampoco, dict vacío.

@@ -49,11 +49,12 @@ namespace BLL.Manejadores
             });
 
             var prendasEnUso = dalPrenda.ObtenerPorCliente(cliente.IdCliente);
+            bool conPrendas = prendasEnUso.Count > 0;
+
             string mensaje = "Suscripción dada de baja. El cliente no podrá generar nuevos pedidos.";
-            if (prendasEnUso.Count > 0)
+            if (conPrendas)
                 mensaje += $" Tiene {prendasEnUso.Count} prenda(s) en uso — solicitar la devolución.";
 
-            bool conPrendas = prendasEnUso.Count > 0;
             return new ResultadoRenovacion
             {
                 Resuelto = true,

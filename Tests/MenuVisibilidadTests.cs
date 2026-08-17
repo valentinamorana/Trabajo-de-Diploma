@@ -150,6 +150,37 @@ namespace Tests
             Assert.IsFalse(V(v, "bitacoraToolStripMenuItem"));
         }
 
+        /// <summary>
+        /// Guarda contra pérdida silenciosa de entradas en Hojas/Grupos: GUI.Menu.AplicarPermisos
+        /// aplica el resultado por .Name y, desde el fix de fail-closed, cualquier ToolStripMenuItem
+        /// cuyo .Name no aparezca acá queda OCULTO sin importar sus permisos reales. Si esta lista se
+        /// desincroniza con el array 'items' de Menu.cs, este test es la única señal antes de que un
+        /// usuario reporte "no veo tal pantalla y sí debería".
+        /// </summary>
+        [TestMethod]
+        public void Resolver_DevuelveTodosLosItemsRealesDelMenu()
+        {
+            var v = BLL.MenuVisibilidad.Resolver(new string[0], esAdmin: true);
+
+            string[] esperados =
+            {
+                "panelControlToolStripMenuItem", "inventarioToolStripMenuItem",
+                "prendasToolStripMenuItem", "outfitsToolStripMenuItem", "categoriasToolStripMenuItem",
+                "clientesToolStripMenuItem", "planesToolStripMenuItem",
+                "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem",
+                "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem",
+                "usuariosToolStripMenuItem", "perfilesToolStripMenuItem", "idiomasToolStripMenuItem",
+                "historialUsuariosToolStripMenuItem", "backupToolStripMenuItem", "integridadToolStripMenuItem",
+                "adminUsuariosItem",
+                "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem",
+                "suscriptoresToolStripMenuItem", "ventasToolStripMenuItem", "bitacoraToolStripMenuItem",
+                "grpUsuarios", "grpSistema", "gestionToolStripMenuItem"
+            };
+
+            foreach (var nombre in esperados)
+                Assert.IsTrue(v.ContainsKey(nombre), $"Falta '{nombre}' en el resultado de Resolver — revisar Menu.cs vs BLL.MenuVisibilidad.");
+        }
+
         [TestMethod]
         public void SinPatentesNiAdmin_SoloPanelDeControl()
         {

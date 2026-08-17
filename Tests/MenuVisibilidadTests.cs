@@ -36,6 +36,7 @@ namespace Tests
             Assert.IsTrue(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitNegocioToolStripMenuItem"));
             Assert.IsTrue(V(v, "reporteJornadaToolStripMenuItem"));
+            Assert.IsTrue(V(v, "analisisAbandonoToolStripMenuItem"));
             Assert.IsTrue(V(v, "gestionToolStripMenuItem"));
             Assert.IsTrue(V(v, "grpUsuarios"));
             Assert.IsTrue(V(v, "grpSistema"));
@@ -61,6 +62,10 @@ namespace Tests
             Assert.IsTrue(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitNegocioToolStripMenuItem"));
             Assert.IsTrue(V(v, "reporteJornadaToolStripMenuItem"));
+
+            // El Auditor no tiene mnuAnalisisAbandono: ve el grupo (por los otros 3 hijos)
+            // pero no este ítem puntual — es de decisión comercial, no de auditoría.
+            Assert.IsFalse(V(v, "analisisAbandonoToolStripMenuItem"));
 
             Assert.IsFalse(V(v, "suscriptoresToolStripMenuItem"));
             Assert.IsFalse(V(v, "inventarioToolStripMenuItem"));
@@ -88,22 +93,33 @@ namespace Tests
             // Vendedor NO despacha: Pedidos Realizados no aparece.
             Assert.IsFalse(V(v, "pedidosRealizadosToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitacoraToolStripMenuItem"));
+            Assert.IsFalse(V(v, "analisisAbandonoToolStripMenuItem")); // patente propia de GerenteComercial, no de Vendedor
             Assert.IsFalse(V(v, "gestionToolStripMenuItem"));
         }
 
         [TestMethod]
-        public void GerenteComercial_HeredaVendedorMasPedidosRealizados()
+        public void GerenteComercial_HeredaVendedorMasPedidosRealizadosYAnalisisAbandono()
         {
             // Composite: GerenteComercial → Vendedor. Las patentes efectivas ya vienen
             // resueltas (recursivamente) antes de llegar acá — se simula el resultado final.
             var patentes = new[] { "mnuPrendas", "mnuClientes", "mnuPlanSuscripciones",
                                     "mnuRenovacionSuscripcion", "mnuCobroSuscripcion",
-                                    "mnuPedidosVenta", "mnuPedidosRealizados" };
+                                    "mnuPedidosVenta", "mnuPedidosRealizados", "mnuAnalisisAbandono" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
 
             Assert.IsTrue(V(v, "pedidosVentaToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
+
+            // PdN10 — patente propia de GerenteComercial: habilita el ítem Y, de paso,
+            // el grupo "Analítica" completo (antes oculto para este rol), aunque los
+            // otros 3 hijos (Bitácora/Reporte de Jornada, gobernados por mnuAuditoria)
+            // sigan ocultos — el criterio "grupo visible si algún hijo lo es" no distingue.
+            Assert.IsTrue(V(v, "analisisAbandonoToolStripMenuItem"));
+            Assert.IsTrue(V(v, "bitacoraToolStripMenuItem"));
+            Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
+            Assert.IsFalse(V(v, "bitNegocioToolStripMenuItem"));
+            Assert.IsFalse(V(v, "reporteJornadaToolStripMenuItem"));
         }
 
         [TestMethod]
@@ -173,6 +189,7 @@ namespace Tests
                 "historialUsuariosToolStripMenuItem", "backupToolStripMenuItem", "integridadToolStripMenuItem",
                 "adminUsuariosItem",
                 "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem",
+                "analisisAbandonoToolStripMenuItem",
                 "suscriptoresToolStripMenuItem", "ventasToolStripMenuItem", "bitacoraToolStripMenuItem",
                 "grpUsuarios", "grpSistema", "gestionToolStripMenuItem"
             };

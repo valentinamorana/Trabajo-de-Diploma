@@ -15,7 +15,7 @@
 -- ese bypass — dependen 100% de que este árbol esté bien armado.
 --
 -- QUÉ HACE:
---   1) Asegura que existan las 12 patentes base + las 5 de edición granular
+--   1) Asegura que existan las 13 patentes base + las 5 de edición granular
 --      (Ver vs Configurar) y los 7 nodos-rol.
 --   2) BORRA todas las aristas SALIENTES actuales de esos 7 roles (a
 --      patentes y a otros roles).
@@ -53,6 +53,7 @@ BEGIN TRY
         ('Gestionar Renovaciones',      'mnuRenovacionSuscripcion', 'Ventas'),
         ('Gestionar Cobros',            'mnuCobroSuscripcion',      'Ventas'),
         ('Realizar Ventas',             'mnuPedidosVenta',          'Ventas'),
+        ('Ver Análisis de Abandono',    'mnuAnalisisAbandono',      'Sistema'),
         ('Ver Pedidos Realizados',      'mnuPedidosRealizados',     'Ventas'),
         ('Configurar Stock',             'mnuStockEditar',             'Inventario'),
         ('Configurar Clientes',          'mnuClientesEditar',          'Ventas'),
@@ -83,13 +84,14 @@ BEGIN TRY
     INSERT INTO PermisoRelacion (IdPadre, IdHijo)
     SELECT rol.IdPermiso, pat.IdPermiso
     FROM (VALUES
-        -- Administrador: acceso total (las 12 patentes de menú)
+        -- Administrador: acceso total (las 13 patentes de menú)
         ('Administrador', 'mnuUsuarios'),   ('Administrador', 'mnuAuditoria'),
         ('Administrador', 'mnuPrendas'),    ('Administrador', 'mnuOutfits'),
         ('Administrador', 'mnuCategorias'), ('Administrador', 'mnuStock'),
         ('Administrador', 'mnuClientes'),   ('Administrador', 'mnuPlanSuscripciones'),
         ('Administrador', 'mnuRenovacionSuscripcion'),
         ('Administrador', 'mnuCobroSuscripcion'),
+        ('Administrador', 'mnuAnalisisAbandono'),
         ('Administrador', 'mnuPedidosVenta'), ('Administrador', 'mnuPedidosRealizados'),
         -- Auditor: solo auditoría (100% solo lectura)
         ('Auditor', 'mnuAuditoria'),
@@ -98,8 +100,9 @@ BEGIN TRY
         ('Vendedor', 'mnuPlanSuscripciones'), ('Vendedor', 'mnuRenovacionSuscripcion'),
         ('Vendedor', 'mnuCobroSuscripcion'),
         ('Vendedor', 'mnuPedidosVenta'),
-        -- GerenteComercial: patente PROPIA (el resto lo hereda de Vendedor, paso 5)
+        -- GerenteComercial: patentes PROPIAS (el resto lo hereda de Vendedor, paso 5)
         ('GerenteComercial', 'mnuPedidosRealizados'),
+        ('GerenteComercial', 'mnuAnalisisAbandono'),
         -- OperadorLogistico: despacho
         ('OperadorLogistico', 'mnuPedidosRealizados'),
         -- OperadorDeInventario: mantenimiento de prendas

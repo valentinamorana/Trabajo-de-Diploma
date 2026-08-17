@@ -38,6 +38,8 @@ namespace BLL
             ("bitSistemaToolStripMenuItem",            "mnuAuditoria"),
             ("bitNegocioToolStripMenuItem",             "mnuAuditoria"),
             ("reporteJornadaToolStripMenuItem",        "mnuAuditoria"),
+            // PdN10 — patente propia: no todo el que audita necesita decidir sobre retención.
+            ("analisisAbandonoToolStripMenuItem",      "mnuAnalisisAbandono"),
         };
 
         /// <summary>Ítems retirados de la interfaz (módulos no implementados): siempre ocultos.</summary>
@@ -54,7 +56,8 @@ namespace BLL
             ("ventasToolStripMenuItem", new[] { "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem" }),
             ("bitacoraToolStripMenuItem", new[]
             {
-                "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem"
+                "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem",
+                "analisisAbandonoToolStripMenuItem"
             }),
         };
 

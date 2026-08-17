@@ -3880,6 +3880,24 @@ ES	cobro.msg.pendiente	La suscripción de {0} no está vencida ni próxima a ven
 ES	cobro.msg.cobrado	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}.
 ES	cobro.msg.gracia	Cobro fallido. Período de gracia hasta {0:d} para regularizar antes de suspender nuevos pedidos.
 ES	cobro.msg.suspendido	Venció el período de gracia sin regularizar el cobro. El cliente no podrá generar nuevos pedidos hasta registrar un cobro exitoso.
+ES	mnu.abandono	Análisis de Abandono
+ES	abandono.titulo	Análisis de Abandono
+ES	abandono.estrategia	Criterio de riesgo:
+ES	abandono.generar	Generar
+ES	abandono.estr.vencinactividad	Vence pronto y sin actividad reciente
+ES	abandono.estr.inactividad	Sin actividad hace tiempo (aunque esté vigente)
+ES	abandono.estr.nuncaactivo	Se dio de alta y nunca hizo un pedido
+ES	abandono.col.cliente	Cliente
+ES	abandono.col.plan	Plan
+ES	abandono.col.vencimiento	Vencimiento
+ES	abandono.col.ultimopedido	Último pedido
+ES	abandono.col.motivo	Motivo
+ES	abandono.nuncapidio	nunca
+ES	abandono.resultado	{0} cliente(s) en riesgo según '{1}'.
+ES	abandono.motivo.vencinactividad_nunca	La suscripción de {0} vence pronto y nunca generó un pedido.
+ES	abandono.motivo.vencinactividad	La suscripción de {0} vence pronto y no tiene actividad hace {1} día(s).
+ES	abandono.motivo.inactividad	{0} no tiene actividad hace {1} día(s), independientemente del vencimiento.
+ES	abandono.motivo.nuncaactivo	{0} se dio de alta hace {1} día(s) y nunca generó un pedido.
 EN	mnu.renovacion	Subscription Renewal
 EN	renov.titulo	Subscription Renewal
 EN	renov.cliente	Client:
@@ -3916,6 +3934,24 @@ EN	cobro.msg.pendiente	{0}'s subscription is not expired or about to expire. Pay
 EN	cobro.msg.cobrado	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}.
 EN	cobro.msg.gracia	Payment failed. Grace period until {0:d} to regularize before suspending new orders.
 EN	cobro.msg.suspendido	The grace period expired without regularizing the payment. The client won't be able to place new orders until a successful payment is recorded.
+EN	mnu.abandono	Churn Analysis
+EN	abandono.titulo	Churn Analysis
+EN	abandono.estrategia	Risk criterion:
+EN	abandono.generar	Generate
+EN	abandono.estr.vencinactividad	Expiring soon with no recent activity
+EN	abandono.estr.inactividad	No activity for a while (even if still active)
+EN	abandono.estr.nuncaactivo	Signed up and never placed an order
+EN	abandono.col.cliente	Client
+EN	abandono.col.plan	Plan
+EN	abandono.col.vencimiento	Expiration
+EN	abandono.col.ultimopedido	Last order
+EN	abandono.col.motivo	Reason
+EN	abandono.nuncapidio	never
+EN	abandono.resultado	{0} client(s) at risk under '{1}'.
+EN	abandono.motivo.vencinactividad_nunca	{0}'s subscription is expiring soon and they never placed an order.
+EN	abandono.motivo.vencinactividad	{0}'s subscription is expiring soon and has had no activity for {1} day(s).
+EN	abandono.motivo.inactividad	{0} has had no activity for {1} day(s), regardless of expiration.
+EN	abandono.motivo.nuncaactivo	{0} signed up {1} day(s) ago and never placed an order.
 RU	mnu.renovacion	Продление подписки
 RU	renov.titulo	Продление подписки
 RU	renov.cliente	Клиент:
@@ -3952,6 +3988,24 @@ RU	cobro.msg.pendiente	Подписка {0} не просрочена и не и
 RU	cobro.msg.cobrado	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}.
 RU	cobro.msg.gracia	Платёж не прошёл. Льготный период до {0:d}, чтобы урегулировать оплату до приостановки новых заказов.
 RU	cobro.msg.suspendido	Льготный период истёк без урегулирования платежа. Клиент не сможет оформлять новые заказы, пока не будет зафиксирован успешный платёж.
+RU	mnu.abandono	Анализ оттока
+RU	abandono.titulo	Анализ оттока
+RU	abandono.estrategia	Критерий риска:
+RU	abandono.generar	Сформировать
+RU	abandono.estr.vencinactividad	Скоро истекает и нет недавней активности
+RU	abandono.estr.inactividad	Давно нет активности (даже если подписка действует)
+RU	abandono.estr.nuncaactivo	Зарегистрировался и никогда не оформлял заказ
+RU	abandono.col.cliente	Клиент
+RU	abandono.col.plan	План
+RU	abandono.col.vencimiento	Срок действия
+RU	abandono.col.ultimopedido	Последний заказ
+RU	abandono.col.motivo	Причина
+RU	abandono.nuncapidio	никогда
+RU	abandono.resultado	Клиентов в зоне риска: {0} (критерий «{1}»).
+RU	abandono.motivo.vencinactividad_nunca	Подписка {0} скоро истекает, и клиент никогда не оформлял заказ.
+RU	abandono.motivo.vencinactividad	Подписка {0} скоро истекает, и нет активности уже {1} дн.
+RU	abandono.motivo.inactividad	У {0} нет активности уже {1} дн., независимо от срока действия.
+RU	abandono.motivo.nuncaactivo	{0} зарегистрировался {1} дн. назад и никогда не оформлял заказ.
 PT	mnu.renovacion	Renovação de Assinatura
 PT	renov.titulo	Renovação de Assinatura
 PT	renov.cliente	Cliente:
@@ -3988,6 +4042,24 @@ PT	cobro.msg.pendiente	A assinatura de {0} não está vencida nem prestes a venc
 PT	cobro.msg.cobrado	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}.
 PT	cobro.msg.gracia	Cobrança falhou. Período de carência até {0:d} para regularizar antes de suspender novos pedidos.
 PT	cobro.msg.suspendido	O período de carência venceu sem regularizar a cobrança. O cliente não poderá fazer novos pedidos até que uma cobrança seja registrada com sucesso.
+PT	mnu.abandono	Análise de Abandono
+PT	abandono.titulo	Análise de Abandono
+PT	abandono.estrategia	Critério de risco:
+PT	abandono.generar	Gerar
+PT	abandono.estr.vencinactividad	Vence em breve e sem atividade recente
+PT	abandono.estr.inactividad	Sem atividade há tempo (mesmo estando vigente)
+PT	abandono.estr.nuncaactivo	Cadastrou-se e nunca fez um pedido
+PT	abandono.col.cliente	Cliente
+PT	abandono.col.plan	Plano
+PT	abandono.col.vencimiento	Vencimento
+PT	abandono.col.ultimopedido	Último pedido
+PT	abandono.col.motivo	Motivo
+PT	abandono.nuncapidio	nunca
+PT	abandono.resultado	{0} cliente(s) em risco segundo '{1}'.
+PT	abandono.motivo.vencinactividad_nunca	A assinatura de {0} vence em breve e nunca fez um pedido.
+PT	abandono.motivo.vencinactividad	A assinatura de {0} vence em breve e não tem atividade há {1} dia(s).
+PT	abandono.motivo.inactividad	{0} não tem atividade há {1} dia(s), independentemente do vencimento.
+PT	abandono.motivo.nuncaactivo	{0} se cadastrou há {1} dia(s) e nunca fez um pedido.
 ES	lbl.permisos.modo	Modo:
 ES	rb.permisos.crear	Crear
 ES	rb.permisos.editar	Editar / Eliminar

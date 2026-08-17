@@ -197,6 +197,7 @@ namespace GUI
                 historialUsuariosToolStripMenuItem, backupToolStripMenuItem, integridadToolStripMenuItem,
                 adminUsuariosItem,
                 bitSistemaToolStripMenuItem, bitNegocioToolStripMenuItem, reporteJornadaToolStripMenuItem,
+                analisisAbandonoToolStripMenuItem,
                 suscriptoresToolStripMenuItem, ventasToolStripMenuItem, bitacoraToolStripMenuItem,
                 grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
@@ -372,6 +373,18 @@ namespace GUI
                 if (hijo is ReporteJornadaForm) { hijo.BringToFront(); return; }
             }
             new ReporteJornadaForm(_usuarioActivo?.Permisos) { MdiParent = this }.Show();
+        }
+
+        /// <summary>
+        /// Abre el módulo de Análisis de Abandono (PdN10) como hijo MDI.
+        /// </summary>
+        private void analisisAbandonoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is AnalisisAbandonoForm) { hijo.BringToFront(); return; }
+            }
+            new AnalisisAbandonoForm { MdiParent = this }.Show();
         }
 
         /// <summary>
@@ -735,6 +748,7 @@ namespace GUI
             Aplicar(bitSistemaToolStripMenuItem,        t);
             Aplicar(bitNegocioToolStripMenuItem,        t);
             Aplicar(reporteJornadaToolStripMenuItem,    t);
+            Aplicar(analisisAbandonoToolStripMenuItem,  t);
             Aplicar(cerrarSesionToolStripMenuItem,      t);
             Aplicar(ventanaToolStripMenuItem,           t);
 

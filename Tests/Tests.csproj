@@ -52,6 +52,7 @@
     <Compile Include="ComandoPedidoTests.cs" />
     <Compile Include="RenovacionTests.cs" />
     <Compile Include="CobroTests.cs" />
+    <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="UsuarioAbmTests.cs" />
     <Compile Include="RolAdminTests.cs" />
     <Compile Include="SessionManagerTests.cs" />

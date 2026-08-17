@@ -469,7 +469,8 @@ FROM (VALUES
     ('Gestionar Renovaciones',      'mnuRenovacionSuscripcion', 'Ventas'),
     ('Gestionar Cobros',            'mnuCobroSuscripcion',   'Ventas'),
     ('Realizar Ventas',             'mnuPedidosVenta',       'Ventas'),
-    ('Ver Pedidos Realizados',      'mnuPedidosRealizados',  'Ventas')
+    ('Ver Pedidos Realizados',      'mnuPedidosRealizados',  'Ventas'),
+    ('Ver Análisis de Abandono',    'mnuAnalisisAbandono',   'Sistema')
 ) AS v(Nombre, NombreMenu, Tipo)
 WHERE NOT EXISTS (SELECT 1 FROM Permiso p
                   WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0);
@@ -488,6 +489,7 @@ FROM (VALUES
     ('Administrador','mnuClientes'),('Administrador','mnuPlanSuscripciones'),
     ('Administrador','mnuRenovacionSuscripcion'),
     ('Administrador','mnuCobroSuscripcion'),
+    ('Administrador','mnuAnalisisAbandono'),
     ('Administrador','mnuPedidosVenta'),('Administrador','mnuPedidosRealizados'),
     -- Supervisor: auditoría + mismos permisos que Vendedor
     ('Supervisor','mnuAuditoria'),
@@ -641,6 +643,7 @@ SELECT rol.IdPermiso, pat.IdPermiso
 FROM (VALUES
     ('Auditor',           'mnuAuditoria'),
     ('GerenteComercial',  'mnuPedidosRealizados'),
+    ('GerenteComercial',  'mnuAnalisisAbandono'),
     ('OperadorLogistico', 'mnuPedidosRealizados'),
     ('EncargadoDeStock',  'mnuPrendas'),
     ('EncargadoDeStock',  'mnuStock'),
@@ -863,6 +866,7 @@ FROM (VALUES
     ('mnuPlanSuscripciones', 'Menu', 'planesToolStripMenuItem'),
     ('mnuRenovacionSuscripcion', 'Menu', 'renovacionSuscripcionToolStripMenuItem'),
     ('mnuCobroSuscripcion',  'Menu', 'cobroSuscripcionToolStripMenuItem'),
+    ('mnuAnalisisAbandono',  'Menu', 'analisisAbandonoToolStripMenuItem'),
     ('mnuPedidosVenta',      'Menu', 'pedidosVentaToolStripMenuItem'),
     ('mnuPedidosRealizados', 'Menu', 'pedidosRealizadosToolStripMenuItem'),
     ('mnuUsuarios',          'Menu', 'usuariosToolStripMenuItem'),

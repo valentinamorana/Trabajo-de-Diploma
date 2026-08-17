@@ -68,6 +68,7 @@
             this.bitNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sepBitacoraToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.reporteJornadaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisAbandonoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventanaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alertasItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsIdioma.SuspendLayout();
@@ -371,7 +372,8 @@
             this.bitSistemaToolStripMenuItem,
             this.bitNegocioToolStripMenuItem,
             this.sepBitacoraToolStripSeparator,
-            this.reporteJornadaToolStripMenuItem});
+            this.reporteJornadaToolStripMenuItem,
+            this.analisisAbandonoToolStripMenuItem});
             this.bitacoraToolStripMenuItem.Name = "bitacoraToolStripMenuItem";
             this.bitacoraToolStripMenuItem.Tag = "mnu.bitacora";
             this.bitacoraToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
@@ -408,6 +410,14 @@
             this.reporteJornadaToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.reporteJornadaToolStripMenuItem.Text = "📊  Reporte de Jornada";
             this.reporteJornadaToolStripMenuItem.Click += new System.EventHandler(this.reporteJornadaToolStripMenuItem_Click);
+            //
+            // analisisAbandonoToolStripMenuItem
+            //
+            this.analisisAbandonoToolStripMenuItem.Name = "analisisAbandonoToolStripMenuItem";
+            this.analisisAbandonoToolStripMenuItem.Tag = "mnu.abandono";
+            this.analisisAbandonoToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.analisisAbandonoToolStripMenuItem.Text = "📉  Análisis de Abandono";
+            this.analisisAbandonoToolStripMenuItem.Click += new System.EventHandler(this.analisisAbandonoToolStripMenuItem_Click);
             //
             // ventanaToolStripMenuItem
             //
@@ -467,6 +477,7 @@
         private System.Windows.Forms.ToolStripMenuItem bitNegocioToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator sepBitacoraToolStripSeparator;
         private System.Windows.Forms.ToolStripMenuItem reporteJornadaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisAbandonoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gestionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem perfilesToolStripMenuItem;

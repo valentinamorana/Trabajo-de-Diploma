@@ -92,6 +92,9 @@
     <Compile Include="Renovacion.cs" />
     <Compile Include="EstadoCobro.cs" />
     <Compile Include="Cobro.cs" />
+    <Compile Include="DatosClienteRiesgo.cs" />
+    <Compile Include="ResultadoRiesgo.cs" />
+    <Compile Include="ClienteEnRiesgo.cs" />
     <Compile Include="HistorialIntegridad.cs" />
     <Compile Include="EstadoComercialCliente.cs" />
     <Compile Include="OcupacionStock.cs" />

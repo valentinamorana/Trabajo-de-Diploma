@@ -79,6 +79,12 @@
     <Compile Include="Manejadores\AplicarGraciaHandler.cs" />
     <Compile Include="Manejadores\SuspenderHandler.cs" />
     <Compile Include="Cobro.cs" />
+    <Compile Include="Interfaces\IAnalisisAbandonoService.cs" />
+    <Compile Include="Estrategias\EstrategiaRiesgo.cs" />
+    <Compile Include="Estrategias\EstrategiaVencimientoInactividad.cs" />
+    <Compile Include="Estrategias\EstrategiaInactividadPura.cs" />
+    <Compile Include="Estrategias\EstrategiaClienteNuevoInactivo.cs" />
+    <Compile Include="AnalisisAbandono.cs" />
     <Compile Include="Pedido.cs" />
     <Compile Include="PlanSuscripcion.cs" />
     <Compile Include="Preferencia.cs" />

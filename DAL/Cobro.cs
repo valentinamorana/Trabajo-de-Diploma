@@ -71,6 +71,30 @@ namespace DAL
                 : 0;
         }
 
+        // Igual que Alta, pero sobre una transacción ya abierta por el caller — usada por los
+        // manejadores de Cobro para que el UPDATE de Cliente y este INSERT sean atómicos
+        // (ver DAL.Cliente.EjecutarTransaccion/ModificarEnTx).
+        public int AltaEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cobro cobro)
+        {
+            using (var cmd = new SqlCommand(
+                "INSERT INTO HistorialCobro " +
+                "(IdCliente, Importe, FechaDeteccion, FechaResolucion, Resultado, Actor) " +
+                "VALUES (@IdCliente, @Importe, @FechaDeteccion, @FechaResolucion, @Resultado, @Actor); " +
+                "SELECT SCOPE_IDENTITY();",
+                conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@IdCliente", cobro.IdCliente);
+                cmd.Parameters.AddWithValue("@Importe", cobro.Importe);
+                cmd.Parameters.AddWithValue("@FechaDeteccion", cobro.FechaDeteccion);
+                cmd.Parameters.AddWithValue("@FechaResolucion", (object)cobro.FechaResolucion ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Resultado", (int)cobro.Resultado);
+                cmd.Parameters.AddWithValue("@Actor", (object)cobro.Actor ?? DBNull.Value);
+
+                var resultadoId = cmd.ExecuteScalar();
+                return resultadoId == null || resultadoId == DBNull.Value ? 0 : Convert.ToInt32(resultadoId);
+            }
+        }
+
         private BE.Cobro Mapear(DataRow row)
         {
             return new BE.Cobro

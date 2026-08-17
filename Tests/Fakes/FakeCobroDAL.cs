@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using DAL.Interfaces;
 
 namespace Tests.Fakes
@@ -17,6 +18,8 @@ namespace Tests.Fakes
             Registros.Add(cobro);
             return cobro.IdCobro;
         }
+
+        public int AltaEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cobro cobro) => Alta(cobro);
 
         public List<BE.Cobro> ObtenerPorCliente(int idCliente) => Registros.FindAll(c => c.IdCliente == idCliente);
         public List<BE.Cobro> ObtenerTodos() => Registros;

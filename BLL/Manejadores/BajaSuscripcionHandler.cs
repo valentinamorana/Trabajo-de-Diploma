@@ -34,19 +34,26 @@ namespace BLL.Manejadores
             cliente.IdPlan           = null;
             cliente.NombrePlan       = null;
             cliente.FechaVencimiento = null;
-            dalCliente.Modificar(cliente);
 
+            // UPDATE de Cliente + INSERT del historial en una única transacción (ver
+            // IntentarRenovarHandler para el porqué).
             var ahora = DateTime.Now;
-            int idRenovacion = dalRenovacion.Alta(new BE.Renovacion
+            int idRenovacion = 0;
+            dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
-                IdCliente = cliente.IdCliente,
-                IdPlanAnterior = idPlanAnterior,
-                IdPlanNuevo = null,
-                FechaDeteccion = ahora,
-                FechaResolucion = ahora,
-                Resultado = BE.EstadoRenovacion.Baja,
-                Actor = contexto.Actor
+                dalCliente.ModificarEnTx(conexion, tx, cliente);
+                idRenovacion = dalRenovacion.AltaEnTx(conexion, tx, new BE.Renovacion
+                {
+                    IdCliente = cliente.IdCliente,
+                    IdPlanAnterior = idPlanAnterior,
+                    IdPlanNuevo = null,
+                    FechaDeteccion = ahora,
+                    FechaResolucion = ahora,
+                    Resultado = BE.EstadoRenovacion.Baja,
+                    Actor = contexto.Actor
+                });
             });
+            dalCliente.RecalcularDV();
 
             var prendasEnUso = dalPrenda.ObtenerPorCliente(cliente.IdCliente);
             bool conPrendas = prendasEnUso.Count > 0;

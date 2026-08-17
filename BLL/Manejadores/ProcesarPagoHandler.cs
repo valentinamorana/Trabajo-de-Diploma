@@ -41,18 +41,26 @@ namespace BLL.Manejadores
 
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
             cliente.FechaLimiteGracia = null;
-            dalCliente.Modificar(cliente);
 
+            // UPDATE de Cliente + INSERT del historial en una única transacción: antes eran
+            // dos round-trips independientes, y un crash entre medio podía dejar el historial
+            // de auditoría desincronizado del estado real de la suscripción.
             var ahora = DateTime.Now;
-            int idCobro = dalCobro.Alta(new BE.Cobro
+            int idCobro = 0;
+            dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
-                IdCliente = cliente.IdCliente,
-                Importe = plan.Precio,
-                FechaDeteccion = ahora,
-                FechaResolucion = ahora,
-                Resultado = BE.EstadoCobro.Cobrado,
-                Actor = contexto.Actor
+                dalCliente.ModificarEnTx(conexion, tx, cliente);
+                idCobro = dalCobro.AltaEnTx(conexion, tx, new BE.Cobro
+                {
+                    IdCliente = cliente.IdCliente,
+                    Importe = plan.Precio,
+                    FechaDeteccion = ahora,
+                    FechaResolucion = ahora,
+                    Resultado = BE.EstadoCobro.Cobrado,
+                    Actor = contexto.Actor
+                });
             });
+            dalCliente.RecalcularDV();
 
             return new ResultadoCobro
             {

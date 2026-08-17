@@ -17,7 +17,10 @@ namespace DAL
         // Recalcula DVH de cada fila + DVV de la tabla. Se llama tras Alta/Modificar/Baja.
         // No propaga errores: la falla del DV no debe abortar la operación de negocio
         // (la verificación de integridad al arranque la detectaría igual).
-        private void RecalcularDV()
+        // Público (antes privado): ModificarEnTx no lo llama internamente porque corre DENTRO
+        // de una transacción todavía sin confirmar — el caller (ver EjecutarTransaccion) debe
+        // invocarlo DESPUÉS del commit, mismo criterio que DAL.Pedido.Alta con su propio DV.
+        public void RecalcularDV()
         {
             try { new DigitoVerificador().RecalcularTabla(DV_Tabla, DV_Pk, DV_Columnas); }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Cliente.RecalcularDV] " + ex.Message); }
@@ -127,8 +130,20 @@ namespace DAL
             {
                 int id = Convert.ToInt32(row["IdCliente"]);
                 if (id == idExcluir) continue;
-                string dniGuardado = Seguridad.Encriptador.TryDesencriptar(row["DNI"].ToString());
-                if (string.Equals(dniGuardado, dni, StringComparison.Ordinal)) return id;
+                string dniCifrado = row["DNI"].ToString();
+                string dniGuardado = Seguridad.Encriptador.TryDesencriptar(dniCifrado);
+                // Si el descifrado "falló" (TryDesencriptar devuelve el valor cifrado tal
+                // cual), ese cliente queda invisible para la detección de duplicados: nunca
+                // puede volver a matchear contra un DNI nuevo tipeado en texto plano. No hay
+                // forma de arreglarlo sin la clave correcta, pero al menos queda registrado
+                // para poder diagnosticarlo (antes fallaba en silencio).
+                if (dniGuardado == dniCifrado)
+                    System.Diagnostics.Trace.TraceWarning(
+                        "[DAL.Cliente.BuscarIdPorDni] Cliente ID " + id +
+                        " tiene un DNI que no se pudo descifrar con la clave actual " +
+                        "(key.dat no coincide con la usada al cifrarlo) — excluido de la detección de duplicados.");
+                else if (string.Equals(dniGuardado, dni, StringComparison.Ordinal))
+                    return id;
             }
             return 0;
         }
@@ -186,6 +201,43 @@ namespace DAL
                 "WHERE IdCliente=@IdCliente",
                 p);
             RecalcularDV();   // T07
+        }
+
+        // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
+        // Le da a las capas superiores (BLL.Manejadores) una forma de componer, DESDE AFUERA
+        // de esta clase, varias escrituras de distintos DAL en una sola operación atómica.
+        public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion)
+            => acceso.EjecutarTransaccion(accion);
+
+        // Igual que Modificar, pero sobre una transacción ya abierta por el caller (ver
+        // EjecutarTransaccion) — usado por los manejadores de Renovación/Cobro para que el
+        // UPDATE de Cliente y el INSERT del historial (HistorialRenovacion/HistorialCobro)
+        // sean atómicos: antes eran dos round-trips independientes sin transacción compartida,
+        // así que un crash entre medio podía dejar el historial de auditoría desincronizado
+        // del estado real de la suscripción. Sin RecalcularDV acá adentro a propósito: corre
+        // sobre datos todavía sin confirmar — el caller lo llama después del commit.
+        public void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
+                "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
+                "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
+                "FechaLimiteGracia=@FechaLimiteGracia " +
+                "WHERE IdCliente=@IdCliente",
+                conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@Nombre", cliente.Nombre);
+                cmd.Parameters.AddWithValue("@Apellido", cliente.Apellido);
+                cmd.Parameters.AddWithValue("@DNI", Seguridad.Encriptador.Encriptar(cliente.DNI));
+                cmd.Parameters.AddWithValue("@Email", (object)cliente.Email ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@MetodoPago", cliente.MetodoPago);
+                cmd.Parameters.AddWithValue("@IdPlan", (object)cliente.IdPlan ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaNacimiento", (object)cliente.FechaNacimiento ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IdCliente", cliente.IdCliente);
+                cmd.ExecuteNonQuery();
+            }
         }
 
         // Baja lógica del cliente (Activo=0).

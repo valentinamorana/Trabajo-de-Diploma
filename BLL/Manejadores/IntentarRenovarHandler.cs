@@ -36,19 +36,27 @@ namespace BLL.Manejadores
             var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, plan);
 
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
-            dalCliente.Modificar(cliente);
 
+            // UPDATE de Cliente + INSERT del historial en una única transacción: antes eran
+            // dos round-trips independientes, y un crash entre medio podía dejar el historial
+            // de auditoría desincronizado del estado real de la suscripción.
             var ahora = DateTime.Now;
-            int idRenovacion = dalRenovacion.Alta(new BE.Renovacion
+            int idRenovacion = 0;
+            dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
-                IdCliente = cliente.IdCliente,
-                IdPlanAnterior = idPlanAnterior,
-                IdPlanNuevo = idPlanAnterior,
-                FechaDeteccion = ahora,
-                FechaResolucion = ahora,
-                Resultado = BE.EstadoRenovacion.Renovada,
-                Actor = contexto.Actor
+                dalCliente.ModificarEnTx(conexion, tx, cliente);
+                idRenovacion = dalRenovacion.AltaEnTx(conexion, tx, new BE.Renovacion
+                {
+                    IdCliente = cliente.IdCliente,
+                    IdPlanAnterior = idPlanAnterior,
+                    IdPlanNuevo = idPlanAnterior,
+                    FechaDeteccion = ahora,
+                    FechaResolucion = ahora,
+                    Resultado = BE.EstadoRenovacion.Renovada,
+                    Actor = contexto.Actor
+                });
             });
+            dalCliente.RecalcularDV();
 
             return new ResultadoRenovacion
             {

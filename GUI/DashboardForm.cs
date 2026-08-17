@@ -565,21 +565,22 @@ namespace GUI
                     if (enMant != null)
                         foreach (var m in enMant)
                         {
-                            int dias = (int)(DateTime.Today - m.FechaEntrada.Date).TotalDays;
+                            int dias = m.DiasTranscurridos;
                             string desde = dias == 0 ? T("dash.hoy", "hoy") : string.Format(T("dash.hace_dias", "hace {0}d"), dias);
                             var fila = dgvTareas.Rows[dgvTareas.Rows.Add(tipoMant, m.NombrePrenda, desde)];
-                            fila.DefaultCellStyle.ForeColor = dias >= 3 ? Color.FromArgb(160, 60, 0) : Color.FromArgb(60, 100, 60);
+                            fila.DefaultCellStyle.ForeColor = m.NivelUrgencia == BE.NivelUrgencia.Reciente
+                                ? Color.FromArgb(60, 100, 60) : Color.FromArgb(160, 60, 0);
                             fila.Tag = "mant";
                         }
 
                     if (pedPend != null)
                         foreach (var p in pedPend)
                         {
-                            int dias = (int)(DateTime.Today - p.FechaPedido.Date).TotalDays;
+                            int dias = p.DiasDesdeAlta;
                             string desde = dias == 0 ? T("dash.hoy", "hoy") : string.Format(T("dash.hace_dias", "hace {0}d"), dias);
                             string desc  = $"#{p.IdPedido} — {p.NombreCliente ?? $"Cliente {p.IdCliente}"}";
                             var fila = dgvTareas.Rows[dgvTareas.Rows.Add(tipoPedido, desc, desde)];
-                            fila.DefaultCellStyle.ForeColor = dias >= 2 ? Color.FromArgb(160, 40, 40) : Color.FromArgb(160, 100, 0);
+                            fila.DefaultCellStyle.ForeColor = p.EsUrgentePorAntiguedad ? Color.FromArgb(160, 40, 40) : Color.FromArgb(160, 100, 0);
                             fila.Tag = "pedido";
                         }
 

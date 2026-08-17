@@ -230,9 +230,19 @@ namespace DAL
                 // RNF-02 — No se restaura un backup corrupto: validar integridad de la copia accesible.
                 VerificarBackup(rutaTemp);
 
+                // El RESTORE va en TRY/CATCH: si falla (disco lleno, corrupción que VERIFYONLY no
+                // detectó, etc.) DESPUÉS de que SINGLE_USER ya se aplicó, sin este guard la base
+                // queda bloqueada en modo single-user para siempre, sin ningún camino de código
+                // para recuperarla. El CATCH fuerza MULTI_USER de vuelta y relanza el error real.
                 const string sql =
                     "ALTER DATABASE WardrobeFlowDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
-                    "RESTORE DATABASE WardrobeFlowDB FROM DISK = @Ruta WITH REPLACE; " +
+                    "BEGIN TRY " +
+                    "    RESTORE DATABASE WardrobeFlowDB FROM DISK = @Ruta WITH REPLACE; " +
+                    "END TRY " +
+                    "BEGIN CATCH " +
+                    "    ALTER DATABASE WardrobeFlowDB SET MULTI_USER; " +
+                    "    THROW; " +
+                    "END CATCH " +
                     "ALTER DATABASE WardrobeFlowDB SET MULTI_USER;";
 
                 using (var conn = new SqlConnection(_cadenaConexionMaster))

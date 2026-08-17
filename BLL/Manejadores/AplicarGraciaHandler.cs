@@ -38,14 +38,12 @@ namespace BLL.Manejadores
 
             // Primer cobro fallido del ciclo (o todavía dentro del plazo ya otorgado):
             // fija (o mantiene) la fecha límite sin extenderla en cada reintento.
-            if (!cliente.EstaEnGracia)
-            {
+            bool abreGracia = !cliente.EstaEnGracia;
+            if (abreGracia)
                 cliente.FechaLimiteGracia = DateTime.Today.AddDays(DiasDeGracia);
-                dalCliente.Modificar(cliente);
-            }
 
             var ahora = DateTime.Now;
-            int idCobro = dalCobro.Alta(new BE.Cobro
+            var cobro = new BE.Cobro
             {
                 IdCliente = cliente.IdCliente,
                 Importe = 0,
@@ -53,7 +51,26 @@ namespace BLL.Manejadores
                 FechaResolucion = ahora,
                 Resultado = BE.EstadoCobro.Gracia,
                 Actor = contexto.Actor
-            });
+            };
+
+            int idCobro = 0;
+            if (abreGracia)
+            {
+                // Reabre gracia: UPDATE de Cliente + INSERT del historial en una única
+                // transacción (ver IntentarRenovarHandler para el porqué).
+                dalCliente.EjecutarTransaccion((conexion, tx) =>
+                {
+                    dalCliente.ModificarEnTx(conexion, tx, cliente);
+                    idCobro = dalCobro.AltaEnTx(conexion, tx, cobro);
+                });
+                dalCliente.RecalcularDV();
+            }
+            else
+            {
+                // Ya estaba en gracia: no hay UPDATE de Cliente que acompañar, solo se
+                // registra el intento en el historial.
+                idCobro = dalCobro.Alta(cobro);
+            }
 
             return new ResultadoCobro
             {

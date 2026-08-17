@@ -4448,3 +4448,11 @@ PT	cobro.estado.cargospendientes	Tem {0} cobrança(s) por dano/perda pendente(s)
 PT	cobro.msg.cobrado.descuento	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2}.
 PT	cobro.msg.cobrado.cargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui {2} cobrança(s) por dano/perda (${3}).
 PT	cobro.msg.cobrado.descuentoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2} e {3} cobrança(s) por dano/perda (${4}).
+ES	mnu.auditoria	Auditoría
+ES	mnu.analiticanegocio	Analítica de Negocio
+EN	mnu.auditoria	Audit
+EN	mnu.analiticanegocio	Business Analytics
+RU	mnu.auditoria	Аудит
+RU	mnu.analiticanegocio	Бизнес-аналитика
+PT	mnu.auditoria	Auditoria
+PT	mnu.analiticanegocio	Análise de Negócio

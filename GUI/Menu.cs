@@ -21,7 +21,7 @@ namespace GUI
     ///
     ///   Administrador     → TODO: Inventario | Ventas | Administrar | Bitácora
     ///   Supervisor        → Bitácora
-    ///   OperadorLogistico → Inventario (Prendas, Outfits, Categorias, Pedidos Realizados)
+    ///   OperadorLogistico → Inventario (Prendas, Pedidos Realizados)
     ///
     /// Roles adicionales (implementación, no están en G04):
     ///   Vendedor             → Ventas (Clientes, Planes, Pedidos de Venta)
@@ -57,6 +57,7 @@ namespace GUI
         public Menu()
         {
             InitializeComponent();
+            AplicarEstiloMenu();
 
             ReconstruirComboIdioma(Traductor.ObtenerIdiomas());
 
@@ -165,6 +166,42 @@ namespace GUI
         }
 
         /// <summary>
+        /// Rediseño visual del menú: renderer propio (GUI.Estilos.MenuRenderer) que pinta
+        /// cada ítem de primer nivel como un "chip" redondeado con color por área funcional
+        /// (Suscriptores/Inventario/Ventas/Auditoría/Analítica de Negocio/Administrar), con
+        /// margen entre ellos para que se lean como botones separados sobre la barra rosa,
+        /// y separadores en puntos en vez de líneas. Pura presentación (colores/Margin) —
+        /// ninguna decisión de negocio vive acá.
+        /// </summary>
+        private void AplicarEstiloMenu()
+        {
+            menuStrip1.Renderer = new Estilos.MenuRenderer();
+
+            var textoOscuro = Color.FromArgb(55, 45, 55);
+            var margenChip = new Padding(3, 3, 3, 3);
+
+            void Estilizar(ToolStripMenuItem item, Color? foreColor = null)
+            {
+                item.Margin = margenChip;
+                if (foreColor.HasValue) item.ForeColor = foreColor.Value;
+            }
+
+            Estilizar(panelControlToolStripMenuItem, textoOscuro);
+            Estilizar(ventanaToolStripMenuItem, textoOscuro);
+            Estilizar(suscriptoresToolStripMenuItem, textoOscuro);
+            Estilizar(inventarioToolStripMenuItem, textoOscuro);
+            Estilizar(ventasToolStripMenuItem, textoOscuro);
+            Estilizar(auditoriaToolStripMenuItem, textoOscuro);
+            Estilizar(analiticaNegocioToolStripMenuItem, textoOscuro);
+            Estilizar(gestionToolStripMenuItem, textoOscuro);
+            // Sesión: fondo claro, el texto default (negro) ya es legible — no hace falta forzarlo.
+            // Alertas: ForeColor dinámico (blanco/dorado) gestionado en RefrescarTextoAlertas,
+            // no se pisa acá — solo se le aplica el margen del chip.
+            Estilizar(usuarioToolStripMenuItem);
+            Estilizar(alertasItem);
+        }
+
+        /// <summary>
         /// Muestra u oculta los ítems del menú según los permisos del usuario. La DECISIÓN
         /// (qué .Name queda visible) vive en BLL.MenuVisibilidad.Resolver — pura, testeable
         /// sin instanciar esta UI (Tests/MenuVisibilidadTests.cs) — este método solo la
@@ -189,7 +226,7 @@ namespace GUI
             var items = new ToolStripMenuItem[]
             {
                 panelControlToolStripMenuItem, inventarioToolStripMenuItem,
-                prendasToolStripMenuItem, outfitsToolStripMenuItem, categoriasToolStripMenuItem,
+                prendasToolStripMenuItem, listaEsperaToolStripMenuItem,
                 clientesToolStripMenuItem, planesToolStripMenuItem,
                 renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
@@ -201,7 +238,8 @@ namespace GUI
                 ventasVendedorToolStripMenuItem, analisisRotacionToolStripMenuItem,
                 analisisMantenimientoToolStripMenuItem, analisisEscasezToolStripMenuItem,
                 recomendacionPrendasToolStripMenuItem,
-                suscriptoresToolStripMenuItem, ventasToolStripMenuItem, bitacoraToolStripMenuItem,
+                suscriptoresToolStripMenuItem, ventasToolStripMenuItem,
+                auditoriaToolStripMenuItem, analiticaNegocioToolStripMenuItem,
                 grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
             // Fail-closed: si un .Name no está en la resolución (typo, ítem renombrado por el
@@ -512,34 +550,6 @@ namespace GUI
         }
 
         /// <summary>
-        /// Abre el módulo de Outfits como hijo MDI.
-        /// TODO: implementar cuando se cree el formulario Outfits.
-        /// </summary>
-        private void outfitsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var tM = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T_m(string k, string fb) => tM.ContainsKey(k) ? tM[k].Texto : fb;
-            MessageBox.Show(
-                T_m("msg.modulo.outfits",    "El módulo de Outfits aún no está disponible."),
-                T_m("lbl.proximamente",       "Próximamente"),
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        /// <summary>
-        /// Abre el módulo de Categorías como hijo MDI.
-        /// TODO: implementar cuando se cree el formulario Categorias.
-        /// </summary>
-        private void categoriasToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var tM = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T_m(string k, string fb) => tM.ContainsKey(k) ? tM[k].Texto : fb;
-            MessageBox.Show(
-                T_m("msg.modulo.categorias", "El módulo de Categorías aún no está disponible."),
-                T_m("lbl.proximamente",       "Próximamente"),
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        /// <summary>
         /// Abre el módulo de Clientes como hijo MDI. Accesible para Vendedor.
         /// </summary>
         private void clientesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -585,6 +595,19 @@ namespace GUI
                 if (hijo is CobroSuscripcionForm) { hijo.BringToFront(); return; }
             }
             new CobroSuscripcionForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>
+        /// Abre el módulo de Lista de Espera de prendas como hijo MDI (mejora opcional,
+        /// no requerida por la cátedra — ver README).
+        /// </summary>
+        private void listaEsperaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is ListaEsperaForm) { hijo.BringToFront(); return; }
+            }
+            new ListaEsperaForm { MdiParent = this }.Show();
         }
 
         /// <summary>
@@ -780,6 +803,7 @@ namespace GUI
             Aplicar(panelControlToolStripMenuItem,      t);
             Aplicar(inventarioToolStripMenuItem,        t);
             Aplicar(prendasToolStripMenuItem,           t);
+            Aplicar(listaEsperaToolStripMenuItem,       t);
             Aplicar(suscriptoresToolStripMenuItem,      t);
             Aplicar(ventasToolStripMenuItem,            t);
             Aplicar(clientesToolStripMenuItem,          t);
@@ -797,7 +821,8 @@ namespace GUI
             Aplicar(historialUsuariosToolStripMenuItem, t);
             Aplicar(backupToolStripMenuItem,            t);
             Aplicar(integridadToolStripMenuItem,        t);
-            Aplicar(bitacoraToolStripMenuItem,          t);
+            Aplicar(auditoriaToolStripMenuItem,         t);
+            Aplicar(analiticaNegocioToolStripMenuItem,  t);
             Aplicar(bitSistemaToolStripMenuItem,        t);
             Aplicar(bitNegocioToolStripMenuItem,        t);
             Aplicar(reporteJornadaToolStripMenuItem,    t);

@@ -347,6 +347,7 @@
     <Compile Include="Exportacion\GeneradorEscasez.cs" />
     <Compile Include="Exportacion\GeneradorRecomendacion.cs" />
     <Compile Include="Exportacion\ExportadorCsv.cs" />
+    <Compile Include="Estilos\MenuRenderer.cs" />
     <Compile Include="AlertasForm.cs">
       <SubType>Form</SubType>
     </Compile>

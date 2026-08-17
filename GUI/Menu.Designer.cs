@@ -42,8 +42,7 @@
             this.panelControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inventarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.outfitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.categoriasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.listaEsperaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.suscriptoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,13 +62,14 @@
             this.backupToolStripMenuItem         = new System.Windows.Forms.ToolStripMenuItem();
             this.historialUsuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.integridadToolStripMenuItem     = new System.Windows.Forms.ToolStripMenuItem();
-            this.bitacoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.auditoriaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bitSistemaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bitNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sepBitacoraToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.reporteJornadaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sepAnaliticaToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.analiticaNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.analisisAbandonoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sepAnaliticaToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.ventasVendedorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.analisisRotacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.analisisMantenimientoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -129,7 +129,8 @@
             this.suscriptoresToolStripMenuItem,
             this.inventarioToolStripMenuItem,
             this.ventasToolStripMenuItem,
-            this.bitacoraToolStripMenuItem,
+            this.auditoriaToolStripMenuItem,
+            this.analiticaNegocioToolStripMenuItem,
             this.gestionToolStripMenuItem,
             this.alertasItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -179,8 +180,7 @@
             // 
             this.inventarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.prendasToolStripMenuItem,
-            this.outfitsToolStripMenuItem,
-            this.categoriasToolStripMenuItem});
+            this.listaEsperaToolStripMenuItem});
             this.inventarioToolStripMenuItem.Name = "inventarioToolStripMenuItem";
             this.inventarioToolStripMenuItem.Tag = "mnu.inventario";
             this.inventarioToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
@@ -193,20 +193,14 @@
             this.prendasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.prendasToolStripMenuItem.Text = "Prendas";
             this.prendasToolStripMenuItem.Click += new System.EventHandler(this.prendasToolStripMenuItem_Click);
-            // 
-            // outfitsToolStripMenuItem
-            // 
-            this.outfitsToolStripMenuItem.Name = "outfitsToolStripMenuItem";
-            this.outfitsToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
-            this.outfitsToolStripMenuItem.Text = "Outfits";
-            this.outfitsToolStripMenuItem.Click += new System.EventHandler(this.outfitsToolStripMenuItem_Click);
-            // 
-            // categoriasToolStripMenuItem
-            // 
-            this.categoriasToolStripMenuItem.Name = "categoriasToolStripMenuItem";
-            this.categoriasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
-            this.categoriasToolStripMenuItem.Text = "Categorias";
-            this.categoriasToolStripMenuItem.Click += new System.EventHandler(this.categoriasToolStripMenuItem_Click);
+            //
+            // listaEsperaToolStripMenuItem — mejora opcional (no requerida por la cátedra, ver README)
+            //
+            this.listaEsperaToolStripMenuItem.Name = "listaEsperaToolStripMenuItem";
+            this.listaEsperaToolStripMenuItem.Tag = "mnu.listaespera";
+            this.listaEsperaToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.listaEsperaToolStripMenuItem.Text = "Lista de Espera";
+            this.listaEsperaToolStripMenuItem.Click += new System.EventHandler(this.listaEsperaToolStripMenuItem_Click);
             //
             // suscriptoresToolStripMenuItem
             //
@@ -379,27 +373,36 @@
             this.integridadToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             this.integridadToolStripMenuItem.Click += new System.EventHandler(this.integridadToolStripMenuItem_Click);
             //
-            // bitacoraToolStripMenuItem
+            // auditoriaToolStripMenuItem — antes vivía junto con los reportes de negocio dentro
+            // de un único menú "Analítica" de 9 ítems en un dropdown plano; se separó en dos
+            // menúes de primer nivel para que cada uno se lea de un vistazo (auditoría del
+            // sistema vs. decisiones comerciales).
             //
-            this.bitacoraToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.auditoriaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bitSistemaToolStripMenuItem,
             this.bitNegocioToolStripMenuItem,
             this.sepBitacoraToolStripSeparator,
-            this.reporteJornadaToolStripMenuItem,
-            this.sepAnaliticaToolStripSeparator,
+            this.reporteJornadaToolStripMenuItem});
+            this.auditoriaToolStripMenuItem.Name = "auditoriaToolStripMenuItem";
+            this.auditoriaToolStripMenuItem.Tag = "mnu.auditoria";
+            this.auditoriaToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
+            this.auditoriaToolStripMenuItem.Text = "Auditoría";
+            //
+            // analiticaNegocioToolStripMenuItem — los 6 reportes de valor agregado (Bloque 3 +
+            // PdN10), cada uno con patente propia (decisión comercial, no auditoría genérica).
+            //
+            this.analiticaNegocioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.analisisAbandonoToolStripMenuItem,
+            this.sepAnaliticaToolStripSeparator,
             this.ventasVendedorToolStripMenuItem,
             this.analisisRotacionToolStripMenuItem,
             this.analisisMantenimientoToolStripMenuItem,
             this.analisisEscasezToolStripMenuItem,
             this.recomendacionPrendasToolStripMenuItem});
-            this.bitacoraToolStripMenuItem.Name = "bitacoraToolStripMenuItem";
-            this.bitacoraToolStripMenuItem.Tag = "mnu.bitacora";
-            this.bitacoraToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
-            // Se renombra a "Analítica": agrupa Bitácora con los reportes del Bloque 3 (Idea de
-            // Negocio) a medida que se implementen — misma clave de traducción "mnu.bitacora",
-            // solo cambia el texto que representa (ver rediseño UX/UI, sección 10).
-            this.bitacoraToolStripMenuItem.Text = "Analítica";
+            this.analiticaNegocioToolStripMenuItem.Name = "analiticaNegocioToolStripMenuItem";
+            this.analiticaNegocioToolStripMenuItem.Tag = "mnu.analiticanegocio";
+            this.analiticaNegocioToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
+            this.analiticaNegocioToolStripMenuItem.Text = "Analítica de Negocio";
             //
             // bitSistemaToolStripMenuItem
             //
@@ -430,8 +433,8 @@
             this.reporteJornadaToolStripMenuItem.Text = "📊  Reporte de Jornada";
             this.reporteJornadaToolStripMenuItem.Click += new System.EventHandler(this.reporteJornadaToolStripMenuItem_Click);
             //
-            // sepAnaliticaToolStripSeparator — separa auditoría (arriba) de los reportes de
-            // valor agregado del Bloque 3 (abajo), ahora que "Analítica" agrupa 8 ítems.
+            // sepAnaliticaToolStripSeparator — separa Análisis de Abandono (retención, PdN10)
+            // de los 5 reportes del Bloque 3 (arriba tiene su propia patente, mnuAnalisisAbandono).
             //
             this.sepAnaliticaToolStripSeparator.Name = "sepAnaliticaToolStripSeparator";
             //
@@ -532,11 +535,11 @@
         private System.Windows.Forms.ToolStripMenuItem panelControlToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem inventarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prendasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem listaEsperaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem backupToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem historialUsuariosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem outfitsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem categoriasToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem bitacoraToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem auditoriaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analiticaNegocioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bitSistemaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bitNegocioToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator sepBitacoraToolStripSeparator;

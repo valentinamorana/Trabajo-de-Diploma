@@ -26,6 +26,8 @@ namespace BLL
             ("cobroSuscripcionToolStripMenuItem",      "mnuCobroSuscripcion"),
             ("pedidosVentaToolStripMenuItem",          "mnuPedidosVenta"),
             ("pedidosRealizadosToolStripMenuItem",     "mnuPedidosRealizados"),
+            // Mejora opcional (no requerida por la cátedra) — ver README.
+            ("listaEsperaToolStripMenuItem",           "mnuListaEspera"),
             // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
             ("usuariosToolStripMenuItem",              "mnuUsuarios"),
             ("perfilesToolStripMenuItem",              "mnuUsuarios"),
@@ -49,9 +51,6 @@ namespace BLL
             ("recomendacionPrendasToolStripMenuItem",  "mnuRecomendacionPrendas"),
         };
 
-        /// <summary>Ítems retirados de la interfaz (módulos no implementados): siempre ocultos.</summary>
-        public static readonly string[] SiempreOcultos = { "outfitsToolStripMenuItem", "categoriasToolStripMenuItem" };
-
         /// <summary>Grupo (Name del menú contenedor) → hojas hijas que determinan su visibilidad (OR).</summary>
         public static readonly (string Grupo, string[] Hijos)[] Grupos =
         {
@@ -61,9 +60,16 @@ namespace BLL
                 "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem"
             }),
             ("ventasToolStripMenuItem", new[] { "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem" }),
-            ("bitacoraToolStripMenuItem", new[]
+            // "Analítica" se partió en dos menúes de primer nivel (antes eran 9 ítems en un
+            // solo dropdown plano): Auditoría (bitácoras + reporte de jornada, gobernados por
+            // mnuAuditoria) y Analítica de Negocio (los 6 reportes de decisión comercial del
+            // Bloque 3 + PdN10, cada uno con patente propia).
+            ("auditoriaToolStripMenuItem", new[]
             {
-                "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem",
+                "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem"
+            }),
+            ("analiticaNegocioToolStripMenuItem", new[]
+            {
                 "analisisAbandonoToolStripMenuItem", "ventasVendedorToolStripMenuItem",
                 "analisisRotacionToolStripMenuItem", "analisisMantenimientoToolStripMenuItem",
                 "analisisEscasezToolStripMenuItem", "recomendacionPrendasToolStripMenuItem"
@@ -77,10 +83,9 @@ namespace BLL
         /// GUI.Menu.AplicarPermisos:
         ///   • Panel de Control: siempre visible para cualquier logueado.
         ///   • Hoja: visible si tiene la patente exacta (o es Admin).
-        ///   • Outfits/Categorías: siempre ocultos (módulo no implementado), sin excepción.
-        ///   • Inventario: visible si Prendas es visible o tiene mnuStock (Stock no tiene
-        ///     ToolStripMenuItem propio en el Designer).
-        ///   • Grupo genérico (Suscriptores/Ventas/Analítica): visible si algún hijo lo es.
+        ///   • Inventario: visible si Prendas o Lista de Espera son visibles, o tiene mnuStock
+        ///     (Stock no tiene ToolStripMenuItem propio en el Designer).
+        ///   • Grupo genérico (Suscriptores/Ventas/Auditoría/Analítica de Negocio): visible si algún hijo lo es.
         ///   • Administrar/Usuarios▸/Sistema▸: gobernados por mnuUsuarios.
         /// </summary>
         public static Dictionary<string, bool> Resolver(IEnumerable<string> patentes, bool esAdmin)
@@ -96,10 +101,8 @@ namespace BLL
             foreach (var h in Hojas)
                 visible[h.Item] = Permite(h.Permiso);
 
-            foreach (var oculto in SiempreOcultos)
-                visible[oculto] = false;
-
-            visible["inventarioToolStripMenuItem"] = visible["prendasToolStripMenuItem"] || Permite("mnuStock");
+            visible["inventarioToolStripMenuItem"] =
+                visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] || Permite("mnuStock");
 
             foreach (var g in Grupos)
                 visible[g.Grupo] = g.Hijos.Any(h => visible.TryGetValue(h, out var v) && v);

@@ -16,7 +16,7 @@ namespace Tests
         private static bool V(Dictionary<string, bool> d, string item) => d.TryGetValue(item, out var v) && v;
 
         [TestMethod]
-        public void Administrador_VeTodoMenosOutfitsYCategorias()
+        public void Administrador_VeTodoElMenu()
         {
             // Bypass total: no depende de tener las patentes bien asignadas en la BD.
             var v = BLL.MenuVisibilidad.Resolver(new string[0], esAdmin: true);
@@ -32,10 +32,14 @@ namespace Tests
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosVentaToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
-            Assert.IsTrue(V(v, "bitacoraToolStripMenuItem"));
+            // "Analítica" (antes un único dropdown de 9 ítems) se partió en dos menúes de
+            // primer nivel: Auditoría (bitácoras + reporte de jornada) y Analítica de Negocio
+            // (los 6 reportes de decisión comercial, Bloque 3 + PdN10).
+            Assert.IsTrue(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitNegocioToolStripMenuItem"));
             Assert.IsTrue(V(v, "reporteJornadaToolStripMenuItem"));
+            Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"));
             Assert.IsTrue(V(v, "analisisAbandonoToolStripMenuItem"));
             Assert.IsTrue(V(v, "ventasVendedorToolStripMenuItem"));
             Assert.IsTrue(V(v, "analisisRotacionToolStripMenuItem"));
@@ -50,26 +54,23 @@ namespace Tests
             Assert.IsTrue(V(v, "idiomasToolStripMenuItem"));
             Assert.IsTrue(V(v, "backupToolStripMenuItem"));
             Assert.IsTrue(V(v, "integridadToolStripMenuItem"));
-
-            // Caso especial: Outfits/Categorías NUNCA se ven, ni siquiera para Admin
-            // (módulo no implementado, Visible=false fijo en el código).
-            Assert.IsFalse(V(v, "outfitsToolStripMenuItem"));
-            Assert.IsFalse(V(v, "categoriasToolStripMenuItem"));
         }
 
         [TestMethod]
-        public void Auditor_SoloVePanelYAnalitica()
+        public void Auditor_SoloVePanelYAuditoria()
         {
             var v = BLL.MenuVisibilidad.Resolver(new[] { "mnuAuditoria" }, esAdmin: false);
 
             Assert.IsTrue(V(v, "panelControlToolStripMenuItem"));
-            Assert.IsTrue(V(v, "bitacoraToolStripMenuItem"));
+            Assert.IsTrue(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitNegocioToolStripMenuItem"));
             Assert.IsTrue(V(v, "reporteJornadaToolStripMenuItem"));
 
-            // El Auditor no tiene mnuAnalisisAbandono: ve el grupo (por los otros 3 hijos)
-            // pero no este ítem puntual — es de decisión comercial, no de auditoría.
+            // El Auditor no tiene ninguna patente de "Analítica de Negocio" (decisión
+            // comercial, no auditoría): el menú entero queda oculto, ya no comparte
+            // dropdown con Auditoría como antes de la separación.
+            Assert.IsFalse(V(v, "analiticaNegocioToolStripMenuItem"));
             Assert.IsFalse(V(v, "analisisAbandonoToolStripMenuItem"));
 
             Assert.IsFalse(V(v, "suscriptoresToolStripMenuItem"));
@@ -103,12 +104,14 @@ namespace Tests
 
             // Vendedor NO despacha: Pedidos Realizados no aparece.
             Assert.IsFalse(V(v, "pedidosRealizadosToolStripMenuItem"));
-            // PdN13 (Recomendación de Prendas) vive dentro de "Analítica": al tener esa
-            // patente propia, el grupo se vuelve visible aunque no tenga Bitácora/Reportes.
-            Assert.IsTrue(V(v, "bitacoraToolStripMenuItem"));
+            // PdN13 (Recomendación de Prendas) vive dentro de "Analítica de Negocio": al tener
+            // esa patente propia, el menú se vuelve visible aunque no tenga los otros 5 hijos.
+            Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"));
+            Assert.IsFalse(V(v, "analisisAbandonoToolStripMenuItem")); // patente propia de GerenteComercial, no de Vendedor
+            // Auditoría vive en un menú aparte ahora: sin mnuAuditoria, queda oculto entero.
+            Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsFalse(V(v, "reporteJornadaToolStripMenuItem"));
-            Assert.IsFalse(V(v, "analisisAbandonoToolStripMenuItem")); // patente propia de GerenteComercial, no de Vendedor
             Assert.IsFalse(V(v, "gestionToolStripMenuItem"));
         }
 
@@ -133,11 +136,11 @@ namespace Tests
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
 
             // PdN10 — patente propia de GerenteComercial: habilita el ítem Y, de paso,
-            // el grupo "Analítica" completo (antes oculto para este rol), aunque los
-            // otros 3 hijos (Bitácora/Reporte de Jornada, gobernados por mnuAuditoria)
-            // sigan ocultos — el criterio "grupo visible si algún hijo lo es" no distingue.
+            // el menú "Analítica de Negocio" completo (antes oculto para este rol). Auditoría
+            // es un menú aparte ahora (gobernado por mnuAuditoria) y sigue oculto para este rol.
             Assert.IsTrue(V(v, "analisisAbandonoToolStripMenuItem"));
-            Assert.IsTrue(V(v, "bitacoraToolStripMenuItem"));
+            Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"));
+            Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitNegocioToolStripMenuItem"));
             Assert.IsFalse(V(v, "reporteJornadaToolStripMenuItem"));
@@ -167,11 +170,10 @@ namespace Tests
         }
 
         [TestMethod]
-        public void GerenteInventario_HeredaAmbosOperadores_PeroOutfitsYCategoriasSiguenOcultos()
+        public void GerenteInventario_HeredaAmbosOperadores()
         {
-            // Composite: GerenteInventario → OperadorLogistico + OperadorDeInventario,
-            // más mnuCategorias/mnuOutfits propias (asignadas en BD, sin efecto visual).
-            var patentes = new[] { "mnuCategorias", "mnuOutfits", "mnuPedidosRealizados", "mnuPrendas", "mnuStock",
+            // Composite: GerenteInventario → OperadorLogistico + OperadorDeInventario.
+            var patentes = new[] { "mnuPedidosRealizados", "mnuPrendas", "mnuStock",
                                     "mnuAnalisisRotacion", "mnuAnalisisMantenimiento", "mnuAnalisisEscasez" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
 
@@ -186,14 +188,12 @@ namespace Tests
             Assert.IsTrue(V(v, "analisisEscasezToolStripMenuItem"));
             Assert.IsFalse(V(v, "ventasVendedorToolStripMenuItem")); // decisión de GerenteComercial
 
-            // Tiene las patentes pero el módulo no está implementado: sigue oculto.
-            Assert.IsFalse(V(v, "outfitsToolStripMenuItem"));
-            Assert.IsFalse(V(v, "categoriasToolStripMenuItem"));
-
             Assert.IsFalse(V(v, "suscriptoresToolStripMenuItem"));
-            // PdN9/11/12 viven dentro de "Analítica": al tener esas patentes propias, el
-            // grupo se vuelve visible aunque no tenga Bitácora/Reportes (gobernados por mnuAuditoria).
-            Assert.IsTrue(V(v, "bitacoraToolStripMenuItem"));
+            // PdN9/11/12 viven dentro de "Analítica de Negocio": al tener esas patentes propias,
+            // el menú se vuelve visible. Auditoría queda oculto (gobernado por mnuAuditoria, que
+            // este rol no tiene).
+            Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"));
+            Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsFalse(V(v, "reporteJornadaToolStripMenuItem"));
         }
@@ -213,7 +213,7 @@ namespace Tests
             string[] esperados =
             {
                 "panelControlToolStripMenuItem", "inventarioToolStripMenuItem",
-                "prendasToolStripMenuItem", "outfitsToolStripMenuItem", "categoriasToolStripMenuItem",
+                "prendasToolStripMenuItem",
                 "clientesToolStripMenuItem", "planesToolStripMenuItem",
                 "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem",
                 "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem",
@@ -225,7 +225,8 @@ namespace Tests
                 "ventasVendedorToolStripMenuItem", "analisisRotacionToolStripMenuItem",
                 "analisisMantenimientoToolStripMenuItem", "analisisEscasezToolStripMenuItem",
                 "recomendacionPrendasToolStripMenuItem",
-                "suscriptoresToolStripMenuItem", "ventasToolStripMenuItem", "bitacoraToolStripMenuItem",
+                "suscriptoresToolStripMenuItem", "ventasToolStripMenuItem",
+                "auditoriaToolStripMenuItem", "analiticaNegocioToolStripMenuItem",
                 "grpUsuarios", "grpSistema", "gestionToolStripMenuItem"
             };
 
@@ -242,7 +243,8 @@ namespace Tests
             Assert.IsFalse(V(v, "suscriptoresToolStripMenuItem"));
             Assert.IsFalse(V(v, "inventarioToolStripMenuItem"));
             Assert.IsFalse(V(v, "ventasToolStripMenuItem"));
-            Assert.IsFalse(V(v, "bitacoraToolStripMenuItem"));
+            Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
+            Assert.IsFalse(V(v, "analiticaNegocioToolStripMenuItem"));
             Assert.IsFalse(V(v, "gestionToolStripMenuItem"));
         }
 

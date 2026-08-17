@@ -1,0 +1,159 @@
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace GUI
+{
+    partial class CobroSuscripcionForm
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+                components.Dispose();
+            base.Dispose(disposing);
+        }
+
+        #region Código generado por el Diseñador de Windows Forms
+
+        private void InitializeComponent()
+        {
+            this.lblTitulo       = new Label();
+            this.lblCliente      = new Label();
+            this.cmbCliente      = new ComboBox();
+            this.lblEstadoActual = new Label();
+            this.grpDecision     = new GroupBox();
+            this.rbCobrado       = new RadioButton();
+            this.rbPagoFallido   = new RadioButton();
+            this.lblModalidad    = new Label();
+            this.cmbModalidad    = new ComboBox();
+            this.btnProcesar     = new Button();
+            this.lblResultado    = new Label();
+            this.grpDecision.SuspendLayout();
+            this.SuspendLayout();
+
+            // ── lblTitulo ──────────────────────────────────────────────────────
+            this.lblTitulo.AutoSize = true;
+            this.lblTitulo.Font     = new Font(this.Font, FontStyle.Bold);
+            this.lblTitulo.Location = new Point(15, 12);
+            this.lblTitulo.Name     = "lblTitulo";
+            this.lblTitulo.TabIndex = 0;
+
+            // ── lblCliente / cmbCliente ──────────────────────────────────────
+            this.lblCliente.AutoSize = true;
+            this.lblCliente.Location = new Point(15, 50);
+            this.lblCliente.Name     = "lblCliente";
+            this.lblCliente.TabIndex = 1;
+
+            this.cmbCliente.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cmbCliente.Location      = new Point(120, 47);
+            this.cmbCliente.Name          = "cmbCliente";
+            this.cmbCliente.TabIndex      = 2;
+            this.cmbCliente.Width         = 320;
+            this.cmbCliente.SelectedIndexChanged += new System.EventHandler(this.CmbCliente_SelectedIndexChanged);
+
+            // ── lblEstadoActual ───────────────────────────────────────────────
+            this.lblEstadoActual.AutoSize  = false;
+            this.lblEstadoActual.ForeColor = Color.DimGray;
+            this.lblEstadoActual.Location  = new Point(15, 80);
+            this.lblEstadoActual.Name      = "lblEstadoActual";
+            this.lblEstadoActual.Size      = new Size(430, 34);
+            this.lblEstadoActual.TabIndex  = 3;
+
+            // ── grpDecision ───────────────────────────────────────────────────
+            this.grpDecision.Controls.Add(this.rbCobrado);
+            this.grpDecision.Controls.Add(this.rbPagoFallido);
+            this.grpDecision.Location = new Point(15, 120);
+            this.grpDecision.Name     = "grpDecision";
+            this.grpDecision.Size     = new Size(430, 80);
+            this.grpDecision.TabIndex = 4;
+            this.grpDecision.TabStop  = false;
+
+            this.rbCobrado.AutoSize = true;
+            this.rbCobrado.Checked  = true;
+            this.rbCobrado.Location = new Point(15, 25);
+            this.rbCobrado.Name     = "rbCobrado";
+            this.rbCobrado.TabIndex = 0;
+            this.rbCobrado.TabStop  = true;
+            this.rbCobrado.UseVisualStyleBackColor = true;
+            this.rbCobrado.CheckedChanged += new System.EventHandler(this.RbCobrado_CheckedChanged);
+
+            this.rbPagoFallido.AutoSize = true;
+            this.rbPagoFallido.Location = new Point(15, 50);
+            this.rbPagoFallido.Name     = "rbPagoFallido";
+            this.rbPagoFallido.TabIndex = 1;
+            this.rbPagoFallido.UseVisualStyleBackColor = true;
+
+            // ── lblModalidad / cmbModalidad ───────────────────────────────────
+            this.lblModalidad.AutoSize = true;
+            this.lblModalidad.Location = new Point(15, 215);
+            this.lblModalidad.Name     = "lblModalidad";
+            this.lblModalidad.TabIndex = 5;
+
+            this.cmbModalidad.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cmbModalidad.Items.AddRange(new object[] {
+                BE.Builders.ModalidadCobro.Mensual,
+                BE.Builders.ModalidadCobro.Trimestral,
+                BE.Builders.ModalidadCobro.Anual });
+            this.cmbModalidad.Location     = new Point(120, 212);
+            this.cmbModalidad.Name         = "cmbModalidad";
+            this.cmbModalidad.SelectedIndex = 0;
+            this.cmbModalidad.TabIndex     = 6;
+            this.cmbModalidad.Width        = 200;
+
+            // ── btnProcesar ────────────────────────────────────────────────────
+            this.btnProcesar.Height   = 32;
+            this.btnProcesar.Location = new Point(15, 250);
+            this.btnProcesar.Name     = "btnProcesar";
+            this.btnProcesar.TabIndex = 7;
+            this.btnProcesar.Width    = 150;
+            this.btnProcesar.UseVisualStyleBackColor = true;
+            this.btnProcesar.Click += new System.EventHandler(this.BtnProcesar_Click);
+
+            // ── lblResultado ───────────────────────────────────────────────────
+            this.lblResultado.AutoSize  = false;
+            this.lblResultado.ForeColor = Color.DarkGreen;
+            this.lblResultado.Location  = new Point(15, 290);
+            this.lblResultado.Name      = "lblResultado";
+            this.lblResultado.Size      = new Size(430, 55);
+            this.lblResultado.TabIndex  = 8;
+
+            // ── CobroSuscripcionForm ───────────────────────────────────────────
+            this.ClientSize      = new Size(480, 360);
+            this.Controls.Add(this.lblTitulo);
+            this.Controls.Add(this.lblCliente);
+            this.Controls.Add(this.cmbCliente);
+            this.Controls.Add(this.lblEstadoActual);
+            this.Controls.Add(this.grpDecision);
+            this.Controls.Add(this.lblModalidad);
+            this.Controls.Add(this.cmbModalidad);
+            this.Controls.Add(this.btnProcesar);
+            this.Controls.Add(this.lblResultado);
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox     = false;
+            this.MinimizeBox     = false;
+            this.Name            = "CobroSuscripcionForm";
+            this.StartPosition   = FormStartPosition.CenterParent;
+            this.Text            = "Cobro de Suscripción";
+
+            this.grpDecision.ResumeLayout(false);
+            this.grpDecision.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+        }
+
+        #endregion
+
+        private Label      lblTitulo;
+        private Label      lblCliente;
+        private ComboBox   cmbCliente;
+        private Label      lblEstadoActual;
+        private GroupBox   grpDecision;
+        private RadioButton rbCobrado;
+        private RadioButton rbPagoFallido;
+        private Label      lblModalidad;
+        private ComboBox   cmbModalidad;
+        private Button     btnProcesar;
+        private Label      lblResultado;
+    }
+}

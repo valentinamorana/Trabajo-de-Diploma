@@ -1,5 +1,5 @@
 -- ============================================================
--- WardrobeFlow — 16. FIDELIZACIÓN: PAUSA, REFERIDOS Y CARGO POR DAÑO/PÉRDIDA
+-- WardrobeFlow — 15. FIDELIZACIÓN: PAUSA, REFERIDOS Y CARGO POR DAÑO/PÉRDIDA
 -- ------------------------------------------------------------
 -- Tres funcionalidades nuevas del Bloque 1 (Fidelización), la última
 -- cruza con Bloque 2 (Cobro):

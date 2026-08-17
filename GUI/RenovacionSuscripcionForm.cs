@@ -66,17 +66,33 @@ namespace GUI
 
         private void CargarClientes()
         {
-            cmbCliente.Items.Clear();
-            foreach (var c in _bllCliente.ObtenerTodos())
-                cmbCliente.Items.Add(new ClienteItem(c));
-            if (cmbCliente.Items.Count > 0) cmbCliente.SelectedIndex = 0;
+            try
+            {
+                cmbCliente.Items.Clear();
+                foreach (var c in _bllCliente.ObtenerTodos())
+                    cmbCliente.Items.Add(new ClienteItem(c));
+                if (cmbCliente.Items.Count > 0) cmbCliente.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                lblResultado.ForeColor = Color.DarkRed;
+                lblResultado.Text = ex.Message;
+            }
         }
 
         private void CargarPlanes()
         {
-            cmbPlanNuevo.Items.Clear();
-            foreach (var p in _bllPlan.ObtenerActivos())
-                cmbPlanNuevo.Items.Add(new PlanItem(p));
+            try
+            {
+                cmbPlanNuevo.Items.Clear();
+                foreach (var p in _bllPlan.ObtenerActivos())
+                    cmbPlanNuevo.Items.Add(new PlanItem(p));
+            }
+            catch (Exception ex)
+            {
+                lblResultado.ForeColor = Color.DarkRed;
+                lblResultado.Text = ex.Message;
+            }
         }
 
         private void MostrarEstadoActual()

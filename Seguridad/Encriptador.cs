@@ -153,6 +153,15 @@ namespace Seguridad
 
             byte[] datos = Convert.FromBase64String(cifrado);
 
+            // Un valor legacy en texto plano (p. ej. un DNI corto) puede decodificar como
+            // Base64 válido "por casualidad" (mismo alfabeto, longitud múltiplo de 4) pero
+            // sin los 16 bytes mínimos del IV. Sin este chequeo, "new byte[datos.Length-16]"
+            // recibe un tamaño negativo y tira OverflowException, que TryDesencriptar no
+            // captura (solo CryptographicException/FormatException/ArgumentException) — eso
+            // hacía crashear cualquier pantalla que liste clientes con DNI legacy sin cifrar.
+            if (datos.Length < 16)
+                throw new FormatException("Datos cifrados demasiado cortos: no es un valor válido de Desencriptar.");
+
             byte[] iv           = new byte[16];
             byte[] textoCifrado = new byte[datos.Length - 16];
             Array.Copy(datos, 0,  iv,           0, 16);

@@ -95,7 +95,7 @@ namespace Tests
         {
             var dalCliente = new FakeClienteDAL();
             var dalCobro = new FakeCobroDAL();
-            var handler = new ProcesarPagoHandler(dalCliente, dalCobro);
+            var handler = new ProcesarPagoHandler(dalCliente, dalCobro, new FakeCargoPrendaDAL());
             var cliente = ClienteEnGracia(2); // veníamos de un ciclo con gracia activa
 
             var resultado = handler.Procesar(new ContextoCobro
@@ -120,9 +120,57 @@ namespace Tests
         }
 
         [TestMethod]
+        public void ProcesarPago_ConDescuentoPendiente_LoRestaDelImporteYLoConsume()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var dalCobro = new FakeCobroDAL();
+            var dalCargo = new FakeCargoPrendaDAL();
+            var handler = new ProcesarPagoHandler(dalCliente, dalCobro, dalCargo);
+            var cliente = ClienteVigente();
+            cliente.DescuentoProximoCobro = 1000m;
+
+            var resultado = handler.Procesar(new ContextoCobro
+            {
+                Cliente = cliente,
+                Decision = DecisionCobro.Cobrado,
+                Modalidad = BE.Builders.ModalidadCobro.Mensual,
+                Actor = "vendedor1"
+            });
+
+            Assert.AreEqual(BE.EstadoCobro.Cobrado, resultado.Estado);
+            Assert.AreEqual(0m, cliente.DescuentoProximoCobro, "El descuento se consume en este cobro.");
+            Assert.AreEqual(4000m, dalCobro.Registros[0].Importe); // 5000 (PrecioPlan) - 1000
+        }
+
+        [TestMethod]
+        public void ProcesarPago_ConCargosPendientes_LosSumaAlImporteYLosMarcaCobrados()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var dalCobro = new FakeCobroDAL();
+            var dalCargo = new FakeCargoPrendaDAL();
+            dalCargo.Alta(new BE.CargoPrenda { IdPrenda = 1, IdCliente = 2, Motivo = "Rotura", Monto = 500m });
+            dalCargo.Alta(new BE.CargoPrenda { IdPrenda = 2, IdCliente = 2, Motivo = "Pérdida", Monto = 300m });
+            var handler = new ProcesarPagoHandler(dalCliente, dalCobro, dalCargo);
+            var cliente = ClienteVigente(); // IdCliente = 2
+
+            var resultado = handler.Procesar(new ContextoCobro
+            {
+                Cliente = cliente,
+                Decision = DecisionCobro.Cobrado,
+                Modalidad = BE.Builders.ModalidadCobro.Mensual,
+                Actor = "vendedor1"
+            });
+
+            Assert.AreEqual(BE.EstadoCobro.Cobrado, resultado.Estado);
+            Assert.AreEqual(5800m, dalCobro.Registros[0].Importe); // 5000 (PrecioPlan) + 500 + 300
+            Assert.AreEqual(1, dalCargo.MarcarCobradosVeces);
+            Assert.AreEqual(0, dalCargo.ObtenerPendientesPorCliente(2).Count, "Los cargos deben quedar marcados como cobrados.");
+        }
+
+        [TestMethod]
         public void ProcesarPago_DecisionDistinta_DelegaAlSucesor()
         {
-            var handler = new ProcesarPagoHandler(new FakeClienteDAL(), new FakeCobroDAL());
+            var handler = new ProcesarPagoHandler(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
             var espia = new ManejadorEspia();
             handler.AgregarSiguiente(espia);
 
@@ -197,7 +245,7 @@ namespace Tests
             var dalCliente = new FakeClienteDAL();
             var dalCobro = new FakeCobroDAL();
             var detectar = new DetectarCobroHandler();
-            var procesar = new ProcesarPagoHandler(dalCliente, dalCobro);
+            var procesar = new ProcesarPagoHandler(dalCliente, dalCobro, new FakeCargoPrendaDAL());
             var gracia = new AplicarGraciaHandler(dalCliente, dalCobro);
             var suspender = new SuspenderHandler(dalCobro);
 
@@ -218,7 +266,7 @@ namespace Tests
             var dalCliente = new FakeClienteDAL();
             var dalCobro = new FakeCobroDAL();
             var detectar = new DetectarCobroHandler();
-            var procesar = new ProcesarPagoHandler(dalCliente, dalCobro);
+            var procesar = new ProcesarPagoHandler(dalCliente, dalCobro, new FakeCargoPrendaDAL());
             var gracia = new AplicarGraciaHandler(dalCliente, dalCobro);
             var suspender = new SuspenderHandler(dalCobro);
 

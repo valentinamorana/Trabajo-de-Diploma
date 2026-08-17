@@ -7,9 +7,11 @@ namespace BE
     ///
     /// Guarda una "foto" del estado del Usuario (snapshot) en un instante dado y
     /// persiste en la tabla HistorialUsuario. Expone metadatos (Fecha/Actor/Detalle)
-    /// vía <see cref="Memento.IMemento"/> para que el Caretaker liste el historial,
-    /// mientras que el estado capturado (los *Snapshot) solo lo usa el Originator
-    /// (BE.Usuario) al crear y restaurar el Memento.
+    /// vía <see cref="Memento.IMemento"/> para que el Caretaker liste el historial.
+    /// El Originator (BE.Usuario) es el único que usa los *Snapshot para crear y
+    /// restaurar el Memento; GUI.VersionHistorialForm también los lee, pero solo
+    /// para MOSTRAR el contenido de cada versión al usuario (grilla e "confirmar
+    /// restauración"), nunca para tomar decisiones de negocio con ellos.
     /// </summary>
     public class VersionUsuario : Memento.IMemento
     {

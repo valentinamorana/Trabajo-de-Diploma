@@ -31,5 +31,8 @@ namespace BLL.Interfaces
         // calcula la vigencia (patrón Builder) y persiste el vencimiento.
         BE.Builders.Suscripcion ActivarSuscripcion(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad);
+
+        // Bloque 1 — Reanuda una suscripción pausada, sin modificar la fecha de vencimiento.
+        void ReanudarPausa(string modulo, BE.Cliente cliente);
     }
 }

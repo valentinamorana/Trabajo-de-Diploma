@@ -41,5 +41,16 @@ namespace Tests
             // Un valor que no es un cifrado válido se devuelve tal cual (compat. con datos legacy).
             Assert.AreEqual("texto-plano", Seguridad.Encriptador.TryDesencriptar("texto-plano"));
         }
+
+        [TestMethod]
+        public void TryDesencriptar_ToleraDniLegacyNumericoCorto()
+        {
+            // Regresión: un DNI legacy sin cifrar ("30111222") tiene alfabeto y longitud
+            // válidos de Base64 "por casualidad", pero decodifica a menos de los 16 bytes
+            // mínimos del IV. Sin el chequeo de longitud en Desencriptar(), esto tiraba
+            // OverflowException (no capturada por TryDesencriptar) y crasheaba cualquier
+            // pantalla que listara clientes con DNI legacy en texto plano.
+            Assert.AreEqual("30111222", Seguridad.Encriptador.TryDesencriptar("30111222"));
+        }
     }
 }

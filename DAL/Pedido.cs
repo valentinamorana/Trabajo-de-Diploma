@@ -16,7 +16,7 @@ namespace DAL
     /// y en BE.Estados.EstadoEnUso. No unificar sin preservar la protección anti-TOCTOU
     /// (UPDATE condicionado + chequeo de filas afectadas dentro de la transacción).
     /// </summary>
-    public class Pedido : BaseDAL<BE.Pedido>
+    public class Pedido : BaseDAL<BE.Pedido>, Interfaces.IPedidoDAL
     {
 
         // SELECT base compartido por todos los métodos de lectura
@@ -96,6 +96,113 @@ namespace DAL
             return resultado;
         }
 
+        // PdN8 — Desempeño por vendedor: total de pedidos, entregados y cancelados por Empleado.
+        // Usada por BLL.ReporteVentasVendedor para evaluar desempeño comercial.
+        public List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado()
+        {
+            var lista = new List<BE.DesempenoVendedor>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT emp.IdEmpleado, emp.Nombre + ' ' + emp.Apellido AS NombreEmpleado, " +
+                    "       COUNT(*) AS TotalPedidos, " +
+                    "       SUM(CASE WHEN ped.Estado = @Entregado THEN 1 ELSE 0 END) AS Entregados, " +
+                    "       SUM(CASE WHEN ped.Estado = @Cancelado THEN 1 ELSE 0 END) AS Cancelados " +
+                    "FROM Pedido ped " +
+                    "INNER JOIN Empleado emp ON emp.IdEmpleado = ped.IdEmpleado " +
+                    "GROUP BY emp.IdEmpleado, emp.Nombre, emp.Apellido " +
+                    "ORDER BY TotalPedidos DESC",
+                    new[]
+                    {
+                        new SqlParameter("@Entregado", (int)BE.EstadoPedido.Entregado),
+                        new SqlParameter("@Cancelado", (int)BE.EstadoPedido.Cancelado)
+                    });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        lista.Add(new BE.DesempenoVendedor
+                        {
+                            IdEmpleado = Convert.ToInt32(row["IdEmpleado"]),
+                            NombreEmpleado = row["NombreEmpleado"].ToString(),
+                            TotalPedidos = Convert.ToInt32(row["TotalPedidos"]),
+                            Entregados = Convert.ToInt32(row["Entregados"]),
+                            Cancelados = Convert.ToInt32(row["Cancelados"])
+                        });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener las estadísticas por vendedor.", ex);
+            }
+            return lista;
+        }
+
+        // PdN9 — Cantidad de veces que cada prenda fue pedida (excluye pedidos Cancelados:
+        // un pedido cancelado no representa demanda real). Usada por BLL.AnalisisRotacion.
+        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda()
+        {
+            var resultado = new Dictionary<int, int>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT pp.IdPrenda, COUNT(*) AS Cantidad " +
+                    "FROM PedidoPrenda pp " +
+                    "INNER JOIN Pedido p ON p.IdPedido = pp.IdPedido " +
+                    "WHERE p.Estado <> @EstadoCancelado " +
+                    "GROUP BY pp.IdPrenda",
+                    new[] { new SqlParameter("@EstadoCancelado", (int)BE.EstadoPedido.Cancelado) });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        resultado[Convert.ToInt32(row["IdPrenda"])] = Convert.ToInt32(row["Cantidad"]);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener la cantidad de pedidos por prenda.", ex);
+            }
+            return resultado;
+        }
+
+        // PdN13 — Prendas que un cliente pidió alguna vez (excluye pedidos Cancelados), para
+        // construir su perfil de preferencias. Usada por BLL.RecomendacionPrendas.
+        public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente)
+        {
+            var lista = new List<BE.Prenda>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT pr.IdPrenda, pr.Nombre, pr.Descripcion, pr.Talle, pr.Color, " +
+                    "       pr.Categoria, pr.Estado, pr.IdClienteActual, pr.FechaAlta " +
+                    "FROM PedidoPrenda pp " +
+                    "INNER JOIN Pedido p ON p.IdPedido = pp.IdPedido " +
+                    "INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda " +
+                    "WHERE p.IdCliente = @IdCliente AND p.Estado <> @EstadoCancelado",
+                    new[]
+                    {
+                        new SqlParameter("@IdCliente", idCliente),
+                        new SqlParameter("@EstadoCancelado", (int)BE.EstadoPedido.Cancelado)
+                    });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        lista.Add(new BE.Prenda
+                        {
+                            IdPrenda = Convert.ToInt32(row["IdPrenda"]),
+                            Nombre = row["Nombre"].ToString(),
+                            Descripcion = row["Descripcion"] != DBNull.Value ? row["Descripcion"].ToString() : null,
+                            Talle = row["Talle"] != DBNull.Value ? row["Talle"].ToString() : null,
+                            Color = row["Color"] != DBNull.Value ? row["Color"].ToString() : null,
+                            Categoria = row["Categoria"] != DBNull.Value ? row["Categoria"].ToString() : null,
+                            Estado = (BE.EstadoPrenda)Convert.ToInt32(row["Estado"]),
+                            FechaAlta = Convert.ToDateTime(row["FechaAlta"])
+                        });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener el historial de prendas del cliente.", ex);
+            }
+            return lista;
+        }
+
         // Obtiene un pedido por ID incluyendo sus prendas.
         public override BE.Pedido ObtenerPorId(int idPedido)
         {
@@ -155,7 +262,10 @@ namespace DAL
                     }
 
                     using (var cmdPr = new SqlCommand(
-                        "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente " +
+                        // IdUltimoCliente (a diferencia de IdClienteActual) NUNCA se limpia al
+                        // devolverse — así BLL.CargoPrenda puede saber quién tuvo la prenda por
+                        // última vez aunque ya esté en Mantenimiento (EnLimpieza) sin dueño actual.
+                        "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, IdUltimoCliente=@IdCliente " +
                         "WHERE IdPrenda=@IdPrenda AND Estado=@EstadoDisponible",
                         conexion, tx))
                     {
@@ -277,13 +387,18 @@ namespace DAL
             bool cancelado = estado == (int)BE.EstadoPedido.Cancelado;
 
             using (var cmd = new SqlCommand(
-                "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente " +
+                // IdUltimoCliente NUNCA se limpia (a diferencia de IdClienteActual): si se cancela,
+                // @IdClienteUltimo llega NULL y COALESCE conserva el valor que ya tenía la prenda.
+                "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, " +
+                "IdUltimoCliente=COALESCE(@IdClienteUltimo, IdUltimoCliente) " +
                 "WHERE IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
                 conexion, tx))
             {
                 cmd.Parameters.AddWithValue("@Estado",
                     cancelado ? (int)BE.EstadoPrenda.Disponible : (int)BE.EstadoPrenda.EnUso);
                 cmd.Parameters.AddWithValue("@IdCliente",
+                    cancelado ? (object)DBNull.Value : idCliente);
+                cmd.Parameters.AddWithValue("@IdClienteUltimo",
                     cancelado ? (object)DBNull.Value : idCliente);
                 cmd.Parameters.AddWithValue("@IdPedido", idPedido);
                 cmd.ExecuteNonQuery();
@@ -446,7 +561,7 @@ namespace DAL
                 }
 
                 using (var cmdPrendas = new SqlCommand(
-                    "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente " +
+                    "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, IdUltimoCliente=@IdCliente " +
                     "WHERE IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
                     conexion, tx))
                 {

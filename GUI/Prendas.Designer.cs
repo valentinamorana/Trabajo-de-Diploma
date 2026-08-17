@@ -29,6 +29,7 @@ namespace GUI
             this.panelDetalle       = new System.Windows.Forms.Panel();
             this.lblDetalleTitulo   = new System.Windows.Forms.Label();
             this.lblDetalleContenido = new System.Windows.Forms.Label();
+            this.btnAnotarEspera    = new System.Windows.Forms.Button();
             this.panelStatus        = new System.Windows.Forms.Panel();
             this.lblMensaje         = new System.Windows.Forms.Label();
             this.dgvPrendas         = new System.Windows.Forms.DataGridView();
@@ -183,6 +184,7 @@ namespace GUI
             this.panelDetalle.Visible   = false;
             this.panelDetalle.Controls.Add(this.lblDetalleTitulo);
             this.panelDetalle.Controls.Add(this.lblDetalleContenido);
+            this.panelDetalle.Controls.Add(this.btnAnotarEspera);
             this.panelDetalle.Name      = "panelDetalle";
             this.panelDetalle.TabIndex  = 3;
 
@@ -199,12 +201,29 @@ namespace GUI
             // lblDetalleContenido
             this.lblDetalleContenido.Left      = 130;
             this.lblDetalleContenido.Top       = 8;
-            this.lblDetalleContenido.Width     = 800;
+            this.lblDetalleContenido.Width     = 620;
             this.lblDetalleContenido.Height    = 50;
             this.lblDetalleContenido.Font      = new System.Drawing.Font("Segoe UI", 8.5f);
             this.lblDetalleContenido.ForeColor = System.Drawing.Color.FromArgb(100, 60, 0);
             this.lblDetalleContenido.Name      = "lblDetalleContenido";
             this.lblDetalleContenido.TabIndex  = 1;
+
+            // btnAnotarEspera — Lista de Espera (mejora opcional, no requerida por la
+            // cátedra, ver README): anotar un cliente para esta prenda EnUso.
+            this.btnAnotarEspera.Left      = 760;
+            this.btnAnotarEspera.Top       = 18;
+            this.btnAnotarEspera.Width     = 170;
+            this.btnAnotarEspera.Height    = 32;
+            this.btnAnotarEspera.BackColor = System.Drawing.Color.FromArgb(100, 80, 160);
+            this.btnAnotarEspera.ForeColor = System.Drawing.Color.White;
+            this.btnAnotarEspera.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAnotarEspera.FlatAppearance.BorderSize = 0;
+            this.btnAnotarEspera.Visible   = false;
+            this.btnAnotarEspera.Tag       = "btn.anotarespera";
+            this.btnAnotarEspera.Text      = "⏳ Lista de Espera";
+            this.btnAnotarEspera.Name      = "btnAnotarEspera";
+            this.btnAnotarEspera.TabIndex  = 2;
+            this.btnAnotarEspera.Click    += new System.EventHandler(this.BtnAnotarEspera_Click);
 
             // panelStatus
             this.panelStatus.BackColor = System.Drawing.Color.FromArgb(230, 230, 240);
@@ -272,6 +291,7 @@ namespace GUI
         private System.Windows.Forms.Button       btnEditar;
         private System.Windows.Forms.Button       btnCambiarEstado;
         private System.Windows.Forms.Button       btnMantenimiento;
+        private System.Windows.Forms.Button       btnAnotarEspera;
         private System.Windows.Forms.Button       btnRefrescar;
         private System.Windows.Forms.Label        lblConteo;
         private System.Windows.Forms.Panel        panelDetalle;

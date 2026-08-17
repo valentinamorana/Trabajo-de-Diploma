@@ -72,6 +72,31 @@ namespace DAL
                 : 0;
         }
 
+        // Igual que Alta, pero sobre una transacción ya abierta por el caller — usada por
+        // los manejadores de Renovación para que el UPDATE de Cliente y este INSERT sean
+        // atómicos (ver DAL.Cliente.EjecutarTransaccion/ModificarEnTx).
+        public int AltaEnTx(SqlConnection conexion, SqlTransaction tx, BE.Renovacion renovacion)
+        {
+            using (var cmd = new SqlCommand(
+                "INSERT INTO HistorialRenovacion " +
+                "(IdCliente, IdPlanAnterior, IdPlanNuevo, FechaDeteccion, FechaResolucion, Resultado, Actor) " +
+                "VALUES (@IdCliente, @IdPlanAnterior, @IdPlanNuevo, @FechaDeteccion, @FechaResolucion, @Resultado, @Actor); " +
+                "SELECT SCOPE_IDENTITY();",
+                conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@IdCliente", renovacion.IdCliente);
+                cmd.Parameters.AddWithValue("@IdPlanAnterior", (object)renovacion.IdPlanAnterior ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IdPlanNuevo", (object)renovacion.IdPlanNuevo ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaDeteccion", renovacion.FechaDeteccion);
+                cmd.Parameters.AddWithValue("@FechaResolucion", (object)renovacion.FechaResolucion ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Resultado", (int)renovacion.Resultado);
+                cmd.Parameters.AddWithValue("@Actor", (object)renovacion.Actor ?? DBNull.Value);
+
+                var resultadoId = cmd.ExecuteScalar();
+                return resultadoId == null || resultadoId == DBNull.Value ? 0 : Convert.ToInt32(resultadoId);
+            }
+        }
+
         public void Resolver(int idRenovacion, BE.EstadoRenovacion resultado, int? idPlanNuevo)
         {
             SqlParameter[] p =

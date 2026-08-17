@@ -6,6 +6,7 @@ namespace BE
         Pendiente = 0,
         Renovada = 1,
         CambioPlan = 2,
-        Baja = 3
+        Baja = 3,
+        Pausada = 4
     }
 }

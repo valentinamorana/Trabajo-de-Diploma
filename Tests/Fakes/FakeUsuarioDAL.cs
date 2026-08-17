@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using DAL.Interfaces;
 
 namespace Tests.Fakes
@@ -69,5 +70,20 @@ namespace Tests.Fakes
         public void             EliminarFisico(int id)               { }
         public int              ContarAdministradoresActivos()       => AdministradoresActivos;
         public List<BE.Usuario> ObtenerArchivadosParaPurga(int dias) => new List<BE.Usuario>();
+
+        // Soporte transaccional (BLL.RecuperacionIntegridad): sin BD real en el fake, la
+        // "transacción" solo ejecuta la acción con conn/tx nulos — nadie los usa fuera de
+        // pasarlos a SqlCommand, que este doble no llega a construir.
+        public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion) => accion(null, null);
+        public void EliminarEnTx(SqlConnection conexion, SqlTransaction tx, int idUsuario)
+            => Usuarios.RemoveAll(u => u.Id == idUsuario);
+        public void RevertirDesdeEspejoEnTx(SqlConnection conexion, SqlTransaction tx, BE.FilaUsuarioDV valoresEspejo)
+        {
+            var u = Usuarios.Find(x => x.Id == valoresEspejo.Id);
+            if (u == null) return;
+            u.Username = valoresEspejo.Username;
+            u.Perfil   = valoresEspejo.Perfil;
+            u.Rol      = valoresEspejo.Rol;
+        }
     }
 }

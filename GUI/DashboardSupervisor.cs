@@ -82,7 +82,8 @@ namespace GUI
                     var clientes  = _bllCliente.ObtenerTodos();
                     var enMant    = _bllPrenda.ObtenerEnMantenimiento();
                     System.Data.DataTable actividad = null;
-                    try { actividad = _bllBitacora.ObtenerUltimosNDiasSistema(7); } catch { }
+                    try { actividad = _bllBitacora.ObtenerUltimosNDiasSistema(7); }
+                    catch (Exception ex) { System.Diagnostics.Trace.TraceWarning($"[DashboardSupervisor] No se pudo cargar la bitácora: {ex.Message}"); }
 
                     this.BeginInvoke(new Action(() =>
                     {
@@ -92,7 +93,10 @@ namespace GUI
                         ActualizarSesion();
                     }));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[DashboardSupervisor] No se pudo cargar el dashboard: {ex.Message}");
+                }
             });
         }
 
@@ -111,21 +115,21 @@ namespace GUI
 
             foreach (var p in pedidos)
             {
-                int    dias = (int)(DateTime.Today - p.FechaPedido.Date).TotalDays;
+                int    dias = p.DiasDesdeAlta;
                 string tit  = $"Pedido #{p.IdPedido}";
                 string sub  = p.NombreCliente ?? $"Cliente {p.IdCliente}";
                 colPedidos.Controls.Add(CrearCard(tit, sub, dias,
-                    dias >= 2 ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 240, 200)));
+                    p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 240, 200)));
             }
 
             foreach (var m in enMant)
             {
-                int    dias = (int)(DateTime.Today - m.FechaEntrada.Date).TotalDays;
+                int    dias = m.DiasTranscurridos;
                 string tit  = m.NombrePrenda ?? $"Prenda #{m.IdPrenda}";
                 string sub  = $"Entrada: {m.FechaEntrada:dd/MM/yyyy}";
                 colMant.Controls.Add(CrearCard(tit, sub, dias,
-                    dias > 7 ? Color.FromArgb(255, 205, 200)
-                    : dias >= 2 ? Color.FromArgb(255, 248, 210)
+                    m.NivelUrgencia == BE.NivelUrgencia.Urgente ? Color.FromArgb(255, 205, 200)
+                    : m.NivelUrgencia == BE.NivelUrgencia.Normal ? Color.FromArgb(255, 248, 210)
                     : Color.FromArgb(210, 240, 220)));
             }
 
@@ -157,7 +161,10 @@ namespace GUI
                 if (u != null)
                     lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"[DashboardSupervisor] No se pudo cargar la sesión: {ex.Message}");
+            }
         }
 
         // ── Handlers de eventos estáticos (wireados desde el Diseñador) ─────────

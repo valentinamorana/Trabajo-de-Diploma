@@ -48,10 +48,18 @@
     <Compile Include="Interfaces\IControlMapeadoDAL.cs" />
     <Compile Include="ControlMapeado.cs" />
     <Compile Include="Interfaces\IClienteDAL.cs" />
+    <Compile Include="Interfaces\IPedidoDAL.cs" />
+    <Compile Include="Interfaces\IEmpleadoDAL.cs" />
+    <Compile Include="Interfaces\IPlanSuscripcionDAL.cs" />
+    <Compile Include="Interfaces\IPedidoHistorialDAL.cs" />
+    <Compile Include="Interfaces\IPrendaDAL.cs" />
+    <Compile Include="Interfaces\IMantenimientoPrendaDAL.cs" />
     <Compile Include="Interfaces\IUsuarioDAL.cs" />
     <Compile Include="Interfaces\IPreferenciaDAL.cs" />
     <Compile Include="Interfaces\IRenovacionDAL.cs" />
     <Compile Include="Interfaces\ICobroDAL.cs" />
+    <Compile Include="Interfaces\IListaEsperaDAL.cs" />
+    <Compile Include="Interfaces\ICargoPrendaDAL.cs" />
     <Compile Include="Interfaces\IClaveRecuperacionDAL.cs" />
     <Compile Include="Interfaces\IBackupDAL.cs" />
     <Compile Include="Idioma.cs" />
@@ -75,6 +83,8 @@
     <Compile Include="Preferencia.cs" />
     <Compile Include="Renovacion.cs" />
     <Compile Include="Cobro.cs" />
+    <Compile Include="ListaEspera.cs" />
+    <Compile Include="CargoPrenda.cs" />
     <Compile Include="HistorialIntegridad.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="VersionUsuario.cs" />

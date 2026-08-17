@@ -17,7 +17,10 @@ namespace DAL
         // Recalcula DVH de cada fila + DVV de la tabla. Se llama tras Alta/Modificar/Baja.
         // No propaga errores: la falla del DV no debe abortar la operación de negocio
         // (la verificación de integridad al arranque la detectaría igual).
-        private void RecalcularDV()
+        // Público (antes privado): ModificarEnTx no lo llama internamente porque corre DENTRO
+        // de una transacción todavía sin confirmar — el caller (ver EjecutarTransaccion) debe
+        // invocarlo DESPUÉS del commit, mismo criterio que DAL.Pedido.Alta con su propio DV.
+        public void RecalcularDV()
         {
             try { new DigitoVerificador().RecalcularTabla(DV_Tabla, DV_Pk, DV_Columnas); }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Cliente.RecalcularDV] " + ex.Message); }
@@ -33,7 +36,8 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
                     "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
-                    "       c.FechaLimiteGracia, " +
+                    "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
+                    "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
                     "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
@@ -73,7 +77,8 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
                     "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
-                    "       c.FechaLimiteGracia, " +
+                    "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
+                    "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
                     "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
@@ -127,8 +132,20 @@ namespace DAL
             {
                 int id = Convert.ToInt32(row["IdCliente"]);
                 if (id == idExcluir) continue;
-                string dniGuardado = Seguridad.Encriptador.TryDesencriptar(row["DNI"].ToString());
-                if (string.Equals(dniGuardado, dni, StringComparison.Ordinal)) return id;
+                string dniCifrado = row["DNI"].ToString();
+                string dniGuardado = Seguridad.Encriptador.TryDesencriptar(dniCifrado);
+                // Si el descifrado "falló" (TryDesencriptar devuelve el valor cifrado tal
+                // cual), ese cliente queda invisible para la detección de duplicados: nunca
+                // puede volver a matchear contra un DNI nuevo tipeado en texto plano. No hay
+                // forma de arreglarlo sin la clave correcta, pero al menos queda registrado
+                // para poder diagnosticarlo (antes fallaba en silencio).
+                if (dniGuardado == dniCifrado)
+                    System.Diagnostics.Trace.TraceWarning(
+                        "[DAL.Cliente.BuscarIdPorDni] Cliente ID " + id +
+                        " tiene un DNI que no se pudo descifrar con la clave actual " +
+                        "(key.dat no coincide con la usada al cifrarlo) — excluido de la detección de duplicados.");
+                else if (string.Equals(dniGuardado, dni, StringComparison.Ordinal))
+                    return id;
             }
             return 0;
         }
@@ -146,12 +163,13 @@ namespace DAL
                 new SqlParameter("@IdPlan",            (object)cliente.IdPlan ?? DBNull.Value),
                 new SqlParameter("@FechaAlta",         cliente.FechaAlta),
                 new SqlParameter("@FechaVencimiento",  (object)cliente.FechaVencimiento  ?? DBNull.Value),
-                new SqlParameter("@FechaNacimiento",   (object)cliente.FechaNacimiento   ?? DBNull.Value)
+                new SqlParameter("@FechaNacimiento",   (object)cliente.FechaNacimiento   ?? DBNull.Value),
+                new SqlParameter("@IdClienteReferente", (object)cliente.IdClienteReferente ?? DBNull.Value)
             };
 
             DataTable tabla = acceso.Leer(
-                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento) " +
-                "VALUES (@Nombre, @Apellido, @DNI, @Email, @MetodoPago, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento); " +
+                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento, IdClienteReferente) " +
+                "VALUES (@Nombre, @Apellido, @DNI, @Email, @MetodoPago, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento, @IdClienteReferente); " +
                 "SELECT SCOPE_IDENTITY() AS IdNuevo",
                 p);
 
@@ -176,16 +194,61 @@ namespace DAL
                 new SqlParameter("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value),
                 new SqlParameter("@FechaNacimiento",  (object)cliente.FechaNacimiento  ?? DBNull.Value),
                 new SqlParameter("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value),
+                new SqlParameter("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value),
+                new SqlParameter("@DescuentoProximoCobro", cliente.DescuentoProximoCobro),
+                new SqlParameter("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado),
                 new SqlParameter("@IdCliente",        cliente.IdCliente)
             };
             acceso.Escribir(
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
                 "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
-                "FechaLimiteGracia=@FechaLimiteGracia " +
+                "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
+                "DescuentoProximoCobro=@DescuentoProximoCobro, BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
                 "WHERE IdCliente=@IdCliente",
                 p);
             RecalcularDV();   // T07
+        }
+
+        // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
+        // Le da a las capas superiores (BLL.Manejadores) una forma de componer, DESDE AFUERA
+        // de esta clase, varias escrituras de distintos DAL en una sola operación atómica.
+        public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion)
+            => acceso.EjecutarTransaccion(accion);
+
+        // Igual que Modificar, pero sobre una transacción ya abierta por el caller (ver
+        // EjecutarTransaccion) — usado por los manejadores de Renovación/Cobro para que el
+        // UPDATE de Cliente y el INSERT del historial (HistorialRenovacion/HistorialCobro)
+        // sean atómicos: antes eran dos round-trips independientes sin transacción compartida,
+        // así que un crash entre medio podía dejar el historial de auditoría desincronizado
+        // del estado real de la suscripción. Sin RecalcularDV acá adentro a propósito: corre
+        // sobre datos todavía sin confirmar — el caller lo llama después del commit.
+        public void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
+                "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
+                "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
+                "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
+                "DescuentoProximoCobro=@DescuentoProximoCobro, BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
+                "WHERE IdCliente=@IdCliente",
+                conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@Nombre", cliente.Nombre);
+                cmd.Parameters.AddWithValue("@Apellido", cliente.Apellido);
+                cmd.Parameters.AddWithValue("@DNI", Seguridad.Encriptador.Encriptar(cliente.DNI));
+                cmd.Parameters.AddWithValue("@Email", (object)cliente.Email ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@MetodoPago", cliente.MetodoPago);
+                cmd.Parameters.AddWithValue("@IdPlan", (object)cliente.IdPlan ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaNacimiento", (object)cliente.FechaNacimiento ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@DescuentoProximoCobro", cliente.DescuentoProximoCobro);
+                cmd.Parameters.AddWithValue("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado);
+                cmd.Parameters.AddWithValue("@IdCliente", cliente.IdCliente);
+                cmd.ExecuteNonQuery();
+            }
         }
 
         // Baja lógica del cliente (Activo=0).
@@ -225,6 +288,17 @@ namespace DAL
                 FechaLimiteGracia = row.Table.Columns.Contains("FechaLimiteGracia") && row["FechaLimiteGracia"] != DBNull.Value
                                       ? (DateTime?)Convert.ToDateTime(row["FechaLimiteGracia"])
                                       : null,
+                FechaPausaHasta = row.Table.Columns.Contains("FechaPausaHasta") && row["FechaPausaHasta"] != DBNull.Value
+                                      ? (DateTime?)Convert.ToDateTime(row["FechaPausaHasta"])
+                                      : null,
+                IdClienteReferente = row.Table.Columns.Contains("IdClienteReferente") && row["IdClienteReferente"] != DBNull.Value
+                                      ? (int?)Convert.ToInt32(row["IdClienteReferente"])
+                                      : null,
+                DescuentoProximoCobro = row.Table.Columns.Contains("DescuentoProximoCobro") && row["DescuentoProximoCobro"] != DBNull.Value
+                                      ? Convert.ToDecimal(row["DescuentoProximoCobro"])
+                                      : 0,
+                BeneficioReferidoOtorgado = row.Table.Columns.Contains("BeneficioReferidoOtorgado") && row["BeneficioReferidoOtorgado"] != DBNull.Value
+                                      && Convert.ToBoolean(row["BeneficioReferidoOtorgado"]),
                 StockUtilizado = Convert.ToInt32(row["StockUtilizado"])
             };
         }

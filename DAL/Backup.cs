@@ -149,7 +149,13 @@ namespace DAL
                     }
                 }
             }
-            catch { /* header ilegible → null (la verificación de corrupción se hace en VerificarBackup) */ }
+            catch (Exception ex)
+            {
+                // Header ilegible → null (la verificación de corrupción se hace en VerificarBackup),
+                // pero se deja constancia por si en realidad es un problema de conectividad real.
+                System.Diagnostics.Trace.TraceWarning(
+                    $"[DAL.Backup] No se pudo leer el header del backup '{rutaArchivo}': {ex.Message}");
+            }
             return null;
         }
 
@@ -189,9 +195,12 @@ namespace DAL
                     if (cant > 0)
                         resultado.Add(new BE.CambioPosterior { Entidad = f.Entidad, Cantidad = cant });
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Tabla inexistente / columna ausente en una BD vieja → se omite esa fuente.
+                    // Tabla inexistente / columna ausente en una BD vieja → se omite esa fuente,
+                    // pero se deja constancia por si en realidad es un problema de conectividad real.
+                    System.Diagnostics.Trace.TraceWarning(
+                        $"[DAL.Backup] No se pudo contar cambios posteriores en '{f.Tabla}': {ex.Message}");
                 }
             }
 
@@ -230,9 +239,19 @@ namespace DAL
                 // RNF-02 — No se restaura un backup corrupto: validar integridad de la copia accesible.
                 VerificarBackup(rutaTemp);
 
+                // El RESTORE va en TRY/CATCH: si falla (disco lleno, corrupción que VERIFYONLY no
+                // detectó, etc.) DESPUÉS de que SINGLE_USER ya se aplicó, sin este guard la base
+                // queda bloqueada en modo single-user para siempre, sin ningún camino de código
+                // para recuperarla. El CATCH fuerza MULTI_USER de vuelta y relanza el error real.
                 const string sql =
                     "ALTER DATABASE WardrobeFlowDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
-                    "RESTORE DATABASE WardrobeFlowDB FROM DISK = @Ruta WITH REPLACE; " +
+                    "BEGIN TRY " +
+                    "    RESTORE DATABASE WardrobeFlowDB FROM DISK = @Ruta WITH REPLACE; " +
+                    "END TRY " +
+                    "BEGIN CATCH " +
+                    "    ALTER DATABASE WardrobeFlowDB SET MULTI_USER; " +
+                    "    THROW; " +
+                    "END CATCH " +
                     "ALTER DATABASE WardrobeFlowDB SET MULTI_USER;";
 
                 using (var conn = new SqlConnection(_cadenaConexionMaster))

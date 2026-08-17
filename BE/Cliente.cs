@@ -70,11 +70,11 @@ namespace BE
             && FechaVencimiento.Value.Date >= DateTime.Today
             && (FechaVencimiento.Value.Date - DateTime.Today).TotalDays <= diasAlerta;
 
-        // Días que faltan para que venza la suscripción; int.MaxValue si no hay fecha.
-        public int DiasHastaVencimiento() =>
+        // Días que faltan para que venza la suscripción; null si no hay fecha.
+        public int? DiasHastaVencimiento() =>
             FechaVencimiento.HasValue
                 ? Math.Max(0, (FechaVencimiento.Value.Date - DateTime.Today).Days)
-                : int.MaxValue;
+                : (int?)null;
 
         // PdN6 — Fecha límite del período de gracia tras un cobro fallido.
         // Null = no está en gracia (al día). Se persiste directo, sin un enum de estado
@@ -91,5 +91,28 @@ namespace BE
         // exitoso: a partir de acá se bloquean nuevos pedidos (BLL.Pedido.CrearPedido).
         public bool EstaSuspendidoPorPago =>
             FechaLimiteGracia.HasValue && FechaLimiteGracia.Value.Date < DateTime.Today;
+
+        // Pausa de suscripción — el cliente pidió no usar el servicio temporalmente (viaje,
+        // etc.) sin darse de baja del todo. Null = nunca pausado / pausa ya terminada.
+        public DateTime? FechaPausaHasta { get; set; }
+
+        // True mientras la pausa está vigente: bloquea pedidos nuevos (BLL.Pedido.CrearPedido)
+        // SIN tocar FechaVencimiento — al reanudar, la fecha de vencimiento queda como estaba
+        // (decisión de diseño: pausar no extiende la suscripción).
+        public bool EstaPausada =>
+            FechaPausaHasta.HasValue && FechaPausaHasta.Value.Date >= DateTime.Today;
+
+        // Programa de referidos — quién trajo a este cliente (null si nadie lo refirió).
+        public int? IdClienteReferente { get; set; }
+
+        // Descuento pendiente de aplicar en el próximo cobro (PdN6), otorgado cuando este
+        // cliente refirió a alguien que activó su suscripción. Se resetea a 0 al usarse.
+        public decimal DescuentoProximoCobro { get; set; }
+
+        // Evita otorgar el beneficio de referido más de una vez para el mismo cliente
+        // referido (ActivarSuscripcion solo debería dispararlo la primera vez).
+        public bool BeneficioReferidoOtorgado { get; set; }
+
+        public bool TieneDescuentoPendiente => DescuentoProximoCobro > 0;
     }
 }

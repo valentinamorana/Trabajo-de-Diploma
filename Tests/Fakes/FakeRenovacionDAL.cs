@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using DAL.Interfaces;
 
 namespace Tests.Fakes
@@ -19,6 +20,8 @@ namespace Tests.Fakes
             Registros.Add(renovacion);
             return renovacion.IdRenovacion;
         }
+
+        public int AltaEnTx(SqlConnection conexion, SqlTransaction tx, BE.Renovacion renovacion) => Alta(renovacion);
 
         public void Resolver(int idRenovacion, BE.EstadoRenovacion resultado, int? idPlanNuevo)
         {

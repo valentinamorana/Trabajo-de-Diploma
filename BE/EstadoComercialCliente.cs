@@ -27,6 +27,6 @@ namespace BE
 
         // Alerta proactiva: suscripción vigente pero vence pronto
         public bool SuscripcionProximaAVencer { get; set; }
-        public int  DiasHastaVencimiento      { get; set; }
+        public int? DiasHastaVencimiento      { get; set; }
     }
 }

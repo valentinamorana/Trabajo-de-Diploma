@@ -14,7 +14,7 @@ namespace DAL
     ///   - acceso  → Singleton de BD (heredado, no se redeclara)
     ///   - ObtenerTodos() y ObtenerPorId() → implementados con SQL de Prenda
     /// </summary>
-    public class Prenda : BaseDAL<BE.Prenda>
+    public class Prenda : BaseDAL<BE.Prenda>, Interfaces.IPrendaDAL
     {
 
         // Devuelve todas las prendas con nombre del cliente si están en uso. 
@@ -25,10 +25,12 @@ namespace DAL
             {
                 DataTable tabla = acceso.Leer(
                     "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
-                    "       p.Categoria, p.Estado, p.IdClienteActual, p.FechaAlta, " +
-                    "       c.Nombre + ' ' + c.Apellido AS NombreCliente " +
+                    "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       c.Nombre + ' ' + c.Apellido AS NombreCliente, " +
+                    "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
                     "FROM Prenda p " +
-                    "LEFT JOIN Cliente c ON c.IdCliente = p.IdClienteActual " +
+                    "LEFT JOIN Cliente c  ON c.IdCliente  = p.IdClienteActual " +
+                    "LEFT JOIN Cliente cu ON cu.IdCliente = p.IdUltimoCliente " +
                     "ORDER BY p.Categoria, p.Nombre",
                     null);
 
@@ -42,17 +44,21 @@ namespace DAL
             return lista;
         }
 
-        // Devuelve solo las prendas con estado Disponible.
-        public List<BE.Prenda> ObtenerDisponibles()
+        // Devuelve solo las prendas con estado Disponible. El filtrado adicional por
+        // reservas de Lista de Espera (mejora opcional) vive en BLL.Prenda — acá se ignora
+        // el parámetro para no acoplar esta query, ya probada, a una tabla nueva y opcional.
+        public List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null)
         {
             var lista = new List<BE.Prenda>();
             try
             {
                 DataTable tabla = acceso.Leer(
                     "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
-                    "       p.Categoria, p.Estado, p.IdClienteActual, p.FechaAlta, " +
-                    "       NULL AS NombreCliente " +
+                    "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       NULL AS NombreCliente, " +
+                    "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
                     "FROM Prenda p " +
+                    "LEFT JOIN Cliente cu ON cu.IdCliente = p.IdUltimoCliente " +
                     "WHERE p.Estado = @Estado " +
                     "ORDER BY p.Categoria, p.Nombre",
                     new[] { new SqlParameter("@Estado", (int)BE.EstadoPrenda.Disponible) });
@@ -75,10 +81,12 @@ namespace DAL
             {
                 DataTable tabla = acceso.Leer(
                     "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
-                    "       p.Categoria, p.Estado, p.IdClienteActual, p.FechaAlta, " +
-                    "       c.Nombre + ' ' + c.Apellido AS NombreCliente " +
+                    "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       c.Nombre + ' ' + c.Apellido AS NombreCliente, " +
+                    "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
                     "FROM Prenda p " +
-                    "LEFT JOIN Cliente c ON c.IdCliente = p.IdClienteActual " +
+                    "LEFT JOIN Cliente c  ON c.IdCliente  = p.IdClienteActual " +
+                    "LEFT JOIN Cliente cu ON cu.IdCliente = p.IdUltimoCliente " +
                     "WHERE p.IdPrenda = @IdPrenda",
                     p);
 
@@ -104,10 +112,12 @@ namespace DAL
             {
                 DataTable tabla = acceso.Leer(
                     "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
-                    "       p.Categoria, p.Estado, p.IdClienteActual, p.FechaAlta, " +
-                    "       c.Nombre + ' ' + c.Apellido AS NombreCliente " +
+                    "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       c.Nombre + ' ' + c.Apellido AS NombreCliente, " +
+                    "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
                     "FROM Prenda p " +
-                    "LEFT JOIN Cliente c ON c.IdCliente = p.IdClienteActual " +
+                    "LEFT JOIN Cliente c  ON c.IdCliente  = p.IdClienteActual " +
+                    "LEFT JOIN Cliente cu ON cu.IdCliente = p.IdUltimoCliente " +
                     "WHERE p.IdClienteActual = @IdCliente AND p.Estado = @Estado",
                     p);
 
@@ -117,6 +127,38 @@ namespace DAL
             catch (Exception ex)
             {
                 throw new Exception("Error al obtener prendas del cliente.", ex);
+            }
+            return lista;
+        }
+
+        // PdN12 — Stock Disponible agrupado por Talle+Categoría. Usada por
+        // BLL.AnalisisEscasez para detectar combinaciones por debajo del umbral mínimo.
+        public List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria()
+        {
+            var lista = new List<BE.StockPorTalleCategoria>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT ISNULL(Talle, '—') AS Talle, ISNULL(Categoria, '—') AS Categoria, " +
+                    "       COUNT(*) AS Cantidad " +
+                    "FROM Prenda " +
+                    "WHERE Estado = @Estado " +
+                    "GROUP BY Talle, Categoria " +
+                    "ORDER BY Categoria, Talle",
+                    new[] { new SqlParameter("@Estado", (int)BE.EstadoPrenda.Disponible) });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        lista.Add(new BE.StockPorTalleCategoria
+                        {
+                            Talle = row["Talle"].ToString(),
+                            Categoria = row["Categoria"].ToString(),
+                            CantidadDisponible = Convert.ToInt32(row["Cantidad"])
+                        });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener el stock disponible por talle y categoría.", ex);
             }
             return lista;
         }
@@ -166,16 +208,20 @@ namespace DAL
         }
 
         // Cambia el estado de una prenda (disponible, en uso, limpieza, baja).
+        // IdUltimoCliente solo se pisa cuando se pasa un idClienteActual concreto (asignación);
+        // en las demás transiciones (limpieza, baja) se conserva el último dueño conocido.
         public void CambiarEstado(int idPrenda, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null)
         {
             SqlParameter[] p =
             {
                 new SqlParameter("@Estado", (int)nuevoEstado),
                 new SqlParameter("@IdClienteActual", (object)idClienteActual ?? DBNull.Value),
+                new SqlParameter("@IdUltimoCliente", (object)idClienteActual ?? DBNull.Value),
                 new SqlParameter("@IdPrenda", idPrenda)
             };
             acceso.Escribir(
-                "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdClienteActual " +
+                "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdClienteActual, " +
+                "IdUltimoCliente=COALESCE(@IdUltimoCliente, IdUltimoCliente) " +
                 "WHERE IdPrenda=@IdPrenda",
                 p);
         }
@@ -193,6 +239,10 @@ namespace DAL
                 Estado = (BE.EstadoPrenda)Convert.ToInt32(row["Estado"]),
                 IdClienteActual = row["IdClienteActual"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdClienteActual"]) : null,
                 NombreCliente = row["NombreCliente"] != DBNull.Value ? row["NombreCliente"].ToString() : null,
+                IdUltimoCliente = row.Table.Columns.Contains("IdUltimoCliente") && row["IdUltimoCliente"] != DBNull.Value
+                    ? (int?)Convert.ToInt32(row["IdUltimoCliente"]) : null,
+                NombreUltimoCliente = row.Table.Columns.Contains("NombreUltimoCliente") && row["NombreUltimoCliente"] != DBNull.Value
+                    ? row["NombreUltimoCliente"].ToString() : null,
                 FechaAlta = Convert.ToDateTime(row["FechaAlta"])
             };
         }

@@ -115,15 +115,5 @@ namespace DAL
                 "INSERT INTO Traduccion (IdControl, IdIdioma, Texto) VALUES (@IdControl, @IdIdioma, @Texto)",
                 p);
         }
-
-        public bool HayTraducciones(string codigoIdioma)
-        {
-            var p = new SqlParameter[] { new SqlParameter("@Codigo", codigoIdioma) };
-            DataTable dt = acceso.Leer(
-                "SELECT TOP 1 t.IdControl FROM Traduccion t " +
-                "JOIN Idioma i ON t.IdIdioma = i.IdIdioma " +
-                "WHERE i.Codigo = @Codigo", p);
-            return dt.Rows.Count > 0;
-        }
     }
 }

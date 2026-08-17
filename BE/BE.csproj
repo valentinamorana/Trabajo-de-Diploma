@@ -70,7 +70,6 @@
     <Compile Include="PlanSuscripcion.cs" />
     <Compile Include="Prenda.cs" />
     <Compile Include="TipoEventoNegocio.cs" />
-    <Compile Include="TipoPermiso.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="VersionUsuario.cs" />
     <Compile Include="Memento\IMemento.cs" />
@@ -92,6 +91,8 @@
     <Compile Include="Renovacion.cs" />
     <Compile Include="EstadoCobro.cs" />
     <Compile Include="Cobro.cs" />
+    <Compile Include="EstadoListaEspera.cs" />
+    <Compile Include="ListaEspera.cs" />
     <Compile Include="DatosClienteRiesgo.cs" />
     <Compile Include="ResultadoRiesgo.cs" />
     <Compile Include="ClienteEnRiesgo.cs" />
@@ -102,6 +103,14 @@
     <Compile Include="FilaDV.cs" />
     <Compile Include="Roles.cs" />
     <Compile Include="Patentes.cs" />
+    <Compile Include="DesempenoVendedor.cs" />
+    <Compile Include="RotacionPrenda.cs" />
+    <Compile Include="TiempoMantenimientoPrenda.cs" />
+    <Compile Include="StockPorTalleCategoria.cs" />
+    <Compile Include="EscasezStock.cs" />
+    <Compile Include="PrendaRecomendada.cs" />
+    <Compile Include="EstadoCargo.cs" />
+    <Compile Include="CargoPrenda.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

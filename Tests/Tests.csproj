@@ -40,6 +40,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="BackupTests.cs" />
     <Compile Include="CasosPruebaEspecialesTests.cs" />
     <Compile Include="ClaveEmergenciaTests.cs" />
@@ -51,7 +54,16 @@
     <Compile Include="SuscripcionBuilderTests.cs" />
     <Compile Include="ComandoPedidoTests.cs" />
     <Compile Include="RenovacionTests.cs" />
+    <Compile Include="ClienteTests.cs" />
+    <Compile Include="CargoPrendaTests.cs" />
+    <Compile Include="PedidoTests.cs" />
+    <Compile Include="AnalisisEscasezTests.cs" />
+    <Compile Include="AnalisisMantenimientoTests.cs" />
+    <Compile Include="AnalisisRotacionTests.cs" />
+    <Compile Include="RecomendacionPrendasTests.cs" />
+    <Compile Include="ReporteVentasVendedorTests.cs" />
     <Compile Include="CobroTests.cs" />
+    <Compile Include="ListaEsperaTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="UsuarioAbmTests.cs" />
     <Compile Include="RolAdminTests.cs" />
@@ -73,6 +85,14 @@
     <Compile Include="Fakes\FakeClienteDAL.cs" />
     <Compile Include="Fakes\FakeRenovacionDAL.cs" />
     <Compile Include="Fakes\FakeCobroDAL.cs" />
+    <Compile Include="Fakes\FakeListaEsperaDAL.cs" />
+    <Compile Include="Fakes\FakeCargoPrendaDAL.cs" />
+    <Compile Include="Fakes\FakePedidoDAL.cs" />
+    <Compile Include="Fakes\FakeEmpleadoDAL.cs" />
+    <Compile Include="Fakes\FakePlanSuscripcionDAL.cs" />
+    <Compile Include="Fakes\FakePedidoHistorialDAL.cs" />
+    <Compile Include="Fakes\FakePrendaDAL.cs" />
+    <Compile Include="Fakes\FakeMantenimientoPrendaDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

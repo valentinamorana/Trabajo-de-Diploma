@@ -166,6 +166,11 @@ namespace GUI
 
         // ── Métricas ──────────────────────────────────────────────────────────
 
+        // Un widget que no pudo cargar deja su tarjeta en "—" (no rompe el dashboard), pero
+        // se deja constancia acá para poder distinguir "dato en cero" de "falló la consulta".
+        private static void LogWidget(string widget, Exception ex)
+            => System.Diagnostics.Trace.TraceWarning($"[DashboardForm] No se pudo cargar '{widget}': {ex.Message}");
+
         private void ActualizarMetricas()
         {
             // Backup es I/O de archivo (rápido, sin BD) — se actualiza al instante
@@ -179,11 +184,11 @@ namespace GUI
                 BE.Usuario usuario = null;
                 DateTime? hora = null;
 
-                if (_verPrendas)  try { nPrendas  = _bllPrenda.ObtenerDisponibles().Count; } catch { }
-                if (_verClientes) try { nClientes = _bllCliente.ObtenerTodos().Count; } catch { }
-                if (_verPedidos)  try { nPedidos  = _bllPedido.ObtenerPendientes().Count; } catch { }
-                if (_verPrendas)  try { ocup      = _bllPrenda.ObtenerOcupacion(); } catch { }
-                try { usuario = _bllUsuario.ObtenerUsuarioActivo(); hora = _bllUsuario.ObtenerFechaInicioSesion(); } catch { }
+                if (_verPrendas)  try { nPrendas  = _bllPrenda.ObtenerDisponibles().Count; } catch (Exception ex) { LogWidget("prendas disponibles", ex); }
+                if (_verClientes) try { nClientes = _bllCliente.ObtenerTodos().Count; } catch (Exception ex) { LogWidget("clientes", ex); }
+                if (_verPedidos)  try { nPedidos  = _bllPedido.ObtenerPendientes().Count; } catch (Exception ex) { LogWidget("pedidos pendientes", ex); }
+                if (_verPrendas)  try { ocup      = _bllPrenda.ObtenerOcupacion(); } catch (Exception ex) { LogWidget("ocupación de stock", ex); }
+                try { usuario = _bllUsuario.ObtenerUsuarioActivo(); hora = _bllUsuario.ObtenerFechaInicioSesion(); } catch (Exception ex) { LogWidget("usuario activo", ex); }
 
                 this.BeginInvoke(new Action(() =>
                 {
@@ -565,21 +570,22 @@ namespace GUI
                     if (enMant != null)
                         foreach (var m in enMant)
                         {
-                            int dias = (int)(DateTime.Today - m.FechaEntrada.Date).TotalDays;
+                            int dias = m.DiasTranscurridos;
                             string desde = dias == 0 ? T("dash.hoy", "hoy") : string.Format(T("dash.hace_dias", "hace {0}d"), dias);
                             var fila = dgvTareas.Rows[dgvTareas.Rows.Add(tipoMant, m.NombrePrenda, desde)];
-                            fila.DefaultCellStyle.ForeColor = dias >= 3 ? Color.FromArgb(160, 60, 0) : Color.FromArgb(60, 100, 60);
+                            fila.DefaultCellStyle.ForeColor = m.NivelUrgencia == BE.NivelUrgencia.Reciente
+                                ? Color.FromArgb(60, 100, 60) : Color.FromArgb(160, 60, 0);
                             fila.Tag = "mant";
                         }
 
                     if (pedPend != null)
                         foreach (var p in pedPend)
                         {
-                            int dias = (int)(DateTime.Today - p.FechaPedido.Date).TotalDays;
+                            int dias = p.DiasDesdeAlta;
                             string desde = dias == 0 ? T("dash.hoy", "hoy") : string.Format(T("dash.hace_dias", "hace {0}d"), dias);
                             string desc  = $"#{p.IdPedido} — {p.NombreCliente ?? $"Cliente {p.IdCliente}"}";
                             var fila = dgvTareas.Rows[dgvTareas.Rows.Add(tipoPedido, desc, desde)];
-                            fila.DefaultCellStyle.ForeColor = dias >= 2 ? Color.FromArgb(160, 40, 40) : Color.FromArgb(160, 100, 0);
+                            fila.DefaultCellStyle.ForeColor = p.EsUrgentePorAntiguedad ? Color.FromArgb(160, 40, 40) : Color.FromArgb(160, 100, 0);
                             fila.Tag = "pedido";
                         }
 
@@ -706,8 +712,8 @@ namespace GUI
             Task.Run(() =>
             {
                 System.Data.DataTable dtN = null, dtNeg = null;
-                try { dtN   = _bllBitacora.ObtenerUltimosNDiasSistema(30); } catch { }
-                try { dtNeg = _bllBitacora.ObtenerTodosNegocio(); } catch { }
+                try { dtN   = _bllBitacora.ObtenerUltimosNDiasSistema(30); } catch (Exception ex) { LogWidget("bitácora del sistema (30d)", ex); }
+                try { dtNeg = _bllBitacora.ObtenerTodosNegocio(); } catch (Exception ex) { LogWidget("bitácora de negocio", ex); }
 
                 this.BeginInvoke(new Action(() =>
                 {

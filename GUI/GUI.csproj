@@ -69,6 +69,12 @@
     <Compile Include="CobroSuscripcionForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ListaEsperaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ListaEsperaForm.Designer.cs">
+      <DependentUpon>ListaEsperaForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AnalisisAbandonoForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +83,36 @@
     </Compile>
     <Compile Include="AnalisisAbandonoForm.Designer.cs">
       <DependentUpon>AnalisisAbandonoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ReporteVentasVendedorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReporteVentasVendedorForm.Designer.cs">
+      <DependentUpon>ReporteVentasVendedorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AnalisisRotacionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AnalisisRotacionForm.Designer.cs">
+      <DependentUpon>AnalisisRotacionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AnalisisMantenimientoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AnalisisMantenimientoForm.Designer.cs">
+      <DependentUpon>AnalisisMantenimientoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AnalisisEscasezForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AnalisisEscasezForm.Designer.cs">
+      <DependentUpon>AnalisisEscasezForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RecomendacionPrendasForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RecomendacionPrendasForm.Designer.cs">
+      <DependentUpon>RecomendacionPrendasForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DashboardControlStock.cs">
       <SubType>Form</SubType>
@@ -170,6 +206,12 @@
     <Compile Include="CambioEstadoDialog.Designer.cs">
       <DependentUpon>CambioEstadoDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="CargoPrendaDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CargoPrendaDialog.Designer.cs">
+      <DependentUpon>CargoPrendaDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="NuevoPedidoForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -193,12 +235,6 @@
     </Compile>
     <Compile Include="PedidosRealizados.Designer.cs">
       <DependentUpon>PedidosRealizados.cs</DependentUpon>
-    </Compile>
-    <Compile Include="NotificacionDespachoForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="NotificacionDespachoForm.Designer.cs">
-      <DependentUpon>NotificacionDespachoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Bitacora.Designer.cs">
       <DependentUpon>Bitacora.cs</DependentUpon>
@@ -311,7 +347,13 @@
     <Compile Include="Exportacion\GeneradorBitacora.cs" />
     <Compile Include="Exportacion\GeneradorJornada.cs" />
     <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
+    <Compile Include="Exportacion\GeneradorVentasVendedor.cs" />
+    <Compile Include="Exportacion\GeneradorRotacion.cs" />
+    <Compile Include="Exportacion\GeneradorMantenimiento.cs" />
+    <Compile Include="Exportacion\GeneradorEscasez.cs" />
+    <Compile Include="Exportacion\GeneradorRecomendacion.cs" />
     <Compile Include="Exportacion\ExportadorCsv.cs" />
+    <Compile Include="Estilos\MenuRenderer.cs" />
     <Compile Include="AlertasForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -338,9 +380,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Menu.resx">
       <DependentUpon>Menu.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="NotificacionDespachoForm.resx">
-      <DependentUpon>NotificacionDespachoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NuevoPedidoForm.resx">
       <DependentUpon>NuevoPedidoForm.cs</DependentUpon>

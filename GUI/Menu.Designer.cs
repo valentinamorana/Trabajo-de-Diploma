@@ -42,8 +42,7 @@
             this.panelControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inventarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.outfitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.categoriasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.listaEsperaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.suscriptoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,12 +62,19 @@
             this.backupToolStripMenuItem         = new System.Windows.Forms.ToolStripMenuItem();
             this.historialUsuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.integridadToolStripMenuItem     = new System.Windows.Forms.ToolStripMenuItem();
-            this.bitacoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.auditoriaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bitSistemaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bitNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sepBitacoraToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.reporteJornadaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analiticaNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.analisisAbandonoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sepAnaliticaToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.ventasVendedorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisRotacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisMantenimientoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisEscasezToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recomendacionPrendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventanaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alertasItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsIdioma.SuspendLayout();
@@ -118,13 +124,14 @@
             this.menuStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.usuarioToolStripMenuItem,
+            this.ventanaToolStripMenuItem,
             this.panelControlToolStripMenuItem,
             this.suscriptoresToolStripMenuItem,
             this.inventarioToolStripMenuItem,
             this.ventasToolStripMenuItem,
-            this.bitacoraToolStripMenuItem,
+            this.auditoriaToolStripMenuItem,
+            this.analiticaNegocioToolStripMenuItem,
             this.gestionToolStripMenuItem,
-            this.ventanaToolStripMenuItem,
             this.alertasItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -137,7 +144,7 @@
             this.usuarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miPerfilItem,
             this.cerrarSesionToolStripMenuItem});
-            this.usuarioToolStripMenuItem.Image = global::GUI.Properties.Resources._3106921_1_;
+//            this.usuarioToolStripMenuItem.Image = global::GUI.Properties.Resources._3106921_1_;
             this.usuarioToolStripMenuItem.Name = "usuarioToolStripMenuItem";
             this.usuarioToolStripMenuItem.Tag = "mnu.sesion";
             this.usuarioToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
@@ -173,8 +180,7 @@
             // 
             this.inventarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.prendasToolStripMenuItem,
-            this.outfitsToolStripMenuItem,
-            this.categoriasToolStripMenuItem});
+            this.listaEsperaToolStripMenuItem});
             this.inventarioToolStripMenuItem.Name = "inventarioToolStripMenuItem";
             this.inventarioToolStripMenuItem.Tag = "mnu.inventario";
             this.inventarioToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
@@ -187,20 +193,14 @@
             this.prendasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.prendasToolStripMenuItem.Text = "Prendas";
             this.prendasToolStripMenuItem.Click += new System.EventHandler(this.prendasToolStripMenuItem_Click);
-            // 
-            // outfitsToolStripMenuItem
-            // 
-            this.outfitsToolStripMenuItem.Name = "outfitsToolStripMenuItem";
-            this.outfitsToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
-            this.outfitsToolStripMenuItem.Text = "Outfits";
-            this.outfitsToolStripMenuItem.Click += new System.EventHandler(this.outfitsToolStripMenuItem_Click);
-            // 
-            // categoriasToolStripMenuItem
-            // 
-            this.categoriasToolStripMenuItem.Name = "categoriasToolStripMenuItem";
-            this.categoriasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
-            this.categoriasToolStripMenuItem.Text = "Categorias";
-            this.categoriasToolStripMenuItem.Click += new System.EventHandler(this.categoriasToolStripMenuItem_Click);
+            //
+            // listaEsperaToolStripMenuItem — mejora opcional (no requerida por la cátedra, ver README)
+            //
+            this.listaEsperaToolStripMenuItem.Name = "listaEsperaToolStripMenuItem";
+            this.listaEsperaToolStripMenuItem.Tag = "mnu.listaespera";
+            this.listaEsperaToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.listaEsperaToolStripMenuItem.Text = "Lista de Espera";
+            this.listaEsperaToolStripMenuItem.Click += new System.EventHandler(this.listaEsperaToolStripMenuItem_Click);
             //
             // suscriptoresToolStripMenuItem
             //
@@ -325,6 +325,10 @@
             this.grpSistema.Name = "grpSistema";
             this.grpSistema.Tag  = "mnu.grp.sistema";
             this.grpSistema.Text = "Sistema";
+            // Resalte distintivo: los 3 ítems de este submenú (y el submenú en sí) se pintan
+            // con un fondo propio para diferenciarlos de un vistazo del resto de "Administrar"
+            // — son herramientas transversales del sistema, no ABM de usuarios.
+            this.grpSistema.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             //
             // perfilesToolStripMenuItem
             //
@@ -340,6 +344,7 @@
             this.idiomasToolStripMenuItem.Tag = "mnu.idiomas";
             this.idiomasToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.idiomasToolStripMenuItem.Text = "Gestión de Idiomas";
+            this.idiomasToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             this.idiomasToolStripMenuItem.Click += new System.EventHandler(this.idiomasToolStripMenuItem_Click);
             //
             // historialUsuariosToolStripMenuItem
@@ -356,6 +361,7 @@
             this.backupToolStripMenuItem.Tag  = "mnu.backup";
             this.backupToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.backupToolStripMenuItem.Text = "Backup y Restauración";
+            this.backupToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             this.backupToolStripMenuItem.Click += new System.EventHandler(this.backupToolStripMenuItem_Click);
             //
             // integridadToolStripMenuItem
@@ -364,23 +370,39 @@
             this.integridadToolStripMenuItem.Tag  = "mnu.integridad";
             this.integridadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.integridadToolStripMenuItem.Text = "Diagnóstico de Integridad";
+            this.integridadToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             this.integridadToolStripMenuItem.Click += new System.EventHandler(this.integridadToolStripMenuItem_Click);
             //
-            // bitacoraToolStripMenuItem
+            // auditoriaToolStripMenuItem — antes vivía junto con los reportes de negocio dentro
+            // de un único menú "Analítica" de 9 ítems en un dropdown plano; se separó en dos
+            // menúes de primer nivel para que cada uno se lea de un vistazo (auditoría del
+            // sistema vs. decisiones comerciales).
             //
-            this.bitacoraToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.auditoriaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bitSistemaToolStripMenuItem,
             this.bitNegocioToolStripMenuItem,
             this.sepBitacoraToolStripSeparator,
-            this.reporteJornadaToolStripMenuItem,
-            this.analisisAbandonoToolStripMenuItem});
-            this.bitacoraToolStripMenuItem.Name = "bitacoraToolStripMenuItem";
-            this.bitacoraToolStripMenuItem.Tag = "mnu.bitacora";
-            this.bitacoraToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
-            // Se renombra a "Analítica": agrupa Bitácora con los reportes del Bloque 3 (Idea de
-            // Negocio) a medida que se implementen — misma clave de traducción "mnu.bitacora",
-            // solo cambia el texto que representa (ver rediseño UX/UI, sección 10).
-            this.bitacoraToolStripMenuItem.Text = "Analítica";
+            this.reporteJornadaToolStripMenuItem});
+            this.auditoriaToolStripMenuItem.Name = "auditoriaToolStripMenuItem";
+            this.auditoriaToolStripMenuItem.Tag = "mnu.auditoria";
+            this.auditoriaToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
+            this.auditoriaToolStripMenuItem.Text = "Auditoría";
+            //
+            // analiticaNegocioToolStripMenuItem — los 6 reportes de valor agregado (Bloque 3 +
+            // PdN10), cada uno con patente propia (decisión comercial, no auditoría genérica).
+            //
+            this.analiticaNegocioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.analisisAbandonoToolStripMenuItem,
+            this.sepAnaliticaToolStripSeparator,
+            this.ventasVendedorToolStripMenuItem,
+            this.analisisRotacionToolStripMenuItem,
+            this.analisisMantenimientoToolStripMenuItem,
+            this.analisisEscasezToolStripMenuItem,
+            this.recomendacionPrendasToolStripMenuItem});
+            this.analiticaNegocioToolStripMenuItem.Name = "analiticaNegocioToolStripMenuItem";
+            this.analiticaNegocioToolStripMenuItem.Tag = "mnu.analiticanegocio";
+            this.analiticaNegocioToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
+            this.analiticaNegocioToolStripMenuItem.Text = "Analítica de Negocio";
             //
             // bitSistemaToolStripMenuItem
             //
@@ -411,6 +433,11 @@
             this.reporteJornadaToolStripMenuItem.Text = "📊  Reporte de Jornada";
             this.reporteJornadaToolStripMenuItem.Click += new System.EventHandler(this.reporteJornadaToolStripMenuItem_Click);
             //
+            // sepAnaliticaToolStripSeparator — separa Análisis de Abandono (retención, PdN10)
+            // de los 5 reportes del Bloque 3 (arriba tiene su propia patente, mnuAnalisisAbandono).
+            //
+            this.sepAnaliticaToolStripSeparator.Name = "sepAnaliticaToolStripSeparator";
+            //
             // analisisAbandonoToolStripMenuItem
             //
             this.analisisAbandonoToolStripMenuItem.Name = "analisisAbandonoToolStripMenuItem";
@@ -419,6 +446,46 @@
             this.analisisAbandonoToolStripMenuItem.Text = "📉  Análisis de Abandono";
             this.analisisAbandonoToolStripMenuItem.Click += new System.EventHandler(this.analisisAbandonoToolStripMenuItem_Click);
             //
+            // ventasVendedorToolStripMenuItem
+            //
+            this.ventasVendedorToolStripMenuItem.Name = "ventasVendedorToolStripMenuItem";
+            this.ventasVendedorToolStripMenuItem.Tag = "mnu.ventasvendedor";
+            this.ventasVendedorToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.ventasVendedorToolStripMenuItem.Text = "🧾  Ventas por Vendedor";
+            this.ventasVendedorToolStripMenuItem.Click += new System.EventHandler(this.ventasVendedorToolStripMenuItem_Click);
+            //
+            // analisisRotacionToolStripMenuItem
+            //
+            this.analisisRotacionToolStripMenuItem.Name = "analisisRotacionToolStripMenuItem";
+            this.analisisRotacionToolStripMenuItem.Tag = "mnu.rotacion";
+            this.analisisRotacionToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.analisisRotacionToolStripMenuItem.Text = "🔄  Rotación de Prendas";
+            this.analisisRotacionToolStripMenuItem.Click += new System.EventHandler(this.analisisRotacionToolStripMenuItem_Click);
+            //
+            // analisisMantenimientoToolStripMenuItem
+            //
+            this.analisisMantenimientoToolStripMenuItem.Name = "analisisMantenimientoToolStripMenuItem";
+            this.analisisMantenimientoToolStripMenuItem.Tag = "mnu.mantanalisis";
+            this.analisisMantenimientoToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.analisisMantenimientoToolStripMenuItem.Text = "🧽  Tiempos de Mantenimiento";
+            this.analisisMantenimientoToolStripMenuItem.Click += new System.EventHandler(this.analisisMantenimientoToolStripMenuItem_Click);
+            //
+            // analisisEscasezToolStripMenuItem
+            //
+            this.analisisEscasezToolStripMenuItem.Name = "analisisEscasezToolStripMenuItem";
+            this.analisisEscasezToolStripMenuItem.Tag = "mnu.escasez";
+            this.analisisEscasezToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.analisisEscasezToolStripMenuItem.Text = "📦  Escasez de Stock";
+            this.analisisEscasezToolStripMenuItem.Click += new System.EventHandler(this.analisisEscasezToolStripMenuItem_Click);
+            //
+            // recomendacionPrendasToolStripMenuItem
+            //
+            this.recomendacionPrendasToolStripMenuItem.Name = "recomendacionPrendasToolStripMenuItem";
+            this.recomendacionPrendasToolStripMenuItem.Tag = "mnu.recomendacion";
+            this.recomendacionPrendasToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.recomendacionPrendasToolStripMenuItem.Text = "✨  Recomendación de Prendas";
+            this.recomendacionPrendasToolStripMenuItem.Click += new System.EventHandler(this.recomendacionPrendasToolStripMenuItem_Click);
+            //
             // ventanaToolStripMenuItem
             //
             // Lista nativa de ventanas MDI abiertas (hallazgo #2 del rediseño UX/UI: hoy no hay
@@ -426,7 +493,7 @@
             this.ventanaToolStripMenuItem.Name = "ventanaToolStripMenuItem";
             this.ventanaToolStripMenuItem.Tag = "mnu.ventana";
             this.ventanaToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
-            this.ventanaToolStripMenuItem.Text = "Ventana";
+            this.ventanaToolStripMenuItem.Text = "Ventanas Abiertas";
             this.menuStrip1.MdiWindowListItem = this.ventanaToolStripMenuItem;
             //
             // alertasItem — Centro de Alertas, alineado a la derecha (badge se compone en código).
@@ -468,16 +535,22 @@
         private System.Windows.Forms.ToolStripMenuItem panelControlToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem inventarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prendasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem listaEsperaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem backupToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem historialUsuariosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem outfitsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem categoriasToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem bitacoraToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem auditoriaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analiticaNegocioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bitSistemaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bitNegocioToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator sepBitacoraToolStripSeparator;
         private System.Windows.Forms.ToolStripMenuItem reporteJornadaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator sepAnaliticaToolStripSeparator;
         private System.Windows.Forms.ToolStripMenuItem analisisAbandonoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ventasVendedorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisRotacionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisMantenimientoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisEscasezToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recomendacionPrendasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gestionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem perfilesToolStripMenuItem;

@@ -8,9 +8,6 @@ namespace Servicios.Multiidioma
     /// </summary>
     public class Traduccion
     {
-        /// <summary>La clave que identifica el texto en la interfaz.</summary>
-        public Etiqueta Etiqueta { get; set; }
-
         /// <summary>La clave string que identifica el texto (usada por Traductor.Construir).</summary>
         public string   Clave    { get; set; }
 

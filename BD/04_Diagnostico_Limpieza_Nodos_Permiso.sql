@@ -1,4 +1,10 @@
 -- ============================================================
+-- ⚠ HERRAMIENTA MANUAL — NO es parte de la secuencia de despliegue automático.
+-- A diferencia de 01/02/03/05.../14 (que se corren completos y sin editar), este
+-- script requiere reemplazar el placeholder 'prueba4' en la PARTE B por el nombre
+-- real a limpiar ANTES de ejecutarlo, y se corre a mano en SSMS caso por caso — no
+-- lo incluyas en un script de instalación ni lo corras en lote junto a los demás.
+-- ============================================================
 -- WardrobeFlow — 04. DIAGNÓSTICO Y LIMPIEZA DE NODOS DEL ÁRBOL DE PERMISOS
 -- ------------------------------------------------------------
 -- Sirve para detectar y borrar nodos "de prueba" insertados a mano en la tabla

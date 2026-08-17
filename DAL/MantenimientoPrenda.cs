@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 
 namespace DAL
 {
-    public class MantenimientoPrenda : BaseDAL<BE.MantenimientoPrenda>
+    public class MantenimientoPrenda : BaseDAL<BE.MantenimientoPrenda>, Interfaces.IMantenimientoPrendaDAL
     {
         public void IniciarMantenimiento(int idPrenda, string actor)
         {

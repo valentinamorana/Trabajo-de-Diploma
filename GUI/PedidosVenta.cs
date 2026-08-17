@@ -317,7 +317,13 @@ namespace GUI
 
             try
             {
-                pedidoBLL.Cancelar(this.Text, pedido, motivo);
+                // Patrón Command (PdN3): la GUI arma el pedido de cancelación y se lo entrega
+                // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
+                // ejecución real siguen 100% en BLL.Pedido.Cancelar, adentro del Command.
+                var invocador = new BLL.Comandos.InvocadorPedido();
+                invocador.TomarOrden(new BLL.Comandos.CancelacionCommand(pedidoBLL, pedido, this.Text, motivo));
+                invocador.ProcesarOrdenes();
+
                 string fmtCancelado = T_c("msg.ped.cancelado", "Pedido #{0} cancelado. Prendas liberadas.");
                 MostrarOk(string.Format(fmtCancelado, pedido.IdPedido));
                 CargarPedidos();

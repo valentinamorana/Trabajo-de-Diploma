@@ -12,6 +12,16 @@ namespace BLL
         private readonly Servicios.Bitacora        srvSistema = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio srvNegocio = new Servicios.BitacoraNegocio();
 
+        // ── Registro ──────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Registra un evento del sistema sin requerir sesión activa (arranque, login fallido,
+        /// excepciones no controladas). Único punto de escritura que la GUI debería usar.
+        /// </summary>
+        public void RegistrarSinSesion(string modulo, string actividad, BE.Criticidad criticidad,
+                                        int? idUsuario = null, string detalle = null)
+            => srvSistema.RegistrarSinSesion(modulo, actividad, criticidad, idUsuario, detalle);
+
         // ── Sistema ───────────────────────────────────────────────────────────
 
         public DataTable ObtenerTodosSistema()

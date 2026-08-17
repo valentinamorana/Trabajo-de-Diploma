@@ -14,10 +14,22 @@ namespace BE.Estados
     public abstract class Estado
     {
         /// <summary>
+        /// Indica, SIN modificar nada, si la transición a <paramref name="destino"/> es
+        /// válida para este estado. Única fuente de verdad de las reglas de transición
+        /// (también la consulta <see cref="Prenda.TransicionPermitida"/>, de solo lectura).
+        /// </summary>
+        public abstract bool EsTransicionValida(EstadoPrenda destino);
+
+        /// <summary>
         /// Si la transición a <paramref name="destino"/> es válida para este estado,
         /// la aplica sobre <paramref name="prenda"/> (Estado = destino) y devuelve true.
         /// Si no es válida, no modifica nada y devuelve false.
         /// </summary>
-        public abstract bool ControlarEstado(Prenda prenda, EstadoPrenda destino);
+        public bool ControlarEstado(Prenda prenda, EstadoPrenda destino)
+        {
+            if (!EsTransicionValida(destino)) return false;
+            prenda.Estado = destino;
+            return true;
+        }
     }
 }

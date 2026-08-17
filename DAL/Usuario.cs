@@ -245,6 +245,44 @@ namespace DAL
             }
         }
 
+        // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
+        // Mismo patrón que DAL.Cliente.EjecutarTransaccion — le da a BLL una forma de componer,
+        // desde afuera de esta clase, varias escrituras en una sola operación atómica.
+        public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion)
+            => acceso.EjecutarTransaccion(accion);
+
+        // Elimina una fila de Usuario dentro de una transacción ya abierta por el caller (ver
+        // EjecutarTransaccion). Usado por BLL.RecuperacionIntegridad.RepararDesdeEspejo para
+        // borrar inserciones externas detectadas al comparar contra el espejo de integridad.
+        public void EliminarEnTx(SqlConnection conexion, SqlTransaction tx, int idUsuario)
+        {
+            using (var cmd = new SqlCommand("DELETE FROM Usuario WHERE IdUsuario = @id", conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@id", idUsuario);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // Revierte una fila de Usuario a los valores legítimos guardados en el espejo de
+        // integridad, dentro de una transacción ya abierta por el caller. Usado por
+        // BLL.RecuperacionIntegridad.RepararDesdeEspejo para deshacer modificaciones externas.
+        public void RevertirDesdeEspejoEnTx(SqlConnection conexion, SqlTransaction tx, BE.FilaUsuarioDV valoresEspejo)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE Usuario SET Username=@u, Clave=@c, Rol=@r, Perfil=@p, Estado=@e, " +
+                "IntentosFallidos=@i WHERE IdUsuario=@id", conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@u",  (object)valoresEspejo.Username ?? string.Empty);
+                cmd.Parameters.AddWithValue("@c",  (object)valoresEspejo.Clave    ?? string.Empty);
+                cmd.Parameters.AddWithValue("@r",  (object)valoresEspejo.Rol      ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@p",  (object)valoresEspejo.Perfil   ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@e",  int.TryParse(valoresEspejo.Estado, out int est) ? est : 1);
+                cmd.Parameters.AddWithValue("@i",  int.TryParse(valoresEspejo.IntentosFallidos, out int it) ? it : 0);
+                cmd.Parameters.AddWithValue("@id", valoresEspejo.Id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         // Incrementa en 1 el contador de intentos fallidos para el username dado.
         // El contador persiste en BD: sobrevive reinicios de la aplicación.
         public void IncrementarIntentosFallidos(string username)

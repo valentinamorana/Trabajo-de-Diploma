@@ -39,6 +39,17 @@ namespace BE
             $"Pedido #{IdPedido} — {NombreCliente ?? $"Cliente {IdCliente}"} — {Estado}";
 
         // Comportamiento
+        // Días transcurridos desde que se generó el pedido — usado por los dashboards de
+        // rol (Kanban) para mostrar antigüedad y decidir el color de la tarjeta, en vez de
+        // que cada dashboard recalcule "DateTime.Today - FechaPedido" por su cuenta.
+        public int DiasDesdeAlta => (int)(DateTime.Today - FechaPedido.Date).TotalDays;
+
+        // Umbral de antigüedad que los dashboards usan para resaltar un pedido Pendiente
+        // sin atender. Centralizado acá para que Vendedor/Operador/Supervisor coincidan
+        // siempre en el mismo criterio (antes duplicado con el mismo número "mágico" en
+        // los 3 dashboards, sin una única fuente de verdad).
+        public bool EsUrgentePorAntiguedad => DiasDesdeAlta >= 2;
+
         // El pedido puede cancelarse solo si está Pendiente.
         public bool PuedeCancelarse() => Estado == EstadoPedido.Pendiente;
 

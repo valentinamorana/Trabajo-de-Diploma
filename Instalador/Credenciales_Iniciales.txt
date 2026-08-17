@@ -1,0 +1,23 @@
+WardrobeFlow — Credenciales iniciales (usuarios semilla)
+==========================================================
+
+Estas cuentas se crean automáticamente al instalar el sistema por primera vez
+(ver BD/01_Crear_BaseDeDatos.sql). Se recomienda cambiar las contraseñas
+desde Mi Perfil apenas se ingresa por primera vez.
+
+  Usuario     Contraseña           Rol
+  ----------- -------------------- --------------------
+  admin       administrador1!      Administrador
+  supervisor  supervisor1!         Supervisor
+  vendedor    vendedor1!           Vendedor
+  stock       controladorstock1!   Controlador de Stock
+  operador    operador1!           Operador de Inventario
+
+Requisitos previos a la instalación
+------------------------------------
+- SQL Server Express (o superior) instalado y en ejecución, con la instancia
+  con nombre SQLEXPRESS (instancia por defecto de SQL Server Express).
+- .NET Framework 4.7.2 o superior.
+
+El instalador crea la base de datos WardrobeFlowDB y todas sus tablas de
+forma automática durante la instalación.

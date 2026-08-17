@@ -10,8 +10,8 @@ namespace Tests
         private const int X = BLL.PanelAlertas.Desconocido;
         // EvaluarAlertas es estática y pura: no se instancia PanelAlertas (su ctor toca la BD).
         private static System.Collections.Generic.List<BE.Alerta> Evaluar(
-            int venc, int porVenc, int backup, int limp, int dv) =>
-            BLL.PanelAlertas.EvaluarAlertas(venc, porVenc, backup, limp, dv);
+            int venc, int porVenc, int backup, int limp, int dv, int reservadasEspera = 0) =>
+            BLL.PanelAlertas.EvaluarAlertas(venc, porVenc, backup, limp, dv, reservadasEspera);
 
         [TestMethod]
         public void Evaluar_TodoEnOrden_SinAlertas()
@@ -95,6 +95,22 @@ namespace Tests
             var alertas = Evaluar(2, 3, -1, 1, 5);
             Assert.AreEqual(5, alertas.Count); // vencidas + porvencer + backup.nunca + limpieza + dv
             Assert.AreEqual(3, alertas.Count(x => x.Nivel == BE.NivelAlerta.Critica)); // vencidas, backup.nunca, dv
+        }
+
+        // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README).
+        [TestMethod]
+        public void Evaluar_PrendasReservadasPorListaDeEspera_AlertaInfo()
+        {
+            var a = Evaluar(0, 0, 2, 0, 0, reservadasEspera: 3).Single();
+            Assert.AreEqual(BE.NivelAlerta.Info, a.Nivel);
+            Assert.AreEqual("alert.listaespera.reservadas", a.ClaveI18n);
+            Assert.AreEqual(3, a.Cantidad);
+        }
+
+        [TestMethod]
+        public void Evaluar_SinReservasListaDeEspera_NoAlerta()
+        {
+            Assert.AreEqual(0, Evaluar(0, 0, 2, 0, 0, reservadasEspera: 0).Count);
         }
     }
 }

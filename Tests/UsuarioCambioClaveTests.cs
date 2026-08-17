@@ -46,19 +46,39 @@ namespace Tests
         }
 
         [TestMethod]
-        public void CambiarClavePropia_ClaveDebil_LanzaClaveInvalida_SinTocarDAL()
+        public void CambiarClavePropia_ClaveCorta_LanzaClaveCorta_SinTocarDAL()
         {
             LoginCon("Actual1!");
             var fake = new FakeUsuarioDAL();
             var bll  = new BLL.Usuario(fake);
             try
             {
-                bll.CambiarClavePropia("Test", "abc");   // no cumple requisitos
+                bll.CambiarClavePropia("Test", "abc");   // menos de 8 caracteres
                 Assert.Fail("Debía rechazar una clave débil.");
             }
             catch (BE.AppException ex)
             {
-                Assert.AreEqual("err.bll.usuario.clave_invalida", ex.Clave);
+                // Encriptador.ValidarContrasena chequea longitud antes que número/especial —
+                // con menos de 8 caracteres la clave devuelta es siempre clave_corta.
+                Assert.AreEqual("err.bll.usuario.clave_corta", ex.Clave);
+            }
+            Assert.AreEqual(0, fake.CambiarClaveVeces);
+        }
+
+        [TestMethod]
+        public void CambiarClavePropia_ClaveSinNumero_LanzaClaveSinNumero_SinTocarDAL()
+        {
+            LoginCon("Actual1!");
+            var fake = new FakeUsuarioDAL();
+            var bll  = new BLL.Usuario(fake);
+            try
+            {
+                bll.CambiarClavePropia("Test", "SinNumeroNiEspecial");   // 8+ caracteres, sin dígito ni especial
+                Assert.Fail("Debía rechazar una clave sin número.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.usuario.clave_sinnumero", ex.Clave);
             }
             Assert.AreEqual(0, fake.CambiarClaveVeces);
         }

@@ -10,7 +10,7 @@ namespace DAL
     /// Opera sobre la tabla [Empleado] de WardrobeFlowDB.
     /// Incluye JOIN opcional con [Usuario] para mostrar el username asociado.
     /// </summary>
-    public class Empleado
+    public class Empleado : Interfaces.IEmpleadoDAL
     {
         private readonly Acceso acceso = Acceso.GetInstance();
 

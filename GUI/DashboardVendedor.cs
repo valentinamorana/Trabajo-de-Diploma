@@ -89,7 +89,10 @@ namespace GUI
                         ActualizarSesion();
                     }));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[DashboardVendedor] No se pudo cargar el dashboard: {ex.Message}");
+                }
             });
         }
 
@@ -112,7 +115,7 @@ namespace GUI
 
             foreach (var p in pedidos)
             {
-                int  dias  = (int)(DateTime.Today - p.FechaPedido.Date).TotalDays;
+                int  dias  = p.DiasDesdeAlta;
                 string tit = $"Pedido #{p.IdPedido}";
                 string sub = p.NombreCliente ?? $"Cliente {p.IdCliente}";
 
@@ -120,7 +123,7 @@ namespace GUI
                 {
                     case BE.EstadoPedido.Pendiente:
                         var cardPendiente = CrearCard(tit, sub, dias,
-                            dias >= 2 ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
+                            p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
                         // Solo "Pendiente" es clickeable: abre Pedidos de Venta, permiso que el
                         // Vendedor siempre tiene (es el único rol que ve este dashboard).
                         // Despachado/Entregado viven en Pedidos Realizados — permiso que un
@@ -152,7 +155,10 @@ namespace GUI
                 if (u != null)
                     lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"[DashboardVendedor] No se pudo cargar la sesión: {ex.Message}");
+            }
         }
 
         // Pinta la tarjeta como clickeable y, al hacer clic, abre (o enfoca) Pedidos de Venta.

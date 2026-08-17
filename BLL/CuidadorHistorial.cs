@@ -28,8 +28,9 @@ namespace BLL
         {
             try
             {
-                // El Caretaker no lee el estado: entrega el Memento como unidad opaca
-                // a la capa de persistencia, que sabe materializarlo.
+                // El Caretaker conoce el tipo concreto (lo necesita para setear IdUsuario y
+                // pasarlo a un DAL fuertemente tipado), pero no lee ni interpreta los campos
+                // *Snapshot — esos son responsabilidad exclusiva del Originator (BE.Usuario).
                 var snapshot = (BE.VersionUsuario)memento;
                 snapshot.IdUsuario = idUsuario;
                 _dalVersion.Insertar(snapshot);

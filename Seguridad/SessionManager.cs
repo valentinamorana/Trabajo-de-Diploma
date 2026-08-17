@@ -38,7 +38,7 @@ namespace Seguridad
             if (s?.Usuario == null) return false;
             if (s.Usuario.EsAdministrador) return true;
             return s.Usuario.Permisos != null &&
-                   s.Usuario.Permisos.Exists(p => p.NombreMenu == nombreMenu);
+                   s.Usuario.Permisos.Exists(p => string.Equals(p.NombreMenu, nombreMenu, StringComparison.OrdinalIgnoreCase));
         }
 
         // Crea la sesión para el usuario autenticado.

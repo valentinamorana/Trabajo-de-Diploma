@@ -300,26 +300,9 @@ namespace BLL
         }
 
         // ── T04 — CRUD de componentes (Patentes / Familias / Roles) ─────────────
-
-        [Obsolete("Los permisos (patentes) son un catálogo fijo del sistema; no se crean desde la app (revisión 11/06). Se conserva por compatibilidad.")]
-        public int CrearPatente(string nombre, string nombreMenu)
-        {
-            VerificarPuedeGestionar();
-            ValidarNombre(nombre);
-            int id = permisoDAL.AltaComponente(nombre, nombreMenu, esFamilia: false, esRol: false, tipoComponente: null);
-            _bitacora.Registrar("Gestión de Perfiles", $"Patente creada: '{nombre}'", BE.Criticidad.Alta);
-            return id;
-        }
-
-        [Obsolete("Las Familias se retiraron del modelo (revisión 11/06): el árbol es Rol→Patente. Se conserva por compatibilidad.")]
-        public int CrearFamilia(string nombre)
-        {
-            VerificarPuedeGestionar();
-            ValidarNombre(nombre);
-            int id = permisoDAL.AltaComponente(nombre, null, esFamilia: true, esRol: false, tipoComponente: "Familia");
-            _bitacora.Registrar("Gestión de Perfiles", $"Familia creada: '{nombre}'", BE.Criticidad.Alta);
-            return id;
-        }
+        // CrearPatente/CrearFamilia (revisión 11/06) se eliminaron: las patentes son un
+        // catálogo fijo del sistema (no se crean desde la app) y las Familias se retiraron
+        // del modelo (el árbol es Rol→Patente) — ninguno de los dos tenía callers.
 
         public int CrearRol(string nombre)
         {

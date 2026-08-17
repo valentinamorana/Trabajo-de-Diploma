@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace BLL.Manejadores
 {
@@ -10,16 +11,25 @@ namespace BLL.Manejadores
     /// IntentarRenovarHandler para extender la vigencia, con el mismo criterio de no
     /// consultar PlanSuscripcion de nuevo — arma el plan a partir de los datos ya
     /// cacheados en Cliente (NombrePlan/LimitePrendas/PrecioPlan, cargados por JOIN).
+    ///
+    /// Bloque 1 — este es también el único punto de cobro real del sistema, así que acá
+    /// se liquidan el descuento por referido (Cliente.DescuentoProximoCobro, se consume
+    /// completo en este cobro) y los cargos por daño/pérdida pendientes (CargoPrenda,
+    /// Estado=Pendiente) del cliente: se suman al importe y se marcan Cobrados en la
+    /// misma transacción.
     /// </summary>
     public sealed class ProcesarPagoHandler : ManejadorCobro
     {
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.ICobroDAL dalCobro;
+        private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
 
-        public ProcesarPagoHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.ICobroDAL dalCobro)
+        public ProcesarPagoHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.ICobroDAL dalCobro,
+                                    DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda)
         {
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalCobro = dalCobro ?? throw new ArgumentNullException(nameof(dalCobro));
+            this.dalCargoPrenda = dalCargoPrenda ?? throw new ArgumentNullException(nameof(dalCargoPrenda));
         }
 
         public override ResultadoCobro Procesar(ContextoCobro contexto)
@@ -42,9 +52,16 @@ namespace BLL.Manejadores
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
             cliente.FechaLimiteGracia = null;
 
-            // UPDATE de Cliente + INSERT del historial en una única transacción: antes eran
-            // dos round-trips independientes, y un crash entre medio podía dejar el historial
-            // de auditoría desincronizado del estado real de la suscripción.
+            decimal descuento = cliente.DescuentoProximoCobro;
+            var cargosPendientes = dalCargoPrenda.ObtenerPendientesPorCliente(cliente.IdCliente);
+            decimal totalCargos = cargosPendientes.Sum(c => c.Monto);
+            decimal importeFinal = Math.Max(0, plan.Precio - descuento) + totalCargos;
+
+            cliente.DescuentoProximoCobro = 0;
+
+            // UPDATE de Cliente + INSERT del historial + liquidación de cargos pendientes, todo
+            // en una única transacción: antes eran round-trips independientes, y un crash entre
+            // medio podía dejar el historial de auditoría desincronizado del estado real.
             var ahora = DateTime.Now;
             int idCobro = 0;
             dalCliente.EjecutarTransaccion((conexion, tx) =>
@@ -53,23 +70,66 @@ namespace BLL.Manejadores
                 idCobro = dalCobro.AltaEnTx(conexion, tx, new BE.Cobro
                 {
                     IdCliente = cliente.IdCliente,
-                    Importe = plan.Precio,
+                    Importe = importeFinal,
                     FechaDeteccion = ahora,
                     FechaResolucion = ahora,
                     Resultado = BE.EstadoCobro.Cobrado,
                     Actor = contexto.Actor
                 });
+                if (cargosPendientes.Count > 0)
+                    dalCargoPrenda.MarcarCobradosEnTx(conexion, tx,
+                        cargosPendientes.Select(c => c.IdCargo).ToList(), ahora);
             });
             dalCliente.RecalcularDV();
+
+            // Clave (y Mensaje de respaldo) distinta por combinación, igual que
+            // BajaSuscripcionHandler con renov.msg.baja/renov.msg.baja_conprendas: el Mensaje
+            // fijo en español es solo el respaldo si el corpus de traducciones no cargó — la
+            // GUI siempre resuelve por Clave+Args primero (ver Traductor.Resolver), así que
+            // concatenar texto extra sobre un Mensaje ya traducido lo perdería en los otros 3 idiomas.
+            bool conDescuento = descuento > 0;
+            bool conCargos = cargosPendientes.Count > 0;
+
+            string clave;
+            string mensaje;
+            object[] args;
+
+            if (conDescuento && conCargos)
+            {
+                clave = "cobro.msg.cobrado.descuentoycargos";
+                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye descuento por referido de ${descuento} y {cargosPendientes.Count} cargo(s) por daño/pérdida (${totalCargos}).";
+                args = new object[] { importeFinal, suscripcion.FechaVencimiento, descuento, cargosPendientes.Count, totalCargos };
+            }
+            else if (conDescuento)
+            {
+                clave = "cobro.msg.cobrado.descuento";
+                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye descuento por referido de ${descuento}.";
+                args = new object[] { importeFinal, suscripcion.FechaVencimiento, descuento };
+            }
+            else if (conCargos)
+            {
+                clave = "cobro.msg.cobrado.cargos";
+                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye {cargosPendientes.Count} cargo(s) por daño/pérdida (${totalCargos}).";
+                args = new object[] { importeFinal, suscripcion.FechaVencimiento, cargosPendientes.Count, totalCargos };
+            }
+            else
+            {
+                clave = "cobro.msg.cobrado";
+                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}.";
+                args = new object[] { importeFinal, suscripcion.FechaVencimiento };
+            }
 
             return new ResultadoCobro
             {
                 Resuelto = true,
                 Estado = BE.EstadoCobro.Cobrado,
                 IdCobro = idCobro,
-                Mensaje = $"Cobro registrado (${plan.Precio}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}.",
-                Clave = "cobro.msg.cobrado",
-                Args = new object[] { plan.Precio, suscripcion.FechaVencimiento }
+                Mensaje = mensaje,
+                Clave = clave,
+                Args = args
             };
         }
     }

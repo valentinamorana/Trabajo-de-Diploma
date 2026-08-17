@@ -12,7 +12,7 @@ namespace GUI
     /// Se abre desde el formulario Clientes con ShowDialog().
     /// Devuelve DialogResult.OK con ClienteEditado cargado si el usuario confirma.
     /// </summary>
-    public partial class ClienteForm : Form
+    public partial class ClienteForm : FormBase
     {
         // ── Resultado del diálogo ─────────────────────────────────────────────
         public BE.Cliente ClienteEditado { get; private set; }
@@ -22,6 +22,9 @@ namespace GUI
         private readonly BE.Cliente _clienteOriginal;
 
         private List<BE.PlanSuscripcion> _planes;
+        private List<BE.Cliente> _clientesParaReferente;
+
+        protected override Label MensajeLabel => lblMensaje;
 
         /// <summary>Constructor para ALTA (cliente nuevo).</summary>
         public ClienteForm() : this(null) { }
@@ -33,13 +36,13 @@ namespace GUI
         public ClienteForm(BE.Cliente cliente)
         {
             InitializeComponent();
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
 
             _esEdicion       = cliente != null;
             _clienteOriginal = cliente;
 
             CargarPlanes();
             CargarModalidades();
+            CargarReferentes();
             AplicarIdioma(GestorIdioma.IdiomaActual);
 
             // PdN1 (Builder): la modalidad de cobro solo aplica al activar una suscripción
@@ -49,6 +52,11 @@ namespace GUI
             cmbModalidad.Visible = !_esEdicion;
             chkVencimiento.Visible = _esEdicion;
             dtpVencimiento.Visible = _esEdicion;
+
+            // Bloque 1 — Programa de referidos: el referente se fija una única vez, al alta
+            // (ver DAL.Cliente.Alta/Modificar — IdClienteReferente no se puede editar después).
+            lblReferente.Visible = !_esEdicion;
+            cmbReferente.Visible = !_esEdicion;
 
             if (_esEdicion) CargarDatosExistentes();
             else ActualizarDisponibilidadModalidad();
@@ -108,11 +116,16 @@ namespace GUI
             lblMetodoPago.Text      = T("lbl.cli.metodopago",  "Método de Pago *");
             lblPlan.Text            = T("lbl.cli.plan",        "Plan de Suscripción *");
             lblModalidad.Text       = T("lbl.cli.modalidad",   "Modalidad de Cobro *");
+            lblReferente.Text       = T("lbl.cli.referente",   "Referido por");
             chkVencimiento.Text     = T("lbl.cli.vencimiento", "Fecha de Vencimiento");
 
             // Actualizar ítem "— Sin plan —" del combo de planes (índice 0)
             if (cmbPlan.Items.Count > 0)
                 cmbPlan.Items[0] = T("combo.cli.sinplan", "— Sin plan —");
+
+            // Actualizar ítem "— Ninguno —" del combo de referentes (índice 0)
+            if (cmbReferente.Items.Count > 0)
+                cmbReferente.Items[0] = T("combo.cli.sinreferente", "— Ninguno —");
 
             // Recargar cmbMetodoPago con etiquetas traducidas (valor interno = clave de BD en español)
             RellenarComboMetodoPago(t);
@@ -193,6 +206,30 @@ namespace GUI
             }
         }
 
+        private void CargarReferentes()
+        {
+            try
+            {
+                var bllCliente = new BLL.Cliente();
+                _clientesParaReferente = bllCliente.ObtenerTodos();
+
+                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                string ninguno = t.ContainsKey("combo.cli.sinreferente") ? t["combo.cli.sinreferente"].Texto : "— Ninguno —";
+                cmbReferente.Items.Clear();
+                cmbReferente.Items.Add(ninguno);
+                foreach (var c in _clientesParaReferente)
+                    cmbReferente.Items.Add($"{c.Nombre} {c.Apellido} (DNI {c.DNI})");
+
+                cmbReferente.SelectedIndex = 0;
+            }
+            catch
+            {
+                cmbReferente.Items.Clear();
+                cmbReferente.Items.Add("— Ninguno —");
+                cmbReferente.SelectedIndex = 0;
+            }
+        }
+
         private void CargarDatosExistentes()
         {
             txtNombre.Text   = _clienteOriginal.Nombre;
@@ -237,6 +274,11 @@ namespace GUI
                 if (cmbPlan.SelectedIndex > 0 && _planes != null && _planes.Count >= cmbPlan.SelectedIndex)
                     idPlan = _planes[cmbPlan.SelectedIndex - 1].IdPlan;
 
+                int? idReferente = (!_esEdicion && cmbReferente.SelectedIndex > 0
+                                     && _clientesParaReferente != null && _clientesParaReferente.Count >= cmbReferente.SelectedIndex)
+                    ? _clientesParaReferente[cmbReferente.SelectedIndex - 1].IdCliente
+                    : (int?)null;
+
                 ClienteEditado = new BE.Cliente
                 {
                     IdCliente        = _esEdicion ? _clienteOriginal.IdCliente : 0,
@@ -248,7 +290,8 @@ namespace GUI
                     IdPlan           = idPlan,
                     FechaNacimiento  = dtpFechaNacimiento.Value.Date,
                     FechaAlta        = _esEdicion ? _clienteOriginal.FechaAlta : DateTime.Now,
-                    FechaVencimiento = chkVencimiento.Checked ? dtpVencimiento.Value.Date : (DateTime?)null
+                    FechaVencimiento = chkVencimiento.Checked ? dtpVencimiento.Value.Date : (DateTime?)null,
+                    IdClienteReferente = idReferente
                 };
 
                 this.DialogResult = DialogResult.OK;
@@ -256,7 +299,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"✗ {ex.Message}";
+                MostrarError(ex);
             }
         }
     }

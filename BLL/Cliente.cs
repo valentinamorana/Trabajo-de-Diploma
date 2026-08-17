@@ -15,6 +15,10 @@ namespace BLL
         private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
 
+        // Bloque 1 — Programa de referidos: descuento fijo que se acredita a quien refirió,
+        // una única vez, cuando el referido activa su suscripción por primera vez (ver ActivarSuscripcion).
+        private const decimal MontoBeneficioReferido = 1000m;
+
         // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble.
         public Cliente() : this(new DAL.Cliente()) { }
         public Cliente(DAL.Interfaces.IClienteDAL dalCliente)
@@ -135,7 +139,30 @@ namespace BLL
             cliente.NombrePlan       = plan.Nombre;
             cliente.LimitePrendas    = plan.LimitePrendas;
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
-            dalCliente.Modificar(cliente);
+
+            // Bloque 1 — Programa de referidos: si este cliente fue referido por otro y todavía
+            // no se acreditó el beneficio (BeneficioReferidoOtorgado evita duplicarlo si se
+            // vuelve a activar la suscripción — ej. tras una baja), se le suma el descuento fijo
+            // al referente. Se hace en la misma transacción que el alta del referido para que
+            // ninguno de los dos UPDATE quede aplicado sin el otro.
+            BE.Cliente referente = null;
+            if (cliente.IdClienteReferente.HasValue && !cliente.BeneficioReferidoOtorgado)
+            {
+                referente = dalCliente.ObtenerPorId(cliente.IdClienteReferente.Value);
+                if (referente != null)
+                {
+                    referente.DescuentoProximoCobro += MontoBeneficioReferido;
+                    cliente.BeneficioReferidoOtorgado = true;
+                }
+            }
+
+            dalCliente.EjecutarTransaccion((conexion, tx) =>
+            {
+                dalCliente.ModificarEnTx(conexion, tx, cliente);
+                if (referente != null)
+                    dalCliente.ModificarEnTx(conexion, tx, referente);
+            });
+            dalCliente.RecalcularDV();
 
             bitacora.Registrar(modulo,
                 $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
@@ -146,7 +173,32 @@ namespace BLL
                 $"Modalidad {modalidad} — Vence {suscripcion.FechaVencimiento:d}",
                 idCliente: cliente.IdCliente);
 
+            if (referente != null)
+                bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
+                    $"Beneficio por referido acreditado: {referente.NombreCompleto} recibe ${MontoBeneficioReferido} " +
+                    $"de descuento en su próximo cobro por referir a {cliente.NombreCompleto}",
+                    idCliente: referente.IdCliente);
+
             return suscripcion;
+        }
+
+        // Bloque 1 — Reanuda una suscripción pausada. La fecha de vencimiento NO se toca:
+        // el cliente retoma el mismo plazo que tenía al pausar, sin extensión.
+        public void ReanudarPausa(string modulo, BE.Cliente cliente)
+        {
+            PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
+            if (cliente == null) throw new ArgumentNullException(nameof(cliente));
+
+            if (!cliente.FechaPausaHasta.HasValue)
+                throw new BE.AppException("err.bll.cliente.no_pausada",
+                    "{0} no tiene la suscripción pausada.", cliente.NombreCompleto);
+
+            cliente.FechaPausaHasta = null;
+            dalCliente.Modificar(cliente);
+
+            bitacora.Registrar(modulo, $"Reanudar Suscripción Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Baja);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
+                $"Suscripción reanudada: {cliente.NombreCompleto}", idCliente: cliente.IdCliente);
         }
 
         // Evalúa si un cliente puede crear un pedido con la cantidad de prendas indicada.

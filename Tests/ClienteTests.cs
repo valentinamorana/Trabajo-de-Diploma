@@ -301,6 +301,46 @@ namespace Tests
             Assert.AreSame(cliente, fake.UltimoModificado);
         }
 
+        // ── ReanudarPausa (Bloque 1) ─────────────────────────────────────────────
+
+        [TestMethod]
+        public void ReanudarPausa_ClientePausado_LimpiaFechaPausaHastaSinTocarVencimiento()
+        {
+            LoginComoAdministrador();
+            var fake = new FakeClienteDAL();
+            var bll = new BLL.Cliente(fake);
+            var cliente = ClienteValido();
+            cliente.FechaPausaHasta = DateTime.Today.AddDays(5);
+            cliente.FechaVencimiento = DateTime.Today.AddDays(20);
+
+            bll.ReanudarPausa("Test", cliente);
+
+            Assert.IsNull(cliente.FechaPausaHasta);
+            Assert.AreEqual(DateTime.Today.AddDays(20), cliente.FechaVencimiento, "No debe tocar el vencimiento.");
+            Assert.AreEqual(1, fake.ModificarVeces);
+        }
+
+        [TestMethod]
+        public void ReanudarPausa_ClienteNoPausado_LanzaNoPausada_SinTocarElDAL()
+        {
+            LoginComoAdministrador();
+            var fake = new FakeClienteDAL();
+            var bll = new BLL.Cliente(fake);
+            var cliente = ClienteValido();
+            cliente.FechaPausaHasta = null;
+
+            try
+            {
+                bll.ReanudarPausa("Test", cliente);
+                Assert.Fail("Debía rechazar reanudar un cliente que no está pausado.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cliente.no_pausada", ex.Clave);
+            }
+            Assert.AreEqual(0, fake.ModificarVeces);
+        }
+
         // ── ObtenerEstadoComercial — DTO puro, sin DAL ──────────────────────────
 
         [TestMethod]

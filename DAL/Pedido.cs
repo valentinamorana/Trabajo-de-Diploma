@@ -262,7 +262,10 @@ namespace DAL
                     }
 
                     using (var cmdPr = new SqlCommand(
-                        "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente " +
+                        // IdUltimoCliente (a diferencia de IdClienteActual) NUNCA se limpia al
+                        // devolverse — así BLL.CargoPrenda puede saber quién tuvo la prenda por
+                        // última vez aunque ya esté en Mantenimiento (EnLimpieza) sin dueño actual.
+                        "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, IdUltimoCliente=@IdCliente " +
                         "WHERE IdPrenda=@IdPrenda AND Estado=@EstadoDisponible",
                         conexion, tx))
                     {
@@ -384,13 +387,18 @@ namespace DAL
             bool cancelado = estado == (int)BE.EstadoPedido.Cancelado;
 
             using (var cmd = new SqlCommand(
-                "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente " +
+                // IdUltimoCliente NUNCA se limpia (a diferencia de IdClienteActual): si se cancela,
+                // @IdClienteUltimo llega NULL y COALESCE conserva el valor que ya tenía la prenda.
+                "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, " +
+                "IdUltimoCliente=COALESCE(@IdClienteUltimo, IdUltimoCliente) " +
                 "WHERE IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
                 conexion, tx))
             {
                 cmd.Parameters.AddWithValue("@Estado",
                     cancelado ? (int)BE.EstadoPrenda.Disponible : (int)BE.EstadoPrenda.EnUso);
                 cmd.Parameters.AddWithValue("@IdCliente",
+                    cancelado ? (object)DBNull.Value : idCliente);
+                cmd.Parameters.AddWithValue("@IdClienteUltimo",
                     cancelado ? (object)DBNull.Value : idCliente);
                 cmd.Parameters.AddWithValue("@IdPedido", idPedido);
                 cmd.ExecuteNonQuery();
@@ -553,7 +561,7 @@ namespace DAL
                 }
 
                 using (var cmdPrendas = new SqlCommand(
-                    "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente " +
+                    "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, IdUltimoCliente=@IdCliente " +
                     "WHERE IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
                     conexion, tx))
                 {

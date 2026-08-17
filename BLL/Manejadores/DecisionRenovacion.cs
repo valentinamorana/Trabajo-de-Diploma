@@ -15,6 +15,7 @@ namespace BLL.Manejadores
     {
         Renovar,
         CambiarPlan,
-        Baja
+        Baja,
+        Pausar
     }
 }

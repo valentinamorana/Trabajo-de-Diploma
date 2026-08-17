@@ -269,6 +269,13 @@ namespace BLL
                     "Regularizar el cobro en el módulo de Suscriptores antes de generar un nuevo pedido.",
                     cliente.NombreCompleto, cliente.FechaLimiteGracia.Value.ToString("dd/MM/yyyy"));
 
+            // Bloque 1 — Pausa de suscripción: mientras está pausada no se pueden generar
+            // pedidos nuevos, aunque la fecha de vencimiento todavía no haya llegado.
+            if (cliente.EstaPausada)
+                throw new BE.AppException("err.bll.pedido.suscripcion_pausada",
+                    "La suscripción de {0} está pausada hasta el {1}. Reanudarla en el módulo de Clientes antes de generar un nuevo pedido.",
+                    cliente.NombreCompleto, cliente.FechaPausaHasta.Value.ToString("dd/MM/yyyy"));
+
             if (!cliente.SuscripcionVigente())
                 throw new BE.AppException("err.bll.pedido.suscripcion_vencida",
                     "La suscripción de {0} venció el {1}. Renovar en el módulo de Clientes.",

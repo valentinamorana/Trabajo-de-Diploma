@@ -28,9 +28,11 @@ namespace BLL
             var verificar = new Manejadores.VerificarVencimientoHandler();
             var renovar   = new Manejadores.IntentarRenovarHandler(dalCliente, dalRenovacion);
             var cambio    = new Manejadores.CambioPlanHandler(dalCliente, dalPlan, dalRenovacion);
+            var pausar    = new Manejadores.PausarSuscripcionHandler(dalCliente, dalRenovacion);
             var baja      = new Manejadores.BajaSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda);
 
-            cambio.AgregarSiguiente(baja);
+            pausar.AgregarSiguiente(baja);
+            cambio.AgregarSiguiente(pausar);
             renovar.AgregarSiguiente(cambio);
             verificar.AgregarSiguiente(renovar);
             cadena = verificar;
@@ -38,7 +40,8 @@ namespace BLL
 
         public Manejadores.ResultadoRenovacion Procesar(
             string modulo, BE.Cliente cliente, Manejadores.DecisionRenovacion decision,
-            int? idPlanNuevo, BE.Builders.ModalidadCobro modalidad, string actor)
+            int? idPlanNuevo, BE.Builders.ModalidadCobro modalidad, string actor,
+            DateTime? fechaPausaHasta = null)
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
@@ -58,6 +61,7 @@ namespace BLL
                 Cliente = cliente,
                 Decision = decision,
                 IdPlanNuevo = idPlanNuevo,
+                FechaPausaHasta = fechaPausaHasta,
                 Modalidad = modalidad,
                 Actor = actor,
                 Modulo = modulo

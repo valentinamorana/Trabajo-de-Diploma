@@ -11,10 +11,13 @@ namespace GUI
     /// of Responsibility (BLL.Manejadores) resuelve el resto: confirma la renovación,
     /// aplica un período de gracia, o suspende nuevos pedidos.
     /// </summary>
-    public partial class CobroSuscripcionForm : Form, IIdiomaObserver
+    public partial class CobroSuscripcionForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IClienteService _bllCliente = new BLL.Cliente();
         private readonly BLL.Interfaces.ICobroService    _bllCobro  = new BLL.Cobro();
+        private readonly BLL.Interfaces.ICargoPrendaService _bllCargoPrenda = new BLL.CargoPrenda();
+
+        protected override Label MensajeLabel => lblResultado;
 
         public CobroSuscripcionForm()
         {
@@ -71,8 +74,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 
@@ -92,6 +94,30 @@ namespace GUI
                                                           : Tr("cobro.estado.aldia", "al día");
             lblEstadoActual.Text = Tr("cobro.estado.resumen", "Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}",
                 new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estadoPago });
+
+            // Bloque 1 — anticipar en pantalla lo que este cobro va a sumar/restar, antes de
+            // procesarlo: descuento por referido pendiente y cargos por daño/pérdida pendientes.
+            if (c.TieneDescuentoPendiente)
+                lblEstadoActual.Text += "\n" + Tr("cobro.estado.descuentopendiente",
+                    "Tiene un descuento de ${0} pendiente para este cobro (programa de referidos).",
+                    new object[] { c.DescuentoProximoCobro });
+
+            try
+            {
+                var cargosPendientes = _bllCargoPrenda.ObtenerPendientesPorCliente(c.IdCliente);
+                if (cargosPendientes.Count > 0)
+                {
+                    decimal total = 0;
+                    foreach (var cargo in cargosPendientes) total += cargo.Monto;
+                    lblEstadoActual.Text += "\n" + Tr("cobro.estado.cargospendientes",
+                        "Tiene {0} cargo(s) por daño/pérdida pendiente(s) por ${1} que se sumarán a este cobro.",
+                        new object[] { cargosPendientes.Count, total });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"[CobroSuscripcionForm] No se pudieron cargar los cargos pendientes: {ex.Message}");
+            }
         }
 
         private void BtnProcesar_Click(object sender, EventArgs e)
@@ -125,15 +151,9 @@ namespace GUI
 
                 CargarClientes();
             }
-            catch (BE.AppException ex)
-            {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = T(ex.Clave, ex.Message, ex.Args);
-            }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 

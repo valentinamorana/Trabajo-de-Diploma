@@ -4332,3 +4332,119 @@ PT	recom.sinhistorial	O cliente não tem histórico de pedidos suficiente para r
 PT	recom.motivo.ambos	{0} combina com a categoria ({1}) e a cor ({2}) preferidas do cliente.
 PT	recom.motivo.categoria	{0} combina com a categoria preferida do cliente ({1}).
 PT	recom.motivo.color	{0} combina com a cor preferida do cliente ({1}).
+ES	renov.pausar	Pausar hasta:
+ES	renov.reanudar	Reanudar ahora
+ES	renov.estado.pausada	PAUSADA
+ES	renov.estado.pausadahasta	pausada hasta {0}
+ES	renov.msg.pausada	Suscripción pausada hasta {0:d}. El cliente no podrá generar nuevos pedidos hasta reanudarla.
+ES	renov.msg.reanudada	Suscripción reanudada.
+ES	err.bll.renovacion.pausa_sin_fecha	Debe indicar hasta cuándo queda pausada la suscripción.
+ES	err.bll.renovacion.pausa_fecha_pasada	La fecha de reanudación no puede ser anterior a hoy.
+ES	err.bll.pedido.suscripcion_pausada	La suscripción de {0} está pausada hasta el {1}. Reanudarla en el módulo de Clientes antes de generar un nuevo pedido.
+ES	err.bll.cliente.no_pausada	{0} no tiene la suscripción pausada.
+ES	lbl.cli.referente	Referido por
+ES	combo.cli.sinreferente	— Ninguno —
+ES	frm.cargoprenda	Cargo por Daño/Pérdida
+ES	lbl.cargoprenda.motivo	Motivo (daño o pérdida) *
+ES	lbl.cargoprenda.monto	Monto a cobrar *
+ES	lbl.cargoprenda.info	Prenda: {0}\nÚltimo cliente: {1}
+ES	btn.registrar.cargo	Registrar Cargo
+ES	msg.cargoprenda.motivorequerido	Indicá el motivo del cargo.
+ES	msg.cargoprenda.montoinvalido	El monto debe ser mayor a cero.
+ES	msg.cargoprenda.preguntar	¿Corresponde cobrarle a {0} por daño o pérdida de esta prenda?
+ES	msg.cargoprenda.registrado	Cargo de ${0} registrado — se sumará al próximo cobro de {1}.
+ES	err.bll.cargoprenda.sin_cliente	La prenda '{0}' no tiene un último cliente registrado; no se le puede cargar el costo a nadie.
+ES	err.bll.cargoprenda.motivo_requerido	Debe indicar el motivo del cargo (daño o pérdida).
+ES	err.bll.cargoprenda.monto_invalido	El monto del cargo debe ser mayor a cero.
+ES	cobro.estado.descuentopendiente	Tiene un descuento de ${0} pendiente para este cobro (programa de referidos).
+ES	cobro.estado.cargospendientes	Tiene {0} cargo(s) por daño/pérdida pendiente(s) por ${1} que se sumarán a este cobro.
+ES	cobro.msg.cobrado.descuento	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2}.
+ES	cobro.msg.cobrado.cargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye {2} cargo(s) por daño/pérdida (${3}).
+ES	cobro.msg.cobrado.descuentoycargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2} y {3} cargo(s) por daño/pérdida (${4}).
+EN	renov.pausar	Pause until:
+EN	renov.reanudar	Resume now
+EN	renov.estado.pausada	PAUSED
+EN	renov.estado.pausadahasta	paused until {0}
+EN	renov.msg.pausada	Subscription paused until {0:d}. The client won't be able to place new orders until it's resumed.
+EN	renov.msg.reanudada	Subscription resumed.
+EN	err.bll.renovacion.pausa_sin_fecha	You must indicate until when the subscription is paused.
+EN	err.bll.renovacion.pausa_fecha_pasada	The resume date can't be earlier than today.
+EN	err.bll.pedido.suscripcion_pausada	{0}'s subscription is paused until {1}. Resume it in the Customers module before creating a new order.
+EN	err.bll.cliente.no_pausada	{0}'s subscription is not paused.
+EN	lbl.cli.referente	Referred by
+EN	combo.cli.sinreferente	— None —
+EN	frm.cargoprenda	Damage/Loss Charge
+EN	lbl.cargoprenda.motivo	Reason (damage or loss) *
+EN	lbl.cargoprenda.monto	Amount to charge *
+EN	lbl.cargoprenda.info	Garment: {0}\nLast client: {1}
+EN	btn.registrar.cargo	Register Charge
+EN	msg.cargoprenda.motivorequerido	Enter the reason for the charge.
+EN	msg.cargoprenda.montoinvalido	The amount must be greater than zero.
+EN	msg.cargoprenda.preguntar	Should {0} be charged for damage or loss of this garment?
+EN	msg.cargoprenda.registrado	Charge of ${0} registered — it will be added to {1}'s next payment.
+EN	err.bll.cargoprenda.sin_cliente	Garment '{0}' has no last known client; there's no one to charge for it.
+EN	err.bll.cargoprenda.motivo_requerido	You must indicate the reason for the charge (damage or loss).
+EN	err.bll.cargoprenda.monto_invalido	The charge amount must be greater than zero.
+EN	cobro.estado.descuentopendiente	Has a pending ${0} discount for this payment (referral program).
+EN	cobro.estado.cargospendientes	Has {0} pending damage/loss charge(s) for ${1} that will be added to this payment.
+EN	cobro.msg.cobrado.descuento	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2}.
+EN	cobro.msg.cobrado.cargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes {2} damage/loss charge(s) (${3}).
+EN	cobro.msg.cobrado.descuentoycargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2} and {3} damage/loss charge(s) (${4}).
+RU	renov.pausar	Приостановить до:
+RU	renov.reanudar	Возобновить сейчас
+RU	renov.estado.pausada	ПРИОСТАНОВЛЕНА
+RU	renov.estado.pausadahasta	приостановлена до {0}
+RU	renov.msg.pausada	Подписка приостановлена до {0:d}. Клиент не сможет оформлять новые заказы до возобновления.
+RU	renov.msg.reanudada	Подписка возобновлена.
+RU	err.bll.renovacion.pausa_sin_fecha	Укажите, до какой даты приостанавливается подписка.
+RU	err.bll.renovacion.pausa_fecha_pasada	Дата возобновления не может быть раньше сегодняшнего дня.
+RU	err.bll.pedido.suscripcion_pausada	Подписка {0} приостановлена до {1}. Возобновите её в модуле Клиентов перед созданием нового заказа.
+RU	err.bll.cliente.no_pausada	Подписка {0} не приостановлена.
+RU	lbl.cli.referente	Приглашён кем
+RU	combo.cli.sinreferente	— Никем —
+RU	frm.cargoprenda	Штраф за повреждение/утрату
+RU	lbl.cargoprenda.motivo	Причина (повреждение или утрата) *
+RU	lbl.cargoprenda.monto	Сумма к оплате *
+RU	lbl.cargoprenda.info	Одежда: {0}\nПоследний клиент: {1}
+RU	btn.registrar.cargo	Зарегистрировать штраф
+RU	msg.cargoprenda.motivorequerido	Укажите причину штрафа.
+RU	msg.cargoprenda.montoinvalido	Сумма должна быть больше нуля.
+RU	msg.cargoprenda.preguntar	Нужно ли взыскать с {0} штраф за повреждение или утрату этой вещи?
+RU	msg.cargoprenda.registrado	Штраф на сумму ${0} зарегистрирован — будет добавлен к следующему платежу {1}.
+RU	err.bll.cargoprenda.sin_cliente	У вещи «{0}» нет последнего известного клиента; взыскать не с кого.
+RU	err.bll.cargoprenda.motivo_requerido	Укажите причину штрафа (повреждение или утрата).
+RU	err.bll.cargoprenda.monto_invalido	Сумма штрафа должна быть больше нуля.
+RU	cobro.estado.descuentopendiente	Есть ожидающая скидка ${0} на этот платёж (реферальная программа).
+RU	cobro.estado.cargospendientes	Есть {0} ожидающих штраф(ов) за повреждение/утрату на сумму ${1}, которые будут добавлены к этому платежу.
+RU	cobro.msg.cobrado.descuento	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2}.
+RU	cobro.msg.cobrado.cargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает {2} штраф(ов) за повреждение/утрату (${3}).
+RU	cobro.msg.cobrado.descuentoycargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2} и {3} штраф(ов) за повреждение/утрату (${4}).
+PT	renov.pausar	Pausar até:
+PT	renov.reanudar	Retomar agora
+PT	renov.estado.pausada	PAUSADA
+PT	renov.estado.pausadahasta	pausada até {0}
+PT	renov.msg.pausada	Assinatura pausada até {0:d}. O cliente não poderá fazer novos pedidos até retomá-la.
+PT	renov.msg.reanudada	Assinatura retomada.
+PT	err.bll.renovacion.pausa_sin_fecha	Você deve indicar até quando a assinatura fica pausada.
+PT	err.bll.renovacion.pausa_fecha_pasada	A data de retomada não pode ser anterior a hoje.
+PT	err.bll.pedido.suscripcion_pausada	A assinatura de {0} está pausada até {1}. Retome-a no módulo de Clientes antes de gerar um novo pedido.
+PT	err.bll.cliente.no_pausada	A assinatura de {0} não está pausada.
+PT	lbl.cli.referente	Indicado por
+PT	combo.cli.sinreferente	— Nenhum —
+PT	frm.cargoprenda	Cobrança por Dano/Perda
+PT	lbl.cargoprenda.motivo	Motivo (dano ou perda) *
+PT	lbl.cargoprenda.monto	Valor a cobrar *
+PT	lbl.cargoprenda.info	Peça: {0}\nÚltimo cliente: {1}
+PT	btn.registrar.cargo	Registrar Cobrança
+PT	msg.cargoprenda.motivorequerido	Informe o motivo da cobrança.
+PT	msg.cargoprenda.montoinvalido	O valor deve ser maior que zero.
+PT	msg.cargoprenda.preguntar	Cabe cobrar de {0} por dano ou perda desta peça?
+PT	msg.cargoprenda.registrado	Cobrança de ${0} registrada — será somada à próxima cobrança de {1}.
+PT	err.bll.cargoprenda.sin_cliente	A peça '{0}' não tem um último cliente registrado; não há quem cobrar.
+PT	err.bll.cargoprenda.motivo_requerido	Você deve indicar o motivo da cobrança (dano ou perda).
+PT	err.bll.cargoprenda.monto_invalido	O valor da cobrança deve ser maior que zero.
+PT	cobro.estado.descuentopendiente	Tem um desconto de ${0} pendente para esta cobrança (programa de indicações).
+PT	cobro.estado.cargospendientes	Tem {0} cobrança(s) por dano/perda pendente(s) de ${1} que serão somadas a esta cobrança.
+PT	cobro.msg.cobrado.descuento	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2}.
+PT	cobro.msg.cobrado.cargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui {2} cobrança(s) por dano/perda (${3}).
+PT	cobro.msg.cobrado.descuentoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2} e {3} cobrança(s) por dano/perda (${4}).

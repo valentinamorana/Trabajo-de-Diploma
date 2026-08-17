@@ -36,7 +36,8 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
                     "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
-                    "       c.FechaLimiteGracia, " +
+                    "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
+                    "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
                     "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
@@ -76,7 +77,8 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
                     "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
-                    "       c.FechaLimiteGracia, " +
+                    "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
+                    "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
                     "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
@@ -161,12 +163,13 @@ namespace DAL
                 new SqlParameter("@IdPlan",            (object)cliente.IdPlan ?? DBNull.Value),
                 new SqlParameter("@FechaAlta",         cliente.FechaAlta),
                 new SqlParameter("@FechaVencimiento",  (object)cliente.FechaVencimiento  ?? DBNull.Value),
-                new SqlParameter("@FechaNacimiento",   (object)cliente.FechaNacimiento   ?? DBNull.Value)
+                new SqlParameter("@FechaNacimiento",   (object)cliente.FechaNacimiento   ?? DBNull.Value),
+                new SqlParameter("@IdClienteReferente", (object)cliente.IdClienteReferente ?? DBNull.Value)
             };
 
             DataTable tabla = acceso.Leer(
-                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento) " +
-                "VALUES (@Nombre, @Apellido, @DNI, @Email, @MetodoPago, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento); " +
+                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento, IdClienteReferente) " +
+                "VALUES (@Nombre, @Apellido, @DNI, @Email, @MetodoPago, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento, @IdClienteReferente); " +
                 "SELECT SCOPE_IDENTITY() AS IdNuevo",
                 p);
 
@@ -191,13 +194,17 @@ namespace DAL
                 new SqlParameter("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value),
                 new SqlParameter("@FechaNacimiento",  (object)cliente.FechaNacimiento  ?? DBNull.Value),
                 new SqlParameter("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value),
+                new SqlParameter("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value),
+                new SqlParameter("@DescuentoProximoCobro", cliente.DescuentoProximoCobro),
+                new SqlParameter("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado),
                 new SqlParameter("@IdCliente",        cliente.IdCliente)
             };
             acceso.Escribir(
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
                 "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
-                "FechaLimiteGracia=@FechaLimiteGracia " +
+                "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
+                "DescuentoProximoCobro=@DescuentoProximoCobro, BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
                 "WHERE IdCliente=@IdCliente",
                 p);
             RecalcularDV();   // T07
@@ -222,7 +229,8 @@ namespace DAL
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
                 "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
-                "FechaLimiteGracia=@FechaLimiteGracia " +
+                "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
+                "DescuentoProximoCobro=@DescuentoProximoCobro, BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
                 "WHERE IdCliente=@IdCliente",
                 conexion, tx))
             {
@@ -235,6 +243,9 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaNacimiento", (object)cliente.FechaNacimiento ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@DescuentoProximoCobro", cliente.DescuentoProximoCobro);
+                cmd.Parameters.AddWithValue("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado);
                 cmd.Parameters.AddWithValue("@IdCliente", cliente.IdCliente);
                 cmd.ExecuteNonQuery();
             }
@@ -277,6 +288,17 @@ namespace DAL
                 FechaLimiteGracia = row.Table.Columns.Contains("FechaLimiteGracia") && row["FechaLimiteGracia"] != DBNull.Value
                                       ? (DateTime?)Convert.ToDateTime(row["FechaLimiteGracia"])
                                       : null,
+                FechaPausaHasta = row.Table.Columns.Contains("FechaPausaHasta") && row["FechaPausaHasta"] != DBNull.Value
+                                      ? (DateTime?)Convert.ToDateTime(row["FechaPausaHasta"])
+                                      : null,
+                IdClienteReferente = row.Table.Columns.Contains("IdClienteReferente") && row["IdClienteReferente"] != DBNull.Value
+                                      ? (int?)Convert.ToInt32(row["IdClienteReferente"])
+                                      : null,
+                DescuentoProximoCobro = row.Table.Columns.Contains("DescuentoProximoCobro") && row["DescuentoProximoCobro"] != DBNull.Value
+                                      ? Convert.ToDecimal(row["DescuentoProximoCobro"])
+                                      : 0,
+                BeneficioReferidoOtorgado = row.Table.Columns.Contains("BeneficioReferidoOtorgado") && row["BeneficioReferidoOtorgado"] != DBNull.Value
+                                      && Convert.ToBoolean(row["BeneficioReferidoOtorgado"]),
                 StockUtilizado = Convert.ToInt32(row["StockUtilizado"])
             };
         }

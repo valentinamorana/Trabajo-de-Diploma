@@ -35,6 +35,7 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPrendaService prendaBLL = new BLL.Prenda();
+        private readonly BLL.Interfaces.ICargoPrendaService cargoBLL = new BLL.CargoPrenda();
 
         // Determina si el usuario puede cambiar estados (ControladorDeStock)
         private readonly bool _tieneStock;
@@ -383,7 +384,43 @@ namespace GUI
                     prendaBLL.CambiarEstado(this.Text, prenda, dlg.EstadoSeleccionado, actor);
                     string fmtEstAct = T_est("msg.prenda.estadoact", "Estado de '{0}' actualizado a {1}.");
                     MostrarOk(string.Format(fmtEstAct, prenda.Nombre, EstadoLabel(dlg.EstadoSeleccionado)));
+
+                    // Bloque 1 — al dar de baja, ofrecer cargar un cargo por daño/pérdida contra
+                    // el último cliente que tuvo la prenda (prenda.IdUltimoCliente ya venía cargado
+                    // desde la grilla — CambiarEstado no lo toca cuando pasa a Baja).
+                    if (dlg.EstadoSeleccionado == BE.EstadoPrenda.Baja && prenda.IdUltimoCliente.HasValue)
+                        OfrecerCargoPorDanioOPerdida(prenda);
+
                     CargarPrendas();
+                }
+                catch (Exception ex) { MostrarError(ex); }
+            }
+        }
+
+        // Bloque 1 — Cargo por daño/pérdida: se ofrece opcionalmente tras confirmar una Baja.
+        private void OfrecerCargoPorDanioOPerdida(BE.Prenda prenda)
+        {
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T_c(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
+            var conf = MessageBox.Show(
+                T_c("msg.cargoprenda.preguntar", "¿Corresponde cobrarle a {0} por daño o pérdida de esta prenda?")
+                    .Replace("{0}", prenda.NombreUltimoCliente ?? "el último cliente"),
+                T_c("frm.cargoprenda", "Cargo por Daño/Pérdida"),
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+            if (conf != DialogResult.Yes) return;
+
+            using (var dlg = new CargoPrendaDialog(prenda))
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                try
+                {
+                    string actor = Seguridad.SessionManager.IsLoggedIn
+                        ? Seguridad.SessionManager.GetInstance().Usuario.Username
+                        : null;
+                    cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
+                    string fmt = T_c("msg.cargoprenda.registrado", "Cargo de ${0} registrado — se sumará al próximo cobro de {1}.");
+                    MostrarOk(string.Format(fmt, dlg.Monto, prenda.NombreUltimoCliente ?? "el cliente"));
                 }
                 catch (Exception ex) { MostrarError(ex); }
             }

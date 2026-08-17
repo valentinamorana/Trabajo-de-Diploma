@@ -68,8 +68,10 @@
     <Compile Include="Manejadores\IntentarRenovarHandler.cs" />
     <Compile Include="Manejadores\CambioPlanHandler.cs" />
     <Compile Include="Manejadores\BajaSuscripcionHandler.cs" />
+    <Compile Include="Manejadores\PausarSuscripcionHandler.cs" />
     <Compile Include="Renovacion.cs" />
     <Compile Include="Interfaces\ICobroService.cs" />
+    <Compile Include="Interfaces\ICargoPrendaService.cs" />
     <Compile Include="Manejadores\DecisionCobro.cs" />
     <Compile Include="Manejadores\ContextoCobro.cs" />
     <Compile Include="Manejadores\ResultadoCobro.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Manejadores\AplicarGraciaHandler.cs" />
     <Compile Include="Manejadores\SuspenderHandler.cs" />
     <Compile Include="Cobro.cs" />
+    <Compile Include="CargoPrenda.cs" />
     <Compile Include="Interfaces\IAnalisisAbandonoService.cs" />
     <Compile Include="Estrategias\EstrategiaRiesgo.cs" />
     <Compile Include="Estrategias\EstrategiaVencimientoInactividad.cs" />
@@ -106,6 +109,10 @@
     <Compile Include="PermisosAccion.cs" />
     <Compile Include="ControlMapeado.cs" />
     <Compile Include="Usuario.cs" />
+    <Compile Include="Usuario.Autenticacion.cs" />
+    <Compile Include="Usuario.Abm.cs" />
+    <Compile Include="Usuario.Archivado.cs" />
+    <Compile Include="Usuario.Claves.cs" />
     <Compile Include="VersionUsuario.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

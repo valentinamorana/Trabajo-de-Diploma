@@ -153,5 +153,89 @@ namespace Tests
             Assert.AreEqual(BE.EstadoRenovacion.Pendiente, resultado.Estado);
             Assert.AreEqual(0, dalCliente.ModificarVeces);
         }
+
+        // ── PausarSuscripcionHandler (Bloque 1) ──────────────────────────────────
+
+        [TestMethod]
+        public void Pausar_ConFechaValida_PausaYPersisteHistorial_SinTocarVencimiento()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var dalRenovacion = new FakeRenovacionDAL();
+            var handler = new PausarSuscripcionHandler(dalCliente, dalRenovacion);
+            var cliente = ClienteVigente();
+            var vencimientoOriginal = cliente.FechaVencimiento;
+            var fechaHasta = DateTime.Today.AddDays(10);
+
+            var resultado = handler.Procesar(new ContextoRenovacion
+            {
+                Cliente = cliente,
+                Decision = DecisionRenovacion.Pausar,
+                FechaPausaHasta = fechaHasta,
+                Actor = "vendedor1"
+            });
+
+            Assert.IsTrue(resultado.Resuelto);
+            Assert.AreEqual(BE.EstadoRenovacion.Pausada, resultado.Estado);
+            Assert.AreEqual(fechaHasta, cliente.FechaPausaHasta);
+            Assert.AreEqual(vencimientoOriginal, cliente.FechaVencimiento, "Pausar no debe tocar el vencimiento.");
+            Assert.AreEqual(1, dalCliente.ModificarVeces);
+            Assert.AreEqual(1, dalRenovacion.AltaVeces);
+
+            var registro = dalRenovacion.Registros[0];
+            Assert.AreEqual(BE.EstadoRenovacion.Pausada, registro.Resultado);
+        }
+
+        [TestMethod]
+        public void Pausar_SinFecha_LanzaPausaSinFecha_SinTocarElDAL()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var handler = new PausarSuscripcionHandler(dalCliente, new FakeRenovacionDAL());
+            var cliente = ClienteVigente();
+
+            try
+            {
+                handler.Procesar(new ContextoRenovacion { Cliente = cliente, Decision = DecisionRenovacion.Pausar });
+                Assert.Fail("Debía exigir la fecha de reanudación.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.pausa_sin_fecha", ex.Clave);
+            }
+            Assert.AreEqual(0, dalCliente.ModificarVeces);
+        }
+
+        [TestMethod]
+        public void Pausar_FechaPasada_LanzaPausaFechaPasada()
+        {
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            var cliente = ClienteVigente();
+
+            try
+            {
+                handler.Procesar(new ContextoRenovacion
+                {
+                    Cliente = cliente,
+                    Decision = DecisionRenovacion.Pausar,
+                    FechaPausaHasta = DateTime.Today.AddDays(-1)
+                });
+                Assert.Fail("Debía rechazar una fecha de reanudación pasada.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.pausa_fecha_pasada", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void Pausar_DecisionDistinta_DelegaAlSucesor()
+        {
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            var espia = new ManejadorEspia();
+            handler.AgregarSiguiente(espia);
+
+            handler.Procesar(new ContextoRenovacion { Cliente = ClienteVencido(), Decision = DecisionRenovacion.Baja });
+
+            Assert.IsTrue(espia.Invocado);
+        }
     }
 }

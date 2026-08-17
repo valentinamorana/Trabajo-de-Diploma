@@ -10,11 +10,13 @@ namespace GUI
     /// fuera del sistema (teléfono/WhatsApp/mail) y carga acá la decisión tomada; el
     /// patrón Chain of Responsibility (BLL.Manejadores) resuelve el resto.
     /// </summary>
-    public partial class RenovacionSuscripcionForm : Form, IIdiomaObserver
+    public partial class RenovacionSuscripcionForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IClienteService    _bllCliente    = new BLL.Cliente();
         private readonly BLL.Interfaces.IPlanSuscripcionService _bllPlan  = new BLL.PlanSuscripcion();
         private readonly BLL.Interfaces.IRenovacionService _bllRenovacion = new BLL.Renovacion();
+
+        protected override Label MensajeLabel => lblResultado;
 
         public RenovacionSuscripcionForm()
         {
@@ -55,14 +57,18 @@ namespace GUI
             rbRenovar.Text         = Tr("renov.renovar", "Renovar mismo plan");
             rbCambiarPlan.Text     = Tr("renov.cambiarplan", "Cambiar de plan");
             rbBaja.Text            = Tr("renov.baja", "Dar de baja");
+            rbPausar.Text          = Tr("renov.pausar", "Pausar hasta:");
             lblPlanNuevo.Text      = Tr("renov.plannuevo", "Plan nuevo:");
             lblModalidad.Text      = Tr("renov.modalidad", "Modalidad de cobro:");
             btnProcesar.Text       = Tr("renov.procesar", "Procesar");
+            btnReanudar.Text       = Tr("renov.reanudar", "Reanudar ahora");
         }
 
         private void CmbCliente_SelectedIndexChanged(object sender, EventArgs e) => MostrarEstadoActual();
 
         private void RbCambiarPlan_CheckedChanged(object sender, EventArgs e) => cmbPlanNuevo.Enabled = rbCambiarPlan.Checked;
+
+        private void RbPausar_CheckedChanged(object sender, EventArgs e) => dtpPausaHasta.Enabled = rbPausar.Checked;
 
         private void CargarClientes()
         {
@@ -75,8 +81,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 
@@ -90,8 +95,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 
@@ -106,11 +110,17 @@ namespace GUI
             string Tr(string clave, string fallback, object[] args = null) => Traductor.Resolver(clave, fallback, args, t);
 
             string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : Tr("susc.sinfecha", "sin fecha");
-            string estado = c.VencimientoExpirado ? Tr("renov.estado.vencida", "VENCIDA")
+            string estado = c.EstaPausada ? Tr("renov.estado.pausada", "PAUSADA")
+                           : c.VencimientoExpirado ? Tr("renov.estado.vencida", "VENCIDA")
                            : c.SuscripcionProximaAVencer() ? Tr("renov.estado.porvencer", "próxima a vencer")
                                                             : Tr("renov.estado.vigente", "vigente");
             lblEstadoActual.Text = Tr("renov.estado.resumen", "Plan actual: {0} — Vencimiento: {1} ({2})",
                 new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estado });
+            if (c.EstaPausada)
+                lblEstadoActual.Text += " — " + Tr("renov.estado.pausadahasta", "pausada hasta {0}",
+                    new object[] { c.FechaPausaHasta.Value.ToString("dd/MM/yyyy") });
+
+            btnReanudar.Enabled = c.EstaPausada;
         }
 
         private void BtnProcesar_Click(object sender, EventArgs e)
@@ -123,12 +133,17 @@ namespace GUI
 
             var decision = rbRenovar.Checked      ? BLL.Manejadores.DecisionRenovacion.Renovar
                           : rbCambiarPlan.Checked  ? BLL.Manejadores.DecisionRenovacion.CambiarPlan
+                          : rbPausar.Checked       ? BLL.Manejadores.DecisionRenovacion.Pausar
                                                      : BLL.Manejadores.DecisionRenovacion.Baja;
 
             int? idPlanNuevo = (decision == BLL.Manejadores.DecisionRenovacion.CambiarPlan
                                  && cmbPlanNuevo.SelectedItem is PlanItem planItem)
                 ? planItem.Plan.IdPlan
                 : (int?)null;
+
+            DateTime? fechaPausaHasta = decision == BLL.Manejadores.DecisionRenovacion.Pausar
+                ? dtpPausaHasta.Value.Date
+                : (DateTime?)null;
 
             var modalidad = (BE.Builders.ModalidadCobro)cmbModalidad.SelectedItem;
 
@@ -139,22 +154,37 @@ namespace GUI
                     ? Seguridad.SessionManager.GetInstance().Usuario.Username
                     : null;
 
-                var resultado = _bllRenovacion.Procesar(this.Text, cliente, decision, idPlanNuevo, modalidad, actor);
+                var resultado = _bllRenovacion.Procesar(this.Text, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta);
 
                 lblResultado.ForeColor = resultado.Estado == BE.EstadoRenovacion.Pendiente ? Color.DarkOrange : Color.DarkGreen;
                 lblResultado.Text = T(resultado.Clave, resultado.Mensaje, resultado.Args);
 
                 MostrarEstadoActual();
             }
-            catch (BE.AppException ex)
+            catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = T(ex.Clave, ex.Message, ex.Args);
+                MostrarError(ex);
+            }
+        }
+
+        private void BtnReanudar_Click(object sender, EventArgs e)
+        {
+            lblResultado.ForeColor = Color.DarkGreen;
+            lblResultado.Text = string.Empty;
+
+            if (!(cmbCliente.SelectedItem is ClienteItem item))
+                return;
+
+            try
+            {
+                var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
+                _bllCliente.ReanudarPausa(this.Text, cliente);
+                lblResultado.Text = T("renov.msg.reanudada", "Suscripción reanudada.");
+                MostrarEstadoActual();
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 

@@ -1,3 +1,5 @@
+using System;
+
 namespace BLL.Manejadores
 {
     /// <summary>Petición que viaja por la cadena de manejadores de renovación (PdN5).</summary>
@@ -8,6 +10,9 @@ namespace BLL.Manejadores
 
         /// <summary>Solo se usa si Decision == CambiarPlan.</summary>
         public int? IdPlanNuevo { get; set; }
+
+        /// <summary>Solo se usa si Decision == Pausar: hasta cuándo queda pausada la suscripción.</summary>
+        public DateTime? FechaPausaHasta { get; set; }
 
         public BE.Builders.ModalidadCobro Modalidad { get; set; }
         public string Actor { get; set; }

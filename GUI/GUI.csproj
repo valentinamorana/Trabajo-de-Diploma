@@ -200,6 +200,12 @@
     <Compile Include="CambioEstadoDialog.Designer.cs">
       <DependentUpon>CambioEstadoDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="CargoPrendaDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CargoPrendaDialog.Designer.cs">
+      <DependentUpon>CargoPrendaDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="NuevoPedidoForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -223,12 +229,6 @@
     </Compile>
     <Compile Include="PedidosRealizados.Designer.cs">
       <DependentUpon>PedidosRealizados.cs</DependentUpon>
-    </Compile>
-    <Compile Include="NotificacionDespachoForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="NotificacionDespachoForm.Designer.cs">
-      <DependentUpon>NotificacionDespachoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Bitacora.Designer.cs">
       <DependentUpon>Bitacora.cs</DependentUpon>
@@ -373,9 +373,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Menu.resx">
       <DependentUpon>Menu.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="NotificacionDespachoForm.resx">
-      <DependentUpon>NotificacionDespachoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NuevoPedidoForm.resx">
       <DependentUpon>NuevoPedidoForm.cs</DependentUpon>

@@ -114,7 +114,7 @@ ES	mnu.usuarios	Usuarios
 ES	mnu.perfiles	Perfiles y Permisos
 ES	mnu.bitacora	Analítica
 ES	mnu.cerrarsesion	Cerrar Sesion
-ES	mnu.ventana	Ventana
+ES	mnu.ventana	Ventanas Abiertas
 ES	mnu.idiomas	Gestión de Idiomas
 ES	frm.clientes	Gestión de Clientes
 ES	lbl.buscar	Buscar:
@@ -881,7 +881,7 @@ EN	mnu.usuarios	Users
 EN	mnu.perfiles	Profiles & Permissions
 EN	mnu.bitacora	Analytics
 EN	mnu.cerrarsesion	Sign Out
-EN	mnu.ventana	Window
+EN	mnu.ventana	Open Windows
 EN	mnu.idiomas	Language Management
 EN	frm.clientes	Client Management
 EN	lbl.buscar	Search:
@@ -1648,7 +1648,7 @@ RU	mnu.usuarios	Пользователи
 RU	mnu.perfiles	Профили и права
 RU	mnu.bitacora	Аналитика
 RU	mnu.cerrarsesion	Выйти из системы
-RU	mnu.ventana	Окно
+RU	mnu.ventana	Открытые окна
 RU	mnu.idiomas	Управление языками
 RU	frm.clientes	Управление клиентами
 RU	lbl.buscar	Поиск:
@@ -2453,7 +2453,7 @@ PT	mnu.usuarios	Usuários
 PT	mnu.perfiles	Perfis e Permissões
 PT	mnu.bitacora	Análise
 PT	mnu.cerrarsesion	Sair do sistema
-PT	mnu.ventana	Janela
+PT	mnu.ventana	Janelas Abertas
 PT	mnu.idiomas	Gerenciamento de Idiomas
 PT	mnu.dashboard	Painel de Controle
 PT	mnu.bitacora.sistema	Registro do Sistema

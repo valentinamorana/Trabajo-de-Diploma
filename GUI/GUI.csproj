@@ -57,6 +57,9 @@
     <Compile Include="DashboardVendedor.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DashboardVendedor.Designer.cs">
+      <DependentUpon>DashboardVendedor.cs</DependentUpon>
+    </Compile>
     <Compile Include="RenovacionSuscripcionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -69,11 +72,20 @@
     <Compile Include="DashboardControlStock.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DashboardControlStock.Designer.cs">
+      <DependentUpon>DashboardControlStock.cs</DependentUpon>
+    </Compile>
     <Compile Include="DashboardOperador.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DashboardOperador.Designer.cs">
+      <DependentUpon>DashboardOperador.cs</DependentUpon>
+    </Compile>
     <Compile Include="DashboardSupervisor.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DashboardSupervisor.Designer.cs">
+      <DependentUpon>DashboardSupervisor.cs</DependentUpon>
     </Compile>
     <Compile Include="FormBase.cs">
       <SubType>Form</SubType>

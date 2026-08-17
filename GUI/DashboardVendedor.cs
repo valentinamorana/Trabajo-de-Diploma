@@ -9,7 +9,7 @@ using Servicios.Multiidioma;
 
 namespace GUI
 {
-    public class DashboardVendedor : Form, IIdiomaObserver
+    public partial class DashboardVendedor : Form, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IPedidoService         _bllPedido  = new BLL.Pedido();
         private readonly BLL.Interfaces.IClienteService        _bllCliente = new BLL.Cliente();
@@ -18,28 +18,9 @@ namespace GUI
 
         private System.Windows.Forms.Timer _timer;
 
-        private Label           _lblTitulo;
-        private Label           _lblSesion;
-        private Button          _btnRefrescar;
-        private Panel           _panelHeader;
-        private Label           _numPedidos, _txtPedidos;
-        private Label           _numClientes, _txtClientes;
-        private Label           _numPlanes,   _txtPlanes;
-        private Label           _numSuscripciones, _txtSuscripciones;
-        private FlowLayoutPanel _flowCards;
-        private FlowLayoutPanel _colPendiente, _colDespachado, _colEntregado;
-        private Label           _lblColPend, _lblColDesp, _lblColEntr;
-
         public DashboardVendedor()
         {
-            this.Text            = "Panel de Ventas";
-            this.Size            = new Size(870, 570);
-            this.MinimumSize     = new Size(600, 400);
-            this.BackColor       = Color.FromArgb(240, 240, 245);
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.StartPosition   = FormStartPosition.Manual;
-            this.Location        = new Point(10, 10);
-            ConstruirUI();
+            InitializeComponent();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -80,15 +61,15 @@ namespace GUI
             string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             this.Text          = Tr("dash.vendedor.titulo", "Panel de Ventas");
-            _lblTitulo.Text    = Tr("dash.vendedor.titulo", "Panel de Ventas");
-            _btnRefrescar.Text = Tr("dash.btn.refrescar",   "↻ Actualizar");
-            if (_txtPedidos  != null) _txtPedidos.Text  = Tr("dash.pedidos",  "Pedidos\npendientes");
-            if (_txtClientes != null) _txtClientes.Text = Tr("dash.clientes", "Clientes\nregistrados");
-            if (_txtPlanes   != null) _txtPlanes.Text   = Tr("dash.planes",   "Planes\nactivos");
-            if (_txtSuscripciones != null) _txtSuscripciones.Text = Tr("dash.suscripciones", "Suscripciones\npor vencer");
-            _lblColPend.Text = Tr("dash.kan.pendiente",  "Pendiente");
-            _lblColDesp.Text = Tr("dash.kan.despachado", "Despachado");
-            _lblColEntr.Text = Tr("dash.kan.entregado",  "Entregado");
+            lblTitulo.Text     = Tr("dash.vendedor.titulo", "Panel de Ventas");
+            btnRefrescar.Text  = Tr("dash.btn.refrescar",   "↻ Actualizar");
+            txtPedidos.Text  = Tr("dash.pedidos",  "Pedidos\npendientes");
+            txtClientes.Text = Tr("dash.clientes", "Clientes\nregistrados");
+            txtPlanes.Text   = Tr("dash.planes",   "Planes\nactivos");
+            txtSuscripciones.Text = Tr("dash.suscripciones", "Suscripciones\npor vencer");
+            lblColPend.Text = Tr("dash.kan.pendiente",  "Pendiente");
+            lblColDesp.Text = Tr("dash.kan.despachado", "Despachado");
+            lblColEntr.Text = Tr("dash.kan.entregado",  "Entregado");
         }
 
         private void CargarEnBackground()
@@ -114,21 +95,20 @@ namespace GUI
 
         private void ActualizarCards(List<BE.Pedido> pedidos, List<BE.Cliente> clientes, List<BE.PlanSuscripcion> planes)
         {
-            if (_numPedidos  != null) _numPedidos.Text  = pedidos.FindAll(p => p.Estado == BE.EstadoPedido.Pendiente).Count.ToString();
-            if (_numClientes != null) _numClientes.Text = clientes.Count.ToString();
-            if (_numPlanes   != null) _numPlanes.Text   = planes.Count.ToString();
+            numPedidos.Text  = pedidos.FindAll(p => p.Estado == BE.EstadoPedido.Pendiente).Count.ToString();
+            numClientes.Text = clientes.Count.ToString();
+            numPlanes.Text   = planes.Count.ToString();
             // Mismo criterio que BLL.PanelAlertas: vencida o vence en los próximos 7 días.
-            if (_numSuscripciones != null)
-                _numSuscripciones.Text = clientes
-                    .Count(c => c.VencimientoExpirado || c.SuscripcionProximaAVencer(7))
-                    .ToString();
+            numSuscripciones.Text = clientes
+                .Count(c => c.VencimientoExpirado || c.SuscripcionProximaAVencer(7))
+                .ToString();
         }
 
         private void ActualizarKanban(List<BE.Pedido> pedidos)
         {
-            _colPendiente.Controls.Clear();
-            _colDespachado.Controls.Clear();
-            _colEntregado.Controls.Clear();
+            colPendiente.Controls.Clear();
+            colDespachado.Controls.Clear();
+            colEntregado.Controls.Clear();
 
             foreach (var p in pedidos)
             {
@@ -147,20 +127,20 @@ namespace GUI
                         // Vendedor base NO tiene (solo lo hereda GerenteComercial) — habilitar
                         // el clic ahí sería un bypass de permisos, así que quedan solo informativas.
                         HabilitarClicAbrirPedidosVenta(cardPendiente);
-                        _colPendiente.Controls.Add(cardPendiente);
+                        colPendiente.Controls.Add(cardPendiente);
                         break;
                     case BE.EstadoPedido.Despachado:
-                        _colDespachado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255)));
+                        colDespachado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255)));
                         break;
                     case BE.EstadoPedido.Entregado:
-                        _colEntregado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220)));
+                        colEntregado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220)));
                         break;
                 }
             }
 
-            if (_colPendiente.Controls.Count  == 0) _colPendiente.Controls.Add(CrearVacio());
-            if (_colDespachado.Controls.Count == 0) _colDespachado.Controls.Add(CrearVacio());
-            if (_colEntregado.Controls.Count  == 0) _colEntregado.Controls.Add(CrearVacio());
+            if (colPendiente.Controls.Count  == 0) colPendiente.Controls.Add(CrearVacio());
+            if (colDespachado.Controls.Count == 0) colDespachado.Controls.Add(CrearVacio());
+            if (colEntregado.Controls.Count  == 0) colEntregado.Controls.Add(CrearVacio());
         }
 
         private void ActualizarSesion()
@@ -169,8 +149,8 @@ namespace GUI
             {
                 var u = _bllUsuario.ObtenerUsuarioActivo();
                 var h = _bllUsuario.ObtenerFechaInicioSesion();
-                if (u != null && _lblSesion != null)
-                    _lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
+                if (u != null)
+                    lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
             catch { }
         }
@@ -200,110 +180,50 @@ namespace GUI
             new PedidosVenta { MdiParent = menu }.Show();
         }
 
-        private void ConstruirUI()
+        // ── Handlers de eventos estáticos (wireados desde el Diseñador) ─────────
+
+        private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
-            _panelHeader = new Panel { Dock = DockStyle.Top, Height = 62, BackColor = Color.FromArgb(176, 62, 96) };
-            _panelHeader.Paint += (s, pe) =>
-            {
-                using (var br = new LinearGradientBrush(_panelHeader.ClientRectangle,
-                    Color.FromArgb(210, 100, 135), Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
-                    pe.Graphics.FillRectangle(br, _panelHeader.ClientRectangle);
-            };
-
-            _lblTitulo = new Label { Text = "Panel de Ventas", Font = new Font("Segoe UI", 14f, FontStyle.Bold), ForeColor = Color.White, AutoSize = true, Location = new Point(14, 8), BackColor = Color.Transparent };
-            _btnRefrescar = new Button { Text = "↻  Actualizar", Size = new Size(100, 28), Anchor = AnchorStyles.Top | AnchorStyles.Right, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(210, 100, 135), ForeColor = Color.White, Font = new Font("Segoe UI", 8.5f), Cursor = Cursors.Hand, Location = new Point(756, 17) };
-            _btnRefrescar.FlatAppearance.BorderColor = Color.FromArgb(180, 230, 140, 170);
-            _btnRefrescar.FlatAppearance.BorderSize  = 1;
-            _btnRefrescar.Click += (s, e) => CargarEnBackground();
-            _panelHeader.Resize += (s, e) => _btnRefrescar.Left = _panelHeader.Width - 112;
-            var lblSub = new Label { Text = "WardrobeFlow  —  Ventas", Font = new Font("Segoe UI", 8f, FontStyle.Italic), ForeColor = Color.FromArgb(200, 255, 200, 220), AutoSize = true, Location = new Point(14, 36), BackColor = Color.Transparent };
-            _panelHeader.Controls.AddRange(new Control[] { _lblTitulo, lblSub, _btnRefrescar });
-
-            var panelSbar = new Panel { Dock = DockStyle.Bottom, Height = 26, BackColor = Color.FromArgb(176, 62, 96) };
-            _lblSesion = new Label { Dock = DockStyle.Fill, ForeColor = Color.FromArgb(244, 212, 226), Font = new Font("Segoe UI", 8f), TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(10, 0, 0, 0) };
-            panelSbar.Controls.Add(_lblSesion);
-
-            _flowCards = new FlowLayoutPanel { Height = 168, Dock = DockStyle.Top, Padding = new Padding(10, 10, 10, 4), BackColor = Color.FromArgb(240, 240, 245), FlowDirection = FlowDirection.LeftToRight, WrapContents = false };
-            _flowCards.Controls.Add(CrearTarjeta(Color.FromArgb(252, 228, 235), Color.FromArgb(80, 28, 52),   out _numPedidos,  out _txtPedidos));
-            _flowCards.Controls.Add(CrearTarjeta(Color.FromArgb(244, 212, 226), Color.FromArgb(110, 42, 74),  out _numClientes, out _txtClientes));
-            _flowCards.Controls.Add(CrearTarjeta(Color.FromArgb(236, 196, 215), Color.FromArgb(176, 62, 96),  out _numPlanes,   out _txtPlanes));
-            // Mismo dato que ya usa BLL.PanelAlertas para el badge de Alertas del menú — acá se
-            // reutiliza directamente sobre los clientes que este dashboard ya carga (rediseño
-            // UX/UI, hallazgo #1: el Vendedor ve "Suscriptores" sin tener que ir a otra pantalla).
-            _flowCards.Controls.Add(CrearTarjeta(Color.FromArgb(255, 235, 210), Color.FromArgb(166, 101, 14), out _numSuscripciones, out _txtSuscripciones));
-            _flowCards.Resize += (s, e) =>
-            {
-                int cnt  = _flowCards.Controls.Count;
-                if (cnt == 0) return;
-                int avail = _flowCards.ClientSize.Width - _flowCards.Padding.Horizontal - cnt * 8;
-                int w     = Math.Max(100, avail / cnt);
-                foreach (Control c in _flowCards.Controls) c.Width = w;
-            };
-
-            _lblColPend = new Label { Text = "Pendiente",  Dock = DockStyle.Top, Height = 30, Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Color.FromArgb(176, 62, 96),  BackColor = Color.FromArgb(252, 228, 235), Padding = new Padding(8, 6, 0, 0) };
-            _lblColDesp = new Label { Text = "Despachado", Dock = DockStyle.Top, Height = 30, Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Color.FromArgb(30, 100, 170),   BackColor = Color.FromArgb(220, 230, 250), Padding = new Padding(8, 6, 0, 0) };
-            _lblColEntr = new Label { Text = "Entregado",  Dock = DockStyle.Top, Height = 30, Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Color.FromArgb(15, 85, 35),    BackColor = Color.FromArgb(215, 240, 220), Padding = new Padding(8, 6, 0, 0) };
-
-            _colPendiente  = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, BackColor = Color.FromArgb(250, 244, 248), Padding = new Padding(6, 6, 6, 6) };
-            _colDespachado = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, BackColor = Color.FromArgb(244, 246, 252), Padding = new Padding(6, 6, 6, 6) };
-            _colEntregado  = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, BackColor = Color.FromArgb(244, 252, 246), Padding = new Padding(6, 6, 6, 6) };
-
-            AjustarAnchosCards(_colPendiente);
-            AjustarAnchosCards(_colDespachado);
-            AjustarAnchosCards(_colEntregado);
-
-            var col1 = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0, 0, 3, 0) };
-            col1.Controls.Add(_colPendiente);  col1.Controls.Add(_lblColPend);
-
-            var col2 = new Panel { Dock = DockStyle.Fill, Margin = new Padding(3, 0, 3, 0) };
-            col2.Controls.Add(_colDespachado); col2.Controls.Add(_lblColDesp);
-
-            var col3 = new Panel { Dock = DockStyle.Fill, Margin = new Padding(3, 0, 0, 0) };
-            col3.Controls.Add(_colEntregado);  col3.Controls.Add(_lblColEntr);
-
-            var tbl = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
-            tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33f));
-            tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33f));
-            tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.34f));
-            tbl.Controls.Add(col1, 0, 0);
-            tbl.Controls.Add(col2, 1, 0);
-            tbl.Controls.Add(col3, 2, 0);
-
-            var kanbanWrapper = new Panel { Dock = DockStyle.Fill, Padding = new Padding(6, 6, 6, 6), BackColor = Color.FromArgb(240, 240, 245) };
-            kanbanWrapper.Controls.Add(tbl);
-
-            this.Controls.Add(kanbanWrapper);
-            this.Controls.Add(_flowCards);
-            this.Controls.Add(_panelHeader);
-            this.Controls.Add(panelSbar);
+            using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
+                Color.FromArgb(210, 100, 135), Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
+                pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
+
+        private void PanelHeader_Resize(object sender, EventArgs e) => btnRefrescar.Left = panelHeader.Width - 112;
+
+        private void BtnRefrescar_Click(object sender, EventArgs e) => CargarEnBackground();
+
+        private void FlowCards_Resize(object sender, EventArgs e)
+        {
+            int cnt = flowCards.Controls.Count;
+            if (cnt == 0) return;
+            int avail = flowCards.ClientSize.Width - flowCards.Padding.Horizontal - cnt * 8;
+            int w     = Math.Max(100, avail / cnt);
+            foreach (Control c in flowCards.Controls) c.Width = w;
+        }
+
+        private void TarjetaKpi_Paint(object sender, PaintEventArgs pe)
+        {
+            var card = (Panel)sender;
+            pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using (var path = RoundedRect(new Rectangle(0, 0, card.Width - 1, card.Height - 1), 10))
+            using (var br   = new SolidBrush(card.BackColor))
+                pe.Graphics.FillPath(br, path);
+        }
+
+        private void CardPedidos_Resize(object sender, EventArgs e) { numPedidos.Width = cardPedidos.Width; txtPedidos.Width = cardPedidos.Width; }
+        private void CardClientes_Resize(object sender, EventArgs e) { numClientes.Width = cardClientes.Width; txtClientes.Width = cardClientes.Width; }
+        private void CardPlanes_Resize(object sender, EventArgs e) { numPlanes.Width = cardPlanes.Width; txtPlanes.Width = cardPlanes.Width; }
+        private void CardSuscripciones_Resize(object sender, EventArgs e) { numSuscripciones.Width = cardSuscripciones.Width; txtSuscripciones.Width = cardSuscripciones.Width; }
+
+        private void ColPendiente_Resize(object sender, EventArgs e) => AjustarAnchosCards(colPendiente);
+        private void ColDespachado_Resize(object sender, EventArgs e) => AjustarAnchosCards(colDespachado);
+        private void ColEntregado_Resize(object sender, EventArgs e) => AjustarAnchosCards(colEntregado);
 
         private static void AjustarAnchosCards(FlowLayoutPanel col)
         {
-            col.Resize += (s, e) =>
-            {
-                int w = Math.Max(100, col.ClientSize.Width - col.Padding.Horizontal - 2);
-                foreach (Control c in col.Controls) c.Width = w;
-            };
-        }
-
-        private static Panel CrearTarjeta(Color fondo, Color tinta, out Label lblNum, out Label lblTxt)
-        {
-            var card = new Panel { Width = 148, Height = 160, BackColor = fondo, Margin = new Padding(0, 0, 8, 0) };
-            card.Paint += (s, pe) =>
-            {
-                pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                using (var path = RoundedRect(new Rectangle(0, 0, card.Width - 1, card.Height - 1), 10))
-                using (var br   = new SolidBrush(card.BackColor))
-                    pe.Graphics.FillPath(br, path);
-            };
-            var num = new Label { Text = "…", Font = new Font("Segoe UI", 30f, FontStyle.Bold), ForeColor = tinta, AutoSize = false, TextAlign = ContentAlignment.BottomCenter, BackColor = Color.Transparent, Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right, Location = new Point(0, 20), Height = 78, Width = card.Width };
-            var txt = new Label { Text = "", Font = new Font("Segoe UI", 8f), ForeColor = Color.FromArgb(Math.Min(tinta.R + 50, 255), Math.Min(tinta.G + 50, 255), Math.Min(tinta.B + 50, 255)), AutoSize = false, TextAlign = ContentAlignment.TopCenter, BackColor = Color.Transparent, Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right, Location = new Point(0, 102), Height = 44, Width = card.Width };
-            card.Resize += (s, e) => { num.Width = card.Width; txt.Width = card.Width; };
-            card.Controls.Add(num);
-            card.Controls.Add(txt);
-            lblNum = num; lblTxt = txt;
-            return card;
+            int w = Math.Max(100, col.ClientSize.Width - col.Padding.Horizontal - 2);
+            foreach (Control c in col.Controls) c.Width = w;
         }
 
         private static Panel CrearCard(string titulo, string sub, int dias, Color fondo)

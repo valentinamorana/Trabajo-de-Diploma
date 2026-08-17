@@ -4140,3 +4140,195 @@ RU	lbl.cli.modalidad	Способ оплаты *
 RU	diag.btn.espejo	Восстановление (Зеркало)...
 PT	lbl.cli.modalidad	Modalidade de Cobrança *
 PT	diag.btn.espejo	Recuperação (Espelho)...
+ES	mnu.ventasvendedor	🧾  Ventas por Vendedor
+ES	mnu.rotacion	🔄  Rotación de Prendas
+ES	mnu.mantanalisis	🧽  Tiempos de Mantenimiento
+ES	mnu.escasez	📦  Escasez de Stock
+ES	mnu.recomendacion	✨  Recomendación de Prendas
+EN	mnu.ventasvendedor	🧾  Sales by Salesperson
+EN	mnu.rotacion	🔄  Garment Turnover
+EN	mnu.mantanalisis	🧽  Maintenance Times
+EN	mnu.escasez	📦  Stock Shortage
+EN	mnu.recomendacion	✨  Garment Recommendations
+RU	mnu.ventasvendedor	🧾  Продажи по продавцам
+RU	mnu.rotacion	🔄  Оборот одежды
+RU	mnu.mantanalisis	🧽  Сроки обслуживания
+RU	mnu.escasez	📦  Дефицит запасов
+RU	mnu.recomendacion	✨  Рекомендации одежды
+PT	mnu.ventasvendedor	🧾  Vendas por Vendedor
+PT	mnu.rotacion	🔄  Rotatividade de Peças
+PT	mnu.mantanalisis	🧽  Tempos de Manutenção
+PT	mnu.escasez	📦  Escassez de Estoque
+PT	mnu.recomendacion	✨  Recomendação de Peças
+ES	ventasvend.titulo	Ventas por Vendedor
+ES	ventasvend.col.vendedor	Vendedor
+ES	ventasvend.col.total	Total pedidos
+ES	ventasvend.col.entregados	Entregados
+ES	ventasvend.col.cancelados	Cancelados
+ES	ventasvend.col.tasacancel	% Cancelación
+ES	ventasvend.resultado	{0} vendedor(es) con pedidos registrados.
+EN	ventasvend.titulo	Sales by Salesperson
+EN	ventasvend.col.vendedor	Salesperson
+EN	ventasvend.col.total	Total orders
+EN	ventasvend.col.entregados	Delivered
+EN	ventasvend.col.cancelados	Cancelled
+EN	ventasvend.col.tasacancel	% Cancellation
+EN	ventasvend.resultado	{0} salesperson(s) with registered orders.
+RU	ventasvend.titulo	Продажи по продавцам
+RU	ventasvend.col.vendedor	Продавец
+RU	ventasvend.col.total	Всего заказов
+RU	ventasvend.col.entregados	Доставлено
+RU	ventasvend.col.cancelados	Отменено
+RU	ventasvend.col.tasacancel	% отмен
+RU	ventasvend.resultado	{0} продавец(ов) с зарегистрированными заказами.
+PT	ventasvend.titulo	Vendas por Vendedor
+PT	ventasvend.col.vendedor	Vendedor
+PT	ventasvend.col.total	Total de pedidos
+PT	ventasvend.col.entregados	Entregues
+PT	ventasvend.col.cancelados	Cancelados
+PT	ventasvend.col.tasacancel	% Cancelamento
+PT	ventasvend.resultado	{0} vendedor(es) com pedidos registrados.
+ES	rotacion.titulo	Rotación de Prendas
+ES	rotacion.col.prenda	Prenda
+ES	rotacion.col.categoria	Categoría
+ES	rotacion.col.cantidad	Cant. pedidos
+ES	rotacion.col.motivo	Motivo
+ES	rotacion.resultado	{0} prenda(s) marcada(s) por rotación.
+ES	rotacion.motivo.bajademanda	{0} no registra pedidos en {1} día(s) desde su alta — candidata a baja.
+ES	rotacion.motivo.altademanda	{0} fue pedida {1} veces — candidata a reposición en su categoría.
+EN	rotacion.titulo	Garment Turnover
+EN	rotacion.col.prenda	Garment
+EN	rotacion.col.categoria	Category
+EN	rotacion.col.cantidad	Order count
+EN	rotacion.col.motivo	Reason
+EN	rotacion.resultado	{0} garment(s) flagged by turnover.
+EN	rotacion.motivo.bajademanda	{0} has had no orders in {1} day(s) since it was added — a candidate for retirement.
+EN	rotacion.motivo.altademanda	{0} was ordered {1} times — a candidate for restocking in its category.
+RU	rotacion.titulo	Оборот одежды
+RU	rotacion.col.prenda	Одежда
+RU	rotacion.col.categoria	Категория
+RU	rotacion.col.cantidad	Кол-во заказов
+RU	rotacion.col.motivo	Причина
+RU	rotacion.resultado	{0} позици(й) отмечено по обороту.
+RU	rotacion.motivo.bajademanda	{0} не заказывали {1} дн. с момента добавления — кандидат на списание.
+RU	rotacion.motivo.altademanda	{0} заказывали {1} раз(а) — кандидат на пополнение в своей категории.
+PT	rotacion.titulo	Rotatividade de Peças
+PT	rotacion.col.prenda	Peça
+PT	rotacion.col.categoria	Categoria
+PT	rotacion.col.cantidad	Qtd. pedidos
+PT	rotacion.col.motivo	Motivo
+PT	rotacion.resultado	{0} peça(s) marcada(s) por rotatividade.
+PT	rotacion.motivo.bajademanda	{0} não registra pedidos há {1} dia(s) desde seu cadastro — candidata a baixa.
+PT	rotacion.motivo.altademanda	{0} foi pedida {1} vezes — candidata a reposição em sua categoria.
+ES	mant.analisis.titulo	Tiempos de Mantenimiento
+ES	mant.analisis.col.prenda	Prenda
+ES	mant.analisis.col.cantidad	Cant. mantenimientos
+ES	mant.analisis.col.promedio	Prom. días
+ES	mant.analisis.col.maximo	Máx. días
+ES	mant.analisis.col.motivo	Motivo
+ES	mant.analisis.resultado	{0} prenda(s) con mantenimiento excesivo.
+ES	mant.analisis.motivo.ambos	{0} lleva {1} mantenimientos, con un promedio de {2:F1} día(s) cada uno.
+ES	mant.analisis.motivo.cantidad	{0} lleva {1} mantenimientos — cantidad excesiva.
+ES	mant.analisis.motivo.duracion	{0} tiene un promedio de {1:F1} día(s) por mantenimiento — duración excesiva.
+EN	mant.analisis.titulo	Maintenance Times
+EN	mant.analisis.col.prenda	Garment
+EN	mant.analisis.col.cantidad	Maintenance count
+EN	mant.analisis.col.promedio	Avg. days
+EN	mant.analisis.col.maximo	Max. days
+EN	mant.analisis.col.motivo	Reason
+EN	mant.analisis.resultado	{0} garment(s) with excessive maintenance.
+EN	mant.analisis.motivo.ambos	{0} has had {1} maintenance cycles, averaging {2:F1} day(s) each.
+EN	mant.analisis.motivo.cantidad	{0} has had {1} maintenance cycles — excessive count.
+EN	mant.analisis.motivo.duracion	{0} averages {1:F1} day(s) per maintenance cycle — excessive duration.
+RU	mant.analisis.titulo	Сроки обслуживания
+RU	mant.analisis.col.prenda	Одежда
+RU	mant.analisis.col.cantidad	Кол-во обслуживаний
+RU	mant.analisis.col.promedio	Ср. дней
+RU	mant.analisis.col.maximo	Макс. дней
+RU	mant.analisis.col.motivo	Причина
+RU	mant.analisis.resultado	{0} позици(й) с чрезмерным обслуживанием.
+RU	mant.analisis.motivo.ambos	{0}: {1} обслуживани(й), в среднем {2:F1} дн. каждое.
+RU	mant.analisis.motivo.cantidad	{0}: {1} обслуживани(й) — чрезмерное количество.
+RU	mant.analisis.motivo.duracion	{0}: в среднем {1:F1} дн. на обслуживание — чрезмерная длительность.
+PT	mant.analisis.titulo	Tempos de Manutenção
+PT	mant.analisis.col.prenda	Peça
+PT	mant.analisis.col.cantidad	Qtd. manutenções
+PT	mant.analisis.col.promedio	Média dias
+PT	mant.analisis.col.maximo	Máx. dias
+PT	mant.analisis.col.motivo	Motivo
+PT	mant.analisis.resultado	{0} peça(s) com manutenção excessiva.
+PT	mant.analisis.motivo.ambos	{0} teve {1} manutenções, com média de {2:F1} dia(s) cada.
+PT	mant.analisis.motivo.cantidad	{0} teve {1} manutenções — quantidade excessiva.
+PT	mant.analisis.motivo.duracion	{0} tem média de {1:F1} dia(s) por manutenção — duração excessiva.
+ES	escasez.titulo	Escasez de Stock
+ES	escasez.umbral	Umbral mínimo:
+ES	escasez.col.talle	Talle
+ES	escasez.col.categoria	Categoría
+ES	escasez.col.disponible	Disponible
+ES	escasez.col.motivo	Motivo
+ES	escasez.resultado	{0} combinación(es) por debajo del umbral.
+ES	escasez.motivo	Talle {0} de {1}: quedan {2} disponible(s), por debajo del mínimo de {3}.
+EN	escasez.titulo	Stock Shortage
+EN	escasez.umbral	Minimum threshold:
+EN	escasez.col.talle	Size
+EN	escasez.col.categoria	Category
+EN	escasez.col.disponible	Available
+EN	escasez.col.motivo	Reason
+EN	escasez.resultado	{0} combination(s) below threshold.
+EN	escasez.motivo	Size {0} of {1}: only {2} available, below the minimum of {3}.
+RU	escasez.titulo	Дефицит запасов
+RU	escasez.umbral	Минимальный порог:
+RU	escasez.col.talle	Размер
+RU	escasez.col.categoria	Категория
+RU	escasez.col.disponible	Доступно
+RU	escasez.col.motivo	Причина
+RU	escasez.resultado	{0} комбинаци(й) ниже порога.
+RU	escasez.motivo	Размер {0}, {1}: осталось {2} шт., ниже минимума {3}.
+PT	escasez.titulo	Escassez de Estoque
+PT	escasez.umbral	Limite mínimo:
+PT	escasez.col.talle	Tamanho
+PT	escasez.col.categoria	Categoria
+PT	escasez.col.disponible	Disponível
+PT	escasez.col.motivo	Motivo
+PT	escasez.resultado	{0} combinação(ões) abaixo do limite.
+PT	escasez.motivo	Tamanho {0} de {1}: restam {2} disponível(is), abaixo do mínimo de {3}.
+ES	recom.titulo	Recomendación de Prendas
+ES	recom.col.prenda	Prenda
+ES	recom.col.categoria	Categoría
+ES	recom.col.color	Color
+ES	recom.col.motivo	Motivo
+ES	recom.resultado	{0} prenda(s) recomendada(s).
+ES	recom.sinhistorial	El cliente no tiene historial de pedidos suficiente para recomendar.
+ES	recom.motivo.ambos	{0} coincide con la categoría ({1}) y el color ({2}) preferidos del cliente.
+ES	recom.motivo.categoria	{0} coincide con la categoría preferida del cliente ({1}).
+ES	recom.motivo.color	{0} coincide con el color preferido del cliente ({1}).
+EN	recom.titulo	Garment Recommendations
+EN	recom.col.prenda	Garment
+EN	recom.col.categoria	Category
+EN	recom.col.color	Color
+EN	recom.col.motivo	Reason
+EN	recom.resultado	{0} garment(s) recommended.
+EN	recom.sinhistorial	The client doesn't have enough order history to generate a recommendation.
+EN	recom.motivo.ambos	{0} matches the client's preferred category ({1}) and color ({2}).
+EN	recom.motivo.categoria	{0} matches the client's preferred category ({1}).
+EN	recom.motivo.color	{0} matches the client's preferred color ({1}).
+RU	recom.titulo	Рекомендации одежды
+RU	recom.col.prenda	Одежда
+RU	recom.col.categoria	Категория
+RU	recom.col.color	Цвет
+RU	recom.col.motivo	Причина
+RU	recom.resultado	{0} позици(й) рекомендовано.
+RU	recom.sinhistorial	У клиента недостаточно истории заказов для рекомендации.
+RU	recom.motivo.ambos	{0} совпадает с предпочитаемой категорией ({1}) и цветом ({2}) клиента.
+RU	recom.motivo.categoria	{0} совпадает с предпочитаемой категорией клиента ({1}).
+RU	recom.motivo.color	{0} совпадает с предпочитаемым цветом клиента ({1}).
+PT	recom.titulo	Recomendação de Peças
+PT	recom.col.prenda	Peça
+PT	recom.col.categoria	Categoria
+PT	recom.col.color	Cor
+PT	recom.col.motivo	Motivo
+PT	recom.resultado	{0} peça(s) recomendada(s).
+PT	recom.sinhistorial	O cliente não tem histórico de pedidos suficiente para recomendar.
+PT	recom.motivo.ambos	{0} combina com a categoria ({1}) e a cor ({2}) preferidas do cliente.
+PT	recom.motivo.categoria	{0} combina com a categoria preferida do cliente ({1}).
+PT	recom.motivo.color	{0} combina com a cor preferida do cliente ({1}).

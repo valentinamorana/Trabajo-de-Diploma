@@ -85,6 +85,16 @@
     <Compile Include="Estrategias\EstrategiaInactividadPura.cs" />
     <Compile Include="Estrategias\EstrategiaClienteNuevoInactivo.cs" />
     <Compile Include="AnalisisAbandono.cs" />
+    <Compile Include="Interfaces\IReporteVentasVendedorService.cs" />
+    <Compile Include="ReporteVentasVendedor.cs" />
+    <Compile Include="Interfaces\IAnalisisRotacionService.cs" />
+    <Compile Include="AnalisisRotacion.cs" />
+    <Compile Include="Interfaces\IAnalisisMantenimientoService.cs" />
+    <Compile Include="AnalisisMantenimiento.cs" />
+    <Compile Include="Interfaces\IAnalisisEscasezService.cs" />
+    <Compile Include="AnalisisEscasez.cs" />
+    <Compile Include="Interfaces\IRecomendacionService.cs" />
+    <Compile Include="RecomendacionPrendas.cs" />
     <Compile Include="Pedido.cs" />
     <Compile Include="PlanSuscripcion.cs" />
     <Compile Include="Preferencia.cs" />

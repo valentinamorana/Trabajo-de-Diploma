@@ -37,6 +37,11 @@ namespace Tests
             Assert.IsTrue(V(v, "bitNegocioToolStripMenuItem"));
             Assert.IsTrue(V(v, "reporteJornadaToolStripMenuItem"));
             Assert.IsTrue(V(v, "analisisAbandonoToolStripMenuItem"));
+            Assert.IsTrue(V(v, "ventasVendedorToolStripMenuItem"));
+            Assert.IsTrue(V(v, "analisisRotacionToolStripMenuItem"));
+            Assert.IsTrue(V(v, "analisisMantenimientoToolStripMenuItem"));
+            Assert.IsTrue(V(v, "analisisEscasezToolStripMenuItem"));
+            Assert.IsTrue(V(v, "recomendacionPrendasToolStripMenuItem"));
             Assert.IsTrue(V(v, "gestionToolStripMenuItem"));
             Assert.IsTrue(V(v, "grpUsuarios"));
             Assert.IsTrue(V(v, "grpSistema"));
@@ -77,8 +82,14 @@ namespace Tests
         public void Vendedor_VeSuscriptoresInventarioPrendasYSoloPedidosDeVenta()
         {
             var patentes = new[] { "mnuPrendas", "mnuClientes", "mnuPlanSuscripciones",
-                                    "mnuRenovacionSuscripcion", "mnuCobroSuscripcion", "mnuPedidosVenta" };
+                                    "mnuRenovacionSuscripcion", "mnuCobroSuscripcion", "mnuPedidosVenta",
+                                    "mnuRecomendacionPrendas" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
+
+            // PdN13 — patente propia de Vendedor: la usa en el momento de armar el pedido.
+            Assert.IsTrue(V(v, "recomendacionPrendasToolStripMenuItem"));
+            Assert.IsFalse(V(v, "ventasVendedorToolStripMenuItem"));      // decisión de GerenteComercial
+            Assert.IsFalse(V(v, "analisisRotacionToolStripMenuItem"));    // decisión de GerenteInventario
 
             Assert.IsTrue(V(v, "suscriptoresToolStripMenuItem"));
             Assert.IsTrue(V(v, "clientesToolStripMenuItem"));
@@ -92,7 +103,11 @@ namespace Tests
 
             // Vendedor NO despacha: Pedidos Realizados no aparece.
             Assert.IsFalse(V(v, "pedidosRealizadosToolStripMenuItem"));
-            Assert.IsFalse(V(v, "bitacoraToolStripMenuItem"));
+            // PdN13 (Recomendación de Prendas) vive dentro de "Analítica": al tener esa
+            // patente propia, el grupo se vuelve visible aunque no tenga Bitácora/Reportes.
+            Assert.IsTrue(V(v, "bitacoraToolStripMenuItem"));
+            Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
+            Assert.IsFalse(V(v, "reporteJornadaToolStripMenuItem"));
             Assert.IsFalse(V(v, "analisisAbandonoToolStripMenuItem")); // patente propia de GerenteComercial, no de Vendedor
             Assert.IsFalse(V(v, "gestionToolStripMenuItem"));
         }
@@ -104,8 +119,14 @@ namespace Tests
             // resueltas (recursivamente) antes de llegar acá — se simula el resultado final.
             var patentes = new[] { "mnuPrendas", "mnuClientes", "mnuPlanSuscripciones",
                                     "mnuRenovacionSuscripcion", "mnuCobroSuscripcion",
-                                    "mnuPedidosVenta", "mnuPedidosRealizados", "mnuAnalisisAbandono" };
+                                    "mnuPedidosVenta", "mnuPedidosRealizados", "mnuAnalisisAbandono",
+                                    "mnuVentasVendedor", "mnuRecomendacionPrendas" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
+
+            // PdN8 — patente propia de GerenteComercial; PdN13 heredada de Vendedor (Composite).
+            Assert.IsTrue(V(v, "ventasVendedorToolStripMenuItem"));
+            Assert.IsTrue(V(v, "recomendacionPrendasToolStripMenuItem"));
+            Assert.IsFalse(V(v, "analisisRotacionToolStripMenuItem")); // decisión de GerenteInventario
 
             Assert.IsTrue(V(v, "pedidosVentaToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
@@ -150,7 +171,8 @@ namespace Tests
         {
             // Composite: GerenteInventario → OperadorLogistico + OperadorDeInventario,
             // más mnuCategorias/mnuOutfits propias (asignadas en BD, sin efecto visual).
-            var patentes = new[] { "mnuCategorias", "mnuOutfits", "mnuPedidosRealizados", "mnuPrendas", "mnuStock" };
+            var patentes = new[] { "mnuCategorias", "mnuOutfits", "mnuPedidosRealizados", "mnuPrendas", "mnuStock",
+                                    "mnuAnalisisRotacion", "mnuAnalisisMantenimiento", "mnuAnalisisEscasez" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
 
             Assert.IsTrue(V(v, "inventarioToolStripMenuItem"));
@@ -158,12 +180,22 @@ namespace Tests
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
 
+            // PdN9/PdN11/PdN12 — patentes propias de GerenteInventario.
+            Assert.IsTrue(V(v, "analisisRotacionToolStripMenuItem"));
+            Assert.IsTrue(V(v, "analisisMantenimientoToolStripMenuItem"));
+            Assert.IsTrue(V(v, "analisisEscasezToolStripMenuItem"));
+            Assert.IsFalse(V(v, "ventasVendedorToolStripMenuItem")); // decisión de GerenteComercial
+
             // Tiene las patentes pero el módulo no está implementado: sigue oculto.
             Assert.IsFalse(V(v, "outfitsToolStripMenuItem"));
             Assert.IsFalse(V(v, "categoriasToolStripMenuItem"));
 
             Assert.IsFalse(V(v, "suscriptoresToolStripMenuItem"));
-            Assert.IsFalse(V(v, "bitacoraToolStripMenuItem"));
+            // PdN9/11/12 viven dentro de "Analítica": al tener esas patentes propias, el
+            // grupo se vuelve visible aunque no tenga Bitácora/Reportes (gobernados por mnuAuditoria).
+            Assert.IsTrue(V(v, "bitacoraToolStripMenuItem"));
+            Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
+            Assert.IsFalse(V(v, "reporteJornadaToolStripMenuItem"));
         }
 
         /// <summary>
@@ -190,6 +222,9 @@ namespace Tests
                 "adminUsuariosItem",
                 "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem",
                 "analisisAbandonoToolStripMenuItem",
+                "ventasVendedorToolStripMenuItem", "analisisRotacionToolStripMenuItem",
+                "analisisMantenimientoToolStripMenuItem", "analisisEscasezToolStripMenuItem",
+                "recomendacionPrendasToolStripMenuItem",
                 "suscriptoresToolStripMenuItem", "ventasToolStripMenuItem", "bitacoraToolStripMenuItem",
                 "grpUsuarios", "grpSistema", "gestionToolStripMenuItem"
             };

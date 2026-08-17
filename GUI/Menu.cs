@@ -198,6 +198,9 @@ namespace GUI
                 adminUsuariosItem,
                 bitSistemaToolStripMenuItem, bitNegocioToolStripMenuItem, reporteJornadaToolStripMenuItem,
                 analisisAbandonoToolStripMenuItem,
+                ventasVendedorToolStripMenuItem, analisisRotacionToolStripMenuItem,
+                analisisMantenimientoToolStripMenuItem, analisisEscasezToolStripMenuItem,
+                recomendacionPrendasToolStripMenuItem,
                 suscriptoresToolStripMenuItem, ventasToolStripMenuItem, bitacoraToolStripMenuItem,
                 grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
@@ -385,6 +388,56 @@ namespace GUI
                 if (hijo is AnalisisAbandonoForm) { hijo.BringToFront(); return; }
             }
             new AnalisisAbandonoForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>Abre el Reporte de Ventas por Vendedor (PdN8) como hijo MDI.</summary>
+        private void ventasVendedorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is ReporteVentasVendedorForm) { hijo.BringToFront(); return; }
+            }
+            new ReporteVentasVendedorForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>Abre el Análisis de Rotación de Prendas (PdN9) como hijo MDI.</summary>
+        private void analisisRotacionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is AnalisisRotacionForm) { hijo.BringToFront(); return; }
+            }
+            new AnalisisRotacionForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>Abre el Análisis de Tiempos de Mantenimiento (PdN11) como hijo MDI.</summary>
+        private void analisisMantenimientoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is AnalisisMantenimientoForm) { hijo.BringToFront(); return; }
+            }
+            new AnalisisMantenimientoForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>Abre la Detección de Escasez por Talle/Categoría (PdN12) como hijo MDI.</summary>
+        private void analisisEscasezToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is AnalisisEscasezForm) { hijo.BringToFront(); return; }
+            }
+            new AnalisisEscasezForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>Abre la Recomendación de Prendas para un Cliente (PdN13) como hijo MDI.</summary>
+        private void recomendacionPrendasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is RecomendacionPrendasForm) { hijo.BringToFront(); return; }
+            }
+            new RecomendacionPrendasForm { MdiParent = this }.Show();
         }
 
         /// <summary>
@@ -749,6 +802,11 @@ namespace GUI
             Aplicar(bitNegocioToolStripMenuItem,        t);
             Aplicar(reporteJornadaToolStripMenuItem,    t);
             Aplicar(analisisAbandonoToolStripMenuItem,  t);
+            Aplicar(ventasVendedorToolStripMenuItem,        t);
+            Aplicar(analisisRotacionToolStripMenuItem,      t);
+            Aplicar(analisisMantenimientoToolStripMenuItem, t);
+            Aplicar(analisisEscasezToolStripMenuItem,       t);
+            Aplicar(recomendacionPrendasToolStripMenuItem,  t);
             Aplicar(cerrarSesionToolStripMenuItem,      t);
             Aplicar(ventanaToolStripMenuItem,           t);
 

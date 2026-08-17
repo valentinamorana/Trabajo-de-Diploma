@@ -102,6 +102,12 @@
     <Compile Include="FilaDV.cs" />
     <Compile Include="Roles.cs" />
     <Compile Include="Patentes.cs" />
+    <Compile Include="DesempenoVendedor.cs" />
+    <Compile Include="RotacionPrenda.cs" />
+    <Compile Include="TiempoMantenimientoPrenda.cs" />
+    <Compile Include="StockPorTalleCategoria.cs" />
+    <Compile Include="EscasezStock.cs" />
+    <Compile Include="PrendaRecomendada.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

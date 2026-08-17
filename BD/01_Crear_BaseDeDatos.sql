@@ -470,7 +470,12 @@ FROM (VALUES
     ('Gestionar Cobros',            'mnuCobroSuscripcion',   'Ventas'),
     ('Realizar Ventas',             'mnuPedidosVenta',       'Ventas'),
     ('Ver Pedidos Realizados',      'mnuPedidosRealizados',  'Ventas'),
-    ('Ver Análisis de Abandono',    'mnuAnalisisAbandono',   'Sistema')
+    ('Ver Análisis de Abandono',    'mnuAnalisisAbandono',   'Sistema'),
+    ('Ver Ventas por Vendedor',     'mnuVentasVendedor',     'Sistema'),
+    ('Ver Rotación de Prendas',     'mnuAnalisisRotacion',   'Sistema'),
+    ('Ver Tiempos de Mantenimiento','mnuAnalisisMantenimiento', 'Sistema'),
+    ('Ver Escasez de Stock',        'mnuAnalisisEscasez',    'Sistema'),
+    ('Ver Recomendación de Prendas','mnuRecomendacionPrendas', 'Sistema')
 ) AS v(Nombre, NombreMenu, Tipo)
 WHERE NOT EXISTS (SELECT 1 FROM Permiso p
                   WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0);
@@ -490,6 +495,9 @@ FROM (VALUES
     ('Administrador','mnuRenovacionSuscripcion'),
     ('Administrador','mnuCobroSuscripcion'),
     ('Administrador','mnuAnalisisAbandono'),
+    ('Administrador','mnuVentasVendedor'),('Administrador','mnuAnalisisRotacion'),
+    ('Administrador','mnuAnalisisMantenimiento'),('Administrador','mnuAnalisisEscasez'),
+    ('Administrador','mnuRecomendacionPrendas'),
     ('Administrador','mnuPedidosVenta'),('Administrador','mnuPedidosRealizados'),
     -- Supervisor: auditoría + mismos permisos que Vendedor
     ('Supervisor','mnuAuditoria'),
@@ -644,11 +652,16 @@ FROM (VALUES
     ('Auditor',           'mnuAuditoria'),
     ('GerenteComercial',  'mnuPedidosRealizados'),
     ('GerenteComercial',  'mnuAnalisisAbandono'),
+    ('GerenteComercial',  'mnuVentasVendedor'),
     ('OperadorLogistico', 'mnuPedidosRealizados'),
     ('EncargadoDeStock',  'mnuPrendas'),
     ('EncargadoDeStock',  'mnuStock'),
     ('GerenteInventario', 'mnuCategorias'),
-    ('GerenteInventario', 'mnuOutfits')
+    ('GerenteInventario', 'mnuOutfits'),
+    ('GerenteInventario', 'mnuAnalisisRotacion'),
+    ('GerenteInventario', 'mnuAnalisisMantenimiento'),
+    ('GerenteInventario', 'mnuAnalisisEscasez'),
+    ('Vendedor',          'mnuRecomendacionPrendas')
 ) AS v(Rol, NombreMenu)
 INNER JOIN Permiso rol ON rol.Nombre = v.Rol AND rol.EsRol = 1
 INNER JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu

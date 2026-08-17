@@ -121,6 +121,38 @@ namespace DAL
             return lista;
         }
 
+        // PdN12 — Stock Disponible agrupado por Talle+Categoría. Usada por
+        // BLL.AnalisisEscasez para detectar combinaciones por debajo del umbral mínimo.
+        public List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria()
+        {
+            var lista = new List<BE.StockPorTalleCategoria>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT ISNULL(Talle, '—') AS Talle, ISNULL(Categoria, '—') AS Categoria, " +
+                    "       COUNT(*) AS Cantidad " +
+                    "FROM Prenda " +
+                    "WHERE Estado = @Estado " +
+                    "GROUP BY Talle, Categoria " +
+                    "ORDER BY Categoria, Talle",
+                    new[] { new SqlParameter("@Estado", (int)BE.EstadoPrenda.Disponible) });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        lista.Add(new BE.StockPorTalleCategoria
+                        {
+                            Talle = row["Talle"].ToString(),
+                            Categoria = row["Categoria"].ToString(),
+                            CantidadDisponible = Convert.ToInt32(row["Cantidad"])
+                        });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener el stock disponible por talle y categoría.", ex);
+            }
+            return lista;
+        }
+
         // Inserta una nueva prenda. Devuelve el ID generado.
         public int Alta(BE.Prenda prenda)
         {

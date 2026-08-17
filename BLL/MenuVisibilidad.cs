@@ -40,6 +40,13 @@ namespace BLL
             ("reporteJornadaToolStripMenuItem",        "mnuAuditoria"),
             // PdN10 — patente propia: no todo el que audita necesita decidir sobre retención.
             ("analisisAbandonoToolStripMenuItem",      "mnuAnalisisAbandono"),
+            // Bloque 3 (Idea de Negocio) — PdN8, 9, 11, 12, 13: cada uno con patente propia,
+            // mismo criterio que PdN10 (decisión de negocio, no auditoría genérica).
+            ("ventasVendedorToolStripMenuItem",        "mnuVentasVendedor"),
+            ("analisisRotacionToolStripMenuItem",      "mnuAnalisisRotacion"),
+            ("analisisMantenimientoToolStripMenuItem", "mnuAnalisisMantenimiento"),
+            ("analisisEscasezToolStripMenuItem",       "mnuAnalisisEscasez"),
+            ("recomendacionPrendasToolStripMenuItem",  "mnuRecomendacionPrendas"),
         };
 
         /// <summary>Ítems retirados de la interfaz (módulos no implementados): siempre ocultos.</summary>
@@ -57,7 +64,9 @@ namespace BLL
             ("bitacoraToolStripMenuItem", new[]
             {
                 "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem",
-                "analisisAbandonoToolStripMenuItem"
+                "analisisAbandonoToolStripMenuItem", "ventasVendedorToolStripMenuItem",
+                "analisisRotacionToolStripMenuItem", "analisisMantenimientoToolStripMenuItem",
+                "analisisEscasezToolStripMenuItem", "recomendacionPrendasToolStripMenuItem"
             }),
         };
 

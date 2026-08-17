@@ -96,6 +96,113 @@ namespace DAL
             return resultado;
         }
 
+        // PdN8 — Desempeño por vendedor: total de pedidos, entregados y cancelados por Empleado.
+        // Usada por BLL.ReporteVentasVendedor para evaluar desempeño comercial.
+        public List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado()
+        {
+            var lista = new List<BE.DesempenoVendedor>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT emp.IdEmpleado, emp.Nombre + ' ' + emp.Apellido AS NombreEmpleado, " +
+                    "       COUNT(*) AS TotalPedidos, " +
+                    "       SUM(CASE WHEN ped.Estado = @Entregado THEN 1 ELSE 0 END) AS Entregados, " +
+                    "       SUM(CASE WHEN ped.Estado = @Cancelado THEN 1 ELSE 0 END) AS Cancelados " +
+                    "FROM Pedido ped " +
+                    "INNER JOIN Empleado emp ON emp.IdEmpleado = ped.IdEmpleado " +
+                    "GROUP BY emp.IdEmpleado, emp.Nombre, emp.Apellido " +
+                    "ORDER BY TotalPedidos DESC",
+                    new[]
+                    {
+                        new SqlParameter("@Entregado", (int)BE.EstadoPedido.Entregado),
+                        new SqlParameter("@Cancelado", (int)BE.EstadoPedido.Cancelado)
+                    });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        lista.Add(new BE.DesempenoVendedor
+                        {
+                            IdEmpleado = Convert.ToInt32(row["IdEmpleado"]),
+                            NombreEmpleado = row["NombreEmpleado"].ToString(),
+                            TotalPedidos = Convert.ToInt32(row["TotalPedidos"]),
+                            Entregados = Convert.ToInt32(row["Entregados"]),
+                            Cancelados = Convert.ToInt32(row["Cancelados"])
+                        });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener las estadísticas por vendedor.", ex);
+            }
+            return lista;
+        }
+
+        // PdN9 — Cantidad de veces que cada prenda fue pedida (excluye pedidos Cancelados:
+        // un pedido cancelado no representa demanda real). Usada por BLL.AnalisisRotacion.
+        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda()
+        {
+            var resultado = new Dictionary<int, int>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT pp.IdPrenda, COUNT(*) AS Cantidad " +
+                    "FROM PedidoPrenda pp " +
+                    "INNER JOIN Pedido p ON p.IdPedido = pp.IdPedido " +
+                    "WHERE p.Estado <> @EstadoCancelado " +
+                    "GROUP BY pp.IdPrenda",
+                    new[] { new SqlParameter("@EstadoCancelado", (int)BE.EstadoPedido.Cancelado) });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        resultado[Convert.ToInt32(row["IdPrenda"])] = Convert.ToInt32(row["Cantidad"]);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener la cantidad de pedidos por prenda.", ex);
+            }
+            return resultado;
+        }
+
+        // PdN13 — Prendas que un cliente pidió alguna vez (excluye pedidos Cancelados), para
+        // construir su perfil de preferencias. Usada por BLL.RecomendacionPrendas.
+        public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente)
+        {
+            var lista = new List<BE.Prenda>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT pr.IdPrenda, pr.Nombre, pr.Descripcion, pr.Talle, pr.Color, " +
+                    "       pr.Categoria, pr.Estado, pr.IdClienteActual, pr.FechaAlta " +
+                    "FROM PedidoPrenda pp " +
+                    "INNER JOIN Pedido p ON p.IdPedido = pp.IdPedido " +
+                    "INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda " +
+                    "WHERE p.IdCliente = @IdCliente AND p.Estado <> @EstadoCancelado",
+                    new[]
+                    {
+                        new SqlParameter("@IdCliente", idCliente),
+                        new SqlParameter("@EstadoCancelado", (int)BE.EstadoPedido.Cancelado)
+                    });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        lista.Add(new BE.Prenda
+                        {
+                            IdPrenda = Convert.ToInt32(row["IdPrenda"]),
+                            Nombre = row["Nombre"].ToString(),
+                            Descripcion = row["Descripcion"] != DBNull.Value ? row["Descripcion"].ToString() : null,
+                            Talle = row["Talle"] != DBNull.Value ? row["Talle"].ToString() : null,
+                            Color = row["Color"] != DBNull.Value ? row["Color"].ToString() : null,
+                            Categoria = row["Categoria"] != DBNull.Value ? row["Categoria"].ToString() : null,
+                            Estado = (BE.EstadoPrenda)Convert.ToInt32(row["Estado"]),
+                            FechaAlta = Convert.ToDateTime(row["FechaAlta"])
+                        });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener el historial de prendas del cliente.", ex);
+            }
+            return lista;
+        }
+
         // Obtiene un pedido por ID incluyendo sus prendas.
         public override BE.Pedido ObtenerPorId(int idPedido)
         {

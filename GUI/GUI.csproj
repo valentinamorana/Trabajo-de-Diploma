@@ -78,6 +78,36 @@
     <Compile Include="AnalisisAbandonoForm.Designer.cs">
       <DependentUpon>AnalisisAbandonoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ReporteVentasVendedorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReporteVentasVendedorForm.Designer.cs">
+      <DependentUpon>ReporteVentasVendedorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AnalisisRotacionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AnalisisRotacionForm.Designer.cs">
+      <DependentUpon>AnalisisRotacionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AnalisisMantenimientoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AnalisisMantenimientoForm.Designer.cs">
+      <DependentUpon>AnalisisMantenimientoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AnalisisEscasezForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AnalisisEscasezForm.Designer.cs">
+      <DependentUpon>AnalisisEscasezForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RecomendacionPrendasForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RecomendacionPrendasForm.Designer.cs">
+      <DependentUpon>RecomendacionPrendasForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DashboardControlStock.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -311,6 +341,11 @@
     <Compile Include="Exportacion\GeneradorBitacora.cs" />
     <Compile Include="Exportacion\GeneradorJornada.cs" />
     <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
+    <Compile Include="Exportacion\GeneradorVentasVendedor.cs" />
+    <Compile Include="Exportacion\GeneradorRotacion.cs" />
+    <Compile Include="Exportacion\GeneradorMantenimiento.cs" />
+    <Compile Include="Exportacion\GeneradorEscasez.cs" />
+    <Compile Include="Exportacion\GeneradorRecomendacion.cs" />
     <Compile Include="Exportacion\ExportadorCsv.cs" />
     <Compile Include="AlertasForm.cs">
       <SubType>Form</SubType>

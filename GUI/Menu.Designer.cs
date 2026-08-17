@@ -68,7 +68,13 @@
             this.bitNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sepBitacoraToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.reporteJornadaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sepAnaliticaToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.analisisAbandonoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ventasVendedorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisRotacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisMantenimientoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisEscasezToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recomendacionPrendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventanaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alertasItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsIdioma.SuspendLayout();
@@ -118,13 +124,13 @@
             this.menuStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.usuarioToolStripMenuItem,
+            this.ventanaToolStripMenuItem,
             this.panelControlToolStripMenuItem,
             this.suscriptoresToolStripMenuItem,
             this.inventarioToolStripMenuItem,
             this.ventasToolStripMenuItem,
             this.bitacoraToolStripMenuItem,
             this.gestionToolStripMenuItem,
-            this.ventanaToolStripMenuItem,
             this.alertasItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -325,6 +331,10 @@
             this.grpSistema.Name = "grpSistema";
             this.grpSistema.Tag  = "mnu.grp.sistema";
             this.grpSistema.Text = "Sistema";
+            // Resalte distintivo: los 3 ítems de este submenú (y el submenú en sí) se pintan
+            // con un fondo propio para diferenciarlos de un vistazo del resto de "Administrar"
+            // — son herramientas transversales del sistema, no ABM de usuarios.
+            this.grpSistema.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             //
             // perfilesToolStripMenuItem
             //
@@ -340,6 +350,7 @@
             this.idiomasToolStripMenuItem.Tag = "mnu.idiomas";
             this.idiomasToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.idiomasToolStripMenuItem.Text = "Gestión de Idiomas";
+            this.idiomasToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             this.idiomasToolStripMenuItem.Click += new System.EventHandler(this.idiomasToolStripMenuItem_Click);
             //
             // historialUsuariosToolStripMenuItem
@@ -356,6 +367,7 @@
             this.backupToolStripMenuItem.Tag  = "mnu.backup";
             this.backupToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.backupToolStripMenuItem.Text = "Backup y Restauración";
+            this.backupToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             this.backupToolStripMenuItem.Click += new System.EventHandler(this.backupToolStripMenuItem_Click);
             //
             // integridadToolStripMenuItem
@@ -364,6 +376,7 @@
             this.integridadToolStripMenuItem.Tag  = "mnu.integridad";
             this.integridadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.integridadToolStripMenuItem.Text = "Diagnóstico de Integridad";
+            this.integridadToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
             this.integridadToolStripMenuItem.Click += new System.EventHandler(this.integridadToolStripMenuItem_Click);
             //
             // bitacoraToolStripMenuItem
@@ -373,7 +386,13 @@
             this.bitNegocioToolStripMenuItem,
             this.sepBitacoraToolStripSeparator,
             this.reporteJornadaToolStripMenuItem,
-            this.analisisAbandonoToolStripMenuItem});
+            this.sepAnaliticaToolStripSeparator,
+            this.analisisAbandonoToolStripMenuItem,
+            this.ventasVendedorToolStripMenuItem,
+            this.analisisRotacionToolStripMenuItem,
+            this.analisisMantenimientoToolStripMenuItem,
+            this.analisisEscasezToolStripMenuItem,
+            this.recomendacionPrendasToolStripMenuItem});
             this.bitacoraToolStripMenuItem.Name = "bitacoraToolStripMenuItem";
             this.bitacoraToolStripMenuItem.Tag = "mnu.bitacora";
             this.bitacoraToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
@@ -411,6 +430,11 @@
             this.reporteJornadaToolStripMenuItem.Text = "📊  Reporte de Jornada";
             this.reporteJornadaToolStripMenuItem.Click += new System.EventHandler(this.reporteJornadaToolStripMenuItem_Click);
             //
+            // sepAnaliticaToolStripSeparator — separa auditoría (arriba) de los reportes de
+            // valor agregado del Bloque 3 (abajo), ahora que "Analítica" agrupa 8 ítems.
+            //
+            this.sepAnaliticaToolStripSeparator.Name = "sepAnaliticaToolStripSeparator";
+            //
             // analisisAbandonoToolStripMenuItem
             //
             this.analisisAbandonoToolStripMenuItem.Name = "analisisAbandonoToolStripMenuItem";
@@ -418,6 +442,46 @@
             this.analisisAbandonoToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.analisisAbandonoToolStripMenuItem.Text = "📉  Análisis de Abandono";
             this.analisisAbandonoToolStripMenuItem.Click += new System.EventHandler(this.analisisAbandonoToolStripMenuItem_Click);
+            //
+            // ventasVendedorToolStripMenuItem
+            //
+            this.ventasVendedorToolStripMenuItem.Name = "ventasVendedorToolStripMenuItem";
+            this.ventasVendedorToolStripMenuItem.Tag = "mnu.ventasvendedor";
+            this.ventasVendedorToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.ventasVendedorToolStripMenuItem.Text = "🧾  Ventas por Vendedor";
+            this.ventasVendedorToolStripMenuItem.Click += new System.EventHandler(this.ventasVendedorToolStripMenuItem_Click);
+            //
+            // analisisRotacionToolStripMenuItem
+            //
+            this.analisisRotacionToolStripMenuItem.Name = "analisisRotacionToolStripMenuItem";
+            this.analisisRotacionToolStripMenuItem.Tag = "mnu.rotacion";
+            this.analisisRotacionToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.analisisRotacionToolStripMenuItem.Text = "🔄  Rotación de Prendas";
+            this.analisisRotacionToolStripMenuItem.Click += new System.EventHandler(this.analisisRotacionToolStripMenuItem_Click);
+            //
+            // analisisMantenimientoToolStripMenuItem
+            //
+            this.analisisMantenimientoToolStripMenuItem.Name = "analisisMantenimientoToolStripMenuItem";
+            this.analisisMantenimientoToolStripMenuItem.Tag = "mnu.mantanalisis";
+            this.analisisMantenimientoToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.analisisMantenimientoToolStripMenuItem.Text = "🧽  Tiempos de Mantenimiento";
+            this.analisisMantenimientoToolStripMenuItem.Click += new System.EventHandler(this.analisisMantenimientoToolStripMenuItem_Click);
+            //
+            // analisisEscasezToolStripMenuItem
+            //
+            this.analisisEscasezToolStripMenuItem.Name = "analisisEscasezToolStripMenuItem";
+            this.analisisEscasezToolStripMenuItem.Tag = "mnu.escasez";
+            this.analisisEscasezToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.analisisEscasezToolStripMenuItem.Text = "📦  Escasez de Stock";
+            this.analisisEscasezToolStripMenuItem.Click += new System.EventHandler(this.analisisEscasezToolStripMenuItem_Click);
+            //
+            // recomendacionPrendasToolStripMenuItem
+            //
+            this.recomendacionPrendasToolStripMenuItem.Name = "recomendacionPrendasToolStripMenuItem";
+            this.recomendacionPrendasToolStripMenuItem.Tag = "mnu.recomendacion";
+            this.recomendacionPrendasToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.recomendacionPrendasToolStripMenuItem.Text = "✨  Recomendación de Prendas";
+            this.recomendacionPrendasToolStripMenuItem.Click += new System.EventHandler(this.recomendacionPrendasToolStripMenuItem_Click);
             //
             // ventanaToolStripMenuItem
             //
@@ -477,7 +541,13 @@
         private System.Windows.Forms.ToolStripMenuItem bitNegocioToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator sepBitacoraToolStripSeparator;
         private System.Windows.Forms.ToolStripMenuItem reporteJornadaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator sepAnaliticaToolStripSeparator;
         private System.Windows.Forms.ToolStripMenuItem analisisAbandonoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ventasVendedorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisRotacionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisMantenimientoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisEscasezToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recomendacionPrendasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gestionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem perfilesToolStripMenuItem;

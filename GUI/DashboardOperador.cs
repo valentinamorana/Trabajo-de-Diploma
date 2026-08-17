@@ -109,7 +109,7 @@ namespace GUI
 
             foreach (var p in pedidos)
             {
-                int    dias = (int)(DateTime.Today - p.FechaPedido.Date).TotalDays;
+                int    dias = p.DiasDesdeAlta;
                 string tit  = $"Pedido #{p.IdPedido}";
                 string sub  = p.NombreCliente ?? $"Cliente {p.IdCliente}";
 
@@ -120,7 +120,7 @@ namespace GUI
                 {
                     case BE.EstadoPedido.Pendiente:
                         var cPend = CrearCard(tit, sub, dias,
-                            dias >= 2 ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
+                            p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
                         HabilitarClicAbrirPedidosRealizados(cPend);
                         colPendiente.Controls.Add(cPend);
                         break;

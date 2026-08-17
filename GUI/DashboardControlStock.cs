@@ -115,22 +115,23 @@ namespace GUI
 
             foreach (var m in enMant)
             {
-                int    dias  = (int)(DateTime.Today - m.FechaEntrada.Date).TotalDays;
+                int    dias  = m.DiasTranscurridos;
                 string tit   = m.NombrePrenda ?? $"Prenda #{m.IdPrenda}";
                 string sub   = $"Entrada: {m.FechaEntrada:dd/MM/yyyy}";
+                var nivel    = m.NivelUrgencia;
 
                 // Las tres columnas abren Prendas: OperadorDeInventario siempre tiene ese
                 // permiso (mnuPrendas), así que no hay riesgo de exponer una pantalla sin acceso.
-                Panel card = dias < 2
+                Panel card = nivel == BE.NivelUrgencia.Reciente
                     ? CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220))
-                    : dias <= 7
+                    : nivel == BE.NivelUrgencia.Normal
                         ? CrearCard(tit, sub, dias, Color.FromArgb(255, 248, 210))
                         : CrearCard(tit, sub, dias, Color.FromArgb(255, 205, 200));
                 HabilitarClicAbrirPrendas(card);
 
-                if (dias < 2)       colReciente.Controls.Add(card);
-                else if (dias <= 7) colEnCurso.Controls.Add(card);
-                else                colUrgente.Controls.Add(card);
+                if (nivel == BE.NivelUrgencia.Reciente)     colReciente.Controls.Add(card);
+                else if (nivel == BE.NivelUrgencia.Normal)  colEnCurso.Controls.Add(card);
+                else                                        colUrgente.Controls.Add(card);
             }
 
             if (colReciente.Controls.Count == 0) colReciente.Controls.Add(CrearVacio());

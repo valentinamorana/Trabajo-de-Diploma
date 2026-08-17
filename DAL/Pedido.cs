@@ -16,7 +16,7 @@ namespace DAL
     /// y en BE.Estados.EstadoEnUso. No unificar sin preservar la protección anti-TOCTOU
     /// (UPDATE condicionado + chequeo de filas afectadas dentro de la transacción).
     /// </summary>
-    public class Pedido : BaseDAL<BE.Pedido>
+    public class Pedido : BaseDAL<BE.Pedido>, Interfaces.IPedidoDAL
     {
 
         // SELECT base compartido por todos los métodos de lectura

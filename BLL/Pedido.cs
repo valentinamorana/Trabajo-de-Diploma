@@ -9,13 +9,29 @@ namespace BLL
     /// </summary>
     public class Pedido : Interfaces.IPedidoService
     {
-        private readonly DAL.Pedido dalPedido = new DAL.Pedido();
-        private readonly DAL.Cliente dalCliente = new DAL.Cliente();
-        private readonly DAL.Empleado dalEmpleado = new DAL.Empleado();
-        private readonly DAL.PlanSuscripcion dalPlan = new DAL.PlanSuscripcion();
+        private readonly DAL.Interfaces.IPedidoDAL dalPedido;
+        private readonly DAL.Interfaces.IClienteDAL dalCliente;
+        private readonly DAL.Interfaces.IEmpleadoDAL dalEmpleado;
+        private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
         private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
-        private readonly DAL.PedidoHistorial dalHistorial = new DAL.PedidoHistorial();
+        private readonly DAL.Interfaces.IPedidoHistorialDAL dalHistorial;
+
+        // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
+        // de prueba (mismo criterio que BLL.Cliente/BLL.Renovacion/BLL.Cobro).
+        public Pedido() : this(new DAL.Pedido(), new DAL.Cliente(), new DAL.Empleado(),
+                                new DAL.PlanSuscripcion(), new DAL.PedidoHistorial()) { }
+
+        public Pedido(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IClienteDAL dalCliente,
+                       DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
+                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial)
+        {
+            this.dalPedido = dalPedido ?? throw new ArgumentNullException(nameof(dalPedido));
+            this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
+            this.dalEmpleado = dalEmpleado ?? throw new ArgumentNullException(nameof(dalEmpleado));
+            this.dalPlan = dalPlan ?? throw new ArgumentNullException(nameof(dalPlan));
+            this.dalHistorial = dalHistorial ?? throw new ArgumentNullException(nameof(dalHistorial));
+        }
 
         // Consultas
         public List<BE.Pedido> ObtenerTodos() => dalPedido.ObtenerTodos();

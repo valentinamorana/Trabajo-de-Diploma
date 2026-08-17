@@ -55,6 +55,7 @@
     <Compile Include="ComandoPedidoTests.cs" />
     <Compile Include="RenovacionTests.cs" />
     <Compile Include="ClienteTests.cs" />
+    <Compile Include="PedidoTests.cs" />
     <Compile Include="CobroTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="UsuarioAbmTests.cs" />
@@ -77,6 +78,10 @@
     <Compile Include="Fakes\FakeClienteDAL.cs" />
     <Compile Include="Fakes\FakeRenovacionDAL.cs" />
     <Compile Include="Fakes\FakeCobroDAL.cs" />
+    <Compile Include="Fakes\FakePedidoDAL.cs" />
+    <Compile Include="Fakes\FakeEmpleadoDAL.cs" />
+    <Compile Include="Fakes\FakePlanSuscripcionDAL.cs" />
+    <Compile Include="Fakes\FakePedidoHistorialDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

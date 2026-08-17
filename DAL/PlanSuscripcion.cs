@@ -9,7 +9,7 @@ namespace DAL
     /// Capa de Acceso a Datos — PlanSuscripcion.
     /// Opera sobre la tabla [PlanSuscripcion] de WardrobeFlowDB.
     /// </summary>
-    public class PlanSuscripcion
+    public class PlanSuscripcion : Interfaces.IPlanSuscripcionDAL
     {
         private readonly Acceso acceso = Acceso.GetInstance();
 

@@ -28,6 +28,8 @@ namespace BE
 
         Devolucion = 10,
 
-        Reactivacion = 11
+        Reactivacion = 11,
+
+        CobroSuscripcion = 12
     }
 }

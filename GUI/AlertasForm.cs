@@ -10,60 +10,14 @@ namespace GUI
     ///
     /// Lista las alertas operativas que calcula <see cref="BLL.PanelAlertas"/>
     /// (vencimientos, backup, stock, integridad). El formulario NO tiene lógica de
-    /// negocio: solo pide las alertas a la BLL, las traduce y las dibuja. Se construye
-    /// 100% por código (sin Designer) y se traduce en vivo (patrón Observer).
+    /// negocio: solo pide las alertas a la BLL, las traduce y las dibuja. Se traduce
+    /// en vivo (patrón Observer).
     /// </summary>
-    public class AlertasForm : Form, IIdiomaObserver
+    public partial class AlertasForm : Form, IIdiomaObserver
     {
-        private readonly Panel          _header;
-        private readonly Label          _lblTitulo;
-        private readonly Button         _btnActualizar;
-        private readonly FlowLayoutPanel _flow;
-
         public AlertasForm()
         {
-            Text          = "Centro de Alertas";
-            ClientSize    = new Size(560, 460);
-            StartPosition = FormStartPosition.CenterParent;
-            BackColor     = Color.FromArgb(252, 240, 245);
-            MinimumSize   = new Size(420, 300);
-
-            _header = new Panel { Dock = DockStyle.Top, Height = 52, BackColor = Color.FromArgb(176, 62, 96) };
-            _lblTitulo = new Label
-            {
-                Text      = "🔔  Centro de Alertas",
-                ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 13F, FontStyle.Bold),
-                AutoSize  = true,
-                Location  = new Point(14, 12)
-            };
-            _btnActualizar = new Button
-            {
-                Text      = "↻",
-                Font      = new Font("Segoe UI", 11F, FontStyle.Bold),
-                ForeColor = Color.White,
-                BackColor = Color.FromArgb(150, 45, 78),
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(40, 32),
-                Anchor    = AnchorStyles.Top | AnchorStyles.Right,
-                Location  = new Point(ClientSize.Width - 52, 10)
-            };
-            _btnActualizar.FlatAppearance.BorderSize = 0;
-            _btnActualizar.Click += (s, e) => CargarAlertas();
-            _header.Controls.Add(_lblTitulo);
-            _header.Controls.Add(_btnActualizar);
-
-            _flow = new FlowLayoutPanel
-            {
-                Dock          = DockStyle.Fill,
-                FlowDirection = FlowDirection.TopDown,
-                WrapContents  = false,
-                AutoScroll    = true,
-                Padding       = new Padding(12)
-            };
-
-            Controls.Add(_flow);
-            Controls.Add(_header);
+            InitializeComponent();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -91,14 +45,16 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(idioma);
             string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
             Text           = T("frm.alertas", "Centro de Alertas");
-            _lblTitulo.Text = "🔔  " + T("frm.alertas", "Centro de Alertas");
+            lblTitulo.Text = "🔔  " + T("frm.alertas", "Centro de Alertas");
         }
+
+        private void BtnActualizar_Click(object sender, EventArgs e) => CargarAlertas();
 
         // Pide las alertas a la BLL, las traduce y las pinta. Sin lógica de negocio acá.
         private void CargarAlertas()
         {
-            _flow.SuspendLayout();
-            _flow.Controls.Clear();
+            flow.SuspendLayout();
+            flow.Controls.Clear();
 
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
@@ -107,8 +63,8 @@ namespace GUI
             try { alertas = new BLL.PanelAlertas().ObtenerAlertas(); }
             catch (Exception ex)
             {
-                _flow.Controls.Add(CrearFila(BE.NivelAlerta.Critica, ex.Message));
-                _flow.ResumeLayout();
+                flow.Controls.Add(CrearFila(BE.NivelAlerta.Critica, ex.Message));
+                flow.ResumeLayout();
                 return;
             }
 
@@ -122,8 +78,8 @@ namespace GUI
                     AutoSize  = true,
                     Margin    = new Padding(6, 10, 6, 6)
                 };
-                _flow.Controls.Add(ok);
-                _flow.ResumeLayout();
+                flow.Controls.Add(ok);
+                flow.ResumeLayout();
                 return;
             }
 
@@ -134,10 +90,10 @@ namespace GUI
                 {
                     try { texto = string.Format(texto, a.Parametros); } catch { }
                 }
-                _flow.Controls.Add(CrearFila(a.Nivel, texto));
+                flow.Controls.Add(CrearFila(a.Nivel, texto));
             }
 
-            _flow.ResumeLayout();
+            flow.ResumeLayout();
         }
 
         // Tarjeta de una alerta: barra de color por severidad + texto.
@@ -161,7 +117,7 @@ namespace GUI
                     break;
             }
 
-            int ancho = _flow.ClientSize.Width - _flow.Padding.Horizontal - 24;
+            int ancho = flow.ClientSize.Width - flow.Padding.Horizontal - 24;
             if (ancho < 200) ancho = 480;
 
             var card = new Panel

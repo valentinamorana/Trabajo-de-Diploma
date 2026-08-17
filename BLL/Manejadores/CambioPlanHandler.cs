@@ -69,7 +69,9 @@ namespace BLL.Manejadores
                 Resuelto = true,
                 Estado = BE.EstadoRenovacion.CambioPlan,
                 IdRenovacion = idRenovacion,
-                Mensaje = $"Plan cambiado a '{planNuevo.Nombre}'. Nueva vigencia hasta {suscripcion.FechaVencimiento:d}."
+                Mensaje = $"Plan cambiado a '{planNuevo.Nombre}'. Nueva vigencia hasta {suscripcion.FechaVencimiento:d}.",
+                Clave = "renov.msg.cambioplan",
+                Args = new object[] { planNuevo.Nombre, suscripcion.FechaVencimiento }
             };
         }
     }

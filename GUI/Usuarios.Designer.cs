@@ -36,6 +36,9 @@ namespace GUI
             this.lblDesbloquearInfo = new System.Windows.Forms.Label();
             this.btnDesbloquear = new System.Windows.Forms.Button();
             this.lblMensaje = new System.Windows.Forms.Label();
+            this.btnEliminar = new System.Windows.Forms.Button();
+            this.btnVerArchivados = new System.Windows.Forms.Button();
+            this.btnPurgar = new System.Windows.Forms.Button();
             this.dgvUsuarios = new System.Windows.Forms.DataGridView();
             this.lblListaTitulo = new System.Windows.Forms.Label();
             this.panelAlta.SuspendLayout();
@@ -63,15 +66,20 @@ namespace GUI
             this.panelAlta.Controls.Add(this.lblDesbloquearInfo);
             this.panelAlta.Controls.Add(this.btnDesbloquear);
             this.panelAlta.Controls.Add(this.lblMensaje);
+            this.panelAlta.Controls.Add(this.btnEliminar);
+            this.panelAlta.Controls.Add(this.btnVerArchivados);
+            this.panelAlta.Controls.Add(this.btnPurgar);
             this.panelAlta.Dock = System.Windows.Forms.DockStyle.Right;
             this.panelAlta.Location = new System.Drawing.Point(620, 0);
             this.panelAlta.Name = "panelAlta";
             this.panelAlta.Padding = new System.Windows.Forms.Padding(12);
+            this.panelAlta.AutoScroll = true;
             this.panelAlta.Size = new System.Drawing.Size(240, 660);
             this.panelAlta.TabIndex = 0;
-            // 
-            // lblTitulo
-            // 
+            //
+            // lblTitulo — ABM de alta movido a "Administración de Usuarios"; oculto acá
+            // (esta pantalla quedó como gestión de CUENTA: reset/desbloqueo/archivado).
+            //
             this.lblTitulo.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
             this.lblTitulo.Location = new System.Drawing.Point(12, 12);
             this.lblTitulo.Name = "lblTitulo";
@@ -79,53 +87,59 @@ namespace GUI
             this.lblTitulo.TabIndex = 0;
             this.lblTitulo.Tag = "lbl.nuevousuario";
             this.lblTitulo.Text = "Nuevo Usuario";
-            // 
+            this.lblTitulo.Visible = false;
+            //
             // lblUser
-            // 
+            //
             this.lblUser.Location = new System.Drawing.Point(12, 50);
             this.lblUser.Name = "lblUser";
             this.lblUser.Size = new System.Drawing.Size(200, 15);
             this.lblUser.TabIndex = 1;
             this.lblUser.Tag = "lbl.nombreusuario";
             this.lblUser.Text = "Nombre de usuario:";
-            // 
+            this.lblUser.Visible = false;
+            //
             // txtUsername
-            // 
+            //
             this.txtUsername.Location = new System.Drawing.Point(12, 68);
             this.txtUsername.Name = "txtUsername";
             this.txtUsername.MaxLength = 50;
             this.txtUsername.Size = new System.Drawing.Size(210, 20);
             this.txtUsername.TabIndex = 2;
-            // 
-            // lblPass
-            // 
+            this.txtUsername.Visible = false;
+            //
+            // lblPass — campo de contraseña oculto: se genera automáticamente en la BLL.
+            //
             this.lblPass.Location = new System.Drawing.Point(12, 100);
             this.lblPass.Name = "lblPass";
             this.lblPass.Size = new System.Drawing.Size(200, 15);
             this.lblPass.TabIndex = 3;
             this.lblPass.Tag = "lbl.contrasena";
             this.lblPass.Text = "Contraseña:";
-            // 
+            this.lblPass.Visible = false;
+            //
             // txtContraseña
-            // 
+            //
             this.txtContraseña.Location = new System.Drawing.Point(12, 118);
             this.txtContraseña.Name = "txtContraseña";
             this.txtContraseña.MaxLength = 100;
             this.txtContraseña.PasswordChar = '●';
             this.txtContraseña.Size = new System.Drawing.Size(210, 20);
             this.txtContraseña.TabIndex = 4;
-            // 
+            this.txtContraseña.Visible = false;
+            //
             // lblPerfil
-            // 
+            //
             this.lblPerfil.Location = new System.Drawing.Point(12, 100);
             this.lblPerfil.Name = "lblPerfil";
             this.lblPerfil.Size = new System.Drawing.Size(200, 15);
             this.lblPerfil.TabIndex = 5;
             this.lblPerfil.Tag = "lbl.perfilrol";
             this.lblPerfil.Text = "Perfil (rol):";
-            // 
+            this.lblPerfil.Visible = false;
+            //
             // cmbPerfil
-            // 
+            //
             this.cmbPerfil.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbPerfil.Items.AddRange(new object[] {
             "Administrador",
@@ -137,9 +151,10 @@ namespace GUI
             this.cmbPerfil.Name = "cmbPerfil";
             this.cmbPerfil.Size = new System.Drawing.Size(210, 21);
             this.cmbPerfil.TabIndex = 6;
-            // 
+            this.cmbPerfil.Visible = false;
+            //
             // btnAgregar
-            // 
+            //
             this.btnAgregar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
             this.btnAgregar.FlatAppearance.BorderSize = 0;
             this.btnAgregar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -151,55 +166,58 @@ namespace GUI
             this.btnAgregar.Tag = "btn.agregar";
             this.btnAgregar.Text = "Agregar Usuario";
             this.btnAgregar.UseVisualStyleBackColor = false;
+            this.btnAgregar.Visible = false;
             this.btnAgregar.Click += new System.EventHandler(this.BtnAgregar_Click);
-            // 
-            // btnRefrescar
-            // 
-            this.btnRefrescar.Location = new System.Drawing.Point(12, 203);
+            //
+            // btnRefrescar — sube a (12,12): con el alta oculta, es el primer control visible.
+            //
+            this.btnRefrescar.Location = new System.Drawing.Point(12, 12);
             this.btnRefrescar.Name = "btnRefrescar";
             this.btnRefrescar.Size = new System.Drawing.Size(210, 28);
             this.btnRefrescar.TabIndex = 8;
             this.btnRefrescar.Tag = "btn.refrescar";
             this.btnRefrescar.Text = "↻ Refrescar Lista";
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
-            // 
-            // separador1
-            // 
+            //
+            // separador1 — posiciones subidas 230px respecto al Designer original: con el
+            // alta oculta (lblTitulo..btnAgregar) este bloque de reset/desbloqueo pasa a ser
+            // lo primero visible del panel, y así no queda un hueco vacío arriba.
+            //
             this.separador1.BackColor = System.Drawing.Color.Silver;
-            this.separador1.Location = new System.Drawing.Point(12, 242);
+            this.separador1.Location = new System.Drawing.Point(12, 12);
             this.separador1.Name = "separador1";
             this.separador1.Size = new System.Drawing.Size(210, 1);
             this.separador1.TabIndex = 9;
-            // 
+            //
             // lblResetTitulo
-            // 
+            //
             this.lblResetTitulo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblResetTitulo.Location = new System.Drawing.Point(12, 252);
+            this.lblResetTitulo.Location = new System.Drawing.Point(12, 22);
             this.lblResetTitulo.Name = "lblResetTitulo";
             this.lblResetTitulo.Size = new System.Drawing.Size(210, 23);
             this.lblResetTitulo.TabIndex = 10;
             this.lblResetTitulo.Tag = "lbl.resettitulo";
             this.lblResetTitulo.Text = "Resetear Contraseña";
-            // 
+            //
             // lblResetInfo
-            // 
+            //
             this.lblResetInfo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblResetInfo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblResetInfo.Location = new System.Drawing.Point(12, 275);
+            this.lblResetInfo.Location = new System.Drawing.Point(12, 45);
             this.lblResetInfo.Name = "lblResetInfo";
             this.lblResetInfo.Size = new System.Drawing.Size(210, 36);
             this.lblResetInfo.TabIndex = 11;
             this.lblResetInfo.Tag = "lbl.resetinfo";
             this.lblResetInfo.Text = "Selecioná un usuario\nen la lista y presioná:";
-            // 
+            //
             // btnResetearClave
-            // 
+            //
             this.btnResetearClave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(110)))), ((int)(((byte)(180)))));
             this.btnResetearClave.Enabled = false;
             this.btnResetearClave.FlatAppearance.BorderSize = 0;
             this.btnResetearClave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnResetearClave.ForeColor = System.Drawing.Color.White;
-            this.btnResetearClave.Location = new System.Drawing.Point(12, 316);
+            this.btnResetearClave.Location = new System.Drawing.Point(12, 86);
             this.btnResetearClave.Name = "btnResetearClave";
             this.btnResetearClave.Size = new System.Drawing.Size(210, 34);
             this.btnResetearClave.TabIndex = 12;
@@ -207,44 +225,44 @@ namespace GUI
             this.btnResetearClave.Text = "Resetear Contraseña";
             this.btnResetearClave.UseVisualStyleBackColor = false;
             this.btnResetearClave.Click += new System.EventHandler(this.BtnResetearClave_Click);
-            // 
+            //
             // separador2
-            // 
+            //
             this.separador2.BackColor = System.Drawing.Color.Silver;
-            this.separador2.Location = new System.Drawing.Point(12, 358);
+            this.separador2.Location = new System.Drawing.Point(12, 128);
             this.separador2.Name = "separador2";
             this.separador2.Size = new System.Drawing.Size(210, 1);
             this.separador2.TabIndex = 13;
-            // 
+            //
             // lblDesbloquearTitulo
-            // 
+            //
             this.lblDesbloquearTitulo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblDesbloquearTitulo.Location = new System.Drawing.Point(12, 368);
+            this.lblDesbloquearTitulo.Location = new System.Drawing.Point(12, 138);
             this.lblDesbloquearTitulo.Name = "lblDesbloquearTitulo";
             this.lblDesbloquearTitulo.Size = new System.Drawing.Size(210, 23);
             this.lblDesbloquearTitulo.TabIndex = 14;
             this.lblDesbloquearTitulo.Tag = "lbl.desbloqtitulo";
             this.lblDesbloquearTitulo.Text = "Desbloquear Cuenta";
-            // 
+            //
             // lblDesbloquearInfo
-            // 
+            //
             this.lblDesbloquearInfo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblDesbloquearInfo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblDesbloquearInfo.Location = new System.Drawing.Point(12, 391);
+            this.lblDesbloquearInfo.Location = new System.Drawing.Point(12, 161);
             this.lblDesbloquearInfo.Name = "lblDesbloquearInfo";
             this.lblDesbloquearInfo.Size = new System.Drawing.Size(210, 36);
             this.lblDesbloquearInfo.TabIndex = 15;
             this.lblDesbloquearInfo.Tag = "lbl.desbloqinfo";
             this.lblDesbloquearInfo.Text = "Selecioná un usuario\nbloqueado y presioná:";
-            // 
+            //
             // btnDesbloquear
-            // 
+            //
             this.btnDesbloquear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.btnDesbloquear.Enabled = false;
             this.btnDesbloquear.FlatAppearance.BorderSize = 0;
             this.btnDesbloquear.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDesbloquear.ForeColor = System.Drawing.Color.White;
-            this.btnDesbloquear.Location = new System.Drawing.Point(12, 432);
+            this.btnDesbloquear.Location = new System.Drawing.Point(12, 202);
             this.btnDesbloquear.Name = "btnDesbloquear";
             this.btnDesbloquear.Size = new System.Drawing.Size(210, 34);
             this.btnDesbloquear.TabIndex = 16;
@@ -252,16 +270,68 @@ namespace GUI
             this.btnDesbloquear.Text = "Desbloquear Cuenta";
             this.btnDesbloquear.UseVisualStyleBackColor = false;
             this.btnDesbloquear.Click += new System.EventHandler(this.BtnDesbloquear_Click);
-            // 
-            // lblMensaje
-            // 
-            this.lblMensaje.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            //
+            // btnEliminar — RF-10, archivar (baja lógica) el usuario seleccionado.
+            //
+            this.btnEliminar.BackColor = System.Drawing.Color.FromArgb(170, 50, 50);
+            this.btnEliminar.Enabled   = false;
+            this.btnEliminar.FlatAppearance.BorderSize = 0;
+            this.btnEliminar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEliminar.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.btnEliminar.ForeColor = System.Drawing.Color.White;
+            this.btnEliminar.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnEliminar.Location  = new System.Drawing.Point(12, 256);
+            this.btnEliminar.Name      = "btnEliminar";
+            this.btnEliminar.Size      = new System.Drawing.Size(210, 30);
+            this.btnEliminar.TabIndex  = 17;
+            this.btnEliminar.Tag       = "btn.usr.eliminar";
+            this.btnEliminar.Text      = "🗑 Archivar usuario";
+            this.btnEliminar.UseVisualStyleBackColor = false;
+            this.btnEliminar.Click    += new System.EventHandler(this.BtnEliminar_Click);
+            //
+            // btnVerArchivados
+            //
+            this.btnVerArchivados.BackColor = System.Drawing.Color.FromArgb(110, 110, 120);
+            this.btnVerArchivados.FlatAppearance.BorderSize = 0;
+            this.btnVerArchivados.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVerArchivados.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.btnVerArchivados.ForeColor = System.Drawing.Color.White;
+            this.btnVerArchivados.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnVerArchivados.Location  = new System.Drawing.Point(12, 294);
+            this.btnVerArchivados.Name      = "btnVerArchivados";
+            this.btnVerArchivados.Size      = new System.Drawing.Size(102, 28);
+            this.btnVerArchivados.TabIndex  = 18;
+            this.btnVerArchivados.Tag       = "btn.usr.verarchivados";
+            this.btnVerArchivados.Text      = "Ver archivados";
+            this.btnVerArchivados.UseVisualStyleBackColor = false;
+            this.btnVerArchivados.Click    += new System.EventHandler(this.BtnVerArchivados_Click);
+            //
+            // btnPurgar
+            //
+            this.btnPurgar.BackColor = System.Drawing.Color.FromArgb(60, 60, 70);
+            this.btnPurgar.FlatAppearance.BorderSize = 0;
+            this.btnPurgar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPurgar.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.btnPurgar.ForeColor = System.Drawing.Color.White;
+            this.btnPurgar.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnPurgar.Location  = new System.Drawing.Point(120, 294);
+            this.btnPurgar.Name      = "btnPurgar";
+            this.btnPurgar.Size      = new System.Drawing.Size(102, 28);
+            this.btnPurgar.TabIndex  = 19;
+            this.btnPurgar.Tag       = "btn.usr.purgar";
+            this.btnPurgar.Text      = "Purgar (>1 año)";
+            this.btnPurgar.UseVisualStyleBackColor = false;
+            this.btnPurgar.Click    += new System.EventHandler(this.BtnPurgar_Click);
+            //
+            // lblMensaje — va DEBAJO de todos los botones de este panel.
+            //
+            this.lblMensaje.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblMensaje.ForeColor = System.Drawing.Color.DarkGreen;
-            this.lblMensaje.Location = new System.Drawing.Point(12, 526);
-            this.lblMensaje.Name = "lblMensaje";
-            this.lblMensaje.Size = new System.Drawing.Size(210, 80);
-            this.lblMensaje.TabIndex = 17;
-            // 
+            this.lblMensaje.Location  = new System.Drawing.Point(12, 336);
+            this.lblMensaje.Name      = "lblMensaje";
+            this.lblMensaje.Size      = new System.Drawing.Size(210, 48);
+            this.lblMensaje.TabIndex  = 20;
+            //
             // dgvUsuarios
             // 
             this.dgvUsuarios.AllowUserToAddRows = false;
@@ -314,6 +384,7 @@ namespace GUI
             this.Name = "Usuarios";
             this.Tag = "frm.gestion";
             this.Text = "Gestión de Usuarios";
+            this.Load += new System.EventHandler(this.Usuarios_Load);
             this.panelAlta.ResumeLayout(false);
             this.panelAlta.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsuarios)).EndInit();
@@ -342,6 +413,9 @@ namespace GUI
         private System.Windows.Forms.Label        lblDesbloquearInfo;
         private System.Windows.Forms.Button       btnDesbloquear;
         private System.Windows.Forms.Label        lblMensaje;
+        private System.Windows.Forms.Button       btnEliminar;
+        private System.Windows.Forms.Button       btnVerArchivados;
+        private System.Windows.Forms.Button       btnPurgar;
         private System.Windows.Forms.DataGridView dgvUsuarios;
         private System.Windows.Forms.Label        lblListaTitulo;
     }

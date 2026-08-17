@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
 
@@ -18,22 +17,28 @@ namespace GUI
     /// (admin logueado) y desde el arranque (Program), cuando un Administrador autenticado entra
     /// con la base comprometida. Cada acción se confirma con ConfirmarAdminForm.
     /// </summary>
-    public class RecuperacionEspejoForm : Form
+    public partial class RecuperacionEspejoForm : Form
     {
-        private DataGridView _grid;
-        private Label  _lblEstado;
-        private TextBox _txtResumen;
-        private Button _btnReparar;
-        private Button _btnAsumir;
-        private Button _btnBackup;
-        private Button _btnCerrar;
-
         // True si se ejecutó una recuperación con éxito (el llamador puede reiniciar/refrescar).
         public bool RecuperadoExitosamente { get; private set; }
 
         public RecuperacionEspejoForm()
         {
-            BuildUI();
+            InitializeComponent();
+
+            this.Text            = T("rec.frm.titulo",    this.Text);
+            btnCerrar.Text       = T("rec.btn.cerrar",     btnCerrar.Text);
+            btnBackup.Text       = T("rec.btn.backup",     btnBackup.Text);
+            btnAsumir.Text       = T("rec.btn.asumir",     btnAsumir.Text);
+            btnReparar.Text      = T("rec.btn.reparar",    btnReparar.Text);
+            colId.HeaderText       = T("rec.col.id",       colId.HeaderText);
+            colUsuario.HeaderText  = T("rec.col.usuario",  colUsuario.HeaderText);
+            colTipo.HeaderText     = T("rec.col.tipo",     colTipo.HeaderText);
+            colCampo.HeaderText    = T("rec.col.campo",    colCampo.HeaderText);
+            colActual.HeaderText   = T("rec.col.actual",   colActual.HeaderText);
+            colEsperado.HeaderText = T("rec.col.esperado", colEsperado.HeaderText);
+
+            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
         }
 
         private static string T(string key, string fallback)
@@ -42,97 +47,26 @@ namespace GUI
             return t.ContainsKey(key) ? t[key].Texto : fallback;
         }
 
-        private void BuildUI()
-        {
-            this.Text          = T("rec.frm.titulo", "Recuperación de Integridad (Espejo)");
-            this.Size          = new Size(860, 600);
-            this.MinimumSize   = new Size(720, 500);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.Font          = new Font("Segoe UI", 9f);
-
-            var panelEstado = new Panel { Dock = DockStyle.Top, Height = 58, BackColor = Color.FromArgb(40, 40, 55), Padding = new Padding(16, 0, 16, 0) };
-            _lblEstado = new Label { Dock = DockStyle.Fill, Font = new Font("Segoe UI", 12f, FontStyle.Bold), ForeColor = Color.White, TextAlign = ContentAlignment.MiddleLeft };
-            panelEstado.Controls.Add(_lblEstado);
-
-            _txtResumen = new TextBox
-            {
-                Dock = DockStyle.Top, Height = 110, Multiline = true, ReadOnly = true,
-                ScrollBars = ScrollBars.Vertical, BackColor = Color.FromArgb(248, 244, 250),
-                BorderStyle = BorderStyle.FixedSingle, Font = new Font("Consolas", 8.5f),
-                ForeColor = Color.FromArgb(60, 30, 50)
-            };
-
-            _grid = new DataGridView
-            {
-                Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false,
-                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect, BackgroundColor = Color.White,
-                BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9f)
-            };
-            _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "cId",       HeaderText = T("rec.col.id",       "ID"),       FillWeight = 7 });
-            _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "cUsuario",  HeaderText = T("rec.col.usuario",  "Usuario"),  FillWeight = 18 });
-            _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "cTipo",     HeaderText = T("rec.col.tipo",     "Tipo"),     FillWeight = 18 });
-            _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "cCampo",    HeaderText = T("rec.col.campo",    "Campo"),    FillWeight = 17 });
-            _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "cActual",   HeaderText = T("rec.col.actual",   "Actual"),   FillWeight = 20 });
-            _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "cEsperado", HeaderText = T("rec.col.esperado", "Esperado (espejo)"), FillWeight = 20 });
-
-            var panelBotones = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Bottom, Height = 52, FlowDirection = FlowDirection.RightToLeft,
-                Padding = new Padding(8, 8, 8, 8), BackColor = Color.FromArgb(245, 245, 250)
-            };
-
-            _btnCerrar = MkButton(T("rec.btn.cerrar", "Cerrar"), Color.FromArgb(120, 120, 135), 90);
-            _btnCerrar.Click += (s, e) => this.Close();
-
-            _btnBackup = MkButton(T("rec.btn.backup", "Restaurar Backup..."), Color.FromArgb(210, 100, 135), 160);
-            _btnBackup.Click += BtnBackup_Click;
-
-            _btnAsumir = MkButton(T("rec.btn.asumir", "Asumir Pérdida"), Color.FromArgb(180, 120, 60), 140);
-            _btnAsumir.Click += BtnAsumir_Click;
-
-            _btnReparar = MkButton(T("rec.btn.reparar", "Reparar desde Espejo"), Color.FromArgb(80, 150, 90), 170);
-            _btnReparar.Click += BtnReparar_Click;
-
-            panelBotones.Controls.AddRange(new Control[] { _btnCerrar, _btnBackup, _btnAsumir, _btnReparar });
-
-            var contenedor = new Panel { Dock = DockStyle.Fill };
-            contenedor.Controls.Add(_grid);
-            contenedor.Controls.Add(_txtResumen);
-
-            this.Controls.Add(contenedor);
-            this.Controls.Add(panelBotones);
-            this.Controls.Add(panelEstado);
-        }
-
-        private Button MkButton(string text, Color back, int width)
-        {
-            var b = new Button { Text = text, Width = width, Height = 34, FlatStyle = FlatStyle.Flat, BackColor = back, ForeColor = Color.White };
-            b.FlatAppearance.BorderSize = 0;
-            return b;
-        }
-
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new Icon(ico); } catch { }
             CargarDiagnostico();
         }
 
         private void CargarDiagnostico()
         {
-            _grid.Rows.Clear();
+            grid.Rows.Clear();
             try
             {
                 var d = BLL.RecuperacionIntegridad.Diagnosticar();
 
-                _lblEstado.Text = d.Integro
+                lblEstado.Text = d.Integro
                     ? T("rec.estado.integro", "Estado: ÍNTEGRO")
                     : T("rec.estado.comprometido", "Estado: COMPROMETIDO");
 
-                _txtResumen.Text = string.Join("\r\n", d.Resumen.ToArray());
+                txtResumen.Text = string.Join("\r\n", d.Resumen.ToArray());
                 if (d.DvvAlmacenado != null || d.DvvCalculado != 0)
-                    _txtResumen.Text += "\r\n" + string.Format(
+                    txtResumen.Text += "\r\n" + string.Format(
                         T("rec.dvv.detalle", "DVV almacenado: {0}  |  DVV calculado: {1}"),
                         d.DvvAlmacenado?.ToString() ?? "—", d.DvvCalculado);
 
@@ -147,23 +81,23 @@ namespace GUI
                                 : a.Tipo == BLL.TipoAlteracion.DVHCorrupto ? tDvh : tIns;
                     if (a.Campos != null && a.Campos.Count > 0)
                         foreach (var c in a.Campos)
-                            _grid.Rows.Add(a.Id, a.Username, tipo, c.Campo, c.ValorActual, c.ValorEsperado);
+                            grid.Rows.Add(a.Id, a.Username, tipo, c.Campo, c.ValorActual, c.ValorEsperado);
                     else
-                        _grid.Rows.Add(a.Id, a.Username, tipo, "—", a.Descripcion ?? "", "—");
+                        grid.Rows.Add(a.Id, a.Username, tipo, "—", a.Descripcion ?? "", "—");
                 }
                 foreach (var f in d.Faltantes)
-                    _grid.Rows.Add(f.Id, f.Username, tDel, "—",
+                    grid.Rows.Add(f.Id, f.Username, tDel, "—",
                         T("rec.fila.ausente", "(ausente en la tabla actual)"), T("rec.fila.enespejo", "(presente en el espejo)"));
 
-                _btnReparar.Enabled = d.PuedeReparar;
-                _btnAsumir.Enabled  = d.PuedeAsumirPerdida;
-                _btnBackup.Enabled  = d.PuedeRestaurarBackup;
+                btnReparar.Enabled = d.PuedeReparar;
+                btnAsumir.Enabled  = d.PuedeAsumirPerdida;
+                btnBackup.Enabled  = d.PuedeRestaurarBackup;
 
                 // Pista visual: si todo está íntegro, deshabilitar las acciones correctivas.
                 if (d.Integro)
                 {
-                    _btnReparar.Enabled = false;
-                    _btnAsumir.Enabled  = false;
+                    btnReparar.Enabled = false;
+                    btnAsumir.Enabled  = false;
                 }
             }
             catch (Exception ex)
@@ -178,6 +112,8 @@ namespace GUI
             using (var admin = new ConfirmarAdminForm())
                 return admin.ShowDialog(this) == DialogResult.OK && admin.Autorizado;
         }
+
+        private void BtnCerrar_Click(object sender, EventArgs e) => this.Close();
 
         private void BtnReparar_Click(object sender, EventArgs e)
         {

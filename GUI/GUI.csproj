@@ -51,20 +51,50 @@
     <Compile Include="DashboardForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DashboardForm.Designer.cs">
+      <DependentUpon>DashboardForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DashboardVendedor.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DashboardVendedor.Designer.cs">
+      <DependentUpon>DashboardVendedor.cs</DependentUpon>
     </Compile>
     <Compile Include="RenovacionSuscripcionForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="RenovacionSuscripcionForm.Designer.cs">
+      <DependentUpon>RenovacionSuscripcionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CobroSuscripcionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AnalisisAbandonoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CobroSuscripcionForm.Designer.cs">
+      <DependentUpon>CobroSuscripcionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AnalisisAbandonoForm.Designer.cs">
+      <DependentUpon>AnalisisAbandonoForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DashboardControlStock.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DashboardControlStock.Designer.cs">
+      <DependentUpon>DashboardControlStock.cs</DependentUpon>
     </Compile>
     <Compile Include="DashboardOperador.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DashboardOperador.Designer.cs">
+      <DependentUpon>DashboardOperador.cs</DependentUpon>
+    </Compile>
     <Compile Include="DashboardSupervisor.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DashboardSupervisor.Designer.cs">
+      <DependentUpon>DashboardSupervisor.cs</DependentUpon>
     </Compile>
     <Compile Include="FormBase.cs">
       <SubType>Form</SubType>
@@ -72,22 +102,40 @@
     <Compile Include="GestorPermisos.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="GestorPermisos.Designer.cs">
+      <DependentUpon>GestorPermisos.cs</DependentUpon>
+    </Compile>
     <Compile Include="AdministracionUsuariosForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AdministracionUsuariosForm.Designer.cs">
+      <DependentUpon>AdministracionUsuariosForm.cs</DependentUpon>
     </Compile>
     <Compile Include="InputDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="InputDialog.Designer.cs">
+      <DependentUpon>InputDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="CambioClaveObligatorioForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CambioClaveObligatorioForm.Designer.cs">
+      <DependentUpon>CambioClaveObligatorioForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ManejadorSeguridad.cs" />
     <Compile Include="RegistroControles.cs" />
     <Compile Include="MapeoControlesForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MapeoControlesForm.Designer.cs">
+      <DependentUpon>MapeoControlesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ExploradorCompositeForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExploradorCompositeForm.Designer.cs">
+      <DependentUpon>ExploradorCompositeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Bitacora.cs">
       <SubType>Form</SubType>
@@ -130,6 +178,9 @@
     </Compile>
     <Compile Include="PedidoHistorialForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PedidoHistorialForm.Designer.cs">
+      <DependentUpon>PedidoHistorialForm.cs</DependentUpon>
     </Compile>
     <Compile Include="PedidosVenta.cs">
       <SubType>Form</SubType>
@@ -214,6 +265,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tema.cs" />
     <Compile Include="ResetClaveDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -229,14 +281,26 @@
     <Compile Include="DiagnosticoIntegridadForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DiagnosticoIntegridadForm.Designer.cs">
+      <DependentUpon>DiagnosticoIntegridadForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="RecuperacionEspejoForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RecuperacionEspejoForm.Designer.cs">
+      <DependentUpon>RecuperacionEspejoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DesbloqueoEmergenciaForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DesbloqueoEmergenciaForm.Designer.cs">
+      <DependentUpon>DesbloqueoEmergenciaForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MiPerfilForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MiPerfilForm.Designer.cs">
+      <DependentUpon>MiPerfilForm.cs</DependentUpon>
     </Compile>
     <Compile Include="PreferenciasUI.cs" />
     <Compile Include="Exportacion\ReporteExportable.cs" />
@@ -246,9 +310,13 @@
     <Compile Include="Exportacion\GeneradorReporte.cs" />
     <Compile Include="Exportacion\GeneradorBitacora.cs" />
     <Compile Include="Exportacion\GeneradorJornada.cs" />
+    <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
     <Compile Include="Exportacion\ExportadorCsv.cs" />
     <Compile Include="AlertasForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlertasForm.Designer.cs">
+      <DependentUpon>AlertasForm.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Bitacora.resx">
       <DependentUpon>Bitacora.cs</DependentUpon>
@@ -338,6 +406,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\3106921[1].png" />
+    <None Include="Resources\Login\01_logo_wardrobeflow_transparent.png" />
+    <None Include="Resources\Login\03_clothing_rack_transparent.png" />
+    <None Include="Resources\Login\04_price_tag_transparent.png" />
+    <None Include="Resources\Login\05_plant_and_bag_transparent.png" />
+    <None Include="Resources\Login\06_icono_percha.png" />
     <Content Include="icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

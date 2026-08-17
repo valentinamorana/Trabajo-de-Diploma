@@ -10,9 +10,6 @@ namespace GUI
     {
         private readonly BLL.Backup _bll = new BLL.Backup();
 
-        // RF-06 — botón de backup de instalación limpia (creado dinámicamente)
-        private Button _btnInicial;
-
         private static readonly string DirBackups =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
 
@@ -26,27 +23,6 @@ namespace GUI
             base.OnLoad(e);
             try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
             GestorIdioma.SuscribirObservador(this);
-
-            // RF-06 — Botón "Backup de instalación limpia". Se ubica debajo de la fila de
-            // restauración y se agranda el formulario para no solapar la nota informativa.
-            this.ClientSize = new System.Drawing.Size(this.ClientSize.Width, this.ClientSize.Height + 44);
-            lblInfo.Top += 44;
-            _btnInicial = new Button
-            {
-                Tag       = "btn.backup.inicial",
-                Text      = "Backup de instalación limpia",
-                Size      = new System.Drawing.Size(btnCrear.Width, 32),
-                Location  = new System.Drawing.Point(btnCrear.Left, btnExterno.Bottom + 8),
-                FlatStyle = btnCrear.FlatStyle,
-                BackColor = System.Drawing.Color.FromArgb(70, 110, 90),
-                ForeColor = System.Drawing.Color.White,
-                Font      = btnCrear.Font,
-                Cursor    = Cursors.Hand
-            };
-            _btnInicial.FlatAppearance.BorderSize = 0;
-            _btnInicial.Click += btnInicial_Click;
-            (btnCrear.Parent ?? this).Controls.Add(_btnInicial);
-            _btnInicial.BringToFront();
 
             Traducir(GestorIdioma.IdiomaActual);
             lblRuta.Text = DirBackups;
@@ -85,8 +61,7 @@ namespace GUI
             colFecha.Text     = T("col.backup.fecha",     "Fecha");
             colAutor.Text     = T("col.backup.autor",     "Autor");
             colTamanio.Text   = T("col.backup.tamanio",   "Tamaño");
-            if (_btnInicial != null)
-                _btnInicial.Text = T("btn.backup.inicial", "Backup de instalación limpia");
+            btnInicial.Text   = T("btn.backup.inicial",   "Backup de instalación limpia");
         }
 
         // Carga los .bak de la carpeta Backups/ ordenados por fecha descendente (más reciente primero).

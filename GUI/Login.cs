@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
 
@@ -13,148 +13,107 @@ namespace GUI
     /// <summary>
     /// WardrobeFlow — Formulario de Login para Empleados.
     ///
+    /// Todos los controles visuales están declarados en Login.Designer.cs (InitializeComponent),
+    /// igual que en el resto del proyecto (ClienteForm, Usuarios, PrendaForm, etc.): nada de
+    /// crear controles "a mano" en el constructor. Esto es lo que le permite al Diseñador de
+    /// Windows Forms de Visual Studio mostrar la preview del formulario y navegar al código con
+    /// doble click sobre cada control.
+    ///
     /// PATRÓN OBSERVER — T05 Gestión de Múltiples Idiomas:
     ///   Implementa IIdiomaObserver. Se suscribe al GestorIdioma en Load
     ///   y se desuscribe en FormClosing. Al recibir UpdateLanguage() aplica
     ///   las traducciones del nuevo idioma a todos sus controles.
-    ///   Las pastillas de idioma (ES / EN / RU) viven en el panel izquierdo.
+    ///   El selector de idioma (cmbIdioma) vive en la franja superior (pnlHeader).
     ///   Al cambiar el idioma acá, el Menu ya abre traducido cuando el usuario ingresa.
+    ///
+    /// Toda la paleta de color usada acá viene de <see cref="Tema"/> — no se agregan
+    /// literales nuevos; las variantes hover/pressed se derivan en runtime con
+    /// ControlPaint.Dark/Light sobre los mismos tokens.
     /// </summary>
     public partial class Login : Form, IIdiomaObserver
     {
         private readonly Usuario usuarioBLL = new Usuario();
-
-        // Selector de idioma (dropdown) — reemplaza las pastillas. Soporta idiomas dinámicos de BD.
-        private ComboBox _cmbIdiomaLogin;
-        private bool _suprimirIdiomaChange = false;
-        // Etiqueta de descripción de marca (creada en código para ser traducible)
-        private Label _lblBrandDesc;
-        // RF-10 — link a autodesbloqueo con clave de emergencia (admin bloqueado)
-        private LinkLabel _lnkEmergencia;
+        private bool suprimirIdiomaChange = false;
 
         public Login()
         {
             InitializeComponent();
 
-            // ── Decoraciones dibujadas mediante eventos Paint ─────────────────────
-            // Evita BackgroundImage bitmaps y permite que los controles transparentes
-            // muestren correctamente el fondo #FBF0F6 del panel derecho.
-            pnlLeft.Paint += PnlLeft_Paint;
-            pnlCard.Paint += PnlCard_Paint;
+            // ── Card flotante: esquinas redondeadas (Region) + sombra propia ──────
+            // BringToFront es necesario: en el orden de InitializeComponent pnlCardShadow
+            // queda "delante" de pnlCard en el z-order (el primer control agregado al form
+            // es el que se pinta al frente), así que sin esto la sombra tapa la card entera.
+            pnlCard.Region = new Region(BuildRoundedRect(new Rectangle(0, 0, pnlCard.Width, pnlCard.Height), Tema.RadioCard));
+            pnlCard.BringToFront();
 
-            // ── Elementos de marca en el panel izquierdo ──────────────────────────
-            AgregarBrandElements();
+            // ── Botones grandes (Ingresar/Salir) con esquinas redondeadas tipo "pill" ─
+            btnIngresar.Region = new Region(BuildRoundedRect(new Rectangle(0, 0, btnIngresar.Width, btnIngresar.Height), Tema.RadioBotonGrande));
+            btnSalir.Region    = new Region(BuildRoundedRect(new Rectangle(0, 0, btnSalir.Width, btnSalir.Height), Tema.RadioBotonGrande));
 
-            // ── Ojito mostrar/ocultar contraseña ─────────────────────────────────
-            // Se achica el textbox para que el botón quede en el borde derecho.
-            txtContraseña.Width -= 28;
-            var btnOjo = new Button
-            {
-                Text      = "👁",
-                Font      = new Font("Segoe UI Emoji", 9f),
-                Size      = new Size(26, txtContraseña.Height),
-                Location  = new Point(txtContraseña.Right + 2, txtContraseña.Top),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(192, 168, 180),
-                Cursor    = Cursors.Hand,
-                TabStop   = false
-            };
-            btnOjo.FlatAppearance.BorderSize = 0;
-            btnOjo.Click += (s, e) =>
-            {
-                var b = (Button)s;
-                if (txtContraseña.PasswordChar == '\0')
-                {
-                    txtContraseña.PasswordChar = '●';
-                    b.Font = new Font("Segoe UI Emoji", 9f);
-                }
-                else
-                {
-                    txtContraseña.PasswordChar = '\0';
-                    b.Font = new Font("Segoe UI Emoji", 9f, FontStyle.Strikeout);
-                }
-            };
-            pnlCard.Controls.Add(btnOjo);
-            btnOjo.BringToFront();
-
-            // ── Líneas del separador "o" dibujadas vía Paint ──────────────────────
-            lblDivider.Paint += LblDivider_Paint;
-
-            // ── Selector de idioma (dropdown) en el panel izquierdo ───────────────
-            AgregarComboIdioma();
-
-            // ── Link de autodesbloqueo con clave de emergencia (RF-10) ────────────
-            // Fila propia entre "¿Olvidaste tu contraseña?" (y=271) y el cartel de error
-            // (y=311), para que el link NO se superponga con el mensaje "cuenta bloqueada".
-            _lnkEmergencia = new LinkLabel
-            {
-                Text         = "¿Cuenta bloqueada? Usar clave de emergencia",
-                AutoSize     = false,
-                TextAlign    = ContentAlignment.MiddleLeft,
-                Location     = new Point(lnkOlvidaste.Left, lnkOlvidaste.Bottom + 4),
-                Size         = new Size(lnkOlvidaste.Width, 18),
-                BackColor    = Color.Transparent,
-                Font         = new Font("Segoe UI", 8.25f),
-                LinkColor    = Color.FromArgb(176, 62, 96),
-                ActiveLinkColor = Color.FromArgb(176, 62, 96),
-                Tag          = "emg.link"
-            };
-            _lnkEmergencia.LinkClicked += LnkEmergencia_LinkClicked;
-            (lnkOlvidaste.Parent ?? (Control)this).Controls.Add(_lnkEmergencia);
-            _lnkEmergencia.BringToFront();
-
-            this.AcceptButton = btnIngresar;
+            ConstruirComboIdioma(Traductor.ObtenerIdiomas());
         }
 
-        // ── Pintura decorativa del panel izquierdo ────────────────────────────────
-        // Fondo blanco + círculos rosados suaves (equivalente al SVG del HTML de referencia).
+        // ── Arrastre de ventana sin borde nativo (FormBorderStyle.None) ──────────────
+        // Reenvía el click a Windows como si hubiera pasado en la barra de título nativa
+        // (HTCAPTION). Es el mecanismo estándar para mover un form sin bordes; no cambia
+        // ningún comportamiento de negocio. Enganchado desde el Designer al MouseDown de
+        // pnlHeader, picLogo y lblSubtitulo (el resto del header son controles interactivos
+        // propios — combo/botones — que no deben disparar el arrastre).
+        [DllImport("user32.dll")] private static extern bool ReleaseCapture();
+        [DllImport("user32.dll")] private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+        private const int HT_CAPTION = 0x2;
+
+        private void PnlHeader_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            ReleaseCapture();
+            SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+        }
+
+        // ── Pintura decorativa del panel izquierdo (fondo rosa + textura sutil) ───
 
         private void PnlLeft_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // Círculo relleno superior-derecho  #F9EEF4
-            using (var b = new SolidBrush(Color.FromArgb(249, 238, 244)))
-                g.FillEllipse(b, 120, -30, 220, 220);
+            // Manchas circulares suaves, en un tono más oscuro que el fondo rosa pálido.
+            using (var b = new SolidBrush(Color.FromArgb(40, Tema.RosaPrimario.R, Tema.RosaPrimario.G, Tema.RosaPrimario.B)))
+                g.FillEllipse(b, 210, -50, 300, 300);
 
-            // Círculo relleno inferior-izquierdo  #F5E6EF
-            using (var b = new SolidBrush(Color.FromArgb(245, 230, 239)))
-                g.FillEllipse(b, -65, 295, 260, 260);
+            using (var b = new SolidBrush(Color.FromArgb(35, Tema.RosaPrimario.R, Tema.RosaPrimario.G, Tema.RosaPrimario.B)))
+                g.FillEllipse(b, -90, 460, 340, 340);
 
-            // Círculos de contorno suaves
-            using (var pen = new Pen(Color.FromArgb(232, 197, 216), 1f))
-                g.DrawEllipse(pen, 145, 218, 110, 110);
-            using (var pen = new Pen(Color.FromArgb(237, 213, 229), 0.8f))
-                g.DrawEllipse(pen, 30, 100, 60, 60);
-
-            // Puntos decorativos
-            foreach (var (dx, dy, a) in new[] { (80, 80, 80), (110, 60, 60), (210, 200, 90), (150, 380, 90) })
-                using (var b = new SolidBrush(Color.FromArgb(a, 192, 130, 168)))
-                    g.FillEllipse(b, dx - 3, dy - 3, 7, 7);
+            using (var pen = new Pen(Color.FromArgb(70, Tema.RosaOscuro.R, Tema.RosaOscuro.G, Tema.RosaOscuro.B), 1f))
+                g.DrawEllipse(pen, 240, 320, 150, 150);
         }
 
-        // ── Pintura decorativa del panel derecho ──────────────────────────────────
-        // Fondo #FBF0F6 + círculos vino muy sutiles (alpha ≈ 5-10%).
+        // ── Sombra suave detrás de la card flotante del formulario ───────────────
+        // Varias capas de un rectángulo redondeado, cada vez más grande y más transparente,
+        // desplazadas levemente hacia abajo (luz desde arriba) — truco clásico de GDI+ para
+        // simular blur sin necesitar procesamiento de imagen.
 
-        private void PnlCard_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        private void PnlCardShadow_Paint(object sender, PaintEventArgs e)
         {
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            int w = pnlCard.Width, h = pnlCard.Height;
 
-            // Círculo superior-derecho
-            using (var b = new SolidBrush(Color.FromArgb(14, 176, 62, 96)))
-                g.FillEllipse(b, w - 170, -90, 180, 180);
+            int offsetX = pnlCard.Left - pnlCardShadow.Left;
+            int offsetY = pnlCard.Top  - pnlCardShadow.Top;
+            var cardRect = new Rectangle(offsetX, offsetY, pnlCard.Width, pnlCard.Height);
 
-            // Círculo inferior-izquierdo
-            using (var b = new SolidBrush(Color.FromArgb(11, 176, 62, 96)))
-                g.FillEllipse(b, -80, h - 150, 200, 200);
-
-            // Círculo de contorno
-            using (var pen = new Pen(Color.FromArgb(25, 176, 62, 96), 0.8f))
-                g.DrawEllipse(pen, w - 100, 220, 80, 80);
+            const int capas = 6;
+            for (int i = capas; i >= 1; i--)
+            {
+                int crecimiento = i * 3;
+                int alpha = 4 + (capas - i) * 2;
+                var rect = Rectangle.Inflate(cardRect, crecimiento, crecimiento);
+                rect.Offset(0, 3);
+                using (var path = BuildRoundedRect(rect, Tema.RadioCard + 10))
+                using (var br = new SolidBrush(Color.FromArgb(alpha, Tema.Tinta.R, Tema.Tinta.G, Tema.Tinta.B)))
+                    g.FillPath(br, path);
+            }
         }
 
         // ── Líneas horizontales del separador "o" ─────────────────────────────────
@@ -163,7 +122,7 @@ namespace GUI
         {
             var lbl = (Label)sender;
             int midY = lbl.Height / 2;
-            using (var pen = new Pen(Color.FromArgb(224, 200, 216), 0.8f))
+            using (var pen = new Pen(Tema.Borde, 0.8f))
             {
                 var sz = e.Graphics.MeasureString(lbl.Text, lbl.Font);
                 float cx = lbl.Width / 2f;
@@ -173,77 +132,32 @@ namespace GUI
             }
         }
 
-        // ── Elementos de marca en pnlLeft ─────────────────────────────────────────
+        // ── Borde redondeado propio de las cajas de usuario/contraseña ────────────
 
-        private void AgregarBrandElements()
+        private void DibujarBordeCampo(object sender, PaintEventArgs e)
         {
-            // 1. Ícono-logo (cuadrado vino redondeado 36×36 con "W" blanca)
-            var pnlLogo = new Panel { Location = new Point(20, 24), Size = new Size(36, 36), BackColor = Color.White };
-            pnlLogo.Paint += (s, e) =>
+            var panel = (Panel)sender;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            var rect = new Rectangle(0, 0, panel.Width - 1, panel.Height - 1);
+            using (var path = BuildRoundedRect(rect, Tema.RadioCampo))
+            using (var pen = new Pen(Tema.Borde, 1f))
+                e.Graphics.DrawPath(pen, path);
+        }
+
+        // ── Ojito mostrar/ocultar contraseña ──────────────────────────────────────
+
+        private void btnMostrarClave_Click(object sender, EventArgs e)
+        {
+            if (txtContraseña.PasswordChar == '\0')
             {
-                var g = e.Graphics;
-                g.SmoothingMode = SmoothingMode.AntiAlias;
-
-                // Fondo vino redondeado
-                using (var path = BuildRoundedRect(new Rectangle(0, 0, 35, 35), 8))
-                using (var br   = new SolidBrush(Color.FromArgb(176, 62, 96)))
-                    g.FillPath(br, path);
-
-                // Ícono de percha blanca (equivalente a ti-hanger de Tabler Icons)
-                using (var pen = new Pen(Color.White, 1.8f) {
-                    StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round })
-                {
-                    // Círculo / anillo superior (la argolla de la percha)
-                    g.DrawEllipse(pen, 14.5f, 6f, 6f, 6f);
-                    // Arco del gancho: sale de la argolla hacia la derecha (el gancho sobre el caño)
-                    g.DrawArc(pen, 17.5f, 5f, 5f, 5f, 180, -200);
-                    // Brazo izquierdo
-                    g.DrawLine(pen, 17.5f, 12f, 9f, 26f);
-                    // Brazo derecho
-                    g.DrawLine(pen, 17.5f, 12f, 26f, 26f);
-                    // Barra inferior (se extiende más allá de los brazos)
-                    g.DrawLine(pen, 5.5f, 26f, 29.5f, 26f);
-                }
-            };
-            pnlLeft.Controls.Add(pnlLogo);
-            pnlLogo.BringToFront();
-
-            // lblTitle ya está en pnlLeft (del Designer): solo reposicionar si es necesario
-            lblTitle.BringToFront();
-
-            // 2. Wordmark "Wardrobe" + "Flow" en dos colores (panel con Paint)
-            var pnlWordmark = new Panel { Location = new Point(18, 200), Size = new Size(244, 40), BackColor = Color.White };
-            pnlWordmark.Paint += (s, e) =>
+                txtContraseña.PasswordChar = '●';
+                btnMostrarClave.Font = new Font("Segoe UI Emoji", 9f);
+            }
+            else
             {
-                e.Graphics.SmoothingMode     = SmoothingMode.AntiAlias;
-                e.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-                using (var fnt = new Font("Segoe UI", 19f))
-                {
-                    using (var bDark = new SolidBrush(Color.FromArgb(44, 26, 36)))
-                        e.Graphics.DrawString("Wardrobe", fnt, bDark, 0, 0);
-                    // Posicionar "Flow" inmediatamente después de "Wardrobe"
-                    var sz = e.Graphics.MeasureString("Wardrobe", fnt);
-                    using (var bVino = new SolidBrush(Color.FromArgb(176, 62, 96)))
-                        e.Graphics.DrawString("Flow", fnt, bVino, sz.Width - 4f, 0);
-                }
-            };
-            pnlLeft.Controls.Add(pnlWordmark);
-            pnlWordmark.BringToFront();
-
-            // 3. Descripción de marca (traducible vía tag)
-            _lblBrandDesc = new Label
-            {
-                Location   = new Point(20, 246),
-                Size       = new Size(240, 38),
-                Font       = new Font("Segoe UI", 9f),
-                ForeColor  = Color.FromArgb(160, 136, 152),
-                BackColor  = Color.White,
-                Text       = "Acceso seguro y centralizado\na todos los módulos del sistema.",
-                Tag        = "lbl.brand.desc",
-                AutoSize   = false
-            };
-            pnlLeft.Controls.Add(_lblBrandDesc);
-            _lblBrandDesc.BringToFront();
+                txtContraseña.PasswordChar = '\0';
+                btnMostrarClave.Font = new Font("Segoe UI Emoji", 9f, FontStyle.Strikeout);
+            }
         }
 
         // Construye un GraphicsPath de rectángulo redondeado.
@@ -258,50 +172,31 @@ namespace GUI
             return path;
         }
 
-        // ── Selector de idioma (dropdown) en pnlLeft ──────────────────────────────
-
-        private void AgregarComboIdioma()
-        {
-            _cmbIdiomaLogin = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Size          = new Size(150, 24),
-                Location      = new Point(22, pnlLeft.Height - 56),
-                FlatStyle     = FlatStyle.Flat,
-                Font          = new Font("Segoe UI", 8.5f),
-                ForeColor     = Color.FromArgb(176, 62, 96),
-                BackColor     = Color.White,
-                TabStop       = false
-            };
-            _cmbIdiomaLogin.SelectedIndexChanged += CmbIdiomaLogin_Changed;
-            pnlLeft.Controls.Add(_cmbIdiomaLogin);
-            _cmbIdiomaLogin.BringToFront();
-            ConstruirComboIdioma(Traductor.ObtenerIdiomas());
-        }
+        // ── Selector de idioma (dropdown) en pnlHeader ────────────────────────────
 
         // Llena el combo con los idiomas (de BD o fallback). Un idioma nuevo aparece solo.
         private void ConstruirComboIdioma(IList<Idioma> idiomas)
         {
-            _suprimirIdiomaChange = true;
-            _cmbIdiomaLogin.DataSource    = null;
-            _cmbIdiomaLogin.DisplayMember = "Nombre";
-            _cmbIdiomaLogin.ValueMember   = "Id";
-            _cmbIdiomaLogin.DataSource    = new List<Idioma>(idiomas);
+            suprimirIdiomaChange = true;
+            cmbIdioma.DataSource    = null;
+            cmbIdioma.DisplayMember = "Nombre";
+            cmbIdioma.ValueMember   = "Id";
+            cmbIdioma.DataSource    = new List<Idioma>(idiomas);
 
             string cod = GestorIdioma.IdiomaActual?.Id ?? "ES";
             for (int i = 0; i < idiomas.Count; i++)
                 if (string.Equals(idiomas[i].Id, cod, StringComparison.OrdinalIgnoreCase))
                 {
-                    _cmbIdiomaLogin.SelectedIndex = i;
+                    cmbIdioma.SelectedIndex = i;
                     break;
                 }
-            _suprimirIdiomaChange = false;
+            suprimirIdiomaChange = false;
         }
 
-        private void CmbIdiomaLogin_Changed(object sender, EventArgs e)
+        private void CmbIdioma_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_suprimirIdiomaChange) return;
-            var idioma = _cmbIdiomaLogin.SelectedItem as Idioma;
+            if (suprimirIdiomaChange) return;
+            var idioma = cmbIdioma.SelectedItem as Idioma;
             if (idioma == null) return;
             try
             {
@@ -364,12 +259,16 @@ namespace GUI
             var tituloForm = Tx(this.Tag?.ToString());
             if (tituloForm != null) this.Text = tituloForm;
 
-            // Panel izquierdo
+            // Header
             var sub = Tx(lblSubtitulo.Tag?.ToString());
             if (sub != null) lblSubtitulo.Text = sub;
 
-            var desc = Tx(_lblBrandDesc?.Tag?.ToString());
-            if (desc != null && _lblBrandDesc != null) _lblBrandDesc.Text = desc;
+            // Panel izquierdo
+            var tagline = Tx(lblTagline.Tag?.ToString());
+            if (tagline != null) lblTagline.Text = tagline;
+
+            var desc = Tx(lblBrandDesc.Tag?.ToString());
+            if (desc != null) lblBrandDesc.Text = desc;
 
             // Panel derecho — título y subtítulo
             var bienvenido = Tx(lblAccent.Tag?.ToString());
@@ -395,8 +294,8 @@ namespace GUI
             var olvide = Tx(lnkOlvidaste.Tag?.ToString());
             if (olvide != null) lnkOlvidaste.Text = olvide;
 
-            var emg = Tx(_lnkEmergencia?.Tag?.ToString());
-            if (emg != null && _lnkEmergencia != null) _lnkEmergencia.Text = emg;
+            var emg = Tx(lnkEmergencia.Tag?.ToString());
+            if (emg != null) lnkEmergencia.Text = emg;
 
             // Separador
             var divider = Tx(lblDivider.Tag?.ToString());
@@ -472,8 +371,8 @@ namespace GUI
         private void MostrarErrorLogin(string mensaje, bool bloqueado)
         {
             lblError.ForeColor = bloqueado
-                ? Color.FromArgb(140, 0, 0)
-                : Color.FromArgb(180, 50, 50);
+                ? ControlPaint.Dark(Tema.Error, 0.3f)
+                : Tema.Error;
             lblError.Text = mensaje;
             lblError.Refresh();
 
@@ -494,6 +393,22 @@ namespace GUI
         private void btnSalir_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        // ── Controles de ventana propios (FormBorderStyle.None no trae los nativos) ──
+
+        private void btnMinimizar_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        // Mismo resultado que cerrar con la X nativa de un ShowDialog: DialogResult.Cancel,
+        // que Program.cs interpreta como "no continuar" (ver GUI/Program.cs). No es un cambio
+        // de comportamiento, es la reposición del control que se pierde al sacar el borde nativo.
+        private void btnCerrarVentana_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
 
         private void lnkOlvidaste_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

@@ -42,20 +42,7 @@ namespace GUI
         // Timer de verificación periódica de integridad (C — background check)
         private System.Windows.Forms.Timer _timerIntegridad;
 
-        // Barra de idioma con un DROPDOWN (reemplaza los botones). Soporta idiomas dinámicos de BD.
-        private ToolStrip _tsIdioma;
-        private ToolStripComboBox _cmbIdiomaMenu;
         private bool _suprimirIdiomaMenu = false;
-        // Label "Idioma:" / "Language:" / "Язык:" — dinámico por Observer
-        private ToolStripLabel _lblIdioma;
-        // Item "Mi Perfil" (preferencias del usuario) — creado dinámicamente, traducible por Observer
-        private ToolStripMenuItem _miPerfilItem;
-        // Ítem "Administración de Usuarios" (panel ABM de datos) — se agrega por código bajo Administrar.
-        private ToolStripMenuItem _adminUsuariosItem;
-        // Submenús de "Administrar" (reorganización): "Usuarios ▸" y "Sistema ▸".
-        private ToolStripMenuItem _grpUsuarios, _grpSistema;
-        // Centro de Alertas (ítem top-level con badge de cantidad) — creado por código.
-        private ToolStripMenuItem _alertasItem;
         private int _alertasCount = -1;
 
         // Helper de traducción con fallback (para ítems creados por código).
@@ -71,43 +58,7 @@ namespace GUI
         {
             InitializeComponent();
 
-            // ── Barra de selección de idioma ─────────────────────────────────
-            // Se agrega un ToolStrip justo debajo del MenuStrip existente.
-            // Los 3 botones llaman a GestorIdioma.CambiarIdioma() → notifica a
-            // todos los formularios abiertos de forma automática (patrón Observer).
-            _tsIdioma = new ToolStrip
-            {
-                Dock      = DockStyle.Top,
-                BackColor = Color.FromArgb(40, 40, 55),
-                GripStyle = ToolStripGripStyle.Hidden,
-                Padding   = new Padding(4, 0, 4, 0),
-                Height    = 28
-            };
-
-            _lblIdioma = new ToolStripLabel
-            {
-                Text      = "Idioma:",
-                ForeColor = Color.FromArgb(200, 200, 210),
-                Font      = new System.Drawing.Font("Segoe UI", 8.5f)
-            };
-
-            _tsIdioma.Items.Add(_lblIdioma);
-            _tsIdioma.Items.Add(new ToolStripSeparator());
-
-            _cmbIdiomaMenu = new ToolStripComboBox
-            {
-                AutoSize      = false,
-                Width         = 140,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font          = new System.Drawing.Font("Segoe UI", 8.5f)
-            };
-            _cmbIdiomaMenu.ComboBox.SelectedIndexChanged += CmbIdiomaMenu_Changed;
-            _tsIdioma.Items.Add(_cmbIdiomaMenu);
             ReconstruirComboIdioma(Traductor.ObtenerIdiomas());
-
-            // Insertar el ToolStrip después del MenuStrip (índice 0 = primero visible abajo del borde)
-            this.Controls.Add(_tsIdioma);
-            _tsIdioma.BringToFront();
 
             // Obtener usuario activo via BLL (GUI nunca toca SessionManager directamente)
             _usuarioActivo = new BLL.Usuario().ObtenerUsuarioActivo();
@@ -122,64 +73,6 @@ namespace GUI
                 PreferenciasUI.Aplicar(this);
             }
 
-            // "Mi Perfil" — preferencias del usuario (idioma). Disponible para TODOS los usuarios.
-            // Se inserta al inicio del menú "Perfil", antes de "Cerrar Sesión".
-            _miPerfilItem = new System.Windows.Forms.ToolStripMenuItem(
-                Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual).ContainsKey("perfil.menu")
-                    ? Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual)["perfil.menu"].Texto
-                    : "Mi Perfil");
-            _miPerfilItem.Click += MiPerfil_Click;
-            usuarioToolStripMenuItem.DropDownItems.Insert(0, _miPerfilItem);
-
-            // El menú de sesión pasa a llamarse "Sesión" (evita confundirlo con "Perfiles y Permisos").
-            usuarioToolStripMenuItem.Tag  = "mnu.sesion";
-            usuarioToolStripMenuItem.Text = Tx("mnu.sesion", "Sesión");
-
-            // ── Reorganización del menú "Administrar" en submenús ──────────────────
-            // El panel ABM de datos de usuario (modificar nombre/apellido/usuario/fecha nac./email,
-            // cambiar rol y ver historial). Va dentro del submenú "Usuarios".
-            _adminUsuariosItem = new ToolStripMenuItem(
-                Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual).ContainsKey("mnu.adminusuarios")
-                    ? Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual)["mnu.adminusuarios"].Texto
-                    : "Administración de Usuarios") { Tag = "mnu.adminusuarios", Name = "adminUsuariosToolStripMenuItem" };
-            _adminUsuariosItem.Click += AdminUsuarios_Click;
-
-            // "Usuarios" (operaciones de cuenta) pasa a llamarse "Cuentas de Usuario" para no
-            // confundirse con "Administración de Usuarios".
-            usuariosToolStripMenuItem.Tag  = "mnu.cuentas";
-            usuariosToolStripMenuItem.Text = Tx("mnu.cuentas", "Cuentas de Usuario");
-
-            // Submenú "Usuarios": ABM de datos + cuentas de usuario + historial de cambios.
-            _grpUsuarios = new ToolStripMenuItem(Tx("mnu.grp.usuarios", "Usuarios")) { Tag = "mnu.grp.usuarios", Name = "grpUsuariosToolStripMenuItem" };
-            _grpUsuarios.DropDownItems.Add(_adminUsuariosItem);
-            _grpUsuarios.DropDownItems.Add(usuariosToolStripMenuItem);
-            _grpUsuarios.DropDownItems.Add(historialUsuariosToolStripMenuItem);
-
-            // Submenú "Sistema": herramientas transversales.
-            _grpSistema = new ToolStripMenuItem(Tx("mnu.grp.sistema", "Sistema")) { Tag = "mnu.grp.sistema", Name = "grpSistemaToolStripMenuItem" };
-            _grpSistema.DropDownItems.Add(idiomasToolStripMenuItem);
-            _grpSistema.DropDownItems.Add(backupToolStripMenuItem);
-            _grpSistema.DropDownItems.Add(integridadToolStripMenuItem);
-
-            // Reconstruir el dropdown de "Administrar": Usuarios ▸, Perfiles, ──── , Sistema ▸.
-            gestionToolStripMenuItem.DropDownItems.Clear();
-            gestionToolStripMenuItem.DropDownItems.Add(_grpUsuarios);
-            gestionToolStripMenuItem.DropDownItems.Add(perfilesToolStripMenuItem);
-            gestionToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
-            gestionToolStripMenuItem.DropDownItems.Add(_grpSistema);
-
-            // ── Centro de Alertas ──────────────────────────────────────────────
-            // Ítem top-level visible para todos los usuarios autenticados (igual que
-            // "Panel de Control"). El conteo de alertas se calcula en background.
-            // Alineado a la DERECHA del MenuStrip (bajo la X de la ventana), en la misma barra.
-            _alertasItem = new ToolStripMenuItem
-            {
-                Tag       = "mnu.alertas",
-                Name      = "alertasToolStripMenuItem",
-                Alignment = ToolStripItemAlignment.Right
-            };
-            _alertasItem.Click += AlertasItem_Click;
-            menuStrip1.Items.Add(_alertasItem);
             RefrescarTextoAlertas();
 
             // Construir menú dinámico según permisos del rol
@@ -199,10 +92,9 @@ namespace GUI
         // Compone el texto del ítem: icono + etiqueta traducida + (N) si hay alertas.
         private void RefrescarTextoAlertas()
         {
-            if (_alertasItem == null) return;
             string baseTxt = "🔔 " + Tx("mnu.alertas", "Alertas");
-            _alertasItem.Text      = _alertasCount > 0 ? $"{baseTxt} ({_alertasCount})" : baseTxt;
-            _alertasItem.ForeColor = _alertasCount > 0 ? Color.FromArgb(255, 235, 130) : Color.White;
+            alertasItem.Text      = _alertasCount > 0 ? $"{baseTxt} ({_alertasCount})" : baseTxt;
+            alertasItem.ForeColor = _alertasCount > 0 ? Color.FromArgb(255, 235, 130) : Color.White;
         }
 
         // Calcula la cantidad de alertas en background (la lógica vive en BLL.PanelAlertas)
@@ -273,96 +165,49 @@ namespace GUI
         }
 
         /// <summary>
-        /// Muestra u oculta los ítems del menú según los permisos del usuario.
-        /// La lógica es completamente basada en permisos (NombreMenu), no en roles.
+        /// Muestra u oculta los ítems del menú según los permisos del usuario. La DECISIÓN
+        /// (qué .Name queda visible) vive en BLL.MenuVisibilidad.Resolver — pura, testeable
+        /// sin instanciar esta UI (Tests/MenuVisibilidadTests.cs) — este método solo la
+        /// APLICA a los ToolStripMenuItem reales, buscándolos por .Name. Mismo criterio de
+        /// separación que BLL.PanelAlertas (EvaluarAlertas puro / ObtenerAlertas con BD).
         ///
-        /// Mapeo NombreMenu → ToolStripMenuItem:
-        ///   mnuPrendas            → prendasToolStripMenuItem       (bajo Inventario)
-        ///   mnuOutfits            → outfitsToolStripMenuItem        (bajo Inventario)
-        ///   mnuCategorias         → categoriasToolStripMenuItem     (bajo Inventario)
-        ///   mnuStock              → stockToolStripMenuItem          (bajo Inventario — pendiente en Designer)
-        ///   mnuClientes           → clientesToolStripMenuItem       (bajo Ventas)
-        ///   mnuPlanSuscripciones  → planesToolStripMenuItem         (bajo Ventas)
-        ///   mnuPedidosVenta       → pedidosVentaToolStripMenuItem   (bajo Ventas)
-        ///   mnuPedidosRealizados  → pedidosRealizadosToolStripMenuItem (bajo Ventas)
-        ///   mnuUsuarios           → gestionToolStripMenuItem        (bajo Administrar)
-        ///   mnuAuditoria          → bitacoraToolStripMenuItem
-        ///
-        /// Administrador tiene los 10 permisos → ve todo el menú.
+        /// Administrador ve todo el menú por bypass explícito (esAdmin), no porque la BD
+        /// tenga las 12 patentes bien asignadas — mismo criterio que ManejadorSeguridad y
+        /// BLL.PermisosAccion, para que los 3 puntos donde se chequea permiso sean consistentes.
         /// </summary>
         private void AplicarPermisos(List<BE.Permiso> permisos)
         {
-            // Panel de Control visible para todos los usuarios autenticados.
-            panelControlToolStripMenuItem.Visible = true;
+            bool esAdmin = _usuarioActivo?.EsAdministrador == true;
+            var nombresMenu = (permisos ?? new List<BE.Permiso>())
+                .Where(p => !string.IsNullOrEmpty(p.NombreMenu))
+                .Select(p => p.NombreMenu);
 
-            // Permisos efectivos del usuario, indexados por NombreMenu (O(1), case-insensitive).
-            var nombresMenu = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (permisos != null)
-                foreach (var p in permisos)
-                    if (!string.IsNullOrEmpty(p.NombreMenu)) nombresMenu.Add(p.NombreMenu);
+            var visibilidad = BLL.MenuVisibilidad.Resolver(nombresMenu, esAdmin);
 
-            bool Permite(string nm) => nombresMenu.Contains(nm);
-
-            // ── Mapa declarativo HOJA → permiso (ÚNICA fuente de verdad) ─────────────────────────
-            // En vez de repetir 'item.Visible = nombresMenu.Contains("mnuX")' por cada control, la
-            // relación se declara UNA sola vez. Agregar un módulo nuevo = una línea acá. (Enfoque
-            // data-driven inspirado en el ManejadorSeguridad de Stach, resuelto en código para
-            // conservar la semántica de "grupo visible si ALGÚN hijo lo está", que un mapeo plano
-            // en tabla no expresa por sí solo.)
-            var hojas = new (ToolStripItem Item, string Permiso)[]
+            // Todo ToolStripMenuItem que BLL.MenuVisibilidad conoce por nombre — se busca por
+            // .Name para no duplicar acá el mapeo patente→ítem (única fuente de verdad).
+            var items = new ToolStripMenuItem[]
             {
-                (prendasToolStripMenuItem,           "mnuPrendas"),
-                (clientesToolStripMenuItem,          "mnuClientes"),
-                (planesToolStripMenuItem,            "mnuPlanSuscripciones"),
-                (renovacionSuscripcionToolStripMenuItem, "mnuRenovacionSuscripcion"),
-                (pedidosVentaToolStripMenuItem,      "mnuPedidosVenta"),
-                (pedidosRealizadosToolStripMenuItem, "mnuPedidosRealizados"),
-                // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
-                (usuariosToolStripMenuItem,          "mnuUsuarios"),
-                (perfilesToolStripMenuItem,          "mnuUsuarios"),
-                (idiomasToolStripMenuItem,           "mnuUsuarios"),
-                (historialUsuariosToolStripMenuItem, "mnuUsuarios"),
-                (backupToolStripMenuItem,            "mnuUsuarios"),
-                (integridadToolStripMenuItem,        "mnuUsuarios"),
-                (_adminUsuariosItem,                 "mnuUsuarios"),
-                // Bitácora.
-                (bitSistemaToolStripMenuItem,        "mnuAuditoria"),
-                (bitNegocioToolStripMenuItem,        "mnuAuditoria"),
-                (reporteJornadaToolStripMenuItem,    "mnuAuditoria"),
-            };
-            foreach (var h in hojas)
-                if (h.Item != null) h.Item.Visible = Permite(h.Permiso);
-
-            // Ítems retirados de la interfaz (módulos no implementados): siempre ocultos.
-            outfitsToolStripMenuItem.Visible    = false;
-            categoriasToolStripMenuItem.Visible = false;
-
-            // ── Grupos: visibles si AL MENOS un hijo está visible (OR genérico, no hardcodeado) ──
-            // Inventario suma 'mnuStock' (su ítem propio está pendiente en el Designer).
-            inventarioToolStripMenuItem.Visible = prendasToolStripMenuItem.Visible || Permite("mnuStock");
-
-            SetGrupoVisible(ventasToolStripMenuItem,
+                panelControlToolStripMenuItem, inventarioToolStripMenuItem,
+                prendasToolStripMenuItem, outfitsToolStripMenuItem, categoriasToolStripMenuItem,
                 clientesToolStripMenuItem, planesToolStripMenuItem,
-                pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem);
-
-            // Submenús "Usuarios ▸" / "Sistema ▸" y el menú "Administrar" (todo gobernado por gestión).
-            bool tieneUsuarios = Permite("mnuUsuarios");
-            if (_grpUsuarios != null) _grpUsuarios.Visible = tieneUsuarios;
-            if (_grpSistema  != null) _grpSistema.Visible  = tieneUsuarios;
-            gestionToolStripMenuItem.Visible = tieneUsuarios;
-
-            SetGrupoVisible(bitacoraToolStripMenuItem,
-                bitSistemaToolStripMenuItem, bitNegocioToolStripMenuItem, reporteJornadaToolStripMenuItem);
-        }
-
-        // Un grupo (menú contenedor) es visible si alguno de sus ítems hijo está visible.
-        private static void SetGrupoVisible(ToolStripMenuItem grupo, params ToolStripItem[] hijos)
-        {
-            if (grupo == null) return;
-            bool algunoVisible = false;
-            foreach (var h in hijos)
-                if (h != null && h.Visible) { algunoVisible = true; break; }
-            grupo.Visible = algunoVisible;
+                renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
+                pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
+                usuariosToolStripMenuItem, perfilesToolStripMenuItem, idiomasToolStripMenuItem,
+                historialUsuariosToolStripMenuItem, backupToolStripMenuItem, integridadToolStripMenuItem,
+                adminUsuariosItem,
+                bitSistemaToolStripMenuItem, bitNegocioToolStripMenuItem, reporteJornadaToolStripMenuItem,
+                analisisAbandonoToolStripMenuItem,
+                suscriptoresToolStripMenuItem, ventasToolStripMenuItem, bitacoraToolStripMenuItem,
+                grpUsuarios, grpSistema, gestionToolStripMenuItem
+            };
+            // Fail-closed: si un .Name no está en la resolución (typo, ítem renombrado por el
+            // Designer sin actualizar BLL.MenuVisibilidad), se OCULTA en vez de quedar con el
+            // Visible=true default de WinForms — un ítem gobernado por permiso que desaparece
+            // por error se nota enseguida; uno que queda expuesto sin permiso, no.
+            foreach (var item in items)
+                if (item != null)
+                    item.Visible = visibilidad.TryGetValue(item.Name, out bool v) && v;
         }
 
         // ── Etapa 2 — Re-aplicación de seguridad EN VIVO (patrón ManejadorSeguridad de Stach) ──
@@ -531,6 +376,18 @@ namespace GUI
         }
 
         /// <summary>
+        /// Abre el módulo de Análisis de Abandono (PdN10) como hijo MDI.
+        /// </summary>
+        private void analisisAbandonoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is AnalisisAbandonoForm) { hijo.BringToFront(); return; }
+            }
+            new AnalisisAbandonoForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>
         /// Abre Gestión de Usuarios como hijo MDI. Accesible solo para Administrador.
         /// </summary>
         private void usuariosToolStripMenuItem_Click(object sender, EventArgs e)
@@ -663,6 +520,18 @@ namespace GUI
                 if (hijo is RenovacionSuscripcionForm) { hijo.BringToFront(); return; }
             }
             new RenovacionSuscripcionForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>
+        /// Abre el módulo de Cobro de Suscripción (PdN6) como hijo MDI.
+        /// </summary>
+        private void cobroSuscripcionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is CobroSuscripcionForm) { hijo.BringToFront(); return; }
+            }
+            new CobroSuscripcionForm { MdiParent = this }.Show();
         }
 
         /// <summary>
@@ -851,26 +720,25 @@ namespace GUI
 
             // Label dinámico "Idioma:" / "Language:" / "Язык:"
             if (t.ContainsKey("lbl.idioma"))
-                _lblIdioma.Text = t["lbl.idioma"].Texto;
-
-            // Item "Mi Perfil" (creado en código, sin Tag del Designer)
-            if (_miPerfilItem != null)
-                _miPerfilItem.Text = t.ContainsKey("perfil.menu") ? t["perfil.menu"].Texto : "Mi Perfil";
+                lblIdioma.Text = t["lbl.idioma"].Texto;
 
             Aplicar(usuarioToolStripMenuItem,           t);
+            Aplicar(miPerfilItem,                       t);
             Aplicar(panelControlToolStripMenuItem,      t);
             Aplicar(inventarioToolStripMenuItem,        t);
             Aplicar(prendasToolStripMenuItem,           t);
+            Aplicar(suscriptoresToolStripMenuItem,      t);
             Aplicar(ventasToolStripMenuItem,            t);
             Aplicar(clientesToolStripMenuItem,          t);
             Aplicar(planesToolStripMenuItem,            t);
+            Aplicar(cobroSuscripcionToolStripMenuItem,  t);
             Aplicar(pedidosVentaToolStripMenuItem,      t);
             Aplicar(pedidosRealizadosToolStripMenuItem, t);
             Aplicar(gestionToolStripMenuItem,           t);
-            Aplicar(_grpUsuarios,                       t);
-            Aplicar(_grpSistema,                        t);
+            Aplicar(grpUsuarios,                        t);
+            Aplicar(grpSistema,                         t);
             Aplicar(usuariosToolStripMenuItem,          t);
-            Aplicar(_adminUsuariosItem,                 t);
+            Aplicar(adminUsuariosItem,                  t);
             Aplicar(perfilesToolStripMenuItem,          t);
             Aplicar(idiomasToolStripMenuItem,           t);
             Aplicar(historialUsuariosToolStripMenuItem, t);
@@ -880,7 +748,9 @@ namespace GUI
             Aplicar(bitSistemaToolStripMenuItem,        t);
             Aplicar(bitNegocioToolStripMenuItem,        t);
             Aplicar(reporteJornadaToolStripMenuItem,    t);
+            Aplicar(analisisAbandonoToolStripMenuItem,  t);
             Aplicar(cerrarSesionToolStripMenuItem,      t);
+            Aplicar(ventanaToolStripMenuItem,           t);
 
             // Ítem de Alertas: tiene icono + badge, se compone aparte (no por Tag directo).
             RefrescarTextoAlertas();
@@ -906,12 +776,11 @@ namespace GUI
         /// </summary>
         private void ReconstruirComboIdioma(IList<Idioma> idiomas)
         {
-            if (_cmbIdiomaMenu == null) return;
             _suprimirIdiomaMenu = true;
-            _cmbIdiomaMenu.ComboBox.DataSource    = null;
-            _cmbIdiomaMenu.ComboBox.DisplayMember = "Nombre";
-            _cmbIdiomaMenu.ComboBox.ValueMember   = "Id";
-            _cmbIdiomaMenu.ComboBox.DataSource    = new List<Idioma>(idiomas);
+            cmbIdiomaMenu.ComboBox.DataSource    = null;
+            cmbIdiomaMenu.ComboBox.DisplayMember = "Nombre";
+            cmbIdiomaMenu.ComboBox.ValueMember   = "Id";
+            cmbIdiomaMenu.ComboBox.DataSource    = new List<Idioma>(idiomas);
             _suprimirIdiomaMenu = false;
             SeleccionarIdiomaEnCombo(GestorIdioma.IdiomaActual?.Id ?? "ES");
         }
@@ -919,16 +788,16 @@ namespace GUI
         /// <summary>Selecciona en el combo el idioma indicado, SIN disparar el cambio (uso interno).</summary>
         private void SeleccionarIdiomaEnCombo(string codigo)
         {
-            if (_cmbIdiomaMenu?.ComboBox?.Items == null) return;
-            for (int i = 0; i < _cmbIdiomaMenu.ComboBox.Items.Count; i++)
-                if (_cmbIdiomaMenu.ComboBox.Items[i] is Idioma idm &&
+            if (cmbIdiomaMenu.ComboBox?.Items == null) return;
+            for (int i = 0; i < cmbIdiomaMenu.ComboBox.Items.Count; i++)
+                if (cmbIdiomaMenu.ComboBox.Items[i] is Idioma idm &&
                     string.Equals(idm.Id, codigo, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (_cmbIdiomaMenu.SelectedIndex != i)
+                    if (cmbIdiomaMenu.SelectedIndex != i)
                     {
                         bool prev = _suprimirIdiomaMenu;
                         _suprimirIdiomaMenu = true;
-                        _cmbIdiomaMenu.SelectedIndex = i;
+                        cmbIdiomaMenu.SelectedIndex = i;
                         _suprimirIdiomaMenu = prev;
                     }
                     break;
@@ -942,7 +811,7 @@ namespace GUI
         private void CmbIdiomaMenu_Changed(object sender, EventArgs e)
         {
             if (_suprimirIdiomaMenu) return;
-            var idioma = _cmbIdiomaMenu.SelectedItem as Idioma;
+            var idioma = cmbIdiomaMenu.SelectedItem as Idioma;
             if (idioma == null) return;
 
             try

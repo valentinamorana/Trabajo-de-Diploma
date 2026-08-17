@@ -282,6 +282,7 @@ namespace GUI
             this.Name = "Planes";
             this.Tag = "frm.planes";
             this.Text = "Planes de Suscripción";
+            this.Load += new System.EventHandler(this.Planes_Load);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudLimite)).EndInit();

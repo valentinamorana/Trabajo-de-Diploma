@@ -72,6 +72,30 @@ namespace DAL
             return lista;
         }
 
+        // PdN10 — Fecha del pedido más reciente de cada cliente (excluye Cancelado: un
+        // pedido cancelado no representa actividad real). Usada por BLL.AnalisisAbandono
+        // para cruzar "último pedido" contra vencimiento sin traer todos los pedidos.
+        public Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente()
+        {
+            var resultado = new Dictionary<int, DateTime>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT IdCliente, MAX(FechaPedido) AS UltimaFecha " +
+                    "FROM Pedido WHERE Estado <> @EstadoCancelado GROUP BY IdCliente",
+                    new[] { new SqlParameter("@EstadoCancelado", (int)BE.EstadoPedido.Cancelado) });
+
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        resultado[Convert.ToInt32(row["IdCliente"])] = Convert.ToDateTime(row["UltimaFecha"]);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener la fecha del último pedido por cliente.", ex);
+            }
+            return resultado;
+        }
+
         // Obtiene un pedido por ID incluyendo sus prendas.
         public override BE.Pedido ObtenerPorId(int idPedido)
         {

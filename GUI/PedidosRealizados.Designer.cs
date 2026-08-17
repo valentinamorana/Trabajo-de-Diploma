@@ -31,6 +31,7 @@ namespace GUI
             this.btnVerNotificacion = new System.Windows.Forms.Button();
             this.btnDevolucion = new System.Windows.Forms.Button();
             this.btnRefrescar = new System.Windows.Forms.Button();
+            this.btnHistorial = new System.Windows.Forms.Button();
             this.panelDetalle = new System.Windows.Forms.Panel();
             this.dgvDetalle = new System.Windows.Forms.DataGridView();
             this.lblDetalleTitulo = new System.Windows.Forms.Label();
@@ -59,6 +60,7 @@ namespace GUI
             this.panelTop.Controls.Add(this.btnVerNotificacion);
             this.panelTop.Controls.Add(this.btnDevolucion);
             this.panelTop.Controls.Add(this.btnRefrescar);
+            this.panelTop.Controls.Add(this.btnHistorial);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
@@ -204,7 +206,24 @@ namespace GUI
             this.btnRefrescar.TabIndex = 9;
             this.btnRefrescar.Text = "↻";
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
-            // 
+            //
+            // btnHistorial
+            //
+            this.btnHistorial.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(80)))), ((int)(((byte)(160)))));
+            this.btnHistorial.Enabled = false;
+            this.btnHistorial.FlatAppearance.BorderSize = 0;
+            this.btnHistorial.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnHistorial.ForeColor = System.Drawing.Color.White;
+            this.btnHistorial.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnHistorial.Location = new System.Drawing.Point(728, 50);
+            this.btnHistorial.Name = "btnHistorial";
+            this.btnHistorial.Size = new System.Drawing.Size(110, 28);
+            this.btnHistorial.TabIndex = 11;
+            this.btnHistorial.Tag  = "btn.historial";
+            this.btnHistorial.Text = "📋 Historial";
+            this.btnHistorial.UseVisualStyleBackColor = false;
+            this.btnHistorial.Click += new System.EventHandler(this.BtnHistorial_Click);
+            //
             // panelDetalle
             // 
             this.panelDetalle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(252)))));
@@ -316,6 +335,7 @@ namespace GUI
             this.Name = "PedidosRealizados";
             this.Tag  = "frm.pedidosreal2";
             this.Text = "Despacho de Pedidos";
+            this.Load += new System.EventHandler(this.PedidosRealizados_Load);
             this.panelTop.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.nudDiasFiltro)).EndInit();
             this.panelDetalle.ResumeLayout(false);
@@ -340,6 +360,7 @@ namespace GUI
         private System.Windows.Forms.Button       btnVerNotificacion;
         private System.Windows.Forms.Button       btnDevolucion;
         private System.Windows.Forms.Button       btnRefrescar;
+        private System.Windows.Forms.Button       btnHistorial;
         private System.Windows.Forms.Panel        panelDetalle;
         private System.Windows.Forms.Label        lblDetalleTitulo;
         private System.Windows.Forms.DataGridView dgvDetalle;

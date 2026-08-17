@@ -27,6 +27,7 @@ namespace GUI
             this.btnRestaurar = new System.Windows.Forms.Button();
             this.btnEliminar  = new System.Windows.Forms.Button();
             this.btnExterno   = new System.Windows.Forms.Button();
+            this.btnInicial   = new System.Windows.Forms.Button();
             this.lblInfo      = new System.Windows.Forms.Label();
             this.pnlMain.SuspendLayout();
             this.SuspendLayout();
@@ -42,6 +43,7 @@ namespace GUI
             this.pnlMain.Controls.Add(this.btnRestaurar);
             this.pnlMain.Controls.Add(this.btnEliminar);
             this.pnlMain.Controls.Add(this.btnExterno);
+            this.pnlMain.Controls.Add(this.btnInicial);
             this.pnlMain.Controls.Add(this.lblInfo);
             this.pnlMain.Dock     = System.Windows.Forms.DockStyle.Fill;
             this.pnlMain.Name     = "pnlMain";
@@ -180,20 +182,35 @@ namespace GUI
             this.btnExterno.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnExterno.Click    += new System.EventHandler(this.btnExterno_Click);
 
+            // ── btnInicial — RF-06, backup de instalación limpia ────────────────
+            this.btnInicial.BackColor = System.Drawing.Color.FromArgb(70, 110, 90);
+            this.btnInicial.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnInicial.FlatAppearance.BorderSize = 0;
+            this.btnInicial.Font      = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.btnInicial.ForeColor = System.Drawing.Color.White;
+            this.btnInicial.Location  = new System.Drawing.Point(20, 410);
+            this.btnInicial.Name      = "btnInicial";
+            this.btnInicial.Size      = new System.Drawing.Size(460, 32);
+            this.btnInicial.TabIndex  = 9;
+            this.btnInicial.Tag       = "btn.backup.inicial";
+            this.btnInicial.Text      = "Backup de instalación limpia";
+            this.btnInicial.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnInicial.Click    += new System.EventHandler(this.btnInicial_Click);
+
             // ── lblInfo ──────────────────────────────────────────────────────
             this.lblInfo.Font      = new System.Drawing.Font("Segoe UI", 8F);
             this.lblInfo.ForeColor = System.Drawing.Color.FromArgb(140, 110, 130);
-            this.lblInfo.Location  = new System.Drawing.Point(20, 412);
+            this.lblInfo.Location  = new System.Drawing.Point(20, 456);
             this.lblInfo.Name      = "lblInfo";
             this.lblInfo.Size      = new System.Drawing.Size(460, 32);
-            this.lblInfo.TabIndex  = 9;
+            this.lblInfo.TabIndex  = 10;
             this.lblInfo.Text      = "Nota: la restauración cierra las conexiones activas y reinicia la aplicación.";
 
             // ── BackupForm ───────────────────────────────────────────────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor           = System.Drawing.Color.FromArgb(252, 250, 252);
-            this.ClientSize          = new System.Drawing.Size(500, 458);
+            this.ClientSize          = new System.Drawing.Size(500, 502);
             this.Controls.Add(this.pnlMain);
             this.FormBorderStyle     = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox         = false;
@@ -219,6 +236,7 @@ namespace GUI
         private System.Windows.Forms.Button       btnRestaurar;
         private System.Windows.Forms.Button       btnEliminar;
         private System.Windows.Forms.Button       btnExterno;
+        private System.Windows.Forms.Button       btnInicial;
         private System.Windows.Forms.Label        lblInfo;
     }
 }

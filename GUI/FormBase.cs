@@ -110,17 +110,8 @@ namespace GUI
             {
                 // AppException = error de negocio esperado (validación, permiso…): se
                 // muestra traducido y NO se registra en bitácora para no generar ruido.
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                if (t.ContainsKey(appEx.Clave))
-                {
-                    string texto = t[appEx.Clave].Texto;
-                    string msg   = (appEx.Args != null && appEx.Args.Length > 0)
-                                   ? string.Format(texto, appEx.Args)
-                                   : texto;
-                    MostrarError(msg);
-                    return;
-                }
-                MostrarError(ex.Message);
+                string msg = Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual);
+                MostrarError(msg);
                 return;
             }
 

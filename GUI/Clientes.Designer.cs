@@ -169,6 +169,7 @@ namespace GUI
             this.Tag                 = "frm.clientes";
             this.Text                = "Gesti\u00f3n de Clientes";
             this.Name                = "Clientes";
+            this.Load                += new System.EventHandler(this.Clientes_Load);
             this.Controls.Add(this.dgvClientes);
             this.Controls.Add(this.panelTop);
             this.Controls.Add(this.panelBottom);

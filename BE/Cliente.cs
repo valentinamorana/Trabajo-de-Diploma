@@ -25,6 +25,11 @@ namespace BE
         // Límite de prendas del plan (cargado por JOIN, no persiste).
         public int LimitePrendas { get; set; }
 
+        // Precio del plan (cargado por JOIN, no persiste). PdN6 — importe a registrar
+        // en el historial de cobro cuando se confirma un pago, sin volver a consultar
+        // PlanSuscripcion (mismo criterio que NombrePlan/LimitePrendas).
+        public decimal PrecioPlan { get; set; }
+
         // Nombre completo para mostrar en grillas.
         public string NombreCompleto => $"{Nombre} {Apellido}";
 
@@ -70,5 +75,21 @@ namespace BE
             FechaVencimiento.HasValue
                 ? Math.Max(0, (FechaVencimiento.Value.Date - DateTime.Today).Days)
                 : int.MaxValue;
+
+        // PdN6 — Fecha límite del período de gracia tras un cobro fallido.
+        // Null = no está en gracia (al día). Se persiste directo, sin un enum de estado
+        // aparte, con el mismo criterio que FechaVencimiento: el estado se DERIVA de la
+        // fecha, no se guarda por duplicado (evita que quede desincronizado).
+        public DateTime? FechaLimiteGracia { get; set; }
+
+        // True si el cliente está dentro del período de gracia: el cobro falló pero
+        // todavía no se cumplió el plazo otorgado para regularizar.
+        public bool EstaEnGracia =>
+            FechaLimiteGracia.HasValue && FechaLimiteGracia.Value.Date >= DateTime.Today;
+
+        // True si venció el período de gracia sin que se haya registrado un cobro
+        // exitoso: a partir de acá se bloquean nuevos pedidos (BLL.Pedido.CrearPedido).
+        public bool EstaSuspendidoPorPago =>
+            FechaLimiteGracia.HasValue && FechaLimiteGracia.Value.Date < DateTime.Today;
     }
 }

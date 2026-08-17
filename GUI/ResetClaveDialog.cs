@@ -20,13 +20,6 @@ namespace GUI
     /// </summary>
     public partial class ResetClaveDialog : Form
     {
-        // ── Controles ─────────────────────────────────────────────────────────
-        private TextBox txtNuevaClave;
-        private TextBox txtConfirmar;
-        private Button  btnAceptar;
-        private Button  btnCancelar;
-        private Label   lblError;
-
         /// <summary>
         /// Nueva contraseña validada (disponible solo cuando DialogResult == OK).
         /// </summary>
@@ -45,105 +38,13 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string T_r(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
-            // ── Propiedades del formulario ────────────────────────────────────
-            this.Text            = T_r("frm.resetclave", "Resetear Contraseña");
-            this.ClientSize      = new Size(340, 260);
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.StartPosition   = FormStartPosition.CenterParent;
-            this.MaximizeBox     = false;
-            this.MinimizeBox     = false;
-            this.BackColor       = Color.White;
-
-            // ── Controles ─────────────────────────────────────────────────────
-            var lblTitulo = new Label
-            {
-                Text      = T_r("frm.resetclave", "Resetear Contraseña"),
-                Font      = new Font("Segoe UI", 12, FontStyle.Bold),
-                Left      = 20, Top    = 18,
-                Width     = 300, Height = 24,
-                ForeColor = Color.FromArgb(30, 30, 60)
-            };
-
-            // Muestra el nombre del usuario afectado para evitar confusiones
-            var lblUsuario = new Label
-            {
-                Text      = $"{T_r("lbl.usuario", "Usuario")}: {username}",
-                Left      = 20, Top    = 50,
-                Width     = 300, Height = 20,
-                ForeColor = Color.DimGray,
-                Font      = new Font("Segoe UI", 9, FontStyle.Italic)
-            };
-
-            var lblNueva = new Label
-            {
-                Text  = T_r("lbl.nueva.clave", "Nueva contraseña (mín. 6 caracteres):"),
-                Left  = 20, Top   = 82,
-                Width = 300, Height = 18
-            };
-
-            txtNuevaClave = new TextBox
-            {
-                Left         = 20,  Top    = 102,
-                Width        = 300, Height = 24,
-                PasswordChar = '●'
-            };
-
-            var lblConfirmar = new Label
-            {
-                Text  = T_r("lbl.confirmar.clave", "Confirmar contraseña:"),
-                Left  = 20, Top   = 136,
-                Width = 300, Height = 18
-            };
-
-            txtConfirmar = new TextBox
-            {
-                Left         = 20,  Top    = 156,
-                Width        = 300, Height = 24,
-                PasswordChar = '●'
-            };
-
-            // Label de error (oculto hasta que falle la validación)
-            lblError = new Label
-            {
-                Left      = 20,  Top    = 186,
-                Width     = 300, Height = 18,
-                ForeColor = Color.Crimson,
-                Font      = new Font("Segoe UI", 8.5f),
-                Text      = string.Empty
-            };
-
-            btnAceptar = new Button
-            {
-                Text      = T_r("btn.confirmar.reset", "Confirmar Reset"),
-                Left      = 20,  Top    = 214,
-                Width     = 145, Height = 32,
-                BackColor = Color.FromArgb(180, 100, 30),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                DialogResult = DialogResult.None   // lo manejamos manualmente
-            };
-            btnAceptar.FlatAppearance.BorderSize = 0;
-            btnAceptar.Click += BtnAceptar_Click;
-
-            btnCancelar = new Button
-            {
-                Text         = T_r("btn.cancelar", "Cancelar"),
-                Left         = 175, Top    = 214,
-                Width        = 145, Height = 32,
-                DialogResult = DialogResult.Cancel
-            };
-
-            // Enter activa el botón Confirmar
-            this.AcceptButton = btnAceptar;
-            this.CancelButton = btnCancelar;
-
-            this.Controls.AddRange(new Control[]
-            {
-                lblTitulo, lblUsuario,
-                lblNueva, txtNuevaClave,
-                lblConfirmar, txtConfirmar,
-                lblError, btnAceptar, btnCancelar
-            });
+            this.Text          = T_r("frm.resetclave", "Resetear Contraseña");
+            lblTitulo.Text     = T_r("frm.resetclave", "Resetear Contraseña");
+            lblUsuario.Text    = $"{T_r("lbl.usuario", "Usuario")}: {username}";
+            lblNueva.Text      = T_r("lbl.nueva.clave", "Nueva contraseña (mín. 6 caracteres):");
+            lblConfirmar.Text  = T_r("lbl.confirmar.clave", "Confirmar contraseña:");
+            btnAceptar.Text    = T_r("btn.confirmar.reset", "Confirmar Reset");
+            btnCancelar.Text   = T_r("btn.cancelar", "Cancelar");
         }
 
         /// <summary>

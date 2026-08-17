@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Bitacora.cs" />
     <Compile Include="PanelAlertas.cs" />
+    <Compile Include="MenuVisibilidad.cs" />
     <Compile Include="ReporteJornada.cs" />
     <Compile Include="Cliente.cs" />
     <Compile Include="Idioma.cs" />
@@ -68,6 +69,22 @@
     <Compile Include="Manejadores\CambioPlanHandler.cs" />
     <Compile Include="Manejadores\BajaSuscripcionHandler.cs" />
     <Compile Include="Renovacion.cs" />
+    <Compile Include="Interfaces\ICobroService.cs" />
+    <Compile Include="Manejadores\DecisionCobro.cs" />
+    <Compile Include="Manejadores\ContextoCobro.cs" />
+    <Compile Include="Manejadores\ResultadoCobro.cs" />
+    <Compile Include="Manejadores\ManejadorCobro.cs" />
+    <Compile Include="Manejadores\DetectarCobroHandler.cs" />
+    <Compile Include="Manejadores\ProcesarPagoHandler.cs" />
+    <Compile Include="Manejadores\AplicarGraciaHandler.cs" />
+    <Compile Include="Manejadores\SuspenderHandler.cs" />
+    <Compile Include="Cobro.cs" />
+    <Compile Include="Interfaces\IAnalisisAbandonoService.cs" />
+    <Compile Include="Estrategias\EstrategiaRiesgo.cs" />
+    <Compile Include="Estrategias\EstrategiaVencimientoInactividad.cs" />
+    <Compile Include="Estrategias\EstrategiaInactividadPura.cs" />
+    <Compile Include="Estrategias\EstrategiaClienteNuevoInactivo.cs" />
+    <Compile Include="AnalisisAbandono.cs" />
     <Compile Include="Pedido.cs" />
     <Compile Include="PlanSuscripcion.cs" />
     <Compile Include="Preferencia.cs" />

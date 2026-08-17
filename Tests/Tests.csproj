@@ -51,6 +51,8 @@
     <Compile Include="SuscripcionBuilderTests.cs" />
     <Compile Include="ComandoPedidoTests.cs" />
     <Compile Include="RenovacionTests.cs" />
+    <Compile Include="CobroTests.cs" />
+    <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="UsuarioAbmTests.cs" />
     <Compile Include="RolAdminTests.cs" />
     <Compile Include="SessionManagerTests.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="TraductorI18nTests.cs" />
     <Compile Include="SerializadorCsvTests.cs" />
     <Compile Include="PanelAlertasTests.cs" />
+    <Compile Include="MenuVisibilidadTests.cs" />
     <Compile Include="ReporteTendenciaTests.cs" />
     <Compile Include="Fakes\FakeBackupDAL.cs" />
     <Compile Include="Fakes\FakePermisoDAL.cs" />
@@ -69,6 +72,7 @@
     <Compile Include="Fakes\FakePedidoService.cs" />
     <Compile Include="Fakes\FakeClienteDAL.cs" />
     <Compile Include="Fakes\FakeRenovacionDAL.cs" />
+    <Compile Include="Fakes\FakeCobroDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

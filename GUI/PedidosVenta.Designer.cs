@@ -24,6 +24,7 @@ namespace GUI
             this.btnCancelar = new System.Windows.Forms.Button();
             this.btnDesCancelar = new System.Windows.Forms.Button();
             this.btnRefrescar = new System.Windows.Forms.Button();
+            this.btnHistorial = new System.Windows.Forms.Button();
             this.lblConteo = new System.Windows.Forms.Label();
             this.panelDetalle = new System.Windows.Forms.Panel();
             this.dgvDetallePrendas = new System.Windows.Forms.DataGridView();
@@ -45,6 +46,7 @@ namespace GUI
             this.panelTop.Controls.Add(this.btnCancelar);
             this.panelTop.Controls.Add(this.btnDesCancelar);
             this.panelTop.Controls.Add(this.btnRefrescar);
+            this.panelTop.Controls.Add(this.btnHistorial);
             this.panelTop.Controls.Add(this.lblConteo);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
@@ -109,15 +111,32 @@ namespace GUI
             this.btnRefrescar.TabIndex = 3;
             this.btnRefrescar.Text = "↻";
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
-            // 
+            //
+            // btnHistorial
+            //
+            this.btnHistorial.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(80)))), ((int)(((byte)(160)))));
+            this.btnHistorial.Enabled = false;
+            this.btnHistorial.FlatAppearance.BorderSize = 0;
+            this.btnHistorial.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnHistorial.ForeColor = System.Drawing.Color.White;
+            this.btnHistorial.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnHistorial.Location = new System.Drawing.Point(452, 11);
+            this.btnHistorial.Name = "btnHistorial";
+            this.btnHistorial.Size = new System.Drawing.Size(110, 28);
+            this.btnHistorial.TabIndex = 4;
+            this.btnHistorial.Tag  = "btn.historial";
+            this.btnHistorial.Text = "📋 Historial";
+            this.btnHistorial.UseVisualStyleBackColor = false;
+            this.btnHistorial.Click += new System.EventHandler(this.BtnHistorial_Click);
+            //
             // lblConteo
-            // 
+            //
             this.lblConteo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblConteo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblConteo.Location = new System.Drawing.Point(452, 16);
+            this.lblConteo.Location = new System.Drawing.Point(570, 16);
             this.lblConteo.Name = "lblConteo";
             this.lblConteo.Size = new System.Drawing.Size(300, 23);
-            this.lblConteo.TabIndex = 4;
+            this.lblConteo.TabIndex = 5;
             // 
             // panelDetalle
             // 
@@ -230,6 +249,7 @@ namespace GUI
             this.Name = "PedidosVenta";
             this.Tag  = "frm.pedidosventa";
             this.Text = "Pedidos de Venta";
+            this.Load += new System.EventHandler(this.PedidosVenta_Load);
             this.panelTop.ResumeLayout(false);
             this.panelDetalle.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvDetallePrendas)).EndInit();
@@ -246,6 +266,7 @@ namespace GUI
         private System.Windows.Forms.Button       btnCancelar;
         private System.Windows.Forms.Button       btnDesCancelar;
         private System.Windows.Forms.Button       btnRefrescar;
+        private System.Windows.Forms.Button       btnHistorial;
         private System.Windows.Forms.Label        lblConteo;
         private System.Windows.Forms.Panel        panelDetalle;
         private System.Windows.Forms.Label        lblDetalleTitulo;

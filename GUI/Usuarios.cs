@@ -36,11 +36,6 @@ namespace GUI
         // Idioma activo — sincronizado en Traducir() para usar en CargarUsuarios
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
-        // Referencias a botones dinámicos para poder traducirlos en UpdateLanguage
-        // RF-10 — baja lógica / archivado / purga
-        private Button _btnEliminar;
-        private Button _btnVerArchivados;
-        private Button _btnPurgar;
         private bool   _viendoArchivados = false;
 
         /// <summary>
@@ -49,7 +44,6 @@ namespace GUI
         public Usuarios()
         {
             InitializeComponent();
-            this.Load += new EventHandler(Usuarios_Load);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -92,9 +86,9 @@ namespace GUI
             Aplicar(lblDesbloquearInfo,   t);
             Aplicar(btnDesbloquear,       t);
             Aplicar(lblListaTitulo,       t);
-            Aplicar(_btnEliminar,         t);
-            Aplicar(_btnVerArchivados,    t);
-            Aplicar(_btnPurgar,           t);
+            Aplicar(btnEliminar,          t);
+            Aplicar(btnVerArchivados,     t);
+            Aplicar(btnPurgar,            t);
             RellenarComboPerfil(t);
             TraducirHeadersGrilla();
         }
@@ -165,85 +159,6 @@ namespace GUI
 
         private void Usuarios_Load(object sender, EventArgs e)
         {
-            // Se crean aquí (en Load, no en constructor) para que la escala DPI del
-            // formulario ya esté aplicada y las posiciones/tamaños sean correctos.
-
-            // El panel lateral muestra varias acciones apiladas; con scroll se garantiza que
-            // todas queden accesibles aunque la resolución/DPI reduzca el alto disponible.
-            panelAlta.AutoScroll = true;
-
-            // Revisión: el ALTA de usuario ("Nuevo usuario") se movió a "Administración de Usuarios".
-            // Esta pantalla queda como gestión de CUENTA: resetear contraseña, desbloquear y archivar/purgar.
-            // Se ocultan los controles de alta y se suben las secciones de reset/desbloqueo para no dejar hueco.
-            foreach (var c in new Control[] { lblTitulo, lblUser, txtUsername, lblPerfil, cmbPerfil, btnAgregar })
-                if (c != null) c.Visible = false;
-            btnRefrescar.Location = new Point(12, 12);
-            const int subir = 230;
-            foreach (var c in new Control[] { separador1, lblResetTitulo, lblResetInfo, btnResetearClave,
-                                              separador2, lblDesbloquearTitulo, lblDesbloquearInfo, btnDesbloquear })
-                if (c != null) c.Location = new Point(c.Location.X, c.Location.Y - subir);
-
-            // ── RF-10 — Archivar / Ver archivados / Purgar ────────────────────────
-            // (El reseteo masivo de claves y el recálculo de DV se quitaron de acá: el primero es
-            //  una operación peligrosa innecesaria; el recálculo de DV vive en Diagnóstico de Integridad.)
-            _btnEliminar = new Button
-            {
-                Tag       = "btn.usr.eliminar",
-                Text      = "🗑 Archivar usuario",
-                Size      = new Size(210, 30),
-                Location  = new Point(12, btnDesbloquear.Bottom + 20),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(170, 50, 50),
-                ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 8.5f, FontStyle.Bold),
-                Cursor    = Cursors.Hand,
-                Enabled   = false
-            };
-            _btnEliminar.FlatAppearance.BorderSize = 0;
-            _btnEliminar.Click += BtnEliminar_Click;
-            panelAlta.Controls.Add(_btnEliminar);
-
-            _btnVerArchivados = new Button
-            {
-                Tag       = "btn.usr.verarchivados",
-                Text      = "Ver archivados",
-                Size      = new Size(102, 28),
-                Location  = new Point(12, _btnEliminar.Bottom + 8),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(110, 110, 120),
-                ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 8.5f),
-                Cursor    = Cursors.Hand
-            };
-            _btnVerArchivados.FlatAppearance.BorderSize = 0;
-            _btnVerArchivados.Click += BtnVerArchivados_Click;
-            panelAlta.Controls.Add(_btnVerArchivados);
-
-            _btnPurgar = new Button
-            {
-                Tag       = "btn.usr.purgar",
-                Text      = "Purgar (>1 año)",
-                Size      = new Size(102, 28),
-                Location  = new Point(120, _btnEliminar.Bottom + 8),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(60, 60, 70),
-                ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 8.5f),
-                Cursor    = Cursors.Hand
-            };
-            _btnPurgar.FlatAppearance.BorderSize = 0;
-            _btnPurgar.Click += BtnPurgar_Click;
-            panelAlta.Controls.Add(_btnPurgar);
-
-            // El cartel de estado va al FINAL del panel, debajo de TODOS los botones. Antes estaba
-            // fijo (Designer) en una Y que se superponía con estos botones agregados por código.
-            lblMensaje.Location = new Point(12, _btnPurgar.Bottom + 14);
-            lblMensaje.Size     = new Size(210, 48);
-
-            // Campo de contraseña oculto: la contraseña se genera automáticamente en la BLL.
-            lblPass.Visible      = false;
-            txtContraseña.Visible = false;
-
             CargarUsuarios();
         }
 
@@ -261,12 +176,12 @@ namespace GUI
             {
                 btnResetearClave.Enabled = false;
                 btnDesbloquear.Enabled   = false;
-                if (_btnEliminar != null) _btnEliminar.Enabled = false;
+                btnEliminar.Enabled      = false;
                 return;
             }
 
             btnResetearClave.Enabled = haySeleccion;
-            if (_btnEliminar != null) _btnEliminar.Enabled = haySeleccion;
+            btnEliminar.Enabled      = haySeleccion;
 
             // Desbloquear solo se habilita si el usuario seleccionado está bloqueado.
             // Usamos la columna interna _BloqueadoKey (int) para ser independientes del idioma.
@@ -344,7 +259,7 @@ namespace GUI
                 btnAgregar.Enabled       = !_viendoArchivados;
                 btnResetearClave.Enabled = false;
                 btnDesbloquear.Enabled   = false;
-                _btnEliminar.Enabled     = false;
+                btnEliminar.Enabled      = false;
             }
             catch (Exception ex)
             {
@@ -491,7 +406,7 @@ namespace GUI
         {
             _viendoArchivados = !_viendoArchivados;
             var t = Traductor.ObtenerTraducciones(_idioma);
-            _btnVerArchivados.Text = _viendoArchivados
+            btnVerArchivados.Text = _viendoArchivados
                 ? (t.ContainsKey("btn.usr.veractivos")   ? t["btn.usr.veractivos"].Texto   : "Ver activos")
                 : (t.ContainsKey("btn.usr.verarchivados") ? t["btn.usr.verarchivados"].Texto : "Ver archivados");
             CargarUsuarios();

@@ -49,8 +49,10 @@ namespace BLL.Manejadores
             });
 
             var prendasEnUso = dalPrenda.ObtenerPorCliente(cliente.IdCliente);
+            bool conPrendas = prendasEnUso.Count > 0;
+
             string mensaje = "Suscripción dada de baja. El cliente no podrá generar nuevos pedidos.";
-            if (prendasEnUso.Count > 0)
+            if (conPrendas)
                 mensaje += $" Tiene {prendasEnUso.Count} prenda(s) en uso — solicitar la devolución.";
 
             return new ResultadoRenovacion
@@ -58,7 +60,9 @@ namespace BLL.Manejadores
                 Resuelto = true,
                 Estado = BE.EstadoRenovacion.Baja,
                 IdRenovacion = idRenovacion,
-                Mensaje = mensaje
+                Mensaje = mensaje,
+                Clave = conPrendas ? "renov.msg.baja_conprendas" : "renov.msg.baja",
+                Args = conPrendas ? new object[] { prendasEnUso.Count } : null
             };
         }
     }

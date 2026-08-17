@@ -83,10 +83,13 @@ namespace Seguridad
         // ── Validacion de requisitos de contraseña ────────────────────────────
 
         // Requisitos: minimo 8 caracteres, al menos 1 numero y 1 caracter especial.
-        public static (bool valida, string mensaje) ValidarContrasena(string contrasena)
+        // Devuelve también la CLAVE de traducción del motivo (una por requisito incumplido),
+        // para que la GUI pueda mostrar el mensaje específico traducido al idioma activo
+        // en vez de un texto genérico (ver BLL.Usuario.ResetearTodasLasClaves/CambiarClavePropia).
+        public static (bool valida, string clave, string mensaje) ValidarContrasena(string contrasena)
         {
             if (string.IsNullOrWhiteSpace(contrasena) || contrasena.Length < 8)
-                return (false, "La contrasena debe tener al menos 8 caracteres.");
+                return (false, "err.bll.usuario.clave_corta", "La contrasena debe tener al menos 8 caracteres.");
 
             bool tieneNumero   = false;
             bool tieneEspecial = false;
@@ -99,11 +102,11 @@ namespace Seguridad
             }
 
             if (!tieneNumero)
-                return (false, "La contrasena debe contener al menos un numero.");
+                return (false, "err.bll.usuario.clave_sinnumero", "La contrasena debe contener al menos un numero.");
             if (!tieneEspecial)
-                return (false, "La contrasena debe contener al menos un caracter especial (!@#$%...).");
+                return (false, "err.bll.usuario.clave_sinespecial", "La contrasena debe contener al menos un caracter especial (!@#$%...).");
 
-            return (true, string.Empty);
+            return (true, null, string.Empty);
         }
 
         // ── AES-128-CBC — cifrado reversible para datos sensibles (ej: DNI) ───

@@ -612,9 +612,9 @@ namespace BLL
         {
             ValidarEsAdministrador();
 
-            var (valida, mensaje) = Encriptador.ValidarContrasena(claveTemporal);
+            var (valida, clave, mensaje) = Encriptador.ValidarContrasena(claveTemporal);
             if (!valida)
-                throw new BE.AppException("err.bll.usuario.clave_invalida", mensaje);
+                throw new BE.AppException(clave, mensaje);
 
             string hash = Encriptador.Hash(claveTemporal);
             usuarioDAL.ResetearTodasLasClaves(hash);
@@ -643,9 +643,9 @@ namespace BLL
 
             var u = SessionManager.GetInstance().Usuario;
 
-            var (valida, mensaje) = Encriptador.ValidarContrasena(claveNueva);
+            var (valida, clave, mensaje) = Encriptador.ValidarContrasena(claveNueva);
             if (!valida)
-                throw new BE.AppException("err.bll.usuario.clave_invalida", mensaje);
+                throw new BE.AppException(clave, mensaje);
 
             // La clave nueva no puede ser la misma que la actual (evita "cambiarla" por la temporal).
             if (Encriptador.VerificarContrasena(claveNueva, u.Contraseña))
@@ -720,7 +720,7 @@ namespace BLL
 
         // Expone la validación de contraseña para que la GUI pueda dar feedback
         // temprano sin acceder directamente a la capa Seguridad.
-        public (bool valida, string mensaje) ValidarContrasena(string contrasena)
+        public (bool valida, string clave, string mensaje) ValidarContrasena(string contrasena)
         {
             return Encriptador.ValidarContrasena(contrasena);
         }

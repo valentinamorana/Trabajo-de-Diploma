@@ -247,6 +247,7 @@ namespace GUI
             this.Tag                 = "frm.prendas";
             this.Text                = "Cat\u00e1logo de Prendas";
             this.Name                = "Prendas";
+            this.Load                += new System.EventHandler(this.Prendas_Load);
             this.Controls.Add(this.dgvPrendas);
             this.Controls.Add(this.panelDetalle);
             this.Controls.Add(this.panelStatus);

@@ -19,6 +19,8 @@ namespace GUI
             this.dgvIdiomas = new System.Windows.Forms.DataGridView();
             this.btnActivar = new System.Windows.Forms.Button();
             this.btnDesactivar = new System.Windows.Forms.Button();
+            this.btnNuevoIdioma = new System.Windows.Forms.Button();
+            this.btnRenombrarIdioma = new System.Windows.Forms.Button();
             this.lblTituloTrad = new System.Windows.Forms.Label();
             this.dgvTraducciones = new System.Windows.Forms.DataGridView();
             this.lblTituloControles = new System.Windows.Forms.Label();
@@ -85,7 +87,37 @@ namespace GUI
             this.btnDesactivar.Text = "✕ Desactivar";
             this.btnDesactivar.UseVisualStyleBackColor = false;
             this.btnDesactivar.Click += new System.EventHandler(this.BtnDesactivar_Click);
-            // 
+            //
+            // btnNuevoIdioma
+            //
+            this.btnNuevoIdioma.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
+            this.btnNuevoIdioma.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnNuevoIdioma.FlatAppearance.BorderSize = 0;
+            this.btnNuevoIdioma.ForeColor = System.Drawing.Color.White;
+            this.btnNuevoIdioma.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnNuevoIdioma.Location = new System.Drawing.Point(280, 4);
+            this.btnNuevoIdioma.Name = "btnNuevoIdioma";
+            this.btnNuevoIdioma.Size = new System.Drawing.Size(130, 28);
+            this.btnNuevoIdioma.TabIndex = 3;
+            this.btnNuevoIdioma.Text = "➕ Nuevo idioma";
+            this.btnNuevoIdioma.UseVisualStyleBackColor = false;
+            this.btnNuevoIdioma.Click += new System.EventHandler(this.BtnNuevoIdioma_Click);
+            //
+            // btnRenombrarIdioma
+            //
+            this.btnRenombrarIdioma.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.btnRenombrarIdioma.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRenombrarIdioma.FlatAppearance.BorderSize = 0;
+            this.btnRenombrarIdioma.ForeColor = System.Drawing.Color.White;
+            this.btnRenombrarIdioma.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnRenombrarIdioma.Location = new System.Drawing.Point(420, 4);
+            this.btnRenombrarIdioma.Name = "btnRenombrarIdioma";
+            this.btnRenombrarIdioma.Size = new System.Drawing.Size(120, 28);
+            this.btnRenombrarIdioma.TabIndex = 4;
+            this.btnRenombrarIdioma.Text = "✏ Renombrar";
+            this.btnRenombrarIdioma.UseVisualStyleBackColor = false;
+            this.btnRenombrarIdioma.Click += new System.EventHandler(this.BtnRenombrarIdioma_Click);
+            //
             // lblTituloTrad
             // 
             this.lblTituloTrad.AutoSize = true;
@@ -170,6 +202,8 @@ namespace GUI
             // 
             this.panelBotonesIdioma.Controls.Add(this.btnActivar);
             this.panelBotonesIdioma.Controls.Add(this.btnDesactivar);
+            this.panelBotonesIdioma.Controls.Add(this.btnNuevoIdioma);
+            this.panelBotonesIdioma.Controls.Add(this.btnRenombrarIdioma);
             this.panelBotonesIdioma.Location = new System.Drawing.Point(8, 163);
             this.panelBotonesIdioma.Name = "panelBotonesIdioma";
             this.panelBotonesIdioma.Size = new System.Drawing.Size(560, 36);
@@ -231,6 +265,8 @@ namespace GUI
         private System.Windows.Forms.DataGridView       dgvIdiomas;
         private System.Windows.Forms.Button             btnActivar;
         private System.Windows.Forms.Button             btnDesactivar;
+        private System.Windows.Forms.Button             btnNuevoIdioma;
+        private System.Windows.Forms.Button             btnRenombrarIdioma;
         private System.Windows.Forms.Label              lblTituloTrad;
         private System.Windows.Forms.DataGridView       dgvTraducciones;
         private System.Windows.Forms.Label              lblTituloControles;

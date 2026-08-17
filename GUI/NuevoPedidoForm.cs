@@ -43,7 +43,6 @@ namespace GUI
         {
             InitializeComponent();
             AplicarIdioma(GestorIdioma.IdiomaActual);
-            this.Load += new EventHandler(NuevoPedidoForm_Load);
         }
 
         protected override void OnLoad(EventArgs e)

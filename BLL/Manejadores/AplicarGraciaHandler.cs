@@ -27,14 +27,14 @@ namespace BLL.Manejadores
         public override ResultadoCobro Procesar(ContextoCobro contexto)
         {
             if (contexto.Decision != DecisionCobro.PagoFallido)
-                return _sucesor.Procesar(contexto);
+                return DelegarASucesor(contexto);
 
             var cliente = contexto.Cliente;
 
             // El plazo de gracia ya otorgado venció sin que se haya regularizado: no
             // corresponde reabrir un nuevo plazo, es el último eslabón el que atiende.
             if (cliente.EstaSuspendidoPorPago)
-                return _sucesor.Procesar(contexto);
+                return DelegarASucesor(contexto);
 
             // Primer cobro fallido del ciclo (o todavía dentro del plazo ya otorgado):
             // fija (o mantiene) la fecha límite sin extenderla en cada reintento.

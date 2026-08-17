@@ -26,7 +26,7 @@ namespace BLL.Manejadores
                 };
             }
 
-            return _sucesor.Procesar(contexto);
+            return DelegarASucesor(contexto);
         }
     }
 }

@@ -462,7 +462,13 @@ namespace GUI
 
             try
             {
-                pedidoBLL.RegistrarDevolucion(this.Text, pedidoCompleto);
+                // Patrón Command (PdN3): la GUI arma el pedido de devolución y se lo entrega
+                // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
+                // ejecución real siguen 100% en BLL.Pedido.RegistrarDevolucion, adentro del Command.
+                var invocador = new BLL.Comandos.InvocadorPedido();
+                invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
+                invocador.ProcesarOrdenes();
+
                 MostrarOk(string.Format(T_dev("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a EnLimpieza."), pedidoCompleto.CantidadPrendas));
                 CargarPedidos();
             }

@@ -24,7 +24,7 @@ namespace BLL.Manejadores
         public override ResultadoRenovacion Procesar(ContextoRenovacion contexto)
         {
             if (contexto.Decision != DecisionRenovacion.CambiarPlan)
-                return _sucesor.Procesar(contexto);
+                return DelegarASucesor(contexto);
 
             if (!contexto.IdPlanNuevo.HasValue)
                 throw new BE.AppException("err.bll.renovacion.plan_requerido",

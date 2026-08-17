@@ -25,7 +25,7 @@ namespace BLL.Manejadores
         public override ResultadoCobro Procesar(ContextoCobro contexto)
         {
             if (contexto.Decision != DecisionCobro.Cobrado)
-                return _sucesor.Procesar(contexto);
+                return DelegarASucesor(contexto);
 
             var cliente = contexto.Cliente;
 

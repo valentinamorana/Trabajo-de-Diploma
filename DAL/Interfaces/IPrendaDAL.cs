@@ -1,0 +1,17 @@
+using System.Collections.Generic;
+
+namespace DAL.Interfaces
+{
+    /// <summary>Contrato del acceso a datos de Prenda (permite inyección y dobles de prueba).</summary>
+    public interface IPrendaDAL
+    {
+        List<BE.Prenda> ObtenerTodos();
+        List<BE.Prenda> ObtenerDisponibles();
+        BE.Prenda ObtenerPorId(int idPrenda);
+        List<BE.Prenda> ObtenerPorCliente(int idCliente);
+        int Alta(BE.Prenda prenda);
+        void Modificar(BE.Prenda prenda);
+        void CambiarEstado(int idPrenda, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null);
+        List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria();
+    }
+}

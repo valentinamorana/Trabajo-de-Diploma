@@ -9,11 +9,11 @@ namespace BLL
     /// </summary>
     public class ReporteVentasVendedor : Interfaces.IReporteVentasVendedorService
     {
-        private readonly DAL.Pedido dalPedido;
+        private readonly DAL.Interfaces.IPedidoDAL dalPedido;
 
         public ReporteVentasVendedor() : this(new DAL.Pedido()) { }
 
-        public ReporteVentasVendedor(DAL.Pedido dalPedido)
+        public ReporteVentasVendedor(DAL.Interfaces.IPedidoDAL dalPedido)
         {
             this.dalPedido = dalPedido ?? throw new System.ArgumentNullException(nameof(dalPedido));
         }

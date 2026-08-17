@@ -70,11 +70,11 @@ namespace BE
             && FechaVencimiento.Value.Date >= DateTime.Today
             && (FechaVencimiento.Value.Date - DateTime.Today).TotalDays <= diasAlerta;
 
-        // Días que faltan para que venza la suscripción; int.MaxValue si no hay fecha.
-        public int DiasHastaVencimiento() =>
+        // Días que faltan para que venza la suscripción; null si no hay fecha.
+        public int? DiasHastaVencimiento() =>
             FechaVencimiento.HasValue
                 ? Math.Max(0, (FechaVencimiento.Value.Date - DateTime.Today).Days)
-                : int.MaxValue;
+                : (int?)null;
 
         // PdN6 — Fecha límite del período de gracia tras un cobro fallido.
         // Null = no está en gracia (al día). Se persiste directo, sin un enum de estado

@@ -13,14 +13,14 @@ namespace BLL
     /// </summary>
     public class AnalisisMantenimiento : Interfaces.IAnalisisMantenimientoService
     {
-        private readonly DAL.MantenimientoPrenda dalMantenimiento;
+        private readonly DAL.Interfaces.IMantenimientoPrendaDAL dalMantenimiento;
 
         public const int CantidadMantenimientosExcesiva = 3;
         public const double DuracionPromedioExcesivaDias = 5.0;
 
         public AnalisisMantenimiento() : this(new DAL.MantenimientoPrenda()) { }
 
-        public AnalisisMantenimiento(DAL.MantenimientoPrenda dalMantenimiento)
+        public AnalisisMantenimiento(DAL.Interfaces.IMantenimientoPrendaDAL dalMantenimiento)
         {
             this.dalMantenimiento = dalMantenimiento ?? throw new ArgumentNullException(nameof(dalMantenimiento));
         }

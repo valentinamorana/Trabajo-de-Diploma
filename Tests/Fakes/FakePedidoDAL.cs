@@ -14,6 +14,10 @@ namespace Tests.Fakes
         public int AltaIdGenerado { get; set; }
         public int RegistrarDevolucionRespuesta { get; set; } = 1;
         public bool DesCancelarRespuesta { get; set; } = true;
+        public Dictionary<int, DateTime> FechaUltimoPedidoPorCliente { get; set; } = new Dictionary<int, DateTime>();
+        public List<BE.DesempenoVendedor> EstadisticasPorEmpleado { get; set; } = new List<BE.DesempenoVendedor>();
+        public Dictionary<int, int> CantidadPedidosPorPrenda { get; set; } = new Dictionary<int, int>();
+        public List<BE.Prenda> PrendasHistoricasPorCliente { get; set; } = new List<BE.Prenda>();
 
         // ── Espías ────────────────────────────────────────────────────────────
         public int AltaVeces { get; private set; }
@@ -29,10 +33,10 @@ namespace Tests.Fakes
 
         public List<BE.Pedido> ObtenerTodos() => PedidosDevueltos;
         public List<BE.Pedido> ObtenerPendientes() => PedidosDevueltos.FindAll(p => p.Estado == BE.EstadoPedido.Pendiente);
-        public Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente() => new Dictionary<int, DateTime>();
-        public List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado() => new List<BE.DesempenoVendedor>();
-        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda() => new Dictionary<int, int>();
-        public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente) => new List<BE.Prenda>();
+        public Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente() => FechaUltimoPedidoPorCliente;
+        public List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado() => EstadisticasPorEmpleado;
+        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda() => CantidadPedidosPorPrenda;
+        public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente) => PrendasHistoricasPorCliente;
         public BE.Pedido ObtenerPorId(int idPedido) => PedidosDevueltos.Find(p => p.IdPedido == idPedido);
 
         public int Alta(BE.Pedido pedido)

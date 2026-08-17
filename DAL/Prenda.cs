@@ -14,7 +14,7 @@ namespace DAL
     ///   - acceso  → Singleton de BD (heredado, no se redeclara)
     ///   - ObtenerTodos() y ObtenerPorId() → implementados con SQL de Prenda
     /// </summary>
-    public class Prenda : BaseDAL<BE.Prenda>
+    public class Prenda : BaseDAL<BE.Prenda>, Interfaces.IPrendaDAL
     {
 
         // Devuelve todas las prendas con nombre del cliente si están en uso. 

@@ -12,8 +12,8 @@ namespace BLL
     /// </summary>
     public class AnalisisRotacion : Interfaces.IAnalisisRotacionService
     {
-        private readonly DAL.Prenda dalPrenda;
-        private readonly DAL.Pedido dalPedido;
+        private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
+        private readonly DAL.Interfaces.IPedidoDAL dalPedido;
 
         // Una prenda sin ningún pedido recién es "candidata a baja" si ya lleva un tiempo
         // en catálogo — evita marcar como sin movimiento a una prenda recién ingresada.
@@ -22,7 +22,7 @@ namespace BLL
 
         public AnalisisRotacion() : this(new DAL.Prenda(), new DAL.Pedido()) { }
 
-        public AnalisisRotacion(DAL.Prenda dalPrenda, DAL.Pedido dalPedido)
+        public AnalisisRotacion(DAL.Interfaces.IPrendaDAL dalPrenda, DAL.Interfaces.IPedidoDAL dalPedido)
         {
             this.dalPrenda = dalPrenda ?? throw new ArgumentNullException(nameof(dalPrenda));
             this.dalPedido = dalPedido ?? throw new ArgumentNullException(nameof(dalPedido));

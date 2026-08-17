@@ -136,7 +136,7 @@ namespace GUI
                     if (c.VencimientoExpirado)
                         etiqueta += "  ⚠ venc.";
                     else if (c.SuscripcionProximaAVencer())
-                        etiqueta += $"  ⏰ {c.DiasHastaVencimiento()}d";
+                        etiqueta += $"  ⏰ {c.DiasHastaVencimiento().Value}d";
                     cmbCliente.Items.Add(etiqueta);
                 }
                 cmbCliente.SelectedIndex = 0;

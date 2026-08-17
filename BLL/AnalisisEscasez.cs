@@ -13,11 +13,11 @@ namespace BLL
     {
         public const int UmbralPorDefecto = 3;
 
-        private readonly DAL.Prenda dalPrenda;
+        private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
 
         public AnalisisEscasez() : this(new DAL.Prenda()) { }
 
-        public AnalisisEscasez(DAL.Prenda dalPrenda)
+        public AnalisisEscasez(DAL.Interfaces.IPrendaDAL dalPrenda)
         {
             this.dalPrenda = dalPrenda ?? throw new ArgumentNullException(nameof(dalPrenda));
         }

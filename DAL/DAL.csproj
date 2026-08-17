@@ -52,6 +52,8 @@
     <Compile Include="Interfaces\IEmpleadoDAL.cs" />
     <Compile Include="Interfaces\IPlanSuscripcionDAL.cs" />
     <Compile Include="Interfaces\IPedidoHistorialDAL.cs" />
+    <Compile Include="Interfaces\IPrendaDAL.cs" />
+    <Compile Include="Interfaces\IMantenimientoPrendaDAL.cs" />
     <Compile Include="Interfaces\IUsuarioDAL.cs" />
     <Compile Include="Interfaces\IPreferenciaDAL.cs" />
     <Compile Include="Interfaces\IRenovacionDAL.cs" />

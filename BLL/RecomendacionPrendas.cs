@@ -12,12 +12,12 @@ namespace BLL
     /// </summary>
     public class RecomendacionPrendas : Interfaces.IRecomendacionService
     {
-        private readonly DAL.Pedido dalPedido;
-        private readonly DAL.Prenda dalPrenda;
+        private readonly DAL.Interfaces.IPedidoDAL dalPedido;
+        private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
 
         public RecomendacionPrendas() : this(new DAL.Pedido(), new DAL.Prenda()) { }
 
-        public RecomendacionPrendas(DAL.Pedido dalPedido, DAL.Prenda dalPrenda)
+        public RecomendacionPrendas(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IPrendaDAL dalPrenda)
         {
             this.dalPedido = dalPedido ?? throw new ArgumentNullException(nameof(dalPedido));
             this.dalPrenda = dalPrenda ?? throw new ArgumentNullException(nameof(dalPrenda));

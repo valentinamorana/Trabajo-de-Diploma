@@ -107,6 +107,65 @@ namespace Tests
             Assert.AreEqual(0, ctx.DalPedido.AltaVeces);
         }
 
+        // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README):
+        // una prenda Disponible pero reservada por Lista de Espera para OTRO cliente se
+        // rechaza igual, aunque BE.Prenda.EstaDisponible() diga que sí se puede.
+        [TestMethod]
+        public void CrearPedido_PrendaReservadaPorListaDeEsperaParaOtroCliente_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente(); // IdCliente = 10
+
+            var dalListaEspera = new FakeListaEsperaDAL();
+            dalListaEspera.Registros.Add(new BE.ListaEspera
+            {
+                IdListaEspera = 1, IdPrenda = 1, IdCliente = 999, // otro cliente, no el 10
+                Estado = BE.EstadoListaEspera.Reservada, FechaLimiteReserva = DateTime.Now.AddHours(10)
+            });
+            var listaEsperaBLL = new BLL.ListaEspera(dalListaEspera, new FakePrendaDAL(), new FakeClienteDAL());
+
+            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL);
+
+            try
+            {
+                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+                Assert.Fail("Debía rechazar una prenda reservada para otro cliente.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.pedido.prenda_reservada", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPedido.AltaVeces);
+        }
+
+        // La misma reserva, pero para el cliente que SÍ está pidiendo la prenda: se permite,
+        // y al persistir el pedido la reserva se cierra (Convertida).
+        [TestMethod]
+        public void CrearPedido_PrendaReservadaParaElMismoCliente_PermiteYCierraLaReserva()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente(); // IdCliente = 10
+            ctx.DalPedido.AltaIdGenerado = 99;
+
+            var dalListaEspera = new FakeListaEsperaDAL();
+            var reserva = new BE.ListaEspera
+            {
+                IdListaEspera = 1, IdPrenda = 1, IdCliente = 10, // el mismo cliente del pedido
+                Estado = BE.EstadoListaEspera.Reservada, FechaLimiteReserva = DateTime.Now.AddHours(10)
+            };
+            dalListaEspera.Registros.Add(reserva);
+            var listaEsperaBLL = new BLL.ListaEspera(dalListaEspera, new FakePrendaDAL(), new FakeClienteDAL());
+
+            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL);
+
+            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+
+            Assert.AreEqual(99, id);
+            Assert.AreEqual(BE.EstadoListaEspera.Convertida, reserva.Estado);
+        }
+
         [TestMethod]
         public void CrearPedido_ClienteInexistente_LanzaClienteInexistente()
         {

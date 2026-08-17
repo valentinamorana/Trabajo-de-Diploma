@@ -95,6 +95,20 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 | **Backup / Restauración** | Copias cifradas con contraseña (`.wfbak`, AES+PBKDF2) con verificación de integridad previa |
 | **Reporte de Jornada** | Exportación PDF de actividad del día filtrable por rol |
 | **Diagnóstico de Integridad** | Visualización y reparación asistida de filas con DVH/DVV corruptos |
+| **Lista de Espera** *(mejora opcional)* | Un cliente se anota por una prenda `EnUso`; al liberarse, queda reservada exclusivamente para él por 48hs (visible solo para ese cliente en Nuevo Pedido) antes de volver a estar disponible para cualquiera |
+
+---
+
+## Mejoras opcionales (no requeridas por la cátedra)
+
+Surgida de comparar WardrobeFlow con el TP de un compañero de cursada (ExperienceHub,
+que tiene Lista de Espera para sus reservas). No es un PdN de la idea de negocio ni un
+requisito de ninguna entrega — es un diferencial de producto que reutiliza el patrón
+State ya entregado (PdN2/PdN4) sin tocarlo.
+
+| Módulo | Resumen |
+|--------|---------|
+| **Lista de Espera de Prendas** | Matchea por prenda específica (mismo `IdPrenda`, no por categoría). Al liberarse, `BLL.Prenda.CambiarEstado` dispara `BLL.ListaEspera.NotificarSiCorresponde`, que reserva la fila `Pendiente` más antigua (FIFO) por `BLL.ListaEspera.HORAS_RESERVA` (48hs). Mientras la reserva está vigente, `BLL.Pedido` la bloquea para cualquier otro cliente (`err.bll.pedido.prenda_reservada`) y la cierra sola (`Convertida`) al crear el pedido del cliente correcto. Si nadie la retira a tiempo, vuelve a estar disponible para cualquiera por simple comparación de fecha — sin job en background, mismo criterio que `Cliente.FechaLimiteGracia` (PdN6). Ver `BD/16_Lista_Espera.sql`, `BLL/ListaEspera.cs`, `GUI/ListaEsperaForm.cs`. |
 
 ---
 
@@ -172,11 +186,13 @@ BD/06_Rediseno_Menu.sql                   -- Actualiza el texto "Bitácora" → 
 BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos de los 7 roles reales
 BD/08_Cobro_Pago.sql                      -- Tabla y permisos del módulo de Cobro de Suscripción (PdN6)
 BD/09_Analisis_Abandono.sql               -- Permisos del módulo de Análisis de Abandono (PdN10) — sin tablas nuevas
+BD/16_Lista_Espera.sql                    -- Lista de Espera de prendas (mejora opcional, no requerida por la cátedra)
 ```
 
 - **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql` y luego `08_Cobro_Pago.sql` y `09_Analisis_Abandono.sql`.
 - **Actualizar una BD existente** → ejecutar `02` a `09` en orden.
 - **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
+- **Lista de Espera (mejora opcional)** → ejecutar `16_Lista_Espera.sql` en cualquier momento; el resto del sistema funciona sin él (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
 
 ### Cadena de conexión
 

@@ -11,10 +11,27 @@ namespace BLL
         private readonly Servicios.Bitacora          bitacora         = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio   bitacoraNeg      = new Servicios.BitacoraNegocio();
 
+        // Lista de Espera (mejora opcional) — composición lazy, mismo criterio que
+        // BLL.Usuario.perfilesBLL => new BLL.Familia().
+        private Interfaces.IListaEsperaService _listaEsperaLazy;
+        private Interfaces.IListaEsperaService listaEsperaBLL => _listaEsperaLazy ?? (_listaEsperaLazy = new ListaEspera());
+
         public List<BE.Prenda> ObtenerTodos()                   => dalPrenda.ObtenerTodos();
-        public List<BE.Prenda> ObtenerDisponibles()            => dalPrenda.ObtenerDisponibles();
         public List<BE.Prenda> ObtenerPorCliente(int id)       => dalPrenda.ObtenerPorCliente(id);
         public BE.Prenda       ObtenerPorId(int idPrenda)      => dalPrenda.ObtenerPorId(idPrenda);
+
+        // Prendas Disponible, excluyendo las reservadas por Lista de Espera para OTRO
+        // cliente (mejora opcional). Filtrado en memoria para no acoplar la query ya
+        // probada de DAL.Prenda a una tabla nueva y opcional — si ListaEspera todavía no
+        // existe (BD sin migrar), ObtenerIdsReservadosParaOtro degrada a lista vacía.
+        public List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null)
+        {
+            var disponibles = dalPrenda.ObtenerDisponibles(idClienteSolicitante);
+            var reservadasParaOtro = listaEsperaBLL.ObtenerIdsReservadosParaOtro(idClienteSolicitante);
+            return reservadasParaOtro.Count == 0
+                ? disponibles
+                : disponibles.FindAll(p => !reservadasParaOtro.Contains(p.IdPrenda));
+        }
 
         // Da de alta una nueva prenda. Estado inicial siempre Disponible.
         public void Alta(string modulo, BE.Prenda prenda)
@@ -98,6 +115,12 @@ namespace BLL
                      nuevoEstado == BE.EstadoPrenda.Disponible)
             {
                 dalMantenimiento.CerrarMantenimiento(prenda.IdPrenda);
+
+                // Lista de Espera (mejora opcional): si alguien esperaba esta prenda,
+                // se la reserva (ventana de HORAS_RESERVA). No hace nada si nadie espera,
+                // ni si la tabla ListaEspera todavía no existe (BD sin migrar).
+                try { listaEsperaBLL.NotificarSiCorresponde(prenda.IdPrenda, actor); }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.Prenda] Lista de Espera: {ex.Message}"); }
             }
 
             bitacora.Registrar(modulo,

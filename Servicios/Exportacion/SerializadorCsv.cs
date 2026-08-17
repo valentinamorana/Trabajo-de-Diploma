@@ -9,6 +9,12 @@ namespace Servicios.Exportacion
     ///
     /// Reglas de escapado: un campo se encierra entre comillas dobles si contiene el
     /// separador, comillas o saltos de línea; las comillas internas se duplican.
+    ///
+    /// Nota de ubicación: esta carpeta (Servicios/Exportacion) solo tiene esta utilidad de
+    /// bajo nivel. El Factory Method completo de exportación (Product/ConcreteProduct/
+    /// Creator: <see cref="GUI.Exportacion.Exportador"/> y compañía) vive en GUI/Exportacion
+    /// porque genera y muestra reportes de UI — son capas distintas con responsabilidades
+    /// distintas, no una duplicación.
     /// </summary>
     public static class SerializadorCsv
     {

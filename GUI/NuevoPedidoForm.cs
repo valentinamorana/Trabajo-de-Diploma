@@ -151,7 +151,7 @@ namespace GUI
         {
             try
             {
-                _disponibles = prendaBLL.ObtenerDisponibles();
+                _disponibles = prendaBLL.ObtenerDisponibles(_clienteSel?.IdCliente);
                 dgvPrendas.Rows.Clear();
 
                 foreach (var p in _disponibles)

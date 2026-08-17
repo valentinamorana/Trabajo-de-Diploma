@@ -6,7 +6,13 @@ namespace DAL.Interfaces
     public interface IPrendaDAL
     {
         List<BE.Prenda> ObtenerTodos();
-        List<BE.Prenda> ObtenerDisponibles();
+
+        /// <summary>
+        /// Prendas Disponible. Si se indica <paramref name="idClienteSolicitante"/>, excluye las
+        /// que estén Reservadas por Lista de Espera para OTRO cliente (mejora opcional) — ese
+        /// cliente sigue viéndolas. Sin cliente en contexto, se excluyen todas las reservas activas.
+        /// </summary>
+        List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null);
         BE.Prenda ObtenerPorId(int idPrenda);
         List<BE.Prenda> ObtenerPorCliente(int idCliente);
         int Alta(BE.Prenda prenda);

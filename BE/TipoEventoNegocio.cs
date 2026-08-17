@@ -30,6 +30,9 @@ namespace BE
 
         Reactivacion = 11,
 
-        CobroSuscripcion = 12
+        CobroSuscripcion = 12,
+
+        // Mejora opcional, no requerida por la cátedra — ver README.
+        ListaEspera = 13
     }
 }

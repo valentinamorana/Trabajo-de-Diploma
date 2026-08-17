@@ -71,6 +71,7 @@
     <Compile Include="Manejadores\PausarSuscripcionHandler.cs" />
     <Compile Include="Renovacion.cs" />
     <Compile Include="Interfaces\ICobroService.cs" />
+    <Compile Include="Interfaces\IListaEsperaService.cs" />
     <Compile Include="Interfaces\ICargoPrendaService.cs" />
     <Compile Include="Manejadores\DecisionCobro.cs" />
     <Compile Include="Manejadores\ContextoCobro.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Manejadores\AplicarGraciaHandler.cs" />
     <Compile Include="Manejadores\SuspenderHandler.cs" />
     <Compile Include="Cobro.cs" />
+    <Compile Include="ListaEspera.cs" />
     <Compile Include="CargoPrenda.cs" />
     <Compile Include="Interfaces\IAnalisisAbandonoService.cs" />
     <Compile Include="Estrategias\EstrategiaRiesgo.cs" />

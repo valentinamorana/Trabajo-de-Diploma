@@ -149,7 +149,13 @@ namespace DAL
                     }
                 }
             }
-            catch { /* header ilegible → null (la verificación de corrupción se hace en VerificarBackup) */ }
+            catch (Exception ex)
+            {
+                // Header ilegible → null (la verificación de corrupción se hace en VerificarBackup),
+                // pero se deja constancia por si en realidad es un problema de conectividad real.
+                System.Diagnostics.Trace.TraceWarning(
+                    $"[DAL.Backup] No se pudo leer el header del backup '{rutaArchivo}': {ex.Message}");
+            }
             return null;
         }
 
@@ -189,9 +195,12 @@ namespace DAL
                     if (cant > 0)
                         resultado.Add(new BE.CambioPosterior { Entidad = f.Entidad, Cantidad = cant });
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Tabla inexistente / columna ausente en una BD vieja → se omite esa fuente.
+                    // Tabla inexistente / columna ausente en una BD vieja → se omite esa fuente,
+                    // pero se deja constancia por si en realidad es un problema de conectividad real.
+                    System.Diagnostics.Trace.TraceWarning(
+                        $"[DAL.Backup] No se pudo contar cambios posteriores en '{f.Tabla}': {ex.Message}");
                 }
             }
 

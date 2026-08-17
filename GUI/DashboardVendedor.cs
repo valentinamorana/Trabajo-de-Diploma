@@ -89,7 +89,10 @@ namespace GUI
                         ActualizarSesion();
                     }));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[DashboardVendedor] No se pudo cargar el dashboard: {ex.Message}");
+                }
             });
         }
 
@@ -152,7 +155,10 @@ namespace GUI
                 if (u != null)
                     lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"[DashboardVendedor] No se pudo cargar la sesión: {ex.Message}");
+            }
         }
 
         // Pinta la tarjeta como clickeable y, al hacer clic, abre (o enfoca) Pedidos de Venta.

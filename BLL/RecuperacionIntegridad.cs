@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 
 namespace BLL
@@ -220,36 +219,21 @@ namespace BLL
             var espById = espejo.ToDictionary(x => x.Id);
             var espIds  = new HashSet<int>(espejo.Select(x => x.Id));
             var actuales = new DAL.DigitoVerificador().ObtenerFilasUsuario();
+            var usuarioDAL = new DAL.Usuario();
 
-            DAL.Acceso.GetInstance().EjecutarTransaccion((conn, tx) =>
+            usuarioDAL.EjecutarTransaccion((conn, tx) =>
             {
                 // 1. Eliminar inserciones externas (filas no presentes en el espejo).
                 foreach (var act in actuales)
                 {
                     if (espIds.Contains(act.Id)) continue;
-                    using (var cmd = new SqlCommand("DELETE FROM Usuario WHERE IdUsuario = @id", conn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@id", act.Id);
-                        cmd.ExecuteNonQuery();
-                    }
+                    usuarioDAL.EliminarEnTx(conn, tx, act.Id);
                 }
                 // 2. Revertir cada fila existente a los valores del espejo.
                 foreach (var act in actuales)
                 {
                     if (!espById.TryGetValue(act.Id, out var e)) continue;
-                    using (var cmd = new SqlCommand(
-                        "UPDATE Usuario SET Username=@u, Clave=@c, Rol=@r, Perfil=@p, Estado=@e, " +
-                        "IntentosFallidos=@i WHERE IdUsuario=@id", conn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@u",  (object)e.Username ?? string.Empty);
-                        cmd.Parameters.AddWithValue("@c",  (object)e.Clave    ?? string.Empty);
-                        cmd.Parameters.AddWithValue("@r",  (object)e.Rol      ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@p",  (object)e.Perfil   ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@e",  int.TryParse(e.Estado, out int est) ? est : 1);
-                        cmd.Parameters.AddWithValue("@i",  int.TryParse(e.IntentosFallidos, out int it) ? it : 0);
-                        cmd.Parameters.AddWithValue("@id", e.Id);
-                        cmd.ExecuteNonQuery();
-                    }
+                    usuarioDAL.RevertirDesdeEspejoEnTx(conn, tx, e);
                 }
             });
 

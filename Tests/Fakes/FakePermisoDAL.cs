@@ -46,5 +46,6 @@ namespace Tests.Fakes
         public void             BajaComponente(int id)          { }
         public int              ContarUsuariosPorRol(string r)  => 0;
         public List<string>     ObtenerUsuariosPorRol(string r) => new List<string>();
+        public List<string>     ObtenerNombresMenuPatentes()    => new List<string>();
     }
 }

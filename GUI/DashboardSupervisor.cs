@@ -82,7 +82,8 @@ namespace GUI
                     var clientes  = _bllCliente.ObtenerTodos();
                     var enMant    = _bllPrenda.ObtenerEnMantenimiento();
                     System.Data.DataTable actividad = null;
-                    try { actividad = _bllBitacora.ObtenerUltimosNDiasSistema(7); } catch { }
+                    try { actividad = _bllBitacora.ObtenerUltimosNDiasSistema(7); }
+                    catch (Exception ex) { System.Diagnostics.Trace.TraceWarning($"[DashboardSupervisor] No se pudo cargar la bitácora: {ex.Message}"); }
 
                     this.BeginInvoke(new Action(() =>
                     {
@@ -92,7 +93,10 @@ namespace GUI
                         ActualizarSesion();
                     }));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[DashboardSupervisor] No se pudo cargar el dashboard: {ex.Message}");
+                }
             });
         }
 
@@ -157,7 +161,10 @@ namespace GUI
                 if (u != null)
                     lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"[DashboardSupervisor] No se pudo cargar la sesión: {ex.Message}");
+            }
         }
 
         // ── Handlers de eventos estáticos (wireados desde el Diseñador) ─────────

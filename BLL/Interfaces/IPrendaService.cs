@@ -10,8 +10,10 @@ namespace BLL.Interfaces
         // Devuelve todas las prendas con cliente actual (JOIN).
         List<BE.Prenda> ObtenerTodos();
 
-        // Devuelve solo las prendas disponibles para asignar a pedidos.
-        List<BE.Prenda> ObtenerDisponibles();
+        // Devuelve solo las prendas disponibles para asignar a pedidos. Si se indica
+        // idClienteSolicitante, incluye las prendas reservadas por Lista de Espera para
+        // ESE cliente y excluye las reservadas para otros (mejora opcional).
+        List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null);
 
         // Devuelve las prendas actualmente asignadas a un cliente.
         List<BE.Prenda> ObtenerPorCliente(int idCliente);

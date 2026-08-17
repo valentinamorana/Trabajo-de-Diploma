@@ -17,6 +17,11 @@ namespace BLL
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
         private readonly DAL.Interfaces.IPedidoHistorialDAL dalHistorial;
 
+        // Lista de Espera (mejora opcional) — composición lazy, mismo criterio que
+        // BLL.Prenda.listaEsperaBLL / BLL.Usuario.perfilesBLL.
+        private Interfaces.IListaEsperaService _listaEsperaLazy;
+        private Interfaces.IListaEsperaService listaEsperaBLL => _listaEsperaLazy ?? (_listaEsperaLazy = new ListaEspera());
+
         // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
         // de prueba (mismo criterio que BLL.Cliente/BLL.Renovacion/BLL.Cobro).
         public Pedido() : this(new DAL.Pedido(), new DAL.Cliente(), new DAL.Empleado(),
@@ -31,6 +36,16 @@ namespace BLL
             this.dalEmpleado = dalEmpleado ?? throw new ArgumentNullException(nameof(dalEmpleado));
             this.dalPlan = dalPlan ?? throw new ArgumentNullException(nameof(dalPlan));
             this.dalHistorial = dalHistorial ?? throw new ArgumentNullException(nameof(dalHistorial));
+        }
+
+        // Overload para inyectar un doble de prueba de Lista de Espera (mejora opcional) sin
+        // tocar el constructor de 5 parámetros usado en el resto de los tests existentes.
+        public Pedido(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IClienteDAL dalCliente,
+                       DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
+                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial, Interfaces.IListaEsperaService listaEsperaBLL)
+            : this(dalPedido, dalCliente, dalEmpleado, dalPlan, dalHistorial)
+        {
+            _listaEsperaLazy = listaEsperaBLL ?? throw new ArgumentNullException(nameof(listaEsperaBLL));
         }
 
         // Consultas
@@ -58,7 +73,7 @@ namespace BLL
 
             var plan    = ObtenerPlanValidado(cliente, prendas.Count);
 
-            ValidarDisponibilidadPrendas(prendas);
+            ValidarDisponibilidadPrendas(prendas, idCliente);
 
             int idNuevo = PersistirPedido(idCliente, prendas);
 
@@ -69,6 +84,16 @@ namespace BLL
             });
 
             LogCrearPedido(modulo, idNuevo, cliente, plan, prendas.Count);
+
+            // Lista de Espera (mejora opcional): si alguna prenda del pedido estaba
+            // reservada para este cliente, cierra el ciclo (Convertida).
+            string actorEspera = Seguridad.SessionManager.IsLoggedIn
+                ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
+            foreach (var p in prendas)
+            {
+                try { listaEsperaBLL.CerrarSiReservada(modulo, p.IdPrenda, idCliente, actorEspera); }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.Pedido] Lista de Espera: {ex.Message}"); }
+            }
 
             return idNuevo;
         }
@@ -306,8 +331,10 @@ namespace BLL
             return plan;
         }
 
-        // Verifica que todas las prendas estén en estado Disponible.
-        private void ValidarDisponibilidadPrendas(List<BE.Prenda> prendas)
+        // Verifica que todas las prendas estén en estado Disponible y, si alguna está
+        // reservada por Lista de Espera (mejora opcional) para OTRO cliente, la rechaza
+        // aunque su Estado siga siendo Disponible a nivel de máquina de estados.
+        private void ValidarDisponibilidadPrendas(List<BE.Prenda> prendas, int idCliente)
         {
             foreach (var p in prendas)
             {
@@ -315,6 +342,15 @@ namespace BLL
                     throw new BE.AppException("err.bll.pedido.prenda_no_disponible",
                         "La prenda '{0}' ya no está disponible (estado: {1}). Actualizá la selección.",
                         p.Nombre, p.Estado);
+
+                bool reservadaParaOtro;
+                try { reservadaParaOtro = listaEsperaBLL.EstaReservadaParaOtro(p.IdPrenda, idCliente); }
+                catch { reservadaParaOtro = false; } // BD sin migrar (tabla ListaEspera inexistente) → no bloquea
+
+                if (reservadaParaOtro)
+                    throw new BE.AppException("err.bll.pedido.prenda_reservada",
+                        "La prenda '{0}' está reservada por Lista de Espera para otro cliente. " +
+                        "Actualizá la selección.", p.Nombre);
             }
         }
 

@@ -8,11 +8,6 @@ namespace BE.Estados
     /// </summary>
     public sealed class EstadoEnUso : Estado
     {
-        public override bool ControlarEstado(Prenda prenda, EstadoPrenda destino)
-        {
-            if (destino != EstadoPrenda.EnUso) return false;
-            prenda.Estado = destino;
-            return true;
-        }
+        public override bool EsTransicionValida(EstadoPrenda destino) => destino == EstadoPrenda.EnUso;
     }
 }

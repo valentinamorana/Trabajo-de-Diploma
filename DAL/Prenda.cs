@@ -44,8 +44,10 @@ namespace DAL
             return lista;
         }
 
-        // Devuelve solo las prendas con estado Disponible.
-        public List<BE.Prenda> ObtenerDisponibles()
+        // Devuelve solo las prendas con estado Disponible. El filtrado adicional por
+        // reservas de Lista de Espera (mejora opcional) vive en BLL.Prenda — acá se ignora
+        // el parámetro para no acoplar esta query, ya probada, a una tabla nueva y opcional.
+        public List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null)
         {
             var lista = new List<BE.Prenda>();
             try

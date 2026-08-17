@@ -83,7 +83,10 @@ namespace GUI
                         ActualizarSesion();
                     }));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[DashboardOperador] No se pudo cargar pedidos: {ex.Message}");
+                }
             });
         }
 
@@ -151,7 +154,10 @@ namespace GUI
                 if (u != null)
                     lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"[DashboardOperador] No se pudo cargar la sesión: {ex.Message}");
+            }
         }
 
         // Abre (o enfoca) Pedidos Realizados. Todavía no deja seleccionado el pedido puntual

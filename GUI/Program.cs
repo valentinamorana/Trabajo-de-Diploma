@@ -65,7 +65,7 @@ namespace GUI
             {
                 try
                 {
-                    new Servicios.Bitacora().RegistrarSinSesion(
+                    new BLL.Bitacora().RegistrarSinSesion(
                         modulo:     "Arranque",
                         actividad:  "Integridad DV inválida detectada antes del Login",
                         criticidad: BE.Criticidad.Alta,
@@ -159,7 +159,7 @@ namespace GUI
             {
                 int? idUsuario = Seguridad.SessionManager.IsLoggedIn
                     ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
-                new Servicios.Bitacora().RegistrarSinSesion(
+                new BLL.Bitacora().RegistrarSinSesion(
                     modulo:     "Aplicación",
                     actividad:  "Excepción no controlada: " + ex.GetType().Name,
                     criticidad: BE.Criticidad.Alta,

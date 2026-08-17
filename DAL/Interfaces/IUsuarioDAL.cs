@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 
 namespace DAL.Interfaces
 {
@@ -30,5 +31,11 @@ namespace DAL.Interfaces
         void             EliminarFisico(int idUsuario);
         int              ContarAdministradoresActivos();
         List<BE.Usuario> ObtenerArchivadosParaPurga(int diasRetencion);
+
+        // Soporte transaccional para BLL.RecuperacionIntegridad.RepararDesdeEspejo (mismo
+        // patrón que IClienteDAL.EjecutarTransaccion/ModificarEnTx).
+        void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion);
+        void EliminarEnTx(SqlConnection conexion, SqlTransaction tx, int idUsuario);
+        void RevertirDesdeEspejoEnTx(SqlConnection conexion, SqlTransaction tx, BE.FilaUsuarioDV valoresEspejo);
     }
 }

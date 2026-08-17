@@ -166,6 +166,11 @@ namespace GUI
 
         // ── Métricas ──────────────────────────────────────────────────────────
 
+        // Un widget que no pudo cargar deja su tarjeta en "—" (no rompe el dashboard), pero
+        // se deja constancia acá para poder distinguir "dato en cero" de "falló la consulta".
+        private static void LogWidget(string widget, Exception ex)
+            => System.Diagnostics.Trace.TraceWarning($"[DashboardForm] No se pudo cargar '{widget}': {ex.Message}");
+
         private void ActualizarMetricas()
         {
             // Backup es I/O de archivo (rápido, sin BD) — se actualiza al instante
@@ -179,11 +184,11 @@ namespace GUI
                 BE.Usuario usuario = null;
                 DateTime? hora = null;
 
-                if (_verPrendas)  try { nPrendas  = _bllPrenda.ObtenerDisponibles().Count; } catch { }
-                if (_verClientes) try { nClientes = _bllCliente.ObtenerTodos().Count; } catch { }
-                if (_verPedidos)  try { nPedidos  = _bllPedido.ObtenerPendientes().Count; } catch { }
-                if (_verPrendas)  try { ocup      = _bllPrenda.ObtenerOcupacion(); } catch { }
-                try { usuario = _bllUsuario.ObtenerUsuarioActivo(); hora = _bllUsuario.ObtenerFechaInicioSesion(); } catch { }
+                if (_verPrendas)  try { nPrendas  = _bllPrenda.ObtenerDisponibles().Count; } catch (Exception ex) { LogWidget("prendas disponibles", ex); }
+                if (_verClientes) try { nClientes = _bllCliente.ObtenerTodos().Count; } catch (Exception ex) { LogWidget("clientes", ex); }
+                if (_verPedidos)  try { nPedidos  = _bllPedido.ObtenerPendientes().Count; } catch (Exception ex) { LogWidget("pedidos pendientes", ex); }
+                if (_verPrendas)  try { ocup      = _bllPrenda.ObtenerOcupacion(); } catch (Exception ex) { LogWidget("ocupación de stock", ex); }
+                try { usuario = _bllUsuario.ObtenerUsuarioActivo(); hora = _bllUsuario.ObtenerFechaInicioSesion(); } catch (Exception ex) { LogWidget("usuario activo", ex); }
 
                 this.BeginInvoke(new Action(() =>
                 {
@@ -707,8 +712,8 @@ namespace GUI
             Task.Run(() =>
             {
                 System.Data.DataTable dtN = null, dtNeg = null;
-                try { dtN   = _bllBitacora.ObtenerUltimosNDiasSistema(30); } catch { }
-                try { dtNeg = _bllBitacora.ObtenerTodosNegocio(); } catch { }
+                try { dtN   = _bllBitacora.ObtenerUltimosNDiasSistema(30); } catch (Exception ex) { LogWidget("bitácora del sistema (30d)", ex); }
+                try { dtNeg = _bllBitacora.ObtenerTodosNegocio(); } catch (Exception ex) { LogWidget("bitácora de negocio", ex); }
 
                 this.BeginInvoke(new Action(() =>
                 {

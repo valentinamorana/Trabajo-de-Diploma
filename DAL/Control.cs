@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace DAL
 {
@@ -29,27 +28,7 @@ namespace DAL
             return lista;
         }
 
-        // Obtiene o crea un Control por su clave y devuelve su ID.
-        public int ObtenerOCrear(string clave, string formulario)
-        {
-            DataTable dt = acceso.Leer(
-                "SELECT IdControl FROM Control WHERE Clave = @Clave",
-                new[] { new SqlParameter("@Clave", clave) });
-            if (dt.Rows.Count > 0)
-                return Convert.ToInt32(dt.Rows[0]["IdControl"]);
-
-            acceso.Escribir(
-                "INSERT INTO Control (Clave, Formulario) VALUES (@Clave, @Formulario)",
-                new[]
-                {
-                    new SqlParameter("@Clave",      clave),
-                    new SqlParameter("@Formulario", formulario ?? "General")
-                });
-
-            DataTable dtNew = acceso.Leer(
-                "SELECT IdControl FROM Control WHERE Clave = @Clave",
-                new[] { new SqlParameter("@Clave", clave) });
-            return Convert.ToInt32(dtNew.Rows[0]["IdControl"]);
-        }
+        // Alta/lookup de un Control por clave vive en DAL.Traduccion.ObtenerOCrearControl
+        // (único lugar que lo necesita — evita mantener la misma consulta en dos DAO).
     }
 }

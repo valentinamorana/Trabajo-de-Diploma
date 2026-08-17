@@ -13,7 +13,7 @@ namespace Tests.Fakes
         public int CambiarEstadoVeces { get; private set; }
 
         public List<BE.Prenda> ObtenerTodos() => Todas;
-        public List<BE.Prenda> ObtenerDisponibles() => Disponibles;
+        public List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null) => Disponibles;
         public BE.Prenda ObtenerPorId(int idPrenda) => Todas.Find(p => p.IdPrenda == idPrenda);
         public List<BE.Prenda> ObtenerPorCliente(int idCliente) => new List<BE.Prenda>();
         public int Alta(BE.Prenda prenda) => 0;

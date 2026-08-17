@@ -85,7 +85,10 @@ namespace GUI
                         ActualizarSesion();
                     }));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[DashboardControlStock] No se pudo cargar el dashboard: {ex.Message}");
+                }
             });
         }
 
@@ -148,7 +151,10 @@ namespace GUI
                 if (u != null)
                     lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"[DashboardControlStock] No se pudo cargar la sesión: {ex.Message}");
+            }
         }
 
         // Abre (o enfoca) Prendas. Todavía no deja seleccionada la prenda puntual dentro de la

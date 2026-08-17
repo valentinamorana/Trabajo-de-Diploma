@@ -35,6 +35,10 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPrendaService prendaBLL = new BLL.Prenda();
+
+        // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README).
+        private readonly BLL.Interfaces.IListaEsperaService listaEsperaBLL = new BLL.ListaEspera();
+        private readonly BLL.Interfaces.IClienteService clienteBLL = new BLL.Cliente();
         private readonly BLL.Interfaces.ICargoPrendaService cargoBLL = new BLL.CargoPrenda();
 
         // Determina si el usuario puede cambiar estados (ControladorDeStock)
@@ -93,6 +97,7 @@ namespace GUI
             Aplicar(btnEditar,         t);
             Aplicar(btnCambiarEstado,  t);
             Aplicar(btnMantenimiento,  t);
+            Aplicar(btnAnotarEspera,   t);
             Aplicar(lblDetalleTitulo,  t);
             RellenarComboEstado(idioma);
             TraducirHeadersGrilla();
@@ -253,6 +258,7 @@ namespace GUI
             string fmt = t.ContainsKey("msg.prenda.conteo") ? t["msg.prenda.conteo"].Texto : "Mostrando {0} de {1}";
             lblConteo.Text = string.Format(fmt, lista.Count, _prendas.Count);
             panelDetalle.Visible = false;
+            btnAnotarEspera.Visible = false;
         }
 
         private void ColorearFilas()
@@ -284,6 +290,7 @@ namespace GUI
 
             // Mostrar panel detalle si la prenda está en uso
             panelDetalle.Visible = false;
+            btnAnotarEspera.Visible = false;
             if (!hay) return;
 
             var prenda = ObtenerPrendaSeleccionada();
@@ -295,6 +302,9 @@ namespace GUI
                     $"{prenda.NombreCliente}   |   " +
                     $"Prenda: {prenda.Nombre}  —  {prenda.Talle}  —  {prenda.Color}";
                 panelDetalle.Visible = true;
+                // Lista de Espera (mejora opcional): solo tiene sentido anotarse mientras
+                // la prenda está EnUso — ver README.
+                btnAnotarEspera.Visible = _tieneStock;
             }
         }
 
@@ -423,6 +433,83 @@ namespace GUI
                     MostrarOk(string.Format(fmt, dlg.Monto, prenda.NombreUltimoCliente ?? "el cliente"));
                 }
                 catch (Exception ex) { MostrarError(ex); }
+            }
+        }
+
+        // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README):
+        // anota a un cliente para que se lo notifique cuando esta prenda EnUso se libere.
+        private void BtnAnotarEspera_Click(object sender, EventArgs e)
+        {
+            var prenda = ObtenerPrendaSeleccionada();
+            if (prenda == null) return;
+
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T_c(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
+            var cliente = SeleccionarClienteDialog(
+                T_c("frm.listaespera.anotar", "Anotar en Lista de Espera"),
+                string.Format(T_c("lbl.listaespera.elegircliente", "Cliente que espera '{0}':"), prenda.Nombre));
+            if (cliente == null) return;
+
+            try
+            {
+                string actor = Seguridad.SessionManager.IsLoggedIn
+                    ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
+                listaEsperaBLL.Anotar(this.Text, prenda.IdPrenda, cliente.IdCliente, actor);
+                MostrarOk(string.Format(
+                    T_c("msg.listaespera.anotado", "{0} anotado en la lista de espera de '{1}'."),
+                    cliente.NombreCompleto, prenda.Nombre));
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        // Diálogo simple de selección de cliente (combo), reutilizable — mismo criterio
+        // que GUI.CobroSuscripcionForm.ClienteItem pero como modal standalone.
+        private BE.Cliente SeleccionarClienteDialog(string titulo, string prompt)
+        {
+            List<BE.Cliente> clientes;
+            try { clientes = clienteBLL.ObtenerTodos(); }
+            catch (Exception ex) { MostrarError(ex); return null; }
+
+            using (var dlg = new Form())
+            {
+                dlg.Text = titulo;
+                dlg.ClientSize = new Size(360, 130);
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MaximizeBox = false;
+                dlg.MinimizeBox = false;
+
+                var lbl = new Label { Text = prompt, Left = 16, Top = 16, Width = 328, Height = 20 };
+                var cmb = new ComboBox
+                {
+                    Left = 16, Top = 40, Width = 328, Height = 22,
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    DisplayMember = "NombreCompleto"
+                };
+                foreach (var c in clientes) cmb.Items.Add(c);
+                if (cmb.Items.Count > 0) cmb.SelectedIndex = 0;
+
+                var btnOk = new Button
+                {
+                    Text = "OK", Left = 184, Top = 80, Width = 76, Height = 30,
+                    DialogResult = DialogResult.OK,
+                    BackColor = Color.FromArgb(210, 100, 135), ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat
+                };
+                btnOk.FlatAppearance.BorderSize = 0;
+                var btnCancel = new Button
+                {
+                    Text = "Cancelar", Left = 268, Top = 80, Width = 76, Height = 30,
+                    DialogResult = DialogResult.Cancel, FlatStyle = FlatStyle.Flat
+                };
+
+                dlg.Controls.AddRange(new Control[] { lbl, cmb, btnOk, btnCancel });
+                dlg.AcceptButton = btnOk;
+                dlg.CancelButton = btnCancel;
+
+                if (dlg.ShowDialog(this) != DialogResult.OK) return null;
+                return cmb.SelectedItem as BE.Cliente;
             }
         }
 

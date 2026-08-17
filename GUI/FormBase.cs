@@ -55,7 +55,13 @@ namespace GUI
                 if (Seguridad.SessionManager.IsLoggedIn)
                     ManejadorSeguridad.AplicarSeguridad(this, Seguridad.SessionManager.GetInstance().Usuario);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                // Sin mapeos no pasa nada (comportamiento normal), pero si ROMPE por otra razón
+                // conviene que quede rastro: esto corre en OnLoad de CADA formulario de la app.
+                System.Diagnostics.Trace.TraceWarning(
+                    $"[FormBase.OnLoad] No se pudo aplicar seguridad de controles en {this.GetType().Name}: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -131,7 +137,7 @@ namespace GUI
         {
             try
             {
-                var bitacora = new Servicios.Bitacora();
+                var bitacora = new BLL.Bitacora();
                 string modulo = this.GetType().Name;
                 int?   idUsuario = Seguridad.SessionManager.IsLoggedIn
                                    ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;

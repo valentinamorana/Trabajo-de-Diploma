@@ -13,16 +13,17 @@ namespace BLL
     /// </summary>
     public class PanelAlertas
     {
-        private readonly Cliente        _cliente = new Cliente();
-        private readonly Prenda         _prenda  = new Prenda();
-        private readonly ReporteJornada _reporte = new ReporteJornada();
+        private readonly Cliente        _cliente     = new Cliente();
+        private readonly Prenda         _prenda      = new Prenda();
+        private readonly ReporteJornada _reporte     = new ReporteJornada();
+        private readonly Interfaces.IListaEsperaService _listaEspera = new ListaEspera();
 
         public List<BE.Alerta> ObtenerAlertas()
         {
             // Recolección de métricas desde las fuentes (cada una aislada en su try para
             // que una caída no tumbe al resto). Desconocido = métrica no disponible (se ignora).
             int vencidas = Desconocido, porVencer = Desconocido, diasSinBackup = Desconocido,
-                enLimpieza = Desconocido, dvRotas = Desconocido;
+                enLimpieza = Desconocido, dvRotas = Desconocido, reservadasEspera = Desconocido;
 
             try
             {
@@ -48,7 +49,11 @@ namespace BLL
             }
             catch { }
 
-            return EvaluarAlertas(vencidas, porVencer, diasSinBackup, enLimpieza, dvRotas);
+            // Lista de Espera (mejora opcional): prendas reservadas esperando que el
+            // cliente pase a retirarlas. Desconocido si la tabla todavía no existe (BD sin migrar).
+            try { reservadasEspera = _listaEspera.ContarReservadasVigentes(); } catch { }
+
+            return EvaluarAlertas(vencidas, porVencer, diasSinBackup, enLimpieza, dvRotas, reservadasEspera);
         }
 
         /// <summary>Centinela: la métrica no pudo obtenerse (fuente caída) → se ignora.</summary>
@@ -61,7 +66,7 @@ namespace BLL
         /// negativo (pero conocido) significa "no hay backups registrados".
         /// </summary>
         public static List<BE.Alerta> EvaluarAlertas(int vencidas, int porVencer,
-            int diasSinBackup, int enLimpieza, int dvRotas)
+            int diasSinBackup, int enLimpieza, int dvRotas, int reservadasEspera = 0)
         {
             var alertas = new List<BE.Alerta>();
 
@@ -93,6 +98,12 @@ namespace BLL
             if (dvRotas > 0)
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Critica, "alert.dv.corruptos",
                     "Integridad comprometida: {0} fila(s) con DV inválido.", dvRotas, dvRotas));
+
+            // 5) Lista de Espera (mejora opcional) — prendas reservadas esperando retiro
+            if (reservadasEspera > 0)
+                alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.listaespera.reservadas",
+                    "{0} prenda(s) reservada(s) por Lista de Espera esperando que el cliente pase a retirarlas.",
+                    reservadasEspera, reservadasEspera));
 
             return alertas;
         }

@@ -40,6 +40,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="BackupTests.cs" />
     <Compile Include="CasosPruebaEspecialesTests.cs" />
     <Compile Include="ClaveEmergenciaTests.cs" />
@@ -51,6 +54,7 @@
     <Compile Include="SuscripcionBuilderTests.cs" />
     <Compile Include="ComandoPedidoTests.cs" />
     <Compile Include="RenovacionTests.cs" />
+    <Compile Include="ClienteTests.cs" />
     <Compile Include="CobroTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="UsuarioAbmTests.cs" />

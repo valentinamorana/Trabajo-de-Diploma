@@ -22,6 +22,7 @@ namespace GUI
         public CobroSuscripcionForm()
         {
             InitializeComponent();
+            Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
         }
 
         protected override void OnLoad(EventArgs e)

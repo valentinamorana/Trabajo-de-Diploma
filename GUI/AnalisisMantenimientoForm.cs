@@ -12,15 +12,21 @@ namespace GUI
     /// cantidad o duración promedio — señal de una prenda problemática a revisar. Exporta a
     /// PDF (vista previa) o CSV (archivo) reutilizando el Factory Method de GUI.Exportacion.
     /// </summary>
-    public partial class AnalisisMantenimientoForm : Form, IIdiomaObserver
+    public partial class AnalisisMantenimientoForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IAnalisisMantenimientoService _bll = new BLL.AnalisisMantenimiento();
 
         private string[] _encabezados;
 
+        protected override Label MensajeLabel => lblResultado;
+
         public AnalisisMantenimientoForm()
         {
             InitializeComponent();
+            Estilos.EstiloFormulario.BotonPrimario(btnGenerar);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarPdf);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarCsv);
+            Estilos.EstiloFormulario.Grilla(dgv);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -92,8 +98,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 

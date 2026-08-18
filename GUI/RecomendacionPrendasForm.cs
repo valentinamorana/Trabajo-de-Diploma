@@ -12,16 +12,22 @@ namespace GUI
     /// pedidos), para ofrecerlas en el próximo pedido. Exporta a PDF (vista previa) o CSV
     /// (archivo) reutilizando el Factory Method de GUI.Exportacion.
     /// </summary>
-    public partial class RecomendacionPrendasForm : Form, IIdiomaObserver
+    public partial class RecomendacionPrendasForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IClienteService _bllCliente = new BLL.Cliente();
         private readonly BLL.Interfaces.IRecomendacionService _bll = new BLL.RecomendacionPrendas();
 
         private string[] _encabezados;
 
+        protected override Label MensajeLabel => lblResultado;
+
         public RecomendacionPrendasForm()
         {
             InitializeComponent();
+            Estilos.EstiloFormulario.BotonPrimario(btnGenerar);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarPdf);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarCsv);
+            Estilos.EstiloFormulario.Grilla(dgv);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -78,8 +84,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 
@@ -108,8 +113,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 

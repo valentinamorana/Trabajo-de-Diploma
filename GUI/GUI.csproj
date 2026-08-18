@@ -354,6 +354,7 @@
     <Compile Include="Exportacion\GeneradorRecomendacion.cs" />
     <Compile Include="Exportacion\ExportadorCsv.cs" />
     <Compile Include="Estilos\MenuRenderer.cs" />
+    <Compile Include="Estilos\EstiloFormulario.cs" />
     <Compile Include="AlertasForm.cs">
       <SubType>Form</SubType>
     </Compile>

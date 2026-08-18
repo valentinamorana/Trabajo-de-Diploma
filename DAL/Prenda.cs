@@ -139,7 +139,7 @@ namespace DAL
             try
             {
                 DataTable tabla = acceso.Leer(
-                    "SELECT ISNULL(Talle, '—') AS Talle, ISNULL(Categoria, '—') AS Categoria, " +
+                    "SELECT ISNULL(Talle, N'—') AS Talle, ISNULL(Categoria, N'—') AS Categoria, " +
                     "       COUNT(*) AS Cantidad " +
                     "FROM Prenda " +
                     "WHERE Estado = @Estado " +

@@ -21,6 +21,8 @@ namespace GUI
         public RenovacionSuscripcionForm()
         {
             InitializeComponent();
+            Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
+            Estilos.EstiloFormulario.BotonSecundario(btnReanudar);
         }
 
         protected override void OnLoad(EventArgs e)

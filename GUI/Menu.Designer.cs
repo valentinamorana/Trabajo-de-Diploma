@@ -443,7 +443,7 @@
             this.analisisAbandonoToolStripMenuItem.Name = "analisisAbandonoToolStripMenuItem";
             this.analisisAbandonoToolStripMenuItem.Tag = "mnu.abandono";
             this.analisisAbandonoToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.analisisAbandonoToolStripMenuItem.Text = "📉  Análisis de Abandono";
+            this.analisisAbandonoToolStripMenuItem.Text = "Análisis de Abandono";
             this.analisisAbandonoToolStripMenuItem.Click += new System.EventHandler(this.analisisAbandonoToolStripMenuItem_Click);
             //
             // ventasVendedorToolStripMenuItem
@@ -451,7 +451,7 @@
             this.ventasVendedorToolStripMenuItem.Name = "ventasVendedorToolStripMenuItem";
             this.ventasVendedorToolStripMenuItem.Tag = "mnu.ventasvendedor";
             this.ventasVendedorToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.ventasVendedorToolStripMenuItem.Text = "🧾  Ventas por Vendedor";
+            this.ventasVendedorToolStripMenuItem.Text = "Ventas por Vendedor";
             this.ventasVendedorToolStripMenuItem.Click += new System.EventHandler(this.ventasVendedorToolStripMenuItem_Click);
             //
             // analisisRotacionToolStripMenuItem
@@ -459,7 +459,7 @@
             this.analisisRotacionToolStripMenuItem.Name = "analisisRotacionToolStripMenuItem";
             this.analisisRotacionToolStripMenuItem.Tag = "mnu.rotacion";
             this.analisisRotacionToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.analisisRotacionToolStripMenuItem.Text = "🔄  Rotación de Prendas";
+            this.analisisRotacionToolStripMenuItem.Text = "Rotación de Prendas";
             this.analisisRotacionToolStripMenuItem.Click += new System.EventHandler(this.analisisRotacionToolStripMenuItem_Click);
             //
             // analisisMantenimientoToolStripMenuItem
@@ -467,7 +467,7 @@
             this.analisisMantenimientoToolStripMenuItem.Name = "analisisMantenimientoToolStripMenuItem";
             this.analisisMantenimientoToolStripMenuItem.Tag = "mnu.mantanalisis";
             this.analisisMantenimientoToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.analisisMantenimientoToolStripMenuItem.Text = "🧽  Tiempos de Mantenimiento";
+            this.analisisMantenimientoToolStripMenuItem.Text = "Tiempos de Mantenimiento";
             this.analisisMantenimientoToolStripMenuItem.Click += new System.EventHandler(this.analisisMantenimientoToolStripMenuItem_Click);
             //
             // analisisEscasezToolStripMenuItem
@@ -475,7 +475,7 @@
             this.analisisEscasezToolStripMenuItem.Name = "analisisEscasezToolStripMenuItem";
             this.analisisEscasezToolStripMenuItem.Tag = "mnu.escasez";
             this.analisisEscasezToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.analisisEscasezToolStripMenuItem.Text = "📦  Escasez de Stock";
+            this.analisisEscasezToolStripMenuItem.Text = "Escasez de Stock";
             this.analisisEscasezToolStripMenuItem.Click += new System.EventHandler(this.analisisEscasezToolStripMenuItem_Click);
             //
             // recomendacionPrendasToolStripMenuItem
@@ -483,17 +483,20 @@
             this.recomendacionPrendasToolStripMenuItem.Name = "recomendacionPrendasToolStripMenuItem";
             this.recomendacionPrendasToolStripMenuItem.Tag = "mnu.recomendacion";
             this.recomendacionPrendasToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.recomendacionPrendasToolStripMenuItem.Text = "✨  Recomendación de Prendas";
+            this.recomendacionPrendasToolStripMenuItem.Text = "Recomendación de Prendas";
             this.recomendacionPrendasToolStripMenuItem.Click += new System.EventHandler(this.recomendacionPrendasToolStripMenuItem_Click);
             //
             // ventanaToolStripMenuItem
             //
             // Lista nativa de ventanas MDI abiertas (hallazgo #2 del rediseño UX/UI: hoy no hay
-            // forma de ver/ordenar las pantallas abiertas más que buscarlas a mano).
+            // forma de ver/ordenar las pantallas abiertas más que buscarlas a mano). Alineado a
+            // la derecha, junto a Sesión: es una herramienta del propio menú, no un módulo de
+            // negocio, así que no debe mezclarse con Suscriptores/Inventario/Ventas/etc.
             this.ventanaToolStripMenuItem.Name = "ventanaToolStripMenuItem";
             this.ventanaToolStripMenuItem.Tag = "mnu.ventana";
             this.ventanaToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
             this.ventanaToolStripMenuItem.Text = "Ventanas Abiertas";
+            this.ventanaToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.menuStrip1.MdiWindowListItem = this.ventanaToolStripMenuItem;
             //
             // alertasItem — Centro de Alertas, alineado a la derecha (badge se compone en código).

@@ -13,15 +13,21 @@ namespace GUI
     /// Exporta a PDF (vista previa) o CSV (archivo) reutilizando el Factory Method de
     /// GUI.Exportacion (mismo mecanismo que Bitácora / Reporte de Jornada).
     /// </summary>
-    public partial class AnalisisAbandonoForm : Form, IIdiomaObserver
+    public partial class AnalisisAbandonoForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IAnalisisAbandonoService _bll = new BLL.AnalisisAbandono();
 
         private string[] _encabezados;
 
+        protected override Label MensajeLabel => lblResultado;
+
         public AnalisisAbandonoForm()
         {
             InitializeComponent();
+            Estilos.EstiloFormulario.BotonPrimario(btnGenerar);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarPdf);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarCsv);
+            Estilos.EstiloFormulario.Grilla(dgv);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -123,8 +129,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 

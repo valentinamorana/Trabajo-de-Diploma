@@ -12,15 +12,21 @@ namespace GUI
     /// Exporta a PDF (vista previa) o CSV (archivo) reutilizando el Factory Method de
     /// GUI.Exportacion (mismo mecanismo que Análisis de Abandono).
     /// </summary>
-    public partial class ReporteVentasVendedorForm : Form, IIdiomaObserver
+    public partial class ReporteVentasVendedorForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IReporteVentasVendedorService _bll = new BLL.ReporteVentasVendedor();
 
         private string[] _encabezados;
 
+        protected override Label MensajeLabel => lblResultado;
+
         public ReporteVentasVendedorForm()
         {
             InitializeComponent();
+            Estilos.EstiloFormulario.BotonPrimario(btnGenerar);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarPdf);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarCsv);
+            Estilos.EstiloFormulario.Grilla(dgv);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -88,8 +94,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 

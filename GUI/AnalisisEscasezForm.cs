@@ -12,15 +12,21 @@ namespace GUI
     /// caen por debajo, para planificar compras antes de un faltante. Exporta a PDF (vista
     /// previa) o CSV (archivo) reutilizando el Factory Method de GUI.Exportacion.
     /// </summary>
-    public partial class AnalisisEscasezForm : Form, IIdiomaObserver
+    public partial class AnalisisEscasezForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IAnalisisEscasezService _bll = new BLL.AnalisisEscasez();
 
         private string[] _encabezados;
 
+        protected override Label MensajeLabel => lblResultado;
+
         public AnalisisEscasezForm()
         {
             InitializeComponent();
+            Estilos.EstiloFormulario.BotonPrimario(btnGenerar);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarPdf);
+            Estilos.EstiloFormulario.BotonSecundario(btnExportarCsv);
+            Estilos.EstiloFormulario.Grilla(dgv);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -88,8 +94,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblResultado.ForeColor = Color.DarkRed;
-                lblResultado.Text = ex.Message;
+                MostrarError(ex);
             }
         }
 

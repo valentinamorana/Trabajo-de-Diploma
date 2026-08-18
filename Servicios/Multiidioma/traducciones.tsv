@@ -4140,26 +4140,26 @@ RU	lbl.cli.modalidad	Способ оплаты *
 RU	diag.btn.espejo	Восстановление (Зеркало)...
 PT	lbl.cli.modalidad	Modalidade de Cobrança *
 PT	diag.btn.espejo	Recuperação (Espelho)...
-ES	mnu.ventasvendedor	🧾  Ventas por Vendedor
-ES	mnu.rotacion	🔄  Rotación de Prendas
-ES	mnu.mantanalisis	🧽  Tiempos de Mantenimiento
-ES	mnu.escasez	📦  Escasez de Stock
-ES	mnu.recomendacion	✨  Recomendación de Prendas
-EN	mnu.ventasvendedor	🧾  Sales by Salesperson
-EN	mnu.rotacion	🔄  Garment Turnover
-EN	mnu.mantanalisis	🧽  Maintenance Times
-EN	mnu.escasez	📦  Stock Shortage
-EN	mnu.recomendacion	✨  Garment Recommendations
-RU	mnu.ventasvendedor	🧾  Продажи по продавцам
-RU	mnu.rotacion	🔄  Оборот одежды
-RU	mnu.mantanalisis	🧽  Сроки обслуживания
-RU	mnu.escasez	📦  Дефицит запасов
-RU	mnu.recomendacion	✨  Рекомендации одежды
-PT	mnu.ventasvendedor	🧾  Vendas por Vendedor
-PT	mnu.rotacion	🔄  Rotatividade de Peças
-PT	mnu.mantanalisis	🧽  Tempos de Manutenção
-PT	mnu.escasez	📦  Escassez de Estoque
-PT	mnu.recomendacion	✨  Recomendação de Peças
+ES	mnu.ventasvendedor	Ventas por Vendedor
+ES	mnu.rotacion	Rotación de Prendas
+ES	mnu.mantanalisis	Tiempos de Mantenimiento
+ES	mnu.escasez	Escasez de Stock
+ES	mnu.recomendacion	Recomendación de Prendas
+EN	mnu.ventasvendedor	Sales by Salesperson
+EN	mnu.rotacion	Garment Turnover
+EN	mnu.mantanalisis	Maintenance Times
+EN	mnu.escasez	Stock Shortage
+EN	mnu.recomendacion	Garment Recommendations
+RU	mnu.ventasvendedor	Продажи по продавцам
+RU	mnu.rotacion	Оборот одежды
+RU	mnu.mantanalisis	Сроки обслуживания
+RU	mnu.escasez	Дефицит запасов
+RU	mnu.recomendacion	Рекомендации одежды
+PT	mnu.ventasvendedor	Vendas por Vendedor
+PT	mnu.rotacion	Rotatividade de Peças
+PT	mnu.mantanalisis	Tempos de Manutenção
+PT	mnu.escasez	Escassez de Estoque
+PT	mnu.recomendacion	Recomendação de Peças
 ES	ventasvend.titulo	Ventas por Vendedor
 ES	ventasvend.col.vendedor	Vendedor
 ES	ventasvend.col.total	Total pedidos

@@ -174,31 +174,32 @@ Soporta **Español · English · Русский · Português** con cambio diná
 
 ### Base de datos
 
-Ejecutar desde SSMS, en orden, los scripts de `BD/` (todos idempotentes):
+**Instalación nueva → un solo script.** Ejecutar desde SSMS (o `sqlcmd -f 65001`, ver comentario en el archivo):
 
 ```
-BD/01_Crear_BaseDeDatos.sql               -- Instalación nueva: estructura + datos semilla
-BD/02_Actualizar_BaseDeDatos.sql          -- BD existente: migraciones incrementales
-BD/03_Permisos_Granulares.sql
-BD/04_Diagnostico_Limpieza_Nodos_Permiso.sql
-BD/05_Renovacion_Suscripcion.sql          -- Tabla y permisos del módulo de Renovación (PdN5)
-BD/06_Rediseno_Menu.sql                   -- Actualiza el texto "Bitácora" → "Analítica" en BD existentes
-BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos de los 7 roles reales
-BD/08_Cobro_Pago.sql                      -- Tabla y permisos del módulo de Cobro de Suscripción (PdN6)
-BD/09_Analisis_Abandono.sql               -- Permisos del módulo de Análisis de Abandono (PdN10) — sin tablas nuevas
-BD/16_Lista_Espera.sql                    -- Lista de Espera de prendas (mejora opcional, no requerida por la cátedra)
-BD/17_Comercializacion_Suscripcion.sql    -- Tabla Contratacion y rol Caja del módulo PN02
-BD/18_Promociones.sql                     -- Tablas Promocion/SugerenciaPromocion y roles AdministracionComercial/Contabilidad del PN03
-BD/19_Inspeccion_Devolucion.sql           -- Columna Prenda.PrecioReposicion y patentes de la pantalla del módulo PN04
+BD/00_Instalacion_Completa.sql   -- Crea WardrobeFlowDB completa: estructura, datos semilla
+                                  -- y los 4 procesos de negocio (PN01-PN04). Idempotente:
+                                  -- se puede volver a ejecutar sin duplicar ni romper nada.
 ```
 
-- **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql` y luego `08_Cobro_Pago.sql` y `09_Analisis_Abandono.sql`.
-- **Actualizar una BD existente** → ejecutar `02` a `09` en orden.
+Es la concatenación (en el orden correcto) de los scripts `01`, `03`, `05`, `06`, `08`, `09`, `10` a `16` y `17` a `19` — cada uno sigue existiendo por separado en `BD/` con su propio comentario de cabecera, por si hace falta revisar o volver a correr uno puntual, pero para una instalación nueva alcanza con `00`. El instalador (`Instalador/WardrobeFlow_Setup.iss`) ya usa este único script.
+
+**Herramientas de mantenimiento** (no forman parte de "crear la BD" — correr por separado solo si hace falta):
+
+```
+BD/02_Actualizar_BaseDeDatos.sql          -- Migra una BD MUY vieja (previa al script 01) a la estructura actual.
+BD/04_Diagnostico_Limpieza_Nodos_Permiso.sql -- Diagnóstico puntual del árbol de permisos.
+BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos de los 7 roles reales.
+```
+
+- **Actualizar una BD MUY vieja** (previa a que existiera `01_Crear_BaseDeDatos.sql`) → ejecutar `02` a `09` en orden.
 - **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
-- **Lista de Espera (mejora opcional)** → ejecutar `16_Lista_Espera.sql` en cualquier momento; el resto del sistema funciona sin él (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
-- **Comercialización de la suscripción (PN02)** → ejecutar `17_Comercializacion_Suscripcion.sql` en cualquier momento. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo.
-- **Métricas, promociones y toma de decisiones (PN03)** → ejecutar `18_Promociones.sql` en cualquier momento. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay que asignarle esos 2 roles a usuarios de prueba desde Administrar → Usuarios.
-- **Inspección de Devolución (PN04)** → ejecutar `19_Inspeccion_Devolucion.sql` en cualquier momento. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
+
+**Notas de módulos incluidos en `00_Instalacion_Completa.sql`** (relevante si se corre alguno de estos suelto en vez del script único):
+- **Lista de Espera (mejora opcional)** → `16_Lista_Espera.sql`; el resto del sistema funciona sin él (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
+- **Comercialización de la suscripción (PN02)** → `17_Comercializacion_Suscripcion.sql`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo.
+- **Métricas, promociones y toma de decisiones (PN03)** → `18_Promociones.sql`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay que asignarle esos 2 roles a usuarios de prueba desde Administrar → Usuarios.
+- **Inspección de Devolución (PN04)** → `19_Inspeccion_Devolucion.sql`. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
 
 ### Cadena de conexión
 

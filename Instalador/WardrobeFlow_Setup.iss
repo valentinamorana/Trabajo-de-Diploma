@@ -3,8 +3,9 @@
 ;
 ; Alcance de esta version (Entrega 2):
 ; - Instala la aplicacion (GUI.exe + dependencias) en Archivos de Programa.
-; - Crea la base de datos WardrobeFlowDB y todas sus tablas ejecutando los
-;   scripts de BD/ contra una instancia SQLEXPRESS local YA INSTALADA.
+; - Crea la base de datos WardrobeFlowDB completa (estructura + los 4
+;   procesos de negocio PN01-PN04) ejecutando BD/00_Instalacion_Completa.sql
+;   (script unico) contra una instancia SQLEXPRESS local YA INSTALADA.
 ; - Crea accesos directos (menu inicio + escritorio opcional).
 ; - Caso de prueba contemplado: instalacion simple, con SQL Server Express
 ;   (instancia SQLEXPRESS) ya instalado y el servicio en ejecucion.
@@ -28,8 +29,8 @@
   #error "No se encontro GUI.exe en GUI\bin\Release. Compilar el proyecto en modo Release antes de generar el instalador."
 #endif
 
-#if !FileExists(DbSourceDir + "\01_Crear_BaseDeDatos.sql")
-  #error "No se encontraron los scripts de BD en la carpeta BD."
+#if !FileExists(DbSourceDir + "\00_Instalacion_Completa.sql")
+  #error "No se encontro BD\00_Instalacion_Completa.sql (script unico de instalacion)."
 #endif
 
 [Setup]
@@ -73,8 +74,8 @@ Filename: "{app}\{#MyAppExeName}"; Description: "Abrir {#MyAppName}"; Flags: now
 [Code]
 // Ejecuta un script .sql con sqlcmd contra la instancia SQLEXPRESS local.
 // -E: autenticacion de Windows (igual que el connection string de la app).
-// -f 65001: codepage UTF-8 (los scripts tienen acentos, ver comentario en
-//   BD/01_Crear_BaseDeDatos.sql).
+// -f 65001: codepage UTF-8 (el script tiene acentos, ver comentario en
+//   BD/00_Instalacion_Completa.sql).
 // -b: si el script tiene un error de T-SQL, sqlcmd devuelve codigo != 0.
 function EjecutarScriptSql(NombreArchivo: String; UsarDb: Boolean; var ErrMsg: String): Boolean;
 var
@@ -114,35 +115,25 @@ end;
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ErrMsg: String;
-  Scripts: array[0..8] of String;
-  UsaDb: array[0..8] of Boolean;
-  i: Integer;
 begin
   if CurStep = ssPostInstall then
   begin
     WizardForm.StatusLabel.Caption := 'Creando la base de datos WardrobeFlowDB...';
 
-    Scripts[0] := '01_Crear_BaseDeDatos.sql';            UsaDb[0] := False;
-    Scripts[1] := '02_Actualizar_BaseDeDatos.sql';        UsaDb[1] := True;
-    Scripts[2] := '03_Permisos_Granulares.sql';           UsaDb[2] := True;
-    Scripts[3] := '04_Diagnostico_Limpieza_Nodos_Permiso.sql'; UsaDb[3] := True;
-    Scripts[4] := '05_Renovacion_Suscripcion.sql';        UsaDb[4] := True;
-    Scripts[5] := '06_Rediseno_Menu.sql';                 UsaDb[5] := True;
-    Scripts[6] := '07_Reset_Perfiles_Permisos.sql';       UsaDb[6] := True;
-    Scripts[7] := '08_Cobro_Pago.sql';                    UsaDb[7] := True;
-    Scripts[8] := '09_Analisis_Abandono.sql';             UsaDb[8] := True;
-
-    for i := 0 to 8 do
+    // Script único (BD/00_Instalacion_Completa.sql): crea la base y TODOS los
+    // módulos de una sola pasada — antes acá se corrían 9 scripts sueltos a
+    // mano y, ademas, se habian quedado desactualizados (nunca llegaron a
+    // incluir los scripts 10 en adelante, con lo cual PN02/PN03/PN04 nunca
+    // se instalaban). UsaDb=False porque, igual que antes con el 01, el
+    // script arranca con CREATE DATABASE + USE WardrobeFlowDB propios.
+    if not EjecutarScriptSql('00_Instalacion_Completa.sql', False, ErrMsg) then
     begin
-      if not EjecutarScriptSql(Scripts[i], UsaDb[i], ErrMsg) then
-      begin
-        SuppressibleMsgBox(
-          'No se pudo completar la creación de la base de datos.' + #13#13 + ErrMsg + #13#13 +
-          'La aplicación quedó instalada, pero necesitará ejecutar manualmente los scripts ' +
-          'restantes de la carpeta BD (con SSMS o sqlcmd) antes de poder iniciar sesión.',
-          mbError, MB_OK, IDOK);
-        exit;
-      end;
+      SuppressibleMsgBox(
+        'No se pudo completar la creación de la base de datos.' + #13#13 + ErrMsg + #13#13 +
+        'La aplicación quedó instalada, pero necesitará ejecutar manualmente ' +
+        'BD\00_Instalacion_Completa.sql (con SSMS o sqlcmd) antes de poder iniciar sesión.',
+        mbError, MB_OK, IDOK);
+      exit;
     end;
   end;
 end;

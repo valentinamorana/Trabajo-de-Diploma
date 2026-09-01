@@ -115,7 +115,20 @@ namespace BLL
                 ? prenda.IdClienteActual
                 : null;
 
-            dalPrenda.CambiarEstado(prenda.IdPrenda, estadoAnterior, nuevoEstado, idCliente);
+            try
+            {
+                dalPrenda.CambiarEstado(prenda.IdPrenda, estadoAnterior, nuevoEstado, idCliente);
+            }
+            catch
+            {
+                // Anti-TOCTOU (DAL/Prenda.cs): si el UPDATE condicionado no afectó ninguna fila
+                // porque el estado cambió entre la lectura y este punto, revertir acá la
+                // mutación en memoria que ControlarEstado ya aplicó — si no, el objeto que
+                // quedó cacheado en la GUI (_prendas/_prendasDetalleActual) sigue mostrando un
+                // estado que en realidad nunca se persistió.
+                prenda.Estado = estadoAnterior;
+                throw;
+            }
 
             if (nuevoEstado == BE.EstadoPrenda.EnLimpieza)
             {

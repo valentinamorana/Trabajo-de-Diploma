@@ -527,8 +527,14 @@ namespace GUI
                 {
                     string actor = Seguridad.SessionManager.IsLoggedIn
                         ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
-                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
+
+                    // Cobrar ANTES de dar de baja — mismo motivo que
+                    // InspeccionDevolucionForm.BtnDarDeBajaConCargo_Click: si RegistrarCargo
+                    // fallara después de la baja, la prenda quedaría destruida sin cobro (Baja
+                    // es estado final). Riesgo residual aceptado: ambos pasos no corren en una
+                    // única transacción (servicios BLL distintos), fuera de alcance de este TP.
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
+                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
                     MostrarOk($"'{prenda.Nombre}' reportada como perdida — cargo de ${dlg.Monto} registrado.");
                     var pedidoSel = ObtenerPedidoSeleccionado();
                     if (pedidoSel != null) CargarDetallePrendas(pedidoSel);

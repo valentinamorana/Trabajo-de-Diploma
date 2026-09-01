@@ -182,8 +182,17 @@ namespace GUI
                 {
                     string actor = Seguridad.SessionManager.IsLoggedIn
                         ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
-                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
+
+                    // Cobrar ANTES de dar de baja: si RegistrarCargo fallara después de la
+                    // baja, la prenda quedaría destruida sin cobro (Baja es estado final, sin
+                    // forma de reintentar el descarte). En este orden, si CambiarEstado fallara
+                    // después del cargo, la prenda queda EnLimpieza con un cargo ya registrado
+                    // — recuperable manualmente, y sin riesgo de "pérdida total silenciosa".
+                    // Riesgo residual aceptado: ambos pasos no corren en una única transacción
+                    // (BLL.Prenda y BLL.CargoPrenda son servicios distintos); no está más
+                    // desarrollado por quedar fuera de alcance de este TP.
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
+                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
                     MostrarOk($"'{prenda.Nombre}' dada de baja — cargo de ${dlg.Monto} registrado.");
                     CargarPrendas();
                 }

@@ -41,6 +41,9 @@ namespace BE
         public const string PromocionesAdminEditar    = "mnuPromocionesAdminEditar";
         public const string PromocionesContableEditar = "mnuPromocionesContableEditar";
         public const string PromocionesVigentesEditar = "mnuPromocionesVigentesEditar";
-        public const string InspeccionDevolucionEditar = "mnuInspeccionDevolucionEditar";
+        // Nota: Inspección de Devolución (PN04) NO tiene patente de Editar propia — su
+        // escritura (CambiarEstado/RegistrarCargo) ya está gobernada por StockEditar
+        // (compartida con el módulo de Stock, ver InspeccionDevolucion arriba). Crear una
+        // patente "Editar" que nada verifica sería engañosa en Perfiles y Permisos.
     }
 }

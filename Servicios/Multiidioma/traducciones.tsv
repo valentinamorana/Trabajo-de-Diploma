@@ -47,6 +47,7 @@ ES	err.bll.usuario.sin_permiso	Solo un Administrador puede gestionar usuarios.
 ES	err.bll.usuario.username_corto	El nombre de usuario debe tener al menos 3 caracteres.
 ES	err.bll.usuario.username_requerido	El nombre de usuario es obligatorio.
 ES	err.bll.version.no_existe	La versión seleccionada no existe.
+ES	err.bll.version.sin_permiso	Solo un Administrador puede restaurar una versión histórica de un usuario.
 ES	err.bll.prenda.transicion_baja	Una prenda dada de baja no puede cambiar de estado.
 ES	err.bll.prenda.transicion_enuso	El estado de una prenda en uso se actualiza automáticamente al procesar pedidos.\nLa única excepción manual es reportarla como perdida (PN04, módulo de Pedidos Realizados).
 ES	err.bll.prenda.transicion_generica	La transición de '{0}' a '{1}' no está permitida.
@@ -817,6 +818,7 @@ EN	err.bll.usuario.sin_permiso	Only an Administrator can manage users.
 EN	err.bll.usuario.username_corto	The username must be at least 3 characters long.
 EN	err.bll.usuario.username_requerido	The username is required.
 EN	err.bll.version.no_existe	The selected version does not exist.
+EN	err.bll.version.sin_permiso	Only an Administrator can restore a user's historical version.
 EN	err.bll.prenda.transicion_baja	A garment that has been deactivated cannot change state.
 EN	err.bll.prenda.transicion_enuso	The state of a garment in use updates automatically when processing orders.\nThe only manual exception is reporting it lost (PN04, Completed Orders module).
 EN	err.bll.prenda.transicion_generica	The transition from '{0}' to '{1}' is not allowed.
@@ -1587,6 +1589,7 @@ RU	err.bll.usuario.sin_permiso	Только администратор може�
 RU	err.bll.usuario.username_corto	Имя пользователя должно содержать не менее 3 символов.
 RU	err.bll.usuario.username_requerido	Имя пользователя обязательно.
 RU	err.bll.version.no_existe	Выбранная версия не существует.
+RU	err.bll.version.sin_permiso	Только администратор может восстановить историческую версию пользователя.
 RU	err.bll.prenda.transicion_baja	Списанная вещь не может менять состояние.
 RU	err.bll.prenda.transicion_enuso	Состояние вещи, находящейся в использовании, обновляется автоматически при обработке заказов.\nЕдинственное ручное исключение — сообщить о её потере (PN04, модуль Выполненных заказов).
 RU	err.bll.prenda.transicion_generica	Переход из «{0}» в «{1}» не разрешён.
@@ -2357,6 +2360,7 @@ PT	err.bll.usuario.sin_permiso	Apenas um Administrador pode gerenciar usuários.
 PT	err.bll.usuario.username_corto	O nome de usuário deve ter pelo menos 3 caracteres.
 PT	err.bll.usuario.username_requerido	O nome de usuário é obrigatório.
 PT	err.bll.version.no_existe	A versão selecionada não existe.
+PT	err.bll.version.sin_permiso	Somente um Administrador pode restaurar uma versão histórica de um usuário.
 PT	err.bll.prenda.transicion_baja	Uma peça baixada não pode mudar de estado.
 PT	err.bll.prenda.transicion_enuso	O estado de uma peça em uso é atualizado automaticamente ao processar pedidos.\nA única exceção manual é reportá-la como perdida (PN04, módulo de Pedidos Realizados).
 PT	err.bll.prenda.transicion_generica	A transição de '{0}' para '{1}' não é permitida.

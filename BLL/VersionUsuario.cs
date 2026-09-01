@@ -51,9 +51,8 @@ namespace BLL
         /// </summary>
         public void RestaurarVersion(string modulo, int idVersion)
         {
-            if (!SessionManager.IsLoggedIn)
-                throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+            BLLHelper.ExigirAdministrador("err.bll.version.sin_permiso",
+                "Solo un Administrador puede restaurar una versión histórica de un usuario.");
 
             // Memento elegido (el Caretaker lo recupera como abstracción IMemento).
             var memento = _caretaker.Obtener(idVersion) as BE.VersionUsuario;

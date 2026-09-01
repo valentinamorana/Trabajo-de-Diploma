@@ -199,34 +199,50 @@ namespace Seguridad
         // Carga la clave AES desde key.dat, PROTEGIDA con DPAPI (ProtectedData, ámbito del
         // usuario actual). Migra automáticamente un key.dat legacy en texto plano sin cambiar
         // la clave (para no invalidar los datos ya cifrados).
-        // ⚠ Eliminar key.dat hace que los DNI cifrados existentes sean irrecuperables.
+        // ⚠ Eliminar key.dat hace que los DNI cifrados existentes sean irrecuperables. Por eso,
+        // si el archivo EXISTE pero no se puede recuperar la clave (DPAPI de otro usuario u
+        // otra máquina, o archivo corrupto), esto debe FALLAR RUIDOSAMENTE en vez de generar
+        // una clave nueva en silencio: generar una nueva acá dejaría los DNI ya cifrados en BD
+        // irrecuperables sin ningún aviso.
         private static byte[] CargarOCrearClave()
         {
             string ruta = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "key.dat");
 
             if (File.Exists(ruta))
             {
-                byte[] bytes = null;
+                byte[] bytes;
                 try { bytes = Convert.FromBase64String(File.ReadAllText(ruta).Trim()); }
-                catch { }
-
-                if (bytes != null)
+                catch (Exception ex)
                 {
-                    // 1) Caso normal: el archivo es un blob DPAPI → desproteger.
-                    try
-                    {
-                        byte[] clave = ProtectedData.Unprotect(bytes, null, DataProtectionScope.CurrentUser);
-                        if (clave.Length == 16) return clave;
-                    }
-                    catch { }
-
-                    // 2) Legacy: clave plana de 16 bytes → migrar a DPAPI conservando la MISMA clave.
-                    if (bytes.Length == 16)
-                    {
-                        GuardarClaveProtegida(ruta, bytes);
-                        return bytes;
-                    }
+                    throw new InvalidOperationException(
+                        "No se pudo leer key.dat (formato inválido). Generar una clave nueva " +
+                        "dejaría irrecuperables los datos ya cifrados en la base — restaurá el " +
+                        "archivo original antes de continuar.", ex);
                 }
+
+                // 1) Caso normal: el archivo es un blob DPAPI → desproteger.
+                try
+                {
+                    byte[] clave = ProtectedData.Unprotect(bytes, null, DataProtectionScope.CurrentUser);
+                    if (clave.Length == 16) return clave;
+                }
+                catch (CryptographicException)
+                {
+                    // No es un blob DPAPI válido para este usuario/máquina — probar el caso legacy abajo.
+                }
+
+                // 2) Legacy: clave plana de 16 bytes → migrar a DPAPI conservando la MISMA clave.
+                if (bytes.Length == 16)
+                {
+                    GuardarClaveProtegida(ruta, bytes);
+                    return bytes;
+                }
+
+                throw new InvalidOperationException(
+                    "key.dat existe pero su clave no se pudo recuperar (protegida con DPAPI de " +
+                    "otro usuario u otra máquina). Generar una clave nueva dejaría irrecuperables " +
+                    "los datos ya cifrados en la base — restaurá el archivo original, o migrá los " +
+                    "datos cifrados antes de reemplazar la clave.");
             }
 
             byte[] nueva = new byte[16];

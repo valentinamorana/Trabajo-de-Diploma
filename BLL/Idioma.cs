@@ -51,6 +51,7 @@ namespace BLL
         // Crea un idioma nuevo (queda inactivo hasta que el admin lo active).
         public void CrearIdioma(string codigo, string nombre)
         {
+            BLLHelper.ValidarPermiso(BE.Patentes.Usuarios);
             if (string.IsNullOrWhiteSpace(codigo) || string.IsNullOrWhiteSpace(nombre))
                 throw new BE.AppException("err.bll.idioma.campos",
                     "El código y el nombre del idioma son obligatorios.");
@@ -67,6 +68,7 @@ namespace BLL
         // Renombra un idioma existente.
         public void ModificarIdioma(int idIdioma, string nombre)
         {
+            BLLHelper.ValidarPermiso(BE.Patentes.Usuarios);
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new BE.AppException("err.bll.idioma.nombre",
                     "El nombre del idioma es obligatorio.");
@@ -75,11 +77,13 @@ namespace BLL
 
         public void ActivarIdioma(int idIdioma)
         {
+            BLLHelper.ValidarPermiso(BE.Patentes.Usuarios);
             dalIdioma.Activar(idIdioma);
         }
 
         public void DesactivarIdioma(int idIdioma)
         {
+            BLLHelper.ValidarPermiso(BE.Patentes.Usuarios);
             dalIdioma.Desactivar(idIdioma);
         }
 
@@ -116,6 +120,7 @@ namespace BLL
         // Persiste el texto editado de una traducción.
         public void GuardarTraduccion(int idControl, int idIdioma, string texto)
         {
+            BLLHelper.ValidarPermiso(BE.Patentes.Usuarios);
             // No se persisten traducciones en blanco/whitespace: una clave sin completar debe
             // quedar SIN traducción en BD para que el Traductor use el fallback por clave (texto del
             // idioma por defecto), en vez de guardar "" y dejar el control vacío en pantalla.

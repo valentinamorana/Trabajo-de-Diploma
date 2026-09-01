@@ -53,6 +53,7 @@ namespace GUI
             this.btnSugerirBaja.Name = "btnSugerirBaja";
             this.btnSugerirBaja.Size = new System.Drawing.Size(150, 28);
             this.btnSugerirBaja.TabIndex = 0;
+            this.btnSugerirBaja.Tag = "promocion.btn.sugerirbaja";
             this.btnSugerirBaja.Text = "Sugerir Baja";
             this.btnSugerirBaja.UseVisualStyleBackColor = false;
             this.btnSugerirBaja.Click += new System.EventHandler(this.BtnSugerirBaja_Click);
@@ -134,6 +135,7 @@ namespace GUI
             this.Controls.Add(this.panelTop);
             this.MinimumSize = new System.Drawing.Size(720, 400);
             this.Name = "PromocionesVigentesForm";
+            this.Tag = "frm.promovigentes";
             this.Text = "Promociones Vigentes";
             this.Load += new System.EventHandler(this.PromocionesVigentesForm_Load);
             this.panelTop.ResumeLayout(false);

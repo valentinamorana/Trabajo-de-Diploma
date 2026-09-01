@@ -60,6 +60,7 @@ namespace GUI
             this.lblNombre.Name = "lblNombre";
             this.lblNombre.Size = new System.Drawing.Size(90, 23);
             this.lblNombre.TabIndex = 1;
+            this.lblNombre.Tag = "promocion.nombre";
             this.lblNombre.Text = "Nombre:";
             //
             // txtNombre
@@ -75,6 +76,7 @@ namespace GUI
             this.lblDescripcion.Name = "lblDescripcion";
             this.lblDescripcion.Size = new System.Drawing.Size(90, 23);
             this.lblDescripcion.TabIndex = 3;
+            this.lblDescripcion.Tag = "promocion.descripcion";
             this.lblDescripcion.Text = "Descripción:";
             //
             // txtDescripcion
@@ -92,6 +94,7 @@ namespace GUI
             this.rbPlan.Name = "rbPlan";
             this.rbPlan.Size = new System.Drawing.Size(90, 24);
             this.rbPlan.TabIndex = 5;
+            this.rbPlan.Tag = "promocion.plan";
             this.rbPlan.Text = "Plan:";
             this.rbPlan.CheckedChanged += new System.EventHandler(this.RbPlan_CheckedChanged);
             //
@@ -109,6 +112,7 @@ namespace GUI
             this.rbCategoria.Name = "rbCategoria";
             this.rbCategoria.Size = new System.Drawing.Size(90, 24);
             this.rbCategoria.TabIndex = 7;
+            this.rbCategoria.Tag = "promocion.categoria";
             this.rbCategoria.Text = "Categoría:";
             //
             // txtCategoria
@@ -125,6 +129,7 @@ namespace GUI
             this.lblTipoDescuento.Name = "lblTipoDescuento";
             this.lblTipoDescuento.Size = new System.Drawing.Size(90, 23);
             this.lblTipoDescuento.TabIndex = 9;
+            this.lblTipoDescuento.Tag = "promocion.tipo";
             this.lblTipoDescuento.Text = "Tipo:";
             //
             // cmbTipoDescuento
@@ -141,6 +146,7 @@ namespace GUI
             this.lblValor.Name = "lblValor";
             this.lblValor.Size = new System.Drawing.Size(50, 23);
             this.lblValor.TabIndex = 11;
+            this.lblValor.Tag = "promocion.valor";
             this.lblValor.Text = "Valor:";
             //
             // numValor
@@ -158,6 +164,7 @@ namespace GUI
             this.lblInicio.Name = "lblInicio";
             this.lblInicio.Size = new System.Drawing.Size(90, 23);
             this.lblInicio.TabIndex = 13;
+            this.lblInicio.Tag = "promocion.vigenciadesde";
             this.lblInicio.Text = "Vigencia desde:";
             //
             // dtpInicio
@@ -174,6 +181,7 @@ namespace GUI
             this.lblFin.Name = "lblFin";
             this.lblFin.Size = new System.Drawing.Size(40, 23);
             this.lblFin.TabIndex = 15;
+            this.lblFin.Tag = "promocion.hasta";
             this.lblFin.Text = "hasta:";
             //
             // dtpFin
@@ -190,6 +198,7 @@ namespace GUI
             this.lblMargenEstimado.Name = "lblMargenEstimado";
             this.lblMargenEstimado.Size = new System.Drawing.Size(90, 23);
             this.lblMargenEstimado.TabIndex = 17;
+            this.lblMargenEstimado.Tag = "promocion.margenestimado";
             this.lblMargenEstimado.Text = "Margen est.:";
             //
             // numMargenEstimado
@@ -207,6 +216,7 @@ namespace GUI
             this.lblImpactoEconomico.Name = "lblImpactoEconomico";
             this.lblImpactoEconomico.Size = new System.Drawing.Size(90, 23);
             this.lblImpactoEconomico.TabIndex = 19;
+            this.lblImpactoEconomico.Tag = "promocion.impactoeconomico";
             this.lblImpactoEconomico.Text = "Impacto econ.:";
             //
             // txtImpactoEconomico
@@ -227,6 +237,7 @@ namespace GUI
             this.btnConfirmar.Name = "btnConfirmar";
             this.btnConfirmar.Size = new System.Drawing.Size(120, 30);
             this.btnConfirmar.TabIndex = 21;
+            this.btnConfirmar.Tag = "promocion.btn.registrar";
             this.btnConfirmar.Text = "Registrar";
             this.btnConfirmar.UseVisualStyleBackColor = false;
             this.btnConfirmar.Click += new System.EventHandler(this.BtnConfirmar_Click);
@@ -238,6 +249,7 @@ namespace GUI
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(100, 30);
             this.btnCancelar.TabIndex = 22;
+            this.btnCancelar.Tag = "btn.cancelar";
             this.btnCancelar.Text = "Cancelar";
             this.btnCancelar.Click += new System.EventHandler(this.BtnCancelar_Click);
             //
@@ -295,6 +307,7 @@ namespace GUI
             this.MinimizeBox = false;
             this.Name = "AltaPromocionForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Tag = "frm.altapromocion";
             this.Text = "Alta de Promoción";
             this.Load += new System.EventHandler(this.AltaPromocionForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numValor)).EndInit();

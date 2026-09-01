@@ -40,6 +40,7 @@ namespace GUI
             this.rbPlan.Name = "rbPlan";
             this.rbPlan.Size = new System.Drawing.Size(90, 24);
             this.rbPlan.TabIndex = 0;
+            this.rbPlan.Tag = "promocion.plan";
             this.rbPlan.Text = "Plan:";
             this.rbPlan.CheckedChanged += new System.EventHandler(this.RbPlan_CheckedChanged);
             //
@@ -57,6 +58,7 @@ namespace GUI
             this.rbCategoria.Name = "rbCategoria";
             this.rbCategoria.Size = new System.Drawing.Size(90, 24);
             this.rbCategoria.TabIndex = 2;
+            this.rbCategoria.Tag = "promocion.categoria";
             this.rbCategoria.Text = "Categoría:";
             //
             // txtCategoria
@@ -73,6 +75,7 @@ namespace GUI
             this.lblTipoDescuento.Name = "lblTipoDescuento";
             this.lblTipoDescuento.Size = new System.Drawing.Size(90, 23);
             this.lblTipoDescuento.TabIndex = 4;
+            this.lblTipoDescuento.Tag = "promocion.tiposugerido";
             this.lblTipoDescuento.Text = "Tipo sugerido:";
             this.lblTipoDescuento.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -90,6 +93,7 @@ namespace GUI
             this.lblBeneficioEstimado.Name = "lblBeneficioEstimado";
             this.lblBeneficioEstimado.Size = new System.Drawing.Size(90, 23);
             this.lblBeneficioEstimado.TabIndex = 6;
+            this.lblBeneficioEstimado.Tag = "promocion.beneficioestimado";
             this.lblBeneficioEstimado.Text = "Beneficio est.:";
             this.lblBeneficioEstimado.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -108,6 +112,7 @@ namespace GUI
             this.lblMotivo.Name = "lblMotivo";
             this.lblMotivo.Size = new System.Drawing.Size(90, 23);
             this.lblMotivo.TabIndex = 8;
+            this.lblMotivo.Tag = "lbl.motivo";
             this.lblMotivo.Text = "Motivo:";
             //
             // txtMotivo
@@ -128,6 +133,7 @@ namespace GUI
             this.btnEnviar.Name = "btnEnviar";
             this.btnEnviar.Size = new System.Drawing.Size(160, 30);
             this.btnEnviar.TabIndex = 10;
+            this.btnEnviar.Tag = "promocion.btn.enviarsugerencia";
             this.btnEnviar.Text = "Enviar Sugerencia";
             this.btnEnviar.UseVisualStyleBackColor = false;
             this.btnEnviar.Click += new System.EventHandler(this.BtnEnviar_Click);
@@ -174,6 +180,7 @@ namespace GUI
             this.MinimizeBox = false;
             this.Name = "SugerirPromocionForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Tag = "frm.sugerirpromocion";
             this.Text = "Sugerir Promoción a Administración";
             this.Load += new System.EventHandler(this.SugerirPromocionForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numBeneficioEstimado)).EndInit();

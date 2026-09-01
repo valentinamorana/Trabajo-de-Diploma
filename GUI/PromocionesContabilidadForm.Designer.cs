@@ -54,6 +54,7 @@ namespace GUI
             this.lblObservacion.Name = "lblObservacion";
             this.lblObservacion.Size = new System.Drawing.Size(80, 23);
             this.lblObservacion.TabIndex = 0;
+            this.lblObservacion.Tag = "promocion.observacion";
             this.lblObservacion.Text = "Observación:";
             this.lblObservacion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -75,6 +76,7 @@ namespace GUI
             this.btnAprobar.Name = "btnAprobar";
             this.btnAprobar.Size = new System.Drawing.Size(130, 28);
             this.btnAprobar.TabIndex = 2;
+            this.btnAprobar.Tag = "promocion.btn.aprobaryactivar";
             this.btnAprobar.Text = "Aprobar y Activar";
             this.btnAprobar.UseVisualStyleBackColor = false;
             this.btnAprobar.Click += new System.EventHandler(this.BtnAprobar_Click);
@@ -90,6 +92,7 @@ namespace GUI
             this.btnRechazar.Name = "btnRechazar";
             this.btnRechazar.Size = new System.Drawing.Size(110, 28);
             this.btnRechazar.TabIndex = 3;
+            this.btnRechazar.Tag = "promocion.btn.rechazar";
             this.btnRechazar.Text = "Rechazar";
             this.btnRechazar.UseVisualStyleBackColor = false;
             this.btnRechazar.Click += new System.EventHandler(this.BtnRechazar_Click);
@@ -171,6 +174,7 @@ namespace GUI
             this.Controls.Add(this.panelTop);
             this.MinimumSize = new System.Drawing.Size(780, 400);
             this.Name = "PromocionesContabilidadForm";
+            this.Tag = "frm.promocontab";
             this.Text = "Revisión Contable de Promociones";
             this.Load += new System.EventHandler(this.PromocionesContabilidadForm_Load);
             this.panelTop.ResumeLayout(false);

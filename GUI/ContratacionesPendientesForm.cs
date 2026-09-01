@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using Servicios.Multiidioma;
 
 namespace GUI
 {
@@ -15,7 +16,7 @@ namespace GUI
     ///
     /// Accesible desde Menú → Caja → Contrataciones Pendientes (permiso mnuCaja).
     /// </summary>
-    public partial class ContratacionesPendientesForm : FormBase
+    public partial class ContratacionesPendientesForm : FormBase, IIdiomaObserver
     {
         protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
 
@@ -23,9 +24,67 @@ namespace GUI
 
         private List<BE.Contratacion> _contrataciones = new List<BE.Contratacion>();
 
+        private Idioma _idioma = GestorIdioma.IdiomaActual;
+
         public ContratacionesPendientesForm()
         {
             InitializeComponent();
+        }
+
+        // ── Observer de idioma ────────────────────────────────────────────────
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            GestorIdioma.SuscribirObservador(this);
+            Traducir(GestorIdioma.IdiomaActual);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+            CargarContrataciones();
+        }
+
+        private void Traducir(Idioma idioma)
+        {
+            _idioma = idioma;
+            var t = Traductor.ObtenerTraducciones(idioma);
+            if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
+                this.Text = t[this.Tag.ToString()].Texto;
+            Aplicar(lblMedioPago,      t);
+            Aplicar(btnCobrar,         t);
+            Aplicar(btnIntentoFallido, t);
+            TraducirHeadersGrilla(t);
+        }
+
+        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        {
+            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                c.Text = t[c.Tag.ToString()].Texto;
+        }
+
+        /// <summary>Renombra el HeaderText de las columnas de dgvContrataciones según el idioma activo.</summary>
+        private void TraducirHeadersGrilla(IDictionary<string, Traduccion> t)
+        {
+            void RH(string col, string clave)
+            {
+                if (dgvContrataciones.Columns.Contains(col) && t.ContainsKey(clave))
+                    dgvContrataciones.Columns[col].HeaderText = t[clave].Texto;
+            }
+
+            RH("ID",        "col.contr.id");
+            RH("Cliente",   "col.contr.cliente");
+            RH("Plan",      "col.contr.plan");
+            RH("Modalidad", "col.contr.modalidad");
+            RH("Intentos",  "col.contr.intentos");
+            RH("Fecha",     "col.contr.fecha");
         }
 
         private void ContratacionesPendientesForm_Load(object sender, EventArgs e)
@@ -60,6 +119,7 @@ namespace GUI
                 dgvContrataciones.DataSource = tabla;
                 if (dgvContrataciones.Columns.Contains("ID"))
                     dgvContrataciones.Columns["ID"].Width = 44;
+                TraducirHeadersGrilla(Traductor.ObtenerTraducciones(_idioma));
 
                 lblConteo.Text = $"{_contrataciones.Count} contratación(es) pendiente(s) de pago.";
                 DeshabilitarBotones();

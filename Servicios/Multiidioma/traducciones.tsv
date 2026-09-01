@@ -4456,3 +4456,267 @@ RU	mnu.auditoria	Аудит
 RU	mnu.analiticanegocio	Бизнес-аналитика
 PT	mnu.auditoria	Auditoria
 PT	mnu.analiticanegocio	Análise de Negócio
+ES	frm.nuevacontratacion	Nueva Contratación
+EN	frm.nuevacontratacion	New Contract
+RU	frm.nuevacontratacion	Новый договор
+PT	frm.nuevacontratacion	Nova Contratação
+ES	contratacion.cliente	Cliente:
+EN	contratacion.cliente	Client:
+RU	contratacion.cliente	Клиент:
+PT	contratacion.cliente	Cliente:
+ES	contratacion.plan	Plan:
+EN	contratacion.plan	Plan:
+RU	contratacion.plan	План:
+PT	contratacion.plan	Plano:
+ES	contratacion.modalidad	Modalidad:
+EN	contratacion.modalidad	Payment Mode:
+RU	contratacion.modalidad	Способ оплаты:
+PT	contratacion.modalidad	Modalidade:
+ES	contratacion.btn.confirmar	Confirmar
+EN	contratacion.btn.confirmar	Confirm
+RU	contratacion.btn.confirmar	Подтвердить
+PT	contratacion.btn.confirmar	Confirmar
+ES	frm.contratacionespend	Contrataciones Pendientes de Pago
+EN	frm.contratacionespend	Contracts Pending Payment
+RU	frm.contratacionespend	Договоры, ожидающие оплаты
+PT	frm.contratacionespend	Contratações Pendentes de Pagamento
+ES	contratacion.mediopago	Medio de pago:
+EN	contratacion.mediopago	Payment method:
+RU	contratacion.mediopago	Способ оплаты:
+PT	contratacion.mediopago	Forma de pagamento:
+ES	contratacion.btn.cobrar	💲 Cobrar
+EN	contratacion.btn.cobrar	💲 Charge
+RU	contratacion.btn.cobrar	💲 Оплатить
+PT	contratacion.btn.cobrar	💲 Cobrar
+ES	contratacion.btn.intentofallido	✗ Intento Fallido
+EN	contratacion.btn.intentofallido	✗ Failed Attempt
+RU	contratacion.btn.intentofallido	✗ Неудачная попытка
+PT	contratacion.btn.intentofallido	✗ Tentativa Falhada
+ES	col.contr.id	ID
+EN	col.contr.id	ID
+RU	col.contr.id	ID
+PT	col.contr.id	ID
+ES	col.contr.cliente	Cliente
+EN	col.contr.cliente	Client
+RU	col.contr.cliente	Клиент
+PT	col.contr.cliente	Cliente
+ES	col.contr.plan	Plan
+EN	col.contr.plan	Plan
+RU	col.contr.plan	План
+PT	col.contr.plan	Plano
+ES	col.contr.modalidad	Modalidad
+EN	col.contr.modalidad	Payment Mode
+RU	col.contr.modalidad	Способ оплаты
+PT	col.contr.modalidad	Modalidade
+ES	col.contr.intentos	Intentos
+EN	col.contr.intentos	Attempts
+RU	col.contr.intentos	Попытки
+PT	col.contr.intentos	Tentativas
+ES	col.contr.fecha	Fecha
+EN	col.contr.fecha	Date
+RU	col.contr.fecha	Дата
+PT	col.contr.fecha	Data
+ES	frm.sugerirpromocion	Sugerir Promoción a Administración
+EN	frm.sugerirpromocion	Suggest Promotion to Administration
+RU	frm.sugerirpromocion	Предложить акцию Администрации
+PT	frm.sugerirpromocion	Sugerir Promoção à Administração
+ES	promocion.plan	Plan:
+EN	promocion.plan	Plan:
+RU	promocion.plan	План:
+PT	promocion.plan	Plano:
+ES	promocion.categoria	Categoría:
+EN	promocion.categoria	Category:
+RU	promocion.categoria	Категория:
+PT	promocion.categoria	Categoria:
+ES	promocion.tiposugerido	Tipo sugerido:
+EN	promocion.tiposugerido	Suggested type:
+RU	promocion.tiposugerido	Предлагаемый тип:
+PT	promocion.tiposugerido	Tipo sugerido:
+ES	promocion.beneficioestimado	Beneficio est.:
+EN	promocion.beneficioestimado	Est. benefit:
+RU	promocion.beneficioestimado	Ожид. выгода:
+PT	promocion.beneficioestimado	Benefício est.:
+ES	promocion.btn.enviarsugerencia	Enviar Sugerencia
+EN	promocion.btn.enviarsugerencia	Send Suggestion
+RU	promocion.btn.enviarsugerencia	Отправить предложение
+PT	promocion.btn.enviarsugerencia	Enviar Sugestão
+ES	frm.altapromocion	Alta de Promoción
+EN	frm.altapromocion	New Promotion
+RU	frm.altapromocion	Создание акции
+PT	frm.altapromocion	Cadastro de Promoção
+ES	promocion.nombre	Nombre:
+EN	promocion.nombre	Name:
+RU	promocion.nombre	Название:
+PT	promocion.nombre	Nome:
+ES	promocion.descripcion	Descripción:
+EN	promocion.descripcion	Description:
+RU	promocion.descripcion	Описание:
+PT	promocion.descripcion	Descrição:
+ES	promocion.tipo	Tipo:
+EN	promocion.tipo	Type:
+RU	promocion.tipo	Тип:
+PT	promocion.tipo	Tipo:
+ES	promocion.valor	Valor:
+EN	promocion.valor	Value:
+RU	promocion.valor	Значение:
+PT	promocion.valor	Valor:
+ES	promocion.vigenciadesde	Vigencia desde:
+EN	promocion.vigenciadesde	Valid from:
+RU	promocion.vigenciadesde	Действует с:
+PT	promocion.vigenciadesde	Vigência a partir de:
+ES	promocion.hasta	hasta:
+EN	promocion.hasta	to:
+RU	promocion.hasta	по:
+PT	promocion.hasta	até:
+ES	promocion.margenestimado	Margen est.:
+EN	promocion.margenestimado	Est. margin:
+RU	promocion.margenestimado	Ожид. маржа:
+PT	promocion.margenestimado	Margem est.:
+ES	promocion.impactoeconomico	Impacto econ.:
+EN	promocion.impactoeconomico	Econ. impact:
+RU	promocion.impactoeconomico	Экон. эффект:
+PT	promocion.impactoeconomico	Impacto econ.:
+ES	promocion.btn.registrar	Registrar
+EN	promocion.btn.registrar	Register
+RU	promocion.btn.registrar	Зарегистрировать
+PT	promocion.btn.registrar	Registrar
+ES	frm.promoadmin	Gestión de Promociones (Administración)
+EN	frm.promoadmin	Promotion Management (Administration)
+RU	frm.promoadmin	Управление акциями (Администрация)
+PT	frm.promoadmin	Gestão de Promoções (Administração)
+ES	promocion.btn.altadesdesugerencia	Alta desde Sugerencia
+EN	promocion.btn.altadesdesugerencia	New from Suggestion
+RU	promocion.btn.altadesdesugerencia	Создать из предложения
+PT	promocion.btn.altadesdesugerencia	Cadastro a partir de Sugestão
+ES	promocion.btn.altamanual	Alta Manual
+EN	promocion.btn.altamanual	Manual Entry
+RU	promocion.btn.altamanual	Ручное создание
+PT	promocion.btn.altamanual	Cadastro Manual
+ES	promocion.btn.desactivar	Desactivar
+EN	promocion.btn.desactivar	Deactivate
+RU	promocion.btn.desactivar	Деактивировать
+PT	promocion.btn.desactivar	Desativar
+ES	promocion.btn.aprobarbaja	Aprobar Baja
+EN	promocion.btn.aprobarbaja	Approve Deactivation
+RU	promocion.btn.aprobarbaja	Утвердить отмену
+PT	promocion.btn.aprobarbaja	Aprovar Baixa
+ES	promocion.btn.rechazarbaja	Rechazar Baja
+EN	promocion.btn.rechazarbaja	Reject Deactivation
+RU	promocion.btn.rechazarbaja	Отклонить отмену
+PT	promocion.btn.rechazarbaja	Rejeitar Baixa
+ES	promocion.titulosugerencias	Sugerencias de Promoción pendientes (Gerencia)
+EN	promocion.titulosugerencias	Pending Promotion Suggestions (Management)
+RU	promocion.titulosugerencias	Ожидающие предложения по акциям (Руководство)
+PT	promocion.titulosugerencias	Sugestões de Promoção pendentes (Gerência)
+ES	promocion.titulotodas	Todas las promociones
+EN	promocion.titulotodas	All promotions
+RU	promocion.titulotodas	Все акции
+PT	promocion.titulotodas	Todas as promoções
+ES	col.promo.id	ID
+EN	col.promo.id	ID
+RU	col.promo.id	ID
+PT	col.promo.id	ID
+ES	col.promo.aplicaa	Aplica a
+EN	col.promo.aplicaa	Applies to
+RU	col.promo.aplicaa	Применяется к
+PT	col.promo.aplicaa	Aplica-se a
+ES	col.promo.motivo	Motivo
+EN	col.promo.motivo	Reason
+RU	col.promo.motivo	Причина
+PT	col.promo.motivo	Motivo
+ES	col.promo.tiposugerido	Tipo Sugerido
+EN	col.promo.tiposugerido	Suggested Type
+RU	col.promo.tiposugerido	Предлагаемый тип
+PT	col.promo.tiposugerido	Tipo Sugerido
+ES	col.promo.beneficioest	Beneficio Est.
+EN	col.promo.beneficioest	Est. Benefit
+RU	col.promo.beneficioest	Ожид. выгода
+PT	col.promo.beneficioest	Benefício Est.
+ES	col.promo.nombre	Nombre
+EN	col.promo.nombre	Name
+RU	col.promo.nombre	Название
+PT	col.promo.nombre	Nome
+ES	col.promo.estado	Estado
+EN	col.promo.estado	Status
+RU	col.promo.estado	Статус
+PT	col.promo.estado	Estado
+ES	col.promo.motivobaja	Motivo Baja
+EN	col.promo.motivobaja	Deactivation Reason
+RU	col.promo.motivobaja	Причина отмены
+PT	col.promo.motivobaja	Motivo da Baixa
+ES	frm.promocontab	Revisión Contable de Promociones
+EN	frm.promocontab	Accounting Review of Promotions
+RU	frm.promocontab	Бухгалтерская проверка акций
+PT	frm.promocontab	Revisão Contábil de Promoções
+ES	promocion.observacion	Observación:
+EN	promocion.observacion	Remark:
+RU	promocion.observacion	Замечание:
+PT	promocion.observacion	Observação:
+ES	promocion.btn.aprobaryactivar	Aprobar y Activar
+EN	promocion.btn.aprobaryactivar	Approve and Activate
+RU	promocion.btn.aprobaryactivar	Утвердить и активировать
+PT	promocion.btn.aprobaryactivar	Aprovar e Ativar
+ES	promocion.btn.rechazar	Rechazar
+EN	promocion.btn.rechazar	Reject
+RU	promocion.btn.rechazar	Отклонить
+PT	promocion.btn.rechazar	Rejeitar
+ES	col.promo.tipo	Tipo
+EN	col.promo.tipo	Type
+RU	col.promo.tipo	Тип
+PT	col.promo.tipo	Tipo
+ES	col.promo.valor	Valor
+EN	col.promo.valor	Value
+RU	col.promo.valor	Значение
+PT	col.promo.valor	Valor
+ES	col.promo.margenest	Margen Est.
+EN	col.promo.margenest	Est. Margin
+RU	col.promo.margenest	Ожид. маржа
+PT	col.promo.margenest	Margem Est.
+ES	col.promo.impactoeconomico	Impacto Económico
+EN	col.promo.impactoeconomico	Economic Impact
+RU	col.promo.impactoeconomico	Экономический эффект
+PT	col.promo.impactoeconomico	Impacto Econômico
+ES	frm.promovigentes	Promociones Vigentes
+EN	frm.promovigentes	Active Promotions
+RU	frm.promovigentes	Действующие акции
+PT	frm.promovigentes	Promoções Vigentes
+ES	promocion.btn.sugerirbaja	Sugerir Baja
+EN	promocion.btn.sugerirbaja	Suggest Deactivation
+RU	promocion.btn.sugerirbaja	Предложить отмену
+PT	promocion.btn.sugerirbaja	Sugerir Baixa
+ES	col.promo.vigencia	Vigencia
+EN	col.promo.vigencia	Validity
+RU	col.promo.vigencia	Срок действия
+PT	col.promo.vigencia	Vigência
+ES	mnu.nuevacontratacion	Nueva Contratación
+EN	mnu.nuevacontratacion	New Contract
+RU	mnu.nuevacontratacion	Новый договор
+PT	mnu.nuevacontratacion	Nova Contratação
+ES	mnu.caja	Caja
+EN	mnu.caja	Cashier
+RU	mnu.caja	Касса
+PT	mnu.caja	Caixa
+ES	mnu.contratacionespendientes	Contrataciones Pendientes
+EN	mnu.contratacionespendientes	Pending Contracts
+RU	mnu.contratacionespendientes	Ожидающие договоры
+PT	mnu.contratacionespendientes	Contratações Pendentes
+ES	mnu.promociones	Promociones
+EN	mnu.promociones	Promotions
+RU	mnu.promociones	Акции
+PT	mnu.promociones	Promoções
+ES	mnu.sugerirpromocion	Sugerir Promoción
+EN	mnu.sugerirpromocion	Suggest Promotion
+RU	mnu.sugerirpromocion	Предложить акцию
+PT	mnu.sugerirpromocion	Sugerir Promoção
+ES	mnu.gestionpromociones	Gestión de Promociones
+EN	mnu.gestionpromociones	Promotion Management
+RU	mnu.gestionpromociones	Управление акциями
+PT	mnu.gestionpromociones	Gestão de Promoções
+ES	mnu.revisioncontablepromociones	Revisión Contable
+EN	mnu.revisioncontablepromociones	Accounting Review
+RU	mnu.revisioncontablepromociones	Бухгалтерская проверка
+PT	mnu.revisioncontablepromociones	Revisão Contábil
+ES	mnu.promocionesvigentes	Promociones Vigentes
+EN	mnu.promocionesvigentes	Active Promotions
+RU	mnu.promocionesvigentes	Действующие акции
+PT	mnu.promocionesvigentes	Promoções Vigentes

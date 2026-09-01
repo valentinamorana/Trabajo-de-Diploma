@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using Servicios.Multiidioma;
 
 namespace GUI
 {
@@ -9,7 +10,7 @@ namespace GUI
     /// Capa de Presentación — PN03, CU-VEND-04-Sugerir Baja de Promoción. Actor: Vendedor
     /// (consulta las promociones Vigentes y puede sugerir que Administración dé de baja una).
     /// </summary>
-    public partial class PromocionesVigentesForm : FormBase
+    public partial class PromocionesVigentesForm : FormBase, IIdiomaObserver
     {
         protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
 
@@ -17,9 +18,65 @@ namespace GUI
 
         private List<BE.Promocion> _promociones = new List<BE.Promocion>();
 
+        private Idioma _idioma = GestorIdioma.IdiomaActual;
+
         public PromocionesVigentesForm()
         {
             InitializeComponent();
+        }
+
+        // ── Observer de idioma ────────────────────────────────────────────────
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            GestorIdioma.SuscribirObservador(this);
+            Traducir(GestorIdioma.IdiomaActual);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+            CargarPromociones();
+        }
+
+        private void Traducir(Idioma idioma)
+        {
+            _idioma = idioma;
+            var t = Traductor.ObtenerTraducciones(idioma);
+            if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
+                this.Text = t[this.Tag.ToString()].Texto;
+            Aplicar(btnSugerirBaja, t);
+            TraducirHeadersGrilla(t);
+        }
+
+        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        {
+            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                c.Text = t[c.Tag.ToString()].Texto;
+        }
+
+        /// <summary>Renombra el HeaderText de las columnas de dgvPromociones según el idioma activo.</summary>
+        private void TraducirHeadersGrilla(IDictionary<string, Traduccion> t)
+        {
+            void RH(string col, string clave)
+            {
+                if (dgvPromociones.Columns.Contains(col) && t.ContainsKey(clave))
+                    dgvPromociones.Columns[col].HeaderText = t[clave].Texto;
+            }
+
+            RH("ID",       "col.promo.id");
+            RH("Nombre",   "col.promo.nombre");
+            RH("Aplica a", "col.promo.aplicaa");
+            RH("Tipo",     "col.promo.tipo");
+            RH("Valor",    "col.promo.valor");
+            RH("Vigencia", "col.promo.vigencia");
         }
 
         private void PromocionesVigentesForm_Load(object sender, EventArgs e)
@@ -56,6 +113,7 @@ namespace GUI
                 dgvPromociones.DataSource = tabla;
                 if (dgvPromociones.Columns.Contains("ID"))
                     dgvPromociones.Columns["ID"].Width = 44;
+                TraducirHeadersGrilla(Traductor.ObtenerTraducciones(_idioma));
 
                 lblConteo.Text = $"{_promociones.Count} promoción(es) vigente(s).";
                 btnSugerirBaja.Enabled = false;

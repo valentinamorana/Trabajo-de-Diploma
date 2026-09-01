@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using Servicios.Multiidioma;
 
 namespace GUI
 {
@@ -8,7 +9,7 @@ namespace GUI
     /// Capa de Presentación — PN03, CU-GE-01-Sugerir Promoción a la Administración.
     /// Actor: GerenteComercial (Gerencia reusa este rol ya existente).
     /// </summary>
-    public partial class SugerirPromocionForm : FormBase
+    public partial class SugerirPromocionForm : FormBase, IIdiomaObserver
     {
         protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
 
@@ -20,6 +21,45 @@ namespace GUI
         public SugerirPromocionForm()
         {
             InitializeComponent();
+        }
+
+        // ── Observer de idioma ────────────────────────────────────────────────
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            GestorIdioma.SuscribirObservador(this);
+            Traducir(GestorIdioma.IdiomaActual);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+        }
+
+        private void Traducir(Idioma idioma)
+        {
+            var t = Traductor.ObtenerTraducciones(idioma);
+            if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
+                this.Text = t[this.Tag.ToString()].Texto;
+            Aplicar(rbPlan,              t);
+            Aplicar(rbCategoria,         t);
+            Aplicar(lblTipoDescuento,    t);
+            Aplicar(lblBeneficioEstimado, t);
+            Aplicar(lblMotivo,           t);
+            Aplicar(btnEnviar,           t);
+        }
+
+        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        {
+            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                c.Text = t[c.Tag.ToString()].Texto;
         }
 
         private void SugerirPromocionForm_Load(object sender, EventArgs e)

@@ -272,6 +272,7 @@
             // nuevaContratacionToolStripMenuItem — PN02 (Venta capta cliente + plan elegido)
             //
             this.nuevaContratacionToolStripMenuItem.Name = "nuevaContratacionToolStripMenuItem";
+            this.nuevaContratacionToolStripMenuItem.Tag = "mnu.nuevacontratacion";
             this.nuevaContratacionToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.nuevaContratacionToolStripMenuItem.Text = "Nueva Contratación";
             this.nuevaContratacionToolStripMenuItem.Click += new System.EventHandler(this.nuevaContratacionToolStripMenuItem_Click);
@@ -297,12 +298,14 @@
             this.cajaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.contratacionesPendientesToolStripMenuItem});
             this.cajaToolStripMenuItem.Name = "cajaToolStripMenuItem";
+            this.cajaToolStripMenuItem.Tag = "mnu.caja";
             this.cajaToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
             this.cajaToolStripMenuItem.Text = "Caja";
             //
             // contratacionesPendientesToolStripMenuItem
             //
             this.contratacionesPendientesToolStripMenuItem.Name = "contratacionesPendientesToolStripMenuItem";
+            this.contratacionesPendientesToolStripMenuItem.Tag = "mnu.contratacionespendientes";
             this.contratacionesPendientesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
             this.contratacionesPendientesToolStripMenuItem.Text = "Contrataciones Pendientes";
             this.contratacionesPendientesToolStripMenuItem.Click += new System.EventHandler(this.contratacionesPendientesToolStripMenuItem_Click);
@@ -316,12 +319,14 @@
             this.revisionContablePromocionesToolStripMenuItem,
             this.promocionesVigentesToolStripMenuItem});
             this.promocionesToolStripMenuItem.Name = "promocionesToolStripMenuItem";
+            this.promocionesToolStripMenuItem.Tag = "mnu.promociones";
             this.promocionesToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
             this.promocionesToolStripMenuItem.Text = "Promociones";
             //
             // sugerirPromocionToolStripMenuItem
             //
             this.sugerirPromocionToolStripMenuItem.Name = "sugerirPromocionToolStripMenuItem";
+            this.sugerirPromocionToolStripMenuItem.Tag = "mnu.sugerirpromocion";
             this.sugerirPromocionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
             this.sugerirPromocionToolStripMenuItem.Text = "Sugerir Promoción";
             this.sugerirPromocionToolStripMenuItem.Click += new System.EventHandler(this.sugerirPromocionToolStripMenuItem_Click);
@@ -329,6 +334,7 @@
             // gestionPromocionesToolStripMenuItem
             //
             this.gestionPromocionesToolStripMenuItem.Name = "gestionPromocionesToolStripMenuItem";
+            this.gestionPromocionesToolStripMenuItem.Tag = "mnu.gestionpromociones";
             this.gestionPromocionesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
             this.gestionPromocionesToolStripMenuItem.Text = "Gestión de Promociones";
             this.gestionPromocionesToolStripMenuItem.Click += new System.EventHandler(this.gestionPromocionesToolStripMenuItem_Click);
@@ -336,6 +342,7 @@
             // revisionContablePromocionesToolStripMenuItem
             //
             this.revisionContablePromocionesToolStripMenuItem.Name = "revisionContablePromocionesToolStripMenuItem";
+            this.revisionContablePromocionesToolStripMenuItem.Tag = "mnu.revisioncontablepromociones";
             this.revisionContablePromocionesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
             this.revisionContablePromocionesToolStripMenuItem.Text = "Revisión Contable";
             this.revisionContablePromocionesToolStripMenuItem.Click += new System.EventHandler(this.revisionContablePromocionesToolStripMenuItem_Click);
@@ -343,6 +350,7 @@
             // promocionesVigentesToolStripMenuItem
             //
             this.promocionesVigentesToolStripMenuItem.Name = "promocionesVigentesToolStripMenuItem";
+            this.promocionesVigentesToolStripMenuItem.Tag = "mnu.promocionesvigentes";
             this.promocionesVigentesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
             this.promocionesVigentesToolStripMenuItem.Text = "Promociones Vigentes";
             this.promocionesVigentesToolStripMenuItem.Click += new System.EventHandler(this.promocionesVigentesToolStripMenuItem_Click);

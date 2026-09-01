@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using Servicios.Multiidioma;
 
 namespace GUI
 {
@@ -8,7 +9,7 @@ namespace GUI
     /// Capa de Presentación — PN03, CU-ADM-Gestionar Promociones (alta, desde una sugerencia de
     /// Gerencia o manual). Actor: Administración (rol AdministracionComercial).
     /// </summary>
-    public partial class AltaPromocionForm : FormBase
+    public partial class AltaPromocionForm : FormBase, IIdiomaObserver
     {
         protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
 
@@ -26,6 +27,51 @@ namespace GUI
         {
             InitializeComponent();
             _sugerenciaOrigen = sugerenciaOrigen;
+        }
+
+        // ── Observer de idioma ────────────────────────────────────────────────
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            GestorIdioma.SuscribirObservador(this);
+            Traducir(GestorIdioma.IdiomaActual);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+        }
+
+        private void Traducir(Idioma idioma)
+        {
+            var t = Traductor.ObtenerTraducciones(idioma);
+            if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
+                this.Text = t[this.Tag.ToString()].Texto;
+            Aplicar(lblNombre,           t);
+            Aplicar(lblDescripcion,      t);
+            Aplicar(rbPlan,              t);
+            Aplicar(rbCategoria,         t);
+            Aplicar(lblTipoDescuento,    t);
+            Aplicar(lblValor,            t);
+            Aplicar(lblInicio,           t);
+            Aplicar(lblFin,              t);
+            Aplicar(lblMargenEstimado,   t);
+            Aplicar(lblImpactoEconomico, t);
+            Aplicar(btnConfirmar,        t);
+            Aplicar(btnCancelar,         t);
+        }
+
+        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        {
+            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                c.Text = t[c.Tag.ToString()].Texto;
         }
 
         private void AltaPromocionForm_Load(object sender, EventArgs e)

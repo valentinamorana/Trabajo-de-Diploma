@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using Servicios.Multiidioma;
 
 namespace GUI
 {
@@ -11,7 +12,7 @@ namespace GUI
     /// (desde sugerencia o manual), las desactiva directamente si están Vigentes, y resuelve
     /// las solicitudes de baja que envía Ventas.
     /// </summary>
-    public partial class PromocionesAdministracionForm : FormBase
+    public partial class PromocionesAdministracionForm : FormBase, IIdiomaObserver
     {
         protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
 
@@ -21,9 +22,87 @@ namespace GUI
         private List<BE.SugerenciaPromocion> _sugerencias = new List<BE.SugerenciaPromocion>();
         private List<BE.Promocion> _promociones = new List<BE.Promocion>();
 
+        private Idioma _idioma = GestorIdioma.IdiomaActual;
+
         public PromocionesAdministracionForm()
         {
             InitializeComponent();
+        }
+
+        // ── Observer de idioma ────────────────────────────────────────────────
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            GestorIdioma.SuscribirObservador(this);
+            Traducir(GestorIdioma.IdiomaActual);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+            CargarTodo();
+        }
+
+        private void Traducir(Idioma idioma)
+        {
+            _idioma = idioma;
+            var t = Traductor.ObtenerTraducciones(idioma);
+            if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
+                this.Text = t[this.Tag.ToString()].Texto;
+            Aplicar(btnUsarSugerencia,     t);
+            Aplicar(btnNuevaManual,        t);
+            Aplicar(btnDesactivar,         t);
+            Aplicar(btnAprobarBaja,        t);
+            Aplicar(btnRechazarBaja,       t);
+            Aplicar(lblSugerenciasTitulo,  t);
+            Aplicar(lblPromocionesTitulo,  t);
+            TraducirHeadersSugerencias(t);
+            TraducirHeadersPromociones(t);
+        }
+
+        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        {
+            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                c.Text = t[c.Tag.ToString()].Texto;
+        }
+
+        /// <summary>Renombra el HeaderText de las columnas de dgvSugerencias según el idioma activo.</summary>
+        private void TraducirHeadersSugerencias(IDictionary<string, Traduccion> t)
+        {
+            void RH(string col, string clave)
+            {
+                if (dgvSugerencias.Columns.Contains(col) && t.ContainsKey(clave))
+                    dgvSugerencias.Columns[col].HeaderText = t[clave].Texto;
+            }
+
+            RH("ID",            "col.promo.id");
+            RH("Aplica a",      "col.promo.aplicaa");
+            RH("Motivo",        "col.promo.motivo");
+            RH("Tipo Sugerido", "col.promo.tiposugerido");
+            RH("Beneficio Est.","col.promo.beneficioest");
+        }
+
+        /// <summary>Renombra el HeaderText de las columnas de dgvPromociones según el idioma activo.</summary>
+        private void TraducirHeadersPromociones(IDictionary<string, Traduccion> t)
+        {
+            void RH(string col, string clave)
+            {
+                if (dgvPromociones.Columns.Contains(col) && t.ContainsKey(clave))
+                    dgvPromociones.Columns[col].HeaderText = t[clave].Texto;
+            }
+
+            RH("ID",          "col.promo.id");
+            RH("Nombre",      "col.promo.nombre");
+            RH("Aplica a",    "col.promo.aplicaa");
+            RH("Estado",      "col.promo.estado");
+            RH("Motivo Baja", "col.promo.motivobaja");
         }
 
         private void PromocionesAdministracionForm_Load(object sender, EventArgs e)
@@ -60,6 +139,7 @@ namespace GUI
 
                 dgvSugerencias.DataSource = tabla;
                 if (dgvSugerencias.Columns.Contains("ID")) dgvSugerencias.Columns["ID"].Width = 44;
+                TraducirHeadersSugerencias(Traductor.ObtenerTraducciones(_idioma));
 
                 btnUsarSugerencia.Enabled = false;
             }
@@ -87,6 +167,7 @@ namespace GUI
 
                 dgvPromociones.DataSource = tabla;
                 if (dgvPromociones.Columns.Contains("ID")) dgvPromociones.Columns["ID"].Width = 44;
+                TraducirHeadersPromociones(Traductor.ObtenerTraducciones(_idioma));
 
                 lblConteo.Text = $"{_promociones.Count} promoción(es) en total.";
                 DeshabilitarBotonesPromocion();

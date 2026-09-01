@@ -34,6 +34,7 @@ namespace GUI
             this.lblCliente.Name = "lblCliente";
             this.lblCliente.Size = new System.Drawing.Size(80, 23);
             this.lblCliente.TabIndex = 0;
+            this.lblCliente.Tag = "contratacion.cliente";
             this.lblCliente.Text = "Cliente:";
             this.lblCliente.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -51,6 +52,7 @@ namespace GUI
             this.lblPlan.Name = "lblPlan";
             this.lblPlan.Size = new System.Drawing.Size(80, 23);
             this.lblPlan.TabIndex = 2;
+            this.lblPlan.Tag = "contratacion.plan";
             this.lblPlan.Text = "Plan:";
             this.lblPlan.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -68,6 +70,7 @@ namespace GUI
             this.lblModalidad.Name = "lblModalidad";
             this.lblModalidad.Size = new System.Drawing.Size(80, 23);
             this.lblModalidad.TabIndex = 4;
+            this.lblModalidad.Tag = "contratacion.modalidad";
             this.lblModalidad.Text = "Modalidad:";
             this.lblModalidad.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -89,6 +92,7 @@ namespace GUI
             this.btnConfirmar.Name = "btnConfirmar";
             this.btnConfirmar.Size = new System.Drawing.Size(120, 30);
             this.btnConfirmar.TabIndex = 6;
+            this.btnConfirmar.Tag = "contratacion.btn.confirmar";
             this.btnConfirmar.Text = "Confirmar";
             this.btnConfirmar.UseVisualStyleBackColor = false;
             this.btnConfirmar.Click += new System.EventHandler(this.BtnConfirmar_Click);
@@ -100,6 +104,7 @@ namespace GUI
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(100, 30);
             this.btnCancelar.TabIndex = 7;
+            this.btnCancelar.Tag = "btn.cancelar";
             this.btnCancelar.Text = "Cancelar";
             this.btnCancelar.Click += new System.EventHandler(this.BtnCancelar_Click);
             //
@@ -142,6 +147,7 @@ namespace GUI
             this.MinimizeBox = false;
             this.Name = "NuevaContratacionForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Tag = "frm.nuevacontratacion";
             this.Text = "Nueva Contratación";
             this.Load += new System.EventHandler(this.NuevaContratacionForm_Load);
             this.panelStatus.ResumeLayout(false);

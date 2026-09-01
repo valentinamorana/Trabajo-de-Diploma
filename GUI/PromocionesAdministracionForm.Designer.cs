@@ -68,6 +68,7 @@ namespace GUI
             this.btnUsarSugerencia.Name = "btnUsarSugerencia";
             this.btnUsarSugerencia.Size = new System.Drawing.Size(160, 28);
             this.btnUsarSugerencia.TabIndex = 0;
+            this.btnUsarSugerencia.Tag = "promocion.btn.altadesdesugerencia";
             this.btnUsarSugerencia.Text = "Alta desde Sugerencia";
             this.btnUsarSugerencia.Click += new System.EventHandler(this.BtnUsarSugerencia_Click);
             //
@@ -78,6 +79,7 @@ namespace GUI
             this.btnNuevaManual.Name = "btnNuevaManual";
             this.btnNuevaManual.Size = new System.Drawing.Size(130, 28);
             this.btnNuevaManual.TabIndex = 1;
+            this.btnNuevaManual.Tag = "promocion.btn.altamanual";
             this.btnNuevaManual.Text = "Alta Manual";
             this.btnNuevaManual.Click += new System.EventHandler(this.BtnNuevaManual_Click);
             //
@@ -92,6 +94,7 @@ namespace GUI
             this.btnDesactivar.Name = "btnDesactivar";
             this.btnDesactivar.Size = new System.Drawing.Size(110, 28);
             this.btnDesactivar.TabIndex = 2;
+            this.btnDesactivar.Tag = "promocion.btn.desactivar";
             this.btnDesactivar.Text = "Desactivar";
             this.btnDesactivar.UseVisualStyleBackColor = false;
             this.btnDesactivar.Click += new System.EventHandler(this.BtnDesactivar_Click);
@@ -107,6 +110,7 @@ namespace GUI
             this.btnAprobarBaja.Name = "btnAprobarBaja";
             this.btnAprobarBaja.Size = new System.Drawing.Size(130, 28);
             this.btnAprobarBaja.TabIndex = 3;
+            this.btnAprobarBaja.Tag = "promocion.btn.aprobarbaja";
             this.btnAprobarBaja.Text = "Aprobar Baja";
             this.btnAprobarBaja.UseVisualStyleBackColor = false;
             this.btnAprobarBaja.Click += new System.EventHandler(this.BtnAprobarBaja_Click);
@@ -119,6 +123,7 @@ namespace GUI
             this.btnRechazarBaja.Name = "btnRechazarBaja";
             this.btnRechazarBaja.Size = new System.Drawing.Size(130, 28);
             this.btnRechazarBaja.TabIndex = 4;
+            this.btnRechazarBaja.Tag = "promocion.btn.rechazarbaja";
             this.btnRechazarBaja.Text = "Rechazar Baja";
             this.btnRechazarBaja.Click += new System.EventHandler(this.BtnRechazarBaja_Click);
             //
@@ -163,6 +168,7 @@ namespace GUI
             this.lblSugerenciasTitulo.Padding = new System.Windows.Forms.Padding(6, 3, 0, 0);
             this.lblSugerenciasTitulo.Size = new System.Drawing.Size(1040, 22);
             this.lblSugerenciasTitulo.TabIndex = 0;
+            this.lblSugerenciasTitulo.Tag = "promocion.titulosugerencias";
             this.lblSugerenciasTitulo.Text = "Sugerencias de Promoción pendientes (Gerencia)";
             //
             // dgvSugerencias
@@ -196,6 +202,7 @@ namespace GUI
             this.lblPromocionesTitulo.Padding = new System.Windows.Forms.Padding(6, 3, 0, 0);
             this.lblPromocionesTitulo.Size = new System.Drawing.Size(1040, 22);
             this.lblPromocionesTitulo.TabIndex = 0;
+            this.lblPromocionesTitulo.Tag = "promocion.titulotodas";
             this.lblPromocionesTitulo.Text = "Todas las promociones";
             //
             // lblConteo
@@ -260,6 +267,7 @@ namespace GUI
             this.Controls.Add(this.panelTop);
             this.MinimumSize = new System.Drawing.Size(880, 480);
             this.Name = "PromocionesAdministracionForm";
+            this.Tag = "frm.promoadmin";
             this.Text = "Gestión de Promociones (Administración)";
             this.Load += new System.EventHandler(this.PromocionesAdministracionForm_Load);
             this.panelTop.ResumeLayout(false);

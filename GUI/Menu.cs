@@ -875,6 +875,14 @@ namespace GUI
             Aplicar(cobroSuscripcionToolStripMenuItem,  t);
             Aplicar(pedidosVentaToolStripMenuItem,      t);
             Aplicar(pedidosRealizadosToolStripMenuItem, t);
+            Aplicar(nuevaContratacionToolStripMenuItem,          t);
+            Aplicar(cajaToolStripMenuItem,                       t);
+            Aplicar(contratacionesPendientesToolStripMenuItem,   t);
+            Aplicar(promocionesToolStripMenuItem,                t);
+            Aplicar(sugerirPromocionToolStripMenuItem,           t);
+            Aplicar(gestionPromocionesToolStripMenuItem,         t);
+            Aplicar(revisionContablePromocionesToolStripMenuItem, t);
+            Aplicar(promocionesVigentesToolStripMenuItem,        t);
             Aplicar(gestionToolStripMenuItem,           t);
             Aplicar(grpUsuarios,                        t);
             Aplicar(grpSistema,                         t);

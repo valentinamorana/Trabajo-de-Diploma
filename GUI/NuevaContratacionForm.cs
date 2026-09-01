@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using Servicios.Multiidioma;
 
 namespace GUI
 {
@@ -13,7 +14,7 @@ namespace GUI
     ///
     /// Accesible desde Menú → Ventas → Nueva Contratación (permiso mnuClientes).
     /// </summary>
-    public partial class NuevaContratacionForm : FormBase
+    public partial class NuevaContratacionForm : FormBase, IIdiomaObserver
     {
         protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
 
@@ -29,6 +30,44 @@ namespace GUI
         public NuevaContratacionForm()
         {
             InitializeComponent();
+        }
+
+        // ── Observer de idioma ────────────────────────────────────────────────
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            GestorIdioma.SuscribirObservador(this);
+            Traducir(GestorIdioma.IdiomaActual);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+        }
+
+        private void Traducir(Idioma idioma)
+        {
+            var t = Traductor.ObtenerTraducciones(idioma);
+            if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
+                this.Text = t[this.Tag.ToString()].Texto;
+            Aplicar(lblCliente,    t);
+            Aplicar(lblPlan,       t);
+            Aplicar(lblModalidad,  t);
+            Aplicar(btnConfirmar,  t);
+            Aplicar(btnCancelar,   t);
+        }
+
+        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        {
+            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                c.Text = t[c.Tag.ToString()].Texto;
         }
 
         private void NuevaContratacionForm_Load(object sender, EventArgs e)

@@ -54,6 +54,7 @@ namespace GUI
             this.lblMedioPago.Name = "lblMedioPago";
             this.lblMedioPago.Size = new System.Drawing.Size(90, 23);
             this.lblMedioPago.TabIndex = 0;
+            this.lblMedioPago.Tag = "contratacion.mediopago";
             this.lblMedioPago.Text = "Medio de pago:";
             this.lblMedioPago.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -80,6 +81,7 @@ namespace GUI
             this.btnCobrar.Name = "btnCobrar";
             this.btnCobrar.Size = new System.Drawing.Size(100, 28);
             this.btnCobrar.TabIndex = 2;
+            this.btnCobrar.Tag = "contratacion.btn.cobrar";
             this.btnCobrar.Text = "💲 Cobrar";
             this.btnCobrar.UseVisualStyleBackColor = false;
             this.btnCobrar.Click += new System.EventHandler(this.BtnCobrar_Click);
@@ -95,6 +97,7 @@ namespace GUI
             this.btnIntentoFallido.Name = "btnIntentoFallido";
             this.btnIntentoFallido.Size = new System.Drawing.Size(160, 28);
             this.btnIntentoFallido.TabIndex = 3;
+            this.btnIntentoFallido.Tag = "contratacion.btn.intentofallido";
             this.btnIntentoFallido.Text = "✗ Intento Fallido";
             this.btnIntentoFallido.UseVisualStyleBackColor = false;
             this.btnIntentoFallido.Click += new System.EventHandler(this.BtnIntentoFallido_Click);
@@ -176,6 +179,7 @@ namespace GUI
             this.Controls.Add(this.panelTop);
             this.MinimumSize = new System.Drawing.Size(720, 400);
             this.Name = "ContratacionesPendientesForm";
+            this.Tag = "frm.contratacionespend";
             this.Text = "Contrataciones Pendientes de Pago";
             this.Load += new System.EventHandler(this.ContratacionesPendientesForm_Load);
             this.panelTop.ResumeLayout(false);

@@ -6,8 +6,8 @@ namespace BLL
     /// <summary>Lógica de negocio para gestión de prendas.</summary>
     public class Prenda : Interfaces.IPrendaService
     {
-        private readonly DAL.Prenda                  dalPrenda        = new DAL.Prenda();
-        private readonly DAL.MantenimientoPrenda     dalMantenimiento = new DAL.MantenimientoPrenda();
+        private readonly DAL.Interfaces.IPrendaDAL              dalPrenda;
+        private readonly DAL.Interfaces.IMantenimientoPrendaDAL dalMantenimiento;
         private readonly Servicios.Bitacora          bitacora         = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio   bitacoraNeg      = new Servicios.BitacoraNegocio();
 
@@ -15,6 +15,16 @@ namespace BLL
         // BLL.Usuario.perfilesBLL => new BLL.Familia().
         private Interfaces.IListaEsperaService _listaEsperaLazy;
         private Interfaces.IListaEsperaService listaEsperaBLL => _listaEsperaLazy ?? (_listaEsperaLazy = new ListaEspera());
+
+        // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
+        // de prueba (mismo criterio que BLL.Pedido/BLL.Cliente).
+        public Prenda() : this(new DAL.Prenda(), new DAL.MantenimientoPrenda()) { }
+
+        public Prenda(DAL.Interfaces.IPrendaDAL dalPrenda, DAL.Interfaces.IMantenimientoPrendaDAL dalMantenimiento)
+        {
+            this.dalPrenda        = dalPrenda ?? throw new ArgumentNullException(nameof(dalPrenda));
+            this.dalMantenimiento = dalMantenimiento ?? throw new ArgumentNullException(nameof(dalMantenimiento));
+        }
 
         public List<BE.Prenda> ObtenerTodos()                   => dalPrenda.ObtenerTodos();
         public List<BE.Prenda> ObtenerPorCliente(int id)       => dalPrenda.ObtenerPorCliente(id);
@@ -131,6 +141,21 @@ namespace BLL
                 BE.TipoEventoNegocio.CambioEstadoPrenda,
                 $"Prenda '{prenda.Nombre}' (ID {prenda.IdPrenda}): {estadoAnterior} → {nuevoEstado}",
                 idPrenda: prenda.IdPrenda);
+        }
+
+        // CU01-CS-Verificar Disponibilidad (PN01): por cada prenda de la selección relee el
+        // estado real desde la base (no confía en el objeto en memoria que pasó el caller) y
+        // evalúa EstaDisponible(). Operación de solo lectura: no reserva ni modifica nada.
+        public (bool Disponible, List<BE.Prenda> NoDisponibles) VerificarDisponibilidad(List<BE.Prenda> seleccion)
+        {
+            var noDisponibles = new List<BE.Prenda>();
+            foreach (var p in seleccion)
+            {
+                var actual = dalPrenda.ObtenerPorId(p.IdPrenda);
+                if (actual == null || !actual.EstaDisponible())
+                    noDisponibles.Add(actual ?? p);
+            }
+            return (noDisponibles.Count == 0, noDisponibles);
         }
 
         public List<BE.MantenimientoPrenda> ObtenerHistorialMantenimiento(int idPrenda)

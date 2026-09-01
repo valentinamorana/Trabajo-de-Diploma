@@ -22,6 +22,11 @@ namespace BLL
         private Interfaces.IListaEsperaService _listaEsperaLazy;
         private Interfaces.IListaEsperaService listaEsperaBLL => _listaEsperaLazy ?? (_listaEsperaLazy = new ListaEspera());
 
+        // PN01 (split lógico Depósito) — composición lazy, mismo criterio que listaEsperaBLL:
+        // BLL.Prenda es dueña de VerificarDisponibilidad, BLL.Pedido solo la consume.
+        private Interfaces.IPrendaService _prendaBLLLazy;
+        private Interfaces.IPrendaService prendaBLL => _prendaBLLLazy ?? (_prendaBLLLazy = new Prenda());
+
         // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
         // de prueba (mismo criterio que BLL.Cliente/BLL.Renovacion/BLL.Cobro).
         public Pedido() : this(new DAL.Pedido(), new DAL.Cliente(), new DAL.Empleado(),
@@ -48,6 +53,26 @@ namespace BLL
             _listaEsperaLazy = listaEsperaBLL ?? throw new ArgumentNullException(nameof(listaEsperaBLL));
         }
 
+        // Overload para inyectar un doble de prueba de BLL.Prenda (PN01, split lógico Depósito)
+        // sin tocar el constructor de 5 parámetros usado en el resto de los tests existentes.
+        public Pedido(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IClienteDAL dalCliente,
+                       DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
+                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial, Interfaces.IPrendaService prendaBLL)
+            : this(dalPedido, dalCliente, dalEmpleado, dalPlan, dalHistorial)
+        {
+            _prendaBLLLazy = prendaBLL ?? throw new ArgumentNullException(nameof(prendaBLL));
+        }
+
+        // Overload para inyectar dobles de prueba de Lista de Espera Y BLL.Prenda a la vez.
+        public Pedido(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IClienteDAL dalCliente,
+                       DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
+                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial, Interfaces.IListaEsperaService listaEsperaBLL,
+                       Interfaces.IPrendaService prendaBLL)
+            : this(dalPedido, dalCliente, dalEmpleado, dalPlan, dalHistorial, listaEsperaBLL)
+        {
+            _prendaBLLLazy = prendaBLL ?? throw new ArgumentNullException(nameof(prendaBLL));
+        }
+
         // Consultas
         public List<BE.Pedido> ObtenerTodos() => dalPedido.ObtenerTodos();
         public List<BE.Pedido> ObtenerPendientes() => dalPedido.ObtenerPendientes();
@@ -71,11 +96,11 @@ namespace BLL
                     "Confirmá la entrega antes de crear uno nuevo.",
                     despachadoActivo.IdPedido);
 
-            var plan    = ObtenerPlanValidado(cliente, prendas.Count);
+            var plan    = ValidarCupoDisponible(cliente, prendas.Count);
 
             ValidarDisponibilidadPrendas(prendas, idCliente);
 
-            int idNuevo = PersistirPedido(idCliente, prendas);
+            int idNuevo = ReservarPrendas(prendas, idCliente);
 
             RegistrarHistorial(idNuevo, "CREAR", new List<(string, string, string)>
             {
@@ -309,8 +334,9 @@ namespace BLL
             return cliente;
         }
 
-        // Verifica que el plan del cliente permita la cantidad de prendas pedidas.
-        private BE.PlanSuscripcion ObtenerPlanValidado(BE.Cliente cliente, int cantidadPrendas)
+        // CU01-VEN-Armar Pedido, paso "Validar cupo disponible" (PN01): verifica que el plan
+        // del cliente permita la cantidad de prendas pedidas y devuelve el plan consultado.
+        public BE.PlanSuscripcion ValidarCupoDisponible(BE.Cliente cliente, int cantidadPrendas)
         {
             if (!cliente.IdPlan.HasValue)
                 throw new BE.AppException("err.bll.pedido.sin_plan",
@@ -331,18 +357,23 @@ namespace BLL
             return plan;
         }
 
-        // Verifica que todas las prendas estén en estado Disponible y, si alguna está
-        // reservada por Lista de Espera (mejora opcional) para OTRO cliente, la rechaza
-        // aunque su Estado siga siendo Disponible a nivel de máquina de estados.
+        // CU01-CS-Verificar Disponibilidad (PN01): delega en BLL.Prenda.VerificarDisponibilidad
+        // (releída fresca desde la base) y, si pasa, chequea si alguna quedó reservada por
+        // Lista de Espera (mejora opcional) para OTRO cliente, aunque su Estado siga siendo
+        // Disponible a nivel de máquina de estados.
         private void ValidarDisponibilidadPrendas(List<BE.Prenda> prendas, int idCliente)
         {
+            var (disponible, noDisponibles) = prendaBLL.VerificarDisponibilidad(prendas);
+            if (!disponible)
+            {
+                var p = noDisponibles[0];
+                throw new BE.AppException("err.bll.pedido.prenda_no_disponible",
+                    "La prenda '{0}' ya no está disponible (estado: {1}). Actualizá la selección.",
+                    p.Nombre, p.Estado);
+            }
+
             foreach (var p in prendas)
             {
-                if (!p.EstaDisponible())
-                    throw new BE.AppException("err.bll.pedido.prenda_no_disponible",
-                        "La prenda '{0}' ya no está disponible (estado: {1}). Actualizá la selección.",
-                        p.Nombre, p.Estado);
-
                 bool reservadaParaOtro;
                 try { reservadaParaOtro = listaEsperaBLL.EstaReservadaParaOtro(p.IdPrenda, idCliente); }
                 catch { reservadaParaOtro = false; } // BD sin migrar (tabla ListaEspera inexistente) → no bloquea
@@ -354,9 +385,16 @@ namespace BLL
             }
         }
 
-        // Construye el pedido y lo persiste en BD. Devuelve el ID generado.
-        private int PersistirPedido(int idCliente, List<BE.Prenda> prendas)
+        // CU02-CS-Reservar Prendas (PN01): construye el pedido y lo persiste en BD de forma
+        // atómica (la reserva física real ocurre dentro de dalPedido.Alta, ver DAL/Pedido.cs).
+        // Devuelve el ID generado. Ahora que es público (antes era el privado PersistirPedido),
+        // vuelve a exigir el mismo permiso que CrearPedido — sin esto, cualquier caller con una
+        // referencia a IPedidoService podría crear un pedido saltándose el chequeo de permisos
+        // (no revalida cupo/disponibilidad: esa orquestación sigue siendo responsabilidad de
+        // CrearPedido, que es quien encadena los 3 pasos en el orden correcto).
+        public int ReservarPrendas(List<BE.Prenda> prendas, int idCliente)
         {
+            PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
             int idEmpleado = ResolverEmpleadoActivo();
 
             var pedido = new BE.Pedido

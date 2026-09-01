@@ -17,6 +17,7 @@ namespace BE
         public const string PedidosRealizados = "mnuPedidosRealizados";
         public const string CobroSuscripcion  = "mnuCobroSuscripcion";
         public const string ListaEspera       = "mnuListaEspera";
+        public const string Caja              = "mnuCaja";
 
         // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────
         // Cada una gobierna las operaciones de escritura (alta/modificación/baja) del módulo.
@@ -27,5 +28,6 @@ namespace BE
         public const string PlanSuscripcionesEditar = "mnuPlanSuscripcionesEditar";
         public const string PedidosVentaEditar      = "mnuPedidosVentaEditar";
         public const string PedidosRealizadosEditar = "mnuPedidosRealizadosEditar";
+        public const string CajaEditar              = "mnuCajaEditar";
     }
 }

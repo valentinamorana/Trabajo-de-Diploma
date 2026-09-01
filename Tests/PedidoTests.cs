@@ -66,7 +66,14 @@ namespace Tests
             public FakePlanSuscripcionDAL DalPlan = new FakePlanSuscripcionDAL { PlanPorId = PlanBasico() };
             public FakePedidoHistorialDAL DalHistorial = new FakePedidoHistorialDAL();
 
-            public BLL.Pedido Crear() => new BLL.Pedido(DalPedido, DalCliente, DalEmpleado, DalPlan, DalHistorial);
+            // PN01 (split lógico Depósito): BLL.Pedido ahora consume BLL.Prenda.VerificarDisponibilidad,
+            // que relee el estado desde la base — sembrado por defecto con la misma prenda que
+            // devuelve PrendaDisponible() para que los tests existentes seleccionen "sí, disponible"
+            // sin tener que tocar cada uno.
+            public FakePrendaDAL DalPrenda = new FakePrendaDAL { Todas = new List<BE.Prenda> { PrendaDisponible() } };
+            public BLL.Prenda PrendaBLL => new BLL.Prenda(DalPrenda, new FakeMantenimientoPrendaDAL());
+
+            public BLL.Pedido Crear() => new BLL.Pedido(DalPedido, DalCliente, DalEmpleado, DalPlan, DalHistorial, PrendaBLL);
         }
 
         // ── CrearPedido ───────────────────────────────────────────────────────
@@ -125,7 +132,7 @@ namespace Tests
             });
             var listaEsperaBLL = new BLL.ListaEspera(dalListaEspera, new FakePrendaDAL(), new FakeClienteDAL());
 
-            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL);
+            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
 
             try
             {
@@ -158,7 +165,7 @@ namespace Tests
             dalListaEspera.Registros.Add(reserva);
             var listaEsperaBLL = new BLL.ListaEspera(dalListaEspera, new FakePrendaDAL(), new FakeClienteDAL());
 
-            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL);
+            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
 
             int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
 
@@ -298,9 +305,12 @@ namespace Tests
             LoginComoAdministrador();
             var ctx = new Contexto();
             ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            // PN01 (split lógico Depósito): la disponibilidad ahora se relee desde la base
+            // (BLL.Prenda.VerificarDisponibilidad), no del objeto en memoria que se pasa acá —
+            // por eso lo que importa es el estado sembrado en el Fake DAL, no en `prendaOcupada`.
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnUso } };
             var bll = ctx.Crear();
             var prendaOcupada = PrendaDisponible();
-            prendaOcupada.Estado = BE.EstadoPrenda.EnUso;
 
             try
             {
@@ -349,6 +359,58 @@ namespace Tests
             {
                 Assert.AreEqual("err.bll.sesion_expirada", ex.Clave);
             }
+        }
+
+        // ── ValidarCupoDisponible (PN01) ─────────────────────────────────────
+
+        [TestMethod]
+        public void ValidarCupoDisponible_DentroDelLimite_DevuelvePlan()
+        {
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var cliente = ClienteConPlanVigente(); // LimitePrendas=3, StockUtilizado=0
+
+            var plan = bll.ValidarCupoDisponible(cliente, 2);
+
+            Assert.AreEqual("Básico", plan.Nombre);
+        }
+
+        [TestMethod]
+        public void ValidarCupoDisponible_ExcedeLimite_LanzaLimitePlan()
+        {
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var cliente = ClienteConPlanVigente();
+            cliente.LimitePrendas = 1;
+            cliente.StockUtilizado = 1;
+
+            try
+            {
+                bll.ValidarCupoDisponible(cliente, 1);
+                Assert.Fail("Debía rechazar superar el límite del plan.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.pedido.limite_plan", ex.Clave);
+            }
+        }
+
+        // ── ReservarPrendas (PN01) ───────────────────────────────────────────
+
+        [TestMethod]
+        public void ReservarPrendas_DatosValidos_DelegaEnAltaDelDAL()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPedido.AltaIdGenerado = 42;
+            var bll = ctx.Crear();
+
+            int id = bll.ReservarPrendas(new List<BE.Prenda> { PrendaDisponible() }, 10);
+
+            Assert.AreEqual(42, id);
+            Assert.AreEqual(1, ctx.DalPedido.AltaVeces);
+            Assert.AreEqual(10, ctx.DalPedido.UltimoAlta.IdCliente);
+            Assert.AreEqual(5, ctx.DalPedido.UltimoAlta.IdEmpleado);
         }
 
         // ── Transiciones de estado ───────────────────────────────────────────

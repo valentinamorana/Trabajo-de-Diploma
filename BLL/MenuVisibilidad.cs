@@ -26,6 +26,10 @@ namespace BLL
             ("cobroSuscripcionToolStripMenuItem",      "mnuCobroSuscripcion"),
             ("pedidosVentaToolStripMenuItem",          "mnuPedidosVenta"),
             ("pedidosRealizadosToolStripMenuItem",     "mnuPedidosRealizados"),
+            // PN02 — Comercialización de la suscripción. Nueva Contratación la ve quien ya
+            // gestiona Clientes (Venta); Contrataciones Pendientes es exclusivo del rol Caja.
+            ("nuevaContratacionToolStripMenuItem",      "mnuClientes"),
+            ("contratacionesPendientesToolStripMenuItem", "mnuCaja"),
             // Mejora opcional (no requerida por la cátedra) — ver README.
             ("listaEsperaToolStripMenuItem",           "mnuListaEspera"),
             // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
@@ -57,9 +61,12 @@ namespace BLL
             ("suscriptoresToolStripMenuItem", new[]
             {
                 "clientesToolStripMenuItem", "planesToolStripMenuItem",
-                "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem"
+                "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem",
+                "nuevaContratacionToolStripMenuItem"
             }),
             ("ventasToolStripMenuItem", new[] { "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem" }),
+            // PN02 — rol Caja, separado de Vendedor.
+            ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem" }),
             // "Analítica" se partió en dos menúes de primer nivel (antes eran 9 ítems en un
             // solo dropdown plano): Auditoría (bitácoras + reporte de jornada, gobernados por
             // mnuAuditoria) y Analítica de Negocio (los 6 reportes de decisión comercial del

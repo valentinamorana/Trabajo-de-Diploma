@@ -125,6 +125,24 @@ namespace BLL
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
+            return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad);
+        }
+
+        // PN02 — usada por BLL.Contratacion.ConfirmarPago cuando Caja confirma el pago de
+        // una contratación y hay que formalizar la suscripción. Caja no tiene el permiso
+        // ClientesEditar (separación de funciones a propósito frente a Vendedor): el gate acá
+        // es CajaEditar/Caja, ya exigido en BLL.Contratacion.ConfirmarPago antes de llamar a
+        // este método — por eso NO vuelve a pedir el permiso de Vendedor.
+        public BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
+        {
+            PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
+            return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad);
+        }
+
+        private BE.Builders.Suscripcion ActivarSuscripcionInterna(
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
+        {
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
 
             var plan = dalPlan.ObtenerPorId(idPlan);

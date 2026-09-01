@@ -51,6 +51,9 @@
             this.cobroSuscripcionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pedidosVentaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pedidosRealizadosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nuevaContratacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cajaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contratacionesPendientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grpUsuarios = new System.Windows.Forms.ToolStripMenuItem();
             this.adminUsuariosItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -129,6 +132,7 @@
             this.suscriptoresToolStripMenuItem,
             this.inventarioToolStripMenuItem,
             this.ventasToolStripMenuItem,
+            this.cajaToolStripMenuItem,
             this.auditoriaToolStripMenuItem,
             this.analiticaNegocioToolStripMenuItem,
             this.gestionToolStripMenuItem,
@@ -210,7 +214,8 @@
             this.clientesToolStripMenuItem,
             this.planesToolStripMenuItem,
             this.renovacionSuscripcionToolStripMenuItem,
-            this.cobroSuscripcionToolStripMenuItem});
+            this.cobroSuscripcionToolStripMenuItem,
+            this.nuevaContratacionToolStripMenuItem});
             this.suscriptoresToolStripMenuItem.Name = "suscriptoresToolStripMenuItem";
             this.suscriptoresToolStripMenuItem.Tag = "mnu.suscriptores";
             this.suscriptoresToolStripMenuItem.Size = new System.Drawing.Size(90, 20);
@@ -258,6 +263,13 @@
             this.cobroSuscripcionToolStripMenuItem.Text = "Cobro de Suscripción";
             this.cobroSuscripcionToolStripMenuItem.Click += new System.EventHandler(this.cobroSuscripcionToolStripMenuItem_Click);
             //
+            // nuevaContratacionToolStripMenuItem — PN02 (Venta capta cliente + plan elegido)
+            //
+            this.nuevaContratacionToolStripMenuItem.Name = "nuevaContratacionToolStripMenuItem";
+            this.nuevaContratacionToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.nuevaContratacionToolStripMenuItem.Text = "Nueva Contratación";
+            this.nuevaContratacionToolStripMenuItem.Click += new System.EventHandler(this.nuevaContratacionToolStripMenuItem_Click);
+            //
             // pedidosVentaToolStripMenuItem
             // 
             this.pedidosVentaToolStripMenuItem.Name = "pedidosVentaToolStripMenuItem";
@@ -273,6 +285,21 @@
             this.pedidosRealizadosToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.pedidosRealizadosToolStripMenuItem.Text = "Pedidos Realizados";
             this.pedidosRealizadosToolStripMenuItem.Click += new System.EventHandler(this.pedidosRealizadosToolStripMenuItem_Click);
+            //
+            // cajaToolStripMenuItem — PN02, rol Caja (separado de Vendedor: Caja cobra, Vendedor no)
+            //
+            this.cajaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contratacionesPendientesToolStripMenuItem});
+            this.cajaToolStripMenuItem.Name = "cajaToolStripMenuItem";
+            this.cajaToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.cajaToolStripMenuItem.Text = "Caja";
+            //
+            // contratacionesPendientesToolStripMenuItem
+            //
+            this.contratacionesPendientesToolStripMenuItem.Name = "contratacionesPendientesToolStripMenuItem";
+            this.contratacionesPendientesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.contratacionesPendientesToolStripMenuItem.Text = "Contrataciones Pendientes";
+            this.contratacionesPendientesToolStripMenuItem.Click += new System.EventHandler(this.contratacionesPendientesToolStripMenuItem_Click);
             //
             // gestionToolStripMenuItem — reorganizado en submenús: Usuarios ▸, Perfiles, ──, Sistema ▸.
             //
@@ -539,6 +566,9 @@
         private System.Windows.Forms.ToolStripMenuItem inventarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prendasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem listaEsperaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem nuevaContratacionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cajaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem contratacionesPendientesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem backupToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem historialUsuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem auditoriaToolStripMenuItem;

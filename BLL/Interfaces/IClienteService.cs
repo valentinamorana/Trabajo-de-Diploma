@@ -32,6 +32,12 @@ namespace BLL.Interfaces
         BE.Builders.Suscripcion ActivarSuscripcion(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad);
 
+        // PN02 — misma activación, pero gateada por CajaEditar/Caja en vez de ClientesEditar:
+        // la usa BLL.Contratacion.ConfirmarPago cuando Caja confirma el pago (Caja no tiene
+        // el permiso de Vendedor, a propósito).
+        BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad);
+
         // Bloque 1 — Reanuda una suscripción pausada, sin modificar la fecha de vencimiento.
         void ReanudarPausa(string modulo, BE.Cliente cliente);
     }

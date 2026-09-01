@@ -230,6 +230,7 @@ namespace GUI
                 clientesToolStripMenuItem, planesToolStripMenuItem,
                 renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
+                nuevaContratacionToolStripMenuItem, contratacionesPendientesToolStripMenuItem,
                 usuariosToolStripMenuItem, perfilesToolStripMenuItem, idiomasToolStripMenuItem,
                 historialUsuariosToolStripMenuItem, backupToolStripMenuItem, integridadToolStripMenuItem,
                 adminUsuariosItem,
@@ -238,7 +239,7 @@ namespace GUI
                 ventasVendedorToolStripMenuItem, analisisRotacionToolStripMenuItem,
                 analisisMantenimientoToolStripMenuItem, analisisEscasezToolStripMenuItem,
                 recomendacionPrendasToolStripMenuItem,
-                suscriptoresToolStripMenuItem, ventasToolStripMenuItem,
+                suscriptoresToolStripMenuItem, ventasToolStripMenuItem, cajaToolStripMenuItem,
                 auditoriaToolStripMenuItem, analiticaNegocioToolStripMenuItem,
                 grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
@@ -608,6 +609,29 @@ namespace GUI
                 if (hijo is ListaEsperaForm) { hijo.BringToFront(); return; }
             }
             new ListaEsperaForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>
+        /// PN02 — Abre el diálogo para que Venta registre una nueva contratación (cliente +
+        /// plan + modalidad). Modal, mismo criterio que NuevoPedidoForm: no es un módulo de
+        /// consulta permanente, es una operación puntual.
+        /// </summary>
+        private void nuevaContratacionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var form = new NuevaContratacionForm())
+                form.ShowDialog(this);
+        }
+
+        /// <summary>
+        /// PN02 — Abre la cola de contrataciones pendientes de pago (rol Caja) como hijo MDI.
+        /// </summary>
+        private void contratacionesPendientesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is ContratacionesPendientesForm) { hijo.BringToFront(); return; }
+            }
+            new ContratacionesPendientesForm { MdiParent = this }.Show();
         }
 
         /// <summary>

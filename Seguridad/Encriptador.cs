@@ -85,7 +85,7 @@ namespace Seguridad
         // Requisitos: minimo 8 caracteres, al menos 1 numero y 1 caracter especial.
         // Devuelve también la CLAVE de traducción del motivo (una por requisito incumplido),
         // para que la GUI pueda mostrar el mensaje específico traducido al idioma activo
-        // en vez de un texto genérico (ver BLL.Usuario.ResetearTodasLasClaves/CambiarClavePropia).
+        // en vez de un texto genérico (ver BLL.Usuario.CambiarClavePropia).
         public static (bool valida, string clave, string mensaje) ValidarContrasena(string contrasena)
         {
             if (string.IsNullOrWhiteSpace(contrasena) || contrasena.Length < 8)

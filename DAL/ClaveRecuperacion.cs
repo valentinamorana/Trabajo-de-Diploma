@@ -62,11 +62,5 @@ namespace DAL
                 });
             return filas > 0;
         }
-
-        // Borra todo el set (para regenerar claves desde cero).
-        public void EliminarTodas()
-        {
-            acceso.Escribir("DELETE FROM ClaveRecuperacion", null);
-        }
     }
 }

@@ -10,6 +10,5 @@ namespace DAL.Interfaces
         int  ContarDisponibles();
         List<KeyValuePair<int, string>> ObtenerDisponibles();
         bool MarcarUsada(int idClave, string username);
-        void EliminarTodas();
     }
 }

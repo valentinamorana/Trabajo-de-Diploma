@@ -329,25 +329,6 @@ namespace DAL
             }
         }
 
-        // Actualiza la contraseña de TODOS los usuarios al hash recibido.
-        // Recalcula DVH y DVV para todas las filas afectadas.
-        public void ResetearTodasLasClaves(string claveHasheada)
-        {
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Usuario SET Clave = @clave",
-                    new SqlParameter[] { new SqlParameter("@clave", claveHasheada) });
-                // Reset masivo → todas las cuentas quedan con clave temporal: forzar el cambio.
-                SetRequiereCambioClaveTodos(true);
-                RecalcularTodosDVH();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al resetear todas las claves de usuario.", ex);
-            }
-        }
-
         // Aplica el snapshot de una versión histórica a la fila activa del usuario.
         // SOLO restaura datos administrativos NO sensibles (username/nombre/apellido/fecha nac./email);
         // la contraseña y el estado de bloqueo NUNCA se revierten (no hay rollback de credenciales).
@@ -494,22 +475,6 @@ namespace DAL
             }
         }
 
-        // Igual que el anterior pero para TODOS los usuarios (tras un reset masivo de claves).
-        private void SetRequiereCambioClaveTodos(bool requiere)
-        {
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Usuario SET RequiereCambioClave = @r",
-                    new SqlParameter[] { new SqlParameter("@r", requiere ? 1 : 0) });
-            }
-            catch (System.Data.SqlClient.SqlException ex) when (ex.Message.Contains("RequiereCambioClave"))
-            {
-                System.Diagnostics.Trace.TraceWarning(
-                    "[DAL.Usuario.SetRequiereCambioClaveTodos] Columna RequiereCambioClave ausente; ejecutá 02_Actualizar.");
-            }
-        }
-
         public override BE.Usuario ObtenerPorId(int idUsuario)
         {
             SqlParameter[] parametros = new SqlParameter[]
@@ -630,7 +595,7 @@ namespace DAL
         }
 
         // Recalcula el DVH de TODOS los usuarios y actualiza DVV.
-        // Se usa después de operaciones masivas (ResetearTodasLasClaves).
+        // Se usa después de operaciones masivas sobre el conjunto de filas.
         private void RecalcularTodosDVH()
         {
             try

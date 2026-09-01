@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Menu));
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsIdioma = new System.Windows.Forms.ToolStrip();
             this.lblIdioma = new System.Windows.Forms.ToolStripLabel();
             this.tsIdiomaSep = new System.Windows.Forms.ToolStripSeparator();
@@ -89,11 +88,6 @@
             this.tsIdioma.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            //
-            // contextMenuStrip1
-            //
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             //
             // tsIdioma — barra de selección de idioma (debajo del MenuStrip principal).
             //
@@ -622,7 +616,6 @@
 
         #endregion
 
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem usuarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cerrarSesionToolStripMenuItem;

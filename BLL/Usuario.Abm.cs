@@ -187,13 +187,6 @@ namespace BLL
             return usuarioDAL.ObtenerTodos();
         }
 
-        // Verifica si un username existe en la base de datos.
-        public bool ExisteUsername(string username)
-        {
-            if (string.IsNullOrWhiteSpace(username)) return false;
-            return usuarioDAL.ObtenerPorUsername(username) != null;
-        }
-
         // ── Validaciones PURAS (testeables sin sesión ni BD) ─────────────────────
 
         // Valida los datos administrativos de un usuario: username (no vacío, ≥3, único entre

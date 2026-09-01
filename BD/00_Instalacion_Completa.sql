@@ -4,10 +4,10 @@
 -- Script único para levantar WardrobeFlowDB de cero: estructura, datos
 -- semilla, y TODOS los módulos (Bloque 1, Bloque 3 / Idea de Negocio, y los
 -- 4 procesos de negocio PN01-PN04). Reemplaza tener que ejecutar a mano los
--- scripts 01, 03, 05, 06, 08, 09, 10 a 16 y 17 a 19 uno por uno, en orden:
--- este archivo es la concatenación de todos ellos, en el mismo orden en el
--- que había que correrlos, cada uno con su propio comentario de cabecera
--- intacto para conservar el porqué de cada uno.
+-- scripts 01, 03, 05, 06, 08, 09, 10 a 16, 17 a 19 y 20 uno por uno, en
+-- orden: este archivo es la concatenación de todos ellos, en el mismo orden
+-- en el que había que correrlos, cada uno con su propio comentario de
+-- cabecera intacto para conservar el porqué de cada uno.
 --
 -- Idempotente de punta a punta (cada script individual ya lo es): correr
 -- este archivo dos veces no duplica nada ni rompe datos existentes.
@@ -951,37 +951,11 @@ ELSE
     PRINT 'FechaVencimiento ya existe en Cliente — sin cambios.';
 GO
 
--- FechaLimiteGracia en Cliente (PdN6 — período de gracia tras un cobro fallido).
--- Null = al día. Ver BE.Cliente.EstaEnGracia / EstaSuspendidoPorPago.
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
-               WHERE TABLE_NAME = 'Cliente' AND COLUMN_NAME = 'FechaLimiteGracia')
-BEGIN
-    ALTER TABLE Cliente ADD FechaLimiteGracia DATE NULL;
-    PRINT 'Columna FechaLimiteGracia agregada a Cliente.';
-END
-ELSE
-    PRINT 'FechaLimiteGracia ya existe en Cliente — sin cambios.';
-GO
-
--- HistorialCobro (PdN6 — auditoría del patrón Chain of Responsibility de cobro,
--- misma estructura que HistorialRenovacion / 05_Renovacion_Suscripcion.sql).
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'HistorialCobro')
-BEGIN
-    CREATE TABLE HistorialCobro (
-        IdCobro         INT           IDENTITY(1,1) PRIMARY KEY,
-        IdCliente       INT           NOT NULL REFERENCES Cliente(IdCliente),
-        Importe         DECIMAL(10,2) NOT NULL DEFAULT 0,
-        FechaDeteccion  DATETIME      NOT NULL DEFAULT GETDATE(),
-        FechaResolucion DATETIME      NULL,
-        -- 0=Pendiente, 1=Cobrado, 2=Gracia, 3=Suspendido (BE.EstadoCobro)
-        Resultado       INT           NOT NULL,
-        Actor           NVARCHAR(100) NULL
-    );
-    PRINT 'Tabla HistorialCobro creada.';
-END
-ELSE
-    PRINT 'Tabla HistorialCobro ya existe — sin cambios.';
-GO
+-- FechaLimiteGracia en Cliente y tabla HistorialCobro (PdN6 — período de gracia
+-- tras un cobro fallido y auditoría del patrón Chain of Responsibility de cobro).
+-- Fuente única: 08_Cobro_Pago.sql (documenta el detalle y el "por qué"; ambos
+-- bloques son idempotentes, así que da igual si 01 u 08 corre primero).
+-- Ver BE.Cliente.EstaEnGracia / EstaSuspendidoPorPago.
 
 -- FechaNacimiento en Cliente — OBLIGATORIA (NOT NULL) para validar mayoría de edad.
 -- 1) Agregar la columna como NULL si todavía no existe.
@@ -1200,7 +1174,6 @@ PRINT '            antes del primer uso (Administrar → Usuarios → Recalcular
 PRINT 'Las traducciones se seedean automáticamente en el primer uso de la app.';
 GO
 
-
 -- ==============================================================
 -- === Fuente: 03_Permisos_Granulares.sql
 -- ==============================================================
@@ -1261,7 +1234,6 @@ PRINT 'OK: patentes de acción creadas y propagadas (idempotente).';
    el botón no se oculte.
    ---------------------------------------------------------------------------- */
 
-
 -- ==============================================================
 -- === Fuente: 05_Renovacion_Suscripcion.sql
 -- ==============================================================
@@ -1289,7 +1261,7 @@ BEGIN
         IdPlanNuevo     INT           NULL REFERENCES PlanSuscripcion(IdPlan),
         FechaDeteccion  DATETIME      NOT NULL DEFAULT GETDATE(),
         FechaResolucion DATETIME      NULL,
-        -- 0=Pendiente, 1=Renovada, 2=CambioPlan, 3=Baja (BE.EstadoRenovacion)
+        -- 0=Pendiente, 1=Renovada, 2=CambioPlan, 3=Baja, 4=Pausada (BE.EstadoRenovacion)
         Resultado       INT           NOT NULL,
         Actor           NVARCHAR(100) NULL
     );
@@ -1343,7 +1315,6 @@ WHERE p.NombreMenu = 'mnuRenovacionSuscripcion'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'renovacionSuscripcionToolStripMenuItem');
 GO
 
-
 -- ==============================================================
 -- === Fuente: 06_Rediseno_Menu.sql
 -- ==============================================================
@@ -1380,7 +1351,6 @@ WHERE c.Clave = 'mnu.bitacora'
 
 PRINT 'mnu.bitacora actualizado a "Analítica" (y equivalentes EN/RU/PT) en las bases que ya lo tenían sembrado.';
 GO
-
 
 -- ==============================================================
 -- === Fuente: 08_Cobro_Pago.sql
@@ -1472,7 +1442,6 @@ WHERE p.NombreMenu = 'mnuCobroSuscripcion'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'cobroSuscripcionToolStripMenuItem');
 GO
 
-
 -- ==============================================================
 -- === Fuente: 09_Analisis_Abandono.sql
 -- ==============================================================
@@ -1522,7 +1491,6 @@ WHERE p.NombreMenu = 'mnuAnalisisAbandono'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisAbandonoToolStripMenuItem');
 GO
-
 
 -- ==============================================================
 -- === Fuente: 10_Reporte_Ventas_Vendedor.sql
@@ -1574,7 +1542,6 @@ WHERE p.NombreMenu = 'mnuVentasVendedor'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'ventasVendedorToolStripMenuItem');
 GO
 
-
 -- ==============================================================
 -- === Fuente: 11_Analisis_Rotacion.sql
 -- ==============================================================
@@ -1625,7 +1592,6 @@ WHERE p.NombreMenu = 'mnuAnalisisRotacion'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisRotacionToolStripMenuItem');
 GO
 
-
 -- ==============================================================
 -- === Fuente: 12_Analisis_Mantenimiento.sql
 -- ==============================================================
@@ -1675,7 +1641,6 @@ WHERE p.NombreMenu = 'mnuAnalisisMantenimiento'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisMantenimientoToolStripMenuItem');
 GO
 
-
 -- ==============================================================
 -- === Fuente: 13_Analisis_Escasez.sql
 -- ==============================================================
@@ -1724,7 +1689,6 @@ WHERE p.NombreMenu = 'mnuAnalisisEscasez'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisEscasezToolStripMenuItem');
 GO
-
 
 -- ==============================================================
 -- === Fuente: 14_Recomendacion_Prendas.sql
@@ -1776,7 +1740,6 @@ WHERE p.NombreMenu = 'mnuRecomendacionPrendas'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'recomendacionPrendasToolStripMenuItem');
 GO
-
 
 -- ==============================================================
 -- === Fuente: 15_Fidelizacion_Pausa_Referidos_Cargo.sql
@@ -1899,12 +1862,11 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Cliente_IdClienteRefer
 PRINT 'Índices de Fidelización verificados/creados.';
 GO
 
-
 -- ==============================================================
 -- === Fuente: 16_Lista_Espera.sql
 -- ==============================================================
 -- ============================================================
--- WardrobeFlow — 15. LISTA DE ESPERA DE PRENDAS (mejora opcional,
+-- WardrobeFlow — 16. LISTA DE ESPERA DE PRENDAS (mejora opcional,
 -- no requerida por la cátedra — ver README, sección "Módulos")
 -- ------------------------------------------------------------
 -- Inspirado en la Lista de Espera de ExperienceHub (TP de un
@@ -1981,7 +1943,6 @@ WHERE p.NombreMenu = 'mnuListaEspera'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'listaEsperaToolStripMenuItem');
 GO
-
 
 -- ==============================================================
 -- === Fuente: 17_Comercializacion_Suscripcion.sql
@@ -2086,7 +2047,6 @@ JOIN Permiso p ON p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND 
 WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
 GO
-
 
 -- ==============================================================
 -- === Fuente: 18_Promociones.sql
@@ -2259,7 +2219,6 @@ WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
 GO
 
-
 -- ==============================================================
 -- === Fuente: 19_Inspeccion_Devolucion.sql
 -- ==============================================================
@@ -2344,3 +2303,79 @@ WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
 GO
 
+-- ==============================================================
+-- === Fuente: 20_Hardening_Integridad.sql
+-- ==============================================================
+-- ============================================================
+-- WardrobeFlow — 20. HARDENING DE INTEGRIDAD (auditoría de BD)
+-- ------------------------------------------------------------
+-- Varias columnas INT respaldadas por un enum de C# (Prenda.Estado,
+-- Pedido.Estado, HistorialRenovacion.Resultado, HistorialCobro.Resultado,
+-- ListaEspera.Estado, CargoPrenda.Estado, Bitacora.criticidad) quedaron
+-- sin el CHECK que sí se agregó para los módulos más nuevos (Contratacion,
+-- Promocion, SugerenciaPromocion, Prenda.PrecioReposicion — ver 17/18/19).
+-- Hoy la app nunca escribe un valor fuera de rango (siempre castea el
+-- enum), pero sin el CHECK un UPDATE manual o una migración futura que
+-- agregue un miembro al enum sin agregar el CHECK correspondiente podría
+-- dejar un valor inválido sin que el motor lo impida. Este script cierra
+-- esa brecha para las columnas viejas, con el mismo patrón idempotente
+-- (ALTER TABLE ... ADD CONSTRAINT IF NOT EXISTS) que ya usan 17/18/19.
+--
+-- También agrega índices sobre Prenda.Estado y Pedido.Estado: son el
+-- predicado principal de varias consultas calientes del DAL
+-- (Prenda.ObtenerDisponibles, Prenda.ObtenerConteoDisponiblesPorTalleCategoria,
+-- Pedido.ObtenerPendientes) que hoy no tienen índice de apoyo.
+--
+-- Idempotente: se puede volver a ejecutar sin duplicar ni romper nada.
+-- ============================================================
+
+USE WardrobeFlowDB;
+GO
+
+-- ── 1) CHECK constraints — columnas Estado/Resultado respaldadas por enum ──
+
+-- Prenda.Estado (BE.EstadoPrenda: Disponible=0, EnUso=1, EnLimpieza=2, Baja=3)
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Prenda_Estado')
+    ALTER TABLE Prenda ADD CONSTRAINT CHK_Prenda_Estado CHECK (Estado IN (0,1,2,3));
+GO
+
+-- Pedido.Estado (BE.EstadoPedido: Pendiente=0, Despachado=1, Entregado=2, Cancelado=3)
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Pedido_Estado')
+    ALTER TABLE Pedido ADD CONSTRAINT CHK_Pedido_Estado CHECK (Estado IN (0,1,2,3));
+GO
+
+-- HistorialRenovacion.Resultado (BE.EstadoRenovacion: Pendiente=0, Renovada=1,
+-- CambioPlan=2, Baja=3, Pausada=4)
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_HistorialRenovacion_Resultado')
+    ALTER TABLE HistorialRenovacion ADD CONSTRAINT CHK_HistorialRenovacion_Resultado CHECK (Resultado IN (0,1,2,3,4));
+GO
+
+-- HistorialCobro.Resultado (BE.EstadoCobro: Pendiente=0, Cobrado=1, Gracia=2, Suspendido=3)
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_HistorialCobro_Resultado')
+    ALTER TABLE HistorialCobro ADD CONSTRAINT CHK_HistorialCobro_Resultado CHECK (Resultado IN (0,1,2,3));
+GO
+
+-- ListaEspera.Estado (BE.EstadoListaEspera: Pendiente=0, Reservada=1, Convertida=2, Cancelada=3)
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_ListaEspera_Estado')
+    ALTER TABLE ListaEspera ADD CONSTRAINT CHK_ListaEspera_Estado CHECK (Estado IN (0,1,2,3));
+GO
+
+-- CargoPrenda.Estado (BE.EstadoCargo: Pendiente=0, Cobrado=1)
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_CargoPrenda_Estado')
+    ALTER TABLE CargoPrenda ADD CONSTRAINT CHK_CargoPrenda_Estado CHECK (Estado IN (0,1));
+GO
+
+-- Bitacora.criticidad (BE.Criticidad: None=0, Baja=1, Media=2, Alta=3,
+-- IntentosLogin=4, RecuperacionClave=5, BloqueosCuenta=6)
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Bitacora_criticidad')
+    ALTER TABLE Bitacora ADD CONSTRAINT CHK_Bitacora_criticidad CHECK (criticidad IN (0,1,2,3,4,5,6));
+GO
+
+-- ── 2) Índices sobre Estado (predicado principal de varias consultas del DAL) ──
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Prenda_Estado' AND object_id = OBJECT_ID('Prenda'))
+    CREATE NONCLUSTERED INDEX IX_Prenda_Estado ON Prenda(Estado) INCLUDE (Categoria, Talle);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Pedido_Estado' AND object_id = OBJECT_ID('Pedido'))
+    CREATE NONCLUSTERED INDEX IX_Pedido_Estado ON Pedido(Estado);
+PRINT 'Índices de Estado (Prenda/Pedido) verificados/creados.';
+GO

@@ -122,9 +122,35 @@ namespace BLL
         {
             PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
 
+            bool aplicaPlan = promocion.IdPlan.HasValue;
+            bool aplicaCategoria = !string.IsNullOrWhiteSpace(promocion.CategoriaPrenda);
+
             if (string.IsNullOrWhiteSpace(promocion.Nombre))
                 throw new BE.AppException("err.bll.promocion.nombre_requerido",
                     "El nombre de la promoción es obligatorio.");
+
+            if (aplicaPlan == aplicaCategoria)
+                throw new BE.AppException("err.bll.promocion.destino_invalido",
+                    "La promoción debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.");
+
+            if (aplicaPlan && dalPlan.ObtenerPorId(promocion.IdPlan.Value) == null)
+                throw new BE.AppException("err.bll.promocion.plan_inexistente",
+                    "El plan seleccionado no existe.");
+
+            if (promocion.Valor <= 0)
+                throw new BE.AppException("err.bll.promocion.valor_invalido",
+                    "El beneficio de la promoción debe ser mayor a cero.");
+
+            if (promocion.TipoDescuento == BE.TipoDescuento.Porcentaje && promocion.Valor > 100)
+                throw new BE.AppException("err.bll.promocion.porcentaje_invalido",
+                    "Un descuento por porcentaje no puede superar el 100%.");
+
+            if (promocion.FechaFin.Date < promocion.FechaInicio.Date)
+                throw new BE.AppException("err.bll.promocion.rango_fechas_invalido",
+                    "La fecha de fin no puede ser anterior a la fecha de inicio.");
+
+            promocion.CategoriaPrenda = aplicaCategoria ? promocion.CategoriaPrenda.Trim() : null;
+            promocion.Nombre = promocion.Nombre.Trim();
 
             dalPromocion.Modificar(promocion);
 

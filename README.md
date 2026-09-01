@@ -182,7 +182,7 @@ BD/00_Instalacion_Completa.sql   -- Crea WardrobeFlowDB completa: estructura, da
                                   -- se puede volver a ejecutar sin duplicar ni romper nada.
 ```
 
-Es la concatenación (en el orden correcto) de los scripts `01`, `03`, `05`, `06`, `08`, `09`, `10` a `16` y `17` a `19` — cada uno sigue existiendo por separado en `BD/` con su propio comentario de cabecera, por si hace falta revisar o volver a correr uno puntual, pero para una instalación nueva alcanza con `00`. El instalador (`Instalador/WardrobeFlow_Setup.iss`) ya usa este único script.
+Es la concatenación (en el orden correcto) de los scripts `01`, `03`, `05`, `06`, `08`, `09`, `10` a `16`, `17` a `19` y `20` — cada uno sigue existiendo por separado en `BD/` con su propio comentario de cabecera, por si hace falta revisar o volver a correr uno puntual, pero para una instalación nueva alcanza con `00`. El instalador (`Instalador/WardrobeFlow_Setup.iss`) ya usa este único script.
 
 **Herramientas de mantenimiento** (no forman parte de "crear la BD" — correr por separado solo si hace falta):
 
@@ -200,6 +200,7 @@ BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos
 - **Comercialización de la suscripción (PN02)** → `17_Comercializacion_Suscripcion.sql`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo.
 - **Métricas, promociones y toma de decisiones (PN03)** → `18_Promociones.sql`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay que asignarle esos 2 roles a usuarios de prueba desde Administrar → Usuarios.
 - **Inspección de Devolución (PN04)** → `19_Inspeccion_Devolucion.sql`. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
+- **Hardening de integridad (auditoría de BD)** → `20_Hardening_Integridad.sql`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
 
 ### Cadena de conexión
 

@@ -19,6 +19,12 @@ namespace BE
         public const string ListaEspera       = "mnuListaEspera";
         public const string Caja              = "mnuCaja";
 
+        // PN03 — Métricas, promociones y toma de decisiones.
+        public const string SugerenciaPromocion   = "mnuSugerenciaPromocion";
+        public const string PromocionesAdmin      = "mnuPromocionesAdmin";
+        public const string PromocionesContable   = "mnuPromocionesContable";
+        public const string PromocionesVigentes   = "mnuPromocionesVigentes";
+
         // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────
         // Cada una gobierna las operaciones de escritura (alta/modificación/baja) del módulo.
         // Convención: <patente de ver> + "Editar". Si la patente no existe en el catálogo,
@@ -29,5 +35,8 @@ namespace BE
         public const string PedidosVentaEditar      = "mnuPedidosVentaEditar";
         public const string PedidosRealizadosEditar = "mnuPedidosRealizadosEditar";
         public const string CajaEditar              = "mnuCajaEditar";
+        public const string PromocionesAdminEditar    = "mnuPromocionesAdminEditar";
+        public const string PromocionesContableEditar = "mnuPromocionesContableEditar";
+        public const string PromocionesVigentesEditar = "mnuPromocionesVigentesEditar";
     }
 }

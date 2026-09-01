@@ -62,6 +62,11 @@
     <Compile Include="EstadoPedido.cs" />
     <Compile Include="EstadoContratacion.cs" />
     <Compile Include="Contratacion.cs" />
+    <Compile Include="TipoDescuento.cs" />
+    <Compile Include="EstadoPromocion.cs" />
+    <Compile Include="EstadoSugerencia.cs" />
+    <Compile Include="Promocion.cs" />
+    <Compile Include="SugerenciaPromocion.cs" />
     <Compile Include="MantenimientoPrenda.cs" />
     <Compile Include="NivelUrgencia.cs" />
     <Compile Include="EstadoPrenda.cs" />

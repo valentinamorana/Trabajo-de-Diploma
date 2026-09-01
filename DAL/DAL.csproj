@@ -52,6 +52,8 @@
     <Compile Include="Interfaces\IEmpleadoDAL.cs" />
     <Compile Include="Interfaces\IPlanSuscripcionDAL.cs" />
     <Compile Include="Interfaces\IContratacionDAL.cs" />
+    <Compile Include="Interfaces\IPromocionDAL.cs" />
+    <Compile Include="Interfaces\ISugerenciaPromocionDAL.cs" />
     <Compile Include="Interfaces\IPedidoHistorialDAL.cs" />
     <Compile Include="Interfaces\IPrendaDAL.cs" />
     <Compile Include="Interfaces\IMantenimientoPrendaDAL.cs" />
@@ -75,6 +77,8 @@
     <Compile Include="Empleado.cs" />
     <Compile Include="Pedido.cs" />
     <Compile Include="Contratacion.cs" />
+    <Compile Include="Promocion.cs" />
+    <Compile Include="SugerenciaPromocion.cs" />
     <Compile Include="PedidoHistorial.cs" />
     <Compile Include="Permiso.cs" />
     <Compile Include="PlanSuscripcion.cs" />

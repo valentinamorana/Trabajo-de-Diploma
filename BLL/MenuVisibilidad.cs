@@ -30,6 +30,11 @@ namespace BLL
             // gestiona Clientes (Venta); Contrataciones Pendientes es exclusivo del rol Caja.
             ("nuevaContratacionToolStripMenuItem",      "mnuClientes"),
             ("contratacionesPendientesToolStripMenuItem", "mnuCaja"),
+            // PN03 — Métricas, promociones y toma de decisiones.
+            ("sugerirPromocionToolStripMenuItem",              "mnuSugerenciaPromocion"),
+            ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
+            ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),
+            ("promocionesVigentesToolStripMenuItem",            "mnuPromocionesVigentes"),
             // Mejora opcional (no requerida por la cátedra) — ver README.
             ("listaEsperaToolStripMenuItem",           "mnuListaEspera"),
             // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
@@ -67,6 +72,14 @@ namespace BLL
             ("ventasToolStripMenuItem", new[] { "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem" }),
             // PN02 — rol Caja, separado de Vendedor.
             ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem" }),
+            // PN03 — Gerencia (GerenteComercial), Administración y Contabilidad (roles nuevos)
+            // y Vendedor conviven en un mismo grupo de menú; cada hoja sigue gobernada por su
+            // propia patente, el grupo solo se muestra si al menos una de las 4 es visible.
+            ("promocionesToolStripMenuItem", new[]
+            {
+                "sugerirPromocionToolStripMenuItem", "gestionPromocionesToolStripMenuItem",
+                "revisionContablePromocionesToolStripMenuItem", "promocionesVigentesToolStripMenuItem"
+            }),
             // "Analítica" se partió en dos menúes de primer nivel (antes eran 9 ítems en un
             // solo dropdown plano): Auditoría (bitácoras + reporte de jornada, gobernados por
             // mnuAuditoria) y Analítica de Negocio (los 6 reportes de decisión comercial del

@@ -54,6 +54,8 @@
     <Compile Include="Interfaces\IClienteService.cs" />
     <Compile Include="Interfaces\IPedidoService.cs" />
     <Compile Include="Interfaces\IContratacionService.cs" />
+    <Compile Include="Interfaces\IPromocionService.cs" />
+    <Compile Include="Interfaces\ISugerenciaPromocionService.cs" />
     <Compile Include="Interfaces\IPlanSuscripcionService.cs" />
     <Compile Include="Interfaces\IPrendaService.cs" />
     <Compile Include="Comandos\PedidoCommand.cs" />
@@ -103,6 +105,8 @@
     <Compile Include="RecomendacionPrendas.cs" />
     <Compile Include="Pedido.cs" />
     <Compile Include="Contratacion.cs" />
+    <Compile Include="Promocion.cs" />
+    <Compile Include="SugerenciaPromocion.cs" />
     <Compile Include="PlanSuscripcion.cs" />
     <Compile Include="Preferencia.cs" />
     <Compile Include="RecuperacionAdmin.cs" />

@@ -54,6 +54,11 @@
             this.nuevaContratacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cajaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contratacionesPendientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.promocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sugerirPromocionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gestionPromocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.revisionContablePromocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.promocionesVigentesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grpUsuarios = new System.Windows.Forms.ToolStripMenuItem();
             this.adminUsuariosItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -133,6 +138,7 @@
             this.inventarioToolStripMenuItem,
             this.ventasToolStripMenuItem,
             this.cajaToolStripMenuItem,
+            this.promocionesToolStripMenuItem,
             this.auditoriaToolStripMenuItem,
             this.analiticaNegocioToolStripMenuItem,
             this.gestionToolStripMenuItem,
@@ -300,6 +306,46 @@
             this.contratacionesPendientesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
             this.contratacionesPendientesToolStripMenuItem.Text = "Contrataciones Pendientes";
             this.contratacionesPendientesToolStripMenuItem.Click += new System.EventHandler(this.contratacionesPendientesToolStripMenuItem_Click);
+            //
+            // promocionesToolStripMenuItem — PN03: Gerencia, Administración, Contabilidad y
+            // Vendedor conviven acá, cada hoja gobernada por su propia patente.
+            //
+            this.promocionesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sugerirPromocionToolStripMenuItem,
+            this.gestionPromocionesToolStripMenuItem,
+            this.revisionContablePromocionesToolStripMenuItem,
+            this.promocionesVigentesToolStripMenuItem});
+            this.promocionesToolStripMenuItem.Name = "promocionesToolStripMenuItem";
+            this.promocionesToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
+            this.promocionesToolStripMenuItem.Text = "Promociones";
+            //
+            // sugerirPromocionToolStripMenuItem
+            //
+            this.sugerirPromocionToolStripMenuItem.Name = "sugerirPromocionToolStripMenuItem";
+            this.sugerirPromocionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.sugerirPromocionToolStripMenuItem.Text = "Sugerir Promoción";
+            this.sugerirPromocionToolStripMenuItem.Click += new System.EventHandler(this.sugerirPromocionToolStripMenuItem_Click);
+            //
+            // gestionPromocionesToolStripMenuItem
+            //
+            this.gestionPromocionesToolStripMenuItem.Name = "gestionPromocionesToolStripMenuItem";
+            this.gestionPromocionesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.gestionPromocionesToolStripMenuItem.Text = "Gestión de Promociones";
+            this.gestionPromocionesToolStripMenuItem.Click += new System.EventHandler(this.gestionPromocionesToolStripMenuItem_Click);
+            //
+            // revisionContablePromocionesToolStripMenuItem
+            //
+            this.revisionContablePromocionesToolStripMenuItem.Name = "revisionContablePromocionesToolStripMenuItem";
+            this.revisionContablePromocionesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.revisionContablePromocionesToolStripMenuItem.Text = "Revisión Contable";
+            this.revisionContablePromocionesToolStripMenuItem.Click += new System.EventHandler(this.revisionContablePromocionesToolStripMenuItem_Click);
+            //
+            // promocionesVigentesToolStripMenuItem
+            //
+            this.promocionesVigentesToolStripMenuItem.Name = "promocionesVigentesToolStripMenuItem";
+            this.promocionesVigentesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.promocionesVigentesToolStripMenuItem.Text = "Promociones Vigentes";
+            this.promocionesVigentesToolStripMenuItem.Click += new System.EventHandler(this.promocionesVigentesToolStripMenuItem_Click);
             //
             // gestionToolStripMenuItem — reorganizado en submenús: Usuarios ▸, Perfiles, ──, Sistema ▸.
             //
@@ -569,6 +615,11 @@
         private System.Windows.Forms.ToolStripMenuItem nuevaContratacionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cajaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem contratacionesPendientesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem promocionesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sugerirPromocionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gestionPromocionesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem revisionContablePromocionesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem promocionesVigentesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem backupToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem historialUsuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem auditoriaToolStripMenuItem;

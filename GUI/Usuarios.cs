@@ -114,6 +114,10 @@ namespace GUI
                 // PN02 — Caja: separado de Vendedor a propósito (Vendedor es "operador" de la
                 // venta, Caja cobra).
                 new PerfilItem("Caja",                TT("perfil.caja",                "Caja")),
+                // PN03 — Administración y Contabilidad: roles nuevos, separados de Gerencia
+                // (que reusa GerenteComercial) y de Administrador (superusuario técnico).
+                new PerfilItem("AdministracionComercial", TT("perfil.administracioncomercial", "Administración")),
+                new PerfilItem("Contabilidad",             TT("perfil.contabilidad",            "Contabilidad")),
             };
 
             int prevIdx = cmbPerfil.SelectedIndex < 0 ? 2 : cmbPerfil.SelectedIndex;

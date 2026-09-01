@@ -231,6 +231,8 @@ namespace GUI
                 renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
                 nuevaContratacionToolStripMenuItem, contratacionesPendientesToolStripMenuItem,
+                sugerirPromocionToolStripMenuItem, gestionPromocionesToolStripMenuItem,
+                revisionContablePromocionesToolStripMenuItem, promocionesVigentesToolStripMenuItem,
                 usuariosToolStripMenuItem, perfilesToolStripMenuItem, idiomasToolStripMenuItem,
                 historialUsuariosToolStripMenuItem, backupToolStripMenuItem, integridadToolStripMenuItem,
                 adminUsuariosItem,
@@ -240,6 +242,7 @@ namespace GUI
                 analisisMantenimientoToolStripMenuItem, analisisEscasezToolStripMenuItem,
                 recomendacionPrendasToolStripMenuItem,
                 suscriptoresToolStripMenuItem, ventasToolStripMenuItem, cajaToolStripMenuItem,
+                promocionesToolStripMenuItem,
                 auditoriaToolStripMenuItem, analiticaNegocioToolStripMenuItem,
                 grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
@@ -632,6 +635,43 @@ namespace GUI
                 if (hijo is ContratacionesPendientesForm) { hijo.BringToFront(); return; }
             }
             new ContratacionesPendientesForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>PN03 — Abre el diálogo para que Gerencia (GerenteComercial) sugiera una promoción.</summary>
+        private void sugerirPromocionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var form = new SugerirPromocionForm())
+                form.ShowDialog(this);
+        }
+
+        /// <summary>PN03 — Abre la gestión de promociones (rol Administración) como hijo MDI.</summary>
+        private void gestionPromocionesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is PromocionesAdministracionForm) { hijo.BringToFront(); return; }
+            }
+            new PromocionesAdministracionForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>PN03 — Abre la cola de revisión contable de promociones (rol Contabilidad) como hijo MDI.</summary>
+        private void revisionContablePromocionesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is PromocionesContabilidadForm) { hijo.BringToFront(); return; }
+            }
+            new PromocionesContabilidadForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>PN03 — Abre la consulta de promociones vigentes (Vendedor) como hijo MDI.</summary>
+        private void promocionesVigentesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is PromocionesVigentesForm) { hijo.BringToFront(); return; }
+            }
+            new PromocionesVigentesForm { MdiParent = this }.Show();
         }
 
         /// <summary>

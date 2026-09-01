@@ -248,6 +248,36 @@
     <Compile Include="ContratacionesPendientesForm.Designer.cs">
       <DependentUpon>ContratacionesPendientesForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="SugerirPromocionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SugerirPromocionForm.Designer.cs">
+      <DependentUpon>SugerirPromocionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AltaPromocionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AltaPromocionForm.Designer.cs">
+      <DependentUpon>AltaPromocionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PromocionesAdministracionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PromocionesAdministracionForm.Designer.cs">
+      <DependentUpon>PromocionesAdministracionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PromocionesContabilidadForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PromocionesContabilidadForm.Designer.cs">
+      <DependentUpon>PromocionesContabilidadForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PromocionesVigentesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PromocionesVigentesForm.Designer.cs">
+      <DependentUpon>PromocionesVigentesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Bitacora.Designer.cs">
       <DependentUpon>Bitacora.cs</DependentUpon>
     </Compile>

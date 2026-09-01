@@ -71,6 +71,14 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.plan_inexistente",
                     "El plan seleccionado no existe o no está activo.");
 
+            // Evita duplicar la contratación si Venta reenvía el formulario (doble click, reintento
+            // tras no ver confirmación, etc.): un cliente no puede tener dos contrataciones pendientes
+            // de pago a la vez.
+            if (dalContratacion.ObtenerPendientesDePago().Exists(c => c.IdCliente == idCliente))
+                throw new BE.AppException("err.bll.contratacion.pendiente_existente",
+                    "Este cliente ya tiene una contratación pendiente de pago. " +
+                    "Hay que resolverla (cobrarla o cancelarla) antes de registrar una nueva.");
+
             var contratacion = new BE.Contratacion
             {
                 IdCliente  = idCliente,

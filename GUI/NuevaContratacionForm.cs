@@ -121,7 +121,9 @@ namespace GUI
                 IdContratacionCreada = contratacionBLL.CrearContratacion(
                     this.Text, cliente.IdCliente, plan.IdPlan, modalidad);
 
-                MostrarOk($"Contratación #{IdContratacionCreada} registrada, pendiente de pago.");
+                // El diálogo se cierra a continuación: un toast en lblMensaje nunca llegaría a
+                // pintarse. La confirmación persistente la muestra el caller (Menu.cs) después
+                // de ShowDialog, mismo criterio que NuevoPedidoForm/PedidosVenta.
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

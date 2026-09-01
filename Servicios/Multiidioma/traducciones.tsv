@@ -4504,6 +4504,18 @@ ES	contratacion.btn.intentofallido	✗ Intento Fallido
 EN	contratacion.btn.intentofallido	✗ Failed Attempt
 RU	contratacion.btn.intentofallido	✗ Неудачная попытка
 PT	contratacion.btn.intentofallido	✗ Tentativa Falhada
+ES	msg.contratacion.creada	Contratación #{0} registrada, pendiente de pago.
+EN	msg.contratacion.creada	Contract #{0} registered, pending payment.
+RU	msg.contratacion.creada	Договор №{0} зарегистрирован, ожидает оплаты.
+PT	msg.contratacion.creada	Contratação #{0} registrada, pendente de pagamento.
+ES	msg.ok.titulo	Listo
+EN	msg.ok.titulo	Done
+RU	msg.ok.titulo	Готово
+PT	msg.ok.titulo	Pronto
+ES	err.bll.contratacion.pendiente_existente	Este cliente ya tiene una contratación pendiente de pago. Hay que resolverla (cobrarla o cancelarla) antes de registrar una nueva.
+EN	err.bll.contratacion.pendiente_existente	This client already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
+RU	err.bll.contratacion.pendiente_existente	У этого клиента уже есть договор, ожидающий оплаты. Его нужно разрешить (оплатить или отменить) перед оформлением нового.
+PT	err.bll.contratacion.pendiente_existente	Este cliente já tem uma contratação pendente de pagamento. É preciso resolvê-la (cobrar ou cancelar) antes de registrar uma nova.
 ES	col.contr.id	ID
 EN	col.contr.id	ID
 RU	col.contr.id	ID

@@ -632,7 +632,18 @@ namespace GUI
         private void nuevaContratacionToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (var form = new NuevaContratacionForm())
-                form.ShowDialog(this);
+            {
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+                MessageBox.Show(
+                    string.Format(T("msg.contratacion.creada", "Contratación #{0} registrada, pendiente de pago."),
+                        form.IdContratacionCreada),
+                    T("msg.ok.titulo", "Listo"),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
         }
 
         /// <summary>

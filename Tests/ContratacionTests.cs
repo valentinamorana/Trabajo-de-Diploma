@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Seguridad;
 using Tests.Fakes;
@@ -145,6 +146,29 @@ namespace Tests
             catch (BE.AppException ex)
             {
                 Assert.AreEqual("err.bll.contratacion.plan_inexistente", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalContratacion.AltaVeces);
+        }
+
+        [TestMethod]
+        public void CrearContratacion_ClienteYaTienePendiente_LanzaPendienteExistente_SinTocarElDAL()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalContratacion.PendientesDePago = new List<BE.Contratacion>
+            {
+                new BE.Contratacion { IdContratacion = 5, IdCliente = 10, Estado = BE.EstadoContratacion.PendientePago }
+            };
+            var bll = ctx.Crear();
+
+            try
+            {
+                bll.CrearContratacion("Test", 10, 1, BE.Builders.ModalidadCobro.Mensual);
+                Assert.Fail("Debía rechazar una segunda contratación pendiente para el mismo cliente.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.contratacion.pendiente_existente", ex.Clave);
             }
             Assert.AreEqual(0, ctx.DalContratacion.AltaVeces);
         }

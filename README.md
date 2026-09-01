@@ -187,12 +187,14 @@ BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos
 BD/08_Cobro_Pago.sql                      -- Tabla y permisos del módulo de Cobro de Suscripción (PdN6)
 BD/09_Analisis_Abandono.sql               -- Permisos del módulo de Análisis de Abandono (PdN10) — sin tablas nuevas
 BD/16_Lista_Espera.sql                    -- Lista de Espera de prendas (mejora opcional, no requerida por la cátedra)
+BD/17_Comercializacion_Suscripcion.sql    -- Tabla Contratacion y rol Caja del módulo PN02
 ```
 
 - **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql` y luego `08_Cobro_Pago.sql` y `09_Analisis_Abandono.sql`.
 - **Actualizar una BD existente** → ejecutar `02` a `09` en orden.
 - **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
 - **Lista de Espera (mejora opcional)** → ejecutar `16_Lista_Espera.sql` en cualquier momento; el resto del sistema funciona sin él (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
+- **Comercialización de la suscripción (PN02)** → ejecutar `17_Comercializacion_Suscripcion.sql` en cualquier momento. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo.
 
 ### Cadena de conexión
 

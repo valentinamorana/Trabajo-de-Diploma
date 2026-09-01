@@ -26,6 +26,7 @@ namespace Servicios.Multiidioma
                 case "Supervisor":           return Key("perfil.supervisor")        ?? perfil;
                 case "ControladorDeStock":   return Key("perfil.stock")             ?? perfil;
                 case "OperadorDeInventario": return Key("perfil.operador")          ?? perfil;
+                case "Caja":                 return Key("perfil.caja")              ?? perfil;
                 default:                     return perfil;
             }
         }

@@ -367,6 +367,13 @@ namespace GUI
 
             foreach (var cand in candidatos)
             {
+                // PN04 — EnUso → Baja SOLO existe para CU-DEP-02 Reportar Prenda Perdida
+                // (Menú → Ventas → Pedidos Realizados, prenda puntual con confirmación propia).
+                // Este diálogo genérico de Stock no debe ofrecerla: daría de baja una prenda
+                // que un cliente todavía tiene, sin pasar por ese flujo dedicado.
+                if (prenda.Estado == BE.EstadoPrenda.EnUso && cand.estado == BE.EstadoPrenda.Baja)
+                    continue;
+
                 if (cand.estado != prenda.Estado && prenda.TransicionPermitida(cand.estado))
                     opciones.Add((T_est(cand.clave, cand.fb), cand.estado));
             }

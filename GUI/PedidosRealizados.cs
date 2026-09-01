@@ -30,8 +30,14 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPedidoService pedidoBLL = new BLL.Pedido();
+        private readonly BLL.Interfaces.IPrendaService prendaBLL = new BLL.Prenda();
+        private readonly BLL.Interfaces.ICargoPrendaService cargoBLL = new BLL.CargoPrenda();
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
+
+        // PN04, CU-DEP-02 Reportar Prenda Perdida: prendas del pedido actualmente mostrado
+        // en dgvDetalle, para resolver la selección sin agregar una columna ID visible.
+        private List<BE.Prenda> _prendasDetalleActual = new List<BE.Prenda>();
 
         // Idioma activo — se actualiza en UpdateLanguage para poder usarlo
         // en los helpers EstadoLabel() y ComputarUrgencia() que no reciben parámetro.
@@ -84,6 +90,7 @@ namespace GUI
             Aplicar(btnDevolucion,      t);
             Aplicar(lblDetalleTitulo,   t);
             Aplicar(btnHistorial,       t);
+            Aplicar(btnReportarPerdida, t);
             RellenarComboEstado(idioma);
         }
 
@@ -330,6 +337,8 @@ namespace GUI
                 var pedido = pedidoBLL.ObtenerPorId(pedidoResumen.IdPedido);
                 if (pedido == null) return;
 
+                _prendasDetalleActual = pedido.Prendas;
+
                 var tDet = Traductor.ObtenerTraducciones(_idioma);
                 string T_det(string k, string fb) => tDet.ContainsKey(k) ? tDet[k].Texto : fb;
                 string prendasLbl = T_det("col.ped.prendas", "prenda(s)");
@@ -339,6 +348,7 @@ namespace GUI
                     EstadoLabel(pedido.Estado), pedido.CantidadPrendas, prendasLbl);
 
                 var tabla = new DataTable();
+                tabla.Columns.Add("IdPrenda",  typeof(int));
                 tabla.Columns.Add("Prenda",    typeof(string));
                 tabla.Columns.Add("Categoría", typeof(string));
                 tabla.Columns.Add("Talle",     typeof(string));
@@ -347,6 +357,7 @@ namespace GUI
 
                 foreach (var p in pedido.Prendas)
                     tabla.Rows.Add(
+                        p.IdPrenda,
                         p.Nombre,
                         p.Categoria ?? "—",
                         p.Talle     ?? "—",
@@ -354,6 +365,11 @@ namespace GUI
                         EstadoPrendaLabel(p.Estado));
 
                 dgvDetalle.DataSource = tabla;
+                // Columna técnica, no se muestra — ObtenerPrendaDetalleSeleccionada() la usa
+                // para resolver la fila seleccionada aunque el usuario ordene la grilla por
+                // columna (el orden de _prendasDetalleActual no se toca).
+                if (dgvDetalle.Columns.Contains("IdPrenda"))
+                    dgvDetalle.Columns["IdPrenda"].Visible = false;
                 TraducirHeadersDetalle();
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[PedidosRealizados] Error al cargar detalle: {ex.Message}"); }
@@ -375,6 +391,25 @@ namespace GUI
             RH("Talle",     "col.prenda.talle",     "Talle");
             RH("Color",     "col.prenda.color",     "Color");
             RH("Estado",    "col.prenda.estado",    "Estado");
+        }
+
+        // PN04, CU-DEP-02 Reportar Prenda Perdida: solo tiene sentido sobre una prenda
+        // EnUso (la única transición manual habilitada desde ese estado, ver
+        // BE.Estados.EstadoEnUso).
+        private void DgvDetalle_SelectionChanged(object sender, EventArgs e)
+        {
+            var prenda = ObtenerPrendaDetalleSeleccionada();
+            btnReportarPerdida.Enabled = prenda != null && prenda.Estado == BE.EstadoPrenda.EnUso;
+        }
+
+        // Resuelve por IdPrenda (columna oculta), no por índice de fila: dgvDetalle permite
+        // ordenar por columna (comportamiento default de WinForms), lo que reordenaría las
+        // filas sin tocar el orden de _prendasDetalleActual.
+        private BE.Prenda ObtenerPrendaDetalleSeleccionada()
+        {
+            if (dgvDetalle.SelectedRows.Count == 0) return null;
+            int id = Convert.ToInt32(dgvDetalle.SelectedRows[0].Cells["IdPrenda"].Value);
+            return _prendasDetalleActual.Find(p => p.IdPrenda == id);
         }
 
         // ── Acciones ──────────────────────────────────────────────────────────
@@ -475,6 +510,33 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); }
         }
 
+        // PN04, CU-DEP-02 Reportar Prenda Perdida: una prenda EnUso que nunca vuelve
+        // físicamente no puede pasar por Inspección de Devolución (esa cola es EnLimpieza).
+        // Mismo mecanismo que CU-DEP-01: CambiarEstado + RegistrarCargo, sin aprobación de
+        // nadie (Nuuly: cobro directo por reposición).
+        private void BtnReportarPerdida_Click(object sender, EventArgs e)
+        {
+            var prenda = ObtenerPrendaDetalleSeleccionada();
+            if (prenda == null || prenda.Estado != BE.EstadoPrenda.EnUso) return;
+
+            using (var dlg = new CargoPrendaDialog(prenda, prenda.PrecioReposicion))
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+                try
+                {
+                    string actor = Seguridad.SessionManager.IsLoggedIn
+                        ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
+                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
+                    cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
+                    MostrarOk($"'{prenda.Nombre}' reportada como perdida — cargo de ${dlg.Monto} registrado.");
+                    var pedidoSel = ObtenerPedidoSeleccionado();
+                    if (pedidoSel != null) CargarDetallePrendas(pedidoSel);
+                }
+                catch (Exception ex) { MostrarError(ex); }
+            }
+        }
+
         private void BtnVerNotificacion_Click(object sender, EventArgs e)
         {
             var pedido = ObtenerPedidoSeleccionado();
@@ -520,6 +582,7 @@ namespace GUI
             btnDevolucion.Enabled      = false;
             btnVerNotificacion.Enabled = false;
             btnHistorial.Enabled      = false;
+            btnReportarPerdida.Enabled = false;
         }
 
         private void LimpiarDetalle()

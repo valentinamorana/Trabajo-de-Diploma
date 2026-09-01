@@ -35,6 +35,8 @@ namespace BLL
             ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
             ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),
             ("promocionesVigentesToolStripMenuItem",            "mnuPromocionesVigentes"),
+            // PN04 — Inspección de Devolución (Depósito = OperadorDeInventario).
+            ("inspeccionDevolucionToolStripMenuItem",  "mnuInspeccionDevolucion"),
             // Mejora opcional (no requerida por la cátedra) — ver README.
             ("listaEsperaToolStripMenuItem",           "mnuListaEspera"),
             // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
@@ -103,8 +105,8 @@ namespace BLL
         /// GUI.Menu.AplicarPermisos:
         ///   • Panel de Control: siempre visible para cualquier logueado.
         ///   • Hoja: visible si tiene la patente exacta (o es Admin).
-        ///   • Inventario: visible si Prendas o Lista de Espera son visibles, o tiene mnuStock
-        ///     (Stock no tiene ToolStripMenuItem propio en el Designer).
+        ///   • Inventario: visible si Prendas, Lista de Espera o Inspección de Devolución son
+        ///     visibles, o tiene mnuStock (Stock no tiene ToolStripMenuItem propio en el Designer).
         ///   • Grupo genérico (Suscriptores/Ventas/Auditoría/Analítica de Negocio): visible si algún hijo lo es.
         ///   • Administrar/Usuarios▸/Sistema▸: gobernados por mnuUsuarios.
         /// </summary>
@@ -122,7 +124,8 @@ namespace BLL
                 visible[h.Item] = Permite(h.Permiso);
 
             visible["inventarioToolStripMenuItem"] =
-                visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] || Permite("mnuStock");
+                visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] ||
+                visible["inspeccionDevolucionToolStripMenuItem"] || Permite("mnuStock");
 
             foreach (var g in Grupos)
                 visible[g.Grupo] = g.Hijos.Any(h => visible.TryGetValue(h, out var v) && v);

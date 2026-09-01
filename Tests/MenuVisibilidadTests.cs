@@ -170,6 +170,16 @@ namespace Tests
         }
 
         [TestMethod]
+        public void OperadorDeInventario_ConPatenteNueva_VeInspeccionDevolucion()
+        {
+            // PN04 — Inspección de Devolución, mismo rol (Depósito = OperadorDeInventario).
+            var v = BLL.MenuVisibilidad.Resolver(new[] { "mnuStock", "mnuInspeccionDevolucion" }, esAdmin: false);
+
+            Assert.IsTrue(V(v, "inspeccionDevolucionToolStripMenuItem"));
+            Assert.IsTrue(V(v, "inventarioToolStripMenuItem"));
+        }
+
+        [TestMethod]
         public void GerenteInventario_HeredaAmbosOperadores()
         {
             // Composite: GerenteInventario → OperadorLogistico + OperadorDeInventario.

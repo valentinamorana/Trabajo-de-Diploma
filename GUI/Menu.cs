@@ -226,7 +226,7 @@ namespace GUI
             var items = new ToolStripMenuItem[]
             {
                 panelControlToolStripMenuItem, inventarioToolStripMenuItem,
-                prendasToolStripMenuItem, listaEsperaToolStripMenuItem,
+                prendasToolStripMenuItem, inspeccionDevolucionToolStripMenuItem, listaEsperaToolStripMenuItem,
                 clientesToolStripMenuItem, planesToolStripMenuItem,
                 renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
@@ -553,6 +553,16 @@ namespace GUI
             new Prendas { MdiParent = this }.Show();
         }
 
+        // PN04, CU-DEP-01 Inspeccionar Devolución.
+        private void inspeccionDevolucionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is InspeccionDevolucionForm) { hijo.BringToFront(); return; }
+            }
+            new InspeccionDevolucionForm { MdiParent = this }.Show();
+        }
+
         /// <summary>
         /// Abre el módulo de Clientes como hijo MDI. Accesible para Vendedor.
         /// </summary>
@@ -867,6 +877,7 @@ namespace GUI
             Aplicar(panelControlToolStripMenuItem,      t);
             Aplicar(inventarioToolStripMenuItem,        t);
             Aplicar(prendasToolStripMenuItem,           t);
+            Aplicar(inspeccionDevolucionToolStripMenuItem, t);
             Aplicar(listaEsperaToolStripMenuItem,       t);
             Aplicar(suscriptoresToolStripMenuItem,      t);
             Aplicar(ventasToolStripMenuItem,            t);

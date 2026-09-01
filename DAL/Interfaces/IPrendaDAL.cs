@@ -17,7 +17,7 @@ namespace DAL.Interfaces
         List<BE.Prenda> ObtenerPorCliente(int idCliente);
         int Alta(BE.Prenda prenda);
         void Modificar(BE.Prenda prenda);
-        void CambiarEstado(int idPrenda, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null);
+        void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null);
         List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria();
     }
 }

@@ -32,6 +32,7 @@ namespace GUI
             this.btnDevolucion = new System.Windows.Forms.Button();
             this.btnRefrescar = new System.Windows.Forms.Button();
             this.btnHistorial = new System.Windows.Forms.Button();
+            this.btnReportarPerdida = new System.Windows.Forms.Button();
             this.panelDetalle = new System.Windows.Forms.Panel();
             this.dgvDetalle = new System.Windows.Forms.DataGridView();
             this.lblDetalleTitulo = new System.Windows.Forms.Label();
@@ -61,6 +62,7 @@ namespace GUI
             this.panelTop.Controls.Add(this.btnDevolucion);
             this.panelTop.Controls.Add(this.btnRefrescar);
             this.panelTop.Controls.Add(this.btnHistorial);
+            this.panelTop.Controls.Add(this.btnReportarPerdida);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
@@ -224,6 +226,22 @@ namespace GUI
             this.btnHistorial.UseVisualStyleBackColor = false;
             this.btnHistorial.Click += new System.EventHandler(this.BtnHistorial_Click);
             //
+            // btnReportarPerdida — PN04, CU-DEP-02 Reportar Prenda Perdida
+            //
+            this.btnReportarPerdida.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
+            this.btnReportarPerdida.Enabled = false;
+            this.btnReportarPerdida.FlatAppearance.BorderSize = 0;
+            this.btnReportarPerdida.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnReportarPerdida.ForeColor = System.Drawing.Color.White;
+            this.btnReportarPerdida.Location = new System.Drawing.Point(850, 50);
+            this.btnReportarPerdida.Name = "btnReportarPerdida";
+            this.btnReportarPerdida.Size = new System.Drawing.Size(180, 28);
+            this.btnReportarPerdida.TabIndex = 12;
+            this.btnReportarPerdida.Tag = "btn.reportarperdida";
+            this.btnReportarPerdida.Text = "⚠ Reportar Perdida";
+            this.btnReportarPerdida.UseVisualStyleBackColor = false;
+            this.btnReportarPerdida.Click += new System.EventHandler(this.BtnReportarPerdida_Click);
+            //
             // panelDetalle
             // 
             this.panelDetalle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(252)))));
@@ -261,6 +279,7 @@ namespace GUI
             this.dgvDetalle.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvDetalle.Size = new System.Drawing.Size(1044, 152);
             this.dgvDetalle.TabIndex = 1;
+            this.dgvDetalle.SelectionChanged += new System.EventHandler(this.DgvDetalle_SelectionChanged);
             // 
             // lblDetalleTitulo
             // 
@@ -361,6 +380,7 @@ namespace GUI
         private System.Windows.Forms.Button       btnDevolucion;
         private System.Windows.Forms.Button       btnRefrescar;
         private System.Windows.Forms.Button       btnHistorial;
+        private System.Windows.Forms.Button       btnReportarPerdida;
         private System.Windows.Forms.Panel        panelDetalle;
         private System.Windows.Forms.Label        lblDetalleTitulo;
         private System.Windows.Forms.DataGridView dgvDetalle;

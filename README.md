@@ -189,6 +189,7 @@ BD/09_Analisis_Abandono.sql               -- Permisos del módulo de Análisis d
 BD/16_Lista_Espera.sql                    -- Lista de Espera de prendas (mejora opcional, no requerida por la cátedra)
 BD/17_Comercializacion_Suscripcion.sql    -- Tabla Contratacion y rol Caja del módulo PN02
 BD/18_Promociones.sql                     -- Tablas Promocion/SugerenciaPromocion y roles AdministracionComercial/Contabilidad del PN03
+BD/19_Inspeccion_Devolucion.sql           -- Columna Prenda.PrecioReposicion y patentes de la pantalla del módulo PN04
 ```
 
 - **Instalación nueva** → ejecutar `01_Crear_BaseDeDatos.sql` y luego `08_Cobro_Pago.sql` y `09_Analisis_Abandono.sql`.
@@ -197,6 +198,7 @@ BD/18_Promociones.sql                     -- Tablas Promocion/SugerenciaPromocio
 - **Lista de Espera (mejora opcional)** → ejecutar `16_Lista_Espera.sql` en cualquier momento; el resto del sistema funciona sin él (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
 - **Comercialización de la suscripción (PN02)** → ejecutar `17_Comercializacion_Suscripcion.sql` en cualquier momento. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo.
 - **Métricas, promociones y toma de decisiones (PN03)** → ejecutar `18_Promociones.sql` en cualquier momento. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay que asignarle esos 2 roles a usuarios de prueba desde Administrar → Usuarios.
+- **Inspección de Devolución (PN04)** → ejecutar `19_Inspeccion_Devolucion.sql` en cualquier momento. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
 
 ### Cadena de conexión
 

@@ -25,9 +25,12 @@ namespace GUI
             this.txtColor = new System.Windows.Forms.TextBox();
             this.lblCategoria = new System.Windows.Forms.Label();
             this.cmbCategoria = new System.Windows.Forms.ComboBox();
+            this.lblPrecioReposicion = new System.Windows.Forms.Label();
+            this.numPrecioReposicion = new System.Windows.Forms.NumericUpDown();
             this.lblMensaje = new System.Windows.Forms.Label();
             this.btnGuardar = new System.Windows.Forms.Button();
             this.btnCancelar = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.numPrecioReposicion)).BeginInit();
             this.SuspendLayout();
             // 
             // lblNombre
@@ -152,55 +155,75 @@ namespace GUI
             this.cmbCategoria.Name = "cmbCategoria";
             this.cmbCategoria.Size = new System.Drawing.Size(360, 25);
             this.cmbCategoria.TabIndex = 9;
-            // 
+            //
+            // lblPrecioReposicion
+            //
+            this.lblPrecioReposicion.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.lblPrecioReposicion.Location = new System.Drawing.Point(16, 258);
+            this.lblPrecioReposicion.Name = "lblPrecioReposicion";
+            this.lblPrecioReposicion.Size = new System.Drawing.Size(360, 18);
+            this.lblPrecioReposicion.TabIndex = 10;
+            this.lblPrecioReposicion.Tag = "lbl.prenda.preciorep";
+            this.lblPrecioReposicion.Text = "Precio de Reposición (PN04, opcional)";
+            //
+            // numPrecioReposicion
+            //
+            this.numPrecioReposicion.DecimalPlaces = 2;
+            this.numPrecioReposicion.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.numPrecioReposicion.Location = new System.Drawing.Point(16, 278);
+            this.numPrecioReposicion.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
+            this.numPrecioReposicion.Name = "numPrecioReposicion";
+            this.numPrecioReposicion.Size = new System.Drawing.Size(160, 24);
+            this.numPrecioReposicion.TabIndex = 11;
+            //
             // lblMensaje
-            // 
+            //
             this.lblMensaje.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblMensaje.ForeColor = System.Drawing.Color.DarkRed;
-            this.lblMensaje.Location = new System.Drawing.Point(16, 258);
+            this.lblMensaje.Location = new System.Drawing.Point(16, 310);
             this.lblMensaje.Name = "lblMensaje";
             this.lblMensaje.Size = new System.Drawing.Size(360, 34);
-            this.lblMensaje.TabIndex = 10;
-            // 
+            this.lblMensaje.TabIndex = 12;
+            //
             // btnGuardar
-            // 
+            //
             this.btnGuardar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
             this.btnGuardar.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnGuardar.FlatAppearance.BorderSize = 0;
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnGuardar.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(16, 298);
+            this.btnGuardar.Location = new System.Drawing.Point(16, 350);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(184, 36);
-            this.btnGuardar.TabIndex = 11;
+            this.btnGuardar.TabIndex = 13;
             this.btnGuardar.Tag = "btn.agregar.prenda";
             this.btnGuardar.Text = "Guardar Cambios";
             this.btnGuardar.UseVisualStyleBackColor = false;
             this.btnGuardar.Click += new System.EventHandler(this.BtnGuardar_Click);
-            // 
+            //
             // btnCancelar
-            // 
+            //
             this.btnCancelar.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCancelar.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCancelar.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.btnCancelar.Location = new System.Drawing.Point(216, 298);
+            this.btnCancelar.Location = new System.Drawing.Point(216, 350);
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(120, 36);
-            this.btnCancelar.TabIndex = 12;
+            this.btnCancelar.TabIndex = 14;
             this.btnCancelar.Tag = "btn.cancelar";
             this.btnCancelar.Text = "Cancelar";
             this.btnCancelar.Click += new System.EventHandler(this.BtnCancelar_Click);
-            // 
+            //
             // PrendaForm
-            // 
+            //
             this.AcceptButton = this.btnGuardar;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.CancelButton = this.btnCancelar;
-            this.ClientSize = new System.Drawing.Size(396, 356);
+            this.ClientSize = new System.Drawing.Size(396, 408);
             this.Controls.Add(this.lblNombre);
             this.Controls.Add(this.txtNombre);
             this.Controls.Add(this.lblDescripcion);
@@ -211,6 +234,8 @@ namespace GUI
             this.Controls.Add(this.txtColor);
             this.Controls.Add(this.lblCategoria);
             this.Controls.Add(this.cmbCategoria);
+            this.Controls.Add(this.lblPrecioReposicion);
+            this.Controls.Add(this.numPrecioReposicion);
             this.Controls.Add(this.lblMensaje);
             this.Controls.Add(this.btnGuardar);
             this.Controls.Add(this.btnCancelar);
@@ -220,6 +245,7 @@ namespace GUI
             this.Name = "PrendaForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Prenda";
+            ((System.ComponentModel.ISupportInitialize)(this.numPrecioReposicion)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -237,6 +263,8 @@ namespace GUI
         private System.Windows.Forms.TextBox  txtColor;
         private System.Windows.Forms.Label    lblCategoria;
         private System.Windows.Forms.ComboBox cmbCategoria;
+        private System.Windows.Forms.Label    lblPrecioReposicion;
+        private System.Windows.Forms.NumericUpDown numPrecioReposicion;
         private System.Windows.Forms.Label    lblMensaje;
         private System.Windows.Forms.Button   btnGuardar;
         private System.Windows.Forms.Button   btnCancelar;

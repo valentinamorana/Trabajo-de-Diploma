@@ -104,8 +104,8 @@ namespace BLL
                         "Una prenda dada de baja no puede cambiar de estado.");
                 if (estadoAnterior == BE.EstadoPrenda.EnUso)
                     throw new BE.AppException("err.bll.prenda.transicion_enuso",
-                        "No se puede cambiar manualmente el estado de una prenda en uso.\n" +
-                        "El estado se actualiza automáticamente al procesar pedidos.");
+                        "El estado de una prenda en uso se actualiza automáticamente al procesar pedidos.\n" +
+                        "La única excepción manual es reportarla como perdida (PN04, módulo de Pedidos Realizados).");
                 throw new BE.AppException("err.bll.prenda.transicion_generica",
                     "La transición de '{0}' a '{1}' no está permitida.",
                     estadoAnterior.ToString(), nuevoEstado.ToString());
@@ -115,7 +115,7 @@ namespace BLL
                 ? prenda.IdClienteActual
                 : null;
 
-            dalPrenda.CambiarEstado(prenda.IdPrenda, nuevoEstado, idCliente);
+            dalPrenda.CambiarEstado(prenda.IdPrenda, estadoAnterior, nuevoEstado, idCliente);
 
             if (nuevoEstado == BE.EstadoPrenda.EnLimpieza)
             {
@@ -157,6 +157,12 @@ namespace BLL
             }
             return (noDisponibles.Count == 0, noDisponibles);
         }
+
+        // PN04, CU-DEP-01 Inspeccionar Devolución: prendas EnLimpieza pendientes de
+        // resolución (reingresan sin cargo o se dan de baja con cargo). Filtrado en memoria,
+        // mismo criterio que ObtenerOcupacion() — no hace falta una query SQL dedicada.
+        public List<BE.Prenda> ObtenerEnLimpieza() =>
+            dalPrenda.ObtenerTodos().FindAll(p => p.Estado == BE.EstadoPrenda.EnLimpieza);
 
         public List<BE.MantenimientoPrenda> ObtenerHistorialMantenimiento(int idPrenda)
             => dalMantenimiento.ObtenerPorPrenda(idPrenda);

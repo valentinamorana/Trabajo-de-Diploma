@@ -78,5 +78,33 @@ namespace Tests
             Assert.AreEqual(1, noDisponibles.Count);
             Assert.AreEqual(2, noDisponibles[0].IdPrenda);
         }
+
+        // ── ObtenerEnLimpieza (PN04, CU-DEP-01 Inspeccionar Devolución) ──────────
+
+        [TestMethod]
+        public void ObtenerEnLimpieza_FiltraSoloLasEnLimpieza()
+        {
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 1, Estado = BE.EstadoPrenda.EnLimpieza });
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 2, Estado = BE.EstadoPrenda.Disponible });
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 3, Estado = BE.EstadoPrenda.EnLimpieza });
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 4, Estado = BE.EstadoPrenda.EnUso });
+            var bll = ctx.Crear();
+
+            var enLimpieza = bll.ObtenerEnLimpieza();
+
+            Assert.AreEqual(2, enLimpieza.Count);
+            CollectionAssert.AreEquivalent(new[] { 1, 3 }, enLimpieza.ConvertAll(p => p.IdPrenda));
+        }
+
+        [TestMethod]
+        public void ObtenerEnLimpieza_NingunaEnLimpieza_DevuelveVacio()
+        {
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 1, Estado = BE.EstadoPrenda.Disponible });
+            var bll = ctx.Crear();
+
+            Assert.AreEqual(0, bll.ObtenerEnLimpieza().Count);
+        }
     }
 }

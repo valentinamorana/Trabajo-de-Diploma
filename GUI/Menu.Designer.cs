@@ -42,6 +42,7 @@
             this.panelControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inventarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.inspeccionDevolucionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listaEsperaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.suscriptoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -190,19 +191,28 @@
             // 
             this.inventarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.prendasToolStripMenuItem,
+            this.inspeccionDevolucionToolStripMenuItem,
             this.listaEsperaToolStripMenuItem});
             this.inventarioToolStripMenuItem.Name = "inventarioToolStripMenuItem";
             this.inventarioToolStripMenuItem.Tag = "mnu.inventario";
             this.inventarioToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
             this.inventarioToolStripMenuItem.Text = "Inventario";
-            // 
+            //
             // prendasToolStripMenuItem
-            // 
+            //
             this.prendasToolStripMenuItem.Name = "prendasToolStripMenuItem";
             this.prendasToolStripMenuItem.Tag = "mnu.prendas";
             this.prendasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.prendasToolStripMenuItem.Text = "Prendas";
             this.prendasToolStripMenuItem.Click += new System.EventHandler(this.prendasToolStripMenuItem_Click);
+            //
+            // inspeccionDevolucionToolStripMenuItem — PN04, CU-DEP-01 Inspeccionar Devolución
+            //
+            this.inspeccionDevolucionToolStripMenuItem.Name = "inspeccionDevolucionToolStripMenuItem";
+            this.inspeccionDevolucionToolStripMenuItem.Tag = "mnu.inspecciondevolucion";
+            this.inspeccionDevolucionToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.inspeccionDevolucionToolStripMenuItem.Text = "Inspección de Devolución";
+            this.inspeccionDevolucionToolStripMenuItem.Click += new System.EventHandler(this.inspeccionDevolucionToolStripMenuItem_Click);
             //
             // listaEsperaToolStripMenuItem — mejora opcional (no requerida por la cátedra, ver README)
             //
@@ -619,6 +629,7 @@
         private System.Windows.Forms.ToolStripMenuItem panelControlToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem inventarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prendasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem inspeccionDevolucionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem listaEsperaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem nuevaContratacionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cajaToolStripMenuItem;

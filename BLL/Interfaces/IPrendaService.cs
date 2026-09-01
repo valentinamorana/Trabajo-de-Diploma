@@ -42,5 +42,8 @@ namespace BLL.Interfaces
 
         // Devuelve el resumen de ocupación del stock (total, en uso, en limpieza, disponibles).
         BE.OcupacionStock ObtenerOcupacion();
+
+        // PN04, CU-DEP-01 Inspeccionar Devolución: prendas EnLimpieza pendientes de resolución.
+        List<BE.Prenda> ObtenerEnLimpieza();
     }
 }

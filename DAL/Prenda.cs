@@ -26,6 +26,7 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
                     "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       p.PrecioReposicion, " +
                     "       c.Nombre + ' ' + c.Apellido AS NombreCliente, " +
                     "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
                     "FROM Prenda p " +
@@ -55,6 +56,7 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
                     "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       p.PrecioReposicion, " +
                     "       NULL AS NombreCliente, " +
                     "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
                     "FROM Prenda p " +
@@ -82,6 +84,7 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
                     "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       p.PrecioReposicion, " +
                     "       c.Nombre + ' ' + c.Apellido AS NombreCliente, " +
                     "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
                     "FROM Prenda p " +
@@ -113,6 +116,7 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
                     "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       p.PrecioReposicion, " +
                     "       c.Nombre + ' ' + c.Apellido AS NombreCliente, " +
                     "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
                     "FROM Prenda p " +
@@ -174,12 +178,13 @@ namespace DAL
                 new SqlParameter("@Color", (object)prenda.Color ?? DBNull.Value),
                 new SqlParameter("@Categoria", (object)prenda.Categoria ?? DBNull.Value),
                 new SqlParameter("@Estado", (int)prenda.Estado),
-                new SqlParameter("@FechaAlta", prenda.FechaAlta)
+                new SqlParameter("@FechaAlta", prenda.FechaAlta),
+                new SqlParameter("@PrecioReposicion", (object)prenda.PrecioReposicion ?? DBNull.Value)
             };
 
             DataTable tabla = acceso.Leer(
-                "INSERT INTO Prenda (Nombre, Descripcion, Talle, Color, Categoria, Estado, FechaAlta) " +
-                "VALUES (@Nombre, @Descripcion, @Talle, @Color, @Categoria, @Estado, @FechaAlta); " +
+                "INSERT INTO Prenda (Nombre, Descripcion, Talle, Color, Categoria, Estado, FechaAlta, PrecioReposicion) " +
+                "VALUES (@Nombre, @Descripcion, @Talle, @Color, @Categoria, @Estado, @FechaAlta, @PrecioReposicion); " +
                 "SELECT SCOPE_IDENTITY() AS IdNuevo",
                 p);
 
@@ -198,32 +203,42 @@ namespace DAL
                 new SqlParameter("@Talle", (object)prenda.Talle ?? DBNull.Value),
                 new SqlParameter("@Color", (object)prenda.Color ?? DBNull.Value),
                 new SqlParameter("@Categoria", (object)prenda.Categoria ?? DBNull.Value),
+                new SqlParameter("@PrecioReposicion", (object)prenda.PrecioReposicion ?? DBNull.Value),
                 new SqlParameter("@IdPrenda", prenda.IdPrenda)
             };
             acceso.Escribir(
                 "UPDATE Prenda SET Nombre=@Nombre, Descripcion=@Descripcion, " +
-                "Talle=@Talle, Color=@Color, Categoria=@Categoria " +
+                "Talle=@Talle, Color=@Color, Categoria=@Categoria, PrecioReposicion=@PrecioReposicion " +
                 "WHERE IdPrenda=@IdPrenda",
                 p);
         }
 
         // Cambia el estado de una prenda (disponible, en uso, limpieza, baja).
+        // UPDATE condicionado por Estado=@EstadoAnterior (anti-TOCTOU, mismo patrón que
+        // DAL.Pedido — ver la nota de clase de esa clase): si 0 filas afectadas, el estado
+        // cambió entre la lectura y este UPDATE (ej. otra sesión ya devolvió o dio de baja la
+        // misma prenda) y se aborta en vez de pisarlo.
         // IdUltimoCliente solo se pisa cuando se pasa un idClienteActual concreto (asignación);
         // en las demás transiciones (limpieza, baja) se conserva el último dueño conocido.
-        public void CambiarEstado(int idPrenda, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null)
+        public void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null)
         {
             SqlParameter[] p =
             {
                 new SqlParameter("@Estado", (int)nuevoEstado),
+                new SqlParameter("@EstadoAnterior", (int)estadoAnterior),
                 new SqlParameter("@IdClienteActual", (object)idClienteActual ?? DBNull.Value),
                 new SqlParameter("@IdUltimoCliente", (object)idClienteActual ?? DBNull.Value),
                 new SqlParameter("@IdPrenda", idPrenda)
             };
-            acceso.Escribir(
+            int afectadas = acceso.Escribir(
                 "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdClienteActual, " +
                 "IdUltimoCliente=COALESCE(@IdUltimoCliente, IdUltimoCliente) " +
-                "WHERE IdPrenda=@IdPrenda",
+                "WHERE IdPrenda=@IdPrenda AND Estado=@EstadoAnterior",
                 p);
+
+            if (afectadas == 0)
+                throw new BE.AppException("err.dal.prenda.estado_cambio",
+                    "El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.");
         }
 
         private BE.Prenda Mapear(DataRow row)
@@ -243,7 +258,9 @@ namespace DAL
                     ? (int?)Convert.ToInt32(row["IdUltimoCliente"]) : null,
                 NombreUltimoCliente = row.Table.Columns.Contains("NombreUltimoCliente") && row["NombreUltimoCliente"] != DBNull.Value
                     ? row["NombreUltimoCliente"].ToString() : null,
-                FechaAlta = Convert.ToDateTime(row["FechaAlta"])
+                FechaAlta = Convert.ToDateTime(row["FechaAlta"]),
+                PrecioReposicion = row.Table.Columns.Contains("PrecioReposicion") && row["PrecioReposicion"] != DBNull.Value
+                    ? (decimal?)Convert.ToDecimal(row["PrecioReposicion"]) : null
             };
         }
     }

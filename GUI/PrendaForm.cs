@@ -56,6 +56,7 @@ namespace GUI
             Aplicar(lblTalle,      t);
             Aplicar(lblColor,      t);
             Aplicar(lblCategoria,  t);
+            Aplicar(lblPrecioReposicion, t);
             Aplicar(btnCancelar,   t);
         }
 
@@ -82,6 +83,10 @@ namespace GUI
 
             int idxCat = cmbCategoria.Items.IndexOf(_original.Categoria ?? "");
             cmbCategoria.SelectedIndex = idxCat >= 0 ? idxCat : 0;
+
+            numPrecioReposicion.Value = _original.PrecioReposicion.HasValue
+                ? Math.Min(_original.PrecioReposicion.Value, numPrecioReposicion.Maximum)
+                : 0;
         }
 
         private void BtnGuardar_Click(object sender, EventArgs e)
@@ -98,7 +103,8 @@ namespace GUI
                     Color = string.IsNullOrWhiteSpace(txtColor.Text) ? null : txtColor.Text.Trim(),
                     Categoria = cmbCategoria.SelectedItem?.ToString(),
                     Estado = _esEdicion ? _original.Estado : BE.EstadoPrenda.Disponible,
-                    FechaAlta = _esEdicion ? _original.FechaAlta : DateTime.Now
+                    FechaAlta = _esEdicion ? _original.FechaAlta : DateTime.Now,
+                    PrecioReposicion = numPrecioReposicion.Value > 0 ? numPrecioReposicion.Value : (decimal?)null
                 };
 
                 this.DialogResult = DialogResult.OK;

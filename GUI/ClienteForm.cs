@@ -41,15 +41,16 @@ namespace GUI
             _clienteOriginal = cliente;
 
             CargarPlanes();
-            CargarModalidades();
             CargarReferentes();
             AplicarIdioma(GestorIdioma.IdiomaActual);
 
-            // PdN1 (Builder): la modalidad de cobro solo aplica al activar una suscripción
-            // nueva. En edición, el vencimiento se ajusta manualmente acá (corrección puntual)
-            // o mediante el proceso de Renovación (PdN5 — Chain of Responsibility), no acá.
-            lblModalidad.Visible = !_esEdicion;
-            cmbModalidad.Visible = !_esEdicion;
+            // PN02 — el plan (y su activación) ya no se elige en este diálogo: un cliente
+            // nuevo se registra sin plan y lo adquiere después a través de una Contratación
+            // (Vendedor) confirmada por Caja. En edición sí se puede corregir el plan
+            // directamente (ajuste administrativo puntual, no pasa por Caja) junto con el
+            // vencimiento, o mediante el proceso de Renovación (PdN5 — Chain of Responsibility).
+            lblPlan.Visible = _esEdicion;
+            cmbPlan.Visible = _esEdicion;
             chkVencimiento.Visible = _esEdicion;
             dtpVencimiento.Visible = _esEdicion;
 
@@ -59,37 +60,6 @@ namespace GUI
             cmbReferente.Visible = !_esEdicion;
 
             if (_esEdicion) CargarDatosExistentes();
-            else ActualizarDisponibilidadModalidad();
-        }
-
-        /// <summary>
-        /// Modalidad de cobro elegida al activar la suscripción de un cliente nuevo
-        /// (PdN1 — patrón Builder). Null en modo edición o si no se eligió un plan:
-        /// en esos casos no corresponde activar nada vía Builder.
-        /// </summary>
-        public BE.Builders.ModalidadCobro? ModalidadSeleccionada =>
-            !_esEdicion && cmbPlan.SelectedIndex > 0 && cmbModalidad.SelectedItem is BE.Builders.ModalidadCobro modalidad
-                ? modalidad
-                : (BE.Builders.ModalidadCobro?)null;
-
-        private void CargarModalidades()
-        {
-            cmbModalidad.Items.Clear();
-            cmbModalidad.Items.AddRange(new object[]
-            {
-                BE.Builders.ModalidadCobro.Mensual,
-                BE.Builders.ModalidadCobro.Trimestral,
-                BE.Builders.ModalidadCobro.Anual
-            });
-            cmbModalidad.SelectedIndex = 0;
-        }
-
-        private void CmbPlan_SelectedIndexChanged(object sender, EventArgs e) => ActualizarDisponibilidadModalidad();
-
-        private void ActualizarDisponibilidadModalidad()
-        {
-            // Sin plan seleccionado ("— Sin plan —" = índice 0) no hay suscripción que activar.
-            cmbModalidad.Enabled = !_esEdicion && cmbPlan.SelectedIndex > 0;
         }
 
         // ── Traducción ────────────────────────────────────────────────────────
@@ -114,8 +84,7 @@ namespace GUI
             lblEmail.Text           = T("lbl.cli.email",       "Email");
             lblFechaNacimiento.Text = T("lbl.cli.fechanac",    "Fecha de Nacimiento *");
             lblMetodoPago.Text      = T("lbl.cli.metodopago",  "Método de Pago *");
-            lblPlan.Text            = T("lbl.cli.plan",        "Plan de Suscripción *");
-            lblModalidad.Text       = T("lbl.cli.modalidad",   "Modalidad de Cobro *");
+            lblPlan.Text            = T("lbl.cli.plan",        "Plan de Suscripción");
             lblReferente.Text       = T("lbl.cli.referente",   "Referido por");
             chkVencimiento.Text     = T("lbl.cli.vencimiento", "Fecha de Vencimiento");
 

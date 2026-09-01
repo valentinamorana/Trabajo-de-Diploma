@@ -260,14 +260,13 @@ namespace GUI
                 if (form.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
+                    // El alta solo registra los datos personales del cliente, sin plan ni
+                    // suscripción activa. Asignarle un plan y activar la suscripción es un paso
+                    // comercial aparte (PN02: Vendedor crea la Contratación en el módulo
+                    // correspondiente, Caja confirma el cobro y recién ahí se activa) — así no
+                    // hay forma de que un cliente quede con una suscripción vigente sin haber
+                    // pasado por Caja.
                     clienteBLL.Alta(this.Text, form.ClienteEditado);
-
-                    // PdN1 (Builder) — si se eligió modalidad de cobro, activar la suscripción
-                    // calcula la vigencia con SuscripcionBuilder y la persiste. Sin modalidad
-                    // (cliente sin plan) el cliente queda dado de alta sin vencimiento, como antes.
-                    if (form.ModalidadSeleccionada.HasValue && form.ClienteEditado.IdPlan.HasValue)
-                        clienteBLL.ActivarSuscripcion(this.Text, form.ClienteEditado,
-                            form.ClienteEditado.IdPlan.Value, form.ModalidadSeleccionada.Value);
 
                     var t = Traductor.ObtenerTraducciones(_idioma);
                     string fmt = t.ContainsKey("msg.cli.registrado") ? t["msg.cli.registrado"].Texto : "Cliente '{0}' registrado correctamente.";

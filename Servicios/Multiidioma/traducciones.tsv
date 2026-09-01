@@ -3754,7 +3754,7 @@ ES	err.bll.usuario.clave_corta	La contraseña debe tener al menos 8 caracteres.
 ES	err.bll.usuario.clave_sinnumero	La contraseña debe contener al menos un número.
 ES	err.bll.usuario.clave_sinespecial	La contraseña debe contener al menos un carácter especial (!@#$%...).
 ES	err.bll.cliente.plan_inexistente	No se encontró el plan de suscripción indicado.
-ES	err.bll.cliente.plan_requerido	Debe seleccionar un plan de suscripción.
+ES	err.bll.cliente.plan_solo_admin	Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. Para activar una suscripción nueva, usá el módulo de Contratación.
 ES	err.bll.cliente.fechanac_requerida	La fecha de nacimiento es obligatoria.
 ES	err.bll.cliente.menor_edad	El cliente debe ser mayor de 18 años.
 ES	err.bll.plan.nombre_letras	El nombre del plan solo puede contener letras y espacios.
@@ -3782,7 +3782,7 @@ EN	err.bll.usuario.clave_corta	The password must be at least 8 characters long.
 EN	err.bll.usuario.clave_sinnumero	The password must contain at least one number.
 EN	err.bll.usuario.clave_sinespecial	The password must contain at least one special character (!@#$%...).
 EN	err.bll.cliente.plan_inexistente	The specified subscription plan was not found.
-EN	err.bll.cliente.plan_requerido	You must select a subscription plan.
+EN	err.bll.cliente.plan_solo_admin	Only an Administrator can change a client's plan or expiration date directly. To activate a new subscription, use the Contracting module.
 EN	err.bll.cliente.fechanac_requerida	The date of birth is required.
 EN	err.bll.cliente.menor_edad	The client must be over 18 years old.
 EN	err.bll.plan.nombre_letras	The plan name can only contain letters and spaces.
@@ -3810,7 +3810,7 @@ RU	err.bll.usuario.clave_corta	Пароль должен содержать не
 RU	err.bll.usuario.clave_sinnumero	Пароль должен содержать хотя бы одну цифру.
 RU	err.bll.usuario.clave_sinespecial	Пароль должен содержать хотя бы один специальный символ (!@#$%...).
 RU	err.bll.cliente.plan_inexistente	Указанный план подписки не найден.
-RU	err.bll.cliente.plan_requerido	Необходимо выбрать план подписки.
+RU	err.bll.cliente.plan_solo_admin	Только администратор может напрямую изменить план или срок действия клиента. Для активации новой подписки используйте модуль Оформление договора.
 RU	err.bll.cliente.fechanac_requerida	Дата рождения обязательна.
 RU	err.bll.cliente.menor_edad	Клиент должен быть старше 18 лет.
 RU	err.bll.plan.nombre_letras	Название плана может содержать только буквы и пробелы.
@@ -3838,7 +3838,7 @@ PT	err.bll.usuario.clave_corta	A senha deve ter pelo menos 8 caracteres.
 PT	err.bll.usuario.clave_sinnumero	A senha deve conter pelo menos um número.
 PT	err.bll.usuario.clave_sinespecial	A senha deve conter pelo menos um caractere especial (!@#$%...).
 PT	err.bll.cliente.plan_inexistente	O plano de assinatura indicado não foi encontrado.
-PT	err.bll.cliente.plan_requerido	Você deve selecionar um plano de assinatura.
+PT	err.bll.cliente.plan_solo_admin	Somente um Administrador pode modificar o plano ou o vencimento de um cliente diretamente. Para ativar uma nova assinatura, use o módulo de Contratação.
 PT	err.bll.cliente.fechanac_requerida	A data de nascimento é obrigatória.
 PT	err.bll.cliente.menor_edad	O cliente deve ter mais de 18 anos.
 PT	err.bll.plan.nombre_letras	O nome do plano só pode conter letras e espaços.
@@ -4144,13 +4144,9 @@ PT	perm.ok.subcreado	Sub-papel '{0}' criado dentro de '{1}'.
 PT	perm.msg.selasignable	Escolha uma permissão ou papel na lista para atribuir.
 PT	perm.msg.selquitar	Selecione um item vinculado a um papel para removê-lo.
 PT	perm.conf.quitar	Remover '{0}' do papel '{1}'?
-ES	lbl.cli.modalidad	Modalidad de Cobro *
 ES	diag.btn.espejo	Recuperación (Espejo)...
-EN	lbl.cli.modalidad	Billing Method *
 EN	diag.btn.espejo	Recovery (Mirror)...
-RU	lbl.cli.modalidad	Способ оплаты *
 RU	diag.btn.espejo	Восстановление (Зеркало)...
-PT	lbl.cli.modalidad	Modalidade de Cobrança *
 PT	diag.btn.espejo	Recuperação (Espelho)...
 ES	mnu.ventasvendedor	Ventas por Vendedor
 ES	mnu.rotacion	Rotación de Prendas

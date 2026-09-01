@@ -73,6 +73,18 @@ namespace BLL
 
             var actual = dalCliente.ObtenerPorId(cliente.IdCliente);
 
+            // PN02 — cambiar el plan o el vencimiento desde acá es una corrección
+            // administrativa puntual (no pasa por Caja, no dispara el Builder ni el
+            // beneficio de referido de ActivarSuscripcionInterna): reservado a Administrador
+            // para no reabrir, con otro nombre, el mismo atajo que Vendedor tenía antes de
+            // PN02 (activar una suscripción sin cobro real). La activación comercial normal
+            // sigue siendo exclusivamente BLL.Contratacion.ConfirmarPago →
+            // ActivarSuscripcionDesdeContratacion.
+            if (actual != null && (cliente.IdPlan != actual.IdPlan || cliente.FechaVencimiento != actual.FechaVencimiento))
+                BLLHelper.ExigirAdministrador("err.bll.cliente.plan_solo_admin",
+                    "Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. " +
+                    "Para activar una suscripción nueva, usá el módulo de Contratación.");
+
             // Bloquear si el nuevo plan tiene menos capacidad que prendas en uso
             if (actual != null && cliente.IdPlan.HasValue && cliente.IdPlan != actual.IdPlan)
             {
@@ -121,6 +133,13 @@ namespace BLL
         // de cobro, usando el patrón Builder (BE.Builders.SuscripcionBuilder). El Director
         // (BE.Builders.DirectorSuscripcion) fija el orden de los pasos; el Builder concreto
         // (Mensual/Trimestral/Anual) decide cómo calcular la vigencia de cada uno.
+        //
+        // Sin caller en la GUI desde PN02: la activación comercial normal pasa por
+        // ActivarSuscripcionDesdeContratacion (Caja, tras confirmar el pago). Este método
+        // queda disponible con permiso ClientesEditar (Vendedor) para un futuro caso de uso
+        // administrativo puntual (ej. reactivar manualmente con Builder sin pasar por una
+        // Contratación) — no lo uses como atajo para evitar Caja: para eso ya existe el guard
+        // de Administrador en Modificar().
         public BE.Builders.Suscripcion ActivarSuscripcion(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
         {
@@ -295,10 +314,11 @@ namespace BLL
                     throw new BE.AppException("err.bll.cliente.dni_numeros",
                         "El DNI solo puede contener números.");
 
-            if (!cliente.IdPlan.HasValue)
-                throw new BE.AppException("err.bll.cliente.plan_requerido",
-                    "Debe seleccionar un plan de suscripción.");
-
+            // PN02 — el plan ya NO se asigna en el alta: un cliente se registra sin plan y
+            // recién lo adquiere a través de una Contratación (Vendedor) confirmada por Caja
+            // (BLL.Contratacion.ConfirmarPago → ActivarSuscripcionDesdeContratacion). Ver
+            // BE.EstadoComercialCliente / BLL.Pedido.ObtenerClienteValidado: "sin plan" ya es
+            // un estado de cliente válido y manejado en todo el resto del sistema.
             if (!cliente.FechaNacimiento.HasValue)
                 throw new BE.AppException("err.bll.cliente.fechanac_requerida",
                     "La fecha de nacimiento es obligatoria.");

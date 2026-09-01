@@ -29,8 +29,6 @@ namespace GUI
             this.cmbMetodoPago        = new System.Windows.Forms.ComboBox();
             this.lblPlan              = new System.Windows.Forms.Label();
             this.cmbPlan              = new System.Windows.Forms.ComboBox();
-            this.lblModalidad         = new System.Windows.Forms.Label();
-            this.cmbModalidad         = new System.Windows.Forms.ComboBox();
             this.lblReferente         = new System.Windows.Forms.Label();
             this.cmbReferente         = new System.Windows.Forms.ComboBox();
             this.chkVencimiento       = new System.Windows.Forms.CheckBox();
@@ -148,7 +146,7 @@ namespace GUI
             this.lblPlan.Name = "lblPlan";
             this.lblPlan.Size = new System.Drawing.Size(340, 15);
             this.lblPlan.TabIndex = 12;
-            this.lblPlan.Text = "Plan de Suscripción *";
+            this.lblPlan.Text = "Plan de Suscripción";
             //
             // cmbPlan
             //
@@ -157,56 +155,42 @@ namespace GUI
             this.cmbPlan.Name = "cmbPlan";
             this.cmbPlan.Size = new System.Drawing.Size(340, 21);
             this.cmbPlan.TabIndex = 13;
-            this.cmbPlan.SelectedIndexChanged += new System.EventHandler(this.CmbPlan_SelectedIndexChanged);
-            //
-            // lblModalidad
-            //
-            this.lblModalidad.Location = new System.Drawing.Point(16, 384);
-            this.lblModalidad.Name = "lblModalidad";
-            this.lblModalidad.Size = new System.Drawing.Size(340, 15);
-            this.lblModalidad.TabIndex = 14;
-            this.lblModalidad.Text = "Modalidad de Cobro *";
-            //
-            // cmbModalidad
-            //
-            this.cmbModalidad.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbModalidad.Location = new System.Drawing.Point(16, 402);
-            this.cmbModalidad.Name = "cmbModalidad";
-            this.cmbModalidad.Size = new System.Drawing.Size(340, 21);
-            this.cmbModalidad.TabIndex = 15;
             //
             // lblReferente
             //
-            this.lblReferente.Location = new System.Drawing.Point(16, 436);
+            // Comparte la misma fila que lblPlan/cmbPlan a propósito: son mutuamente
+            // excluyentes (Plan solo se muestra en edición, Referente solo en alta), así que
+            // nunca están visibles los dos a la vez y no hace falta una fila propia.
+            this.lblReferente.Location = new System.Drawing.Point(16, 332);
             this.lblReferente.Name = "lblReferente";
             this.lblReferente.Size = new System.Drawing.Size(340, 15);
-            this.lblReferente.TabIndex = 16;
+            this.lblReferente.TabIndex = 14;
             this.lblReferente.Text = "Referido por";
             //
             // cmbReferente
             //
             this.cmbReferente.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbReferente.Location = new System.Drawing.Point(16, 454);
+            this.cmbReferente.Location = new System.Drawing.Point(16, 350);
             this.cmbReferente.Name = "cmbReferente";
             this.cmbReferente.Size = new System.Drawing.Size(340, 21);
-            this.cmbReferente.TabIndex = 17;
+            this.cmbReferente.TabIndex = 15;
             //
             // chkVencimiento
             //
-            this.chkVencimiento.Location = new System.Drawing.Point(16, 488);
+            this.chkVencimiento.Location = new System.Drawing.Point(16, 384);
             this.chkVencimiento.Name = "chkVencimiento";
             this.chkVencimiento.Size = new System.Drawing.Size(340, 20);
-            this.chkVencimiento.TabIndex = 18;
+            this.chkVencimiento.TabIndex = 16;
             this.chkVencimiento.Text = "Fecha de Vencimiento";
             this.chkVencimiento.CheckedChanged += new System.EventHandler(this.ChkVencimiento_CheckedChanged);
             //
             // dtpVencimiento
             //
             this.dtpVencimiento.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpVencimiento.Location = new System.Drawing.Point(16, 512);
+            this.dtpVencimiento.Location = new System.Drawing.Point(16, 408);
             this.dtpVencimiento.Name = "dtpVencimiento";
             this.dtpVencimiento.Size = new System.Drawing.Size(340, 20);
-            this.dtpVencimiento.TabIndex = 19;
+            this.dtpVencimiento.TabIndex = 17;
             this.dtpVencimiento.Enabled = false;
             this.dtpVencimiento.Value = System.DateTime.Today.AddYears(1);
             //
@@ -214,10 +198,10 @@ namespace GUI
             //
             this.lblMensaje.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblMensaje.ForeColor = System.Drawing.Color.DarkRed;
-            this.lblMensaje.Location = new System.Drawing.Point(16, 546);
+            this.lblMensaje.Location = new System.Drawing.Point(16, 442);
             this.lblMensaje.Name = "lblMensaje";
             this.lblMensaje.Size = new System.Drawing.Size(340, 36);
-            this.lblMensaje.TabIndex = 20;
+            this.lblMensaje.TabIndex = 18;
             //
             // btnGuardar
             //
@@ -225,10 +209,10 @@ namespace GUI
             this.btnGuardar.FlatAppearance.BorderSize = 0;
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(16, 590);
+            this.btnGuardar.Location = new System.Drawing.Point(16, 486);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(160, 34);
-            this.btnGuardar.TabIndex = 21;
+            this.btnGuardar.TabIndex = 19;
             this.btnGuardar.Text = "Registrar Cliente";
             this.btnGuardar.UseVisualStyleBackColor = false;
             this.btnGuardar.Click += new System.EventHandler(this.BtnGuardar_Click);
@@ -236,10 +220,10 @@ namespace GUI
             // btnCancelar
             //
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelar.Location = new System.Drawing.Point(192, 590);
+            this.btnCancelar.Location = new System.Drawing.Point(192, 486);
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(100, 34);
-            this.btnCancelar.TabIndex = 22;
+            this.btnCancelar.TabIndex = 20;
             this.btnCancelar.Text = "Cancelar";
             this.btnCancelar.Click += new System.EventHandler(this.BtnCancelar_Click);
             //
@@ -247,7 +231,7 @@ namespace GUI
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(380, 642);
+            this.ClientSize = new System.Drawing.Size(380, 538);
             this.Controls.Add(this.lblNombre);
             this.Controls.Add(this.txtNombre);
             this.Controls.Add(this.lblApellido);
@@ -262,8 +246,6 @@ namespace GUI
             this.Controls.Add(this.cmbMetodoPago);
             this.Controls.Add(this.lblPlan);
             this.Controls.Add(this.cmbPlan);
-            this.Controls.Add(this.lblModalidad);
-            this.Controls.Add(this.cmbModalidad);
             this.Controls.Add(this.lblReferente);
             this.Controls.Add(this.cmbReferente);
             this.Controls.Add(this.chkVencimiento);
@@ -298,8 +280,6 @@ namespace GUI
         private System.Windows.Forms.ComboBox       cmbMetodoPago;
         private System.Windows.Forms.Label          lblPlan;
         private System.Windows.Forms.ComboBox       cmbPlan;
-        private System.Windows.Forms.Label          lblModalidad;
-        private System.Windows.Forms.ComboBox       cmbModalidad;
         private System.Windows.Forms.Label          lblReferente;
         private System.Windows.Forms.ComboBox       cmbReferente;
         private System.Windows.Forms.CheckBox       chkVencimiento;

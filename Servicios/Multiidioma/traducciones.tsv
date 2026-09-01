@@ -34,7 +34,7 @@ ES	err.bll.idioma.codigo_largo	El código de idioma no puede superar los 5 carac
 ES	err.bll.idioma.duplicado	Ya existe un idioma con el código '{0}'.
 ES	err.bll.idioma.nombre	El nombre del idioma es obligatorio.
 ES	err.bll.pedido.devolucion_ya_hecha	El Pedido #{0} no tiene prendas en uso para devolver (es posible que la devolución ya se haya registrado).
-ES	err.bll.pedido.empleado_sin_vinculo	El usuario '{0}' no tiene un Empleado vinculado. Pedíle al Administrador que configure el vínculo.
+ES	err.bll.empleado_sin_vinculo	El usuario '{0}' no tiene un Empleado vinculado. Pedíle al Administrador que configure el vínculo.
 ES	err.bll.pedido.historial_vacio	No se encontraron cambios para la operación #{0} del Pedido #{1}.
 ES	err.bll.pedido.ya_despachado	El cliente tiene el pedido #{0} despachado pendiente de entrega. Confirmá la entrega antes de crear uno nuevo.
 ES	err.bll.plan.tiene_clientes	No se puede desactivar el plan: tiene {0} cliente(s) activo(s) asignado(s). Reasignalos a otro plan antes de desactivarlo.
@@ -804,7 +804,7 @@ EN	err.bll.idioma.codigo_largo	The language code cannot exceed 5 characters.
 EN	err.bll.idioma.duplicado	A language with code '{0}' already exists.
 EN	err.bll.idioma.nombre	The language name is required.
 EN	err.bll.pedido.devolucion_ya_hecha	Order #{0} has no garments in use to return (the return may have already been registered).
-EN	err.bll.pedido.empleado_sin_vinculo	User '{0}' has no linked Employee. Ask the Administrator to configure the link.
+EN	err.bll.empleado_sin_vinculo	User '{0}' has no linked Employee. Ask the Administrator to configure the link.
 EN	err.bll.pedido.historial_vacio	No changes found for operation #{0} of Order #{1}.
 EN	err.bll.pedido.ya_despachado	The customer has order #{0} dispatched and pending delivery. Confirm the delivery before creating a new one.
 EN	err.bll.plan.tiene_clientes	The plan cannot be deactivated: it has {0} active customer(s) assigned. Reassign them to another plan before deactivating it.
@@ -1574,7 +1574,7 @@ RU	err.bll.idioma.codigo_largo	Код языка не может превыша�
 RU	err.bll.idioma.duplicado	Язык с кодом «{0}» уже существует.
 RU	err.bll.idioma.nombre	Название языка обязательно.
 RU	err.bll.pedido.devolucion_ya_hecha	В заказе №{0} нет вещей в использовании для возврата (возможно, возврат уже оформлен).
-RU	err.bll.pedido.empleado_sin_vinculo	У пользователя «{0}» нет связанного сотрудника. Попросите администратора настроить связь.
+RU	err.bll.empleado_sin_vinculo	У пользователя «{0}» нет связанного сотрудника. Попросите администратора настроить связь.
 RU	err.bll.pedido.historial_vacio	Не найдены изменения для операции №{0} заказа №{1}.
 RU	err.bll.pedido.ya_despachado	У клиента есть отправленный заказ №{0}, ожидающий доставки. Подтвердите доставку перед созданием нового.
 RU	err.bll.plan.tiene_clientes	Невозможно деактивировать план: к нему привязано {0} активный(ых) клиент(ов). Переназначьте их на другой план перед деактивацией.
@@ -2344,7 +2344,7 @@ PT	err.bll.idioma.codigo_largo	O código do idioma não pode exceder 5 caractere
 PT	err.bll.idioma.duplicado	Já existe um idioma com o código '{0}'.
 PT	err.bll.idioma.nombre	O nome do idioma é obrigatório.
 PT	err.bll.pedido.devolucion_ya_hecha	O Pedido #{0} não tem peças em uso para devolver (é possível que a devolução já tenha sido registrada).
-PT	err.bll.pedido.empleado_sin_vinculo	O usuário '{0}' não tem um Funcionário vinculado. Peça ao Administrador para configurar o vínculo.
+PT	err.bll.empleado_sin_vinculo	O usuário '{0}' não tem um Funcionário vinculado. Peça ao Administrador para configurar o vínculo.
 PT	err.bll.pedido.historial_vacio	Não foram encontradas alterações para a operação #{0} do Pedido #{1}.
 PT	err.bll.pedido.ya_despachado	O cliente tem o pedido #{0} despachado e pendente de entrega. Confirme a entrega antes de criar um novo.
 PT	err.bll.plan.tiene_clientes	Não é possível desativar o plano: tem {0} cliente(s) ativo(s) atribuído(s). Reatribua-os a outro plano antes de desativá-lo.

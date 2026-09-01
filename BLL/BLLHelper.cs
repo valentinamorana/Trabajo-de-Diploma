@@ -31,6 +31,24 @@ namespace BLL
                 throw new BE.AppException(claveSinPermiso, mensajeSinPermiso);
         }
 
+        // Resuelve el IdEmpleado vinculado al usuario en sesión. Centraliza el guard que antes
+        // estaba duplicado, casi textual, en BLL.Pedido y BLL.Contratacion.
+        internal static int ResolverEmpleadoActivo(DAL.Interfaces.IEmpleadoDAL dalEmpleado)
+        {
+            if (!Seguridad.SessionManager.IsLoggedIn)
+                throw new BE.AppException("err.bll.sesion_expirada",
+                    "La sesión expiró. Volvé a iniciar sesión.");
+
+            var usuario  = Seguridad.SessionManager.GetInstance().Usuario;
+            var empleado = dalEmpleado.ObtenerPorUsuario(usuario.Id);
+            if (empleado == null)
+                throw new BE.AppException("err.bll.empleado_sin_vinculo",
+                    "El usuario '{0}' no tiene un Empleado vinculado. " +
+                    "Pedíle al Administrador que configure el vínculo.",
+                    usuario.Username);
+            return empleado.IdEmpleado;
+        }
+
         // Exige poder gestionar usuarios/permisos: Administrador (bypass) o un rol que tenga la
         // patente de Gestión de Usuarios (mnuUsuarios). Centraliza el guard duplicado en
         // BLL.Familia y BLL.ControlMapeado.

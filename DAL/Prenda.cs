@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace DAL
 {
@@ -100,6 +101,40 @@ namespace DAL
             {
                 throw new Exception("Error al obtener la prenda.", ex);
             }
+        }
+
+        // PN01, CU01-CS-Verificar Disponibilidad: relee un lote de prendas por ID en una sola
+        // consulta (batch), en vez de una consulta por prenda — ver BLL.Prenda.VerificarDisponibilidad.
+        public List<BE.Prenda> ObtenerPorIds(List<int> ids)
+        {
+            if (ids == null || ids.Count == 0) return new List<BE.Prenda>();
+
+            var lista = new List<BE.Prenda>();
+            try
+            {
+                var nombresParametros = ids.Select((id, i) => $"@Id{i}").ToArray();
+                var parametros = ids.Select((id, i) => new SqlParameter($"@Id{i}", id)).ToArray();
+
+                DataTable tabla = acceso.Leer(
+                    "SELECT p.IdPrenda, p.Nombre, p.Descripcion, p.Talle, p.Color, " +
+                    "       p.Categoria, p.Estado, p.IdClienteActual, p.IdUltimoCliente, p.FechaAlta, " +
+                    "       p.PrecioReposicion, " +
+                    "       c.Nombre + ' ' + c.Apellido AS NombreCliente, " +
+                    "       cu.Nombre + ' ' + cu.Apellido AS NombreUltimoCliente " +
+                    "FROM Prenda p " +
+                    "LEFT JOIN Cliente c  ON c.IdCliente  = p.IdClienteActual " +
+                    "LEFT JOIN Cliente cu ON cu.IdCliente = p.IdUltimoCliente " +
+                    $"WHERE p.IdPrenda IN ({string.Join(",", nombresParametros)})",
+                    parametros);
+
+                foreach (DataRow row in tabla.Rows)
+                    lista.Add(Mapear(row));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener las prendas por ID.", ex);
+            }
+            return lista;
         }
 
         // Devuelve las prendas actualmente asignadas a un cliente.

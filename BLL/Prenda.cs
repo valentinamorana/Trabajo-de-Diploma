@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -156,15 +157,19 @@ namespace BLL
                 idPrenda: prenda.IdPrenda);
         }
 
-        // CU01-CS-Verificar Disponibilidad (PN01): por cada prenda de la selección relee el
-        // estado real desde la base (no confía en el objeto en memoria que pasó el caller) y
-        // evalúa EstaDisponible(). Operación de solo lectura: no reserva ni modifica nada.
+        // CU01-CS-Verificar Disponibilidad (PN01): relee el estado real de toda la selección
+        // desde la base en una sola consulta batch (no confía en el objeto en memoria que pasó
+        // el caller, y no hace una query por prenda) y evalúa EstaDisponible() de cada una.
+        // Operación de solo lectura: no reserva ni modifica nada.
         public (bool Disponible, List<BE.Prenda> NoDisponibles) VerificarDisponibilidad(List<BE.Prenda> seleccion)
         {
+            var actuales = dalPrenda.ObtenerPorIds(seleccion.Select(p => p.IdPrenda).ToList())
+                .ToDictionary(p => p.IdPrenda);
+
             var noDisponibles = new List<BE.Prenda>();
             foreach (var p in seleccion)
             {
-                var actual = dalPrenda.ObtenerPorId(p.IdPrenda);
+                actuales.TryGetValue(p.IdPrenda, out var actual);
                 if (actual == null || !actual.EstaDisponible())
                     noDisponibles.Add(actual ?? p);
             }

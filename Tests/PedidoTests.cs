@@ -339,7 +339,7 @@ namespace Tests
             }
             catch (BE.AppException ex)
             {
-                Assert.AreEqual("err.bll.pedido.empleado_sin_vinculo", ex.Clave);
+                Assert.AreEqual("err.bll.empleado_sin_vinculo", ex.Clave);
             }
         }
 

@@ -400,7 +400,7 @@ namespace BLL
         public int ReservarPrendas(List<BE.Prenda> prendas, int idCliente)
         {
             PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
-            int idEmpleado = ResolverEmpleadoActivo();
+            int idEmpleado = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
 
             var pedido = new BE.Pedido
             {
@@ -429,23 +429,6 @@ namespace BLL
                 $"{cantidadPrendas} prenda(s) — Plan {plan.Nombre} — {DateTime.Now:dd/MM/yyyy HH:mm}",
                 idPedido:  idPedido,
                 idCliente: cliente.IdCliente);
-        }
-
-        // Obtiene el IdEmpleado del usuario en sesión.
-        private int ResolverEmpleadoActivo()
-        {
-            if (!Seguridad.SessionManager.IsLoggedIn)
-                throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
-
-            var usuario  = Seguridad.SessionManager.GetInstance().Usuario;
-            var empleado = dalEmpleado.ObtenerPorUsuario(usuario.Id);
-            if (empleado == null)
-                throw new BE.AppException("err.bll.pedido.empleado_sin_vinculo",
-                    "El usuario '{0}' no tiene un Empleado vinculado. " +
-                    "Pedíle al Administrador que configure el vínculo.",
-                    usuario.Username);
-            return empleado.IdEmpleado;
         }
 
         // ── Historial ─────────────────────────────────────────────────────────

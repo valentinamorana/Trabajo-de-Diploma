@@ -75,7 +75,7 @@ namespace BLL
             {
                 IdCliente  = idCliente,
                 IdPlan     = idPlan,
-                IdVendedor = ResolverEmpleadoActivo(),
+                IdVendedor = BLLHelper.ResolverEmpleadoActivo(dalEmpleado),
                 Modalidad  = modalidad,
                 Estado     = BE.EstadoContratacion.PendientePago,
                 FechaAlta  = DateTime.Now
@@ -113,7 +113,7 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.medio_pago_requerido",
                     "Debe indicar el medio de pago (efectivo, tarjeta o transferencia).");
 
-            int idCaja = ResolverEmpleadoActivo();
+            int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
             string numeroComprobante = GenerarNumeroComprobante(contratacion.IdContratacion);
 
             // Activar la suscripción PRIMERO: si esto falla (plan dado de baja entre la
@@ -190,21 +190,5 @@ namespace BLL
         private string GenerarNumeroComprobante(int idContratacion)
             => $"CMP-{idContratacion:D6}-{DateTime.Now:yyyyMMdd}";
 
-        // Obtiene el IdEmpleado del usuario en sesión (mismo criterio que BLL.Pedido.ResolverEmpleadoActivo).
-        private int ResolverEmpleadoActivo()
-        {
-            if (!Seguridad.SessionManager.IsLoggedIn)
-                throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
-
-            var usuario  = Seguridad.SessionManager.GetInstance().Usuario;
-            var empleado = dalEmpleado.ObtenerPorUsuario(usuario.Id);
-            if (empleado == null)
-                throw new BE.AppException("err.bll.contratacion.empleado_sin_vinculo",
-                    "El usuario '{0}' no tiene un Empleado vinculado. " +
-                    "Pedíle al Administrador que configure el vínculo.",
-                    usuario.Username);
-            return empleado.IdEmpleado;
-        }
     }
 }

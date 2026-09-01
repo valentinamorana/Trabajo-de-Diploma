@@ -222,6 +222,26 @@ namespace Tests
         }
 
         [TestMethod]
+        public void CrearManual_PorcentajeMayorA100_LanzaPorcentajeInvalido()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+
+            try
+            {
+                bll.CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 150m,
+                    DateTime.Today, DateTime.Today.AddDays(30), 1, null, 500m, "impacto");
+                Assert.Fail("Debía rechazar un porcentaje mayor a 100.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.promocion.porcentaje_invalido", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPromocion.AltaVeces);
+        }
+
+        [TestMethod]
         public void CrearManual_RangoFechasInvalido_LanzaRangoFechasInvalido()
         {
             LoginComoAdministrador();
@@ -520,7 +540,8 @@ namespace Tests
             Assert.AreEqual(1, ctx.DalPromocion.CambiarEstadoVeces);
             Assert.AreEqual(promocion.IdPromocion, ctx.DalPromocion.UltimoIdPromocionCambiarEstado);
             Assert.AreEqual(BE.EstadoPromocion.Vigente, ctx.DalPromocion.UltimoNuevoEstado);
-            Assert.AreEqual("Sigue siendo rentable", ctx.DalPromocion.UltimaObservacionOMotivo);
+            // No pisa la Observacion de Contabilidad: el motivo del rechazo va solo a bitácora.
+            Assert.IsNull(ctx.DalPromocion.UltimaObservacionOMotivo);
         }
 
         [TestMethod]

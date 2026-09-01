@@ -176,6 +176,7 @@ namespace Tests
             var ctx = new Contexto();
             var bll = ctx.Crear();
             var contratacion = ContratacionPendiente();
+            ctx.DalContratacion.ContratacionPorId = contratacion;
 
             bll.ConfirmarPago("Test", contratacion, "Efectivo");
 
@@ -197,6 +198,7 @@ namespace Tests
             var bll = ctx.Crear();
             var contratacion = ContratacionPendiente();
             contratacion.Estado = BE.EstadoContratacion.Pagada;
+            ctx.DalContratacion.ContratacionPorId = contratacion;
 
             try
             {
@@ -218,6 +220,7 @@ namespace Tests
             var ctx = new Contexto();
             var bll = ctx.Crear();
             var contratacion = ContratacionPendiente();
+            ctx.DalContratacion.ContratacionPorId = contratacion;
 
             try
             {
@@ -261,6 +264,7 @@ namespace Tests
             ctx.DalContratacion.IntentosDespuesDeIncrementar = 2; // por debajo del máximo (3)
             var bll = ctx.Crear();
             var contratacion = ContratacionPendiente();
+            ctx.DalContratacion.ContratacionPorId = contratacion;
 
             bll.RegistrarIntentoFallido("Test", contratacion);
 
@@ -276,6 +280,7 @@ namespace Tests
             ctx.DalContratacion.IntentosDespuesDeIncrementar = 3; // llega al máximo
             var bll = ctx.Crear();
             var contratacion = ContratacionPendiente();
+            ctx.DalContratacion.ContratacionPorId = contratacion;
 
             bll.RegistrarIntentoFallido("Test", contratacion);
 
@@ -292,6 +297,7 @@ namespace Tests
             var bll = ctx.Crear();
             var contratacion = ContratacionPendiente();
             contratacion.Estado = BE.EstadoContratacion.Cancelada;
+            ctx.DalContratacion.ContratacionPorId = contratacion;
 
             try
             {

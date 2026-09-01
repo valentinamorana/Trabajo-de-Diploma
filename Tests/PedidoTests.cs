@@ -366,6 +366,7 @@ namespace Tests
         [TestMethod]
         public void ValidarCupoDisponible_DentroDelLimite_DevuelvePlan()
         {
+            LoginComoAdministrador();
             var ctx = new Contexto();
             var bll = ctx.Crear();
             var cliente = ClienteConPlanVigente(); // LimitePrendas=3, StockUtilizado=0
@@ -378,6 +379,7 @@ namespace Tests
         [TestMethod]
         public void ValidarCupoDisponible_ExcedeLimite_LanzaLimitePlan()
         {
+            LoginComoAdministrador();
             var ctx = new Contexto();
             var bll = ctx.Crear();
             var cliente = ClienteConPlanVigente();

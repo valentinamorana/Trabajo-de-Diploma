@@ -119,7 +119,7 @@ namespace DAL
             try
             {
                 acceso.Escribir(
-                    "UPDATE Contratacion SET Estado = 1, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
+                    $"UPDATE Contratacion SET Estado = {(int)BE.EstadoContratacion.Pagada}, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
                     "NumeroComprobante = @NumeroComprobante, FechaComprobante = @FechaComprobante, " +
                     "FechaResolucion = @FechaResolucion WHERE IdContratacion = @IdContratacion",
                     p);
@@ -140,7 +140,7 @@ namespace DAL
             try
             {
                 acceso.Escribir(
-                    "UPDATE Contratacion SET Estado = 2, FechaResolucion = @FechaResolucion " +
+                    $"UPDATE Contratacion SET Estado = {(int)BE.EstadoContratacion.Cancelada}, FechaResolucion = @FechaResolucion " +
                     "WHERE IdContratacion = @IdContratacion",
                     p);
             }

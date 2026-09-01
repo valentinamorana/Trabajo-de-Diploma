@@ -338,6 +338,11 @@ namespace BLL
         // del cliente permita la cantidad de prendas pedidas y devuelve el plan consultado.
         public BE.PlanSuscripcion ValidarCupoDisponible(BE.Cliente cliente, int cantidadPrendas)
         {
+            // Público desde el split lógico del Depósito (PN01): mismo motivo que ReservarPrendas
+            // — sin este chequeo, cualquier caller con una referencia a IPedidoService podría
+            // consultar el cupo saltándose el permiso de Pedidos de Venta.
+            PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
+
             if (!cliente.IdPlan.HasValue)
                 throw new BE.AppException("err.bll.pedido.sin_plan",
                     "El cliente {0} no tiene plan asignado. Asignale un plan antes de crear un pedido.",

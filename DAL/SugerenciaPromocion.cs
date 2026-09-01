@@ -80,7 +80,7 @@ namespace DAL
             SqlParameter[] p = { new SqlParameter("@IdSugerencia", idSugerencia) };
             try
             {
-                acceso.Escribir("UPDATE SugerenciaPromocion SET Estado = 1 WHERE IdSugerencia = @IdSugerencia", p);
+                acceso.Escribir($"UPDATE SugerenciaPromocion SET Estado = {(int)BE.EstadoSugerencia.Evaluada} WHERE IdSugerencia = @IdSugerencia", p);
             }
             catch (Exception ex)
             {

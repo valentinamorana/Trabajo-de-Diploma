@@ -30,8 +30,8 @@ BEGIN
         IdPlan            INT           NOT NULL REFERENCES PlanSuscripcion(IdPlan),
         IdVendedor        INT           NOT NULL REFERENCES Empleado(IdEmpleado),
         IdCaja            INT           NULL     REFERENCES Empleado(IdEmpleado),
-        Modalidad         INT           NOT NULL,
-        Estado            INT           NOT NULL DEFAULT 0,
+        Modalidad         INT           NOT NULL CONSTRAINT CHK_Contratacion_Modalidad CHECK (Modalidad IN (0,1,2)),
+        Estado            INT           NOT NULL DEFAULT 0 CONSTRAINT CHK_Contratacion_Estado CHECK (Estado IN (0,1,2)),
         IntentosPago      INT           NOT NULL DEFAULT 0,
         FechaAlta         DATETIME      NOT NULL DEFAULT GETDATE(),
         FechaResolucion   DATETIME      NULL,
@@ -43,6 +43,14 @@ BEGIN
 END
 ELSE
     PRINT 'Tabla Contratacion ya existe — sin cambios.';
+GO
+
+-- ── 1bis) Constraints de integridad (por si la tabla ya existía sin ellas) ──
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacion_Modalidad')
+    ALTER TABLE Contratacion ADD CONSTRAINT CHK_Contratacion_Modalidad CHECK (Modalidad IN (0,1,2));
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacion_Estado')
+    ALTER TABLE Contratacion ADD CONSTRAINT CHK_Contratacion_Estado CHECK (Estado IN (0,1,2));
 GO
 
 -- ── 2) Patentes de menú mnuCaja / mnuCajaEditar ──────────────────────────

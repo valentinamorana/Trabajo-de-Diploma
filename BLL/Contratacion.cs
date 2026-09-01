@@ -99,10 +99,15 @@ namespace BLL
         {
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
 
-            if (!contratacion.PuedeCobrarse())
+            // Revalida contra el estado fresco de la BD, no el objeto que trae el caller: cubre
+            // doble clic / dos sesiones de Caja cobrando la misma contratación al mismo tiempo.
+            var actual = dalContratacion.ObtenerPorId(contratacion.IdContratacion);
+            if (actual == null)
+                throw new BE.AppException("err.bll.contratacion.inexistente", "La contratación ya no existe.");
+            if (!actual.PuedeCobrarse())
                 throw new BE.AppException("err.bll.contratacion.cobrar_estado",
                     "Solo se pueden cobrar contrataciones Pendientes de pago. Esta contratación está '{0}'.",
-                    contratacion.Estado);
+                    actual.Estado);
 
             if (string.IsNullOrWhiteSpace(medioPago))
                 throw new BE.AppException("err.bll.contratacion.medio_pago_requerido",
@@ -116,10 +121,19 @@ namespace BLL
             // reintentar. Si confirmáramos el pago antes y esto fallara después, quedaría
             // Pagada sin suscripción activada y sin forma de reintentar (PuedeCobrarse()
             // exige PendientePago).
-            var cliente = dalCliente.ObtenerPorId(contratacion.IdCliente);
-            clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, contratacion.IdPlan, contratacion.Modalidad);
+            //
+            // Riesgo residual aceptado: estos dos pasos no corren en una única transacción de
+            // BD (Contratacion y Cliente/Suscripcion son tablas distintas). Si el proceso cae
+            // justo entre ambas líneas, un reintento manual de Caja re-ejecuta la activación
+            // (extiende la vigencia de nuevo) porque la Contratacion sigue viéndose
+            // PendientePago. Es una ventana angosta (falla exactamente ahí) y de bajo impacto
+            // (a lo sumo días de suscripción de más, nunca de menos ni cobro duplicado real);
+            // una solución completa requeriría una transacción cruzando ambos DAL o una marca
+            // de idempotencia dedicada, fuera de alcance de este TP.
+            var cliente = dalCliente.ObtenerPorId(actual.IdCliente);
+            clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad);
 
-            dalContratacion.ConfirmarPago(contratacion.IdContratacion, idCaja, medioPago, numeroComprobante);
+            dalContratacion.ConfirmarPago(actual.IdContratacion, idCaja, medioPago, numeroComprobante);
 
             bitacora.Registrar(modulo,
                 $"Cobro Contratación #{contratacion.IdContratacion} — Cliente: {contratacion.NombreCliente} — " +
@@ -137,12 +151,19 @@ namespace BLL
         {
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
 
-            if (!contratacion.PuedeCobrarse())
+            // Mismo motivo que en ConfirmarPago: revalida contra el estado fresco de la BD, no
+            // el objeto que trae el caller. Sin esto, una grilla de Caja desactualizada podría
+            // registrar un intento fallido (y hasta cancelar) sobre una contratación que otra
+            // sesión de Caja ya cobró en el ínterin.
+            var actual = dalContratacion.ObtenerPorId(contratacion.IdContratacion);
+            if (actual == null)
+                throw new BE.AppException("err.bll.contratacion.inexistente", "La contratación ya no existe.");
+            if (!actual.PuedeCobrarse())
                 throw new BE.AppException("err.bll.contratacion.cobrar_estado",
                     "Solo se pueden registrar intentos sobre contrataciones Pendientes de pago. Esta contratación está '{0}'.",
-                    contratacion.Estado);
+                    actual.Estado);
 
-            int intentos = dalContratacion.IncrementarIntento(contratacion.IdContratacion);
+            int intentos = dalContratacion.IncrementarIntento(actual.IdContratacion);
 
             bitacora.Registrar(modulo,
                 $"Intento de pago fallido en Contratación #{contratacion.IdContratacion} — Cliente: {contratacion.NombreCliente} — " +
@@ -151,7 +172,7 @@ namespace BLL
 
             if (intentos >= MaxIntentosPago)
             {
-                dalContratacion.Cancelar(contratacion.IdContratacion);
+                dalContratacion.Cancelar(actual.IdContratacion);
 
                 bitacora.Registrar(modulo,
                     $"Cancelar Contratación #{contratacion.IdContratacion} — Cliente: {contratacion.NombreCliente} — " +

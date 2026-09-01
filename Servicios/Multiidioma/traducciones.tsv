@@ -478,6 +478,9 @@ ES	perfil.gerentecomercial	Gerente Comercial
 ES	perfil.gerenteinventario	Gerente de Inventario
 ES	perfil.encargadodestock	Encargado de Stock
 ES	perfil.operadorlogistico	Operador Logístico
+ES	perfil.caja	Caja
+ES	perfil.administracioncomercial	Administración Comercial
+ES	perfil.contabilidad	Contabilidad
 ES	perm.rol.auditor	Auditor
 ES	perm.rol.gerentecomercial	Gerente Comercial
 ES	perm.rol.gerenteinventario	Gerente de Inventario
@@ -1245,6 +1248,9 @@ EN	perfil.gerentecomercial	Sales Manager
 EN	perfil.gerenteinventario	Inventory Manager
 EN	perfil.encargadodestock	Stock Clerk
 EN	perfil.operadorlogistico	Logistics Operator
+EN	perfil.caja	Cashier
+EN	perfil.administracioncomercial	Commercial Administration
+EN	perfil.contabilidad	Accounting
 EN	perm.rol.auditor	Auditor
 EN	perm.rol.gerentecomercial	Sales Manager
 EN	perm.rol.gerenteinventario	Inventory Manager
@@ -2012,6 +2018,9 @@ RU	perfil.gerentecomercial	Коммерческий менеджер
 RU	perfil.gerenteinventario	Менеджер склада
 RU	perfil.encargadodestock	Кладовщик
 RU	perfil.operadorlogistico	Логист
+RU	perfil.caja	Касса
+RU	perfil.administracioncomercial	Коммерческая администрация
+RU	perfil.contabilidad	Бухгалтерия
 RU	perm.rol.auditor	Аудитор
 RU	perm.rol.gerentecomercial	Коммерческий менеджер
 RU	perm.rol.gerenteinventario	Менеджер склада
@@ -2823,6 +2832,9 @@ PT	perfil.gerentecomercial	Gerente Comercial
 PT	perfil.gerenteinventario	Gerente de Estoque
 PT	perfil.encargadodestock	Responsável de Estoque
 PT	perfil.operadorlogistico	Operador Logístico
+PT	perfil.caja	Caixa
+PT	perfil.administracioncomercial	Administração Comercial
+PT	perfil.contabilidad	Contabilidade
 PT	perm.rol.auditor	Auditor
 PT	perm.rol.gerentecomercial	Gerente Comercial
 PT	perm.rol.gerenteinventario	Gerente de Estoque

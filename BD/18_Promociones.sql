@@ -29,15 +29,23 @@ BEGIN
         IdPlan                INT           NULL REFERENCES PlanSuscripcion(IdPlan),
         CategoriaPrenda       NVARCHAR(100) NULL,
         Motivo                NVARCHAR(500) NOT NULL,
-        TipoDescuentoSugerido INT           NOT NULL,
+        TipoDescuentoSugerido INT           NOT NULL CONSTRAINT CHK_SugerenciaPromocion_Tipo CHECK (TipoDescuentoSugerido IN (0,1,2)),
         BeneficioEstimado     DECIMAL(10,2) NOT NULL,
-        Estado                INT           NOT NULL DEFAULT 0,
+        Estado                INT           NOT NULL DEFAULT 0 CONSTRAINT CHK_SugerenciaPromocion_Estado CHECK (Estado IN (0,1)),
         FechaAlta             DATETIME      NOT NULL DEFAULT GETDATE()
     );
     PRINT 'Tabla SugerenciaPromocion creada.';
 END
 ELSE
     PRINT 'Tabla SugerenciaPromocion ya existe — sin cambios.';
+GO
+
+-- ── 1bis) Constraints de integridad (por si la tabla ya existía sin ellas) ──
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SugerenciaPromocion_Tipo')
+    ALTER TABLE SugerenciaPromocion ADD CONSTRAINT CHK_SugerenciaPromocion_Tipo CHECK (TipoDescuentoSugerido IN (0,1,2));
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SugerenciaPromocion_Estado')
+    ALTER TABLE SugerenciaPromocion ADD CONSTRAINT CHK_SugerenciaPromocion_Estado CHECK (Estado IN (0,1));
 GO
 
 -- ── 2) Tabla Promocion ───────────────────────────────────────────────────
@@ -47,11 +55,11 @@ BEGIN
         IdPromocion        INT           IDENTITY(1,1) PRIMARY KEY,
         Nombre             NVARCHAR(150) NOT NULL,
         Descripcion        NVARCHAR(500) NULL,
-        TipoDescuento      INT           NOT NULL,
-        Valor              DECIMAL(10,2) NOT NULL,
+        TipoDescuento      INT           NOT NULL CONSTRAINT CHK_Promocion_Tipo CHECK (TipoDescuento IN (0,1,2)),
+        Valor              DECIMAL(10,2) NOT NULL CONSTRAINT CHK_Promocion_Valor CHECK (Valor > 0),
         FechaInicio        DATE          NOT NULL,
         FechaFin           DATE          NOT NULL,
-        Estado             INT           NOT NULL DEFAULT 0,
+        Estado             INT           NOT NULL DEFAULT 0 CONSTRAINT CHK_Promocion_Estado CHECK (Estado IN (0,1,2,3,4)),
         IdPlan             INT           NULL REFERENCES PlanSuscripcion(IdPlan),
         CategoriaPrenda    NVARCHAR(100) NULL,
         MargenEstimado     DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -59,12 +67,40 @@ BEGIN
         Observacion        NVARCHAR(500) NULL,
         MotivoBaja         NVARCHAR(500) NULL,
         IdSugerenciaOrigen INT           NULL REFERENCES SugerenciaPromocion(IdSugerencia),
-        FechaAlta          DATETIME      NOT NULL DEFAULT GETDATE()
+        FechaAlta          DATETIME      NOT NULL DEFAULT GETDATE(),
+        CONSTRAINT CHK_Promocion_Fechas CHECK (FechaFin >= FechaInicio),
+        CONSTRAINT CHK_Promocion_Destino CHECK (
+            (IdPlan IS NOT NULL AND CategoriaPrenda IS NULL) OR
+            (IdPlan IS NULL AND CategoriaPrenda IS NOT NULL)),
+        -- TipoDescuento 0 = Porcentaje (BE.TipoDescuento): no puede superar el 100%.
+        CONSTRAINT CHK_Promocion_Porcentaje CHECK (TipoDescuento <> 0 OR Valor <= 100)
     );
     PRINT 'Tabla Promocion creada.';
 END
 ELSE
     PRINT 'Tabla Promocion ya existe — sin cambios.';
+GO
+
+-- ── 2bis) Constraints de integridad (por si la tabla ya existía sin ellas) ──
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Tipo')
+    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Tipo CHECK (TipoDescuento IN (0,1,2));
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Valor')
+    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Valor CHECK (Valor > 0);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Estado')
+    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Estado CHECK (Estado IN (0,1,2,3,4));
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Fechas')
+    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Fechas CHECK (FechaFin >= FechaInicio);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Destino')
+    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Destino CHECK (
+        (IdPlan IS NOT NULL AND CategoriaPrenda IS NULL) OR
+        (IdPlan IS NULL AND CategoriaPrenda IS NOT NULL));
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Porcentaje')
+    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Porcentaje CHECK (TipoDescuento <> 0 OR Valor <= 100);
 GO
 
 -- ── 3) Patentes de menú ──────────────────────────────────────────────────

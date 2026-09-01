@@ -84,6 +84,10 @@ namespace BLL
                 throw new BE.AppException("err.bll.promocion.valor_invalido",
                     "El beneficio de la promoción debe ser mayor a cero.");
 
+            if (tipo == BE.TipoDescuento.Porcentaje && valor > 100)
+                throw new BE.AppException("err.bll.promocion.porcentaje_invalido",
+                    "Un descuento por porcentaje no puede superar el 100%.");
+
             if (fechaFin.Date < fechaInicio.Date)
                 throw new BE.AppException("err.bll.promocion.rango_fechas_invalido",
                     "La fecha de fin no puede ser anterior a la fecha de inicio.");
@@ -217,9 +221,13 @@ namespace BLL
                 throw new BE.AppException("err.bll.promocion.motivorechazobaja_requerido",
                     "Debe indicar el motivo por el cual la promoción sigue vigente.");
 
-            dalPromocion.CambiarEstado(promocion.IdPromocion, BE.EstadoPromocion.Vigente, motivo.Trim());
+            // No se pasa "motivo" a CambiarEstado: Observacion ya guarda la evaluación de
+            // Contabilidad (AprobarContable/RechazarContable) y no hay un campo propio para el
+            // motivo de rechazo de una baja — pisarla acá perdería esa evaluación. El motivo
+            // queda igual registrado en bitácora y bitácora de negocio, abajo.
+            dalPromocion.CambiarEstado(promocion.IdPromocion, BE.EstadoPromocion.Vigente, null);
 
-            bitacora.Registrar(modulo, $"Rechazar baja Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Baja);
+            bitacora.Registrar(modulo, $"Rechazar baja Promoción #{promocion.IdPromocion}: {promocion.Nombre} — Motivo: {motivo}", BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
                 $"Administración rechaza la baja de la Promoción #{promocion.IdPromocion} '{promocion.Nombre}', sigue Vigente: {motivo}");
         }

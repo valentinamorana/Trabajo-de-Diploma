@@ -1,5 +1,10 @@
 # Auditoría técnica — WardrobeFlow
 
+> **Nota (histórica):** esta auditoría es del 2026-08-17, previa a los procesos de negocio
+> PN01-PN04 y a la ronda de auditoría posterior (seguridad, BD, código muerto, usabilidad de
+> forms) que se hizo después. Queda como registro de un momento puntual del proyecto, no
+> como el estado de deuda técnica actual — para eso ver los commits recientes.
+
 Auditoría de las 5 capas (BE, BLL, DAL, GUI, Seguridad/Servicios) más BD y Tests, hecha el 2026-08-17 después de cerrar el Bloque 3 (PdN8/9/11/12/13). Cada hallazgo tiene archivo:línea, qué pasa y una sugerencia de arreglo. Marcá `[x]` a medida que los vayas resolviendo.
 
 Los hallazgos ya corregidos antes de esta auditoría (crash de DNI legacy sin cifrar en PdN10, drift de umbrales de urgencia en 4 de los 5 dashboards) **no** están listados acá porque ya estaban resueltos y pusheados. **Las 3 secciones (alta, media, baja) ya están resueltas** — queda como registro de qué se encontró y cómo se solucionó, y de las 2 decisiones que quedaron en tus manos (HMAC-DNI: no implementar ahora; el caso Lucia/Lucía Fernández: sin decidir).

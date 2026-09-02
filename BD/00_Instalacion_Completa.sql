@@ -2048,6 +2048,20 @@ WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
 GO
 
+-- ── 6) Usuario demo del rol Caja ──────────────────────────────────────────
+-- Mismo criterio que los usuarios demo de 01 (Auditor/GerenteComercial/...):
+-- clave hasheada (PBKDF2), texto plano 'usuario1!'.
+INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma, Activo)
+SELECT 'caja', 'IVYc7mzk/g0OD/k6lOKrMK4xXI4dnw14xGccH3ZuTbVWsQyUpkNFKnY6hzQcYBG0', 'Caja', 'Caja', 1, 0, 0, 'ES', 1
+WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE Username = 'caja');
+GO
+
+UPDATE u SET u.Nombre = N'Carolina', u.Apellido = N'Ibáñez', u.Email = 'caja@wardrobeflow.com', u.FechaNacimiento = '1991-04-12'
+FROM Usuario u
+WHERE u.Username = 'caja' AND u.Nombre IS NULL AND u.Apellido IS NULL;
+PRINT 'Usuario demo del rol Caja inicializado.';
+GO
+
 -- ==============================================================
 -- === Fuente: 18_Promociones.sql
 -- ==============================================================
@@ -2217,6 +2231,28 @@ FROM (VALUES
 JOIN Permiso p ON p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
+GO
+
+-- ── 7) Usuarios demo de los roles nuevos ──────────────────────────────────
+-- Mismo criterio que los usuarios demo de 01: clave hasheada (PBKDF2),
+-- texto plano 'usuario1!'.
+INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma, Activo)
+SELECT v.Username, v.Clave, v.Rol, v.Perfil, 1, 0, 0, 'ES', 1
+FROM (VALUES
+  ('admcomercial', 'gm4kogeeRRIphufl0aWPR2S0wW17VwHYqiSihJ3GXs3WzW85kcb+i/7yVDHRNDZA', 'AdministracionComercial', 'AdministracionComercial'),
+  ('contable',     '9IehcthmyLV2v3I9zeWkUkelEhorzkOrjxcWqylFYwOVmVV/x1fGwsgCNOv+yvcM', 'Contabilidad',            'Contabilidad')
+) AS v(Username, Clave, Rol, Perfil)
+WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username);
+GO
+
+UPDATE u SET u.Nombre = v.Nombre, u.Apellido = v.Apellido, u.Email = v.Email, u.FechaNacimiento = v.FechaNac
+FROM Usuario u
+JOIN (VALUES
+    ('admcomercial', N'Agustina', N'Ríos',    'admcomercial@wardrobeflow.com', '1989-08-22'),
+    ('contable',     N'Carlos',   N'Suárez',  'contable@wardrobeflow.com',     '1984-05-14')
+) AS v(Username, Nombre, Apellido, Email, FechaNac) ON u.Username = v.Username
+WHERE u.Nombre IS NULL AND u.Apellido IS NULL;
+PRINT 'Usuarios demo de AdministracionComercial y Contabilidad inicializados.';
 GO
 
 -- ==============================================================

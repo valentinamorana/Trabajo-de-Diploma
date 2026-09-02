@@ -98,3 +98,17 @@ JOIN Permiso p ON p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND 
 WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
 GO
+
+-- ── 6) Usuario demo del rol Caja ──────────────────────────────────────────
+-- Mismo criterio que los usuarios demo de 01 (Auditor/GerenteComercial/...):
+-- clave hasheada (PBKDF2), texto plano 'usuario1!'.
+INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma, Activo)
+SELECT 'caja', 'IVYc7mzk/g0OD/k6lOKrMK4xXI4dnw14xGccH3ZuTbVWsQyUpkNFKnY6hzQcYBG0', 'Caja', 'Caja', 1, 0, 0, 'ES', 1
+WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE Username = 'caja');
+GO
+
+UPDATE u SET u.Nombre = N'Carolina', u.Apellido = N'Ibáñez', u.Email = 'caja@wardrobeflow.com', u.FechaNacimiento = '1991-04-12'
+FROM Usuario u
+WHERE u.Username = 'caja' AND u.Nombre IS NULL AND u.Apellido IS NULL;
+PRINT 'Usuario demo del rol Caja inicializado.';
+GO

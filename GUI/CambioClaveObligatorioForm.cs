@@ -63,11 +63,14 @@ namespace GUI
             catch (BE.AppException ex)
             {
                 // Error de negocio esperado (requisitos / clave igual): mostrar traducido inline.
-                lblError.Text = t.ContainsKey(ex.Clave) ? t[ex.Clave].Texto : ex.Message;
+                lblError.Text = Traductor.Resolver(ex.Clave, ex.Message, ex.Args, GestorIdioma.IdiomaActual);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblError.Text = ex.Message;
+                // Excepción inesperada (sin clave de traducción): mensaje genérico, no el texto
+                // técnico crudo, mismo criterio que FormBase.MostrarError(Exception).
+                lblError.Text = T("msg.error.inesperado",
+                    "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.");
             }
         }
     }

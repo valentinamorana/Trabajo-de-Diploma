@@ -119,7 +119,10 @@ namespace GUI
                 string fmtErr = tErr.ContainsKey("err.mant.cargar")
                     ? tErr["err.mant.cargar"].Texto
                     : "Error al cargar historial: {0}";
-                lblSinRegistros.Text    = string.Format(fmtErr, ex.Message);
+                string msg = ex is BE.AppException appEx
+                    ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, _idioma)
+                    : ex.Message;
+                lblSinRegistros.Text    = string.Format(fmtErr, msg);
                 lblSinRegistros.Visible = true;
                 dgvHistorial.Visible    = false;
             }

@@ -4704,6 +4704,18 @@ ES	err.imprimir.titulo	Error al imprimir
 EN	err.imprimir.titulo	Print error
 RU	err.imprimir.titulo	Ошибка печати
 PT	err.imprimir.titulo	Erro ao imprimir
+ES	frm.listaespera	Lista de Espera
+EN	frm.listaespera	Waiting List
+RU	frm.listaespera	Список ожидания
+PT	frm.listaespera	Lista de Espera
+ES	mnu.listaespera	Lista de Espera
+EN	mnu.listaespera	Waiting List
+RU	mnu.listaespera	Список ожидания
+PT	mnu.listaespera	Lista de Espera
+ES	btn.anotarespera	⏳ Lista de Espera
+EN	btn.anotarespera	⏳ Waiting List
+RU	btn.anotarespera	⏳ Список ожидания
+PT	btn.anotarespera	⏳ Lista de Espera
 ES	col.contr.id	ID
 EN	col.contr.id	ID
 RU	col.contr.id	ID

@@ -64,11 +64,14 @@ namespace GUI
             }
             catch (BE.AppException ax)
             {
-                lblError.Text = t.ContainsKey(ax.Clave) ? t[ax.Clave].Texto : ax.Message;
+                lblError.Text = Traductor.Resolver(ax.Clave, ax.Message, ax.Args, GestorIdioma.IdiomaActual);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblError.Text = ex.Message;
+                // Excepción inesperada (no BE.AppException, sin clave de traducción): mismo criterio
+                // que FormBase.MostrarError(Exception) — mensaje genérico, no el texto técnico crudo.
+                lblError.Text = T("msg.error.inesperado",
+                    "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.");
             }
             finally
             {

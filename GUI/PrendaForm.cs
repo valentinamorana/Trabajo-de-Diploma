@@ -112,7 +112,10 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"✗ {ex.Message}";
+                string msg = ex is BE.AppException appEx
+                    ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
+                    : ex.Message;
+                lblMensaje.Text = $"✗ {msg}";
             }
         }
     }

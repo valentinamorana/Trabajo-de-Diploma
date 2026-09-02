@@ -165,6 +165,7 @@ namespace GUI
             this.ClientSize = new System.Drawing.Size(452, 284);
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.btnEnviar);
+            this.AcceptButton = this.btnEnviar;
             this.Controls.Add(this.txtMotivo);
             this.Controls.Add(this.lblMotivo);
             this.Controls.Add(this.numBeneficioEstimado);

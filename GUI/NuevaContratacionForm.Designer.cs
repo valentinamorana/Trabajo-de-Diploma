@@ -136,6 +136,8 @@ namespace GUI
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.btnCancelar);
             this.Controls.Add(this.btnConfirmar);
+            this.AcceptButton = this.btnConfirmar;
+            this.CancelButton = this.btnCancelar;
             this.Controls.Add(this.cmbModalidad);
             this.Controls.Add(this.lblModalidad);
             this.Controls.Add(this.cmbPlan);

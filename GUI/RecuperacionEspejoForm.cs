@@ -235,7 +235,14 @@ namespace GUI
 
         private void MostrarError(Exception ex)
         {
-            MessageBox.Show(T("rec.err.titulo", "Error") + ":\n" + ex.Message,
+            // BE.AppException lleva una clave de traducción — ex.Message es el fallback hardcodeado
+            // en español fijado en el throw, así que hay que resolver la clave contra el idioma
+            // activo (mismo criterio que FormBase.MostrarError(Exception), que esta clase no hereda).
+            string mensaje = ex is BE.AppException appEx
+                ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
+                : ex.Message;
+
+            MessageBox.Show(T("rec.err.titulo", "Error") + ":\n" + mensaje,
                 T("rec.err.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }

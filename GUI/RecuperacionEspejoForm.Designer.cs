@@ -132,6 +132,9 @@ namespace GUI
             this.panelBotones.Controls.Add(this.btnBackup);
             this.panelBotones.Controls.Add(this.btnAsumir);
             this.panelBotones.Controls.Add(this.btnReparar);
+            // Sin AcceptButton a propósito: las otras 3 acciones del panel son irreversibles
+            // (reparar/asumir pérdida/restaurar backup) — Enter no debe dispararlas por accidente.
+            this.CancelButton = this.btnCerrar;
             this.panelBotones.Dock          = System.Windows.Forms.DockStyle.Bottom;
             this.panelBotones.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.panelBotones.Height        = 52;

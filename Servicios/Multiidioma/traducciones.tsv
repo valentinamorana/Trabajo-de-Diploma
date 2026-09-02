@@ -4696,6 +4696,14 @@ ES	msg.sugerencia.enviada	Sugerencia #{0} enviada a Administración.
 EN	msg.sugerencia.enviada	Suggestion #{0} sent to Administration.
 RU	msg.sugerencia.enviada	Предложение №{0} отправлено в Администрацию.
 PT	msg.sugerencia.enviada	Sugestão #{0} enviada à Administração.
+ES	err.exportar.titulo	Error al exportar
+EN	err.exportar.titulo	Export error
+RU	err.exportar.titulo	Ошибка экспорта
+PT	err.exportar.titulo	Erro ao exportar
+ES	err.imprimir.titulo	Error al imprimir
+EN	err.imprimir.titulo	Print error
+RU	err.imprimir.titulo	Ошибка печати
+PT	err.imprimir.titulo	Erro ao imprimir
 ES	col.contr.id	ID
 EN	col.contr.id	ID
 RU	col.contr.id	ID

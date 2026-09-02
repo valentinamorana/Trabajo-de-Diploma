@@ -281,6 +281,8 @@ namespace GUI
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.btnCancelar);
             this.Controls.Add(this.btnConfirmar);
+            this.AcceptButton = this.btnConfirmar;
+            this.CancelButton = this.btnCancelar;
             this.Controls.Add(this.txtImpactoEconomico);
             this.Controls.Add(this.lblImpactoEconomico);
             this.Controls.Add(this.numMargenEstimado);

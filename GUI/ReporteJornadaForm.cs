@@ -163,7 +163,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error al exportar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex, "err.exportar.titulo", "Error al exportar");
             }
         }
 
@@ -188,7 +188,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error al imprimir", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex, "err.imprimir.titulo", "Error al imprimir");
             }
         }
 
@@ -207,7 +207,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex, "msg.error.titulo", "Error");
             }
         }
 
@@ -250,7 +250,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error al exportar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex, "err.exportar.titulo", "Error al exportar");
             }
         }
 
@@ -286,7 +286,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex, "msg.error.titulo", "Error");
             }
         }
 
@@ -330,6 +330,20 @@ namespace GUI
             };
         }
 
+        // BE.AppException lleva una clave de traducción — ex.Message es el fallback hardcodeado en
+        // español fijado en el throw. Este form no hereda FormBase (no tiene lblMensaje propio), así
+        // que replica acá la misma resolución que FormBase.MostrarError(Exception) hace para el resto
+        // de la app, y también traduce el título del MessageBox.
+        private static void MostrarError(Exception ex, string claveTitulo, string tituloFallback)
+        {
+            string mensaje = ex is BE.AppException appEx
+                ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
+                : ex.Message;
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string titulo = t.ContainsKey(claveTitulo) ? t[claveTitulo].Texto : tituloFallback;
+            MessageBox.Show(mensaje, titulo, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         private void GenerarReporte()
         {
             try
@@ -344,7 +358,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex, "msg.error.titulo", "Error");
             }
         }
     }

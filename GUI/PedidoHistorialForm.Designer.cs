@@ -226,6 +226,7 @@ namespace GUI
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.btnRestaurar);
             this.Controls.Add(this.btnCerrar);
+            this.CancelButton = this.btnCerrar;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.MinimumSize     = new System.Drawing.Size(760, 460);
             this.Name            = "PedidoHistorialForm";

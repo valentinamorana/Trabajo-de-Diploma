@@ -253,6 +253,8 @@ namespace GUI
             this.Controls.Add(this.lblMensaje);
             this.Controls.Add(this.btnGuardar);
             this.Controls.Add(this.btnCancelar);
+            this.AcceptButton = this.btnGuardar;
+            this.CancelButton = this.btnCancelar;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;

@@ -10,8 +10,5 @@ namespace DAL.Interfaces
 
         // Mapeos de una patente puntual (para la UI de mapeo en Gestión de Permisos).
         List<BE.ControlMapeado> ObtenerPorPermiso(int idPermiso);
-
-        // Reemplaza el conjunto de controles asociados a una patente (borra los previos e inserta los nuevos).
-        void GuardarAsociados(int idPermiso, List<BE.ControlMapeado> controles);
     }
 }

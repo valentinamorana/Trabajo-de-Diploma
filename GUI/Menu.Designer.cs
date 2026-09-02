@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Menu));
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsIdioma = new System.Windows.Forms.ToolStrip();
             this.lblIdioma = new System.Windows.Forms.ToolStripLabel();
             this.tsIdiomaSep = new System.Windows.Forms.ToolStripSeparator();
@@ -42,6 +41,7 @@
             this.panelControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inventarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.inspeccionDevolucionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listaEsperaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.suscriptoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,6 +51,14 @@
             this.cobroSuscripcionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pedidosVentaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pedidosRealizadosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nuevaContratacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cajaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contratacionesPendientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.promocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sugerirPromocionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gestionPromocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.revisionContablePromocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.promocionesVigentesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grpUsuarios = new System.Windows.Forms.ToolStripMenuItem();
             this.adminUsuariosItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -80,11 +88,6 @@
             this.tsIdioma.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            //
-            // contextMenuStrip1
-            //
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             //
             // tsIdioma — barra de selección de idioma (debajo del MenuStrip principal).
             //
@@ -129,6 +132,8 @@
             this.suscriptoresToolStripMenuItem,
             this.inventarioToolStripMenuItem,
             this.ventasToolStripMenuItem,
+            this.cajaToolStripMenuItem,
+            this.promocionesToolStripMenuItem,
             this.auditoriaToolStripMenuItem,
             this.analiticaNegocioToolStripMenuItem,
             this.gestionToolStripMenuItem,
@@ -180,19 +185,28 @@
             // 
             this.inventarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.prendasToolStripMenuItem,
+            this.inspeccionDevolucionToolStripMenuItem,
             this.listaEsperaToolStripMenuItem});
             this.inventarioToolStripMenuItem.Name = "inventarioToolStripMenuItem";
             this.inventarioToolStripMenuItem.Tag = "mnu.inventario";
             this.inventarioToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
             this.inventarioToolStripMenuItem.Text = "Inventario";
-            // 
+            //
             // prendasToolStripMenuItem
-            // 
+            //
             this.prendasToolStripMenuItem.Name = "prendasToolStripMenuItem";
             this.prendasToolStripMenuItem.Tag = "mnu.prendas";
             this.prendasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.prendasToolStripMenuItem.Text = "Prendas";
             this.prendasToolStripMenuItem.Click += new System.EventHandler(this.prendasToolStripMenuItem_Click);
+            //
+            // inspeccionDevolucionToolStripMenuItem — PN04, CU-DEP-01 Inspeccionar Devolución
+            //
+            this.inspeccionDevolucionToolStripMenuItem.Name = "inspeccionDevolucionToolStripMenuItem";
+            this.inspeccionDevolucionToolStripMenuItem.Tag = "mnu.inspecciondevolucion";
+            this.inspeccionDevolucionToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.inspeccionDevolucionToolStripMenuItem.Text = "Inspección de Devolución";
+            this.inspeccionDevolucionToolStripMenuItem.Click += new System.EventHandler(this.inspeccionDevolucionToolStripMenuItem_Click);
             //
             // listaEsperaToolStripMenuItem — mejora opcional (no requerida por la cátedra, ver README)
             //
@@ -210,7 +224,8 @@
             this.clientesToolStripMenuItem,
             this.planesToolStripMenuItem,
             this.renovacionSuscripcionToolStripMenuItem,
-            this.cobroSuscripcionToolStripMenuItem});
+            this.cobroSuscripcionToolStripMenuItem,
+            this.nuevaContratacionToolStripMenuItem});
             this.suscriptoresToolStripMenuItem.Name = "suscriptoresToolStripMenuItem";
             this.suscriptoresToolStripMenuItem.Tag = "mnu.suscriptores";
             this.suscriptoresToolStripMenuItem.Size = new System.Drawing.Size(90, 20);
@@ -258,6 +273,14 @@
             this.cobroSuscripcionToolStripMenuItem.Text = "Cobro de Suscripción";
             this.cobroSuscripcionToolStripMenuItem.Click += new System.EventHandler(this.cobroSuscripcionToolStripMenuItem_Click);
             //
+            // nuevaContratacionToolStripMenuItem — PN02 (Venta capta cliente + plan elegido)
+            //
+            this.nuevaContratacionToolStripMenuItem.Name = "nuevaContratacionToolStripMenuItem";
+            this.nuevaContratacionToolStripMenuItem.Tag = "mnu.nuevacontratacion";
+            this.nuevaContratacionToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.nuevaContratacionToolStripMenuItem.Text = "Nueva Contratación";
+            this.nuevaContratacionToolStripMenuItem.Click += new System.EventHandler(this.nuevaContratacionToolStripMenuItem_Click);
+            //
             // pedidosVentaToolStripMenuItem
             // 
             this.pedidosVentaToolStripMenuItem.Name = "pedidosVentaToolStripMenuItem";
@@ -273,6 +296,68 @@
             this.pedidosRealizadosToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.pedidosRealizadosToolStripMenuItem.Text = "Pedidos Realizados";
             this.pedidosRealizadosToolStripMenuItem.Click += new System.EventHandler(this.pedidosRealizadosToolStripMenuItem_Click);
+            //
+            // cajaToolStripMenuItem — PN02, rol Caja (separado de Vendedor: Caja cobra, Vendedor no)
+            //
+            this.cajaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contratacionesPendientesToolStripMenuItem});
+            this.cajaToolStripMenuItem.Name = "cajaToolStripMenuItem";
+            this.cajaToolStripMenuItem.Tag = "mnu.caja";
+            this.cajaToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.cajaToolStripMenuItem.Text = "Caja";
+            //
+            // contratacionesPendientesToolStripMenuItem
+            //
+            this.contratacionesPendientesToolStripMenuItem.Name = "contratacionesPendientesToolStripMenuItem";
+            this.contratacionesPendientesToolStripMenuItem.Tag = "mnu.contratacionespendientes";
+            this.contratacionesPendientesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.contratacionesPendientesToolStripMenuItem.Text = "Contrataciones Pendientes";
+            this.contratacionesPendientesToolStripMenuItem.Click += new System.EventHandler(this.contratacionesPendientesToolStripMenuItem_Click);
+            //
+            // promocionesToolStripMenuItem — PN03: Gerencia, Administración, Contabilidad y
+            // Vendedor conviven acá, cada hoja gobernada por su propia patente.
+            //
+            this.promocionesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sugerirPromocionToolStripMenuItem,
+            this.gestionPromocionesToolStripMenuItem,
+            this.revisionContablePromocionesToolStripMenuItem,
+            this.promocionesVigentesToolStripMenuItem});
+            this.promocionesToolStripMenuItem.Name = "promocionesToolStripMenuItem";
+            this.promocionesToolStripMenuItem.Tag = "mnu.promociones";
+            this.promocionesToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
+            this.promocionesToolStripMenuItem.Text = "Promociones";
+            //
+            // sugerirPromocionToolStripMenuItem
+            //
+            this.sugerirPromocionToolStripMenuItem.Name = "sugerirPromocionToolStripMenuItem";
+            this.sugerirPromocionToolStripMenuItem.Tag = "mnu.sugerirpromocion";
+            this.sugerirPromocionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.sugerirPromocionToolStripMenuItem.Text = "Sugerir Promoción";
+            this.sugerirPromocionToolStripMenuItem.Click += new System.EventHandler(this.sugerirPromocionToolStripMenuItem_Click);
+            //
+            // gestionPromocionesToolStripMenuItem
+            //
+            this.gestionPromocionesToolStripMenuItem.Name = "gestionPromocionesToolStripMenuItem";
+            this.gestionPromocionesToolStripMenuItem.Tag = "mnu.gestionpromociones";
+            this.gestionPromocionesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.gestionPromocionesToolStripMenuItem.Text = "Gestión de Promociones";
+            this.gestionPromocionesToolStripMenuItem.Click += new System.EventHandler(this.gestionPromocionesToolStripMenuItem_Click);
+            //
+            // revisionContablePromocionesToolStripMenuItem
+            //
+            this.revisionContablePromocionesToolStripMenuItem.Name = "revisionContablePromocionesToolStripMenuItem";
+            this.revisionContablePromocionesToolStripMenuItem.Tag = "mnu.revisioncontablepromociones";
+            this.revisionContablePromocionesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.revisionContablePromocionesToolStripMenuItem.Text = "Revisión Contable";
+            this.revisionContablePromocionesToolStripMenuItem.Click += new System.EventHandler(this.revisionContablePromocionesToolStripMenuItem_Click);
+            //
+            // promocionesVigentesToolStripMenuItem
+            //
+            this.promocionesVigentesToolStripMenuItem.Name = "promocionesVigentesToolStripMenuItem";
+            this.promocionesVigentesToolStripMenuItem.Tag = "mnu.promocionesvigentes";
+            this.promocionesVigentesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.promocionesVigentesToolStripMenuItem.Text = "Promociones Vigentes";
+            this.promocionesVigentesToolStripMenuItem.Click += new System.EventHandler(this.promocionesVigentesToolStripMenuItem_Click);
             //
             // gestionToolStripMenuItem — reorganizado en submenús: Usuarios ▸, Perfiles, ──, Sistema ▸.
             //
@@ -531,14 +616,22 @@
 
         #endregion
 
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem usuarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cerrarSesionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem panelControlToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem inventarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prendasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem inspeccionDevolucionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem listaEsperaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem nuevaContratacionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cajaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem contratacionesPendientesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem promocionesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sugerirPromocionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gestionPromocionesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem revisionContablePromocionesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem promocionesVigentesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem backupToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem historialUsuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem auditoriaToolStripMenuItem;

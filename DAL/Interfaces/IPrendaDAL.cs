@@ -14,10 +14,15 @@ namespace DAL.Interfaces
         /// </summary>
         List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null);
         BE.Prenda ObtenerPorId(int idPrenda);
+
+        /// <summary>Relee un lote de prendas por ID en una sola consulta (batch), en vez de
+        /// N consultas individuales. Devuelve solo las que existen — no lanza por IDs faltantes.</summary>
+        List<BE.Prenda> ObtenerPorIds(List<int> ids);
+
         List<BE.Prenda> ObtenerPorCliente(int idCliente);
         int Alta(BE.Prenda prenda);
         void Modificar(BE.Prenda prenda);
-        void CambiarEstado(int idPrenda, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null);
+        void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null);
         List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria();
     }
 }

@@ -1,5 +1,5 @@
 -- ============================================================
--- WardrobeFlow — 15. LISTA DE ESPERA DE PRENDAS (mejora opcional,
+-- WardrobeFlow — 16. LISTA DE ESPERA DE PRENDAS (mejora opcional,
 -- no requerida por la cátedra — ver README, sección "Módulos")
 -- ------------------------------------------------------------
 -- Inspirado en la Lista de Espera de ExperienceHub (TP de un

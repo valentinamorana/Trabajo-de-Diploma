@@ -918,37 +918,11 @@ ELSE
     PRINT 'FechaVencimiento ya existe en Cliente — sin cambios.';
 GO
 
--- FechaLimiteGracia en Cliente (PdN6 — período de gracia tras un cobro fallido).
--- Null = al día. Ver BE.Cliente.EstaEnGracia / EstaSuspendidoPorPago.
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
-               WHERE TABLE_NAME = 'Cliente' AND COLUMN_NAME = 'FechaLimiteGracia')
-BEGIN
-    ALTER TABLE Cliente ADD FechaLimiteGracia DATE NULL;
-    PRINT 'Columna FechaLimiteGracia agregada a Cliente.';
-END
-ELSE
-    PRINT 'FechaLimiteGracia ya existe en Cliente — sin cambios.';
-GO
-
--- HistorialCobro (PdN6 — auditoría del patrón Chain of Responsibility de cobro,
--- misma estructura que HistorialRenovacion / 05_Renovacion_Suscripcion.sql).
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'HistorialCobro')
-BEGIN
-    CREATE TABLE HistorialCobro (
-        IdCobro         INT           IDENTITY(1,1) PRIMARY KEY,
-        IdCliente       INT           NOT NULL REFERENCES Cliente(IdCliente),
-        Importe         DECIMAL(10,2) NOT NULL DEFAULT 0,
-        FechaDeteccion  DATETIME      NOT NULL DEFAULT GETDATE(),
-        FechaResolucion DATETIME      NULL,
-        -- 0=Pendiente, 1=Cobrado, 2=Gracia, 3=Suspendido (BE.EstadoCobro)
-        Resultado       INT           NOT NULL,
-        Actor           NVARCHAR(100) NULL
-    );
-    PRINT 'Tabla HistorialCobro creada.';
-END
-ELSE
-    PRINT 'Tabla HistorialCobro ya existe — sin cambios.';
-GO
+-- FechaLimiteGracia en Cliente y tabla HistorialCobro (PdN6 — período de gracia
+-- tras un cobro fallido y auditoría del patrón Chain of Responsibility de cobro).
+-- Fuente única: 08_Cobro_Pago.sql (documenta el detalle y el "por qué"; ambos
+-- bloques son idempotentes, así que da igual si 01 u 08 corre primero).
+-- Ver BE.Cliente.EstaEnGracia / EstaSuspendidoPorPago.
 
 -- FechaNacimiento en Cliente — OBLIGATORIA (NOT NULL) para validar mayoría de edad.
 -- 1) Agregar la columna como NULL si todavía no existe.

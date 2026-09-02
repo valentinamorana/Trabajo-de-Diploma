@@ -22,7 +22,7 @@ BEGIN
         IdPlanNuevo     INT           NULL REFERENCES PlanSuscripcion(IdPlan),
         FechaDeteccion  DATETIME      NOT NULL DEFAULT GETDATE(),
         FechaResolucion DATETIME      NULL,
-        -- 0=Pendiente, 1=Renovada, 2=CambioPlan, 3=Baja (BE.EstadoRenovacion)
+        -- 0=Pendiente, 1=Renovada, 2=CambioPlan, 3=Baja, 4=Pausada (BE.EstadoRenovacion)
         Resultado       INT           NOT NULL,
         Actor           NVARCHAR(100) NULL
     );

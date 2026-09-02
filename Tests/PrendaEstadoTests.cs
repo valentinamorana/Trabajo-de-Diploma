@@ -43,12 +43,19 @@ namespace Tests
         }
 
         [TestMethod]
-        public void EnUso_NoAdmiteTransicionManual()
+        public void EnUso_NoAdmiteTransicionManualSalvoBaja()
         {
             var p = new BE.Prenda { Estado = BE.EstadoPrenda.EnUso };
             Assert.IsFalse(p.TransicionPermitida(BE.EstadoPrenda.Disponible));
             Assert.IsFalse(p.TransicionPermitida(BE.EstadoPrenda.EnLimpieza));
-            Assert.IsFalse(p.TransicionPermitida(BE.EstadoPrenda.Baja));
+        }
+
+        [TestMethod]
+        public void EnUso_PuedePasarABaja_ReportarPrendaPerdida()
+        {
+            // PN04, CU-DEP-02 Reportar Prenda Perdida: única transición manual desde EnUso.
+            var p = new BE.Prenda { Estado = BE.EstadoPrenda.EnUso };
+            Assert.IsTrue(p.TransicionPermitida(BE.EstadoPrenda.Baja));
         }
 
         [TestMethod]

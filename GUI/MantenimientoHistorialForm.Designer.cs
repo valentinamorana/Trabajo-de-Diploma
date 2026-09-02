@@ -91,6 +91,8 @@ namespace GUI
             this.Controls.Add(this.dgvHistorial);
             this.Controls.Add(this.lblSinRegistros);
             this.Controls.Add(this.btnCerrar);
+            this.AcceptButton = this.btnCerrar;
+            this.CancelButton = this.btnCerrar;
 
             ((System.ComponentModel.ISupportInitialize)(this.dgvHistorial)).EndInit();
             this.ResumeLayout(false);

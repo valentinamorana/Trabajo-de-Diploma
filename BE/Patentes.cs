@@ -17,6 +17,16 @@ namespace BE
         public const string PedidosRealizados = "mnuPedidosRealizados";
         public const string CobroSuscripcion  = "mnuCobroSuscripcion";
         public const string ListaEspera       = "mnuListaEspera";
+        public const string Caja              = "mnuCaja";
+
+        // PN03 — Métricas, promociones y toma de decisiones.
+        public const string SugerenciaPromocion   = "mnuSugerenciaPromocion";
+        public const string PromocionesAdmin      = "mnuPromocionesAdmin";
+        public const string PromocionesContable   = "mnuPromocionesContable";
+        public const string PromocionesVigentes   = "mnuPromocionesVigentes";
+
+        // PN04 — Inspección de Devolución (Depósito = OperadorDeInventario, sin rol nuevo).
+        public const string InspeccionDevolucion  = "mnuInspeccionDevolucion";
 
         // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────
         // Cada una gobierna las operaciones de escritura (alta/modificación/baja) del módulo.
@@ -27,5 +37,13 @@ namespace BE
         public const string PlanSuscripcionesEditar = "mnuPlanSuscripcionesEditar";
         public const string PedidosVentaEditar      = "mnuPedidosVentaEditar";
         public const string PedidosRealizadosEditar = "mnuPedidosRealizadosEditar";
+        public const string CajaEditar              = "mnuCajaEditar";
+        public const string PromocionesAdminEditar    = "mnuPromocionesAdminEditar";
+        public const string PromocionesContableEditar = "mnuPromocionesContableEditar";
+        public const string PromocionesVigentesEditar = "mnuPromocionesVigentesEditar";
+        // Nota: Inspección de Devolución (PN04) NO tiene patente de Editar propia — su
+        // escritura (CambiarEstado/RegistrarCargo) ya está gobernada por StockEditar
+        // (compartida con el módulo de Stock, ver InspeccionDevolucion arriba). Crear una
+        // patente "Editar" que nada verifica sería engañosa en Perfiles y Permisos.
     }
 }

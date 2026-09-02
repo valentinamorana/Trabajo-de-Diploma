@@ -35,33 +35,6 @@ namespace DAL
             return lista;
         }
 
-        // Reemplazo atómico: borra los mapeos previos de la patente e inserta el set nuevo.
-        public void GuardarAsociados(int idPermiso, List<BE.ControlMapeado> controles)
-        {
-            acceso.EjecutarTransaccion((conn, tx) =>
-            {
-                using (var del = new SqlCommand("DELETE FROM ControlMapeado WHERE IdPermiso = @id", conn, tx))
-                {
-                    del.Parameters.AddWithValue("@id", idPermiso);
-                    del.ExecuteNonQuery();
-                }
-
-                if (controles == null) return;
-                foreach (var c in controles)
-                {
-                    using (var ins = new SqlCommand(
-                        "INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl) " +
-                        "VALUES (@id, @form, @ctrl)", conn, tx))
-                    {
-                        ins.Parameters.AddWithValue("@id",   idPermiso);
-                        ins.Parameters.AddWithValue("@form", c.Formulario ?? string.Empty);
-                        ins.Parameters.AddWithValue("@ctrl", c.NombreControl ?? string.Empty);
-                        ins.ExecuteNonQuery();
-                    }
-                }
-            });
-        }
-
         private static BE.ControlMapeado Mapear(DataRow row) => new BE.ControlMapeado
         {
             Id            = Convert.ToInt32(row["IdControlMapeado"]),

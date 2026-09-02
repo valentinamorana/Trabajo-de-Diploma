@@ -26,6 +26,17 @@ namespace BLL
             ("cobroSuscripcionToolStripMenuItem",      "mnuCobroSuscripcion"),
             ("pedidosVentaToolStripMenuItem",          "mnuPedidosVenta"),
             ("pedidosRealizadosToolStripMenuItem",     "mnuPedidosRealizados"),
+            // PN02 — Comercialización de la suscripción. Nueva Contratación la ve quien ya
+            // gestiona Clientes (Venta); Contrataciones Pendientes es exclusivo del rol Caja.
+            ("nuevaContratacionToolStripMenuItem",      "mnuClientes"),
+            ("contratacionesPendientesToolStripMenuItem", "mnuCaja"),
+            // PN03 — Métricas, promociones y toma de decisiones.
+            ("sugerirPromocionToolStripMenuItem",              "mnuSugerenciaPromocion"),
+            ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
+            ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),
+            ("promocionesVigentesToolStripMenuItem",            "mnuPromocionesVigentes"),
+            // PN04 — Inspección de Devolución (Depósito = OperadorDeInventario).
+            ("inspeccionDevolucionToolStripMenuItem",  "mnuInspeccionDevolucion"),
             // Mejora opcional (no requerida por la cátedra) — ver README.
             ("listaEsperaToolStripMenuItem",           "mnuListaEspera"),
             // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
@@ -57,9 +68,20 @@ namespace BLL
             ("suscriptoresToolStripMenuItem", new[]
             {
                 "clientesToolStripMenuItem", "planesToolStripMenuItem",
-                "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem"
+                "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem",
+                "nuevaContratacionToolStripMenuItem"
             }),
             ("ventasToolStripMenuItem", new[] { "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem" }),
+            // PN02 — rol Caja, separado de Vendedor.
+            ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem" }),
+            // PN03 — Gerencia (GerenteComercial), Administración y Contabilidad (roles nuevos)
+            // y Vendedor conviven en un mismo grupo de menú; cada hoja sigue gobernada por su
+            // propia patente, el grupo solo se muestra si al menos una de las 4 es visible.
+            ("promocionesToolStripMenuItem", new[]
+            {
+                "sugerirPromocionToolStripMenuItem", "gestionPromocionesToolStripMenuItem",
+                "revisionContablePromocionesToolStripMenuItem", "promocionesVigentesToolStripMenuItem"
+            }),
             // "Analítica" se partió en dos menúes de primer nivel (antes eran 9 ítems en un
             // solo dropdown plano): Auditoría (bitácoras + reporte de jornada, gobernados por
             // mnuAuditoria) y Analítica de Negocio (los 6 reportes de decisión comercial del
@@ -83,8 +105,8 @@ namespace BLL
         /// GUI.Menu.AplicarPermisos:
         ///   • Panel de Control: siempre visible para cualquier logueado.
         ///   • Hoja: visible si tiene la patente exacta (o es Admin).
-        ///   • Inventario: visible si Prendas o Lista de Espera son visibles, o tiene mnuStock
-        ///     (Stock no tiene ToolStripMenuItem propio en el Designer).
+        ///   • Inventario: visible si Prendas, Lista de Espera o Inspección de Devolución son
+        ///     visibles, o tiene mnuStock (Stock no tiene ToolStripMenuItem propio en el Designer).
         ///   • Grupo genérico (Suscriptores/Ventas/Auditoría/Analítica de Negocio): visible si algún hijo lo es.
         ///   • Administrar/Usuarios▸/Sistema▸: gobernados por mnuUsuarios.
         /// </summary>
@@ -102,7 +124,8 @@ namespace BLL
                 visible[h.Item] = Permite(h.Permiso);
 
             visible["inventarioToolStripMenuItem"] =
-                visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] || Permite("mnuStock");
+                visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] ||
+                visible["inspeccionDevolucionToolStripMenuItem"] || Permite("mnuStock");
 
             foreach (var g in Grupos)
                 visible[g.Grupo] = g.Hijos.Any(h => visible.TryGetValue(h, out var v) && v);

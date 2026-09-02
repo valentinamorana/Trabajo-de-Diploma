@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
     /// <summary>Lógica de negocio para gestión de prendas.</summary>
     public class Prenda : Interfaces.IPrendaService
     {
-        private readonly DAL.Prenda                  dalPrenda        = new DAL.Prenda();
-        private readonly DAL.MantenimientoPrenda     dalMantenimiento = new DAL.MantenimientoPrenda();
+        private readonly DAL.Interfaces.IPrendaDAL              dalPrenda;
+        private readonly DAL.Interfaces.IMantenimientoPrendaDAL dalMantenimiento;
         private readonly Servicios.Bitacora          bitacora         = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio   bitacoraNeg      = new Servicios.BitacoraNegocio();
 
@@ -15,6 +16,16 @@ namespace BLL
         // BLL.Usuario.perfilesBLL => new BLL.Familia().
         private Interfaces.IListaEsperaService _listaEsperaLazy;
         private Interfaces.IListaEsperaService listaEsperaBLL => _listaEsperaLazy ?? (_listaEsperaLazy = new ListaEspera());
+
+        // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
+        // de prueba (mismo criterio que BLL.Pedido/BLL.Cliente).
+        public Prenda() : this(new DAL.Prenda(), new DAL.MantenimientoPrenda()) { }
+
+        public Prenda(DAL.Interfaces.IPrendaDAL dalPrenda, DAL.Interfaces.IMantenimientoPrendaDAL dalMantenimiento)
+        {
+            this.dalPrenda        = dalPrenda ?? throw new ArgumentNullException(nameof(dalPrenda));
+            this.dalMantenimiento = dalMantenimiento ?? throw new ArgumentNullException(nameof(dalMantenimiento));
+        }
 
         public List<BE.Prenda> ObtenerTodos()                   => dalPrenda.ObtenerTodos();
         public List<BE.Prenda> ObtenerPorCliente(int id)       => dalPrenda.ObtenerPorCliente(id);
@@ -94,8 +105,8 @@ namespace BLL
                         "Una prenda dada de baja no puede cambiar de estado.");
                 if (estadoAnterior == BE.EstadoPrenda.EnUso)
                     throw new BE.AppException("err.bll.prenda.transicion_enuso",
-                        "No se puede cambiar manualmente el estado de una prenda en uso.\n" +
-                        "El estado se actualiza automáticamente al procesar pedidos.");
+                        "El estado de una prenda en uso se actualiza automáticamente al procesar pedidos.\n" +
+                        "La única excepción manual es reportarla como perdida (PN04, módulo de Pedidos Realizados).");
                 throw new BE.AppException("err.bll.prenda.transicion_generica",
                     "La transición de '{0}' a '{1}' no está permitida.",
                     estadoAnterior.ToString(), nuevoEstado.ToString());
@@ -105,7 +116,20 @@ namespace BLL
                 ? prenda.IdClienteActual
                 : null;
 
-            dalPrenda.CambiarEstado(prenda.IdPrenda, nuevoEstado, idCliente);
+            try
+            {
+                dalPrenda.CambiarEstado(prenda.IdPrenda, estadoAnterior, nuevoEstado, idCliente);
+            }
+            catch
+            {
+                // Anti-TOCTOU (DAL/Prenda.cs): si el UPDATE condicionado no afectó ninguna fila
+                // porque el estado cambió entre la lectura y este punto, revertir acá la
+                // mutación en memoria que ControlarEstado ya aplicó — si no, el objeto que
+                // quedó cacheado en la GUI (_prendas/_prendasDetalleActual) sigue mostrando un
+                // estado que en realidad nunca se persistió.
+                prenda.Estado = estadoAnterior;
+                throw;
+            }
 
             if (nuevoEstado == BE.EstadoPrenda.EnLimpieza)
             {
@@ -132,6 +156,31 @@ namespace BLL
                 $"Prenda '{prenda.Nombre}' (ID {prenda.IdPrenda}): {estadoAnterior} → {nuevoEstado}",
                 idPrenda: prenda.IdPrenda);
         }
+
+        // CU01-CS-Verificar Disponibilidad (PN01): relee el estado real de toda la selección
+        // desde la base en una sola consulta batch (no confía en el objeto en memoria que pasó
+        // el caller, y no hace una query por prenda) y evalúa EstaDisponible() de cada una.
+        // Operación de solo lectura: no reserva ni modifica nada.
+        public (bool Disponible, List<BE.Prenda> NoDisponibles) VerificarDisponibilidad(List<BE.Prenda> seleccion)
+        {
+            var actuales = dalPrenda.ObtenerPorIds(seleccion.Select(p => p.IdPrenda).ToList())
+                .ToDictionary(p => p.IdPrenda);
+
+            var noDisponibles = new List<BE.Prenda>();
+            foreach (var p in seleccion)
+            {
+                actuales.TryGetValue(p.IdPrenda, out var actual);
+                if (actual == null || !actual.EstaDisponible())
+                    noDisponibles.Add(actual ?? p);
+            }
+            return (noDisponibles.Count == 0, noDisponibles);
+        }
+
+        // PN04, CU-DEP-01 Inspeccionar Devolución: prendas EnLimpieza pendientes de
+        // resolución (reingresan sin cargo o se dan de baja con cargo). Filtrado en memoria,
+        // mismo criterio que ObtenerOcupacion() — no hace falta una query SQL dedicada.
+        public List<BE.Prenda> ObtenerEnLimpieza() =>
+            dalPrenda.ObtenerTodos().FindAll(p => p.Estado == BE.EstadoPrenda.EnLimpieza);
 
         public List<BE.MantenimientoPrenda> ObtenerHistorialMantenimiento(int idPrenda)
             => dalMantenimiento.ObtenerPorPrenda(idPrenda);

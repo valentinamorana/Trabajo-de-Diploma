@@ -93,7 +93,7 @@ namespace GUI
         }
 
         // Mini cuadro de entrada de texto (sin dependencias externas).
-        private static string Pedir(string titulo, string prompt)
+        private string Pedir(string titulo, string prompt)
         {
             var tr = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string txtOk = tr.ContainsKey("btn.aceptar")  ? tr["btn.aceptar"].Texto  : "Aceptar";
@@ -109,7 +109,8 @@ namespace GUI
                 var ca = new Button { Text = txtCa, DialogResult = DialogResult.Cancel, Location = new System.Drawing.Point(315, 80), Size = new System.Drawing.Size(80, 30) };
                 f.Controls.AddRange(new Control[] { lbl, txt, ok, ca });
                 f.AcceptButton = ok; f.CancelButton = ca;
-                return f.ShowDialog() == DialogResult.OK ? txt.Text : null;
+                // Owner explícito: sin esto, en MDI el diálogo puede aparecer detrás de FormIdiomas.
+                return f.ShowDialog(this) == DialogResult.OK ? txt.Text : null;
             }
         }
 

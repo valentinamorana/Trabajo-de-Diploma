@@ -226,10 +226,13 @@ namespace GUI
             var items = new ToolStripMenuItem[]
             {
                 panelControlToolStripMenuItem, inventarioToolStripMenuItem,
-                prendasToolStripMenuItem, listaEsperaToolStripMenuItem,
+                prendasToolStripMenuItem, inspeccionDevolucionToolStripMenuItem, listaEsperaToolStripMenuItem,
                 clientesToolStripMenuItem, planesToolStripMenuItem,
                 renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
+                nuevaContratacionToolStripMenuItem, contratacionesPendientesToolStripMenuItem,
+                sugerirPromocionToolStripMenuItem, gestionPromocionesToolStripMenuItem,
+                revisionContablePromocionesToolStripMenuItem, promocionesVigentesToolStripMenuItem,
                 usuariosToolStripMenuItem, perfilesToolStripMenuItem, idiomasToolStripMenuItem,
                 historialUsuariosToolStripMenuItem, backupToolStripMenuItem, integridadToolStripMenuItem,
                 adminUsuariosItem,
@@ -238,7 +241,8 @@ namespace GUI
                 ventasVendedorToolStripMenuItem, analisisRotacionToolStripMenuItem,
                 analisisMantenimientoToolStripMenuItem, analisisEscasezToolStripMenuItem,
                 recomendacionPrendasToolStripMenuItem,
-                suscriptoresToolStripMenuItem, ventasToolStripMenuItem,
+                suscriptoresToolStripMenuItem, ventasToolStripMenuItem, cajaToolStripMenuItem,
+                promocionesToolStripMenuItem,
                 auditoriaToolStripMenuItem, analiticaNegocioToolStripMenuItem,
                 grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
@@ -549,6 +553,16 @@ namespace GUI
             new Prendas { MdiParent = this }.Show();
         }
 
+        // PN04, CU-DEP-01 Inspeccionar Devolución.
+        private void inspeccionDevolucionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is InspeccionDevolucionForm) { hijo.BringToFront(); return; }
+            }
+            new InspeccionDevolucionForm { MdiParent = this }.Show();
+        }
+
         /// <summary>
         /// Abre el módulo de Clientes como hijo MDI. Accesible para Vendedor.
         /// </summary>
@@ -608,6 +622,77 @@ namespace GUI
                 if (hijo is ListaEsperaForm) { hijo.BringToFront(); return; }
             }
             new ListaEsperaForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>
+        /// PN02 — Abre el diálogo para que Venta registre una nueva contratación (cliente +
+        /// plan + modalidad). Modal, mismo criterio que NuevoPedidoForm: no es un módulo de
+        /// consulta permanente, es una operación puntual.
+        /// </summary>
+        private void nuevaContratacionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var form = new NuevaContratacionForm())
+            {
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+                MessageBox.Show(
+                    string.Format(T("msg.contratacion.creada", "Contratación #{0} registrada, pendiente de pago."),
+                        form.IdContratacionCreada),
+                    T("msg.ok.titulo", "Listo"),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+        }
+
+        /// <summary>
+        /// PN02 — Abre la cola de contrataciones pendientes de pago (rol Caja) como hijo MDI.
+        /// </summary>
+        private void contratacionesPendientesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is ContratacionesPendientesForm) { hijo.BringToFront(); return; }
+            }
+            new ContratacionesPendientesForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>PN03 — Abre el diálogo para que Gerencia (GerenteComercial) sugiera una promoción.</summary>
+        private void sugerirPromocionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var form = new SugerirPromocionForm())
+                form.ShowDialog(this);
+        }
+
+        /// <summary>PN03 — Abre la gestión de promociones (rol Administración) como hijo MDI.</summary>
+        private void gestionPromocionesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is PromocionesAdministracionForm) { hijo.BringToFront(); return; }
+            }
+            new PromocionesAdministracionForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>PN03 — Abre la cola de revisión contable de promociones (rol Contabilidad) como hijo MDI.</summary>
+        private void revisionContablePromocionesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is PromocionesContabilidadForm) { hijo.BringToFront(); return; }
+            }
+            new PromocionesContabilidadForm { MdiParent = this }.Show();
+        }
+
+        /// <summary>PN03 — Abre la consulta de promociones vigentes (Vendedor) como hijo MDI.</summary>
+        private void promocionesVigentesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is PromocionesVigentesForm) { hijo.BringToFront(); return; }
+            }
+            new PromocionesVigentesForm { MdiParent = this }.Show();
         }
 
         /// <summary>
@@ -803,6 +888,7 @@ namespace GUI
             Aplicar(panelControlToolStripMenuItem,      t);
             Aplicar(inventarioToolStripMenuItem,        t);
             Aplicar(prendasToolStripMenuItem,           t);
+            Aplicar(inspeccionDevolucionToolStripMenuItem, t);
             Aplicar(listaEsperaToolStripMenuItem,       t);
             Aplicar(suscriptoresToolStripMenuItem,      t);
             Aplicar(ventasToolStripMenuItem,            t);
@@ -811,6 +897,14 @@ namespace GUI
             Aplicar(cobroSuscripcionToolStripMenuItem,  t);
             Aplicar(pedidosVentaToolStripMenuItem,      t);
             Aplicar(pedidosRealizadosToolStripMenuItem, t);
+            Aplicar(nuevaContratacionToolStripMenuItem,          t);
+            Aplicar(cajaToolStripMenuItem,                       t);
+            Aplicar(contratacionesPendientesToolStripMenuItem,   t);
+            Aplicar(promocionesToolStripMenuItem,                t);
+            Aplicar(sugerirPromocionToolStripMenuItem,           t);
+            Aplicar(gestionPromocionesToolStripMenuItem,         t);
+            Aplicar(revisionContablePromocionesToolStripMenuItem, t);
+            Aplicar(promocionesVigentesToolStripMenuItem,        t);
             Aplicar(gestionToolStripMenuItem,           t);
             Aplicar(grpUsuarios,                        t);
             Aplicar(grpSistema,                         t);

@@ -14,7 +14,14 @@ namespace GUI
         public string Motivo { get; private set; }
         public decimal Monto { get; private set; }
 
-        public CargoPrendaDialog(BE.Prenda prenda)
+        /// <param name="prenda">Prenda sobre la que se registra el cargo.</param>
+        /// <param name="montoSugerido">
+        /// PN04 — precio de reposición de la prenda (si está cargado), para no depender de
+        /// que el inspector tipee un monto a ojo al dar de baja con cargo. Pre-carga
+        /// <c>numMonto</c> pero sigue siendo editable; null si no hay valor de referencia
+        /// (comportamiento original, sin cambios).
+        /// </param>
+        public CargoPrendaDialog(BE.Prenda prenda, decimal? montoSugerido = null)
         {
             InitializeComponent();
             try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
@@ -30,6 +37,9 @@ namespace GUI
 
             string fmtInfo = T("lbl.cargoprenda.info", "Prenda: {0}\nÚltimo cliente: {1}");
             lblPrendaInfo.Text = string.Format(fmtInfo, prenda.Nombre, prenda.NombreUltimoCliente ?? "—");
+
+            if (montoSugerido.HasValue && montoSugerido.Value > 0)
+                numMonto.Value = Math.Min(montoSugerido.Value, numMonto.Maximum);
         }
 
         private void BtnConfirmar_Click(object sender, EventArgs e)

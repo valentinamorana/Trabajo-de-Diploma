@@ -30,6 +30,10 @@ namespace BLL.Interfaces
         // Cambia el estado de una prenda validando las transiciones permitidas por negocio.
         void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null);
 
+        // CU01-CS-Verificar Disponibilidad (PN01): releyendo el estado real desde la base,
+        // confirma si cada prenda de la selección sigue Disponible. Solo lectura.
+        (bool Disponible, List<BE.Prenda> NoDisponibles) VerificarDisponibilidad(List<BE.Prenda> seleccion);
+
         // Devuelve el historial de registros de mantenimiento/limpieza de una prenda.
         System.Collections.Generic.List<BE.MantenimientoPrenda> ObtenerHistorialMantenimiento(int idPrenda);
 
@@ -38,5 +42,8 @@ namespace BLL.Interfaces
 
         // Devuelve el resumen de ocupación del stock (total, en uso, en limpieza, disponibles).
         BE.OcupacionStock ObtenerOcupacion();
+
+        // PN04, CU-DEP-01 Inspeccionar Devolución: prendas EnLimpieza pendientes de resolución.
+        List<BE.Prenda> ObtenerEnLimpieza();
     }
 }

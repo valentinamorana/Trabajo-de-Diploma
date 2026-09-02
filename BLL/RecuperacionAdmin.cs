@@ -43,16 +43,6 @@ namespace BLL
             return GeneradorCredenciales.ExportarClavesRecuperacion(planas);
         }
 
-        // Regenera el set completo (admin): borra las anteriores y crea N nuevas. Devuelve la ruta del .txt.
-        public string RegenerarClaves(string modulo, int cantidad = 10)
-        {
-            ValidarEsAdministrador();
-            claveDAL.EliminarTodas();
-            string ruta = GenerarClavesEmergencia(cantidad);
-            bitacora.Registrar(modulo, $"Regeneración de {cantidad} claves de emergencia", BE.Criticidad.Alta);
-            return ruta;
-        }
-
         // Claves de emergencia todavía disponibles.
         public int ContarClavesDisponibles()
         {

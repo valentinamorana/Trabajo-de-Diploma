@@ -33,6 +33,7 @@ namespace GUI
         private List<BE.Componente> _raices = new List<BE.Componente>();
         private readonly Dictionary<int, BE.Componente> _todos = new Dictionary<int, BE.Componente>();
         private BE.Componente _seleccionado;
+        private ExploradorCompositeForm _exploradorAbierto;
 
         // Envoltura para mostrar un componente en el ComboBox con su ícono.
         private class Item
@@ -271,7 +272,17 @@ namespace GUI
         private void BtnAsignar_Click(object sender, EventArgs e) => Asignar();
         private void BtnQuitar_Click(object sender, EventArgs e) => QuitarItem();
         private void BtnActualizar_Click(object sender, EventArgs e) => CargarArbol();
-        private void BtnExplorador_Click(object sender, EventArgs e) => new ExploradorCompositeForm().Show(this);
+        private void BtnExplorador_Click(object sender, EventArgs e)
+        {
+            if (_exploradorAbierto != null && !_exploradorAbierto.IsDisposed)
+            {
+                _exploradorAbierto.BringToFront();
+                return;
+            }
+            _exploradorAbierto = new ExploradorCompositeForm();
+            _exploradorAbierto.FormClosed += (s, ev) => _exploradorAbierto = null;
+            _exploradorAbierto.Show(this);
+        }
         private void BtnCerrar_Click(object sender, EventArgs e) => this.Close();
 
         // ── Acciones: modo CREAR ───────────────────────────────────────────────────

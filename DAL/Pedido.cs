@@ -585,7 +585,8 @@ namespace DAL
 
             DataTable tabla = acceso.Leer(
                 "SELECT pr.IdPrenda, pr.Nombre, pr.Descripcion, pr.Talle, pr.Color, " +
-                "       pr.Categoria, pr.Estado, pr.IdClienteActual, pr.FechaAlta, " +
+                "       pr.Categoria, pr.Estado, pr.IdClienteActual, pr.IdUltimoCliente, " +
+                "       pr.PrecioReposicion, pr.FechaAlta, " +
                 "       NULL AS NombreCliente " +
                 "FROM PedidoPrenda pp " +
                 "INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda " +
@@ -603,6 +604,12 @@ namespace DAL
                     Color = row["Color"] != DBNull.Value ? row["Color"].ToString() : null,
                     Categoria = row["Categoria"] != DBNull.Value ? row["Categoria"].ToString() : null,
                     Estado = (BE.EstadoPrenda)Convert.ToInt32(row["Estado"]),
+                    // PN04, CU-DEP-02 Reportar Prenda Perdida (GUI/PedidosRealizados.cs) necesita
+                    // IdUltimoCliente para poder cargar el cobro contra el cliente que la tenía
+                    // — sin esto, BLL.CargoPrenda.RegistrarCargo siempre rechazaba con
+                    // "sin_cliente" DESPUÉS de que la prenda ya había pasado a Baja.
+                    IdUltimoCliente = row["IdUltimoCliente"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdUltimoCliente"]) : null,
+                    PrecioReposicion = row["PrecioReposicion"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["PrecioReposicion"]) : null,
                     FechaAlta = Convert.ToDateTime(row["FechaAlta"])
                 });
             }

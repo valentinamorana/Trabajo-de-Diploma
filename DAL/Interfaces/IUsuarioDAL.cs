@@ -21,7 +21,6 @@ namespace DAL.Interfaces
         void             Desbloquear(int idUsuario);
         void             IncrementarIntentosFallidos(string username);
         void             ResetearIntentosFallidos(string username);
-        void             ResetearTodasLasClaves(string claveHasheada);
         void             ResetearClave(int idUsuario, string claveHasheada);
         // Cambio de clave por el propio usuario (baja el flag RequiereCambioClave).
         void             CambiarClave(int idUsuario, string claveHasheada);

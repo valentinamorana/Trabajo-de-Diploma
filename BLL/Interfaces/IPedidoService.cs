@@ -32,6 +32,14 @@ namespace BLL.Interfaces
         // Devuelve el ID del pedido creado.
         int CrearPedido(string modulo, int idCliente, List<BE.Prenda> prendas);
 
+        // CU01-VEN-Armar Pedido, paso "Validar cupo disponible" (PN01): verifica que el plan
+        // del cliente permita la cantidad de prendas pedidas y devuelve el plan consultado.
+        BE.PlanSuscripcion ValidarCupoDisponible(BE.Cliente cliente, int cantidadPrendas);
+
+        // CU02-CS-Reservar Prendas (PN01): construye el pedido y lo persiste en BD de forma
+        // atómica. Devuelve el ID generado.
+        int ReservarPrendas(List<BE.Prenda> prendas, int idCliente);
+
         // Marca el pedido como Despachado. Solo válido desde estado Pendiente.
         void Despachar(string modulo, BE.Pedido pedido);
 

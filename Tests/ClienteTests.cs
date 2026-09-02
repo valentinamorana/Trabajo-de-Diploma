@@ -134,23 +134,20 @@ namespace Tests
         }
 
         [TestMethod]
-        public void Alta_SinPlan_LanzaPlanRequerido()
+        public void Alta_SinPlan_Persiste()
         {
+            // PN02 — el plan ya no se asigna en el alta: un cliente sin plan es un estado
+            // válido (se adquiere el plan después vía Contratación + Caja).
             LoginComoAdministrador();
-            var fake = new FakeClienteDAL();
+            var fake = new FakeClienteDAL { AltaIdGenerado = 42 };
             var bll = new BLL.Cliente(fake);
             var cliente = ClienteValido();
             cliente.IdPlan = null;
 
-            try
-            {
-                bll.Alta("Test", cliente);
-                Assert.Fail("Debía exigir un plan.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.cliente.plan_requerido", ex.Clave);
-            }
+            bll.Alta("Test", cliente);
+
+            Assert.AreEqual(1, fake.AltaVeces);
+            Assert.IsNull(fake.UltimoAlta.IdPlan);
         }
 
         [TestMethod]
@@ -299,6 +296,41 @@ namespace Tests
 
             Assert.AreEqual(1, fake.ModificarVeces);
             Assert.AreSame(cliente, fake.UltimoModificado);
+        }
+
+        [TestMethod]
+        public void Modificar_CambioDePlanSinSerAdministrador_LanzaPlanSoloAdmin()
+        {
+            // PN02 — cambiar el plan/vencimiento por Modificar() es una corrección
+            // administrativa; un Vendedor con ClientesEditar (pero no Administrador) no debe
+            // poder usarla como atajo para activar una suscripción sin pasar por Caja.
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 9,
+                Username = "vendedor",
+                Perfil = "Vendedor",
+                Permisos = new System.Collections.Generic.List<BE.Permiso>
+                {
+                    new BE.Permiso { NombreMenu = BE.Patentes.Clientes },
+                    new BE.Permiso { NombreMenu = BE.Patentes.ClientesEditar }
+                }
+            });
+            var actual = ClienteValido();       // IdPlan = 1
+            var fake = new FakeClienteDAL { ClientePorId = actual };
+            var bll = new BLL.Cliente(fake);
+            var cliente = ClienteValido();
+            cliente.IdPlan = 2;                 // distinto del "actual" → dispara el guard
+
+            try
+            {
+                bll.Modificar("Test", cliente);
+                Assert.Fail("Debía exigir Administrador para cambiar el plan.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cliente.plan_solo_admin", ex.Clave);
+            }
+            Assert.AreEqual(0, fake.ModificarVeces, "No debe tocar el DAL si el guard rechaza.");
         }
 
         // ── ReanudarPausa (Bloque 1) ─────────────────────────────────────────────

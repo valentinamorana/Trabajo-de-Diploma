@@ -125,7 +125,10 @@ namespace GUI
             catch (Exception ex)
             {
                 lblEstado.ForeColor = Color.FromArgb(180, 50, 50);
-                lblEstado.Text = "✗ " + ex.Message;
+                string msg = ex is BE.AppException appEx
+                    ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
+                    : ex.Message;
+                lblEstado.Text = "✗ " + msg;
             }
         }
 

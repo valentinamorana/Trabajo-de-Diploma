@@ -63,7 +63,6 @@ namespace Tests.Fakes
         public void             Desbloquear(int id)                  { }
         public void             IncrementarIntentosFallidos(string u){ }
         public void             ResetearIntentosFallidos(string u)   { }
-        public void             ResetearTodasLasClaves(string hash)  { }
         public void             ResetearClave(int id, string hash)   { }
         public void             GuardarIdioma(int id, string idi)    { }
         public void             BajaLogica(int id)                   { }

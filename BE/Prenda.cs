@@ -29,6 +29,11 @@ namespace BE
         /// <summary>Nombre del último cliente que la tuvo (cargado por JOIN, no persiste).</summary>
         public string       NombreUltimoCliente { get; set; }
 
+        /// <summary>PN04 — valor de reposición de la prenda: monto a cobrar si se pierde o se
+        /// daña sin posibilidad de reparación (Inspección de Devolución). Opcional: si no está
+        /// cargado, el inspector puede tipear el monto igual al registrar el cargo.</summary>
+        public decimal?     PrecioReposicion { get; set; }
+
         /// <summary>Descripción para mostrar en grillas: "Vestido azul – en uso"</summary>
         public string ResumenEstado =>
             Estado == EstadoPrenda.EnUso && !string.IsNullOrEmpty(NombreCliente)
@@ -50,7 +55,7 @@ namespace BE
         /// módulo de Prendas):
         ///   Disponible  → EnLimpieza | Baja
         ///   EnLimpieza  → Disponible | Baja
-        ///   EnUso       → (ninguna: solo via pedido)
+        ///   EnUso       → Baja (PN04, CU-DEP-02 Reportar Prenda Perdida — la única manual)
         ///   Baja        → (ninguna: estado final)
         /// La transición Disponible/EnLimpieza → EnUso solo ocurre
         /// internamente al crear o des-cancelar un pedido (ver DAL.Pedido).

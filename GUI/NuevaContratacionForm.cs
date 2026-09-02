@@ -1,0 +1,145 @@
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+using Servicios.Multiidioma;
+
+namespace GUI
+{
+    /// <summary>
+    /// Capa de Presentación — PN02, CU01-VTA-Gestionar Suscripción (parte de Venta).
+    /// El Vendedor elige cliente, plan y modalidad de cobro; el sistema deja la
+    /// contratación pendiente de pago. La formalización de la suscripción ocurre
+    /// recién cuando Caja confirma el pago (ver ContratacionesPendientesForm) — este
+    /// formulario NO decide nada de eso, solo captura los datos e invoca a BLL.
+    ///
+    /// Accesible desde Menú → Ventas → Nueva Contratación (permiso mnuClientes).
+    /// </summary>
+    public partial class NuevaContratacionForm : FormBase, IIdiomaObserver
+    {
+        protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
+
+        private readonly BLL.Interfaces.IContratacionService contratacionBLL = new BLL.Contratacion();
+        private readonly BLL.Interfaces.IClienteService clienteBLL = new BLL.Cliente();
+        private readonly BLL.Interfaces.IPlanSuscripcionService planBLL = new BLL.PlanSuscripcion();
+
+        private List<BE.Cliente> _clientes = new List<BE.Cliente>();
+        private List<BE.PlanSuscripcion> _planes = new List<BE.PlanSuscripcion>();
+
+        public int IdContratacionCreada { get; private set; }
+
+        public NuevaContratacionForm()
+        {
+            InitializeComponent();
+        }
+
+        // ── Observer de idioma ────────────────────────────────────────────────
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            GestorIdioma.SuscribirObservador(this);
+            Traducir(GestorIdioma.IdiomaActual);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+        }
+
+        private void Traducir(Idioma idioma)
+        {
+            var t = Traductor.ObtenerTraducciones(idioma);
+            if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
+                this.Text = t[this.Tag.ToString()].Texto;
+            Aplicar(lblCliente,    t);
+            Aplicar(lblPlan,       t);
+            Aplicar(lblModalidad,  t);
+            Aplicar(btnConfirmar,  t);
+            Aplicar(btnCancelar,   t);
+        }
+
+        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        {
+            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                c.Text = t[c.Tag.ToString()].Texto;
+        }
+
+        private void NuevaContratacionForm_Load(object sender, EventArgs e)
+        {
+            CargarDatosIniciales();
+        }
+
+        private void CargarDatosIniciales()
+        {
+            try
+            {
+                _clientes = clienteBLL.ObtenerTodos();
+                cmbCliente.DataSource = _clientes;
+                cmbCliente.DisplayMember = nameof(BE.Cliente.NombreCompleto);
+                cmbCliente.ValueMember = nameof(BE.Cliente.IdCliente);
+
+                _planes = planBLL.ObtenerActivos();
+                cmbPlan.DataSource = _planes;
+                cmbPlan.DisplayMember = nameof(BE.PlanSuscripcion.Nombre);
+                cmbPlan.ValueMember = nameof(BE.PlanSuscripcion.IdPlan);
+
+                cmbModalidad.DataSource = Enum.GetValues(typeof(BE.Builders.ModalidadCobro));
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        private void BtnConfirmar_Click(object sender, EventArgs e)
+        {
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
+            if (cmbCliente.SelectedItem == null || cmbPlan.SelectedItem == null)
+            {
+                MostrarError(T("err.contratacion.faltandatos", "Seleccioná un cliente y un plan para continuar."));
+                return;
+            }
+
+            var cliente = (BE.Cliente)cmbCliente.SelectedItem;
+            var plan = (BE.PlanSuscripcion)cmbPlan.SelectedItem;
+            var modalidad = (BE.Builders.ModalidadCobro)cmbModalidad.SelectedItem;
+
+            var confirmar = MessageBox.Show(
+                string.Format(
+                    T("conf.contratacion.crear.msg",
+                      "¿Registrar la contratación del plan '{0}' ({1}) para {2}?\n\n" +
+                      "Quedará pendiente de pago hasta que Caja confirme el cobro."),
+                    plan.Nombre, modalidad, cliente.NombreCompleto),
+                T("conf.contratacion.crear.titulo", "Confirmar Contratación"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+
+            if (confirmar != DialogResult.Yes) return;
+
+            try
+            {
+                IdContratacionCreada = contratacionBLL.CrearContratacion(
+                    this.Text, cliente.IdCliente, plan.IdPlan, modalidad);
+
+                // El diálogo se cierra a continuación: un toast en lblMensaje nunca llegaría a
+                // pintarse. La confirmación persistente la muestra el caller (Menu.cs) después
+                // de ShowDialog, mismo criterio que NuevoPedidoForm/PedidosVenta.
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        private void BtnCancelar_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
+    }
+}

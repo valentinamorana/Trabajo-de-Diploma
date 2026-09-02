@@ -8,17 +8,6 @@ namespace BLL
     // y cambio de clave propia). Ver BLL.Usuario (Usuario.cs) para el resto de grupos.
     public partial class Usuario
     {
-        // Clave temporal por defecto para el reset masivo. Configurable en App.config
-        // (appSettings["ClaveTemporalDefault"]); si falta o está vacía, usa un fallback válido.
-        // Antes estaba hardcodeada; sacarla a config evita exponer la clave en el binario.
-        private static readonly string ClaveTemporalDefault = LeerClaveTemporalDefault();
-
-        private static string LeerClaveTemporalDefault()
-        {
-            string v = System.Configuration.ConfigurationManager.AppSettings["ClaveTemporalDefault"];
-            return string.IsNullOrWhiteSpace(v) ? "Wardrobe1!" : v;
-        }
-
         // Resetea la contraseña de un usuario generando una nueva automáticamente.
         // El administrador NO ingresa la contraseña — se genera aquí y se exporta
         // a un archivo .txt en CredencialesGeneradas/.
@@ -50,36 +39,6 @@ namespace BLL
             );
 
             return rutaArchivo;
-        }
-
-        // Resetea la contraseña de TODOS los usuarios a la clave temporal por defecto. Solo Administrador.
-        // Devuelve la clave usada para que la GUI pueda informarla al usuario sin conocerla.
-        public string ResetearTodasLasClaves(string modulo)
-        {
-            ResetearTodasLasClaves(modulo, ClaveTemporalDefault);
-            return ClaveTemporalDefault;
-        }
-
-        // Resetea la contraseña de TODOS los usuarios a una clave temporal. Solo Administrador.
-        public void ResetearTodasLasClaves(string modulo, string claveTemporal)
-        {
-            ValidarEsAdministrador();
-
-            var (valida, clave, mensaje) = Encriptador.ValidarContrasena(claveTemporal);
-            if (!valida)
-                throw new BE.AppException(clave, mensaje);
-
-            string hash = Encriptador.Hash(claveTemporal);
-            usuarioDAL.ResetearTodasLasClaves(hash);
-
-            var admin = SessionManager.GetInstance().Usuario;
-            bitacora.RegistrarSinSesion(
-                modulo:     modulo,
-                actividad:  "Reset Masivo Contrasenas",
-                criticidad: BE.Criticidad.Alta,
-                idUsuario:  admin.Id,
-                detalle:    $"Admin '{admin.Username}' (ID: {admin.Id}) reseteo todas las contrasenas a clave temporal a las {DateTime.Now:HH:mm:ss}."
-            );
         }
 
         // Las claves de emergencia (autodesbloqueo de Admin) viven en BLL.RecuperacionAdmin (SRP).

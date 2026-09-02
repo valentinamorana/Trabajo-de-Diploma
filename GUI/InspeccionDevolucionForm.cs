@@ -117,7 +117,10 @@ namespace GUI
                     dgvPrendas.Columns["ID"].Width = 44;
                 TraducirHeadersGrilla(Traductor.ObtenerTraducciones(_idioma));
 
-                lblConteo.Text = $"{_prendas.Count} prenda(s) pendiente(s) de inspección.";
+                var tCnt = Traductor.ObtenerTraducciones(_idioma);
+                lblConteo.Text = string.Format(
+                    tCnt.ContainsKey("insp.conteo") ? tCnt["insp.conteo"].Texto : "{0} prenda(s) pendiente(s) de inspección.",
+                    _prendas.Count);
                 DeshabilitarBotones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -150,9 +153,13 @@ namespace GUI
             var prenda = ObtenerSeleccionada();
             if (prenda == null) return;
 
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             var confirmar = MessageBox.Show(
-                $"¿Aprobar el reingreso de '{prenda.Nombre}' a Disponible?",
-                "Confirmar Reingreso", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                string.Format(T("conf.insp.reingreso.msg", "¿Aprobar el reingreso de '{0}' a Disponible?"), prenda.Nombre),
+                T("conf.insp.reingreso.titulo", "Confirmar Reingreso"),
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
             try
@@ -160,7 +167,7 @@ namespace GUI
                 string actor = Seguridad.SessionManager.IsLoggedIn
                     ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
                 prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Disponible, actor);
-                MostrarOk($"'{prenda.Nombre}' reingresó a Disponible.");
+                MostrarOk(string.Format(T("msg.insp.reingreso_ok", "'{0}' reingresó a Disponible."), prenda.Nombre));
                 CargarPrendas();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -193,7 +200,10 @@ namespace GUI
                     // desarrollado por quedar fuera de alcance de este TP.
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
                     prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
-                    MostrarOk($"'{prenda.Nombre}' dada de baja — cargo de ${dlg.Monto} registrado.");
+                    var tBaja = Traductor.ObtenerTraducciones(_idioma);
+                    MostrarOk(string.Format(
+                        tBaja.ContainsKey("msg.insp.baja_ok") ? tBaja["msg.insp.baja_ok"].Texto : "'{0}' dada de baja — cargo de ${1} registrado.",
+                        prenda.Nombre, dlg.Monto));
                     CargarPrendas();
                 }
                 catch (Exception ex) { MostrarError(ex); }

@@ -535,7 +535,10 @@ namespace GUI
                     // única transacción (servicios BLL distintos), fuera de alcance de este TP.
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
                     prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
-                    MostrarOk($"'{prenda.Nombre}' reportada como perdida — cargo de ${dlg.Monto} registrado.");
+                    var tPerd = Traductor.ObtenerTraducciones(_idioma);
+                    MostrarOk(string.Format(
+                        tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de ${1} registrado.",
+                        prenda.Nombre, dlg.Monto));
                     var pedidoSel = ObtenerPedidoSeleccionado();
                     if (pedidoSel != null) CargarDetallePrendas(pedidoSel);
                 }

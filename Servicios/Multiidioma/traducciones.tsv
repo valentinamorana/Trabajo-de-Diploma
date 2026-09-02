@@ -4516,6 +4516,186 @@ ES	err.bll.contratacion.pendiente_existente	Este cliente ya tiene una contrataci
 EN	err.bll.contratacion.pendiente_existente	This client already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
 RU	err.bll.contratacion.pendiente_existente	У этого клиента уже есть договор, ожидающий оплаты. Его нужно разрешить (оплатить или отменить) перед оформлением нового.
 PT	err.bll.contratacion.pendiente_existente	Este cliente já tem uma contratação pendente de pagamento. É preciso resolvê-la (cobrar ou cancelar) antes de registrar uma nova.
+ES	err.contratacion.faltandatos	Seleccioná un cliente y un plan para continuar.
+EN	err.contratacion.faltandatos	Select a client and a plan to continue.
+RU	err.contratacion.faltandatos	Выберите клиента и план, чтобы продолжить.
+PT	err.contratacion.faltandatos	Selecione um cliente e um plano para continuar.
+ES	conf.contratacion.crear.titulo	Confirmar Contratación
+EN	conf.contratacion.crear.titulo	Confirm Contract
+RU	conf.contratacion.crear.titulo	Подтвердить договор
+PT	conf.contratacion.crear.titulo	Confirmar Contratação
+ES	conf.contratacion.crear.msg	¿Registrar la contratación del plan '{0}' ({1}) para {2}?\n\nQuedará pendiente de pago hasta que Caja confirme el cobro.
+EN	conf.contratacion.crear.msg	Register the '{0}' plan contract ({1}) for {2}?\n\nIt will remain pending payment until Cashier confirms the charge.
+RU	conf.contratacion.crear.msg	Зарегистрировать договор по плану '{0}' ({1}) для {2}?\n\nОн останется ожидающим оплаты, пока Касса не подтвердит платёж.
+PT	conf.contratacion.crear.msg	Registrar a contratação do plano '{0}' ({1}) para {2}?\n\nFicará pendente de pagamento até que o Caixa confirme a cobrança.
+ES	contratacion.conteo	{0} contratación(es) pendiente(s) de pago.
+EN	contratacion.conteo	{0} contract(s) pending payment.
+RU	contratacion.conteo	{0} договор(ов), ожидающих оплаты.
+PT	contratacion.conteo	{0} contratação(ões) pendente(s) de pagamento.
+ES	err.contratacion.mediopago_requerido	Seleccioná el medio de pago antes de cobrar.
+EN	err.contratacion.mediopago_requerido	Select the payment method before charging.
+RU	err.contratacion.mediopago_requerido	Выберите способ оплаты перед списанием.
+PT	err.contratacion.mediopago_requerido	Selecione a forma de pagamento antes de cobrar.
+ES	conf.contratacion.cobro.titulo	Confirmar Cobro
+EN	conf.contratacion.cobro.titulo	Confirm Charge
+RU	conf.contratacion.cobro.titulo	Подтвердить оплату
+PT	conf.contratacion.cobro.titulo	Confirmar Cobrança
+ES	conf.contratacion.cobro.msg	¿Confirmar el cobro de la Contratación #{0}?\n\nCliente: {1}\nPlan: {2}\nMedio de pago: {3}\n\nSe emitirá el comprobante y la suscripción quedará formalizada.
+EN	conf.contratacion.cobro.msg	Confirm the charge for Contract #{0}?\n\nClient: {1}\nPlan: {2}\nPayment method: {3}\n\nA receipt will be issued and the subscription will be formalized.
+RU	conf.contratacion.cobro.msg	Подтвердить оплату договора №{0}?\n\nКлиент: {1}\nПлан: {2}\nСпособ оплаты: {3}\n\nБудет выдана квитанция, подписка будет оформлена.
+PT	conf.contratacion.cobro.msg	Confirmar a cobrança da Contratação #{0}?\n\nCliente: {1}\nPlano: {2}\nForma de pagamento: {3}\n\nO comprovante será emitido e a assinatura será formalizada.
+ES	msg.contratacion.cobrada	Contratación #{0} cobrada. Suscripción formalizada.
+EN	msg.contratacion.cobrada	Contract #{0} charged. Subscription formalized.
+RU	msg.contratacion.cobrada	Договор №{0} оплачен. Подписка оформлена.
+PT	msg.contratacion.cobrada	Contratação #{0} cobrada. Assinatura formalizada.
+ES	conf.contratacion.intentofallido.titulo	Registrar Intento Fallido
+EN	conf.contratacion.intentofallido.titulo	Record Failed Attempt
+RU	conf.contratacion.intentofallido.titulo	Зарегистрировать неудачную попытку
+PT	conf.contratacion.intentofallido.titulo	Registrar Tentativa Falhada
+ES	conf.contratacion.intentofallido.msg	¿Registrar un intento de pago fallido para la Contratación #{0}?\n\nIntentos hasta ahora: {1}/3. Al llegar a 3 se cancela automáticamente.
+EN	conf.contratacion.intentofallido.msg	Record a failed payment attempt for Contract #{0}?\n\nAttempts so far: {1}/3. It cancels automatically at 3.
+RU	conf.contratacion.intentofallido.msg	Зарегистрировать неудачную попытку оплаты договора №{0}?\n\nПопыток на данный момент: {1}/3. При достижении 3 договор отменяется автоматически.
+PT	conf.contratacion.intentofallido.msg	Registrar uma tentativa de pagamento falhada para a Contratação #{0}?\n\nTentativas até agora: {1}/3. Ao chegar a 3, cancela automaticamente.
+ES	msg.contratacion.intentofallido_registrado	Intento fallido registrado para la Contratación #{0}.
+EN	msg.contratacion.intentofallido_registrado	Failed attempt recorded for Contract #{0}.
+RU	msg.contratacion.intentofallido_registrado	Неудачная попытка зарегистрирована для договора №{0}.
+PT	msg.contratacion.intentofallido_registrado	Tentativa falhada registrada para a Contratação #{0}.
+ES	insp.conteo	{0} prenda(s) pendiente(s) de inspección.
+EN	insp.conteo	{0} garment(s) pending inspection.
+RU	insp.conteo	{0} вещь(ей) ожидают проверки.
+PT	insp.conteo	{0} peça(s) pendente(s) de inspeção.
+ES	conf.insp.reingreso.titulo	Confirmar Reingreso
+EN	conf.insp.reingreso.titulo	Confirm Return to Stock
+RU	conf.insp.reingreso.titulo	Подтвердить возврат в наличие
+PT	conf.insp.reingreso.titulo	Confirmar Reingresso
+ES	conf.insp.reingreso.msg	¿Aprobar el reingreso de '{0}' a Disponible?
+EN	conf.insp.reingreso.msg	Approve returning '{0}' to Available?
+RU	conf.insp.reingreso.msg	Одобрить возврат '{0}' в статус «Доступно»?
+PT	conf.insp.reingreso.msg	Aprovar o reingresso de '{0}' para Disponível?
+ES	msg.insp.reingreso_ok	'{0}' reingresó a Disponible.
+EN	msg.insp.reingreso_ok	'{0}' returned to Available.
+RU	msg.insp.reingreso_ok	'{0}' возвращена в статус «Доступно».
+PT	msg.insp.reingreso_ok	'{0}' reingressou em Disponível.
+ES	msg.insp.baja_ok	'{0}' dada de baja — cargo de ${1} registrado.
+EN	msg.insp.baja_ok	'{0}' discarded — charge of ${1} recorded.
+RU	msg.insp.baja_ok	'{0}' списана — зарегистрирован платёж на ${1}.
+PT	msg.insp.baja_ok	'{0}' baixada — cobrança de ${1} registrada.
+ES	msg.ped.perdida_ok	'{0}' reportada como perdida — cargo de ${1} registrado.
+EN	msg.ped.perdida_ok	'{0}' reported as lost — charge of ${1} recorded.
+RU	msg.ped.perdida_ok	'{0}' отмечена как утерянная — зарегистрирован платёж на ${1}.
+PT	msg.ped.perdida_ok	'{0}' reportada como perdida — cobrança de ${1} registrada.
+ES	promo.sugerenciaorigen	A partir de la sugerencia #{0}: {1}
+EN	promo.sugerenciaorigen	From suggestion #{0}: {1}
+RU	promo.sugerenciaorigen	На основе предложения №{0}: {1}
+PT	promo.sugerenciaorigen	A partir da sugestão #{0}: {1}
+ES	promo.altamanual	Alta manual (sin sugerencia de Gerencia).
+EN	promo.altamanual	Manual entry (no suggestion from Management).
+RU	promo.altamanual	Ручное создание (без предложения от руководства).
+PT	promo.altamanual	Cadastro manual (sem sugestão da Gerência).
+ES	msg.promo.creada	Promoción #{0} registrada, pendiente de revisión contable.
+EN	msg.promo.creada	Promotion #{0} registered, pending accounting review.
+RU	msg.promo.creada	Акция №{0} зарегистрирована, ожидает проверки бухгалтерии.
+PT	msg.promo.creada	Promoção #{0} registrada, pendente de revisão contábil.
+ES	promo.conteo	{0} promoción(es) en total.
+EN	promo.conteo	{0} promotion(s) in total.
+RU	promo.conteo	Всего акций: {0}.
+PT	promo.conteo	{0} promoção(ões) no total.
+ES	msg.promo.registrada	Promoción #{0} registrada.
+EN	msg.promo.registrada	Promotion #{0} registered.
+RU	msg.promo.registrada	Акция №{0} зарегистрирована.
+PT	msg.promo.registrada	Promoção #{0} registrada.
+ES	conf.promo.desactivar.titulo	Confirmar Desactivación
+EN	conf.promo.desactivar.titulo	Confirm Deactivation
+RU	conf.promo.desactivar.titulo	Подтвердить отключение
+PT	conf.promo.desactivar.titulo	Confirmar Desativação
+ES	conf.promo.desactivar.msg	¿Desactivar la promoción '{0}'?
+EN	conf.promo.desactivar.msg	Deactivate promotion '{0}'?
+RU	conf.promo.desactivar.msg	Отключить акцию '{0}'?
+PT	conf.promo.desactivar.msg	Desativar a promoção '{0}'?
+ES	msg.promo.desactivada	Promoción '{0}' desactivada.
+EN	msg.promo.desactivada	Promotion '{0}' deactivated.
+RU	msg.promo.desactivada	Акция '{0}' отключена.
+PT	msg.promo.desactivada	Promoção '{0}' desativada.
+ES	conf.promo.aprobarbaja.titulo	Confirmar Baja
+EN	conf.promo.aprobarbaja.titulo	Confirm Discontinuation
+RU	conf.promo.aprobarbaja.titulo	Подтвердить отмену
+PT	conf.promo.aprobarbaja.titulo	Confirmar Baixa
+ES	conf.promo.aprobarbaja.msg	¿Aprobar la baja de '{0}' sugerida por Ventas?\nMotivo: {1}
+EN	conf.promo.aprobarbaja.msg	Approve discontinuing '{0}' as suggested by Sales?\nReason: {1}
+RU	conf.promo.aprobarbaja.msg	Одобрить отмену '{0}', предложенную отделом продаж?\nПричина: {1}
+PT	conf.promo.aprobarbaja.msg	Aprovar a baixa de '{0}' sugerida pelas Vendas?\nMotivo: {1}
+ES	msg.promo.dadabaja	Promoción '{0}' dada de baja.
+EN	msg.promo.dadabaja	Promotion '{0}' discontinued.
+RU	msg.promo.dadabaja	Акция '{0}' отменена.
+PT	msg.promo.dadabaja	Promoção '{0}' baixada.
+ES	inputdlg.rechazarbaja.titulo	Rechazar Baja de Promoción
+EN	inputdlg.rechazarbaja.titulo	Reject Promotion Discontinuation
+RU	inputdlg.rechazarbaja.titulo	Отклонить отмену акции
+PT	inputdlg.rechazarbaja.titulo	Rejeitar Baixa de Promoção
+ES	inputdlg.rechazarbaja.prompt	Motivo por el cual '{0}' sigue vigente:
+EN	inputdlg.rechazarbaja.prompt	Reason why '{0}' remains active:
+RU	inputdlg.rechazarbaja.prompt	Причина, по которой '{0}' остаётся действующей:
+PT	inputdlg.rechazarbaja.prompt	Motivo pelo qual '{0}' continua vigente:
+ES	msg.promo.bajarechazada	Se rechazó la baja de '{0}': sigue vigente.
+EN	msg.promo.bajarechazada	Discontinuation of '{0}' rejected: it remains active.
+RU	msg.promo.bajarechazada	Отмена '{0}' отклонена: акция остаётся действующей.
+PT	msg.promo.bajarechazada	A baixa de '{0}' foi rejeitada: continua vigente.
+ES	promo.conteo.revisioncontable	{0} promoción(es) pendiente(s) de revisión contable.
+EN	promo.conteo.revisioncontable	{0} promotion(s) pending accounting review.
+RU	promo.conteo.revisioncontable	{0} акци(й/я) ожидают проверки бухгалтерии.
+PT	promo.conteo.revisioncontable	{0} promoção(ões) pendente(s) de revisão contábil.
+ES	err.promo.observacion_requerida_aprobar	Ingresá una observación antes de aprobar.
+EN	err.promo.observacion_requerida_aprobar	Enter a note before approving.
+RU	err.promo.observacion_requerida_aprobar	Введите комментарий перед одобрением.
+PT	err.promo.observacion_requerida_aprobar	Insira uma observação antes de aprovar.
+ES	err.promo.observacion_requerida_rechazar	Ingresá una observación antes de rechazar.
+EN	err.promo.observacion_requerida_rechazar	Enter a note before rejecting.
+RU	err.promo.observacion_requerida_rechazar	Введите комментарий перед отклонением.
+PT	err.promo.observacion_requerida_rechazar	Insira uma observação antes de rejeitar.
+ES	conf.promo.aprobarcontable.titulo	Confirmar Aprobación
+EN	conf.promo.aprobarcontable.titulo	Confirm Approval
+RU	conf.promo.aprobarcontable.titulo	Подтвердить одобрение
+PT	conf.promo.aprobarcontable.titulo	Confirmar Aprovação
+ES	conf.promo.aprobarcontable.msg	¿Aprobar y activar la promoción '{0}'?
+EN	conf.promo.aprobarcontable.msg	Approve and activate promotion '{0}'?
+RU	conf.promo.aprobarcontable.msg	Одобрить и активировать акцию '{0}'?
+PT	conf.promo.aprobarcontable.msg	Aprovar e ativar a promoção '{0}'?
+ES	msg.promo.aprobada	Promoción '{0}' aprobada y activada.
+EN	msg.promo.aprobada	Promotion '{0}' approved and activated.
+RU	msg.promo.aprobada	Акция '{0}' одобрена и активирована.
+PT	msg.promo.aprobada	Promoção '{0}' aprovada e ativada.
+ES	conf.promo.rechazarcontable.titulo	Confirmar Rechazo
+EN	conf.promo.rechazarcontable.titulo	Confirm Rejection
+RU	conf.promo.rechazarcontable.titulo	Подтвердить отклонение
+PT	conf.promo.rechazarcontable.titulo	Confirmar Rejeição
+ES	conf.promo.rechazarcontable.msg	¿Rechazar la promoción '{0}'? Vuelve a Administración para reformularla.
+EN	conf.promo.rechazarcontable.msg	Reject promotion '{0}'? It goes back to Administration to be reworked.
+RU	conf.promo.rechazarcontable.msg	Отклонить акцию '{0}'? Она вернётся в Администрацию для доработки.
+PT	conf.promo.rechazarcontable.msg	Rejeitar a promoção '{0}'? Volta para a Administração para ser reformulada.
+ES	msg.promo.rechazada	Promoción '{0}' rechazada.
+EN	msg.promo.rechazada	Promotion '{0}' rejected.
+RU	msg.promo.rechazada	Акция '{0}' отклонена.
+PT	msg.promo.rechazada	Promoção '{0}' rejeitada.
+ES	promo.conteo.vigentes	{0} promoción(es) vigente(s).
+EN	promo.conteo.vigentes	{0} active promotion(s).
+RU	promo.conteo.vigentes	{0} действующих акций.
+PT	promo.conteo.vigentes	{0} promoção(ões) vigente(s).
+ES	inputdlg.sugerirbaja.titulo	Sugerir Baja de Promoción
+EN	inputdlg.sugerirbaja.titulo	Suggest Promotion Discontinuation
+RU	inputdlg.sugerirbaja.titulo	Предложить отмену акции
+PT	inputdlg.sugerirbaja.titulo	Sugerir Baixa de Promoção
+ES	inputdlg.sugerirbaja.prompt	Motivo para sugerir la baja de '{0}':
+EN	inputdlg.sugerirbaja.prompt	Reason to suggest discontinuing '{0}':
+RU	inputdlg.sugerirbaja.prompt	Причина для предложения отмены '{0}':
+PT	inputdlg.sugerirbaja.prompt	Motivo para sugerir a baixa de '{0}':
+ES	msg.promo.sugerenciabaja_enviada	Se envió a Administración la sugerencia de baja de '{0}'.
+EN	msg.promo.sugerenciabaja_enviada	The suggestion to discontinue '{0}' was sent to Administration.
+RU	msg.promo.sugerenciabaja_enviada	Предложение об отмене '{0}' отправлено в Администрацию.
+PT	msg.promo.sugerenciabaja_enviada	A sugestão de baixa de '{0}' foi enviada à Administração.
+ES	msg.sugerencia.enviada	Sugerencia #{0} enviada a Administración.
+EN	msg.sugerencia.enviada	Suggestion #{0} sent to Administration.
+RU	msg.sugerencia.enviada	Предложение №{0} отправлено в Администрацию.
+PT	msg.sugerencia.enviada	Sugestão #{0} enviada à Administração.
 ES	col.contr.id	ID
 EN	col.contr.id	ID
 RU	col.contr.id	ID

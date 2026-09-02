@@ -118,7 +118,10 @@ namespace GUI
                     dgvPromociones.Columns["ID"].Width = 44;
                 TraducirHeadersGrilla(Traductor.ObtenerTraducciones(_idioma));
 
-                lblConteo.Text = $"{_promociones.Count} promoción(es) pendiente(s) de revisión contable.";
+                var tCnt = Traductor.ObtenerTraducciones(_idioma);
+                lblConteo.Text = string.Format(
+                    tCnt.ContainsKey("promo.conteo.revisioncontable") ? tCnt["promo.conteo.revisioncontable"].Texto : "{0} promoción(es) pendiente(s) de revisión contable.",
+                    _promociones.Count);
                 DeshabilitarBotones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -149,21 +152,25 @@ namespace GUI
             var promocion = ObtenerSeleccionada();
             if (promocion == null) return;
 
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             if (string.IsNullOrWhiteSpace(txtObservacion.Text))
             {
-                MostrarError("Ingresá una observación antes de aprobar.");
+                MostrarError(T("err.promo.observacion_requerida_aprobar", "Ingresá una observación antes de aprobar."));
                 return;
             }
 
             var confirmar = MessageBox.Show(
-                $"¿Aprobar y activar la promoción '{promocion.Nombre}'?",
-                "Confirmar Aprobación", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                string.Format(T("conf.promo.aprobarcontable.msg", "¿Aprobar y activar la promoción '{0}'?"), promocion.Nombre),
+                T("conf.promo.aprobarcontable.titulo", "Confirmar Aprobación"),
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
             try
             {
                 promocionBLL.AprobarContable(this.Text, promocion, txtObservacion.Text);
-                MostrarOk($"Promoción '{promocion.Nombre}' aprobada y activada.");
+                MostrarOk(string.Format(T("msg.promo.aprobada", "Promoción '{0}' aprobada y activada."), promocion.Nombre));
                 txtObservacion.Clear();
                 CargarPromociones();
             }
@@ -175,21 +182,25 @@ namespace GUI
             var promocion = ObtenerSeleccionada();
             if (promocion == null) return;
 
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             if (string.IsNullOrWhiteSpace(txtObservacion.Text))
             {
-                MostrarError("Ingresá una observación antes de rechazar.");
+                MostrarError(T("err.promo.observacion_requerida_rechazar", "Ingresá una observación antes de rechazar."));
                 return;
             }
 
             var confirmar = MessageBox.Show(
-                $"¿Rechazar la promoción '{promocion.Nombre}'? Vuelve a Administración para reformularla.",
-                "Confirmar Rechazo", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                string.Format(T("conf.promo.rechazarcontable.msg", "¿Rechazar la promoción '{0}'? Vuelve a Administración para reformularla."), promocion.Nombre),
+                T("conf.promo.rechazarcontable.titulo", "Confirmar Rechazo"),
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
             try
             {
                 promocionBLL.RechazarContable(this.Text, promocion, txtObservacion.Text);
-                MostrarOk($"Promoción '{promocion.Nombre}' rechazada.");
+                MostrarOk(string.Format(T("msg.promo.rechazada", "Promoción '{0}' rechazada."), promocion.Nombre));
                 txtObservacion.Clear();
                 CargarPromociones();
             }

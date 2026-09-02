@@ -96,9 +96,12 @@ namespace GUI
 
         private void BtnConfirmar_Click(object sender, EventArgs e)
         {
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             if (cmbCliente.SelectedItem == null || cmbPlan.SelectedItem == null)
             {
-                MostrarError("Seleccioná un cliente y un plan para continuar.");
+                MostrarError(T("err.contratacion.faltandatos", "Seleccioná un cliente y un plan para continuar."));
                 return;
             }
 
@@ -107,9 +110,12 @@ namespace GUI
             var modalidad = (BE.Builders.ModalidadCobro)cmbModalidad.SelectedItem;
 
             var confirmar = MessageBox.Show(
-                $"¿Registrar la contratación del plan '{plan.Nombre}' ({modalidad}) para {cliente.NombreCompleto}?\n\n" +
-                "Quedará pendiente de pago hasta que Caja confirme el cobro.",
-                "Confirmar Contratación",
+                string.Format(
+                    T("conf.contratacion.crear.msg",
+                      "¿Registrar la contratación del plan '{0}' ({1}) para {2}?\n\n" +
+                      "Quedará pendiente de pago hasta que Caja confirme el cobro."),
+                    plan.Nombre, modalidad, cliente.NombreCompleto),
+                T("conf.contratacion.crear.titulo", "Confirmar Contratación"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);

@@ -169,7 +169,10 @@ namespace GUI
                 if (dgvPromociones.Columns.Contains("ID")) dgvPromociones.Columns["ID"].Width = 44;
                 TraducirHeadersPromociones(Traductor.ObtenerTraducciones(_idioma));
 
-                lblConteo.Text = $"{_promociones.Count} promoción(es) en total.";
+                var tCnt = Traductor.ObtenerTraducciones(_idioma);
+                lblConteo.Text = string.Format(
+                    tCnt.ContainsKey("promo.conteo") ? tCnt["promo.conteo"].Texto : "{0} promoción(es) en total.",
+                    _promociones.Count);
                 DeshabilitarBotonesPromocion();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -202,7 +205,10 @@ namespace GUI
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    MostrarOk($"Promoción #{form.IdPromocionCreada} registrada.");
+                    var t = Traductor.ObtenerTraducciones(_idioma);
+                    MostrarOk(string.Format(
+                        t.ContainsKey("msg.promo.registrada") ? t["msg.promo.registrada"].Texto : "Promoción #{0} registrada.",
+                        form.IdPromocionCreada));
                     CargarTodo();
                 }
             }
@@ -237,14 +243,19 @@ namespace GUI
             var promocion = ObtenerPromocionSeleccionada();
             if (promocion == null) return;
 
-            var confirmar = MessageBox.Show($"¿Desactivar la promoción '{promocion.Nombre}'?",
-                "Confirmar Desactivación", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
+            var confirmar = MessageBox.Show(
+                string.Format(T("conf.promo.desactivar.msg", "¿Desactivar la promoción '{0}'?"), promocion.Nombre),
+                T("conf.promo.desactivar.titulo", "Confirmar Desactivación"),
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
             try
             {
                 promocionBLL.Desactivar(this.Text, promocion);
-                MostrarOk($"Promoción '{promocion.Nombre}' desactivada.");
+                MostrarOk(string.Format(T("msg.promo.desactivada", "Promoción '{0}' desactivada."), promocion.Nombre));
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -255,15 +266,20 @@ namespace GUI
             var promocion = ObtenerPromocionSeleccionada();
             if (promocion == null) return;
 
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             var confirmar = MessageBox.Show(
-                $"¿Aprobar la baja de '{promocion.Nombre}' sugerida por Ventas?\nMotivo: {promocion.MotivoBaja}",
-                "Confirmar Baja", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                string.Format(T("conf.promo.aprobarbaja.msg", "¿Aprobar la baja de '{0}' sugerida por Ventas?\nMotivo: {1}"),
+                    promocion.Nombre, promocion.MotivoBaja),
+                T("conf.promo.aprobarbaja.titulo", "Confirmar Baja"),
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
             try
             {
                 promocionBLL.AprobarBaja(this.Text, promocion);
-                MostrarOk($"Promoción '{promocion.Nombre}' dada de baja.");
+                MostrarOk(string.Format(T("msg.promo.dadabaja", "Promoción '{0}' dada de baja."), promocion.Nombre));
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -274,9 +290,14 @@ namespace GUI
             var promocion = ObtenerPromocionSeleccionada();
             if (promocion == null) return;
 
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             string motivo;
-            using (var dlg = new InputDialog("Rechazar Baja de Promoción",
-                $"Motivo por el cual '{promocion.Nombre}' sigue vigente:", esPassword: false))
+            using (var dlg = new InputDialog(
+                T("inputdlg.rechazarbaja.titulo", "Rechazar Baja de Promoción"),
+                string.Format(T("inputdlg.rechazarbaja.prompt", "Motivo por el cual '{0}' sigue vigente:"), promocion.Nombre),
+                esPassword: false))
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 motivo = dlg.InputText;
@@ -286,7 +307,7 @@ namespace GUI
             try
             {
                 promocionBLL.RechazarBaja(this.Text, promocion, motivo);
-                MostrarOk($"Se rechazó la baja de '{promocion.Nombre}': sigue vigente.");
+                MostrarOk(string.Format(T("msg.promo.bajarechazada", "Se rechazó la baja de '{0}': sigue vigente."), promocion.Nombre));
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }

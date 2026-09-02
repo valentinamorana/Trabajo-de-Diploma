@@ -115,7 +115,10 @@ namespace GUI
                     dgvPromociones.Columns["ID"].Width = 44;
                 TraducirHeadersGrilla(Traductor.ObtenerTraducciones(_idioma));
 
-                lblConteo.Text = $"{_promociones.Count} promoción(es) vigente(s).";
+                var tCnt = Traductor.ObtenerTraducciones(_idioma);
+                lblConteo.Text = string.Format(
+                    tCnt.ContainsKey("promo.conteo.vigentes") ? tCnt["promo.conteo.vigentes"].Texto : "{0} promoción(es) vigente(s).",
+                    _promociones.Count);
                 btnSugerirBaja.Enabled = false;
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -138,9 +141,14 @@ namespace GUI
             var promocion = ObtenerSeleccionada();
             if (promocion == null) return;
 
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             string motivo;
-            using (var dlg = new InputDialog("Sugerir Baja de Promoción",
-                $"Motivo para sugerir la baja de '{promocion.Nombre}':", esPassword: false))
+            using (var dlg = new InputDialog(
+                T("inputdlg.sugerirbaja.titulo", "Sugerir Baja de Promoción"),
+                string.Format(T("inputdlg.sugerirbaja.prompt", "Motivo para sugerir la baja de '{0}':"), promocion.Nombre),
+                esPassword: false))
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 motivo = dlg.InputText;
@@ -150,7 +158,7 @@ namespace GUI
             try
             {
                 promocionBLL.SugerirBaja(this.Text, promocion, motivo);
-                MostrarOk($"Se envió a Administración la sugerencia de baja de '{promocion.Nombre}'.");
+                MostrarOk(string.Format(T("msg.promo.sugerenciabaja_enviada", "Se envió a Administración la sugerencia de baja de '{0}'."), promocion.Nombre));
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }

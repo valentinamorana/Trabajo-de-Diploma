@@ -121,7 +121,10 @@ namespace GUI
                     dgvContrataciones.Columns["ID"].Width = 44;
                 TraducirHeadersGrilla(Traductor.ObtenerTraducciones(_idioma));
 
-                lblConteo.Text = $"{_contrataciones.Count} contratación(es) pendiente(s) de pago.";
+                var tCnt = Traductor.ObtenerTraducciones(_idioma);
+                lblConteo.Text = string.Format(
+                    tCnt.ContainsKey("contratacion.conteo") ? tCnt["contratacion.conteo"].Texto : "{0} contratación(es) pendiente(s) de pago.",
+                    _contrataciones.Count);
                 DeshabilitarBotones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -152,18 +155,24 @@ namespace GUI
             var contratacion = ObtenerSeleccionada();
             if (contratacion == null) return;
 
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             if (cmbMedioPago.SelectedItem == null)
             {
-                MostrarError("Seleccioná el medio de pago antes de cobrar.");
+                MostrarError(T("err.contratacion.mediopago_requerido", "Seleccioná el medio de pago antes de cobrar."));
                 return;
             }
             string medioPago = cmbMedioPago.SelectedItem.ToString();
 
             var confirmar = MessageBox.Show(
-                $"¿Confirmar el cobro de la Contratación #{contratacion.IdContratacion}?\n\n" +
-                $"Cliente: {contratacion.NombreCliente}\nPlan: {contratacion.NombrePlan}\nMedio de pago: {medioPago}\n\n" +
-                "Se emitirá el comprobante y la suscripción quedará formalizada.",
-                "Confirmar Cobro",
+                string.Format(
+                    T("conf.contratacion.cobro.msg",
+                      "¿Confirmar el cobro de la Contratación #{0}?\n\n" +
+                      "Cliente: {1}\nPlan: {2}\nMedio de pago: {3}\n\n" +
+                      "Se emitirá el comprobante y la suscripción quedará formalizada."),
+                    contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan, medioPago),
+                T("conf.contratacion.cobro.titulo", "Confirmar Cobro"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -173,7 +182,8 @@ namespace GUI
             try
             {
                 contratacionBLL.ConfirmarPago(this.Text, contratacion, medioPago);
-                MostrarOk($"Contratación #{contratacion.IdContratacion} cobrada. Suscripción formalizada.");
+                MostrarOk(string.Format(T("msg.contratacion.cobrada", "Contratación #{0} cobrada. Suscripción formalizada."),
+                    contratacion.IdContratacion));
                 CargarContrataciones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -184,10 +194,16 @@ namespace GUI
             var contratacion = ObtenerSeleccionada();
             if (contratacion == null) return;
 
+            var t = Traductor.ObtenerTraducciones(_idioma);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
             var confirmar = MessageBox.Show(
-                $"¿Registrar un intento de pago fallido para la Contratación #{contratacion.IdContratacion}?\n\n" +
-                $"Intentos hasta ahora: {contratacion.IntentosPago}/3. Al llegar a 3 se cancela automáticamente.",
-                "Registrar Intento Fallido",
+                string.Format(
+                    T("conf.contratacion.intentofallido.msg",
+                      "¿Registrar un intento de pago fallido para la Contratación #{0}?\n\n" +
+                      "Intentos hasta ahora: {1}/3. Al llegar a 3 se cancela automáticamente."),
+                    contratacion.IdContratacion, contratacion.IntentosPago),
+                T("conf.contratacion.intentofallido.titulo", "Registrar Intento Fallido"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -197,7 +213,8 @@ namespace GUI
             try
             {
                 contratacionBLL.RegistrarIntentoFallido(this.Text, contratacion);
-                MostrarOk($"Intento fallido registrado para la Contratación #{contratacion.IdContratacion}.");
+                MostrarOk(string.Format(T("msg.contratacion.intentofallido_registrado", "Intento fallido registrado para la Contratación #{0}."),
+                    contratacion.IdContratacion));
                 CargarContrataciones();
             }
             catch (Exception ex) { MostrarError(ex); }

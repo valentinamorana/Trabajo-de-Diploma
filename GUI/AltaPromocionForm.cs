@@ -86,9 +86,14 @@ namespace GUI
                 dtpInicio.Value = DateTime.Today;
                 dtpFin.Value = DateTime.Today.AddMonths(1);
 
+                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
                 if (_sugerenciaOrigen != null)
                 {
-                    lblSugerencia.Text = $"A partir de la sugerencia #{_sugerenciaOrigen.IdSugerencia}: {_sugerenciaOrigen.Motivo}";
+                    lblSugerencia.Text = string.Format(
+                        T("promo.sugerenciaorigen", "A partir de la sugerencia #{0}: {1}"),
+                        _sugerenciaOrigen.IdSugerencia, _sugerenciaOrigen.Motivo);
                     rbPlan.Checked = _sugerenciaOrigen.AplicaAPlan();
                     rbCategoria.Checked = _sugerenciaOrigen.AplicaACategoria();
                     if (_sugerenciaOrigen.AplicaAPlan()) cmbPlan.SelectedValue = _sugerenciaOrigen.IdPlan.Value;
@@ -102,7 +107,7 @@ namespace GUI
                 }
                 else
                 {
-                    lblSugerencia.Text = "Alta manual (sin sugerencia de Gerencia).";
+                    lblSugerencia.Text = T("promo.altamanual", "Alta manual (sin sugerencia de Gerencia).");
                     RbPlan_CheckedChanged(this, EventArgs.Empty);
                 }
             }
@@ -136,7 +141,10 @@ namespace GUI
                         numMargenEstimado.Value, txtImpactoEconomico.Text);
                 }
 
-                MostrarOk($"Promoción #{IdPromocionCreada} registrada, pendiente de revisión contable.");
+                var tOk = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                MostrarOk(string.Format(
+                    tOk.ContainsKey("msg.promo.creada") ? tOk["msg.promo.creada"].Texto : "Promoción #{0} registrada, pendiente de revisión contable.",
+                    IdPromocionCreada));
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

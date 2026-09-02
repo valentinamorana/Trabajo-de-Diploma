@@ -92,7 +92,10 @@ namespace GUI
 
                 int id = sugerenciaBLL.Crear(this.Text, idPlan, categoria, txtMotivo.Text, tipo, beneficio);
 
-                MostrarOk($"Sugerencia #{id} enviada a Administración.");
+                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                MostrarOk(string.Format(
+                    t.ContainsKey("msg.sugerencia.enviada") ? t["msg.sugerencia.enviada"].Texto : "Sugerencia #{0} enviada a Administración.",
+                    id));
                 txtMotivo.Clear();
             }
             catch (Exception ex) { MostrarError(ex); }

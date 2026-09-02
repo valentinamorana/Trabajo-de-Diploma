@@ -56,19 +56,48 @@ La GUI nunca accede a DAL ni a Seguridad directamente. Toda la lógica de negoci
 
 ---
 
+## Procesos de negocio nuevos (PN01-PN04)
+
+| PN | Proceso | Rol(es) protagonista(s) | Detalle |
+|----|---------|--------------------------|---------|
+| PN01 | Verificación de disponibilidad al armar un pedido (split lógico "Depósito") | Vendedor / OperadorDeInventario | `BLL.Pedido` relee el estado real de toda la selección por lote (`BLL.Prenda.VerificarDisponibilidad`) justo antes de confirmar — cierra la ventana TOCTOU entre elegir prendas y crear el pedido |
+| PN02 | Comercialización de la Suscripción | Vendedor (crea la contratación) / **Caja** (cobra y formaliza) | Rol `Caja` nuevo, separado de Vendedor a propósito (separación de funciones: quien vende no cobra) |
+| PN03 | Métricas, Promociones y Toma de Decisiones | GerenteComercial (sugiere) / **AdministracionComercial** (crea) / **Contabilidad** (aprueba) | 2 roles nuevos; quien redacta una promoción no es quien aprueba su impacto económico |
+| PN04 | Inspección de Devolución | OperadorDeInventario ("Depósito") | Sin rol nuevo. Lógica binaria alineada a Nuuly (sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, ya existente desde Bloque 1) |
+
+---
+
+## Bloque 3 — Idea de Negocio (analítica de decisión comercial)
+
+| PdN | Reporte | Rol dueño | Patrón / detalle |
+|-----|---------|-----------|-------------------|
+| PdN8 | Reporte de Ventas por Vendedor | GerenteComercial | — |
+| PdN9 | Análisis de Rotación de Prendas (candidatas a baja / reposición) | GerenteInventario | — |
+| PdN10 | Análisis de Abandono (clientes en riesgo) | GerenteComercial | **Strategy** — 3 criterios de riesgo intercambiables |
+| PdN11 | Análisis de Tiempos de Mantenimiento | GerenteInventario | — |
+| PdN12 | Detección de Escasez por Talle/Categoría | GerenteInventario | — |
+| PdN13 | Recomendación de Prendas para un Cliente | Vendedor | — |
+
+Los 6 reportes son de solo lectura, con exportación a PDF/CSV (Factory Method, `GUI.Exportacion`); cada uno tiene su propia patente (`mnuAnalisisXxx`), agrupados bajo el menú "Analítica de Negocio".
+
+---
+
 ## Roles del sistema
 
 | Rol | Permisos | Jerarquía (Composite) |
 |-----|----------|-----------------------|
-| **Administrador** | Acceso total: Inventario, Ventas, Administrar, Bitácora, Perfiles, Backup | — (acceso total) |
-| **Auditor** | Solo Bitácora / Auditoría | rol plano |
-| **Vendedor** | Prendas, Clientes, Planes, Renovación, Cobro, Realizar Ventas | rol base comercial |
-| **GerenteComercial** | lo de Vendedor + Ver Pedidos Realizados | ⊃ Vendedor |
+| **Administrador** | Acceso total | — (acceso total) |
+| **Auditor** | Solo Bitácora / Auditoría | rol plano, transversal (no participa de ningún PN/PdN) |
+| **Vendedor** | Prendas, Clientes, Planes, Renovación, Cobro, Realizar Ventas, Contratación (PN02), Recomendación de Prendas (PdN13) | rol base comercial |
+| **GerenteComercial** | lo de Vendedor + Ver Pedidos Realizados, Ventas por Vendedor (PdN8), Análisis de Abandono (PdN10) | ⊃ Vendedor |
 | **OperadorLogistico** | Ver Pedidos Realizados (despacho) | rol base inventario |
-| **OperadorDeInventario** | Ver Prendas + Gestionar Stock (mantenimiento) | rol base inventario |
-| **GerenteInventario** | lo de ambos operadores + Categorías/Outfits | ⊃ OperadorLogistico + OperadorDeInventario |
+| **OperadorDeInventario** | Ver Prendas + Gestionar Stock (mantenimiento), Inspección de Devolución (PN04) | rol base inventario |
+| **GerenteInventario** | lo de ambos operadores + Categorías/Outfits, Rotación/Mantenimiento/Escasez (PdN9/11/12) | ⊃ OperadorLogistico + OperadorDeInventario |
+| **Caja** *(PN02)* | Contrataciones pendientes de pago: cobrar, registrar intento fallido | rol simple, sin herencia |
+| **AdministracionComercial** *(PN03)* | Gestionar Promociones: crear desde sugerencia o manual, desactivar, resolver bajas | rol simple, sin herencia |
+| **Contabilidad** *(PN03)* | Revisión Contable de Promociones: aprobar o rechazar | rol simple, sin herencia |
 
-Los permisos se resuelven recursivamente desde el árbol Composite (tabla `PermisoRelacion`) y se cargan en sesión al hacer login. Se gestionan desde **Administrar → Perfiles y Permisos**.
+Los permisos se resuelven recursivamente desde el árbol Composite (tabla `PermisoRelacion`) y se cargan en sesión al hacer login. Se gestionan desde **Administrar → Perfiles y Permisos**. Usuarios demo para los 3 roles nuevos: `caja`, `admcomercial`, `contable` (clave `usuario1!`, sección "Base de datos" abajo).
 
 ---
 
@@ -96,6 +125,10 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 | **Reporte de Jornada** | Exportación PDF de actividad del día filtrable por rol |
 | **Diagnóstico de Integridad** | Visualización y reparación asistida de filas con DVH/DVV corruptos |
 | **Lista de Espera** *(mejora opcional)* | Un cliente se anota por una prenda `EnUso`; al liberarse, queda reservada exclusivamente para él por 48hs (visible solo para ese cliente en Nuevo Pedido) antes de volver a estar disponible para cualquiera |
+| **Nueva Contratación / Contrataciones Pendientes** *(PN02)* | Vendedor da de alta la contratación (plan + modalidad); Caja la cobra y formaliza la suscripción, o registra intentos fallidos hasta cancelarla |
+| **Promociones** *(PN03)* | Sugerir (GerenteComercial) → Gestionar/crear (AdministracionComercial) → Revisión Contable, aprobar o rechazar (Contabilidad) → consultar vigentes y sugerir baja (Vendedor) |
+| **Inspección de Devolución** *(PN04)* | Cola de prendas `EnLimpieza`: reingresa sin cargo o se da de baja cobrando el precio de reposición; también permite reportar una prenda `EnUso` como perdida sin esperar la devolución |
+| **Analítica de Negocio** *(Bloque 3, PdN8-13)* | 6 reportes de decisión comercial de solo lectura (Ventas por Vendedor, Rotación, Abandono, Mantenimiento, Escasez, Recomendación de Prendas), exportables a PDF/CSV |
 
 ---
 
@@ -182,7 +215,7 @@ BD/00_Instalacion_Completa.sql   -- Crea WardrobeFlowDB completa: estructura, da
                                   -- se puede volver a ejecutar sin duplicar ni romper nada.
 ```
 
-Es la concatenación (en el orden correcto) de los scripts `01`, `03`, `05`, `06`, `08`, `09`, `10` a `16`, `17` a `19` y `20` — cada uno sigue existiendo por separado en `BD/` con su propio comentario de cabecera, por si hace falta revisar o volver a correr uno puntual, pero para una instalación nueva alcanza con `00`. El instalador (`Instalador/WardrobeFlow_Setup.iss`) ya usa este único script.
+Es el único archivo de esquema que se edita — ya no se regenera concatenando los scripts individuales. Los archivos `01`, `03`, `05`, `06`, `08`, `09`, `10` a `16`, `17` a `19` y `20` siguen en `BD/` como referencia histórica de cómo se introdujo cada módulo (útil para ver el diff puntual de una funcionalidad), pero no se vuelven a tocar ni a correr sueltos — `00` es la fuente de verdad. El instalador (`Instalador/WardrobeFlow_Setup.iss`) usa este único script.
 
 **Herramientas de mantenimiento** (no forman parte de "crear la BD" — correr por separado solo si hace falta):
 
@@ -195,12 +228,12 @@ BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos
 - **Actualizar una BD MUY vieja** (previa a que existiera `01_Crear_BaseDeDatos.sql`) → ejecutar `02` a `09` en orden.
 - **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
 
-**Notas de módulos incluidos en `00_Instalacion_Completa.sql`** (relevante si se corre alguno de estos suelto en vez del script único):
-- **Lista de Espera (mejora opcional)** → `16_Lista_Espera.sql`; el resto del sistema funciona sin él (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
-- **Comercialización de la suscripción (PN02)** → `17_Comercializacion_Suscripcion.sql`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo.
-- **Métricas, promociones y toma de decisiones (PN03)** → `18_Promociones.sql`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay que asignarle esos 2 roles a usuarios de prueba desde Administrar → Usuarios.
-- **Inspección de Devolución (PN04)** → `19_Inspeccion_Devolucion.sql`. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
-- **Hardening de integridad (auditoría de BD)** → `20_Hardening_Integridad.sql`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
+**Notas de los módulos** (para ubicarlos dentro de `00_Instalacion_Completa.sql` — los números de sección adentro del archivo coinciden con estos, y son el orden histórico en el que se agregaron):
+- **Lista de Espera (mejora opcional)** — sección 16 en `00`; el resto del sistema funciona sin ella (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
+- **Comercialización de la suscripción (PN02)** — sección 17 en `00`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo (o usar el usuario demo `caja`).
+- **Métricas, promociones y toma de decisiones (PN03)** — sección 18 en `00`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay usuarios demo (`admcomercial`, `contable`) para probar el módulo sin dar de alta nada a mano.
+- **Inspección de Devolución (PN04)** — sección 19 en `00`. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
+- **Hardening de integridad (auditoría de BD)** — sección 20 en `00`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
 
 ### Cadena de conexión
 

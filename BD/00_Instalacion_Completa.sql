@@ -1,21 +1,28 @@
 -- ============================================================
--- WardrobeFlow — 00. INSTALACIÓN COMPLETA (instalación nueva)
+-- WardrobeFlow — INSTALACIÓN COMPLETA (script único, instalación nueva)
 -- ------------------------------------------------------------
 -- Script único para levantar WardrobeFlowDB de cero: estructura, datos
 -- semilla, y TODOS los módulos (Bloque 1, Bloque 3 / Idea de Negocio, y los
--- 4 procesos de negocio PN01-PN04). Reemplaza tener que ejecutar a mano los
--- scripts 01, 03, 05, 06, 08, 09, 10 a 16, 17 a 19 y 20 uno por uno, en
--- orden: este archivo es la concatenación de todos ellos, en el mismo orden
--- en el que había que correrlos, cada uno con su propio comentario de
--- cabecera intacto para conservar el porqué de cada uno.
+-- 4 procesos de negocio PN01-PN04). Este es el ÚNICO script de esquema
+-- que se edita de acá en más — no se regenera concatenando archivos.
 --
--- Idempotente de punta a punta (cada script individual ya lo es): correr
--- este archivo dos veces no duplica nada ni rompe datos existentes.
+-- Los números de sección (01, 03, 05, 06, 08...20) que van a aparecer abajo
+-- son el orden histórico en el que cada módulo se agregó al proyecto y se
+-- conservan como referencia (coinciden con los archivos individuales que
+-- se describen a continuación); no indican que falten partes.
 --
--- NO incluye (son herramientas de mantenimiento, no parte de "crear la
--- BD" — correr por separado solo si hace falta, ver README):
+-- Los archivos BD/01_*.sql … BD/20_*.sql siguen en el repo como REFERENCIA
+-- HISTÓRICA de cómo se construyó cada parte (útil para ver el diff exacto
+-- que introdujo un módulo puntual), pero ya no se mantienen ni se vuelven
+-- a ejecutar sueltos — este archivo es la fuente de verdad del esquema.
+--
+-- Idempotente de punta a punta: correr este archivo dos veces no duplica
+-- nada ni rompe datos existentes.
+--
+-- NO incluye (son herramientas de mantenimiento activas, independientes del
+-- esquema — correr por separado solo si hace falta, ver README):
 --   • 02_Actualizar_BaseDeDatos.sql        — migra una BD MUY vieja (previa
---     a 01) a la estructura actual. Sobra en una instalación nueva.
+--     a este script) a la estructura actual. Sobra en una instalación nueva.
 --   • 04_Diagnostico_Limpieza_Nodos_Permiso.sql — diagnóstico puntual del
 --     árbol de permisos, no una migración de estructura.
 --   • 07_Reset_Perfiles_Permisos.sql       — herramienta de reparación para
@@ -28,9 +35,6 @@
 -- ============================================================
 
 
--- ==============================================================
--- === Fuente: 01_Crear_BaseDeDatos.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 01. CREAR BASE DE DATOS DE CERO
 -- ------------------------------------------------------------
@@ -1174,11 +1178,8 @@ PRINT '            antes del primer uso (Administrar → Usuarios → Recalcular
 PRINT 'Las traducciones se seedean automáticamente en el primer uso de la app.';
 GO
 
--- ==============================================================
--- === Fuente: 03_Permisos_Granulares.sql
--- ==============================================================
 /* ============================================================================
-   03_Permisos_Granulares.sql
+   WardrobeFlow — 03. PERMISOS GRANULARES (Ver vs. Configurar)
    Tier 2 — Permisos de ACCIÓN granular: separar "Ver" de "Configurar".
 
    Crea una patente de EDICIÓN por cada módulo de negocio (alta/modificación/baja)
@@ -1234,9 +1235,6 @@ PRINT 'OK: patentes de acción creadas y propagadas (idempotente).';
    el botón no se oculte.
    ---------------------------------------------------------------------------- */
 
--- ==============================================================
--- === Fuente: 05_Renovacion_Suscripcion.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 05. RENOVACIÓN DE SUSCRIPCIÓN (PdN5)
 -- ------------------------------------------------------------
@@ -1315,9 +1313,6 @@ WHERE p.NombreMenu = 'mnuRenovacionSuscripcion'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'renovacionSuscripcionToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 06_Rediseno_Menu.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 06. REDISEÑO DE MENÚ (UX/UI)
 -- ------------------------------------------------------------
@@ -1352,9 +1347,6 @@ WHERE c.Clave = 'mnu.bitacora'
 PRINT 'mnu.bitacora actualizado a "Analítica" (y equivalentes EN/RU/PT) en las bases que ya lo tenían sembrado.';
 GO
 
--- ==============================================================
--- === Fuente: 08_Cobro_Pago.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 08. COBRO Y PAGO DE SUSCRIPCIÓN (PdN6)
 -- ------------------------------------------------------------
@@ -1442,9 +1434,6 @@ WHERE p.NombreMenu = 'mnuCobroSuscripcion'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'cobroSuscripcionToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 09_Analisis_Abandono.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 09. ANÁLISIS DE ABANDONO (PdN10)
 -- ------------------------------------------------------------
@@ -1492,9 +1481,6 @@ WHERE p.NombreMenu = 'mnuAnalisisAbandono'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisAbandonoToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 10_Reporte_Ventas_Vendedor.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 10. REPORTE DE VENTAS POR VENDEDOR (PdN8)
 -- ------------------------------------------------------------
@@ -1542,9 +1528,6 @@ WHERE p.NombreMenu = 'mnuVentasVendedor'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'ventasVendedorToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 11_Analisis_Rotacion.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 11. ANÁLISIS DE ROTACIÓN DE PRENDAS (PdN9)
 -- ------------------------------------------------------------
@@ -1592,9 +1575,6 @@ WHERE p.NombreMenu = 'mnuAnalisisRotacion'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisRotacionToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 12_Analisis_Mantenimiento.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 12. ANÁLISIS DE TIEMPOS DE MANTENIMIENTO (PdN11)
 -- ------------------------------------------------------------
@@ -1641,9 +1621,6 @@ WHERE p.NombreMenu = 'mnuAnalisisMantenimiento'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisMantenimientoToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 13_Analisis_Escasez.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 13. DETECCIÓN DE ESCASEZ POR TALLE/CATEGORÍA (PdN12)
 -- ------------------------------------------------------------
@@ -1690,9 +1667,6 @@ WHERE p.NombreMenu = 'mnuAnalisisEscasez'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisEscasezToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 14_Recomendacion_Prendas.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 14. RECOMENDACIÓN DE PRENDAS PARA UN CLIENTE (PdN13)
 -- ------------------------------------------------------------
@@ -1741,9 +1715,6 @@ WHERE p.NombreMenu = 'mnuRecomendacionPrendas'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'recomendacionPrendasToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 15_Fidelizacion_Pausa_Referidos_Cargo.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 15. FIDELIZACIÓN: PAUSA, REFERIDOS Y CARGO POR DAÑO/PÉRDIDA
 -- ------------------------------------------------------------
@@ -1862,9 +1833,6 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Cliente_IdClienteRefer
 PRINT 'Índices de Fidelización verificados/creados.';
 GO
 
--- ==============================================================
--- === Fuente: 16_Lista_Espera.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 16. LISTA DE ESPERA DE PRENDAS (mejora opcional,
 -- no requerida por la cátedra — ver README, sección "Módulos")
@@ -1944,9 +1912,6 @@ WHERE p.NombreMenu = 'mnuListaEspera'
                   WHERE c.Formulario = 'Menu' AND c.NombreControl = 'listaEsperaToolStripMenuItem');
 GO
 
--- ==============================================================
--- === Fuente: 17_Comercializacion_Suscripcion.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 17. COMERCIALIZACIÓN DE LA SUSCRIPCIÓN (PN02)
 -- ------------------------------------------------------------
@@ -2002,24 +1967,23 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacio
     ALTER TABLE Contratacion ADD CONSTRAINT CHK_Contratacion_Estado CHECK (Estado IN (0,1,2));
 GO
 
--- ── 2) Patentes de menú mnuCaja / mnuCajaEditar ──────────────────────────
+-- ── 2) Patentes mnuCaja/mnuCajaEditar + rol Caja (nuevo, real — separado de
+--     Vendedor). Van juntas: ambas son filas de Permiso (dos hojas/patentes
+--     y un nodo-rol), no hace falta un INSERT por fila cuando es la misma
+--     tabla — Caja es un rol simple (sin hijos propios en el árbol
+--     Composite), así que no necesita más que esto para existir.
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, 0, 0
+SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, v.EsFamilia, v.EsRol
 FROM (VALUES
-    ('Gestionar Caja',  'mnuCaja',       'Caja'),
-    ('Configurar Caja', 'mnuCajaEditar', 'Caja')
-) AS v(Nombre, NombreMenu, Tipo)
+    ('Gestionar Caja',  'mnuCaja',       'Caja', 0, 0),
+    ('Configurar Caja', 'mnuCajaEditar', 'Caja', 0, 0),
+    ('Caja',             'Caja',         'Rol',  1, 1)
+) AS v(Nombre, NombreMenu, Tipo, EsFamilia, EsRol)
 WHERE NOT EXISTS (SELECT 1 FROM Permiso p
-                  WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0);
+                  WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = v.EsFamilia AND ISNULL(p.EsRol,0) = v.EsRol);
 GO
 
--- ── 3) Rol Caja (nuevo, real — separado de Vendedor) ─────────────────────
-INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT 'Caja', 'Caja', 'Rol', 1, 1, 1
-WHERE NOT EXISTS (SELECT 1 FROM Permiso WHERE Nombre = 'Caja' AND EsRol = 1);
-GO
-
--- ── 4) Asignación de patentes: Administrador (acceso total) + Caja ───────
+-- ── 3) Asignación de patentes: Administrador (acceso total) + Caja ───────
 INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT rol.IdPermiso, pat.IdPermiso
 FROM (VALUES
@@ -2035,7 +1999,7 @@ WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
 PRINT 'Permisos mnuCaja/mnuCajaEditar asignados a Administrador y Caja.';
 GO
 
--- ── 5) Mapeo de controles (pantalla "Perfiles y Permisos" → ítems de menú) ─
+-- ── 4) Mapeo de controles (pantalla "Perfiles y Permisos" → ítems de menú) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
 SELECT p.IdPermiso, v.Formulario, v.NombreControl
 FROM (VALUES
@@ -2048,23 +2012,20 @@ WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
 GO
 
--- ── 6) Usuario demo del rol Caja ──────────────────────────────────────────
--- Mismo criterio que los usuarios demo de 01 (Auditor/GerenteComercial/...):
--- clave hasheada (PBKDF2), texto plano 'usuario1!'.
-INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma, Activo)
-SELECT 'caja', 'IVYc7mzk/g0OD/k6lOKrMK4xXI4dnw14xGccH3ZuTbVWsQyUpkNFKnY6hzQcYBG0', 'Caja', 'Caja', 1, 0, 0, 'ES', 1
+-- ── 5) Usuario demo del rol Caja ──────────────────────────────────────────
+-- Mismo criterio que los usuarios demo de la sección 01 (Auditor/
+-- GerenteComercial/...): clave hasheada (PBKDF2), texto plano 'usuario1!'.
+-- Un solo INSERT (sin UPDATE aparte): al ser un username nuevo, los datos
+-- administrativos se cargan directo, no hace falta el patrón "completar
+-- solo si está vacío" que sí usan las siembras que reparten varios roles.
+INSERT INTO Usuario (Username, Clave, Rol, Perfil, Nombre, Apellido, Email, FechaNacimiento,
+                      Estado, IntentosFallidos, DVH, IdIdioma, Activo)
+SELECT 'caja', 'IVYc7mzk/g0OD/k6lOKrMK4xXI4dnw14xGccH3ZuTbVWsQyUpkNFKnY6hzQcYBG0', 'Caja', 'Caja',
+       N'Carolina', N'Ibáñez', 'caja@wardrobeflow.com', '1991-04-12', 1, 0, 0, 'ES', 1
 WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE Username = 'caja');
-GO
-
-UPDATE u SET u.Nombre = N'Carolina', u.Apellido = N'Ibáñez', u.Email = 'caja@wardrobeflow.com', u.FechaNacimiento = '1991-04-12'
-FROM Usuario u
-WHERE u.Username = 'caja' AND u.Nombre IS NULL AND u.Apellido IS NULL;
 PRINT 'Usuario demo del rol Caja inicializado.';
 GO
 
--- ==============================================================
--- === Fuente: 18_Promociones.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 18. MÉTRICAS, PROMOCIONES Y TOMA DE DECISIONES (PN03)
 -- ------------------------------------------------------------
@@ -2170,30 +2131,28 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_P
     ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Porcentaje CHECK (TipoDescuento <> 0 OR Valor <= 100);
 GO
 
--- ── 3) Patentes de menú ──────────────────────────────────────────────────
+-- ── 3) Patentes de menú + roles nuevos AdministracionComercial y
+--     Contabilidad. Van juntas (mismo criterio que el rol Caja en la
+--     sección 17): todo es Permiso, y ninguno de los dos roles tiene hijos
+--     propios en el árbol Composite — son roles simples.
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, 0, 0
+SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, v.EsFamilia, v.EsRol
 FROM (VALUES
-    ('Sugerir Promoción',           'mnuSugerenciaPromocion',        'Promociones'),
-    ('Gestionar Promociones',       'mnuPromocionesAdmin',           'Promociones'),
-    ('Configurar Promociones Admin','mnuPromocionesAdminEditar',     'Promociones'),
-    ('Revisión Contable',           'mnuPromocionesContable',        'Promociones'),
-    ('Configurar Revisión Contable','mnuPromocionesContableEditar',  'Promociones'),
-    ('Ver Promociones Vigentes',    'mnuPromocionesVigentes',        'Promociones'),
-    ('Sugerir Baja de Promoción',   'mnuPromocionesVigentesEditar',  'Promociones')
-) AS v(Nombre, NombreMenu, Tipo)
+    ('Sugerir Promoción',           'mnuSugerenciaPromocion',        'Promociones', 0, 0),
+    ('Gestionar Promociones',       'mnuPromocionesAdmin',           'Promociones', 0, 0),
+    ('Configurar Promociones Admin','mnuPromocionesAdminEditar',     'Promociones', 0, 0),
+    ('Revisión Contable',           'mnuPromocionesContable',        'Promociones', 0, 0),
+    ('Configurar Revisión Contable','mnuPromocionesContableEditar',  'Promociones', 0, 0),
+    ('Ver Promociones Vigentes',    'mnuPromocionesVigentes',        'Promociones', 0, 0),
+    ('Sugerir Baja de Promoción',   'mnuPromocionesVigentesEditar',  'Promociones', 0, 0),
+    ('AdministracionComercial',     'AdministracionComercial',       'Rol',         1, 1),
+    ('Contabilidad',                'Contabilidad',                  'Rol',         1, 1)
+) AS v(Nombre, NombreMenu, Tipo, EsFamilia, EsRol)
 WHERE NOT EXISTS (SELECT 1 FROM Permiso p
-                  WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0);
+                  WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = v.EsFamilia AND ISNULL(p.EsRol,0) = v.EsRol);
 GO
 
--- ── 4) Roles nuevos: AdministracionComercial y Contabilidad ─────────────
-INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT v.Rol, v.Rol, 'Rol', 1, 1, 1
-FROM (VALUES ('AdministracionComercial'), ('Contabilidad')) AS v(Rol)
-WHERE NOT EXISTS (SELECT 1 FROM Permiso p WHERE p.Nombre = v.Rol AND p.EsRol = 1);
-GO
-
--- ── 5) Asignación de patentes ────────────────────────────────────────────
+-- ── 4) Asignación de patentes ────────────────────────────────────────────
 INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT rol.IdPermiso, pat.IdPermiso
 FROM (VALUES
@@ -2218,7 +2177,7 @@ WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
 PRINT 'Permisos de Promociones asignados a Administrador, GerenteComercial, Vendedor, AdministracionComercial y Contabilidad.';
 GO
 
--- ── 6) Mapeo de controles (pantalla "Perfiles y Permisos" → ítems de menú) ─
+-- ── 5) Mapeo de controles (pantalla "Perfiles y Permisos" → ítems de menú) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
 SELECT p.IdPermiso, v.Formulario, v.NombreControl
 FROM (VALUES
@@ -2233,31 +2192,22 @@ WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
 GO
 
--- ── 7) Usuarios demo de los roles nuevos ──────────────────────────────────
--- Mismo criterio que los usuarios demo de 01: clave hasheada (PBKDF2),
--- texto plano 'usuario1!'.
-INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma, Activo)
-SELECT v.Username, v.Clave, v.Rol, v.Perfil, 1, 0, 0, 'ES', 1
+-- ── 6) Usuarios demo de los roles nuevos ──────────────────────────────────
+-- Mismo criterio que el usuario 'caja' de la sección 17: clave hasheada
+-- (PBKDF2), texto plano 'usuario1!', un solo INSERT con los datos
+-- administrativos ya cargados (usernames nuevos, sin necesidad del patrón
+-- insert+update "completar solo si está vacío").
+INSERT INTO Usuario (Username, Clave, Rol, Perfil, Nombre, Apellido, Email, FechaNacimiento,
+                      Estado, IntentosFallidos, DVH, IdIdioma, Activo)
+SELECT v.Username, v.Clave, v.Rol, v.Perfil, v.Nombre, v.Apellido, v.Email, v.FechaNac, 1, 0, 0, 'ES', 1
 FROM (VALUES
-  ('admcomercial', 'gm4kogeeRRIphufl0aWPR2S0wW17VwHYqiSihJ3GXs3WzW85kcb+i/7yVDHRNDZA', 'AdministracionComercial', 'AdministracionComercial'),
-  ('contable',     '9IehcthmyLV2v3I9zeWkUkelEhorzkOrjxcWqylFYwOVmVV/x1fGwsgCNOv+yvcM', 'Contabilidad',            'Contabilidad')
-) AS v(Username, Clave, Rol, Perfil)
+  ('admcomercial', 'gm4kogeeRRIphufl0aWPR2S0wW17VwHYqiSihJ3GXs3WzW85kcb+i/7yVDHRNDZA', 'AdministracionComercial', 'AdministracionComercial', N'Agustina', N'Ríos',   'admcomercial@wardrobeflow.com', '1989-08-22'),
+  ('contable',     '9IehcthmyLV2v3I9zeWkUkelEhorzkOrjxcWqylFYwOVmVV/x1fGwsgCNOv+yvcM', 'Contabilidad',            'Contabilidad',            N'Carlos',   N'Suárez', 'contable@wardrobeflow.com',     '1984-05-14')
+) AS v(Username, Clave, Rol, Perfil, Nombre, Apellido, Email, FechaNac)
 WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username);
-GO
-
-UPDATE u SET u.Nombre = v.Nombre, u.Apellido = v.Apellido, u.Email = v.Email, u.FechaNacimiento = v.FechaNac
-FROM Usuario u
-JOIN (VALUES
-    ('admcomercial', N'Agustina', N'Ríos',    'admcomercial@wardrobeflow.com', '1989-08-22'),
-    ('contable',     N'Carlos',   N'Suárez',  'contable@wardrobeflow.com',     '1984-05-14')
-) AS v(Username, Nombre, Apellido, Email, FechaNac) ON u.Username = v.Username
-WHERE u.Nombre IS NULL AND u.Apellido IS NULL;
 PRINT 'Usuarios demo de AdministracionComercial y Contabilidad inicializados.';
 GO
 
--- ==============================================================
--- === Fuente: 19_Inspeccion_Devolucion.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 19. INSPECCIÓN DE DEVOLUCIÓN (PN04)
 -- ------------------------------------------------------------
@@ -2339,9 +2289,6 @@ WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
                   WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
 GO
 
--- ==============================================================
--- === Fuente: 20_Hardening_Integridad.sql
--- ==============================================================
 -- ============================================================
 -- WardrobeFlow — 20. HARDENING DE INTEGRIDAD (auditoría de BD)
 -- ------------------------------------------------------------

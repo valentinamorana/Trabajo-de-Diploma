@@ -182,7 +182,7 @@ BD/00_Instalacion_Completa.sql   -- Crea WardrobeFlowDB completa: estructura, da
                                   -- se puede volver a ejecutar sin duplicar ni romper nada.
 ```
 
-Es la concatenación (en el orden correcto) de los scripts `01`, `03`, `05`, `06`, `08`, `09`, `10` a `16`, `17` a `19` y `20` — cada uno sigue existiendo por separado en `BD/` con su propio comentario de cabecera, por si hace falta revisar o volver a correr uno puntual, pero para una instalación nueva alcanza con `00`. El instalador (`Instalador/WardrobeFlow_Setup.iss`) ya usa este único script.
+Es el único archivo de esquema que se edita — ya no se regenera concatenando los scripts individuales. Los archivos `01`, `03`, `05`, `06`, `08`, `09`, `10` a `16`, `17` a `19` y `20` siguen en `BD/` como referencia histórica de cómo se introdujo cada módulo (útil para ver el diff puntual de una funcionalidad), pero no se vuelven a tocar ni a correr sueltos — `00` es la fuente de verdad. El instalador (`Instalador/WardrobeFlow_Setup.iss`) usa este único script.
 
 **Herramientas de mantenimiento** (no forman parte de "crear la BD" — correr por separado solo si hace falta):
 
@@ -195,12 +195,12 @@ BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos
 - **Actualizar una BD MUY vieja** (previa a que existiera `01_Crear_BaseDeDatos.sql`) → ejecutar `02` a `09` en orden.
 - **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
 
-**Notas de módulos incluidos en `00_Instalacion_Completa.sql`** (relevante si se corre alguno de estos suelto en vez del script único):
-- **Lista de Espera (mejora opcional)** → `16_Lista_Espera.sql`; el resto del sistema funciona sin él (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
-- **Comercialización de la suscripción (PN02)** → `17_Comercializacion_Suscripcion.sql`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo.
-- **Métricas, promociones y toma de decisiones (PN03)** → `18_Promociones.sql`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay que asignarle esos 2 roles a usuarios de prueba desde Administrar → Usuarios.
-- **Inspección de Devolución (PN04)** → `19_Inspeccion_Devolucion.sql`. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
-- **Hardening de integridad (auditoría de BD)** → `20_Hardening_Integridad.sql`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
+**Notas de los módulos** (para ubicarlos dentro de `00_Instalacion_Completa.sql` — los números de sección adentro del archivo coinciden con estos, y son el orden histórico en el que se agregaron):
+- **Lista de Espera (mejora opcional)** — sección 16 en `00`; el resto del sistema funciona sin ella (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
+- **Comercialización de la suscripción (PN02)** — sección 17 en `00`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo (o usar el usuario demo `caja`).
+- **Métricas, promociones y toma de decisiones (PN03)** — sección 18 en `00`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay usuarios demo (`admcomercial`, `contable`) para probar el módulo sin dar de alta nada a mano.
+- **Inspección de Devolución (PN04)** — sección 19 en `00`. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
+- **Hardening de integridad (auditoría de BD)** — sección 20 en `00`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
 
 ### Cadena de conexión
 

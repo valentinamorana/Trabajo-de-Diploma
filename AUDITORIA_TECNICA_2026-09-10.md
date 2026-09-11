@@ -346,7 +346,8 @@ Contexto: el patrón Command para Cancelación/Devolución de Pedido (fix de la 
 13. Sufijo `Form` no uniforme en las clases (`Login`, `Usuarios`, `GestorPermisos` no lo llevan) — justo el trío más crítico del módulo. *(pendiente — rename de alcance amplio)*
 14. ✅ RESUELTO (2026-09-11) — Typo "Selecioná" (falta una c) en dos labels de `Usuarios.Designer.cs`.
 *Solución aplicada:* corregido a "Seleccioná" en los 4 fallbacks hardcodeados de `Usuarios.Designer.cs`/`NuevoPedidoForm.Designer.cs` (el TSV ya estaba bien escrito).
-15. Fraseo no unificado de "credenciales inválidas" entre `Login` y `ConfirmarAdminForm`. *(pendiente)*
+15. ✅ RESUELTO (2026-09-11) — Fraseo no unificado de "credenciales inválidas" entre `Login` y `ConfirmarAdminForm`.
+*Solución aplicada:* `ConfirmarAdminForm` reusa el mismo fraseo base que `Login` ("Usuario o contraseña incorrectos"), agregando la cláusula específica de admin.
 16. Indicador visual del toggle mostrar/ocultar contraseña en `Login` (tachado de fuente) poco convencional comparado con el patrón usual de ícono de ojo. *(pendiente — rediseño cosmético)*
 
 ---
@@ -498,7 +499,8 @@ Búsquedas sobre el conjunto completo (no archivo por archivo) para detectar pat
 
 **5. Catches genéricos: 273 en 84 archivos, pero 0 completamente vacíos** — contradice la hipótesis inicial de "catches que tragan en silencio". El problema real es otro: **al menos 3 implementaciones independientes de `MostrarError(Exception ex)`** (`FormBase`, `RecuperacionEspejoForm`, `ReporteJornadaForm`) con lógica ligeramente distinta, en vez de una sola función compartida.
 
-**6. Constante `DiasSinActividadParaRiesgo` duplicada con valores distintos** entre `EstrategiaVencimientoInactividad.cs` (30) y `EstrategiaInactividadPura.cs` (60) — mismo nombre, misma semántica aparente, sin comentario que explique la diferencia (podría ser deliberado, pero no está documentado como tal).
+**6. ✅ RESUELTO (2026-09-11) — Constante `DiasSinActividadParaRiesgo` duplicada con valores distintos** entre `EstrategiaVencimientoInactividad.cs` (30) y `EstrategiaInactividadPura.cs` (60) — mismo nombre, misma semántica aparente, sin comentario que explique la diferencia (podría ser deliberado, pero no está documentado como tal).
+*Solución aplicada:* verificado que la diferencia es intencional (una estrategia usa la inactividad como señal secundaria sobre un vencimiento ya próximo, la otra como única señal y necesita un umbral más largo para evitar falsos positivos); se documentó con un comentario cruzado en ambas clases en vez de unificar los valores.
 
 **7. Interfaces BLL: 17/17 con su única clase implementadora, 1 con nombre inconsistente** (`IRecomendacionService` debería ser `IRecomendacionPrendasService`). 17 clases BLL de nivel similar no implementan ninguna interfaz, sin una regla escrita que distinga cuáles la necesitan.
 

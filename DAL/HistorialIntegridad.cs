@@ -7,13 +7,13 @@ namespace DAL
 {
     public class HistorialIntegridad
     {
-        private readonly Acceso _acceso = Acceso.GetInstance();
+        private readonly Acceso acceso = Acceso.GetInstance();
 
         public void Insertar(BE.HistorialIntegridad entrada)
         {
             try
             {
-                _acceso.Escribir(
+                acceso.Escribir(
                     "INSERT INTO HistorialIntegridad " +
                     "(NombreTabla, DVVAlmacenado, DVVCalculado, Resultado, FilasCorruptas, FechaVerificacion, DisparadoPor) " +
                     "VALUES (@tabla, @dvvAlm, @dvvCal, @resultado, @filas, GETDATE(), @disparador)",
@@ -38,7 +38,7 @@ namespace DAL
             var lista = new List<BE.HistorialIntegridad>();
             try
             {
-                DataTable tabla = _acceso.Leer(
+                DataTable tabla = acceso.Leer(
                     "SELECT TOP (@n) Id, NombreTabla, DVVAlmacenado, DVVCalculado, " +
                     "Resultado, FilasCorruptas, FechaVerificacion, DisparadoPor " +
                     "FROM HistorialIntegridad ORDER BY FechaVerificacion DESC",

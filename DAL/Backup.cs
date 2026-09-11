@@ -91,7 +91,7 @@ namespace DAL
             finally
             {
                 if (File.Exists(rutaTemp))
-                    try { File.Delete(rutaTemp); } catch { }
+                    try { File.Delete(rutaTemp); } catch (Exception exTemp) { System.Diagnostics.Trace.TraceWarning($"[DAL.Backup] No se pudo borrar el temporal '{rutaTemp}': {exTemp.Message}"); }
             }
         }
 
@@ -188,8 +188,8 @@ namespace DAL
                 {
                     // Tabla/columna son CONSTANTES del sistema (no entrada de usuario) y se encierran
                     // en corchetes; la fecha SÍ va parametrizada. Defensa en profundidad igual que el DV.
-                    string sql = "SELECT COUNT(*) AS Cantidad FROM " + Id(f.Tabla) +
-                                 " WHERE " + Id(f.Columna) + " > @fecha";
+                    string sql = "SELECT COUNT(*) AS Cantidad FROM " + SqlIdentificador.Validar(f.Tabla) +
+                                 " WHERE " + SqlIdentificador.Validar(f.Columna) + " > @fecha";
                     DataTable dt = acceso.Leer(sql, new[] { new SqlParameter("@fecha", fecha) });
                     int cant = (dt != null && dt.Rows.Count > 0) ? Convert.ToInt32(dt.Rows[0]["Cantidad"]) : 0;
                     if (cant > 0)
@@ -205,20 +205,6 @@ namespace DAL
             }
 
             return resultado;
-        }
-
-        // Valida que un identificador de tabla/columna sea un nombre simple y lo devuelve entre
-        // corchetes. Falla cerrado si no cumple. (Mismo criterio que DAL.DigitoVerificador.Id.)
-        private static string Id(string identificador)
-        {
-            if (string.IsNullOrEmpty(identificador))
-                throw new ArgumentException("Identificador SQL vacío.");
-            foreach (char c in identificador)
-                if (!(char.IsLetterOrDigit(c) || c == '_'))
-                    throw new ArgumentException($"Identificador SQL inválido: '{identificador}'.");
-            if (char.IsDigit(identificador[0]))
-                throw new ArgumentException($"Identificador SQL inválido: '{identificador}'.");
-            return "[" + identificador + "]";
         }
 
         public void RestaurarBackup(string rutaOrigen)
@@ -266,7 +252,7 @@ namespace DAL
             finally
             {
                 if (File.Exists(rutaTemp))
-                    try { File.Delete(rutaTemp); } catch { }
+                    try { File.Delete(rutaTemp); } catch (Exception exTemp) { System.Diagnostics.Trace.TraceWarning($"[DAL.Backup] No se pudo borrar el temporal '{rutaTemp}': {exTemp.Message}"); }
             }
         }
     }

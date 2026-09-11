@@ -7,9 +7,11 @@ namespace BLL.Manejadores
     /// ⚠ BajaSuscripcionHandler es el último eslabón de la cadena y trata CUALQUIER
     /// decisión que llegue hasta él como Baja, sin validar cuál es (mismo criterio que
     /// DirectorGeneral en el ejemplo de cátedra: el último eslabón resuelve sin condición).
-    /// Si agregás un valor nuevo acá (ej. "Pausar"), tenés que insertar su propio Handler
-    /// en la cadena ANTES de BajaSuscripcionHandler (ver BLL.Renovacion) — si te olvidás,
-    /// esa decisión nueva se va a tratar como una baja completa sin ningún error visible.
+    /// Si agregás un valor nuevo acá (ej. un futuro "Congelar"), tenés que insertar su propio
+    /// Handler en la cadena ANTES de BajaSuscripcionHandler (ver BLL.Renovacion) — si te
+    /// olvidás, esa decisión nueva se va a tratar como una baja completa sin ningún error
+    /// visible. "Pausar" ya no es un ejemplo hipotético: PausarSuscripcionHandler existe y
+    /// está insertado correctamente.
     /// </summary>
     public enum DecisionRenovacion
     {

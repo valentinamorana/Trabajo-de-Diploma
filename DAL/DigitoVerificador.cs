@@ -125,26 +125,15 @@ namespace DAL
 
         // Valida que el identificador sea un nombre simple ([A-Za-z_][A-Za-z0-9_]*) y lo
         // devuelve entre corchetes. Lanza si no cumple — falla cerrado, no concatena algo dudoso.
-        private static string Id(string identificador)
-        {
-            if (string.IsNullOrEmpty(identificador))
-                throw new ArgumentException("Identificador SQL vacío.");
-            foreach (char c in identificador)
-                if (!(char.IsLetterOrDigit(c) || c == '_'))
-                    throw new ArgumentException($"Identificador SQL inválido: '{identificador}'.");
-            if (char.IsDigit(identificador[0]))
-                throw new ArgumentException($"Identificador SQL inválido: '{identificador}'.");
-            return "[" + identificador + "]";
-        }
-
         // Lee las filas de una tabla con sus campos relevantes para el DVH y el DVH almacenado.
         public List<BE.FilaDV> ObtenerFilas(string tabla, string pkCol, string[] columnas)
         {
             var colsQuoted = new string[columnas.Length];
-            for (int i = 0; i < columnas.Length; i++) colsQuoted[i] = Id(columnas[i]);
+            for (int i = 0; i < columnas.Length; i++) colsQuoted[i] = SqlIdentificador.Validar(columnas[i]);
             string cols = string.Join(", ", colsQuoted);
             DataTable dt = acceso.Leer(
-                "SELECT " + Id(pkCol) + ", " + cols + ", DVH FROM " + Id(tabla) + " ORDER BY " + Id(pkCol), null);
+                "SELECT " + SqlIdentificador.Validar(pkCol) + ", " + cols + ", DVH FROM " + SqlIdentificador.Validar(tabla) +
+                " ORDER BY " + SqlIdentificador.Validar(pkCol), null);
 
             var lista = new List<BE.FilaDV>();
             if (dt == null) return lista;
@@ -171,7 +160,7 @@ namespace DAL
         public void ActualizarDVH(string tabla, string pkCol, int id, int dvh)
         {
             acceso.Escribir(
-                "UPDATE " + Id(tabla) + " SET DVH = @dvh WHERE " + Id(pkCol) + " = @id",
+                "UPDATE " + SqlIdentificador.Validar(tabla) + " SET DVH = @dvh WHERE " + SqlIdentificador.Validar(pkCol) + " = @id",
                 new SqlParameter[] { new SqlParameter("@dvh", dvh), new SqlParameter("@id", id) });
         }
 

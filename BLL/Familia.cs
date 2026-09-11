@@ -76,18 +76,44 @@ namespace BLL
         {
             List<BE.Componente> arbol;
             try { arbol = permisoDAL.ObtenerArbol(); }
-            catch { return; }   // si no se puede reconstruir el árbol, no bloqueamos por un fallo lateral
+            catch (Exception ex)
+            {
+                // Fail-open deliberado (no bloquear por un fallo lateral de BD), pero registrado:
+                // antes quedaba en absoluto silencio que el guard anti-lockout no se aplicó esta vez.
+                RegistrarGuardSaltado("ObtenerArbol", ex);
+                return;
+            }
             try { mutarArbolSimulado(arbol); }
             catch { /* la mutación simulada nunca debe romper la operación real */ }
 
             List<BE.Usuario> usuarios;
             try { usuarios = new Usuario().ObtenerTodos(); }
-            catch { return; }   // sin poder enumerar usuarios → fail-open controlado (no romper por un fallo de BD)
+            catch (Exception ex)
+            {
+                // Fail-open controlado (no romper por un fallo de BD al enumerar usuarios), registrado.
+                RegistrarGuardSaltado("ObtenerTodos", ex);
+                return;
+            }
 
             if (!SistemaConservaGestion(arbol, usuarios))
                 throw new BE.AppException("err.bll.familia.sistema_sin_gestion",
                     "Esta acción dejaría al sistema SIN NINGÚN usuario con acceso de Gestión de Usuarios. " +
                     "Asigná la gestión a otro rol o usuario antes de continuar.");
+        }
+
+        // Deja constancia en bitácora (criticidad Alta) cada vez que el guard anti-lockout de
+        // administradores se salta por un fallo lateral de BD, para que quede visible que la
+        // protección no se aplicó esa vez — antes el fail-open era completamente silencioso.
+        private void RegistrarGuardSaltado(string paso, Exception ex)
+        {
+            try
+            {
+                _bitacora.Registrar("Gestión de Perfiles",
+                    $"Guard anti-lockout de administradores NO se pudo verificar (falló '{paso}'): {ex.Message}. " +
+                    "La operación continuó sin este chequeo.",
+                    BE.Criticidad.Alta);
+            }
+            catch { /* el fallo al registrar no debe romper el fail-open ya decidido */ }
         }
 
         // Núcleo PURO y testeable (mismo estilo que ValidarPuedeArchivar/ValidarPuedeCambiarRol):

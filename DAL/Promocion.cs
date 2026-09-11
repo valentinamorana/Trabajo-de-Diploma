@@ -180,12 +180,13 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdPromocion", idPromocion),
+                new SqlParameter("@Estado", (int)BE.EstadoPromocion.BajaSolicitada),
                 new SqlParameter("@MotivoBaja",  motivo)
             };
             try
             {
                 acceso.Escribir(
-                    "UPDATE Promocion SET Estado=3, MotivoBaja=@MotivoBaja WHERE IdPromocion=@IdPromocion",
+                    "UPDATE Promocion SET Estado=@Estado, MotivoBaja=@MotivoBaja WHERE IdPromocion=@IdPromocion",
                     p);
             }
             catch (Exception ex)

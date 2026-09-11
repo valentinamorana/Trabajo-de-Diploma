@@ -269,10 +269,22 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
-                    "DELETE FROM PermisoRelacion WHERE IdPadre = @id OR IdHijo = @id; " +
-                    "UPDATE Permiso SET Estado = 0 WHERE IdPermiso = @id",
-                    new[] { new SqlParameter("@id", idPermiso) });
+                // Envuelto en una transacción explícita (antes viajaba como un solo Escribir() con
+                // dos sentencias, sin EjecutarTransaccion, a diferencia del resto de las operaciones
+                // multi-tabla del proyecto): si el DELETE de relaciones tiene éxito pero el UPDATE de
+                // Estado falla (o viceversa), el componente podía quedar con sus relaciones borradas
+                // pero todavía activo, o dado de baja con relaciones colgantes.
+                acceso.EjecutarTransaccion((conexion, tx) =>
+                {
+                    using (var cmd = new SqlCommand(
+                        "DELETE FROM PermisoRelacion WHERE IdPadre = @id OR IdHijo = @id; " +
+                        "UPDATE Permiso SET Estado = 0 WHERE IdPermiso = @id",
+                        conexion, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@id", idPermiso);
+                        cmd.ExecuteNonQuery();
+                    }
+                });
             }
             catch (Exception ex)
             {

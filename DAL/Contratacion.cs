@@ -110,6 +110,7 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdContratacion",    idContratacion),
+                new SqlParameter("@Estado",             (int)BE.EstadoContratacion.Pagada),
                 new SqlParameter("@IdCaja",             idCaja),
                 new SqlParameter("@MedioPago",          medioPago),
                 new SqlParameter("@NumeroComprobante",  numeroComprobante),
@@ -119,7 +120,7 @@ namespace DAL
             try
             {
                 acceso.Escribir(
-                    $"UPDATE Contratacion SET Estado = {(int)BE.EstadoContratacion.Pagada}, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
+                    "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
                     "NumeroComprobante = @NumeroComprobante, FechaComprobante = @FechaComprobante, " +
                     "FechaResolucion = @FechaResolucion WHERE IdContratacion = @IdContratacion",
                     p);
@@ -135,12 +136,13 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdContratacion", idContratacion),
+                new SqlParameter("@Estado", (int)BE.EstadoContratacion.Cancelada),
                 new SqlParameter("@FechaResolucion", DateTime.Now)
             };
             try
             {
                 acceso.Escribir(
-                    $"UPDATE Contratacion SET Estado = {(int)BE.EstadoContratacion.Cancelada}, FechaResolucion = @FechaResolucion " +
+                    "UPDATE Contratacion SET Estado = @Estado, FechaResolucion = @FechaResolucion " +
                     "WHERE IdContratacion = @IdContratacion",
                     p);
             }

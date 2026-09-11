@@ -61,9 +61,11 @@ namespace BLL
                 idPlan, categoriaPrenda, margenEstimado, impactoEconomico, idSugerenciaOrigen: null);
         }
 
-        private int CrearInterna(string modulo, string nombre, string descripcion, BE.TipoDescuento tipo, decimal valor,
-                                  DateTime fechaInicio, DateTime fechaFin, int? idPlan, string categoriaPrenda,
-                                  decimal margenEstimado, string impactoEconomico, int? idSugerenciaOrigen)
+        // Validación común a CrearInterna y Modificar (antes duplicada entre las dos, con riesgo de
+        // que una cambiara un umbral/regla y la otra quedara desincronizada). No muta nada — solo
+        // valida y lanza; el caller decide qué hacer con los valores ya validados.
+        private void ValidarCamposComunes(string nombre, int? idPlan, string categoriaPrenda,
+                                           decimal valor, BE.TipoDescuento tipo, DateTime fechaInicio, DateTime fechaFin)
         {
             bool aplicaPlan = idPlan.HasValue;
             bool aplicaCategoria = !string.IsNullOrWhiteSpace(categoriaPrenda);
@@ -91,6 +93,14 @@ namespace BLL
             if (fechaFin.Date < fechaInicio.Date)
                 throw new BE.AppException("err.bll.promocion.rango_fechas_invalido",
                     "La fecha de fin no puede ser anterior a la fecha de inicio.");
+        }
+
+        private int CrearInterna(string modulo, string nombre, string descripcion, BE.TipoDescuento tipo, decimal valor,
+                                  DateTime fechaInicio, DateTime fechaFin, int? idPlan, string categoriaPrenda,
+                                  decimal margenEstimado, string impactoEconomico, int? idSugerenciaOrigen)
+        {
+            bool aplicaCategoria = !string.IsNullOrWhiteSpace(categoriaPrenda);
+            ValidarCamposComunes(nombre, idPlan, categoriaPrenda, valor, tipo, fechaInicio, fechaFin);
 
             var promocion = new BE.Promocion
             {
@@ -122,32 +132,19 @@ namespace BLL
         {
             PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
 
-            bool aplicaPlan = promocion.IdPlan.HasValue;
+            // Guarda de estado que faltaba (a diferencia de Desactivar/AprobarContable/etc., todos
+            // con su Puede...() antes de mutar): sin esto se podía modificar precio/fechas/tipo de
+            // descuento de una promoción ya Vigente (aprobada por Contabilidad) o Desactivada sin
+            // pasar de nuevo por revisión contable. Mismo estado que exige AprobarContable/
+            // RechazarContable — modificar solo tiene sentido mientras todavía está en revisión.
+            if (!promocion.PuedeAprobarseORechazarseContable())
+                throw new BE.AppException("err.bll.promocion.modificar_estado",
+                    "Solo se puede modificar una promoción mientras está en revisión contable. Estado actual: '{0}'.",
+                    promocion.Estado);
+
             bool aplicaCategoria = !string.IsNullOrWhiteSpace(promocion.CategoriaPrenda);
-
-            if (string.IsNullOrWhiteSpace(promocion.Nombre))
-                throw new BE.AppException("err.bll.promocion.nombre_requerido",
-                    "El nombre de la promoción es obligatorio.");
-
-            if (aplicaPlan == aplicaCategoria)
-                throw new BE.AppException("err.bll.promocion.destino_invalido",
-                    "La promoción debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.");
-
-            if (aplicaPlan && dalPlan.ObtenerPorId(promocion.IdPlan.Value) == null)
-                throw new BE.AppException("err.bll.promocion.plan_inexistente",
-                    "El plan seleccionado no existe.");
-
-            if (promocion.Valor <= 0)
-                throw new BE.AppException("err.bll.promocion.valor_invalido",
-                    "El beneficio de la promoción debe ser mayor a cero.");
-
-            if (promocion.TipoDescuento == BE.TipoDescuento.Porcentaje && promocion.Valor > 100)
-                throw new BE.AppException("err.bll.promocion.porcentaje_invalido",
-                    "Un descuento por porcentaje no puede superar el 100%.");
-
-            if (promocion.FechaFin.Date < promocion.FechaInicio.Date)
-                throw new BE.AppException("err.bll.promocion.rango_fechas_invalido",
-                    "La fecha de fin no puede ser anterior a la fecha de inicio.");
+            ValidarCamposComunes(promocion.Nombre, promocion.IdPlan, promocion.CategoriaPrenda,
+                promocion.Valor, promocion.TipoDescuento, promocion.FechaInicio, promocion.FechaFin);
 
             promocion.CategoriaPrenda = aplicaCategoria ? promocion.CategoriaPrenda.Trim() : null;
             promocion.Nombre = promocion.Nombre.Trim();

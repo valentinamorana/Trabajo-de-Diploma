@@ -43,7 +43,10 @@ namespace BLL
             return GeneradorCredenciales.ExportarClavesRecuperacion(planas);
         }
 
-        // Claves de emergencia todavía disponibles.
+        // Claves de emergencia todavía disponibles. Sin caller en la GUI por ahora (candidato
+        // natural para una futura pantalla de administración de claves de emergencia); se deja
+        // documentado en vez de eliminarlo porque, a diferencia de un método realmente muerto, es
+        // una consulta de una sola línea sin lógica propia que pueda desincronizarse.
         public int ContarClavesDisponibles()
         {
             return claveDAL.ContarDisponibles();
@@ -122,13 +125,6 @@ namespace BLL
 
             throw new BE.AppException("err.bll.emergencia.invalida",
                 "Usuario o clave de emergencia inválidos.");
-        }
-
-        // Fail-closed: solo un Administrador con sesión puede gestionar las claves.
-        private static void ValidarEsAdministrador()
-        {
-            BLLHelper.ExigirAdministrador("err.bll.usuario.sin_permiso",
-                "Solo un Administrador puede gestionar las claves de emergencia.");
         }
     }
 }

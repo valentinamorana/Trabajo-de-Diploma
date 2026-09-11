@@ -48,17 +48,8 @@ namespace GUI
             CargarEnBackground();
         }
 
-        private string T(string k, string fb)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(k) ? t[k].Texto : fb;
-        }
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             this.Text          = Tr("dash.vendedor.titulo", "Panel de Ventas");
             lblTitulo.Text     = Tr("dash.vendedor.titulo", "Panel de Ventas");
             lblSub.Text        = Tr("dash.vendedor.subtitulo", "WardrobeFlow  —  Ventas");

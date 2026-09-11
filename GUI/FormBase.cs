@@ -142,8 +142,11 @@ namespace GUI
         }
 
         // Registra una excepción inesperada en la bitácora con criticidad Alta.
-        // Nunca propaga: si el logueo falla, no debe tapar el error original.
-        private void RegistrarExcepcion(Exception ex)
+        // Nunca propaga: si el logueo falla, no debe tapar el error original. Protected (no
+        // private) para que formularios con una necesidad real de título de MessageBox
+        // personalizado (ej. ReporteJornadaForm) puedan reusar el mismo criterio de auditoría
+        // que MostrarError(Exception) sin reimplementarlo de cero.
+        protected void RegistrarExcepcion(Exception ex)
         {
             try
             {

@@ -17,7 +17,7 @@ namespace GUI
     /// (admin logueado) y desde el arranque (Program), cuando un Administrador autenticado entra
     /// con la base comprometida. Cada acción se confirma con ConfirmarAdminForm.
     /// </summary>
-    public partial class RecuperacionEspejoForm : Form
+    public partial class RecuperacionEspejoForm : FormBase
     {
         // True si se ejecutó una recuperación con éxito (el llamador puede reiniciar/refrescar).
         public bool RecuperadoExitosamente { get; private set; }
@@ -26,25 +26,17 @@ namespace GUI
         {
             InitializeComponent();
 
-            this.Text            = T("rec.frm.titulo",    this.Text);
-            btnCerrar.Text       = T("rec.btn.cerrar",     btnCerrar.Text);
-            btnBackup.Text       = T("rec.btn.backup",     btnBackup.Text);
-            btnAsumir.Text       = T("rec.btn.asumir",     btnAsumir.Text);
-            btnReparar.Text      = T("rec.btn.reparar",    btnReparar.Text);
-            colId.HeaderText       = T("rec.col.id",       colId.HeaderText);
-            colUsuario.HeaderText  = T("rec.col.usuario",  colUsuario.HeaderText);
-            colTipo.HeaderText     = T("rec.col.tipo",     colTipo.HeaderText);
-            colCampo.HeaderText    = T("rec.col.campo",    colCampo.HeaderText);
-            colActual.HeaderText   = T("rec.col.actual",   colActual.HeaderText);
-            colEsperado.HeaderText = T("rec.col.esperado", colEsperado.HeaderText);
-
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
-        }
-
-        private static string T(string key, string fallback)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(key) ? t[key].Texto : fallback;
+            this.Text            = Tr("rec.frm.titulo",    this.Text);
+            btnCerrar.Text       = Tr("rec.btn.cerrar",     btnCerrar.Text);
+            btnBackup.Text       = Tr("rec.btn.backup",     btnBackup.Text);
+            btnAsumir.Text       = Tr("rec.btn.asumir",     btnAsumir.Text);
+            btnReparar.Text      = Tr("rec.btn.reparar",    btnReparar.Text);
+            colId.HeaderText       = Tr("rec.col.id",       colId.HeaderText);
+            colUsuario.HeaderText  = Tr("rec.col.usuario",  colUsuario.HeaderText);
+            colTipo.HeaderText     = Tr("rec.col.tipo",     colTipo.HeaderText);
+            colCampo.HeaderText    = Tr("rec.col.campo",    colCampo.HeaderText);
+            colActual.HeaderText   = Tr("rec.col.actual",   colActual.HeaderText);
+            colEsperado.HeaderText = Tr("rec.col.esperado", colEsperado.HeaderText);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -61,19 +53,19 @@ namespace GUI
                 var d = BLL.RecuperacionIntegridad.Diagnosticar();
 
                 lblEstado.Text = d.Integro
-                    ? T("rec.estado.integro", "Estado: ÍNTEGRO")
-                    : T("rec.estado.comprometido", "Estado: COMPROMETIDO");
+                    ? Tr("rec.estado.integro", "Estado: ÍNTEGRO")
+                    : Tr("rec.estado.comprometido", "Estado: COMPROMETIDO");
 
                 txtResumen.Text = string.Join("\r\n", d.Resumen.ToArray());
                 if (d.DvvAlmacenado != null || d.DvvCalculado != 0)
                     txtResumen.Text += "\r\n" + string.Format(
-                        T("rec.dvv.detalle", "DVV almacenado: {0}  |  DVV calculado: {1}"),
+                        Tr("rec.dvv.detalle", "DVV almacenado: {0}  |  DVV calculado: {1}"),
                         d.DvvAlmacenado?.ToString() ?? "—", d.DvvCalculado);
 
-                string tMod = T("rec.tipo.modificada",   "Modificada");
-                string tDvh = T("rec.tipo.dvh",          "DVH corrupto");
-                string tIns = T("rec.tipo.insertada",    "Inserción externa");
-                string tDel = T("rec.tipo.eliminada",    "Eliminada (falta)");
+                string tMod = Tr("rec.tipo.modificada",   "Modificada");
+                string tDvh = Tr("rec.tipo.dvh",          "DVH corrupto");
+                string tIns = Tr("rec.tipo.insertada",    "Inserción externa");
+                string tDel = Tr("rec.tipo.eliminada",    "Eliminada (falta)");
 
                 foreach (var a in d.Alteradas)
                 {
@@ -87,7 +79,7 @@ namespace GUI
                 }
                 foreach (var f in d.Faltantes)
                     grid.Rows.Add(f.Id, f.Username, tDel, "—",
-                        T("rec.fila.ausente", "(ausente en la tabla actual)"), T("rec.fila.enespejo", "(presente en el espejo)"));
+                        Tr("rec.fila.ausente", "(ausente en la tabla actual)"), Tr("rec.fila.enespejo", "(presente en el espejo)"));
 
                 btnReparar.Enabled = d.PuedeReparar;
                 btnAsumir.Enabled  = d.PuedeAsumirPerdida;
@@ -102,8 +94,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(T("rec.err.cargar", "Error al diagnosticar: {0}"), ex.Message),
-                    T("rec.err.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -118,8 +109,8 @@ namespace GUI
         private void BtnReparar_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show(
-                    T("rec.conf.reparar", "¿Restaurar la tabla Usuario a los valores legítimos del espejo?\n\nSe revertirán las filas modificadas y se eliminarán las inserciones externas."),
-                    T("rec.conf.reparar.titulo", "Confirmar Reparación"),
+                    Tr("rec.conf.reparar", "¿Restaurar la tabla Usuario a los valores legítimos del espejo?\n\nSe revertirán las filas modificadas y se eliminarán las inserciones externas."),
+                    Tr("rec.conf.reparar.titulo", "Confirmar Reparación"),
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             if (!ConfirmarAdmin()) return;
 
@@ -127,8 +118,8 @@ namespace GUI
             {
                 BLL.RecuperacionIntegridad.RepararDesdeEspejo();
                 RecuperadoExitosamente = true;
-                MessageBox.Show(T("rec.msg.reparado", "Saneamiento completado: se restauraron los datos legítimos del espejo."),
-                    T("rec.msg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(Tr("rec.msg.reparado", "Saneamiento completado: se restauraron los datos legítimos del espejo."),
+                    Tr("rec.msg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarDiagnostico();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -137,8 +128,8 @@ namespace GUI
         private void BtnAsumir_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show(
-                    T("rec.conf.asumir", "ATENCIÓN: se aceptarán los datos ACTUALES como legítimos y se recalcularán todos los dígitos verificadores.\n\nSi hubo manipulación, quedará consolidada. ¿Continuar?"),
-                    T("rec.conf.asumir.titulo", "Confirmar Asumir Pérdida"),
+                    Tr("rec.conf.asumir", "ATENCIÓN: se aceptarán los datos ACTUALES como legítimos y se recalcularán todos los dígitos verificadores.\n\nSi hubo manipulación, quedará consolidada. ¿Continuar?"),
+                    Tr("rec.conf.asumir.titulo", "Confirmar Asumir Pérdida"),
                     MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes) return;
             if (!ConfirmarAdmin()) return;
 
@@ -146,8 +137,8 @@ namespace GUI
             {
                 BLL.RecuperacionIntegridad.AsumirPerdida();
                 RecuperadoExitosamente = true;
-                MessageBox.Show(T("rec.msg.asumido", "Dígitos verificadores recalculados sobre los datos actuales."),
-                    T("rec.msg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(Tr("rec.msg.asumido", "Dígitos verificadores recalculados sobre los datos actuales."),
+                    Tr("rec.msg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarDiagnostico();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -160,7 +151,7 @@ namespace GUI
             using (var ofd = new OpenFileDialog())
             {
                 ofd.Filter = "Copias de Seguridad (*.wfbak;*.bak)|*.wfbak;*.bak";
-                ofd.Title  = T("rec.backup.seleccionar", "Seleccionar Backup para Restaurar");
+                ofd.Title  = Tr("rec.backup.seleccionar", "Seleccionar Backup para Restaurar");
                 if (ofd.ShowDialog() != DialogResult.OK) return;
 
                 // RF-08 — Informar el ALCANCE de la pérdida (fecha del backup + registros actuales
@@ -168,16 +159,16 @@ namespace GUI
                 string alcance = ConstruirAlcancePerdida(ofd.FileName);
 
                 if (MessageBox.Show(
-                        T("conf.rest.sobreescribir", "¿Está seguro? Esta operación sobrescribirá todos los datos actuales y reiniciará la aplicación.") + alcance,
-                        T("msg.backup.titulorestaura", "Confirmar Restauración"),
+                        Tr("conf.rest.sobreescribir", "¿Está seguro? Esta operación sobrescribirá todos los datos actuales y reiniciará la aplicación.") + alcance,
+                        Tr("msg.backup.titulorestaura", "Confirmar Restauración"),
                         MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
 
                 string clave = null;
                 if (BLL.Backup.EsCifrado(ofd.FileName))
                 {
                     using (var dlg = new InputDialog(
-                        T("dlg.backup.clave.titulo", "Contraseña del backup"),
-                        T("dlg.backup.clave.ingresar", "Ingresá la contraseña con la que se cifró este backup:"),
+                        Tr("dlg.backup.clave.titulo", "Contraseña del backup"),
+                        Tr("dlg.backup.clave.ingresar", "Ingresá la contraseña con la que se cifró este backup:"),
                         esPassword: true))
                     {
                         if (dlg.ShowDialog(this) != DialogResult.OK) return;
@@ -188,8 +179,8 @@ namespace GUI
                 try
                 {
                     new BLL.Backup().RestaurarBackup("RecuperacionEspejo", ofd.FileName, clave);
-                    MessageBox.Show(T("msg.backup.restauradaexito", "Base de datos restaurada con éxito.\nLa aplicación se reiniciará."),
-                        T("rpt.dlg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(Tr("msg.backup.restauradaexito", "Base de datos restaurada con éxito.\nLa aplicación se reiniciará."),
+                        Tr("rpt.dlg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                     RecuperadoExitosamente = true;
                     Application.Restart();
                 }
@@ -207,23 +198,23 @@ namespace GUI
                 var bll = new BLL.Backup();
                 DateTime? fecha = bll.ObtenerFechaBackup(ruta);
                 if (!fecha.HasValue)
-                    return T("msg.backup.alcance.desconocido",
+                    return Tr("msg.backup.alcance.desconocido",
                         "\n\nNo se pudo determinar la fecha del backup. Se perderán todos los cambios posteriores a su creación.");
 
                 var sb = new System.Text.StringBuilder();
                 sb.Append(string.Format(
-                    T("msg.backup.alcance",
+                    Tr("msg.backup.alcance",
                       "\n\nEl backup es del {0} (hace {1} día(s)).\nSe PERDERÁN todos los cambios posteriores a esa fecha."),
                     fecha.Value.ToString("dd/MM/yyyy HH:mm"),
                     Math.Max(0, (int)(DateTime.Now - fecha.Value).TotalDays)));
 
                 var cambios = bll.ObtenerCambiosDesde(fecha);
                 if (cambios == null || cambios.Count == 0)
-                    sb.Append(T("msg.backup.sinperdida",
+                    sb.Append(Tr("msg.backup.sinperdida",
                         "\n\nNo hay registros nuevos posteriores a esa fecha: no se perdería información reciente."));
                 else
                 {
-                    sb.Append(T("msg.backup.perdida.titulo",
+                    sb.Append(Tr("msg.backup.perdida.titulo",
                         "\n\nSe perderán estos registros creados después del backup:"));
                     foreach (var c in cambios)
                         sb.Append($"\n  • {c.Entidad}: {c.Cantidad}");
@@ -231,19 +222,6 @@ namespace GUI
                 return sb.ToString();
             }
             catch { return string.Empty; }
-        }
-
-        private void MostrarError(Exception ex)
-        {
-            // BE.AppException lleva una clave de traducción — ex.Message es el fallback hardcodeado
-            // en español fijado en el throw, así que hay que resolver la clave contra el idioma
-            // activo (mismo criterio que FormBase.MostrarError(Exception), que esta clase no hereda).
-            string mensaje = ex is BE.AppException appEx
-                ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
-                : ex.Message;
-
-            MessageBox.Show(T("rec.err.titulo", "Error") + ":\n" + mensaje,
-                T("rec.err.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

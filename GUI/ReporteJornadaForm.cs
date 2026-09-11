@@ -340,16 +340,27 @@ namespace GUI
             };
         }
 
-        // BE.AppException lleva una clave de traducción — ex.Message es el fallback hardcodeado en
-        // español fijado en el throw. Este form no hereda FormBase (no tiene lblMensaje propio), así
-        // que replica acá la misma resolución que FormBase.MostrarError(Exception) hace para el resto
-        // de la app, y también traduce el título del MessageBox.
-        private static void MostrarError(Exception ex, string claveTitulo, string tituloFallback)
+        // Variante de FormBase.MostrarError(Exception) con título de MessageBox personalizado
+        // (ej. "Error al exportar" vs. "Error al imprimir") — este form no tiene lblMensaje
+        // propio, así que ambas formas terminan en MessageBox igual, pero acá el título importa
+        // para distinguir en qué paso falló. Mismo criterio que la base: AppException se traduce
+        // y se muestra tal cual; una excepción inesperada se audita en bitácora (heredado de
+        // FormBase.RegistrarExcepcion) y al usuario solo se le muestra un mensaje genérico, sin
+        // exponer detalle técnico.
+        private void MostrarError(Exception ex, string claveTitulo, string tituloFallback)
         {
-            string mensaje = ex is BE.AppException appEx
-                ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
-                : ex.Message;
             string titulo = Traductor.Resolver(claveTitulo, tituloFallback, null, GestorIdioma.IdiomaActual);
+            string mensaje;
+            if (ex is BE.AppException appEx)
+            {
+                mensaje = Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual);
+            }
+            else
+            {
+                RegistrarExcepcion(ex);
+                mensaje = Tr("msg.error.inesperado",
+                    "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.");
+            }
             MessageBox.Show(mensaje, titulo, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 

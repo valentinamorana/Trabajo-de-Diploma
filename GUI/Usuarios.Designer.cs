@@ -36,7 +36,7 @@ namespace GUI
             this.lblDesbloquearInfo = new System.Windows.Forms.Label();
             this.btnDesbloquear = new System.Windows.Forms.Button();
             this.lblMensaje = new System.Windows.Forms.Label();
-            this.btnEliminar = new System.Windows.Forms.Button();
+            this.btnArchivar = new System.Windows.Forms.Button();
             this.btnVerArchivados = new System.Windows.Forms.Button();
             this.btnPurgar = new System.Windows.Forms.Button();
             this.dgvUsuarios = new System.Windows.Forms.DataGridView();
@@ -66,7 +66,7 @@ namespace GUI
             this.panelAlta.Controls.Add(this.lblDesbloquearInfo);
             this.panelAlta.Controls.Add(this.btnDesbloquear);
             this.panelAlta.Controls.Add(this.lblMensaje);
-            this.panelAlta.Controls.Add(this.btnEliminar);
+            this.panelAlta.Controls.Add(this.btnArchivar);
             this.panelAlta.Controls.Add(this.btnVerArchivados);
             this.panelAlta.Controls.Add(this.btnPurgar);
             this.panelAlta.Dock = System.Windows.Forms.DockStyle.Right;
@@ -208,7 +208,7 @@ namespace GUI
             this.lblResetInfo.Size = new System.Drawing.Size(210, 36);
             this.lblResetInfo.TabIndex = 11;
             this.lblResetInfo.Tag = "lbl.resetinfo";
-            this.lblResetInfo.Text = "Selecioná un usuario\nen la lista y presioná:";
+            this.lblResetInfo.Text = "Seleccioná un usuario\nen la lista y presioná:";
             //
             // btnResetearClave
             //
@@ -253,7 +253,7 @@ namespace GUI
             this.lblDesbloquearInfo.Size = new System.Drawing.Size(210, 36);
             this.lblDesbloquearInfo.TabIndex = 15;
             this.lblDesbloquearInfo.Tag = "lbl.desbloqinfo";
-            this.lblDesbloquearInfo.Text = "Selecioná un usuario\nbloqueado y presioná:";
+            this.lblDesbloquearInfo.Text = "Seleccioná un usuario\nbloqueado y presioná:";
             //
             // btnDesbloquear
             //
@@ -271,23 +271,23 @@ namespace GUI
             this.btnDesbloquear.UseVisualStyleBackColor = false;
             this.btnDesbloquear.Click += new System.EventHandler(this.BtnDesbloquear_Click);
             //
-            // btnEliminar — RF-10, archivar (baja lógica) el usuario seleccionado.
+            // btnArchivar — RF-10, archivar (baja lógica) el usuario seleccionado.
             //
-            this.btnEliminar.BackColor = System.Drawing.Color.FromArgb(170, 50, 50);
-            this.btnEliminar.Enabled   = false;
-            this.btnEliminar.FlatAppearance.BorderSize = 0;
-            this.btnEliminar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEliminar.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
-            this.btnEliminar.ForeColor = System.Drawing.Color.White;
-            this.btnEliminar.Cursor    = System.Windows.Forms.Cursors.Hand;
-            this.btnEliminar.Location  = new System.Drawing.Point(12, 256);
-            this.btnEliminar.Name      = "btnEliminar";
-            this.btnEliminar.Size      = new System.Drawing.Size(210, 30);
-            this.btnEliminar.TabIndex  = 17;
-            this.btnEliminar.Tag       = "btn.usr.eliminar";
-            this.btnEliminar.Text      = "🗑 Archivar usuario";
-            this.btnEliminar.UseVisualStyleBackColor = false;
-            this.btnEliminar.Click    += new System.EventHandler(this.BtnEliminar_Click);
+            this.btnArchivar.BackColor = System.Drawing.Color.FromArgb(170, 50, 50);
+            this.btnArchivar.Enabled   = false;
+            this.btnArchivar.FlatAppearance.BorderSize = 0;
+            this.btnArchivar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnArchivar.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.btnArchivar.ForeColor = System.Drawing.Color.White;
+            this.btnArchivar.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnArchivar.Location  = new System.Drawing.Point(12, 256);
+            this.btnArchivar.Name      = "btnArchivar";
+            this.btnArchivar.Size      = new System.Drawing.Size(210, 30);
+            this.btnArchivar.TabIndex  = 17;
+            this.btnArchivar.Tag       = "btn.usr.eliminar";
+            this.btnArchivar.Text      = "🗑 Archivar usuario";
+            this.btnArchivar.UseVisualStyleBackColor = false;
+            this.btnArchivar.Click    += new System.EventHandler(this.BtnArchivar_Click);
             //
             // btnVerArchivados
             //
@@ -413,7 +413,7 @@ namespace GUI
         private System.Windows.Forms.Label        lblDesbloquearInfo;
         private System.Windows.Forms.Button       btnDesbloquear;
         private System.Windows.Forms.Label        lblMensaje;
-        private System.Windows.Forms.Button       btnEliminar;
+        private System.Windows.Forms.Button       btnArchivar;
         private System.Windows.Forms.Button       btnVerArchivados;
         private System.Windows.Forms.Button       btnPurgar;
         private System.Windows.Forms.DataGridView dgvUsuarios;

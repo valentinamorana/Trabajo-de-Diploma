@@ -313,7 +313,34 @@ namespace GUI
             try
             {
                 int nuevoId = _familiaBLL.CrearRol(nombre);
-                _familiaBLL.AgregarComponente(padre.Id, nuevoId);   // valida ciclos en la BLL
+                try
+                {
+                    _familiaBLL.AgregarComponente(padre.Id, nuevoId);   // valida ciclos en la BLL
+                }
+                catch (Exception exVincular)
+                {
+                    // CrearRol y AgregarComponente son dos llamadas BLL no transaccionales: si la
+                    // segunda falla (ciclo detectado, error de BD), el rol ya quedó persistido como
+                    // raíz huérfana sin vínculo al padre pedido. Se intenta deshacer la creación
+                    // antes de propagar el error, en vez de dejarlo a medias para que un admin lo
+                    // encuentre por casualidad más adelante.
+                    try
+                    {
+                        _familiaBLL.EliminarComponente(nuevoId);
+                    }
+                    catch
+                    {
+                        // Ni siquiera se pudo deshacer: avisar explícitamente en vez de un error
+                        // genérico, para que quede claro que hay que revisarlo a mano.
+                        MostrarError(string.Format(
+                            T("perm.err.subrol_huerfano",
+                              "El sub-rol '{0}' se creó pero no se pudo vincular a '{1}' ({2}), y tampoco se pudo deshacer automáticamente. Revisalo manualmente en la lista de Roles."),
+                            nombre, padre.Nombre, exVincular.Message));
+                        CargarArbol();
+                        return;
+                    }
+                    throw; // re-lanza el error original (ej. ciclo) ya con el rol huérfano limpiado
+                }
                 GUI.Menu.RefrescarSeguridadAbierta();
                 MostrarOk(string.Format(T("perm.ok.subcreado", "Sub-rol '{0}' creado dentro de '{1}'."), nombre, padre.Nombre));
                 txtNombreRol.Text = "";

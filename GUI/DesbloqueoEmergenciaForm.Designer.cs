@@ -21,6 +21,7 @@ namespace GUI
             this.txtUsuario     = new System.Windows.Forms.TextBox();
             this.lblClave       = new System.Windows.Forms.Label();
             this.txtClave       = new System.Windows.Forms.TextBox();
+            this.btnMostrarClave = new System.Windows.Forms.Button();
             this.lblError       = new System.Windows.Forms.Label();
             this.btnDesbloquear = new System.Windows.Forms.Button();
             this.btnCancelar    = new System.Windows.Forms.Button();
@@ -68,12 +69,31 @@ namespace GUI
             this.lblClave.Text     = "Clave de emergencia:";
 
             // ── txtClave ───────────────────────────────────────────────────────
+            // Enmascarado por diseño (PasswordChar), como el resto de los campos de contraseña
+            // del sistema — antes quedaba completamente visible mientras se escribía. btnMostrarClave
+            // (mismo mecanismo que Login.btnMostrarClave) permite revelarla temporalmente.
             this.txtClave.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtClave.Font            = new System.Drawing.Font("Consolas", 11F);
             this.txtClave.Location        = new System.Drawing.Point(24, 170);
             this.txtClave.Name            = "txtClave";
-            this.txtClave.Size            = new System.Drawing.Size(382, 29);
+            this.txtClave.PasswordChar    = '●';
+            this.txtClave.Size            = new System.Drawing.Size(350, 29);
             this.txtClave.TabIndex        = 5;
+
+            // ── btnMostrarClave — ojito mostrar/ocultar clave de emergencia ──────
+            this.btnMostrarClave.Cursor                    = System.Windows.Forms.Cursors.Hand;
+            this.btnMostrarClave.FlatAppearance.BorderSize = 0;
+            this.btnMostrarClave.FlatStyle                 = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMostrarClave.Font                      = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Strikeout);
+            this.btnMostrarClave.ForeColor                 = System.Drawing.Color.Gray;
+            this.btnMostrarClave.Location                  = new System.Drawing.Point(378, 170);
+            this.btnMostrarClave.Name                      = "btnMostrarClave";
+            this.btnMostrarClave.Size                      = new System.Drawing.Size(28, 29);
+            this.btnMostrarClave.TabIndex                  = 9;
+            this.btnMostrarClave.TabStop                   = false;
+            this.btnMostrarClave.Text                      = "👁";
+            this.btnMostrarClave.UseVisualStyleBackColor   = true;
+            this.btnMostrarClave.Click += new System.EventHandler(this.BtnMostrarClave_Click);
 
             // ── lblError ───────────────────────────────────────────────────────
             this.lblError.ForeColor = System.Drawing.Color.FromArgb(180, 50, 50);
@@ -118,6 +138,7 @@ namespace GUI
             this.Controls.Add(this.txtUsuario);
             this.Controls.Add(this.lblClave);
             this.Controls.Add(this.txtClave);
+            this.Controls.Add(this.btnMostrarClave);
             this.Controls.Add(this.lblError);
             this.Controls.Add(this.btnDesbloquear);
             this.Controls.Add(this.btnCancelar);
@@ -141,6 +162,7 @@ namespace GUI
         private System.Windows.Forms.TextBox txtUsuario;
         private System.Windows.Forms.Label   lblClave;
         private System.Windows.Forms.TextBox txtClave;
+        private System.Windows.Forms.Button  btnMostrarClave;
         private System.Windows.Forms.Label   lblError;
         private System.Windows.Forms.Button  btnDesbloquear;
         private System.Windows.Forms.Button  btnCancelar;

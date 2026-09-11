@@ -3569,9 +3569,13 @@ EN	err.bll.usuario.sin_cambios	There are no changes to save.
 RU	err.bll.usuario.sin_cambios	Нет изменений для сохранения.
 PT	err.bll.usuario.sin_cambios	Não há alterações para salvar.
 ES	err.cambioclave.nocoincide	Las contraseñas no coinciden.
+ES	err.cambioclave.vacia	Ingresá una contraseña nueva.
 EN	err.cambioclave.nocoincide	The passwords do not match.
+EN	err.cambioclave.vacia	Enter a new password.
 RU	err.cambioclave.nocoincide	Пароли не совпадают.
+RU	err.cambioclave.vacia	Введите новый пароль.
 PT	err.cambioclave.nocoincide	As senhas não coincidem.
+PT	err.cambioclave.vacia	Digite uma nova senha.
 ES	err.login.debecambiarclave	Debés cambiar tu contraseña temporal para ingresar.
 EN	err.login.debecambiarclave	You must change your temporary password to log in.
 RU	err.login.debecambiarclave	Чтобы войти, необходимо сменить временный пароль.
@@ -4243,6 +4247,7 @@ ES	lbl.permisos.detalle	Detalle:
 ES	lbl.permisos.detalle.vacio	Detalle: (sin selección)
 ES	perm.msg.selpadrerol	Seleccioná un Rol del árbol para crearle un sub-rol.
 ES	perm.ok.subcreado	Sub-rol '{0}' creado dentro de '{1}'.
+ES	perm.err.subrol_huerfano	El sub-rol '{0}' se creó pero no se pudo vincular a '{1}' ({2}), y tampoco se pudo deshacer automáticamente. Revisalo manualmente en la lista de Roles.
 ES	perm.msg.selasignable	Elegí un permiso o rol de la lista para asignar.
 ES	perm.msg.selquitar	Seleccioná un ítem que cuelgue de un rol para quitarlo.
 ES	perm.conf.quitar	¿Quitar '{0}' del rol '{1}'?
@@ -4261,6 +4266,7 @@ EN	lbl.permisos.detalle	Details:
 EN	lbl.permisos.detalle.vacio	Details: (nothing selected)
 EN	perm.msg.selpadrerol	Select a Role from the tree to create a sub-role under it.
 EN	perm.ok.subcreado	Sub-role '{0}' created inside '{1}'.
+EN	perm.err.subrol_huerfano	Sub-role '{0}' was created but could not be linked to '{1}' ({2}), and the automatic rollback also failed. Please review it manually in the Roles list.
 EN	perm.msg.selasignable	Choose a permission or role from the list to assign.
 EN	perm.msg.selquitar	Select an item hanging from a role to remove it.
 EN	perm.conf.quitar	Remove '{0}' from role '{1}'?
@@ -4279,6 +4285,7 @@ RU	lbl.permisos.detalle	Детали:
 RU	lbl.permisos.detalle.vacio	Детали: (ничего не выбрано)
 RU	perm.msg.selpadrerol	Выберите Роль в дереве, чтобы создать вложенную роль.
 RU	perm.ok.subcreado	Вложенная роль «{0}» создана внутри «{1}».
+RU	perm.err.subrol_huerfano	Подроль '{0}' создана, но не удалось привязать её к '{1}' ({2}), и автоматический откат тоже не сработал. Проверьте вручную в списке ролей.
 RU	perm.msg.selasignable	Выберите право или роль из списка для назначения.
 RU	perm.msg.selquitar	Выберите элемент, вложенный в роль, чтобы удалить его.
 RU	perm.conf.quitar	Удалить «{0}» из роли «{1}»?
@@ -4297,6 +4304,7 @@ PT	lbl.permisos.detalle	Detalhe:
 PT	lbl.permisos.detalle.vacio	Detalhe: (nada selecionado)
 PT	perm.msg.selpadrerol	Selecione um Papel na árvore para criar um sub-papel nele.
 PT	perm.ok.subcreado	Sub-papel '{0}' criado dentro de '{1}'.
+PT	perm.err.subrol_huerfano	O subperfil '{0}' foi criado mas não pôde ser vinculado a '{1}' ({2}), e a reversão automática também falhou. Revise manualmente na lista de Perfis.
 PT	perm.msg.selasignable	Escolha uma permissão ou papel na lista para atribuir.
 PT	perm.msg.selquitar	Selecione um item vinculado a um papel para removê-lo.
 PT	perm.conf.quitar	Remover '{0}' do papel '{1}'?

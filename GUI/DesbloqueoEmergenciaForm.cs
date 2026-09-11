@@ -42,6 +42,21 @@ namespace GUI
 
         private void BtnDesbloquear_Click(object sender, EventArgs e) => Desbloquear();
 
+        // Mismo mecanismo que Login.btnMostrarClave_Click.
+        private void BtnMostrarClave_Click(object sender, EventArgs e)
+        {
+            if (txtClave.PasswordChar == '\0')
+            {
+                txtClave.PasswordChar = '●';
+                btnMostrarClave.Font = new Font("Segoe UI Emoji", 9f, FontStyle.Strikeout);
+            }
+            else
+            {
+                txtClave.PasswordChar = '\0';
+                btnMostrarClave.Font = new Font("Segoe UI Emoji", 9f);
+            }
+        }
+
         private void Desbloquear()
         {
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);

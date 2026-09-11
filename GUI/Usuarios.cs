@@ -86,7 +86,7 @@ namespace GUI
             Aplicar(lblDesbloquearInfo,   t);
             Aplicar(btnDesbloquear,       t);
             Aplicar(lblListaTitulo,       t);
-            Aplicar(btnEliminar,          t);
+            Aplicar(btnArchivar,          t);
             Aplicar(btnVerArchivados,     t);
             Aplicar(btnPurgar,            t);
             RellenarComboPerfil(t);
@@ -183,12 +183,12 @@ namespace GUI
             {
                 btnResetearClave.Enabled = false;
                 btnDesbloquear.Enabled   = false;
-                btnEliminar.Enabled      = false;
+                btnArchivar.Enabled      = false;
                 return;
             }
 
             btnResetearClave.Enabled = haySeleccion;
-            btnEliminar.Enabled      = haySeleccion;
+            btnArchivar.Enabled      = haySeleccion;
 
             // Desbloquear solo se habilita si el usuario seleccionado está bloqueado.
             // Usamos la columna interna _BloqueadoKey (int) para ser independientes del idioma.
@@ -266,7 +266,7 @@ namespace GUI
                 btnAgregar.Enabled       = !_viendoArchivados;
                 btnResetearClave.Enabled = false;
                 btnDesbloquear.Enabled   = false;
-                btnEliminar.Enabled      = false;
+                btnArchivar.Enabled      = false;
             }
             catch (Exception ex)
             {
@@ -378,7 +378,7 @@ namespace GUI
         // ── RF-10 — Archivar / Ver archivados / Purgar ────────────────────────
 
         // Archiva (baja lógica) el usuario seleccionado. La BLL protege al último admin y al self.
-        private void BtnEliminar_Click(object sender, EventArgs e)
+        private void BtnArchivar_Click(object sender, EventArgs e)
         {
             if (_viendoArchivados || dgvUsuarios.SelectedRows.Count == 0) return;
 
@@ -457,58 +457,5 @@ namespace GUI
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Diálogo de entrada de texto simple — reemplaza Microsoft.VisualBasic.Interaction.InputBox
-        /// para evitar dependencia externa en el proyecto GUI.
-        /// </summary>
-        private string PedirTexto(string mensaje, string titulo)
-        {
-            using (Form dlg = new Form())
-            {
-                dlg.Text            = titulo;
-                dlg.ClientSize      = new System.Drawing.Size(360, 130);
-                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
-                dlg.StartPosition  = FormStartPosition.CenterParent;
-                dlg.MaximizeBox    = false;
-                dlg.MinimizeBox    = false;
-
-                var lbl = new Label
-                {
-                    Text     = mensaje,
-                    Left     = 12, Top   = 12,
-                    Width    = 336, Height = 32,
-                    Font     = new Font("Segoe UI", 9f)
-                };
-
-                var txt = new TextBox
-                {
-                    Left         = 12,  Top   = 50,
-                    Width        = 336, Height = 24,
-                    PasswordChar = '●'
-                };
-
-                var tPT = Traductor.ObtenerTraducciones(_idioma);
-                var btnOk = new Button
-                {
-                    Text         = tPT.ContainsKey("btn.aceptar")  ? tPT["btn.aceptar"].Texto  : "Aceptar",
-                    Left         = 168, Top    = 88,
-                    Width        = 80,  Height = 28,
-                    DialogResult = DialogResult.OK
-                };
-                var btnCancelar = new Button
-                {
-                    Text         = tPT.ContainsKey("btn.cancelar") ? tPT["btn.cancelar"].Texto : "Cancelar",
-                    Left         = 260, Top    = 88,
-                    Width        = 88,  Height = 28,
-                    DialogResult = DialogResult.Cancel
-                };
-
-                dlg.AcceptButton = btnOk;
-                dlg.CancelButton = btnCancelar;
-                dlg.Controls.AddRange(new Control[] { lbl, txt, btnOk, btnCancelar });
-
-                return dlg.ShowDialog(this) == DialogResult.OK ? txt.Text : string.Empty;
-            }
-        }
     }
 }

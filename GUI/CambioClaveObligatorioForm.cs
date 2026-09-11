@@ -42,6 +42,26 @@ namespace GUI
 
             lblError.Text = string.Empty;
 
+            // Feedback temprano en la propia GUI (antes dependía 100% de que la BLL rechazara la
+            // clave débil tras el roundtrip, sin decirle al usuario cuál regla incumplió hasta
+            // recibir la excepción) — BLL.Usuario.ValidarContrasena ya existía justo para esto
+            // ("para que la GUI pueda dar feedback temprano sin acceder directamente a Seguridad")
+            // pero ninguna pantalla la llamaba todavía. Misma regla que ya se muestra en lblReglas.
+            if (string.IsNullOrEmpty(txtNueva.Text))
+            {
+                lblError.Text = T("err.cambioclave.vacia", "Ingresá una contraseña nueva.");
+                txtNueva.Focus();
+                return;
+            }
+
+            var (valida, claveErr, mensajeErr) = _usuarioBLL.ValidarContrasena(txtNueva.Text);
+            if (!valida)
+            {
+                lblError.Text = Traductor.Resolver(claveErr, mensajeErr, null, GestorIdioma.IdiomaActual);
+                txtNueva.Focus();
+                return;
+            }
+
             if (txtNueva.Text != txtRepetir.Text)
             {
                 lblError.Text = T("err.cambioclave.nocoincide", "Las contraseñas no coinciden.");

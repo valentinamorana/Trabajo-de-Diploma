@@ -42,10 +42,8 @@ namespace GUI
 
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-            Text           = T("frm.alertas", "Centro de Alertas");
-            lblTitulo.Text = "🔔  " + T("frm.alertas", "Centro de Alertas");
+            Text           = Tr("frm.alertas", "Centro de Alertas");
+            lblTitulo.Text = "🔔  " + Tr("frm.alertas", "Centro de Alertas");
         }
 
         private void BtnActualizar_Click(object sender, EventArgs e) => CargarAlertas();
@@ -55,9 +53,6 @@ namespace GUI
         {
             flow.SuspendLayout();
             flow.Controls.Clear();
-
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             System.Collections.Generic.List<BE.Alerta> alertas;
             try { alertas = new BLL.PanelAlertas().ObtenerAlertas(); }
@@ -74,9 +69,8 @@ namespace GUI
                 }
                 catch { /* el fallo al registrar no debe romper el manejo del error */ }
 
-                string generico = t.ContainsKey("msg.error.inesperado")
-                    ? t["msg.error.inesperado"].Texto
-                    : "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.";
+                string generico = Tr("msg.error.inesperado",
+                    "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.");
                 flow.Controls.Add(CrearFila(BE.NivelAlerta.Critica, generico));
                 flow.ResumeLayout();
                 return;
@@ -86,7 +80,7 @@ namespace GUI
             {
                 var ok = new Label
                 {
-                    Text      = "✓  " + T("alert.sinalertas", "No hay alertas activas. Todo en orden."),
+                    Text      = "✓  " + Tr("alert.sinalertas", "No hay alertas activas. Todo en orden."),
                     Font      = new Font("Segoe UI", 10F),
                     ForeColor = Color.FromArgb(60, 110, 70),
                     AutoSize  = true,
@@ -99,7 +93,7 @@ namespace GUI
 
             foreach (var a in alertas)
             {
-                string texto = t.ContainsKey(a.ClaveI18n) ? t[a.ClaveI18n].Texto : a.MensajeFallback;
+                string texto = Tr(a.ClaveI18n, a.MensajeFallback);
                 if (a.Parametros != null && a.Parametros.Length > 0)
                 {
                     try { texto = string.Format(texto, a.Parametros); } catch { }

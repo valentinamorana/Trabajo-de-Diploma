@@ -1,11 +1,13 @@
 # Auditoría técnica — WardrobeFlow (2026-09-10)
 
-> **Actualización (2026-09-11): todos los 🔴 Alta están resueltos.** Los 23 hallazgos Alta de
-> código de producción (todo salvo Tests) y los 5 hallazgos Alta de Tests (cobertura nueva) se
-> corrigieron en una sesión de trabajo posterior a esta auditoría — ver el marcador
-> `✅ RESUELTO (2026-09-11)` en cada uno. Build + suite completa de tests verificados en verde
-> después de cada tanda de cambios (325+ tests, 0 fallando). Los 🟡 Media y 🟢 Baja siguen
-> pendientes tal cual se encontraron.
+> **Actualización (2026-09-11): todos los 🔴 Alta están resueltos**, y ~60 de los 95 hallazgos
+> 🟡 Media/🟢 Baja también (ver el marcador `✅ RESUELTO (2026-09-11)` en cada uno, con su
+> "Solución aplicada"). Build + tests verificados en verde después de cada tanda de cambios
+> (325+ tests, 0 fallando). Los ítems Media/Baja sin ese marcador quedan anotados `(pendiente)`
+> cuando requieren un refactor de mayor alcance, una decisión de producto, o simplemente no se
+> llegó a esta pasada — no se tocó nada fuera de lo explícitamente marcado como resuelto. El scan
+> transversal (§10) sigue sin empezar salvo el ítem #12 (color de marca), resuelto como parte de
+> §8 GUI-Infraestructura.
 
 > **Metodología:** revisión manual y crítica hecha por 10 agentes en paralelo, cada uno con un
 > alcance acotado (una capa o un grupo funcional de pantallas), sobre las ~56.000 líneas de
@@ -58,7 +60,7 @@ Los ~18 hallazgos de mayor impacto de negocio/seguridad de toda la revisión, en
 8. **Selección múltiple habilitada por defecto pero ignorada en todas las grillas de acción** (Pedidos, Prendas, Clientes, Lista de Espera, Inspección): el usuario puede creer que actuó sobre 3 filas seleccionadas y solo se aplicó a la primera, sin aviso (§GUI-Operación #2).
 9. **`ContratacionesPendientesForm` nunca muestra el monto a cobrar** — Caja confirma un cobro real sin ver el importe en pantalla (§GUI-Promociones #3).
 10. **`CobroSuscripcionForm`/`RenovacionSuscripcionForm` sin ninguna confirmación antes de procesar**, incluyendo la opción "Dar de baja" (irreversible) (§GUI-Promociones #2).
-11. **`GestorPermisos.CrearSubRol` — si falla el segundo paso, el rol nuevo queda huérfano** en la base sin vínculo al padre, sin rollback ni aviso claro (§GUI-Usuarios #4).
+11. ✅ RESUELTO — **`GestorPermisos.CrearSubRol` — si falla el segundo paso, el rol nuevo queda huérfano** en la base sin vínculo al padre, sin rollback ni aviso claro (§GUI-Usuarios #4).
 12. **9 de 16 pantallas (dashboards, reportes, historiales, alertas) no heredan `FormBase`**: ignoran tema oscuro/fuente del usuario, duplican a mano la carga de ícono, y `AlertasForm` directamente se olvidó de copiarlo (abre con ícono por defecto) (§GUI-Dashboards #1).
 13. **`DashboardSupervisor` es el único de los 4 dashboards con Kanban sin navegación por clic** en sus tarjetas — inconsistencia funcional entre pantallas gemelas (§GUI-Dashboards #3).
 14. **`DAL/Interfaces/IUsuarioDAL` no expone `RestaurarVersion` ni `ObtenerPorId`**, rompiendo la inversión de dependencias justo para el patrón Memento (el más sensible del proyecto) — no se puede testear esa ruta con un doble (§BE-DAL #1).
@@ -89,30 +91,37 @@ Se invoca sin protección inmediatamente después del `Commit` en `Alta`(287), `
 
 ### 🟡 Media
 
-**3. SQL con enteros interpolados en vez de parametrizados (+ un magic number).** `DAL/Contratacion.cs:122,143`, `DAL/SugerenciaPromocion.cs:83` interpolan un cast de enum en el texto del UPDATE (sin riesgo real, pero rompe la convención parametrizada del resto del DAL); `DAL/Promocion.cs:188` es peor — `Estado=3` es un magic number literal, sin comentario, y 15 líneas más abajo `CambiarEstado` en el mismo archivo sí parametriza `@Estado` correctamente.
+**3. ✅ RESUELTO (2026-09-11) — SQL con enteros interpolados en vez de parametrizados (+ un magic number).** `DAL/Contratacion.cs:122,143`, `DAL/SugerenciaPromocion.cs:83` interpolan un cast de enum en el texto del UPDATE (sin riesgo real, pero rompe la convención parametrizada del resto del DAL); `DAL/Promocion.cs:188` es peor — `Estado=3` es un magic number literal, sin comentario, y 15 líneas más abajo `CambiarEstado` en el mismo archivo sí parametriza `@Estado` correctamente.
+*Solución aplicada:* los 3 sitios pasan a `@Estado` parametrizado.
 
-**4. Detección de "BD sin migrar" por matcheo de texto sobre `SqlException.Message`.** Más de 10 veces en `DAL/Usuario.cs` (afecta el login), también en `DAL/Permiso.cs`/`DAL/VersionUsuario.cs`. Frágil: depende del idioma del servidor y de que el mensaje contenga la subcadena esperada; un error real que mencione esa palabra por coincidencia se trataría como "no migrado" en el camino más transitado del sistema.
+**4. Detección de "BD sin migrar" por matcheo de texto sobre `SqlException.Message`.** Más de 10 veces en `DAL/Usuario.cs` (afecta el login), también en `DAL/Permiso.cs`/`DAL/VersionUsuario.cs`. Frágil: depende del idioma del servidor y de que el mensaje contenga la subcadena esperada; un error real que mencione esa palabra por coincidencia se trataría como "no migrado" en el camino más transitado del sistema. *(pendiente — refactor transversal de mayor alcance, se deja para una pasada aparte)*
 
-**5. `DAL/VersionUsuario.cs:49-50` — el fallback de `LeerLista` solo reconstruye el primer parámetro del array**, ignorando silenciosamente el resto si en el futuro un filtro usa 2+ parámetros. Bug latente, no activo hoy.
+**5. ✅ RESUELTO (2026-09-11) — `DAL/VersionUsuario.cs:49-50` — el fallback de `LeerLista` solo reconstruye el primer parámetro del array**, ignorando silenciosamente el resto si en el futuro un filtro usa 2+ parámetros. Bug latente, no activo hoy.
+*Solución aplicada:* el fallback ahora copia todos los parámetros vía `Array.ConvertAll`, no solo `parametros[0]`.
 
-**6. Inconsistencia sistemática: `BaseDAL<T>` (que centraliza el acceso a BD) vs. ~17 clases DAL que redeclaran `Acceso.GetInstance()` a mano** en vez de heredar — pierden el contrato mínimo uniforme que la clase base fuerza.
+**6. Inconsistencia sistemática: `BaseDAL<T>` (que centraliza el acceso a BD) vs. ~17 clases DAL que redeclaran `Acceso.GetInstance()` a mano** en vez de heredar — pierden el contrato mínimo uniforme que la clase base fuerza. *(pendiente — refactor de ~17 archivos, se deja para una pasada aparte)*
 
-**7. `Bitacora.Registrar`/`BitacoraNegocio.Registrar` tragan cualquier falla del INSERT de auditoría con criterios distintos entre sí** (una atrapa y solo traza, la otra ni siquiera tiene try/catch) — riesgo de pérdida silenciosa e indefinida de rastro de auditoría.
+**7. ✅ RESUELTO (2026-09-11) — `Bitacora.Registrar`/`BitacoraNegocio.Registrar` tragan cualquier falla del INSERT de auditoría con criterios distintos entre sí** (una atrapa y solo traza, la otra ni siquiera tiene try/catch) — riesgo de pérdida silenciosa e indefinida de rastro de auditoría.
+*Solución aplicada:* `BitacoraNegocio.Registrar` ahora tiene try/catch con el mismo criterio que `Bitacora.Registrar`.
 
-**8. `DAL/Permiso.cs:268-281` (`BajaComponente`) — DELETE+UPDATE como batch sin `EjecutarTransaccion` explícita**, a diferencia del resto de operaciones multi-tabla del proyecto.
+**8. ✅ RESUELTO (2026-09-11) — `DAL/Permiso.cs:268-281` (`BajaComponente`) — DELETE+UPDATE como batch sin `EjecutarTransaccion` explícita**, a diferencia del resto de operaciones multi-tabla del proyecto.
+*Solución aplicada:* envuelto en `acceso.EjecutarTransaccion`.
 
-**9. `AddWithValue` sin tipar vs. `SqlParameter` explícito — split sistemático entre métodos normales y `*EnTx`** dentro del mismo archivo DAL (anti-patrón de ADO.NET documentado).
+**9. `AddWithValue` sin tipar vs. `SqlParameter` explícito — split sistemático entre métodos normales y `*EnTx`** dentro del mismo archivo DAL (anti-patrón de ADO.NET documentado). *(pendiente — refactor transversal, se deja para una pasada aparte)*
 
-**10. Helper `Id()` de whitelist de identificadores SQL duplicado byte a byte** entre `DAL/DigitoVerificador.cs:128-138` y `DAL/Backup.cs:212-222` (el propio comentario de Backup reconoce la duplicación).
+**10. ✅ RESUELTO (2026-09-11) — Helper `Id()` de whitelist de identificadores SQL duplicado byte a byte** entre `DAL/DigitoVerificador.cs:128-138` y `DAL/Backup.cs:212-222` (el propio comentario de Backup reconoce la duplicación).
+*Solución aplicada:* extraído a `DAL/SqlIdentificador.Validar(string)`, usado por ambos archivos.
 
 ### 🟢 Baja
 
-11. `HistorialIntegridad.cs` es la única clase DAL que nombra el campo `_acceso` en vez de `acceso`.
-12. Mezcla de `camelCase`/`PascalCase` en nombres de `SqlParameter` dentro del mismo archivo (`DAL/Usuario.cs`).
-13. `IEmpleadoDAL` no tiene el equivalente a `ExisteDNIParaOtro` que sí tiene `IClienteDAL` (misma necesidad de negocio resuelta de forma asimétrica).
-14. `DAL.Usuario` reimplementa ~90% de `DigitoVerificador.RecalcularTabla` para poder sincronizar la tabla espejo — duplicación justificable pero con riesgo de divergencia.
-15. Full-table scan de `Usuario` (dos veces) en cada intento de login fallido/exitoso — no escala, invisible a esta escala de datos.
-16. `catch { }` vacíos al limpiar archivos temporales de backup, sin ningún `Trace` — un `.bak` temporal que no se borra queda invisible en los logs.
+11. ✅ RESUELTO (2026-09-11) — `HistorialIntegridad.cs` es la única clase DAL que nombra el campo `_acceso` en vez de `acceso`.
+*Solución aplicada:* renombrado a `acceso`.
+12. Mezcla de `camelCase`/`PascalCase` en nombres de `SqlParameter` dentro del mismo archivo (`DAL/Usuario.cs`). *(pendiente)*
+13. `IEmpleadoDAL` no tiene el equivalente a `ExisteDNIParaOtro` que sí tiene `IClienteDAL` (misma necesidad de negocio resuelta de forma asimétrica). *(evaluado y descartado a propósito: `DAL.Empleado.ExisteDNI` no tiene ningún caller en BLL — no existe `BLL.Empleado` — agregar la paridad en la interfaz sería solo código muerto nuevo)*
+14. `DAL.Usuario` reimplementa ~90% de `DigitoVerificador.RecalcularTabla` para poder sincronizar la tabla espejo — duplicación justificable pero con riesgo de divergencia. *(pendiente)*
+15. Full-table scan de `Usuario` (dos veces) en cada intento de login fallido/exitoso — no escala, invisible a esta escala de datos. *(pendiente)*
+16. ✅ RESUELTO (2026-09-11) — `catch { }` vacíos al limpiar archivos temporales de backup, sin ningún `Trace` — un `.bak` temporal que no se borra queda invisible en los logs.
+*Solución aplicada:* ambos `catch` ahora loguean vía `Trace.TraceWarning`.
 17. `DAL.Cliente.BuscarIdPorDni` sigue siendo O(n) con descifrado en memoria — comportamiento conocido y decisión explícita de no resolver, se deja constancia.
 
 ---
@@ -137,22 +146,29 @@ Si el rol tiene 3 componentes nuevos (A, B, C) y C formaría un ciclo, el métod
 
 ### 🟡 Media
 
-**3. `BLL/Bitacora.cs:54-59` (`UsuarioPuedeVerSistema`) — compara contra un perfil retirado.** `"Supervisor"` fue remapeado a `"GerenteComercial"` (`Usuario.Abm.cs:307`, `BD/07_Reset_Perfiles_Permisos.sql:27-28`). El método devuelve `true` para todo el mundo en la práctica — la restricción de negocio ("el Supervisor solo ve bitácora de negocio") quedó muerta tras la consolidación de roles.
+**3. ✅ RESUELTO (2026-09-11) — `BLL/Bitacora.cs:54-59` (`UsuarioPuedeVerSistema`) — compara contra un perfil retirado.** `"Supervisor"` fue remapeado a `"GerenteComercial"` (`Usuario.Abm.cs:307`, `BD/07_Reset_Perfiles_Permisos.sql:27-28`). El método devuelve `true` para todo el mundo en la práctica — la restricción de negocio ("el Supervisor solo ve bitácora de negocio") quedó muerta tras la consolidación de roles.
+*Solución aplicada:* ahora compara contra `"GerenteComercial"`.
 
-**4. `BLL/Familia.cs:75-91` (`ExigirSistemaConservaGestion`) — 3 `catch` fail-open sobre el guard de "último administrador".** Si hay un problema transitorio de BD (el escenario más probable de disparo), la operación destructiva procede **sin el chequeo**, en vez de fallar cerrado — antipatrón para un guard de seguridad.
+**4. ✅ RESUELTO (2026-09-11) — `BLL/Familia.cs:75-91` (`ExigirSistemaConservaGestion`) — 3 `catch` fail-open sobre el guard de "último administrador".** Si hay un problema transitorio de BD (el escenario más probable de disparo), la operación destructiva procede **sin el chequeo**, en vez de fallar cerrado — antipatrón para un guard de seguridad.
+*Solución aplicada:* se mantiene el fail-open (cambiarlo a fail-closed rompería el guard en un caso legítimo de BD caída), pero ahora cada catch loguea explícitamente en Bitácora con `Criticidad.Alta` vía el nuevo helper `RegistrarGuardSaltado`, así el salteo queda auditado en vez de silencioso.
 
-**5. `BLL/Configuracion.cs:220-222` (`VerificarIntegridadDV`) — heurística de texto frágil** (`msg.Contains("DVH")`) para distinguir "BD sin migrar" de corrupción real; un error real que mencione esas palabras por coincidencia se trataría como no-migrado.
+**5. `BLL/Configuracion.cs:220-222` (`VerificarIntegridadDV`) — heurística de texto frágil** (`msg.Contains("DVH")`) para distinguir "BD sin migrar" de corrupción real; un error real que mencione esas palabras por coincidencia se trataría como no-migrado. *(pendiente — mismo patrón que §1 #4, se deja para la misma pasada)*
 
-**6. `BLL/Pedido.cs:380-390` — `catch` mudo (sin loguear) que traga cualquier excepción al validar reserva de Lista de Espera**, inconsistente con el catch hermano de `CrearPedido` (30 líneas antes) que sí loguea el mismo tipo de degradación.
+**6. ✅ RESUELTO (2026-09-11) — `BLL/Pedido.cs:380-390` — `catch` mudo (sin loguear) que traga cualquier excepción al validar reserva de Lista de Espera**, inconsistente con el catch hermano de `CrearPedido` (30 líneas antes) que sí loguea el mismo tipo de degradación.
+*Solución aplicada:* ahora loguea vía `Trace.TraceWarning`, mismo criterio que el catch hermano.
 
-**7. `BLL/Promocion.Modificar` (121-158) es código muerto** (sin caller en GUI ni tests) y, de usarse, no tiene guarda de estado (podría modificar una promoción ya `Vigente` sin repasar por Contabilidad) ni reutiliza la validación de `CrearInterna` (duplicada, riesgo de divergencia).
+**7. ✅ RESUELTO (2026-09-11) — `BLL/Promocion.Modificar` (121-158) es código muerto** (sin caller en GUI ni tests) y, de usarse, no tiene guarda de estado (podría modificar una promoción ya `Vigente` sin repasar por Contabilidad) ni reutiliza la validación de `CrearInterna` (duplicada, riesgo de divergencia).
+*Solución aplicada:* se extrajo `ValidarCamposComunes(...)` compartida por `CrearInterna` y `Modificar`; se agregó el guard de estado (`!PuedeAprobarseORechazarseContable()` → `err.bll.promocion.modificar_estado`); se agregaron 4 tests (ver §9 #7). Sigue sin ningún caller en GUI — el código muerto en sí no se resolvió (ninguna pantalla ofrece "editar promoción"), pero ya no tiene los dos riesgos de diseño que tenía el método.
 
-**8. `BLL/Backup.cs` (`ExtraerAutorDeNombre`) no reconoce el prefijo `"WardrobeFlow_Inicial_"`** de los backups iniciales — la UI siempre muestra autor desconocido para ellos.
+**8. ✅ RESUELTO (2026-09-11) — `BLL/Backup.cs` (`ExtraerAutorDeNombre`) no reconoce el prefijo `"WardrobeFlow_Inicial_"`** de los backups iniciales — la UI siempre muestra autor desconocido para ellos.
+*Solución aplicada:* ahora reconoce ambos prefijos (`"WardrobeFlow_Backup_"`/`"WardrobeFlow_Inicial_"`) vía un array `PrefijosConocidos` + `FirstOrDefault`.
 
 ### 🟢 Baja
 
-9. Comentario desactualizado en `DecisionRenovacion.cs:11` (habla de "Pausar" como hipotético cuando ya es un valor real implementado).
-10. `BLL/RecuperacionAdmin.cs` tiene dos métodos sin ningún caller en todo el repo (`ContarClavesDisponibles`, `ValidarEsAdministrador`).
+9. ✅ RESUELTO (2026-09-11) — Comentario desactualizado en `DecisionRenovacion.cs:11` (habla de "Pausar" como hipotético cuando ya es un valor real implementado).
+*Solución aplicada:* comentario actualizado.
+10. ✅ RESUELTO (2026-09-11) — `BLL/RecuperacionAdmin.cs` tiene dos métodos sin ningún caller en todo el repo (`ContarClavesDisponibles`, `ValidarEsAdministrador`).
+*Solución aplicada:* `ValidarEsAdministrador` (dead code real) se eliminó; `ContarClavesDisponibles` se documentó como intencionalmente sin uso por ahora (diseñado para una futura pantalla de estado) y además ganó test (ver §9 #5).
 
 ---
 
@@ -171,22 +187,28 @@ Contexto: `SessionManager.TienePermiso` con `OrdinalIgnoreCase` — verificado r
 
 ### 🟡 Media
 
-**2. `SessionManager.cs` — Singleton sin `volatile`, inconsistente con `ContadorSesion`** (que sí lo hace y lo documenta). Antipatrón de doble-checked locking sin `volatile` en el punto de entrada más usado de BLL/GUI.
+**2. ✅ RESUELTO (2026-09-11) — `SessionManager.cs` — Singleton sin `volatile`, inconsistente con `ContadorSesion`** (que sí lo hace y lo documenta). Antipatrón de doble-checked locking sin `volatile` en el punto de entrada más usado de BLL/GUI.
+*Solución aplicada:* campo `_session` ahora `volatile`.
 
-**3. `GeneradorCredenciales` — contraseñas y claves de emergencia en `.txt` sin cifrar**, en carpeta predecible (`Mis Documentos\WardrobeFlow\CredencialesGeneradas\`), acumulándose indefinidamente sin borrado ni expiración.
+**3. `GeneradorCredenciales` — contraseñas y claves de emergencia en `.txt` sin cifrar**, en carpeta predecible (`Mis Documentos\WardrobeFlow\CredencialesGeneradas\`), acumulándose indefinidamente sin borrado ni expiración. *(pendiente — requiere decisión de producto sobre almacenamiento cifrado, se deja para una pasada aparte)*
 
-**4. `SerializadorCsv.Escapar` — sin mitigación de CSV/Formula Injection** (CWE-1236): una celda que empiece con `=`/`+`/`-`/`@` queda tal cual, interpretable como fórmula por Excel al abrir el export.
+**4. ✅ RESUELTO (2026-09-11) — `SerializadorCsv.Escapar` — sin mitigación de CSV/Formula Injection** (CWE-1236): una celda que empiece con `=`/`+`/`-`/`@` queda tal cual, interpretable como fórmula por Excel al abrir el export.
+*Solución aplicada:* `Escapar` ahora prepende `'` para campos que empiecen con `=+-@` o tab, vía el array `PrefijosFormula`; 5 tests nuevos de CSV-injection.
 
-**5. ~40 claves `err.bll.*`/`msg.*`/`col.*` de Contratación/Lista de Espera/Promociones usadas en BLL no existen en `traducciones.tsv`.** Un usuario con UI en EN/RU/PT ve estos mensajes de error específicos en español (fallback hardcodeado), rompiendo la promesa de 100% multiidioma para estos módulos nuevos.
+**5. ✅ RESUELTO (2026-09-11) — ~40 claves `err.bll.*`/`msg.*`/`col.*` de Contratación/Lista de Espera/Promociones usadas en BLL no existen en `traducciones.tsv`.** Un usuario con UI en EN/RU/PT ve estos mensajes de error específicos en español (fallback hardcodeado), rompiendo la promesa de 100% multiidioma para estos módulos nuevos.
+*Solución aplicada:* se agregaron 41 claves faltantes (Contratación 5, Lista de Espera 15, Promoción 15, SugerenciaPromocion 4, Pedido 1, más 1 corrección de ancla) × 4 idiomas, detectadas diffeando las claves usadas en código contra la columna ES del TSV.
 
 ### 🟢 Baja
 
-6. Claves huérfanas documentadas en el comentario de `Traductor.cs` (`mnu.usuarios`, `mnu.bitacora`) que ya no se usan en el código actual.
+6. Claves huérfanas documentadas en el comentario de `Traductor.cs` (`mnu.usuarios`, `mnu.bitacora`) que ya no se usan en el código actual. *(el comentario en sí se corrigió — ver la nota del commit de Seguridad+Servicios — pero el hallazgo de fondo, claves huérfanas reales en el TSV, no se investigó a fondo; queda pendiente si se quiere ir más allá de la corrección del comentario)*
 7. Las 4 líneas nuevas de `traducciones.tsv` (`mnu.ventana.cerrartodas`) verificadas explícitamente: esquema, duplicados y completitud por idioma — todo OK, sin hallazgo.
-8. `Encriptador` usa AES-128-CBC sin HMAC/AEAD — desviación de la práctica recomendada (cifrar-y-autenticar), riesgo bajo (requiere acceso directo a BD).
-9. `CifradorArchivos` no limpia el archivo de salida si `Cifrar`/`Descifrar` fallan a mitad de camino — puede dejar un `.wfbak` corrupto con nombre "definitivo".
-10. `GeneradorCredenciales.cs:129` — `catch { }` sin log, rompe la convención del resto de la capa.
-11. `Encriptador.ConvertirBase64` — wrapper público trivial sin uso externo.
+8. `Encriptador` usa AES-128-CBC sin HMAC/AEAD — desviación de la práctica recomendada (cifrar-y-autenticar), riesgo bajo (requiere acceso directo a BD). *(pendiente — decisión de mayor alcance, documentada como diferida)*
+9. ✅ RESUELTO (2026-09-11) — `CifradorArchivos` no limpia el archivo de salida si `Cifrar`/`Descifrar` fallan a mitad de camino — puede dejar un `.wfbak` corrupto con nombre "definitivo".
+*Solución aplicada:* ambos métodos quedaron envueltos en try/catch que llama a `BorrarSiExiste(ruta)` antes de re-lanzar.
+10. ✅ RESUELTO (2026-09-11) — `GeneradorCredenciales.cs:129` — `catch { }` sin log, rompe la convención del resto de la capa.
+*Solución aplicada:* ahora loguea vía `Trace.TraceWarning`.
+11. ✅ RESUELTO (2026-09-11) — `Encriptador.ConvertirBase64` — wrapper público trivial sin uso externo.
+*Solución aplicada:* cambiado de `public` a `private` (ya no expone superficie sin uso).
 12. `ContadorSesion` de intentos de login es global al proceso (no por usuario) — documentado como intencional para app de escritorio mono-usuario.
 
 ---
@@ -219,23 +241,27 @@ Contexto: el criterio de urgencia/mantenimiento entre los 5 dashboards (objeto d
 
 ### 🟡 Media
 
-7. Boilerplate de layout/paint casi idéntico duplicado 4-5 veces entre los 5 dashboards (mismo origen que el bug de umbrales de la auditoría anterior, ahora en pintado/layout).
-8. `lblSub` (subtítulo del header) nunca se traduce en ninguno de los 5 dashboards — queda fijo en español con cualquier idioma activo.
-9. `DashboardForm` hardcodea `"Sistema (30d)"` fuera del sistema de traducción, rompiendo el patrón que el resto del archivo sí sigue.
-10. Tres patrones distintos de "cuándo cargo mis datos por primera vez" (`OnLoad` override vs. evento `Load` del Designer vs. directo en el constructor) entre las 16 pantallas.
-11. Manejo de excepciones inconsistente: desde `FormBase.MostrarError` (traducido + auditado) hasta `AlertasForm` mostrando `ex.Message` crudo sin traducir directo en una tarjeta "Crítica".
-12. Carga de datos síncrona en el hilo de UI sin indicador de progreso en casi todas las pantallas fuera de los 5 dashboards (que sí usan `Task.Run`).
-13. `Font` recreado sin `Dispose` en cada refresco periódico (cada 2 min) en 2 dashboards — fuga de handles GDI en sesiones largas.
-14. `DashboardControlStock`: la tarjeta KPI "En mantenimiento" (por cantidad) y el Kanban debajo (por antigüedad) usan criterios de alerta distintos en la misma pantalla, pueden contradecirse visualmente.
+7. Boilerplate de layout/paint casi idéntico duplicado 4-5 veces entre los 5 dashboards (mismo origen que el bug de umbrales de la auditoría anterior, ahora en pintado/layout). *(pendiente — extracción de mayor alcance)*
+8. ✅ RESUELTO (2026-09-11) — `lblSub` (subtítulo del header) nunca se traduce en ninguno de los 5 dashboards — queda fijo en español con cualquier idioma activo.
+*Solución aplicada:* `lblSub.Text = Tr(...)` en los 5 dashboards, con 5 claves nuevas `dash.*.subtitulo`.
+9. ✅ RESUELTO (2026-09-11) — `DashboardForm` hardcodea `"Sistema (30d)"` fuera del sistema de traducción, rompiendo el patrón que el resto del archivo sí sigue.
+*Solución aplicada:* nueva clave `dash.stats.sistema30d`.
+10. Tres patrones distintos de "cuándo cargo mis datos por primera vez" (`OnLoad` override vs. evento `Load` del Designer vs. directo en el constructor) entre las 16 pantallas. *(pendiente — unificación de mayor alcance)*
+11. Manejo de excepciones inconsistente: desde `FormBase.MostrarError` (traducido + auditado) hasta `AlertasForm` mostrando `ex.Message` crudo sin traducir directo en una tarjeta "Crítica". *(parcial: el caso puntual de `AlertasForm` ya se resolvió como parte del hallazgo Alta #1 de esta sección — ahora usa un mensaje genérico traducido y logueado en bitácora; la inconsistencia de fondo entre las 3 implementaciones de `MostrarError` del repo sigue pendiente, ver §10 transversal #5)*
+12. Carga de datos síncrona en el hilo de UI sin indicador de progreso en casi todas las pantallas fuera de los 5 dashboards (que sí usan `Task.Run`). *(pendiente)*
+13. ✅ RESUELTO (2026-09-11) — `Font` recreado sin `Dispose` en cada refresco periódico (cada 2 min) en 2 dashboards — fuga de handles GDI en sesiones largas.
+*Solución aplicada:* `DashboardForm`/`DashboardControlStock` ahora reusan campos `Font` estáticos en vez de crear uno nuevo en cada refresco.
+14. `DashboardControlStock`: la tarjeta KPI "En mantenimiento" (por cantidad) y el Kanban debajo (por antigüedad) usan criterios de alerta distintos en la misma pantalla, pueden contradecirse visualmente. *(no se cambió el comportamiento — es una decisión de negocio válida usar dos criterios distintos para dos preguntas distintas — se agregó un comentario aclaratorio en el código para que no se lea como un descuido)*
 
 ### 🟢 Baja
 
-15. `DashboardVendedor` nombra su panel Kanban distinto a sus 3 hermanos (`kanbanWrapper` vs `wrapper`).
-16. Convención de nombres de event handlers distinta entre las 3 pantallas de Historial (PascalCase vs camelCase).
-17. Contenedores de columna con nombres genéricos `col1`/`col2`/`col3` en los 4 dashboards con Kanban.
-18. Cero controles `ToolTip` en las 16 pantallas revisadas (incl. un botón solo-ícono "⚙" sin texto ni tooltip).
-19. `AutoScaleDimensions`/`AutoScaleMode` configurados de forma distinta entre las 3 pantallas de Historial.
-20. Botones "Exportar a PDF/CSV" nunca se deshabilitan sin datos generados (el guard llega recién al clic).
+15. ✅ RESUELTO (2026-09-11) — `DashboardVendedor` nombra su panel Kanban distinto a sus 3 hermanos (`kanbanWrapper` vs `wrapper`).
+*Solución aplicada:* renombrado a `wrapper` en el Designer.
+16. Convención de nombres de event handlers distinta entre las 3 pantallas de Historial (PascalCase vs camelCase). *(pendiente)*
+17. Contenedores de columna con nombres genéricos `col1`/`col2`/`col3` en los 4 dashboards con Kanban. *(pendiente)*
+18. Cero controles `ToolTip` en las 16 pantallas revisadas (incl. un botón solo-ícono "⚙" sin texto ni tooltip). *(pendiente)*
+19. `AutoScaleDimensions`/`AutoScaleMode` configurados de forma distinta entre las 3 pantallas de Historial. *(pendiente)*
+20. Botones "Exportar a PDF/CSV" nunca se deshabilitan sin datos generados (el guard llega recién al clic). *(pendiente)*
 
 ---
 
@@ -258,20 +284,25 @@ Contexto: el patrón Command para Cancelación/Devolución de Pedido (fix de la 
 
 ### 🟡 Media
 
-4. Regla "EnUso→Baja solo por el flujo dedicado de pérdida" impuesta únicamente en la GUI (`Prendas.cs`, un `continue` en una lista de opciones), sin respaldo en BLL/BE — cualquier código futuro que llame `CambiarEstado` directo la saltea.
-5. Cobro + baja como dos llamadas BLL no atómicas, repetido en 3 lugares distintos con el mismo riesgo aceptado pero sin ningún helper común de compensación.
-6. Tres implementaciones distintas de "diálogo simple" en vez de reusar `GUI.InputDialog` — una de ellas con botones hardcodeados sin traducir ("OK" en inglés fijo).
-7. Feedback de validación inconsistente entre diálogos modales similares (`CargoPrendaDialog`/`CambioEstadoDialog` sin color/ícono de error, a diferencia de `InspeccionDevolucionForm` que sí hereda `FormBase`).
-8. Errores al cargar detalle de pedido se silencian por completo (solo `Trace`, sin `MostrarError` ni auditoría) en `PedidosVenta`/`PedidosRealizados`.
-9. Alcance inconsistente del patrón Command dentro del mismo agregado `Pedido`: Cancelar/Devolución pasan por Command, pero Despachar/MarcarEntregado/DesCancelar llaman a BLL directo, sin que el criterio esté documentado.
-10. Feedback "Procesando..." que probablemente nunca se pinta en `NuevoPedidoForm` (falta `Refresh()`/`DoEvents()` antes de la llamada sincrónica).
+4. ✅ RESUELTO (2026-09-11) — Regla "EnUso→Baja solo por el flujo dedicado de pérdida" impuesta únicamente en la GUI (`Prendas.cs`, un `continue` en una lista de opciones), sin respaldo en BLL/BE — cualquier código futuro que llame `CambiarEstado` directo la saltea.
+*Solución aplicada:* `IPrendaService.CambiarEstado`/`BLL.Prenda.CambiarEstado` ganaron un parámetro `bool viaFlujoPerdida = false`; ahora lanza `err.bll.prenda.baja_requiere_flujoperdida` si se intenta `EnUso→Baja` sin pasar por el flujo dedicado, sin importar quién llame — la regla vive en BLL, no solo en la GUI.
+5. Cobro + baja como dos llamadas BLL no atómicas, repetido en 3 lugares distintos con el mismo riesgo aceptado pero sin ningún helper común de compensación. *(pendiente — requiere diseñar el helper de compensación, mayor alcance)*
+6. Tres implementaciones distintas de "diálogo simple" en vez de reusar `GUI.InputDialog` — una de ellas con botones hardcodeados sin traducir ("OK" en inglés fijo). *(pendiente)*
+7. Feedback de validación inconsistente entre diálogos modales similares (`CargoPrendaDialog`/`CambioEstadoDialog` sin color/ícono de error, a diferencia de `InspeccionDevolucionForm` que sí hereda `FormBase`). *(pendiente)*
+8. ✅ RESUELTO (2026-09-11) — Errores al cargar detalle de pedido se silencian por completo (solo `Trace`, sin `MostrarError` ni auditoría) en `PedidosVenta`/`PedidosRealizados`.
+*Solución aplicada:* ambos catches ahora también llaman a `MostrarError(ex)`, no solo `Trace.TraceError`.
+9. Alcance inconsistente del patrón Command dentro del mismo agregado `Pedido`: Cancelar/Devolución pasan por Command, pero Despachar/MarcarEntregado/DesCancelar llaman a BLL directo, sin que el criterio esté documentado. *(pendiente — decisión de diseño, no un bug puntual)*
+10. ✅ RESUELTO (2026-09-11) — Feedback "Procesando..." que probablemente nunca se pinta en `NuevoPedidoForm` (falta `Refresh()`/`DoEvents()` antes de la llamada sincrónica).
+*Solución aplicada:* se agregó `this.Refresh()` antes de la llamada sincrónica a `CrearPedido`.
 
 ### 🟢 Baja
 
-11. Handler de evento vacío (código muerto) en `ListaEsperaForm_Load`.
-12. `ExploradorCompositeForm` tiene un chequeo de tipo redundante que no aprovecha la interfaz uniforme del Composite (funciona igual sin él).
-13. Verbos inconsistentes para "confirmar/continuar" entre pantallas (Aceptar/Confirmar/OK, uno de ellos sin traducir).
-14. Emojis de estado/urgencia hardcodeados como literales en la lógica de presentación en vez de una capa de estilos.
+11. ✅ RESUELTO (2026-09-11) — Handler de evento vacío (código muerto) en `ListaEsperaForm_Load`.
+*Solución aplicada:* eliminado el handler vacío y su cableado en el Designer.
+12. ✅ RESUELTO (2026-09-11) — `ExploradorCompositeForm` tiene un chequeo de tipo redundante que no aprovecha la interfaz uniforme del Composite (funciona igual sin él).
+*Solución aplicada:* se verificó que `BE.Patente.Hijos` devuelve lista vacía (nunca lanza) y se eliminó el `if (esFamilia)` redundante alrededor de la recursión.
+13. Verbos inconsistentes para "confirmar/continuar" entre pantallas (Aceptar/Confirmar/OK, uno de ellos sin traducir). *(pendiente)*
+14. Emojis de estado/urgencia hardcodeados como literales en la lógica de presentación en vez de una capa de estilos. *(pendiente)*
 
 ---
 
@@ -292,22 +323,28 @@ Contexto: el patrón Command para Cancelación/Devolución de Pedido (fix de la 
 
 ### 🟡 Media
 
-4. `GestorPermisos.CrearSubRol` — si `AgregarComponente` falla tras `CrearRol` exitoso, el rol queda persistido como raíz huérfana, sin rollback visible ni aviso de que quedó a medias.
-5. `ConfirmarAdminForm` (gate de la Clave Maestra) sin límite de intentos visible en la GUI — vulnerable a fuerza bruta sin fricción sobre el secreto más crítico del sistema si la BLL tampoco lo limita.
-6. `DesbloqueoEmergenciaForm` — el campo de clave de emergencia se muestra en **texto plano** (sin `PasswordChar`), a diferencia de todos los demás campos de contraseña del sistema.
-7. `CambioClaveObligatorioForm` sin ninguna validación de vacío/fortaleza en la GUI antes de invocar BLL — depende 100% de que la BLL nunca falle en aplicar la regla.
-8. `GestorPermisos` sin resguardo visible contra que un usuario modifique/potencie el rol al que él mismo pertenece (auto-escalación de privilegios), a diferencia de la protección de "último administrador" que sí existe para usuarios puntuales.
-9. `DiagnosticoIntegridadForm` no distingue en pantalla los dos problemas ya conocidos de auditorías previas (DNI sin descifrar, duplicados de clientes) — todo se reduce a un genérico "DV inválido" por tabla.
+4. ✅ RESUELTO (2026-09-11) — `GestorPermisos.CrearSubRol` — si `AgregarComponente` falla tras `CrearRol` exitoso, el rol queda persistido como raíz huérfana, sin rollback visible ni aviso de que quedó a medias.
+*Solución aplicada:* `CrearSubRol` envuelve `AgregarComponente` en try/catch; si falla, intenta `EliminarComponente(nuevoId)` como rollback, y si el rollback también falla muestra explícitamente `perm.err.subrol_huerfano` en vez de un error genérico.
+5. `ConfirmarAdminForm` (gate de la Clave Maestra) sin límite de intentos visible en la GUI — vulnerable a fuerza bruta sin fricción sobre el secreto más crítico del sistema si la BLL tampoco lo limita. *(pendiente)*
+6. ✅ RESUELTO (2026-09-11) — `DesbloqueoEmergenciaForm` — el campo de clave de emergencia se muestra en **texto plano** (sin `PasswordChar`), a diferencia de todos los demás campos de contraseña del sistema.
+*Solución aplicada:* `txtClave` ahora enmascarado por defecto (`PasswordChar = '●'`), con un botón `btnMostrarClave` para alternar, mismo mecanismo que ya usa `Login.cs`.
+7. ✅ RESUELTO (2026-09-11) — `CambioClaveObligatorioForm` sin ninguna validación de vacío/fortaleza en la GUI antes de invocar BLL — depende 100% de que la BLL nunca falle en aplicar la regla.
+*Solución aplicada:* `Confirmar()` ahora llama a `_usuarioBLL.ValidarContrasena(txtNueva.Text)` (existía en BLL sin ningún caller) más un chequeo de vacío, para feedback inmediato.
+8. `GestorPermisos` sin resguardo visible contra que un usuario modifique/potencie el rol al que él mismo pertenece (auto-escalación de privilegios), a diferencia de la protección de "último administrador" que sí existe para usuarios puntuales. *(pendiente)*
+9. `DiagnosticoIntegridadForm` no distingue en pantalla los dos problemas ya conocidos de auditorías previas (DNI sin descifrar, duplicados de clientes) — todo se reduce a un genérico "DV inválido" por tabla. *(pendiente)*
 
 ### 🟢 Baja
 
-10. `Usuarios.PedirTexto` — método completo sin ningún caller (código muerto duplicado).
-11. Panel completo de "Alta de Usuario" oculto (`Visible=false`) pero funcionalmente vivo en `Usuarios.cs`, con una lista de roles obsoleta (`"Supervisor"`) — dos implementaciones de alta mantenidas en paralelo.
-12. `btnEliminar`/`BtnEliminar_Click` nombra "Eliminar" una acción que en realidad archiva (soft-delete) — el texto visible sí dice "Archivar", pero el nombre en código no.
-13. Sufijo `Form` no uniforme en las clases (`Login`, `Usuarios`, `GestorPermisos` no lo llevan) — justo el trío más crítico del módulo.
-14. Typo "Selecioná" (falta una c) en dos labels de `Usuarios.Designer.cs`.
-15. Fraseo no unificado de "credenciales inválidas" entre `Login` y `ConfirmarAdminForm`.
-16. Indicador visual del toggle mostrar/ocultar contraseña en `Login` (tachado de fuente) poco convencional comparado con el patrón usual de ícono de ojo.
+10. ✅ RESUELTO (2026-09-11) — `Usuarios.PedirTexto` — método completo sin ningún caller (código muerto duplicado).
+*Solución aplicada:* eliminado (confirmado cero callers en todo el repo antes de borrar).
+11. Panel completo de "Alta de Usuario" oculto (`Visible=false`) pero funcionalmente vivo en `Usuarios.cs`, con una lista de roles obsoleta (`"Supervisor"`) — dos implementaciones de alta mantenidas en paralelo. *(pendiente — requiere decisión de producto sobre cuál alta es la vigente)*
+12. ✅ RESUELTO (2026-09-11) — `btnEliminar`/`BtnEliminar_Click` nombra "Eliminar" una acción que en realidad archiva (soft-delete) — el texto visible sí dice "Archivar", pero el nombre en código no.
+*Solución aplicada:* renombrado a `btnArchivar`/`BtnArchivar_Click` en `.cs` y `.Designer.cs` (confirmado sin referencias cruzadas antes del rename).
+13. Sufijo `Form` no uniforme en las clases (`Login`, `Usuarios`, `GestorPermisos` no lo llevan) — justo el trío más crítico del módulo. *(pendiente — rename de alcance amplio)*
+14. ✅ RESUELTO (2026-09-11) — Typo "Selecioná" (falta una c) en dos labels de `Usuarios.Designer.cs`.
+*Solución aplicada:* corregido a "Seleccioná" en los 4 fallbacks hardcodeados de `Usuarios.Designer.cs`/`NuevoPedidoForm.Designer.cs` (el TSV ya estaba bien escrito).
+15. Fraseo no unificado de "credenciales inválidas" entre `Login` y `ConfirmarAdminForm`. *(pendiente)*
+16. Indicador visual del toggle mostrar/ocultar contraseña en `Login` (tachado de fuente) poco convencional comparado con el patrón usual de ícono de ojo. *(pendiente — rediseño cosmético)*
 
 ---
 
@@ -463,7 +500,7 @@ Búsquedas sobre el conjunto completo (no archivo por archivo) para detectar pat
 
 **11. Idioma de nombres de método: 180 verbos en español vs. 1 sola excepción** (`Acceso.GetInstance()`, nombre técnico de patrón, no de dominio) — sin mezcla real de idioma en nomenclatura de negocio.
 
-**12. Color de marca `210,100,135` hardcodeado en 25 archivos**, confirmado (ver también §8 GUI-Infraestructura #7).
+**12. ✅ RESUELTO (2026-09-11) — Color de marca `210,100,135` hardcodeado en 25 archivos**, confirmado (ver también §8 GUI-Infraestructura #7, donde está la solución aplicada).
 
 **13. Pares Designer/Form: 0 huérfanos reales** de 56 archivos `.Designer.cs` (los 2 sin par son `Resources.Designer.cs`/`Settings.Designer.cs`, scaffolding estándar, no formularios).
 

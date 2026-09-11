@@ -86,25 +86,12 @@ namespace GUI
         }
 
         // Mini cuadro de entrada de texto (sin dependencias externas).
+        // Antes armaba un Form ad-hoc a mano (duplicando lo que InputDialog ya resuelve) — mismo
+        // hallazgo que GUI-Operación §5 #6 (tres implementaciones distintas de "diálogo simple").
         private string Pedir(string titulo, string prompt)
         {
-            var tr = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string txtOk = tr.ContainsKey("btn.aceptar")  ? tr["btn.aceptar"].Texto  : "Aceptar";
-            string txtCa = tr.ContainsKey("btn.cancelar") ? tr["btn.cancelar"].Texto : "Cancelar";
-            using (var f = new Form())
-            {
-                f.Text = titulo; f.Size = new System.Drawing.Size(420, 160);
-                f.StartPosition = FormStartPosition.CenterParent;
-                f.FormBorderStyle = FormBorderStyle.FixedDialog; f.MinimizeBox = false; f.MaximizeBox = false;
-                var lbl = new Label { Text = prompt, Location = new System.Drawing.Point(12, 15), AutoSize = true };
-                var txt = new TextBox { Location = new System.Drawing.Point(15, 45), Size = new System.Drawing.Size(380, 24) };
-                var ok = new Button { Text = txtOk, DialogResult = DialogResult.OK, Location = new System.Drawing.Point(225, 80), Size = new System.Drawing.Size(80, 30) };
-                var ca = new Button { Text = txtCa, DialogResult = DialogResult.Cancel, Location = new System.Drawing.Point(315, 80), Size = new System.Drawing.Size(80, 30) };
-                f.Controls.AddRange(new Control[] { lbl, txt, ok, ca });
-                f.AcceptButton = ok; f.CancelButton = ca;
-                // Owner explícito: sin esto, en MDI el diálogo puede aparecer detrás de FormIdiomas.
-                return f.ShowDialog(this) == DialogResult.OK ? txt.Text : null;
-            }
+            using (var dlg = new InputDialog(titulo, prompt, esPassword: false))
+                return dlg.ShowDialog(this) == DialogResult.OK ? dlg.InputText : null;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

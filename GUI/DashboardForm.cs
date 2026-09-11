@@ -58,6 +58,11 @@ namespace GUI
         private Label _numOcupacion, _txtOcupacion;
         private Panel _cardBackupPanel;
 
+        // Único ícono-solo ("⚙") de las 16 pantallas de Dashboards/Análisis/Reportes/Historiales
+        // sin tooltip — se crea en código (btnConfig no viene del Designer), así que el ToolTip
+        // también se instancia acá.
+        private readonly ToolTip _tipConfig = new ToolTip();
+
         private Panel        _panelActividad;
         private Label        _lblActTitulo;
         private DataGridView _dgvActividad;
@@ -470,6 +475,7 @@ namespace GUI
                     Anchor    = AnchorStyles.Top | AnchorStyles.Right
                 };
                 btnConfig.FlatAppearance.BorderSize = 0;
+                _tipConfig.SetToolTip(btnConfig, Tr("tip.config.backup", "Configurar recordatorio de backup"));
                 btnConfig.Click += (s, e) => ConfigurarRecordatorio();
                 tarjeta.Controls.Add(btnConfig);
                 btnConfig.BringToFront();

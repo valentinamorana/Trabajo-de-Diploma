@@ -263,7 +263,8 @@ Contexto: el criterio de urgencia/mantenimiento entre los 5 dashboards (objeto d
 16. Convención de nombres de event handlers distinta entre las 3 pantallas de Historial (PascalCase vs camelCase). *(pendiente)*
 17. Contenedores de columna con nombres genéricos `col1`/`col2`/`col3` en los 4 dashboards con Kanban. *(pendiente)*
 18. Cero controles `ToolTip` en las 16 pantallas revisadas (incl. un botón solo-ícono "⚙" sin texto ni tooltip). *(parcial 2026-09-11: el botón "⚙" de `DashboardForm` ya tiene tooltip; el resto de las 16 pantallas sigue sin ninguno)*
-19. `AutoScaleDimensions`/`AutoScaleMode` configurados de forma distinta entre las 3 pantallas de Historial. *(pendiente)*
+19. ✅ RESUELTO (2026-09-11) — `AutoScaleDimensions`/`AutoScaleMode` configurados de forma distinta entre las 3 pantallas de Historial.
+*Solución aplicada:* `PedidoHistorialForm` (la única que no los declaraba) ahora los declara igual que las otras dos, sin cambio de comportamiento visible.
 20. ✅ RESUELTO (2026-09-11) — Botones "Exportar a PDF/CSV" nunca se deshabilitan sin datos generados (el guard llega recién al clic).
 *Solución aplicada:* en las 6 pantallas con botones dedicados de exportación (los 4 de Análisis, Recomendación de Prendas, Ventas por Vendedor), `btnExportarPdf`/`btnExportarCsv` arrancan deshabilitados y se habilitan solo cuando `BtnGenerar_Click` produce resultados.
 

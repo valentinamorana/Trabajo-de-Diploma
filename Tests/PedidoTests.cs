@@ -173,6 +173,47 @@ namespace Tests
             Assert.AreEqual(BE.EstadoListaEspera.Convertida, reserva.Estado);
         }
 
+        // Lista de Espera es una mejora opcional (no requerida por la cátedra): si falla al
+        // verificar si una prenda está reservada, el catch fail-open NO debe bloquear la
+        // creación del pedido — antes era un catch mudo sin ningún test que probara este
+        // comportamiento, así que una regresión a "sí bloquea" hubiera pasado desapercibida.
+        [TestMethod]
+        public void CrearPedido_ListaEsperaFallaAlVerificarReserva_NoBloqueaLaCreacion()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            ctx.DalPedido.AltaIdGenerado = 99;
+            var listaEsperaBLL = new FakeListaEsperaService { EstaReservadaParaOtroLanza = true };
+
+            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
+
+            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+
+            Assert.AreEqual(99, id);
+            Assert.AreEqual(1, ctx.DalPedido.AltaVeces);
+        }
+
+        // Mismo criterio para el segundo catch fail-open: si falla al cerrar la reserva
+        // DESPUÉS de persistir el pedido, el pedido ya creado no debe revertirse ni la
+        // excepción debe propagarse al usuario.
+        [TestMethod]
+        public void CrearPedido_ListaEsperaFallaAlCerrarReserva_NoBloqueaLaCreacionYaPersistida()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            ctx.DalPedido.AltaIdGenerado = 99;
+            var listaEsperaBLL = new FakeListaEsperaService { CerrarSiReservadaLanza = true };
+
+            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
+
+            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+
+            Assert.AreEqual(99, id);
+            Assert.AreEqual(1, listaEsperaBLL.CerrarSiReservadaVeces);
+        }
+
         [TestMethod]
         public void CrearPedido_ClienteInexistente_LanzaClienteInexistente()
         {

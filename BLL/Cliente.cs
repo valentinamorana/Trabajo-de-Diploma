@@ -10,8 +10,8 @@ namespace BLL
     /// </summary>
     public class Cliente : Interfaces.IClienteService
     {
-        private readonly DAL.Interfaces.IClienteDAL dalCliente;
-        private readonly DAL.PlanSuscripcion       dalPlan     = new DAL.PlanSuscripcion();
+        private readonly DAL.Interfaces.IClienteDAL        dalCliente;
+        private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
         private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
 
@@ -19,11 +19,15 @@ namespace BLL
         // una única vez, cuando el referido activa su suscripción por primera vez (ver ActivarSuscripcion).
         private const decimal MontoBeneficioReferido = 1000m;
 
-        // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble.
-        public Cliente() : this(new DAL.Cliente()) { }
-        public Cliente(DAL.Interfaces.IClienteDAL dalCliente)
+        // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
+        // (antes dalPlan era un DAL.PlanSuscripcion concreto fijo — ActivarSuscripcion y la
+        // rama de cambio de plan de Modificar quedaban sin poder testearse con un Fake, mismo
+        // problema que ya se había resuelto en BLL.Renovacion/CambioPlanHandler).
+        public Cliente() : this(new DAL.Cliente(), new DAL.PlanSuscripcion()) { }
+        public Cliente(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPlanSuscripcionDAL dalPlan = null)
         {
             this.dalCliente = dalCliente;
+            this.dalPlan    = dalPlan ?? new DAL.PlanSuscripcion();
         }
 
         // Devuelve todos los clientes con plan y stock utilizado.

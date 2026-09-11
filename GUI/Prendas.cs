@@ -501,7 +501,7 @@ namespace GUI
                 {
                     Text = "OK", Left = 184, Top = 80, Width = 76, Height = 30,
                     DialogResult = DialogResult.OK,
-                    BackColor = Color.FromArgb(210, 100, 135), ForeColor = Color.White,
+                    BackColor = Tema.RosaPrimario, ForeColor = Color.White,
                     FlatStyle = FlatStyle.Flat
                 };
                 btnOk.FlatAppearance.BorderSize = 0;

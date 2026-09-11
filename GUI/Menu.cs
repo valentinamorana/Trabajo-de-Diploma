@@ -298,7 +298,11 @@ namespace GUI
         /// </summary>
         private void cerrarSesionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ConfirmarCerrarSesion())
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
+
+            if (ConfirmarSiNo(T("dlg.cerrarsesion.titulo", "Cerrar Sesión"),
+                               T("dlg.cerrarsesion.msg", "¿Está seguro que desea cerrar la sesión?")))
             {
                 new BLL.Usuario().Logout(this.Text);
                 Application.Restart();
@@ -306,17 +310,18 @@ namespace GUI
         }
 
         /// <summary>
-        /// Diálogo de confirmación de cierre de sesión con botones traducidos al idioma activo.
-        /// Reemplaza MessageBox.Show() cuyo "Yes"/"No" es siempre en inglés (Windows).
+        /// Diálogo de confirmación Sí/No genérico, con botones traducidos al idioma activo.
+        /// Reemplaza MessageBox.Show() cuyo "Yes"/"No" es siempre en inglés (Windows). Compartido
+        /// por "Cerrar sesión" y "Cerrar todas las ventanas" — antes cada uno armaba el suyo a mano.
         /// </summary>
-        private bool ConfirmarCerrarSesion()
+        private bool ConfirmarSiNo(string titulo, string mensaje)
         {
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
 
             using (var dlg = new Form())
             {
-                dlg.Text            = T("dlg.cerrarsesion.titulo", "Cerrar Sesión");
+                dlg.Text            = titulo;
                 dlg.ClientSize      = new Size(340, 126);
                 dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
                 dlg.StartPosition   = FormStartPosition.CenterParent;
@@ -325,7 +330,7 @@ namespace GUI
 
                 var lbl = new Label
                 {
-                    Text      = T("dlg.cerrarsesion.msg", "¿Está seguro que desea cerrar la sesión?"),
+                    Text      = mensaje,
                     Left = 16, Top = 20, Width = 308, Height = 44,
                     Font      = new System.Drawing.Font("Segoe UI", 9.5f),
                     TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -336,7 +341,7 @@ namespace GUI
                     Text         = T("btn.si", "Sí"),
                     Left = 84, Top = 76, Width = 76, Height = 30,
                     DialogResult = DialogResult.Yes,
-                    BackColor    = Color.FromArgb(210, 100, 135),
+                    BackColor    = Tema.RosaPrimario,
                     ForeColor    = Color.White,
                     FlatStyle    = FlatStyle.Flat
                 };
@@ -806,6 +811,15 @@ namespace GUI
         /// </summary>
         private void cerrarTodasLasVentanasToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (this.MdiChildren.Length == 0) return;
+
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
+
+            if (!ConfirmarSiNo(T("dlg.cerrartodas.titulo", "Cerrar Todas las Ventanas"),
+                                T("dlg.cerrartodas.msg", "¿Cerrar todas las ventanas abiertas?")))
+                return;
+
             foreach (Form hijo in this.MdiChildren)
                 hijo.Close();
         }

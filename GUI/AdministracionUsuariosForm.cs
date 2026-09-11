@@ -32,7 +32,6 @@ namespace GUI
         private int  _idSeleccionado = 0;
         private bool _modoAlta = false;   // true mientras se cargan los datos de un usuario NUEVO
 
-        private static readonly Color RosaPrimario = Color.FromArgb(210, 100, 135);
         private static readonly Color RosaOscuro   = Color.FromArgb(176, 62, 96);
         private static readonly Color PanelClaro   = Color.FromArgb(245, 245, 250);
 

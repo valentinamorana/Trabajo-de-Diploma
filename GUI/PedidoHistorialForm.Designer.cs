@@ -183,7 +183,7 @@ namespace GUI
             // ── btnRestaurar ───────────────────────────────────────────────────
             this.btnRestaurar.Anchor = ((System.Windows.Forms.AnchorStyles)(
                 System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left));
-            this.btnRestaurar.BackColor = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnRestaurar.BackColor = Tema.RosaPrimario;
             this.btnRestaurar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnRestaurar.Enabled   = false;
             this.btnRestaurar.FlatAppearance.BorderSize = 0;

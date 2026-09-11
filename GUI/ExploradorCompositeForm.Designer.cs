@@ -124,7 +124,7 @@ namespace GUI
             this.btnCerrar.Click += new System.EventHandler(this.BtnCerrar_Click);
 
             // ── btnColapsar ────────────────────────────────────────────────────
-            this.btnColapsar.BackColor = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnColapsar.BackColor = Tema.RosaPrimario;
             this.btnColapsar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnColapsar.FlatAppearance.BorderSize = 0;
             this.btnColapsar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

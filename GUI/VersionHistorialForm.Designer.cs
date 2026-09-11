@@ -138,7 +138,7 @@ namespace GUI
 
             // ── btnRestaurar (deshabilitado por diseño: solo se habilita con una fila
             // seleccionada — mismo patrón que PedidoHistorialForm.btnRestaurar) ───
-            this.btnRestaurar.BackColor                  = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnRestaurar.BackColor                  = Tema.RosaPrimario;
             this.btnRestaurar.FlatStyle                  = System.Windows.Forms.FlatStyle.Flat;
             this.btnRestaurar.FlatAppearance.BorderSize  = 0;
             this.btnRestaurar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(190, 80, 115);

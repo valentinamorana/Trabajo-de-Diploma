@@ -2,6 +2,7 @@ using Servicios.Multiidioma;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -108,7 +109,7 @@ namespace GUI
             btnEliminar.Enabled  = seleccionado;
         }
 
-        private void btnCrear_Click(object sender, EventArgs e)
+        private async void btnCrear_Click(object sender, EventArgs e)
         {
             try
             {
@@ -118,7 +119,7 @@ namespace GUI
                 string clave = PedirClaveNueva();
                 if (clave == null) return;   // cancelado o inválido
 
-                string filename = _bll.RealizarBackup(this.Text, DirBackups, clave);
+                string filename = await EjecutarConEsperaAsync(() => _bll.RealizarBackup(this.Text, DirBackups, clave));
                 MessageBox.Show(
                     string.Format(T("msg.backup.creadoexito", "Copia de seguridad generada con éxito:\n{0}"), filename),
                     T("rpt.dlg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -132,7 +133,7 @@ namespace GUI
             }
         }
 
-        private void btnInicial_Click(object sender, EventArgs e)
+        private async void btnInicial_Click(object sender, EventArgs e)
         {
             try
             {
@@ -142,7 +143,7 @@ namespace GUI
                 string clave = PedirClaveNueva();
                 if (clave == null) return;
 
-                string filename = _bll.RealizarBackupInicial(this.Text, DirBackups, clave);
+                string filename = await EjecutarConEsperaAsync(() => _bll.RealizarBackupInicial(this.Text, DirBackups, clave));
                 MessageBox.Show(
                     string.Format(T("msg.backup.inicialexito", "Backup de instalación limpia generado:\n{0}"), filename),
                     T("rpt.dlg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -156,10 +157,10 @@ namespace GUI
             }
         }
 
-        private void btnRestaurar_Click(object sender, EventArgs e)
+        private async void btnRestaurar_Click(object sender, EventArgs e)
         {
             if (lstBackups.SelectedItems.Count == 0) return;
-            Restaurar(lstBackups.SelectedItems[0].Tag as string);
+            await Restaurar(lstBackups.SelectedItems[0].Tag as string);
         }
 
         private void btnEliminar_Click(object sender, EventArgs e)
@@ -190,21 +191,21 @@ namespace GUI
         }
 
         // Restaura un archivo elegido manualmente (útil para backups en USB u otra ubicación).
-        private void btnExterno_Click(object sender, EventArgs e)
+        private async void btnExterno_Click(object sender, EventArgs e)
         {
             using (var ofd = new OpenFileDialog())
             {
                 ofd.Filter = "Copias de Seguridad (*.wfbak;*.bak)|*.wfbak;*.bak";
-                ofd.Title  = "Seleccionar Copia de Seguridad para Restaurar";
+                ofd.Title  = T("dlg.backup.seleccionarexterno", "Seleccionar Copia de Seguridad para Restaurar");
                 if (Directory.Exists(DirBackups))
                     ofd.InitialDirectory = DirBackups;
 
                 if (ofd.ShowDialog() != DialogResult.OK) return;
-                Restaurar(ofd.FileName);
+                await Restaurar(ofd.FileName);
             }
         }
 
-        private void Restaurar(string ruta)
+        private async Task Restaurar(string ruta)
         {
             if (string.IsNullOrEmpty(ruta)) return;
 
@@ -251,7 +252,7 @@ namespace GUI
 
             try
             {
-                _bll.RestaurarBackup(this.Text, ruta, clave);
+                await EjecutarConEsperaAsync(() => _bll.RestaurarBackup(this.Text, ruta, clave));
                 MessageBox.Show(
                     T("msg.backup.restauradaexito", "Base de datos restaurada con éxito.\nLa aplicación se reiniciará."),
                     T("msg.backup.restauradatitulo", "Restauración Exitosa"), MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -334,6 +335,39 @@ namespace GUI
             {
                 return d.ShowDialog(this) == DialogResult.OK ? d.InputText : null;
             }
+        }
+
+        // Ejecuta una operación de backup/restauración (I/O de archivos potencialmente grande)
+        // en un hilo de background, deshabilitando los controles y mostrando el cursor de espera
+        // mientras corre — antes eran síncronas en el hilo de UI y con una base grande la ventana
+        // podía marcarse "No responde".
+        private async Task<T> EjecutarConEsperaAsync<T>(Func<T> operacion)
+        {
+            this.Cursor = Cursors.WaitCursor;
+            SetControlesHabilitados(false);
+            try
+            {
+                return await Task.Run(operacion);
+            }
+            finally
+            {
+                SetControlesHabilitados(true);
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private Task EjecutarConEsperaAsync(Action operacion)
+            => EjecutarConEsperaAsync<object>(() => { operacion(); return null; });
+
+        private void SetControlesHabilitados(bool habilitado)
+        {
+            btnCrear.Enabled     = habilitado;
+            btnInicial.Enabled   = habilitado;
+            btnExterno.Enabled   = habilitado;
+            lstBackups.Enabled   = habilitado;
+            bool haySeleccion    = habilitado && lstBackups.SelectedItems.Count > 0;
+            btnEliminar.Enabled  = haySeleccion;
+            btnRestaurar.Enabled = haySeleccion;
         }
     }
 }

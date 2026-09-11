@@ -22,7 +22,7 @@ namespace GUI.Estilos
     /// </summary>
     public class MenuRenderer : ToolStripProfessionalRenderer
     {
-        private static readonly Color AcentoPorDefecto = Color.FromArgb(210, 100, 135);
+        private static readonly Color AcentoPorDefecto = GUI.Tema.RosaPrimario;
         private static readonly Color ResaltadoDropdown = Color.FromArgb(252, 228, 235);
         private static readonly Color ColorResaltoSistema = Color.FromArgb(224, 231, 245);
 

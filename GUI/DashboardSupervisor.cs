@@ -245,7 +245,7 @@ namespace GUI
         private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
             using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
-                Color.FromArgb(210, 100, 135), Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
+                Tema.RosaPrimario, Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
 

@@ -71,7 +71,7 @@ namespace GUI
             this.btnNuevo.Top       = 11;
             this.btnNuevo.Width     = 130;
             this.btnNuevo.Height    = 28;
-            this.btnNuevo.BackColor = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnNuevo.BackColor = Tema.RosaPrimario;
             this.btnNuevo.ForeColor = System.Drawing.Color.White;
             this.btnNuevo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnNuevo.FlatAppearance.BorderSize = 0;

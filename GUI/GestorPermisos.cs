@@ -43,7 +43,6 @@ namespace GUI
         }
 
         // ── Paleta de marca ────────────────────────────────────────────────────────
-        private static readonly Color RosaPrimario = Color.FromArgb(210, 100, 135);  // #D26487
         private static readonly Color RosaOscuro   = Color.FromArgb(176, 62, 96);    // #B03E60
         private static readonly Color Peligro      = Color.FromArgb(200, 60, 60);    // #C83C3C
         private static readonly Color PanelClaro   = Color.FromArgb(245, 245, 250);  // #F5F5FA
@@ -113,7 +112,7 @@ namespace GUI
         private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
             using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
-                RosaPrimario, RosaOscuro, LinearGradientMode.Horizontal))
+                Tema.RosaPrimario, RosaOscuro, LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
 

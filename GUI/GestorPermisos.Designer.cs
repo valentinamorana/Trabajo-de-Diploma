@@ -250,7 +250,7 @@ namespace GUI
             this.grpCrear.TabStop   = false;
             this.grpCrear.Text      = "Crear rol";
 
-            this.btnCrearRaiz.BackColor = RosaPrimario;
+            this.btnCrearRaiz.BackColor = Tema.RosaPrimario;
             this.btnCrearRaiz.Cursor    = Cursors.Hand;
             this.btnCrearRaiz.FlatAppearance.BorderSize = 0;
             this.btnCrearRaiz.FlatStyle = FlatStyle.Flat;
@@ -350,7 +350,7 @@ namespace GUI
             this.cmbAsignables.Size          = new Size(288, 24);
             this.cmbAsignables.TabIndex      = 1;
 
-            this.btnAsignar.BackColor = RosaPrimario;
+            this.btnAsignar.BackColor = Tema.RosaPrimario;
             this.btnAsignar.Cursor    = Cursors.Hand;
             this.btnAsignar.FlatAppearance.BorderSize = 0;
             this.btnAsignar.FlatStyle = FlatStyle.Flat;

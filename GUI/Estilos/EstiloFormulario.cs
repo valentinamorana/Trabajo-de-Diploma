@@ -13,7 +13,7 @@ namespace GUI.Estilos
     /// </summary>
     public static class EstiloFormulario
     {
-        public static readonly Color Rosa         = Color.FromArgb(210, 100, 135);
+        public static readonly Color Rosa         = GUI.Tema.RosaPrimario;
         public static readonly Color RosaOscuro   = Color.FromArgb(176, 62, 96);
         public static readonly Color RosaClara    = Color.FromArgb(245, 222, 230);
         public static readonly Color RosaMuyClara = Color.FromArgb(250, 244, 246);

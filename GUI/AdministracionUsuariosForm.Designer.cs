@@ -83,7 +83,7 @@ namespace GUI
             this.txtBuscar.TabIndex = 2;
             this.txtBuscar.KeyDown += new KeyEventHandler(this.TxtBuscar_KeyDown);
 
-            this.btnBuscar.BackColor = RosaPrimario;
+            this.btnBuscar.BackColor = Tema.RosaPrimario;
             this.btnBuscar.Cursor    = Cursors.Hand;
             this.btnBuscar.FlatAppearance.BorderSize = 0;
             this.btnBuscar.FlatStyle = FlatStyle.Flat;
@@ -112,7 +112,7 @@ namespace GUI
             this.btnRefrescar.UseVisualStyleBackColor = false;
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
 
-            this.btnNuevo.BackColor = RosaPrimario;
+            this.btnNuevo.BackColor = Tema.RosaPrimario;
             this.btnNuevo.Cursor    = Cursors.Hand;
             this.btnNuevo.FlatAppearance.BorderSize = 0;
             this.btnNuevo.FlatStyle = FlatStyle.Flat;
@@ -264,7 +264,7 @@ namespace GUI
             this.cmbRol.Size          = new Size(260, 24);
             this.cmbRol.TabIndex      = 12;
 
-            this.btnGuardar.BackColor = RosaPrimario;
+            this.btnGuardar.BackColor = Tema.RosaPrimario;
             this.btnGuardar.Cursor    = Cursors.Hand;
             this.btnGuardar.FlatAppearance.BorderSize = 0;
             this.btnGuardar.FlatStyle = FlatStyle.Flat;

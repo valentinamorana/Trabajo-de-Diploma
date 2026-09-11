@@ -156,7 +156,7 @@ namespace GUI
             this.btnCerrar.Click += new System.EventHandler(this.BtnCerrar_Click);
 
             // ── btnBackup ──────────────────────────────────────────────────────
-            this.btnBackup.BackColor = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnBackup.BackColor = Tema.RosaPrimario;
             this.btnBackup.FlatAppearance.BorderSize = 0;
             this.btnBackup.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBackup.ForeColor = System.Drawing.Color.White;

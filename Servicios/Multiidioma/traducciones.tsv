@@ -249,6 +249,8 @@ ES	col.hist.anterior	Valor Anterior
 ES	col.hist.nuevo	Valor Nuevo
 ES	dlg.cerrarsesion.titulo	Cerrar Sesión
 ES	dlg.cerrarsesion.msg	¿Está seguro que desea cerrar la sesión?
+ES	dlg.cerrartodas.titulo	Cerrar Todas las Ventanas
+ES	dlg.cerrartodas.msg	¿Cerrar todas las ventanas abiertas?
 ES	btn.si	Sí
 ES	btn.no	No
 ES	btn.refrescar	↻ Refrescar Lista
@@ -1049,6 +1051,8 @@ EN	col.hist.anterior	Previous Value
 EN	col.hist.nuevo	New Value
 EN	dlg.cerrarsesion.titulo	Sign Out
 EN	dlg.cerrarsesion.msg	Are you sure you want to sign out?
+EN	dlg.cerrartodas.titulo	Close All Windows
+EN	dlg.cerrartodas.msg	Close all open windows?
 EN	btn.si	Yes
 EN	btn.no	No
 EN	btn.refrescar	↻ Refresh List
@@ -1851,6 +1855,8 @@ RU	col.hist.anterior	Было
 RU	col.hist.nuevo	Стало
 RU	dlg.cerrarsesion.titulo	Выход из системы
 RU	dlg.cerrarsesion.msg	Вы уверены, что хотите выйти?
+RU	dlg.cerrartodas.titulo	Закрыть все окна
+RU	dlg.cerrartodas.msg	Закрыть все открытые окна?
 RU	btn.si	Да
 RU	btn.no	Нет
 RU	btn.refrescar	↻ Обновить список
@@ -2693,6 +2699,8 @@ PT	col.hist.anterior	Valor Anterior
 PT	col.hist.nuevo	Novo Valor
 PT	dlg.cerrarsesion.titulo	Sair do sistema
 PT	dlg.cerrarsesion.msg	Tem certeza que deseja sair?
+PT	dlg.cerrartodas.titulo	Fechar Todas as Janelas
+PT	dlg.cerrartodas.msg	Fechar todas as janelas abertas?
 PT	btn.si	Sim
 PT	btn.no	Não
 PT	btn.refrescar	↻ Atualizar Lista
@@ -3787,6 +3795,7 @@ ES	rec.fila.enespejo	(presente en el espejo)
 ES	rec.err.cargar	Error al diagnosticar: {0}
 ES	rec.err.titulo	Error
 ES	rec.backup.seleccionar	Seleccionar Backup para Restaurar
+ES	dlg.backup.seleccionarexterno	Seleccionar Copia de Seguridad para Restaurar
 ES	rec.conf.asumir	ATENCIÓN: se aceptarán los datos ACTUALES como legítimos y se recalcularán todos los dígitos verificadores.\n\nSi hubo manipulación, quedará consolidada. ¿Continuar?
 ES	rec.conf.asumir.titulo	Confirmar Asumir Pérdida
 ES	rec.msg.asumido	Dígitos verificadores recalculados sobre los datos actuales.
@@ -3817,6 +3826,7 @@ EN	rec.fila.enespejo	(present in mirror)
 EN	rec.err.cargar	Error diagnosing: {0}
 EN	rec.err.titulo	Error
 EN	rec.backup.seleccionar	Select Backup to Restore
+EN	dlg.backup.seleccionarexterno	Select Backup File to Restore
 EN	rec.conf.asumir	WARNING: the CURRENT data will be accepted as legitimate and all check digits will be recalculated.\n\nIf there was tampering, it will be consolidated. Continue?
 EN	rec.conf.asumir.titulo	Confirm Accept Loss
 EN	rec.msg.asumido	Check digits recalculated over the current data.
@@ -3847,6 +3857,7 @@ RU	rec.fila.enespejo	(присутствует в зеркале)
 RU	rec.err.cargar	Ошибка диагностики: {0}
 RU	rec.err.titulo	Ошибка
 RU	rec.backup.seleccionar	Выбрать бэкап для восстановления
+RU	dlg.backup.seleccionarexterno	Выбрать файл резервной копии для восстановления
 RU	rec.conf.asumir	ВНИМАНИЕ: ТЕКУЩИЕ данные будут приняты как законные, и все контрольные разряды будут пересчитаны.\n\nЕсли имела место фальсификация данных, она будет закреплена. Продолжить?
 RU	rec.conf.asumir.titulo	Подтвердить принятие потери
 RU	rec.msg.asumido	Контрольные разряды пересчитаны на основе текущих данных.
@@ -3877,6 +3888,7 @@ PT	rec.fila.enespejo	(presente no espelho)
 PT	rec.err.cargar	Erro ao diagnosticar: {0}
 PT	rec.err.titulo	Erro
 PT	rec.backup.seleccionar	Selecionar Backup para Restaurar
+PT	dlg.backup.seleccionarexterno	Selecionar Cópia de Segurança para Restaurar
 PT	rec.conf.asumir	ATENÇÃO: os dados ATUAIS serão aceitos como legítimos e todos os dígitos verificadores serão recalculados.\n\nSe houve manipulação, ela será consolidada. Continuar?
 PT	rec.conf.asumir.titulo	Confirmar Assumir Perda
 PT	rec.msg.asumido	Dígitos verificadores recalculados sobre os dados atuais.

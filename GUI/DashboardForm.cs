@@ -400,7 +400,7 @@ namespace GUI
         {
             using (var br = new LinearGradientBrush(
                 panelHeader.ClientRectangle,
-                Color.FromArgb(210, 100, 135),
+                Tema.RosaPrimario,
                 Color.FromArgb(176, 62, 96),
                 LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);

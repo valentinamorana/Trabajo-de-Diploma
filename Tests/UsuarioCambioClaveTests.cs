@@ -84,6 +84,24 @@ namespace Tests
         }
 
         [TestMethod]
+        public void CambiarClavePropia_ClaveSinEspecial_LanzaClaveSinEspecial_SinTocarDAL()
+        {
+            LoginCon("Actual1!");
+            var fake = new FakeUsuarioDAL();
+            var bll  = new BLL.Usuario(fake);
+            try
+            {
+                bll.CambiarClavePropia("Test", "ConNumero123");   // 8+ caracteres y dígito, sin especial
+                Assert.Fail("Debía rechazar una clave sin caracter especial.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.usuario.clave_sinespecial", ex.Clave);
+            }
+            Assert.AreEqual(0, fake.CambiarClaveVeces);
+        }
+
+        [TestMethod]
         public void CambiarClavePropia_IgualALaActual_LanzaClaveIgual_SinTocarDAL()
         {
             LoginCon("Actual1!");

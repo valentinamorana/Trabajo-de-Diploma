@@ -597,6 +597,33 @@ namespace Tests
             }
         }
 
+        [TestMethod]
+        public void DesCancelar_PrendasDisponibles_RevierteAPendienteYRegistraHistorial()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido
+            {
+                IdPedido = 1,
+                Estado = BE.EstadoPedido.Cancelado,
+                MotivoCancelacion = "Cliente se arrepintió"
+            };
+
+            bll.DesCancelar("Test", pedido);
+
+            Assert.AreEqual(1, ctx.DalPedido.DesCancelarVeces);
+            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces);
+
+            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("Cancelado", estado.ValorAnterior);
+            Assert.AreEqual("Pendiente", estado.ValorNuevo);
+
+            var motivo = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "MotivoCancelacion");
+            Assert.AreEqual("Cliente se arrepintió", motivo.ValorAnterior);
+            Assert.IsNull(motivo.ValorNuevo);
+        }
+
         // ── CalcularNivelUrgencia — lógica pura, sin DAL ─────────────────────
 
         [TestMethod]
@@ -659,6 +686,35 @@ namespace Tests
                 Assert.AreEqual("err.bll.pedido.historial_vacio", ex.Clave);
             }
             Assert.AreEqual(0, ctx.DalPedido.RestaurarOperacionAtomicaVeces);
+        }
+
+        [TestMethod]
+        public void RestaurarOperacion_ConCambiosRegistrados_RevierteYReRegistraElHistorialConLosValoresInvertidos()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalHistorial.CambiosParaOperacion = new List<BE.PedidoHistorial>
+            {
+                new BE.PedidoHistorial { Campo = "Estado", Accion = "CANCELAR", ValorAnterior = "Pendiente", ValorNuevo = "Cancelado" }
+            };
+            var bll = ctx.Crear();
+
+            bll.RestaurarOperacion("Test", 1, 5);
+
+            // El DAL debe recibir el ValorAnterior original (a donde hay que volver).
+            Assert.AreEqual(1, ctx.DalPedido.RestaurarOperacionAtomicaVeces);
+            Assert.AreEqual("Estado", ctx.DalPedido.UltimoRestaurarOperacionCampos[0].Campo);
+            Assert.AreEqual("Pendiente", ctx.DalPedido.UltimoRestaurarOperacionCampos[0].ValorAnterior);
+
+            // El nuevo evento RESTAURAR debe quedar con los valores INVERTIDOS respecto al cambio
+            // original: lo que estaba "Nuevo" pasa a ser el "Anterior" de este evento (el estado
+            // del que se viene al restaurar) y el "Anterior" original pasa a ser el "Nuevo" (a
+            // donde se vuelve) — swap fácil de invertir por error, de ahí el test explícito.
+            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces);
+            var restaurado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("RESTAURAR", restaurado.Accion);
+            Assert.AreEqual("Cancelado", restaurado.ValorAnterior);
+            Assert.AreEqual("Pendiente", restaurado.ValorNuevo);
         }
     }
 }

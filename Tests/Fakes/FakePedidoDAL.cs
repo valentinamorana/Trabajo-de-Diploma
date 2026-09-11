@@ -29,6 +29,7 @@ namespace Tests.Fakes
         public string UltimoMotivoCancelar { get; private set; }
         public int DesCancelarVeces { get; private set; }
         public int RestaurarOperacionAtomicaVeces { get; private set; }
+        public IList<(string Campo, string ValorAnterior)> UltimoRestaurarOperacionCampos { get; private set; }
         public int RecalcularDVVeces { get; private set; }
 
         public List<BE.Pedido> ObtenerTodos() => PedidosDevueltos;
@@ -58,7 +59,10 @@ namespace Tests.Fakes
         public void ReconciliarPrendasConEstado(int idPedido) { }
 
         public void RestaurarOperacionAtomica(int idPedido, IList<(string Campo, string ValorAnterior)> campos)
-            => RestaurarOperacionAtomicaVeces++;
+        {
+            RestaurarOperacionAtomicaVeces++;
+            UltimoRestaurarOperacionCampos = campos;
+        }
 
         public void Cancelar(int idPedido, string motivo)
         {

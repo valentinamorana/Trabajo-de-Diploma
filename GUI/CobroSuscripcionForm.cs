@@ -41,14 +41,8 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
-        private string T(string clave, string fallback, object[] args = null)
-            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             this.Text          = Tr("cobro.titulo", "Cobro de Suscripción");
             lblTitulo.Text     = Tr("cobro.titulo", "Cobro de Suscripción");
             lblCliente.Text    = Tr("cobro.cliente", "Cliente:");
@@ -85,7 +79,7 @@ namespace GUI
             var c = item.Cliente;
 
             // Un solo fetch del diccionario mergeado (BD + corpus) para las 5 sub-resoluciones,
-            // en vez de que cada T(...) lo reconstruya desde cero (Traductor.ObtenerTraducciones).
+            // en vez de que cada Tr(...) lo reconstruya desde cero (Traductor.ObtenerTraducciones).
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string Tr(string clave, string fallback, object[] args = null) => Traductor.Resolver(clave, fallback, args, t);
 
@@ -139,8 +133,8 @@ namespace GUI
             // efectivamente mueve dinero (mismo criterio que ya aplican Planes/Promociones/
             // Contrataciones para acciones sensibles).
             var confirmar = MessageBox.Show(
-                T("conf.cobro.procesar.msg", "¿Procesar este cobro para {0}?", new object[] { item.Cliente.NombreCompleto }),
-                T("conf.cobro.procesar.tit", "Confirmar Cobro"),
+                Tr("conf.cobro.procesar.msg", "¿Procesar este cobro para {0}?", new object[] { item.Cliente.NombreCompleto }),
+                Tr("conf.cobro.procesar.tit", "Confirmar Cobro"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
@@ -157,7 +151,7 @@ namespace GUI
                                          : resultado.Estado == BE.EstadoCobro.Suspendido ? Color.DarkRed
                                          : resultado.Estado == BE.EstadoCobro.Gracia ? Color.DarkOrange
                                          : Color.DarkGreen;
-                lblResultado.Text = T(resultado.Clave, resultado.Mensaje, resultado.Args);
+                lblResultado.Text = Tr(resultado.Clave, resultado.Mensaje, resultado.Args);
 
                 CargarClientes();
             }

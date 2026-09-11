@@ -86,14 +86,10 @@ namespace GUI
                 dtpInicio.Value = DateTime.Today;
                 dtpFin.Value = DateTime.Today.AddMonths(1);
 
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
                 if (_sugerenciaOrigen != null)
                 {
-                    lblSugerencia.Text = string.Format(
-                        T("promo.sugerenciaorigen", "A partir de la sugerencia #{0}: {1}"),
-                        _sugerenciaOrigen.IdSugerencia, _sugerenciaOrigen.Motivo);
+                    lblSugerencia.Text = Tr("promo.sugerenciaorigen", "A partir de la sugerencia #{0}: {1}",
+                        new object[] { _sugerenciaOrigen.IdSugerencia, _sugerenciaOrigen.Motivo });
                     rbPlan.Checked = _sugerenciaOrigen.AplicaAPlan();
                     rbCategoria.Checked = _sugerenciaOrigen.AplicaACategoria();
                     if (_sugerenciaOrigen.AplicaAPlan()) cmbPlan.SelectedValue = _sugerenciaOrigen.IdPlan.Value;
@@ -107,7 +103,7 @@ namespace GUI
                 }
                 else
                 {
-                    lblSugerencia.Text = T("promo.altamanual", "Alta manual (sin sugerencia de Gerencia).");
+                    lblSugerencia.Text = Tr("promo.altamanual", "Alta manual (sin sugerencia de Gerencia).");
                     RbPlan_CheckedChanged(this, EventArgs.Empty);
                 }
             }
@@ -122,9 +118,6 @@ namespace GUI
 
         private void BtnConfirmar_Click(object sender, EventArgs e)
         {
-            var tv = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string Tv(string k, string fb) => tv.ContainsKey(k) ? tv[k].Texto : fb;
-
             var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
 
             // Validación inline antes de invocar BLL: ambas reglas ya existen del lado de
@@ -132,12 +125,12 @@ namespace GUI
             // con un cartel de error genérico tras el roundtrip, en vez de feedback inmediato.
             if (dtpFin.Value.Date < dtpInicio.Value.Date)
             {
-                MostrarError(Tv("err.bll.promocion.rango_fechas_invalido", "La fecha de fin no puede ser anterior a la fecha de inicio."));
+                MostrarError(Tr("err.bll.promocion.rango_fechas_invalido", "La fecha de fin no puede ser anterior a la fecha de inicio."));
                 return;
             }
             if (tipo == BE.TipoDescuento.Porcentaje && numValor.Value > 100)
             {
-                MostrarError(Tv("err.bll.promocion.porcentaje_invalido", "Un descuento por porcentaje no puede superar el 100%."));
+                MostrarError(Tr("err.bll.promocion.porcentaje_invalido", "Un descuento por porcentaje no puede superar el 100%."));
                 return;
             }
 

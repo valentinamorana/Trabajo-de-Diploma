@@ -44,14 +44,8 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
-        private string T(string clave, string fallback, object[] args = null)
-            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             this.Text          = Tr("ventasvend.titulo", "Ventas por Vendedor");
             lblTitulo.Text      = Tr("ventasvend.titulo", "Ventas por Vendedor");
             btnGenerar.Text     = Tr("abandono.generar", "Generar");
@@ -89,7 +83,7 @@ namespace GUI
 
                 lblResultado.ForeColor = Color.DarkGreen;
                 lblResultado.Text = string.Format(
-                    T("ventasvend.resultado", "{0} vendedor(es) con pedidos registrados."),
+                    Tr("ventasvend.resultado", "{0} vendedor(es) con pedidos registrados."),
                     new object[] { resultados.Count });
             }
             catch (Exception ex)
@@ -108,7 +102,7 @@ namespace GUI
             if (datos == null || datos.Rows.Count == 0)
             {
                 MessageBox.Show(
-                    T("err.pdf.sinDatos", "No hay datos para exportar."),
+                    Tr("err.pdf.sinDatos", "No hay datos para exportar."),
                     this.Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

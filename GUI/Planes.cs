@@ -135,10 +135,8 @@ namespace GUI
                 tabla.Columns.Add("Precio",  typeof(string));
                 tabla.Columns.Add("Estado",  typeof(string));
 
-                var t = Traductor.ObtenerTraducciones(_idioma);
-                string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
-                string lblActivo   = T("plan.activo",   "Activo");
-                string lblInactivo = T("plan.inactivo", "Inactivo");
+                string lblActivo   = Tr("plan.activo",   "Activo");
+                string lblInactivo = Tr("plan.inactivo", "Inactivo");
 
                 foreach (var p in _planes)
                     tabla.Rows.Add(p.IdPlan, p.Nombre, p.LimitePrendas,
@@ -162,13 +160,11 @@ namespace GUI
                     rowIdx++;
                 }
 
-                string fmt = T("msg.planes.cargados", "{0} plan(es) cargado(s).");
-                MostrarOk(string.Format(fmt, _planes.Count));
+                MostrarOk(Tr("msg.planes.cargados", "{0} plan(es) cargado(s).", new object[] { _planes.Count }));
             }
             catch (Exception ex)
             {
-                var te = Traductor.ObtenerTraducciones(_idioma);
-                MostrarError(string.Format(te.ContainsKey("err.generico.cargar") ? te["err.generico.cargar"].Texto : "Error al cargar: {0}", ex.Message));
+                MostrarError(Tr("err.generico.cargar", "Error al cargar: {0}", new object[] { ex.Message }));
             }
         }
 
@@ -198,8 +194,7 @@ namespace GUI
             if (plan == null) return;
 
             _idEnEdicion       = plan.IdPlan;
-            var tE = Traductor.ObtenerTraducciones(_idioma);
-            lblFormTitulo.Text = tE.ContainsKey("lbl.editplan") ? tE["lbl.editplan"].Texto : "Editar Plan";
+            lblFormTitulo.Text = Tr("lbl.editplan", "Editar Plan");
             txtNombre.Text     = plan.Nombre;
             nudLimite.Value    = plan.LimitePrendas;
             nudPrecio.Value    = plan.Precio;
@@ -208,8 +203,7 @@ namespace GUI
         private void LimpiarFormulario()
         {
             _idEnEdicion       = 0;
-            var tN = Traductor.ObtenerTraducciones(_idioma);
-            lblFormTitulo.Text = tN.ContainsKey("lbl.nuevopla") ? tN["lbl.nuevopla"].Texto : "Nuevo Plan";
+            lblFormTitulo.Text = Tr("lbl.nuevopla", "Nuevo Plan");
             txtNombre.Clear();
             nudLimite.Value    = 3;
             nudPrecio.Value    = 0;
@@ -224,9 +218,6 @@ namespace GUI
             lblMensaje.Text = string.Empty;
             try
             {
-                var t = Traductor.ObtenerTraducciones(_idioma);
-                string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
                 var plan = new BE.PlanSuscripcion
                 {
                     IdPlan        = _idEnEdicion,
@@ -239,12 +230,12 @@ namespace GUI
                 if (_idEnEdicion == 0)
                 {
                     planBLL.Alta(plan);
-                    MostrarOk(string.Format(T("msg.planes.creado", "Plan '{0}' creado."), plan.Nombre));
+                    MostrarOk(Tr("msg.planes.creado", "Plan '{0}' creado.", new object[] { plan.Nombre }));
                 }
                 else
                 {
                     planBLL.Modificar(plan);
-                    MostrarOk(string.Format(T("msg.planes.actualizado", "Plan '{0}' actualizado."), plan.Nombre));
+                    MostrarOk(Tr("msg.planes.actualizado", "Plan '{0}' actualizado.", new object[] { plan.Nombre }));
                 }
 
                 LimpiarFormulario();
@@ -263,12 +254,9 @@ namespace GUI
             var plan = _planes.Find(p => p.IdPlan == id);
             if (plan == null) return;
 
-            var td = Traductor.ObtenerTraducciones(_idioma);
-            string Td(string k, string fb) => td.ContainsKey(k) ? td[k].Texto : fb;
-
             var confirm = MessageBox.Show(
-                string.Format(Td("conf.planes.desat.msg", "¿Desactivar el plan '{0}'?\n\nLos clientes con este plan no serán afectados."), plan.Nombre),
-                Td("conf.planes.desat.tit", "Confirmar Desactivación"),
+                Tr("conf.planes.desat.msg", "¿Desactivar el plan '{0}'?\n\nLos clientes con este plan no serán afectados.", new object[] { plan.Nombre }),
+                Tr("conf.planes.desat.tit", "Confirmar Desactivación"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
                 MessageBoxDefaultButton.Button2);
 
@@ -277,7 +265,7 @@ namespace GUI
             try
             {
                 planBLL.Desactivar(id);
-                MostrarOk(string.Format(Td("msg.planes.desactivado", "Plan '{0}' desactivado."), plan.Nombre));
+                MostrarOk(Tr("msg.planes.desactivado", "Plan '{0}' desactivado.", new object[] { plan.Nombre }));
                 LimpiarFormulario();
                 CargarPlanes();
             }
@@ -291,12 +279,9 @@ namespace GUI
             var plan = _planes.Find(p => p.IdPlan == id);
             if (plan == null) return;
 
-            var ta = Traductor.ObtenerTraducciones(_idioma);
-            string Ta(string k, string fb) => ta.ContainsKey(k) ? ta[k].Texto : fb;
-
             var confirm = MessageBox.Show(
-                string.Format(Ta("conf.planes.act.msg", "¿Reactivar el plan '{0}'?\n\nEl plan volverá a estar disponible para nuevas suscripciones."), plan.Nombre),
-                Ta("conf.planes.act.tit", "Confirmar Activación"),
+                Tr("conf.planes.act.msg", "¿Reactivar el plan '{0}'?\n\nEl plan volverá a estar disponible para nuevas suscripciones.", new object[] { plan.Nombre }),
+                Tr("conf.planes.act.tit", "Confirmar Activación"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
 
@@ -305,7 +290,7 @@ namespace GUI
             try
             {
                 planBLL.Activar(id);
-                MostrarOk(string.Format(Ta("msg.planes.reactivado", "Plan '{0}' reactivado."), plan.Nombre));
+                MostrarOk(Tr("msg.planes.reactivado", "Plan '{0}' reactivado.", new object[] { plan.Nombre }));
                 LimpiarFormulario();
                 CargarPlanes();
             }

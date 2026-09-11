@@ -137,15 +137,12 @@ namespace GUI
                     dgvPedidos.Columns["_EstadoKey"].Visible = false;
                 TraducirHeadersGrilla();
 
-                var tConteo = Traductor.ObtenerTraducciones(_idioma);
-                string fmtConteo   = tConteo.ContainsKey("msg.ped.conteo")   ? tConteo["msg.ped.conteo"].Texto   : "{0} pedido(s)";
-                string fmtCargados = tConteo.ContainsKey("msg.ped.cargados") ? tConteo["msg.ped.cargados"].Texto : "{0} pedido(s) cargado(s).";
-                lblConteo.Text = string.Format(fmtConteo, _pedidos.Count);
+                lblConteo.Text = Tr("msg.ped.conteo", "{0} pedido(s)", new object[] { _pedidos.Count });
                 dgvDetallePrendas.DataSource = null;
                 // lblDetalleTitulo se traduce via Tag en Traducir(); no hardcodear aquí
-                Aplicar(lblDetalleTitulo, tConteo);
+                Aplicar(lblDetalleTitulo, Traductor.ObtenerTraducciones(_idioma));
 
-                MostrarOk(string.Format(fmtCargados, _pedidos.Count));
+                MostrarOk(Tr("msg.ped.cargados", "{0} pedido(s) cargado(s).", new object[] { _pedidos.Count }));
             }
             catch (Exception ex)
             {
@@ -219,12 +216,9 @@ namespace GUI
             // Cargar detalle de prendas del pedido seleccionado
             CargarDetallePrendas(pedido.IdPedido);
 
-            var tMotivo = Traductor.ObtenerTraducciones(_idioma);
-            string T_sel(string k, string fb) => tMotivo.ContainsKey(k) ? tMotivo[k].Texto : fb;
-            string motivoLabel = T_sel("lbl.motivo", "Motivo:");
-            lblDetalleTitulo.Text = string.Format(
-                T_sel("lbl.ped.seleccionado", "Pedido #{0} — {1} — {2}"),
-                pedido.IdPedido, pedido.NombreCliente, EstadoLabel(pedido.Estado)) +
+            string motivoLabel = Tr("lbl.motivo", "Motivo:");
+            lblDetalleTitulo.Text = Tr("lbl.ped.seleccionado", "Pedido #{0} — {1} — {2}",
+                new object[] { pedido.IdPedido, pedido.NombreCliente, EstadoLabel(pedido.Estado) }) +
                 (!string.IsNullOrEmpty(pedido.MotivoCancelacion)
                     ? $"  |  {motivoLabel} {pedido.MotivoCancelacion}" : "");
         }
@@ -236,15 +230,12 @@ namespace GUI
                 var pedidoCompleto = pedidoBLL.ObtenerPorId(idPedido);
                 if (pedidoCompleto == null) return;
 
-                var tD = Traductor.ObtenerTraducciones(_idioma);
-                string TD(string k, string fb) => tD.ContainsKey(k) ? tD[k].Texto : fb;
-
                 var tabla = new DataTable();
-                tabla.Columns.Add(TD("col.prenda.nombre",    "Prenda"),    typeof(string));
-                tabla.Columns.Add(TD("col.prenda.categoria", "Categoría"), typeof(string));
-                tabla.Columns.Add(TD("col.prenda.talle",     "Talle"),     typeof(string));
-                tabla.Columns.Add(TD("col.prenda.color",     "Color"),     typeof(string));
-                tabla.Columns.Add(TD("col.prenda.estado",    "Estado"),    typeof(string));
+                tabla.Columns.Add(Tr("col.prenda.nombre",    "Prenda"),    typeof(string));
+                tabla.Columns.Add(Tr("col.prenda.categoria", "Categoría"), typeof(string));
+                tabla.Columns.Add(Tr("col.prenda.talle",     "Talle"),     typeof(string));
+                tabla.Columns.Add(Tr("col.prenda.color",     "Color"),     typeof(string));
+                tabla.Columns.Add(Tr("col.prenda.estado",    "Estado"),    typeof(string));
 
                 foreach (var p in pedidoCompleto.Prendas)
                     tabla.Rows.Add(p.Nombre, p.Categoria ?? "—",
@@ -264,13 +255,12 @@ namespace GUI
 
         private string EstadoPrendaLabel(BE.EstadoPrenda estado)
         {
-            var t = Traductor.ObtenerTraducciones(_idioma);
             switch (estado)
             {
-                case BE.EstadoPrenda.Disponible:  return t.ContainsKey("prenda.disponible")  ? t["prenda.disponible"].Texto  : "Disponible";
-                case BE.EstadoPrenda.EnUso:       return t.ContainsKey("prenda.enuso")       ? t["prenda.enuso"].Texto       : "En Uso";
-                case BE.EstadoPrenda.EnLimpieza:  return t.ContainsKey("prenda.enlimpieza")  ? t["prenda.enlimpieza"].Texto  : "En Limpieza";
-                case BE.EstadoPrenda.Baja:        return t.ContainsKey("prenda.baja")        ? t["prenda.baja"].Texto        : "Baja";
+                case BE.EstadoPrenda.Disponible:  return Tr("prenda.disponible",  "Disponible");
+                case BE.EstadoPrenda.EnUso:       return Tr("prenda.enuso",       "En Uso");
+                case BE.EstadoPrenda.EnLimpieza:  return Tr("prenda.enlimpieza",  "En Limpieza");
+                case BE.EstadoPrenda.Baja:        return Tr("prenda.baja",        "Baja");
                 default: return estado.ToString();
             }
         }
@@ -302,33 +292,29 @@ namespace GUI
             var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
             if (pedido == null)
             {
-                var tNoEx = Traductor.ObtenerTraducciones(_idioma);
-                MostrarError(tNoEx.ContainsKey("msg.ped.yanoexiste") ? tNoEx["msg.ped.yanoexiste"].Texto : "Este pedido ya no existe. Actualizá la grilla.");
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
                 CargarPedidos();
                 return;
             }
 
             // Pedir motivo de cancelación con un dialog inline
-            var tCanc = Traductor.ObtenerTraducciones(_idioma);
-            string T_c(string k, string fb) => tCanc.ContainsKey(k) ? tCanc[k].Texto : fb;
-
             string motivo = PedirTexto(
-                $"{T_c("dlg.cancelped.titulo", "Motivo de Cancelación")} — Pedido #{pedido.IdPedido} ({pedido.NombreCliente}):",
-                T_c("dlg.cancelped.titulo", "Motivo de Cancelación"));
+                $"{Tr("dlg.cancelped.titulo", "Motivo de Cancelación")} — Pedido #{pedido.IdPedido} ({pedido.NombreCliente}):",
+                Tr("dlg.cancelped.titulo", "Motivo de Cancelación"));
 
             if (string.IsNullOrWhiteSpace(motivo))
             {
-                MostrarError(T_c("msg.cancelped.req", "La cancelación requiere un motivo."));
+                MostrarError(Tr("msg.cancelped.req", "La cancelación requiere un motivo."));
                 return;
             }
 
             string bodyCanc = string.Format(
-                T_c("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),
+                Tr("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),
                 pedido.IdPedido, pedido.NombreCliente, motivo);
 
             var confirmar = MessageBox.Show(
                 bodyCanc,
-                T_c("conf.cancelped.titulo", "Confirmar Cancelación"),
+                Tr("conf.cancelped.titulo", "Confirmar Cancelación"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning,
                 MessageBoxDefaultButton.Button2);
@@ -344,8 +330,7 @@ namespace GUI
                 invocador.TomarOrden(new BLL.Comandos.CancelacionCommand(pedidoBLL, pedido, this.Text, motivo));
                 invocador.ProcesarOrdenes();
 
-                string fmtCancelado = T_c("msg.ped.cancelado", "Pedido #{0} cancelado. Prendas liberadas.");
-                MostrarOk(string.Format(fmtCancelado, pedido.IdPedido));
+                MostrarOk(Tr("msg.ped.cancelado", "Pedido #{0} cancelado. Prendas liberadas.", new object[] { pedido.IdPedido }));
                 CargarPedidos();
             }
             catch (Exception ex)
@@ -362,23 +347,20 @@ namespace GUI
             // Releer el estado ACTUAL desde BD antes de actuar (ver comentario en
             // BtnCancelarPedido_Click).
             var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
-            var tDesc = Traductor.ObtenerTraducciones(_idioma);
             if (pedido == null)
             {
-                MostrarError(tDesc.ContainsKey("msg.ped.yanoexiste") ? tDesc["msg.ped.yanoexiste"].Texto : "Este pedido ya no existe. Actualizá la grilla.");
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
                 CargarPedidos();
                 return;
             }
 
-            string T_d(string k, string fb) => tDesc.ContainsKey(k) ? tDesc[k].Texto : fb;
-
             string bodyDesc = string.Format(
-                T_d("conf.descancelar.body", "¿Des-cancelar el Pedido #{0} de {1}?\n\nSe verificará que las prendas originales estén disponibles\ny el pedido volverá a estado Pendiente."),
+                Tr("conf.descancelar.body", "¿Des-cancelar el Pedido #{0} de {1}?\n\nSe verificará que las prendas originales estén disponibles\ny el pedido volverá a estado Pendiente."),
                 pedido.IdPedido, pedido.NombreCliente);
 
             var confirmar = MessageBox.Show(
                 bodyDesc,
-                T_d("conf.descancelar.titulo", "Confirmar Des-cancelación"),
+                Tr("conf.descancelar.titulo", "Confirmar Des-cancelación"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -388,7 +370,7 @@ namespace GUI
             try
             {
                 pedidoBLL.DesCancelar(this.Text, pedido);
-                string fmtReact = T_d("msg.ped.reactivado", "Pedido #{0} reactivado — volvió a Pendiente.");
+                string fmtReact = Tr("msg.ped.reactivado", "Pedido #{0} reactivado — volvió a Pendiente.");
                 MostrarOk(string.Format(fmtReact, pedido.IdPedido));
                 CargarPedidos();
             }

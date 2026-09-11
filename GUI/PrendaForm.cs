@@ -43,16 +43,15 @@ namespace GUI
         private void AplicarIdioma(Idioma idioma)
         {
             var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
 
             this.Text = _esEdicion
-                ? T("frm.editarprenda", "Editar Prenda")
-                : T("frm.nuevaprenda",  "Nueva Prenda");
+                ? Tr("frm.editarprenda", "Editar Prenda")
+                : Tr("frm.nuevaprenda",  "Nueva Prenda");
 
             // El botón guardar tiene dos estados: alta vs edición
             btnGuardar.Text = _esEdicion
-                ? T("btn.guardar.cambios", "Guardar Cambios")
-                : T("btn.agregar.prenda",  "Agregar Prenda");
+                ? Tr("btn.guardar.cambios", "Guardar Cambios")
+                : Tr("btn.agregar.prenda",  "Agregar Prenda");
 
             Aplicar(lblNombre,     t);
             Aplicar(lblDescripcion,t);

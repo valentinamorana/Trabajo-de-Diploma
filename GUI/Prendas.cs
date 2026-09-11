@@ -99,24 +99,21 @@ namespace GUI
             Aplicar(btnMantenimiento,  t);
             Aplicar(btnAnotarEspera,   t);
             Aplicar(lblDetalleTitulo,  t);
-            RellenarComboEstado(idioma);
+            RellenarComboEstado();
             TraducirHeadersGrilla();
         }
 
         /// <summary>Rellena el combo de estado con las opciones traducidas al idioma activo.</summary>
-        private void RellenarComboEstado(Idioma idioma)
+        private void RellenarComboEstado()
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
-
             int prevIdx = cmbEstadoFiltro.SelectedIndex < 0 ? 0 : cmbEstadoFiltro.SelectedIndex;
             cmbEstadoFiltro.SelectedIndexChanged -= CmbEstadoFiltro_SelectedIndexChanged;
             cmbEstadoFiltro.Items.Clear();
-            cmbEstadoFiltro.Items.Add(T("combo.prenda.todos",  "Todos"));
-            cmbEstadoFiltro.Items.Add(T("prenda.disponible",   "Disponible"));
-            cmbEstadoFiltro.Items.Add(T("prenda.enuso",        "En Uso"));
-            cmbEstadoFiltro.Items.Add(T("prenda.enlimpieza",   "En Limpieza"));
-            cmbEstadoFiltro.Items.Add(T("prenda.baja",         "Baja"));
+            cmbEstadoFiltro.Items.Add(Tr("combo.prenda.todos",  "Todos"));
+            cmbEstadoFiltro.Items.Add(Tr("prenda.disponible",   "Disponible"));
+            cmbEstadoFiltro.Items.Add(Tr("prenda.enuso",        "En Uso"));
+            cmbEstadoFiltro.Items.Add(Tr("prenda.enlimpieza",   "En Limpieza"));
+            cmbEstadoFiltro.Items.Add(Tr("prenda.baja",         "Baja"));
             cmbEstadoFiltro.SelectedIndex = prevIdx < cmbEstadoFiltro.Items.Count ? prevIdx : 0;
             cmbEstadoFiltro.SelectedIndexChanged += CmbEstadoFiltro_SelectedIndexChanged;
         }
@@ -182,9 +179,7 @@ namespace GUI
             {
                 _prendas = prendaBLL.ObtenerTodos();
                 AplicarFiltro();
-                var t = Traductor.ObtenerTraducciones(_idioma);
-                string fmt = t.ContainsKey("msg.prenda.cargadas") ? t["msg.prenda.cargadas"].Texto : "{0} prenda(s) en el catálogo.";
-                MostrarOk(string.Format(fmt, _prendas.Count));
+                MostrarOk(Tr("msg.prenda.cargadas", "{0} prenda(s) en el catálogo.", new object[] { _prendas.Count }));
             }
             catch (Exception ex)
             {
@@ -353,9 +348,6 @@ namespace GUI
             if (prenda == null) return;
 
             // Construir opciones de transición válidas usando la lógica de BE
-            var tEst = Traductor.ObtenerTraducciones(_idioma);
-            string T_est(string k, string fb) => tEst.ContainsKey(k) ? tEst[k].Texto : fb;
-
             var opciones = new List<(string texto, BE.EstadoPrenda estado)>();
 
             var candidatos = new (BE.EstadoPrenda estado, string clave, string fb)[]
@@ -375,7 +367,7 @@ namespace GUI
                     continue;
 
                 if (cand.estado != prenda.Estado && prenda.TransicionPermitida(cand.estado))
-                    opciones.Add((T_est(cand.clave, cand.fb), cand.estado));
+                    opciones.Add((Tr(cand.clave, cand.fb), cand.estado));
             }
 
             if (opciones.Count == 0)
@@ -384,7 +376,7 @@ namespace GUI
                 string errFb  = prenda.Estado == BE.EstadoPrenda.EnUso
                     ? "No se puede cambiar el estado: la prenda está en uso por un cliente."
                     : "La prenda está dada de baja y no puede ser reactivada.";
-                MostrarError(T_est(errKey, errFb));
+                MostrarError(Tr(errKey, errFb));
                 return;
             }
 
@@ -399,7 +391,7 @@ namespace GUI
                         ? Seguridad.SessionManager.GetInstance().Usuario.Username
                         : null;
                     prendaBLL.CambiarEstado(this.Text, prenda, dlg.EstadoSeleccionado, actor);
-                    string fmtEstAct = T_est("msg.prenda.estadoact", "Estado de '{0}' actualizado a {1}.");
+                    string fmtEstAct = Tr("msg.prenda.estadoact", "Estado de '{0}' actualizado a {1}.");
                     MostrarOk(string.Format(fmtEstAct, prenda.Nombre, EstadoLabel(dlg.EstadoSeleccionado)));
 
                     // Bloque 1 — al dar de baja, ofrecer cargar un cargo por daño/pérdida contra
@@ -417,13 +409,10 @@ namespace GUI
         // Bloque 1 — Cargo por daño/pérdida: se ofrece opcionalmente tras confirmar una Baja.
         private void OfrecerCargoPorDanioOPerdida(BE.Prenda prenda)
         {
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T_c(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             var conf = MessageBox.Show(
-                T_c("msg.cargoprenda.preguntar", "¿Corresponde cobrarle a {0} por daño o pérdida de esta prenda?")
+                Tr("msg.cargoprenda.preguntar", "¿Corresponde cobrarle a {0} por daño o pérdida de esta prenda?")
                     .Replace("{0}", prenda.NombreUltimoCliente ?? "el último cliente"),
-                T_c("frm.cargoprenda", "Cargo por Daño/Pérdida"),
+                Tr("frm.cargoprenda", "Cargo por Daño/Pérdida"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
             if (conf != DialogResult.Yes) return;
 
@@ -436,8 +425,8 @@ namespace GUI
                         ? Seguridad.SessionManager.GetInstance().Usuario.Username
                         : null;
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
-                    string fmt = T_c("msg.cargoprenda.registrado", "Cargo de ${0} registrado — se sumará al próximo cobro de {1}.");
-                    MostrarOk(string.Format(fmt, dlg.Monto, prenda.NombreUltimoCliente ?? "el cliente"));
+                    MostrarOk(Tr("msg.cargoprenda.registrado", "Cargo de ${0} registrado — se sumará al próximo cobro de {1}.",
+                        new object[] { dlg.Monto, prenda.NombreUltimoCliente ?? "el cliente" }));
                 }
                 catch (Exception ex) { MostrarError(ex); }
             }
@@ -450,12 +439,9 @@ namespace GUI
             var prenda = ObtenerPrendaSeleccionada();
             if (prenda == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T_c(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             var cliente = SeleccionarClienteDialog(
-                T_c("frm.listaespera.anotar", "Anotar en Lista de Espera"),
-                string.Format(T_c("lbl.listaespera.elegircliente", "Cliente que espera '{0}':"), prenda.Nombre));
+                Tr("frm.listaespera.anotar", "Anotar en Lista de Espera"),
+                Tr("lbl.listaespera.elegircliente", "Cliente que espera '{0}':", new object[] { prenda.Nombre }));
             if (cliente == null) return;
 
             try
@@ -463,9 +449,8 @@ namespace GUI
                 string actor = Seguridad.SessionManager.IsLoggedIn
                     ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
                 listaEsperaBLL.Anotar(this.Text, prenda.IdPrenda, cliente.IdCliente, actor);
-                MostrarOk(string.Format(
-                    T_c("msg.listaespera.anotado", "{0} anotado en la lista de espera de '{1}'."),
-                    cliente.NombreCompleto, prenda.Nombre));
+                MostrarOk(Tr("msg.listaespera.anotado", "{0} anotado en la lista de espera de '{1}'.",
+                    new object[] { cliente.NombreCompleto, prenda.Nombre }));
             }
             catch (Exception ex) { MostrarError(ex); }
         }
@@ -540,14 +525,12 @@ namespace GUI
 
         private string EstadoLabel(BE.EstadoPrenda estado)
         {
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
             switch (estado)
             {
-                case BE.EstadoPrenda.Disponible:  return T("prenda.disponible",  "Disponible");
-                case BE.EstadoPrenda.EnUso:       return T("prenda.enuso",       "En Uso");
-                case BE.EstadoPrenda.EnLimpieza:  return T("prenda.enlimpieza",  "En Limpieza");
-                case BE.EstadoPrenda.Baja:        return T("prenda.baja",        "Baja");
+                case BE.EstadoPrenda.Disponible:  return Tr("prenda.disponible",  "Disponible");
+                case BE.EstadoPrenda.EnUso:       return Tr("prenda.enuso",       "En Uso");
+                case BE.EstadoPrenda.EnLimpieza:  return Tr("prenda.enlimpieza",  "En Limpieza");
+                case BE.EstadoPrenda.Baja:        return Tr("prenda.baja",        "Baja");
                 default:                          return estado.ToString();
             }
         }

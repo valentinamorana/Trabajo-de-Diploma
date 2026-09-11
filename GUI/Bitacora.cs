@@ -95,8 +95,6 @@ namespace GUI
             {
                 var g = pe.Graphics;
                 int x = 10;
-                var tr = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string Tl(string key, string fb) => tr.ContainsKey(key) ? tr[key].Texto : fb;
                 // (trad-key, fallback, back, fore)
                 var niveles = new (string key, string fb, Color back, Color fore)[]
                 {
@@ -116,7 +114,7 @@ namespace GUI
                             g.FillRectangle(br, x, 7, 10, 10);
                         g.DrawRectangle(Pens.Gray, x, 7, 10, 10);
                         x += 13;
-                        string etiqueta = Tl(n.key, n.fb);
+                        string etiqueta = Tr(n.key, n.fb);
                         using (var br = new SolidBrush(Color.FromArgb(60,40,50)))
                             g.DrawString(etiqueta, fnt, br, x, 6);
                         x += (int)g.MeasureString(etiqueta, fnt).Width + 6;
@@ -202,10 +200,7 @@ namespace GUI
         {
             var datos = dgv?.DataSource as DataTable;
             if (datos == null) return;
-            var tR = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string linea1 = string.Format(
-                tR.ContainsKey("msg.bit.registros") ? tR["msg.bit.registros"].Texto : "  {0} registro(s)",
-                datos.Rows.Count);
+            string linea1 = Tr("msg.bit.registros", "  {0} registro(s)", new object[] { datos.Rows.Count });
             if (dgv == dgvSistema && datos.Columns.Contains("criticidad"))
             {
                 lbl.Height = 44;
@@ -227,12 +222,11 @@ namespace GUI
         private void Traducir(Idioma idioma)
         {
             var t = Traductor.ObtenerTraducciones(idioma);
-            string Tv(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
-            lblBitTitulo.Text    = Tv("frm.bitacora",          "Auditoría — Bitácoras");
-            lblBitSubtitulo.Text = Tv("frm.bitacora.subtitulo","Registro de eventos del sistema y operaciones de negocio");
+            lblBitTitulo.Text    = Tr("frm.bitacora",          "Auditoría — Bitácoras");
+            lblBitSubtitulo.Text = Tr("frm.bitacora.subtitulo","Registro de eventos del sistema y operaciones de negocio");
             // Tabs
             if (t.ContainsKey("tab.sistema")) tabPageSistema.Text = t["tab.sistema"].Texto;
             if (t.ContainsKey("tab.negocio")) tabPageNegocio.Text = t["tab.negocio"].Texto;
@@ -255,13 +249,12 @@ namespace GUI
             Aplicar(btnNegBuscar,         t);
             Aplicar(btnNegLimpiar,        t);
             // Botones Exportar PDF (sin Tag en Designer → texto directo)
-            string exportPdf = t.ContainsKey("btn.exportar.pdf")
-                ? t["btn.exportar.pdf"].Texto : "📄 Exportar PDF";
+            string exportPdf = Tr("btn.exportar.pdf", "📄 Exportar PDF");
             btnExportSistema.Text  = exportPdf;
             btnExportNegocio.Text  = exportPdf;
 
-            RellenarComboCriticidad(idioma);
-            RellenarComboTipoEvento(idioma);
+            RellenarComboCriticidad();
+            RellenarComboTipoEvento();
         }
 
         /// <summary>
@@ -269,22 +262,19 @@ namespace GUI
         /// respetando el índice previamente seleccionado (para que el cambio de idioma
         /// no pierda la selección del usuario).
         /// </summary>
-        private void RellenarComboCriticidad(Idioma idioma)
+        private void RellenarComboCriticidad()
         {
             int idx = cmbCriticidad.SelectedIndex;
             if (idx < 0) idx = 0;
             cmbCriticidad.Items.Clear();
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string key, string fallback) =>
-                t.ContainsKey(key) ? t[key].Texto : fallback;
-            cmbCriticidad.Items.Add(T("crit.todas",      "Todas"));
-            cmbCriticidad.Items.Add(T("crit.ninguno",    "Ninguno (0)"));
-            cmbCriticidad.Items.Add(T("crit.baja",       "Baja (1)"));
-            cmbCriticidad.Items.Add(T("crit.media",      "Media (2)"));
-            cmbCriticidad.Items.Add(T("crit.alta",       "Alta (3)"));
-            cmbCriticidad.Items.Add(T("crit.intlogin",   "Intentos Login (4)"));
-            cmbCriticidad.Items.Add(T("crit.recupclave", "Recuperacion Clave (5)"));
-            cmbCriticidad.Items.Add(T("crit.bloqueos",   "Bloqueos Cuenta (6)"));
+            cmbCriticidad.Items.Add(Tr("crit.todas",      "Todas"));
+            cmbCriticidad.Items.Add(Tr("crit.ninguno",    "Ninguno (0)"));
+            cmbCriticidad.Items.Add(Tr("crit.baja",       "Baja (1)"));
+            cmbCriticidad.Items.Add(Tr("crit.media",      "Media (2)"));
+            cmbCriticidad.Items.Add(Tr("crit.alta",       "Alta (3)"));
+            cmbCriticidad.Items.Add(Tr("crit.intlogin",   "Intentos Login (4)"));
+            cmbCriticidad.Items.Add(Tr("crit.recupclave", "Recuperacion Clave (5)"));
+            cmbCriticidad.Items.Add(Tr("crit.bloqueos",   "Bloqueos Cuenta (6)"));
             cmbCriticidad.SelectedIndex =
                 (idx >= 0 && idx < cmbCriticidad.Items.Count) ? idx : 0;
         }
@@ -294,18 +284,16 @@ namespace GUI
         /// Usa _tipoEventoDB como lista paralela de claves reales de BD,
         /// para que el filtro pueda usar el valor correcto aunque el idioma cambie.
         /// </summary>
-        private void RellenarComboTipoEvento(Idioma idioma)
+        private void RellenarComboTipoEvento()
         {
             int idx = cmbTipoEvento.SelectedIndex;
             if (idx < 0) idx = 0;
             cmbTipoEvento.Items.Clear();
             _tipoEventoDB.Clear();
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string key, string fb) => t.ContainsKey(key) ? t[key].Texto : fb;
 
             void Add(string dbVal, string key, string fb)
             {
-                cmbTipoEvento.Items.Add(T(key, fb));
+                cmbTipoEvento.Items.Add(Tr(key, fb));
                 _tipoEventoDB.Add(dbVal);
             }
 
@@ -348,10 +336,9 @@ namespace GUI
             DataTable dt = dias == 0
                 ? bllBitacora.ObtenerTodosSistema()
                 : bllBitacora.ObtenerUltimosNDiasSistema(dias);
-            var tU = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string contexto = dias > 0
-                ? string.Format(tU.ContainsKey("msg.bit.ultimos") ? tU["msg.bit.ultimos"].Texto : "últimos {0} días", dias)
-                : (tU.ContainsKey("msg.bit.todos") ? tU["msg.bit.todos"].Texto : "todos los registros");
+                ? Tr("msg.bit.ultimos", "últimos {0} días", new object[] { dias })
+                : Tr("msg.bit.todos", "todos los registros");
             MostrarEnGrilla(dgvSistema, lblResultadosSistema, dt, contexto);
         }
 
@@ -361,21 +348,15 @@ namespace GUI
             txtActividad.Clear();
             nudDias.Value   = 7;
             // Refill combo first (keeps index 0), then explicitly reset to 0
-            RellenarComboCriticidad(GestorIdioma.IdiomaActual);
+            RellenarComboCriticidad();
             cmbCriticidad.SelectedIndex = 0;
             CargarSistema();
-        }
-
-        private string T(string key, string fallback)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(key) ? t[key].Texto : fallback;
         }
 
         private void BtnExportSistema_Click(object sender, EventArgs e)
         {
             MostrarMenuExportar((Control)sender, dgvSistema,
-                T("bit.pdf.titulosistema", "Bitácora del Sistema — WardrobeFlow"));
+                Tr("bit.pdf.titulosistema", "Bitácora del Sistema — WardrobeFlow"));
         }
 
         private void DgvSistema_DataBindingComplete(object sender,
@@ -389,10 +370,9 @@ namespace GUI
             int dias = (int)nudNegDias.Value;
             DateTime? desde = dias > 0 ? DateTime.Now.AddDays(-dias) : (DateTime?)null;
             var dt = bllBitacora.BuscarPorFiltrosNegocio(desde, null, null, null, null);
-            var tUN = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string contexto = dias > 0
-                ? string.Format(tUN.ContainsKey("msg.bit.ultimos") ? tUN["msg.bit.ultimos"].Texto : "últimos {0} días", dias)
-                : (tUN.ContainsKey("msg.bit.todos") ? tUN["msg.bit.todos"].Texto : "todos los registros");
+                ? Tr("msg.bit.ultimos", "últimos {0} días", new object[] { dias })
+                : Tr("msg.bit.todos", "todos los registros");
             MostrarEnGrilla(dgvNegocio, lblResultadosNegocio, dt, contexto);
         }
 
@@ -408,7 +388,7 @@ namespace GUI
         private void BtnExportNegocio_Click(object sender, EventArgs e)
         {
             MostrarMenuExportar((Control)sender, dgvNegocio,
-                T("bit.pdf.titulonegocio", "Bitácora de Negocio — WardrobeFlow"));
+                Tr("bit.pdf.titulonegocio", "Bitácora de Negocio — WardrobeFlow"));
         }
 
         // ── Carga ─────────────────────────────────────────────────────────────
@@ -483,9 +463,9 @@ namespace GUI
         private void MostrarMenuExportar(Control ancla, DataGridView dgv, string titulo)
         {
             var menu = new ContextMenuStrip();
-            menu.Items.Add(T("bit.menu.exportarpdf", "Exportar a PDF"), null,
+            menu.Items.Add(Tr("bit.menu.exportarpdf", "Exportar a PDF"), null,
                 (s, e) => ExportarReporte(dgv, titulo, "pdf"));
-            menu.Items.Add(T("bit.menu.exportarcsv", "Exportar a CSV"), null,
+            menu.Items.Add(Tr("bit.menu.exportarcsv", "Exportar a CSV"), null,
                 (s, e) => ExportarReporte(dgv, titulo, "csv"));
             menu.Show(ancla, new Point(0, ancla.Height));
         }
@@ -526,10 +506,7 @@ namespace GUI
             bool esSistema = (dgv == dgvSistema);
             TraducirHeadersGrilla(dgv, GestorIdioma.IdiomaActual, esSistema);
 
-            var tR = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string linea1 = string.Format(
-                tR.ContainsKey("msg.bit.registros") ? tR["msg.bit.registros"].Texto : "  {0} registro(s)",
-                datos.Rows.Count);
+            string linea1 = Tr("msg.bit.registros", "  {0} registro(s)", new object[] { datos.Rows.Count });
             if (!string.IsNullOrEmpty(contexto)) linea1 += $"  —  {contexto}";
 
             if (dgv == dgvSistema && datos.Columns.Contains("criticidad"))

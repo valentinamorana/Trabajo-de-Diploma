@@ -1,9 +1,10 @@
 # Auditoría técnica — WardrobeFlow (2026-09-10)
 
-> **Actualización (2026-09-11): todos los 🔴 Alta están resueltos**, y ~60 de los 95 hallazgos
+> **Actualización (2026-09-11): todos los 🔴 Alta están resueltos**, y ~64 de los 95 hallazgos
 > 🟡 Media/🟢 Baja también (ver el marcador `✅ RESUELTO (2026-09-11)` en cada uno, con su
 > "Solución aplicada"). Build + tests verificados en verde después de cada tanda de cambios
-> (325+ tests, 0 fallando). Los ítems Media/Baja sin ese marcador quedan anotados `(pendiente)`
+> (407 tests, 405 passed, 2 skipped preexistentes, 0 fallando). Los ítems Media/Baja sin ese
+> marcador quedan anotados `(pendiente)`
 > cuando requieren un refactor de mayor alcance, una decisión de producto, o simplemente no se
 > llegó a esta pasada — no se tocó nada fuera de lo explícitamente marcado como resuelto. El scan
 > transversal (§10) sigue sin empezar salvo el ítem #12 (color de marca), resuelto como parte de
@@ -448,18 +449,22 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 
 ### 🟡 Media
 
-6. `BLL.Cliente.ActivarSuscripcion`/rama de cambio de plan en `Modificar` — sin tests porque `dalPlan` no está inyectado por constructor (única clase "core" con este gap; documentado honestamente en el propio archivo de test, pero evitable). *(pendiente)*
+6. ✅ RESUELTO (2026-09-11) — `BLL.Cliente.ActivarSuscripcion`/rama de cambio de plan en `Modificar` — sin tests porque `dalPlan` no está inyectado por constructor (única clase "core" con este gap; documentado honestamente en el propio archivo de test, pero evitable).
+*Solución aplicada:* `dalPlan` pasa de `DAL.PlanSuscripcion` concreto fijo a `IPlanSuscripcionDAL` inyectable por constructor (mismo patrón que `BLL.Renovacion`); 4 tests nuevos cubren ambos métodos.
 7. ✅ RESUELTO (2026-09-11) — `BLL.Promocion.Modificar` — 0 tests, en un archivo por lo demás ejemplar en cobertura.
 *Solución aplicada:* se agregaron 4 tests (`Modificar_EnRevisionContableConDatosValidos_ActualizaYRegistra`, `Modificar_PromocionVigente_LanzaModificarEstado`, `Modificar_BajaSolicitada_LanzaModificarEstado`, `Modificar_AmbosDestinos_LanzaDestinoInvalido`).
-8. `BLL.Pedido` — catches silenciosos de Lista de Espera nunca ejercitados por ningún test (no se sabe si el fail-open es intencional o esconde un bug). *(pendiente)*
+8. ✅ RESUELTO (2026-09-11) — `BLL.Pedido` — catches silenciosos de Lista de Espera nunca ejercitados por ningún test (no se sabe si el fail-open es intencional o esconde un bug).
+*Solución aplicada:* nuevo `FakeListaEsperaService` configurable para lanzar; 2 tests verifican explícitamente que `CrearPedido` no se bloquea si Lista de Espera falla al verificar o al cerrar una reserva — el fail-open es intencional y ahora queda documentado por test.
 9. ✅ RESUELTO (2026-09-11) — `RestaurarOperacion`/`DesCancelar` — solo se testea el camino de error, nunca el camino feliz (incluido un swap de campos sutil en el re-registro de historial).
 *Solución aplicada:* se agregó el camino feliz de ambos; el de `RestaurarOperacion` verifica explícitamente el swap Anterior/Nuevo al re-registrar el historial. `FakePedidoHistorialDAL`/`FakePedidoDAL` ahora capturan lo que reciben (antes solo contaban invocaciones).
 10. ✅ RESUELTO (2026-09-11) — (Del bloque de Seguridad/Permisos) `Seguridad/SessionManager.TienePermiso` sin test directo (solo se testea la función pura que recibe los booleanos ya resueltos, no el método real que hace el bypass de admin/comparación case-insensitive).
 *Solución aplicada:* 3 tests nuevos contra el método real (bypass de Administrador, permiso presente/ausente con comparación case-insensitive).
-11. (Del bloque de Seguridad/Permisos) `BLL/Familia.cs` — todos los métodos de escritura (`GuardarAsignacionRol`, `CrearRol`, `EliminarRol`, `ValidarSinCiclo`) sin test — solo la función pura `SistemaConservaGestion` está bien cubierta, no la orquestación real que la dispara en producción. *(pendiente)*
+11. ✅ RESUELTO (2026-09-11) — (Del bloque de Seguridad/Permisos) `BLL/Familia.cs` — todos los métodos de escritura (`GuardarAsignacionRol`, `CrearRol`, `EliminarRol`, `ValidarSinCiclo`) sin test — solo la función pura `SistemaConservaGestion` está bien cubierta, no la orquestación real que la dispara en producción.
+*Solución aplicada:* `FakePermisoDAL` ganó árbol configurable + espías; 10 tests nuevos cubren `CrearRol`, `EliminarRol` y `AgregarComponente`/`ValidarSinCiclo` (ciclo directo e indirecto) de punta a punta, más las validaciones de `GuardarAsignacionRol` previas al guard sistémico (rol inexistente, autobloqueo). Deliberadamente sin cobertura del camino feliz de `GuardarAsignacionRol`/`EliminarRol`/`QuitarComponente`: los tres pasan por `ExigirSistemaConservaGestion`, que internamente instancia `new Usuario()` (BLL/DAL concretos, no inyectables) para enumerar usuarios reales — ejercitarlos de punta a punta pegaría contra la BD real con un resultado dependiente de su contenido. Ese acoplamiento en sí queda como hallazgo residual, no resuelto.
 12. ✅ RESUELTO (2026-09-11) — (Del bloque de Seguridad/Permisos) `Encriptador.ValidarContrasena` — rama `clave_sinespecial` nunca ejercitada por ningún test.
 *Solución aplicada:* se agregó `CambiarClavePropia_ClaveSinEspecial_LanzaClaveSinEspecial_SinTocarDAL`.
-13. (Del bloque de Seguridad/Permisos) `Usuario.Claves.ResetearClave`/`SolicitarRecuperacionClave`/`ValidarCredencialesAdmin` sin ningún test. *(pendiente)*
+13. ✅ RESUELTO (2026-09-11) — (Del bloque de Seguridad/Permisos) `Usuario.Claves.ResetearClave`/`SolicitarRecuperacionClave`/`ValidarCredencialesAdmin` sin ningún test.
+*Solución aplicada:* 12 tests nuevos. `ValidarCredencialesAdmin` queda con cobertura completa (6 ramas, sin dependencia de BD). `ResetearClave`/`SolicitarRecuperacionClave` cubren el guard/camino determinístico previo a cualquier side-effect; el resto de ambos métodos escribe contra Bitácora/VersionUsuario/disco de forma no inyectable, mismo motivo de exclusión que el ítem #11.
 
 ### 🟢 Baja
 

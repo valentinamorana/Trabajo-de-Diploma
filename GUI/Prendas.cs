@@ -484,7 +484,7 @@ namespace GUI
 
                 var btnOk = new Button
                 {
-                    Text = "OK", Left = 184, Top = 80, Width = 76, Height = 30,
+                    Text = Tr("btn.aceptar", "Aceptar"), Left = 184, Top = 80, Width = 76, Height = 30,
                     DialogResult = DialogResult.OK,
                     BackColor = Tema.RosaPrimario, ForeColor = Color.White,
                     FlatStyle = FlatStyle.Flat
@@ -492,7 +492,7 @@ namespace GUI
                 btnOk.FlatAppearance.BorderSize = 0;
                 var btnCancel = new Button
                 {
-                    Text = "Cancelar", Left = 268, Top = 80, Width = 76, Height = 30,
+                    Text = Tr("btn.cancelar", "Cancelar"), Left = 268, Top = 80, Width = 76, Height = 30,
                     DialogResult = DialogResult.Cancel, FlatStyle = FlatStyle.Flat
                 };
 

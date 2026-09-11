@@ -262,7 +262,7 @@ Contexto: el criterio de urgencia/mantenimiento entre los 5 dashboards (objeto d
 *Solución aplicada:* renombrado a `wrapper` en el Designer.
 16. Convención de nombres de event handlers distinta entre las 3 pantallas de Historial (PascalCase vs camelCase). *(pendiente)*
 17. Contenedores de columna con nombres genéricos `col1`/`col2`/`col3` en los 4 dashboards con Kanban. *(pendiente)*
-18. Cero controles `ToolTip` en las 16 pantallas revisadas (incl. un botón solo-ícono "⚙" sin texto ni tooltip). *(pendiente)*
+18. Cero controles `ToolTip` en las 16 pantallas revisadas (incl. un botón solo-ícono "⚙" sin texto ni tooltip). *(parcial 2026-09-11: el botón "⚙" de `DashboardForm` ya tiene tooltip; el resto de las 16 pantallas sigue sin ninguno)*
 19. `AutoScaleDimensions`/`AutoScaleMode` configurados de forma distinta entre las 3 pantallas de Historial. *(pendiente)*
 20. Botones "Exportar a PDF/CSV" nunca se deshabilitan sin datos generados (el guard llega recién al clic). *(pendiente)*
 
@@ -418,7 +418,8 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 *Solución aplicada:* ahora pide confirmación con el mismo diálogo Sí/No que "Cerrar sesión" (`ConfirmarCerrarSesion` se generalizó a `ConfirmarSiNo(titulo, mensaje)`, compartido por ambas acciones).
 5. ✅ RESUELTO (2026-09-11) — Backup/Restore corren síncronos en el hilo de UI, sin cursor de espera ni deshabilitar botones — con BD grande, la ventana puede marcarse "No responde".
 *Solución aplicada:* `BackupForm` ejecuta backup/backup inicial/restauración en `Task.Run`, con cursor de espera y controles deshabilitados mientras corre.
-6. Mini-diálogos ad-hoc duplicados (`Menu.ConfirmarCerrarSesion`, `FormIdiomas.Pedir`) en vez de reusar `InputDialog`, que existe explícitamente para esto. *(parcial: `ConfirmarCerrarSesion` se generalizó como parte del #4, pero sigue sin reusar `InputDialog` — ese es un diálogo de entrada de texto, no de confirmación Sí/No, así que no aplica directamente; `FormIdiomas.Pedir` queda pendiente de revisar)*
+6. ✅ RESUELTO (2026-09-11) — Mini-diálogos ad-hoc duplicados (`Menu.ConfirmarCerrarSesion`, `FormIdiomas.Pedir`) en vez de reusar `InputDialog`, que existe explícitamente para esto.
+*Solución aplicada:* `ConfirmarCerrarSesion` se generalizó a `ConfirmarSiNo` (diálogo de confirmación Sí/No, no aplica `InputDialog` que es de entrada de texto — ver #4). `FormIdiomas.Pedir` ahora delega en `InputDialog` en vez de armar un `Form` a mano.
 7. ✅ RESUELTO (2026-09-11) — El rosa de marca (`210,100,135`) sigue hardcodeado en 25 archivos pese a existir `Tema.RosaPrimario`/`EstiloFormulario.Rosa` para centralizarlo — la migración "de a poco" documentada en el propio `Tema.cs` no avanzó sobre el código existente.
 *Solución aplicada:* los 25 archivos migraron a `Tema.RosaPrimario`; se eliminaron además las constantes `RosaPrimario` locales y duplicadas de `AdministracionUsuariosForm` y `GestorPermisos`.
 
@@ -497,7 +498,8 @@ Búsquedas sobre el conjunto completo (no archivo por archivo) para detectar pat
 
 **4. `MessageBox.Show` — 82 ocurrencias en 38 archivos, 0 con literal directo salvo un solo archivo**: `GUI/Program.cs` (mensajes de arranque, antes de que exista un `Form` con su propio helper de traducción) y puntualmente `Login.cs:347` — el resto del proyecto (517 llamados a `T(`/`Tx(`) tiene una disciplina fuerte de nunca mostrar un literal sin traductor.
 
-**5. Catches genéricos: 273 en 84 archivos, pero 0 completamente vacíos** — contradice la hipótesis inicial de "catches que tragan en silencio". El problema real es otro: **al menos 3 implementaciones independientes de `MostrarError(Exception ex)`** (`FormBase`, `RecuperacionEspejoForm`, `ReporteJornadaForm`) con lógica ligeramente distinta, en vez de una sola función compartida.
+**5. ✅ RESUELTO (2026-09-11) — Catches genéricos: 273 en 84 archivos, pero 0 completamente vacíos** — contradice la hipótesis inicial de "catches que tragan en silencio". El problema real es otro: **al menos 3 implementaciones independientes de `MostrarError(Exception ex)`** (`FormBase`, `RecuperacionEspejoForm`, `ReporteJornadaForm`) con lógica ligeramente distinta, en vez de una sola función compartida.
+*Solución aplicada:* `RecuperacionEspejoForm` pasó a heredar `FormBase` (antes heredaba `Form` directo) y usa la implementación heredada — de paso corrigió el mismo gap de exponer `ex.Message` crudo sin auditar que ya se había resuelto en otros formularios. `ReporteJornadaForm.MostrarError(ex, claveTitulo, tituloFallback)` es una variante legítima (necesita título de `MessageBox` personalizado por pantalla) que se mantiene, pero ahora delega en `FormBase.RegistrarExcepcion` (pasado de `private` a `protected`) para el caso de excepción inesperada, con el mismo criterio que la base.
 
 **6. ✅ RESUELTO (2026-09-11) — Constante `DiasSinActividadParaRiesgo` duplicada con valores distintos** entre `EstrategiaVencimientoInactividad.cs` (30) y `EstrategiaInactividadPura.cs` (60) — mismo nombre, misma semántica aparente, sin comentario que explique la diferencia (podría ser deliberado, pero no está documentado como tal).
 *Solución aplicada:* verificado que la diferencia es intencional (una estrategia usa la inactividad como señal secundaria sobre un vencimiento ya próximo, la otra como única señal y necesita un umbral más largo para evitar falsos positivos); se documentó con un comentario cruzado en ambas clases en vez de unificar los valores.

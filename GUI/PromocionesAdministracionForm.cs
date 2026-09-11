@@ -63,6 +63,9 @@ namespace GUI
             Aplicar(btnRechazarBaja,       t);
             Aplicar(lblSugerenciasTitulo,  t);
             Aplicar(lblPromocionesTitulo,  t);
+            // btnRefrescar es el único botón solo-ícono ("↻") de las 10 pantallas de este
+            // alcance sin texto traducible ni tooltip — se le agrega tooltip.
+            tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
             TraducirHeadersSugerencias(t);
             TraducirHeadersPromociones(t);
         }

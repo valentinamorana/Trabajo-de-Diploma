@@ -185,6 +185,11 @@ namespace GUI
             catch (Exception ex)
             {
                 MostrarError(ex);
+                // Si la falla ocurrió después de una escritura parcial, releer y refrescar el
+                // estado igual: mejor mostrar el dato real (aunque haya cambiado) que dejar la
+                // pantalla congelada con el estado de antes del intento. Best-effort: si el
+                // refresco en sí falla, no debe tapar el error ya mostrado arriba.
+                try { MostrarEstadoActual(_bllCliente.ObtenerPorId(item.Cliente.IdCliente)); } catch { }
             }
         }
 
@@ -206,6 +211,7 @@ namespace GUI
             catch (Exception ex)
             {
                 MostrarError(ex);
+                try { MostrarEstadoActual(_bllCliente.ObtenerPorId(item.Cliente.IdCliente)); } catch { }
             }
         }
 

@@ -24,6 +24,7 @@ namespace GUI
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
             this.dgvPromociones = new System.Windows.Forms.DataGridView();
+            this.tip = new System.Windows.Forms.ToolTip(this.components);
             this.panelTop.SuspendLayout();
             this.panelStatus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPromociones)).BeginInit();
@@ -66,6 +67,7 @@ namespace GUI
             this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
             this.btnRefrescar.TabIndex = 1;
             this.btnRefrescar.Text = "↻";
+            this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
             // lblConteo
@@ -150,6 +152,7 @@ namespace GUI
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.Button btnSugerirBaja;
         private System.Windows.Forms.Button btnRefrescar;
+        private System.Windows.Forms.ToolTip tip;
         private System.Windows.Forms.Label lblConteo;
         private System.Windows.Forms.Panel panelStatus;
         private System.Windows.Forms.Label lblMensaje;

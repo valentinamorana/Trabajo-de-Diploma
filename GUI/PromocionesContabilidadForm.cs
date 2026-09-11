@@ -55,6 +55,7 @@ namespace GUI
             Aplicar(lblObservacion, t);
             Aplicar(btnAprobar,     t);
             Aplicar(btnRechazar,    t);
+            tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
             TraducirHeadersGrilla(t);
         }
 

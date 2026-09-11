@@ -53,6 +53,9 @@ namespace GUI
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
             Aplicar(btnSugerirBaja, t);
+            // btnRefrescar es el único botón solo-ícono ("↻") de las 10 pantallas de este
+            // alcance sin texto traducible ni tooltip — se le agrega tooltip.
+            tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
             TraducirHeadersGrilla(t);
         }
 

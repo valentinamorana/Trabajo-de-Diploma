@@ -34,6 +34,7 @@ namespace GUI
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
             this.splitPrincipal = new System.Windows.Forms.SplitContainer();
+            this.tip = new System.Windows.Forms.ToolTip(this.components);
             this.panelTop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSugerencias)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPromociones)).BeginInit();
@@ -135,6 +136,7 @@ namespace GUI
             this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
             this.btnRefrescar.TabIndex = 5;
             this.btnRefrescar.Text = "↻";
+            this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
             // splitPrincipal
@@ -291,6 +293,7 @@ namespace GUI
         private System.Windows.Forms.Button btnAprobarBaja;
         private System.Windows.Forms.Button btnRechazarBaja;
         private System.Windows.Forms.Button btnRefrescar;
+        private System.Windows.Forms.ToolTip tip;
         private System.Windows.Forms.SplitContainer splitPrincipal;
         private System.Windows.Forms.Label lblSugerenciasTitulo;
         private System.Windows.Forms.DataGridView dgvSugerencias;

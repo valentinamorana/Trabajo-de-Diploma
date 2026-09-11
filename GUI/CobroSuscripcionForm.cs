@@ -157,7 +157,11 @@ namespace GUI
             }
             catch (Exception ex)
             {
+                // Si la falla ocurrió después de una escritura parcial, refrescar igual: mejor
+                // mostrar el estado real (aunque haya cambiado) que dejar la pantalla congelada
+                // con datos de antes del intento.
                 MostrarError(ex);
+                CargarClientes();
             }
         }
     }

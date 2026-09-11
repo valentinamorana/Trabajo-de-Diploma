@@ -58,6 +58,7 @@ ES	perm.msg.selpadre	Seleccioná una Familia o Rol para agregarle hijos.
 ES	perm.ok.agregado	'{0}' agregado a '{1}'.
 ES	perm.ok.quitado	'{0}' quitado de '{1}'.
 ES	btn.permisos.actualizar	↻ Actualizar
+ES	tip.actualizar	Actualizar
 ES	help.permisos.rol	Rol = perfil que se asigna a un usuario. Puede contener patentes, familias y otros roles (rol-en-rol).
 ES	lbl.permisos.subtitulo	Gestión de roles, familias y patentes
 ES	btn.permisos.eliminar	🗑 Eliminar selección
@@ -860,6 +861,7 @@ EN	perm.msg.selpadre	Select a Family or Role to add children to.
 EN	perm.ok.agregado	'{0}' added to '{1}'.
 EN	perm.ok.quitado	'{0}' removed from '{1}'.
 EN	btn.permisos.actualizar	↻ Refresh
+EN	tip.actualizar	Refresh
 EN	help.permisos.rol	Role = profile assigned to a user. Can contain patents, families and other roles (role-in-role).
 EN	lbl.permisos.subtitulo	Manage roles, families and patents
 EN	btn.permisos.eliminar	🗑 Delete selection
@@ -1662,6 +1664,7 @@ RU	perm.msg.selpadre	Выберите семейство или роль, что
 RU	perm.ok.agregado	«{0}» добавлено в «{1}».
 RU	perm.ok.quitado	«{0}» убрано из «{1}».
 RU	btn.permisos.actualizar	↻ Обновить
+RU	tip.actualizar	Обновить
 RU	help.permisos.rol	Роль — профиль, назначаемый пользователю. Может содержать права, семейства и другие роли (роль в роли).
 RU	lbl.permisos.subtitulo	Управление ролями, семействами и правами
 RU	btn.permisos.eliminar	🗑 Удалить выбор
@@ -2464,6 +2467,7 @@ PT	perm.msg.selpadre	Selecione uma Família ou Papel para adicionar filhos.
 PT	perm.ok.agregado	'{0}' adicionado a '{1}'.
 PT	perm.ok.quitado	'{0}' removido de '{1}'.
 PT	btn.permisos.actualizar	↻ Atualizar
+PT	tip.actualizar	Atualizar
 PT	help.permisos.rol	Papel = perfil atribuído a um usuário. Pode conter patentes, famílias e outros papéis (papel-em-papel).
 PT	lbl.permisos.subtitulo	Gestão de papéis, famílias e patentes
 PT	btn.permisos.eliminar	🗑 Excluir seleção

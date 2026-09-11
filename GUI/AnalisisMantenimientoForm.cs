@@ -27,6 +27,7 @@ namespace GUI
             Estilos.EstiloFormulario.BotonSecundario(btnExportarPdf);
             Estilos.EstiloFormulario.BotonSecundario(btnExportarCsv);
             Estilos.EstiloFormulario.Grilla(dgv);
+            btnExportarPdf.Enabled = btnExportarCsv.Enabled = false;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -85,6 +86,7 @@ namespace GUI
                 dgv.DataSource = tabla;
                 for (int i = 0; i < _encabezados.Length && i < dgv.Columns.Count; i++)
                     dgv.Columns[i].HeaderText = _encabezados[i];
+                btnExportarPdf.Enabled = btnExportarCsv.Enabled = resultados.Count > 0;
 
                 lblResultado.ForeColor = resultados.Count > 0 ? Color.DarkOrange : Color.DarkGreen;
                 lblResultado.Text = string.Format(

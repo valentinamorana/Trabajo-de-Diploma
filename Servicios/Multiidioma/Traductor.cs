@@ -37,8 +37,9 @@ namespace Servicios.Multiidioma
     ///   mnu.pedidosventa    → ítem "Pedidos de Venta"
     ///   mnu.pedidosreal     → ítem "Pedidos Realizados"
     ///   mnu.administrar     → menú "Administrar"
-    ///   mnu.usuarios        → ítem "Usuarios"
-    ///   mnu.bitacora        → menú "Analítica" (agrupa Bitácora + reportes futuros del Bloque 3)
+    ///   mnu.adminusuarios   → ítem "Usuarios" (reemplazó a mnu.usuarios, restructuración de menú)
+    ///   mnu.bitacora.sistema→ ítem "Bitácora del Sistema"
+    ///   mnu.bitacora.negocio→ ítem "Bitácora de Negocio" (reemplazaron a mnu.bitacora)
     ///   mnu.cerrarsesion    → ítem "Cerrar Sesión"
     ///   mnu.ventana         → menú "Ventana" (lista nativa de ventanas MDI abiertas)
     /// </summary>

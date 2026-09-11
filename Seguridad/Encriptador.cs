@@ -260,8 +260,9 @@ namespace Seguridad
             File.WriteAllText(ruta, Convert.ToBase64String(protegida));
         }
 
-        /// <summary>Convierte un array de bytes a Base64.</summary>
-        public static string ConvertirBase64(byte[] data)
+        // Wrapper trivial sobre Convert.ToBase64String, sin uso fuera de esta clase — bajado a
+        // private (era public sin ningún consumidor externo).
+        private static string ConvertirBase64(byte[] data)
         {
             return Convert.ToBase64String(data);
         }

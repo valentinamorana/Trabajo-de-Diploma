@@ -35,23 +35,34 @@ namespace Seguridad
             using (var rng = RandomNumberGenerator.Create())
                 rng.GetBytes(salt);
 
-            using (var aes = Aes.Create())
+            try
             {
-                aes.KeySize = 128;
-                aes.Mode    = CipherMode.CBC;
-                aes.Padding = PaddingMode.PKCS7;
-                aes.Key     = DerivarClave(password, salt);
-                aes.GenerateIV();
-
-                using (var fsOut = new FileStream(rutaDestino, FileMode.Create, FileAccess.Write))
+                using (var aes = Aes.Create())
                 {
-                    fsOut.Write(salt,   0, salt.Length);
-                    fsOut.Write(aes.IV, 0, aes.IV.Length);
-                    using (var encryptor = aes.CreateEncryptor())
-                    using (var cs = new CryptoStream(fsOut, encryptor, CryptoStreamMode.Write))
-                    using (var fsIn = new FileStream(rutaOrigen, FileMode.Open, FileAccess.Read))
-                        fsIn.CopyTo(cs);
+                    aes.KeySize = 128;
+                    aes.Mode    = CipherMode.CBC;
+                    aes.Padding = PaddingMode.PKCS7;
+                    aes.Key     = DerivarClave(password, salt);
+                    aes.GenerateIV();
+
+                    using (var fsOut = new FileStream(rutaDestino, FileMode.Create, FileAccess.Write))
+                    {
+                        fsOut.Write(salt,   0, salt.Length);
+                        fsOut.Write(aes.IV, 0, aes.IV.Length);
+                        using (var encryptor = aes.CreateEncryptor())
+                        using (var cs = new CryptoStream(fsOut, encryptor, CryptoStreamMode.Write))
+                        using (var fsIn = new FileStream(rutaOrigen, FileMode.Open, FileAccess.Read))
+                            fsIn.CopyTo(cs);
+                    }
                 }
+            }
+            catch
+            {
+                // Si la operación falla a mitad de camino (disco lleno, etc.), no debe quedar un
+                // archivo con el nombre "definitivo" pero corrupto/parcial — podía confundir a un
+                // admin más adelante haciéndole creer que es un backup válido.
+                BorrarSiExiste(rutaDestino);
+                throw;
             }
         }
 
@@ -61,25 +72,41 @@ namespace Seguridad
         /// </summary>
         public static void Descifrar(string rutaOrigen, string rutaDestino, string password)
         {
-            using (var fsIn = new FileStream(rutaOrigen, FileMode.Open, FileAccess.Read))
+            try
             {
-                byte[] salt = LeerExacto(fsIn, SaltSize);
-                byte[] iv   = LeerExacto(fsIn, IvSize);
-
-                using (var aes = Aes.Create())
+                using (var fsIn = new FileStream(rutaOrigen, FileMode.Open, FileAccess.Read))
                 {
-                    aes.KeySize = 128;
-                    aes.Mode    = CipherMode.CBC;
-                    aes.Padding = PaddingMode.PKCS7;
-                    aes.Key     = DerivarClave(password, salt);
-                    aes.IV      = iv;
+                    byte[] salt = LeerExacto(fsIn, SaltSize);
+                    byte[] iv   = LeerExacto(fsIn, IvSize);
 
-                    using (var decryptor = aes.CreateDecryptor())
-                    using (var cs = new CryptoStream(fsIn, decryptor, CryptoStreamMode.Read))
-                    using (var fsOut = new FileStream(rutaDestino, FileMode.Create, FileAccess.Write))
-                        cs.CopyTo(fsOut);   // contraseña incorrecta → CryptographicException acá
+                    using (var aes = Aes.Create())
+                    {
+                        aes.KeySize = 128;
+                        aes.Mode    = CipherMode.CBC;
+                        aes.Padding = PaddingMode.PKCS7;
+                        aes.Key     = DerivarClave(password, salt);
+                        aes.IV      = iv;
+
+                        using (var decryptor = aes.CreateDecryptor())
+                        using (var cs = new CryptoStream(fsIn, decryptor, CryptoStreamMode.Read))
+                        using (var fsOut = new FileStream(rutaDestino, FileMode.Create, FileAccess.Write))
+                            cs.CopyTo(fsOut);   // contraseña incorrecta → CryptographicException acá
+                    }
                 }
             }
+            catch
+            {
+                // Contraseña incorrecta (padding inválido) u otro fallo a mitad de la escritura:
+                // no debe quedar un archivo parcial/corrupto con el nombre "definitivo".
+                BorrarSiExiste(rutaDestino);
+                throw;
+            }
+        }
+
+        private static void BorrarSiExiste(string ruta)
+        {
+            try { if (File.Exists(ruta)) File.Delete(ruta); }
+            catch { /* best-effort: no tapar la excepción original por no poder limpiar */ }
         }
 
         private static byte[] LeerExacto(Stream s, int n)

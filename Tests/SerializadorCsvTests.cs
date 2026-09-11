@@ -83,5 +83,55 @@ namespace Tests
             var csv = SerializadorCsv.Generar(new[] { "A", "B" }, dt);
             Assert.AreEqual("x;", Lineas(csv)[1]);
         }
+
+        // ── Mitigación de CSV/Formula Injection (CWE-1236) ───────────────────────
+
+        [TestMethod]
+        public void Csv_CampoEmpiezaConIgual_SeNeutralizaConApostrofe()
+        {
+            // Sin comillas internas a propósito: un campo con '"' se entrecomilla por RFC 4180
+            // (ver Csv_CampoConComillas_*), lo que movería el apóstrofe agregado adentro de las
+            // comillas — este test aísla solo la neutralización del prefijo de fórmula.
+            var dt  = Tabla(new[] { "c1" }, new object[] { "=HYPERLINK(http://evil,click)" });
+            var csv = SerializadorCsv.Generar(new[] { "H" }, dt);
+            Assert.IsTrue(Lineas(csv)[1].StartsWith("'="), "Debe anteponer un apóstrofe al '=' inicial.");
+        }
+
+        [TestMethod]
+        public void Csv_CampoEmpiezaConArroba_SeNeutralizaConApostrofe()
+        {
+            var dt  = Tabla(new[] { "c1" }, new object[] { "@SUM(A1:A2)" });
+            var csv = SerializadorCsv.Generar(new[] { "H" }, dt);
+            Assert.IsTrue(Lineas(csv)[1].StartsWith("'@"));
+        }
+
+        [TestMethod]
+        public void Csv_CampoEmpiezaConMasOMenos_SeNeutralizaConApostrofe()
+        {
+            var dt  = Tabla(new[] { "c1", "c2" }, new object[] { "+1234", "-5678" });
+            var csv = SerializadorCsv.Generar(new[] { "H1", "H2" }, dt);
+            var celdas = Lineas(csv)[1].Split(';');
+            Assert.IsTrue(celdas[0].StartsWith("'+"));
+            Assert.IsTrue(celdas[1].StartsWith("'-"));
+        }
+
+        [TestMethod]
+        public void Csv_MontoNegativoNormal_NoDeberiaConfundirseConFormula_PeroSeNeutralizaIgual()
+        {
+            // Nota: un número negativo legítimo ("-500") también empieza con '-' y se neutraliza
+            // igual que una fórmula — es el mismo trade-off que aplican las librerías CSV modernas
+            // (falso positivo aceptable frente al riesgo de ejecución de fórmula).
+            var dt  = Tabla(new[] { "c1" }, new object[] { "-500" });
+            var csv = SerializadorCsv.Generar(new[] { "H" }, dt);
+            Assert.AreEqual("'-500", Lineas(csv)[1]);
+        }
+
+        [TestMethod]
+        public void Csv_CampoNoEmpiezaConCaracterDeFormula_QuedaIntacto()
+        {
+            var dt  = Tabla(new[] { "c1" }, new object[] { "Remera roja" });
+            var csv = SerializadorCsv.Generar(new[] { "H" }, dt);
+            Assert.AreEqual("Remera roja", Lineas(csv)[1]);
+        }
     }
 }

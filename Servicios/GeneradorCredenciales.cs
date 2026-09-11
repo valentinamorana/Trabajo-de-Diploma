@@ -126,7 +126,13 @@ namespace Servicios
                 if (string.IsNullOrEmpty(baseDir)) baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 else baseDir = Path.Combine(baseDir, "WardrobeFlow");
             }
-            catch { baseDir = AppDomain.CurrentDomain.BaseDirectory; }
+            catch (Exception ex)
+            {
+                // Antes era silencioso, inconsistente con el resto de esta capa (Bitacora.cs,
+                // GestorIdioma.cs), que siempre loguea antes de degradar a un fallback.
+                System.Diagnostics.Trace.TraceWarning($"[GeneradorCredenciales] No se pudo resolver MyDocuments: {ex.Message}");
+                baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            }
 
             string ruta = Path.Combine(baseDir, CarpetaCredenciales);
             if (!Directory.Exists(ruta))

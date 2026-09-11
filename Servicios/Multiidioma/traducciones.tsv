@@ -261,6 +261,8 @@ ES	col.prenda.categoria	Categoría
 ES	col.prenda.talle	Talle
 ES	col.prenda.color	Color
 ES	col.prenda.estado	Estado
+ES	col.listaespera.alta	Anotado el
+ES	col.listaespera.vence	Reserva vence
 ES	col.prenda.cliente	Cliente
 ES	col.prenda.alta	Alta
 ES	msg.prenda.conteo	Mostrando {0} de {1}
@@ -675,6 +677,8 @@ ES	conf.planes.desat.msg	¿Desactivar el plan '{0}'?\n\nLos clientes con este pl
 ES	conf.planes.desat.tit	Confirmar Desactivación
 ES	conf.planes.act.msg	¿Reactivar el plan '{0}'?\n\nEl plan volverá a estar disponible para nuevas suscripciones.
 ES	conf.planes.act.tit	Confirmar Activación
+ES	conf.listaespera.cancelar.body	¿Cancelar la anotación de {0} por '{1}'?
+ES	conf.listaespera.cancelar.titulo	Confirmar Cancelación
 ES	msg.idiomas.activado	Idioma activado.
 ES	msg.idiomas.desactivado	Idioma desactivado.
 ES	conf.idiomas.desactivar	¿Desactivar este idioma? Los usuarios no podrán seleccionarlo.
@@ -727,6 +731,14 @@ ES	err.bll.pedido.sin_plan	El cliente {0} no tiene plan asignado. Asignale un pl
 ES	err.bll.pedido.suscripcion_vencida	La suscripción de {0} venció el {1}. Renovar en el módulo de Clientes.
 ES	err.bll.pedido.limite_plan	El plan '{0}' permite {1} prenda(s). El cliente ya tiene {2} en uso y agrega {3} más. Máximo posible: {4}.
 ES	err.bll.pedido.prenda_no_disponible	La prenda '{0}' ya no está disponible (estado: {1}). Actualizá la selección.
+ES	err.bll.listaespera.cliente_inexistente	El cliente no existe.
+ES	err.bll.listaespera.inexistente	La anotación no existe.
+ES	err.bll.listaespera.prenda_inexistente	La prenda no existe.
+ES	err.bll.listaespera.prenda_no_enuso	'{0}' está {1} — no hace falta anotarse, ya se puede pedir directamente.
+ES	err.bll.listaespera.suscripcion_vencida	{0} no tiene una suscripción vigente.
+ES	err.bll.listaespera.ya_anotado	{0} ya está anotado en la lista de espera de '{1}'.
+ES	err.bll.listaespera.ya_resuelta	Esta anotación ya está {0} — no se puede cancelar.
+ES	err.bll.pedido.prenda_reservada	La prenda '{0}' está reservada por Lista de Espera para otro cliente. Actualizá la selección.
 ES	err.bll.pedido.despachar_estado	Solo se pueden despachar pedidos Pendientes. Este pedido está '{0}'.
 ES	err.bll.pedido.entregar_estado	Solo se pueden marcar como entregados los pedidos Despachados. Este pedido está '{0}'.
 ES	err.bll.pedido.devolucion_estado	Solo se puede registrar la devolución de pedidos ya Entregados. Este pedido está '{0}'.
@@ -1046,6 +1058,8 @@ EN	col.prenda.categoria	Category
 EN	col.prenda.talle	Size
 EN	col.prenda.color	Color
 EN	col.prenda.estado	Status
+EN	col.listaespera.alta	Signed up on
+EN	col.listaespera.vence	Reservation expires
 EN	col.prenda.cliente	Client
 EN	col.prenda.alta	Registered
 EN	msg.prenda.conteo	Showing {0} of {1}
@@ -1460,6 +1474,8 @@ EN	conf.planes.desat.msg	Deactivate plan '{0}'?\n\nExisting clients with this pl
 EN	conf.planes.desat.tit	Confirm Deactivation
 EN	conf.planes.act.msg	Reactivate plan '{0}'?\n\nThe plan will be available for new subscriptions again.
 EN	conf.planes.act.tit	Confirm Activation
+EN	conf.listaespera.cancelar.body	Cancel {0}'s entry for '{1}'?
+EN	conf.listaespera.cancelar.titulo	Confirm Cancellation
 EN	msg.idiomas.activado	Language activated.
 EN	msg.idiomas.desactivado	Language deactivated.
 EN	conf.idiomas.desactivar	Deactivate this language? Users will no longer be able to select it.
@@ -1512,6 +1528,14 @@ EN	err.bll.pedido.sin_plan	Customer {0} has no plan assigned. Assign a plan befo
 EN	err.bll.pedido.suscripcion_vencida	Subscription for {0} expired on {1}. Renew in the Customers module.
 EN	err.bll.pedido.limite_plan	Plan '{0}' allows {1} garment(s). Customer already has {2} in use and is adding {3} more. Maximum allowed: {4}.
 EN	err.bll.pedido.prenda_no_disponible	Garment '{0}' is no longer available (status: {1}). Update your selection.
+EN	err.bll.listaespera.cliente_inexistente	The client does not exist.
+EN	err.bll.listaespera.inexistente	The entry does not exist.
+EN	err.bll.listaespera.prenda_inexistente	The garment does not exist.
+EN	err.bll.listaespera.prenda_no_enuso	'{0}' is {1} — no need to wait, it can already be ordered directly.
+EN	err.bll.listaespera.suscripcion_vencida	{0} does not have an active subscription.
+EN	err.bll.listaespera.ya_anotado	{0} is already on the waiting list for '{1}'.
+EN	err.bll.listaespera.ya_resuelta	This entry is already {0} — it cannot be cancelled.
+EN	err.bll.pedido.prenda_reservada	The garment '{0}' is reserved on the Waiting List for another client. Update the selection.
 EN	err.bll.pedido.despachar_estado	Only Pending orders can be dispatched. This order is '{0}'.
 EN	err.bll.pedido.entregar_estado	Only Dispatched orders can be marked as Delivered. This order is '{0}'.
 EN	err.bll.pedido.devolucion_estado	Returns can only be registered for Delivered orders. This order is '{0}'.
@@ -1833,6 +1857,8 @@ RU	col.prenda.categoria	Категория
 RU	col.prenda.talle	Размер
 RU	col.prenda.color	Цвет
 RU	col.prenda.estado	Статус
+RU	col.listaespera.alta	Дата записи
+RU	col.listaespera.vence	Бронь истекает
 RU	col.prenda.cliente	Клиент
 RU	col.prenda.alta	Добавлено
 RU	msg.prenda.conteo	Показано {0} из {1}
@@ -2245,6 +2271,8 @@ RU	conf.planes.desat.msg	Деактивировать план '{0}'?\n\nКли�
 RU	conf.planes.desat.tit	Подтверждение деактивации
 RU	conf.planes.act.msg	Реактивировать план '{0}'?\n\nПлан снова станет доступен для новых подписок.
 RU	conf.planes.act.tit	Подтверждение активации
+RU	conf.listaespera.cancelar.body	Отменить запись {0} на '{1}'?
+RU	conf.listaespera.cancelar.titulo	Подтвердить отмену
 RU	msg.idiomas.activado	Язык активирован.
 RU	msg.idiomas.desactivado	Язык деактивирован.
 RU	conf.idiomas.desactivar	Деактивировать этот язык? Пользователи не смогут его выбрать.
@@ -2297,6 +2325,14 @@ RU	err.bll.pedido.sin_plan	У клиента {0} нет назначенного
 RU	err.bll.pedido.suscripcion_vencida	Подписка {0} истекла {1}. Обновите в модуле Клиентов.
 RU	err.bll.pedido.limite_plan	План '{0}' разрешает {1} вещь(ей). У клиента уже {2} в использовании, добавляется ещё {3}. Максимум: {4}.
 RU	err.bll.pedido.prenda_no_disponible	Вещь '{0}' недоступна (статус: {1}). Обновите выбор.
+RU	err.bll.listaespera.cliente_inexistente	Клиент не существует.
+RU	err.bll.listaespera.inexistente	Запись не существует.
+RU	err.bll.listaespera.prenda_inexistente	Вещь не существует.
+RU	err.bll.listaespera.prenda_no_enuso	'{0}' сейчас {1} — не нужно вставать в очередь, можно заказать напрямую.
+RU	err.bll.listaespera.suscripcion_vencida	У {0} нет действующей подписки.
+RU	err.bll.listaespera.ya_anotado	{0} уже в списке ожидания на '{1}'.
+RU	err.bll.listaespera.ya_resuelta	Эта запись уже {0} — отменить нельзя.
+RU	err.bll.pedido.prenda_reservada	Вещь '{0}' зарезервирована в списке ожидания для другого клиента. Обновите выбор.
 RU	err.bll.pedido.despachar_estado	Отправить можно только заказы в статусе Ожидания. Этот заказ: '{0}'.
 RU	err.bll.pedido.entregar_estado	Отметить доставленным можно только Отправленные заказы. Этот заказ: '{0}'.
 RU	err.bll.pedido.devolucion_estado	Возврат можно зарегистрировать только для Доставленных заказов. Этот заказ: '{0}'.
@@ -2660,6 +2696,8 @@ PT	col.prenda.categoria	Categoria
 PT	col.prenda.talle	Tamanho
 PT	col.prenda.color	Cor
 PT	col.prenda.estado	Estado
+PT	col.listaespera.alta	Inscrito em
+PT	col.listaespera.vence	Reserva vence
 PT	col.prenda.cliente	Cliente
 PT	col.prenda.alta	Cadastro
 PT	msg.prenda.conteo	Mostrando {0} de {1}
@@ -3068,6 +3106,8 @@ PT	conf.planes.desat.msg	Desativar o plano '{0}'?\n\nOs clientes com este plano 
 PT	conf.planes.desat.tit	Confirmar Desativação
 PT	conf.planes.act.msg	Reativar o plano '{0}'?\n\nO plano voltará a estar disponível para novas assinaturas.
 PT	conf.planes.act.tit	Confirmar Ativação
+PT	conf.listaespera.cancelar.body	Cancelar o registro de {0} para '{1}'?
+PT	conf.listaespera.cancelar.titulo	Confirmar Cancelamento
 PT	msg.idiomas.activado	Idioma ativado.
 PT	msg.idiomas.desactivado	Idioma desativado.
 PT	conf.idiomas.desactivar	Desativar este idioma? Os usuários não poderão selecioná-lo.
@@ -3120,6 +3160,14 @@ PT	err.bll.pedido.sin_plan	O cliente {0} não tem plano atribuído. Atribua um p
 PT	err.bll.pedido.suscripcion_vencida	A assinatura de {0} venceu em {1}. Renovar no módulo de Clientes.
 PT	err.bll.pedido.limite_plan	O plano '{0}' permite {1} roupa(s). O cliente já tem {2} em uso e adiciona {3} mais. Máximo permitido: {4}.
 PT	err.bll.pedido.prenda_no_disponible	A roupa '{0}' não está disponível (estado: {1}). Atualize a seleção.
+PT	err.bll.listaespera.cliente_inexistente	O cliente não existe.
+PT	err.bll.listaespera.inexistente	O registro não existe.
+PT	err.bll.listaespera.prenda_inexistente	A peça não existe.
+PT	err.bll.listaespera.prenda_no_enuso	'{0}' está {1} — não é necessário entrar na lista, já pode ser pedida diretamente.
+PT	err.bll.listaespera.suscripcion_vencida	{0} não tem uma assinatura vigente.
+PT	err.bll.listaespera.ya_anotado	{0} já está na lista de espera de '{1}'.
+PT	err.bll.listaespera.ya_resuelta	Este registro já está {0} — não é possível cancelar.
+PT	err.bll.pedido.prenda_reservada	A peça '{0}' está reservada na Lista de Espera para outro cliente. Atualize a seleção.
 PT	err.bll.pedido.despachar_estado	Só é possível despachar pedidos Pendentes. Este pedido está '{0}'.
 PT	err.bll.pedido.entregar_estado	Só é possível marcar como entregues pedidos Despachados. Este pedido está '{0}'.
 PT	err.bll.pedido.devolucion_estado	Só é possível registrar devolução de pedidos Entregues. Este pedido está '{0}'.
@@ -4589,9 +4637,29 @@ EN	msg.ok.titulo	Done
 RU	msg.ok.titulo	Готово
 PT	msg.ok.titulo	Pronto
 ES	err.bll.contratacion.pendiente_existente	Este cliente ya tiene una contratación pendiente de pago. Hay que resolverla (cobrarla o cancelarla) antes de registrar una nueva.
+ES	err.bll.contratacion.cliente_inexistente	El cliente seleccionado no existe.
+ES	err.bll.contratacion.cobrar_estado	Solo se pueden cobrar contrataciones Pendientes de pago. Esta contratación está '{0}'.
+ES	err.bll.contratacion.inexistente	La contratación ya no existe.
+ES	err.bll.contratacion.medio_pago_requerido	Debe indicar el medio de pago (efectivo, tarjeta o transferencia).
+ES	err.bll.contratacion.plan_inexistente	El plan seleccionado no existe o no está activo.
 EN	err.bll.contratacion.pendiente_existente	This client already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
+EN	err.bll.contratacion.cliente_inexistente	The selected client does not exist.
+EN	err.bll.contratacion.cobrar_estado	Only contracts Pending payment can be charged. This contract is '{0}'.
+EN	err.bll.contratacion.inexistente	The contract no longer exists.
+EN	err.bll.contratacion.medio_pago_requerido	You must indicate the payment method (cash, card or transfer).
+EN	err.bll.contratacion.plan_inexistente	The selected plan does not exist or is not active.
 RU	err.bll.contratacion.pendiente_existente	У этого клиента уже есть договор, ожидающий оплаты. Его нужно разрешить (оплатить или отменить) перед оформлением нового.
+RU	err.bll.contratacion.cliente_inexistente	Выбранный клиент не существует.
+RU	err.bll.contratacion.cobrar_estado	Оплатить можно только контракты в статусе 'Ожидает оплаты'. Текущий статус: '{0}'.
+RU	err.bll.contratacion.inexistente	Контракт больше не существует.
+RU	err.bll.contratacion.medio_pago_requerido	Необходимо указать способ оплаты (наличные, карта или перевод).
+RU	err.bll.contratacion.plan_inexistente	Выбранный план не существует или неактивен.
 PT	err.bll.contratacion.pendiente_existente	Este cliente já tem uma contratação pendente de pagamento. É preciso resolvê-la (cobrar ou cancelar) antes de registrar uma nova.
+PT	err.bll.contratacion.cliente_inexistente	O cliente selecionado não existe.
+PT	err.bll.contratacion.cobrar_estado	Só é possível cobrar contratações Pendentes de pagamento. Esta contratação está '{0}'.
+PT	err.bll.contratacion.inexistente	A contratação não existe mais.
+PT	err.bll.contratacion.medio_pago_requerido	Deve indicar o meio de pagamento (dinheiro, cartão ou transferência).
+PT	err.bll.contratacion.plan_inexistente	O plano selecionado não existe ou não está ativo.
 ES	err.contratacion.faltandatos	Seleccioná un cliente y un plan para continuar.
 EN	err.contratacion.faltandatos	Select a client and a plan to continue.
 RU	err.contratacion.faltandatos	Выберите клиента и план, чтобы продолжить.
@@ -4789,9 +4857,29 @@ EN	err.imprimir.titulo	Print error
 RU	err.imprimir.titulo	Ошибка печати
 PT	err.imprimir.titulo	Erro ao imprimir
 ES	frm.listaespera	Lista de Espera
+ES	frm.listaespera.anotar	Anotar en Lista de Espera
+ES	lbl.listaespera.elegircliente	Cliente que espera '{0}':
+ES	msg.listaespera.anotado	{0} anotado en la lista de espera de '{1}'.
+ES	msg.listaespera.cancelada	Anotación de {0} cancelada.
+ES	msg.listaespera.cargadas	{0} anotación(es) activa(s).
 EN	frm.listaespera	Waiting List
+EN	frm.listaespera.anotar	Add to Waiting List
+EN	lbl.listaespera.elegircliente	Client waiting for '{0}':
+EN	msg.listaespera.anotado	{0} added to the waiting list for '{1}'.
+EN	msg.listaespera.cancelada	{0}'s entry cancelled.
+EN	msg.listaespera.cargadas	{0} active entry(ies).
 RU	frm.listaespera	Список ожидания
+RU	frm.listaespera.anotar	Записать в список ожидания
+RU	lbl.listaespera.elegircliente	Клиент, ожидающий '{0}':
+RU	msg.listaespera.anotado	{0} записан(а) в список ожидания на '{1}'.
+RU	msg.listaespera.cancelada	Запись {0} отменена.
+RU	msg.listaespera.cargadas	Активных записей: {0}.
 PT	frm.listaespera	Lista de Espera
+PT	frm.listaespera.anotar	Registrar na Lista de Espera
+PT	lbl.listaespera.elegircliente	Cliente que espera por '{0}':
+PT	msg.listaespera.anotado	{0} registrado na lista de espera de '{1}'.
+PT	msg.listaespera.cancelada	Registro de {0} cancelado.
+PT	msg.listaespera.cargadas	{0} registro(s) ativo(s).
 ES	mnu.listaespera	Lista de Espera
 EN	mnu.listaespera	Waiting List
 RU	mnu.listaespera	Список ожидания
@@ -4810,12 +4898,88 @@ RU	col.contr.cliente	Клиент
 PT	col.contr.cliente	Cliente
 ES	col.contr.plan	Plan
 ES	col.contr.monto	Monto
+ES	err.bll.promocion.sugerencia_inexistente	La sugerencia seleccionada no existe.
+ES	err.bll.promocion.nombre_requerido	El nombre de la promoción es obligatorio.
+ES	err.bll.promocion.destino_invalido	La promoción debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.
+ES	err.bll.promocion.plan_inexistente	El plan seleccionado no existe.
+ES	err.bll.promocion.valor_invalido	El beneficio de la promoción debe ser mayor a cero.
+ES	err.bll.promocion.porcentaje_invalido	Un descuento por porcentaje no puede superar el 100%.
+ES	err.bll.promocion.rango_fechas_invalido	La fecha de fin no puede ser anterior a la fecha de inicio.
+ES	err.bll.promocion.modificar_estado	Solo se puede modificar una promoción mientras está en revisión contable. Estado actual: '{0}'.
+ES	err.bll.promocion.desactivar_estado	Solo se pueden desactivar promociones Vigentes. Esta promoción está '{0}'.
+ES	err.bll.promocion.sugerirbaja_estado	Solo se puede sugerir la baja de promociones Vigentes. Esta promoción está '{0}'.
+ES	err.bll.promocion.motivobaja_requerido	Debe indicar el motivo de la baja sugerida.
+ES	err.bll.promocion.resolverbaja_estado	Solo se puede resolver la baja de promociones con baja Solicitada. Esta promoción está '{0}'.
+ES	err.bll.promocion.motivorechazobaja_requerido	Debe indicar el motivo por el cual la promoción sigue vigente.
+ES	err.bll.promocion.revisioncontable_estado	Solo se pueden aprobar o rechazar promociones En Revisión Contable. Esta promoción está '{0}'.
+ES	err.bll.promocion.observacion_requerida	Debe ingresar una observación para esta decisión.
+ES	err.bll.sugerenciapromocion.destino_invalido	La sugerencia debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.
+ES	err.bll.sugerenciapromocion.plan_inexistente	El plan seleccionado no existe.
+ES	err.bll.sugerenciapromocion.motivo_requerido	Debe indicar el motivo de la sugerencia.
+ES	err.bll.sugerenciapromocion.beneficio_invalido	El beneficio estimado debe ser mayor a cero.
 EN	col.contr.plan	Plan
 EN	col.contr.monto	Amount
+EN	err.bll.promocion.sugerencia_inexistente	The selected suggestion does not exist.
+EN	err.bll.promocion.nombre_requerido	The promotion name is required.
+EN	err.bll.promocion.destino_invalido	The promotion must apply to either a plan or a garment category, never both or neither.
+EN	err.bll.promocion.plan_inexistente	The selected plan does not exist.
+EN	err.bll.promocion.valor_invalido	The promotion's benefit must be greater than zero.
+EN	err.bll.promocion.porcentaje_invalido	A percentage discount cannot exceed 100%.
+EN	err.bll.promocion.rango_fechas_invalido	The end date cannot be earlier than the start date.
+EN	err.bll.promocion.modificar_estado	A promotion can only be modified while it is under accounting review. Current state: '{0}'.
+EN	err.bll.promocion.desactivar_estado	Only Active promotions can be deactivated. This promotion is '{0}'.
+EN	err.bll.promocion.sugerirbaja_estado	Only Active promotions can have their removal suggested. This promotion is '{0}'.
+EN	err.bll.promocion.motivobaja_requerido	You must indicate the reason for the suggested removal.
+EN	err.bll.promocion.resolverbaja_estado	Only promotions with a Requested removal can be resolved. This promotion is '{0}'.
+EN	err.bll.promocion.motivorechazobaja_requerido	You must indicate why the promotion remains active.
+EN	err.bll.promocion.revisioncontable_estado	Only promotions Under accounting review can be approved or rejected. This promotion is '{0}'.
+EN	err.bll.promocion.observacion_requerida	You must enter a remark for this decision.
+EN	err.bll.sugerenciapromocion.destino_invalido	The suggestion must apply to either a plan or a garment category, never both or neither.
+EN	err.bll.sugerenciapromocion.plan_inexistente	The selected plan does not exist.
+EN	err.bll.sugerenciapromocion.motivo_requerido	You must indicate the reason for the suggestion.
+EN	err.bll.sugerenciapromocion.beneficio_invalido	The estimated benefit must be greater than zero.
 RU	col.contr.plan	План
 RU	col.contr.monto	Сумма
+RU	err.bll.promocion.sugerencia_inexistente	Выбранное предложение не существует.
+RU	err.bll.promocion.nombre_requerido	Название акции обязательно.
+RU	err.bll.promocion.destino_invalido	Акция должна применяться либо к плану, либо к категории вещей, но не к обоим и не ни к одному.
+RU	err.bll.promocion.plan_inexistente	Выбранный план не существует.
+RU	err.bll.promocion.valor_invalido	Выгода по акции должна быть больше нуля.
+RU	err.bll.promocion.porcentaje_invalido	Процентная скидка не может превышать 100%.
+RU	err.bll.promocion.rango_fechas_invalido	Дата окончания не может быть раньше даты начала.
+RU	err.bll.promocion.modificar_estado	Акцию можно изменять только пока она на бухгалтерской проверке. Текущий статус: '{0}'.
+RU	err.bll.promocion.desactivar_estado	Отключить можно только действующие акции. Текущий статус: '{0}'.
+RU	err.bll.promocion.sugerirbaja_estado	Предложить отмену можно только для действующих акций. Текущий статус: '{0}'.
+RU	err.bll.promocion.motivobaja_requerido	Необходимо указать причину предложенной отмены.
+RU	err.bll.promocion.resolverbaja_estado	Решение можно принять только по акциям с запрошенной отменой. Текущий статус: '{0}'.
+RU	err.bll.promocion.motivorechazobaja_requerido	Необходимо указать, почему акция остаётся действующей.
+RU	err.bll.promocion.revisioncontable_estado	Утвердить или отклонить можно только акции на бухгалтерской проверке. Текущий статус: '{0}'.
+RU	err.bll.promocion.observacion_requerida	Необходимо ввести комментарий к этому решению.
+RU	err.bll.sugerenciapromocion.destino_invalido	Предложение должно применяться либо к плану, либо к категории вещей, но не к обоим и не ни к одному.
+RU	err.bll.sugerenciapromocion.plan_inexistente	Выбранный план не существует.
+RU	err.bll.sugerenciapromocion.motivo_requerido	Необходимо указать причину предложения.
+RU	err.bll.sugerenciapromocion.beneficio_invalido	Ожидаемая выгода должна быть больше нуля.
 PT	col.contr.plan	Plano
 PT	col.contr.monto	Valor
+PT	err.bll.promocion.sugerencia_inexistente	A sugestão selecionada não existe.
+PT	err.bll.promocion.nombre_requerido	O nome da promoção é obrigatório.
+PT	err.bll.promocion.destino_invalido	A promoção deve aplicar-se a um plano ou a uma categoria de peça, nunca a ambos nem a nenhum.
+PT	err.bll.promocion.plan_inexistente	O plano selecionado não existe.
+PT	err.bll.promocion.valor_invalido	O benefício da promoção deve ser maior que zero.
+PT	err.bll.promocion.porcentaje_invalido	Um desconto percentual não pode superar 100%.
+PT	err.bll.promocion.rango_fechas_invalido	A data de término não pode ser anterior à data de início.
+PT	err.bll.promocion.modificar_estado	Só é possível modificar uma promoção enquanto está em revisão contábil. Estado atual: '{0}'.
+PT	err.bll.promocion.desactivar_estado	Só é possível desativar promoções Vigentes. Esta promoção está '{0}'.
+PT	err.bll.promocion.sugerirbaja_estado	Só é possível sugerir a baixa de promoções Vigentes. Esta promoção está '{0}'.
+PT	err.bll.promocion.motivobaja_requerido	Deve indicar o motivo da baixa sugerida.
+PT	err.bll.promocion.resolverbaja_estado	Só é possível resolver a baixa de promoções com baixa Solicitada. Esta promoção está '{0}'.
+PT	err.bll.promocion.motivorechazobaja_requerido	Deve indicar o motivo pelo qual a promoção permanece vigente.
+PT	err.bll.promocion.revisioncontable_estado	Só é possível aprovar ou rejeitar promoções Em Revisão Contábil. Esta promoção está '{0}'.
+PT	err.bll.promocion.observacion_requerida	Deve inserir uma observação para esta decisão.
+PT	err.bll.sugerenciapromocion.destino_invalido	A sugestão deve aplicar-se a um plano ou a uma categoria de peça, nunca a ambos nem a nenhum.
+PT	err.bll.sugerenciapromocion.plan_inexistente	O plano selecionado não existe.
+PT	err.bll.sugerenciapromocion.motivo_requerido	Deve indicar o motivo da sugestão.
+PT	err.bll.sugerenciapromocion.beneficio_invalido	O benefício estimado deve ser maior que zero.
 ES	col.contr.modalidad	Modalidad
 EN	col.contr.modalidad	Payment Mode
 RU	col.contr.modalidad	Способ оплаты

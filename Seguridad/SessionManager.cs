@@ -6,8 +6,13 @@ namespace Seguridad
     /// <summary>Singleton que gestiona la sesión del usuario autenticado.</summary>
     public sealed class SessionManager
     {
-        private static object _lock    = new object();
-        private static SessionManager _session;
+        private static readonly object _lock    = new object();
+        // volatile: se escribe dentro de lock (Login/Logout) pero se lee sin lock en GetInstance/
+        // IsLoggedIn/TienePermiso, los puntos de entrada más usados de BLL/GUI — sin esto, una
+        // escritura protegida por lock en un hilo no garantiza que otro hilo que lee sin
+        // sincronización vea el valor actualizado de inmediato (visibilidad, no solo atomicidad).
+        // Mismo criterio que ya usa la clase hermana Seguridad.ContadorSesion.
+        private static volatile SessionManager _session;
 
         // Usuario actualmente en sesión y fecha/hora de inicio. 
         public Usuario Usuario    { get; set; }

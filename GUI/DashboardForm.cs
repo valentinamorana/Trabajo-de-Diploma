@@ -65,6 +65,12 @@ namespace GUI
         // ── Auto-refresh timer ────────────────────────────────────────────────
         private System.Windows.Forms.Timer _timer;
 
+        // Se reasignaban con `new Font(...)` en cada refresco (timer de 2 min) sin liberar el
+        // anterior — Font implementa IDisposable y envuelve un handle GDI; creadas una sola vez
+        // acá y reutilizadas evita esa fuga en sesiones largas.
+        private readonly Font _fontBackupChico  = new Font("Segoe UI", 20f, FontStyle.Bold);
+        private readonly Font _fontBackupGrande = new Font("Segoe UI", 36f, FontStyle.Bold);
+
         public DashboardForm(List<BE.Permiso> permisos)
         {
             var nombres = new HashSet<string>();
@@ -135,6 +141,7 @@ namespace GUI
 
             this.Text          = T("frm.dashboard",      "Panel de Control");
             lblTitulo.Text     = T("frm.dashboard",      "Panel de Control");
+            lblSub.Text        = T("dash.general.subtitulo", "WardrobeFlow");
             btnRefrescar.Text  = T("dash.btn.refrescar", "↻ Actualizar");
 
             if (_txtPrendas   != null) _txtPrendas.Text   = T("dash.prendas",    "Prendas\ndisponibles");
@@ -226,7 +233,7 @@ namespace GUI
                 if (ultimo == null)
                 {
                     _numBackup.Text              = "!";
-                    _numBackup.Font              = new Font("Segoe UI", 36f, FontStyle.Bold);
+                    _numBackup.Font              = _fontBackupGrande;
                     _cardBackupPanel.BackColor   = Color.FromArgb(255, 218, 218);
                     _numBackup.ForeColor         = Color.FromArgb(160, 20, 20);
                     _txtBackup.ForeColor         = Color.FromArgb(160, 20, 20);
@@ -241,12 +248,12 @@ namespace GUI
                 if (dias == 0)
                 {
                     _numBackup.Text = T("dash.backup.hoy", "Hoy");
-                    _numBackup.Font = new Font("Segoe UI", 20f, FontStyle.Bold);
+                    _numBackup.Font = _fontBackupChico;
                 }
                 else
                 {
                     _numBackup.Text = dias.ToString();
-                    _numBackup.Font = new Font("Segoe UI", 36f, FontStyle.Bold);
+                    _numBackup.Font = _fontBackupGrande;
                 }
 
                 // Código de color: verde → amarillo → rojo según antigüedad vs umbral
@@ -719,7 +726,9 @@ namespace GUI
                     if (IsDisposed) return;
                     flStats.Controls.Clear();
 
-                    flStats.Controls.Add(CrearMiniStatRow("Sistema (30d)", (dtN?.Rows.Count ?? 0).ToString(), Color.FromArgb(176, 62, 96)));
+                    var tStats = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                    string lblSistema30d = tStats.ContainsKey("dash.stats.sistema30d") ? tStats["dash.stats.sistema30d"].Texto : "Sistema (30d)";
+                    flStats.Controls.Add(CrearMiniStatRow(lblSistema30d, (dtN?.Rows.Count ?? 0).ToString(), Color.FromArgb(176, 62, 96)));
 
                     if (dtNeg != null)
                     {

@@ -15,6 +15,11 @@ namespace GUI
 
         private System.Windows.Forms.Timer _timer;
 
+        // Se reasignaba con `new Font(...)` en cada refresco (timer de 2 min) sin liberar el
+        // anterior — Font implementa IDisposable y envuelve un handle GDI; creada una sola vez
+        // acá y reutilizada evita esa fuga en sesiones largas.
+        private readonly Font _fontOcupacionGrande = new Font("Segoe UI", 24f, FontStyle.Bold);
+
         public DashboardControlStock()
         {
             InitializeComponent();
@@ -58,6 +63,7 @@ namespace GUI
 
             this.Text          = Tr("dash.stock.titulo",   "Panel de Stock");
             lblTitulo.Text     = Tr("dash.stock.titulo",   "Panel de Stock");
+            lblSub.Text        = Tr("dash.stock.subtitulo", "WardrobeFlow  —  Stock");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",  "↻ Actualizar");
             txtDisp.Text = Tr("dash.prendas",    "Prendas\ndisponibles");
             txtMant.Text = Tr("dash.mant.activo", "En\nmantenimiento");
@@ -96,6 +102,12 @@ namespace GUI
             numDisp.Text = disponibles.Count.ToString();
 
             numMant.Text = enMant.Count.ToString();
+            // Señal INDEPENDIENTE de la del Kanban de abajo (ActualizarKanban, que colorea cada
+            // tarjeta por ANTIGÜEDAD vía BE.MantenimientoPrenda.NivelUrgencia): esta tarjeta resumen
+            // colorea por CANTIDAD total en mantenimiento. Pueden mostrar colores contradictorios
+            // (ej. tarjeta en rojo por más de 5 prendas, con las 3 columnas del Kanban en verde si
+            // todas son recientes) — es intencional, no el mismo drift de umbrales que ya se corrigió
+            // entre dashboards distintos.
             Color fondo = enMant.Count == 0
                 ? Color.FromArgb(215, 240, 220)
                 : enMant.Count > 5 ? Color.FromArgb(255, 218, 218) : Color.FromArgb(255, 248, 210);
@@ -104,7 +116,7 @@ namespace GUI
             if (ocup != null)
             {
                 numOcup.Text = $"{ocup.PorcentajeOcupacion}%";
-                numOcup.Font = new Font("Segoe UI", 24f, FontStyle.Bold);
+                numOcup.Font = _fontOcupacionGrande;
                 txtOcup.Text = $"{ocup.EnUso} en uso · {ocup.Disponibles} libres";
             }
         }

@@ -568,11 +568,13 @@ ES	mnu.bitacora.sistema	Bitácora del Sistema
 ES	mnu.bitacora.negocio	Bitácora de Negocio
 ES	mnu.reportejornada	Reporte de Jornada
 ES	frm.dashboard	Panel de Control
+ES	dash.general.subtitulo	WardrobeFlow
 ES	dash.prendas	Prendas\ndisponibles
 ES	dash.clientes	Clientes\nregistrados
 ES	dash.pedidos	Pedidos\npendientes
 ES	dash.suscripciones	Suscripciones\npor vencer
 ES	dash.backup	días sin\nbackup
+ES	dash.stats.sistema30d	Sistema (30d)
 ES	dash.ocupacion	ocupación\ndel stock
 ES	dash.ocupacion.detalle	{0} en uso · {1} libres
 ES	dash.btn.refrescar	↻ Actualizar
@@ -1364,11 +1366,13 @@ EN	mnu.dashboard	Dashboard
 EN	mnu.bitacora.sistema	System Log
 EN	mnu.bitacora.negocio	Business Log
 EN	frm.dashboard	Control Panel
+EN	dash.general.subtitulo	WardrobeFlow
 EN	dash.prendas	Garments\navailable
 EN	dash.clientes	Clients\nregistered
 EN	dash.pedidos	Orders\npending
 EN	dash.suscripciones	Subscriptions\nexpiring soon
 EN	dash.backup	days without\nbackup
+EN	dash.stats.sistema30d	System (30d)
 EN	dash.ocupacion	stock\noccupancy
 EN	dash.ocupacion.detalle	{0} in use · {1} available
 EN	dash.btn.refrescar	↻ Refresh
@@ -2161,11 +2165,13 @@ RU	mnu.dashboard	Панель управления
 RU	mnu.bitacora.sistema	Системный журнал
 RU	mnu.bitacora.negocio	Бизнес-журнал
 RU	frm.dashboard	Панель управления
+RU	dash.general.subtitulo	WardrobeFlow
 RU	dash.prendas	Товаров\nдоступно
 RU	dash.clientes	Клиентов\nзарегистрировано
 RU	dash.pedidos	Заказов\nв ожидании
 RU	dash.suscripciones	Подписок\nскоро истекает
 RU	dash.backup	дней без\nрезервной копии
+RU	dash.stats.sistema30d	Система (30д)
 RU	dash.ocupacion	загрузка\nсклада
 RU	dash.ocupacion.detalle	{0} исп. · {1} свободно
 RU	dash.btn.refrescar	↻ Обновить
@@ -2998,11 +3004,13 @@ PT	lbl.backup.sincopias	Nenhum backup gerado ainda.
 PT	lbl.backup.conteo	{0} backup(s) disponível(eis). Mais recente: {1}
 PT	frm.restauracion	Integridade do Sistema
 PT	frm.dashboard	Painel de Controle
+PT	dash.general.subtitulo	WardrobeFlow
 PT	dash.prendas	Roupas\ndisponíveis
 PT	dash.clientes	Clientes\ncadastrados
 PT	dash.pedidos	Pedidos\npendentes
 PT	dash.suscripciones	Assinaturas\na vencer
 PT	dash.backup	dias sem\nbackup
+PT	dash.stats.sistema30d	Sistema (30d)
 PT	dash.ocupacion	ocupação\ndo estoque
 PT	dash.ocupacion.detalle	{0} em uso · {1} disponíveis
 PT	dash.btn.refrescar	↻ Atualizar
@@ -3300,13 +3308,17 @@ ES	dash.mant.encurso	En curso (2-7d)
 ES	dash.mant.reciente	Reciente (< 2d)
 ES	dash.mant.urgente	Urgente (> 7d)
 ES	dash.operador.titulo	Panel de Operaciones
+ES	dash.operador.subtitulo	WardrobeFlow  —  Operaciones
 ES	dash.planes	Planes activos
 ES	dash.stock.titulo	Panel de Stock
+ES	dash.stock.subtitulo	WardrobeFlow  —  Stock
 ES	dash.sup.bitacora	Actividad reciente
 ES	dash.sup.mant	En mantenimiento
 ES	dash.sup.pedidos	Pedidos pendientes
 ES	dash.supervisor.titulo	Panel de Supervisor
+ES	dash.supervisor.subtitulo	WardrobeFlow  —  Supervisión
 ES	dash.vendedor.titulo	Panel de Ventas
+ES	dash.vendedor.subtitulo	WardrobeFlow  —  Ventas
 EN	dash.despachados	Dispatched orders
 EN	dash.entregados	Delivered orders
 EN	dash.kan.despachado	Dispatched
@@ -3317,13 +3329,17 @@ EN	dash.mant.encurso	In progress (2-7d)
 EN	dash.mant.reciente	Recent (< 2d)
 EN	dash.mant.urgente	Urgent (> 7d)
 EN	dash.operador.titulo	Operations Panel
+EN	dash.operador.subtitulo	WardrobeFlow  —  Operations
 EN	dash.planes	Active plans
 EN	dash.stock.titulo	Stock Panel
+EN	dash.stock.subtitulo	WardrobeFlow  —  Stock
 EN	dash.sup.bitacora	Recent activity
 EN	dash.sup.mant	Under maintenance
 EN	dash.sup.pedidos	Pending orders
 EN	dash.supervisor.titulo	Supervisor Panel
+EN	dash.supervisor.subtitulo	WardrobeFlow  —  Supervision
 EN	dash.vendedor.titulo	Sales Panel
+EN	dash.vendedor.subtitulo	WardrobeFlow  —  Sales
 
 PT	dash.despachados	Pedidos despachados
 PT	dash.entregados	Pedidos entregues
@@ -3335,13 +3351,17 @@ PT	dash.mant.encurso	Em andamento (2-7d)
 PT	dash.mant.reciente	Recente (< 2d)
 PT	dash.mant.urgente	Urgente (> 7d)
 PT	dash.operador.titulo	Painel de Operações
+PT	dash.operador.subtitulo	WardrobeFlow  —  Operações
 PT	dash.planes	Planos ativos
 PT	dash.stock.titulo	Painel de Estoque
+PT	dash.stock.subtitulo	WardrobeFlow  —  Estoque
 PT	dash.sup.bitacora	Atividade recente
 PT	dash.sup.mant	Em manutenção
 PT	dash.sup.pedidos	Pedidos pendentes
 PT	dash.supervisor.titulo	Painel de Supervisor
+PT	dash.supervisor.subtitulo	WardrobeFlow  —  Supervisão
 PT	dash.vendedor.titulo	Painel de Vendas
+PT	dash.vendedor.subtitulo	WardrobeFlow  —  Vendas
 RU	dash.despachados	Отгружено заказов
 RU	dash.entregados	Доставлено заказов
 RU	dash.kan.despachado	Отгружен
@@ -3352,13 +3372,17 @@ RU	dash.mant.encurso	В процессе (2-7д)
 RU	dash.mant.reciente	Недавно (< 2д)
 RU	dash.mant.urgente	Срочно (> 7д)
 RU	dash.operador.titulo	Панель операций
+RU	dash.operador.subtitulo	WardrobeFlow — Операции
 RU	dash.planes	Активных планов
 RU	dash.stock.titulo	Панель склада
+RU	dash.stock.subtitulo	WardrobeFlow — Склад
 RU	dash.sup.bitacora	Недавняя активность
 RU	dash.sup.mant	На обслуживании
 RU	dash.sup.pedidos	Заказы в ожидании
 RU	dash.supervisor.titulo	Панель супервайзера
+RU	dash.supervisor.subtitulo	WardrobeFlow — Контроль
 RU	dash.vendedor.titulo	Панель продаж
+RU	dash.vendedor.subtitulo	WardrobeFlow — Продажи
 
 ES	btn.adminusr.nuevo	➕ Nuevo usuario
 ES	btn.adminusr.crear	💾 Crear usuario

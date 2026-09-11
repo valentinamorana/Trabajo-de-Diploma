@@ -42,7 +42,7 @@ namespace GUI
             this.cardSuscripciones = new Panel();
             this.numSuscripciones  = new Label();
             this.txtSuscripciones  = new Label();
-            this.kanbanWrapper     = new Panel();
+            this.wrapper     = new Panel();
             this.tbl               = new TableLayoutPanel();
             this.col1               = new Panel();
             this.colPendiente       = new FlowLayoutPanel();
@@ -60,7 +60,7 @@ namespace GUI
             this.cardClientes.SuspendLayout();
             this.cardPlanes.SuspendLayout();
             this.cardSuscripciones.SuspendLayout();
-            this.kanbanWrapper.SuspendLayout();
+            this.wrapper.SuspendLayout();
             this.tbl.SuspendLayout();
             this.col1.SuspendLayout();
             this.col2.SuspendLayout();
@@ -276,15 +276,15 @@ namespace GUI
             this.txtSuscripciones.TabIndex  = 1;
             this.txtSuscripciones.TextAlign = ContentAlignment.TopCenter;
 
-            // ── kanbanWrapper / tbl / columnas ────────────────────────────────
-            this.kanbanWrapper.BackColor = Color.FromArgb(240, 240, 245);
-            this.kanbanWrapper.Controls.Add(this.tbl);
-            this.kanbanWrapper.Dock     = DockStyle.Fill;
-            this.kanbanWrapper.Location = new Point(0, 230);
-            this.kanbanWrapper.Name     = "kanbanWrapper";
-            this.kanbanWrapper.Padding  = new Padding(6);
-            this.kanbanWrapper.Size     = new Size(870, 314);
-            this.kanbanWrapper.TabIndex = 2;
+            // ── wrapper / tbl / columnas ────────────────────────────────
+            this.wrapper.BackColor = Color.FromArgb(240, 240, 245);
+            this.wrapper.Controls.Add(this.tbl);
+            this.wrapper.Dock     = DockStyle.Fill;
+            this.wrapper.Location = new Point(0, 230);
+            this.wrapper.Name     = "wrapper";
+            this.wrapper.Padding  = new Padding(6);
+            this.wrapper.Size     = new Size(870, 314);
+            this.wrapper.TabIndex = 2;
 
             this.tbl.ColumnCount = 3;
             this.tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
@@ -401,7 +401,7 @@ namespace GUI
 
             // ── DashboardVendedor ──────────────────────────────────────────────
             this.BackColor       = Color.FromArgb(240, 240, 245);
-            this.Controls.Add(this.kanbanWrapper);
+            this.Controls.Add(this.wrapper);
             this.Controls.Add(this.flowCards);
             this.Controls.Add(this.panelHeader);
             this.Controls.Add(this.panelSbar);
@@ -421,7 +421,7 @@ namespace GUI
             this.cardClientes.ResumeLayout(false);
             this.cardPlanes.ResumeLayout(false);
             this.cardSuscripciones.ResumeLayout(false);
-            this.kanbanWrapper.ResumeLayout(false);
+            this.wrapper.ResumeLayout(false);
             this.tbl.ResumeLayout(false);
             this.col1.ResumeLayout(false);
             this.col2.ResumeLayout(false);
@@ -450,7 +450,7 @@ namespace GUI
         private Panel    cardSuscripciones;
         private Label    numSuscripciones;
         private Label    txtSuscripciones;
-        private Panel    kanbanWrapper;
+        private Panel    wrapper;
         private TableLayoutPanel tbl;
         private Panel    col1;
         private FlowLayoutPanel colPendiente;

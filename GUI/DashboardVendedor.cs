@@ -61,6 +61,7 @@ namespace GUI
 
             this.Text          = Tr("dash.vendedor.titulo", "Panel de Ventas");
             lblTitulo.Text     = Tr("dash.vendedor.titulo", "Panel de Ventas");
+            lblSub.Text        = Tr("dash.vendedor.subtitulo", "WardrobeFlow  —  Ventas");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",   "↻ Actualizar");
             txtPedidos.Text  = Tr("dash.pedidos",  "Pedidos\npendientes");
             txtClientes.Text = Tr("dash.clientes", "Clientes\nregistrados");

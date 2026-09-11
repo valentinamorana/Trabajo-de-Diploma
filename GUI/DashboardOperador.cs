@@ -58,6 +58,7 @@ namespace GUI
 
             this.Text          = Tr("dash.operador.titulo", "Panel de Operaciones");
             lblTitulo.Text     = Tr("dash.operador.titulo", "Panel de Operaciones");
+            lblSub.Text        = Tr("dash.operador.subtitulo", "WardrobeFlow  —  Operaciones");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",   "↻ Actualizar");
             txtPend.Text = Tr("dash.pedidos",   "Pedidos\npendientes");
             txtDesp.Text = Tr("dash.despachados", "Pedidos\ndespachados");

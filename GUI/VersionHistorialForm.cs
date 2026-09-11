@@ -49,22 +49,19 @@ namespace GUI
 
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
-
-            this.Text           = T("frm.historialusr",    "Historial de Cambios de Usuarios");
-            lblTitulo.Text      = T("frm.historialusr",    "Historial de Cambios de Usuarios");
-            lblUsuario.Text     = T("lbl.ver.usuario",     "Usuario:");
-            btnCargar.Text      = T("btn.ver.cargar",      "Cargar");
-            btnRestaurar.Text   = T("btn.ver.restaurar",   "Restaurar Versión Seleccionada");
-            btnCerrar.Text      = T("btn.ver.cerrar",      "Cerrar");
+            this.Text           = Tr("frm.historialusr",    "Historial de Cambios de Usuarios");
+            lblTitulo.Text      = Tr("frm.historialusr",    "Historial de Cambios de Usuarios");
+            lblUsuario.Text     = Tr("lbl.ver.usuario",     "Usuario:");
+            btnCargar.Text      = Tr("btn.ver.cargar",      "Cargar");
+            btnRestaurar.Text   = Tr("btn.ver.restaurar",   "Restaurar Versión Seleccionada");
+            btnCerrar.Text      = Tr("btn.ver.cerrar",      "Cerrar");
 
             if (dgv.Columns.Count > 0)
             {
-                dgv.Columns["colRegistro"].HeaderText = T("col.ver.registro", "Usuario (ID)");
-                dgv.Columns["colFecha"].HeaderText    = T("col.ver.fecha",    "Fecha");
-                dgv.Columns["colActor"].HeaderText    = T("col.ver.actor",    "Modificado por");
-                dgv.Columns["colDetalle"].HeaderText  = T("col.ver.detalle",  "Cambios realizados");
+                dgv.Columns["colRegistro"].HeaderText = Tr("col.ver.registro", "Usuario (ID)");
+                dgv.Columns["colFecha"].HeaderText    = Tr("col.ver.fecha",    "Fecha");
+                dgv.Columns["colActor"].HeaderText    = Tr("col.ver.actor",    "Modificado por");
+                dgv.Columns["colDetalle"].HeaderText  = Tr("col.ver.detalle",  "Cambios realizados");
             }
         }
 
@@ -105,9 +102,8 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                var tErr = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string titErr = tErr.ContainsKey("msg.error.titulo") ? tErr["msg.error.titulo"].Texto : "Error";
-                string fmtErr = tErr.ContainsKey("msg.historial.errorcargar") ? tErr["msg.historial.errorcargar"].Texto : "Error al cargar historial:\n{0}";
+                string titErr = Tr("msg.error.titulo", "Error");
+                string fmtErr = Tr("msg.historial.errorcargar", "Error al cargar historial:\n{0}");
                 MessageBox.Show(string.Format(fmtErr, ex.Message), titErr, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -120,9 +116,6 @@ namespace GUI
         private void CargarGrilla()
         {
             dgv.Rows.Clear();
-
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string Campo(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             // Más reciente primero (el DAL ya devuelve ORDER BY Fecha DESC; se reordena por las dudas).
             var orden = new List<BE.VersionUsuario>(_versiones);
@@ -138,7 +131,7 @@ namespace GUI
                 string registroTxt = $"{v.UsernameSnapshot} (ID {v.IdUsuario})";
                 // Si esta versión proviene de una restauración, se marca en "Modificado por".
                 string actorTxt = EsRestauracion(v)
-                    ? $"{v.Actor} · {Campo("hist.rollback", "rollback")}"
+                    ? $"{v.Actor} · {Tr("hist.rollback", "rollback")}"
                     : v.Actor;
 
                 // colId = Id de ESTA versión: "Restaurar" deja al usuario en el estado de este snapshot.
@@ -158,14 +151,11 @@ namespace GUI
 
         private void btnRestaurar_Click(object sender, EventArgs e)
         {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             if (dgv.CurrentRow == null)
             {
                 MessageBox.Show(
-                    T("msg.historial.sinseleccion", "Seleccioná una versión de la grilla."),
-                    T("msg.historial.atencion",     "Atención"),
+                    Tr("msg.historial.sinseleccion", "Seleccioná una versión de la grilla."),
+                    Tr("msg.historial.atencion",     "Atención"),
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -186,11 +176,11 @@ namespace GUI
                 $"Email: {version.EmailSnapshot}\n" +
                 $"Fecha nac.: {fnac}";
 
-            string tpl = T("msg.historial.confirmar.restaurar",
-                "¿Restaurar al usuario al estado del {0}?\n\n{1}\n\nEl usuario quedará exactamente en este estado. Es reversible (queda registrado como un nuevo cambio en el historial).");
-            string msg = string.Format(tpl, fechaTxt, estado);
+            string msg = Tr("msg.historial.confirmar.restaurar",
+                "¿Restaurar al usuario al estado del {0}?\n\n{1}\n\nEl usuario quedará exactamente en este estado. Es reversible (queda registrado como un nuevo cambio en el historial).",
+                new object[] { fechaTxt, estado });
 
-            if (MessageBox.Show(msg, T("msg.backup.titulorestaura", "Confirmar Restauración"),
+            if (MessageBox.Show(msg, Tr("msg.backup.titulorestaura", "Confirmar Restauración"),
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
                 return;
 
@@ -198,17 +188,16 @@ namespace GUI
             {
                 _bll.RestaurarVersion(this.Text, idVersion);
                 MessageBox.Show(
-                    T("msg.historial.restaurado",  "Versión restaurada correctamente."),
-                    T("rpt.dlg.exito.titulo",       "Éxito"),
+                    Tr("msg.historial.restaurado",  "Versión restaurada correctamente."),
+                    Tr("rpt.dlg.exito.titulo",       "Éxito"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 btnCargar_Click(null, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                var tErr = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string titErr = tErr.ContainsKey("msg.error.titulo") ? tErr["msg.error.titulo"].Texto : "Error";
-                string fmtErr = tErr.ContainsKey("msg.historial.errorrestaur") ? tErr["msg.historial.errorrestaur"].Texto : "Error al restaurar versión:\n{0}";
+                string titErr = Tr("msg.error.titulo", "Error");
+                string fmtErr = Tr("msg.historial.errorrestaur", "Error al restaurar versión:\n{0}");
                 MessageBox.Show(string.Format(fmtErr, ex.Message), titErr, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

@@ -330,21 +330,27 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 
 ### 🟡 Media
 
-4. Formato de moneda inconsistente entre pantallas: `N2` explícito, `ToString()` por defecto (decimales variables), y binding crudo sin formato — tres representaciones del mismo concepto en 10 pantallas.
-5. Dos patrones de multiidioma distintos conviviendo (Tag+diccionario genérico vs. hardcodeo dentro de `Traducir()`) — justo en las dos pantallas donde aparece el problema de formato de moneda.
-6. `cmbMedioPago` con strings hardcodeados nunca traducidos, la única lista de opciones así en las 10 pantallas.
-7. `cmbModalidad` poblado de dos formas distintas (hardcodeado vs. `Enum.GetValues`) entre pantallas hermanas — un cuarto valor de enum a futuro solo se reflejaría en una de las tres.
-8. Clave de traducción compartida entre pantallas no relacionadas (`"renov.modalidad"` reusada en `CobroSuscripcionForm`), acopla el copy de ambas.
-9. `DateTimePicker.Format = Short` depende del locale del SO en 3 controles, mientras las etiquetas de solo-lectura de las mismas pantallas fuerzan `dd/MM/yyyy` explícito — riesgo real de leer mal una fecha límite.
-10. El manejo de error en `catch` no refresca el estado mostrado en ninguna de las dos pantallas de Cobro/Renovación — si la falla ocurrió tras una escritura parcial, la pantalla no lo refleja.
-11. Convención de nombres de campos de servicio BLL inconsistente (`promocionBLL` vs `_bllCliente`) dentro del mismo conjunto de 10 pantallas.
+4. Formato de moneda inconsistente entre pantallas: `N2` explícito, `ToString()` por defecto (decimales variables), y binding crudo sin formato — tres representaciones del mismo concepto en 10 pantallas. *(pendiente — refactor transversal, se deja para una pasada aparte)*
+5. Dos patrones de multiidioma distintos conviviendo (Tag+diccionario genérico vs. hardcodeo dentro de `Traducir()`) — justo en las dos pantallas donde aparece el problema de formato de moneda. *(pendiente — refactor de mayor alcance)*
+6. ✅ RESUELTO (2026-09-11) — `cmbMedioPago` con strings hardcodeados nunca traducidos, la única lista de opciones así en las 10 pantallas.
+*Solución aplicada:* nueva clase `MedioPagoItem` (Value/Label, mismo patrón que `Usuarios.PerfilItem`), poblada desde el idioma actual en `CargarMediosPago()`.
+7. ✅ RESUELTO (2026-09-11) — `cmbModalidad` poblado de dos formas distintas (hardcodeado vs. `Enum.GetValues`) entre pantallas hermanas — un cuarto valor de enum a futuro solo se reflejaría en una de las tres.
+*Solución aplicada:* `CobroSuscripcionForm`/`RenovacionSuscripcionForm` pasan a `Enum.GetValues(typeof(ModalidadCobro))`, igual que ya hacía `NuevaContratacionForm`.
+8. ✅ RESUELTO (2026-09-11) — Clave de traducción compartida entre pantallas no relacionadas (`"renov.modalidad"` reusada en `CobroSuscripcionForm`), acopla el copy de ambas.
+*Solución aplicada:* `CobroSuscripcionForm` usa su propia clave `"cobro.modalidad"`.
+9. ✅ RESUELTO (2026-09-11) — `DateTimePicker.Format = Short` depende del locale del SO en 3 controles, mientras las etiquetas de solo-lectura de las mismas pantallas fuerzan `dd/MM/yyyy` explícito — riesgo real de leer mal una fecha límite.
+*Solución aplicada:* `Format = Custom` + `CustomFormat = "dd/MM/yyyy"` en `AltaPromocionForm` (dtpInicio/dtpFin) y `RenovacionSuscripcionForm` (dtpPausaHasta).
+10. El manejo de error en `catch` no refresca el estado mostrado en ninguna de las dos pantallas de Cobro/Renovación — si la falla ocurrió tras una escritura parcial, la pantalla no lo refleja. *(pendiente — no evaluado en esta pasada)*
+11. Convención de nombres de campos de servicio BLL inconsistente (`promocionBLL` vs `_bllCliente`) dentro del mismo conjunto de 10 pantallas. *(pendiente — rename cosmético de riesgo amplio, se deja para una pasada aparte)*
 
 ### 🟢 Baja
 
-12. Clase `ClienteItem` duplicada literalmente entre `CobroSuscripcionForm` y `RenovacionSuscripcionForm`.
-13. `AltaPromocionForm` no valida en cliente rango de fechas ni tope de porcentaje antes de enviar (sí lo hace BLL, pero el feedback es tardío y genérico).
-14. `btnRefrescar` sin texto traducible ni tooltip, único caso así entre las acciones del conjunto.
-15. Eventos `CheckedChanged` cableados a un solo radio button del par en varios formularios (acoplamiento implícito).
+12. ✅ RESUELTO (2026-09-11) — Clase `ClienteItem` duplicada literalmente entre `CobroSuscripcionForm` y `RenovacionSuscripcionForm`.
+*Solución aplicada:* extraída a `GUI/ClienteItem.cs`.
+13. ✅ RESUELTO (2026-09-11) — `AltaPromocionForm` no valida en cliente rango de fechas ni tope de porcentaje antes de enviar (sí lo hace BLL, pero el feedback es tardío y genérico).
+*Solución aplicada:* `BtnConfirmar_Click` valida ambas reglas del lado del cliente antes de invocar al BLL, reusando las claves de traducción ya existentes.
+14. `btnRefrescar` sin texto traducible ni tooltip, único caso así entre las acciones del conjunto. *(pendiente)*
+15. Eventos `CheckedChanged` cableados a un solo radio button del par en varios formularios (acoplamiento implícito). *(pendiente — riesgo de diseño, no un bug puntual)*
 
 ---
 
@@ -365,15 +371,18 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 
 ### 🟡 Media
 
-4. El nuevo `cerrarTodasLasVentanasToolStripMenuItem_Click` en `Menu.cs` (cambio sin commitear) es funcionalmente correcto y sigue el patrón del archivo, pero cierra todas las ventanas MDI **sin ninguna confirmación previa**, a diferencia de "Cerrar sesión" (acción mucho menos destructiva) que sí la pide.
-5. Backup/Restore corren síncronos en el hilo de UI, sin cursor de espera ni deshabilitar botones — con BD grande, la ventana puede marcarse "No responde".
-6. Mini-diálogos ad-hoc duplicados (`Menu.ConfirmarCerrarSesion`, `FormIdiomas.Pedir`) en vez de reusar `InputDialog`, que existe explícitamente para esto.
-7. El rosa de marca (`210,100,135`) sigue hardcodeado en 25 archivos pese a existir `Tema.RosaPrimario`/`EstiloFormulario.Rosa` para centralizarlo — la migración "de a poco" documentada en el propio `Tema.cs` no avanzó sobre el código existente.
+4. ✅ RESUELTO (2026-09-11) — El nuevo `cerrarTodasLasVentanasToolStripMenuItem_Click` en `Menu.cs` (cambio sin commitear) es funcionalmente correcto y sigue el patrón del archivo, pero cierra todas las ventanas MDI **sin ninguna confirmación previa**, a diferencia de "Cerrar sesión" (acción mucho menos destructiva) que sí la pide.
+*Solución aplicada:* ahora pide confirmación con el mismo diálogo Sí/No que "Cerrar sesión" (`ConfirmarCerrarSesion` se generalizó a `ConfirmarSiNo(titulo, mensaje)`, compartido por ambas acciones).
+5. ✅ RESUELTO (2026-09-11) — Backup/Restore corren síncronos en el hilo de UI, sin cursor de espera ni deshabilitar botones — con BD grande, la ventana puede marcarse "No responde".
+*Solución aplicada:* `BackupForm` ejecuta backup/backup inicial/restauración en `Task.Run`, con cursor de espera y controles deshabilitados mientras corre.
+6. Mini-diálogos ad-hoc duplicados (`Menu.ConfirmarCerrarSesion`, `FormIdiomas.Pedir`) en vez de reusar `InputDialog`, que existe explícitamente para esto. *(parcial: `ConfirmarCerrarSesion` se generalizó como parte del #4, pero sigue sin reusar `InputDialog` — ese es un diálogo de entrada de texto, no de confirmación Sí/No, así que no aplica directamente; `FormIdiomas.Pedir` queda pendiente de revisar)*
+7. ✅ RESUELTO (2026-09-11) — El rosa de marca (`210,100,135`) sigue hardcodeado en 25 archivos pese a existir `Tema.RosaPrimario`/`EstiloFormulario.Rosa` para centralizarlo — la migración "de a poco" documentada en el propio `Tema.cs` no avanzó sobre el código existente.
+*Solución aplicada:* los 25 archivos migraron a `Tema.RosaPrimario`; se eliminaron además las constantes `RosaPrimario` locales y duplicadas de `AdministracionUsuariosForm` y `GestorPermisos`.
 
 ### 🟢 Baja
 
-8. Los ítems del `Menu` aparecen "mapeables" en `GestorPermisos` pero sin ningún efecto real (`Menu` se gobierna solo por `MenuVisibilidad`) — diseño intencional, pero la UI de mapeo no lo distingue y puede confundir a un admin.
-9. Textos hardcodeados menores fuera del sistema de traducción (título de un `OpenFileDialog`, filtros de archivo en inglés).
+8. Los ítems del `Menu` aparecen "mapeables" en `GestorPermisos` pero sin ningún efecto real (`Menu` se gobierna solo por `MenuVisibilidad`) — diseño intencional, pero la UI de mapeo no lo distingue y puede confundir a un admin. *(pendiente)*
+9. Textos hardcodeados menores fuera del sistema de traducción (título de un `OpenFileDialog`, filtros de archivo en inglés). *(parcial: el título del `OpenFileDialog` de "Desde archivo..." en `BackupForm` ahora usa el sistema de traducción; los filtros de archivo restantes no son en realidad texto en inglés — no se encontró más pendiente en los 4 archivos que usan `OpenFileDialog`/`SaveFileDialog`)*
 
 **Verificado sin hallazgos:** `Program.cs` sí tiene handler global de excepciones no controladas; el diff de `Menu.cs` no tiene código de debug ni nada a medio hacer, y su traducción está completa en los 4 idiomas; `BackupForm.Restaurar()` maneja bien el error de restauración (el único gap real es la falta de hilo en background, ítem #5).
 
@@ -402,14 +411,18 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 
 ### 🟡 Media
 
-6. `BLL.Cliente.ActivarSuscripcion`/rama de cambio de plan en `Modificar` — sin tests porque `dalPlan` no está inyectado por constructor (única clase "core" con este gap; documentado honestamente en el propio archivo de test, pero evitable).
-7. `BLL.Promocion.Modificar` — 0 tests, en un archivo por lo demás ejemplar en cobertura.
-8. `BLL.Pedido` — catches silenciosos de Lista de Espera nunca ejercitados por ningún test (no se sabe si el fail-open es intencional o esconde un bug).
-9. `RestaurarOperacion`/`DesCancelar` — solo se testea el camino de error, nunca el camino feliz (incluido un swap de campos sutil en el re-registro de historial).
-10. (Del bloque de Seguridad/Permisos) `Seguridad/SessionManager.TienePermiso` sin test directo (solo se testea la función pura que recibe los booleanos ya resueltos, no el método real que hace el bypass de admin/comparación case-insensitive).
-11. (Del bloque de Seguridad/Permisos) `BLL/Familia.cs` — todos los métodos de escritura (`GuardarAsignacionRol`, `CrearRol`, `EliminarRol`, `ValidarSinCiclo`) sin test — solo la función pura `SistemaConservaGestion` está bien cubierta, no la orquestación real que la dispara en producción.
-12. (Del bloque de Seguridad/Permisos) `Encriptador.ValidarContrasena` — rama `clave_sinespecial` nunca ejercitada por ningún test.
-13. (Del bloque de Seguridad/Permisos) `Usuario.Claves.ResetearClave`/`SolicitarRecuperacionClave`/`ValidarCredencialesAdmin` sin ningún test.
+6. `BLL.Cliente.ActivarSuscripcion`/rama de cambio de plan en `Modificar` — sin tests porque `dalPlan` no está inyectado por constructor (única clase "core" con este gap; documentado honestamente en el propio archivo de test, pero evitable). *(pendiente)*
+7. ✅ RESUELTO (2026-09-11) — `BLL.Promocion.Modificar` — 0 tests, en un archivo por lo demás ejemplar en cobertura.
+*Solución aplicada:* se agregaron 4 tests (`Modificar_EnRevisionContableConDatosValidos_ActualizaYRegistra`, `Modificar_PromocionVigente_LanzaModificarEstado`, `Modificar_BajaSolicitada_LanzaModificarEstado`, `Modificar_AmbosDestinos_LanzaDestinoInvalido`).
+8. `BLL.Pedido` — catches silenciosos de Lista de Espera nunca ejercitados por ningún test (no se sabe si el fail-open es intencional o esconde un bug). *(pendiente)*
+9. ✅ RESUELTO (2026-09-11) — `RestaurarOperacion`/`DesCancelar` — solo se testea el camino de error, nunca el camino feliz (incluido un swap de campos sutil en el re-registro de historial).
+*Solución aplicada:* se agregó el camino feliz de ambos; el de `RestaurarOperacion` verifica explícitamente el swap Anterior/Nuevo al re-registrar el historial. `FakePedidoHistorialDAL`/`FakePedidoDAL` ahora capturan lo que reciben (antes solo contaban invocaciones).
+10. ✅ RESUELTO (2026-09-11) — (Del bloque de Seguridad/Permisos) `Seguridad/SessionManager.TienePermiso` sin test directo (solo se testea la función pura que recibe los booleanos ya resueltos, no el método real que hace el bypass de admin/comparación case-insensitive).
+*Solución aplicada:* 3 tests nuevos contra el método real (bypass de Administrador, permiso presente/ausente con comparación case-insensitive).
+11. (Del bloque de Seguridad/Permisos) `BLL/Familia.cs` — todos los métodos de escritura (`GuardarAsignacionRol`, `CrearRol`, `EliminarRol`, `ValidarSinCiclo`) sin test — solo la función pura `SistemaConservaGestion` está bien cubierta, no la orquestación real que la dispara en producción. *(pendiente)*
+12. ✅ RESUELTO (2026-09-11) — (Del bloque de Seguridad/Permisos) `Encriptador.ValidarContrasena` — rama `clave_sinespecial` nunca ejercitada por ningún test.
+*Solución aplicada:* se agregó `CambiarClavePropia_ClaveSinEspecial_LanzaClaveSinEspecial_SinTocarDAL`.
+13. (Del bloque de Seguridad/Permisos) `Usuario.Claves.ResetearClave`/`SolicitarRecuperacionClave`/`ValidarCredencialesAdmin` sin ningún test. *(pendiente)*
 
 ### 🟢 Baja
 

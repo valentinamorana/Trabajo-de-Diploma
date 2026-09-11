@@ -331,7 +331,8 @@ Contexto: el patrón Command para Cancelación/Devolución de Pedido (fix de la 
 
 4. ✅ RESUELTO (2026-09-11) — `GestorPermisos.CrearSubRol` — si `AgregarComponente` falla tras `CrearRol` exitoso, el rol queda persistido como raíz huérfana, sin rollback visible ni aviso de que quedó a medias.
 *Solución aplicada:* `CrearSubRol` envuelve `AgregarComponente` en try/catch; si falla, intenta `EliminarComponente(nuevoId)` como rollback, y si el rollback también falla muestra explícitamente `perm.err.subrol_huerfano` en vez de un error genérico.
-5. `ConfirmarAdminForm` (gate de la Clave Maestra) sin límite de intentos visible en la GUI — vulnerable a fuerza bruta sin fricción sobre el secreto más crítico del sistema si la BLL tampoco lo limita. *(pendiente)*
+5. ✅ RESUELTO (2026-09-11) — `ConfirmarAdminForm` (gate de la Clave Maestra) sin límite de intentos visible en la GUI — vulnerable a fuerza bruta sin fricción sobre el secreto más crítico del sistema si la BLL tampoco lo limita.
+*Solución aplicada:* contador de intentos fallidos por instancia del diálogo (no un contador de sesión global — no debe interferir con `Seguridad.ContadorSesion`, que es el mecanismo del Login); al tercer intento fallido de credenciales, el diálogo se cierra con Cancel. No cubre la vía de la Clave Maestra en sí de forma aislada, ya que el flujo intenta ambas vías en cada click.
 6. ✅ RESUELTO (2026-09-11) — `DesbloqueoEmergenciaForm` — el campo de clave de emergencia se muestra en **texto plano** (sin `PasswordChar`), a diferencia de todos los demás campos de contraseña del sistema.
 *Solución aplicada:* `txtClave` ahora enmascarado por defecto (`PasswordChar = '●'`), con un botón `btnMostrarClave` para alternar, mismo mecanismo que ya usa `Login.cs`.
 7. ✅ RESUELTO (2026-09-11) — `CambioClaveObligatorioForm` sin ninguna validación de vacío/fortaleza en la GUI antes de invocar BLL — depende 100% de que la BLL nunca falle en aplicar la regla.

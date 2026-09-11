@@ -81,12 +81,10 @@ namespace GUI
         private void BtnEnviar_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T_o(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             if (string.IsNullOrWhiteSpace(username))
             {
-                MostrarError(T_o("err.recup.nousername", "Ingresá tu nombre de usuario."));
+                MostrarError(Tr("err.recup.nousername", "Ingresá tu nombre de usuario."));
                 return;
             }
 
@@ -101,14 +99,14 @@ namespace GUI
                 new BLL.Usuario().SolicitarRecuperacionClave(username);
 
                 lblMensaje.ForeColor = Color.FromArgb(30, 120, 60);
-                lblMensaje.Text = T_o("msg.recup.exito",
+                lblMensaje.Text = Tr("msg.recup.exito",
                     "Si el usuario existe, contactá al administrador para que resetee\ntu contraseña desde Administrar -> Usuarios.");
 
                 btnEnviar.Enabled = false;
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(T_o("err.recup.verificar", "Error al verificar el usuario: {0}"), ex.Message));
+                MostrarError(string.Format(Tr("err.recup.verificar", "Error al verificar el usuario: {0}"), ex.Message));
             }
         }
 

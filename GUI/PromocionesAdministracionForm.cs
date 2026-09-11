@@ -243,19 +243,16 @@ namespace GUI
             var promocion = ObtenerPromocionSeleccionada();
             if (promocion == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             var confirmar = MessageBox.Show(
-                string.Format(T("conf.promo.desactivar.msg", "¿Desactivar la promoción '{0}'?"), promocion.Nombre),
-                T("conf.promo.desactivar.titulo", "Confirmar Desactivación"),
+                Tr("conf.promo.desactivar.msg", "¿Desactivar la promoción '{0}'?", new object[] { promocion.Nombre }),
+                Tr("conf.promo.desactivar.titulo", "Confirmar Desactivación"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
             try
             {
                 promocionBLL.Desactivar(this.Text, promocion);
-                MostrarOk(string.Format(T("msg.promo.desactivada", "Promoción '{0}' desactivada."), promocion.Nombre));
+                MostrarOk(Tr("msg.promo.desactivada", "Promoción '{0}' desactivada.", new object[] { promocion.Nombre }));
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -266,20 +263,17 @@ namespace GUI
             var promocion = ObtenerPromocionSeleccionada();
             if (promocion == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             var confirmar = MessageBox.Show(
-                string.Format(T("conf.promo.aprobarbaja.msg", "¿Aprobar la baja de '{0}' sugerida por Ventas?\nMotivo: {1}"),
-                    promocion.Nombre, promocion.MotivoBaja),
-                T("conf.promo.aprobarbaja.titulo", "Confirmar Baja"),
+                Tr("conf.promo.aprobarbaja.msg", "¿Aprobar la baja de '{0}' sugerida por Ventas?\nMotivo: {1}",
+                    new object[] { promocion.Nombre, promocion.MotivoBaja }),
+                Tr("conf.promo.aprobarbaja.titulo", "Confirmar Baja"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
             try
             {
                 promocionBLL.AprobarBaja(this.Text, promocion);
-                MostrarOk(string.Format(T("msg.promo.dadabaja", "Promoción '{0}' dada de baja."), promocion.Nombre));
+                MostrarOk(Tr("msg.promo.dadabaja", "Promoción '{0}' dada de baja.", new object[] { promocion.Nombre }));
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -290,13 +284,10 @@ namespace GUI
             var promocion = ObtenerPromocionSeleccionada();
             if (promocion == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             string motivo;
             using (var dlg = new InputDialog(
-                T("inputdlg.rechazarbaja.titulo", "Rechazar Baja de Promoción"),
-                string.Format(T("inputdlg.rechazarbaja.prompt", "Motivo por el cual '{0}' sigue vigente:"), promocion.Nombre),
+                Tr("inputdlg.rechazarbaja.titulo", "Rechazar Baja de Promoción"),
+                Tr("inputdlg.rechazarbaja.prompt", "Motivo por el cual '{0}' sigue vigente:", new object[] { promocion.Nombre }),
                 esPassword: false))
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
@@ -307,7 +298,7 @@ namespace GUI
             try
             {
                 promocionBLL.RechazarBaja(this.Text, promocion, motivo);
-                MostrarOk(string.Format(T("msg.promo.bajarechazada", "Se rechazó la baja de '{0}': sigue vigente."), promocion.Nombre));
+                MostrarOk(Tr("msg.promo.bajarechazada", "Se rechazó la baja de '{0}': sigue vigente.", new object[] { promocion.Nombre }));
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }

@@ -46,14 +46,8 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
-        private string T(string clave, string fallback, object[] args = null)
-            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             this.Text          = Tr("recom.titulo", "Recomendación de Prendas");
             lblTitulo.Text      = Tr("recom.titulo", "Recomendación de Prendas");
             lblCliente.Text     = Tr("renov.cliente", "Cliente:");
@@ -100,7 +94,7 @@ namespace GUI
                 foreach (var h in _encabezados) tabla.Columns.Add(h);
                 foreach (var r in resultados)
                     tabla.Rows.Add(r.Prenda.Nombre, r.Prenda.Categoria ?? "", r.Prenda.Color ?? "",
-                        T(r.Clave, r.Motivo, r.Args));
+                        Tr(r.Clave, r.Motivo, r.Args));
 
                 dgv.DataSource = tabla;
                 for (int i = 0; i < _encabezados.Length && i < dgv.Columns.Count; i++)
@@ -108,8 +102,8 @@ namespace GUI
 
                 lblResultado.ForeColor = resultados.Count > 0 ? Color.DarkGreen : Color.DarkOrange;
                 lblResultado.Text = resultados.Count > 0
-                    ? string.Format(T("recom.resultado", "{0} prenda(s) recomendada(s)."), new object[] { resultados.Count })
-                    : T("recom.sinhistorial", "El cliente no tiene historial de pedidos suficiente para recomendar.");
+                    ? string.Format(Tr("recom.resultado", "{0} prenda(s) recomendada(s)."), new object[] { resultados.Count })
+                    : Tr("recom.sinhistorial", "El cliente no tiene historial de pedidos suficiente para recomendar.");
             }
             catch (Exception ex)
             {
@@ -127,7 +121,7 @@ namespace GUI
             if (datos == null || datos.Rows.Count == 0)
             {
                 MessageBox.Show(
-                    T("err.pdf.sinDatos", "No hay datos para exportar."),
+                    Tr("err.pdf.sinDatos", "No hay datos para exportar."),
                     this.Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

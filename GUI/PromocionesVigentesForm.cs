@@ -141,13 +141,10 @@ namespace GUI
             var promocion = ObtenerSeleccionada();
             if (promocion == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             string motivo;
             using (var dlg = new InputDialog(
-                T("inputdlg.sugerirbaja.titulo", "Sugerir Baja de Promoción"),
-                string.Format(T("inputdlg.sugerirbaja.prompt", "Motivo para sugerir la baja de '{0}':"), promocion.Nombre),
+                Tr("inputdlg.sugerirbaja.titulo", "Sugerir Baja de Promoción"),
+                Tr("inputdlg.sugerirbaja.prompt", "Motivo para sugerir la baja de '{0}':", new object[] { promocion.Nombre }),
                 esPassword: false))
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
@@ -158,7 +155,7 @@ namespace GUI
             try
             {
                 promocionBLL.SugerirBaja(this.Text, promocion, motivo);
-                MostrarOk(string.Format(T("msg.promo.sugerenciabaja_enviada", "Se envió a Administración la sugerencia de baja de '{0}'."), promocion.Nombre));
+                MostrarOk(Tr("msg.promo.sugerenciabaja_enviada", "Se envió a Administración la sugerencia de baja de '{0}'.", new object[] { promocion.Nombre }));
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }

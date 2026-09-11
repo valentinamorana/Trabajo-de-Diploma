@@ -11,20 +11,41 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    public partial class ReporteJornadaForm : Form, IIdiomaObserver
+    public partial class ReporteJornadaForm : FormBase, IIdiomaObserver
     {
         private readonly ReporteJornada _servicio = new ReporteJornada();
 
         private bool _esComparacion = false;
 
+        // Mismo criterio de visibilidad que GUI.DashboardForm para estos 3 KPIs: "Días sin
+        // backup" es exclusivo de Administrador (mnuUsuarios); Prendas/Clientes requieren su
+        // propio permiso de módulo. El parámetro `permisos` se recibía pero no se usaba —
+        // este reporte mostraba esos datos a cualquier rol con acceso a Auditoría (mnuAuditoria),
+        // aunque no tuviera el permiso que el propio Dashboard exige para lo mismo.
+        private readonly bool _verPrendas, _verClientes, _verBackup;
+
         public ReporteJornadaForm(List<BE.Permiso> permisos)
         {
             InitializeComponent();
+
+            var nombres = new HashSet<string>();
+            if (permisos != null)
+                foreach (var p in permisos)
+                    if (p.NombreMenu != null) nombres.Add(p.NombreMenu);
+
+            _verPrendas  = nombres.Contains("mnuPrendas");
+            _verClientes = nombres.Contains("mnuClientes");
+            _verBackup   = nombres.Contains("mnuUsuarios");
+
+            if (!_verPrendas)  { kpiPrendasLbl.Visible  = false; kpiPrendasVal.Visible  = false; }
+            if (!_verClientes) { kpiClientesLbl.Visible = false; kpiClientesVal.Visible = false; }
+            if (!_verBackup)   { kpiBackupLbl.Visible   = false; kpiBackupVal.Visible   = false; }
         }
 
         private void ReporteJornadaForm_Load(object sender, EventArgs e)
         {
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            // El ícono ahora lo aplica FormBase.OnLoad (esta clase no lo sobreescribe, así que
+            // corre alrededor de este handler del Load del Designer) — no hace falta duplicarlo acá.
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
 
@@ -114,12 +135,15 @@ namespace GUI
         {
             try
             {
-                kpiPrendasVal.Text  = _servicio.ContarPrendasDisponibles().ToString();
-                kpiClientesVal.Text = _servicio.ContarClientes().ToString();
-                kpiEventosVal.Text  = _servicio.ContarEventosDia(fecha).ToString();
+                if (_verPrendas)  kpiPrendasVal.Text  = _servicio.ContarPrendasDisponibles().ToString();
+                if (_verClientes) kpiClientesVal.Text = _servicio.ContarClientes().ToString();
+                kpiEventosVal.Text = _servicio.ContarEventosDia(fecha).ToString();
 
-                int dias = _servicio.ObtenerDiasSinBackup();
-                kpiBackupVal.Text = dias < 0 ? "!" : dias.ToString();
+                if (_verBackup)
+                {
+                    int dias = _servicio.ObtenerDiasSinBackup();
+                    kpiBackupVal.Text = dias < 0 ? "!" : dias.ToString();
+                }
             }
             catch { /* no interrumpir el reporte */ }
         }

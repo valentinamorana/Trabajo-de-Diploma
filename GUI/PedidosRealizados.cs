@@ -416,11 +416,22 @@ namespace GUI
 
         private void BtnDespachar_Click(object sender, EventArgs e)
         {
-            var pedido = ObtenerPedidoSeleccionado();
-            if (pedido == null) return;
+            var seleccionado = ObtenerPedidoSeleccionado();
+            if (seleccionado == null) return;
 
+            // Releer el estado ACTUAL desde BD antes de actuar: `seleccionado` viene de la grilla
+            // cacheada en memoria, que puede estar desactualizada si otro operador ya cambió este
+            // pedido — mismo criterio que ya usa BtnDevolucion_Click acá abajo.
+            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
             var tDesp = Traductor.ObtenerTraducciones(_idioma);
             string T_desp(string k, string fb) => tDesp.ContainsKey(k) ? tDesp[k].Texto : fb;
+            if (pedido == null)
+            {
+                MostrarError(T_desp("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                CargarPedidos();
+                return;
+            }
+
             string bodyDesp = string.Format(
                 T_desp("conf.despachar.body", "¿Despachar el Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nEl pedido pasará a estado Despachado."),
                 pedido.IdPedido, pedido.NombreCliente, pedido.CantidadPrendas);
@@ -445,11 +456,20 @@ namespace GUI
 
         private void BtnEntregado_Click(object sender, EventArgs e)
         {
-            var pedido = ObtenerPedidoSeleccionado();
-            if (pedido == null) return;
+            var seleccionado = ObtenerPedidoSeleccionado();
+            if (seleccionado == null) return;
 
+            // Releer el estado ACTUAL desde BD antes de actuar (ver comentario en BtnDespachar_Click).
+            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
             var tEntr = Traductor.ObtenerTraducciones(_idioma);
             string T_entr(string k, string fb) => tEntr.ContainsKey(k) ? tEntr[k].Texto : fb;
+            if (pedido == null)
+            {
+                MostrarError(T_entr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                CargarPedidos();
+                return;
+            }
+
             string bodyEntr = string.Format(
                 T_entr("conf.entrega.body", "¿Confirmar entrega del Pedido #{0} a {1}?"),
                 pedido.IdPedido, pedido.NombreCliente);

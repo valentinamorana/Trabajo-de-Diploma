@@ -17,7 +17,7 @@ namespace DAL
             "SELECT c.IdContratacion, c.IdCliente, c.IdPlan, c.IdVendedor, c.IdCaja, c.Modalidad, " +
             "c.Estado, c.IntentosPago, c.FechaAlta, c.FechaResolucion, c.MedioPago, " +
             "c.NumeroComprobante, c.FechaComprobante, " +
-            "cli.Nombre + ' ' + cli.Apellido AS NombreCliente, pl.Nombre AS NombrePlan " +
+            "cli.Nombre + ' ' + cli.Apellido AS NombreCliente, pl.Nombre AS NombrePlan, pl.Precio AS MontoPlan " +
             "FROM Contratacion c " +
             "JOIN Cliente cli ON cli.IdCliente = c.IdCliente " +
             "JOIN PlanSuscripcion pl ON pl.IdPlan = c.IdPlan ";
@@ -168,7 +168,8 @@ namespace DAL
                 NumeroComprobante = row["NumeroComprobante"] != DBNull.Value ? row["NumeroComprobante"].ToString() : null,
                 FechaComprobante  = row["FechaComprobante"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaComprobante"]) : null,
                 NombreCliente     = row["NombreCliente"].ToString(),
-                NombrePlan        = row["NombrePlan"].ToString()
+                NombrePlan        = row["NombrePlan"].ToString(),
+                MontoPlan         = Convert.ToDecimal(row["MontoPlan"])
             };
         }
     }

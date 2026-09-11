@@ -78,6 +78,17 @@ ES	idiomas.ok.renombrado	Idioma renombrado.
 ES	idiomas.conf.incompleto	Este idioma tiene {0} control(es) sin traducir.\nSi lo activás, esos textos se mostrarán en el idioma por defecto.\n\n¿Activar de todos modos?
 ES	idiomas.conf.incompleto.t	Traducciones incompletas
 ES	lbl.idiomas.controles	Controles traducibles
+ES	col.idiomas.id	ID
+ES	col.idiomas.clave	Clave
+ES	col.idiomas.formulario	Formulario
+ES	col.idiomas.codigo	Código
+ES	col.idiomas.nombre	Nombre
+ES	col.idiomas.activo	Activo
+ES	col.idiomas.default	Default
+ES	col.idiomas.referencia	Referencia (por defecto)
+ES	col.idiomas.texto	Texto / Traducción
+ES	lbl.idiomas.si	Sí
+ES	lbl.idiomas.no	No
 ES	err.generico.cargar	Error al cargar: {0}
 ES	pedidos.hist.encontrados	{0} registro(s) encontrado(s).
 ES	frm.login	WardrobeFlow
@@ -116,6 +127,7 @@ ES	mnu.perfiles	Perfiles y Permisos
 ES	mnu.bitacora	Analítica
 ES	mnu.cerrarsesion	Cerrar Sesion
 ES	mnu.ventana	Ventanas Abiertas
+ES	mnu.ventana.cerrartodas	Cerrar Todas
 ES	mnu.idiomas	Gestión de Idiomas
 ES	frm.clientes	Gestión de Clientes
 ES	lbl.buscar	Buscar:
@@ -333,6 +345,7 @@ ES	msg.ped.conteo	{0} pedido(s)
 ES	msg.ped.cargados	{0} pedido(s) cargado(s).
 ES	msg.ped.creado	Pedido #{0} creado. Estado: Pendiente.
 ES	msg.ped.cancelado	Pedido #{0} cancelado. Prendas liberadas.
+ES	msg.ped.yanoexiste	Este pedido ya no existe. Actualizá la grilla.
 ES	msg.ped.reactivado	Pedido #{0} reactivado — volvió a Pendiente.
 ES	msg.ped.ensistema	{0} pedido(s) en el sistema.
 ES	msg.ped.mostrando	Mostrando {0} de {1}
@@ -434,7 +447,7 @@ ES	lbl.ped.infoplan	Cliente: {0}\nPlan: {1}\nPrendas en uso actualmente: {2}\nM�
 ES	err.ped.sinplan	⚠ {0} no tiene plan asignado.\nAsigná un plan en el módulo de Clientes antes de crear un pedido.
 ES	err.recup.nousername	Ingresá tu nombre de usuario.
 ES	err.recup.nousuario	No se encontró el usuario '{0}'.\nVerificá que escribiste tu nombre correctamente.
-ES	msg.recup.exito	Usuario '{0}' encontrado.\nContacta al administrador para que resetee\ntu contrasena desde Administrar -> Usuarios.
+ES	msg.recup.exito	Si el usuario existe, contactá al administrador para que resetee\ntu contraseña desde Administrar -> Usuarios.
 ES	err.recup.verificar	Error al verificar el usuario: {0}
 ES	msg.usr.creado.exportado	Usuario '{0}' [{1}] creado.\nCredenciales guardadas en:\n{2}
 ES	msg.usr.clave.exportada	Contraseña de '{0}' regenerada automáticamente.\nCredenciales guardadas en:\n{1}
@@ -633,6 +646,7 @@ ES	frm.historialusr	Historial de Cambios de Usuarios
 ES	lbl.ver.usuario	Usuario:
 ES	btn.ver.cargar	Cargar
 ES	btn.ver.restaurar	Restaurar Versión Seleccionada
+ES	btn.ver.cerrar	Cerrar
 ES	col.ver.fecha	Fecha
 ES	col.ver.actor	Modificado por
 ES	mnu.historialusr	Historial de Cambios
@@ -849,6 +863,17 @@ EN	idiomas.ok.renombrado	Language renamed.
 EN	idiomas.conf.incompleto	This language has {0} untranslated control(s).\nIf you activate it, those texts will be shown in the default language.\n\nActivate anyway?
 EN	idiomas.conf.incompleto.t	Incomplete translations
 EN	lbl.idiomas.controles	Translatable controls
+EN	col.idiomas.id	ID
+EN	col.idiomas.clave	Key
+EN	col.idiomas.formulario	Form
+EN	col.idiomas.codigo	Code
+EN	col.idiomas.nombre	Name
+EN	col.idiomas.activo	Active
+EN	col.idiomas.default	Default
+EN	col.idiomas.referencia	Reference (default)
+EN	col.idiomas.texto	Text / Translation
+EN	lbl.idiomas.si	Yes
+EN	lbl.idiomas.no	No
 EN	err.generico.cargar	Error loading: {0}
 EN	pedidos.hist.encontrados	{0} record(s) found.
 EN	frm.login	WardrobeFlow — Login
@@ -887,6 +912,7 @@ EN	mnu.perfiles	Profiles & Permissions
 EN	mnu.bitacora	Analytics
 EN	mnu.cerrarsesion	Sign Out
 EN	mnu.ventana	Open Windows
+EN	mnu.ventana.cerrartodas	Close All
 EN	mnu.idiomas	Language Management
 EN	frm.clientes	Client Management
 EN	lbl.buscar	Search:
@@ -1067,7 +1093,7 @@ EN	lbl.recup.usuario	Username:
 EN	btn.enviar.solicitud	Submit request
 EN	err.recup.nousername	Enter your username.
 EN	err.recup.nousuario	User '{0}' not found.\nCheck that you typed your username correctly.
-EN	msg.recup.exito	User '{0}' found.\nContact the administrator to reset\nyour password from Manage → Users.
+EN	msg.recup.exito	If the user exists, contact the administrator to reset\nyour password from Manage -> Users.
 EN	err.recup.verificar	Error verifying user: {0}
 EN	col.det.prenda	Garment
 EN	frm.nuevaprenda	New Garment
@@ -1108,6 +1134,7 @@ EN	msg.ped.conteo	{0} order(s)
 EN	msg.ped.cargados	{0} order(s) loaded.
 EN	msg.ped.creado	Order #{0} created. Status: Pending.
 EN	msg.ped.cancelado	Order #{0} cancelled. Garments released.
+EN	msg.ped.yanoexiste	This order no longer exists. Refresh the grid.
 EN	msg.ped.reactivado	Order #{0} reactivated — back to Pending.
 EN	msg.ped.ensistema	{0} order(s) in the system.
 EN	msg.ped.mostrando	Showing {0} of {1}
@@ -1404,6 +1431,7 @@ EN	frm.historialusr	User Change History
 EN	lbl.ver.usuario	User:
 EN	btn.ver.cargar	Load
 EN	btn.ver.restaurar	Restore Selected Version
+EN	btn.ver.cerrar	Close
 EN	col.ver.fecha	Date
 EN	col.ver.actor	Modified by
 EN	mnu.historialusr	Change History
@@ -1620,6 +1648,17 @@ RU	idiomas.ok.renombrado	Язык переименован.
 RU	idiomas.conf.incompleto	В этом языке {0} непереведённых элемент(ов).\nЕсли вы активируете его, эти тексты будут показаны на языке по умолчанию.\n\nВсё равно активировать?
 RU	idiomas.conf.incompleto.t	Неполные переводы
 RU	lbl.idiomas.controles	Переводимые элементы
+RU	col.idiomas.id	ID
+RU	col.idiomas.clave	Ключ
+RU	col.idiomas.formulario	Форма
+RU	col.idiomas.codigo	Код
+RU	col.idiomas.nombre	Название
+RU	col.idiomas.activo	Активен
+RU	col.idiomas.default	По умолчанию
+RU	col.idiomas.referencia	Образец (по умолчанию)
+RU	col.idiomas.texto	Текст / Перевод
+RU	lbl.idiomas.si	Да
+RU	lbl.idiomas.no	Нет
 RU	err.generico.cargar	Ошибка загрузки: {0}
 RU	pedidos.hist.encontrados	Найдено записей: {0}.
 RU	frm.login	WardrobeFlow — Вход
@@ -1658,6 +1697,7 @@ RU	mnu.perfiles	Профили и права
 RU	mnu.bitacora	Аналитика
 RU	mnu.cerrarsesion	Выйти из системы
 RU	mnu.ventana	Открытые окна
+RU	mnu.ventana.cerrartodas	Закрыть все
 RU	mnu.idiomas	Управление языками
 RU	frm.clientes	Управление клиентами
 RU	lbl.buscar	Поиск:
@@ -1840,7 +1880,7 @@ RU	lbl.recup.usuario	Имя пользователя:
 RU	btn.enviar.solicitud	Отправить запрос
 RU	err.recup.nousername	Введите имя пользователя.
 RU	err.recup.nousuario	Пользователь '{0}' не найден.\nПроверьте правильность написания имени.
-RU	msg.recup.exito	Пользователь '{0}' найден.\nОбратитесь к администратору для сброса\nпароля через Управление → Пользователи.
+RU	msg.recup.exito	Если такой пользователь существует, обратитесь к администратору для сброса\nпароля через Управление -> Пользователи.
 RU	err.recup.verificar	Ошибка при проверке пользователя: {0}
 RU	col.det.prenda	Одежда
 RU	frm.nuevaprenda	Новая одежда
@@ -1881,6 +1921,7 @@ RU	msg.ped.conteo	{0} заказ(ов)
 RU	msg.ped.cargados	{0} заказ(ов) загружено.
 RU	msg.ped.creado	Заказ #{0} создан. Статус: Ожидание.
 RU	msg.ped.cancelado	Заказ #{0} отменён. Вещи освобождены.
+RU	msg.ped.yanoexiste	Этот заказ больше не существует. Обновите таблицу.
 RU	msg.ped.reactivado	Заказ #{0} реактивирован — статус: Ожидание.
 RU	msg.ped.ensistema	{0} заказ(ов) в системе.
 RU	msg.ped.mostrando	Показано {0} из {1}
@@ -2175,6 +2216,7 @@ RU	frm.historialusr	История изменений пользователей
 RU	lbl.ver.usuario	Пользователь:
 RU	btn.ver.cargar	Загрузить
 RU	btn.ver.restaurar	Восстановить выбранную версию
+RU	btn.ver.cerrar	Закрыть
 RU	col.ver.fecha	Дата
 RU	col.ver.actor	Изменено кем
 RU	mnu.historialusr	История изменений
@@ -2391,6 +2433,17 @@ PT	idiomas.ok.renombrado	Idioma renomeado.
 PT	idiomas.conf.incompleto	Este idioma tem {0} controle(s) sem tradução.\nSe você ativá-lo, esses textos serão exibidos no idioma padrão.\n\nAtivar mesmo assim?
 PT	idiomas.conf.incompleto.t	Traduções incompletas
 PT	lbl.idiomas.controles	Controles traduzíveis
+PT	col.idiomas.id	ID
+PT	col.idiomas.clave	Chave
+PT	col.idiomas.formulario	Formulário
+PT	col.idiomas.codigo	Código
+PT	col.idiomas.nombre	Nome
+PT	col.idiomas.activo	Ativo
+PT	col.idiomas.default	Padrão
+PT	col.idiomas.referencia	Referência (padrão)
+PT	col.idiomas.texto	Texto / Tradução
+PT	lbl.idiomas.si	Sim
+PT	lbl.idiomas.no	Não
 PT	err.generico.cargar	Erro ao carregar: {0}
 PT	pedidos.hist.encontrados	{0} registro(s) encontrado(s).
 PT	diag.frm.titulo	Diagnóstico de Integridade
@@ -2467,6 +2520,7 @@ PT	mnu.perfiles	Perfis e Permissões
 PT	mnu.bitacora	Análise
 PT	mnu.cerrarsesion	Sair do sistema
 PT	mnu.ventana	Janelas Abertas
+PT	mnu.ventana.cerrartodas	Fechar Todas
 PT	mnu.idiomas	Gerenciamento de Idiomas
 PT	mnu.dashboard	Painel de Controle
 PT	mnu.bitacora.sistema	Registro do Sistema
@@ -2653,7 +2707,7 @@ PT	lbl.recup.usuario	Nome de usuário:
 PT	btn.enviar.solicitud	Enviar solicitação
 PT	err.recup.nousername	Informe seu nome de usuário.
 PT	err.recup.nousuario	Usuário '{0}' não encontrado.\nVerifique se digitou corretamente.
-PT	msg.recup.exito	Usuário '{0}' encontrado.\nContate o administrador para redefinir\nsua senha em Administrar → Usuários.
+PT	msg.recup.exito	Se o usuário existir, contate o administrador para redefinir\nsua senha em Administrar -> Usuários.
 PT	err.recup.verificar	Erro ao verificar usuário: {0}
 PT	col.det.prenda	Roupa
 PT	frm.nuevaprenda	Nova Roupa
@@ -2694,6 +2748,7 @@ PT	msg.ped.conteo	{0} pedido(s)
 PT	msg.ped.cargados	{0} pedido(s) carregado(s).
 PT	msg.ped.creado	Pedido #{0} criado. Estado: Pendente.
 PT	msg.ped.cancelado	Pedido #{0} cancelado. Roupas liberadas.
+PT	msg.ped.yanoexiste	Este pedido não existe mais. Atualize a grade.
 PT	msg.ped.reactivado	Pedido #{0} reativado — voltou a Pendente.
 PT	msg.ped.ensistema	{0} pedido(s) no sistema.
 PT	msg.ped.mostrando	Mostrando {0} de {1}
@@ -2985,6 +3040,7 @@ PT	frm.historialusr	Histórico de Alterações de Usuários
 PT	lbl.ver.usuario	Usuário:
 PT	btn.ver.cargar	Carregar
 PT	btn.ver.restaurar	Restaurar Versão Selecionada
+PT	btn.ver.cerrar	Fechar
 PT	col.ver.fecha	Data
 PT	col.ver.actor	Modificado por
 PT	frm.confirmaradmin	Confirmar Administrador
@@ -3862,6 +3918,9 @@ PT	err.bll.pref.nula	Não há preferências para salvar.
 PT	err.dal.pedido.prenda_tomada	A peça '{0}' não está mais disponível. Atualize a seleção e tente novamente.
 ES	mnu.renovacion	Renovación de Suscripción
 ES	renov.titulo	Renovación de Suscripción
+ES	conf.renov.baja.msg	¿Dar de baja la suscripción de {0}?\n\nEsta acción es irreversible.
+ES	conf.renov.procesar.msg	¿Procesar esta decisión para {0}?
+ES	conf.renov.procesar.tit	Confirmar Renovación
 ES	renov.cliente	Cliente:
 ES	renov.decision	Decisión (tras contactar al cliente)
 ES	renov.renovar	Renovar mismo plan
@@ -3872,6 +3931,8 @@ ES	renov.modalidad	Modalidad de cobro:
 ES	renov.procesar	Procesar
 ES	mnu.cobro	Cobro de Suscripción
 ES	cobro.titulo	Cobro de Suscripción
+ES	conf.cobro.procesar.msg	¿Procesar este cobro para {0}?
+ES	conf.cobro.procesar.tit	Confirmar Cobro
 ES	cobro.cliente	Cliente:
 ES	cobro.decision	Resultado del cobro
 ES	cobro.cobrado	Cobrado
@@ -3916,6 +3977,9 @@ ES	abandono.motivo.inactividad	{0} no tiene actividad hace {1} día(s), independ
 ES	abandono.motivo.nuncaactivo	{0} se dio de alta hace {1} día(s) y nunca generó un pedido.
 EN	mnu.renovacion	Subscription Renewal
 EN	renov.titulo	Subscription Renewal
+EN	conf.renov.baja.msg	Cancel {0}'s subscription?\n\nThis action is irreversible.
+EN	conf.renov.procesar.msg	Process this decision for {0}?
+EN	conf.renov.procesar.tit	Confirm Renewal
 EN	renov.cliente	Client:
 EN	renov.decision	Decision (after contacting the client)
 EN	renov.renovar	Renew same plan
@@ -3926,6 +3990,8 @@ EN	renov.modalidad	Billing method:
 EN	renov.procesar	Process
 EN	mnu.cobro	Subscription Payment
 EN	cobro.titulo	Subscription Payment
+EN	conf.cobro.procesar.msg	Process this payment for {0}?
+EN	conf.cobro.procesar.tit	Confirm Payment
 EN	cobro.cliente	Client:
 EN	cobro.decision	Payment outcome
 EN	cobro.cobrado	Paid
@@ -3970,6 +4036,9 @@ EN	abandono.motivo.inactividad	{0} has had no activity for {1} day(s), regardles
 EN	abandono.motivo.nuncaactivo	{0} signed up {1} day(s) ago and never placed an order.
 RU	mnu.renovacion	Продление подписки
 RU	renov.titulo	Продление подписки
+RU	conf.renov.baja.msg	Отменить подписку {0}?\n\nЭто действие необратимо.
+RU	conf.renov.procesar.msg	Обработать это решение для {0}?
+RU	conf.renov.procesar.tit	Подтвердить продление
 RU	renov.cliente	Клиент:
 RU	renov.decision	Решение (после связи с клиентом)
 RU	renov.renovar	Продлить тот же план
@@ -3980,6 +4049,8 @@ RU	renov.modalidad	Способ оплаты:
 RU	renov.procesar	Обработать
 RU	mnu.cobro	Оплата подписки
 RU	cobro.titulo	Оплата подписки
+RU	conf.cobro.procesar.msg	Обработать этот платёж для {0}?
+RU	conf.cobro.procesar.tit	Подтвердить оплату
 RU	cobro.cliente	Клиент:
 RU	cobro.decision	Результат платежа
 RU	cobro.cobrado	Оплачено
@@ -4024,6 +4095,9 @@ RU	abandono.motivo.inactividad	У {0} нет активности уже {1} д�
 RU	abandono.motivo.nuncaactivo	{0} зарегистрировался {1} дн. назад и никогда не оформлял заказ.
 PT	mnu.renovacion	Renovação de Assinatura
 PT	renov.titulo	Renovação de Assinatura
+PT	conf.renov.baja.msg	Cancelar a assinatura de {0}?\n\nEsta ação é irreversível.
+PT	conf.renov.procesar.msg	Processar esta decisão para {0}?
+PT	conf.renov.procesar.tit	Confirmar Renovação
 PT	renov.cliente	Cliente:
 PT	renov.decision	Decisão (após contatar o cliente)
 PT	renov.renovar	Renovar o mesmo plano
@@ -4034,6 +4108,8 @@ PT	renov.modalidad	Modalidade de cobrança:
 PT	renov.procesar	Processar
 PT	mnu.cobro	Cobrança de Assinatura
 PT	cobro.titulo	Cobrança de Assinatura
+PT	conf.cobro.procesar.msg	Processar esta cobrança para {0}?
+PT	conf.cobro.procesar.tit	Confirmar Cobrança
 PT	cobro.cliente	Cliente:
 PT	cobro.decision	Resultado da cobrança
 PT	cobro.cobrado	Cobrado
@@ -4697,9 +4773,17 @@ EN	msg.sugerencia.enviada	Suggestion #{0} sent to Administration.
 RU	msg.sugerencia.enviada	Предложение №{0} отправлено в Администрацию.
 PT	msg.sugerencia.enviada	Sugestão #{0} enviada à Administração.
 ES	err.exportar.titulo	Error al exportar
+ES	err.exportar.archivoenuso	No se pudo guardar el archivo: puede estar abierto en otro programa (por ejemplo, Excel). Cerralo e intentá de nuevo.
+ES	err.exportar.sinpermiso	No se pudo guardar el archivo: no tenés permisos para escribir en esa ubicación.
 EN	err.exportar.titulo	Export error
+EN	err.exportar.archivoenuso	Could not save the file: it may be open in another program (e.g. Excel). Close it and try again.
+EN	err.exportar.sinpermiso	Could not save the file: you don't have permission to write to that location.
 RU	err.exportar.titulo	Ошибка экспорта
+RU	err.exportar.archivoenuso	Не удалось сохранить файл: возможно, он открыт в другой программе (например, Excel). Закройте его и попробуйте снова.
+RU	err.exportar.sinpermiso	Не удалось сохранить файл: нет прав на запись в это место.
 PT	err.exportar.titulo	Erro ao exportar
+PT	err.exportar.archivoenuso	Não foi possível salvar o arquivo: ele pode estar aberto em outro programa (por exemplo, Excel). Feche-o e tente novamente.
+PT	err.exportar.sinpermiso	Não foi possível salvar o arquivo: você não tem permissão para gravar nesse local.
 ES	err.imprimir.titulo	Error al imprimir
 EN	err.imprimir.titulo	Print error
 RU	err.imprimir.titulo	Ошибка печати
@@ -4725,9 +4809,13 @@ EN	col.contr.cliente	Client
 RU	col.contr.cliente	Клиент
 PT	col.contr.cliente	Cliente
 ES	col.contr.plan	Plan
+ES	col.contr.monto	Monto
 EN	col.contr.plan	Plan
+EN	col.contr.monto	Amount
 RU	col.contr.plan	План
+RU	col.contr.monto	Сумма
 PT	col.contr.plan	Plano
+PT	col.contr.monto	Valor
 ES	col.contr.modalidad	Modalidad
 EN	col.contr.modalidad	Payment Mode
 RU	col.contr.modalidad	Способ оплаты

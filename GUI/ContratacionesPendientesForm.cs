@@ -82,6 +82,7 @@ namespace GUI
             RH("ID",        "col.contr.id");
             RH("Cliente",   "col.contr.cliente");
             RH("Plan",      "col.contr.plan");
+            RH("Monto",     "col.contr.monto");
             RH("Modalidad", "col.contr.modalidad");
             RH("Intentos",  "col.contr.intentos");
             RH("Fecha",     "col.contr.fecha");
@@ -107,14 +108,15 @@ namespace GUI
                 tabla.Columns.Add("ID", typeof(int));
                 tabla.Columns.Add("Cliente", typeof(string));
                 tabla.Columns.Add("Plan", typeof(string));
+                tabla.Columns.Add("Monto", typeof(string));
                 tabla.Columns.Add("Modalidad", typeof(string));
                 tabla.Columns.Add("Intentos", typeof(string));
                 tabla.Columns.Add("Fecha", typeof(string));
 
                 foreach (var c in _contrataciones)
                     tabla.Rows.Add(
-                        c.IdContratacion, c.NombreCliente, c.NombrePlan, c.Modalidad.ToString(),
-                        $"{c.IntentosPago}/3", c.FechaAlta.ToString("dd/MM/yyyy HH:mm"));
+                        c.IdContratacion, c.NombreCliente, c.NombrePlan, c.MontoPlan.ToString("C2"),
+                        c.Modalidad.ToString(), $"{c.IntentosPago}/3", c.FechaAlta.ToString("dd/MM/yyyy HH:mm"));
 
                 dgvContrataciones.DataSource = tabla;
                 if (dgvContrataciones.Columns.Contains("ID"))
@@ -169,9 +171,10 @@ namespace GUI
                 string.Format(
                     T("conf.contratacion.cobro.msg",
                       "¿Confirmar el cobro de la Contratación #{0}?\n\n" +
-                      "Cliente: {1}\nPlan: {2}\nMedio de pago: {3}\n\n" +
+                      "Cliente: {1}\nPlan: {2}\nMonto: {3:C2}\nMedio de pago: {4}\n\n" +
                       "Se emitirá el comprobante y la suscripción quedará formalizada."),
-                    contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan, medioPago),
+                    contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan,
+                    contratacion.MontoPlan, medioPago),
                 T("conf.contratacion.cobro.titulo", "Confirmar Cobro"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,

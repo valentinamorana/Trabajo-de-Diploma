@@ -135,6 +135,15 @@ namespace GUI
 
             var modalidad = (BE.Builders.ModalidadCobro)cmbModalidad.SelectedItem;
 
+            // Confirmación antes de procesar — antes se ejecutaba sin ninguna, en la pantalla que
+            // efectivamente mueve dinero (mismo criterio que ya aplican Planes/Promociones/
+            // Contrataciones para acciones sensibles).
+            var confirmar = MessageBox.Show(
+                T("conf.cobro.procesar.msg", "¿Procesar este cobro para {0}?", new object[] { item.Cliente.NombreCompleto }),
+                T("conf.cobro.procesar.tit", "Confirmar Cobro"),
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+            if (confirmar != DialogResult.Yes) return;
+
             try
             {
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);

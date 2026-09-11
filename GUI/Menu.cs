@@ -799,6 +799,18 @@ namespace GUI
         }
 
         /// <summary>
+        /// Cierra todas las ventanas MDI abiertas de una sola vez (ítem fijo agregado arriba
+        /// de la lista nativa de ventanas en ventanaToolStripMenuItem). MdiChildren devuelve
+        /// un array nuevo en cada llamada, así que recorrerlo mientras se cierra cada hijo es
+        /// seguro (no se está mutando la colección que se está iterando).
+        /// </summary>
+        private void cerrarTodasLasVentanasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+                hijo.Close();
+        }
+
+        /// <summary>
         /// Desuscribe este formulario del GestorIdioma al cerrarse.
         /// Equivalente a frmMain_FormClosing → ManejadorDeSesion.DesuscribirObservador(this)
         /// del ejemplo de cátedra.
@@ -928,6 +940,7 @@ namespace GUI
             Aplicar(recomendacionPrendasToolStripMenuItem,  t);
             Aplicar(cerrarSesionToolStripMenuItem,      t);
             Aplicar(ventanaToolStripMenuItem,           t);
+            Aplicar(cerrarTodasLasVentanasToolStripMenuItem, t);
 
             // Ítem de Alertas: tiene icono + badge, se compone aparte (no por Tag directo).
             RefrescarTextoAlertas();

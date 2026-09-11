@@ -269,13 +269,20 @@ namespace BLL
                 }
             });
 
+            // Altas: en selección pero no actuales. Se VALIDAN todos los ciclos antes de persistir
+            // ninguna relación: si una sola generaría un ciclo, la excepción aborta acá y no queda
+            // ninguna alta a medio aplicar en BD (antes se validaba y persistía de a una, así que un
+            // ciclo detectado a mitad de camino dejaba las relaciones anteriores ya escritas).
+            var aAgregar = new List<int>();
+            foreach (int idHijo in seleccion)
+                if (!actuales.Contains(idHijo)) aAgregar.Add(idHijo);
+            foreach (int idHijo in aAgregar)
+                ValidarSinCiclo(idRol, idHijo);
+
             int agregados = 0, quitados = 0;
 
-            // Altas: en selección pero no actuales.
-            foreach (int idHijo in seleccion)
+            foreach (int idHijo in aAgregar)
             {
-                if (actuales.Contains(idHijo)) continue;
-                ValidarSinCiclo(idRol, idHijo);
                 permisoDAL.AgregarRelacion(idRol, idHijo);
                 agregados++;
             }

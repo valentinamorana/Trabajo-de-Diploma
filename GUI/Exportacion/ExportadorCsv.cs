@@ -50,8 +50,28 @@ namespace GUI.Exportacion
                     ? Servicios.Exportacion.SerializadorCsv.Generar(reporte.Encabezados, reporte.Datos)
                     : (reporte.TextoPlano ?? string.Empty);
 
-                // UTF-8 con BOM → Excel reconoce la codificación y muestra acentos/cirílico correctos.
-                File.WriteAllText(dlg.FileName, contenido, new UTF8Encoding(true));
+                try
+                {
+                    // UTF-8 con BOM → Excel reconoce la codificación y muestra acentos/cirílico correctos.
+                    File.WriteAllText(dlg.FileName, contenido, new UTF8Encoding(true));
+                }
+                catch (IOException)
+                {
+                    // Caso más común: el archivo está abierto en Excel/otro programa.
+                    MessageBox.Show(
+                        T("err.exportar.archivoenuso", "No se pudo guardar el archivo: puede estar abierto en otro programa (por ejemplo, Excel). Cerralo e intentá de nuevo."),
+                        T("err.exportar.titulo", "Error al exportar"),
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    MessageBox.Show(
+                        T("err.exportar.sinpermiso", "No se pudo guardar el archivo: no tenés permisos para escribir en esa ubicación."),
+                        T("err.exportar.titulo", "Error al exportar"),
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
 
                 MessageBox.Show(
                     string.Format(T("rpt.dlg.exito.msg", "Archivo guardado:\n{0}"), dlg.FileName),

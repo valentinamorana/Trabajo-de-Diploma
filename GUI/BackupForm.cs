@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    public partial class BackupForm : Form, IIdiomaObserver
+    public partial class BackupForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Backup _bll = new BLL.Backup();
 
@@ -20,8 +20,7 @@ namespace GUI
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             GestorIdioma.SuscribirObservador(this);
 
             Traducir(GestorIdioma.IdiomaActual);

@@ -258,6 +258,27 @@ namespace Tests
         }
 
         [TestMethod]
+        public void CrearPedido_SuscripcionPausada_LanzaSuscripcionPausada()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.FechaPausaHasta = DateTime.Today.AddDays(5);
+            ctx.DalCliente.ClientePorId = cliente;
+            var bll = ctx.Crear();
+
+            try
+            {
+                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+                Assert.Fail("Debía rechazar una suscripción pausada.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.pedido.suscripcion_pausada", ex.Clave);
+            }
+        }
+
+        [TestMethod]
         public void CrearPedido_ConDespachoActivo_LanzaYaDespachado()
         {
             LoginComoAdministrador();
@@ -448,6 +469,39 @@ namespace Tests
                 Assert.AreEqual("err.bll.pedido.despachar_estado", ex.Clave);
             }
             Assert.AreEqual(0, ctx.DalPedido.DespacharVeces);
+        }
+
+        [TestMethod]
+        public void MarcarEntregado_PedidoDespachado_Entrega()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido { IdPedido = 1, Estado = BE.EstadoPedido.Despachado };
+
+            bll.MarcarEntregado("Test", pedido);
+
+            Assert.AreEqual(1, ctx.DalPedido.MarcarEntregadoVeces);
+        }
+
+        [TestMethod]
+        public void MarcarEntregado_PedidoNoDespachado_LanzaEntregarEstado()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido { IdPedido = 1, Estado = BE.EstadoPedido.Pendiente };
+
+            try
+            {
+                bll.MarcarEntregado("Test", pedido);
+                Assert.Fail("Debía rechazar marcar como entregado un pedido no Despachado.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.pedido.entregar_estado", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPedido.MarcarEntregadoVeces);
         }
 
         [TestMethod]

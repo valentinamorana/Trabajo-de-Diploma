@@ -25,7 +25,10 @@ namespace GUI
             this.colActor    = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colDetalle  = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnRestaurar= new System.Windows.Forms.Button();
+            this.pnlBottom   = new System.Windows.Forms.Panel();
+            this.btnCerrar   = new System.Windows.Forms.Button();
             this.pnlTop.SuspendLayout();
+            this.pnlBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.SuspendLayout();
 
@@ -102,6 +105,7 @@ namespace GUI
             {
                 this.colId, this.colRegistro, this.colFecha, this.colActor, this.colDetalle
             });
+            this.dgv.SelectionChanged += new System.EventHandler(this.Dgv_SelectionChanged);
 
             // ── colId (oculta: referencia a la versión para restaurar) ────────
             this.colId.Name        = "colId";
@@ -132,20 +136,46 @@ namespace GUI
             this.colDetalle.FillWeight  = 46;
             this.colDetalle.MinimumWidth= 220;
 
-            // ── btnRestaurar ─────────────────────────────────────────────────
+            // ── btnRestaurar (deshabilitado por diseño: solo se habilita con una fila
+            // seleccionada — mismo patrón que PedidoHistorialForm.btnRestaurar) ───
             this.btnRestaurar.BackColor                  = System.Drawing.Color.FromArgb(210, 100, 135);
             this.btnRestaurar.FlatStyle                  = System.Windows.Forms.FlatStyle.Flat;
             this.btnRestaurar.FlatAppearance.BorderSize  = 0;
             this.btnRestaurar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(190, 80, 115);
-            this.btnRestaurar.Dock      = System.Windows.Forms.DockStyle.Bottom;
+            this.btnRestaurar.Dock      = System.Windows.Forms.DockStyle.Left;
+            this.btnRestaurar.Enabled   = false;
             this.btnRestaurar.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnRestaurar.ForeColor = System.Drawing.Color.White;
-            this.btnRestaurar.Height    = 36;
+            this.btnRestaurar.Width     = 664;
             this.btnRestaurar.Name      = "btnRestaurar";
             this.btnRestaurar.TabIndex  = 5;
             this.btnRestaurar.Text      = "Restaurar Versión Seleccionada";
             this.btnRestaurar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnRestaurar.Click    += new System.EventHandler(this.btnRestaurar_Click);
+
+            // ── pnlBottom (contiene Restaurar + Cerrar) ───────────────────────
+            this.pnlBottom.BackColor = System.Drawing.Color.FromArgb(252, 250, 252);
+            this.pnlBottom.Controls.Add(this.btnRestaurar);
+            this.pnlBottom.Controls.Add(this.btnCerrar);
+            this.pnlBottom.Dock      = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlBottom.Height    = 36;
+            this.pnlBottom.Name      = "pnlBottom";
+            this.pnlBottom.TabIndex  = 6;
+
+            // ── btnCerrar ──────────────────────────────────────────────────────
+            this.btnCerrar.BackColor = System.Drawing.Color.FromArgb(210, 210, 210);
+            this.btnCerrar.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnCerrar.FlatAppearance.BorderSize = 0;
+            this.btnCerrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCerrar.Dock      = System.Windows.Forms.DockStyle.Right;
+            this.btnCerrar.Font      = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnCerrar.ForeColor = System.Drawing.Color.Black;
+            this.btnCerrar.Width     = 136;
+            this.btnCerrar.Name      = "btnCerrar";
+            this.btnCerrar.TabIndex  = 7;
+            this.btnCerrar.Text      = "Cerrar";
+            this.btnCerrar.UseVisualStyleBackColor = false;
+            this.btnCerrar.Click    += new System.EventHandler(this.BtnCerrar_Click);
 
             // ── VersionHistorialForm ─────────────────────────────────────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -153,12 +183,14 @@ namespace GUI
             this.BackColor           = System.Drawing.Color.FromArgb(252, 250, 252);
             this.ClientSize          = new System.Drawing.Size(800, 500);
             this.Controls.Add(this.dgv);
-            this.Controls.Add(this.btnRestaurar);
+            this.Controls.Add(this.pnlBottom);
             this.Controls.Add(this.pnlTop);
+            this.CancelButton  = this.btnCerrar;
             this.Name          = "VersionHistorialForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text          = "Historial de Cambios de Usuarios";
             this.pnlTop.ResumeLayout(false);
+            this.pnlBottom.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.ResumeLayout(false);
         }
@@ -175,5 +207,7 @@ namespace GUI
         private System.Windows.Forms.DataGridViewTextBoxColumn colActor;
         private System.Windows.Forms.DataGridViewTextBoxColumn colDetalle;
         private System.Windows.Forms.Button                   btnRestaurar;
+        private System.Windows.Forms.Panel                    pnlBottom;
+        private System.Windows.Forms.Button                   btnCerrar;
     }
 }

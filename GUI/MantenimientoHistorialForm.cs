@@ -11,7 +11,7 @@ namespace GUI
     /// Muestra el historial de registros de mantenimiento/limpieza de una prenda.
     /// Solo lectura. Accesible desde el módulo Prendas (btnMantenimiento).
     /// </summary>
-    public partial class MantenimientoHistorialForm : Form
+    public partial class MantenimientoHistorialForm : FormBase, IIdiomaObserver
     {
         private readonly BE.Prenda              _prenda;
         private readonly BLL.Interfaces.IPrendaService  _prendaBLL;
@@ -22,16 +22,34 @@ namespace GUI
             InitializeComponent();
             _prenda    = prenda;
             _prendaBLL = prendaBLL;
+        }
 
-            try
-            {
-                string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
-                if (System.IO.File.Exists(ico)) this.Icon = new Icon(ico);
-            }
-            catch { }
+        // ── Ciclo de vida ─────────────────────────────────────────────────────
+        // A diferencia de PedidoHistorialForm/VersionHistorialForm (sus 2 pantallas "hermanas"
+        // de Historial), esta cargaba en el constructor y no se suscribía a cambios de idioma —
+        // quedaba con los textos del idioma anterior si el usuario lo cambiaba con la ventana
+        // abierta. Unificado al mismo patrón OnLoad/OnFormClosing + IIdiomaObserver.
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
+            GestorIdioma.SuscribirObservador(this);
             AplicarIdioma(_idioma);
             CargarHistorial();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        // ── IIdiomaObserver ───────────────────────────────────────────────────
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            AplicarIdioma(idioma);
+            CargarHistorial();   // los textos de estado ("En limpieza"/etc.) se arman ya traducidos
         }
 
         private void AplicarIdioma(Idioma idioma)

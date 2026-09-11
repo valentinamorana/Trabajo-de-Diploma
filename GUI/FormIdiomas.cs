@@ -122,7 +122,18 @@ namespace GUI
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
 
-        public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
+        // Antes solo traducía labels/botones: los encabezados de las 3 grillas (y los valores
+        // "Sí"/"No") quedaban hardcodeados en español y nunca se refrescaban al cambiar idioma
+        // en caliente, justo en la propia pantalla de gestión de idiomas. Ahora se reconstruyen
+        // dgvControles y dgvIdiomas (mismos métodos que ya usa el resto del form para poblarlas);
+        // dgvTraducciones se refresca sola porque CargarIdiomas() restaura la selección de fila,
+        // lo que dispara DgvIdiomas_SelectionChanged → CargarTraducciones().
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+            CargarControles();
+            CargarIdiomas();
+        }
 
         private void Traducir(Idioma idioma)
         {
@@ -182,9 +193,9 @@ namespace GUI
             {
                 dgvControles.Rows.Clear();
                 dgvControles.Columns.Clear();
-                dgvControles.Columns.Add("colCtrlId",   "ID");
-                dgvControles.Columns.Add("colCtrlClave","Clave");
-                dgvControles.Columns.Add("colCtrlForm", "Formulario");
+                dgvControles.Columns.Add("colCtrlId",   Tx("col.idiomas.id",         "ID"));
+                dgvControles.Columns.Add("colCtrlClave",Tx("col.idiomas.clave",      "Clave"));
+                dgvControles.Columns.Add("colCtrlForm", Tx("col.idiomas.formulario", "Formulario"));
                 dgvControles.Columns["colCtrlId"].Width = 40;
 
                 foreach (var c in _bllIdioma.ObtenerControles())
@@ -212,24 +223,25 @@ namespace GUI
                 dgvIdiomas.Rows.Clear();
                 dgvIdiomas.Columns.Clear();
 
-                dgvIdiomas.Columns.Add("colId",     "ID");
-                dgvIdiomas.Columns.Add("colCodigo", "Código");
-                dgvIdiomas.Columns.Add("colNombre", "Nombre");
-                dgvIdiomas.Columns.Add("colActivo", "Activo");
-                dgvIdiomas.Columns.Add("colDefault","Default");
+                dgvIdiomas.Columns.Add("colId",     Tx("col.idiomas.id",      "ID"));
+                dgvIdiomas.Columns.Add("colCodigo", Tx("col.idiomas.codigo",  "Código"));
+                dgvIdiomas.Columns.Add("colNombre", Tx("col.idiomas.nombre",  "Nombre"));
+                dgvIdiomas.Columns.Add("colActivo", Tx("col.idiomas.activo",  "Activo"));
+                dgvIdiomas.Columns.Add("colDefault",Tx("col.idiomas.default", "Default"));
 
                 dgvIdiomas.Columns["colId"].Width      = 40;
                 dgvIdiomas.Columns["colCodigo"].Width  = 60;
                 dgvIdiomas.Columns["colActivo"].Width  = 60;
                 dgvIdiomas.Columns["colDefault"].Width = 65;
 
+                string si = Tx("lbl.idiomas.si", "Sí"), no = Tx("lbl.idiomas.no", "No");
                 foreach (var idm in _idiomas)
                     dgvIdiomas.Rows.Add(
                         idm.IdIdioma,
                         idm.Codigo,
                         idm.Nombre,
-                        idm.Activo   ? "Sí" : "No",
-                        idm.EsDefault? "Sí" : "No");
+                        idm.Activo   ? si : no,
+                        idm.EsDefault? si : no);
 
                 dgvIdiomas.SelectionChanged += DgvIdiomas_SelectionChanged;
 
@@ -270,14 +282,14 @@ namespace GUI
                 dgvTraducciones.Rows.Clear();
                 dgvTraducciones.Columns.Clear();
 
-                var colIdControl = new DataGridViewTextBoxColumn { Name = "colIdControl", HeaderText = "ID", Width = 40, ReadOnly = true };
-                var colClave     = new DataGridViewTextBoxColumn { Name = "colClave",     HeaderText = "Clave",      ReadOnly = true };
-                var colFormulario= new DataGridViewTextBoxColumn { Name = "colFormulario",HeaderText = "Formulario", ReadOnly = true, Width = 120 };
+                var colIdControl = new DataGridViewTextBoxColumn { Name = "colIdControl", HeaderText = Tx("col.idiomas.id", "ID"), Width = 40, ReadOnly = true };
+                var colClave     = new DataGridViewTextBoxColumn { Name = "colClave",     HeaderText = Tx("col.idiomas.clave", "Clave"),      ReadOnly = true };
+                var colFormulario= new DataGridViewTextBoxColumn { Name = "colFormulario",HeaderText = Tx("col.idiomas.formulario", "Formulario"), ReadOnly = true, Width = 120 };
                 // Referencia: el texto del idioma por defecto (completo), para que un traductor vea
                 // el original mientras completa el idioma destino. Solo lectura.
-                var colReferencia= new DataGridViewTextBoxColumn { Name = "colReferencia",HeaderText = "Referencia (por defecto)", ReadOnly = true };
+                var colReferencia= new DataGridViewTextBoxColumn { Name = "colReferencia",HeaderText = Tx("col.idiomas.referencia", "Referencia (por defecto)"), ReadOnly = true };
                 colReferencia.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(110, 110, 120);
-                var colTexto     = new DataGridViewTextBoxColumn { Name = "colTexto",     HeaderText = "Texto / Traducción", ReadOnly = false };
+                var colTexto     = new DataGridViewTextBoxColumn { Name = "colTexto",     HeaderText = Tx("col.idiomas.texto", "Texto / Traducción"), ReadOnly = false };
 
                 dgvTraducciones.Columns.AddRange(colIdControl, colClave, colFormulario, colReferencia, colTexto);
 

@@ -284,7 +284,7 @@ namespace DAL
                 }
             });
 
-            RecalcularDV();   // T07: DV multi-tabla (pedido + líneas)
+            RecalcularDVSilencioso();   // T07: DV multi-tabla (pedido + líneas)
             return idNuevo;
         }
 
@@ -307,7 +307,7 @@ namespace DAL
             {
                 throw new Exception($"Error al despachar el pedido ID {idPedido}.", ex);
             }
-            RecalcularDV();   // T07
+            RecalcularDVSilencioso();   // T07
         }
 
         // Marca un pedido como Entregado y registra la fecha.
@@ -329,7 +329,7 @@ namespace DAL
             {
                 throw new Exception($"Error al marcar como entregado el pedido ID {idPedido}.", ex);
             }
-            RecalcularDV();   // T07
+            RecalcularDVSilencioso();   // T07
         }
 
         // Pasa a EnLimpieza SOLO las prendas del pedido que siguen EnUso por este cliente.
@@ -354,7 +354,7 @@ namespace DAL
                     afectadas = cmd.ExecuteNonQuery();
                 }
             });
-            if (afectadas > 0) RecalcularDV();   // T07 — mantener el DV del pedido consistente
+            if (afectadas > 0) RecalcularDVSilencioso();   // T07 — mantener el DV del pedido consistente
             return afectadas;
         }
 
@@ -519,7 +519,7 @@ namespace DAL
                     cmdPrendas.ExecuteNonQuery();
                 }
             });
-            RecalcularDV();   // T07
+            RecalcularDVSilencioso();   // T07
         }
 
         // Revierte la cancelación. Devuelve false si alguna prenda ya no está Disponible.
@@ -572,7 +572,7 @@ namespace DAL
                 }
             });
 
-            if (puedeReactivar) RecalcularDV();   // T07
+            if (puedeReactivar) RecalcularDVSilencioso();   // T07
             return puedeReactivar;
         }
 
@@ -701,6 +701,19 @@ namespace DAL
                 dvhs.Add(dvh);
             }
             dvDAL.GuardarDVV(DV_Tabla, svc.CalcularDVV(dvhs));
+        }
+
+        // Variante "best-effort" para los puntos internos de esta clase que llaman a
+        // RecalcularDV() inmediatamente después de haber confirmado (Commit) la operación de
+        // negocio principal: si el recálculo del DV falla, no debe reportarse como si la
+        // operación ya persistida (Alta/Despachar/Entregar/Devolución/Cancelar/DesCancelar)
+        // hubiera fallado — mismo criterio que DAL.Cliente.RecalcularDV/DAL.Empleado.RecalcularDV.
+        // RecalcularDV() en sí sigue propagando: la usa el recálculo administrativo manual desde
+        // BLL.Configuracion, que sí necesita enterarse si falla.
+        private void RecalcularDVSilencioso()
+        {
+            try { RecalcularDV(); }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Pedido.RecalcularDV] " + ex.Message); }
         }
     }
 }

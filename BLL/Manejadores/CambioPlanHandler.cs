@@ -10,10 +10,13 @@ namespace BLL.Manejadores
     public sealed class CambioPlanHandler : ManejadorRenovacion
     {
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
-        private readonly DAL.PlanSuscripcion dalPlan;
+        private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
 
-        public CambioPlanHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.PlanSuscripcion dalPlan,
+        // Antes tomaba DAL.PlanSuscripcion (clase concreta) en vez de IPlanSuscripcionDAL —
+        // por eso no se podía instanciar con un doble de prueba y quedaba sin ningún test,
+        // incluida la validación de "plan insuficiente para el stock en uso" al cambiar de plan.
+        public CambioPlanHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
                                   DAL.Interfaces.IRenovacionDAL dalRenovacion)
         {
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));

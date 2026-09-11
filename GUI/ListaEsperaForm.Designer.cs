@@ -144,6 +144,9 @@ namespace GUI
             this.dgvListaEspera.ReadOnly = true;
             this.dgvListaEspera.RowHeadersVisible = false;
             this.dgvListaEspera.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            // Pantalla de acción sobre UNA fila a la vez: sin esto, Ctrl/Shift-click permite
+            // seleccionar varias filas y las acciones solo actúan sobre la primera, sin avisar.
+            this.dgvListaEspera.MultiSelect = false;
             this.dgvListaEspera.Size = new System.Drawing.Size(900, 504);
             this.dgvListaEspera.TabIndex = 1;
             this.dgvListaEspera.SelectionChanged += new System.EventHandler(this.DgvListaEspera_SelectionChanged);

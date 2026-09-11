@@ -285,8 +285,21 @@ namespace GUI
 
         private void BtnCancelarPedido_Click(object sender, EventArgs e)
         {
-            var pedido = ObtenerPedidoSeleccionado();
-            if (pedido == null) return;
+            var seleccionado = ObtenerPedidoSeleccionado();
+            if (seleccionado == null) return;
+
+            // Releer el estado ACTUAL desde BD antes de actuar: `seleccionado` viene de la grilla
+            // cacheada en memoria (última vez que se llamó CargarPedidos()), que puede estar
+            // desactualizada si otro operador ya cambió este pedido. Mismo criterio que ya usa
+            // BtnDevolucion_Click en PedidosRealizados.
+            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
+            if (pedido == null)
+            {
+                var tNoEx = Traductor.ObtenerTraducciones(_idioma);
+                MostrarError(tNoEx.ContainsKey("msg.ped.yanoexiste") ? tNoEx["msg.ped.yanoexiste"].Texto : "Este pedido ya no existe. Actualizá la grilla.");
+                CargarPedidos();
+                return;
+            }
 
             // Pedir motivo de cancelación con un dialog inline
             var tCanc = Traductor.ObtenerTraducciones(_idioma);
@@ -336,10 +349,20 @@ namespace GUI
 
         private void BtnDesCancelarPedido_Click(object sender, EventArgs e)
         {
-            var pedido = ObtenerPedidoSeleccionado();
-            if (pedido == null) return;
+            var seleccionado = ObtenerPedidoSeleccionado();
+            if (seleccionado == null) return;
 
+            // Releer el estado ACTUAL desde BD antes de actuar (ver comentario en
+            // BtnCancelarPedido_Click).
+            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
             var tDesc = Traductor.ObtenerTraducciones(_idioma);
+            if (pedido == null)
+            {
+                MostrarError(tDesc.ContainsKey("msg.ped.yanoexiste") ? tDesc["msg.ped.yanoexiste"].Texto : "Este pedido ya no existe. Actualizá la grilla.");
+                CargarPedidos();
+                return;
+            }
+
             string T_d(string k, string fb) => tDesc.ContainsKey(k) ? tDesc[k].Texto : fb;
 
             string bodyDesc = string.Format(

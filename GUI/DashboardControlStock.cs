@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 
 namespace GUI
 {
-    public partial class DashboardControlStock : Form, IIdiomaObserver
+    public partial class DashboardControlStock : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IPrendaService _bllPrenda  = new BLL.Prenda();
         private readonly BLL.Usuario                   _bllUsuario = new BLL.Usuario();
@@ -22,8 +22,7 @@ namespace GUI
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarEnBackground();

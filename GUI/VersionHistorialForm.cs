@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    public partial class VersionHistorialForm : Form, IIdiomaObserver
+    public partial class VersionHistorialForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.VersionUsuario _bll         = new BLL.VersionUsuario();
         private readonly BLL.Usuario        _bllUsuario  = new BLL.Usuario();
@@ -26,8 +26,7 @@ namespace GUI
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarUsuarios();
@@ -58,6 +57,7 @@ namespace GUI
             lblUsuario.Text     = T("lbl.ver.usuario",     "Usuario:");
             btnCargar.Text      = T("btn.ver.cargar",      "Cargar");
             btnRestaurar.Text   = T("btn.ver.restaurar",   "Restaurar Versión Seleccionada");
+            btnCerrar.Text      = T("btn.ver.cerrar",      "Cerrar");
 
             if (dgv.Columns.Count > 0)
             {
@@ -83,6 +83,15 @@ namespace GUI
                 System.Diagnostics.Trace.TraceError($"[VersionHistorialForm.CargarUsuarios] {ex.Message}");
             }
         }
+
+        // Deshabilitado por diseño (ver Designer); solo se habilita con una fila seleccionada —
+        // mismo patrón que PedidoHistorialForm.Dgv_SelectionChanged.
+        private void Dgv_SelectionChanged(object sender, EventArgs e)
+        {
+            btnRestaurar.Enabled = dgv.SelectedRows.Count > 0;
+        }
+
+        private void BtnCerrar_Click(object sender, EventArgs e) => this.Close();
 
         private void btnCargar_Click(object sender, EventArgs e)
         {

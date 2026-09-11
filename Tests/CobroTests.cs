@@ -1,6 +1,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BLL.Manejadores;
+using Seguridad;
 using Tests.Fakes;
 
 namespace Tests
@@ -15,6 +16,20 @@ namespace Tests
     [TestClass]
     public class CobroTests
     {
+        [TestInitialize] public void Setup()   => SessionManager.Logout();
+        [TestCleanup]    public void Cleanup() => SessionManager.Logout();
+
+        private static void LoginComoAdministrador()
+        {
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 1,
+                Username = "admin",
+                Perfil = "Administrador",
+                Contraseña = Encriptador.Hash("Admin1!")
+            });
+        }
+
         private static BE.Cliente ClienteVencido() => new BE.Cliente
         {
             IdCliente = 1,
@@ -282,6 +297,75 @@ namespace Tests
             });
 
             Assert.AreEqual(BE.EstadoCobro.Cobrado, resultado.Estado);
+        }
+
+        // ── BLL.Cobro (fachada real) ──────────────────────────────────────────────
+        // Hasta acá todos los tests de este archivo arman su PROPIA copia de la cadena a mano
+        // (mismo orden que el constructor de BLL.Cobro, pero reconstruido en el test) — si
+        // alguien invierte el orden real en el constructor de producción, ningún test de los de
+        // arriba lo detecta. Estos instancian la clase fachada REAL y ejercitan Procesar(...) de
+        // punta a punta, más el guard de entrada (permisos + sin_plan) que tampoco tenía cobertura.
+
+        [TestMethod]
+        public void Real_SinSesion_LanzaSesionExpirada()
+        {
+            // Setup() ya hizo Logout.
+            var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
+
+            try
+            {
+                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+                Assert.Fail("Debía exigir sesión iniciada.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.sesion_expirada", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void Real_ClienteSinPlan_LanzaSinPlan()
+        {
+            LoginComoAdministrador();
+            var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
+            var cliente = ClienteVencido();
+            cliente.IdPlan = null;
+            cliente.NombrePlan = null;
+
+            try
+            {
+                bll.Procesar("Test", cliente, DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+                Assert.Fail("Debía rechazar un cliente sin plan asignado.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cobro.sin_plan", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void Real_ClienteVencidoConCobroExitoso_ProcesaDePuntaAPuntaConLaCadenaReal()
+        {
+            LoginComoAdministrador();
+            var dalCobro = new FakeCobroDAL();
+            var bll = new BLL.Cobro(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL());
+
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Anual, "vendedor1");
+
+            Assert.AreEqual(BE.EstadoCobro.Cobrado, resultado.Estado);
+            Assert.AreEqual(1, dalCobro.AltaVeces);
+        }
+
+        [TestMethod]
+        public void Real_ClienteVencidoConPagoFallidoYaSuspendido_ProcesaDePuntaAPuntaConLaCadenaReal()
+        {
+            LoginComoAdministrador();
+            var dalCobro = new FakeCobroDAL();
+            var bll = new BLL.Cobro(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL());
+
+            var resultado = bll.Procesar("Test", ClienteEnGracia(-1), DecisionCobro.PagoFallido, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+
+            Assert.AreEqual(BE.EstadoCobro.Suspendido, resultado.Estado);
         }
     }
 }

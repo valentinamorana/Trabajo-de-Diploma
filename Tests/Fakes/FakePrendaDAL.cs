@@ -9,6 +9,7 @@ namespace Tests.Fakes
         public List<BE.Prenda> Todas { get; set; } = new List<BE.Prenda>();
         public List<BE.Prenda> Disponibles { get; set; } = new List<BE.Prenda>();
         public List<BE.StockPorTalleCategoria> ConteoDisponiblesPorTalleCategoria { get; set; } = new List<BE.StockPorTalleCategoria>();
+        public List<BE.Prenda> PorCliente { get; set; } = new List<BE.Prenda>();
 
         public int CambiarEstadoVeces { get; private set; }
 
@@ -16,7 +17,7 @@ namespace Tests.Fakes
         public List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null) => Disponibles;
         public BE.Prenda ObtenerPorId(int idPrenda) => Todas.Find(p => p.IdPrenda == idPrenda);
         public List<BE.Prenda> ObtenerPorIds(List<int> ids) => Todas.FindAll(p => ids.Contains(p.IdPrenda));
-        public List<BE.Prenda> ObtenerPorCliente(int idCliente) => new List<BE.Prenda>();
+        public List<BE.Prenda> ObtenerPorCliente(int idCliente) => PorCliente;
         public int Alta(BE.Prenda prenda) => 0;
         public void Modificar(BE.Prenda prenda) { }
         public BE.EstadoPrenda? UltimoEstadoAnterior { get; private set; }

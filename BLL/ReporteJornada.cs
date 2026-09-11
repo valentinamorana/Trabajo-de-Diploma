@@ -46,8 +46,14 @@ namespace BLL
             try
             {
                 if (!Directory.Exists(DirBackups)) return -1;
-                FileInfo ultimo = new DirectoryInfo(DirBackups)
-                    .GetFiles("*.bak")
+                // El backup se genera siempre cifrado (Backup.ExtensionCifrada = ".wfbak"); el ".bak"
+                // intermedio se borra tras cifrarlo (ver BLL.Backup.GenerarBackupCifrado). Buscar solo
+                // "*.bak" hacía que esta alerta quedara en falso-positivo permanente ("sin backups")
+                // en cualquier instalación que solo tenga backups cifrados — mismo criterio que ya usa
+                // GUI.BackupForm al listarlos.
+                var dir = new DirectoryInfo(DirBackups);
+                FileInfo ultimo = dir.GetFiles("*.bak")
+                    .Concat(dir.GetFiles("*" + Backup.ExtensionCifrada))
                     .OrderByDescending(f => f.LastWriteTime)
                     .FirstOrDefault();
                 return ultimo == null ? -1 : (int)(DateTime.Now - ultimo.LastWriteTime).TotalDays;

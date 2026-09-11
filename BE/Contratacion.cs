@@ -30,6 +30,11 @@ namespace BE
         /// <summary>Cargado por JOIN, no persiste.</summary>
         public string NombrePlan { get; set; }
 
+        /// <summary>Precio del plan al momento de consultar (JOIN con PlanSuscripcion), no persiste.
+        /// Antes no se exponía: Caja confirmaba un cobro real sin que el sistema le mostrara en
+        /// ningún momento cuánto tenía que cobrar.</summary>
+        public decimal MontoPlan { get; set; }
+
         public bool PuedeCobrarse() => Estado == EstadoContratacion.PendientePago;
     }
 }

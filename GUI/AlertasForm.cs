@@ -13,7 +13,7 @@ namespace GUI
     /// negocio: solo pide las alertas a la BLL, las traduce y las dibuja. Se traduce
     /// en vivo (patrón Observer).
     /// </summary>
-    public partial class AlertasForm : Form, IIdiomaObserver
+    public partial class AlertasForm : FormBase, IIdiomaObserver
     {
         public AlertasForm()
         {
@@ -63,7 +63,21 @@ namespace GUI
             try { alertas = new BLL.PanelAlertas().ObtenerAlertas(); }
             catch (Exception ex)
             {
-                flow.Controls.Add(CrearFila(BE.NivelAlerta.Critica, ex.Message));
+                // Excepción inesperada: se registra en bitácora (detalle técnico) y se muestra
+                // solo un mensaje genérico traducido — antes mostraba ex.Message crudo, sin
+                // traducir, directo en la tarjeta de alerta (único lugar de la GUI donde eso pasaba).
+                try
+                {
+                    new BLL.Bitacora().RegistrarSinSesion(nameof(AlertasForm),
+                        "Excepción: " + ex.GetType().Name, BE.Criticidad.Alta,
+                        detalle: $"{nameof(AlertasForm)}.CargarAlertas: {ex.Message}");
+                }
+                catch { /* el fallo al registrar no debe romper el manejo del error */ }
+
+                string generico = t.ContainsKey("msg.error.inesperado")
+                    ? t["msg.error.inesperado"].Texto
+                    : "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.";
+                flow.Controls.Add(CrearFila(BE.NivelAlerta.Critica, generico));
                 flow.ResumeLayout();
                 return;
             }

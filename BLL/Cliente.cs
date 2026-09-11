@@ -53,9 +53,12 @@ namespace BLL
             int idNuevo = dalCliente.Alta(cliente);
             cliente.IdCliente = idNuevo;
 
-            bitacora.Registrar(modulo, $"Alta Cliente: {cliente.NombreCompleto} (DNI {cliente.DNI})", BE.Criticidad.Baja);
+            // El DNI está cifrado en la tabla Cliente (Seguridad.Encriptador); no se incluye en
+            // texto plano acá para no anular esa protección en la Bitácora, que suele tener menos
+            // controles de acceso — el IdCliente ya identifica el registro sin exponerlo.
+            bitacora.Registrar(modulo, $"Alta Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.AltaCliente,
-                $"Nuevo cliente: {cliente.NombreCompleto} — DNI {cliente.DNI} — Plan: {cliente.NombrePlan ?? "Sin plan"}",
+                $"Nuevo cliente: {cliente.NombreCompleto} — Plan: {cliente.NombrePlan ?? "Sin plan"}",
                 idCliente: cliente.IdCliente);
         }
 
@@ -96,8 +99,9 @@ namespace BLL
                         nuevoPlan.Nombre, actual.StockUtilizado, nuevoPlan.LimitePrendas);
             }
 
-            // Construir detalle de auditoría incluyendo cambio de plan si ocurrió
-            string detalle = $"Modificación cliente: {cliente.NombreCompleto} — DNI {cliente.DNI}";
+            // Construir detalle de auditoría incluyendo cambio de plan si ocurrió (sin el DNI:
+            // está cifrado en la tabla Cliente y no debe quedar en texto plano en la Bitácora).
+            string detalle = $"Modificación cliente: {cliente.NombreCompleto}";
             if (actual != null && cliente.IdPlan != actual.IdPlan)
             {
                 string planAnterior = actual.NombrePlan ?? (actual.IdPlan.HasValue ? $"ID {actual.IdPlan}" : "Sin plan");
@@ -124,7 +128,7 @@ namespace BLL
             dalCliente.Baja(cliente.IdCliente);
             bitacora.Registrar(modulo, $"Baja Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.BajaCliente,
-                $"Baja cliente: {cliente.NombreCompleto} — DNI {cliente.DNI}",
+                $"Baja cliente: {cliente.NombreCompleto}",
                 idCliente: cliente.IdCliente);
         }
 

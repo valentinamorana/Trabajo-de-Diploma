@@ -64,16 +64,33 @@ namespace GUI
 
                 foreach (var m in mapeos)
                 {
-                    object control = EncontrarControl(form, m.NombreControl);
-                    if (control == null) continue;
+                    // Cada mapeo se aplica en su propio try/catch: antes, si UN control fallaba al
+                    // resolverse/aplicarse, la excepción abortaba todo el foreach y los mapeos que
+                    // todavía no se habían procesado quedaban con su estado de visibilidad PREVIO
+                    // (potencialmente visibles/habilitados) — un fallo parcial pasaba inadvertido.
+                    try
+                    {
+                        object control = EncontrarControl(form, m.NombreControl);
+                        if (control == null) continue;
 
-                    string key = form.Name + "." + m.NombreControl;
-                    mapeadosAhora.Add(key);
+                        string key = form.Name + "." + m.NombreControl;
+                        mapeadosAhora.Add(key);
 
-                    bool tieneAcceso = esAdmin || patentesUsuario.Contains(m.IdPermiso);
-                    SetVisible(control, tieneAcceso);
-                    if (tieneAcceso) _ocultadosPorNosotros.Remove(key);
-                    else             _ocultadosPorNosotros.Add(key);
+                        bool tieneAcceso = esAdmin || patentesUsuario.Contains(m.IdPermiso);
+                        // Ocultar NO es equivalente a deshabilitar: un control oculto pero todavía
+                        // Enabled podía seguir siendo disparable por un atajo de teclado, un
+                        // AcceptButton/CancelButton, u otro control que lo revelara sin pasar por
+                        // este manejador. Ahora se aplican ambos.
+                        SetVisible(control, tieneAcceso);
+                        SetEnabled(control, tieneAcceso);
+                        if (tieneAcceso) _ocultadosPorNosotros.Remove(key);
+                        else             _ocultadosPorNosotros.Add(key);
+                    }
+                    catch (Exception exMapeo)
+                    {
+                        System.Diagnostics.Trace.TraceError(
+                            $"[ManejadorSeguridad.AplicarSeguridad] Formulario '{form.Name}', control '{m.NombreControl}': {exMapeo.Message}");
+                    }
                 }
 
                 // Re-mostrar lo que NOSOTROS habíamos ocultado en este form y ya no está mapeado
@@ -85,13 +102,13 @@ namespace GUI
                     if (mapeadosAhora.Contains(key)) continue;
                     string ctrlName = key.Substring(prefijo.Length);
                     object control = EncontrarControl(form, ctrlName);
-                    if (control != null) SetVisible(control, true);
+                    if (control != null) { SetVisible(control, true); SetEnabled(control, true); }
                     _ocultadosPorNosotros.Remove(key);
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.TraceError("[ManejadorSeguridad.AplicarSeguridad] " + ex.Message);
+                System.Diagnostics.Trace.TraceError($"[ManejadorSeguridad.AplicarSeguridad] Formulario '{form.Name}': {ex.Message}");
             }
         }
 
@@ -109,6 +126,12 @@ namespace GUI
         {
             if (control is Control c)               c.Visible = visible;
             else if (control is ToolStripItem tsi)  tsi.Visible = visible;
+        }
+
+        private static void SetEnabled(object control, bool enabled)
+        {
+            if (control is Control c)               c.Enabled = enabled;
+            else if (control is ToolStripItem tsi)  tsi.Enabled = enabled;
         }
 
         // Busca un control por nombre: primero entre los Controls (recursivo), luego dentro de los

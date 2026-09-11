@@ -92,22 +92,17 @@ namespace GUI
 
             try
             {
-                bool existe = new BLL.Usuario().SolicitarRecuperacionClave(username);
-
-                if (!existe)
-                {
-                    MostrarError(string.Format(
-                        T_o("err.recup.nousuario",
-                            "No se encontró el usuario '{0}'.\nVerificá que escribiste tu nombre correctamente."),
-                        username));
-                    return;
-                }
+                // Se ignora deliberadamente el valor de retorno para lo que se MUESTRA en pantalla:
+                // antes este formulario devolvía un mensaje distinto según si el username existía o
+                // no ("No se encontró..." vs "Usuario encontrado"), reintroduciendo la enumeración de
+                // usuarios que Login.cs evita a propósito (mismo mensaje exista o no la cuenta). La
+                // BLL sigue registrando la solicitud en bitácora solo cuando el usuario existe; acá
+                // no se distingue esa respuesta.
+                new BLL.Usuario().SolicitarRecuperacionClave(username);
 
                 lblMensaje.ForeColor = Color.FromArgb(30, 120, 60);
-                lblMensaje.Text = string.Format(
-                    T_o("msg.recup.exito",
-                        "Usuario '{0}' encontrado.\nContacta al administrador para que resetee\ntu contrasena desde Administrar -> Usuarios."),
-                    username);
+                lblMensaje.Text = T_o("msg.recup.exito",
+                    "Si el usuario existe, contactá al administrador para que resetee\ntu contraseña desde Administrar -> Usuarios.");
 
                 btnEnviar.Enabled = false;
             }

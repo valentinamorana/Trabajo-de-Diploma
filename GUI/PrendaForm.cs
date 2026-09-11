@@ -10,19 +10,22 @@ namespace GUI
     /// Diálogo modal para dar de alta o editar una prenda del catálogo.
     /// Devuelve DialogResult.OK con PrendaEditada cargada si el usuario confirma.
     /// </summary>
-    public partial class PrendaForm : Form
+    public partial class PrendaForm : FormBase
     {
         public BE.Prenda PrendaEditada { get; private set; }
 
         private readonly bool _esEdicion;
         private readonly BE.Prenda _original;
 
+        protected override Label MensajeLabel => lblMensaje;
+
         public PrendaForm() : this(null) { }
 
         public PrendaForm(BE.Prenda prenda)
         {
             InitializeComponent();
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            // Ícono, tema/fuente del usuario y seguridad de controles ahora los aplica
+            // FormBase.OnLoad (antes se duplicaba a mano solo el ícono acá).
             _esEdicion = prenda != null;
             _original  = prenda;
 
@@ -112,10 +115,11 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                string msg = ex is BE.AppException appEx
-                    ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
-                    : ex.Message;
-                lblMensaje.Text = $"✗ {msg}";
+                // Antes reimplementaba esto a mano y, para una excepción inesperada (no
+                // BE.AppException), mostraba ex.Message crudo sin traducir ni registrar en
+                // bitácora — MostrarError(Exception), heredado de FormBase, sí lo hace
+                // (mensaje genérico al usuario + detalle técnico auditado).
+                MostrarError(ex);
             }
         }
     }

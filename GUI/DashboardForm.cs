@@ -25,7 +25,7 @@ namespace GUI
     ///
     /// Implementa IIdiomaObserver: las etiquetas se traducen al cambiar el idioma.
     /// </summary>
-    public partial class DashboardForm : Form, IIdiomaObserver
+    public partial class DashboardForm : FormBase, IIdiomaObserver
     {
         private static readonly string DirBackups =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
@@ -90,8 +90,7 @@ namespace GUI
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-            try { string ico = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             // Cargar datos en background — el form aparece inmediatamente

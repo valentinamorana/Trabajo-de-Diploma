@@ -153,12 +153,9 @@ namespace GUI
             var prenda = ObtenerSeleccionada();
             if (prenda == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             var confirmar = MessageBox.Show(
-                string.Format(T("conf.insp.reingreso.msg", "¿Aprobar el reingreso de '{0}' a Disponible?"), prenda.Nombre),
-                T("conf.insp.reingreso.titulo", "Confirmar Reingreso"),
+                Tr("conf.insp.reingreso.msg", "¿Aprobar el reingreso de '{0}' a Disponible?", new object[] { prenda.Nombre }),
+                Tr("conf.insp.reingreso.titulo", "Confirmar Reingreso"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;
 
@@ -167,7 +164,7 @@ namespace GUI
                 string actor = Seguridad.SessionManager.IsLoggedIn
                     ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
                 prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Disponible, actor);
-                MostrarOk(string.Format(T("msg.insp.reingreso_ok", "'{0}' reingresó a Disponible."), prenda.Nombre));
+                MostrarOk(Tr("msg.insp.reingreso_ok", "'{0}' reingresó a Disponible.", new object[] { prenda.Nombre }));
                 CargarPrendas();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -200,10 +197,8 @@ namespace GUI
                     // desarrollado por quedar fuera de alcance de este TP.
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
                     prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
-                    var tBaja = Traductor.ObtenerTraducciones(_idioma);
-                    MostrarOk(string.Format(
-                        tBaja.ContainsKey("msg.insp.baja_ok") ? tBaja["msg.insp.baja_ok"].Texto : "'{0}' dada de baja — cargo de ${1} registrado.",
-                        prenda.Nombre, dlg.Monto));
+                    MostrarOk(Tr("msg.insp.baja_ok", "'{0}' dada de baja — cargo de ${1} registrado.",
+                        new object[] { prenda.Nombre, dlg.Monto }));
                     CargarPrendas();
                 }
                 catch (Exception ex) { MostrarError(ex); }

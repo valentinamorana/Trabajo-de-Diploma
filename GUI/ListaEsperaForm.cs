@@ -59,23 +59,20 @@ namespace GUI
             Aplicar(lblEstado, t);
             Aplicar(btnCancelar, t);
             Aplicar(btnRefrescar, t);
-            RellenarComboEstado(idioma);
+            RellenarComboEstado();
             TraducirHeadersGrilla();
         }
 
-        private void RellenarComboEstado(Idioma idioma)
+        private void RellenarComboEstado()
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
-
             int prevIdx = cmbFiltroEstado.SelectedIndex < 0 ? 0 : cmbFiltroEstado.SelectedIndex;
             cmbFiltroEstado.SelectedIndexChanged -= CmbFiltroEstado_SelectedIndexChanged;
             cmbFiltroEstado.Items.Clear();
-            cmbFiltroEstado.Items.Add(T("combo.prenda.todos",      "Todos"));
-            cmbFiltroEstado.Items.Add(T("listaespera.pendiente",   "Pendiente"));
-            cmbFiltroEstado.Items.Add(T("listaespera.reservada",   "Reservada"));
-            cmbFiltroEstado.Items.Add(T("listaespera.convertida",  "Convertida"));
-            cmbFiltroEstado.Items.Add(T("listaespera.cancelada",   "Cancelada"));
+            cmbFiltroEstado.Items.Add(Tr("combo.prenda.todos",      "Todos"));
+            cmbFiltroEstado.Items.Add(Tr("listaespera.pendiente",   "Pendiente"));
+            cmbFiltroEstado.Items.Add(Tr("listaespera.reservada",   "Reservada"));
+            cmbFiltroEstado.Items.Add(Tr("listaespera.convertida",  "Convertida"));
+            cmbFiltroEstado.Items.Add(Tr("listaespera.cancelada",   "Cancelada"));
             cmbFiltroEstado.SelectedIndex = prevIdx < cmbFiltroEstado.Items.Count ? prevIdx : 0;
             cmbFiltroEstado.SelectedIndexChanged += CmbFiltroEstado_SelectedIndexChanged;
         }
@@ -223,14 +220,11 @@ namespace GUI
             var fila = ObtenerFilaSeleccionada();
             if (fila == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-            string body = string.Format(
-                T("conf.listaespera.cancelar.body", "¿Cancelar la anotación de {0} por '{1}'?"),
-                fila.NombreCliente, fila.NombrePrenda);
+            string body = Tr("conf.listaespera.cancelar.body", "¿Cancelar la anotación de {0} por '{1}'?",
+                new object[] { fila.NombreCliente, fila.NombrePrenda });
 
             var confirmar = MessageBox.Show(body,
-                T("conf.listaespera.cancelar.titulo", "Confirmar Cancelación"),
+                Tr("conf.listaespera.cancelar.titulo", "Confirmar Cancelación"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
 
             if (confirmar != DialogResult.Yes) return;
@@ -240,7 +234,7 @@ namespace GUI
                 string actor = Seguridad.SessionManager.IsLoggedIn
                     ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
                 listaEsperaBLL.Cancelar(this.Text, fila.IdListaEspera, actor);
-                MostrarOk(string.Format(T("msg.listaespera.cancelada", "Anotación de {0} cancelada."), fila.NombreCliente));
+                MostrarOk(Tr("msg.listaespera.cancelada", "Anotación de {0} cancelada.", new object[] { fila.NombreCliente }));
                 CargarFilas();
             }
             catch (Exception ex) { MostrarError(ex); }

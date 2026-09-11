@@ -71,39 +71,33 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) { Traducir(); }
 
-        private string T(string key, string fallback)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(key) ? t[key].Texto : fallback;
-        }
-
         private void Traducir()
         {
-            this.Text            = T("frm.gestorpermisos",      "Gestor de Perfiles — Roles y Permisos (Composite)");
-            lblTitulo.Text       = T("lbl.permisos.titulo",     "Perfiles y Permisos");
-            lblSubtitulo.Text    = T("lbl.permisos.subtitulo",  "Gestión de roles (los permisos son un catálogo fijo)");
-            lblEstructura.Text   = T("lbl.permisos.estructura", "Estructura del sistema (roles y permisos)");
+            this.Text            = Tr("frm.gestorpermisos",      "Gestor de Perfiles — Roles y Permisos (Composite)");
+            lblTitulo.Text       = Tr("lbl.permisos.titulo",     "Perfiles y Permisos");
+            lblSubtitulo.Text    = Tr("lbl.permisos.subtitulo",  "Gestión de roles (los permisos son un catálogo fijo)");
+            lblEstructura.Text   = Tr("lbl.permisos.estructura", "Estructura del sistema (roles y permisos)");
 
-            lblModo.Text         = T("lbl.permisos.modo",       "Modo:");
-            rbCrear.Text         = T("rb.permisos.crear",       "Crear");
-            rbEditar.Text        = T("rb.permisos.editar",      "Editar / Eliminar");
-            lblNombreRol.Text    = T("lbl.permisos.nombrerol",  "Nombre del rol:");
-            grpCrear.Text        = T("grp.permisos.crear",      "Crear rol");
-            grpEditar.Text       = T("grp.permisos.editar",     "Editar rol");
-            grpAsignar.Text      = T("grp.permisos.asignar",    "Asignar permiso o rol");
+            lblModo.Text         = Tr("lbl.permisos.modo",       "Modo:");
+            rbCrear.Text         = Tr("rb.permisos.crear",       "Crear");
+            rbEditar.Text        = Tr("rb.permisos.editar",      "Editar / Eliminar");
+            lblNombreRol.Text    = Tr("lbl.permisos.nombrerol",  "Nombre del rol:");
+            grpCrear.Text        = Tr("grp.permisos.crear",      "Crear rol");
+            grpEditar.Text       = Tr("grp.permisos.editar",     "Editar rol");
+            grpAsignar.Text      = Tr("grp.permisos.asignar",    "Asignar permiso o rol");
 
-            btnCrearRaiz.Text    = T("btn.permisos.crearraiz",  "➕ Crear rol raíz");
-            btnCrearSub.Text     = T("btn.permisos.crearsub",   "➕ Crear sub-rol");
-            btnEditarNombre.Text = T("btn.permisos.editarnom",  "✏ Renombrar rol");
-            btnEliminarRol.Text  = T("btn.permisos.eliminar",   "🗑 Eliminar rol");
-            btnAsignar.Text      = T("btn.permisos.asignar",    "Asignar ↓");
-            btnQuitar.Text       = T("btn.permisos.quitar",     "Quitar ítem seleccionado");
-            btnActualizar.Text   = T("btn.permisos.actualizar", "↻ Actualizar");
-            btnExplorador.Text   = T("btn.explorador",          "🌳 Ver vista completa del sistema");
-            btnCerrar.Text       = T("btn.permisos.cerrar",     "Cerrar");
+            btnCrearRaiz.Text    = Tr("btn.permisos.crearraiz",  "➕ Crear rol raíz");
+            btnCrearSub.Text     = Tr("btn.permisos.crearsub",   "➕ Crear sub-rol");
+            btnEditarNombre.Text = Tr("btn.permisos.editarnom",  "✏ Renombrar rol");
+            btnEliminarRol.Text  = Tr("btn.permisos.eliminar",   "🗑 Eliminar rol");
+            btnAsignar.Text      = Tr("btn.permisos.asignar",    "Asignar ↓");
+            btnQuitar.Text       = Tr("btn.permisos.quitar",     "Quitar ítem seleccionado");
+            btnActualizar.Text   = Tr("btn.permisos.actualizar", "↻ Actualizar");
+            btnExplorador.Text   = Tr("btn.explorador",          "🌳 Ver vista completa del sistema");
+            btnCerrar.Text       = Tr("btn.permisos.cerrar",     "Cerrar");
 
             if (tip != null)
-                tip.SetToolTip(rbCrear, T("help.permisos.rol",
+                tip.SetToolTip(rbCrear, Tr("help.permisos.rol",
                     "Rol = perfil que se asigna a un usuario. Puede contener permisos (patentes) y otros roles (rol-en-rol)."));
 
             ActualizarControles();
@@ -141,7 +135,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(T("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
             }
         }
 
@@ -225,8 +219,8 @@ namespace GUI
 
             // Detalle de la selección.
             lblDetalle.Text = _seleccionado == null
-                ? T("lbl.permisos.detalle.vacio", "Detalle: (sin selección)")
-                : T("lbl.permisos.detalle", "Detalle: ") + Etiqueta(_seleccionado);
+                ? Tr("lbl.permisos.detalle.vacio", "Detalle: (sin selección)")
+                : Tr("lbl.permisos.detalle", "Detalle: ") + Etiqueta(_seleccionado);
 
             if (crear)
             {
@@ -289,12 +283,12 @@ namespace GUI
         {
             string nombre = txtNombreRol.Text.Trim();
             if (string.IsNullOrWhiteSpace(nombre))
-            { MostrarError(T("perm.msg.nombrevacio", "Escribí un nombre para el rol.")); return; }
+            { MostrarError(Tr("perm.msg.nombrevacio", "Escribí un nombre para el rol.")); return; }
             try
             {
                 _familiaBLL.CrearRol(nombre);
                 GUI.Menu.RefrescarSeguridadAbierta();
-                MostrarOk(string.Format(T("perm.ok.rolcreado", "Rol raíz '{0}' creado."), nombre));
+                MostrarOk(string.Format(Tr("perm.ok.rolcreado", "Rol raíz '{0}' creado."), nombre));
                 txtNombreRol.Text = "";
                 CargarArbol();
             }
@@ -304,11 +298,11 @@ namespace GUI
         private void CrearSubRol()
         {
             if (!(_seleccionado is BE.Rol padre))
-            { MostrarError(T("perm.msg.selpadrerol", "Seleccioná un Rol del árbol para crearle un sub-rol.")); return; }
+            { MostrarError(Tr("perm.msg.selpadrerol", "Seleccioná un Rol del árbol para crearle un sub-rol.")); return; }
 
             string nombre = txtNombreRol.Text.Trim();
             if (string.IsNullOrWhiteSpace(nombre))
-            { MostrarError(T("perm.msg.nombrevacio", "Escribí un nombre para el sub-rol.")); return; }
+            { MostrarError(Tr("perm.msg.nombrevacio", "Escribí un nombre para el sub-rol.")); return; }
             try
             {
                 int nuevoId = _familiaBLL.CrearRol(nombre);
@@ -332,7 +326,7 @@ namespace GUI
                         // Ni siquiera se pudo deshacer: avisar explícitamente en vez de un error
                         // genérico, para que quede claro que hay que revisarlo a mano.
                         MostrarError(string.Format(
-                            T("perm.err.subrol_huerfano",
+                            Tr("perm.err.subrol_huerfano",
                               "El sub-rol '{0}' se creó pero no se pudo vincular a '{1}' ({2}), y tampoco se pudo deshacer automáticamente. Revisalo manualmente en la lista de Roles."),
                             nombre, padre.Nombre, exVincular.Message));
                         CargarArbol();
@@ -341,7 +335,7 @@ namespace GUI
                     throw; // re-lanza el error original (ej. ciclo) ya con el rol huérfano limpiado
                 }
                 GUI.Menu.RefrescarSeguridadAbierta();
-                MostrarOk(string.Format(T("perm.ok.subcreado", "Sub-rol '{0}' creado dentro de '{1}'."), nombre, padre.Nombre));
+                MostrarOk(string.Format(Tr("perm.ok.subcreado", "Sub-rol '{0}' creado dentro de '{1}'."), nombre, padre.Nombre));
                 txtNombreRol.Text = "";
                 CargarArbol();
             }
@@ -352,16 +346,16 @@ namespace GUI
         private void EditarNombre()
         {
             if (!(_seleccionado is BE.Rol rol))
-            { MostrarError(T("perm.msg.selmodrol", "Seleccioná un ROL del árbol para renombrar (los permisos no se editan).")); return; }
+            { MostrarError(Tr("perm.msg.selmodrol", "Seleccioná un ROL del árbol para renombrar (los permisos no se editan).")); return; }
 
             string nombre = txtNombreRol.Text.Trim();
             if (string.IsNullOrWhiteSpace(nombre))
-            { MostrarError(T("perm.msg.nombrevacio", "El nombre del rol no puede estar vacío.")); return; }
+            { MostrarError(Tr("perm.msg.nombrevacio", "El nombre del rol no puede estar vacío.")); return; }
             try
             {
                 _familiaBLL.RenombrarComponente(rol.Id, nombre, nombre);
                 GUI.Menu.RefrescarSeguridadAbierta();
-                MostrarOk(string.Format(T("perm.ok.modificado", "Rol actualizado a '{0}'."), nombre));
+                MostrarOk(string.Format(Tr("perm.ok.modificado", "Rol actualizado a '{0}'."), nombre));
                 CargarArbol();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -370,11 +364,11 @@ namespace GUI
         private void EliminarRolSel()
         {
             if (!(_seleccionado is BE.Rol rol))
-            { MostrarError(T("perm.msg.selelirol", "Seleccioná un ROL del árbol para eliminar (los permisos no se eliminan).")); return; }
+            { MostrarError(Tr("perm.msg.selelirol", "Seleccioná un ROL del árbol para eliminar (los permisos no se eliminan).")); return; }
 
             if (MessageBox.Show(
-                    string.Format(T("perm.conf.elirol", "¿Eliminar el rol '{0}'? No se permite si tiene usuarios asignados."), rol.Nombre),
-                    T("perm.conf.titulo", "Confirmar"),
+                    string.Format(Tr("perm.conf.elirol", "¿Eliminar el rol '{0}'? No se permite si tiene usuarios asignados."), rol.Nombre),
+                    Tr("perm.conf.titulo", "Confirmar"),
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             try
             {
@@ -382,7 +376,7 @@ namespace GUI
                 _familiaBLL.EliminarRol(nombre);   // valida que no tenga usuarios asignados
                 _seleccionado = null;
                 GUI.Menu.RefrescarSeguridadAbierta();
-                MostrarOk(string.Format(T("perm.ok.eliminado", "Rol '{0}' eliminado."), nombre));
+                MostrarOk(string.Format(Tr("perm.ok.eliminado", "Rol '{0}' eliminado."), nombre));
                 CargarArbol();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -391,14 +385,14 @@ namespace GUI
         private void Asignar()
         {
             if (!(_seleccionado is BE.Rol rol))
-            { MostrarError(T("perm.msg.selpadre", "Seleccioná un Rol para asignarle un permiso o rol.")); return; }
+            { MostrarError(Tr("perm.msg.selpadre", "Seleccioná un Rol para asignarle un permiso o rol.")); return; }
             if (!(cmbAsignables.SelectedItem is Item it))
-            { MostrarError(T("perm.msg.selasignable", "Elegí un permiso o rol de la lista para asignar.")); return; }
+            { MostrarError(Tr("perm.msg.selasignable", "Elegí un permiso o rol de la lista para asignar.")); return; }
             try
             {
                 _familiaBLL.AgregarComponente(rol.Id, it.Comp.Id);
                 GUI.Menu.RefrescarSeguridadAbierta();
-                MostrarOk(string.Format(T("perm.ok.agregado", "'{0}' asignado a '{1}'."), it.Comp.Nombre, rol.Nombre));
+                MostrarOk(string.Format(Tr("perm.ok.agregado", "'{0}' asignado a '{1}'."), it.Comp.Nombre, rol.Nombre));
                 CargarArbol();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -408,21 +402,21 @@ namespace GUI
         {
             var node = tvEstructura.SelectedNode;
             if (node?.Parent == null)
-            { MostrarError(T("perm.msg.selquitar", "Seleccioná un ítem que cuelgue de un rol para quitarlo.")); return; }
+            { MostrarError(Tr("perm.msg.selquitar", "Seleccioná un ítem que cuelgue de un rol para quitarlo.")); return; }
 
             var padre = node.Parent.Tag as BE.Componente;
             var hijo  = node.Tag as BE.Componente;
             if (padre == null || hijo == null) return;
 
             if (MessageBox.Show(
-                    string.Format(T("perm.conf.quitar", "¿Quitar '{0}' del rol '{1}'?"), hijo.Nombre, padre.Nombre),
-                    T("perm.conf.titulo", "Confirmar"),
+                    string.Format(Tr("perm.conf.quitar", "¿Quitar '{0}' del rol '{1}'?"), hijo.Nombre, padre.Nombre),
+                    Tr("perm.conf.titulo", "Confirmar"),
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             try
             {
                 _familiaBLL.QuitarComponente(padre.Id, hijo.Id);
                 GUI.Menu.RefrescarSeguridadAbierta();
-                MostrarOk(string.Format(T("perm.ok.quitado", "'{0}' quitado de '{1}'."), hijo.Nombre, padre.Nombre));
+                MostrarOk(string.Format(Tr("perm.ok.quitado", "'{0}' quitado de '{1}'."), hijo.Nombre, padre.Nombre));
                 CargarArbol();
             }
             catch (Exception ex) { MostrarError(ex); }

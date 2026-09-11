@@ -1,10 +1,12 @@
 # Auditoría técnica — WardrobeFlow (2026-09-10)
 
-> **Actualización (2026-09-11): todos los 🔴 Alta están resueltos**, y ~64 de los 95 hallazgos
-> 🟡 Media/🟢 Baja también (ver el marcador `✅ RESUELTO (2026-09-11)` en cada uno, con su
-> "Solución aplicada"). Build + tests verificados en verde después de cada tanda de cambios
-> (407 tests, 405 passed, 2 skipped preexistentes, 0 fallando). Los ítems Media/Baja sin ese
-> marcador quedan anotados `(pendiente)`
+> **Actualización (2026-09-11): todos los 🔴 Alta están resueltos**, ~64 de los 95 hallazgos
+> 🟡 Media/🟢 Baja también, y el ítem #1 del scan transversal (§10) — el helper de traducción
+> duplicado ~84 veces — quedó centralizado en `FormBase.Tr` en los 45 formularios que heredan
+> `FormBase` (ver el marcador `✅ RESUELTO (2026-09-11)` en cada uno, con su "Solución
+> aplicada"). Build + tests verificados en verde después de cada tanda de cambios (407 tests,
+> 405 passed, 2 skipped preexistentes, 0 fallando). Los ítems Media/Baja sin ese marcador
+> quedan anotados `(pendiente)`
 > cuando requieren un refactor de mayor alcance, una decisión de producto, o simplemente no se
 > llegó a esta pasada — no se tocó nada fuera de lo explícitamente marcado como resuelto. El scan
 > transversal (§10) sigue sin empezar salvo el ítem #12 (color de marca), resuelto como parte de
@@ -68,7 +70,7 @@ Los ~18 hallazgos de mayor impacto de negocio/seguridad de toda la revisión, en
 15. **`DAL/Pedido.cs` — `RecalcularDV()` sin `try/catch` después del `Commit`** en 6 puntos: si el recálculo falla, el usuario ve "error al despachar" con el pedido ya despachado en la base (§BE-DAL #2).
 16. **`BLL.Cobro`/`BLL.Renovacion` (las clases fachada reales) nunca se instancian en los tests** — la cadena de Responsabilidad se prueba reconstruida "a mano" en el test, no la que arma el constructor real; si alguien invierte el orden real, ningún test lo detecta (§Tests #1).
 17. **`CambioPlanHandler`/`BajaSuscripcionHandler` reciben DAL concretos en vez de interfaces → 0% testeados**, incluida la validación de "plan insuficiente para el stock en uso" al cambiar de plan (§Tests #2).
-18. **Helper de traducción reinventado ~84 veces con ~24 nombres distintos** (`T`, `Tx`, `T_ce`, `T_dlg`, `T_c`...) en 48 archivos — mismo cuerpo copiado sin centralizar (§Transversal #1).
+18. ✅ RESUELTO — **Helper de traducción reinventado ~84 veces con ~24 nombres distintos** (`T`, `Tx`, `T_ce`, `T_dlg`, `T_c`...) en 48 archivos — mismo cuerpo copiado sin centralizar (§Transversal #1).
 
 ---
 
@@ -483,7 +485,8 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 
 Búsquedas sobre el conjunto completo (no archivo por archivo) para detectar patrones que solo se ven mirando el todo.
 
-**1. Helper de traducción reinventado ~84 veces con ~24 nombres distintos** (`T`, `Tx`, `T_ce`, `T_dlg`, `T_c`, `T_d`, `T_e`...) en 48 archivos — mismo cuerpo `ContainsKey ? Texto : fallback` copiado sin centralizar en ningún helper compartido (ej. en `FormBase`).
+**1. ✅ RESUELTO (2026-09-11) — Helper de traducción reinventado ~84 veces con ~24 nombres distintos** (`T`, `Tx`, `T_ce`, `T_dlg`, `T_c`, `T_d`, `T_e`...) en 48 archivos — mismo cuerpo `ContainsKey ? Texto : fallback` copiado sin centralizar en ningún helper compartido (ej. en `FormBase`).
+*Solución aplicada:* se agregó `FormBase.Tr(clave, fallback, args = null)` (wrapper de `Traductor.Resolver` con el idioma activo) como único punto de traducción, y se migraron los ~121 usos encontrados (más de los ~84 estimados originalmente) en los 45 formularios que heredan `FormBase` — 14 commits, uno por lote, cada uno verificado con build + tests. Varios `RellenarCombo*`/`TraducirX` perdieron parámetros de idioma/diccionario que ya no necesitaban. Se preservaron intactos, a propósito, los dos closures locales de `MostrarEstadoActual()` en `CobroSuscripcionForm`/`RenovacionSuscripcionForm`, que cachean un único fetch del diccionario para 5 sub-resoluciones (optimización deliberada y documentada, no duplicación). *Alcance no cubierto:* 11 formularios que heredan `Form` directo en vez de `FormBase` (`Login`, `Menu`, `MiPerfilForm`, `ConfirmarAdminForm`, `DesbloqueoEmergenciaForm`, `DiagnosticoIntegridadForm`, `ExploradorCompositeForm`, `RecuperacionEspejoForm`, `CambioClaveObligatorioForm`, `CargoPrendaDialog`, `CambioEstadoDialog`) no pueden usar el helper heredado sin además migrarlos a `FormBase` — cambio de mayor alcance, fuera de esta pasada. Los 3 `Exportadores` y `Program.cs` tampoco son `Form` y quedan igual sin tocar.
 
 **2. Convención de campos privados dividida por capa, no aleatoria.** DAL: 100% sin `_` (17 archivos). GUI: 100% con `_` (27 archivos, salvo `Login.cs`, única excepción). BLL: mezcla ambas **dentro de la misma clase** (11 archivos) según si el campo es inyectado (`dalPedido`) o lazy (`_listaEsperaLazy`) — regla informal nunca documentada.
 

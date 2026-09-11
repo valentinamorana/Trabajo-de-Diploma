@@ -380,7 +380,8 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 *Solución aplicada:* `CobroSuscripcionForm` usa su propia clave `"cobro.modalidad"`.
 9. ✅ RESUELTO (2026-09-11) — `DateTimePicker.Format = Short` depende del locale del SO en 3 controles, mientras las etiquetas de solo-lectura de las mismas pantallas fuerzan `dd/MM/yyyy` explícito — riesgo real de leer mal una fecha límite.
 *Solución aplicada:* `Format = Custom` + `CustomFormat = "dd/MM/yyyy"` en `AltaPromocionForm` (dtpInicio/dtpFin) y `RenovacionSuscripcionForm` (dtpPausaHasta).
-10. El manejo de error en `catch` no refresca el estado mostrado en ninguna de las dos pantallas de Cobro/Renovación — si la falla ocurrió tras una escritura parcial, la pantalla no lo refleja. *(pendiente — no evaluado en esta pasada)*
+10. ✅ RESUELTO (2026-09-11) — El manejo de error en `catch` no refresca el estado mostrado en ninguna de las dos pantallas de Cobro/Renovación — si la falla ocurrió tras una escritura parcial, la pantalla no lo refleja.
+*Solución aplicada:* los catch de `BtnProcesar_Click` (ambas pantallas) y `BtnReanudar_Click` (Renovación) ahora refrescan el estado mostrado después de mostrar el error (best-effort, envuelto en su propio try/catch para no tapar el error ya mostrado).
 11. Convención de nombres de campos de servicio BLL inconsistente (`promocionBLL` vs `_bllCliente`) dentro del mismo conjunto de 10 pantallas. *(pendiente — rename cosmético de riesgo amplio, se deja para una pasada aparte)*
 
 ### 🟢 Baja
@@ -389,8 +390,9 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 *Solución aplicada:* extraída a `GUI/ClienteItem.cs`.
 13. ✅ RESUELTO (2026-09-11) — `AltaPromocionForm` no valida en cliente rango de fechas ni tope de porcentaje antes de enviar (sí lo hace BLL, pero el feedback es tardío y genérico).
 *Solución aplicada:* `BtnConfirmar_Click` valida ambas reglas del lado del cliente antes de invocar al BLL, reusando las claves de traducción ya existentes.
-14. `btnRefrescar` sin texto traducible ni tooltip, único caso así entre las acciones del conjunto. *(pendiente)*
-15. Eventos `CheckedChanged` cableados a un solo radio button del par en varios formularios (acoplamiento implícito). *(pendiente — riesgo de diseño, no un bug puntual)*
+14. ✅ RESUELTO (2026-09-11) — `btnRefrescar` sin texto traducible ni tooltip, único caso así entre las acciones del conjunto.
+*Solución aplicada:* ToolTip traducible (`tip.actualizar`) agregado en las 4 pantallas afectadas (PromocionesVigentes/Administracion/Contabilidad, ContratacionesPendientes).
+15. Eventos `CheckedChanged` cableados a un solo radio button del par en varios formularios (acoplamiento implícito). *(revisado 2026-09-11, sin cambios: el radio "apagado" del par dispara su propio `CheckedChanged` al descheckearse — todos los handlers leen `.Checked` del control, no `sender` — así que el control dependiente siempre queda en el estado correcto sin importar cuál de los dos se clickee; es cosmético, no un bug)*
 
 ---
 

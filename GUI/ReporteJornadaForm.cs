@@ -102,31 +102,28 @@ namespace GUI
 
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+            this.Text          = Tr("frm.reportejornada", "Reporte de Jornada — WardrobeFlow");
+            lblTitulo.Text     = Tr("frm.reportejornada", "Reporte de Jornada — WardrobeFlow");
+            lblSubtitulo.Text  = Tr("rpt.subtitulo",      "Eventos de negocio por jornada con exportación a TXT");
+            lblJornada.Text    = Tr("rpt.fecha",          "Jornada:");
+            lblComparar.Text   = Tr("rpt.fecha2",         "Comparar con:");
+            btnGenerar.Text    = "↻  " + Tr("rpt.generar",     "Generar");
+            btnComparar.Text   = "⚖  " + Tr("rpt.comparar",    "Comparar jornadas");
+            btnExportar.Text   = "⬇  " + Tr("rpt.exportartxt", "Exportar TXT") + "...";
+            btnExportarComp.Text = "⬇  " + Tr("rpt.exportartxt", "Exportar TXT") + "...";
+            btnLimpiar.Text    = "↩  " + Tr("rpt.limpiar",     "Limpiar");
+            btnTendencia.Text  = "📈  " + Tr("rpt.tendencia", "Tendencia (rango)");
 
-            this.Text          = T("frm.reportejornada", "Reporte de Jornada — WardrobeFlow");
-            lblTitulo.Text     = T("frm.reportejornada", "Reporte de Jornada — WardrobeFlow");
-            lblSubtitulo.Text  = T("rpt.subtitulo",      "Eventos de negocio por jornada con exportación a TXT");
-            lblJornada.Text    = T("rpt.fecha",          "Jornada:");
-            lblComparar.Text   = T("rpt.fecha2",         "Comparar con:");
-            btnGenerar.Text    = "↻  " + T("rpt.generar",     "Generar");
-            btnComparar.Text   = "⚖  " + T("rpt.comparar",    "Comparar jornadas");
-            btnExportar.Text   = "⬇  " + T("rpt.exportartxt", "Exportar TXT") + "...";
-            btnExportarComp.Text = "⬇  " + T("rpt.exportartxt", "Exportar TXT") + "...";
-            btnLimpiar.Text    = "↩  " + T("rpt.limpiar",     "Limpiar");
-            btnTendencia.Text  = "📈  " + T("rpt.tendencia", "Tendencia (rango)");
+            kpiPrendasLbl.Text  = Tr("rpt.kpi.prendas",  "Prendas disponibles");
+            kpiClientesLbl.Text = Tr("rpt.kpi.clientes", "Clientes registrados");
+            kpiEventosLbl.Text  = Tr("rpt.kpi.eventos",  "Eventos del día");
+            kpiBackupLbl.Text   = Tr("rpt.kpi.backup",   "días sin backup");
 
-            kpiPrendasLbl.Text  = T("rpt.kpi.prendas",  "Prendas disponibles");
-            kpiClientesLbl.Text = T("rpt.kpi.clientes", "Clientes registrados");
-            kpiEventosLbl.Text  = T("rpt.kpi.eventos",  "Eventos del día");
-            kpiBackupLbl.Text   = T("rpt.kpi.backup",   "días sin backup");
-
-            mnuGuardarTxt.Text  = T("rpt.menu.guardartxt",  "Guardar como .TXT");
-            mnuImprimir.Text    = T("rpt.menu.imprimir",    "Imprimir / Exportar PDF");
-            mnuGuardarCsv.Text  = T("rpt.menu.guardarcsv",  "Guardar eventos como .CSV");
-            mnuGuardarComp.Text = T("rpt.menu.guardarcmp",  "Guardar comparación como .TXT");
-            mnuImprimirComp.Text = T("rpt.menu.imprimir",   "Imprimir / Exportar PDF");
+            mnuGuardarTxt.Text  = Tr("rpt.menu.guardartxt",  "Guardar como .TXT");
+            mnuImprimir.Text    = Tr("rpt.menu.imprimir",    "Imprimir / Exportar PDF");
+            mnuGuardarCsv.Text  = Tr("rpt.menu.guardarcsv",  "Guardar eventos como .CSV");
+            mnuGuardarComp.Text = Tr("rpt.menu.guardarcmp",  "Guardar comparación como .TXT");
+            mnuImprimirComp.Text = Tr("rpt.menu.imprimir",   "Imprimir / Exportar PDF");
         }
 
         // ── KPI Banner ────────────────────────────────────────────────────────
@@ -167,12 +164,9 @@ namespace GUI
                     ? $"Comparacion_{dtpJornada.Value:yyyyMMdd}_vs_{dtpJornada2.Value:yyyyMMdd}"
                     : $"ReporteJornada_{dtpJornada.Value:yyyyMMdd}";
 
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string Tk(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tk("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:dd/MM/yyyy}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:dd/MM/yyyy}",
                     NombreArchivo = nombreBase,
                     TextoPlano    = rtbReporte.Text
                 };
@@ -195,12 +189,9 @@ namespace GUI
         {
             try
             {
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string Tk(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tk("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:dd/MM/yyyy}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:dd/MM/yyyy}",
                     NombreArchivo = $"ReporteJornada_{dtpJornada.Value:yyyyMMdd}",
                     TextoPlano    = rtbReporte.Text
                 };
@@ -241,17 +232,14 @@ namespace GUI
         {
             try
             {
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string Tk(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
                 DateTime fecha    = dtpJornada.Value.Date;
                 DataTable eventos = _servicio.ObtenerEventosDelDia(fecha);
 
                 if (eventos == null || eventos.Rows.Count == 0)
                 {
                     MessageBox.Show(
-                        Tk("err.pdf.sinDatos", "No hay datos para exportar."),
-                        Tk("rpt.menu.guardarcsv", "Guardar eventos como .CSV"),
+                        Tr("err.pdf.sinDatos", "No hay datos para exportar."),
+                        Tr("rpt.menu.guardarcsv", "Guardar eventos como .CSV"),
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
@@ -262,7 +250,7 @@ namespace GUI
 
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tk("frm.reportejornada", "Reporte de Jornada")} — {fecha:dd/MM/yyyy}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {fecha:dd/MM/yyyy}",
                     NombreArchivo = $"EventosJornada_{fecha:yyyyMMdd}",
                     Encabezados   = headers,
                     Datos         = eventos
@@ -316,41 +304,39 @@ namespace GUI
 
         private IDictionary<string, string> ConstruirLblReporte()
         {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string Tv(string key, string fb) => t.ContainsKey(key) ? t[key].Texto : fb;
             return new Dictionary<string, string>
             {
-                { "titulo",        Tv("rpt.txt.titulo",       "REPORTE DE JORNADA")                                    },
-                { "resumen",       Tv("rpt.txt.resumen",      "RESUMEN DEL SISTEMA")                                   },
-                { "prendas",       Tv("rpt.txt.prendas",      "Prendas disponibles")                                   },
-                { "clientes",      Tv("rpt.txt.clientes",     "Clientes registrados")                                  },
-                { "diassinbkp",    Tv("rpt.txt.diassinbkp",   "Días sin backup")                                       },
-                { "sinbackups",    Tv("rpt.txt.sinbackups",   "Sin backups")                                           },
-                { "eventos",       Tv("rpt.txt.eventos",      "EVENTOS DE NEGOCIO DEL DÍA")                            },
-                { "sinevt",        Tv("rpt.txt.sinevt",       "(sin eventos registrados para esta jornada)")            },
-                { "usuario",       Tv("rpt.txt.usuario",      "Usuario")                                               },
-                { "cliente",       Tv("rpt.txt.cliente",      "Cliente")                                               },
-                { "totalevt",      Tv("rpt.txt.totalevt",     "TOTAL EVENTOS")                                         },
-                { "generado",      Tv("rpt.txt.generado",     "Generado")                                              },
-                { "comparacion",   Tv("rpt.txt.comparacion",  "COMPARACIÓN DE JORNADAS")                               },
-                { "jornada",       Tv("rpt.txt.jornada",      "JORNADA")                                               },
-                { "sinevtjorn",    Tv("rpt.txt.sinevtjorn",   "(sin eventos registrados en esta jornada)")              },
-                { "comparfinal",   Tv("rpt.txt.comparfinal",  "COMPARATIVO FINAL")                                     },
-                { "fecha",         Tv("rpt.txt.fecha",        "Fecha")                                                 },
-                { "eventostot",    Tv("rpt.txt.eventostot",   "Eventos totales")                                       },
-                { "masmasa",       Tv("rpt.txt.masmasa",      "tuvo más actividad")                                    },
-                { "ninguna",       Tv("rpt.txt.ninguna",      "Ninguna jornada tuvo eventos registrados.")              },
-                { "iguales",       Tv("rpt.txt.iguales",      "Ambas jornadas tuvieron la misma cantidad de eventos.") },
-                { "rptoegenerado", Tv("rpt.txt.rptoegenerado","Reporte generado")                                      },
-                { "compgenerada",  Tv("rpt.txt.compgenerada", "Comparación generada")                                  },
-                { "impresionenv",  Tv("rpt.txt.impresionenv", "Impresión enviada")                                     },
-                { "tend.titulo",   Tv("rpt.txt.tend.titulo",  "TENDENCIA DE ACTIVIDAD")                                },
-                { "tend.dias",     Tv("rpt.txt.tend.dias",    "Días analizados")                                       },
-                { "tend.total",    Tv("rpt.txt.tend.total",   "Total de eventos")                                      },
-                { "tend.promedio", Tv("rpt.txt.tend.promedio","Promedio diario")                                       },
-                { "tend.diapico",  Tv("rpt.txt.tend.diapico", "Día de mayor actividad")                                },
-                { "tend.diavalle", Tv("rpt.txt.tend.diavalle","Día de menor actividad")                                },
-                { "tend.detalle",  Tv("rpt.txt.tend.detalle", "DETALLE POR DÍA")                                       },
+                { "titulo",        Tr("rpt.txt.titulo",       "REPORTE DE JORNADA")                                    },
+                { "resumen",       Tr("rpt.txt.resumen",      "RESUMEN DEL SISTEMA")                                   },
+                { "prendas",       Tr("rpt.txt.prendas",      "Prendas disponibles")                                   },
+                { "clientes",      Tr("rpt.txt.clientes",     "Clientes registrados")                                  },
+                { "diassinbkp",    Tr("rpt.txt.diassinbkp",   "Días sin backup")                                       },
+                { "sinbackups",    Tr("rpt.txt.sinbackups",   "Sin backups")                                           },
+                { "eventos",       Tr("rpt.txt.eventos",      "EVENTOS DE NEGOCIO DEL DÍA")                            },
+                { "sinevt",        Tr("rpt.txt.sinevt",       "(sin eventos registrados para esta jornada)")            },
+                { "usuario",       Tr("rpt.txt.usuario",      "Usuario")                                               },
+                { "cliente",       Tr("rpt.txt.cliente",      "Cliente")                                               },
+                { "totalevt",      Tr("rpt.txt.totalevt",     "TOTAL EVENTOS")                                         },
+                { "generado",      Tr("rpt.txt.generado",     "Generado")                                              },
+                { "comparacion",   Tr("rpt.txt.comparacion",  "COMPARACIÓN DE JORNADAS")                               },
+                { "jornada",       Tr("rpt.txt.jornada",      "JORNADA")                                               },
+                { "sinevtjorn",    Tr("rpt.txt.sinevtjorn",   "(sin eventos registrados en esta jornada)")              },
+                { "comparfinal",   Tr("rpt.txt.comparfinal",  "COMPARATIVO FINAL")                                     },
+                { "fecha",         Tr("rpt.txt.fecha",        "Fecha")                                                 },
+                { "eventostot",    Tr("rpt.txt.eventostot",   "Eventos totales")                                       },
+                { "masmasa",       Tr("rpt.txt.masmasa",      "tuvo más actividad")                                    },
+                { "ninguna",       Tr("rpt.txt.ninguna",      "Ninguna jornada tuvo eventos registrados.")              },
+                { "iguales",       Tr("rpt.txt.iguales",      "Ambas jornadas tuvieron la misma cantidad de eventos.") },
+                { "rptoegenerado", Tr("rpt.txt.rptoegenerado","Reporte generado")                                      },
+                { "compgenerada",  Tr("rpt.txt.compgenerada", "Comparación generada")                                  },
+                { "impresionenv",  Tr("rpt.txt.impresionenv", "Impresión enviada")                                     },
+                { "tend.titulo",   Tr("rpt.txt.tend.titulo",  "TENDENCIA DE ACTIVIDAD")                                },
+                { "tend.dias",     Tr("rpt.txt.tend.dias",    "Días analizados")                                       },
+                { "tend.total",    Tr("rpt.txt.tend.total",   "Total de eventos")                                      },
+                { "tend.promedio", Tr("rpt.txt.tend.promedio","Promedio diario")                                       },
+                { "tend.diapico",  Tr("rpt.txt.tend.diapico", "Día de mayor actividad")                                },
+                { "tend.diavalle", Tr("rpt.txt.tend.diavalle","Día de menor actividad")                                },
+                { "tend.detalle",  Tr("rpt.txt.tend.detalle", "DETALLE POR DÍA")                                       },
             };
         }
 
@@ -363,8 +349,7 @@ namespace GUI
             string mensaje = ex is BE.AppException appEx
                 ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
                 : ex.Message;
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string titulo = t.ContainsKey(claveTitulo) ? t[claveTitulo].Texto : tituloFallback;
+            string titulo = Traductor.Resolver(claveTitulo, tituloFallback, null, GestorIdioma.IdiomaActual);
             MessageBox.Show(mensaje, titulo, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 

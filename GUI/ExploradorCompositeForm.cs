@@ -173,12 +173,12 @@ namespace GUI
                     : Color.FromArgb(30, 110, 50)
             };
 
-            // Recursión sobre los hijos — profundidad arbitraria
-            if (esFamilia)
-            {
-                foreach (BE.Componente hijo in componente.Hijos)
-                    nodo.Nodes.Add(CrearNodoRecursivo(hijo, t));
-            }
+            // Recursión sobre los hijos — profundidad arbitraria. Sin el `if (esFamilia)` que había
+            // acá antes: BE.Patente.Hijos ya devuelve una lista vacía (nunca lanza), así que apoyarse
+            // directo en el polimorfismo del Composite alcanza — no hace falta duplicar a mano la
+            // distinción hoja/compuesto que el propio patrón ya resuelve.
+            foreach (BE.Componente hijo in componente.Hijos)
+                nodo.Nodes.Add(CrearNodoRecursivo(hijo, t));
 
             return nodo;
         }

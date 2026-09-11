@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Seguridad;
 using Tests.Fakes;
 
 namespace Tests
@@ -13,6 +14,20 @@ namespace Tests
     [TestClass]
     public class PrendaTests
     {
+        [TestInitialize] public void Setup()   => SessionManager.Logout();
+        [TestCleanup]    public void Cleanup() => SessionManager.Logout();
+
+        private static void LoginComoAdministrador()
+        {
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 1,
+                Username = "admin",
+                Perfil = "Administrador",
+                Contraseña = Encriptador.Hash("Admin1!")
+            });
+        }
+
         private class Contexto
         {
             public FakePrendaDAL DalPrenda = new FakePrendaDAL();
@@ -105,6 +120,62 @@ namespace Tests
             var bll = ctx.Crear();
 
             Assert.AreEqual(0, bll.ObtenerEnLimpieza().Count);
+        }
+
+        // ── CambiarEstado — guard EnUso→Baja (CU-DEP-02, Reportar Prenda Perdida) ───────────
+        // Antes esta restricción vivía únicamente en GUI/Prendas.cs (un `continue` en una lista
+        // de opciones del diálogo genérico de cambio de estado) — cualquier código que llamara
+        // CambiarEstado directo podía saltearla. Ahora la guarda vive en el propio BLL.
+
+        [TestMethod]
+        public void CambiarEstado_EnUsoABajaSinFlujoPerdida_LanzaBajaRequiereFlujoPerdida()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnUso };
+
+            try
+            {
+                bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja);
+                Assert.Fail("Debía rechazar dar de baja directamente una prenda EnUso.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.prenda.baja_requiere_flujoperdida", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPrenda.CambiarEstadoVeces);
+            Assert.AreEqual(BE.EstadoPrenda.EnUso, prenda.Estado, "No debe mutar el estado en memoria si rechaza la transición.");
+        }
+
+        [TestMethod]
+        public void CambiarEstado_EnUsoABajaViaFlujoPerdida_Permite()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnUso };
+
+            bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja, actor: "vendedor1", viaFlujoPerdida: true);
+
+            Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
+            Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
+        }
+
+        [TestMethod]
+        public void CambiarEstado_EnLimpiezaADisponible_NoRequiereFlujoPerdida()
+        {
+            // La guarda es específica de EnUso→Baja; otras transiciones válidas del patrón State
+            // no deben verse afectadas por el nuevo parámetro (default false).
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+
+            bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Disponible);
+
+            Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
+            Assert.AreEqual(BE.EstadoPrenda.Disponible, prenda.Estado);
         }
     }
 }

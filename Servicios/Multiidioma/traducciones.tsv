@@ -50,6 +50,7 @@ ES	err.bll.version.no_existe	La versión seleccionada no existe.
 ES	err.bll.version.sin_permiso	Solo un Administrador puede restaurar una versión histórica de un usuario.
 ES	err.bll.prenda.transicion_baja	Una prenda dada de baja no puede cambiar de estado.
 ES	err.bll.prenda.transicion_enuso	El estado de una prenda en uso se actualiza automáticamente al procesar pedidos.\nLa única excepción manual es reportarla como perdida (PN04, módulo de Pedidos Realizados).
+ES	err.bll.prenda.baja_requiere_flujoperdida	Una prenda en uso solo puede darse de baja a través de 'Reportar Prenda Perdida' (con cargo de reposición al cliente), no directamente.
 ES	err.bll.prenda.transicion_generica	La transición de '{0}' a '{1}' no está permitida.
 ES	lbl.permisos.estructura	Estructura del sistema (roles, familias y patentes)
 ES	btn.permisos.quitar	Quitar ↑
@@ -849,6 +850,7 @@ EN	err.bll.version.no_existe	The selected version does not exist.
 EN	err.bll.version.sin_permiso	Only an Administrator can restore a user's historical version.
 EN	err.bll.prenda.transicion_baja	A garment that has been deactivated cannot change state.
 EN	err.bll.prenda.transicion_enuso	The state of a garment in use updates automatically when processing orders.\nThe only manual exception is reporting it lost (PN04, Completed Orders module).
+EN	err.bll.prenda.baja_requiere_flujoperdida	A garment in use can only be discontinued through 'Report Lost Garment' (with a replacement charge to the client), not directly.
 EN	err.bll.prenda.transicion_generica	The transition from '{0}' to '{1}' is not allowed.
 EN	lbl.permisos.estructura	System structure (roles, families and patents)
 EN	btn.permisos.quitar	Remove ↑
@@ -1648,6 +1650,7 @@ RU	err.bll.version.no_existe	Выбранная версия не существ
 RU	err.bll.version.sin_permiso	Только администратор может восстановить историческую версию пользователя.
 RU	err.bll.prenda.transicion_baja	Списанная вещь не может менять состояние.
 RU	err.bll.prenda.transicion_enuso	Состояние вещи, находящейся в использовании, обновляется автоматически при обработке заказов.\nЕдинственное ручное исключение — сообщить о её потере (PN04, модуль Выполненных заказов).
+RU	err.bll.prenda.baja_requiere_flujoperdida	Вещь, находящуюся в использовании, можно списать только через 'Сообщить о пропаже вещи' (с начислением стоимости замены клиенту), а не напрямую.
 RU	err.bll.prenda.transicion_generica	Переход из «{0}» в «{1}» не разрешён.
 RU	lbl.permisos.estructura	Структура системы (роли, семейства и права)
 RU	btn.permisos.quitar	Убрать ↑
@@ -2447,6 +2450,7 @@ PT	err.bll.version.no_existe	A versão selecionada não existe.
 PT	err.bll.version.sin_permiso	Somente um Administrador pode restaurar uma versão histórica de um usuário.
 PT	err.bll.prenda.transicion_baja	Uma peça baixada não pode mudar de estado.
 PT	err.bll.prenda.transicion_enuso	O estado de uma peça em uso é atualizado automaticamente ao processar pedidos.\nA única exceção manual é reportá-la como perdida (PN04, módulo de Pedidos Realizados).
+PT	err.bll.prenda.baja_requiere_flujoperdida	Uma peça em uso só pode ser baixada através de 'Reportar Peça Perdida' (com cobrança de reposição ao cliente), não diretamente.
 PT	err.bll.prenda.transicion_generica	A transição de '{0}' para '{1}' não é permitida.
 PT	lbl.permisos.estructura	Estrutura do sistema (papéis, famílias e patentes)
 PT	btn.permisos.quitar	Remover ↑

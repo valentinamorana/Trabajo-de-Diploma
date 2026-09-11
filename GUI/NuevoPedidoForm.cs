@@ -400,6 +400,10 @@ namespace GUI
                 btnConfirmar.Enabled = false;
                 var tp = Traductor.ObtenerTraducciones(_idioma);
                 btnConfirmar.Text = tp.ContainsKey("btn.procesando") ? tp["btn.procesando"].Texto : "Procesando...";
+                // Sin este Refresh(), WinForms no repinta el cambio de Enabled/Text hasta que el
+                // hilo de UI vuelve al loop de mensajes — es decir, hasta que CrearPedido (llamada
+                // sincrónica a BD) ya terminó. El usuario nunca llegaba a ver realmente "Procesando…".
+                this.Refresh();
 
                 IdPedidoCreado = pedidoBLL.CrearPedido(this.Text, _clienteSel.IdCliente, prendas);
 

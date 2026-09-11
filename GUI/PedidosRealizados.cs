@@ -372,7 +372,14 @@ namespace GUI
                     dgvDetalle.Columns["IdPrenda"].Visible = false;
                 TraducirHeadersDetalle();
             }
-            catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[PedidosRealizados] Error al cargar detalle: {ex.Message}"); }
+            catch (Exception ex)
+            {
+                // Antes solo trazaba (Trace.TraceError): el usuario veía la grilla de detalle
+                // vacía sin ningún mensaje, sin poder distinguir "no hay prendas" de "falló la
+                // consulta", y tampoco quedaba auditado en bitácora. MostrarError(ex), heredado
+                // de FormBase, cubre ambas cosas.
+                MostrarError(ex);
+            }
         }
 
         /// <summary>Traduce los HeaderText de la grilla de detalle de prendas según el idioma activo.</summary>
@@ -554,7 +561,7 @@ namespace GUI
                     // es estado final). Riesgo residual aceptado: ambos pasos no corren en una
                     // única transacción (servicios BLL distintos), fuera de alcance de este TP.
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
-                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
+                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor, viaFlujoPerdida: true);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);
                     MostrarOk(string.Format(
                         tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de ${1} registrado.",

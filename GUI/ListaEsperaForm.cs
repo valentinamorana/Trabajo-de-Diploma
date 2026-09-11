@@ -88,8 +88,6 @@ namespace GUI
 
         // ── Eventos del Designer ──────────────────────────────────────────────
 
-        private void ListaEsperaForm_Load(object sender, EventArgs e) { }
-
         private void CmbFiltroEstado_SelectedIndexChanged(object sender, EventArgs e) => AplicarFiltro();
 
         private void BtnRefrescar_Click(object sender, EventArgs e) => CargarFilas();

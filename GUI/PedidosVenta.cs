@@ -252,7 +252,14 @@ namespace GUI
 
                 dgvDetallePrendas.DataSource = tabla;
             }
-            catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[PedidosVenta] Error al cargar detalle: {ex.Message}"); }
+            catch (Exception ex)
+            {
+                // Antes solo trazaba (Trace.TraceError): el usuario veía la grilla de detalle
+                // vacía sin ningún mensaje, sin poder distinguir "no hay prendas" de "falló la
+                // consulta", y tampoco quedaba auditado en bitácora. MostrarError(ex), heredado
+                // de FormBase, cubre ambas cosas.
+                MostrarError(ex);
+            }
         }
 
         private string EstadoPrendaLabel(BE.EstadoPrenda estado)

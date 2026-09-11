@@ -163,7 +163,6 @@ namespace GUI
             this.Name = "ListaEsperaForm";
             this.Tag = "frm.listaespera";
             this.Text = "Lista de Espera";
-            this.Load += new System.EventHandler(this.ListaEsperaForm_Load);
             this.panelTop.ResumeLayout(false);
             this.panelStatus.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvListaEspera)).EndInit();

@@ -264,7 +264,8 @@ Contexto: el criterio de urgencia/mantenimiento entre los 5 dashboards (objeto d
 17. Contenedores de columna con nombres genéricos `col1`/`col2`/`col3` en los 4 dashboards con Kanban. *(pendiente)*
 18. Cero controles `ToolTip` en las 16 pantallas revisadas (incl. un botón solo-ícono "⚙" sin texto ni tooltip). *(parcial 2026-09-11: el botón "⚙" de `DashboardForm` ya tiene tooltip; el resto de las 16 pantallas sigue sin ninguno)*
 19. `AutoScaleDimensions`/`AutoScaleMode` configurados de forma distinta entre las 3 pantallas de Historial. *(pendiente)*
-20. Botones "Exportar a PDF/CSV" nunca se deshabilitan sin datos generados (el guard llega recién al clic). *(pendiente)*
+20. ✅ RESUELTO (2026-09-11) — Botones "Exportar a PDF/CSV" nunca se deshabilitan sin datos generados (el guard llega recién al clic).
+*Solución aplicada:* en las 6 pantallas con botones dedicados de exportación (los 4 de Análisis, Recomendación de Prendas, Ventas por Vendedor), `btnExportarPdf`/`btnExportarCsv` arrancan deshabilitados y se habilitan solo cuando `BtnGenerar_Click` produce resultados.
 
 ---
 
@@ -305,7 +306,7 @@ Contexto: el patrón Command para Cancelación/Devolución de Pedido (fix de la 
 *Solución aplicada:* eliminado el handler vacío y su cableado en el Designer.
 12. ✅ RESUELTO (2026-09-11) — `ExploradorCompositeForm` tiene un chequeo de tipo redundante que no aprovecha la interfaz uniforme del Composite (funciona igual sin él).
 *Solución aplicada:* se verificó que `BE.Patente.Hijos` devuelve lista vacía (nunca lanza) y se eliminó el `if (esFamilia)` redundante alrededor de la recursión.
-13. Verbos inconsistentes para "confirmar/continuar" entre pantallas (Aceptar/Confirmar/OK, uno de ellos sin traducir). *(pendiente)*
+13. Verbos inconsistentes para "confirmar/continuar" entre pantallas (Aceptar/Confirmar/OK, uno de ellos sin traducir). *(parcial 2026-09-11: el caso sin traducir era el mismo "OK" de `SeleccionarClienteDialog` ya corregido en §5 #6; la inconsistencia de fondo — qué verbo usar en cada pantalla — es una decisión de copywriting/rename de alcance amplio, se deja para una pasada aparte)*
 14. Emojis de estado/urgencia hardcodeados como literales en la lógica de presentación en vez de una capa de estilos. *(pendiente)*
 
 ---

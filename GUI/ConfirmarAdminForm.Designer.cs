@@ -125,7 +125,7 @@ namespace GUI
             // btnCancelar
             this.btnCancelar.BackColor = System.Drawing.Color.FromArgb(252, 228, 235);
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnCancelar.FlatAppearance.BorderColor = Tema.RosaPrimario;
             this.btnCancelar.FlatAppearance.BorderSize = 1;
             this.btnCancelar.Font = new System.Drawing.Font("Segoe UI", 9f);
             this.btnCancelar.ForeColor = System.Drawing.Color.FromArgb(100, 40, 80);

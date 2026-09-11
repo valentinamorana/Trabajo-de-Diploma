@@ -196,10 +196,16 @@ namespace BLL
         // Extrae el autor del nombre de un archivo de backup.
         // Formato: WardrobeFlow_Backup_yyyyMMddHHmmss_USUARIO.bak
         // Devuelve "—" si el nombre no sigue la convención.
+        // Reconoce ambos prefijos: "WardrobeFlow_Backup_" (RealizarBackup) y
+        // "WardrobeFlow_Inicial_" (RealizarBackupInicial) — antes solo reconocía el primero, así
+        // que la UI (GUI.BackupForm, columna "Autor") siempre mostraba autor desconocido para
+        // cualquier backup de instalación limpia, aunque el username estuviera en el nombre.
+        private static readonly string[] PrefijosConocidos = { "WardrobeFlow_Backup_", "WardrobeFlow_Inicial_" };
+
         public string ExtraerAutorDeNombre(string nombreArchivo)
         {
-            const string prefix = "WardrobeFlow_Backup_";
-            if (!nombreArchivo.StartsWith(prefix) || nombreArchivo.Length <= prefix.Length + 15)
+            string prefix = PrefijosConocidos.FirstOrDefault(p => nombreArchivo.StartsWith(p));
+            if (prefix == null || nombreArchivo.Length <= prefix.Length + 15)
                 return "—";
 
             string rest = nombreArchivo.Substring(prefix.Length);

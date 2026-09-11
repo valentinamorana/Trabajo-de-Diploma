@@ -46,8 +46,13 @@ namespace DAL
                 when (sqlEx.Message.Contains("NombreSnap") || sqlEx.Message.Contains("ApellidoSnap")
                       || sqlEx.Message.Contains("FechaNacSnap") || sqlEx.Message.Contains("EmailSnap"))
             {
-                dt = acceso.Leer($"SELECT {ColsLegacy} FROM HistorialUsuario {filtro}",
-                    parametros == null ? null : new[] { new SqlParameter(parametros[0].ParameterName, parametros[0].Value) });
+                // Se copian TODOS los parámetros del filtro, no solo el primero: hoy los 3 callers
+                // usan a lo sumo uno, pero un fallback que solo reconstruye parametros[0] ignoraría
+                // silenciosamente el resto si algún filtro futuro usara 2+ (ej. un rango de fechas).
+                SqlParameter[] paramsLegacy = parametros == null
+                    ? null
+                    : Array.ConvertAll(parametros, p2 => new SqlParameter(p2.ParameterName, p2.Value));
+                dt = acceso.Leer($"SELECT {ColsLegacy} FROM HistorialUsuario {filtro}", paramsLegacy);
             }
             foreach (DataRow row in dt.Rows)
                 lista.Add(Mapear(row));

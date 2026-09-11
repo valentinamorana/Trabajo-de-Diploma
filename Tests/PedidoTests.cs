@@ -173,6 +173,47 @@ namespace Tests
             Assert.AreEqual(BE.EstadoListaEspera.Convertida, reserva.Estado);
         }
 
+        // Lista de Espera es una mejora opcional (no requerida por la cátedra): si falla al
+        // verificar si una prenda está reservada, el catch fail-open NO debe bloquear la
+        // creación del pedido — antes era un catch mudo sin ningún test que probara este
+        // comportamiento, así que una regresión a "sí bloquea" hubiera pasado desapercibida.
+        [TestMethod]
+        public void CrearPedido_ListaEsperaFallaAlVerificarReserva_NoBloqueaLaCreacion()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            ctx.DalPedido.AltaIdGenerado = 99;
+            var listaEsperaBLL = new FakeListaEsperaService { EstaReservadaParaOtroLanza = true };
+
+            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
+
+            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+
+            Assert.AreEqual(99, id);
+            Assert.AreEqual(1, ctx.DalPedido.AltaVeces);
+        }
+
+        // Mismo criterio para el segundo catch fail-open: si falla al cerrar la reserva
+        // DESPUÉS de persistir el pedido, el pedido ya creado no debe revertirse ni la
+        // excepción debe propagarse al usuario.
+        [TestMethod]
+        public void CrearPedido_ListaEsperaFallaAlCerrarReserva_NoBloqueaLaCreacionYaPersistida()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            ctx.DalPedido.AltaIdGenerado = 99;
+            var listaEsperaBLL = new FakeListaEsperaService { CerrarSiReservadaLanza = true };
+
+            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
+
+            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+
+            Assert.AreEqual(99, id);
+            Assert.AreEqual(1, listaEsperaBLL.CerrarSiReservadaVeces);
+        }
+
         [TestMethod]
         public void CrearPedido_ClienteInexistente_LanzaClienteInexistente()
         {
@@ -254,6 +295,27 @@ namespace Tests
             catch (BE.AppException ex)
             {
                 Assert.AreEqual("err.bll.pedido.suscripcion_vencida", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void CrearPedido_SuscripcionPausada_LanzaSuscripcionPausada()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.FechaPausaHasta = DateTime.Today.AddDays(5);
+            ctx.DalCliente.ClientePorId = cliente;
+            var bll = ctx.Crear();
+
+            try
+            {
+                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+                Assert.Fail("Debía rechazar una suscripción pausada.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.pedido.suscripcion_pausada", ex.Clave);
             }
         }
 
@@ -451,6 +513,39 @@ namespace Tests
         }
 
         [TestMethod]
+        public void MarcarEntregado_PedidoDespachado_Entrega()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido { IdPedido = 1, Estado = BE.EstadoPedido.Despachado };
+
+            bll.MarcarEntregado("Test", pedido);
+
+            Assert.AreEqual(1, ctx.DalPedido.MarcarEntregadoVeces);
+        }
+
+        [TestMethod]
+        public void MarcarEntregado_PedidoNoDespachado_LanzaEntregarEstado()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido { IdPedido = 1, Estado = BE.EstadoPedido.Pendiente };
+
+            try
+            {
+                bll.MarcarEntregado("Test", pedido);
+                Assert.Fail("Debía rechazar marcar como entregado un pedido no Despachado.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.pedido.entregar_estado", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPedido.MarcarEntregadoVeces);
+        }
+
+        [TestMethod]
         public void RegistrarDevolucion_PedidoNoEntregado_LanzaDevolucionEstado()
         {
             LoginComoAdministrador();
@@ -543,6 +638,33 @@ namespace Tests
             }
         }
 
+        [TestMethod]
+        public void DesCancelar_PrendasDisponibles_RevierteAPendienteYRegistraHistorial()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido
+            {
+                IdPedido = 1,
+                Estado = BE.EstadoPedido.Cancelado,
+                MotivoCancelacion = "Cliente se arrepintió"
+            };
+
+            bll.DesCancelar("Test", pedido);
+
+            Assert.AreEqual(1, ctx.DalPedido.DesCancelarVeces);
+            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces);
+
+            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("Cancelado", estado.ValorAnterior);
+            Assert.AreEqual("Pendiente", estado.ValorNuevo);
+
+            var motivo = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "MotivoCancelacion");
+            Assert.AreEqual("Cliente se arrepintió", motivo.ValorAnterior);
+            Assert.IsNull(motivo.ValorNuevo);
+        }
+
         // ── CalcularNivelUrgencia — lógica pura, sin DAL ─────────────────────
 
         [TestMethod]
@@ -605,6 +727,35 @@ namespace Tests
                 Assert.AreEqual("err.bll.pedido.historial_vacio", ex.Clave);
             }
             Assert.AreEqual(0, ctx.DalPedido.RestaurarOperacionAtomicaVeces);
+        }
+
+        [TestMethod]
+        public void RestaurarOperacion_ConCambiosRegistrados_RevierteYReRegistraElHistorialConLosValoresInvertidos()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalHistorial.CambiosParaOperacion = new List<BE.PedidoHistorial>
+            {
+                new BE.PedidoHistorial { Campo = "Estado", Accion = "CANCELAR", ValorAnterior = "Pendiente", ValorNuevo = "Cancelado" }
+            };
+            var bll = ctx.Crear();
+
+            bll.RestaurarOperacion("Test", 1, 5);
+
+            // El DAL debe recibir el ValorAnterior original (a donde hay que volver).
+            Assert.AreEqual(1, ctx.DalPedido.RestaurarOperacionAtomicaVeces);
+            Assert.AreEqual("Estado", ctx.DalPedido.UltimoRestaurarOperacionCampos[0].Campo);
+            Assert.AreEqual("Pendiente", ctx.DalPedido.UltimoRestaurarOperacionCampos[0].ValorAnterior);
+
+            // El nuevo evento RESTAURAR debe quedar con los valores INVERTIDOS respecto al cambio
+            // original: lo que estaba "Nuevo" pasa a ser el "Anterior" de este evento (el estado
+            // del que se viene al restaurar) y el "Anterior" original pasa a ser el "Nuevo" (a
+            // donde se vuelve) — swap fácil de invertir por error, de ahí el test explícito.
+            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces);
+            var restaurado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("RESTAURAR", restaurado.Accion);
+            Assert.AreEqual("Cancelado", restaurado.ValorAnterior);
+            Assert.AreEqual("Pendiente", restaurado.ValorNuevo);
         }
     }
 }

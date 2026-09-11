@@ -28,13 +28,6 @@ namespace GUI
             InitializeComponent();
         }
 
-        // Helper de traducción reutilizable (idioma activo).
-        private string Tx(string key, string fallback)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(key) ? t[key].Texto : fallback;
-        }
-
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -49,29 +42,29 @@ namespace GUI
 
         private void BtnNuevoIdioma_Click(object sender, EventArgs e)
         {
-            string codigo = Pedir(Tx("idiomas.dlg.nuevo.t", "Nuevo idioma"), Tx("idiomas.dlg.nuevo.codigo", "Código (ej: FR, IT, PT) — máx. 5:"));
+            string codigo = Pedir(Tr("idiomas.dlg.nuevo.t", "Nuevo idioma"), Tr("idiomas.dlg.nuevo.codigo", "Código (ej: FR, IT, PT) — máx. 5:"));
             if (string.IsNullOrWhiteSpace(codigo)) return;
-            string nombre = Pedir(Tx("idiomas.dlg.nuevo.t", "Nuevo idioma"), Tx("idiomas.dlg.nuevo.nombre", "Nombre del idioma (ej: Français):"));
+            string nombre = Pedir(Tr("idiomas.dlg.nuevo.t", "Nuevo idioma"), Tr("idiomas.dlg.nuevo.nombre", "Nombre del idioma (ej: Français):"));
             if (string.IsNullOrWhiteSpace(nombre)) return;
             try
             {
                 _bllIdioma.CrearIdioma(codigo, nombre);
                 CargarIdiomas();
-                MostrarOk(string.Format(Tx("idiomas.ok.creado", "Idioma '{0}' creado (inactivo — activalo cuando cargues sus traducciones)."), nombre.Trim()));
+                MostrarOk(string.Format(Tr("idiomas.ok.creado", "Idioma '{0}' creado (inactivo — activalo cuando cargues sus traducciones)."), nombre.Trim()));
             }
             catch (Exception ex) { MostrarError(ex); }
         }
 
         private void BtnRenombrarIdioma_Click(object sender, EventArgs e)
         {
-            if (_idIdiomaSeleccionado == 0) { MostrarError(Tx("idiomas.msg.selecc", "Seleccioná un idioma de la grilla.")); return; }
-            string nombre = Pedir(Tx("idiomas.dlg.renombrar.t", "Renombrar idioma"), Tx("idiomas.dlg.renombrar.p", "Nuevo nombre:"));
+            if (_idIdiomaSeleccionado == 0) { MostrarError(Tr("idiomas.msg.selecc", "Seleccioná un idioma de la grilla.")); return; }
+            string nombre = Pedir(Tr("idiomas.dlg.renombrar.t", "Renombrar idioma"), Tr("idiomas.dlg.renombrar.p", "Nuevo nombre:"));
             if (string.IsNullOrWhiteSpace(nombre)) return;
             try
             {
                 _bllIdioma.ModificarIdioma(_idIdiomaSeleccionado, nombre);
                 CargarIdiomas();
-                MostrarOk(Tx("idiomas.ok.renombrado", "Idioma renombrado."));
+                MostrarOk(Tr("idiomas.ok.renombrado", "Idioma renombrado."));
             }
             catch (Exception ex) { MostrarError(ex); }
         }
@@ -93,25 +86,12 @@ namespace GUI
         }
 
         // Mini cuadro de entrada de texto (sin dependencias externas).
+        // Antes armaba un Form ad-hoc a mano (duplicando lo que InputDialog ya resuelve) — mismo
+        // hallazgo que GUI-Operación §5 #6 (tres implementaciones distintas de "diálogo simple").
         private string Pedir(string titulo, string prompt)
         {
-            var tr = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string txtOk = tr.ContainsKey("btn.aceptar")  ? tr["btn.aceptar"].Texto  : "Aceptar";
-            string txtCa = tr.ContainsKey("btn.cancelar") ? tr["btn.cancelar"].Texto : "Cancelar";
-            using (var f = new Form())
-            {
-                f.Text = titulo; f.Size = new System.Drawing.Size(420, 160);
-                f.StartPosition = FormStartPosition.CenterParent;
-                f.FormBorderStyle = FormBorderStyle.FixedDialog; f.MinimizeBox = false; f.MaximizeBox = false;
-                var lbl = new Label { Text = prompt, Location = new System.Drawing.Point(12, 15), AutoSize = true };
-                var txt = new TextBox { Location = new System.Drawing.Point(15, 45), Size = new System.Drawing.Size(380, 24) };
-                var ok = new Button { Text = txtOk, DialogResult = DialogResult.OK, Location = new System.Drawing.Point(225, 80), Size = new System.Drawing.Size(80, 30) };
-                var ca = new Button { Text = txtCa, DialogResult = DialogResult.Cancel, Location = new System.Drawing.Point(315, 80), Size = new System.Drawing.Size(80, 30) };
-                f.Controls.AddRange(new Control[] { lbl, txt, ok, ca });
-                f.AcceptButton = ok; f.CancelButton = ca;
-                // Owner explícito: sin esto, en MDI el diálogo puede aparecer detrás de FormIdiomas.
-                return f.ShowDialog(this) == DialogResult.OK ? txt.Text : null;
-            }
+            using (var dlg = new InputDialog(titulo, prompt, esPassword: false))
+                return dlg.ShowDialog(this) == DialogResult.OK ? dlg.InputText : null;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -122,22 +102,30 @@ namespace GUI
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
 
-        public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
+        // Antes solo traducía labels/botones: los encabezados de las 3 grillas (y los valores
+        // "Sí"/"No") quedaban hardcodeados en español y nunca se refrescaban al cambiar idioma
+        // en caliente, justo en la propia pantalla de gestión de idiomas. Ahora se reconstruyen
+        // dgvControles y dgvIdiomas (mismos métodos que ya usa el resto del form para poblarlas);
+        // dgvTraducciones se refresca sola porque CargarIdiomas() restaura la selección de fila,
+        // lo que dispara DgvIdiomas_SelectionChanged → CargarTraducciones().
+        public void UpdateLanguage(Idioma idioma)
+        {
+            Traducir(idioma);
+            CargarControles();
+            CargarIdiomas();
+        }
 
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
-            this.Text               = T("frm.idiomas",            "Gestión de Idiomas");
-            lblTituloIdiomas.Text   = T("lbl.idiomas.titulo",     "Idiomas del sistema");
-            lblTituloTrad.Text      = T("lbl.idiomas.trad",       "Traducciones del idioma seleccionado");
-            lblTituloControles.Text = T("lbl.idiomas.controles",  "Controles traducibles");
-            btnActivar.Text         = T("btn.idiomas.activar",    "✔ Activar");
-            btnDesactivar.Text      = T("btn.idiomas.desactivar", "✕ Desactivar");
-            btnGuardar.Text         = T("btn.idiomas.guardar",    "💾 Guardar cambios");
-            btnNuevoIdioma.Text     = T("btn.idiomas.nuevo",      "➕ Nuevo idioma");
-            btnRenombrarIdioma.Text = T("btn.idiomas.renombrar",  "✏ Renombrar");
+            this.Text               = Tr("frm.idiomas",            "Gestión de Idiomas");
+            lblTituloIdiomas.Text   = Tr("lbl.idiomas.titulo",     "Idiomas del sistema");
+            lblTituloTrad.Text      = Tr("lbl.idiomas.trad",       "Traducciones del idioma seleccionado");
+            lblTituloControles.Text = Tr("lbl.idiomas.controles",  "Controles traducibles");
+            btnActivar.Text         = Tr("btn.idiomas.activar",    "✔ Activar");
+            btnDesactivar.Text      = Tr("btn.idiomas.desactivar", "✕ Desactivar");
+            btnGuardar.Text         = Tr("btn.idiomas.guardar",    "💾 Guardar cambios");
+            btnNuevoIdioma.Text     = Tr("btn.idiomas.nuevo",      "➕ Nuevo idioma");
+            btnRenombrarIdioma.Text = Tr("btn.idiomas.renombrar",  "✏ Renombrar");
         }
 
         // ── Configuración inicial de grillas ─────────────────────────────────
@@ -182,9 +170,9 @@ namespace GUI
             {
                 dgvControles.Rows.Clear();
                 dgvControles.Columns.Clear();
-                dgvControles.Columns.Add("colCtrlId",   "ID");
-                dgvControles.Columns.Add("colCtrlClave","Clave");
-                dgvControles.Columns.Add("colCtrlForm", "Formulario");
+                dgvControles.Columns.Add("colCtrlId",   Tr("col.idiomas.id",         "ID"));
+                dgvControles.Columns.Add("colCtrlClave",Tr("col.idiomas.clave",      "Clave"));
+                dgvControles.Columns.Add("colCtrlForm", Tr("col.idiomas.formulario", "Formulario"));
                 dgvControles.Columns["colCtrlId"].Width = 40;
 
                 foreach (var c in _bllIdioma.ObtenerControles())
@@ -192,7 +180,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tx("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
             }
         }
 
@@ -212,24 +200,25 @@ namespace GUI
                 dgvIdiomas.Rows.Clear();
                 dgvIdiomas.Columns.Clear();
 
-                dgvIdiomas.Columns.Add("colId",     "ID");
-                dgvIdiomas.Columns.Add("colCodigo", "Código");
-                dgvIdiomas.Columns.Add("colNombre", "Nombre");
-                dgvIdiomas.Columns.Add("colActivo", "Activo");
-                dgvIdiomas.Columns.Add("colDefault","Default");
+                dgvIdiomas.Columns.Add("colId",     Tr("col.idiomas.id",      "ID"));
+                dgvIdiomas.Columns.Add("colCodigo", Tr("col.idiomas.codigo",  "Código"));
+                dgvIdiomas.Columns.Add("colNombre", Tr("col.idiomas.nombre",  "Nombre"));
+                dgvIdiomas.Columns.Add("colActivo", Tr("col.idiomas.activo",  "Activo"));
+                dgvIdiomas.Columns.Add("colDefault",Tr("col.idiomas.default", "Default"));
 
                 dgvIdiomas.Columns["colId"].Width      = 40;
                 dgvIdiomas.Columns["colCodigo"].Width  = 60;
                 dgvIdiomas.Columns["colActivo"].Width  = 60;
                 dgvIdiomas.Columns["colDefault"].Width = 65;
 
+                string si = Tr("lbl.idiomas.si", "Sí"), no = Tr("lbl.idiomas.no", "No");
                 foreach (var idm in _idiomas)
                     dgvIdiomas.Rows.Add(
                         idm.IdIdioma,
                         idm.Codigo,
                         idm.Nombre,
-                        idm.Activo   ? "Sí" : "No",
-                        idm.EsDefault? "Sí" : "No");
+                        idm.Activo   ? si : no,
+                        idm.EsDefault? si : no);
 
                 dgvIdiomas.SelectionChanged += DgvIdiomas_SelectionChanged;
 
@@ -255,7 +244,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tx("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
             }
         }
 
@@ -270,14 +259,14 @@ namespace GUI
                 dgvTraducciones.Rows.Clear();
                 dgvTraducciones.Columns.Clear();
 
-                var colIdControl = new DataGridViewTextBoxColumn { Name = "colIdControl", HeaderText = "ID", Width = 40, ReadOnly = true };
-                var colClave     = new DataGridViewTextBoxColumn { Name = "colClave",     HeaderText = "Clave",      ReadOnly = true };
-                var colFormulario= new DataGridViewTextBoxColumn { Name = "colFormulario",HeaderText = "Formulario", ReadOnly = true, Width = 120 };
+                var colIdControl = new DataGridViewTextBoxColumn { Name = "colIdControl", HeaderText = Tr("col.idiomas.id", "ID"), Width = 40, ReadOnly = true };
+                var colClave     = new DataGridViewTextBoxColumn { Name = "colClave",     HeaderText = Tr("col.idiomas.clave", "Clave"),      ReadOnly = true };
+                var colFormulario= new DataGridViewTextBoxColumn { Name = "colFormulario",HeaderText = Tr("col.idiomas.formulario", "Formulario"), ReadOnly = true, Width = 120 };
                 // Referencia: el texto del idioma por defecto (completo), para que un traductor vea
                 // el original mientras completa el idioma destino. Solo lectura.
-                var colReferencia= new DataGridViewTextBoxColumn { Name = "colReferencia",HeaderText = "Referencia (por defecto)", ReadOnly = true };
+                var colReferencia= new DataGridViewTextBoxColumn { Name = "colReferencia",HeaderText = Tr("col.idiomas.referencia", "Referencia (por defecto)"), ReadOnly = true };
                 colReferencia.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(110, 110, 120);
-                var colTexto     = new DataGridViewTextBoxColumn { Name = "colTexto",     HeaderText = "Texto / Traducción", ReadOnly = false };
+                var colTexto     = new DataGridViewTextBoxColumn { Name = "colTexto",     HeaderText = Tr("col.idiomas.texto", "Texto / Traducción"), ReadOnly = false };
 
                 dgvTraducciones.Columns.AddRange(colIdControl, colClave, colFormulario, colReferencia, colTexto);
 
@@ -296,7 +285,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tx("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
             }
         }
 
@@ -345,9 +334,9 @@ namespace GUI
                 if (faltantes > 0)
                 {
                     var confirm = MessageBox.Show(
-                        string.Format(Tx("idiomas.conf.incompleto",
+                        string.Format(Tr("idiomas.conf.incompleto",
                             "Este idioma tiene {0} control(es) sin traducir.\nSi lo activás, esos textos se mostrarán en el idioma por defecto.\n\n¿Activar de todos modos?"), faltantes),
-                        Tx("idiomas.conf.incompleto.t", "Traducciones incompletas"),
+                        Tr("idiomas.conf.incompleto.t", "Traducciones incompletas"),
                         MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
                         MessageBoxDefaultButton.Button2);
                     if (confirm != DialogResult.Yes) return;
@@ -365,12 +354,10 @@ namespace GUI
         private void BtnDesactivar_Click(object sender, EventArgs e)
         {
             if (_idIdiomaSeleccionado == 0) return;
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             var confirm = MessageBox.Show(
-                T("conf.idiomas.desactivar", "¿Desactivar este idioma? Los usuarios no podrán seleccionarlo."),
-                T("conf.idiomas.titulo", "Confirmar"),
+                Tr("conf.idiomas.desactivar", "¿Desactivar este idioma? Los usuarios no podrán seleccionarlo."),
+                Tr("conf.idiomas.titulo", "Confirmar"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
                 MessageBoxDefaultButton.Button2);
             if (confirm != DialogResult.Yes) return;
@@ -401,7 +388,7 @@ namespace GUI
             try
             {
                 _bllIdioma.GuardarTraduccion(idControl, _idIdiomaSeleccionado, texto);
-                MostrarOk(Tx("msg.idiomas.guardada.una", "Traducción guardada."));
+                MostrarOk(Tr("msg.idiomas.guardada.una", "Traducción guardada."));
                 RefrescarTraduccionesEnVivoSiActivo();   // impacta en el sistema al instante
             }
             catch (Exception ex)

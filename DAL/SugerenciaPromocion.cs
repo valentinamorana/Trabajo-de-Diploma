@@ -77,10 +77,14 @@ namespace DAL
 
         public void MarcarEvaluada(int idSugerencia)
         {
-            SqlParameter[] p = { new SqlParameter("@IdSugerencia", idSugerencia) };
+            SqlParameter[] p =
+            {
+                new SqlParameter("@IdSugerencia", idSugerencia),
+                new SqlParameter("@Estado", (int)BE.EstadoSugerencia.Evaluada)
+            };
             try
             {
-                acceso.Escribir($"UPDATE SugerenciaPromocion SET Estado = {(int)BE.EstadoSugerencia.Evaluada} WHERE IdSugerencia = @IdSugerencia", p);
+                acceso.Escribir("UPDATE SugerenciaPromocion SET Estado = @Estado WHERE IdSugerencia = @IdSugerencia", p);
             }
             catch (Exception ex)
             {

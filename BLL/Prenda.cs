@@ -85,7 +85,16 @@ namespace BLL
         // Cambia el estado de una prenda validando la transición.
         // Al entrar a EnLimpieza abre un registro de mantenimiento;
         // al volver a Disponible desde EnLimpieza lo cierra.
-        public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null)
+        // viaFlujoPerdida=true SOLO lo pasa el flujo dedicado de "Reportar Prenda Perdida"
+        // (CU-DEP-02, GUI.PedidosRealizados.BtnReportarPerdida_Click). El patrón State (BE.Estados)
+        // permite la transición EnUso→Baja a nivel de datos (una prenda perdida/destruida
+        // efectivamente termina en Baja), pero saltarse el cobro de reposición no es una decisión
+        // que el modelo de estados deba tomar — antes la única barrera era un `continue` en la
+        // lista de opciones de GUI/Prendas.cs (el diálogo GENÉRICO de cambio de estado), así que
+        // cualquier código que llamara CambiarEstado directo (otra pantalla, un script, un test)
+        // podía dar de baja una prenda que un cliente todavía tiene, sin pasar por ese flujo.
+        public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null,
+                                   bool viaFlujoPerdida = false)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
 
@@ -95,6 +104,11 @@ namespace BLL
             // Por eso se guarda el estado anterior ANTES de llamar: después de un éxito,
             // prenda.Estado ya vale nuevoEstado.
             BE.EstadoPrenda estadoAnterior = prenda.Estado;
+
+            if (estadoAnterior == BE.EstadoPrenda.EnUso && nuevoEstado == BE.EstadoPrenda.Baja && !viaFlujoPerdida)
+                throw new BE.AppException("err.bll.prenda.baja_requiere_flujoperdida",
+                    "Una prenda en uso solo puede darse de baja a través de 'Reportar Prenda Perdida' " +
+                    "(con cargo de reposición al cliente), no directamente.");
 
             if (!prenda.ControlarEstado(nuevoEstado))
             {

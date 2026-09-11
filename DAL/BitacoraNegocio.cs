@@ -26,10 +26,21 @@ namespace DAL
                 new SqlParameter("@IdCliente", (object)evento.IdCliente ?? DBNull.Value),
                 new SqlParameter("@Descripcion", evento.Descripcion)
             };
-            acceso.Escribir(
-                "INSERT INTO BitacoraNegocio (Fecha, Tipo, IdUsuario, IdPedido, IdPrenda, IdCliente, Descripcion) " +
-                "VALUES (@Fecha, @Tipo, @IdUsuario, @IdPedido, @IdPrenda, @IdCliente, @Descripcion)",
-                p);
+            // Mismo criterio que DAL.Bitacora.Registrar (antes esta clase no tenía try/catch acá y
+            // una falla del INSERT de auditoría se propagaba, a diferencia de la otra bitácora del
+            // sistema para el mismo tipo de operación): no debe abortar la operación de negocio que
+            // dispara el registro por un fallo de logging.
+            try
+            {
+                acceso.Escribir(
+                    "INSERT INTO BitacoraNegocio (Fecha, Tipo, IdUsuario, IdPedido, IdPrenda, IdCliente, Descripcion) " +
+                    "VALUES (@Fecha, @Tipo, @IdUsuario, @IdPedido, @IdPrenda, @IdCliente, @Descripcion)",
+                    p);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[DAL.BitacoraNegocio] Error al registrar: {ex.Message}");
+            }
         }
 
         // Devuelve todos los eventos ordenados por fecha descendente.

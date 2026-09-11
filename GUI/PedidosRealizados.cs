@@ -91,25 +91,23 @@ namespace GUI
             Aplicar(lblDetalleTitulo,   t);
             Aplicar(btnHistorial,       t);
             Aplicar(btnReportarPerdida, t);
-            RellenarComboEstado(idioma);
+            RellenarComboEstado();
         }
 
         /// <summary>
         /// Rellena el combo de filtro de estado con valores traducidos.
         /// Mantiene el orden fijo (índice 0–4) para que el filtro por índice siga funcionando.
         /// </summary>
-        private void RellenarComboEstado(Idioma idioma)
+        private void RellenarComboEstado()
         {
             int idx = cmbFiltroEstado.SelectedIndex;
             cmbFiltroEstado.SelectedIndexChanged -= CmbFiltroEstado_SelectedIndexChanged;
             cmbFiltroEstado.Items.Clear();
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
-            cmbFiltroEstado.Items.Add(T("combo.prenda.todos", "Todos"));
-            cmbFiltroEstado.Items.Add(T("est.pendiente",  "Pendiente"));
-            cmbFiltroEstado.Items.Add(T("est.despachado", "Despachado"));
-            cmbFiltroEstado.Items.Add(T("est.entregado",  "Entregado"));
-            cmbFiltroEstado.Items.Add(T("est.cancelado",  "Cancelado"));
+            cmbFiltroEstado.Items.Add(Tr("combo.prenda.todos", "Todos"));
+            cmbFiltroEstado.Items.Add(Tr("est.pendiente",  "Pendiente"));
+            cmbFiltroEstado.Items.Add(Tr("est.despachado", "Despachado"));
+            cmbFiltroEstado.Items.Add(Tr("est.entregado",  "Entregado"));
+            cmbFiltroEstado.Items.Add(Tr("est.cancelado",  "Cancelado"));
             cmbFiltroEstado.SelectedIndex = idx >= 0 && idx < cmbFiltroEstado.Items.Count ? idx : 0;
             cmbFiltroEstado.SelectedIndexChanged += CmbFiltroEstado_SelectedIndexChanged;
         }
@@ -149,9 +147,7 @@ namespace GUI
             {
                 _pedidos = pedidoBLL.ObtenerTodos();
                 AplicarFiltro();
-                var tSis = Traductor.ObtenerTraducciones(_idioma);
-                string fmtSis = tSis.ContainsKey("msg.ped.ensistema") ? tSis["msg.ped.ensistema"].Texto : "{0} pedido(s) en el sistema.";
-                MostrarOk(string.Format(fmtSis, _pedidos.Count));
+                MostrarOk(Tr("msg.ped.ensistema", "{0} pedido(s) en el sistema.", new object[] { _pedidos.Count }));
             }
             catch (Exception ex)
             {
@@ -339,13 +335,10 @@ namespace GUI
 
                 _prendasDetalleActual = pedido.Prendas;
 
-                var tDet = Traductor.ObtenerTraducciones(_idioma);
-                string T_det(string k, string fb) => tDet.ContainsKey(k) ? tDet[k].Texto : fb;
-                string prendasLbl = T_det("col.ped.prendas", "prenda(s)");
-                lblDetalleTitulo.Text = string.Format(
-                    T_det("lbl.ped.detalletitulo", "Pedido #{0}  ·  {1}  ·  {2}  ·  {3} {4}"),
-                    pedido.IdPedido, pedido.NombreCliente,
-                    EstadoLabel(pedido.Estado), pedido.CantidadPrendas, prendasLbl);
+                string prendasLbl = Tr("col.ped.prendas", "prenda(s)");
+                lblDetalleTitulo.Text = Tr("lbl.ped.detalletitulo", "Pedido #{0}  ·  {1}  ·  {2}  ·  {3} {4}",
+                    new object[] { pedido.IdPedido, pedido.NombreCliente,
+                                    EstadoLabel(pedido.Estado), pedido.CantidadPrendas, prendasLbl });
 
                 var tabla = new DataTable();
                 tabla.Columns.Add("IdPrenda",  typeof(int));
@@ -372,7 +365,14 @@ namespace GUI
                     dgvDetalle.Columns["IdPrenda"].Visible = false;
                 TraducirHeadersDetalle();
             }
-            catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[PedidosRealizados] Error al cargar detalle: {ex.Message}"); }
+            catch (Exception ex)
+            {
+                // Antes solo trazaba (Trace.TraceError): el usuario veía la grilla de detalle
+                // vacía sin ningún mensaje, sin poder distinguir "no hay prendas" de "falló la
+                // consulta", y tampoco quedaba auditado en bitácora. MostrarError(ex), heredado
+                // de FormBase, cubre ambas cosas.
+                MostrarError(ex);
+            }
         }
 
         /// <summary>Traduce los HeaderText de la grilla de detalle de prendas según el idioma activo.</summary>
@@ -416,18 +416,27 @@ namespace GUI
 
         private void BtnDespachar_Click(object sender, EventArgs e)
         {
-            var pedido = ObtenerPedidoSeleccionado();
-            if (pedido == null) return;
+            var seleccionado = ObtenerPedidoSeleccionado();
+            if (seleccionado == null) return;
 
-            var tDesp = Traductor.ObtenerTraducciones(_idioma);
-            string T_desp(string k, string fb) => tDesp.ContainsKey(k) ? tDesp[k].Texto : fb;
+            // Releer el estado ACTUAL desde BD antes de actuar: `seleccionado` viene de la grilla
+            // cacheada en memoria, que puede estar desactualizada si otro operador ya cambió este
+            // pedido — mismo criterio que ya usa BtnDevolucion_Click acá abajo.
+            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
+            if (pedido == null)
+            {
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                CargarPedidos();
+                return;
+            }
+
             string bodyDesp = string.Format(
-                T_desp("conf.despachar.body", "¿Despachar el Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nEl pedido pasará a estado Despachado."),
+                Tr("conf.despachar.body", "¿Despachar el Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nEl pedido pasará a estado Despachado."),
                 pedido.IdPedido, pedido.NombreCliente, pedido.CantidadPrendas);
 
             var confirmar = MessageBox.Show(
                 bodyDesp,
-                T_desp("conf.despachar.titulo", "Confirmar Despacho"),
+                Tr("conf.despachar.titulo", "Confirmar Despacho"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -437,7 +446,7 @@ namespace GUI
             try
             {
                 pedidoBLL.Despachar(this.Text, pedido);
-                MostrarOk(string.Format(T_desp("msg.ped.despachado", "Pedido #{0} despachado correctamente."), pedido.IdPedido));
+                MostrarOk(string.Format(Tr("msg.ped.despachado", "Pedido #{0} despachado correctamente."), pedido.IdPedido));
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -445,18 +454,25 @@ namespace GUI
 
         private void BtnEntregado_Click(object sender, EventArgs e)
         {
-            var pedido = ObtenerPedidoSeleccionado();
-            if (pedido == null) return;
+            var seleccionado = ObtenerPedidoSeleccionado();
+            if (seleccionado == null) return;
 
-            var tEntr = Traductor.ObtenerTraducciones(_idioma);
-            string T_entr(string k, string fb) => tEntr.ContainsKey(k) ? tEntr[k].Texto : fb;
+            // Releer el estado ACTUAL desde BD antes de actuar (ver comentario en BtnDespachar_Click).
+            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
+            if (pedido == null)
+            {
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                CargarPedidos();
+                return;
+            }
+
             string bodyEntr = string.Format(
-                T_entr("conf.entrega.body", "¿Confirmar entrega del Pedido #{0} a {1}?"),
+                Tr("conf.entrega.body", "¿Confirmar entrega del Pedido #{0} a {1}?"),
                 pedido.IdPedido, pedido.NombreCliente);
 
             var confirmar = MessageBox.Show(
                 bodyEntr,
-                T_entr("conf.entrega.titulo", "Confirmar Entrega"),
+                Tr("conf.entrega.titulo", "Confirmar Entrega"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -466,7 +482,7 @@ namespace GUI
             try
             {
                 pedidoBLL.MarcarEntregado(this.Text, pedido);
-                MostrarOk(string.Format(T_entr("msg.ped.entregado", "Pedido #{0} marcado como Entregado."), pedido.IdPedido));
+                MostrarOk(string.Format(Tr("msg.ped.entregado", "Pedido #{0} marcado como Entregado."), pedido.IdPedido));
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -480,15 +496,13 @@ namespace GUI
             var pedidoCompleto = pedidoBLL.ObtenerPorId(pedido.IdPedido);
             if (pedidoCompleto == null) return;
 
-            var tDev = Traductor.ObtenerTraducciones(_idioma);
-            string T_dev(string k, string fb) => tDev.ContainsKey(k) ? tDev[k].Texto : fb;
             string bodyDev = string.Format(
-                T_dev("conf.devolucion.body", "¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado EnLimpieza."),
+                Tr("conf.devolucion.body", "¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado EnLimpieza."),
                 pedidoCompleto.IdPedido, pedidoCompleto.NombreCliente, pedidoCompleto.CantidadPrendas);
 
             var confirmar = MessageBox.Show(
                 bodyDev,
-                T_dev("conf.devolucion.titulo", "Confirmar Devolución"),
+                Tr("conf.devolucion.titulo", "Confirmar Devolución"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -504,7 +518,7 @@ namespace GUI
                 invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
                 invocador.ProcesarOrdenes();
 
-                MostrarOk(string.Format(T_dev("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a EnLimpieza."), pedidoCompleto.CantidadPrendas));
+                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a EnLimpieza."), pedidoCompleto.CantidadPrendas));
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -534,7 +548,7 @@ namespace GUI
                     // es estado final). Riesgo residual aceptado: ambos pasos no corren en una
                     // única transacción (servicios BLL distintos), fuera de alcance de este TP.
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
-                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
+                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor, viaFlujoPerdida: true);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);
                     MostrarOk(string.Format(
                         tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de ${1} registrado.",
@@ -554,18 +568,16 @@ namespace GUI
             var completo = pedidoBLL.ObtenerPorId(pedido.IdPedido);
             if (completo == null) return;
 
-            var tN = Traductor.ObtenerTraducciones(_idioma);
-            string T_n(string k, string fb) => tN.ContainsKey(k) ? tN[k].Texto : fb;
 
             // Reutilizar claves de columnas existentes para las etiquetas de la notificación
-            string notifTitulo   = T_n("notif.titulo",   "NOTIFICACIÓN DE PEDIDO");
-            string notifNumero   = T_n("notif.numero",   "Pedido #:");
-            string notifCliente  = T_n("col.ped.cliente","Cliente")  + ":";
-            string notifEstado   = T_n("col.ped.estado", "Estado")   + ":";
-            string notifFecha    = T_n("col.ped.fecha",  "Fecha")    + ":";
-            string notifDespacho = T_n("col.ped.despacho","Despacho")+ ":";
-            string notifEntrega  = T_n("col.ped.entrega","Entrega")  + ":";
-            string notifPrendas  = T_n("col.ped.prendas","Prendas")  + ":";
+            string notifTitulo   = Tr("notif.titulo",   "NOTIFICACIÓN DE PEDIDO");
+            string notifNumero   = Tr("notif.numero",   "Pedido #:");
+            string notifCliente  = Tr("col.ped.cliente","Cliente")  + ":";
+            string notifEstado   = Tr("col.ped.estado", "Estado")   + ":";
+            string notifFecha    = Tr("col.ped.fecha",  "Fecha")    + ":";
+            string notifDespacho = Tr("col.ped.despacho","Despacho")+ ":";
+            string notifEntrega  = Tr("col.ped.entrega","Entrega")  + ":";
+            string notifPrendas  = Tr("col.ped.prendas","Prendas")  + ":";
 
             string texto =
                 $"=== {notifTitulo} ===\n\n" +
@@ -577,7 +589,7 @@ namespace GUI
                 $"{notifEntrega,-12}{(completo.FechaEntrega.HasValue  ? completo.FechaEntrega.Value.ToString("dd/MM/yyyy")  : "—")}\n" +
                 $"{notifPrendas,-12}{completo.CantidadPrendas}\n";
 
-            string tituloMsgBox = string.Format(T_n("notif.msgbox.titulo", "Notificación — Pedido #{0}"), completo.IdPedido);
+            string tituloMsgBox = string.Format(Tr("notif.msgbox.titulo", "Notificación — Pedido #{0}"), completo.IdPedido);
             MessageBox.Show(texto, tituloMsgBox,
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

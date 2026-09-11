@@ -381,7 +381,15 @@ namespace BLL
             {
                 bool reservadaParaOtro;
                 try { reservadaParaOtro = listaEsperaBLL.EstaReservadaParaOtro(p.IdPrenda, idCliente); }
-                catch { reservadaParaOtro = false; } // BD sin migrar (tabla ListaEspera inexistente) → no bloquea
+                catch (Exception ex)
+                {
+                    // BD sin migrar (tabla ListaEspera inexistente) → no bloquea; pero se loguea
+                    // (antes era un catch mudo, inconsistente con el catch hermano de arriba en
+                    // esta misma clase) para no perder visibilidad si el motivo real NO es "tabla
+                    // inexistente" sino un problema transitorio de BD.
+                    reservadaParaOtro = false;
+                    System.Diagnostics.Trace.TraceWarning($"[BLL.Pedido] Lista de Espera (validación de reserva): {ex.Message}");
+                }
 
                 if (reservadaParaOtro)
                     throw new BE.AppException("err.bll.pedido.prenda_reservada",

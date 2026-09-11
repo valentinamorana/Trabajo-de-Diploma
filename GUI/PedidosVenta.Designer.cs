@@ -232,6 +232,10 @@ namespace GUI
             this.dgvPedidos.ReadOnly = true;
             this.dgvPedidos.RowHeadersVisible = false;
             this.dgvPedidos.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            // Pantalla de acción sobre UN pedido a la vez: sin esto, Ctrl/Shift-click permite
+            // seleccionar varias filas y las acciones (Cancelar/DesCancelar) solo actúan sobre la
+            // primera, sin avisar que el resto de la selección se ignoró.
+            this.dgvPedidos.MultiSelect = false;
             this.dgvPedidos.Size = new System.Drawing.Size(1000, 342);
             this.dgvPedidos.TabIndex = 1;
             this.dgvPedidos.SelectionChanged += new System.EventHandler(this.DgvPedidos_SelectionChanged);

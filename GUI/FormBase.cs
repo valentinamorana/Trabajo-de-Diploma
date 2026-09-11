@@ -78,6 +78,16 @@ namespace GUI
         protected virtual Label MensajeLabel => null;
 
         /// <summary>
+        /// Traduce una clave al idioma activo, con fallback si no existe. Único punto de acceso
+        /// al diccionario de traducciones — reemplaza los ~84 helpers locales casi idénticos
+        /// (`T`, `Tx`, `T_ce`, `Tv`...) que antes reinventaba cada formulario/método por su cuenta
+        /// (ver §10 #1 de AUDITORIA_TECNICA_2026-09-10.md). Heredado por todos los formularios
+        /// hijos — no necesitan redefinirlo.
+        /// </summary>
+        protected string Tr(string clave, string fallback, object[] args = null)
+            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
+
+        /// <summary>
         /// Muestra un mensaje de operación exitosa (✓ en verde).
         /// Heredado por todos los formularios hijos — no necesitan redefinirlo.
         /// </summary>
@@ -132,8 +142,11 @@ namespace GUI
         }
 
         // Registra una excepción inesperada en la bitácora con criticidad Alta.
-        // Nunca propaga: si el logueo falla, no debe tapar el error original.
-        private void RegistrarExcepcion(Exception ex)
+        // Nunca propaga: si el logueo falla, no debe tapar el error original. Protected (no
+        // private) para que formularios con una necesidad real de título de MessageBox
+        // personalizado (ej. ReporteJornadaForm) puedan reusar el mismo criterio de auditoría
+        // que MostrarError(Exception) sin reimplementarlo de cero.
+        protected void RegistrarExcepcion(Exception ex)
         {
             try
             {

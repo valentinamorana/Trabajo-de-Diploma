@@ -8,12 +8,17 @@ using Servicios.Multiidioma;
 
 namespace GUI
 {
-    public partial class DashboardControlStock : Form, IIdiomaObserver
+    public partial class DashboardControlStock : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IPrendaService _bllPrenda  = new BLL.Prenda();
         private readonly BLL.Usuario                   _bllUsuario = new BLL.Usuario();
 
         private System.Windows.Forms.Timer _timer;
+
+        // Se reasignaba con `new Font(...)` en cada refresco (timer de 2 min) sin liberar el
+        // anterior — Font implementa IDisposable y envuelve un handle GDI; creada una sola vez
+        // acá y reutilizada evita esa fuga en sesiones largas.
+        private readonly Font _fontOcupacionGrande = new Font("Segoe UI", 24f, FontStyle.Bold);
 
         public DashboardControlStock()
         {
@@ -22,8 +27,7 @@ namespace GUI
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarEnBackground();
@@ -46,19 +50,11 @@ namespace GUI
             CargarEnBackground();
         }
 
-        private string T(string k, string fb)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(k) ? t[k].Texto : fb;
-        }
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             this.Text          = Tr("dash.stock.titulo",   "Panel de Stock");
             lblTitulo.Text     = Tr("dash.stock.titulo",   "Panel de Stock");
+            lblSub.Text        = Tr("dash.stock.subtitulo", "WardrobeFlow  —  Stock");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",  "↻ Actualizar");
             txtDisp.Text = Tr("dash.prendas",    "Prendas\ndisponibles");
             txtMant.Text = Tr("dash.mant.activo", "En\nmantenimiento");
@@ -97,6 +93,12 @@ namespace GUI
             numDisp.Text = disponibles.Count.ToString();
 
             numMant.Text = enMant.Count.ToString();
+            // Señal INDEPENDIENTE de la del Kanban de abajo (ActualizarKanban, que colorea cada
+            // tarjeta por ANTIGÜEDAD vía BE.MantenimientoPrenda.NivelUrgencia): esta tarjeta resumen
+            // colorea por CANTIDAD total en mantenimiento. Pueden mostrar colores contradictorios
+            // (ej. tarjeta en rojo por más de 5 prendas, con las 3 columnas del Kanban en verde si
+            // todas son recientes) — es intencional, no el mismo drift de umbrales que ya se corrigió
+            // entre dashboards distintos.
             Color fondo = enMant.Count == 0
                 ? Color.FromArgb(215, 240, 220)
                 : enMant.Count > 5 ? Color.FromArgb(255, 218, 218) : Color.FromArgb(255, 248, 210);
@@ -105,7 +107,7 @@ namespace GUI
             if (ocup != null)
             {
                 numOcup.Text = $"{ocup.PorcentajeOcupacion}%";
-                numOcup.Font = new Font("Segoe UI", 24f, FontStyle.Bold);
+                numOcup.Font = _fontOcupacionGrande;
                 txtOcup.Text = $"{ocup.EnUso} en uso · {ocup.Disponibles} libres";
             }
         }
@@ -185,7 +187,7 @@ namespace GUI
         private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
             using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
-                Color.FromArgb(210, 100, 135), Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
+                Tema.RosaPrimario, Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
 

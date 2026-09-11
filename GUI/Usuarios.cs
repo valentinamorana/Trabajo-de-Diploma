@@ -86,38 +86,36 @@ namespace GUI
             Aplicar(lblDesbloquearInfo,   t);
             Aplicar(btnDesbloquear,       t);
             Aplicar(lblListaTitulo,       t);
-            Aplicar(btnEliminar,          t);
+            Aplicar(btnArchivar,          t);
             Aplicar(btnVerArchivados,     t);
             Aplicar(btnPurgar,            t);
-            RellenarComboPerfil(t);
+            RellenarComboPerfil();
             TraducirHeadersGrilla();
         }
 
         // Recarga cmbPerfil con etiquetas traducidas manteniendo los valores internos (DB keys).
-        private void RellenarComboPerfil(IDictionary<string, Servicios.Multiidioma.Traduccion> t)
+        private void RellenarComboPerfil()
         {
-            string TT(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             var items = new[]
             {
                 // Jerarquía consolidada (2da entrega):
                 //   Comercial:   GerenteComercial ⊃ Vendedor
                 //   Inventario:  GerenteInventario ⊃ OperadorLogistico + OperadorDeInventario
                 //   Transversal: Auditor (solo lectura) · Administrador (todo)
-                new PerfilItem("Administrador",       TT("perfil.administrador",       "Administrador")),
-                new PerfilItem("Auditor",             TT("perfil.auditor",             "Auditor")),
-                new PerfilItem("GerenteComercial",    TT("perfil.gerentecomercial",    "Gerente Comercial")),
-                new PerfilItem("Vendedor",            TT("perfil.vendedor",            "Vendedor")),
-                new PerfilItem("GerenteInventario",   TT("perfil.gerenteinventario",   "Gerente de Inventario")),
-                new PerfilItem("OperadorDeInventario",TT("perfil.operador",            "Operador de Inventario")),
-                new PerfilItem("OperadorLogistico",   TT("perfil.operadorlogistico",   "Operador Logístico")),
+                new PerfilItem("Administrador",       Tr("perfil.administrador",       "Administrador")),
+                new PerfilItem("Auditor",             Tr("perfil.auditor",             "Auditor")),
+                new PerfilItem("GerenteComercial",    Tr("perfil.gerentecomercial",    "Gerente Comercial")),
+                new PerfilItem("Vendedor",            Tr("perfil.vendedor",            "Vendedor")),
+                new PerfilItem("GerenteInventario",   Tr("perfil.gerenteinventario",   "Gerente de Inventario")),
+                new PerfilItem("OperadorDeInventario",Tr("perfil.operador",            "Operador de Inventario")),
+                new PerfilItem("OperadorLogistico",   Tr("perfil.operadorlogistico",   "Operador Logístico")),
                 // PN02 — Caja: separado de Vendedor a propósito (Vendedor es "operador" de la
                 // venta, Caja cobra).
-                new PerfilItem("Caja",                TT("perfil.caja",                "Caja")),
+                new PerfilItem("Caja",                Tr("perfil.caja",                "Caja")),
                 // PN03 — Administración y Contabilidad: roles nuevos, separados de Gerencia
                 // (que reusa GerenteComercial) y de Administrador (superusuario técnico).
-                new PerfilItem("AdministracionComercial", TT("perfil.administracioncomercial", "Administración")),
-                new PerfilItem("Contabilidad",             TT("perfil.contabilidad",            "Contabilidad")),
+                new PerfilItem("AdministracionComercial", Tr("perfil.administracioncomercial", "Administración")),
+                new PerfilItem("Contabilidad",             Tr("perfil.contabilidad",            "Contabilidad")),
             };
 
             int prevIdx = cmbPerfil.SelectedIndex < 0 ? 2 : cmbPerfil.SelectedIndex;
@@ -183,12 +181,12 @@ namespace GUI
             {
                 btnResetearClave.Enabled = false;
                 btnDesbloquear.Enabled   = false;
-                btnEliminar.Enabled      = false;
+                btnArchivar.Enabled      = false;
                 return;
             }
 
             btnResetearClave.Enabled = haySeleccion;
-            btnEliminar.Enabled      = haySeleccion;
+            btnArchivar.Enabled      = haySeleccion;
 
             // Desbloquear solo se habilita si el usuario seleccionado está bloqueado.
             // Usamos la columna interna _BloqueadoKey (int) para ser independientes del idioma.
@@ -217,10 +215,9 @@ namespace GUI
                     ? usuarioBLL.ObtenerArchivados()
                     : usuarioBLL.ObtenerTodos();
 
-                var t = Traductor.ObtenerTraducciones(_idioma);
-                string lblActivo    = t.ContainsKey("usr.activo")   ? t["usr.activo"].Texto   : "Activo";
-                string lblBloqueada = t.ContainsKey("usr.bloqueada") ? t["usr.bloqueada"].Texto : "Bloqueada";
-                string lblArchivado = t.ContainsKey("usr.archivado") ? t["usr.archivado"].Texto : "Archivado";
+                string lblActivo    = Tr("usr.activo",    "Activo");
+                string lblBloqueada = Tr("usr.bloqueada", "Bloqueada");
+                string lblArchivado = Tr("usr.archivado", "Archivado");
 
                 var tabla = new DataTable();
                 tabla.Columns.Add("ID",           typeof(int));
@@ -257,8 +254,8 @@ namespace GUI
                 }
 
                 string fmt = _viendoArchivados
-                    ? (t.ContainsKey("msg.usr.archivados") ? t["msg.usr.archivados"].Texto : "{0} usuario(s) archivado(s).")
-                    : (t.ContainsKey("msg.usr.cargados")   ? t["msg.usr.cargados"].Texto   : "{0} usuario(s) registrado(s).");
+                    ? Tr("msg.usr.archivados", "{0} usuario(s) archivado(s).")
+                    : Tr("msg.usr.cargados",   "{0} usuario(s) registrado(s).");
                 lblMensaje.ForeColor = Color.DarkGreen;
                 lblMensaje.Text      = string.Format(fmt, usuarios.Count);
 
@@ -266,7 +263,7 @@ namespace GUI
                 btnAgregar.Enabled       = !_viendoArchivados;
                 btnResetearClave.Enabled = false;
                 btnDesbloquear.Enabled   = false;
-                btnEliminar.Enabled      = false;
+                btnArchivar.Enabled      = false;
             }
             catch (Exception ex)
             {
@@ -343,20 +340,16 @@ namespace GUI
         {
             if (dgvUsuarios.SelectedRows.Count == 0)
             {
-                var tDSel = Traductor.ObtenerTraducciones(_idioma);
-                MostrarError(tDSel.ContainsKey("err.usr.sel.bloqueado") ? tDSel["err.usr.sel.bloqueado"].Texto : "Seleccioná un usuario bloqueado de la lista.");
+                MostrarError(Tr("err.usr.sel.bloqueado", "Seleccioná un usuario bloqueado de la lista."));
                 return;
             }
 
             int    idUsuario = Convert.ToInt32(dgvUsuarios.SelectedRows[0].Cells["ID"].Value);
             string username  = dgvUsuarios.SelectedRows[0].Cells["Username"].Value?.ToString() ?? "";
 
-            var tD = Traductor.ObtenerTraducciones(_idioma);
-            string T_d(string k, string fb) => tD.ContainsKey(k) ? tD[k].Texto : fb;
-
             var confirm = MessageBox.Show(
-                string.Format(T_d("conf.desbloquear.body",  "¿Desbloquear la cuenta de '{0}'?"), username),
-                T_d("conf.desbloquear.titulo", "Confirmar Desbloqueo"),
+                string.Format(Tr("conf.desbloquear.body",  "¿Desbloquear la cuenta de '{0}'?"), username),
+                Tr("conf.desbloquear.titulo", "Confirmar Desbloqueo"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2);
@@ -367,7 +360,7 @@ namespace GUI
             {
                 usuarioBLL.Desbloquear(this.Text, idUsuario, username);
                 CargarUsuarios();
-                MostrarOk(string.Format(T_d("msg.usr.desbloqueada", "Cuenta '{0}' desbloqueada correctamente."), username));
+                MostrarOk(string.Format(Tr("msg.usr.desbloqueada", "Cuenta '{0}' desbloqueada correctamente."), username));
             }
             catch (Exception ex)
             {
@@ -378,20 +371,17 @@ namespace GUI
         // ── RF-10 — Archivar / Ver archivados / Purgar ────────────────────────
 
         // Archiva (baja lógica) el usuario seleccionado. La BLL protege al último admin y al self.
-        private void BtnEliminar_Click(object sender, EventArgs e)
+        private void BtnArchivar_Click(object sender, EventArgs e)
         {
             if (_viendoArchivados || dgvUsuarios.SelectedRows.Count == 0) return;
-
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T_e(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             int    idUsuario = Convert.ToInt32(dgvUsuarios.SelectedRows[0].Cells["ID"].Value);
             string username  = dgvUsuarios.SelectedRows[0].Cells["Username"].Value?.ToString() ?? "";
 
             var confirm = MessageBox.Show(
-                string.Format(T_e("conf.usr.archivar.body",
+                string.Format(Tr("conf.usr.archivar.body",
                     "¿Archivar al usuario '{0}'?\n\nNo podrá iniciar sesión y saldrá de la lista, pero se conserva su historial.\nPodrá eliminarse definitivamente tras 1 año."), username),
-                T_e("conf.usr.archivar.titulo", "Confirmar Archivado"),
+                Tr("conf.usr.archivar.titulo", "Confirmar Archivado"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
 
             if (confirm != DialogResult.Yes) return;
@@ -400,7 +390,7 @@ namespace GUI
             {
                 usuarioBLL.Eliminar(this.Text, idUsuario, username);
                 CargarUsuarios();
-                MostrarOk(string.Format(T_e("msg.usr.archivado", "Usuario '{0}' archivado correctamente."), username));
+                MostrarOk(string.Format(Tr("msg.usr.archivado", "Usuario '{0}' archivado correctamente."), username));
             }
             catch (Exception ex)
             {
@@ -412,33 +402,29 @@ namespace GUI
         private void BtnVerArchivados_Click(object sender, EventArgs e)
         {
             _viendoArchivados = !_viendoArchivados;
-            var t = Traductor.ObtenerTraducciones(_idioma);
             btnVerArchivados.Text = _viendoArchivados
-                ? (t.ContainsKey("btn.usr.veractivos")   ? t["btn.usr.veractivos"].Texto   : "Ver activos")
-                : (t.ContainsKey("btn.usr.verarchivados") ? t["btn.usr.verarchivados"].Texto : "Ver archivados");
+                ? Tr("btn.usr.veractivos",    "Ver activos")
+                : Tr("btn.usr.verarchivados", "Ver archivados");
             CargarUsuarios();
         }
 
         // Purga (eliminación física) de todos los usuarios archivados hace más de 1 año.
         private void BtnPurgar_Click(object sender, EventArgs e)
         {
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T_p(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             int elegibles;
             try { elegibles = usuarioBLL.ObtenerArchivadosParaPurga().Count; }
             catch (Exception ex) { MostrarError(ex); return; }
 
             if (elegibles == 0)
             {
-                MostrarOk(T_p("msg.usr.purga.ninguno", "No hay usuarios archivados con más de 1 año para purgar."));
+                MostrarOk(Tr("msg.usr.purga.ninguno", "No hay usuarios archivados con más de 1 año para purgar."));
                 return;
             }
 
             var confirm = MessageBox.Show(
-                string.Format(T_p("conf.usr.purgar.body",
+                string.Format(Tr("conf.usr.purgar.body",
                     "Se eliminarán DEFINITIVAMENTE {0} usuario(s) archivado(s) hace más de 1 año.\nEsta acción no se puede deshacer.\n\n¿Continuar?"), elegibles),
-                T_p("conf.usr.purgar.titulo", "Confirmar Purga"),
+                Tr("conf.usr.purgar.titulo", "Confirmar Purga"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
 
             if (confirm != DialogResult.Yes) return;
@@ -447,7 +433,7 @@ namespace GUI
             {
                 int eliminados = usuarioBLL.PurgarArchivados(this.Text);
                 CargarUsuarios();
-                MostrarOk(string.Format(T_p("msg.usr.purga.ok", "{0} usuario(s) eliminado(s) definitivamente."), eliminados));
+                MostrarOk(string.Format(Tr("msg.usr.purga.ok", "{0} usuario(s) eliminado(s) definitivamente."), eliminados));
             }
             catch (Exception ex)
             {
@@ -457,58 +443,5 @@ namespace GUI
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Diálogo de entrada de texto simple — reemplaza Microsoft.VisualBasic.Interaction.InputBox
-        /// para evitar dependencia externa en el proyecto GUI.
-        /// </summary>
-        private string PedirTexto(string mensaje, string titulo)
-        {
-            using (Form dlg = new Form())
-            {
-                dlg.Text            = titulo;
-                dlg.ClientSize      = new System.Drawing.Size(360, 130);
-                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
-                dlg.StartPosition  = FormStartPosition.CenterParent;
-                dlg.MaximizeBox    = false;
-                dlg.MinimizeBox    = false;
-
-                var lbl = new Label
-                {
-                    Text     = mensaje,
-                    Left     = 12, Top   = 12,
-                    Width    = 336, Height = 32,
-                    Font     = new Font("Segoe UI", 9f)
-                };
-
-                var txt = new TextBox
-                {
-                    Left         = 12,  Top   = 50,
-                    Width        = 336, Height = 24,
-                    PasswordChar = '●'
-                };
-
-                var tPT = Traductor.ObtenerTraducciones(_idioma);
-                var btnOk = new Button
-                {
-                    Text         = tPT.ContainsKey("btn.aceptar")  ? tPT["btn.aceptar"].Texto  : "Aceptar",
-                    Left         = 168, Top    = 88,
-                    Width        = 80,  Height = 28,
-                    DialogResult = DialogResult.OK
-                };
-                var btnCancelar = new Button
-                {
-                    Text         = tPT.ContainsKey("btn.cancelar") ? tPT["btn.cancelar"].Texto : "Cancelar",
-                    Left         = 260, Top    = 88,
-                    Width        = 88,  Height = 28,
-                    DialogResult = DialogResult.Cancel
-                };
-
-                dlg.AcceptButton = btnOk;
-                dlg.CancelButton = btnCancelar;
-                dlg.Controls.AddRange(new Control[] { lbl, txt, btnOk, btnCancelar });
-
-                return dlg.ShowDialog(this) == DialogResult.OK ? txt.Text : string.Empty;
-            }
-        }
     }
 }

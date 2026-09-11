@@ -17,8 +17,13 @@ namespace BLL
 
         public Renovacion() : this(new DAL.Cliente(), new DAL.Renovacion(), new DAL.PlanSuscripcion(), new DAL.Prenda()) { }
 
+        // dalPlan/dalPrenda tipados por interfaz (antes eran DAL.PlanSuscripcion/DAL.Prenda
+        // concretos): con eso, ni esta fachada ni CambioPlanHandler/BajaSuscripcionHandler se
+        // podían instanciar con un doble de prueba — la cadena real quedaba sin ningún test que
+        // la ejercitara de punta a punta (los tests reconstruían su propio orden de cadena en vez
+        // de usar el que arma este constructor).
         public Renovacion(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
-                           DAL.PlanSuscripcion dalPlan, DAL.Prenda dalPrenda)
+                           DAL.Interfaces.IPlanSuscripcionDAL dalPlan, DAL.Interfaces.IPrendaDAL dalPrenda)
         {
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
 

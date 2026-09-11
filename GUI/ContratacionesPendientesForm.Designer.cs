@@ -27,6 +27,7 @@ namespace GUI
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
             this.dgvContrataciones = new System.Windows.Forms.DataGridView();
+            this.tip = new System.Windows.Forms.ToolTip(this.components);
             this.panelTop.SuspendLayout();
             this.panelStatus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvContrataciones)).BeginInit();
@@ -60,11 +61,9 @@ namespace GUI
             //
             // cmbMedioPago
             //
+            // Los ítems se cargan en runtime (ContratacionesPendientesForm.CargarMediosPago), ya
+            // traducidos — antes estaban hardcodeados acá en español fijo.
             this.cmbMedioPago.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbMedioPago.Items.AddRange(new object[] {
-            "Efectivo",
-            "Tarjeta",
-            "Transferencia"});
             this.cmbMedioPago.Location = new System.Drawing.Point(102, 16);
             this.cmbMedioPago.Name = "cmbMedioPago";
             this.cmbMedioPago.Size = new System.Drawing.Size(140, 21);
@@ -110,6 +109,7 @@ namespace GUI
             this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
             this.btnRefrescar.TabIndex = 4;
             this.btnRefrescar.Text = "↻";
+            this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
             // lblConteo
@@ -197,6 +197,7 @@ namespace GUI
         private System.Windows.Forms.Button btnCobrar;
         private System.Windows.Forms.Button btnIntentoFallido;
         private System.Windows.Forms.Button btnRefrescar;
+        private System.Windows.Forms.ToolTip tip;
         private System.Windows.Forms.Label lblConteo;
         private System.Windows.Forms.Panel panelStatus;
         private System.Windows.Forms.Label lblMensaje;

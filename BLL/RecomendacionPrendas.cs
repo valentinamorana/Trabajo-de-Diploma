@@ -10,7 +10,7 @@ namespace BLL
     /// sugiere prendas Disponibles afines, para que el Vendedor las ofrezca en el próximo
     /// pedido. Sin historial de pedidos, no hay base para recomendar: devuelve lista vacía.
     /// </summary>
-    public class RecomendacionPrendas : Interfaces.IRecomendacionService
+    public class RecomendacionPrendas : Interfaces.IRecomendacionPrendasService
     {
         private readonly DAL.Interfaces.IPedidoDAL dalPedido;
         private readonly DAL.Interfaces.IPrendaDAL dalPrenda;

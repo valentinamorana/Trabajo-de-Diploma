@@ -138,7 +138,7 @@ namespace GUI
             this.btnRestaurar.Enabled                           = false;
             this.btnRestaurar.FlatStyle                         = System.Windows.Forms.FlatStyle.Flat;
             this.btnRestaurar.FlatAppearance.BorderSize         = 1;
-            this.btnRestaurar.FlatAppearance.BorderColor        = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnRestaurar.FlatAppearance.BorderColor        = Tema.RosaPrimario;
             this.btnRestaurar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(244, 212, 226);
             this.btnRestaurar.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnRestaurar.ForeColor = System.Drawing.Color.FromArgb(100, 40, 80);

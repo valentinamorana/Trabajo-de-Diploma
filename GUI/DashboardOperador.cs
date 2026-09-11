@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 
 namespace GUI
 {
-    public partial class DashboardOperador : Form, IIdiomaObserver
+    public partial class DashboardOperador : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IPedidoService _bllPedido  = new BLL.Pedido();
         private readonly BLL.Usuario                   _bllUsuario = new BLL.Usuario();
@@ -22,8 +22,7 @@ namespace GUI
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarEnBackground();
@@ -46,19 +45,11 @@ namespace GUI
             CargarEnBackground();
         }
 
-        private string T(string k, string fb)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(k) ? t[k].Texto : fb;
-        }
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             this.Text          = Tr("dash.operador.titulo", "Panel de Operaciones");
             lblTitulo.Text     = Tr("dash.operador.titulo", "Panel de Operaciones");
+            lblSub.Text        = Tr("dash.operador.subtitulo", "WardrobeFlow  —  Operaciones");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",   "↻ Actualizar");
             txtPend.Text = Tr("dash.pedidos",   "Pedidos\npendientes");
             txtDesp.Text = Tr("dash.despachados", "Pedidos\ndespachados");
@@ -188,7 +179,7 @@ namespace GUI
         private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
             using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
-                Color.FromArgb(210, 100, 135), Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
+                Tema.RosaPrimario, Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
 

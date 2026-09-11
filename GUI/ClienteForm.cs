@@ -70,51 +70,46 @@ namespace GUI
         /// </summary>
         private void AplicarIdioma(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
-
-            this.Text       = _esEdicion ? T("frm.editarcliente", "Editar Cliente")
-                                         : T("frm.nuevocliente",  "Nuevo Cliente");
-            btnGuardar.Text = _esEdicion ? T("btn.guardar.cambios",  "Guardar Cambios")
-                                         : T("btn.registrar.cliente","Registrar Cliente");
-            btnCancelar.Text  = T("btn.cancelar",        "Cancelar");
-            lblNombre.Text          = T("lbl.cli.nombre",      "Nombre *");
-            lblApellido.Text        = T("lbl.cli.apellido",    "Apellido *");
-            lblDNI.Text             = T("lbl.cli.dni",         "DNI * (7-8 dígitos)");
-            lblEmail.Text           = T("lbl.cli.email",       "Email");
-            lblFechaNacimiento.Text = T("lbl.cli.fechanac",    "Fecha de Nacimiento *");
-            lblMetodoPago.Text      = T("lbl.cli.metodopago",  "Método de Pago *");
-            lblPlan.Text            = T("lbl.cli.plan",        "Plan de Suscripción");
-            lblReferente.Text       = T("lbl.cli.referente",   "Referido por");
-            chkVencimiento.Text     = T("lbl.cli.vencimiento", "Fecha de Vencimiento");
+            this.Text       = _esEdicion ? Tr("frm.editarcliente", "Editar Cliente")
+                                         : Tr("frm.nuevocliente",  "Nuevo Cliente");
+            btnGuardar.Text = _esEdicion ? Tr("btn.guardar.cambios",  "Guardar Cambios")
+                                         : Tr("btn.registrar.cliente","Registrar Cliente");
+            btnCancelar.Text  = Tr("btn.cancelar",        "Cancelar");
+            lblNombre.Text          = Tr("lbl.cli.nombre",      "Nombre *");
+            lblApellido.Text        = Tr("lbl.cli.apellido",    "Apellido *");
+            lblDNI.Text             = Tr("lbl.cli.dni",         "DNI * (7-8 dígitos)");
+            lblEmail.Text           = Tr("lbl.cli.email",       "Email");
+            lblFechaNacimiento.Text = Tr("lbl.cli.fechanac",    "Fecha de Nacimiento *");
+            lblMetodoPago.Text      = Tr("lbl.cli.metodopago",  "Método de Pago *");
+            lblPlan.Text            = Tr("lbl.cli.plan",        "Plan de Suscripción");
+            lblReferente.Text       = Tr("lbl.cli.referente",   "Referido por");
+            chkVencimiento.Text     = Tr("lbl.cli.vencimiento", "Fecha de Vencimiento");
 
             // Actualizar ítem "— Sin plan —" del combo de planes (índice 0)
             if (cmbPlan.Items.Count > 0)
-                cmbPlan.Items[0] = T("combo.cli.sinplan", "— Sin plan —");
+                cmbPlan.Items[0] = Tr("combo.cli.sinplan", "— Sin plan —");
 
             // Actualizar ítem "— Ninguno —" del combo de referentes (índice 0)
             if (cmbReferente.Items.Count > 0)
-                cmbReferente.Items[0] = T("combo.cli.sinreferente", "— Ninguno —");
+                cmbReferente.Items[0] = Tr("combo.cli.sinreferente", "— Ninguno —");
 
             // Recargar cmbMetodoPago con etiquetas traducidas (valor interno = clave de BD en español)
-            RellenarComboMetodoPago(t);
+            RellenarComboMetodoPago();
         }
 
         // Clave fija en BD ← muestra etiqueta traducida.
         // El SelectedValue siempre es la cadena en español almacenada en la BD ("Efectivo", etc.).
-        private void RellenarComboMetodoPago(IDictionary<string, Servicios.Multiidioma.Traduccion> t)
+        private void RellenarComboMetodoPago()
         {
-            string TT(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             string prevValue = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value
                             ?? cmbMetodoPago.SelectedItem?.ToString();
 
             var items = new[]
             {
-                new MetodoItem("Efectivo",      TT("metodo.efectivo",      "Efectivo")),
-                new MetodoItem("Débito",        TT("metodo.debito",        "Débito")),
-                new MetodoItem("Crédito",       TT("metodo.credito",       "Crédito")),
-                new MetodoItem("Transferencia", TT("metodo.transferencia", "Transferencia")),
+                new MetodoItem("Efectivo",      Tr("metodo.efectivo",      "Efectivo")),
+                new MetodoItem("Débito",        Tr("metodo.debito",        "Débito")),
+                new MetodoItem("Crédito",       Tr("metodo.credito",       "Crédito")),
+                new MetodoItem("Transferencia", Tr("metodo.transferencia", "Transferencia")),
             };
 
             cmbMetodoPago.DataSource    = null;
@@ -157,8 +152,7 @@ namespace GUI
                 var bllPlan = new BLL.PlanSuscripcion();
                 _planes = bllPlan.ObtenerActivos();
 
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string sinPlan = t.ContainsKey("combo.cli.sinplan") ? t["combo.cli.sinplan"].Texto : "— Sin plan —";
+                string sinPlan = Tr("combo.cli.sinplan", "— Sin plan —");
                 cmbPlan.Items.Clear();
                 cmbPlan.Items.Add(sinPlan);
                 foreach (var p in _planes)
@@ -168,8 +162,7 @@ namespace GUI
             }
             catch
             {
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string errPlanes = t.ContainsKey("err.cli.errorplanes") ? t["err.cli.errorplanes"].Texto : "— Error al cargar planes —";
+                string errPlanes = Tr("err.cli.errorplanes", "— Error al cargar planes —");
                 cmbPlan.Items.Add(errPlanes);
                 cmbPlan.SelectedIndex = 0;
             }
@@ -182,8 +175,7 @@ namespace GUI
                 var bllCliente = new BLL.Cliente();
                 _clientesParaReferente = bllCliente.ObtenerTodos();
 
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string ninguno = t.ContainsKey("combo.cli.sinreferente") ? t["combo.cli.sinreferente"].Texto : "— Ninguno —";
+                string ninguno = Tr("combo.cli.sinreferente", "— Ninguno —");
                 cmbReferente.Items.Clear();
                 cmbReferente.Items.Add(ninguno);
                 foreach (var c in _clientesParaReferente)

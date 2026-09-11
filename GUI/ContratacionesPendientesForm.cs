@@ -61,7 +61,45 @@ namespace GUI
             Aplicar(lblMedioPago,      t);
             Aplicar(btnCobrar,         t);
             Aplicar(btnIntentoFallido, t);
+            tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
             TraducirHeadersGrilla(t);
+            CargarMediosPago();
+        }
+
+        // Antes hardcodeado en el Designer ("Efectivo"/"Tarjeta"/"Transferencia" fijos, sin pasar
+        // por el traductor) — única lista de opciones de las 10 pantallas de este alcance que no
+        // pasaba por el sistema de multiidioma. El VALOR persistido (BE.Contratacion.MedioPago)
+        // se mantiene en español canónico independientemente del idioma de la UI — solo se
+        // traduce el texto visible (DisplayMember), vía MedioPagoItem (mismo patrón que
+        // Usuarios.PerfilItem).
+        private void CargarMediosPago()
+        {
+            object seleccionActual = cmbMedioPago.SelectedItem is MedioPagoItem mpi ? mpi.Value : null;
+
+            cmbMedioPago.DataSource = null;
+            cmbMedioPago.DisplayMember = "Label";
+            cmbMedioPago.ValueMember   = "Value";
+            cmbMedioPago.DataSource = new[]
+            {
+                new MedioPagoItem("Efectivo",      Tr("medio.efectivo",      "Efectivo")),
+                new MedioPagoItem("Tarjeta",        Tr("medio.tarjeta",       "Tarjeta")),
+                new MedioPagoItem("Transferencia",  Tr("medio.transferencia", "Transferencia")),
+            };
+            cmbMedioPago.SelectedIndex = -1;
+            if (seleccionActual != null)
+            {
+                for (int i = 0; i < cmbMedioPago.Items.Count; i++)
+                    if (((MedioPagoItem)cmbMedioPago.Items[i]).Value.Equals(seleccionActual))
+                    { cmbMedioPago.SelectedIndex = i; break; }
+            }
+        }
+
+        private sealed class MedioPagoItem
+        {
+            public string Value { get; }
+            public string Label { get; }
+            public MedioPagoItem(string value, string label) { Value = value; Label = label; }
+            public override string ToString() => Label;
         }
 
         private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
@@ -82,6 +120,7 @@ namespace GUI
             RH("ID",        "col.contr.id");
             RH("Cliente",   "col.contr.cliente");
             RH("Plan",      "col.contr.plan");
+            RH("Monto",     "col.contr.monto");
             RH("Modalidad", "col.contr.modalidad");
             RH("Intentos",  "col.contr.intentos");
             RH("Fecha",     "col.contr.fecha");
@@ -107,14 +146,15 @@ namespace GUI
                 tabla.Columns.Add("ID", typeof(int));
                 tabla.Columns.Add("Cliente", typeof(string));
                 tabla.Columns.Add("Plan", typeof(string));
+                tabla.Columns.Add("Monto", typeof(string));
                 tabla.Columns.Add("Modalidad", typeof(string));
                 tabla.Columns.Add("Intentos", typeof(string));
                 tabla.Columns.Add("Fecha", typeof(string));
 
                 foreach (var c in _contrataciones)
                     tabla.Rows.Add(
-                        c.IdContratacion, c.NombreCliente, c.NombrePlan, c.Modalidad.ToString(),
-                        $"{c.IntentosPago}/3", c.FechaAlta.ToString("dd/MM/yyyy HH:mm"));
+                        c.IdContratacion, c.NombreCliente, c.NombrePlan, c.MontoPlan.ToString("C2"),
+                        c.Modalidad.ToString(), $"{c.IntentosPago}/3", c.FechaAlta.ToString("dd/MM/yyyy HH:mm"));
 
                 dgvContrataciones.DataSource = tabla;
                 if (dgvContrataciones.Columns.Contains("ID"))
@@ -155,24 +195,21 @@ namespace GUI
             var contratacion = ObtenerSeleccionada();
             if (contratacion == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             if (cmbMedioPago.SelectedItem == null)
             {
-                MostrarError(T("err.contratacion.mediopago_requerido", "Seleccioná el medio de pago antes de cobrar."));
+                MostrarError(Tr("err.contratacion.mediopago_requerido", "Seleccioná el medio de pago antes de cobrar."));
                 return;
             }
-            string medioPago = cmbMedioPago.SelectedItem.ToString();
+            string medioPago = ((MedioPagoItem)cmbMedioPago.SelectedItem).Value;
 
             var confirmar = MessageBox.Show(
-                string.Format(
-                    T("conf.contratacion.cobro.msg",
-                      "¿Confirmar el cobro de la Contratación #{0}?\n\n" +
-                      "Cliente: {1}\nPlan: {2}\nMedio de pago: {3}\n\n" +
-                      "Se emitirá el comprobante y la suscripción quedará formalizada."),
-                    contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan, medioPago),
-                T("conf.contratacion.cobro.titulo", "Confirmar Cobro"),
+                Tr("conf.contratacion.cobro.msg",
+                    "¿Confirmar el cobro de la Contratación #{0}?\n\n" +
+                    "Cliente: {1}\nPlan: {2}\nMonto: {3:C2}\nMedio de pago: {4}\n\n" +
+                    "Se emitirá el comprobante y la suscripción quedará formalizada.",
+                    new object[] { contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan,
+                                    contratacion.MontoPlan, medioPago }),
+                Tr("conf.contratacion.cobro.titulo", "Confirmar Cobro"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -182,8 +219,8 @@ namespace GUI
             try
             {
                 contratacionBLL.ConfirmarPago(this.Text, contratacion, medioPago);
-                MostrarOk(string.Format(T("msg.contratacion.cobrada", "Contratación #{0} cobrada. Suscripción formalizada."),
-                    contratacion.IdContratacion));
+                MostrarOk(Tr("msg.contratacion.cobrada", "Contratación #{0} cobrada. Suscripción formalizada.",
+                    new object[] { contratacion.IdContratacion }));
                 CargarContrataciones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -194,16 +231,12 @@ namespace GUI
             var contratacion = ObtenerSeleccionada();
             if (contratacion == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             var confirmar = MessageBox.Show(
-                string.Format(
-                    T("conf.contratacion.intentofallido.msg",
-                      "¿Registrar un intento de pago fallido para la Contratación #{0}?\n\n" +
-                      "Intentos hasta ahora: {1}/3. Al llegar a 3 se cancela automáticamente."),
-                    contratacion.IdContratacion, contratacion.IntentosPago),
-                T("conf.contratacion.intentofallido.titulo", "Registrar Intento Fallido"),
+                Tr("conf.contratacion.intentofallido.msg",
+                    "¿Registrar un intento de pago fallido para la Contratación #{0}?\n\n" +
+                    "Intentos hasta ahora: {1}/3. Al llegar a 3 se cancela automáticamente.",
+                    new object[] { contratacion.IdContratacion, contratacion.IntentosPago }),
+                Tr("conf.contratacion.intentofallido.titulo", "Registrar Intento Fallido"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -213,8 +246,8 @@ namespace GUI
             try
             {
                 contratacionBLL.RegistrarIntentoFallido(this.Text, contratacion);
-                MostrarOk(string.Format(T("msg.contratacion.intentofallido_registrado", "Intento fallido registrado para la Contratación #{0}."),
-                    contratacion.IdContratacion));
+                MostrarOk(Tr("msg.contratacion.intentofallido_registrado", "Intento fallido registrado para la Contratación #{0}.",
+                    new object[] { contratacion.IdContratacion }));
                 CargarContrataciones();
             }
             catch (Exception ex) { MostrarError(ex); }

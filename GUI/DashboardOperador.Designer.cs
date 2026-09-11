@@ -94,7 +94,7 @@ namespace GUI
             this.lblSub.Text      = "WardrobeFlow  —  Operaciones";
 
             this.btnRefrescar.Anchor    = AnchorStyles.Top | AnchorStyles.Right;
-            this.btnRefrescar.BackColor = Color.FromArgb(210, 100, 135);
+            this.btnRefrescar.BackColor = Tema.RosaPrimario;
             this.btnRefrescar.Cursor    = Cursors.Hand;
             this.btnRefrescar.FlatAppearance.BorderColor = Color.FromArgb(180, 230, 140, 170);
             this.btnRefrescar.FlatAppearance.BorderSize  = 1;

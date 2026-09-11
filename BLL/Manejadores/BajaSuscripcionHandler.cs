@@ -16,10 +16,12 @@ namespace BLL.Manejadores
     {
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
-        private readonly DAL.Prenda dalPrenda;
+        private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
 
+        // Antes tomaba DAL.Prenda (clase concreta) en vez de IPrendaDAL — por eso no se podía
+        // instanciar con un doble de prueba y quedaba sin ningún test.
         public BajaSuscripcionHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
-                                       DAL.Prenda dalPrenda)
+                                       DAL.Interfaces.IPrendaDAL dalPrenda)
         {
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));

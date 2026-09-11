@@ -139,6 +139,9 @@ namespace GUI
             this.dgvPrendas.ReadOnly = true;
             this.dgvPrendas.RowHeadersVisible = false;
             this.dgvPrendas.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            // Pantalla de acción sobre UNA prenda a la vez: sin esto, Ctrl/Shift-click permite
+            // seleccionar varias filas y las acciones solo actúan sobre la primera, sin avisar.
+            this.dgvPrendas.MultiSelect = false;
             this.dgvPrendas.Size = new System.Drawing.Size(960, 424);
             this.dgvPrendas.TabIndex = 1;
             this.dgvPrendas.SelectionChanged += new System.EventHandler(this.DgvPrendas_SelectionChanged);

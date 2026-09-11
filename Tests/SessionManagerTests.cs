@@ -53,5 +53,36 @@ namespace Tests
                 new BE.SesionException("err.seg.sesion_no_iniciada", "fallback"),
                 typeof(BE.AppException));
         }
+
+        // TienePermiso(string) — antes solo estaba cubierta la función pura que recibe los
+        // booleanos ya resueltos (PermisosAccion), no este método real que hace el bypass de
+        // administrador y la comparación case-insensitive contra BE.Permiso.NombreMenu.
+
+        [TestMethod]
+        public void TienePermiso_Administrador_DevuelveTrueSinImportarElMenu()
+        {
+            SessionManager.Login(new BE.Usuario { Id = 1, Username = "admin", Perfil = BE.Roles.Administrador });
+            Assert.IsTrue(SessionManager.GetInstance().TienePermiso("cualquier.menu.inexistente"));
+        }
+
+        [TestMethod]
+        public void TienePermiso_NoAdministradorConElPermiso_DevuelveTrue()
+        {
+            var u = new BE.Usuario { Id = 1, Username = "vend", Perfil = "Vendedor" };
+            u.Permisos.Add(new BE.Permiso { NombreMenu = "mnuClientes" });
+            SessionManager.Login(u);
+
+            Assert.IsTrue(SessionManager.GetInstance().TienePermiso("mnuclientes")); // case-insensitive
+        }
+
+        [TestMethod]
+        public void TienePermiso_NoAdministradorSinElPermiso_DevuelveFalse()
+        {
+            var u = new BE.Usuario { Id = 1, Username = "vend", Perfil = "Vendedor" };
+            u.Permisos.Add(new BE.Permiso { NombreMenu = "mnuClientes" });
+            SessionManager.Login(u);
+
+            Assert.IsFalse(SessionManager.GetInstance().TienePermiso("mnuUsuarios"));
+        }
     }
 }

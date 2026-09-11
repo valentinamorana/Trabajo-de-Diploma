@@ -600,5 +600,84 @@ namespace Tests
             }
             Assert.AreEqual(0, ctx.DalPromocion.CambiarEstadoVeces);
         }
+
+        // ── Modificar ─────────────────────────────────────────────────────────
+        // Antes sin ningún test (único método público de la clase sin cobertura), sin guarda de
+        // estado, y con la validación de campos copiada de CrearInterna en vez de compartida.
+
+        [TestMethod]
+        public void Modificar_EnRevisionContableConDatosValidos_ActualizaYRegistra()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var promocion = PromocionEnRevision();
+            promocion.Nombre = "  Promo Editada  ";
+            promocion.Valor = 15;
+
+            bll.Modificar("Test", promocion);
+
+            Assert.AreEqual(1, ctx.DalPromocion.ModificarVeces);
+            Assert.AreEqual("Promo Editada", promocion.Nombre);
+        }
+
+        [TestMethod]
+        public void Modificar_PromocionVigente_LanzaModificarEstado()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var promocion = PromocionVigente();
+
+            try
+            {
+                bll.Modificar("Test", promocion);
+                Assert.Fail("Debía rechazar modificar una promoción ya Vigente (aprobada por Contabilidad).");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.promocion.modificar_estado", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPromocion.ModificarVeces);
+        }
+
+        [TestMethod]
+        public void Modificar_BajaSolicitada_LanzaModificarEstado()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var promocion = PromocionBajaSolicitada();
+
+            try
+            {
+                bll.Modificar("Test", promocion);
+                Assert.Fail("Debía rechazar modificar una promoción con baja ya solicitada.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.promocion.modificar_estado", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void Modificar_AmbosDestinos_LanzaDestinoInvalido()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var promocion = PromocionEnRevision();
+            promocion.CategoriaPrenda = "Remeras"; // ya tiene IdPlan=1 seteado por el helper
+
+            try
+            {
+                bll.Modificar("Test", promocion);
+                Assert.Fail("Debía rechazar aplicar a plan y categoría simultáneamente.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.promocion.destino_invalido", ex.Clave);
+            }
+        }
     }
 }

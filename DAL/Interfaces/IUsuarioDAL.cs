@@ -10,6 +10,7 @@ namespace DAL.Interfaces
         List<BE.Usuario> ObtenerTodos();
         List<BE.Usuario> ObtenerArchivados();
         BE.Usuario       ObtenerPorUsername(string username);
+        BE.Usuario       ObtenerPorId(int idUsuario);
         void             Alta(string username, string clave, string perfil);
         // ABM — modificación de datos administrativos NO sensibles y cambio de rol.
         void             Modificar(int idUsuario, string nombre, string apellido, string username, DateTime? fechaNacimiento, string email);
@@ -36,5 +37,11 @@ namespace DAL.Interfaces
         void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion);
         void EliminarEnTx(SqlConnection conexion, SqlTransaction tx, int idUsuario);
         void RevertirDesdeEspejoEnTx(SqlConnection conexion, SqlTransaction tx, BE.FilaUsuarioDV valoresEspejo);
+
+        // Aplica un snapshot del patrón Memento (Historial de Cambios) sobre la fila activa.
+        // Estaba implementado en DAL.Usuario pero faltaba en el contrato de inyección: ninguna
+        // capa que dependiera de IUsuarioDAL podía invocar la restauración sin castear al tipo
+        // concreto, ni testearla con un doble.
+        void RestaurarVersion(BE.VersionUsuario v);
     }
 }

@@ -9,6 +9,12 @@ namespace BLL.Estrategias
     public sealed class EstrategiaVencimientoInactividad : EstrategiaRiesgo
     {
         public const int DiasParaConsiderarVencimientoProximo = 15;
+
+        // 30 días (vs. los 60 de EstrategiaInactividadPura) a propósito: acá la inactividad es
+        // una señal SECUNDARIA que solo se evalúa cuando la suscripción YA está vencida o por
+        // vencer, así que un umbral más corto alcanza para reforzar ese riesgo. La otra
+        // estrategia usa la inactividad como ÚNICA señal (sin mirar vencimiento) y necesita un
+        // umbral más largo para no marcar en riesgo a alguien que solo se tomó un respiro corto.
         public const int DiasSinActividadParaRiesgo = 30;
 
         public override BE.ResultadoRiesgo Evaluar(BE.DatosClienteRiesgo datos)

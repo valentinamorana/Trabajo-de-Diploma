@@ -71,7 +71,7 @@ namespace GUI
             this.btnNuevo.Top       = 11;
             this.btnNuevo.Width     = 130;
             this.btnNuevo.Height    = 28;
-            this.btnNuevo.BackColor = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnNuevo.BackColor = Tema.RosaPrimario;
             this.btnNuevo.ForeColor = System.Drawing.Color.White;
             this.btnNuevo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnNuevo.FlatAppearance.BorderSize = 0;
@@ -134,6 +134,9 @@ namespace GUI
             this.dgvClientes.AllowUserToAddRows     = false;
             this.dgvClientes.AllowUserToDeleteRows  = false;
             this.dgvClientes.SelectionMode          = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            // Pantalla de acción sobre UN cliente a la vez: sin esto, Ctrl/Shift-click permite
+            // seleccionar varias filas y las acciones solo actúan sobre la primera, sin avisar.
+            this.dgvClientes.MultiSelect            = false;
             this.dgvClientes.AutoSizeColumnsMode    = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvClientes.BackgroundColor        = System.Drawing.Color.White;
             this.dgvClientes.RowHeadersVisible      = false;

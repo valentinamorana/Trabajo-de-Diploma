@@ -109,7 +109,7 @@ namespace GUI
             this.lblSeleccionaCliente.Size = new System.Drawing.Size(600, 23);
             this.lblSeleccionaCliente.TabIndex = 0;
             this.lblSeleccionaCliente.Tag = "lbl.ped.selcliente";
-            this.lblSeleccionaCliente.Text = "Selecioná el cliente para este pedido:";
+            this.lblSeleccionaCliente.Text = "Seleccioná el cliente para este pedido:";
             // 
             // cmbCliente
             // 
@@ -174,7 +174,7 @@ namespace GUI
             this.lblInstruccion.Size = new System.Drawing.Size(660, 23);
             this.lblInstruccion.TabIndex = 0;
             this.lblInstruccion.Tag = "lbl.ped.selprendas";
-            this.lblInstruccion.Text = "Selecioná las prendas para incluir en el pedido (checkbox):";
+            this.lblInstruccion.Text = "Seleccioná las prendas para incluir en el pedido (checkbox):";
             // 
             // dgvPrendas
             // 

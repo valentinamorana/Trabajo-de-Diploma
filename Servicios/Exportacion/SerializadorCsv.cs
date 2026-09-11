@@ -53,8 +53,18 @@ namespace Servicios.Exportacion
             return sb.ToString();
         }
 
+        // Caracteres que Excel/LibreOffice interpretan como inicio de fórmula al abrir el CSV
+        // (CSV/Formula Injection, CWE-1236). Sin esto, un campo con datos cargados por un usuario
+        // (nombre, motivo, observación...) que empezara con uno de estos podía ejecutar una
+        // fórmula al abrirse — riesgo real aunque de explotación limitada en este contexto (export
+        // manual, uso interno).
+        private static readonly char[] PrefijosFormula = { '=', '+', '-', '@', '\t' };
+
         private static string Escapar(string campo)
         {
+            if (campo.Length > 0 && System.Array.IndexOf(PrefijosFormula, campo[0]) >= 0)
+                campo = "'" + campo;
+
             bool necesitaComillas =
                 campo.IndexOf(Separador) >= 0 ||
                 campo.IndexOf('"') >= 0 ||

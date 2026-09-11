@@ -183,7 +183,7 @@ namespace GUI
             // ── btnRestaurar ───────────────────────────────────────────────────
             this.btnRestaurar.Anchor = ((System.Windows.Forms.AnchorStyles)(
                 System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left));
-            this.btnRestaurar.BackColor = System.Drawing.Color.FromArgb(210, 100, 135);
+            this.btnRestaurar.BackColor = Tema.RosaPrimario;
             this.btnRestaurar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnRestaurar.Enabled   = false;
             this.btnRestaurar.FlatAppearance.BorderSize = 0;
@@ -218,6 +218,8 @@ namespace GUI
             this.btnCerrar.Click += new System.EventHandler(this.BtnCerrar_Click);
 
             // ── PedidoHistorialForm ────────────────────────────────────────────
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor       = System.Drawing.Color.White;
             this.ClientSize      = new System.Drawing.Size(860, 560);
             this.Controls.Add(this.lblPedidoInfo);

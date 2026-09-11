@@ -84,6 +84,7 @@
             this.analisisEscasezToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.recomendacionPrendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventanaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cerrarTodasLasVentanasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alertasItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsIdioma.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -577,12 +578,27 @@
             // forma de ver/ordenar las pantallas abiertas más que buscarlas a mano). Alineado a
             // la derecha, junto a Sesión: es una herramienta del propio menú, no un módulo de
             // negocio, así que no debe mezclarse con Suscriptores/Inventario/Ventas/etc.
+            //
+            // cerrarTodasLasVentanasToolStripMenuItem se agrega ACÁ (antes de asignar
+            // MdiWindowListItem) porque WinForms respeta los DropDownItems ya presentes y
+            // les agrega un separador + la lista de ventanas abajo — no hace falta
+            // mantenerla sincronizada a mano.
+            this.ventanaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cerrarTodasLasVentanasToolStripMenuItem});
             this.ventanaToolStripMenuItem.Name = "ventanaToolStripMenuItem";
             this.ventanaToolStripMenuItem.Tag = "mnu.ventana";
             this.ventanaToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
             this.ventanaToolStripMenuItem.Text = "Ventanas Abiertas";
             this.ventanaToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.menuStrip1.MdiWindowListItem = this.ventanaToolStripMenuItem;
+            //
+            // cerrarTodasLasVentanasToolStripMenuItem
+            //
+            this.cerrarTodasLasVentanasToolStripMenuItem.Name = "cerrarTodasLasVentanasToolStripMenuItem";
+            this.cerrarTodasLasVentanasToolStripMenuItem.Tag = "mnu.ventana.cerrartodas";
+            this.cerrarTodasLasVentanasToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.cerrarTodasLasVentanasToolStripMenuItem.Text = "Cerrar Todas";
+            this.cerrarTodasLasVentanasToolStripMenuItem.Click += new System.EventHandler(this.cerrarTodasLasVentanasToolStripMenuItem_Click);
             //
             // alertasItem — Centro de Alertas, alineado a la derecha (badge se compone en código).
             //
@@ -661,6 +677,7 @@
         private System.Windows.Forms.ToolStripMenuItem idiomasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem integridadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ventanaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cerrarTodasLasVentanasToolStripMenuItem;
         private System.Windows.Forms.ToolStrip tsIdioma;
         private System.Windows.Forms.ToolStripLabel lblIdioma;
         private System.Windows.Forms.ToolStripSeparator tsIdiomaSep;

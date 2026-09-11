@@ -7,13 +7,10 @@ namespace Tests
 {
     /// <summary>
     /// BLL.Cliente — gestión de clientes (PdN1). Cubre validación de alta/modificación,
-    /// detección de DNI duplicado, bloqueo de baja con prendas en uso y el DTO de estado
-    /// comercial que usa NuevoPedidoForm para decidir si un cliente puede pedir.
-    ///
-    /// NO cubre ActivarSuscripcion() ni la rama de "cambio de plan" de Modificar(): ambas
-    /// llaman a DAL.PlanSuscripcion.ObtenerPorId directo (campo concreto, no inyectado —
-    /// mismo patrón de acoplamiento que BLL.Pedido, ver nota en el README de Tests) y no
-    /// se pueden ejercitar sin una conexión real a la base.
+    /// detección de DNI duplicado, bloqueo de baja con prendas en uso, el DTO de estado
+    /// comercial que usa NuevoPedidoForm para decidir si un cliente puede pedir, la rama de
+    /// "cambio de plan" de Modificar() y ActivarSuscripcion() (ambas vía FakePlanSuscripcionDAL,
+    /// inyectado desde que el constructor dejó de usar un DAL.PlanSuscripcion concreto fijo).
     /// </summary>
     [TestClass]
     public class ClienteTests
@@ -331,6 +328,96 @@ namespace Tests
                 Assert.AreEqual("err.bll.cliente.plan_solo_admin", ex.Clave);
             }
             Assert.AreEqual(0, fake.ModificarVeces, "No debe tocar el DAL si el guard rechaza.");
+        }
+
+        [TestMethod]
+        public void Modificar_CambioDePlanConStockInsuficiente_LanzaPlanInsuficiente_SinTocarElDAL()
+        {
+            LoginComoAdministrador();
+            var actual = ClienteValido();
+            actual.StockUtilizado = 5;
+            var dalCliente = new FakeClienteDAL { ClientePorId = actual };
+            var dalPlan = new FakePlanSuscripcionDAL
+            {
+                PlanPorId = new BE.PlanSuscripcion { IdPlan = 2, Nombre = "Básico", LimitePrendas = 3 }
+            };
+            var bll = new BLL.Cliente(dalCliente, dalPlan);
+            var cliente = ClienteValido();
+            cliente.IdPlan = 2; // distinto del actual → consulta el plan inyectado
+
+            try
+            {
+                bll.Modificar("Test", cliente);
+                Assert.Fail("Debía rechazar un plan con menos capacidad que el stock en uso.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cliente.plan_insuficiente", ex.Clave);
+            }
+            Assert.AreEqual(0, dalCliente.ModificarVeces);
+        }
+
+        [TestMethod]
+        public void Modificar_CambioDePlanConStockSuficiente_Actualiza()
+        {
+            LoginComoAdministrador();
+            var actual = ClienteValido();
+            actual.StockUtilizado = 2;
+            var dalCliente = new FakeClienteDAL { ClientePorId = actual };
+            var dalPlan = new FakePlanSuscripcionDAL
+            {
+                PlanPorId = new BE.PlanSuscripcion { IdPlan = 2, Nombre = "Premium", LimitePrendas = 5 }
+            };
+            var bll = new BLL.Cliente(dalCliente, dalPlan);
+            var cliente = ClienteValido();
+            cliente.IdPlan = 2;
+
+            bll.Modificar("Test", cliente);
+
+            Assert.AreEqual(1, dalCliente.ModificarVeces);
+        }
+
+        // ── ActivarSuscripcion (Builder) ─────────────────────────────────────────
+
+        [TestMethod]
+        public void ActivarSuscripcion_PlanInexistente_LanzaPlanInexistente_SinAsignarNada()
+        {
+            LoginComoAdministrador();
+            var dalPlan = new FakePlanSuscripcionDAL { PlanPorId = null };
+            var bll = new BLL.Cliente(new FakeClienteDAL(), dalPlan);
+            var cliente = ClienteValido();
+            cliente.IdPlan = null;
+
+            try
+            {
+                bll.ActivarSuscripcion("Test", cliente, 99, BE.Builders.ModalidadCobro.Mensual);
+                Assert.Fail("Debía rechazar un plan inexistente.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cliente.plan_inexistente", ex.Clave);
+            }
+            Assert.IsNull(cliente.IdPlan, "No debe haber asignado ningún plan.");
+        }
+
+        [TestMethod]
+        public void ActivarSuscripcion_PlanValido_AsignaPlanYCalculaVencimientoConElBuilder()
+        {
+            LoginComoAdministrador();
+            var plan = new BE.PlanSuscripcion { IdPlan = 3, Nombre = "Anual", LimitePrendas = 10 };
+            var dalPlan = new FakePlanSuscripcionDAL { PlanPorId = plan };
+            var bll = new BLL.Cliente(new FakeClienteDAL(), dalPlan);
+            var cliente = ClienteValido();
+            cliente.IdPlan = null;
+            cliente.FechaVencimiento = null;
+
+            var suscripcion = bll.ActivarSuscripcion("Test", cliente, 3, BE.Builders.ModalidadCobro.Mensual);
+
+            Assert.AreEqual(3, cliente.IdPlan);
+            Assert.AreEqual("Anual", cliente.NombrePlan);
+            Assert.AreEqual(10, cliente.LimitePrendas);
+            Assert.IsNotNull(cliente.FechaVencimiento);
+            Assert.AreEqual(cliente.FechaVencimiento, suscripcion.FechaVencimiento);
         }
 
         // ── ReanudarPausa (Bloque 1) ─────────────────────────────────────────────

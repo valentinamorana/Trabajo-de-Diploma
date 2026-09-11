@@ -91,10 +91,10 @@ namespace GUI
             this.lblModalidad.TabIndex = 5;
 
             this.cmbModalidad.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.cmbModalidad.Items.AddRange(new object[] {
-                BE.Builders.ModalidadCobro.Mensual,
-                BE.Builders.ModalidadCobro.Trimestral,
-                BE.Builders.ModalidadCobro.Anual });
+            // Enum.GetValues en vez de una lista hardcodeada (antes la única de las 3 pantallas
+            // que no lo hacía así — NuevaContratacionForm ya usaba este criterio): un valor nuevo
+            // en BE.Builders.ModalidadCobro se refleja acá sin tener que acordarse de tocar esta lista.
+            this.cmbModalidad.DataSource = System.Enum.GetValues(typeof(BE.Builders.ModalidadCobro));
             this.cmbModalidad.Location     = new Point(120, 212);
             this.cmbModalidad.Name         = "cmbModalidad";
             this.cmbModalidad.SelectedIndex = 0;

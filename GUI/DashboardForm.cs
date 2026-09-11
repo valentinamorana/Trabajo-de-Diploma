@@ -25,7 +25,7 @@ namespace GUI
     ///
     /// Implementa IIdiomaObserver: las etiquetas se traducen al cambiar el idioma.
     /// </summary>
-    public partial class DashboardForm : Form, IIdiomaObserver
+    public partial class DashboardForm : FormBase, IIdiomaObserver
     {
         private static readonly string DirBackups =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
@@ -58,12 +58,23 @@ namespace GUI
         private Label _numOcupacion, _txtOcupacion;
         private Panel _cardBackupPanel;
 
+        // Único ícono-solo ("⚙") de las 16 pantallas de Dashboards/Análisis/Reportes/Historiales
+        // sin tooltip — se crea en código (btnConfig no viene del Designer), así que el ToolTip
+        // también se instancia acá.
+        private readonly ToolTip _tipConfig = new ToolTip();
+
         private Panel        _panelActividad;
         private Label        _lblActTitulo;
         private DataGridView _dgvActividad;
 
         // ── Auto-refresh timer ────────────────────────────────────────────────
         private System.Windows.Forms.Timer _timer;
+
+        // Se reasignaban con `new Font(...)` en cada refresco (timer de 2 min) sin liberar el
+        // anterior — Font implementa IDisposable y envuelve un handle GDI; creadas una sola vez
+        // acá y reutilizadas evita esa fuga en sesiones largas.
+        private readonly Font _fontBackupChico  = new Font("Segoe UI", 20f, FontStyle.Bold);
+        private readonly Font _fontBackupGrande = new Font("Segoe UI", 36f, FontStyle.Bold);
 
         public DashboardForm(List<BE.Permiso> permisos)
         {
@@ -90,8 +101,7 @@ namespace GUI
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-            try { string ico = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             // Cargar datos en background — el form aparece inmediatamente
@@ -123,44 +133,36 @@ namespace GUI
             CargarTareasPendientes();
         }
 
-        private string T(string key, string fallback)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(key) ? t[key].Texto : fallback;
-        }
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+            this.Text          = Tr("frm.dashboard",      "Panel de Control");
+            lblTitulo.Text     = Tr("frm.dashboard",      "Panel de Control");
+            lblSub.Text        = Tr("dash.general.subtitulo", "WardrobeFlow");
+            btnRefrescar.Text  = Tr("dash.btn.refrescar", "↻ Actualizar");
 
-            this.Text          = T("frm.dashboard",      "Panel de Control");
-            lblTitulo.Text     = T("frm.dashboard",      "Panel de Control");
-            btnRefrescar.Text  = T("dash.btn.refrescar", "↻ Actualizar");
+            if (_txtPrendas   != null) _txtPrendas.Text   = Tr("dash.prendas",    "Prendas\ndisponibles");
+            if (_txtClientes  != null) _txtClientes.Text  = Tr("dash.clientes",   "Clientes\nregistrados");
+            if (_txtPedidos   != null) _txtPedidos.Text   = Tr("dash.pedidos",    "Pedidos\npendientes");
+            if (_txtBackup    != null) _txtBackup.Text    = Tr("dash.backup",     "días sin\nbackup");
+            if (_txtOcupacion != null) _txtOcupacion.Text = Tr("dash.ocupacion",  "ocupación\ndel stock");
 
-            if (_txtPrendas   != null) _txtPrendas.Text   = T("dash.prendas",    "Prendas\ndisponibles");
-            if (_txtClientes  != null) _txtClientes.Text  = T("dash.clientes",   "Clientes\nregistrados");
-            if (_txtPedidos   != null) _txtPedidos.Text   = T("dash.pedidos",    "Pedidos\npendientes");
-            if (_txtBackup    != null) _txtBackup.Text    = T("dash.backup",     "días sin\nbackup");
-            if (_txtOcupacion != null) _txtOcupacion.Text = T("dash.ocupacion",  "ocupación\ndel stock");
-
-            if (_lblActTitulo != null) _lblActTitulo.Text = T("dash.actividad.titulo", "Actividad reciente");
-            lblStTitulo.Text  = T("dash.stats.titulo",     "Resumen de eventos");
+            if (_lblActTitulo != null) _lblActTitulo.Text = Tr("dash.actividad.titulo", "Actividad reciente");
+            lblStTitulo.Text  = Tr("dash.stats.titulo",     "Resumen de eventos");
             if (_dgvActividad != null && _dgvActividad.Columns.Count >= 3)
             {
-                _dgvActividad.Columns["colFecha"].HeaderText = T("dash.col.fecha",   "Fecha");
-                _dgvActividad.Columns["colTipo"].HeaderText  = T("dash.col.evento",  "Evento");
-                _dgvActividad.Columns["colUser"].HeaderText  = T("dash.col.usuario", "Usuario");
+                _dgvActividad.Columns["colFecha"].HeaderText = Tr("dash.col.fecha",   "Fecha");
+                _dgvActividad.Columns["colTipo"].HeaderText  = Tr("dash.col.evento",  "Evento");
+                _dgvActividad.Columns["colUser"].HeaderText  = Tr("dash.col.usuario", "Usuario");
             }
 
             // Panel "Mis Tareas Pendientes": título y encabezados del grid (antes quedaban
             // siempre en español porque se fijaban una sola vez al construir la UI).
-            lblTareasTitulo.Text = string.Format(T("dash.tareas.titulo", "Mis Tareas Pendientes ({0})"), 0);
+            lblTareasTitulo.Text = string.Format(Tr("dash.tareas.titulo", "Mis Tareas Pendientes ({0})"), 0);
             if (dgvTareas.Columns.Count >= 3)
             {
-                dgvTareas.Columns["colTipo"].HeaderText  = T("dash.tareas.col.tipo",  "Tipo");
-                dgvTareas.Columns["colDesc"].HeaderText  = T("dash.tareas.col.desc",  "Descripción");
-                dgvTareas.Columns["colFecha"].HeaderText = T("dash.tareas.col.fecha", "Desde");
+                dgvTareas.Columns["colTipo"].HeaderText  = Tr("dash.tareas.col.tipo",  "Tipo");
+                dgvTareas.Columns["colDesc"].HeaderText  = Tr("dash.tareas.col.desc",  "Descripción");
+                dgvTareas.Columns["colFecha"].HeaderText = Tr("dash.tareas.col.fecha", "Desde");
             }
         }
 
@@ -200,7 +202,7 @@ namespace GUI
                     if (usuario != null)
                         lblSesion.Text =
                             $"{usuario.Username}  ·  {usuario.Perfil ?? "—"}" +
-                            (hora.HasValue ? $"  ·  {T("dash.sesion.iniciada", "Sesión iniciada:")} {hora.Value:HH:mm}" : "");
+                            (hora.HasValue ? $"  ·  {Tr("dash.sesion.iniciada", "Sesión iniciada:")} {hora.Value:HH:mm}" : "");
                 }));
             });
         }
@@ -227,12 +229,12 @@ namespace GUI
                 if (ultimo == null)
                 {
                     _numBackup.Text              = "!";
-                    _numBackup.Font              = new Font("Segoe UI", 36f, FontStyle.Bold);
+                    _numBackup.Font              = _fontBackupGrande;
                     _cardBackupPanel.BackColor   = Color.FromArgb(255, 218, 218);
                     _numBackup.ForeColor         = Color.FromArgb(160, 20, 20);
                     _txtBackup.ForeColor         = Color.FromArgb(160, 20, 20);
                     _cardBackupPanel.Invalidate();
-                    MostrarAviso(T("dash.aviso.sinbackup", "⚠  Sin backups. Generá uno desde Administrar → Backup."), Color.FromArgb(180, 30, 30));
+                    MostrarAviso(Tr("dash.aviso.sinbackup", "⚠  Sin backups. Generá uno desde Administrar → Backup."), Color.FromArgb(180, 30, 30));
                     return;
                 }
 
@@ -241,13 +243,13 @@ namespace GUI
                 // Número grande: días transcurridos (o "Hoy")
                 if (dias == 0)
                 {
-                    _numBackup.Text = T("dash.backup.hoy", "Hoy");
-                    _numBackup.Font = new Font("Segoe UI", 20f, FontStyle.Bold);
+                    _numBackup.Text = Tr("dash.backup.hoy", "Hoy");
+                    _numBackup.Font = _fontBackupChico;
                 }
                 else
                 {
                     _numBackup.Text = dias.ToString();
-                    _numBackup.Font = new Font("Segoe UI", 36f, FontStyle.Bold);
+                    _numBackup.Font = _fontBackupGrande;
                 }
 
                 // Código de color: verde → amarillo → rojo según antigüedad vs umbral
@@ -275,7 +277,7 @@ namespace GUI
 
                 if (dias > umbral)
                     MostrarAviso(
-                        string.Format(T("dash.aviso.vencido", "⚠  Hace {0} día(s) sin backup — recordatorio cada {1} días."), dias, umbral),
+                        string.Format(Tr("dash.aviso.vencido", "⚠  Hace {0} día(s) sin backup — recordatorio cada {1} días."), dias, umbral),
                         Color.FromArgb(160, 60, 0));
                 else
                     OcultarAviso();
@@ -316,7 +318,7 @@ namespace GUI
             if (_txtOcupacion != null)
             {
                 _txtOcupacion.Text = string.Format(
-                    T("dash.ocupacion.detalle", "{0} en uso · {1} libres"),
+                    Tr("dash.ocupacion.detalle", "{0} en uso · {1} libres"),
                     oc.EnUso, oc.Disponibles);
                 _txtOcupacion.ForeColor = tinta;
             }
@@ -333,7 +335,7 @@ namespace GUI
 
             using (var dlg = new Form())
             {
-                dlg.Text            = T("dash.cfg.titulo", "Recordatorio de Backup");
+                dlg.Text            = Tr("dash.cfg.titulo", "Recordatorio de Backup");
                 dlg.ClientSize      = new Size(300, 150);
                 dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
                 dlg.StartPosition   = FormStartPosition.CenterParent;
@@ -343,7 +345,7 @@ namespace GUI
 
                 var lbl = new Label
                 {
-                    Text     = T("dash.cfg.recada", "Recordarme cada:"),
+                    Text     = Tr("dash.cfg.recada", "Recordarme cada:"),
                     Left     = 16, Top = 22, Width = 268, Height = 20,
                     Font     = new Font("Segoe UI", 9f)
                 };
@@ -357,13 +359,13 @@ namespace GUI
 
                 var lblDias = new Label
                 {
-                    Text = T("dash.cfg.dias", "días"), Left = 104, Top = 52, Width = 60, Height = 20,
+                    Text = Tr("dash.cfg.dias", "días"), Left = 104, Top = 52, Width = 60, Height = 20,
                     Font = new Font("Segoe UI", 9f)
                 };
 
                 var btnOk = new Button
                 {
-                    Text = T("dash.cfg.guardar", "Guardar"), Left = 80, Top = 104, Width = 90, Height = 30,
+                    Text = Tr("dash.cfg.guardar", "Guardar"), Left = 80, Top = 104, Width = 90, Height = 30,
                     DialogResult = DialogResult.OK,
                     BackColor    = Color.FromArgb(176, 62, 96),
                     ForeColor    = Color.White, FlatStyle = FlatStyle.Flat
@@ -372,7 +374,7 @@ namespace GUI
 
                 var btnCancelar = new Button
                 {
-                    Text = T("btn.cancelar", "Cancelar"), Left = 184, Top = 104, Width = 100, Height = 30,
+                    Text = Tr("btn.cancelar", "Cancelar"), Left = 184, Top = 104, Width = 100, Height = 30,
                     DialogResult = DialogResult.Cancel, FlatStyle = FlatStyle.Flat
                 };
 
@@ -394,7 +396,7 @@ namespace GUI
         {
             using (var br = new LinearGradientBrush(
                 panelHeader.ClientRectangle,
-                Color.FromArgb(210, 100, 135),
+                Tema.RosaPrimario,
                 Color.FromArgb(176, 62, 96),
                 LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
@@ -473,6 +475,7 @@ namespace GUI
                     Anchor    = AnchorStyles.Top | AnchorStyles.Right
                 };
                 btnConfig.FlatAppearance.BorderSize = 0;
+                _tipConfig.SetToolTip(btnConfig, Tr("tip.config.backup", "Configurar recordatorio de backup"));
                 btnConfig.Click += (s, e) => ConfigurarRecordatorio();
                 tarjeta.Controls.Add(btnConfig);
                 btnConfig.BringToFront();
@@ -564,14 +567,14 @@ namespace GUI
                     if (IsDisposed || !panelTareas.Visible) return;
                     dgvTareas.Rows.Clear();
 
-                    string tipoMant   = T("dash.tarea.mantenimiento", "Mantenimiento");
-                    string tipoPedido = T("dash.tarea.pedido",        "Pedido");
+                    string tipoMant   = Tr("dash.tarea.mantenimiento", "Mantenimiento");
+                    string tipoPedido = Tr("dash.tarea.pedido",        "Pedido");
 
                     if (enMant != null)
                         foreach (var m in enMant)
                         {
                             int dias = m.DiasTranscurridos;
-                            string desde = dias == 0 ? T("dash.hoy", "hoy") : string.Format(T("dash.hace_dias", "hace {0}d"), dias);
+                            string desde = dias == 0 ? Tr("dash.hoy", "hoy") : string.Format(Tr("dash.hace_dias", "hace {0}d"), dias);
                             var fila = dgvTareas.Rows[dgvTareas.Rows.Add(tipoMant, m.NombrePrenda, desde)];
                             fila.DefaultCellStyle.ForeColor = m.NivelUrgencia == BE.NivelUrgencia.Reciente
                                 ? Color.FromArgb(60, 100, 60) : Color.FromArgb(160, 60, 0);
@@ -582,7 +585,7 @@ namespace GUI
                         foreach (var p in pedPend)
                         {
                             int dias = p.DiasDesdeAlta;
-                            string desde = dias == 0 ? T("dash.hoy", "hoy") : string.Format(T("dash.hace_dias", "hace {0}d"), dias);
+                            string desde = dias == 0 ? Tr("dash.hoy", "hoy") : string.Format(Tr("dash.hace_dias", "hace {0}d"), dias);
                             string desc  = $"#{p.IdPedido} — {p.NombreCliente ?? $"Cliente {p.IdCliente}"}";
                             var fila = dgvTareas.Rows[dgvTareas.Rows.Add(tipoPedido, desc, desde)];
                             fila.DefaultCellStyle.ForeColor = p.EsUrgentePorAntiguedad ? Color.FromArgb(160, 40, 40) : Color.FromArgb(160, 100, 0);
@@ -591,12 +594,12 @@ namespace GUI
 
                     if (dgvTareas.Rows.Count == 0)
                     {
-                        dgvTareas.Rows.Add("—", T("dash.tareas.sinpendientes", "Sin tareas pendientes"), "—");
+                        dgvTareas.Rows.Add("—", Tr("dash.tareas.sinpendientes", "Sin tareas pendientes"), "—");
                         dgvTareas.Rows[0].DefaultCellStyle.ForeColor = Color.Gray;
                     }
 
                     lblTareasTitulo.Text = string.Format(
-                        T("dash.tareas.titulo", "Mis Tareas Pendientes ({0})"),
+                        Tr("dash.tareas.titulo", "Mis Tareas Pendientes ({0})"),
                         dgvTareas.Rows.Count == 1 && dgvTareas.Rows[0].Cells["colTipo"].Value?.ToString() == "—" ? 0 : dgvTareas.Rows.Count);
                 }));
             });
@@ -644,19 +647,19 @@ namespace GUI
 
             switch (actividad)
             {
-                case "Inicio Sesion":                      return T("dash.act.login",           actividad);
-                case "Cierre Sesion":                      return T("dash.act.logout",          actividad);
-                case "Cambio de Contrasena Propia":        return T("dash.act.pwchange",        actividad);
-                case "Bloqueo de Cuenta":                  return T("dash.act.accountlock",     actividad);
-                case "Intento Fallido Login":              return T("dash.act.loginfail",       actividad);
-                case "Baja Logica Usuario":                return T("dash.act.userdeactivate",  actividad);
-                case "Cambio de Rol de Usuario":           return T("dash.act.rolechange",      actividad);
-                case "Desbloqueo con Clave de Emergencia": return T("dash.act.emergencyunlock", actividad);
-                case "Modificación de Usuario":            return T("dash.act.usermod",         actividad);
-                case "Purga Usuarios Archivados":          return T("dash.act.userpurge",       actividad);
-                case "Reset Contrasena":                   return T("dash.act.pwreset",         actividad);
-                case "Reset Masivo Contrasenas":           return T("dash.act.pwresetmass",     actividad);
-                case "Solicitud Recuperacion Clave":       return T("dash.act.pwrecoveryreq",   actividad);
+                case "Inicio Sesion":                      return Tr("dash.act.login",           actividad);
+                case "Cierre Sesion":                      return Tr("dash.act.logout",          actividad);
+                case "Cambio de Contrasena Propia":        return Tr("dash.act.pwchange",        actividad);
+                case "Bloqueo de Cuenta":                  return Tr("dash.act.accountlock",     actividad);
+                case "Intento Fallido Login":              return Tr("dash.act.loginfail",       actividad);
+                case "Baja Logica Usuario":                return Tr("dash.act.userdeactivate",  actividad);
+                case "Cambio de Rol de Usuario":           return Tr("dash.act.rolechange",      actividad);
+                case "Desbloqueo con Clave de Emergencia": return Tr("dash.act.emergencyunlock", actividad);
+                case "Modificación de Usuario":            return Tr("dash.act.usermod",         actividad);
+                case "Purga Usuarios Archivados":          return Tr("dash.act.userpurge",       actividad);
+                case "Reset Contrasena":                   return Tr("dash.act.pwreset",         actividad);
+                case "Reset Masivo Contrasenas":           return Tr("dash.act.pwresetmass",     actividad);
+                case "Solicitud Recuperacion Clave":       return Tr("dash.act.pwrecoveryreq",   actividad);
             }
 
             // Prefijos con parte dinámica (orden: el más específico primero).
@@ -672,12 +675,12 @@ namespace GUI
             };
             foreach (var p in prefijos)
                 if (actividad.StartsWith(p.Es, StringComparison.Ordinal))
-                    return string.Format(T(p.Key, "{0}"), actividad.Substring(p.Es.Length));
+                    return string.Format(Tr(p.Key, "{0}"), actividad.Substring(p.Es.Length));
 
             var m = System.Text.RegularExpressions.Regex.Match(
                 actividad, @"^Regeneración de (\d+) claves de emergencia$");
             if (m.Success)
-                return string.Format(T("dash.act.emergencykeys", "{0}"), m.Groups[1].Value);
+                return string.Format(Tr("dash.act.emergencykeys", "{0}"), m.Groups[1].Value);
 
             return actividad;   // actividad desconocida → sin traducir
         }
@@ -720,7 +723,9 @@ namespace GUI
                     if (IsDisposed) return;
                     flStats.Controls.Clear();
 
-                    flStats.Controls.Add(CrearMiniStatRow("Sistema (30d)", (dtN?.Rows.Count ?? 0).ToString(), Color.FromArgb(176, 62, 96)));
+                    var tStats = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                    string lblSistema30d = tStats.ContainsKey("dash.stats.sistema30d") ? tStats["dash.stats.sistema30d"].Texto : "Sistema (30d)";
+                    flStats.Controls.Add(CrearMiniStatRow(lblSistema30d, (dtN?.Rows.Count ?? 0).ToString(), Color.FromArgb(176, 62, 96)));
 
                     if (dtNeg != null)
                     {

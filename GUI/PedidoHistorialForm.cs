@@ -62,43 +62,33 @@ namespace GUI
         private void Traducir(Idioma idioma)
         {
             _idioma = idioma;   // sincronizar antes de llamar a TraducirHeadersGrilla()
-            var t = Traductor.ObtenerTraducciones(idioma);
+            this.Text           = Tr("frm.historial",      "Historial de Cambios — Pedido");
+            grpFiltros.Text     = Tr("lbl.hist.filtros",   "Filtros");
+            lblDesde.Text       = Tr("lbl.hist.desde",     "Desde:");
+            lblHasta.Text       = Tr("lbl.hist.hasta",     "Hasta:");
+            lblAccion.Text      = Tr("lbl.hist.accion",    "Acción:");
+            btnBuscar.Text      = Tr("btn.hist.buscar",    "🔍 Buscar");
+            btnRestaurar.Text   = Tr("btn.hist.restaurar", "⟲ Restaurar");
+            btnCerrar.Text      = Tr("btn.hist.cerrar",    "Cerrar");
+            lblPedidoInfo.Text  = Tr("lbl.hist.pedido",    "Pedido #") + _idPedido;
 
-            string T(string clave, string fallback) =>
-                t.ContainsKey(clave) ? t[clave].Texto : fallback;
-
-            this.Text           = T("frm.historial",      "Historial de Cambios — Pedido");
-            grpFiltros.Text     = T("lbl.hist.filtros",   "Filtros");
-            lblDesde.Text       = T("lbl.hist.desde",     "Desde:");
-            lblHasta.Text       = T("lbl.hist.hasta",     "Hasta:");
-            lblAccion.Text      = T("lbl.hist.accion",    "Acción:");
-            btnBuscar.Text      = T("btn.hist.buscar",    "🔍 Buscar");
-            btnRestaurar.Text   = T("btn.hist.restaurar", "⟲ Restaurar");
-            btnCerrar.Text      = T("btn.hist.cerrar",    "Cerrar");
-            lblPedidoInfo.Text  = T("lbl.hist.pedido",    "Pedido #") + _idPedido;
-
-            RellenarComboAcciones(idioma);
+            RellenarComboAcciones();
             TraducirHeadersGrilla();
         }
 
-        private void RellenarComboAcciones(Idioma idioma)
+        private void RellenarComboAcciones()
         {
             // Opciones fijas de acción — incluye "Todas" como opción vacía
-            var t = Traductor.ObtenerTraducciones(idioma);
-
-            string T(string clave, string fallback) =>
-                t.ContainsKey(clave) ? t[clave].Texto : fallback;
-
             var items = new List<ComboItem>
             {
-                new ComboItem("",           T("combo.hist.todas",      "— Todas —")),
-                new ComboItem("CREAR",      T("accion.crear",          "Crear")),
-                new ComboItem("DESPACHAR",  T("accion.despachar",      "Despachar")),
-                new ComboItem("ENTREGAR",   T("accion.entregar",       "Entregar")),
-                new ComboItem("CANCELAR",   T("accion.cancelar",       "Cancelar")),
-                new ComboItem("DESCANCELAR",T("accion.descancelar",    "Des-cancelar")),
-                new ComboItem("DEVOLUCION", T("accion.devolucion",     "Devolución")),
-                new ComboItem("RESTAURAR",  T("accion.restaurar",      "Restaurar")),
+                new ComboItem("",           Tr("combo.hist.todas",      "— Todas —")),
+                new ComboItem("CREAR",      Tr("accion.crear",          "Crear")),
+                new ComboItem("DESPACHAR",  Tr("accion.despachar",      "Despachar")),
+                new ComboItem("ENTREGAR",   Tr("accion.entregar",       "Entregar")),
+                new ComboItem("CANCELAR",   Tr("accion.cancelar",       "Cancelar")),
+                new ComboItem("DESCANCELAR",Tr("accion.descancelar",    "Des-cancelar")),
+                new ComboItem("DEVOLUCION", Tr("accion.devolucion",     "Devolución")),
+                new ComboItem("RESTAURAR",  Tr("accion.restaurar",      "Restaurar")),
             };
 
             string prevValue = (cmbAccion.SelectedItem as ComboItem)?.Value ?? "";
@@ -198,14 +188,11 @@ namespace GUI
             int idOperacion = Convert.ToInt32(row["IdOperacion"]);
             string accion   = row["Accion"].ToString();
 
-            var tH = Traductor.ObtenerTraducciones(_idioma);
-            string TH(string k, string fb) => tH.ContainsKey(k) ? tH[k].Texto : fb;
+            string advertencia = Tr("conf.hist.restaurar.msg",
+                "¿Restaurar el pedido #{0} al estado anterior a '{1}' (op. #{2})?\n\n⚠ Nota: esta operación modifica el estado del Pedido en la base de datos.\nEl estado de las Prendas asociadas NO se revierte automáticamente.\n\n¿Confirmar?",
+                new object[] { _idPedido, accion, idOperacion });
 
-            string tpl = TH("conf.hist.restaurar.msg",
-                "¿Restaurar el pedido #{0} al estado anterior a '{1}' (op. #{2})?\n\n⚠ Nota: esta operación modifica el estado del Pedido en la base de datos.\nEl estado de las Prendas asociadas NO se revierte automáticamente.\n\n¿Confirmar?");
-            string advertencia = string.Format(tpl, _idPedido, accion, idOperacion);
-
-            if (MessageBox.Show(advertencia, TH("msg.backup.titulorestaura", "Confirmar Restauración"),
+            if (MessageBox.Show(advertencia, Tr("msg.backup.titulorestaura", "Confirmar Restauración"),
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
                     MessageBoxDefaultButton.Button2) != DialogResult.Yes)
                 return;
@@ -213,7 +200,7 @@ namespace GUI
             try
             {
                 _pedidoBLL.RestaurarOperacion(this.Text, _idPedido, idOperacion);
-                MostrarOk(string.Format(TH("msg.hist.restaurado", "Pedido #{0} restaurado correctamente."), _idPedido));
+                MostrarOk(Tr("msg.hist.restaurado", "Pedido #{0} restaurado correctamente.", new object[] { _idPedido }));
                 Buscar();   // Recargar historial para ver el evento RESTAURAR
             }
             catch (Exception ex)

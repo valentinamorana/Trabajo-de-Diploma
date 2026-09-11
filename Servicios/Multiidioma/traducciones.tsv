@@ -50,6 +50,7 @@ ES	err.bll.version.no_existe	La versión seleccionada no existe.
 ES	err.bll.version.sin_permiso	Solo un Administrador puede restaurar una versión histórica de un usuario.
 ES	err.bll.prenda.transicion_baja	Una prenda dada de baja no puede cambiar de estado.
 ES	err.bll.prenda.transicion_enuso	El estado de una prenda en uso se actualiza automáticamente al procesar pedidos.\nLa única excepción manual es reportarla como perdida (PN04, módulo de Pedidos Realizados).
+ES	err.bll.prenda.baja_requiere_flujoperdida	Una prenda en uso solo puede darse de baja a través de 'Reportar Prenda Perdida' (con cargo de reposición al cliente), no directamente.
 ES	err.bll.prenda.transicion_generica	La transición de '{0}' a '{1}' no está permitida.
 ES	lbl.permisos.estructura	Estructura del sistema (roles, familias y patentes)
 ES	btn.permisos.quitar	Quitar ↑
@@ -57,6 +58,8 @@ ES	perm.msg.selpadre	Seleccioná una Familia o Rol para agregarle hijos.
 ES	perm.ok.agregado	'{0}' agregado a '{1}'.
 ES	perm.ok.quitado	'{0}' quitado de '{1}'.
 ES	btn.permisos.actualizar	↻ Actualizar
+ES	tip.actualizar	Actualizar
+ES	tip.config.backup	Configurar recordatorio de backup
 ES	help.permisos.rol	Rol = perfil que se asigna a un usuario. Puede contener patentes, familias y otros roles (rol-en-rol).
 ES	lbl.permisos.subtitulo	Gestión de roles, familias y patentes
 ES	btn.permisos.eliminar	🗑 Eliminar selección
@@ -78,6 +81,17 @@ ES	idiomas.ok.renombrado	Idioma renombrado.
 ES	idiomas.conf.incompleto	Este idioma tiene {0} control(es) sin traducir.\nSi lo activás, esos textos se mostrarán en el idioma por defecto.\n\n¿Activar de todos modos?
 ES	idiomas.conf.incompleto.t	Traducciones incompletas
 ES	lbl.idiomas.controles	Controles traducibles
+ES	col.idiomas.id	ID
+ES	col.idiomas.clave	Clave
+ES	col.idiomas.formulario	Formulario
+ES	col.idiomas.codigo	Código
+ES	col.idiomas.nombre	Nombre
+ES	col.idiomas.activo	Activo
+ES	col.idiomas.default	Default
+ES	col.idiomas.referencia	Referencia (por defecto)
+ES	col.idiomas.texto	Texto / Traducción
+ES	lbl.idiomas.si	Sí
+ES	lbl.idiomas.no	No
 ES	err.generico.cargar	Error al cargar: {0}
 ES	pedidos.hist.encontrados	{0} registro(s) encontrado(s).
 ES	frm.login	WardrobeFlow
@@ -116,6 +130,7 @@ ES	mnu.perfiles	Perfiles y Permisos
 ES	mnu.bitacora	Analítica
 ES	mnu.cerrarsesion	Cerrar Sesion
 ES	mnu.ventana	Ventanas Abiertas
+ES	mnu.ventana.cerrartodas	Cerrar Todas
 ES	mnu.idiomas	Gestión de Idiomas
 ES	frm.clientes	Gestión de Clientes
 ES	lbl.buscar	Buscar:
@@ -236,6 +251,8 @@ ES	col.hist.anterior	Valor Anterior
 ES	col.hist.nuevo	Valor Nuevo
 ES	dlg.cerrarsesion.titulo	Cerrar Sesión
 ES	dlg.cerrarsesion.msg	¿Está seguro que desea cerrar la sesión?
+ES	dlg.cerrartodas.titulo	Cerrar Todas las Ventanas
+ES	dlg.cerrartodas.msg	¿Cerrar todas las ventanas abiertas?
 ES	btn.si	Sí
 ES	btn.no	No
 ES	btn.refrescar	↻ Refrescar Lista
@@ -249,6 +266,8 @@ ES	col.prenda.categoria	Categoría
 ES	col.prenda.talle	Talle
 ES	col.prenda.color	Color
 ES	col.prenda.estado	Estado
+ES	col.listaespera.alta	Anotado el
+ES	col.listaespera.vence	Reserva vence
 ES	col.prenda.cliente	Cliente
 ES	col.prenda.alta	Alta
 ES	msg.prenda.conteo	Mostrando {0} de {1}
@@ -333,6 +352,7 @@ ES	msg.ped.conteo	{0} pedido(s)
 ES	msg.ped.cargados	{0} pedido(s) cargado(s).
 ES	msg.ped.creado	Pedido #{0} creado. Estado: Pendiente.
 ES	msg.ped.cancelado	Pedido #{0} cancelado. Prendas liberadas.
+ES	msg.ped.yanoexiste	Este pedido ya no existe. Actualizá la grilla.
 ES	msg.ped.reactivado	Pedido #{0} reactivado — volvió a Pendiente.
 ES	msg.ped.ensistema	{0} pedido(s) en el sistema.
 ES	msg.ped.mostrando	Mostrando {0} de {1}
@@ -434,7 +454,7 @@ ES	lbl.ped.infoplan	Cliente: {0}\nPlan: {1}\nPrendas en uso actualmente: {2}\nM�
 ES	err.ped.sinplan	⚠ {0} no tiene plan asignado.\nAsigná un plan en el módulo de Clientes antes de crear un pedido.
 ES	err.recup.nousername	Ingresá tu nombre de usuario.
 ES	err.recup.nousuario	No se encontró el usuario '{0}'.\nVerificá que escribiste tu nombre correctamente.
-ES	msg.recup.exito	Usuario '{0}' encontrado.\nContacta al administrador para que resetee\ntu contrasena desde Administrar -> Usuarios.
+ES	msg.recup.exito	Si el usuario existe, contactá al administrador para que resetee\ntu contraseña desde Administrar -> Usuarios.
 ES	err.recup.verificar	Error al verificar el usuario: {0}
 ES	msg.usr.creado.exportado	Usuario '{0}' [{1}] creado.\nCredenciales guardadas en:\n{2}
 ES	msg.usr.clave.exportada	Contraseña de '{0}' regenerada automáticamente.\nCredenciales guardadas en:\n{1}
@@ -553,11 +573,13 @@ ES	mnu.bitacora.sistema	Bitácora del Sistema
 ES	mnu.bitacora.negocio	Bitácora de Negocio
 ES	mnu.reportejornada	Reporte de Jornada
 ES	frm.dashboard	Panel de Control
+ES	dash.general.subtitulo	WardrobeFlow
 ES	dash.prendas	Prendas\ndisponibles
 ES	dash.clientes	Clientes\nregistrados
 ES	dash.pedidos	Pedidos\npendientes
 ES	dash.suscripciones	Suscripciones\npor vencer
 ES	dash.backup	días sin\nbackup
+ES	dash.stats.sistema30d	Sistema (30d)
 ES	dash.ocupacion	ocupación\ndel stock
 ES	dash.ocupacion.detalle	{0} en uso · {1} libres
 ES	dash.btn.refrescar	↻ Actualizar
@@ -633,6 +655,7 @@ ES	frm.historialusr	Historial de Cambios de Usuarios
 ES	lbl.ver.usuario	Usuario:
 ES	btn.ver.cargar	Cargar
 ES	btn.ver.restaurar	Restaurar Versión Seleccionada
+ES	btn.ver.cerrar	Cerrar
 ES	col.ver.fecha	Fecha
 ES	col.ver.actor	Modificado por
 ES	mnu.historialusr	Historial de Cambios
@@ -643,7 +666,8 @@ ES	lbl.confirmaradmin.clave	Contraseña
 ES	btn.confirmaradmin.ok	Confirmar
 ES	btn.confirmaradmin.cancelar	Cancelar
 ES	msg.confirmar.vacio	Ingrese usuario y contraseña.
-ES	msg.confirmar.invalido	Credenciales inválidas o el usuario no es Administrador.
+ES	msg.confirmar.invalido	Usuario o contraseña incorrectos, o el usuario no es Administrador.
+ES	msg.confirmar.limiteintentos	Demasiados intentos fallidos. Cerrá esta ventana e intentá de nuevo más tarde.
 ES	msg.historial.sinseleccion	Seleccioná una versión de la grilla.
 ES	msg.historial.atencion	Atención
 ES	msg.historial.restaurado	Versión restaurada correctamente.
@@ -661,6 +685,8 @@ ES	conf.planes.desat.msg	¿Desactivar el plan '{0}'?\n\nLos clientes con este pl
 ES	conf.planes.desat.tit	Confirmar Desactivación
 ES	conf.planes.act.msg	¿Reactivar el plan '{0}'?\n\nEl plan volverá a estar disponible para nuevas suscripciones.
 ES	conf.planes.act.tit	Confirmar Activación
+ES	conf.listaespera.cancelar.body	¿Cancelar la anotación de {0} por '{1}'?
+ES	conf.listaespera.cancelar.titulo	Confirmar Cancelación
 ES	msg.idiomas.activado	Idioma activado.
 ES	msg.idiomas.desactivado	Idioma desactivado.
 ES	conf.idiomas.desactivar	¿Desactivar este idioma? Los usuarios no podrán seleccionarlo.
@@ -713,6 +739,14 @@ ES	err.bll.pedido.sin_plan	El cliente {0} no tiene plan asignado. Asignale un pl
 ES	err.bll.pedido.suscripcion_vencida	La suscripción de {0} venció el {1}. Renovar en el módulo de Clientes.
 ES	err.bll.pedido.limite_plan	El plan '{0}' permite {1} prenda(s). El cliente ya tiene {2} en uso y agrega {3} más. Máximo posible: {4}.
 ES	err.bll.pedido.prenda_no_disponible	La prenda '{0}' ya no está disponible (estado: {1}). Actualizá la selección.
+ES	err.bll.listaespera.cliente_inexistente	El cliente no existe.
+ES	err.bll.listaespera.inexistente	La anotación no existe.
+ES	err.bll.listaespera.prenda_inexistente	La prenda no existe.
+ES	err.bll.listaespera.prenda_no_enuso	'{0}' está {1} — no hace falta anotarse, ya se puede pedir directamente.
+ES	err.bll.listaespera.suscripcion_vencida	{0} no tiene una suscripción vigente.
+ES	err.bll.listaespera.ya_anotado	{0} ya está anotado en la lista de espera de '{1}'.
+ES	err.bll.listaespera.ya_resuelta	Esta anotación ya está {0} — no se puede cancelar.
+ES	err.bll.pedido.prenda_reservada	La prenda '{0}' está reservada por Lista de Espera para otro cliente. Actualizá la selección.
 ES	err.bll.pedido.despachar_estado	Solo se pueden despachar pedidos Pendientes. Este pedido está '{0}'.
 ES	err.bll.pedido.entregar_estado	Solo se pueden marcar como entregados los pedidos Despachados. Este pedido está '{0}'.
 ES	err.bll.pedido.devolucion_estado	Solo se puede registrar la devolución de pedidos ya Entregados. Este pedido está '{0}'.
@@ -821,6 +855,7 @@ EN	err.bll.version.no_existe	The selected version does not exist.
 EN	err.bll.version.sin_permiso	Only an Administrator can restore a user's historical version.
 EN	err.bll.prenda.transicion_baja	A garment that has been deactivated cannot change state.
 EN	err.bll.prenda.transicion_enuso	The state of a garment in use updates automatically when processing orders.\nThe only manual exception is reporting it lost (PN04, Completed Orders module).
+EN	err.bll.prenda.baja_requiere_flujoperdida	A garment in use can only be discontinued through 'Report Lost Garment' (with a replacement charge to the client), not directly.
 EN	err.bll.prenda.transicion_generica	The transition from '{0}' to '{1}' is not allowed.
 EN	lbl.permisos.estructura	System structure (roles, families and patents)
 EN	btn.permisos.quitar	Remove ↑
@@ -828,6 +863,8 @@ EN	perm.msg.selpadre	Select a Family or Role to add children to.
 EN	perm.ok.agregado	'{0}' added to '{1}'.
 EN	perm.ok.quitado	'{0}' removed from '{1}'.
 EN	btn.permisos.actualizar	↻ Refresh
+EN	tip.actualizar	Refresh
+EN	tip.config.backup	Configure backup reminder
 EN	help.permisos.rol	Role = profile assigned to a user. Can contain patents, families and other roles (role-in-role).
 EN	lbl.permisos.subtitulo	Manage roles, families and patents
 EN	btn.permisos.eliminar	🗑 Delete selection
@@ -849,6 +886,17 @@ EN	idiomas.ok.renombrado	Language renamed.
 EN	idiomas.conf.incompleto	This language has {0} untranslated control(s).\nIf you activate it, those texts will be shown in the default language.\n\nActivate anyway?
 EN	idiomas.conf.incompleto.t	Incomplete translations
 EN	lbl.idiomas.controles	Translatable controls
+EN	col.idiomas.id	ID
+EN	col.idiomas.clave	Key
+EN	col.idiomas.formulario	Form
+EN	col.idiomas.codigo	Code
+EN	col.idiomas.nombre	Name
+EN	col.idiomas.activo	Active
+EN	col.idiomas.default	Default
+EN	col.idiomas.referencia	Reference (default)
+EN	col.idiomas.texto	Text / Translation
+EN	lbl.idiomas.si	Yes
+EN	lbl.idiomas.no	No
 EN	err.generico.cargar	Error loading: {0}
 EN	pedidos.hist.encontrados	{0} record(s) found.
 EN	frm.login	WardrobeFlow — Login
@@ -887,6 +935,7 @@ EN	mnu.perfiles	Profiles & Permissions
 EN	mnu.bitacora	Analytics
 EN	mnu.cerrarsesion	Sign Out
 EN	mnu.ventana	Open Windows
+EN	mnu.ventana.cerrartodas	Close All
 EN	mnu.idiomas	Language Management
 EN	frm.clientes	Client Management
 EN	lbl.buscar	Search:
@@ -1007,6 +1056,8 @@ EN	col.hist.anterior	Previous Value
 EN	col.hist.nuevo	New Value
 EN	dlg.cerrarsesion.titulo	Sign Out
 EN	dlg.cerrarsesion.msg	Are you sure you want to sign out?
+EN	dlg.cerrartodas.titulo	Close All Windows
+EN	dlg.cerrartodas.msg	Close all open windows?
 EN	btn.si	Yes
 EN	btn.no	No
 EN	btn.refrescar	↻ Refresh List
@@ -1020,6 +1071,8 @@ EN	col.prenda.categoria	Category
 EN	col.prenda.talle	Size
 EN	col.prenda.color	Color
 EN	col.prenda.estado	Status
+EN	col.listaespera.alta	Signed up on
+EN	col.listaespera.vence	Reservation expires
 EN	col.prenda.cliente	Client
 EN	col.prenda.alta	Registered
 EN	msg.prenda.conteo	Showing {0} of {1}
@@ -1067,7 +1120,7 @@ EN	lbl.recup.usuario	Username:
 EN	btn.enviar.solicitud	Submit request
 EN	err.recup.nousername	Enter your username.
 EN	err.recup.nousuario	User '{0}' not found.\nCheck that you typed your username correctly.
-EN	msg.recup.exito	User '{0}' found.\nContact the administrator to reset\nyour password from Manage → Users.
+EN	msg.recup.exito	If the user exists, contact the administrator to reset\nyour password from Manage -> Users.
 EN	err.recup.verificar	Error verifying user: {0}
 EN	col.det.prenda	Garment
 EN	frm.nuevaprenda	New Garment
@@ -1108,6 +1161,7 @@ EN	msg.ped.conteo	{0} order(s)
 EN	msg.ped.cargados	{0} order(s) loaded.
 EN	msg.ped.creado	Order #{0} created. Status: Pending.
 EN	msg.ped.cancelado	Order #{0} cancelled. Garments released.
+EN	msg.ped.yanoexiste	This order no longer exists. Refresh the grid.
 EN	msg.ped.reactivado	Order #{0} reactivated — back to Pending.
 EN	msg.ped.ensistema	{0} order(s) in the system.
 EN	msg.ped.mostrando	Showing {0} of {1}
@@ -1323,11 +1377,13 @@ EN	mnu.dashboard	Dashboard
 EN	mnu.bitacora.sistema	System Log
 EN	mnu.bitacora.negocio	Business Log
 EN	frm.dashboard	Control Panel
+EN	dash.general.subtitulo	WardrobeFlow
 EN	dash.prendas	Garments\navailable
 EN	dash.clientes	Clients\nregistered
 EN	dash.pedidos	Orders\npending
 EN	dash.suscripciones	Subscriptions\nexpiring soon
 EN	dash.backup	days without\nbackup
+EN	dash.stats.sistema30d	System (30d)
 EN	dash.ocupacion	stock\noccupancy
 EN	dash.ocupacion.detalle	{0} in use · {1} available
 EN	dash.btn.refrescar	↻ Refresh
@@ -1404,6 +1460,7 @@ EN	frm.historialusr	User Change History
 EN	lbl.ver.usuario	User:
 EN	btn.ver.cargar	Load
 EN	btn.ver.restaurar	Restore Selected Version
+EN	btn.ver.cerrar	Close
 EN	col.ver.fecha	Date
 EN	col.ver.actor	Modified by
 EN	mnu.historialusr	Change History
@@ -1414,7 +1471,8 @@ EN	lbl.confirmaradmin.clave	Password
 EN	btn.confirmaradmin.ok	Confirm
 EN	btn.confirmaradmin.cancelar	Cancel
 EN	msg.confirmar.vacio	Enter username and password.
-EN	msg.confirmar.invalido	Invalid credentials or the user is not an Administrator.
+EN	msg.confirmar.invalido	Incorrect username or password, or the user is not an Administrator.
+EN	msg.confirmar.limiteintentos	Too many failed attempts. Close this window and try again later.
 EN	msg.historial.sinseleccion	Select a version from the grid.
 EN	msg.historial.atencion	Attention
 EN	msg.historial.restaurado	Version restored successfully.
@@ -1432,6 +1490,8 @@ EN	conf.planes.desat.msg	Deactivate plan '{0}'?\n\nExisting clients with this pl
 EN	conf.planes.desat.tit	Confirm Deactivation
 EN	conf.planes.act.msg	Reactivate plan '{0}'?\n\nThe plan will be available for new subscriptions again.
 EN	conf.planes.act.tit	Confirm Activation
+EN	conf.listaespera.cancelar.body	Cancel {0}'s entry for '{1}'?
+EN	conf.listaespera.cancelar.titulo	Confirm Cancellation
 EN	msg.idiomas.activado	Language activated.
 EN	msg.idiomas.desactivado	Language deactivated.
 EN	conf.idiomas.desactivar	Deactivate this language? Users will no longer be able to select it.
@@ -1484,6 +1544,14 @@ EN	err.bll.pedido.sin_plan	Customer {0} has no plan assigned. Assign a plan befo
 EN	err.bll.pedido.suscripcion_vencida	Subscription for {0} expired on {1}. Renew in the Customers module.
 EN	err.bll.pedido.limite_plan	Plan '{0}' allows {1} garment(s). Customer already has {2} in use and is adding {3} more. Maximum allowed: {4}.
 EN	err.bll.pedido.prenda_no_disponible	Garment '{0}' is no longer available (status: {1}). Update your selection.
+EN	err.bll.listaespera.cliente_inexistente	The client does not exist.
+EN	err.bll.listaespera.inexistente	The entry does not exist.
+EN	err.bll.listaespera.prenda_inexistente	The garment does not exist.
+EN	err.bll.listaespera.prenda_no_enuso	'{0}' is {1} — no need to wait, it can already be ordered directly.
+EN	err.bll.listaespera.suscripcion_vencida	{0} does not have an active subscription.
+EN	err.bll.listaespera.ya_anotado	{0} is already on the waiting list for '{1}'.
+EN	err.bll.listaespera.ya_resuelta	This entry is already {0} — it cannot be cancelled.
+EN	err.bll.pedido.prenda_reservada	The garment '{0}' is reserved on the Waiting List for another client. Update the selection.
 EN	err.bll.pedido.despachar_estado	Only Pending orders can be dispatched. This order is '{0}'.
 EN	err.bll.pedido.entregar_estado	Only Dispatched orders can be marked as Delivered. This order is '{0}'.
 EN	err.bll.pedido.devolucion_estado	Returns can only be registered for Delivered orders. This order is '{0}'.
@@ -1592,6 +1660,7 @@ RU	err.bll.version.no_existe	Выбранная версия не существ
 RU	err.bll.version.sin_permiso	Только администратор может восстановить историческую версию пользователя.
 RU	err.bll.prenda.transicion_baja	Списанная вещь не может менять состояние.
 RU	err.bll.prenda.transicion_enuso	Состояние вещи, находящейся в использовании, обновляется автоматически при обработке заказов.\nЕдинственное ручное исключение — сообщить о её потере (PN04, модуль Выполненных заказов).
+RU	err.bll.prenda.baja_requiere_flujoperdida	Вещь, находящуюся в использовании, можно списать только через 'Сообщить о пропаже вещи' (с начислением стоимости замены клиенту), а не напрямую.
 RU	err.bll.prenda.transicion_generica	Переход из «{0}» в «{1}» не разрешён.
 RU	lbl.permisos.estructura	Структура системы (роли, семейства и права)
 RU	btn.permisos.quitar	Убрать ↑
@@ -1599,6 +1668,8 @@ RU	perm.msg.selpadre	Выберите семейство или роль, что
 RU	perm.ok.agregado	«{0}» добавлено в «{1}».
 RU	perm.ok.quitado	«{0}» убрано из «{1}».
 RU	btn.permisos.actualizar	↻ Обновить
+RU	tip.actualizar	Обновить
+RU	tip.config.backup	Настроить напоминание о резервном копировании
 RU	help.permisos.rol	Роль — профиль, назначаемый пользователю. Может содержать права, семейства и другие роли (роль в роли).
 RU	lbl.permisos.subtitulo	Управление ролями, семействами и правами
 RU	btn.permisos.eliminar	🗑 Удалить выбор
@@ -1620,6 +1691,17 @@ RU	idiomas.ok.renombrado	Язык переименован.
 RU	idiomas.conf.incompleto	В этом языке {0} непереведённых элемент(ов).\nЕсли вы активируете его, эти тексты будут показаны на языке по умолчанию.\n\nВсё равно активировать?
 RU	idiomas.conf.incompleto.t	Неполные переводы
 RU	lbl.idiomas.controles	Переводимые элементы
+RU	col.idiomas.id	ID
+RU	col.idiomas.clave	Ключ
+RU	col.idiomas.formulario	Форма
+RU	col.idiomas.codigo	Код
+RU	col.idiomas.nombre	Название
+RU	col.idiomas.activo	Активен
+RU	col.idiomas.default	По умолчанию
+RU	col.idiomas.referencia	Образец (по умолчанию)
+RU	col.idiomas.texto	Текст / Перевод
+RU	lbl.idiomas.si	Да
+RU	lbl.idiomas.no	Нет
 RU	err.generico.cargar	Ошибка загрузки: {0}
 RU	pedidos.hist.encontrados	Найдено записей: {0}.
 RU	frm.login	WardrobeFlow — Вход
@@ -1658,6 +1740,7 @@ RU	mnu.perfiles	Профили и права
 RU	mnu.bitacora	Аналитика
 RU	mnu.cerrarsesion	Выйти из системы
 RU	mnu.ventana	Открытые окна
+RU	mnu.ventana.cerrartodas	Закрыть все
 RU	mnu.idiomas	Управление языками
 RU	frm.clientes	Управление клиентами
 RU	lbl.buscar	Поиск:
@@ -1780,6 +1863,8 @@ RU	col.hist.anterior	Было
 RU	col.hist.nuevo	Стало
 RU	dlg.cerrarsesion.titulo	Выход из системы
 RU	dlg.cerrarsesion.msg	Вы уверены, что хотите выйти?
+RU	dlg.cerrartodas.titulo	Закрыть все окна
+RU	dlg.cerrartodas.msg	Закрыть все открытые окна?
 RU	btn.si	Да
 RU	btn.no	Нет
 RU	btn.refrescar	↻ Обновить список
@@ -1793,6 +1878,8 @@ RU	col.prenda.categoria	Категория
 RU	col.prenda.talle	Размер
 RU	col.prenda.color	Цвет
 RU	col.prenda.estado	Статус
+RU	col.listaespera.alta	Дата записи
+RU	col.listaespera.vence	Бронь истекает
 RU	col.prenda.cliente	Клиент
 RU	col.prenda.alta	Добавлено
 RU	msg.prenda.conteo	Показано {0} из {1}
@@ -1840,7 +1927,7 @@ RU	lbl.recup.usuario	Имя пользователя:
 RU	btn.enviar.solicitud	Отправить запрос
 RU	err.recup.nousername	Введите имя пользователя.
 RU	err.recup.nousuario	Пользователь '{0}' не найден.\nПроверьте правильность написания имени.
-RU	msg.recup.exito	Пользователь '{0}' найден.\nОбратитесь к администратору для сброса\nпароля через Управление → Пользователи.
+RU	msg.recup.exito	Если такой пользователь существует, обратитесь к администратору для сброса\nпароля через Управление -> Пользователи.
 RU	err.recup.verificar	Ошибка при проверке пользователя: {0}
 RU	col.det.prenda	Одежда
 RU	frm.nuevaprenda	Новая одежда
@@ -1881,6 +1968,7 @@ RU	msg.ped.conteo	{0} заказ(ов)
 RU	msg.ped.cargados	{0} заказ(ов) загружено.
 RU	msg.ped.creado	Заказ #{0} создан. Статус: Ожидание.
 RU	msg.ped.cancelado	Заказ #{0} отменён. Вещи освобождены.
+RU	msg.ped.yanoexiste	Этот заказ больше не существует. Обновите таблицу.
 RU	msg.ped.reactivado	Заказ #{0} реактивирован — статус: Ожидание.
 RU	msg.ped.ensistema	{0} заказ(ов) в системе.
 RU	msg.ped.mostrando	Показано {0} из {1}
@@ -2094,11 +2182,13 @@ RU	mnu.dashboard	Панель управления
 RU	mnu.bitacora.sistema	Системный журнал
 RU	mnu.bitacora.negocio	Бизнес-журнал
 RU	frm.dashboard	Панель управления
+RU	dash.general.subtitulo	WardrobeFlow
 RU	dash.prendas	Товаров\nдоступно
 RU	dash.clientes	Клиентов\nзарегистрировано
 RU	dash.pedidos	Заказов\nв ожидании
 RU	dash.suscripciones	Подписок\nскоро истекает
 RU	dash.backup	дней без\nрезервной копии
+RU	dash.stats.sistema30d	Система (30д)
 RU	dash.ocupacion	загрузка\nсклада
 RU	dash.ocupacion.detalle	{0} исп. · {1} свободно
 RU	dash.btn.refrescar	↻ Обновить
@@ -2175,6 +2265,7 @@ RU	frm.historialusr	История изменений пользователей
 RU	lbl.ver.usuario	Пользователь:
 RU	btn.ver.cargar	Загрузить
 RU	btn.ver.restaurar	Восстановить выбранную версию
+RU	btn.ver.cerrar	Закрыть
 RU	col.ver.fecha	Дата
 RU	col.ver.actor	Изменено кем
 RU	mnu.historialusr	История изменений
@@ -2185,7 +2276,8 @@ RU	lbl.confirmaradmin.clave	Пароль
 RU	btn.confirmaradmin.ok	Подтвердить
 RU	btn.confirmaradmin.cancelar	Отмена
 RU	msg.confirmar.vacio	Введите имя пользователя и пароль.
-RU	msg.confirmar.invalido	Неверные учётные данные или пользователь не является Администратором.
+RU	msg.confirmar.invalido	Неверное имя пользователя или пароль, либо пользователь не является Администратором.
+RU	msg.confirmar.limiteintentos	Слишком много неудачных попыток. Закройте это окно и попробуйте позже.
 RU	msg.historial.sinseleccion	Выберите версию из таблицы.
 RU	msg.historial.atencion	Внимание
 RU	msg.historial.restaurado	Версия успешно восстановлена.
@@ -2203,6 +2295,8 @@ RU	conf.planes.desat.msg	Деактивировать план '{0}'?\n\nКли�
 RU	conf.planes.desat.tit	Подтверждение деактивации
 RU	conf.planes.act.msg	Реактивировать план '{0}'?\n\nПлан снова станет доступен для новых подписок.
 RU	conf.planes.act.tit	Подтверждение активации
+RU	conf.listaespera.cancelar.body	Отменить запись {0} на '{1}'?
+RU	conf.listaespera.cancelar.titulo	Подтвердить отмену
 RU	msg.idiomas.activado	Язык активирован.
 RU	msg.idiomas.desactivado	Язык деактивирован.
 RU	conf.idiomas.desactivar	Деактивировать этот язык? Пользователи не смогут его выбрать.
@@ -2255,6 +2349,14 @@ RU	err.bll.pedido.sin_plan	У клиента {0} нет назначенного
 RU	err.bll.pedido.suscripcion_vencida	Подписка {0} истекла {1}. Обновите в модуле Клиентов.
 RU	err.bll.pedido.limite_plan	План '{0}' разрешает {1} вещь(ей). У клиента уже {2} в использовании, добавляется ещё {3}. Максимум: {4}.
 RU	err.bll.pedido.prenda_no_disponible	Вещь '{0}' недоступна (статус: {1}). Обновите выбор.
+RU	err.bll.listaespera.cliente_inexistente	Клиент не существует.
+RU	err.bll.listaespera.inexistente	Запись не существует.
+RU	err.bll.listaespera.prenda_inexistente	Вещь не существует.
+RU	err.bll.listaespera.prenda_no_enuso	'{0}' сейчас {1} — не нужно вставать в очередь, можно заказать напрямую.
+RU	err.bll.listaespera.suscripcion_vencida	У {0} нет действующей подписки.
+RU	err.bll.listaespera.ya_anotado	{0} уже в списке ожидания на '{1}'.
+RU	err.bll.listaespera.ya_resuelta	Эта запись уже {0} — отменить нельзя.
+RU	err.bll.pedido.prenda_reservada	Вещь '{0}' зарезервирована в списке ожидания для другого клиента. Обновите выбор.
 RU	err.bll.pedido.despachar_estado	Отправить можно только заказы в статусе Ожидания. Этот заказ: '{0}'.
 RU	err.bll.pedido.entregar_estado	Отметить доставленным можно только Отправленные заказы. Этот заказ: '{0}'.
 RU	err.bll.pedido.devolucion_estado	Возврат можно зарегистрировать только для Доставленных заказов. Этот заказ: '{0}'.
@@ -2363,6 +2465,7 @@ PT	err.bll.version.no_existe	A versão selecionada não existe.
 PT	err.bll.version.sin_permiso	Somente um Administrador pode restaurar uma versão histórica de um usuário.
 PT	err.bll.prenda.transicion_baja	Uma peça baixada não pode mudar de estado.
 PT	err.bll.prenda.transicion_enuso	O estado de uma peça em uso é atualizado automaticamente ao processar pedidos.\nA única exceção manual é reportá-la como perdida (PN04, módulo de Pedidos Realizados).
+PT	err.bll.prenda.baja_requiere_flujoperdida	Uma peça em uso só pode ser baixada através de 'Reportar Peça Perdida' (com cobrança de reposição ao cliente), não diretamente.
 PT	err.bll.prenda.transicion_generica	A transição de '{0}' para '{1}' não é permitida.
 PT	lbl.permisos.estructura	Estrutura do sistema (papéis, famílias e patentes)
 PT	btn.permisos.quitar	Remover ↑
@@ -2370,6 +2473,8 @@ PT	perm.msg.selpadre	Selecione uma Família ou Papel para adicionar filhos.
 PT	perm.ok.agregado	'{0}' adicionado a '{1}'.
 PT	perm.ok.quitado	'{0}' removido de '{1}'.
 PT	btn.permisos.actualizar	↻ Atualizar
+PT	tip.actualizar	Atualizar
+PT	tip.config.backup	Configurar lembrete de backup
 PT	help.permisos.rol	Papel = perfil atribuído a um usuário. Pode conter patentes, famílias e outros papéis (papel-em-papel).
 PT	lbl.permisos.subtitulo	Gestão de papéis, famílias e patentes
 PT	btn.permisos.eliminar	🗑 Excluir seleção
@@ -2391,6 +2496,17 @@ PT	idiomas.ok.renombrado	Idioma renomeado.
 PT	idiomas.conf.incompleto	Este idioma tem {0} controle(s) sem tradução.\nSe você ativá-lo, esses textos serão exibidos no idioma padrão.\n\nAtivar mesmo assim?
 PT	idiomas.conf.incompleto.t	Traduções incompletas
 PT	lbl.idiomas.controles	Controles traduzíveis
+PT	col.idiomas.id	ID
+PT	col.idiomas.clave	Chave
+PT	col.idiomas.formulario	Formulário
+PT	col.idiomas.codigo	Código
+PT	col.idiomas.nombre	Nome
+PT	col.idiomas.activo	Ativo
+PT	col.idiomas.default	Padrão
+PT	col.idiomas.referencia	Referência (padrão)
+PT	col.idiomas.texto	Texto / Tradução
+PT	lbl.idiomas.si	Sim
+PT	lbl.idiomas.no	Não
 PT	err.generico.cargar	Erro ao carregar: {0}
 PT	pedidos.hist.encontrados	{0} registro(s) encontrado(s).
 PT	diag.frm.titulo	Diagnóstico de Integridade
@@ -2467,6 +2583,7 @@ PT	mnu.perfiles	Perfis e Permissões
 PT	mnu.bitacora	Análise
 PT	mnu.cerrarsesion	Sair do sistema
 PT	mnu.ventana	Janelas Abertas
+PT	mnu.ventana.cerrartodas	Fechar Todas
 PT	mnu.idiomas	Gerenciamento de Idiomas
 PT	mnu.dashboard	Painel de Controle
 PT	mnu.bitacora.sistema	Registro do Sistema
@@ -2593,6 +2710,8 @@ PT	col.hist.anterior	Valor Anterior
 PT	col.hist.nuevo	Novo Valor
 PT	dlg.cerrarsesion.titulo	Sair do sistema
 PT	dlg.cerrarsesion.msg	Tem certeza que deseja sair?
+PT	dlg.cerrartodas.titulo	Fechar Todas as Janelas
+PT	dlg.cerrartodas.msg	Fechar todas as janelas abertas?
 PT	btn.si	Sim
 PT	btn.no	Não
 PT	btn.refrescar	↻ Atualizar Lista
@@ -2606,6 +2725,8 @@ PT	col.prenda.categoria	Categoria
 PT	col.prenda.talle	Tamanho
 PT	col.prenda.color	Cor
 PT	col.prenda.estado	Estado
+PT	col.listaespera.alta	Inscrito em
+PT	col.listaespera.vence	Reserva vence
 PT	col.prenda.cliente	Cliente
 PT	col.prenda.alta	Cadastro
 PT	msg.prenda.conteo	Mostrando {0} de {1}
@@ -2653,7 +2774,7 @@ PT	lbl.recup.usuario	Nome de usuário:
 PT	btn.enviar.solicitud	Enviar solicitação
 PT	err.recup.nousername	Informe seu nome de usuário.
 PT	err.recup.nousuario	Usuário '{0}' não encontrado.\nVerifique se digitou corretamente.
-PT	msg.recup.exito	Usuário '{0}' encontrado.\nContate o administrador para redefinir\nsua senha em Administrar → Usuários.
+PT	msg.recup.exito	Se o usuário existir, contate o administrador para redefinir\nsua senha em Administrar -> Usuários.
 PT	err.recup.verificar	Erro ao verificar usuário: {0}
 PT	col.det.prenda	Roupa
 PT	frm.nuevaprenda	Nova Roupa
@@ -2694,6 +2815,7 @@ PT	msg.ped.conteo	{0} pedido(s)
 PT	msg.ped.cargados	{0} pedido(s) carregado(s).
 PT	msg.ped.creado	Pedido #{0} criado. Estado: Pendente.
 PT	msg.ped.cancelado	Pedido #{0} cancelado. Roupas liberadas.
+PT	msg.ped.yanoexiste	Este pedido não existe mais. Atualize a grade.
 PT	msg.ped.reactivado	Pedido #{0} reativado — voltou a Pendente.
 PT	msg.ped.ensistema	{0} pedido(s) no sistema.
 PT	msg.ped.mostrando	Mostrando {0} de {1}
@@ -2905,11 +3027,13 @@ PT	lbl.backup.sincopias	Nenhum backup gerado ainda.
 PT	lbl.backup.conteo	{0} backup(s) disponível(eis). Mais recente: {1}
 PT	frm.restauracion	Integridade do Sistema
 PT	frm.dashboard	Painel de Controle
+PT	dash.general.subtitulo	WardrobeFlow
 PT	dash.prendas	Roupas\ndisponíveis
 PT	dash.clientes	Clientes\ncadastrados
 PT	dash.pedidos	Pedidos\npendentes
 PT	dash.suscripciones	Assinaturas\na vencer
 PT	dash.backup	dias sem\nbackup
+PT	dash.stats.sistema30d	Sistema (30d)
 PT	dash.ocupacion	ocupação\ndo estoque
 PT	dash.ocupacion.detalle	{0} em uso · {1} disponíveis
 PT	dash.btn.refrescar	↻ Atualizar
@@ -2985,6 +3109,7 @@ PT	frm.historialusr	Histórico de Alterações de Usuários
 PT	lbl.ver.usuario	Usuário:
 PT	btn.ver.cargar	Carregar
 PT	btn.ver.restaurar	Restaurar Versão Selecionada
+PT	btn.ver.cerrar	Fechar
 PT	col.ver.fecha	Data
 PT	col.ver.actor	Modificado por
 PT	frm.confirmaradmin	Confirmar Administrador
@@ -2994,7 +3119,8 @@ PT	lbl.confirmaradmin.clave	Senha
 PT	btn.confirmaradmin.ok	Confirmar
 PT	btn.confirmaradmin.cancelar	Cancelar
 PT	msg.confirmar.vacio	Informe usuário e senha.
-PT	msg.confirmar.invalido	Credenciais inválidas ou o usuário não é Administrador.
+PT	msg.confirmar.invalido	Usuário ou senha incorretos, ou o usuário não é Administrador.
+PT	msg.confirmar.limiteintentos	Muitas tentativas falhadas. Feche esta janela e tente novamente mais tarde.
 PT	msg.historial.sinseleccion	Selecione uma versão da grade.
 PT	msg.historial.atencion	Atenção
 PT	msg.historial.restaurado	Versão restaurada com sucesso.
@@ -3012,6 +3138,8 @@ PT	conf.planes.desat.msg	Desativar o plano '{0}'?\n\nOs clientes com este plano 
 PT	conf.planes.desat.tit	Confirmar Desativação
 PT	conf.planes.act.msg	Reativar o plano '{0}'?\n\nO plano voltará a estar disponível para novas assinaturas.
 PT	conf.planes.act.tit	Confirmar Ativação
+PT	conf.listaespera.cancelar.body	Cancelar o registro de {0} para '{1}'?
+PT	conf.listaespera.cancelar.titulo	Confirmar Cancelamento
 PT	msg.idiomas.activado	Idioma ativado.
 PT	msg.idiomas.desactivado	Idioma desativado.
 PT	conf.idiomas.desactivar	Desativar este idioma? Os usuários não poderão selecioná-lo.
@@ -3064,6 +3192,14 @@ PT	err.bll.pedido.sin_plan	O cliente {0} não tem plano atribuído. Atribua um p
 PT	err.bll.pedido.suscripcion_vencida	A assinatura de {0} venceu em {1}. Renovar no módulo de Clientes.
 PT	err.bll.pedido.limite_plan	O plano '{0}' permite {1} roupa(s). O cliente já tem {2} em uso e adiciona {3} mais. Máximo permitido: {4}.
 PT	err.bll.pedido.prenda_no_disponible	A roupa '{0}' não está disponível (estado: {1}). Atualize a seleção.
+PT	err.bll.listaespera.cliente_inexistente	O cliente não existe.
+PT	err.bll.listaespera.inexistente	O registro não existe.
+PT	err.bll.listaespera.prenda_inexistente	A peça não existe.
+PT	err.bll.listaespera.prenda_no_enuso	'{0}' está {1} — não é necessário entrar na lista, já pode ser pedida diretamente.
+PT	err.bll.listaespera.suscripcion_vencida	{0} não tem uma assinatura vigente.
+PT	err.bll.listaespera.ya_anotado	{0} já está na lista de espera de '{1}'.
+PT	err.bll.listaespera.ya_resuelta	Este registro já está {0} — não é possível cancelar.
+PT	err.bll.pedido.prenda_reservada	A peça '{0}' está reservada na Lista de Espera para outro cliente. Atualize a seleção.
 PT	err.bll.pedido.despachar_estado	Só é possível despachar pedidos Pendentes. Este pedido está '{0}'.
 PT	err.bll.pedido.entregar_estado	Só é possível marcar como entregues pedidos Despachados. Este pedido está '{0}'.
 PT	err.bll.pedido.devolucion_estado	Só é possível registrar devolução de pedidos Entregues. Este pedido está '{0}'.
@@ -3196,13 +3332,17 @@ ES	dash.mant.encurso	En curso (2-7d)
 ES	dash.mant.reciente	Reciente (< 2d)
 ES	dash.mant.urgente	Urgente (> 7d)
 ES	dash.operador.titulo	Panel de Operaciones
+ES	dash.operador.subtitulo	WardrobeFlow  —  Operaciones
 ES	dash.planes	Planes activos
 ES	dash.stock.titulo	Panel de Stock
+ES	dash.stock.subtitulo	WardrobeFlow  —  Stock
 ES	dash.sup.bitacora	Actividad reciente
 ES	dash.sup.mant	En mantenimiento
 ES	dash.sup.pedidos	Pedidos pendientes
 ES	dash.supervisor.titulo	Panel de Supervisor
+ES	dash.supervisor.subtitulo	WardrobeFlow  —  Supervisión
 ES	dash.vendedor.titulo	Panel de Ventas
+ES	dash.vendedor.subtitulo	WardrobeFlow  —  Ventas
 EN	dash.despachados	Dispatched orders
 EN	dash.entregados	Delivered orders
 EN	dash.kan.despachado	Dispatched
@@ -3213,13 +3353,17 @@ EN	dash.mant.encurso	In progress (2-7d)
 EN	dash.mant.reciente	Recent (< 2d)
 EN	dash.mant.urgente	Urgent (> 7d)
 EN	dash.operador.titulo	Operations Panel
+EN	dash.operador.subtitulo	WardrobeFlow  —  Operations
 EN	dash.planes	Active plans
 EN	dash.stock.titulo	Stock Panel
+EN	dash.stock.subtitulo	WardrobeFlow  —  Stock
 EN	dash.sup.bitacora	Recent activity
 EN	dash.sup.mant	Under maintenance
 EN	dash.sup.pedidos	Pending orders
 EN	dash.supervisor.titulo	Supervisor Panel
+EN	dash.supervisor.subtitulo	WardrobeFlow  —  Supervision
 EN	dash.vendedor.titulo	Sales Panel
+EN	dash.vendedor.subtitulo	WardrobeFlow  —  Sales
 
 PT	dash.despachados	Pedidos despachados
 PT	dash.entregados	Pedidos entregues
@@ -3231,13 +3375,17 @@ PT	dash.mant.encurso	Em andamento (2-7d)
 PT	dash.mant.reciente	Recente (< 2d)
 PT	dash.mant.urgente	Urgente (> 7d)
 PT	dash.operador.titulo	Painel de Operações
+PT	dash.operador.subtitulo	WardrobeFlow  —  Operações
 PT	dash.planes	Planos ativos
 PT	dash.stock.titulo	Painel de Estoque
+PT	dash.stock.subtitulo	WardrobeFlow  —  Estoque
 PT	dash.sup.bitacora	Atividade recente
 PT	dash.sup.mant	Em manutenção
 PT	dash.sup.pedidos	Pedidos pendentes
 PT	dash.supervisor.titulo	Painel de Supervisor
+PT	dash.supervisor.subtitulo	WardrobeFlow  —  Supervisão
 PT	dash.vendedor.titulo	Painel de Vendas
+PT	dash.vendedor.subtitulo	WardrobeFlow  —  Vendas
 RU	dash.despachados	Отгружено заказов
 RU	dash.entregados	Доставлено заказов
 RU	dash.kan.despachado	Отгружен
@@ -3248,13 +3396,17 @@ RU	dash.mant.encurso	В процессе (2-7д)
 RU	dash.mant.reciente	Недавно (< 2д)
 RU	dash.mant.urgente	Срочно (> 7д)
 RU	dash.operador.titulo	Панель операций
+RU	dash.operador.subtitulo	WardrobeFlow — Операции
 RU	dash.planes	Активных планов
 RU	dash.stock.titulo	Панель склада
+RU	dash.stock.subtitulo	WardrobeFlow — Склад
 RU	dash.sup.bitacora	Недавняя активность
 RU	dash.sup.mant	На обслуживании
 RU	dash.sup.pedidos	Заказы в ожидании
 RU	dash.supervisor.titulo	Панель супервайзера
+RU	dash.supervisor.subtitulo	WardrobeFlow — Контроль
 RU	dash.vendedor.titulo	Панель продаж
+RU	dash.vendedor.subtitulo	WardrobeFlow — Продажи
 
 ES	btn.adminusr.nuevo	➕ Nuevo usuario
 ES	btn.adminusr.crear	💾 Crear usuario
@@ -3437,9 +3589,13 @@ EN	err.bll.usuario.sin_cambios	There are no changes to save.
 RU	err.bll.usuario.sin_cambios	Нет изменений для сохранения.
 PT	err.bll.usuario.sin_cambios	Não há alterações para salvar.
 ES	err.cambioclave.nocoincide	Las contraseñas no coinciden.
+ES	err.cambioclave.vacia	Ingresá una contraseña nueva.
 EN	err.cambioclave.nocoincide	The passwords do not match.
+EN	err.cambioclave.vacia	Enter a new password.
 RU	err.cambioclave.nocoincide	Пароли не совпадают.
+RU	err.cambioclave.vacia	Введите новый пароль.
 PT	err.cambioclave.nocoincide	As senhas não coincidem.
+PT	err.cambioclave.vacia	Digite uma nova senha.
 ES	err.login.debecambiarclave	Debés cambiar tu contraseña temporal para ingresar.
 EN	err.login.debecambiarclave	You must change your temporary password to log in.
 RU	err.login.debecambiarclave	Чтобы войти, необходимо сменить временный пароль.
@@ -3651,6 +3807,7 @@ ES	rec.fila.enespejo	(presente en el espejo)
 ES	rec.err.cargar	Error al diagnosticar: {0}
 ES	rec.err.titulo	Error
 ES	rec.backup.seleccionar	Seleccionar Backup para Restaurar
+ES	dlg.backup.seleccionarexterno	Seleccionar Copia de Seguridad para Restaurar
 ES	rec.conf.asumir	ATENCIÓN: se aceptarán los datos ACTUALES como legítimos y se recalcularán todos los dígitos verificadores.\n\nSi hubo manipulación, quedará consolidada. ¿Continuar?
 ES	rec.conf.asumir.titulo	Confirmar Asumir Pérdida
 ES	rec.msg.asumido	Dígitos verificadores recalculados sobre los datos actuales.
@@ -3681,6 +3838,7 @@ EN	rec.fila.enespejo	(present in mirror)
 EN	rec.err.cargar	Error diagnosing: {0}
 EN	rec.err.titulo	Error
 EN	rec.backup.seleccionar	Select Backup to Restore
+EN	dlg.backup.seleccionarexterno	Select Backup File to Restore
 EN	rec.conf.asumir	WARNING: the CURRENT data will be accepted as legitimate and all check digits will be recalculated.\n\nIf there was tampering, it will be consolidated. Continue?
 EN	rec.conf.asumir.titulo	Confirm Accept Loss
 EN	rec.msg.asumido	Check digits recalculated over the current data.
@@ -3711,6 +3869,7 @@ RU	rec.fila.enespejo	(присутствует в зеркале)
 RU	rec.err.cargar	Ошибка диагностики: {0}
 RU	rec.err.titulo	Ошибка
 RU	rec.backup.seleccionar	Выбрать бэкап для восстановления
+RU	dlg.backup.seleccionarexterno	Выбрать файл резервной копии для восстановления
 RU	rec.conf.asumir	ВНИМАНИЕ: ТЕКУЩИЕ данные будут приняты как законные, и все контрольные разряды будут пересчитаны.\n\nЕсли имела место фальсификация данных, она будет закреплена. Продолжить?
 RU	rec.conf.asumir.titulo	Подтвердить принятие потери
 RU	rec.msg.asumido	Контрольные разряды пересчитаны на основе текущих данных.
@@ -3741,6 +3900,7 @@ PT	rec.fila.enespejo	(presente no espelho)
 PT	rec.err.cargar	Erro ao diagnosticar: {0}
 PT	rec.err.titulo	Erro
 PT	rec.backup.seleccionar	Selecionar Backup para Restaurar
+PT	dlg.backup.seleccionarexterno	Selecionar Cópia de Segurança para Restaurar
 PT	rec.conf.asumir	ATENÇÃO: os dados ATUAIS serão aceitos como legítimos e todos os dígitos verificadores serão recalculados.\n\nSe houve manipulação, ela será consolidada. Continuar?
 PT	rec.conf.asumir.titulo	Confirmar Assumir Perda
 PT	rec.msg.asumido	Dígitos verificadores recalculados sobre os dados atuais.
@@ -3862,6 +4022,9 @@ PT	err.bll.pref.nula	Não há preferências para salvar.
 PT	err.dal.pedido.prenda_tomada	A peça '{0}' não está mais disponível. Atualize a seleção e tente novamente.
 ES	mnu.renovacion	Renovación de Suscripción
 ES	renov.titulo	Renovación de Suscripción
+ES	conf.renov.baja.msg	¿Dar de baja la suscripción de {0}?\n\nEsta acción es irreversible.
+ES	conf.renov.procesar.msg	¿Procesar esta decisión para {0}?
+ES	conf.renov.procesar.tit	Confirmar Renovación
 ES	renov.cliente	Cliente:
 ES	renov.decision	Decisión (tras contactar al cliente)
 ES	renov.renovar	Renovar mismo plan
@@ -3869,9 +4032,12 @@ ES	renov.cambiarplan	Cambiar de plan
 ES	renov.baja	Dar de baja
 ES	renov.plannuevo	Plan nuevo:
 ES	renov.modalidad	Modalidad de cobro:
+ES	cobro.modalidad	Modalidad de cobro:
 ES	renov.procesar	Procesar
 ES	mnu.cobro	Cobro de Suscripción
 ES	cobro.titulo	Cobro de Suscripción
+ES	conf.cobro.procesar.msg	¿Procesar este cobro para {0}?
+ES	conf.cobro.procesar.tit	Confirmar Cobro
 ES	cobro.cliente	Cliente:
 ES	cobro.decision	Resultado del cobro
 ES	cobro.cobrado	Cobrado
@@ -3916,6 +4082,9 @@ ES	abandono.motivo.inactividad	{0} no tiene actividad hace {1} día(s), independ
 ES	abandono.motivo.nuncaactivo	{0} se dio de alta hace {1} día(s) y nunca generó un pedido.
 EN	mnu.renovacion	Subscription Renewal
 EN	renov.titulo	Subscription Renewal
+EN	conf.renov.baja.msg	Cancel {0}'s subscription?\n\nThis action is irreversible.
+EN	conf.renov.procesar.msg	Process this decision for {0}?
+EN	conf.renov.procesar.tit	Confirm Renewal
 EN	renov.cliente	Client:
 EN	renov.decision	Decision (after contacting the client)
 EN	renov.renovar	Renew same plan
@@ -3923,9 +4092,12 @@ EN	renov.cambiarplan	Change plan
 EN	renov.baja	Cancel subscription
 EN	renov.plannuevo	New plan:
 EN	renov.modalidad	Billing method:
+EN	cobro.modalidad	Billing method:
 EN	renov.procesar	Process
 EN	mnu.cobro	Subscription Payment
 EN	cobro.titulo	Subscription Payment
+EN	conf.cobro.procesar.msg	Process this payment for {0}?
+EN	conf.cobro.procesar.tit	Confirm Payment
 EN	cobro.cliente	Client:
 EN	cobro.decision	Payment outcome
 EN	cobro.cobrado	Paid
@@ -3970,6 +4142,9 @@ EN	abandono.motivo.inactividad	{0} has had no activity for {1} day(s), regardles
 EN	abandono.motivo.nuncaactivo	{0} signed up {1} day(s) ago and never placed an order.
 RU	mnu.renovacion	Продление подписки
 RU	renov.titulo	Продление подписки
+RU	conf.renov.baja.msg	Отменить подписку {0}?\n\nЭто действие необратимо.
+RU	conf.renov.procesar.msg	Обработать это решение для {0}?
+RU	conf.renov.procesar.tit	Подтвердить продление
 RU	renov.cliente	Клиент:
 RU	renov.decision	Решение (после связи с клиентом)
 RU	renov.renovar	Продлить тот же план
@@ -3977,9 +4152,12 @@ RU	renov.cambiarplan	Сменить план
 RU	renov.baja	Отменить подписку
 RU	renov.plannuevo	Новый план:
 RU	renov.modalidad	Способ оплаты:
+RU	cobro.modalidad	Способ оплаты:
 RU	renov.procesar	Обработать
 RU	mnu.cobro	Оплата подписки
 RU	cobro.titulo	Оплата подписки
+RU	conf.cobro.procesar.msg	Обработать этот платёж для {0}?
+RU	conf.cobro.procesar.tit	Подтвердить оплату
 RU	cobro.cliente	Клиент:
 RU	cobro.decision	Результат платежа
 RU	cobro.cobrado	Оплачено
@@ -4024,6 +4202,9 @@ RU	abandono.motivo.inactividad	У {0} нет активности уже {1} д�
 RU	abandono.motivo.nuncaactivo	{0} зарегистрировался {1} дн. назад и никогда не оформлял заказ.
 PT	mnu.renovacion	Renovação de Assinatura
 PT	renov.titulo	Renovação de Assinatura
+PT	conf.renov.baja.msg	Cancelar a assinatura de {0}?\n\nEsta ação é irreversível.
+PT	conf.renov.procesar.msg	Processar esta decisão para {0}?
+PT	conf.renov.procesar.tit	Confirmar Renovação
 PT	renov.cliente	Cliente:
 PT	renov.decision	Decisão (após contatar o cliente)
 PT	renov.renovar	Renovar o mesmo plano
@@ -4031,9 +4212,12 @@ PT	renov.cambiarplan	Mudar de plano
 PT	renov.baja	Cancelar assinatura
 PT	renov.plannuevo	Novo plano:
 PT	renov.modalidad	Modalidade de cobrança:
+PT	cobro.modalidad	Modalidade de cobrança:
 PT	renov.procesar	Processar
 PT	mnu.cobro	Cobrança de Assinatura
 PT	cobro.titulo	Cobrança de Assinatura
+PT	conf.cobro.procesar.msg	Processar esta cobrança para {0}?
+PT	conf.cobro.procesar.tit	Confirmar Cobrança
 PT	cobro.cliente	Cliente:
 PT	cobro.decision	Resultado da cobrança
 PT	cobro.cobrado	Cobrado
@@ -4091,6 +4275,7 @@ ES	lbl.permisos.detalle	Detalle:
 ES	lbl.permisos.detalle.vacio	Detalle: (sin selección)
 ES	perm.msg.selpadrerol	Seleccioná un Rol del árbol para crearle un sub-rol.
 ES	perm.ok.subcreado	Sub-rol '{0}' creado dentro de '{1}'.
+ES	perm.err.subrol_huerfano	El sub-rol '{0}' se creó pero no se pudo vincular a '{1}' ({2}), y tampoco se pudo deshacer automáticamente. Revisalo manualmente en la lista de Roles.
 ES	perm.msg.selasignable	Elegí un permiso o rol de la lista para asignar.
 ES	perm.msg.selquitar	Seleccioná un ítem que cuelgue de un rol para quitarlo.
 ES	perm.conf.quitar	¿Quitar '{0}' del rol '{1}'?
@@ -4109,6 +4294,7 @@ EN	lbl.permisos.detalle	Details:
 EN	lbl.permisos.detalle.vacio	Details: (nothing selected)
 EN	perm.msg.selpadrerol	Select a Role from the tree to create a sub-role under it.
 EN	perm.ok.subcreado	Sub-role '{0}' created inside '{1}'.
+EN	perm.err.subrol_huerfano	Sub-role '{0}' was created but could not be linked to '{1}' ({2}), and the automatic rollback also failed. Please review it manually in the Roles list.
 EN	perm.msg.selasignable	Choose a permission or role from the list to assign.
 EN	perm.msg.selquitar	Select an item hanging from a role to remove it.
 EN	perm.conf.quitar	Remove '{0}' from role '{1}'?
@@ -4127,6 +4313,7 @@ RU	lbl.permisos.detalle	Детали:
 RU	lbl.permisos.detalle.vacio	Детали: (ничего не выбрано)
 RU	perm.msg.selpadrerol	Выберите Роль в дереве, чтобы создать вложенную роль.
 RU	perm.ok.subcreado	Вложенная роль «{0}» создана внутри «{1}».
+RU	perm.err.subrol_huerfano	Подроль '{0}' создана, но не удалось привязать её к '{1}' ({2}), и автоматический откат тоже не сработал. Проверьте вручную в списке ролей.
 RU	perm.msg.selasignable	Выберите право или роль из списка для назначения.
 RU	perm.msg.selquitar	Выберите элемент, вложенный в роль, чтобы удалить его.
 RU	perm.conf.quitar	Удалить «{0}» из роли «{1}»?
@@ -4145,6 +4332,7 @@ PT	lbl.permisos.detalle	Detalhe:
 PT	lbl.permisos.detalle.vacio	Detalhe: (nada selecionado)
 PT	perm.msg.selpadrerol	Selecione um Papel na árvore para criar um sub-papel nele.
 PT	perm.ok.subcreado	Sub-papel '{0}' criado dentro de '{1}'.
+PT	perm.err.subrol_huerfano	O subperfil '{0}' foi criado mas não pôde ser vinculado a '{1}' ({2}), e a reversão automática também falhou. Revise manualmente na lista de Perfis.
 PT	perm.msg.selasignable	Escolha uma permissão ou papel na lista para atribuir.
 PT	perm.msg.selquitar	Selecione um item vinculado a um papel para removê-lo.
 PT	perm.conf.quitar	Remover '{0}' do papel '{1}'?
@@ -4513,9 +4701,29 @@ EN	msg.ok.titulo	Done
 RU	msg.ok.titulo	Готово
 PT	msg.ok.titulo	Pronto
 ES	err.bll.contratacion.pendiente_existente	Este cliente ya tiene una contratación pendiente de pago. Hay que resolverla (cobrarla o cancelarla) antes de registrar una nueva.
+ES	err.bll.contratacion.cliente_inexistente	El cliente seleccionado no existe.
+ES	err.bll.contratacion.cobrar_estado	Solo se pueden cobrar contrataciones Pendientes de pago. Esta contratación está '{0}'.
+ES	err.bll.contratacion.inexistente	La contratación ya no existe.
+ES	err.bll.contratacion.medio_pago_requerido	Debe indicar el medio de pago (efectivo, tarjeta o transferencia).
+ES	err.bll.contratacion.plan_inexistente	El plan seleccionado no existe o no está activo.
 EN	err.bll.contratacion.pendiente_existente	This client already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
+EN	err.bll.contratacion.cliente_inexistente	The selected client does not exist.
+EN	err.bll.contratacion.cobrar_estado	Only contracts Pending payment can be charged. This contract is '{0}'.
+EN	err.bll.contratacion.inexistente	The contract no longer exists.
+EN	err.bll.contratacion.medio_pago_requerido	You must indicate the payment method (cash, card or transfer).
+EN	err.bll.contratacion.plan_inexistente	The selected plan does not exist or is not active.
 RU	err.bll.contratacion.pendiente_existente	У этого клиента уже есть договор, ожидающий оплаты. Его нужно разрешить (оплатить или отменить) перед оформлением нового.
+RU	err.bll.contratacion.cliente_inexistente	Выбранный клиент не существует.
+RU	err.bll.contratacion.cobrar_estado	Оплатить можно только контракты в статусе 'Ожидает оплаты'. Текущий статус: '{0}'.
+RU	err.bll.contratacion.inexistente	Контракт больше не существует.
+RU	err.bll.contratacion.medio_pago_requerido	Необходимо указать способ оплаты (наличные, карта или перевод).
+RU	err.bll.contratacion.plan_inexistente	Выбранный план не существует или неактивен.
 PT	err.bll.contratacion.pendiente_existente	Este cliente já tem uma contratação pendente de pagamento. É preciso resolvê-la (cobrar ou cancelar) antes de registrar uma nova.
+PT	err.bll.contratacion.cliente_inexistente	O cliente selecionado não existe.
+PT	err.bll.contratacion.cobrar_estado	Só é possível cobrar contratações Pendentes de pagamento. Esta contratação está '{0}'.
+PT	err.bll.contratacion.inexistente	A contratação não existe mais.
+PT	err.bll.contratacion.medio_pago_requerido	Deve indicar o meio de pagamento (dinheiro, cartão ou transferência).
+PT	err.bll.contratacion.plan_inexistente	O plano selecionado não existe ou não está ativo.
 ES	err.contratacion.faltandatos	Seleccioná un cliente y un plan para continuar.
 EN	err.contratacion.faltandatos	Select a client and a plan to continue.
 RU	err.contratacion.faltandatos	Выберите клиента и план, чтобы продолжить.
@@ -4697,17 +4905,45 @@ EN	msg.sugerencia.enviada	Suggestion #{0} sent to Administration.
 RU	msg.sugerencia.enviada	Предложение №{0} отправлено в Администрацию.
 PT	msg.sugerencia.enviada	Sugestão #{0} enviada à Administração.
 ES	err.exportar.titulo	Error al exportar
+ES	err.exportar.archivoenuso	No se pudo guardar el archivo: puede estar abierto en otro programa (por ejemplo, Excel). Cerralo e intentá de nuevo.
+ES	err.exportar.sinpermiso	No se pudo guardar el archivo: no tenés permisos para escribir en esa ubicación.
 EN	err.exportar.titulo	Export error
+EN	err.exportar.archivoenuso	Could not save the file: it may be open in another program (e.g. Excel). Close it and try again.
+EN	err.exportar.sinpermiso	Could not save the file: you don't have permission to write to that location.
 RU	err.exportar.titulo	Ошибка экспорта
+RU	err.exportar.archivoenuso	Не удалось сохранить файл: возможно, он открыт в другой программе (например, Excel). Закройте его и попробуйте снова.
+RU	err.exportar.sinpermiso	Не удалось сохранить файл: нет прав на запись в это место.
 PT	err.exportar.titulo	Erro ao exportar
+PT	err.exportar.archivoenuso	Não foi possível salvar o arquivo: ele pode estar aberto em outro programa (por exemplo, Excel). Feche-o e tente novamente.
+PT	err.exportar.sinpermiso	Não foi possível salvar o arquivo: você não tem permissão para gravar nesse local.
 ES	err.imprimir.titulo	Error al imprimir
 EN	err.imprimir.titulo	Print error
 RU	err.imprimir.titulo	Ошибка печати
 PT	err.imprimir.titulo	Erro ao imprimir
 ES	frm.listaespera	Lista de Espera
+ES	frm.listaespera.anotar	Anotar en Lista de Espera
+ES	lbl.listaespera.elegircliente	Cliente que espera '{0}':
+ES	msg.listaespera.anotado	{0} anotado en la lista de espera de '{1}'.
+ES	msg.listaespera.cancelada	Anotación de {0} cancelada.
+ES	msg.listaespera.cargadas	{0} anotación(es) activa(s).
 EN	frm.listaespera	Waiting List
+EN	frm.listaespera.anotar	Add to Waiting List
+EN	lbl.listaespera.elegircliente	Client waiting for '{0}':
+EN	msg.listaespera.anotado	{0} added to the waiting list for '{1}'.
+EN	msg.listaespera.cancelada	{0}'s entry cancelled.
+EN	msg.listaespera.cargadas	{0} active entry(ies).
 RU	frm.listaespera	Список ожидания
+RU	frm.listaespera.anotar	Записать в список ожидания
+RU	lbl.listaespera.elegircliente	Клиент, ожидающий '{0}':
+RU	msg.listaespera.anotado	{0} записан(а) в список ожидания на '{1}'.
+RU	msg.listaespera.cancelada	Запись {0} отменена.
+RU	msg.listaespera.cargadas	Активных записей: {0}.
 PT	frm.listaespera	Lista de Espera
+PT	frm.listaespera.anotar	Registrar na Lista de Espera
+PT	lbl.listaespera.elegircliente	Cliente que espera por '{0}':
+PT	msg.listaespera.anotado	{0} registrado na lista de espera de '{1}'.
+PT	msg.listaespera.cancelada	Registro de {0} cancelado.
+PT	msg.listaespera.cargadas	{0} registro(s) ativo(s).
 ES	mnu.listaespera	Lista de Espera
 EN	mnu.listaespera	Waiting List
 RU	mnu.listaespera	Список ожидания
@@ -4725,9 +4961,101 @@ EN	col.contr.cliente	Client
 RU	col.contr.cliente	Клиент
 PT	col.contr.cliente	Cliente
 ES	col.contr.plan	Plan
+ES	col.contr.monto	Monto
+ES	medio.efectivo	Efectivo
+ES	medio.tarjeta	Tarjeta
+ES	medio.transferencia	Transferencia
+ES	err.bll.promocion.sugerencia_inexistente	La sugerencia seleccionada no existe.
+ES	err.bll.promocion.nombre_requerido	El nombre de la promoción es obligatorio.
+ES	err.bll.promocion.destino_invalido	La promoción debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.
+ES	err.bll.promocion.plan_inexistente	El plan seleccionado no existe.
+ES	err.bll.promocion.valor_invalido	El beneficio de la promoción debe ser mayor a cero.
+ES	err.bll.promocion.porcentaje_invalido	Un descuento por porcentaje no puede superar el 100%.
+ES	err.bll.promocion.rango_fechas_invalido	La fecha de fin no puede ser anterior a la fecha de inicio.
+ES	err.bll.promocion.modificar_estado	Solo se puede modificar una promoción mientras está en revisión contable. Estado actual: '{0}'.
+ES	err.bll.promocion.desactivar_estado	Solo se pueden desactivar promociones Vigentes. Esta promoción está '{0}'.
+ES	err.bll.promocion.sugerirbaja_estado	Solo se puede sugerir la baja de promociones Vigentes. Esta promoción está '{0}'.
+ES	err.bll.promocion.motivobaja_requerido	Debe indicar el motivo de la baja sugerida.
+ES	err.bll.promocion.resolverbaja_estado	Solo se puede resolver la baja de promociones con baja Solicitada. Esta promoción está '{0}'.
+ES	err.bll.promocion.motivorechazobaja_requerido	Debe indicar el motivo por el cual la promoción sigue vigente.
+ES	err.bll.promocion.revisioncontable_estado	Solo se pueden aprobar o rechazar promociones En Revisión Contable. Esta promoción está '{0}'.
+ES	err.bll.promocion.observacion_requerida	Debe ingresar una observación para esta decisión.
+ES	err.bll.sugerenciapromocion.destino_invalido	La sugerencia debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.
+ES	err.bll.sugerenciapromocion.plan_inexistente	El plan seleccionado no existe.
+ES	err.bll.sugerenciapromocion.motivo_requerido	Debe indicar el motivo de la sugerencia.
+ES	err.bll.sugerenciapromocion.beneficio_invalido	El beneficio estimado debe ser mayor a cero.
 EN	col.contr.plan	Plan
+EN	col.contr.monto	Amount
+EN	medio.efectivo	Cash
+EN	medio.tarjeta	Card
+EN	medio.transferencia	Transfer
+EN	err.bll.promocion.sugerencia_inexistente	The selected suggestion does not exist.
+EN	err.bll.promocion.nombre_requerido	The promotion name is required.
+EN	err.bll.promocion.destino_invalido	The promotion must apply to either a plan or a garment category, never both or neither.
+EN	err.bll.promocion.plan_inexistente	The selected plan does not exist.
+EN	err.bll.promocion.valor_invalido	The promotion's benefit must be greater than zero.
+EN	err.bll.promocion.porcentaje_invalido	A percentage discount cannot exceed 100%.
+EN	err.bll.promocion.rango_fechas_invalido	The end date cannot be earlier than the start date.
+EN	err.bll.promocion.modificar_estado	A promotion can only be modified while it is under accounting review. Current state: '{0}'.
+EN	err.bll.promocion.desactivar_estado	Only Active promotions can be deactivated. This promotion is '{0}'.
+EN	err.bll.promocion.sugerirbaja_estado	Only Active promotions can have their removal suggested. This promotion is '{0}'.
+EN	err.bll.promocion.motivobaja_requerido	You must indicate the reason for the suggested removal.
+EN	err.bll.promocion.resolverbaja_estado	Only promotions with a Requested removal can be resolved. This promotion is '{0}'.
+EN	err.bll.promocion.motivorechazobaja_requerido	You must indicate why the promotion remains active.
+EN	err.bll.promocion.revisioncontable_estado	Only promotions Under accounting review can be approved or rejected. This promotion is '{0}'.
+EN	err.bll.promocion.observacion_requerida	You must enter a remark for this decision.
+EN	err.bll.sugerenciapromocion.destino_invalido	The suggestion must apply to either a plan or a garment category, never both or neither.
+EN	err.bll.sugerenciapromocion.plan_inexistente	The selected plan does not exist.
+EN	err.bll.sugerenciapromocion.motivo_requerido	You must indicate the reason for the suggestion.
+EN	err.bll.sugerenciapromocion.beneficio_invalido	The estimated benefit must be greater than zero.
 RU	col.contr.plan	План
+RU	col.contr.monto	Сумма
+RU	medio.efectivo	Наличные
+RU	medio.tarjeta	Карта
+RU	medio.transferencia	Перевод
+RU	err.bll.promocion.sugerencia_inexistente	Выбранное предложение не существует.
+RU	err.bll.promocion.nombre_requerido	Название акции обязательно.
+RU	err.bll.promocion.destino_invalido	Акция должна применяться либо к плану, либо к категории вещей, но не к обоим и не ни к одному.
+RU	err.bll.promocion.plan_inexistente	Выбранный план не существует.
+RU	err.bll.promocion.valor_invalido	Выгода по акции должна быть больше нуля.
+RU	err.bll.promocion.porcentaje_invalido	Процентная скидка не может превышать 100%.
+RU	err.bll.promocion.rango_fechas_invalido	Дата окончания не может быть раньше даты начала.
+RU	err.bll.promocion.modificar_estado	Акцию можно изменять только пока она на бухгалтерской проверке. Текущий статус: '{0}'.
+RU	err.bll.promocion.desactivar_estado	Отключить можно только действующие акции. Текущий статус: '{0}'.
+RU	err.bll.promocion.sugerirbaja_estado	Предложить отмену можно только для действующих акций. Текущий статус: '{0}'.
+RU	err.bll.promocion.motivobaja_requerido	Необходимо указать причину предложенной отмены.
+RU	err.bll.promocion.resolverbaja_estado	Решение можно принять только по акциям с запрошенной отменой. Текущий статус: '{0}'.
+RU	err.bll.promocion.motivorechazobaja_requerido	Необходимо указать, почему акция остаётся действующей.
+RU	err.bll.promocion.revisioncontable_estado	Утвердить или отклонить можно только акции на бухгалтерской проверке. Текущий статус: '{0}'.
+RU	err.bll.promocion.observacion_requerida	Необходимо ввести комментарий к этому решению.
+RU	err.bll.sugerenciapromocion.destino_invalido	Предложение должно применяться либо к плану, либо к категории вещей, но не к обоим и не ни к одному.
+RU	err.bll.sugerenciapromocion.plan_inexistente	Выбранный план не существует.
+RU	err.bll.sugerenciapromocion.motivo_requerido	Необходимо указать причину предложения.
+RU	err.bll.sugerenciapromocion.beneficio_invalido	Ожидаемая выгода должна быть больше нуля.
 PT	col.contr.plan	Plano
+PT	col.contr.monto	Valor
+PT	medio.efectivo	Dinheiro
+PT	medio.tarjeta	Cartão
+PT	medio.transferencia	Transferência
+PT	err.bll.promocion.sugerencia_inexistente	A sugestão selecionada não existe.
+PT	err.bll.promocion.nombre_requerido	O nome da promoção é obrigatório.
+PT	err.bll.promocion.destino_invalido	A promoção deve aplicar-se a um plano ou a uma categoria de peça, nunca a ambos nem a nenhum.
+PT	err.bll.promocion.plan_inexistente	O plano selecionado não existe.
+PT	err.bll.promocion.valor_invalido	O benefício da promoção deve ser maior que zero.
+PT	err.bll.promocion.porcentaje_invalido	Um desconto percentual não pode superar 100%.
+PT	err.bll.promocion.rango_fechas_invalido	A data de término não pode ser anterior à data de início.
+PT	err.bll.promocion.modificar_estado	Só é possível modificar uma promoção enquanto está em revisão contábil. Estado atual: '{0}'.
+PT	err.bll.promocion.desactivar_estado	Só é possível desativar promoções Vigentes. Esta promoção está '{0}'.
+PT	err.bll.promocion.sugerirbaja_estado	Só é possível sugerir a baixa de promoções Vigentes. Esta promoção está '{0}'.
+PT	err.bll.promocion.motivobaja_requerido	Deve indicar o motivo da baixa sugerida.
+PT	err.bll.promocion.resolverbaja_estado	Só é possível resolver a baixa de promoções com baixa Solicitada. Esta promoção está '{0}'.
+PT	err.bll.promocion.motivorechazobaja_requerido	Deve indicar o motivo pelo qual a promoção permanece vigente.
+PT	err.bll.promocion.revisioncontable_estado	Só é possível aprovar ou rejeitar promoções Em Revisão Contábil. Esta promoção está '{0}'.
+PT	err.bll.promocion.observacion_requerida	Deve inserir uma observação para esta decisão.
+PT	err.bll.sugerenciapromocion.destino_invalido	A sugestão deve aplicar-se a um plano ou a uma categoria de peça, nunca a ambos nem a nenhum.
+PT	err.bll.sugerenciapromocion.plan_inexistente	O plano selecionado não existe.
+PT	err.bll.sugerenciapromocion.motivo_requerido	Deve indicar o motivo da sugestão.
+PT	err.bll.sugerenciapromocion.beneficio_invalido	O benefício estimado deve ser maior que zero.
 ES	col.contr.modalidad	Modalidad
 EN	col.contr.modalidad	Payment Mode
 RU	col.contr.modalidad	Способ оплаты

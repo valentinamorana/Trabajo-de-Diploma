@@ -1,6 +1,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BLL.Manejadores;
+using Seguridad;
 using Tests.Fakes;
 
 namespace Tests
@@ -15,6 +16,20 @@ namespace Tests
     [TestClass]
     public class RenovacionTests
     {
+        [TestInitialize] public void Setup()   => SessionManager.Logout();
+        [TestCleanup]    public void Cleanup() => SessionManager.Logout();
+
+        private static void LoginComoAdministrador()
+        {
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 1,
+                Username = "admin",
+                Perfil = "Administrador",
+                Contraseña = Encriptador.Hash("Admin1!")
+            });
+        }
+
         private static BE.Cliente ClienteVencido() => new BE.Cliente
         {
             IdCliente = 1,
@@ -236,6 +251,261 @@ namespace Tests
             handler.Procesar(new ContextoRenovacion { Cliente = ClienteVencido(), Decision = DecisionRenovacion.Baja });
 
             Assert.IsTrue(espia.Invocado);
+        }
+
+        // ── CambioPlanHandler ─────────────────────────────────────────────────────
+        // Antes tomaba DAL.PlanSuscripcion concreto en vez de IPlanSuscripcionDAL: no se podía
+        // instanciar con un doble de prueba y quedaba sin ningún test, incluida la validación de
+        // "plan insuficiente para el stock en uso" al cambiar de plan.
+
+        private static BE.PlanSuscripcion PlanPremium(int limitePrendas = 10) => new BE.PlanSuscripcion
+        {
+            IdPlan = 2,
+            Nombre = "Premium",
+            LimitePrendas = limitePrendas,
+            Precio = 2000,
+            Estado = true
+        };
+
+        [TestMethod]
+        public void CambioPlan_PlanSuficiente_CambiaYActualizaVencimiento()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var dalRenovacion = new FakeRenovacionDAL();
+            var dalPlan = new FakePlanSuscripcionDAL { PlanPorId = PlanPremium() };
+            var handler = new CambioPlanHandler(dalCliente, dalPlan, dalRenovacion);
+            var cliente = ClienteVigente();
+            cliente.StockUtilizado = 2;
+
+            var resultado = handler.Procesar(new ContextoRenovacion
+            {
+                Cliente = cliente,
+                Decision = DecisionRenovacion.CambiarPlan,
+                IdPlanNuevo = 2,
+                Modalidad = BE.Builders.ModalidadCobro.Mensual,
+                Actor = "vendedor1"
+            });
+
+            Assert.IsTrue(resultado.Resuelto);
+            Assert.AreEqual(BE.EstadoRenovacion.CambioPlan, resultado.Estado);
+            Assert.AreEqual(2, cliente.IdPlan);
+            Assert.AreEqual("Premium", cliente.NombrePlan);
+            Assert.AreEqual(DateTime.Today.AddMonths(1), cliente.FechaVencimiento);
+            Assert.AreEqual(1, dalCliente.ModificarVeces);
+            Assert.AreEqual(1, dalRenovacion.AltaVeces);
+        }
+
+        [TestMethod]
+        public void CambioPlan_SinPlanNuevo_LanzaPlanRequerido()
+        {
+            var handler = new CambioPlanHandler(new FakeClienteDAL(), new FakePlanSuscripcionDAL(), new FakeRenovacionDAL());
+
+            try
+            {
+                handler.Procesar(new ContextoRenovacion { Cliente = ClienteVigente(), Decision = DecisionRenovacion.CambiarPlan });
+                Assert.Fail("Debía exigir el plan nuevo.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.plan_requerido", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void CambioPlan_PlanInexistente_LanzaPlanInexistente()
+        {
+            var handler = new CambioPlanHandler(new FakeClienteDAL(), new FakePlanSuscripcionDAL { PlanPorId = null }, new FakeRenovacionDAL());
+
+            try
+            {
+                handler.Procesar(new ContextoRenovacion { Cliente = ClienteVigente(), Decision = DecisionRenovacion.CambiarPlan, IdPlanNuevo = 99 });
+                Assert.Fail("Debía rechazar un plan inexistente.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.plan_inexistente", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void CambioPlan_PlanInsuficienteParaStockEnUso_LanzaPlanInsuficiente()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var dalPlan = new FakePlanSuscripcionDAL { PlanPorId = PlanPremium(limitePrendas: 1) };
+            var handler = new CambioPlanHandler(dalCliente, dalPlan, new FakeRenovacionDAL());
+            var cliente = ClienteVigente();
+            cliente.StockUtilizado = 3; // más prendas en uso que el nuevo plan permite
+
+            try
+            {
+                handler.Procesar(new ContextoRenovacion { Cliente = cliente, Decision = DecisionRenovacion.CambiarPlan, IdPlanNuevo = 2 });
+                Assert.Fail("Debía rechazar un plan que no alcanza para el stock en uso.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.plan_insuficiente", ex.Clave);
+            }
+            Assert.AreEqual(0, dalCliente.ModificarVeces);
+        }
+
+        [TestMethod]
+        public void CambioPlan_DecisionDistinta_DelegaAlSucesor()
+        {
+            var handler = new CambioPlanHandler(new FakeClienteDAL(), new FakePlanSuscripcionDAL(), new FakeRenovacionDAL());
+            var espia = new ManejadorEspia();
+            handler.AgregarSiguiente(espia);
+
+            handler.Procesar(new ContextoRenovacion { Cliente = ClienteVencido(), Decision = DecisionRenovacion.Renovar });
+
+            Assert.IsTrue(espia.Invocado);
+        }
+
+        // ── BajaSuscripcionHandler ────────────────────────────────────────────────
+        // Antes tomaba DAL.Prenda concreto en vez de IPrendaDAL: no se podía instanciar con un
+        // doble de prueba y quedaba sin ningún test (eslabón terminal, siempre resuelve).
+
+        [TestMethod]
+        public void Baja_SinPrendasEnUso_DaDeBajaSinAvisoDeDevolucion()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var dalRenovacion = new FakeRenovacionDAL();
+            var dalPrenda = new FakePrendaDAL();
+            var handler = new BajaSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda);
+            var cliente = ClienteVigente();
+
+            var resultado = handler.Procesar(new ContextoRenovacion
+            {
+                Cliente = cliente,
+                Decision = DecisionRenovacion.Baja,
+                Actor = "vendedor1"
+            });
+
+            Assert.IsTrue(resultado.Resuelto);
+            Assert.AreEqual(BE.EstadoRenovacion.Baja, resultado.Estado);
+            Assert.IsNull(cliente.IdPlan);
+            Assert.IsNull(cliente.FechaVencimiento);
+            Assert.AreEqual("renov.msg.baja", resultado.Clave);
+            Assert.AreEqual(1, dalCliente.ModificarVeces);
+            Assert.AreEqual(1, dalRenovacion.AltaVeces);
+        }
+
+        [TestMethod]
+        public void Baja_ConPrendasEnUso_AvisaSolicitarDevolucion()
+        {
+            var dalPrenda = new FakePrendaDAL { PorCliente = new System.Collections.Generic.List<BE.Prenda>
+            {
+                new BE.Prenda { IdPrenda = 1, Nombre = "Remera" },
+                new BE.Prenda { IdPrenda = 2, Nombre = "Pantalón" }
+            }};
+            var handler = new BajaSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL(), dalPrenda);
+
+            var resultado = handler.Procesar(new ContextoRenovacion { Cliente = ClienteVigente(), Decision = DecisionRenovacion.Baja });
+
+            Assert.AreEqual("renov.msg.baja_conprendas", resultado.Clave);
+            Assert.AreEqual(2, resultado.Args[0]);
+        }
+
+        [TestMethod]
+        public void Baja_SiempreResuelve_SinDelegar()
+        {
+            // Eslabón terminal: nunca delega, sin importar la Decision (igual que
+            // DirectorGeneral del ejemplo de cátedra).
+            var handler = new BajaSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL(), new FakePrendaDAL());
+
+            var resultado = handler.Procesar(new ContextoRenovacion { Cliente = ClienteVigente(), Decision = DecisionRenovacion.Renovar });
+
+            Assert.IsTrue(resultado.Resuelto);
+            Assert.AreEqual(BE.EstadoRenovacion.Baja, resultado.Estado);
+        }
+
+        // ── BLL.Renovacion (fachada real) ─────────────────────────────────────────
+        // Hasta acá todos los tests de este archivo arman su PROPIA copia de la cadena a mano
+        // (mismo orden que el constructor de BLL.Renovacion, pero reconstruido en el test) — si
+        // alguien invierte el orden real en el constructor de producción, ningún test de los de
+        // arriba lo detecta. Estos instancian la clase fachada REAL y ejercitan Procesar(...) de
+        // punta a punta, más el guard de entrada (permisos + sin_plan) que tampoco tenía cobertura.
+
+        [TestMethod]
+        public void Real_SinSesion_LanzaSesionExpirada()
+        {
+            // Setup() ya hizo Logout.
+            var bll = new BLL.Renovacion(new FakeClienteDAL(), new FakeRenovacionDAL(), new FakePlanSuscripcionDAL(), new FakePrendaDAL());
+
+            try
+            {
+                bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+                Assert.Fail("Debía exigir sesión iniciada.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.sesion_expirada", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void Real_ClienteSinPlan_LanzaSinPlan()
+        {
+            LoginComoAdministrador();
+            var bll = new BLL.Renovacion(new FakeClienteDAL(), new FakeRenovacionDAL(), new FakePlanSuscripcionDAL(), new FakePrendaDAL());
+            var cliente = ClienteVencido();
+            cliente.IdPlan = null;
+            cliente.NombrePlan = null;
+
+            try
+            {
+                bll.Procesar("Test", cliente, DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+                Assert.Fail("Debía rechazar un cliente sin plan asignado.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.sin_plan", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void Real_ClienteVencidoConRenovacion_ProcesaDePuntaAPuntaConLaCadenaReal()
+        {
+            LoginComoAdministrador();
+            var dalRenovacion = new FakeRenovacionDAL();
+            var bll = new BLL.Renovacion(new FakeClienteDAL(), dalRenovacion, new FakePlanSuscripcionDAL(), new FakePrendaDAL());
+
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Anual, "vendedor1");
+
+            Assert.AreEqual(BE.EstadoRenovacion.Renovada, resultado.Estado);
+            Assert.AreEqual(1, dalRenovacion.AltaVeces);
+        }
+
+        [TestMethod]
+        public void Real_ClienteVencidoConCambioDePlan_ProcesaDePuntaAPuntaConLaCadenaReal()
+        {
+            // VerificarVencimientoHandler (primer eslabón real) solo delega si la suscripción
+            // está vencida o próxima a vencer, sea cual sea la Decision pedida — con un cliente
+            // vigente, CambiarPlan/Baja quedan en Pendiente sin llegar a los eslabones que las
+            // resuelven (comportamiento documentado, no un bug: PdN5 solo cubre la decisión
+            // tomada AL VENCER, no una baja/cambio anticipado). Por eso estos tests de punta a
+            // punta usan un cliente vencido, igual que el de Renovar más arriba.
+            LoginComoAdministrador();
+            var dalRenovacion = new FakeRenovacionDAL();
+            var dalPlan = new FakePlanSuscripcionDAL { PlanPorId = PlanPremium() };
+            var bll = new BLL.Renovacion(new FakeClienteDAL(), dalRenovacion, dalPlan, new FakePrendaDAL());
+
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.CambiarPlan, 2, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+
+            Assert.AreEqual(BE.EstadoRenovacion.CambioPlan, resultado.Estado);
+            Assert.AreEqual(1, dalRenovacion.AltaVeces);
+        }
+
+        [TestMethod]
+        public void Real_ClienteVencidoConBaja_ProcesaDePuntaAPuntaConLaCadenaReal()
+        {
+            LoginComoAdministrador();
+            var dalRenovacion = new FakeRenovacionDAL();
+            var bll = new BLL.Renovacion(new FakeClienteDAL(), dalRenovacion, new FakePlanSuscripcionDAL(), new FakePrendaDAL());
+
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Baja, null, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+
+            Assert.AreEqual(BE.EstadoRenovacion.Baja, resultado.Estado);
+            Assert.AreEqual(1, dalRenovacion.AltaVeces);
         }
     }
 }

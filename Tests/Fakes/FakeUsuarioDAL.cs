@@ -56,11 +56,22 @@ namespace Tests.Fakes
         public List<BE.Usuario> ObtenerTodos()                       => new List<BE.Usuario>(Usuarios);
         public List<BE.Usuario> ObtenerArchivados()                  => new List<BE.Usuario>();
         public BE.Usuario       ObtenerPorUsername(string username)  => Usuarios.Find(x => string.Equals(x.Username, username, StringComparison.OrdinalIgnoreCase));
+        public BE.Usuario       ObtenerPorId(int idUsuario)          => Usuarios.Find(x => x.Id == idUsuario);
         public void             Alta(string u, string c, string p)   { }
         public void             Bloquear(int id)                     { }
         public void             BloquearConTiempo(int id)            { }
         public void             AutoDesbloquear(int id)              { }
-        public void             Desbloquear(int id)                  { }
+
+        // Espía de Desbloquear (usado por BLL.RecuperacionAdmin.DesbloquearConClave).
+        public int  DesbloquearVeces { get; private set; }
+        public int  UltimoIdDesbloqueado { get; private set; }
+        public void Desbloquear(int id)
+        {
+            DesbloquearVeces++;
+            UltimoIdDesbloqueado = id;
+            var u = Usuarios.Find(x => x.Id == id);
+            if (u != null) u.Bloqueado = false;
+        }
         public void             IncrementarIntentosFallidos(string u){ }
         public void             ResetearIntentosFallidos(string u)   { }
         public void             ResetearClave(int id, string hash)   { }
@@ -83,6 +94,22 @@ namespace Tests.Fakes
             u.Username = valoresEspejo.Username;
             u.Perfil   = valoresEspejo.Perfil;
             u.Rol      = valoresEspejo.Rol;
+        }
+
+        // Espía de RestaurarVersion (Memento): aplica el snapshot al usuario sembrado equivalente,
+        // mismos campos administrativos no sensibles que restaura DAL.Usuario.RestaurarVersion
+        // (username/nombre/apellido/fecha nac./email — nunca clave ni estado de bloqueo).
+        public int RestaurarVersionVeces { get; private set; }
+        public void RestaurarVersion(BE.VersionUsuario v)
+        {
+            RestaurarVersionVeces++;
+            var u = Usuarios.Find(x => x.Id == v.IdUsuario);
+            if (u == null) return;
+            u.Username        = v.UsernameSnapshot;
+            u.Nombre          = v.NombreSnapshot;
+            u.Apellido        = v.ApellidoSnapshot;
+            u.FechaNacimiento = v.FechaNacSnapshot;
+            u.Email           = v.EmailSnapshot;
         }
     }
 }

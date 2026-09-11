@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 
 namespace GUI
 {
-    public partial class DashboardSupervisor : Form, IIdiomaObserver
+    public partial class DashboardSupervisor : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IPedidoService  _bllPedido  = new BLL.Pedido();
         private readonly BLL.Interfaces.IPrendaService  _bllPrenda  = new BLL.Prenda();
@@ -25,8 +25,7 @@ namespace GUI
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarEnBackground();
@@ -49,19 +48,11 @@ namespace GUI
             CargarEnBackground();
         }
 
-        private string T(string k, string fb)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(k) ? t[k].Texto : fb;
-        }
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             this.Text          = Tr("dash.supervisor.titulo", "Panel de Supervisor");
             lblTitulo.Text     = Tr("dash.supervisor.titulo", "Panel de Supervisor");
+            lblSub.Text        = Tr("dash.supervisor.subtitulo", "WardrobeFlow  —  Supervisión");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",     "↻ Actualizar");
             txtPrendas.Text  = Tr("dash.prendas",  "Prendas\ndisponibles");
             txtClientes.Text = Tr("dash.clientes", "Clientes\nregistrados");
@@ -118,8 +109,10 @@ namespace GUI
                 int    dias = p.DiasDesdeAlta;
                 string tit  = $"Pedido #{p.IdPedido}";
                 string sub  = p.NombreCliente ?? $"Cliente {p.IdCliente}";
-                colPedidos.Controls.Add(CrearCard(tit, sub, dias,
-                    p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 240, 200)));
+                var card = CrearCard(tit, sub, dias,
+                    p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 240, 200));
+                HabilitarClicAbrirPedidosVenta(card);
+                colPedidos.Controls.Add(card);
             }
 
             foreach (var m in enMant)
@@ -127,10 +120,12 @@ namespace GUI
                 int    dias = m.DiasTranscurridos;
                 string tit  = m.NombrePrenda ?? $"Prenda #{m.IdPrenda}";
                 string sub  = $"Entrada: {m.FechaEntrada:dd/MM/yyyy}";
-                colMant.Controls.Add(CrearCard(tit, sub, dias,
+                var card = CrearCard(tit, sub, dias,
                     m.NivelUrgencia == BE.NivelUrgencia.Urgente ? Color.FromArgb(255, 205, 200)
                     : m.NivelUrgencia == BE.NivelUrgencia.Normal ? Color.FromArgb(255, 248, 210)
-                    : Color.FromArgb(210, 240, 220)));
+                    : Color.FromArgb(210, 240, 220));
+                HabilitarClicAbrirPrendas(card);
+                colMant.Controls.Add(card);
             }
 
             if (actividad != null)
@@ -142,7 +137,9 @@ namespace GUI
                     string evento  = row["actividad"]?.ToString() ?? "";
                     string usuario = row["usuario"]?.ToString() ?? "";
                     string fecha   = row["fecha"]?.ToString() ?? "";
-                    colBitacora.Controls.Add(CrearCardBitacora(evento, usuario, fecha));
+                    var card = CrearCardBitacora(evento, usuario, fecha);
+                    HabilitarClicAbrirBitacora(card);
+                    colBitacora.Controls.Add(card);
                     n++;
                 }
             }
@@ -167,12 +164,79 @@ namespace GUI
             }
         }
 
+        // ── Navegación por clic en las tarjetas del Kanban (mismo patrón que los otros
+        // dashboards: DashboardControlStock.HabilitarClicAbrirPrendas,
+        // DashboardOperador/DashboardVendedor.HabilitarClicAbrirPedidos*) ──────────────
+
+        private void HabilitarClicAbrirPedidosVenta(Panel card)
+        {
+            EventHandler abrir = (s, e) => AbrirPedidosVenta();
+            card.Cursor = Cursors.Hand;
+            card.Click += abrir;
+            foreach (Control c in card.Controls)
+            {
+                c.Cursor = Cursors.Hand;
+                c.Click += abrir;
+            }
+        }
+
+        private void AbrirPedidosVenta()
+        {
+            var menu = this.MdiParent;
+            if (menu == null) return;
+            foreach (Form hijo in menu.MdiChildren)
+                if (hijo is PedidosVenta) { hijo.BringToFront(); return; }
+            new PedidosVenta { MdiParent = menu }.Show();
+        }
+
+        private void HabilitarClicAbrirPrendas(Panel card)
+        {
+            EventHandler abrir = (s, e) => AbrirPrendas();
+            card.Cursor = Cursors.Hand;
+            card.Click += abrir;
+            foreach (Control c in card.Controls)
+            {
+                c.Cursor = Cursors.Hand;
+                c.Click += abrir;
+            }
+        }
+
+        private void AbrirPrendas()
+        {
+            var menu = this.MdiParent;
+            if (menu == null) return;
+            foreach (Form hijo in menu.MdiChildren)
+                if (hijo is Prendas) { hijo.BringToFront(); return; }
+            new Prendas { MdiParent = menu }.Show();
+        }
+
+        private void HabilitarClicAbrirBitacora(Panel card)
+        {
+            EventHandler abrir = (s, e) => AbrirBitacora();
+            card.Cursor = Cursors.Hand;
+            card.Click += abrir;
+            foreach (Control c in card.Controls)
+            {
+                c.Cursor = Cursors.Hand;
+                c.Click += abrir;
+            }
+        }
+
+        private void AbrirBitacora()
+        {
+            var menu = this.MdiParent;
+            if (menu == null) return;
+            foreach (Form hijo in menu.MdiChildren)
+                if (hijo is Bitacora) { hijo.BringToFront(); return; }
+            new Bitacora { MdiParent = menu }.Show();
+        }
+
         // ── Handlers de eventos estáticos (wireados desde el Diseñador) ─────────
 
         private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
             using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
-                Color.FromArgb(210, 100, 135), Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
+                Tema.RosaPrimario, Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
 

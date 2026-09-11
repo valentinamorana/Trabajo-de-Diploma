@@ -10,8 +10,8 @@ namespace BLL
     /// </summary>
     public class Cliente : Interfaces.IClienteService
     {
-        private readonly DAL.Interfaces.IClienteDAL dalCliente;
-        private readonly DAL.PlanSuscripcion       dalPlan     = new DAL.PlanSuscripcion();
+        private readonly DAL.Interfaces.IClienteDAL        dalCliente;
+        private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
         private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
 
@@ -19,11 +19,15 @@ namespace BLL
         // una única vez, cuando el referido activa su suscripción por primera vez (ver ActivarSuscripcion).
         private const decimal MontoBeneficioReferido = 1000m;
 
-        // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble.
-        public Cliente() : this(new DAL.Cliente()) { }
-        public Cliente(DAL.Interfaces.IClienteDAL dalCliente)
+        // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
+        // (antes dalPlan era un DAL.PlanSuscripcion concreto fijo — ActivarSuscripcion y la
+        // rama de cambio de plan de Modificar quedaban sin poder testearse con un Fake, mismo
+        // problema que ya se había resuelto en BLL.Renovacion/CambioPlanHandler).
+        public Cliente() : this(new DAL.Cliente(), new DAL.PlanSuscripcion()) { }
+        public Cliente(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPlanSuscripcionDAL dalPlan = null)
         {
             this.dalCliente = dalCliente;
+            this.dalPlan    = dalPlan ?? new DAL.PlanSuscripcion();
         }
 
         // Devuelve todos los clientes con plan y stock utilizado.
@@ -53,9 +57,12 @@ namespace BLL
             int idNuevo = dalCliente.Alta(cliente);
             cliente.IdCliente = idNuevo;
 
-            bitacora.Registrar(modulo, $"Alta Cliente: {cliente.NombreCompleto} (DNI {cliente.DNI})", BE.Criticidad.Baja);
+            // El DNI está cifrado en la tabla Cliente (Seguridad.Encriptador); no se incluye en
+            // texto plano acá para no anular esa protección en la Bitácora, que suele tener menos
+            // controles de acceso — el IdCliente ya identifica el registro sin exponerlo.
+            bitacora.Registrar(modulo, $"Alta Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.AltaCliente,
-                $"Nuevo cliente: {cliente.NombreCompleto} — DNI {cliente.DNI} — Plan: {cliente.NombrePlan ?? "Sin plan"}",
+                $"Nuevo cliente: {cliente.NombreCompleto} — Plan: {cliente.NombrePlan ?? "Sin plan"}",
                 idCliente: cliente.IdCliente);
         }
 
@@ -96,8 +103,9 @@ namespace BLL
                         nuevoPlan.Nombre, actual.StockUtilizado, nuevoPlan.LimitePrendas);
             }
 
-            // Construir detalle de auditoría incluyendo cambio de plan si ocurrió
-            string detalle = $"Modificación cliente: {cliente.NombreCompleto} — DNI {cliente.DNI}";
+            // Construir detalle de auditoría incluyendo cambio de plan si ocurrió (sin el DNI:
+            // está cifrado en la tabla Cliente y no debe quedar en texto plano en la Bitácora).
+            string detalle = $"Modificación cliente: {cliente.NombreCompleto}";
             if (actual != null && cliente.IdPlan != actual.IdPlan)
             {
                 string planAnterior = actual.NombrePlan ?? (actual.IdPlan.HasValue ? $"ID {actual.IdPlan}" : "Sin plan");
@@ -124,7 +132,7 @@ namespace BLL
             dalCliente.Baja(cliente.IdCliente);
             bitacora.Registrar(modulo, $"Baja Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.BajaCliente,
-                $"Baja cliente: {cliente.NombreCompleto} — DNI {cliente.DNI}",
+                $"Baja cliente: {cliente.NombreCompleto}",
                 idCliente: cliente.IdCliente);
         }
 

@@ -17,7 +17,7 @@ namespace DAL
             "SELECT c.IdContratacion, c.IdCliente, c.IdPlan, c.IdVendedor, c.IdCaja, c.Modalidad, " +
             "c.Estado, c.IntentosPago, c.FechaAlta, c.FechaResolucion, c.MedioPago, " +
             "c.NumeroComprobante, c.FechaComprobante, " +
-            "cli.Nombre + ' ' + cli.Apellido AS NombreCliente, pl.Nombre AS NombrePlan " +
+            "cli.Nombre + ' ' + cli.Apellido AS NombreCliente, pl.Nombre AS NombrePlan, pl.Precio AS MontoPlan " +
             "FROM Contratacion c " +
             "JOIN Cliente cli ON cli.IdCliente = c.IdCliente " +
             "JOIN PlanSuscripcion pl ON pl.IdPlan = c.IdPlan ";
@@ -110,6 +110,7 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdContratacion",    idContratacion),
+                new SqlParameter("@Estado",             (int)BE.EstadoContratacion.Pagada),
                 new SqlParameter("@IdCaja",             idCaja),
                 new SqlParameter("@MedioPago",          medioPago),
                 new SqlParameter("@NumeroComprobante",  numeroComprobante),
@@ -119,7 +120,7 @@ namespace DAL
             try
             {
                 acceso.Escribir(
-                    $"UPDATE Contratacion SET Estado = {(int)BE.EstadoContratacion.Pagada}, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
+                    "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
                     "NumeroComprobante = @NumeroComprobante, FechaComprobante = @FechaComprobante, " +
                     "FechaResolucion = @FechaResolucion WHERE IdContratacion = @IdContratacion",
                     p);
@@ -135,12 +136,13 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdContratacion", idContratacion),
+                new SqlParameter("@Estado", (int)BE.EstadoContratacion.Cancelada),
                 new SqlParameter("@FechaResolucion", DateTime.Now)
             };
             try
             {
                 acceso.Escribir(
-                    $"UPDATE Contratacion SET Estado = {(int)BE.EstadoContratacion.Cancelada}, FechaResolucion = @FechaResolucion " +
+                    "UPDATE Contratacion SET Estado = @Estado, FechaResolucion = @FechaResolucion " +
                     "WHERE IdContratacion = @IdContratacion",
                     p);
             }
@@ -168,7 +170,8 @@ namespace DAL
                 NumeroComprobante = row["NumeroComprobante"] != DBNull.Value ? row["NumeroComprobante"].ToString() : null,
                 FechaComprobante  = row["FechaComprobante"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaComprobante"]) : null,
                 NombreCliente     = row["NombreCliente"].ToString(),
-                NombrePlan        = row["NombrePlan"].ToString()
+                NombrePlan        = row["NombrePlan"].ToString(),
+                MontoPlan         = Convert.ToDecimal(row["MontoPlan"])
             };
         }
     }

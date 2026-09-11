@@ -11,7 +11,7 @@ namespace GUI
     /// Muestra el historial de registros de mantenimiento/limpieza de una prenda.
     /// Solo lectura. Accesible desde el módulo Prendas (btnMantenimiento).
     /// </summary>
-    public partial class MantenimientoHistorialForm : Form
+    public partial class MantenimientoHistorialForm : FormBase, IIdiomaObserver
     {
         private readonly BE.Prenda              _prenda;
         private readonly BLL.Interfaces.IPrendaService  _prendaBLL;
@@ -22,27 +22,42 @@ namespace GUI
             InitializeComponent();
             _prenda    = prenda;
             _prendaBLL = prendaBLL;
+        }
 
-            try
-            {
-                string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
-                if (System.IO.File.Exists(ico)) this.Icon = new Icon(ico);
-            }
-            catch { }
+        // ── Ciclo de vida ─────────────────────────────────────────────────────
+        // A diferencia de PedidoHistorialForm/VersionHistorialForm (sus 2 pantallas "hermanas"
+        // de Historial), esta cargaba en el constructor y no se suscribía a cambios de idioma —
+        // quedaba con los textos del idioma anterior si el usuario lo cambiaba con la ventana
+        // abierta. Unificado al mismo patrón OnLoad/OnFormClosing + IIdiomaObserver.
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
+            GestorIdioma.SuscribirObservador(this);
             AplicarIdioma(_idioma);
             CargarHistorial();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            GestorIdioma.DesuscribirObservador(this);
+            base.OnFormClosing(e);
+        }
+
+        // ── IIdiomaObserver ───────────────────────────────────────────────────
+
+        public void UpdateLanguage(Idioma idioma)
+        {
+            AplicarIdioma(idioma);
+            CargarHistorial();   // los textos de estado ("En limpieza"/etc.) se arman ya traducidos
         }
 
         private void AplicarIdioma(Idioma idioma)
         {
             _idioma = idioma;
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
-            this.Text      = T("frm.mantenimiento", "Historial de Mantenimiento");
-            lblTitulo.Text = $"{T("frm.mantenimiento", "Historial de Mantenimiento")} — {_prenda.Nombre}";
-            btnCerrar.Text = T("btn.mant.cerrar", "Cerrar");
+            this.Text      = Tr("frm.mantenimiento", "Historial de Mantenimiento");
+            lblTitulo.Text = $"{Tr("frm.mantenimiento", "Historial de Mantenimiento")} — {_prenda.Nombre}";
+            btnCerrar.Text = Tr("btn.mant.cerrar", "Cerrar");
 
             TraducirHeadersGrilla();
         }
@@ -66,14 +81,11 @@ namespace GUI
         {
             try
             {
-                var t = Traductor.ObtenerTraducciones(_idioma);
-                string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
                 var registros = _prendaBLL.ObtenerHistorialMantenimiento(_prenda.IdPrenda);
 
                 if (registros == null || registros.Count == 0)
                 {
-                    lblSinRegistros.Text    = T("msg.mant.sinregistros", "Esta prenda no tiene historial de mantenimiento.");
+                    lblSinRegistros.Text    = Tr("msg.mant.sinregistros", "Esta prenda no tiene historial de mantenimiento.");
                     lblSinRegistros.Visible = true;
                     dgvHistorial.Visible    = false;
                     return;
@@ -82,8 +94,8 @@ namespace GUI
                 lblSinRegistros.Visible = false;
                 dgvHistorial.Visible    = true;
 
-                string abierto  = T("mant.abierto",  "En limpieza");
-                string cerrado  = T("mant.cerrado",  "Finalizado");
+                string abierto  = Tr("mant.abierto",  "En limpieza");
+                string cerrado  = Tr("mant.cerrado",  "Finalizado");
                 string sinFecha = "—";
 
                 var tabla = new DataTable();

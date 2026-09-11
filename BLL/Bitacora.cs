@@ -49,13 +49,15 @@ namespace BLL
 
         /// <summary>
         /// Determina si el usuario activo puede ver la tab de Bitácora del Sistema.
-        /// El Supervisor solo accede a la bitácora de negocio; el resto (Administrador) ve ambas.
+        /// El Gerente Comercial (rol que absorbió las responsabilidades del extinto "Supervisor",
+        /// ver Usuario.Abm.NormalizarPerfil) solo accede a la bitácora de negocio; el resto
+        /// (Administrador) ve ambas.
         /// </summary>
         public bool UsuarioPuedeVerSistema()
         {
             if (!Seguridad.SessionManager.IsLoggedIn) return false;
             string perfil = Seguridad.SessionManager.GetInstance().Usuario.Perfil ?? "";
-            return !perfil.Equals("Supervisor", StringComparison.OrdinalIgnoreCase);
+            return !perfil.Equals("GerenteComercial", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

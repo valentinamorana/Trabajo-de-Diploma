@@ -42,16 +42,8 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
-        private string T(string k, string fb) => T(k, fb, null);
-
-        private string T(string clave, string fallback, object[] args)
-            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             this.Text             = Tr("renov.titulo", "Renovación de Suscripción");
             lblTitulo.Text         = Tr("renov.titulo", "Renovación de Suscripción");
             lblCliente.Text        = Tr("renov.cliente", "Cliente:");
@@ -101,13 +93,23 @@ namespace GUI
             }
         }
 
+        // Lee el cliente seleccionado en el combo (posiblemente desactualizado: es el objeto
+        // cacheado la última vez que se llamó CargarClientes()).
         private void MostrarEstadoActual()
         {
             if (!(cmbCliente.SelectedItem is ClienteItem item)) { lblEstadoActual.Text = string.Empty; return; }
-            var c = item.Cliente;
+            MostrarEstadoActual(item.Cliente);
+        }
 
+        // Muestra el estado de un cliente puntual. BtnProcesar_Click/BtnReanudar_Click le pasan el
+        // objeto RECIÉN releído (y mutado en el lugar por la cadena de Manejadores) tras la acción,
+        // en vez de que esta vuelva a leer cmbCliente.SelectedItem — que seguiría apuntando al
+        // ClienteItem cacheado ANTES de la acción, mostrando el estado/vencimiento anterior aunque
+        // la operación ya se haya aplicado y persistido correctamente.
+        private void MostrarEstadoActual(BE.Cliente c)
+        {
             // Un solo fetch del diccionario mergeado (BD + corpus) para las 5 sub-resoluciones,
-            // en vez de que cada T(...) lo reconstruya desde cero (Traductor.ObtenerTraducciones).
+            // en vez de que cada Tr(...) lo reconstruya desde cero (Traductor.ObtenerTraducciones).
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string Tr(string clave, string fallback, object[] args = null) => Traductor.Resolver(clave, fallback, args, t);
 
@@ -149,6 +151,21 @@ namespace GUI
 
             var modalidad = (BE.Builders.ModalidadCobro)cmbModalidad.SelectedItem;
 
+            // Confirmación antes de procesar — antes se ejecutaba sin ninguna, incluida la opción
+            // "Dar de baja" (irreversible desde esta pantalla), a diferencia del resto de las
+            // pantallas de Suscripciones/Promociones que sí confirman acciones sensibles.
+            bool esBaja = decision == BLL.Manejadores.DecisionRenovacion.Baja;
+            string bodyConf = esBaja
+                ? Tr("conf.renov.baja.msg", "¿Dar de baja la suscripción de {0}?\n\nEsta acción es irreversible.", new object[] { item.Cliente.NombreCompleto })
+                : Tr("conf.renov.procesar.msg", "¿Procesar esta decisión para {0}?", new object[] { item.Cliente.NombreCompleto });
+            var confirmar = MessageBox.Show(
+                bodyConf,
+                Tr("conf.renov.procesar.tit", "Confirmar Renovación"),
+                MessageBoxButtons.YesNo,
+                esBaja ? MessageBoxIcon.Warning : MessageBoxIcon.Question,
+                esBaja ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1);
+            if (confirmar != DialogResult.Yes) return;
+
             try
             {
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
@@ -159,13 +176,20 @@ namespace GUI
                 var resultado = _bllRenovacion.Procesar(this.Text, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta);
 
                 lblResultado.ForeColor = resultado.Estado == BE.EstadoRenovacion.Pendiente ? Color.DarkOrange : Color.DarkGreen;
-                lblResultado.Text = T(resultado.Clave, resultado.Mensaje, resultado.Args);
+                lblResultado.Text = Tr(resultado.Clave, resultado.Mensaje, resultado.Args);
 
-                MostrarEstadoActual();
+                // `cliente` es el objeto recién releído y mutado por la cadena de Manejadores —
+                // refleja el estado post-acción sin depender de cmbCliente.SelectedItem (stale).
+                MostrarEstadoActual(cliente);
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
+                // Si la falla ocurrió después de una escritura parcial, releer y refrescar el
+                // estado igual: mejor mostrar el dato real (aunque haya cambiado) que dejar la
+                // pantalla congelada con el estado de antes del intento. Best-effort: si el
+                // refresco en sí falla, no debe tapar el error ya mostrado arriba.
+                try { MostrarEstadoActual(_bllCliente.ObtenerPorId(item.Cliente.IdCliente)); } catch { }
             }
         }
 
@@ -181,20 +205,14 @@ namespace GUI
             {
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
                 _bllCliente.ReanudarPausa(this.Text, cliente);
-                lblResultado.Text = T("renov.msg.reanudada", "Suscripción reanudada.");
-                MostrarEstadoActual();
+                lblResultado.Text = Tr("renov.msg.reanudada", "Suscripción reanudada.");
+                MostrarEstadoActual(cliente);
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
+                try { MostrarEstadoActual(_bllCliente.ObtenerPorId(item.Cliente.IdCliente)); } catch { }
             }
-        }
-
-        private sealed class ClienteItem
-        {
-            public BE.Cliente Cliente { get; }
-            public ClienteItem(BE.Cliente c) => Cliente = c;
-            public override string ToString() => $"{Cliente.NombreCompleto} (DNI {Cliente.DNI})";
         }
 
         private sealed class PlanItem

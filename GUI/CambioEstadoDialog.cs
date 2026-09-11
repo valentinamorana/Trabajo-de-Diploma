@@ -48,7 +48,7 @@ namespace GUI
             string T_dlg(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             int idx = cmbOpciones.SelectedIndex;
-            if (idx < 0) { lblMensaje.Text = T_dlg("msg.cambioest.selecciona", "Seleccioná una opción."); return; }
+            if (idx < 0) { lblMensaje.Text = "✗ " + T_dlg("msg.cambioest.selecciona", "Seleccioná una opción."); return; }
 
             EstadoSeleccionado = _opciones[idx].estado;
 

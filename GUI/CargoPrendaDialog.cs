@@ -49,12 +49,12 @@ namespace GUI
 
             if (string.IsNullOrWhiteSpace(txtMotivo.Text))
             {
-                lblMensaje.Text = T("msg.cargoprenda.motivorequerido", "Indicá el motivo del cargo.");
+                lblMensaje.Text = "✗ " + T("msg.cargoprenda.motivorequerido", "Indicá el motivo del cargo.");
                 return;
             }
             if (numMonto.Value <= 0)
             {
-                lblMensaje.Text = T("msg.cargoprenda.montoinvalido", "El monto debe ser mayor a cero.");
+                lblMensaje.Text = "✗ " + T("msg.cargoprenda.montoinvalido", "El monto debe ser mayor a cero.");
                 return;
             }
 

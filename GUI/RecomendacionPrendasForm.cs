@@ -15,7 +15,7 @@ namespace GUI
     public partial class RecomendacionPrendasForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Interfaces.IClienteService _bllCliente = new BLL.Cliente();
-        private readonly BLL.Interfaces.IRecomendacionService _bll = new BLL.RecomendacionPrendas();
+        private readonly BLL.Interfaces.IRecomendacionPrendasService _bll = new BLL.RecomendacionPrendas();
 
         private string[] _encabezados;
 

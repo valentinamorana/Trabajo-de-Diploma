@@ -101,7 +101,7 @@
     <Compile Include="AnalisisMantenimiento.cs" />
     <Compile Include="Interfaces\IAnalisisEscasezService.cs" />
     <Compile Include="AnalisisEscasez.cs" />
-    <Compile Include="Interfaces\IRecomendacionService.cs" />
+    <Compile Include="Interfaces\IRecomendacionPrendasService.cs" />
     <Compile Include="RecomendacionPrendas.cs" />
     <Compile Include="Pedido.cs" />
     <Compile Include="Contratacion.cs" />

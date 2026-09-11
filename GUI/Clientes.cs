@@ -311,13 +311,10 @@ namespace GUI
             var cliente = ObtenerClienteSeleccionado();
             if (cliente == null) return;
 
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             var confirmacion = MessageBox.Show(
-                string.Format(T("conf.baja.cli.msg", "¿Dar de baja a {0} (DNI {1})?\n\nEsta acción no se puede deshacer."),
-                    cliente.NombreCompleto, cliente.DNI),
-                T("conf.baja.cli.titulo", "Confirmar Baja"),
+                Tr("conf.baja.cli.msg", "¿Dar de baja a {0} (DNI {1})?\n\nEsta acción no se puede deshacer.",
+                    new object[] { cliente.NombreCompleto, cliente.DNI }),
+                Tr("conf.baja.cli.titulo", "Confirmar Baja"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning,
                 MessageBoxDefaultButton.Button2);
@@ -327,8 +324,7 @@ namespace GUI
             try
             {
                 clienteBLL.Baja(this.Text, cliente);
-                string fmt = T("msg.cli.eliminado", "Cliente '{0}' eliminado.");
-                MostrarOk(string.Format(fmt, cliente.NombreCompleto));
+                MostrarOk(Tr("msg.cli.eliminado", "Cliente '{0}' eliminado.", new object[] { cliente.NombreCompleto }));
                 CargarClientes();
             }
             catch (Exception ex)

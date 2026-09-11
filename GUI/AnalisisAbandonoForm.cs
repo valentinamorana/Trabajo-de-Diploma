@@ -45,13 +45,8 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
-        private string T(string clave, string fallback, object[] args = null)
-            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             this.Text            = Tr("abandono.titulo", "Análisis de Abandono");
             lblTitulo.Text        = Tr("abandono.titulo", "Análisis de Abandono");
@@ -89,11 +84,11 @@ namespace GUI
 
             cmbEstrategia.Items.Clear();
             cmbEstrategia.Items.Add(new EstrategiaItem(new BLL.Estrategias.EstrategiaVencimientoInactividad(),
-                T("abandono.estr.vencinactividad", "Vence pronto y sin actividad reciente")));
+                Tr("abandono.estr.vencinactividad", "Vence pronto y sin actividad reciente")));
             cmbEstrategia.Items.Add(new EstrategiaItem(new BLL.Estrategias.EstrategiaInactividadPura(),
-                T("abandono.estr.inactividad", "Sin actividad hace tiempo (aunque esté vigente)")));
+                Tr("abandono.estr.inactividad", "Sin actividad hace tiempo (aunque esté vigente)")));
             cmbEstrategia.Items.Add(new EstrategiaItem(new BLL.Estrategias.EstrategiaClienteNuevoInactivo(),
-                T("abandono.estr.nuncaactivo", "Se dio de alta y nunca hizo un pedido")));
+                Tr("abandono.estr.nuncaactivo", "Se dio de alta y nunca hizo un pedido")));
 
             cmbEstrategia.SelectedIndex = (idx >= 0 && idx < cmbEstrategia.Items.Count) ? idx : 0;
         }
@@ -114,9 +109,9 @@ namespace GUI
                     tabla.Rows.Add(
                         r.NombreCliente,
                         r.NombrePlan ?? "",
-                        r.FechaVencimiento.HasValue ? r.FechaVencimiento.Value.ToString("dd/MM/yyyy") : T("susc.sinfecha", "sin fecha"),
-                        r.FechaUltimoPedido.HasValue ? r.FechaUltimoPedido.Value.ToString("dd/MM/yyyy") : T("abandono.nuncapidio", "nunca"),
-                        T(r.Clave, r.Motivo, r.Args));
+                        r.FechaVencimiento.HasValue ? r.FechaVencimiento.Value.ToString("dd/MM/yyyy") : Tr("susc.sinfecha", "sin fecha"),
+                        r.FechaUltimoPedido.HasValue ? r.FechaUltimoPedido.Value.ToString("dd/MM/yyyy") : Tr("abandono.nuncapidio", "nunca"),
+                        Tr(r.Clave, r.Motivo, r.Args));
                 }
                 dgv.DataSource = tabla;
                 for (int i = 0; i < _encabezados.Length && i < dgv.Columns.Count; i++)
@@ -124,7 +119,7 @@ namespace GUI
 
                 lblResultado.ForeColor = resultados.Count > 0 ? Color.DarkOrange : Color.DarkGreen;
                 lblResultado.Text = string.Format(
-                    T("abandono.resultado", "{0} cliente(s) en riesgo según '{1}'."),
+                    Tr("abandono.resultado", "{0} cliente(s) en riesgo según '{1}'."),
                     new object[] { resultados.Count, item.ToString() });
             }
             catch (Exception ex)
@@ -148,7 +143,7 @@ namespace GUI
             if (datos == null || datos.Rows.Count == 0)
             {
                 MessageBox.Show(
-                    T("err.pdf.sinDatos", "No hay datos para exportar."),
+                    Tr("err.pdf.sinDatos", "No hay datos para exportar."),
                     this.Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

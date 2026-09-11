@@ -78,6 +78,16 @@ namespace GUI
         protected virtual Label MensajeLabel => null;
 
         /// <summary>
+        /// Traduce una clave al idioma activo, con fallback si no existe. Único punto de acceso
+        /// al diccionario de traducciones — reemplaza los ~84 helpers locales casi idénticos
+        /// (`T`, `Tx`, `T_ce`, `Tv`...) que antes reinventaba cada formulario/método por su cuenta
+        /// (ver §10 #1 de AUDITORIA_TECNICA_2026-09-10.md). Heredado por todos los formularios
+        /// hijos — no necesitan redefinirlo.
+        /// </summary>
+        protected string Tr(string clave, string fallback, object[] args = null)
+            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
+
+        /// <summary>
         /// Muestra un mensaje de operación exitosa (✓ en verde).
         /// Heredado por todos los formularios hijos — no necesitan redefinirlo.
         /// </summary>

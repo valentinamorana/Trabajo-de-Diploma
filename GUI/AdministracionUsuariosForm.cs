@@ -59,31 +59,25 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) { Traducir(); CargarUsuarios(); }
 
-        private string T(string key, string fallback)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(key) ? t[key].Texto : fallback;
-        }
-
         private void Traducir()
         {
-            this.Text            = T("frm.adminusuarios",      "Administración de Usuarios");
-            lblTitulo.Text       = T("lbl.adminusr.titulo",    "Administración de Usuarios");
-            lblBuscar.Text       = T("lbl.adminusr.buscar",    "Buscar (nombre, apellido o email):");
-            btnBuscar.Text       = T("btn.adminusr.buscar",    "🔍 Buscar");
-            btnRefrescar.Text    = T("btn.adminusr.refrescar", "↻ Ver todos");
-            btnNuevo.Text        = T("btn.adminusr.nuevo",     "➕ Nuevo usuario");
-            lblDatos.Text        = T("lbl.adminusr.datos",     "Datos del usuario seleccionado");
-            lblNombre.Text       = T("lbl.adminusr.nombre",    "Nombre:");
-            lblApellido.Text     = T("lbl.adminusr.apellido",  "Apellido:");
-            lblUsername.Text     = T("lbl.adminusr.username",  "Nombre de usuario:");
-            lblEmail.Text        = T("lbl.adminusr.email",     "Email:");
-            lblNacimiento.Text   = T("lbl.adminusr.nacimiento","Fecha de nacimiento:");
-            lblRol.Text          = T("lbl.adminusr.rol",       "Rol:");
-            btnGuardar.Text      = T("btn.adminusr.guardar",   "💾 Guardar cambios");
-            btnCambiarRol.Text   = T("btn.adminusr.cambiarrol","🔁 Cambiar rol");
-            btnHistorial.Text    = T("btn.adminusr.historial", "📜 Ver historial de cambios");
-            btnCerrar.Text       = T("btn.permisos.cerrar",    "Cerrar");
+            this.Text            = Tr("frm.adminusuarios",      "Administración de Usuarios");
+            lblTitulo.Text       = Tr("lbl.adminusr.titulo",    "Administración de Usuarios");
+            lblBuscar.Text       = Tr("lbl.adminusr.buscar",    "Buscar (nombre, apellido o email):");
+            btnBuscar.Text       = Tr("btn.adminusr.buscar",    "🔍 Buscar");
+            btnRefrescar.Text    = Tr("btn.adminusr.refrescar", "↻ Ver todos");
+            btnNuevo.Text        = Tr("btn.adminusr.nuevo",     "➕ Nuevo usuario");
+            lblDatos.Text        = Tr("lbl.adminusr.datos",     "Datos del usuario seleccionado");
+            lblNombre.Text       = Tr("lbl.adminusr.nombre",    "Nombre:");
+            lblApellido.Text     = Tr("lbl.adminusr.apellido",  "Apellido:");
+            lblUsername.Text     = Tr("lbl.adminusr.username",  "Nombre de usuario:");
+            lblEmail.Text        = Tr("lbl.adminusr.email",     "Email:");
+            lblNacimiento.Text   = Tr("lbl.adminusr.nacimiento","Fecha de nacimiento:");
+            lblRol.Text          = Tr("lbl.adminusr.rol",       "Rol:");
+            btnGuardar.Text      = Tr("btn.adminusr.guardar",   "💾 Guardar cambios");
+            btnCambiarRol.Text   = Tr("btn.adminusr.cambiarrol","🔁 Cambiar rol");
+            btnHistorial.Text    = Tr("btn.adminusr.historial", "📜 Ver historial de cambios");
+            btnCerrar.Text       = Tr("btn.permisos.cerrar",    "Cerrar");
             TraducirHeaders();
         }
 
@@ -92,7 +86,7 @@ namespace GUI
             if (dgv.Columns.Count == 0) return;
             void RH(string col, string clave, string fb)
             {
-                if (dgv.Columns.Contains(col)) dgv.Columns[col].HeaderText = T(clave, fb);
+                if (dgv.Columns.Contains(col)) dgv.Columns[col].HeaderText = Tr(clave, fb);
             }
             RH("Username", "col.usr.username", "Usuario");
             RH("Nombre",   "col.adminusr.nombre",   "Nombre");
@@ -146,7 +140,7 @@ namespace GUI
                 TraducirHeaders();
 
                 lblMensaje.ForeColor = Color.DarkGreen;
-                lblMensaje.Text = string.Format(T("msg.adminusr.cargados", "{0} usuario(s)."), _usuarios.Count);
+                lblMensaje.Text = string.Format(Tr("msg.adminusr.cargados", "{0} usuario(s)."), _usuarios.Count);
                 LimpiarEdicion();
             }
             catch (Exception ex)
@@ -164,7 +158,7 @@ namespace GUI
 
             // Seleccionar un usuario existente sale del modo alta.
             _modoAlta = false;
-            btnGuardar.Text = T("btn.adminusr.guardar", "💾 Guardar cambios");
+            btnGuardar.Text = Tr("btn.adminusr.guardar", "💾 Guardar cambios");
             _idSeleccionado     = u.Id;
             txtNombre.Text     = u.Nombre   ?? "";
             txtApellido.Text   = u.Apellido ?? "";
@@ -194,7 +188,7 @@ namespace GUI
             dtpNacimiento.Checked = false;
             cmbRol.SelectedIndex = -1;
             HabilitarEdicion(false);
-            if (btnGuardar != null) btnGuardar.Text = T("btn.adminusr.guardar", "💾 Guardar cambios");
+            if (btnGuardar != null) btnGuardar.Text = Tr("btn.adminusr.guardar", "💾 Guardar cambios");
         }
 
         private void HabilitarEdicion(bool on)
@@ -238,9 +232,9 @@ namespace GUI
             HabilitarEdicion(true);
             btnCambiarRol.Enabled = false;   // el rol se elige en el alta; "cambiar rol" es para existentes
             btnHistorial.Enabled  = false;
-            btnGuardar.Text = T("btn.adminusr.crear", "💾 Crear usuario");
+            btnGuardar.Text = Tr("btn.adminusr.crear", "💾 Crear usuario");
             lblMensaje.ForeColor = System.Drawing.Color.DimGray;
-            lblMensaje.Text = T("msg.adminusr.modoalta", "Cargá los datos del nuevo usuario y presioná Crear.");
+            lblMensaje.Text = Tr("msg.adminusr.modoalta", "Cargá los datos del nuevo usuario y presioná Crear.");
             txtNombre.Focus();
         }
 
@@ -278,9 +272,9 @@ namespace GUI
                 }
 
                 if (!huboCambio)
-                { MostrarError(T("err.bll.usuario.sin_cambios", "No hay cambios para guardar.")); return; }
+                { MostrarError(Tr("err.bll.usuario.sin_cambios", "No hay cambios para guardar.")); return; }
 
-                MostrarOk(T("msg.adminusr.guardado", "Datos del usuario actualizados correctamente."));
+                MostrarOk(Tr("msg.adminusr.guardado", "Datos del usuario actualizados correctamente."));
                 CargarUsuarios(txtBuscar.Text);
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -292,17 +286,17 @@ namespace GUI
         {
             string rol = (cmbRol.SelectedItem as RolItem)?.Value;
             if (string.IsNullOrWhiteSpace(rol))
-            { MostrarError(T("err.adminusr.rol_vacio", "Seleccioná un rol.")); return; }
+            { MostrarError(Tr("err.adminusr.rol_vacio", "Seleccioná un rol.")); return; }
             try
             {
                 DateTime? fnac = dtpNacimiento.Checked ? (DateTime?)dtpNacimiento.Value.Date : null;
                 string ruta = _usuarioBLL.Alta(this.Text, txtUsername.Text, rol,
                     txtNombre.Text, txtApellido.Text, fnac, txtEmail.Text);
                 _modoAlta = false;
-                btnGuardar.Text = T("btn.adminusr.guardar", "💾 Guardar cambios");
+                btnGuardar.Text = Tr("btn.adminusr.guardar", "💾 Guardar cambios");
                 CargarUsuarios();
                 MostrarOk(string.Format(
-                    T("msg.adminusr.creado", "Usuario '{0}' creado. Credenciales en: {1}"),
+                    Tr("msg.adminusr.creado", "Usuario '{0}' creado. Credenciales en: {1}"),
                     txtUsername.Text.Trim(), ruta));
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -313,12 +307,12 @@ namespace GUI
             if (_idSeleccionado == 0) return;
             string rol = (cmbRol.SelectedItem as RolItem)?.Value;
             if (string.IsNullOrWhiteSpace(rol))
-            { MostrarError(T("err.adminusr.rol_vacio", "Seleccioná un rol.")); return; }
+            { MostrarError(Tr("err.adminusr.rol_vacio", "Seleccioná un rol.")); return; }
             try
             {
                 _usuarioBLL.CambiarRol(this.Text, _idSeleccionado, rol);
                 GUI.Menu.RefrescarSeguridadAbierta();   // re-aplica seguridad en vivo si tocó al usuario en sesión
-                MostrarOk(T("msg.adminusr.rolcambiado", "Rol del usuario actualizado correctamente."));
+                MostrarOk(Tr("msg.adminusr.rolcambiado", "Rol del usuario actualizado correctamente."));
                 CargarUsuarios(txtBuscar.Text);
             }
             catch (Exception ex) { MostrarError(ex); }

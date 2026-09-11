@@ -45,13 +45,8 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
 
-        private string T(string clave, string fallback, object[] args = null)
-            => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
-
         private void Traducir(Idioma idioma)
         {
-            var t = Traductor.ObtenerTraducciones(idioma);
-            string Tr(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             this.Text          = Tr("rotacion.titulo", "Rotación de Prendas");
             lblTitulo.Text      = Tr("rotacion.titulo", "Rotación de Prendas");
@@ -81,7 +76,7 @@ namespace GUI
                 foreach (var h in _encabezados) tabla.Columns.Add(h);
                 foreach (var r in resultados)
                     tabla.Rows.Add(r.NombrePrenda, r.Categoria ?? "", r.CantidadPedidos,
-                        T(r.Clave, r.Motivo, r.Args));
+                        Tr(r.Clave, r.Motivo, r.Args));
 
                 dgv.DataSource = tabla;
                 for (int i = 0; i < _encabezados.Length && i < dgv.Columns.Count; i++)
@@ -89,7 +84,7 @@ namespace GUI
 
                 lblResultado.ForeColor = resultados.Count > 0 ? Color.DarkOrange : Color.DarkGreen;
                 lblResultado.Text = string.Format(
-                    T("rotacion.resultado", "{0} prenda(s) marcada(s) por rotación."),
+                    Tr("rotacion.resultado", "{0} prenda(s) marcada(s) por rotación."),
                     new object[] { resultados.Count });
             }
             catch (Exception ex)
@@ -108,7 +103,7 @@ namespace GUI
             if (datos == null || datos.Rows.Count == 0)
             {
                 MessageBox.Show(
-                    T("err.pdf.sinDatos", "No hay datos para exportar."),
+                    Tr("err.pdf.sinDatos", "No hay datos para exportar."),
                     this.Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

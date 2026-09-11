@@ -74,7 +74,7 @@ namespace GUI
                 }
                 if (!_usuarioBLL.ValidarCredencialesAdmin(txtUsuario.Text.Trim(), txtClave.Text))
                 {
-                    lblError.Text = T("msg.confirmar.invalido", "Credenciales inválidas o el usuario no es Administrador.");
+                    lblError.Text = T("msg.confirmar.invalido", "Usuario o contraseña incorrectos, o el usuario no es Administrador.");
                     txtClave.Clear();
                     txtClave.Focus();
                     return;

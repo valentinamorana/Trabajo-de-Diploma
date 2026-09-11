@@ -8,6 +8,11 @@ namespace BLL.Estrategias
     /// </summary>
     public sealed class EstrategiaInactividadPura : EstrategiaRiesgo
     {
+        // 60 días (vs. los 30 de EstrategiaVencimientoInactividad) a propósito: acá la
+        // inactividad es la ÚNICA señal de riesgo (no se mira el vencimiento), así que necesita
+        // un umbral más largo para no marcar en riesgo a alguien que solo se tomó un respiro
+        // corto. La otra estrategia solo evalúa inactividad como refuerzo de un vencimiento ya
+        // próximo/vencido, por eso le alcanza con un umbral más corto.
         public const int DiasSinActividadParaRiesgo = 60;
 
         public override BE.ResultadoRiesgo Evaluar(BE.DatosClienteRiesgo datos)

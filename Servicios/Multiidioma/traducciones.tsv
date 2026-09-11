@@ -665,7 +665,7 @@ ES	lbl.confirmaradmin.clave	Contraseña
 ES	btn.confirmaradmin.ok	Confirmar
 ES	btn.confirmaradmin.cancelar	Cancelar
 ES	msg.confirmar.vacio	Ingrese usuario y contraseña.
-ES	msg.confirmar.invalido	Credenciales inválidas o el usuario no es Administrador.
+ES	msg.confirmar.invalido	Usuario o contraseña incorrectos, o el usuario no es Administrador.
 ES	msg.historial.sinseleccion	Seleccioná una versión de la grilla.
 ES	msg.historial.atencion	Atención
 ES	msg.historial.restaurado	Versión restaurada correctamente.
@@ -1468,7 +1468,7 @@ EN	lbl.confirmaradmin.clave	Password
 EN	btn.confirmaradmin.ok	Confirm
 EN	btn.confirmaradmin.cancelar	Cancel
 EN	msg.confirmar.vacio	Enter username and password.
-EN	msg.confirmar.invalido	Invalid credentials or the user is not an Administrator.
+EN	msg.confirmar.invalido	Incorrect username or password, or the user is not an Administrator.
 EN	msg.historial.sinseleccion	Select a version from the grid.
 EN	msg.historial.atencion	Attention
 EN	msg.historial.restaurado	Version restored successfully.
@@ -2271,7 +2271,7 @@ RU	lbl.confirmaradmin.clave	Пароль
 RU	btn.confirmaradmin.ok	Подтвердить
 RU	btn.confirmaradmin.cancelar	Отмена
 RU	msg.confirmar.vacio	Введите имя пользователя и пароль.
-RU	msg.confirmar.invalido	Неверные учётные данные или пользователь не является Администратором.
+RU	msg.confirmar.invalido	Неверное имя пользователя или пароль, либо пользователь не является Администратором.
 RU	msg.historial.sinseleccion	Выберите версию из таблицы.
 RU	msg.historial.atencion	Внимание
 RU	msg.historial.restaurado	Версия успешно восстановлена.
@@ -3112,7 +3112,7 @@ PT	lbl.confirmaradmin.clave	Senha
 PT	btn.confirmaradmin.ok	Confirmar
 PT	btn.confirmaradmin.cancelar	Cancelar
 PT	msg.confirmar.vacio	Informe usuário e senha.
-PT	msg.confirmar.invalido	Credenciais inválidas ou o usuário não é Administrador.
+PT	msg.confirmar.invalido	Usuário ou senha incorretos, ou o usuário não é Administrador.
 PT	msg.historial.sinseleccion	Selecione uma versão da grade.
 PT	msg.historial.atencion	Atenção
 PT	msg.historial.restaurado	Versão restaurada com sucesso.

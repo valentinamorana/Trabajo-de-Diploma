@@ -10,6 +10,12 @@ namespace GUI
         private readonly Usuario _usuarioBLL = new Usuario();
         private readonly RecuperacionAdmin _recuperacionBLL = new RecuperacionAdmin();
 
+        // Límite de intentos fallidos DENTRO de esta instancia del diálogo (se resetea cada vez
+        // que se vuelve a abrir) — antes no había ninguna fricción para probar credenciales o la
+        // Clave Maestra a repetición sobre el secreto más crítico del sistema.
+        private const int MaxIntentos = 3;
+        private int _intentosFallidos = 0;
+
         public bool Autorizado { get; private set; }
 
         public ConfirmarAdminForm()
@@ -74,6 +80,17 @@ namespace GUI
                 }
                 if (!_usuarioBLL.ValidarCredencialesAdmin(txtUsuario.Text.Trim(), txtClave.Text))
                 {
+                    _intentosFallidos++;
+                    if (_intentosFallidos >= MaxIntentos)
+                    {
+                        MessageBox.Show(
+                            T("msg.confirmar.limiteintentos", "Demasiados intentos fallidos. Cerrá esta ventana e intentá de nuevo más tarde."),
+                            T("msg.error.titulo", "Error"),
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        this.DialogResult = DialogResult.Cancel;
+                        this.Close();
+                        return;
+                    }
                     lblError.Text = T("msg.confirmar.invalido", "Usuario o contraseña incorrectos, o el usuario no es Administrador.");
                     txtClave.Clear();
                     txtClave.Focus();

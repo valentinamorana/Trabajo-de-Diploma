@@ -4008,6 +4008,7 @@ ES	renov.cambiarplan	Cambiar de plan
 ES	renov.baja	Dar de baja
 ES	renov.plannuevo	Plan nuevo:
 ES	renov.modalidad	Modalidad de cobro:
+ES	cobro.modalidad	Modalidad de cobro:
 ES	renov.procesar	Procesar
 ES	mnu.cobro	Cobro de Suscripción
 ES	cobro.titulo	Cobro de Suscripción
@@ -4067,6 +4068,7 @@ EN	renov.cambiarplan	Change plan
 EN	renov.baja	Cancel subscription
 EN	renov.plannuevo	New plan:
 EN	renov.modalidad	Billing method:
+EN	cobro.modalidad	Billing method:
 EN	renov.procesar	Process
 EN	mnu.cobro	Subscription Payment
 EN	cobro.titulo	Subscription Payment
@@ -4126,6 +4128,7 @@ RU	renov.cambiarplan	Сменить план
 RU	renov.baja	Отменить подписку
 RU	renov.plannuevo	Новый план:
 RU	renov.modalidad	Способ оплаты:
+RU	cobro.modalidad	Способ оплаты:
 RU	renov.procesar	Обработать
 RU	mnu.cobro	Оплата подписки
 RU	cobro.titulo	Оплата подписки
@@ -4185,6 +4188,7 @@ PT	renov.cambiarplan	Mudar de plano
 PT	renov.baja	Cancelar assinatura
 PT	renov.plannuevo	Novo plano:
 PT	renov.modalidad	Modalidade de cobrança:
+PT	cobro.modalidad	Modalidade de cobrança:
 PT	renov.procesar	Processar
 PT	mnu.cobro	Cobrança de Assinatura
 PT	cobro.titulo	Cobrança de Assinatura
@@ -4934,6 +4938,9 @@ RU	col.contr.cliente	Клиент
 PT	col.contr.cliente	Cliente
 ES	col.contr.plan	Plan
 ES	col.contr.monto	Monto
+ES	medio.efectivo	Efectivo
+ES	medio.tarjeta	Tarjeta
+ES	medio.transferencia	Transferencia
 ES	err.bll.promocion.sugerencia_inexistente	La sugerencia seleccionada no existe.
 ES	err.bll.promocion.nombre_requerido	El nombre de la promoción es obligatorio.
 ES	err.bll.promocion.destino_invalido	La promoción debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.
@@ -4955,6 +4962,9 @@ ES	err.bll.sugerenciapromocion.motivo_requerido	Debe indicar el motivo de la sug
 ES	err.bll.sugerenciapromocion.beneficio_invalido	El beneficio estimado debe ser mayor a cero.
 EN	col.contr.plan	Plan
 EN	col.contr.monto	Amount
+EN	medio.efectivo	Cash
+EN	medio.tarjeta	Card
+EN	medio.transferencia	Transfer
 EN	err.bll.promocion.sugerencia_inexistente	The selected suggestion does not exist.
 EN	err.bll.promocion.nombre_requerido	The promotion name is required.
 EN	err.bll.promocion.destino_invalido	The promotion must apply to either a plan or a garment category, never both or neither.
@@ -4976,6 +4986,9 @@ EN	err.bll.sugerenciapromocion.motivo_requerido	You must indicate the reason for
 EN	err.bll.sugerenciapromocion.beneficio_invalido	The estimated benefit must be greater than zero.
 RU	col.contr.plan	План
 RU	col.contr.monto	Сумма
+RU	medio.efectivo	Наличные
+RU	medio.tarjeta	Карта
+RU	medio.transferencia	Перевод
 RU	err.bll.promocion.sugerencia_inexistente	Выбранное предложение не существует.
 RU	err.bll.promocion.nombre_requerido	Название акции обязательно.
 RU	err.bll.promocion.destino_invalido	Акция должна применяться либо к плану, либо к категории вещей, но не к обоим и не ни к одному.
@@ -4997,6 +5010,9 @@ RU	err.bll.sugerenciapromocion.motivo_requerido	Необходимо указа�
 RU	err.bll.sugerenciapromocion.beneficio_invalido	Ожидаемая выгода должна быть больше нуля.
 PT	col.contr.plan	Plano
 PT	col.contr.monto	Valor
+PT	medio.efectivo	Dinheiro
+PT	medio.tarjeta	Cartão
+PT	medio.transferencia	Transferência
 PT	err.bll.promocion.sugerencia_inexistente	A sugestão selecionada não existe.
 PT	err.bll.promocion.nombre_requerido	O nome da promoção é obrigatório.
 PT	err.bll.promocion.destino_invalido	A promoção deve aplicar-se a um plano ou a uma categoria de peça, nunca a ambos nem a nenhum.

@@ -122,10 +122,27 @@ namespace GUI
 
         private void BtnConfirmar_Click(object sender, EventArgs e)
         {
+            var tv = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string Tv(string k, string fb) => tv.ContainsKey(k) ? tv[k].Texto : fb;
+
+            var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
+
+            // Validación inline antes de invocar BLL: ambas reglas ya existen del lado de
+            // BLL.Promocion (CrearInterna) y bloqueaban correctamente, pero recién al enviar —
+            // con un cartel de error genérico tras el roundtrip, en vez de feedback inmediato.
+            if (dtpFin.Value.Date < dtpInicio.Value.Date)
+            {
+                MostrarError(Tv("err.bll.promocion.rango_fechas_invalido", "La fecha de fin no puede ser anterior a la fecha de inicio."));
+                return;
+            }
+            if (tipo == BE.TipoDescuento.Porcentaje && numValor.Value > 100)
+            {
+                MostrarError(Tv("err.bll.promocion.porcentaje_invalido", "Un descuento por porcentaje no puede superar el 100%."));
+                return;
+            }
+
             try
             {
-                var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
-
                 if (_sugerenciaOrigen != null)
                 {
                     IdPromocionCreada = promocionBLL.CrearDesdeSugerencia(this.Text, _sugerenciaOrigen.IdSugerencia,

@@ -60,11 +60,9 @@ namespace GUI
             //
             // cmbMedioPago
             //
+            // Los ítems se cargan en runtime (ContratacionesPendientesForm.CargarMediosPago), ya
+            // traducidos — antes estaban hardcodeados acá en español fijo.
             this.cmbMedioPago.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbMedioPago.Items.AddRange(new object[] {
-            "Efectivo",
-            "Tarjeta",
-            "Transferencia"});
             this.cmbMedioPago.Location = new System.Drawing.Point(102, 16);
             this.cmbMedioPago.Name = "cmbMedioPago";
             this.cmbMedioPago.Size = new System.Drawing.Size(140, 21);

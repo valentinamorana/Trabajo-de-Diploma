@@ -217,13 +217,6 @@ namespace GUI
             }
         }
 
-        private sealed class ClienteItem
-        {
-            public BE.Cliente Cliente { get; }
-            public ClienteItem(BE.Cliente c) => Cliente = c;
-            public override string ToString() => $"{Cliente.NombreCompleto} (DNI {Cliente.DNI})";
-        }
-
         private sealed class PlanItem
         {
             public BE.PlanSuscripcion Plan { get; }

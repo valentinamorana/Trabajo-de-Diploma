@@ -107,7 +107,10 @@ namespace GUI
             this.rbPausar.CheckedChanged += new System.EventHandler(this.RbPausar_CheckedChanged);
 
             this.dtpPausaHasta.Enabled  = false;
-            this.dtpPausaHasta.Format   = DateTimePickerFormat.Short;
+            // Custom + dd/MM/yyyy explícito en vez de Short (depende del locale de la máquina) —
+            // mismo motivo que AltaPromocionForm.dtpInicio/dtpFin.
+            this.dtpPausaHasta.Format       = DateTimePickerFormat.Custom;
+            this.dtpPausaHasta.CustomFormat = "dd/MM/yyyy";
             this.dtpPausaHasta.Location = new Point(250, 98);
             this.dtpPausaHasta.MinDate  = DateTime.Today;
             this.dtpPausaHasta.Name     = "dtpPausaHasta";
@@ -134,10 +137,10 @@ namespace GUI
             this.lblModalidad.TabIndex = 7;
 
             this.cmbModalidad.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.cmbModalidad.Items.AddRange(new object[] {
-                BE.Builders.ModalidadCobro.Mensual,
-                BE.Builders.ModalidadCobro.Trimestral,
-                BE.Builders.ModalidadCobro.Anual });
+            // Enum.GetValues en vez de una lista hardcodeada (antes la única de las 3 pantallas
+            // que no lo hacía así — NuevaContratacionForm ya usaba este criterio): un valor nuevo
+            // en BE.Builders.ModalidadCobro se refleja acá sin tener que acordarse de tocar esta lista.
+            this.cmbModalidad.DataSource = Enum.GetValues(typeof(BE.Builders.ModalidadCobro));
             this.cmbModalidad.Location     = new Point(120, 287);
             this.cmbModalidad.Name         = "cmbModalidad";
             this.cmbModalidad.SelectedIndex = 0;

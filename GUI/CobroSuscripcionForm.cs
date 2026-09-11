@@ -55,7 +55,7 @@ namespace GUI
             grpDecision.Text   = Tr("cobro.decision", "Resultado del cobro");
             rbCobrado.Text     = Tr("cobro.cobrado", "Cobrado");
             rbPagoFallido.Text = Tr("cobro.pagofallido", "Pago fallido");
-            lblModalidad.Text  = Tr("renov.modalidad", "Modalidad de cobro:");
+            lblModalidad.Text  = Tr("cobro.modalidad", "Modalidad de cobro:");
             btnProcesar.Text   = Tr("cobro.procesar", "Procesar");
         }
 
@@ -165,13 +165,6 @@ namespace GUI
             {
                 MostrarError(ex);
             }
-        }
-
-        private sealed class ClienteItem
-        {
-            public BE.Cliente Cliente { get; }
-            public ClienteItem(BE.Cliente c) => Cliente = c;
-            public override string ToString() => $"{Cliente.NombreCompleto} (DNI {Cliente.DNI})";
         }
     }
 }

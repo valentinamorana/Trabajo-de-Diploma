@@ -62,6 +62,44 @@ namespace GUI
             Aplicar(btnCobrar,         t);
             Aplicar(btnIntentoFallido, t);
             TraducirHeadersGrilla(t);
+            CargarMediosPago(t);
+        }
+
+        // Antes hardcodeado en el Designer ("Efectivo"/"Tarjeta"/"Transferencia" fijos, sin pasar
+        // por el traductor) — única lista de opciones de las 10 pantallas de este alcance que no
+        // pasaba por el sistema de multiidioma. El VALOR persistido (BE.Contratacion.MedioPago)
+        // se mantiene en español canónico independientemente del idioma de la UI — solo se
+        // traduce el texto visible (DisplayMember), vía MedioPagoItem (mismo patrón que
+        // Usuarios.PerfilItem).
+        private void CargarMediosPago(IDictionary<string, Traduccion> t)
+        {
+            string TT(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+            object seleccionActual = cmbMedioPago.SelectedItem is MedioPagoItem mpi ? mpi.Value : null;
+
+            cmbMedioPago.DataSource = null;
+            cmbMedioPago.DisplayMember = "Label";
+            cmbMedioPago.ValueMember   = "Value";
+            cmbMedioPago.DataSource = new[]
+            {
+                new MedioPagoItem("Efectivo",      TT("medio.efectivo",      "Efectivo")),
+                new MedioPagoItem("Tarjeta",        TT("medio.tarjeta",       "Tarjeta")),
+                new MedioPagoItem("Transferencia",  TT("medio.transferencia", "Transferencia")),
+            };
+            cmbMedioPago.SelectedIndex = -1;
+            if (seleccionActual != null)
+            {
+                for (int i = 0; i < cmbMedioPago.Items.Count; i++)
+                    if (((MedioPagoItem)cmbMedioPago.Items[i]).Value.Equals(seleccionActual))
+                    { cmbMedioPago.SelectedIndex = i; break; }
+            }
+        }
+
+        private sealed class MedioPagoItem
+        {
+            public string Value { get; }
+            public string Label { get; }
+            public MedioPagoItem(string value, string label) { Value = value; Label = label; }
+            public override string ToString() => Label;
         }
 
         private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
@@ -165,7 +203,7 @@ namespace GUI
                 MostrarError(T("err.contratacion.mediopago_requerido", "Seleccioná el medio de pago antes de cobrar."));
                 return;
             }
-            string medioPago = cmbMedioPago.SelectedItem.ToString();
+            string medioPago = ((MedioPagoItem)cmbMedioPago.SelectedItem).Value;
 
             var confirmar = MessageBox.Show(
                 string.Format(

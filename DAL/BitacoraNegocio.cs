@@ -11,7 +11,6 @@ namespace DAL
     /// </summary>
     public class BitacoraNegocio : BaseDAL
     {
-
         // Registra un evento de negocio en la bitácora.
         public void Registrar(BE.BitacoraNegocio evento)
         {

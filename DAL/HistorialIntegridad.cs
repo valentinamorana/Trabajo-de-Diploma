@@ -7,7 +7,6 @@ namespace DAL
 {
     public class HistorialIntegridad : BaseDAL
     {
-
         public void Insertar(BE.HistorialIntegridad entrada)
         {
             try

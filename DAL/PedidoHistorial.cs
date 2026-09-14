@@ -14,7 +14,6 @@ namespace DAL
     /// </summary>
     public class PedidoHistorial : BaseDAL, Interfaces.IPedidoHistorialDAL
     {
-
         // ── Escritura ─────────────────────────────────────────────────────────
 
         /// <summary>

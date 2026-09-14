@@ -19,14 +19,14 @@ namespace BE
         public const string CierreSesion                   = "Cierre Sesion";
         public const string CambioContrasenaPropia         = "Cambio de Contrasena Propia";
         public const string BloqueoDeCuenta                = "Bloqueo de Cuenta";
-        public const string IntentoFallidoLogin             = "Intento Fallido Login";
-        public const string BajaLogicaUsuario               = "Baja Logica Usuario";
-        public const string CambioDeRolDeUsuario            = "Cambio de Rol de Usuario";
-        public const string DesbloqueoConClaveDeEmergencia  = "Desbloqueo con Clave de Emergencia";
-        public const string ModificacionDeUsuario           = "Modificación de Usuario";
-        public const string PurgaUsuariosArchivados         = "Purga Usuarios Archivados";
-        public const string ResetContrasena                 = "Reset Contrasena";
-        public const string SolicitudRecuperacionClave      = "Solicitud Recuperacion Clave";
+        public const string IntentoFallidoLogin            = "Intento Fallido Login";
+        public const string BajaLogicaUsuario              = "Baja Logica Usuario";
+        public const string CambioDeRolDeUsuario           = "Cambio de Rol de Usuario";
+        public const string DesbloqueoConClaveDeEmergencia = "Desbloqueo con Clave de Emergencia";
+        public const string ModificacionDeUsuario          = "Modificación de Usuario";
+        public const string PurgaUsuariosArchivados        = "Purga Usuarios Archivados";
+        public const string ResetContrasena                = "Reset Contrasena";
+        public const string SolicitudRecuperacionClave     = "Solicitud Recuperacion Clave";
 
         public const string BackupInstalacionLimpiaPrefijo = "Backup de instalación limpia (cifrado) generado: ";
         public const string BackupCifradoGeneradoPrefijo   = "Backup cifrado generado: ";

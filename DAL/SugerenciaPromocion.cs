@@ -11,7 +11,6 @@ namespace DAL
     /// </summary>
     public class SugerenciaPromocion : BaseDAL, Interfaces.ISugerenciaPromocionDAL
     {
-
         private const string SELECT_BASE =
             "SELECT s.IdSugerencia, s.IdPlan, s.CategoriaPrenda, s.Motivo, s.TipoDescuentoSugerido, " +
             "s.BeneficioEstimado, s.Estado, s.FechaAlta, pl.Nombre AS NombrePlan " +

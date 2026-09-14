@@ -10,7 +10,6 @@ namespace DAL
     /// </summary>
     public class Preferencia : BaseDAL, Interfaces.IPreferenciaDAL
     {
-
         public BE.Preferencia Obtener(int idUsuario)
         {
             var pref = new BE.Preferencia { IdUsuario = idUsuario };

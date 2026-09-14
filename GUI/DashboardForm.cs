@@ -647,9 +647,9 @@ namespace GUI
 
             switch (actividad)
             {
-                case BE.ActividadesBitacora.InicioSesion:                  return Tr("dash.act.login",           actividad);
-                case BE.ActividadesBitacora.CierreSesion:                  return Tr("dash.act.logout",          actividad);
-                case BE.ActividadesBitacora.CambioContrasenaPropia:        return Tr("dash.act.pwchange",        actividad);
+                case BE.ActividadesBitacora.InicioSesion:                   return Tr("dash.act.login",           actividad);
+                case BE.ActividadesBitacora.CierreSesion:                   return Tr("dash.act.logout",          actividad);
+                case BE.ActividadesBitacora.CambioContrasenaPropia:         return Tr("dash.act.pwchange",        actividad);
                 case BE.ActividadesBitacora.BloqueoDeCuenta:                return Tr("dash.act.accountlock",     actividad);
                 case BE.ActividadesBitacora.IntentoFallidoLogin:            return Tr("dash.act.loginfail",       actividad);
                 case BE.ActividadesBitacora.BajaLogicaUsuario:              return Tr("dash.act.userdeactivate",  actividad);

@@ -11,7 +11,6 @@ namespace DAL
     /// </summary>
     public class Contratacion : BaseDAL, Interfaces.IContratacionDAL
     {
-
         private const string SELECT_BASE =
             "SELECT c.IdContratacion, c.IdCliente, c.IdPlan, c.IdVendedor, c.IdCaja, c.Modalidad, " +
             "c.Estado, c.IntentosPago, c.FechaAlta, c.FechaResolucion, c.MedioPago, " +

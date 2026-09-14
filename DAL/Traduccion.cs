@@ -7,7 +7,6 @@ namespace DAL
 {
     public class Traduccion : BaseDAL
     {
-
         // Devuelve todas las traducciones de un idioma como diccionario clave→texto.
         // Usado por BLL para cargar el cache en memoria antes de notificar observers.
         public Dictionary<string, string> ObtenerDiccionario(string codigoIdioma)

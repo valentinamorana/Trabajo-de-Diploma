@@ -11,7 +11,6 @@ namespace DAL
     /// </summary>
     public class Promocion : BaseDAL, Interfaces.IPromocionDAL
     {
-
         private const string SELECT_BASE =
             "SELECT p.IdPromocion, p.Nombre, p.Descripcion, p.TipoDescuento, p.Valor, " +
             "p.FechaInicio, p.FechaFin, p.Estado, p.IdPlan, p.CategoriaPrenda, p.MargenEstimado, " +

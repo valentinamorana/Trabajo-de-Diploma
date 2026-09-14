@@ -11,7 +11,6 @@ namespace DAL
     /// </summary>
     public class Bitacora : BaseDAL
     {
-
         // Inserta un registro de auditoría. Id es identity — lo genera la BD.
         public void Registrar(BE.Bitacora registro)
         {

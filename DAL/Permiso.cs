@@ -49,7 +49,6 @@ namespace DAL
     /// </summary>
     public class Permiso : BaseDAL, Interfaces.IPermisoDAL
     {
-
         // Construye el árbol Composite completo desde BD.
         // Lee Permiso (EsFamilia discrimina tipo) y PermisoRelacion (padre→hijo).
         // Retorna los nodos raíz (Familias sin padre) listas para que BLL las envuelva.

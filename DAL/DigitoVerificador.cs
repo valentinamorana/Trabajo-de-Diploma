@@ -19,7 +19,6 @@ namespace DAL
     /// </summary>
     public class DigitoVerificador : BaseDAL
     {
-
         // Lee el DVV almacenado para una tabla. Retorna null si no existe registro.
         public int? ObtenerDVV(string nombreTabla)
         {

@@ -11,7 +11,6 @@ namespace DAL
     /// </summary>
     public class ControlMapeado : BaseDAL, DAL.Interfaces.IControlMapeadoDAL
     {
-
         public List<BE.ControlMapeado> ObtenerTodos()
         {
             var lista = new List<BE.ControlMapeado>();

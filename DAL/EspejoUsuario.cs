@@ -24,7 +24,6 @@ namespace DAL
     /// </summary>
     public class EspejoUsuario : BaseDAL
     {
-
         // Indica si la tabla espejo existe (BD migrada). Se usa para no intentar operar sin migración.
         public bool Existe()
         {

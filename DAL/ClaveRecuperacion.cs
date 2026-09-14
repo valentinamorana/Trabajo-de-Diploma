@@ -12,7 +12,6 @@ namespace DAL
     /// </summary>
     public class ClaveRecuperacion : BaseDAL, Interfaces.IClaveRecuperacionDAL
     {
-
         // Inserta una clave (ya hasheada por la capa de negocio).
         public void Insertar(string claveHash)
         {

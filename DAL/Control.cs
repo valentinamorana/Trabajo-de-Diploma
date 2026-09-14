@@ -9,7 +9,6 @@ namespace DAL
     /// </summary>
     public class Control : BaseDAL
     {
-
         // Todos los controles traducibles, para el grid de Controles del FormIdiomas.
         public List<BE.Control> ObtenerTodos()
         {

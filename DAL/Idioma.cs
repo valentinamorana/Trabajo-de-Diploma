@@ -7,7 +7,6 @@ namespace DAL
 {
     public class Idioma : BaseDAL
     {
-
         public List<BE.Idioma> ObtenerActivos()
         {
             var lista = new List<BE.Idioma>();

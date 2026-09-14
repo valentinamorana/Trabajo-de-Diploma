@@ -49,6 +49,12 @@ namespace DAL
     /// </summary>
     public class Permiso : BaseDAL, Interfaces.IPermisoDAL
     {
+        // Código de error nativo de SQL Server para "Invalid column name" — antes el catch de
+        // abajo no filtraba nada (catch (SqlException) a secas), así que CUALQUIER falla de SQL
+        // (timeout, deadlock, permisos, etc.) se interpretaba como "columna EsRol sin migrar" y
+        // reintentaba con una consulta distinta en vez de propagar el error real.
+        private const int ColumnaInexistente = 207;
+
         // Construye el árbol Composite completo desde BD.
         // Lee Permiso (EsFamilia discrimina tipo) y PermisoRelacion (padre→hijo).
         // Retorna los nodos raíz (Familias sin padre) listas para que BLL las envuelva.
@@ -65,7 +71,7 @@ namespace DAL
                     "FROM Permiso WHERE Estado = 1 ORDER BY EsFamilia DESC, Nombre",
                     null);
             }
-            catch (SqlException)
+            catch (SqlException ex) when (ex.Number == ColumnaInexistente)
             {
                 dt = acceso.Leer(
                     "SELECT IdPermiso, Nombre, NombreMenu, EsFamilia, " +

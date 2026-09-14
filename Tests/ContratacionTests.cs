@@ -215,6 +215,30 @@ namespace Tests
         }
 
         [TestMethod]
+        public void ConfirmarPago_ContratacionInexistente_LanzaInexistente_SinTocarElDAL()
+        {
+            // Revalida contra el estado FRESCO de la BD (dalContratacion.ObtenerPorId), no el
+            // objeto que trae el caller — cubre el caso de que otra sesión de Caja ya la haya
+            // cobrado/eliminado en el ínterin. ContratacionPorId queda null (default del Fake).
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var contratacion = ContratacionPendiente();
+
+            try
+            {
+                bll.ConfirmarPago("Test", contratacion, "Efectivo");
+                Assert.Fail("Debía rechazar una contratación que ya no existe.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.contratacion.inexistente", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarPagoVeces);
+            Assert.AreEqual(0, ctx.ClienteBLL.ActivarSuscripcionVeces);
+        }
+
+        [TestMethod]
         public void ConfirmarPago_ContratacionNoPendientePago_LanzaCobrarEstado()
         {
             LoginComoAdministrador();
@@ -311,6 +335,26 @@ namespace Tests
             Assert.AreEqual(1, ctx.DalContratacion.IncrementarIntentoVeces);
             Assert.AreEqual(1, ctx.DalContratacion.CancelarVeces);
             Assert.AreEqual(contratacion.IdContratacion, ctx.DalContratacion.UltimoCancelarId);
+        }
+
+        [TestMethod]
+        public void RegistrarIntentoFallido_ContratacionInexistente_LanzaInexistente_SinTocarElDAL()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var contratacion = ContratacionPendiente();
+
+            try
+            {
+                bll.RegistrarIntentoFallido("Test", contratacion);
+                Assert.Fail("Debía rechazar una contratación que ya no existe.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.contratacion.inexistente", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalContratacion.IncrementarIntentoVeces);
         }
 
         [TestMethod]

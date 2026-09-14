@@ -513,7 +513,18 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 > parameterless de siempre para producción). Se agregaron `FakeBitacoraService`/`FakePrendaService`
 > y 8 tests de la fachada real en `Tests/ReporteJornadaTests.cs`.
 >
-> Prenda/CargoPrenda/ListaEspera siguen sin la misma revisión de detalle.
+> Por último, se revisó Prenda/CargoPrenda/ListaEspera (`PrendaTests.cs`, `CargoPrendaTests.cs`,
+> `ListaEsperaTests.cs`): a diferencia de los casos anteriores, las tres clases BLL ya usaban DI
+> por interfaz correctamente desde el vamos (`IPrendaDAL`/`IMantenimientoPrendaDAL`,
+> `ICargoPrendaDAL`, `IListaEsperaDAL`+`IPrendaDAL`+`IClienteDAL`) y ya tenían tests reales de la
+> fachada cubriendo las reglas de negocio riesgosas (guardas de transición de estado, FIFO de
+> reserva, rechazo de doble anotación, etc.), no solo lógica pura. Lo único sin test directo son
+> delegaciones triviales de una línea (`ObtenerTodos`/`ObtenerPorId`/`ObtenerPorCliente` de
+> `Prenda`, `ObtenerTodos` de `CargoPrenda`, `ObtenerActivas`/`ObtenerPorPrenda`/
+> `ObtenerIdsReservadosParaOtro`/`ContarReservadasVigentes` de `ListaEspera`) — mismo criterio ya
+> aceptado en el resto de la suite para pass-throughs sin lógica, no se agregan tests solo para
+> subir el número. No se encontró ningún problema estructural en esta área: **cierra la nota de
+> cobertura**, no quedan sub-áreas pendientes de esta sección.
 
 ---
 

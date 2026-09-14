@@ -3684,6 +3684,10 @@ ES	err.bll.familia.autobloqueo	No podés quitarte a vos mismo el acceso de Gesti
 EN	err.bll.familia.autobloqueo	You cannot remove your own User Management access from your own role.
 RU	err.bll.familia.autobloqueo	Вы не можете убрать у себя доступ к управлению пользователями из своей собственной роли.
 PT	err.bll.familia.autobloqueo	Você não pode remover o seu próprio acesso à Gestão de Usuários do seu próprio perfil.
+ES	err.bll.familia.autoescalacion	No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando tu propio rol. Pedile a otro administrador que lo haga.
+EN	err.bll.familia.autoescalacion	You cannot grant yourself permissions your role doesn't already have by editing your own role. Ask another administrator to do it.
+RU	err.bll.familia.autoescalacion	Вы не можете предоставить себе разрешения, которых у вашей роли ещё нет, редактируя свою собственную роль. Попросите другого администратора сделать это.
+PT	err.bll.familia.autoescalacion	Você não pode conceder a si mesmo permissões que seu perfil ainda não tem editando o seu próprio perfil. Peça a outro administrador para fazer isso.
 ES	msg.mantenimiento.titulo	Sistema en mantenimiento
 ES	msg.mantenimiento.cuerpo	El sistema no está disponible en este momento por tareas de mantenimiento. Reintentá más tarde o contactá al Administrador.
 EN	msg.mantenimiento.titulo	System under maintenance

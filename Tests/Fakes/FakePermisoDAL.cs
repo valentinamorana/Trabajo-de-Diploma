@@ -25,6 +25,10 @@ namespace Tests.Fakes
         public List<BE.Componente> ArbolPersonalizado { get; set; }
 
         public Dictionary<string, int> IdsPorRol { get; set; } = new Dictionary<string, int>();
+        // Hijos DIRECTOS configurables por id de padre — usado por ObtenerIdsDirectosDelRol
+        // (BLL.Familia) para saber qué tiene HOY un rol antes de comparar contra una selección
+        // propuesta (guard anti-autoescalación). Sin configurar, se comporta como antes (vacío).
+        public Dictionary<int, List<int>> HijosPorIdPadre { get; set; } = new Dictionary<int, List<int>>();
         public int ContarUsuariosPorRolRespuesta { get; set; }
         public List<string> ObtenerUsuariosPorRolRespuesta { get; set; } = new List<string>();
         public int AltaComponenteIdGenerado { get; set; } = 1;
@@ -61,7 +65,8 @@ namespace Tests.Fakes
         public List<string>     ObtenerRoles()                  => new List<string> { "Admin", "Gerente" };
         public List<BE.Permiso> ObtenerPorRol(string rol)       => new List<BE.Permiso>();   // fallback vacío
         public int              ObtenerIdRol(string rolNombre)  => IdsPorRol.TryGetValue(rolNombre, out int id) ? id : 0;
-        public List<int>        ObtenerIdsHijos(int idPadre)    => new List<int>();
+        public List<int>        ObtenerIdsHijos(int idPadre)
+            => HijosPorIdPadre.TryGetValue(idPadre, out var hijos) ? hijos : new List<int>();
 
         public void AgregarRelacion(int p, int h)
         {

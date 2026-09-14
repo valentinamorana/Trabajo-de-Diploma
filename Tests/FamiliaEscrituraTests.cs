@@ -290,5 +290,84 @@ namespace Tests
             Assert.AreEqual(0, dal.AgregarRelacionVeces);
             Assert.AreEqual(0, dal.QuitarRelacionVeces);
         }
+
+        [TestMethod]
+        public void GuardarAsignacionRol_UsuarioNoAdminSeAgregaUnPermisoQueNoTenia_LanzaAutoescalacion_SinTocarElDAL()
+        {
+            // Anti-autoescalación (§6 Media #8 de la auditoría): un no-Administrador con la
+            // patente de gestión puede reorganizar su PROPIO rol, pero no puede agregarse a sí
+            // mismo un permiso que su rol no resuelve hoy. "Vendedor" hoy solo tiene mnuUsuarios
+            // (id 10, conserva gestión); intenta agregarse además mnuStock (id 2, patente real del
+            // árbol pero ajena a su rol) — debe rechazarse antes de tocar el DAL.
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 4, Username = "vend", Perfil = "Vendedor",
+                Permisos = new List<BE.Permiso> { new BE.Permiso { NombreMenu = "mnuUsuarios" } }
+            });
+            var mnuUsuarios = new BE.Patente { Id = 10, Nombre = "Usuarios", NombreMenu = "mnuUsuarios" };
+            var vendedor = new BE.Rol { Id = 1, Nombre = "Vendedor" };
+            vendedor.AgregarHijo(mnuUsuarios);
+            // mnuStock existe en el árbol pero NO es hijo de Vendedor: ajeno a su techo actual.
+            var stock = new BE.Patente { Id = 2, Nombre = "Stock", NombreMenu = "mnuStock" };
+            var otroRol = new BE.Rol { Id = 5, Nombre = "OtroRol" };
+            otroRol.AgregarHijo(stock);
+
+            var dal = new FakePermisoDAL
+            {
+                ArbolPersonalizado = new List<BE.Componente> { vendedor, otroRol },
+                IdsPorRol = new Dictionary<string, int> { ["Vendedor"] = 1 },
+                HijosPorIdPadre = new Dictionary<int, List<int>> { [1] = new List<int> { 10 } }
+            };
+            var bll = new BLL.Familia(dal);
+
+            try
+            {
+                bll.GuardarAsignacionRol("Vendedor", new List<int> { 10, 2 });
+                Assert.Fail("Debía rechazar que el usuario se agregue a sí mismo un permiso que no tenía.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.familia.autoescalacion", ex.Clave);
+            }
+            Assert.AreEqual(0, dal.AgregarRelacionVeces);
+            Assert.AreEqual(0, dal.QuitarRelacionVeces);
+        }
+
+        // ── NoEscalaPrivilegios — núcleo puro del guard anti-autoescalación ────────────────
+
+        [TestMethod]
+        public void NoEscalaPrivilegios_SoloQuitaOReorganizaLoQueYaTenia_True()
+        {
+            Assert.IsTrue(BLL.Familia.NoEscalaPrivilegios(
+                patentesAntes: new[] { 10, 11 }, patentesDespues: new[] { 10 }));
+        }
+
+        [TestMethod]
+        public void NoEscalaPrivilegios_MismoConjunto_True()
+        {
+            Assert.IsTrue(BLL.Familia.NoEscalaPrivilegios(
+                patentesAntes: new[] { 10, 11 }, patentesDespues: new[] { 11, 10 }));
+        }
+
+        [TestMethod]
+        public void NoEscalaPrivilegios_AgregaUnoNuevo_False()
+        {
+            Assert.IsFalse(BLL.Familia.NoEscalaPrivilegios(
+                patentesAntes: new[] { 10 }, patentesDespues: new[] { 10, 20 }));
+        }
+
+        [TestMethod]
+        public void NoEscalaPrivilegios_SinNadaAntes_CualquierAgregadoEscala_False()
+        {
+            Assert.IsFalse(BLL.Familia.NoEscalaPrivilegios(
+                patentesAntes: new int[0], patentesDespues: new[] { 1 }));
+        }
+
+        [TestMethod]
+        public void NoEscalaPrivilegios_AmbosVacios_True()
+        {
+            Assert.IsTrue(BLL.Familia.NoEscalaPrivilegios(
+                patentesAntes: new int[0], patentesDespues: new int[0]));
+        }
     }
 }

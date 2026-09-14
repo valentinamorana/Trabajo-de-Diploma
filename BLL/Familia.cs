@@ -276,9 +276,25 @@ namespace BLL
             {
                 var u = Seguridad.SessionManager.GetInstance().Usuario;
                 string rolPropio = u.Rol ?? u.Perfil;
-                if (string.Equals(rol, rolPropio, StringComparison.OrdinalIgnoreCase) && !ConservaGestion(seleccion))
-                    throw new BE.AppException("err.bll.familia.autobloqueo",
-                        "No podés quitarte a vos mismo el acceso de Gestión de Usuarios de tu propio rol.");
+                if (string.Equals(rol, rolPropio, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!ConservaGestion(seleccion))
+                        throw new BE.AppException("err.bll.familia.autobloqueo",
+                            "No podés quitarte a vos mismo el acceso de Gestión de Usuarios de tu propio rol.");
+
+                    // Anti-autoescalación: tampoco puede AGREGARSE a su propio rol ningún permiso
+                    // que ese rol no resuelva YA hoy — el guard de arriba solo protege contra
+                    // PERDER la gestión, no contra ampliar el propio techo de acceso editándose a
+                    // sí mismo. Se comparan las patentes efectivas actuales vs. las que resolvería
+                    // la selección propuesta, sin mutar el árbol real (solo lectura vía
+                    // ObtenerPatentesEfectivas de cada id candidato).
+                    var arbolActual = permisoDAL.ObtenerArbol();
+                    if (!NoEscalaPrivilegios(PatentesDeConjunto(arbolActual, actuales),
+                                             PatentesDeConjunto(arbolActual, seleccion)))
+                        throw new BE.AppException("err.bll.familia.autoescalacion",
+                            "No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando " +
+                            "tu propio rol. Pedile a otro administrador que lo haga.");
+                }
             }
 
             // Guard sistémico: simular el rol con EXACTAMENTE los hijos seleccionados y verificar que
@@ -442,6 +458,35 @@ namespace BLL
                     $"Error al grabar snapshots de usuarios con rol '{rol}': {ex.Message}",
                     BE.Criticidad.Alta);
             }
+        }
+
+        // Núcleo PURO y testeable (mismo estilo que SistemaConservaGestion): ¿el conjunto de
+        // patentes DESPUÉS de un cambio se queda dentro del techo de acceso ANTES del cambio? No
+        // toca BD ni sesión — la I/O (resolver el árbol y las patentes efectivas) vive en
+        // PatentesDeConjunto, llamado desde GuardarAsignacionRol.
+        public static bool NoEscalaPrivilegios(IEnumerable<int> patentesAntes, IEnumerable<int> patentesDespues)
+        {
+            var antes = new HashSet<int>(patentesAntes);
+            foreach (int id in patentesDespues)
+                if (!antes.Contains(id)) return false;
+            return true;
+        }
+
+        // Ids de Patente (hojas, resolución recursiva) que alcanzarían un conjunto de componentes
+        // candidatos si fueran hijos directos de un rol — sin mutar el árbol real, cada id se
+        // resuelve de forma independiente vía ObtenerPatentesEfectivas() del propio nodo. Usado
+        // para comparar el "antes"/"después" de una asignación sin tocar la BD ni el árbol vivo.
+        private static HashSet<int> PatentesDeConjunto(List<BE.Componente> arbol, IEnumerable<int> ids)
+        {
+            var resultado = new HashSet<int>();
+            foreach (int id in ids)
+            {
+                var nodo = BuscarPorId(arbol, id, new HashSet<int>());
+                if (nodo == null) continue;
+                foreach (var pat in nodo.ObtenerPatentesEfectivas())
+                    resultado.Add(pat.Id);
+            }
+            return resultado;
         }
 
         // ── Helpers privados de recorrido recursivo ─────────────────────────────

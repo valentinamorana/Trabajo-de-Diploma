@@ -486,6 +486,17 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 > Fakes/estilo de tests en esas áreas — el agente que la produjo se quedó sin tiempo/presupuesto de
 > API a mitad de esa segunda pasada. Si se quiere cerrar esa cobertura, es la única sección de las
 > 10 que ameritaría una pasada adicional.
+>
+> **Actualización (2026-09-13):** se revisó Contratación (ya tenía buena cobertura — 14 tests
+> existentes, incluida la fachada real instanciada con `BLL.Cliente` inyectado por interfaz desde
+> el vamos; se agregaron 2 tests que faltaban para la revalidación contra estado fresco de BD en
+> `ConfirmarPago`/`RegistrarIntentoFallido`) y los 5 de Análisis/Recomendación/Reportes. De estos
+> últimos, **`BLL.AnalisisAbandono` tenía el mismo problema estructural que `BLL.Cliente`/
+> `BLL.Renovacion`**: `dalPedido` era `DAL.Pedido` concreto (las otras 5 clases ya usaban
+> `IPedidoDAL` correctamente), así que `Tests/AnalisisAbandonoTests.cs` solo testeaba las
+> Estrategias puras y nunca la orquestación real de `Detectar()`/`CambiarEstrategia()` — quedaban
+> 0% cubiertas. Corregido: `dalPedido` pasa a `IPedidoDAL` y se agregaron 5 tests de la fachada
+> real. Reportes/Prenda/CargoPrenda/ListaEspera siguen sin la misma revisión de detalle.
 
 ---
 

@@ -46,6 +46,7 @@
     <Compile Include="LoginException.cs" />
     <Compile Include="Bitacora.cs" />
     <Compile Include="BitacoraNegocio.cs" />
+    <Compile Include="ActividadesBitacora.cs" />
     <Compile Include="FilaTraduccion.cs" />
     <Compile Include="Control.cs" />
     <Compile Include="Idioma.cs" />

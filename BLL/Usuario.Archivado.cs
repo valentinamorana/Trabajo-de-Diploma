@@ -27,7 +27,7 @@ namespace BLL
             usuarioDAL.Desbloquear(idUsuario);
 
             bitacora.Registrar(modulo,
-                $"Desbloqueo de Cuenta: '{usernameObjetivo}'",
+                $"{BE.ActividadesBitacora.DesbloqueoDeCuentaPrefijo}'{usernameObjetivo}'",
                 BE.Criticidad.Alta);
         }
 
@@ -59,7 +59,7 @@ namespace BLL
 
             bitacora.RegistrarSinSesion(
                 modulo:     modulo,
-                actividad:  "Baja Logica Usuario",
+                actividad:  BE.ActividadesBitacora.BajaLogicaUsuario,
                 criticidad: BE.Criticidad.Alta,
                 idUsuario:  admin.Id,
                 detalle:    $"Admin '{admin.Username}' archivó al usuario '{usernameObjetivo}' (ID {idUsuario}) a las {System.DateTime.Now:HH:mm:ss}.");
@@ -115,7 +115,7 @@ namespace BLL
 
             bitacora.RegistrarSinSesion(
                 modulo:     modulo,
-                actividad:  "Purga Usuarios Archivados",
+                actividad:  BE.ActividadesBitacora.PurgaUsuariosArchivados,
                 criticidad: BE.Criticidad.Alta,
                 idUsuario:  admin.Id,
                 detalle:    $"Admin '{admin.Username}' purgó definitivamente {eliminados} usuario(s) archivado(s) con más de {DiasRetencionPurga} días a las {System.DateTime.Now:HH:mm:ss}.");

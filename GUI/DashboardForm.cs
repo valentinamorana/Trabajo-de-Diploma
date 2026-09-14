@@ -647,39 +647,36 @@ namespace GUI
 
             switch (actividad)
             {
-                case "Inicio Sesion":                      return Tr("dash.act.login",           actividad);
-                case "Cierre Sesion":                      return Tr("dash.act.logout",          actividad);
-                case "Cambio de Contrasena Propia":        return Tr("dash.act.pwchange",        actividad);
-                case "Bloqueo de Cuenta":                  return Tr("dash.act.accountlock",     actividad);
-                case "Intento Fallido Login":              return Tr("dash.act.loginfail",       actividad);
-                case "Baja Logica Usuario":                return Tr("dash.act.userdeactivate",  actividad);
-                case "Cambio de Rol de Usuario":           return Tr("dash.act.rolechange",      actividad);
-                case "Desbloqueo con Clave de Emergencia": return Tr("dash.act.emergencyunlock", actividad);
-                case "Modificación de Usuario":            return Tr("dash.act.usermod",         actividad);
-                case "Purga Usuarios Archivados":          return Tr("dash.act.userpurge",       actividad);
-                case "Reset Contrasena":                   return Tr("dash.act.pwreset",         actividad);
-                case "Solicitud Recuperacion Clave":       return Tr("dash.act.pwrecoveryreq",   actividad);
+                case BE.ActividadesBitacora.InicioSesion:                  return Tr("dash.act.login",           actividad);
+                case BE.ActividadesBitacora.CierreSesion:                  return Tr("dash.act.logout",          actividad);
+                case BE.ActividadesBitacora.CambioContrasenaPropia:        return Tr("dash.act.pwchange",        actividad);
+                case BE.ActividadesBitacora.BloqueoDeCuenta:                return Tr("dash.act.accountlock",     actividad);
+                case BE.ActividadesBitacora.IntentoFallidoLogin:            return Tr("dash.act.loginfail",       actividad);
+                case BE.ActividadesBitacora.BajaLogicaUsuario:              return Tr("dash.act.userdeactivate",  actividad);
+                case BE.ActividadesBitacora.CambioDeRolDeUsuario:           return Tr("dash.act.rolechange",      actividad);
+                case BE.ActividadesBitacora.DesbloqueoConClaveDeEmergencia: return Tr("dash.act.emergencyunlock", actividad);
+                case BE.ActividadesBitacora.ModificacionDeUsuario:          return Tr("dash.act.usermod",         actividad);
+                case BE.ActividadesBitacora.PurgaUsuariosArchivados:        return Tr("dash.act.userpurge",       actividad);
+                case BE.ActividadesBitacora.ResetContrasena:                return Tr("dash.act.pwreset",         actividad);
+                case BE.ActividadesBitacora.SolicitudRecuperacionClave:     return Tr("dash.act.pwrecoveryreq",   actividad);
             }
 
-            // Prefijos con parte dinámica (orden: el más específico primero).
+            // Prefijos con parte dinámica (orden: el más específico primero). Misma fuente
+            // (BE.ActividadesBitacora) que usa la BLL al escribir, así un cambio de texto no
+            // puede desincronizar la traducción sin que el compilador lo note.
             var prefijos = new[]
             {
-                new { Es = "Backup de instalación limpia (cifrado) generado: ", Key = "dash.act.backupinitial" },
-                new { Es = "Backup cifrado generado: ",                         Key = "dash.act.backupcreate"  },
-                new { Es = "Backup eliminado: ",                                Key = "dash.act.backupdelete"  },
-                new { Es = "Base de datos restaurada desde ",                   Key = "dash.act.dbrestore"     },
-                new { Es = "Desbloqueo de Cuenta: ",                            Key = "dash.act.accountunlock" },
-                new { Es = "Alta Usuario: ",                                    Key = "dash.act.useradd"       },
-                new { Es = "Restauración a versión ",                           Key = "dash.act.userrestore"   },
+                new { Es = BE.ActividadesBitacora.BackupInstalacionLimpiaPrefijo, Key = "dash.act.backupinitial" },
+                new { Es = BE.ActividadesBitacora.BackupCifradoGeneradoPrefijo,   Key = "dash.act.backupcreate"  },
+                new { Es = BE.ActividadesBitacora.BackupEliminadoPrefijo,         Key = "dash.act.backupdelete"  },
+                new { Es = BE.ActividadesBitacora.BaseDeDatosRestauradaPrefijo,   Key = "dash.act.dbrestore"     },
+                new { Es = BE.ActividadesBitacora.DesbloqueoDeCuentaPrefijo,      Key = "dash.act.accountunlock" },
+                new { Es = BE.ActividadesBitacora.AltaUsuarioPrefijo,             Key = "dash.act.useradd"       },
+                new { Es = BE.ActividadesBitacora.RestauracionAVersionPrefijo,    Key = "dash.act.userrestore"   },
             };
             foreach (var p in prefijos)
                 if (actividad.StartsWith(p.Es, StringComparison.Ordinal))
                     return string.Format(Tr(p.Key, "{0}"), actividad.Substring(p.Es.Length));
-
-            var m = System.Text.RegularExpressions.Regex.Match(
-                actividad, @"^Regeneración de (\d+) claves de emergencia$");
-            if (m.Success)
-                return string.Format(Tr("dash.act.emergencykeys", "{0}"), m.Groups[1].Value);
 
             return actividad;   // actividad desconocida → sin traducir
         }

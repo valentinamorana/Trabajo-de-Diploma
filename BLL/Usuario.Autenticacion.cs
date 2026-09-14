@@ -56,7 +56,7 @@ namespace BLL
                 ContadorSesion.GetInstance().RegistrarIntento();
                 bitacora.RegistrarSinSesion(
                     modulo:     modulo ?? "Login",
-                    actividad:  "Intento Fallido Login",
+                    actividad:  BE.ActividadesBitacora.IntentoFallidoLogin,
                     criticidad: BE.Criticidad.IntentosLogin,
                     detalle:    $"Intento de login para usuario inexistente '{username}' a las {DateTime.Now:HH:mm:ss}.");
                 throw new BE.LoginException(BE.LoginException.TipoError.CredencialesInvalidas,
@@ -92,7 +92,7 @@ namespace BLL
                 // (rol → roles/familias → patentes), con deduplicación de permisos repetidos.
                 usuario.Permisos = perfilesBLL.ObtenerPermisosEfectivos(usuario.Rol ?? usuario.Perfil);
                 SessionManager.Login(usuario);
-                bitacora.Registrar(modulo, "Inicio Sesion", BE.Criticidad.None);
+                bitacora.Registrar(modulo, BE.ActividadesBitacora.InicioSesion, BE.Criticidad.None);
             }
             else
             {
@@ -134,7 +134,7 @@ namespace BLL
         // Cierra la sesión: registra en bitácora y destruye la sesión Singleton.
         public void Logout(string modulo)
         {
-            bitacora.Registrar(modulo, "Cierre Sesion", BE.Criticidad.None);
+            bitacora.Registrar(modulo, BE.ActividadesBitacora.CierreSesion, BE.Criticidad.None);
             SessionManager.Logout();
         }
 
@@ -167,7 +167,7 @@ namespace BLL
         {
             bitacora.RegistrarSinSesion(
                 modulo:      modulo ?? "Login",
-                actividad:   "Intento Fallido Login",
+                actividad:   BE.ActividadesBitacora.IntentoFallidoLogin,
                 criticidad:  BE.Criticidad.IntentosLogin,
                 idUsuario:   idUsuario,
                 detalle:     $"Intento fallido #{numeroIntento}/{MaxIntentosFallidos} " +
@@ -180,7 +180,7 @@ namespace BLL
         {
             bitacora.RegistrarSinSesion(
                 modulo:      modulo ?? "Login",
-                actividad:   "Bloqueo de Cuenta",
+                actividad:   BE.ActividadesBitacora.BloqueoDeCuenta,
                 criticidad:  BE.Criticidad.BloqueosCuenta,
                 idUsuario:   idUsuario,
                 detalle:     $"Cuenta '{username}' (ID: {idUsuario?.ToString() ?? "?"}) " +

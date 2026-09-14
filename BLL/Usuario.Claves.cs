@@ -32,7 +32,7 @@ namespace BLL
 
             bitacora.RegistrarSinSesion(
                 modulo:     modulo,
-                actividad:  "Reset Contrasena",
+                actividad:  BE.ActividadesBitacora.ResetContrasena,
                 criticidad: BE.Criticidad.RecuperacionClave,
                 idUsuario:  admin.Id,
                 detalle:    "Admin '" + admin.Username + "' (ID: " + admin.Id + ") reseteo la contrasena del usuario ID " + idUsuario + " a las " + DateTime.Now.ToString("HH:mm:ss") + "."
@@ -71,7 +71,7 @@ namespace BLL
             u.Contraseña          = hash;
             u.RequiereCambioClave = false;
 
-            bitacora.Registrar(modulo, "Cambio de Contrasena Propia", BE.Criticidad.Media);
+            bitacora.Registrar(modulo, BE.ActividadesBitacora.CambioContrasenaPropia, BE.Criticidad.Media);
         }
 
         // Registra una solicitud de recuperación de clave en la bitácora.
@@ -86,7 +86,7 @@ namespace BLL
 
             bitacora.RegistrarSinSesion(
                 modulo:     "Recuperar Contrasena",
-                actividad:  "Solicitud Recuperacion Clave",
+                actividad:  BE.ActividadesBitacora.SolicitudRecuperacionClave,
                 criticidad: BE.Criticidad.RecuperacionClave,
                 detalle:    $"Solicitud de recuperacion de clave para '{username}' a las {DateTime.Now:HH:mm:ss}."
             );

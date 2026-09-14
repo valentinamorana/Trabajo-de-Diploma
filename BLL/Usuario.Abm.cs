@@ -74,7 +74,7 @@ namespace BLL
             string rutaArchivo = GeneradorCredenciales.ExportarCredenciales(username.Trim(), contrasena);
 
             bitacora.Registrar(modulo,
-                "Alta Usuario: '" + username.Trim() + "' [" + perfil + "]",
+                BE.ActividadesBitacora.AltaUsuarioPrefijo + "'" + username.Trim() + "' [" + perfil + "]",
                 BE.Criticidad.Media);
 
             return rutaArchivo;
@@ -124,7 +124,7 @@ namespace BLL
 
             bitacora.RegistrarSinSesion(
                 modulo:     modulo,
-                actividad:  "Modificación de Usuario",
+                actividad:  BE.ActividadesBitacora.ModificacionDeUsuario,
                 criticidad: BE.Criticidad.Media,
                 idUsuario:  SessionManager.GetInstance().Usuario.Id,
                 detalle:    $"Usuario ID {idUsuario}: {detalle}");
@@ -163,7 +163,7 @@ namespace BLL
 
             bitacora.RegistrarSinSesion(
                 modulo:     modulo,
-                actividad:  "Cambio de Rol de Usuario",
+                actividad:  BE.ActividadesBitacora.CambioDeRolDeUsuario,
                 criticidad: BE.Criticidad.Alta,
                 idUsuario:  SessionManager.GetInstance().Usuario.Id,
                 detalle:    $"Usuario ID {idUsuario} ('{antes.Username}'): rol '{antes.Perfil}' → '{perfilNorm}'.");

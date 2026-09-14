@@ -64,7 +64,7 @@ namespace BLL
 
             GenerarBackupCifrado(Path.Combine(dirDestino, filename), claveCifrado);
             _bitacora.Registrar(modulo,
-                $"Backup cifrado generado: '{filename}'",
+                $"{BE.ActividadesBitacora.BackupCifradoGeneradoPrefijo}'{filename}'",
                 BE.Criticidad.Alta);
 
             return filename;
@@ -108,7 +108,7 @@ namespace BLL
 
             GenerarBackupCifrado(Path.Combine(dirDestino, filename), claveCifrado);
             _bitacora.Registrar(modulo,
-                $"Backup de instalación limpia (cifrado) generado: '{filename}'",
+                $"{BE.ActividadesBitacora.BackupInstalacionLimpiaPrefijo}'{filename}'",
                 BE.Criticidad.Alta);
 
             return filename;
@@ -176,7 +176,7 @@ namespace BLL
             }
 
             _bitacora.Registrar(modulo,
-                $"Base de datos restaurada desde '{Path.GetFileName(rutaArchivo)}'",
+                $"{BE.ActividadesBitacora.BaseDeDatosRestauradaPrefijo}'{Path.GetFileName(rutaArchivo)}'",
                 BE.Criticidad.Alta);
         }
 
@@ -189,7 +189,7 @@ namespace BLL
             string filename = Path.GetFileName(rutaArchivo);
             File.Delete(rutaArchivo);
             _bitacora.Registrar(modulo,
-                $"Backup eliminado: '{filename}'",
+                $"{BE.ActividadesBitacora.BackupEliminadoPrefijo}'{filename}'",
                 BE.Criticidad.Alta);
         }
 

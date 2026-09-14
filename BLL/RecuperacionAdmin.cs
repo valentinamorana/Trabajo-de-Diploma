@@ -116,7 +116,7 @@ namespace BLL
 
                 bitacora.RegistrarSinSesion(
                     modulo:     modulo ?? "Login",
-                    actividad:  "Desbloqueo con Clave de Emergencia",
+                    actividad:  BE.ActividadesBitacora.DesbloqueoConClaveDeEmergencia,
                     criticidad: BE.Criticidad.Alta,
                     idUsuario:  usuario.Id,
                     detalle:    $"La cuenta '{user}' se autodesbloqueó con una clave de emergencia a las {DateTime.Now:HH:mm:ss}. Claves restantes: {claveDAL.ContarDisponibles()}.");

@@ -17,9 +17,8 @@ namespace DAL
     ///   CREATE TABLE DVVertical (Id INT IDENTITY PK, NombreTabla VARCHAR(100) UNIQUE,
     ///                            DVV INT NOT NULL, FechaCalculo DATETIME NOT NULL)
     /// </summary>
-    public class DigitoVerificador
+    public class DigitoVerificador : BaseDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         // Lee el DVV almacenado para una tabla. Retorna null si no existe registro.
         public int? ObtenerDVV(string nombreTabla)

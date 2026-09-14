@@ -5,9 +5,8 @@ using System.Data.SqlClient;
 
 namespace DAL
 {
-    public class HistorialIntegridad
+    public class HistorialIntegridad : BaseDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         public void Insertar(BE.HistorialIntegridad entrada)
         {

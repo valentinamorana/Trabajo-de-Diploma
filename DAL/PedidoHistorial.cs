@@ -12,9 +12,8 @@ namespace DAL
     ///   - Consultar el historial de un pedido con filtros opcionales.
     ///   - Obtener el próximo IdOperacion para agrupar los campos de un mismo evento.
     /// </summary>
-    public class PedidoHistorial : Interfaces.IPedidoHistorialDAL
+    public class PedidoHistorial : BaseDAL, Interfaces.IPedidoHistorialDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         // ── Escritura ─────────────────────────────────────────────────────────
 

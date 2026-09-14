@@ -47,9 +47,8 @@ namespace DAL
     /// bases todavía sin migrar al Composite (sin columna EsRol / sin PermisoRelacion poblada).
     /// En una base migrada esas ramas no se ejecutan.
     /// </summary>
-    public class Permiso : Interfaces.IPermisoDAL
+    public class Permiso : BaseDAL, Interfaces.IPermisoDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         // Construye el árbol Composite completo desde BD.
         // Lee Permiso (EsFamilia discrimina tipo) y PermisoRelacion (padre→hijo).

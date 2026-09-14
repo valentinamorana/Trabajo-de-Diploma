@@ -9,9 +9,8 @@ namespace DAL
     /// Capa de Acceso a Datos — Contratacion (PN02, Comercialización de la suscripción).
     /// Opera sobre la tabla [Contratacion] de WardrobeFlowDB.
     /// </summary>
-    public class Contratacion : Interfaces.IContratacionDAL
+    public class Contratacion : BaseDAL, Interfaces.IContratacionDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         private const string SELECT_BASE =
             "SELECT c.IdContratacion, c.IdCliente, c.IdPlan, c.IdVendedor, c.IdCaja, c.Modalidad, " +

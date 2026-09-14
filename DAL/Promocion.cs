@@ -9,9 +9,8 @@ namespace DAL
     /// Capa de Acceso a Datos — Promocion (PN03, Métricas y Promociones).
     /// Opera sobre la tabla [Promocion] de WardrobeFlowDB.
     /// </summary>
-    public class Promocion : Interfaces.IPromocionDAL
+    public class Promocion : BaseDAL, Interfaces.IPromocionDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         private const string SELECT_BASE =
             "SELECT p.IdPromocion, p.Nombre, p.Descripcion, p.TipoDescuento, p.Valor, " +

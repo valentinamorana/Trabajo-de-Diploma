@@ -9,9 +9,8 @@ namespace DAL
     /// Capa de Acceso a Datos — Etapa 4 (permisos a nivel de control).
     /// Lee/escribe la tabla [ControlMapeado] (patente ↔ control de un formulario).
     /// </summary>
-    public class ControlMapeado : DAL.Interfaces.IControlMapeadoDAL
+    public class ControlMapeado : BaseDAL, DAL.Interfaces.IControlMapeadoDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         public List<BE.ControlMapeado> ObtenerTodos()
         {

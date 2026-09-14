@@ -9,9 +9,8 @@ namespace DAL
     /// Capa de Acceso a Datos — SugerenciaPromocion (PN03).
     /// Opera sobre la tabla [SugerenciaPromocion] de WardrobeFlowDB.
     /// </summary>
-    public class SugerenciaPromocion : Interfaces.ISugerenciaPromocionDAL
+    public class SugerenciaPromocion : BaseDAL, Interfaces.ISugerenciaPromocionDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         private const string SELECT_BASE =
             "SELECT s.IdSugerencia, s.IdPlan, s.CategoriaPrenda, s.Motivo, s.TipoDescuentoSugerido, " +

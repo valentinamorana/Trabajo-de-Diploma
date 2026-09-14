@@ -8,9 +8,8 @@ namespace DAL
     /// Capa de Acceso a Datos — Preferencias de UI por usuario (tabla Preferencia).
     /// Si no hay fila (o la tabla aún no está migrada), devuelve los valores por defecto.
     /// </summary>
-    public class Preferencia : Interfaces.IPreferenciaDAL
+    public class Preferencia : BaseDAL, Interfaces.IPreferenciaDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         public BE.Preferencia Obtener(int idUsuario)
         {

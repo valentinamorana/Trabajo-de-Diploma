@@ -9,9 +9,8 @@ namespace DAL
     /// Capa de Acceso a Datos — BitacoraNegocio.
     /// Opera sobre la tabla [BitacoraNegocio] de WardrobeFlowDB.
     /// </summary>
-    public class BitacoraNegocio
+    public class BitacoraNegocio : BaseDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         // Registra un evento de negocio en la bitácora.
         public void Registrar(BE.BitacoraNegocio evento)

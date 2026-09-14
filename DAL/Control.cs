@@ -7,9 +7,8 @@ namespace DAL
     /// <summary>
     /// T05 — Acceso a datos de la entidad CONTROL (textos traducibles del sistema).
     /// </summary>
-    public class Control
+    public class Control : BaseDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         // Todos los controles traducibles, para el grid de Controles del FormIdiomas.
         public List<BE.Control> ObtenerTodos()

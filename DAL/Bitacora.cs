@@ -9,9 +9,8 @@ namespace DAL
     /// Capa de Acceso a Datos — Bitácora.
     /// Opera sobre la tabla [Bitacora] de WardrobeFlowDB.
     /// </summary>
-    public class Bitacora
+    public class Bitacora : BaseDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         // Inserta un registro de auditoría. Id es identity — lo genera la BD.
         public void Registrar(BE.Bitacora registro)

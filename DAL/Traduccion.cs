@@ -5,9 +5,8 @@ using System.Data.SqlClient;
 
 namespace DAL
 {
-    public class Traduccion
+    public class Traduccion : BaseDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         // Devuelve todas las traducciones de un idioma como diccionario clave→texto.
         // Usado por BLL para cargar el cache en memoria antes de notificar observers.

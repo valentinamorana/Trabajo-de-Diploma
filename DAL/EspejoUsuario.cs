@@ -22,9 +22,8 @@ namespace DAL
     /// TOLERANCIA: si la tabla aún no fue creada (BD sin migrar — falta 02_Actualizar), todos los
     /// métodos fallan en silencio (no-op / lista vacía), igual que el resto de la capa DAL.
     /// </summary>
-    public class EspejoUsuario
+    public class EspejoUsuario : BaseDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
 
         // Indica si la tabla espejo existe (BD migrada). Se usa para no intentar operar sin migración.
         public bool Existe()

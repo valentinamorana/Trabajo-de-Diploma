@@ -13,14 +13,18 @@ namespace BLL
     public class AnalisisAbandono : Interfaces.IAnalisisAbandonoService
     {
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
-        private readonly DAL.Pedido dalPedido;
+        private readonly DAL.Interfaces.IPedidoDAL dalPedido;
 
         // Criterio por defecto: el que describe PdN10 literalmente (vencimiento + inactividad).
         private Estrategias.EstrategiaRiesgo _estrategia = new Estrategias.EstrategiaVencimientoInactividad();
 
         public AnalisisAbandono() : this(new DAL.Cliente(), new DAL.Pedido()) { }
 
-        public AnalisisAbandono(DAL.Interfaces.IClienteDAL dalCliente, DAL.Pedido dalPedido)
+        // dalPedido pasa a IPedidoDAL (antes DAL.Pedido concreto) — el mismo problema
+        // estructural ya corregido en BLL.Cliente/BLL.Renovacion: sin la interfaz, Detectar()
+        // no se podía testear con un doble y quedaba 0% cubierto (ver Tests §9, cobertura de
+        // Análisis nunca revisada con el mismo detalle que Pedido/Cliente/Cobro/Renovación).
+        public AnalisisAbandono(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPedidoDAL dalPedido)
         {
             this.dalCliente = dalCliente ?? throw new System.ArgumentNullException(nameof(dalCliente));
             this.dalPedido = dalPedido ?? throw new System.ArgumentNullException(nameof(dalPedido));

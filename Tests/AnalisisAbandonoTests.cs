@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BLL.Estrategias;
+using Tests.Fakes;
 
 namespace Tests
 {
@@ -188,6 +190,100 @@ namespace Tests
         {
             var datos = new BE.DatosClienteRiesgo { Cliente = Cliente(DateTime.Today, null), FechaUltimoPedido = DateTime.Today.AddDays(-10) };
             Assert.AreEqual(10, datos.DiasSinActividad);
+        }
+
+        // ── BLL.AnalisisAbandono (fachada real, Detectar/CambiarEstrategia) ──────────────
+        // Antes dalPedido era DAL.Pedido concreto (no inyectable) y esta clase nunca se
+        // instanciaba en los tests — solo las Estrategias puras de arriba. Mismo problema
+        // estructural que BLL.Cliente/BLL.Renovacion ya tenían resuelto.
+
+        [TestMethod]
+        public void Detectar_ClienteConPlanEnRiesgoSegunEstrategiaPorDefecto_LoIncluye()
+        {
+            var clienteEnRiesgo = new BE.Cliente
+            {
+                IdCliente = 1, Nombre = "Ana", Apellido = "Gómez", IdPlan = 1, NombrePlan = "Básico",
+                FechaAlta = DateTime.Today.AddYears(-1), FechaVencimiento = DateTime.Today.AddDays(5)
+            };
+            var dalCliente = new FakeClienteDAL { ClientesDevueltos = { clienteEnRiesgo } };
+            var dalPedido = new FakePedidoDAL(); // sin pedidos registrados para nadie
+
+            var bll = new BLL.AnalisisAbandono(dalCliente, dalPedido);
+            var resultado = bll.Detectar();
+
+            Assert.AreEqual(1, resultado.Count);
+            Assert.AreEqual(1, resultado[0].IdCliente);
+            Assert.AreEqual("abandono.motivo.vencinactividad_nunca", resultado[0].Clave);
+        }
+
+        [TestMethod]
+        public void Detectar_ClienteSinPlan_Excluido()
+        {
+            var clienteSinPlan = new BE.Cliente
+            {
+                IdCliente = 2, Nombre = "Beto", Apellido = "Ruiz", IdPlan = null,
+                FechaAlta = DateTime.Today.AddYears(-1), FechaVencimiento = null
+            };
+            var dalCliente = new FakeClienteDAL { ClientesDevueltos = { clienteSinPlan } };
+            var bll = new BLL.AnalisisAbandono(dalCliente, new FakePedidoDAL());
+
+            Assert.AreEqual(0, bll.Detectar().Count);
+        }
+
+        [TestMethod]
+        public void Detectar_UsaLaFechaDeUltimoPedidoDelDAL_ClienteConActividadReciente_NoEnRiesgo()
+        {
+            var cliente = new BE.Cliente
+            {
+                IdCliente = 3, Nombre = "Cami", Apellido = "Díaz", IdPlan = 1, NombrePlan = "Básico",
+                FechaAlta = DateTime.Today.AddYears(-1), FechaVencimiento = DateTime.Today.AddDays(5)
+            };
+            var dalCliente = new FakeClienteDAL { ClientesDevueltos = { cliente } };
+            var dalPedido = new FakePedidoDAL
+            {
+                FechaUltimoPedidoPorCliente = new Dictionary<int, DateTime> { [3] = DateTime.Today.AddDays(-2) }
+            };
+
+            var bll = new BLL.AnalisisAbandono(dalCliente, dalPedido);
+
+            Assert.AreEqual(0, bll.Detectar().Count);
+        }
+
+        [TestMethod]
+        public void CambiarEstrategia_AplicaLaNuevaEstrategiaEnDetectar()
+        {
+            // Con la estrategia por defecto (vencimiento+inactividad) este cliente NO está en
+            // riesgo (suscripción vigente, lejos de vencer). Con InactividadPura sí lo está
+            // (60+ días sin pedidos, sin importar el vencimiento).
+            var cliente = new BE.Cliente
+            {
+                IdCliente = 4, Nombre = "Dario", Apellido = "Paz", IdPlan = 1, NombrePlan = "Básico",
+                FechaAlta = DateTime.Today.AddYears(-1), FechaVencimiento = DateTime.Today.AddMonths(6)
+            };
+            var dalCliente = new FakeClienteDAL { ClientesDevueltos = { cliente } };
+            var dalPedido = new FakePedidoDAL
+            {
+                FechaUltimoPedidoPorCliente = new Dictionary<int, DateTime> { [4] = DateTime.Today.AddDays(-70) }
+            };
+            var bll = new BLL.AnalisisAbandono(dalCliente, dalPedido);
+
+            Assert.AreEqual(0, bll.Detectar().Count);
+
+            bll.CambiarEstrategia(new EstrategiaInactividadPura());
+
+            Assert.AreEqual(1, bll.Detectar().Count);
+        }
+
+        [TestMethod]
+        public void CambiarEstrategia_Null_LanzaArgumentNullException()
+        {
+            var bll = new BLL.AnalisisAbandono(new FakeClienteDAL(), new FakePedidoDAL());
+            try
+            {
+                bll.CambiarEstrategia(null);
+                Assert.Fail("Debía rechazar una estrategia null.");
+            }
+            catch (ArgumentNullException) { /* esperado */ }
         }
     }
 }

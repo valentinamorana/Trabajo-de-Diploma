@@ -658,7 +658,6 @@ namespace GUI
                 case "Modificación de Usuario":            return Tr("dash.act.usermod",         actividad);
                 case "Purga Usuarios Archivados":          return Tr("dash.act.userpurge",       actividad);
                 case "Reset Contrasena":                   return Tr("dash.act.pwreset",         actividad);
-                case "Reset Masivo Contrasenas":           return Tr("dash.act.pwresetmass",     actividad);
                 case "Solicitud Recuperacion Clave":       return Tr("dash.act.pwrecoveryreq",   actividad);
             }
 

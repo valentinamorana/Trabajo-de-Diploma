@@ -4,7 +4,7 @@ using System;
 
 namespace BLL
 {
-    // Partial de BLL.Usuario — reseteo y recuperación de contraseña (individual, masivo,
+    // Partial de BLL.Usuario — reseteo y recuperación de contraseña (individual
     // y cambio de clave propia). Ver BLL.Usuario (Usuario.cs) para el resto de grupos.
     public partial class Usuario
     {

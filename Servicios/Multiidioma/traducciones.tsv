@@ -3711,7 +3711,6 @@ ES	dash.act.emergencyunlock	Desbloqueo con clave de emergencia
 ES	dash.act.usermod	Modificación de usuario
 ES	dash.act.userpurge	Purga de usuarios archivados
 ES	dash.act.pwreset	Reseteo de contraseña
-ES	dash.act.pwresetmass	Reseteo masivo de contraseñas
 ES	dash.act.pwrecoveryreq	Solicitud de recuperación de clave
 ES	dash.act.backupinitial	Backup de instalación limpia (cifrado) generado: {0}
 ES	dash.act.backupcreate	Backup cifrado generado: {0}
@@ -3732,7 +3731,6 @@ EN	dash.act.emergencyunlock	Unlock with emergency key
 EN	dash.act.usermod	User modification
 EN	dash.act.userpurge	Archived users purge
 EN	dash.act.pwreset	Password reset
-EN	dash.act.pwresetmass	Mass password reset
 EN	dash.act.pwrecoveryreq	Password recovery request
 EN	dash.act.backupinitial	Clean install backup (encrypted) created: {0}
 EN	dash.act.backupcreate	Encrypted backup created: {0}
@@ -3753,7 +3751,6 @@ PT	dash.act.emergencyunlock	Desbloqueio com chave de emergência
 PT	dash.act.usermod	Modificação de usuário
 PT	dash.act.userpurge	Limpeza de usuários arquivados
 PT	dash.act.pwreset	Redefinição de senha
-PT	dash.act.pwresetmass	Redefinição em massa de senhas
 PT	dash.act.pwrecoveryreq	Solicitação de recuperação de senha
 PT	dash.act.backupinitial	Backup de instalação limpa (criptografado) gerado: {0}
 PT	dash.act.backupcreate	Backup criptografado gerado: {0}
@@ -3774,7 +3771,6 @@ RU	dash.act.emergencyunlock	Разблокировка аварийным клю
 RU	dash.act.usermod	Изменение пользователя
 RU	dash.act.userpurge	Очистка архивных пользователей
 RU	dash.act.pwreset	Сброс пароля
-RU	dash.act.pwresetmass	Массовый сброс паролей
 RU	dash.act.pwrecoveryreq	Запрос на восстановление пароля
 RU	dash.act.backupinitial	Создан бэкап чистой установки (зашифрован): {0}
 RU	dash.act.backupcreate	Создан зашифрованный бэкап: {0}

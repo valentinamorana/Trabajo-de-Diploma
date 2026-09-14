@@ -125,9 +125,7 @@ ES	mnu.planes	Planes de Suscripcion
 ES	mnu.pedidosventa	Pedidos de Venta
 ES	mnu.pedidosreal	Pedidos Realizados
 ES	mnu.administrar	Administrar
-ES	mnu.usuarios	Usuarios
 ES	mnu.perfiles	Perfiles y Permisos
-ES	mnu.bitacora	Analítica
 ES	mnu.cerrarsesion	Cerrar Sesion
 ES	mnu.ventana	Ventanas Abiertas
 ES	mnu.ventana.cerrartodas	Cerrar Todas
@@ -930,9 +928,7 @@ EN	mnu.planes	Subscription Plans
 EN	mnu.pedidosventa	Sales Orders
 EN	mnu.pedidosreal	Fulfilled Orders
 EN	mnu.administrar	Administration
-EN	mnu.usuarios	Users
 EN	mnu.perfiles	Profiles & Permissions
-EN	mnu.bitacora	Analytics
 EN	mnu.cerrarsesion	Sign Out
 EN	mnu.ventana	Open Windows
 EN	mnu.ventana.cerrartodas	Close All
@@ -1735,9 +1731,7 @@ RU	mnu.planes	Тарифные планы
 RU	mnu.pedidosventa	Заказы на продажу
 RU	mnu.pedidosreal	Выполненные заказы
 RU	mnu.administrar	Администрирование
-RU	mnu.usuarios	Пользователи
 RU	mnu.perfiles	Профили и права
-RU	mnu.bitacora	Аналитика
 RU	mnu.cerrarsesion	Выйти из системы
 RU	mnu.ventana	Открытые окна
 RU	mnu.ventana.cerrartodas	Закрыть все
@@ -2578,9 +2572,7 @@ PT	mnu.planes	Planos de Assinatura
 PT	mnu.pedidosventa	Pedidos de Venda
 PT	mnu.pedidosreal	Pedidos Realizados
 PT	mnu.administrar	Administrar
-PT	mnu.usuarios	Usuários
 PT	mnu.perfiles	Perfis e Permissões
-PT	mnu.bitacora	Análise
 PT	mnu.cerrarsesion	Sair do sistema
 PT	mnu.ventana	Janelas Abertas
 PT	mnu.ventana.cerrartodas	Fechar Todas

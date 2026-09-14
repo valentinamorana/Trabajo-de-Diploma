@@ -209,7 +209,7 @@ Contexto: `SessionManager.TienePermiso` con `OrdinalIgnoreCase` — verificado r
 
 ### 🟢 Baja
 
-6. Claves huérfanas documentadas en el comentario de `Traductor.cs` (`mnu.usuarios`, `mnu.bitacora`) que ya no se usan en el código actual. *(el comentario en sí se corrigió — ver la nota del commit de Seguridad+Servicios — pero el hallazgo de fondo, claves huérfanas reales en el TSV, no se investigó a fondo; queda pendiente si se quiere ir más allá de la corrección del comentario)*
+6. ✅ RESUELTO (2026-09-14) — Claves huérfanas documentadas en el comentario de `Traductor.cs` (`mnu.usuarios`, `mnu.bitacora`) que ya no se usan en el código actual. *Solución aplicada:* verificado con grep (literal y por concatenación/interpolación, no solo literal exacto) que ninguna de las dos claves tiene un solo uso en todo el código — ambas fueron reemplazadas hace tiempo por `mnu.adminusuarios` y `mnu.bitacora.sistema`/`mnu.bitacora.negocio` respectivamente. Se eliminaron las 8 filas huérfanas (2 claves × 4 idiomas) del TSV; `TodosLosIdiomasTienenLasMismasClaves` sigue en verde (se quitaron las 4 filas de cada idioma en paralelo, sin desbalancear el corpus).
 7. Las 4 líneas nuevas de `traducciones.tsv` (`mnu.ventana.cerrartodas`) verificadas explícitamente: esquema, duplicados y completitud por idioma — todo OK, sin hallazgo.
 8. `Encriptador` usa AES-128-CBC sin HMAC/AEAD — desviación de la práctica recomendada (cifrar-y-autenticar), riesgo bajo (requiere acceso directo a BD). *(pendiente — decisión de mayor alcance, documentada como diferida)*
 9. ✅ RESUELTO (2026-09-11) — `CifradorArchivos` no limpia el archivo de salida si `Cifrar`/`Descifrar` fallan a mitad de camino — puede dejar un `.wfbak` corrupto con nombre "definitivo".

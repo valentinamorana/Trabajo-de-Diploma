@@ -69,6 +69,7 @@
     <Compile Include="CobroTests.cs" />
     <Compile Include="ListaEsperaTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />
+    <Compile Include="ReporteJornadaTests.cs" />
     <Compile Include="UsuarioAbmTests.cs" />
     <Compile Include="RolAdminTests.cs" />
     <Compile Include="SessionManagerTests.cs" />
@@ -106,6 +107,8 @@
     <Compile Include="Fakes\FakePedidoHistorialDAL.cs" />
     <Compile Include="Fakes\FakePrendaDAL.cs" />
     <Compile Include="Fakes\FakeMantenimientoPrendaDAL.cs" />
+    <Compile Include="Fakes\FakeBitacoraService.cs" />
+    <Compile Include="Fakes\FakePrendaService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

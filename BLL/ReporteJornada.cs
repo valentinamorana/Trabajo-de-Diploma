@@ -9,12 +9,29 @@ namespace BLL
 {
     public class ReporteJornada
     {
-        private readonly Bitacora _bllBitacora = new Bitacora();
-        private readonly Prenda   _bllPrenda   = new Prenda();
-        private readonly Cliente  _bllCliente  = new Cliente();
+        private readonly Interfaces.IBitacoraService _bllBitacora;
+        private readonly Interfaces.IPrendaService   _bllPrenda;
+        private readonly Interfaces.IClienteService  _bllCliente;
 
         private static readonly string DirBackups =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+
+        public ReporteJornada() : this(new Bitacora(), new Prenda(), new Cliente()) { }
+
+        // Antes los tres colaboradores eran tipos concretos hardcodeados (new Bitacora(),
+        // new Prenda(), new Cliente()) sin ningún parámetro de constructor — el mismo
+        // problema estructural que AnalisisAbandono/Cliente/Renovacion, pero sin siquiera
+        // una interfaz para Bitacora (se agregó IBitacoraService acá mismo). Sin esto,
+        // Generar/GenerarTendencia/GenerarComparacion/ContarXxx quedaban 0% testeables
+        // sin una base de datos real (ver Tests §9, "Reportes" nunca revisado).
+        public ReporteJornada(Interfaces.IBitacoraService bllBitacora,
+                               Interfaces.IPrendaService bllPrenda,
+                               Interfaces.IClienteService bllCliente)
+        {
+            _bllBitacora = bllBitacora ?? throw new ArgumentNullException(nameof(bllBitacora));
+            _bllPrenda = bllPrenda ?? throw new ArgumentNullException(nameof(bllPrenda));
+            _bllCliente = bllCliente ?? throw new ArgumentNullException(nameof(bllCliente));
+        }
 
         // ── KPI helpers ───────────────────────────────────────────────────────
 

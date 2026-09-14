@@ -486,6 +486,45 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 > Fakes/estilo de tests en esas áreas — el agente que la produjo se quedó sin tiempo/presupuesto de
 > API a mitad de esa segunda pasada. Si se quiere cerrar esa cobertura, es la única sección de las
 > 10 que ameritaría una pasada adicional.
+>
+> **Actualización (2026-09-13):** se revisó Contratación (ya tenía buena cobertura — 14 tests
+> existentes, incluida la fachada real instanciada con `BLL.Cliente` inyectado por interfaz desde
+> el vamos; se agregaron 2 tests que faltaban para la revalidación contra estado fresco de BD en
+> `ConfirmarPago`/`RegistrarIntentoFallido`) y los 5 de Análisis/Recomendación/Reportes. De estos
+> últimos, **`BLL.AnalisisAbandono` tenía el mismo problema estructural que `BLL.Cliente`/
+> `BLL.Renovacion`**: `dalPedido` era `DAL.Pedido` concreto (las otras 5 clases ya usaban
+> `IPedidoDAL` correctamente), así que `Tests/AnalisisAbandonoTests.cs` solo testeaba las
+> Estrategias puras y nunca la orquestación real de `Detectar()`/`CambiarEstrategia()` — quedaban
+> 0% cubiertas. Corregido: `dalPedido` pasa a `IPedidoDAL` y se agregaron 5 tests de la fachada
+> real.
+>
+> Se revisó también Reportes (`BLL.ReporteJornada`): tenía una variante más severa del mismo
+> problema — **cero parámetros de constructor**, los tres colaboradores (`Bitacora`, `Prenda`,
+> `Cliente`, las tres clases BLL) eran instancias concretas hardcodeadas (`new Bitacora()`, etc.)
+> sin ningún punto de inyección, así que `Generar`/`GenerarTendencia`/`GenerarComparacion`/
+> `ContarPrendasDisponibles`/`ContarClientes`/`ContarEventosDia` quedaban 0% testeables sin una
+> base de datos real (`ReporteTendenciaTests.cs` solo cubría `CalcularTendencia`, el núcleo puro
+> de agregación, no la fachada). A diferencia de `AnalisisAbandono`, acá faltaba directamente la
+> interfaz: `BLL.Prenda`/`BLL.Cliente` ya implementaban `IPrendaService`/`IClienteService`, pero
+> `BLL.Bitacora` no implementaba ninguna interfaz. Corregido: se agregó `IBitacoraService` (mismo
+> patrón que el resto — mirror completo de la superficie pública de `Bitacora`, aunque
+> `ReporteJornada` solo use `BuscarPorFiltrosNegocio`), `Bitacora` pasa a implementarla, y
+> `ReporteJornada` gana un constructor con los tres colaboradores por interfaz (más el
+> parameterless de siempre para producción). Se agregaron `FakeBitacoraService`/`FakePrendaService`
+> y 8 tests de la fachada real en `Tests/ReporteJornadaTests.cs`.
+>
+> Por último, se revisó Prenda/CargoPrenda/ListaEspera (`PrendaTests.cs`, `CargoPrendaTests.cs`,
+> `ListaEsperaTests.cs`): a diferencia de los casos anteriores, las tres clases BLL ya usaban DI
+> por interfaz correctamente desde el vamos (`IPrendaDAL`/`IMantenimientoPrendaDAL`,
+> `ICargoPrendaDAL`, `IListaEsperaDAL`+`IPrendaDAL`+`IClienteDAL`) y ya tenían tests reales de la
+> fachada cubriendo las reglas de negocio riesgosas (guardas de transición de estado, FIFO de
+> reserva, rechazo de doble anotación, etc.), no solo lógica pura. Lo único sin test directo son
+> delegaciones triviales de una línea (`ObtenerTodos`/`ObtenerPorId`/`ObtenerPorCliente` de
+> `Prenda`, `ObtenerTodos` de `CargoPrenda`, `ObtenerActivas`/`ObtenerPorPrenda`/
+> `ObtenerIdsReservadosParaOtro`/`ContarReservadasVigentes` de `ListaEspera`) — mismo criterio ya
+> aceptado en el resto de la suite para pass-throughs sin lógica, no se agregan tests solo para
+> subir el número. No se encontró ningún problema estructural en esta área: **cierra la nota de
+> cobertura**, no quedan sub-áreas pendientes de esta sección.
 
 ---
 
@@ -496,9 +535,9 @@ Búsquedas sobre el conjunto completo (no archivo por archivo) para detectar pat
 **1. ✅ RESUELTO (2026-09-11) — Helper de traducción reinventado ~84 veces con ~24 nombres distintos** (`T`, `Tx`, `T_ce`, `T_dlg`, `T_c`, `T_d`, `T_e`...) en 48 archivos — mismo cuerpo `ContainsKey ? Texto : fallback` copiado sin centralizar en ningún helper compartido (ej. en `FormBase`).
 *Solución aplicada:* se agregó `FormBase.Tr(clave, fallback, args = null)` (wrapper de `Traductor.Resolver` con el idioma activo) como único punto de traducción, y se migraron los ~121 usos encontrados (más de los ~84 estimados originalmente) en los 45 formularios que heredan `FormBase` — 14 commits, uno por lote, cada uno verificado con build + tests. Varios `RellenarCombo*`/`TraducirX` perdieron parámetros de idioma/diccionario que ya no necesitaban. Se preservaron intactos, a propósito, los dos closures locales de `MostrarEstadoActual()` en `CobroSuscripcionForm`/`RenovacionSuscripcionForm`, que cachean un único fetch del diccionario para 5 sub-resoluciones (optimización deliberada y documentada, no duplicación). *Alcance no cubierto:* 11 formularios que heredan `Form` directo en vez de `FormBase` (`Login`, `Menu`, `MiPerfilForm`, `ConfirmarAdminForm`, `DesbloqueoEmergenciaForm`, `DiagnosticoIntegridadForm`, `ExploradorCompositeForm`, `RecuperacionEspejoForm`, `CambioClaveObligatorioForm`, `CargoPrendaDialog`, `CambioEstadoDialog`) no pueden usar el helper heredado sin además migrarlos a `FormBase` — cambio de mayor alcance, fuera de esta pasada. Los 3 `Exportadores` y `Program.cs` tampoco son `Form` y quedan igual sin tocar.
 
-**2. Convención de campos privados dividida por capa, no aleatoria.** DAL: 100% sin `_` (17 archivos). GUI: 100% con `_` (27 archivos, salvo `Login.cs`, única excepción). BLL: mezcla ambas **dentro de la misma clase** (11 archivos) según si el campo es inyectado (`dalPedido`) o lazy (`_listaEsperaLazy`) — regla informal nunca documentada.
+**2. (Diferido) Convención de campos privados dividida por capa, no aleatoria.** DAL: 100% sin `_` (17 archivos). GUI: 100% con `_` (27 archivos, salvo `Login.cs`, única excepción). BLL: mezcla ambas **dentro de la misma clase** (11 archivos) según si el campo es inyectado (`dalPedido`) o lazy (`_listaEsperaLazy`) — regla informal nunca documentada. *Motivo del diferimiento:* renombrar campos privados en 17+ archivos de DAL (o unificar el criterio BLL) es un rename masivo de bajo riesgo pero alto ruido en el diff, sin bug asociado — mismo criterio que el resto de convenciones cosméticas ya diferidas (§7 Media #11, BLL field naming).
 
-**3. DAL nunca usa la jerarquía de excepciones propia del proyecto.** 79 `throw new Exception(...)` genéricos en 14 archivos (12 en DAL) — pese a existir `BE.AppException`/`LoginException`/`SesionException`, usadas consistentemente en BLL/GUI para distinguir error esperado de inesperado (`GUI/FormBase.cs:113-118` chequea explícitamente `is BE.AppException`).
+**3. (Diferido) DAL nunca usa la jerarquía de excepciones propia del proyecto.** 79 `throw new Exception(...)` genéricos en 14 archivos (12 en DAL) — pese a existir `BE.AppException`/`LoginException`/`SesionException`, usadas consistentemente en BLL/GUI para distinguir error esperado de inesperado (`GUI/FormBase.cs:113-118` chequea explícitamente `is BE.AppException`). *Motivo del diferimiento:* en la práctica no es un bug — la BLL ya envuelve/traduce estos errores como "inesperados" (`RegistrarExcepcion` + mensaje genérico), que es el comportamiento correcto para una falla real de DAL (SQL, conexión). Migrar 79 sitios a una jerarquía propia solo para distinguir tipos de error de infraestructura es un refactor grande sin beneficio de negocio claro — mismo criterio que el resto de refactors de DAL ya diferidos (§1 #4, #5, #6, #9).
 
 **4. `MessageBox.Show` — 82 ocurrencias en 38 archivos, 0 con literal directo salvo un solo archivo**: `GUI/Program.cs` (mensajes de arranque, antes de que exista un `Form` con su propio helper de traducción) y puntualmente `Login.cs:347` — el resto del proyecto (517 llamados a `T(`/`Tx(`) tiene una disciplina fuerte de nunca mostrar un literal sin traductor.
 
@@ -508,9 +547,10 @@ Búsquedas sobre el conjunto completo (no archivo por archivo) para detectar pat
 **6. ✅ RESUELTO (2026-09-11) — Constante `DiasSinActividadParaRiesgo` duplicada con valores distintos** entre `EstrategiaVencimientoInactividad.cs` (30) y `EstrategiaInactividadPura.cs` (60) — mismo nombre, misma semántica aparente, sin comentario que explique la diferencia (podría ser deliberado, pero no está documentado como tal).
 *Solución aplicada:* verificado que la diferencia es intencional (una estrategia usa la inactividad como señal secundaria sobre un vencimiento ya próximo, la otra como única señal y necesita un umbral más largo para evitar falsos positivos); se documentó con un comentario cruzado en ambas clases en vez de unificar los valores.
 
-**7. Interfaces BLL: 17/17 con su única clase implementadora, 1 con nombre inconsistente** (`IRecomendacionService` debería ser `IRecomendacionPrendasService`). 17 clases BLL de nivel similar no implementan ninguna interfaz, sin una regla escrita que distinga cuáles la necesitan.
+**7. ✅ RESUELTO (2026-09-13) — Interfaces BLL: 17/17 con su única clase implementadora, 1 con nombre inconsistente** (`IRecomendacionService` debería ser `IRecomendacionPrendasService`).
+*Solución aplicada:* renombrada a `IRecomendacionPrendasService` (archivo, csproj, clase implementadora `RecomendacionPrendas` y el campo tipado en `RecomendacionPrendasForm`). *Alcance no cubierto (diferido):* "17 clases BLL de nivel similar no implementan ninguna interfaz, sin una regla escrita que distinga cuáles la necesitan" queda como observación, no como defecto — la regla real y ya aplicada en todo el código es "tiene interfaz si necesita ser inyectada con un doble de test" (ver el propio Tests §9: se agregaron interfaces puntuales — `IAnalisisAbandonoService`, `IBitacoraService` — exactamente cuando una clase lo necesitó para ser testeable, no de forma preventiva). Escribir esa regla en ningún lado más allá de este párrafo no cambia comportamiento; no amerita una pasada adicional.
 
-**8. Métodos más largos del repo (candidatos a god-method):** `Traductor.InferirFormulario` (~131 líneas), `Configuracion.VerificarIntegridadDV` (~129), `DashboardForm.ConstruirElementosCondicionales` (~110), `RecuperacionIntegridad.Diagnosticar` (~105), `Usuario.Autenticacion.Login` (~99), entre otros — mezclan validación, orquestación de DAL y side-effects en un solo bloque, a diferencia de los servicios que sí delegan en Manejadores/Estrategias.
+**8. (Diferido) Métodos más largos del repo (candidatos a god-method):** `Traductor.InferirFormulario` (~131 líneas), `Configuracion.VerificarIntegridadDV` (~129), `DashboardForm.ConstruirElementosCondicionales` (~110), `RecuperacionIntegridad.Diagnosticar` (~105), `Usuario.Autenticacion.Login` (~99), entre otros — mezclan validación, orquestación de DAL y side-effects en un solo bloque, a diferencia de los servicios que sí delegan en Manejadores/Estrategias. *Motivo del diferimiento:* son candidatos a extraer en sub-métodos/Manejadores, pero ninguno tiene un bug asociado ni falta de cobertura crítica detectada en esta auditoría — es trabajo de legibilidad, no de corrección, y partir 5 métodos de distintas capas es un lote de PRs por sí solo. Se deja la lista acá como punto de partida si se decide encararlo más adelante.
 
 **9. `var` vs. tipo explícito: 1549 vs. 3 — consistente, no es un problema real.**
 

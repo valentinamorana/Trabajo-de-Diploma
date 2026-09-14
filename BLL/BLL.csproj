@@ -58,6 +58,7 @@
     <Compile Include="Interfaces\ISugerenciaPromocionService.cs" />
     <Compile Include="Interfaces\IPlanSuscripcionService.cs" />
     <Compile Include="Interfaces\IPrendaService.cs" />
+    <Compile Include="Interfaces\IBitacoraService.cs" />
     <Compile Include="Comandos\PedidoCommand.cs" />
     <Compile Include="Comandos\CancelacionCommand.cs" />
     <Compile Include="Comandos\DevolucionCommand.cs" />

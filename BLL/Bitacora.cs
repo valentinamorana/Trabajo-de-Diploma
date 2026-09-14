@@ -7,7 +7,7 @@ namespace BLL
     /// Lógica de negocio para consultas de auditoría (Bitácora del sistema y de negocio).
     /// La GUI no accede directamente a Servicios.Bitacora ni a Servicios.BitacoraNegocio.
     /// </summary>
-    public class Bitacora
+    public class Bitacora : Interfaces.IBitacoraService
     {
         private readonly Servicios.Bitacora        srvSistema = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio srvNegocio = new Servicios.BitacoraNegocio();

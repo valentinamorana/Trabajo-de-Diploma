@@ -496,7 +496,24 @@ Contexto: el criterio de "promoción vigente" es consistente entre las 5 pantall
 > `IPedidoDAL` correctamente), así que `Tests/AnalisisAbandonoTests.cs` solo testeaba las
 > Estrategias puras y nunca la orquestación real de `Detectar()`/`CambiarEstrategia()` — quedaban
 > 0% cubiertas. Corregido: `dalPedido` pasa a `IPedidoDAL` y se agregaron 5 tests de la fachada
-> real. Reportes/Prenda/CargoPrenda/ListaEspera siguen sin la misma revisión de detalle.
+> real.
+>
+> Se revisó también Reportes (`BLL.ReporteJornada`): tenía una variante más severa del mismo
+> problema — **cero parámetros de constructor**, los tres colaboradores (`Bitacora`, `Prenda`,
+> `Cliente`, las tres clases BLL) eran instancias concretas hardcodeadas (`new Bitacora()`, etc.)
+> sin ningún punto de inyección, así que `Generar`/`GenerarTendencia`/`GenerarComparacion`/
+> `ContarPrendasDisponibles`/`ContarClientes`/`ContarEventosDia` quedaban 0% testeables sin una
+> base de datos real (`ReporteTendenciaTests.cs` solo cubría `CalcularTendencia`, el núcleo puro
+> de agregación, no la fachada). A diferencia de `AnalisisAbandono`, acá faltaba directamente la
+> interfaz: `BLL.Prenda`/`BLL.Cliente` ya implementaban `IPrendaService`/`IClienteService`, pero
+> `BLL.Bitacora` no implementaba ninguna interfaz. Corregido: se agregó `IBitacoraService` (mismo
+> patrón que el resto — mirror completo de la superficie pública de `Bitacora`, aunque
+> `ReporteJornada` solo use `BuscarPorFiltrosNegocio`), `Bitacora` pasa a implementarla, y
+> `ReporteJornada` gana un constructor con los tres colaboradores por interfaz (más el
+> parameterless de siempre para producción). Se agregaron `FakeBitacoraService`/`FakePrendaService`
+> y 8 tests de la fachada real en `Tests/ReporteJornadaTests.cs`.
+>
+> Prenda/CargoPrenda/ListaEspera siguen sin la misma revisión de detalle.
 
 ---
 

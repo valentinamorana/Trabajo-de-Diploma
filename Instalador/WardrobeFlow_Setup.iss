@@ -486,8 +486,8 @@ begin
   if ResultCode <> 0 then
   begin
     Result := False;
-    ErrMsg := 'El script ' + NombreArchivo + ' devolvió un error (código ' + IntToStr(ResultCode) + ').' + #13#13 +
-              'Verificar que el servidor ''' + ServidorElegido + ''' esté accesible y revisar el log: ' + LogPath;
+    ErrMsg := 'El script ' + NombreArchivo + ' devolvió un error (código ' + IntToStr(ResultCode) + ') contra ''' + ServidorElegido + '''.' + #13#13 +
+              'Puede ser un problema de conexión o un error en el script SQL. Revisá el log para más detalle: ' + LogPath;
   end;
 end;
 
@@ -512,10 +512,25 @@ begin
     begin
       WizardForm.StatusLabel.Caption := 'Verificando el servicio de SQL Server...';
       LogPath := ExpandConstant('{app}\install.log');
-      if not (Exec(ExpandConstant('{app}\BD\{#DbInstallerExeName}'),
-                    'check-service "' + ServicioWindowsElegido + '" "' + LogPath + '"',
-                    '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0)) then
+      if not Exec(ExpandConstant('{app}\BD\{#DbInstallerExeName}'),
+                  'check-service "' + ServicioWindowsElegido + '" "' + LogPath + '"',
+                  '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+        ResultCode := -1; // no se pudo ni siquiera lanzar DbInstaller.exe
+
+      if ResultCode = 2 then
       begin
+        // El servicio no existe: probablemente la instancia se desinstaló
+        // o se le cambió el nombre después de detectarla.
+        SuppressibleMsgBox(
+          'No se encontró el servicio de Windows ''' + ServicioWindowsElegido + ''' en este equipo.' + #13#13 +
+          'La instancia de SQL Server puede haberse desinstalado. Verificalo y ejecutá BD\00_Instalacion_Completa.sql a mano una vez resuelto.' + #13#13 +
+          'Revisá el log para más detalle: ' + LogPath,
+          mbError, MB_OK, IDOK);
+        exit;
+      end
+      else if ResultCode <> 0 then
+      begin
+        // Existe pero no se pudo arrancar (permisos, u otro motivo).
         SuppressibleMsgBox(
           'El servicio de SQL Server (' + ServicioWindowsElegido + ') está detenido y no se pudo iniciar automáticamente.' + #13#13 +
           'Iniciá el servicio manualmente (Panel de Control > Herramientas administrativas > Servicios, o SQL Server Configuration Manager — puede requerir permisos de administrador) y después abrí WardrobeFlow, o ejecutá BD\00_Instalacion_Completa.sql a mano.' + #13#13 +

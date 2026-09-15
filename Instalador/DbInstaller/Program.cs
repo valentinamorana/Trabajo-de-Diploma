@@ -177,6 +177,26 @@ namespace DbInstaller
                 return 0;
             }
 
+            // Estado transitorio (arrancando, deteniéndose, pausado, etc.): un
+            // Start() ahí puede tirar "no puede aceptar comandos de control".
+            // Mejor esperar a que se asiente antes de decidir si hace falta
+            // arrancarlo.
+            if (servicio.Status != ServiceControllerStatus.Stopped)
+            {
+                registrar($"El servicio está en estado transitorio ({servicio.Status}). Esperando...");
+                try
+                {
+                    servicio.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(30));
+                    registrar("El servicio quedó en ejecución.");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    registrar("El servicio no llegó a estar en ejecución: " + ex.Message);
+                    return 3;
+                }
+            }
+
             registrar("El servicio está detenido. Intentando iniciarlo...");
             try
             {

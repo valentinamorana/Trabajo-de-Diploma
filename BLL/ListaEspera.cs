@@ -6,7 +6,8 @@ namespace BLL
 {
     /// <summary>
     /// Lógica de negocio — Lista de Espera de prendas (mejora opcional, no requerida
-    /// por la cátedra). Ver README, sección "Módulos", y BD/16_Lista_Espera.sql.
+    /// por la cátedra). Ver README, sección "Módulos", y BD/00_Instalacion_Completa.sql
+    /// (sección 16, "LISTA DE ESPERA DE PRENDAS").
     /// </summary>
     public class ListaEspera : Interfaces.IListaEsperaService
     {
@@ -132,8 +133,8 @@ namespace BLL
         }
 
         // Best-effort: si la tabla ListaEspera todavía no existe (BD sin migrar,
-        // BD/16_Lista_Espera.sql no corrido), no filtra nada — degrada al comportamiento
-        // anterior sin romper Nuevo Pedido, mismo criterio que BLL.PanelAlertas.
+        // sección 16 de BD/00_Instalacion_Completa.sql no corrida), no filtra nada — degrada
+        // al comportamiento anterior sin romper Nuevo Pedido, mismo criterio que BLL.PanelAlertas.
         public List<int> ObtenerIdsReservadosParaOtro(int? idClienteSolicitante)
         {
             try

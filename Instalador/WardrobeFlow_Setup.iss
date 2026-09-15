@@ -5,14 +5,30 @@
 ; - Instala la aplicacion (GUI.exe + dependencias) en Archivos de Programa.
 ; - Crea la base de datos WardrobeFlowDB completa (estructura + los 4
 ;   procesos de negocio PN01-PN04) ejecutando BD/00_Instalacion_Completa.sql
-;   (script unico) contra una instancia SQLEXPRESS local YA INSTALADA.
+;   contra una instancia SQLEXPRESS local YA INSTALADA, mediante un cliente
+;   SQL embebido (DbInstaller.exe, ADO.NET/SqlClient) que viaja DENTRO del
+;   propio instalador — no depende de que el cliente tenga sqlcmd/SQL Server
+;   Command Line Utilities instalados aparte (PPT, slide "A01: Instalacion
+;   de Base Datos": "Automatizacion mediante cliente SQL embebido...").
 ; - Crea accesos directos (menu inicio + escritorio opcional).
 ; - Caso de prueba contemplado: instalacion simple, con SQL Server Express
 ;   (instancia SQLEXPRESS) ya instalado y el servicio en ejecucion.
+; - Un unico archivo .exe de salida: Inno Setup empaqueta GUI.exe + todas
+;   las DLLs de la app, los .sql y DbInstaller.exe comprimidos adentro del
+;   instalador (ver OutputBaseFilename mas abajo); nada se distribuye suelto.
+; - Verifica .NET Framework 4.7.2+ en el cliente ANTES de copiar archivos
+;   (InitializeSetup); si falta, avisa y no instala nada.
 ;
 ; Fuera de alcance para esta entrega (se agrega en Entrega 3, "casos
 ; especiales"): deteccion/instalacion de SQL Server si no esta presente,
-; deteccion de instancia con otro nombre, deteccion de servicio detenido.
+; deteccion de instancia con otro nombre o de 2 instancias simultaneas,
+; deteccion de servicio detenido, desinstalacion de SQL, pre-flight checks
+; y rollback automatico si falla la creacion de la BD.
+;
+; Gap conocido (fuera de esta iteracion, requiere certificado de firma de
+; codigo que todavia no se consiguio): firma digital del .exe con SignTool
+; (PPT, slide "Compilacion y Generacion .EXE"). Sin firma, Windows
+; SmartScreen puede advertir al ejecutarlo.
 ; =====================================================================
 
 #define MyAppName "WardrobeFlow"
@@ -24,6 +40,8 @@
 
 #define AppSourceDir "..\GUI\bin\Release"
 #define DbSourceDir "..\BD"
+#define DbInstallerSourceDir "DbInstaller\bin\Release"
+#define DbInstallerExeName "DbInstaller.exe"
 
 #if !FileExists(AppSourceDir + "\" + MyAppExeName)
   #error "No se encontro GUI.exe en GUI\bin\Release. Compilar el proyecto en modo Release antes de generar el instalador."
@@ -31,6 +49,10 @@
 
 #if !FileExists(DbSourceDir + "\00_Instalacion_Completa.sql")
   #error "No se encontro BD\00_Instalacion_Completa.sql (script unico de instalacion)."
+#endif
+
+#if !FileExists(DbInstallerSourceDir + "\" + DbInstallerExeName)
+  #error "No se encontro DbInstaller.exe en Instalador\DbInstaller\bin\Release. Compilar ese proyecto en modo Release antes de generar el instalador."
 #endif
 
 [Setup]
@@ -60,6 +82,7 @@ Name: "desktopicon"; Description: "Crear un acceso directo en el escritorio"; Gr
 [Files]
 Source: "{#AppSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#DbSourceDir}\*.sql"; DestDir: "{app}\BD"; Flags: ignoreversion
+Source: "{#DbInstallerSourceDir}\{#DbInstallerExeName}"; DestDir: "{app}\BD"; Flags: ignoreversion
 Source: "Credenciales_Iniciales.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
@@ -72,32 +95,62 @@ Filename: "{app}\Credenciales_Iniciales.txt"; Description: "Ver las credenciales
 Filename: "{app}\{#MyAppExeName}"; Description: "Abrir {#MyAppName}"; Flags: nowait postinstall skipifsilent
 
 [Code]
-// Ejecuta un script .sql con sqlcmd contra la instancia SQLEXPRESS local.
-// -E: autenticacion de Windows (igual que el connection string de la app).
-// -f 65001: codepage UTF-8 (el script tiene acentos, ver comentario en
-//   BD/00_Instalacion_Completa.sql).
-// -b: si el script tiene un error de T-SQL, sqlcmd devuelve codigo != 0.
-function EjecutarScriptSql(NombreArchivo: String; UsarDb: Boolean; var ErrMsg: String): Boolean;
+// Verifica que el cliente tenga .NET Framework 4.7.2 o superior instalado
+// (release >= 461808, umbral oficial de Microsoft para 4.7.2) ANTES de
+// copiar ningún archivo — si falta, se corta acá y no queda nada instalado
+// a medias (PPT, slide "Inclusión de Dependencias": "Verificación del
+// Runtime de .NET: el instalador valida si la versión requerida está
+// presente... antes de continuar").
+function TieneNetFramework472(): Boolean;
+var
+  Release: Cardinal;
+begin
+  Result := RegQueryDWordValue(HKLM, 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full', 'Release', Release)
+            and (Release >= 461808);
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  Result := True;
+  if not TieneNetFramework472() then
+  begin
+    SuppressibleMsgBox(
+      'WardrobeFlow requiere .NET Framework 4.7.2 o superior, que no se encontró instalado en este equipo.' + #13#13 +
+      'Instalá .NET Framework 4.7.2 (o una versión posterior) desde ' +
+      'https://dotnet.microsoft.com/download/dotnet-framework y volvé a ejecutar este instalador.',
+      mbError, MB_OK, IDOK);
+    Result := False;
+  end;
+end;
+
+// Ejecuta un script .sql contra la instancia SQLEXPRESS local usando el
+// cliente SQL embebido (DbInstaller.exe, ADO.NET/SqlClient) que se copió
+// junto con la app en {app}\BD. A diferencia de sqlcmd, este .exe viaja
+// DENTRO del instalador (ver [Files]) y no depende de que el cliente tenga
+// las SQL Server Command Line Utilities instaladas aparte — así el
+// instalador queda autocontenido en un único .exe (PPT: "cliente SQL
+// embebido").
+// El log queda en {app}\install.log (persistente, no en {tmp}) para poder
+// diagnosticar después de terminada la instalación.
+function EjecutarScriptSql(NombreArchivo: String; var ErrMsg: String): Boolean;
 var
   ResultCode: Integer;
-  Params: String;
+  DbInstallerPath: String;
   ScriptPath: String;
   LogPath: String;
+  Params: String;
 begin
+  DbInstallerPath := ExpandConstant('{app}\BD\{#DbInstallerExeName}');
   ScriptPath := ExpandConstant('{app}\BD\') + NombreArchivo;
-  LogPath := ExpandConstant('{tmp}\sqlcmd_') + NombreArchivo + '.log';
+  LogPath := ExpandConstant('{app}\install.log');
 
-  Params := '-S {#MySqlInstance} -E -b -f 65001';
-  if UsarDb then
-    Params := Params + ' -d {#MyDatabaseName}';
-  Params := Params + ' -i "' + ScriptPath + '" -o "' + LogPath + '"';
+  Params := '{#MySqlInstance} "' + ScriptPath + '" "' + LogPath + '"';
 
-  Result := Exec(ExpandConstant('{cmd}'), '/C sqlcmd ' + Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Result := Exec(DbInstallerPath, Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 
   if not Result then
   begin
-    ErrMsg := 'No se pudo ejecutar sqlcmd. Verificar que las herramientas de línea de comandos ' +
-              'de SQL Server (sqlcmd) estén instaladas y disponibles en PATH.';
+    ErrMsg := 'No se pudo ejecutar DbInstaller.exe (cliente SQL embebido del instalador).';
     exit;
   end;
 
@@ -105,7 +158,7 @@ begin
   begin
     Result := False;
     ErrMsg := 'El script ' + NombreArchivo + ' devolvió un error (código ' + IntToStr(ResultCode) + ').' + #13#13 +
-              'Verificar que SQL Server Express esté instalado, la instancia SQLEXPRESS en ejecución, ' +
+              'Verificar que SQL Server Express esté instalado y la instancia SQLEXPRESS en ejecución, ' +
               'y revisar el log: ' + LogPath;
   end;
 end;
@@ -124,14 +177,14 @@ begin
     // módulos de una sola pasada — antes acá se corrían 9 scripts sueltos a
     // mano y, ademas, se habian quedado desactualizados (nunca llegaron a
     // incluir los scripts 10 en adelante, con lo cual PN02/PN03/PN04 nunca
-    // se instalaban). UsaDb=False porque, igual que antes con el 01, el
-    // script arranca con CREATE DATABASE + USE WardrobeFlowDB propios.
-    if not EjecutarScriptSql('00_Instalacion_Completa.sql', False, ErrMsg) then
+    // se instalaban). No hace falta indicar la base: el script arranca con
+    // CREATE DATABASE + USE WardrobeFlowDB propios.
+    if not EjecutarScriptSql('00_Instalacion_Completa.sql', ErrMsg) then
     begin
       SuppressibleMsgBox(
         'No se pudo completar la creación de la base de datos.' + #13#13 + ErrMsg + #13#13 +
         'La aplicación quedó instalada, pero necesitará ejecutar manualmente ' +
-        'BD\00_Instalacion_Completa.sql (con SSMS o sqlcmd) antes de poder iniciar sesión.',
+        'BD\00_Instalacion_Completa.sql (con SSMS) antes de poder iniciar sesión.',
         mbError, MB_OK, IDOK);
       exit;
     end;

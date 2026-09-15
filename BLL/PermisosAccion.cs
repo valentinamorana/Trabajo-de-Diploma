@@ -13,7 +13,8 @@ namespace BLL
     /// RETROCOMPATIBLE (decisión de despliegue seguro): si la patente de edición todavía NO
     /// existe en el catálogo (base sin migrar), se exige la patente de VER — exactamente el
     /// comportamiento anterior, así desplegar este código NO rompe nada. Una vez creada la
-    /// patente de edición (script BD/03_Permisos_Granulares.sql) pasa a exigirse esa, y el
+    /// patente de edición (sección "PERMISOS GRANULARES" de BD/00_Instalacion_Completa.sql)
+    /// pasa a exigirse esa, y el
     /// Administrador puede quitarla a los roles que deban quedar de solo-lectura.
     /// El Administrador siempre tiene acceso (bypass por perfil).
     /// </summary>

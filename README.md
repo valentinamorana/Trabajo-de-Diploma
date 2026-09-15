@@ -141,7 +141,7 @@ State ya entregado (PdN2/PdN4) sin tocarlo.
 
 | Módulo | Resumen |
 |--------|---------|
-| **Lista de Espera de Prendas** | Matchea por prenda específica (mismo `IdPrenda`, no por categoría). Al liberarse, `BLL.Prenda.CambiarEstado` dispara `BLL.ListaEspera.NotificarSiCorresponde`, que reserva la fila `Pendiente` más antigua (FIFO) por `BLL.ListaEspera.HORAS_RESERVA` (48hs). Mientras la reserva está vigente, `BLL.Pedido` la bloquea para cualquier otro cliente (`err.bll.pedido.prenda_reservada`) y la cierra sola (`Convertida`) al crear el pedido del cliente correcto. Si nadie la retira a tiempo, vuelve a estar disponible para cualquiera por simple comparación de fecha — sin job en background, mismo criterio que `Cliente.FechaLimiteGracia` (PdN6). Ver `BD/16_Lista_Espera.sql`, `BLL/ListaEspera.cs`, `GUI/ListaEsperaForm.cs`. |
+| **Lista de Espera de Prendas** | Matchea por prenda específica (mismo `IdPrenda`, no por categoría). Al liberarse, `BLL.Prenda.CambiarEstado` dispara `BLL.ListaEspera.NotificarSiCorresponde`, que reserva la fila `Pendiente` más antigua (FIFO) por `BLL.ListaEspera.HORAS_RESERVA` (48hs). Mientras la reserva está vigente, `BLL.Pedido` la bloquea para cualquier otro cliente (`err.bll.pedido.prenda_reservada`) y la cierra sola (`Convertida`) al crear el pedido del cliente correcto. Si nadie la retira a tiempo, vuelve a estar disponible para cualquiera por simple comparación de fecha — sin job en background, mismo criterio que `Cliente.FechaLimiteGracia` (PdN6). Ver `BD/00_Instalacion_Completa.sql` (sección 16), `BLL/ListaEspera.cs`, `GUI/ListaEsperaForm.cs`. |
 
 ---
 
@@ -215,7 +215,7 @@ BD/00_Instalacion_Completa.sql   -- Crea WardrobeFlowDB completa: estructura, da
                                   -- se puede volver a ejecutar sin duplicar ni romper nada.
 ```
 
-Es el único archivo de esquema que se edita — ya no se regenera concatenando los scripts individuales. Los archivos `01`, `03`, `05`, `06`, `08`, `09`, `10` a `16`, `17` a `19` y `20` siguen en `BD/` como referencia histórica de cómo se introdujo cada módulo (útil para ver el diff puntual de una funcionalidad), pero no se vuelven a tocar ni a correr sueltos — `00` es la fuente de verdad. El instalador (`Instalador/WardrobeFlow_Setup.iss`) usa este único script.
+Es el único archivo de esquema que se edita. Los scripts individuales que introdujeron cada módulo históricamente (`01`, `03`, `05`, `06`, `08` a `20`) ya no están en el repo — todo su contenido está absorbido en `00`, que es la única fuente de verdad; si hace falta ver cómo se introdujo una funcionalidad puntual, buscarlo en el historial de git en vez de en un archivo aparte. El instalador (`Instalador/WardrobeFlow_Setup.iss`) usa este único script.
 
 **Herramientas de mantenimiento** (no forman parte de "crear la BD" — correr por separado solo si hace falta):
 
@@ -225,7 +225,7 @@ BD/04_Diagnostico_Limpieza_Nodos_Permiso.sql -- Diagnóstico puntual del árbol 
 BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos de los 7 roles reales.
 ```
 
-- **Actualizar una BD MUY vieja** (previa a que existiera `01_Crear_BaseDeDatos.sql`) → ejecutar `02` a `09` en orden.
+- **Actualizar una BD MUY vieja** (previa a que existiera un script de instalación) → ejecutar `02_Actualizar_BaseDeDatos.sql` y después `00_Instalacion_Completa.sql`. Ambos son idempotentes (chequean `IF NOT EXISTS` antes de cada tabla/columna/dato semilla), así que correr `00` a continuación no duplica ni rompe nada de lo que `02` ya haya creado — simplemente completa lo que a `02` le falta (PN01-PN04, Lista de Espera, hardening, etc., que `02` no cubre).
 - **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
 
 **Notas de los módulos** (para ubicarlos dentro de `00_Instalacion_Completa.sql` — los números de sección adentro del archivo coinciden con estos, y son el orden histórico en el que se agregaron):

@@ -1,5 +1,5 @@
 /*
- * SCRIPT SQL — ver BD/01_Crear_BaseDeDatos.sql (tabla HistorialUsuario). Columnas:
+ * SCRIPT SQL — ver BD/00_Instalacion_Completa.sql (tabla HistorialUsuario). Columnas:
  *   IdVersion, IdUsuario, Fecha, Actor, Detalle,
  *   UsernameSnap, NombreSnap, ApellidoSnap, FechaNacSnap, EmailSnap   (datos administrativos)
  *   ClaveSnap, EstadoSnap, IntentosSnap                               (trazabilidad interna)

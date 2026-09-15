@@ -12,7 +12,7 @@ namespace GUI
     /// (Usuario.IdIdioma + tabla Preferencia) y se aplica al instante (idioma por Observer;
     /// fuente/tema re-aplicados a los formularios abiertos).
     /// </summary>
-    public partial class MiPerfilForm : Form, IIdiomaObserver
+    public partial class MiPerfilForm : FormBase, IIdiomaObserver
     {
         private readonly BE.Usuario  _usuario;
         private readonly BLL.Usuario _usuarioBLL = new BLL.Usuario();
@@ -30,16 +30,9 @@ namespace GUI
             lblPerfilVal.Text  = TraductorPerfil.Nombre(_usuario?.Perfil);
         }
 
-        private string T(string k, string fb)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(k) ? t[k].Texto : fb;
-        }
-
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new Icon(ico); } catch { }
             GestorIdioma.SuscribirObservador(this);
             CargarIdiomas();
             CargarPreferencias();
@@ -120,7 +113,7 @@ namespace GUI
                 PreferenciasUI.ReaplicarTodo();
 
                 lblEstado.ForeColor = Color.FromArgb(40, 140, 60);
-                lblEstado.Text = "✓ " + T("perfil.guardado", "Preferencias guardadas.");
+                lblEstado.Text = "✓ " + Tr("perfil.guardado", "Preferencias guardadas.");
             }
             catch (Exception ex)
             {
@@ -134,20 +127,20 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma)
         {
-            this.Text          = T("perfil.frm.titulo", "Mi Perfil");
-            lblTitulo.Text     = T("perfil.frm.titulo", "Mi Perfil");
-            lblUsuarioCap.Text = T("perfil.usuario", "Usuario:");
-            lblPerfilCap.Text  = T("perfil.perfil", "Perfil / Rol:");
+            this.Text          = Tr("perfil.frm.titulo", "Mi Perfil");
+            lblTitulo.Text     = Tr("perfil.frm.titulo", "Mi Perfil");
+            lblUsuarioCap.Text = Tr("perfil.usuario", "Usuario:");
+            lblPerfilCap.Text  = Tr("perfil.perfil", "Perfil / Rol:");
             lblPerfilVal.Text  = TraductorPerfil.Nombre(_usuario?.Perfil);
-            lblSeccion.Text    = T("perfil.seccion", "Preferencias");
-            lblIdiomaCap.Text  = T("perfil.idioma", "Idioma preferido:");
-            lblFuenteCap.Text  = T("perfil.fuente", "Tipografía:");
-            lblTamanoCap.Text  = T("perfil.tamano", "Tamaño de letra:");
-            lblTemaCap.Text    = T("perfil.tema", "Tema:");
-            lblFechaCap.Text   = T("perfil.fecha", "Formato de fecha:");
-            chkNotif.Text      = T("perfil.notif", "Recibir notificaciones");
-            btnGuardar.Text    = T("perfil.btn.guardar", "Guardar preferencias");
-            btnDefault.Text    = T("perfil.btn.default", "Restaurar valores de fábrica");
+            lblSeccion.Text    = Tr("perfil.seccion", "Preferencias");
+            lblIdiomaCap.Text  = Tr("perfil.idioma", "Idioma preferido:");
+            lblFuenteCap.Text  = Tr("perfil.fuente", "Tipografía:");
+            lblTamanoCap.Text  = Tr("perfil.tamano", "Tamaño de letra:");
+            lblTemaCap.Text    = Tr("perfil.tema", "Tema:");
+            lblFechaCap.Text   = Tr("perfil.fecha", "Formato de fecha:");
+            chkNotif.Text      = Tr("perfil.notif", "Recibir notificaciones");
+            btnGuardar.Text    = Tr("perfil.btn.guardar", "Guardar preferencias");
+            btnDefault.Text    = Tr("perfil.btn.default", "Restaurar valores de fábrica");
         }
 
         private void BtnDefault_Click(object sender, EventArgs e) => RestaurarDefault();

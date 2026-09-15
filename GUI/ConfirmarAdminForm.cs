@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    public partial class ConfirmarAdminForm : Form
+    public partial class ConfirmarAdminForm : FormBase
     {
         private readonly Usuario _usuarioBLL = new Usuario();
         private readonly RecuperacionAdmin _recuperacionBLL = new RecuperacionAdmin();
@@ -22,7 +22,6 @@ namespace GUI
         {
             InitializeComponent();
             Autorizado = false;
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
         }
 
         protected override void OnLoad(EventArgs e)
@@ -50,12 +49,9 @@ namespace GUI
         {
             lblError.Text = string.Empty;
 
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             if (string.IsNullOrWhiteSpace(txtClave.Text))
             {
-                lblError.Text = T("msg.confirmar.vacio", "Ingrese usuario y contraseña.");
+                lblError.Text = Tr("msg.confirmar.vacio", "Ingrese usuario y contraseña.");
                 return;
             }
 
@@ -75,7 +71,7 @@ namespace GUI
                 // Vía 2 — Credenciales de un Administrador.
                 if (string.IsNullOrWhiteSpace(txtUsuario.Text))
                 {
-                    lblError.Text = T("msg.confirmar.vacio", "Ingrese usuario y contraseña.");
+                    lblError.Text = Tr("msg.confirmar.vacio", "Ingrese usuario y contraseña.");
                     return;
                 }
                 if (!_usuarioBLL.ValidarCredencialesAdmin(txtUsuario.Text.Trim(), txtClave.Text))
@@ -84,14 +80,14 @@ namespace GUI
                     if (_intentosFallidos >= MaxIntentos)
                     {
                         MessageBox.Show(
-                            T("msg.confirmar.limiteintentos", "Demasiados intentos fallidos. Cerrá esta ventana e intentá de nuevo más tarde."),
-                            T("msg.error.titulo", "Error"),
+                            Tr("msg.confirmar.limiteintentos", "Demasiados intentos fallidos. Cerrá esta ventana e intentá de nuevo más tarde."),
+                            Tr("msg.error.titulo", "Error"),
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         this.DialogResult = DialogResult.Cancel;
                         this.Close();
                         return;
                     }
-                    lblError.Text = T("msg.confirmar.invalido", "Usuario o contraseña incorrectos, o el usuario no es Administrador.");
+                    lblError.Text = Tr("msg.confirmar.invalido", "Usuario o contraseña incorrectos, o el usuario no es Administrador.");
                     txtClave.Clear();
                     txtClave.Focus();
                     return;

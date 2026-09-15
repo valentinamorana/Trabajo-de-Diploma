@@ -9,7 +9,7 @@ namespace GUI
     /// que tuvo la prenda (BE.Prenda.IdUltimoCliente). Se ofrece desde Prendas.cs justo
     /// después de confirmar el paso a Baja.
     /// </summary>
-    public partial class CargoPrendaDialog : Form
+    public partial class CargoPrendaDialog : FormBase
     {
         public string Motivo { get; private set; }
         public decimal Monto { get; private set; }
@@ -24,18 +24,14 @@ namespace GUI
         public CargoPrendaDialog(BE.Prenda prenda, decimal? montoSugerido = null)
         {
             InitializeComponent();
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico); } catch { }
 
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+            this.Text           = Tr("frm.cargoprenda",       "Cargo por Daño/Pérdida");
+            lblMotivo.Text      = Tr("lbl.cargoprenda.motivo", "Motivo (daño o pérdida) *");
+            lblMonto.Text       = Tr("lbl.cargoprenda.monto",  "Monto a cobrar *");
+            btnConfirmar.Text   = Tr("btn.registrar.cargo",    "Registrar Cargo");
+            btnCancelar.Text    = Tr("btn.cancelar",           "Cancelar");
 
-            this.Text           = T("frm.cargoprenda",       "Cargo por Daño/Pérdida");
-            lblMotivo.Text      = T("lbl.cargoprenda.motivo", "Motivo (daño o pérdida) *");
-            lblMonto.Text       = T("lbl.cargoprenda.monto",  "Monto a cobrar *");
-            btnConfirmar.Text   = T("btn.registrar.cargo",    "Registrar Cargo");
-            btnCancelar.Text    = T("btn.cancelar",           "Cancelar");
-
-            string fmtInfo = T("lbl.cargoprenda.info", "Prenda: {0}\nÚltimo cliente: {1}");
+            string fmtInfo = Tr("lbl.cargoprenda.info", "Prenda: {0}\nÚltimo cliente: {1}");
             lblPrendaInfo.Text = string.Format(fmtInfo, prenda.Nombre, prenda.NombreUltimoCliente ?? "—");
 
             if (montoSugerido.HasValue && montoSugerido.Value > 0)
@@ -44,17 +40,14 @@ namespace GUI
 
         private void BtnConfirmar_Click(object sender, EventArgs e)
         {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             if (string.IsNullOrWhiteSpace(txtMotivo.Text))
             {
-                lblMensaje.Text = "✗ " + T("msg.cargoprenda.motivorequerido", "Indicá el motivo del cargo.");
+                lblMensaje.Text = "✗ " + Tr("msg.cargoprenda.motivorequerido", "Indicá el motivo del cargo.");
                 return;
             }
             if (numMonto.Value <= 0)
             {
-                lblMensaje.Text = "✗ " + T("msg.cargoprenda.montoinvalido", "El monto debe ser mayor a cero.");
+                lblMensaje.Text = "✗ " + Tr("msg.cargoprenda.montoinvalido", "El monto debe ser mayor a cero.");
                 return;
             }
 

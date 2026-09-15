@@ -195,7 +195,7 @@ namespace Servicios.Multiidioma
                 clave == "btn.confirmar.cambio")                               return "CambioEstado";
             if (clave.StartsWith("col.usr.")  || clave.StartsWith("usr.") ||
                 clave.StartsWith("msg.usr.")  || clave.StartsWith("err.usr.") ||
-                clave.StartsWith("conf.desbloquear.") || clave.StartsWith("conf.resetmasivo.") ||
+                clave.StartsWith("conf.desbloquear.") ||
                 clave.StartsWith("dlg.resetclave.") || clave == "btn.refrescar") return "GestionUsuarios";
             if (clave.StartsWith("err.clave.") || clave == "lbl.nueva.clave" ||
                 clave == "lbl.confirmar.clave" || clave == "btn.confirmar.reset") return "ResetClave";

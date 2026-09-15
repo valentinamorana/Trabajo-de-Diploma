@@ -10,10 +10,8 @@ namespace DAL
     /// Opera sobre la tabla [Empleado] de WardrobeFlowDB.
     /// Incluye JOIN opcional con [Usuario] para mostrar el username asociado.
     /// </summary>
-    public class Empleado : Interfaces.IEmpleadoDAL
+    public class Empleado : BaseDAL<BE.Empleado>, Interfaces.IEmpleadoDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
-
         // T07 — Definición del Dígito Verificador de esta tabla (fuente única).
         public const  string   DV_Tabla    = "Empleado";
         public const  string   DV_Pk       = "IdEmpleado";
@@ -26,7 +24,7 @@ namespace DAL
         }
 
         // Devuelve todos los empleados con su username (si tienen usuario).
-        public List<BE.Empleado> ObtenerTodos()
+        public override List<BE.Empleado> ObtenerTodos()
         {
             var lista = new List<BE.Empleado>();
             try
@@ -51,7 +49,7 @@ namespace DAL
         }
 
         // Obtiene un empleado por ID.
-        public BE.Empleado ObtenerPorId(int idEmpleado)
+        public override BE.Empleado ObtenerPorId(int idEmpleado)
         {
             SqlParameter[] p = { new SqlParameter("@IdEmpleado", idEmpleado) };
             try

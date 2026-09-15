@@ -9,11 +9,9 @@ namespace DAL
     /// Capa de Acceso a Datos — PlanSuscripcion.
     /// Opera sobre la tabla [PlanSuscripcion] de WardrobeFlowDB.
     /// </summary>
-    public class PlanSuscripcion : Interfaces.IPlanSuscripcionDAL
+    public class PlanSuscripcion : BaseDAL<BE.PlanSuscripcion>, Interfaces.IPlanSuscripcionDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
-
-        // Devuelve todos los planes activos. 
+        // Devuelve todos los planes activos.
         public List<BE.PlanSuscripcion> ObtenerActivos()
         {
             var lista = new List<BE.PlanSuscripcion>();
@@ -35,7 +33,7 @@ namespace DAL
         }
 
         // Devuelve todos los planes (activos e inactivos) — para administración.
-        public List<BE.PlanSuscripcion> ObtenerTodos()
+        public override List<BE.PlanSuscripcion> ObtenerTodos()
         {
             var lista = new List<BE.PlanSuscripcion>();
             try
@@ -56,7 +54,7 @@ namespace DAL
         }
 
         // Obtiene un plan por su ID. Devuelve null si no existe.
-        public BE.PlanSuscripcion ObtenerPorId(int idPlan)
+        public override BE.PlanSuscripcion ObtenerPorId(int idPlan)
         {
             SqlParameter[] p = { new SqlParameter("@IdPlan", idPlan) };
             try

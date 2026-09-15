@@ -87,7 +87,7 @@ namespace BLL
             _caretaker.Guardar(memento.IdUsuario, originator.CrearMemento(actor, detalle));
 
             _bitacora.Registrar(modulo,
-                $"Restauración a versión ID {idVersion} — usuario ID {memento.IdUsuario} ({memento.UsernameSnapshot})",
+                $"{BE.ActividadesBitacora.RestauracionAVersionPrefijo}ID {idVersion} — usuario ID {memento.IdUsuario} ({memento.UsernameSnapshot})",
                 BE.Criticidad.Alta);
         }
 

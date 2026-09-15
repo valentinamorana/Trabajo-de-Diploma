@@ -125,9 +125,7 @@ ES	mnu.planes	Planes de Suscripcion
 ES	mnu.pedidosventa	Pedidos de Venta
 ES	mnu.pedidosreal	Pedidos Realizados
 ES	mnu.administrar	Administrar
-ES	mnu.usuarios	Usuarios
 ES	mnu.perfiles	Perfiles y Permisos
-ES	mnu.bitacora	Analítica
 ES	mnu.cerrarsesion	Cerrar Sesion
 ES	mnu.ventana	Ventanas Abiertas
 ES	mnu.ventana.cerrartodas	Cerrar Todas
@@ -930,9 +928,7 @@ EN	mnu.planes	Subscription Plans
 EN	mnu.pedidosventa	Sales Orders
 EN	mnu.pedidosreal	Fulfilled Orders
 EN	mnu.administrar	Administration
-EN	mnu.usuarios	Users
 EN	mnu.perfiles	Profiles & Permissions
-EN	mnu.bitacora	Analytics
 EN	mnu.cerrarsesion	Sign Out
 EN	mnu.ventana	Open Windows
 EN	mnu.ventana.cerrartodas	Close All
@@ -1735,9 +1731,7 @@ RU	mnu.planes	Тарифные планы
 RU	mnu.pedidosventa	Заказы на продажу
 RU	mnu.pedidosreal	Выполненные заказы
 RU	mnu.administrar	Администрирование
-RU	mnu.usuarios	Пользователи
 RU	mnu.perfiles	Профили и права
-RU	mnu.bitacora	Аналитика
 RU	mnu.cerrarsesion	Выйти из системы
 RU	mnu.ventana	Открытые окна
 RU	mnu.ventana.cerrartodas	Закрыть все
@@ -2578,9 +2572,7 @@ PT	mnu.planes	Planos de Assinatura
 PT	mnu.pedidosventa	Pedidos de Venda
 PT	mnu.pedidosreal	Pedidos Realizados
 PT	mnu.administrar	Administrar
-PT	mnu.usuarios	Usuários
 PT	mnu.perfiles	Perfis e Permissões
-PT	mnu.bitacora	Análise
 PT	mnu.cerrarsesion	Sair do sistema
 PT	mnu.ventana	Janelas Abertas
 PT	mnu.ventana.cerrartodas	Fechar Todas
@@ -3692,6 +3684,10 @@ ES	err.bll.familia.autobloqueo	No podés quitarte a vos mismo el acceso de Gesti
 EN	err.bll.familia.autobloqueo	You cannot remove your own User Management access from your own role.
 RU	err.bll.familia.autobloqueo	Вы не можете убрать у себя доступ к управлению пользователями из своей собственной роли.
 PT	err.bll.familia.autobloqueo	Você não pode remover o seu próprio acesso à Gestão de Usuários do seu próprio perfil.
+ES	err.bll.familia.autoescalacion	No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando tu propio rol. Pedile a otro administrador que lo haga.
+EN	err.bll.familia.autoescalacion	You cannot grant yourself permissions your role doesn't already have by editing your own role. Ask another administrator to do it.
+RU	err.bll.familia.autoescalacion	Вы не можете предоставить себе разрешения, которых у вашей роли ещё нет, редактируя свою собственную роль. Попросите другого администратора сделать это.
+PT	err.bll.familia.autoescalacion	Você não pode conceder a si mesmo permissões que seu perfil ainda não tem editando o seu próprio perfil. Peça a outro administrador para fazer isso.
 ES	msg.mantenimiento.titulo	Sistema en mantenimiento
 ES	msg.mantenimiento.cuerpo	El sistema no está disponible en este momento por tareas de mantenimiento. Reintentá más tarde o contactá al Administrador.
 EN	msg.mantenimiento.titulo	System under maintenance
@@ -3711,7 +3707,6 @@ ES	dash.act.emergencyunlock	Desbloqueo con clave de emergencia
 ES	dash.act.usermod	Modificación de usuario
 ES	dash.act.userpurge	Purga de usuarios archivados
 ES	dash.act.pwreset	Reseteo de contraseña
-ES	dash.act.pwresetmass	Reseteo masivo de contraseñas
 ES	dash.act.pwrecoveryreq	Solicitud de recuperación de clave
 ES	dash.act.backupinitial	Backup de instalación limpia (cifrado) generado: {0}
 ES	dash.act.backupcreate	Backup cifrado generado: {0}
@@ -3732,7 +3727,6 @@ EN	dash.act.emergencyunlock	Unlock with emergency key
 EN	dash.act.usermod	User modification
 EN	dash.act.userpurge	Archived users purge
 EN	dash.act.pwreset	Password reset
-EN	dash.act.pwresetmass	Mass password reset
 EN	dash.act.pwrecoveryreq	Password recovery request
 EN	dash.act.backupinitial	Clean install backup (encrypted) created: {0}
 EN	dash.act.backupcreate	Encrypted backup created: {0}
@@ -3753,7 +3747,6 @@ PT	dash.act.emergencyunlock	Desbloqueio com chave de emergência
 PT	dash.act.usermod	Modificação de usuário
 PT	dash.act.userpurge	Limpeza de usuários arquivados
 PT	dash.act.pwreset	Redefinição de senha
-PT	dash.act.pwresetmass	Redefinição em massa de senhas
 PT	dash.act.pwrecoveryreq	Solicitação de recuperação de senha
 PT	dash.act.backupinitial	Backup de instalação limpa (criptografado) gerado: {0}
 PT	dash.act.backupcreate	Backup criptografado gerado: {0}
@@ -3774,7 +3767,6 @@ RU	dash.act.emergencyunlock	Разблокировка аварийным клю
 RU	dash.act.usermod	Изменение пользователя
 RU	dash.act.userpurge	Очистка архивных пользователей
 RU	dash.act.pwreset	Сброс пароля
-RU	dash.act.pwresetmass	Массовый сброс паролей
 RU	dash.act.pwrecoveryreq	Запрос на восстановление пароля
 RU	dash.act.backupinitial	Создан бэкап чистой установки (зашифрован): {0}
 RU	dash.act.backupcreate	Создан зашифрованный бэкап: {0}

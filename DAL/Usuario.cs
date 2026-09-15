@@ -25,6 +25,14 @@ namespace DAL
     /// </summary>
     public class Usuario : BaseDAL<BE.Usuario>, Interfaces.IUsuarioDAL
     {
+        // Código de error nativo de SQL Server para "Invalid column name" — independiente del
+        // idioma del servidor, a diferencia de matchear texto contra SqlException.Message (antes:
+        // sqlEx.Message.Contains("NombreDeColumna"), frágil y podía confundirse con un error real
+        // que mencionara esa palabra por coincidencia). Los catches de "BD sin migrar" de esta
+        // clase no necesitan saber CUÁL columna falta —siempre caen al mismo fallback sin esa
+        // columna— así que basta con detectar el tipo de error, no el texto exacto.
+        private const int ColumnaInexistente = 207;
+
         // Inserta un nuevo usuario con contraseña hasheada y rol asignado.
         // Estado=1 (activo) e IntentosFallidos=0 por defecto al crear.
         // Después del INSERT calcula y persiste el DVH de la nueva fila.
@@ -117,12 +125,7 @@ namespace DAL
                     "FROM Usuario WHERE Username = @Username AND ISNULL(Activo, 1) = 1",
                     parametros);
             }
-            catch (System.Data.SqlClient.SqlException sqlEx)
-                when (sqlEx.Message.Contains("IdIdioma") || sqlEx.Message.Contains("Activo")
-                      || sqlEx.Message.Contains("CantidadBloqueos") || sqlEx.Message.Contains("FechaBloqueo")
-                      || sqlEx.Message.Contains("RequiereCambioClave")
-                      || sqlEx.Message.Contains("Nombre") || sqlEx.Message.Contains("Apellido")
-                      || sqlEx.Message.Contains("Email")  || sqlEx.Message.Contains("FechaNacimiento"))
+            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
             {
                 // Columna IdIdioma/Activo no existe: migración pendiente. Funciona con "ES" por
                 // defecto y sin filtro de archivado (en una BD sin migrar nadie está archivado).
@@ -173,8 +176,7 @@ namespace DAL
                         "WHERE IdUsuario = @idUsuario",
                         new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
                 }
-                catch (System.Data.SqlClient.SqlException sqlEx)
-                    when (sqlEx.Message.Contains("FechaBloqueo") || sqlEx.Message.Contains("CantidadBloqueos"))
+                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
                 {
                     // BD sin migrar: bloqueo simple permanente (comportamiento anterior).
                     acceso.Escribir(
@@ -202,7 +204,7 @@ namespace DAL
                         "WHERE IdUsuario = @idUsuario",
                         new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
                 }
-                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Message.Contains("FechaBloqueo"))
+                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
                 {
                     acceso.Escribir(
                         "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0 WHERE IdUsuario = @idUsuario",
@@ -230,8 +232,7 @@ namespace DAL
                         "       CantidadBloqueos = 0, FechaBloqueo = NULL WHERE IdUsuario = @idUsuario",
                         new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
                 }
-                catch (System.Data.SqlClient.SqlException sqlEx)
-                    when (sqlEx.Message.Contains("FechaBloqueo") || sqlEx.Message.Contains("CantidadBloqueos"))
+                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
                 {
                     acceso.Escribir(
                         "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0 WHERE IdUsuario = @idUsuario",
@@ -467,7 +468,7 @@ namespace DAL
                         new SqlParameter("@id", idUsuario)
                     });
             }
-            catch (System.Data.SqlClient.SqlException ex) when (ex.Message.Contains("RequiereCambioClave"))
+            catch (System.Data.SqlClient.SqlException ex) when (ex.Number == ColumnaInexistente)
             {
                 // BD sin migrar (falta la columna): el cambio obligatorio queda inactivo. No es crítico.
                 System.Diagnostics.Trace.TraceWarning(
@@ -491,9 +492,7 @@ namespace DAL
                     parametros);
             }
             catch (System.Data.SqlClient.SqlException sqlEx)
-                when (sqlEx.Message.Contains("IdIdioma") || sqlEx.Message.Contains("Nombre")
-                      || sqlEx.Message.Contains("Apellido") || sqlEx.Message.Contains("Email")
-                      || sqlEx.Message.Contains("FechaNacimiento"))
+                when (sqlEx.Number == ColumnaInexistente)
             {
                 // SqlParameter NUEVO en el fallback (no reusar el del primer intento; ver nota
                 // en ObtenerPorUsername).
@@ -668,9 +667,7 @@ namespace DAL
                         null);
                 }
                 catch (System.Data.SqlClient.SqlException sqlEx)
-                    when (sqlEx.Message.Contains("Activo") || sqlEx.Message.Contains("FechaBaja")
-                          || sqlEx.Message.Contains("Nombre") || sqlEx.Message.Contains("Apellido")
-                          || sqlEx.Message.Contains("Email")  || sqlEx.Message.Contains("FechaNacimiento"))
+                    when (sqlEx.Number == ColumnaInexistente)
                 {
                     // BD sin migrar: sin columnas de archivado/perfil. Si la migración base de
                     // RF-10 (Activo) tampoco existe y se piden archivados, no hay ninguno.
@@ -683,7 +680,7 @@ namespace DAL
                             "FROM Usuario WHERE " + filtro + " ORDER BY Username", null);
                     }
                     catch (System.Data.SqlClient.SqlException sqlEx2)
-                        when (sqlEx2.Message.Contains("Activo") || sqlEx2.Message.Contains("FechaBaja"))
+                        when (sqlEx2.Number == ColumnaInexistente)
                     {
                         tieneArchivado = false;
                         tabla = null;
@@ -798,7 +795,7 @@ namespace DAL
                         "WHERE Perfil = @perfil AND ISNULL(Activo, 1) = 1",
                         new SqlParameter[] { new SqlParameter("@perfil", BE.Roles.Administrador) });
                 }
-                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Message.Contains("Activo"))
+                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
                 {
                     tabla = acceso.Leer(
                         "SELECT COUNT(*) AS Total FROM Usuario WHERE Perfil = @perfil",
@@ -839,7 +836,7 @@ namespace DAL
                     });
                 }
             }
-            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Message.Contains("Activo") || sqlEx.Message.Contains("FechaBaja"))
+            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
             {
                 // BD sin migrar: no hay archivados.
             }

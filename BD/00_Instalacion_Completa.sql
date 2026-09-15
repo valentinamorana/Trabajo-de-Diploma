@@ -101,6 +101,35 @@ ELSE
     PRINT 'Tabla Usuario ya existe — sin cambios.';
 GO
 
+-- Usuario_Seguridad (T07 — tabla ESPEJO de integridad, ver DAL.EspejoUsuario)
+-- Copia sombra de los campos que entran al DVH de cada usuario, más su DVH. La app la
+-- mantiene en sincronía con cada escritura LEGÍTIMA (junto al recálculo del DVH), lo que
+-- permite, ante una manipulación directa en BD: (1) diagnosticar QUÉ campo cambió comparando
+-- contra el espejo y (2) REPARAR restaurando el valor legítimo sin necesitar un backup
+-- completo. Sin esta tabla, DAL.EspejoUsuario degrada en silencio (ver su propio comentario
+-- de TOLERANCIA) y BLL.RecuperacionIntegridad.Diagnosticar() nunca puede ofrecer "Reparar
+-- desde Espejo" — antes solo se creaba en 02_Actualizar_BaseDeDatos.sql (script de migración
+-- de una BD MUY vieja), y faltaba acá, así que una instalación nueva vía este script nunca
+-- la tenía.
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Usuario_Seguridad')
+BEGIN
+    CREATE TABLE Usuario_Seguridad (
+        IdUsuario          INT           PRIMARY KEY,   -- mismo Id que Usuario (NO identity: lo fija la app)
+        Username           NVARCHAR(100) NOT NULL,
+        Clave              NVARCHAR(500) NOT NULL,
+        Rol                NVARCHAR(100) NULL,
+        Perfil             NVARCHAR(100) NULL,
+        Estado             BIT           NOT NULL DEFAULT 1,
+        IntentosFallidos   INT           NOT NULL DEFAULT 0,
+        DVH                INT           NULL,
+        FechaActualizacion DATETIME      NOT NULL DEFAULT GETDATE()
+    );
+    PRINT 'Tabla Usuario_Seguridad (espejo de integridad) creada.';
+END
+ELSE
+    PRINT 'Tabla Usuario_Seguridad ya existe — sin cambios.';
+GO
+
 -- DVVertical (T07 Dígitos Verificadores)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'DVVertical')
 BEGIN

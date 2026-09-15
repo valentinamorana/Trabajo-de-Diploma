@@ -5,10 +5,8 @@ using System.Data.SqlClient;
 
 namespace DAL
 {
-    public class Idioma
+    public class Idioma : BaseDAL
     {
-        private readonly Acceso acceso = Acceso.GetInstance();
-
         public List<BE.Idioma> ObtenerActivos()
         {
             var lista = new List<BE.Idioma>();

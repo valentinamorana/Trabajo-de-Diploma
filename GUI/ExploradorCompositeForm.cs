@@ -29,7 +29,7 @@ namespace GUI
     /// Implementa IIdiomaObserver: todos los controles se traducen al cambiar de idioma.
     /// NO modifica permisos ni afecta la autorización.
     /// </summary>
-    public partial class ExploradorCompositeForm : Form, IIdiomaObserver
+    public partial class ExploradorCompositeForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.Familia _familiaBLL = new BLL.Familia();
 
@@ -38,24 +38,11 @@ namespace GUI
             InitializeComponent();
         }
 
-        // Helper de traducción — obtiene texto con fallback.
-        private string T(string key, string fallback)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(key) ? t[key].Texto : fallback;
-        }
-
         // ── Ciclo de vida ─────────────────────────────────────────────────────
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            try
-            {
-                string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
-                if (System.IO.File.Exists(ico)) this.Icon = new Icon(ico);
-            }
-            catch { }
             GestorIdioma.SuscribirObservador(this);
             AplicarIdioma();
             CargarArbol();
@@ -78,14 +65,14 @@ namespace GUI
         // Actualiza TODOS los controles de texto del formulario con las traducciones activas.
         private void AplicarIdioma()
         {
-            this.Text            = T("frm.explorador",             "Vista completa del sistema");
-            lblTitulo.Text       = T("lbl.explorador.titulo",      "Vista completa del sistema");
-            lblDescripcion.Text  = T("lbl.explorador.descripcion", "Estructura organizacional de WardrobeFlow — Solo lectura");
-            lblLeyenda.Text      = T("lbl.explorador.leyenda",     "📁 Familia (nodo compuesto — Área o Rol)    🔑 Patente (hoja — permiso atómico)");
-            btnCerrar.Text       = T("btn.explorador.cerrar",      "Cerrar");
-            btnColapsar.Text     = T("btn.explorador.colapsar",    "⊟ Colapsar todo");
-            btnExpandir.Text     = T("btn.explorador.expandir",    "⊞ Expandir todo");
-            btnActualizar.Text   = T("btn.permisos.actualizar",    "↻ Actualizar");
+            this.Text            = Tr("frm.explorador",             "Vista completa del sistema");
+            lblTitulo.Text       = Tr("lbl.explorador.titulo",      "Vista completa del sistema");
+            lblDescripcion.Text  = Tr("lbl.explorador.descripcion", "Estructura organizacional de WardrobeFlow — Solo lectura");
+            lblLeyenda.Text      = Tr("lbl.explorador.leyenda",     "📁 Familia (nodo compuesto — Área o Rol)    🔑 Patente (hoja — permiso atómico)");
+            btnCerrar.Text       = Tr("btn.explorador.cerrar",      "Cerrar");
+            btnColapsar.Text     = Tr("btn.explorador.colapsar",    "⊟ Colapsar todo");
+            btnExpandir.Text     = Tr("btn.explorador.expandir",    "⊞ Expandir todo");
+            btnActualizar.Text   = Tr("btn.permisos.actualizar",    "↻ Actualizar");
         }
 
         // ── Construcción del árbol ────────────────────────────────────────────
@@ -117,8 +104,8 @@ namespace GUI
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    string.Format(T("err.explorador.cargar", "Error al cargar árbol Composite:\n{0}"), ex.Message),
-                    T("diag.err.titulo", "Error"),
+                    string.Format(Tr("err.explorador.cargar", "Error al cargar árbol Composite:\n{0}"), ex.Message),
+                    Tr("diag.err.titulo", "Error"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 

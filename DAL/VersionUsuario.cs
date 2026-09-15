@@ -13,6 +13,11 @@ namespace DAL
 {
     public class VersionUsuario : BaseDAL<BE.VersionUsuario>
     {
+        // Código de error nativo de SQL Server para "Invalid column name" — independiente del
+        // idioma del servidor, a diferencia de matchear texto contra SqlException.Message (ver
+        // el mismo criterio en DAL.Usuario.ColumnaInexistente).
+        private const int ColumnaInexistente = 207;
+
         // Todas las columnas (perfil + seguridad). Tras 02_Actualizar la tabla las tiene.
         private const string Cols =
             "IdVersion, IdUsuario, Fecha, Actor, Detalle, UsernameSnap, " +
@@ -42,9 +47,7 @@ namespace DAL
             {
                 dt = acceso.Leer($"SELECT {Cols} FROM HistorialUsuario {filtro}", parametros);
             }
-            catch (System.Data.SqlClient.SqlException sqlEx)
-                when (sqlEx.Message.Contains("NombreSnap") || sqlEx.Message.Contains("ApellidoSnap")
-                      || sqlEx.Message.Contains("FechaNacSnap") || sqlEx.Message.Contains("EmailSnap"))
+            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
             {
                 // Se copian TODOS los parámetros del filtro, no solo el primero: hoy los 3 callers
                 // usan a lo sumo uno, pero un fallback que solo reconstruye parametros[0] ignoraría
@@ -71,9 +74,7 @@ namespace DAL
                     " @FechaNac, @Email, @Clave, @Estado, @Intentos)",
                     Parametros(v, conPerfil: true));
             }
-            catch (System.Data.SqlClient.SqlException sqlEx)
-                when (sqlEx.Message.Contains("NombreSnap") || sqlEx.Message.Contains("ApellidoSnap")
-                      || sqlEx.Message.Contains("FechaNacSnap") || sqlEx.Message.Contains("EmailSnap"))
+            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
             {
                 // BD sin migrar a snapshots de perfil: insertar solo las columnas legacy.
                 acceso.Escribir(

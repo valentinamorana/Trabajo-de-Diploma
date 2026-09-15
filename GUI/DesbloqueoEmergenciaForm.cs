@@ -10,7 +10,7 @@ namespace GUI
     /// de un solo uso (tipo códigos de respaldo de Steam / 2FA). Se abre desde el Login cuando
     /// la cuenta quedó bloqueada por intentos fallidos, sin depender de otro Administrador.
     /// </summary>
-    public partial class DesbloqueoEmergenciaForm : Form
+    public partial class DesbloqueoEmergenciaForm : FormBase
     {
         private readonly BLL.RecuperacionAdmin _recBLL = new BLL.RecuperacionAdmin();
 
@@ -18,20 +18,15 @@ namespace GUI
         {
             InitializeComponent();
 
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
-            this.Text          = T("emg.titulo",           this.Text);
-            lblTitulo.Text     = T("emg.encabezado",        lblTitulo.Text);
-            lblInfo.Text       = T("emg.info",              lblInfo.Text);
-            lblUsuario.Text    = T("emg.usuario",           lblUsuario.Text);
-            lblClave.Text      = T("emg.clave",             lblClave.Text);
-            btnDesbloquear.Text = T("emg.btn.desbloquear",  btnDesbloquear.Text);
-            btnCancelar.Text   = T("btn.cancelar",          btnCancelar.Text);
+            this.Text          = Tr("emg.titulo",           this.Text);
+            lblTitulo.Text     = Tr("emg.encabezado",        lblTitulo.Text);
+            lblInfo.Text       = Tr("emg.info",              lblInfo.Text);
+            lblUsuario.Text    = Tr("emg.usuario",           lblUsuario.Text);
+            lblClave.Text      = Tr("emg.clave",             lblClave.Text);
+            btnDesbloquear.Text = Tr("emg.btn.desbloquear",  btnDesbloquear.Text);
+            btnCancelar.Text   = Tr("btn.cancelar",          btnCancelar.Text);
 
             txtClave.SetPlaceholder("XXXX-XXXX-XXXX");
-
-            try { string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"); if (System.IO.File.Exists(ico)) this.Icon = new Icon(ico); } catch { }
 
             if (!string.IsNullOrWhiteSpace(usuarioSugerido))
             {
@@ -59,9 +54,6 @@ namespace GUI
 
         private void Desbloquear()
         {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-
             lblError.Text = string.Empty;
             btnDesbloquear.Enabled = false;
             try
@@ -70,8 +62,8 @@ namespace GUI
                 if (ok)
                 {
                     MessageBox.Show(
-                        T("emg.exito", "Cuenta desbloqueada con éxito.\nYa podés iniciar sesión normalmente."),
-                        T("emg.exito.titulo", "Cuenta desbloqueada"),
+                        Tr("emg.exito", "Cuenta desbloqueada con éxito.\nYa podés iniciar sesión normalmente."),
+                        Tr("emg.exito.titulo", "Cuenta desbloqueada"),
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.DialogResult = DialogResult.OK;
                     this.Close();
@@ -85,7 +77,7 @@ namespace GUI
             {
                 // Excepción inesperada (no BE.AppException, sin clave de traducción): mismo criterio
                 // que FormBase.MostrarError(Exception) — mensaje genérico, no el texto técnico crudo.
-                lblError.Text = T("msg.error.inesperado",
+                lblError.Text = Tr("msg.error.inesperado",
                     "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.");
             }
             finally

@@ -9,7 +9,7 @@ using System.Security.Principal;
 
 namespace DAL
 {
-    public class Backup : Interfaces.IBackupDAL
+    public class Backup : BaseDAL, Interfaces.IBackupDAL
     {
         private readonly string _cadenaConexionMaster;
 
@@ -179,7 +179,6 @@ namespace DAL
                 ("Registros de bitácora",         "Bitacora",           "fecha"),
             };
 
-            var acceso   = Acceso.GetInstance();
             var resultado = new List<BE.CambioPosterior>();
 
             foreach (var f in fuentes)

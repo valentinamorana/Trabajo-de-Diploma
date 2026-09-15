@@ -6,18 +6,11 @@ using Servicios.Multiidioma;
 
 namespace GUI
 {
-    public partial class DiagnosticoIntegridadForm : Form, IIdiomaObserver
+    public partial class DiagnosticoIntegridadForm : FormBase, IIdiomaObserver
     {
         public DiagnosticoIntegridadForm()
         {
             InitializeComponent();
-        }
-
-        // Helper de traducción
-        private string T(string key, string fallback)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            return t.ContainsKey(key) ? t[key].Texto : fallback;
         }
 
         // ── Ciclo de vida ─────────────────────────────────────────────────────
@@ -25,12 +18,6 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            try
-            {
-                string ico = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
-                if (System.IO.File.Exists(ico)) this.Icon = new System.Drawing.Icon(ico);
-            }
-            catch { }
             GestorIdioma.SuscribirObservador(this);
             UpdateLanguage(GestorIdioma.IdiomaActual);
             CargarDiagnostico();
@@ -47,18 +34,18 @@ namespace GUI
 
         public void UpdateLanguage(Idioma idioma)
         {
-            this.Text                   = T("diag.frm.titulo",         "Diagnóstico de Integridad");
-            lblFilasRotas.Text          = T("diag.lbl.filasrotas",     "Filas con DVH inválido:");
-            btnActualizar.Text          = T("diag.btn.actualizar",     "Actualizar");
-            btnRecalcularTodo.Text      = T("diag.btn.recalcular",     "Recalcular Todo");
-            btnEspejo.Text              = T("diag.btn.espejo",         "Recuperación (Espejo)...");
+            this.Text                   = Tr("diag.frm.titulo",         "Diagnóstico de Integridad");
+            lblFilasRotas.Text          = Tr("diag.lbl.filasrotas",     "Filas con DVH inválido:");
+            btnActualizar.Text          = Tr("diag.btn.actualizar",     "Actualizar");
+            btnRecalcularTodo.Text      = Tr("diag.btn.recalcular",     "Recalcular Todo");
+            btnEspejo.Text              = Tr("diag.btn.espejo",         "Recuperación (Espejo)...");
             // (botón "Reparar Seleccionadas" eliminado: lo reemplaza la consola del Espejo)
-            btnActualizarHist.Text      = T("diag.btn.actualizar",     "Actualizar");
+            btnActualizarHist.Text      = Tr("diag.btn.actualizar",     "Actualizar");
 
             if (tabs.TabPages.Count >= 1)
-                tabs.TabPages[0].Text = T("diag.tab.diagnostico",    "Diagnóstico");
+                tabs.TabPages[0].Text = Tr("diag.tab.diagnostico",    "Diagnóstico");
             if (tabs.TabPages.Count >= 2)
-                tabs.TabPages[1].Text = T("diag.tab.historial",      "Historial de Verificaciones");
+                tabs.TabPages[1].Text = Tr("diag.tab.historial",      "Historial de Verificaciones");
 
             ActualizarHeadersGrilla();
             CargarDiagnostico();
@@ -69,7 +56,7 @@ namespace GUI
         {
             void SetH(DataGridView g, string col, string key, string fb)
             {
-                if (g.Columns.Contains(col)) g.Columns[col].HeaderText = T(key, fb);
+                if (g.Columns.Contains(col)) g.Columns[col].HeaderText = Tr(key, fb);
             }
             SetH(gridRotas,    "colId",       "diag.col.id",       "ID");
             SetH(gridRotas,    "colUsuario",   "diag.col.usuario",  "Usuario");
@@ -95,27 +82,27 @@ namespace GUI
                 var diag = BLL.Configuracion.ObtenerDiagnostico();
 
                 lblEstadoDVV.Text = diag.Integro
-                    ? T("diag.estado.integro",      "Estado: INTEGRO")
-                    : T("diag.estado.comprometido", "Estado: COMPROMETIDO");
+                    ? Tr("diag.estado.integro",      "Estado: INTEGRO")
+                    : Tr("diag.estado.comprometido", "Estado: COMPROMETIDO");
                 lblEstadoDVV.ForeColor = diag.Integro
                     ? Color.FromArgb(40, 140, 60)
                     : Color.FromArgb(180, 50, 50);
 
                 lblDVVDetalle.Text = string.Format(
-                    T("diag.dvv.detalle", "DVV almacenado: {0}   |   DVV calculado: {1}   |   Filas con DVH inválido: {2}"),
+                    Tr("diag.dvv.detalle", "DVV almacenado: {0}   |   DVV calculado: {1}   |   Filas con DVH inválido: {2}"),
                     diag.DVVAlmacenado?.ToString() ?? "—",
                     diag.DVVCalculado,
                     diag.FilasRotas.Count);
 
                 if (diag.TablasAdicionalesCorruptas.Count > 0)
                     lblDVVDetalle.Text += "   |   " + string.Format(
-                        T("diag.tablas.corruptas", "Tablas con DV inválido: {0}"),
+                        Tr("diag.tablas.corruptas", "Tablas con DV inválido: {0}"),
                         string.Join(", ", diag.TablasAdicionalesCorruptas));
 
                 gridRotas.Rows.Clear();
-                string sinDVH      = T("diag.fila.sinDVH",     "Sin DVH");
-                string noCoincide  = T("diag.fila.nocoincide", "DVH no coincide");
-                string dvhRuntime  = T("diag.fila.recalculado", "Recalculado en vivo");
+                string sinDVH      = Tr("diag.fila.sinDVH",     "Sin DVH");
+                string noCoincide  = Tr("diag.fila.nocoincide", "DVH no coincide");
+                string dvhRuntime  = Tr("diag.fila.recalculado", "Recalculado en vivo");
                 foreach (var fila in diag.FilasRotas)
                 {
                     string estadoFila = fila.DVHAlmacenado == null ? sinDVH : noCoincide;
@@ -131,9 +118,9 @@ namespace GUI
                 foreach (var tablaCorrupta in diag.TablasAdicionalesCorruptas)
                 {
                     int tIdx = gridRotas.Rows.Add("—",
-                        string.Format(T("diag.tabla.corrupta", "Tabla '{0}'"), tablaCorrupta),
+                        string.Format(Tr("diag.tabla.corrupta", "Tabla '{0}'"), tablaCorrupta),
                         "—", "—",
-                        T("diag.tabla.dvinvalido", "DV inválido — usá «Recalcular Todo»"));
+                        Tr("diag.tabla.dvinvalido", "DV inválido — usá «Recalcular Todo»"));
                     gridRotas.Rows[tIdx].DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(180, 50, 50);
                     gridRotas.Rows[tIdx].ReadOnly = true;
                 }
@@ -141,7 +128,7 @@ namespace GUI
                 // Si no hay NINGÚN problema (ni en Usuario ni en las tablas adicionales),
                 // mostrar el cartel "Todo íntegro" SOBRE la grilla (no como fila en Usuario).
                 bool gridVacio = diag.FilasRotas.Count == 0 && diag.TablasAdicionalesCorruptas.Count == 0;
-                lblGridVacio.Text    = T("diag.sinfilas", "✓ Todo íntegro — no hay filas con problemas de integridad.");
+                lblGridVacio.Text    = Tr("diag.sinfilas", "✓ Todo íntegro — no hay filas con problemas de integridad.");
                 lblGridVacio.Visible = gridVacio;
                 if (gridVacio) lblGridVacio.BringToFront(); else lblGridVacio.SendToBack();
 
@@ -152,8 +139,8 @@ namespace GUI
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    string.Format(T("diag.err.cargar", "Error al cargar diagnóstico: {0}"), ex.Message),
-                    T("diag.err.titulo", "Error"),
+                    string.Format(Tr("diag.err.cargar", "Error al cargar diagnóstico: {0}"), ex.Message),
+                    Tr("diag.err.titulo", "Error"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
@@ -167,8 +154,8 @@ namespace GUI
             gridHistorial.Rows.Clear();
             try
             {
-                string ok    = T("diag.hist.ok",    "OK");
-                string fallo = T("diag.hist.fallo", "FALLO");
+                string ok    = Tr("diag.hist.ok",    "OK");
+                string fallo = Tr("diag.hist.fallo", "FALLO");
                 var lista = BLL.Configuracion.ObtenerHistorialIntegridad(150);
                 foreach (var h in lista)
                 {
@@ -199,27 +186,27 @@ namespace GUI
         private string ConstruirTooltipHistorial(BE.HistorialIntegridad h)
         {
             if (h.Resultado)
-                return T("diag.tip.ok", "Verificación correcta: los dígitos verificadores coinciden con los datos.");
+                return Tr("diag.tip.ok", "Verificación correcta: los dígitos verificadores coinciden con los datos.");
 
             var sb = new System.Text.StringBuilder();
             sb.AppendLine(string.Format(
-                T("diag.tip.fallo.titulo", "Verificación FALLIDA — tabla {0}"), h.NombreTabla));
+                Tr("diag.tip.fallo.titulo", "Verificación FALLIDA — tabla {0}"), h.NombreTabla));
 
             // DVV no coincide → se agregaron/quitaron/reordenaron filas.
             if (h.DVVAlmacenado == null || h.DVVAlmacenado != h.DVVCalculado)
                 sb.AppendLine(string.Format(
-                    T("diag.tip.dvv.mismatch",
+                    Tr("diag.tip.dvv.mismatch",
                       "• El DVV no coincide: almacenado {0} ≠ calculado {1} (se insertaron, eliminaron o reordenaron filas)."),
                     h.DVVAlmacenado?.ToString() ?? "—", h.DVVCalculado));
 
             // Filas con DVH inválido → se modificó el contenido de esas filas.
             if (h.FilasCorruptas > 0)
                 sb.AppendLine(string.Format(
-                    T("diag.tip.filas.corruptas",
+                    Tr("diag.tip.filas.corruptas",
                       "• {0} fila(s) con DVH inválido: el contenido de esas filas fue modificado directamente en la base."),
                     h.FilasCorruptas));
 
-            sb.Append(T("diag.tip.causa",
+            sb.Append(Tr("diag.tip.causa",
                 "Posible manipulación directa de la base de datos. Reparar desde la pestaña Diagnóstico o restaurar un backup."));
             return sb.ToString();
         }
@@ -230,7 +217,7 @@ namespace GUI
             var col = gridHistorial.Columns[e.ColumnIndex];
             if (col.Name != "hResultado") return;
 
-            string ok  = T("diag.hist.ok", "OK");
+            string ok  = Tr("diag.hist.ok", "OK");
             string val = e.Value?.ToString() ?? "";
             e.CellStyle.ForeColor = val == ok
                 ? Color.FromArgb(30, 130, 50)
@@ -257,9 +244,9 @@ namespace GUI
         private void BtnRecalcularTodo_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show(
-                    T("diag.conf.recalcular",
+                    Tr("diag.conf.recalcular",
                       "¿Recalcular todos los DVH y el DVV de la tabla Usuario?\n\nEsta operación sobreescribirá todos los dígitos verificadores almacenados."),
-                    T("diag.conf.recalcular.titulo", "Confirmar Recálculo Total"),
+                    Tr("diag.conf.recalcular.titulo", "Confirmar Recálculo Total"),
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
                 return;
 
@@ -271,15 +258,15 @@ namespace GUI
                 {
                     BLL.Configuracion.RecalcularIntegridadDV();
                     MessageBox.Show(
-                        T("diag.msg.recalc.exito", "Dígitos verificadores recalculados con éxito."),
-                        T("diag.msg.exito.titulo", "Éxito"),
+                        Tr("diag.msg.recalc.exito", "Dígitos verificadores recalculados con éxito."),
+                        Tr("diag.msg.exito.titulo", "Éxito"),
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(
-                        string.Format(T("diag.err.recalcular", "Error al recalcular: {0}"), ex.Message),
-                        T("diag.err.titulo", "Error"),
+                        string.Format(Tr("diag.err.recalcular", "Error al recalcular: {0}"), ex.Message),
+                        Tr("diag.err.titulo", "Error"),
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }

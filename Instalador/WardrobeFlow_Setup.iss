@@ -15,37 +15,45 @@
 ; - Verifica .NET Framework 4.7.2+ en el cliente ANTES de copiar archivos;
 ;   si falta, avisa y no instala nada.
 ;
-; Entrega 3 (casos especiales, esta version):
+; Entrega 3 (casos especiales):
 ; - Deteccion de instancias SQL Server locales (registro de Windows, PPT
 ;   slide "A01.1: Instancias SQL Inexistentes"). Si hay 2+, se le pide al
-;   usuario elegir cual usar; si hay 0, se ofrece ingresar un servidor
-;   manualmente o cancelar.
-; - Si no hay NINGUNA instancia y el usuario no quiere ingresar una a mano:
-;   se le muestra el link de descarga de SQL Server Express/LocalDB y se
-;   corta la instalacion sin copiar nada (PPT slide "Sin Motor de Base de
-;   Datos": "Asistente Guiado").
+;   usuario elegir cual usar.
+; - Si no hay NINGUNA instancia pero SQL LocalDB SI esta instalado en el
+;   equipo (comun en maquinas con Visual Studio), se ofrece usarlo
+;   automaticamente ((localdb)\MSSQLLocalDB) sin pedirle nada mas al
+;   usuario (PPT slide "Instancias SQL Inexistentes": "Fallback Automatico").
+; - Si no hay NINGUNA instancia (ni LocalDB) y el usuario no quiere
+;   ingresar un servidor a mano: se le muestra el link de descarga de SQL
+;   Server Express/LocalDB y se corta la instalacion sin copiar nada (PPT
+;   slide "Sin Motor de Base de Datos": "Asistente Guiado").
 ; - Si la instancia elegida existe pero su servicio de Windows esta
 ;   detenido, se intenta arrancarlo automaticamente (PPT slide "Servicio
 ;   SQL Detenido": ServiceController + Start()); si no se puede (permisos),
-;   se avisa con instrucciones.
-; - Pre-flight check: si el servidor se ingresa a mano, se prueba la
-;   conexion antes de seguir (PPT slide "Resiliencia").
+;   se avisa con instrucciones. Se chequea DOS veces: como pre-flight en el
+;   wizard (antes de copiar archivos) y de nuevo antes de crear la BD.
+; - Pre-flight check de conexion (servidor ingresado a mano) y de servicio
+;   (instancia detectada), ambos ANTES de copiar archivos (PPT slide
+;   "Resiliencia": "antes de alterar el sistema"). El chequeo de espacio en
+;   disco lo hace Inno Setup por si solo (comportamiento nativo).
+; - Rollback automatico: si el servicio no arranca o falla la creacion de
+;   la BD DESPUES de copiar archivos, se desinstala todo lo recien copiado
+;   automaticamente (preservando el log en Documentos) en vez de dejar la
+;   app instalada pero no funcional (PPT slide "Resiliencia": "Rollback
+;   Automatico").
 ; - El App.config (GUI.exe.config) instalado se reescribe con el servidor
 ;   realmente elegido — asi el connection string queda embebido pero
 ;   correcto para CUALQUIER instancia, no solo ".\SQLEXPRESS" fijo.
 ; - Al desinstalar, se pregunta (por defecto "No") si tambien se quiere
 ;   borrar la base de datos.
 ;
-; Fuera de alcance (queda documentado como gap conocido, no bloqueante):
-; - Firma digital del .exe con SignTool (requiere certificado de codigo,
-;   que todavia no se consiguio).
-; - Instalacion silenciosa/embebida de SQL Server Express o LocalDB si no
-;   esta presente: se eligio deliberadamente NO embeber ese instalador
-;   (~60MB+) y en su lugar guiar al usuario con un link de descarga, para
-;   mantener el instalador liviano.
-; - Rollback automatico de los archivos ya copiados si falla la creacion
-;   de la base de datos (la app queda instalada, con instrucciones claras
-;   de como completar la creacion de la BD a mano).
+; Fuera de alcance (gap conocido, no bloqueante):
+; - Firma digital del .exe con SignTool (requiere certificado de codigo
+;   propio; no es algo que se pueda generar/conseguir automaticamente).
+; - Instalacion silenciosa/embebida de SQL Server Express o LocalDB si NO
+;   esta presente en el equipo: se eligio deliberadamente NO embeber ese
+;   instalador (~60MB+) y en su lugar detectar+guiar (o usar LocalDB si ya
+;   esta instalado), para mantener el instalador liviano.
 ; =====================================================================
 
 #define MyAppName "WardrobeFlow"
@@ -132,6 +140,7 @@ var
   PaginaSinInstancias: TInputOptionWizardPage;
   PaginaIngresoManual: TInputQueryWizardPage;
   InstanciasDetectadas: TArrayOfString;
+  LocalDbDisponible: Boolean;
   ServidorElegido: String;
   // '' si la instancia final es manual/posiblemente remota: en ese caso no
   // hay un servicio de Windows LOCAL que tenga sentido chequear/arrancar.
@@ -223,6 +232,23 @@ begin
   Result := Combinadas;
 end;
 
+// Fallback automático a LocalDB (PPT, slide "A01.1: Instancias SQL
+// Inexistentes": "Fallback Automático: Intentar la creación de una
+// instancia LocalDB en demanda si la arquitectura lo permite"). No
+// instalamos LocalDB nosotros (ver decisión de diseño: no embeber el
+// instalador de ~60MB) — solo detectamos si YA está presente (algo común
+// en máquinas con Visual Studio) para ofrecerlo como opción automática
+// antes de pedirle al usuario que instale algo.
+function TieneLocalDbInstalado(): Boolean;
+var
+  Versiones: TArrayOfString;
+begin
+  Result := (RegGetSubkeyNames(HKLM, 'SOFTWARE\Microsoft\Microsoft SQL Server Local DB\Installed Versions', Versiones)
+             and (GetArrayLength(Versiones) > 0))
+         or (RegGetSubkeyNames(HKCU, 'SOFTWARE\Microsoft\Microsoft SQL Server Local DB\Installed Versions', Versiones)
+             and (GetArrayLength(Versiones) > 0));
+end;
+
 // La instancia por defecto de SQL Server se registra como "MSSQLSERVER"
 // (servicio "MSSQLSERVER", Data Source "."); cualquier otra es una
 // instancia con nombre (servicio "MSSQL$<nombre>", Data Source ".\<nombre>").
@@ -242,6 +268,23 @@ begin
     Result := '.\' + Instancia;
 end;
 
+// Indices de PaginaSinInstancias: cambian segun si se ofrece o no la
+// opcion de LocalDB automatico (siempre primera, si esta disponible).
+function IndiceLocalDbEnSinInstancias(): Integer;
+begin
+  Result := 0; // solo valido si LocalDbDisponible
+end;
+
+function IndiceManualEnSinInstancias(): Integer;
+begin
+  if LocalDbDisponible then Result := 1 else Result := 0;
+end;
+
+function IndiceCancelarEnSinInstancias(): Integer;
+begin
+  if LocalDbDisponible then Result := 2 else Result := 1;
+end;
+
 // ---------------------------------------------------------------------
 // Paginas del wizard
 // ---------------------------------------------------------------------
@@ -250,6 +293,7 @@ var
   I: Integer;
 begin
   InstanciasDetectadas := DetectarInstanciasSql();
+  LocalDbDisponible := TieneLocalDbInstalado();
 
   // Valor por defecto sensato para ServidorElegido/ServicioWindowsElegido
   // desde ya (coincide con lo pre-seleccionado en la pagina de abajo): si
@@ -260,6 +304,11 @@ begin
   begin
     ServidorElegido := DataSourceParaInstancia(InstanciasDetectadas[0]);
     ServicioWindowsElegido := NombreServicioParaInstancia(InstanciasDetectadas[0]);
+  end
+  else if LocalDbDisponible then
+  begin
+    ServidorElegido := '(localdb)\MSSQLLocalDB';
+    ServicioWindowsElegido := ''; // LocalDB no corre como servicio de Windows
   end
   else
   begin
@@ -294,8 +343,10 @@ begin
     'Base de datos', 'No se encontró SQL Server en este equipo',
     'WardrobeFlow necesita una instancia de SQL Server (Express, LocalDB, o una instalación completa) para funcionar. ¿Cómo querés continuar?',
     True, False);
+  if LocalDbDisponible then
+    PaginaSinInstancias.Add('Usar SQL LocalDB, ya detectado en este equipo ((localdb)\MSSQLLocalDB)');
   PaginaSinInstancias.Add('Ya tengo SQL Server instalado (con otro nombre, o en otro servidor) — ingresar manualmente');
-  PaginaSinInstancias.Add('No tengo SQL Server instalado — cancelar la instalación');
+  PaginaSinInstancias.Add('No tengo ningún motor de SQL Server instalado — cancelar la instalación');
   PaginaSinInstancias.SelectedValueIndex := 0;
 
   // Ingreso manual del servidor\instancia (comun a los dos casos de arriba).
@@ -321,9 +372,37 @@ begin
       Result := PaginaSeleccionInstancia.SelectedValueIndex <> GetArrayLength(InstanciasDetectadas)
     else
       // Sin instancias detectadas: el ingreso manual solo aplica si se
-      // eligio la opcion 0 ("ya tengo, ingresar manualmente").
-      Result := PaginaSinInstancias.SelectedValueIndex <> 0;
+      // eligio esa opcion especifica (el indice depende de si tambien se
+      // ofrece LocalDB automatico).
+      Result := PaginaSinInstancias.SelectedValueIndex <> IndiceManualEnSinInstancias();
   end;
+end;
+
+// Pre-flight del servicio de Windows para una instancia detectada
+// localmente: chequea/arranca el servicio usando la copia de DbInstaller.exe
+// en {tmp} (todavía no existe {app}). Si falla, le pregunta al usuario si
+// quiere volver atrás a elegir otra instancia o seguir igual (se vuelve a
+// chequear, con rollback si vuelve a fallar, en CurStepChanged).
+function VerificarServicioPreflight(const NombreServicio: String): Boolean;
+var
+  ResultCode: Integer;
+  DbInstallerTmp, LogPath: String;
+begin
+  Result := True; // si no se puede chequear acá, no bloqueamos: se reintenta después
+  DbInstallerTmp := ExpandConstant('{tmp}\{#DbInstallerExeName}');
+  if not FileExists(DbInstallerTmp) then exit;
+
+  LogPath := ExpandConstant('{tmp}\preflight.log');
+  if Exec(DbInstallerTmp, 'check-service "' + NombreServicio + '" "' + LogPath + '"',
+          '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0) then
+    exit; // Result ya es True: servicio OK
+
+  if SuppressibleMsgBox(
+       'El servicio de Windows para esa instancia (' + NombreServicio + ') no está disponible ' +
+       '(no existe, o está detenido y no se pudo iniciar automáticamente — ¿faltan permisos de administrador?).' + #13#13 +
+       '¿Querés continuar de todos modos? (se va a reintentar más adelante)',
+       mbConfirmation, MB_YESNO, IDYES) = IDNO then
+    Result := False;
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
@@ -343,6 +422,17 @@ begin
       // Se eligió una instancia detectada automáticamente.
       ServidorElegido := DataSourceParaInstancia(InstanciasDetectadas[IndiceElegido]);
       ServicioWindowsElegido := NombreServicioParaInstancia(InstanciasDetectadas[IndiceElegido]);
+
+      // Pre-flight (PPT "Resiliencia": validar servicios ANTES de alterar
+      // el sistema): chequear/arrancar el servicio ACÁ, antes de copiar
+      // ningún archivo — no recién en ssPostInstall como en la versión
+      // anterior. Si el usuario decide "continuar de todos modos", se
+      // vuelve a intentar más tarde igual (con rollback si falla ahí).
+      if not VerificarServicioPreflight(ServicioWindowsElegido) then
+      begin
+        Result := False;
+        exit;
+      end;
     end;
     // Si eligió "Otra..." (el último índice), ServidorElegido se define
     // más abajo, en PaginaIngresoManual.
@@ -350,9 +440,18 @@ begin
 
   if CurPageID = PaginaSinInstancias.ID then
   begin
-    if PaginaSinInstancias.SelectedValueIndex = 1 then
+    if LocalDbDisponible and (PaginaSinInstancias.SelectedValueIndex = IndiceLocalDbEnSinInstancias()) then
     begin
-      // "No tengo SQL Server instalado" -> cortar ACÁ, sin copiar nada
+      // Fallback automático a LocalDB (PPT slide "Instancias SQL
+      // Inexistentes"): ya está instalado en este equipo, no hace falta
+      // pedirle nada más al usuario. LocalDB no corre como servicio de
+      // Windows, así que no hay nada que chequear/arrancar acá.
+      ServidorElegido := '(localdb)\MSSQLLocalDB';
+      ServicioWindowsElegido := '';
+    end
+    else if PaginaSinInstancias.SelectedValueIndex = IndiceCancelarEnSinInstancias() then
+    begin
+      // "No tengo ningún motor instalado" -> cortar ACÁ, sin copiar nada
       // (PPT slide "Sin Motor de Base de Datos": Asistente Guiado con link
       // de descarga). El usuario instala el motor y vuelve a correr esto.
       SuppressibleMsgBox(
@@ -363,6 +462,8 @@ begin
         mbInformation, MB_OK, IDOK);
       ExitProcess(1);
     end;
+    // Si eligió "ingresar manualmente", ServidorElegido se define más
+    // abajo, en PaginaIngresoManual.
   end;
 
   if CurPageID = PaginaIngresoManual.ID then
@@ -491,6 +592,39 @@ begin
   end;
 end;
 
+// Rollback automático (PPT, slide "Resiliencia y Flujo UX": "Rollback
+// Automático: Deshacer cambios si la creación de la BD o las tablas falla
+// a mitad del proceso"). En vez de dejar la app instalada pero rota:
+//   1) Preserva el install.log FUERA de {app} (en Documentos), porque
+//      {app} está por desaparecer.
+//   2) Avisa con un mensaje claro.
+//   3) Corre el desinstalador silenciosamente (a esta altura ya existe:
+//      Inno lo genera durante la copia de archivos, antes de ssPostInstall).
+//      Con /SUPPRESSMSGBOXES, la pregunta de "¿borrar también la BD?" del
+//      desinstalador se autorresponde con su default (No) — no tiene
+//      sentido preguntar por una BD que puede ni haberse llegado a crear.
+//   4) Termina el proceso: nunca vuelve, así que no hace falta "exit"
+//      después de llamarla.
+procedure RevertirInstalacion(const MensajeError: String);
+var
+  LogPreservado: String;
+  ResultCode: Integer;
+begin
+  LogPreservado := ExpandConstant('{userdocs}\WardrobeFlow_instalacion_fallida.log');
+  if FileExists(ExpandConstant('{app}\install.log')) then
+    CopyFile(ExpandConstant('{app}\install.log'), LogPreservado, False);
+
+  SuppressibleMsgBox(
+    MensajeError + #13#13 +
+    'Se va a deshacer la instalación (rollback automático) para no dejar la aplicación a medio instalar.' + #13#13 +
+    'El detalle quedó guardado en: ' + LogPreservado + #13#13 +
+    'Solucioná el problema y volvé a ejecutar el instalador.',
+    mbError, MB_OK, IDOK);
+
+  Exec(ExpandConstant('{uninstallexe}'), '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  ExitProcess(1);
+end;
+
 // ---------------------------------------------------------------------
 // Instalacion: reescribir config, chequear servicio, crear la BD
 // ---------------------------------------------------------------------
@@ -507,7 +641,9 @@ begin
     // Servicio SQL Detenido (PPT slide "A01.1: Servicio SQL Detenido"):
     // solo aplica a instancias detectadas localmente (ServicioWindowsElegido
     // vacío = instancia manual/posiblemente remota, no hay servicio local
-    // que chequear).
+    // que chequear). Esto es una SEGUNDA verificación — la primera ya pasó
+    // en el wizard (VerificarServicioPreflight, antes de copiar archivos);
+    // esta es la red de seguridad final antes de tocar la base de datos.
     if ServicioWindowsElegido <> '' then
     begin
       WizardForm.StatusLabel.Caption := 'Verificando el servicio de SQL Server...';
@@ -518,26 +654,13 @@ begin
         ResultCode := -1; // no se pudo ni siquiera lanzar DbInstaller.exe
 
       if ResultCode = 2 then
-      begin
-        // El servicio no existe: probablemente la instancia se desinstaló
-        // o se le cambió el nombre después de detectarla.
-        SuppressibleMsgBox(
-          'No se encontró el servicio de Windows ''' + ServicioWindowsElegido + ''' en este equipo.' + #13#13 +
-          'La instancia de SQL Server puede haberse desinstalado. Verificalo y ejecutá BD\00_Instalacion_Completa.sql a mano una vez resuelto.' + #13#13 +
-          'Revisá el log para más detalle: ' + LogPath,
-          mbError, MB_OK, IDOK);
-        exit;
-      end
+        RevertirInstalacion(
+          'No se encontró el servicio de Windows ''' + ServicioWindowsElegido + ''' en este equipo. ' +
+          'La instancia de SQL Server puede haberse desinstalado.')
       else if ResultCode <> 0 then
-      begin
-        // Existe pero no se pudo arrancar (permisos, u otro motivo).
-        SuppressibleMsgBox(
-          'El servicio de SQL Server (' + ServicioWindowsElegido + ') está detenido y no se pudo iniciar automáticamente.' + #13#13 +
-          'Iniciá el servicio manualmente (Panel de Control > Herramientas administrativas > Servicios, o SQL Server Configuration Manager — puede requerir permisos de administrador) y después abrí WardrobeFlow, o ejecutá BD\00_Instalacion_Completa.sql a mano.' + #13#13 +
-          'Revisá el log para más detalle: ' + LogPath,
-          mbError, MB_OK, IDOK);
-        exit;
-      end;
+        RevertirInstalacion(
+          'El servicio de SQL Server (' + ServicioWindowsElegido + ') está detenido y no se pudo iniciar ' +
+          'automáticamente (¿faltan permisos de administrador?).');
     end;
 
     WizardForm.StatusLabel.Caption := 'Creando la base de datos WardrobeFlowDB...';
@@ -545,14 +668,7 @@ begin
     // Script único (BD/00_Instalacion_Completa.sql): crea la base y TODOS
     // los módulos de una sola pasada.
     if not EjecutarScriptSql('00_Instalacion_Completa.sql', ErrMsg) then
-    begin
-      SuppressibleMsgBox(
-        'No se pudo completar la creación de la base de datos.' + #13#13 + ErrMsg + #13#13 +
-        'La aplicación quedó instalada, pero necesitará ejecutar manualmente ' +
-        'BD\00_Instalacion_Completa.sql (con SSMS) antes de poder iniciar sesión.',
-        mbError, MB_OK, IDOK);
-      exit;
-    end;
+      RevertirInstalacion('No se pudo completar la creación de la base de datos.' + #13#13 + ErrMsg);
   end;
 end;
 

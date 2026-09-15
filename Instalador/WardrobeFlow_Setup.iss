@@ -101,6 +101,12 @@ PrivilegesRequired=admin
 ; DetectarInstanciasSql() encuentra 0 instancias aunque SQLEXPRESS esté
 ; corriendo; con esta línea, lo detecta correctamente.
 ArchitecturesInstallIn64BitMode=x64compatible
+; Si GUI.exe está corriendo, copiar/reemplazar sus archivos (o el desinstalador
+; intentando borrarlos) falla a mitad de camino con el archivo bloqueado. Con
+; esto, Inno detecta la app abierta (via Restart Manager de Windows) y le
+; pide al usuario cerrarla antes de continuar, en vez de fallar silenciosamente.
+CloseApplications=yes
+RestartApplications=no
 OutputDir=Salida
 OutputBaseFilename=Instalador_WardrobeFlow_V1
 Compression=lzma
@@ -133,6 +139,16 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 Filename: "{app}\Credenciales_Iniciales.txt"; Description: "Ver las credenciales iniciales"; Flags: postinstall shellexec skipifsilent unchecked
 Filename: "{app}\{#MyAppExeName}"; Description: "Abrir {#MyAppName}"; Flags: nowait postinstall skipifsilent
+
+; install.log y uninstall.log se escriben en tiempo de ejecucion (CurStepChanged
+; / CurUninstallStepChanged) — Inno no los conoce por venir de [Files], asi que
+; sin esto quedan huerfanos en {app} y el desinstalador NO borra el directorio
+; (por seguridad, no borra carpetas no vacias). Verificado con un harness
+; aislado: sin esta seccion, el rollback automatico dejaba {app} a medio
+; borrar; con ella, se limpia por completo.
+[UninstallDelete]
+Type: files; Name: "{app}\install.log"
+Type: files; Name: "{app}\uninstall.log"
 
 [Code]
 var
@@ -605,21 +621,79 @@ end;
 //      sentido preguntar por una BD que puede ni haberse llegado a crear.
 //   4) Termina el proceso: nunca vuelve, así que no hace falta "exit"
 //      después de llamarla.
-procedure RevertirInstalacion(const MensajeError: String);
+// Devuelve las ultimas hasta MaxChars caracteres de Texto (o el texto
+// entero si es mas corto) — para mostrar un extracto del log directo en
+// el mensaje, sin obligar al usuario a ir a abrir el archivo para
+// enterarse de qué pasó.
+function UltimosCaracteres(const Texto: AnsiString; MaxChars: Integer): AnsiString;
+begin
+  if Length(Texto) <= MaxChars then
+    Result := Texto
+  else
+    Result := '(...)' + #13#10 + Copy(Texto, Length(Texto) - MaxChars + 1, MaxChars);
+end;
+
+// Rollback automático (PPT, slide "Resiliencia y Flujo UX": "Rollback
+// Automático: Deshacer cambios si la creación de la BD o las tablas falla
+// a mitad del proceso"). En vez de dejar la app instalada pero rota:
+//   1) Preserva el install.log FUERA de {app} (en Documentos), porque
+//      {app} está por desaparecer. Si por lo que sea no se puede escribir
+//      ahí (permisos, OneDrive, etc.), el extracto se muestra igual en el
+//      propio mensaje — la comunicación con el usuario no depende de que
+//      ese archivo se haya podido guardar.
+//   2) Avisa con un mensaje estructurado: qué pasó, qué se hizo, qué hacer.
+//   3) Corre el desinstalador silenciosamente (a esta altura ya existe:
+//      Inno lo genera durante la copia de archivos, antes de ssPostInstall).
+//      Con /SUPPRESSMSGBOXES, la pregunta de "¿borrar también la BD?" del
+//      desinstalador se autorresponde con su default (No) — no tiene
+//      sentido preguntar por una BD que puede ni haberse llegado a crear.
+//   4) Termina el proceso: nunca vuelve, así que no hace falta "exit"
+//      después de llamarla.
+// PuedeHaberBDParcial: True solo cuando ya se llegó a intentar correr el
+// script (a diferencia de un servicio caído, donde nunca se tocó la BD) —
+// el script no está envuelto en una única transacción (CREATE DATABASE no
+// puede estarlo), así que un fallo a mitad de camino puede dejar objetos
+// creados a medias en el servidor.
+procedure RevertirInstalacion(const MensajeError: String; const PuedeHaberBDParcial: Boolean);
 var
-  LogPreservado: String;
+  LogPreservado, ExtractoLog, MensajeFinal: String;
+  ContenidoLog: AnsiString;
+  LogOriginal: String;
   ResultCode: Integer;
 begin
+  LogOriginal := ExpandConstant('{app}\install.log');
   LogPreservado := ExpandConstant('{userdocs}\WardrobeFlow_instalacion_fallida.log');
-  if FileExists(ExpandConstant('{app}\install.log')) then
-    CopyFile(ExpandConstant('{app}\install.log'), LogPreservado, False);
+  ExtractoLog := '';
 
-  SuppressibleMsgBox(
-    MensajeError + #13#13 +
-    'Se va a deshacer la instalación (rollback automático) para no dejar la aplicación a medio instalar.' + #13#13 +
-    'El detalle quedó guardado en: ' + LogPreservado + #13#13 +
-    'Solucioná el problema y volvé a ejecutar el instalador.',
-    mbError, MB_OK, IDOK);
+  if FileExists(LogOriginal) then
+  begin
+    if LoadStringFromFile(LogOriginal, ContenidoLog) then
+      ExtractoLog := UltimosCaracteres(ContenidoLog, 500);
+    if not CopyFile(LogOriginal, LogPreservado, False) then
+      LogPreservado := '(no se pudo guardar una copia del log; el detalle completo se perdió junto con la instalación)';
+  end
+  else
+    LogPreservado := '(no se generó ningún log para este error)';
+
+  MensajeFinal :=
+    'QUÉ PASÓ:' + #13#10 + MensajeError + #13#13;
+
+  if PuedeHaberBDParcial then
+    MensajeFinal := MensajeFinal +
+      'Como el script de creación de la base no se ejecuta dentro de una única transacción, ' +
+      'es posible que hayan quedado objetos creados a medias en el servidor.' + #13#13;
+
+  MensajeFinal := MensajeFinal +
+    'QUÉ SE HIZO:' + #13#10 +
+    'Se deshace la instalación (rollback automático) para no dejar la aplicación instalada pero no funcional.' + #13#13 +
+    'QUÉ HACER AHORA:' + #13#10 +
+    'Solucioná el problema descripto arriba y volvé a ejecutar el instalador. ' +
+    'Log completo: ' + LogPreservado;
+
+  if ExtractoLog <> '' then
+    MensajeFinal := MensajeFinal + #13#13 + 'DETALLE TÉCNICO (últimas líneas del log):' + #13#10 + ExtractoLog;
+
+  SuppressibleMsgBox(MensajeFinal, mbError, MB_OK, IDOK);
 
   Exec(ExpandConstant('{uninstallexe}'), '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   ExitProcess(1);
@@ -656,11 +730,11 @@ begin
       if ResultCode = 2 then
         RevertirInstalacion(
           'No se encontró el servicio de Windows ''' + ServicioWindowsElegido + ''' en este equipo. ' +
-          'La instancia de SQL Server puede haberse desinstalado.')
+          'La instancia de SQL Server puede haberse desinstalado.', False)
       else if ResultCode <> 0 then
         RevertirInstalacion(
           'El servicio de SQL Server (' + ServicioWindowsElegido + ') está detenido y no se pudo iniciar ' +
-          'automáticamente (¿faltan permisos de administrador?).');
+          'automáticamente (¿faltan permisos de administrador?).', False);
     end;
 
     WizardForm.StatusLabel.Caption := 'Creando la base de datos WardrobeFlowDB...';
@@ -668,7 +742,7 @@ begin
     // Script único (BD/00_Instalacion_Completa.sql): crea la base y TODOS
     // los módulos de una sola pasada.
     if not EjecutarScriptSql('00_Instalacion_Completa.sql', ErrMsg) then
-      RevertirInstalacion('No se pudo completar la creación de la base de datos.' + #13#13 + ErrMsg);
+      RevertirInstalacion('No se pudo completar la creación de la base de datos.' + #13#13 + ErrMsg, True);
   end;
 end;
 

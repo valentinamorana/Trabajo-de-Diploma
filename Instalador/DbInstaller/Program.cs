@@ -117,6 +117,14 @@ namespace DbInstaller
                         catch (SqlException ex)
                         {
                             registrar($"ERROR en batch {i + 1}/{batches.Length}: {ex.Message}");
+                            // Class 14 = SQL Server clasifica ahí los errores de permisos
+                            // (CREATE DATABASE denegado, SELECT denegado, etc.) — distinguirlo
+                            // de un error de sintaxis/dato evita que el usuario pierda tiempo
+                            // revisando el script cuando el problema real es de permisos.
+                            if (ex.Class == 14)
+                                registrar("DIAGNÓSTICO: parece un problema de PERMISOS — el usuario de Windows/SQL " +
+                                          "usado para instalar no tiene privilegios suficientes en esta instancia " +
+                                          "(hace falta ser sysadmin, o al menos dbcreator, para crear la base).");
                             registrar("--- Contenido del batch que falló ---");
                             registrar(batch);
                             return 2;

@@ -6,7 +6,7 @@ namespace BE
     /// que quien ESCRIBE (BLL) y quien TRADUCE para mostrar (GUI.DashboardForm.
     /// TraducirActividad) usen la misma fuente en vez de retipear el mismo string en dos
     /// archivos — antes, cambiar el texto en uno sin actualizar el otro rompía la
-    /// traducción en silencio (ver AUDITORIA_TECNICA_2026-09-10.md, revisión de lógica
+    /// traducción en silencio (revisión de lógica
     /// en la GUI). La tabla sigue guardando texto plano en español, no una clave — esto
     /// no es un cambio de esquema, solo elimina la duplicación del literal en sí.
     ///

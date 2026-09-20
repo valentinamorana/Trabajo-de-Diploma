@@ -43,6 +43,20 @@ La GUI nunca accede a DAL ni a Seguridad directamente. Toda la lógica de negoci
 
 ---
 
+## Estructura del repositorio
+
+```
+BE/ BLL/ DAL/ GUI/ Seguridad/ Servicios/   Capas de la aplicación (ver arriba)
+Tests/                                    Tests unitarios (MSTest) con fakes de DAL
+BD/00_Instalacion_Completa.sql            Único script: esquema, datos semilla y datos de prueba
+Instalador/                               Script de Inno Setup, DbInstaller (cliente SQL embebido)
+                                          y credenciales iniciales. El .exe se genera en
+                                          Instalador/Salida/ y no se versiona
+WardrobeFlow.slnx                         Solución de Visual Studio
+```
+
+---
+
 ## Procesos de negocio — Bloque 1: Operativos Core (Clientes)
 
 | PdN | Proceso | Patrón aplicado |
@@ -252,8 +266,10 @@ En el primer arranque el sistema seedea automáticamente las tablas de traduccio
 
 ### Build y tests
 
-```powershell
-.\build-and-test.ps1
-```
+Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (7 capas: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`).
 
-Compila las 7 capas (BE, Seguridad, DAL, Servicios, BLL, GUI, Tests) y corre la suite de MSTest sobre `Tests.dll`.
+### Generar el instalador
+
+1. Compilar la solución en modo **Release** (y `Instalador/DbInstaller` en Release).
+2. Abrir `Instalador/WardrobeFlow_Setup.iss` en Inno Setup y compilar.
+3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_V1.exe`, con la aplicación, la base de datos y los datos de prueba adentro.

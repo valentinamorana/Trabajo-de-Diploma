@@ -81,7 +81,7 @@ namespace GUI
         /// Traduce una clave al idioma activo, con fallback si no existe. Único punto de acceso
         /// al diccionario de traducciones — reemplaza los ~84 helpers locales casi idénticos
         /// (`T`, `Tx`, `T_ce`, `Tv`...) que antes reinventaba cada formulario/método por su cuenta
-        /// (ver §10 #1 de AUDITORIA_TECNICA_2026-09-10.md). Heredado por todos los formularios
+        ///. Heredado por todos los formularios
         /// hijos — no necesitan redefinirlo.
         /// </summary>
         protected string Tr(string clave, string fallback, object[] args = null)

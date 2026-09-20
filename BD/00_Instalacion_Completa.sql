@@ -6,27 +6,17 @@
 -- 4 procesos de negocio PN01-PN04). Este es el ÚNICO script de esquema
 -- que se edita de acá en más — no se regenera concatenando archivos.
 --
--- Los números de sección (01, 03, 05, 06, 08...20) que van a aparecer abajo
--- son el orden histórico en el que cada módulo se agregó al proyecto y se
--- conservan como referencia (coinciden con los archivos individuales que
--- se describen a continuación); no indican que falten partes.
+-- Los números de sección (01, 03, 05, 06, 08...21) que aparecen abajo son el
+-- orden histórico en el que cada módulo se agregó al proyecto y se conservan
+-- como referencia; no indican que falten partes. Este es el ÚNICO script de
+-- la carpeta BD/: los scripts individuales ya no existen (su historial está
+-- en git).
 --
--- Los archivos BD/01_*.sql … BD/20_*.sql siguen en el repo como REFERENCIA
--- HISTÓRICA de cómo se construyó cada parte (útil para ver el diff exacto
--- que introdujo un módulo puntual), pero ya no se mantienen ni se vuelven
--- a ejecutar sueltos — este archivo es la fuente de verdad del esquema.
+-- Incluye al final (sección 21) los DATOS DE PRUEBA de todos los procesos,
+-- para que la base quede lista para probar apenas se instala.
 --
 -- Idempotente de punta a punta: correr este archivo dos veces no duplica
 -- nada ni rompe datos existentes.
---
--- NO incluye (son herramientas de mantenimiento activas, independientes del
--- esquema — correr por separado solo si hace falta, ver README):
---   • 02_Actualizar_BaseDeDatos.sql        — migra una BD MUY vieja (previa
---     a este script) a la estructura actual. Sobra en una instalación nueva.
---   • 04_Diagnostico_Limpieza_Nodos_Permiso.sql — diagnóstico puntual del
---     árbol de permisos, no una migración de estructura.
---   • 07_Reset_Perfiles_Permisos.sql       — herramienta de reparación para
---     cuando el árbol de permisos de una BD ya en uso quedó desincronizado.
 --
 -- NOTA DE CODIFICACIÓN: este archivo es UTF-8 y contiene acentos.
 --   • En SSMS se ejecuta sin problemas.
@@ -46,13 +36,13 @@
 --   admin/administrador1!   
 --   vendedor/vendedor1!     deposito/deposito1!
 --
--- Para ACTUALIZAR una BD ya existente, usar: 02_Actualizar_BaseDeDatos.sql
+-- Sobre una BD ya existente también es seguro: es idempotente y migra lo que haga falta.
 --
 -- Orden: 1) crear BD  2) tablas  3) seeds  4) migración Composite  5) datos demo
 --
 -- NOTA DE CODIFICACIÓN: este archivo es UTF-8 y contiene acentos (Básico, Lucía…).
 --   • En SSMS se ejecuta sin problemas.
---   • Con sqlcmd usar el codepage UTF-8:  sqlcmd -S .\SQLEXPRESS -E -f 65001 -i 01_Crear_BaseDeDatos.sql
+--   • Con sqlcmd usar el codepage UTF-8:  sqlcmd -S .\SQLEXPRESS -E -f 65001 -i 00_Instalacion_Completa.sql
 -- ============================================================
 
 IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = 'WardrobeFlowDB')
@@ -108,8 +98,8 @@ GO
 -- contra el espejo y (2) REPARAR restaurando el valor legítimo sin necesitar un backup
 -- completo. Sin esta tabla, DAL.EspejoUsuario degrada en silencio (ver su propio comentario
 -- de TOLERANCIA) y BLL.RecuperacionIntegridad.Diagnosticar() nunca puede ofrecer "Reparar
--- desde Espejo" — antes solo se creaba en 02_Actualizar_BaseDeDatos.sql (script de migración
--- de una BD MUY vieja), y faltaba acá, así que una instalación nueva vía este script nunca
+-- desde Espejo" — antes solo se creaba en un script de migración aparte
+-- (ya retirado), y faltaba acá, así que una instalación nueva vía este script nunca
 -- la tenía.
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Usuario_Seguridad')
 BEGIN
@@ -1287,9 +1277,9 @@ GO
 -- ============================================================
 -- PERMISO — patente de menú para bases YA CREADAS (idempotente)
 -- ------------------------------------------------------------
--- Solo hace falta para instalaciones existentes: 01_Crear_BaseDeDatos.sql ya
+-- Solo hace falta para instalaciones existentes: la sección 01 (arriba) ya
 -- siembra esto en instalaciones nuevas. Sigue el mismo patrón de migración que
--- el resto del archivo 02 (RolPermiso plano → PermisoRelacion Composite).
+-- el resto de las migraciones (RolPermiso plano → PermisoRelacion Composite).
 -- Supervisor NO se lista acá: hereda mnuRenovacionSuscripcion de Vendedor a
 -- través de la arista Composite Supervisor→Vendedor que ya existe.
 -- ============================================================
@@ -1379,7 +1369,7 @@ GO
 -- antes de bloquear nuevos pedidos.
 --
 -- Sigue el patrón DIRECTO a PermisoRelacion (no vía RolPermiso), el
--- mismo criterio que 07_Reset_Perfiles_Permisos.sql documenta como
+-- mismo criterio que el resto de la jerarquía de roles: es
 -- la única fuente real de autorización.
 --
 -- Idempotente: se puede volver a ejecutar sin duplicar nada.

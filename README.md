@@ -271,5 +271,5 @@ Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (7 capas: BE, 
 ### Generar el instalador
 
 1. Compilar la solución en modo **Release** (y `Instalador/DbInstaller` en Release).
-2. Abrir `Instalador/WardrobeFlow_Setup.iss` en Inno Setup y compilar.
+2. Ejecutar `Instalador/compilar-y-firmar.ps1`: compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool. El certificado (`wardrobeflow.pfx`) se busca en `%USERPROFILE%` y no se versiona; si no está, el instalador queda compilado sin firmar.
 3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_V1.exe`, con la aplicación, la base de datos y los datos de prueba adentro.

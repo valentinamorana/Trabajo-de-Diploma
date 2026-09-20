@@ -26,3 +26,6 @@ TestResults/
 
 # Instalador compilado (se genera con Inno Setup desde Instalador/WardrobeFlow_Setup.iss)
 Instalador/Salida/
+
+# Certificados de firma (contienen la clave privada)
+*.pfx

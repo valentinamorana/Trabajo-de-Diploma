@@ -10,7 +10,7 @@ namespace GUI
     /// <summary>
     /// Capa de Presentación — Módulo de Gestión de Prendas.
     ///
-    /// Permite al ControladorDeStock administrar el catálogo de prendas:
+    /// Permite a Depósito administrar el catálogo de prendas:
     ///   ✓ Ver todas las prendas con estado, cliente actual y datos descriptivos
     ///   ✓ Filtrar por estado (Todos / Disponible / EnUso / EnLimpieza / Baja)
     ///   ✓ Filtrar por texto libre (nombre, categoría, color)
@@ -41,7 +41,7 @@ namespace GUI
         private readonly BLL.Interfaces.IClienteService clienteBLL = new BLL.Cliente();
         private readonly BLL.Interfaces.ICargoPrendaService cargoBLL = new BLL.CargoPrenda();
 
-        // Determina si el usuario puede cambiar estados (ControladorDeStock)
+        // Determina si el usuario puede cambiar estados (Depósito)
         private readonly bool _tieneStock;
 
         // Idioma activo — sincronizado en Traducir() para usar en EstadoLabel y ColorearFilas

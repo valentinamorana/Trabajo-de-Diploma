@@ -435,10 +435,8 @@ ES	notif.gen.categoria	Categoría
 ES	notif.gen.footer	Ante cualquier consulta, comuníquese con nosotros.
 ES	notif.gen.slogan	WardrobeFlow — Tu guardarropa, sin límites.
 ES	perfil.administrador	Administrador
-ES	perfil.supervisor	Supervisor
 ES	perfil.vendedor	Vendedor
-ES	perfil.stock	Controlador de Stock
-ES	perfil.operador	Operador de Inventario
+ES	perfil.deposito	Depósito
 ES	metodo.efectivo	Efectivo
 ES	metodo.debito	Débito
 ES	metodo.credito	Crédito
@@ -467,9 +465,6 @@ ES	btn.permisos.cerrar	Cerrar
 ES	perm.rol.administrador	Administrador
 ES	perm.rol.vendedor	Vendedor
 ES	perm.rol.operadorlogistico	Operador Logístico
-ES	perm.rol.supervisor	Supervisor
-ES	perm.rol.controladordestock	Controlador de Stock
-ES	perm.rol.operadordeinventario	Operador de Inventario
 ES	perm.grp.inventario	Inventario
 ES	perm.grp.sistema	Sistema
 ES	perm.grp.ventas	Ventas
@@ -495,7 +490,6 @@ ES	err.explorador.cargar	Error al cargar árbol Composite:\n{0}
 ES	perfil.auditor	Auditor
 ES	perfil.gerentecomercial	Gerente Comercial
 ES	perfil.gerenteinventario	Gerente de Inventario
-ES	perfil.encargadodestock	Encargado de Stock
 ES	perfil.operadorlogistico	Operador Logístico
 ES	perfil.caja	Caja
 ES	perfil.administracioncomercial	Administración Comercial
@@ -503,7 +497,10 @@ ES	perfil.contabilidad	Contabilidad
 ES	perm.rol.auditor	Auditor
 ES	perm.rol.gerentecomercial	Gerente Comercial
 ES	perm.rol.gerenteinventario	Gerente de Inventario
-ES	perm.rol.encargadodestock	Encargado de Stock
+ES	perm.rol.deposito	Depósito
+ES	perm.rol.caja	Caja
+ES	perm.rol.administracioncomercial	Administración Comercial
+ES	perm.rol.contabilidad	Contabilidad
 ES	frm.idiomas	Gestión de Idiomas
 ES	lbl.idiomas.titulo	Idiomas del sistema
 ES	lbl.idiomas.trad	Traducciones del idioma seleccionado
@@ -1242,10 +1239,8 @@ EN	notif.gen.categoria	Category
 EN	notif.gen.footer	For any questions, please contact us.
 EN	notif.gen.slogan	WardrobeFlow — Your wardrobe, without limits.
 EN	perfil.administrador	Administrator
-EN	perfil.supervisor	Supervisor
 EN	perfil.vendedor	Sales Rep
-EN	perfil.stock	Stock Controller
-EN	perfil.operador	Inventory Operator
+EN	perfil.deposito	Warehouse
 EN	metodo.efectivo	Cash
 EN	metodo.debito	Debit
 EN	metodo.credito	Credit
@@ -1270,9 +1265,6 @@ EN	btn.permisos.cerrar	Close
 EN	perm.rol.administrador	Administrator
 EN	perm.rol.vendedor	Salesperson
 EN	perm.rol.operadorlogistico	Logistics Operator
-EN	perm.rol.supervisor	Supervisor
-EN	perm.rol.controladordestock	Stock Controller
-EN	perm.rol.operadordeinventario	Inventory Operator
 EN	perm.grp.inventario	Inventory
 EN	perm.grp.sistema	System
 EN	perm.grp.ventas	Sales
@@ -1298,7 +1290,6 @@ EN	err.explorador.cargar	Error loading Composite tree:\n{0}
 EN	perfil.auditor	Auditor
 EN	perfil.gerentecomercial	Sales Manager
 EN	perfil.gerenteinventario	Inventory Manager
-EN	perfil.encargadodestock	Stock Clerk
 EN	perfil.operadorlogistico	Logistics Operator
 EN	perfil.caja	Cashier
 EN	perfil.administracioncomercial	Commercial Administration
@@ -1306,7 +1297,10 @@ EN	perfil.contabilidad	Accounting
 EN	perm.rol.auditor	Auditor
 EN	perm.rol.gerentecomercial	Sales Manager
 EN	perm.rol.gerenteinventario	Inventory Manager
-EN	perm.rol.encargadodestock	Stock Clerk
+EN	perm.rol.deposito	Warehouse
+EN	perm.rol.caja	Cashier
+EN	perm.rol.administracioncomercial	Commercial Administration
+EN	perm.rol.contabilidad	Accounting
 EN	frm.idiomas	Language Management
 EN	lbl.idiomas.titulo	System Languages
 EN	lbl.idiomas.trad	Translations for the selected language
@@ -2045,10 +2039,8 @@ RU	notif.gen.categoria	Категория
 RU	notif.gen.footer	По любым вопросам обращайтесь к нам.
 RU	notif.gen.slogan	WardrobeFlow — Ваш гардероб без ограничений.
 RU	perfil.administrador	Администратор
-RU	perfil.supervisor	Supervisor
 RU	perfil.vendedor	Продавец
-RU	perfil.stock	Контролёр склада
-RU	perfil.operador	Оператор инвентаря
+RU	perfil.deposito	Склад
 RU	metodo.efectivo	Наличные
 RU	metodo.debito	Дебетовая карта
 RU	metodo.credito	Кредитная карта
@@ -2073,9 +2065,6 @@ RU	btn.permisos.cerrar	Закрыть
 RU	perm.rol.administrador	Администратор
 RU	perm.rol.vendedor	Продавец
 RU	perm.rol.operadorlogistico	Логист
-RU	perm.rol.supervisor	Супервайзер
-RU	perm.rol.controladordestock	Контролёр склада
-RU	perm.rol.operadordeinventario	Оператор склада
 RU	perm.grp.inventario	Склад
 RU	perm.grp.sistema	Система
 RU	perm.grp.ventas	Продажи
@@ -2101,7 +2090,6 @@ RU	err.explorador.cargar	Ошибка загрузки дерева Composite:\n
 RU	perfil.auditor	Аудитор
 RU	perfil.gerentecomercial	Коммерческий менеджер
 RU	perfil.gerenteinventario	Менеджер склада
-RU	perfil.encargadodestock	Кладовщик
 RU	perfil.operadorlogistico	Логист
 RU	perfil.caja	Касса
 RU	perfil.administracioncomercial	Коммерческая администрация
@@ -2109,7 +2097,10 @@ RU	perfil.contabilidad	Бухгалтерия
 RU	perm.rol.auditor	Аудитор
 RU	perm.rol.gerentecomercial	Коммерческий менеджер
 RU	perm.rol.gerenteinventario	Менеджер склада
-RU	perm.rol.encargadodestock	Кладовщик
+RU	perm.rol.deposito	Склад
+RU	perm.rol.caja	Касса
+RU	perm.rol.administracioncomercial	Коммерческая администрация
+RU	perm.rol.contabilidad	Бухгалтерия
 RU	frm.idiomas	Управление языками
 RU	lbl.idiomas.titulo	Языки системы
 RU	lbl.idiomas.trad	Переводы для выбранного языка
@@ -2892,10 +2883,8 @@ PT	notif.gen.categoria	Categoria
 PT	notif.gen.footer	Em caso de dúvidas, entre em contato conosco.
 PT	notif.gen.slogan	WardrobeFlow — Seu guarda-roupa, sem limites.
 PT	perfil.administrador	Administrador
-PT	perfil.supervisor	Supervisor
 PT	perfil.vendedor	Vendedor
-PT	perfil.stock	Controlador de Estoque
-PT	perfil.operador	Operador de Estoque
+PT	perfil.deposito	Depósito
 PT	metodo.efectivo	Dinheiro
 PT	metodo.debito	Débito
 PT	metodo.credito	Crédito
@@ -2920,9 +2909,6 @@ PT	btn.permisos.cerrar	Fechar
 PT	perm.rol.administrador	Administrador
 PT	perm.rol.vendedor	Vendedor
 PT	perm.rol.operadorlogistico	Operador Logístico
-PT	perm.rol.supervisor	Supervisor
-PT	perm.rol.controladordestock	Controlador de Estoque
-PT	perm.rol.operadordeinventario	Operador de Estoque
 PT	perm.grp.inventario	Estoque
 PT	perm.grp.sistema	Sistema
 PT	perm.grp.ventas	Vendas
@@ -2948,7 +2934,6 @@ PT	err.explorador.cargar	Erro ao carregar árvore Composite:\n{0}
 PT	perfil.auditor	Auditor
 PT	perfil.gerentecomercial	Gerente Comercial
 PT	perfil.gerenteinventario	Gerente de Estoque
-PT	perfil.encargadodestock	Responsável de Estoque
 PT	perfil.operadorlogistico	Operador Logístico
 PT	perfil.caja	Caixa
 PT	perfil.administracioncomercial	Administração Comercial
@@ -2956,7 +2941,10 @@ PT	perfil.contabilidad	Contabilidade
 PT	perm.rol.auditor	Auditor
 PT	perm.rol.gerentecomercial	Gerente Comercial
 PT	perm.rol.gerenteinventario	Gerente de Estoque
-PT	perm.rol.encargadodestock	Responsável de Estoque
+PT	perm.rol.deposito	Depósito
+PT	perm.rol.caja	Caixa
+PT	perm.rol.administracioncomercial	Administração Comercial
+PT	perm.rol.contabilidad	Contabilidade
 PT	frm.idiomas	Gerenciamento de Idiomas
 PT	lbl.idiomas.titulo	Idiomas do sistema
 PT	lbl.idiomas.trad	Traduções do idioma selecionado
@@ -3323,16 +3311,11 @@ ES	dash.mant.activo	En mantenimiento
 ES	dash.mant.encurso	En curso (2-7d)
 ES	dash.mant.reciente	Reciente (< 2d)
 ES	dash.mant.urgente	Urgente (> 7d)
-ES	dash.operador.titulo	Panel de Operaciones
-ES	dash.operador.subtitulo	WardrobeFlow  —  Operaciones
+ES	dash.logistica.titulo	Panel de Logística
+ES	dash.logistica.subtitulo	WardrobeFlow  —  Logística
 ES	dash.planes	Planes activos
-ES	dash.stock.titulo	Panel de Stock
-ES	dash.stock.subtitulo	WardrobeFlow  —  Stock
-ES	dash.sup.bitacora	Actividad reciente
-ES	dash.sup.mant	En mantenimiento
-ES	dash.sup.pedidos	Pedidos pendientes
-ES	dash.supervisor.titulo	Panel de Supervisor
-ES	dash.supervisor.subtitulo	WardrobeFlow  —  Supervisión
+ES	dash.deposito.titulo	Panel de Depósito
+ES	dash.deposito.subtitulo	WardrobeFlow  —  Depósito
 ES	dash.vendedor.titulo	Panel de Ventas
 ES	dash.vendedor.subtitulo	WardrobeFlow  —  Ventas
 EN	dash.despachados	Dispatched orders
@@ -3344,16 +3327,11 @@ EN	dash.mant.activo	Under maintenance
 EN	dash.mant.encurso	In progress (2-7d)
 EN	dash.mant.reciente	Recent (< 2d)
 EN	dash.mant.urgente	Urgent (> 7d)
-EN	dash.operador.titulo	Operations Panel
-EN	dash.operador.subtitulo	WardrobeFlow  —  Operations
+EN	dash.logistica.titulo	Logistics Panel
+EN	dash.logistica.subtitulo	WardrobeFlow  —  Logistics
 EN	dash.planes	Active plans
-EN	dash.stock.titulo	Stock Panel
-EN	dash.stock.subtitulo	WardrobeFlow  —  Stock
-EN	dash.sup.bitacora	Recent activity
-EN	dash.sup.mant	Under maintenance
-EN	dash.sup.pedidos	Pending orders
-EN	dash.supervisor.titulo	Supervisor Panel
-EN	dash.supervisor.subtitulo	WardrobeFlow  —  Supervision
+EN	dash.deposito.titulo	Warehouse Panel
+EN	dash.deposito.subtitulo	WardrobeFlow  —  Warehouse
 EN	dash.vendedor.titulo	Sales Panel
 EN	dash.vendedor.subtitulo	WardrobeFlow  —  Sales
 
@@ -3366,16 +3344,11 @@ PT	dash.mant.activo	Em manutenção
 PT	dash.mant.encurso	Em andamento (2-7d)
 PT	dash.mant.reciente	Recente (< 2d)
 PT	dash.mant.urgente	Urgente (> 7d)
-PT	dash.operador.titulo	Painel de Operações
-PT	dash.operador.subtitulo	WardrobeFlow  —  Operações
+PT	dash.logistica.titulo	Painel de Logística
+PT	dash.logistica.subtitulo	WardrobeFlow  —  Logística
 PT	dash.planes	Planos ativos
-PT	dash.stock.titulo	Painel de Estoque
-PT	dash.stock.subtitulo	WardrobeFlow  —  Estoque
-PT	dash.sup.bitacora	Atividade recente
-PT	dash.sup.mant	Em manutenção
-PT	dash.sup.pedidos	Pedidos pendentes
-PT	dash.supervisor.titulo	Painel de Supervisor
-PT	dash.supervisor.subtitulo	WardrobeFlow  —  Supervisão
+PT	dash.deposito.titulo	Painel de Depósito
+PT	dash.deposito.subtitulo	WardrobeFlow  —  Depósito
 PT	dash.vendedor.titulo	Painel de Vendas
 PT	dash.vendedor.subtitulo	WardrobeFlow  —  Vendas
 RU	dash.despachados	Отгружено заказов
@@ -3387,16 +3360,11 @@ RU	dash.mant.activo	На обслуживании
 RU	dash.mant.encurso	В процессе (2-7д)
 RU	dash.mant.reciente	Недавно (< 2д)
 RU	dash.mant.urgente	Срочно (> 7д)
-RU	dash.operador.titulo	Панель операций
-RU	dash.operador.subtitulo	WardrobeFlow — Операции
+RU	dash.logistica.titulo	Панель логистики
+RU	dash.logistica.subtitulo	WardrobeFlow — Логистика
 RU	dash.planes	Активных планов
-RU	dash.stock.titulo	Панель склада
-RU	dash.stock.subtitulo	WardrobeFlow — Склад
-RU	dash.sup.bitacora	Недавняя активность
-RU	dash.sup.mant	На обслуживании
-RU	dash.sup.pedidos	Заказы в ожидании
-RU	dash.supervisor.titulo	Панель супервайзера
-RU	dash.supervisor.subtitulo	WardrobeFlow — Контроль
+RU	dash.deposito.titulo	Панель склада
+RU	dash.deposito.subtitulo	WardrobeFlow — Склад
 RU	dash.vendedor.titulo	Панель продаж
 RU	dash.vendedor.subtitulo	WardrobeFlow — Продажи
 

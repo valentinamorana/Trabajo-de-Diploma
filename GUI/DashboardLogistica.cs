@@ -8,19 +8,14 @@ using Servicios.Multiidioma;
 
 namespace GUI
 {
-    public partial class DashboardControlStock : FormBase, IIdiomaObserver
+    public partial class DashboardLogistica : FormBase, IIdiomaObserver
     {
-        private readonly BLL.Interfaces.IPrendaService _bllPrenda  = new BLL.Prenda();
+        private readonly BLL.Interfaces.IPedidoService _bllPedido  = new BLL.Pedido();
         private readonly BLL.Usuario                   _bllUsuario = new BLL.Usuario();
 
         private System.Windows.Forms.Timer _timer;
 
-        // Se reasignaba con `new Font(...)` en cada refresco (timer de 2 min) sin liberar el
-        // anterior — Font implementa IDisposable y envuelve un handle GDI; creada una sola vez
-        // acá y reutilizada evita esa fuga en sesiones largas.
-        private readonly Font _fontOcupacionGrande = new Font("Segoe UI", 24f, FontStyle.Bold);
-
-        public DashboardControlStock()
+        public DashboardLogistica()
         {
             InitializeComponent();
         }
@@ -52,16 +47,16 @@ namespace GUI
 
         private void Traducir(Idioma idioma)
         {
-            this.Text          = Tr("dash.stock.titulo",   "Panel de Stock");
-            lblTitulo.Text     = Tr("dash.stock.titulo",   "Panel de Stock");
-            lblSub.Text        = Tr("dash.stock.subtitulo", "WardrobeFlow  —  Stock");
-            btnRefrescar.Text  = Tr("dash.btn.refrescar",  "↻ Actualizar");
-            txtDisp.Text = Tr("dash.prendas",    "Prendas\ndisponibles");
-            txtMant.Text = Tr("dash.mant.activo", "En\nmantenimiento");
-            txtOcup.Text = Tr("dash.ocupacion",  "ocupación\ndel stock");
-            lblColRec.Text = Tr("dash.mant.reciente", "Reciente (< 2d)");
-            lblColCur.Text = Tr("dash.mant.encurso",  "En curso (2-7d)");
-            lblColUrg.Text = Tr("dash.mant.urgente",  "Urgente (> 7d)");
+            this.Text          = Tr("dash.logistica.titulo", "Panel de Logística");
+            lblTitulo.Text     = Tr("dash.logistica.titulo", "Panel de Logística");
+            lblSub.Text        = Tr("dash.logistica.subtitulo", "WardrobeFlow  —  Logística");
+            btnRefrescar.Text  = Tr("dash.btn.refrescar",   "↻ Actualizar");
+            txtPend.Text = Tr("dash.pedidos",   "Pedidos\npendientes");
+            txtDesp.Text = Tr("dash.despachados", "Pedidos\ndespachados");
+            txtEntr.Text = Tr("dash.entregados",  "Pedidos\nentregados");
+            lblColPend.Text = Tr("dash.kan.pendiente",  "Pendiente");
+            lblColDesp.Text = Tr("dash.kan.despachado", "Despachado");
+            lblColEntr.Text = Tr("dash.kan.entregado",  "Entregado");
         }
 
         private void CargarEnBackground()
@@ -70,78 +65,75 @@ namespace GUI
             {
                 try
                 {
-                    var disponibles  = _bllPrenda.ObtenerDisponibles();
-                    var enMant       = _bllPrenda.ObtenerEnMantenimiento();
-                    var ocupacion    = _bllPrenda.ObtenerOcupacion();
+                    var pedidos = _bllPedido.ObtenerTodos();
                     this.BeginInvoke(new Action(() =>
                     {
                         if (IsDisposed) return;
-                        ActualizarCards(disponibles, enMant, ocupacion);
-                        ActualizarKanban(enMant);
+                        ActualizarCards(pedidos);
+                        ActualizarKanban(pedidos);
                         ActualizarSesion();
                     }));
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Trace.TraceWarning($"[DashboardControlStock] No se pudo cargar el dashboard: {ex.Message}");
+                    System.Diagnostics.Trace.TraceWarning($"[DashboardLogistica] No se pudo cargar pedidos: {ex.Message}");
                 }
             });
         }
 
-        private void ActualizarCards(List<BE.Prenda> disponibles, List<BE.MantenimientoPrenda> enMant, BE.OcupacionStock ocup)
+        private void ActualizarCards(List<BE.Pedido> pedidos)
         {
-            numDisp.Text = disponibles.Count.ToString();
-
-            numMant.Text = enMant.Count.ToString();
-            // Señal INDEPENDIENTE de la del Kanban de abajo (ActualizarKanban, que colorea cada
-            // tarjeta por ANTIGÜEDAD vía BE.MantenimientoPrenda.NivelUrgencia): esta tarjeta resumen
-            // colorea por CANTIDAD total en mantenimiento. Pueden mostrar colores contradictorios
-            // (ej. tarjeta en rojo por más de 5 prendas, con las 3 columnas del Kanban en verde si
-            // todas son recientes) — es intencional, no el mismo drift de umbrales que ya se corrigió
-            // entre dashboards distintos.
-            Color fondo = enMant.Count == 0
-                ? Color.FromArgb(215, 240, 220)
-                : enMant.Count > 5 ? Color.FromArgb(255, 218, 218) : Color.FromArgb(255, 248, 210);
-            cardMant.BackColor = fondo;
-
-            if (ocup != null)
+            int pend = 0, desp = 0, entr = 0;
+            foreach (var p in pedidos)
             {
-                numOcup.Text = $"{ocup.PorcentajeOcupacion}%";
-                numOcup.Font = _fontOcupacionGrande;
-                txtOcup.Text = $"{ocup.EnUso} en uso · {ocup.Disponibles} libres";
+                if (p.Estado == BE.EstadoPedido.Pendiente)  pend++;
+                else if (p.Estado == BE.EstadoPedido.Despachado) desp++;
+                else if (p.Estado == BE.EstadoPedido.Entregado)  entr++;
             }
+            numPend.Text = pend.ToString();
+            numDesp.Text = desp.ToString();
+            numEntr.Text = entr.ToString();
         }
 
-        private void ActualizarKanban(List<BE.MantenimientoPrenda> enMant)
+        private void ActualizarKanban(List<BE.Pedido> pedidos)
         {
-            colReciente.Controls.Clear();
-            colEnCurso.Controls.Clear();
-            colUrgente.Controls.Clear();
+            colPendiente.Controls.Clear();
+            colDespachado.Controls.Clear();
+            colEntregado.Controls.Clear();
 
-            foreach (var m in enMant)
+            foreach (var p in pedidos)
             {
-                int    dias  = m.DiasTranscurridos;
-                string tit   = m.NombrePrenda ?? $"Prenda #{m.IdPrenda}";
-                string sub   = $"Entrada: {m.FechaEntrada:dd/MM/yyyy}";
-                var nivel    = m.NivelUrgencia;
+                int    dias = p.DiasDesdeAlta;
+                string tit  = $"Pedido #{p.IdPedido}";
+                string sub  = p.NombreCliente ?? $"Cliente {p.IdCliente}";
 
-                // Las tres columnas abren Prendas: OperadorDeInventario siempre tiene ese
-                // permiso (mnuPrendas), así que no hay riesgo de exponer una pantalla sin acceso.
-                Panel card = nivel == BE.NivelUrgencia.Reciente
-                    ? CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220))
-                    : nivel == BE.NivelUrgencia.Normal
-                        ? CrearCard(tit, sub, dias, Color.FromArgb(255, 248, 210))
-                        : CrearCard(tit, sub, dias, Color.FromArgb(255, 205, 200));
-                HabilitarClicAbrirPrendas(card);
-
-                if (nivel == BE.NivelUrgencia.Reciente)     colReciente.Controls.Add(card);
-                else if (nivel == BE.NivelUrgencia.Normal)  colEnCurso.Controls.Add(card);
-                else                                        colUrgente.Controls.Add(card);
+                // Las tres columnas abren la misma pantalla (Pedidos Realizados): es el único
+                // permiso que tiene OperadorLogistico, y ahí se despacha, se marca entregado y
+                // se ve el historial — no hay riesgo de exponer una pantalla sin permiso.
+                switch (p.Estado)
+                {
+                    case BE.EstadoPedido.Pendiente:
+                        var cPend = CrearCard(tit, sub, dias,
+                            p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
+                        HabilitarClicAbrirPedidosRealizados(cPend);
+                        colPendiente.Controls.Add(cPend);
+                        break;
+                    case BE.EstadoPedido.Despachado:
+                        var cDesp = CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255));
+                        HabilitarClicAbrirPedidosRealizados(cDesp);
+                        colDespachado.Controls.Add(cDesp);
+                        break;
+                    case BE.EstadoPedido.Entregado:
+                        var cEntr = CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220));
+                        HabilitarClicAbrirPedidosRealizados(cEntr);
+                        colEntregado.Controls.Add(cEntr);
+                        break;
+                }
             }
 
-            if (colReciente.Controls.Count == 0) colReciente.Controls.Add(CrearVacio());
-            if (colEnCurso.Controls.Count  == 0) colEnCurso.Controls.Add(CrearVacio());
-            if (colUrgente.Controls.Count  == 0) colUrgente.Controls.Add(CrearVacio());
+            if (colPendiente.Controls.Count  == 0) colPendiente.Controls.Add(CrearVacio());
+            if (colDespachado.Controls.Count == 0) colDespachado.Controls.Add(CrearVacio());
+            if (colEntregado.Controls.Count  == 0) colEntregado.Controls.Add(CrearVacio());
         }
 
         private void ActualizarSesion()
@@ -155,15 +147,15 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.TraceWarning($"[DashboardControlStock] No se pudo cargar la sesión: {ex.Message}");
+                System.Diagnostics.Trace.TraceWarning($"[DashboardLogistica] No se pudo cargar la sesión: {ex.Message}");
             }
         }
 
-        // Abre (o enfoca) Prendas. Todavía no deja seleccionada la prenda puntual dentro de la
-        // grilla — esa pantalla no tiene esa capacidad hoy.
-        private void HabilitarClicAbrirPrendas(Panel card)
+        // Abre (o enfoca) Pedidos Realizados. Todavía no deja seleccionado el pedido puntual
+        // dentro de la grilla — esa pantalla no tiene esa capacidad hoy.
+        private void HabilitarClicAbrirPedidosRealizados(Panel card)
         {
-            EventHandler abrir = (s, e) => AbrirPrendas();
+            EventHandler abrir = (s, e) => AbrirPedidosRealizados();
             card.Cursor = Cursors.Hand;
             card.Click += abrir;
             foreach (Control c in card.Controls)
@@ -173,13 +165,13 @@ namespace GUI
             }
         }
 
-        private void AbrirPrendas()
+        private void AbrirPedidosRealizados()
         {
             var menu = this.MdiParent;
             if (menu == null) return;
             foreach (Form hijo in menu.MdiChildren)
-                if (hijo is Prendas) { hijo.BringToFront(); return; }
-            new Prendas { MdiParent = menu }.Show();
+                if (hijo is PedidosRealizados) { hijo.BringToFront(); return; }
+            new PedidosRealizados { MdiParent = menu }.Show();
         }
 
         // ── Handlers de eventos estáticos (wireados desde el Diseñador) ─────────
@@ -212,13 +204,13 @@ namespace GUI
                 pe.Graphics.FillPath(br, path);
         }
 
-        private void CardDisp_Resize(object sender, EventArgs e) { numDisp.Width = cardDisp.Width; txtDisp.Width = cardDisp.Width; }
-        private void CardMant_Resize(object sender, EventArgs e) { numMant.Width = cardMant.Width; txtMant.Width = cardMant.Width; }
-        private void CardOcup_Resize(object sender, EventArgs e) { numOcup.Width = cardOcup.Width; txtOcup.Width = cardOcup.Width; }
+        private void CardPend_Resize(object sender, EventArgs e) { numPend.Width = cardPend.Width; txtPend.Width = cardPend.Width; }
+        private void CardDesp_Resize(object sender, EventArgs e) { numDesp.Width = cardDesp.Width; txtDesp.Width = cardDesp.Width; }
+        private void CardEntr_Resize(object sender, EventArgs e) { numEntr.Width = cardEntr.Width; txtEntr.Width = cardEntr.Width; }
 
-        private void ColReciente_Resize(object sender, EventArgs e) => AjustarAnchosCards(colReciente);
-        private void ColEnCurso_Resize(object sender, EventArgs e) => AjustarAnchosCards(colEnCurso);
-        private void ColUrgente_Resize(object sender, EventArgs e) => AjustarAnchosCards(colUrgente);
+        private void ColPendiente_Resize(object sender, EventArgs e) => AjustarAnchosCards(colPendiente);
+        private void ColDespachado_Resize(object sender, EventArgs e) => AjustarAnchosCards(colDespachado);
+        private void ColEntregado_Resize(object sender, EventArgs e) => AjustarAnchosCards(colEntregado);
 
         private static void AjustarAnchosCards(FlowLayoutPanel col)
         {
@@ -239,7 +231,7 @@ namespace GUI
             card.Controls.Add(new Label { Text = titulo, Font = new Font("Segoe UI", 8.5f, FontStyle.Bold), AutoSize = true, Location = new Point(8, 6), BackColor = Color.Transparent });
             card.Controls.Add(new Label { Text = sub, Font = new Font("Segoe UI", 7.5f), AutoSize = false, Size = new Size(164, 16), Location = new Point(8, 24), BackColor = Color.Transparent, ForeColor = Color.FromArgb(70, 70, 80) });
             string dStr = dias == 0 ? "hoy" : $"hace {dias}d";
-            card.Controls.Add(new Label { Text = dStr, Font = new Font("Segoe UI", 7f, FontStyle.Italic), AutoSize = true, Location = new Point(8, 44), BackColor = Color.Transparent, ForeColor = Color.FromArgb(110, 100, 80) });
+            card.Controls.Add(new Label { Text = dStr, Font = new Font("Segoe UI", 7f, FontStyle.Italic), AutoSize = true, Location = new Point(8, 44), BackColor = Color.Transparent, ForeColor = Color.FromArgb(110, 100, 100) });
             return card;
         }
 

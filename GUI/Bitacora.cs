@@ -19,7 +19,7 @@ namespace GUI
     /// Criticidad: "Todas" + valores reales 1-6, sin "None (0)".
     /// Exportación PDF: vía PrintPreviewDialog (imprimir → "Microsoft Print to PDF").
     ///
-    /// Accesible para Administrador (mnuAuditoria) y Supervisor (mnuAuditoria).
+    /// Accesible para Administrador y Auditor (mnuAuditoria).
     /// </summary>
     /// <summary>
     /// Hereda de <see cref="FormBase"/>:

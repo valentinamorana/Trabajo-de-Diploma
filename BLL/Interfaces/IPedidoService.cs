@@ -9,7 +9,7 @@ namespace BLL.Interfaces
     ///
     /// Casos de uso definidos:
     ///   CrearPedido()         — Vendedor genera un pedido para un cliente
-    ///   Despachar()           — OperadorDeInventario despacha el pedido
+    ///   Despachar()           — Deposito despacha el pedido
     ///   MarcarEntregado()     — Se confirma la entrega al cliente
     ///   RegistrarDevolucion() — El cliente devuelve las prendas al finalizar
     ///   Cancelar()            — Se cancela un pedido Pendiente

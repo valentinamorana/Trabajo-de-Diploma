@@ -25,7 +25,7 @@ namespace BE
         public const string PromocionesContable   = "mnuPromocionesContable";
         public const string PromocionesVigentes   = "mnuPromocionesVigentes";
 
-        // PN04 — Inspección de Devolución (Depósito = OperadorDeInventario, sin rol nuevo).
+        // PN04 — Inspección de Devolución (Depósito = rol Deposito, sin rol nuevo).
         public const string InspeccionDevolucion  = "mnuInspeccionDevolucion";
 
         // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────

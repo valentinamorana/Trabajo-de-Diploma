@@ -17,16 +17,18 @@ namespace GUI
     /// del usuario logueado, resueltos en el Login desde el árbol Composite
     /// (tabla PermisoRelacion — la única fuente de verdad de autorización).
     ///
-    /// Roles del sistema (documento G04 — WardrobeFlow_Iteracion1.docx):
+    /// Roles del sistema (según los procesos de negocio PN01–PN04):
     ///
-    ///   Administrador     → TODO: Inventario | Ventas | Administrar | Bitácora
-    ///   Supervisor        → Bitácora
-    ///   OperadorLogistico → Inventario (Prendas, Pedidos Realizados)
-    ///
-    /// Roles adicionales (implementación, no están en G04):
-    ///   Vendedor             → Ventas (Clientes, Planes, Pedidos de Venta)
-    ///   ControladorDeStock   → Inventario (Prendas, Stock)
-    ///   OperadorDeInventario → Ventas (Pedidos Realizados)
+    ///   Administrador           → TODO: Inventario | Ventas | Administrar | Bitácora
+    ///   Vendedor                → Ventas (Clientes, Planes, Pedidos de Venta, Contratación)
+    ///   Caja                    → Contrataciones pendientes de pago (PN02)
+    ///   Deposito                → Inventario (Prendas, Stock, Inspección de Devolución)
+    ///   OperadorLogistico       → Pedidos Realizados (despacho)
+    ///   GerenteComercial        → Vendedor + reportes comerciales y sugerencia de promociones
+    ///   GerenteInventario       → Deposito + OperadorLogistico + reportes de inventario
+    ///   AdministracionComercial → Gestión de promociones (PN03)
+    ///   Contabilidad            → Revisión contable de promociones (PN03)
+    ///   Auditor                 → Bitácora (solo lectura)
     ///
     /// Los permisos se leen de BE.Usuario.Permisos via BLL.ObtenerUsuarioActivo().
     /// La GUI nunca accede directamente a Seguridad ni a DAL.
@@ -368,7 +370,7 @@ namespace GUI
             foreach (Form hijo in this.MdiChildren)
             {
                 if (hijo is DashboardForm || hijo is DashboardVendedor ||
-                    hijo is DashboardControlStock || hijo is DashboardOperador || hijo is DashboardSupervisor)
+                    hijo is DashboardDeposito || hijo is DashboardLogistica)
                 { hijo.BringToFront(); return; }
             }
             CrearDashboardDelRol().Show();
@@ -380,10 +382,10 @@ namespace GUI
             new Dictionary<string, Func<Form>>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Vendedor",             () => new DashboardVendedor()     },
-                // OperadorDeInventario = mantenimiento de prendas/stock
-                { "OperadorDeInventario", () => new DashboardControlStock() },
+                // Deposito = inspección de devoluciones, mantenimiento de prendas y stock
+                { "Deposito",             () => new DashboardDeposito()     },
                 // OperadorLogistico = pedidos/despacho
-                { "OperadorLogistico",    () => new DashboardOperador()     },
+                { "OperadorLogistico",    () => new DashboardLogistica()     },
             };
 
         private Form CrearDashboardDelRol()
@@ -714,7 +716,7 @@ namespace GUI
 
         /// <summary>
         /// Abre el módulo de Pedidos Realizados como hijo MDI.
-        /// Accesible para OperadorDeInventario (mnuPedidosRealizados).
+        /// Accesible para Deposito (mnuPedidosRealizados).
         /// </summary>
         private void pedidosRealizadosToolStripMenuItem_Click(object sender, EventArgs e)
         {

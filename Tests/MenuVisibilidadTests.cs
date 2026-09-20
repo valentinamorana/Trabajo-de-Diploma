@@ -7,7 +7,7 @@ namespace Tests
     /// Regresión para la visibilidad del menú principal por rol (GUI.Menu.AplicarPermisos,
     /// vía BLL.MenuVisibilidad.Resolver — la lógica pura extraída para poder testearla).
     /// Los 7 roles y sus patentes reproducen EXACTAMENTE lo que siembra
-    /// BD/07_Reset_Perfiles_Permisos.sql, no una versión inventada — si este archivo y ese
+    /// BD/00_Instalacion_Completa.sql, no una versión inventada — si este archivo y ese
     /// script se desincronizan, alguno de los dos está mal.
     /// </summary>
     [TestClass]
@@ -159,7 +159,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void OperadorDeInventario_VeSoloInventarioPrendas()
+        public void Deposito_VeSoloInventarioPrendas()
         {
             var v = BLL.MenuVisibilidad.Resolver(new[] { "mnuPrendas", "mnuStock" }, esAdmin: false);
 
@@ -170,9 +170,9 @@ namespace Tests
         }
 
         [TestMethod]
-        public void OperadorDeInventario_ConPatenteNueva_VeInspeccionDevolucion()
+        public void Deposito_ConPatenteNueva_VeInspeccionDevolucion()
         {
-            // PN04 — Inspección de Devolución, mismo rol (Depósito = OperadorDeInventario).
+            // PN04 — Inspección de Devolución, mismo rol (Depósito = rol Deposito).
             var v = BLL.MenuVisibilidad.Resolver(new[] { "mnuStock", "mnuInspeccionDevolucion" }, esAdmin: false);
 
             Assert.IsTrue(V(v, "inspeccionDevolucionToolStripMenuItem"));
@@ -182,7 +182,7 @@ namespace Tests
         [TestMethod]
         public void GerenteInventario_HeredaAmbosOperadores()
         {
-            // Composite: GerenteInventario → OperadorLogistico + OperadorDeInventario.
+            // Composite: GerenteInventario → OperadorLogistico + Deposito.
             var patentes = new[] { "mnuPedidosRealizados", "mnuPrendas", "mnuStock",
                                     "mnuAnalisisRotacion", "mnuAnalisisMantenimiento", "mnuAnalisisEscasez" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);

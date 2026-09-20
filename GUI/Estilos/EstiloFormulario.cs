@@ -7,7 +7,7 @@ namespace GUI.Estilos
     /// Paleta y helpers de estilo compartidos por los formularios de decisión/reporte
     /// (Renovación, Cobro, y los 6 de Analítica de Negocio: Abandono, Ventas por Vendedor,
     /// Rotación, Mantenimiento, Escasez, Recomendación de Prendas) para que sigan la misma
-    /// identidad visual que ya usan ClienteForm/CambioEstadoDialog/DashboardControlStock/Menu
+    /// identidad visual que ya usan ClienteForm/CambioEstadoDialog/DashboardDeposito/Menu
     /// (rosa de marca), en vez de quedar con los botones y grillas grises default de
     /// WinForms. Pura presentación (colores/fuentes) — ninguna decisión de negocio vive acá.
     /// </summary>

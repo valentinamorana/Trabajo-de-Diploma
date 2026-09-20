@@ -115,23 +115,17 @@
     <Compile Include="RecomendacionPrendasForm.Designer.cs">
       <DependentUpon>RecomendacionPrendasForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DashboardControlStock.cs">
+    <Compile Include="DashboardDeposito.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DashboardControlStock.Designer.cs">
-      <DependentUpon>DashboardControlStock.cs</DependentUpon>
+    <Compile Include="DashboardDeposito.Designer.cs">
+      <DependentUpon>DashboardDeposito.cs</DependentUpon>
     </Compile>
-    <Compile Include="DashboardOperador.cs">
+    <Compile Include="DashboardLogistica.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DashboardOperador.Designer.cs">
-      <DependentUpon>DashboardOperador.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DashboardSupervisor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DashboardSupervisor.Designer.cs">
-      <DependentUpon>DashboardSupervisor.cs</DependentUpon>
+    <Compile Include="DashboardLogistica.Designer.cs">
+      <DependentUpon>DashboardLogistica.cs</DependentUpon>
     </Compile>
     <Compile Include="FormBase.cs">
       <SubType>Form</SubType>

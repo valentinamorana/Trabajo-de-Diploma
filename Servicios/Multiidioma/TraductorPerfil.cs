@@ -21,11 +21,8 @@ namespace Servicios.Multiidioma
                 case "GerenteComercial":     return Key("perfil.gerentecomercial")  ?? perfil;
                 case "Vendedor":             return Key("perfil.vendedor")          ?? perfil;
                 case "GerenteInventario":    return Key("perfil.gerenteinventario") ?? perfil;
-                case "EncargadoDeStock":     return Key("perfil.encargadodestock")  ?? perfil;
                 case "OperadorLogistico":    return Key("perfil.operadorlogistico") ?? perfil;
-                case "Supervisor":           return Key("perfil.supervisor")        ?? perfil;
-                case "ControladorDeStock":   return Key("perfil.stock")             ?? perfil;
-                case "OperadorDeInventario": return Key("perfil.operador")          ?? perfil;
+                case "Deposito":             return Key("perfil.deposito")          ?? perfil;
                 case "Caja":                 return Key("perfil.caja")              ?? perfil;
                 case "AdministracionComercial": return Key("perfil.administracioncomercial") ?? perfil;
                 case "Contabilidad":            return Key("perfil.contabilidad")            ?? perfil;

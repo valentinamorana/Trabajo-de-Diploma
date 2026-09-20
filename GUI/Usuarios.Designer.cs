@@ -141,12 +141,6 @@ namespace GUI
             // cmbPerfil
             //
             this.cmbPerfil.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbPerfil.Items.AddRange(new object[] {
-            "Administrador",
-            "Supervisor",
-            "Vendedor",
-            "Controlador de Stock",
-            "Operador de Inventario"});
             this.cmbPerfil.Location = new System.Drawing.Point(12, 118);
             this.cmbPerfil.Name = "cmbPerfil";
             this.cmbPerfil.Size = new System.Drawing.Size(210, 21);

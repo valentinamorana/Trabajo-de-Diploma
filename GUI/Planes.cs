@@ -10,7 +10,7 @@ namespace GUI
     /// <summary>
     /// Capa de Presentación — Módulo de Gestión de Planes de Suscripción.
     ///
-    /// Permite al Vendedor consultar los planes disponibles y al Supervisor/Admin
+    /// Permite al Vendedor consultar los planes disponibles y a Gerencia/Admin
     /// crear y modificar planes.
     ///
     ///   ✓ Ver listado de planes (activos e inactivos)

@@ -17,7 +17,7 @@ namespace GUI
     ///         🔑 Gestionar Usuarios
     ///         🔑 Ver Auditoría
     ///         ...
-    ///       📁 Auditor / Supervisor
+    ///       📁 Auditor
     ///     📁 Comercial
     ///       📁 Gerente Comercial / Vendedor
     ///     📁 Inventario y Logística

@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    partial class DashboardOperador
+    partial class DashboardLogistica
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -362,7 +362,7 @@ namespace GUI
             this.lblColEntr.TabIndex  = 0;
             this.lblColEntr.Text      = "Entregado";
 
-            // ── DashboardOperador ──────────────────────────────────────────────
+            // ── DashboardLogistica ──────────────────────────────────────────────
             this.BackColor       = Color.FromArgb(240, 240, 245);
             this.Controls.Add(this.wrapper);
             this.Controls.Add(this.flowCards);
@@ -371,7 +371,7 @@ namespace GUI
             this.FormBorderStyle = FormBorderStyle.Sizable;
             this.Location        = new Point(10, 10);
             this.MinimumSize     = new Size(600, 400);
-            this.Name            = "DashboardOperador";
+            this.Name            = "DashboardLogistica";
             this.Size            = new Size(870, 570);
             this.StartPosition   = FormStartPosition.Manual;
             this.Text             = "Panel de Operaciones";

@@ -35,7 +35,7 @@ namespace BLL
             ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
             ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),
             ("promocionesVigentesToolStripMenuItem",            "mnuPromocionesVigentes"),
-            // PN04 — Inspección de Devolución (Depósito = OperadorDeInventario).
+            // PN04 — Inspección de Devolución (Depósito = rol Deposito).
             ("inspeccionDevolucionToolStripMenuItem",  "mnuInspeccionDevolucion"),
             // Mejora opcional (no requerida por la cátedra) — ver README.
             ("listaEsperaToolStripMenuItem",           "mnuListaEspera"),

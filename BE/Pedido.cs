@@ -45,7 +45,7 @@ namespace BE
         public int DiasDesdeAlta => (int)(DateTime.Today - FechaPedido.Date).TotalDays;
 
         // Umbral de antigüedad que los dashboards usan para resaltar un pedido Pendiente
-        // sin atender. Centralizado acá para que Vendedor/Operador/Supervisor coincidan
+        // sin atender. Centralizado acá para que Vendedor/Logística/Gerencia coincidan
         // siempre en el mismo criterio (antes duplicado con el mismo número "mágico" en
         // los 3 dashboards, sin una única fuente de verdad).
         public bool EsUrgentePorAntiguedad => DiasDesdeAlta >= 2;

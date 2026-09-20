@@ -19,7 +19,7 @@ namespace DAL
     ///
     /// Inspirado en la tabla 'Usuario_Seguridad' del proyecto de referencia (Agus).
     ///
-    /// TOLERANCIA: si la tabla aún no fue creada (BD sin migrar — falta 02_Actualizar), todos los
+    /// TOLERANCIA: si la tabla aún no fue creada (BD sin migrar — falta ejecutar 00_Instalacion_Completa.sql), todos los
     /// métodos fallan en silencio (no-op / lista vacía), igual que el resto de la capa DAL.
     /// </summary>
     public class EspejoUsuario : BaseDAL
@@ -88,7 +88,7 @@ namespace DAL
             catch (SqlException ex) when (ex.Message.Contains("Usuario_Seguridad"))
             {
                 System.Diagnostics.Trace.TraceWarning(
-                    "[DAL.EspejoUsuario.Upsert] Tabla espejo ausente; ejecutá 02_Actualizar.");
+                    "[DAL.EspejoUsuario.Upsert] Tabla espejo ausente; ejecutá BD/00_Instalacion_Completa.sql.");
             }
             catch (Exception ex)
             {

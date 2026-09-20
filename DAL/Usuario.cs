@@ -472,7 +472,7 @@ namespace DAL
             {
                 // BD sin migrar (falta la columna): el cambio obligatorio queda inactivo. No es crítico.
                 System.Diagnostics.Trace.TraceWarning(
-                    "[DAL.Usuario.SetRequiereCambioClave] Columna RequiereCambioClave ausente; ejecutá 02_Actualizar.");
+                    "[DAL.Usuario.SetRequiereCambioClave] Columna RequiereCambioClave ausente; ejecutá BD/00_Instalacion_Completa.sql.");
             }
         }
 

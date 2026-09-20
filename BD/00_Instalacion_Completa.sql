@@ -43,8 +43,8 @@
 -- Idempotente: se puede re-ejecutar sin romper datos existentes.
 --
 -- Usuarios semilla (ver Contraseñas.txt):
---   admin/administrador1!   supervisor/supervisor1!
---   vendedor/vendedor1!     stock/controladorstock1!   operador/operador1!
+--   admin/administrador1!   
+--   vendedor/vendedor1!     deposito/deposito1!
 --
 -- Para ACTUALIZAR una BD ya existente, usar: 02_Actualizar_BaseDeDatos.sql
 --
@@ -527,8 +527,6 @@ FROM (VALUES
     ('Gestionar Usuarios',          'mnuUsuarios',           'Sistema'),
     ('Ver Auditoria',               'mnuAuditoria',          'Sistema'),
     ('Ver Prendas',                 'mnuPrendas',            'Inventario'),
-    ('Ver Outfits',                 'mnuOutfits',            'Inventario'),
-    ('Ver Categorias',              'mnuCategorias',         'Inventario'),
     ('Gestionar Stock',             'mnuStock',              'Inventario'),
     ('Gestionar Clientes',          'mnuClientes',           'Ventas'),
     ('Gestionar PlanSuscripciones', 'mnuPlanSuscripciones',  'Ventas'),
@@ -548,6 +546,26 @@ WHERE NOT EXISTS (SELECT 1 FROM Permiso p
 PRINT 'Patentes (permisos simples) inicializadas.';
 GO
 
+-- ── Renombre de rol alineado a los procesos de negocio ───────────────────────
+-- OperadorDeInventario → Deposito (PN01/PN04 lo llaman "Depósito"). En una BD nueva
+-- no hace nada; en una BD ya instalada migra usuarios, asignaciones y nodo-rol.
+-- Va ANTES de sembrar RolPermiso para no duplicar el nodo-rol.
+IF EXISTS (SELECT 1 FROM Usuario WHERE Rol = 'OperadorDeInventario'
+                                    OR Perfil IN ('OperadorDeInventario','Operador de Inventario'))
+BEGIN
+    UPDATE Usuario SET Rol = 'Deposito', Perfil = 'Deposito'
+    WHERE Rol = 'OperadorDeInventario' OR Perfil IN ('OperadorDeInventario','Operador de Inventario');
+    -- El DVH incluye el Rol: se resetea para que la app lo recalcule limpio en el próximo arranque.
+    UPDATE Usuario SET DVH = 0;
+    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Usuario';
+    PRINT 'Usuarios migrados: OperadorDeInventario → Deposito.';
+END
+UPDATE RolPermiso SET Rol = 'Deposito' WHERE Rol = 'OperadorDeInventario';
+UPDATE Permiso SET Nombre = 'Deposito', NombreMenu = 'Deposito'
+WHERE EsRol = 1 AND Nombre = 'OperadorDeInventario'
+  AND NOT EXISTS (SELECT 1 FROM Permiso WHERE EsRol = 1 AND Nombre = 'Deposito');
+GO
+
 -- ── Asignación rol → patente (RolPermiso) ────────────────────────────────────
 -- Se asigna por NombreMenu para no depender de IDs de identidad.
 INSERT INTO RolPermiso (Rol, IdPermiso)
@@ -555,8 +573,8 @@ SELECT r.Rol, p.IdPermiso
 FROM (VALUES
     -- Administrador: acceso total
     ('Administrador','mnuUsuarios'),('Administrador','mnuAuditoria'),
-    ('Administrador','mnuPrendas'),('Administrador','mnuOutfits'),
-    ('Administrador','mnuCategorias'),('Administrador','mnuStock'),
+    ('Administrador','mnuPrendas'),
+    ('Administrador','mnuStock'),
     ('Administrador','mnuClientes'),('Administrador','mnuPlanSuscripciones'),
     ('Administrador','mnuRenovacionSuscripcion'),
     ('Administrador','mnuCobroSuscripcion'),
@@ -565,21 +583,13 @@ FROM (VALUES
     ('Administrador','mnuAnalisisMantenimiento'),('Administrador','mnuAnalisisEscasez'),
     ('Administrador','mnuRecomendacionPrendas'),
     ('Administrador','mnuPedidosVenta'),('Administrador','mnuPedidosRealizados'),
-    -- Supervisor: auditoría + mismos permisos que Vendedor
-    ('Supervisor','mnuAuditoria'),
-    ('Supervisor','mnuPrendas'),('Supervisor','mnuClientes'),
-    ('Supervisor','mnuPlanSuscripciones'),('Supervisor','mnuPedidosVenta'),
     -- Vendedor: prendas + clientes + planes + ventas
-    -- (mnuRenovacionSuscripcion/mnuCobroSuscripcion NO se listan para Supervisor acá: los
-    --  hereda de Vendedor vía la arista Composite Supervisor→Vendedor que se arma más abajo)
     ('Vendedor','mnuPrendas'),('Vendedor','mnuClientes'),
     ('Vendedor','mnuPlanSuscripciones'),('Vendedor','mnuRenovacionSuscripcion'),
     ('Vendedor','mnuCobroSuscripcion'),
     ('Vendedor','mnuPedidosVenta'),
-    -- ControladorDeStock: prendas + stock
-    ('ControladorDeStock','mnuPrendas'),('ControladorDeStock','mnuStock'),
-    -- OperadorDeInventario: solo despacho
-    ('OperadorDeInventario','mnuPedidosRealizados')
+    -- Deposito: solo despacho
+    ('Deposito','mnuPedidosRealizados')
 ) AS r(Rol, NombreMenu)
 JOIN Permiso p ON p.NombreMenu = r.NombreMenu AND ISNULL(p.EsFamilia,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM RolPermiso x WHERE x.Rol = r.Rol AND x.IdPermiso = p.IdPermiso);
@@ -587,17 +597,14 @@ PRINT 'Asignaciones rol→patente inicializadas.';
 GO
 
 -- ── Usuarios iniciales (clave hasheada PBKDF2; ver Contraseñas.txt) ───────────
--- admin/administrador1!  supervisor/supervisor1!  vendedor/vendedor1!
--- operador/operador1!     stock/controladorstock1!
+-- admin/administrador1!  vendedor/vendedor1!  deposito/deposito1!
 -- DVH=0 → la app recalcula el DV en el primer arranque.
 INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma)
 SELECT v.Username, v.Clave, v.Rol, v.Perfil, 1, 0, 0, 'ES'
 FROM (VALUES
     ('admin',      '3ZTrmLBPYN+Dr4uWxFV6gfhtzhqVjnLEaPuUd2v+MNHwAaWlmPPfHwmMMwS0bZuP', 'Administrador',        'Administrador'),
-    ('supervisor', 'k2GSNeiFtFw7m/Ipaok3XUqzWKFidcIy9agOxXKfs3MAiTD+1wF1kyFPcB2iYlaj', 'Supervisor',           'Supervisor'),
     ('vendedor',   'VWyQxHK8Dxr+BBWgw63IMTgFG91ZeDZSxRtj5FIpH9qxHbayJVLUBFpErIgLdOmZ', 'Vendedor',             'Vendedor'),
-    ('stock',      'jkBe/qjMTd/g8kS1BAZEGO0gp+U2xIXev6mTuPrlTTSXz/aWWjPAyKcqNGrJwstR', 'ControladorDeStock',   'Controlador de Stock'),
-    ('operador',   'EMy1Imvv5SfGsRX8ZIW2F6J0u6j86jbqhXXCPeVAloOX790eWYOGIHfUg5hcrOlR', 'OperadorDeInventario', 'Operador de Inventario')
+    ('deposito',   'xL86BMbo9P5XpIZ7fW+jdMVNsgP+jhQykYOFpbClQoSsU44mv9HKYdU1aDgp4cBV', 'Deposito', 'Deposito')
 ) AS v(Username, Clave, Rol, Perfil)
 WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username);
 PRINT 'Usuarios iniciales creados.';
@@ -697,8 +704,7 @@ GO
 --
 --   Auditor                                → Auditoría
 --   GerenteComercial  ⊃ Vendedor           → (Vendedor) + Pedidos Realizados
---   EncargadoDeStock  ⊃ OperadorLogistico  → (despacho) + Prendas + Stock
---   GerenteInventario ⊃ EncargadoDeStock   → (lo anterior) + Categorías + Outfits
+--   GerenteInventario ⊃ OperadorLogistico + Deposito → despacho + prendas + stock + reportes
 -- ============================================================
 
 -- 1) Nodos-rol para los roles nuevos (si faltan).
@@ -706,7 +712,7 @@ INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRo
 SELECT v.Rol, v.Rol, 'Rol', 1, 1, 1
 FROM (VALUES
     ('Auditor'), ('GerenteComercial'), ('OperadorLogistico'),
-    ('EncargadoDeStock'), ('GerenteInventario')
+    ('GerenteInventario')
 ) AS v(Rol)
 WHERE NOT EXISTS (SELECT 1 FROM Permiso p WHERE p.Nombre = v.Rol AND p.EsRol = 1);
 GO
@@ -720,10 +726,6 @@ FROM (VALUES
     ('GerenteComercial',  'mnuAnalisisAbandono'),
     ('GerenteComercial',  'mnuVentasVendedor'),
     ('OperadorLogistico', 'mnuPedidosRealizados'),
-    ('EncargadoDeStock',  'mnuPrendas'),
-    ('EncargadoDeStock',  'mnuStock'),
-    ('GerenteInventario', 'mnuCategorias'),
-    ('GerenteInventario', 'mnuOutfits'),
     ('GerenteInventario', 'mnuAnalisisRotacion'),
     ('GerenteInventario', 'mnuAnalisisMantenimiento'),
     ('GerenteInventario', 'mnuAnalisisEscasez'),
@@ -741,8 +743,8 @@ INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT padre.IdPermiso, hijo.IdPermiso
 FROM (VALUES
     ('GerenteComercial',  'Vendedor'),
-    ('EncargadoDeStock',  'OperadorLogistico'),
-    ('GerenteInventario', 'EncargadoDeStock')
+    ('GerenteInventario', 'OperadorLogistico'),
+    ('GerenteInventario', 'Deposito')
 ) AS v(Padre, Hijo)
 INNER JOIN Permiso padre ON padre.Nombre = v.Padre AND padre.EsRol = 1
 INNER JOIN Permiso hijo  ON hijo.Nombre  = v.Hijo  AND hijo.EsRol  = 1
@@ -751,8 +753,7 @@ WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
 GO
 
 -- ============================================================
--- USUARIOS DEMO DE LOS ROLES NUEVOS + SUPERVISOR COMPUESTO
--- Idempotente. Crea un usuario por rol nuevo (claves en Contraseñas.txt) y convierte a
+-- Idempotente. Crea un usuario demo por cada rol nuevo (claves en Contraseñas.txt).
 -- Supervisor en rol COMPUESTO (Supervisor ⊃ Vendedor) conservando su Auditoría propia:
 -- mismos permisos efectivos que antes, pero ahora obtenidos por HERENCIA (no copiados).
 -- Las claves se guardan hasheadas (PBKDF2). Texto plano: usuario1! (ver Contraseñas.txt).
@@ -764,7 +765,6 @@ FROM (VALUES
   ('auditor',     'SmnGp5hqSC+FXdbLiccYieNpC6vEaWn6nVpgZFrlyyeOXqx8yTjJYOgaw+oXAP7B', 'Auditor',           'Auditor'),
   ('gcomercial',  '1KWgyl8MkMcuisigf4fRBDb2f803LIsA/hvfKpzfwcMbRboUiS5CwuvFQq64GJft', 'GerenteComercial',  'GerenteComercial'),
   ('ginventario', 'G89lxogCulMeAK+WA5rNHSyWpuz5QKF/DBH8PSfiPbUv5SBKStFVQYXylikq+OMw', 'GerenteInventario', 'GerenteInventario'),
-  ('encargado',   'H9LyJ5OBv0m2atrETHrimO5mBcVpKLn46uy/hiTgw4130wCo2H7/sgqAoZ/zroA8', 'EncargadoDeStock',  'EncargadoDeStock'),
   ('logistico',   'U3g703lDqDJfLgaXpOaNiAQpDOaBSq1LUMzEu3X7x8hh6097jTcMUNAsPfl1SCVG', 'OperadorLogistico', 'OperadorLogistico')
 ) AS v(Username, Clave, Rol, Perfil)
 WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username);
@@ -778,7 +778,7 @@ FROM Usuario u
 JOIN (VALUES
     ('admin',       N'Admin',     N'Sistema',      'admin@wardrobeflow.com',       '1985-01-15'),
     ('vendedor',    N'Valentina', N'Bolívar',      'vendedor@wardrobeflow.com',    '1995-06-20'),
-    ('operador',    N'Oscar',     N'Pérez',        'operador@wardrobeflow.com',    '1990-03-10'),
+    ('deposito',    N'Oscar',     N'Pérez',        'deposito@wardrobeflow.com',    '1990-03-10'),
     ('auditor',     N'Ana',       N'Díaz',         'auditor@wardrobeflow.com',     '1988-09-05'),
     ('gcomercial',  N'Gabriel',   N'Morán',        'gcomercial@wardrobeflow.com',  '1983-11-25'),
     ('ginventario', N'Gisela',    N'Ortiz',        'ginventario@wardrobeflow.com', '1986-07-30'),
@@ -788,59 +788,46 @@ WHERE u.Nombre IS NULL AND u.Apellido IS NULL;
 PRINT 'Datos administrativos de usuarios semilla aplicados.';
 GO
 
--- Supervisor → COMPUESTO: se quitan las patentes de Vendedor asignadas directo (quedan por
--- herencia) y se agrega la arista Supervisor → Vendedor; conserva su Auditoría propia.
-DELETE r FROM PermisoRelacion r
-JOIN Permiso sup ON sup.IdPermiso = r.IdPadre AND sup.Nombre = 'Supervisor' AND sup.EsRol = 1
-JOIN Permiso pat ON pat.IdPermiso = r.IdHijo
-                AND pat.NombreMenu IN ('mnuPrendas','mnuClientes','mnuPlanSuscripciones','mnuPedidosVenta');
-INSERT INTO PermisoRelacion (IdPadre, IdHijo)
-SELECT sup.IdPermiso, ven.IdPermiso
-FROM Permiso sup JOIN Permiso ven ON ven.Nombre = 'Vendedor' AND ven.EsRol = 1
-WHERE sup.Nombre = 'Supervisor' AND sup.EsRol = 1
-  AND NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = sup.IdPermiso AND x.IdHijo = ven.IdPermiso);
-PRINT 'Supervisor convertido en rol compuesto (Supervisor → Vendedor).';
-GO
 
 -- ============================================================
 -- CONSOLIDACIÓN DE ROLES (v8) — decisión de diseño 2da entrega
 -- Lleva la jerarquía al ESTADO OBJETIVO (idempotente, sin importar el estado previo):
 --   • Inventario — dos operadores con responsabilidades CLARAS, sin duplicados:
 --       - OperadorLogistico    → pedidos / despacho       (Ver Pedidos Realizados)
---       - OperadorDeInventario → mantenimiento de prendas (Ver Prendas + Gestionar Stock)
+--       - Deposito → mantenimiento de prendas (Ver Prendas + Gestionar Stock)
 --       - GerenteInventario ⊃ AMBOS                       (+ Categorías + Outfits)
 --     Se RETIRAN EncargadoDeStock y ControladorDeStock (eran redundantes con lo anterior).
 --   • Comercial — se RETIRA Supervisor; el jefe es GerenteComercial ⊃ Vendedor.
 -- Este bloque SUPERSEDE los bloques previos para los nodos afectados.
 -- ============================================================
 
--- (a) Asegurar el nodo-rol OperadorDeInventario (por si la BD no lo tenía).
+-- (a) Asegurar el nodo-rol Deposito (por si la BD no lo tenía).
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT 'OperadorDeInventario', 'OperadorDeInventario', 'Rol', 1, 1, 1
-WHERE NOT EXISTS (SELECT 1 FROM Permiso WHERE Nombre = 'OperadorDeInventario' AND EsRol = 1);
+SELECT 'Deposito', 'Deposito', 'Rol', 1, 1, 1
+WHERE NOT EXISTS (SELECT 1 FROM Permiso WHERE Nombre = 'Deposito' AND EsRol = 1);
 GO
 
--- (b) OperadorDeInventario: sus patentes propias deben ser EXACTAMENTE Prendas + Stock.
+-- (b) Deposito: sus patentes propias deben ser EXACTAMENTE Prendas + Stock.
 --     Se quita cualquier patente vieja (p. ej. el legacy 'Ver Pedidos Realizados') y se agregan las nuevas.
 DELETE r FROM PermisoRelacion r
-JOIN Permiso rol ON rol.IdPermiso = r.IdPadre AND rol.Nombre = 'OperadorDeInventario' AND rol.EsRol = 1
+JOIN Permiso rol ON rol.IdPermiso = r.IdPadre AND rol.Nombre = 'Deposito' AND rol.EsRol = 1
 JOIN Permiso pat ON pat.IdPermiso = r.IdHijo  AND ISNULL(pat.EsRol,0) = 0
 WHERE pat.NombreMenu NOT IN ('mnuPrendas','mnuStock');
 INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT rol.IdPermiso, pat.IdPermiso
 FROM (VALUES ('mnuPrendas'), ('mnuStock')) AS v(NombreMenu)
-JOIN Permiso rol ON rol.Nombre = 'OperadorDeInventario' AND rol.EsRol = 1
+JOIN Permiso rol ON rol.Nombre = 'Deposito' AND rol.EsRol = 1
 JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
 GO
 
--- (c) GerenteInventario ⊃ OperadorLogistico + OperadorDeInventario (y se quita la arista vieja a EncargadoDeStock).
+-- (c) GerenteInventario ⊃ OperadorLogistico + Deposito (y se quita la arista vieja a EncargadoDeStock).
 DELETE r FROM PermisoRelacion r
 JOIN Permiso gi ON gi.IdPermiso = r.IdPadre AND gi.Nombre = 'GerenteInventario' AND gi.EsRol = 1
 JOIN Permiso ed ON ed.IdPermiso = r.IdHijo  AND ed.Nombre = 'EncargadoDeStock'  AND ed.EsRol = 1;
 INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT gi.IdPermiso, h.IdPermiso
-FROM (VALUES ('OperadorLogistico'), ('OperadorDeInventario')) AS v(Hijo)
+FROM (VALUES ('OperadorLogistico'), ('Deposito')) AS v(Hijo)
 JOIN Permiso gi ON gi.Nombre = 'GerenteInventario' AND gi.EsRol = 1
 JOIN Permiso h  ON h.Nombre  = v.Hijo AND h.EsRol = 1
 WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = gi.IdPermiso AND x.IdHijo = h.IdPermiso);
@@ -848,7 +835,7 @@ GO
 
 -- (d) Migrar usuarios de los roles que se retiran ANTES de desactivarlos.
 DECLARE @rolesCambiados INT = 0;
-UPDATE Usuario SET Rol = 'OperadorDeInventario', Perfil = 'OperadorDeInventario'
+UPDATE Usuario SET Rol = 'Deposito', Perfil = 'Deposito'
 WHERE Rol IN ('EncargadoDeStock','ControladorDeStock') OR Perfil IN ('EncargadoDeStock','ControladorDeStock','Controlador de Stock');
 SET @rolesCambiados = @rolesCambiados + @@ROWCOUNT;
 UPDATE Usuario SET Rol = 'GerenteComercial', Perfil = 'GerenteComercial'
@@ -960,7 +947,7 @@ GO
 
 -- Si se insertaron usuarios nuevos en una BD ya inicializada, resetear el DV para que la app
 -- lo recalcule limpio en el próximo arranque (evita una falsa alarma de integridad por mezcla).
-IF EXISTS (SELECT 1 FROM Usuario WHERE Username IN ('auditor','gcomercial','ginventario','encargado','logistico') AND DVH = 0)
+IF EXISTS (SELECT 1 FROM Usuario WHERE Username IN ('auditor','gcomercial','ginventario','logistico') AND DVH = 0)
    AND EXISTS (SELECT 1 FROM Usuario WHERE DVH <> 0)
 BEGIN
     UPDATE Usuario SET DVH = 0;
@@ -1057,8 +1044,7 @@ SELECT v.Nombre, v.Apellido, v.DNI, v.Email, GETDATE(), v.Puesto, v.Legajo,
        (SELECT TOP 1 IdUsuario FROM Usuario u WHERE u.Username = v.Username), 0
 FROM (VALUES
     (N'Valentina', N'Morana', '33111000', 'vendedor@wardrobeflow.com', N'Vendedora',           'L-001', 'vendedor'),
-    (N'Bruno',     N'Díaz',   '31222000', 'operador@wardrobeflow.com', N'Operador Inventario', 'L-002', 'operador'),
-    (N'Carla',     N'Méndez', '32333000', 'stock@wardrobeflow.com',    N'Controlador Stock',   'L-003', 'stock')
+    (N'Bruno',     N'Díaz',   '31222000', 'deposito@wardrobeflow.com', N'Depósito',           'L-002', 'deposito')
 ) AS v(Nombre, Apellido, DNI, Email, Puesto, Legajo, Username)
 WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo);
 PRINT 'Demo: empleados.';
@@ -1917,19 +1903,19 @@ GO
 
 -- ── 3) Asignación directa a PermisoRelacion (Administrador y las 2 patentes
 --     de Inventario: Vendedor la usa para anotar clientes, GerenteInventario/
---     OperadorDeInventario para gestionarla) ───────────────────────────────
+--     Deposito para gestionarla) ───────────────────────────────
 INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT rol.IdPermiso, pat.IdPermiso
 FROM (VALUES
     ('Administrador',        'mnuListaEspera'),
     ('Vendedor',              'mnuListaEspera'),
-    ('OperadorDeInventario',  'mnuListaEspera')
+    ('Deposito',  'mnuListaEspera')
 ) AS v(Rol, NombreMenu)
 JOIN Permiso rol ON rol.Nombre = v.Rol AND rol.EsRol = 1
 JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
                   WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
-PRINT 'Permiso mnuListaEspera asignado a Administrador, Vendedor y OperadorDeInventario.';
+PRINT 'Permiso mnuListaEspera asignado a Administrador, Vendedor y Deposito.';
 GO
 
 -- ── 4) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
@@ -2248,7 +2234,7 @@ GO
 -- vuelve físicamente (perdida) se reporta directo desde EnUso → Baja
 -- (CU-DEP-02), habilitado en BE.Estados.EstadoEnUso.
 --
--- Rol: reusa OperadorDeInventario (ya tiene StockEditar/Stock, ya es el
+-- Rol: reusa Deposito (ya tiene StockEditar/Stock, ya es el
 -- "Depósito" conceptual de PN01) — sin rol nuevo, coherente con que en el
 -- modelo real de Nuuly no hay un aprobador. GerenteInventario lo hereda.
 --
@@ -2293,18 +2279,18 @@ WHERE NOT EXISTS (SELECT 1 FROM Permiso p
                   WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0);
 GO
 
--- ── 3) Asignación de patente: Administrador + OperadorDeInventario ───────
+-- ── 3) Asignación de patente: Administrador + Deposito ───────
 INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT rol.IdPermiso, pat.IdPermiso
 FROM (VALUES
     ('Administrador',         'mnuInspeccionDevolucion'),
-    ('OperadorDeInventario',  'mnuInspeccionDevolucion')
+    ('Deposito',  'mnuInspeccionDevolucion')
 ) AS v(Rol, NombreMenu)
 JOIN Permiso rol ON rol.Nombre = v.Rol AND rol.EsRol = 1
 JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
                   WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
-PRINT 'Permiso mnuInspeccionDevolucion asignado a Administrador y OperadorDeInventario.';
+PRINT 'Permiso mnuInspeccionDevolucion asignado a Administrador y Deposito.';
 GO
 
 -- ── 4) Mapeo de controles (pantalla "Perfiles y Permisos" → ítems de menú) ─
@@ -2390,4 +2376,198 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Prenda_Estado' AND obj
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Pedido_Estado' AND object_id = OBJECT_ID('Pedido'))
     CREATE NONCLUSTERED INDEX IX_Pedido_Estado ON Pedido(Estado);
 PRINT 'Índices de Estado (Prenda/Pedido) verificados/creados.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21. DATOS DE PRUEBA DE TODOS LOS PROCESOS
+-- ------------------------------------------------------------
+-- Deja la base instalada con escenarios listos para probar cada proceso sin
+-- cargar nada a mano:
+--   N01  suscripciones en distintos estados (vigente, por vencer, vencida, en
+--        gracia, suspendida, pausada, referido) para Renovación y Cobro.
+--   PN01 clientes aptos para armar un pedido, prendas disponibles y una prenda
+--        en uso con lista de espera.
+--   PN02 contrataciones pendientes de pago (una con un intento fallido) y una
+--        ya cobrada con comprobante.
+--   PN03 sugerencias de promoción y promociones en revisión, vigente y con baja
+--        solicitada.
+--   PN04 prendas En Limpieza pendientes de inspección, una dada de baja con
+--        cargo y valor de reposición cargado en todo el catálogo.
+--   Analítica: pedidos y mantenimientos repartidos en el tiempo.
+-- Idempotente: se aplica una sola vez (marca: cliente Julieta Navarro).
+-- También vincula un Empleado a los usuarios 'caja' y 'admin': sin ese vínculo
+-- no pueden cobrar ni crear pedidos (BLLHelper.ResolverEmpleadoActivo).
+-- DVH = 0: la app recalcula los dígitos verificadores en el primer arranque.
+-- ============================================================
+IF EXISTS (SELECT 1 FROM Cliente WHERE Nombre = N'Julieta' AND Apellido = N'Navarro')
+    PRINT 'Datos de prueba (sección 21) ya aplicados — sin cambios.';
+ELSE
+BEGIN
+    -- ── Empleados de Caja y Administrador ───────────────────────────────────
+    INSERT INTO Empleado (Nombre, Apellido, DNI, Email, FechaIngreso, Puesto, Legajo, IdUsuario, DVH)
+    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, GETDATE(), v.Puesto, v.Legajo,
+           (SELECT TOP 1 IdUsuario FROM Usuario u WHERE u.Username = v.Username), 0
+    FROM (VALUES
+        (N'Carolina', N'Ibáñez',  '34555666', 'caja@wardrobeflow.com',  N'Caja',          'L-003', 'caja'),
+        (N'Admin',    N'Sistema', '30000001', 'admin@wardrobeflow.com', N'Administrador', 'L-004', 'admin')
+    ) AS v(Nombre, Apellido, DNI, Email, Puesto, Legajo, Username)
+    WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo);
+
+    DECLARE @vend INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-001');
+    DECLARE @caja INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-003');
+    DECLARE @hoy  DATE = CAST(GETDATE() AS DATE);
+    DECLARE @pBasico  INT = (SELECT IdPlan FROM PlanSuscripcion WHERE Nombre = N'Básico');
+    DECLARE @pEstand  INT = (SELECT IdPlan FROM PlanSuscripcion WHERE Nombre = N'Estándar');
+    DECLARE @pPremium INT = (SELECT IdPlan FROM PlanSuscripcion WHERE Nombre = N'Premium');
+
+    -- ── Clientes nuevos ──────────────────────────────────────────────────────
+    INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaNacimiento, Activo, DVH)
+    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, v.MetodoPago,
+           (SELECT TOP 1 IdPlan FROM PlanSuscripcion p WHERE p.Nombre = v.PlanNom),
+           DATEADD(DAY, -v.DiasAlta, GETDATE()), v.FechaNac, 1, 0
+    FROM (VALUES
+        (N'Julieta', N'Navarro', '31555777', 'julieta.navarro@mail.com', 'Crédito',       N'Estándar', 120, CONVERT(date,'1992-05-18')),
+        (N'Tomás',   N'Benítez', '33666888', 'tomas.benitez@mail.com',   'Débito',        N'Básico',    90, CONVERT(date,'1995-09-03')),
+        (N'Renata',  N'Silva',   '36777999', 'renata.silva@mail.com',    'Efectivo',      NULL,          2, CONVERT(date,'1999-12-21')),
+        (N'Agustín', N'Molina',  '34888111', 'agustin.molina@mail.com',  'Transferencia', N'Estándar',  30, CONVERT(date,'1988-02-09')),
+        (N'Paula',   N'Herrera', '32999222', 'paula.herrera@mail.com',   'Crédito',       N'Premium',   45, CONVERT(date,'1993-08-27')),
+        (N'Nicolás', N'Vega',    '38111333', 'nicolas.vega@mail.com',    'Débito',        N'Básico',    60, CONVERT(date,'1997-04-14'))
+    ) AS v(Nombre, Apellido, DNI, Email, MetodoPago, PlanNom, DiasAlta, FechaNac)
+    WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE c.Nombre = v.Nombre AND c.Apellido = v.Apellido);
+
+    DECLARE @cLucia  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Lucía'   AND Apellido=N'Fernández');
+    DECLARE @cMartin INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Martín'  AND Apellido=N'Gómez');
+    DECLARE @cSofia  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Sofía'   AND Apellido=N'Rossi');
+    DECLARE @cDiego  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Diego'   AND Apellido=N'Paz');
+    DECLARE @cCamila INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Camila'  AND Apellido=N'Torres');
+    DECLARE @cJulie  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Julieta' AND Apellido=N'Navarro');
+    DECLARE @cTomas  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Tomás'   AND Apellido=N'Benítez');
+    DECLARE @cRenata INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Renata'  AND Apellido=N'Silva');
+    DECLARE @cAgus   INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Agustín' AND Apellido=N'Molina');
+    DECLARE @cPaula  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Paula'   AND Apellido=N'Herrera');
+    DECLARE @cNico   INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Nicolás' AND Apellido=N'Vega');
+
+    -- ── Estado de la suscripción de cada cliente (N01: Renovación / Cobro) ──
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 25, @hoy)  WHERE IdCliente = @cLucia;   -- vigente
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 4,  @hoy)  WHERE IdCliente = @cMartin;  -- por vencer
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, -10, @hoy) WHERE IdCliente = @cSofia;   -- vencida
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, -20, @hoy),
+                       FechaLimiteGracia = DATEADD(DAY, 3, @hoy)  WHERE IdCliente = @cDiego;   -- en gracia
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 40, @hoy)  WHERE IdCliente = @cCamila;  -- vigente
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, -40, @hoy),
+                       FechaLimiteGracia = DATEADD(DAY, -5, @hoy) WHERE IdCliente = @cJulie;   -- suspendida por pago
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 20, @hoy),
+                       FechaPausaHasta = DATEADD(DAY, 10, GETDATE()) WHERE IdCliente = @cTomas; -- pausada
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 28, @hoy),
+                       IdClienteReferente = @cLucia, BeneficioReferidoOtorgado = 1,
+                       DescuentoProximoCobro = 1000               WHERE IdCliente = @cAgus;    -- referido
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 30, @hoy)  WHERE IdCliente = @cPaula;   -- vigente, sin pedidos
+    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 18, @hoy)  WHERE IdCliente = @cNico;    -- vigente
+    -- Renata Silva: sin plan ni vencimiento, para probar la contratación (PN02).
+
+    -- ── Prendas: valor de reposición en todo el catálogo (PN04) ─────────────
+    UPDATE Prenda SET PrecioReposicion = CASE Categoria
+            WHEN N'Vestido' THEN 45000 WHEN N'Saco' THEN 38000 WHEN N'Abrigo' THEN 52000
+            WHEN N'Camisa'  THEN 18000 WHEN N'Pantalón' THEN 24000 WHEN N'Falda' THEN 20000
+            WHEN N'Sweater' THEN 22000 ELSE 30000 END
+    WHERE PrecioReposicion IS NULL;
+
+    -- ── Prendas nuevas: 3 En Limpieza (a inspeccionar), 1 de Baja y 4 Disponibles ──
+    INSERT INTO Prenda (Nombre, Descripcion, Talle, Color, Categoria, Estado, IdClienteActual, IdUltimoCliente, PrecioReposicion, FechaAlta)
+    SELECT v.Nombre, v.Descripcion, v.Talle, v.Color, v.Categoria, v.Estado, NULL, v.UltimoCliente, v.Precio, DATEADD(DAY, -70, GETDATE())
+    FROM (VALUES
+        (N'Vestido Rojo Cóctel',     N'Vestido corto de fiesta',  'S',  N'Rojo',      N'Vestido',  2, @cLucia,  45000.00),
+        (N'Blazer Azul Marino',      N'Blazer cruzado',           'M',  N'Azul',      N'Saco',     2, @cCamila, 38000.00),
+        (N'Campera de Cuero',        N'Campera biker de cuero',   'L',  N'Negro',     N'Abrigo',   2, @cDiego,  60000.00),
+        (N'Traje Gris Slim',         N'Traje de dos piezas',      'L',  N'Gris',      N'Saco',     3, @cCamila, 60000.00),
+        (N'Vestido Midi Verde',      N'Vestido midi de gasa',     'M',  N'Verde',     N'Vestido',  0, NULL,     42000.00),
+        (N'Tapado Rojo',             N'Tapado de paño',           'M',  N'Rojo',      N'Abrigo',   0, NULL,     55000.00),
+        (N'Camisa Estampada',        N'Camisa de viscosa',        'S',  N'Estampado', N'Camisa',   0, NULL,     19000.00),
+        (N'Pantalón Palazzo Blanco', N'Pantalón ancho de lino',   '40', N'Blanco',    N'Pantalón', 0, NULL,     26000.00)
+    ) AS v(Nombre, Descripcion, Talle, Color, Categoria, Estado, UltimoCliente, Precio)
+    WHERE NOT EXISTS (SELECT 1 FROM Prenda pr WHERE pr.Nombre = v.Nombre);
+
+    -- Las prendas que ya estaban en uso recuerdan quién las tiene (para cargos por daño/pérdida).
+    UPDATE Prenda SET IdUltimoCliente = IdClienteActual
+    WHERE IdClienteActual IS NOT NULL AND IdUltimoCliente IS NULL;
+
+    -- ── Mantenimiento: 3 abiertos (las En Limpieza) + histórico cerrado (analítica) ──
+    INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, FechaSalida, Actor)
+    SELECT pr.IdPrenda, DATEADD(DAY, -v.Dias, GETDATE()), NULL, 'deposito'
+    FROM (VALUES (N'Vestido Rojo Cóctel', 2), (N'Blazer Azul Marino', 1), (N'Campera de Cuero', 0)) AS v(Nombre, Dias)
+    JOIN Prenda pr ON pr.Nombre = v.Nombre;
+
+    INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, FechaSalida, Actor)
+    SELECT pr.IdPrenda, DATEADD(DAY, -v.Dias, GETDATE()), DATEADD(DAY, -v.Dias + v.Duracion, GETDATE()), 'deposito'
+    FROM (VALUES
+        (N'Vestido Floral', 50, 6), (N'Vestido Floral', 35, 7), (N'Vestido Floral', 20, 5),
+        (N'Blazer Beige',   45, 4), (N'Blazer Beige',   25, 6)
+    ) AS v(Nombre, Dias, Duracion)
+    JOIN Prenda pr ON pr.Nombre = v.Nombre;
+
+    -- ── Pedidos históricos (analítica de rotación y ventas por vendedor) ─────
+    DECLARE @vf  INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Vestido Floral');
+    DECLARE @gab INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Gabardina Verde');
+    DECLARE @ph TABLE (Cli INT, Dias INT, Estado INT);
+    INSERT INTO @ph VALUES (@cLucia, 55, 2), (@cMartin, 45, 2), (@cDiego, 35, 2),
+                           (@cCamila, 25, 2), (@cPaula, 15, 2), (@cNico, 10, 3);
+    DECLARE @cli INT, @dias INT, @est INT, @idp INT;
+    DECLARE curPed CURSOR LOCAL FAST_FORWARD FOR SELECT Cli, Dias, Estado FROM @ph;
+    OPEN curPed;
+    FETCH NEXT FROM curPed INTO @cli, @dias, @est;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, MotivoCancelacion, DVH)
+        VALUES (@cli, @vend, @est, DATEADD(DAY, -@dias, GETDATE()),
+                CASE WHEN @est = 2 THEN DATEADD(DAY, -@dias + 2, GETDATE()) END,
+                CASE WHEN @est = 2 THEN DATEADD(DAY, -@dias + 4, GETDATE()) END,
+                CASE WHEN @est = 3 THEN N'El cliente desistió del pedido' END, 0);
+        SET @idp = SCOPE_IDENTITY();
+        INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@idp, @vf);
+        IF @dias IN (45, 25) INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@idp, @gab);
+        FETCH NEXT FROM curPed INTO @cli, @dias, @est;
+    END
+    CLOSE curPed;
+    DEALLOCATE curPed;
+
+    -- ── PN01: lista de espera sobre una prenda en uso ────────────────────────
+    INSERT INTO ListaEspera (IdPrenda, IdCliente, FechaAlta, Estado, Actor)
+    SELECT pr.IdPrenda, @cNico, DATEADD(DAY, -1, GETDATE()), 0, 'vendedor'
+    FROM Prenda pr WHERE pr.Nombre = N'Vestido Largo Negro' AND pr.Estado = 1;
+
+    -- ── PN02: contrataciones (2 pendientes de pago y 1 cobrada) ─────────────
+    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, IntentosPago, FechaAlta, FechaResolucion, MedioPago, NumeroComprobante, FechaComprobante)
+    VALUES
+        (@cRenata, @pEstand,  @vend, NULL,  0, 0, 0, DATEADD(HOUR, -3, GETDATE()), NULL, NULL, NULL, NULL),
+        (@cJulie,  @pPremium, @vend, NULL,  2, 0, 1, DATEADD(DAY,  -1, GETDATE()), NULL, NULL, NULL, NULL),
+        (@cPaula,  @pPremium, @vend, @caja, 1, 1, 0, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
+            'Efectivo', 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()));
+
+    -- ── PN03: sugerencias y promociones en cada estado ──────────────────────
+    INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta)
+    VALUES
+        (@pBasico, NULL,      N'El plan Básico tiene la mayor tasa de abandono: un descuento de retención puede sostenerlo.', 0, 12000.00, 0, DATEADD(DAY, -3, GETDATE())),
+        (NULL,     N'Abrigo', N'Los abrigos rotan poco fuera de temporada: conviene incentivar su alquiler.',                 1,  5000.00, 0, DATEADD(DAY, -2, GETDATE()));
+
+    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, CategoriaPrenda, MargenEstimado, ImpactoEconomico, Observacion, MotivoBaja, FechaAlta)
+    VALUES
+        (N'Verano Estándar -10%', N'10% de descuento en el plan Estándar durante el verano.', 0, 10.00,
+         DATEADD(DAY, -10, @hoy), DATEADD(DAY, 50, @hoy), 1, @pEstand, NULL, 8000.00,
+         N'Reducción de ingresos compensada por mayor retención.', N'Aprobada por Contabilidad.', NULL, DATEADD(DAY, -12, GETDATE())),
+        (N'Abrigos $3000 off', N'Descuento fijo por prenda en la categoría Abrigo.', 1, 3000.00,
+         @hoy, DATEADD(DAY, 60, @hoy), 0, NULL, N'Abrigo', 4500.00,
+         N'Impacto bajo: la categoría tiene baja rotación.', NULL, NULL, DATEADD(DAY, -1, GETDATE())),
+        (N'Premium Bienvenida -15%', N'15% de descuento en el primer mes del plan Premium.', 0, 15.00,
+         DATEADD(DAY, -30, @hoy), DATEADD(DAY, 30, @hoy), 3, @pPremium, NULL, 6000.00,
+         N'Descuento de captación para nuevos clientes.', N'Aprobada por Contabilidad.',
+         N'Se superpone con la promoción Verano y erosiona el margen.', DATEADD(DAY, -32, GETDATE()));
+
+    -- ── PN04: cargo pendiente por la prenda dada de baja ─────────────────────
+    INSERT INTO CargoPrenda (IdPrenda, IdCliente, Motivo, Monto, FechaRegistro, Actor, Estado)
+    SELECT pr.IdPrenda, @cCamila, N'Daño irreparable detectado en la inspección', pr.PrecioReposicion,
+           DATEADD(DAY, -2, GETDATE()), 'deposito', 0
+    FROM Prenda pr WHERE pr.Nombre = N'Traje Gris Slim';
+
+    PRINT 'Datos de prueba (sección 21) aplicados.';
+END
 GO

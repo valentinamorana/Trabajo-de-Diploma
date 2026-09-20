@@ -18,7 +18,7 @@ namespace DAL
         // el mismo criterio en DAL.Usuario.ColumnaInexistente).
         private const int ColumnaInexistente = 207;
 
-        // Todas las columnas (perfil + seguridad). Tras 02_Actualizar la tabla las tiene.
+        // Todas las columnas (perfil + seguridad). Tras 00_Instalacion_Completa la tabla las tiene.
         private const string Cols =
             "IdVersion, IdUsuario, Fecha, Actor, Detalle, UsernameSnap, " +
             "NombreSnap, ApellidoSnap, FechaNacSnap, EmailSnap, ClaveSnap, EstadoSnap, IntentosSnap";

@@ -2,22 +2,45 @@ WardrobeFlow — Credenciales iniciales (usuarios semilla)
 ==========================================================
 
 Estas cuentas se crean automáticamente al instalar el sistema por primera vez
-(ver BD/01_Crear_BaseDeDatos.sql). Se recomienda cambiar las contraseñas
+(ver BD/00_Instalacion_Completa.sql). Se recomienda cambiar las contraseñas
 desde Mi Perfil apenas se ingresa por primera vez.
 
-  Usuario     Contraseña           Rol
-  ----------- -------------------- --------------------
-  admin       administrador1!      Administrador
-  supervisor  supervisor1!         Supervisor
-  vendedor    vendedor1!           Vendedor
-  stock       controladorstock1!   Controlador de Stock
-  operador    operador1!           Operador de Inventario
+  Usuario       Contraseña           Rol
+  ------------- -------------------- -----------------------------------------
+  admin         administrador1!      Administrador
+  vendedor      vendedor1!           Vendedor
+  deposito      deposito1!           Deposito
+  caja          usuario1!            Caja                      (PN02)
+  admcomercial  usuario1!            AdministracionComercial   (PN03)
+  contable      usuario1!            Contabilidad              (PN03)
+  gcomercial    gcomercial1!         GerenteComercial
+  ginventario   ginventario1!        GerenteInventario
+  logistico     logistico1!          OperadorLogistico
+  auditor       auditor1!            Auditor
+
+Usuarios sugeridos para probar los procesos de negocio
+-------------------------------------------------------
+  PN01 Armar pedido ............ vendedor (arma el pedido) y deposito (verifica
+                                 y reserva las prendas)
+  PN02 Comercialización ........ vendedor (crea la contratación) y caja (cobra)
+  PN03 Promociones ............. gcomercial (sugiere), admcomercial (crea),
+                                 contable (aprueba), vendedor (sugiere la baja)
+  PN04 Inspección de devolución  deposito
+
+Datos de prueba incluidos
+-------------------------
+La base se instala con datos de ejemplo para probar cada proceso sin cargar
+nada a mano: 11 clientes con suscripciones en distintos estados (vigente, por
+vencer, vencida, en gracia, suspendida, pausada, referido), 20 prendas en
+distintos estados (3 En Limpieza para inspeccionar), pedidos, contrataciones
+pendientes de pago, una lista de espera, sugerencias y promociones.
 
 Requisitos previos a la instalación
 ------------------------------------
-- SQL Server Express (o superior) instalado y en ejecución, con la instancia
-  con nombre SQLEXPRESS (instancia por defecto de SQL Server Express).
+- SQL Server Express (o superior) o SQL LocalDB instalado. El instalador
+  detecta las instancias disponibles; si hay más de una permite elegir, y si
+  no encuentra ninguna permite ingresar el servidor a mano.
 - .NET Framework 4.7.2 o superior.
 
-El instalador crea la base de datos WardrobeFlowDB y todas sus tablas de
-forma automática durante la instalación.
+El instalador crea la base de datos WardrobeFlowDB, todas sus tablas y los
+datos de prueba de forma automática durante la instalación.

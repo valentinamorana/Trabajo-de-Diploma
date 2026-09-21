@@ -515,7 +515,7 @@
             this.reporteJornadaToolStripMenuItem.Name = "reporteJornadaToolStripMenuItem";
             this.reporteJornadaToolStripMenuItem.Tag = "mnu.reportejornada";
             this.reporteJornadaToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.reporteJornadaToolStripMenuItem.Text = "📊  Reporte de Jornada";
+            this.reporteJornadaToolStripMenuItem.Text = "Reporte de Jornada";
             this.reporteJornadaToolStripMenuItem.Click += new System.EventHandler(this.reporteJornadaToolStripMenuItem_Click);
             //
             // sepAnaliticaToolStripSeparator — separa Análisis de Abandono (retención, PdN10)

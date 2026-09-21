@@ -64,7 +64,7 @@ namespace DAL
                     "LEFT JOIN Cliente cu ON cu.IdCliente = p.IdUltimoCliente " +
                     "WHERE p.Estado = @Estado " +
                     "ORDER BY p.Categoria, p.Nombre",
-                    new[] { new SqlParameter("@Estado", (int)BE.EstadoPrenda.Disponible) });
+                    new[] { new SqlParameter("@Estado", (object)(int)BE.EstadoPrenda.Disponible) });
 
                 foreach (DataRow row in tabla.Rows)
                     lista.Add(Mapear(row));
@@ -184,7 +184,7 @@ namespace DAL
                     "WHERE Estado = @Estado " +
                     "GROUP BY Talle, Categoria " +
                     "ORDER BY Categoria, Talle",
-                    new[] { new SqlParameter("@Estado", (int)BE.EstadoPrenda.Disponible) });
+                    new[] { new SqlParameter("@Estado", (object)(int)BE.EstadoPrenda.Disponible) });
 
                 if (tabla != null)
                     foreach (DataRow row in tabla.Rows)

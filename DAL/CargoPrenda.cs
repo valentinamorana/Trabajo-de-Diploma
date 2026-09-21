@@ -38,7 +38,7 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdCliente", idCliente),
-                new SqlParameter("@Estado", (int)BE.EstadoCargo.Pendiente)
+                new SqlParameter("@Estado", (object)(int)BE.EstadoCargo.Pendiente)
             };
             DataTable tabla = acceso.Leer(
                 SELECT_BASE + " WHERE g.IdCliente = @IdCliente AND g.Estado = @Estado " +
@@ -58,7 +58,7 @@ namespace DAL
                 new SqlParameter("@Monto",         cargo.Monto),
                 new SqlParameter("@FechaRegistro", cargo.FechaRegistro),
                 new SqlParameter("@Actor",         (object)cargo.Actor ?? DBNull.Value),
-                new SqlParameter("@Estado",        (int)BE.EstadoCargo.Pendiente)
+                new SqlParameter("@Estado",        (object)(int)BE.EstadoCargo.Pendiente)
             };
 
             DataTable tabla = acceso.Leer(

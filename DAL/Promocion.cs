@@ -133,7 +133,7 @@ namespace DAL
                 new SqlParameter("@CategoriaPrenda",  (object)promocion.CategoriaPrenda ?? DBNull.Value),
                 new SqlParameter("@MargenEstimado",   promocion.MargenEstimado),
                 new SqlParameter("@ImpactoEconomico", (object)promocion.ImpactoEconomico ?? DBNull.Value),
-                new SqlParameter("@EstadoRevision",  (int)BE.EstadoPromocion.EnRevisionContable)
+                new SqlParameter("@EstadoRevision",  (object)(int)BE.EstadoPromocion.EnRevisionContable)
             };
             try
             {

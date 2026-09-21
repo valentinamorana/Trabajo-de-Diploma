@@ -60,7 +60,7 @@ namespace DAL
                     SELECT_BASE +
                     " WHERE ped.Estado = @Estado" +
                     " ORDER BY ped.FechaPedido",
-                    new[] { new SqlParameter("@Estado", (int)BE.EstadoPedido.Pendiente) });
+                    new[] { new SqlParameter("@Estado", (object)(int)BE.EstadoPedido.Pendiente) });
 
                 foreach (DataRow row in tabla.Rows)
                     lista.Add(MapearCabecera(row));

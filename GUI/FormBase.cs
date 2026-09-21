@@ -161,7 +161,8 @@ namespace GUI
                     "Excepción: " + ex.GetType().Name,
                     BE.Criticidad.Alta,
                     idUsuario,
-                    $"Usuario '{usuario}' — {modulo}: {ex.Message}");
+                    $"Usuario '{usuario}' — {modulo}: {ex.Message}" +
+                    (ex.InnerException != null ? $" | Causa: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}" : ""));
             }
             catch { /* el fallo al registrar no debe romper el manejo del error */ }
         }

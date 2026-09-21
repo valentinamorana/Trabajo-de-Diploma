@@ -1,0 +1,41 @@
+erDiagram
+  Permiso ||--o{ PermisoRelacion : "IdPadre"
+  Permiso ||--o{ PermisoRelacion : "IdHijo"
+  Permiso ||--o{ RolPermiso : "IdPermiso"
+  Permiso {
+    int IdPermiso PK
+    nvarchar(100) Nombre
+    nvarchar(100) NombreMenu "NULL"
+    nvarchar(100) TipoComponente "NULL"
+    bit Estado
+    bit EsFamilia
+    bit EsRol
+  }
+  PermisoRelacion {
+    int IdPadre PK,FK
+    int IdHijo PK,FK
+  }
+  RolPermiso {
+    nvarchar(100) Rol PK
+    int IdPermiso PK,FK
+  }
+  Usuario {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    varchar(5) IdIdioma "NULL"
+    bit Activo
+    datetime FechaBaja "NULL"
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
+    bit RequiereCambioClave
+    nvarchar(100) Nombre "NULL"
+    nvarchar(100) Apellido "NULL"
+    date FechaNacimiento "NULL"
+    nvarchar(200) Email "NULL"
+  }

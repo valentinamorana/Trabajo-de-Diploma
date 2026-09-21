@@ -1,0 +1,32 @@
+erDiagram
+  Usuario |o--o{ Bitacora : "usuario"
+  Bitacora {
+    int Id PK
+    datetime fecha
+    int usuario FK "NULL"
+    nvarchar(100) modulo "NULL"
+    nvarchar(200) actividad "NULL"
+    nvarchar(1000) detalle "NULL"
+    int criticidad
+    nvarchar(50) ip "NULL"
+  }
+  Usuario {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    varchar(5) IdIdioma "NULL"
+    bit Activo
+    datetime FechaBaja "NULL"
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
+    bit RequiereCambioClave
+    nvarchar(100) Nombre "NULL"
+    nvarchar(100) Apellido "NULL"
+    date FechaNacimiento "NULL"
+    nvarchar(200) Email "NULL"
+  }

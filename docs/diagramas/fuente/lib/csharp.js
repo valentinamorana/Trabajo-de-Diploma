@@ -111,7 +111,11 @@ function indice() {
     for (const f of listar(dir)) {
       for (const c of parsearArchivo(f)) {
         const clave = c.ns + '.' + c.nombre;
-        (mapa[c.nombre] = mapa[c.nombre] || []).push({ ...c, clave });
+        const lista = (mapa[c.nombre] = mapa[c.nombre] || []);
+        // Clases parciales (partial): se fusionan los miembros de todos los archivos en una sola clase.
+        const previa = lista.find(x => x.ns === c.ns);
+        if (previa) { previa.metodos = previa.metodos.concat(c.metodos); previa.props = previa.props.concat(c.props); continue; }
+        lista.push({ ...c, clave });
       }
     }
   }

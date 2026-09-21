@@ -1,0 +1,14 @@
+sequenceDiagram
+  autonumber
+  actor A as Administrador
+  participant F as GestorPermisos
+  participant B as BLL.Familia
+  participant D as DAL.Permiso
+  participant L as Bitácora
+  A->>F: Selecciona un rol y un permiso o rol asignable (BtnAsignar_Click)
+  F->>B: AgregarComponente(idPadre, idHijo)
+  Note over B: VerificarPuedeGestionar() · un componente no puede contenerse a sí mismo · ValidarSinCiclo()
+  B->>D: AgregarRelacion(idPadre, idHijo)
+  B->>L: Registrar(Relación creada, Criticidad.Alta)
+  B-->>F: relación creada
+  F-->>A: Refresca el árbol de permisos

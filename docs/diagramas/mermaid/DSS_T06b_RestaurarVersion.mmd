@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor A as Administrador
+  participant F as Version<br/>HistorialForm
+  participant B as BLL.Version<br/>Usuario
+  participant C as BLL.Cuidador<br/>Historial
+  participant U as BE.Usuario
+  participant D as DAL.Usuario
+  participant L as Bitácora
+  A->>F: Elige una versión del historial y restaura (btnRestaurar_Click)
+  F->>B: RestaurarVersion(modulo, idVersion)
+  Note over B: exige Administrador
+  B->>C: Obtener(idVersion)
+  C-->>B: memento (IMemento)
+  B->>D: ObtenerPorId(idUsuario)
+  B->>U: RestaurarDesde(memento)
+  B->>D: RestaurarVersion(memento)
+  B->>C: Guardar(idUsuario, memento del estado restaurado)
+  B->>L: Registrar(Restauración a versión, Criticidad.Alta)
+  B-->>F: usuario restaurado
+  F-->>A: Confirma y actualiza el historial

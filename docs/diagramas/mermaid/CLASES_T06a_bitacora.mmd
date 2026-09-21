@@ -1,0 +1,56 @@
+classDiagram
+  direction TB
+  class GUI_Bitacora["GUI.Bitacora"] {
+  }
+  class BLL_Bitacora["BLL.Bitacora"] {
+    +RegistrarSinSesion(string,  string,  Criticidad,  int?,  string) void
+    +ObtenerTodosSistema() DataTable
+    +ObtenerUltimosNDiasSistema(int) DataTable
+    +BuscarPorFiltrosSistema(DateTime?,  DateTime?,  int,  string,  int) DataTable
+    +ObtenerTodosNegocio() DataTable
+    +BuscarPorFiltrosNegocio(DateTime?,  DateTime?,  string,  int?,  int?) DataTable
+    +UsuarioPuedeVerSistema() bool
+  }
+  class Servicios_Bitacora["Servicios.Bitacora"] {
+    +Registrar(string,  string,  Criticidad) void
+    +RegistrarSinSesion(string,  string,  Criticidad,  int?,  string) void
+    +ObtenerTodos() DataTable
+    +ObtenerUltimosNDias(int) DataTable
+    +BuscarPorFiltros(DateTime?,  DateTime?,  int,  string,  int) DataTable
+    +ObtenerIPLocal() string
+  }
+  class Servicios_BitacoraNegocio["Servicios.BitacoraNegocio"] {
+    +Registrar(TipoEventoNegocio,  string,  int?,  int?,  int?) void
+    +ObtenerTodos() DataTable
+    +BuscarPorFiltros(DateTime?,  DateTime?,  string,  int?,  int?) DataTable
+  }
+  class Bitacora {
+    +int Id
+    +DateTime Fecha
+    +int? IdUsuario
+    +string Modulo
+    +string Actividad
+    +string Detalle
+    +Criticidad Criticidad
+    +string IP
+  }
+  class BitacoraNegocio {
+    +int IdEvento
+    +DateTime Fecha
+    +TipoEventoNegocio Tipo
+    +int? IdUsuario
+    +int? IdPedido
+    +int? IdPrenda
+    +int? IdCliente
+    +string Descripcion
+    +string UsernameUsuario
+    +string NombreCliente
+  }
+  class ActividadesBitacora {
+    <<static>>
+  }
+  ____________ ..> ____________ : usa
+  ____________ ..> __________________ : usa
+  ____________ ..> _________________________ : usa
+  __________________ ..> Bitacora : usa
+  _________________________ ..> BitacoraNegocio : usa

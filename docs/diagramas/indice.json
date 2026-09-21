@@ -313,5 +313,130 @@
     "id": "DSS_PN03_CU02_GER_ConsultarAnalitica",
     "tipo": "secuencia",
     "titulo": "PN03 · CU02-GER Consultar analítica de negocio"
+  },
+  {
+    "id": "CLASES_T02_login_logout",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — T02 Login y Logout"
+  },
+  {
+    "id": "CLASES_T04_perfiles",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — T04 Gestión de perfiles (patrón Composite)"
+  },
+  {
+    "id": "CLASES_T05_idiomas",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — T05 Gestión de múltiples idiomas (patrón Observer)"
+  },
+  {
+    "id": "CLASES_T06a_bitacora",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — T06a Gestión de bitácora"
+  },
+  {
+    "id": "CLASES_T06b_control_cambios",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — T06b Control de cambios de usuarios (patrón Memento)"
+  },
+  {
+    "id": "CLASES_T07_digitos_verificadores",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — T07 Dígitos verificadores"
+  },
+  {
+    "id": "CLASES_T08_backup",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — T08 Backup y restauración"
+  },
+  {
+    "id": "DER_T02_login",
+    "tipo": "er",
+    "titulo": "DER — T02 Login y Logout"
+  },
+  {
+    "id": "DER_T04_perfiles",
+    "tipo": "er",
+    "titulo": "DER — T04 Gestión de perfiles"
+  },
+  {
+    "id": "DER_T05_idiomas",
+    "tipo": "er",
+    "titulo": "DER — T05 Gestión de múltiples idiomas"
+  },
+  {
+    "id": "DER_T06_bitacora",
+    "tipo": "er",
+    "titulo": "DER — T06 Bitácora y control de cambios"
+  },
+  {
+    "id": "DER_T07_dv",
+    "tipo": "er",
+    "titulo": "DER — T07 Dígitos verificadores"
+  },
+  {
+    "id": "DER_T08_backup",
+    "tipo": "er",
+    "titulo": "DER — T08 Backup y restauración (bitácora de las operaciones)"
+  },
+  {
+    "id": "DSS_T02_1_Login",
+    "tipo": "secuencia",
+    "titulo": "T02.1 · Login del sistema"
+  },
+  {
+    "id": "DSS_T02_2_Logout",
+    "tipo": "secuencia",
+    "titulo": "T02.2 · Logout del sistema"
+  },
+  {
+    "id": "DSS_T04_AsignarPermiso",
+    "tipo": "secuencia",
+    "titulo": "T04 · Asignar un permiso o rol a un rol (Composite)"
+  },
+  {
+    "id": "DSS_T05_CambiarIdioma",
+    "tipo": "secuencia",
+    "titulo": "T05 · Cambio de idioma (Observer)"
+  },
+  {
+    "id": "DSS_T05_GuardarTraduccion",
+    "tipo": "secuencia",
+    "titulo": "T05 · Administrar traducciones"
+  },
+  {
+    "id": "DSS_T06a_ConsultarBitacora",
+    "tipo": "secuencia",
+    "titulo": "T06a · Consultar la bitácora del sistema"
+  },
+  {
+    "id": "DSS_T06a_RegistrarBitacora",
+    "tipo": "secuencia",
+    "titulo": "T06a · Registrar un evento en la bitácora"
+  },
+  {
+    "id": "DSS_T06b_RestaurarVersion",
+    "tipo": "secuencia",
+    "titulo": "T06b · Restaurar una versión de un usuario (Memento)"
+  },
+  {
+    "id": "DSS_T07_VerificarIntegridad",
+    "tipo": "secuencia",
+    "titulo": "T07 · Verificación de integridad al iniciar (DVH y DVV)"
+  },
+  {
+    "id": "DSS_T07_RecuperarIntegridad",
+    "tipo": "secuencia",
+    "titulo": "T07 · Diagnóstico y reparación de la integridad"
+  },
+  {
+    "id": "DSS_T08_RealizarBackup",
+    "tipo": "secuencia",
+    "titulo": "T08 · Realizar un backup cifrado"
+  },
+  {
+    "id": "DSS_T08_RestaurarBackup",
+    "tipo": "secuencia",
+    "titulo": "T08 · Restaurar un backup"
   }
 ]

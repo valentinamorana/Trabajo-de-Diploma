@@ -19,7 +19,9 @@ const modelos = [].concat(
   require('./modelos/clases'),
   require('./modelos/casos'),
   require('./modelos/actividades'),
-  require('./modelos/secuencias')
+  require('./modelos/secuencias'),
+  require('./modelos/seguridad_clases'),
+  require('./modelos/seguridad_secuencias')
 );
 
 for (const d of ['mermaid', 'drawio']) fs.mkdirSync(path.join(SALIDA, d), { recursive: true });

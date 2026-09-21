@@ -1,0 +1,40 @@
+sequenceDiagram
+  autonumber
+  actor U as Usuario
+  participant F as Login
+  participant B as BLL.Usuario
+  participant S as ContadorSesion
+  participant D as DAL.Usuario
+  participant E as Encriptador
+  participant M as SessionManager
+  participant L as Bitácora
+  U->>F: Ingresa usuario y contraseña (btnIngresar_Click)
+  F->>B: Login(modulo, username, contraseña)
+  B->>D: ObtenerPorUsername(username)
+  D-->>B: usuario (o null)
+  alt Usuario inexistente
+    B->>E: VerificacionSenuelo(contraseña)
+    B->>S: RegistrarIntento()
+    B->>L: RegistrarSinSesion(IntentoFallidoLogin)
+    B-->>F: LoginException(CredencialesInvalidas)
+  else Usuario existente
+    B->>E: VerificarContrasena(contraseña, hash)
+    alt Contraseña correcta
+      B->>S: Resetear()
+      B->>D: ResetearIntentosFallidos(username)
+      B->>M: Login(usuario)  [permisos efectivos resueltos del árbol Composite]
+      B->>L: Registrar(InicioSesion)
+      B-->>F: true
+      F-->>U: Abre el menú principal
+    else Contraseña incorrecta
+      B->>S: RegistrarIntento()
+      B->>D: IncrementarIntentosFallidos(username)
+      alt 3 intentos fallidos
+        B->>D: BloquearConTiempo(id)  [1, 5, 15 o 60 min, luego permanente]
+        B->>L: RegistrarSinSesion(BloqueoDeCuenta)
+        B-->>F: LoginException(CuentaBloqueada)
+      else Menos de 3
+        B-->>F: LoginException(CredencialesInvalidas)
+      end
+    end
+  end

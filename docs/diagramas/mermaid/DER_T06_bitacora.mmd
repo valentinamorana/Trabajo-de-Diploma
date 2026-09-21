@@ -1,0 +1,59 @@
+erDiagram
+  Usuario |o--o{ Bitacora : "usuario"
+  Usuario |o--o{ BitacoraNegocio : "IdUsuario"
+  Usuario ||--o{ HistorialUsuario : "IdUsuario"
+  Bitacora {
+    int Id PK
+    datetime fecha
+    int usuario FK "NULL"
+    nvarchar(100) modulo "NULL"
+    nvarchar(200) actividad "NULL"
+    nvarchar(1000) detalle "NULL"
+    int criticidad
+    nvarchar(50) ip "NULL"
+  }
+  BitacoraNegocio {
+    int IdEvento PK
+    datetime Fecha
+    nvarchar(100) Tipo
+    int IdUsuario FK "NULL"
+    int IdPedido FK "NULL"
+    int IdPrenda FK "NULL"
+    int IdCliente FK "NULL"
+    nvarchar(500) Descripcion
+  }
+  HistorialUsuario {
+    int IdVersion PK
+    int IdUsuario FK
+    datetime Fecha
+    nvarchar(100) Actor
+    nvarchar(500) Detalle
+    nvarchar(100) UsernameSnap
+    nvarchar(100) NombreSnap "NULL"
+    nvarchar(100) ApellidoSnap "NULL"
+    date FechaNacSnap "NULL"
+    nvarchar(200) EmailSnap "NULL"
+    nvarchar(500) ClaveSnap
+    bit EstadoSnap
+    int IntentosSnap
+  }
+  Usuario {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    varchar(5) IdIdioma "NULL"
+    bit Activo
+    datetime FechaBaja "NULL"
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
+    bit RequiereCambioClave
+    nvarchar(100) Nombre "NULL"
+    nvarchar(100) Apellido "NULL"
+    date FechaNacimiento "NULL"
+    nvarchar(200) Email "NULL"
+  }

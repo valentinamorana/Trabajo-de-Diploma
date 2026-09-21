@@ -1,0 +1,57 @@
+classDiagram
+  direction TB
+  class GUI_VersionHistorialForm["GUI.VersionHistorialForm"] {
+  }
+  class BLL_VersionUsuario["BLL.VersionUsuario"] {
+    +GrabarVersion(int,  string,  string) void
+    +ObtenerPorUsuario(int) List~VersionUsuario~
+    +ObtenerTodos() List~VersionUsuario~
+    +RestaurarVersion(string,  int) void
+  }
+  class BLL_CuidadorHistorial["BLL.CuidadorHistorial"] {
+    +Guardar(int,  IMemento) void
+    +ObtenerHistorial(int) List~IMemento~
+    +Obtener(int) IMemento
+  }
+  class Usuario {
+    +int Id
+    +string Username
+    +string Nombre
+    +string Apellido
+    +DateTime? FechaNacimiento
+    +string Email
+    +CrearMemento(string,  string) IMemento
+    +RestaurarDesde(IMemento) void
+  }
+  class VersionUsuario {
+    +int Id
+    +int IdUsuario
+    +DateTime Fecha
+    +string Actor
+    +string Detalle
+    +string UsernameSnapshot
+    +string NombreSnapshot
+    +string ApellidoSnapshot
+    +DateTime? FechaNacSnapshot
+    +string EmailSnapshot
+    +string ClaveSnapshot
+    +bool EstadoSnapshot
+    +int IntentosSnapshot
+  }
+  class IMemento {
+    <<interface>>
+  }
+  class DAL_VersionUsuario["DAL.VersionUsuario"] {
+    +ObtenerTodos() List~VersionUsuario~
+    +ObtenerPorId(int) VersionUsuario
+    +ObtenerPorUsuario(int) List~VersionUsuario~
+    +Insertar(VersionUsuario) void
+  }
+  IMemento <|.. VersionUsuario
+  VersionUsuario --> "1" Usuario : IdUsuario
+  ________________________ ..> __________________ : usa
+  __________________ ..> _____________________ : usa
+  __________________ ..> Usuario : usa
+  __________________ ..> __________________ : usa
+  _____________________ ..> IMemento : usa
+  Usuario ..> IMemento : usa

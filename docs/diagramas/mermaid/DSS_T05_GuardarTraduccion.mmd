@@ -1,0 +1,12 @@
+sequenceDiagram
+  autonumber
+  actor A as Administrador
+  participant F as FormIdiomas
+  participant I as BLL.Idioma<br/>Service
+  participant T as DAL.Traduccion
+  A->>F: Edita los textos de un idioma y guarda (BtnGuardar_Click)
+  F->>I: GuardarTraduccion(idControl, idIdioma, texto)
+  Note over I: exige el permiso Usuarios · un texto en blanco no se guarda (queda el fallback)
+  I->>T: GuardarTraduccion(idControl, idIdioma, texto)
+  I-->>F: guardado
+  F-->>A: Confirma

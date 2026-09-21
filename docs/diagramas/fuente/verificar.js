@@ -29,7 +29,7 @@ const idx = cs.indice();
 const metodos = new Set(), clases = new Set();
 for (const lista of Object.values(idx)) for (const c of lista) { clases.add(c.nombre); c.metodos.forEach(m => metodos.add(m.nombre)); }
 const permitidos = new Set(['AppException']);
-const secuencias = require('./modelos/secuencias');
+const secuencias = require('./modelos/secuencias').concat(require('./modelos/seguridad_secuencias'));
 const recorrer = (pasos, cb) => { for (const s of pasos) { cb(s); if (s.pasos) recorrer(s.pasos, cb); for (const e of (s.sino || [])) recorrer(e.pasos, cb); } };
 for (const d of secuencias) {
   for (const p of d.participantes) {

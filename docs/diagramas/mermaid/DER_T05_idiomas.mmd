@@ -1,0 +1,34 @@
+erDiagram
+  Idioma ||--o{ Traduccion : "IdIdioma"
+  Control ||--o{ Traduccion : "IdControl"
+  Idioma {
+    int IdIdioma PK
+    varchar(5) Codigo
+    nvarchar(50) Nombre
+    bit Activo
+    bit EsDefault
+  }
+  Traduccion {
+    int IdControl PK,FK
+    int IdIdioma PK,FK
+    nvarchar(1000) Texto
+  }
+  Control {
+    int IdControl PK
+    varchar(100) Clave
+    varchar(50) Formulario
+  }
+  ControlMapeado {
+    int IdControlMapeado PK
+    int IdPermiso FK
+    nvarchar(100) Formulario
+    nvarchar(100) NombreControl
+  }
+  Preferencia {
+    int IdUsuario PK,FK
+    nvarchar(50) FuenteFamilia "NULL"
+    varchar(10) FuenteTamano "NULL"
+    varchar(20) Tema "NULL"
+    varchar(20) FormatoFecha "NULL"
+    bit Notificaciones "NULL"
+  }

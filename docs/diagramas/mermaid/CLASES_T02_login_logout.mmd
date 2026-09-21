@@ -1,0 +1,71 @@
+classDiagram
+  direction TB
+  class GUI_Login["GUI.Login"] {
+    +UpdateLanguage(Idioma) void
+  }
+  class BLL_Usuario["BLL.Usuario"] {
+    +Login(string,  string,  string) bool
+    +Logout(string) void
+    +ObtenerUsuarioActivo() Usuario
+    +ObtenerFechaInicioSesion() DateTime?
+    +GuardarPreferenciaIdioma(int,  string) void
+  }
+  class Usuario {
+    +int Id
+    +string Username
+    +string Rol
+    +List~Permiso~ Permisos
+    +bool Bloqueado
+    +int IntentosFallidos
+    +int CantidadBloqueos
+    +DateTime? FechaBloqueo
+    +string IdIdioma
+  }
+  class LoginException {
+    +TipoError Tipo
+    +int? IntentosRestantes
+  }
+  class SesionException {
+  }
+  class Seguridad_SessionManager["Seguridad.SessionManager"] {
+    +Usuario Usuario
+    +DateTime FechaInicio
+    +bool IsLoggedIn
+    +GetInstance() SessionManager
+    +TienePermiso(string) bool
+    +Login(Usuario) void
+    +Logout() void
+  }
+  class Seguridad_ContadorSesion["Seguridad.ContadorSesion"] {
+    +bool LimiteAlcanzado
+    +int IntentosRestantes
+    +GetInstance() ContadorSesion
+    +RegistrarIntento() void
+    +Resetear() void
+  }
+  class Seguridad_Encriptador["Seguridad.Encriptador"] {
+    <<static>>
+    +Hash(string) string
+    +VerificarContrasena(string,  string) bool
+    +VerificacionSenuelo(string) bool
+  }
+  class DAL_Interfaces_IUsuarioDAL["DAL.Interfaces.IUsuarioDAL"] {
+    <<interface>>
+    +ObtenerPorUsername(string) Usuario
+    +BloquearConTiempo(int) void
+    +AutoDesbloquear(int) void
+    +IncrementarIntentosFallidos(string) void
+    +ResetearIntentosFallidos(string) void
+  }
+  class Servicios_Bitacora["Servicios.Bitacora"] {
+    +Registrar(string,  string,  Criticidad) void
+    +RegistrarSinSesion(string,  string,  Criticidad,  int?,  string) void
+  }
+  _________ ..> ___________ : usa
+  ___________ ..> __________________________ : usa
+  ___________ ..> ________________________ : usa
+  ___________ ..> _____________________ : usa
+  ___________ ..> __________________ : usa
+  ___________ ..> LoginException : usa
+  ________________________ ..> SesionException : usa
+  ________________________ ..> Usuario : usa

@@ -1,0 +1,61 @@
+classDiagram
+  direction TB
+  class GUI_FormIdiomas["GUI.FormIdiomas"] {
+    +UpdateLanguage(Idioma) void
+  }
+  class BLL_IdiomaService["BLL.IdiomaService"] {
+    +CrearIdioma(string,  string) void
+    +ActivarIdioma(int) void
+    +DesactivarIdioma(int) void
+    +CargarTraducciones(string) Dictionary~string, string~
+    +GuardarTraduccion(int,  int,  string) void
+    +ContarTraduccionesFaltantes(int) int
+  }
+  class Servicios_Multiidioma_GestorIdioma["Servicios.Multiidioma.GestorIdioma"] {
+    <<static>>
+    +Idioma IdiomaActual
+    +Dictionary~string, string~ TradActuales
+    +IList~Idioma~ IdiomasDisponibles
+    +SetIdiomasDisponibles(IList~Idioma~) void
+    +SuscribirObservador(IIdiomaObserver) void
+    +DesuscribirObservador(IIdiomaObserver) void
+    +CambiarIdioma(Idioma,  Dictionary~string,  string~) void
+    +CambiarIdioma(Idioma) void
+  }
+  class Servicios_Multiidioma_IIdiomaObserver["Servicios.Multiidioma.IIdiomaObserver"] {
+    <<interface>>
+    +UpdateLanguage(Idioma) void
+  }
+  class Servicios_Multiidioma_Traductor["Servicios.Multiidioma.Traductor"] {
+    <<static>>
+    +ObtenerIdiomaDefault() Idioma
+    +ObtenerTraducciones(Idioma) IDictionary~string, Traduccion~
+    +Resolver(string,  string,  object[],  IDictionary~string,  Traduccion~) string
+    +Resolver(string,  string,  object[],  Idioma) string
+  }
+  class Servicios_Multiidioma_Idioma["Servicios.Multiidioma.Idioma"] {
+    +string Id
+    +string Nombre
+    +bool EsDefault
+  }
+  class Control {
+    +int IdControl
+    +string Clave
+    +string Formulario
+  }
+  class FilaTraduccion {
+    +int IdControl
+    +int IdIdioma
+    +string Clave
+    +string Formulario
+    +string Texto
+  }
+  Servicios_Multiidioma_IIdiomaObserver <|.. GUI_FormIdiomas
+  FilaTraduccion --> "1" Control : IdControl
+  _______________ ..> _________________ : usa
+  _______________ ..> __________________________________ : usa
+  __________________________________ ..> _____________________________________ : usa
+  __________________________________ ..> ____________________________ : usa
+  _______________________________ ..> __________________________________ : usa
+  _________________ ..> Control : usa
+  _________________ ..> FilaTraduccion : usa

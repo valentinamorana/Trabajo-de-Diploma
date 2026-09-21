@@ -24,24 +24,25 @@ namespace GUI
         // panel de tareas, mini-stats, sesión) es estático y vive acá.
         private void InitializeComponent()
         {
-            this.panelHeader     = new Panel();
-            this.lblTitulo       = new Label();
-            this.lblSub          = new Label();
-            this.btnRefrescar    = new Button();
-            this.flowCards       = new FlowLayoutPanel();
-            this.lblAviso        = new Label();
-            this.panelCentro     = new Panel();
-            this.panelMiniStats  = new Panel();
-            this.flStats         = new FlowLayoutPanel();
-            this.lblStTitulo     = new Label();
-            this.panelTareas     = new Panel();
-            this.dgvTareas       = new DataGridView();
-            this.colTipo         = new DataGridViewTextBoxColumn();
-            this.colDesc         = new DataGridViewTextBoxColumn();
-            this.colFecha        = new DataGridViewTextBoxColumn();
-            this.lblTareasTitulo = new Label();
-            this.panelSbar       = new Panel();
-            this.lblSesion       = new Label();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            this.panelHeader = new System.Windows.Forms.Panel();
+            this.lblTitulo = new System.Windows.Forms.Label();
+            this.lblSub = new System.Windows.Forms.Label();
+            this.btnRefrescar = new System.Windows.Forms.Button();
+            this.flowCards = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblAviso = new System.Windows.Forms.Label();
+            this.panelCentro = new System.Windows.Forms.Panel();
+            this.panelMiniStats = new System.Windows.Forms.Panel();
+            this.flStats = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblStTitulo = new System.Windows.Forms.Label();
+            this.panelTareas = new System.Windows.Forms.Panel();
+            this.dgvTareas = new System.Windows.Forms.DataGridView();
+            this.colTipo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDesc = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colFecha = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lblTareasTitulo = new System.Windows.Forms.Label();
+            this.panelSbar = new System.Windows.Forms.Panel();
+            this.lblSesion = new System.Windows.Forms.Label();
             this.panelHeader.SuspendLayout();
             this.panelCentro.SuspendLayout();
             this.panelMiniStats.SuspendLayout();
@@ -49,220 +50,249 @@ namespace GUI
             ((System.ComponentModel.ISupportInitialize)(this.dgvTareas)).BeginInit();
             this.panelSbar.SuspendLayout();
             this.SuspendLayout();
-
-            // ── panelHeader ────────────────────────────────────────────────────
-            this.panelHeader.BackColor = Color.FromArgb(176, 62, 96);
+            // 
+            // panelHeader
+            // 
+            this.panelHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.panelHeader.Controls.Add(this.lblTitulo);
             this.panelHeader.Controls.Add(this.lblSub);
             this.panelHeader.Controls.Add(this.btnRefrescar);
-            this.panelHeader.Dock     = DockStyle.Top;
-            this.panelHeader.Location = new Point(0, 0);
-            this.panelHeader.Name     = "panelHeader";
-            this.panelHeader.Size     = new Size(870, 62);
+            this.panelHeader.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelHeader.Location = new System.Drawing.Point(0, 0);
+            this.panelHeader.Name = "panelHeader";
+            this.panelHeader.Size = new System.Drawing.Size(854, 62);
             this.panelHeader.TabIndex = 0;
-            this.panelHeader.Paint  += new PaintEventHandler(this.PanelHeader_Paint);
+            this.panelHeader.Paint += new System.Windows.Forms.PaintEventHandler(this.PanelHeader_Paint);
             this.panelHeader.Resize += new System.EventHandler(this.PanelHeader_Resize);
-
-            this.lblTitulo.AutoSize  = true;
-            this.lblTitulo.BackColor = Color.Transparent;
-            this.lblTitulo.Font      = new Font("Segoe UI", 14F, FontStyle.Bold);
-            this.lblTitulo.ForeColor = Color.White;
-            this.lblTitulo.Location  = new Point(14, 8);
-            this.lblTitulo.Name      = "lblTitulo";
-            this.lblTitulo.TabIndex  = 0;
-            this.lblTitulo.Text      = "Panel de Control";
-
-            this.lblSub.AutoSize  = true;
-            this.lblSub.BackColor = Color.Transparent;
-            this.lblSub.Font      = new Font("Segoe UI", 8F, FontStyle.Italic);
-            this.lblSub.ForeColor = Color.FromArgb(200, 255, 200, 220);
-            this.lblSub.Location  = new Point(14, 36);
-            this.lblSub.Name      = "lblSub";
-            this.lblSub.TabIndex  = 1;
-            this.lblSub.Text      = "WardrobeFlow";
-
-            this.btnRefrescar.Anchor    = AnchorStyles.Top | AnchorStyles.Right;
-            this.btnRefrescar.BackColor = Tema.RosaPrimario;
-            this.btnRefrescar.Cursor    = Cursors.Hand;
-            this.btnRefrescar.FlatAppearance.BorderColor = Color.FromArgb(180, 230, 140, 170);
-            this.btnRefrescar.FlatAppearance.BorderSize  = 1;
-            this.btnRefrescar.FlatStyle = FlatStyle.Flat;
-            this.btnRefrescar.Font      = new Font("Segoe UI", 8.5F);
-            this.btnRefrescar.ForeColor = Color.White;
-            this.btnRefrescar.Location  = new Point(88, 17);
-            this.btnRefrescar.Name      = "btnRefrescar";
-            this.btnRefrescar.Size      = new Size(100, 28);
-            this.btnRefrescar.TabIndex  = 2;
-            this.btnRefrescar.Text      = "↻  Actualizar";
+            // 
+            // lblTitulo
+            // 
+            this.lblTitulo.AutoSize = true;
+            this.lblTitulo.BackColor = System.Drawing.Color.Transparent;
+            this.lblTitulo.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblTitulo.ForeColor = System.Drawing.Color.White;
+            this.lblTitulo.Location = new System.Drawing.Point(14, 8);
+            this.lblTitulo.Name = "lblTitulo";
+            this.lblTitulo.Size = new System.Drawing.Size(161, 25);
+            this.lblTitulo.TabIndex = 0;
+            this.lblTitulo.Text = "Panel de Control";
+            // 
+            // lblSub
+            // 
+            this.lblSub.AutoSize = true;
+            this.lblSub.BackColor = System.Drawing.Color.Transparent;
+            this.lblSub.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Italic);
+            this.lblSub.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(220)))));
+            this.lblSub.Location = new System.Drawing.Point(14, 36);
+            this.lblSub.Name = "lblSub";
+            this.lblSub.Size = new System.Drawing.Size(76, 13);
+            this.lblSub.TabIndex = 1;
+            this.lblSub.Text = "WardrobeFlow";
+            // 
+            // btnRefrescar
+            // 
+            this.btnRefrescar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRefrescar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
+            this.btnRefrescar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnRefrescar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(230)))), ((int)(((byte)(140)))), ((int)(((byte)(170)))));
+            this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRefrescar.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.btnRefrescar.ForeColor = System.Drawing.Color.White;
+            this.btnRefrescar.Location = new System.Drawing.Point(746, 21);
+            this.btnRefrescar.Name = "btnRefrescar";
+            this.btnRefrescar.Size = new System.Drawing.Size(100, 28);
+            this.btnRefrescar.TabIndex = 2;
+            this.btnRefrescar.Text = "↻  Actualizar";
             this.btnRefrescar.UseVisualStyleBackColor = false;
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
-
-            // ── flowCards ──────────────────────────────────────────────────────
-            this.flowCards.BackColor     = Color.FromArgb(240, 240, 245);
-            this.flowCards.Dock          = DockStyle.Top;
-            this.flowCards.FlowDirection = FlowDirection.LeftToRight;
-            this.flowCards.Height        = 168;
-            this.flowCards.Location      = new Point(0, 62);
-            this.flowCards.Name          = "flowCards";
-            this.flowCards.Padding       = new Padding(10, 10, 10, 4);
-            this.flowCards.Size          = new Size(870, 168);
-            this.flowCards.TabIndex      = 1;
-            this.flowCards.WrapContents  = false;
+            // 
+            // flowCards
+            // 
+            this.flowCards.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(245)))));
+            this.flowCards.Dock = System.Windows.Forms.DockStyle.Top;
+            this.flowCards.Location = new System.Drawing.Point(0, 62);
+            this.flowCards.Name = "flowCards";
+            this.flowCards.Padding = new System.Windows.Forms.Padding(10, 10, 10, 4);
+            this.flowCards.Size = new System.Drawing.Size(854, 168);
+            this.flowCards.TabIndex = 1;
+            this.flowCards.WrapContents = false;
             this.flowCards.Resize += new System.EventHandler(this.FlowCards_Resize);
-
-            // ── lblAviso ───────────────────────────────────────────────────────
-            this.lblAviso.AutoSize = false;
-            this.lblAviso.Dock     = DockStyle.Top;
-            this.lblAviso.Font     = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            this.lblAviso.Height   = 0;
-            this.lblAviso.Location = new Point(0, 230);
-            this.lblAviso.Name     = "lblAviso";
-            this.lblAviso.Padding  = new Padding(12, 0, 0, 0);
-            this.lblAviso.Size     = new Size(870, 0);
+            // 
+            // lblAviso
+            // 
+            this.lblAviso.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblAviso.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.lblAviso.Location = new System.Drawing.Point(0, 230);
+            this.lblAviso.Name = "lblAviso";
+            this.lblAviso.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.lblAviso.Size = new System.Drawing.Size(854, 0);
             this.lblAviso.TabIndex = 2;
-            this.lblAviso.Visible  = false;
-
-            // ── panelCentro ────────────────────────────────────────────────────
-            this.panelCentro.BackColor = Color.FromArgb(240, 240, 245);
+            this.lblAviso.Visible = false;
+            // 
+            // panelCentro
+            // 
+            this.panelCentro.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(245)))));
             this.panelCentro.Controls.Add(this.panelMiniStats);
-            this.panelCentro.Dock     = DockStyle.Fill;
-            this.panelCentro.Location = new Point(0, 230);
-            this.panelCentro.Name     = "panelCentro";
-            this.panelCentro.Size     = new Size(870, 118);
+            this.panelCentro.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelCentro.Location = new System.Drawing.Point(0, 370);
+            this.panelCentro.Name = "panelCentro";
+            this.panelCentro.Size = new System.Drawing.Size(854, 135);
             this.panelCentro.TabIndex = 3;
             this.panelCentro.Resize += new System.EventHandler(this.PanelCentro_Resize);
-
-            // ── panelMiniStats ─────────────────────────────────────────────────
-            this.panelMiniStats.BackColor = Color.FromArgb(248, 244, 250);
+            // 
+            // panelMiniStats
+            // 
+            this.panelMiniStats.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(244)))), ((int)(((byte)(250)))));
             this.panelMiniStats.Controls.Add(this.flStats);
             this.panelMiniStats.Controls.Add(this.lblStTitulo);
-            this.panelMiniStats.Dock     = DockStyle.Fill;
-            this.panelMiniStats.Location = new Point(0, 0);
-            this.panelMiniStats.Name     = "panelMiniStats";
-            this.panelMiniStats.Padding  = new Padding(8);
-            this.panelMiniStats.Size     = new Size(870, 118);
+            this.panelMiniStats.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelMiniStats.Location = new System.Drawing.Point(0, 0);
+            this.panelMiniStats.Name = "panelMiniStats";
+            this.panelMiniStats.Padding = new System.Windows.Forms.Padding(8);
+            this.panelMiniStats.Size = new System.Drawing.Size(854, 135);
             this.panelMiniStats.TabIndex = 0;
-
-            this.flStats.BackColor     = Color.Transparent;
-            this.flStats.Dock          = DockStyle.Fill;
-            this.flStats.FlowDirection = FlowDirection.TopDown;
-            this.flStats.Location      = new Point(8, 36);
-            this.flStats.Name          = "flStats";
-            this.flStats.Padding       = new Padding(6, 4, 6, 4);
-            this.flStats.Size          = new Size(854, 74);
-            this.flStats.TabIndex      = 1;
-            this.flStats.WrapContents  = false;
-
-            this.lblStTitulo.BackColor = Color.FromArgb(252, 240, 246);
-            this.lblStTitulo.Dock      = DockStyle.Top;
-            this.lblStTitulo.Font      = new Font("Segoe UI", 9F, FontStyle.Bold);
-            this.lblStTitulo.ForeColor = Color.FromArgb(176, 62, 96);
-            this.lblStTitulo.Height    = 28;
-            this.lblStTitulo.Location  = new Point(8, 8);
-            this.lblStTitulo.Name      = "lblStTitulo";
-            this.lblStTitulo.Padding   = new Padding(4, 6, 0, 0);
-            this.lblStTitulo.Size      = new Size(854, 28);
-            this.lblStTitulo.TabIndex  = 0;
-            this.lblStTitulo.Text      = "Resumen de eventos";
-
-            // ── panelTareas ────────────────────────────────────────────────────
-            this.panelTareas.BackColor = Color.White;
+            // 
+            // flStats
+            // 
+            this.flStats.BackColor = System.Drawing.Color.Transparent;
+            this.flStats.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flStats.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.flStats.Location = new System.Drawing.Point(8, 36);
+            this.flStats.Name = "flStats";
+            this.flStats.Padding = new System.Windows.Forms.Padding(6, 4, 6, 4);
+            this.flStats.Size = new System.Drawing.Size(838, 91);
+            this.flStats.TabIndex = 1;
+            this.flStats.WrapContents = false;
+            // 
+            // lblStTitulo
+            // 
+            this.lblStTitulo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(240)))), ((int)(((byte)(246)))));
+            this.lblStTitulo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblStTitulo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblStTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.lblStTitulo.Location = new System.Drawing.Point(8, 8);
+            this.lblStTitulo.Name = "lblStTitulo";
+            this.lblStTitulo.Padding = new System.Windows.Forms.Padding(4, 6, 0, 0);
+            this.lblStTitulo.Size = new System.Drawing.Size(838, 28);
+            this.lblStTitulo.TabIndex = 0;
+            this.lblStTitulo.Text = "Resumen de eventos";
+            // 
+            // panelTareas
+            // 
+            this.panelTareas.BackColor = System.Drawing.Color.White;
             this.panelTareas.Controls.Add(this.dgvTareas);
             this.panelTareas.Controls.Add(this.lblTareasTitulo);
-            this.panelTareas.Dock     = DockStyle.Top;
-            this.panelTareas.Height   = 140;
-            this.panelTareas.Location = new Point(0, 230);
-            this.panelTareas.Name     = "panelTareas";
-            this.panelTareas.Size     = new Size(870, 140);
+            this.panelTareas.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelTareas.Location = new System.Drawing.Point(0, 230);
+            this.panelTareas.Name = "panelTareas";
+            this.panelTareas.Size = new System.Drawing.Size(854, 140);
             this.panelTareas.TabIndex = 4;
-
-            this.dgvTareas.AllowUserToAddRows    = false;
+            // 
+            // dgvTareas
+            // 
+            this.dgvTareas.AllowUserToAddRows = false;
             this.dgvTareas.AllowUserToResizeRows = false;
-            this.dgvTareas.AutoSizeColumnsMode   = DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvTareas.BackgroundColor       = Color.White;
-            this.dgvTareas.BorderStyle           = BorderStyle.None;
-            this.dgvTareas.CellBorderStyle       = DataGridViewCellBorderStyle.SingleHorizontal;
-            this.dgvTareas.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(176, 62, 96);
-            this.dgvTareas.ColumnHeadersDefaultCellStyle.Font      = new Font("Segoe UI", 8F, FontStyle.Bold);
-            this.dgvTareas.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            this.dgvTareas.Columns.AddRange(new DataGridViewColumn[] {
-                this.colTipo, this.colDesc, this.colFecha });
-            this.dgvTareas.Dock                      = DockStyle.Fill;
-            this.dgvTareas.EnableHeadersVisualStyles  = false;
-            this.dgvTareas.Font                       = new Font("Segoe UI", 8F);
-            this.dgvTareas.GridColor                  = Color.FromArgb(235, 225, 232);
-            this.dgvTareas.Location                   = new Point(0, 26);
-            this.dgvTareas.Name                       = "dgvTareas";
-            this.dgvTareas.ReadOnly                   = true;
-            this.dgvTareas.RowHeadersVisible          = false;
-            this.dgvTareas.SelectionMode              = DataGridViewSelectionMode.FullRowSelect;
-            this.dgvTareas.Size                       = new Size(870, 114);
-            this.dgvTareas.TabIndex                   = 1;
-            this.dgvTareas.CellClick += new DataGridViewCellEventHandler(this.DgvTareas_CellClick);
-
+            this.dgvTareas.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvTareas.BackgroundColor = System.Drawing.Color.White;
+            this.dgvTareas.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvTareas.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvTareas.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            this.dgvTareas.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colTipo,
+            this.colDesc,
+            this.colFecha});
+            this.dgvTareas.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvTareas.EnableHeadersVisualStyles = false;
+            this.dgvTareas.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.dgvTareas.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(225)))), ((int)(((byte)(232)))));
+            this.dgvTareas.Location = new System.Drawing.Point(0, 26);
+            this.dgvTareas.Name = "dgvTareas";
+            this.dgvTareas.ReadOnly = true;
+            this.dgvTareas.RowHeadersVisible = false;
+            this.dgvTareas.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvTareas.Size = new System.Drawing.Size(854, 114);
+            this.dgvTareas.TabIndex = 1;
+            this.dgvTareas.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvTareas_CellClick);
+            // 
+            // colTipo
+            // 
             this.colTipo.FillWeight = 22F;
             this.colTipo.HeaderText = "Tipo";
-            this.colTipo.Name       = "colTipo";
-            this.colTipo.ReadOnly   = true;
-
+            this.colTipo.Name = "colTipo";
+            this.colTipo.ReadOnly = true;
+            // 
+            // colDesc
+            // 
             this.colDesc.FillWeight = 56F;
             this.colDesc.HeaderText = "Descripción";
-            this.colDesc.Name       = "colDesc";
-            this.colDesc.ReadOnly   = true;
-
+            this.colDesc.Name = "colDesc";
+            this.colDesc.ReadOnly = true;
+            // 
+            // colFecha
+            // 
             this.colFecha.FillWeight = 22F;
             this.colFecha.HeaderText = "Desde";
-            this.colFecha.Name       = "colFecha";
-            this.colFecha.ReadOnly   = true;
-
-            this.lblTareasTitulo.BackColor = Color.FromArgb(252, 240, 248);
-            this.lblTareasTitulo.Dock      = DockStyle.Top;
-            this.lblTareasTitulo.Font      = new Font("Segoe UI", 9F, FontStyle.Bold);
-            this.lblTareasTitulo.ForeColor = Color.FromArgb(176, 62, 96);
-            this.lblTareasTitulo.Height    = 26;
-            this.lblTareasTitulo.Location  = new Point(0, 0);
-            this.lblTareasTitulo.Name      = "lblTareasTitulo";
-            this.lblTareasTitulo.Padding   = new Padding(10, 5, 0, 0);
-            this.lblTareasTitulo.Size      = new Size(870, 26);
-            this.lblTareasTitulo.TabIndex  = 0;
-            this.lblTareasTitulo.Text      = "Mis Tareas Pendientes";
-
-            // ── panelSbar ──────────────────────────────────────────────────────
-            this.panelSbar.BackColor = Color.FromArgb(176, 62, 96);
+            this.colFecha.Name = "colFecha";
+            this.colFecha.ReadOnly = true;
+            // 
+            // lblTareasTitulo
+            // 
+            this.lblTareasTitulo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(240)))), ((int)(((byte)(248)))));
+            this.lblTareasTitulo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblTareasTitulo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblTareasTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.lblTareasTitulo.Location = new System.Drawing.Point(0, 0);
+            this.lblTareasTitulo.Name = "lblTareasTitulo";
+            this.lblTareasTitulo.Padding = new System.Windows.Forms.Padding(10, 5, 0, 0);
+            this.lblTareasTitulo.Size = new System.Drawing.Size(854, 26);
+            this.lblTareasTitulo.TabIndex = 0;
+            this.lblTareasTitulo.Text = "Mis Tareas Pendientes";
+            // 
+            // panelSbar
+            // 
+            this.panelSbar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.panelSbar.Controls.Add(this.lblSesion);
-            this.panelSbar.Dock     = DockStyle.Bottom;
-            this.panelSbar.Height   = 26;
-            this.panelSbar.Location = new Point(0, 544);
-            this.panelSbar.Name     = "panelSbar";
-            this.panelSbar.Size     = new Size(870, 26);
+            this.panelSbar.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelSbar.Location = new System.Drawing.Point(0, 505);
+            this.panelSbar.Name = "panelSbar";
+            this.panelSbar.Size = new System.Drawing.Size(854, 26);
             this.panelSbar.TabIndex = 5;
-
-            this.lblSesion.Dock      = DockStyle.Fill;
-            this.lblSesion.Font      = new Font("Segoe UI", 8F);
-            this.lblSesion.ForeColor = Color.FromArgb(244, 212, 226);
-            this.lblSesion.Location  = new Point(0, 0);
-            this.lblSesion.Name      = "lblSesion";
-            this.lblSesion.Padding   = new Padding(10, 0, 0, 0);
-            this.lblSesion.Size      = new Size(870, 26);
-            this.lblSesion.TabIndex  = 0;
-            this.lblSesion.TextAlign = ContentAlignment.MiddleLeft;
-
-            // ── DashboardForm ──────────────────────────────────────────────────
-            this.BackColor       = Color.FromArgb(240, 240, 245);
+            // 
+            // lblSesion
+            // 
+            this.lblSesion.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblSesion.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.lblSesion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(212)))), ((int)(((byte)(226)))));
+            this.lblSesion.Location = new System.Drawing.Point(0, 0);
+            this.lblSesion.Name = "lblSesion";
+            this.lblSesion.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
+            this.lblSesion.Size = new System.Drawing.Size(854, 26);
+            this.lblSesion.TabIndex = 0;
+            this.lblSesion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // DashboardForm
+            // 
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(245)))));
+            this.ClientSize = new System.Drawing.Size(854, 531);
             this.Controls.Add(this.panelCentro);
             this.Controls.Add(this.panelTareas);
             this.Controls.Add(this.lblAviso);
             this.Controls.Add(this.flowCards);
             this.Controls.Add(this.panelHeader);
             this.Controls.Add(this.panelSbar);
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.Location        = new Point(10, 10);
-            this.MinimumSize     = new Size(600, 400);
-            this.Name            = "DashboardForm";
-            this.Size            = new Size(870, 570);
-            this.StartPosition   = FormStartPosition.Manual;
-            this.Text             = "Panel de Control";
-
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F);
+            this.Location = new System.Drawing.Point(10, 10);
+            this.MinimumSize = new System.Drawing.Size(600, 400);
+            this.Name = "DashboardForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            this.Text = "Panel de Control";
             this.panelHeader.ResumeLayout(false);
             this.panelHeader.PerformLayout();
             this.panelCentro.ResumeLayout(false);
@@ -271,6 +301,7 @@ namespace GUI
             ((System.ComponentModel.ISupportInitialize)(this.dgvTareas)).EndInit();
             this.panelSbar.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         #endregion

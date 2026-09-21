@@ -498,6 +498,18 @@ namespace BLL
         // Verifica las tablas protegidas además de Usuario. Si alguna está corrupta,
         // arma el resultado y devuelve false; si están OK (o se inicializan en el primer
         // arranque), devuelve true. Las definiciones de columnas viven en cada DAL.
+        /// <summary>
+        /// Detalle de las tablas protegidas ADICIONALES a Usuario (Cliente, Empleado, Pedido) cuyo dígito
+        /// verificador no cierra. Lista vacía si están íntegras. Lo usa la consola de recuperación: si solo
+        /// falla una de estas tablas, el diagnóstico de Usuario no alcanza para explicar el bloqueo.
+        /// </summary>
+        public static List<string> ObtenerTablasAdicionalesCorruptas()
+        {
+            return VerificarTablasAdicionales(out ResultadoIntegridad r)
+                ? new List<string>()
+                : (r?.FilasCorruptas ?? new List<string>());
+        }
+
         private static bool VerificarTablasAdicionales(out ResultadoIntegridad resultado)
         {
             resultado = null;

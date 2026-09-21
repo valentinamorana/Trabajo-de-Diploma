@@ -4,8 +4,8 @@ namespace BLL.Manejadores
 {
     /// <summary>
     /// Eslabón que atiende Decision.Pausar: pausa la suscripción hasta la fecha indicada
-    /// SIN tocar FechaVencimiento — al reanudar (ver BLL.Cliente.ReanudarPausa), el cliente
-    /// retoma exactamente el mismo plazo que tenía, no se le regala tiempo extra. Mientras
+    /// y corre FechaVencimiento por los días de pausa (NUULY: no se cobra mientras está pausada) —
+    /// al reanudar (ver BLL.Cliente.ReanudarPausa) el cliente retoma el tiempo que ya había pagado. Mientras
     /// está pausada, BLL.Pedido.ObtenerClienteValidado bloquea nuevos pedidos (ver
     /// BE.Cliente.EstaPausada). Debe insertarse ANTES de BajaSuscripcionHandler en la
     /// cadena (ver BLL.Renovacion) — mismo motivo que el resto de los eslabones no
@@ -59,6 +59,14 @@ namespace BLL.Manejadores
 
             var cliente = contexto.Cliente;
             cliente.FechaPausaHasta = contexto.FechaPausaHasta;
+
+            // NUULY 4.8: mientras dura la pausa no se cobra, así que el tiempo ya pagado no se consume:
+            // el vencimiento se corre tantos días como dure la pausa (solo si todavía quedaba tiempo
+            // pagado; una suscripción ya vencida no tiene nada que preservar). Al reanudar antes de
+            // tiempo, BLL.Cliente.ReanudarPausa devuelve los días no usados.
+            int diasPausa = (contexto.FechaPausaHasta.Value.Date - DateTime.Today).Days;
+            if (cliente.FechaVencimiento.HasValue && cliente.FechaVencimiento.Value.Date > DateTime.Today)
+                cliente.FechaVencimiento = cliente.FechaVencimiento.Value.AddDays(diasPausa);
 
             // UPDATE de Cliente + INSERT del historial en una única transacción (ver
             // IntentarRenovarHandler para el porqué).

@@ -423,7 +423,7 @@ namespace Tests
         // ── ReanudarPausa (Bloque 1) ─────────────────────────────────────────────
 
         [TestMethod]
-        public void ReanudarPausa_ClientePausado_LimpiaFechaPausaHastaSinTocarVencimiento()
+        public void ReanudarPausa_AntesDeTiempo_LimpiaLaPausaYDevuelveLosDiasNoUsados()
         {
             LoginComoAdministrador();
             var fake = new FakeClienteDAL();
@@ -435,7 +435,8 @@ namespace Tests
             bll.ReanudarPausa("Test", cliente);
 
             Assert.IsNull(cliente.FechaPausaHasta);
-            Assert.AreEqual(DateTime.Today.AddDays(20), cliente.FechaVencimiento, "No debe tocar el vencimiento.");
+            Assert.AreEqual(DateTime.Today.AddDays(15), cliente.FechaVencimiento,
+                "Reanudar 5 días antes devuelve esos 5 días al vencimiento (la pausa lo había corrido por completo).");
             Assert.AreEqual(1, fake.ModificarVeces);
         }
 

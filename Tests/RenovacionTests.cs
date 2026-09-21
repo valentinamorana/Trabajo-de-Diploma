@@ -233,6 +233,23 @@ namespace Tests
         }
 
         [TestMethod]
+        public void Pausar_SuscripcionYaVencida_NoCorreElVencimiento()
+        {
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            var cliente = ClienteVigente();
+            cliente.FechaVencimiento = DateTime.Today.AddDays(-3); // nada pagado que preservar
+
+            handler.Procesar(new ContextoRenovacion
+            {
+                Cliente = cliente,
+                Decision = DecisionRenovacion.Pausar,
+                FechaPausaHasta = DateTime.Today.AddDays(10)
+            });
+
+            Assert.AreEqual(DateTime.Today.AddDays(-3), cliente.FechaVencimiento);
+        }
+
+        [TestMethod]
         public void Pausar_ExactamenteTresMeses_EsValida()
         {
             var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
@@ -271,7 +288,7 @@ namespace Tests
             Assert.AreEqual(0, dalCliente.ModificarVeces);
         }
         [TestMethod]
-        public void Pausar_ConFechaValida_PausaYPersisteHistorial_SinTocarVencimiento()
+        public void Pausar_ConFechaValida_PausaPersisteHistorialYCorreElVencimientoPorLosDiasPausados()
         {
             var dalCliente = new FakeClienteDAL();
             var dalRenovacion = new FakeRenovacionDAL();
@@ -291,7 +308,8 @@ namespace Tests
             Assert.IsTrue(resultado.Resuelto);
             Assert.AreEqual(BE.EstadoRenovacion.Pausada, resultado.Estado);
             Assert.AreEqual(fechaHasta, cliente.FechaPausaHasta);
-            Assert.AreEqual(vencimientoOriginal, cliente.FechaVencimiento, "Pausar no debe tocar el vencimiento.");
+            Assert.AreEqual(vencimientoOriginal.Value.AddDays(10), cliente.FechaVencimiento,
+                "Pausa 10 días: el tiempo ya pagado no se consume, el vencimiento se corre 10 días.");
             Assert.AreEqual(1, dalCliente.ModificarVeces);
             Assert.AreEqual(1, dalRenovacion.AltaVeces);
 

@@ -255,6 +255,12 @@ namespace BLL
                 throw new BE.AppException("err.bll.cliente.no_pausada",
                     "{0} no tiene la suscripción pausada.", cliente.NombreCompleto);
 
+            // Reanudar antes de tiempo: se devuelven los días de pausa no usados (al pausar, el vencimiento
+            // se corrió por toda la pausa; ver PausarSuscripcionHandler).
+            int diasSinUsar = (cliente.FechaPausaHasta.Value.Date - DateTime.Today).Days;
+            if (diasSinUsar > 0 && cliente.FechaVencimiento.HasValue)
+                cliente.FechaVencimiento = cliente.FechaVencimiento.Value.AddDays(-diasSinUsar);
+
             cliente.FechaPausaHasta = null;
             dalCliente.Modificar(cliente);
 

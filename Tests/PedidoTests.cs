@@ -55,6 +55,28 @@ namespace Tests
             Assert.AreEqual(0, ctx.DalPedido.RestaurarOperacionAtomicaVeces, "No debe llegar a modificar el pedido.");
         }
 
+        [TestMethod]
+        public void DespacharYEntregar_ExigenPermisoDePedidosRealizados_NoElDeVentas()
+        {
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 3,
+                Username = "sinpermisos",
+                Perfil = "Auditor",
+                Contraseña = Encriptador.Hash("Auditor1!")
+            });
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido { IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Pendiente };
+
+            try { bll.Despachar("Test", pedido); Assert.Fail("Despachar exige PedidosRealizadosEditar."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }
+
+            pedido.Estado = BE.EstadoPedido.Despachado;
+            try { bll.MarcarEntregado("Test", pedido); Assert.Fail("Entregar exige PedidosRealizadosEditar."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }
+        }
+
         private static BE.Cliente ClienteConPlanVigente() => new BE.Cliente
         {
             IdCliente = 10,

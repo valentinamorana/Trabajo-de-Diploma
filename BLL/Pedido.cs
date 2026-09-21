@@ -151,7 +151,7 @@ namespace BLL
         // Marca el pedido como Despachado.
         public void Despachar(string modulo, BE.Pedido pedido)
         {
-            PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
+            PermisosAccion.Exigir(BE.Patentes.PedidosRealizadosEditar, BE.Patentes.PedidosRealizados);
             if (!pedido.PuedeDespachar())
                 throw new BE.AppException("err.bll.pedido.despachar_estado",
                     "Solo se pueden despachar pedidos Pendientes. Este pedido está '{0}'.",
@@ -182,7 +182,7 @@ namespace BLL
         // Marca el pedido como Entregado.
         public void MarcarEntregado(string modulo, BE.Pedido pedido)
         {
-            PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
+            PermisosAccion.Exigir(BE.Patentes.PedidosRealizadosEditar, BE.Patentes.PedidosRealizados);
             if (!pedido.PuedeEntregarse())
                 throw new BE.AppException("err.bll.pedido.entregar_estado",
                     "Solo se pueden marcar como entregados los pedidos Despachados. Este pedido está '{0}'.",

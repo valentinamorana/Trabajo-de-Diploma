@@ -2632,6 +2632,22 @@ END
 GO
 
 -- ============================================================
+-- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
+-- ------------------------------------------------------------
+-- Despachar, registrar la entrega y registrar la devolución (que abre PN04) se hacen desde Pedidos
+-- Realizados y exigen mnuPedidosRealizadosEditar. El rol Deposito solo tenía la patente de VER, así
+-- que no podía registrar una devolución. Idempotente; corre también sobre bases ya creadas.
+-- ============================================================
+INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+SELECT r.IdPermiso, e.IdPermiso
+FROM   Permiso r
+JOIN   Permiso e ON e.NombreMenu = 'mnuPedidosRealizadosEditar'
+WHERE  r.EsRol = 1 AND r.Estado = 1 AND r.Nombre = 'Deposito'
+  AND  NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = r.IdPermiso AND x.IdHijo = e.IdPermiso);
+PRINT 'Permiso de edición de Pedidos Realizados asegurado para el rol Deposito.';
+GO
+
+-- ============================================================
 -- WardrobeFlow — 22. NORMALIZACIÓN DE LOS DÍGITOS VERIFICADORES
 -- ------------------------------------------------------------
 -- Las filas que siembra este script (usuarios, empleados, clientes y pedidos demo) llevan DVH = 0.

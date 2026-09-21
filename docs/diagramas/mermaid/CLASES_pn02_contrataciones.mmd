@@ -43,6 +43,9 @@ classDiagram
     +DescuentoDe(Promocion,  decimal,  int) decimal
     +Resolver(decimal,  int?,  IEnumerable~Promocion~,  decimal,  int) ResultadoDescuento
   }
+  class BLL_Cliente["BLL.Cliente"] {
+    +ActivarSuscripcionDesdeContratacion(string,  Cliente,  int,  ModalidadCobro,  decimal) Suscripcion
+  }
   class BLL_Contratacion["BLL.Contratacion"] {
     +CrearContratacion(string,  int,  int,  ModalidadCobro) int
     +ConfirmarPago(string,  Contratacion,  string) LiquidacionContratacion
@@ -51,6 +54,7 @@ classDiagram
   }
   class DAL_Interfaces_IContratacionDAL["DAL.Interfaces.IContratacionDAL"] {
     <<interface>>
+    +ObtenerPendientesDePago() List~Contratacion~
     +Alta(Contratacion) int
     +IncrementarIntento(int) int
     +ConfirmarPago(int,  int,  string,  string,  decimal,  decimal,  int?) bool

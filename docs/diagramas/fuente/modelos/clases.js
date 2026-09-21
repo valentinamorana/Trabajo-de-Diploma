@@ -22,16 +22,16 @@ module.exports = [
 
   // ───────────── N01 ─────────────
   {
-    tipo: 'clases', id: 'CLASES_n01_clientes_suscripciones', titulo: 'Diagrama de clases — N01 Clientes y suscripciones', columnas: 3,
+    tipo: 'clases', id: 'CLASES_n01_clientes_suscripciones', procesos: ['N01'], titulo: 'Diagrama de clases — N01 Clientes y suscripciones', columnas: 3,
     clases: [
       E('BE.Cliente', { attrs: 'all' }), E('BE.PlanSuscripcion', { attrs: 'all' }), E('BE.Renovacion', { attrs: 'all' }), E('BE.Cobro', { attrs: 'all' }),
       E('BLL.Cliente', { metodos: ['Alta', 'Modificar', 'Baja', 'ActivarSuscripcionDesdeContratacion', 'ReanudarPausa', 'ObtenerEstadoComercial'] }),
       E('BLL.Renovacion', { metodos: ['Procesar', 'ObtenerHistorial'] }), E('BLL.Cobro', { metodos: ['Procesar', 'ObtenerHistorial'] }),
-      E('BLL.PlanSuscripcion', { metodos: 'all' }), E('IClienteDAL', { metodos: ['SumarCreditoEnTx', 'ConsumirCreditoEnTx', 'EjecutarTransaccion'] })
+      E('BLL.PlanSuscripcion', { metodos: 'all' }), E('IPlanSuscripcionDAL', { metodos: [] }), E('IClienteDAL', { metodos: ['SumarCreditoEnTx', 'ConsumirCreditoEnTx', 'EjecutarTransaccion'] })
     ]
   },
   {
-    tipo: 'clases', id: 'CLASES_patron_builder_suscripcion', titulo: 'Patrón Builder — Activación de suscripción por modalidad de cobro', columnas: 3,
+    tipo: 'clases', id: 'CLASES_patron_builder_suscripcion', procesos: ['N01'], titulo: 'Patrón Builder — Activación de suscripción por modalidad de cobro', columnas: 3,
     clases: [
       E('BE.Builders.DirectorSuscripcion', { metodos: 'all' }), E('BE.Builders.SuscripcionBuilder', { metodos: 'all', attrs: 'none' }),
       E('BE.Builders.SuscripcionMensualBuilder'), E('BE.Builders.SuscripcionTrimestralBuilder'), E('BE.Builders.SuscripcionAnualBuilder'),
@@ -40,7 +40,7 @@ module.exports = [
     relaciones: [{ tipo: 'depende', de: 'SuscripcionBuilderFactory', a: 'SuscripcionBuilder' }]
   },
   {
-    tipo: 'clases', id: 'CLASES_patron_chain_renovacion', titulo: 'Patrón Chain of Responsibility — Renovación de suscripción', columnas: 3,
+    tipo: 'clases', id: 'CLASES_patron_chain_renovacion', procesos: ['N01'], titulo: 'Patrón Chain of Responsibility — Renovación de suscripción', columnas: 3,
     clases: [
       E('BLL.Renovacion', { metodos: ['Procesar'] }), E('BLL.Manejadores.ManejadorRenovacion', { metodos: 'all' }),
       E('BLL.Manejadores.VerificarVencimientoHandler', { metodos: 'all' }), E('BLL.Manejadores.IntentarRenovarHandler', { metodos: 'all' }),
@@ -53,7 +53,7 @@ module.exports = [
     ]
   },
   {
-    tipo: 'clases', id: 'CLASES_patron_chain_cobro', titulo: 'Patrón Chain of Responsibility — Cobro recurrente de la suscripción', columnas: 3,
+    tipo: 'clases', id: 'CLASES_patron_chain_cobro', procesos: ['N01'], titulo: 'Patrón Chain of Responsibility — Cobro recurrente de la suscripción', columnas: 3,
     clases: [
       E('BLL.Cobro', { metodos: ['Procesar'] }), E('BLL.Manejadores.ManejadorCobro', { metodos: 'all' }),
       E('BLL.Manejadores.DetectarCobroHandler', { metodos: 'all' }), E('BLL.Manejadores.ProcesarPagoHandler', { metodos: 'all' }),
@@ -69,7 +69,7 @@ module.exports = [
 
   // ───────────── PN01 ─────────────
   {
-    tipo: 'clases', id: 'CLASES_pn01_pedidos', titulo: 'Diagrama de clases — PN01 Armar pedido', columnas: 3,
+    tipo: 'clases', id: 'CLASES_pn01_pedidos', procesos: ['PN01'], titulo: 'Diagrama de clases — PN01 Armar pedido', columnas: 3,
     clases: [
       E('BE.Pedido', { attrs: 'all' }), E('BE.Prenda', { attrs: 'all' }), E('BE.ListaEspera', { attrs: 'all' }),
       E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido', 'IdPlan', 'FechaVencimiento', 'FechaPausaHasta', 'StockUtilizado'] }),
@@ -77,11 +77,12 @@ module.exports = [
       E('BLL.Pedido', { metodos: ['CrearPedido', 'ValidarPuedeArmarPedido', 'ValidarCupoDisponible', 'ReservarPrendas', 'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] }),
       E('BLL.Prenda', { metodos: ['ObtenerDisponibles', 'VerificarDisponibilidad', 'CambiarEstado'] }),
       E('BLL.ListaEspera', { metodos: ['EstaReservadaParaOtro', 'CerrarSiReservada', 'NotificarSiCorresponde'] }),
+      E('BLL.Cliente', { metodos: [] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }), E('IPedidoHistorialDAL', { metodos: [] }),
       E('IPedidoDAL', { metodos: ['Alta', 'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] })
     ]
   },
   {
-    tipo: 'clases', id: 'CLASES_patron_command_pedido', titulo: 'Patrón Command — Cancelar pedido y registrar devolución', columnas: 3,
+    tipo: 'clases', id: 'CLASES_patron_command_pedido', procesos: ['PN01'], titulo: 'Patrón Command — Cancelar pedido y registrar devolución', columnas: 3,
     clases: [
       E('BLL.Comandos.InvocadorPedido', { metodos: 'all' }), E('BLL.Comandos.PedidoCommand', { metodos: 'all' }),
       E('BLL.Comandos.CancelacionCommand', { metodos: 'all' }), E('BLL.Comandos.DevolucionCommand', { metodos: 'all' }),
@@ -98,11 +99,12 @@ module.exports = [
 
   // ───────────── PN02 ─────────────
   {
-    tipo: 'clases', id: 'CLASES_pn02_contrataciones', titulo: 'Diagrama de clases — PN02 Comercialización de la suscripción', columnas: 3,
+    tipo: 'clases', id: 'CLASES_pn02_contrataciones', procesos: ['PN02'], titulo: 'Diagrama de clases — PN02 Comercialización de la suscripción', columnas: 3,
     clases: [
       E('BE.Contratacion', { attrs: 'all' }), E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido', 'IdPlan', 'FechaVencimiento', 'DescuentoProximoCobro'] }),
       E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'LimitePrendas', 'Precio'] }), E('BE.Promocion', { attrs: ['IdPromocion', 'Nombre', 'TipoDescuento', 'Valor'] }),
       E('BE.PoliticaDescuento', { metodos: 'all' }),
+      E('BLL.Cliente', { metodos: [] }),
       E('BLL.Contratacion', { metodos: ['CrearContratacion', 'ConfirmarPago', 'CalcularImporte', 'RegistrarIntentoFallido'] }),
       E('IContratacionDAL', { metodos: ['Alta', 'ConfirmarPago', 'IncrementarIntento', 'ReabrirPago', 'Cancelar'] })
     ]
@@ -110,7 +112,7 @@ module.exports = [
 
   // ───────────── PN03 ─────────────
   {
-    tipo: 'clases', id: 'CLASES_pn03_promociones', titulo: 'Diagrama de clases — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
+    tipo: 'clases', id: 'CLASES_pn03_promociones', procesos: ['PN03'], titulo: 'Diagrama de clases — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
     clases: [
       E('BE.SugerenciaPromocion', { attrs: 'all' }), E('BE.Promocion', { attrs: 'all' }), E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'Precio'] }), E('BE.CandidataSugerencia', { attrs: 'all' }),
       E('BLL.SugerenciaPromocion', { metodos: ['Crear', 'ObtenerPendientes'] }), E('BLL.AnalisisPromociones', { metodos: 'all' }),
@@ -119,7 +121,7 @@ module.exports = [
     ]
   },
   {
-    tipo: 'clases', id: 'CLASES_patron_strategy_abandono', titulo: 'Patrón Strategy — Análisis de abandono (criterio de riesgo intercambiable)', columnas: 3,
+    tipo: 'clases', id: 'CLASES_patron_strategy_abandono', procesos: ['PN03'], titulo: 'Patrón Strategy — Análisis de abandono (criterio de riesgo intercambiable)', columnas: 3,
     clases: [
       E('BLL.AnalisisAbandono', { metodos: 'all' }), E('BLL.Estrategias.EstrategiaRiesgo', { metodos: 'all' }),
       E('BLL.Estrategias.EstrategiaInactividadPura', { metodos: 'all' }), E('BLL.Estrategias.EstrategiaVencimientoInactividad', { metodos: 'all' }),
@@ -130,15 +132,15 @@ module.exports = [
 
   // ───────────── PN04 ─────────────
   {
-    tipo: 'clases', id: 'CLASES_pn04_devolucion', titulo: 'Diagrama de clases — PN04 Inspección de devolución', columnas: 3,
+    tipo: 'clases', id: 'CLASES_pn04_devolucion', procesos: ['PN04'], titulo: 'Diagrama de clases — PN04 Inspección de devolución', columnas: 3,
     clases: [
       E('BE.Prenda', { attrs: 'all' }), E('BE.MantenimientoPrenda', { attrs: 'all' }), E('BE.CargoPrenda', { attrs: 'all' }), E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido'] }),
-      E('BLL.Prenda', { metodos: ['ObtenerEnLimpieza', 'CambiarEstado', 'ObtenerHistorialMantenimiento'] }), E('BLL.CargoPrenda', { metodos: ['RegistrarCargo', 'ObtenerPendientesPorCliente'] }),
+      E('BLL.ListaEspera', { metodos: [] }), E('BLL.Prenda', { metodos: ['ObtenerEnLimpieza', 'CambiarEstado', 'ObtenerHistorialMantenimiento'] }), E('BLL.CargoPrenda', { metodos: ['RegistrarCargo', 'ObtenerPendientesPorCliente'] }),
       E('IPrendaDAL', { metodos: ['CambiarEstado'] }), E('ICargoPrendaDAL', { metodos: ['Alta', 'ObtenerPendientesPorCliente', 'MarcarCobradosEnTx'] })
     ]
   },
   {
-    tipo: 'clases', id: 'CLASES_patron_state_prenda', titulo: 'Patrón State — Ciclo de vida de una prenda', columnas: 3,
+    tipo: 'clases', id: 'CLASES_patron_state_prenda', procesos: ['PN04'], titulo: 'Patrón State — Ciclo de vida de una prenda', columnas: 3,
     clases: [
       E('BE.Prenda', { attrs: ['IdPrenda', 'Nombre', 'Estado'], metodos: ['ControlarEstado', 'EstaDisponible'] }),
       E('BE.Estados.Estado', { metodos: 'all' }), E('BE.Estados.EstadoDisponible', { metodos: 'all' }), E('BE.Estados.EstadoEnUso', { metodos: 'all' }),

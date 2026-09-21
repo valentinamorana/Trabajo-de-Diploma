@@ -44,6 +44,9 @@ classDiagram
     +string Nombre
     +string Apellido
   }
+  class BLL_ListaEspera["BLL.ListaEspera"] {
+    +NotificarSiCorresponde(int,  string) void
+  }
   class BLL_Prenda["BLL.Prenda"] {
     +CambiarEstado(string,  Prenda,  EstadoPrenda,  string,  bool,  bool) void
     +ObtenerEnLimpieza() List~Prenda~
@@ -68,5 +71,6 @@ classDiagram
   MantenimientoPrenda --> "1" Prenda : IdPrenda
   CargoPrenda --> "1" Prenda : IdPrenda
   CargoPrenda --> "1" Cliente : IdCliente
+  BLL_ListaEspera ..> DAL_Interfaces_IPrendaDAL : usa
   BLL_Prenda ..> DAL_Interfaces_IPrendaDAL : usa
   BLL_CargoPrenda ..> DAL_Interfaces_ICargoPrendaDAL : usa

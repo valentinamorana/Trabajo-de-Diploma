@@ -457,9 +457,22 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 | D10 | **Pausar corre el vencimiento** por los días de pausa (solo si quedaba tiempo pagado); reanudar antes de tiempo devuelve los días no usados | NUULY 4.8: mientras dura la pausa no se cobra, así que la pausa no consume lo ya pagado. Implementado en `PausarSuscripcionHandler` y `BLL.Cliente.ReanudarPausa` |
 | D11 | **Concurrencia entre sesiones**: el crédito de referido se modifica solo con `SumarCreditoEnTx` / `ConsumirCreditoEnTx` (UPDATE atómico sobre el valor real; el UPDATE general de Cliente ya no lo escribe); el cobro de cargos exige `Estado=Pendiente` y aborta todo el cobro si otra sesión ya los cobró; `Promocion.Modificar` exige `Estado=EnRevisionContable`; contratar y cobrar validan el cupo del plan contra las prendas en uso | Evita perder actualizaciones, cobrar dos veces un cargo y editar una promoción ya aprobada por otra sesión |
 
-### 7.2 Desvíos conocidos entre el documento del trabajo (`WardrobeFlow - Trabajo de Diploma.docx`) y el código
-| Tema | Documento | Código actual | Acción sugerida |
-|---|---|---|---|
+### 7.2 Desvíos entre el documento del trabajo (`WardrobeFlow - Trabajo de Diploma.docx`) y el código
+Estado tras la edición de la tesis (N01 y PN01–PN04 documentados desde el código; G01, G02, G04, G05, G06, G07 y G08 corregidos).
+
+| Tema | Estado | Detalle |
+|---|---|---|
+| Roles (G05), estados de prenda (G04) | **Resuelto** | 10 roles reales y 4 estados de prenda |
+| Despacho, cargos, incidencias por demora, compra definitiva | **Resuelto** | La tesis describe solo lo implementado (sin email/tracking, sin aprobador de cargos, sin compra definitiva) |
+| PN01 con Depósito, PN04 con cargo por daño | **Resuelto** | Reescritos según D7 y D2 |
+| N01 | **Resuelto** | Incorporado a la tesis (sección N00) |
+| Diagramas PN01–PN04 y N01 (proceso, casos de uso, secuencia, clases, conceptual, DER) | **Resuelto** | 63 diagramas generados desde el código (`docs/diagramas/`, Mermaid + draw.io), verificados en cada commit |
+| Balanceo clases–secuencia (corrección de la Entrega 1) | **Resuelto** | `verificar.js` exige que toda clase y método citado en las secuencias de un proceso figure en sus diagramas de clases |
+| Diagramas T01–T08 | Pendiente | Diagramas antiguos de la tesis, no regenerados ni contrastados con el código |
+| Calidad de impresión | Limitación | Los diagramas de clases y DER son grandes: se leen ampliando en el Word |
+| draw.io | Limitación | Archivos generados con disposición automática; no se abrieron uno por uno en draw.io |
+
+---|---|---|---|
 | Roles (G05) | Supervisor, Operador de Inventario, Depósito | 10 roles reales (§2.2); Supervisor no existe; "Depósito" = rol `Deposito` | actualizar G05 (y G02/G04) |
 | Estados de prenda (G04) | "Disponible / En uso" | 4 estados | actualizar G04 |
 | Despacho (M05) | email con tracking; estados Despachado/En curso/On Hold | sin email/tracking; estados Pendiente/Despachado/Entregado/Cancelado | ajustar el documento |
@@ -480,8 +493,8 @@ Fuente: `Plan de Entregas TD 2026.xlsx` y notas de la clase 4. Fechas: **Entrega
 
 | Entrega | Exige (Plan) | Estado |
 |---|---|---|
-| **1** | G00–G08 + N01 analizado y diseñado | N01 diseñado en su momento (`Entrega1.eapx`, diagramas "PN01 - …" de `Diagramas VALEN/`); ver §7.2 sobre su ausencia en el `.docx` actual |
-| **2** | N01 implementado y documentado · N02 (= **PN01–PN04**) analizado, diseñado e implementado (roles, descripción funcional, diagrama de proceso, modelo conceptual, casos de uso no-ABM, diagrama de clases y modelo de datos) · **A01** instalador (caso simple) · G07/G08 refinados · balanceo con la implementación | **Código:** N01 ; PN02 ; PN04 ; PN03 (ahora con aplicación al cobro); PN01 parcial (sin actor Depósito, §4). **Instalador:** `.exe` firmado, BD por script con datos de prueba; **falta la prueba en máquina limpia**. **Documento:** texto, roles y casos de uso de PN01–PN04 escritos; **faltan diagramas** (actividad, casos de uso, secuencia, clases, conceptual, DER) y los ajustes de §7.2; G07/G08 a regenerar desde código/SQL (78 BE, 81 BLL, 52 DAL, 76 GUI aprox.; 31 tablas) |
+| **1** | G00–G08 + N01 analizado y diseñado | N01 diseñado en su momento (`Entrega1.eapx`, diagramas "PN01 - …" de `Diagramas VALEN/`); ya incorporado a la tesis (§7.2) |
+| **2** | N01 implementado y documentado · N02 (= **PN01–PN04**) analizado, diseñado e implementado (roles, descripción funcional, diagrama de proceso, modelo conceptual, casos de uso no-ABM, diagrama de clases y modelo de datos) · **A01** instalador (caso simple) · G07/G08 refinados · balanceo con la implementación | **Código:** N01 y PN01–PN04 implementados (498 tests, 2 omitidos). **Instalador:** `.exe` firmado, BD por script con datos de prueba; **falta la prueba en máquina limpia**. **Documento:** hecho en la tesis para N01 y PN01–PN04 (roles, descripción, proceso, modelo conceptual, casos de uso, clases, datos) con diagramas generados desde el código; G07/G08 refinados; balanceo clases–secuencia verificado automáticamente. **Pendiente:** T01–T08, prueba manual (`CHECKLIST_PRUEBA_MANUAL.md`) y prueba del instalador en máquina limpia |
 | **3** | N03 (proceso complejo que cruce información para decidir) · D01 manual de instalación · D02 ayuda en línea · D03 material de usuario · A01 casos especiales · A02 informe PDF y **serialización** | Instalador con casos especiales: hecho (`.iss`). PDF: hecho (analítica). **Serialización (A02): no encontrada en el código** (búsqueda de `XmlSerializer/BinaryFormatter/DataContractSerializer/JsonConvert/[Serializable]` sin resultados; solo hay exportación CSV/TXT). **Ayuda en línea (D02): no hay** (`HelpProvider`/F1 sin resultados). N03: PN03 conectado a la analítica es la base natural |
 
 Criterios de evaluación del Plan (balanceo de clases, DER, casos de uso, secuencia; UI; POO; BD 3FN; presentación): el código y el SQL son la fuente para el balanceo;

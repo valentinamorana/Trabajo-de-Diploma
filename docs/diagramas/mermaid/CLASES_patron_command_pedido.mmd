@@ -20,6 +20,10 @@ classDiagram
     +Cancelar(string,  Pedido,  string) void
   }
   class BLL_Pedido["BLL.Pedido"] {
+    +CrearPedido(string,  int,  List~Prenda~) int
+    +ValidarPuedeArmarPedido(int) Cliente
+    +Despachar(string,  Pedido) void
+    +MarcarEntregado(string,  Pedido) void
     +RegistrarDevolucion(string,  Pedido) void
     +Cancelar(string,  Pedido,  string) void
   }

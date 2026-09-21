@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const cs = require('./csharp');
+const balanceo = require('./balanceo');
 
 const ESQUEMA = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'schema.json'), 'utf8').replace(/^﻿/, ''));
 
@@ -73,7 +74,14 @@ function resolverClases(m) {
     else if (s.attrs === 'none') props = [];
     else if (s.attrs === 'keys') props = props.filter(p => /^Id|^Estado$|^Nombre$|^Fecha/.test(p.nombre)).slice(0, 8);
     let metodos = c.metodos;
-    if (Array.isArray(s.metodos)) metodos = metodos.filter(x => s.metodos.includes(x.nombre));
+    const citadosDe = () => { const cit = balanceo.citados(), r = new Set(); for (const p of (m.procesos || [])) { const mp = cit[p] && cit[p].get(c.ns + '.' + c.nombre); if (mp) mp.forEach(x => r.add(x)); } return r; };
+    if (Array.isArray(s.metodos)) { const uni = new Set([...s.metodos, ...citadosDe()]); metodos = metodos.filter(x => uni.has(x.nombre)); }
+    else if (s.metodos === 'auto') {
+      // Los métodos que citan las secuencias de los procesos de este diagrama (balanceo clases-secuencia).
+      const conjunto = new Set(); const cit = balanceo.citados();
+      for (const p of (m.procesos || [])) { const mp = cit[p] && cit[p].get(c.ns + '.' + c.nombre); if (mp) mp.forEach(x => conjunto.add(x)); }
+      metodos = metodos.filter(x => conjunto.has(x.nombre));
+    }
     else if (s.metodos !== 'all') metodos = [];
     metodos = metodos.map(x => ({ ...x, params: soloTipos(x.params), retorno: x.retorno.replace(/[()]/g, '').replace(/\s+/g, ' ') }));
     items.push({

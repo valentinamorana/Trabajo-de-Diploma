@@ -77,6 +77,22 @@ classDiagram
     +NotificarSiCorresponde(int,  string) void
     +EstaReservadaParaOtro(int,  int) bool
     +CerrarSiReservada(string,  int,  int,  string) void
+    +ObtenerIdsReservadosParaOtro(int?) List~int~
+  }
+  class BLL_Cliente["BLL.Cliente"] {
+    +ObtenerEstadoComercial(Cliente,  int) EstadoComercialCliente
+  }
+  class DAL_Interfaces_IClienteDAL["DAL.Interfaces.IClienteDAL"] {
+    <<interface>>
+    +ObtenerPorId(int) Cliente
+  }
+  class DAL_Interfaces_IPrendaDAL["DAL.Interfaces.IPrendaDAL"] {
+    <<interface>>
+    +ObtenerTodos() List~Prenda~
+  }
+  class DAL_Interfaces_IPedidoHistorialDAL["DAL.Interfaces.IPedidoHistorialDAL"] {
+    <<interface>>
+    +RegistrarCambios(List~PedidoHistorial~) void
   }
   class DAL_Interfaces_IPedidoDAL["DAL.Interfaces.IPedidoDAL"] {
     <<interface>>
@@ -95,3 +111,9 @@ classDiagram
   ListaEspera --> "1" Cliente : IdCliente
   Cliente --> "0..1" PlanSuscripcion : IdPlan
   BLL_Pedido ..> DAL_Interfaces_IPedidoDAL : usa
+  BLL_Pedido ..> DAL_Interfaces_IClienteDAL : usa
+  BLL_Pedido ..> DAL_Interfaces_IPedidoHistorialDAL : usa
+  BLL_Prenda ..> DAL_Interfaces_IPrendaDAL : usa
+  BLL_ListaEspera ..> DAL_Interfaces_IPrendaDAL : usa
+  BLL_ListaEspera ..> DAL_Interfaces_IClienteDAL : usa
+  BLL_Cliente ..> DAL_Interfaces_IClienteDAL : usa

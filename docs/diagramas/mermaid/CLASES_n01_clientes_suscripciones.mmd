@@ -78,8 +78,16 @@ classDiagram
     +Desactivar(int) void
     +Activar(int) void
   }
+  class DAL_Interfaces_IPlanSuscripcionDAL["DAL.Interfaces.IPlanSuscripcionDAL"] {
+    <<interface>>
+    +Alta(PlanSuscripcion) void
+    +Modificar(PlanSuscripcion) void
+    +Desactivar(int) void
+  }
   class DAL_Interfaces_IClienteDAL["DAL.Interfaces.IClienteDAL"] {
     <<interface>>
+    +Alta(Cliente) int
+    +ExisteDNI(string) bool
     +EjecutarTransaccion(Action~SqlConnection,  SqlTransaction~) void
     +SumarCreditoEnTx(SqlConnection,  SqlTransaction,  int,  decimal) void
     +ConsumirCreditoEnTx(SqlConnection,  SqlTransaction,  int,  decimal) void
@@ -90,5 +98,7 @@ classDiagram
   Renovacion --> "0..1" PlanSuscripcion : IdPlanNuevo
   Cobro --> "1" Cliente : IdCliente
   BLL_Cliente ..> DAL_Interfaces_IClienteDAL : usa
+  BLL_Cliente ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
   BLL_Renovacion ..> DAL_Interfaces_IClienteDAL : usa
+  BLL_Renovacion ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
   BLL_Cobro ..> DAL_Interfaces_IClienteDAL : usa

@@ -45,6 +45,29 @@ for (const d of secuencias) {
   });
 }
 
+// 3b) balanceo clases-secuencia: toda clase/método citado por las secuencias de un proceso debe estar en sus diagramas de clases
+{
+  const balanceo = require('./lib/balanceo');
+  const { resolverClases } = require('./lib/modelo');
+  const modelosClases = require('./modelos/clases');
+  const cit = balanceo.citados();
+  for (const [p, mapa] of Object.entries(cit)) {
+    const presentes = new Map();
+    for (const m of modelosClases.filter(x => (x.procesos || []).includes(p))) {
+      for (const it of resolverClases(m).items || resolverClases(m)) {
+        const k = it.ns + '.' + it.nombre;
+        if (!presentes.has(k)) presentes.set(k, new Set());
+        (it.metodos || []).forEach(x => presentes.get(k).add(x.nombre));
+      }
+    }
+    for (const [clave, mets] of mapa) {
+      if (!presentes.has(clave)) { errores.push(`Balanceo ${p}: la clase ${clave} se usa en las secuencias (${[...mets].join(', ')}) pero no está en los diagramas de clases del proceso.`); continue; }
+      const faltan = [...mets].filter(x => !presentes.get(clave).has(x));
+      if (faltan.length) errores.push(`Balanceo ${p}: ${clave} no muestra ${faltan.join(', ')} citados en las secuencias.`);
+    }
+  }
+}
+
 // 4) regenerar
 if (regenerar) {
   try { execFileSync(process.execPath, [path.join(__dirname, 'generar.js')], { stdio: 'inherit' }); }

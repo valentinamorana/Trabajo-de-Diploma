@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Drawing;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
@@ -22,6 +23,7 @@ namespace GUI
         public CobroSuscripcionForm()
         {
             InitializeComponent();
+            cmbModalidad.Items.AddRange(Enum.GetValues(typeof(BE.Builders.ModalidadCobro)).Cast<object>().ToArray());
             cmbModalidad.SelectedIndex = 0;
             Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
         }

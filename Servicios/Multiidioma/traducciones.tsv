@@ -4526,6 +4526,7 @@ ES	err.bll.renovacion.pausa_sin_fecha	Debe indicar hasta cuándo queda pausada l
 ES	err.bll.renovacion.pausa_fecha_pasada	La fecha de reanudación no puede ser anterior a hoy.
 ES	err.bll.renovacion.pausa_excede_tope	La pausa no puede superar los {0} meses (hasta el {1:d}).
 ES	err.bll.renovacion.pausa_con_prendas	No se puede pausar: el cliente tiene prendas en uso pendientes de devolución.
+ES	err.bll.renovacion.ya_pausada	La suscripción ya está pausada. Reanudala antes de pedir una nueva pausa.
 ES	err.bll.pedido.suscripcion_pausada	La suscripción de {0} está pausada hasta el {1}. Reanudarla en el módulo de Clientes antes de generar un nuevo pedido.
 ES	err.bll.cliente.no_pausada	{0} no tiene la suscripción pausada.
 ES	lbl.cli.referente	Referido por
@@ -4559,6 +4560,7 @@ EN	err.bll.renovacion.pausa_sin_fecha	You must indicate until when the subscript
 EN	err.bll.renovacion.pausa_fecha_pasada	The resume date can't be earlier than today.
 EN	err.bll.renovacion.pausa_excede_tope	A pause can't exceed {0} months (until {1:d}).
 EN	err.bll.renovacion.pausa_con_prendas	Can't pause: the customer has garments in use pending return.
+EN	err.bll.renovacion.ya_pausada	The subscription is already paused. Resume it before requesting a new pause.
 EN	err.bll.pedido.suscripcion_pausada	{0}'s subscription is paused until {1}. Resume it in the Customers module before creating a new order.
 EN	err.bll.cliente.no_pausada	{0}'s subscription is not paused.
 EN	lbl.cli.referente	Referred by
@@ -4592,6 +4594,7 @@ RU	err.bll.renovacion.pausa_sin_fecha	Укажите, до какой даты �
 RU	err.bll.renovacion.pausa_fecha_pasada	Дата возобновления не может быть раньше сегодняшнего дня.
 RU	err.bll.renovacion.pausa_excede_tope	Пауза не может превышать {0} мес. (до {1:d}).
 RU	err.bll.renovacion.pausa_con_prendas	Невозможно приостановить: у клиента есть вещи, которые нужно вернуть.
+RU	err.bll.renovacion.ya_pausada	Подписка уже приостановлена. Возобновите её, прежде чем запрашивать новую паузу.
 RU	err.bll.pedido.suscripcion_pausada	Подписка {0} приостановлена до {1}. Возобновите её в модуле Клиентов перед созданием нового заказа.
 RU	err.bll.cliente.no_pausada	Подписка {0} не приостановлена.
 RU	lbl.cli.referente	Приглашён кем
@@ -4625,6 +4628,7 @@ PT	err.bll.renovacion.pausa_sin_fecha	Você deve indicar até quando a assinatur
 PT	err.bll.renovacion.pausa_fecha_pasada	A data de retomada não pode ser anterior a hoje.
 PT	err.bll.renovacion.pausa_excede_tope	A pausa não pode exceder {0} meses (até {1:d}).
 PT	err.bll.renovacion.pausa_con_prendas	Não é possível pausar: o cliente tem peças em uso pendentes de devolução.
+PT	err.bll.renovacion.ya_pausada	A assinatura já está pausada. Retome-a antes de pedir uma nova pausa.
 PT	err.bll.pedido.suscripcion_pausada	A assinatura de {0} está pausada até {1}. Retome-a no módulo de Clientes antes de gerar um novo pedido.
 PT	err.bll.cliente.no_pausada	A assinatura de {0} não está pausada.
 PT	lbl.cli.referente	Indicado por

@@ -262,7 +262,7 @@ namespace BLL
                 var plan = dalPlan.ObtenerPorId(c.IdPlan);
                 var cliente = dalCliente.ObtenerPorId(c.IdCliente);
                 var r = BE.PoliticaDescuento.Resolver(
-                    (plan != null ? plan.Precio : c.MontoPlan) * BE.Builders.ModalidadCobroExtensiones.Meses(c.Modalidad), c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m);
+                    (plan != null ? plan.Precio : c.MontoPlan) * BE.Builders.ModalidadCobroExtensiones.Meses(c.Modalidad), c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m, BE.Builders.ModalidadCobroExtensiones.Meses(c.Modalidad));
                 resultado[c.IdContratacion] = new BE.LiquidacionContratacion
                 {
                     Bruto = r.Bruto, Descuento = r.Descuento,
@@ -278,7 +278,7 @@ namespace BLL
         {
             decimal bruto = (plan != null ? plan.Precio : c.MontoPlan) * BE.Builders.ModalidadCobroExtensiones.Meses(c.Modalidad);
             return BE.PoliticaDescuento.Resolver(
-                bruto, c.IdPlan, ObtenerPromocionesVigentes(), cliente?.DescuentoProximoCobro ?? 0m);
+                bruto, c.IdPlan, ObtenerPromocionesVigentes(), cliente?.DescuentoProximoCobro ?? 0m, BE.Builders.ModalidadCobroExtensiones.Meses(c.Modalidad));
         }
 
         // Best-effort: sin DAL de promociones, o si la tabla aún no existe, se cobra sin promociones.

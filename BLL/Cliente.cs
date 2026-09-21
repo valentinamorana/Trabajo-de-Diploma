@@ -184,6 +184,10 @@ namespace BLL
             cliente.NombrePlan       = plan.Nombre;
             cliente.LimitePrendas    = plan.LimitePrendas;
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
+            // Un cobro exitoso deja la cuenta al día: limpia la gracia y cualquier pausa
+            // (ProcesarPagoHandler ya hacía lo mismo con la gracia).
+            cliente.FechaLimiteGracia = null;
+            cliente.FechaPausaHasta = null;
 
             // Bloque 1 — Programa de referidos: si este cliente fue referido por otro y todavía
             // no se acreditó el beneficio (BeneficioReferidoOtorgado evita duplicarlo si se
@@ -207,22 +211,33 @@ namespace BLL
                 if (referente != null)
                     dalCliente.ModificarEnTx(conexion, tx, referente);
             });
-            dalCliente.RecalcularDV();
+            // La activación ya quedó confirmada: un fallo del registro posterior no debe propagarse,
+            // porque BLL.Contratacion.ConfirmarPago lo interpretaría como activación fallida y
+            // reabriría el cobro de una suscripción que sí quedó activa (doble cobro).
+            try
+            {
+                dalCliente.RecalcularDV();
 
-            bitacora.Registrar(modulo,
-                $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
-                $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}",
-                BE.Criticidad.Media);
-            bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
-                $"Activación de suscripción: {cliente.NombreCompleto} — Plan {plan.Nombre} — " +
-                $"Modalidad {modalidad} — Vence {suscripcion.FechaVencimiento:d}",
-                idCliente: cliente.IdCliente);
-
-            if (referente != null)
+                bitacora.Registrar(modulo,
+                    $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
+                    $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}",
+                    BE.Criticidad.Media);
                 bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
-                    $"Beneficio por referido acreditado: {referente.NombreCompleto} recibe ${MontoBeneficioReferido} " +
-                    $"de descuento en su próximo cobro por referir a {cliente.NombreCompleto}",
-                    idCliente: referente.IdCliente);
+                    $"Activación de suscripción: {cliente.NombreCompleto} — Plan {plan.Nombre} — " +
+                    $"Modalidad {modalidad} — Vence {suscripcion.FechaVencimiento:d}",
+                    idCliente: cliente.IdCliente);
+
+                if (referente != null)
+                    bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
+                        $"Beneficio por referido acreditado: {referente.NombreCompleto} recibe ${MontoBeneficioReferido} " +
+                        $"de descuento en su próximo cobro por referir a {cliente.NombreCompleto}",
+                        idCliente: referente.IdCliente);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError(
+                    $"[BLL.Cliente] Suscripción activada, pero falló el registro posterior: {ex.Message}");
+            }
 
             return suscripcion;
         }

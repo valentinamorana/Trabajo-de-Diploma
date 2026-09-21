@@ -32,7 +32,13 @@ namespace BE.Builders
         public Suscripcion BuildSuscripcion()
         {
             var fechaActivacion = DateTime.Today;
-            var fechaVencimiento = CalcularVencimiento(fechaActivacion);
+            // Si todavía tiene tiempo pagado, el nuevo período se suma a continuación del actual:
+            // no se pierden los días ya abonados al renovar por adelantado.
+            var inicioPeriodo = _cliente != null && _cliente.FechaVencimiento.HasValue
+                                && _cliente.FechaVencimiento.Value.Date > fechaActivacion
+                ? _cliente.FechaVencimiento.Value.Date
+                : fechaActivacion;
+            var fechaVencimiento = CalcularVencimiento(inicioPeriodo);
             return new Suscripcion(_cliente, _plan, Modalidad, fechaActivacion, fechaVencimiento);
         }
     }

@@ -172,6 +172,45 @@ namespace Tests
         // ── PausarSuscripcionHandler (Bloque 1) ──────────────────────────────────
 
         [TestMethod]
+        public void Pausar_ClienteVigenteSinVencer_NoQuedaPendiente_PausaIgual()
+        {
+            var verificar = new VerificarVencimientoHandler();
+            var pausar = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            verificar.AgregarSiguiente(pausar);
+            var cliente = ClienteVigente();
+
+            var r = verificar.Procesar(new ContextoRenovacion
+            {
+                Cliente = cliente,
+                Decision = DecisionRenovacion.Pausar,
+                FechaPausaHasta = DateTime.Today.AddDays(20)
+            });
+
+            Assert.AreEqual(BE.EstadoRenovacion.Pausada, r.Estado);
+        }
+
+        [TestMethod]
+        public void Pausar_YaPausada_LanzaYNoEncadenaPausas()
+        {
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            var cliente = ClienteVigente();
+            cliente.FechaPausaHasta = DateTime.Today.AddDays(5);
+            try
+            {
+                handler.Procesar(new ContextoRenovacion
+                {
+                    Cliente = cliente,
+                    Decision = DecisionRenovacion.Pausar,
+                    FechaPausaHasta = DateTime.Today.AddDays(30)
+                });
+                Assert.Fail("No debe permitir re-pausar una suscripción ya pausada.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.ya_pausada", ex.Clave);
+            }
+        }
+        [TestMethod]
         public void Pausar_MasDeTresMeses_LanzaTopeDeNuuly()
         {
             var dalCliente = new FakeClienteDAL();
@@ -336,6 +375,7 @@ namespace Tests
             var handler = new CambioPlanHandler(dalCliente, dalPlan, dalRenovacion);
             var cliente = ClienteVigente();
             cliente.StockUtilizado = 2;
+            cliente.FechaVencimiento = DateTime.Today.AddDays(-1); // el cambio de plan se atiende al vencer
 
             var resultado = handler.Procesar(new ContextoRenovacion
             {

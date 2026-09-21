@@ -41,6 +41,12 @@ namespace BLL.Manejadores
                 throw new BE.AppException("err.bll.renovacion.pausa_fecha_pasada",
                     "La fecha de reanudación no puede ser anterior a hoy.");
 
+            // Sin re-pausar: si ya está pausada hay que reanudar primero; si no, se podría
+            // encadenar pausas día a día y superar el tope de 3 meses.
+            if (contexto.Cliente.EstaPausada)
+                throw new BE.AppException("err.bll.renovacion.ya_pausada",
+                    "La suscripción ya está pausada. Reanudala antes de pedir una nueva pausa.");
+
             if (contexto.FechaPausaHasta.Value.Date > DateTime.Today.AddMonths(MaxMesesPausa))
                 throw new BE.AppException("err.bll.renovacion.pausa_excede_tope",
                     "La pausa no puede superar los {0} meses (hasta el {1:d}).",

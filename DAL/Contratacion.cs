@@ -14,7 +14,7 @@ namespace DAL
         private const string SELECT_BASE =
             "SELECT c.IdContratacion, c.IdCliente, c.IdPlan, c.IdVendedor, c.IdCaja, c.Modalidad, " +
             "c.Estado, c.IntentosPago, c.FechaAlta, c.FechaResolucion, c.MedioPago, " +
-            "c.NumeroComprobante, c.FechaComprobante, " +
+            "c.NumeroComprobante, c.FechaComprobante, c.Importe, c.DescuentoAplicado, c.IdPromocion, " +
             "cli.Nombre + ' ' + cli.Apellido AS NombreCliente, pl.Nombre AS NombrePlan, pl.Precio AS MontoPlan " +
             "FROM Contratacion c " +
             "JOIN Cliente cli ON cli.IdCliente = c.IdCliente " +
@@ -105,7 +105,8 @@ namespace DAL
             }
         }
 
-        public bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante)
+        public bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante,
+                                  decimal importe, decimal descuento, int? idPromocion)
         {
             SqlParameter[] p =
             {
@@ -115,7 +116,10 @@ namespace DAL
                 new SqlParameter("@MedioPago",          medioPago),
                 new SqlParameter("@NumeroComprobante",  numeroComprobante),
                 new SqlParameter("@FechaResolucion",    DateTime.Now),
-                new SqlParameter("@FechaComprobante",   DateTime.Now)
+                new SqlParameter("@FechaComprobante",   DateTime.Now),
+                new SqlParameter("@Importe",            importe),
+                new SqlParameter("@Descuento",          descuento),
+                new SqlParameter("@IdPromocion",        (object)idPromocion ?? DBNull.Value)
             };
             try
             {
@@ -123,6 +127,7 @@ namespace DAL
                 int filas = acceso.Escribir(
                     "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
                     "NumeroComprobante = @NumeroComprobante, FechaComprobante = @FechaComprobante, " +
+                    "Importe = @Importe, DescuentoAplicado = @Descuento, IdPromocion = @IdPromocion, " +
                     "FechaResolucion = @FechaResolucion WHERE IdContratacion = @IdContratacion AND Estado = 0",
                     p);
                 return filas > 0;
@@ -140,7 +145,7 @@ namespace DAL
             {
                 acceso.Escribir(
                     "UPDATE Contratacion SET Estado = 0, IdCaja = NULL, MedioPago = NULL, NumeroComprobante = NULL, " +
-                    "FechaComprobante = NULL, FechaResolucion = NULL WHERE IdContratacion = @IdContratacion AND Estado = 1",
+                    "FechaComprobante = NULL, Importe = NULL, DescuentoAplicado = NULL, IdPromocion = NULL, FechaResolucion = NULL WHERE IdContratacion = @IdContratacion AND Estado = 1",
                     p);
             }
             catch (Exception ex)
@@ -187,6 +192,9 @@ namespace DAL
                 MedioPago         = row["MedioPago"] != DBNull.Value ? row["MedioPago"].ToString() : null,
                 NumeroComprobante = row["NumeroComprobante"] != DBNull.Value ? row["NumeroComprobante"].ToString() : null,
                 FechaComprobante  = row["FechaComprobante"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaComprobante"]) : null,
+                Importe           = row["Importe"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["Importe"]) : null,
+                DescuentoAplicado = row["DescuentoAplicado"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["DescuentoAplicado"]) : null,
+                IdPromocion       = row["IdPromocion"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPromocion"]) : null,
                 NombreCliente     = row["NombreCliente"].ToString(),
                 NombrePlan        = row["NombrePlan"].ToString(),
                 MontoPlan         = Convert.ToDecimal(row["MontoPlan"])

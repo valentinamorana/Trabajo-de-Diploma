@@ -98,6 +98,7 @@
     <Compile Include="ReporteVentasVendedor.cs" />
     <Compile Include="Interfaces\IAnalisisRotacionService.cs" />
     <Compile Include="AnalisisRotacion.cs" />
+    <Compile Include="AnalisisPromociones.cs" />
     <Compile Include="Interfaces\IAnalisisMantenimientoService.cs" />
     <Compile Include="AnalisisMantenimiento.cs" />
     <Compile Include="Interfaces\IAnalisisEscasezService.cs" />

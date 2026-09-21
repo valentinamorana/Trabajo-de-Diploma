@@ -17,16 +17,19 @@ namespace GUI
         private readonly BLL.Interfaces.IPlanSuscripcionService planBLL = new BLL.PlanSuscripcion();
 
         private readonly BE.SugerenciaPromocion _sugerenciaOrigen;
+        // PN03: si viene una promoción Rechazada por Contabilidad, el formulario la reformula.
+        private readonly BE.Promocion _reformular;
         private List<BE.PlanSuscripcion> _planes = new List<BE.PlanSuscripcion>();
 
         public int IdPromocionCreada { get; private set; }
 
         /// <param name="sugerenciaOrigen">Si viene de una sugerencia de Gerencia, precarga plan/categoría
         /// y los bloquea (no se puede cambiar el destino de la sugerencia). Null para alta manual.</param>
-        public AltaPromocionForm(BE.SugerenciaPromocion sugerenciaOrigen = null)
+        public AltaPromocionForm(BE.SugerenciaPromocion sugerenciaOrigen = null, BE.Promocion promocionAReformular = null)
         {
             InitializeComponent();
             _sugerenciaOrigen = sugerenciaOrigen;
+            _reformular = promocionAReformular;
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -86,7 +89,28 @@ namespace GUI
                 dtpInicio.Value = DateTime.Today;
                 dtpFin.Value = DateTime.Today.AddMonths(1);
 
-                if (_sugerenciaOrigen != null)
+                if (_reformular != null)
+                {
+                    lblSugerencia.Text = Tr("promo.reformular", "Reformulando la promoción #{0}. Observación de Contabilidad: {1}",
+                        new object[] { _reformular.IdPromocion, _reformular.Observacion ?? "—" });
+                    rbPlan.Checked = _reformular.AplicaAPlan();
+                    rbCategoria.Checked = _reformular.AplicaACategoria();
+                    if (_reformular.AplicaAPlan()) cmbPlan.SelectedValue = _reformular.IdPlan.Value;
+                    else txtCategoria.Text = _reformular.CategoriaPrenda;
+                    rbPlan.Enabled = false;
+                    rbCategoria.Enabled = false;
+                    cmbPlan.Enabled = _reformular.AplicaAPlan();
+                    txtCategoria.Enabled = _reformular.AplicaACategoria();
+                    txtNombre.Text = _reformular.Nombre;
+                    txtDescripcion.Text = _reformular.Descripcion;
+                    cmbTipoDescuento.SelectedItem = _reformular.TipoDescuento;
+                    numValor.Value = _reformular.Valor;
+                    dtpInicio.Value = _reformular.FechaInicio < dtpInicio.MinDate ? dtpInicio.MinDate : _reformular.FechaInicio;
+                    dtpFin.Value = _reformular.FechaFin < dtpFin.MinDate ? dtpFin.MinDate : _reformular.FechaFin;
+                    numMargenEstimado.Value = _reformular.MargenEstimado;
+                    txtImpactoEconomico.Text = _reformular.ImpactoEconomico;
+                }
+                else if (_sugerenciaOrigen != null)
                 {
                     lblSugerencia.Text = Tr("promo.sugerenciaorigen", "A partir de la sugerencia #{0}: {1}",
                         new object[] { _sugerenciaOrigen.IdSugerencia, _sugerenciaOrigen.Motivo });
@@ -136,7 +160,20 @@ namespace GUI
 
             try
             {
-                if (_sugerenciaOrigen != null)
+                if (_reformular != null)
+                {
+                    _reformular.Nombre = txtNombre.Text;
+                    _reformular.Descripcion = txtDescripcion.Text;
+                    _reformular.TipoDescuento = tipo;
+                    _reformular.Valor = numValor.Value;
+                    _reformular.FechaInicio = dtpInicio.Value;
+                    _reformular.FechaFin = dtpFin.Value;
+                    _reformular.MargenEstimado = numMargenEstimado.Value;
+                    _reformular.ImpactoEconomico = txtImpactoEconomico.Text;
+                    promocionBLL.Reformular(this.Text, _reformular);
+                    IdPromocionCreada = _reformular.IdPromocion;
+                }
+                else if (_sugerenciaOrigen != null)
                 {
                     IdPromocionCreada = promocionBLL.CrearDesdeSugerencia(this.Text, _sugerenciaOrigen.IdSugerencia,
                         txtNombre.Text, txtDescripcion.Text, tipo, numValor.Value,

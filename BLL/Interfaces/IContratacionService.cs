@@ -24,7 +24,11 @@ namespace BLL.Interfaces
 
         // Confirma el pago: marca la contratación como Pagada, emite el comprobante y
         // formaliza la suscripción del cliente (BLL.Cliente.ActivarSuscripcion).
-        void ConfirmarPago(string modulo, BE.Contratacion contratacion, string medioPago);
+        // Devuelve la liquidación: comprobante emitido, importe cobrado y descuento aplicado (PN03).
+        BE.LiquidacionContratacion ConfirmarPago(string modulo, BE.Contratacion contratacion, string medioPago);
+
+        // Importe a cobrar (con el descuento aplicable) de una contratación pendiente.
+        BE.LiquidacionContratacion CalcularImporte(BE.Contratacion contratacion);
 
         // Registra un intento de pago fallido. Si se alcanzan los 3 intentos, cancela
         // automáticamente la contratación.

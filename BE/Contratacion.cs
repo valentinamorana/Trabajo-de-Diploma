@@ -24,6 +24,15 @@ namespace BE
         public string NumeroComprobante { get; set; }
         public DateTime? FechaComprobante { get; set; }
 
+        /// <summary>Importe efectivamente cobrado (plan menos el descuento aplicado). Null si aún no se cobró.</summary>
+        public decimal? Importe { get; set; }
+
+        /// <summary>Descuento aplicado en el cobro (promoción vigente o crédito por referido; nunca ambos).</summary>
+        public decimal? DescuentoAplicado { get; set; }
+
+        /// <summary>Promoción vigente aplicada al cobro (PN03), o null si no se aplicó ninguna.</summary>
+        public int? IdPromocion { get; set; }
+
         /// <summary>Cargado por JOIN, no persiste.</summary>
         public string NombreCliente { get; set; }
 

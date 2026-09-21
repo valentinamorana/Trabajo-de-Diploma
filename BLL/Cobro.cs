@@ -15,10 +15,11 @@ namespace BLL
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
         private readonly Manejadores.ManejadorCobro cadena;
 
-        public Cobro() : this(new DAL.Cliente(), new DAL.Cobro(), new DAL.CargoPrenda()) { }
+        public Cobro() : this(new DAL.Cliente(), new DAL.Cobro(), new DAL.CargoPrenda(), new DAL.Promocion()) { }
 
         public Cobro(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.ICobroDAL dalCobro,
-                      DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda)
+                      DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda,
+                      DAL.Interfaces.IPromocionDAL dalPromocion = null)
         {
             this.dalCobro = dalCobro ?? throw new ArgumentNullException(nameof(dalCobro));
 
@@ -26,7 +27,7 @@ namespace BLL
             // Program.cs del ejemplo de cátedra (director.AgregarSiguiente(directorGeneral);
             // gerente.AgregarSiguiente(director); comprador.AgregarSiguiente(gerente);).
             var detectar  = new Manejadores.DetectarCobroHandler();
-            var procesar  = new Manejadores.ProcesarPagoHandler(dalCliente, dalCobro, dalCargoPrenda);
+            var procesar  = new Manejadores.ProcesarPagoHandler(dalCliente, dalCobro, dalCargoPrenda, dalPromocion);
             var gracia    = new Manejadores.AplicarGraciaHandler(dalCliente, dalCobro);
             var suspender = new Manejadores.SuspenderHandler(dalCobro);
 

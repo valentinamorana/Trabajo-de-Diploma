@@ -23,10 +23,14 @@ namespace BLL.Manejadores
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.ICobroDAL dalCobro;
         private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
+        // PN03: promociones vigentes que se aplican al cobro. Opcional (null = sin promociones).
+        private readonly DAL.Interfaces.IPromocionDAL dalPromocion;
 
         public ProcesarPagoHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.ICobroDAL dalCobro,
-                                    DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda)
+                                    DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda,
+                                    DAL.Interfaces.IPromocionDAL dalPromocion = null)
         {
+            this.dalPromocion = dalPromocion;
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalCobro = dalCobro ?? throw new ArgumentNullException(nameof(dalCobro));
             this.dalCargoPrenda = dalCargoPrenda ?? throw new ArgumentNullException(nameof(dalCargoPrenda));
@@ -52,12 +56,17 @@ namespace BLL.Manejadores
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
             cliente.FechaLimiteGracia = null;
 
-            decimal descuento = cliente.DescuentoProximoCobro;
+            // PN03 + NUULY 5.1: un solo descuento por ciclo — el mayor entre la promoción vigente del
+            // plan y el crédito por referidos. Si gana la promoción, el crédito queda acumulado.
+            var resDescuento = BE.PoliticaDescuento.Resolver(
+                plan.Precio, cliente.IdPlan, ObtenerPromocionesVigentes(), cliente.DescuentoProximoCobro);
+            decimal descuento = resDescuento.Descuento;
             var cargosPendientes = dalCargoPrenda.ObtenerPendientesPorCliente(cliente.IdCliente);
             decimal totalCargos = cargosPendientes.Sum(c => c.Monto);
-            decimal importeFinal = Math.Max(0, plan.Precio - descuento) + totalCargos;
+            decimal importeFinal = resDescuento.Total + totalCargos;
 
-            cliente.DescuentoProximoCobro = 0;
+            if (resDescuento.UsaCreditoReferido)
+                cliente.DescuentoProximoCobro = 0;
 
             // UPDATE de Cliente + INSERT del historial + liquidación de cargos pendientes, todo
             // en una única transacción: antes eran round-trips independientes, y un crash entre
@@ -87,14 +96,29 @@ namespace BLL.Manejadores
             // fijo en español es solo el respaldo si el corpus de traducciones no cargó — la
             // GUI siempre resuelve por Clave+Args primero (ver Traductor.Resolver), así que
             // concatenar texto extra sobre un Mensaje ya traducido lo perdería en los otros 3 idiomas.
-            bool conDescuento = descuento > 0;
+            bool conDescuento = resDescuento.UsaCreditoReferido;
+            bool conPromo = resDescuento.Promocion != null;
             bool conCargos = cargosPendientes.Count > 0;
 
             string clave;
             string mensaje;
             object[] args;
 
-            if (conDescuento && conCargos)
+            if (conPromo && conCargos)
+            {
+                clave = "cobro.msg.cobrado.promoycargos";
+                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye la promoción '{resDescuento.Promocion.Nombre}' (-${descuento}) y {cargosPendientes.Count} cargo(s) por daño/pérdida (${totalCargos}).";
+                args = new object[] { importeFinal, suscripcion.FechaVencimiento, resDescuento.Promocion.Nombre, descuento, cargosPendientes.Count, totalCargos };
+            }
+            else if (conPromo)
+            {
+                clave = "cobro.msg.cobrado.promo";
+                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye la promoción '{resDescuento.Promocion.Nombre}' (-${descuento}).";
+                args = new object[] { importeFinal, suscripcion.FechaVencimiento, resDescuento.Promocion.Nombre, descuento };
+            }
+            else if (conDescuento && conCargos)
             {
                 clave = "cobro.msg.cobrado.descuentoycargos";
                 mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
@@ -131,6 +155,19 @@ namespace BLL.Manejadores
                 Clave = clave,
                 Args = args
             };
+        }
+
+        // Best-effort: si la tabla Promocion no existe todavía (BD sin migrar) o falla la lectura, el
+        // cobro sigue sin promociones en vez de romperse.
+        private System.Collections.Generic.List<BE.Promocion> ObtenerPromocionesVigentes()
+        {
+            if (dalPromocion == null) return new System.Collections.Generic.List<BE.Promocion>();
+            try { return dalPromocion.ObtenerVigentes(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[ProcesarPagoHandler] No se pudieron leer las promociones: {ex.Message}");
+                return new System.Collections.Generic.List<BE.Promocion>();
+            }
         }
     }
 }

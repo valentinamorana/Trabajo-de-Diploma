@@ -24,9 +24,47 @@ namespace GUI
 
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
+        // PN03: una promoción Rechazada por Contabilidad se reformula y vuelve a la cola de revisión.
+        private Button btnReformular;
+
         public PromocionesAdministracionForm()
         {
             InitializeComponent();
+            CrearBotonReformular();
+        }
+
+        private void CrearBotonReformular()
+        {
+            btnReformular = new Button
+            {
+                Name = "btnReformular",
+                Tag = "promocion.btn.reformular",
+                Text = "Reformular",
+                Enabled = false,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = btnDesactivar.BackColor,
+                ForeColor = btnDesactivar.ForeColor,
+                Location = new System.Drawing.Point(750, btnDesactivar.Top),
+                Size = new System.Drawing.Size(130, btnDesactivar.Height)
+            };
+            btnReformular.FlatAppearance.BorderSize = 0;
+            btnReformular.Click += BtnReformular_Click;
+            panelTop.Controls.Add(btnReformular);
+        }
+
+        private void BtnReformular_Click(object sender, EventArgs e)
+        {
+            var promocion = ObtenerPromocionSeleccionada();
+            if (promocion == null) return;
+            using (var form = new AltaPromocionForm(null, promocion))
+            {
+                if (form.ShowDialog(this) == DialogResult.OK)
+                {
+                    MostrarOk(Tr("msg.promo.reformulada", "Promoción #{0} reformulada: vuelve a revisión contable.",
+                        new object[] { form.IdPromocionCreada }));
+                    CargarTodo();
+                }
+            }
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -61,6 +99,7 @@ namespace GUI
             Aplicar(btnDesactivar,         t);
             Aplicar(btnAprobarBaja,        t);
             Aplicar(btnRechazarBaja,       t);
+            Aplicar(btnReformular,         t);
             Aplicar(lblSugerenciasTitulo,  t);
             Aplicar(lblPromocionesTitulo,  t);
             // btnRefrescar es el único botón solo-ícono ("↻") de las 10 pantallas de este
@@ -225,6 +264,7 @@ namespace GUI
             btnDesactivar.Enabled = promocion.PuedeDesactivarseDirecto();
             btnAprobarBaja.Enabled = promocion.PuedeResolverseBaja();
             btnRechazarBaja.Enabled = promocion.PuedeResolverseBaja();
+            btnReformular.Enabled = promocion.PuedeReformularse();
         }
 
         private void DeshabilitarBotonesPromocion()
@@ -232,6 +272,7 @@ namespace GUI
             btnDesactivar.Enabled = false;
             btnAprobarBaja.Enabled = false;
             btnRechazarBaja.Enabled = false;
+            btnReformular.Enabled = false;
         }
 
         private BE.Promocion ObtenerPromocionSeleccionada()

@@ -149,11 +149,12 @@ namespace DAL
             }
         }
 
-        public void CambiarEstado(int idPromocion, BE.EstadoPromocion nuevoEstado, string observacionOMotivo)
+        public bool CambiarEstado(int idPromocion, BE.EstadoPromocion estadoEsperado, BE.EstadoPromocion nuevoEstado, string observacionOMotivo)
         {
             SqlParameter[] p =
             {
                 new SqlParameter("@IdPromocion", idPromocion),
+                new SqlParameter("@Esperado",    (int)estadoEsperado),
                 new SqlParameter("@Estado",      (int)nuevoEstado),
                 new SqlParameter("@Observacion", (object)observacionOMotivo ?? DBNull.Value)
             };
@@ -162,10 +163,11 @@ namespace DAL
                 // COALESCE: Desactivar()/AprobarBaja() llaman a esto con observacionOMotivo=null
                 // (no tienen nada que agregar) — sin el COALESCE, ese null pisaba la observacion
                 // que Contabilidad ya habia dejado en AprobarContable/RechazarContable.
-                acceso.Escribir(
+                int filas = acceso.Escribir(
                     "UPDATE Promocion SET Estado=@Estado, Observacion=COALESCE(@Observacion, Observacion) " +
-                    "WHERE IdPromocion=@IdPromocion",
+                    "WHERE IdPromocion=@IdPromocion AND Estado=@Esperado",
                     p);
+                return filas > 0;
             }
             catch (Exception ex)
             {
@@ -173,7 +175,7 @@ namespace DAL
             }
         }
 
-        public void SolicitarBaja(int idPromocion, string motivo)
+        public bool SolicitarBaja(int idPromocion, string motivo)
         {
             SqlParameter[] p =
             {
@@ -183,9 +185,10 @@ namespace DAL
             };
             try
             {
-                acceso.Escribir(
-                    "UPDATE Promocion SET Estado=@Estado, MotivoBaja=@MotivoBaja WHERE IdPromocion=@IdPromocion",
+                int filas = acceso.Escribir(
+                    "UPDATE Promocion SET Estado=@Estado, MotivoBaja=@MotivoBaja WHERE IdPromocion=@IdPromocion AND Estado=1",
                     p);
+                return filas > 0;
             }
             catch (Exception ex)
             {

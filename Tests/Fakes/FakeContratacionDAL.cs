@@ -46,13 +46,21 @@ namespace Tests.Fakes
             return IntentosDespuesDeIncrementar;
         }
 
-        public bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante)
+        public decimal UltimoImporte { get; private set; }
+        public decimal UltimoDescuento { get; private set; }
+        public int? UltimaPromocion { get; private set; }
+
+        public bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante,
+                                  decimal importe, decimal descuento, int? idPromocion)
         {
             ConfirmarPagoVeces++;
             UltimoIdContratacionConfirmado = idContratacion;
             UltimoIdCaja = idCaja;
             UltimoMedioPago = medioPago;
             UltimoNumeroComprobante = numeroComprobante;
+            UltimoImporte = importe;
+            UltimoDescuento = descuento;
+            UltimaPromocion = idPromocion;
             return ConfirmarPagoResultado;
         }
 

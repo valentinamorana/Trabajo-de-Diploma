@@ -4529,6 +4529,8 @@ ES	cobro.estado.cargospendientes	Tiene {0} cargo(s) por daño/pérdida pendiente
 ES	cobro.msg.cobrado.descuento	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2}.
 ES	cobro.msg.cobrado.cargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye {2} cargo(s) por daño/pérdida (${3}).
 ES	cobro.msg.cobrado.descuentoycargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2} y {3} cargo(s) por daño/pérdida (${4}).
+ES	cobro.msg.cobrado.promo	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye la promoción '{2}' (-${3}).
+ES	cobro.msg.cobrado.promoycargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye la promoción '{2}' (-${3}) y {4} cargo(s) por daño/pérdida (${5}).
 EN	renov.pausar	Pause until:
 EN	renov.reanudar	Resume now
 EN	renov.estado.pausada	PAUSED
@@ -4558,6 +4560,8 @@ EN	cobro.estado.cargospendientes	Has {0} pending damage/loss charge(s) for ${1} 
 EN	cobro.msg.cobrado.descuento	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2}.
 EN	cobro.msg.cobrado.cargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes {2} damage/loss charge(s) (${3}).
 EN	cobro.msg.cobrado.descuentoycargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2} and {3} damage/loss charge(s) (${4}).
+EN	cobro.msg.cobrado.promo	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes the promotion '{2}' (-${3}).
+EN	cobro.msg.cobrado.promoycargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes the promotion '{2}' (-${3}) and {4} damage/loss charge(s) (${5}).
 RU	renov.pausar	Приостановить до:
 RU	renov.reanudar	Возобновить сейчас
 RU	renov.estado.pausada	ПРИОСТАНОВЛЕНА
@@ -4587,6 +4591,8 @@ RU	cobro.estado.cargospendientes	Есть {0} ожидающих штраф(ов
 RU	cobro.msg.cobrado.descuento	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2}.
 RU	cobro.msg.cobrado.cargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает {2} штраф(ов) за повреждение/утрату (${3}).
 RU	cobro.msg.cobrado.descuentoycargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2} и {3} штраф(ов) за повреждение/утрату (${4}).
+RU	cobro.msg.cobrado.promo	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает акцию '{2}' (-${3}).
+RU	cobro.msg.cobrado.promoycargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает акцию '{2}' (-${3}) и {4} штраф(ов) за повреждение/утрату (${5}).
 PT	renov.pausar	Pausar até:
 PT	renov.reanudar	Retomar agora
 PT	renov.estado.pausada	PAUSADA
@@ -4616,6 +4622,8 @@ PT	cobro.estado.cargospendientes	Tem {0} cobrança(s) por dano/perda pendente(s)
 PT	cobro.msg.cobrado.descuento	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2}.
 PT	cobro.msg.cobrado.cargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui {2} cobrança(s) por dano/perda (${3}).
 PT	cobro.msg.cobrado.descuentoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2} e {3} cobrança(s) por dano/perda (${4}).
+PT	cobro.msg.cobrado.promo	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui a promoção '{2}' (-${3}).
+PT	cobro.msg.cobrado.promoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui a promoção '{2}' (-${3}) e {4} cobrança(s) por dano/perda (${5}).
 ES	mnu.auditoria	Auditoría
 ES	mnu.analiticanegocio	Analítica de Negocio
 EN	mnu.auditoria	Audit
@@ -4729,9 +4737,21 @@ EN	conf.contratacion.cobro.msg	Confirm the charge for Contract #{0}?\n\nClient: 
 RU	conf.contratacion.cobro.msg	Подтвердить оплату договора №{0}?\n\nКлиент: {1}\nПлан: {2}\nСпособ оплаты: {3}\n\nБудет выдана квитанция, подписка будет оформлена.
 PT	conf.contratacion.cobro.msg	Confirmar a cobrança da Contratação #{0}?\n\nCliente: {1}\nPlano: {2}\nForma de pagamento: {3}\n\nO comprovante será emitido e a assinatura será formalizada.
 ES	msg.contratacion.cobrada	Contratación #{0} cobrada. Suscripción formalizada.
+ES	msg.contratacion.cobrada.comprobante	Contratación #{0} cobrada por {1:C2}. Comprobante {2}. Suscripción formalizada.
+ES	conf.contratacion.cobro.desc	Descuento aplicado: {0:C2} ({1}).
+ES	lbl.contratacion.creditoreferido	crédito por referido
 EN	msg.contratacion.cobrada	Contract #{0} charged. Subscription formalized.
+EN	msg.contratacion.cobrada.comprobante	Contracting #{0} charged for {1:C2}. Receipt {2}. Subscription formalized.
+EN	conf.contratacion.cobro.desc	Discount applied: {0:C2} ({1}).
+EN	lbl.contratacion.creditoreferido	referral credit
 RU	msg.contratacion.cobrada	Договор №{0} оплачен. Подписка оформлена.
+RU	msg.contratacion.cobrada.comprobante	Заказ #{0} оплачен на сумму {1:C2}. Квитанция {2}. Подписка оформлена.
+RU	conf.contratacion.cobro.desc	Применена скидка: {0:C2} ({1}).
+RU	lbl.contratacion.creditoreferido	реферальный кредит
 PT	msg.contratacion.cobrada	Contratação #{0} cobrada. Assinatura formalizada.
+PT	msg.contratacion.cobrada.comprobante	Contratação #{0} cobrada por {1:C2}. Comprovante {2}. Assinatura formalizada.
+PT	conf.contratacion.cobro.desc	Desconto aplicado: {0:C2} ({1}).
+PT	lbl.contratacion.creditoreferido	crédito por indicação
 ES	conf.contratacion.intentofallido.titulo	Registrar Intento Fallido
 EN	conf.contratacion.intentofallido.titulo	Record Failed Attempt
 RU	conf.contratacion.intentofallido.titulo	Зарегистрировать неудачную попытку
@@ -4949,6 +4969,9 @@ ES	err.bll.promocion.valor_invalido	El beneficio de la promoción debe ser mayor
 ES	err.bll.promocion.porcentaje_invalido	Un descuento por porcentaje no puede superar el 100%.
 ES	err.bll.promocion.rango_fechas_invalido	La fecha de fin no puede ser anterior a la fecha de inicio.
 ES	err.bll.promocion.modificar_estado	Solo se puede modificar una promoción mientras está en revisión contable. Estado actual: '{0}'.
+ES	err.bll.promocion.reformular_estado	Solo se puede reformular una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.
+ES	err.bll.promocion.estado_concurrente	La promoción cambió de estado desde otra sesión. Actualizá la lista e intentá de nuevo.
+ES	err.bll.promocion.sugerencia_evaluada	La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.
 ES	err.bll.promocion.desactivar_estado	Solo se pueden desactivar promociones Vigentes. Esta promoción está '{0}'.
 ES	err.bll.promocion.sugerirbaja_estado	Solo se puede sugerir la baja de promociones Vigentes. Esta promoción está '{0}'.
 ES	err.bll.promocion.motivobaja_requerido	Debe indicar el motivo de la baja sugerida.
@@ -4973,6 +4996,9 @@ EN	err.bll.promocion.valor_invalido	The promotion's benefit must be greater than
 EN	err.bll.promocion.porcentaje_invalido	A percentage discount cannot exceed 100%.
 EN	err.bll.promocion.rango_fechas_invalido	The end date cannot be earlier than the start date.
 EN	err.bll.promocion.modificar_estado	A promotion can only be modified while it is under accounting review. Current state: '{0}'.
+EN	err.bll.promocion.reformular_estado	Only a promotion Rejected by Accounting can be reformulated. This promotion is '{0}'.
+EN	err.bll.promocion.estado_concurrente	The promotion changed state from another session. Refresh the list and try again.
+EN	err.bll.promocion.sugerencia_evaluada	The selected suggestion has already been evaluated. Refresh the suggestions list.
 EN	err.bll.promocion.desactivar_estado	Only Active promotions can be deactivated. This promotion is '{0}'.
 EN	err.bll.promocion.sugerirbaja_estado	Only Active promotions can have their removal suggested. This promotion is '{0}'.
 EN	err.bll.promocion.motivobaja_requerido	You must indicate the reason for the suggested removal.
@@ -4997,6 +5023,9 @@ RU	err.bll.promocion.valor_invalido	Выгода по акции должна б
 RU	err.bll.promocion.porcentaje_invalido	Процентная скидка не может превышать 100%.
 RU	err.bll.promocion.rango_fechas_invalido	Дата окончания не может быть раньше даты начала.
 RU	err.bll.promocion.modificar_estado	Акцию можно изменять только пока она на бухгалтерской проверке. Текущий статус: '{0}'.
+RU	err.bll.promocion.reformular_estado	Переработать можно только акцию, отклонённую бухгалтерией. Эта акция в статусе '{0}'.
+RU	err.bll.promocion.estado_concurrente	Статус акции изменён в другом сеансе. Обновите список и повторите.
+RU	err.bll.promocion.sugerencia_evaluada	Выбранное предложение уже рассмотрено. Обновите список предложений.
 RU	err.bll.promocion.desactivar_estado	Отключить можно только действующие акции. Текущий статус: '{0}'.
 RU	err.bll.promocion.sugerirbaja_estado	Предложить отмену можно только для действующих акций. Текущий статус: '{0}'.
 RU	err.bll.promocion.motivobaja_requerido	Необходимо указать причину предложенной отмены.
@@ -5021,6 +5050,9 @@ PT	err.bll.promocion.valor_invalido	O benefício da promoção deve ser maior qu
 PT	err.bll.promocion.porcentaje_invalido	Um desconto percentual não pode superar 100%.
 PT	err.bll.promocion.rango_fechas_invalido	A data de término não pode ser anterior à data de início.
 PT	err.bll.promocion.modificar_estado	Só é possível modificar uma promoção enquanto está em revisão contábil. Estado atual: '{0}'.
+PT	err.bll.promocion.reformular_estado	Somente uma promoção Rejeitada pela Contabilidade pode ser reformulada. Esta promoção está '{0}'.
+PT	err.bll.promocion.estado_concurrente	A promoção mudou de estado em outra sessão. Atualize a lista e tente novamente.
+PT	err.bll.promocion.sugerencia_evaluada	A sugestão selecionada já foi avaliada. Atualize a lista de sugestões.
 PT	err.bll.promocion.desactivar_estado	Só é possível desativar promoções Vigentes. Esta promoção está '{0}'.
 PT	err.bll.promocion.sugerirbaja_estado	Só é possível sugerir a baixa de promoções Vigentes. Esta promoção está '{0}'.
 PT	err.bll.promocion.motivobaja_requerido	Deve indicar o motivo da baixa sugerida.
@@ -5065,9 +5097,41 @@ EN	promocion.beneficioestimado	Est. benefit:
 RU	promocion.beneficioestimado	Ожид. выгода:
 PT	promocion.beneficioestimado	Benefício est.:
 ES	promocion.btn.enviarsugerencia	Enviar Sugerencia
+ES	promocion.btn.desdeanalisis	Desde el análisis…
+ES	promocion.btn.reformular	Reformular
+ES	promocion.desdeanalisis.titulo	Ideas detectadas por los reportes
+ES	promocion.desdeanalisis.usar	Usar esta idea
+ES	promocion.desdeanalisis.beneficio	Beneficio estimado inicial: {0:C2} (editable antes de enviar).
+ES	msg.sugerencia.sinanalisis	Los reportes de rotación y abandono no detectan casos para sugerir por ahora.
+ES	msg.promo.reformulada	Promoción #{0} reformulada: vuelve a revisión contable.
+ES	promo.reformular	Reformulando la promoción #{0}. Observación de Contabilidad: {1}
 EN	promocion.btn.enviarsugerencia	Send Suggestion
+EN	promocion.btn.desdeanalisis	From the analysis…
+EN	promocion.btn.reformular	Reformulate
+EN	promocion.desdeanalisis.titulo	Ideas detected by the reports
+EN	promocion.desdeanalisis.usar	Use this idea
+EN	promocion.desdeanalisis.beneficio	Initial estimated benefit: {0:C2} (editable before sending).
+EN	msg.sugerencia.sinanalisis	The rotation and churn reports do not detect any cases to suggest for now.
+EN	msg.promo.reformulada	Promotion #{0} reformulated: back to accounting review.
+EN	promo.reformular	Reformulating promotion #{0}. Accounting note: {1}
 RU	promocion.btn.enviarsugerencia	Отправить предложение
+RU	promocion.btn.desdeanalisis	Из анализа…
+RU	promocion.btn.reformular	Переработать
+RU	promocion.desdeanalisis.titulo	Идеи, выявленные отчётами
+RU	promocion.desdeanalisis.usar	Использовать эту идею
+RU	promocion.desdeanalisis.beneficio	Начальная оценка выгоды: {0:C2} (можно изменить перед отправкой).
+RU	msg.sugerencia.sinanalisis	Отчёты по обороту и оттоку пока не выявляют случаев для предложения.
+RU	msg.promo.reformulada	Акция #{0} переработана: возвращена на бухгалтерскую проверку.
+RU	promo.reformular	Переработка акции #{0}. Замечание бухгалтерии: {1}
 PT	promocion.btn.enviarsugerencia	Enviar Sugestão
+PT	promocion.btn.desdeanalisis	Da análise…
+PT	promocion.btn.reformular	Reformular
+PT	promocion.desdeanalisis.titulo	Ideias detectadas pelos relatórios
+PT	promocion.desdeanalisis.usar	Usar esta ideia
+PT	promocion.desdeanalisis.beneficio	Benefício estimado inicial: {0:C2} (editável antes de enviar).
+PT	msg.sugerencia.sinanalisis	Os relatórios de rotação e abandono não detectam casos para sugerir por enquanto.
+PT	msg.promo.reformulada	Promoção #{0} reformulada: volta para a revisão contábil.
+PT	promo.reformular	Reformulando a promoção #{0}. Observação da Contabilidade: {1}
 ES	frm.altapromocion	Alta de Promoción
 EN	frm.altapromocion	New Promotion
 RU	frm.altapromocion	Создание акции

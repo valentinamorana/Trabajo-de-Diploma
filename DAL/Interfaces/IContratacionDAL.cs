@@ -20,7 +20,8 @@ namespace DAL.Interfaces
         // Marca la contratación como Pagada, registra el medio de pago, el comprobante y quién cobró.
         // Es un "claim" atómico: el UPDATE exige que siga PendientePago. Devuelve false si otra
         // sesión de Caja ya la resolvió (nadie más debe activar la suscripción en ese caso).
-        bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante);
+        bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante,
+                          decimal importe, decimal descuento, int? idPromocion);
 
         // Compensación: revierte un cobro recién confirmado a PendientePago (solo si está Pagada)
         // cuando la activación de la suscripción falló después del claim.

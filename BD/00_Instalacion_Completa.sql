@@ -2368,6 +2368,70 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Pedido_Estado' AND obj
 PRINT 'Índices de Estado (Prenda/Pedido) verificados/creados.';
 GO
 
+
+-- ============================================================
+-- WardrobeFlow — 20b. PN03 APLICADO AL COBRO + INTEGRIDAD DE PN02/PN03/PN04
+-- ------------------------------------------------------------
+-- (1) Contratacion guarda lo que realmente se cobró: importe, descuento aplicado y la promoción
+--     vigente que se usó (regla de NUULY: UN solo descuento por ciclo — BE.PoliticaDescuento).
+-- (2) Restricciones que solo estaban en la BLL: monto de cargo > 0, intentos de pago 0..3, una
+--     única contratación pendiente por cliente y una única anotación activa por prenda y cliente.
+-- (3) Índices sobre las columnas por las que se filtran las tablas nuevas.
+-- Idempotente: cada elemento se crea solo si falta.
+-- ============================================================
+SET QUOTED_IDENTIFIER ON;
+GO
+
+-- (1) Importe cobrado, descuento y promoción aplicada
+IF COL_LENGTH('Contratacion', 'Importe') IS NULL
+    ALTER TABLE Contratacion ADD Importe DECIMAL(10,2) NULL;
+IF COL_LENGTH('Contratacion', 'DescuentoAplicado') IS NULL
+    ALTER TABLE Contratacion ADD DescuentoAplicado DECIMAL(10,2) NULL;
+IF COL_LENGTH('Contratacion', 'IdPromocion') IS NULL
+    ALTER TABLE Contratacion ADD IdPromocion INT NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contratacion_Promocion')
+    ALTER TABLE Contratacion ADD CONSTRAINT FK_Contratacion_Promocion
+        FOREIGN KEY (IdPromocion) REFERENCES Promocion(IdPromocion);
+GO
+
+-- (2) Restricciones de integridad
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_CargoPrenda_Monto')
+    ALTER TABLE CargoPrenda ADD CONSTRAINT CK_CargoPrenda_Monto CHECK (Monto > 0);
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Contratacion_Intentos')
+    ALTER TABLE Contratacion ADD CONSTRAINT CK_Contratacion_Intentos CHECK (IntentosPago BETWEEN 0 AND 3);
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Contratacion_Importe')
+    ALTER TABLE Contratacion ADD CONSTRAINT CK_Contratacion_Importe
+        CHECK ((Importe IS NULL OR Importe >= 0) AND (DescuentoAplicado IS NULL OR DescuentoAplicado >= 0));
+GO
+
+-- Un cliente no puede tener dos contrataciones pendientes de pago a la vez (la BLL ya lo valida,
+-- pero entre dos sesiones simultáneas de Venta solo el motor puede garantizarlo).
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Contratacion_UnaPendientePorCliente' AND object_id = OBJECT_ID('Contratacion'))
+    CREATE UNIQUE NONCLUSTERED INDEX UX_Contratacion_UnaPendientePorCliente
+        ON Contratacion(IdCliente) WHERE Estado = 0;
+
+-- Un cliente no puede estar anotado dos veces (Pendiente o Reservada) en la lista de espera de la misma prenda.
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_ListaEspera_AnotacionActiva' AND object_id = OBJECT_ID('ListaEspera'))
+    CREATE UNIQUE NONCLUSTERED INDEX UX_ListaEspera_AnotacionActiva
+        ON ListaEspera(IdPrenda, IdCliente) WHERE Estado IN (0, 1);
+GO
+
+-- (3) Índices de las tablas nuevas
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Contratacion_Estado' AND object_id = OBJECT_ID('Contratacion'))
+    CREATE NONCLUSTERED INDEX IX_Contratacion_Estado ON Contratacion(Estado);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_ListaEspera_Prenda_Estado' AND object_id = OBJECT_ID('ListaEspera'))
+    CREATE NONCLUSTERED INDEX IX_ListaEspera_Prenda_Estado ON ListaEspera(IdPrenda, Estado);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_MantenimientoPrenda_IdPrenda' AND object_id = OBJECT_ID('MantenimientoPrenda'))
+    CREATE NONCLUSTERED INDEX IX_MantenimientoPrenda_IdPrenda ON MantenimientoPrenda(IdPrenda);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Promocion_Estado' AND object_id = OBJECT_ID('Promocion'))
+    CREATE NONCLUSTERED INDEX IX_Promocion_Estado ON Promocion(Estado);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Prenda_IdUltimoCliente' AND object_id = OBJECT_ID('Prenda'))
+    CREATE NONCLUSTERED INDEX IX_Prenda_IdUltimoCliente ON Prenda(IdUltimoCliente);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Cliente_IdPlan' AND object_id = OBJECT_ID('Cliente'))
+    CREATE NONCLUSTERED INDEX IX_Cliente_IdPlan ON Cliente(IdPlan);
+PRINT 'Sección 20b: importe/promoción en Contratacion, restricciones e índices verificados.';
+GO
 -- ============================================================
 -- WardrobeFlow — 21. DATOS DE PRUEBA DE TODOS LOS PROCESOS
 -- ------------------------------------------------------------
@@ -2526,12 +2590,13 @@ BEGIN
     FROM Prenda pr WHERE pr.Nombre = N'Vestido Largo Negro' AND pr.Estado = 1;
 
     -- ── PN02: contrataciones (2 pendientes de pago y 1 cobrada) ─────────────
-    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, IntentosPago, FechaAlta, FechaResolucion, MedioPago, NumeroComprobante, FechaComprobante)
+    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, IntentosPago, FechaAlta, FechaResolucion, MedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado)
     VALUES
-        (@cRenata, @pEstand,  @vend, NULL,  0, 0, 0, DATEADD(HOUR, -3, GETDATE()), NULL, NULL, NULL, NULL),
-        (@cJulie,  @pPremium, @vend, NULL,  2, 0, 1, DATEADD(DAY,  -1, GETDATE()), NULL, NULL, NULL, NULL),
+        (@cRenata, @pEstand,  @vend, NULL,  0, 0, 0, DATEADD(HOUR, -3, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL),
+        (@cJulie,  @pPremium, @vend, NULL,  2, 0, 1, DATEADD(DAY,  -1, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL),
         (@cPaula,  @pPremium, @vend, @caja, 1, 1, 0, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
-            'Efectivo', 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()));
+            'Efectivo', 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()),
+            (SELECT Precio FROM PlanSuscripcion WHERE IdPlan = @pPremium), 0);
 
     -- ── PN03: sugerencias y promociones en cada estado ──────────────────────
     INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta)

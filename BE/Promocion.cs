@@ -42,5 +42,6 @@ namespace BE
         public bool PuedeSugerirseBaja() => Estado == EstadoPromocion.Vigente;
         public bool PuedeResolverseBaja() => Estado == EstadoPromocion.BajaSolicitada;
         public bool PuedeDesactivarseDirecto() => Estado == EstadoPromocion.Vigente;
+        public bool PuedeReformularse() => Estado == EstadoPromocion.RechazadaContabilidad;
     }
 }

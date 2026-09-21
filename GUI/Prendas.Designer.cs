@@ -113,7 +113,7 @@ namespace GUI
 
             // btnEditar
             this.btnEditar.Tag       = "btn.editar";
-            this.btnEditar.Text      = "\u270e Editar";
+            this.btnEditar.Text      = "Editar";
             this.btnEditar.Left      = 610;
             this.btnEditar.Top       = 13;
             this.btnEditar.Width     = 80;
@@ -126,7 +126,7 @@ namespace GUI
 
             // btnCambiarEstado
             this.btnCambiarEstado.Tag       = "btn.cambiarestado";
-            this.btnCambiarEstado.Text      = "\u21c4 Estado";
+            this.btnCambiarEstado.Text      = "Estado";
             this.btnCambiarEstado.Left      = 698;
             this.btnCambiarEstado.Top       = 13;
             this.btnCambiarEstado.Width     = 90;
@@ -142,10 +142,10 @@ namespace GUI
 
             // btnMantenimiento
             this.btnMantenimiento.Tag       = "btn.mantenimiento";
-            this.btnMantenimiento.Text      = "\U0001f527 Mantenimiento";
+            this.btnMantenimiento.Text      = "Mantenimiento";
             this.btnMantenimiento.Left      = 796;
             this.btnMantenimiento.Top       = 13;
-            this.btnMantenimiento.Width     = 130;
+            this.btnMantenimiento.Width     = 112;
             this.btnMantenimiento.Height    = 28;
             this.btnMantenimiento.BackColor = System.Drawing.Color.FromArgb(70, 130, 180);
             this.btnMantenimiento.ForeColor = System.Drawing.Color.White;
@@ -157,10 +157,10 @@ namespace GUI
             this.btnMantenimiento.Click    += new System.EventHandler(this.BtnMantenimiento_Click);
 
             // btnRefrescar
-            this.btnRefrescar.Text      = "\u21bb";
-            this.btnRefrescar.Left      = 932;
+            this.btnRefrescar.Text      = "Actualizar";
+            this.btnRefrescar.Left      = 914;
             this.btnRefrescar.Top       = 13;
-            this.btnRefrescar.Width     = 32;
+            this.btnRefrescar.Width     = 84;
             this.btnRefrescar.Height    = 28;
             this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefrescar.Name      = "btnRefrescar";
@@ -168,9 +168,9 @@ namespace GUI
             this.btnRefrescar.Click    += new System.EventHandler(this.BtnRefrescar_Click);
 
             // lblConteo
-            this.lblConteo.Left      = 970;
+            this.lblConteo.Left      = 1004;
             this.lblConteo.Top       = 18;
-            this.lblConteo.Width     = 120;
+            this.lblConteo.Width     = 90;
             this.lblConteo.ForeColor = System.Drawing.Color.DimGray;
             this.lblConteo.Font      = new System.Drawing.Font("Segoe UI", 8.5f);
             this.lblConteo.Name      = "lblConteo";

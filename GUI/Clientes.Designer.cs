@@ -81,7 +81,7 @@ namespace GUI
 
             // btnEditar
             this.btnEditar.Tag       = "btn.editar";
-            this.btnEditar.Text      = "\u270e Editar";
+            this.btnEditar.Text      = "Editar";
             this.btnEditar.Left      = 438;
             this.btnEditar.Top       = 11;
             this.btnEditar.Width     = 90;
@@ -94,7 +94,7 @@ namespace GUI
 
             // btnBaja
             this.btnBaja.Tag       = "btn.darbaja";
-            this.btnBaja.Text      = "\u2715 Dar de Baja";
+            this.btnBaja.Text      = "Dar de Baja";
             this.btnBaja.Left      = 536;
             this.btnBaja.Top       = 11;
             this.btnBaja.Width     = 110;
@@ -109,10 +109,10 @@ namespace GUI
             this.btnBaja.Click    += new System.EventHandler(this.BtnBaja_Click);
 
             // btnRefrescar
-            this.btnRefrescar.Text      = "\u21bb";
+            this.btnRefrescar.Text      = "Actualizar";
             this.btnRefrescar.Left      = 654;
             this.btnRefrescar.Top       = 11;
-            this.btnRefrescar.Width     = 32;
+            this.btnRefrescar.Width     = 84;
             this.btnRefrescar.Height    = 28;
             this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefrescar.Name      = "btnRefrescar";
@@ -120,9 +120,9 @@ namespace GUI
             this.btnRefrescar.Click    += new System.EventHandler(this.BtnRefrescar_Click);
 
             // lblConteo
-            this.lblConteo.Left      = 696;
+            this.lblConteo.Left      = 746;
             this.lblConteo.Top       = 16;
-            this.lblConteo.Width     = 200;
+            this.lblConteo.Width     = 160;
             this.lblConteo.ForeColor = System.Drawing.Color.DimGray;
             this.lblConteo.Font      = new System.Drawing.Font("Segoe UI", 8.5f);
             this.lblConteo.Name      = "lblConteo";

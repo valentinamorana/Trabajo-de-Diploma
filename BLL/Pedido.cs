@@ -543,6 +543,14 @@ namespace BLL
         /// </summary>
         public void RestaurarOperacion(string modulo, int idPedido, int idOperacion)
         {
+            // Revierte campos del pedido: exige permiso de edición. El historial se abre desde Pedidos de
+            // Venta y desde Pedidos Realizados, así que alcanza con poder editar cualquiera de los dos.
+            try { PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta); }
+            catch (BE.AppException)
+            {
+                PermisosAccion.Exigir(BE.Patentes.PedidosRealizadosEditar, BE.Patentes.PedidosRealizados);
+            }
+
             var cambios = dalHistorial.ObtenerPorOperacion(idPedido, idOperacion);
             if (cambios == null || cambios.Count == 0)
                 throw new BE.AppException("err.bll.pedido.historial_vacio",

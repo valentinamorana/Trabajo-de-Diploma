@@ -341,6 +341,25 @@ namespace DAL
             int afectadas = 0;
             acceso.EjecutarTransaccion((conexion, tx) =>
             {
+                // Abre el registro de mantenimiento de cada prenda que entra a limpieza (antes que el
+                // UPDATE, con el mismo criterio de selección): sin esto las devoluciones no quedaban en
+                // el historial de mantenimiento ni en el análisis de tiempos (PdN11), porque el cambio de
+                // estado se hace en SQL directo y no pasa por BLL.Prenda.CambiarEstado.
+                using (var cmd = new SqlCommand(
+                    "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor) " +
+                    "SELECT IdPrenda, GETDATE(), N'Devolución' FROM Prenda " +
+                    "WHERE Estado=@EstadoEnUso AND IdClienteActual=@IdCliente AND IdPrenda IN " +
+                    "  (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido) " +
+                    "AND NOT EXISTS (SELECT 1 FROM MantenimientoPrenda m " +
+                    "                WHERE m.IdPrenda = Prenda.IdPrenda AND m.FechaSalida IS NULL)",
+                    conexion, tx))
+                {
+                    cmd.Parameters.AddWithValue("@EstadoEnUso", (int)BE.EstadoPrenda.EnUso);
+                    cmd.Parameters.AddWithValue("@IdCliente",   idCliente);
+                    cmd.Parameters.AddWithValue("@IdPedido",    idPedido);
+                    cmd.ExecuteNonQuery();
+                }
+
                 using (var cmd = new SqlCommand(
                     "UPDATE Prenda SET Estado=@Estado, IdClienteActual=NULL " +
                     "WHERE Estado=@EstadoEnUso AND IdClienteActual=@IdCliente AND IdPrenda IN " +

@@ -30,6 +30,31 @@ namespace Tests
             });
         }
 
+        [TestMethod]
+        public void RestaurarOperacion_SinPermisoDeEdicion_LanzaSinPermisoYNoTocaElHistorial()
+        {
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 2,
+                Username = "auditor",
+                Perfil = "Auditor",
+                Contraseña = Encriptador.Hash("Auditor1!")
+            });
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+
+            try
+            {
+                bll.RestaurarOperacion("Test", 1, 1);
+                Assert.Fail("Debía exigir permiso de edición de pedidos.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.sin_permiso", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPedido.RestaurarOperacionAtomicaVeces, "No debe llegar a modificar el pedido.");
+        }
+
         private static BE.Cliente ClienteConPlanVigente() => new BE.Cliente
         {
             IdCliente = 10,

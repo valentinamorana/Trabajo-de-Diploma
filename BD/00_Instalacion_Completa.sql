@@ -32,7 +32,7 @@
 -- semilla (permisos, roles, usuarios, idiomas) + árbol Composite.
 -- Idempotente: se puede re-ejecutar sin romper datos existentes.
 --
--- Usuarios semilla (ver Contraseñas.txt):
+-- Usuarios semilla: 10 (uno por rol; ver Instalador/Credenciales_Iniciales.txt):
 --   admin/administrador1!   
 --   vendedor/vendedor1!     deposito/deposito1!
 --
@@ -586,7 +586,7 @@ WHERE NOT EXISTS (SELECT 1 FROM RolPermiso x WHERE x.Rol = r.Rol AND x.IdPermiso
 PRINT 'Asignaciones rol→patente inicializadas.';
 GO
 
--- ── Usuarios iniciales (clave hasheada PBKDF2; ver Contraseñas.txt) ───────────
+-- ── Usuarios iniciales (clave hasheada PBKDF2; ver Instalador/Credenciales_Iniciales.txt) ───────────
 -- admin/administrador1!  vendedor/vendedor1!  deposito/deposito1!
 -- DVH=0 → la app recalcula el DV en el primer arranque.
 INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma)
@@ -609,7 +609,7 @@ FROM (VALUES
     ('RU', N'Русский', 1, 0)
 ) AS v(Codigo, Nombre, Activo, EsDefault)
 WHERE NOT EXISTS (SELECT 1 FROM Idioma WHERE Codigo = v.Codigo);
-PRINT 'Idiomas inicializados (ES, EN, RU).';
+PRINT 'Idiomas inicializados (ES, EN, RU, PT).';
 GO
 
 -- DVV inicial para la tabla Usuario (en 0 — recalcular desde la app)
@@ -743,10 +743,10 @@ WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
 GO
 
 -- ============================================================
--- Idempotente. Crea un usuario demo por cada rol nuevo (claves en Contraseñas.txt).
--- Supervisor en rol COMPUESTO (Supervisor ⊃ Vendedor) conservando su Auditoría propia:
--- mismos permisos efectivos que antes, pero ahora obtenidos por HERENCIA (no copiados).
--- Las claves se guardan hasheadas (PBKDF2). Texto plano: usuario1! (ver Contraseñas.txt).
+-- Idempotente. Crea un usuario demo por cada rol nuevo (claves en Instalador/Credenciales_Iniciales.txt).
+-- Roles compuestos por HERENCIA: GerenteComercial ⊃ Vendedor y GerenteInventario ⊃ OperadorLogistico + Deposito.
+-- Los permisos efectivos se obtienen del árbol Composite (no se copian).
+-- Las claves se guardan hasheadas (PBKDF2). Texto plano: usuario1! (ver Instalador/Credenciales_Iniciales.txt).
 -- ============================================================
 
 INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma, Activo)

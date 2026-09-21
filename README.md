@@ -53,6 +53,7 @@ Instalador/                               Script de Inno Setup, DbInstaller (cli
                                           y credenciales iniciales. El .exe se genera en
                                           Instalador/Salida/ y no se versiona
 docs/NEGOCIO_Y_PROCESOS.md               Documento de referencia: reglas y procesos de negocio, roles y arquitectura
+docs/MAPA_DE_NAVEGACION.md               Mapa de menús, formularios, procesos y roles
 WardrobeFlow.slnx                         Solución de Visual Studio
 ```
 
@@ -249,7 +250,7 @@ Configurar en `GUI/App.config`:
 ```xml
 <connectionStrings>
   <add name="WardrobeFlowDB"
-       connectionString="Data Source=.;Initial Catalog=WardrobeFlowDB;Integrated Security=True"
+       connectionString="Data Source=.\SQLEXPRESS;Initial Catalog=WardrobeFlowDB;Integrated Security=True;TrustServerCertificate=True"
        providerName="System.Data.SqlClient" />
 </connectionStrings>
 ```
@@ -264,11 +265,11 @@ Configurar en `GUI/App.config`:
 5. Compilar y ejecutar GUI como proyecto de inicio
 ```
 
-En el primer arranque el sistema seedea automáticamente las tablas de traducciones, idiomas, permisos y el usuario `admin2` de respaldo.
+En el primer arranque el sistema seedea automáticamente las tablas de traducciones, idiomas, permisos y el usuario `admin2` de respaldo (se crea en el primer arranque; no figura en `Instalador/Credenciales_Iniciales.txt`).
 
 ### Build y tests
 
-Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (7 capas: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`).
+Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`).
 
 ### Generar el instalador
 

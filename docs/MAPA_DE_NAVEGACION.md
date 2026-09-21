@@ -69,7 +69,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 ### PN01 — Armar pedido y logística
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `PedidosVenta` | Lista pedidos y permite crearlos o cancelarlos. | Nuevo Pedido · Cancelar · Des-cancelar · Historial · Actualizar |
+| `PedidosVenta` | Lista pedidos y permite crearlos o cancelarlos. | + Nuevo Pedido · Cancelar · Des-cancelar · Historial · Actualizar |
 | `NuevoPedidoForm` (modal) | Asistente en pasos: cliente y prendas. Valida cuenta bloqueada, suscripción vigente y pedido abierto. | Siguiente → · ← Volver · Confirmar Pedido |
 | `PedidoHistorialForm` | Historial de cambios de un pedido (solo lectura). | — |
 | `PedidosRealizados` | Vista de Depósito/Logística: despacho, entrega, devolución y pérdida, con nivel de urgencia. | Despachar · Marcar Entregado · Registrar Devolución · Reportar Pérdida · Ver Notificación · Historial · Actualizar |
@@ -114,12 +114,12 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | `DesbloqueoEmergenciaForm` | Desbloqueo del Administrador con clave de emergencia de un solo uso. | Desbloquear · Cancelar |
 | `CambioClaveObligatorioForm` | Fuerza el cambio de clave temporal tras el login. | — |
 | `MiPerfilForm` | Idioma, tipografía, tamaño y tema del usuario en sesión. | Guardar preferencias · Restaurar valores de fábrica · Recibir notificaciones |
-| `Usuarios` | Cuentas: alta, desbloqueo, reset de clave, archivar y purgar. | Agregar · Desbloquear Cuenta · Resetear Contraseña · Archivar · Ver archivados · Purgar (>1 año) · Refrescar |
+| `Usuarios` | Cuentas: alta, desbloqueo, reset de clave, archivar y purgar. | Agregar Usuario · Desbloquear Cuenta · Resetear Contraseña · Archivar usuario · Ver archivados · Purgar (>1 año) · Refrescar Lista |
 | `AdministracionUsuariosForm` | Datos administrativos no sensibles y cambio de rol. | Nuevo usuario · Guardar cambios · Cambiar rol · Buscar · Ver historial de cambios |
 | `GestorPermisos` | Roles y familias con el Composite: crear, renombrar, asignar y quitar. | Crear rol raíz · Crear sub-rol · Renombrar · Eliminar · Asignar · Quitar · Ver vista completa |
 | `ExploradorCompositeForm` | Vista de solo lectura del árbol Composite. | — |
 | `FormIdiomas` | ABM de idiomas y traducciones. | Nuevo idioma · Renombrar · Activar · Desactivar · Guardar cambios |
-| `BackupForm` | Copias de seguridad y restauración. | Generar Copia · Restaurar seleccionado · Desde archivo… · Eliminar · Backup de instalación limpia |
+| `BackupForm` | Copias de seguridad y restauración. | Generar Copia de Seguridad · Restaurar seleccionado · Desde archivo… · Eliminar · Backup de instalación limpia |
 | `DiagnosticoIntegridadForm` | Verifica DVH/DVV de las tablas. | Recalcular Todo · Recuperación (Espejo)… · Actualizar |
 | `RecuperacionEspejoForm` | Repara integridad desde el espejo `Usuario_Seguridad`. | Reparar desde Espejo · Asumir Pérdida · Restaurar Backup… · Cerrar |
 | `ConfirmarAdminForm` · `InputDialog` | Diálogos de confirmación y entrada de texto. | — |
@@ -129,7 +129,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | Formulario | Qué hace | Acciones |
 |---|---|---|
 | `Bitacora` | Bitácora de Sistema o de Negocio, con filtros. | Buscar · Limpiar · Ver · Exportar PDF |
-| `ReporteJornadaForm` | Reporte de la jornada, tendencia por rango y comparación entre jornadas. | Generar · Tendencia (rango) · Comparar Jornadas · Exportar reporte… · Exportar comparación… · Exportar TXT · Limpiar |
+| `ReporteJornadaForm` | Reporte de la jornada, tendencia por rango y comparación entre jornadas. | Generar · Tendencia (rango) · Comparar Jornadas · Exportar reporte… · Exportar comparación… · Volver al reporte · menú Guardar como .TXT / Imprimir |
 | `AlertasForm` | Centro de alertas (integridad, backups, stock, pedidos). | Actualizar |
 | `DashboardForm` | Panel genérico (ADM, AUD, GCO, GIN, CAJ, ACO, CON). | — |
 | `DashboardVendedor` | Pedidos pendientes, clientes, planes, suscripciones por vencer, Kanban de pedidos. | Actualizar |

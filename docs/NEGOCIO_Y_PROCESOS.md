@@ -258,7 +258,7 @@ no hay notificación a Depósito, planilla de existencias ni registro de desisti
 | 1 | La contratación exige cliente existente y plan **activo** | `BLL/Contratacion.cs › CrearContratacion` | `ContratacionTests` (`ClienteInexistente`, `PlanInexistente`, `PlanInactivo`) |
 | 2 | Un cliente no puede tener **dos** contrataciones pendientes | `CrearContratacion` + índice único `UX_Contratacion_UnaPendientePorCliente` | `ContratacionTests › ClienteYaTienePendiente` |
 | 3 | Solo se cobra una contratación **Pendiente de pago** (revalidada contra la BD) | `ConfirmarPago` (`err.bll.contratacion.cobrar_estado`) | `ContratacionTests` |
-| 4 | El medio de pago es obligatorio (efectivo/tarjeta/transferencia) | `ConfirmarPago` (`medio_pago_requerido`) | `ContratacionTests` |
+| 4 | El medio de pago es obligatorio (texto no vacío; la pantalla ofrece las opciones habituales) | `ConfirmarPago` (`medio_pago_requerido`) | `ContratacionTests` |
 | 5 | Si el plan fue dado de baja antes del cobro se rechaza y la contratación sigue pendiente | `ConfirmarPago` (`err.bll.contratacion.plan_baja`) | `ContratacionTests › PlanDadoDeBaja...` |
 | 6 | **Doble cobro imposible:** solo una sesión de Caja gana el claim | `DAL/Contratacion.cs › ConfirmarPago`; `BLL` (`cobrar_concurrente`) | `ContratacionTests › OtraSesionGanoElClaim...` (con fake; no contra BD real) |
 | 7 | Si la activación falla, la contratación vuelve a Pendiente (nunca queda Pagada sin suscripción) | `ConfirmarPago` + `DAL.ReabrirPago` | `ContratacionTests › FallaLaActivacion_Reabre...`. Si además falla la compensación se deja constancia CRÍTICA en bitácora y Caja recibe `cobro_sin_activar` (`EndurecimientoPn02Pn03Tests`) |
@@ -305,7 +305,7 @@ aprobar su impacto económico y **aplicarla realmente al cobro**.
 | 9 | Solo una promoción **Rechazada** se puede reformular | `Reformular` (`reformular_estado`) | `EndurecimientoPn02Pn03Tests › Reformular_*` |
 | 10 | Los cambios de estado son atómicos frente a otra sesión (`UPDATE ... WHERE Estado=@esperado`) | `BLL/Promocion.cs › CambiarEstadoOFalla` | `PromocionTests` (con fake) |
 | 11 | **Un solo descuento por ciclo:** compiten la mejor promoción vigente **del plan del cliente** y el crédito por referido; se aplica el **mayor**; si gana la promoción el crédito **no se consume** (queda acumulado; si gana el crédito solo se descuenta lo aplicado y el excedente también queda acumulado); en empate gana la promoción | `BE/PoliticaDescuento.cs › Resolver` | `PoliticaDescuentoTests` (11), `CobroTests`, `ContratacionTests` |
-| 12 | Tipos de descuento: `Porcentaje` (% del bruto), `MontoFijo` (tope = bruto), `PrecioPromocional` (`Valor` = precio final) | `PoliticaDescuento.DescuentoDe` | `PoliticaDescuentoTests` |
+| 12 | Tipos de descuento: `Porcentaje` (% del bruto), `MontoFijo` (tope = bruto), `PrecioPromocional` (`Valor` = precio **mensual**; el descuento es bruto − `Valor` × meses de la modalidad) | `PoliticaDescuento.DescuentoDe` | `PoliticaDescuentoTests` |
 | 13 | Solo aplican promociones **Vigentes**, dentro de fechas y del **plan** del cliente; las de **categoría son informativas** (no tienen importe donde aplicarse en el cobro de suscripción) | `Promocion.EstaVigente`, `PoliticaDescuento.Resolver` | `PoliticaDescuentoTests` |
 
 **Casos de uso:** CU01-GER Sugerir Promoción, CU01-ADM Gestionar Promociones, CU01-CONT Analizar Promoción, CU01-VEN Sugerir Baja, CU02-ADM Resolver Baja.

@@ -235,6 +235,12 @@ namespace GUI
                     ex.Clave, ex.Message, ex.Args, Servicios.Multiidioma.GestorIdioma.IdiomaActual);
                 return;
             }
+            catch (Exception ex)
+            {
+                btnSiguiente.Enabled = false;
+                MostrarError(ex);
+                return;
+            }
 
             btnSiguiente.Enabled  = true;
             lblInfoPlan.Visible   = true;

@@ -29,3 +29,6 @@ Instalador/Salida/
 
 # Certificados de firma (contienen la clave privada)
 *.pfx
+
+# Carpeta de trabajo local de Claude Code (worktrees temporales)
+.claude/worktrees/

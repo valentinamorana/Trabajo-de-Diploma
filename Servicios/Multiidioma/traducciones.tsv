@@ -4681,6 +4681,7 @@ ES	err.bll.contratacion.cliente_inexistente	El cliente seleccionado no existe.
 ES	err.bll.contratacion.cobrar_estado	Solo se pueden cobrar contrataciones Pendientes de pago. Esta contratación está '{0}'.
 ES	err.bll.contratacion.plan_baja	El plan '{0}' fue dado de baja: no se puede formalizar la suscripción. La contratación queda pendiente de pago.
 ES	err.bll.contratacion.cobrar_concurrente	Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.
+ES	err.bll.contratacion.cobro_sin_activar	El cobro de la contratación #{0} quedó registrado pero la suscripción NO se activó. Avisá al Administrador para completar el alta del plan.
 ES	err.bll.contratacion.inexistente	La contratación ya no existe.
 ES	err.bll.contratacion.medio_pago_requerido	Debe indicar el medio de pago (efectivo, tarjeta o transferencia).
 ES	err.bll.contratacion.plan_inexistente	El plan seleccionado no existe o no está activo.
@@ -4689,6 +4690,7 @@ EN	err.bll.contratacion.cliente_inexistente	The selected client does not exist.
 EN	err.bll.contratacion.cobrar_estado	Only contracts Pending payment can be charged. This contract is '{0}'.
 EN	err.bll.contratacion.plan_baja	Plan '{0}' has been discontinued: the subscription cannot be formalized. The contracting remains pending payment.
 EN	err.bll.contratacion.cobrar_concurrente	Another Cashier session has already resolved this contracting. Refresh the Cashier queue.
+EN	err.bll.contratacion.cobro_sin_activar	The payment for contracting #{0} was recorded but the subscription was NOT activated. Notify the Administrator to complete the plan activation.
 EN	err.bll.contratacion.inexistente	The contract no longer exists.
 EN	err.bll.contratacion.medio_pago_requerido	You must indicate the payment method (cash, card or transfer).
 EN	err.bll.contratacion.plan_inexistente	The selected plan does not exist or is not active.
@@ -4697,6 +4699,7 @@ RU	err.bll.contratacion.cliente_inexistente	Выбранный клиент не
 RU	err.bll.contratacion.cobrar_estado	Оплатить можно только контракты в статусе 'Ожидает оплаты'. Текущий статус: '{0}'.
 RU	err.bll.contratacion.plan_baja	Тариф '{0}' снят с продажи: оформить подписку нельзя. Заказ остаётся ожидающим оплаты.
 RU	err.bll.contratacion.cobrar_concurrente	Другой сеанс кассы уже обработал этот заказ. Обновите очередь кассы.
+RU	err.bll.contratacion.cobro_sin_activar	Оплата заказа #{0} зафиксирована, но подписка НЕ активирована. Сообщите администратору, чтобы завершить активацию тарифа.
 RU	err.bll.contratacion.inexistente	Контракт больше не существует.
 RU	err.bll.contratacion.medio_pago_requerido	Необходимо указать способ оплаты (наличные, карта или перевод).
 RU	err.bll.contratacion.plan_inexistente	Выбранный план не существует или неактивен.
@@ -4705,6 +4708,7 @@ PT	err.bll.contratacion.cliente_inexistente	O cliente selecionado não existe.
 PT	err.bll.contratacion.cobrar_estado	Só é possível cobrar contratações Pendentes de pagamento. Esta contratação está '{0}'.
 PT	err.bll.contratacion.plan_baja	O plano '{0}' foi desativado: não é possível formalizar a assinatura. A contratação permanece pendente de pagamento.
 PT	err.bll.contratacion.cobrar_concurrente	Outra sessão do Caixa já resolveu esta contratação. Atualize a fila do Caixa.
+PT	err.bll.contratacion.cobro_sin_activar	A cobrança da contratação #{0} foi registrada, mas a assinatura NÃO foi ativada. Avise o Administrador para concluir a ativação do plano.
 PT	err.bll.contratacion.inexistente	A contratação não existe mais.
 PT	err.bll.contratacion.medio_pago_requerido	Deve indicar o meio de pagamento (dinheiro, cartão ou transferência).
 PT	err.bll.contratacion.plan_inexistente	O plano selecionado não existe ou não está ativo.
@@ -5102,6 +5106,7 @@ ES	promocion.btn.reformular	Reformular
 ES	promocion.desdeanalisis.titulo	Ideas detectadas por los reportes
 ES	promocion.desdeanalisis.usar	Usar esta idea
 ES	promocion.desdeanalisis.beneficio	Beneficio estimado inicial: {0:C2} (editable antes de enviar).
+ES	promocion.desdeanalisis.notacategoria	Ojo: una promoción por categoría es informativa (no se descuenta del cobro de la suscripción).
 ES	msg.sugerencia.sinanalisis	Los reportes de rotación y abandono no detectan casos para sugerir por ahora.
 ES	msg.promo.reformulada	Promoción #{0} reformulada: vuelve a revisión contable.
 ES	promo.reformular	Reformulando la promoción #{0}. Observación de Contabilidad: {1}
@@ -5111,6 +5116,7 @@ EN	promocion.btn.reformular	Reformulate
 EN	promocion.desdeanalisis.titulo	Ideas detected by the reports
 EN	promocion.desdeanalisis.usar	Use this idea
 EN	promocion.desdeanalisis.beneficio	Initial estimated benefit: {0:C2} (editable before sending).
+EN	promocion.desdeanalisis.notacategoria	Note: a category promotion is informational (it is not deducted from the subscription payment).
 EN	msg.sugerencia.sinanalisis	The rotation and churn reports do not detect any cases to suggest for now.
 EN	msg.promo.reformulada	Promotion #{0} reformulated: back to accounting review.
 EN	promo.reformular	Reformulating promotion #{0}. Accounting note: {1}
@@ -5120,6 +5126,7 @@ RU	promocion.btn.reformular	Переработать
 RU	promocion.desdeanalisis.titulo	Идеи, выявленные отчётами
 RU	promocion.desdeanalisis.usar	Использовать эту идею
 RU	promocion.desdeanalisis.beneficio	Начальная оценка выгоды: {0:C2} (можно изменить перед отправкой).
+RU	promocion.desdeanalisis.notacategoria	Внимание: акция по категории носит информационный характер (не вычитается из оплаты подписки).
 RU	msg.sugerencia.sinanalisis	Отчёты по обороту и оттоку пока не выявляют случаев для предложения.
 RU	msg.promo.reformulada	Акция #{0} переработана: возвращена на бухгалтерскую проверку.
 RU	promo.reformular	Переработка акции #{0}. Замечание бухгалтерии: {1}
@@ -5129,6 +5136,7 @@ PT	promocion.btn.reformular	Reformular
 PT	promocion.desdeanalisis.titulo	Ideias detectadas pelos relatórios
 PT	promocion.desdeanalisis.usar	Usar esta ideia
 PT	promocion.desdeanalisis.beneficio	Benefício estimado inicial: {0:C2} (editável antes de enviar).
+PT	promocion.desdeanalisis.notacategoria	Atenção: uma promoção por categoria é informativa (não é descontada da cobrança da assinatura).
 PT	msg.sugerencia.sinanalisis	Os relatórios de rotação e abandono não detectam casos para sugerir por enquanto.
 PT	msg.promo.reformulada	Promoção #{0} reformulada: volta para a revisão contábil.
 PT	promo.reformular	Reformulando a promoção #{0}. Observação da Contabilidade: {1}

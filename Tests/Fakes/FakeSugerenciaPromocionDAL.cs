@@ -30,10 +30,16 @@ namespace Tests.Fakes
             return AltaIdGenerado;
         }
 
-        public void MarcarEvaluada(int idSugerencia)
+        // false simula que otra sesión ya evaluó la sugerencia (el UPDATE condicionado no afectó filas).
+        public bool MarcarEvaluadaResultado { get; set; } = true;
+        public int ReabrirEvaluacionVeces { get; private set; }
+        public void ReabrirEvaluacion(int idSugerencia) => ReabrirEvaluacionVeces++;
+
+        public bool MarcarEvaluada(int idSugerencia)
         {
             MarcarEvaluadaVeces++;
             UltimoIdEvaluado = idSugerencia;
+            return MarcarEvaluadaResultado;
         }
     }
 }

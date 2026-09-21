@@ -8,6 +8,10 @@ namespace DAL.Interfaces
         List<BE.SugerenciaPromocion> ObtenerPendientes();
         BE.SugerenciaPromocion ObtenerPorId(int idSugerencia);
         int Alta(BE.SugerenciaPromocion sugerencia);
-        void MarcarEvaluada(int idSugerencia);
+        // Reclamo atómico: solo pasa de Pendiente a Evaluada UNA vez. Devuelve false si otra sesión ya la evaluó.
+        bool MarcarEvaluada(int idSugerencia);
+
+        // Compensación: devuelve a Pendiente una sugerencia recién reclamada si la promoción no llegó a crearse.
+        void ReabrirEvaluacion(int idSugerencia);
     }
 }

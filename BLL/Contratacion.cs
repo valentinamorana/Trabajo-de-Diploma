@@ -180,7 +180,7 @@ namespace BLL
                 // promoción, el crédito queda acumulado (un solo descuento por ciclo). La activación
                 // persiste al cliente completo, así que el consumo se guarda junto con el alta.
                 if (descuento.UsaCreditoReferido)
-                    cliente.DescuentoProximoCobro = 0;
+                    cliente.DescuentoProximoCobro = Math.Max(0, cliente.DescuentoProximoCobro - descuento.Descuento);
                 clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad);
             }
             catch
@@ -188,8 +188,24 @@ namespace BLL
                 try { dalContratacion.ReabrirPago(actual.IdContratacion); }
                 catch (Exception ex)
                 {
+                    // Peor caso: el cobro quedó registrado y NO se pudo reabrir (por ejemplo Venta
+                    // creó otra contratación pendiente para el cliente y el índice único lo impide).
+                    // No se puede tragar en silencio: se deja constancia de alta criticidad en la
+                    // bitácora y se avisa a Caja con un error propio, en vez del de la activación.
                     System.Diagnostics.Trace.TraceError(
                         $"[BLL.Contratacion] No se pudo reabrir la contratación #{actual.IdContratacion}: {ex.Message}");
+                    try
+                    {
+                        bitacora.Registrar(modulo,
+                            $"CRÍTICO: Contratación #{actual.IdContratacion} cobrada pero la suscripción NO se activó " +
+                            $"y no se pudo reabrir el cobro — Cliente: {actual.NombreCliente}. Requiere alta administrativa del plan.",
+                            BE.Criticidad.Alta);
+                    }
+                    catch { /* la bitácora no puede impedir el aviso a Caja */ }
+                    throw new BE.AppException("err.bll.contratacion.cobro_sin_activar",
+                        "El cobro de la contratación #{0} quedó registrado pero la suscripción NO se activó. " +
+                        "Avisá al Administrador para completar el alta del plan.",
+                        actual.IdContratacion);
                 }
                 throw;
             }
@@ -233,6 +249,29 @@ namespace BLL
             };
         }
 
+        // Igual que CalcularImporte pero para toda la cola de Caja: las promociones vigentes se leen UNA vez
+        // (antes eran 3 consultas por fila en cada refresco de la grilla).
+        public Dictionary<int, BE.LiquidacionContratacion> CalcularImportes(List<BE.Contratacion> contrataciones)
+        {
+            var resultado = new Dictionary<int, BE.LiquidacionContratacion>();
+            if (contrataciones == null || contrataciones.Count == 0) return resultado;
+
+            var promos = ObtenerPromocionesVigentes();
+            foreach (var c in contrataciones)
+            {
+                var plan = dalPlan.ObtenerPorId(c.IdPlan);
+                var cliente = dalCliente.ObtenerPorId(c.IdCliente);
+                var r = BE.PoliticaDescuento.Resolver(
+                    plan != null ? plan.Precio : c.MontoPlan, c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m);
+                resultado[c.IdContratacion] = new BE.LiquidacionContratacion
+                {
+                    Bruto = r.Bruto, Descuento = r.Descuento,
+                    NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido
+                };
+            }
+            return resultado;
+        }
+
         // Precio del plan por cobro (Precio = importe de cada cobro; la modalidad solo define la
         // duración del ciclo) menos un único descuento: promoción vigente del plan o crédito por referido.
         private BE.ResultadoDescuento ResolverDescuento(BE.Contratacion c, BE.PlanSuscripcion plan, BE.Cliente cliente)
@@ -250,6 +289,8 @@ namespace BLL
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError($"[BLL.Contratacion] No se pudieron leer las promociones: {ex.Message}");
+                try { bitacora.Registrar("Contratación", $"No se pudieron leer las promociones vigentes; se cobró sin descuento: {ex.Message}", BE.Criticidad.Media); }
+                catch { }
                 return new List<BE.Promocion>();
             }
         }

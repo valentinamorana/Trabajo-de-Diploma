@@ -30,6 +30,9 @@ namespace BLL.Interfaces
         // Importe a cobrar (con el descuento aplicable) de una contratación pendiente.
         BE.LiquidacionContratacion CalcularImporte(BE.Contratacion contratacion);
 
+        // Igual para toda la cola de Caja (clave = IdContratacion), leyendo las promociones una sola vez.
+        System.Collections.Generic.Dictionary<int, BE.LiquidacionContratacion> CalcularImportes(System.Collections.Generic.List<BE.Contratacion> contrataciones);
+
         // Registra un intento de pago fallido. Si se alcanzan los 3 intentos, cancela
         // automáticamente la contratación.
         void RegistrarIntentoFallido(string modulo, BE.Contratacion contratacion);

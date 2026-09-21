@@ -64,7 +64,13 @@ namespace Tests.Fakes
             return ConfirmarPagoResultado;
         }
 
-        public void ReabrirPago(int idContratacion) => ReabrirPagoVeces++;
+        // Si se asigna, ReabrirPago lanza (simula que la compensación también falla).
+        public System.Exception ReabrirPagoLanza { get; set; }
+        public void ReabrirPago(int idContratacion)
+        {
+            ReabrirPagoVeces++;
+            if (ReabrirPagoLanza != null) throw ReabrirPagoLanza;
+        }
 
         public void Cancelar(int idContratacion)
         {

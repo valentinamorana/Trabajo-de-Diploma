@@ -73,7 +73,20 @@ namespace DAL
             }
         }
 
-        public void MarcarEvaluada(int idSugerencia)
+        public void ReabrirEvaluacion(int idSugerencia)
+        {
+            SqlParameter[] p = { new SqlParameter("@IdSugerencia", idSugerencia) };
+            try
+            {
+                acceso.Escribir("UPDATE SugerenciaPromocion SET Estado = 0 WHERE IdSugerencia = @IdSugerencia AND Estado = 1", p);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al reabrir la sugerencia.", ex);
+            }
+        }
+
+        public bool MarcarEvaluada(int idSugerencia)
         {
             SqlParameter[] p =
             {
@@ -82,7 +95,9 @@ namespace DAL
             };
             try
             {
-                acceso.Escribir("UPDATE SugerenciaPromocion SET Estado = @Estado WHERE IdSugerencia = @IdSugerencia", p);
+                int filas = acceso.Escribir(
+                    "UPDATE SugerenciaPromocion SET Estado = @Estado WHERE IdSugerencia = @IdSugerencia AND Estado = 0", p);
+                return filas > 0;
             }
             catch (Exception ex)
             {

@@ -65,8 +65,9 @@ namespace BLL.Manejadores
             decimal totalCargos = cargosPendientes.Sum(c => c.Monto);
             decimal importeFinal = resDescuento.Total + totalCargos;
 
+            // El crédito por referido no usado queda acumulado: solo se descuenta lo aplicado.
             if (resDescuento.UsaCreditoReferido)
-                cliente.DescuentoProximoCobro = 0;
+                cliente.DescuentoProximoCobro = Math.Max(0, cliente.DescuentoProximoCobro - resDescuento.Descuento);
 
             // UPDATE de Cliente + INSERT del historial + liquidación de cargos pendientes, todo
             // en una única transacción: antes eran round-trips independientes, y un crash entre
@@ -166,6 +167,8 @@ namespace BLL.Manejadores
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError($"[ProcesarPagoHandler] No se pudieron leer las promociones: {ex.Message}");
+                try { new Servicios.Bitacora().Registrar("Cobro", $"No se pudieron leer las promociones vigentes; se cobró sin descuento: {ex.Message}", BE.Criticidad.Media); }
+                catch { }
                 return new System.Collections.Generic.List<BE.Promocion>();
             }
         }

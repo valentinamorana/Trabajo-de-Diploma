@@ -11,10 +11,13 @@ namespace DAL.Interfaces
         BE.Promocion ObtenerPorId(int idPromocion);
         int Alta(BE.Promocion promocion);
         void Modificar(BE.Promocion promocion);
-        void CambiarEstado(int idPromocion, BE.EstadoPromocion nuevoEstado, string observacionOMotivo);
+        // Cambia el estado SOLO si la promoción sigue en estadoEsperado (UPDATE condicionado: cubre dos
+        // sesiones resolviendo la misma promoción a la vez). Devuelve false si otra sesión ya la cambió.
+        bool CambiarEstado(int idPromocion, BE.EstadoPromocion estadoEsperado, BE.EstadoPromocion nuevoEstado, string observacionOMotivo);
 
         // PN03, CU-VEND-04-Sugerir Baja: pasa a BajaSolicitada y registra el motivo (columna
         // propia, distinta de Observacion que usa Contabilidad).
-        void SolicitarBaja(int idPromocion, string motivo);
+        // Pasa una promoción Vigente a BajaSolicitada; false si otra sesión ya la cambió.
+        bool SolicitarBaja(int idPromocion, string motivo);
     }
 }

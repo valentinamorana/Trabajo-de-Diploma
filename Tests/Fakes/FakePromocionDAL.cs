@@ -43,19 +43,26 @@ namespace Tests.Fakes
             UltimoModificar = promocion;
         }
 
-        public void CambiarEstado(int idPromocion, BE.EstadoPromocion nuevoEstado, string observacionOMotivo)
+        // false simula que otra sesión ya cambió el estado (el UPDATE condicionado no afectó filas).
+        public bool CambiarEstadoResultado { get; set; } = true;
+        public BE.EstadoPromocion UltimoEstadoEsperado { get; private set; }
+
+        public bool CambiarEstado(int idPromocion, BE.EstadoPromocion estadoEsperado, BE.EstadoPromocion nuevoEstado, string observacionOMotivo)
         {
+            UltimoEstadoEsperado = estadoEsperado;
             CambiarEstadoVeces++;
             UltimoIdPromocionCambiarEstado = idPromocion;
             UltimoNuevoEstado = nuevoEstado;
             UltimaObservacionOMotivo = observacionOMotivo;
+            return CambiarEstadoResultado;
         }
 
-        public void SolicitarBaja(int idPromocion, string motivo)
+        public bool SolicitarBaja(int idPromocion, string motivo)
         {
             SolicitarBajaVeces++;
             UltimoIdSolicitarBaja = idPromocion;
             UltimoMotivoSolicitarBaja = motivo;
+            return CambiarEstadoResultado;
         }
     }
 }

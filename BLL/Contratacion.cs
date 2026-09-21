@@ -18,6 +18,8 @@ namespace BLL
         private readonly DAL.Interfaces.IClienteDAL         dalCliente;
         private readonly DAL.Interfaces.IEmpleadoDAL        dalEmpleado;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
+        // PN03: promociones vigentes que se aplican al importe del cobro. Opcional (null = sin promociones).
+        private DAL.Interfaces.IPromocionDAL dalPromocion;
         private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
 
@@ -28,7 +30,10 @@ namespace BLL
 
         // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
         // de prueba (mismo criterio que BLL.Pedido/BLL.Cliente).
-        public Contratacion() : this(new DAL.Contratacion(), new DAL.Cliente(), new DAL.Empleado(), new DAL.PlanSuscripcion()) { }
+        public Contratacion() : this(new DAL.Contratacion(), new DAL.Cliente(), new DAL.Empleado(), new DAL.PlanSuscripcion())
+        {
+            dalPromocion = new DAL.Promocion();
+        }
 
         public Contratacion(DAL.Interfaces.IContratacionDAL dalContratacion, DAL.Interfaces.IClienteDAL dalCliente,
                              DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan)
@@ -47,6 +52,15 @@ namespace BLL
             : this(dalContratacion, dalCliente, dalEmpleado, dalPlan)
         {
             _clienteBLLLazy = clienteBLL ?? throw new ArgumentNullException(nameof(clienteBLL));
+        }
+
+        // Overload que además inyecta el DAL de promociones (pruebas del descuento aplicado al cobro).
+        public Contratacion(DAL.Interfaces.IContratacionDAL dalContratacion, DAL.Interfaces.IClienteDAL dalCliente,
+                             DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
+                             Interfaces.IClienteService clienteBLL, DAL.Interfaces.IPromocionDAL dalPromocion)
+            : this(dalContratacion, dalCliente, dalEmpleado, dalPlan, clienteBLL)
+        {
+            this.dalPromocion = dalPromocion;
         }
 
         // Cola de contrataciones a cobrar (pantalla de Caja).
@@ -103,7 +117,7 @@ namespace BLL
 
         // CU01-CAJ-Gestionar Cobro + CU02-CAJ-Emitir Comprobante (PN02): Caja confirma el
         // pago, emite el comprobante y formaliza la suscripción del cliente.
-        public void ConfirmarPago(string modulo, BE.Contratacion contratacion, string medioPago)
+        public BE.LiquidacionContratacion ConfirmarPago(string modulo, BE.Contratacion contratacion, string medioPago)
         {
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
 
@@ -121,27 +135,64 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.medio_pago_requerido",
                     "Debe indicar el medio de pago (efectivo, tarjeta o transferencia).");
 
+            // Flujo alternativo 4.1 (PN02): el plan fue dado de baja entre que Venta generó la
+            // contratación y que Caja la cobra. Se rechaza ANTES de tocar nada: la contratación
+            // permanece Pendiente de pago y se puede reintentar una vez resuelta la causa.
+            var plan = dalPlan.ObtenerPorId(actual.IdPlan);
+            if (plan == null || !plan.Estado)
+                throw new BE.AppException("err.bll.contratacion.plan_baja",
+                    "El plan '{0}' fue dado de baja: no se puede formalizar la suscripción. " +
+                    "La contratación queda pendiente de pago.",
+                    actual.NombrePlan ?? plan?.Nombre ?? actual.IdPlan.ToString());
+
             int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
             string numeroComprobante = GenerarNumeroComprobante(contratacion.IdContratacion);
 
-            // Activar la suscripción PRIMERO: si esto falla (plan dado de baja entre la
-            // contratación y el cobro, etc.) la Contratacion sigue PendientePago y se puede
-            // reintentar. Si confirmáramos el pago antes y esto fallara después, quedaría
-            // Pagada sin suscripción activada y sin forma de reintentar (PuedeCobrarse()
-            // exige PendientePago).
-            //
-            // Riesgo residual aceptado: estos dos pasos no corren en una única transacción de
-            // BD (Contratacion y Cliente/Suscripcion son tablas distintas). Si el proceso cae
-            // justo entre ambas líneas, un reintento manual de Caja re-ejecuta la activación
-            // (extiende la vigencia de nuevo) porque la Contratacion sigue viéndose
-            // PendientePago. Es una ventana angosta (falla exactamente ahí) y de bajo impacto
-            // (a lo sumo días de suscripción de más, nunca de menos ni cobro duplicado real);
-            // una solución completa requeriría una transacción cruzando ambos DAL o una marca
-            // de idempotencia dedicada, fuera de alcance de este TP.
+            // PN03 — importe a cobrar: precio del plan menos UN solo descuento (la promoción vigente
+            // del plan o el crédito por referidos, el mayor; ver BE.PoliticaDescuento).
             var cliente = dalCliente.ObtenerPorId(actual.IdCliente);
-            clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad);
+            if (cliente == null)
+                throw new BE.AppException("err.bll.contratacion.cliente_inexistente",
+                    "El cliente seleccionado no existe.");
+            var descuento = ResolverDescuento(actual, plan, cliente);
 
-            dalContratacion.ConfirmarPago(actual.IdContratacion, idCaja, medioPago, numeroComprobante);
+            // 1) "Claim" atómico: el UPDATE exige que la contratación siga PendientePago, así que
+            //    entre dos sesiones de Caja (o un doble clic) solo UNA pasa. Sin esto, las dos
+            //    superaban la revalidación de arriba y activaban la suscripción dos veces.
+            if (!dalContratacion.ConfirmarPago(actual.IdContratacion, idCaja, medioPago, numeroComprobante,
+                    descuento.Total, descuento.Descuento, descuento.Promocion?.IdPromocion))
+                throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
+                    "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
+
+            // 2) Activar la suscripción. Si falla, se compensa devolviendo la contratación a
+            //    Pendiente de pago para que Caja pueda reintentar (nunca queda Pagada sin
+            //    suscripción activada).
+            //
+            // Riesgo residual aceptado: el claim y la activación no comparten una única
+            // transacción de BD (Contratacion y Cliente son tablas distintas). Si el proceso
+            // cae justo entre ambos pasos la contratación queda Pagada sin suscripción activa:
+            // se detecta en la cola de Caja/Renovación y se corrige con el alta administrativa
+            // del plan. Ventana angosta; una solución completa requeriría una transacción que
+            // cruce ambos DAL, fuera de alcance de este TP.
+            try
+            {
+                // Si el descuento aplicado fue el crédito por referidos, se consume; si fue una
+                // promoción, el crédito queda acumulado (un solo descuento por ciclo). La activación
+                // persiste al cliente completo, así que el consumo se guarda junto con el alta.
+                if (descuento.UsaCreditoReferido)
+                    cliente.DescuentoProximoCobro = 0;
+                clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad);
+            }
+            catch
+            {
+                try { dalContratacion.ReabrirPago(actual.IdContratacion); }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceError(
+                        $"[BLL.Contratacion] No se pudo reabrir la contratación #{actual.IdContratacion}: {ex.Message}");
+                }
+                throw;
+            }
 
             bitacora.Registrar(modulo,
                 $"Cobro Contratación #{contratacion.IdContratacion} — Cliente: {contratacion.NombreCliente} — " +
@@ -149,8 +200,58 @@ namespace BLL
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.CobroSuscripcion,
                 $"Contratación #{contratacion.IdContratacion} cobrada y suscripción formalizada — " +
-                $"{contratacion.NombreCliente} — Plan {contratacion.NombrePlan} — Comprobante {numeroComprobante}",
+                $"{contratacion.NombreCliente} — Plan {contratacion.NombrePlan} — Comprobante {numeroComprobante} — " +
+                $"Importe ${descuento.Total}" +
+                (descuento.Descuento > 0
+                    ? $" (descuento ${descuento.Descuento}: {(descuento.Promocion != null ? $"promoción '{descuento.Promocion.Nombre}'" : "crédito por referido")})"
+                    : ""),
                 idCliente: contratacion.IdCliente);
+
+            return new BE.LiquidacionContratacion
+            {
+                Bruto = descuento.Bruto,
+                Descuento = descuento.Descuento,
+                NombrePromocion = descuento.Promocion?.Nombre,
+                UsaCreditoReferido = descuento.UsaCreditoReferido,
+                NumeroComprobante = numeroComprobante
+            };
+        }
+
+        // Importe que Caja debe cobrar por una contratación pendiente, con el descuento aplicable
+        // (para mostrarlo en la cola de Caja y en la confirmación, antes de cobrar).
+        public BE.LiquidacionContratacion CalcularImporte(BE.Contratacion contratacion)
+        {
+            var plan = dalPlan.ObtenerPorId(contratacion.IdPlan);
+            var cliente = dalCliente.ObtenerPorId(contratacion.IdCliente);
+            var r = ResolverDescuento(contratacion, plan, cliente);
+            return new BE.LiquidacionContratacion
+            {
+                Bruto = r.Bruto,
+                Descuento = r.Descuento,
+                NombrePromocion = r.Promocion?.Nombre,
+                UsaCreditoReferido = r.UsaCreditoReferido
+            };
+        }
+
+        // Precio del plan por cobro (Precio = importe de cada cobro; la modalidad solo define la
+        // duración del ciclo) menos un único descuento: promoción vigente del plan o crédito por referido.
+        private BE.ResultadoDescuento ResolverDescuento(BE.Contratacion c, BE.PlanSuscripcion plan, BE.Cliente cliente)
+        {
+            decimal bruto = plan != null ? plan.Precio : c.MontoPlan;
+            return BE.PoliticaDescuento.Resolver(
+                bruto, c.IdPlan, ObtenerPromocionesVigentes(), cliente?.DescuentoProximoCobro ?? 0m);
+        }
+
+        // Best-effort: sin DAL de promociones, o si la tabla aún no existe, se cobra sin promociones.
+        private List<BE.Promocion> ObtenerPromocionesVigentes()
+        {
+            if (dalPromocion == null) return new List<BE.Promocion>();
+            try { return dalPromocion.ObtenerVigentes(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[BLL.Contratacion] No se pudieron leer las promociones: {ex.Message}");
+                return new List<BE.Promocion>();
+            }
         }
 
         // CU03-CAJ-Cancelar Contratación (PN02): un intento de pago que no se concretó. Al
@@ -172,6 +273,9 @@ namespace BLL
                     actual.Estado);
 
             int intentos = dalContratacion.IncrementarIntento(actual.IdContratacion);
+            if (intentos < 0)
+                throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
+                    "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
 
             bitacora.Registrar(modulo,
                 $"Intento de pago fallido en Contratación #{contratacion.IdContratacion} — Cliente: {contratacion.NombreCliente} — " +

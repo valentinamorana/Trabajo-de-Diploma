@@ -49,7 +49,7 @@ namespace BLL
 
         /// <summary>
         /// Determina si el usuario activo puede ver la tab de Bitácora del Sistema.
-        /// El Gerente Comercial (rol que absorbió las responsabilidades del extinto "Supervisor",
+        /// El Gerente Comercial (rol que absorbió las responsabilidades del antiguo rol "Supervisor",
         /// ver Usuario.Abm.NormalizarPerfil) solo accede a la bitácora de negocio; el resto
         /// (Administrador) ve ambas.
         /// </summary>

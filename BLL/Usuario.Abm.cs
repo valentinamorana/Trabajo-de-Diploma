@@ -296,15 +296,11 @@ namespace BLL
             switch (perfil.Trim())
             {
                 // Jerarquía consolidada (2da entrega)
-                case "Operador de Inventario":  return "OperadorDeInventario"; // mantenimiento de prendas
+                case "Depósito":               return "Deposito";             // inspección y mantenimiento de prendas
                 case "Operador Logístico":      return "OperadorLogistico";    // pedidos / despacho
                 case "Gerente Comercial":       return "GerenteComercial";
                 case "Gerente de Inventario":   return "GerenteInventario";
                 case "Auditor":                 return "Auditor";
-                // Roles retirados → se mapean a su reemplazo (por si llega una etiqueta vieja)
-                case "Controlador de Stock":    return "OperadorDeInventario";
-                case "Encargado de Stock":      return "OperadorDeInventario";
-                case "Supervisor":              return "GerenteComercial";
                 default:                        return perfil.Trim();
             }
         }

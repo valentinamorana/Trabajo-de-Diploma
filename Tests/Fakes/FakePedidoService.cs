@@ -33,6 +33,7 @@ namespace Tests.Fakes
         public List<BE.Pedido> ObtenerPendientes() => new List<BE.Pedido>();
         public BE.Pedido ObtenerPorId(int id) => null;
         public int CrearPedido(string modulo, int idCliente, List<BE.Prenda> prendas) => 0;
+        public BE.Cliente ValidarPuedeArmarPedido(int idCliente) => new BE.Cliente { IdCliente = idCliente };
         public BE.PlanSuscripcion ValidarCupoDisponible(BE.Cliente cliente, int cantidadPrendas) => null;
         public int ReservarPrendas(List<BE.Prenda> prendas, int idCliente) => 0;
         public void Despachar(string modulo, BE.Pedido pedido) { }

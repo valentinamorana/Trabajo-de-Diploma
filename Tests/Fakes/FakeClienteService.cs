@@ -16,6 +16,8 @@ namespace Tests.Fakes
         public BE.Cliente UltimoCliente { get; private set; }
         public int UltimoIdPlan { get; private set; }
         public BE.Builders.ModalidadCobro UltimaModalidad { get; private set; }
+        // Si se asigna, ActivarSuscripcion lanza esta excepción (simula un fallo a mitad del cobro).
+        public Exception ActivarSuscripcionLanza { get; set; }
 
         public BE.Builders.Suscripcion ActivarSuscripcion(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
@@ -24,6 +26,7 @@ namespace Tests.Fakes
             UltimoCliente = cliente;
             UltimoIdPlan = idPlan;
             UltimaModalidad = modalidad;
+            if (ActivarSuscripcionLanza != null) throw ActivarSuscripcionLanza;
 
             return new BE.Builders.Suscripcion(
                 cliente, new BE.PlanSuscripcion { IdPlan = idPlan }, modalidad,

@@ -9,7 +9,7 @@ namespace BLL.Interfaces
     ///
     /// Casos de uso definidos:
     ///   CrearPedido()         — Vendedor genera un pedido para un cliente
-    ///   Despachar()           — OperadorDeInventario despacha el pedido
+    ///   Despachar()           — Deposito despacha el pedido
     ///   MarcarEntregado()     — Se confirma la entrega al cliente
     ///   RegistrarDevolucion() — El cliente devuelve las prendas al finalizar
     ///   Cancelar()            — Se cancela un pedido Pendiente
@@ -31,6 +31,10 @@ namespace BLL.Interfaces
         // Crea un nuevo pedido de venta validando plan, límites y disponibilidad de prendas.
         // Devuelve el ID del pedido creado.
         int CrearPedido(string modulo, int idCliente, List<BE.Prenda> prendas);
+
+        // Valida si el cliente puede armar un pedido (suscripción, despacho pendiente y cuenta
+        // desbloqueada). Lanza BE.AppException con el motivo; devuelve el cliente validado.
+        BE.Cliente ValidarPuedeArmarPedido(int idCliente);
 
         // CU01-VEN-Armar Pedido, paso "Validar cupo disponible" (PN01): verifica que el plan
         // del cliente permita la cantidad de prendas pedidas y devuelve el plan consultado.

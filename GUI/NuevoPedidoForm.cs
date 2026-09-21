@@ -220,6 +220,22 @@ namespace GUI
                 return;
             }
 
+            // PN01/PN04: cuenta bloqueada por prendas sin devolver, pedido despachado, pausa, etc.
+            // Se avisa acá y no recién al confirmar el pedido.
+            try
+            {
+                pedidoBLL.ValidarPuedeArmarPedido(_clienteSel.IdCliente);
+            }
+            catch (BE.AppException ex)
+            {
+                btnSiguiente.Enabled  = false;
+                lblInfoPlan.ForeColor = Color.DarkRed;
+                lblInfoPlan.Visible   = true;
+                lblInfoPlan.Text      = "⚠ " + Servicios.Multiidioma.Traductor.Resolver(
+                    ex.Clave, ex.Message, ex.Args, Servicios.Multiidioma.GestorIdioma.IdiomaActual);
+                return;
+            }
+
             btnSiguiente.Enabled  = true;
             lblInfoPlan.Visible   = true;
 

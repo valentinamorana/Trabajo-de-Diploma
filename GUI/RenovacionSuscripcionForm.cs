@@ -6,7 +6,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// PdN5 — Renovación de suscripción. El Vendedor/Supervisor contacta al cliente por
+    /// PdN5 — Renovación de suscripción. El Vendedor/Gerencia contacta al cliente por
     /// fuera del sistema (teléfono/WhatsApp/mail) y carga acá la decisión tomada; el
     /// patrón Chain of Responsibility (BLL.Manejadores) resuelve el resto.
     /// </summary>

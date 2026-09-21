@@ -9,9 +9,9 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Módulo de Pedidos Realizados (OperadorDeInventario).
+    /// Capa de Presentación — Módulo de Pedidos Realizados (Deposito).
     ///
-    /// Permite al OperadorDeInventario gestionar el ciclo de vida post-venta:
+    /// Permite al Deposito gestionar el ciclo de vida post-venta:
     ///   ✓ Ver todos los pedidos con su estado actual
     ///   ✓ Filtrar por estado (Todos / Pendiente / Despachado / Entregado / Cancelado)
     ///   ✓ Despachar un pedido Pendiente → estado Despachado

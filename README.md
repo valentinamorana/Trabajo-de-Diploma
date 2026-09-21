@@ -43,6 +43,21 @@ La GUI nunca accede a DAL ni a Seguridad directamente. Toda la lógica de negoci
 
 ---
 
+## Estructura del repositorio
+
+```
+BE/ BLL/ DAL/ GUI/ Seguridad/ Servicios/   Capas de la aplicación (ver arriba)
+Tests/                                    Tests unitarios (MSTest) con fakes de DAL
+BD/00_Instalacion_Completa.sql            Único script: esquema, datos semilla y datos de prueba
+Instalador/                               Script de Inno Setup, DbInstaller (cliente SQL embebido)
+                                          y credenciales iniciales. El .exe se genera en
+                                          Instalador/Salida/ y no se versiona
+docs/NEGOCIO_Y_PROCESOS.md               Documento de referencia: reglas y procesos de negocio, roles y arquitectura
+WardrobeFlow.slnx                         Solución de Visual Studio
+```
+
+---
+
 ## Procesos de negocio — Bloque 1: Operativos Core (Clientes)
 
 | PdN | Proceso | Patrón aplicado |
@@ -60,10 +75,10 @@ La GUI nunca accede a DAL ni a Seguridad directamente. Toda la lógica de negoci
 
 | PN | Proceso | Rol(es) protagonista(s) | Detalle |
 |----|---------|--------------------------|---------|
-| PN01 | Verificación de disponibilidad al armar un pedido (split lógico "Depósito") | Vendedor / OperadorDeInventario | `BLL.Pedido` relee el estado real de toda la selección por lote (`BLL.Prenda.VerificarDisponibilidad`) justo antes de confirmar — cierra la ventana TOCTOU entre elegir prendas y crear el pedido |
-| PN02 | Comercialización de la Suscripción | Vendedor (crea la contratación) / **Caja** (cobra y formaliza) | Rol `Caja` nuevo, separado de Vendedor a propósito (separación de funciones: quien vende no cobra) |
-| PN03 | Métricas, Promociones y Toma de Decisiones | GerenteComercial (sugiere) / **AdministracionComercial** (crea) / **Contabilidad** (aprueba) | 2 roles nuevos; quien redacta una promoción no es quien aprueba su impacto económico |
-| PN04 | Inspección de Devolución | OperadorDeInventario ("Depósito") | Sin rol nuevo. Lógica binaria alineada a Nuuly (sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, ya existente desde Bloque 1) |
+| PN01 | Armar pedido de prendas | Vendedor / Deposito | `BLL.Pedido.ValidarPuedeArmarPedido` valida suscripción vigente, sin pausa ni suspensión, sin pedido despachado sin entregar y **cuenta desbloqueada** (sin prendas pendientes de devolución, como NUULY 4.2/4.6). El asistente lo avisa al elegir el cliente. La disponibilidad se relee por lote (`BLL.Prenda.VerificarDisponibilidad`) y la reserva es atómica (`UPDATE ... AND Estado = Disponible`) |
+| PN02 | Comercialización de la Suscripción | Vendedor (crea la contratación) / **Caja** (cobra y formaliza) | Rol `Caja` separado de Vendedor (quien vende no cobra). El cobro es un *claim* atómico (`UPDATE ... AND Estado = Pendiente`): dos sesiones de Caja no pueden cobrar la misma contratación, y si la activación falla se compensa reabriéndola. Rechaza planes dados de baja y muestra el importe con el descuento y el comprobante emitido |
+| PN03 | Métricas, Promociones y Toma de Decisiones | GerenteComercial (sugiere) / **AdministracionComercial** (crea y reformula) / **Contabilidad** (aprueba) | Circuito **reporte → sugerencia → Administración → Contabilidad → Vigente → se aplica al cobro**. Gerencia puede cargar ideas detectadas por los reportes de rotación y abandono (`BLL.AnalisisPromociones`). Regla de NUULY (5.1): **un solo descuento por ciclo**, el mayor entre la promoción vigente del plan y el crédito por referido (`BE.PoliticaDescuento`); el crédito no usado se acumula. Las promociones por categoría son informativas |
+| PN04 | Inspección de Devolución | Deposito ("Depósito") | Sin rol nuevo, sin aprobador: reingresa sin cargo o se da de baja registrando **antes** el cargo por el daño irreparable (decisión propia, a diferencia de NUULY que no cobra daños). En Limpieza → Baja solo desde la Inspección (la BLL lo exige). Al registrarse la devolución las prendas dejan de estar En Uso y la cuenta del cliente se desbloquea (PN01) |
 
 ---
 
@@ -91,8 +106,8 @@ Los 6 reportes son de solo lectura, con exportación a PDF/CSV (Factory Method, 
 | **Vendedor** | Prendas, Clientes, Planes, Renovación, Cobro, Realizar Ventas, Contratación (PN02), Recomendación de Prendas (PdN13) | rol base comercial |
 | **GerenteComercial** | lo de Vendedor + Ver Pedidos Realizados, Ventas por Vendedor (PdN8), Análisis de Abandono (PdN10) | ⊃ Vendedor |
 | **OperadorLogistico** | Ver Pedidos Realizados (despacho) | rol base inventario |
-| **OperadorDeInventario** | Ver Prendas + Gestionar Stock (mantenimiento), Inspección de Devolución (PN04) | rol base inventario |
-| **GerenteInventario** | lo de ambos operadores + Categorías/Outfits, Rotación/Mantenimiento/Escasez (PdN9/11/12) | ⊃ OperadorLogistico + OperadorDeInventario |
+| **Deposito** *(PN01, PN04)* | Ver Prendas + Gestionar Stock (mantenimiento), Inspección de Devolución (PN04) | rol base inventario |
+| **GerenteInventario** | lo de ambos operadores + Rotación/Mantenimiento/Escasez (PdN9/11/12) | ⊃ OperadorLogistico + Deposito |
 | **Caja** *(PN02)* | Contrataciones pendientes de pago: cobrar, registrar intento fallido | rol simple, sin herencia |
 | **AdministracionComercial** *(PN03)* | Gestionar Promociones: crear desde sugerencia o manual, desactivar, resolver bajas | rol simple, sin herencia |
 | **Contabilidad** *(PN03)* | Revisión Contable de Promociones: aprobar o rechazar | rol simple, sin herencia |
@@ -217,22 +232,14 @@ BD/00_Instalacion_Completa.sql   -- Crea WardrobeFlowDB completa: estructura, da
 
 Es el único archivo de esquema que se edita. Los scripts individuales que introdujeron cada módulo históricamente (`01`, `03`, `05`, `06`, `08` a `20`) ya no están en el repo — todo su contenido está absorbido en `00`, que es la única fuente de verdad; si hace falta ver cómo se introdujo una funcionalidad puntual, buscarlo en el historial de git en vez de en un archivo aparte. El instalador (`Instalador/WardrobeFlow_Setup.iss`) usa este único script.
 
-**Herramientas de mantenimiento** (no forman parte de "crear la BD" — correr por separado solo si hace falta):
-
-```
-BD/02_Actualizar_BaseDeDatos.sql          -- Migra una BD MUY vieja (previa al script 01) a la estructura actual.
-BD/04_Diagnostico_Limpieza_Nodos_Permiso.sql -- Diagnóstico puntual del árbol de permisos.
-BD/07_Reset_Perfiles_Permisos.sql         -- Reconstruye desde cero los permisos de los 7 roles reales.
-```
-
-- **Actualizar una BD MUY vieja** (previa a que existiera un script de instalación) → ejecutar `02_Actualizar_BaseDeDatos.sql` y después `00_Instalacion_Completa.sql`. Ambos son idempotentes (chequean `IF NOT EXISTS` antes de cada tabla/columna/dato semilla), así que correr `00` a continuación no duplica ni rompe nada de lo que `02` ya haya creado — simplemente completa lo que a `02` le falta (PN01-PN04, Lista de Espera, hardening, etc., que `02` no cubre).
-- **BD con el árbol de permisos desincronizado** (un rol no ve lo que debería) → ejecutar `07_Reset_Perfiles_Permisos.sql`. Reescribe las patentes de los 7 roles reales al estado correcto — hacer un backup antes si hay permisos customizados a mano.
+**Es el único script de la carpeta `BD/`.** Incluye también los **datos de prueba** de todos los procesos (sección 21: clientes en distintos estados de suscripción, prendas en cada estado, pedidos, contrataciones pendientes, promociones, etc.), así que la base queda lista para probar apenas se instala — el instalador (`Instalador/`) ejecuta este mismo archivo. Sobre una base ya instalada con una versión anterior también es seguro volver a ejecutarlo: migra el rol `OperadorDeInventario` a `Deposito` y retira los roles viejos.
 
 **Notas de los módulos** (para ubicarlos dentro de `00_Instalacion_Completa.sql` — los números de sección adentro del archivo coinciden con estos, y son el orden histórico en el que se agregaron):
 - **Lista de Espera (mejora opcional)** — sección 16 en `00`; el resto del sistema funciona sin ella (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
 - **Comercialización de la suscripción (PN02)** — sección 17 en `00`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo (o usar el usuario demo `caja`).
 - **Métricas, promociones y toma de decisiones (PN03)** — sección 18 en `00`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay usuarios demo (`admcomercial`, `contable`) para probar el módulo sin dar de alta nada a mano.
-- **Inspección de Devolución (PN04)** — sección 19 en `00`. Sin rol nuevo: reusa `OperadorDeInventario` (ya es el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
+- **Inspección de Devolución (PN04)** — sección 19 en `00`. Sin rol nuevo: reusa el rol `Deposito` (el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
+- **Aplicación de promociones al cobro e integridad (PN02/PN03/PN04)** — sección 20b en `00`. Agrega `Importe`, `DescuentoAplicado` e `IdPromocion` a `Contratacion` (lo que realmente se cobró), los `CHECK` de `CargoPrenda.Monto` e `IntentosPago`, las restricciones únicas (una contratación pendiente por cliente, una anotación activa por prenda y cliente) y los índices de las tablas nuevas.
 - **Hardening de integridad (auditoría de BD)** — sección 20 en `00`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
 
 ### Cadena de conexión
@@ -253,7 +260,7 @@ Configurar en `GUI/App.config`:
 1. Clonar el repositorio
 2. Abrir WardrobeFlow.slnx en Visual Studio
 3. Configurar la cadena de conexión en GUI/App.config
-4. Ejecutar los scripts SQL en orden
+4. Ejecutar BD/00_Instalacion_Completa.sql (o usar el instalador)
 5. Compilar y ejecutar GUI como proyecto de inicio
 ```
 
@@ -261,8 +268,10 @@ En el primer arranque el sistema seedea automáticamente las tablas de traduccio
 
 ### Build y tests
 
-```powershell
-.\build-and-test.ps1
-```
+Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (7 capas: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`).
 
-Compila las 7 capas (BE, Seguridad, DAL, Servicios, BLL, GUI, Tests) y corre la suite de MSTest sobre `Tests.dll`.
+### Generar el instalador
+
+1. Compilar la solución en modo **Release** (y `Instalador/DbInstaller` en Release).
+2. Ejecutar `Instalador/compilar-y-firmar.ps1`: compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool. El certificado (`wardrobeflow.pfx`) se busca en `%USERPROFILE%` y no se versiona; si no está, el instalador queda compilado sin firmar.
+3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_V1.exe`, con la aplicación, la base de datos y los datos de prueba adentro.

@@ -37,6 +37,7 @@ ES	err.bll.pedido.devolucion_ya_hecha	El Pedido #{0} no tiene prendas en uso par
 ES	err.bll.empleado_sin_vinculo	El usuario '{0}' no tiene un Empleado vinculado. Pedíle al Administrador que configure el vínculo.
 ES	err.bll.pedido.historial_vacio	No se encontraron cambios para la operación #{0} del Pedido #{1}.
 ES	err.bll.pedido.ya_despachado	El cliente tiene el pedido #{0} despachado pendiente de entrega. Confirmá la entrega antes de crear uno nuevo.
+ES	err.bll.pedido.cuenta_bloqueada	{0} tiene {1} prenda(s) pendientes de devolución. La cuenta se desbloquea cuando se registra la devolución del pedido anterior.
 ES	err.bll.plan.tiene_clientes	No se puede desactivar el plan: tiene {0} cliente(s) activo(s) asignado(s). Reasignalos a otro plan antes de desactivarlo.
 ES	err.bll.prenda.categoria_requerida	La categoría es obligatoria.
 ES	err.bll.prenda.nombre_requerido	El nombre de la prenda es obligatorio.
@@ -51,6 +52,7 @@ ES	err.bll.version.sin_permiso	Solo un Administrador puede restaurar una versió
 ES	err.bll.prenda.transicion_baja	Una prenda dada de baja no puede cambiar de estado.
 ES	err.bll.prenda.transicion_enuso	El estado de una prenda en uso se actualiza automáticamente al procesar pedidos.\nLa única excepción manual es reportarla como perdida (PN04, módulo de Pedidos Realizados).
 ES	err.bll.prenda.baja_requiere_flujoperdida	Una prenda en uso solo puede darse de baja a través de 'Reportar Prenda Perdida' (con cargo de reposición al cliente), no directamente.
+ES	err.bll.prenda.baja_requiere_inspeccion	Una prenda En Limpieza solo puede darse de baja desde la Inspección de Devolución (que registra el cargo por el daño), no directamente.
 ES	err.bll.prenda.transicion_generica	La transición de '{0}' a '{1}' no está permitida.
 ES	lbl.permisos.estructura	Estructura del sistema (roles, familias y patentes)
 ES	btn.permisos.quitar	Quitar ↑
@@ -435,10 +437,8 @@ ES	notif.gen.categoria	Categoría
 ES	notif.gen.footer	Ante cualquier consulta, comuníquese con nosotros.
 ES	notif.gen.slogan	WardrobeFlow — Tu guardarropa, sin límites.
 ES	perfil.administrador	Administrador
-ES	perfil.supervisor	Supervisor
 ES	perfil.vendedor	Vendedor
-ES	perfil.stock	Controlador de Stock
-ES	perfil.operador	Operador de Inventario
+ES	perfil.deposito	Depósito
 ES	metodo.efectivo	Efectivo
 ES	metodo.debito	Débito
 ES	metodo.credito	Crédito
@@ -467,9 +467,6 @@ ES	btn.permisos.cerrar	Cerrar
 ES	perm.rol.administrador	Administrador
 ES	perm.rol.vendedor	Vendedor
 ES	perm.rol.operadorlogistico	Operador Logístico
-ES	perm.rol.supervisor	Supervisor
-ES	perm.rol.controladordestock	Controlador de Stock
-ES	perm.rol.operadordeinventario	Operador de Inventario
 ES	perm.grp.inventario	Inventario
 ES	perm.grp.sistema	Sistema
 ES	perm.grp.ventas	Ventas
@@ -495,7 +492,6 @@ ES	err.explorador.cargar	Error al cargar árbol Composite:\n{0}
 ES	perfil.auditor	Auditor
 ES	perfil.gerentecomercial	Gerente Comercial
 ES	perfil.gerenteinventario	Gerente de Inventario
-ES	perfil.encargadodestock	Encargado de Stock
 ES	perfil.operadorlogistico	Operador Logístico
 ES	perfil.caja	Caja
 ES	perfil.administracioncomercial	Administración Comercial
@@ -503,7 +499,10 @@ ES	perfil.contabilidad	Contabilidad
 ES	perm.rol.auditor	Auditor
 ES	perm.rol.gerentecomercial	Gerente Comercial
 ES	perm.rol.gerenteinventario	Gerente de Inventario
-ES	perm.rol.encargadodestock	Encargado de Stock
+ES	perm.rol.deposito	Depósito
+ES	perm.rol.caja	Caja
+ES	perm.rol.administracioncomercial	Administración Comercial
+ES	perm.rol.contabilidad	Contabilidad
 ES	frm.idiomas	Gestión de Idiomas
 ES	lbl.idiomas.titulo	Idiomas del sistema
 ES	lbl.idiomas.trad	Traducciones del idioma seleccionado
@@ -840,6 +839,7 @@ EN	err.bll.pedido.devolucion_ya_hecha	Order #{0} has no garments in use to retur
 EN	err.bll.empleado_sin_vinculo	User '{0}' has no linked Employee. Ask the Administrator to configure the link.
 EN	err.bll.pedido.historial_vacio	No changes found for operation #{0} of Order #{1}.
 EN	err.bll.pedido.ya_despachado	The customer has order #{0} dispatched and pending delivery. Confirm the delivery before creating a new one.
+EN	err.bll.pedido.cuenta_bloqueada	{0} has {1} garment(s) pending return. The account is unlocked once the return of the previous order is registered.
 EN	err.bll.plan.tiene_clientes	The plan cannot be deactivated: it has {0} active customer(s) assigned. Reassign them to another plan before deactivating it.
 EN	err.bll.prenda.categoria_requerida	The category is required.
 EN	err.bll.prenda.nombre_requerido	The garment name is required.
@@ -854,6 +854,7 @@ EN	err.bll.version.sin_permiso	Only an Administrator can restore a user's histor
 EN	err.bll.prenda.transicion_baja	A garment that has been deactivated cannot change state.
 EN	err.bll.prenda.transicion_enuso	The state of a garment in use updates automatically when processing orders.\nThe only manual exception is reporting it lost (PN04, Completed Orders module).
 EN	err.bll.prenda.baja_requiere_flujoperdida	A garment in use can only be discontinued through 'Report Lost Garment' (with a replacement charge to the client), not directly.
+EN	err.bll.prenda.baja_requiere_inspeccion	A garment In Cleaning can only be retired from the Return Inspection (which records the damage charge), not directly.
 EN	err.bll.prenda.transicion_generica	The transition from '{0}' to '{1}' is not allowed.
 EN	lbl.permisos.estructura	System structure (roles, families and patents)
 EN	btn.permisos.quitar	Remove ↑
@@ -1242,10 +1243,8 @@ EN	notif.gen.categoria	Category
 EN	notif.gen.footer	For any questions, please contact us.
 EN	notif.gen.slogan	WardrobeFlow — Your wardrobe, without limits.
 EN	perfil.administrador	Administrator
-EN	perfil.supervisor	Supervisor
 EN	perfil.vendedor	Sales Rep
-EN	perfil.stock	Stock Controller
-EN	perfil.operador	Inventory Operator
+EN	perfil.deposito	Warehouse
 EN	metodo.efectivo	Cash
 EN	metodo.debito	Debit
 EN	metodo.credito	Credit
@@ -1270,9 +1269,6 @@ EN	btn.permisos.cerrar	Close
 EN	perm.rol.administrador	Administrator
 EN	perm.rol.vendedor	Salesperson
 EN	perm.rol.operadorlogistico	Logistics Operator
-EN	perm.rol.supervisor	Supervisor
-EN	perm.rol.controladordestock	Stock Controller
-EN	perm.rol.operadordeinventario	Inventory Operator
 EN	perm.grp.inventario	Inventory
 EN	perm.grp.sistema	System
 EN	perm.grp.ventas	Sales
@@ -1298,7 +1294,6 @@ EN	err.explorador.cargar	Error loading Composite tree:\n{0}
 EN	perfil.auditor	Auditor
 EN	perfil.gerentecomercial	Sales Manager
 EN	perfil.gerenteinventario	Inventory Manager
-EN	perfil.encargadodestock	Stock Clerk
 EN	perfil.operadorlogistico	Logistics Operator
 EN	perfil.caja	Cashier
 EN	perfil.administracioncomercial	Commercial Administration
@@ -1306,7 +1301,10 @@ EN	perfil.contabilidad	Accounting
 EN	perm.rol.auditor	Auditor
 EN	perm.rol.gerentecomercial	Sales Manager
 EN	perm.rol.gerenteinventario	Inventory Manager
-EN	perm.rol.encargadodestock	Stock Clerk
+EN	perm.rol.deposito	Warehouse
+EN	perm.rol.caja	Cashier
+EN	perm.rol.administracioncomercial	Commercial Administration
+EN	perm.rol.contabilidad	Accounting
 EN	frm.idiomas	Language Management
 EN	lbl.idiomas.titulo	System Languages
 EN	lbl.idiomas.trad	Translations for the selected language
@@ -1643,6 +1641,7 @@ RU	err.bll.pedido.devolucion_ya_hecha	В заказе №{0} нет вещей �
 RU	err.bll.empleado_sin_vinculo	У пользователя «{0}» нет связанного сотрудника. Попросите администратора настроить связь.
 RU	err.bll.pedido.historial_vacio	Не найдены изменения для операции №{0} заказа №{1}.
 RU	err.bll.pedido.ya_despachado	У клиента есть отправленный заказ №{0}, ожидающий доставки. Подтвердите доставку перед созданием нового.
+RU	err.bll.pedido.cuenta_bloqueada	У {0} есть непринятые к возврату вещи ({1}). Аккаунт разблокируется после регистрации возврата предыдущего заказа.
 RU	err.bll.plan.tiene_clientes	Невозможно деактивировать план: к нему привязано {0} активный(ых) клиент(ов). Переназначьте их на другой план перед деактивацией.
 RU	err.bll.prenda.categoria_requerida	Категория обязательна.
 RU	err.bll.prenda.nombre_requerido	Название вещи обязательно.
@@ -1657,6 +1656,7 @@ RU	err.bll.version.sin_permiso	Только администратор може�
 RU	err.bll.prenda.transicion_baja	Списанная вещь не может менять состояние.
 RU	err.bll.prenda.transicion_enuso	Состояние вещи, находящейся в использовании, обновляется автоматически при обработке заказов.\nЕдинственное ручное исключение — сообщить о её потере (PN04, модуль Выполненных заказов).
 RU	err.bll.prenda.baja_requiere_flujoperdida	Вещь, находящуюся в использовании, можно списать только через 'Сообщить о пропаже вещи' (с начислением стоимости замены клиенту), а не напрямую.
+RU	err.bll.prenda.baja_requiere_inspeccion	Вещь в статусе «В чистке» можно списать только через инспекцию возврата (она фиксирует начисление за повреждение), а не напрямую.
 RU	err.bll.prenda.transicion_generica	Переход из «{0}» в «{1}» не разрешён.
 RU	lbl.permisos.estructura	Структура системы (роли, семейства и права)
 RU	btn.permisos.quitar	Убрать ↑
@@ -2045,10 +2045,8 @@ RU	notif.gen.categoria	Категория
 RU	notif.gen.footer	По любым вопросам обращайтесь к нам.
 RU	notif.gen.slogan	WardrobeFlow — Ваш гардероб без ограничений.
 RU	perfil.administrador	Администратор
-RU	perfil.supervisor	Supervisor
 RU	perfil.vendedor	Продавец
-RU	perfil.stock	Контролёр склада
-RU	perfil.operador	Оператор инвентаря
+RU	perfil.deposito	Склад
 RU	metodo.efectivo	Наличные
 RU	metodo.debito	Дебетовая карта
 RU	metodo.credito	Кредитная карта
@@ -2073,9 +2071,6 @@ RU	btn.permisos.cerrar	Закрыть
 RU	perm.rol.administrador	Администратор
 RU	perm.rol.vendedor	Продавец
 RU	perm.rol.operadorlogistico	Логист
-RU	perm.rol.supervisor	Супервайзер
-RU	perm.rol.controladordestock	Контролёр склада
-RU	perm.rol.operadordeinventario	Оператор склада
 RU	perm.grp.inventario	Склад
 RU	perm.grp.sistema	Система
 RU	perm.grp.ventas	Продажи
@@ -2101,7 +2096,6 @@ RU	err.explorador.cargar	Ошибка загрузки дерева Composite:\n
 RU	perfil.auditor	Аудитор
 RU	perfil.gerentecomercial	Коммерческий менеджер
 RU	perfil.gerenteinventario	Менеджер склада
-RU	perfil.encargadodestock	Кладовщик
 RU	perfil.operadorlogistico	Логист
 RU	perfil.caja	Касса
 RU	perfil.administracioncomercial	Коммерческая администрация
@@ -2109,7 +2103,10 @@ RU	perfil.contabilidad	Бухгалтерия
 RU	perm.rol.auditor	Аудитор
 RU	perm.rol.gerentecomercial	Коммерческий менеджер
 RU	perm.rol.gerenteinventario	Менеджер склада
-RU	perm.rol.encargadodestock	Кладовщик
+RU	perm.rol.deposito	Склад
+RU	perm.rol.caja	Касса
+RU	perm.rol.administracioncomercial	Коммерческая администрация
+RU	perm.rol.contabilidad	Бухгалтерия
 RU	frm.idiomas	Управление языками
 RU	lbl.idiomas.titulo	Языки системы
 RU	lbl.idiomas.trad	Переводы для выбранного языка
@@ -2446,6 +2443,7 @@ PT	err.bll.pedido.devolucion_ya_hecha	O Pedido #{0} não tem peças em uso para 
 PT	err.bll.empleado_sin_vinculo	O usuário '{0}' não tem um Funcionário vinculado. Peça ao Administrador para configurar o vínculo.
 PT	err.bll.pedido.historial_vacio	Não foram encontradas alterações para a operação #{0} do Pedido #{1}.
 PT	err.bll.pedido.ya_despachado	O cliente tem o pedido #{0} despachado e pendente de entrega. Confirme a entrega antes de criar um novo.
+PT	err.bll.pedido.cuenta_bloqueada	{0} tem {1} peça(s) pendentes de devolução. A conta é desbloqueada quando a devolução do pedido anterior for registrada.
 PT	err.bll.plan.tiene_clientes	Não é possível desativar o plano: tem {0} cliente(s) ativo(s) atribuído(s). Reatribua-os a outro plano antes de desativá-lo.
 PT	err.bll.prenda.categoria_requerida	A categoria é obrigatória.
 PT	err.bll.prenda.nombre_requerido	O nome da peça é obrigatório.
@@ -2460,6 +2458,7 @@ PT	err.bll.version.sin_permiso	Somente um Administrador pode restaurar uma vers�
 PT	err.bll.prenda.transicion_baja	Uma peça baixada não pode mudar de estado.
 PT	err.bll.prenda.transicion_enuso	O estado de uma peça em uso é atualizado automaticamente ao processar pedidos.\nA única exceção manual é reportá-la como perdida (PN04, módulo de Pedidos Realizados).
 PT	err.bll.prenda.baja_requiere_flujoperdida	Uma peça em uso só pode ser baixada através de 'Reportar Peça Perdida' (com cobrança de reposição ao cliente), não diretamente.
+PT	err.bll.prenda.baja_requiere_inspeccion	Uma peça Em Limpeza só pode ser baixada pela Inspeção de Devolução (que registra a cobrança do dano), não diretamente.
 PT	err.bll.prenda.transicion_generica	A transição de '{0}' para '{1}' não é permitida.
 PT	lbl.permisos.estructura	Estrutura do sistema (papéis, famílias e patentes)
 PT	btn.permisos.quitar	Remover ↑
@@ -2892,10 +2891,8 @@ PT	notif.gen.categoria	Categoria
 PT	notif.gen.footer	Em caso de dúvidas, entre em contato conosco.
 PT	notif.gen.slogan	WardrobeFlow — Seu guarda-roupa, sem limites.
 PT	perfil.administrador	Administrador
-PT	perfil.supervisor	Supervisor
 PT	perfil.vendedor	Vendedor
-PT	perfil.stock	Controlador de Estoque
-PT	perfil.operador	Operador de Estoque
+PT	perfil.deposito	Depósito
 PT	metodo.efectivo	Dinheiro
 PT	metodo.debito	Débito
 PT	metodo.credito	Crédito
@@ -2920,9 +2917,6 @@ PT	btn.permisos.cerrar	Fechar
 PT	perm.rol.administrador	Administrador
 PT	perm.rol.vendedor	Vendedor
 PT	perm.rol.operadorlogistico	Operador Logístico
-PT	perm.rol.supervisor	Supervisor
-PT	perm.rol.controladordestock	Controlador de Estoque
-PT	perm.rol.operadordeinventario	Operador de Estoque
 PT	perm.grp.inventario	Estoque
 PT	perm.grp.sistema	Sistema
 PT	perm.grp.ventas	Vendas
@@ -2948,7 +2942,6 @@ PT	err.explorador.cargar	Erro ao carregar árvore Composite:\n{0}
 PT	perfil.auditor	Auditor
 PT	perfil.gerentecomercial	Gerente Comercial
 PT	perfil.gerenteinventario	Gerente de Estoque
-PT	perfil.encargadodestock	Responsável de Estoque
 PT	perfil.operadorlogistico	Operador Logístico
 PT	perfil.caja	Caixa
 PT	perfil.administracioncomercial	Administração Comercial
@@ -2956,7 +2949,10 @@ PT	perfil.contabilidad	Contabilidade
 PT	perm.rol.auditor	Auditor
 PT	perm.rol.gerentecomercial	Gerente Comercial
 PT	perm.rol.gerenteinventario	Gerente de Estoque
-PT	perm.rol.encargadodestock	Responsável de Estoque
+PT	perm.rol.deposito	Depósito
+PT	perm.rol.caja	Caixa
+PT	perm.rol.administracioncomercial	Administração Comercial
+PT	perm.rol.contabilidad	Contabilidade
 PT	frm.idiomas	Gerenciamento de Idiomas
 PT	lbl.idiomas.titulo	Idiomas do sistema
 PT	lbl.idiomas.trad	Traduções do idioma selecionado
@@ -3323,16 +3319,11 @@ ES	dash.mant.activo	En mantenimiento
 ES	dash.mant.encurso	En curso (2-7d)
 ES	dash.mant.reciente	Reciente (< 2d)
 ES	dash.mant.urgente	Urgente (> 7d)
-ES	dash.operador.titulo	Panel de Operaciones
-ES	dash.operador.subtitulo	WardrobeFlow  —  Operaciones
+ES	dash.logistica.titulo	Panel de Logística
+ES	dash.logistica.subtitulo	WardrobeFlow  —  Logística
 ES	dash.planes	Planes activos
-ES	dash.stock.titulo	Panel de Stock
-ES	dash.stock.subtitulo	WardrobeFlow  —  Stock
-ES	dash.sup.bitacora	Actividad reciente
-ES	dash.sup.mant	En mantenimiento
-ES	dash.sup.pedidos	Pedidos pendientes
-ES	dash.supervisor.titulo	Panel de Supervisor
-ES	dash.supervisor.subtitulo	WardrobeFlow  —  Supervisión
+ES	dash.deposito.titulo	Panel de Depósito
+ES	dash.deposito.subtitulo	WardrobeFlow  —  Depósito
 ES	dash.vendedor.titulo	Panel de Ventas
 ES	dash.vendedor.subtitulo	WardrobeFlow  —  Ventas
 EN	dash.despachados	Dispatched orders
@@ -3344,16 +3335,11 @@ EN	dash.mant.activo	Under maintenance
 EN	dash.mant.encurso	In progress (2-7d)
 EN	dash.mant.reciente	Recent (< 2d)
 EN	dash.mant.urgente	Urgent (> 7d)
-EN	dash.operador.titulo	Operations Panel
-EN	dash.operador.subtitulo	WardrobeFlow  —  Operations
+EN	dash.logistica.titulo	Logistics Panel
+EN	dash.logistica.subtitulo	WardrobeFlow  —  Logistics
 EN	dash.planes	Active plans
-EN	dash.stock.titulo	Stock Panel
-EN	dash.stock.subtitulo	WardrobeFlow  —  Stock
-EN	dash.sup.bitacora	Recent activity
-EN	dash.sup.mant	Under maintenance
-EN	dash.sup.pedidos	Pending orders
-EN	dash.supervisor.titulo	Supervisor Panel
-EN	dash.supervisor.subtitulo	WardrobeFlow  —  Supervision
+EN	dash.deposito.titulo	Warehouse Panel
+EN	dash.deposito.subtitulo	WardrobeFlow  —  Warehouse
 EN	dash.vendedor.titulo	Sales Panel
 EN	dash.vendedor.subtitulo	WardrobeFlow  —  Sales
 
@@ -3366,16 +3352,11 @@ PT	dash.mant.activo	Em manutenção
 PT	dash.mant.encurso	Em andamento (2-7d)
 PT	dash.mant.reciente	Recente (< 2d)
 PT	dash.mant.urgente	Urgente (> 7d)
-PT	dash.operador.titulo	Painel de Operações
-PT	dash.operador.subtitulo	WardrobeFlow  —  Operações
+PT	dash.logistica.titulo	Painel de Logística
+PT	dash.logistica.subtitulo	WardrobeFlow  —  Logística
 PT	dash.planes	Planos ativos
-PT	dash.stock.titulo	Painel de Estoque
-PT	dash.stock.subtitulo	WardrobeFlow  —  Estoque
-PT	dash.sup.bitacora	Atividade recente
-PT	dash.sup.mant	Em manutenção
-PT	dash.sup.pedidos	Pedidos pendentes
-PT	dash.supervisor.titulo	Painel de Supervisor
-PT	dash.supervisor.subtitulo	WardrobeFlow  —  Supervisão
+PT	dash.deposito.titulo	Painel de Depósito
+PT	dash.deposito.subtitulo	WardrobeFlow  —  Depósito
 PT	dash.vendedor.titulo	Painel de Vendas
 PT	dash.vendedor.subtitulo	WardrobeFlow  —  Vendas
 RU	dash.despachados	Отгружено заказов
@@ -3387,16 +3368,11 @@ RU	dash.mant.activo	На обслуживании
 RU	dash.mant.encurso	В процессе (2-7д)
 RU	dash.mant.reciente	Недавно (< 2д)
 RU	dash.mant.urgente	Срочно (> 7д)
-RU	dash.operador.titulo	Панель операций
-RU	dash.operador.subtitulo	WardrobeFlow — Операции
+RU	dash.logistica.titulo	Панель логистики
+RU	dash.logistica.subtitulo	WardrobeFlow — Логистика
 RU	dash.planes	Активных планов
-RU	dash.stock.titulo	Панель склада
-RU	dash.stock.subtitulo	WardrobeFlow — Склад
-RU	dash.sup.bitacora	Недавняя активность
-RU	dash.sup.mant	На обслуживании
-RU	dash.sup.pedidos	Заказы в ожидании
-RU	dash.supervisor.titulo	Панель супервайзера
-RU	dash.supervisor.subtitulo	WardrobeFlow — Контроль
+RU	dash.deposito.titulo	Панель склада
+RU	dash.deposito.subtitulo	WardrobeFlow — Склад
 RU	dash.vendedor.titulo	Панель продаж
 RU	dash.vendedor.subtitulo	WardrobeFlow — Продажи
 
@@ -4553,6 +4529,8 @@ ES	cobro.estado.cargospendientes	Tiene {0} cargo(s) por daño/pérdida pendiente
 ES	cobro.msg.cobrado.descuento	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2}.
 ES	cobro.msg.cobrado.cargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye {2} cargo(s) por daño/pérdida (${3}).
 ES	cobro.msg.cobrado.descuentoycargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2} y {3} cargo(s) por daño/pérdida (${4}).
+ES	cobro.msg.cobrado.promo	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye la promoción '{2}' (-${3}).
+ES	cobro.msg.cobrado.promoycargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye la promoción '{2}' (-${3}) y {4} cargo(s) por daño/pérdida (${5}).
 EN	renov.pausar	Pause until:
 EN	renov.reanudar	Resume now
 EN	renov.estado.pausada	PAUSED
@@ -4582,6 +4560,8 @@ EN	cobro.estado.cargospendientes	Has {0} pending damage/loss charge(s) for ${1} 
 EN	cobro.msg.cobrado.descuento	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2}.
 EN	cobro.msg.cobrado.cargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes {2} damage/loss charge(s) (${3}).
 EN	cobro.msg.cobrado.descuentoycargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2} and {3} damage/loss charge(s) (${4}).
+EN	cobro.msg.cobrado.promo	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes the promotion '{2}' (-${3}).
+EN	cobro.msg.cobrado.promoycargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes the promotion '{2}' (-${3}) and {4} damage/loss charge(s) (${5}).
 RU	renov.pausar	Приостановить до:
 RU	renov.reanudar	Возобновить сейчас
 RU	renov.estado.pausada	ПРИОСТАНОВЛЕНА
@@ -4611,6 +4591,8 @@ RU	cobro.estado.cargospendientes	Есть {0} ожидающих штраф(ов
 RU	cobro.msg.cobrado.descuento	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2}.
 RU	cobro.msg.cobrado.cargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает {2} штраф(ов) за повреждение/утрату (${3}).
 RU	cobro.msg.cobrado.descuentoycargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2} и {3} штраф(ов) за повреждение/утрату (${4}).
+RU	cobro.msg.cobrado.promo	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает акцию '{2}' (-${3}).
+RU	cobro.msg.cobrado.promoycargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает акцию '{2}' (-${3}) и {4} штраф(ов) за повреждение/утрату (${5}).
 PT	renov.pausar	Pausar até:
 PT	renov.reanudar	Retomar agora
 PT	renov.estado.pausada	PAUSADA
@@ -4640,6 +4622,8 @@ PT	cobro.estado.cargospendientes	Tem {0} cobrança(s) por dano/perda pendente(s)
 PT	cobro.msg.cobrado.descuento	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2}.
 PT	cobro.msg.cobrado.cargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui {2} cobrança(s) por dano/perda (${3}).
 PT	cobro.msg.cobrado.descuentoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2} e {3} cobrança(s) por dano/perda (${4}).
+PT	cobro.msg.cobrado.promo	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui a promoção '{2}' (-${3}).
+PT	cobro.msg.cobrado.promoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui a promoção '{2}' (-${3}) e {4} cobrança(s) por dano/perda (${5}).
 ES	mnu.auditoria	Auditoría
 ES	mnu.analiticanegocio	Analítica de Negocio
 EN	mnu.auditoria	Audit
@@ -4695,24 +4679,32 @@ PT	msg.ok.titulo	Pronto
 ES	err.bll.contratacion.pendiente_existente	Este cliente ya tiene una contratación pendiente de pago. Hay que resolverla (cobrarla o cancelarla) antes de registrar una nueva.
 ES	err.bll.contratacion.cliente_inexistente	El cliente seleccionado no existe.
 ES	err.bll.contratacion.cobrar_estado	Solo se pueden cobrar contrataciones Pendientes de pago. Esta contratación está '{0}'.
+ES	err.bll.contratacion.plan_baja	El plan '{0}' fue dado de baja: no se puede formalizar la suscripción. La contratación queda pendiente de pago.
+ES	err.bll.contratacion.cobrar_concurrente	Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.
 ES	err.bll.contratacion.inexistente	La contratación ya no existe.
 ES	err.bll.contratacion.medio_pago_requerido	Debe indicar el medio de pago (efectivo, tarjeta o transferencia).
 ES	err.bll.contratacion.plan_inexistente	El plan seleccionado no existe o no está activo.
 EN	err.bll.contratacion.pendiente_existente	This client already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
 EN	err.bll.contratacion.cliente_inexistente	The selected client does not exist.
 EN	err.bll.contratacion.cobrar_estado	Only contracts Pending payment can be charged. This contract is '{0}'.
+EN	err.bll.contratacion.plan_baja	Plan '{0}' has been discontinued: the subscription cannot be formalized. The contracting remains pending payment.
+EN	err.bll.contratacion.cobrar_concurrente	Another Cashier session has already resolved this contracting. Refresh the Cashier queue.
 EN	err.bll.contratacion.inexistente	The contract no longer exists.
 EN	err.bll.contratacion.medio_pago_requerido	You must indicate the payment method (cash, card or transfer).
 EN	err.bll.contratacion.plan_inexistente	The selected plan does not exist or is not active.
 RU	err.bll.contratacion.pendiente_existente	У этого клиента уже есть договор, ожидающий оплаты. Его нужно разрешить (оплатить или отменить) перед оформлением нового.
 RU	err.bll.contratacion.cliente_inexistente	Выбранный клиент не существует.
 RU	err.bll.contratacion.cobrar_estado	Оплатить можно только контракты в статусе 'Ожидает оплаты'. Текущий статус: '{0}'.
+RU	err.bll.contratacion.plan_baja	Тариф '{0}' снят с продажи: оформить подписку нельзя. Заказ остаётся ожидающим оплаты.
+RU	err.bll.contratacion.cobrar_concurrente	Другой сеанс кассы уже обработал этот заказ. Обновите очередь кассы.
 RU	err.bll.contratacion.inexistente	Контракт больше не существует.
 RU	err.bll.contratacion.medio_pago_requerido	Необходимо указать способ оплаты (наличные, карта или перевод).
 RU	err.bll.contratacion.plan_inexistente	Выбранный план не существует или неактивен.
 PT	err.bll.contratacion.pendiente_existente	Este cliente já tem uma contratação pendente de pagamento. É preciso resolvê-la (cobrar ou cancelar) antes de registrar uma nova.
 PT	err.bll.contratacion.cliente_inexistente	O cliente selecionado não existe.
 PT	err.bll.contratacion.cobrar_estado	Só é possível cobrar contratações Pendentes de pagamento. Esta contratação está '{0}'.
+PT	err.bll.contratacion.plan_baja	O plano '{0}' foi desativado: não é possível formalizar a assinatura. A contratação permanece pendente de pagamento.
+PT	err.bll.contratacion.cobrar_concurrente	Outra sessão do Caixa já resolveu esta contratação. Atualize a fila do Caixa.
 PT	err.bll.contratacion.inexistente	A contratação não existe mais.
 PT	err.bll.contratacion.medio_pago_requerido	Deve indicar o meio de pagamento (dinheiro, cartão ou transferência).
 PT	err.bll.contratacion.plan_inexistente	O plano selecionado não existe ou não está ativo.
@@ -4745,9 +4737,21 @@ EN	conf.contratacion.cobro.msg	Confirm the charge for Contract #{0}?\n\nClient: 
 RU	conf.contratacion.cobro.msg	Подтвердить оплату договора №{0}?\n\nКлиент: {1}\nПлан: {2}\nСпособ оплаты: {3}\n\nБудет выдана квитанция, подписка будет оформлена.
 PT	conf.contratacion.cobro.msg	Confirmar a cobrança da Contratação #{0}?\n\nCliente: {1}\nPlano: {2}\nForma de pagamento: {3}\n\nO comprovante será emitido e a assinatura será formalizada.
 ES	msg.contratacion.cobrada	Contratación #{0} cobrada. Suscripción formalizada.
+ES	msg.contratacion.cobrada.comprobante	Contratación #{0} cobrada por {1:C2}. Comprobante {2}. Suscripción formalizada.
+ES	conf.contratacion.cobro.desc	Descuento aplicado: {0:C2} ({1}).
+ES	lbl.contratacion.creditoreferido	crédito por referido
 EN	msg.contratacion.cobrada	Contract #{0} charged. Subscription formalized.
+EN	msg.contratacion.cobrada.comprobante	Contracting #{0} charged for {1:C2}. Receipt {2}. Subscription formalized.
+EN	conf.contratacion.cobro.desc	Discount applied: {0:C2} ({1}).
+EN	lbl.contratacion.creditoreferido	referral credit
 RU	msg.contratacion.cobrada	Договор №{0} оплачен. Подписка оформлена.
+RU	msg.contratacion.cobrada.comprobante	Заказ #{0} оплачен на сумму {1:C2}. Квитанция {2}. Подписка оформлена.
+RU	conf.contratacion.cobro.desc	Применена скидка: {0:C2} ({1}).
+RU	lbl.contratacion.creditoreferido	реферальный кредит
 PT	msg.contratacion.cobrada	Contratação #{0} cobrada. Assinatura formalizada.
+PT	msg.contratacion.cobrada.comprobante	Contratação #{0} cobrada por {1:C2}. Comprovante {2}. Assinatura formalizada.
+PT	conf.contratacion.cobro.desc	Desconto aplicado: {0:C2} ({1}).
+PT	lbl.contratacion.creditoreferido	crédito por indicação
 ES	conf.contratacion.intentofallido.titulo	Registrar Intento Fallido
 EN	conf.contratacion.intentofallido.titulo	Record Failed Attempt
 RU	conf.contratacion.intentofallido.titulo	Зарегистрировать неудачную попытку
@@ -4965,6 +4969,9 @@ ES	err.bll.promocion.valor_invalido	El beneficio de la promoción debe ser mayor
 ES	err.bll.promocion.porcentaje_invalido	Un descuento por porcentaje no puede superar el 100%.
 ES	err.bll.promocion.rango_fechas_invalido	La fecha de fin no puede ser anterior a la fecha de inicio.
 ES	err.bll.promocion.modificar_estado	Solo se puede modificar una promoción mientras está en revisión contable. Estado actual: '{0}'.
+ES	err.bll.promocion.reformular_estado	Solo se puede reformular una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.
+ES	err.bll.promocion.estado_concurrente	La promoción cambió de estado desde otra sesión. Actualizá la lista e intentá de nuevo.
+ES	err.bll.promocion.sugerencia_evaluada	La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.
 ES	err.bll.promocion.desactivar_estado	Solo se pueden desactivar promociones Vigentes. Esta promoción está '{0}'.
 ES	err.bll.promocion.sugerirbaja_estado	Solo se puede sugerir la baja de promociones Vigentes. Esta promoción está '{0}'.
 ES	err.bll.promocion.motivobaja_requerido	Debe indicar el motivo de la baja sugerida.
@@ -4989,6 +4996,9 @@ EN	err.bll.promocion.valor_invalido	The promotion's benefit must be greater than
 EN	err.bll.promocion.porcentaje_invalido	A percentage discount cannot exceed 100%.
 EN	err.bll.promocion.rango_fechas_invalido	The end date cannot be earlier than the start date.
 EN	err.bll.promocion.modificar_estado	A promotion can only be modified while it is under accounting review. Current state: '{0}'.
+EN	err.bll.promocion.reformular_estado	Only a promotion Rejected by Accounting can be reformulated. This promotion is '{0}'.
+EN	err.bll.promocion.estado_concurrente	The promotion changed state from another session. Refresh the list and try again.
+EN	err.bll.promocion.sugerencia_evaluada	The selected suggestion has already been evaluated. Refresh the suggestions list.
 EN	err.bll.promocion.desactivar_estado	Only Active promotions can be deactivated. This promotion is '{0}'.
 EN	err.bll.promocion.sugerirbaja_estado	Only Active promotions can have their removal suggested. This promotion is '{0}'.
 EN	err.bll.promocion.motivobaja_requerido	You must indicate the reason for the suggested removal.
@@ -5013,6 +5023,9 @@ RU	err.bll.promocion.valor_invalido	Выгода по акции должна б
 RU	err.bll.promocion.porcentaje_invalido	Процентная скидка не может превышать 100%.
 RU	err.bll.promocion.rango_fechas_invalido	Дата окончания не может быть раньше даты начала.
 RU	err.bll.promocion.modificar_estado	Акцию можно изменять только пока она на бухгалтерской проверке. Текущий статус: '{0}'.
+RU	err.bll.promocion.reformular_estado	Переработать можно только акцию, отклонённую бухгалтерией. Эта акция в статусе '{0}'.
+RU	err.bll.promocion.estado_concurrente	Статус акции изменён в другом сеансе. Обновите список и повторите.
+RU	err.bll.promocion.sugerencia_evaluada	Выбранное предложение уже рассмотрено. Обновите список предложений.
 RU	err.bll.promocion.desactivar_estado	Отключить можно только действующие акции. Текущий статус: '{0}'.
 RU	err.bll.promocion.sugerirbaja_estado	Предложить отмену можно только для действующих акций. Текущий статус: '{0}'.
 RU	err.bll.promocion.motivobaja_requerido	Необходимо указать причину предложенной отмены.
@@ -5037,6 +5050,9 @@ PT	err.bll.promocion.valor_invalido	O benefício da promoção deve ser maior qu
 PT	err.bll.promocion.porcentaje_invalido	Um desconto percentual não pode superar 100%.
 PT	err.bll.promocion.rango_fechas_invalido	A data de término não pode ser anterior à data de início.
 PT	err.bll.promocion.modificar_estado	Só é possível modificar uma promoção enquanto está em revisão contábil. Estado atual: '{0}'.
+PT	err.bll.promocion.reformular_estado	Somente uma promoção Rejeitada pela Contabilidade pode ser reformulada. Esta promoção está '{0}'.
+PT	err.bll.promocion.estado_concurrente	A promoção mudou de estado em outra sessão. Atualize a lista e tente novamente.
+PT	err.bll.promocion.sugerencia_evaluada	A sugestão selecionada já foi avaliada. Atualize a lista de sugestões.
 PT	err.bll.promocion.desactivar_estado	Só é possível desativar promoções Vigentes. Esta promoção está '{0}'.
 PT	err.bll.promocion.sugerirbaja_estado	Só é possível sugerir a baixa de promoções Vigentes. Esta promoção está '{0}'.
 PT	err.bll.promocion.motivobaja_requerido	Deve indicar o motivo da baixa sugerida.
@@ -5081,9 +5097,41 @@ EN	promocion.beneficioestimado	Est. benefit:
 RU	promocion.beneficioestimado	Ожид. выгода:
 PT	promocion.beneficioestimado	Benefício est.:
 ES	promocion.btn.enviarsugerencia	Enviar Sugerencia
+ES	promocion.btn.desdeanalisis	Desde el análisis…
+ES	promocion.btn.reformular	Reformular
+ES	promocion.desdeanalisis.titulo	Ideas detectadas por los reportes
+ES	promocion.desdeanalisis.usar	Usar esta idea
+ES	promocion.desdeanalisis.beneficio	Beneficio estimado inicial: {0:C2} (editable antes de enviar).
+ES	msg.sugerencia.sinanalisis	Los reportes de rotación y abandono no detectan casos para sugerir por ahora.
+ES	msg.promo.reformulada	Promoción #{0} reformulada: vuelve a revisión contable.
+ES	promo.reformular	Reformulando la promoción #{0}. Observación de Contabilidad: {1}
 EN	promocion.btn.enviarsugerencia	Send Suggestion
+EN	promocion.btn.desdeanalisis	From the analysis…
+EN	promocion.btn.reformular	Reformulate
+EN	promocion.desdeanalisis.titulo	Ideas detected by the reports
+EN	promocion.desdeanalisis.usar	Use this idea
+EN	promocion.desdeanalisis.beneficio	Initial estimated benefit: {0:C2} (editable before sending).
+EN	msg.sugerencia.sinanalisis	The rotation and churn reports do not detect any cases to suggest for now.
+EN	msg.promo.reformulada	Promotion #{0} reformulated: back to accounting review.
+EN	promo.reformular	Reformulating promotion #{0}. Accounting note: {1}
 RU	promocion.btn.enviarsugerencia	Отправить предложение
+RU	promocion.btn.desdeanalisis	Из анализа…
+RU	promocion.btn.reformular	Переработать
+RU	promocion.desdeanalisis.titulo	Идеи, выявленные отчётами
+RU	promocion.desdeanalisis.usar	Использовать эту идею
+RU	promocion.desdeanalisis.beneficio	Начальная оценка выгоды: {0:C2} (можно изменить перед отправкой).
+RU	msg.sugerencia.sinanalisis	Отчёты по обороту и оттоку пока не выявляют случаев для предложения.
+RU	msg.promo.reformulada	Акция #{0} переработана: возвращена на бухгалтерскую проверку.
+RU	promo.reformular	Переработка акции #{0}. Замечание бухгалтерии: {1}
 PT	promocion.btn.enviarsugerencia	Enviar Sugestão
+PT	promocion.btn.desdeanalisis	Da análise…
+PT	promocion.btn.reformular	Reformular
+PT	promocion.desdeanalisis.titulo	Ideias detectadas pelos relatórios
+PT	promocion.desdeanalisis.usar	Usar esta ideia
+PT	promocion.desdeanalisis.beneficio	Benefício estimado inicial: {0:C2} (editável antes de enviar).
+PT	msg.sugerencia.sinanalisis	Os relatórios de rotação e abandono não detectam casos para sugerir por enquanto.
+PT	msg.promo.reformulada	Promoção #{0} reformulada: volta para a revisão contábil.
+PT	promo.reformular	Reformulando a promoção #{0}. Observação da Contabilidade: {1}
 ES	frm.altapromocion	Alta de Promoción
 EN	frm.altapromocion	New Promotion
 RU	frm.altapromocion	Создание акции

@@ -8,7 +8,7 @@ namespace GUI
 {
     /// <summary>
     /// Capa de Presentación — PN04, CU-DEP-01 Inspeccionar Devolución. Actor: Depósito
-    /// (OperadorDeInventario). Lógica alineada a Nuuly: binaria, sin aprobador — la prenda
+    /// (Deposito). Lógica alineada a Nuuly: binaria, sin aprobador — la prenda
     /// devuelta (EnLimpieza) reingresa sin cargo o se da de baja y se cobra el precio de
     /// reposición completo (BLL.CargoPrenda.RegistrarCargo, ya existente desde Bloque 1).
     /// </summary>
@@ -196,7 +196,7 @@ namespace GUI
                     // (BLL.Prenda y BLL.CargoPrenda son servicios distintos); no está más
                     // desarrollado por quedar fuera de alcance de este TP.
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
-                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor);
+                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor, viaInspeccion: true);
                     MostrarOk(Tr("msg.insp.baja_ok", "'{0}' dada de baja — cargo de ${1} registrado.",
                         new object[] { prenda.Nombre, dlg.Monto }));
                     CargarPrendas();

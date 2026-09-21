@@ -397,5 +397,96 @@ namespace Tests
                 Assert.AreEqual("err.bll.sesion_expirada", ex.Clave);
             }
         }
+
+        // ── Endurecimiento PN02: cobro concurrente, plan de baja y compensación ──────────
+
+        [TestMethod]
+        public void ConfirmarPago_PlanDadoDeBajaAntesDelCobro_LanzaPlanBaja_SinTocarNada()
+        {
+            // Flujo alternativo 4.1 del CU01-CAJ: la contratación sigue Pendiente de pago.
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPlan.PlanPorId = new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Estado = false };
+            var contratacion = ContratacionPendiente();
+            ctx.DalContratacion.ContratacionPorId = contratacion;
+
+            try
+            {
+                ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+                Assert.Fail("Debía rechazar el cobro de un plan dado de baja.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.contratacion.plan_baja", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarPagoVeces);
+            Assert.AreEqual(0, ctx.ClienteBLL.ActivarSuscripcionVeces);
+        }
+
+        [TestMethod]
+        public void ConfirmarPago_OtraSesionGanoElClaim_LanzaCobrarConcurrente_SinActivarLaSuscripcion()
+        {
+            // Dos sesiones de Caja superan la revalidación; el UPDATE condicional deja pasar a una sola.
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalContratacion.ConfirmarPagoResultado = false;
+            var contratacion = ContratacionPendiente();
+            ctx.DalContratacion.ContratacionPorId = contratacion;
+
+            try
+            {
+                ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+                Assert.Fail("Debía rechazar el cobro si otra sesión ya reclamó la contratación.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.contratacion.cobrar_concurrente", ex.Clave);
+            }
+            Assert.AreEqual(1, ctx.DalContratacion.ConfirmarPagoVeces);
+            Assert.AreEqual(0, ctx.ClienteBLL.ActivarSuscripcionVeces, "No debe activarse dos veces la suscripción.");
+            Assert.AreEqual(0, ctx.DalContratacion.ReabrirPagoVeces);
+        }
+
+        [TestMethod]
+        public void ConfirmarPago_FallaLaActivacion_ReabreLaContratacionYRelanza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.ClienteBLL.ActivarSuscripcionLanza = new System.InvalidOperationException("boom");
+            var contratacion = ContratacionPendiente();
+            ctx.DalContratacion.ContratacionPorId = contratacion;
+
+            try
+            {
+                ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+                Assert.Fail("Debía propagar el fallo de la activación.");
+            }
+            catch (System.InvalidOperationException)
+            {
+            }
+            Assert.AreEqual(1, ctx.DalContratacion.ConfirmarPagoVeces);
+            Assert.AreEqual(1, ctx.DalContratacion.ReabrirPagoVeces, "Nunca debe quedar Pagada sin suscripción activa.");
+        }
+
+        [TestMethod]
+        public void RegistrarIntentoFallido_OtraSesionYaLaResolvio_LanzaCobrarConcurrente_SinCancelar()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalContratacion.IntentosDespuesDeIncrementar = -1;
+            var contratacion = ContratacionPendiente();
+            ctx.DalContratacion.ContratacionPorId = contratacion;
+
+            try
+            {
+                ctx.Crear().RegistrarIntentoFallido("Test", contratacion);
+                Assert.Fail("Debía rechazar el intento si la contratación ya no estaba pendiente.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.contratacion.cobrar_concurrente", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalContratacion.CancelarVeces);
+        }
     }
 }

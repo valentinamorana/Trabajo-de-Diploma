@@ -13,6 +13,8 @@ namespace Tests.Fakes
         public BE.Contratacion ContratacionPorId { get; set; }
         public int AltaIdGenerado { get; set; }
         public int IntentosDespuesDeIncrementar { get; set; } = 1;
+        // false simula que otra sesión de Caja ya reclamó el cobro (el UPDATE condicional no afectó filas).
+        public bool ConfirmarPagoResultado { get; set; } = true;
 
         // ── Espías ────────────────────────────────────────────────────────────
         public int AltaVeces { get; private set; }
@@ -23,6 +25,7 @@ namespace Tests.Fakes
         public int UltimoIdCaja { get; private set; }
         public string UltimoMedioPago { get; private set; }
         public string UltimoNumeroComprobante { get; private set; }
+        public int ReabrirPagoVeces { get; private set; }
         public int CancelarVeces { get; private set; }
         public int UltimoCancelarId { get; private set; }
 
@@ -43,14 +46,25 @@ namespace Tests.Fakes
             return IntentosDespuesDeIncrementar;
         }
 
-        public void ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante)
+        public decimal UltimoImporte { get; private set; }
+        public decimal UltimoDescuento { get; private set; }
+        public int? UltimaPromocion { get; private set; }
+
+        public bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante,
+                                  decimal importe, decimal descuento, int? idPromocion)
         {
             ConfirmarPagoVeces++;
             UltimoIdContratacionConfirmado = idContratacion;
             UltimoIdCaja = idCaja;
             UltimoMedioPago = medioPago;
             UltimoNumeroComprobante = numeroComprobante;
+            UltimoImporte = importe;
+            UltimoDescuento = descuento;
+            UltimaPromocion = idPromocion;
+            return ConfirmarPagoResultado;
         }
+
+        public void ReabrirPago(int idContratacion) => ReabrirPagoVeces++;
 
         public void Cancelar(int idContratacion)
         {

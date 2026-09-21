@@ -28,6 +28,9 @@ namespace BLL.Interfaces
                          decimal margenEstimado, string impactoEconomico);
 
         void Modificar(string modulo, BE.Promocion promocion);
+        // Una promoción Rechazada por Contabilidad se corrige y vuelve a la cola de revisión contable.
+        void Reformular(string modulo, BE.Promocion promocion);
+
         void Desactivar(string modulo, BE.Promocion promocion);
 
         void AprobarContable(string modulo, BE.Promocion promocion, string observacion);

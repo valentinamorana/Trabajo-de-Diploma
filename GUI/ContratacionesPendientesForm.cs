@@ -153,7 +153,7 @@ namespace GUI
 
                 foreach (var c in _contrataciones)
                     tabla.Rows.Add(
-                        c.IdContratacion, c.NombreCliente, c.NombrePlan, c.MontoPlan.ToString("C2"),
+                        c.IdContratacion, c.NombreCliente, c.NombrePlan, FormatearMonto(c),
                         c.Modalidad.ToString(), $"{c.IntentosPago}/3", c.FechaAlta.ToString("dd/MM/yyyy HH:mm"));
 
                 dgvContrataciones.DataSource = tabla;
@@ -175,6 +175,19 @@ namespace GUI
             bool haySeleccion = dgvContrataciones.SelectedRows.Count > 0;
             btnCobrar.Enabled = haySeleccion;
             btnIntentoFallido.Enabled = haySeleccion;
+        }
+
+        // PN03: importe a cobrar con el descuento aplicable (promoción vigente del plan o crédito por referido).
+        private string FormatearMonto(BE.Contratacion c)
+        {
+            try
+            {
+                var liq = contratacionBLL.CalcularImporte(c);
+                return liq.Descuento > 0
+                    ? $"{liq.Total:C2} (-{liq.Descuento:C2})"
+                    : liq.Total.ToString("C2");
+            }
+            catch { return c.MontoPlan.ToString("C2"); }
         }
 
         private BE.Contratacion ObtenerSeleccionada()
@@ -202,13 +215,20 @@ namespace GUI
             }
             string medioPago = ((MedioPagoItem)cmbMedioPago.SelectedItem).Value;
 
+            var liquidacion = contratacionBLL.CalcularImporte(contratacion);
+            string detalleDescuento = liquidacion.Descuento > 0
+                ? "\n" + Tr("conf.contratacion.cobro.desc", "Descuento aplicado: {0:C2} ({1}).",
+                    new object[] { liquidacion.Descuento,
+                                   liquidacion.NombrePromocion ?? Tr("lbl.contratacion.creditoreferido", "crédito por referido") })
+                : "";
+
             var confirmar = MessageBox.Show(
                 Tr("conf.contratacion.cobro.msg",
                     "¿Confirmar el cobro de la Contratación #{0}?\n\n" +
                     "Cliente: {1}\nPlan: {2}\nMonto: {3:C2}\nMedio de pago: {4}\n\n" +
                     "Se emitirá el comprobante y la suscripción quedará formalizada.",
                     new object[] { contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan,
-                                    contratacion.MontoPlan, medioPago }),
+                                    liquidacion.Total, medioPago }) + detalleDescuento,
                 Tr("conf.contratacion.cobro.titulo", "Confirmar Cobro"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -218,9 +238,10 @@ namespace GUI
 
             try
             {
-                contratacionBLL.ConfirmarPago(this.Text, contratacion, medioPago);
-                MostrarOk(Tr("msg.contratacion.cobrada", "Contratación #{0} cobrada. Suscripción formalizada.",
-                    new object[] { contratacion.IdContratacion }));
+                var cobro = contratacionBLL.ConfirmarPago(this.Text, contratacion, medioPago);
+                MostrarOk(Tr("msg.contratacion.cobrada.comprobante",
+                    "Contratación #{0} cobrada por {1:C2}. Comprobante {2}. Suscripción formalizada.",
+                    new object[] { contratacion.IdContratacion, cobro.Total, cobro.NumeroComprobante }));
                 CargarContrataciones();
             }
             catch (Exception ex) { MostrarError(ex); }

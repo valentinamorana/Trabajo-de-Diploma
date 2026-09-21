@@ -157,6 +157,75 @@ namespace Tests
             Assert.AreEqual(4000m, dalCobro.Registros[0].Importe); // 5000 (PrecioPlan) - 1000
         }
 
+        // ── PN03: las promociones vigentes se aplican al cobro (un solo descuento por ciclo) ─────
+
+        private static BE.Promocion PromoVigenteDelPlan(BE.TipoDescuento tipo, decimal valor, int idPlan) => new BE.Promocion
+        {
+            IdPromocion = 1, Nombre = "Verano", TipoDescuento = tipo, Valor = valor, IdPlan = idPlan,
+            Estado = BE.EstadoPromocion.Vigente,
+            FechaInicio = DateTime.Today.AddDays(-5), FechaFin = DateTime.Today.AddDays(30)
+        };
+
+        [TestMethod]
+        public void ProcesarPago_ConPromocionVigenteDelPlan_LaAplicaYNoConsumeElCreditoPorReferido()
+        {
+            var dalCobro = new FakeCobroDAL();
+            var dalPromo = new FakePromocionDAL();
+            var cliente = ClienteVigente();
+            cliente.DescuentoProximoCobro = 500m;
+            dalPromo.Todas.Add(PromoVigenteDelPlan(BE.TipoDescuento.Porcentaje, 10, cliente.IdPlan.Value));
+            var handler = new ProcesarPagoHandler(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL(), dalPromo);
+
+            var resultado = handler.Procesar(new ContextoCobro
+            {
+                Cliente = cliente, Decision = DecisionCobro.Cobrado,
+                Modalidad = BE.Builders.ModalidadCobro.Mensual, Actor = "vendedor1"
+            });
+
+            Assert.AreEqual(4500m, dalCobro.Registros[0].Importe); // 5000 - 10% (500): un solo descuento
+            Assert.AreEqual(500m, cliente.DescuentoProximoCobro, "El crédito por referido queda acumulado para el próximo ciclo.");
+            Assert.AreEqual("cobro.msg.cobrado.promo", resultado.Clave);
+        }
+
+        [TestMethod]
+        public void ProcesarPago_CreditoPorReferidoMayorQueLaPromocion_ConsumeElCreditoYNoAplicaLaPromocion()
+        {
+            var dalCobro = new FakeCobroDAL();
+            var dalPromo = new FakePromocionDAL();
+            var cliente = ClienteVigente();
+            cliente.DescuentoProximoCobro = 2000m;
+            dalPromo.Todas.Add(PromoVigenteDelPlan(BE.TipoDescuento.MontoFijo, 300, cliente.IdPlan.Value));
+            var handler = new ProcesarPagoHandler(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL(), dalPromo);
+
+            var resultado = handler.Procesar(new ContextoCobro
+            {
+                Cliente = cliente, Decision = DecisionCobro.Cobrado,
+                Modalidad = BE.Builders.ModalidadCobro.Mensual, Actor = "vendedor1"
+            });
+
+            Assert.AreEqual(3000m, dalCobro.Registros[0].Importe); // 5000 - 2000 (no se suman los dos)
+            Assert.AreEqual(0m, cliente.DescuentoProximoCobro);
+            Assert.AreEqual("cobro.msg.cobrado.descuento", resultado.Clave);
+        }
+
+        [TestMethod]
+        public void ProcesarPago_PromocionDeOtroPlan_NoSeAplica()
+        {
+            var dalCobro = new FakeCobroDAL();
+            var dalPromo = new FakePromocionDAL();
+            var cliente = ClienteVigente();
+            dalPromo.Todas.Add(PromoVigenteDelPlan(BE.TipoDescuento.Porcentaje, 50, cliente.IdPlan.Value + 99));
+            var handler = new ProcesarPagoHandler(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL(), dalPromo);
+
+            handler.Procesar(new ContextoCobro
+            {
+                Cliente = cliente, Decision = DecisionCobro.Cobrado,
+                Modalidad = BE.Builders.ModalidadCobro.Mensual, Actor = "vendedor1"
+            });
+
+            Assert.AreEqual(5000m, dalCobro.Registros[0].Importe);
+        }
+
         [TestMethod]
         public void ProcesarPago_ConCargosPendientes_LosSumaAlImporteYLosMarcaCobrados()
         {

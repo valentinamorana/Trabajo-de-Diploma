@@ -100,14 +100,14 @@ namespace GUI
             {
                 // Jerarquía consolidada (2da entrega):
                 //   Comercial:   GerenteComercial ⊃ Vendedor
-                //   Inventario:  GerenteInventario ⊃ OperadorLogistico + OperadorDeInventario
+                //   Inventario:  GerenteInventario ⊃ OperadorLogistico + Deposito
                 //   Transversal: Auditor (solo lectura) · Administrador (todo)
                 new PerfilItem("Administrador",       Tr("perfil.administrador",       "Administrador")),
                 new PerfilItem("Auditor",             Tr("perfil.auditor",             "Auditor")),
                 new PerfilItem("GerenteComercial",    Tr("perfil.gerentecomercial",    "Gerente Comercial")),
                 new PerfilItem("Vendedor",            Tr("perfil.vendedor",            "Vendedor")),
                 new PerfilItem("GerenteInventario",   Tr("perfil.gerenteinventario",   "Gerente de Inventario")),
-                new PerfilItem("OperadorDeInventario",Tr("perfil.operador",            "Operador de Inventario")),
+                new PerfilItem("Deposito",          Tr("perfil.deposito",            "Depósito")),
                 new PerfilItem("OperadorLogistico",   Tr("perfil.operadorlogistico",   "Operador Logístico")),
                 // PN02 — Caja: separado de Vendedor a propósito (Vendedor es "operador" de la
                 // venta, Caja cobra).

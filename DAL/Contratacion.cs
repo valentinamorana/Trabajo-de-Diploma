@@ -14,7 +14,7 @@ namespace DAL
         private const string SELECT_BASE =
             "SELECT c.IdContratacion, c.IdCliente, c.IdPlan, c.IdVendedor, c.IdCaja, c.Modalidad, " +
             "c.Estado, c.IntentosPago, c.FechaAlta, c.FechaResolucion, c.MedioPago, " +
-            "c.NumeroComprobante, c.FechaComprobante, " +
+            "c.NumeroComprobante, c.FechaComprobante, c.Importe, c.DescuentoAplicado, c.IdPromocion, " +
             "cli.Nombre + ' ' + cli.Apellido AS NombreCliente, pl.Nombre AS NombrePlan, pl.Precio AS MontoPlan " +
             "FROM Contratacion c " +
             "JOIN Cliente cli ON cli.IdCliente = c.IdCliente " +
@@ -89,8 +89,10 @@ namespace DAL
             try
             {
                 DataTable tabla = acceso.Leer(
-                    "UPDATE Contratacion SET IntentosPago = IntentosPago + 1 WHERE IdContratacion = @IdContratacion; " +
-                    "SELECT IntentosPago AS Intentos FROM Contratacion WHERE IdContratacion = @IdContratacion",
+                    "UPDATE Contratacion SET IntentosPago = IntentosPago + 1 " +
+                    "WHERE IdContratacion = @IdContratacion AND Estado = 0; " +
+                    "IF @@ROWCOUNT = 0 SELECT -1 AS Intentos " +
+                    "ELSE SELECT IntentosPago AS Intentos FROM Contratacion WHERE IdContratacion = @IdContratacion",
                     p);
 
                 return tabla != null && tabla.Rows.Count > 0
@@ -103,7 +105,8 @@ namespace DAL
             }
         }
 
-        public void ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante)
+        public bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante,
+                                  decimal importe, decimal descuento, int? idPromocion)
         {
             SqlParameter[] p =
             {
@@ -113,19 +116,41 @@ namespace DAL
                 new SqlParameter("@MedioPago",          medioPago),
                 new SqlParameter("@NumeroComprobante",  numeroComprobante),
                 new SqlParameter("@FechaResolucion",    DateTime.Now),
-                new SqlParameter("@FechaComprobante",   DateTime.Now)
+                new SqlParameter("@FechaComprobante",   DateTime.Now),
+                new SqlParameter("@Importe",            importe),
+                new SqlParameter("@Descuento",          descuento),
+                new SqlParameter("@IdPromocion",        (object)idPromocion ?? DBNull.Value)
             };
             try
             {
-                acceso.Escribir(
+                // "Claim" atómico: solo una sesión puede pasar de PendientePago (0) a Pagada.
+                int filas = acceso.Escribir(
                     "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
                     "NumeroComprobante = @NumeroComprobante, FechaComprobante = @FechaComprobante, " +
-                    "FechaResolucion = @FechaResolucion WHERE IdContratacion = @IdContratacion",
+                    "Importe = @Importe, DescuentoAplicado = @Descuento, IdPromocion = @IdPromocion, " +
+                    "FechaResolucion = @FechaResolucion WHERE IdContratacion = @IdContratacion AND Estado = 0",
                     p);
+                return filas > 0;
             }
             catch (Exception ex)
             {
                 throw new Exception("Error al confirmar el pago de la contratación.", ex);
+            }
+        }
+
+        public void ReabrirPago(int idContratacion)
+        {
+            SqlParameter[] p = { new SqlParameter("@IdContratacion", idContratacion) };
+            try
+            {
+                acceso.Escribir(
+                    "UPDATE Contratacion SET Estado = 0, IdCaja = NULL, MedioPago = NULL, NumeroComprobante = NULL, " +
+                    "FechaComprobante = NULL, Importe = NULL, DescuentoAplicado = NULL, IdPromocion = NULL, FechaResolucion = NULL WHERE IdContratacion = @IdContratacion AND Estado = 1",
+                    p);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al reabrir la contratación tras un cobro fallido.", ex);
             }
         }
 
@@ -141,7 +166,7 @@ namespace DAL
             {
                 acceso.Escribir(
                     "UPDATE Contratacion SET Estado = @Estado, FechaResolucion = @FechaResolucion " +
-                    "WHERE IdContratacion = @IdContratacion",
+                    "WHERE IdContratacion = @IdContratacion AND Estado = 0",
                     p);
             }
             catch (Exception ex)
@@ -167,6 +192,9 @@ namespace DAL
                 MedioPago         = row["MedioPago"] != DBNull.Value ? row["MedioPago"].ToString() : null,
                 NumeroComprobante = row["NumeroComprobante"] != DBNull.Value ? row["NumeroComprobante"].ToString() : null,
                 FechaComprobante  = row["FechaComprobante"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaComprobante"]) : null,
+                Importe           = row["Importe"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["Importe"]) : null,
+                DescuentoAplicado = row["DescuentoAplicado"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["DescuentoAplicado"]) : null,
+                IdPromocion       = row["IdPromocion"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPromocion"]) : null,
                 NombreCliente     = row["NombreCliente"].ToString(),
                 NombrePlan        = row["NombrePlan"].ToString(),
                 MontoPlan         = Convert.ToDecimal(row["MontoPlan"])

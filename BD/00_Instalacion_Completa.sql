@@ -2600,7 +2600,7 @@ BEGIN
         (@cJulie,  @pPremium, @vend, NULL,  2, 0, 1, DATEADD(DAY,  -1, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL),
         (@cPaula,  @pPremium, @vend, @caja, 1, 1, 0, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
             'Efectivo', 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()),
-            (SELECT Precio FROM PlanSuscripcion WHERE IdPlan = @pPremium), 0);
+            (SELECT Precio FROM PlanSuscripcion WHERE IdPlan = @pPremium) * 3, 0);
 
     -- ── PN03: sugerencias y promociones en cada estado ──────────────────────
     INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta)

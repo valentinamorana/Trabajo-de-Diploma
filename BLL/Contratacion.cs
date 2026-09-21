@@ -262,7 +262,7 @@ namespace BLL
                 var plan = dalPlan.ObtenerPorId(c.IdPlan);
                 var cliente = dalCliente.ObtenerPorId(c.IdCliente);
                 var r = BE.PoliticaDescuento.Resolver(
-                    plan != null ? plan.Precio : c.MontoPlan, c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m);
+                    (plan != null ? plan.Precio : c.MontoPlan) * BE.Builders.ModalidadCobroExtensiones.Meses(c.Modalidad), c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m);
                 resultado[c.IdContratacion] = new BE.LiquidacionContratacion
                 {
                     Bruto = r.Bruto, Descuento = r.Descuento,
@@ -272,11 +272,11 @@ namespace BLL
             return resultado;
         }
 
-        // Precio del plan por cobro (Precio = importe de cada cobro; la modalidad solo define la
-        // duración del ciclo) menos un único descuento: promoción vigente del plan o crédito por referido.
+        // Precio mensual del plan × meses de la modalidad (NUULY cobra por mes; sin descuento por modalidad)
+        // menos un único descuento: promoción vigente del plan o crédito por referido.
         private BE.ResultadoDescuento ResolverDescuento(BE.Contratacion c, BE.PlanSuscripcion plan, BE.Cliente cliente)
         {
-            decimal bruto = plan != null ? plan.Precio : c.MontoPlan;
+            decimal bruto = (plan != null ? plan.Precio : c.MontoPlan) * BE.Builders.ModalidadCobroExtensiones.Meses(c.Modalidad);
             return BE.PoliticaDescuento.Resolver(
                 bruto, c.IdPlan, ObtenerPromocionesVigentes(), cliente?.DescuentoProximoCobro ?? 0m);
         }

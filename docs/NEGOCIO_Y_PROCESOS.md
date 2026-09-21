@@ -30,7 +30,7 @@ especificación de WardrobeFlow.
 
 | Aspecto | NUULY | WardrobeFlow |
 |---|---|---|
-| Modelo | Suscripción mensual (USD 98, 6 prendas, +4 por USD 22), sin niveles | **Adaptado:** varios planes (`PlanSuscripcion`, con `LimitePrendas` y `Precio`) y 3 modalidades de cobro (mensual/trimestral/anual) que solo definen la **duración** del ciclo |
+| Modelo | Suscripción mensual (USD 98, 6 prendas, +4 por USD 22), sin niveles ni permanencia mínima | **Adaptado:** varios planes (`PlanSuscripcion`, con `LimitePrendas` y `Precio` **mensual**) y 3 modalidades de cobro (mensual/trimestral/anual, requeridas por el Builder de la cátedra). Cada cobro cubre 1, 3 o 12 meses: importe = `Precio` × meses, **sin descuento por modalidad** (los descuentos salen solo de las promociones, PN03) |
 | Pedido | Se confirma contra stock y se **bloquea**; el centro de distribución prepara después | **Adoptado:** el pedido se confirma y reserva de forma atómica; no hay edición posterior |
 | Desbloqueo | No se arma otro pedido hasta que la devolución esté escaneada (4.2/4.6) | **Adoptado** como *cuenta desbloqueada* (§4, PN01/PN04) |
 | Descuentos | **Un solo descuento por ciclo**; los no usados se acumulan (5.1) | **Adoptado** (`BE.PoliticaDescuento`, §4 PN03) |
@@ -38,7 +38,7 @@ especificación de WardrobeFlow.
 | Cargos por daño | **No hay** cargos por daño/limpieza; solo se cobra la prenda no devuelta | **Decisión propia distinta:** se cobra el precio de reposición por daño irreparable y por pérdida (§4 PN04) |
 | Compra de prenda / Thrift / bonus items / sustitución por quiebre | Existen | **No implementados** |
 | Devolución tardía | Sin cargos por demora | Igual: **no hay cargos por demora** en el código |
-| Pausa | Máx. 3 meses | Implementada (`FechaPausaHasta`); el código **no fija un tope** de meses (no verificado línea por línea en `PausarSuscripcionHandler`) |
+| Pausa | Máx. 3 meses; requiere no tener pedido pendiente de devolución (4.8) | **Adoptado:** `PausarSuscripcionHandler` rechaza fechas a más de 3 meses (`err.bll.renovacion.pausa_excede_tope`) y pausas con prendas en uso (`pausa_con_prendas`); el selector de fecha de `RenovacionSuscripcionForm` está topado a 3 meses |
 | Personalización con IA | Sí | No; el equivalente son los reportes de analítica (§4b) |
 
 **Decisiones de diseño derivadas** (vigentes): ver §7.
@@ -112,7 +112,7 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 ### 3.1 Tablas de negocio principales
 | Tabla | Entidad `BE` | Campos clave |
 |---|---|---|
-| `PlanSuscripcion` | `PlanSuscripcion` | `Nombre`, `LimitePrendas`, `Precio` (= **importe de cada cobro**), `Estado` (activo) |
+| `PlanSuscripcion` | `PlanSuscripcion` | `Nombre`, `LimitePrendas`, `Precio` (= **precio de un mes**; cada cobro = `Precio` × meses de la modalidad), `Estado` (activo) |
 | `Cliente` | `Cliente` | `DNI` cifrado (AES), `IdPlan`, `FechaVencimiento`, `FechaLimiteGracia`, `FechaPausaHasta`, `IdClienteReferente`, `DescuentoProximoCobro`, `BeneficioReferidoOtorgado`, `DVH` |
 | `Empleado` | `Empleado` | `IdUsuario` (vínculo con `Usuario`), `Legajo` |
 | `Prenda` | `Prenda` | `Estado` (0–3), `IdClienteActual` (quién la tiene), `IdUltimoCliente` (nunca se limpia), `PrecioReposicion`, `Talle/Color/Categoria` |
@@ -445,9 +445,9 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 ### 7.1 Decisiones (con su justificación)
 | # | Decisión | Por qué |
 |---|---|---|
-| D1 | **`Plan.Precio` = importe de cada cobro**; la modalidad (mensual/trimestral/anual) solo define la duración del ciclo | Es lo que ya hace el cobro recurrente (`ProcesarPagoHandler` cobra `plan.Precio`); NUULY es solo mensual. Si se quisiera "precio × meses" habría que decidirlo y cambiar cobro y contratación |
+| D1 | **`Plan.Precio` = precio de UN mes**; cada cobro cubre los meses de la modalidad (mensual 1, trimestral 3, anual 12) e importa `Precio` × meses, sin descuento por modalidad | NUULY cobra por mes y no tiene niveles ni permanencia: la unidad de precio es el mes. Trimestral y anual salen del Builder que pide la cátedra; para que no regalen meses se cobran por adelantado. Los descuentos por plazo, si se quisieran, se modelan como promoción (PN03) |
 | D2 | **Cargo por daño irreparable** (además de por pérdida) | Decisión propia para proteger el inventario; **difiere de NUULY** (que no cobra daños). Debe redactarse así en el documento del trabajo (no como "alineado a NUULY") |
-| D3 | **Crédito de referido inmediato** ($1000 fijo al activar) | Simplificación de NUULY (7 días de espera, tope 12/año, descuento de bienvenida) |
+| D3 | **Crédito de referido inmediato** ($1000 fijo al activar) | Simplificación de NUULY (7 días de espera, tope 12/año, descuento de bienvenida). No se adopta la espera de 7 días porque requeriría un proceso en segundo plano que la aplicación de escritorio no tiene; el referente se fija una sola vez al alta (no hay auto-referencia ni referido con cuenta previa) |
 | D4 | **Cuenta desbloqueada = sin prendas `EnUso`** (cubre pedidos Pendiente, Despachado y Entregado sin devolver) | Adopta NUULY 4.2/4.6 y reemplaza la validación por cupo con prendas en uso, que era más laxa que G02 |
 | D5 | **Un solo descuento por ciclo**, el mayor entre promoción y crédito por referido | NUULY 5.1; el crédito no usado se acumula |
 | D6 | Promociones **por categoría informativas** | No hay compra/precio de prenda donde aplicarlas |
@@ -498,7 +498,7 @@ puntos discutibles de 3FN ya detectados: `Categoria`/`Talle`/`Color` son texto l
 | **Patente** | Permiso simple (`mnuXxx`); un rol agrupa patentes y otros roles (Composite) |
 | **DVH / DVV** | Dígito verificador horizontal (fila) / vertical (tabla) |
 | **Gracia** | Plazo de 5 días tras un cobro fallido antes de suspender por pago |
-| **Modalidad** | Mensual / Trimestral / Anual: duración del ciclo de cobro (no cambia el precio, D1) |
+| **Modalidad** | Mensual / Trimestral / Anual: meses que cubre cada cobro (1 / 3 / 12); importe = precio mensual del plan × meses (D1) |
 | **PN / PdN / N** | PN01–PN04 procesos de la Entrega 2; PdN1–13 procesos/reportes del Bloque 1 y 3; N01 proceso de la Entrega 1 |
 | **Depósito** | Nombre de negocio del rol técnico `Deposito` (antes `OperadorDeInventario`) |
 | **Gerencia / Administración / Contabilidad** | Nombres de negocio de `GerenteComercial` / `AdministracionComercial` / `Contabilidad` en PN03 |

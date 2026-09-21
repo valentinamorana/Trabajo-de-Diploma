@@ -33,7 +33,7 @@ namespace BLL
             var verificar = new Manejadores.VerificarVencimientoHandler();
             var renovar   = new Manejadores.IntentarRenovarHandler(dalCliente, dalRenovacion);
             var cambio    = new Manejadores.CambioPlanHandler(dalCliente, dalPlan, dalRenovacion);
-            var pausar    = new Manejadores.PausarSuscripcionHandler(dalCliente, dalRenovacion);
+            var pausar    = new Manejadores.PausarSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda);
             var baja      = new Manejadores.BajaSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda);
 
             pausar.AgregarSiguiente(baja);

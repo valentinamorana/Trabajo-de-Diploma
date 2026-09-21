@@ -172,6 +172,66 @@ namespace Tests
         // ── PausarSuscripcionHandler (Bloque 1) ──────────────────────────────────
 
         [TestMethod]
+        public void Pausar_MasDeTresMeses_LanzaTopeDeNuuly()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var handler = new PausarSuscripcionHandler(dalCliente, new FakeRenovacionDAL());
+            try
+            {
+                handler.Procesar(new ContextoRenovacion
+                {
+                    Cliente = ClienteVigente(),
+                    Decision = DecisionRenovacion.Pausar,
+                    FechaPausaHasta = DateTime.Today.AddMonths(PausarSuscripcionHandler.MaxMesesPausa).AddDays(1)
+                });
+                Assert.Fail("La pausa no puede superar los 3 meses.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.pausa_excede_tope", ex.Clave);
+            }
+            Assert.AreEqual(0, dalCliente.ModificarVeces);
+        }
+
+        [TestMethod]
+        public void Pausar_ExactamenteTresMeses_EsValida()
+        {
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            var resultado = handler.Procesar(new ContextoRenovacion
+            {
+                Cliente = ClienteVigente(),
+                Decision = DecisionRenovacion.Pausar,
+                FechaPausaHasta = DateTime.Today.AddMonths(PausarSuscripcionHandler.MaxMesesPausa)
+            });
+            Assert.IsTrue(resultado.Resuelto);
+        }
+
+        [TestMethod]
+        public void Pausar_ConPrendasEnUso_LanzaYNoPersiste()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var dalPrenda = new FakePrendaDAL { PorCliente = new System.Collections.Generic.List<BE.Prenda>
+            {
+                new BE.Prenda { IdPrenda = 1, Nombre = "Remera" }
+            }};
+            var handler = new PausarSuscripcionHandler(dalCliente, new FakeRenovacionDAL(), dalPrenda);
+            try
+            {
+                handler.Procesar(new ContextoRenovacion
+                {
+                    Cliente = ClienteVigente(),
+                    Decision = DecisionRenovacion.Pausar,
+                    FechaPausaHasta = DateTime.Today.AddDays(10)
+                });
+                Assert.Fail("No se puede pausar con prendas pendientes de devolución.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.pausa_con_prendas", ex.Clave);
+            }
+            Assert.AreEqual(0, dalCliente.ModificarVeces);
+        }
+        [TestMethod]
         public void Pausar_ConFechaValida_PausaYPersisteHistorial_SinTocarVencimiento()
         {
             var dalCliente = new FakeClienteDAL();

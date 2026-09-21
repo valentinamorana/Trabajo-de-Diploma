@@ -159,6 +159,43 @@ namespace Tests
         }
 
         [TestMethod]
+        public void ModalidadCobro_Meses_EsUnoTresYDoce()
+        {
+            Assert.AreEqual(1, BE.Builders.ModalidadCobroExtensiones.Meses(BE.Builders.ModalidadCobro.Mensual));
+            Assert.AreEqual(3, BE.Builders.ModalidadCobroExtensiones.Meses(BE.Builders.ModalidadCobro.Trimestral));
+            Assert.AreEqual(12, BE.Builders.ModalidadCobroExtensiones.Meses(BE.Builders.ModalidadCobro.Anual));
+        }
+
+        [TestMethod]
+        public void CalcularImporte_Trimestral_CobraTresMesesDelPrecioMensual()
+        {
+            LoginComoAdministrador();
+            var ctx = new CtxCobro();
+            var contratacion = ctx.Pendiente();
+            contratacion.Modalidad = BE.Builders.ModalidadCobro.Trimestral;
+
+            var liq = ctx.Crear().CalcularImporte(contratacion);
+
+            Assert.AreEqual(30000m, liq.Bruto);
+            Assert.AreEqual(30000m, liq.Total);
+        }
+
+        [TestMethod]
+        public void CalcularImporte_Anual_CobraDoceMesesYElDescuentoSeRestaUnaVez()
+        {
+            LoginComoAdministrador();
+            var ctx = new CtxCobro();
+            ctx.AgregarPromocion(BE.TipoDescuento.MontoFijo, 2500);
+            var contratacion = ctx.Pendiente();
+            contratacion.Modalidad = BE.Builders.ModalidadCobro.Anual;
+
+            var liq = ctx.Crear().CalcularImporte(contratacion);
+
+            Assert.AreEqual(120000m, liq.Bruto);
+            Assert.AreEqual(2500m, liq.Descuento);
+            Assert.AreEqual(117500m, liq.Total);
+        }
+        [TestMethod]
         public void CalcularImportes_DevuelveUnaLiquidacionPorContratacion()
         {
             LoginComoAdministrador();

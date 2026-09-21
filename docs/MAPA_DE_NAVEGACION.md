@@ -188,9 +188,9 @@ Marcado con lo que sí verifiqué en el código y lo que no.
 
 1. **PN01, paso de Depósito:** no tiene pantalla propia. Lo cubre `PedidosRealizados` (despachar, entregar, devolver, perdida). Confirmar que la documentación lo describa así.
 2. **Stock sin menú propio:** mnuStock no es una opción; solo habilita los botones de alta, edición y estado dentro de `Prendas`. Está bien, pero conviene aclararlo en la documentación.
-3. **Pausa y referidos (N01):** la pausa se reanuda desde `RenovacionSuscripcionForm` (botón "Reanudar ahora"). No verifiqué qué pantalla expone los referidos ni dónde se inicia la pausa: buscarlo en `Clientes` o `ClienteForm`; si no está, es un faltante de GUI.
+3. **Pausa y referidos (N01):** resuelto. La pausa se pide y se reanuda desde `RenovacionSuscripcionForm` ("Pausar hasta:" con tope de 3 meses y "Reanudar ahora"); el referente se elige en `ClienteForm` ("Referido por") y el crédito se ve al cobrar (`CobroSuscripcionForm`, `ContratacionesPendientesForm`).
 4. **Renovación y Cobro:** cada uno tiene un solo botón "Procesar" más los campos de decisión. No revisé que la cadena (Chain of Responsibility) muestre en pantalla cada paso.
-5. **Modalidad trimestral/anual:** el precio del plan es el monto de cada cobro; la modalidad solo define la duración. Es una decisión de negocio sin cerrar.
+5. **Modalidad trimestral/anual:** resuelto según NUULY (cobra por mes): el precio del plan es mensual y cada cobro cubre 1, 3 o 12 meses (`Precio` × meses, sin descuento por modalidad). Ver decisión D1 en `NEGOCIO_Y_PROCESOS.md`.
 6. **Roles con una sola pantalla:** CAJ, ACO, CON y LOG. Es coherente con los procesos, pero su panel de inicio es el genérico (salvo LOG).
 7. **Alertas:** visible para todos los usuarios logueados, sin patente propia. Si algún rol no debería verlas, hay que agregarla.
 8. **GCO no ve análisis de inventario, y GIN no ve análisis comerciales:** intencional, cada análisis tiene su patente.

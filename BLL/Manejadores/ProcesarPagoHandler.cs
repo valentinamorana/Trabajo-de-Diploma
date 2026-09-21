@@ -59,7 +59,7 @@ namespace BLL.Manejadores
             // PN03 + NUULY 5.1: un solo descuento por ciclo — el mayor entre la promoción vigente del
             // plan y el crédito por referidos. Si gana la promoción, el crédito queda acumulado.
             var resDescuento = BE.PoliticaDescuento.Resolver(
-                plan.Precio, cliente.IdPlan, ObtenerPromocionesVigentes(), cliente.DescuentoProximoCobro);
+                plan.Precio * BE.Builders.ModalidadCobroExtensiones.Meses(contexto.Modalidad), cliente.IdPlan, ObtenerPromocionesVigentes(), cliente.DescuentoProximoCobro);
             decimal descuento = resDescuento.Descuento;
             var cargosPendientes = dalCargoPrenda.ObtenerPendientesPorCliente(cliente.IdCliente);
             decimal totalCargos = cargosPendientes.Sum(c => c.Monto);

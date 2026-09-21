@@ -278,7 +278,7 @@ ES	msg.prenda.conteo	Mostrando {0} de {1}
 ES	msg.prenda.cargadas	{0} prenda(s) en el catálogo.
 ES	col.plan.nombre	Nombre
 ES	col.plan.prendas	Prendas
-ES	col.plan.precio	Precio
+ES	col.plan.precio	Precio mensual
 ES	col.plan.estado	Estado
 ES	plan.activo	Activo
 ES	plan.inactivo	Inactivo
@@ -1084,7 +1084,7 @@ EN	msg.prenda.conteo	Showing {0} of {1}
 EN	msg.prenda.cargadas	{0} garment(s) in catalog.
 EN	col.plan.nombre	Name
 EN	col.plan.prendas	Garments
-EN	col.plan.precio	Price
+EN	col.plan.precio	Monthly price
 EN	col.plan.estado	Status
 EN	plan.activo	Active
 EN	plan.inactivo	Inactive
@@ -1892,7 +1892,7 @@ RU	msg.prenda.conteo	Показано {0} из {1}
 RU	msg.prenda.cargadas	{0} вещей в каталоге.
 RU	col.plan.nombre	Название
 RU	col.plan.prendas	Одежда
-RU	col.plan.precio	Цена
+RU	col.plan.precio	Цена в месяц
 RU	col.plan.estado	Статус
 RU	plan.activo	Активен
 RU	plan.inactivo	Неактивен
@@ -2740,7 +2740,7 @@ PT	msg.prenda.conteo	Mostrando {0} de {1}
 PT	msg.prenda.cargadas	{0} roupa(s) no catálogo.
 PT	col.plan.nombre	Nome
 PT	col.plan.prendas	Roupas
-PT	col.plan.precio	Preço
+PT	col.plan.precio	Preço mensal
 PT	col.plan.estado	Estado
 PT	plan.activo	Ativo
 PT	plan.inactivo	Inativo
@@ -4524,6 +4524,8 @@ ES	renov.msg.pausada	Suscripción pausada hasta {0:d}. El cliente no podrá gene
 ES	renov.msg.reanudada	Suscripción reanudada.
 ES	err.bll.renovacion.pausa_sin_fecha	Debe indicar hasta cuándo queda pausada la suscripción.
 ES	err.bll.renovacion.pausa_fecha_pasada	La fecha de reanudación no puede ser anterior a hoy.
+ES	err.bll.renovacion.pausa_excede_tope	La pausa no puede superar los {0} meses (hasta el {1:d}).
+ES	err.bll.renovacion.pausa_con_prendas	No se puede pausar: el cliente tiene prendas en uso pendientes de devolución.
 ES	err.bll.pedido.suscripcion_pausada	La suscripción de {0} está pausada hasta el {1}. Reanudarla en el módulo de Clientes antes de generar un nuevo pedido.
 ES	err.bll.cliente.no_pausada	{0} no tiene la suscripción pausada.
 ES	lbl.cli.referente	Referido por
@@ -4555,6 +4557,8 @@ EN	renov.msg.pausada	Subscription paused until {0:d}. The client won't be able t
 EN	renov.msg.reanudada	Subscription resumed.
 EN	err.bll.renovacion.pausa_sin_fecha	You must indicate until when the subscription is paused.
 EN	err.bll.renovacion.pausa_fecha_pasada	The resume date can't be earlier than today.
+EN	err.bll.renovacion.pausa_excede_tope	A pause can't exceed {0} months (until {1:d}).
+EN	err.bll.renovacion.pausa_con_prendas	Can't pause: the customer has garments in use pending return.
 EN	err.bll.pedido.suscripcion_pausada	{0}'s subscription is paused until {1}. Resume it in the Customers module before creating a new order.
 EN	err.bll.cliente.no_pausada	{0}'s subscription is not paused.
 EN	lbl.cli.referente	Referred by
@@ -4586,6 +4590,8 @@ RU	renov.msg.pausada	Подписка приостановлена до {0:d}. �
 RU	renov.msg.reanudada	Подписка возобновлена.
 RU	err.bll.renovacion.pausa_sin_fecha	Укажите, до какой даты приостанавливается подписка.
 RU	err.bll.renovacion.pausa_fecha_pasada	Дата возобновления не может быть раньше сегодняшнего дня.
+RU	err.bll.renovacion.pausa_excede_tope	Пауза не может превышать {0} мес. (до {1:d}).
+RU	err.bll.renovacion.pausa_con_prendas	Невозможно приостановить: у клиента есть вещи, которые нужно вернуть.
 RU	err.bll.pedido.suscripcion_pausada	Подписка {0} приостановлена до {1}. Возобновите её в модуле Клиентов перед созданием нового заказа.
 RU	err.bll.cliente.no_pausada	Подписка {0} не приостановлена.
 RU	lbl.cli.referente	Приглашён кем
@@ -4617,6 +4623,8 @@ PT	renov.msg.pausada	Assinatura pausada até {0:d}. O cliente não poderá fazer
 PT	renov.msg.reanudada	Assinatura retomada.
 PT	err.bll.renovacion.pausa_sin_fecha	Você deve indicar até quando a assinatura fica pausada.
 PT	err.bll.renovacion.pausa_fecha_pasada	A data de retomada não pode ser anterior a hoje.
+PT	err.bll.renovacion.pausa_excede_tope	A pausa não pode exceder {0} meses (até {1:d}).
+PT	err.bll.renovacion.pausa_con_prendas	Não é possível pausar: o cliente tem peças em uso pendentes de devolução.
 PT	err.bll.pedido.suscripcion_pausada	A assinatura de {0} está pausada até {1}. Retome-a no módulo de Clientes antes de gerar um novo pedido.
 PT	err.bll.cliente.no_pausada	A assinatura de {0} não está pausada.
 PT	lbl.cli.referente	Indicado por

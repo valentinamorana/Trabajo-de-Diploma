@@ -113,6 +113,7 @@ namespace GUI
             this.dtpPausaHasta.CustomFormat = "dd/MM/yyyy";
             this.dtpPausaHasta.Location = new Point(250, 98);
             this.dtpPausaHasta.MinDate  = DateTime.Today;
+            this.dtpPausaHasta.MaxDate  = DateTime.Today.AddMonths(BLL.Manejadores.PausarSuscripcionHandler.MaxMesesPausa);
             this.dtpPausaHasta.Name     = "dtpPausaHasta";
             this.dtpPausaHasta.TabIndex = 4;
             this.dtpPausaHasta.Width    = 150;

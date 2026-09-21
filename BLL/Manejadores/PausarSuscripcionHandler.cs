@@ -15,11 +15,17 @@ namespace BLL.Manejadores
     {
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
+        private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
 
-        public PausarSuscripcionHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion)
+        // NUULY 4.8: la pausa tiene un máximo de 3 meses.
+        public const int MaxMesesPausa = 3;
+
+        public PausarSuscripcionHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
+                                        DAL.Interfaces.IPrendaDAL dalPrenda = null)
         {
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
+            this.dalPrenda = dalPrenda;
         }
 
         public override ResultadoRenovacion Procesar(ContextoRenovacion contexto)
@@ -34,6 +40,16 @@ namespace BLL.Manejadores
             if (contexto.FechaPausaHasta.Value.Date < DateTime.Today)
                 throw new BE.AppException("err.bll.renovacion.pausa_fecha_pasada",
                     "La fecha de reanudación no puede ser anterior a hoy.");
+
+            if (contexto.FechaPausaHasta.Value.Date > DateTime.Today.AddMonths(MaxMesesPausa))
+                throw new BE.AppException("err.bll.renovacion.pausa_excede_tope",
+                    "La pausa no puede superar los {0} meses (hasta el {1:d}).",
+                    new object[] { MaxMesesPausa, DateTime.Today.AddMonths(MaxMesesPausa) });
+
+            // NUULY 4.8: no se puede pausar con prendas pendientes de devolución.
+            if (dalPrenda != null && dalPrenda.ObtenerPorCliente(contexto.Cliente.IdCliente).Count > 0)
+                throw new BE.AppException("err.bll.renovacion.pausa_con_prendas",
+                    "No se puede pausar: el cliente tiene prendas en uso pendientes de devolución.");
 
             var cliente = contexto.Cliente;
             cliente.FechaPausaHasta = contexto.FechaPausaHasta;

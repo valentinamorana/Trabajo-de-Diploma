@@ -392,7 +392,9 @@ namespace Tests
 
             BllCliente(dal).ActivarSuscripcion("Test", nuevo, 1, BE.Builders.ModalidadCobro.Mensual);
 
-            Assert.AreEqual(1000m, referente.DescuentoProximoCobro);
+            Assert.AreEqual(1, dal.CreditosSumados.Count, "El crédito se suma con un UPDATE atómico, no reescribiendo al referente.");
+            Assert.AreEqual(5, dal.CreditosSumados[0].Key);
+            Assert.AreEqual(1000m, dal.CreditosSumados[0].Value);
             Assert.IsTrue(nuevo.BeneficioReferidoOtorgado);
         }
 
@@ -405,7 +407,7 @@ namespace Tests
 
             BllCliente(dal).ActivarSuscripcion("Test", ClienteReferido(5, otorgado: true), 1, BE.Builders.ModalidadCobro.Mensual);
 
-            Assert.AreEqual(1000m, referente.DescuentoProximoCobro, "No se acredita dos veces.");
+            Assert.AreEqual(0, dal.CreditosSumados.Count, "No se acredita dos veces.");
         }
 
         [TestMethod]

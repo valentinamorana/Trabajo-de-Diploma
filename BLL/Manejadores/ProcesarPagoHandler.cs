@@ -77,6 +77,9 @@ namespace BLL.Manejadores
             dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
                 dalCliente.ModificarEnTx(conexion, tx, cliente);
+                // Crédito de referido: delta atómico sobre el valor real de la BD.
+                if (resDescuento.UsaCreditoReferido)
+                    dalCliente.ConsumirCreditoEnTx(conexion, tx, cliente.IdCliente, resDescuento.Descuento);
                 idCobro = dalCobro.AltaEnTx(conexion, tx, new BE.Cobro
                 {
                     IdCliente = cliente.IdCliente,
@@ -86,9 +89,17 @@ namespace BLL.Manejadores
                     Resultado = BE.EstadoCobro.Cobrado,
                     Actor = contexto.Actor
                 });
-                if (cargosPendientes.Count > 0)
-                    dalCargoPrenda.MarcarCobradosEnTx(conexion, tx,
-                        cargosPendientes.Select(c => c.IdCargo).ToList(), ahora);
+                if (cargosPendientes.Count > 0 &&
+
+                    !dalCargoPrenda.MarcarCobradosEnTx(conexion, tx,
+
+                        cargosPendientes.Select(c => c.IdCargo).ToList(), ahora))
+
+                    // Otra sesión ya cobró alguno de estos cargos: se revierte TODO el cobro (cliente, historial y cargos).
+
+                    throw new BE.AppException("err.bll.cobro.cargo_concurrente",
+
+                        "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.");
             });
             dalCliente.RecalcularDV();
 

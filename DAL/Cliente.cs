@@ -195,7 +195,6 @@ namespace DAL
                 new SqlParameter("@FechaNacimiento",  (object)cliente.FechaNacimiento  ?? DBNull.Value),
                 new SqlParameter("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value),
                 new SqlParameter("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value),
-                new SqlParameter("@DescuentoProximoCobro", cliente.DescuentoProximoCobro),
                 new SqlParameter("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado),
                 new SqlParameter("@IdCliente",        cliente.IdCliente)
             };
@@ -204,7 +203,7 @@ namespace DAL
                 "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
                 "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
-                "DescuentoProximoCobro=@DescuentoProximoCobro, BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
+                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
                 "WHERE IdCliente=@IdCliente",
                 p);
             RecalcularDV();   // T07
@@ -230,7 +229,7 @@ namespace DAL
                 "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
                 "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
-                "DescuentoProximoCobro=@DescuentoProximoCobro, BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
+                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
                 "WHERE IdCliente=@IdCliente",
                 conexion, tx))
             {
@@ -244,9 +243,37 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@FechaNacimiento", (object)cliente.FechaNacimiento ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@DescuentoProximoCobro", cliente.DescuentoProximoCobro);
                 cmd.Parameters.AddWithValue("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado);
                 cmd.Parameters.AddWithValue("@IdCliente", cliente.IdCliente);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // Crédito de referido: se modifica SOLO con estas dos operaciones atómicas (el UPDATE general
+        // de Cliente ya no lo escribe). Así dos sesiones que suman o consumen crédito a la vez no se
+        // pisan: cada una aplica su delta sobre el valor real de la base, no sobre una copia leída antes.
+        public void SumarCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE Cliente SET DescuentoProximoCobro = ISNULL(DescuentoProximoCobro, 0) + @Monto " +
+                "WHERE IdCliente = @IdCliente", conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@Monto", monto);
+                cmd.Parameters.AddWithValue("@IdCliente", idCliente);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // Resta lo aplicado sin dejar el saldo negativo.
+        public void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE Cliente SET DescuentoProximoCobro = " +
+                "CASE WHEN ISNULL(DescuentoProximoCobro, 0) > @Monto THEN DescuentoProximoCobro - @Monto ELSE 0 END " +
+                "WHERE IdCliente = @IdCliente", conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@Monto", monto);
+                cmd.Parameters.AddWithValue("@IdCliente", idCliente);
                 cmd.ExecuteNonQuery();
             }
         }

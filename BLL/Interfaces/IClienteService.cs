@@ -36,7 +36,7 @@ namespace BLL.Interfaces
         // la usa BLL.Contratacion.ConfirmarPago cuando Caja confirma el pago (Caja no tiene
         // el permiso de Vendedor, a propósito).
         BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
-            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad);
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m);
 
         // Bloque 1 — Reanuda una suscripción pausada, sin modificar la fecha de vencimiento.
         void ReanudarPausa(string modulo, BE.Cliente cliente);

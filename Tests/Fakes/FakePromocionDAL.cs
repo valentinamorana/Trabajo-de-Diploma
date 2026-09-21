@@ -37,10 +37,13 @@ namespace Tests.Fakes
             return AltaIdGenerado;
         }
 
-        public void Modificar(BE.Promocion promocion)
+        public bool ModificarRespuesta { get; set; } = true;
+
+        public bool Modificar(BE.Promocion promocion)
         {
             ModificarVeces++;
             UltimoModificar = promocion;
+            return ModificarRespuesta;
         }
 
         // false simula que otra sesión ya cambió el estado (el UPDATE condicionado no afectó filas).

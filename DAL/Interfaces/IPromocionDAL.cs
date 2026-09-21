@@ -10,7 +10,7 @@ namespace DAL.Interfaces
         List<BE.Promocion> ObtenerPendientesRevisionContable();
         BE.Promocion ObtenerPorId(int idPromocion);
         int Alta(BE.Promocion promocion);
-        void Modificar(BE.Promocion promocion);
+        bool Modificar(BE.Promocion promocion);
         // Cambia el estado SOLO si la promoción sigue en estadoEsperado (UPDATE condicionado: cubre dos
         // sesiones resolviendo la misma promoción a la vez). Devuelve false si otra sesión ya la cambió.
         bool CambiarEstado(int idPromocion, BE.EstadoPromocion estadoEsperado, BE.EstadoPromocion nuevoEstado, string observacionOMotivo);

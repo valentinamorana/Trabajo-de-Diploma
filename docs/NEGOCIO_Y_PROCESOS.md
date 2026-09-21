@@ -455,6 +455,7 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 | D8 | Cargo y baja de PN04 **sin transacción común** (BLL.Prenda y BLL.CargoPrenda son servicios distintos); el cargo va primero | Riesgo aceptado y comentado en el código: peor caso, un cargo sin baja |
 | D9 | Claim + activación de PN02 **sin transacción común**; se compensa con `ReabrirPago` | Tablas distintas; la ventana residual (caída entre ambos pasos) queda documentada en `BLL/Contratacion.cs` |
 | D10 | Pausar **no extiende** el vencimiento | Decisión de diseño documentada en `BE/Cliente.cs` |
+| D11 | **Concurrencia entre sesiones**: el crédito de referido se modifica solo con `SumarCreditoEnTx` / `ConsumirCreditoEnTx` (UPDATE atómico sobre el valor real; el UPDATE general de Cliente ya no lo escribe); el cobro de cargos exige `Estado=Pendiente` y aborta todo el cobro si otra sesión ya los cobró; `Promocion.Modificar` exige `Estado=EnRevisionContable`; contratar y cobrar validan el cupo del plan contra las prendas en uso | Evita perder actualizaciones, cobrar dos veces un cargo y editar una promoción ya aprobada por otra sesión |
 
 ### 7.2 Desvíos conocidos entre el documento del trabajo (`WardrobeFlow - Trabajo de Diploma.docx`) y el código
 | Tema | Documento | Código actual | Acción sugerida |

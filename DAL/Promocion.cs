@@ -118,7 +118,7 @@ namespace DAL
             }
         }
 
-        public void Modificar(BE.Promocion promocion)
+        public bool Modificar(BE.Promocion promocion)
         {
             SqlParameter[] p =
             {
@@ -132,16 +132,17 @@ namespace DAL
                 new SqlParameter("@IdPlan",           (object)promocion.IdPlan ?? DBNull.Value),
                 new SqlParameter("@CategoriaPrenda",  (object)promocion.CategoriaPrenda ?? DBNull.Value),
                 new SqlParameter("@MargenEstimado",   promocion.MargenEstimado),
-                new SqlParameter("@ImpactoEconomico", (object)promocion.ImpactoEconomico ?? DBNull.Value)
+                new SqlParameter("@ImpactoEconomico", (object)promocion.ImpactoEconomico ?? DBNull.Value),
+                new SqlParameter("@EstadoRevision",  (int)BE.EstadoPromocion.EnRevisionContable)
             };
             try
             {
-                acceso.Escribir(
+                return acceso.Escribir(
                     "UPDATE Promocion SET Nombre=@Nombre, Descripcion=@Descripcion, TipoDescuento=@TipoDescuento, " +
                     "Valor=@Valor, FechaInicio=@FechaInicio, FechaFin=@FechaFin, IdPlan=@IdPlan, " +
                     "CategoriaPrenda=@CategoriaPrenda, MargenEstimado=@MargenEstimado, ImpactoEconomico=@ImpactoEconomico " +
-                    "WHERE IdPromocion=@IdPromocion",
-                    p);
+                    "WHERE IdPromocion=@IdPromocion AND Estado=@EstadoRevision",
+                    p) == 1;
             }
             catch (Exception ex)
             {

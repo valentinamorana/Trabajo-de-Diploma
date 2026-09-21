@@ -57,6 +57,16 @@ namespace Tests.Fakes
 
         public void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente) => Modificar(cliente);
 
+        // Espías del crédito de referido (en la BD real son UPDATEs atómicos).
+        public List<KeyValuePair<int, decimal>> CreditosSumados { get; } = new List<KeyValuePair<int, decimal>>();
+        public List<KeyValuePair<int, decimal>> CreditosConsumidos { get; } = new List<KeyValuePair<int, decimal>>();
+
+        public void SumarCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
+            => CreditosSumados.Add(new KeyValuePair<int, decimal>(idCliente, monto));
+
+        public void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
+            => CreditosConsumidos.Add(new KeyValuePair<int, decimal>(idCliente, monto));
+
         public void RecalcularDV() => RecalcularDVVeces++;
     }
 }

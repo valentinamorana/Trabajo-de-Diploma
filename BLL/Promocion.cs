@@ -168,7 +168,9 @@ namespace BLL
             promocion.CategoriaPrenda = aplicaCategoria ? promocion.CategoriaPrenda.Trim() : null;
             promocion.Nombre = promocion.Nombre.Trim();
 
-            dalPromocion.Modificar(promocion);
+            // El UPDATE exige que siga en revisión contable: si otra sesión la aprobó o rechazó mientras tanto, no se pisa.
+            if (!dalPromocion.Modificar(promocion))
+                throw EstadoConcurrente();
 
             bitacora.Registrar(modulo, $"Modificar Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
         }
@@ -195,7 +197,8 @@ namespace BLL
             // Primero se reclama el cambio de estado (UPDATE condicionado a Rechazada) y recién después
             // se guardan las condiciones nuevas, así dos sesiones no pisan la reformulación de la otra.
             CambiarEstadoOFalla(promocion, BE.EstadoPromocion.EnRevisionContable, null);
-            dalPromocion.Modificar(promocion);
+            if (!dalPromocion.Modificar(promocion))
+                throw EstadoConcurrente();
 
             bitacora.Registrar(modulo, $"Reformular Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,

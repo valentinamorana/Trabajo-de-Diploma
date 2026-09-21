@@ -161,14 +161,14 @@ namespace BLL
         // es CajaEditar/Caja, ya exigido en BLL.Contratacion.ConfirmarPago antes de llamar a
         // este método — por eso NO vuelve a pedir el permiso de Vendedor.
         public BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
-            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
         {
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
-            return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad);
+            return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad, consumoCredito);
         }
 
         private BE.Builders.Suscripcion ActivarSuscripcionInterna(
-            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
         {
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
 
@@ -200,7 +200,6 @@ namespace BLL
                 referente = dalCliente.ObtenerPorId(cliente.IdClienteReferente.Value);
                 if (referente != null)
                 {
-                    referente.DescuentoProximoCobro += MontoBeneficioReferido;
                     cliente.BeneficioReferidoOtorgado = true;
                 }
             }
@@ -208,8 +207,11 @@ namespace BLL
             dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
                 dalCliente.ModificarEnTx(conexion, tx, cliente);
+                // Crédito: deltas atómicos sobre el valor real de la BD (no se reescribe el cliente entero).
+                if (consumoCredito > 0)
+                    dalCliente.ConsumirCreditoEnTx(conexion, tx, cliente.IdCliente, consumoCredito);
                 if (referente != null)
-                    dalCliente.ModificarEnTx(conexion, tx, referente);
+                    dalCliente.SumarCreditoEnTx(conexion, tx, referente.IdCliente, MontoBeneficioReferido);
             });
             // La activación ya quedó confirmada: un fallo del registro posterior no debe propagarse,
             // porque BLL.Contratacion.ConfirmarPago lo interpretaría como activación fallida y

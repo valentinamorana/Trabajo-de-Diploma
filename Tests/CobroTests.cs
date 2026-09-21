@@ -167,6 +167,52 @@ namespace Tests
         };
 
         [TestMethod]
+        public void ProcesarPago_ConCreditoDeReferido_LoConsumeConUpdateAtomico()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var handler = new ProcesarPagoHandler(dalCliente, new FakeCobroDAL(), new FakeCargoPrendaDAL());
+            var cliente = ClienteVigente();
+            cliente.DescuentoProximoCobro = 1000m;
+
+            handler.Procesar(new ContextoCobro
+            {
+                Cliente = cliente,
+                Decision = DecisionCobro.Cobrado,
+                Modalidad = BE.Builders.ModalidadCobro.Mensual,
+                Actor = "vendedor1"
+            });
+
+            Assert.AreEqual(1, dalCliente.CreditosConsumidos.Count);
+            Assert.AreEqual(cliente.IdCliente, dalCliente.CreditosConsumidos[0].Key);
+            Assert.AreEqual(1000m, dalCliente.CreditosConsumidos[0].Value);
+        }
+
+        [TestMethod]
+        public void ProcesarPago_SiOtraSesionYaCobroLosCargos_LanzaCargoConcurrente()
+        {
+            var cliente = ClienteVigente();
+            var dalCargo = new FakeCargoPrendaDAL { MarcarCobradosRespuesta = false };
+            dalCargo.Registros.Add(new BE.CargoPrenda { IdCargo = 1, IdCliente = cliente.IdCliente, Monto = 500m, Estado = BE.EstadoCargo.Pendiente });
+            var handler = new ProcesarPagoHandler(new FakeClienteDAL(), new FakeCobroDAL(), dalCargo);
+
+            try
+            {
+                handler.Procesar(new ContextoCobro
+                {
+                    Cliente = cliente,
+                    Decision = DecisionCobro.Cobrado,
+                    Modalidad = BE.Builders.ModalidadCobro.Mensual,
+                    Actor = "vendedor1"
+                });
+                Assert.Fail("Debía abortar el cobro si los cargos ya fueron cobrados por otra sesión.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cobro.cargo_concurrente", ex.Clave);
+            }
+        }
+
+        [TestMethod]
         public void ProcesarPago_ConPromocionVigenteDelPlan_LaAplicaYNoConsumeElCreditoPorReferido()
         {
             var dalCobro = new FakeCobroDAL();

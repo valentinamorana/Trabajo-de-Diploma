@@ -85,6 +85,8 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.plan_inexistente",
                     "El plan seleccionado no existe o no está activo.");
 
+            ValidarCupo(cliente, plan);
+
             // Evita duplicar la contratación si Venta reenvía el formulario (doble click, reintento
             // tras no ver confirmación, etc.): un cliente no puede tener dos contrataciones pendientes
             // de pago a la vez.
@@ -154,6 +156,7 @@ namespace BLL
             if (cliente == null)
                 throw new BE.AppException("err.bll.contratacion.cliente_inexistente",
                     "El cliente seleccionado no existe.");
+            ValidarCupo(cliente, plan);
             var descuento = ResolverDescuento(actual, plan, cliente);
 
             // 1) "Claim" atómico: el UPDATE exige que la contratación siga PendientePago, así que
@@ -181,7 +184,8 @@ namespace BLL
                 // persiste al cliente completo, así que el consumo se guarda junto con el alta.
                 if (descuento.UsaCreditoReferido)
                     cliente.DescuentoProximoCobro = Math.Max(0, cliente.DescuentoProximoCobro - descuento.Descuento);
-                clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad);
+                clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad,
+                    descuento.UsaCreditoReferido ? descuento.Descuento : 0m);
             }
             catch
             {
@@ -270,6 +274,17 @@ namespace BLL
                 };
             }
             return resultado;
+        }
+
+        // El plan elegido debe tener capacidad para las prendas que el cliente ya tiene en uso
+        // (misma regla que BLL.Cliente.Modificar): sin esto, contratar un plan más chico dejaba
+        // al cliente por encima de su cupo.
+        private static void ValidarCupo(BE.Cliente cliente, BE.PlanSuscripcion plan)
+        {
+            if (cliente != null && plan != null && cliente.StockUtilizado > plan.LimitePrendas)
+                throw new BE.AppException("err.bll.cliente.plan_insuficiente",
+                    "No se puede asignar el plan '{0}': el cliente tiene {1} prenda(s) en uso y ese plan solo permite {2}. Registrá las devoluciones primero.",
+                    plan.Nombre, cliente.StockUtilizado, plan.LimitePrendas);
         }
 
         // Precio mensual del plan × meses de la modalidad (NUULY cobra por mes; sin descuento por modalidad)

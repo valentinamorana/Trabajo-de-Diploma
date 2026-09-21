@@ -1,0 +1,72 @@
+classDiagram
+  direction TB
+  class Prenda {
+    +int IdPrenda
+    +DateTime FechaAlta
+    +string Nombre
+    +string Descripcion
+    +string Talle
+    +string Color
+    +string Categoria
+    +EstadoPrenda Estado
+    +int? IdClienteActual
+    +int? IdUltimoCliente
+    +decimal? PrecioReposicion
+    +string ResumenEstado
+  }
+  class MantenimientoPrenda {
+    +int IdMantenimiento
+    +int IdPrenda
+    +string NombrePrenda
+    +DateTime FechaEntrada
+    +DateTime? FechaSalida
+    +string Actor
+    +bool EstaAbierto
+    +int? DuracionDias
+    +int DiasTranscurridos
+    +NivelUrgencia NivelUrgencia
+  }
+  class CargoPrenda {
+    +int IdCargo
+    +int IdPrenda
+    +string NombrePrenda
+    +int IdCliente
+    +string NombreCliente
+    +string Motivo
+    +decimal Monto
+    +DateTime FechaRegistro
+    +DateTime? FechaCobro
+    +string Actor
+    +EstadoCargo Estado
+  }
+  class Cliente {
+    +int IdCliente
+    +string Nombre
+    +string Apellido
+  }
+  class BLL_Prenda["BLL.Prenda"] {
+    +CambiarEstado(string,  Prenda,  EstadoPrenda,  string,  bool,  bool) void
+    +ObtenerEnLimpieza() List~Prenda~
+    +ObtenerHistorialMantenimiento(int) List~MantenimientoPrenda~
+  }
+  class BLL_CargoPrenda["BLL.CargoPrenda"] {
+    +RegistrarCargo(string,  Prenda,  string,  decimal,  string) void
+    +ObtenerPendientesPorCliente(int) List~CargoPrenda~
+  }
+  class DAL_Interfaces_IPrendaDAL["DAL.Interfaces.IPrendaDAL"] {
+    <<interface>>
+    +CambiarEstado(int,  EstadoPrenda,  EstadoPrenda,  int?) void
+  }
+  class DAL_Interfaces_ICargoPrendaDAL["DAL.Interfaces.ICargoPrendaDAL"] {
+    <<interface>>
+    +Alta(CargoPrenda) int
+    +ObtenerPendientesPorCliente(int) List~CargoPrenda~
+    +MarcarCobradosEnTx(SqlConnection,  SqlTransaction,  List~int~,  DateTime) bool
+  }
+  Prenda --> "0..1" Cliente : IdClienteActual
+  Prenda --> "0..1" Cliente : IdUltimoCliente
+  MantenimientoPrenda --> "1" Prenda : IdPrenda
+  CargoPrenda --> "1" Prenda : IdPrenda
+  CargoPrenda --> "1" Cliente : IdCliente
+  BLL_Prenda ..> DAL_Interfaces_IPrendaDAL : usa
+  BLL_CargoPrenda ..> DAL_Interfaces_ICargoPrendaDAL : usa

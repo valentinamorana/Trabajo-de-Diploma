@@ -1,0 +1,100 @@
+erDiagram
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  Cliente ||--o{ ListaEspera : "IdCliente"
+  Prenda ||--o{ ListaEspera : "IdPrenda"
+  Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
+  Empleado ||--o{ Pedido : "IdEmpleado"
+  Cliente ||--o{ Pedido : "IdCliente"
+  Pedido ||--o{ PedidoHistorial : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
+  Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Cliente {
+    int IdCliente PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    nvarchar(100) MetodoPago "NULL"
+    int IdPlan FK "NULL"
+    datetime FechaAlta
+    date FechaNacimiento
+    bit Activo
+    int DVH "NULL"
+    date FechaVencimiento "NULL"
+    date FechaLimiteGracia "NULL"
+    datetime FechaPausaHasta "NULL"
+    int IdClienteReferente FK "NULL"
+    decimal(10_2) DescuentoProximoCobro
+    bit BeneficioReferidoOtorgado
+  }
+  Empleado {
+    int IdEmpleado PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    datetime FechaIngreso
+    nvarchar(100) Puesto "NULL"
+    nvarchar(50) Legajo "NULL"
+    int IdUsuario FK "NULL"
+    int DVH "NULL"
+  }
+  Pedido {
+    int IdPedido PK
+    int IdCliente FK
+    int IdEmpleado FK
+    int Estado
+    datetime FechaPedido
+    datetime FechaDespacho "NULL"
+    datetime FechaEntrega "NULL"
+    nvarchar(500) MotivoCancelacion "NULL"
+    int DVH "NULL"
+  }
+  PedidoPrenda {
+    int IdPedido PK,FK
+    int IdPrenda PK,FK
+  }
+  PedidoHistorial {
+    int IdHistorial PK
+    int IdPedido FK
+    int IdOperacion
+    datetime Fecha
+    int IdUsuario FK "NULL"
+    nvarchar(200) NombreUsuario "NULL"
+    nvarchar(200) Accion
+    nvarchar(100) Campo
+    nvarchar(1000) ValorAnterior "NULL"
+    nvarchar(1000) ValorNuevo "NULL"
+  }
+  Prenda {
+    int IdPrenda PK
+    nvarchar(100) Nombre
+    nvarchar(500) Descripcion "NULL"
+    nvarchar(20) Talle "NULL"
+    nvarchar(50) Color "NULL"
+    nvarchar(100) Categoria "NULL"
+    int Estado
+    int IdClienteActual FK "NULL"
+    datetime FechaAlta
+    int IdUltimoCliente FK "NULL"
+    decimal(10_2) PrecioReposicion "NULL"
+  }
+  ListaEspera {
+    int IdListaEspera PK
+    int IdPrenda FK
+    int IdCliente FK
+    datetime FechaAlta
+    int Estado
+    datetime FechaLimiteReserva "NULL"
+    datetime FechaResolucion "NULL"
+    nvarchar(100) Actor "NULL"
+  }
+  MantenimientoPrenda {
+    int IdMantenimiento PK
+    int IdPrenda FK
+    datetime FechaEntrada
+    datetime FechaSalida "NULL"
+    nvarchar(100) Actor "NULL"
+  }

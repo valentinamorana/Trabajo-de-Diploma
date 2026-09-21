@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor K as Contabilidad
+  participant F as Promociones<br/>ContabilidadForm
+  participant B as BLL.Promocion
+  participant D as DAL.Promocion
+  K->>F: Consulta la cola, analiza margen e impacto, ingresa la observación y decide
+  alt Aprueba
+    F->>B: AprobarContable(modulo, promocion, observacion)
+  else Rechaza
+    F->>B: RechazarContable(modulo, promocion, observacion)
+  end
+  Note over B: Exigir(PromocionesContableEditar) · la observación es obligatoria · solo desde EnRevisionContable
+  B->>D: CambiarEstado(id, esperado = EnRevisionContable, nuevo = Vigente o RechazadaContabilidad, observación)
+  alt Otra sesión ya la resolvió
+    D-->>B: false
+    B-->>F: AppException(estado_concurrente)
+  else Estado cambiado
+    B-->>F: ok
+    F-->>K: Promoción Vigente (se aplica al cobro) o Rechazada (vuelve a Administración)
+  end

@@ -1,0 +1,41 @@
+classDiagram
+  direction TB
+  class BLL_Cobro["BLL.Cobro"] {
+    +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string) ResultadoCobro
+  }
+  class BLL_Manejadores_ManejadorCobro["BLL.Manejadores.ManejadorCobro"] {
+    <<abstract>>
+    +AgregarSiguiente(ManejadorCobro) void
+    +Procesar(ContextoCobro) ResultadoCobro
+  }
+  class BLL_Manejadores_DetectarCobroHandler["BLL.Manejadores.DetectarCobroHandler"] {
+    +Procesar(ContextoCobro) ResultadoCobro
+  }
+  class BLL_Manejadores_ProcesarPagoHandler["BLL.Manejadores.ProcesarPagoHandler"] {
+    +Procesar(ContextoCobro) ResultadoCobro
+  }
+  class BLL_Manejadores_AplicarGraciaHandler["BLL.Manejadores.AplicarGraciaHandler"] {
+    +Procesar(ContextoCobro) ResultadoCobro
+  }
+  class BLL_Manejadores_SuspenderHandler["BLL.Manejadores.SuspenderHandler"] {
+    +Procesar(ContextoCobro) ResultadoCobro
+  }
+  class BLL_Manejadores_ContextoCobro["BLL.Manejadores.ContextoCobro"] {
+    +Cliente Cliente
+    +DecisionCobro Decision
+    +ModalidadCobro Modalidad
+    +string Actor
+    +string Modulo
+  }
+  class PoliticaDescuento {
+    <<static>>
+    +DescuentoDe(Promocion,  decimal,  int) decimal
+    +Resolver(decimal,  int?,  IEnumerable~Promocion~,  decimal,  int) ResultadoDescuento
+  }
+  BLL_Manejadores_ManejadorCobro <|-- BLL_Manejadores_DetectarCobroHandler
+  BLL_Manejadores_ManejadorCobro <|-- BLL_Manejadores_ProcesarPagoHandler
+  BLL_Manejadores_ManejadorCobro <|-- BLL_Manejadores_AplicarGraciaHandler
+  BLL_Manejadores_ManejadorCobro <|-- BLL_Manejadores_SuspenderHandler
+  BLL_Cobro --> "1" BLL_Manejadores_DetectarCobroHandler : primer eslabón
+  BLL_Manejadores_ManejadorCobro --> "0..1" BLL_Manejadores_ManejadorCobro : sucesor
+  BLL_Manejadores_ProcesarPagoHandler ..> PoliticaDescuento : usa

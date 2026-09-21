@@ -1,0 +1,38 @@
+flowchart TD
+  subgraph S["Sistema"]
+    direction TB
+    i((" "))
+    a1["Detecta suscripción vencida o próxima a vencer (7 días)"]
+    r1["Renovar: nuevo vencimiento por Builder (1, 3 o 12 meses)"]
+    r2["Cambiar plan: valida cupo y renueva con el plan nuevo"]
+    r3["Pausar: máx. 3 meses, sin prendas en uso, corre el vencimiento"]
+    r4["Baja: exige prendas devueltas"]
+    a3["Registra el resultado en el historial (transacción)"]
+    c1["Cobro: precio mensual × meses − un descuento + cargos"]
+    c2["Pago fallido: gracia de 5 días, luego suspensión"]
+    f(((" ")))
+  end
+  subgraph V["Vendedor"]
+    direction TB
+    a2["Contacta al cliente fuera del sistema y carga la decisión"]
+    d1{"Decisión del cliente"}
+    d2{"¿Cobro pagado?"}
+  end
+  i --> a1
+  a1 --> a2
+  a2 --> d1
+  d1 -- "Renovar" --> r1
+  d1 -- "Cambiar plan" --> r2
+  d1 -- "Pausar" --> r3
+  d1 -- "Baja" --> r4
+  r1 --> a3
+  r2 --> a3
+  r3 --> a3
+  r4 --> a3
+  a3 --> d2
+  d2 -- "Sí" --> c1
+  d2 -- "No" --> c2
+  c1 --> f
+  c2 --> f
+  classDef ini fill:#222,stroke:#222,color:#222
+  class i,f ini

@@ -1,0 +1,64 @@
+classDiagram
+  direction TB
+  class Contratacion {
+    +int IdContratacion
+    +int IdCliente
+    +int IdPlan
+    +int IdVendedor
+    +int? IdCaja
+    +ModalidadCobro Modalidad
+    +EstadoContratacion Estado
+    +int IntentosPago
+    +DateTime FechaAlta
+    +DateTime? FechaResolucion
+    +string MedioPago
+    +string NumeroComprobante
+    +DateTime? FechaComprobante
+    +decimal? Importe
+    +decimal? DescuentoAplicado
+    +int? IdPromocion
+  }
+  class Cliente {
+    +int IdCliente
+    +string Nombre
+    +string Apellido
+    +int? IdPlan
+    +DateTime? FechaVencimiento
+    +decimal DescuentoProximoCobro
+  }
+  class PlanSuscripcion {
+    +int IdPlan
+    +string Nombre
+    +int LimitePrendas
+    +decimal Precio
+  }
+  class Promocion {
+    +int IdPromocion
+    +string Nombre
+    +TipoDescuento TipoDescuento
+    +decimal Valor
+  }
+  class PoliticaDescuento {
+    <<static>>
+    +DescuentoDe(Promocion,  decimal,  int) decimal
+    +Resolver(decimal,  int?,  IEnumerable~Promocion~,  decimal,  int) ResultadoDescuento
+  }
+  class BLL_Contratacion["BLL.Contratacion"] {
+    +CrearContratacion(string,  int,  int,  ModalidadCobro) int
+    +ConfirmarPago(string,  Contratacion,  string) LiquidacionContratacion
+    +CalcularImporte(Contratacion) LiquidacionContratacion
+    +RegistrarIntentoFallido(string,  Contratacion) void
+  }
+  class DAL_Interfaces_IContratacionDAL["DAL.Interfaces.IContratacionDAL"] {
+    <<interface>>
+    +Alta(Contratacion) int
+    +IncrementarIntento(int) int
+    +ConfirmarPago(int,  int,  string,  string,  decimal,  decimal,  int?) bool
+    +ReabrirPago(int) void
+    +Cancelar(int) void
+  }
+  Contratacion --> "1" Cliente : IdCliente
+  Contratacion --> "1" PlanSuscripcion : IdPlan
+  Contratacion --> "0..1" Promocion : IdPromocion
+  Cliente --> "0..1" PlanSuscripcion : IdPlan
+  BLL_Contratacion ..> DAL_Interfaces_IContratacionDAL : usa

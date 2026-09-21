@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor L as Depósito / Logística
+  participant F as Pedidos<br/>Realizados
+  participant B as BLL.Pedido
+  participant D as DAL.Pedido
+  participant H as DAL.Pedido<br/>Historial
+  L->>F: Selecciona un pedido Pendiente y pulsa Despachar
+  F->>B: Despachar(modulo, pedido)
+  Note over B: Exigir(PedidosRealizadosEditar) · pedido.PuedeDespachar()
+  alt El pedido no está Pendiente
+    B-->>F: AppException(despachar_estado)
+    F-->>L: Informa el estado actual
+  else Pendiente
+    B->>D: Despachar(idPedido)
+    B->>H: RegistrarCambios(idPedido, "DESPACHAR")
+    B-->>F: ok
+    F-->>L: Pedido Despachado
+  end

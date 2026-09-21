@@ -1,0 +1,31 @@
+classDiagram
+  direction TB
+  class Prenda {
+    +int IdPrenda
+    +string Nombre
+    +EstadoPrenda Estado
+    +EstaDisponible() bool
+    +ControlarEstado(EstadoPrenda) bool
+  }
+  class Estado {
+    <<abstract>>
+    +EsTransicionValida(EstadoPrenda) bool
+    +ControlarEstado(Prenda,  EstadoPrenda) bool
+  }
+  class EstadoDisponible {
+    +EsTransicionValida(EstadoPrenda) bool
+  }
+  class EstadoEnUso {
+    +EsTransicionValida(EstadoPrenda) bool
+  }
+  class EstadoEnLimpieza {
+    +EsTransicionValida(EstadoPrenda) bool
+  }
+  class EstadoBaja {
+    +EsTransicionValida(EstadoPrenda) bool
+  }
+  Estado <|-- EstadoDisponible
+  Estado <|-- EstadoEnUso
+  Estado <|-- EstadoEnLimpieza
+  Estado <|-- EstadoBaja
+  Prenda --> "1" Estado : estado actual

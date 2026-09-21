@@ -1,0 +1,22 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as ClienteForm
+  participant B as BLL.Cliente
+  participant D as DAL.Cliente
+  participant L as Bitácoras
+  V->>F: Completa los datos del cliente (y "Referido por", opcional)
+  F->>B: Alta(modulo, cliente)
+  Note over B: PermisosAccion.Exigir(ClientesEditar) · Validar(cliente)
+  B->>D: ExisteDNI(dni)
+  D-->>B: existe: bool
+  alt DNI ya registrado
+    B-->>F: AppException(dni_duplicado)
+    F-->>V: Informa el error
+  else DNI nuevo
+    B->>D: Alta(cliente)  [DNI cifrado con AES]
+    D-->>B: idCliente
+    B->>L: Registrar(Alta Cliente) + BitacoraNegocio(AltaCliente)
+    B-->>F: cliente registrado
+    F-->>V: Confirma el alta (sin plan: la suscripción se contrata en PN02)
+  end

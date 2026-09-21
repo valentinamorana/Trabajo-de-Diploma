@@ -1,0 +1,77 @@
+classDiagram
+  direction TB
+  class Cliente {
+    +int IdCliente
+    +DateTime FechaAlta
+    +string Nombre
+    +int? IdPlan
+    +DateTime? FechaNacimiento
+    +DateTime? FechaVencimiento
+    +DateTime? FechaLimiteGracia
+    +DateTime? FechaPausaHasta
+  }
+  class PlanSuscripcion {
+    +int IdPlan
+    +string Nombre
+    +int LimitePrendas
+    +decimal Precio
+    +bool Estado
+  }
+  class Contratacion {
+    +int IdContratacion
+    +int IdCliente
+    +int IdPlan
+    +int IdVendedor
+    +int? IdCaja
+    +EstadoContratacion Estado
+    +DateTime FechaAlta
+    +DateTime? FechaResolucion
+  }
+  class Renovacion {
+    +int IdRenovacion
+    +int IdCliente
+    +int? IdPlanAnterior
+    +int? IdPlanNuevo
+    +DateTime FechaDeteccion
+    +DateTime? FechaResolucion
+  }
+  class Cobro {
+    +int IdCobro
+    +int IdCliente
+    +DateTime FechaDeteccion
+    +DateTime? FechaResolucion
+  }
+  class Promocion {
+    +int IdPromocion
+    +string Nombre
+    +DateTime FechaInicio
+    +DateTime FechaFin
+    +EstadoPromocion Estado
+    +int? IdPlan
+    +int? IdSugerenciaOrigen
+    +DateTime FechaAlta
+  }
+  class SugerenciaPromocion {
+    +int IdSugerencia
+    +int? IdPlan
+    +EstadoSugerencia Estado
+    +DateTime FechaAlta
+  }
+  class Empleado {
+    +int IdEmpleado
+    +string Nombre
+    +DateTime FechaIngreso
+    +int? IdUsuario
+  }
+  Cliente --> "0..1" PlanSuscripcion : IdPlan
+  Contratacion --> "1" Cliente : IdCliente
+  Contratacion --> "1" PlanSuscripcion : IdPlan
+  Contratacion --> "1" Empleado : IdVendedor
+  Contratacion --> "0..1" Empleado : IdCaja
+  Renovacion --> "1" Cliente : IdCliente
+  Renovacion --> "0..1" PlanSuscripcion : IdPlanAnterior
+  Renovacion --> "0..1" PlanSuscripcion : IdPlanNuevo
+  Cobro --> "1" Cliente : IdCliente
+  Promocion --> "0..1" PlanSuscripcion : IdPlan
+  Promocion --> "0..1" SugerenciaPromocion : IdSugerenciaOrigen
+  SugerenciaPromocion --> "0..1" PlanSuscripcion : IdPlan

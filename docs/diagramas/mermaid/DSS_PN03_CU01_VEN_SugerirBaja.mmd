@@ -1,0 +1,17 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as Promociones<br/>VigentesForm
+  participant B as BLL.Promocion
+  participant D as DAL.Promocion
+  V->>F: Consulta las promociones vigentes, elige una e indica el motivo
+  F->>B: SugerirBaja(modulo, promocion, motivo)
+  Note over B: Exigir(PromocionesVigentesEditar) · el motivo es obligatorio · solo desde Vigente
+  B->>D: SolicitarBaja(id, motivo)  [UPDATE condicionado a Vigente]
+  alt Ya no está Vigente
+    D-->>B: false
+    B-->>F: AppException(estado_concurrente)
+  else Solicitada
+    B-->>F: ok
+    F-->>V: Promoción en Baja solicitada: Administración la resuelve
+  end

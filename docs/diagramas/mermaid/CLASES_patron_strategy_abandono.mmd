@@ -1,0 +1,35 @@
+classDiagram
+  direction TB
+  class BLL_AnalisisAbandono["BLL.AnalisisAbandono"] {
+    +CambiarEstrategia(EstrategiaRiesgo) void
+    +Detectar() List~ClienteEnRiesgo~
+  }
+  class BLL_Estrategias_EstrategiaRiesgo["BLL.Estrategias.EstrategiaRiesgo"] {
+    <<abstract>>
+    +ToString() string
+    +Evaluar(DatosClienteRiesgo) ResultadoRiesgo
+  }
+  class BLL_Estrategias_EstrategiaInactividadPura["BLL.Estrategias.EstrategiaInactividadPura"] {
+    +Evaluar(DatosClienteRiesgo) ResultadoRiesgo
+  }
+  class BLL_Estrategias_EstrategiaVencimientoInactividad["BLL.Estrategias.EstrategiaVencimientoInactividad"] {
+    +Evaluar(DatosClienteRiesgo) ResultadoRiesgo
+  }
+  class BLL_Estrategias_EstrategiaClienteNuevoInactivo["BLL.Estrategias.EstrategiaClienteNuevoInactivo"] {
+    +Evaluar(DatosClienteRiesgo) ResultadoRiesgo
+  }
+  class ClienteEnRiesgo {
+    +int IdCliente
+    +string NombreCliente
+    +string NombrePlan
+    +DateTime? FechaVencimiento
+    +DateTime? FechaUltimoPedido
+    +string Estrategia
+    +string Motivo
+    +string Clave
+    +object[] Args
+  }
+  BLL_Estrategias_EstrategiaRiesgo <|-- BLL_Estrategias_EstrategiaInactividadPura
+  BLL_Estrategias_EstrategiaRiesgo <|-- BLL_Estrategias_EstrategiaVencimientoInactividad
+  BLL_Estrategias_EstrategiaRiesgo <|-- BLL_Estrategias_EstrategiaClienteNuevoInactivo
+  BLL_AnalisisAbandono --> "1" BLL_Estrategias_EstrategiaRiesgo : estrategia activa

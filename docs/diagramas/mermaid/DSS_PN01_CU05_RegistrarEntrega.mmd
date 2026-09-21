@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor L as Depósito / Logística
+  participant F as Pedidos<br/>Realizados
+  participant B as BLL.Pedido
+  participant D as DAL.Pedido
+  participant H as DAL.Pedido<br/>Historial
+  L->>F: Selecciona un pedido Despachado y pulsa Marcar Entregado
+  F->>B: MarcarEntregado(modulo, pedido)
+  Note over B: Exigir(PedidosRealizadosEditar) · pedido.PuedeEntregarse()
+  alt El pedido no está Despachado
+    B-->>F: AppException(entregar_estado)
+    F-->>L: Informa el estado actual
+  else Despachado
+    B->>D: MarcarEntregado(idPedido)
+    B->>H: RegistrarCambios(idPedido, "ENTREGAR")
+    B-->>F: ok
+    F-->>L: Pedido Entregado
+  end

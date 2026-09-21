@@ -1,0 +1,83 @@
+classDiagram
+  direction TB
+  class SugerenciaPromocion {
+    +int IdSugerencia
+    +int? IdPlan
+    +string CategoriaPrenda
+    +string Motivo
+    +TipoDescuento TipoDescuentoSugerido
+    +decimal BeneficioEstimado
+    +EstadoSugerencia Estado
+    +DateTime FechaAlta
+  }
+  class Promocion {
+    +int IdPromocion
+    +string Nombre
+    +string Descripcion
+    +TipoDescuento TipoDescuento
+    +decimal Valor
+    +DateTime FechaInicio
+    +DateTime FechaFin
+    +EstadoPromocion Estado
+    +int? IdPlan
+    +string CategoriaPrenda
+    +decimal MargenEstimado
+    +string ImpactoEconomico
+    +string Observacion
+    +string MotivoBaja
+    +int? IdSugerenciaOrigen
+    +DateTime FechaAlta
+  }
+  class PlanSuscripcion {
+    +int IdPlan
+    +string Nombre
+    +decimal Precio
+  }
+  class CandidataSugerencia {
+    +string Origen
+    +int? IdPlan
+    +string NombrePlan
+    +string CategoriaPrenda
+    +string Motivo
+    +TipoDescuento TipoSugerido
+    +decimal BeneficioEstimado
+    +string Resumen
+  }
+  class BLL_SugerenciaPromocion["BLL.SugerenciaPromocion"] {
+    +ObtenerPendientes() List~SugerenciaPromocion~
+    +Crear(string,  int?,  string,  string,  TipoDescuento,  decimal) int
+  }
+  class BLL_AnalisisPromociones["BLL.AnalisisPromociones"] {
+    +Detectar() List~CandidataSugerencia~
+  }
+  class BLL_Promocion["BLL.Promocion"] {
+    +CrearDesdeSugerencia(string,  int,  string,  string,  TipoDescuento,  decimal,  DateTime,  DateTime,  decimal,  string) int
+    +CrearManual(string,  string,  string,  TipoDescuento,  decimal,  DateTime,  DateTime,  int?,  string,  decimal,  string) int
+    +Modificar(string,  Promocion) void
+    +Reformular(string,  Promocion) void
+    +Desactivar(string,  Promocion) void
+    +AprobarContable(string,  Promocion,  string) void
+    +RechazarContable(string,  Promocion,  string) void
+    +SugerirBaja(string,  Promocion,  string) void
+    +AprobarBaja(string,  Promocion) void
+    +RechazarBaja(string,  Promocion,  string) void
+  }
+  class DAL_Interfaces_IPromocionDAL["DAL.Interfaces.IPromocionDAL"] {
+    <<interface>>
+    +Alta(Promocion) int
+    +Modificar(Promocion) bool
+    +CambiarEstado(int,  EstadoPromocion,  EstadoPromocion,  string) bool
+    +SolicitarBaja(int,  string) bool
+  }
+  class DAL_Interfaces_ISugerenciaPromocionDAL["DAL.Interfaces.ISugerenciaPromocionDAL"] {
+    <<interface>>
+    +MarcarEvaluada(int) bool
+    +ReabrirEvaluacion(int) void
+  }
+  SugerenciaPromocion --> "0..1" PlanSuscripcion : IdPlan
+  Promocion --> "0..1" PlanSuscripcion : IdPlan
+  Promocion --> "0..1" SugerenciaPromocion : IdSugerenciaOrigen
+  CandidataSugerencia --> "0..1" PlanSuscripcion : IdPlan
+  BLL_SugerenciaPromocion ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa
+  BLL_Promocion ..> DAL_Interfaces_IPromocionDAL : usa
+  BLL_Promocion ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa

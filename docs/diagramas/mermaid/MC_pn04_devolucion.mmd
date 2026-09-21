@@ -1,0 +1,16 @@
+erDiagram
+  Prenda ||--o{ CargoPrenda : "IdPrenda"
+  Cliente ||--o{ CargoPrenda : "IdCliente"
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
+  Cliente ||--o{ Pedido : "IdCliente"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
+  Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Cliente
+  Pedido
+  PedidoPrenda
+  Prenda
+  MantenimientoPrenda
+  CargoPrenda

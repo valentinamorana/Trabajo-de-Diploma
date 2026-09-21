@@ -1,0 +1,22 @@
+sequenceDiagram
+  autonumber
+  actor C as Caja
+  participant F as Contrataciones<br/>PendientesForm
+  participant B as BLL.<br/>Contratacion
+  participant D as DAL.<br/>Contratacion
+  C->>F: Registra el intento fallido de una contratación
+  F->>B: RegistrarIntentoFallido(modulo, idContratacion)
+  Note over B: Exigir(CajaEditar)
+  B->>D: IncrementarIntento(id)  [solo si sigue PendientePago y IntentosPago < 3]
+  alt La contratación ya no está pendiente
+    D-->>B: -1
+    B-->>F: AppException(cobrar_concurrente)
+  else Intento registrado
+    D-->>B: intentos
+    alt intentos = 3
+      B->>D: Cancelar(id)  [WHERE Estado = PendientePago]
+      B-->>F: Contratación Cancelada
+    else intentos < 3
+      B-->>F: Sigue pendiente, queda disponible otro intento
+    end
+  end

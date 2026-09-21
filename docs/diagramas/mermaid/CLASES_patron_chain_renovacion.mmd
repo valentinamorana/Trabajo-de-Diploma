@@ -1,0 +1,41 @@
+classDiagram
+  direction TB
+  class BLL_Renovacion["BLL.Renovacion"] {
+    +Procesar(string,  Cliente,  DecisionRenovacion,  int?,  ModalidadCobro,  string,  DateTime?) ResultadoRenovacion
+  }
+  class BLL_Manejadores_ManejadorRenovacion["BLL.Manejadores.ManejadorRenovacion"] {
+    <<abstract>>
+    +AgregarSiguiente(ManejadorRenovacion) void
+    +Procesar(ContextoRenovacion) ResultadoRenovacion
+  }
+  class BLL_Manejadores_VerificarVencimientoHandler["BLL.Manejadores.VerificarVencimientoHandler"] {
+    +Procesar(ContextoRenovacion) ResultadoRenovacion
+  }
+  class BLL_Manejadores_IntentarRenovarHandler["BLL.Manejadores.IntentarRenovarHandler"] {
+    +Procesar(ContextoRenovacion) ResultadoRenovacion
+  }
+  class BLL_Manejadores_CambioPlanHandler["BLL.Manejadores.CambioPlanHandler"] {
+    +Procesar(ContextoRenovacion) ResultadoRenovacion
+  }
+  class BLL_Manejadores_PausarSuscripcionHandler["BLL.Manejadores.PausarSuscripcionHandler"] {
+    +Procesar(ContextoRenovacion) ResultadoRenovacion
+  }
+  class BLL_Manejadores_BajaSuscripcionHandler["BLL.Manejadores.BajaSuscripcionHandler"] {
+    +Procesar(ContextoRenovacion) ResultadoRenovacion
+  }
+  class BLL_Manejadores_ContextoRenovacion["BLL.Manejadores.ContextoRenovacion"] {
+    +Cliente Cliente
+    +DecisionRenovacion Decision
+    +int? IdPlanNuevo
+    +DateTime? FechaPausaHasta
+    +ModalidadCobro Modalidad
+    +string Actor
+    +string Modulo
+  }
+  BLL_Manejadores_ManejadorRenovacion <|-- BLL_Manejadores_VerificarVencimientoHandler
+  BLL_Manejadores_ManejadorRenovacion <|-- BLL_Manejadores_IntentarRenovarHandler
+  BLL_Manejadores_ManejadorRenovacion <|-- BLL_Manejadores_CambioPlanHandler
+  BLL_Manejadores_ManejadorRenovacion <|-- BLL_Manejadores_PausarSuscripcionHandler
+  BLL_Manejadores_ManejadorRenovacion <|-- BLL_Manejadores_BajaSuscripcionHandler
+  BLL_Renovacion --> "1" BLL_Manejadores_VerificarVencimientoHandler : primer eslabón
+  BLL_Manejadores_ManejadorRenovacion --> "0..1" BLL_Manejadores_ManejadorRenovacion : sucesor

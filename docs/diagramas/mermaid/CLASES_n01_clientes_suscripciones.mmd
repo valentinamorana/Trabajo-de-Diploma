@@ -1,0 +1,94 @@
+classDiagram
+  direction TB
+  class Cliente {
+    +int IdCliente
+    +DateTime FechaAlta
+    +string Nombre
+    +string Apellido
+    +string DNI
+    +string Email
+    +string MetodoPago
+    +int? IdPlan
+    +string NombrePlan
+    +int StockUtilizado
+    +int LimitePrendas
+    +decimal PrecioPlan
+    +string NombreCompleto
+    +DateTime? FechaNacimiento
+    +DateTime? FechaVencimiento
+    +bool VencimientoExpirado
+    +DateTime? FechaLimiteGracia
+    +bool EstaEnGracia
+    +bool EstaSuspendidoPorPago
+    +DateTime? FechaPausaHasta
+    +bool EstaPausada
+    +int? IdClienteReferente
+    +decimal DescuentoProximoCobro
+    +bool BeneficioReferidoOtorgado
+    +bool TieneDescuentoPendiente
+  }
+  class PlanSuscripcion {
+    +int IdPlan
+    +string Nombre
+    +int LimitePrendas
+    +decimal Precio
+    +bool Estado
+  }
+  class Renovacion {
+    +int IdRenovacion
+    +int IdCliente
+    +int? IdPlanAnterior
+    +int? IdPlanNuevo
+    +DateTime FechaDeteccion
+    +DateTime? FechaResolucion
+    +EstadoRenovacion Resultado
+    +string Actor
+  }
+  class Cobro {
+    +int IdCobro
+    +int IdCliente
+    +decimal Importe
+    +DateTime FechaDeteccion
+    +DateTime? FechaResolucion
+    +EstadoCobro Resultado
+    +string Actor
+  }
+  class BLL_Cliente["BLL.Cliente"] {
+    +Alta(string,  Cliente) void
+    +Modificar(string,  Cliente) void
+    +Baja(string,  Cliente) void
+    +ActivarSuscripcionDesdeContratacion(string,  Cliente,  int,  ModalidadCobro,  decimal) Suscripcion
+    +ReanudarPausa(string,  Cliente) void
+    +ObtenerEstadoComercial(Cliente,  int) EstadoComercialCliente
+  }
+  class BLL_Renovacion["BLL.Renovacion"] {
+    +Procesar(string,  Cliente,  DecisionRenovacion,  int?,  ModalidadCobro,  string,  DateTime?) ResultadoRenovacion
+    +ObtenerHistorial(int) List~Renovacion~
+  }
+  class BLL_Cobro["BLL.Cobro"] {
+    +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string) ResultadoCobro
+    +ObtenerHistorial(int) List~Cobro~
+  }
+  class BLL_PlanSuscripcion["BLL.PlanSuscripcion"] {
+    +ObtenerActivos() List~PlanSuscripcion~
+    +ObtenerTodos() List~PlanSuscripcion~
+    +ObtenerPorId(int) PlanSuscripcion
+    +Alta(PlanSuscripcion) void
+    +Modificar(PlanSuscripcion) void
+    +Desactivar(int) void
+    +Activar(int) void
+  }
+  class DAL_Interfaces_IClienteDAL["DAL.Interfaces.IClienteDAL"] {
+    <<interface>>
+    +EjecutarTransaccion(Action~SqlConnection,  SqlTransaction~) void
+    +SumarCreditoEnTx(SqlConnection,  SqlTransaction,  int,  decimal) void
+    +ConsumirCreditoEnTx(SqlConnection,  SqlTransaction,  int,  decimal) void
+  }
+  Cliente --> "0..1" PlanSuscripcion : IdPlan
+  Renovacion --> "1" Cliente : IdCliente
+  Renovacion --> "0..1" PlanSuscripcion : IdPlanAnterior
+  Renovacion --> "0..1" PlanSuscripcion : IdPlanNuevo
+  Cobro --> "1" Cliente : IdCliente
+  BLL_Cliente ..> DAL_Interfaces_IClienteDAL : usa
+  BLL_Renovacion ..> DAL_Interfaces_IClienteDAL : usa
+  BLL_Cobro ..> DAL_Interfaces_IClienteDAL : usa

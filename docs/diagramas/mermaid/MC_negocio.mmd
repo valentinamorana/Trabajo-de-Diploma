@@ -1,0 +1,42 @@
+erDiagram
+  Prenda ||--o{ CargoPrenda : "IdPrenda"
+  Cliente ||--o{ CargoPrenda : "IdCliente"
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  PlanSuscripcion |o--o{ Cliente : "IdPlan"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  Promocion |o--o{ Contratacion : "IdPromocion"
+  Empleado ||--o{ Contratacion : "IdVendedor"
+  Empleado |o--o{ Contratacion : "IdCaja"
+  Cliente ||--o{ Contratacion : "IdCliente"
+  Cliente ||--o{ HistorialCobro : "IdCliente"
+  Cliente ||--o{ HistorialRenovacion : "IdCliente"
+  PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
+  PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
+  Cliente ||--o{ ListaEspera : "IdCliente"
+  Prenda ||--o{ ListaEspera : "IdPrenda"
+  Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
+  Empleado ||--o{ Pedido : "IdEmpleado"
+  Cliente ||--o{ Pedido : "IdCliente"
+  Pedido ||--o{ PedidoHistorial : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
+  Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
+  PlanSuscripcion |o--o{ Promocion : "IdPlan"
+  SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
+  PlanSuscripcion
+  Cliente
+  Empleado
+  Contratacion
+  Promocion
+  SugerenciaPromocion
+  HistorialRenovacion
+  HistorialCobro
+  Pedido
+  PedidoPrenda
+  PedidoHistorial
+  Prenda
+  MantenimientoPrenda
+  CargoPrenda
+  ListaEspera

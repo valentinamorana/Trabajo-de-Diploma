@@ -1,0 +1,25 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as Planes
+  participant B as BLL.Plan<br/>Suscripcion
+  participant D as DAL.Plan<br/>Suscripcion
+  V->>F: Completa nombre, límite de prendas y precio mensual, y pulsa Guardar Plan
+  F->>B: Alta(modulo, plan)  [o Modificar(modulo, plan) si edita uno existente]
+  Note over B: Exigir(PlanSuscripcionesEditar) · nombre obligatorio (solo letras) · límite de prendas válido · precio mayor a cero
+  alt Datos inválidos
+    B-->>F: AppException(nombre_requerido / limite_invalido / precio_cero)
+    F-->>V: Informa el error
+  else Datos válidos
+    B->>D: Alta(plan) / Modificar(plan)
+    B-->>F: ok
+    F-->>V: Plan guardado (queda activo)
+  end
+  V->>F: Pulsa Desactivar Plan
+  F->>B: Desactivar(modulo, plan)
+  alt El plan tiene clientes asignados
+    B-->>F: AppException(tiene_clientes)
+  else Sin clientes
+    B->>D: Desactivar(idPlan)
+    B-->>F: ok
+  end

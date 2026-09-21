@@ -1,0 +1,317 @@
+[
+  {
+    "id": "DER_global",
+    "tipo": "er",
+    "titulo": "DER global — WardrobeFlow"
+  },
+  {
+    "id": "DER_seguridad",
+    "tipo": "er",
+    "titulo": "DER — Seguridad, usuarios, permisos, idiomas y auditoría"
+  },
+  {
+    "id": "DER_n01_clientes_suscripciones",
+    "tipo": "er",
+    "titulo": "DER — N01 Clientes y suscripciones"
+  },
+  {
+    "id": "DER_pn01_pedidos",
+    "tipo": "er",
+    "titulo": "DER — PN01 Armar pedido"
+  },
+  {
+    "id": "DER_pn02_contrataciones",
+    "tipo": "er",
+    "titulo": "DER — PN02 Comercialización de la suscripción"
+  },
+  {
+    "id": "DER_pn03_promociones",
+    "tipo": "er",
+    "titulo": "DER — PN03 Métricas, promociones y toma de decisiones"
+  },
+  {
+    "id": "DER_pn04_devolucion",
+    "tipo": "er",
+    "titulo": "DER — PN04 Inspección de devolución"
+  },
+  {
+    "id": "MC_n01_clientes_suscripciones",
+    "tipo": "er",
+    "titulo": "Modelo conceptual — N01 Clientes y suscripciones"
+  },
+  {
+    "id": "MC_pn01_pedidos",
+    "tipo": "er",
+    "titulo": "Modelo conceptual — PN01 Armar pedido"
+  },
+  {
+    "id": "MC_pn02_contrataciones",
+    "tipo": "er",
+    "titulo": "Modelo conceptual — PN02 Comercialización de la suscripción"
+  },
+  {
+    "id": "MC_pn03_promociones",
+    "tipo": "er",
+    "titulo": "Modelo conceptual — PN03 Métricas, promociones y toma de decisiones"
+  },
+  {
+    "id": "MC_pn04_devolucion",
+    "tipo": "er",
+    "titulo": "Modelo conceptual — PN04 Inspección de devolución"
+  },
+  {
+    "id": "DER_seg_usuarios",
+    "tipo": "er",
+    "titulo": "DER — Módulo de usuarios: cuentas, empleados, preferencias y recuperación"
+  },
+  {
+    "id": "DER_seg_permisos_idiomas",
+    "tipo": "er",
+    "titulo": "DER — Módulo de permisos (Composite) e idiomas"
+  },
+  {
+    "id": "DER_seg_auditoria",
+    "tipo": "er",
+    "titulo": "DER — Módulo de auditoría e integridad"
+  },
+  {
+    "id": "DER_negocio",
+    "tipo": "er",
+    "titulo": "DER — Módulos de negocio: clientes, suscripciones, pedidos, prendas y promociones"
+  },
+  {
+    "id": "MC_negocio",
+    "tipo": "er",
+    "titulo": "Modelo conceptual — Módulos de negocio"
+  },
+  {
+    "id": "CLASES_global_dominio_a",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — Dominio: clientes, suscripciones y promociones"
+  },
+  {
+    "id": "CLASES_global_dominio_b",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — Dominio: pedidos y prendas"
+  },
+  {
+    "id": "CLASES_n01_clientes_suscripciones",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — N01 Clientes y suscripciones"
+  },
+  {
+    "id": "CLASES_patron_builder_suscripcion",
+    "tipo": "clases",
+    "titulo": "Patrón Builder — Activación de suscripción por modalidad de cobro"
+  },
+  {
+    "id": "CLASES_patron_chain_renovacion",
+    "tipo": "clases",
+    "titulo": "Patrón Chain of Responsibility — Renovación de suscripción"
+  },
+  {
+    "id": "CLASES_patron_chain_cobro",
+    "tipo": "clases",
+    "titulo": "Patrón Chain of Responsibility — Cobro recurrente de la suscripción"
+  },
+  {
+    "id": "CLASES_pn01_pedidos",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — PN01 Armar pedido"
+  },
+  {
+    "id": "CLASES_patron_command_pedido",
+    "tipo": "clases",
+    "titulo": "Patrón Command — Cancelar pedido y registrar devolución"
+  },
+  {
+    "id": "CLASES_pn02_contrataciones",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — PN02 Comercialización de la suscripción"
+  },
+  {
+    "id": "CLASES_pn03_promociones",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — PN03 Métricas, promociones y toma de decisiones"
+  },
+  {
+    "id": "CLASES_patron_strategy_abandono",
+    "tipo": "clases",
+    "titulo": "Patrón Strategy — Análisis de abandono (criterio de riesgo intercambiable)"
+  },
+  {
+    "id": "CLASES_pn04_devolucion",
+    "tipo": "clases",
+    "titulo": "Diagrama de clases — PN04 Inspección de devolución"
+  },
+  {
+    "id": "CLASES_patron_state_prenda",
+    "tipo": "clases",
+    "titulo": "Patrón State — Ciclo de vida de una prenda"
+  },
+  {
+    "id": "CU_n01_clientes_suscripciones",
+    "tipo": "casos",
+    "titulo": "Casos de uso — N01 Clientes y suscripciones"
+  },
+  {
+    "id": "CU_pn01_armar_pedido",
+    "tipo": "casos",
+    "titulo": "Casos de uso — PN01 Armar pedido"
+  },
+  {
+    "id": "CU_pn02_comercializacion",
+    "tipo": "casos",
+    "titulo": "Casos de uso — PN02 Comercialización de la suscripción"
+  },
+  {
+    "id": "CU_pn03_promociones",
+    "tipo": "casos",
+    "titulo": "Casos de uso — PN03 Métricas, promociones y toma de decisiones"
+  },
+  {
+    "id": "CU_pn04_devolucion",
+    "tipo": "casos",
+    "titulo": "Casos de uso — PN04 Inspección de devolución"
+  },
+  {
+    "id": "ACT_n01_renovacion_cobro",
+    "tipo": "actividad",
+    "titulo": "Actividad — N01 Renovación y cobro de la suscripción"
+  },
+  {
+    "id": "ACT_pn01_armar_pedido",
+    "tipo": "actividad",
+    "titulo": "Actividad — PN01 Armar pedido"
+  },
+  {
+    "id": "ACT_pn02_comercializacion",
+    "tipo": "actividad",
+    "titulo": "Actividad — PN02 Comercialización de la suscripción"
+  },
+  {
+    "id": "ACT_pn03_promociones",
+    "tipo": "actividad",
+    "titulo": "Actividad — PN03 Métricas, promociones y toma de decisiones"
+  },
+  {
+    "id": "ACT_pn04_devolucion",
+    "tipo": "actividad",
+    "titulo": "Actividad — PN04 Inspección de devolución"
+  },
+  {
+    "id": "DSS_N01_CU01_GestionarCliente",
+    "tipo": "secuencia",
+    "titulo": "N01 · CU01-VEN Gestionar Cliente (alta)"
+  },
+  {
+    "id": "DSS_N01_CU02_RenovarSuscripcion",
+    "tipo": "secuencia",
+    "titulo": "N01 · CU02-VEN Renovar suscripción (Chain of Responsibility)"
+  },
+  {
+    "id": "DSS_N01_CU03_CobrarSuscripcion",
+    "tipo": "secuencia",
+    "titulo": "N01 · CU03-VEN Cobrar suscripción (cobro recurrente)"
+  },
+  {
+    "id": "DSS_PN01_CU01_ArmarPedido",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU01-VEN Armar pedido"
+  },
+  {
+    "id": "DSS_PN01_CU02_ConsultarCatalogo",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU02-VEN Consultar catálogo"
+  },
+  {
+    "id": "DSS_PN01_CU03_ConsultarSituacionCliente",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU03-VEN Consultar situación del cliente"
+  },
+  {
+    "id": "DSS_PN01_CU04_DespacharPedido",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU01-DEP Despachar pedido"
+  },
+  {
+    "id": "DSS_PN01_CU05_RegistrarEntrega",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU02-DEP Registrar entrega"
+  },
+  {
+    "id": "DSS_PN01_CU06_RegistrarDevolucion",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU03-DEP Registrar devolución (desbloquea la cuenta)"
+  },
+  {
+    "id": "DSS_PN01_CU07_CancelarPedido",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU04-VEN Cancelar pedido (patrón Command)"
+  },
+  {
+    "id": "DSS_PN02_CU01_VTA_GestionarSuscripcion",
+    "tipo": "secuencia",
+    "titulo": "PN02 · CU01-VTA Gestionar suscripción (contratación)"
+  },
+  {
+    "id": "DSS_PN02_CU01_CAJ_GestionarCobro",
+    "tipo": "secuencia",
+    "titulo": "PN02 · CU01-CAJ Gestionar cobro (incluye CU02-CAJ Emitir comprobante)"
+  },
+  {
+    "id": "DSS_PN02_CU02_CAJ_EmitirComprobante",
+    "tipo": "secuencia",
+    "titulo": "PN02 · CU02-CAJ Emitir comprobante"
+  },
+  {
+    "id": "DSS_PN02_CU03_CAJ_CancelarContratacion",
+    "tipo": "secuencia",
+    "titulo": "PN02 · CU03-CAJ Cancelar contratación (intentos fallidos)"
+  },
+  {
+    "id": "DSS_PN03_CU01_GER_SugerirPromocion",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU01-GER Sugerir promoción"
+  },
+  {
+    "id": "DSS_PN03_CU01_ADM_GestionarPromociones",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU01-ADM Gestionar promociones (alta desde sugerencia)"
+  },
+  {
+    "id": "DSS_PN03_CU01_CONT_AnalizarPromocion",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU01-CONT Analizar promoción"
+  },
+  {
+    "id": "DSS_PN03_CU01_VEN_SugerirBaja",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU01-VEN Sugerir baja de promoción"
+  },
+  {
+    "id": "DSS_PN03_CU02_ADM_ResolverBaja",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU02-ADM Resolver baja de promoción"
+  },
+  {
+    "id": "DSS_PN04_CU01_DEP_InspeccionarDevolucion",
+    "tipo": "secuencia",
+    "titulo": "PN04 · CU-DEP-01 Inspeccionar devolución"
+  },
+  {
+    "id": "DSS_PN04_CU02_DEP_ReportarPrendaPerdida",
+    "tipo": "secuencia",
+    "titulo": "PN04 · CU-DEP-02 Reportar prenda perdida"
+  },
+  {
+    "id": "DSS_N01_CU04_GestionarPlanes",
+    "tipo": "secuencia",
+    "titulo": "N01 · CU04-VEN Gestionar planes de suscripción"
+  },
+  {
+    "id": "DSS_PN03_CU02_GER_ConsultarAnalitica",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU02-GER Consultar analítica de negocio"
+  }
+]

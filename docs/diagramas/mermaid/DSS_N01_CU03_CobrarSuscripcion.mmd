@@ -1,0 +1,36 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as Cobro<br/>SuscripcionForm
+  participant B as BLL.Cobro
+  participant H1 as Detectar<br/>CobroHandler
+  participant H2 as Procesar<br/>PagoHandler
+  participant H3 as AplicarGracia / Suspender Handler
+  participant D as DAL (Cliente, Cobro, CargoPrenda, Promocion)
+  V->>F: Elige cliente, modalidad y resultado del cobro (Cobrado o Pago fallido)
+  F->>B: Procesar(modulo, cliente, decision, modalidad, actor)
+  B->>H1: Procesar(contexto)
+  alt Todavía no corresponde cobrar
+    H1-->>B: Resultado: Pendiente
+  else Vencida o próxima a vencer
+    H1->>H2: DelegarASucesor(contexto)
+    alt Decisión = Cobrado
+      H2->>D: ObtenerPromocionesVigentes() · ObtenerPendientesPorCliente() (cargos)
+      Note over H2: Importe = Precio mensual × meses de la modalidad − un solo descuento (promoción o crédito de referido) + cargos
+      H2->>D: EjecutarTransaccion: ModificarEnTx + ConsumirCreditoEnTx + AltaEnTx(Cobro) + MarcarCobradosEnTx
+      alt Otra sesión ya cobró los cargos pendientes
+        D-->>H2: MarcarCobradosEnTx = false
+        H2-->>B: AppException(cargo_concurrente): se revierte todo el cobro
+      else Cargos liquidados
+        D-->>H2: ok
+      end
+      H2-->>B: Resultado: Cobrado (nuevo vencimiento por Builder)
+    else Decisión = Pago fallido
+      H2->>H3: DelegarASucesor(contexto)
+      H3->>D: Primer fallo: gracia de 5 días · vencida la gracia: suspensión
+      H3-->>B: Resultado: Gracia o Suspendido
+    end
+  end
+  B->>D: RecalcularDV() · Bitácoras
+  B-->>F: ResultadoCobro
+  F-->>V: Informa el resultado

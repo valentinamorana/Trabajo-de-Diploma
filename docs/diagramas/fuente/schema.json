@@ -1,0 +1,3152 @@
+﻿{
+    "pks":  [
+                {
+                    "tabla":  "ClaveRecuperacion",
+                    "col":  "IdClave"
+                },
+                {
+                    "tabla":  "Preferencia",
+                    "col":  "IdUsuario"
+                },
+                {
+                    "tabla":  "ControlMapeado",
+                    "col":  "IdControlMapeado"
+                },
+                {
+                    "tabla":  "MantenimientoPrenda",
+                    "col":  "IdMantenimiento"
+                },
+                {
+                    "tabla":  "HistorialRenovacion",
+                    "col":  "IdRenovacion"
+                },
+                {
+                    "tabla":  "HistorialCobro",
+                    "col":  "IdCobro"
+                },
+                {
+                    "tabla":  "CargoPrenda",
+                    "col":  "IdCargo"
+                },
+                {
+                    "tabla":  "Usuario",
+                    "col":  "IdUsuario"
+                },
+                {
+                    "tabla":  "ListaEspera",
+                    "col":  "IdListaEspera"
+                },
+                {
+                    "tabla":  "Contratacion",
+                    "col":  "IdContratacion"
+                },
+                {
+                    "tabla":  "Usuario_Seguridad",
+                    "col":  "IdUsuario"
+                },
+                {
+                    "tabla":  "DVVertical",
+                    "col":  "Id"
+                },
+                {
+                    "tabla":  "PlanSuscripcion",
+                    "col":  "IdPlan"
+                },
+                {
+                    "tabla":  "SugerenciaPromocion",
+                    "col":  "IdSugerencia"
+                },
+                {
+                    "tabla":  "Permiso",
+                    "col":  "IdPermiso"
+                },
+                {
+                    "tabla":  "Promocion",
+                    "col":  "IdPromocion"
+                },
+                {
+                    "tabla":  "Idioma",
+                    "col":  "IdIdioma"
+                },
+                {
+                    "tabla":  "Control",
+                    "col":  "IdControl"
+                },
+                {
+                    "tabla":  "Bitacora",
+                    "col":  "Id"
+                },
+                {
+                    "tabla":  "Empleado",
+                    "col":  "IdEmpleado"
+                },
+                {
+                    "tabla":  "Cliente",
+                    "col":  "IdCliente"
+                },
+                {
+                    "tabla":  "Prenda",
+                    "col":  "IdPrenda"
+                },
+                {
+                    "tabla":  "Pedido",
+                    "col":  "IdPedido"
+                },
+                {
+                    "tabla":  "PedidoPrenda",
+                    "col":  "IdPedido"
+                },
+                {
+                    "tabla":  "PedidoPrenda",
+                    "col":  "IdPrenda"
+                },
+                {
+                    "tabla":  "PedidoHistorial",
+                    "col":  "IdHistorial"
+                },
+                {
+                    "tabla":  "BitacoraNegocio",
+                    "col":  "IdEvento"
+                },
+                {
+                    "tabla":  "RolPermiso",
+                    "col":  "Rol"
+                },
+                {
+                    "tabla":  "RolPermiso",
+                    "col":  "IdPermiso"
+                },
+                {
+                    "tabla":  "PermisoRelacion",
+                    "col":  "IdPadre"
+                },
+                {
+                    "tabla":  "PermisoRelacion",
+                    "col":  "IdHijo"
+                },
+                {
+                    "tabla":  "Traduccion",
+                    "col":  "IdControl"
+                },
+                {
+                    "tabla":  "Traduccion",
+                    "col":  "IdIdioma"
+                },
+                {
+                    "tabla":  "HistorialUsuario",
+                    "col":  "IdVersion"
+                },
+                {
+                    "tabla":  "HistorialIntegridad",
+                    "col":  "Id"
+                }
+            ],
+    "cols":  [
+                 {
+                     "tabla":  "Bitacora",
+                     "ord":  1,
+                     "col":  "Id",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Bitacora",
+                     "ord":  2,
+                     "col":  "fecha",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Bitacora",
+                     "ord":  3,
+                     "col":  "usuario",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Bitacora",
+                     "ord":  4,
+                     "col":  "modulo",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Bitacora",
+                     "ord":  5,
+                     "col":  "actividad",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Bitacora",
+                     "ord":  6,
+                     "col":  "detalle",
+                     "tipo":  "nvarchar",
+                     "len":  2000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Bitacora",
+                     "ord":  7,
+                     "col":  "criticidad",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Bitacora",
+                     "ord":  8,
+                     "col":  "ip",
+                     "tipo":  "nvarchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "BitacoraNegocio",
+                     "ord":  1,
+                     "col":  "IdEvento",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "BitacoraNegocio",
+                     "ord":  2,
+                     "col":  "Fecha",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "BitacoraNegocio",
+                     "ord":  3,
+                     "col":  "Tipo",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "BitacoraNegocio",
+                     "ord":  4,
+                     "col":  "IdUsuario",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "BitacoraNegocio",
+                     "ord":  5,
+                     "col":  "IdPedido",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "BitacoraNegocio",
+                     "ord":  6,
+                     "col":  "IdPrenda",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "BitacoraNegocio",
+                     "ord":  7,
+                     "col":  "IdCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "BitacoraNegocio",
+                     "ord":  8,
+                     "col":  "Descripcion",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  1,
+                     "col":  "IdCargo",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  2,
+                     "col":  "IdPrenda",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  3,
+                     "col":  "IdCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  4,
+                     "col":  "Motivo",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  5,
+                     "col":  "Monto",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  6,
+                     "col":  "FechaRegistro",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  7,
+                     "col":  "FechaCobro",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  8,
+                     "col":  "Actor",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "CargoPrenda",
+                     "ord":  9,
+                     "col":  "Estado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ClaveRecuperacion",
+                     "ord":  1,
+                     "col":  "IdClave",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "ClaveRecuperacion",
+                     "ord":  2,
+                     "col":  "ClaveHash",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ClaveRecuperacion",
+                     "ord":  3,
+                     "col":  "Usada",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ClaveRecuperacion",
+                     "ord":  4,
+                     "col":  "UsadaPor",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ClaveRecuperacion",
+                     "ord":  5,
+                     "col":  "FechaUso",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ClaveRecuperacion",
+                     "ord":  6,
+                     "col":  "FechaCreacion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  1,
+                     "col":  "IdCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  2,
+                     "col":  "Nombre",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  3,
+                     "col":  "Apellido",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  4,
+                     "col":  "DNI",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  5,
+                     "col":  "Email",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  6,
+                     "col":  "MetodoPago",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  7,
+                     "col":  "IdPlan",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  8,
+                     "col":  "FechaAlta",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  9,
+                     "col":  "FechaNacimiento",
+                     "tipo":  "date",
+                     "len":  3,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  10,
+                     "col":  "Activo",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  11,
+                     "col":  "DVH",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  12,
+                     "col":  "FechaVencimiento",
+                     "tipo":  "date",
+                     "len":  3,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  13,
+                     "col":  "FechaLimiteGracia",
+                     "tipo":  "date",
+                     "len":  3,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  14,
+                     "col":  "FechaPausaHasta",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  15,
+                     "col":  "IdClienteReferente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  16,
+                     "col":  "DescuentoProximoCobro",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Cliente",
+                     "ord":  17,
+                     "col":  "BeneficioReferidoOtorgado",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  1,
+                     "col":  "IdContratacion",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  2,
+                     "col":  "IdCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  3,
+                     "col":  "IdPlan",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  4,
+                     "col":  "IdVendedor",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  5,
+                     "col":  "IdCaja",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  6,
+                     "col":  "Modalidad",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  7,
+                     "col":  "Estado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  8,
+                     "col":  "IntentosPago",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  9,
+                     "col":  "FechaAlta",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  10,
+                     "col":  "FechaResolucion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  11,
+                     "col":  "MedioPago",
+                     "tipo":  "nvarchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  12,
+                     "col":  "NumeroComprobante",
+                     "tipo":  "nvarchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  13,
+                     "col":  "FechaComprobante",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  14,
+                     "col":  "Importe",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  15,
+                     "col":  "DescuentoAplicado",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Contratacion",
+                     "ord":  16,
+                     "col":  "IdPromocion",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Control",
+                     "ord":  1,
+                     "col":  "IdControl",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Control",
+                     "ord":  2,
+                     "col":  "Clave",
+                     "tipo":  "varchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Control",
+                     "ord":  3,
+                     "col":  "Formulario",
+                     "tipo":  "varchar",
+                     "len":  50,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ControlMapeado",
+                     "ord":  1,
+                     "col":  "IdControlMapeado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "ControlMapeado",
+                     "ord":  2,
+                     "col":  "IdPermiso",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ControlMapeado",
+                     "ord":  3,
+                     "col":  "Formulario",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ControlMapeado",
+                     "ord":  4,
+                     "col":  "NombreControl",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "DVVertical",
+                     "ord":  1,
+                     "col":  "Id",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "DVVertical",
+                     "ord":  2,
+                     "col":  "NombreTabla",
+                     "tipo":  "varchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "DVVertical",
+                     "ord":  3,
+                     "col":  "DVV",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "DVVertical",
+                     "ord":  4,
+                     "col":  "FechaCalculo",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  1,
+                     "col":  "IdEmpleado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  2,
+                     "col":  "Nombre",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  3,
+                     "col":  "Apellido",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  4,
+                     "col":  "DNI",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  5,
+                     "col":  "Email",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  6,
+                     "col":  "FechaIngreso",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  7,
+                     "col":  "Puesto",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  8,
+                     "col":  "Legajo",
+                     "tipo":  "nvarchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  9,
+                     "col":  "IdUsuario",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Empleado",
+                     "ord":  10,
+                     "col":  "DVH",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialCobro",
+                     "ord":  1,
+                     "col":  "IdCobro",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "HistorialCobro",
+                     "ord":  2,
+                     "col":  "IdCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialCobro",
+                     "ord":  3,
+                     "col":  "Importe",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialCobro",
+                     "ord":  4,
+                     "col":  "FechaDeteccion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialCobro",
+                     "ord":  5,
+                     "col":  "FechaResolucion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialCobro",
+                     "ord":  6,
+                     "col":  "Resultado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialCobro",
+                     "ord":  7,
+                     "col":  "Actor",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialIntegridad",
+                     "ord":  1,
+                     "col":  "Id",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "HistorialIntegridad",
+                     "ord":  2,
+                     "col":  "NombreTabla",
+                     "tipo":  "varchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialIntegridad",
+                     "ord":  3,
+                     "col":  "DVVAlmacenado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialIntegridad",
+                     "ord":  4,
+                     "col":  "DVVCalculado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialIntegridad",
+                     "ord":  5,
+                     "col":  "Resultado",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialIntegridad",
+                     "ord":  6,
+                     "col":  "FilasCorruptas",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialIntegridad",
+                     "ord":  7,
+                     "col":  "FechaVerificacion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialIntegridad",
+                     "ord":  8,
+                     "col":  "DisparadoPor",
+                     "tipo":  "varchar",
+                     "len":  50,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialRenovacion",
+                     "ord":  1,
+                     "col":  "IdRenovacion",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "HistorialRenovacion",
+                     "ord":  2,
+                     "col":  "IdCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialRenovacion",
+                     "ord":  3,
+                     "col":  "IdPlanAnterior",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialRenovacion",
+                     "ord":  4,
+                     "col":  "IdPlanNuevo",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialRenovacion",
+                     "ord":  5,
+                     "col":  "FechaDeteccion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialRenovacion",
+                     "ord":  6,
+                     "col":  "FechaResolucion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialRenovacion",
+                     "ord":  7,
+                     "col":  "Resultado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialRenovacion",
+                     "ord":  8,
+                     "col":  "Actor",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  1,
+                     "col":  "IdVersion",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  2,
+                     "col":  "IdUsuario",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  3,
+                     "col":  "Fecha",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  4,
+                     "col":  "Actor",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  5,
+                     "col":  "Detalle",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  6,
+                     "col":  "UsernameSnap",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  7,
+                     "col":  "NombreSnap",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  8,
+                     "col":  "ApellidoSnap",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  9,
+                     "col":  "FechaNacSnap",
+                     "tipo":  "date",
+                     "len":  3,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  10,
+                     "col":  "EmailSnap",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  11,
+                     "col":  "ClaveSnap",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  12,
+                     "col":  "EstadoSnap",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "HistorialUsuario",
+                     "ord":  13,
+                     "col":  "IntentosSnap",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Idioma",
+                     "ord":  1,
+                     "col":  "IdIdioma",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Idioma",
+                     "ord":  2,
+                     "col":  "Codigo",
+                     "tipo":  "varchar",
+                     "len":  5,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Idioma",
+                     "ord":  3,
+                     "col":  "Nombre",
+                     "tipo":  "nvarchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Idioma",
+                     "ord":  4,
+                     "col":  "Activo",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Idioma",
+                     "ord":  5,
+                     "col":  "EsDefault",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ListaEspera",
+                     "ord":  1,
+                     "col":  "IdListaEspera",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "ListaEspera",
+                     "ord":  2,
+                     "col":  "IdPrenda",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ListaEspera",
+                     "ord":  3,
+                     "col":  "IdCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ListaEspera",
+                     "ord":  4,
+                     "col":  "FechaAlta",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ListaEspera",
+                     "ord":  5,
+                     "col":  "Estado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ListaEspera",
+                     "ord":  6,
+                     "col":  "FechaLimiteReserva",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ListaEspera",
+                     "ord":  7,
+                     "col":  "FechaResolucion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "ListaEspera",
+                     "ord":  8,
+                     "col":  "Actor",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "MantenimientoPrenda",
+                     "ord":  1,
+                     "col":  "IdMantenimiento",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "MantenimientoPrenda",
+                     "ord":  2,
+                     "col":  "IdPrenda",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "MantenimientoPrenda",
+                     "ord":  3,
+                     "col":  "FechaEntrada",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "MantenimientoPrenda",
+                     "ord":  4,
+                     "col":  "FechaSalida",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "MantenimientoPrenda",
+                     "ord":  5,
+                     "col":  "Actor",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  1,
+                     "col":  "IdPedido",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  2,
+                     "col":  "IdCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  3,
+                     "col":  "IdEmpleado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  4,
+                     "col":  "Estado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  5,
+                     "col":  "FechaPedido",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  6,
+                     "col":  "FechaDespacho",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  7,
+                     "col":  "FechaEntrega",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  8,
+                     "col":  "MotivoCancelacion",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Pedido",
+                     "ord":  9,
+                     "col":  "DVH",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  1,
+                     "col":  "IdHistorial",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  2,
+                     "col":  "IdPedido",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  3,
+                     "col":  "IdOperacion",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  4,
+                     "col":  "Fecha",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  5,
+                     "col":  "IdUsuario",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  6,
+                     "col":  "NombreUsuario",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  7,
+                     "col":  "Accion",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  8,
+                     "col":  "Campo",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  9,
+                     "col":  "ValorAnterior",
+                     "tipo":  "nvarchar",
+                     "len":  2000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoHistorial",
+                     "ord":  10,
+                     "col":  "ValorNuevo",
+                     "tipo":  "nvarchar",
+                     "len":  2000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoPrenda",
+                     "ord":  1,
+                     "col":  "IdPedido",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PedidoPrenda",
+                     "ord":  2,
+                     "col":  "IdPrenda",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Permiso",
+                     "ord":  1,
+                     "col":  "IdPermiso",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Permiso",
+                     "ord":  2,
+                     "col":  "Nombre",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Permiso",
+                     "ord":  3,
+                     "col":  "NombreMenu",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Permiso",
+                     "ord":  4,
+                     "col":  "TipoComponente",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Permiso",
+                     "ord":  5,
+                     "col":  "Estado",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Permiso",
+                     "ord":  6,
+                     "col":  "EsFamilia",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Permiso",
+                     "ord":  7,
+                     "col":  "EsRol",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PermisoRelacion",
+                     "ord":  1,
+                     "col":  "IdPadre",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PermisoRelacion",
+                     "ord":  2,
+                     "col":  "IdHijo",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PlanSuscripcion",
+                     "ord":  1,
+                     "col":  "IdPlan",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "PlanSuscripcion",
+                     "ord":  2,
+                     "col":  "Nombre",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PlanSuscripcion",
+                     "ord":  3,
+                     "col":  "LimitePrendas",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PlanSuscripcion",
+                     "ord":  4,
+                     "col":  "Precio",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "PlanSuscripcion",
+                     "ord":  5,
+                     "col":  "Estado",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Preferencia",
+                     "ord":  1,
+                     "col":  "IdUsuario",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Preferencia",
+                     "ord":  2,
+                     "col":  "FuenteFamilia",
+                     "tipo":  "nvarchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Preferencia",
+                     "ord":  3,
+                     "col":  "FuenteTamano",
+                     "tipo":  "varchar",
+                     "len":  10,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Preferencia",
+                     "ord":  4,
+                     "col":  "Tema",
+                     "tipo":  "varchar",
+                     "len":  20,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Preferencia",
+                     "ord":  5,
+                     "col":  "FormatoFecha",
+                     "tipo":  "varchar",
+                     "len":  20,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Preferencia",
+                     "ord":  6,
+                     "col":  "Notificaciones",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  1,
+                     "col":  "IdPrenda",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  2,
+                     "col":  "Nombre",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  3,
+                     "col":  "Descripcion",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  4,
+                     "col":  "Talle",
+                     "tipo":  "nvarchar",
+                     "len":  40,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  5,
+                     "col":  "Color",
+                     "tipo":  "nvarchar",
+                     "len":  100,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  6,
+                     "col":  "Categoria",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  7,
+                     "col":  "Estado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  8,
+                     "col":  "IdClienteActual",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  9,
+                     "col":  "FechaAlta",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  10,
+                     "col":  "IdUltimoCliente",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Prenda",
+                     "ord":  11,
+                     "col":  "PrecioReposicion",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  1,
+                     "col":  "IdPromocion",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  2,
+                     "col":  "Nombre",
+                     "tipo":  "nvarchar",
+                     "len":  300,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  3,
+                     "col":  "Descripcion",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  4,
+                     "col":  "TipoDescuento",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  5,
+                     "col":  "Valor",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  6,
+                     "col":  "FechaInicio",
+                     "tipo":  "date",
+                     "len":  3,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  7,
+                     "col":  "FechaFin",
+                     "tipo":  "date",
+                     "len":  3,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  8,
+                     "col":  "Estado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  9,
+                     "col":  "IdPlan",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  10,
+                     "col":  "CategoriaPrenda",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  11,
+                     "col":  "MargenEstimado",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  12,
+                     "col":  "ImpactoEconomico",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  13,
+                     "col":  "Observacion",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  14,
+                     "col":  "MotivoBaja",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  15,
+                     "col":  "IdSugerenciaOrigen",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Promocion",
+                     "ord":  16,
+                     "col":  "FechaAlta",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "RolPermiso",
+                     "ord":  1,
+                     "col":  "Rol",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "RolPermiso",
+                     "ord":  2,
+                     "col":  "IdPermiso",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "SugerenciaPromocion",
+                     "ord":  1,
+                     "col":  "IdSugerencia",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "SugerenciaPromocion",
+                     "ord":  2,
+                     "col":  "IdPlan",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "SugerenciaPromocion",
+                     "ord":  3,
+                     "col":  "CategoriaPrenda",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "SugerenciaPromocion",
+                     "ord":  4,
+                     "col":  "Motivo",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "SugerenciaPromocion",
+                     "ord":  5,
+                     "col":  "TipoDescuentoSugerido",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "SugerenciaPromocion",
+                     "ord":  6,
+                     "col":  "BeneficioEstimado",
+                     "tipo":  "decimal",
+                     "len":  9,
+                     "prec":  10,
+                     "sc":  2,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "SugerenciaPromocion",
+                     "ord":  7,
+                     "col":  "Estado",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "SugerenciaPromocion",
+                     "ord":  8,
+                     "col":  "FechaAlta",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Traduccion",
+                     "ord":  1,
+                     "col":  "IdControl",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Traduccion",
+                     "ord":  2,
+                     "col":  "IdIdioma",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Traduccion",
+                     "ord":  3,
+                     "col":  "Texto",
+                     "tipo":  "nvarchar",
+                     "len":  2000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  1,
+                     "col":  "IdUsuario",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  true
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  2,
+                     "col":  "Username",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  3,
+                     "col":  "Clave",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  4,
+                     "col":  "Rol",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  5,
+                     "col":  "Perfil",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  6,
+                     "col":  "Estado",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  7,
+                     "col":  "IntentosFallidos",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  8,
+                     "col":  "DVH",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  9,
+                     "col":  "IdIdioma",
+                     "tipo":  "varchar",
+                     "len":  5,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  10,
+                     "col":  "Activo",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  11,
+                     "col":  "FechaBaja",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  12,
+                     "col":  "CantidadBloqueos",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  13,
+                     "col":  "FechaBloqueo",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  14,
+                     "col":  "RequiereCambioClave",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  15,
+                     "col":  "Nombre",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  16,
+                     "col":  "Apellido",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  17,
+                     "col":  "FechaNacimiento",
+                     "tipo":  "date",
+                     "len":  3,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario",
+                     "ord":  18,
+                     "col":  "Email",
+                     "tipo":  "nvarchar",
+                     "len":  400,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  1,
+                     "col":  "IdUsuario",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  2,
+                     "col":  "Username",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  3,
+                     "col":  "Clave",
+                     "tipo":  "nvarchar",
+                     "len":  1000,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  4,
+                     "col":  "Rol",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  5,
+                     "col":  "Perfil",
+                     "tipo":  "nvarchar",
+                     "len":  200,
+                     "prec":  0,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  6,
+                     "col":  "Estado",
+                     "tipo":  "bit",
+                     "len":  1,
+                     "prec":  1,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  7,
+                     "col":  "IntentosFallidos",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  false,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  8,
+                     "col":  "DVH",
+                     "tipo":  "int",
+                     "len":  4,
+                     "prec":  10,
+                     "sc":  0,
+                     "nulo":  true,
+                     "ident":  false
+                 },
+                 {
+                     "tabla":  "Usuario_Seguridad",
+                     "ord":  9,
+                     "col":  "FechaActualizacion",
+                     "tipo":  "datetime",
+                     "len":  8,
+                     "prec":  23,
+                     "sc":  3,
+                     "nulo":  false,
+                     "ident":  false
+                 }
+             ],
+    "fks":  [
+                {
+                    "fk":  "FK__Bitacora__usuari__47DBAE45",
+                    "hija":  "Bitacora",
+                    "colhija":  "usuario",
+                    "padre":  "Usuario",
+                    "colpadre":  "IdUsuario"
+                },
+                {
+                    "fk":  "FK__BitacoraN__IdUsu__68487DD7",
+                    "hija":  "BitacoraNegocio",
+                    "colhija":  "IdUsuario",
+                    "padre":  "Usuario",
+                    "colpadre":  "IdUsuario"
+                },
+                {
+                    "fk":  "FK__BitacoraN__IdCli__6B24EA82",
+                    "hija":  "BitacoraNegocio",
+                    "colhija":  "IdCliente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__BitacoraN__IdPre__6A30C649",
+                    "hija":  "BitacoraNegocio",
+                    "colhija":  "IdPrenda",
+                    "padre":  "Prenda",
+                    "colpadre":  "IdPrenda"
+                },
+                {
+                    "fk":  "FK__BitacoraN__IdPed__693CA210",
+                    "hija":  "BitacoraNegocio",
+                    "colhija":  "IdPedido",
+                    "padre":  "Pedido",
+                    "colpadre":  "IdPedido"
+                },
+                {
+                    "fk":  "FK__CargoPren__IdPre__1F98B2C1",
+                    "hija":  "CargoPrenda",
+                    "colhija":  "IdPrenda",
+                    "padre":  "Prenda",
+                    "colpadre":  "IdPrenda"
+                },
+                {
+                    "fk":  "FK__CargoPren__IdCli__208CD6FA",
+                    "hija":  "CargoPrenda",
+                    "colhija":  "IdCliente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__Cliente__IdClien__19DFD96B",
+                    "hija":  "Cliente",
+                    "colhija":  "IdClienteReferente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__Cliente__IdPlan__4F7CD00D",
+                    "hija":  "Cliente",
+                    "colhija":  "IdPlan",
+                    "padre":  "PlanSuscripcion",
+                    "colpadre":  "IdPlan"
+                },
+                {
+                    "fk":  "FK__Contratac__IdPla__2BFE89A6",
+                    "hija":  "Contratacion",
+                    "colhija":  "IdPlan",
+                    "padre":  "PlanSuscripcion",
+                    "colpadre":  "IdPlan"
+                },
+                {
+                    "fk":  "FK_Contratacion_Promocion",
+                    "hija":  "Contratacion",
+                    "colhija":  "IdPromocion",
+                    "padre":  "Promocion",
+                    "colpadre":  "IdPromocion"
+                },
+                {
+                    "fk":  "FK__Contratac__IdVen__2CF2ADDF",
+                    "hija":  "Contratacion",
+                    "colhija":  "IdVendedor",
+                    "padre":  "Empleado",
+                    "colpadre":  "IdEmpleado"
+                },
+                {
+                    "fk":  "FK__Contratac__IdCaj__2DE6D218",
+                    "hija":  "Contratacion",
+                    "colhija":  "IdCaja",
+                    "padre":  "Empleado",
+                    "colpadre":  "IdEmpleado"
+                },
+                {
+                    "fk":  "FK__Contratac__IdCli__2B0A656D",
+                    "hija":  "Contratacion",
+                    "colhija":  "IdCliente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK_ControlMapeado_Permiso",
+                    "hija":  "ControlMapeado",
+                    "colhija":  "IdPermiso",
+                    "padre":  "Permiso",
+                    "colpadre":  "IdPermiso"
+                },
+                {
+                    "fk":  "FK__Empleado__IdUsua__4CA06362",
+                    "hija":  "Empleado",
+                    "colhija":  "IdUsuario",
+                    "padre":  "Usuario",
+                    "colpadre":  "IdUsuario"
+                },
+                {
+                    "fk":  "FK__Historial__IdCli__17036CC0",
+                    "hija":  "HistorialCobro",
+                    "colhija":  "IdCliente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__Historial__IdCli__114A936A",
+                    "hija":  "HistorialRenovacion",
+                    "colhija":  "IdCliente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__Historial__IdPla__123EB7A3",
+                    "hija":  "HistorialRenovacion",
+                    "colhija":  "IdPlanAnterior",
+                    "padre":  "PlanSuscripcion",
+                    "colpadre":  "IdPlan"
+                },
+                {
+                    "fk":  "FK__Historial__IdPla__1332DBDC",
+                    "hija":  "HistorialRenovacion",
+                    "colhija":  "IdPlanNuevo",
+                    "padre":  "PlanSuscripcion",
+                    "colpadre":  "IdPlan"
+                },
+                {
+                    "fk":  "FK__Historial__IdUsu__797309D9",
+                    "hija":  "HistorialUsuario",
+                    "colhija":  "IdUsuario",
+                    "padre":  "Usuario",
+                    "colpadre":  "IdUsuario"
+                },
+                {
+                    "fk":  "FK__ListaEspe__IdCli__2645B050",
+                    "hija":  "ListaEspera",
+                    "colhija":  "IdCliente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__ListaEspe__IdPre__25518C17",
+                    "hija":  "ListaEspera",
+                    "colhija":  "IdPrenda",
+                    "padre":  "Prenda",
+                    "colpadre":  "IdPrenda"
+                },
+                {
+                    "fk":  "FK__Mantenimi__IdPre__0C85DE4D",
+                    "hija":  "MantenimientoPrenda",
+                    "colhija":  "IdPrenda",
+                    "padre":  "Prenda",
+                    "colpadre":  "IdPrenda"
+                },
+                {
+                    "fk":  "FK__Pedido__IdEmplea__59FA5E80",
+                    "hija":  "Pedido",
+                    "colhija":  "IdEmpleado",
+                    "padre":  "Empleado",
+                    "colpadre":  "IdEmpleado"
+                },
+                {
+                    "fk":  "FK__Pedido__IdClient__59063A47",
+                    "hija":  "Pedido",
+                    "colhija":  "IdCliente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__PedidoHis__IdPed__628FA481",
+                    "hija":  "PedidoHistorial",
+                    "colhija":  "IdPedido",
+                    "padre":  "Pedido",
+                    "colpadre":  "IdPedido"
+                },
+                {
+                    "fk":  "FK__PedidoHis__IdUsu__6477ECF3",
+                    "hija":  "PedidoHistorial",
+                    "colhija":  "IdUsuario",
+                    "padre":  "Usuario",
+                    "colpadre":  "IdUsuario"
+                },
+                {
+                    "fk":  "FK__PedidoPre__IdPre__5FB337D6",
+                    "hija":  "PedidoPrenda",
+                    "colhija":  "IdPrenda",
+                    "padre":  "Prenda",
+                    "colpadre":  "IdPrenda"
+                },
+                {
+                    "fk":  "FK__PedidoPre__IdPed__5EBF139D",
+                    "hija":  "PedidoPrenda",
+                    "colhija":  "IdPedido",
+                    "padre":  "Pedido",
+                    "colpadre":  "IdPedido"
+                },
+                {
+                    "fk":  "FK__PermisoRe__IdPad__70DDC3D8",
+                    "hija":  "PermisoRelacion",
+                    "colhija":  "IdPadre",
+                    "padre":  "Permiso",
+                    "colpadre":  "IdPermiso"
+                },
+                {
+                    "fk":  "FK__PermisoRe__IdHij__71D1E811",
+                    "hija":  "PermisoRelacion",
+                    "colhija":  "IdHijo",
+                    "padre":  "Permiso",
+                    "colpadre":  "IdPermiso"
+                },
+                {
+                    "fk":  "FK_Preferencia_Usuario",
+                    "hija":  "Preferencia",
+                    "colhija":  "IdUsuario",
+                    "padre":  "Usuario",
+                    "colpadre":  "IdUsuario"
+                },
+                {
+                    "fk":  "FK__Prenda__IdClient__5535A963",
+                    "hija":  "Prenda",
+                    "colhija":  "IdClienteActual",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__Prenda__IdUltimo__1CBC4616",
+                    "hija":  "Prenda",
+                    "colhija":  "IdUltimoCliente",
+                    "padre":  "Cliente",
+                    "colpadre":  "IdCliente"
+                },
+                {
+                    "fk":  "FK__Promocion__IdPla__40058253",
+                    "hija":  "Promocion",
+                    "colhija":  "IdPlan",
+                    "padre":  "PlanSuscripcion",
+                    "colpadre":  "IdPlan"
+                },
+                {
+                    "fk":  "FK__Promocion__IdSug__41EDCAC5",
+                    "hija":  "Promocion",
+                    "colhija":  "IdSugerenciaOrigen",
+                    "padre":  "SugerenciaPromocion",
+                    "colpadre":  "IdSugerencia"
+                },
+                {
+                    "fk":  "FK__RolPermis__IdPer__6E01572D",
+                    "hija":  "RolPermiso",
+                    "colhija":  "IdPermiso",
+                    "padre":  "Permiso",
+                    "colpadre":  "IdPermiso"
+                },
+                {
+                    "fk":  "FK__Sugerenci__IdPla__3587F3E0",
+                    "hija":  "SugerenciaPromocion",
+                    "colhija":  "IdPlan",
+                    "padre":  "PlanSuscripcion",
+                    "colpadre":  "IdPlan"
+                },
+                {
+                    "fk":  "FK__Traduccio__IdIdi__75A278F5",
+                    "hija":  "Traduccion",
+                    "colhija":  "IdIdioma",
+                    "padre":  "Idioma",
+                    "colpadre":  "IdIdioma"
+                },
+                {
+                    "fk":  "FK__Traduccio__IdCon__74AE54BC",
+                    "hija":  "Traduccion",
+                    "colhija":  "IdControl",
+                    "padre":  "Control",
+                    "colpadre":  "IdControl"
+                }
+            ]
+}

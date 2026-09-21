@@ -1,0 +1,41 @@
+classDiagram
+  direction TB
+  class BLL_Comandos_InvocadorPedido["BLL.Comandos.InvocadorPedido"] {
+    +TomarOrden(PedidoCommand) void
+    +ProcesarOrdenes() void
+  }
+  class BLL_Comandos_PedidoCommand["BLL.Comandos.PedidoCommand"] {
+    <<abstract>>
+    +Ejecutar() void
+  }
+  class BLL_Comandos_CancelacionCommand["BLL.Comandos.CancelacionCommand"] {
+    +Ejecutar() void
+  }
+  class BLL_Comandos_DevolucionCommand["BLL.Comandos.DevolucionCommand"] {
+    +Ejecutar() void
+  }
+  class BLL_Interfaces_IPedidoService["BLL.Interfaces.IPedidoService"] {
+    <<interface>>
+    +RegistrarDevolucion(string,  Pedido) void
+    +Cancelar(string,  Pedido,  string) void
+  }
+  class BLL_Pedido["BLL.Pedido"] {
+    +RegistrarDevolucion(string,  Pedido) void
+    +Cancelar(string,  Pedido,  string) void
+  }
+  class Pedido {
+    +int IdPedido
+    +EstadoPedido Estado
+  }
+  BLL_Comandos_PedidoCommand ..> BLL_Interfaces_IPedidoService : usa
+  BLL_Comandos_PedidoCommand ..> BLL_Pedido : usa
+  BLL_Comandos_PedidoCommand <|-- BLL_Comandos_CancelacionCommand
+  BLL_Comandos_CancelacionCommand ..> BLL_Interfaces_IPedidoService : usa
+  BLL_Comandos_CancelacionCommand ..> BLL_Pedido : usa
+  BLL_Comandos_PedidoCommand <|-- BLL_Comandos_DevolucionCommand
+  BLL_Comandos_DevolucionCommand ..> BLL_Interfaces_IPedidoService : usa
+  BLL_Comandos_DevolucionCommand ..> BLL_Pedido : usa
+  BLL_Interfaces_IPedidoService <|.. BLL_Pedido
+  BLL_Comandos_InvocadorPedido --> "*" BLL_Comandos_PedidoCommand : órdenes
+  BLL_Comandos_PedidoCommand --> "1" BLL_Interfaces_IPedidoService : receptor
+  BLL_Comandos_PedidoCommand --> "1" Pedido : pedido

@@ -1,0 +1,29 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as Renovacion<br/>SuscripcionForm
+  participant B as BLL.Renovacion
+  participant H1 as Verificar<br/>VencimientoHandler
+  participant H2 as Intentar<br/>RenovarHandler
+  participant H3 as CambioPlan / Pausar / Baja Handler
+  participant D as DAL.Cliente + DAL.Renovacion
+  V->>F: Elige cliente y decisión (Renovar, Cambiar plan, Pausar, Baja)
+  F->>B: Procesar(modulo, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta)
+  Note over B: Exigir(ClientesEditar) · el cliente debe tener plan
+  B->>H1: Procesar(contexto)
+  alt Ni vencida ni próxima a vencer (y la decisión no es Pausar)
+    H1-->>B: Resultado: Pendiente (todavía no corresponde renovar)
+  else Vencida, próxima a vencer o decisión Pausar
+    H1->>H2: DelegarASucesor(contexto)
+    alt Decisión = Renovar
+      H2->>D: EjecutarTransaccion(ModificarEnTx + AltaEnTx HistorialRenovacion)
+      H2-->>B: Resultado: Renovada (nuevo vencimiento por Builder)
+    else Otra decisión
+      H2->>H3: DelegarASucesor(contexto)
+      H3->>D: CambiarPlan / Pausar (tope 3 meses, sin prendas en uso) / Baja (exige devolución)
+      H3-->>B: Resultado: CambioPlan, Pausada o Baja
+    end
+  end
+  B->>D: RecalcularDV() · Bitácoras
+  B-->>F: ResultadoRenovacion (mensaje traducible)
+  F-->>V: Informa el resultado

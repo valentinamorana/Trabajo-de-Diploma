@@ -1,0 +1,97 @@
+classDiagram
+  direction TB
+  class Pedido {
+    +int IdPedido
+    +int IdCliente
+    +int IdEmpleado
+    +EstadoPedido Estado
+    +DateTime FechaPedido
+    +DateTime? FechaDespacho
+    +DateTime? FechaEntrega
+    +string MotivoCancelacion
+    +string NombreCliente
+    +string NombreEmpleado
+    +List~Prenda~ Prendas
+    +int CantidadPrendas
+    +string Resumen
+    +int DiasDesdeAlta
+    +bool EsUrgentePorAntiguedad
+  }
+  class Prenda {
+    +int IdPrenda
+    +DateTime FechaAlta
+    +string Nombre
+    +string Descripcion
+    +string Talle
+    +string Color
+    +string Categoria
+    +EstadoPrenda Estado
+    +int? IdClienteActual
+    +int? IdUltimoCliente
+    +decimal? PrecioReposicion
+    +string ResumenEstado
+  }
+  class ListaEspera {
+    +int IdListaEspera
+    +int IdPrenda
+    +int IdCliente
+    +DateTime FechaAlta
+    +EstadoListaEspera Estado
+    +DateTime? FechaLimiteReserva
+    +DateTime? FechaResolucion
+    +string Actor
+    +bool ReservaVigente
+    +bool ReservaExpirada
+  }
+  class Cliente {
+    +int IdCliente
+    +string Nombre
+    +string Apellido
+    +int? IdPlan
+    +int StockUtilizado
+    +DateTime? FechaVencimiento
+    +DateTime? FechaPausaHasta
+  }
+  class PlanSuscripcion {
+    +int IdPlan
+    +string Nombre
+    +int LimitePrendas
+  }
+  class BLL_Pedido["BLL.Pedido"] {
+    +CrearPedido(string,  int,  List~Prenda~) int
+    +ValidarPuedeArmarPedido(int) Cliente
+    +Despachar(string,  Pedido) void
+    +MarcarEntregado(string,  Pedido) void
+    +RegistrarDevolucion(string,  Pedido) void
+    +Cancelar(string,  Pedido,  string) void
+    +DesCancelar(string,  Pedido) void
+    +ValidarCupoDisponible(Cliente,  int) PlanSuscripcion
+    +ReservarPrendas(List~Prenda~,  int) int
+  }
+  class BLL_Prenda["BLL.Prenda"] {
+    +ObtenerDisponibles(int?) List~Prenda~
+    +CambiarEstado(string,  Prenda,  EstadoPrenda,  string,  bool,  bool) void
+    +VerificarDisponibilidad(List~Prenda~) bool Disponible, List~Prenda~ NoDisponibles
+  }
+  class BLL_ListaEspera["BLL.ListaEspera"] {
+    +NotificarSiCorresponde(int,  string) void
+    +EstaReservadaParaOtro(int,  int) bool
+    +CerrarSiReservada(string,  int,  int,  string) void
+  }
+  class DAL_Interfaces_IPedidoDAL["DAL.Interfaces.IPedidoDAL"] {
+    <<interface>>
+    +Alta(Pedido) int
+    +Despachar(int) void
+    +MarcarEntregado(int) void
+    +RegistrarDevolucion(int,  int) int
+    +Cancelar(int,  string) void
+    +DesCancelar(int,  int) bool
+  }
+  Pedido --> "1" Cliente : IdCliente
+  Pedido --> "*" Prenda : Prendas
+  Prenda --> "0..1" Cliente : IdClienteActual
+  Prenda --> "0..1" Cliente : IdUltimoCliente
+  ListaEspera --> "1" Prenda : IdPrenda
+  ListaEspera --> "1" Cliente : IdCliente
+  Cliente --> "0..1" PlanSuscripcion : IdPlan
+  BLL_Pedido ..> DAL_Interfaces_IPedidoDAL : usa

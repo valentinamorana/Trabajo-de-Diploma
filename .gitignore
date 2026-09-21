@@ -29,3 +29,6 @@ TestResults/
 
 # Carpeta de trabajo local de Claude Code (worktrees temporales)
 .claude/worktrees/
+
+# Imágenes generadas (se regeneran con mmdc)
+docs/diagramas/png/

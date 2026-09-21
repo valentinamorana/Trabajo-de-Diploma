@@ -125,3 +125,22 @@ Si cambia el esquema de la base, volver a extraer `fuente/schema.json` (tablas, 
 | `DSS_N01_CU04_GestionarPlanes` | N01 · CU04-VEN Gestionar planes de suscripción |
 | `DSS_PN03_CU02_GER_ConsultarAnalitica` | PN03 · CU02-GER Consultar analítica de negocio |
 
+
+## Mantener los diagramas al día
+
+Regla: **todo cambio en el código o en la base debe verse reflejado en los diagramas.** Está automatizado en parte:
+
+| Qué cambia | Qué pasa |
+|---|---|
+| Clases, atributos, métodos, herencia, dependencias | Se regeneran solos (`generar.js` lee los `.cs`). |
+| Tablas o columnas (`BD/00_Instalacion_Completa.sql`) | `verificar.js` detecta que `schema.json` quedó viejo; se actualiza con `node docs/diagramas/fuente/extraer-esquema.js`. |
+| Un método o clase que un diagrama de secuencia cita y ya no existe | `verificar.js` lo informa y hay que corregir `fuente/modelos/secuencias.js`. |
+| Un flujo nuevo o modificado (pasos, ramas, casos de uso, actividad) | **Es manual**: editar `fuente/modelos/*.js` (secuencias, actividades, casos de uso). |
+
+El gancho `.githooks/pre-commit` ejecuta `verificar.js --regenerar` cuando un commit toca código o la base, agrega los diagramas regenerados al commit y lo cancela si algo quedó desactualizado. Activarlo una vez por copia del repositorio:
+
+```
+git config core.hooksPath .githooks
+```
+
+Las imágenes del documento de la tesis no se actualizan solas: después de regenerar, volver a renderizar los `.mmd` (ver arriba) y reemplazar las figuras en el Word.

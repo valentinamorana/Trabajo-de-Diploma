@@ -13,9 +13,9 @@ sequenceDiagram
   alt Todavía no corresponde cobrar
     H1-->>B: Resultado: Pendiente
   else Vencida o próxima a vencer
-    H1->>H2: DelegarASucesor(contexto)
+    H1->>H2: Procesar(contexto) del sucesor
     alt Decisión = Cobrado
-      H2->>D: ObtenerPromocionesVigentes() · ObtenerPendientesPorCliente() (cargos)
+      H2->>D: ObtenerVigentes() · ObtenerPendientesPorCliente() (cargos)
       Note over H2: Importe = Precio mensual × meses de la modalidad − un solo descuento (promoción o crédito de referido) + cargos
       H2->>D: EjecutarTransaccion: ModificarEnTx + ConsumirCreditoEnTx + AltaEnTx(Cobro) + MarcarCobradosEnTx
       alt Otra sesión ya cobró los cargos pendientes
@@ -26,7 +26,7 @@ sequenceDiagram
       end
       H2-->>B: Resultado: Cobrado (nuevo vencimiento por Builder)
     else Decisión = Pago fallido
-      H2->>H3: DelegarASucesor(contexto)
+      H2->>H3: Procesar(contexto) del sucesor
       H3->>D: Primer fallo: gracia de 5 días · vencida la gracia: suspensión
       H3-->>B: Resultado: Gracia o Suspendido
     end

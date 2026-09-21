@@ -593,6 +593,21 @@ namespace Tests
         }
 
         [TestMethod]
+        public void RegistrarDevolucion_PedidoEntregado_DevuelveLasPrendasYRegistraElHistorial()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPedido.RegistrarDevolucionRespuesta = 2; // dos prendas pasan de En uso a En limpieza
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido { IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Entregado };
+
+            bll.RegistrarDevolucion("Test", pedido);
+
+            Assert.AreEqual(1, ctx.DalPedido.RegistrarDevolucionVeces, "La devolución (En uso a En limpieza, con mantenimiento) se hace una sola vez.");
+            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces, "Queda la operación DEVOLUCION en el historial.");
+        }
+
+        [TestMethod]
         public void RegistrarDevolucion_PedidoNoEntregado_LanzaDevolucionEstado()
         {
             LoginComoAdministrador();

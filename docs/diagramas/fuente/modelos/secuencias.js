@@ -37,12 +37,12 @@ module.exports = [
       c('B', 'H1', 'Procesar(contexto)'),
       { alt: 'Ni vencida ni próxima a vencer (y la decisión no es Pausar)', pasos: [r('H1', 'B', 'Resultado: Pendiente (todavía no corresponde renovar)')],
         sino: [{ etiqueta: 'Vencida, próxima a vencer o decisión Pausar', pasos: [
-          c('H1', 'H2', 'DelegarASucesor(contexto)'),
+          c('H1', 'H2', 'Procesar(contexto) del sucesor'),
           { alt: 'Decisión = Renovar', pasos: [
             c('H2', 'D', 'EjecutarTransaccion(ModificarEnTx + AltaEnTx HistorialRenovacion)'),
             r('H2', 'B', 'Resultado: Renovada (nuevo vencimiento por Builder)')
           ], sino: [{ etiqueta: 'Otra decisión', pasos: [
-            c('H2', 'H3', 'DelegarASucesor(contexto)'),
+            c('H2', 'H3', 'Procesar(contexto) del sucesor'),
             c('H3', 'D', 'CambiarPlan / Pausar (tope 3 meses, sin prendas en uso) / Baja (exige devolución)'),
             r('H3', 'B', 'Resultado: CambioPlan, Pausada o Baja')
           ] }] }
@@ -61,15 +61,15 @@ module.exports = [
       c('B', 'H1', 'Procesar(contexto)'),
       { alt: 'Todavía no corresponde cobrar', pasos: [r('H1', 'B', 'Resultado: Pendiente')],
         sino: [{ etiqueta: 'Vencida o próxima a vencer', pasos: [
-          c('H1', 'H2', 'DelegarASucesor(contexto)'),
+          c('H1', 'H2', 'Procesar(contexto) del sucesor'),
           { alt: 'Decisión = Cobrado', pasos: [
-            c('H2', 'D', 'ObtenerPromocionesVigentes() · ObtenerPendientesPorCliente() (cargos)'),
+            c('H2', 'D', 'ObtenerVigentes() · ObtenerPendientesPorCliente() (cargos)'),
             nota('Importe = Precio mensual × meses de la modalidad − un solo descuento (promoción o crédito de referido) + cargos', 'H2'),
             c('H2', 'D', 'EjecutarTransaccion: ModificarEnTx + ConsumirCreditoEnTx + AltaEnTx(Cobro) + MarcarCobradosEnTx'),
             alt_cargo(),
             r('H2', 'B', 'Resultado: Cobrado (nuevo vencimiento por Builder)')
           ], sino: [{ etiqueta: 'Decisión = Pago fallido', pasos: [
-            c('H2', 'H3', 'DelegarASucesor(contexto)'),
+            c('H2', 'H3', 'Procesar(contexto) del sucesor'),
             c('H3', 'D', 'Primer fallo: gracia de 5 días · vencida la gracia: suspensión'),
             r('H3', 'B', 'Resultado: Gracia o Suspendido')
           ] }] }

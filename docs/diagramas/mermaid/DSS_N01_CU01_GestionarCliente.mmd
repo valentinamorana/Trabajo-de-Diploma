@@ -14,7 +14,7 @@ sequenceDiagram
     B-->>F: AppException(dni_duplicado)
     F-->>V: Informa el error
   else DNI nuevo
-    B->>D: Alta(cliente)  [DNI cifrado con AES]
+    B->>D: Alta(cliente)
     D-->>B: idCliente
     B->>L: Registrar(Alta Cliente) + BitacoraNegocio(AltaCliente)
     B-->>F: cliente registrado

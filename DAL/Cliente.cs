@@ -120,9 +120,7 @@ namespace DAL
             return BuscarIdPorDni(dni, idExcluir) != 0;
         }
 
-        // T03 — El DNI se almacena CIFRADO (AES con IV aleatorio), por lo que no se puede
-        // comparar por igualdad en SQL. Se trae el DNI de cada cliente activo, se descifra
-        // (TryDesencriptar tolera registros legacy en texto plano) y se compara en memoria.
+        // Busca un cliente activo con ese DNI (excluyendo el ID indicado). Devuelve 0 si no hay.
         private int BuscarIdPorDni(string dni, int idExcluir)
         {
             DataTable tabla = acceso.Leer(
@@ -132,19 +130,7 @@ namespace DAL
             {
                 int id = Convert.ToInt32(row["IdCliente"]);
                 if (id == idExcluir) continue;
-                string dniCifrado = row["DNI"].ToString();
-                string dniGuardado = Seguridad.Encriptador.TryDesencriptar(dniCifrado);
-                // Si el descifrado "falló" (TryDesencriptar devuelve el valor cifrado tal
-                // cual), ese cliente queda invisible para la detección de duplicados: nunca
-                // puede volver a matchear contra un DNI nuevo tipeado en texto plano. No hay
-                // forma de arreglarlo sin la clave correcta, pero al menos queda registrado
-                // para poder diagnosticarlo (antes fallaba en silencio).
-                if (dniGuardado == dniCifrado)
-                    System.Diagnostics.Trace.TraceWarning(
-                        "[DAL.Cliente.BuscarIdPorDni] Cliente ID " + id +
-                        " tiene un DNI que no se pudo descifrar con la clave actual " +
-                        "(key.dat no coincide con la usada al cifrarlo) — excluido de la detección de duplicados.");
-                else if (string.Equals(dniGuardado, dni, StringComparison.Ordinal))
+                if (string.Equals(row["DNI"].ToString(), dni, StringComparison.Ordinal))
                     return id;
             }
             return 0;
@@ -157,7 +143,7 @@ namespace DAL
             {
                 new SqlParameter("@Nombre",            cliente.Nombre),
                 new SqlParameter("@Apellido",          cliente.Apellido),
-                new SqlParameter("@DNI",               Seguridad.Encriptador.Encriptar(cliente.DNI)),
+                new SqlParameter("@DNI",               cliente.DNI),
                 new SqlParameter("@Email",             (object)cliente.Email ?? DBNull.Value),
                 new SqlParameter("@MetodoPago",        cliente.MetodoPago),
                 new SqlParameter("@IdPlan",            (object)cliente.IdPlan ?? DBNull.Value),
@@ -187,7 +173,7 @@ namespace DAL
             {
                 new SqlParameter("@Nombre",           cliente.Nombre),
                 new SqlParameter("@Apellido",         cliente.Apellido),
-                new SqlParameter("@DNI",              Seguridad.Encriptador.Encriptar(cliente.DNI)),
+                new SqlParameter("@DNI",              cliente.DNI),
                 new SqlParameter("@Email",            (object)cliente.Email ?? DBNull.Value),
                 new SqlParameter("@MetodoPago",       cliente.MetodoPago),
                 new SqlParameter("@IdPlan",           (object)cliente.IdPlan ?? DBNull.Value),
@@ -235,7 +221,7 @@ namespace DAL
             {
                 cmd.Parameters.AddWithValue("@Nombre", cliente.Nombre);
                 cmd.Parameters.AddWithValue("@Apellido", cliente.Apellido);
-                cmd.Parameters.AddWithValue("@DNI", Seguridad.Encriptador.Encriptar(cliente.DNI));
+                cmd.Parameters.AddWithValue("@DNI", cliente.DNI);
                 cmd.Parameters.AddWithValue("@Email", (object)cliente.Email ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@MetodoPago", cliente.MetodoPago);
                 cmd.Parameters.AddWithValue("@IdPlan", (object)cliente.IdPlan ?? DBNull.Value);
@@ -294,7 +280,7 @@ namespace DAL
                 IdCliente      = Convert.ToInt32(row["IdCliente"]),
                 Nombre         = row["Nombre"].ToString(),
                 Apellido       = row["Apellido"].ToString(),
-                DNI            = Seguridad.Encriptador.TryDesencriptar(row["DNI"].ToString()),
+                DNI            = row["DNI"].ToString(),
                 Email          = row["Email"] != DBNull.Value ? row["Email"].ToString() : null,
                 MetodoPago     = row["MetodoPago"].ToString(),
                 IdPlan         = row["IdPlan"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPlan"]) : null,

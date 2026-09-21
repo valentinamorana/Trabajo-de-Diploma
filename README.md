@@ -24,7 +24,7 @@ Este repositorio parte de la base construida durante la materia Ingeniería de S
 | UI | Windows Forms (MDI) |
 | Base de datos | SQL Server |
 | Acceso a datos | ADO.NET puro (sin ORM) |
-| Encriptado | PBKDF2-SHA256 (contraseñas) · AES-128-CBC (datos sensibles) |
+| Encriptado | PBKDF2-SHA256 (contraseñas) · AES-128 + PBKDF2 (backups .wfbak) |
 
 ---
 
@@ -199,7 +199,6 @@ State ya entregado (PdN2/PdN4) sin tocarlo.
 ## Características de seguridad
 
 - Contraseñas nunca en texto plano: PBKDF2-SHA256 con salt aleatorio y 100.000 iteraciones; verificación en tiempo constante
-- Datos sensibles (DNI) encriptados con AES-128-CBC
 - Bloqueo de login progresivo (1 → 5 → 15 → 60 min) con claves de emergencia de un solo uso
 - Handler global de excepciones no controladas: registra el detalle técnico en bitácora y muestra un mensaje genérico al usuario
 - Dígitos verificadores (DVH por fila + DVV por tabla) sobre `Usuario`, `Cliente` y `Empleado`

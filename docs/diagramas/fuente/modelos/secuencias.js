@@ -19,7 +19,7 @@ module.exports = [
       r('D', 'B', 'existe: bool'),
       { alt: 'DNI ya registrado', pasos: [r('B', 'F', 'AppException(dni_duplicado)'), r('F', 'V', 'Informa el error')],
         sino: [{ etiqueta: 'DNI nuevo', pasos: [
-          c('B', 'D', 'Alta(cliente)  [DNI cifrado con AES]'),
+          c('B', 'D', 'Alta(cliente)'),
           r('D', 'B', 'idCliente'),
           c('B', 'L', 'Registrar(Alta Cliente) + BitacoraNegocio(AltaCliente)'),
           r('B', 'F', 'cliente registrado'),

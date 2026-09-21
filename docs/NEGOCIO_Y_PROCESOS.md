@@ -113,7 +113,7 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 | Tabla | Entidad `BE` | Campos clave |
 |---|---|---|
 | `PlanSuscripcion` | `PlanSuscripcion` | `Nombre`, `LimitePrendas`, `Precio` (= **precio de un mes**; cada cobro = `Precio` × meses de la modalidad), `Estado` (activo) |
-| `Cliente` | `Cliente` | `DNI` cifrado (AES), `IdPlan`, `FechaVencimiento`, `FechaLimiteGracia`, `FechaPausaHasta`, `IdClienteReferente`, `DescuentoProximoCobro`, `BeneficioReferidoOtorgado`, `DVH` |
+| `Cliente` | `Cliente` | `DNI`, `IdPlan`, `FechaVencimiento`, `FechaLimiteGracia`, `FechaPausaHasta`, `IdClienteReferente`, `DescuentoProximoCobro`, `BeneficioReferidoOtorgado`, `DVH` |
 | `Empleado` | `Empleado` | `IdUsuario` (vínculo con `Usuario`), `Legajo` |
 | `Prenda` | `Prenda` | `Estado` (0–3), `IdClienteActual` (quién la tiene), `IdUltimoCliente` (nunca se limpia), `PrecioReposicion`, `Talle/Color/Categoria` |
 | `Pedido` / `PedidoPrenda` / `PedidoHistorial` | `Pedido`, `PedidoHistorial` | `Estado` (0–3), fechas de despacho/entrega, `MotivoCancelacion`; el historial permite restaurar operaciones |
@@ -367,7 +367,7 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 | Tema | Regla | Ubicación |
 |---|---|---|
 | **Contraseñas** | PBKDF2-SHA256, sal aleatoria de 16 B, **100 000 iteraciones**, verificación en tiempo constante | `Seguridad/Encriptador.cs` |
-| **Datos sensibles** | DNI del cliente cifrado con **AES-128-CBC**; el DNI no se escribe en la bitácora | `Seguridad/Encriptador.cs`, `BLL/Cliente.cs` |
+| **Datos sensibles** | El DNI se guarda en texto plano (se quitó el cifrado AES); igualmente no se escribe en la bitácora | `Seguridad/Encriptador.cs`, `BLL/Cliente.cs` |
 | **Login** | 3 intentos fallidos bloquean; bloqueo **progresivo** (1/5/15/60 min); claves de emergencia de autodesbloqueo del admin | `BLL/Usuario.Autenticacion.cs`, `BLL/RecuperacionAdmin.cs`, `Seguridad/ContadorSesion.cs` |
 | **Integridad** | DVH (por fila) y DVV (por tabla) sobre Usuario, Cliente, Empleado, Pedido; al iniciar, filas con `DVH=0` se **recalculan** (no es falsa alarma); una discrepancia real bloquea el login hasta que el Administrador repara | `Seguridad/DigitoVerificador.cs`, `BLL/Configuracion.cs › VerificarIntegridadDV` |
 | **Bitácora** | `Bitacora` (sistema, con criticidad) y `BitacoraNegocio` (eventos de negocio); toda escritura relevante deja rastro | `Servicios/Bitacora.cs`, `Servicios/BitacoraNegocio.cs` |

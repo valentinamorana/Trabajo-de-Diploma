@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
-    /// <summary>T03 — Pruebas de hash de contraseñas (PBKDF2) y cifrado simétrico (AES).</summary>
+    /// <summary>T03 — Pruebas de hash de contraseñas (PBKDF2).</summary>
     [TestClass]
     public class EncriptadorTests
     {
@@ -25,32 +25,6 @@ namespace Tests
         {
             // Mismo texto, hashes distintos → hay salt aleatorio.
             Assert.AreNotEqual(Seguridad.Encriptador.Hash("x"), Seguridad.Encriptador.Hash("x"));
-        }
-
-        [TestMethod]
-        public void Aes_RoundTrip()
-        {
-            string cifrado = Seguridad.Encriptador.Encriptar("12345678");
-            Assert.AreNotEqual("12345678", cifrado, "El texto cifrado no debe coincidir con el plano.");
-            Assert.AreEqual("12345678", Seguridad.Encriptador.Desencriptar(cifrado));
-        }
-
-        [TestMethod]
-        public void TryDesencriptar_ToleraTextoPlano()
-        {
-            // Un valor que no es un cifrado válido se devuelve tal cual (compat. con datos legacy).
-            Assert.AreEqual("texto-plano", Seguridad.Encriptador.TryDesencriptar("texto-plano"));
-        }
-
-        [TestMethod]
-        public void TryDesencriptar_ToleraDniLegacyNumericoCorto()
-        {
-            // Regresión: un DNI legacy sin cifrar ("30111222") tiene alfabeto y longitud
-            // válidos de Base64 "por casualidad", pero decodifica a menos de los 16 bytes
-            // mínimos del IV. Sin el chequeo de longitud en Desencriptar(), esto tiraba
-            // OverflowException (no capturada por TryDesencriptar) y crasheaba cualquier
-            // pantalla que listara clientes con DNI legacy en texto plano.
-            Assert.AreEqual("30111222", Seguridad.Encriptador.TryDesencriptar("30111222"));
         }
     }
 }

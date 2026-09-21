@@ -106,7 +106,7 @@ namespace DAL
             if (tabla == null) return false;
             foreach (DataRow row in tabla.Rows)
             {
-                string dniGuardado = Seguridad.Encriptador.TryDesencriptar(row["DNI"].ToString());
+                string dniGuardado = row["DNI"].ToString();
                 if (string.Equals(dniGuardado, dni, StringComparison.Ordinal)) return true;
             }
             return false;
@@ -119,7 +119,7 @@ namespace DAL
             {
                 new SqlParameter("@Nombre", empleado.Nombre),
                 new SqlParameter("@Apellido", empleado.Apellido),
-                new SqlParameter("@DNI", Seguridad.Encriptador.Encriptar(empleado.DNI)),
+                new SqlParameter("@DNI", empleado.DNI),
                 new SqlParameter("@Email", (object)empleado.Email ?? DBNull.Value),
                 new SqlParameter("@FechaIngreso", empleado.FechaIngreso),
                 new SqlParameter("@Puesto", (object)empleado.Puesto ?? DBNull.Value),
@@ -147,7 +147,7 @@ namespace DAL
             {
                 new SqlParameter("@Nombre", empleado.Nombre),
                 new SqlParameter("@Apellido", empleado.Apellido),
-                new SqlParameter("@DNI", Seguridad.Encriptador.Encriptar(empleado.DNI)),
+                new SqlParameter("@DNI", empleado.DNI),
                 new SqlParameter("@Email", (object)empleado.Email ?? DBNull.Value),
                 new SqlParameter("@FechaIngreso", empleado.FechaIngreso),
                 new SqlParameter("@Puesto", (object)empleado.Puesto ?? DBNull.Value),
@@ -170,7 +170,7 @@ namespace DAL
                 IdEmpleado = Convert.ToInt32(row["IdEmpleado"]),
                 Nombre = row["Nombre"].ToString(),
                 Apellido = row["Apellido"].ToString(),
-                DNI = Seguridad.Encriptador.TryDesencriptar(row["DNI"].ToString()),
+                DNI = row["DNI"].ToString(),
                 Email = row["Email"] != DBNull.Value ? row["Email"].ToString() : null,
                 FechaIngreso = Convert.ToDateTime(row["FechaIngreso"]),
                 Puesto = row["Puesto"] != DBNull.Value ? row["Puesto"].ToString() : null,

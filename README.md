@@ -52,6 +52,7 @@ BD/00_Instalacion_Completa.sql            Único script: esquema, datos semilla 
 Instalador/                               Script de Inno Setup, DbInstaller (cliente SQL embebido)
                                           y credenciales iniciales. El .exe se genera en
                                           Instalador/Salida/ y no se versiona
+docs/NEGOCIO_Y_PROCESOS.md               Documento de referencia: reglas y procesos de negocio, roles y arquitectura
 WardrobeFlow.slnx                         Solución de Visual Studio
 ```
 
@@ -74,10 +75,10 @@ WardrobeFlow.slnx                         Solución de Visual Studio
 
 | PN | Proceso | Rol(es) protagonista(s) | Detalle |
 |----|---------|--------------------------|---------|
-| PN01 | Verificación de disponibilidad al armar un pedido (split lógico "Depósito") | Vendedor / Deposito | `BLL.Pedido` relee el estado real de toda la selección por lote (`BLL.Prenda.VerificarDisponibilidad`) justo antes de confirmar — cierra la ventana TOCTOU entre elegir prendas y crear el pedido |
-| PN02 | Comercialización de la Suscripción | Vendedor (crea la contratación) / **Caja** (cobra y formaliza) | Rol `Caja` nuevo, separado de Vendedor a propósito (separación de funciones: quien vende no cobra) |
-| PN03 | Métricas, Promociones y Toma de Decisiones | GerenteComercial (sugiere) / **AdministracionComercial** (crea) / **Contabilidad** (aprueba) | 2 roles nuevos; quien redacta una promoción no es quien aprueba su impacto económico |
-| PN04 | Inspección de Devolución | Deposito ("Depósito") | Sin rol nuevo. Lógica binaria alineada a Nuuly (sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, ya existente desde Bloque 1) |
+| PN01 | Armar pedido de prendas | Vendedor / Deposito | `BLL.Pedido.ValidarPuedeArmarPedido` valida suscripción vigente, sin pausa ni suspensión, sin pedido despachado sin entregar y **cuenta desbloqueada** (sin prendas pendientes de devolución, como NUULY 4.2/4.6). El asistente lo avisa al elegir el cliente. La disponibilidad se relee por lote (`BLL.Prenda.VerificarDisponibilidad`) y la reserva es atómica (`UPDATE ... AND Estado = Disponible`) |
+| PN02 | Comercialización de la Suscripción | Vendedor (crea la contratación) / **Caja** (cobra y formaliza) | Rol `Caja` separado de Vendedor (quien vende no cobra). El cobro es un *claim* atómico (`UPDATE ... AND Estado = Pendiente`): dos sesiones de Caja no pueden cobrar la misma contratación, y si la activación falla se compensa reabriéndola. Rechaza planes dados de baja y muestra el importe con el descuento y el comprobante emitido |
+| PN03 | Métricas, Promociones y Toma de Decisiones | GerenteComercial (sugiere) / **AdministracionComercial** (crea y reformula) / **Contabilidad** (aprueba) | Circuito **reporte → sugerencia → Administración → Contabilidad → Vigente → se aplica al cobro**. Gerencia puede cargar ideas detectadas por los reportes de rotación y abandono (`BLL.AnalisisPromociones`). Regla de NUULY (5.1): **un solo descuento por ciclo**, el mayor entre la promoción vigente del plan y el crédito por referido (`BE.PoliticaDescuento`); el crédito no usado se acumula. Las promociones por categoría son informativas |
+| PN04 | Inspección de Devolución | Deposito ("Depósito") | Sin rol nuevo, sin aprobador: reingresa sin cargo o se da de baja registrando **antes** el cargo por el daño irreparable (decisión propia, a diferencia de NUULY que no cobra daños). En Limpieza → Baja solo desde la Inspección (la BLL lo exige). Al registrarse la devolución las prendas dejan de estar En Uso y la cuenta del cliente se desbloquea (PN01) |
 
 ---
 
@@ -238,6 +239,7 @@ Es el único archivo de esquema que se edita. Los scripts individuales que intro
 - **Comercialización de la suscripción (PN02)** — sección 17 en `00`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo (o usar el usuario demo `caja`).
 - **Métricas, promociones y toma de decisiones (PN03)** — sección 18 en `00`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay usuarios demo (`admcomercial`, `contable`) para probar el módulo sin dar de alta nada a mano.
 - **Inspección de Devolución (PN04)** — sección 19 en `00`. Sin rol nuevo: reusa el rol `Deposito` (el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
+- **Aplicación de promociones al cobro e integridad (PN02/PN03/PN04)** — sección 20b en `00`. Agrega `Importe`, `DescuentoAplicado` e `IdPromocion` a `Contratacion` (lo que realmente se cobró), los `CHECK` de `CargoPrenda.Monto` e `IntentosPago`, las restricciones únicas (una contratación pendiente por cliente, una anotación activa por prenda y cliente) y los índices de las tablas nuevas.
 - **Hardening de integridad (auditoría de BD)** — sección 20 en `00`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
 
 ### Cadena de conexión

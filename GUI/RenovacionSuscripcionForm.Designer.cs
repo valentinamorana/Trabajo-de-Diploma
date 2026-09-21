@@ -143,7 +143,6 @@ namespace GUI
             this.cmbModalidad.DataSource = Enum.GetValues(typeof(BE.Builders.ModalidadCobro));
             this.cmbModalidad.Location     = new Point(120, 287);
             this.cmbModalidad.Name         = "cmbModalidad";
-            this.cmbModalidad.SelectedIndex = 0;
             this.cmbModalidad.TabIndex     = 8;
             this.cmbModalidad.Width        = 200;
 

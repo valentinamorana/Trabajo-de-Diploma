@@ -170,7 +170,7 @@ namespace GUI
             this.btnCerrarVentana.Size                      = new System.Drawing.Size(28, 28);
             this.btnCerrarVentana.TabIndex                  = 28;
             this.btnCerrarVentana.TabStop                   = false;
-            this.btnCerrarVentana.Text                      = "X";
+            this.btnCerrarVentana.Text                      = "✕";
             this.btnCerrarVentana.UseVisualStyleBackColor    = false;
             this.btnCerrarVentana.Click += new System.EventHandler(this.btnCerrarVentana_Click);
 
@@ -368,7 +368,7 @@ namespace GUI
             this.lblIconoUsuario.Name       = "lblIconoUsuario";
             this.lblIconoUsuario.Size       = new System.Drawing.Size(26, 26);
             this.lblIconoUsuario.TabIndex   = 34;
-            this.lblIconoUsuario.Text       = "";
+            this.lblIconoUsuario.Text       = "👤";
             this.lblIconoUsuario.TextAlign  = System.Drawing.ContentAlignment.MiddleCenter;
 
             // ── lblContraseña — etiqueta "CONTRASEÑA" ─────────────────────
@@ -416,7 +416,7 @@ namespace GUI
             this.lblIconoContraseña.Name       = "lblIconoContraseña";
             this.lblIconoContraseña.Size       = new System.Drawing.Size(26, 26);
             this.lblIconoContraseña.TabIndex   = 35;
-            this.lblIconoContraseña.Text       = "";
+            this.lblIconoContraseña.Text       = "🔒";
             this.lblIconoContraseña.TextAlign  = System.Drawing.ContentAlignment.MiddleCenter;
 
             // ── btnMostrarClave — ojito mostrar/ocultar contraseña ──────────
@@ -431,7 +431,7 @@ namespace GUI
             this.btnMostrarClave.Size                      = new System.Drawing.Size(24, 26);
             this.btnMostrarClave.TabIndex                  = 36;
             this.btnMostrarClave.TabStop                   = false;
-            this.btnMostrarClave.Text                      = "Ver";
+            this.btnMostrarClave.Text                      = "👁";
             this.btnMostrarClave.UseVisualStyleBackColor    = false;
             this.btnMostrarClave.Click += new System.EventHandler(this.btnMostrarClave_Click);
 

@@ -21,6 +21,7 @@ namespace GUI
         public RenovacionSuscripcionForm()
         {
             InitializeComponent();
+            cmbModalidad.SelectedIndex = 0;
             Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
             Estilos.EstiloFormulario.BotonSecundario(btnReanudar);
         }

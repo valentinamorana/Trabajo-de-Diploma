@@ -22,6 +22,7 @@ namespace GUI
         public CobroSuscripcionForm()
         {
             InitializeComponent();
+            cmbModalidad.SelectedIndex = 0;
             Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
         }
 

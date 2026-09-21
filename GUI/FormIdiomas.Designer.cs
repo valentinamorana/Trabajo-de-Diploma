@@ -71,7 +71,7 @@ namespace GUI
             this.btnActivar.Name = "btnActivar";
             this.btnActivar.Size = new System.Drawing.Size(130, 28);
             this.btnActivar.TabIndex = 1;
-            this.btnActivar.Text = "✔ Activar";
+            this.btnActivar.Text = "Activar";
             this.btnActivar.UseVisualStyleBackColor = false;
             this.btnActivar.Click += new System.EventHandler(this.BtnActivar_Click);
             // 
@@ -84,7 +84,7 @@ namespace GUI
             this.btnDesactivar.Name = "btnDesactivar";
             this.btnDesactivar.Size = new System.Drawing.Size(130, 28);
             this.btnDesactivar.TabIndex = 2;
-            this.btnDesactivar.Text = "✕ Desactivar";
+            this.btnDesactivar.Text = "Desactivar";
             this.btnDesactivar.UseVisualStyleBackColor = false;
             this.btnDesactivar.Click += new System.EventHandler(this.BtnDesactivar_Click);
             //
@@ -99,7 +99,7 @@ namespace GUI
             this.btnNuevoIdioma.Name = "btnNuevoIdioma";
             this.btnNuevoIdioma.Size = new System.Drawing.Size(130, 28);
             this.btnNuevoIdioma.TabIndex = 3;
-            this.btnNuevoIdioma.Text = "➕ Nuevo idioma";
+            this.btnNuevoIdioma.Text = "Nuevo idioma";
             this.btnNuevoIdioma.UseVisualStyleBackColor = false;
             this.btnNuevoIdioma.Click += new System.EventHandler(this.BtnNuevoIdioma_Click);
             //
@@ -114,7 +114,7 @@ namespace GUI
             this.btnRenombrarIdioma.Name = "btnRenombrarIdioma";
             this.btnRenombrarIdioma.Size = new System.Drawing.Size(120, 28);
             this.btnRenombrarIdioma.TabIndex = 4;
-            this.btnRenombrarIdioma.Text = "✏ Renombrar";
+            this.btnRenombrarIdioma.Text = "Renombrar";
             this.btnRenombrarIdioma.UseVisualStyleBackColor = false;
             this.btnRenombrarIdioma.Click += new System.EventHandler(this.BtnRenombrarIdioma_Click);
             //
@@ -172,7 +172,7 @@ namespace GUI
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(138, 30);
             this.btnGuardar.TabIndex = 4;
-            this.btnGuardar.Text = "💾 Guardar cambios";
+            this.btnGuardar.Text = "Guardar cambios";
             this.btnGuardar.UseVisualStyleBackColor = false;
             this.btnGuardar.Click += new System.EventHandler(this.BtnGuardar_Click);
             // 

@@ -220,7 +220,7 @@ namespace GUI
             this.btnAnotarEspera.FlatAppearance.BorderSize = 0;
             this.btnAnotarEspera.Visible   = false;
             this.btnAnotarEspera.Tag       = "btn.anotarespera";
-            this.btnAnotarEspera.Text      = "⏳ Lista de Espera";
+            this.btnAnotarEspera.Text      = "Lista de Espera";
             this.btnAnotarEspera.Name      = "btnAnotarEspera";
             this.btnAnotarEspera.TabIndex  = 2;
             this.btnAnotarEspera.Click    += new System.EventHandler(this.BtnAnotarEspera_Click);

@@ -62,6 +62,7 @@ namespace GUI
             Aplicar(btnCobrar,         t);
             Aplicar(btnIntentoFallido, t);
             tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
+            btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
             TraducirHeadersGrilla(t);
             CargarMediosPago();
         }

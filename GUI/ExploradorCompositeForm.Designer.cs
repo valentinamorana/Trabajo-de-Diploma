@@ -78,7 +78,7 @@ namespace GUI
             this.lblLeyenda.Name      = "lblLeyenda";
             this.lblLeyenda.TabIndex  = 0;
             this.lblLeyenda.Tag       = "lbl.explorador.leyenda";
-            this.lblLeyenda.Text      = "📁 Familia (nodo compuesto — Área o Rol)    🔑 Patente (hoja — permiso atómico)";
+            this.lblLeyenda.Text      = "Familia (nodo compuesto — Área o Rol)    Patente (hoja — permiso atómico)";
 
             // ── treeView ───────────────────────────────────────────────────────
             this.treeView.BackColor     = System.Drawing.Color.FromArgb(252, 250, 252);
@@ -165,7 +165,7 @@ namespace GUI
             this.btnActualizar.Size      = new System.Drawing.Size(120, 32);
             this.btnActualizar.TabIndex  = 0;
             this.btnActualizar.Tag       = "btn.permisos.actualizar";
-            this.btnActualizar.Text      = "↻ Actualizar";
+            this.btnActualizar.Text      = "Actualizar";
             this.btnActualizar.UseVisualStyleBackColor = false;
             this.btnActualizar.Click += new System.EventHandler(this.BtnActualizar_Click);
 

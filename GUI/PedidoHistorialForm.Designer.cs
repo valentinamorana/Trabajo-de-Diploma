@@ -146,7 +146,7 @@ namespace GUI
             this.btnBuscar.Size      = new System.Drawing.Size(100, 28);
             this.btnBuscar.TabIndex  = 8;
             this.btnBuscar.Tag       = "btn.hist.buscar";
-            this.btnBuscar.Text      = "🔍 Buscar";
+            this.btnBuscar.Text      = "Buscar";
             this.btnBuscar.UseVisualStyleBackColor = false;
             this.btnBuscar.Click += new System.EventHandler(this.BtnBuscar_Click);
 

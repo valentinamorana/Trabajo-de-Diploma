@@ -494,7 +494,7 @@
             this.bitSistemaToolStripMenuItem.Name = "bitSistemaToolStripMenuItem";
             this.bitSistemaToolStripMenuItem.Tag = "mnu.bitacora.sistema";
             this.bitSistemaToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.bitSistemaToolStripMenuItem.Text = "🔐  Bitácora del Sistema";
+            this.bitSistemaToolStripMenuItem.Text = "Bitácora del Sistema";
             this.bitSistemaToolStripMenuItem.Click += new System.EventHandler(this.bitSistemaToolStripMenuItem_Click);
             //
             // bitNegocioToolStripMenuItem
@@ -502,7 +502,7 @@
             this.bitNegocioToolStripMenuItem.Name = "bitNegocioToolStripMenuItem";
             this.bitNegocioToolStripMenuItem.Tag = "mnu.bitacora.negocio";
             this.bitNegocioToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.bitNegocioToolStripMenuItem.Text = "📦  Bitácora de Negocio";
+            this.bitNegocioToolStripMenuItem.Text = "Bitácora de Negocio";
             this.bitNegocioToolStripMenuItem.Click += new System.EventHandler(this.bitNegocioToolStripMenuItem_Click);
             //
             // sepBitacoraToolStripSeparator

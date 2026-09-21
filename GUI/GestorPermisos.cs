@@ -11,7 +11,7 @@ namespace GUI
     /// T04 — Gestión de Perfiles de Usuario (Patrón Composite) — UX "árbol + panel de acciones
     /// con modo Crear/Editar" (misma experiencia que la pantalla de Gestión de Roles de referencia):
     ///
-    ///   • Izquierda: TreeView con TODA la estructura (Roles 👥 → sub-roles → Patentes 🔑).
+    ///   • Izquierda: TreeView con TODA la estructura (Roles → sub-roles → Patentes ).
     ///     Se selecciona el nodo sobre el que se quiere operar.
     ///   • Centro: panel de acciones con un TOGGLE de modo:
     ///       – Crear:  nombre + "Crear rol raíz" / "Crear sub-rol" (bajo el rol seleccionado).
@@ -86,14 +86,14 @@ namespace GUI
             grpEditar.Text       = Tr("grp.permisos.editar",     "Editar rol");
             grpAsignar.Text      = Tr("grp.permisos.asignar",    "Asignar permiso o rol");
 
-            btnCrearRaiz.Text    = Tr("btn.permisos.crearraiz",  "➕ Crear rol raíz");
-            btnCrearSub.Text     = Tr("btn.permisos.crearsub",   "➕ Crear sub-rol");
-            btnEditarNombre.Text = Tr("btn.permisos.editarnom",  "✏ Renombrar rol");
-            btnEliminarRol.Text  = Tr("btn.permisos.eliminar",   "🗑 Eliminar rol");
+            btnCrearRaiz.Text    = Tr("btn.permisos.crearraiz",  "Crear rol raíz");
+            btnCrearSub.Text     = Tr("btn.permisos.crearsub",   "Crear sub-rol");
+            btnEditarNombre.Text = Tr("btn.permisos.editarnom",  "Renombrar rol");
+            btnEliminarRol.Text  = Tr("btn.permisos.eliminar",   "Eliminar rol");
             btnAsignar.Text      = Tr("btn.permisos.asignar",    "Asignar ↓");
             btnQuitar.Text       = Tr("btn.permisos.quitar",     "Quitar ítem seleccionado");
-            btnActualizar.Text   = Tr("btn.permisos.actualizar", "↻ Actualizar");
-            btnExplorador.Text   = Tr("btn.explorador",          "🌳 Ver vista completa del sistema");
+            btnActualizar.Text   = Tr("btn.permisos.actualizar", "Actualizar");
+            btnExplorador.Text   = Tr("btn.explorador",          "Ver vista completa del sistema");
             btnCerrar.Text       = Tr("btn.permisos.cerrar",     "Cerrar");
 
             if (tip != null)
@@ -161,9 +161,9 @@ namespace GUI
             return nodo;
         }
 
-        // 👥 Rol · 📁 Familia · 🔑 Patente
+        // Rol · Familia · Patente
         private static string Etiqueta(BE.Componente c)
-            => (c is BE.Rol ? "👥 " : c is BE.Familia ? "📁 " : "🔑 ") + (c?.Nombre ?? "");
+            => (c is BE.Rol ? "(Rol) " : c is BE.Familia ? "(Familia) " : "") + (c?.Nombre ?? "");
 
         private void Tv_AfterSelect(object sender, TreeViewEventArgs e)
         {

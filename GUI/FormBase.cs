@@ -88,18 +88,18 @@ namespace GUI
             => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
 
         /// <summary>
-        /// Muestra un mensaje de operación exitosa (✓ en verde).
+        /// Muestra un mensaje de operación exitosa (en verde).
         /// Heredado por todos los formularios hijos — no necesitan redefinirlo.
         /// </summary>
         protected void MostrarOk(string msg)
         {
             if (MensajeLabel == null) return;
             MensajeLabel.ForeColor = Color.DarkGreen;
-            MensajeLabel.Text      = $"✓ {msg}";
+            MensajeLabel.Text      = $"{msg}";
         }
 
         /// <summary>
-        /// Muestra un mensaje de error (✗ en rojo).
+        /// Muestra un mensaje de error (en rojo).
         /// Si el formulario no tiene lblMensaje, usa MessageBox como fallback.
         /// Heredado por todos los formularios hijos — no necesitan redefinirlo.
         /// </summary>
@@ -113,7 +113,7 @@ namespace GUI
                 return;
             }
             MensajeLabel.ForeColor = Color.DarkRed;
-            MensajeLabel.Text      = $"✗ {msg}";
+            MensajeLabel.Text      = $"{msg}";
         }
 
         /// <summary>

@@ -104,9 +104,9 @@ namespace GUI
             this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefrescar.Location = new System.Drawing.Point(716, 7);
             this.btnRefrescar.Name = "btnRefrescar";
-            this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
+            this.btnRefrescar.Size = new System.Drawing.Size(84, 28);
             this.btnRefrescar.TabIndex = 4;
-            this.btnRefrescar.Text = "↻";
+            this.btnRefrescar.Text = "Actualizar";
             this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //

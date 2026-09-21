@@ -81,9 +81,9 @@ namespace GUI
             this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefrescar.Location = new System.Drawing.Point(364, 10);
             this.btnRefrescar.Name = "btnRefrescar";
-            this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
+            this.btnRefrescar.Size = new System.Drawing.Size(84, 28);
             this.btnRefrescar.TabIndex = 2;
-            this.btnRefrescar.Text = "↻";
+            this.btnRefrescar.Text = "Actualizar";
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
             // lblConteo

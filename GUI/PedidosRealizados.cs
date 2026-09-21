@@ -12,12 +12,12 @@ namespace GUI
     /// Capa de Presentación — Módulo de Pedidos Realizados (Deposito).
     ///
     /// Permite al Deposito gestionar el ciclo de vida post-venta:
-    ///   ✓ Ver todos los pedidos con su estado actual
-    ///   ✓ Filtrar por estado (Todos / Pendiente / Despachado / Entregado / Cancelado)
-    ///   ✓ Despachar un pedido Pendiente → estado Despachado
-    ///   ✓ Marcar Entregado un pedido Despachado → estado Entregado
-    ///   ✓ Ver el detalle de prendas de cada pedido
-    ///   ✓ Ver notificación de despacho (resumen para comunicar al cliente)
+    ///   Ver todos los pedidos con su estado actual
+    ///   Filtrar por estado (Todos / Pendiente / Despachado / Entregado / Cancelado)
+    ///   Despachar un pedido Pendiente → estado Despachado
+    ///   Marcar Entregado un pedido Despachado → estado Entregado
+    ///   Ver el detalle de prendas de cada pedido
+    ///   Ver notificación de despacho (resumen para comunicar al cliente)
     ///
     /// Hereda de <see cref="FormBase"/>:
     ///   - MostrarOk() y MostrarError() → heredados, no se redeclaran
@@ -79,6 +79,7 @@ namespace GUI
         {
             _idioma = idioma;  // centralizado aquí para que EstadoLabel/ComputarUrgencia estén siempre sincronizados
             var t = Traductor.ObtenerTraducciones(idioma);
+            btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
             Aplicar(lblEstado,          t);
@@ -187,6 +188,7 @@ namespace GUI
             tabla.Columns.Add("Entrega",    typeof(string));
             // Columna interna: almacena el int del enum para colorear sin depender del idioma
             tabla.Columns.Add("_EstadoKey", typeof(int));
+            tabla.Columns.Add("_UrgenciaKey", typeof(int));
 
             foreach (var p in lista)
             {
@@ -200,7 +202,8 @@ namespace GUI
                     EstadoLabel(p.Estado),
                     p.FechaDespacho?.ToString("dd/MM/yyyy") ?? "—",
                     p.FechaEntrega?.ToString("dd/MM/yyyy")  ?? "—",
-                    (int)p.Estado);
+                    (int)p.Estado,
+                    (int)pedidoBLL.CalcularNivelUrgencia(p));
             }
 
             dgvPedidos.DataSource = tabla;
@@ -218,17 +221,17 @@ namespace GUI
             string urgLabel = t.ContainsKey("urg.urgente") ? t["urg.urgente"].Texto : "Urgentes";
             string norLabel = t.ContainsKey("urg.normal")  ? t["urg.normal"].Texto  : "Normales";
             string fmtMostr = t.ContainsKey("msg.ped.mostrando") ? t["msg.ped.mostrando"].Texto : "Mostrando {0} de {1}";
-            // Conteo de urgentes/normales usando el emoji (independiente del idioma)
-            int nUrgentes = lista.Count(p => ComputarUrgencia(p).StartsWith("🔴"));
-            int nNormales = lista.Count(p => ComputarUrgencia(p).StartsWith("🟡"));
+            // Conteo de urgentes/normales segÃºn el nivel calculado en la BLL (independiente del idioma)
+            int nUrgentes = lista.Count(p => pedidoBLL.CalcularNivelUrgencia(p) == BE.NivelUrgencia.Urgente);
+            int nNormales = lista.Count(p => pedidoBLL.CalcularNivelUrgencia(p) == BE.NivelUrgencia.Normal);
             lblConteo.Text = string.Format(fmtMostr, lista.Count, _pedidos.Count) +
-                             $"  |  🔴 {urgLabel}: {nUrgentes}  🟡 {norLabel}: {nNormales}";
+                             $"  |  {urgLabel}: {nUrgentes}  {norLabel}: {nNormales}";
             LimpiarDetalle();
         }
 
         /// <summary>
-        /// Mapea el NivelUrgencia (calculado en BLL) a emoji + texto traducido.
-        /// El prefijo emoji queda fijo (lo usa ColorearFilas); el texto se traduce.
+        /// Mapea el NivelUrgencia (calculado en BLL) al texto traducido.
+        /// El color de la fila lo decide ColorearFilas con el nivel (columna interna _UrgenciaKey), no con el texto.
         /// </summary>
         private string ComputarUrgencia(BE.Pedido p)
         {
@@ -242,9 +245,9 @@ namespace GUI
 
             switch (nivel)
             {
-                case BE.NivelUrgencia.Urgente:  return $"🔴 {urg}";
-                case BE.NivelUrgencia.Normal:   return $"🟡 {nor}";
-                case BE.NivelUrgencia.Reciente: return $"🟢 {rec}";
+                case BE.NivelUrgencia.Urgente:  return urg;
+                case BE.NivelUrgencia.Normal:   return nor;
+                case BE.NivelUrgencia.Reciente: return rec;
                 default:                        return "—";
             }
         }
@@ -274,17 +277,19 @@ namespace GUI
             // Ocultar la columna interna de clave de estado
             if (dgvPedidos.Columns.Contains("_EstadoKey"))
                 dgvPedidos.Columns["_EstadoKey"].Visible = false;
+            if (dgvPedidos.Columns.Contains("_UrgenciaKey"))
+                dgvPedidos.Columns["_UrgenciaKey"].Visible = false;
         }
 
         private void ColorearFilas()
         {
             foreach (DataGridViewRow row in dgvPedidos.Rows)
             {
-                string urgencia  = row.Cells["Urgencia"].Value?.ToString() ?? "";
-                // El emoji prefijo es independiente del idioma: 🔴 / 🟡 / 🟢
-                if (urgencia.StartsWith("🔴"))
+                int.TryParse(row.Cells["_UrgenciaKey"].Value?.ToString(), out int urgenciaKey);
+                // El nivel (int del enum) es independiente del idioma de la etiqueta visible.
+                if (urgenciaKey == (int)BE.NivelUrgencia.Urgente)
                     row.DefaultCellStyle.BackColor = Color.FromArgb(255, 225, 225);
-                else if (urgencia.StartsWith("🟡"))
+                else if (urgenciaKey == (int)BE.NivelUrgencia.Normal)
                     row.DefaultCellStyle.BackColor = Color.FromArgb(255, 250, 210);
 
                 // Coloreado por estado usando la columna interna _EstadoKey (int enum)

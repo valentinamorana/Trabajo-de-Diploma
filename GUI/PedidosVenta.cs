@@ -11,10 +11,10 @@ namespace GUI
     /// Capa de Presentación — Módulo de Pedidos de Venta.
     ///
     /// Permite al Vendedor:
-    ///   ✓ Ver todos los pedidos realizados con su estado actual
-    ///   ✓ Crear un nuevo pedido (abre NuevoPedidoForm)
-    ///   ✓ Cancelar un pedido pendiente (libera prendas)
-    ///   ✓ Ver detalle de prendas de cada pedido al seleccionarlo
+    ///   Ver todos los pedidos realizados con su estado actual
+    ///   Crear un nuevo pedido (abre NuevoPedidoForm)
+    ///   Cancelar un pedido pendiente (libera prendas)
+    ///   Ver detalle de prendas de cada pedido al seleccionarlo
     ///
     /// Hereda de <see cref="FormBase"/>:
     ///   - MostrarOk() y MostrarError() → heredados, no se redeclaran
@@ -64,6 +64,7 @@ namespace GUI
         {
             _idioma = idioma;  // mantener sincronizado para EstadoLabel y ColorearFilasPedidos
             var t = Traductor.ObtenerTraducciones(idioma);
+            btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
             Aplicar(btnNuevoPedido,   t);

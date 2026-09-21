@@ -44,7 +44,7 @@ namespace GUI
                 FlatStyle = FlatStyle.Flat,
                 BackColor = btnDesactivar.BackColor,
                 ForeColor = btnDesactivar.ForeColor,
-                Location = new System.Drawing.Point(750, btnDesactivar.Top),
+                Location = new System.Drawing.Point(btnRefrescar.Right + 8, btnDesactivar.Top),
                 Size = new System.Drawing.Size(130, btnDesactivar.Height)
             };
             btnReformular.FlatAppearance.BorderSize = 0;
@@ -102,9 +102,10 @@ namespace GUI
             Aplicar(btnReformular,         t);
             Aplicar(lblSugerenciasTitulo,  t);
             Aplicar(lblPromocionesTitulo,  t);
-            // btnRefrescar es el único botón solo-ícono ("↻") de las 10 pantallas de este
+            // btnRefrescar es el único botón solo-ícono ("") de las 10 pantallas de este
             // alcance sin texto traducible ni tooltip — se le agrega tooltip.
             tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
+            btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
             TraducirHeadersSugerencias(t);
             TraducirHeadersPromociones(t);
         }

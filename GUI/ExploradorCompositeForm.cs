@@ -11,17 +11,17 @@ namespace GUI
     ///
     /// Muestra la estructura organizacional completa de WardrobeFlow como árbol Composite:
     ///
-    ///   📁 WardrobeFlow
-    ///     📁 Administración
-    ///       📁 Administrador
-    ///         🔑 Gestionar Usuarios
-    ///         🔑 Ver Auditoría
+    ///   WardrobeFlow
+    ///     Administración
+    ///       Administrador
+    ///         Gestionar Usuarios
+    ///         Ver Auditoría
     ///         ...
-    ///       📁 Auditor
-    ///     📁 Comercial
-    ///       📁 Gerente Comercial / Vendedor
-    ///     📁 Inventario y Logística
-    ///       📁 ...
+    ///       Auditor
+    ///     Comercial
+    ///       Gerente Comercial / Vendedor
+    ///     Inventario y Logística
+    ///       ...
     ///
     /// El árbol se obtiene de BLL.Familia.ObtenerArbol() (árbol real desde BD vía
     /// PermisoRelacion) usando BE.Rol/BE.Familia (nodos compuestos) y BE.Patente (hojas).
@@ -68,11 +68,11 @@ namespace GUI
             this.Text            = Tr("frm.explorador",             "Vista completa del sistema");
             lblTitulo.Text       = Tr("lbl.explorador.titulo",      "Vista completa del sistema");
             lblDescripcion.Text  = Tr("lbl.explorador.descripcion", "Estructura organizacional de WardrobeFlow — Solo lectura");
-            lblLeyenda.Text      = Tr("lbl.explorador.leyenda",     "📁 Familia (nodo compuesto — Área o Rol)    🔑 Patente (hoja — permiso atómico)");
+            lblLeyenda.Text      = Tr("lbl.explorador.leyenda",     "Familia (nodo compuesto — Área o Rol)    Patente (hoja — permiso atómico)");
             btnCerrar.Text       = Tr("btn.explorador.cerrar",      "Cerrar");
             btnColapsar.Text     = Tr("btn.explorador.colapsar",    "⊟ Colapsar todo");
             btnExpandir.Text     = Tr("btn.explorador.expandir",    "⊞ Expandir todo");
-            btnActualizar.Text   = Tr("btn.permisos.actualizar",    "↻ Actualizar");
+            btnActualizar.Text   = Tr("btn.permisos.actualizar",    "Actualizar");
         }
 
         // ── Construcción del árbol ────────────────────────────────────────────
@@ -90,7 +90,7 @@ namespace GUI
                 // Árbol REAL desde BD (vía PermisoRelacion): roles, familias y patentes.
                 // Los nodos raíz son los que no tienen padre (roles y familias huérfanas).
                 var raices = _familiaBLL.ObtenerArbol();
-                var empresa = new TreeNode("📁 WardrobeFlow")
+                var empresa = new TreeNode("WardrobeFlow")
                 {
                     NodeFont  = new Font("Segoe UI", 9f, FontStyle.Bold),
                     ForeColor = Color.FromArgb(176, 62, 96)
@@ -114,8 +114,8 @@ namespace GUI
 
         /// <summary>
         /// Construye un TreeNode recursivamente a partir de un BE.Componente.
-        /// Familias → nodo azul en negrita con prefijo 📁
-        /// Patentes  → nodo verde con prefijo 🔑
+        /// Familias → nodo azul en negrita con prefijo
+        /// Patentes  → nodo verde con prefijo
         ///
         /// Idéntico al método CrearNodoRecursivo de Stach/GUI/PermisosForm.cs.
         /// Las traducciones se pasan como parámetro para no llamar a ObtenerTraducciones en cada nodo.
@@ -124,7 +124,7 @@ namespace GUI
                                              IDictionary<string, Traduccion> t)
         {
             bool esFamilia = componente is BE.Familia;
-            string prefijo = esFamilia ? "📁 " : "🔑 ";
+            string prefijo = esFamilia ? "(Familia) " : "";
             string nombre  = componente.Nombre;
 
             if (esFamilia)

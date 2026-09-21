@@ -150,7 +150,7 @@ namespace GUI
             this.btnExplorador.Name      = "btnExplorador";
             this.btnExplorador.Size      = new Size(240, 30);
             this.btnExplorador.TabIndex  = 1;
-            this.btnExplorador.Text      = "🌳 Ver vista completa del sistema";
+            this.btnExplorador.Text      = "Ver vista completa del sistema";
             this.btnExplorador.UseVisualStyleBackColor = false;
             this.btnExplorador.Click += new System.EventHandler(this.BtnExplorador_Click);
 
@@ -165,7 +165,7 @@ namespace GUI
             this.btnActualizar.Name      = "btnActualizar";
             this.btnActualizar.Size      = new Size(120, 30);
             this.btnActualizar.TabIndex  = 2;
-            this.btnActualizar.Text      = "↻ Actualizar";
+            this.btnActualizar.Text      = "Actualizar";
             this.btnActualizar.UseVisualStyleBackColor = false;
             this.btnActualizar.Click += new System.EventHandler(this.BtnActualizar_Click);
 
@@ -260,7 +260,7 @@ namespace GUI
             this.btnCrearRaiz.Name      = "btnCrearRaiz";
             this.btnCrearRaiz.Size      = new Size(312, 30);
             this.btnCrearRaiz.TabIndex  = 0;
-            this.btnCrearRaiz.Text      = "➕ Crear rol raíz";
+            this.btnCrearRaiz.Text      = "Crear rol raíz";
             this.btnCrearRaiz.UseVisualStyleBackColor = false;
             this.btnCrearRaiz.Click += new System.EventHandler(this.BtnCrearRaiz_Click);
 
@@ -275,7 +275,7 @@ namespace GUI
             this.btnCrearSub.Name      = "btnCrearSub";
             this.btnCrearSub.Size      = new Size(312, 30);
             this.btnCrearSub.TabIndex  = 1;
-            this.btnCrearSub.Text      = "➕ Crear sub-rol";
+            this.btnCrearSub.Text      = "Crear sub-rol";
             this.btnCrearSub.UseVisualStyleBackColor = false;
             this.btnCrearSub.Click += new System.EventHandler(this.BtnCrearSub_Click);
 
@@ -305,7 +305,7 @@ namespace GUI
             this.btnEditarNombre.Name      = "btnEditarNombre";
             this.btnEditarNombre.Size      = new Size(312, 30);
             this.btnEditarNombre.TabIndex  = 0;
-            this.btnEditarNombre.Text      = "✏ Renombrar rol";
+            this.btnEditarNombre.Text      = "Renombrar rol";
             this.btnEditarNombre.UseVisualStyleBackColor = false;
             this.btnEditarNombre.Click += new System.EventHandler(this.BtnEditarNombre_Click);
 
@@ -319,7 +319,7 @@ namespace GUI
             this.btnEliminarRol.Name      = "btnEliminarRol";
             this.btnEliminarRol.Size      = new Size(312, 30);
             this.btnEliminarRol.TabIndex  = 1;
-            this.btnEliminarRol.Text      = "🗑 Eliminar rol";
+            this.btnEliminarRol.Text      = "Eliminar rol";
             this.btnEliminarRol.UseVisualStyleBackColor = false;
             this.btnEliminarRol.Click += new System.EventHandler(this.BtnEliminarRol_Click);
 

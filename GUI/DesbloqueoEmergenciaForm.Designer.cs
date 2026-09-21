@@ -91,7 +91,7 @@ namespace GUI
             this.btnMostrarClave.Size                      = new System.Drawing.Size(28, 29);
             this.btnMostrarClave.TabIndex                  = 9;
             this.btnMostrarClave.TabStop                   = false;
-            this.btnMostrarClave.Text                      = "👁";
+            this.btnMostrarClave.Text                      = "Ver";
             this.btnMostrarClave.UseVisualStyleBackColor   = true;
             this.btnMostrarClave.Click += new System.EventHandler(this.BtnMostrarClave_Click);
 

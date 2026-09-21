@@ -82,7 +82,7 @@ namespace GUI
             this.btnCobrar.Size = new System.Drawing.Size(100, 28);
             this.btnCobrar.TabIndex = 2;
             this.btnCobrar.Tag = "contratacion.btn.cobrar";
-            this.btnCobrar.Text = "💲 Cobrar";
+            this.btnCobrar.Text = "Cobrar";
             this.btnCobrar.UseVisualStyleBackColor = false;
             this.btnCobrar.Click += new System.EventHandler(this.BtnCobrar_Click);
             //
@@ -98,7 +98,7 @@ namespace GUI
             this.btnIntentoFallido.Size = new System.Drawing.Size(160, 28);
             this.btnIntentoFallido.TabIndex = 3;
             this.btnIntentoFallido.Tag = "contratacion.btn.intentofallido";
-            this.btnIntentoFallido.Text = "✗ Intento Fallido";
+            this.btnIntentoFallido.Text = "Intento Fallido";
             this.btnIntentoFallido.UseVisualStyleBackColor = false;
             this.btnIntentoFallido.Click += new System.EventHandler(this.BtnIntentoFallido_Click);
             //
@@ -107,9 +107,9 @@ namespace GUI
             this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefrescar.Location = new System.Drawing.Point(528, 15);
             this.btnRefrescar.Name = "btnRefrescar";
-            this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
+            this.btnRefrescar.Size = new System.Drawing.Size(84, 28);
             this.btnRefrescar.TabIndex = 4;
-            this.btnRefrescar.Text = "↻";
+            this.btnRefrescar.Text = "Actualizar";
             this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //

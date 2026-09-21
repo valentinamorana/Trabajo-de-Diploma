@@ -53,6 +53,7 @@ namespace GUI
         {
             _idioma = idioma;
             var t = Traductor.ObtenerTraducciones(idioma);
+            btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
             Aplicar(btnAprobarReingreso, t);

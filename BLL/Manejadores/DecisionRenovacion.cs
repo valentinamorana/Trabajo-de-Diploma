@@ -4,7 +4,7 @@ namespace BLL.Manejadores
     /// PdN5 — Qué resolvió el Vendedor/Gerencia tras contactar al cliente (fuera del
     /// sistema, por teléfono/WhatsApp/mail) sobre su suscripción próxima a vencer o vencida.
     ///
-    /// ⚠ BajaSuscripcionHandler es el último eslabón de la cadena y trata CUALQUIER
+    /// BajaSuscripcionHandler es el último eslabón de la cadena y trata CUALQUIER
     /// decisión que llegue hasta él como Baja, sin validar cuál es (mismo criterio que
     /// DirectorGeneral en el ejemplo de cátedra: el último eslabón resuelve sin condición).
     /// Si agregás un valor nuevo acá (ej. un futuro "Congelar"), tenés que insertar su propio

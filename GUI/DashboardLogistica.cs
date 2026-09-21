@@ -50,7 +50,7 @@ namespace GUI
             this.Text          = Tr("dash.logistica.titulo", "Panel de Logística");
             lblTitulo.Text     = Tr("dash.logistica.titulo", "Panel de Logística");
             lblSub.Text        = Tr("dash.logistica.subtitulo", "WardrobeFlow  —  Logística");
-            btnRefrescar.Text  = Tr("dash.btn.refrescar",   "↻ Actualizar");
+            btnRefrescar.Text  = Tr("dash.btn.refrescar",   "Actualizar");
             txtPend.Text = Tr("dash.pedidos",   "Pedidos\npendientes");
             txtDesp.Text = Tr("dash.despachados", "Pedidos\ndespachados");
             txtEntr.Text = Tr("dash.entregados",  "Pedidos\nentregados");

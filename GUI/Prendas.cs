@@ -11,13 +11,13 @@ namespace GUI
     /// Capa de Presentación — Módulo de Gestión de Prendas.
     ///
     /// Permite a Depósito administrar el catálogo de prendas:
-    ///   ✓ Ver todas las prendas con estado, cliente actual y datos descriptivos
-    ///   ✓ Filtrar por estado (Todos / Disponible / EnUso / EnLimpieza / Baja)
-    ///   ✓ Filtrar por texto libre (nombre, categoría, color)
-    ///   ✓ Agregar nueva prenda al catálogo
-    ///   ✓ Editar datos descriptivos de una prenda
-    ///   ✓ Cambiar estado (Disponible ↔ EnLimpieza, → Baja)
-    ///   ✓ Ver detalle del cliente que tiene la prenda en uso
+    ///   Ver todas las prendas con estado, cliente actual y datos descriptivos
+    ///   Filtrar por estado (Todos / Disponible / EnUso / EnLimpieza / Baja)
+    ///   Filtrar por texto libre (nombre, categoría, color)
+    ///   Agregar nueva prenda al catálogo
+    ///   Editar datos descriptivos de una prenda
+    ///   Cambiar estado (Disponible ↔ EnLimpieza, → Baja)
+    ///   Ver detalle del cliente que tiene la prenda en uso
     ///
     /// El OperadorLogístico también accede (mnuPrendas) pero sin panel de acciones
     /// de stock (mnuStock). Los botones de cambio de estado están disponibles solo

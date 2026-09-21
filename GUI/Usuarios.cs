@@ -16,10 +16,10 @@ namespace GUI
     /// Se abre como formulario hijo MDI desde el Menú → Administrar → Usuarios.
     ///
     /// CUMPLE REQUISITOS T02:
-    ///   ✓ Gestión de usuarios del sistema
-    ///   ✓ Las contraseñas se hashean con PBKDF2 antes de guardarse
-    ///   ✓ Se registra la actividad en la bitácora (via BLL)
-    ///   ✓ Solo un Administrador puede resetear contraseñas ajenas
+    ///   Gestión de usuarios del sistema
+    ///   Las contraseñas se hashean con PBKDF2 antes de guardarse
+    ///   Se registra la actividad en la bitácora (via BLL)
+    ///   Solo un Administrador puede resetear contraseñas ajenas
     /// </summary>
     /// <summary>
     /// Hereda de <see cref="FormBase"/>:

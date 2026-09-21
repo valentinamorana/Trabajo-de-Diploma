@@ -13,7 +13,7 @@ namespace GUI
     /// valor anterior y valor nuevo). Permite filtrar por fecha y por tipo de acción,
     /// y restaurar el pedido al estado previo a cualquier operación registrada.
     ///
-    /// Accesible desde PedidosVenta y PedidosRealizados mediante un botón "📋 Historial".
+    /// Accesible desde PedidosVenta y PedidosRealizados mediante un botón "Historial".
     /// </summary>
     public partial class PedidoHistorialForm : FormBase, IIdiomaObserver
     {
@@ -67,7 +67,7 @@ namespace GUI
             lblDesde.Text       = Tr("lbl.hist.desde",     "Desde:");
             lblHasta.Text       = Tr("lbl.hist.hasta",     "Hasta:");
             lblAccion.Text      = Tr("lbl.hist.accion",    "Acción:");
-            btnBuscar.Text      = Tr("btn.hist.buscar",    "🔍 Buscar");
+            btnBuscar.Text      = Tr("btn.hist.buscar",    "Buscar");
             btnRestaurar.Text   = Tr("btn.hist.restaurar", "⟲ Restaurar");
             btnCerrar.Text      = Tr("btn.hist.cerrar",    "Cerrar");
             lblPedidoInfo.Text  = Tr("lbl.hist.pedido",    "Pedido #") + _idPedido;
@@ -189,7 +189,7 @@ namespace GUI
             string accion   = row["Accion"].ToString();
 
             string advertencia = Tr("conf.hist.restaurar.msg",
-                "¿Restaurar el pedido #{0} al estado anterior a '{1}' (op. #{2})?\n\n⚠ Nota: esta operación modifica el estado del Pedido en la base de datos.\nEl estado de las Prendas asociadas NO se revierte automáticamente.\n\n¿Confirmar?",
+                "¿Restaurar el pedido #{0} al estado anterior a '{1}' (op. #{2})?\n\nNota: esta operación modifica el estado del Pedido en la base de datos.\nEl estado de las Prendas asociadas NO se revierte automáticamente.\n\n¿Confirmar?",
                 new object[] { _idPedido, accion, idOperacion });
 
             if (MessageBox.Show(advertencia, Tr("msg.backup.titulorestaura", "Confirmar Restauración"),

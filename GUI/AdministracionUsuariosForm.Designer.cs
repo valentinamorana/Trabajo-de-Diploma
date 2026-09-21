@@ -93,7 +93,7 @@ namespace GUI
             this.btnBuscar.Name      = "btnBuscar";
             this.btnBuscar.Size      = new Size(90, 30);
             this.btnBuscar.TabIndex  = 3;
-            this.btnBuscar.Text      = "🔍 Buscar";
+            this.btnBuscar.Text      = "Buscar";
             this.btnBuscar.UseVisualStyleBackColor = false;
             this.btnBuscar.Click += new System.EventHandler(this.BtnBuscar_Click);
 
@@ -108,7 +108,7 @@ namespace GUI
             this.btnRefrescar.Name      = "btnRefrescar";
             this.btnRefrescar.Size      = new Size(96, 30);
             this.btnRefrescar.TabIndex  = 4;
-            this.btnRefrescar.Text      = "↻ Ver todos";
+            this.btnRefrescar.Text      = "Ver todos";
             this.btnRefrescar.UseVisualStyleBackColor = false;
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
 
@@ -122,7 +122,7 @@ namespace GUI
             this.btnNuevo.Name      = "btnNuevo";
             this.btnNuevo.Size      = new Size(100, 30);
             this.btnNuevo.TabIndex  = 5;
-            this.btnNuevo.Text      = "➕ Nuevo usuario";
+            this.btnNuevo.Text      = "Nuevo usuario";
             this.btnNuevo.UseVisualStyleBackColor = false;
             this.btnNuevo.Click += new System.EventHandler(this.BtnNuevo_Click);
 
@@ -274,7 +274,7 @@ namespace GUI
             this.btnGuardar.Name      = "btnGuardar";
             this.btnGuardar.Size      = new Size(260, 30);
             this.btnGuardar.TabIndex  = 13;
-            this.btnGuardar.Text      = "💾 Guardar cambios";
+            this.btnGuardar.Text      = "Guardar cambios";
             this.btnGuardar.UseVisualStyleBackColor = false;
             this.btnGuardar.Click += new System.EventHandler(this.BtnGuardar_Click);
 
@@ -289,7 +289,7 @@ namespace GUI
             this.btnCambiarRol.Name      = "btnCambiarRol";
             this.btnCambiarRol.Size      = new Size(260, 30);
             this.btnCambiarRol.TabIndex  = 14;
-            this.btnCambiarRol.Text      = "🔁 Cambiar rol";
+            this.btnCambiarRol.Text      = "Cambiar rol";
             this.btnCambiarRol.UseVisualStyleBackColor = false;
             this.btnCambiarRol.Click += new System.EventHandler(this.BtnCambiarRol_Click);
 
@@ -304,7 +304,7 @@ namespace GUI
             this.btnHistorial.Name      = "btnHistorial";
             this.btnHistorial.Size      = new Size(260, 30);
             this.btnHistorial.TabIndex  = 15;
-            this.btnHistorial.Text      = "📜 Ver historial de cambios";
+            this.btnHistorial.Text      = "Ver historial de cambios";
             this.btnHistorial.UseVisualStyleBackColor = false;
             this.btnHistorial.Click += new System.EventHandler(this.BtnHistorial_Click);
 

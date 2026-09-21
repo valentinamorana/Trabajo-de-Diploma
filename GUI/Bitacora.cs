@@ -249,7 +249,7 @@ namespace GUI
             Aplicar(btnNegBuscar,         t);
             Aplicar(btnNegLimpiar,        t);
             // Botones Exportar PDF (sin Tag en Designer → texto directo)
-            string exportPdf = Tr("btn.exportar.pdf", "📄 Exportar PDF");
+            string exportPdf = Tr("btn.exportar.pdf", "Exportar PDF");
             btnExportSistema.Text  = exportPdf;
             btnExportNegocio.Text  = exportPdf;
 

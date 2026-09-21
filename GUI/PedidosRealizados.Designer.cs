@@ -151,7 +151,7 @@ namespace GUI
             this.btnDespachar.Size = new System.Drawing.Size(130, 28);
             this.btnDespachar.TabIndex = 6;
             this.btnDespachar.Tag  = "btn.despachar";
-            this.btnDespachar.Text = "📦 Despachar";
+            this.btnDespachar.Text = "Despachar";
             this.btnDespachar.UseVisualStyleBackColor = false;
             this.btnDespachar.Click += new System.EventHandler(this.BtnDespachar_Click);
             // 
@@ -167,7 +167,7 @@ namespace GUI
             this.btnEntregado.Size = new System.Drawing.Size(160, 28);
             this.btnEntregado.TabIndex = 7;
             this.btnEntregado.Tag  = "btn.entregado";
-            this.btnEntregado.Text = "✓ Marcar Entregado";
+            this.btnEntregado.Text = "Marcar Entregado";
             this.btnEntregado.UseVisualStyleBackColor = false;
             this.btnEntregado.Click += new System.EventHandler(this.BtnEntregado_Click);
             //
@@ -180,7 +180,7 @@ namespace GUI
             this.btnVerNotificacion.Size = new System.Drawing.Size(150, 28);
             this.btnVerNotificacion.TabIndex = 8;
             this.btnVerNotificacion.Tag  = "btn.vernotificacion";
-            this.btnVerNotificacion.Text = "✉ Ver Notificación";
+            this.btnVerNotificacion.Text = "Ver Notificación";
             this.btnVerNotificacion.Click += new System.EventHandler(this.BtnVerNotificacion_Click);
             //
             // btnDevolucion
@@ -195,7 +195,7 @@ namespace GUI
             this.btnDevolucion.Size = new System.Drawing.Size(160, 28);
             this.btnDevolucion.TabIndex = 10;
             this.btnDevolucion.Tag  = "btn.devolucion";
-            this.btnDevolucion.Text = "↩ Registrar Devolución";
+            this.btnDevolucion.Text = "Registrar Devolución";
             this.btnDevolucion.UseVisualStyleBackColor = false;
             this.btnDevolucion.Click += new System.EventHandler(this.BtnDevolucion_Click);
             //
@@ -204,9 +204,9 @@ namespace GUI
             this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefrescar.Location = new System.Drawing.Point(640, 50);
             this.btnRefrescar.Name = "btnRefrescar";
-            this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
+            this.btnRefrescar.Size = new System.Drawing.Size(84, 28);
             this.btnRefrescar.TabIndex = 9;
-            this.btnRefrescar.Text = "↻";
+            this.btnRefrescar.Text = "Actualizar";
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
             // btnHistorial
@@ -222,7 +222,7 @@ namespace GUI
             this.btnHistorial.Size = new System.Drawing.Size(110, 28);
             this.btnHistorial.TabIndex = 11;
             this.btnHistorial.Tag  = "btn.historial";
-            this.btnHistorial.Text = "📋 Historial";
+            this.btnHistorial.Text = "Historial";
             this.btnHistorial.UseVisualStyleBackColor = false;
             this.btnHistorial.Click += new System.EventHandler(this.BtnHistorial_Click);
             //
@@ -238,7 +238,7 @@ namespace GUI
             this.btnReportarPerdida.Size = new System.Drawing.Size(180, 28);
             this.btnReportarPerdida.TabIndex = 12;
             this.btnReportarPerdida.Tag = "btn.reportarperdida";
-            this.btnReportarPerdida.Text = "⚠ Reportar Perdida";
+            this.btnReportarPerdida.Text = "Reportar Perdida";
             this.btnReportarPerdida.UseVisualStyleBackColor = false;
             this.btnReportarPerdida.Click += new System.EventHandler(this.BtnReportarPerdida_Click);
             //

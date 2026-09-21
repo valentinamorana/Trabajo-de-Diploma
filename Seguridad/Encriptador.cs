@@ -199,7 +199,7 @@ namespace Seguridad
         // Carga la clave AES desde key.dat, PROTEGIDA con DPAPI (ProtectedData, ámbito del
         // usuario actual). Migra automáticamente un key.dat legacy en texto plano sin cambiar
         // la clave (para no invalidar los datos ya cifrados).
-        // ⚠ Eliminar key.dat hace que los DNI cifrados existentes sean irrecuperables. Por eso,
+        // Eliminar key.dat hace que los DNI cifrados existentes sean irrecuperables. Por eso,
         // si el archivo EXISTE pero no se puede recuperar la clave (DPAPI de otro usuario u
         // otra máquina, o archivo corrupto), esto debe FALLAR RUIDOSAMENTE en vez de generar
         // una clave nueva en silencio: generar una nueva acá dejaría los DNI ya cifrados en BD

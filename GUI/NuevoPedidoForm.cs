@@ -77,7 +77,7 @@ namespace GUI
             lblInstruccion.Text       = Tr("lbl.ped.selprendas",   "Seleccioná las prendas para incluir en el pedido (checkbox):");
             btnSiguiente.Text         = Tr("btn.siguiente",         "Siguiente →");
             btnVolver.Text            = Tr("btn.volver",            "← Volver");
-            btnConfirmar.Text         = Tr("btn.confirmar.pedido",  "✓ Confirmar Pedido");
+            btnConfirmar.Text         = Tr("btn.confirmar.pedido",  "Confirmar Pedido");
         }
 
         private void TraducirHeadersGrilla()
@@ -127,9 +127,9 @@ namespace GUI
                 {
                     string etiqueta = $"{c.NombreCompleto}  (DNI {c.DNI})";
                     if (c.VencimientoExpirado)
-                        etiqueta += "  ⚠ venc.";
+                        etiqueta += "  venc.";
                     else if (c.SuscripcionProximaAVencer())
-                        etiqueta += $"  ⏰ {c.DiasHastaVencimiento().Value}d";
+                        etiqueta += $"  {c.DiasHastaVencimiento().Value}d";
                     cmbCliente.Items.Add(etiqueta);
                 }
                 cmbCliente.SelectedIndex = 0;
@@ -206,14 +206,14 @@ namespace GUI
                 {
                     lblInfoPlan.Text = string.Format(
                         Tr("err.ped.sinplan",
-                            "⚠ {0} no tiene plan asignado.\nAsigná un plan en el módulo de Clientes antes de crear un pedido."),
+                            "{0} no tiene plan asignado.\nAsigná un plan en el módulo de Clientes antes de crear un pedido."),
                         _clienteSel.NombreCompleto);
                 }
                 else if (estado.MotivoBloqueo == "SUSCRIPCION_VENCIDA")
                 {
                     lblInfoPlan.Text = string.Format(
                         Tr("err.ped.suscvencida",
-                            "⚠ La suscripción de {0} venció el {1}.\nRenovar en el módulo de Clientes."),
+                            "La suscripción de {0} venció el {1}.\nRenovar en el módulo de Clientes."),
                         _clienteSel.NombreCompleto,
                         estado.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—");
                 }
@@ -231,7 +231,7 @@ namespace GUI
                 btnSiguiente.Enabled  = false;
                 lblInfoPlan.ForeColor = Color.DarkRed;
                 lblInfoPlan.Visible   = true;
-                lblInfoPlan.Text      = "⚠ " + Servicios.Multiidioma.Traductor.Resolver(
+                lblInfoPlan.Text      = Servicios.Multiidioma.Traductor.Resolver(
                     ex.Clave, ex.Message, ex.Args, Servicios.Multiidioma.GestorIdioma.IdiomaActual);
                 return;
             }
@@ -259,7 +259,7 @@ namespace GUI
                 lblInfoPlan.ForeColor = Color.FromArgb(160, 100, 0);
                 lblInfoPlan.Text = infoBase + "\n" + string.Format(
                     Tr("lbl.ped.proxvencer",
-                        "⏰ La suscripción vence en {0} día(s). Avisale al cliente para renovarla."),
+                        "La suscripción vence en {0} día(s). Avisale al cliente para renovarla."),
                     estado.DiasHastaVencimiento);
             }
             else
@@ -303,7 +303,7 @@ namespace GUI
                 {
                     linea2 = string.Format(
                         Tr("lbl.ped.res.limite",
-                           "✗ El plan '{0}' permite {1} prenda(s). Estás superando el límite por {2}."),
+                           "El plan '{0}' permite {1} prenda(s). Estás superando el límite por {2}."),
                         estado.NombrePlan, limite, estado.Exceso);
                     lblResumen.ForeColor = Color.DarkRed;
                     btnConfirmar.Enabled = false;
@@ -320,7 +320,7 @@ namespace GUI
                 {
                     linea2 = string.Format(
                         Tr("lbl.ped.res.parcial",
-                           "ℹ El plan '{0}' permite {1}. Estás eligiendo {2} de {3} posibles — podés agregar más."),
+                           "El plan '{0}' permite {1}. Estás eligiendo {2} de {3} posibles — podés agregar más."),
                         estado.NombrePlan, limite, seleccionadas, estado.PrendasDisponibles);
                     lblResumen.ForeColor = Color.FromArgb(140, 100, 0);
                     btnConfirmar.Enabled = true;
@@ -329,7 +329,7 @@ namespace GUI
                 {
                     linea2 = string.Format(
                         Tr("lbl.ped.res.lleno",
-                           "✓ Alcanzás el máximo del plan '{0}' ({1} prendas)."),
+                           "Alcanzás el máximo del plan '{0}' ({1} prendas)."),
                         estado.NombrePlan, limite);
                     lblResumen.ForeColor = Color.DarkGreen;
                     btnConfirmar.Enabled = true;
@@ -419,7 +419,7 @@ namespace GUI
             {
                 btnConfirmar.Enabled = true;
                 var te = Traductor.ObtenerTraducciones(_idioma);
-                btnConfirmar.Text = te.ContainsKey("btn.confirmar.pedido") ? te["btn.confirmar.pedido"].Texto : "✓ Confirmar Pedido";
+                btnConfirmar.Text = te.ContainsKey("btn.confirmar.pedido") ? te["btn.confirmar.pedido"].Texto : "Confirmar Pedido";
                 MostrarError(ex);
             }
         }

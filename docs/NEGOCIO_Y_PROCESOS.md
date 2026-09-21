@@ -224,8 +224,8 @@ BLL en la confirmación.
 
 **Casos de uso** (nombres del documento): CU01-VEN Armar Pedido, CU02-VEN Consultar Catálogo, CU03-VEN Consultar
 Situación del Cliente, CU01-DEP Verificar Disponibilidad, CU02-DEP Reservar Prendas.
-**Estado de implementación:** CU01-VEN ✔; CU02-VEN ✔ (sin "valor de reposición" en la grilla); CU03-VEN **sin pantalla propia**
-(la situación se ve dentro del asistente); CU01/CU02-DEP ✔ **como lógica de BLL** pero **sin actor Depósito ni cola/pantalla**;
+**Estado de implementación:** CU01-VEN ; CU02-VEN (sin "valor de reposición" en la grilla); CU03-VEN **sin pantalla propia**
+(la situación se ve dentro del asistente); CU01/CU02-DEP **como lógica de BLL** pero **sin actor Depósito ni cola/pantalla**;
 no hay notificación a Depósito, planilla de existencias ni registro de desistimiento.
 **Alcance.** Abarca: validar cliente, catálogo disponible, cupo, disponibilidad, reserva y creación del pedido.
 **No abarca:** preparación/empaque físico, envío con tracking, email al cliente, sustitución por quiebre de stock.
@@ -336,7 +336,7 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 | 2 | Solo se inspecciona una prenda **En Limpieza**; el `UPDATE` es condicionado al estado anterior | `DAL/Prenda.cs › CambiarEstado` | `PrendaEstadoTests`, `PrendaTests` |
 | 3 | Solo se reporta como perdida una prenda **En Uso**; es la única baja permitida desde EnUso | `BLL/Prenda.cs › CambiarEstado` (`baja_requiere_flujoperdida`) | `PrendaTests` |
 | 4 | **En Limpieza → Baja solo desde la Inspección** (exige el cargo previo): la BLL lo impone y la pantalla genérica de Prendas no ofrece esa opción | `BLL/Prenda.cs` (`baja_requiere_inspeccion`), `GUI/Prendas.cs` | `PrendaTests › CambiarEstado_EnLimpiezaABaja*` |
-| 5 | El cargo se registra **antes** de la baja | `InspeccionDevolucionForm.cs`, `PedidosRealizados.cs` | ⚠ orden garantizado por la pantalla; sin transacción (riesgo aceptado, ver §7) |
+| 5 | El cargo se registra **antes** de la baja | `InspeccionDevolucionForm.cs`, `PedidosRealizados.cs` | orden garantizado por la pantalla; sin transacción (riesgo aceptado, ver §7) |
 | 6 | El cargo exige un **último cliente** registrado, motivo y monto > 0 | `BLL/CargoPrenda.cs › RegistrarCargo`; CHECK `CK_CargoPrenda_Monto` | `CargoPrendaTests` |
 | 7 | Baja es estado final | `BE/Estados/EstadoBaja.cs` | `PrendaEstadoTests` |
 | 8 | Al registrar la devolución la cuenta se **desbloquea** (las prendas dejan de estar EnUso) | `BLL/Pedido.cs › RegistrarDevolucion` | `PedidoTests` (`ValidarPuedeArmarPedido_..._SeDesbloquea`) |
@@ -480,7 +480,7 @@ Fuente: `Plan de Entregas TD 2026.xlsx` y notas de la clase 4. Fechas: **Entrega
 | Entrega | Exige (Plan) | Estado |
 |---|---|---|
 | **1** | G00–G08 + N01 analizado y diseñado | N01 diseñado en su momento (`Entrega1.eapx`, diagramas "PN01 - …" de `Diagramas VALEN/`); ver §7.2 sobre su ausencia en el `.docx` actual |
-| **2** | N01 implementado y documentado · N02 (= **PN01–PN04**) analizado, diseñado e implementado (roles, descripción funcional, diagrama de proceso, modelo conceptual, casos de uso no-ABM, diagrama de clases y modelo de datos) · **A01** instalador (caso simple) · G07/G08 refinados · balanceo con la implementación | **Código:** N01 ✔; PN02 ✔; PN04 ✔; PN03 ✔ (ahora con aplicación al cobro); PN01 parcial (sin actor Depósito, §4). **Instalador:** `.exe` firmado, BD por script con datos de prueba; **falta la prueba en máquina limpia**. **Documento:** texto, roles y casos de uso de PN01–PN04 escritos; **faltan diagramas** (actividad, casos de uso, secuencia, clases, conceptual, DER) y los ajustes de §7.2; G07/G08 a regenerar desde código/SQL (78 BE, 81 BLL, 52 DAL, 76 GUI aprox.; 31 tablas) |
+| **2** | N01 implementado y documentado · N02 (= **PN01–PN04**) analizado, diseñado e implementado (roles, descripción funcional, diagrama de proceso, modelo conceptual, casos de uso no-ABM, diagrama de clases y modelo de datos) · **A01** instalador (caso simple) · G07/G08 refinados · balanceo con la implementación | **Código:** N01 ; PN02 ; PN04 ; PN03 (ahora con aplicación al cobro); PN01 parcial (sin actor Depósito, §4). **Instalador:** `.exe` firmado, BD por script con datos de prueba; **falta la prueba en máquina limpia**. **Documento:** texto, roles y casos de uso de PN01–PN04 escritos; **faltan diagramas** (actividad, casos de uso, secuencia, clases, conceptual, DER) y los ajustes de §7.2; G07/G08 a regenerar desde código/SQL (78 BE, 81 BLL, 52 DAL, 76 GUI aprox.; 31 tablas) |
 | **3** | N03 (proceso complejo que cruce información para decidir) · D01 manual de instalación · D02 ayuda en línea · D03 material de usuario · A01 casos especiales · A02 informe PDF y **serialización** | Instalador con casos especiales: hecho (`.iss`). PDF: hecho (analítica). **Serialización (A02): no encontrada en el código** (búsqueda de `XmlSerializer/BinaryFormatter/DataContractSerializer/JsonConvert/[Serializable]` sin resultados; solo hay exportación CSV/TXT). **Ayuda en línea (D02): no hay** (`HelpProvider`/F1 sin resultados). N03: PN03 conectado a la analítica es la base natural |
 
 Criterios de evaluación del Plan (balanceo de clases, DER, casos de uso, secuencia; UI; POO; BD 3FN; presentación): el código y el SQL son la fuente para el balanceo;

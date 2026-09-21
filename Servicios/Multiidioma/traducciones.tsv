@@ -268,6 +268,10 @@ ES	col.prenda.color	Color
 ES	col.prenda.estado	Estado
 ES	col.listaespera.alta	Anotado el
 ES	col.listaespera.vence	Reserva vence
+ES	listaespera.pendiente	Pendiente
+ES	listaespera.reservada	Reservada
+ES	listaespera.convertida	Convertida
+ES	listaespera.cancelada	Cancelada
 ES	col.prenda.cliente	Cliente
 ES	col.prenda.alta	Alta
 ES	msg.prenda.conteo	Mostrando {0} de {1}
@@ -1070,6 +1074,10 @@ EN	col.prenda.color	Color
 EN	col.prenda.estado	Status
 EN	col.listaespera.alta	Signed up on
 EN	col.listaespera.vence	Reservation expires
+EN	listaespera.pendiente	Pending
+EN	listaespera.reservada	Reserved
+EN	listaespera.convertida	Converted
+EN	listaespera.cancelada	Cancelled
 EN	col.prenda.cliente	Client
 EN	col.prenda.alta	Registered
 EN	msg.prenda.conteo	Showing {0} of {1}
@@ -1874,6 +1882,10 @@ RU	col.prenda.color	Цвет
 RU	col.prenda.estado	Статус
 RU	col.listaespera.alta	Дата записи
 RU	col.listaespera.vence	Бронь истекает
+RU	listaespera.pendiente	Ожидает
+RU	listaespera.reservada	Зарезервировано
+RU	listaespera.convertida	Преобразовано
+RU	listaespera.cancelada	Отменено
 RU	col.prenda.cliente	Клиент
 RU	col.prenda.alta	Добавлено
 RU	msg.prenda.conteo	Показано {0} из {1}
@@ -2718,6 +2730,10 @@ PT	col.prenda.color	Cor
 PT	col.prenda.estado	Estado
 PT	col.listaespera.alta	Inscrito em
 PT	col.listaespera.vence	Reserva vence
+PT	listaespera.pendiente	Pendente
+PT	listaespera.reservada	Reservada
+PT	listaespera.convertida	Convertida
+PT	listaespera.cancelada	Cancelada
 PT	col.prenda.cliente	Cliente
 PT	col.prenda.alta	Cadastro
 PT	msg.prenda.conteo	Mostrando {0} de {1}

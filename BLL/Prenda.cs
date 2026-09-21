@@ -94,7 +94,7 @@ namespace BLL
         // cualquier código que llamara CambiarEstado directo (otra pantalla, un script, un test)
         // podía dar de baja una prenda que un cliente todavía tiene, sin pasar por ese flujo.
         public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null,
-                                   bool viaFlujoPerdida = false)
+                                   bool viaFlujoPerdida = false, bool viaInspeccion = false)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
 
@@ -109,6 +109,14 @@ namespace BLL
                 throw new BE.AppException("err.bll.prenda.baja_requiere_flujoperdida",
                     "Una prenda en uso solo puede darse de baja a través de 'Reportar Prenda Perdida' " +
                     "(con cargo de reposición al cliente), no directamente.");
+
+            // PN04: una prenda que volvió del cliente (En Limpieza) solo se da de baja desde la
+            // Inspección de Devolución, que registra ANTES el cargo por el daño irreparable. Sin
+            // esta barrera en la BLL, cualquier otra pantalla podía retirarla del catálogo sin cargo.
+            if (estadoAnterior == BE.EstadoPrenda.EnLimpieza && nuevoEstado == BE.EstadoPrenda.Baja && !viaInspeccion)
+                throw new BE.AppException("err.bll.prenda.baja_requiere_inspeccion",
+                    "Una prenda En Limpieza solo puede darse de baja desde la Inspección de Devolución " +
+                    "(que registra el cargo por el daño), no directamente.");
 
             if (!prenda.ControlarEstado(nuevoEstado))
             {

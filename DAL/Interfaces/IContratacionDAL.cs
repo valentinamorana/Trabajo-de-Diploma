@@ -13,13 +13,20 @@ namespace DAL.Interfaces
         // Inserta una nueva contratación en estado PendientePago. Devuelve el ID generado.
         int Alta(BE.Contratacion contratacion);
 
-        // Suma un intento de pago fallido. Devuelve la cantidad de intentos ya registrados.
+        // Suma un intento de pago fallido SOLO si la contratación sigue PendientePago. Devuelve la
+        // cantidad de intentos ya registrados, o -1 si ya no estaba pendiente (otra sesión la resolvió).
         int IncrementarIntento(int idContratacion);
 
         // Marca la contratación como Pagada, registra el medio de pago, el comprobante y quién cobró.
-        void ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante);
+        // Es un "claim" atómico: el UPDATE exige que siga PendientePago. Devuelve false si otra
+        // sesión de Caja ya la resolvió (nadie más debe activar la suscripción en ese caso).
+        bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante);
 
-        // Marca la contratación como Cancelada (máximo de intentos agotado).
+        // Compensación: revierte un cobro recién confirmado a PendientePago (solo si está Pagada)
+        // cuando la activación de la suscripción falló después del claim.
+        void ReabrirPago(int idContratacion);
+
+        // Marca la contratación como Cancelada (máximo de intentos agotado). Solo si sigue PendientePago.
         void Cancelar(int idContratacion);
     }
 }

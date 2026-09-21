@@ -89,8 +89,10 @@ namespace DAL
             try
             {
                 DataTable tabla = acceso.Leer(
-                    "UPDATE Contratacion SET IntentosPago = IntentosPago + 1 WHERE IdContratacion = @IdContratacion; " +
-                    "SELECT IntentosPago AS Intentos FROM Contratacion WHERE IdContratacion = @IdContratacion",
+                    "UPDATE Contratacion SET IntentosPago = IntentosPago + 1 " +
+                    "WHERE IdContratacion = @IdContratacion AND Estado = 0; " +
+                    "IF @@ROWCOUNT = 0 SELECT -1 AS Intentos " +
+                    "ELSE SELECT IntentosPago AS Intentos FROM Contratacion WHERE IdContratacion = @IdContratacion",
                     p);
 
                 return tabla != null && tabla.Rows.Count > 0
@@ -103,7 +105,7 @@ namespace DAL
             }
         }
 
-        public void ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante)
+        public bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante)
         {
             SqlParameter[] p =
             {
@@ -117,15 +119,33 @@ namespace DAL
             };
             try
             {
-                acceso.Escribir(
+                // "Claim" atómico: solo una sesión puede pasar de PendientePago (0) a Pagada.
+                int filas = acceso.Escribir(
                     "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, MedioPago = @MedioPago, " +
                     "NumeroComprobante = @NumeroComprobante, FechaComprobante = @FechaComprobante, " +
-                    "FechaResolucion = @FechaResolucion WHERE IdContratacion = @IdContratacion",
+                    "FechaResolucion = @FechaResolucion WHERE IdContratacion = @IdContratacion AND Estado = 0",
                     p);
+                return filas > 0;
             }
             catch (Exception ex)
             {
                 throw new Exception("Error al confirmar el pago de la contratación.", ex);
+            }
+        }
+
+        public void ReabrirPago(int idContratacion)
+        {
+            SqlParameter[] p = { new SqlParameter("@IdContratacion", idContratacion) };
+            try
+            {
+                acceso.Escribir(
+                    "UPDATE Contratacion SET Estado = 0, IdCaja = NULL, MedioPago = NULL, NumeroComprobante = NULL, " +
+                    "FechaComprobante = NULL, FechaResolucion = NULL WHERE IdContratacion = @IdContratacion AND Estado = 1",
+                    p);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al reabrir la contratación tras un cobro fallido.", ex);
             }
         }
 
@@ -141,7 +161,7 @@ namespace DAL
             {
                 acceso.Escribir(
                     "UPDATE Contratacion SET Estado = @Estado, FechaResolucion = @FechaResolucion " +
-                    "WHERE IdContratacion = @IdContratacion",
+                    "WHERE IdContratacion = @IdContratacion AND Estado = 0",
                     p);
             }
             catch (Exception ex)

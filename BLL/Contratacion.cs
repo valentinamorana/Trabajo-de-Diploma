@@ -121,27 +121,51 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.medio_pago_requerido",
                     "Debe indicar el medio de pago (efectivo, tarjeta o transferencia).");
 
+            // Flujo alternativo 4.1 (PN02): el plan fue dado de baja entre que Venta generó la
+            // contratación y que Caja la cobra. Se rechaza ANTES de tocar nada: la contratación
+            // permanece Pendiente de pago y se puede reintentar una vez resuelta la causa.
+            var plan = dalPlan.ObtenerPorId(actual.IdPlan);
+            if (plan == null || !plan.Estado)
+                throw new BE.AppException("err.bll.contratacion.plan_baja",
+                    "El plan '{0}' fue dado de baja: no se puede formalizar la suscripción. " +
+                    "La contratación queda pendiente de pago.",
+                    actual.NombrePlan ?? plan?.Nombre ?? actual.IdPlan.ToString());
+
             int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
             string numeroComprobante = GenerarNumeroComprobante(contratacion.IdContratacion);
 
-            // Activar la suscripción PRIMERO: si esto falla (plan dado de baja entre la
-            // contratación y el cobro, etc.) la Contratacion sigue PendientePago y se puede
-            // reintentar. Si confirmáramos el pago antes y esto fallara después, quedaría
-            // Pagada sin suscripción activada y sin forma de reintentar (PuedeCobrarse()
-            // exige PendientePago).
-            //
-            // Riesgo residual aceptado: estos dos pasos no corren en una única transacción de
-            // BD (Contratacion y Cliente/Suscripcion son tablas distintas). Si el proceso cae
-            // justo entre ambas líneas, un reintento manual de Caja re-ejecuta la activación
-            // (extiende la vigencia de nuevo) porque la Contratacion sigue viéndose
-            // PendientePago. Es una ventana angosta (falla exactamente ahí) y de bajo impacto
-            // (a lo sumo días de suscripción de más, nunca de menos ni cobro duplicado real);
-            // una solución completa requeriría una transacción cruzando ambos DAL o una marca
-            // de idempotencia dedicada, fuera de alcance de este TP.
-            var cliente = dalCliente.ObtenerPorId(actual.IdCliente);
-            clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad);
+            // 1) "Claim" atómico: el UPDATE exige que la contratación siga PendientePago, así que
+            //    entre dos sesiones de Caja (o un doble clic) solo UNA pasa. Sin esto, las dos
+            //    superaban la revalidación de arriba y activaban la suscripción dos veces.
+            if (!dalContratacion.ConfirmarPago(actual.IdContratacion, idCaja, medioPago, numeroComprobante))
+                throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
+                    "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
 
-            dalContratacion.ConfirmarPago(actual.IdContratacion, idCaja, medioPago, numeroComprobante);
+            // 2) Activar la suscripción. Si falla, se compensa devolviendo la contratación a
+            //    Pendiente de pago para que Caja pueda reintentar (nunca queda Pagada sin
+            //    suscripción activada).
+            //
+            // Riesgo residual aceptado: el claim y la activación no comparten una única
+            // transacción de BD (Contratacion y Cliente son tablas distintas). Si el proceso
+            // cae justo entre ambos pasos la contratación queda Pagada sin suscripción activa:
+            // se detecta en la cola de Caja/Renovación y se corrige con el alta administrativa
+            // del plan. Ventana angosta; una solución completa requeriría una transacción que
+            // cruce ambos DAL, fuera de alcance de este TP.
+            try
+            {
+                var cliente = dalCliente.ObtenerPorId(actual.IdCliente);
+                clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad);
+            }
+            catch
+            {
+                try { dalContratacion.ReabrirPago(actual.IdContratacion); }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceError(
+                        $"[BLL.Contratacion] No se pudo reabrir la contratación #{actual.IdContratacion}: {ex.Message}");
+                }
+                throw;
+            }
 
             bitacora.Registrar(modulo,
                 $"Cobro Contratación #{contratacion.IdContratacion} — Cliente: {contratacion.NombreCliente} — " +
@@ -172,6 +196,9 @@ namespace BLL
                     actual.Estado);
 
             int intentos = dalContratacion.IncrementarIntento(actual.IdContratacion);
+            if (intentos < 0)
+                throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
+                    "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
 
             bitacora.Registrar(modulo,
                 $"Intento de pago fallido en Contratación #{contratacion.IdContratacion} — Cliente: {contratacion.NombreCliente} — " +

@@ -32,6 +32,10 @@ namespace BLL.Interfaces
         // Devuelve el ID del pedido creado.
         int CrearPedido(string modulo, int idCliente, List<BE.Prenda> prendas);
 
+        // Valida si el cliente puede armar un pedido (suscripción, despacho pendiente y cuenta
+        // desbloqueada). Lanza BE.AppException con el motivo; devuelve el cliente validado.
+        BE.Cliente ValidarPuedeArmarPedido(int idCliente);
+
         // CU01-VEN-Armar Pedido, paso "Validar cupo disponible" (PN01): verifica que el plan
         // del cliente permita la cantidad de prendas pedidas y devuelve el plan consultado.
         BE.PlanSuscripcion ValidarCupoDisponible(BE.Cliente cliente, int cantidadPrendas);

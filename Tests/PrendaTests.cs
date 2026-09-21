@@ -149,6 +149,41 @@ namespace Tests
         }
 
         [TestMethod]
+        public void CambiarEstado_EnLimpiezaABajaSinInspeccion_LanzaBajaRequiereInspeccion()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+
+            try
+            {
+                bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja);
+                Assert.Fail("Debía exigir la Inspección de Devolución para dar de baja una prenda En Limpieza.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.prenda.baja_requiere_inspeccion", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPrenda.CambiarEstadoVeces);
+            Assert.AreEqual(BE.EstadoPrenda.EnLimpieza, prenda.Estado);
+        }
+
+        [TestMethod]
+        public void CambiarEstado_EnLimpiezaABajaViaInspeccion_Permite()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+
+            bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja, actor: "deposito", viaInspeccion: true);
+
+            Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
+            Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
+        }
+
+        [TestMethod]
         public void CambiarEstado_EnUsoABajaViaFlujoPerdida_Permite()
         {
             LoginComoAdministrador();

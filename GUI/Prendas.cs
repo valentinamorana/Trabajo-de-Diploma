@@ -366,6 +366,11 @@ namespace GUI
                 if (prenda.Estado == BE.EstadoPrenda.EnUso && cand.estado == BE.EstadoPrenda.Baja)
                     continue;
 
+                // PN04 — En Limpieza → Baja solo desde Inspección de Devolución (registra el cargo
+                // por el daño antes de retirar la prenda); la BLL también lo exige.
+                if (prenda.Estado == BE.EstadoPrenda.EnLimpieza && cand.estado == BE.EstadoPrenda.Baja)
+                    continue;
+
                 if (cand.estado != prenda.Estado && prenda.TransicionPermitida(cand.estado))
                     opciones.Add((Tr(cand.clave, cand.fb), cand.estado));
             }

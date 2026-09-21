@@ -37,6 +37,7 @@ ES	err.bll.pedido.devolucion_ya_hecha	El Pedido #{0} no tiene prendas en uso par
 ES	err.bll.empleado_sin_vinculo	El usuario '{0}' no tiene un Empleado vinculado. Pedíle al Administrador que configure el vínculo.
 ES	err.bll.pedido.historial_vacio	No se encontraron cambios para la operación #{0} del Pedido #{1}.
 ES	err.bll.pedido.ya_despachado	El cliente tiene el pedido #{0} despachado pendiente de entrega. Confirmá la entrega antes de crear uno nuevo.
+ES	err.bll.pedido.cuenta_bloqueada	{0} tiene {1} prenda(s) pendientes de devolución. La cuenta se desbloquea cuando se registra la devolución del pedido anterior.
 ES	err.bll.plan.tiene_clientes	No se puede desactivar el plan: tiene {0} cliente(s) activo(s) asignado(s). Reasignalos a otro plan antes de desactivarlo.
 ES	err.bll.prenda.categoria_requerida	La categoría es obligatoria.
 ES	err.bll.prenda.nombre_requerido	El nombre de la prenda es obligatorio.
@@ -51,6 +52,7 @@ ES	err.bll.version.sin_permiso	Solo un Administrador puede restaurar una versió
 ES	err.bll.prenda.transicion_baja	Una prenda dada de baja no puede cambiar de estado.
 ES	err.bll.prenda.transicion_enuso	El estado de una prenda en uso se actualiza automáticamente al procesar pedidos.\nLa única excepción manual es reportarla como perdida (PN04, módulo de Pedidos Realizados).
 ES	err.bll.prenda.baja_requiere_flujoperdida	Una prenda en uso solo puede darse de baja a través de 'Reportar Prenda Perdida' (con cargo de reposición al cliente), no directamente.
+ES	err.bll.prenda.baja_requiere_inspeccion	Una prenda En Limpieza solo puede darse de baja desde la Inspección de Devolución (que registra el cargo por el daño), no directamente.
 ES	err.bll.prenda.transicion_generica	La transición de '{0}' a '{1}' no está permitida.
 ES	lbl.permisos.estructura	Estructura del sistema (roles, familias y patentes)
 ES	btn.permisos.quitar	Quitar ↑
@@ -837,6 +839,7 @@ EN	err.bll.pedido.devolucion_ya_hecha	Order #{0} has no garments in use to retur
 EN	err.bll.empleado_sin_vinculo	User '{0}' has no linked Employee. Ask the Administrator to configure the link.
 EN	err.bll.pedido.historial_vacio	No changes found for operation #{0} of Order #{1}.
 EN	err.bll.pedido.ya_despachado	The customer has order #{0} dispatched and pending delivery. Confirm the delivery before creating a new one.
+EN	err.bll.pedido.cuenta_bloqueada	{0} has {1} garment(s) pending return. The account is unlocked once the return of the previous order is registered.
 EN	err.bll.plan.tiene_clientes	The plan cannot be deactivated: it has {0} active customer(s) assigned. Reassign them to another plan before deactivating it.
 EN	err.bll.prenda.categoria_requerida	The category is required.
 EN	err.bll.prenda.nombre_requerido	The garment name is required.
@@ -851,6 +854,7 @@ EN	err.bll.version.sin_permiso	Only an Administrator can restore a user's histor
 EN	err.bll.prenda.transicion_baja	A garment that has been deactivated cannot change state.
 EN	err.bll.prenda.transicion_enuso	The state of a garment in use updates automatically when processing orders.\nThe only manual exception is reporting it lost (PN04, Completed Orders module).
 EN	err.bll.prenda.baja_requiere_flujoperdida	A garment in use can only be discontinued through 'Report Lost Garment' (with a replacement charge to the client), not directly.
+EN	err.bll.prenda.baja_requiere_inspeccion	A garment In Cleaning can only be retired from the Return Inspection (which records the damage charge), not directly.
 EN	err.bll.prenda.transicion_generica	The transition from '{0}' to '{1}' is not allowed.
 EN	lbl.permisos.estructura	System structure (roles, families and patents)
 EN	btn.permisos.quitar	Remove ↑
@@ -1637,6 +1641,7 @@ RU	err.bll.pedido.devolucion_ya_hecha	В заказе №{0} нет вещей �
 RU	err.bll.empleado_sin_vinculo	У пользователя «{0}» нет связанного сотрудника. Попросите администратора настроить связь.
 RU	err.bll.pedido.historial_vacio	Не найдены изменения для операции №{0} заказа №{1}.
 RU	err.bll.pedido.ya_despachado	У клиента есть отправленный заказ №{0}, ожидающий доставки. Подтвердите доставку перед созданием нового.
+RU	err.bll.pedido.cuenta_bloqueada	У {0} есть непринятые к возврату вещи ({1}). Аккаунт разблокируется после регистрации возврата предыдущего заказа.
 RU	err.bll.plan.tiene_clientes	Невозможно деактивировать план: к нему привязано {0} активный(ых) клиент(ов). Переназначьте их на другой план перед деактивацией.
 RU	err.bll.prenda.categoria_requerida	Категория обязательна.
 RU	err.bll.prenda.nombre_requerido	Название вещи обязательно.
@@ -1651,6 +1656,7 @@ RU	err.bll.version.sin_permiso	Только администратор може�
 RU	err.bll.prenda.transicion_baja	Списанная вещь не может менять состояние.
 RU	err.bll.prenda.transicion_enuso	Состояние вещи, находящейся в использовании, обновляется автоматически при обработке заказов.\nЕдинственное ручное исключение — сообщить о её потере (PN04, модуль Выполненных заказов).
 RU	err.bll.prenda.baja_requiere_flujoperdida	Вещь, находящуюся в использовании, можно списать только через 'Сообщить о пропаже вещи' (с начислением стоимости замены клиенту), а не напрямую.
+RU	err.bll.prenda.baja_requiere_inspeccion	Вещь в статусе «В чистке» можно списать только через инспекцию возврата (она фиксирует начисление за повреждение), а не напрямую.
 RU	err.bll.prenda.transicion_generica	Переход из «{0}» в «{1}» не разрешён.
 RU	lbl.permisos.estructura	Структура системы (роли, семейства и права)
 RU	btn.permisos.quitar	Убрать ↑
@@ -2437,6 +2443,7 @@ PT	err.bll.pedido.devolucion_ya_hecha	O Pedido #{0} não tem peças em uso para 
 PT	err.bll.empleado_sin_vinculo	O usuário '{0}' não tem um Funcionário vinculado. Peça ao Administrador para configurar o vínculo.
 PT	err.bll.pedido.historial_vacio	Não foram encontradas alterações para a operação #{0} do Pedido #{1}.
 PT	err.bll.pedido.ya_despachado	O cliente tem o pedido #{0} despachado e pendente de entrega. Confirme a entrega antes de criar um novo.
+PT	err.bll.pedido.cuenta_bloqueada	{0} tem {1} peça(s) pendentes de devolução. A conta é desbloqueada quando a devolução do pedido anterior for registrada.
 PT	err.bll.plan.tiene_clientes	Não é possível desativar o plano: tem {0} cliente(s) ativo(s) atribuído(s). Reatribua-os a outro plano antes de desativá-lo.
 PT	err.bll.prenda.categoria_requerida	A categoria é obrigatória.
 PT	err.bll.prenda.nombre_requerido	O nome da peça é obrigatório.
@@ -2451,6 +2458,7 @@ PT	err.bll.version.sin_permiso	Somente um Administrador pode restaurar uma vers�
 PT	err.bll.prenda.transicion_baja	Uma peça baixada não pode mudar de estado.
 PT	err.bll.prenda.transicion_enuso	O estado de uma peça em uso é atualizado automaticamente ao processar pedidos.\nA única exceção manual é reportá-la como perdida (PN04, módulo de Pedidos Realizados).
 PT	err.bll.prenda.baja_requiere_flujoperdida	Uma peça em uso só pode ser baixada através de 'Reportar Peça Perdida' (com cobrança de reposição ao cliente), não diretamente.
+PT	err.bll.prenda.baja_requiere_inspeccion	Uma peça Em Limpeza só pode ser baixada pela Inspeção de Devolução (que registra a cobrança do dano), não diretamente.
 PT	err.bll.prenda.transicion_generica	A transição de '{0}' para '{1}' não é permitida.
 PT	lbl.permisos.estructura	Estrutura do sistema (papéis, famílias e patentes)
 PT	btn.permisos.quitar	Remover ↑
@@ -4663,24 +4671,32 @@ PT	msg.ok.titulo	Pronto
 ES	err.bll.contratacion.pendiente_existente	Este cliente ya tiene una contratación pendiente de pago. Hay que resolverla (cobrarla o cancelarla) antes de registrar una nueva.
 ES	err.bll.contratacion.cliente_inexistente	El cliente seleccionado no existe.
 ES	err.bll.contratacion.cobrar_estado	Solo se pueden cobrar contrataciones Pendientes de pago. Esta contratación está '{0}'.
+ES	err.bll.contratacion.plan_baja	El plan '{0}' fue dado de baja: no se puede formalizar la suscripción. La contratación queda pendiente de pago.
+ES	err.bll.contratacion.cobrar_concurrente	Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.
 ES	err.bll.contratacion.inexistente	La contratación ya no existe.
 ES	err.bll.contratacion.medio_pago_requerido	Debe indicar el medio de pago (efectivo, tarjeta o transferencia).
 ES	err.bll.contratacion.plan_inexistente	El plan seleccionado no existe o no está activo.
 EN	err.bll.contratacion.pendiente_existente	This client already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
 EN	err.bll.contratacion.cliente_inexistente	The selected client does not exist.
 EN	err.bll.contratacion.cobrar_estado	Only contracts Pending payment can be charged. This contract is '{0}'.
+EN	err.bll.contratacion.plan_baja	Plan '{0}' has been discontinued: the subscription cannot be formalized. The contracting remains pending payment.
+EN	err.bll.contratacion.cobrar_concurrente	Another Cashier session has already resolved this contracting. Refresh the Cashier queue.
 EN	err.bll.contratacion.inexistente	The contract no longer exists.
 EN	err.bll.contratacion.medio_pago_requerido	You must indicate the payment method (cash, card or transfer).
 EN	err.bll.contratacion.plan_inexistente	The selected plan does not exist or is not active.
 RU	err.bll.contratacion.pendiente_existente	У этого клиента уже есть договор, ожидающий оплаты. Его нужно разрешить (оплатить или отменить) перед оформлением нового.
 RU	err.bll.contratacion.cliente_inexistente	Выбранный клиент не существует.
 RU	err.bll.contratacion.cobrar_estado	Оплатить можно только контракты в статусе 'Ожидает оплаты'. Текущий статус: '{0}'.
+RU	err.bll.contratacion.plan_baja	Тариф '{0}' снят с продажи: оформить подписку нельзя. Заказ остаётся ожидающим оплаты.
+RU	err.bll.contratacion.cobrar_concurrente	Другой сеанс кассы уже обработал этот заказ. Обновите очередь кассы.
 RU	err.bll.contratacion.inexistente	Контракт больше не существует.
 RU	err.bll.contratacion.medio_pago_requerido	Необходимо указать способ оплаты (наличные, карта или перевод).
 RU	err.bll.contratacion.plan_inexistente	Выбранный план не существует или неактивен.
 PT	err.bll.contratacion.pendiente_existente	Este cliente já tem uma contratação pendente de pagamento. É preciso resolvê-la (cobrar ou cancelar) antes de registrar uma nova.
 PT	err.bll.contratacion.cliente_inexistente	O cliente selecionado não existe.
 PT	err.bll.contratacion.cobrar_estado	Só é possível cobrar contratações Pendentes de pagamento. Esta contratação está '{0}'.
+PT	err.bll.contratacion.plan_baja	O plano '{0}' foi desativado: não é possível formalizar a assinatura. A contratação permanece pendente de pagamento.
+PT	err.bll.contratacion.cobrar_concurrente	Outra sessão do Caixa já resolveu esta contratação. Atualize a fila do Caixa.
 PT	err.bll.contratacion.inexistente	A contratação não existe mais.
 PT	err.bll.contratacion.medio_pago_requerido	Deve indicar o meio de pagamento (dinheiro, cartão ou transferência).
 PT	err.bll.contratacion.plan_inexistente	O plano selecionado não existe ou não está ativo.

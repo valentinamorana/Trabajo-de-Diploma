@@ -757,5 +757,59 @@ namespace Tests
             Assert.AreEqual("Cancelado", restaurado.ValorAnterior);
             Assert.AreEqual("Pendiente", restaurado.ValorNuevo);
         }
+
+        // ── PN01/PN04: cuenta bloqueada hasta registrar la devolución (regla de NUULY) ────
+
+        [TestMethod]
+        public void CrearPedido_ConPrendasPendientesDeDevolucion_LanzaCuentaBloqueada()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            ctx.DalPrenda.PorCliente = new List<BE.Prenda>
+            {
+                new BE.Prenda { IdPrenda = 99, Nombre = "Blazer", Estado = BE.EstadoPrenda.EnUso, IdClienteActual = 10 }
+            };
+
+            try
+            {
+                ctx.Crear().CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+                Assert.Fail("Debía bloquear el pedido: hay prendas pendientes de devolución.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.pedido.cuenta_bloqueada", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPedido.AltaVeces, "No debe crearse ningún pedido.");
+        }
+
+        [TestMethod]
+        public void ValidarPuedeArmarPedido_SinPrendasPendientes_DevuelveElCliente()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+
+            var cliente = ctx.Crear().ValidarPuedeArmarPedido(10);
+
+            Assert.AreEqual(10, cliente.IdCliente);
+        }
+
+        [TestMethod]
+        public void ValidarPuedeArmarPedido_ConPrendasPendientes_LanzaCuentaBloqueada_YSeDesbloqueaAlDevolver()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            ctx.DalPrenda.PorCliente = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 99, Estado = BE.EstadoPrenda.EnUso } };
+            var bll = ctx.Crear();
+
+            try { bll.ValidarPuedeArmarPedido(10); Assert.Fail("Debía estar bloqueada."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.cuenta_bloqueada", ex.Clave); }
+
+            // PN04: al registrarse la devolución las prendas dejan de estar EnUso y la cuenta se desbloquea.
+            ctx.DalPrenda.PorCliente = new List<BE.Prenda>();
+            Assert.AreEqual(10, bll.ValidarPuedeArmarPedido(10).IdCliente);
+        }
     }
 }

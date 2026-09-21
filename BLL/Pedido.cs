@@ -85,16 +85,8 @@ namespace BLL
             PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
             ValidarParametrosEntrada(prendas);
 
-            var cliente = ObtenerClienteValidado(idCliente);
-
-            // Bloquear si el cliente tiene un pedido despachado que aún no fue entregado
-            var despachadoActivo = ObtenerTodos()
-                .Find(p => p.IdCliente == idCliente && p.Estado == BE.EstadoPedido.Despachado);
-            if (despachadoActivo != null)
-                throw new BE.AppException("err.bll.pedido.ya_despachado",
-                    "El cliente tiene el pedido #{0} despachado pendiente de entrega. " +
-                    "Confirmá la entrega antes de crear uno nuevo.",
-                    despachadoActivo.IdPedido);
+            // Suscripción vigente + pedido despachado sin entregar + cuenta desbloqueada.
+            var cliente = ValidarPuedeArmarPedido(idCliente);
 
             var plan    = ValidarCupoDisponible(cliente, prendas.Count);
 
@@ -121,6 +113,38 @@ namespace BLL
             }
 
             return idNuevo;
+        }
+
+        // PN01 (paso "verificar situación del cliente") + PN04 (desbloqueo). Reglas, en orden:
+        //   1) suscripción vigente, no pausada ni suspendida por pago (ObtenerClienteValidado);
+        //   2) sin un pedido Despachado pendiente de entrega;
+        //   3) CUENTA DESBLOQUEADA: sin prendas pendientes de devolución. Igual que NUULY (4.2/4.6),
+        //      no se arma otro pedido hasta que se registre la devolución del anterior: los pedidos
+        //      Pendiente, Despachado y Entregado mantienen sus prendas EnUso hasta ese momento, y
+        //      PN04 (RegistrarDevolucion) las pasa a En Limpieza y así desbloquea la cuenta.
+        // Público para que el asistente de la GUI avise al elegir el cliente y no recién al confirmar.
+        public BE.Cliente ValidarPuedeArmarPedido(int idCliente)
+        {
+            PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
+
+            var cliente = ObtenerClienteValidado(idCliente);
+
+            var despachadoActivo = ObtenerTodos()
+                .Find(p => p.IdCliente == idCliente && p.Estado == BE.EstadoPedido.Despachado);
+            if (despachadoActivo != null)
+                throw new BE.AppException("err.bll.pedido.ya_despachado",
+                    "El cliente tiene el pedido #{0} despachado pendiente de entrega. " +
+                    "Confirmá la entrega antes de crear uno nuevo.",
+                    despachadoActivo.IdPedido);
+
+            int enUso = prendaBLL.ObtenerPorCliente(idCliente).Count;
+            if (enUso > 0)
+                throw new BE.AppException("err.bll.pedido.cuenta_bloqueada",
+                    "{0} tiene {1} prenda(s) pendientes de devolución. La cuenta se desbloquea cuando " +
+                    "se registra la devolución del pedido anterior.",
+                    cliente.NombreCompleto, enUso);
+
+            return cliente;
         }
 
         // Despachar

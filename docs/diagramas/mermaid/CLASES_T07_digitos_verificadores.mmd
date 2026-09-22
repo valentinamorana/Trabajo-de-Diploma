@@ -1,0 +1,57 @@
+classDiagram
+  direction TB
+  class BLL_Configuracion["BLL.Configuracion"] {
+    +VerificarIntegridadDV(ResultadoIntegridad) bool
+    +AsegurarIntegridadUsuarios() void
+    +RecalcularIntegridadDV() void
+  }
+  class BLL_RecuperacionIntegridad["BLL.RecuperacionIntegridad"] {
+    <<static>>
+    +Diagnosticar() DiagnosticoEspejo
+    +RepararDesdeEspejo() void
+    +AsumirPerdida() void
+  }
+  class Seguridad_ICalculadorDV["Seguridad.ICalculadorDV"] {
+    <<interface>>
+    +CalcularDVH(string[]) int
+    +CalcularDVV(IList~int~) int
+  }
+  class Seguridad_CalculadorDV["Seguridad.CalculadorDV"] {
+    <<static>>
+    +Crear() ICalculadorDV
+  }
+  class Seguridad_DigitoVerificador["Seguridad.DigitoVerificador"] {
+    +CalcularDVH(string[]) int
+    +CalcularDVV(IList~int~) int
+  }
+  class DAL_DigitoVerificador["DAL.DigitoVerificador"] {
+    +ObtenerDVV(string) int?
+    +GuardarDVV(string,  int) void
+    +ObtenerFilasUsuario() List~FilaUsuarioDV~
+    +ActualizarDVH(int,  int) void
+    +ObtenerFilas(string,  string,  string[]) List~FilaDV~
+    +ActualizarDVH(string,  string,  int,  int) void
+    +RecalcularTabla(string,  string,  string[]) void
+  }
+  class DAL_HistorialIntegridad["DAL.HistorialIntegridad"] {
+    +Insertar(HistorialIntegridad) void
+    +ObtenerUltimos(int) List~HistorialIntegridad~
+  }
+  class FilaUsuarioDV {
+    +int Id
+    +string Username
+    +string Clave
+    +string Rol
+    +string Perfil
+    +string Estado
+    +string IntentosFallidos
+    +int? DVHAlmacenado
+  }
+  Seguridad_ICalculadorDV <|.. Seguridad_DigitoVerificador
+  _________________ ..> ______________________ : usa
+  _________________ ..> _____________________ : usa
+  __________________________ ..> _____________________ : usa
+  _________________ ..> _______________________ : usa
+  _______________________ <|.. ______________________
+  ______________________ ..> ___________________________ : usa
+  _____________________ ..> FilaUsuarioDV : usa

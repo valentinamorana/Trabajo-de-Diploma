@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor A as Administrador
+  participant F as Diagnostico<br/>IntegridadForm
+  participant R as BLL.Recuperacion<br/>Integridad
+  participant D as DAL.Digito<br/>Verificador
+  participant H as DAL.Historial<br/>Integridad
+  A->>F: Abre el diagnóstico de integridad
+  F->>R: Diagnosticar()
+  R->>D: ObtenerFilasUsuario()
+  R->>D: ObtenerDVV("Usuario")
+  R-->>F: DiagnosticoEspejo (filas alteradas, faltantes, DVV)
+  alt Hay alteraciones
+    A->>F: Elige reparar desde el espejo o asumir la pérdida
+    F->>R: RepararDesdeEspejo() o AsumirPerdida()
+    R->>D: RecalcularTabla(tabla, pkCol, columnas)
+    R->>H: Insertar(entrada)
+    R-->>F: integridad restablecida
+  else Sin alteraciones
+    R-->>F: Integro = true
+  end

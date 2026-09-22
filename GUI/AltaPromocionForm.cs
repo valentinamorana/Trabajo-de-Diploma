@@ -104,10 +104,10 @@ namespace GUI
                     txtNombre.Text = _reformular.Nombre;
                     txtDescripcion.Text = _reformular.Descripcion;
                     cmbTipoDescuento.SelectedItem = _reformular.TipoDescuento;
-                    numValor.Value = _reformular.Valor;
+                    numValor.Value = Math.Min(numValor.Maximum, _reformular.Valor);
                     dtpInicio.Value = _reformular.FechaInicio < dtpInicio.MinDate ? dtpInicio.MinDate : _reformular.FechaInicio;
                     dtpFin.Value = _reformular.FechaFin < dtpFin.MinDate ? dtpFin.MinDate : _reformular.FechaFin;
-                    numMargenEstimado.Value = _reformular.MargenEstimado;
+                    numMargenEstimado.Value = Math.Min(numMargenEstimado.Maximum, Math.Max(numMargenEstimado.Minimum, _reformular.MargenEstimado));
                     txtImpactoEconomico.Text = _reformular.ImpactoEconomico;
                 }
                 else if (_sugerenciaOrigen != null)
@@ -123,7 +123,12 @@ namespace GUI
                     cmbPlan.Enabled = _sugerenciaOrigen.AplicaAPlan();
                     txtCategoria.Enabled = _sugerenciaOrigen.AplicaACategoria();
                     cmbTipoDescuento.SelectedItem = _sugerenciaOrigen.TipoDescuentoSugerido;
-                    numValor.Value = _sugerenciaOrigen.BeneficioEstimado;
+                    // El beneficio estimado es un importe en $; si el descuento sugerido es un PORCENTAJE no se
+                    // puede precargar como valor (16000 % es inválido): se propone 10 % y Administración lo ajusta.
+                    decimal valorInicial = _sugerenciaOrigen.BeneficioEstimado;
+                    if (_sugerenciaOrigen.TipoDescuentoSugerido == BE.TipoDescuento.Porcentaje && valorInicial > 100)
+                        valorInicial = 10;
+                    numValor.Value = Math.Min(numValor.Maximum, valorInicial);
                 }
                 else
                 {

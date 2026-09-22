@@ -62,6 +62,7 @@ namespace GUI
             Aplicar(btnCobrar,         t);
             Aplicar(btnIntentoFallido, t);
             tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
+            btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
             TraducirHeadersGrilla(t);
             CargarMediosPago();
         }
@@ -141,6 +142,10 @@ namespace GUI
             try
             {
                 _contrataciones = contratacionBLL.ObtenerPendientesDePago();
+                // Un solo cálculo en lote para toda la cola (las promociones se leen una vez).
+                _importes = new System.Collections.Generic.Dictionary<int, BE.LiquidacionContratacion>();
+                try { _importes = contratacionBLL.CalcularImportes(_contrataciones); }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[ContratacionesPendientesForm] No se pudieron calcular los importes: {ex.Message}"); }
 
                 var tabla = new DataTable();
                 tabla.Columns.Add("ID", typeof(int));
@@ -177,17 +182,18 @@ namespace GUI
             btnIntentoFallido.Enabled = haySeleccion;
         }
 
+        // Importes calculados en lote por CargarContrataciones (clave = IdContratacion).
+        private System.Collections.Generic.Dictionary<int, BE.LiquidacionContratacion> _importes =
+            new System.Collections.Generic.Dictionary<int, BE.LiquidacionContratacion>();
+
         // PN03: importe a cobrar con el descuento aplicable (promoción vigente del plan o crédito por referido).
+        // Si no se pudo calcular se muestra "—": nunca un monto sin descuento que después no coincida con el cobro.
         private string FormatearMonto(BE.Contratacion c)
         {
-            try
-            {
-                var liq = contratacionBLL.CalcularImporte(c);
-                return liq.Descuento > 0
-                    ? $"{liq.Total:C2} (-{liq.Descuento:C2})"
-                    : liq.Total.ToString("C2");
-            }
-            catch { return c.MontoPlan.ToString("C2"); }
+            if (!_importes.TryGetValue(c.IdContratacion, out var liq)) return "—";
+            return liq.Descuento > 0
+                ? $"{liq.Total:C2} (-{liq.Descuento:C2})"
+                : liq.Total.ToString("C2");
         }
 
         private BE.Contratacion ObtenerSeleccionada()
@@ -215,7 +221,9 @@ namespace GUI
             }
             string medioPago = ((MedioPagoItem)cmbMedioPago.SelectedItem).Value;
 
-            var liquidacion = contratacionBLL.CalcularImporte(contratacion);
+            BE.LiquidacionContratacion liquidacion;
+            try { liquidacion = contratacionBLL.CalcularImporte(contratacion); }
+            catch (Exception ex) { MostrarError(ex); return; }
             string detalleDescuento = liquidacion.Descuento > 0
                 ? "\n" + Tr("conf.contratacion.cobro.desc", "Descuento aplicado: {0:C2} ({1}).",
                     new object[] { liquidacion.Descuento,

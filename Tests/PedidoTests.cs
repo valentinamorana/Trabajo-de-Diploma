@@ -30,6 +30,53 @@ namespace Tests
             });
         }
 
+        [TestMethod]
+        public void RestaurarOperacion_SinPermisoDeEdicion_LanzaSinPermisoYNoTocaElHistorial()
+        {
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 2,
+                Username = "auditor",
+                Perfil = "Auditor",
+                Contraseña = Encriptador.Hash("Auditor1!")
+            });
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+
+            try
+            {
+                bll.RestaurarOperacion("Test", 1, 1);
+                Assert.Fail("Debía exigir permiso de edición de pedidos.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.sin_permiso", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPedido.RestaurarOperacionAtomicaVeces, "No debe llegar a modificar el pedido.");
+        }
+
+        [TestMethod]
+        public void DespacharYEntregar_ExigenPermisoDePedidosRealizados_NoElDeVentas()
+        {
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 3,
+                Username = "sinpermisos",
+                Perfil = "Auditor",
+                Contraseña = Encriptador.Hash("Auditor1!")
+            });
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido { IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Pendiente };
+
+            try { bll.Despachar("Test", pedido); Assert.Fail("Despachar exige PedidosRealizadosEditar."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }
+
+            pedido.Estado = BE.EstadoPedido.Despachado;
+            try { bll.MarcarEntregado("Test", pedido); Assert.Fail("Entregar exige PedidosRealizadosEditar."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }
+        }
+
         private static BE.Cliente ClienteConPlanVigente() => new BE.Cliente
         {
             IdCliente = 10,
@@ -73,7 +120,19 @@ namespace Tests
             public FakePrendaDAL DalPrenda = new FakePrendaDAL { Todas = new List<BE.Prenda> { PrendaDisponible() } };
             public BLL.Prenda PrendaBLL => new BLL.Prenda(DalPrenda, new FakeMantenimientoPrendaDAL());
 
-            public BLL.Pedido Crear() => new BLL.Pedido(DalPedido, DalCliente, DalEmpleado, DalPlan, DalHistorial, PrendaBLL);
+            // Lista de Espera (mejora opcional): si no se inyecta un doble acá, BLL.Pedido cae en
+            // su lazy `new ListaEspera()` real (BLL.Pedido.cs), que abre DAL.ListaEspera/DAL.Prenda/
+            // DAL.Cliente REALES contra la connection string de Tests/App.config. Si esa base
+            // (.\SQLEXPRESS WardrobeFlowDB) existe y tiene datos — por ej. de correr la GUI a mano —
+            // estos tests dejan de ser unitarios y su resultado depende del estado de esa base.
+            // Se vio en vivo: una fila real de ListaEspera con IdPrenda=1 reservada para otro cliente
+            // hizo fallar CrearPedido_DatosValidos_PersisteYRegistraHistorial y
+            // CrearPedido_SinEmpleadoVinculado_LanzaEmpleadoSinVinculo con "err.bll.pedido.prenda_reservada"
+            // en vez de sus resultados esperados. Inyectar el Fake (responde "no reservada" por
+            // defecto) mantiene estos tests herméticos sin importar el estado de la base real.
+            public FakeListaEsperaService DalListaEspera = new FakeListaEsperaService();
+
+            public BLL.Pedido Crear() => new BLL.Pedido(DalPedido, DalCliente, DalEmpleado, DalPlan, DalHistorial, DalListaEspera, PrendaBLL);
         }
 
         // ── CrearPedido ───────────────────────────────────────────────────────
@@ -543,6 +602,21 @@ namespace Tests
                 Assert.AreEqual("err.bll.pedido.entregar_estado", ex.Clave);
             }
             Assert.AreEqual(0, ctx.DalPedido.MarcarEntregadoVeces);
+        }
+
+        [TestMethod]
+        public void RegistrarDevolucion_PedidoEntregado_DevuelveLasPrendasYRegistraElHistorial()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPedido.RegistrarDevolucionRespuesta = 2; // dos prendas pasan de En uso a En limpieza
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido { IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Entregado };
+
+            bll.RegistrarDevolucion("Test", pedido);
+
+            Assert.AreEqual(1, ctx.DalPedido.RegistrarDevolucionVeces, "La devolución (En uso a En limpieza, con mantenimiento) se hace una sola vez.");
+            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces, "Queda la operación DEVOLUCION en el historial.");
         }
 
         [TestMethod]

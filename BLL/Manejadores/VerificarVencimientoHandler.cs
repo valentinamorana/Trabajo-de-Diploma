@@ -15,7 +15,9 @@ namespace BLL.Manejadores
         {
             var cliente = contexto.Cliente;
 
-            if (!cliente.VencimientoExpirado && !cliente.SuscripcionProximaAVencer())
+            // NUULY 4.8: la pausa se puede pedir en cualquier momento, no solo al vencer.
+            if (contexto.Decision != DecisionRenovacion.Pausar
+                && !cliente.VencimientoExpirado && !cliente.SuscripcionProximaAVencer())
             {
                 return new ResultadoRenovacion
                 {

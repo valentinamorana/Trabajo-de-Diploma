@@ -1,0 +1,33 @@
+sequenceDiagram
+  autonumber
+  actor D as Depósito
+  participant F as Inspeccion<br/>DevolucionForm
+  participant PB as BLL.Prenda
+  participant CG as BLL.CargoPrenda
+  participant DA as DAL (Prenda, Mantenimiento, CargoPrenda)
+  participant LE as BLL.ListaEspera
+  D->>F: Abre la cola de prendas En limpieza
+  F->>PB: ObtenerEnLimpieza()
+  PB-->>F: prendas En limpieza
+  D->>F: Inspecciona una prenda y decide
+  alt Desgaste normal: Aprobar reingreso
+    F->>PB: CambiarEstado(modulo, prenda, Disponible, actor, viaInspeccion: true)
+    Note over PB: Exigir(StockEditar) · patrón State: EnLimpieza → Disponible
+    PB->>DA: CambiarEstado(id, esperado = EnLimpieza, nuevo = Disponible)  [UPDATE condicionado] · CerrarMantenimiento(id)
+    PB->>LE: NotificarSiCorresponde(idPrenda)  [reserva 48 h si hay lista de espera]
+    PB-->>F: ok
+    F-->>D: Prenda de nuevo en el catálogo, sin cargo
+  else Daño irreparable: Dar de baja y cobrar
+    F->>CG: RegistrarCargo(modulo, prenda, motivo, monto, actor)  [primero el cargo]
+    Note over CG: Exigir(StockEditar) · la prenda debe tener último cliente · motivo obligatorio · monto > 0
+    CG->>DA: Alta(cargo: Pendiente, IdCliente = último cliente)
+    F->>PB: CambiarEstado(modulo, prenda, Baja, actor, viaInspeccion: true)  [después la baja]
+    PB->>DA: CambiarEstado(id, esperado = EnLimpieza, nuevo = Baja)
+    PB-->>F: ok
+    F-->>D: Prenda dada de baja: el cargo se suma al próximo cobro del cliente
+  end
+  alt Otra sesión ya la resolvió
+    DA-->>PB: UPDATE sin filas
+    PB-->>F: AppException(estado_cambio)
+    F-->>D: Actualizá la cola
+  end

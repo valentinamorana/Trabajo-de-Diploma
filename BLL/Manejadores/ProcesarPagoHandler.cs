@@ -59,14 +59,15 @@ namespace BLL.Manejadores
             // PN03 + NUULY 5.1: un solo descuento por ciclo — el mayor entre la promoción vigente del
             // plan y el crédito por referidos. Si gana la promoción, el crédito queda acumulado.
             var resDescuento = BE.PoliticaDescuento.Resolver(
-                plan.Precio, cliente.IdPlan, ObtenerPromocionesVigentes(), cliente.DescuentoProximoCobro);
+                plan.Precio * BE.Builders.ModalidadCobroExtensiones.Meses(contexto.Modalidad), cliente.IdPlan, ObtenerPromocionesVigentes(), cliente.DescuentoProximoCobro, BE.Builders.ModalidadCobroExtensiones.Meses(contexto.Modalidad));
             decimal descuento = resDescuento.Descuento;
             var cargosPendientes = dalCargoPrenda.ObtenerPendientesPorCliente(cliente.IdCliente);
             decimal totalCargos = cargosPendientes.Sum(c => c.Monto);
             decimal importeFinal = resDescuento.Total + totalCargos;
 
+            // El crédito por referido no usado queda acumulado: solo se descuenta lo aplicado.
             if (resDescuento.UsaCreditoReferido)
-                cliente.DescuentoProximoCobro = 0;
+                cliente.DescuentoProximoCobro = Math.Max(0, cliente.DescuentoProximoCobro - resDescuento.Descuento);
 
             // UPDATE de Cliente + INSERT del historial + liquidación de cargos pendientes, todo
             // en una única transacción: antes eran round-trips independientes, y un crash entre
@@ -76,6 +77,9 @@ namespace BLL.Manejadores
             dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
                 dalCliente.ModificarEnTx(conexion, tx, cliente);
+                // Crédito de referido: delta atómico sobre el valor real de la BD.
+                if (resDescuento.UsaCreditoReferido)
+                    dalCliente.ConsumirCreditoEnTx(conexion, tx, cliente.IdCliente, resDescuento.Descuento);
                 idCobro = dalCobro.AltaEnTx(conexion, tx, new BE.Cobro
                 {
                     IdCliente = cliente.IdCliente,
@@ -85,9 +89,17 @@ namespace BLL.Manejadores
                     Resultado = BE.EstadoCobro.Cobrado,
                     Actor = contexto.Actor
                 });
-                if (cargosPendientes.Count > 0)
-                    dalCargoPrenda.MarcarCobradosEnTx(conexion, tx,
-                        cargosPendientes.Select(c => c.IdCargo).ToList(), ahora);
+                if (cargosPendientes.Count > 0 &&
+
+                    !dalCargoPrenda.MarcarCobradosEnTx(conexion, tx,
+
+                        cargosPendientes.Select(c => c.IdCargo).ToList(), ahora))
+
+                    // Otra sesión ya cobró alguno de estos cargos: se revierte TODO el cobro (cliente, historial y cargos).
+
+                    throw new BE.AppException("err.bll.cobro.cargo_concurrente",
+
+                        "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.");
             });
             dalCliente.RecalcularDV();
 
@@ -166,6 +178,8 @@ namespace BLL.Manejadores
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError($"[ProcesarPagoHandler] No se pudieron leer las promociones: {ex.Message}");
+                try { new Servicios.Bitacora().Registrar("Cobro", $"No se pudieron leer las promociones vigentes; se cobró sin descuento: {ex.Message}", BE.Criticidad.Media); }
+                catch { }
                 return new System.Collections.Generic.List<BE.Promocion>();
             }
         }

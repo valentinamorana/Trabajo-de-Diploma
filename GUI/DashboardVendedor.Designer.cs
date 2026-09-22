@@ -110,7 +110,7 @@ namespace GUI
             this.btnRefrescar.Name      = "btnRefrescar";
             this.btnRefrescar.Size      = new Size(100, 28);
             this.btnRefrescar.TabIndex  = 2;
-            this.btnRefrescar.Text      = "↻  Actualizar";
+            this.btnRefrescar.Text      = "Actualizar";
             this.btnRefrescar.UseVisualStyleBackColor = false;
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
 

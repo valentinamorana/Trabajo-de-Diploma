@@ -90,9 +90,10 @@ namespace DAL
             {
                 DataTable tabla = acceso.Leer(
                     "UPDATE Contratacion SET IntentosPago = IntentosPago + 1 " +
-                    "WHERE IdContratacion = @IdContratacion AND Estado = 0; " +
-                    "IF @@ROWCOUNT = 0 SELECT -1 AS Intentos " +
-                    "ELSE SELECT IntentosPago AS Intentos FROM Contratacion WHERE IdContratacion = @IdContratacion",
+                    "WHERE IdContratacion = @IdContratacion AND Estado = 0 AND IntentosPago < 3; " +
+                    // -1 = ya no está pendiente (otra sesión la resolvió). Si sigue pendiente devuelve sus intentos
+                    // actuales, incluso 3: así una contratación que quedó con el tope alcanzado se cancela.
+                    "SELECT ISNULL((SELECT IntentosPago FROM Contratacion WHERE IdContratacion = @IdContratacion AND Estado = 0), -1) AS Intentos",
                     p);
 
                 return tabla != null && tabla.Rows.Count > 0

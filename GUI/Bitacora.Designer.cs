@@ -122,7 +122,7 @@ namespace GUI
             this.tabPageSistema.Name = "tabPageSistema";
             this.tabPageSistema.Size = new System.Drawing.Size(1012, 614);
             this.tabPageSistema.TabIndex = 0;
-            this.tabPageSistema.Text = "🔐  Bitácora del Sistema";
+            this.tabPageSistema.Text = "Bitácora del Sistema";
             // 
             // dgvSistema
             // 
@@ -334,7 +334,7 @@ namespace GUI
             this.btnExportSistema.Name = "btnExportSistema";
             this.btnExportSistema.Size = new System.Drawing.Size(130, 66);
             this.btnExportSistema.TabIndex = 12;
-            this.btnExportSistema.Text = "📄 Exportar PDF";
+            this.btnExportSistema.Text = "Exportar PDF";
             this.btnExportSistema.UseVisualStyleBackColor = false;
             this.btnExportSistema.Click += new System.EventHandler(this.BtnExportSistema_Click);
             // 
@@ -347,7 +347,7 @@ namespace GUI
             this.tabPageNegocio.Name = "tabPageNegocio";
             this.tabPageNegocio.Size = new System.Drawing.Size(1012, 614);
             this.tabPageNegocio.TabIndex = 1;
-            this.tabPageNegocio.Text = "📦  Bitácora de Negocio";
+            this.tabPageNegocio.Text = "Bitácora de Negocio";
             // 
             // dgvNegocio
             // 
@@ -562,7 +562,7 @@ namespace GUI
             this.btnExportNegocio.Name = "btnExportNegocio";
             this.btnExportNegocio.Size = new System.Drawing.Size(130, 66);
             this.btnExportNegocio.TabIndex = 12;
-            this.btnExportNegocio.Text = "📄 Exportar PDF";
+            this.btnExportNegocio.Text = "Exportar PDF";
             this.btnExportNegocio.UseVisualStyleBackColor = false;
             this.btnExportNegocio.Click += new System.EventHandler(this.BtnExportNegocio_Click);
             // 

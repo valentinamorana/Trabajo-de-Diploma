@@ -24,6 +24,13 @@ namespace DAL.Interfaces
         /// No recalcula el DV — el caller debe llamar a <see cref="RecalcularDV"/> después de confirmar la transacción.</summary>
         void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente);
 
+        /// <summary>Suma <paramref name="monto"/> al crédito de referido de forma atómica (delta sobre el valor real de la BD).
+        /// El UPDATE general de Cliente no escribe el crédito: solo estas dos operaciones lo modifican.</summary>
+        void SumarCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto);
+
+        /// <summary>Resta <paramref name="monto"/> del crédito de referido de forma atómica, sin dejarlo negativo.</summary>
+        void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto);
+
         /// <summary>Recalcula el Dígito Verificador (T07) de la tabla Cliente. Público para poder
         /// invocarse tras confirmar una transacción externa armada con <see cref="EjecutarTransaccion"/>.</summary>
         void RecalcularDV();

@@ -1,0 +1,22 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as PedidosVenta
+  participant I as InvocadorPedido
+  participant K as Cancelacion<br/>Command
+  participant B as BLL.Pedido
+  participant D as DAL.Pedido
+  V->>F: Selecciona un pedido Pendiente, indica el motivo y pulsa Cancelar
+  F->>I: TomarOrden(new CancelacionCommand(pedido, motivo))
+  F->>I: ProcesarOrdenes()
+  I->>K: Ejecutar()
+  K->>B: Cancelar(modulo, pedido, motivo)
+  Note over B: Exigir(PedidosVentaEditar) · pedido.PuedeCancelarse() · el motivo es obligatorio
+  alt No está Pendiente o falta el motivo
+    B-->>F: AppException(cancelar_estado / cancelar_sin_motivo)
+    F-->>V: Informa el error
+  else Válido
+    B->>D: Cancelar(idPedido, motivo)  [libera las prendas a Disponible]
+    B-->>F: ok
+    F-->>V: Pedido Cancelado (se puede des-cancelar si las prendas siguen disponibles)
+  end

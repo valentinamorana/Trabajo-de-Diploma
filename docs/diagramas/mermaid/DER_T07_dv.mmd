@@ -1,0 +1,37 @@
+erDiagram
+  Usuario {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    varchar(5) IdIdioma "NULL"
+    bit Activo
+    datetime FechaBaja "NULL"
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
+    bit RequiereCambioClave
+    nvarchar(100) Nombre "NULL"
+    nvarchar(100) Apellido "NULL"
+    date FechaNacimiento "NULL"
+    nvarchar(200) Email "NULL"
+  }
+  DVVertical {
+    int Id PK
+    varchar(100) NombreTabla
+    int DVV
+    datetime FechaCalculo
+  }
+  HistorialIntegridad {
+    int Id PK
+    varchar(100) NombreTabla
+    int DVVAlmacenado "NULL"
+    int DVVCalculado
+    bit Resultado
+    int FilasCorruptas
+    datetime FechaVerificacion
+    varchar(50) DisparadoPor
+  }

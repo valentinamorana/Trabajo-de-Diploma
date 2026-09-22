@@ -172,7 +172,123 @@ namespace Tests
         // ── PausarSuscripcionHandler (Bloque 1) ──────────────────────────────────
 
         [TestMethod]
-        public void Pausar_ConFechaValida_PausaYPersisteHistorial_SinTocarVencimiento()
+        public void Pausar_ClienteVigenteSinVencer_NoQuedaPendiente_PausaIgual()
+        {
+            var verificar = new VerificarVencimientoHandler();
+            var pausar = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            verificar.AgregarSiguiente(pausar);
+            var cliente = ClienteVigente();
+
+            var r = verificar.Procesar(new ContextoRenovacion
+            {
+                Cliente = cliente,
+                Decision = DecisionRenovacion.Pausar,
+                FechaPausaHasta = DateTime.Today.AddDays(20)
+            });
+
+            Assert.AreEqual(BE.EstadoRenovacion.Pausada, r.Estado);
+        }
+
+        [TestMethod]
+        public void Pausar_YaPausada_LanzaYNoEncadenaPausas()
+        {
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            var cliente = ClienteVigente();
+            cliente.FechaPausaHasta = DateTime.Today.AddDays(5);
+            try
+            {
+                handler.Procesar(new ContextoRenovacion
+                {
+                    Cliente = cliente,
+                    Decision = DecisionRenovacion.Pausar,
+                    FechaPausaHasta = DateTime.Today.AddDays(30)
+                });
+                Assert.Fail("No debe permitir re-pausar una suscripción ya pausada.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.ya_pausada", ex.Clave);
+            }
+        }
+        [TestMethod]
+        public void Pausar_MasDeTresMeses_LanzaTopeDeNuuly()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var handler = new PausarSuscripcionHandler(dalCliente, new FakeRenovacionDAL());
+            try
+            {
+                handler.Procesar(new ContextoRenovacion
+                {
+                    Cliente = ClienteVigente(),
+                    Decision = DecisionRenovacion.Pausar,
+                    FechaPausaHasta = DateTime.Today.AddMonths(PausarSuscripcionHandler.MaxMesesPausa).AddDays(1)
+                });
+                Assert.Fail("La pausa no puede superar los 3 meses.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.pausa_excede_tope", ex.Clave);
+            }
+            Assert.AreEqual(0, dalCliente.ModificarVeces);
+        }
+
+        [TestMethod]
+        public void Pausar_SuscripcionYaVencida_NoCorreElVencimiento()
+        {
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            var cliente = ClienteVigente();
+            cliente.FechaVencimiento = DateTime.Today.AddDays(-3); // nada pagado que preservar
+
+            handler.Procesar(new ContextoRenovacion
+            {
+                Cliente = cliente,
+                Decision = DecisionRenovacion.Pausar,
+                FechaPausaHasta = DateTime.Today.AddDays(10)
+            });
+
+            Assert.AreEqual(DateTime.Today.AddDays(-3), cliente.FechaVencimiento);
+        }
+
+        [TestMethod]
+        public void Pausar_ExactamenteTresMeses_EsValida()
+        {
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL());
+            var resultado = handler.Procesar(new ContextoRenovacion
+            {
+                Cliente = ClienteVigente(),
+                Decision = DecisionRenovacion.Pausar,
+                FechaPausaHasta = DateTime.Today.AddMonths(PausarSuscripcionHandler.MaxMesesPausa)
+            });
+            Assert.IsTrue(resultado.Resuelto);
+        }
+
+        [TestMethod]
+        public void Pausar_ConPrendasEnUso_LanzaYNoPersiste()
+        {
+            var dalCliente = new FakeClienteDAL();
+            var dalPrenda = new FakePrendaDAL { PorCliente = new System.Collections.Generic.List<BE.Prenda>
+            {
+                new BE.Prenda { IdPrenda = 1, Nombre = "Remera" }
+            }};
+            var handler = new PausarSuscripcionHandler(dalCliente, new FakeRenovacionDAL(), dalPrenda);
+            try
+            {
+                handler.Procesar(new ContextoRenovacion
+                {
+                    Cliente = ClienteVigente(),
+                    Decision = DecisionRenovacion.Pausar,
+                    FechaPausaHasta = DateTime.Today.AddDays(10)
+                });
+                Assert.Fail("No se puede pausar con prendas pendientes de devolución.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.renovacion.pausa_con_prendas", ex.Clave);
+            }
+            Assert.AreEqual(0, dalCliente.ModificarVeces);
+        }
+        [TestMethod]
+        public void Pausar_ConFechaValida_PausaPersisteHistorialYCorreElVencimientoPorLosDiasPausados()
         {
             var dalCliente = new FakeClienteDAL();
             var dalRenovacion = new FakeRenovacionDAL();
@@ -192,7 +308,8 @@ namespace Tests
             Assert.IsTrue(resultado.Resuelto);
             Assert.AreEqual(BE.EstadoRenovacion.Pausada, resultado.Estado);
             Assert.AreEqual(fechaHasta, cliente.FechaPausaHasta);
-            Assert.AreEqual(vencimientoOriginal, cliente.FechaVencimiento, "Pausar no debe tocar el vencimiento.");
+            Assert.AreEqual(vencimientoOriginal.Value.AddDays(10), cliente.FechaVencimiento,
+                "Pausa 10 días: el tiempo ya pagado no se consume, el vencimiento se corre 10 días.");
             Assert.AreEqual(1, dalCliente.ModificarVeces);
             Assert.AreEqual(1, dalRenovacion.AltaVeces);
 
@@ -276,6 +393,7 @@ namespace Tests
             var handler = new CambioPlanHandler(dalCliente, dalPlan, dalRenovacion);
             var cliente = ClienteVigente();
             cliente.StockUtilizado = 2;
+            cliente.FechaVencimiento = DateTime.Today.AddDays(-1); // el cambio de plan se atiende al vencer
 
             var resultado = handler.Procesar(new ContextoRenovacion
             {

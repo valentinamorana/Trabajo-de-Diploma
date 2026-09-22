@@ -151,7 +151,7 @@ namespace BLL
         // Marca el pedido como Despachado.
         public void Despachar(string modulo, BE.Pedido pedido)
         {
-            PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
+            PermisosAccion.Exigir(BE.Patentes.PedidosRealizadosEditar, BE.Patentes.PedidosRealizados);
             if (!pedido.PuedeDespachar())
                 throw new BE.AppException("err.bll.pedido.despachar_estado",
                     "Solo se pueden despachar pedidos Pendientes. Este pedido está '{0}'.",
@@ -182,7 +182,7 @@ namespace BLL
         // Marca el pedido como Entregado.
         public void MarcarEntregado(string modulo, BE.Pedido pedido)
         {
-            PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
+            PermisosAccion.Exigir(BE.Patentes.PedidosRealizadosEditar, BE.Patentes.PedidosRealizados);
             if (!pedido.PuedeEntregarse())
                 throw new BE.AppException("err.bll.pedido.entregar_estado",
                     "Solo se pueden marcar como entregados los pedidos Despachados. Este pedido está '{0}'.",
@@ -543,6 +543,14 @@ namespace BLL
         /// </summary>
         public void RestaurarOperacion(string modulo, int idPedido, int idOperacion)
         {
+            // Revierte campos del pedido: exige permiso de edición. El historial se abre desde Pedidos de
+            // Venta y desde Pedidos Realizados, así que alcanza con poder editar cualquiera de los dos.
+            try { PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta); }
+            catch (BE.AppException)
+            {
+                PermisosAccion.Exigir(BE.Patentes.PedidosRealizadosEditar, BE.Patentes.PedidosRealizados);
+            }
+
             var cambios = dalHistorial.ObtenerPorOperacion(idPedido, idOperacion);
             if (cambios == null || cambios.Count == 0)
                 throw new BE.AppException("err.bll.pedido.historial_vacio",

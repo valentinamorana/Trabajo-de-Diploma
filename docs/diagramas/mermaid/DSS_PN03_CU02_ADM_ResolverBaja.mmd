@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor A as Administración
+  participant F as Promociones<br/>AdministracionForm
+  participant B as BLL.Promocion
+  participant D as DAL.Promocion
+  A->>F: Consulta las promociones con baja solicitada y revisa el motivo
+  alt Aprueba la baja
+    F->>B: AprobarBaja(modulo, promocion)
+    B->>D: CambiarEstado(id, BajaSolicitada → Desactivada)
+  else Rechaza la baja (exige motivo)
+    F->>B: RechazarBaja(modulo, promocion, motivo)
+    B->>D: CambiarEstado(id, BajaSolicitada → Vigente)  [conserva la observación de Contabilidad]
+  end
+  alt Otra sesión ya la resolvió
+    D-->>B: false
+    B-->>F: AppException(estado_concurrente)
+  else Resuelta
+    B-->>F: ok
+    F-->>A: Promoción Desactivada o de nuevo Vigente
+  end

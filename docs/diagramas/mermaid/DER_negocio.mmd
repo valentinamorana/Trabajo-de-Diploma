@@ -1,0 +1,198 @@
+erDiagram
+  Prenda ||--o{ CargoPrenda : "IdPrenda"
+  Cliente ||--o{ CargoPrenda : "IdCliente"
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  PlanSuscripcion |o--o{ Cliente : "IdPlan"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  Promocion |o--o{ Contratacion : "IdPromocion"
+  Empleado ||--o{ Contratacion : "IdVendedor"
+  Empleado |o--o{ Contratacion : "IdCaja"
+  Cliente ||--o{ Contratacion : "IdCliente"
+  Cliente ||--o{ HistorialCobro : "IdCliente"
+  Cliente ||--o{ HistorialRenovacion : "IdCliente"
+  PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
+  PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
+  Cliente ||--o{ ListaEspera : "IdCliente"
+  Prenda ||--o{ ListaEspera : "IdPrenda"
+  Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
+  Empleado ||--o{ Pedido : "IdEmpleado"
+  Cliente ||--o{ Pedido : "IdCliente"
+  Pedido ||--o{ PedidoHistorial : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
+  Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
+  PlanSuscripcion |o--o{ Promocion : "IdPlan"
+  SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
+  PlanSuscripcion {
+    int IdPlan PK
+    nvarchar(100) Nombre
+    int LimitePrendas
+    decimal(10_2) Precio
+    bit Estado
+  }
+  Cliente {
+    int IdCliente PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    nvarchar(100) MetodoPago "NULL"
+    int IdPlan FK "NULL"
+    datetime FechaAlta
+    date FechaNacimiento
+    bit Activo
+    int DVH "NULL"
+    date FechaVencimiento "NULL"
+    date FechaLimiteGracia "NULL"
+    datetime FechaPausaHasta "NULL"
+    int IdClienteReferente FK "NULL"
+    decimal(10_2) DescuentoProximoCobro
+    bit BeneficioReferidoOtorgado
+  }
+  Empleado {
+    int IdEmpleado PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    datetime FechaIngreso
+    nvarchar(100) Puesto "NULL"
+    nvarchar(50) Legajo "NULL"
+    int IdUsuario FK "NULL"
+    int DVH "NULL"
+  }
+  Contratacion {
+    int IdContratacion PK
+    int IdCliente FK
+    int IdPlan FK
+    int IdVendedor FK
+    int IdCaja FK "NULL"
+    int Modalidad
+    int Estado
+    int IntentosPago
+    datetime FechaAlta
+    datetime FechaResolucion "NULL"
+    nvarchar(50) MedioPago "NULL"
+    nvarchar(50) NumeroComprobante "NULL"
+    datetime FechaComprobante "NULL"
+    decimal(10_2) Importe "NULL"
+    decimal(10_2) DescuentoAplicado "NULL"
+    int IdPromocion FK "NULL"
+  }
+  Promocion {
+    int IdPromocion PK
+    nvarchar(150) Nombre
+    nvarchar(500) Descripcion "NULL"
+    int TipoDescuento
+    decimal(10_2) Valor
+    date FechaInicio
+    date FechaFin
+    int Estado
+    int IdPlan FK "NULL"
+    nvarchar(100) CategoriaPrenda "NULL"
+    decimal(10_2) MargenEstimado
+    nvarchar(500) ImpactoEconomico "NULL"
+    nvarchar(500) Observacion "NULL"
+    nvarchar(500) MotivoBaja "NULL"
+    int IdSugerenciaOrigen FK "NULL"
+    datetime FechaAlta
+  }
+  SugerenciaPromocion {
+    int IdSugerencia PK
+    int IdPlan FK "NULL"
+    nvarchar(100) CategoriaPrenda "NULL"
+    nvarchar(500) Motivo
+    int TipoDescuentoSugerido
+    decimal(10_2) BeneficioEstimado
+    int Estado
+    datetime FechaAlta
+  }
+  HistorialRenovacion {
+    int IdRenovacion PK
+    int IdCliente FK
+    int IdPlanAnterior FK "NULL"
+    int IdPlanNuevo FK "NULL"
+    datetime FechaDeteccion
+    datetime FechaResolucion "NULL"
+    int Resultado
+    nvarchar(100) Actor "NULL"
+  }
+  HistorialCobro {
+    int IdCobro PK
+    int IdCliente FK
+    decimal(10_2) Importe
+    datetime FechaDeteccion
+    datetime FechaResolucion "NULL"
+    int Resultado
+    nvarchar(100) Actor "NULL"
+  }
+  Pedido {
+    int IdPedido PK
+    int IdCliente FK
+    int IdEmpleado FK
+    int Estado
+    datetime FechaPedido
+    datetime FechaDespacho "NULL"
+    datetime FechaEntrega "NULL"
+    nvarchar(500) MotivoCancelacion "NULL"
+    int DVH "NULL"
+  }
+  PedidoPrenda {
+    int IdPedido PK,FK
+    int IdPrenda PK,FK
+  }
+  PedidoHistorial {
+    int IdHistorial PK
+    int IdPedido FK
+    int IdOperacion
+    datetime Fecha
+    int IdUsuario FK "NULL"
+    nvarchar(200) NombreUsuario "NULL"
+    nvarchar(200) Accion
+    nvarchar(100) Campo
+    nvarchar(1000) ValorAnterior "NULL"
+    nvarchar(1000) ValorNuevo "NULL"
+  }
+  Prenda {
+    int IdPrenda PK
+    nvarchar(100) Nombre
+    nvarchar(500) Descripcion "NULL"
+    nvarchar(20) Talle "NULL"
+    nvarchar(50) Color "NULL"
+    nvarchar(100) Categoria "NULL"
+    int Estado
+    int IdClienteActual FK "NULL"
+    datetime FechaAlta
+    int IdUltimoCliente FK "NULL"
+    decimal(10_2) PrecioReposicion "NULL"
+  }
+  MantenimientoPrenda {
+    int IdMantenimiento PK
+    int IdPrenda FK
+    datetime FechaEntrada
+    datetime FechaSalida "NULL"
+    nvarchar(100) Actor "NULL"
+  }
+  CargoPrenda {
+    int IdCargo PK
+    int IdPrenda FK
+    int IdCliente FK
+    nvarchar(200) Motivo
+    decimal(10_2) Monto
+    datetime FechaRegistro
+    datetime FechaCobro "NULL"
+    nvarchar(100) Actor "NULL"
+    int Estado
+  }
+  ListaEspera {
+    int IdListaEspera PK
+    int IdPrenda FK
+    int IdCliente FK
+    datetime FechaAlta
+    int Estado
+    datetime FechaLimiteReserva "NULL"
+    datetime FechaResolucion "NULL"
+    nvarchar(100) Actor "NULL"
+  }

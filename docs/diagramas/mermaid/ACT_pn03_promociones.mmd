@@ -1,0 +1,50 @@
+flowchart TD
+  subgraph G["Gerencia"]
+    direction TB
+    i((" "))
+    a1["Detecta una oportunidad (análisis de abandono y rotación) y sugiere una promoción"]
+  end
+  subgraph A["Administración"]
+    direction TB
+    a2["Crea la promoción desde la sugerencia o en forma manual"]
+    a6["Reformula las condiciones"]
+    d3{"¿Aprueba la baja?"}
+  end
+  subgraph K["Contabilidad"]
+    direction TB
+    a4["Analiza margen e impacto económico"]
+    d1{"¿Aprueba?"}
+  end
+  subgraph V["Vendedor"]
+    direction TB
+    d2{"¿Sugiere la baja?"}
+    a8["Sugiere la baja indicando el motivo (Baja solicitada)"]
+  end
+  subgraph S["Sistema"]
+    direction TB
+    a3["Valida (destino único, valor, fechas) y registra En revisión contable"]
+    a5["Rechazada por Contabilidad: vuelve a Administración"]
+    a7["Vigente: se aplica un solo descuento por cobro"]
+    a9["Desactivada"]
+    a10["Sigue Vigente (conserva la observación contable)"]
+    f(((" ")))
+  end
+  i --> a1
+  a1 --> a2
+  a2 --> a3
+  a3 --> a4
+  a4 --> d1
+  d1 -- "No" --> a5
+  a5 --> a6
+  a6 --> a3
+  d1 -- "Sí" --> a7
+  a7 --> d2
+  d2 -- "No" --> f
+  d2 -- "Sí" --> a8
+  a8 --> d3
+  d3 -- "Sí" --> a9
+  d3 -- "No" --> a10
+  a9 --> f
+  a10 --> f
+  classDef ini fill:#222,stroke:#222,color:#222
+  class i,f ini

@@ -13,11 +13,11 @@ namespace GUI
     /// Permite al Vendedor consultar los planes disponibles y a Gerencia/Admin
     /// crear y modificar planes.
     ///
-    ///   ✓ Ver listado de planes (activos e inactivos)
-    ///   ✓ Crear nuevo plan
-    ///   ✓ Editar plan existente (doble clic en la grilla)
-    ///   ✓ Desactivar plan (baja lógica)
-    ///   ✓ Reactivar plan desactivado
+    ///   Ver listado de planes (activos e inactivos)
+    ///   Crear nuevo plan
+    ///   Editar plan existente (doble clic en la grilla)
+    ///   Desactivar plan (baja lógica)
+    ///   Reactivar plan desactivado
     ///
     /// Accesible desde Menú → Ventas → Planes (permiso mnuPlanSuscripciones).
     /// </summary>

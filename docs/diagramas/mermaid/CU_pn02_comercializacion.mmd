@@ -1,0 +1,14 @@
+flowchart LR
+  V["Vendedor"]:::actor
+  C["Caja"]:::actor
+  subgraph SIS["WardrobeFlow — PN02 Comercialización de la suscripción"]
+    c1(["CU01-VTA Gestionar Suscripción"])
+    c2(["CU01-CAJ Gestionar Cobro"])
+    c3(["CU02-CAJ Emitir Comprobante"])
+    c4(["CU03-CAJ Cancelar Contratación"])
+  end
+  V --- c1
+  C --- c2
+  C --- c4
+  c2 -. "«include»" .-> c3
+  classDef actor fill:#fff7e6,stroke:#b8860b

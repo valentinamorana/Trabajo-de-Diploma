@@ -1,0 +1,14 @@
+erDiagram
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  PlanSuscripcion |o--o{ Cliente : "IdPlan"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  Promocion |o--o{ Contratacion : "IdPromocion"
+  Cliente ||--o{ Contratacion : "IdCliente"
+  PlanSuscripcion |o--o{ Promocion : "IdPlan"
+  SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
+  PlanSuscripcion
+  SugerenciaPromocion
+  Promocion
+  Contratacion
+  Cliente

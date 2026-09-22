@@ -1,0 +1,51 @@
+flowchart TD
+  subgraph C["Cliente"]
+    direction TB
+    i((" "))
+    a1["Elige plan y modalidad de cobro (mensual, trimestral o anual)"]
+  end
+  subgraph V["Vendedor"]
+    direction TB
+    d1{"¿Cliente registrado?"}
+    a2["Registra al cliente"]
+    a3["Registra la contratación (plan + modalidad)"]
+    a4["Informa el motivo del rechazo"]
+  end
+  subgraph S["Sistema"]
+    direction TB
+    d2{"¿Cliente y plan válidos, con cupo y sin otra contratación pendiente?"}
+    a5["Contratación en Pendiente de pago (la suscripción todavía no está vigente)"]
+    a7["Calcula el importe: precio × meses − un solo descuento"]
+    a8["Activa la suscripción (Builder), acredita al referente y emite el comprobante"]
+    d4{"¿Tercer intento?"}
+    a10["Cancela la contratación"]
+    f(((" ")))
+    f2(((" ")))
+  end
+  subgraph J["Caja"]
+    direction TB
+    a6["Consulta la cola y cobra al cliente indicando el medio de pago"]
+    d3{"¿Pago concretado?"}
+    a9["Registra el intento fallido"]
+  end
+  i --> a1
+  a1 --> d1
+  d1 -- "No" --> a2
+  a2 --> a3
+  d1 -- "Sí" --> a3
+  a3 --> d2
+  d2 -- "No" --> a4
+  a4 --> f2
+  d2 -- "Sí" --> a5
+  a5 --> a6
+  a6 --> d3
+  d3 -- "Sí" --> a7
+  a7 --> a8
+  a8 --> f
+  d3 -- "No" --> a9
+  a9 --> d4
+  d4 -- "Sí" --> a10
+  a10 --> f2
+  d4 -- "No" --> a6
+  classDef ini fill:#222,stroke:#222,color:#222
+  class i,f,f2 ini

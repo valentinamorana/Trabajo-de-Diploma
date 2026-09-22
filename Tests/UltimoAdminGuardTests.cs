@@ -19,8 +19,8 @@ namespace Tests
             => new BE.Usuario { Rol = rol, Perfil = perfil };
 
         // Árbol de prueba:
-        //   admin1   → 🔑 mnuUsuarios (gestión)
-        //   vendedor → 🔑 mnuClientes
+        //   admin1   → mnuUsuarios (gestión)
+        //   vendedor → mnuClientes
         //   super    → [Rol] admin1            (rol-dentro-de-rol: hereda la gestión)
         private static List<BE.Componente> ArbolBase()
         {

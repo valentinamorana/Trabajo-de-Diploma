@@ -1,0 +1,46 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as NuevoPedidoForm
+  participant B as BLL.Pedido
+  participant PB as BLL.Prenda
+  participant LE as BLL.ListaEspera
+  participant D as DAL.Pedido
+  participant H as DAL.Pedido<br/>Historial
+  V->>F: Elige al cliente
+  F->>B: ValidarPuedeArmarPedido(idCliente)
+  Note over B: Suscripción vigente, sin pausa ni suspensión · sin pedido Despachado · sin prendas En uso (cuenta desbloqueada)
+  alt Cliente no apto
+    B-->>F: AppException(motivo)
+    F-->>V: Informa la situación y no permite avanzar
+  else Cliente apto
+    B-->>F: cliente validado
+    V->>F: Selecciona las prendas del catálogo y confirma
+    F->>B: CrearPedido(modulo, idCliente, prendas)
+    Note over B: Exigir(PedidosVentaEditar) · ValidarCupoDisponible: cantidad ≤ LimitePrendas del plan
+    alt Excede el cupo del plan
+      B-->>F: AppException(cupo)
+      F-->>V: Informa el exceso: ajustar o desistir
+    else Dentro del cupo
+      B->>PB: VerificarDisponibilidad(prendas)  [relee el estado en la BD]
+      PB-->>B: (disponible, noDisponibles)
+      B->>LE: ObtenerIdsReservadosParaOtro(idCliente)
+      alt Alguna prenda no disponible o reservada para otro cliente
+        B-->>F: AppException(prenda_no_disponible / prenda_reservada)
+        F-->>V: Informa la falta: ajustar o desistir
+      else Todas disponibles
+        B->>D: Alta(pedido)  [transacción: Pedido + PedidoPrenda + prendas a En uso, con reclamo por prenda]
+        alt Otra sesión tomó una prenda
+          D-->>B: error de concurrencia
+          B-->>F: AppException
+          F-->>V: Revierte todo el pedido
+        else Reserva confirmada
+          D-->>B: idPedido
+          B->>H: RegistrarCambios(idPedido, "CREAR")
+          B->>LE: CerrarSiReservada(idPrenda, idCliente)
+          B-->>F: idPedido
+          F-->>V: Pedido creado: queda bloqueado y con número único
+        end
+      end
+    end
+  end

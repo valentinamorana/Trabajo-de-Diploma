@@ -1,0 +1,75 @@
+erDiagram
+  Prenda ||--o{ CargoPrenda : "IdPrenda"
+  Cliente ||--o{ CargoPrenda : "IdCliente"
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
+  Cliente ||--o{ Pedido : "IdCliente"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
+  Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Cliente {
+    int IdCliente PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    nvarchar(100) MetodoPago "NULL"
+    int IdPlan FK "NULL"
+    datetime FechaAlta
+    date FechaNacimiento
+    bit Activo
+    int DVH "NULL"
+    date FechaVencimiento "NULL"
+    date FechaLimiteGracia "NULL"
+    datetime FechaPausaHasta "NULL"
+    int IdClienteReferente FK "NULL"
+    decimal(10_2) DescuentoProximoCobro
+    bit BeneficioReferidoOtorgado
+  }
+  Pedido {
+    int IdPedido PK
+    int IdCliente FK
+    int IdEmpleado FK
+    int Estado
+    datetime FechaPedido
+    datetime FechaDespacho "NULL"
+    datetime FechaEntrega "NULL"
+    nvarchar(500) MotivoCancelacion "NULL"
+    int DVH "NULL"
+  }
+  PedidoPrenda {
+    int IdPedido PK,FK
+    int IdPrenda PK,FK
+  }
+  Prenda {
+    int IdPrenda PK
+    nvarchar(100) Nombre
+    nvarchar(500) Descripcion "NULL"
+    nvarchar(20) Talle "NULL"
+    nvarchar(50) Color "NULL"
+    nvarchar(100) Categoria "NULL"
+    int Estado
+    int IdClienteActual FK "NULL"
+    datetime FechaAlta
+    int IdUltimoCliente FK "NULL"
+    decimal(10_2) PrecioReposicion "NULL"
+  }
+  MantenimientoPrenda {
+    int IdMantenimiento PK
+    int IdPrenda FK
+    datetime FechaEntrada
+    datetime FechaSalida "NULL"
+    nvarchar(100) Actor "NULL"
+  }
+  CargoPrenda {
+    int IdCargo PK
+    int IdPrenda FK
+    int IdCliente FK
+    nvarchar(200) Motivo
+    decimal(10_2) Monto
+    datetime FechaRegistro
+    datetime FechaCobro "NULL"
+    nvarchar(100) Actor "NULL"
+    int Estado
+  }

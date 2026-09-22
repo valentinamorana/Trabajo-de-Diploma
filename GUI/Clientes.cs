@@ -11,11 +11,11 @@ namespace GUI
     /// Capa de Presentación — Módulo de Gestión de Clientes.
     ///
     /// Permite al Vendedor administrar los clientes suscriptores del servicio:
-    ///   ✓ Ver listado completo con plan y stock en uso
-    ///   ✓ Registrar nuevo cliente
-    ///   ✓ Editar datos de cliente existente
-    ///   ✓ Dar de baja (solo si no tiene prendas en uso)
-    ///   ✓ Filtrar por nombre/apellido/DNI
+    ///   Ver listado completo con plan y stock en uso
+    ///   Registrar nuevo cliente
+    ///   Editar datos de cliente existente
+    ///   Dar de baja (solo si no tiene prendas en uso)
+    ///   Filtrar por nombre/apellido/DNI
     ///
     /// Accesible desde Menú → Ventas → Clientes (permiso mnuClientes).
     /// </summary>
@@ -197,9 +197,9 @@ namespace GUI
 
                 string vencStr = c.FechaVencimiento.HasValue
                     ? (expirado
-                        ? $"⚠ {c.FechaVencimiento.Value:dd/MM/yyyy} ({vencido})"
+                        ? $"{c.FechaVencimiento.Value:dd/MM/yyyy} ({vencido})"
                         : proxAVencer
-                            ? $"⏰ {c.FechaVencimiento.Value:dd/MM/yyyy} ({proxVencer})"
+                            ? $"{c.FechaVencimiento.Value:dd/MM/yyyy} ({proxVencer})"
                             : c.FechaVencimiento.Value.ToString("dd/MM/yyyy"))
                     : sinVenc;
 

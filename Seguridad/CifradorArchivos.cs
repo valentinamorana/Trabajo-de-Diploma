@@ -9,7 +9,7 @@ namespace Seguridad
     ///
     /// Formato del archivo de salida:  [ salt(16) ][ IV(16) ][ ciphertext ]
     ///
-    /// A diferencia de <see cref="Encriptador"/> (que usa la clave de máquina en key.dat, no
+    /// A diferencia de <see cref="Encriptador"/> (que ya no maneja claves AES; no
     /// portable), acá la clave depende SOLO de la contraseña, de modo que el backup se puede
     /// restaurar en otra máquina conociendo la contraseña. Una contraseña incorrecta produce
     /// una CryptographicException al descifrar (padding inválido), que la capa superior traduce

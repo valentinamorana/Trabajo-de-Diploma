@@ -1,0 +1,25 @@
+sequenceDiagram
+  autonumber
+  actor A as Administración
+  participant F as Promociones<br/>AdministracionForm
+  participant B as BLL.Promocion
+  participant DS as DAL.Sugerencia<br/>Promocion
+  participant D as DAL.Promocion
+  A->>F: Consulta las sugerencias y elige "Alta desde sugerencia"
+  F->>B: CrearDesdeSugerencia(modulo, promocion, idSugerencia)
+  Note over B: Exigir(PromocionesAdminEditar) · destino único · valor > 0 (≤ 100 si es Porcentaje) · fin ≥ inicio
+  B->>DS: MarcarEvaluada(idSugerencia)  [reclamo: solo si sigue Pendiente]
+  alt Otra sesión ya la evaluó
+    DS-->>B: false
+    B-->>F: AppException(sugerencia_evaluada)
+  else Reclamo obtenido
+    B->>D: Alta(promoción: estado EnRevisionContable)
+    alt Falla el alta
+      B->>DS: ReabrirEvaluacion(idSugerencia)  [compensación]
+      B-->>F: error
+    else Alta correcta
+      B-->>F: idPromocion
+      F-->>A: Promoción pendiente de revisión contable
+    end
+  end
+  Note over A,D: Variantes: CrearManual (sin sugerencia) · Modificar y Reformular (UPDATE solo si sigue EnRevisionContable) · Desactivar (Vigente → Desactivada)

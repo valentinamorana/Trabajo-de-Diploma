@@ -1,0 +1,16 @@
+sequenceDiagram
+  autonumber
+  actor U as Usuario
+  participant F as Login
+  participant I as BLL.Idioma<br/>Service
+  participant T as DAL.Traduccion
+  participant G as GestorIdioma
+  participant O as IIdiomaObserver
+  U->>F: Elige un idioma
+  F->>I: CargarTraducciones(codigoIdioma)
+  I->>T: ObtenerDiccionario(codigoIdioma)
+  T-->>I: diccionario clave → texto
+  I-->>F: traducciones
+  F->>G: CambiarIdioma(idioma, traducciones)
+  G->>O: UpdateLanguage(idioma)  [a cada formulario suscripto]
+  O-->>U: Los formularios abiertos se muestran traducidos

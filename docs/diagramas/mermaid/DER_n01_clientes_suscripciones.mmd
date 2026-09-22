@@ -1,0 +1,80 @@
+erDiagram
+  Prenda ||--o{ CargoPrenda : "IdPrenda"
+  Cliente ||--o{ CargoPrenda : "IdCliente"
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  PlanSuscripcion |o--o{ Cliente : "IdPlan"
+  Cliente ||--o{ HistorialCobro : "IdCliente"
+  Cliente ||--o{ HistorialRenovacion : "IdCliente"
+  PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
+  PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
+  Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
+  PlanSuscripcion {
+    int IdPlan PK
+    nvarchar(100) Nombre
+    int LimitePrendas
+    decimal(10_2) Precio
+    bit Estado
+  }
+  Cliente {
+    int IdCliente PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    nvarchar(100) MetodoPago "NULL"
+    int IdPlan FK "NULL"
+    datetime FechaAlta
+    date FechaNacimiento
+    bit Activo
+    int DVH "NULL"
+    date FechaVencimiento "NULL"
+    date FechaLimiteGracia "NULL"
+    datetime FechaPausaHasta "NULL"
+    int IdClienteReferente FK "NULL"
+    decimal(10_2) DescuentoProximoCobro
+    bit BeneficioReferidoOtorgado
+  }
+  HistorialRenovacion {
+    int IdRenovacion PK
+    int IdCliente FK
+    int IdPlanAnterior FK "NULL"
+    int IdPlanNuevo FK "NULL"
+    datetime FechaDeteccion
+    datetime FechaResolucion "NULL"
+    int Resultado
+    nvarchar(100) Actor "NULL"
+  }
+  HistorialCobro {
+    int IdCobro PK
+    int IdCliente FK
+    decimal(10_2) Importe
+    datetime FechaDeteccion
+    datetime FechaResolucion "NULL"
+    int Resultado
+    nvarchar(100) Actor "NULL"
+  }
+  CargoPrenda {
+    int IdCargo PK
+    int IdPrenda FK
+    int IdCliente FK
+    nvarchar(200) Motivo
+    decimal(10_2) Monto
+    datetime FechaRegistro
+    datetime FechaCobro "NULL"
+    nvarchar(100) Actor "NULL"
+    int Estado
+  }
+  Prenda {
+    int IdPrenda PK
+    nvarchar(100) Nombre
+    nvarchar(500) Descripcion "NULL"
+    nvarchar(20) Talle "NULL"
+    nvarchar(50) Color "NULL"
+    nvarchar(100) Categoria "NULL"
+    int Estado
+    int IdClienteActual FK "NULL"
+    datetime FechaAlta
+    int IdUltimoCliente FK "NULL"
+    decimal(10_2) PrecioReposicion "NULL"
+  }

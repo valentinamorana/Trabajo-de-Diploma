@@ -1,0 +1,162 @@
+erDiagram
+  Usuario |o--o{ Bitacora : "usuario"
+  Usuario |o--o{ BitacoraNegocio : "IdUsuario"
+  Permiso ||--o{ ControlMapeado : "IdPermiso"
+  Usuario |o--o{ Empleado : "IdUsuario"
+  Usuario ||--o{ HistorialUsuario : "IdUsuario"
+  Permiso ||--o{ PermisoRelacion : "IdPadre"
+  Permiso ||--o{ PermisoRelacion : "IdHijo"
+  Usuario ||--o{ Preferencia : "IdUsuario"
+  Permiso ||--o{ RolPermiso : "IdPermiso"
+  Idioma ||--o{ Traduccion : "IdIdioma"
+  Control ||--o{ Traduccion : "IdControl"
+  Usuario {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    varchar(5) IdIdioma "NULL"
+    bit Activo
+    datetime FechaBaja "NULL"
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
+    bit RequiereCambioClave
+    nvarchar(100) Nombre "NULL"
+    nvarchar(100) Apellido "NULL"
+    date FechaNacimiento "NULL"
+    nvarchar(200) Email "NULL"
+  }
+  Usuario_Seguridad {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    datetime FechaActualizacion
+  }
+  Empleado {
+    int IdEmpleado PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    datetime FechaIngreso
+    nvarchar(100) Puesto "NULL"
+    nvarchar(50) Legajo "NULL"
+    int IdUsuario FK "NULL"
+    int DVH "NULL"
+  }
+  Preferencia {
+    int IdUsuario PK,FK
+    nvarchar(50) FuenteFamilia "NULL"
+    varchar(10) FuenteTamano "NULL"
+    varchar(20) Tema "NULL"
+    varchar(20) FormatoFecha "NULL"
+    bit Notificaciones "NULL"
+  }
+  Permiso {
+    int IdPermiso PK
+    nvarchar(100) Nombre
+    nvarchar(100) NombreMenu "NULL"
+    nvarchar(100) TipoComponente "NULL"
+    bit Estado
+    bit EsFamilia
+    bit EsRol
+  }
+  PermisoRelacion {
+    int IdPadre PK,FK
+    int IdHijo PK,FK
+  }
+  RolPermiso {
+    nvarchar(100) Rol PK
+    int IdPermiso PK,FK
+  }
+  ControlMapeado {
+    int IdControlMapeado PK
+    int IdPermiso FK
+    nvarchar(100) Formulario
+    nvarchar(100) NombreControl
+  }
+  Control {
+    int IdControl PK
+    varchar(100) Clave
+    varchar(50) Formulario
+  }
+  Idioma {
+    int IdIdioma PK
+    varchar(5) Codigo
+    nvarchar(50) Nombre
+    bit Activo
+    bit EsDefault
+  }
+  Traduccion {
+    int IdControl PK,FK
+    int IdIdioma PK,FK
+    nvarchar(1000) Texto
+  }
+  ClaveRecuperacion {
+    int IdClave PK
+    nvarchar(500) ClaveHash
+    bit Usada
+    nvarchar(100) UsadaPor "NULL"
+    datetime FechaUso "NULL"
+    datetime FechaCreacion
+  }
+  HistorialUsuario {
+    int IdVersion PK
+    int IdUsuario FK
+    datetime Fecha
+    nvarchar(100) Actor
+    nvarchar(500) Detalle
+    nvarchar(100) UsernameSnap
+    nvarchar(100) NombreSnap "NULL"
+    nvarchar(100) ApellidoSnap "NULL"
+    date FechaNacSnap "NULL"
+    nvarchar(200) EmailSnap "NULL"
+    nvarchar(500) ClaveSnap
+    bit EstadoSnap
+    int IntentosSnap
+  }
+  Bitacora {
+    int Id PK
+    datetime fecha
+    int usuario FK "NULL"
+    nvarchar(100) modulo "NULL"
+    nvarchar(200) actividad "NULL"
+    nvarchar(1000) detalle "NULL"
+    int criticidad
+    nvarchar(50) ip "NULL"
+  }
+  BitacoraNegocio {
+    int IdEvento PK
+    datetime Fecha
+    nvarchar(100) Tipo
+    int IdUsuario FK "NULL"
+    int IdPedido FK "NULL"
+    int IdPrenda FK "NULL"
+    int IdCliente FK "NULL"
+    nvarchar(500) Descripcion
+  }
+  DVVertical {
+    int Id PK
+    varchar(100) NombreTabla
+    int DVV
+    datetime FechaCalculo
+  }
+  HistorialIntegridad {
+    int Id PK
+    varchar(100) NombreTabla
+    int DVVAlmacenado "NULL"
+    int DVVCalculado
+    bit Resultado
+    int FilasCorruptas
+    datetime FechaVerificacion
+    varchar(50) DisparadoPor
+  }

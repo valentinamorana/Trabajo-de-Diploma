@@ -24,14 +24,18 @@ namespace Tests.Fakes
         public List<BE.CargoPrenda> ObtenerPendientesPorCliente(int idCliente) =>
             Registros.FindAll(c => c.IdCliente == idCliente && c.Estado == BE.EstadoCargo.Pendiente);
 
-        public void MarcarCobradosEnTx(SqlConnection conexion, SqlTransaction tx, List<int> idsCargo, DateTime fechaCobro)
+        public bool MarcarCobradosRespuesta { get; set; } = true;
+
+        public bool MarcarCobradosEnTx(SqlConnection conexion, SqlTransaction tx, List<int> idsCargo, DateTime fechaCobro)
         {
             MarcarCobradosVeces++;
+            if (!MarcarCobradosRespuesta) return false;
             foreach (var c in Registros.Where(c => idsCargo.Contains(c.IdCargo)))
             {
                 c.Estado = BE.EstadoCargo.Cobrado;
                 c.FechaCobro = fechaCobro;
             }
+            return true;
         }
 
         public List<BE.CargoPrenda> ObtenerTodos() => Registros;

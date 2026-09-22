@@ -97,8 +97,8 @@ namespace BE
         public DateTime? FechaPausaHasta { get; set; }
 
         // True mientras la pausa está vigente: bloquea pedidos nuevos (BLL.Pedido.CrearPedido)
-        // SIN tocar FechaVencimiento — al reanudar, la fecha de vencimiento queda como estaba
-        // (decisión de diseño: pausar no extiende la suscripción).
+        // y el vencimiento se corre por los días pausados (NUULY: no se cobra mientras está pausada;
+        // ver BLL.Manejadores.PausarSuscripcionHandler y BLL.Cliente.ReanudarPausa).
         public bool EstaPausada =>
             FechaPausaHasta.HasValue && FechaPausaHasta.Value.Date >= DateTime.Today;
 

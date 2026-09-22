@@ -85,6 +85,7 @@ namespace GUI
             this.rbRenovar.TabIndex = 0;
             this.rbRenovar.TabStop  = true;
             this.rbRenovar.UseVisualStyleBackColor = true;
+            this.rbRenovar.CheckedChanged += new System.EventHandler(this.RbRenovar_CheckedChanged);
 
             this.rbCambiarPlan.AutoSize = true;
             this.rbCambiarPlan.Location = new Point(15, 50);
@@ -98,6 +99,7 @@ namespace GUI
             this.rbBaja.Name     = "rbBaja";
             this.rbBaja.TabIndex = 2;
             this.rbBaja.UseVisualStyleBackColor = true;
+            this.rbBaja.CheckedChanged += new System.EventHandler(this.RbBaja_CheckedChanged);
 
             this.rbPausar.AutoSize = true;
             this.rbPausar.Location = new Point(15, 100);
@@ -113,6 +115,7 @@ namespace GUI
             this.dtpPausaHasta.CustomFormat = "dd/MM/yyyy";
             this.dtpPausaHasta.Location = new Point(250, 98);
             this.dtpPausaHasta.MinDate  = DateTime.Today;
+            this.dtpPausaHasta.MaxDate  = DateTime.Today.AddMonths(BLL.Manejadores.PausarSuscripcionHandler.MaxMesesPausa);
             this.dtpPausaHasta.Name     = "dtpPausaHasta";
             this.dtpPausaHasta.TabIndex = 4;
             this.dtpPausaHasta.Width    = 150;
@@ -140,10 +143,8 @@ namespace GUI
             // Enum.GetValues en vez de una lista hardcodeada (antes la única de las 3 pantallas
             // que no lo hacía así — NuevaContratacionForm ya usaba este criterio): un valor nuevo
             // en BE.Builders.ModalidadCobro se refleja acá sin tener que acordarse de tocar esta lista.
-            this.cmbModalidad.DataSource = Enum.GetValues(typeof(BE.Builders.ModalidadCobro));
             this.cmbModalidad.Location     = new Point(120, 287);
             this.cmbModalidad.Name         = "cmbModalidad";
-            this.cmbModalidad.SelectedIndex = 0;
             this.cmbModalidad.TabIndex     = 8;
             this.cmbModalidad.Width        = 200;
 

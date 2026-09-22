@@ -51,7 +51,7 @@ namespace BE
     public static class PoliticaDescuento
     {
         /// <summary>Descuento que aporta una promoción sobre un importe bruto.</summary>
-        public static decimal DescuentoDe(Promocion promocion, decimal bruto)
+        public static decimal DescuentoDe(Promocion promocion, decimal bruto, int meses = 1)
         {
             if (promocion == null) throw new ArgumentNullException(nameof(promocion));
             if (bruto <= 0) return 0;
@@ -66,8 +66,9 @@ namespace BE
                     d = promocion.Valor;
                     break;
                 case TipoDescuento.PrecioPromocional:
-                    // Valor = precio final promocional: el descuento es la diferencia con el bruto.
-                    d = bruto - promocion.Valor;
+                    // Valor = precio promocional MENSUAL (como Plan.Precio): el descuento es la diferencia
+                    // con el bruto, que cubre `meses` meses.
+                    d = bruto - promocion.Valor * Math.Max(1, meses);
                     break;
                 default:
                     d = 0;
@@ -82,7 +83,7 @@ namespace BE
         /// vigentes hoy.
         /// </summary>
         public static ResultadoDescuento Resolver(
-            decimal bruto, int? idPlan, IEnumerable<Promocion> promocionesDelPlan, decimal creditoReferido)
+            decimal bruto, int? idPlan, IEnumerable<Promocion> promocionesDelPlan, decimal creditoReferido, int meses = 1)
         {
             var resultado = new ResultadoDescuento { Bruto = bruto };
             if (bruto <= 0) return resultado;
@@ -94,7 +95,7 @@ namespace BE
                 foreach (var p in promocionesDelPlan.Where(x => x != null && x.AplicaAPlan()
                                                                 && x.IdPlan == idPlan && x.EstaVigente()))
                 {
-                    decimal d = DescuentoDe(p, bruto);
+                    decimal d = DescuentoDe(p, bruto, meses);
                     if (d > descuentoMejor) { descuentoMejor = d; mejor = p; }
                 }
             }

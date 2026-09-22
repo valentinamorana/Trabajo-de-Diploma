@@ -161,14 +161,14 @@ namespace BLL
         // es CajaEditar/Caja, ya exigido en BLL.Contratacion.ConfirmarPago antes de llamar a
         // este método — por eso NO vuelve a pedir el permiso de Vendedor.
         public BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
-            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
         {
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
-            return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad);
+            return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad, consumoCredito);
         }
 
         private BE.Builders.Suscripcion ActivarSuscripcionInterna(
-            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
         {
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
 
@@ -184,6 +184,10 @@ namespace BLL
             cliente.NombrePlan       = plan.Nombre;
             cliente.LimitePrendas    = plan.LimitePrendas;
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
+            // Un cobro exitoso deja la cuenta al día: limpia la gracia y cualquier pausa
+            // (ProcesarPagoHandler ya hacía lo mismo con la gracia).
+            cliente.FechaLimiteGracia = null;
+            cliente.FechaPausaHasta = null;
 
             // Bloque 1 — Programa de referidos: si este cliente fue referido por otro y todavía
             // no se acreditó el beneficio (BeneficioReferidoOtorgado evita duplicarlo si se
@@ -196,7 +200,6 @@ namespace BLL
                 referente = dalCliente.ObtenerPorId(cliente.IdClienteReferente.Value);
                 if (referente != null)
                 {
-                    referente.DescuentoProximoCobro += MontoBeneficioReferido;
                     cliente.BeneficioReferidoOtorgado = true;
                 }
             }
@@ -204,25 +207,39 @@ namespace BLL
             dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
                 dalCliente.ModificarEnTx(conexion, tx, cliente);
+                // Crédito: deltas atómicos sobre el valor real de la BD (no se reescribe el cliente entero).
+                if (consumoCredito > 0)
+                    dalCliente.ConsumirCreditoEnTx(conexion, tx, cliente.IdCliente, consumoCredito);
                 if (referente != null)
-                    dalCliente.ModificarEnTx(conexion, tx, referente);
+                    dalCliente.SumarCreditoEnTx(conexion, tx, referente.IdCliente, MontoBeneficioReferido);
             });
-            dalCliente.RecalcularDV();
+            // La activación ya quedó confirmada: un fallo del registro posterior no debe propagarse,
+            // porque BLL.Contratacion.ConfirmarPago lo interpretaría como activación fallida y
+            // reabriría el cobro de una suscripción que sí quedó activa (doble cobro).
+            try
+            {
+                dalCliente.RecalcularDV();
 
-            bitacora.Registrar(modulo,
-                $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
-                $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}",
-                BE.Criticidad.Media);
-            bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
-                $"Activación de suscripción: {cliente.NombreCompleto} — Plan {plan.Nombre} — " +
-                $"Modalidad {modalidad} — Vence {suscripcion.FechaVencimiento:d}",
-                idCliente: cliente.IdCliente);
-
-            if (referente != null)
+                bitacora.Registrar(modulo,
+                    $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
+                    $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}",
+                    BE.Criticidad.Media);
                 bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
-                    $"Beneficio por referido acreditado: {referente.NombreCompleto} recibe ${MontoBeneficioReferido} " +
-                    $"de descuento en su próximo cobro por referir a {cliente.NombreCompleto}",
-                    idCliente: referente.IdCliente);
+                    $"Activación de suscripción: {cliente.NombreCompleto} — Plan {plan.Nombre} — " +
+                    $"Modalidad {modalidad} — Vence {suscripcion.FechaVencimiento:d}",
+                    idCliente: cliente.IdCliente);
+
+                if (referente != null)
+                    bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
+                        $"Beneficio por referido acreditado: {referente.NombreCompleto} recibe ${MontoBeneficioReferido} " +
+                        $"de descuento en su próximo cobro por referir a {cliente.NombreCompleto}",
+                        idCliente: referente.IdCliente);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError(
+                    $"[BLL.Cliente] Suscripción activada, pero falló el registro posterior: {ex.Message}");
+            }
 
             return suscripcion;
         }
@@ -237,6 +254,12 @@ namespace BLL
             if (!cliente.FechaPausaHasta.HasValue)
                 throw new BE.AppException("err.bll.cliente.no_pausada",
                     "{0} no tiene la suscripción pausada.", cliente.NombreCompleto);
+
+            // Reanudar antes de tiempo: se devuelven los días de pausa no usados (al pausar, el vencimiento
+            // se corrió por toda la pausa; ver PausarSuscripcionHandler).
+            int diasSinUsar = (cliente.FechaPausaHasta.Value.Date - DateTime.Today).Days;
+            if (diasSinUsar > 0 && cliente.FechaVencimiento.HasValue)
+                cliente.FechaVencimiento = cliente.FechaVencimiento.Value.AddDays(-diasSinUsar);
 
             cliente.FechaPausaHasta = null;
             dalCliente.Modificar(cliente);

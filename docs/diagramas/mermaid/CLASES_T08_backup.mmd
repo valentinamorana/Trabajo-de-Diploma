@@ -1,0 +1,39 @@
+classDiagram
+  direction TB
+  class GUI_BackupForm["GUI.BackupForm"] {
+  }
+  class BLL_Backup["BLL.Backup"] {
+    +RealizarBackup(string,  string,  string) string
+    +RealizarBackupInicial(string,  string,  string) string
+    +ObtenerFechaBackup(string) DateTime?
+    +ObtenerCambiosDesde(DateTime?) List~CambioPosterior~
+    +EsCifrado(string) bool
+    +RestaurarBackup(string,  string,  string) void
+    +EliminarBackup(string,  string) void
+    +ExtraerAutorDeNombre(string) string
+  }
+  class DAL_Interfaces_IBackupDAL["DAL.Interfaces.IBackupDAL"] {
+    <<interface>>
+    +RealizarBackup(string) void
+    +RestaurarBackup(string) void
+    +ObtenerFechaBackup(string) DateTime?
+    +ContarCambiosPosterioresA(DateTime) List~CambioPosterior~
+  }
+  class DAL_Backup["DAL.Backup"] {
+    +DirectorioTempSeguro() string
+  }
+  class Seguridad_CifradorArchivos["Seguridad.CifradorArchivos"] {
+    <<static>>
+    +Cifrar(string,  string,  string) void
+    +Descifrar(string,  string,  string) void
+  }
+  class Servicios_Bitacora["Servicios.Bitacora"] {
+    +Registrar(string,  string,  Criticidad) void
+  }
+  BLL_Backup ..> DAL_Interfaces_IBackupDAL : usa
+  DAL_Interfaces_IBackupDAL <|.. DAL_Backup
+  ______________ ..> __________ : usa
+  __________ ..> _________________________ : usa
+  __________ ..> __________________________ : usa
+  __________ ..> __________________ : usa
+  _________________________ <|.. __________

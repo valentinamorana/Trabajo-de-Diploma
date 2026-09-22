@@ -89,6 +89,26 @@ namespace Tests
         }
 
         [TestMethod]
+        public void CrearContratacion_PlanConMenosCupoQueLasPrendasEnUso_LanzaPlanInsuficiente()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId.StockUtilizado = 5; // el plan Básico permite 3
+            var bll = ctx.Crear();
+
+            try
+            {
+                bll.CrearContratacion("Test", 10, 1, BE.Builders.ModalidadCobro.Mensual);
+                Assert.Fail("Debía rechazar un plan con menos cupo que las prendas en uso.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cliente.plan_insuficiente", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalContratacion.AltaVeces);
+        }
+
+        [TestMethod]
         public void CrearContratacion_ClienteInexistente_LanzaClienteInexistente()
         {
             LoginComoAdministrador();

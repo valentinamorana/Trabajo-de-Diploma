@@ -622,6 +622,25 @@ namespace Tests
         }
 
         [TestMethod]
+        public void Modificar_SiOtraSesionCambioElEstado_LanzaEstadoConcurrente()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPromocion.ModificarRespuesta = false; // el UPDATE condicionado a EnRevision no afectó filas
+            var bll = ctx.Crear();
+
+            try
+            {
+                bll.Modificar("Test", PromocionEnRevision());
+                Assert.Fail("Debía detectar que la promoción ya no está en revisión contable.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.promocion.estado_concurrente", ex.Clave);
+            }
+        }
+
+        [TestMethod]
         public void Modificar_PromocionVigente_LanzaModificarEstado()
         {
             LoginComoAdministrador();

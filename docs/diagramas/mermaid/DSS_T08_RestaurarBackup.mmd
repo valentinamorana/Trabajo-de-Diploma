@@ -1,0 +1,24 @@
+sequenceDiagram
+  autonumber
+  actor A as Administrador
+  participant F as BackupForm
+  participant B as BLL.Backup
+  participant K as Cifrador<br/>Archivos
+  participant D as DAL.Backup
+  participant L as Bitácora
+  A->>F: Elige el backup y la contraseña (btnRestaurar_Click)
+  F->>B: RestaurarBackup(modulo, rutaArchivo, claveCifrado)
+  B->>B: EsCifrado(rutaArchivo)
+  alt Backup cifrado (.wfbak)
+    B->>K: Descifrar(rutaArchivo, tempPlano, claveCifrado)
+    alt Contraseña incorrecta o archivo dañado
+      B-->>F: AppException(clave_invalida)
+    else Descifrado correcto
+      B->>D: RestaurarBackup(tempPlano)
+    end
+  else .bak plano
+    B->>D: RestaurarBackup(rutaArchivo)
+  end
+  B->>L: Registrar(Base de datos restaurada, Criticidad.Alta)
+  B-->>F: restaurado
+  F-->>A: Confirma

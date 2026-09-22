@@ -1,0 +1,13 @@
+#!/bin/sh
+# Mantiene los diagramas al dia con el codigo y la base (ver docs/diagramas/README.md).
+# Si el commit toca codigo C# o el script de la base, regenera los diagramas y verifica que los de
+# secuencia sigan citando metodos y clases que existen. Si algo quedo desactualizado, cancela el commit.
+if git diff --cached --name-only | grep -Eq '^(BE|BLL|DAL|Seguridad|Servicios|GUI)/.*\.cs$|^BD/.*\.sql$|^docs/diagramas/fuente/'; then
+  if ! command -v node >/dev/null 2>&1; then
+    echo "AVISO: Node no esta instalado; no se pudieron verificar los diagramas."
+    exit 0
+  fi
+  node docs/diagramas/fuente/verificar.js --regenerar || { echo "Commit cancelado: hay diagramas desactualizados."; exit 1; }
+  git add docs/diagramas/mermaid docs/diagramas/drawio docs/diagramas/indice.json
+fi
+exit 0

@@ -49,11 +49,24 @@ namespace BLL
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
                     "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
 
-            int idNuevo = CrearInterna(modulo, nombre, descripcion, tipo, valor, fechaInicio, fechaFin,
-                sugerencia.IdPlan, sugerencia.CategoriaPrenda, margenEstimado, impactoEconomico, idSugerencia);
+            // Reclamo atómico (UPDATE ... WHERE Estado = Pendiente): dos administradores que abren la misma
+            // sugerencia no pueden crear dos promociones. Si la creación falla (validación, BD), se
+            // compensa devolviendo la sugerencia a Pendiente para que pueda reintentarse.
+            if (!dalSugerencia.MarcarEvaluada(idSugerencia))
+                throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
+                    "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
 
-            dalSugerencia.MarcarEvaluada(idSugerencia);
-            return idNuevo;
+            try
+            {
+                return CrearInterna(modulo, nombre, descripcion, tipo, valor, fechaInicio, fechaFin,
+                    sugerencia.IdPlan, sugerencia.CategoriaPrenda, margenEstimado, impactoEconomico, idSugerencia);
+            }
+            catch
+            {
+                try { dalSugerencia.ReabrirEvaluacion(idSugerencia); }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.Promocion] No se pudo reabrir la sugerencia #{idSugerencia}: {ex.Message}"); }
+                throw;
+            }
         }
 
         // CU-ADM-Gestionar Promociones (manual, sin sugerencia previa).
@@ -155,7 +168,9 @@ namespace BLL
             promocion.CategoriaPrenda = aplicaCategoria ? promocion.CategoriaPrenda.Trim() : null;
             promocion.Nombre = promocion.Nombre.Trim();
 
-            dalPromocion.Modificar(promocion);
+            // El UPDATE exige que siga en revisión contable: si otra sesión la aprobó o rechazó mientras tanto, no se pisa.
+            if (!dalPromocion.Modificar(promocion))
+                throw EstadoConcurrente();
 
             bitacora.Registrar(modulo, $"Modificar Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
         }
@@ -182,7 +197,8 @@ namespace BLL
             // Primero se reclama el cambio de estado (UPDATE condicionado a Rechazada) y recién después
             // se guardan las condiciones nuevas, así dos sesiones no pisan la reformulación de la otra.
             CambiarEstadoOFalla(promocion, BE.EstadoPromocion.EnRevisionContable, null);
-            dalPromocion.Modificar(promocion);
+            if (!dalPromocion.Modificar(promocion))
+                throw EstadoConcurrente();
 
             bitacora.Registrar(modulo, $"Reformular Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,

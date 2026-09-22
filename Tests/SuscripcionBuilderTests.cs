@@ -23,6 +23,26 @@ namespace Tests
         };
 
         [TestMethod]
+        public void Renovar_ConTiempoPagado_ExtiendeDesdeElVencimientoActual()
+        {
+            var cliente = ClienteDePrueba();
+            cliente.FechaVencimiento = DateTime.Today.AddDays(10);
+            var builder = new BE.Builders.SuscripcionMensualBuilder();
+            var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, PlanDePrueba());
+            Assert.AreEqual(DateTime.Today.AddDays(10).AddMonths(1), suscripcion.FechaVencimiento,
+                "No debe perder los días ya pagados.");
+        }
+
+        [TestMethod]
+        public void Renovar_ConSuscripcionVencida_CuentaDesdeHoy()
+        {
+            var cliente = ClienteDePrueba();
+            cliente.FechaVencimiento = DateTime.Today.AddDays(-5);
+            var builder = new BE.Builders.SuscripcionTrimestralBuilder();
+            var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, PlanDePrueba());
+            Assert.AreEqual(DateTime.Today.AddMonths(3), suscripcion.FechaVencimiento);
+        }
+        [TestMethod]
         public void Mensual_VenceEnUnMes()
         {
             var builder = new BE.Builders.SuscripcionMensualBuilder();

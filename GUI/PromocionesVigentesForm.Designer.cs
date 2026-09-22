@@ -15,6 +15,7 @@ namespace GUI
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.panelTop = new System.Windows.Forms.Panel();
@@ -64,9 +65,9 @@ namespace GUI
             this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefrescar.Location = new System.Drawing.Point(168, 10);
             this.btnRefrescar.Name = "btnRefrescar";
-            this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
+            this.btnRefrescar.Size = new System.Drawing.Size(84, 28);
             this.btnRefrescar.TabIndex = 1;
-            this.btnRefrescar.Text = "↻";
+            this.btnRefrescar.Text = "Actualizar";
             this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //

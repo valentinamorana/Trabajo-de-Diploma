@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor D as Depósito
+  participant F as Pedidos<br/>Realizados
+  participant CG as BLL.CargoPrenda
+  participant PB as BLL.Prenda
+  participant DA as DAL (CargoPrenda, Prenda)
+  D->>F: Ve el detalle de prendas del pedido, elige una En uso y pulsa Reportar Pérdida
+  D->>F: Indica el motivo y el monto (precargado con el precio de reposición)
+  F->>CG: RegistrarCargo(modulo, prenda, motivo, monto, actor)
+  Note over CG: La prenda debe tener último cliente registrado · motivo obligatorio · monto > 0
+  alt Sin último cliente o datos inválidos
+    CG-->>F: AppException(sin_cliente / motivo_requerido / monto_invalido)
+    F-->>D: Rechaza la operación
+  else Cargo registrado
+    CG->>DA: Alta(cargo: Pendiente)
+    F->>PB: CambiarEstado(modulo, prenda, Baja, actor, viaFlujoPerdida: true)
+    PB->>DA: CambiarEstado(id, esperado = EnUso, nuevo = Baja)
+    PB-->>F: ok
+    F-->>D: Prenda dada de baja: el cargo se suma al próximo cobro
+  end

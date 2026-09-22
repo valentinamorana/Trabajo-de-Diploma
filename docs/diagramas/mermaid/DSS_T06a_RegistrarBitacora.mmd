@@ -1,0 +1,10 @@
+sequenceDiagram
+  autonumber
+  participant B as Operación de la BLL
+  participant S as Servicios.<br/>Bitacora
+  participant M as SessionManager
+  participant D as DAL.Bitacora
+  B->>S: Registrar(modulo, actividad, criticidad)
+  S->>M: GetInstance()  [usuario en sesión]
+  S->>D: Registrar(registro)  [fecha, usuario, módulo, actividad, criticidad, IP local]
+  D-->>S: ok

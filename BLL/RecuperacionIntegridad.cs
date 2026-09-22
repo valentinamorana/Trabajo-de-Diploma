@@ -49,7 +49,13 @@ namespace BLL
         // Líneas legibles que resumen/clasifican el daño detectado.
         public List<string>            Resumen   { get; set; } = new List<string>();
 
-        public bool Integro => !TablaVaciada && DvvOk && Alteradas.Count == 0 && Faltantes.Count == 0;
+        // Otras tablas protegidas (Cliente, Empleado, Pedido) con DV inválido. Sin esto, si solo fallaba una
+        // de ellas la consola decía "ÍNTEGRO", deshabilitaba Reparar y Asumir pérdida y dejaba únicamente
+        // "Restaurar backup".
+        public List<string> OtrasTablasCorruptas { get; set; } = new List<string>();
+
+        public bool Integro => !TablaVaciada && DvvOk && Alteradas.Count == 0 && Faltantes.Count == 0
+                               && OtrasTablasCorruptas.Count == 0;
 
         // Habilitación de cada opción de recuperación según el tipo de daño.
         public bool PuedeReparar        { get; set; }   // restaurar valores legítimos desde el espejo
@@ -77,6 +83,20 @@ namespace BLL
             var dvDAL = new DAL.DigitoVerificador();
             var esp   = new DAL.EspejoUsuario();
             var svc   = Seguridad.CalculadorDV.Crear();
+
+            // Otras tablas protegidas: el arranque también bloquea si falla alguna de ellas.
+            try
+            {
+                d.OtrasTablasCorruptas.AddRange(Configuracion.ObtenerTablasAdicionalesCorruptas());
+                if (d.OtrasTablasCorruptas.Count > 0)
+                    d.Resumen.Add("Los dígitos verificadores de otras tablas protegidas no coinciden " +
+                                  "(Cliente, Empleado o Pedido). Si los datos son legítimos (por ejemplo, cargados por script), " +
+                                  "usá \"Asumir pérdida\" para recalcularlos.");
+            }
+            catch (Exception ex)
+            {
+                d.Resumen.Add("No se pudo verificar el resto de las tablas protegidas: " + ex.Message);
+            }
 
             var actuales = dvDAL.ObtenerFilasUsuario();
             var espejo   = esp.Existe() ? esp.ObtenerFilas() : new List<BE.FilaUsuarioDV>();

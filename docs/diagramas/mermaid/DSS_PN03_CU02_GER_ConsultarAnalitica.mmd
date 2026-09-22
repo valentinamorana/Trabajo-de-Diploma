@@ -1,0 +1,25 @@
+sequenceDiagram
+  autonumber
+  actor G as Gerencia
+  participant F as Analisis*Form / ReporteVentasVendedorForm
+  participant B as BLL.Analisis* / ReporteVentasVendedor
+  participant D as DAL (Cliente, Pedido, Prenda, Mantenimiento)
+  participant X as GeneradorReporte / Exportador
+  G->>F: Elige el reporte (abandono, ventas por vendedor, rotación, mantenimiento, escasez o recomendación)
+  opt Análisis de abandono: elige el criterio de riesgo (Strategy)
+    F->>B: CambiarEstrategia(estrategia)
+  end
+  opt Escasez de stock: indica el umbral mínimo
+    Note over F,B: Detectar(umbralMinimo)
+  end
+  G->>F: Pulsa Generar
+  F->>B: Detectar() / Obtener() / Recomendar(idCliente)
+  B->>D: Consulta los datos agregados
+  D-->>B: datos
+  B-->>F: lista de resultados (clientes en riesgo, desempeño, prendas, combinaciones talle+categoría)
+  F-->>G: Muestra la grilla (sin resultados: lo informa)
+  opt Exporta el resultado
+    G->>F: Pulsa Exportar a PDF o Guardar como .CSV
+    F->>X: CrearExportador(formato) y exportar el ReporteExportable
+    X-->>G: Archivo generado
+  end

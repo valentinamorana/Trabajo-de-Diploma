@@ -1,0 +1,36 @@
+flowchart TD
+  subgraph C["Cliente"]
+    direction TB
+    i((" "))
+    d0{"¿Devuelve las prendas?"}
+  end
+  subgraph D["Depósito"]
+    direction TB
+    a1["Registra la devolución: las prendas pasan a En limpieza"]
+    a2["Inspecciona cada prenda"]
+    d1{"¿Desgaste normal?"}
+    a3["Aprueba el reingreso"]
+    a5["Indica motivo del daño y monto (o reporta la prenda perdida)"]
+  end
+  subgraph S["Sistema"]
+    direction TB
+    a4["Prenda Disponible sin cargo (cierra mantenimiento y avisa a la lista de espera)"]
+    a6["Registra el cargo contra el último cliente y luego da la prenda de baja"]
+    a7["El cargo se suma al próximo cobro de la suscripción"]
+    f(((" ")))
+    f2(((" ")))
+  end
+  i --> d0
+  d0 -- "Sí" --> a1
+  a1 --> a2
+  a2 --> d1
+  d1 -- "Sí" --> a3
+  a3 --> a4
+  a4 --> f
+  d1 -- "No, dañada" --> a5
+  d0 -- "No, perdida" --> a5
+  a5 --> a6
+  a6 --> a7
+  a7 --> f2
+  classDef ini fill:#222,stroke:#222,color:#222
+  class i,f,f2 ini

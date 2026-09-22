@@ -121,11 +121,11 @@ namespace GUI
             lblTituloIdiomas.Text   = Tr("lbl.idiomas.titulo",     "Idiomas del sistema");
             lblTituloTrad.Text      = Tr("lbl.idiomas.trad",       "Traducciones del idioma seleccionado");
             lblTituloControles.Text = Tr("lbl.idiomas.controles",  "Controles traducibles");
-            btnActivar.Text         = Tr("btn.idiomas.activar",    "✔ Activar");
-            btnDesactivar.Text      = Tr("btn.idiomas.desactivar", "✕ Desactivar");
-            btnGuardar.Text         = Tr("btn.idiomas.guardar",    "💾 Guardar cambios");
-            btnNuevoIdioma.Text     = Tr("btn.idiomas.nuevo",      "➕ Nuevo idioma");
-            btnRenombrarIdioma.Text = Tr("btn.idiomas.renombrar",  "✏ Renombrar");
+            btnActivar.Text         = Tr("btn.idiomas.activar",    "Activar");
+            btnDesactivar.Text      = Tr("btn.idiomas.desactivar", "Desactivar");
+            btnGuardar.Text         = Tr("btn.idiomas.guardar",    "Guardar cambios");
+            btnNuevoIdioma.Text     = Tr("btn.idiomas.nuevo",      "Nuevo idioma");
+            btnRenombrarIdioma.Text = Tr("btn.idiomas.renombrar",  "Renombrar");
         }
 
         // ── Configuración inicial de grillas ─────────────────────────────────

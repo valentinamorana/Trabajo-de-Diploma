@@ -15,7 +15,7 @@ namespace DAL.Interfaces
         /// <summary>Marca como Cobrados los cargos indicados dentro de una transacción YA abierta
         /// (ver <see cref="IClienteDAL.EjecutarTransaccion"/>) — para que el INSERT del cobro y este
         /// UPDATE sean atómicos junto con el descuento aplicado al Cliente.</summary>
-        void MarcarCobradosEnTx(SqlConnection conexion, SqlTransaction tx, List<int> idsCargo, System.DateTime fechaCobro);
+        bool MarcarCobradosEnTx(SqlConnection conexion, SqlTransaction tx, List<int> idsCargo, System.DateTime fechaCobro);
 
         List<BE.CargoPrenda> ObtenerTodos();
     }

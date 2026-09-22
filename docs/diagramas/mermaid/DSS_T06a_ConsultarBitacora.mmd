@@ -1,0 +1,14 @@
+sequenceDiagram
+  autonumber
+  actor A as Administrador
+  participant F as Bitacora
+  participant B as BLL.Bitacora
+  participant S as Servicios.<br/>Bitacora
+  participant D as DAL.Bitacora
+  A->>F: Abre la bitácora y filtra por días (BtnUltimosDias_Click)
+  F->>B: UsuarioPuedeVerSistema()
+  F->>B: ObtenerUltimosNDiasSistema(dias)
+  B->>S: ObtenerUltimosNDias(dias)
+  S->>D: ObtenerUltimosNDias(dias)
+  D-->>F: registros de bitácora
+  F-->>A: Muestra la grilla

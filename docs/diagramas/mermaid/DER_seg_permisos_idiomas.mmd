@@ -1,0 +1,47 @@
+erDiagram
+  Permiso ||--o{ ControlMapeado : "IdPermiso"
+  Permiso ||--o{ PermisoRelacion : "IdPadre"
+  Permiso ||--o{ PermisoRelacion : "IdHijo"
+  Permiso ||--o{ RolPermiso : "IdPermiso"
+  Idioma ||--o{ Traduccion : "IdIdioma"
+  Control ||--o{ Traduccion : "IdControl"
+  Permiso {
+    int IdPermiso PK
+    nvarchar(100) Nombre
+    nvarchar(100) NombreMenu "NULL"
+    nvarchar(100) TipoComponente "NULL"
+    bit Estado
+    bit EsFamilia
+    bit EsRol
+  }
+  PermisoRelacion {
+    int IdPadre PK,FK
+    int IdHijo PK,FK
+  }
+  RolPermiso {
+    nvarchar(100) Rol PK
+    int IdPermiso PK,FK
+  }
+  Control {
+    int IdControl PK
+    varchar(100) Clave
+    varchar(50) Formulario
+  }
+  ControlMapeado {
+    int IdControlMapeado PK
+    int IdPermiso FK
+    nvarchar(100) Formulario
+    nvarchar(100) NombreControl
+  }
+  Idioma {
+    int IdIdioma PK
+    varchar(5) Codigo
+    nvarchar(50) Nombre
+    bit Activo
+    bit EsDefault
+  }
+  Traduccion {
+    int IdControl PK,FK
+    int IdIdioma PK,FK
+    nvarchar(1000) Texto
+  }

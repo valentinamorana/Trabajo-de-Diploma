@@ -1,0 +1,74 @@
+classDiagram
+  direction TB
+  class Pedido {
+    +int IdPedido
+    +int IdCliente
+    +int IdEmpleado
+    +EstadoPedido Estado
+    +DateTime FechaPedido
+    +DateTime? FechaDespacho
+    +DateTime? FechaEntrega
+  }
+  class PedidoHistorial {
+    +int IdHistorial
+    +int IdPedido
+    +int IdOperacion
+    +DateTime Fecha
+    +int? IdUsuario
+  }
+  class Prenda {
+    +int IdPrenda
+    +DateTime FechaAlta
+    +string Nombre
+    +EstadoPrenda Estado
+    +int? IdClienteActual
+    +int? IdUltimoCliente
+  }
+  class MantenimientoPrenda {
+    +int IdMantenimiento
+    +int IdPrenda
+    +string NombrePrenda
+    +DateTime FechaEntrada
+    +DateTime? FechaSalida
+    +string Actor
+    +bool EstaAbierto
+    +int? DuracionDias
+    +int DiasTranscurridos
+    +NivelUrgencia NivelUrgencia
+  }
+  class CargoPrenda {
+    +int IdCargo
+    +int IdPrenda
+    +int IdCliente
+    +DateTime FechaRegistro
+    +DateTime? FechaCobro
+    +EstadoCargo Estado
+  }
+  class ListaEspera {
+    +int IdListaEspera
+    +int IdPrenda
+    +int IdCliente
+    +DateTime FechaAlta
+    +EstadoListaEspera Estado
+    +DateTime? FechaLimiteReserva
+    +DateTime? FechaResolucion
+  }
+  class Cliente {
+    +int IdCliente
+    +string Nombre
+    +string Apellido
+  }
+  class Empleado {
+    +int IdEmpleado
+    +string Nombre
+  }
+  Pedido --> "1" Cliente : IdCliente
+  Pedido --> "1" Empleado : IdEmpleado
+  PedidoHistorial --> "1" Pedido : IdPedido
+  Prenda --> "0..1" Cliente : IdClienteActual
+  Prenda --> "0..1" Cliente : IdUltimoCliente
+  MantenimientoPrenda --> "1" Prenda : IdPrenda
+  CargoPrenda --> "1" Prenda : IdPrenda
+  CargoPrenda --> "1" Cliente : IdCliente
+  ListaEspera --> "1" Prenda : IdPrenda
+  ListaEspera --> "1" Cliente : IdCliente

@@ -113,7 +113,7 @@ namespace GUI
                 PreferenciasUI.ReaplicarTodo();
 
                 lblEstado.ForeColor = Color.FromArgb(40, 140, 60);
-                lblEstado.Text = "✓ " + Tr("perfil.guardado", "Preferencias guardadas.");
+                lblEstado.Text = Tr("perfil.guardado", "Preferencias guardadas.");
             }
             catch (Exception ex)
             {
@@ -121,7 +121,7 @@ namespace GUI
                 string msg = ex is BE.AppException appEx
                     ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
                     : ex.Message;
-                lblEstado.Text = "✗ " + msg;
+                lblEstado.Text = msg;
             }
         }
 

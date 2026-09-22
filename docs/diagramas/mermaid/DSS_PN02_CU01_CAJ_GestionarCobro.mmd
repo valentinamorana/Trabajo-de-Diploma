@@ -1,0 +1,31 @@
+sequenceDiagram
+  autonumber
+  actor C as Caja
+  participant F as Contrataciones<br/>PendientesForm
+  participant B as BLL.<br/>Contratacion
+  participant PD as Politica<br/>Descuento
+  participant CB as BLL.Cliente
+  participant D as DAL.<br/>Contratacion
+  participant DC as DAL.Cliente
+  C->>F: Consulta la cola, elige una contratación e indica el medio de pago
+  F->>B: ConfirmarPago(modulo, idContratacion, medioPago)
+  Note over B: Exigir(CajaEditar) · medio de pago obligatorio · contratación PendientePago · plan activo · ValidarCupo
+  B->>PD: Resolver(bruto = Precio × meses, promociones vigentes, crédito de referido)
+  PD-->>B: un solo descuento (el mayor) y total
+  B->>D: ConfirmarPago(id, idCaja, medio, comprobante, total, descuento, idPromocion)  [reclamo atómico: WHERE Estado = PendientePago]
+  alt Otra sesión de Caja ya la resolvió
+    D-->>B: false
+    B-->>F: AppException(cobrar_concurrente)
+    F-->>C: Actualizá la cola de Caja
+  else Reclamo obtenido (comprobante emitido)
+    B->>CB: ActivarSuscripcionDesdeContratacion(cliente, idPlan, modalidad, consumoCredito)
+    Note over CB: Builder según modalidad: vencimiento = fin del período vigente + 1, 3 o 12 meses, limpia gracia y pausa
+    CB->>DC: EjecutarTransaccion: ModificarEnTx + ConsumirCreditoEnTx + SumarCreditoEnTx (referente)
+    alt Falla la activación
+      B->>D: ReabrirPago(id)  [compensación: vuelve a PendientePago]
+      B-->>F: error (o cobro_sin_activar si no se pudo reabrir)
+    else Activada
+      B-->>F: LiquidacionContratacion
+      F-->>C: Suscripción formalizada y comprobante emitido
+    end
+  end

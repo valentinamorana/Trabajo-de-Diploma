@@ -95,7 +95,7 @@ namespace GUI
         // Compone el texto del ítem: icono + etiqueta traducida + (N) si hay alertas.
         private void RefrescarTextoAlertas()
         {
-            string baseTxt = "🔔 " + Tx("mnu.alertas", "Alertas");
+            string baseTxt = Tx("mnu.alertas", "Alertas");
             alertasItem.Text      = _alertasCount > 0 ? $"{baseTxt} ({_alertasCount})" : baseTxt;
             alertasItem.ForeColor = _alertasCount > 0 ? Color.FromArgb(255, 235, 130) : Color.White;
         }

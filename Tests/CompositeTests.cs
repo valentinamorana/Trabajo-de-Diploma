@@ -66,7 +66,7 @@ namespace Tests
         [TestMethod]
         public void Composite_PatentesEfectivas_RecursivoEnRolesAnidados()
         {
-            // 3 niveles de anidamiento: GerenteInventario ⊃ EncargadoDeStock ⊃ OperadorLogistico.
+            // 3 niveles de anidamiento: GerenteInventario ⊃ RolIntermedio ⊃ OperadorLogistico.
             var pOper  = new BE.Patente { Id = 1, Nombre = "Despacho",   NombreMenu = "mnuPedidosRealizados" };
             var pStock = new BE.Patente { Id = 2, Nombre = "Stock",      NombreMenu = "mnuStock" };
             var pCat   = new BE.Patente { Id = 3, Nombre = "Categorias", NombreMenu = "mnuCategorias" };
@@ -74,7 +74,7 @@ namespace Tests
             var operador = new BE.Rol { Id = 10, Nombre = "OperadorLogistico" };
             operador.AgregarHijo(pOper);
 
-            var encargado = new BE.Rol { Id = 11, Nombre = "EncargadoDeStock" };
+            var encargado = new BE.Rol { Id = 11, Nombre = "RolIntermedio" };
             encargado.AgregarHijo(pStock);
             encargado.AgregarHijo(operador);    // rol dentro de rol
 

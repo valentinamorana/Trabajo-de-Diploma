@@ -41,7 +41,7 @@ namespace GUI
         private void BtnConfirmar_Click(object sender, EventArgs e)
         {
             int idx = cmbOpciones.SelectedIndex;
-            if (idx < 0) { lblMensaje.Text = "✗ " + Tr("msg.cambioest.selecciona", "Seleccioná una opción."); return; }
+            if (idx < 0) { lblMensaje.Text = Tr("msg.cambioest.selecciona", "Seleccioná una opción."); return; }
 
             EstadoSeleccionado = _opciones[idx].estado;
 

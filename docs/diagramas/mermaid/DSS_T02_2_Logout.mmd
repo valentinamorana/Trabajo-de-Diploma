@@ -1,0 +1,13 @@
+sequenceDiagram
+  autonumber
+  actor U as Usuario
+  participant F as Menu
+  participant B as BLL.Usuario
+  participant L as Bitácora
+  participant M as SessionManager
+  U->>F: Elige Cerrar sesión
+  F->>B: Logout(modulo)
+  B->>L: Registrar(CierreSesion)
+  B->>M: Logout()  [descarta la sesión, idempotente]
+  B-->>F: sesión cerrada
+  F-->>U: Vuelve a la pantalla de Login

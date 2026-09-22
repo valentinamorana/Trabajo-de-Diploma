@@ -1,0 +1,36 @@
+classDiagram
+  direction TB
+  class DirectorSuscripcion {
+    <<static>>
+    +Construir(SuscripcionBuilder,  Cliente,  PlanSuscripcion) Suscripcion
+  }
+  class SuscripcionBuilder {
+    <<abstract>>
+    +AsignarCliente(Cliente) void
+    +AsignarPlan(PlanSuscripcion) void
+    +BuildSuscripcion() Suscripcion
+  }
+  class SuscripcionMensualBuilder {
+    +ModalidadCobro Modalidad
+  }
+  class SuscripcionTrimestralBuilder {
+    +ModalidadCobro Modalidad
+  }
+  class SuscripcionAnualBuilder {
+    +ModalidadCobro Modalidad
+  }
+  class SuscripcionBuilderFactory {
+    <<static>>
+    +Crear(ModalidadCobro) SuscripcionBuilder
+  }
+  class Suscripcion {
+    +Cliente Cliente
+    +PlanSuscripcion Plan
+    +ModalidadCobro Modalidad
+    +DateTime FechaActivacion
+    +DateTime FechaVencimiento
+  }
+  SuscripcionBuilder <|-- SuscripcionMensualBuilder
+  SuscripcionBuilder <|-- SuscripcionTrimestralBuilder
+  SuscripcionBuilder <|-- SuscripcionAnualBuilder
+  SuscripcionBuilderFactory ..> SuscripcionBuilder : usa

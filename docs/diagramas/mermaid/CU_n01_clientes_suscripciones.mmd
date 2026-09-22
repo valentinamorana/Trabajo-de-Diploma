@@ -1,0 +1,13 @@
+flowchart LR
+  V["Vendedor"]:::actor
+  subgraph SIS["WardrobeFlow — N01 Clientes y suscripciones"]
+    c1(["CU01-VEN Gestionar Cliente"])
+    c2(["CU02-VEN Renovar Suscripción"])
+    c3(["CU03-VEN Cobrar Suscripción"])
+    c4(["CU04-VEN Gestionar Planes"])
+  end
+  V --- c1
+  V --- c2
+  V --- c3
+  V --- c4
+  classDef actor fill:#fff7e6,stroke:#b8860b

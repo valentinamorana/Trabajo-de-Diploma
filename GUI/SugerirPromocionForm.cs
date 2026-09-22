@@ -75,6 +75,13 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); }
         }
 
+        // Las promociones por categoría de prenda son informativas: no reducen el importe del cobro de la suscripción.
+        private string NotaCategoria(BE.CandidataSugerencia c)
+            => c != null && !c.IdPlan.HasValue
+                ? "\n\n" + Tr("promocion.desdeanalisis.notacategoria",
+                    "Ojo: una promoción por categoría es informativa (no se descuenta del cobro de la suscripción).")
+                : "";
+
         private BE.CandidataSugerencia ElegirCandidata(List<BE.CandidataSugerencia> candidatas)
         {
             using (var dlg = new Form
@@ -96,10 +103,12 @@ namespace GUI
                 {
                     var c = lista.SelectedItem as BE.CandidataSugerencia;
                     detalle.Text = c == null ? "" : c.Motivo + "\n\n" + Tr("promocion.desdeanalisis.beneficio",
-                        "Beneficio estimado inicial: {0:C2} (editable antes de enviar).", new object[] { c.BeneficioEstimado });
+                        "Beneficio estimado inicial: {0:C2} (editable antes de enviar).", new object[] { c.BeneficioEstimado })
+                        + NotaCategoria(c);
                 };
                 detalle.Text = candidatas[0].Motivo + "\n\n" + Tr("promocion.desdeanalisis.beneficio",
-                    "Beneficio estimado inicial: {0:C2} (editable antes de enviar).", new object[] { candidatas[0].BeneficioEstimado });
+                    "Beneficio estimado inicial: {0:C2} (editable antes de enviar).", new object[] { candidatas[0].BeneficioEstimado })
+                    + NotaCategoria(candidatas[0]);
 
                 var ok = new Button { Text = Tr("promocion.desdeanalisis.usar", "Usar esta idea"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 150 };
                 var cancelar = new Button { Text = Tr("btn.cancelar", "Cancelar"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 100 };

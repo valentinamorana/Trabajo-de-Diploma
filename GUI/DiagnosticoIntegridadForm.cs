@@ -128,7 +128,7 @@ namespace GUI
                 // Si no hay NINGÚN problema (ni en Usuario ni en las tablas adicionales),
                 // mostrar el cartel "Todo íntegro" SOBRE la grilla (no como fila en Usuario).
                 bool gridVacio = diag.FilasRotas.Count == 0 && diag.TablasAdicionalesCorruptas.Count == 0;
-                lblGridVacio.Text    = Tr("diag.sinfilas", "✓ Todo íntegro — no hay filas con problemas de integridad.");
+                lblGridVacio.Text    = Tr("diag.sinfilas", "Todo íntegro — no hay filas con problemas de integridad.");
                 lblGridVacio.Visible = gridVacio;
                 if (gridVacio) lblGridVacio.BringToFront(); else lblGridVacio.SendToBack();
 

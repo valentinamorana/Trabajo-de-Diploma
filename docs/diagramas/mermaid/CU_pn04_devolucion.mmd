@@ -1,0 +1,9 @@
+flowchart LR
+  D["Depósito"]:::actor
+  subgraph SIS["WardrobeFlow — PN04 Inspección de devolución"]
+    c1(["CU-DEP-01 Inspeccionar Devolución"])
+    c2(["CU-DEP-02 Reportar Prenda Perdida"])
+  end
+  D --- c1
+  D --- c2
+  classDef actor fill:#fff7e6,stroke:#b8860b

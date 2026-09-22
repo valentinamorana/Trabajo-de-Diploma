@@ -32,7 +32,7 @@
 -- semilla (permisos, roles, usuarios, idiomas) + árbol Composite.
 -- Idempotente: se puede re-ejecutar sin romper datos existentes.
 --
--- Usuarios semilla (ver Contraseñas.txt):
+-- Usuarios semilla: 10 (uno por rol; ver Instalador/Credenciales_Iniciales.txt):
 --   admin/administrador1!   
 --   vendedor/vendedor1!     deposito/deposito1!
 --
@@ -586,7 +586,7 @@ WHERE NOT EXISTS (SELECT 1 FROM RolPermiso x WHERE x.Rol = r.Rol AND x.IdPermiso
 PRINT 'Asignaciones rol→patente inicializadas.';
 GO
 
--- ── Usuarios iniciales (clave hasheada PBKDF2; ver Contraseñas.txt) ───────────
+-- ── Usuarios iniciales (clave hasheada PBKDF2; ver Instalador/Credenciales_Iniciales.txt) ───────────
 -- admin/administrador1!  vendedor/vendedor1!  deposito/deposito1!
 -- DVH=0 → la app recalcula el DV en el primer arranque.
 INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma)
@@ -609,7 +609,7 @@ FROM (VALUES
     ('RU', N'Русский', 1, 0)
 ) AS v(Codigo, Nombre, Activo, EsDefault)
 WHERE NOT EXISTS (SELECT 1 FROM Idioma WHERE Codigo = v.Codigo);
-PRINT 'Idiomas inicializados (ES, EN, RU).';
+PRINT 'Idiomas inicializados (ES, EN, RU, PT).';
 GO
 
 -- DVV inicial para la tabla Usuario (en 0 — recalcular desde la app)
@@ -743,10 +743,10 @@ WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
 GO
 
 -- ============================================================
--- Idempotente. Crea un usuario demo por cada rol nuevo (claves en Contraseñas.txt).
--- Supervisor en rol COMPUESTO (Supervisor ⊃ Vendedor) conservando su Auditoría propia:
--- mismos permisos efectivos que antes, pero ahora obtenidos por HERENCIA (no copiados).
--- Las claves se guardan hasheadas (PBKDF2). Texto plano: usuario1! (ver Contraseñas.txt).
+-- Idempotente. Crea un usuario demo por cada rol nuevo (claves en Instalador/Credenciales_Iniciales.txt).
+-- Roles compuestos por HERENCIA: GerenteComercial ⊃ Vendedor y GerenteInventario ⊃ OperadorLogistico + Deposito.
+-- Los permisos efectivos se obtienen del árbol Composite (no se copian).
+-- Las claves se guardan hasheadas (PBKDF2). Texto plano: usuario1! (ver Instalador/Credenciales_Iniciales.txt).
 -- ============================================================
 
 INSERT INTO Usuario (Username, Clave, Rol, Perfil, Estado, IntentosFallidos, DVH, IdIdioma, Activo)
@@ -915,7 +915,7 @@ GO
 -- Seed inicial: mapea cada patente con NombreMenu al item de menu correspondiente del Menu
 -- principal, como punto de partida coherente con la visibilidad actual. Idempotente.
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, v.Formulario, v.NombreControl
+SELECT ISNULL(MIN(CASE WHEN p.Estado = 1 THEN p.IdPermiso END), MIN(p.IdPermiso)), v.Formulario, v.NombreControl
 FROM (VALUES
     ('mnuPrendas',           'Menu', 'prendasToolStripMenuItem'),
     ('mnuClientes',          'Menu', 'clientesToolStripMenuItem'),
@@ -931,7 +931,8 @@ FROM (VALUES
 INNER JOIN Permiso p ON p.NombreMenu = v.NombreMenu
                     AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado x
-                  WHERE x.Formulario = v.Formulario AND x.NombreControl = v.NombreControl);
+                  WHERE x.Formulario = v.Formulario AND x.NombreControl = v.NombreControl)
+GROUP BY v.Formulario, v.NombreControl;
 PRINT 'Seed de ControlMapeado (mapeos de menu) aplicado.';
 GO
 
@@ -1311,11 +1312,11 @@ PRINT 'Permiso mnuRenovacionSuscripcion asignado a Administrador y Vendedor (Sup
 GO
 
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'renovacionSuscripcionToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'renovacionSuscripcionToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuRenovacionSuscripcion'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'renovacionSuscripcionToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'renovacionSuscripcionToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -1432,11 +1433,11 @@ GO
 
 -- ── 5) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'cobroSuscripcionToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'cobroSuscripcionToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuCobroSuscripcion'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'cobroSuscripcionToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'cobroSuscripcionToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -1479,11 +1480,11 @@ GO
 
 -- ── 3) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'analisisAbandonoToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'analisisAbandonoToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuAnalisisAbandono'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisAbandonoToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisAbandonoToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -1526,11 +1527,11 @@ GO
 
 -- ── 3) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'ventasVendedorToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'ventasVendedorToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuVentasVendedor'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'ventasVendedorToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'ventasVendedorToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -1573,11 +1574,11 @@ GO
 
 -- ── 3) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'analisisRotacionToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'analisisRotacionToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuAnalisisRotacion'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisRotacionToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisRotacionToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -1619,11 +1620,11 @@ GO
 
 -- ── 3) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'analisisMantenimientoToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'analisisMantenimientoToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuAnalisisMantenimiento'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisMantenimientoToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisMantenimientoToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -1665,11 +1666,11 @@ GO
 
 -- ── 3) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'analisisEscasezToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'analisisEscasezToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuAnalisisEscasez'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisEscasezToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'analisisEscasezToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -1713,11 +1714,11 @@ GO
 
 -- ── 3) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'recomendacionPrendasToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'recomendacionPrendasToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuRecomendacionPrendas'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'recomendacionPrendasToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'recomendacionPrendasToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -1910,11 +1911,11 @@ GO
 
 -- ── 4) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, 'Menu', 'listaEsperaToolStripMenuItem'
+SELECT TOP 1 p.IdPermiso, 'Menu', 'listaEsperaToolStripMenuItem'
 FROM Permiso p
 WHERE p.NombreMenu = 'mnuListaEspera'
   AND NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'listaEsperaToolStripMenuItem');
+                  WHERE c.Formulario = 'Menu' AND c.NombreControl = 'listaEsperaToolStripMenuItem') ORDER BY p.Estado DESC, p.IdPermiso;
 GO
 
 -- ============================================================
@@ -2006,7 +2007,7 @@ GO
 
 -- ── 4) Mapeo de controles (pantalla "Perfiles y Permisos" → ítems de menú) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, v.Formulario, v.NombreControl
+SELECT ISNULL(MIN(CASE WHEN p.Estado = 1 THEN p.IdPermiso END), MIN(p.IdPermiso)), v.Formulario, v.NombreControl
 FROM (VALUES
     ('mnuClientes', 'Menu', 'nuevaContratacionToolStripMenuItem'),
     ('mnuCaja',     'Menu', 'cajaToolStripMenuItem'),
@@ -2014,7 +2015,8 @@ FROM (VALUES
 ) AS v(NombreMenu, Formulario, NombreControl)
 JOIN Permiso p ON p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
+                  WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl)
+GROUP BY v.Formulario, v.NombreControl;
 GO
 
 -- ── 5) Usuario demo del rol Caja ──────────────────────────────────────────
@@ -2184,7 +2186,7 @@ GO
 
 -- ── 5) Mapeo de controles (pantalla "Perfiles y Permisos" → ítems de menú) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, v.Formulario, v.NombreControl
+SELECT ISNULL(MIN(CASE WHEN p.Estado = 1 THEN p.IdPermiso END), MIN(p.IdPermiso)), v.Formulario, v.NombreControl
 FROM (VALUES
     ('mnuSugerenciaPromocion', 'Menu', 'promocionesToolStripMenuItem'),
     ('mnuSugerenciaPromocion', 'Menu', 'sugerirPromocionToolStripMenuItem'),
@@ -2194,7 +2196,8 @@ FROM (VALUES
 ) AS v(NombreMenu, Formulario, NombreControl)
 JOIN Permiso p ON p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
+                  WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl)
+GROUP BY v.Formulario, v.NombreControl;
 GO
 
 -- ── 6) Usuarios demo de los roles nuevos ──────────────────────────────────
@@ -2285,13 +2288,14 @@ GO
 
 -- ── 4) Mapeo de controles (pantalla "Perfiles y Permisos" → ítems de menú) ─
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
-SELECT p.IdPermiso, v.Formulario, v.NombreControl
+SELECT ISNULL(MIN(CASE WHEN p.Estado = 1 THEN p.IdPermiso END), MIN(p.IdPermiso)), v.Formulario, v.NombreControl
 FROM (VALUES
     ('mnuInspeccionDevolucion', 'Menu', 'inspeccionDevolucionToolStripMenuItem')
 ) AS v(NombreMenu, Formulario, NombreControl)
 JOIN Permiso p ON p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
-                  WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl);
+                  WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl)
+GROUP BY v.Formulario, v.NombreControl;
 GO
 
 -- ============================================================
@@ -2596,7 +2600,7 @@ BEGIN
         (@cJulie,  @pPremium, @vend, NULL,  2, 0, 1, DATEADD(DAY,  -1, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL),
         (@cPaula,  @pPremium, @vend, @caja, 1, 1, 0, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
             'Efectivo', 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()),
-            (SELECT Precio FROM PlanSuscripcion WHERE IdPlan = @pPremium), 0);
+            (SELECT Precio FROM PlanSuscripcion WHERE IdPlan = @pPremium) * 3, 0);
 
     -- ── PN03: sugerencias y promociones en cada estado ──────────────────────
     INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta)
@@ -2624,5 +2628,59 @@ BEGIN
     FROM Prenda pr WHERE pr.Nombre = N'Traje Gris Slim';
 
     PRINT 'Datos de prueba (sección 21) aplicados.';
+END
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
+-- ------------------------------------------------------------
+-- Despachar, registrar la entrega y registrar la devolución (que abre PN04) se hacen desde Pedidos
+-- Realizados y exigen mnuPedidosRealizadosEditar. El rol Deposito solo tenía la patente de VER, así
+-- que no podía registrar una devolución. Idempotente; corre también sobre bases ya creadas.
+-- ============================================================
+INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+SELECT r.IdPermiso, e.IdPermiso
+FROM   Permiso r
+JOIN   Permiso e ON e.NombreMenu = 'mnuPedidosRealizadosEditar'
+WHERE  r.EsRol = 1 AND r.Estado = 1 AND r.Nombre = 'Deposito'
+  AND  NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = r.IdPermiso AND x.IdHijo = e.IdPermiso);
+PRINT 'Permiso de edición de Pedidos Realizados asegurado para el rol Deposito.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 22. NORMALIZACIÓN DE LOS DÍGITOS VERIFICADORES
+-- ------------------------------------------------------------
+-- Las filas que siembra este script (usuarios, empleados, clientes y pedidos demo) llevan DVH = 0.
+-- En una base NUEVA (todo en 0, sin DVV) la app las inicializa sola en el primer arranque. Pero en una
+-- base que YA tenía dígitos verificadores calculados, esas filas dejan la tabla "mezclada" (unas con
+-- DVH válido y otras en 0) y el arranque la marca como manipulada: el sistema bloquea el ingreso y la
+-- consola de recuperación solo ofrece restaurar un backup.
+-- Por eso, si una tabla protegida quedó mezclada, se la deja en el estado "sin calcular" (DVH = 0 y
+-- DVV = 0) para que la app la recalcule limpia en el próximo arranque, igual que hacen los bloques de
+-- migración de Usuario más arriba. Idempotente: solo actúa sobre tablas mezcladas.
+-- ============================================================
+IF EXISTS (SELECT 1 FROM Usuario WHERE ISNULL(DVH, 0) = 0) AND EXISTS (SELECT 1 FROM Usuario WHERE ISNULL(DVH, 0) <> 0)
+BEGIN
+    UPDATE Usuario SET DVH = 0;
+    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Usuario';
+    PRINT 'DV de Usuario normalizado (recálculo en el próximo arranque).';
+END
+IF EXISTS (SELECT 1 FROM Cliente WHERE ISNULL(DVH, 0) = 0) AND EXISTS (SELECT 1 FROM Cliente WHERE ISNULL(DVH, 0) <> 0)
+BEGIN
+    UPDATE Cliente SET DVH = 0;
+    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Cliente';
+    PRINT 'DV de Cliente normalizado (recálculo en el próximo arranque).';
+END
+IF EXISTS (SELECT 1 FROM Empleado WHERE ISNULL(DVH, 0) = 0) AND EXISTS (SELECT 1 FROM Empleado WHERE ISNULL(DVH, 0) <> 0)
+BEGIN
+    UPDATE Empleado SET DVH = 0;
+    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Empleado';
+    PRINT 'DV de Empleado normalizado (recálculo en el próximo arranque).';
+END
+IF EXISTS (SELECT 1 FROM Pedido WHERE ISNULL(DVH, 0) = 0) AND EXISTS (SELECT 1 FROM Pedido WHERE ISNULL(DVH, 0) <> 0)
+BEGIN
+    UPDATE Pedido SET DVH = 0;
+    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Pedido';
+    PRINT 'DV de Pedido normalizado (recálculo en el próximo arranque).';
 END
 GO

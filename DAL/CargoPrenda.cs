@@ -38,7 +38,7 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdCliente", idCliente),
-                new SqlParameter("@Estado", (int)BE.EstadoCargo.Pendiente)
+                new SqlParameter("@Estado", (object)(int)BE.EstadoCargo.Pendiente)
             };
             DataTable tabla = acceso.Leer(
                 SELECT_BASE + " WHERE g.IdCliente = @IdCliente AND g.Estado = @Estado " +
@@ -58,7 +58,7 @@ namespace DAL
                 new SqlParameter("@Monto",         cargo.Monto),
                 new SqlParameter("@FechaRegistro", cargo.FechaRegistro),
                 new SqlParameter("@Actor",         (object)cargo.Actor ?? DBNull.Value),
-                new SqlParameter("@Estado",        (int)BE.EstadoCargo.Pendiente)
+                new SqlParameter("@Estado",        (object)(int)BE.EstadoCargo.Pendiente)
             };
 
             DataTable tabla = acceso.Leer(
@@ -75,22 +75,25 @@ namespace DAL
         // Igual que MarcarCobrado individual, pero para todos los cargos Pendientes que
         // ProcesarPagoHandler suma a un mismo cobro — sobre la transacción ya abierta por
         // DAL.Cliente.EjecutarTransaccion, junto con el INSERT de HistorialCobro (ver DAL.Cobro.AltaEnTx).
-        public void MarcarCobradosEnTx(SqlConnection conexion, SqlTransaction tx, List<int> idsCargo, DateTime fechaCobro)
+        public bool MarcarCobradosEnTx(SqlConnection conexion, SqlTransaction tx, List<int> idsCargo, DateTime fechaCobro)
         {
-            if (idsCargo == null || idsCargo.Count == 0) return;
+            if (idsCargo == null || idsCargo.Count == 0) return true;
 
             foreach (var idCargo in idsCargo)
             {
                 using (var cmd = new SqlCommand(
-                    "UPDATE CargoPrenda SET Estado=@Estado, FechaCobro=@FechaCobro WHERE IdCargo=@IdCargo",
+                    "UPDATE CargoPrenda SET Estado=@Estado, FechaCobro=@FechaCobro " +
+                    "WHERE IdCargo=@IdCargo AND Estado=@Pendiente",
                     conexion, tx))
                 {
                     cmd.Parameters.AddWithValue("@Estado", (int)BE.EstadoCargo.Cobrado);
                     cmd.Parameters.AddWithValue("@FechaCobro", fechaCobro);
                     cmd.Parameters.AddWithValue("@IdCargo", idCargo);
-                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue("@Pendiente", (int)BE.EstadoCargo.Pendiente);
+                    if (cmd.ExecuteNonQuery() != 1) return false;
                 }
             }
+            return true;
         }
 
         private BE.CargoPrenda Mapear(DataRow row)

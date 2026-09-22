@@ -1,0 +1,18 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as NuevoPedidoForm
+  participant B as BLL.Cliente
+  participant D as DAL.Cliente
+  V->>F: Ingresa DNI o código y confirma la consulta
+  F->>B: ObtenerEstadoComercial(cliente, prendasSolicitadas)
+  B->>D: ObtenerPorId(idCliente)
+  D-->>B: cliente (plan, cupo, vencimiento, prendas en uso)
+  alt Sin plan
+    B-->>F: MotivoBloqueo = SIN_PLAN
+  else Suscripción vencida
+    B-->>F: MotivoBloqueo = SUSCRIPCION_VENCIDA + fecha
+  else Vigente
+    B-->>F: EstadoComercialCliente (PuedeProceder, cupo disponible)
+  end
+  F-->>V: Muestra plan, cupo disponible, vigencia y pedido activo

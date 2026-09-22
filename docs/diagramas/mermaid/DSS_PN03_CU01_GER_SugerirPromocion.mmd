@@ -1,0 +1,24 @@
+sequenceDiagram
+  autonumber
+  actor G as Gerencia
+  participant F as Sugerir<br/>PromocionForm
+  participant AN as BLL.Analisis<br/>Promociones
+  participant B as BLL.Sugerencia<br/>Promocion
+  participant D as DAL.Sugerencia<br/>Promocion
+  opt Toma una idea del análisis de datos
+    G->>F: Pulsa "Desde el análisis…"
+    F->>AN: Detectar()
+    AN-->>F: candidatas (abandono por plan, baja rotación por categoría)
+    F-->>G: Precarga plan o categoría, motivo, tipo y beneficio estimado
+  end
+  G->>F: Indica destino (plan o categoría), motivo, tipo de descuento y beneficio
+  F->>B: Crear(modulo, sugerencia)
+  Note over B: Exigir(SugerenciaPromocion) · destino único (plan o categoría) · motivo obligatorio · beneficio válido
+  alt Datos inválidos
+    B-->>F: AppException(motivo específico)
+    F-->>G: Informa y retoma la carga
+  else Válidos
+    B->>D: Alta(sugerencia: estado Pendiente)
+    B-->>F: ok
+    F-->>G: Sugerencia registrada para Administración
+  end

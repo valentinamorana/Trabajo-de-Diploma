@@ -1,0 +1,15 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as Prendas / NuevoPedidoForm
+  participant B as BLL.Prenda
+  participant D as DAL.Prenda
+  V->>F: Solicita consultar el catálogo
+  F->>B: ObtenerDisponibles()
+  B->>D: ObtenerTodos() filtrado por Estado = Disponible
+  D-->>B: lista de prendas
+  B-->>F: prendas Disponibles
+  F-->>V: Muestra talle, color, categoría y valor de reposición
+  alt No hay prendas disponibles
+    F-->>V: Muestra la grilla vacía
+  end

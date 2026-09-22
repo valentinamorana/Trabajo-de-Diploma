@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  participant P as Program
+  participant B as BLL.<br/>Configuracion
+  participant D as DAL.Digito<br/>Verificador
+  participant K as CalculadorDV
+  participant V as Seguridad.Digito<br/>Verificador
+  P->>B: VerificarIntegridadDV(resultado)
+  B->>K: Crear()
+  B->>D: ObtenerFilasUsuario()
+  D-->>B: filas con su DVH almacenado
+  B->>D: ObtenerDVV("Usuario")
+  B->>V: CalcularDVH(campos de cada fila)
+  B->>V: CalcularDVV(dvhs)
+  alt DVH o DVV no coinciden
+    B-->>P: false (integridad comprometida, se abre el diagnóstico)
+  else Todo coincide
+    B-->>P: true
+  end

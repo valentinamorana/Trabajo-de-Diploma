@@ -1,0 +1,83 @@
+erDiagram
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  PlanSuscripcion |o--o{ Cliente : "IdPlan"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  Promocion |o--o{ Contratacion : "IdPromocion"
+  Empleado ||--o{ Contratacion : "IdVendedor"
+  Empleado |o--o{ Contratacion : "IdCaja"
+  Cliente ||--o{ Contratacion : "IdCliente"
+  PlanSuscripcion |o--o{ Promocion : "IdPlan"
+  Cliente {
+    int IdCliente PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    nvarchar(100) MetodoPago "NULL"
+    int IdPlan FK "NULL"
+    datetime FechaAlta
+    date FechaNacimiento
+    bit Activo
+    int DVH "NULL"
+    date FechaVencimiento "NULL"
+    date FechaLimiteGracia "NULL"
+    datetime FechaPausaHasta "NULL"
+    int IdClienteReferente FK "NULL"
+    decimal(10_2) DescuentoProximoCobro
+    bit BeneficioReferidoOtorgado
+  }
+  PlanSuscripcion {
+    int IdPlan PK
+    nvarchar(100) Nombre
+    int LimitePrendas
+    decimal(10_2) Precio
+    bit Estado
+  }
+  Empleado {
+    int IdEmpleado PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    datetime FechaIngreso
+    nvarchar(100) Puesto "NULL"
+    nvarchar(50) Legajo "NULL"
+    int IdUsuario FK "NULL"
+    int DVH "NULL"
+  }
+  Contratacion {
+    int IdContratacion PK
+    int IdCliente FK
+    int IdPlan FK
+    int IdVendedor FK
+    int IdCaja FK "NULL"
+    int Modalidad
+    int Estado
+    int IntentosPago
+    datetime FechaAlta
+    datetime FechaResolucion "NULL"
+    nvarchar(50) MedioPago "NULL"
+    nvarchar(50) NumeroComprobante "NULL"
+    datetime FechaComprobante "NULL"
+    decimal(10_2) Importe "NULL"
+    decimal(10_2) DescuentoAplicado "NULL"
+    int IdPromocion FK "NULL"
+  }
+  Promocion {
+    int IdPromocion PK
+    nvarchar(150) Nombre
+    nvarchar(500) Descripcion "NULL"
+    int TipoDescuento
+    decimal(10_2) Valor
+    date FechaInicio
+    date FechaFin
+    int Estado
+    int IdPlan FK "NULL"
+    nvarchar(100) CategoriaPrenda "NULL"
+    decimal(10_2) MargenEstimado
+    nvarchar(500) ImpactoEconomico "NULL"
+    nvarchar(500) Observacion "NULL"
+    nvarchar(500) MotivoBaja "NULL"
+    int IdSugerenciaOrigen FK "NULL"
+    datetime FechaAlta
+  }

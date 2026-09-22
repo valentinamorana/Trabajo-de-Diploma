@@ -1,0 +1,37 @@
+erDiagram
+  Bitacora {
+    int Id PK
+    datetime fecha
+    int usuario FK "NULL"
+    nvarchar(100) modulo "NULL"
+    nvarchar(200) actividad "NULL"
+    nvarchar(1000) detalle "NULL"
+    int criticidad
+    nvarchar(50) ip "NULL"
+  }
+  BitacoraNegocio {
+    int IdEvento PK
+    datetime Fecha
+    nvarchar(100) Tipo
+    int IdUsuario FK "NULL"
+    int IdPedido FK "NULL"
+    int IdPrenda FK "NULL"
+    int IdCliente FK "NULL"
+    nvarchar(500) Descripcion
+  }
+  DVVertical {
+    int Id PK
+    varchar(100) NombreTabla
+    int DVV
+    datetime FechaCalculo
+  }
+  HistorialIntegridad {
+    int Id PK
+    varchar(100) NombreTabla
+    int DVVAlmacenado "NULL"
+    int DVVCalculado
+    bit Resultado
+    int FilasCorruptas
+    datetime FechaVerificacion
+    varchar(50) DisparadoPor
+  }

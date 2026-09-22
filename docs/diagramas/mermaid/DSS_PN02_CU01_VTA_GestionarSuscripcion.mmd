@@ -1,0 +1,25 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as Nueva<br/>ContratacionForm
+  participant B as BLL.<br/>Contratacion
+  participant DC as DAL.Cliente / DAL.PlanSuscripcion
+  participant D as DAL.<br/>Contratacion
+  V->>F: Elige cliente, plan y modalidad (Mensual, Trimestral, Anual)
+  F->>B: CrearContratacion(modulo, idCliente, idPlan, modalidad)
+  Note over B: Exigir(ClientesEditar)
+  B->>DC: ObtenerPorId(idCliente) · ObtenerPorId(idPlan)
+  alt Cliente inexistente, plan inexistente o inactivo
+    B-->>F: AppException(cliente_inexistente / plan_inexistente)
+  else Datos válidos
+    Note over B: ValidarCupo: el plan debe alcanzar para las prendas que el cliente tiene en uso
+    B->>D: ObtenerPendientesDePago()
+    alt El cliente ya tiene una contratación pendiente
+      B-->>F: AppException(pendiente_existente)
+    else Sin pendientes
+      B->>D: Alta(contratación: estado PendientePago, IdVendedor)
+      D-->>B: idContratacion
+      B-->>F: idContratacion
+      F-->>V: Contratación pendiente de pago: derivar a Caja (la suscripción todavía no está vigente)
+    end
+  end

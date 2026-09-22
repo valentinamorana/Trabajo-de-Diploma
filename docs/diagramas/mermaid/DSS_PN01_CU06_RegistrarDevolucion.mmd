@@ -1,0 +1,20 @@
+sequenceDiagram
+  autonumber
+  actor L as Depósito / Logística
+  participant F as Pedidos<br/>Realizados
+  participant B as BLL.Pedido
+  participant D as DAL.Pedido
+  participant H as DAL.Pedido<br/>Historial
+  L->>F: Selecciona un pedido Entregado y pulsa Registrar Devolución
+  F->>B: RegistrarDevolucion(modulo, pedido)
+  Note over B: Exigir(PedidosRealizadosEditar) · el pedido debe estar Entregado
+  B->>D: RegistrarDevolucion(idPedido, idCliente)
+  Note over D: Una transacción: abre MantenimientoPrenda y pasa a En limpieza solo las prendas que siguen En uso por ese cliente
+  D-->>B: cantidad de prendas devueltas
+  alt Ninguna prenda devuelta (ya registrada)
+    B-->>F: AppException(devolucion_ya_hecha)
+  else Devolución registrada
+    B->>H: RegistrarCambios(idPedido, "DEVOLUCION")
+    B-->>F: ok
+    F-->>L: Prendas en limpieza: la cuenta del cliente queda desbloqueada (PN04 inspecciona)
+  end

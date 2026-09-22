@@ -4,8 +4,8 @@ namespace BLL.Manejadores
 {
     /// <summary>
     /// Eslabón que atiende Decision.Pausar: pausa la suscripción hasta la fecha indicada
-    /// SIN tocar FechaVencimiento — al reanudar (ver BLL.Cliente.ReanudarPausa), el cliente
-    /// retoma exactamente el mismo plazo que tenía, no se le regala tiempo extra. Mientras
+    /// y corre FechaVencimiento por los días de pausa (NUULY: no se cobra mientras está pausada) —
+    /// al reanudar (ver BLL.Cliente.ReanudarPausa) el cliente retoma el tiempo que ya había pagado. Mientras
     /// está pausada, BLL.Pedido.ObtenerClienteValidado bloquea nuevos pedidos (ver
     /// BE.Cliente.EstaPausada). Debe insertarse ANTES de BajaSuscripcionHandler en la
     /// cadena (ver BLL.Renovacion) — mismo motivo que el resto de los eslabones no
@@ -15,11 +15,17 @@ namespace BLL.Manejadores
     {
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
+        private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
 
-        public PausarSuscripcionHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion)
+        // NUULY 4.8: la pausa tiene un máximo de 3 meses.
+        public const int MaxMesesPausa = 3;
+
+        public PausarSuscripcionHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
+                                        DAL.Interfaces.IPrendaDAL dalPrenda = null)
         {
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
+            this.dalPrenda = dalPrenda;
         }
 
         public override ResultadoRenovacion Procesar(ContextoRenovacion contexto)
@@ -35,8 +41,32 @@ namespace BLL.Manejadores
                 throw new BE.AppException("err.bll.renovacion.pausa_fecha_pasada",
                     "La fecha de reanudación no puede ser anterior a hoy.");
 
+            // Sin re-pausar: si ya está pausada hay que reanudar primero; si no, se podría
+            // encadenar pausas día a día y superar el tope de 3 meses.
+            if (contexto.Cliente.EstaPausada)
+                throw new BE.AppException("err.bll.renovacion.ya_pausada",
+                    "La suscripción ya está pausada. Reanudala antes de pedir una nueva pausa.");
+
+            if (contexto.FechaPausaHasta.Value.Date > DateTime.Today.AddMonths(MaxMesesPausa))
+                throw new BE.AppException("err.bll.renovacion.pausa_excede_tope",
+                    "La pausa no puede superar los {0} meses (hasta el {1:d}).",
+                    new object[] { MaxMesesPausa, DateTime.Today.AddMonths(MaxMesesPausa) });
+
+            // NUULY 4.8: no se puede pausar con prendas pendientes de devolución.
+            if (dalPrenda != null && dalPrenda.ObtenerPorCliente(contexto.Cliente.IdCliente).Count > 0)
+                throw new BE.AppException("err.bll.renovacion.pausa_con_prendas",
+                    "No se puede pausar: el cliente tiene prendas en uso pendientes de devolución.");
+
             var cliente = contexto.Cliente;
             cliente.FechaPausaHasta = contexto.FechaPausaHasta;
+
+            // NUULY 4.8: mientras dura la pausa no se cobra, así que el tiempo ya pagado no se consume:
+            // el vencimiento se corre tantos días como dure la pausa (solo si todavía quedaba tiempo
+            // pagado; una suscripción ya vencida no tiene nada que preservar). Al reanudar antes de
+            // tiempo, BLL.Cliente.ReanudarPausa devuelve los días no usados.
+            int diasPausa = (contexto.FechaPausaHasta.Value.Date - DateTime.Today).Days;
+            if (cliente.FechaVencimiento.HasValue && cliente.FechaVencimiento.Value.Date > DateTime.Today)
+                cliente.FechaVencimiento = cliente.FechaVencimiento.Value.AddDays(diasPausa);
 
             // UPDATE de Cliente + INSERT del historial en una única transacción (ver
             // IntentarRenovarHandler para el porqué).

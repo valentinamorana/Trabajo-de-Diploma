@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Drawing;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
@@ -22,6 +23,8 @@ namespace GUI
         public CobroSuscripcionForm()
         {
             InitializeComponent();
+            cmbModalidad.Items.AddRange(Enum.GetValues(typeof(BE.Builders.ModalidadCobro)).Cast<object>().ToArray());
+            cmbModalidad.SelectedIndex = 0;
             Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
         }
 
@@ -63,9 +66,15 @@ namespace GUI
             try
             {
                 cmbCliente.Items.Clear();
-                foreach (var c in _bllCliente.ObtenerTodos())
+                // Solo clientes con plan y con la suscripción vencida o próxima a vencer:
+                // mismo criterio que DetectarCobroHandler, que rechaza cualquier cobro con
+                // cobro.msg.pendiente si todavía no corresponde procesarlo.
+                foreach (var c in _bllCliente.ObtenerTodos()
+                    .Where(c => c.TienePlan() && (c.VencimientoExpirado || c.SuscripcionProximaAVencer())))
                     cmbCliente.Items.Add(new ClienteItem(c));
+                btnProcesar.Enabled = cmbCliente.Items.Count > 0;
                 if (cmbCliente.Items.Count > 0) cmbCliente.SelectedIndex = 0;
+                else lblEstadoActual.Text = Tr("cobro.sinelegibles", "No hay clientes con un cobro pendiente de procesar.");
             }
             catch (Exception ex)
             {

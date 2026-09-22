@@ -1,0 +1,53 @@
+flowchart TD
+  subgraph C["Cliente"]
+    direction TB
+    i((" "))
+    a1["Solicita prendas"]
+    a5["Selecciona las prendas"]
+    d4{"¿Ajusta la selección?"}
+    f2(((" ")))
+  end
+  subgraph V["Vendedor"]
+    direction TB
+    a2["Solicita la identificación y localiza la ficha"]
+    a3["Informa la situación al cliente"]
+    a4["Presenta el catálogo de prendas disponibles"]
+    a6["Registra la selección"]
+    a7["Informa el exceso o la falta"]
+    a9["Confirma el pedido al cliente"]
+  end
+  subgraph S["Sistema"]
+    direction TB
+    d1{"¿Cuenta apta? vigente, sin pausa, sin pedido despachado, sin prendas en uso"}
+    d2{"¿Dentro del cupo del plan?"}
+    d3{"¿Todas disponibles y no reservadas para otro?"}
+    a8["Reserva las prendas (En uso) y crea el pedido bloqueado, en una transacción"]
+  end
+  subgraph D["Depósito / Logística"]
+    direction TB
+    a10["Despacha el pedido (Despachado)"]
+    a11["Registra la entrega (Entregado)"]
+    f(((" ")))
+  end
+  i --> a1
+  a1 --> a2
+  a2 --> d1
+  d1 -- "No" --> a3
+  a3 --> f2
+  d1 -- "Sí" --> a4
+  a4 --> a5
+  a5 --> a6
+  a6 --> d2
+  d2 -- "Sí" --> d3
+  d2 -- "No" --> a7
+  d3 -- "No" --> a7
+  d3 -- "Sí" --> a8
+  a7 --> d4
+  d4 -- "Sí" --> a6
+  d4 -- "Desiste" --> f2
+  a8 --> a9
+  a9 --> a10
+  a10 --> a11
+  a11 --> f
+  classDef ini fill:#222,stroke:#222,color:#222
+  class i,f,f2 ini

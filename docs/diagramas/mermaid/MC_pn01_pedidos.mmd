@@ -1,0 +1,20 @@
+erDiagram
+  Cliente |o--o{ Cliente : "IdClienteReferente"
+  Cliente ||--o{ ListaEspera : "IdCliente"
+  Prenda ||--o{ ListaEspera : "IdPrenda"
+  Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
+  Empleado ||--o{ Pedido : "IdEmpleado"
+  Cliente ||--o{ Pedido : "IdCliente"
+  Pedido ||--o{ PedidoHistorial : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
+  Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Cliente
+  Empleado
+  Pedido
+  PedidoPrenda
+  PedidoHistorial
+  Prenda
+  ListaEspera
+  MantenimientoPrenda

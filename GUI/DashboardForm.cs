@@ -21,7 +21,7 @@ namespace GUI
     ///
     /// La tarjeta de Backup cambia de color según la antigüedad y muestra un aviso
     /// cuando se supera el umbral configurado (recordatorio.cfg en carpeta Backups).
-    /// El botón ⚙ permite configurar el intervalo de recordatorio.
+    /// El botón permite configurar el intervalo de recordatorio.
     ///
     /// Implementa IIdiomaObserver: las etiquetas se traducen al cambiar el idioma.
     /// </summary>
@@ -58,7 +58,7 @@ namespace GUI
         private Label _numOcupacion, _txtOcupacion;
         private Panel _cardBackupPanel;
 
-        // Único ícono-solo ("⚙") de las 16 pantallas de Dashboards/Análisis/Reportes/Historiales
+        // Único botón de solo símbolo ("...") de las 16 pantallas de Dashboards/Análisis/Reportes/Historiales
         // sin tooltip — se crea en código (btnConfig no viene del Designer), así que el ToolTip
         // también se instancia acá.
         private readonly ToolTip _tipConfig = new ToolTip();
@@ -138,7 +138,7 @@ namespace GUI
             this.Text          = Tr("frm.dashboard",      "Panel de Control");
             lblTitulo.Text     = Tr("frm.dashboard",      "Panel de Control");
             lblSub.Text        = Tr("dash.general.subtitulo", "WardrobeFlow");
-            btnRefrescar.Text  = Tr("dash.btn.refrescar", "↻ Actualizar");
+            btnRefrescar.Text  = Tr("dash.btn.refrescar", "Actualizar");
 
             if (_txtPrendas   != null) _txtPrendas.Text   = Tr("dash.prendas",    "Prendas\ndisponibles");
             if (_txtClientes  != null) _txtClientes.Text  = Tr("dash.clientes",   "Clientes\nregistrados");
@@ -234,7 +234,7 @@ namespace GUI
                     _numBackup.ForeColor         = Color.FromArgb(160, 20, 20);
                     _txtBackup.ForeColor         = Color.FromArgb(160, 20, 20);
                     _cardBackupPanel.Invalidate();
-                    MostrarAviso(Tr("dash.aviso.sinbackup", "⚠  Sin backups. Generá uno desde Administrar → Backup."), Color.FromArgb(180, 30, 30));
+                    MostrarAviso(Tr("dash.aviso.sinbackup", "Sin backups. Generá uno desde Administrar → Backup."), Color.FromArgb(180, 30, 30));
                     return;
                 }
 
@@ -277,7 +277,7 @@ namespace GUI
 
                 if (dias > umbral)
                     MostrarAviso(
-                        string.Format(Tr("dash.aviso.vencido", "⚠  Hace {0} día(s) sin backup — recordatorio cada {1} días."), dias, umbral),
+                        string.Format(Tr("dash.aviso.vencido", "Hace {0} día(s) sin backup — recordatorio cada {1} días."), dias, umbral),
                         Color.FromArgb(160, 60, 0));
                 else
                     OcultarAviso();
@@ -463,7 +463,7 @@ namespace GUI
                     out _numBackup, out _txtBackup, out _cardBackupPanel);
                 var btnConfig = new Button
                 {
-                    Text      = "⚙",
+                    Text      = "...",
                     Font      = new Font("Segoe UI", 9f),
                     Size      = new Size(22, 22),
                     Location  = new Point(tarjeta.Width - 26, 4),

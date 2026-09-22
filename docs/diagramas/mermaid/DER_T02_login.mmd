@@ -1,0 +1,65 @@
+erDiagram
+  Usuario |o--o{ Bitacora : "usuario"
+  Usuario |o--o{ Empleado : "IdUsuario"
+  Usuario ||--o{ Preferencia : "IdUsuario"
+  Usuario {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    varchar(5) IdIdioma "NULL"
+    bit Activo
+    datetime FechaBaja "NULL"
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
+    bit RequiereCambioClave
+    nvarchar(100) Nombre "NULL"
+    nvarchar(100) Apellido "NULL"
+    date FechaNacimiento "NULL"
+    nvarchar(200) Email "NULL"
+  }
+  Usuario_Seguridad {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    datetime FechaActualizacion
+  }
+  Empleado {
+    int IdEmpleado PK
+    nvarchar(100) Nombre
+    nvarchar(100) Apellido
+    nvarchar(200) DNI
+    nvarchar(200) Email "NULL"
+    datetime FechaIngreso
+    nvarchar(100) Puesto "NULL"
+    nvarchar(50) Legajo "NULL"
+    int IdUsuario FK "NULL"
+    int DVH "NULL"
+  }
+  Preferencia {
+    int IdUsuario PK,FK
+    nvarchar(50) FuenteFamilia "NULL"
+    varchar(10) FuenteTamano "NULL"
+    varchar(20) Tema "NULL"
+    varchar(20) FormatoFecha "NULL"
+    bit Notificaciones "NULL"
+  }
+  Bitacora {
+    int Id PK
+    datetime fecha
+    int usuario FK "NULL"
+    nvarchar(100) modulo "NULL"
+    nvarchar(200) actividad "NULL"
+    nvarchar(1000) detalle "NULL"
+    int criticidad
+    nvarchar(50) ip "NULL"
+  }

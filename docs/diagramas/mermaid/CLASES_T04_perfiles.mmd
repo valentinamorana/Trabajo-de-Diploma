@@ -1,0 +1,64 @@
+classDiagram
+  direction TB
+  class GUI_GestorPermisos["GUI.GestorPermisos"] {
+  }
+  class BLL_Familia["BLL.Familia"] {
+    +ObtenerArbol() List~Componente~
+    +ObtenerPermisosEfectivos(string) List~Permiso~
+    +GuardarAsignacionRol(string,  IEnumerable~int~) int Agregados, int Quitados
+    +CrearRol(string) int
+    +AgregarComponente(int,  int) void
+    +QuitarComponente(int,  int) void
+    +NoEscalaPrivilegios(IEnumerable~int~,  IEnumerable~int~) bool
+  }
+  class BLL_PermisosAccion["BLL.PermisosAccion"] {
+    <<static>>
+    +PermiteAccion(bool,  bool,  bool,  bool) bool
+    +InvalidarCache() void
+    +Exigir(string,  string) void
+  }
+  class Componente {
+    <<abstract>>
+    +int Id
+    +string Nombre
+    +IList~Componente~ Hijos
+    +AgregarHijo(Componente) void
+    +QuitarHijo(Componente) void
+    +VaciarHijos() void
+    +ObtenerPatentesEfectivas() IList~Patente~
+    +ObtenerDescripcion(int) string
+    +ToString() string
+  }
+  class Familia {
+    +IList~Componente~ Hijos
+    +AgregarHijo(Componente) void
+    +QuitarHijo(Componente) void
+    +VaciarHijos() void
+    +ObtenerDescripcion(int) string
+  }
+  class Patente {
+    +string NombreMenu
+    +bool Asignado
+    +IList~Componente~ Hijos
+    +AgregarHijo(Componente) void
+    +QuitarHijo(Componente) void
+    +VaciarHijos() void
+    +ObtenerDescripcion(int) string
+  }
+  class Rol {
+    +bool EsFijo
+  }
+  class DAL_Interfaces_IPermisoDAL["DAL.Interfaces.IPermisoDAL"] {
+    <<interface>>
+    +ObtenerIdRol(string) int
+    +AgregarRelacion(int,  int) void
+  }
+  BLL_Familia ..> DAL_Interfaces_IPermisoDAL : usa
+  Componente <|-- Familia
+  Familia --> "*" Componente : Hijos
+  Componente <|-- Patente
+  Patente --> "*" Componente : Hijos
+  BLL_Familia <|-- Rol
+  __________________ ..> ___________ : usa
+  ___________ ..> __________________________ : usa
+  ___________ ..> Componente : usa

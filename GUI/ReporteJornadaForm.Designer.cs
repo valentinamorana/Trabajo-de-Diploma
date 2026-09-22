@@ -225,7 +225,7 @@ namespace GUI
             this.btnTendencia.Name = "btnTendencia";
             this.btnTendencia.Size = new System.Drawing.Size(175, 28);
             this.btnTendencia.TabIndex = 9;
-            this.btnTendencia.Text = "📈  Tendencia (rango)";
+            this.btnTendencia.Text = "Tendencia (rango)";
             this.btnTendencia.UseVisualStyleBackColor = false;
             this.btnTendencia.Click += new System.EventHandler(this.BtnTendencia_Click);
             //
@@ -313,7 +313,7 @@ namespace GUI
             this.btnGenerar.Name = "btnGenerar";
             this.btnGenerar.Size = new System.Drawing.Size(145, 28);
             this.btnGenerar.TabIndex = 2;
-            this.btnGenerar.Text = "↻  Generar";
+            this.btnGenerar.Text = "Generar";
             this.btnGenerar.UseVisualStyleBackColor = false;
             this.btnGenerar.Click += new System.EventHandler(this.btnGenerar_Click);
             //
@@ -328,7 +328,7 @@ namespace GUI
             this.btnExportar.Name = "btnExportar";
             this.btnExportar.Size = new System.Drawing.Size(165, 28);
             this.btnExportar.TabIndex = 3;
-            this.btnExportar.Text = "⬇  Exportar reporte...";
+            this.btnExportar.Text = "Exportar reporte...";
             this.btnExportar.UseVisualStyleBackColor = false;
             this.btnExportar.Click += new System.EventHandler(this.btnExportar_Click);
             //
@@ -363,7 +363,7 @@ namespace GUI
             this.btnComparar.Name = "btnComparar";
             this.btnComparar.Size = new System.Drawing.Size(185, 28);
             this.btnComparar.TabIndex = 6;
-            this.btnComparar.Text = "⚖  Comparar Jornadas";
+            this.btnComparar.Text = "Comparar Jornadas";
             this.btnComparar.UseVisualStyleBackColor = false;
             this.btnComparar.Click += new System.EventHandler(this.btnComparar_Click);
             //
@@ -378,7 +378,7 @@ namespace GUI
             this.btnExportarComp.Name = "btnExportarComp";
             this.btnExportarComp.Size = new System.Drawing.Size(185, 28);
             this.btnExportarComp.TabIndex = 7;
-            this.btnExportarComp.Text = "⬇  Exportar comparación...";
+            this.btnExportarComp.Text = "Exportar comparación...";
             this.btnExportarComp.UseVisualStyleBackColor = false;
             this.btnExportarComp.Click += new System.EventHandler(this.btnExportarComp_Click);
             //
@@ -393,7 +393,7 @@ namespace GUI
             this.btnLimpiar.Name = "btnLimpiar";
             this.btnLimpiar.Size = new System.Drawing.Size(175, 28);
             this.btnLimpiar.TabIndex = 8;
-            this.btnLimpiar.Text = "↩  Volver al reporte";
+            this.btnLimpiar.Text = "Volver al reporte";
             this.btnLimpiar.UseVisualStyleBackColor = false;
             this.btnLimpiar.Click += new System.EventHandler(this.btnLimpiar_Click);
             //

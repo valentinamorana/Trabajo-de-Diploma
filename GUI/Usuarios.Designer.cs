@@ -170,7 +170,7 @@ namespace GUI
             this.btnRefrescar.Size = new System.Drawing.Size(210, 28);
             this.btnRefrescar.TabIndex = 8;
             this.btnRefrescar.Tag = "btn.refrescar";
-            this.btnRefrescar.Text = "↻ Refrescar Lista";
+            this.btnRefrescar.Text = "Refrescar Lista";
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
             // separador1 — posiciones subidas 230px respecto al Designer original: con el
@@ -279,7 +279,7 @@ namespace GUI
             this.btnArchivar.Size      = new System.Drawing.Size(210, 30);
             this.btnArchivar.TabIndex  = 17;
             this.btnArchivar.Tag       = "btn.usr.eliminar";
-            this.btnArchivar.Text      = "🗑 Archivar usuario";
+            this.btnArchivar.Text      = "Archivar usuario";
             this.btnArchivar.UseVisualStyleBackColor = false;
             this.btnArchivar.Click    += new System.EventHandler(this.BtnArchivar_Click);
             //

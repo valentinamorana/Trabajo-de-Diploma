@@ -1,0 +1,20 @@
+flowchart LR
+  G["Gerencia"]:::actor
+  A["Administración"]:::actor
+  K["Contabilidad"]:::actor
+  V["Vendedor"]:::actor
+  subgraph SIS["WardrobeFlow — PN03 Promociones"]
+    c1(["CU01-GER Sugerir Promoción"])
+    c2(["CU01-ADM Gestionar Promociones"])
+    c3(["CU01-CONT Analizar Promoción"])
+    c4(["CU01-VEN Sugerir Baja de Promoción"])
+    c5(["CU02-ADM Resolver Baja de Promoción"])
+    c6(["CU02-GER Consultar Analítica de Negocio"])
+  end
+  G --- c1
+  A --- c2
+  K --- c3
+  V --- c4
+  A --- c5
+  G --- c6
+  classDef actor fill:#fff7e6,stroke:#b8860b

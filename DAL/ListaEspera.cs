@@ -38,7 +38,7 @@ namespace DAL
             var lista = new List<BE.ListaEspera>();
             SqlParameter[] p =
             {
-                new SqlParameter("@Pendiente", (int)BE.EstadoListaEspera.Pendiente),
+                new SqlParameter("@Pendiente", (object)(int)BE.EstadoListaEspera.Pendiente),
                 new SqlParameter("@Reservada",  (int)BE.EstadoListaEspera.Reservada)
             };
             DataTable tabla = acceso.Leer(
@@ -64,7 +64,7 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdPrenda", idPrenda),
-                new SqlParameter("@Pendiente", (int)BE.EstadoListaEspera.Pendiente)
+                new SqlParameter("@Pendiente", (object)(int)BE.EstadoListaEspera.Pendiente)
             };
             DataTable tabla = acceso.Leer(
                 SELECT_BASE + " WHERE le.IdPrenda = @IdPrenda AND le.Estado = @Pendiente " +

@@ -82,7 +82,7 @@ namespace GUI
             this.btnCancelar.Size = new System.Drawing.Size(110, 28);
             this.btnCancelar.TabIndex = 1;
             this.btnCancelar.Tag  = "btn.cancelarpedido";
-            this.btnCancelar.Text = "✕ Cancelar";
+            this.btnCancelar.Text = "Cancelar";
             this.btnCancelar.UseVisualStyleBackColor = false;
             this.btnCancelar.Click += new System.EventHandler(this.BtnCancelarPedido_Click);
             // 
@@ -98,7 +98,7 @@ namespace GUI
             this.btnDesCancelar.Size = new System.Drawing.Size(130, 28);
             this.btnDesCancelar.TabIndex = 2;
             this.btnDesCancelar.Tag  = "btn.descancelar";
-            this.btnDesCancelar.Text = "↩ Des-cancelar";
+            this.btnDesCancelar.Text = "Des-cancelar";
             this.btnDesCancelar.UseVisualStyleBackColor = false;
             this.btnDesCancelar.Click += new System.EventHandler(this.BtnDesCancelarPedido_Click);
             // 
@@ -107,9 +107,9 @@ namespace GUI
             this.btnRefrescar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefrescar.Location = new System.Drawing.Point(412, 11);
             this.btnRefrescar.Name = "btnRefrescar";
-            this.btnRefrescar.Size = new System.Drawing.Size(32, 28);
+            this.btnRefrescar.Size = new System.Drawing.Size(84, 28);
             this.btnRefrescar.TabIndex = 3;
-            this.btnRefrescar.Text = "↻";
+            this.btnRefrescar.Text = "Actualizar";
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
             // btnHistorial
@@ -120,12 +120,12 @@ namespace GUI
             this.btnHistorial.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnHistorial.ForeColor = System.Drawing.Color.White;
             this.btnHistorial.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnHistorial.Location = new System.Drawing.Point(452, 11);
+            this.btnHistorial.Location = new System.Drawing.Point(504, 11);
             this.btnHistorial.Name = "btnHistorial";
             this.btnHistorial.Size = new System.Drawing.Size(110, 28);
             this.btnHistorial.TabIndex = 4;
             this.btnHistorial.Tag  = "btn.historial";
-            this.btnHistorial.Text = "📋 Historial";
+            this.btnHistorial.Text = "Historial";
             this.btnHistorial.UseVisualStyleBackColor = false;
             this.btnHistorial.Click += new System.EventHandler(this.BtnHistorial_Click);
             //

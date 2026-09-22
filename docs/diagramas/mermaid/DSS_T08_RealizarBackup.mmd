@@ -1,0 +1,16 @@
+sequenceDiagram
+  autonumber
+  actor A as Administrador
+  participant F as BackupForm
+  participant B as BLL.Backup
+  participant D as DAL.Backup
+  participant K as Cifrador<br/>Archivos
+  participant L as Bitácora
+  A->>F: Elige carpeta destino y contraseña (btnCrear_Click)
+  F->>B: RealizarBackup(modulo, dirDestino, claveCifrado)
+  Note over B: exige Administrador y verifica la integridad antes de respaldar
+  B->>D: RealizarBackup(tempPlano)
+  B->>K: Cifrar(tempPlano, rutaFinal, claveCifrado)  [.wfbak]
+  B->>L: Registrar(Backup cifrado generado, Criticidad.Alta)
+  B-->>F: nombre del archivo
+  F-->>A: Confirma (el temporal plano se borra siempre)

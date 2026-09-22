@@ -39,7 +39,7 @@ namespace GUI
             this.lblTitulo.Name      = "lblTitulo";
             this.lblTitulo.TabIndex  = 0;
             this.lblTitulo.Tag       = "frm.alertas";
-            this.lblTitulo.Text      = "🔔  Centro de Alertas";
+            this.lblTitulo.Text      = "Centro de Alertas";
 
             // ── btnActualizar ──────────────────────────────────────────────────
             this.btnActualizar.Anchor = ((System.Windows.Forms.AnchorStyles)(
@@ -49,11 +49,11 @@ namespace GUI
             this.btnActualizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnActualizar.Font      = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
             this.btnActualizar.ForeColor = System.Drawing.Color.White;
-            this.btnActualizar.Location  = new System.Drawing.Point(508, 10);
+            this.btnActualizar.Location  = new System.Drawing.Point(452, 10);
             this.btnActualizar.Name      = "btnActualizar";
-            this.btnActualizar.Size      = new System.Drawing.Size(40, 32);
+            this.btnActualizar.Size      = new System.Drawing.Size(96, 32);
             this.btnActualizar.TabIndex  = 1;
-            this.btnActualizar.Text      = "↻";
+            this.btnActualizar.Text      = "Actualizar";
             this.btnActualizar.UseVisualStyleBackColor = false;
             this.btnActualizar.Click += new System.EventHandler(this.BtnActualizar_Click);
 

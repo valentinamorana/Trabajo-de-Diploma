@@ -107,12 +107,12 @@ namespace GUI
             lblSubtitulo.Text  = Tr("rpt.subtitulo",      "Eventos de negocio por jornada con exportación a TXT");
             lblJornada.Text    = Tr("rpt.fecha",          "Jornada:");
             lblComparar.Text   = Tr("rpt.fecha2",         "Comparar con:");
-            btnGenerar.Text    = "↻  " + Tr("rpt.generar",     "Generar");
-            btnComparar.Text   = "⚖  " + Tr("rpt.comparar",    "Comparar jornadas");
-            btnExportar.Text   = "⬇  " + Tr("rpt.exportartxt", "Exportar TXT") + "...";
-            btnExportarComp.Text = "⬇  " + Tr("rpt.exportartxt", "Exportar TXT") + "...";
-            btnLimpiar.Text    = "↩  " + Tr("rpt.limpiar",     "Limpiar");
-            btnTendencia.Text  = "📈  " + Tr("rpt.tendencia", "Tendencia (rango)");
+            btnGenerar.Text    = Tr("rpt.generar",     "Generar");
+            btnComparar.Text   = Tr("rpt.comparar",    "Comparar jornadas");
+            btnExportar.Text   = Tr("rpt.exportartxt", "Exportar TXT") + "...";
+            btnExportarComp.Text = Tr("rpt.exportartxt", "Exportar TXT") + "...";
+            btnLimpiar.Text    = Tr("rpt.limpiar",     "Limpiar");
+            btnTendencia.Text  = Tr("rpt.tendencia", "Tendencia (rango)");
 
             kpiPrendasLbl.Text  = Tr("rpt.kpi.prendas",  "Prendas disponibles");
             kpiClientesLbl.Text = Tr("rpt.kpi.clientes", "Clientes registrados");

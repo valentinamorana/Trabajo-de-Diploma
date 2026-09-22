@@ -37,6 +37,13 @@ namespace Tests
         }
 
         [TestMethod]
+        public void DescuentoDe_PrecioPromocional_EsPrecioMensual_EscalaPorMeses()
+        {
+            // Plan a 1000/mes, cobro anual (bruto 12000), promo a 800/mes: paga 9600, no 800.
+            Assert.AreEqual(2400m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 800), 12000m, 12));
+            Assert.AreEqual(600m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 800), 3000m, 3));
+        }
+        [TestMethod]
         public void DescuentoDe_PrecioPromocional_EsLaDiferenciaConElBruto()
         {
             Assert.AreEqual(5000m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 10000), 15000m));

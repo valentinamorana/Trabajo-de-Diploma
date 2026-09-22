@@ -4041,6 +4041,7 @@ ES	renov.msg.baja_conprendas	Suscripción dada de baja. El cliente no podrá gen
 ES	cobro.estado.suspendido	SUSPENDIDO por falta de pago
 ES	cobro.estado.engracia	en gracia hasta {0:dd/MM/yyyy}
 ES	cobro.estado.aldia	al día
+ES	cobro.sinelegibles	No hay clientes con un cobro pendiente de procesar.
 ES	cobro.estado.resumen	Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}
 ES	cobro.msg.pendiente	La suscripción de {0} no está vencida ni próxima a vencer. Todavía no corresponde procesar el cobro.
 ES	cobro.msg.cobrado	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}.
@@ -4101,6 +4102,7 @@ EN	renov.msg.baja_conprendas	Subscription cancelled. The client won't be able to
 EN	cobro.estado.suspendido	SUSPENDED for non-payment
 EN	cobro.estado.engracia	in grace period until {0:dd/MM/yyyy}
 EN	cobro.estado.aldia	up to date
+EN	cobro.sinelegibles	No clients have a charge pending to process.
 EN	cobro.estado.resumen	Plan: {0} — Expiration: {1}\nPayment status: {2}
 EN	cobro.msg.pendiente	{0}'s subscription is not expired or about to expire. Payment doesn't need to be processed yet.
 EN	cobro.msg.cobrado	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}.
@@ -4161,6 +4163,7 @@ RU	renov.msg.baja_conprendas	Подписка отменена. Клиент н�
 RU	cobro.estado.suspendido	ПРИОСТАНОВЛЕНО из-за неоплаты
 RU	cobro.estado.engracia	льготный период до {0:dd/MM/yyyy}
 RU	cobro.estado.aldia	оплачено
+RU	cobro.sinelegibles	Нет клиентов с ожидающим оплаты платежом.
 RU	cobro.estado.resumen	План: {0} — Срок действия: {1}\nСтатус оплаты: {2}
 RU	cobro.msg.pendiente	Подписка {0} не просрочена и не истекает в ближайшее время. Обрабатывать платёж пока не требуется.
 RU	cobro.msg.cobrado	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}.
@@ -4221,6 +4224,7 @@ PT	renov.msg.baja_conprendas	Assinatura cancelada. O cliente não poderá fazer 
 PT	cobro.estado.suspendido	SUSPENSO por falta de pagamento
 PT	cobro.estado.engracia	em carência até {0:dd/MM/yyyy}
 PT	cobro.estado.aldia	em dia
+PT	cobro.sinelegibles	Não há clientes com uma cobrança pendente de processar.
 PT	cobro.estado.resumen	Plano: {0} — Vencimento: {1}\nStatus de pagamento: {2}
 PT	cobro.msg.pendiente	A assinatura de {0} não está vencida nem prestes a vencer. Ainda não é necessário processar a cobrança.
 PT	cobro.msg.cobrado	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}.
@@ -4522,6 +4526,7 @@ ES	renov.estado.pausada	PAUSADA
 ES	renov.estado.pausadahasta	pausada hasta {0}
 ES	renov.msg.pausada	Suscripción pausada hasta {0:d}. El cliente no podrá generar nuevos pedidos hasta reanudarla.
 ES	renov.msg.reanudada	Suscripción reanudada.
+ES	renov.sinelegibles	No hay clientes en condiciones de procesar esta decisión.
 ES	err.bll.renovacion.pausa_sin_fecha	Debe indicar hasta cuándo queda pausada la suscripción.
 ES	err.bll.renovacion.pausa_fecha_pasada	La fecha de reanudación no puede ser anterior a hoy.
 ES	err.bll.renovacion.pausa_excede_tope	La pausa no puede superar los {0} meses (hasta el {1:d}).
@@ -4557,6 +4562,7 @@ EN	renov.estado.pausada	PAUSED
 EN	renov.estado.pausadahasta	paused until {0}
 EN	renov.msg.pausada	Subscription paused until {0:d}. The client won't be able to place new orders until it's resumed.
 EN	renov.msg.reanudada	Subscription resumed.
+EN	renov.sinelegibles	No clients are eligible to process this decision.
 EN	err.bll.renovacion.pausa_sin_fecha	You must indicate until when the subscription is paused.
 EN	err.bll.renovacion.pausa_fecha_pasada	The resume date can't be earlier than today.
 EN	err.bll.renovacion.pausa_excede_tope	A pause can't exceed {0} months (until {1:d}).
@@ -4592,6 +4598,7 @@ RU	renov.estado.pausada	ПРИОСТАНОВЛЕНА
 RU	renov.estado.pausadahasta	приостановлена до {0}
 RU	renov.msg.pausada	Подписка приостановлена до {0:d}. Клиент не сможет оформлять новые заказы до возобновления.
 RU	renov.msg.reanudada	Подписка возобновлена.
+RU	renov.sinelegibles	Нет клиентов, для которых можно обработать это решение.
 RU	err.bll.renovacion.pausa_sin_fecha	Укажите, до какой даты приостанавливается подписка.
 RU	err.bll.renovacion.pausa_fecha_pasada	Дата возобновления не может быть раньше сегодняшнего дня.
 RU	err.bll.renovacion.pausa_excede_tope	Пауза не может превышать {0} мес. (до {1:d}).
@@ -4627,6 +4634,7 @@ PT	renov.estado.pausada	PAUSADA
 PT	renov.estado.pausadahasta	pausada até {0}
 PT	renov.msg.pausada	Assinatura pausada até {0:d}. O cliente não poderá fazer novos pedidos até retomá-la.
 PT	renov.msg.reanudada	Assinatura retomada.
+PT	renov.sinelegibles	Não há clientes em condições de processar esta decisão.
 PT	err.bll.renovacion.pausa_sin_fecha	Você deve indicar até quando a assinatura fica pausada.
 PT	err.bll.renovacion.pausa_fecha_pasada	A data de retomada não pode ser anterior a hoje.
 PT	err.bll.renovacion.pausa_excede_tope	A pausa não pode exceder {0} meses (até {1:d}).

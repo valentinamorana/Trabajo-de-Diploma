@@ -63,26 +63,73 @@ namespace GUI
 
         private void CmbCliente_SelectedIndexChanged(object sender, EventArgs e) => MostrarEstadoActual();
 
-        private void RbCambiarPlan_CheckedChanged(object sender, EventArgs e) => cmbPlanNuevo.Enabled = rbCambiarPlan.Checked;
+        private void RbRenovar_CheckedChanged(object sender, EventArgs e) => AplicarFiltroPorDecision();
 
-        private void RbPausar_CheckedChanged(object sender, EventArgs e) => dtpPausaHasta.Enabled = rbPausar.Checked;
+        private void RbCambiarPlan_CheckedChanged(object sender, EventArgs e)
+        {
+            cmbPlanNuevo.Enabled = rbCambiarPlan.Checked;
+            AplicarFiltroPorDecision();
+        }
+
+        private void RbBaja_CheckedChanged(object sender, EventArgs e) => AplicarFiltroPorDecision();
+
+        private void RbPausar_CheckedChanged(object sender, EventArgs e)
+        {
+            dtpPausaHasta.Enabled = rbPausar.Checked;
+            AplicarFiltroPorDecision();
+        }
+
+        // Todos los clientes con plan asignado (sin filtrar por decisión todavía). Se recarga
+        // desde la BD en CargarClientes(); AplicarFiltroPorDecision() reusa esta lista en
+        // memoria cada vez que cambia la decisión marcada, sin volver a consultar la BD.
+        private System.Collections.Generic.List<BE.Cliente> _clientesConPlan =
+            new System.Collections.Generic.List<BE.Cliente>();
 
         private void CargarClientes()
         {
             try
             {
-                cmbCliente.Items.Clear();
                 // Solo clientes con un plan asignado: sin plan no hay suscripción que renovar,
                 // cambiar, pausar o dar de baja (mismo criterio que BLL.Renovacion.Procesar,
                 // que rechaza a un cliente sin plan con err.bll.renovacion.sin_plan).
-                foreach (var c in _bllCliente.ObtenerTodos().Where(c => c.TienePlan()))
-                    cmbCliente.Items.Add(new ClienteItem(c));
-                if (cmbCliente.Items.Count > 0) cmbCliente.SelectedIndex = 0;
+                _clientesConPlan = _bllCliente.ObtenerTodos().Where(c => c.TienePlan()).ToList();
+                AplicarFiltroPorDecision();
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
             }
+        }
+
+        // Filtra _clientesConPlan según la decisión marcada, con el mismo criterio que aplica
+        // la cadena de manejadores al procesar (para no ofrecer una decisión que el sistema va
+        // a rechazar igual): Renovar/Cambiar plan/Baja solo corresponden con la suscripción
+        // vencida o próxima a vencer (VerificarVencimientoHandler); Pausar se puede pedir en
+        // cualquier momento salvo que ya esté pausada (PausarSuscripcionHandler no permite
+        // re-pausar: err.bll.renovacion.ya_pausada). SIEMPRE se incluye además a los clientes
+        // ya pausados, sea cual sea la decisión marcada: "Reanudar ahora" es una acción aparte
+        // que no depende del radio button, y un cliente pausado suele quedar con el vencimiento
+        // corrido bastante hacia adelante (PausarSuscripcionHandler), así que sin esto quedaba
+        // inalcanzable para reanudarlo desde esta pantalla. Conserva la selección si el cliente
+        // sigue siendo elegible con la nueva decisión.
+        private void AplicarFiltroPorDecision()
+        {
+            int? idPrevio = (cmbCliente.SelectedItem as ClienteItem)?.Cliente.IdCliente;
+
+            var elegibles = (rbPausar.Checked
+                ? _clientesConPlan.Where(c => !c.EstaPausada)
+                : _clientesConPlan.Where(c => c.VencimientoExpirado || c.SuscripcionProximaAVencer()))
+                .Union(_clientesConPlan.Where(c => c.EstaPausada));
+
+            cmbCliente.Items.Clear();
+            foreach (var c in elegibles)
+                cmbCliente.Items.Add(new ClienteItem(c));
+
+            var items = cmbCliente.Items.Cast<ClienteItem>().ToList();
+            int idx = idPrevio.HasValue ? items.FindIndex(i => i.Cliente.IdCliente == idPrevio.Value) : -1;
+            cmbCliente.SelectedIndex = idx >= 0 ? idx : (items.Count > 0 ? 0 : -1);
+            btnProcesar.Enabled = items.Count > 0;
+            MostrarEstadoActual();
         }
 
         private void CargarPlanes()
@@ -103,7 +150,14 @@ namespace GUI
         // cacheado la última vez que se llamó CargarClientes()).
         private void MostrarEstadoActual()
         {
-            if (!(cmbCliente.SelectedItem is ClienteItem item)) { lblEstadoActual.Text = string.Empty; return; }
+            if (!(cmbCliente.SelectedItem is ClienteItem item))
+            {
+                lblEstadoActual.Text = cmbCliente.Items.Count == 0
+                    ? Tr("renov.sinelegibles", "No hay clientes en condiciones de procesar esta decisión.")
+                    : string.Empty;
+                btnReanudar.Enabled = false;
+                return;
+            }
             MostrarEstadoActual(item.Cliente);
         }
 
@@ -184,18 +238,21 @@ namespace GUI
                 lblResultado.ForeColor = resultado.Estado == BE.EstadoRenovacion.Pendiente ? Color.DarkOrange : Color.DarkGreen;
                 lblResultado.Text = Tr(resultado.Clave, resultado.Mensaje, resultado.Args);
 
-                // `cliente` es el objeto recién releído y mutado por la cadena de Manejadores —
-                // refleja el estado post-acción sin depender de cmbCliente.SelectedItem (stale).
-                MostrarEstadoActual(cliente);
+                // Recarga la lista completa (no solo el estado del cliente actual): la acción
+                // recién procesada puede haber sacado a este cliente — o metido a otros — de la
+                // lista de elegibles para la decisión marcada (ej. ya no está próximo a vencer
+                // tras renovar). Sin esto, un segundo clic en "Procesar" sobre el mismo cliente
+                // reproducía el mismo rechazo confuso que este filtro buscaba evitar.
+                CargarClientes();
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
-                // Si la falla ocurrió después de una escritura parcial, releer y refrescar el
-                // estado igual: mejor mostrar el dato real (aunque haya cambiado) que dejar la
-                // pantalla congelada con el estado de antes del intento. Best-effort: si el
-                // refresco en sí falla, no debe tapar el error ya mostrado arriba.
-                try { MostrarEstadoActual(_bllCliente.ObtenerPorId(item.Cliente.IdCliente)); } catch { }
+                // Si la falla ocurrió después de una escritura parcial, recargar igual: mejor
+                // mostrar el estado real (aunque haya cambiado) que dejar la pantalla congelada
+                // con datos de antes del intento. CargarClientes() ya contiene su propio
+                // try/catch, así que un fallo del refresco no tapa el error ya mostrado arriba.
+                CargarClientes();
             }
         }
 
@@ -212,12 +269,12 @@ namespace GUI
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
                 _bllCliente.ReanudarPausa(this.Text, cliente);
                 lblResultado.Text = Tr("renov.msg.reanudada", "Suscripción reanudada.");
-                MostrarEstadoActual(cliente);
+                CargarClientes();
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
-                try { MostrarEstadoActual(_bllCliente.ObtenerPorId(item.Cliente.IdCliente)); } catch { }
+                CargarClientes();
             }
         }
 

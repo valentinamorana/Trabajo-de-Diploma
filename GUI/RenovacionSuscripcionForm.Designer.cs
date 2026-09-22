@@ -85,6 +85,7 @@ namespace GUI
             this.rbRenovar.TabIndex = 0;
             this.rbRenovar.TabStop  = true;
             this.rbRenovar.UseVisualStyleBackColor = true;
+            this.rbRenovar.CheckedChanged += new System.EventHandler(this.RbRenovar_CheckedChanged);
 
             this.rbCambiarPlan.AutoSize = true;
             this.rbCambiarPlan.Location = new Point(15, 50);
@@ -98,6 +99,7 @@ namespace GUI
             this.rbBaja.Name     = "rbBaja";
             this.rbBaja.TabIndex = 2;
             this.rbBaja.UseVisualStyleBackColor = true;
+            this.rbBaja.CheckedChanged += new System.EventHandler(this.RbBaja_CheckedChanged);
 
             this.rbPausar.AutoSize = true;
             this.rbPausar.Location = new Point(15, 100);

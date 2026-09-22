@@ -66,12 +66,15 @@ namespace GUI
             try
             {
                 cmbCliente.Items.Clear();
-                // Solo clientes con un plan asignado: sin plan no hay suscripción que cobrar
-                // (mismo criterio que BLL.Cobro.Procesar, que rechaza a un cliente sin plan
-                // con err.bll.cobro.sin_plan).
-                foreach (var c in _bllCliente.ObtenerTodos().Where(c => c.TienePlan()))
+                // Solo clientes con plan y con la suscripción vencida o próxima a vencer:
+                // mismo criterio que DetectarCobroHandler, que rechaza cualquier cobro con
+                // cobro.msg.pendiente si todavía no corresponde procesarlo.
+                foreach (var c in _bllCliente.ObtenerTodos()
+                    .Where(c => c.TienePlan() && (c.VencimientoExpirado || c.SuscripcionProximaAVencer())))
                     cmbCliente.Items.Add(new ClienteItem(c));
+                btnProcesar.Enabled = cmbCliente.Items.Count > 0;
                 if (cmbCliente.Items.Count > 0) cmbCliente.SelectedIndex = 0;
+                else lblEstadoActual.Text = Tr("cobro.sinelegibles", "No hay clientes con un cobro pendiente de procesar.");
             }
             catch (Exception ex)
             {

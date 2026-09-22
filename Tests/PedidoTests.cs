@@ -120,7 +120,19 @@ namespace Tests
             public FakePrendaDAL DalPrenda = new FakePrendaDAL { Todas = new List<BE.Prenda> { PrendaDisponible() } };
             public BLL.Prenda PrendaBLL => new BLL.Prenda(DalPrenda, new FakeMantenimientoPrendaDAL());
 
-            public BLL.Pedido Crear() => new BLL.Pedido(DalPedido, DalCliente, DalEmpleado, DalPlan, DalHistorial, PrendaBLL);
+            // Lista de Espera (mejora opcional): si no se inyecta un doble acá, BLL.Pedido cae en
+            // su lazy `new ListaEspera()` real (BLL.Pedido.cs), que abre DAL.ListaEspera/DAL.Prenda/
+            // DAL.Cliente REALES contra la connection string de Tests/App.config. Si esa base
+            // (.\SQLEXPRESS WardrobeFlowDB) existe y tiene datos — por ej. de correr la GUI a mano —
+            // estos tests dejan de ser unitarios y su resultado depende del estado de esa base.
+            // Se vio en vivo: una fila real de ListaEspera con IdPrenda=1 reservada para otro cliente
+            // hizo fallar CrearPedido_DatosValidos_PersisteYRegistraHistorial y
+            // CrearPedido_SinEmpleadoVinculado_LanzaEmpleadoSinVinculo con "err.bll.pedido.prenda_reservada"
+            // en vez de sus resultados esperados. Inyectar el Fake (responde "no reservada" por
+            // defecto) mantiene estos tests herméticos sin importar el estado de la base real.
+            public FakeListaEsperaService DalListaEspera = new FakeListaEsperaService();
+
+            public BLL.Pedido Crear() => new BLL.Pedido(DalPedido, DalCliente, DalEmpleado, DalPlan, DalHistorial, DalListaEspera, PrendaBLL);
         }
 
         // ── CrearPedido ───────────────────────────────────────────────────────

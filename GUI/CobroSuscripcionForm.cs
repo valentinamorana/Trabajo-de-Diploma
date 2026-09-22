@@ -66,7 +66,10 @@ namespace GUI
             try
             {
                 cmbCliente.Items.Clear();
-                foreach (var c in _bllCliente.ObtenerTodos())
+                // Solo clientes con un plan asignado: sin plan no hay suscripción que cobrar
+                // (mismo criterio que BLL.Cobro.Procesar, que rechaza a un cliente sin plan
+                // con err.bll.cobro.sin_plan).
+                foreach (var c in _bllCliente.ObtenerTodos().Where(c => c.TienePlan()))
                     cmbCliente.Items.Add(new ClienteItem(c));
                 if (cmbCliente.Items.Count > 0) cmbCliente.SelectedIndex = 0;
             }

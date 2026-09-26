@@ -46,6 +46,16 @@
 ;   correcto para CUALQUIER instancia, no solo ".\SQLEXPRESS" fijo.
 ; - Al desinstalar, se pregunta (por defecto "No") si tambien se quiere
 ;   borrar la base de datos.
+; - Varias instancias en el mismo equipo (ej. SQLEXPRESS + SQLEXPRESS01 +
+;   LocalDB): se listan todas con su version de SQL Server; LocalDB tambien
+;   aparece aunque haya instancias. Al reinstalar se preselecciona la que se
+;   uso la vez anterior (ahi estan los datos). Para instalaciones
+;   desatendidas: Instalador.exe /VERYSILENT /SERVIDOR=.\SQLEXPRESS01
+; - Despues del script: se da acceso a la base al grupo local "Usuarios"
+;   (Integrated Security = el usuario de Windows que abre la app, que puede
+;   no ser el administrador que instalo) y se corre una verificacion final
+;   (admin semilla + datos); si falla, rollback.
+; - {app}\Backups y {app}\TempBackups quedan escribibles para usuarios comunes.
 ;
 ; Fuera de alcance (gap conocido, no bloqueante):
 ; - Firma digital del .exe con SignTool (requiere certificado de codigo
@@ -131,6 +141,14 @@ Source: "{#DbInstallerSourceDir}\{#DbInstallerExeName}"; DestDir: "{app}\BD"; Fl
 Source: "{#DbInstallerSourceDir}\{#DbInstallerExeName}"; DestDir: "{tmp}"; Flags: dontcopy
 Source: "Credenciales_Iniciales.txt"; DestDir: "{app}"; Flags: ignoreversion
 
+; La app guarda backups y su configuracion de recordatorio en {app}\Backups
+; (y usa {app}\TempBackups como temporal de respaldo). {app} esta en Archivos
+; de Programa, donde un usuario sin permisos de administrador no puede
+; escribir: sin esto, hacer un backup fallaba para cualquier usuario comun.
+[Dirs]
+Name: "{app}\Backups"; Permissions: users-modify
+Name: "{app}\TempBackups"; Permissions: users-modify
+
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\Credenciales iniciales"; Filename: "{app}\Credenciales_Iniciales.txt"
@@ -161,6 +179,12 @@ var
   // '' si la instancia final es manual/posiblemente remota: en ese caso no
   // hay un servicio de Windows LOCAL que tenga sentido chequear/arrancar.
   ServicioWindowsElegido: String;
+  // Servidor pasado por linea de comandos (/SERVIDOR=.\SQLEXPRESS01). Si
+  // viene, se usa ese y se saltan las paginas de base de datos: sirve para
+  // instalaciones desatendidas (/VERYSILENT) en equipos con varias
+  // instancias, donde el default (la primera detectada) puede no ser la
+  // correcta.
+  ServidorPorParametro: String;
 
 // ExitProcess no es una funcion built-in de Pascal Script: hay que
 // importarla de la WinAPI para poder cortar el setup de una sin copiar
@@ -284,6 +308,59 @@ begin
     Result := '.\' + Instancia;
 end;
 
+// "MSSQL15.SQLEXPRESS" -> "SQL Server 2019". Con varias instancias en el
+// mismo equipo (ej. una Express vieja y una nueva) el nombre solo no alcanza
+// para elegir: se muestra tambien la version de cada una.
+function VersionDeInstancia(const Instancia: String): String;
+var
+  Id, Mayor: String;
+  P: Integer;
+begin
+  Result := '';
+  if not RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL', Instancia, Id) then
+    if not RegQueryStringValue(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\Microsoft SQL Server\Instance Names\SQL', Instancia, Id) then
+      exit;
+  P := Pos('.', Id);
+  if (Pos('MSSQL', Id) <> 1) or (P = 0) then exit;
+  Mayor := Copy(Id, 6, P - 6);
+  if Mayor = '11' then Result := 'SQL Server 2012'
+  else if Mayor = '12' then Result := 'SQL Server 2014'
+  else if Mayor = '13' then Result := 'SQL Server 2016'
+  else if Mayor = '14' then Result := 'SQL Server 2017'
+  else if Mayor = '15' then Result := 'SQL Server 2019'
+  else if Mayor = '16' then Result := 'SQL Server 2022'
+  else if Mayor = '17' then Result := 'SQL Server 2025'
+  else Result := 'SQL Server v' + Mayor;
+end;
+
+function EtiquetaInstancia(const Instancia: String): String;
+var
+  Version: String;
+begin
+  Result := DataSourceParaInstancia(Instancia);
+  Version := VersionDeInstancia(Instancia);
+  if Version <> '' then
+    Result := Result + '   (' + Version + ')';
+end;
+
+function EsLocalDb(const Servidor: String): Boolean;
+begin
+  Result := Pos('(localdb)', Lowercase(Servidor)) = 1;
+end;
+
+// Indices de PaginaSeleccionInstancia: primero las N instancias detectadas,
+// despues LocalDB (solo si esta instalado) y al final "Otra...".
+function IndiceLocalDbEnSeleccion(): Integer;
+begin
+  if LocalDbDisponible then Result := GetArrayLength(InstanciasDetectadas) else Result := -1;
+end;
+
+function IndiceOtraEnSeleccion(): Integer;
+begin
+  Result := GetArrayLength(InstanciasDetectadas);
+  if LocalDbDisponible then Result := Result + 1;
+end;
+
 // Indices de PaginaSinInstancias: cambian segun si se ofrece o no la
 // opcion de LocalDB automatico (siempre primera, si esta disponible).
 function IndiceLocalDbEnSinInstancias(): Integer;
@@ -306,10 +383,16 @@ end;
 // ---------------------------------------------------------------------
 procedure InitializeWizard();
 var
-  I: Integer;
+  I, IndicePrevio: Integer;
+  ServidorPrevio: String;
 begin
   InstanciasDetectadas := DetectarInstanciasSql();
   LocalDbDisponible := TieneLocalDbInstalado();
+  ServidorPorParametro := Trim(ExpandConstant('{param:SERVIDOR|}'));
+  // Reinstalacion/actualizacion: el servidor que se uso la vez anterior (ahi
+  // estan los datos). Con varias instancias, preseleccionar otra crearia una
+  // base nueva y vacia en esa y la app "perderia" los datos existentes.
+  ServidorPrevio := GetPreviousData('ServidorSql', '');
 
   // Valor por defecto sensato para ServidorElegido/ServicioWindowsElegido
   // desde ya (coincide con lo pre-seleccionado en la pagina de abajo): si
@@ -346,11 +429,31 @@ begin
     'Base de datos', 'Se encontró SQL Server en este equipo',
     'Se detectaron las siguientes instancias de SQL Server instaladas localmente. Elegí cuál va a usar WardrobeFlow:',
     True, False);
+  IndicePrevio := -1;
   for I := 0 to GetArrayLength(InstanciasDetectadas) - 1 do
-    PaginaSeleccionInstancia.Add(InstanciasDetectadas[I]);
+  begin
+    PaginaSeleccionInstancia.Add(EtiquetaInstancia(InstanciasDetectadas[I]));
+    if CompareText(DataSourceParaInstancia(InstanciasDetectadas[I]), ServidorPrevio) = 0 then
+      IndicePrevio := I;
+  end;
+  if LocalDbDisponible then
+  begin
+    PaginaSeleccionInstancia.Add('(localdb)\MSSQLLocalDB   (SQL LocalDB)');
+    if EsLocalDb(ServidorPrevio) then
+      IndicePrevio := IndiceLocalDbEnSeleccion();
+  end;
   PaginaSeleccionInstancia.Add('Otra instancia o servidor (ingresar manualmente)');
+  // Servidor previo que no es ninguno de los detectados (remoto/manual):
+  // queda preseleccionado "Otra..." con ese valor ya cargado.
+  if (IndicePrevio = -1) and (ServidorPrevio <> '') then
+    IndicePrevio := IndiceOtraEnSeleccion();
   if GetArrayLength(InstanciasDetectadas) > 0 then
-    PaginaSeleccionInstancia.SelectedValueIndex := 0;
+  begin
+    if IndicePrevio >= 0 then
+      PaginaSeleccionInstancia.SelectedValueIndex := IndicePrevio
+    else
+      PaginaSeleccionInstancia.SelectedValueIndex := 0;
+  end;
 
   // Encadenadas por .ID (no todas a wpSelectTasks): crear varias paginas
   // custom con el mismo AfterID puede insertarlas en orden invertido.
@@ -371,12 +474,42 @@ begin
     'Ingresá el servidor y, si corresponde, la instancia (ejemplos: .\SQLEXPRESS, (localdb)\MSSQLLocalDB, MIPC\INSTANCIA):');
   PaginaIngresoManual.Add('Servidor\Instancia:', False);
   PaginaIngresoManual.Values[0] := '{#MySqlInstanceSugerido}';
+  if ServidorPrevio <> '' then
+    PaginaIngresoManual.Values[0] := ServidorPrevio;
+
+  // Defaults coherentes con lo preseleccionado (importa en /VERYSILENT,
+  // donde NextButtonClick no se llama).
+  if (GetArrayLength(InstanciasDetectadas) > 0) and (IndicePrevio >= 0) then
+  begin
+    if IndicePrevio < GetArrayLength(InstanciasDetectadas) then
+    begin
+      ServidorElegido := DataSourceParaInstancia(InstanciasDetectadas[IndicePrevio]);
+      ServicioWindowsElegido := NombreServicioParaInstancia(InstanciasDetectadas[IndicePrevio]);
+    end
+    else
+    begin
+      ServidorElegido := ServidorPrevio;
+      ServicioWindowsElegido := '';
+    end;
+  end;
+
+  if ServidorPorParametro <> '' then
+  begin
+    ServidorElegido := ServidorPorParametro;
+    ServicioWindowsElegido := '';
+    for I := 0 to GetArrayLength(InstanciasDetectadas) - 1 do
+      if CompareText(DataSourceParaInstancia(InstanciasDetectadas[I]), ServidorPorParametro) = 0 then
+        ServicioWindowsElegido := NombreServicioParaInstancia(InstanciasDetectadas[I]);
+  end;
 end;
 
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
   Result := False;
-  if PageID = PaginaSeleccionInstancia.ID then
+  if (ServidorPorParametro <> '') and ((PageID = PaginaSeleccionInstancia.ID) or
+     (PageID = PaginaSinInstancias.ID) or (PageID = PaginaIngresoManual.ID)) then
+    Result := True
+  else if PageID = PaginaSeleccionInstancia.ID then
     Result := GetArrayLength(InstanciasDetectadas) = 0
   else if PageID = PaginaSinInstancias.ID then
     Result := GetArrayLength(InstanciasDetectadas) > 0
@@ -385,7 +518,7 @@ begin
     if GetArrayLength(InstanciasDetectadas) > 0 then
       // Se salta el ingreso manual salvo que se haya elegido la ultima
       // opcion de la lista ("Otra instancia...").
-      Result := PaginaSeleccionInstancia.SelectedValueIndex <> GetArrayLength(InstanciasDetectadas)
+      Result := PaginaSeleccionInstancia.SelectedValueIndex <> IndiceOtraEnSeleccion()
     else
       // Sin instancias detectadas: el ingreso manual solo aplica si se
       // eligio esa opcion especifica (el indice depende de si tambien se
@@ -449,6 +582,12 @@ begin
         Result := False;
         exit;
       end;
+    end
+    else if IndiceElegido = IndiceLocalDbEnSeleccion() then
+    begin
+      // LocalDB junto a otras instancias: no corre como servicio de Windows.
+      ServidorElegido := '(localdb)\MSSQLLocalDB';
+      ServicioWindowsElegido := '';
     end;
     // Si eligió "Otra..." (el último índice), ServidorElegido se define
     // más abajo, en PaginaIngresoManual.
@@ -743,6 +882,31 @@ begin
     // los módulos de una sola pasada.
     if not EjecutarScriptSql('00_Instalacion_Completa.sql', ErrMsg) then
       RevertirInstalacion('No se pudo completar la creación de la base de datos.' + #13#13 + ErrMsg, True);
+
+    LogPath := ExpandConstant('{app}\install.log');
+
+    // Acceso para cualquier usuario de Windows del equipo (ver
+    // OtorgarAccesoUsuariosLocales en DbInstaller): cubre el caso de instalar
+    // con la cuenta de otro administrador (UAC) y abrir la app con la propia.
+    // No aplica a LocalDB (es una instancia privada de cada usuario) y no es
+    // bloqueante: el que instalo ya tiene acceso igual.
+    if not EsLocalDb(ServidorElegido) then
+    begin
+      WizardForm.StatusLabel.Caption := 'Otorgando acceso a los usuarios del equipo...';
+      Exec(ExpandConstant('{app}\BD\{#DbInstallerExeName}'),
+           'grant-users "' + ServidorElegido + '" "{#MyDatabaseName}" "' + LogPath + '"',
+           '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    end;
+
+    // Smoke test final: la base responde con la misma forma de conexion que
+    // usa la app y tiene el admin semilla y datos para operar. Si no, rollback:
+    // mejor no instalar que dejar una app en la que no se puede entrar.
+    WizardForm.StatusLabel.Caption := 'Verificando la instalación...';
+    if not (Exec(ExpandConstant('{app}\BD\{#DbInstallerExeName}'),
+                 'verify "' + ServidorElegido + '" "{#MyDatabaseName}" "' + LogPath + '"',
+                 '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0)) then
+      RevertirInstalacion('La base de datos se creó pero la verificación final falló ' +
+                          '(no se encontró el usuario admin inicial o faltan datos).', True);
   end;
 end;
 

@@ -88,17 +88,36 @@ namespace BLL
 
                 if (!ok)
                 {
-                    mensajeError = "No se pudo conectar a la base de datos.\nVerifique que SQL Server esté en ejecución.";
+                    mensajeError = "No se pudo conectar a la base de datos en el servidor '" + ServidorConfigurado() + "'.\n" +
+                                   "Verifique que SQL Server esté en ejecución.\n\n" + AyudaCadenaConexion();
                     return false;
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                mensajeError = $"Error al inicializar la conexión:\n{ex.Message}\n\nVerifique la cadena de conexión en App.config.";
+                mensajeError = $"Error al inicializar la conexión:\n{ex.Message}\n\n" + AyudaCadenaConexion();
                 return false;
             }
         }
+
+        // Servidor (Data Source) de la cadena de conexión configurada, para mostrarlo en el error.
+        private static string ServidorConfigurado()
+        {
+            try
+            {
+                var entry = System.Configuration.ConfigurationManager.ConnectionStrings["WardrobeFlowDB"];
+                return entry == null ? "?" : new System.Data.SqlClient.SqlConnectionStringBuilder(entry.ConnectionString).DataSource;
+            }
+            catch { return "?"; }
+        }
+
+        // En una instalación la cadena no está en "App.config" sino en GUI.exe.config, al lado del
+        // ejecutable (el instalador la escribe con el servidor elegido): se indica la ruta real.
+        private static string AyudaCadenaConexion() =>
+            "La cadena de conexión 'WardrobeFlowDB' está en:\n" +
+            AppDomain.CurrentDomain.SetupInformation.ConfigurationFile +
+            "\n(o reinstale WardrobeFlow y elija otra instancia de SQL Server).";
 
         // T07 — Versión del FORMATO del DVH de Usuario. Se incrementa cuando cambian los
         // campos que entran al cálculo (v2 = se agregó Rol). Se persiste como marcador en

@@ -5,6 +5,7 @@
 .DESCRIPTION
     1. Compila WardrobeFlow_Setup.iss  ->  Salida\Instalador_WardrobeFlow_V1.exe
     2. Firma el .exe con el certificado .pfx (SignTool, SHA256 + sello de tiempo).
+       Si no esta instalado el Windows SDK, firma con Set-AuthenticodeSignature.
 
     Antes de correrlo hay que compilar la solución en Release (y DbInstaller en Release).
     Si no se encuentra el certificado, el instalador queda compilado SIN firmar (no falla).
@@ -46,11 +47,6 @@ if (-not (Test-Path $Pfx)) {
 $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -match '\\x64\\' } | Sort-Object FullName -Descending |
     Select-Object -First 1 -ExpandProperty FullName
-if (-not $signtool) {
-    Write-Warning 'No se encontro signtool.exe (Windows SDK): el instalador queda SIN firmar.'
-    return
-}
-
 $pass = $env:WF_PFX_PASS
 if (-not $pass) {
     $sec  = Read-Host 'Contrasena del certificado' -AsSecureString
@@ -58,8 +54,16 @@ if (-not $pass) {
 }
 
 Write-Host 'Firmando el instalador...' -ForegroundColor Cyan
-& $signtool sign /f $Pfx /p $pass /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $exe
-if ($LASTEXITCODE -ne 0) { throw 'Fallo la firma con SignTool.' }
+if ($signtool) {
+    & $signtool sign /f $Pfx /p $pass /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $exe
+    if ($LASTEXITCODE -ne 0) { throw 'Fallo la firma con SignTool.' }
+} else {
+    # Sin Windows SDK: misma firma (SHA256 + sello de tiempo) con el cmdlet de PowerShell.
+    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($Pfx, $pass)
+    $r = Set-AuthenticodeSignature -FilePath $exe -Certificate $cert -HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
+    # Con certificado autofirmado el estado es UnknownError (raiz no confiable) pero la firma queda aplicada.
+    if (-not $r.SignerCertificate) { throw "Fallo la firma: $($r.StatusMessage)" }
+}
 
 $firma = Get-AuthenticodeSignature $exe
 Write-Host ("Firmado por: {0}  |  Estado: {1}" -f $firma.SignerCertificate.Subject, $firma.Status) -ForegroundColor Green

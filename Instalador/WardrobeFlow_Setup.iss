@@ -56,10 +56,11 @@
 ;   no ser el administrador que instalo) y se corre una verificacion final
 ;   (admin semilla + datos); si falla, rollback.
 ; - {app}\Backups y {app}\TempBackups quedan escribibles para usuarios comunes.
+; - La firma digital del .exe la hace compilar-y-firmar.ps1 (SignTool) con un
+;   certificado autofirmado: Windows SmartScreen igual advierte porque no es
+;   de una CA de confianza. Sin el .pfx el instalador queda sin firmar.
 ;
 ; Fuera de alcance (gap conocido, no bloqueante):
-; - Firma digital del .exe con SignTool (requiere certificado de codigo
-;   propio; no es algo que se pueda generar/conseguir automaticamente).
 ; - Instalacion silenciosa/embebida de SQL Server Express o LocalDB si NO
 ;   esta presente en el equipo: se eligio deliberadamente NO embeber ese
 ;   instalador (~60MB+) y en su lugar detectar+guiar (o usar LocalDB si ya
@@ -931,11 +932,12 @@ begin
     // Se pregunta ANTES de que Inno borre los archivos — DbInstaller.exe
     // todavía está en {app}\BD en este punto, lo necesitamos para poder
     // borrar la base. Por defecto NO se borra (acción destructiva e
-    // irreversible: el foco del MsgBox queda en "No").
+    // irreversible). MB_DEFBUTTON2 deja el foco en "No"; el IDNO final es
+    // solo la respuesta por defecto en desinstalación silenciosa.
     if SuppressibleMsgBox(
          '¿Querés borrar también la base de datos WardrobeFlowDB?' + #13#13 +
          'Esta acción NO se puede deshacer. Si no estás seguro, elegí "No": la base va a quedar en el servidor aunque desinstales la aplicación.',
-         mbConfirmation, MB_YESNO, IDNO) = IDYES then
+         mbConfirmation, MB_YESNO or MB_DEFBUTTON2, IDNO) = IDYES then
     begin
       ServidorGuardado := GetPreviousData('ServidorSql', '{#MySqlInstanceSugerido}');
       LogPath := ExpandConstant('{app}\uninstall.log');

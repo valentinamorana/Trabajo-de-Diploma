@@ -26,6 +26,16 @@ $ErrorActionPreference = 'Stop'
 $dir = $PSScriptRoot
 $exe = Join-Path $dir 'Salida\Instalador_WardrobeFlow_V1.exe'
 
+# ── 0) SQL Server 2022 Express LocalDB (va embebido para equipos sin SQL) ────
+$msi = Join-Path $dir 'Redist\SqlLocalDB.msi'
+if (-not (Test-Path $msi)) {
+    Write-Host 'Descargando SQL Server LocalDB...' -ForegroundColor Cyan
+    New-Item -ItemType Directory -Force (Split-Path $msi) | Out-Null
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12  # PowerShell 5.1 no lo usa por defecto
+    Invoke-WebRequest 'https://download.microsoft.com/download/3/8/d/38de7036-2433-4207-8eae-06e247e17b25/SqlLocalDB.msi' -OutFile $msi -UseBasicParsing
+}
+if ((Get-AuthenticodeSignature $msi).Status -ne 'Valid') { throw 'SqlLocalDB.msi no tiene una firma valida de Microsoft.' }
+
 # ── 1) Compilar con Inno Setup ───────────────────────────────────────────────
 $iscc = @(
     "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe",

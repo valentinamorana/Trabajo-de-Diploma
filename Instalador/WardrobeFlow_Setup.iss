@@ -23,10 +23,15 @@
 ;   equipo (comun en maquinas con Visual Studio), se ofrece usarlo
 ;   automaticamente ((localdb)\MSSQLLocalDB) sin pedirle nada mas al
 ;   usuario (PPT slide "Instancias SQL Inexistentes": "Fallback Automatico").
-; - Si no hay NINGUNA instancia (ni LocalDB) y el usuario no quiere
-;   ingresar un servidor a mano: se le muestra el link de descarga de SQL
-;   Server Express/LocalDB y se corta la instalacion sin copiar nada (PPT
-;   slide "Sin Motor de Base de Datos": "Asistente Guiado").
+; - Si no hay NINGUNA instancia (ni LocalDB): la opcion por defecto instala
+;   SQL Server 2022 Express LocalDB, que viaja embebido en el instalador
+;   (Redist\SqlLocalDB.msi, ~60MB, msiexec /passive), y sigue con la
+;   instalacion normal sobre (localdb)\MSSQLLocalDB: "Siguiente, Siguiente"
+;   alcanza aunque el equipo no tenga ningun motor. LocalDB es privado de
+;   cada usuario de Windows: queda para el usuario que instala. Si el
+;   usuario elige no instalarlo, se le muestra el link de descarga de SQL
+;   Server y se corta sin copiar nada (PPT slide "Sin Motor de Base de
+;   Datos": "Asistente Guiado").
 ; - Si la instancia elegida existe pero su servicio de Windows esta
 ;   detenido, se intenta arrancarlo automaticamente (PPT slide "Servicio
 ;   SQL Detenido": ServiceController + Start()); si no se puede (permisos),
@@ -61,10 +66,10 @@
 ;   de una CA de confianza. Sin el .pfx el instalador queda sin firmar.
 ;
 ; Fuera de alcance (gap conocido, no bloqueante):
-; - Instalacion silenciosa/embebida de SQL Server Express o LocalDB si NO
-;   esta presente en el equipo: se eligio deliberadamente NO embeber ese
-;   instalador (~60MB+) y en su lugar detectar+guiar (o usar LocalDB si ya
-;   esta instalado), para mantener el instalador liviano.
+; - SQL Server Express completo (servicio multiusuario, ~260MB) no se
+;   embebe: sin motor se instala LocalDB, que alcanza para un puesto.
+; - En /VERYSILENT sin ningun motor no se instala LocalDB: pasar
+;   /SERVIDOR= con una instancia existente.
 ; =====================================================================
 
 #define MyAppName "WardrobeFlow"
@@ -81,6 +86,9 @@
 #define DbSourceDir "..\BD"
 #define DbInstallerSourceDir "DbInstaller\bin\Release"
 #define DbInstallerExeName "DbInstaller.exe"
+; Instalador oficial de SQL Server 2022 Express LocalDB. No se versiona (es
+; de Microsoft, ~60MB): compilar-y-firmar.ps1 lo descarga si falta.
+#define LocalDbMsi "Redist\SqlLocalDB.msi"
 
 #if !FileExists(AppSourceDir + "\" + MyAppExeName)
   #error "No se encontro GUI.exe en GUI\bin\Release. Compilar el proyecto en modo Release antes de generar el instalador."
@@ -92,6 +100,10 @@
 
 #if !FileExists(DbInstallerSourceDir + "\" + DbInstallerExeName)
   #error "No se encontro DbInstaller.exe en Instalador\DbInstaller\bin\Release. Compilar ese proyecto en modo Release antes de generar el instalador."
+#endif
+
+#if !FileExists(LocalDbMsi)
+  #error "No se encontro Redist\SqlLocalDB.msi. Correr compilar-y-firmar.ps1, que lo descarga."
 #endif
 
 [Setup]
@@ -141,6 +153,8 @@ Source: "{#DbInstallerSourceDir}\{#DbInstallerExeName}"; DestDir: "{app}\BD"; Fl
 ; {app}, vía ExtractTemporaryFile — ver PaginaIngresoManual mas abajo.
 Source: "{#DbInstallerSourceDir}\{#DbInstallerExeName}"; DestDir: "{tmp}"; Flags: dontcopy
 Source: "Credenciales_Iniciales.txt"; DestDir: "{app}"; Flags: ignoreversion
+; Solo se extrae (a {tmp}) si hay que instalar LocalDB: ver InstalarLocalDb.
+Source: "{#LocalDbMsi}"; DestDir: "{tmp}"; Flags: dontcopy nocompression
 
 ; La app guarda backups y su configuracion de recordatorio en {app}\Backups
 ; (y usa {app}\TempBackups como temporal de respaldo). {app} esta en Archivos
@@ -362,21 +376,73 @@ begin
   if LocalDbDisponible then Result := Result + 1;
 end;
 
-// Indices de PaginaSinInstancias: cambian segun si se ofrece o no la
-// opcion de LocalDB automatico (siempre primera, si esta disponible).
+// Indices de PaginaSinInstancias: la primera opcion es siempre LocalDB
+// (usarlo si ya esta instalado, o instalarlo si no).
 function IndiceLocalDbEnSinInstancias(): Integer;
 begin
-  Result := 0; // solo valido si LocalDbDisponible
+  Result := 0;
 end;
 
 function IndiceManualEnSinInstancias(): Integer;
 begin
-  if LocalDbDisponible then Result := 1 else Result := 0;
+  Result := 1;
 end;
 
 function IndiceCancelarEnSinInstancias(): Integer;
 begin
-  if LocalDbDisponible then Result := 2 else Result := 1;
+  Result := 2;
+end;
+
+// Instala SQL Server 2022 Express LocalDB desde el MSI embebido (equipo sin
+// ningun motor) y deja creada y arrancada la instancia MSSQLLocalDB. /passive
+// muestra solo la barra de progreso de Windows Installer, sin preguntas.
+// Arrancarla aca evita que la primera conexion de DbInstaller (Connect
+// Timeout=15) choque con el arranque en frio de LocalDB.
+function InstalarLocalDb(): Boolean;
+var
+  ResultCode: Integer;
+  Msi, Log, SqlLocalDbExe: String;
+begin
+  Result := False;
+  WizardForm.NextButton.Enabled := False;
+  try
+    ExtractTemporaryFile('SqlLocalDB.msi');
+    Msi := ExpandConstant('{tmp}\SqlLocalDB.msi');
+    Log := ExpandConstant('{userdocs}\WardrobeFlow_LocalDB_install.log');
+    if not Exec(ExpandConstant('{sys}\msiexec.exe'),
+                '/i "' + Msi + '" /passive /norestart IACCEPTSQLLOCALDBLICENSETERMS=YES /l*v "' + Log + '"',
+                '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+      ResultCode := -1;
+    // 3010 = instalado OK, pide reiniciar (LocalDB funciona igual sin reinicio).
+    if (ResultCode <> 0) and (ResultCode <> 3010) then
+    begin
+      SuppressibleMsgBox(
+        'No se pudo instalar SQL Server LocalDB (código ' + IntToStr(ResultCode) + ').' + #13#13 +
+        'Detalle en: ' + Log + #13#13 +
+        'Podés instalar SQL Server Express a mano desde https://www.microsoft.com/sql-server/sql-server-downloads ' +
+        'y volver a ejecutar este instalador. No se instaló nada de WardrobeFlow.',
+        mbError, MB_OK, IDOK);
+      exit;
+    end;
+
+    LocalDbDisponible := TieneLocalDbInstalado();
+    if not LocalDbDisponible then
+    begin
+      SuppressibleMsgBox('SQL Server LocalDB se instaló pero no aparece registrado en el equipo. Detalle en: ' + Log,
+                         mbError, MB_OK, IDOK);
+      exit;
+    end;
+
+    SqlLocalDbExe := ExpandConstant('{commonpf64}\Microsoft SQL Server\160\Tools\Binn\SqlLocalDB.exe');
+    if FileExists(SqlLocalDbExe) then
+    begin
+      Exec(SqlLocalDbExe, 'create MSSQLLocalDB', '', SW_HIDE, ewWaitUntilTerminated, ResultCode); // ya existe: no pasa nada
+      Exec(SqlLocalDbExe, 'start MSSQLLocalDB', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    end;
+    Result := True;
+  finally
+    WizardForm.NextButton.Enabled := True;
+  end;
 end;
 
 // ---------------------------------------------------------------------
@@ -464,7 +530,9 @@ begin
     'WardrobeFlow necesita una instancia de SQL Server (Express, LocalDB, o una instalación completa) para funcionar. ¿Cómo querés continuar?',
     True, False);
   if LocalDbDisponible then
-    PaginaSinInstancias.Add('Usar SQL LocalDB, ya detectado en este equipo ((localdb)\MSSQLLocalDB)');
+    PaginaSinInstancias.Add('Usar SQL LocalDB, ya detectado en este equipo ((localdb)\MSSQLLocalDB)')
+  else
+    PaginaSinInstancias.Add('Instalar SQL Server Express LocalDB ahora (recomendado, incluido en este instalador)');
   PaginaSinInstancias.Add('Ya tengo SQL Server instalado (con otro nombre, o en otro servidor) — ingresar manualmente');
   PaginaSinInstancias.Add('No tengo ningún motor de SQL Server instalado — cancelar la instalación');
   PaginaSinInstancias.SelectedValueIndex := 0;
@@ -596,8 +664,16 @@ begin
 
   if CurPageID = PaginaSinInstancias.ID then
   begin
-    if LocalDbDisponible and (PaginaSinInstancias.SelectedValueIndex = IndiceLocalDbEnSinInstancias()) then
+    if PaginaSinInstancias.SelectedValueIndex = IndiceLocalDbEnSinInstancias() then
     begin
+      // Sin ningun motor: instalar LocalDB desde el MSI embebido. Si falla,
+      // se queda en esta pagina (el usuario puede elegir otra opcion).
+      if not LocalDbDisponible then
+        if not InstalarLocalDb() then
+        begin
+          Result := False;
+          exit;
+        end;
       // Fallback automático a LocalDB (PPT slide "Instancias SQL
       // Inexistentes"): ya está instalado en este equipo, no hace falta
       // pedirle nada más al usuario. LocalDB no corre como servicio de

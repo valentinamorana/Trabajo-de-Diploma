@@ -273,5 +273,5 @@ Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: 
 ### Generar el instalador
 
 1. Compilar la solución en modo **Release** (y `Instalador/DbInstaller` en Release).
-2. Ejecutar `Instalador/compilar-y-firmar.ps1`: compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool. El certificado (`wardrobeflow.pfx`) se busca en `%USERPROFILE%` y no se versiona; si no está, el instalador queda compilado sin firmar.
-3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_V1.exe`, con la aplicación, la base de datos y los datos de prueba adentro.
+2. Ejecutar `Instalador/compilar-y-firmar.ps1`: descarga `Instalador/Redist/SqlLocalDB.msi` si falta (instalador oficial de SQL Server 2022 Express LocalDB, no se versiona), compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool, o con `Set-AuthenticodeSignature` si no está el Windows SDK. El certificado (`wardrobeflow.pfx`) se busca en `%USERPROFILE%` y no se versiona; si no está, el instalador queda compilado sin firmar.
+3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_V1.exe` (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal.

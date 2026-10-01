@@ -425,9 +425,11 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 - `Instalador/WardrobeFlow_Setup.iss` (Inno Setup 6): verifica .NET 4.7.2, detecta instancias SQL (registro/LocalDB), verifica que el servicio esté iniciado
   (lo arranca si puede), reescribe el `Data Source` de `GUI.exe.config`, ejecuta el script con `DbInstaller.exe run-script`, hace **rollback** ante fallos y
   guarda `install.log`. Copia la app (14 archivos de `GUI/bin/Release`), el `.sql`, `DbInstaller.exe` y `Credenciales_Iniciales.txt`.
+  Si el equipo no tiene ningún SQL Server, la opción por defecto instala **SQL Server 2022 Express LocalDB** (MSI oficial embebido, `msiexec /passive`)
+  y continúa sobre `(localdb)\MSSQLLocalDB`. LocalDB es privado de cada usuario de Windows: la base queda para el usuario que instala.
 - `Instalador/DbInstaller/` (C#): cliente SQL embebido (subcomandos `run-script`, chequeo/arranque de servicio, prueba de conexión, borrado de BD).
 - **Un solo `.exe`** de salida: `Instalador/Salida/Instalador_WardrobeFlow_V1.exe` (no se versiona).
-- `Instalador/compilar-y-firmar.ps1`: compila con Inno Setup y firma con SignTool (certificado en `%USERPROFILE%\wardrobeflow.pfx`, **autofirmado**, fuera del repo;
+- `Instalador/compilar-y-firmar.ps1`: descarga `Redist/SqlLocalDB.msi` si falta, compila con Inno Setup y firma con SignTool, o con `Set-AuthenticodeSignature` sin Windows SDK (certificado en `%USERPROFILE%\wardrobeflow.pfx`, **autofirmado**, fuera del repo;
   contraseña por `WF_PFX_PASS` o prompt). Un certificado autofirmado **no** evita el aviso de SmartScreen en otras PCs.
 - Requisitos de la cátedra (clase 4): un `.exe`, crea BD/tablas por script (sin `.bak`), usuarios/roles, multiidioma, datos de ejemplo, una sola corrida.
   Casos especiales (sin instancia, sin motor, servicio detenido) son de la Entrega 3 y ya están contemplados.

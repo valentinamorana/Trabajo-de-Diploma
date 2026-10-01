@@ -32,3 +32,6 @@ TestResults/
 
 # Imágenes generadas (se regeneran con mmdc)
 docs/diagramas/png/
+
+# Instalador oficial de SQL Server LocalDB (lo descarga compilar-y-firmar.ps1)
+Instalador/Redist/

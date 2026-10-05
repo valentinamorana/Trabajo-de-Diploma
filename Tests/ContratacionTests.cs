@@ -800,16 +800,28 @@ namespace Tests
         }
 
         // Separación de funciones por persona: el empleado que vendió no puede cobrar su propia
-        // contratación, aunque tenga ambos permisos (un Administrador que hace las dos cosas).
+        // contratación (un usuario de Caja que también hubiera vendido).
         [TestMethod]
         public void ConfirmarCobro_ElMismoEmpleadoQueVendio_LanzaCobraElVendedor_SinCobrar()
         {
-            LoginComoAdministrador();
+            LoginComoCaja();
             var ctx = new Contexto();
             var c = ctx.Pendiente();
             c.IdVendedor = 5;   // el empleado vinculado al usuario en sesión (Caja) es el 5
             EsperarError(() => ctx.Crear().ConfirmarCobro("Test", c, 1), "err.bll.contratacion.cobra_el_vendedor");
             Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces);
+        }
+
+        // Excepción: el Administrador puede registrar y cobrar la misma contratación.
+        [TestMethod]
+        public void ConfirmarCobro_AdministradorQueVendio_PuedeCobrar()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            c.IdVendedor = 5;   // el mismo empleado que cobra
+            ctx.Crear().ConfirmarCobro("Test", c, 1);
+            Assert.AreEqual(1, ctx.DalContratacion.ConfirmarCobroVeces);
         }
 
         [TestMethod]

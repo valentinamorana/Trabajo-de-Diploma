@@ -325,9 +325,9 @@ namespace BLL
             ValidarCupo(cliente, plan);
 
             int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
-            // Separación de funciones POR PERSONA: quien vendió la contratación no puede cobrarla,
-            // aunque tenga ambos permisos (por ejemplo un Administrador que hizo las dos cosas).
-            if (idCaja == actual.IdVendedor)
+            // Separación de funciones POR PERSONA: quien vendió la contratación no puede cobrarla.
+            // Excepción: el Administrador puede hacer las dos cosas (decisión de la alumna).
+            if (idCaja == actual.IdVendedor && !(Sesion.Usuario?.EsAdministrador ?? false))
                 throw new BE.AppException("err.bll.contratacion.cobra_el_vendedor",
                     "Quien registró la contratación no puede cobrarla: el cobro lo confirma otra persona de Caja.");
             var descuento = ResolverDescuento(actual, plan, cliente, ObtenerPromocionesVigentes());

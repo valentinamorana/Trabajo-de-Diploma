@@ -34,7 +34,7 @@ namespace BLL
     ///
     /// Cada transición es un claim atómico en el DAL (UPDATE ... WHERE Estado = esperado) que inserta,
     /// en la misma transacción, su fila de PromocionHistorial. Quien crea la promoción no puede
-    /// dictaminarla (separación de funciones), sin excepción para el Administrador.
+    /// dictaminarla (separación de funciones), salvo el Administrador, que puede hacer todo.
     /// </summary>
     public class Promocion : Interfaces.IPromocionService
     {
@@ -252,7 +252,9 @@ namespace BLL
         public bool PuedeDictaminar(BE.Promocion promocion)
         {
             if (promocion == null || !Seguridad.SessionManager.IsLoggedIn) return false;
-            return promocion.PuedeDictaminarla(Seguridad.SessionManager.GetInstance().Usuario.Id);
+            var usuario = Seguridad.SessionManager.GetInstance().Usuario;
+            // El Administrador puede dictaminar aunque la haya creado él (decisión de la alumna).
+            return usuario.EsAdministrador || promocion.PuedeDictaminarla(usuario.Id);
         }
 
         // "¿Aprueba? Sí" → Vigente + «Dictamen contable».

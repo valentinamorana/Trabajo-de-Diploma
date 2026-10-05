@@ -85,7 +85,7 @@ Notas:
 ### 2.3 Separación de funciones (intencional)
 | Par | Regla | Dónde se garantiza |
 |---|---|---|
-| Vendedor ≠ Caja | quien vende no cobra: Vendedor no tiene `CajaEditar`; Caja no tiene `ClientesEditar` | `BLL/Contratacion.cs › CrearContratacion / ConfirmarPago` (`PermisosAccion.Exigir`); T: `PermisosAccionTests`, `ContratacionTests` |
+| Vendedor ≠ Caja | quien vende no cobra (salvo el Administrador, que puede hacer las dos cosas): Vendedor no tiene `CajaEditar`; Caja no tiene `ClientesEditar` | `BLL/Contratacion.cs › CrearContratacion / ConfirmarPago` (`PermisosAccion.Exigir`); T: `PermisosAccionTests`, `ContratacionTests` |
 | Gerencia ≠ Administración ≠ Contabilidad | quien sugiere no define condiciones y quien define no aprueba el impacto económico | `BLL/SugerenciaPromocion.cs`, `BLL/Promocion.cs` (patentes distintas por acción); T: `PromocionTests`, `SugerenciaPromocionTests` |
 | Depósito sin aprobador | inspecciona y resuelve solo | `BLL/CargoPrenda.cs`, `BLL/Prenda.cs` (solo exigen `StockEditar`) |
 

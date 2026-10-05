@@ -284,6 +284,32 @@ namespace Tests
         // Todos entran como Administrador para no depender del catálogo de patentes: la guarda
         // "quien crea no dictamina" se aplica igual al Administrador.
 
+        // Usuario de Contabilidad (no administrador) con las patentes de revisión contable.
+        private static void LoginComoContable(int idUsuario)
+        {
+            SessionManager.Logout();
+            var u = new BE.Usuario
+            {
+                Id = idUsuario,
+                Username = "contable" + idUsuario,
+                Perfil = "Contabilidad",
+                Contraseña = Encriptador.Hash("Clave1!")
+            };
+            u.Permisos.Add(new BE.Permiso { NombreMenu = BE.Patentes.PromocionesContable });
+            u.Permisos.Add(new BE.Permiso { NombreMenu = BE.Patentes.PromocionesContableEditar });
+            SessionManager.Login(u);
+        }
+
+        // Excepción: el Administrador puede dictaminar una promoción que creó él.
+        [TestMethod]
+        public void AprobarContable_AdministradorQueLaCreo_PuedeDictaminar()
+        {
+            LoginComo(1);
+            var ctx = new Contexto();
+            ctx.Crear().AprobarContable("Test", Promo(BE.EstadoPromocion.EnRevisionContable, 1), "ok");
+            Assert.AreEqual(1, ctx.DalPromocion.Dictamenes.Count);
+        }
+
         private static void LoginComo(int idUsuario)
         {
             SessionManager.Logout();
@@ -427,7 +453,7 @@ namespace Tests
         [TestMethod]
         public void AnalizarMargenEImpacto_ElCreadorNoPuedeDictaminar()
         {
-            LoginComo(1);
+            LoginComoContable(1);   // un Administrador sí podría (ver AprobarContable_AdministradorQueLaCreo_PuedeDictaminar)
             var ctx = new Contexto();
             ctx.DalPromocion.Todas.Add(Promo(BE.EstadoPromocion.EnRevisionContable, idUsuarioAlta: 1));
 
@@ -472,9 +498,9 @@ namespace Tests
         }
 
         [TestMethod]
-        public void AprobarContable_QuienCreoLaPromocionNoPuedeDictaminarla_NiSiendoAdministrador()
+        public void AprobarContable_QuienCreoLaPromocionNoPuedeDictaminarla()
         {
-            LoginComo(1);
+            LoginComoContable(1);
             var ctx = new Contexto();
 
             EsperarError(() => ctx.Crear().AprobarContable("Test", Promo(BE.EstadoPromocion.EnRevisionContable, 1), "ok"),
@@ -485,7 +511,7 @@ namespace Tests
         [TestMethod]
         public void RechazarContable_QuienCreoLaPromocionNoPuedeDictaminarla()
         {
-            LoginComo(1);
+            LoginComoContable(1);
             var ctx = new Contexto();
 
             EsperarError(() => ctx.Crear().RechazarContable("Test", Promo(BE.EstadoPromocion.EnRevisionContable, 1), "no"),

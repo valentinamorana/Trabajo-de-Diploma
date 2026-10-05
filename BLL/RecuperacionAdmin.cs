@@ -17,7 +17,7 @@ namespace BLL
     {
         private readonly DAL.Interfaces.IUsuarioDAL           usuarioDAL;
         private readonly DAL.Interfaces.IClaveRecuperacionDAL claveDAL;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
 
         // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles.
         public RecuperacionAdmin() : this(new DAL.Usuario(), new DAL.ClaveRecuperacion()) { }

@@ -264,7 +264,7 @@ namespace BLL
                            ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
             string actor = Seguridad.SessionManager.IsLoggedIn
                            ? Seguridad.SessionManager.GetInstance().Usuario.Username : "(arranque/sin sesión)";
-            new Servicios.Bitacora().RegistrarSinSesion(
+            Servicios.FabricaBitacora.CrearSistema().RegistrarSinSesion(
                 modulo:     "Integridad de Datos",
                 actividad:  "Reparación desde Espejo de Integridad",
                 criticidad: BE.Criticidad.Alta,
@@ -286,7 +286,7 @@ namespace BLL
                            ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
             string actor = Seguridad.SessionManager.IsLoggedIn
                            ? Seguridad.SessionManager.GetInstance().Usuario.Username : "(arranque/sin sesión)";
-            new Servicios.Bitacora().RegistrarSinSesion(
+            Servicios.FabricaBitacora.CrearSistema().RegistrarSinSesion(
                 modulo:     "Integridad de Datos",
                 actividad:  "Asumir pérdida (recálculo de DV sobre datos actuales)",
                 criticidad: BE.Criticidad.Alta,

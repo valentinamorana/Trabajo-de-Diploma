@@ -12,8 +12,8 @@ namespace BLL
     {
         private readonly DAL.Interfaces.IClienteDAL        dalCliente;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
-        private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
         // Bloque 1 — Programa de referidos: descuento fijo que se acredita a quien refirió,
         // una única vez, cuando el referido activa su suscripción por primera vez (ver ActivarSuscripcion).
@@ -287,7 +287,8 @@ namespace BLL
             // reabriría el cobro de una suscripción que sí quedó activa (doble cobro).
             try
             {
-                dalCliente.RecalcularDV();
+                dalCliente.RecalcularDV(cliente.IdCliente);
+                if (referente != null) dalCliente.RecalcularDV(referente.IdCliente);
 
                 bitacora.Registrar(modulo,
                     $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +

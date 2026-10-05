@@ -75,6 +75,7 @@ namespace Tests.Fakes
         public void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
             => CreditosConsumidos.Add(new KeyValuePair<int, decimal>(idCliente, monto));
 
-        public void RecalcularDV() => RecalcularDVVeces++;
+        public List<int> IdsDVRecalculados { get; } = new List<int>();
+        public void RecalcularDV(int idCliente) { RecalcularDVVeces++; IdsDVRecalculados.Add(idCliente); }
     }
 }

@@ -1,6 +1,7 @@
 classDiagram
   direction TB
   class BLL_Configuracion["BLL.Configuracion"] {
+    +bool IntegridadComprometida
     +VerificarIntegridadDV(ResultadoIntegridad) bool
     +AsegurarIntegridadUsuarios() void
     +RecalcularIntegridadDV() void
@@ -25,12 +26,18 @@ classDiagram
     +CalcularDVV(IList~int~) int
   }
   class DAL_DigitoVerificador["DAL.DigitoVerificador"] {
+    +Formatear(object) string
     +ObtenerDVV(string) int?
     +GuardarDVV(string,  int) void
+    +ObtenerParametro(string) string
+    +GuardarParametro(string,  string) void
+    +EjecutarConBloqueo(string,  Action~SqlConnection,  SqlTransaction~) void
     +ObtenerFilasUsuario() List~FilaUsuarioDV~
+    +RecalcularTablaUsuario() List~FilaUsuarioDV~
     +ActualizarDVH(int,  int) void
     +ObtenerFilas(string,  string,  string[]) List~FilaDV~
     +ActualizarDVH(string,  string,  int,  int) void
+    +ActualizarFila(string,  string,  string[],  int) void
     +RecalcularTabla(string,  string,  string[]) void
   }
   class DAL_HistorialIntegridad["DAL.HistorialIntegridad"] {
@@ -45,6 +52,10 @@ classDiagram
     +string Perfil
     +string Estado
     +string IntentosFallidos
+    +string Activo
+    +string RequiereCambioClave
+    +string CantidadBloqueos
+    +string FechaBloqueo
     +int? DVHAlmacenado
   }
   Seguridad_ICalculadorDV <|.. Seguridad_DigitoVerificador

@@ -35,8 +35,8 @@ namespace BLL
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
         // PN03: promociones vigentes que se aplican al importe del cobro. Opcional (null = sin promociones).
         private DAL.Interfaces.IPromocionDAL dalPromocion;
-        private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
         // BLL.Cliente es quien activa la suscripción (Builder) y acredita el referido — composición
         // lazy, mismo criterio que BLL.Pedido.prendaBLL / BLL.Prenda.listaEsperaBLL.

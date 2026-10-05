@@ -33,8 +33,9 @@ namespace DAL.Interfaces
         /// <summary>Resta <paramref name="monto"/> del crédito de referido de forma atómica, sin dejarlo negativo.</summary>
         void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto);
 
-        /// <summary>Recalcula el Dígito Verificador (T07) de la tabla Cliente. Público para poder
-        /// invocarse tras confirmar una transacción externa armada con <see cref="EjecutarTransaccion"/>.</summary>
-        void RecalcularDV();
+        /// <summary>Recalcula el Dígito Verificador (T07) de UNA fila de Cliente y el DVV de la tabla
+        /// (desde los DVH almacenados). Se invoca tras confirmar una transacción externa armada con
+        /// <see cref="EjecutarTransaccion"/>, una vez por cada cliente modificado.</summary>
+        void RecalcularDV(int idCliente);
     }
 }

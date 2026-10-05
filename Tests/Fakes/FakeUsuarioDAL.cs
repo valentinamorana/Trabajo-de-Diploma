@@ -59,7 +59,7 @@ namespace Tests.Fakes
         public BE.Usuario       ObtenerPorId(int idUsuario)          => Usuarios.Find(x => x.Id == idUsuario);
         public void             Alta(string u, string c, string p)   { }
         public void             Bloquear(int id)                     { }
-        public void             BloquearConTiempo(int id)            { }
+        public void             BloquearConTiempo(int id)            { BloquearConTiempoVeces++; var x = Usuarios.Find(y => y.Id == id); if (x != null) { x.Bloqueado = true; x.CantidadBloqueos++; x.FechaBloqueo = DateTime.Now; } }
         public void             AutoDesbloquear(int id)              { }
 
         // Espía de Desbloquear (usado por BLL.RecuperacionAdmin.DesbloquearConClave).
@@ -72,7 +72,15 @@ namespace Tests.Fakes
             var u = Usuarios.Find(x => x.Id == id);
             if (u != null) u.Bloqueado = false;
         }
-        public void             IncrementarIntentosFallidos(string u){ }
+        public int  IncrementarIntentosVeces { get; private set; }
+        public int? IncrementarIntentosFallidos(string u)
+        {
+            IncrementarIntentosVeces++;
+            var x = ObtenerPorUsername(u);
+            if (x == null) return null;
+            return ++x.IntentosFallidos;
+        }
+        public int  BloquearConTiempoVeces { get; private set; }
         public void             ResetearIntentosFallidos(string u)   { }
         public void             ResetearClave(int id, string hash)   { }
         public void             GuardarIdioma(int id, string idi)    { }

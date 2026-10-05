@@ -18,7 +18,7 @@ namespace BLL
         private readonly CuidadorHistorial   _caretaker  = new CuidadorHistorial();
         private readonly DAL.VersionUsuario  _dalVersion = new DAL.VersionUsuario();
         private readonly DAL.Usuario         _dalUsuario = new DAL.Usuario();
-        private readonly Servicios.Bitacora  _bitacora   = new Servicios.Bitacora();
+        private readonly Servicios.IRegistroBitacora  _bitacora   = Servicios.FabricaBitacora.CrearSistema();
 
         /// <summary>
         /// Captura el estado actual del usuario (Originator) en un Memento y lo guarda

@@ -13,8 +13,8 @@ namespace BLL
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.IEmpleadoDAL dalEmpleado;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora bitacora;
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg;
         private readonly DAL.Interfaces.IPedidoHistorialDAL dalHistorial;
 
         // Lista de Espera (mejora opcional) — composición lazy, mismo criterio que
@@ -28,49 +28,28 @@ namespace BLL
         private Interfaces.IPrendaService prendaBLL => _prendaBLLLazy ?? (_prendaBLLLazy = new Prenda());
 
         // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles
-        // de prueba (mismo criterio que BLL.Cliente/BLL.Renovacion/BLL.Cobro).
+        // de prueba (mismo criterio que BLL.Cliente/BLL.Renovacion/BLL.Cobro). Los colaboradores
+        // opcionales (Lista de Espera, BLL.Prenda, bitácoras) se crean por defecto si no se pasan.
         public Pedido() : this(new DAL.Pedido(), new DAL.Cliente(), new DAL.Empleado(),
                                 new DAL.PlanSuscripcion(), new DAL.PedidoHistorial()) { }
 
         public Pedido(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IClienteDAL dalCliente,
                        DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
-                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial)
+                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial,
+                       Interfaces.IListaEsperaService listaEsperaBLL = null,
+                       Interfaces.IPrendaService prendaBLL = null,
+                       Servicios.IRegistroBitacora bitacora = null,
+                       Servicios.IRegistroBitacoraNegocio bitacoraNegocio = null)
         {
             this.dalPedido = dalPedido ?? throw new ArgumentNullException(nameof(dalPedido));
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalEmpleado = dalEmpleado ?? throw new ArgumentNullException(nameof(dalEmpleado));
             this.dalPlan = dalPlan ?? throw new ArgumentNullException(nameof(dalPlan));
             this.dalHistorial = dalHistorial ?? throw new ArgumentNullException(nameof(dalHistorial));
-        }
-
-        // Overload para inyectar un doble de prueba de Lista de Espera (mejora opcional) sin
-        // tocar el constructor de 5 parámetros usado en el resto de los tests existentes.
-        public Pedido(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IClienteDAL dalCliente,
-                       DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
-                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial, Interfaces.IListaEsperaService listaEsperaBLL)
-            : this(dalPedido, dalCliente, dalEmpleado, dalPlan, dalHistorial)
-        {
-            _listaEsperaLazy = listaEsperaBLL ?? throw new ArgumentNullException(nameof(listaEsperaBLL));
-        }
-
-        // Overload para inyectar un doble de prueba de BLL.Prenda (PN01, split lógico Depósito)
-        // sin tocar el constructor de 5 parámetros usado en el resto de los tests existentes.
-        public Pedido(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IClienteDAL dalCliente,
-                       DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
-                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial, Interfaces.IPrendaService prendaBLL)
-            : this(dalPedido, dalCliente, dalEmpleado, dalPlan, dalHistorial)
-        {
-            _prendaBLLLazy = prendaBLL ?? throw new ArgumentNullException(nameof(prendaBLL));
-        }
-
-        // Overload para inyectar dobles de prueba de Lista de Espera Y BLL.Prenda a la vez.
-        public Pedido(DAL.Interfaces.IPedidoDAL dalPedido, DAL.Interfaces.IClienteDAL dalCliente,
-                       DAL.Interfaces.IEmpleadoDAL dalEmpleado, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
-                       DAL.Interfaces.IPedidoHistorialDAL dalHistorial, Interfaces.IListaEsperaService listaEsperaBLL,
-                       Interfaces.IPrendaService prendaBLL)
-            : this(dalPedido, dalCliente, dalEmpleado, dalPlan, dalHistorial, listaEsperaBLL)
-        {
-            _prendaBLLLazy = prendaBLL ?? throw new ArgumentNullException(nameof(prendaBLL));
+            _listaEsperaLazy = listaEsperaBLL;
+            _prendaBLLLazy   = prendaBLL;
+            this.bitacora    = bitacora ?? Servicios.FabricaBitacora.CrearSistema();
+            this.bitacoraNeg = bitacoraNegocio ?? Servicios.FabricaBitacora.CrearNegocio();
         }
 
         // Consultas
@@ -489,6 +468,9 @@ namespace BLL
                     "Confirmá las prendas disponibles del Pedido #{0} antes de separarlas.",
                     pedido.IdPedido);
             ExigirTransicion(pedido, BE.EstadoPedido.Separado);
+            // El cliente pudo pausar, vencer o quedar suspendido mientras el pedido esperaba en la
+            // cola de Depósito: se revalida antes de reservar las prendas.
+            ObtenerClienteValidado(pedido.IdCliente);
 
             bool todasDisponibles = RevisarStock(pedido).TrueForAll(l => l.Disponible);
             if (todasDisponibles)
@@ -549,6 +531,8 @@ namespace BLL
                     "Solo se formaliza un pedido con las prendas ya separadas por Depósito. Este pedido está '{0}'.",
                     pedido.Estado);
             ExigirTransicion(pedido, BE.EstadoPedido.Pendiente);
+            // Se revalida la vigencia del cliente al cerrar el pedido (pudo cambiar desde el armado).
+            ObtenerClienteValidado(pedido.IdCliente);
 
             dalPedido.Formalizar(pedido.IdPedido);
 
@@ -632,6 +616,18 @@ namespace BLL
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.pedido.desistir_sin_motivo",
                     "Es obligatorio indicar el motivo del desistimiento que comunicó el cliente.");
+            ValidarLargoMotivo(motivo);
+        }
+
+        // Pedido.MotivoCancelacion y Pedido.MotivoDesistimiento son NVARCHAR(500)
+        // (BD/00_Instalacion_Completa.sql): un texto más largo haría fallar la escritura.
+        public const int LargoMaximoMotivo = 500;
+
+        private static void ValidarLargoMotivo(string motivo)
+        {
+            if (motivo != null && motivo.Trim().Length > LargoMaximoMotivo)
+                throw new BE.AppException("err.bll.pedido.motivo_largo",
+                    "El motivo no puede superar los {0} caracteres.", LargoMaximoMotivo);
         }
 
         private static string IdsDe(List<BE.Prenda> prendas) =>
@@ -746,20 +742,25 @@ namespace BLL
         }
 
         // Cancelar
-        // Cancela un pedido Pendiente. Requiere motivo.
+        // Cancela un pedido formalizado (Pendiente) o con las prendas ya separadas por Depósito
+        // (Separado: "Cancelar pedido separado", su única salida además de formalizar). Requiere
+        // motivo. Libera las prendas que el pedido tenía reservadas.
         public void Cancelar(string modulo, BE.Pedido pedido, string motivo)
         {
             PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
             if (!pedido.PuedeCancelarse())
-                throw new BE.AppException("err.bll.pedido.cancelar_estado",
-                    "Solo se pueden cancelar pedidos en estado Pendiente. Este pedido está '{0}'.",
+                throw new BE.AppException("err.bll.pedido.cancelar_estado_separado",
+                    "Solo se pueden cancelar pedidos Pendientes o con las prendas separadas. Este pedido está '{0}'.",
                     pedido.Estado);
+            ExigirTransicion(pedido, BE.EstadoPedido.Cancelado);
 
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.pedido.cancelar_sin_motivo",
                     "Es obligatorio ingresar un motivo de cancelación.");
+            ValidarLargoMotivo(motivo);
 
-            dalPedido.Cancelar(pedido.IdPedido, motivo.Trim());
+            bool separado = pedido.Estado == BE.EstadoPedido.Separado;
+            dalPedido.Cancelar(pedido.IdPedido, pedido.IdCliente, pedido.Estado, motivo.Trim());
 
             RegistrarHistorial(pedido.IdPedido, "CANCELAR", new List<(string, string, string)>
             {
@@ -767,13 +768,15 @@ namespace BLL
                 ("MotivoCancelacion",  pedido.MotivoCancelacion,           motivo.Trim())
             });
 
+            string accion = separado ? "Cancelar pedido separado" : "Cancelar";
             bitacora.Registrar(modulo,
-                $"Cancelar Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — Motivo: {motivo}",
+                $"{accion} Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — Motivo: {motivo.Trim()}",
                 BE.Criticidad.Media);
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Cancelacion,
-                $"Pedido #{pedido.IdPedido} cancelado — Cliente: {pedido.NombreCliente} — Motivo: {motivo}",
+                $"Pedido #{pedido.IdPedido} cancelado{(separado ? " (con las prendas separadas, liberadas)" : "")} — " +
+                $"Cliente: {pedido.NombreCliente} — Motivo: {motivo.Trim()}",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
         }
@@ -970,7 +973,22 @@ namespace BLL
             DateTime? desde = null, DateTime? hasta = null)
             => dalHistorial.ObtenerPorPedido(idPedido, accion, desde, hasta);
 
-        private static readonly HashSet<string> OperacionesNoRestaurables = new HashSet<string>
+        // T06b — Qué operaciones se pueden revertir desde el historial. Lista BLANCA: una
+        // operación nueva queda bloqueada por defecto hasta que se analice si revertirla es seguro.
+        //   • Los pasos del armado (PN01) tienen su propia operación en el proceso.
+        //   • CANCELAR / DESCANCELAR / DEVOLUCION / RESTAURAR mueven prendas o reabren el circuito:
+        //     tienen acciones explícitas (Reactivar, Cancelar, Registrar devolución) y revertirlas
+        //     desde el historial reasignaría prendas que pudieron volver a circular.
+        //   • DESPACHAR y ENTREGAR solo cambian el estado logístico y sus fechas, con las prendas
+        //     reservadas a nombre del cliente durante todo el tramo: se pueden deshacer (por
+        //     ejemplo un despacho registrado por error) siempre que sea la ÚLTIMA operación del
+        //     pedido y el pedido siga en el estado que esa operación dejó.
+        private static readonly HashSet<string> OperacionesRestaurables = new HashSet<string>
+        {
+            "DESPACHAR", "ENTREGAR"
+        };
+
+        private static readonly HashSet<string> OperacionesDelArmado = new HashSet<string>
         {
             "CREAR", "ENVIAR_CONTROL", "AJUSTAR_SELECCION", "INFORMAR_FALTANTES",
             "CONFIRMAR_PRENDAS", "SEPARAR", "FORMALIZAR", "DESISTIR"
@@ -979,6 +997,8 @@ namespace BLL
         /// <summary>
         /// Restaura el pedido al estado previo a la operación indicada (por IdOperacion).
         /// Revierte cada campo al ValorAnterior registrado y escribe un evento RESTAURAR.
+        /// Solo se admite la ÚLTIMA operación del pedido, de un tipo restaurable, y solo si el
+        /// pedido sigue en el estado que esa operación dejó (claim atómico en el DAL).
         /// </summary>
         public void RestaurarOperacion(string modulo, int idPedido, int idOperacion)
         {
@@ -999,22 +1019,41 @@ namespace BLL
             string accionOriginal = cambios[0].Accion;
 
             // PN01: los pasos del circuito de control de stock no se revierten desde el historial.
-            // Revertirlos permitiría, por ejemplo, volver un pedido formalizado a "en control" o
-            // saltear la revisión de Depósito; cada paso tiene su propia operación en el proceso.
-            if (OperacionesNoRestaurables.Contains(accionOriginal))
+            if (OperacionesDelArmado.Contains(accionOriginal))
                 throw new BE.AppException("err.bll.pedido.restaurar_no_permitido",
                     "La operación '{0}' es parte del armado del pedido (control de stock) y no se puede " +
                     "revertir desde el historial.", accionOriginal);
+            if (!OperacionesRestaurables.Contains(accionOriginal))
+                throw new BE.AppException("err.bll.pedido.restaurar_no_restaurable",
+                    "La operación '{0}' no se puede revertir desde el historial: usá la acción correspondiente " +
+                    "del pedido (reactivar, cancelar o registrar la devolución).", accionOriginal);
 
-            // Restauración ATÓMICA: revertir todos los campos y reconciliar las prendas en UNA
-            // sola transacción (si algo falla, no queda el pedido con un estado y las prendas con
-            // otro). El DV se recalcula después: es recomputable y no debe abortar el rollback.
-            dalPedido.RestaurarOperacionAtomica(idPedido,
+            // Solo la última operación: revertir una intermedia dejaría al pedido en un estado que
+            // ignora lo que pasó después (por ejemplo, una devolución ya registrada).
+            int ultima = dalHistorial.ObtenerSiguienteIdOperacion(idPedido) - 1;
+            if (idOperacion != ultima)
+                throw new BE.AppException("err.bll.pedido.restaurar_no_ultima",
+                    "Solo se puede revertir la última operación del Pedido #{0} (la #{1}).", idPedido, ultima);
+
+            var cambioEstado = cambios.Find(c => c.Campo == "Estado");
+            if (cambioEstado == null
+                || !Enum.TryParse(cambioEstado.ValorNuevo, out BE.EstadoPedido estadoQueDejo)
+                || !Enum.TryParse(cambioEstado.ValorAnterior, out BE.EstadoPedido _))
+                throw new BE.AppException("err.bll.pedido.restaurar_no_restaurable",
+                    "La operación '{0}' no se puede revertir desde el historial: usá la acción correspondiente " +
+                    "del pedido (reactivar, cancelar o registrar la devolución).", accionOriginal);
+
+            var actual = dalPedido.ObtenerPorId(idPedido);
+            if (actual == null || actual.Estado != estadoQueDejo)
+                throw new BE.AppException("err.dal.pedido.estado_cambiado",
+                    "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
+                    idPedido);
+
+            // Restauración ATÓMICA: el DAL vuelve a exigir el estado esperado (WHERE Estado=...),
+            // revierte los campos y verifica las prendas en UNA sola transacción; también
+            // recalcula el DV del pedido después de confirmar.
+            dalPedido.RestaurarOperacionAtomica(idPedido, estadoQueDejo,
                 cambios.Select(c => (c.Campo, c.ValorAnterior)).ToList());
-            // DV se recalcula fuera de la transacción: es recomputable y no debe
-            // abortar ni enmascarar una restauración que ya se confirmó correctamente.
-            try { dalPedido.RecalcularDV(); }
-            catch { /* ignorado intencionalmente — el operador puede recalcular desde Diagnóstico */ }
 
             RegistrarHistorial(idPedido, "RESTAURAR",
                 cambios.Select(c => (c.Campo, c.ValorNuevo, c.ValorAnterior)).ToList());

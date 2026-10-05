@@ -14,8 +14,8 @@ namespace BLL
         private readonly DAL.Interfaces.ICobroDAL dalCobro;
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
         private readonly Manejadores.ManejadorCobro cadena;
 
         public Cobro() : this(new DAL.Cliente(), new DAL.Cobro(), new DAL.CargoPrenda(), new DAL.Promocion()) { }

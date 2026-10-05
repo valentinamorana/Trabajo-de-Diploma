@@ -24,8 +24,8 @@ namespace BLL
         // —y testear con un IUsuarioDAL falso— no toca la BD a través de sus DAL internos.
         private BLL.Familia _perfilesLazy;
         private BLL.Familia perfilesBLL => _perfilesLazy ?? (_perfilesLazy = new BLL.Familia());
-        private Servicios.Bitacora _bitacoraLazy;
-        private Servicios.Bitacora bitacora => _bitacoraLazy ?? (_bitacoraLazy = new Servicios.Bitacora());
+        private Servicios.IRegistroBitacora _bitacoraLazy;
+        private Servicios.IRegistroBitacora bitacora => _bitacoraLazy ?? (_bitacoraLazy = Servicios.FabricaBitacora.CrearSistema());
 
         // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble.
         public Usuario() : this(new DAL.Usuario()) { }

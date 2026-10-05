@@ -146,7 +146,7 @@ classDiagram
     +Despachar(int) void
     +MarcarEntregado(int) void
     +RegistrarDevolucion(int,  int) int
-    +Cancelar(int,  string) void
+    +Cancelar(int,  int,  EstadoPedido,  string) void
     +DesCancelar(int,  int) bool
   }
   Pedido --> "1" Cliente : IdCliente

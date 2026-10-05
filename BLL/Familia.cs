@@ -17,8 +17,8 @@ namespace BLL
         private readonly DAL.Interfaces.IPermisoDAL permisoDAL;
         // Bitácora perezosa: solo se instancia cuando una operación de escritura la usa.
         // Así los métodos de lectura/resolución se pueden testear sin tocar la BD.
-        private Servicios.Bitacora _bitacoraLazy;
-        private Servicios.Bitacora _bitacora => _bitacoraLazy ?? (_bitacoraLazy = new Servicios.Bitacora());
+        private Servicios.IRegistroBitacora _bitacoraLazy;
+        private Servicios.IRegistroBitacora _bitacora => _bitacoraLazy ?? (_bitacoraLazy = Servicios.FabricaBitacora.CrearSistema());
 
         // Inyección de dependencias: el constructor por defecto usa el DAL real;
         // el segundo permite inyectar un doble de prueba (tests unitarios sin BD).

@@ -49,36 +49,86 @@ namespace DAL
     /// </summary>
     public class Permiso : BaseDAL, Interfaces.IPermisoDAL
     {
-        // Código de error nativo de SQL Server para "Invalid column name" — antes el catch de
-        // abajo no filtraba nada (catch (SqlException) a secas), así que CUALQUIER falla de SQL
-        // (timeout, deadlock, permisos, etc.) se interpretaba como "columna EsRol sin migrar" y
-        // reintentaba con una consulta distinta en vez de propagar el error real.
-        private const int ColumnaInexistente = 207;
+        // ── T07 — Dígito Verificador de PermisoRelacion (formato 2) ─────────────────
+        // Las aristas padre→hijo definen qué puede hacer cada rol: agregar por SQL una patente a
+        // un rol (escalada de privilegios) queda detectado. La tabla tiene clave compuesta, por
+        // eso no usa el DV genérico por Id: el DVH pondera IdPadre e IdHijo y el DVV se calcula
+        // en el orden (IdPadre, IdHijo).
+        public const string DV_TablaRelacion = "PermisoRelacion";
+        private static readonly string OrdenRelacion = DigitoVerificador.OrdenPor("IdPadre", "IdHijo");
+
+        private static BE.FilaDV MapearRelacion(DataRow r)
+        {
+            int padre = Convert.ToInt32(r["IdPadre"]), hijo = Convert.ToInt32(r["IdHijo"]);
+            return new BE.FilaDV
+            {
+                Id            = padre,
+                Campos        = new[] { DigitoVerificador.Formatear(padre), DigitoVerificador.Formatear(hijo) },
+                DVHAlmacenado = r["DVH"] == DBNull.Value ? (int?)null : Convert.ToInt32(r["DVH"]),
+                Descripcion   = "PermisoRelacion " + padre + "→" + hijo
+            };
+        }
+
+        public List<BE.FilaDV> ObtenerFilasDVRelacion()
+        {
+            var lista = new List<BE.FilaDV>();
+            DataTable dt = acceso.Leer("SELECT IdPadre, IdHijo, DVH FROM PermisoRelacion ORDER BY " + OrdenRelacion, null);
+            foreach (DataRow r in dt.Rows) lista.Add(MapearRelacion(r));
+            return lista;
+        }
+
+        // Recalcula el DVH de la arista (si existe) y el DVV desde los DVH almacenados.
+        // El bloqueo del DV ya debe estar tomado en la transacción.
+        private static void ActualizarDVRelacionEnTx(SqlConnection cn, SqlTransaction tx, int idPadre, int idHijo)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE PermisoRelacion SET DVH = @dvh WHERE IdPadre = @p AND IdHijo = @h", cn, tx))
+            {
+                cmd.Parameters.AddWithValue("@dvh", Seguridad.CalculadorDV.Crear().CalcularDVH(
+                    DigitoVerificador.Formatear(idPadre), DigitoVerificador.Formatear(idHijo)));
+                cmd.Parameters.AddWithValue("@p", idPadre);
+                cmd.Parameters.AddWithValue("@h", idHijo);
+                cmd.ExecuteNonQuery();
+            }
+            DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_TablaRelacion, OrdenRelacion);
+        }
+
+        // Recalcula TODAS las aristas (solo recálculo administrativo / inicialización).
+        public void RecalcularDVRelaciones()
+        {
+            new DigitoVerificador().EjecutarConBloqueo(DV_TablaRelacion, (cn, tx) =>
+            {
+                var svc = Seguridad.CalculadorDV.Crear();
+                var dt = DigitoVerificador.LeerEnTx(cn, tx, "SELECT IdPadre, IdHijo, DVH FROM PermisoRelacion ORDER BY " + OrdenRelacion);
+                var dvhs = new List<int>();
+                foreach (DataRow r in dt.Rows)
+                {
+                    var fila = MapearRelacion(r);
+                    int dvh = svc.CalcularDVH(fila.Campos);
+                    using (var cmd = new SqlCommand(
+                        "UPDATE PermisoRelacion SET DVH = @dvh WHERE IdPadre = @p AND IdHijo = @h", cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@dvh", dvh);
+                        cmd.Parameters.AddWithValue("@p", Convert.ToInt32(r["IdPadre"]));
+                        cmd.Parameters.AddWithValue("@h", Convert.ToInt32(r["IdHijo"]));
+                        cmd.ExecuteNonQuery();
+                    }
+                    dvhs.Add(dvh);
+                }
+                DigitoVerificador.GuardarDVVEnTx(cn, tx, DV_TablaRelacion, svc.CalcularDVV(dvhs));
+            });
+        }
 
         // Construye el árbol Composite completo desde BD.
         // Lee Permiso (EsFamilia discrimina tipo) y PermisoRelacion (padre→hijo).
         // Retorna los nodos raíz (Familias sin padre) listas para que BLL las envuelva.
         public List<BE.Componente> ObtenerArbol()
         {
-            // EsRol se lee de forma resiliente: si la columna aún no existe (BD sin migrar),
-            // se trata todo EsFamilia como Familia común.
-            DataTable dt;
-            try
-            {
-                dt = acceso.Leer(
-                    "SELECT IdPermiso, Nombre, NombreMenu, EsFamilia, " +
-                    "ISNULL(EsRol,0) AS EsRol " +
-                    "FROM Permiso WHERE Estado = 1 ORDER BY EsFamilia DESC, Nombre",
-                    null);
-            }
-            catch (SqlException ex) when (ex.Number == ColumnaInexistente)
-            {
-                dt = acceso.Leer(
-                    "SELECT IdPermiso, Nombre, NombreMenu, EsFamilia, " +
-                    "CAST(0 AS BIT) AS EsRol " +
-                    "FROM Permiso WHERE Estado = 1 ORDER BY EsFamilia DESC, Nombre",
-                    null);
-            }
+            DataTable dt = acceso.Leer(
+                "SELECT IdPermiso, Nombre, NombreMenu, EsFamilia, " +
+                "ISNULL(EsRol,0) AS EsRol " +
+                "FROM Permiso WHERE Estado = 1 ORDER BY EsFamilia DESC, Nombre",
+                null);
 
             var nodos = new Dictionary<int, BE.Componente>();
 
@@ -107,9 +157,7 @@ namespace DAL
                 }
             }
 
-            DataTable rels;
-            try { rels = acceso.Leer("SELECT IdPadre, IdHijo FROM PermisoRelacion", null); }
-            catch { rels = new System.Data.DataTable(); }
+            DataTable rels = acceso.Leer("SELECT IdPadre, IdHijo FROM PermisoRelacion", null);
             var conPadre = new HashSet<int>();
 
             foreach (DataRow row in rels.Rows)
@@ -137,8 +185,6 @@ namespace DAL
         // Roles disponibles en el sistema.
         // T04: los roles son nodos del Composite (EsRol=1), de modo que un rol recién
         // creado aparece aunque todavía no tenga permisos asignados.
-        // FALLBACK LEGACY: solo si la columna EsRol no existe (BD sin migrar) se cae a [RolPermiso].
-        // En una BD migrada esta rama no se ejecuta (ver nota de la clase sobre RolPermiso).
         public List<string> ObtenerRoles()
         {
             var lista = new List<string>();
@@ -150,14 +196,6 @@ namespace DAL
                 if (tabla == null) return lista;
                 foreach (DataRow row in tabla.Rows)
                     lista.Add(row["Nombre"].ToString());
-            }
-            catch (SqlException)
-            {
-                DataTable tabla = acceso.Leer(
-                    "SELECT DISTINCT Rol FROM RolPermiso ORDER BY Rol", null);
-                if (tabla == null) return lista;
-                foreach (DataRow row in tabla.Rows)
-                    lista.Add(row["Rol"].ToString());
             }
             catch (Exception ex)
             {
@@ -280,6 +318,7 @@ namespace DAL
                 // pero todavía activo, o dado de baja con relaciones colgantes.
                 acceso.EjecutarTransaccion((conexion, tx) =>
                 {
+                    DigitoVerificador.Bloquear(conexion, tx, DV_TablaRelacion);
                     using (var cmd = new SqlCommand(
                         "DELETE FROM PermisoRelacion WHERE IdPadre = @id OR IdHijo = @id; " +
                         "UPDATE Permiso SET Estado = 0 WHERE IdPermiso = @id",
@@ -288,35 +327,14 @@ namespace DAL
                         cmd.Parameters.AddWithValue("@id", idPermiso);
                         cmd.ExecuteNonQuery();
                     }
+                    // T07 — cambió el conjunto de aristas: DVV desde los DVH almacenados.
+                    DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(conexion, tx, DV_TablaRelacion, OrdenRelacion);
                 });
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error al dar de baja el componente {idPermiso}.", ex);
             }
-        }
-
-        // NombreMenu de todas las PATENTES (permisos simples) activas. Sirve para saber qué
-        // patentes de acción granular ("…Editar") están DEFINIDAS en el catálogo, y así
-        // BLL.PermisosAccion decide si exige el permiso de edición o cae al de ver (legacy).
-        public List<string> ObtenerNombresMenuPatentes()
-        {
-            var lista = new List<string>();
-            DataTable t;
-            try
-            {
-                t = acceso.Leer(
-                    "SELECT NombreMenu FROM Permiso " +
-                    "WHERE ISNULL(EsFamilia,0) = 0 AND Estado = 1 AND NombreMenu IS NOT NULL", null);
-            }
-            catch { return lista; }   // BD sin columnas esperadas → vacío → fallback legacy
-            if (t == null) return lista;
-            foreach (DataRow row in t.Rows)
-            {
-                string nm = row["NombreMenu"]?.ToString();
-                if (!string.IsNullOrEmpty(nm)) lista.Add(nm);
-            }
-            return lista;
         }
 
         // Ids de los hijos DIRECTOS de un nodo (un solo nivel).
@@ -337,10 +355,21 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
-                    "IF NOT EXISTS (SELECT 1 FROM PermisoRelacion WHERE IdPadre = @p AND IdHijo = @h) " +
-                    "INSERT INTO PermisoRelacion (IdPadre, IdHijo) VALUES (@p, @h)",
-                    new[] { new SqlParameter("@p", idPadre), new SqlParameter("@h", idHijo) });
+                // La arista y su DV se escriben en la MISMA transacción (con el bloqueo del DV
+                // tomado primero): no queda una arista nueva sin DVH válido.
+                acceso.EjecutarTransaccion((cn, tx) =>
+                {
+                    DigitoVerificador.Bloquear(cn, tx, DV_TablaRelacion);
+                    using (var cmd = new SqlCommand(
+                        "IF NOT EXISTS (SELECT 1 FROM PermisoRelacion WHERE IdPadre = @p AND IdHijo = @h) " +
+                        "INSERT INTO PermisoRelacion (IdPadre, IdHijo, DVH) VALUES (@p, @h, 0)", cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@p", idPadre);
+                        cmd.Parameters.AddWithValue("@h", idHijo);
+                        cmd.ExecuteNonQuery();
+                    }
+                    ActualizarDVRelacionEnTx(cn, tx, idPadre, idHijo);
+                });
             }
             catch (Exception ex)
             {
@@ -353,9 +382,18 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
-                    "DELETE FROM PermisoRelacion WHERE IdPadre = @p AND IdHijo = @h",
-                    new[] { new SqlParameter("@p", idPadre), new SqlParameter("@h", idHijo) });
+                acceso.EjecutarTransaccion((cn, tx) =>
+                {
+                    DigitoVerificador.Bloquear(cn, tx, DV_TablaRelacion);
+                    using (var cmd = new SqlCommand(
+                        "DELETE FROM PermisoRelacion WHERE IdPadre = @p AND IdHijo = @h", cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@p", idPadre);
+                        cmd.Parameters.AddWithValue("@h", idHijo);
+                        cmd.ExecuteNonQuery();
+                    }
+                    DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_TablaRelacion, OrdenRelacion);
+                });
             }
             catch (Exception ex)
             {

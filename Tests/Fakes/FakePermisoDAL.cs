@@ -96,6 +96,5 @@ namespace Tests.Fakes
 
         public int              ContarUsuariosPorRol(string r)  => ContarUsuariosPorRolRespuesta;
         public List<string>     ObtenerUsuariosPorRol(string r) => ObtenerUsuariosPorRolRespuesta;
-        public List<string>     ObtenerNombresMenuPatentes()    => new List<string>();
     }
 }

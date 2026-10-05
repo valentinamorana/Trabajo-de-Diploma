@@ -92,6 +92,8 @@
     <Compile Include="ReporteTendenciaTests.cs" />
     <Compile Include="RecuperacionAdminTests.cs" />
     <Compile Include="Fakes\FakeBackupDAL.cs" />
+    <Compile Include="Fakes\FakeRegistroBitacora.cs" />
+    <Compile Include="ConfiguracionTests.cs" />
     <Compile Include="Fakes\FakeClaveRecuperacionDAL.cs" />
     <Compile Include="Fakes\FakePermisoDAL.cs" />
     <Compile Include="Fakes\FakeUsuarioDAL.cs" />

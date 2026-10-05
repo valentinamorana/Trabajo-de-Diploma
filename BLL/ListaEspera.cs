@@ -17,8 +17,8 @@ namespace BLL
         private readonly DAL.Interfaces.IListaEsperaDAL dalListaEspera;
         private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
         public ListaEspera() : this(new DAL.ListaEspera(), new DAL.Prenda(), new DAL.Cliente()) { }
 

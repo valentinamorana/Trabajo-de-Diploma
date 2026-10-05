@@ -20,7 +20,8 @@ namespace DAL.Interfaces
         void             BloquearConTiempo(int idUsuario);
         void             AutoDesbloquear(int idUsuario);
         void             Desbloquear(int idUsuario);
-        void             IncrementarIntentosFallidos(string username);
+        // Devuelve el contador RESULTANTE (OUTPUT inserted), o null si el usuario no existe.
+        int?             IncrementarIntentosFallidos(string username);
         void             ResetearIntentosFallidos(string username);
         void             ResetearClave(int idUsuario, string claveHasheada);
         // Cambio de clave por el propio usuario (baja el flag RequiereCambioClave).

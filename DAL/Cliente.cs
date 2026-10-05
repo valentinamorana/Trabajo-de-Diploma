@@ -12,17 +12,25 @@ namespace DAL
         // tanto para recalcular tras escrituras como para verificar al arrancar).
         public const  string   DV_Tabla    = "Cliente";
         public const  string   DV_Pk       = "IdCliente";
-        public static readonly string[] DV_Columnas = { "Nombre", "Apellido", "DNI", "Email", "MetodoPago" };
+        // Formato 2: además de los datos personales, el estado de la suscripción y el dinero
+        // (plan, vencimientos, gracia, pausa, crédito de referido, referente y baja lógica).
+        public static readonly string[] DV_Columnas =
+        {
+            "Nombre", "Apellido", "DNI", "Email", "MetodoPago",
+            "IdPlan", "FechaVencimiento", "FechaLimiteGracia", "FechaPausaHasta",
+            "DescuentoProximoCobro", "IdClienteReferente", "Activo"
+        };
 
-        // Recalcula DVH de cada fila + DVV de la tabla. Se llama tras Alta/Modificar/Baja.
+        // Recalcula el DVH de la fila del cliente + el DVV de la tabla desde los DVH almacenados
+        // (DigitoVerificador.ActualizarFila). Se llama tras Alta/Modificar/Baja.
         // No propaga errores: la falla del DV no debe abortar la operación de negocio
         // (la verificación de integridad al arranque la detectaría igual).
         // Público (antes privado): ModificarEnTx no lo llama internamente porque corre DENTRO
         // de una transacción todavía sin confirmar — el caller (ver EjecutarTransaccion) debe
         // invocarlo DESPUÉS del commit, mismo criterio que DAL.Pedido.Alta con su propio DV.
-        public void RecalcularDV()
+        public void RecalcularDV(int idCliente)
         {
-            try { new DigitoVerificador().RecalcularTabla(DV_Tabla, DV_Pk, DV_Columnas); }
+            try { new DigitoVerificador().ActualizarFila(DV_Tabla, DV_Pk, DV_Columnas, idCliente); }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Cliente.RecalcularDV] " + ex.Message); }
         }
 
@@ -173,7 +181,7 @@ namespace DAL
             int idNuevo = tabla != null && tabla.Rows.Count > 0
                 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"])
                 : 0;
-            RecalcularDV();   // T07
+            RecalcularDV(idNuevo);   // T07
             return idNuevo;
         }
 
@@ -203,7 +211,7 @@ namespace DAL
                 "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
                 "WHERE IdCliente=@IdCliente",
                 p);
-            RecalcularDV();   // T07
+            RecalcularDV(cliente.IdCliente);   // T07
         }
 
         // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
@@ -281,7 +289,7 @@ namespace DAL
             SqlParameter[] p = { new SqlParameter("@IdCliente", idCliente) };
             acceso.Escribir(
                 "UPDATE Cliente SET Activo = 0 WHERE IdCliente = @IdCliente", p);
-            RecalcularDV();   // T07
+            RecalcularDV(idCliente);   // T07
         }
 
         private BE.Cliente Mapear(DataRow row)

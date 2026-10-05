@@ -55,7 +55,7 @@ namespace BLL.Manejadores
                     Actor = contexto.Actor
                 });
             });
-            dalCliente.RecalcularDV();
+            dalCliente.RecalcularDV(cliente.IdCliente);
 
             var prendasEnUso = dalPrenda.ObtenerPorCliente(cliente.IdCliente);
             bool conPrendas = prendasEnUso.Count > 0;

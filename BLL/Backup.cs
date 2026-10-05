@@ -12,8 +12,8 @@ namespace BLL
         private readonly DAL.Interfaces.IBackupDAL _dal;
         // Bitácora perezosa: solo se instancia cuando una operación de escritura la usa, para que
         // construir BLL.Backup (y testear el preview RF-08) no toque la BD ni el App.config.
-        private Servicios.Bitacora _bitacoraLazy;
-        private Servicios.Bitacora _bitacora => _bitacoraLazy ?? (_bitacoraLazy = new Servicios.Bitacora());
+        private Servicios.IRegistroBitacora _bitacoraLazy;
+        private Servicios.IRegistroBitacora _bitacora => _bitacoraLazy ?? (_bitacoraLazy = Servicios.FabricaBitacora.CrearSistema());
 
         // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble
         // de prueba (tests del preview de pérdida RF-08 sin tocar SQL Server).

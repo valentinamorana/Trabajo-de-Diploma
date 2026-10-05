@@ -101,7 +101,7 @@ namespace BLL.Manejadores
 
                         "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.");
             });
-            dalCliente.RecalcularDV();
+            dalCliente.RecalcularDV(cliente.IdCliente);
 
             // Clave (y Mensaje de respaldo) distinta por combinación, igual que
             // BajaSuscripcionHandler con renov.msg.baja/renov.msg.baja_conprendas: el Mensaje
@@ -178,7 +178,7 @@ namespace BLL.Manejadores
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError($"[ProcesarPagoHandler] No se pudieron leer las promociones: {ex.Message}");
-                try { new Servicios.Bitacora().Registrar("Cobro", $"No se pudieron leer las promociones vigentes; se cobró sin descuento: {ex.Message}", BE.Criticidad.Media); }
+                try { Servicios.FabricaBitacora.CrearSistema().Registrar("Cobro", $"No se pudieron leer las promociones vigentes; se cobró sin descuento: {ex.Message}", BE.Criticidad.Media); }
                 catch { }
                 return new System.Collections.Generic.List<BE.Promocion>();
             }

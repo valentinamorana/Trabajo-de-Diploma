@@ -23,6 +23,5 @@ namespace DAL.Interfaces
         List<string>        ObtenerUsuariosPorRol(string rol);
         // Catálogo de NombreMenu de todas las patentes definidas (usado por BLL.PermisosAccion
         // para saber qué patentes de acción granular existen sin cablearlas a mano).
-        List<string>        ObtenerNombresMenuPatentes();
     }
 }

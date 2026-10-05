@@ -20,7 +20,7 @@ namespace BLL
         /// </summary>
         public void RegistrarSinSesion(string modulo, string actividad, BE.Criticidad criticidad,
                                         int? idUsuario = null, string detalle = null)
-            => srvSistema.RegistrarSinSesion(modulo, actividad, criticidad, idUsuario, detalle);
+            => Servicios.FabricaBitacora.CrearSistema().RegistrarSinSesion(modulo, actividad, criticidad, idUsuario, detalle);
 
         // ── Sistema ───────────────────────────────────────────────────────────
 

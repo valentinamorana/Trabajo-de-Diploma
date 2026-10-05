@@ -11,6 +11,27 @@ namespace DAL
     /// </summary>
     public class Contratacion : BaseDAL, Interfaces.IContratacionDAL
     {
+        // T07 — Dígito Verificador (formato 2): la contratación tiene el dinero cobrado, quién
+        // vendió y quién cobró. Una alteración por SQL (por ejemplo del importe o de IdCaja)
+        // queda detectada por la verificación de integridad.
+        public const  string   DV_Tabla    = "Contratacion";
+        public const  string   DV_Pk       = "IdContratacion";
+        public static readonly string[] DV_Columnas =
+        {
+            "IdCliente", "IdPlan", "IdVendedor", "IdCaja", "Modalidad", "Estado", "FechaAlta",
+            "FechaResolucion", "IdMedioPago", "NumeroComprobante", "FechaComprobante", "Importe",
+            "DescuentoAplicado", "IdPromocion", "VigenciaDesde", "VigenciaHasta", "PrecioMensual",
+            "IdReferenteAcreditado"
+        };
+
+        // Recalcula el DVH de la fila y el DVV de la tabla. Best-effort: la escritura de negocio
+        // ya quedó confirmada; si esto falla, la verificación de integridad lo detecta.
+        private static void ActualizarDV(int idContratacion)
+        {
+            try { new DigitoVerificador().ActualizarFila(DV_Tabla, DV_Pk, DV_Columnas, idContratacion); }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Contratacion.ActualizarDV] " + ex.Message); }
+        }
+
         private const string SELECT_BASE =
             "SELECT c.IdContratacion, c.IdCliente, c.IdPlan, c.IdVendedor, c.IdCaja, c.Modalidad, " +
             "c.Estado, c.FechaAlta, c.FechaResolucion, c.IdMedioPago, mp.Nombre AS NombreMedioPago, " +
@@ -74,7 +95,9 @@ namespace DAL
                     "INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, Modalidad, Estado, FechaAlta, PrecioMensual) " +
                     "VALUES (@IdCliente, @IdPlan, @IdVendedor, @Modalidad, 0, @FechaAlta, @PrecioMensual); " +
                     "SELECT SCOPE_IDENTITY() AS IdNuevo", p);
-                return tabla != null && tabla.Rows.Count > 0 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"]) : 0;
+                int id = tabla != null && tabla.Rows.Count > 0 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"]) : 0;
+                if (id > 0) ActualizarDV(id);
+                return id;
             }
             catch (Exception ex) { throw new Exception("Error al registrar la contratación.", ex); }
         }
@@ -97,11 +120,13 @@ namespace DAL
             try
             {
                 // "Claim" atómico: solo una sesión puede pasar de PendientePago (0) a Pagada.
-                return acceso.Escribir(
+                bool ok = acceso.Escribir(
                     "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, IdMedioPago = @IdMedioPago, " +
                     "NumeroComprobante = @NumeroComprobante, FechaComprobante = @Ahora, " +
                     "Importe = @Importe, DescuentoAplicado = @Descuento, IdPromocion = @IdPromocion, " +
                     "FechaResolucion = @Ahora WHERE IdContratacion = @IdContratacion AND Estado = 0", p) > 0;
+                if (ok) ActualizarDV(idContratacion);
+                return ok;
             }
             catch (Exception ex) { throw new Exception("Error al confirmar el cobro de la contratación.", ex); }
         }
@@ -120,6 +145,7 @@ namespace DAL
                 acceso.Escribir(
                     "UPDATE Contratacion SET VigenciaDesde = @Desde, VigenciaHasta = @Hasta, IdReferenteAcreditado = @IdReferente " +
                     "WHERE IdContratacion = @IdContratacion AND Estado = 1", p);
+                ActualizarDV(idContratacion);
             }
             catch (Exception ex) { throw new Exception("Error al registrar la vigencia de la contratación.", ex); }
         }
@@ -134,6 +160,7 @@ namespace DAL
                     "FechaComprobante = NULL, Importe = NULL, DescuentoAplicado = NULL, IdPromocion = NULL, " +
                     "FechaResolucion = NULL, VigenciaDesde = NULL, VigenciaHasta = NULL, IdReferenteAcreditado = NULL " +
                     "WHERE IdContratacion = @IdContratacion AND Estado = 1", p);
+                ActualizarDV(idContratacion);
             }
             catch (Exception ex) { throw new Exception("Error al reabrir la contratación tras un cobro fallido.", ex); }
         }
@@ -194,6 +221,7 @@ namespace DAL
                 });
             }
             catch (Exception ex) { throw new Exception("Error al registrar el intento de pago.", ex); }
+            if (resultado != null && resultado.Cancelada) ActualizarDV(idContratacion);
             return resultado;
         }
 

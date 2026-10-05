@@ -12,8 +12,8 @@ namespace BLL
     public class Renovacion : Interfaces.IRenovacionService
     {
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
         private readonly Manejadores.ManejadorRenovacion cadena;
 
         public Renovacion() : this(new DAL.Cliente(), new DAL.Renovacion(), new DAL.PlanSuscripcion(), new DAL.Prenda()) { }

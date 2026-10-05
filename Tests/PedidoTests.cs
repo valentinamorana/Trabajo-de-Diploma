@@ -711,6 +711,7 @@ namespace Tests
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
             ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1) };
             var pedido = PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1));
             pedido.PrendasConfirmadas = new List<int> { 1 };
@@ -728,6 +729,7 @@ namespace Tests
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
             ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1) };   // disponible al revisar
             var pedido = PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1));
             pedido.PrendasConfirmadas = new List<int> { 1 };
@@ -829,7 +831,8 @@ namespace Tests
 
             p.Estado = BE.EstadoPedido.Separado;
             Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.Pendiente));
-            Assert.IsFalse(p.TransicionValida(BE.EstadoPedido.Cancelado));
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.Cancelado), "Cancelar pedido separado: única salida además de formalizar.");
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPedido.Despachado));
 
             p.Estado = BE.EstadoPedido.Desistido;
             Assert.IsFalse(p.TransicionValida(BE.EstadoPedido.EnControlStock), "Desistido es final.");
@@ -1157,14 +1160,18 @@ namespace Tests
             var ctx = new Contexto();
             ctx.DalHistorial.CambiosParaOperacion = new List<BE.PedidoHistorial>
             {
-                new BE.PedidoHistorial { Campo = "Estado", Accion = "CANCELAR", ValorAnterior = "Pendiente", ValorNuevo = "Cancelado" }
+                new BE.PedidoHistorial { Campo = "Estado", Accion = "DESPACHAR", ValorAnterior = "Pendiente", ValorNuevo = "Despachado" }
             };
+            ctx.DalHistorial.SiguienteIdOperacion = 6;   // la #5 es la última operación del pedido
+            ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 1, Estado = BE.EstadoPedido.Despachado });
             var bll = ctx.Crear();
 
             bll.RestaurarOperacion("Test", 1, 5);
 
-            // El DAL debe recibir el ValorAnterior original (a donde hay que volver).
+            // El DAL debe recibir el ValorAnterior original (a donde hay que volver) y el estado
+            // que tiene que seguir teniendo el pedido (claim atómico).
             Assert.AreEqual(1, ctx.DalPedido.RestaurarOperacionAtomicaVeces);
+            Assert.AreEqual(BE.EstadoPedido.Despachado, ctx.DalPedido.UltimoEstadoEsperadoRestaurar);
             Assert.AreEqual("Estado", ctx.DalPedido.UltimoRestaurarOperacionCampos[0].Campo);
             Assert.AreEqual("Pendiente", ctx.DalPedido.UltimoRestaurarOperacionCampos[0].ValorAnterior);
 
@@ -1175,8 +1182,120 @@ namespace Tests
             Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces);
             var restaurado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
             Assert.AreEqual("RESTAURAR", restaurado.Accion);
-            Assert.AreEqual("Cancelado", restaurado.ValorAnterior);
+            Assert.AreEqual("Despachado", restaurado.ValorAnterior);
             Assert.AreEqual("Pendiente", restaurado.ValorNuevo);
+        }
+
+        // ── Restaurar desde el historial: solo lo seguro (hallazgo BLOQUEANTE) ──
+
+        private static void ProbarRestauracionRechazada(string accion, string anterior, string nuevo,
+                                                         BE.EstadoPedido estadoActual, int siguiente, int op, string claveEsperada)
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalHistorial.CambiosParaOperacion = new List<BE.PedidoHistorial>
+            {
+                new BE.PedidoHistorial { Campo = "Estado", Accion = accion, ValorAnterior = anterior, ValorNuevo = nuevo }
+            };
+            ctx.DalHistorial.SiguienteIdOperacion = siguiente;
+            ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 1, Estado = estadoActual });
+            try { ctx.Crear().RestaurarOperacion("Test", 1, op); Assert.Fail("Debía rechazar: " + accion); }
+            catch (BE.AppException ex) { Assert.AreEqual(claveEsperada, ex.Clave, accion); }
+            finally { SessionManager.Logout(); }
+            Assert.AreEqual(0, ctx.DalPedido.RestaurarOperacionAtomicaVeces, "No debe tocar el pedido ni las prendas.");
+        }
+
+        [TestMethod]
+        public void RestaurarOperacion_AccionesConFlujoPropio_NoSeRevierten()
+        {
+            // Revertir estas operaciones reasignaba prendas a ciegas (podían estar en otro pedido).
+            ProbarRestauracionRechazada("CANCELAR", "Pendiente", "Cancelado", BE.EstadoPedido.Cancelado, 6, 5, "err.bll.pedido.restaurar_no_restaurable");
+            ProbarRestauracionRechazada("DESCANCELAR", "Cancelado", "EnControlStock", BE.EstadoPedido.EnControlStock, 6, 5, "err.bll.pedido.restaurar_no_restaurable");
+            ProbarRestauracionRechazada("DEVOLUCION", "EnUso", "EnLimpieza", BE.EstadoPedido.Entregado, 6, 5, "err.bll.pedido.restaurar_no_restaurable");
+            ProbarRestauracionRechazada("RESTAURAR", "Despachado", "Pendiente", BE.EstadoPedido.Pendiente, 6, 5, "err.bll.pedido.restaurar_no_restaurable");
+        }
+
+        [TestMethod]
+        public void RestaurarOperacion_NoEsLaUltima_SeRechaza()
+        {
+            // Entregó (op 5) y después se registró la devolución (op 6): deshacer la entrega dejaría
+            // al pedido "Despachado" con las prendas ya en limpieza.
+            ProbarRestauracionRechazada("ENTREGAR", "Despachado", "Entregado", BE.EstadoPedido.Entregado, 7, 5, "err.bll.pedido.restaurar_no_ultima");
+        }
+
+        [TestMethod]
+        public void RestaurarOperacion_ElPedidoYaNoEstaEnElEstadoQueDejoLaOperacion_SeRechaza()
+        {
+            ProbarRestauracionRechazada("DESPACHAR", "Pendiente", "Despachado", BE.EstadoPedido.Entregado, 6, 5, "err.dal.pedido.estado_cambiado");
+        }
+
+        // ── Cancelar pedido separado (salida del estado Separado) ──
+
+        [TestMethod]
+        public void Cancelar_PedidoSeparado_CancelaConClaimYRegistraHistorial()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var pedido = new BE.Pedido { IdPedido = 3, IdCliente = 10, Estado = BE.EstadoPedido.Separado, NombreCliente = "Ana" };
+            Assert.IsTrue(pedido.PuedeCancelarse());
+
+            ctx.Crear().Cancelar("Test", pedido, "El cliente ya no lo quiere");
+
+            Assert.AreEqual(1, ctx.DalPedido.CancelarVeces);
+            Assert.AreEqual(BE.EstadoPedido.Separado, ctx.DalPedido.UltimoEstadoEsperadoCancelar, "Claim: solo si sigue Separado.");
+            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("Separado", estado.ValorAnterior);
+            Assert.AreEqual("Cancelado", estado.ValorNuevo);
+        }
+
+        [TestMethod]
+        public void Cancelar_PedidoDespachado_SeRechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var pedido = new BE.Pedido { IdPedido = 3, IdCliente = 10, Estado = BE.EstadoPedido.Despachado };
+            try { ctx.Crear().Cancelar("Test", pedido, "motivo"); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.cancelar_estado_separado", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.CancelarVeces);
+        }
+
+        [TestMethod]
+        public void Cancelar_MotivoMasLargoQueLaColumna_SeRechazaAntesDeEscribir()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var pedido = new BE.Pedido { IdPedido = 3, IdCliente = 10, Estado = BE.EstadoPedido.Pendiente };
+            try { ctx.Crear().Cancelar("Test", pedido, new string('x', BLL.Pedido.LargoMaximoMotivo + 1)); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.motivo_largo", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.CancelarVeces);
+        }
+
+        [TestMethod]
+        public void SepararPrendas_ClienteConSuscripcionPausada_NoReserva()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.FechaPausaHasta = DateTime.Now.AddDays(5);
+            ctx.DalCliente.ClientePorId = cliente;
+            var pedido = PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1));
+            pedido.PrendasConfirmadas = new List<int> { 1 };
+            try { ctx.Crear().SepararPrendas("Test", pedido); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.suscripcion_pausada", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces);
+        }
+
+        [TestMethod]
+        public void FormalizarPedido_ClienteVencido_NoFormaliza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.FechaVencimiento = DateTime.Today.AddDays(-1);
+            ctx.DalCliente.ClientePorId = cliente;
+            try { ctx.Crear().FormalizarPedido("Test", PedidoEn(BE.EstadoPedido.Separado, Prenda(1))); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.suscripcion_vencida", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.FormalizarVeces);
         }
 
         // ── PN01/PN04: cuenta bloqueada hasta registrar la devolución (regla de NUULY) ────

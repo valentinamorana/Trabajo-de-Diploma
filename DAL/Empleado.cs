@@ -15,12 +15,15 @@ namespace DAL
         // T07 — Definición del Dígito Verificador de esta tabla (fuente única).
         public const  string   DV_Tabla    = "Empleado";
         public const  string   DV_Pk       = "IdEmpleado";
-        public static readonly string[] DV_Columnas = { "Nombre", "Apellido", "DNI", "Email", "Puesto", "Legajo" };
+        // Formato 2: también IdUsuario — el vínculo empleado↔usuario decide quién figura como
+        // vendedor o cajero de cada operación (separación de funciones).
+        public static readonly string[] DV_Columnas = { "Nombre", "Apellido", "DNI", "Email", "Puesto", "Legajo", "IdUsuario" };
 
-        private void RecalcularDV()
+        // Recalcula el DVH de la fila y el DVV de la tabla (desde los DVH almacenados).
+        public void ActualizarDV(int idEmpleado)
         {
-            try { new DigitoVerificador().RecalcularTabla(DV_Tabla, DV_Pk, DV_Columnas); }
-            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Empleado.RecalcularDV] " + ex.Message); }
+            try { new DigitoVerificador().ActualizarFila(DV_Tabla, DV_Pk, DV_Columnas, idEmpleado); }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Empleado.ActualizarDV] " + ex.Message); }
         }
 
         // Devuelve todos los empleados con su username (si tienen usuario).
@@ -136,7 +139,7 @@ namespace DAL
             int idNuevo = tabla != null && tabla.Rows.Count > 0
                 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"])
                 : 0;
-            RecalcularDV();   // T07
+            ActualizarDV(idNuevo);   // T07
             return idNuevo;
         }
 
@@ -160,7 +163,7 @@ namespace DAL
                 "Email=@Email, FechaIngreso=@FechaIngreso, Puesto=@Puesto, Legajo=@Legajo, " +
                 "IdUsuario=@IdUsuario WHERE IdEmpleado=@IdEmpleado",
                 p);
-            RecalcularDV();   // T07
+            ActualizarDV(empleado.IdEmpleado);   // T07
         }
 
         private BE.Empleado Mapear(DataRow row)

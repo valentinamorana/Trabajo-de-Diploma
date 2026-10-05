@@ -769,6 +769,7 @@ var
   DbInstallerTmp: String;
   IndiceElegido: Integer;
   ConexionOk: Boolean;
+  Espera: TOutputProgressWizardPage;
 begin
   Result := True;
 
@@ -877,8 +878,16 @@ begin
     if FileExists(DbInstallerTmp) then
     begin
       LogPath := ExpandConstant('{tmp}\preflight.log');
-      ConexionOk := Exec(DbInstallerTmp, 'test-connection "' + ServidorElegido + '" "' + LogPath + '"',
-                         '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0);
+      // La prueba puede tardar hasta 30 s (arranque en frío): se muestra una página de espera
+      // para que el asistente no parezca colgado.
+      Espera := CreateOutputProgressPage('Base de datos', 'Probando la conexión con ' + ServidorElegido + '...');
+      Espera.Show;
+      try
+        ConexionOk := Exec(DbInstallerTmp, 'test-connection "' + ServidorElegido + '" "' + LogPath + '"',
+                           '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0);
+      finally
+        Espera.Hide;
+      end;
       if not ConexionOk then
       begin
         if SuppressibleMsgBox(
@@ -1203,7 +1212,13 @@ var
 begin
   if CurStep = ssPostInstall then
   begin
-    ActualizarConnectionString(ServidorElegido);
+    // Si no se pudo escribir el servidor en el .config, la app apuntaría a otro servidor aunque la
+    // verificación final (que usa ServidorElegido) pasara: se corta acá.
+    if not ActualizarConnectionString(ServidorElegido) then
+    begin
+      FallarInstalacion('No se pudo guardar el servidor elegido (' + ServidorElegido + ') en la configuración de la aplicación.', False);
+      exit;
+    end;
     LogPath := LogBaseDeDatos();
 
     // Servicio SQL Detenido (PPT slide "A01.1: Servicio SQL Detenido"):

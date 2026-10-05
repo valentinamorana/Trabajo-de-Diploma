@@ -57,9 +57,6 @@ namespace GUI
         public static readonly System.Drawing.Font FuenteSubtitulo = new System.Drawing.Font(FamiliaFuente, 10F, FontStyle.Bold);
         public static readonly System.Drawing.Font FuenteTitulo   = new System.Drawing.Font(FamiliaFuente, 12F, FontStyle.Bold);
 
-        /// <summary>Radio de esquina estándar para botones/cards/inputs (sección 15 del rediseño).</summary>
-        public const int RadioBoton = 6;
-
         /// <summary>Radio de esquina para inputs con borde propio (cajas de usuario/contraseña).</summary>
         public const int RadioCampo = 10;
 

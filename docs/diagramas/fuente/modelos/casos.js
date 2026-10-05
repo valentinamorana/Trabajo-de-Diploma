@@ -27,9 +27,10 @@ module.exports = [
     actores: [{ id: 'V', nombre: 'Vendedor' }, { id: 'C', nombre: 'Caja' }],
     casos: [
       { id: 'c1', nombre: 'CU01-VTA Gestionar Suscripción' }, { id: 'c2', nombre: 'CU01-CAJ Gestionar Cobro' },
-      { id: 'c3', nombre: 'CU02-CAJ Emitir Comprobante' }, { id: 'c4', nombre: 'CU03-CAJ Cancelar Contratación' }
+      { id: 'c3', nombre: 'CU02-CAJ Emitir Comprobante' }, { id: 'c4', nombre: 'CU03-CAJ Registrar Intento y Cancelar Contratación' },
+      { id: 'c5', nombre: 'CU02-VTA Asentar Desistimiento' }
     ],
-    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'C', caso: 'c2' }, { actor: 'C', caso: 'c4' }],
+    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c5' }, { actor: 'C', caso: 'c2' }, { actor: 'C', caso: 'c4' }],
     incluye: [{ de: 'c2', a: 'c3' }]
   },
   {

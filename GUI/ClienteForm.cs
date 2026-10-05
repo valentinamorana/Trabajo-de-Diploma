@@ -49,10 +49,13 @@ namespace GUI
             // (Vendedor) confirmada por Caja. En edición sí se puede corregir el plan
             // directamente (ajuste administrativo puntual, no pasa por Caja) junto con el
             // vencimiento, o mediante el proceso de Renovación (PdN5 — Chain of Responsibility).
-            lblPlan.Visible = _esEdicion;
-            cmbPlan.Visible = _esEdicion;
-            chkVencimiento.Visible = _esEdicion;
-            dtpVencimiento.Visible = _esEdicion;
+            // Corregir el plan o el vencimiento sin Contratación + Caja es una corrección
+            // administrativa: la BLL decide quién puede (solo Administrador, regla 6 de N01).
+            bool correccionAdmin = _esEdicion && new BLL.Cliente().PuedeCorregirPlanDirectamente();
+            lblPlan.Visible = correccionAdmin;
+            cmbPlan.Visible = correccionAdmin;
+            chkVencimiento.Visible = correccionAdmin;
+            dtpVencimiento.Visible = correccionAdmin;
 
             // Bloque 1 — Programa de referidos: el referente se fija una única vez, al alta
             // (ver DAL.Cliente.Alta/Modificar — IdClienteReferente no se puede editar después).

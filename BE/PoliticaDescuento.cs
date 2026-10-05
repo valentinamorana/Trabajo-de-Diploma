@@ -33,6 +33,14 @@ namespace BE
         public bool UsaCreditoReferido { get; set; }
         /// <summary>Número de comprobante emitido (null mientras solo se está calculando el importe).</summary>
         public string NumeroComprobante { get; set; }
+
+        /// <summary>Período activado por el cobro (Constancia de suscripción).</summary>
+        public System.DateTime? VigenciaDesde { get; set; }
+        public System.DateTime? VigenciaHasta { get; set; }
+
+        /// <summary>"¿Referido? Sí → Acreditar crédito": el referente al que se le acreditó el
+        /// beneficio con este cobro, o null si no correspondía.</summary>
+        public string ReferenteAcreditado { get; set; }
     }
 
     /// <summary>

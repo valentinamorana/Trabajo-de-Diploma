@@ -70,7 +70,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 ### PN01 — Armar pedido y logística
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `PedidosVenta` | Lista los pedidos del Vendedor y las acciones que corresponden a cada estado del armado (PN01). | + Nuevo Pedido · Ver faltantes · Ajustar selección · Registrar desistimiento · Formalizar pedido · Confirmación del pedido · Cancelar · Des-cancelar · Historial · Actualizar |
+| `PedidosVenta` | Lista los pedidos del Vendedor y las acciones que corresponden a cada estado del armado (PN01). | + Nuevo Pedido · Ver faltantes · Ajustar selección · Registrar desistimiento · Formalizar pedido · Confirmación del pedido · Cancelar · Reactivar (vuelve a control de stock) · Historial · Actualizar |
 | `NuevoPedidoForm` (modal) | Asistente en 2 pasos. Paso 1: identifica al cliente por DNI, nombre o apellido, muestra la ficha y verifica la vigencia y el pedido activo. Paso 2: catálogo, detalle de la selección y cupo del plan. Tiene un modo ajuste para los pedidos con faltantes, con las alternativas resaltadas. Imprime la planilla o el aviso de desistimiento. | Buscar · Siguiente → · ← Volver · Enviar a control de stock (o Reenviar) · Registrar desistimiento |
 | `ControlStockForm` | Pantalla de Depósito. Muestra la cola de pedidos enviados a control y la planilla con el estado real de cada prenda (disponible, reservada para otro o faltante). | Informar faltantes · Confirmar prendas disponibles · Separar prendas · Imprimir planilla · Actualizar |
 | `PedidoHistorialForm` | Historial de cambios de un pedido (solo lectura). | — |
@@ -84,8 +84,8 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 ### PN02 — Comercialización de la suscripción
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `NuevaContratacionForm` | El vendedor elige cliente, plan y modalidad; queda pendiente de cobro. | Confirmar · Cancelar |
-| `ContratacionesPendientesForm` | Caja cobra, emite comprobante o registra intento fallido (máximo 3). Aplica el descuento de PN03. | Cobrar · Intento Fallido · Actualizar |
+| `NuevaContratacionForm` | Carril Vendedor de PN02. Identifica al cliente por DNI, nombre o apellido (si no está registrado, lo registra) y presenta los planes con precio y límite. Valida la contratación e informa el motivo si no es válida. Muestra el importe a abonar y registra la contratación («Orden de cobro»), o asienta el desistimiento. | Buscar · Registrar cliente · Imprimir planes · Registrar contratación · El cliente desiste · Cerrar |
+| `ContratacionesPendientesForm` | Carril Caja de PN02. Muestra la cola con la liquidación (un solo descuento) y cobra con un medio de pago del catálogo: emite el comprobante, activa la suscripción y acredita al referente. También registra intentos con motivo; al tercero cancela automáticamente. La vista Resueltas permite reimprimir. | Pendientes/Resueltas · Cobrar · Intento Fallido · Ver intentos · Imprimir liquidación · Imprimir comprobante · Imprimir constancia · Actualizar |
 
 ### PN03 — Métricas, promociones y decisiones
 | Formulario | Qué hace | Acciones |

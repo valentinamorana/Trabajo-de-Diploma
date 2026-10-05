@@ -360,12 +360,12 @@ namespace GUI
             }
 
             string bodyDesc = string.Format(
-                Tr("conf.descancelar.body", "¿Des-cancelar el Pedido #{0} de {1}?\n\nSe verificará que las prendas originales estén disponibles\ny el pedido volverá a estado Pendiente."),
+                Tr("conf.ped.reactivar", "¿Reactivar el Pedido #{0} de {1}?\n\nVuelve a control de stock: Depósito revisa otra vez la disponibilidad y separa las prendas."),
                 pedido.IdPedido, pedido.NombreCliente);
 
             var confirmar = MessageBox.Show(
                 bodyDesc,
-                Tr("conf.descancelar.titulo", "Confirmar Des-cancelación"),
+                Tr("conf.ped.reactivar.titulo", "Reactivar pedido"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -375,7 +375,7 @@ namespace GUI
             try
             {
                 pedidoBLL.DesCancelar(this.Text, pedido);
-                string fmtReact = Tr("msg.ped.reactivado", "Pedido #{0} reactivado — volvió a Pendiente.");
+                string fmtReact = Tr("msg.ped.reactivadocontrol", "Pedido #{0} reactivado: volvió a control de stock.");
                 MostrarOk(string.Format(fmtReact, pedido.IdPedido));
                 CargarPedidos();
             }

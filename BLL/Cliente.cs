@@ -103,7 +103,7 @@ namespace BLL
             // beneficio de referido de ActivarSuscripcionInterna): reservado a Administrador
             // para no reabrir, con otro nombre, el mismo atajo que Vendedor tenía antes de
             // PN02 (activar una suscripción sin cobro real). La activación comercial normal
-            // sigue siendo exclusivamente BLL.Contratacion.ConfirmarPago →
+            // sigue siendo exclusivamente BLL.Contratacion.ConfirmarCobro →
             // ActivarSuscripcionDesdeContratacion.
             if (actual != null && (cliente.IdPlan != actual.IdPlan || cliente.FechaVencimiento != actual.FechaVencimiento))
                 BLLHelper.ExigirAdministrador("err.bll.cliente.plan_solo_admin",
@@ -147,6 +147,12 @@ namespace BLL
                     "No se puede eliminar a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.",
                     cliente.NombreCompleto, cliente.StockUtilizado);
 
+            // PN02: una contratación pendiente de pago quedaría sin poder cobrarse.
+            if (dalCliente.TieneContratacionPendiente(cliente.IdCliente))
+                throw new BE.AppException("err.bll.cliente.baja_contratacion",
+                    "No se puede dar de baja a {0}: tiene una contratación pendiente de pago. Caja tiene que cobrarla o cancelarla primero.",
+                    cliente.NombreCompleto);
+
             dalCliente.Baja(cliente.IdCliente);
             bitacora.Registrar(modulo, $"Baja Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.BajaCliente,
@@ -170,13 +176,22 @@ namespace BLL
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
+            // Activar sin pasar por Contratación + Caja es una corrección administrativa (PN02).
+            BLLHelper.ExigirAdministrador("err.bll.cliente.plan_solo_admin",
+                "Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. " +
+                "Para activar una suscripción nueva, usá el módulo de Contratación.");
             return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad);
         }
 
-        // PN02 — usada por BLL.Contratacion.ConfirmarPago cuando Caja confirma el pago de
+        // ¿El usuario puede corregir el plan o el vencimiento directamente (sin Contratación + Caja)?
+        // Solo el Administrador (regla 6 de N01). La pantalla usa esto para mostrar u ocultar esos campos.
+        public bool PuedeCorregirPlanDirectamente() =>
+            Seguridad.SessionManager.IsLoggedIn && Seguridad.SessionManager.GetInstance().Usuario.EsAdministrador;
+
+        // PN02 — usada por BLL.Contratacion.ConfirmarCobro cuando Caja confirma el pago de
         // una contratación y hay que formalizar la suscripción. Caja no tiene el permiso
         // ClientesEditar (separación de funciones a propósito frente a Vendedor): el gate acá
-        // es CajaEditar/Caja, ya exigido en BLL.Contratacion.ConfirmarPago antes de llamar a
+        // es CajaEditar/Caja, ya exigido en BLL.Contratacion.ConfirmarCobro antes de llamar a
         // este método — por eso NO vuelve a pedir el permiso de Vendedor.
         public BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
@@ -232,7 +247,7 @@ namespace BLL
                     dalCliente.SumarCreditoEnTx(conexion, tx, referente.IdCliente, MontoBeneficioReferido);
             });
             // La activación ya quedó confirmada: un fallo del registro posterior no debe propagarse,
-            // porque BLL.Contratacion.ConfirmarPago lo interpretaría como activación fallida y
+            // porque BLL.Contratacion.ConfirmarCobro lo interpretaría como activación fallida y
             // reabriría el cobro de una suscripción que sí quedó activa (doble cobro).
             try
             {
@@ -365,7 +380,7 @@ namespace BLL
 
             // PN02 — el plan ya NO se asigna en el alta: un cliente se registra sin plan y
             // recién lo adquiere a través de una Contratación (Vendedor) confirmada por Caja
-            // (BLL.Contratacion.ConfirmarPago → ActivarSuscripcionDesdeContratacion). Ver
+            // (BLL.Contratacion.ConfirmarCobro → ActivarSuscripcionDesdeContratacion). Ver
             // BE.EstadoComercialCliente / BLL.Pedido.ObtenerClienteValidado: "sin plan" ya es
             // un estado de cliente válido y manejado en todo el resto del sistema.
             if (!cliente.FechaNacimiento.HasValue)

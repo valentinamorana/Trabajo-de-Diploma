@@ -27,7 +27,10 @@ namespace Tests.Fakes
         public int UltimoIdBaja { get; private set; }
 
         public List<BE.Cliente> ObtenerTodos() => ClientesDevueltos;
-        public BE.Cliente ObtenerPorId(int idCliente) => ClientePorId;
+        // Clientes adicionales por ID (p. ej. el referente en PN02); si el ID no está, devuelve ClientePorId.
+        public Dictionary<int, BE.Cliente> OtrosClientesPorId { get; } = new Dictionary<int, BE.Cliente>();
+        public BE.Cliente ObtenerPorId(int idCliente)
+            => OtrosClientesPorId.TryGetValue(idCliente, out var otro) ? otro : ClientePorId;
 
         public int Alta(BE.Cliente cliente)
         {
@@ -50,6 +53,8 @@ namespace Tests.Fakes
 
         public bool ExisteDNI(string dni) => ExisteDNIRespuesta;
         public bool ExisteDNIParaOtro(string dni, int idExcluir) => ExisteDNIParaOtroRespuesta;
+        public bool TieneContratacionPendienteRespuesta { get; set; }
+        public bool TieneContratacionPendiente(int idCliente) => TieneContratacionPendienteRespuesta;
 
         // Sin BD real: no hay transacción que abrir, se ejecuta la acción directamente
         // (conexión/transacción null — los EnTx de estos fakes no las usan).

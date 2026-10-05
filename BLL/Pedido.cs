@@ -788,34 +788,34 @@ namespace BLL
                     "Solo se pueden des-cancelar pedidos Cancelados. Este pedido está '{0}'.",
                     pedido.Estado);
 
-            // Reactivar vuelve a reservar las prendas a nombre del cliente: se exigen las mismas
-            // condiciones del cliente que para armar un pedido (vigencia, sin otro pedido activo
-            // ni prendas sin devolver, y cupo del plan). Sin esto, des-cancelar permitía saltarse
-            // esas reglas de PN01.
+            ExigirTransicion(pedido, BE.EstadoPedido.EnControlStock);
+
+            // Reactivar = volver a "Enviar selección para control stock": se exigen las mismas
+            // verificaciones del carril Vendedor (vigencia, sin otro pedido activo ni prendas sin
+            // devolver, y cupo del plan). No se reserva nada: Depósito revisa el stock de nuevo.
             var cliente = VerificarVigencia(pedido.IdCliente);
             RevisarPedidoActivo(cliente, pedido.IdPedido);
             var completo = dalPedido.ObtenerPorId(pedido.IdPedido) ?? pedido;
             ComprobarCupo(cliente, completo.CantidadPrendas);
 
-            bool ok = dalPedido.DesCancelar(pedido.IdPedido, pedido.IdCliente);
-            if (!ok)
-                throw new BE.AppException("err.bll.pedido.descancelar_prendas",
-                    "No se puede des-cancelar el Pedido #{0}. Una o más prendas ya no están disponibles.",
+            if (!dalPedido.DesCancelar(pedido.IdPedido, pedido.IdCliente))
+                throw new BE.AppException("err.bll.pedido.estado_cambiado",
+                    "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
                     pedido.IdPedido);
 
             RegistrarHistorial(pedido.IdPedido, "DESCANCELAR", new List<(string, string, string)>
             {
-                ("Estado",            pedido.Estado.ToString(),           BE.EstadoPedido.Pendiente.ToString()),
-                ("MotivoCancelacion", pedido.MotivoCancelacion,          null)
+                ("Estado",            pedido.Estado.ToString(),  BE.EstadoPedido.EnControlStock.ToString()),
+                ("MotivoCancelacion", pedido.MotivoCancelacion, null)
             });
 
             bitacora.Registrar(modulo,
-                $"Des-cancelar Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente}",
+                $"Reactivar Pedido #{pedido.IdPedido} — vuelve a control de stock — Cliente: {pedido.NombreCliente}",
                 BE.Criticidad.Media);
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Reactivacion,
-                $"Pedido #{pedido.IdPedido} des-cancelado — vuelve a Pendiente — Cliente: {pedido.NombreCliente}",
+                $"Pedido #{pedido.IdPedido} reactivado — vuelve a control de stock — Cliente: {pedido.NombreCliente}",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
         }

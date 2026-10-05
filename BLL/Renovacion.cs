@@ -22,9 +22,12 @@ namespace BLL
         // podían instanciar con un doble de prueba — la cadena real quedaba sin ningún test que
         // la ejercitara de punta a punta (los tests reconstruían su propio orden de cadena en vez
         // de usar el que arma este constructor).
+        private readonly DAL.Interfaces.IClienteDAL dalCliente;
+
         public Renovacion(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
                            DAL.Interfaces.IPlanSuscripcionDAL dalPlan, DAL.Interfaces.IPrendaDAL dalPrenda)
         {
+            this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
 
             // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
@@ -59,6 +62,13 @@ namespace BLL
             if (!cliente.TienePlan())
                 throw new BE.AppException("err.bll.renovacion.sin_plan",
                     "{0} no tiene un plan de suscripción asignado. No corresponde procesar una renovación.",
+                    cliente.NombreCompleto);
+
+            // PN02: con una contratación pendiente de pago, el plan y el vencimiento los define el
+            // cobro de Caja. Procesar una renovación a la vez extendería o cambiaría la suscripción dos veces.
+            if (dalCliente.TieneContratacionPendiente(cliente.IdCliente))
+                throw new BE.AppException("err.bll.renovacion.contratacion_pendiente",
+                    "{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.",
                     cliente.NombreCompleto);
 
             var contexto = new Manejadores.ContextoRenovacion

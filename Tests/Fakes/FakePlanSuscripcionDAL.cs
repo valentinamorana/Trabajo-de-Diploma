@@ -8,7 +8,8 @@ namespace Tests.Fakes
     {
         public BE.PlanSuscripcion PlanPorId { get; set; }
 
-        public List<BE.PlanSuscripcion> ObtenerActivos() => new List<BE.PlanSuscripcion>();
+        // Simula el WHERE Estado = 1 del DAL real sobre la misma lista que ObtenerTodos.
+        public List<BE.PlanSuscripcion> ObtenerActivos() => Planes.FindAll(p => p.Estado);
         // Lista devuelta por ObtenerTodos (los tests que la necesitan la siembran).
         public List<BE.PlanSuscripcion> Planes { get; set; } = new List<BE.PlanSuscripcion>();
         public List<BE.PlanSuscripcion> ObtenerTodos() => Planes;

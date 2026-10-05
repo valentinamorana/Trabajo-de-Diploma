@@ -5538,6 +5538,93 @@ ES	doc.cupo.titulo	Detalle de restricciones de cupo
 ES	doc.confirmadas.lista	Prendas confirmadas como disponibles (pendientes de separar):
 ES	doc.confirmadas.titulo	Detalle de prendas confirmadas
 ES	conf.cs.imprimirconfirmadas	¿Imprimir el detalle de prendas confirmadas?
+ES	err.bll.cliente.baja_contratacion	No se puede dar de baja a {0}: tiene una contratación pendiente de pago. Caja tiene que cobrarla o cancelarla primero.
+ES	err.bll.contratacion.desistir_sin_motivo	Es obligatorio indicar el motivo del desistimiento que comunicó el cliente.
+ES	err.bll.contratacion.intento_sin_motivo	Indicá el motivo por el que no se concretó el pago.
+ES	err.bll.contratacion.medio_invalido	El medio de pago indicado no existe.
+ES	tend.titulo	TENDENCIA DE ACTIVIDAD
+ES	tend.dias	Días analizados
+ES	tend.total	Total de eventos
+ES	tend.promedio	Promedio diario
+ES	tend.diapico	Día de mayor actividad
+ES	tend.diavalle	Día de menor actividad
+ES	tend.detalle	DETALLE POR DÍA
+ES	lbl.contr.vista.pendientes	Pendientes de pago
+ES	lbl.contr.vista.resueltas	Resueltas
+ES	lbl.contr.conteo.resueltas	{0} contratación(es) resuelta(s).
+ES	est.contr.pagada	Pagada
+ES	est.contr.cancelada	Cancelada
+ES	est.contr.pendiente	Pendiente de pago
+ES	msg.contr.referido	Se acreditó el beneficio por referido a {0}.
+ES	conf.contr.imprimircobro	¿Imprimir el comprobante y la constancia de suscripción para el cliente?
+ES	dlg.contr.intento.prompt	Motivo por el que no se concretó el pago (Contratación #{0}, intentos: {1}/{2}).\nAl tercer intento se cancela automáticamente:
+ES	msg.contr.cancelada	Contratación #{0} cancelada: no se concretó el pago en {1} intentos.
+ES	conf.contr.imprimircancelacion	¿Imprimir la constancia de cancelación?
+ES	msg.contr.intento	Intento {0} de {1} registrado para la Contratación #{2}. Sigue en la cola para volver a cobrarla.
+ES	lbl.contr.intentos.titulo	Intentos de cobro — Contratación #{0}
+ES	btn.contr.verintentos	Ver intentos
+ES	btn.contr.imprimirliq	Imprimir liquidación
+ES	btn.contr.imprimircomprobante	Imprimir comprobante
+ES	btn.contr.imprimirconstancia	Imprimir constancia
+ES	modalidad.trimestral	Trimestral
+ES	modalidad.anual	Anual
+ES	modalidad.mensual	Mensual
+ES	doc.contr.numero	Contratación
+ES	doc.contr.plan	Plan
+ES	doc.contr.modalidad	Modalidad
+ES	doc.contr.alta	Registrada el
+ES	doc.contr.bruto	Importe del plan
+ES	doc.contr.descuento	Descuento
+ES	doc.contr.total	Total a cobrar
+ES	doc.contr.undescuento	Se aplica un solo descuento por cobro: el mayor entre la promoción vigente del plan y el crédito por referido.
+ES	doc.contr.planlinea	• {0}: {1:C2} por mes — hasta {2} prenda(s) en simultáneo
+ES	doc.contr.modalidades	Modalidades de cobro: mensual, trimestral (3 meses) o anual (12 meses). Sin permanencia.
+ES	doc.contr.planes.titulo	Planes disponibles
+ES	doc.contr.planconsiderado	Plan considerado
+ES	doc.contr.desist.nota	No se registró ninguna contratación ni se generó un cobro.
+ES	doc.contr.orden.nota	La suscripción queda vigente recién cuando Caja confirma el cobro.
+ES	doc.contr.orden.titulo	Orden de cobro
+ES	doc.contr.intentos	Intentos de cobro fallidos
+ES	doc.contr.liq.titulo	Liquidación
+ES	doc.contr.comprobante	Comprobante
+ES	doc.contr.medio	Medio de pago
+ES	doc.contr.cobro	Cobró
+ES	doc.contr.importe	Importe cobrado
+ES	doc.contr.vigencia	Suscripción vigente desde el {0} hasta el {1}.
+ES	doc.contr.referido	Se acreditó el beneficio por referido a {0}.
+ES	doc.contr.constancia.titulo	Constancia de suscripción
+ES	doc.contr.cancelada	La contratación se canceló el {0} al no concretarse el pago en {1} intentos.
+ES	doc.contr.cancelacion.titulo	Constancia de cancelación
+ES	msg.contr.desistimiento	Desistimiento asentado: el cliente no contrató ningún plan.
+ES	msg.contr.noregistrado	El cliente no está registrado. Registralo para continuar con la contratación.
+ES	lbl.contr.ficha	Cliente: {0}  —  DNI {1}\nPlan actual: {2}  —  Vence: {3}  —  Prendas en uso: {4}
+ES	col.contr.preciomensual	Precio mensual
+ES	col.contr.limite	Límite de prendas
+ES	col.contr.estado	Estado
+ES	col.contr.comprobante	Comprobante
+ES	lbl.contr.importedesc	Importe a abonar en Caja: {0:C2}\n(incluye un descuento de {1:C2}: {2})
+ES	lbl.contr.importe	Importe a abonar en Caja: {0:C2}
+ES	conf.contr.imprimirorden	¿Imprimir la orden de cobro para que el cliente abone en Caja?
+ES	btn.contr.registrarcliente	Registrar cliente
+ES	lbl.contr.planes	Planes disponibles:
+ES	btn.contr.imprimirplanes	Imprimir planes
+ES	lbl.contratacion.modalidad	Modalidad de cobro:
+ES	btn.contr.registrar	Registrar contratación
+ES	btn.contr.desistir	El cliente desiste
+ES	conf.contr.cobro.confirmar	¿Confirmar el cobro de la Contratación #{0}?\n\nCliente: {1}\nPlan: {2}\nMonto: {3:C2}\nMedio de pago: {4}\n\nSe emitirá el comprobante y la suscripción quedará formalizada.
+ES	err.bll.cobro.contratacion_pendiente	{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.
+ES	err.bll.renovacion.contratacion_pendiente	{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.
+ES	alert.contr.pendientes	{0} contratación(es) esperando el cobro de Caja.
+ES	conf.cli.contratar	¿Continuar con la contratación de un plan para este cliente?
+ES	est.formalizado	Formalizado (pendiente de despacho)
+ES	conf.ped.reactivar	¿Reactivar el Pedido #{0} de {1}?\n\nVuelve a control de stock: Depósito revisa otra vez la disponibilidad y separa las prendas.
+ES	conf.ped.reactivar.titulo	Reactivar pedido
+ES	msg.ped.reactivadocontrol	Pedido #{0} reactivado: volvió a control de stock.
+ES	btn.ped.reactivar	Reactivar
+ES	err.bll.contratacion.importe_cambiado	El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Volvé a calcular el importe y confirmá de nuevo.
+ES	err.bll.pedido.estado_cambiado	El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.
+ES	msg.contr.vigencia	Vigente del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}.
+ES	col.contr.vigencia	Vigencia
 EN	err.dal.prenda.estado_cambio	The garment's state changed since it was last read. Refresh the screen and try again.
 EN	paso1.identificar	Step 1 of 2 — Identify the client
 EN	paso.ajuste.texto	Adjust selection of Order #{0}
@@ -5668,6 +5755,93 @@ EN	doc.cupo.titulo	Plan limit restrictions
 EN	doc.confirmadas.lista	Garments confirmed as available (pending set-aside):
 EN	doc.confirmadas.titulo	Confirmed garments detail
 EN	conf.cs.imprimirconfirmadas	Print the confirmed garments detail?
+EN	err.bll.cliente.baja_contratacion	{0} cannot be removed: they have a contract pending payment. Cashier must charge or cancel it first.
+EN	err.bll.contratacion.desistir_sin_motivo	You must enter the withdrawal reason given by the client.
+EN	err.bll.contratacion.intento_sin_motivo	Enter the reason why the payment did not go through.
+EN	err.bll.contratacion.medio_invalido	The selected payment method does not exist.
+EN	tend.titulo	ACTIVITY TREND
+EN	tend.dias	Days analyzed
+EN	tend.total	Total events
+EN	tend.promedio	Daily average
+EN	tend.diapico	Busiest day
+EN	tend.diavalle	Quietest day
+EN	tend.detalle	DETAIL BY DAY
+EN	lbl.contr.vista.pendientes	Pending payment
+EN	lbl.contr.vista.resueltas	Resolved
+EN	lbl.contr.conteo.resueltas	{0} contract(s) resolved.
+EN	est.contr.pagada	Paid
+EN	est.contr.cancelada	Cancelled
+EN	est.contr.pendiente	Pending payment
+EN	msg.contr.referido	The referral benefit was credited to {0}.
+EN	conf.contr.imprimircobro	Print the receipt and the subscription certificate for the client?
+EN	dlg.contr.intento.prompt	Reason why the payment did not go through (Contract #{0}, attempts: {1}/{2}).\nOn the third attempt it is cancelled automatically:
+EN	msg.contr.cancelada	Contract #{0} cancelled: payment did not go through in {1} attempts.
+EN	conf.contr.imprimircancelacion	Print the cancellation certificate?
+EN	msg.contr.intento	Attempt {0} of {1} recorded for Contract #{2}. It stays in the queue to be charged again.
+EN	lbl.contr.intentos.titulo	Payment attempts — Contract #{0}
+EN	btn.contr.verintentos	View attempts
+EN	btn.contr.imprimirliq	Print statement
+EN	btn.contr.imprimircomprobante	Print receipt
+EN	btn.contr.imprimirconstancia	Print certificate
+EN	modalidad.trimestral	Quarterly
+EN	modalidad.anual	Annual
+EN	modalidad.mensual	Monthly
+EN	doc.contr.numero	Contract
+EN	doc.contr.plan	Plan
+EN	doc.contr.modalidad	Billing frequency
+EN	doc.contr.alta	Registered on
+EN	doc.contr.bruto	Plan amount
+EN	doc.contr.descuento	Discount
+EN	doc.contr.total	Total to charge
+EN	doc.contr.undescuento	Only one discount applies per charge: the greater of the plan's active promotion and the referral credit.
+EN	doc.contr.planlinea	• {0}: {1:C2} per month — up to {2} garment(s) at a time
+EN	doc.contr.modalidades	Billing options: monthly, quarterly (3 months) or annual (12 months). No minimum term.
+EN	doc.contr.planes.titulo	Available plans
+EN	doc.contr.planconsiderado	Plan considered
+EN	doc.contr.desist.nota	No contract was registered and no charge was generated.
+EN	doc.contr.orden.nota	The subscription only becomes active once the cashier confirms the charge.
+EN	doc.contr.orden.titulo	Payment order
+EN	doc.contr.intentos	Failed payment attempts
+EN	doc.contr.liq.titulo	Statement
+EN	doc.contr.comprobante	Receipt
+EN	doc.contr.medio	Payment method
+EN	doc.contr.cobro	Charged by
+EN	doc.contr.importe	Amount charged
+EN	doc.contr.vigencia	Subscription active from {0} to {1}.
+EN	doc.contr.referido	The referral benefit was credited to {0}.
+EN	doc.contr.constancia.titulo	Subscription certificate
+EN	doc.contr.cancelada	The contract was cancelled on {0} because the payment did not go through in {1} attempts.
+EN	doc.contr.cancelacion.titulo	Cancellation certificate
+EN	msg.contr.desistimiento	Withdrawal recorded: the client did not sign up for any plan.
+EN	msg.contr.noregistrado	The client is not registered. Register them to continue with the contract.
+EN	lbl.contr.ficha	Client: {0}  —  ID {1}\nCurrent plan: {2}  —  Expires: {3}  —  Garments in use: {4}
+EN	col.contr.preciomensual	Monthly price
+EN	col.contr.limite	Garment limit
+EN	col.contr.estado	Status
+EN	col.contr.comprobante	Receipt
+EN	lbl.contr.importedesc	Amount to pay at the cashier: {0:C2}\n(includes a {1:C2} discount: {2})
+EN	lbl.contr.importe	Amount to pay at the cashier: {0:C2}
+EN	conf.contr.imprimirorden	Print the payment order so the client can pay at the cashier?
+EN	btn.contr.registrarcliente	Register client
+EN	lbl.contr.planes	Available plans:
+EN	btn.contr.imprimirplanes	Print plans
+EN	lbl.contratacion.modalidad	Billing frequency:
+EN	btn.contr.registrar	Register contract
+EN	btn.contr.desistir	Client withdraws
+EN	conf.contr.cobro.confirmar	Confirm the charge for Contract #{0}?\n\nClient: {1}\nPlan: {2}\nAmount: {3:C2}\nPayment method: {4}\n\nA receipt will be issued and the subscription will be activated.
+EN	err.bll.cobro.contratacion_pendiente	{0} has a contract pending payment: the subscription is set when the cashier charges or cancels it.
+EN	err.bll.renovacion.contratacion_pendiente	{0} has a contract pending payment: the subscription is set when the cashier charges or cancels it.
+EN	alert.contr.pendientes	{0} contract(s) waiting for the cashier to charge them.
+EN	conf.cli.contratar	Continue with a plan contract for this client?
+EN	est.formalizado	Finalized (pending dispatch)
+EN	conf.ped.reactivar	Reactivate Order #{0} for {1}?\n\nIt goes back to stock control: the warehouse checks availability again and sets the garments aside.
+EN	conf.ped.reactivar.titulo	Reactivate order
+EN	msg.ped.reactivadocontrol	Order #{0} reactivated: it went back to stock control.
+EN	btn.ped.reactivar	Reactivate
+EN	err.bll.contratacion.importe_cambiado	The amount to charge changed since the statement ({0:C2} → {1:C2}). Recalculate the amount and confirm again.
+EN	err.bll.pedido.estado_cambiado	Order #{0} changed status in another session. Refresh the list and try again.
+EN	msg.contr.vigencia	Active from {0:dd/MM/yyyy} to {1:dd/MM/yyyy}.
+EN	col.contr.vigencia	Validity
 RU	err.dal.prenda.estado_cambio	Состояние вещи изменилось с момента последнего запроса. Обновите экран и повторите попытку.
 RU	paso1.identificar	Шаг 1 из 2 — Идентифицировать клиента
 RU	paso.ajuste.texto	Корректировка выбора заказа №{0}
@@ -5798,6 +5972,93 @@ RU	doc.cupo.titulo	Ограничения лимита плана
 RU	doc.confirmadas.lista	Вещи, подтверждённые как доступные (ожидают откладывания):
 RU	doc.confirmadas.titulo	Подтверждённые вещи
 RU	conf.cs.imprimirconfirmadas	Распечатать список подтверждённых вещей?
+RU	err.bll.cliente.baja_contratacion	Нельзя удалить клиента {0}: у него есть договор, ожидающий оплаты. Касса должна сначала принять оплату или отменить его.
+RU	err.bll.contratacion.desistir_sin_motivo	Необходимо указать причину отказа, названную клиентом.
+RU	err.bll.contratacion.intento_sin_motivo	Укажите причину, по которой оплата не прошла.
+RU	err.bll.contratacion.medio_invalido	Указанный способ оплаты не существует.
+RU	tend.titulo	ДИНАМИКА АКТИВНОСТИ
+RU	tend.dias	Проанализировано дней
+RU	tend.total	Всего событий
+RU	tend.promedio	Среднее за день
+RU	tend.diapico	День наибольшей активности
+RU	tend.diavalle	День наименьшей активности
+RU	tend.detalle	ПОДРОБНО ПО ДНЯМ
+RU	lbl.contr.vista.pendientes	Ожидают оплаты
+RU	lbl.contr.vista.resueltas	Завершённые
+RU	lbl.contr.conteo.resueltas	Завершённых договоров: {0}.
+RU	est.contr.pagada	Оплачен
+RU	est.contr.cancelada	Отменён
+RU	est.contr.pendiente	Ожидает оплаты
+RU	msg.contr.referido	Бонус за приглашение начислен клиенту {0}.
+RU	conf.contr.imprimircobro	Распечатать квитанцию и справку о подписке для клиента?
+RU	dlg.contr.intento.prompt	Причина, по которой оплата не прошла (договор №{0}, попыток: {1}/{2}).\nПосле третьей попытки договор отменяется автоматически:
+RU	msg.contr.cancelada	Договор №{0} отменён: оплата не прошла за {1} попытки.
+RU	conf.contr.imprimircancelacion	Распечатать справку об отмене?
+RU	msg.contr.intento	Попытка {0} из {1} зарегистрирована для договора №{2}. Он остаётся в очереди для повторной оплаты.
+RU	lbl.contr.intentos.titulo	Попытки оплаты — договор №{0}
+RU	btn.contr.verintentos	Попытки
+RU	btn.contr.imprimirliq	Печать расчёта
+RU	btn.contr.imprimircomprobante	Печать квитанции
+RU	btn.contr.imprimirconstancia	Печать справки
+RU	modalidad.trimestral	Ежеквартально
+RU	modalidad.anual	Ежегодно
+RU	modalidad.mensual	Ежемесячно
+RU	doc.contr.numero	Договор
+RU	doc.contr.plan	План
+RU	doc.contr.modalidad	Периодичность оплаты
+RU	doc.contr.alta	Зарегистрирован
+RU	doc.contr.bruto	Стоимость плана
+RU	doc.contr.descuento	Скидка
+RU	doc.contr.total	Итого к оплате
+RU	doc.contr.undescuento	К каждой оплате применяется только одна скидка: наибольшая из действующей акции плана и бонуса за приглашение.
+RU	doc.contr.planlinea	• {0}: {1:C2} в месяц — до {2} вещ. одновременно
+RU	doc.contr.modalidades	Варианты оплаты: ежемесячно, ежеквартально (3 месяца) или ежегодно (12 месяцев). Без минимального срока.
+RU	doc.contr.planes.titulo	Доступные планы
+RU	doc.contr.planconsiderado	Рассматриваемый план
+RU	doc.contr.desist.nota	Договор не зарегистрирован, оплата не создана.
+RU	doc.contr.orden.nota	Подписка начинает действовать только после подтверждения оплаты кассой.
+RU	doc.contr.orden.titulo	Распоряжение на оплату
+RU	doc.contr.intentos	Неудачные попытки оплаты
+RU	doc.contr.liq.titulo	Расчёт
+RU	doc.contr.comprobante	Квитанция
+RU	doc.contr.medio	Способ оплаты
+RU	doc.contr.cobro	Принял оплату
+RU	doc.contr.importe	Оплаченная сумма
+RU	doc.contr.vigencia	Подписка действует с {0} по {1}.
+RU	doc.contr.referido	Бонус за приглашение начислен клиенту {0}.
+RU	doc.contr.constancia.titulo	Справка о подписке
+RU	doc.contr.cancelada	Договор отменён {0}: оплата не прошла за {1} попытки.
+RU	doc.contr.cancelacion.titulo	Справка об отмене
+RU	msg.contr.desistimiento	Отказ зарегистрирован: клиент не оформил ни один план.
+RU	msg.contr.noregistrado	Клиент не зарегистрирован. Зарегистрируйте его, чтобы продолжить оформление.
+RU	lbl.contr.ficha	Клиент: {0}  —  Документ {1}\nТекущий план: {2}  —  Истекает: {3}  —  Вещей в пользовании: {4}
+RU	col.contr.preciomensual	Цена в месяц
+RU	col.contr.limite	Лимит вещей
+RU	col.contr.estado	Состояние
+RU	col.contr.comprobante	Квитанция
+RU	lbl.contr.importedesc	Сумма к оплате в кассе: {0:C2}\n(включая скидку {1:C2}: {2})
+RU	lbl.contr.importe	Сумма к оплате в кассе: {0:C2}
+RU	conf.contr.imprimirorden	Распечатать распоряжение на оплату для кассы?
+RU	btn.contr.registrarcliente	Зарегистрировать клиента
+RU	lbl.contr.planes	Доступные планы:
+RU	btn.contr.imprimirplanes	Печать планов
+RU	lbl.contratacion.modalidad	Периодичность оплаты:
+RU	btn.contr.registrar	Оформить договор
+RU	btn.contr.desistir	Клиент отказывается
+RU	conf.contr.cobro.confirmar	Подтвердить оплату договора №{0}?\n\nКлиент: {1}\nПлан: {2}\nСумма: {3:C2}\nСпособ оплаты: {4}\n\nБудет выдана квитанция, подписка будет активирована.
+RU	err.bll.cobro.contratacion_pendiente	У клиента {0} есть договор, ожидающий оплаты: подписка определится, когда касса примет оплату или отменит его.
+RU	err.bll.renovacion.contratacion_pendiente	У клиента {0} есть договор, ожидающий оплаты: подписка определится, когда касса примет оплату или отменит его.
+RU	alert.contr.pendientes	Договоров, ожидающих оплаты в кассе: {0}.
+RU	conf.cli.contratar	Продолжить оформление плана для этого клиента?
+RU	est.formalizado	Оформлен (ожидает отправки)
+RU	conf.ped.reactivar	Возобновить заказ №{0} клиента {1}?\n\nОн вернётся на контроль запасов: склад снова проверит наличие и отложит вещи.
+RU	conf.ped.reactivar.titulo	Возобновить заказ
+RU	msg.ped.reactivadocontrol	Заказ №{0} возобновлён: он вернулся на контроль запасов.
+RU	btn.ped.reactivar	Возобновить
+RU	err.bll.contratacion.importe_cambiado	Сумма к оплате изменилась после расчёта ({0:C2} → {1:C2}). Пересчитайте сумму и подтвердите снова.
+RU	err.bll.pedido.estado_cambiado	Состояние заказа №{0} изменилось в другом сеансе. Обновите список и повторите попытку.
+RU	msg.contr.vigencia	Действует с {0:dd/MM/yyyy} по {1:dd/MM/yyyy}.
+RU	col.contr.vigencia	Срок действия
 PT	err.dal.prenda.estado_cambio	O estado da peça mudou desde a última consulta. Atualize a tela e tente novamente.
 PT	paso1.identificar	Passo 1 de 2 — Identificar o cliente
 PT	paso.ajuste.texto	Ajustar seleção do Pedido #{0}
@@ -5928,3 +6189,90 @@ PT	doc.cupo.titulo	Detalhe das restrições de limite
 PT	doc.confirmadas.lista	Peças confirmadas como disponíveis (pendentes de separação):
 PT	doc.confirmadas.titulo	Detalhe das peças confirmadas
 PT	conf.cs.imprimirconfirmadas	Imprimir o detalhe das peças confirmadas?
+PT	err.bll.cliente.baja_contratacion	Não é possível dar baixa em {0}: há uma contratação pendente de pagamento. O caixa precisa cobrá-la ou cancelá-la primeiro.
+PT	err.bll.contratacion.desistir_sin_motivo	É obrigatório indicar o motivo da desistência informado pelo cliente.
+PT	err.bll.contratacion.intento_sin_motivo	Indique o motivo pelo qual o pagamento não foi concluído.
+PT	err.bll.contratacion.medio_invalido	A forma de pagamento indicada não existe.
+PT	tend.titulo	TENDÊNCIA DE ATIVIDADE
+PT	tend.dias	Dias analisados
+PT	tend.total	Total de eventos
+PT	tend.promedio	Média diária
+PT	tend.diapico	Dia de maior atividade
+PT	tend.diavalle	Dia de menor atividade
+PT	tend.detalle	DETALHE POR DIA
+PT	lbl.contr.vista.pendientes	Pendentes de pagamento
+PT	lbl.contr.vista.resueltas	Resolvidas
+PT	lbl.contr.conteo.resueltas	{0} contratação(ões) resolvida(s).
+PT	est.contr.pagada	Paga
+PT	est.contr.cancelada	Cancelada
+PT	est.contr.pendiente	Pendente de pagamento
+PT	msg.contr.referido	O benefício por indicação foi creditado a {0}.
+PT	conf.contr.imprimircobro	Imprimir o comprovante e a constância de assinatura para o cliente?
+PT	dlg.contr.intento.prompt	Motivo pelo qual o pagamento não foi concluído (Contratação #{0}, tentativas: {1}/{2}).\nNa terceira tentativa é cancelada automaticamente:
+PT	msg.contr.cancelada	Contratação #{0} cancelada: o pagamento não foi concluído em {1} tentativas.
+PT	conf.contr.imprimircancelacion	Imprimir a constância de cancelamento?
+PT	msg.contr.intento	Tentativa {0} de {1} registrada para a Contratação #{2}. Continua na fila para ser cobrada novamente.
+PT	lbl.contr.intentos.titulo	Tentativas de cobrança — Contratação #{0}
+PT	btn.contr.verintentos	Ver tentativas
+PT	btn.contr.imprimirliq	Imprimir liquidação
+PT	btn.contr.imprimircomprobante	Imprimir comprovante
+PT	btn.contr.imprimirconstancia	Imprimir constância
+PT	modalidad.trimestral	Trimestral
+PT	modalidad.anual	Anual
+PT	modalidad.mensual	Mensal
+PT	doc.contr.numero	Contratação
+PT	doc.contr.plan	Plano
+PT	doc.contr.modalidad	Modalidade
+PT	doc.contr.alta	Registrada em
+PT	doc.contr.bruto	Valor do plano
+PT	doc.contr.descuento	Desconto
+PT	doc.contr.total	Total a cobrar
+PT	doc.contr.undescuento	Aplica-se um único desconto por cobrança: o maior entre a promoção vigente do plano e o crédito por indicação.
+PT	doc.contr.planlinea	• {0}: {1:C2} por mês — até {2} peça(s) simultâneas
+PT	doc.contr.modalidades	Modalidades de cobrança: mensal, trimestral (3 meses) ou anual (12 meses). Sem fidelidade.
+PT	doc.contr.planes.titulo	Planos disponíveis
+PT	doc.contr.planconsiderado	Plano considerado
+PT	doc.contr.desist.nota	Nenhuma contratação foi registrada nem gerada cobrança.
+PT	doc.contr.orden.nota	A assinatura só fica vigente quando o caixa confirma a cobrança.
+PT	doc.contr.orden.titulo	Ordem de cobrança
+PT	doc.contr.intentos	Tentativas de cobrança sem sucesso
+PT	doc.contr.liq.titulo	Liquidação
+PT	doc.contr.comprobante	Comprovante
+PT	doc.contr.medio	Forma de pagamento
+PT	doc.contr.cobro	Cobrado por
+PT	doc.contr.importe	Valor cobrado
+PT	doc.contr.vigencia	Assinatura vigente de {0} até {1}.
+PT	doc.contr.referido	O benefício por indicação foi creditado a {0}.
+PT	doc.contr.constancia.titulo	Constância de assinatura
+PT	doc.contr.cancelada	A contratação foi cancelada em {0} porque o pagamento não foi concluído em {1} tentativas.
+PT	doc.contr.cancelacion.titulo	Constância de cancelamento
+PT	msg.contr.desistimiento	Desistência registrada: o cliente não contratou nenhum plano.
+PT	msg.contr.noregistrado	O cliente não está cadastrado. Cadastre-o para continuar com a contratação.
+PT	lbl.contr.ficha	Cliente: {0}  —  Documento {1}\nPlano atual: {2}  —  Vence: {3}  —  Peças em uso: {4}
+PT	col.contr.preciomensual	Preço mensal
+PT	col.contr.limite	Limite de peças
+PT	col.contr.estado	Estado
+PT	col.contr.comprobante	Comprovante
+PT	lbl.contr.importedesc	Valor a pagar no caixa: {0:C2}\n(inclui um desconto de {1:C2}: {2})
+PT	lbl.contr.importe	Valor a pagar no caixa: {0:C2}
+PT	conf.contr.imprimirorden	Imprimir a ordem de cobrança para o cliente pagar no caixa?
+PT	btn.contr.registrarcliente	Cadastrar cliente
+PT	lbl.contr.planes	Planos disponíveis:
+PT	btn.contr.imprimirplanes	Imprimir planos
+PT	lbl.contratacion.modalidad	Modalidade de cobrança:
+PT	btn.contr.registrar	Registrar contratação
+PT	btn.contr.desistir	O cliente desiste
+PT	conf.contr.cobro.confirmar	Confirmar a cobrança da Contratação #{0}?\n\nCliente: {1}\nPlano: {2}\nValor: {3:C2}\nForma de pagamento: {4}\n\nO comprovante será emitido e a assinatura será ativada.
+PT	err.bll.cobro.contratacion_pendiente	{0} tem uma contratação pendente de pagamento: a assinatura é definida quando o caixa a cobrar ou cancelar.
+PT	err.bll.renovacion.contratacion_pendiente	{0} tem uma contratação pendente de pagamento: a assinatura é definida quando o caixa a cobrar ou cancelar.
+PT	alert.contr.pendientes	{0} contratação(ões) aguardando a cobrança do caixa.
+PT	conf.cli.contratar	Continuar com a contratação de um plano para este cliente?
+PT	est.formalizado	Formalizado (pendente de despacho)
+PT	conf.ped.reactivar	Reativar o Pedido #{0} de {1}?\n\nVolta ao controle de estoque: o depósito verifica novamente a disponibilidade e separa as peças.
+PT	conf.ped.reactivar.titulo	Reativar pedido
+PT	msg.ped.reactivadocontrol	Pedido #{0} reativado: voltou ao controle de estoque.
+PT	btn.ped.reactivar	Reativar
+PT	err.bll.contratacion.importe_cambiado	O valor a cobrar mudou desde a liquidação ({0:C2} → {1:C2}). Recalcule o valor e confirme novamente.
+PT	err.bll.pedido.estado_cambiado	O Pedido #{0} mudou de estado em outra sessão. Atualize a lista e tente novamente.
+PT	msg.contr.vigencia	Vigente de {0:dd/MM/yyyy} até {1:dd/MM/yyyy}.
+PT	col.contr.vigencia	Vigência

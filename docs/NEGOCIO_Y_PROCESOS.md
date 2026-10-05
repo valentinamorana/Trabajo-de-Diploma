@@ -130,8 +130,8 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 | Entidad | Estados (enum en `BE/`) | Transiciones válidas |
 |---|---|---|
 | **Prenda** (`EstadoPrenda`, patrón **State** en `BE/Estados/`) | Disponible 0 · EnUso 1 · EnLimpieza 2 · Baja 3 | Disponible→EnLimpieza\|Baja; EnLimpieza→Disponible\|Baja; EnUso→Baja (solo por *Reportar prenda perdida*); Baja = final. **→EnUso** solo al separar las prendas de un pedido (`DAL/Pedido.cs › SepararPrendas`); **EnUso→EnLimpieza** solo al registrar la devolución. Restricciones extra en `BLL/Prenda.cs › CambiarEstado`: EnUso→Baja exige `viaFlujoPerdida`; EnLimpieza→Baja exige `viaInspeccion` |
-| **Pedido** (`EstadoPedido`) | Pendiente 0 (formalizado) · Despachado 1 · Entregado 2 · Cancelado 3 · EnControlStock 4 · ConFaltantes 5 · Separado 6 · Desistido 7 | Armado (PN01): EnControlStock→ConFaltantes\|Separado; ConFaltantes→EnControlStock (ajuste)\|Desistido; Separado→Pendiente (formalizar). Ciclo: Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); `DesCancelar` (revalida); `RegistrarDevolucion` solo sobre Entregado (prendas EnUso→EnLimpieza). Entregado y Desistido son finales. Cancelar/devolver con **Command** (`BLL/Comandos/`) |
-| **Contratacion** (`EstadoContratacion`) | PendientePago 0 · Pagada 1 · Cancelada 2 | Pendiente→Pagada (cobro, claim atómico) · Pendiente→Cancelada (3.er intento fallido) · Pagada→Pendiente solo como **compensación** si falla la activación (`ReabrirPago`) |
+| **Pedido** (`EstadoPedido`) | Pendiente 0 (formalizado) · Despachado 1 · Entregado 2 · Cancelado 3 · EnControlStock 4 · ConFaltantes 5 · Separado 6 · Desistido 7 | Armado (PN01): EnControlStock→ConFaltantes\|Separado; ConFaltantes→EnControlStock (ajuste)\|Desistido; Separado→Pendiente (formalizar). Ciclo: Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); Cancelado→EnControlStock (`DesCancelar` = "Reactivar": revalida y vuelve a control de stock, sin reservar); `RegistrarDevolucion` solo sobre Entregado (prendas EnUso→EnLimpieza). Entregado y Desistido son finales. Cancelar/devolver con **Command** (`BLL/Comandos/`) |
+| **Contratacion** (`EstadoContratacion`) | PendientePago 0 · Pagada 1 · Cancelada 2 | Pendiente→Pagada (cobro, claim atómico) · Pendiente→Cancelada (3.er intento fallido, automático) · Pagada→Pendiente solo como **compensación** si falla la activación (`ReabrirPago`). Regla en `BE.Contratacion.TransicionValida` |
 | **Promocion** (`EstadoPromocion`) | EnRevisionContable 0 · Vigente 1 · RechazadaContabilidad 2 · BajaSolicitada 3 · Desactivada 4 | EnRevisión→Vigente\|Rechazada (Contabilidad); Rechazada→EnRevisión (**Reformular**, Administración); Vigente→BajaSolicitada (Vendedor) → Desactivada (aprueba baja) \| Vigente (rechaza baja); Vigente→Desactivada (Administración, directo). Cada cambio es un `UPDATE ... WHERE Estado=@esperado` (`DAL/Promocion.cs`) |
 | **SugerenciaPromocion** (`EstadoSugerencia`) | Pendiente 0 · Evaluada 1 | Pendiente→Evaluada al crear una promoción desde ella (una sugerencia evaluada no se reutiliza) |
 | **ListaEspera** (`EstadoListaEspera`) | Pendiente 0 · Reservada 1 · Convertida 2 · Cancelada 3 | Pendiente→Reservada (al pasar la prenda a Disponible, FIFO, ventana `HORAS_RESERVA = 48` en `BLL/ListaEspera.cs`) → Convertida (el cliente arma su pedido) \| Cancelada |
@@ -254,7 +254,7 @@ Cada transición registra:
 | 9 | Solo se separa lo confirmado. La separación es **atómica** (`UPDATE ... AND Estado = Disponible`): si otra operación tomó una prenda, se revierte todo y el pedido pasa a faltantes. | `SepararPrendas`, `DAL/Pedido.cs › SepararPrendas` | `SepararPrendas_*` |
 | 10 | Solo se formaliza un pedido Separado, y después de formalizar no hay operación que cambie la selección. Cada transición del armado exige `BE.Pedido.TransicionValida` (`err.bll.pedido.transicion_invalida`) | `FormalizarPedido`, `ExigirTransicion` | `FormalizarPedido_*`, `PedidoFormalizado_NoAdmiteModificaciones`, `TransicionesDelArmado_SiguenElDiagrama` |
 | 11 | Los pasos del armado no se pueden revertir desde el historial | `RestaurarOperacion` (`err.bll.pedido.restaurar_no_permitido`) | `RestaurarOperacion_PasoDelControlDeStock_NoSePuedeRevertir` |
-| 12 | Des-cancelar revalida la vigencia, el pedido activo y el cupo | `DesCancelar` | `DesCancelar_ClienteConOtroPedidoActivo_Rechaza`, `DesCancelar_SuscripcionVencida_Rechaza` |
+| 12 | Reactivar un pedido cancelado revalida la vigencia, el pedido activo y el cupo, y lo devuelve a control de stock sin reservar | `DesCancelar` | `DesCancelar_ClienteConOtroPedidoActivo_Rechaza`, `DesCancelar_SuscripcionVencida_Rechaza` |
 | 14 | Los avisos que cortan el circuito (suscripción no vigente, pedido activo) quedan en la bitácora y se pueden imprimir | `VerificarVigencia`, `RevisarPedidoActivo` (`RegistrarAviso`); `DocumentosPedido.AvisoImposibilidad` | Arnés contra la BD real |
 | 15 | Solo se prepara la confirmación de un pedido formalizado que no fue cancelado | `BE.Pedido.EstaFormalizado` | `PrepararConfirmacion_*` |
 | 13 | Una prenda que pasa de En Limpieza a Disponible se reserva 48 h para el primer anotado de la Lista de Espera. La reserva se cierra al separar. | `BLL/ListaEspera.cs › NotificarSiCorresponde`, `SepararPrendas` | `ListaEsperaTests`, `SepararPrendas_Confirmadas_ReservaYCierraLaListaDeEspera` |
@@ -280,41 +280,78 @@ Cada transición registra:
 
 ### PN02 — Comercialización de la suscripción
 
-**Objetivo.** Que un cliente registrado elija plan y modalidad, se derive el cobro a Caja (separada de quien vendió) y, recién al cobrar, se formalice la suscripción.
-**Actores.** Vendedor (crea la contratación), Caja (cobra), Cliente (externo).
-**Pantallas.** `GUI/NuevaContratacionForm.cs`, `GUI/ContratacionesPendientesForm.cs`.
-**Precondiciones.** Cliente existente (el alta de cliente **no** exige plan); al menos un plan activo.
+**Objetivo.** Que un cliente identificado elija un plan y una modalidad, abone en Caja (separada de quien vendió) y, recién al cobrar, quede vigente su suscripción.
+**Referencia.** Flujo aprobado por la alumna. El diagrama original venía de otro trabajo ("ExperienceHub") y se adaptó a WardrobeFlow:
+- se quitaron "Informar condiciones" y "¿Acepta condiciones?";
+- se agregaron la identificación por DNI, la validación, el descuento único, el referido y los intentos.
 
-**Flujo**
-1. Vendedor: `BLL.Contratacion.CrearContratacion(cliente, plan, modalidad)` → contratación `PendientePago`. La suscripción **aún no está vigente**.
-2. Caja ve la cola (`ObtenerPendientesDePago`) con el **importe a cobrar** (`CalcularImporte`: precio del plan menos un único descuento).
-3. Caja: `ConfirmarPago(medioPago)`:
-   a. revalida contra la BD que siga Pendiente y que el plan siga activo;
-   b. calcula importe y descuento;
-   c. **claim atómico** (`DAL.Contratacion.ConfirmarPago`: `UPDATE ... AND Estado = 0`, devuelve `false` si otra sesión ya la cobró);
-   d. activa la suscripción (`BLL.Cliente.ActivarSuscripcionDesdeContratacion`: Builder + crédito de referido);
-   e. si (d) falla, **compensa** con `ReabrirPago`;
-   f. emite comprobante `CMP-{id:D6}-{yyyyMMdd}` y lo devuelve; bitácora.
-4. Si el intento de cobro no se concreta: `RegistrarIntentoFallido` (UPDATE condicionado a Pendiente); al **3.er intento** la contratación pasa a `Cancelada`.
+**Actores.** Cliente (externo), Vendedor y Caja.
+**Pantallas.**
+- `GUI/NuevaContratacionForm.cs` (Vendedor). También se abre desde Clientes después de un alta.
+- `GUI/ContratacionesPendientesForm.cs` (Caja), con dos vistas: Pendientes y Resueltas, para volver a imprimir.
+
+**Documentos (PDF, Factory Method en `GUI/Exportacion/DocumentosContratacion.cs`):**
+- Planes disponibles;
+- Aviso de desistimiento;
+- Orden de cobro;
+- Liquidación (con los intentos);
+- Comprobante;
+- Constancia de suscripción;
+- Constancia de cancelación.
+
+**Flujo (actividad → método de `BLL/Contratacion.cs`)**
+| Carril | Actividad | Código |
+|---|---|---|
+| Vendedor | Identificar cliente → ¿Registrado? | `IdentificarCliente` (`BLL.Cliente.BuscarPorIdentificacion`). Si no está registrado: "Registrar cliente" (ABM, referente opcional). |
+| Vendedor | Presentar planes («Planes disponibles») | `PresentarPlanes`: planes activos con precio y límite |
+| Cliente/Vendedor | ¿Elige plan y modalidad? No → Asentar desistimiento | `AsentarDesistimiento` → tabla `DesistimientoContratacion` (motivo obligatorio) |
+| Vendedor | Registrar contratación → ¿Contratación válida? | `ValidarContratacion` (consulta) y `RegistrarContratacion`: guarda la contratación PendientePago con el **precio mensual pactado**. Si no es válida, "Informar motivo" queda en la bitácora. |
+| Caja | Consultar cola → Calcular importe («Liquidación») | `ObtenerPendientesDePago`, `CalcularImporte(s)`: precio pactado × meses menos **un** descuento (promoción PN03 o crédito por referido, el mayor) |
+| Cliente/Caja | Abonar → ¿Se concreta el pago? Sí | `ConfirmarCobro(idMedioPago, importeConfirmado)` (ver los pasos debajo de la tabla) |
+| Caja | ¿Se concreta? No → Registrar intento → ¿Máximo de 3? | `RegistrarIntentoFallido(idMedioPago, motivo)`: en una transacción con bloqueo de fila guarda el intento en `ContratacionIntentoPago` y, en el 3.º, **cancela automáticamente** («Constancia de cancelación»). Si no se llegó a 3, la contratación sigue en la cola. |
+
+Pasos de `ConfirmarCobro`:
+1. Revalida el estado, el medio de pago (catálogo `MedioPago`), el plan, el cupo y que el importe sea el confirmado.
+2. **Claim atómico** que emite el comprobante `CMP-NNNNNN-AAAAMMDD`.
+3. Activa la suscripción con el Builder (el período va a continuación del vencimiento vigente).
+4. ¿Referido? Sí: acredita $1000 al referente.
+5. Guarda la vigencia y el referente acreditado («Constancia de suscripción»).
+6. Si la activación falla, **compensa** con `ReabrirPago`.
 
 **Reglas de negocio PN02**
 | # | Regla | Ubicación | T: |
 |---|---|---|---|
-| 1 | La contratación exige cliente existente y plan **activo** | `BLL/Contratacion.cs › CrearContratacion` | `ContratacionTests` (`ClienteInexistente`, `PlanInexistente`, `PlanInactivo`) |
-| 2 | Un cliente no puede tener **dos** contrataciones pendientes | `CrearContratacion` + índice único `UX_Contratacion_UnaPendientePorCliente` | `ContratacionTests › ClienteYaTienePendiente` |
-| 3 | Solo se cobra una contratación **Pendiente de pago** (revalidada contra la BD) | `ConfirmarPago` (`err.bll.contratacion.cobrar_estado`) | `ContratacionTests` |
-| 4 | El medio de pago es obligatorio (texto no vacío; la pantalla ofrece las opciones habituales) | `ConfirmarPago` (`medio_pago_requerido`) | `ContratacionTests` |
-| 5 | Si el plan fue dado de baja antes del cobro se rechaza y la contratación sigue pendiente | `ConfirmarPago` (`err.bll.contratacion.plan_baja`) | `ContratacionTests › PlanDadoDeBaja...` |
-| 6 | **Doble cobro imposible:** solo una sesión de Caja gana el claim | `DAL/Contratacion.cs › ConfirmarPago`; `BLL` (`cobrar_concurrente`) | `ContratacionTests › OtraSesionGanoElClaim...` (con fake; no contra BD real) |
-| 7 | Si la activación falla, la contratación vuelve a Pendiente (nunca queda Pagada sin suscripción) | `ConfirmarPago` + `DAL.ReabrirPago` | `ContratacionTests › FallaLaActivacion_Reabre...`. Si además falla la compensación se deja constancia CRÍTICA en bitácora y Caja recibe `cobro_sin_activar` (`EndurecimientoPn02Pn03Tests`) |
-| 8 | Tercer intento fallido cancela automáticamente | `RegistrarIntentoFallido` (`MaxIntentosPago = 3`); CHECK `IntentosPago 0..3` y el UPDATE de `DAL.IncrementarIntento` respeta el tope (`IntentosPago < 3`; devuelve -1 si ya no está pendiente) | `ContratacionTests` |
-| 9 | Vendedor no cobra y Caja no vende (patentes) | ver §2.3 | `PermisosAccionTests` |
-| 10 | Al activar se acredita el referido (una sola vez) | `BLL/Cliente.cs` | `EndurecimientoPn02Pn03Tests › ActivarSuscripcion_ClienteReferido...` |
-| 11 | El importe cobrado, el descuento y la promoción aplicada **se guardan** en `Contratacion` | `DAL/Contratacion.cs` (columnas `Importe`, `DescuentoAplicado`, `IdPromocion`) | `ContratacionTests` (fake) |
+| 1 | La contratación exige un cliente activo y un plan activo, y que el plan alcance para las prendas en uso | `ValidarContratacion` | `ContratacionTests › ValidarContratacion_*` |
+| 2 | Un cliente no puede tener **dos** contrataciones pendientes | `ValidarContratacion` + índice único `UX_Contratacion_UnaPendientePorCliente` | `ValidarContratacion_ClienteYaTienePendiente_*` |
+| 3 | Desistir exige un motivo; no genera contratación ni cobro | `AsentarDesistimiento`; CHECK `CHK_DesistContr_ModalidadConPlan` | `AsentarDesistimiento_*` |
+| 4 | Caja cobra el **precio pactado** en la orden aunque el plan cambie de precio mientras espera | `Contratacion.PrecioMensual` | `ConfirmarCobro_ElPlanCambioDePrecio_CobraElPrecioPactado` |
+| 5 | Un solo descuento por cobro: el mayor entre la promoción vigente y el crédito por referido | `BE.PoliticaDescuento` | `EndurecimientoPn02Pn03Tests` |
+| 6 | No se cobra un importe distinto del confirmado por Caja | `ConfirmarCobro` (`importe_cambiado`) | `ConfirmarCobro_ImporteDistintoDelConfirmado_*` |
+| 7 | El medio de pago sale del catálogo `MedioPago` (3FN) | `ValidarMedioPago` (`medio_invalido`) | `ConfirmarCobro_MedioDePagoInexistente_*` |
+| 8 | **Doble cobro imposible:** solo una sesión de Caja gana el claim | `DAL.ConfirmarCobro` (`WHERE Estado = 0`) | `ConfirmarCobro_OtraSesion*` |
+| 9 | Si la activación falla, la contratación vuelve a Pendiente; si además no se puede reabrir, se registra un aviso CRÍTICO | `ConfirmarCobro` + `ReabrirPago` | `ConfirmarCobro_FallaLaActivacion_*` |
+| 10 | Cada intento queda registrado (número, medio, motivo, quién); al tercero se cancela automáticamente | `DAL.RegistrarIntentoFallido` (transacción, `UPDLOCK`); CHECK `NroIntento 1..3` | `RegistrarIntentoFallido_*` |
+| 11 | El referido se acredita una sola vez y queda registrado en la contratación | `BLL.Cliente.ActivarSuscripcionInterna`; `Contratacion.IdReferenteAcreditado` | `ConfirmarCobro_ClienteReferido*` |
+| 12 | Máquina de estados: PendientePago → Pagada \| Cancelada; Pagada → PendientePago solo como compensación | `BE.Contratacion.TransicionValida` | `TransicionValida_*` |
+| 13 | El Vendedor no cobra y Caja no vende (patentes) | `PermisosAccion` | `RegistrarContratacion_UsuarioDeCaja_*`, `ConfirmarCobroYRegistrarIntento_UsuarioVendedor_*` |
+| 14 | Con una contratación pendiente no se puede dar de baja al cliente, ni renovar ni cobrar por N01 | `Cliente.Baja`, `Renovacion.Procesar`, `Cobro.Procesar` | `Cliente_Baja_*`, `Renovacion_*`, `Cobro_*` |
+| 15 | Activar una suscripción o corregir el plan sin pasar por Contratación + Caja es exclusivo del Administrador | `Cliente.ActivarSuscripcion`, `PuedeCorregirPlanDirectamente` | `Cliente_ActivarSuscripcion_NoAdministrador_Rechaza` |
 
-**Casos de uso:** CU01-VTA Gestionar Suscripción, CU01-CAJ Gestionar Cobro, CU02-CAJ Emitir Comprobante, CU03-CAJ Cancelar Contratación.
-**Alcance.** Abarca: contratar, cobrar, comprobante numerado, cancelación por intentos, descuento en el cobro.
-**No abarca:** comprobante impreso/PDF, factura fiscal, conciliación con medios de pago reales. El comprobante es solo un número mostrado y guardado (sin entidad propia). El flujo alternativo del referido "en el momento" queda simplificado (§7).
+**Base de datos (3FN).**
+- `MedioPago` es un catálogo y reemplaza el texto libre.
+- `ContratacionIntentoPago` reemplaza al contador derivable `IntentosPago`.
+- Tabla nueva `DesistimientoContratacion`.
+- `Contratacion` suma `IdMedioPago`, `PrecioMensual`, `VigenciaDesde/Hasta` e `IdReferenteAcreditado`.
+- La sección 20c del script migra las bases ya instaladas.
+
+**Casos de uso:**
+- CU01-VTA Gestionar Suscripción;
+- CU02-VTA Asentar Desistimiento;
+- CU01-CAJ Gestionar Cobro;
+- CU02-CAJ Emitir Comprobante;
+- CU03-CAJ Registrar Intento y Cancelar Contratación.
+
+**No abarca:** factura fiscal ni conciliación con medios de pago reales.
 
 ---
 

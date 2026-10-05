@@ -16,7 +16,7 @@ namespace GUI
 
             switch (estado)
             {
-                case BE.EstadoPedido.Pendiente:      return T("est.pendiente",     "Pendiente");
+                case BE.EstadoPedido.Pendiente:      return T("est.formalizado",   "Formalizado (pendiente de despacho)");
                 case BE.EstadoPedido.Despachado:     return T("est.despachado",    "Despachado");
                 case BE.EstadoPedido.Entregado:      return T("est.entregado",     "Entregado");
                 case BE.EstadoPedido.Cancelado:      return T("est.cancelado",     "Cancelado");

@@ -1053,7 +1053,7 @@ FROM (VALUES
     (N'Diego',  N'Paz',       '27333444', 'diego.paz@mail.com',       'Transferencia', N'Estándar', CONVERT(date,'1982-01-30')),
     (N'Camila', N'Torres',    '40222333', 'camila.torres@mail.com',   'Efectivo',      N'Premium',  CONVERT(date,'2001-06-10'))
 ) AS v(Nombre, Apellido, DNI, Email, MetodoPago, PlanNom, FechaNac)
-WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE c.Nombre = v.Nombre AND c.Apellido = v.Apellido);
+WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE (c.Nombre = v.Nombre AND c.Apellido = v.Apellido) OR c.DNI = v.DNI);  -- también por DNI: un cliente demo renombrado no se duplica
 PRINT 'Demo: clientes.';
 GO
 
@@ -1952,10 +1952,8 @@ BEGIN
         IdCaja            INT           NULL     REFERENCES Empleado(IdEmpleado),
         Modalidad         INT           NOT NULL CONSTRAINT CHK_Contratacion_Modalidad CHECK (Modalidad IN (0,1,2)),
         Estado            INT           NOT NULL DEFAULT 0 CONSTRAINT CHK_Contratacion_Estado CHECK (Estado IN (0,1,2)),
-        IntentosPago      INT           NOT NULL DEFAULT 0,
         FechaAlta         DATETIME      NOT NULL DEFAULT GETDATE(),
         FechaResolucion   DATETIME      NULL,
-        MedioPago         NVARCHAR(50)  NULL,
         NumeroComprobante NVARCHAR(50)  NULL,
         FechaComprobante  DATETIME      NULL
     );
@@ -2403,7 +2401,8 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_CargoPrenda_Monto')
     ALTER TABLE CargoPrenda ADD CONSTRAINT CK_CargoPrenda_Monto CHECK (Monto > 0);
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Contratacion_Intentos')
-    ALTER TABLE Contratacion ADD CONSTRAINT CK_Contratacion_Intentos CHECK (IntentosPago BETWEEN 0 AND 3);
+   AND COL_LENGTH('Contratacion', 'IntentosPago') IS NOT NULL
+    EXEC(N'ALTER TABLE Contratacion ADD CONSTRAINT CK_Contratacion_Intentos CHECK (IntentosPago BETWEEN 0 AND 3)');  -- dinámico: la columna la quita 20c
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Contratacion_Importe')
     ALTER TABLE Contratacion ADD CONSTRAINT CK_Contratacion_Importe
         CHECK ((Importe IS NULL OR Importe >= 0) AND (DescuentoAplicado IS NULL OR DescuentoAplicado >= 0));
@@ -2435,6 +2434,145 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Prenda_IdUltimoCliente
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Cliente_IdPlan' AND object_id = OBJECT_ID('Cliente'))
     CREATE NONCLUSTERED INDEX IX_Cliente_IdPlan ON Cliente(IdPlan);
 PRINT 'Sección 20b: importe/promoción en Contratacion, restricciones e índices verificados.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20c. PN02: MEDIOS DE PAGO, INTENTOS Y DESISTIMIENTOS
+-- ------------------------------------------------------------
+-- Diagrama de actividad de PN02 (adaptado a WardrobeFlow):
+--   · «Medio de pago»: catálogo propio (antes texto libre en Contratacion.MedioPago).
+--   · «Intento»: cada cobro que no se concreta queda registrado (antes solo un contador
+--     Contratacion.IntentosPago, dato derivable). La cantidad se cuenta sobre la tabla.
+--   · «Aviso de desistimiento»: el cliente identificado no elige plan y modalidad.
+--   · «Constancia de suscripción»: período activado por el cobro (VigenciaDesde/Hasta).
+-- Idempotente: migra los datos existentes y quita las columnas reemplazadas.
+-- ============================================================
+SET QUOTED_IDENTIFIER ON;
+GO
+
+-- (1) Catálogo de medios de pago
+IF OBJECT_ID('MedioPago', 'U') IS NULL
+BEGIN
+    CREATE TABLE MedioPago (
+        IdMedioPago     INT           NOT NULL PRIMARY KEY,
+        Nombre          NVARCHAR(50)  NOT NULL CONSTRAINT UX_MedioPago_Nombre UNIQUE,
+        ClaveTraduccion NVARCHAR(100) NOT NULL
+    );
+    PRINT 'Tabla MedioPago creada.';
+END
+GO
+INSERT INTO MedioPago (IdMedioPago, Nombre, ClaveTraduccion)
+SELECT v.Id, v.Nombre, v.Clave
+FROM (VALUES (1, N'Efectivo', 'medio.efectivo'), (2, N'Tarjeta', 'medio.tarjeta'), (3, N'Transferencia', 'medio.transferencia'))
+     AS v(Id, Nombre, Clave)
+WHERE NOT EXISTS (SELECT 1 FROM MedioPago m WHERE m.IdMedioPago = v.Id);
+GO
+
+-- (2) Contratacion: medio de pago por FK y período activado
+IF COL_LENGTH('Contratacion', 'IdMedioPago') IS NULL
+    ALTER TABLE Contratacion ADD IdMedioPago INT NULL;
+IF COL_LENGTH('Contratacion', 'VigenciaDesde') IS NULL
+    ALTER TABLE Contratacion ADD VigenciaDesde DATE NULL;
+IF COL_LENGTH('Contratacion', 'VigenciaHasta') IS NULL
+    ALTER TABLE Contratacion ADD VigenciaHasta DATE NULL;
+-- Precio mensual pactado al registrar la contratación («Orden de cobro»): Caja cobra ese precio
+-- aunque el plan cambie de precio mientras la contratación espera en la cola.
+IF COL_LENGTH('Contratacion', 'PrecioMensual') IS NULL
+    ALTER TABLE Contratacion ADD PrecioMensual DECIMAL(10,2) NULL;
+-- «¿Referido? Sí → Acreditar crédito»: a quién se le acreditó el beneficio con este cobro.
+IF COL_LENGTH('Contratacion', 'IdReferenteAcreditado') IS NULL
+    ALTER TABLE Contratacion ADD IdReferenteAcreditado INT NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contratacion_Referente')
+    ALTER TABLE Contratacion ADD CONSTRAINT FK_Contratacion_Referente
+        FOREIGN KEY (IdReferenteAcreditado) REFERENCES Cliente(IdCliente);
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contratacion_MedioPago')
+    ALTER TABLE Contratacion ADD CONSTRAINT FK_Contratacion_MedioPago
+        FOREIGN KEY (IdMedioPago) REFERENCES MedioPago(IdMedioPago);
+GO
+
+-- Migración del texto libre al catálogo y baja de la columna reemplazada.
+IF COL_LENGTH('Contratacion', 'MedioPago') IS NOT NULL
+BEGIN
+    EXEC(N'UPDATE c SET c.IdMedioPago = m.IdMedioPago
+           FROM Contratacion c JOIN MedioPago m ON m.Nombre = LTRIM(RTRIM(c.MedioPago))
+           WHERE c.IdMedioPago IS NULL AND c.MedioPago IS NOT NULL;
+           DECLARE @n INT = (SELECT COUNT(*) FROM Contratacion WHERE IdMedioPago IS NULL AND MedioPago IS NOT NULL);
+           IF @n > 0 PRINT ''AVISO: '' + CAST(@n AS NVARCHAR(10)) + '' cobro(s) con un medio de pago fuera del catálogo quedaron como Efectivo.'';
+           UPDATE Contratacion SET IdMedioPago = 1
+           WHERE IdMedioPago IS NULL AND MedioPago IS NOT NULL;');
+    ALTER TABLE Contratacion DROP COLUMN MedioPago;
+    PRINT 'Contratacion.MedioPago migrado a IdMedioPago.';
+END
+GO
+
+-- (3) Intentos de cobro fallidos
+IF OBJECT_ID('ContratacionIntentoPago', 'U') IS NULL
+BEGIN
+    CREATE TABLE ContratacionIntentoPago (
+        IdIntento      INT IDENTITY(1,1) PRIMARY KEY,
+        IdContratacion INT           NOT NULL CONSTRAINT FK_IntentoPago_Contratacion REFERENCES Contratacion(IdContratacion),
+        NroIntento     INT           NOT NULL CONSTRAINT CHK_IntentoPago_Nro CHECK (NroIntento BETWEEN 1 AND 3),
+        Fecha          DATETIME      NOT NULL DEFAULT GETDATE(),
+        IdMedioPago    INT           NULL     CONSTRAINT FK_IntentoPago_MedioPago REFERENCES MedioPago(IdMedioPago),
+        Motivo         NVARCHAR(200) NOT NULL,
+        IdCaja         INT           NULL     CONSTRAINT FK_IntentoPago_Caja REFERENCES Empleado(IdEmpleado),
+        CONSTRAINT UX_IntentoPago_Nro UNIQUE (IdContratacion, NroIntento)
+    );
+    PRINT 'Tabla ContratacionIntentoPago creada.';
+END
+GO
+
+-- Migración del contador: un registro por intento ya contado, y baja de la columna derivable.
+IF COL_LENGTH('Contratacion', 'IntentosPago') IS NOT NULL
+BEGIN
+    EXEC(N'INSERT INTO ContratacionIntentoPago (IdContratacion, NroIntento, Fecha, IdMedioPago, Motivo, IdCaja)
+           SELECT c.IdContratacion, n.Nro, ISNULL(c.FechaResolucion, c.FechaAlta), NULL,
+                  N''Intento registrado antes del detalle por intento'', c.IdCaja
+           FROM Contratacion c
+           JOIN (VALUES (1), (2), (3)) AS n(Nro) ON n.Nro <= c.IntentosPago
+           WHERE NOT EXISTS (SELECT 1 FROM ContratacionIntentoPago i
+                             WHERE i.IdContratacion = c.IdContratacion AND i.NroIntento = n.Nro);');
+    IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Contratacion_Intentos')
+        ALTER TABLE Contratacion DROP CONSTRAINT CK_Contratacion_Intentos;
+    DECLARE @df SYSNAME = (SELECT d.name FROM sys.default_constraints d
+                           JOIN sys.columns col ON col.object_id = d.parent_object_id AND col.column_id = d.parent_column_id
+                           WHERE d.parent_object_id = OBJECT_ID('Contratacion') AND col.name = 'IntentosPago');
+    IF @df IS NOT NULL EXEC(N'ALTER TABLE Contratacion DROP CONSTRAINT [' + @df + N']');
+    ALTER TABLE Contratacion DROP COLUMN IntentosPago;
+    PRINT 'Contratacion.IntentosPago migrado a ContratacionIntentoPago.';
+END
+GO
+
+-- (4) Desistimientos ("¿Elige plan y modalidad? No → Asentar desistimiento")
+IF OBJECT_ID('DesistimientoContratacion', 'U') IS NULL
+BEGIN
+    CREATE TABLE DesistimientoContratacion (
+        IdDesistimiento INT IDENTITY(1,1) PRIMARY KEY,
+        IdCliente       INT           NOT NULL CONSTRAINT FK_DesistContr_Cliente  REFERENCES Cliente(IdCliente),
+        IdPlan          INT           NULL     CONSTRAINT FK_DesistContr_Plan     REFERENCES PlanSuscripcion(IdPlan),
+        Modalidad       INT           NULL     CONSTRAINT CHK_DesistContr_Modalidad CHECK (Modalidad IN (0,1,2)),
+        Motivo          NVARCHAR(200) NOT NULL,
+        Fecha           DATETIME      NOT NULL DEFAULT GETDATE(),
+        IdVendedor      INT           NOT NULL CONSTRAINT FK_DesistContr_Vendedor REFERENCES Empleado(IdEmpleado),
+        CONSTRAINT CHK_DesistContr_ModalidadConPlan CHECK (IdPlan IS NOT NULL OR Modalidad IS NULL)
+    );
+    PRINT 'Tabla DesistimientoContratacion creada.';
+END
+GO
+
+-- (5) Integridad: una contratación Pagada tiene medio de pago y comprobante; el comprobante es único.
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacion_Pagada')
+   AND NOT EXISTS (SELECT 1 FROM Contratacion WHERE Estado = 1 AND (IdMedioPago IS NULL OR NumeroComprobante IS NULL))
+    ALTER TABLE Contratacion ADD CONSTRAINT CHK_Contratacion_Pagada
+        CHECK (Estado <> 1 OR (IdMedioPago IS NOT NULL AND NumeroComprobante IS NOT NULL));
+ELSE IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacion_Pagada')
+    PRINT 'AVISO: CHK_Contratacion_Pagada no creada: hay contrataciones Pagadas sin medio de pago o sin comprobante.';
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Contratacion_Comprobante' AND object_id = OBJECT_ID('Contratacion'))
+    CREATE UNIQUE NONCLUSTERED INDEX UX_Contratacion_Comprobante
+        ON Contratacion(NumeroComprobante) WHERE NumeroComprobante IS NOT NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_IntentoPago_Contratacion' AND object_id = OBJECT_ID('ContratacionIntentoPago'))
+    CREATE NONCLUSTERED INDEX IX_IntentoPago_Contratacion ON ContratacionIntentoPago(IdContratacion);
+PRINT 'Sección 20c: medios de pago, intentos y desistimientos de PN02 verificados.';
 GO
 -- ============================================================
 -- WardrobeFlow — 21. DATOS DE PRUEBA DE TODOS LOS PROCESOS
@@ -2491,7 +2629,7 @@ BEGIN
         (N'Paula',   N'Herrera', '32999222', 'paula.herrera@mail.com',   'Crédito',       N'Premium',   45, CONVERT(date,'1993-08-27')),
         (N'Nicolás', N'Vega',    '38111333', 'nicolas.vega@mail.com',    'Débito',        N'Básico',    60, CONVERT(date,'1997-04-14'))
     ) AS v(Nombre, Apellido, DNI, Email, MetodoPago, PlanNom, DiasAlta, FechaNac)
-    WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE c.Nombre = v.Nombre AND c.Apellido = v.Apellido);
+    WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE (c.Nombre = v.Nombre AND c.Apellido = v.Apellido) OR c.DNI = v.DNI);  -- también por DNI: un cliente demo renombrado no se duplica
 
     DECLARE @cLucia  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Lucía'   AND Apellido=N'Fernández');
     DECLARE @cMartin INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Martín'  AND Apellido=N'Gómez');
@@ -2594,13 +2732,19 @@ BEGIN
     FROM Prenda pr WHERE pr.Nombre = N'Vestido Largo Negro' AND pr.Estado = 1;
 
     -- ── PN02: contrataciones (2 pendientes de pago y 1 cobrada) ─────────────
-    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, IntentosPago, FechaAlta, FechaResolucion, MedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado)
+    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion, IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado, VigenciaDesde, VigenciaHasta)
     VALUES
-        (@cRenata, @pEstand,  @vend, NULL,  0, 0, 0, DATEADD(HOUR, -3, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL),
-        (@cJulie,  @pPremium, @vend, NULL,  2, 0, 1, DATEADD(DAY,  -1, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL),
-        (@cPaula,  @pPremium, @vend, @caja, 1, 1, 0, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
-            'Efectivo', 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()),
-            (SELECT Precio FROM PlanSuscripcion WHERE IdPlan = @pPremium) * 3, 0);
+        (@cRenata, @pEstand,  @vend, NULL,  0, 0, DATEADD(HOUR, -3, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+        (@cJulie,  @pPremium, @vend, NULL,  2, 0, DATEADD(DAY,  -1, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+        (@cPaula,  @pPremium, @vend, @caja, 1, 1, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
+            1, 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()),
+            (SELECT Precio FROM PlanSuscripcion WHERE IdPlan = @pPremium) * 3, 0,
+            CAST(DATEADD(DAY, -45, GETDATE()) AS DATE), CAST(DATEADD(MONTH, 3, DATEADD(DAY, -45, GETDATE())) AS DATE));
+
+    -- La contratación de Julieta ya tuvo un intento de cobro que no se concretó.
+    INSERT INTO ContratacionIntentoPago (IdContratacion, NroIntento, Fecha, IdMedioPago, Motivo, IdCaja)
+    SELECT c.IdContratacion, 1, DATEADD(HOUR, -20, GETDATE()), 2, N'Tarjeta rechazada', @caja
+    FROM Contratacion c WHERE c.IdCliente = @cJulie AND c.Estado = 0;
 
     -- ── PN03: sugerencias y promociones en cada estado ──────────────────────
     INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace DAL.Interfaces
@@ -5,29 +6,43 @@ namespace DAL.Interfaces
     /// <summary>Contrato del acceso a datos de Contratacion (PN02, permite inyección y dobles de prueba).</summary>
     public interface IContratacionDAL
     {
-        // Contrataciones en estado PendientePago (la cola que ve Caja).
+        // Contrataciones en estado PendientePago (la cola que consulta Caja).
         List<BE.Contratacion> ObtenerPendientesDePago();
+
+        // Contrataciones ya resueltas (Pagadas o Canceladas), para volver a imprimir sus constancias.
+        List<BE.Contratacion> ObtenerResueltas();
 
         BE.Contratacion ObtenerPorId(int idContratacion);
 
-        // Inserta una nueva contratación en estado PendientePago. Devuelve el ID generado.
+        // "Registrar contratación": inserta en PendientePago («Orden de cobro»). Devuelve el ID.
         int Alta(BE.Contratacion contratacion);
 
-        // Suma un intento de pago fallido SOLO si la contratación sigue PendientePago. Devuelve la
-        // cantidad de intentos ya registrados, o -1 si ya no estaba pendiente (otra sesión la resolvió).
-        int IncrementarIntento(int idContratacion);
+        // "Confirmar cobro" + "Emitir comprobante": marca la contratación como Pagada con el medio
+        // de pago, el comprobante y quién cobró. "Claim" atómico: el UPDATE exige que siga
+        // PendientePago; devuelve false si otra sesión de Caja ya la resolvió.
+        bool ConfirmarCobro(int idContratacion, int idCaja, int idMedioPago, string numeroComprobante,
+                            decimal importe, decimal descuento, int? idPromocion);
 
-        // Marca la contratación como Pagada, registra el medio de pago, el comprobante y quién cobró.
-        // Es un "claim" atómico: el UPDATE exige que siga PendientePago. Devuelve false si otra
-        // sesión de Caja ya la resolvió (nadie más debe activar la suscripción en ese caso).
-        bool ConfirmarPago(int idContratacion, int idCaja, string medioPago, string numeroComprobante,
-                          decimal importe, decimal descuento, int? idPromocion);
+        // "Activar suscripción" («Constancia de suscripción»): guarda el período activado y, si hubo
+        // "¿Referido? Sí → Acreditar crédito", a qué referente se le acreditó el beneficio.
+        void RegistrarVigencia(int idContratacion, DateTime desde, DateTime hasta, int? idReferenteAcreditado = null);
 
-        // Compensación: revierte un cobro recién confirmado a PendientePago (solo si está Pagada)
-        // cuando la activación de la suscripción falló después del claim.
+        // Compensación técnica: revierte un cobro recién confirmado a PendientePago (solo si está
+        // Pagada) cuando la activación de la suscripción falló después del claim.
         void ReabrirPago(int idContratacion);
 
-        // Marca la contratación como Cancelada (máximo de intentos agotado). Solo si sigue PendientePago.
-        void Cancelar(int idContratacion);
+        // "Registrar intento" → ¿Alcanzó el máximo? En una transacción: exige que siga
+        // PendientePago, guarda el intento con el número siguiente y, si llega al máximo, la
+        // cancela. Devuelve null si ya no estaba pendiente (otra sesión la resolvió).
+        BE.ResultadoIntentoPago RegistrarIntentoFallido(int idContratacion, int? idMedioPago, string motivo, int idCaja, int maximo);
+
+        List<BE.IntentoPago> ObtenerIntentos(int idContratacion);
+
+        List<BE.MedioPago> ObtenerMediosPago();
+
+        // "Asentar desistimiento": el cliente identificado no elige plan y modalidad.
+        int AltaDesistimiento(BE.DesistimientoContratacion desistimiento);
+
+        BE.DesistimientoContratacion ObtenerDesistimiento(int idDesistimiento);
     }
 }

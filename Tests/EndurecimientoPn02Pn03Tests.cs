@@ -66,14 +66,14 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_ConPromocionVigenteDelPlan_CobraElImporteConDescuentoYGuardaLaPromocion()
+        public void ConfirmarCobro_ConPromocionVigenteDelPlan_CobraElImporteConDescuentoYGuardaLaPromocion()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
             ctx.AgregarPromocion(BE.TipoDescuento.Porcentaje, 10);
             var contratacion = ctx.Pendiente();
 
-            var liq = ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            var liq = ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(9000m, ctx.DalContratacion.UltimoImporte);
             Assert.AreEqual(1000m, ctx.DalContratacion.UltimoDescuento);
@@ -84,13 +84,13 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_SinPromocionNiCredito_CobraElPrecioDelPlanCompleto()
+        public void ConfirmarCobro_SinPromocionNiCredito_CobraElPrecioDelPlanCompleto()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
             var contratacion = ctx.Pendiente();
 
-            ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(10000m, ctx.DalContratacion.UltimoImporte);
             Assert.AreEqual(0m, ctx.DalContratacion.UltimoDescuento);
@@ -98,7 +98,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_CreditoPorReferidoMayorQueLaPromocion_ConsumeSoloLoAplicado()
+        public void ConfirmarCobro_CreditoPorReferidoMayorQueLaPromocion_ConsumeSoloLoAplicado()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
@@ -106,7 +106,7 @@ namespace Tests
             ctx.AgregarPromocion(BE.TipoDescuento.MontoFijo, 500);
             var contratacion = ctx.Pendiente();
 
-            ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(7000m, ctx.DalContratacion.UltimoImporte, "Un solo descuento: el crédito (3000), no la suma con la promo.");
             Assert.IsNull(ctx.DalContratacion.UltimaPromocion);
@@ -114,7 +114,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_GanaLaPromocion_ElCreditoPorReferidoQuedaAcumulado()
+        public void ConfirmarCobro_GanaLaPromocion_ElCreditoPorReferidoQuedaAcumulado()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
@@ -122,21 +122,21 @@ namespace Tests
             ctx.AgregarPromocion(BE.TipoDescuento.Porcentaje, 10);
             var contratacion = ctx.Pendiente();
 
-            ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(9000m, ctx.DalContratacion.UltimoImporte);
             Assert.AreEqual(500m, ctx.Cliente.DescuentoProximoCobro, "No se consume el crédito si se aplicó la promoción.");
         }
 
         [TestMethod]
-        public void ConfirmarPago_CreditoMayorAlPrecio_ElExcedenteQuedaAcumulado()
+        public void ConfirmarCobro_CreditoMayorAlPrecio_ElExcedenteQuedaAcumulado()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
             ctx.Cliente.DescuentoProximoCobro = 12500m;   // el plan cuesta 10000
             var contratacion = ctx.Pendiente();
 
-            ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(0m, ctx.DalContratacion.UltimoImporte);
             Assert.AreEqual(2500m, ctx.Cliente.DescuentoProximoCobro, "Los descuentos no usados quedan acumulados.");
@@ -155,7 +155,7 @@ namespace Tests
             Assert.AreEqual(10000m, liq.Bruto);
             Assert.AreEqual(2500m, liq.Descuento);
             Assert.AreEqual(7500m, liq.Total);
-            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarPagoVeces);
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces);
         }
 
         [TestMethod]
@@ -212,7 +212,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_FallaLaActivacionYTampocoSePuedeReabrir_AvisaQueElCobroQuedoSinActivar()
+        public void ConfirmarCobro_FallaLaActivacionYTampocoSePuedeReabrir_AvisaQueElCobroQuedoSinActivar()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
@@ -222,7 +222,7 @@ namespace Tests
 
             try
             {
-                ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+                ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
                 Assert.Fail("Debía avisar que el cobro quedó sin activar.");
             }
             catch (BE.AppException ex)

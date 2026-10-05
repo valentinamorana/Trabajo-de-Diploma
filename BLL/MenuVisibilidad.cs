@@ -127,7 +127,8 @@ namespace BLL
 
             visible["inventarioToolStripMenuItem"] =
                 visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] ||
-                visible["inspeccionDevolucionToolStripMenuItem"] || Permite("mnuStock");
+                visible["inspeccionDevolucionToolStripMenuItem"] || visible["controlStockToolStripMenuItem"] ||
+                Permite("mnuStock");
 
             foreach (var g in Grupos)
                 visible[g.Grupo] = g.Hijos.Any(h => visible.TryGetValue(h, out var v) && v);

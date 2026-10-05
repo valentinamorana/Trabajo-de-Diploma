@@ -89,6 +89,18 @@ namespace BE
         // El pedido puede des-cancelarse solo si está Cancelado.
         public bool PuedeDesCancelarse() => Estado == EstadoPedido.Cancelado;
 
+        // Registrar la devolución (PN04): solo de un pedido entregado.
+        public bool PuedeDevolverse() => Estado == EstadoPedido.Entregado;
+
+        // Hay notificación de envío desde que se despachó.
+        public bool TieneNotificacionEnvio() => Estado == EstadoPedido.Despachado || Estado == EstadoPedido.Entregado;
+
+        // Ciclo logístico (Pedidos Realizados): pedidos formalizados en adelante. Los que siguen en
+        // el armado de PN01 (control de stock, faltantes, separados) o desistidos no son para despachar.
+        public bool EsDelCicloLogistico() =>
+            Estado == EstadoPedido.Pendiente || Estado == EstadoPedido.Despachado ||
+            Estado == EstadoPedido.Entregado || Estado == EstadoPedido.Cancelado;
+
         // ── PN01 ──────────────────────────────────────────────────────────────
         // Depósito revisa el stock, informa faltantes o confirma prendas: solo en control.
         public bool PuedeControlarse() => Estado == EstadoPedido.EnControlStock;
@@ -126,7 +138,7 @@ namespace BE
         ///   Separado       → Pendiente (formalizar)
         ///   Pendiente      → Despachado | Cancelado
         ///   Despachado     → Entregado
-        ///   Cancelado      → Pendiente (des-cancelar)
+        ///   Cancelado      → EnControlStock (reactivar: vuelve a control de stock)
         /// Entregado y Desistido son estados finales.
         /// </summary>
         public bool TransicionValida(EstadoPedido destino)
@@ -152,7 +164,7 @@ namespace BE
                     return destino == EstadoPedido.Entregado;
 
                 case EstadoPedido.Cancelado:
-                    return destino == EstadoPedido.Pendiente; // Des-cancelar
+                    return destino == EstadoPedido.EnControlStock; // Reactivar: vuelve a control de stock
 
                 case EstadoPedido.Entregado:
                 case EstadoPedido.Desistido:

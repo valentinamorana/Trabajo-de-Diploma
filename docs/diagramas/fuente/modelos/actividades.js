@@ -72,27 +72,35 @@ module.exports = [
   },
   {
     tipo: 'actividad', id: 'ACT_pn02_comercializacion', titulo: 'Actividad — PN02 Comercialización de la suscripción',
-    carriles: [{ id: 'C', nombre: 'Cliente' }, { id: 'V', nombre: 'Vendedor' }, { id: 'S', nombre: 'Sistema' }, { id: 'J', nombre: 'Caja' }],
+    carriles: [{ id: 'C', nombre: 'Cliente' }, { id: 'V', nombre: 'Vendedor' }, { id: 'J', nombre: 'Caja' }],
     nodos: [
-      N('i', 'inicio', 'C'), N('a1', 'accion', 'C', 'Elige plan y modalidad de cobro (mensual, trimestral o anual)'),
-      N('d1', 'decision', 'V', '¿Cliente registrado?'), N('a2', 'accion', 'V', 'Registra al cliente'),
-      N('a3', 'accion', 'V', 'Registra la contratación (plan + modalidad)'),
-      N('d2', 'decision', 'S', '¿Cliente y plan válidos, con cupo y sin otra contratación pendiente?'),
-      N('a4', 'accion', 'V', 'Informa el motivo del rechazo'),
-      N('a5', 'accion', 'S', 'Contratación en Pendiente de pago (la suscripción todavía no está vigente)'),
-      N('a6', 'accion', 'J', 'Consulta la cola y cobra al cliente indicando el medio de pago'),
-      N('d3', 'decision', 'J', '¿Pago concretado?'),
-      N('a7', 'accion', 'S', 'Calcula el importe: precio × meses − un solo descuento'),
-      N('a8', 'accion', 'S', 'Activa la suscripción (Builder), acredita al referente y emite el comprobante'),
-      N('a9', 'accion', 'J', 'Registra el intento fallido'),
-      N('d4', 'decision', 'S', '¿Tercer intento?'),
-      N('a10', 'accion', 'S', 'Cancela la contratación'),
-      N('f', 'fin', 'S'), N('f2', 'fin', 'S')
+      N('i', 'inicio', 'C'), N('a1', 'accion', 'C', 'Solicitar información'),
+      N('a2', 'accion', 'V', 'Identificar cliente (DNI, nombre o apellido)'),
+      N('d1', 'decision', 'V', '¿Registrado?'), N('a3', 'accion', 'V', 'Registrar cliente (referente opcional)'),
+      N('a4', 'accion', 'V', 'Presentar planes (Planes disponibles)'),
+      N('d2', 'decision', 'C', '¿Elige plan y modalidad?'),
+      N('a5', 'accion', 'V', 'Asentar desistimiento (aviso)'),
+      N('a6', 'accion', 'V', 'Registrar contratación'),
+      N('d3', 'decision', 'V', '¿Contratación válida?'),
+      N('a7', 'accion', 'V', 'Informar motivo'),
+      N('a8', 'accion', 'J', 'Calcular importe (Liquidación: un solo descuento)'),
+      N('a9', 'accion', 'C', 'Abonar (medio de pago)'),
+      N('d4', 'decision', 'J', '¿Se concreta el pago?'),
+      N('a10', 'accion', 'J', 'Confirmar cobro y emitir comprobante'),
+      N('a11', 'accion', 'J', 'Activar suscripción (Constancia de suscripción)'),
+      N('d5', 'decision', 'J', '¿Referido?'),
+      N('a12', 'accion', 'J', 'Acreditar crédito al referente'),
+      N('a13', 'accion', 'J', 'Registrar intento'),
+      N('d6', 'decision', 'J', '¿Alcanzó el máximo de 3 intentos?'),
+      N('a14', 'accion', 'J', 'Cancelar contratación (Constancia de cancelación)'),
+      N('f', 'fin', 'C'), N('f2', 'fin', 'C')
     ],
     flujos: [
-      F('i', 'a1'), F('a1', 'd1'), F('d1', 'a2', 'No'), F('a2', 'a3'), F('d1', 'a3', 'Sí'), F('a3', 'd2'), F('d2', 'a4', 'No'), F('a4', 'f2'),
-      F('d2', 'a5', 'Sí'), F('a5', 'a6'), F('a6', 'd3'), F('d3', 'a7', 'Sí'), F('a7', 'a8'), F('a8', 'f'), F('d3', 'a9', 'No'), F('a9', 'd4'),
-      F('d4', 'a10', 'Sí'), F('a10', 'f2'), F('d4', 'a6', 'No')
+      F('i', 'a1'), F('a1', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'No'), F('a3', 'a4'), F('d1', 'a4', 'Sí'), F('a4', 'd2'),
+      F('d2', 'a5', 'No'), F('a5', 'f2'), F('d2', 'a6', 'Sí'), F('a6', 'd3'), F('d3', 'a7', 'No'), F('a7', 'f2'),
+      F('d3', 'a8', 'Sí'), F('a8', 'a9'), F('a9', 'd4'), F('d4', 'a10', 'Sí'), F('a10', 'a11'), F('a11', 'd5'),
+      F('d5', 'a12', 'Sí'), F('a12', 'f'), F('d5', 'f', 'No'),
+      F('d4', 'a13', 'No'), F('a13', 'd6'), F('d6', 'a8', 'No'), F('d6', 'a14', 'Sí'), F('a14', 'f2')
     ]
   },
   {

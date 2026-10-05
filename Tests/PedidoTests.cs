@@ -1006,7 +1006,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void DesCancelar_PrendasYaNoDisponibles_LanzaDescancelarPrendas()
+        public void DesCancelar_OtraSesionLoCambio_LanzaEstadoCambiado()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
@@ -1018,16 +1018,16 @@ namespace Tests
             try
             {
                 bll.DesCancelar("Test", pedido);
-                Assert.Fail("Debía rechazar si las prendas ya no están disponibles.");
+                Assert.Fail("Debía rechazar si el pedido ya no está Cancelado.");
             }
             catch (BE.AppException ex)
             {
-                Assert.AreEqual("err.bll.pedido.descancelar_prendas", ex.Clave);
+                Assert.AreEqual("err.bll.pedido.estado_cambiado", ex.Clave);
             }
         }
 
         [TestMethod]
-        public void DesCancelar_PrendasDisponibles_RevierteAPendienteYRegistraHistorial()
+        public void DesCancelar_Reactiva_VuelveAControlDeStockSinReservar()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
@@ -1048,14 +1048,15 @@ namespace Tests
 
             var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
             Assert.AreEqual("Cancelado", estado.ValorAnterior);
-            Assert.AreEqual("Pendiente", estado.ValorNuevo);
+            Assert.AreEqual("EnControlStock", estado.ValorNuevo);
+            Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces, "Reactivar no reserva: separa Depósito.");
 
             var motivo = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "MotivoCancelacion");
             Assert.AreEqual("Cliente se arrepintió", motivo.ValorAnterior);
             Assert.IsNull(motivo.ValorNuevo);
         }
 
-        // Des-cancelar vuelve a reservar las prendas: no puede saltarse las reglas de PN01.
+        // Reactivar vuelve a "Enviar selección para control stock": no puede saltarse las reglas de PN01.
         [TestMethod]
         public void DesCancelar_ClienteConOtroPedidoActivo_Rechaza()
         {

@@ -272,6 +272,12 @@ namespace GUI
                     string fmt = t.ContainsKey("msg.cli.registrado") ? t["msg.cli.registrado"].Texto : "Cliente '{0}' registrado correctamente.";
                     MostrarOk(string.Format(fmt, form.ClienteEditado.NombreCompleto));
                     CargarClientes();
+
+                    // PN02: "Registrar cliente" → sigue en "Presentar planes" para el mismo cliente.
+                    if (MessageBox.Show(Tr("conf.cli.contratar", "¿Continuar con la contratación de un plan para este cliente?"),
+                            this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        using (var contratacion = new NuevaContratacionForm(form.ClienteEditado.DNI))
+                            contratacion.ShowDialog(this);
                 }
                 catch (Exception ex)
                 {

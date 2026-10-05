@@ -4,19 +4,18 @@ sequenceDiagram
   participant F as Contrataciones<br/>PendientesForm
   participant B as BLL.<br/>Contratacion
   participant D as DAL.<br/>Contratacion
-  C->>F: Registra el intento fallido de una contratación
-  F->>B: RegistrarIntentoFallido(modulo, idContratacion)
-  Note over B: Exigir(CajaEditar)
-  B->>D: IncrementarIntento(id)  [solo si sigue PendientePago y IntentosPago < 3]
-  alt La contratación ya no está pendiente
-    D-->>B: -1
+  C->>F: El pago no se concretó: medio intentado + motivo
+  F->>B: RegistrarIntentoFallido(modulo, contratacion, idMedioPago, motivo)
+  Note over B: Exigir(CajaEditar) · PendientePago · motivo obligatorio
+  B->>D: RegistrarIntentoFallido(id, idMedioPago, motivo, idCaja, máximo 3)  [transacción con bloqueo de fila]
+  alt Ya no está pendiente
+    D-->>B: null
     B-->>F: AppException(cobrar_concurrente)
   else Intento registrado
-    D-->>B: intentos
-    alt intentos = 3
-      B->>D: Cancelar(id)  [WHERE Estado = PendientePago]
-      B-->>F: Contratación Cancelada
-    else intentos < 3
-      B-->>F: Sigue pendiente, queda disponible otro intento
+    alt ¿Alcanzó el máximo? Sí
+      D-->>B: Cancelada (automática)
+      F-->>C: Constancia de cancelación (PDF)
+    else No
+      F-->>C: Sigue en la cola: vuelve a Calcular importe
     end
   end

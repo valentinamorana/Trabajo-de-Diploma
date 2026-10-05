@@ -25,7 +25,8 @@ namespace BLL
             // que una caída no tumbe al resto). Desconocido = métrica no disponible (se ignora).
             int vencidas = Desconocido, porVencer = Desconocido, diasSinBackup = Desconocido,
                 enLimpieza = Desconocido, dvRotas = Desconocido, reservadasEspera = Desconocido,
-                enControl = Desconocido, conFaltantes = Desconocido, separados = Desconocido;
+                enControl = Desconocido, conFaltantes = Desconocido, separados = Desconocido,
+                contratacionesPendientes = Desconocido;
 
             try
             {
@@ -66,8 +67,11 @@ namespace BLL
             }
             catch { }
 
+            // PN02 — contrataciones registradas por el Vendedor que esperan el cobro de Caja.
+            try { contratacionesPendientes = new Contratacion().ContarPendientesDePago(); } catch { }
+
             return EvaluarAlertas(vencidas, porVencer, diasSinBackup, enLimpieza, dvRotas, reservadasEspera,
-                                  enControl, conFaltantes, separados);
+                                  enControl, conFaltantes, separados, contratacionesPendientes);
         }
 
         /// <summary>Centinela: la métrica no pudo obtenerse (fuente caída) → se ignora.</summary>
@@ -81,7 +85,7 @@ namespace BLL
         /// </summary>
         public static List<BE.Alerta> EvaluarAlertas(int vencidas, int porVencer,
             int diasSinBackup, int enLimpieza, int dvRotas, int reservadasEspera = 0,
-            int enControl = 0, int conFaltantes = 0, int separados = 0)
+            int enControl = 0, int conFaltantes = 0, int separados = 0, int contratacionesPendientes = 0)
         {
             var alertas = new List<BE.Alerta>();
 
@@ -130,6 +134,11 @@ namespace BLL
             if (separados > 0)
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.pedidos.formalizar",
                     "{0} pedido(s) con las prendas separadas, listos para formalizar.", separados, separados));
+
+            // 7) PN02 — cola de Caja
+            if (contratacionesPendientes > 0)
+                alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.contr.pendientes",
+                    "{0} contratación(es) esperando el cobro de Caja.", contratacionesPendientes, contratacionesPendientes));
 
             return alertas;
         }

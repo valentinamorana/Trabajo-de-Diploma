@@ -11,6 +11,7 @@ namespace BLL
     public class Cobro : Interfaces.ICobroService
     {
         private readonly DAL.Interfaces.ICobroDAL dalCobro;
+        private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
         private readonly Manejadores.ManejadorCobro cadena;
@@ -21,6 +22,7 @@ namespace BLL
                       DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda,
                       DAL.Interfaces.IPromocionDAL dalPromocion = null)
         {
+            this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalCobro = dalCobro ?? throw new ArgumentNullException(nameof(dalCobro));
 
             // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
@@ -53,6 +55,13 @@ namespace BLL
             if (!cliente.TienePlan())
                 throw new BE.AppException("err.bll.cobro.sin_plan",
                     "{0} no tiene un plan de suscripción asignado. No corresponde procesar un cobro.",
+                    cliente.NombreCompleto);
+
+            // PN02: con una contratación pendiente de pago, el plan y el vencimiento los define el
+            // cobro de Caja. Procesar un cobro recurrente a la vez extendería o cambiaría la suscripción dos veces.
+            if (dalCliente.TieneContratacionPendiente(cliente.IdCliente))
+                throw new BE.AppException("err.bll.cobro.contratacion_pendiente",
+                    "{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.",
                     cliente.NombreCompleto);
 
             var contexto = new Manejadores.ContextoCobro

@@ -2,17 +2,18 @@ erDiagram
   Usuario |o--o{ Bitacora : "usuario"
   Usuario |o--o{ BitacoraNegocio : "IdUsuario"
   Cliente |o--o{ BitacoraNegocio : "IdCliente"
-  Prenda |o--o{ BitacoraNegocio : "IdPrenda"
   Pedido |o--o{ BitacoraNegocio : "IdPedido"
+  Prenda |o--o{ BitacoraNegocio : "IdPrenda"
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Cliente ||--o{ Contratacion : "IdCliente"
+  Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
+  Promocion |o--o{ Contratacion : "IdPromocion"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
-  Promocion |o--o{ Contratacion : "IdPromocion"
   Permiso ||--o{ ControlMapeado : "IdPermiso"
   Usuario |o--o{ Empleado : "IdUsuario"
   Cliente ||--o{ HistorialCobro : "IdCliente"
@@ -23,9 +24,9 @@ erDiagram
   Cliente ||--o{ ListaEspera : "IdCliente"
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
+  Cliente ||--o{ Pedido : "IdCliente"
   Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Empleado ||--o{ Pedido : "IdEmpleado"
-  Cliente ||--o{ Pedido : "IdCliente"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Usuario |o--o{ PedidoHistorial : "IdUsuario"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
@@ -244,15 +245,18 @@ erDiagram
     int IdCaja FK "NULL"
     int Modalidad
     int Estado
-    int IntentosPago
     datetime FechaAlta
     datetime FechaResolucion "NULL"
-    nvarchar(50) MedioPago "NULL"
     nvarchar(50) NumeroComprobante "NULL"
     datetime FechaComprobante "NULL"
     decimal(10_2) Importe "NULL"
     decimal(10_2) DescuentoAplicado "NULL"
     int IdPromocion FK "NULL"
+    int IdMedioPago FK "NULL"
+    date VigenciaDesde "NULL"
+    date VigenciaHasta "NULL"
+    decimal(10_2) PrecioMensual "NULL"
+    int IdReferenteAcreditado FK "NULL"
   }
   Pedido {
     int IdPedido PK

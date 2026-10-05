@@ -3,9 +3,17 @@ erDiagram
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Cliente ||--o{ Contratacion : "IdCliente"
+  Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
+  Promocion |o--o{ Contratacion : "IdPromocion"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
-  Promocion |o--o{ Contratacion : "IdPromocion"
+  MedioPago |o--o{ Contratacion : "IdMedioPago"
+  MedioPago |o--o{ ContratacionIntentoPago : "IdMedioPago"
+  Empleado |o--o{ ContratacionIntentoPago : "IdCaja"
+  Contratacion ||--o{ ContratacionIntentoPago : "IdContratacion"
+  PlanSuscripcion |o--o{ DesistimientoContratacion : "IdPlan"
+  Empleado ||--o{ DesistimientoContratacion : "IdVendedor"
+  Cliente ||--o{ DesistimientoContratacion : "IdCliente"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Cliente {
     int IdCliente PK
@@ -53,15 +61,41 @@ erDiagram
     int IdCaja FK "NULL"
     int Modalidad
     int Estado
-    int IntentosPago
     datetime FechaAlta
     datetime FechaResolucion "NULL"
-    nvarchar(50) MedioPago "NULL"
     nvarchar(50) NumeroComprobante "NULL"
     datetime FechaComprobante "NULL"
     decimal(10_2) Importe "NULL"
     decimal(10_2) DescuentoAplicado "NULL"
     int IdPromocion FK "NULL"
+    int IdMedioPago FK "NULL"
+    date VigenciaDesde "NULL"
+    date VigenciaHasta "NULL"
+    decimal(10_2) PrecioMensual "NULL"
+    int IdReferenteAcreditado FK "NULL"
+  }
+  MedioPago {
+    int IdMedioPago PK
+    nvarchar(50) Nombre
+    nvarchar(100) ClaveTraduccion
+  }
+  ContratacionIntentoPago {
+    int IdIntento PK
+    int IdContratacion FK
+    int NroIntento
+    datetime Fecha
+    int IdMedioPago FK "NULL"
+    nvarchar(200) Motivo
+    int IdCaja FK "NULL"
+  }
+  DesistimientoContratacion {
+    int IdDesistimiento PK
+    int IdCliente FK
+    int IdPlan FK "NULL"
+    int Modalidad "NULL"
+    nvarchar(200) Motivo
+    datetime Fecha
+    int IdVendedor FK
   }
   Promocion {
     int IdPromocion PK

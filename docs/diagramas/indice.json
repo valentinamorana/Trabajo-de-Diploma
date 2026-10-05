@@ -282,7 +282,7 @@
   {
     "id": "DSS_PN02_CU03_CAJ_CancelarContratacion",
     "tipo": "secuencia",
-    "titulo": "PN02 · CU03-CAJ Cancelar contratación (intentos fallidos)"
+    "titulo": "PN02 · CU03-CAJ Registrar intento y cancelar (3 intentos)"
   },
   {
     "id": "DSS_PN03_CU01_GER_SugerirPromocion",

@@ -120,6 +120,17 @@ namespace DAL
             return BuscarIdPorDni(dni, idExcluir) != 0;
         }
 
+        public bool TieneContratacionPendiente(int idCliente)
+        {
+            SqlParameter[] p = { new SqlParameter("@IdCliente", idCliente) };
+            try
+            {
+                DataTable t = acceso.Leer("SELECT COUNT(*) AS N FROM Contratacion WHERE IdCliente = @IdCliente AND Estado = 0", p);
+                return t != null && t.Rows.Count > 0 && Convert.ToInt32(t.Rows[0]["N"]) > 0;
+            }
+            catch (Exception ex) { throw new Exception("Error al consultar las contrataciones del cliente.", ex); }
+        }
+
         // Busca un cliente activo con ese DNI (excluyendo el ID indicado). Devuelve 0 si no hay.
         private int BuscarIdPorDni(string dni, int idExcluir)
         {

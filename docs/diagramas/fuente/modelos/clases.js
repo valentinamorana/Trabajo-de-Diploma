@@ -111,9 +111,12 @@ module.exports = [
       E('BE.Contratacion', { attrs: 'all' }), E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido', 'IdPlan', 'FechaVencimiento', 'DescuentoProximoCobro'] }),
       E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'LimitePrendas', 'Precio'] }), E('BE.Promocion', { attrs: ['IdPromocion', 'Nombre', 'TipoDescuento', 'Valor'] }),
       E('BE.PoliticaDescuento', { metodos: 'all' }),
-      E('BLL.Cliente', { metodos: [] }),
-      E('BLL.Contratacion', { metodos: ['CrearContratacion', 'ConfirmarPago', 'CalcularImporte', 'RegistrarIntentoFallido'] }),
-      E('IContratacionDAL', { metodos: ['Alta', 'ConfirmarPago', 'IncrementarIntento', 'ReabrirPago', 'Cancelar'] })
+      E('BE.MedioPago', { attrs: 'all' }), E('BE.IntentoPago', { attrs: 'all' }), E('BE.DesistimientoContratacion', { attrs: 'all' }),
+      E('BLL.Cliente', { metodos: ['BuscarPorIdentificacion', 'ActivarSuscripcionDesdeContratacion'] }),
+      E('BLL.Contratacion', { metodos: ['IdentificarCliente', 'PresentarPlanes', 'AsentarDesistimiento', 'ValidarContratacion', 'RegistrarContratacion',
+                                        'EstimarImporte', 'ObtenerPendientesDePago', 'CalcularImporte', 'CalcularImportes', 'ConfirmarCobro', 'RegistrarIntentoFallido'] }),
+      E('IContratacionDAL', { metodos: ['Alta', 'ConfirmarCobro', 'RegistrarVigencia', 'ReabrirPago', 'RegistrarIntentoFallido', 'ObtenerIntentos',
+                                        'ObtenerMediosPago', 'AltaDesistimiento', 'ObtenerPendientesDePago'] })
     ]
   },
 

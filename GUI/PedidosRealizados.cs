@@ -149,9 +149,7 @@ namespace GUI
                 // Despacho trabaja solo con pedidos formalizados (y su ciclo posterior). Los que
                 // están en el armado (control de stock, con faltantes, separados) o desistidos
                 // todavía no son pedidos para despachar (PN01).
-                _pedidos = pedidoBLL.ObtenerTodos().FindAll(p =>
-                    p.Estado == BE.EstadoPedido.Pendiente  || p.Estado == BE.EstadoPedido.Despachado ||
-                    p.Estado == BE.EstadoPedido.Entregado  || p.Estado == BE.EstadoPedido.Cancelado);
+                _pedidos = pedidoBLL.ObtenerTodos().FindAll(p => p.EsDelCicloLogistico());
                 AplicarFiltro();
                 MostrarOk(Tr("msg.ped.ensistema", "{0} pedido(s) en el sistema.", new object[] { _pedidos.Count }));
             }
@@ -326,11 +324,10 @@ namespace GUI
             var pedido = ObtenerPedidoSeleccionado();
             if (pedido == null) { DeshabilitarBotones(); return; }
 
-            btnDespachar.Enabled        = pedido.Estado == BE.EstadoPedido.Pendiente;
-            btnEntregado.Enabled        = pedido.Estado == BE.EstadoPedido.Despachado;
-            btnDevolucion.Enabled       = pedido.Estado == BE.EstadoPedido.Entregado;
-            btnVerNotificacion.Enabled  = pedido.Estado == BE.EstadoPedido.Despachado ||
-                                          pedido.Estado == BE.EstadoPedido.Entregado;
+            btnDespachar.Enabled        = pedido.PuedeDespachar();
+            btnEntregado.Enabled        = pedido.PuedeEntregarse();
+            btnDevolucion.Enabled       = pedido.PuedeDevolverse();
+            btnVerNotificacion.Enabled  = pedido.TieneNotificacionEnvio();
             btnHistorial.Enabled       = true;
 
             CargarDetallePrendas(pedido);
@@ -634,7 +631,7 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(_idioma);
             switch (estado)
             {
-                case BE.EstadoPedido.Pendiente:  return t.ContainsKey("est.pendiente")  ? t["est.pendiente"].Texto  : "Pendiente";
+                case BE.EstadoPedido.Pendiente:  return t.ContainsKey("est.formalizado") ? t["est.formalizado"].Texto : "Formalizado (pendiente de despacho)";
                 case BE.EstadoPedido.Despachado: return t.ContainsKey("est.despachado") ? t["est.despachado"].Texto : "Despachado";
                 case BE.EstadoPedido.Entregado:  return t.ContainsKey("est.entregado")  ? t["est.entregado"].Texto  : "Entregado";
                 case BE.EstadoPedido.Cancelado:  return t.ContainsKey("est.cancelado")  ? t["est.cancelado"].Texto  : "Cancelado";

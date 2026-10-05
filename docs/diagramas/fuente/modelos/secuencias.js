@@ -311,45 +311,59 @@ module.exports = [
   },
 
   // ───────────────────────────── PN02 — Comercialización de la suscripción ─────────────────────────────
+  // Sigue el flujo aprobado (adaptado a WardrobeFlow): Vendedor identifica, presenta planes y
+  // registra la contratación; Caja calcula, cobra o registra intentos (al tercero se cancela).
   {
     tipo: 'secuencia', id: 'DSS_PN02_CU01_VTA_GestionarSuscripcion', titulo: 'PN02 · CU01-VTA Gestionar suscripción (contratación)',
-    participantes: [A('V', 'Vendedor'), P('F', 'NuevaContratacionForm'), P('B', 'BLL.Contratacion'), P('DC', 'DAL.Cliente / DAL.PlanSuscripcion'), P('D', 'DAL.Contratacion')],
+    participantes: [A('V', 'Vendedor'), P('F', 'NuevaContratacionForm'), P('B', 'BLL.Contratacion'), P('CB', 'BLL.Cliente'), P('D', 'DAL.Contratacion')],
     pasos: [
-      c('V', 'F', 'Elige cliente, plan y modalidad (Mensual, Trimestral, Anual)'),
-      c('F', 'B', 'CrearContratacion(modulo, idCliente, idPlan, modalidad)'),
-      nota('Exigir(ClientesEditar)', 'B'),
-      c('B', 'DC', 'ObtenerPorId(idCliente) · ObtenerPorId(idPlan)'),
-      { alt: 'Cliente inexistente, plan inexistente o inactivo', pasos: [r('B', 'F', 'AppException(cliente_inexistente / plan_inexistente)')],
-        sino: [{ etiqueta: 'Datos válidos', pasos: [
-          nota('ValidarCupo: el plan debe alcanzar para las prendas que el cliente tiene en uso', 'B'),
-          c('B', 'D', 'ObtenerPendientesDePago()'),
-          { alt: 'El cliente ya tiene una contratación pendiente', pasos: [r('B', 'F', 'AppException(pendiente_existente)')],
-            sino: [{ etiqueta: 'Sin pendientes', pasos: [
-              c('B', 'D', 'Alta(contratación: estado PendientePago, IdVendedor)'),
-              r('D', 'B', 'idContratacion'),
-              r('B', 'F', 'idContratacion'),
-              r('F', 'V', 'Contratación pendiente de pago: derivar a Caja (la suscripción todavía no está vigente)')
-            ] }] }
-        ] }] }
+      c('V', 'F', 'Ingresa DNI, nombre o apellido del cliente'),
+      c('F', 'B', 'IdentificarCliente(identificacion)'),
+      c('B', 'CB', 'BuscarPorIdentificacion(texto)'),
+      { alt: '¿Registrado? No', pasos: [r('F', 'V', 'Registrar cliente (ABM de Clientes, referente opcional)')] },
+      c('F', 'B', 'PresentarPlanes()'),
+      r('B', 'F', 'Planes disponibles (nombre, precio mensual, límite de prendas)'),
+      { alt: '¿Elige plan y modalidad? No', pasos: [
+        c('V', 'F', 'El cliente desiste + motivo'),
+        c('F', 'B', 'AsentarDesistimiento(modulo, idCliente, idPlan, modalidad, motivo)'),
+        c('B', 'D', 'AltaDesistimiento(desistimiento)'),
+        r('F', 'V', 'Aviso de desistimiento (PDF)')
+      ], sino: [{ etiqueta: 'Sí', pasos: [
+        c('F', 'B', 'ValidarContratacion(idCliente, idPlan)  [¿Contratación válida?]'),
+        c('F', 'B', 'EstimarImporte(idCliente, idPlan, modalidad)'),
+        c('V', 'F', 'Registrar contratación'),
+        c('F', 'B', 'RegistrarContratacion(modulo, idCliente, idPlan, modalidad)'),
+        nota('Exigir(ClientesEditar) · cliente activo, plan activo, cupo, sin otra pendiente', 'B'),
+        { alt: 'No válida', pasos: [r('B', 'F', 'AppException(motivo)  [queda en la bitácora]'), r('F', 'V', 'Informar motivo')],
+          sino: [{ etiqueta: 'Válida', pasos: [
+            c('B', 'D', 'Alta(contratación PendientePago, PrecioMensual pactado)'),
+            r('B', 'F', 'idContratacion'),
+            r('F', 'V', 'Orden de cobro (PDF): el cliente abona en Caja')
+          ] }] }
+      ] }] }
     ]
   },
   {
     tipo: 'secuencia', id: 'DSS_PN02_CU01_CAJ_GestionarCobro', titulo: 'PN02 · CU01-CAJ Gestionar cobro (incluye CU02-CAJ Emitir comprobante)',
-    participantes: [A('C', 'Caja'), P('F', 'ContratacionesPendientesForm'), P('B', 'BLL.Contratacion'), P('PD', 'PoliticaDescuento'), P('CB', 'BLL.Cliente'), P('D', 'DAL.Contratacion'), P('DC', 'DAL.Cliente')],
+    participantes: [A('C', 'Caja'), P('F', 'ContratacionesPendientesForm'), P('B', 'BLL.Contratacion'), P('PD', 'PoliticaDescuento'), P('CB', 'BLL.Cliente'), P('D', 'DAL.Contratacion')],
     pasos: [
-      c('C', 'F', 'Consulta la cola, elige una contratación e indica el medio de pago'),
-      c('F', 'B', 'ConfirmarPago(modulo, idContratacion, medioPago)'),
-      nota('Exigir(CajaEditar) · medio de pago obligatorio · contratación PendientePago · plan activo · ValidarCupo', 'B'),
-      c('B', 'PD', 'Resolver(bruto = Precio × meses, promociones vigentes, crédito de referido)'),
-      r('PD', 'B', 'un solo descuento (el mayor) y total'),
-      c('B', 'D', 'ConfirmarPago(id, idCaja, medio, comprobante, total, descuento, idPromocion)  [reclamo atómico: WHERE Estado = PendientePago]'),
-      { alt: 'Otra sesión de Caja ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(cobrar_concurrente)'), r('F', 'C', 'Actualizá la cola de Caja')],
-        sino: [{ etiqueta: 'Reclamo obtenido (comprobante emitido)', pasos: [
-          c('B', 'CB', 'ActivarSuscripcionDesdeContratacion(cliente, idPlan, modalidad, consumoCredito)'),
-          nota('Builder según modalidad: vencimiento = fin del período vigente + 1, 3 o 12 meses; limpia gracia y pausa', 'CB'),
-          c('CB', 'DC', 'EjecutarTransaccion: ModificarEnTx + ConsumirCreditoEnTx + SumarCreditoEnTx (referente)'),
-          { alt: 'Falla la activación', pasos: [c('B', 'D', 'ReabrirPago(id)  [compensación: vuelve a PendientePago]'), r('B', 'F', 'error (o cobro_sin_activar si no se pudo reabrir)')],
-            sino: [{ etiqueta: 'Activada', pasos: [r('B', 'F', 'LiquidacionContratacion'), r('F', 'C', 'Suscripción formalizada y comprobante emitido')] }] }
+      c('F', 'B', 'ObtenerPendientesDePago()  [Consultar cola]'),
+      c('F', 'B', 'CalcularImportes(contrataciones)'),
+      c('B', 'PD', 'Resolver(bruto = PrecioMensual pactado × meses, promociones, crédito)'),
+      r('B', 'F', 'Liquidación: un solo descuento (el mayor)'),
+      c('C', 'F', 'El cliente abona: elige el medio de pago y confirma el importe'),
+      c('F', 'B', 'ConfirmarCobro(modulo, contratacion, idMedioPago, importeConfirmado)'),
+      nota('Exigir(CajaEditar) · PendientePago · medio del catálogo · plan activo · cupo · importe igual al confirmado', 'B'),
+      c('B', 'D', 'ConfirmarCobro(id, idCaja, idMedioPago, comprobante, total, descuento, idPromocion)  [claim: WHERE Estado = PendientePago]'),
+      { alt: 'Otra sesión ya la resolvió', pasos: [r('B', 'F', 'AppException(cobrar_concurrente)')],
+        sino: [{ etiqueta: 'Comprobante emitido', pasos: [
+          c('B', 'CB', 'ActivarSuscripcionDesdeContratacion(cliente, idPlan, modalidad, consumoCredito)  [+ acredita al referente]'),
+          { alt: 'Falla la activación', pasos: [c('B', 'D', 'ReabrirPago(id)  [compensación]'), r('B', 'F', 'error')],
+            sino: [{ etiqueta: 'Activada', pasos: [
+              c('B', 'D', 'RegistrarVigencia(id, desde, hasta, idReferenteAcreditado)'),
+              r('B', 'F', 'Liquidación con comprobante, vigencia y referente acreditado'),
+              r('F', 'C', 'Comprobante y Constancia de suscripción (PDF)')
+            ] }] }
         ] }] }
     ]
   },
@@ -357,25 +371,24 @@ module.exports = [
     tipo: 'secuencia', id: 'DSS_PN02_CU02_CAJ_EmitirComprobante', titulo: 'PN02 · CU02-CAJ Emitir comprobante',
     participantes: [A('C', 'Caja'), P('B', 'BLL.Contratacion'), P('D', 'DAL.Contratacion')],
     pasos: [
-      nota('Se dispara dentro de ConfirmarPago (CU01-CAJ): no requiere una acción independiente de Caja', 'C', 'B'),
-      c('B', 'D', 'ConfirmarPago(..., numeroComprobante = CMP-{id:D6}-{yyyyMMdd}, fechaComprobante)'),
+      nota('Parte de ConfirmarCobro (CU01-CAJ): número CMP-{id:D6}-{yyyyMMdd} guardado en el mismo UPDATE del cobro', 'C', 'B'),
+      c('B', 'D', 'ConfirmarCobro(..., numeroComprobante, ...)'),
       r('D', 'B', 'contratación Pagada con número y fecha de comprobante'),
-      r('B', 'C', 'comprobante visible en el mensaje de confirmación')
+      r('B', 'C', 'Comprobante (PDF), reimprimible desde la vista Resueltas')
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN02_CU03_CAJ_CancelarContratacion', titulo: 'PN02 · CU03-CAJ Cancelar contratación (intentos fallidos)',
+    tipo: 'secuencia', id: 'DSS_PN02_CU03_CAJ_CancelarContratacion', titulo: 'PN02 · CU03-CAJ Registrar intento y cancelar (3 intentos)',
     participantes: [A('C', 'Caja'), P('F', 'ContratacionesPendientesForm'), P('B', 'BLL.Contratacion'), P('D', 'DAL.Contratacion')],
     pasos: [
-      c('C', 'F', 'Registra el intento fallido de una contratación'),
-      c('F', 'B', 'RegistrarIntentoFallido(modulo, idContratacion)'),
-      nota('Exigir(CajaEditar)', 'B'),
-      c('B', 'D', 'IncrementarIntento(id)  [solo si sigue PendientePago y IntentosPago < 3]'),
-      { alt: 'La contratación ya no está pendiente', pasos: [r('D', 'B', '-1'), r('B', 'F', 'AppException(cobrar_concurrente)')],
+      c('C', 'F', 'El pago no se concretó: medio intentado + motivo'),
+      c('F', 'B', 'RegistrarIntentoFallido(modulo, contratacion, idMedioPago, motivo)'),
+      nota('Exigir(CajaEditar) · PendientePago · motivo obligatorio', 'B'),
+      c('B', 'D', 'RegistrarIntentoFallido(id, idMedioPago, motivo, idCaja, máximo 3)  [transacción con bloqueo de fila]'),
+      { alt: 'Ya no está pendiente', pasos: [r('D', 'B', 'null'), r('B', 'F', 'AppException(cobrar_concurrente)')],
         sino: [{ etiqueta: 'Intento registrado', pasos: [
-          r('D', 'B', 'intentos'),
-          { alt: 'intentos = 3', pasos: [c('B', 'D', 'Cancelar(id)  [WHERE Estado = PendientePago]'), r('B', 'F', 'Contratación Cancelada')],
-            sino: [{ etiqueta: 'intentos < 3', pasos: [r('B', 'F', 'Sigue pendiente, queda disponible otro intento')] }] }
+          { alt: '¿Alcanzó el máximo? Sí', pasos: [r('D', 'B', 'Cancelada (automática)'), r('F', 'C', 'Constancia de cancelación (PDF)')],
+            sino: [{ etiqueta: 'No', pasos: [r('F', 'C', 'Sigue en la cola: vuelve a Calcular importe')] }] }
         ] }] }
     ]
   },

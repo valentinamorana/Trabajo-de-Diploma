@@ -59,6 +59,20 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 - [ ] Bitácora de negocio: aparecen los eventos Envío a control de stock, Informe de faltantes, Separación de prendas, Desistimiento y Venta.
 - [ ] Cambiar el idioma a EN/RU/PT en Control de Stock y en el asistente: no quedan claves crudas.
 
+## 1c. PN02 — Contratación (`vendedor`) y cobro (`caja`)
+
+- [ ] Suscriptores → Nueva contratación: buscar por DNI. Un DNI inexistente muestra "Registrar cliente"; al registrarlo se continúa con la contratación.
+- [ ] La grilla de planes muestra precio mensual y límite. "Imprimir planes" abre la vista previa.
+- [ ] Elegir un plan que no alcanza para las prendas en uso informa el motivo y deja "Registrar" deshabilitado.
+- [ ] Al elegir plan y modalidad se muestra el importe a abonar en Caja (con el descuento, si corresponde).
+- [ ] "El cliente desiste" pide motivo y ofrece el aviso. "Registrar contratación" ofrece imprimir la orden de cobro.
+- [ ] Caja: la cola muestra la contratación y su monto. Cobrar con Tarjeta muestra el comprobante y la vigencia, y ofrece imprimir el comprobante y la constancia.
+- [ ] Un cliente referido: al cobrar avisa que se acreditó el beneficio al referente.
+- [ ] "Intento fallido" pide motivo. Al tercero avisa que se canceló y ofrece la constancia. "Ver intentos" lista los 3.
+- [ ] Vista "Resueltas": reimprimir comprobante, constancia de suscripción y constancia de cancelación.
+- [ ] Clientes: dar de baja a un cliente con contratación pendiente se rechaza. Renovación de ese cliente también se rechaza.
+- [ ] Editar un cliente como Vendedor no muestra plan ni vencimiento; como Administrador sí.
+
 ## 2. Caja (`caja`)
 
 - [ ] Solo ve el menú Caja. En Contrataciones pendientes se ve el importe a cobrar (con el descuento).

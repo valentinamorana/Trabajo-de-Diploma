@@ -5,9 +5,11 @@ flowchart LR
     c1(["CU01-VTA Gestionar Suscripción"])
     c2(["CU01-CAJ Gestionar Cobro"])
     c3(["CU02-CAJ Emitir Comprobante"])
-    c4(["CU03-CAJ Cancelar Contratación"])
+    c4(["CU03-CAJ Registrar Intento y Cancelar Contratación"])
+    c5(["CU02-VTA Asentar Desistimiento"])
   end
   V --- c1
+  V --- c5
   C --- c2
   C --- c4
   c2 -. "«include»" .-> c3

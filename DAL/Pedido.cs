@@ -897,54 +897,32 @@ namespace DAL
         // La verificación de disponibilidad se ejecuta DENTRO de la transacción para
         // evitar race conditions: si otra operación cambia el estado de una prenda entre
         // la verificación y el UPDATE, la transacción lo detecta con bloqueo consistente.
+        // Reactivar un pedido cancelado: vuelve a "Enviar selección para control stock"
+        // (Cancelado → EnControlStock) SIN reservar prendas; Depósito revisa otra vez el stock.
+        // Claim atómico: solo pasa si sigue Cancelado. Devuelve false si otra sesión lo cambió.
         public bool DesCancelar(int idPedido, int idCliente)
         {
-            bool puedeReactivar = true;
-
+            bool ok = false;
             acceso.EjecutarTransaccion((conexion, tx) =>
             {
-                // Verificar disponibilidad DENTRO de la transacción (con bloqueo compartido)
-                using (var cmdCheck = new SqlCommand(
-                    "SELECT COUNT(*) AS Ocupadas " +
-                    "FROM PedidoPrenda pp " +
-                    "INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda " +
-                    "WHERE pp.IdPedido = @IdPedido AND pr.Estado <> @Estado",
+                using (var cmd = new SqlCommand(
+                    "UPDATE Pedido SET Estado=@Nuevo, MotivoCancelacion=NULL, FechaEnvioControl=@Ahora, " +
+                    "       FechaControl=NULL, IdEmpleadoControl=NULL, FechaSeparacion=NULL, FechaFormalizacion=NULL " +
+                    "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
                     conexion, tx))
                 {
-                    cmdCheck.Parameters.AddWithValue("@Estado",   (int)BE.EstadoPrenda.Disponible);
-                    cmdCheck.Parameters.AddWithValue("@IdPedido", idPedido);
-                    int ocupadas = Convert.ToInt32(cmdCheck.ExecuteScalar());
-                    if (ocupadas > 0)
-                    {
-                        puedeReactivar = false;
-                        return;  // salir del lambda; la transacción se revierte en EjecutarTransaccion
-                    }
+                    cmd.Parameters.AddWithValue("@Nuevo",    (int)BE.EstadoPedido.EnControlStock);
+                    cmd.Parameters.AddWithValue("@Ahora",    DateTime.Now);
+                    cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                    cmd.Parameters.AddWithValue("@Esperado", (int)BE.EstadoPedido.Cancelado);
+                    ok = cmd.ExecuteNonQuery() > 0;
                 }
-
-                using (var cmdPedido = new SqlCommand(
-                    "UPDATE Pedido SET Estado=@Estado, MotivoCancelacion=NULL " +
-                    "WHERE IdPedido=@IdPedido",
-                    conexion, tx))
-                {
-                    cmdPedido.Parameters.AddWithValue("@Estado",   (int)BE.EstadoPedido.Pendiente);
-                    cmdPedido.Parameters.AddWithValue("@IdPedido", idPedido);
-                    cmdPedido.ExecuteNonQuery();
-                }
-
-                using (var cmdPrendas = new SqlCommand(
-                    "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, IdUltimoCliente=@IdCliente " +
-                    "WHERE IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
-                    conexion, tx))
-                {
-                    cmdPrendas.Parameters.AddWithValue("@Estado",    (int)BE.EstadoPrenda.EnUso);
-                    cmdPrendas.Parameters.AddWithValue("@IdCliente", idCliente);
-                    cmdPrendas.Parameters.AddWithValue("@IdPedido",  idPedido);
-                    cmdPrendas.ExecuteNonQuery();
-                }
+                if (!ok) return;
+                BorrarInformeFaltantesEnTx(conexion, tx, idPedido);
+                Ejecutar(conexion, tx, "UPDATE PedidoPrenda SET Confirmada = 0 WHERE IdPedido=@IdPedido", idPedido);
             });
-
-            if (puedeReactivar) RecalcularDVSilencioso();   // T07
-            return puedeReactivar;
+            if (ok) RecalcularDVSilencioso();   // T07
+            return ok;
         }
 
         private List<BE.Prenda> ObtenerPrendasDePedido(int idPedido)

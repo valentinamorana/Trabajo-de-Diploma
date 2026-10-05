@@ -32,7 +32,7 @@ module.exports = [
   },
   {
     tipo: 'er', id: 'DER_pn02_contrataciones', titulo: 'DER — PN02 Comercialización de la suscripción', columnas: 3,
-    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Contratacion', 'Promocion']
+    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Contratacion', 'MedioPago', 'ContratacionIntentoPago', 'DesistimientoContratacion', 'Promocion']
   },
   {
     tipo: 'er', id: 'DER_pn03_promociones', titulo: 'DER — PN03 Métricas, promociones y toma de decisiones', columnas: 3,

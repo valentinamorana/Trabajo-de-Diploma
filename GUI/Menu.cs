@@ -656,8 +656,10 @@ namespace GUI
                 var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
                 string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
                 MessageBox.Show(
-                    string.Format(T("msg.contratacion.creada", "Contratación #{0} registrada, pendiente de pago."),
-                        form.IdContratacionCreada),
+                    form.FueDesistimiento
+                        ? T("msg.contr.desistimiento", "Desistimiento asentado: el cliente no contrató ningún plan.")
+                        : string.Format(T("msg.contratacion.creada", "Contratación #{0} registrada, pendiente de pago."),
+                            form.IdContratacionCreada),
                     T("msg.ok.titulo", "Listo"),
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);

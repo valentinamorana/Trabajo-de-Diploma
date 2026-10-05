@@ -386,6 +386,8 @@
     <Compile Include="Exportacion\GeneradorJornada.cs" />
     <Compile Include="Exportacion\GeneradorDocumentoPedido.cs" />
     <Compile Include="Exportacion\DocumentosPedido.cs" />
+    <Compile Include="Exportacion\GeneradorDocumentoContratacion.cs" />
+    <Compile Include="Exportacion\DocumentosContratacion.cs" />
     <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
     <Compile Include="Exportacion\GeneradorVentasVendedor.cs" />
     <Compile Include="Exportacion\GeneradorRotacion.cs" />

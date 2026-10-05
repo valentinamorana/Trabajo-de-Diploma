@@ -107,8 +107,8 @@ namespace GUI
             this.btnDesCancelar.Name = "btnDesCancelar";
             this.btnDesCancelar.Size = new System.Drawing.Size(130, 28);
             this.btnDesCancelar.TabIndex = 2;
-            this.btnDesCancelar.Tag  = "btn.descancelar";
-            this.btnDesCancelar.Text = "Des-cancelar";
+            this.btnDesCancelar.Tag  = "btn.ped.reactivar";
+            this.btnDesCancelar.Text = "Reactivar";
             this.btnDesCancelar.UseVisualStyleBackColor = false;
             this.btnDesCancelar.Click += new System.EventHandler(this.BtnDesCancelarPedido_Click);
             // 

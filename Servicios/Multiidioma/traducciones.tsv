@@ -5409,6 +5409,458 @@ EN	btn.reportarperdida	Report Lost
 RU	btn.reportarperdida	Сообщить о потере
 PT	btn.reportarperdida	Reportar Perdida
 ES	err.dal.prenda.estado_cambio	El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.
+ES	paso1.identificar	Paso 1 de 2 — Identificar al cliente
+ES	paso.ajuste.texto	Ajustar selección del Pedido #{0}
+ES	frm.ajustarpedido	Ajustar selección del pedido
+ES	frm.controlstock	Control de Stock
+ES	mnu.controlstock	Control de Stock
+ES	lbl.ped.identificacion	Identificación del cliente (DNI, nombre o apellido):
+ES	btn.ped.buscar	Buscar
+ES	err.ped.noencontrado	No se encontró ningún cliente con esa identificación. Verificá el DNI, el nombre o el apellido.
+ES	lbl.ped.variascoinc	Hay varios clientes que coinciden: elegí el correcto en la lista.
+ES	lbl.ped.imposible	No se puede continuar:
+ES	lbl.ped.pedidoactivo	Pedido activo:
+ES	lbl.ped.ficha	Cliente: {0}  —  DNI {1}\nPlan: {2} (hasta {3} prendas)  —  Vence: {4}\nPrendas en uso: {5}  —  Último pedido: {6}\nMétodo de pago: {7}  —  Alta: {8}
+ES	lbl.ped.ajuste	Ajustá la selección: las prendas faltantes ya no figuran y las alternativas sugeridas están resaltadas.
+ES	lbl.ped.res.ajustar	El cliente ajusta la selección o desiste.
+ES	lbl.ped.detalle	Detalle de la selección:
+ES	btn.ped.enviarcontrol	Enviar a control de stock
+ES	btn.ped.reenviarcontrol	Reenviar a control de stock
+ES	btn.ped.desistir	Registrar desistimiento
+ES	btn.ped.verfaltantes	Ver faltantes
+ES	btn.ped.ajustar	Ajustar selección
+ES	btn.ped.formalizar	Formalizar pedido
+ES	btn.ped.confirmacion	Confirmación del pedido
+ES	conf.ped.enviar.msg	Enviar a control de stock la selección de {0}:\n\n  • {1}\n\nTotal: {2} prenda(s)\n\nDepósito revisará la disponibilidad. Las prendas no quedan reservadas hasta que las separe.
+ES	conf.ped.enviar.titulo	Enviar a control de stock
+ES	conf.ped.planilla	¿Imprimir la planilla de control de existencias?
+ES	conf.ped.aviso	¿Imprimir el aviso de desistimiento?
+ES	conf.ped.formalizar	¿Formalizar el Pedido #{0} de {1}?\n\nDepósito ya separó las {2} prenda(s). Desde aquí la selección queda cerrada y no admite modificaciones.
+ES	conf.ped.formalizar.titulo	Formalizar pedido
+ES	dlg.desistir.titulo	Asentar desistimiento
+ES	dlg.desistir.prompt	Motivo del desistimiento que comunicó el cliente:
+ES	dlg.desistir.pedido	Motivo del desistimiento — Pedido #{0} ({1}):
+ES	msg.desistir.req	El desistimiento requiere un motivo.
+ES	msg.ped.encontrol	Pedido #{0} enviado a control de stock. Depósito revisará la disponibilidad.
+ES	msg.ped.desistido	Pedido #{0}: desistimiento asentado.
+ES	msg.ped.reenviado	Pedido #{0}: selección ajustada y reenviada a control de stock.
+ES	msg.ped.formalizado	Pedido #{0} formalizado. Queda pendiente de despacho.
+ES	est.encontrol	En control de stock
+ES	est.confaltantes	Con faltantes
+ES	est.separado	Separado
+ES	est.desistido	Desistido
+ES	btn.cs.faltantes	Informar faltantes
+ES	btn.cs.confirmar	Confirmar prendas disponibles
+ES	btn.cs.separar	Separar prendas
+ES	btn.cs.planilla	Imprimir planilla
+ES	col.cs.enviado	Enviado a control
+ES	col.cs.confirmado	Prendas confirmadas
+ES	col.cs.estadoactual	Estado actual
+ES	col.cs.disponible	¿Disponible?
+ES	col.cs.confirmada	Confirmada
+ES	lbl.cs.planilla	Planilla de control de existencias — seleccioná un pedido de la cola
+ES	lbl.cs.planilla.pedido	Planilla de control — Pedido #{0} — {1} — ¿Selección disponible? {2}
+ES	lbl.cs.reservada	Reservada (Lista de Espera)
+ES	lbl.si	Sí
+ES	lbl.no	No
+ES	msg.cs.conteo	{0} pedido(s) para controlar
+ES	msg.cs.yanoencontrol	Este pedido ya no está en control de stock. Se actualiza la cola.
+ES	msg.cs.faltantes	Informe de faltantes del Pedido #{0} emitido: {1} prenda(s). El Vendedor lo comunicará al cliente.
+ES	msg.cs.confirmadas	Pedido #{0}: {1} prenda(s) confirmadas como disponibles. Separalas para reservarlas.
+ES	msg.cs.separadas	Pedido #{0}: prendas separadas. El Vendedor ya puede formalizar el pedido.
+ES	conf.cs.imprimirinforme	¿Imprimir el informe de disponibilidad (faltantes y alternativas)?
+ES	conf.cs.separar	¿Separar las {0} prenda(s) del Pedido #{1} para {2}?\n\nQuedan reservadas (en uso) a nombre del cliente.
+ES	conf.cs.imprimirconstancia	¿Imprimir la constancia de prendas separadas?
+ES	doc.ped.pedido	Pedido
+ES	doc.ped.cliente	Cliente
+ES	doc.ped.vendedor	Vendedor
+ES	doc.ped.fecha	Fecha del pedido
+ES	doc.ped.envio	Enviado a control de stock
+ES	doc.ped.detalle	Detalle de la selección (prenda, talle, color, cantidad):
+ES	doc.ped.unidades	Unidades a controlar:
+ES	doc.ped.disp	[Disponible]
+ES	doc.ped.nodisp	[NO disponible]
+ES	doc.ped.total	Total: {0} prenda(s)
+ES	doc.ped.controlo	Controló
+ES	doc.planilla.titulo	Planilla de control de existencias
+ES	doc.faltantes.titulo	Informe de disponibilidad (faltantes y alternativas)
+ES	doc.faltantes.lista	Prendas no disponibles y alternativas sugeridas:
+ES	doc.faltantes.reservada	reservada por Lista de Espera para otro cliente
+ES	doc.faltantes.estado	estado: {0}
+ES	doc.faltantes.sinalt	Sin alternativas disponibles de la misma categoría y talle.
+ES	doc.separacion.titulo	Constancia de prendas separadas
+ES	doc.separacion.fecha	Prendas separadas el
+ES	doc.separacion.lista	Prendas separadas para el pedido (quedan en uso a nombre del cliente):
+ES	doc.confirmacion.titulo	Confirmación y constancia del pedido
+ES	doc.confirmacion.formalizado	Pedido formalizado el
+ES	doc.confirmacion.cerrada	La selección quedó cerrada y no admite modificaciones.
+ES	doc.desist.titulo	Aviso de desistimiento
+ES	doc.desist.etapa	Desistió por
+ES	doc.desist.etapa.cupo	la selección excede el cupo del plan
+ES	doc.desist.etapa.disp	falta de disponibilidad de prendas
+ES	doc.desist.motivo	Motivo comunicado por el cliente
+ES	tevt.enviocontrol	Envío a control de stock
+ES	tevt.faltantes	Informe de faltantes
+ES	tevt.separacion	Separación de prendas
+ES	tevt.desistimiento	Desistimiento
+ES	alert.pedidos.control	{0} pedido(s) esperando el control de stock de Depósito.
+ES	alert.pedidos.faltantes	{0} pedido(s) con faltantes para comunicar al cliente.
+ES	alert.pedidos.formalizar	{0} pedido(s) con las prendas separadas, listos para formalizar.
+ES	alert.listaespera.reservadas	{0} prenda(s) reservada(s) por Lista de Espera esperando que el cliente pase a retirarlas.
+ES	err.bll.pedido.pedido_activo	{0} ya tiene el pedido #{1} en curso (estado: {2}). No se puede armar otro pedido hasta que ese termine su ciclo.
+ES	err.bll.pedido.desistimiento_sin_exceso	La selección está dentro del cupo del plan: el desistimiento por cupo solo se asienta cuando la selección lo excede.
+ES	err.bll.pedido.desistir_estado	Solo se asienta el desistimiento de un pedido con faltantes informados. Este pedido está '{0}'.
+ES	err.bll.pedido.desistir_sin_motivo	Es obligatorio indicar el motivo del desistimiento que comunicó el cliente.
+ES	err.bll.pedido.ajustar_estado	Solo se ajusta la selección de un pedido con faltantes informados. Este pedido está '{0}'.
+ES	err.bll.pedido.control_estado	Solo se revisa el stock de un pedido enviado a control. Este pedido está '{0}'.
+ES	err.bll.pedido.sin_faltantes	Todas las prendas del Pedido #{0} están disponibles: confirmalas en lugar de informar faltantes.
+ES	err.bll.pedido.hay_faltantes	La prenda '{0}' no está disponible: informá los faltantes en lugar de confirmar.
+ES	err.bll.pedido.sin_confirmar	Confirmá las prendas disponibles del Pedido #{0} antes de separarlas.
+ES	err.bll.pedido.separar_faltantes	Al separar, una o más prendas del Pedido #{0} ya no estaban disponibles. No se reservó nada y se emitió el informe de faltantes para el Vendedor.
+ES	err.bll.pedido.formalizar_estado	Solo se formaliza un pedido con las prendas ya separadas por Depósito. Este pedido está '{0}'.
+ES	err.bll.pedido.inexistente	El Pedido #{0} no existe.
+ES	err.bll.pedido.confirmacion_estado	Solo se prepara la confirmación de un pedido formalizado. Este pedido está '{0}'.
+ES	err.bll.pedido.restaurar_no_permitido	La operación '{0}' es parte del armado del pedido (control de stock) y no se puede revertir desde el historial.
+ES	err.dal.pedido.estado_cambiado	El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.
 EN	err.dal.prenda.estado_cambio	The garment's state changed since it was last read. Refresh the screen and try again.
+EN	paso1.identificar	Step 1 of 2 — Identify the client
+EN	paso.ajuste.texto	Adjust selection of Order #{0}
+EN	frm.ajustarpedido	Adjust order selection
+EN	frm.controlstock	Stock Control
+EN	mnu.controlstock	Stock Control
+EN	lbl.ped.identificacion	Client identification (ID number, first or last name):
+EN	btn.ped.buscar	Search
+EN	err.ped.noencontrado	No client was found with that identification. Check the ID number, first name or last name.
+EN	lbl.ped.variascoinc	Several clients match: choose the right one from the list.
+EN	lbl.ped.imposible	Cannot continue:
+EN	lbl.ped.pedidoactivo	Active order:
+EN	lbl.ped.ficha	Client: {0}  —  ID {1}\nPlan: {2} (up to {3} garments)  —  Expires: {4}\nGarments in use: {5}  —  Last order: {6}\nPayment method: {7}  —  Joined: {8}
+EN	lbl.ped.ajuste	Adjust the selection: missing garments are no longer listed and the suggested alternatives are highlighted.
+EN	lbl.ped.res.ajustar	The client adjusts the selection or withdraws.
+EN	lbl.ped.detalle	Selection detail:
+EN	btn.ped.enviarcontrol	Send to stock control
+EN	btn.ped.reenviarcontrol	Resend to stock control
+EN	btn.ped.desistir	Record withdrawal
+EN	btn.ped.verfaltantes	View missing items
+EN	btn.ped.ajustar	Adjust selection
+EN	btn.ped.formalizar	Finalize order
+EN	btn.ped.confirmacion	Order confirmation
+EN	conf.ped.enviar.msg	Send {0}'s selection to stock control:\n\n  • {1}\n\nTotal: {2} garment(s)\n\nWarehouse will check availability. Garments are not reserved until they are set aside.
+EN	conf.ped.enviar.titulo	Send to stock control
+EN	conf.ped.planilla	Print the stock control sheet?
+EN	conf.ped.aviso	Print the withdrawal notice?
+EN	conf.ped.formalizar	Finalize Order #{0} for {1}?\n\nWarehouse already set aside the {2} garment(s). From here on the selection is closed and cannot be modified.
+EN	conf.ped.formalizar.titulo	Finalize order
+EN	dlg.desistir.titulo	Record withdrawal
+EN	dlg.desistir.prompt	Withdrawal reason given by the client:
+EN	dlg.desistir.pedido	Withdrawal reason — Order #{0} ({1}):
+EN	msg.desistir.req	A withdrawal requires a reason.
+EN	msg.ped.encontrol	Order #{0} sent to stock control. Warehouse will check availability.
+EN	msg.ped.desistido	Order #{0}: withdrawal recorded.
+EN	msg.ped.reenviado	Order #{0}: selection adjusted and resent to stock control.
+EN	msg.ped.formalizado	Order #{0} finalized. It is now pending dispatch.
+EN	est.encontrol	In stock control
+EN	est.confaltantes	Missing items
+EN	est.separado	Set aside
+EN	est.desistido	Withdrawn
+EN	btn.cs.faltantes	Report missing items
+EN	btn.cs.confirmar	Confirm available garments
+EN	btn.cs.separar	Set garments aside
+EN	btn.cs.planilla	Print sheet
+EN	col.cs.enviado	Sent to control
+EN	col.cs.confirmado	Garments confirmed
+EN	col.cs.estadoactual	Current status
+EN	col.cs.disponible	Available?
+EN	col.cs.confirmada	Confirmed
+EN	lbl.cs.planilla	Stock control sheet — select an order from the queue
+EN	lbl.cs.planilla.pedido	Control sheet — Order #{0} — {1} — Selection available? {2}
+EN	lbl.cs.reservada	Reserved (Waiting List)
+EN	lbl.si	Yes
+EN	lbl.no	No
+EN	msg.cs.conteo	{0} order(s) to check
+EN	msg.cs.yanoencontrol	This order is no longer in stock control. The queue is refreshed.
+EN	msg.cs.faltantes	Missing-items report for Order #{0} issued: {1} garment(s). The seller will tell the client.
+EN	msg.cs.confirmadas	Order #{0}: {1} garment(s) confirmed as available. Set them aside to reserve them.
+EN	msg.cs.separadas	Order #{0}: garments set aside. The seller can now finalize the order.
+EN	conf.cs.imprimirinforme	Print the availability report (missing items and alternatives)?
+EN	conf.cs.separar	Set aside the {0} garment(s) of Order #{1} for {2}?\n\nThey become reserved (in use) in the client's name.
+EN	conf.cs.imprimirconstancia	Print the set-aside garments receipt?
+EN	doc.ped.pedido	Order
+EN	doc.ped.cliente	Client
+EN	doc.ped.vendedor	Seller
+EN	doc.ped.fecha	Order date
+EN	doc.ped.envio	Sent to stock control
+EN	doc.ped.detalle	Selection detail (garment, size, color, quantity):
+EN	doc.ped.unidades	Units to check:
+EN	doc.ped.disp	[Available]
+EN	doc.ped.nodisp	[NOT available]
+EN	doc.ped.total	Total: {0} garment(s)
+EN	doc.ped.controlo	Checked by
+EN	doc.planilla.titulo	Stock control sheet
+EN	doc.faltantes.titulo	Availability report (missing items and alternatives)
+EN	doc.faltantes.lista	Unavailable garments and suggested alternatives:
+EN	doc.faltantes.reservada	reserved by the Waiting List for another client
+EN	doc.faltantes.estado	status: {0}
+EN	doc.faltantes.sinalt	No available alternatives of the same category and size.
+EN	doc.separacion.titulo	Set-aside garments receipt
+EN	doc.separacion.fecha	Garments set aside on
+EN	doc.separacion.lista	Garments set aside for the order (now in use in the client's name):
+EN	doc.confirmacion.titulo	Order confirmation and receipt
+EN	doc.confirmacion.formalizado	Order finalized on
+EN	doc.confirmacion.cerrada	The selection is closed and cannot be modified.
+EN	doc.desist.titulo	Withdrawal notice
+EN	doc.desist.etapa	Withdrew because of
+EN	doc.desist.etapa.cupo	the selection exceeds the plan limit
+EN	doc.desist.etapa.disp	garments not available
+EN	doc.desist.motivo	Reason given by the client
+EN	tevt.enviocontrol	Sent to stock control
+EN	tevt.faltantes	Missing-items report
+EN	tevt.separacion	Garments set aside
+EN	tevt.desistimiento	Withdrawal
+EN	alert.pedidos.control	{0} order(s) waiting for warehouse stock control.
+EN	alert.pedidos.faltantes	{0} order(s) with missing items to tell the client about.
+EN	alert.pedidos.formalizar	{0} order(s) with garments set aside, ready to finalize.
+EN	alert.listaespera.reservadas	{0} garment(s) reserved by the Waiting List waiting for the client to pick them up.
+EN	err.bll.pedido.pedido_activo	{0} already has order #{1} in progress (status: {2}). Another order cannot be created until that one finishes its cycle.
+EN	err.bll.pedido.desistimiento_sin_exceso	The selection is within the plan limit: a limit-based withdrawal is only recorded when the selection exceeds it.
+EN	err.bll.pedido.desistir_estado	A withdrawal can only be recorded for an order with reported missing items. This order is '{0}'.
+EN	err.bll.pedido.desistir_sin_motivo	You must enter the withdrawal reason given by the client.
+EN	err.bll.pedido.ajustar_estado	Only an order with reported missing items can have its selection adjusted. This order is '{0}'.
+EN	err.bll.pedido.control_estado	Stock can only be checked for an order sent to control. This order is '{0}'.
+EN	err.bll.pedido.sin_faltantes	All garments of Order #{0} are available: confirm them instead of reporting missing items.
+EN	err.bll.pedido.hay_faltantes	Garment '{0}' is not available: report the missing items instead of confirming.
+EN	err.bll.pedido.sin_confirmar	Confirm the available garments of Order #{0} before setting them aside.
+EN	err.bll.pedido.separar_faltantes	While setting aside, one or more garments of Order #{0} were no longer available. Nothing was reserved and a missing-items report was issued for the seller.
+EN	err.bll.pedido.formalizar_estado	Only an order whose garments were set aside by the warehouse can be finalized. This order is '{0}'.
+EN	err.bll.pedido.inexistente	Order #{0} does not exist.
+EN	err.bll.pedido.confirmacion_estado	A confirmation can only be prepared for a finalized order. This order is '{0}'.
+EN	err.bll.pedido.restaurar_no_permitido	Operation '{0}' is part of building the order (stock control) and cannot be reverted from the history.
+EN	err.dal.pedido.estado_cambiado	Order #{0} changed status in another session. Refresh the list and try again.
 RU	err.dal.prenda.estado_cambio	Состояние вещи изменилось с момента последнего запроса. Обновите экран и повторите попытку.
+RU	paso1.identificar	Шаг 1 из 2 — Идентифицировать клиента
+RU	paso.ajuste.texto	Корректировка выбора заказа №{0}
+RU	frm.ajustarpedido	Корректировка выбора заказа
+RU	frm.controlstock	Контроль запасов
+RU	mnu.controlstock	Контроль запасов
+RU	lbl.ped.identificacion	Идентификация клиента (номер документа, имя или фамилия):
+RU	btn.ped.buscar	Найти
+RU	err.ped.noencontrado	Клиент с такими данными не найден. Проверьте номер документа, имя или фамилию.
+RU	lbl.ped.variascoinc	Найдено несколько клиентов: выберите нужного из списка.
+RU	lbl.ped.imposible	Продолжить невозможно:
+RU	lbl.ped.pedidoactivo	Активный заказ:
+RU	lbl.ped.ficha	Клиент: {0}  —  Документ {1}\nПлан: {2} (до {3} вещей)  —  Истекает: {4}\nВещей в пользовании: {5}  —  Последний заказ: {6}\nСпособ оплаты: {7}  —  Регистрация: {8}
+RU	lbl.ped.ajuste	Скорректируйте выбор: недостающих вещей больше нет в списке, предложенные альтернативы выделены.
+RU	lbl.ped.res.ajustar	Клиент корректирует выбор или отказывается.
+RU	lbl.ped.detalle	Детали выбора:
+RU	btn.ped.enviarcontrol	Отправить на контроль запасов
+RU	btn.ped.reenviarcontrol	Повторно отправить на контроль запасов
+RU	btn.ped.desistir	Зарегистрировать отказ
+RU	btn.ped.verfaltantes	Недостающие вещи
+RU	btn.ped.ajustar	Изменить выбор
+RU	btn.ped.formalizar	Оформить заказ
+RU	btn.ped.confirmacion	Подтверждение заказа
+RU	conf.ped.enviar.msg	Отправить выбор клиента {0} на контроль запасов:\n\n  • {1}\n\nВсего: {2} вещ.\n\nСклад проверит наличие. Вещи не резервируются, пока склад их не отложит.
+RU	conf.ped.enviar.titulo	Отправить на контроль запасов
+RU	conf.ped.planilla	Распечатать лист контроля запасов?
+RU	conf.ped.aviso	Распечатать уведомление об отказе?
+RU	conf.ped.formalizar	Оформить заказ №{0} клиента {1}?\n\nСклад уже отложил {2} вещ. После этого выбор закрывается и не может быть изменён.
+RU	conf.ped.formalizar.titulo	Оформить заказ
+RU	dlg.desistir.titulo	Зарегистрировать отказ
+RU	dlg.desistir.prompt	Причина отказа, указанная клиентом:
+RU	dlg.desistir.pedido	Причина отказа — заказ №{0} ({1}):
+RU	msg.desistir.req	Для отказа нужна причина.
+RU	msg.ped.encontrol	Заказ №{0} отправлен на контроль запасов. Склад проверит наличие.
+RU	msg.ped.desistido	Заказ №{0}: отказ зарегистрирован.
+RU	msg.ped.reenviado	Заказ №{0}: выбор изменён и повторно отправлен на контроль запасов.
+RU	msg.ped.formalizado	Заказ №{0} оформлен и ожидает отправки.
+RU	est.encontrol	На контроле запасов
+RU	est.confaltantes	Есть недостача
+RU	est.separado	Отложен
+RU	est.desistido	Отказ
+RU	btn.cs.faltantes	Сообщить о недостаче
+RU	btn.cs.confirmar	Подтвердить наличие вещей
+RU	btn.cs.separar	Отложить вещи
+RU	btn.cs.planilla	Печать листа
+RU	col.cs.enviado	Отправлен на контроль
+RU	col.cs.confirmado	Вещи подтверждены
+RU	col.cs.estadoactual	Текущее состояние
+RU	col.cs.disponible	В наличии?
+RU	col.cs.confirmada	Подтверждена
+RU	lbl.cs.planilla	Лист контроля запасов — выберите заказ из очереди
+RU	lbl.cs.planilla.pedido	Лист контроля — заказ №{0} — {1} — Выбор в наличии? {2}
+RU	lbl.cs.reservada	Зарезервирована (лист ожидания)
+RU	lbl.si	Да
+RU	lbl.no	Нет
+RU	msg.cs.conteo	Заказов для контроля: {0}
+RU	msg.cs.yanoencontrol	Этот заказ больше не на контроле запасов. Очередь обновлена.
+RU	msg.cs.faltantes	Отчёт о недостаче по заказу №{0} создан: {1} вещ. Продавец сообщит клиенту.
+RU	msg.cs.confirmadas	Заказ №{0}: {1} вещ. подтверждены как доступные. Отложите их, чтобы зарезервировать.
+RU	msg.cs.separadas	Заказ №{0}: вещи отложены. Продавец может оформить заказ.
+RU	conf.cs.imprimirinforme	Распечатать отчёт о наличии (недостача и альтернативы)?
+RU	conf.cs.separar	Отложить {0} вещ. заказа №{1} для {2}?\n\nОни будут зарезервированы (в пользовании) на имя клиента.
+RU	conf.cs.imprimirconstancia	Распечатать акт об отложенных вещах?
+RU	doc.ped.pedido	Заказ
+RU	doc.ped.cliente	Клиент
+RU	doc.ped.vendedor	Продавец
+RU	doc.ped.fecha	Дата заказа
+RU	doc.ped.envio	Отправлен на контроль запасов
+RU	doc.ped.detalle	Детали выбора (вещь, размер, цвет, количество):
+RU	doc.ped.unidades	Единицы для проверки:
+RU	doc.ped.disp	[В наличии]
+RU	doc.ped.nodisp	[НЕТ в наличии]
+RU	doc.ped.total	Всего: {0} вещ.
+RU	doc.ped.controlo	Проверил
+RU	doc.planilla.titulo	Лист контроля запасов
+RU	doc.faltantes.titulo	Отчёт о наличии (недостача и альтернативы)
+RU	doc.faltantes.lista	Недоступные вещи и предложенные альтернативы:
+RU	doc.faltantes.reservada	зарезервирована по листу ожидания для другого клиента
+RU	doc.faltantes.estado	состояние: {0}
+RU	doc.faltantes.sinalt	Нет доступных альтернатив той же категории и размера.
+RU	doc.separacion.titulo	Акт об отложенных вещах
+RU	doc.separacion.fecha	Вещи отложены
+RU	doc.separacion.lista	Вещи, отложенные для заказа (в пользовании на имя клиента):
+RU	doc.confirmacion.titulo	Подтверждение и квитанция заказа
+RU	doc.confirmacion.formalizado	Заказ оформлен
+RU	doc.confirmacion.cerrada	Выбор закрыт и не может быть изменён.
+RU	doc.desist.titulo	Уведомление об отказе
+RU	doc.desist.etapa	Причина отказа
+RU	doc.desist.etapa.cupo	выбор превышает лимит плана
+RU	doc.desist.etapa.disp	отсутствие вещей в наличии
+RU	doc.desist.motivo	Причина, указанная клиентом
+RU	tevt.enviocontrol	Отправка на контроль запасов
+RU	tevt.faltantes	Отчёт о недостаче
+RU	tevt.separacion	Отложены вещи
+RU	tevt.desistimiento	Отказ
+RU	alert.pedidos.control	Заказов, ожидающих контроля запасов на складе: {0}.
+RU	alert.pedidos.faltantes	Заказов с недостачей, о которой нужно сообщить клиенту: {0}.
+RU	alert.pedidos.formalizar	Заказов с отложенными вещами, готовых к оформлению: {0}.
+RU	alert.listaespera.reservadas	Вещей, зарезервированных по листу ожидания и ожидающих клиента: {0}.
+RU	err.bll.pedido.pedido_activo	У клиента {0} уже есть заказ №{1} в работе (состояние: {2}). Новый заказ нельзя создать, пока этот не завершится.
+RU	err.bll.pedido.desistimiento_sin_exceso	Выбор в пределах лимита плана: отказ по лимиту регистрируется только при его превышении.
+RU	err.bll.pedido.desistir_estado	Отказ регистрируется только для заказа с сообщённой недостачей. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.desistir_sin_motivo	Необходимо указать причину отказа, названную клиентом.
+RU	err.bll.pedido.ajustar_estado	Изменить выбор можно только у заказа с сообщённой недостачей. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.control_estado	Проверять запасы можно только для заказа, отправленного на контроль. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.sin_faltantes	Все вещи заказа №{0} в наличии: подтвердите их вместо сообщения о недостаче.
+RU	err.bll.pedido.hay_faltantes	Вещь '{0}' недоступна: сообщите о недостаче вместо подтверждения.
+RU	err.bll.pedido.sin_confirmar	Подтвердите наличие вещей заказа №{0}, прежде чем откладывать их.
+RU	err.bll.pedido.separar_faltantes	При откладывании одна или несколько вещей заказа №{0} оказались недоступны. Ничего не зарезервировано, для продавца создан отчёт о недостаче.
+RU	err.bll.pedido.formalizar_estado	Оформить можно только заказ, вещи которого склад уже отложил. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.inexistente	Заказ №{0} не существует.
+RU	err.bll.pedido.confirmacion_estado	Подтверждение готовится только для оформленного заказа. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.restaurar_no_permitido	Операция '{0}' — часть формирования заказа (контроль запасов) и не может быть отменена из истории.
+RU	err.dal.pedido.estado_cambiado	Состояние заказа №{0} изменилось в другом сеансе. Обновите список и повторите попытку.
 PT	err.dal.prenda.estado_cambio	O estado da peça mudou desde a última consulta. Atualize a tela e tente novamente.
+PT	paso1.identificar	Passo 1 de 2 — Identificar o cliente
+PT	paso.ajuste.texto	Ajustar seleção do Pedido #{0}
+PT	frm.ajustarpedido	Ajustar seleção do pedido
+PT	frm.controlstock	Controle de Estoque
+PT	mnu.controlstock	Controle de Estoque
+PT	lbl.ped.identificacion	Identificação do cliente (documento, nome ou sobrenome):
+PT	btn.ped.buscar	Buscar
+PT	err.ped.noencontrado	Nenhum cliente encontrado com essa identificação. Verifique o documento, o nome ou o sobrenome.
+PT	lbl.ped.variascoinc	Há vários clientes que coincidem: escolha o correto na lista.
+PT	lbl.ped.imposible	Não é possível continuar:
+PT	lbl.ped.pedidoactivo	Pedido ativo:
+PT	lbl.ped.ficha	Cliente: {0}  —  Documento {1}\nPlano: {2} (até {3} peças)  —  Vence: {4}\nPeças em uso: {5}  —  Último pedido: {6}\nForma de pagamento: {7}  —  Cadastro: {8}
+PT	lbl.ped.ajuste	Ajuste a seleção: as peças em falta não aparecem mais e as alternativas sugeridas estão destacadas.
+PT	lbl.ped.res.ajustar	O cliente ajusta a seleção ou desiste.
+PT	lbl.ped.detalle	Detalhe da seleção:
+PT	btn.ped.enviarcontrol	Enviar ao controle de estoque
+PT	btn.ped.reenviarcontrol	Reenviar ao controle de estoque
+PT	btn.ped.desistir	Registrar desistência
+PT	btn.ped.verfaltantes	Ver faltantes
+PT	btn.ped.ajustar	Ajustar seleção
+PT	btn.ped.formalizar	Formalizar pedido
+PT	btn.ped.confirmacion	Confirmação do pedido
+PT	conf.ped.enviar.msg	Enviar ao controle de estoque a seleção de {0}:\n\n  • {1}\n\nTotal: {2} peça(s)\n\nO depósito verificará a disponibilidade. As peças só ficam reservadas quando forem separadas.
+PT	conf.ped.enviar.titulo	Enviar ao controle de estoque
+PT	conf.ped.planilla	Imprimir a planilha de controle de estoque?
+PT	conf.ped.aviso	Imprimir o aviso de desistência?
+PT	conf.ped.formalizar	Formalizar o Pedido #{0} de {1}?\n\nO depósito já separou as {2} peça(s). A partir daqui a seleção fica fechada e não admite alterações.
+PT	conf.ped.formalizar.titulo	Formalizar pedido
+PT	dlg.desistir.titulo	Registrar desistência
+PT	dlg.desistir.prompt	Motivo da desistência informado pelo cliente:
+PT	dlg.desistir.pedido	Motivo da desistência — Pedido #{0} ({1}):
+PT	msg.desistir.req	A desistência requer um motivo.
+PT	msg.ped.encontrol	Pedido #{0} enviado ao controle de estoque. O depósito verificará a disponibilidade.
+PT	msg.ped.desistido	Pedido #{0}: desistência registrada.
+PT	msg.ped.reenviado	Pedido #{0}: seleção ajustada e reenviada ao controle de estoque.
+PT	msg.ped.formalizado	Pedido #{0} formalizado. Fica pendente de despacho.
+PT	est.encontrol	Em controle de estoque
+PT	est.confaltantes	Com faltantes
+PT	est.separado	Separado
+PT	est.desistido	Desistido
+PT	btn.cs.faltantes	Informar faltantes
+PT	btn.cs.confirmar	Confirmar peças disponíveis
+PT	btn.cs.separar	Separar peças
+PT	btn.cs.planilla	Imprimir planilha
+PT	col.cs.enviado	Enviado ao controle
+PT	col.cs.confirmado	Peças confirmadas
+PT	col.cs.estadoactual	Estado atual
+PT	col.cs.disponible	Disponível?
+PT	col.cs.confirmada	Confirmada
+PT	lbl.cs.planilla	Planilha de controle de estoque — selecione um pedido da fila
+PT	lbl.cs.planilla.pedido	Planilha de controle — Pedido #{0} — {1} — Seleção disponível? {2}
+PT	lbl.cs.reservada	Reservada (Lista de Espera)
+PT	lbl.si	Sim
+PT	lbl.no	Não
+PT	msg.cs.conteo	{0} pedido(s) para controlar
+PT	msg.cs.yanoencontrol	Este pedido não está mais em controle de estoque. A fila foi atualizada.
+PT	msg.cs.faltantes	Relatório de faltantes do Pedido #{0} emitido: {1} peça(s). O vendedor informará o cliente.
+PT	msg.cs.confirmadas	Pedido #{0}: {1} peça(s) confirmadas como disponíveis. Separe-as para reservá-las.
+PT	msg.cs.separadas	Pedido #{0}: peças separadas. O vendedor já pode formalizar o pedido.
+PT	conf.cs.imprimirinforme	Imprimir o relatório de disponibilidade (faltantes e alternativas)?
+PT	conf.cs.separar	Separar as {0} peça(s) do Pedido #{1} para {2}?\n\nFicam reservadas (em uso) em nome do cliente.
+PT	conf.cs.imprimirconstancia	Imprimir o comprovante de peças separadas?
+PT	doc.ped.pedido	Pedido
+PT	doc.ped.cliente	Cliente
+PT	doc.ped.vendedor	Vendedor
+PT	doc.ped.fecha	Data do pedido
+PT	doc.ped.envio	Enviado ao controle de estoque
+PT	doc.ped.detalle	Detalhe da seleção (peça, tamanho, cor, quantidade):
+PT	doc.ped.unidades	Unidades a controlar:
+PT	doc.ped.disp	[Disponível]
+PT	doc.ped.nodisp	[NÃO disponível]
+PT	doc.ped.total	Total: {0} peça(s)
+PT	doc.ped.controlo	Controlou
+PT	doc.planilla.titulo	Planilha de controle de estoque
+PT	doc.faltantes.titulo	Relatório de disponibilidade (faltantes e alternativas)
+PT	doc.faltantes.lista	Peças indisponíveis e alternativas sugeridas:
+PT	doc.faltantes.reservada	reservada pela Lista de Espera para outro cliente
+PT	doc.faltantes.estado	estado: {0}
+PT	doc.faltantes.sinalt	Sem alternativas disponíveis da mesma categoria e tamanho.
+PT	doc.separacion.titulo	Comprovante de peças separadas
+PT	doc.separacion.fecha	Peças separadas em
+PT	doc.separacion.lista	Peças separadas para o pedido (ficam em uso em nome do cliente):
+PT	doc.confirmacion.titulo	Confirmação e comprovante do pedido
+PT	doc.confirmacion.formalizado	Pedido formalizado em
+PT	doc.confirmacion.cerrada	A seleção ficou fechada e não admite alterações.
+PT	doc.desist.titulo	Aviso de desistência
+PT	doc.desist.etapa	Desistiu por
+PT	doc.desist.etapa.cupo	a seleção excede o limite do plano
+PT	doc.desist.etapa.disp	falta de disponibilidade de peças
+PT	doc.desist.motivo	Motivo informado pelo cliente
+PT	tevt.enviocontrol	Envio ao controle de estoque
+PT	tevt.faltantes	Relatório de faltantes
+PT	tevt.separacion	Separação de peças
+PT	tevt.desistimiento	Desistência
+PT	alert.pedidos.control	{0} pedido(s) aguardando o controle de estoque do depósito.
+PT	alert.pedidos.faltantes	{0} pedido(s) com faltantes para informar ao cliente.
+PT	alert.pedidos.formalizar	{0} pedido(s) com as peças separadas, prontos para formalizar.
+PT	alert.listaespera.reservadas	{0} peça(s) reservada(s) pela Lista de Espera aguardando a retirada pelo cliente.
+PT	err.bll.pedido.pedido_activo	{0} já tem o pedido #{1} em andamento (estado: {2}). Não é possível montar outro pedido até que esse termine seu ciclo.
+PT	err.bll.pedido.desistimiento_sin_exceso	A seleção está dentro do limite do plano: a desistência por limite só é registrada quando a seleção o excede.
+PT	err.bll.pedido.desistir_estado	Só se registra a desistência de um pedido com faltantes informados. Este pedido está '{0}'.
+PT	err.bll.pedido.desistir_sin_motivo	É obrigatório indicar o motivo da desistência informado pelo cliente.
+PT	err.bll.pedido.ajustar_estado	Só se ajusta a seleção de um pedido com faltantes informados. Este pedido está '{0}'.
+PT	err.bll.pedido.control_estado	Só se verifica o estoque de um pedido enviado ao controle. Este pedido está '{0}'.
+PT	err.bll.pedido.sin_faltantes	Todas as peças do Pedido #{0} estão disponíveis: confirme-as em vez de informar faltantes.
+PT	err.bll.pedido.hay_faltantes	A peça '{0}' não está disponível: informe os faltantes em vez de confirmar.
+PT	err.bll.pedido.sin_confirmar	Confirme as peças disponíveis do Pedido #{0} antes de separá-las.
+PT	err.bll.pedido.separar_faltantes	Ao separar, uma ou mais peças do Pedido #{0} já não estavam disponíveis. Nada foi reservado e foi emitido o relatório de faltantes para o vendedor.
+PT	err.bll.pedido.formalizar_estado	Só se formaliza um pedido com as peças já separadas pelo depósito. Este pedido está '{0}'.
+PT	err.bll.pedido.inexistente	O Pedido #{0} não existe.
+PT	err.bll.pedido.confirmacion_estado	Só se prepara a confirmação de um pedido formalizado. Este pedido está '{0}'.
+PT	err.bll.pedido.restaurar_no_permitido	A operação '{0}' faz parte da montagem do pedido (controle de estoque) e não pode ser revertida pelo histórico.
+PT	err.dal.pedido.estado_cambiado	O Pedido #{0} mudou de estado em outra sessão. Atualize a lista e tente novamente.

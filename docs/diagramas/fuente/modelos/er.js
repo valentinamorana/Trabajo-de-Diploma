@@ -28,7 +28,7 @@ module.exports = [
   },
   {
     tipo: 'er', id: 'DER_pn01_pedidos', titulo: 'DER — PN01 Armar pedido', columnas: 3,
-    tablas: ['Cliente', 'Empleado', 'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'ListaEspera', 'MantenimientoPrenda']
+    tablas: ['Cliente', 'Empleado', 'Pedido', 'PedidoPrenda', 'PedidoFaltante', 'PedidoFaltanteAlternativa', 'PedidoHistorial', 'Prenda', 'ListaEspera', 'MantenimientoPrenda']
   },
   {
     tipo: 'er', id: 'DER_pn02_contrataciones', titulo: 'DER — PN02 Comercialización de la suscripción', columnas: 3,

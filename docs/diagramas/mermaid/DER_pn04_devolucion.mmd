@@ -4,8 +4,8 @@ erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
   Cliente {
@@ -37,10 +37,18 @@ erDiagram
     datetime FechaEntrega "NULL"
     nvarchar(500) MotivoCancelacion "NULL"
     int DVH "NULL"
+    datetime FechaEnvioControl "NULL"
+    datetime FechaControl "NULL"
+    int IdEmpleadoControl FK "NULL"
+    datetime FechaSeparacion "NULL"
+    datetime FechaFormalizacion "NULL"
+    nvarchar(500) MotivoDesistimiento "NULL"
+    nvarchar(20) EtapaDesistimiento "NULL"
   }
   PedidoPrenda {
     int IdPedido PK,FK
     int IdPrenda PK,FK
+    bit Confirmada
   }
   Prenda {
     int IdPrenda PK

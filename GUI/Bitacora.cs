@@ -308,6 +308,11 @@ namespace GUI
             Add("AltaCliente",        "tevt.altacliente",    "Alta Cliente");
             Add("ModificacionCliente","tevt.modcliente",     "Modificación Cliente");
             Add("BajaCliente",        "tevt.bajacliente",    "Baja Cliente");
+            // PN01 — armado del pedido con control de stock.
+            Add("EnvioControlStock",  "tevt.enviocontrol",   "Envío a control de stock");
+            Add("InformeFaltantes",   "tevt.faltantes",      "Informe de faltantes");
+            Add("SeparacionPrendas",  "tevt.separacion",     "Separación de prendas");
+            Add("Desistimiento",      "tevt.desistimiento",  "Desistimiento");
 
             cmbTipoEvento.SelectedIndex =
                 (idx >= 0 && idx < cmbTipoEvento.Items.Count) ? idx : 0;
@@ -619,6 +624,10 @@ namespace GUI
                 { "AltaCliente",         "tevt.altacliente"    },
                 { "ModificacionCliente", "tevt.modcliente"     },
                 { "BajaCliente",         "tevt.bajacliente"    },
+                { "EnvioControlStock",   "tevt.enviocontrol"   },
+                { "InformeFaltantes",    "tevt.faltantes"      },
+                { "SeparacionPrendas",   "tevt.separacion"     },
+                { "Desistimiento",       "tevt.desistimiento"  },
             };
 
             var partes = new List<string>();

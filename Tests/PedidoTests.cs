@@ -118,7 +118,7 @@ namespace Tests
             // devuelve PrendaDisponible() para que los tests existentes seleccionen "sí, disponible"
             // sin tener que tocar cada uno.
             public FakePrendaDAL DalPrenda = new FakePrendaDAL { Todas = new List<BE.Prenda> { PrendaDisponible() } };
-            public BLL.Prenda PrendaBLL => new BLL.Prenda(DalPrenda, new FakeMantenimientoPrendaDAL());
+            public BLL.Prenda PrendaBLL => new BLL.Prenda(DalPrenda, new FakeMantenimientoPrendaDAL(), DalListaEspera);
 
             // Lista de Espera (mejora opcional): si no se inyecta un doble acá, BLL.Pedido cae en
             // su lazy `new ListaEspera()` real (BLL.Pedido.cs), que abre DAL.ListaEspera/DAL.Prenda/
@@ -135,185 +135,59 @@ namespace Tests
             public BLL.Pedido Crear() => new BLL.Pedido(DalPedido, DalCliente, DalEmpleado, DalPlan, DalHistorial, DalListaEspera, PrendaBLL);
         }
 
-        // ── CrearPedido ───────────────────────────────────────────────────────
+        // ══ PN01 — Armar pedido (diagrama de actividad): una prueba por rama ══════
 
-        [TestMethod]
-        public void CrearPedido_DatosValidos_PersisteYRegistraHistorial()
+        private static void LoginComo(string perfil, params string[] patentes)
         {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
-            ctx.DalPedido.AltaIdGenerado = 99;
-            var bll = ctx.Crear();
-
-            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-
-            Assert.AreEqual(99, id);
-            Assert.AreEqual(1, ctx.DalPedido.AltaVeces);
-            Assert.AreEqual(5, ctx.DalPedido.UltimoAlta.IdEmpleado);
-            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces);
-        }
-
-        [TestMethod]
-        public void CrearPedido_SinPrendas_LanzaSinPrendas()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
-
-            try
+            var u = new BE.Usuario
             {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda>());
-                Assert.Fail("Debía exigir al menos una prenda.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.sin_prendas", ex.Clave);
-            }
-            Assert.AreEqual(0, ctx.DalPedido.AltaVeces);
-        }
-
-        // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README):
-        // una prenda Disponible pero reservada por Lista de Espera para OTRO cliente se
-        // rechaza igual, aunque BE.Prenda.EstaDisponible() diga que sí se puede.
-        [TestMethod]
-        public void CrearPedido_PrendaReservadaPorListaDeEsperaParaOtroCliente_Rechaza()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalCliente.ClientePorId = ClienteConPlanVigente(); // IdCliente = 10
-
-            var dalListaEspera = new FakeListaEsperaDAL();
-            dalListaEspera.Registros.Add(new BE.ListaEspera
-            {
-                IdListaEspera = 1, IdPrenda = 1, IdCliente = 999, // otro cliente, no el 10
-                Estado = BE.EstadoListaEspera.Reservada, FechaLimiteReserva = DateTime.Now.AddHours(10)
-            });
-            var listaEsperaBLL = new BLL.ListaEspera(dalListaEspera, new FakePrendaDAL(), new FakeClienteDAL());
-
-            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
-
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía rechazar una prenda reservada para otro cliente.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.prenda_reservada", ex.Clave);
-            }
-            Assert.AreEqual(0, ctx.DalPedido.AltaVeces);
-        }
-
-        // La misma reserva, pero para el cliente que SÍ está pidiendo la prenda: se permite,
-        // y al persistir el pedido la reserva se cierra (Convertida).
-        [TestMethod]
-        public void CrearPedido_PrendaReservadaParaElMismoCliente_PermiteYCierraLaReserva()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalCliente.ClientePorId = ClienteConPlanVigente(); // IdCliente = 10
-            ctx.DalPedido.AltaIdGenerado = 99;
-
-            var dalListaEspera = new FakeListaEsperaDAL();
-            var reserva = new BE.ListaEspera
-            {
-                IdListaEspera = 1, IdPrenda = 1, IdCliente = 10, // el mismo cliente del pedido
-                Estado = BE.EstadoListaEspera.Reservada, FechaLimiteReserva = DateTime.Now.AddHours(10)
+                Id = 7,
+                Username = perfil.ToLowerInvariant(),
+                Perfil = perfil,
+                Contraseña = Encriptador.Hash("Clave1!")
             };
-            dalListaEspera.Registros.Add(reserva);
-            var listaEsperaBLL = new BLL.ListaEspera(dalListaEspera, new FakePrendaDAL(), new FakeClienteDAL());
-
-            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
-
-            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-
-            Assert.AreEqual(99, id);
-            Assert.AreEqual(BE.EstadoListaEspera.Convertida, reserva.Estado);
+            foreach (var nm in patentes)
+                u.Permisos.Add(new BE.Permiso { NombreMenu = nm });
+            SessionManager.Login(u);
         }
 
-        // Lista de Espera es una mejora opcional (no requerida por la cátedra): si falla al
-        // verificar si una prenda está reservada, el catch fail-open NO debe bloquear la
-        // creación del pedido — antes era un catch mudo sin ningún test que probara este
-        // comportamiento, así que una regresión a "sí bloquea" hubiera pasado desapercibida.
-        [TestMethod]
-        public void CrearPedido_ListaEsperaFallaAlVerificarReserva_NoBloqueaLaCreacion()
+        private static BE.Prenda Prenda(int id, string categoria = "Remeras", string talle = "M",
+                                        BE.EstadoPrenda estado = BE.EstadoPrenda.Disponible) => new BE.Prenda
         {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
-            ctx.DalPedido.AltaIdGenerado = 99;
-            var listaEsperaBLL = new FakeListaEsperaService { EstaReservadaParaOtroLanza = true };
+            IdPrenda = id, Nombre = "Prenda " + id, Categoria = categoria, Talle = talle, Color = "Negro", Estado = estado
+        };
 
-            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
-
-            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-
-            Assert.AreEqual(99, id);
-            Assert.AreEqual(1, ctx.DalPedido.AltaVeces);
-        }
-
-        // Mismo criterio para el segundo catch fail-open: si falla al cerrar la reserva
-        // DESPUÉS de persistir el pedido, el pedido ya creado no debe revertirse ni la
-        // excepción debe propagarse al usuario.
-        [TestMethod]
-        public void CrearPedido_ListaEsperaFallaAlCerrarReserva_NoBloqueaLaCreacionYaPersistida()
+        private static BE.Pedido PedidoEn(BE.EstadoPedido estado, params BE.Prenda[] prendas) => new BE.Pedido
         {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
-            ctx.DalPedido.AltaIdGenerado = 99;
-            var listaEsperaBLL = new FakeListaEsperaService { CerrarSiReservadaLanza = true };
+            IdPedido = 50, IdCliente = 10, IdEmpleado = 5, Estado = estado, NombreCliente = "Ana Gómez",
+            FechaPedido = DateTime.Now, Prendas = new List<BE.Prenda>(prendas)
+        };
 
-            var bll = new BLL.Pedido(ctx.DalPedido, ctx.DalCliente, ctx.DalEmpleado, ctx.DalPlan, ctx.DalHistorial, listaEsperaBLL, ctx.PrendaBLL);
-
-            int id = bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-
-            Assert.AreEqual(99, id);
-            Assert.AreEqual(1, listaEsperaBLL.CerrarSiReservadaVeces);
-        }
+        // ── Verificar la vigencia → ¿Suscripción vigente? (No: informar imposibilidad) ──
 
         [TestMethod]
-        public void CrearPedido_ClienteInexistente_LanzaClienteInexistente()
+        public void VerificarVigencia_ClienteInexistente_LanzaClienteInexistente()
         {
             LoginComoAdministrador();
             var ctx = new Contexto(); // ClientePorId queda null
-            var bll = ctx.Crear();
-
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía rechazar un cliente inexistente.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.cliente_inexistente", ex.Clave);
-            }
+            try { ctx.Crear().VerificarVigencia(10); Assert.Fail("Debía rechazar un cliente inexistente."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.cliente_inexistente", ex.Clave); }
         }
 
         [TestMethod]
-        public void CrearPedido_ClienteSinPlan_LanzaSinPlan()
+        public void VerificarVigencia_SinPlan_LanzaSinPlan()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
             var cliente = ClienteConPlanVigente();
             cliente.IdPlan = null;
             ctx.DalCliente.ClientePorId = cliente;
-            var bll = ctx.Crear();
-
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía exigir un plan asignado.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.sin_plan", ex.Clave);
-            }
+            try { ctx.Crear().VerificarVigencia(10); Assert.Fail("Debía exigir un plan asignado."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.sin_plan", ex.Clave); }
         }
 
         [TestMethod]
-        public void CrearPedido_SuspendidoPorPago_LanzaPagoSuspendido_AntesQueVencimiento()
+        public void VerificarVigencia_SuspendidoPorPago_LanzaPagoSuspendido_AntesQueVencimiento()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
@@ -321,13 +195,7 @@ namespace Tests
             cliente.FechaVencimiento = DateTime.Today.AddDays(-10); // también vencida
             cliente.FechaLimiteGracia = DateTime.Today.AddDays(-1); // gracia ya vencida → suspendido
             ctx.DalCliente.ClientePorId = cliente;
-            var bll = ctx.Crear();
-
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía bloquear por suspensión de pago.");
-            }
+            try { ctx.Crear().VerificarVigencia(10); Assert.Fail("Debía bloquear por suspensión de pago."); }
             catch (BE.AppException ex)
             {
                 // El chequeo de pago va ANTES que el de vencimiento genérico (a propósito,
@@ -337,203 +205,547 @@ namespace Tests
         }
 
         [TestMethod]
-        public void CrearPedido_SuscripcionVencida_LanzaSuscripcionVencida()
+        public void VerificarVigencia_SuscripcionVencida_LanzaSuscripcionVencida()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
             var cliente = ClienteConPlanVigente();
             cliente.FechaVencimiento = DateTime.Today.AddDays(-5);
             ctx.DalCliente.ClientePorId = cliente;
-            var bll = ctx.Crear();
-
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía rechazar una suscripción vencida.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.suscripcion_vencida", ex.Clave);
-            }
+            try { ctx.Crear().VerificarVigencia(10); Assert.Fail("Debía rechazar una suscripción vencida."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.suscripcion_vencida", ex.Clave); }
         }
 
         [TestMethod]
-        public void CrearPedido_SuscripcionPausada_LanzaSuscripcionPausada()
+        public void VerificarVigencia_SuscripcionPausada_LanzaSuscripcionPausada()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
             var cliente = ClienteConPlanVigente();
             cliente.FechaPausaHasta = DateTime.Today.AddDays(5);
             ctx.DalCliente.ClientePorId = cliente;
-            var bll = ctx.Crear();
+            try { ctx.Crear().VerificarVigencia(10); Assert.Fail("Debía rechazar una suscripción pausada."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.suscripcion_pausada", ex.Clave); }
+        }
 
-            try
+        [TestMethod]
+        public void VerificarVigencia_SinSesion_LanzaSesionExpirada()
+        {
+            // Setup() ya hizo Logout.
+            try { new Contexto().Crear().VerificarVigencia(10); Assert.Fail("Debía exigir sesión iniciada."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sesion_expirada", ex.Clave); }
+        }
+
+        // ── Revisar existencia de un pedido activo → ¿Posee pedido activo? ──
+
+        [TestMethod]
+        public void RevisarPedidoActivo_ConDespachoActivo_LanzaYaDespachado()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 7, IdCliente = 10, Estado = BE.EstadoPedido.Despachado });
+            try { ctx.Crear().RevisarPedidoActivo(ClienteConPlanVigente()); Assert.Fail("Debía bloquear con un pedido despachado."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.ya_despachado", ex.Clave); }
+        }
+
+        [TestMethod]
+        public void RevisarPedidoActivo_PedidoEnCadaEstadoDelArmado_LanzaPedidoActivo()
+        {
+            LoginComoAdministrador();
+            foreach (var estado in new[] { BE.EstadoPedido.EnControlStock, BE.EstadoPedido.ConFaltantes,
+                                           BE.EstadoPedido.Separado, BE.EstadoPedido.Pendiente })
             {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía rechazar una suscripción pausada.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.suscripcion_pausada", ex.Clave);
+                var ctx = new Contexto();
+                ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 7, IdCliente = 10, Estado = estado });
+                try
+                {
+                    ctx.Crear().RevisarPedidoActivo(ClienteConPlanVigente());
+                    Assert.Fail($"Un pedido {estado} debía contar como activo.");
+                }
+                catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.pedido_activo", ex.Clave, estado.ToString()); }
             }
         }
 
         [TestMethod]
-        public void CrearPedido_ConDespachoActivo_LanzaYaDespachado()
+        public void RevisarPedidoActivo_PedidosTerminados_NoBloquean()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            foreach (var estado in new[] { BE.EstadoPedido.Cancelado, BE.EstadoPedido.Desistido, BE.EstadoPedido.Entregado })
+                ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 7 + (int)estado, IdCliente = 10, Estado = estado });
+
+            ctx.Crear().RevisarPedidoActivo(ClienteConPlanVigente()); // no lanza
+        }
+
+        [TestMethod]
+        public void RevisarPedidoActivo_ConPrendasPendientesDeDevolucion_LanzaCuentaBloqueada()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.PorCliente = new List<BE.Prenda>
+            {
+                new BE.Prenda { IdPrenda = 99, Nombre = "Blazer", Estado = BE.EstadoPrenda.EnUso, IdClienteActual = 10 }
+            };
+            try { ctx.Crear().RevisarPedidoActivo(ClienteConPlanVigente()); Assert.Fail("Debía estar bloqueada."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.cuenta_bloqueada", ex.Clave); }
+        }
+
+        // ── Comprobar el cupo del plan → ¿Excede el cupo disponible? ──
+
+        [TestMethod]
+        public void ComprobarCupo_DentroDelLimite_DevuelvePlan()
+        {
+            LoginComoAdministrador();
+            var plan = new Contexto().Crear().ComprobarCupo(ClienteConPlanVigente(), 2); // límite 3
+            Assert.AreEqual("Básico", plan.Nombre);
+        }
+
+        [TestMethod]
+        public void ComprobarCupo_ExcedeLimite_LanzaLimitePlan()
+        {
+            LoginComoAdministrador();
+            var cliente = ClienteConPlanVigente();
+            cliente.LimitePrendas = 1;
+            cliente.StockUtilizado = 1;
+            try { new Contexto().Crear().ComprobarCupo(cliente, 1); Assert.Fail("Debía rechazar superar el límite."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.limite_plan", ex.Clave); }
+        }
+
+        // ── Enviar selección para control stock (sin reservar prendas) ──
+
+        [TestMethod]
+        public void EnviarAControlStock_DatosValidos_CreaPedidoEnControlSinReservar()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
             ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
-            ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 7, IdCliente = 10, Estado = BE.EstadoPedido.Despachado });
-            var bll = ctx.Crear();
+            ctx.DalPedido.AltaIdGenerado = 99;
 
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía bloquear un segundo pedido con uno despachado pendiente.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.ya_despachado", ex.Clave);
-            }
+            int id = ctx.Crear().EnviarAControlStock("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
+
+            Assert.AreEqual(99, id);
+            Assert.AreEqual(1, ctx.DalPedido.AltaSinReservaVeces);
+            Assert.AreEqual(BE.EstadoPedido.EnControlStock, ctx.DalPedido.UltimoAltaSinReserva.Estado);
+            Assert.IsNotNull(ctx.DalPedido.UltimoAltaSinReserva.FechaEnvioControl);
+            Assert.AreEqual(5, ctx.DalPedido.UltimoAltaSinReserva.IdEmpleado);
+            Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces, "Enviar a control no reserva prendas.");
+            Assert.AreEqual("ENVIAR_CONTROL", ctx.DalHistorial.UltimoCambiosRegistrados[0].Accion);
         }
 
         [TestMethod]
-        public void CrearPedido_SuperaLimiteDelPlan_LanzaLimitePlan()
+        public void EnviarAControlStock_SinPrendas_LanzaSinPrendas()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            try { ctx.Crear().EnviarAControlStock("Test", 10, new List<BE.Prenda>()); Assert.Fail("Debía exigir prendas."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.sin_prendas", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.AltaSinReservaVeces);
+        }
+
+        [TestMethod]
+        public void EnviarAControlStock_ConPedidoActivo_NoCreaNada()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 7, IdCliente = 10, Estado = BE.EstadoPedido.EnControlStock });
+            try { ctx.Crear().EnviarAControlStock("Test", 10, new List<BE.Prenda> { PrendaDisponible() }); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.pedido_activo", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.AltaSinReservaVeces);
+        }
+
+        [TestMethod]
+        public void EnviarAControlStock_SuperaLimiteDelPlan_LanzaLimitePlan()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
             var cliente = ClienteConPlanVigente();
             cliente.LimitePrendas = 1;
-            cliente.StockUtilizado = 1;
             ctx.DalCliente.ClientePorId = cliente;
-            var bll = ctx.Crear();
-
             try
             {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía rechazar superar el límite del plan.");
+                ctx.Crear().EnviarAControlStock("Test", 10, new List<BE.Prenda> { Prenda(1), Prenda(2) });
+                Assert.Fail("Una selección que excede el cupo no se envía a control.");
             }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.limite_plan", ex.Clave);
-            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.limite_plan", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.AltaSinReservaVeces);
         }
 
         [TestMethod]
-        public void CrearPedido_PrendaNoDisponible_LanzaPrendaNoDisponible()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
-            // PN01 (split lógico Depósito): la disponibilidad ahora se relee desde la base
-            // (BLL.Prenda.VerificarDisponibilidad), no del objeto en memoria que se pasa acá —
-            // por eso lo que importa es el estado sembrado en el Fake DAL, no en `prendaOcupada`.
-            ctx.DalPrenda.Todas = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnUso } };
-            var bll = ctx.Crear();
-            var prendaOcupada = PrendaDisponible();
-
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { prendaOcupada });
-                Assert.Fail("Debía rechazar una prenda no disponible.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.prenda_no_disponible", ex.Clave);
-            }
-        }
-
-        [TestMethod]
-        public void CrearPedido_SinEmpleadoVinculado_LanzaEmpleadoSinVinculo()
+        public void EnviarAControlStock_SinEmpleadoVinculado_LanzaEmpleadoSinVinculo()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
             ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
             ctx.DalEmpleado.EmpleadoPorUsuario = null; // usuario sin Empleado vinculado
-            var bll = ctx.Crear();
-
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía exigir un Empleado vinculado al usuario.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.empleado_sin_vinculo", ex.Clave);
-            }
+            try { ctx.Crear().EnviarAControlStock("Test", 10, new List<BE.Prenda> { PrendaDisponible() }); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.empleado_sin_vinculo", ex.Clave); }
         }
 
-        [TestMethod]
-        public void CrearPedido_SinSesion_LanzaSesionExpirada()
-        {
-            // Setup() ya hizo Logout.
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
-
-            try
-            {
-                bll.CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía exigir sesión iniciada.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.sesion_expirada", ex.Clave);
-            }
-        }
-
-        // ── ValidarCupoDisponible (PN01) ─────────────────────────────────────
+        // ── Asentar desistimiento ──
 
         [TestMethod]
-        public void ValidarCupoDisponible_DentroDelLimite_DevuelvePlan()
+        public void AsentarDesistimiento_SeleccionQueExcedeElCupo_RegistraPedidoDesistidoSinReservar()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
-            var bll = ctx.Crear();
-            var cliente = ClienteConPlanVigente(); // LimitePrendas=3, StockUtilizado=0
-
-            var plan = bll.ValidarCupoDisponible(cliente, 2);
-
-            Assert.AreEqual("Básico", plan.Nombre);
-        }
-
-        [TestMethod]
-        public void ValidarCupoDisponible_ExcedeLimite_LanzaLimitePlan()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
             var cliente = ClienteConPlanVigente();
             cliente.LimitePrendas = 1;
-            cliente.StockUtilizado = 1;
+            ctx.DalCliente.ClientePorId = cliente;
+            ctx.DalPedido.AltaIdGenerado = 77;
 
-            try
-            {
-                bll.ValidarCupoDisponible(cliente, 1);
-                Assert.Fail("Debía rechazar superar el límite del plan.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.limite_plan", ex.Clave);
-            }
+            int id = ctx.Crear().AsentarDesistimiento("Test", 10, new List<BE.Prenda> { Prenda(1), Prenda(2) }, "  No quiere menos prendas ");
+
+            Assert.AreEqual(77, id);
+            var p = ctx.DalPedido.UltimoAltaSinReserva;
+            Assert.AreEqual(BE.EstadoPedido.Desistido, p.Estado);
+            Assert.AreEqual(BE.EtapaDesistimiento.Cupo, p.EtapaDesistimiento);
+            Assert.AreEqual("No quiere menos prendas", p.MotivoDesistimiento);
+            Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces);
         }
 
-        // ── ReservarPrendas (PN01) ───────────────────────────────────────────
-
         [TestMethod]
-        public void ReservarPrendas_DatosValidos_DelegaEnAltaDelDAL()
+        public void AsentarDesistimiento_SeleccionDentroDelCupo_Rechaza()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
-            ctx.DalPedido.AltaIdGenerado = 42;
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente(); // límite 3
+            try { ctx.Crear().AsentarDesistimiento("Test", 10, new List<BE.Prenda> { Prenda(1) }, "x"); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.desistimiento_sin_exceso", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.AltaSinReservaVeces);
+        }
+
+        [TestMethod]
+        public void AsentarDesistimiento_SinMotivo_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            try { ctx.Crear().AsentarDesistimiento("Test", PedidoEn(BE.EstadoPedido.ConFaltantes, Prenda(1)), "  ", BE.EtapaDesistimiento.Disponibilidad); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.desistir_sin_motivo", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.RegistrarDesistimientoVeces);
+        }
+
+        [TestMethod]
+        public void AsentarDesistimiento_PedidoConFaltantes_PasaADesistido()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.Crear().AsentarDesistimiento("Test", PedidoEn(BE.EstadoPedido.ConFaltantes, Prenda(1)),
+                                             "No le sirven las alternativas", BE.EtapaDesistimiento.Disponibilidad);
+
+            Assert.AreEqual(1, ctx.DalPedido.RegistrarDesistimientoVeces);
+            Assert.AreEqual(BE.EtapaDesistimiento.Disponibilidad, ctx.DalPedido.UltimaEtapaDesistimiento);
+            Assert.AreEqual("DESISTIR", ctx.DalHistorial.UltimoCambiosRegistrados[0].Accion);
+        }
+
+        [TestMethod]
+        public void AsentarDesistimiento_PedidoQueNoTieneFaltantes_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            try { ctx.Crear().AsentarDesistimiento("Test", PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1)), "x", BE.EtapaDesistimiento.Disponibilidad); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.desistir_estado", ex.Clave); }
+        }
+
+        // ── Recibir selección ajustada por disponibilidad (vuelve al control del cupo) ──
+
+        [TestMethod]
+        public void AjustarSeleccion_PedidoConFaltantes_ReemplazaYVuelveAControl()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            var pedido = PedidoEn(BE.EstadoPedido.ConFaltantes, Prenda(1), Prenda(2));
+            ctx.DalPedido.PedidosDevueltos.Add(pedido); // el propio pedido no cuenta como "otro activo"
+
+            ctx.Crear().AjustarSeleccion("Test", pedido, new List<BE.Prenda> { Prenda(1), Prenda(3) });
+
+            Assert.AreEqual(1, ctx.DalPedido.ReemplazarSeleccionVeces);
+            Assert.AreEqual(2, ctx.DalPedido.UltimaSeleccionReemplazada.Count);
+            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("EnControlStock", estado.ValorNuevo);
+        }
+
+        [TestMethod]
+        public void AjustarSeleccion_ExcedeElCupo_NoReemplaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.LimitePrendas = 1;
+            ctx.DalCliente.ClientePorId = cliente;
+            try { ctx.Crear().AjustarSeleccion("Test", PedidoEn(BE.EstadoPedido.ConFaltantes, Prenda(1)), new List<BE.Prenda> { Prenda(1), Prenda(2) }); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.limite_plan", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.ReemplazarSeleccionVeces);
+        }
+
+        [TestMethod]
+        public void AjustarSeleccion_PedidoSinFaltantes_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            try { ctx.Crear().AjustarSeleccion("Test", PedidoEn(BE.EstadoPedido.Separado, Prenda(1)), new List<BE.Prenda> { Prenda(1) }); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.ajustar_estado", ex.Clave); }
+        }
+
+        // ── Depósito: Revisar stock → ¿Selección disponible? ──
+
+        [TestMethod]
+        public void RevisarStock_ReleeElEstadoRealDeCadaPrenda()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1), Prenda(2, estado: BE.EstadoPrenda.EnUso) };
+
+            var lineas = ctx.Crear().RevisarStock(PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1), Prenda(2)));
+
+            Assert.IsTrue(lineas.Find(l => l.Prenda.IdPrenda == 1).Disponible);
+            var falta = lineas.Find(l => l.Prenda.IdPrenda == 2);
+            Assert.IsFalse(falta.Disponible);
+            Assert.AreEqual(BE.EstadoPrenda.EnUso, falta.EstadoActual);
+        }
+
+        [TestMethod]
+        public void RevisarStock_PrendaReservadaParaOtroCliente_NoEstaDisponible()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1) };
+            ctx.DalListaEspera.EstaReservadaParaOtroRespuesta = true;
+
+            var lineas = ctx.Crear().RevisarStock(PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1)));
+
+            Assert.IsTrue(lineas[0].ReservadaParaOtro);
+            Assert.IsFalse(lineas[0].Disponible);
+        }
+
+        [TestMethod]
+        public void RevisarStock_PedidoQueNoEstaEnControl_Rechaza()
+        {
+            LoginComoAdministrador();
+            try { new Contexto().Crear().RevisarStock(PedidoEn(BE.EstadoPedido.Separado, Prenda(1))); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.control_estado", ex.Clave); }
+        }
+
+        [TestMethod]
+        public void AccionesDeDeposito_SinPermisoDeControlDeStock_Rechazan()
+        {
+            LoginComo("Vendedor", BE.Patentes.PedidosVenta, BE.Patentes.PedidosVentaEditar);
+            var ctx = new Contexto();
+            var pedido = PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1));
             var bll = ctx.Crear();
 
-            int id = bll.ReservarPrendas(new List<BE.Prenda> { PrendaDisponible() }, 10);
+            try { bll.RevisarStock(pedido); Assert.Fail("El Vendedor no revisa el stock."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }
+            try { bll.SepararPrendas("Test", pedido); Assert.Fail("El Vendedor no separa prendas."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces);
+        }
 
-            Assert.AreEqual(42, id);
-            Assert.AreEqual(1, ctx.DalPedido.AltaVeces);
-            Assert.AreEqual(10, ctx.DalPedido.UltimoAlta.IdCliente);
-            Assert.AreEqual(5, ctx.DalPedido.UltimoAlta.IdEmpleado);
+        // ── Depósito: ¿Selección disponible? No → Informe de prendas faltantes (y alternativas) ──
+
+        [TestMethod]
+        public void InformarFaltantes_SugiereAlternativasDeLaMismaCategoriaYTalle()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1), Prenda(2, estado: BE.EstadoPrenda.EnLimpieza) };
+            ctx.DalPrenda.Disponibles = new List<BE.Prenda>
+            {
+                Prenda(1),                         // ya está en el pedido: no es alternativa
+                Prenda(3),                         // misma categoría y talle: sí
+                Prenda(4, talle: "S"),             // otro talle: no
+                Prenda(5, categoria: "Vestidos")   // otra categoría: no
+            };
+            var pedido = PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1), Prenda(2));
+
+            var faltantes = ctx.Crear().InformarFaltantes("Test", pedido);
+
+            Assert.AreEqual(1, faltantes.Count);
+            Assert.AreEqual(2, faltantes[0].Prenda.IdPrenda);
+            Assert.AreEqual(BE.EstadoPrenda.EnLimpieza, faltantes[0].EstadoAlRevisar);
+            CollectionAssert.AreEqual(new[] { 3 }, faltantes[0].Alternativas.ConvertAll(a => a.IdPrenda));
+            Assert.AreEqual(1, ctx.DalPedido.RegistrarFaltantesVeces);
+            Assert.AreEqual(5, ctx.DalPedido.UltimoIdEmpleadoControl);
+            Assert.AreEqual("INFORMAR_FALTANTES", ctx.DalHistorial.UltimoCambiosRegistrados[0].Accion);
+        }
+
+        [TestMethod]
+        public void InformarFaltantes_TodoDisponible_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1) };
+            try { ctx.Crear().InformarFaltantes("Test", PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1))); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.sin_faltantes", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.RegistrarFaltantesVeces);
+        }
+
+        // ── Depósito: ¿Selección disponible? Sí → Confirmar prendas disponibles → Separar ──
+
+        [TestMethod]
+        public void ConfirmarPrendasDisponibles_TodoDisponible_LasConfirma()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1) };
+
+            ctx.Crear().ConfirmarPrendasDisponibles("Test", PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1)));
+
+            Assert.AreEqual(1, ctx.DalPedido.ConfirmarPrendasVeces);
+            Assert.AreEqual("CONFIRMAR_PRENDAS", ctx.DalHistorial.UltimoCambiosRegistrados[0].Accion);
+        }
+
+        [TestMethod]
+        public void ConfirmarPrendasDisponibles_ConUnaFaltante_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1, estado: BE.EstadoPrenda.EnUso) };
+            try { ctx.Crear().ConfirmarPrendasDisponibles("Test", PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1))); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.hay_faltantes", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.ConfirmarPrendasVeces);
+        }
+
+        [TestMethod]
+        public void SepararPrendas_SinConfirmarAntes_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            try { ctx.Crear().SepararPrendas("Test", PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1))); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.sin_confirmar", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces);
+        }
+
+        [TestMethod]
+        public void SepararPrendas_Confirmadas_ReservaYCierraLaListaDeEspera()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1) };
+            var pedido = PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1));
+            pedido.PrendasConfirmadas = new List<int> { 1 };
+
+            ctx.Crear().SepararPrendas("Test", pedido);
+
+            Assert.AreEqual(1, ctx.DalPedido.SepararPrendasVeces);
+            Assert.AreEqual(1, ctx.DalListaEspera.CerrarSiReservadaVeces);
+            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("Separado", estado.ValorNuevo);
+        }
+
+        [TestMethod]
+        public void SepararPrendas_OtraOperacionTomoLaPrenda_EmiteInformeDeFaltantesYNoSepara()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1) };   // disponible al revisar
+            var pedido = PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1));
+            pedido.PrendasConfirmadas = new List<int> { 1 };
+            ctx.DalPedido.PedidosDevueltos.Add(pedido);
+            // Entre la revisión y el UPDATE otra operación toma la prenda: la DAL rechaza la reserva
+            // (rollback) y, al releerla, la prenda ya figura en uso.
+            ctx.DalPedido.AntesDeSeparar = () =>
+                ctx.DalPrenda.Todas = new List<BE.Prenda> { Prenda(1, estado: BE.EstadoPrenda.EnUso) };
+            ctx.DalPedido.SepararPrendasLanza = new BE.AppException("err.dal.pedido.prenda_tomada", "tomada");
+
+            try
+            {
+                ctx.Crear().SepararPrendas("Test", pedido);
+                Assert.Fail("Debía volver al circuito de faltantes.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.separar_faltantes", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces, "No queda nada separado.");
+            Assert.AreEqual(1, ctx.DalPedido.RegistrarFaltantesVeces, "¿Selección disponible? No → informe de faltantes.");
+        }
+
+        // ── Formalizar el pedido / Preparar la confirmación ──
+
+        [TestMethod]
+        public void FormalizarPedido_Separado_PasaAPendiente()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+
+            ctx.Crear().FormalizarPedido("Test", PedidoEn(BE.EstadoPedido.Separado, Prenda(1)));
+
+            Assert.AreEqual(1, ctx.DalPedido.FormalizarVeces);
+            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("Separado", estado.ValorAnterior);
+            Assert.AreEqual("Pendiente", estado.ValorNuevo);
+        }
+
+        [TestMethod]
+        public void FormalizarPedido_SinSeparar_Rechaza()
+        {
+            LoginComoAdministrador();
+            foreach (var estado in new[] { BE.EstadoPedido.EnControlStock, BE.EstadoPedido.ConFaltantes, BE.EstadoPedido.Pendiente })
+            {
+                var ctx = new Contexto();
+                try { ctx.Crear().FormalizarPedido("Test", PedidoEn(estado, Prenda(1))); Assert.Fail(estado.ToString()); }
+                catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.formalizar_estado", ex.Clave); }
+                Assert.AreEqual(0, ctx.DalPedido.FormalizarVeces);
+            }
+        }
+
+        [TestMethod]
+        public void PrepararConfirmacion_PedidoNoFormalizado_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPedido.PedidosDevueltos.Add(PedidoEn(BE.EstadoPedido.Separado, Prenda(1)));
+            try { ctx.Crear().PrepararConfirmacion("Test", 50); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.confirmacion_estado", ex.Clave); }
+        }
+
+        [TestMethod]
+        public void PrepararConfirmacion_PedidoFormalizado_LoDevuelve()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var pedido = PedidoEn(BE.EstadoPedido.Pendiente, Prenda(1));
+            pedido.FechaFormalizacion = DateTime.Now;
+            ctx.DalPedido.PedidosDevueltos.Add(pedido);
+
+            Assert.AreEqual(50, ctx.Crear().PrepararConfirmacion("Test", 50).IdPedido);
+        }
+
+        // ── Máquina de estados del pedido (BE) ──
+
+        [TestMethod]
+        public void TransicionesDelArmado_SiguenElDiagrama()
+        {
+            var p = new BE.Pedido { Estado = BE.EstadoPedido.EnControlStock };
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.ConFaltantes));
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.Separado));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPedido.Pendiente), "No se formaliza sin separar.");
+
+            p.Estado = BE.EstadoPedido.ConFaltantes;
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.EnControlStock));
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.Desistido));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPedido.Separado));
+
+            p.Estado = BE.EstadoPedido.Separado;
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.Pendiente));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPedido.Cancelado));
+
+            p.Estado = BE.EstadoPedido.Desistido;
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPedido.EnControlStock), "Desistido es final.");
+        }
+
+        [TestMethod]
+        public void RestaurarOperacion_PasoDelControlDeStock_NoSePuedeRevertir()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalHistorial.CambiosParaOperacion = new List<BE.PedidoHistorial>
+            {
+                new BE.PedidoHistorial { Campo = "Estado", Accion = "SEPARAR", ValorAnterior = "EnControlStock", ValorNuevo = "Separado" }
+            };
+            try { ctx.Crear().RestaurarOperacion("Test", 1, 3); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.restaurar_no_permitido", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.RestaurarOperacionAtomicaVeces);
         }
 
         // ── Transiciones de estado ───────────────────────────────────────────
@@ -697,9 +909,10 @@ namespace Tests
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
             ctx.DalPedido.DesCancelarRespuesta = false;
             var bll = ctx.Crear();
-            var pedido = new BE.Pedido { IdPedido = 1, Estado = BE.EstadoPedido.Cancelado };
+            var pedido = new BE.Pedido { IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Cancelado };
 
             try
             {
@@ -717,10 +930,12 @@ namespace Tests
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
             var bll = ctx.Crear();
             var pedido = new BE.Pedido
             {
                 IdPedido = 1,
+                IdCliente = 10,
                 Estado = BE.EstadoPedido.Cancelado,
                 MotivoCancelacion = "Cliente se arrepintió"
             };
@@ -737,6 +952,36 @@ namespace Tests
             var motivo = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "MotivoCancelacion");
             Assert.AreEqual("Cliente se arrepintió", motivo.ValorAnterior);
             Assert.IsNull(motivo.ValorNuevo);
+        }
+
+        // Des-cancelar vuelve a reservar las prendas: no puede saltarse las reglas de PN01.
+        [TestMethod]
+        public void DesCancelar_ClienteConOtroPedidoActivo_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 2, IdCliente = 10, Estado = BE.EstadoPedido.EnControlStock });
+            var pedido = new BE.Pedido { IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Cancelado };
+
+            try { ctx.Crear().DesCancelar("Test", pedido); Assert.Fail("Debía rechazar: el cliente ya tiene otro pedido en curso."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.pedido_activo", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.DesCancelarVeces);
+        }
+
+        [TestMethod]
+        public void DesCancelar_SuscripcionVencida_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.FechaVencimiento = DateTime.Today.AddDays(-3);
+            ctx.DalCliente.ClientePorId = cliente;
+            var pedido = new BE.Pedido { IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Cancelado };
+
+            try { ctx.Crear().DesCancelar("Test", pedido); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.suscripcion_vencida", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.DesCancelarVeces);
         }
 
         // ── CalcularNivelUrgencia — lógica pura, sin DAL ─────────────────────
@@ -833,29 +1078,6 @@ namespace Tests
         }
 
         // ── PN01/PN04: cuenta bloqueada hasta registrar la devolución (regla de NUULY) ────
-
-        [TestMethod]
-        public void CrearPedido_ConPrendasPendientesDeDevolucion_LanzaCuentaBloqueada()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
-            ctx.DalPrenda.PorCliente = new List<BE.Prenda>
-            {
-                new BE.Prenda { IdPrenda = 99, Nombre = "Blazer", Estado = BE.EstadoPrenda.EnUso, IdClienteActual = 10 }
-            };
-
-            try
-            {
-                ctx.Crear().CrearPedido("Test", 10, new List<BE.Prenda> { PrendaDisponible() });
-                Assert.Fail("Debía bloquear el pedido: hay prendas pendientes de devolución.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.pedido.cuenta_bloqueada", ex.Clave);
-            }
-            Assert.AreEqual(0, ctx.DalPedido.AltaVeces, "No debe crearse ningún pedido.");
-        }
 
         [TestMethod]
         public void ValidarPuedeArmarPedido_SinPrendasPendientes_DevuelveElCliente()

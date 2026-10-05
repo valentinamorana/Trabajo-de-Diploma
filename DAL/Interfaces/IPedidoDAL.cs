@@ -8,12 +8,30 @@ namespace DAL.Interfaces
     {
         List<BE.Pedido> ObtenerTodos();
         List<BE.Pedido> ObtenerPendientes();
+        List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado);
         Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente();
         List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado();
         Dictionary<int, int> ObtenerCantidadPedidosPorPrenda();
         List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente);
         BE.Pedido ObtenerPorId(int idPedido);
-        int Alta(BE.Pedido pedido);
+
+        // ── PN01 — circuito de control de stock ─────────────────────────────
+        // Inserta el pedido y sus líneas SIN reservar prendas (EnControlStock o Desistido).
+        int AltaSinReserva(BE.Pedido pedido);
+        // Reemplaza la selección de un pedido ConFaltantes y lo devuelve a EnControlStock.
+        void ReemplazarSeleccion(int idPedido, List<BE.Prenda> prendas);
+        // EnControlStock → ConFaltantes, con el informe de faltantes y alternativas.
+        void RegistrarFaltantes(int idPedido, int idEmpleadoControl, List<BE.PedidoFaltante> faltantes);
+        // Marca todas las líneas como confirmadas por Depósito (sigue EnControlStock).
+        void ConfirmarPrendas(int idPedido, int idEmpleadoControl);
+        // EnControlStock → Separado y prendas Disponible → EnUso, en una transacción.
+        void SepararPrendas(int idPedido, int idCliente);
+        // Separado → Pendiente (formalizado).
+        void Formalizar(int idPedido);
+        // ConFaltantes → Desistido.
+        void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa);
+        List<BE.PedidoFaltante> ObtenerFaltantes(int idPedido);
+
         void Despachar(int idPedido);
         void MarcarEntregado(int idPedido);
         int RegistrarDevolucion(int idPedido, int idCliente);

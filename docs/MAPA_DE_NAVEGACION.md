@@ -27,6 +27,7 @@ El Administrador ve todo (bypass en las 3 capas). Un grupo del menú se muestra 
 | **Inventario** | Prendas | `Prendas` | mnuPrendas | VEN, GCO, DEP, GIN, ADM | PN01 / PN04 |
 | | Inspección de Devolución | `InspeccionDevolucionForm` | mnuInspeccionDevolucion | DEP, GIN, ADM | PN04 |
 | | Lista de Espera | `ListaEsperaForm` | mnuListaEspera | VEN, GCO, DEP, GIN, ADM | EXT |
+| | Control de Stock | `ControlStockForm` | mnuControlStock (acciones: mnuControlStockEditar) | DEP, GIN, ADM | PN01 |
 | **Ventas** | Pedidos de Venta | `PedidosVenta` | mnuPedidosVenta | VEN, GCO, ADM | PN01 |
 | | Pedidos Realizados | `PedidosRealizados` | mnuPedidosRealizados | DEP, GCO, GIN, LOG, ADM | PN01 / PN04 |
 | **Caja** | Contrataciones Pendientes | `ContratacionesPendientesForm` | mnuCaja | CAJ, ADM | PN02 |
@@ -69,10 +70,11 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 ### PN01 — Armar pedido y logística
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `PedidosVenta` | Lista pedidos y permite crearlos o cancelarlos. | + Nuevo Pedido · Cancelar · Des-cancelar · Historial · Actualizar |
-| `NuevoPedidoForm` (modal) | Asistente en pasos: cliente y prendas. Valida cuenta bloqueada, suscripción vigente y pedido abierto. | Siguiente → · ← Volver · Confirmar Pedido |
+| `PedidosVenta` | Lista los pedidos del Vendedor y las acciones que corresponden a cada estado del armado (PN01). | + Nuevo Pedido · Ver faltantes · Ajustar selección · Registrar desistimiento · Formalizar pedido · Confirmación del pedido · Cancelar · Des-cancelar · Historial · Actualizar |
+| `NuevoPedidoForm` (modal) | Asistente en 2 pasos. Paso 1: identifica al cliente por DNI, nombre o apellido, muestra la ficha y verifica la vigencia y el pedido activo. Paso 2: catálogo, detalle de la selección y cupo del plan. Tiene un modo ajuste para los pedidos con faltantes, con las alternativas resaltadas. Imprime la planilla o el aviso de desistimiento. | Buscar · Siguiente → · ← Volver · Enviar a control de stock (o Reenviar) · Registrar desistimiento |
+| `ControlStockForm` | Pantalla de Depósito. Muestra la cola de pedidos enviados a control y la planilla con el estado real de cada prenda (disponible, reservada para otro o faltante). | Informar faltantes · Confirmar prendas disponibles · Separar prendas · Imprimir planilla · Actualizar |
 | `PedidoHistorialForm` | Historial de cambios de un pedido (solo lectura). | — |
-| `PedidosRealizados` | Vista de Depósito/Logística: despacho, entrega, devolución y pérdida, con nivel de urgencia. | Despachar · Marcar Entregado · Registrar Devolución · Reportar Pérdida · Ver Notificación · Historial · Actualizar |
+| `PedidosRealizados` | Vista de Depósito/Logística de los pedidos **formalizados**: despacho, entrega, devolución y pérdida, con nivel de urgencia. | Despachar · Marcar Entregado · Registrar Devolución · Reportar Pérdida · Ver Notificación · Historial · Actualizar |
 | `Prendas` | Catálogo con filtro por estado (State). Alta y edición requieren mnuStock. | Nueva Prenda · Editar · Estado · Mantenimiento · Lista de Espera · Actualizar |
 | `PrendaForm` (modal) | Alta y edición de una prenda. | Guardar Cambios · Cancelar |
 | `CambioEstadoDialog` | Elige el nuevo estado válido de la prenda. | — |
@@ -186,7 +188,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 
 Marcado con lo que sí verifiqué en el código y lo que no.
 
-1. **PN01, paso de Depósito:** no tiene pantalla propia. Lo cubre `PedidosRealizados` (despachar, entregar, devolver, perdida). Confirmar que la documentación lo describa así.
+1. **PN01, paso de Depósito:** resuelto. `ControlStockForm` (Inventario → Control de Stock) cubre el carril "Controlador de Stock" del diagrama de actividad: revisar stock, informar faltantes con alternativas, confirmar y separar.
 2. **Stock sin menú propio:** mnuStock no es una opción; solo habilita los botones de alta, edición y estado dentro de `Prendas`. Está bien, pero conviene aclararlo en la documentación.
 3. **Pausa y referidos (N01):** resuelto. La pausa se pide y se reanuda desde `RenovacionSuscripcionForm` ("Pausar hasta:" con tope de 3 meses y "Reanudar ahora"); el referente se elige en `ClienteForm` ("Referido por") y el crédito se ve al cobrar (`CobroSuscripcionForm`, `ContratacionesPendientesForm`).
 4. **Renovación y Cobro:** cada uno tiene un solo botón "Procesar" más los campos de decisión. No revisé que la cadena (Chain of Responsibility) muestre en pantalla cada paso.

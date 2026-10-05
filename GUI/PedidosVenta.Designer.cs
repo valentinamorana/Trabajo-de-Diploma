@@ -25,6 +25,11 @@ namespace GUI
             this.btnDesCancelar = new System.Windows.Forms.Button();
             this.btnRefrescar = new System.Windows.Forms.Button();
             this.btnHistorial = new System.Windows.Forms.Button();
+            this.btnVerFaltantes = new System.Windows.Forms.Button();
+            this.btnAjustar = new System.Windows.Forms.Button();
+            this.btnDesistirPedido = new System.Windows.Forms.Button();
+            this.btnFormalizar = new System.Windows.Forms.Button();
+            this.btnConfirmacion = new System.Windows.Forms.Button();
             this.lblConteo = new System.Windows.Forms.Label();
             this.panelDetalle = new System.Windows.Forms.Panel();
             this.dgvDetallePrendas = new System.Windows.Forms.DataGridView();
@@ -47,12 +52,17 @@ namespace GUI
             this.panelTop.Controls.Add(this.btnDesCancelar);
             this.panelTop.Controls.Add(this.btnRefrescar);
             this.panelTop.Controls.Add(this.btnHistorial);
+            this.panelTop.Controls.Add(this.btnVerFaltantes);
+            this.panelTop.Controls.Add(this.btnAjustar);
+            this.panelTop.Controls.Add(this.btnDesistirPedido);
+            this.panelTop.Controls.Add(this.btnFormalizar);
+            this.panelTop.Controls.Add(this.btnConfirmacion);
             this.panelTop.Controls.Add(this.lblConteo);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
             this.panelTop.Padding = new System.Windows.Forms.Padding(8, 8, 8, 4);
-            this.panelTop.Size = new System.Drawing.Size(1000, 52);
+            this.panelTop.Size = new System.Drawing.Size(1000, 88);
             this.panelTop.TabIndex = 0;
             // 
             // btnNuevoPedido
@@ -128,12 +138,92 @@ namespace GUI
             this.btnHistorial.Text = "Historial";
             this.btnHistorial.UseVisualStyleBackColor = false;
             this.btnHistorial.Click += new System.EventHandler(this.BtnHistorial_Click);
+            // 
+            // btnVerFaltantes
+            // 
+            this.btnVerFaltantes.BackColor = System.Drawing.Color.FromArgb(200, 80, 0);
+            this.btnVerFaltantes.Enabled = false;
+            this.btnVerFaltantes.FlatAppearance.BorderSize = 0;
+            this.btnVerFaltantes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVerFaltantes.ForeColor = System.Drawing.Color.White;
+            this.btnVerFaltantes.Location = new System.Drawing.Point(8, 50);
+            this.btnVerFaltantes.Name = "btnVerFaltantes";
+            this.btnVerFaltantes.Size = new System.Drawing.Size(130, 28);
+            this.btnVerFaltantes.TabIndex = 6;
+            this.btnVerFaltantes.Tag  = "btn.ped.verfaltantes";
+            this.btnVerFaltantes.Text = "Ver faltantes";
+            this.btnVerFaltantes.UseVisualStyleBackColor = false;
+            this.btnVerFaltantes.Click += new System.EventHandler(this.BtnVerFaltantes_Click);
+            // 
+            // btnAjustar
+            // 
+            this.btnAjustar.BackColor = System.Drawing.Color.FromArgb(110, 60, 150);
+            this.btnAjustar.Enabled = false;
+            this.btnAjustar.FlatAppearance.BorderSize = 0;
+            this.btnAjustar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAjustar.ForeColor = System.Drawing.Color.White;
+            this.btnAjustar.Location = new System.Drawing.Point(146, 50);
+            this.btnAjustar.Name = "btnAjustar";
+            this.btnAjustar.Size = new System.Drawing.Size(140, 28);
+            this.btnAjustar.TabIndex = 7;
+            this.btnAjustar.Tag  = "btn.ped.ajustar";
+            this.btnAjustar.Text = "Ajustar selección";
+            this.btnAjustar.UseVisualStyleBackColor = false;
+            this.btnAjustar.Click += new System.EventHandler(this.BtnAjustar_Click);
+            // 
+            // btnDesistirPedido
+            // 
+            this.btnDesistirPedido.BackColor = System.Drawing.Color.FromArgb(120, 120, 120);
+            this.btnDesistirPedido.Enabled = false;
+            this.btnDesistirPedido.FlatAppearance.BorderSize = 0;
+            this.btnDesistirPedido.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDesistirPedido.ForeColor = System.Drawing.Color.White;
+            this.btnDesistirPedido.Location = new System.Drawing.Point(294, 50);
+            this.btnDesistirPedido.Name = "btnDesistirPedido";
+            this.btnDesistirPedido.Size = new System.Drawing.Size(160, 28);
+            this.btnDesistirPedido.TabIndex = 8;
+            this.btnDesistirPedido.Tag  = "btn.ped.desistir";
+            this.btnDesistirPedido.Text = "Registrar desistimiento";
+            this.btnDesistirPedido.UseVisualStyleBackColor = false;
+            this.btnDesistirPedido.Click += new System.EventHandler(this.BtnDesistirPedido_Click);
+            // 
+            // btnFormalizar
+            // 
+            this.btnFormalizar.BackColor = System.Drawing.Color.FromArgb(30, 130, 30);
+            this.btnFormalizar.Enabled = false;
+            this.btnFormalizar.FlatAppearance.BorderSize = 0;
+            this.btnFormalizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnFormalizar.ForeColor = System.Drawing.Color.White;
+            this.btnFormalizar.Location = new System.Drawing.Point(462, 50);
+            this.btnFormalizar.Name = "btnFormalizar";
+            this.btnFormalizar.Size = new System.Drawing.Size(140, 28);
+            this.btnFormalizar.TabIndex = 9;
+            this.btnFormalizar.Tag  = "btn.ped.formalizar";
+            this.btnFormalizar.Text = "Formalizar pedido";
+            this.btnFormalizar.UseVisualStyleBackColor = false;
+            this.btnFormalizar.Click += new System.EventHandler(this.BtnFormalizar_Click);
+            // 
+            // btnConfirmacion
+            // 
+            this.btnConfirmacion.BackColor = System.Drawing.Color.FromArgb(30, 100, 170);
+            this.btnConfirmacion.Enabled = false;
+            this.btnConfirmacion.FlatAppearance.BorderSize = 0;
+            this.btnConfirmacion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnConfirmacion.ForeColor = System.Drawing.Color.White;
+            this.btnConfirmacion.Location = new System.Drawing.Point(610, 50);
+            this.btnConfirmacion.Name = "btnConfirmacion";
+            this.btnConfirmacion.Size = new System.Drawing.Size(170, 28);
+            this.btnConfirmacion.TabIndex = 10;
+            this.btnConfirmacion.Tag  = "btn.ped.confirmacion";
+            this.btnConfirmacion.Text = "Confirmación del pedido";
+            this.btnConfirmacion.UseVisualStyleBackColor = false;
+            this.btnConfirmacion.Click += new System.EventHandler(this.BtnConfirmacion_Click);
             //
             // lblConteo
             //
             this.lblConteo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblConteo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblConteo.Location = new System.Drawing.Point(570, 16);
+            this.lblConteo.Location = new System.Drawing.Point(630, 16);
             this.lblConteo.Name = "lblConteo";
             this.lblConteo.Size = new System.Drawing.Size(300, 23);
             this.lblConteo.TabIndex = 5;
@@ -271,6 +361,11 @@ namespace GUI
         private System.Windows.Forms.Button       btnDesCancelar;
         private System.Windows.Forms.Button       btnRefrescar;
         private System.Windows.Forms.Button       btnHistorial;
+        private System.Windows.Forms.Button       btnVerFaltantes;
+        private System.Windows.Forms.Button       btnAjustar;
+        private System.Windows.Forms.Button       btnDesistirPedido;
+        private System.Windows.Forms.Button       btnFormalizar;
+        private System.Windows.Forms.Button       btnConfirmacion;
         private System.Windows.Forms.Label        lblConteo;
         private System.Windows.Forms.Panel        panelDetalle;
         private System.Windows.Forms.Label        lblDetalleTitulo;

@@ -228,7 +228,8 @@ namespace GUI
             var items = new ToolStripMenuItem[]
             {
                 panelControlToolStripMenuItem, inventarioToolStripMenuItem,
-                prendasToolStripMenuItem, inspeccionDevolucionToolStripMenuItem, listaEsperaToolStripMenuItem,
+                prendasToolStripMenuItem, controlStockToolStripMenuItem, inspeccionDevolucionToolStripMenuItem,
+                listaEsperaToolStripMenuItem,
                 clientesToolStripMenuItem, planesToolStripMenuItem,
                 renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
@@ -561,6 +562,16 @@ namespace GUI
         }
 
         // PN04, CU-DEP-01 Inspeccionar Devolución.
+        // PN01 — Control de Stock (Depósito): revisar stock, informar faltantes, confirmar y separar.
+        private void controlStockToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is ControlStockForm) { hijo.BringToFront(); return; }
+            }
+            new ControlStockForm { MdiParent = this }.Show();
+        }
+
         private void inspeccionDevolucionToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (Form hijo in this.MdiChildren)
@@ -917,6 +928,7 @@ namespace GUI
             Aplicar(inventarioToolStripMenuItem,        t);
             Aplicar(prendasToolStripMenuItem,           t);
             Aplicar(inspeccionDevolucionToolStripMenuItem, t);
+            Aplicar(controlStockToolStripMenuItem,      t);
             Aplicar(listaEsperaToolStripMenuItem,       t);
             Aplicar(suscriptoresToolStripMenuItem,      t);
             Aplicar(ventasToolStripMenuItem,            t);

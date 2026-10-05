@@ -8,7 +8,10 @@ namespace BLL.Interfaces
     /// Gestión del ciclo de vida de Pedidos.
     ///
     /// Casos de uso definidos:
-    ///   CrearPedido()         — Vendedor genera un pedido para un cliente
+    ///   PN01 Armar pedido (diagrama de actividad): VerificarVigencia, RevisarPedidoActivo,
+    ///     ComprobarCupo, EnviarAControlStock, AsentarDesistimiento, AjustarSeleccion,
+    ///     FormalizarPedido, PrepararConfirmacion (Vendedor) y RevisarStock, InformarFaltantes,
+    ///     ConfirmarPrendasDisponibles, SepararPrendas (Depósito)
     ///   Despachar()           — Deposito despacha el pedido
     ///   MarcarEntregado()     — Se confirma la entrega al cliente
     ///   RegistrarDevolucion() — El cliente devuelve las prendas al finalizar
@@ -28,21 +31,57 @@ namespace BLL.Interfaces
         // Obtiene un pedido por ID con sus prendas asociadas.
         BE.Pedido ObtenerPorId(int id);
 
-        // Crea un nuevo pedido de venta validando plan, límites y disponibilidad de prendas.
-        // Devuelve el ID del pedido creado.
-        int CrearPedido(string modulo, int idCliente, List<BE.Prenda> prendas);
+        // Pedidos en un estado dado.
+        List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado);
 
-        // Valida si el cliente puede armar un pedido (suscripción, despacho pendiente y cuenta
-        // desbloqueada). Lanza BE.AppException con el motivo; devuelve el cliente validado.
+        // ── PN01 — Armar pedido de prendas (una operación por actividad del diagrama) ──
+        // "Verificar la vigencia de la suscripción": devuelve el cliente o lanza el motivo.
+        BE.Cliente VerificarVigencia(int idCliente);
+
+        // "Revisar existencia de un pedido activo": lanza el motivo si lo tiene.
+        void RevisarPedidoActivo(BE.Cliente cliente);
+
+        // Paso 1 del asistente: VerificarVigencia + RevisarPedidoActivo.
         BE.Cliente ValidarPuedeArmarPedido(int idCliente);
 
-        // CU01-VEN-Armar Pedido, paso "Validar cupo disponible" (PN01): verifica que el plan
-        // del cliente permita la cantidad de prendas pedidas y devuelve el plan consultado.
-        BE.PlanSuscripcion ValidarCupoDisponible(BE.Cliente cliente, int cantidadPrendas);
+        // "Comprobar el cupo del plan": devuelve el plan o lanza el exceso.
+        BE.PlanSuscripcion ComprobarCupo(BE.Cliente cliente, int cantidadPrendas);
 
-        // CU02-CS-Reservar Prendas (PN01): construye el pedido y lo persiste en BD de forma
-        // atómica. Devuelve el ID generado.
-        int ReservarPrendas(List<BE.Prenda> prendas, int idCliente);
+        // "Enviar selección para control stock": crea el pedido EnControlStock. Devuelve el ID.
+        int EnviarAControlStock(string modulo, int idCliente, List<BE.Prenda> prendas);
+
+        // "Asentar desistimiento" por exceso de cupo, sin pedido previo. Devuelve el ID.
+        int AsentarDesistimiento(string modulo, int idCliente, List<BE.Prenda> prendas, string motivo);
+
+        // "Asentar desistimiento" de un pedido con faltantes informados.
+        void AsentarDesistimiento(string modulo, BE.Pedido pedido, string motivo, BE.EtapaDesistimiento etapa);
+
+        // "Recibir selección ajustada por disponibilidad": vuelve a control de stock.
+        void AjustarSeleccion(string modulo, BE.Pedido pedido, List<BE.Prenda> prendas);
+
+        // Depósito — "Revisar stock de las prendas" (planilla de control de existencias).
+        List<BE.LineaControlStock> RevisarStock(BE.Pedido pedido);
+
+        // Depósito — "Informe de prendas faltantes" (faltantes y alternativas).
+        List<BE.PedidoFaltante> InformarFaltantes(string modulo, BE.Pedido pedido);
+
+        // Depósito — "Confirmar prendas disponibles".
+        void ConfirmarPrendasDisponibles(string modulo, BE.Pedido pedido);
+
+        // Depósito — "Separar prendas del pedido" (reserva las prendas).
+        void SepararPrendas(string modulo, BE.Pedido pedido);
+
+        // "Formalizar el pedido": desde acá no admite modificaciones.
+        void FormalizarPedido(string modulo, BE.Pedido pedido);
+
+        // "Preparar la confirmación": pedido formalizado completo para la constancia.
+        BE.Pedido PrepararConfirmacion(string modulo, int idPedido);
+
+        // Cola de Depósito (pedidos EnControlStock, FIFO).
+        List<BE.Pedido> ObtenerColaControlStock();
+
+        // Informe de faltantes y alternativas de un pedido.
+        List<BE.PedidoFaltante> ObtenerInformeFaltantes(int idPedido);
 
         // Marca el pedido como Despachado. Solo válido desde estado Pendiente.
         void Despachar(string modulo, BE.Pedido pedido);

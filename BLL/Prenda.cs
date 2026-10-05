@@ -27,6 +27,15 @@ namespace BLL
             this.dalMantenimiento = dalMantenimiento ?? throw new ArgumentNullException(nameof(dalMantenimiento));
         }
 
+        // Overload para inyectar un doble de prueba de Lista de Espera (mismo criterio que BLL.Pedido):
+        // sin esto, ObtenerDisponibles consulta la Lista de Espera real contra la base.
+        public Prenda(DAL.Interfaces.IPrendaDAL dalPrenda, DAL.Interfaces.IMantenimientoPrendaDAL dalMantenimiento,
+                      Interfaces.IListaEsperaService listaEsperaBLL)
+            : this(dalPrenda, dalMantenimiento)
+        {
+            _listaEsperaLazy = listaEsperaBLL ?? throw new ArgumentNullException(nameof(listaEsperaBLL));
+        }
+
         public List<BE.Prenda> ObtenerTodos()                   => dalPrenda.ObtenerTodos();
         public List<BE.Prenda> ObtenerPorCliente(int id)       => dalPrenda.ObtenerPorCliente(id);
         public BE.Prenda       ObtenerPorId(int idPrenda)      => dalPrenda.ObtenerPorId(idPrenda);

@@ -81,37 +81,136 @@ module.exports = [
   },
 
   // ───────────────────────────── PN01 — Armar pedido ─────────────────────────────
+  // Sigue el diagrama de actividad de EA (Entrega1.eapx): el Vendedor arma y envía la selección,
+  // Depósito (carril "Controlador de Stock") la controla y la separa, y el Vendedor la formaliza.
   {
-    tipo: 'secuencia', id: 'DSS_PN01_CU01_ArmarPedido', titulo: 'PN01 · CU01-VEN Armar pedido',
-    participantes: [A('V', 'Vendedor'), P('F', 'NuevoPedidoForm'), P('B', 'BLL.Pedido'), P('PB', 'BLL.Prenda'), P('LE', 'BLL.ListaEspera'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    tipo: 'secuencia', id: 'DSS_PN01_CU01_ArmarPedido', titulo: 'PN01 · CU01-VEN Armar pedido y enviar a control de stock',
+    participantes: [A('V', 'Vendedor'), P('F', 'NuevoPedidoForm'), P('CB', 'BLL.Cliente'), P('B', 'BLL.Pedido'), P('PB', 'BLL.Prenda'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
     pasos: [
-      c('V', 'F', 'Elige al cliente'),
-      c('F', 'B', 'ValidarPuedeArmarPedido(idCliente)'),
-      nota('Suscripción vigente, sin pausa ni suspensión · sin pedido Despachado · sin prendas En uso (cuenta desbloqueada)', 'B'),
-      { alt: 'Cliente no apto', pasos: [r('B', 'F', 'AppException(motivo)'), r('F', 'V', 'Informa la situación y no permite avanzar')],
-        sino: [{ etiqueta: 'Cliente apto', pasos: [
-          r('B', 'F', 'cliente validado'),
-          c('V', 'F', 'Selecciona las prendas del catálogo y confirma'),
-          c('F', 'B', 'CrearPedido(modulo, idCliente, prendas)'),
-          nota('Exigir(PedidosVentaEditar) · ValidarCupoDisponible: cantidad ≤ LimitePrendas del plan', 'B'),
-          { alt: 'Excede el cupo del plan', pasos: [r('B', 'F', 'AppException(cupo)'), r('F', 'V', 'Informa el exceso: ajustar o desistir')],
-            sino: [{ etiqueta: 'Dentro del cupo', pasos: [
-              c('B', 'PB', 'VerificarDisponibilidad(prendas)  [relee el estado en la BD]'),
-              r('PB', 'B', '(disponible, noDisponibles)'),
-              c('B', 'LE', 'ObtenerIdsReservadosParaOtro(idCliente)'),
-              { alt: 'Alguna prenda no disponible o reservada para otro cliente', pasos: [r('B', 'F', 'AppException(prenda_no_disponible / prenda_reservada)'), r('F', 'V', 'Informa la falta: ajustar o desistir')],
-                sino: [{ etiqueta: 'Todas disponibles', pasos: [
-                  c('B', 'D', 'Alta(pedido)  [transacción: Pedido + PedidoPrenda + prendas a En uso, con reclamo por prenda]'),
-                  { alt: 'Otra sesión tomó una prenda', pasos: [r('D', 'B', 'error de concurrencia'), r('B', 'F', 'AppException'), r('F', 'V', 'Revierte todo el pedido')],
-                    sino: [{ etiqueta: 'Reserva confirmada', pasos: [
-                      r('D', 'B', 'idPedido'),
-                      c('B', 'H', 'RegistrarCambios(idPedido, "CREAR")'),
-                      c('B', 'LE', 'CerrarSiReservada(idPrenda, idCliente)'),
-                      r('B', 'F', 'idPedido'),
-                      r('F', 'V', 'Pedido creado: queda bloqueado y con número único')
-                    ] }] }
-                ] }] }
+      c('V', 'F', 'Ingresa la identificación del cliente (DNI, nombre o apellido)'),
+      c('F', 'CB', 'BuscarPorIdentificacion(texto)'),
+      r('CB', 'F', 'clientes que coinciden (DNI exacto o nombre/apellido parcial)'),
+      c('F', 'B', 'VerificarVigencia(idCliente)'),
+      nota('Exigir(PedidosVentaEditar) · vigente = con plan, sin suspensión por pago, sin pausa y sin vencer', 'B'),
+      { alt: 'Suscripción no vigente', pasos: [r('B', 'F', 'AppException(sin_plan / suscripcion_vencida / pausada / suspendida)'), r('F', 'V', 'Aviso de suscripción no vigente: no deja avanzar')],
+        sino: [{ etiqueta: 'Vigente', pasos: [
+          r('B', 'F', 'cliente (Ficha del cliente)'),
+          c('F', 'B', 'RevisarPedidoActivo(cliente)'),
+          { alt: 'Posee pedido activo o prendas sin devolver', pasos: [r('B', 'F', 'AppException(pedido_activo / ya_despachado / cuenta_bloqueada)'), r('F', 'V', 'Aviso de pedido activo: no deja avanzar')],
+            sino: [{ etiqueta: 'Sin pedido activo', pasos: [
+              c('F', 'PB', 'ObtenerDisponibles(idCliente)'),
+              r('PB', 'F', 'Catálogo: prendas Disponibles, sin las reservadas por Lista de Espera para otro'),
+              { loop: 'Por cada prenda que el Vendedor anota (o quita) de la selección', pasos: [
+                c('F', 'CB', 'ObtenerEstadoComercial(cliente, cantidadSeleccionada)'),
+                r('CB', 'F', 'cupo disponible del plan'),
+                r('F', 'V', 'Detalle de selección (prenda, talle, color, cantidad) y estado del cupo')
+              ] },
+              { alt: 'Excede el cupo y el cliente no ajusta', pasos: [
+                c('V', 'F', 'Registrar desistimiento + motivo'),
+                c('F', 'B', 'AsentarDesistimiento(modulo, idCliente, prendas, motivo)'),
+                nota('Solo si la selección excede el cupo (si no: desistimiento_sin_exceso)', 'B'),
+                c('B', 'D', 'AltaSinReserva(pedido Desistido, etapa Cupo)'),
+                r('D', 'B', 'idPedido'),
+                c('B', 'H', 'RegistrarCambios(DESISTIR)'),
+                r('B', 'F', 'idPedido'),
+                r('F', 'V', 'Aviso de desistimiento (PDF)')
+              ], sino: [{ etiqueta: 'Dentro del cupo', pasos: [
+                c('V', 'F', 'Enviar a control de stock'),
+                c('F', 'B', 'EnviarAControlStock(modulo, idCliente, prendas)'),
+                nota('Revalida: ValidarPuedeArmarPedido + ComprobarCupo(cliente, cantidad)', 'B'),
+                c('B', 'D', 'AltaSinReserva(pedido EnControlStock)  [Pedido + PedidoPrenda, prendas siguen Disponibles]'),
+                r('D', 'B', 'idPedido'),
+                c('B', 'H', 'RegistrarCambios(ENVIAR_CONTROL)'),
+                r('B', 'F', 'idPedido'),
+                r('F', 'V', 'Planilla de control de existencias (PDF): el pedido queda en la cola de Depósito')
+              ] }] }
             ] }] }
+        ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN01_CU08_ControlarStock', titulo: 'PN01 · CU04-DEP Controlar stock del pedido',
+    participantes: [A('DP', 'Depósito'), P('F', 'ControlStockForm'), P('B', 'BLL.Pedido'), P('PB', 'BLL.Prenda'), P('LE', 'BLL.ListaEspera'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    pasos: [
+      c('F', 'B', 'ObtenerColaControlStock()'),
+      r('B', 'F', 'pedidos EnControlStock (del más antiguo al más nuevo)'),
+      c('DP', 'F', 'Elige un pedido de la cola'),
+      c('F', 'B', 'RevisarStock(pedido)'),
+      nota('Exigir(ControlStockEditar) · solo pedidos EnControlStock', 'B'),
+      c('B', 'PB', 'VerificarDisponibilidad(prendas)  [relee el estado en la BD]'),
+      r('PB', 'B', '(disponible, noDisponibles)'),
+      c('B', 'LE', 'EstaReservadaParaOtro(idPrenda, idCliente)'),
+      r('B', 'F', 'líneas de la planilla (estado actual, reservada, confirmada)'),
+      { alt: '¿Selección disponible? No', pasos: [
+        c('DP', 'F', 'Informar faltantes'),
+        c('F', 'B', 'InformarFaltantes(modulo, pedido)'),
+        c('B', 'PB', 'ObtenerDisponibles(idCliente)  [alternativas: misma categoría y talle, máx. 3]'),
+        c('B', 'D', 'RegistrarFaltantes(idPedido, idEmpleadoControl, faltantes)  [→ ConFaltantes]'),
+        c('B', 'H', 'RegistrarCambios(INFORMAR_FALTANTES)'),
+        r('B', 'F', 'informe de faltantes y alternativas'),
+        r('F', 'DP', 'Informe de disponibilidad (PDF) para el Vendedor')
+      ], sino: [{ etiqueta: 'Sí', pasos: [
+        c('DP', 'F', 'Confirmar prendas disponibles'),
+        c('F', 'B', 'ConfirmarPrendasDisponibles(modulo, pedido)'),
+        c('B', 'D', 'ConfirmarPrendas(idPedido, idEmpleadoControl)'),
+        c('B', 'H', 'RegistrarCambios(CONFIRMAR_PRENDAS)'),
+        r('F', 'DP', 'Detalle de prendas confirmadas'),
+        c('DP', 'F', 'Separar prendas'),
+        c('F', 'B', 'SepararPrendas(modulo, pedido)'),
+        c('B', 'D', 'SepararPrendas(idPedido, idCliente)  [transacción: prendas a En uso con reclamo, → Separado]'),
+        { alt: 'Otra operación tomó una prenda', pasos: [
+          r('D', 'B', 'AppException(prenda_tomada)  [rollback: no se reserva nada]'),
+          c('B', 'B', 'InformarFaltantes(modulo, pedido)'),
+          r('B', 'F', 'AppException(separar_faltantes)'),
+          r('F', 'DP', 'Informa que el pedido pasó a faltantes')
+        ], sino: [{ etiqueta: 'Reserva confirmada', pasos: [
+          c('B', 'H', 'RegistrarCambios(SEPARAR)'),
+          c('B', 'LE', 'CerrarSiReservada(modulo, idPrenda, idCliente, actor)'),
+          r('F', 'DP', 'Constancia de prendas separadas (PDF)')
+        ] }] }
+      ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN01_CU09_GestionarFaltantes', titulo: 'PN01 · CU05-VEN Comunicar faltantes, ajustar selección o desistir',
+    participantes: [A('V', 'Vendedor'), P('F', 'PedidosVenta / NuevoPedidoForm'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    pasos: [
+      c('V', 'F', 'Ver faltantes de un pedido ConFaltantes'),
+      c('F', 'B', 'ObtenerInformeFaltantes(idPedido)'),
+      c('B', 'D', 'ObtenerFaltantes(idPedido)'),
+      r('B', 'F', 'faltantes con sus alternativas'),
+      r('F', 'V', 'Detalle de prendas no disponibles (pantalla y PDF)'),
+      { alt: 'El cliente ajusta la selección', pasos: [
+        c('V', 'F', 'Ajustar selección (sin los faltantes, alternativas resaltadas)'),
+        c('F', 'B', 'AjustarSeleccion(modulo, pedido, prendas)'),
+        nota('Exigir(PedidosVentaEditar) · solo ConFaltantes · VerificarVigencia + RevisarPedidoActivo + ComprobarCupo', 'B'),
+        c('B', 'D', 'ReemplazarSeleccion(idPedido, prendas)  [→ EnControlStock, informe anterior descartado]'),
+        c('B', 'H', 'RegistrarCambios(AJUSTAR_SELECCION)'),
+        r('F', 'V', 'Pedido reenviado a control de stock')
+      ], sino: [{ etiqueta: 'El cliente desiste', pasos: [
+        c('V', 'F', 'Registrar desistimiento + motivo'),
+        c('F', 'B', 'AsentarDesistimiento(modulo, pedido, motivo, etapa Disponibilidad)'),
+        c('B', 'D', 'RegistrarDesistimiento(idPedido, motivo, etapa)  [→ Desistido]'),
+        c('B', 'H', 'RegistrarCambios(DESISTIR)'),
+        r('F', 'V', 'Aviso de desistimiento (PDF)')
+      ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN01_CU10_FormalizarPedido', titulo: 'PN01 · CU06-VEN Formalizar pedido y preparar la confirmación',
+    participantes: [A('V', 'Vendedor'), P('F', 'PedidosVenta'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    pasos: [
+      c('V', 'F', 'Formalizar un pedido Separado'),
+      c('F', 'B', 'FormalizarPedido(modulo, pedido)'),
+      nota('Exigir(PedidosVentaEditar) · solo Separado', 'B'),
+      { alt: 'No está Separado', pasos: [r('B', 'F', 'AppException(formalizar_estado)'), r('F', 'V', 'Informa el estado')],
+        sino: [{ etiqueta: 'Separado', pasos: [
+          c('B', 'D', 'Formalizar(idPedido)  [→ Pendiente de despacho, selección cerrada]'),
+          c('B', 'H', 'RegistrarCambios(FORMALIZAR)'),
+          c('F', 'B', 'PrepararConfirmacion(modulo, idPedido)'),
+          c('B', 'D', 'ObtenerPorId(idPedido)'),
+          r('B', 'F', 'pedido formalizado'),
+          r('F', 'V', 'Confirmación y constancia del pedido (PDF) para el cliente')
         ] }] }
     ]
   },
@@ -132,7 +231,7 @@ module.exports = [
     tipo: 'secuencia', id: 'DSS_PN01_CU03_ConsultarSituacionCliente', titulo: 'PN01 · CU03-VEN Consultar situación del cliente',
     participantes: [A('V', 'Vendedor'), P('F', 'NuevoPedidoForm'), P('B', 'BLL.Cliente'), P('D', 'DAL.Cliente')],
     pasos: [
-      c('V', 'F', 'Ingresa DNI o código y confirma la consulta'),
+      c('V', 'F', 'Ingresa DNI, nombre o apellido y elige al cliente'),
       c('F', 'B', 'ObtenerEstadoComercial(cliente, prendasSolicitadas)'),
       c('B', 'D', 'ObtenerPorId(idCliente)'),
       r('D', 'B', 'cliente (plan, cupo, vencimiento, prendas en uso)'),

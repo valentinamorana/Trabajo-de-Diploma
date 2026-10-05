@@ -41,6 +41,7 @@ namespace Tests.Fakes
 
         // Resto del contrato: no ejercitado por estos tests, cuerpos mínimos.
         public List<BE.Cliente> ObtenerTodos() => new List<BE.Cliente>();
+        public List<BE.Cliente> BuscarPorIdentificacion(string texto) => new List<BE.Cliente>();
         public BE.Cliente ObtenerPorId(int idCliente) => null;
         public void Alta(string modulo, BE.Cliente cliente) { }
         public void Modificar(string modulo, BE.Cliente cliente) { }

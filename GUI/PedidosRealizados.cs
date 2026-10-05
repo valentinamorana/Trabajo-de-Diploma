@@ -146,7 +146,12 @@ namespace GUI
         {
             try
             {
-                _pedidos = pedidoBLL.ObtenerTodos();
+                // Despacho trabaja solo con pedidos formalizados (y su ciclo posterior). Los que
+                // están en el armado (control de stock, con faltantes, separados) o desistidos
+                // todavía no son pedidos para despachar (PN01).
+                _pedidos = pedidoBLL.ObtenerTodos().FindAll(p =>
+                    p.Estado == BE.EstadoPedido.Pendiente  || p.Estado == BE.EstadoPedido.Despachado ||
+                    p.Estado == BE.EstadoPedido.Entregado  || p.Estado == BE.EstadoPedido.Cancelado);
                 AplicarFiltro();
                 MostrarOk(Tr("msg.ped.ensistema", "{0} pedido(s) en el sistema.", new object[] { _pedidos.Count }));
             }

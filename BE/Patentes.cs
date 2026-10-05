@@ -28,6 +28,10 @@ namespace BE
         // PN04 — Inspección de Devolución (Depósito = rol Deposito, sin rol nuevo).
         public const string InspeccionDevolucion  = "mnuInspeccionDevolucion";
 
+        // PN01 — Control de Stock: Depósito revisa el stock de la selección enviada por el
+        // Vendedor, informa faltantes o confirma y separa las prendas.
+        public const string ControlStock          = "mnuControlStock";
+
         // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────
         // Cada una gobierna las operaciones de escritura (alta/modificación/baja) del módulo.
         // Convención: <patente de ver> + "Editar". Si la patente no existe en el catálogo,
@@ -41,6 +45,7 @@ namespace BE
         public const string PromocionesAdminEditar    = "mnuPromocionesAdminEditar";
         public const string PromocionesContableEditar = "mnuPromocionesContableEditar";
         public const string PromocionesVigentesEditar = "mnuPromocionesVigentesEditar";
+        public const string ControlStockEditar        = "mnuControlStockEditar";
         // Nota: Inspección de Devolución (PN04) NO tiene patente de Editar propia — su
         // escritura (CambiarEstado/RegistrarCargo) ya está gobernada por StockEditar
         // (compartida con el módulo de Stock, ver InspeccionDevolucion arriba). Crear una

@@ -19,8 +19,45 @@ Marcar cada punto: OK / falla (anotar qué se vio).
 - [ ] **Nueva contratación**: el combo de **modalidad** aparece con Mensual, Trimestral y Anual, sin error. Con un cliente que ya tiene una contratación pendiente, la rechaza.
 - [ ] **Renovación**: el combo de modalidad funciona. Pausar: la fecha no deja pasar de 3 meses. Reanudar ahora devuelve los días no usados.
 - [ ] **Cobro de suscripción**: el combo de modalidad funciona; cobrar y pago fallido muestran mensajes claros.
-- [ ] **Nuevo pedido**: un cliente con prendas sin devolver se avisa al elegirlo; excede el cupo se rechaza.
-- [ ] **Pedidos de venta**: cancelar pide motivo; des-cancelar funciona.
+- [ ] **Pedidos de venta**: cancelar pide motivo; des-cancelar funciona (y se rechaza si el cliente ya tiene otro pedido en curso).
+
+## 1b. PN01 — Circuito completo del pedido (`vendedor` + `deposito`, en dos sesiones o alternando)
+
+Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, sin pedidos en curso ni prendas sin devolver.
+
+**Identificación y avisos (Vendedor → Nuevo pedido)**
+- [ ] Buscar por DNI exacto encuentra al cliente; buscar por parte del nombre o del apellido muestra la lista de coincidencias.
+- [ ] Al elegirlo se ve la ficha: plan, vencimiento, prendas en uso, último pedido, método de pago y fecha de alta.
+- [ ] Con un cliente vencido, pausado o sin plan aparece el aviso de suscripción no vigente y no deja avanzar.
+- [ ] Con un cliente que ya tiene un pedido en curso aparece el aviso de pedido activo con su número y estado, y no deja avanzar.
+
+**Selección y cupo**
+- [ ] El catálogo solo muestra prendas Disponibles. El detalle agrupa por prenda, talle y color, con su cantidad.
+- [ ] Si se pasa del cupo, se informa el exceso, "Enviar a control de stock" queda deshabilitado y aparece "Registrar desistimiento".
+- [ ] Destildar prendas hasta entrar en el cupo vuelve a habilitar el envío.
+- [ ] Registrar desistimiento exige un motivo, crea el pedido "Desistido" y ofrece imprimir el aviso. Las prendas siguen Disponibles.
+- [ ] Enviar a control de stock crea el pedido "En control de stock" y ofrece imprimir la planilla. Las prendas siguen **Disponibles** en Prendas.
+
+**Control de stock (Depósito → Inventario → Control de Stock)**
+- [ ] El Vendedor no ve el menú Control de Stock; Depósito y Gerente de inventario sí.
+- [ ] La cola muestra el pedido. Al elegirlo, la planilla indica para cada prenda si está disponible.
+- [ ] Rama de faltantes: pasar una prenda del pedido a En limpieza (Prendas → Estado) y Actualizar. La planilla la marca como no disponible y "Confirmar" se rechaza.
+- [ ] "Informar faltantes" pasa el pedido a "Con faltantes" y ofrece imprimir el informe con alternativas de la misma categoría y talle.
+
+**Faltantes (Vendedor → Pedidos de venta)**
+- [ ] "Ver faltantes" muestra el informe con las alternativas.
+- [ ] "Ajustar selección" abre el asistente sin la prenda faltante y con las alternativas resaltadas. "Reenviar a control de stock" devuelve el pedido a la cola de Depósito.
+- [ ] Con otro pedido con faltantes, "Registrar desistimiento" pide motivo y lo deja "Desistido".
+
+**Confirmar, separar y formalizar**
+- [ ] Depósito: con todo disponible, "Confirmar prendas disponibles" y luego "Separar prendas". El pedido queda "Separado", se ofrece la constancia y las prendas pasan a **En uso**.
+- [ ] Separar sin confirmar antes se rechaza.
+- [ ] Vendedor: "Formalizar pedido" pasa el pedido a "Pendiente" y ofrece la confirmación del pedido. A partir de ahí no se puede ajustar ni desistir.
+- [ ] El pedido formalizado aparece en Pedidos realizados para despachar. Los pedidos en control, con faltantes, separados o desistidos no aparecen ahí.
+- [ ] Alertas: aparecen "pedidos esperando el control de stock", "pedidos con faltantes" y "listos para formalizar" según el estado de los pedidos (el panel de alertas es común a todos los roles).
+- [ ] Historial del pedido: muestra cada paso (ENVIAR_CONTROL, INFORMAR_FALTANTES, AJUSTAR_SELECCION, CONFIRMAR_PRENDAS, SEPARAR, FORMALIZAR) y "Restaurar" sobre esos pasos se rechaza.
+- [ ] Bitácora de negocio: aparecen los eventos Envío a control de stock, Informe de faltantes, Separación de prendas, Desistimiento y Venta.
+- [ ] Cambiar el idioma a EN/RU/PT en Control de Stock y en el asistente: no quedan claves crudas.
 
 ## 2. Caja (`caja`)
 
@@ -31,7 +68,7 @@ Marcar cada punto: OK / falla (anotar qué se vio).
 ## 3. Depósito (`deposito`) y Operador Logístico (`logistico`)
 
 - [ ] Pedidos realizados: **Despachar**, **Marcar entregado** y **Registrar devolución** funcionan con ambos usuarios (antes fallaban por permisos).
-- [ ] Depósito: Prendas (alta, editar, estado), Lista de espera, Inspección de devolución.
+- [ ] Depósito: Prendas (alta, editar, estado), Lista de espera, Control de Stock, Inspección de devolución.
 - [ ] Después de **Registrar devolución**, las prendas aparecen en Inspección (En limpieza) y en el historial de mantenimiento de la prenda.
 - [ ] Inspección: aprobar reingreso deja la prenda Disponible; dar de baja y cobrar registra el cargo antes de la baja.
 - [ ] Logístico solo ve Pedidos realizados.

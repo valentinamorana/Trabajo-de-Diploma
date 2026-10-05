@@ -267,6 +267,13 @@
     <Compile Include="PromocionesVigentesForm.Designer.cs">
       <DependentUpon>PromocionesVigentesForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ControlStockForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlStockForm.Designer.cs">
+      <DependentUpon>ControlStockForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EstadosPedido.cs" />
     <Compile Include="InspeccionDevolucionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -377,6 +384,8 @@
     <Compile Include="Exportacion\GeneradorReporte.cs" />
     <Compile Include="Exportacion\GeneradorBitacora.cs" />
     <Compile Include="Exportacion\GeneradorJornada.cs" />
+    <Compile Include="Exportacion\GeneradorDocumentoPedido.cs" />
+    <Compile Include="Exportacion\DocumentosPedido.cs" />
     <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
     <Compile Include="Exportacion\GeneradorVentasVendedor.cs" />
     <Compile Include="Exportacion\GeneradorRotacion.cs" />

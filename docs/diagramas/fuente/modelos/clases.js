@@ -72,13 +72,20 @@ module.exports = [
     tipo: 'clases', id: 'CLASES_pn01_pedidos', procesos: ['PN01'], titulo: 'Diagrama de clases — PN01 Armar pedido', columnas: 3,
     clases: [
       E('BE.Pedido', { attrs: 'all' }), E('BE.Prenda', { attrs: 'all' }), E('BE.ListaEspera', { attrs: 'all' }),
+      E('BE.PedidoFaltante', { attrs: 'all' }), E('BE.LineaControlStock', { attrs: 'all' }),
       E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido', 'IdPlan', 'FechaVencimiento', 'FechaPausaHasta', 'StockUtilizado'] }),
       E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'LimitePrendas'] }),
-      E('BLL.Pedido', { metodos: ['CrearPedido', 'ValidarPuedeArmarPedido', 'ValidarCupoDisponible', 'ReservarPrendas', 'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] }),
+      E('BLL.Pedido', { metodos: ['VerificarVigencia', 'RevisarPedidoActivo', 'ValidarPuedeArmarPedido', 'ComprobarCupo', 'EnviarAControlStock', 'AsentarDesistimiento',
+                                  'AjustarSeleccion', 'RevisarStock', 'InformarFaltantes', 'ConfirmarPrendasDisponibles', 'SepararPrendas', 'FormalizarPedido',
+                                  'PrepararConfirmacion', 'ObtenerColaControlStock', 'ObtenerInformeFaltantes', 'ObtenerPorId',
+                                  'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] }),
       E('BLL.Prenda', { metodos: ['ObtenerDisponibles', 'VerificarDisponibilidad', 'CambiarEstado'] }),
       E('BLL.ListaEspera', { metodos: ['EstaReservadaParaOtro', 'CerrarSiReservada', 'NotificarSiCorresponde'] }),
-      E('BLL.Cliente', { metodos: [] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }), E('IPedidoHistorialDAL', { metodos: [] }),
-      E('IPedidoDAL', { metodos: ['Alta', 'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] })
+      E('BLL.Cliente', { metodos: ['BuscarPorIdentificacion', 'ObtenerEstadoComercial'] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }),
+      E('IPedidoHistorialDAL', { metodos: ['RegistrarCambios'] }),
+      E('IPedidoDAL', { metodos: ['AltaSinReserva', 'ReemplazarSeleccion', 'RegistrarFaltantes', 'ConfirmarPrendas', 'SepararPrendas', 'Formalizar',
+                                  'RegistrarDesistimiento', 'ObtenerFaltantes', 'ObtenerPorEstado', 'ObtenerPorId',
+                                  'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] })
     ]
   },
   {

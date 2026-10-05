@@ -2648,6 +2648,129 @@ PRINT 'Permiso de edición de Pedidos Realizados asegurado para el rol Deposito.
 GO
 
 -- ============================================================
+-- WardrobeFlow — 21c. PN01: CONTROL DE STOCK (diagrama de actividad de Armar pedido)
+-- ------------------------------------------------------------
+-- El Vendedor envía la selección a control de stock (sin reservar prendas); Depósito revisa
+-- el stock y emite el informe de faltantes con alternativas, o confirma las prendas y las
+-- separa (recién ahí pasan a En uso); el Vendedor formaliza el pedido. Si el cliente no
+-- ajusta la selección, se asienta el desistimiento.
+-- Estados nuevos de Pedido: 4 EnControlStock, 5 ConFaltantes, 6 Separado, 7 Desistido.
+-- Idempotente; corre también sobre bases ya creadas.
+-- ============================================================
+IF COL_LENGTH('Pedido', 'FechaEnvioControl') IS NULL
+    ALTER TABLE Pedido ADD FechaEnvioControl DATETIME NULL;
+IF COL_LENGTH('Pedido', 'FechaControl') IS NULL
+    ALTER TABLE Pedido ADD FechaControl DATETIME NULL;
+IF COL_LENGTH('Pedido', 'IdEmpleadoControl') IS NULL
+    ALTER TABLE Pedido ADD IdEmpleadoControl INT NULL
+        CONSTRAINT FK_Pedido_EmpleadoControl REFERENCES Empleado(IdEmpleado);
+IF COL_LENGTH('Pedido', 'FechaSeparacion') IS NULL
+    ALTER TABLE Pedido ADD FechaSeparacion DATETIME NULL;
+IF COL_LENGTH('Pedido', 'FechaFormalizacion') IS NULL
+    ALTER TABLE Pedido ADD FechaFormalizacion DATETIME NULL;
+IF COL_LENGTH('Pedido', 'MotivoDesistimiento') IS NULL
+    ALTER TABLE Pedido ADD MotivoDesistimiento NVARCHAR(500) NULL;
+IF COL_LENGTH('Pedido', 'EtapaDesistimiento') IS NULL
+    ALTER TABLE Pedido ADD EtapaDesistimiento NVARCHAR(20) NULL;
+IF COL_LENGTH('PedidoPrenda', 'Confirmada') IS NULL
+    ALTER TABLE PedidoPrenda ADD Confirmada BIT NOT NULL
+        CONSTRAINT DF_PedidoPrenda_Confirmada DEFAULT 0;
+GO
+
+-- Estado admite los 8 valores (antes 0..3).
+IF EXISTS (SELECT 1 FROM sys.check_constraints
+           WHERE name = 'CHK_Pedido_Estado' AND definition NOT LIKE '%7%')
+    ALTER TABLE Pedido DROP CONSTRAINT CHK_Pedido_Estado;
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Pedido_Estado')
+    ALTER TABLE Pedido ADD CONSTRAINT CHK_Pedido_Estado CHECK (Estado IN (0,1,2,3,4,5,6,7));
+
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Pedido_EtapaDesistimiento')
+    ALTER TABLE Pedido ADD CONSTRAINT CHK_Pedido_EtapaDesistimiento
+        CHECK (EtapaDesistimiento IS NULL OR EtapaDesistimiento IN ('Cupo', 'Disponibilidad'));
+
+-- Un pedido desistido siempre tiene etapa y motivo (Aviso de desistimiento).
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Pedido_Desistido')
+    ALTER TABLE Pedido ADD CONSTRAINT CHK_Pedido_Desistido
+        CHECK (Estado <> 7 OR (EtapaDesistimiento IS NOT NULL AND MotivoDesistimiento IS NOT NULL));
+GO
+
+-- Informe de disponibilidad: una fila por prenda faltante del pedido...
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PedidoFaltante')
+BEGIN
+    CREATE TABLE PedidoFaltante (
+        IdPedido          INT NOT NULL,
+        IdPrenda          INT NOT NULL,
+        EstadoAlRevisar   INT NOT NULL,                 -- estado de la prenda al revisar el stock
+        ReservadaParaOtro BIT NOT NULL DEFAULT 0,       -- reservada por Lista de Espera para otro cliente
+        CONSTRAINT PK_PedidoFaltante PRIMARY KEY (IdPedido, IdPrenda),
+        CONSTRAINT FK_PedidoFaltante_Linea FOREIGN KEY (IdPedido, IdPrenda)
+            REFERENCES PedidoPrenda(IdPedido, IdPrenda)
+    );
+    PRINT 'Tabla PedidoFaltante creada.';
+END
+ELSE
+    PRINT 'Tabla PedidoFaltante ya existe — sin cambios.';
+GO
+
+-- ...y una fila por alternativa que propone el sistema para cada faltante.
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PedidoFaltanteAlternativa')
+BEGIN
+    CREATE TABLE PedidoFaltanteAlternativa (
+        IdPedido            INT NOT NULL,
+        IdPrenda            INT NOT NULL,
+        IdPrendaAlternativa INT NOT NULL REFERENCES Prenda(IdPrenda),
+        CONSTRAINT PK_PedidoFaltanteAlternativa PRIMARY KEY (IdPedido, IdPrenda, IdPrendaAlternativa),
+        CONSTRAINT FK_PedidoFaltanteAlternativa_Faltante FOREIGN KEY (IdPedido, IdPrenda)
+            REFERENCES PedidoFaltante(IdPedido, IdPrenda),
+        CONSTRAINT CHK_PedidoFaltanteAlternativa_Distinta CHECK (IdPrendaAlternativa <> IdPrenda)
+    );
+    PRINT 'Tabla PedidoFaltanteAlternativa creada.';
+END
+ELSE
+    PRINT 'Tabla PedidoFaltanteAlternativa ya existe — sin cambios.';
+GO
+
+-- Patentes de Control de Stock: ver (menú) y editar (acciones de Depósito).
+INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
+SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, 0, 0
+FROM (VALUES
+    ('Control de Stock',                'mnuControlStock',       'Inventario'),
+    ('Configurar Control de Stock',     'mnuControlStockEditar', 'Acción')
+) AS v(Nombre, NombreMenu, Tipo)
+WHERE NOT EXISTS (SELECT 1 FROM Permiso p
+                  WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0);
+GO
+
+-- Asignación: Deposito (cumple el carril "Controlador de Stock" del diagrama) y Administrador.
+-- GerenteInventario las hereda porque contiene al rol Deposito.
+INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+SELECT rol.IdPermiso, pat.IdPermiso
+FROM (VALUES
+    ('Administrador', 'mnuControlStock'),
+    ('Administrador', 'mnuControlStockEditar'),
+    ('Deposito',      'mnuControlStock'),
+    ('Deposito',      'mnuControlStockEditar')
+) AS v(Rol, NombreMenu)
+JOIN Permiso rol ON rol.Nombre = v.Rol AND rol.EsRol = 1
+JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0
+WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
+                  WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
+PRINT 'Permisos de Control de Stock asignados a Administrador y Deposito.';
+GO
+
+-- Mapeo del ítem de menú (pantalla "Perfiles y Permisos").
+INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
+SELECT ISNULL(MIN(CASE WHEN p.Estado = 1 THEN p.IdPermiso END), MIN(p.IdPermiso)), v.Formulario, v.NombreControl
+FROM (VALUES
+    ('mnuControlStock', 'Menu', 'controlStockToolStripMenuItem')
+) AS v(NombreMenu, Formulario, NombreControl)
+JOIN Permiso p ON p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0
+WHERE NOT EXISTS (SELECT 1 FROM ControlMapeado c
+                  WHERE c.Formulario = v.Formulario AND c.NombreControl = v.NombreControl)
+GROUP BY v.Formulario, v.NombreControl;
+GO
+
+-- ============================================================
 -- WardrobeFlow — 22. NORMALIZACIÓN DE LOS DÍGITOS VERIFICADORES
 -- ------------------------------------------------------------
 -- Las filas que siembra este script (usuarios, empleados, clientes y pedidos demo) llevan DVH = 0.

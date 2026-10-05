@@ -129,8 +129,8 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 ### 3.2 Máquinas de estado
 | Entidad | Estados (enum en `BE/`) | Transiciones válidas |
 |---|---|---|
-| **Prenda** (`EstadoPrenda`, patrón **State** en `BE/Estados/`) | Disponible 0 · EnUso 1 · EnLimpieza 2 · Baja 3 | Disponible→EnLimpieza\|Baja; EnLimpieza→Disponible\|Baja; EnUso→Baja (solo por *Reportar prenda perdida*); Baja = final. **→EnUso** solo al reservar por pedido (`DAL/Pedido.cs`); **EnUso→EnLimpieza** solo al registrar la devolución. Restricciones extra en `BLL/Prenda.cs › CambiarEstado`: EnUso→Baja exige `viaFlujoPerdida`; EnLimpieza→Baja exige `viaInspeccion` |
-| **Pedido** (`EstadoPedido`) | Pendiente 0 · Despachado 1 · Entregado 2 · Cancelado 3 | Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); `DesCancelar`; `RegistrarDevolucion` solo sobre Entregado (prendas EnUso→EnLimpieza). Implementado con **Command** (`BLL/Comandos/`) |
+| **Prenda** (`EstadoPrenda`, patrón **State** en `BE/Estados/`) | Disponible 0 · EnUso 1 · EnLimpieza 2 · Baja 3 | Disponible→EnLimpieza\|Baja; EnLimpieza→Disponible\|Baja; EnUso→Baja (solo por *Reportar prenda perdida*); Baja = final. **→EnUso** solo al separar las prendas de un pedido (`DAL/Pedido.cs › SepararPrendas`); **EnUso→EnLimpieza** solo al registrar la devolución. Restricciones extra en `BLL/Prenda.cs › CambiarEstado`: EnUso→Baja exige `viaFlujoPerdida`; EnLimpieza→Baja exige `viaInspeccion` |
+| **Pedido** (`EstadoPedido`) | Pendiente 0 (formalizado) · Despachado 1 · Entregado 2 · Cancelado 3 · EnControlStock 4 · ConFaltantes 5 · Separado 6 · Desistido 7 | Armado (PN01): EnControlStock→ConFaltantes\|Separado; ConFaltantes→EnControlStock (ajuste)\|Desistido; Separado→Pendiente (formalizar). Ciclo: Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); `DesCancelar` (revalida); `RegistrarDevolucion` solo sobre Entregado (prendas EnUso→EnLimpieza). Entregado y Desistido son finales. Cancelar/devolver con **Command** (`BLL/Comandos/`) |
 | **Contratacion** (`EstadoContratacion`) | PendientePago 0 · Pagada 1 · Cancelada 2 | Pendiente→Pagada (cobro, claim atómico) · Pendiente→Cancelada (3.er intento fallido) · Pagada→Pendiente solo como **compensación** si falla la activación (`ReabrirPago`) |
 | **Promocion** (`EstadoPromocion`) | EnRevisionContable 0 · Vigente 1 · RechazadaContabilidad 2 · BajaSolicitada 3 · Desactivada 4 | EnRevisión→Vigente\|Rechazada (Contabilidad); Rechazada→EnRevisión (**Reformular**, Administración); Vigente→BajaSolicitada (Vendedor) → Desactivada (aprueba baja) \| Vigente (rechaza baja); Vigente→Desactivada (Administración, directo). Cada cambio es un `UPDATE ... WHERE Estado=@esperado` (`DAL/Promocion.cs`) |
 | **SugerenciaPromocion** (`EstadoSugerencia`) | Pendiente 0 · Evaluada 1 | Pendiente→Evaluada al crear una promoción desde ella (una sugerencia evaluada no se reutiliza) |
@@ -194,42 +194,81 @@ Baja de suscripción, Cambiar plan (pantallas `Clientes`, `ClienteForm`, `Renova
 
 ### PN01 — Armar pedido de prendas
 
-**Objetivo.** Que un cliente con suscripción vigente reciba un pedido confirmado con sus prendas reservadas.
-**Actores.** Vendedor (arma el pedido). Depósito (rol `Deposito`) verifica disponibilidad y participa en la
-preparación física; en el código **no hay un paso separado de Depósito**: la verificación y la reserva las ejecuta la
-BLL en la confirmación.
-**Precondiciones.** Vendedor con sesión y vínculo `Empleado`; cliente registrado.
-**Pantallas.** `GUI/NuevoPedidoForm.cs` (asistente), `PedidosVenta.cs`, `PedidosRealizados.cs`.
+**Objetivo.** Que un cliente con suscripción vigente reciba un pedido formalizado, con sus prendas controladas y separadas.
+**Referencia.** El código sigue el diagrama de actividad de EA (`Entrega - Procesos de Negocio/Entrega1.eapx`, `PN01 - Diagrama de Actividad.bmp`).
+El carril "Controlador de Stock" lo cumple el rol **Depósito**.
+**Actores.** El Vendedor identifica al cliente, arma la selección, comunica faltantes, asienta desistimientos y formaliza. Depósito revisa el stock, informa faltantes, confirma y separa.
+**Precondiciones.** Vendedor y Depósito con sesión y vínculo `Empleado`; cliente registrado.
+**Pantallas.**
+- `GUI/NuevoPedidoForm.cs`: asistente de armado, y modo ajuste para los pedidos con faltantes.
+- `GUI/ControlStockForm.cs`: Inventario → Control de Stock, patentes `mnuControlStock` y `mnuControlStockEditar`.
+- `GUI/PedidosVenta.cs`: Ver faltantes · Ajustar · Desistir · Formalizar · Confirmación.
+- `PedidosRealizados.cs`: muestra solo los pedidos formalizados en adelante.
+**Documentos (PDF, Factory Method en `GUI/Exportacion/DocumentosPedido.cs`).**
+- Planilla de control de existencias.
+- Informe de disponibilidad, con los faltantes y sus alternativas.
+- Constancia de prendas separadas.
+- Confirmación y constancia del pedido.
+- Aviso de desistimiento.
 
-**Flujo (código)**
-1. El asistente elige al cliente → `BLL.Pedido.ValidarPuedeArmarPedido` (avisa el motivo en pantalla si no puede).
-2. Selecciona prendas del catálogo (`BLL.Prenda.ObtenerDisponibles`, excluye las reservadas por Lista de Espera para otro cliente).
-3. `BLL.Pedido.CrearPedido`: valida **cupo** (`ValidarCupoDisponible`), **relee la disponibilidad por lote**
-   (`BLL.Prenda.VerificarDisponibilidad`) y **reserva** (`ReservarPrendas` → `DAL.Pedido.Alta`).
-4. Registra historial (`PedidoHistorial`), bitácora y cierra reservas de Lista de Espera del cliente.
-5. Postcondición: pedido `Pendiente` con número único; prendas `EnUso` a nombre del cliente.
+**Flujo (actividad del diagrama → método)**
+| Carril | Actividad del diagrama | Código |
+|---|---|---|
+| Vendedor | Recibir identificación → Ficha del cliente | `BLL.Cliente.BuscarPorIdentificacion` busca por DNI exacto, o por nombre o apellido parcial. La ficha se muestra en el paso 1 del asistente. |
+| Vendedor | Verificar la vigencia → *Informar imposibilidad* | `BLL.Pedido.VerificarVigencia`: sin plan, vencida, pausada o suspendida por pago |
+| Vendedor | Revisar existencia de pedido activo → *Informar existencia* | `BLL.Pedido.RevisarPedidoActivo`. Bloquea si hay un pedido EnControlStock, ConFaltantes, Separado, Pendiente o Despachado, o prendas sin devolver. |
+| Vendedor | Presentar catálogo | `BLL.Prenda.ObtenerDisponibles(idCliente)`: excluye las prendas reservadas por Lista de Espera para otro cliente |
+| Vendedor | Anotar la selección ∥ Comprobar el cupo | En cada tilde se recalcula el cupo con `BLL.Cliente.ObtenerEstadoComercial`. En el envío se vuelve a validar con `BLL.Pedido.ComprobarCupo`. |
+| Vendedor | ¿Excede el cupo? → Informar exceso → ¿Ajustar? No → Asentar desistimiento | `AsentarDesistimiento(modulo, idCliente, prendas, motivo)` crea un pedido **Desistido**, en la etapa Cupo y sin reservar nada |
+| Vendedor | Enviar selección para control de stock | `EnviarAControlStock` → `DAL.Pedido.AltaSinReserva`: el pedido queda **EnControlStock** y las prendas siguen Disponibles |
+| Depósito | Revisar stock → ¿Selección disponible? | `RevisarStock`: relee el estado de cada prenda (`VerificarDisponibilidad`) y si está reservada para otro cliente |
+| Depósito | Informe de prendas faltantes | `InformarFaltantes`: sugiere hasta 3 alternativas por faltante (misma categoría y talle, disponibles) y pasa el pedido a **ConFaltantes** |
+| Vendedor | Comunicar faltantes → ¿Ajustar? | Desde Pedidos de Venta: `ObtenerInformeFaltantes` |
+| Vendedor | Recibir selección ajustada por disponibilidad | `AjustarSeleccion`: vuelve a comprobar vigencia, pedido activo y cupo, reemplaza las líneas y el pedido vuelve a **EnControlStock** |
+| Vendedor | No ajusta → Asentar desistimiento | `AsentarDesistimiento(modulo, pedido, motivo, etapa)` pasa el pedido a **Desistido** |
+| Depósito | Confirmar prendas disponibles | `ConfirmarPrendasDisponibles`: marca `PedidoPrenda.Confirmada` y registra el empleado y la fecha de control |
+| Depósito | Separar prendas del pedido | `SepararPrendas`: es la **reserva**. Pasa las prendas a EnUso dentro de una transacción y el pedido a **Separado**. Si otra operación tomó una prenda, no se reserva nada y se emite el informe de faltantes. |
+| Vendedor | Formalizar el pedido (desde aquí no admite cambios) | `FormalizarPedido`: el pedido pasa de **Separado** a **Pendiente**, que significa "formalizado, pendiente de despacho" |
+| Vendedor | Preparar la confirmación | `PrepararConfirmacion` → Confirmación y constancia del pedido |
+
+Cada transición registra:
+- `PedidoHistorial`: ENVIAR_CONTROL, DESISTIR, AJUSTAR_SELECCION, INFORMAR_FALTANTES, CONFIRMAR_PRENDAS, SEPARAR y FORMALIZAR;
+- la bitácora;
+- la bitácora de negocio: `EnvioControlStock`, `InformeFaltantes`, `SeparacionPrendas`, `Desistimiento` y `Venta` (al formalizar).
 
 **Reglas de negocio PN01**
 | # | Regla | Ubicación | T: |
 |---|---|---|---|
-| 1 | No se arma pedido sin suscripción vigente ni con suscripción pausada ni suspendida por pago | `BLL/Pedido.cs › ObtenerClienteValidado` | `PedidoTests` (`SuscripcionVencida/Pausada/SuspendidoPorPago`) |
-| 2 | Con un pedido **Despachado** sin entregar no se arma otro | `BLL/Pedido.cs › ValidarPuedeArmarPedido` (`err.bll.pedido.ya_despachado`) | `PedidoTests › CrearPedido_ConDespachoActivo_LanzaYaDespachado` |
-| 3 | **Cuenta bloqueada:** con prendas `EnUso` (pendientes de devolución) no se arma otro pedido; se desbloquea cuando PN04 registra la devolución | `ValidarPuedeArmarPedido` (`err.bll.pedido.cuenta_bloqueada`); aviso en `NuevoPedidoForm › CmbCliente_SelectedIndexChanged` | `PedidoTests › CrearPedido_ConPrendasPendientesDeDevolucion_LanzaCuentaBloqueada`, `ValidarPuedeArmarPedido_*` |
-| 4 | La cantidad no puede superar el `LimitePrendas` del plan | `ValidarCupoDisponible` | `PedidoTests › CrearPedido_SuperaLimiteDelPlan_LanzaLimitePlan` |
-| 5 | La disponibilidad se relee **contra la BD** justo antes de confirmar (cierra la ventana TOCTOU) | `BLL/Prenda.cs › VerificarDisponibilidad` | `PedidoTests`, `PrendaTests` |
-| 6 | La reserva es **atómica**: `UPDATE ... AND Estado = Disponible` dentro de la transacción; si otra operación tomó la prenda se revierte todo | `DAL/Pedido.cs › Alta` | (sin test contra BD real; los tests usan fakes) |
-| 7 | Guardar una prenda como interés **no reserva stock** (solo la confirmación reserva) | diseño (no hay "closet" persistido) | — |
-| 8 | El pedido queda bloqueado al crearse: no existe API de edición de pedido | `BLL/Pedido.cs` (solo cancelar/despachar/entregar/devolver) | — |
-| 9 | Una prenda que sale de En Limpieza a Disponible se reserva 48 h para el primer anotado de la Lista de Espera | `BLL/ListaEspera.cs › NotificarSiCorresponde` | `ListaEsperaTests` (11) |
+| 1 | No se arma pedido sin suscripción vigente, ni con la suscripción pausada o suspendida por pago | `BLL/Pedido.cs › VerificarVigencia` | `PedidoTests › VerificarVigencia_*` |
+| 2 | No se arma pedido si el cliente tiene otro pedido activo (en cualquier estado del armado, o despachado) | `RevisarPedidoActivo` (`err.bll.pedido.pedido_activo` / `ya_despachado`) | `RevisarPedidoActivo_PedidoEnCadaEstadoDelArmado_LanzaPedidoActivo`, `RevisarPedidoActivo_ConDespachoActivo_LanzaYaDespachado` |
+| 3 | **Cuenta bloqueada:** con prendas `EnUso` sin devolver no se arma otro pedido. Se desbloquea cuando PN04 registra la devolución. | `RevisarPedidoActivo` (`err.bll.pedido.cuenta_bloqueada`) | `RevisarPedidoActivo_ConPrendasPendientesDeDevolucion_LanzaCuentaBloqueada` |
+| 4 | La cantidad no puede superar el `LimitePrendas` del plan | `ComprobarCupo` | `ComprobarCupo_*`, `EnviarAControlStock_SuperaLimiteDelPlan_LanzaLimitePlan` |
+| 5 | Enviar a control **no reserva**: las prendas se reservan recién al separarlas | `EnviarAControlStock` → `AltaSinReserva` | `EnviarAControlStock_DatosValidos_CreaPedidoEnControlSinReservar` |
+| 6 | El desistimiento por cupo solo se asienta si la selección excede el cupo, y siempre exige un motivo | `AsentarDesistimiento` | `AsentarDesistimiento_*` |
+| 7 | Solo Depósito revisa, informa faltantes, confirma y separa | `PermisosAccion.Exigir(ControlStockEditar)` | `AccionesDeDeposito_SinPermisoDeControlDeStock_Rechazan` |
+| 8 | Las alternativas son prendas Disponibles de la misma categoría y talle, que no están en el pedido (máximo 3) | `SugerirAlternativas` | `InformarFaltantes_SugiereAlternativasDeLaMismaCategoriaYTalle` |
+| 9 | Solo se separa lo confirmado. La separación es **atómica** (`UPDATE ... AND Estado = Disponible`): si otra operación tomó una prenda, se revierte todo y el pedido pasa a faltantes. | `SepararPrendas`, `DAL/Pedido.cs › SepararPrendas` | `SepararPrendas_*` |
+| 10 | Solo se formaliza un pedido Separado, y después de formalizar no hay operación que cambie la selección | `FormalizarPedido`, `BE.Pedido.TransicionValida` | `FormalizarPedido_*`, `TransicionesDelArmado_SiguenElDiagrama` |
+| 11 | Los pasos del armado no se pueden revertir desde el historial | `RestaurarOperacion` (`err.bll.pedido.restaurar_no_permitido`) | `RestaurarOperacion_PasoDelControlDeStock_NoSePuedeRevertir` |
+| 12 | Des-cancelar revalida la vigencia, el pedido activo y el cupo | `DesCancelar` | `DesCancelar_ClienteConOtroPedidoActivo_Rechaza`, `DesCancelar_SuscripcionVencida_Rechaza` |
+| 13 | Una prenda que pasa de En Limpieza a Disponible se reserva 48 h para el primer anotado de la Lista de Espera. La reserva se cierra al separar. | `BLL/ListaEspera.cs › NotificarSiCorresponde`, `SepararPrendas` | `ListaEsperaTests`, `SepararPrendas_Confirmadas_ReservaYCierraLaListaDeEspera` |
 
-**Casos de uso** (nombres del documento): CU01-VEN Armar Pedido, CU02-VEN Consultar Catálogo, CU03-VEN Consultar
-Situación del Cliente, CU01-DEP Verificar Disponibilidad, CU02-DEP Reservar Prendas.
-**Estado de implementación:** CU01-VEN ; CU02-VEN (sin "valor de reposición" en la grilla); CU03-VEN **sin pantalla propia**
-(la situación se ve dentro del asistente); CU01/CU02-DEP **como lógica de BLL** pero **sin actor Depósito ni cola/pantalla**;
-no hay notificación a Depósito, planilla de existencias ni registro de desistimiento.
-**Alcance.** Abarca: validar cliente, catálogo disponible, cupo, disponibilidad, reserva y creación del pedido.
-**No abarca:** preparación/empaque físico, envío con tracking, email al cliente, sustitución por quiebre de stock.
-**Ciclo posterior del pedido** (pantalla `PedidosRealizados`, rol `OperadorLogistico`/Vendedor según patente): Despachar → Marcar entregado → Registrar devolución (PN04). No hay estados "En curso / On Hold" ni email de despacho.
+**Base de datos.**
+- `Pedido` tiene columnas nuevas: FechaEnvioControl, FechaControl, IdEmpleadoControl, FechaSeparacion, FechaFormalizacion, MotivoDesistimiento y EtapaDesistimiento.
+- `PedidoPrenda` suma la columna `Confirmada`.
+- El informe de faltantes se guarda en 3FN, en `PedidoFaltante` y `PedidoFaltanteAlternativa`.
+
+**Casos de uso:**
+- CU01-VEN Armar Pedido y Enviar a Control de Stock;
+- CU02-VEN Consultar Catálogo;
+- CU03-VEN Consultar Situación del Cliente;
+- CU04-DEP Controlar Stock del Pedido;
+- CU05-VEN Comunicar Faltantes, Ajustar o Desistir;
+- CU06-VEN Formalizar Pedido.
+
+**Alcance.** Abarca todo el diagrama de actividad, desde la solicitud hasta la confirmación al cliente.
+**No abarca:** empaque físico, envío con tracking ni email al cliente.
+**Ciclo posterior del pedido formalizado** (`PedidosRealizados`): Despachar → Marcar entregado → Registrar devolución (PN04). Un pedido formalizado todavía se puede cancelar desde Pedidos de Venta (patrón Command).
 
 ---
 

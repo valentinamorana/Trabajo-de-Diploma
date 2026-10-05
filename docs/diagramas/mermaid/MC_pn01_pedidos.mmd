@@ -3,17 +3,25 @@ erDiagram
   Cliente ||--o{ ListaEspera : "IdCliente"
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
+  Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Empleado ||--o{ Pedido : "IdEmpleado"
   Cliente ||--o{ Pedido : "IdCliente"
+  PedidoPrenda ||--o{ PedidoFaltante : "IdPedido"
+  PedidoPrenda ||--o{ PedidoFaltante : "IdPrenda"
+  Prenda ||--o{ PedidoFaltanteAlternativa : "IdPrendaAlternativa"
+  PedidoFaltante ||--o{ PedidoFaltanteAlternativa : "IdPedido"
+  PedidoFaltante ||--o{ PedidoFaltanteAlternativa : "IdPrenda"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
-  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
   Cliente
   Empleado
   Pedido
   PedidoPrenda
+  PedidoFaltante
+  PedidoFaltanteAlternativa
   PedidoHistorial
   Prenda
   ListaEspera

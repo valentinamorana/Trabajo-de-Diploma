@@ -182,7 +182,7 @@
   {
     "id": "ACT_pn01_armar_pedido",
     "tipo": "actividad",
-    "titulo": "Actividad — PN01 Armar pedido"
+    "titulo": "Actividad — PN01 Armar pedido de prendas"
   },
   {
     "id": "ACT_pn02_comercializacion",
@@ -217,7 +217,22 @@
   {
     "id": "DSS_PN01_CU01_ArmarPedido",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU01-VEN Armar pedido"
+    "titulo": "PN01 · CU01-VEN Armar pedido y enviar a control de stock"
+  },
+  {
+    "id": "DSS_PN01_CU08_ControlarStock",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU04-DEP Controlar stock del pedido"
+  },
+  {
+    "id": "DSS_PN01_CU09_GestionarFaltantes",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU05-VEN Comunicar faltantes, ajustar selección o desistir"
+  },
+  {
+    "id": "DSS_PN01_CU10_FormalizarPedido",
+    "tipo": "secuencia",
+    "titulo": "PN01 · CU06-VEN Formalizar pedido y preparar la confirmación"
   },
   {
     "id": "DSS_PN01_CU02_ConsultarCatalogo",

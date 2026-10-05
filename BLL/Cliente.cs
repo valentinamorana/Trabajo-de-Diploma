@@ -36,6 +36,24 @@ namespace BLL
             return dalCliente.ObtenerTodos();
         }
 
+        // PN01 — "Recibir identificación": el cliente brinda su documentación (DNI, nombre y
+        // apellido). Si el texto coincide exacto con un DNI devuelve ese cliente; si no, los que
+        // contienen el texto en el nombre o el apellido (sin distinguir mayúsculas).
+        public List<BE.Cliente> BuscarPorIdentificacion(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return new List<BE.Cliente>();
+            string t = texto.Trim();
+
+            var todos = ObtenerTodos();
+            var porDni = todos.FindAll(c => string.Equals((c.DNI ?? "").Trim(), t, StringComparison.OrdinalIgnoreCase));
+            if (porDni.Count > 0) return porDni;
+
+            return todos.FindAll(c =>
+                (c.Nombre ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                (c.Apellido ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                (c.NombreCompleto ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
         // Obtiene un cliente por ID.
         public BE.Cliente ObtenerPorId(int idCliente)
         {

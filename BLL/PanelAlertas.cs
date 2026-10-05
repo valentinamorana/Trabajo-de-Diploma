@@ -17,13 +17,15 @@ namespace BLL
         private readonly Prenda         _prenda      = new Prenda();
         private readonly ReporteJornada _reporte     = new ReporteJornada();
         private readonly Interfaces.IListaEsperaService _listaEspera = new ListaEspera();
+        private readonly Pedido         _pedido      = new Pedido();
 
         public List<BE.Alerta> ObtenerAlertas()
         {
             // Recolección de métricas desde las fuentes (cada una aislada en su try para
             // que una caída no tumbe al resto). Desconocido = métrica no disponible (se ignora).
             int vencidas = Desconocido, porVencer = Desconocido, diasSinBackup = Desconocido,
-                enLimpieza = Desconocido, dvRotas = Desconocido, reservadasEspera = Desconocido;
+                enLimpieza = Desconocido, dvRotas = Desconocido, reservadasEspera = Desconocido,
+                enControl = Desconocido, conFaltantes = Desconocido, separados = Desconocido;
 
             try
             {
@@ -53,7 +55,19 @@ namespace BLL
             // cliente pase a retirarlas. Desconocido si la tabla todavía no existe (BD sin migrar).
             try { reservadasEspera = _listaEspera.ContarReservadasVigentes(); } catch { }
 
-            return EvaluarAlertas(vencidas, porVencer, diasSinBackup, enLimpieza, dvRotas, reservadasEspera);
+            // PN01 — pedidos esperando una acción en el armado: Depósito (control de stock) o
+            // Vendedor (comunicar faltantes / formalizar).
+            try
+            {
+                var pedidos = _pedido.ObtenerTodos();
+                enControl    = pedidos.Count(p => p.Estado == BE.EstadoPedido.EnControlStock);
+                conFaltantes = pedidos.Count(p => p.Estado == BE.EstadoPedido.ConFaltantes);
+                separados    = pedidos.Count(p => p.Estado == BE.EstadoPedido.Separado);
+            }
+            catch { }
+
+            return EvaluarAlertas(vencidas, porVencer, diasSinBackup, enLimpieza, dvRotas, reservadasEspera,
+                                  enControl, conFaltantes, separados);
         }
 
         /// <summary>Centinela: la métrica no pudo obtenerse (fuente caída) → se ignora.</summary>
@@ -66,7 +80,8 @@ namespace BLL
         /// negativo (pero conocido) significa "no hay backups registrados".
         /// </summary>
         public static List<BE.Alerta> EvaluarAlertas(int vencidas, int porVencer,
-            int diasSinBackup, int enLimpieza, int dvRotas, int reservadasEspera = 0)
+            int diasSinBackup, int enLimpieza, int dvRotas, int reservadasEspera = 0,
+            int enControl = 0, int conFaltantes = 0, int separados = 0)
         {
             var alertas = new List<BE.Alerta>();
 
@@ -104,6 +119,17 @@ namespace BLL
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.listaespera.reservadas",
                     "{0} prenda(s) reservada(s) por Lista de Espera esperando que el cliente pase a retirarlas.",
                     reservadasEspera, reservadasEspera));
+
+            // 6) PN01 — armado de pedidos pendiente de acción
+            if (enControl > 0)
+                alertas.Add(new BE.Alerta(BE.NivelAlerta.Advertencia, "alert.pedidos.control",
+                    "{0} pedido(s) esperando el control de stock de Depósito.", enControl, enControl));
+            if (conFaltantes > 0)
+                alertas.Add(new BE.Alerta(BE.NivelAlerta.Advertencia, "alert.pedidos.faltantes",
+                    "{0} pedido(s) con faltantes para comunicar al cliente.", conFaltantes, conFaltantes));
+            if (separados > 0)
+                alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.pedidos.formalizar",
+                    "{0} pedido(s) con las prendas separadas, listos para formalizar.", separados, separados));
 
             return alertas;
         }

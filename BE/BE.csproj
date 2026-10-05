@@ -61,6 +61,9 @@
     <Compile Include="Criticidad.cs" />
     <Compile Include="Empleado.cs" />
     <Compile Include="EstadoPedido.cs" />
+    <Compile Include="EtapaDesistimiento.cs" />
+    <Compile Include="LineaControlStock.cs" />
+    <Compile Include="PedidoFaltante.cs" />
     <Compile Include="EstadoContratacion.cs" />
     <Compile Include="Contratacion.cs" />
     <Compile Include="TipoDescuento.cs" />

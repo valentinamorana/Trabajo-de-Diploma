@@ -42,6 +42,7 @@
             this.inventarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inspeccionDevolucionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.controlStockToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listaEsperaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.suscriptoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -185,6 +186,7 @@
             // 
             this.inventarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.prendasToolStripMenuItem,
+            this.controlStockToolStripMenuItem,
             this.inspeccionDevolucionToolStripMenuItem,
             this.listaEsperaToolStripMenuItem});
             this.inventarioToolStripMenuItem.Name = "inventarioToolStripMenuItem";
@@ -199,6 +201,14 @@
             this.prendasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.prendasToolStripMenuItem.Text = "Prendas";
             this.prendasToolStripMenuItem.Click += new System.EventHandler(this.prendasToolStripMenuItem_Click);
+            //
+            // controlStockToolStripMenuItem — PN01, carril Depósito (Controlador de Stock)
+            //
+            this.controlStockToolStripMenuItem.Name = "controlStockToolStripMenuItem";
+            this.controlStockToolStripMenuItem.Tag = "mnu.controlstock";
+            this.controlStockToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.controlStockToolStripMenuItem.Text = "Control de Stock";
+            this.controlStockToolStripMenuItem.Click += new System.EventHandler(this.controlStockToolStripMenuItem_Click);
             //
             // inspeccionDevolucionToolStripMenuItem — PN04, CU-DEP-01 Inspeccionar Devolución
             //
@@ -638,6 +648,7 @@
         private System.Windows.Forms.ToolStripMenuItem inventarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prendasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem inspeccionDevolucionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem controlStockToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem listaEsperaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem nuevaContratacionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cajaToolStripMenuItem;

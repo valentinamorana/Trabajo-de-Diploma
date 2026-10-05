@@ -13,11 +13,13 @@ module.exports = [
     tipo: 'casos', id: 'CU_pn01_armar_pedido', titulo: 'Casos de uso — PN01 Armar pedido', sistema: 'WardrobeFlow — PN01 Armar pedido',
     actores: [{ id: 'V', nombre: 'Vendedor' }, { id: 'D', nombre: 'Depósito / Logística' }],
     casos: [
-      { id: 'c1', nombre: 'CU01-VEN Armar Pedido' }, { id: 'c2', nombre: 'CU02-VEN Consultar Catálogo' }, { id: 'c3', nombre: 'CU03-VEN Consultar Situación del Cliente' },
+      { id: 'c1', nombre: 'CU01-VEN Armar Pedido y Enviar a Control de Stock' }, { id: 'c2', nombre: 'CU02-VEN Consultar Catálogo' }, { id: 'c3', nombre: 'CU03-VEN Consultar Situación del Cliente' },
       { id: 'c4', nombre: 'CU04-VEN Cancelar Pedido' }, { id: 'c5', nombre: 'CU01-DEP Despachar Pedido' }, { id: 'c6', nombre: 'CU02-DEP Registrar Entrega' },
-      { id: 'c7', nombre: 'CU03-DEP Registrar Devolución' }
+      { id: 'c7', nombre: 'CU03-DEP Registrar Devolución' }, { id: 'c8', nombre: 'CU04-DEP Controlar Stock del Pedido' },
+      { id: 'c9', nombre: 'CU05-VEN Comunicar Faltantes, Ajustar o Desistir' }, { id: 'c10', nombre: 'CU06-VEN Formalizar Pedido' }
     ],
-    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c4' }, { actor: 'D', caso: 'c5' }, { actor: 'D', caso: 'c6' }, { actor: 'D', caso: 'c7' }],
+    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c4' }, { actor: 'V', caso: 'c9' }, { actor: 'V', caso: 'c10' },
+              { actor: 'D', caso: 'c5' }, { actor: 'D', caso: 'c6' }, { actor: 'D', caso: 'c7' }, { actor: 'D', caso: 'c8' }],
     incluye: [{ de: 'c1', a: 'c2' }, { de: 'c1', a: 'c3' }]
   },
   {

@@ -35,6 +35,8 @@ namespace BLL
             ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
             ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),
             ("promocionesVigentesToolStripMenuItem",            "mnuPromocionesVigentes"),
+            // PN01 — Control de Stock (Depósito = carril "Controlador de Stock" del diagrama).
+            ("controlStockToolStripMenuItem",          "mnuControlStock"),
             // PN04 — Inspección de Devolución (Depósito = rol Deposito).
             ("inspeccionDevolucionToolStripMenuItem",  "mnuInspeccionDevolucion"),
             // Mejora opcional (no requerida por la cátedra) — ver README.

@@ -8,7 +8,7 @@ namespace DAL
 {
     /// <summary>
     /// Acceso a datos de las tablas [Pedido] y [PedidoPrenda].
-    /// NOTA — Estado de Prenda: los UPDATE de Prenda.Estado de esta clase (Alta,
+    /// NOTA — Estado de Prenda: los UPDATE de Prenda.Estado de esta clase (SepararPrendas,
     /// RegistrarDevolucion, ReconciliarEnTx, Cancelar, DesCancelar) son intencionalmente
     /// SQL directo dentro de la misma transacción del Pedido, y no pasan por
     /// BLL.Prenda.CambiarEstado / el patrón State de BE.Estados. Es la única vía por la
@@ -24,11 +24,29 @@ namespace DAL
             "SELECT ped.IdPedido, ped.IdCliente, ped.IdEmpleado, ped.Estado, " +
             "       ped.FechaPedido, ped.FechaDespacho, ped.FechaEntrega, " +
             "       ped.MotivoCancelacion, " +
+            "       ped.FechaEnvioControl, ped.FechaControl, ped.IdEmpleadoControl, " +
+            "       ped.FechaSeparacion, ped.FechaFormalizacion, " +
+            "       ped.MotivoDesistimiento, ped.EtapaDesistimiento, " +
             "       cli.Nombre + ' ' + cli.Apellido AS NombreCliente, " +
-            "       emp.Nombre + ' ' + emp.Apellido AS NombreEmpleado " +
+            "       emp.Nombre + ' ' + emp.Apellido AS NombreEmpleado, " +
+            "       ctl.Nombre + ' ' + ctl.Apellido AS NombreEmpleadoControl " +
             "FROM Pedido ped " +
             "INNER JOIN Cliente cli ON cli.IdCliente = ped.IdCliente " +
-            "INNER JOIN Empleado emp ON emp.IdEmpleado = ped.IdEmpleado";
+            "INNER JOIN Empleado emp ON emp.IdEmpleado = ped.IdEmpleado " +
+            "LEFT JOIN Empleado ctl ON ctl.IdEmpleado = ped.IdEmpleadoControl";
+
+        // Pedidos que cuentan como venta concretada para reportes y analítica: los formalizados
+        // (Pendiente de despacho) y los que siguieron el ciclo logístico. Los que están en el
+        // circuito de control de stock (todavía sin formalizar), los desistidos y los cancelados
+        // no representan una venta.
+        private static readonly string ESTADOS_VENTA =
+            "(" + (int)BE.EstadoPedido.Pendiente + "," + (int)BE.EstadoPedido.Despachado + "," +
+                  (int)BE.EstadoPedido.Entregado + ")";
+
+        // Ventas concretadas más las que se cancelaron después de formalizarse (desempeño por vendedor).
+        private static readonly string ESTADOS_VENTA_O_CANCELADO =
+            "(" + (int)BE.EstadoPedido.Pendiente + "," + (int)BE.EstadoPedido.Despachado + "," +
+                  (int)BE.EstadoPedido.Entregado + "," + (int)BE.EstadoPedido.Cancelado + ")";
 
         // Devuelve todos los pedidos. Las prendas se cargan por separado en ObtenerPorId.
         public override List<BE.Pedido> ObtenerTodos()
@@ -72,9 +90,32 @@ namespace DAL
             return lista;
         }
 
-        // PdN10 — Fecha del pedido más reciente de cada cliente (excluye Cancelado: un
-        // pedido cancelado no representa actividad real). Usada por BLL.AnalisisAbandono
-        // para cruzar "último pedido" contra vencimiento sin traer todos los pedidos.
+        // PN01 — pedidos en un estado dado (por ej. la cola de Control de Stock de Depósito),
+        // del más antiguo al más nuevo según el envío a control.
+        public List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado)
+        {
+            var lista = new List<BE.Pedido>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    SELECT_BASE +
+                    " WHERE ped.Estado = @Estado" +
+                    " ORDER BY ISNULL(ped.FechaEnvioControl, ped.FechaPedido), ped.IdPedido",
+                    new[] { new SqlParameter("@Estado", (object)(int)estado) });
+
+                foreach (DataRow row in tabla.Rows)
+                    lista.Add(MapearCabecera(row));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener los pedidos por estado.", ex);
+            }
+            return lista;
+        }
+
+        // PdN10 — Fecha del pedido más reciente de cada cliente (solo ventas concretadas: un
+        // pedido cancelado, desistido o todavía en control no representa actividad real).
+        // Usada por BLL.AnalisisAbandono para cruzar "último pedido" contra vencimiento.
         public Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente()
         {
             var resultado = new Dictionary<int, DateTime>();
@@ -82,8 +123,8 @@ namespace DAL
             {
                 DataTable tabla = acceso.Leer(
                     "SELECT IdCliente, MAX(FechaPedido) AS UltimaFecha " +
-                    "FROM Pedido WHERE Estado <> @EstadoCancelado GROUP BY IdCliente",
-                    new[] { new SqlParameter("@EstadoCancelado", (int)BE.EstadoPedido.Cancelado) });
+                    "FROM Pedido WHERE Estado IN " + ESTADOS_VENTA + " GROUP BY IdCliente",
+                    null);
 
                 if (tabla != null)
                     foreach (DataRow row in tabla.Rows)
@@ -110,6 +151,9 @@ namespace DAL
                     "       SUM(CASE WHEN ped.Estado = @Cancelado THEN 1 ELSE 0 END) AS Cancelados " +
                     "FROM Pedido ped " +
                     "INNER JOIN Empleado emp ON emp.IdEmpleado = ped.IdEmpleado " +
+                    // Solo pedidos formalizados (y los cancelados después de formalizar): los que
+                    // están en control de stock o fueron desistidos no son ventas del vendedor.
+                    "WHERE ped.Estado IN " + ESTADOS_VENTA_O_CANCELADO + " " +
                     "GROUP BY emp.IdEmpleado, emp.Nombre, emp.Apellido " +
                     "ORDER BY TotalPedidos DESC",
                     new[]
@@ -136,8 +180,9 @@ namespace DAL
             return lista;
         }
 
-        // PdN9 — Cantidad de veces que cada prenda fue pedida (excluye pedidos Cancelados:
-        // un pedido cancelado no representa demanda real). Usada por BLL.AnalisisRotacion.
+        // PdN9 — Cantidad de veces que cada prenda fue pedida (solo ventas concretadas: un
+        // pedido cancelado, desistido o en control no representa demanda real).
+        // Usada por BLL.AnalisisRotacion.
         public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda()
         {
             var resultado = new Dictionary<int, int>();
@@ -147,9 +192,9 @@ namespace DAL
                     "SELECT pp.IdPrenda, COUNT(*) AS Cantidad " +
                     "FROM PedidoPrenda pp " +
                     "INNER JOIN Pedido p ON p.IdPedido = pp.IdPedido " +
-                    "WHERE p.Estado <> @EstadoCancelado " +
+                    "WHERE p.Estado IN " + ESTADOS_VENTA + " " +
                     "GROUP BY pp.IdPrenda",
-                    new[] { new SqlParameter("@EstadoCancelado", (int)BE.EstadoPedido.Cancelado) });
+                    null);
 
                 if (tabla != null)
                     foreach (DataRow row in tabla.Rows)
@@ -162,7 +207,7 @@ namespace DAL
             return resultado;
         }
 
-        // PdN13 — Prendas que un cliente pidió alguna vez (excluye pedidos Cancelados), para
+        // PdN13 — Prendas que un cliente pidió alguna vez (solo ventas concretadas), para
         // construir su perfil de preferencias. Usada por BLL.RecomendacionPrendas.
         public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente)
         {
@@ -175,12 +220,8 @@ namespace DAL
                     "FROM PedidoPrenda pp " +
                     "INNER JOIN Pedido p ON p.IdPedido = pp.IdPedido " +
                     "INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda " +
-                    "WHERE p.IdCliente = @IdCliente AND p.Estado <> @EstadoCancelado",
-                    new[]
-                    {
-                        new SqlParameter("@IdCliente", idCliente),
-                        new SqlParameter("@EstadoCancelado", (int)BE.EstadoPedido.Cancelado)
-                    });
+                    "WHERE p.IdCliente = @IdCliente AND p.Estado IN " + ESTADOS_VENTA,
+                    new[] { new SqlParameter("@IdCliente", idCliente) });
 
                 if (tabla != null)
                     foreach (DataRow row in tabla.Rows)
@@ -217,6 +258,7 @@ namespace DAL
 
                 var pedido = MapearCabecera(tabla.Rows[0]);
                 pedido.Prendas = ObtenerPrendasDePedido(idPedido);
+                pedido.PrendasConfirmadas = ObtenerPrendasConfirmadas(idPedido);
                 return pedido;
             }
             catch (Exception ex)
@@ -225,16 +267,27 @@ namespace DAL
             }
         }
 
-        // Inserta el pedido y sus prendas en una transacción. Devuelve el ID generado.
-        public int Alta(BE.Pedido pedido)
+        // ── PN01 — circuito de control de stock ─────────────────────────────────
+        // Ninguno de estos métodos reserva prendas salvo SepararPrendas: hasta que Depósito
+        // separa, la selección es solo un pedido de revisión (las prendas siguen Disponibles).
+        // Cada transición de estado se hace con un UPDATE condicionado al estado esperado
+        // ("claim" atómico): si otra sesión ya movió el pedido, no se afecta ninguna fila y la
+        // operación se rechaza en vez de pisar el estado.
+
+        // Inserta el pedido y sus líneas SIN tocar el estado de las prendas. Se usa al enviar la
+        // selección a control de stock (EnControlStock) y al asentar un desistimiento por exceso
+        // de cupo (Desistido). Devuelve el ID generado.
+        public int AltaSinReserva(BE.Pedido pedido)
         {
             int idNuevo = 0;
 
             acceso.EjecutarTransaccion((conexion, tx) =>
             {
                 using (var cmd = new SqlCommand(
-                    "INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido) " +
-                    "VALUES (@IdCliente, @IdEmpleado, @Estado, @FechaPedido); " +
+                    "INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, " +
+                    "                    MotivoDesistimiento, EtapaDesistimiento) " +
+                    "VALUES (@IdCliente, @IdEmpleado, @Estado, @FechaPedido, @FechaEnvioControl, " +
+                    "        @MotivoDesistimiento, @EtapaDesistimiento); " +
                     "SELECT SCOPE_IDENTITY() AS IdNuevo",
                     conexion, tx))
                 {
@@ -242,6 +295,12 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@IdEmpleado", pedido.IdEmpleado);
                     cmd.Parameters.AddWithValue("@Estado", (int)pedido.Estado);
                     cmd.Parameters.AddWithValue("@FechaPedido", pedido.FechaPedido);
+                    cmd.Parameters.AddWithValue("@FechaEnvioControl",
+                        (object)pedido.FechaEnvioControl ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@MotivoDesistimiento",
+                        (object)pedido.MotivoDesistimiento ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@EtapaDesistimiento",
+                        pedido.EtapaDesistimiento.HasValue ? (object)pedido.EtapaDesistimiento.Value.ToString() : DBNull.Value);
 
                     var resultado = cmd.ExecuteScalar();
                     if (resultado == null || resultado == DBNull.Value)
@@ -250,17 +309,150 @@ namespace DAL
                     idNuevo = Convert.ToInt32(resultado);
                 }
 
-                foreach (var prenda in pedido.Prendas)
+                InsertarLineasEnTx(conexion, tx, idNuevo, pedido.Prendas);
+            });
+
+            RecalcularDVSilencioso();   // T07: DV multi-tabla (pedido + líneas)
+            return idNuevo;
+        }
+
+        // "Recibir selección ajustada por disponibilidad": reemplaza las líneas de un pedido con
+        // faltantes informados, borra el informe anterior y lo devuelve a control de stock.
+        public void ReemplazarSeleccion(int idPedido, List<BE.Prenda> prendas)
+        {
+            acceso.EjecutarTransaccion((conexion, tx) =>
+            {
+                using (var cmd = new SqlCommand(
+                    "UPDATE Pedido SET Estado=@Nuevo, FechaEnvioControl=@Ahora, FechaControl=NULL, " +
+                    "       IdEmpleadoControl=NULL " +
+                    "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                    conexion, tx))
                 {
-                    using (var cmdPP = new SqlCommand(
-                        "INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@IdPedido, @IdPrenda)",
+                    cmd.Parameters.AddWithValue("@Nuevo",    (int)BE.EstadoPedido.EnControlStock);
+                    cmd.Parameters.AddWithValue("@Ahora",    DateTime.Now);
+                    cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                    cmd.Parameters.AddWithValue("@Esperado", (int)BE.EstadoPedido.ConFaltantes);
+                    if (cmd.ExecuteNonQuery() == 0) throw EstadoCambiado(idPedido);
+                }
+
+                BorrarInformeFaltantesEnTx(conexion, tx, idPedido);
+                Ejecutar(conexion, tx, "DELETE FROM PedidoPrenda WHERE IdPedido=@IdPedido", idPedido);
+                InsertarLineasEnTx(conexion, tx, idPedido, prendas);
+            });
+            RecalcularDVSilencioso();   // T07 — cambiaron las líneas del pedido
+        }
+
+        // "Informe de prendas faltantes": EnControlStock → ConFaltantes. Guarda una fila por
+        // prenda faltante (PedidoFaltante) y una por alternativa propuesta (PedidoFaltanteAlternativa).
+        public void RegistrarFaltantes(int idPedido, int idEmpleadoControl, List<BE.PedidoFaltante> faltantes)
+        {
+            acceso.EjecutarTransaccion((conexion, tx) =>
+            {
+                using (var cmd = new SqlCommand(
+                    "UPDATE Pedido SET Estado=@Nuevo, FechaControl=@Ahora, IdEmpleadoControl=@IdEmpleado " +
+                    "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                    conexion, tx))
+                {
+                    cmd.Parameters.AddWithValue("@Nuevo",      (int)BE.EstadoPedido.ConFaltantes);
+                    cmd.Parameters.AddWithValue("@Ahora",      DateTime.Now);
+                    cmd.Parameters.AddWithValue("@IdEmpleado", idEmpleadoControl);
+                    cmd.Parameters.AddWithValue("@IdPedido",   idPedido);
+                    cmd.Parameters.AddWithValue("@Esperado",   (int)BE.EstadoPedido.EnControlStock);
+                    if (cmd.ExecuteNonQuery() == 0) throw EstadoCambiado(idPedido);
+                }
+
+                BorrarInformeFaltantesEnTx(conexion, tx, idPedido);
+                Ejecutar(conexion, tx, "UPDATE PedidoPrenda SET Confirmada=0 WHERE IdPedido=@IdPedido", idPedido);
+
+                foreach (var f in faltantes)
+                {
+                    using (var cmd = new SqlCommand(
+                        "INSERT INTO PedidoFaltante (IdPedido, IdPrenda, EstadoAlRevisar, ReservadaParaOtro) " +
+                        "VALUES (@IdPedido, @IdPrenda, @EstadoAlRevisar, @Reservada)",
                         conexion, tx))
                     {
-                        cmdPP.Parameters.AddWithValue("@IdPedido", idNuevo);
-                        cmdPP.Parameters.AddWithValue("@IdPrenda", prenda.IdPrenda);
-                        cmdPP.ExecuteNonQuery();
+                        cmd.Parameters.AddWithValue("@IdPedido",        idPedido);
+                        cmd.Parameters.AddWithValue("@IdPrenda",        f.Prenda.IdPrenda);
+                        cmd.Parameters.AddWithValue("@EstadoAlRevisar", (int)f.EstadoAlRevisar);
+                        cmd.Parameters.AddWithValue("@Reservada",       f.ReservadaParaOtro);
+                        cmd.ExecuteNonQuery();
                     }
 
+                    foreach (var alt in f.Alternativas ?? new List<BE.Prenda>())
+                    {
+                        using (var cmd = new SqlCommand(
+                            "INSERT INTO PedidoFaltanteAlternativa (IdPedido, IdPrenda, IdPrendaAlternativa) " +
+                            "VALUES (@IdPedido, @IdPrenda, @IdAlt)",
+                            conexion, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                            cmd.Parameters.AddWithValue("@IdPrenda", f.Prenda.IdPrenda);
+                            cmd.Parameters.AddWithValue("@IdAlt",    alt.IdPrenda);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            });
+            RecalcularDVSilencioso();   // T07
+        }
+
+        // "Confirmar prendas disponibles": marca todas las líneas como confirmadas por Depósito.
+        // El pedido sigue EnControlStock hasta que se separen las prendas.
+        public void ConfirmarPrendas(int idPedido, int idEmpleadoControl)
+        {
+            acceso.EjecutarTransaccion((conexion, tx) =>
+            {
+                using (var cmd = new SqlCommand(
+                    "UPDATE Pedido SET FechaControl=@Ahora, IdEmpleadoControl=@IdEmpleado " +
+                    "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                    conexion, tx))
+                {
+                    cmd.Parameters.AddWithValue("@Ahora",      DateTime.Now);
+                    cmd.Parameters.AddWithValue("@IdEmpleado", idEmpleadoControl);
+                    cmd.Parameters.AddWithValue("@IdPedido",   idPedido);
+                    cmd.Parameters.AddWithValue("@Esperado",   (int)BE.EstadoPedido.EnControlStock);
+                    if (cmd.ExecuteNonQuery() == 0) throw EstadoCambiado(idPedido);
+                }
+
+                Ejecutar(conexion, tx, "UPDATE PedidoPrenda SET Confirmada=1 WHERE IdPedido=@IdPedido", idPedido);
+            });
+        }
+
+        // "Separar prendas del pedido": EnControlStock → Separado y cada prenda Disponible → EnUso
+        // a nombre del cliente, todo en una transacción. Si otra operación tomó una prenda desde
+        // la revisión, el UPDATE condicionado no afecta filas y se revierte TODO (no queda nada
+        // reservado a medias).
+        public void SepararPrendas(int idPedido, int idCliente)
+        {
+            acceso.EjecutarTransaccion((conexion, tx) =>
+            {
+                using (var cmd = new SqlCommand(
+                    "UPDATE Pedido SET Estado=@Nuevo, FechaSeparacion=@Ahora " +
+                    "WHERE IdPedido=@IdPedido AND Estado=@Esperado " +
+                    "  AND NOT EXISTS (SELECT 1 FROM PedidoPrenda WHERE IdPedido=@IdPedido AND Confirmada=0)",
+                    conexion, tx))
+                {
+                    cmd.Parameters.AddWithValue("@Nuevo",    (int)BE.EstadoPedido.Separado);
+                    cmd.Parameters.AddWithValue("@Ahora",    DateTime.Now);
+                    cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                    cmd.Parameters.AddWithValue("@Esperado", (int)BE.EstadoPedido.EnControlStock);
+                    if (cmd.ExecuteNonQuery() == 0) throw EstadoCambiado(idPedido);
+                }
+
+                var lineas = new List<(int IdPrenda, string Nombre)>();
+                using (var cmd = new SqlCommand(
+                    "SELECT pr.IdPrenda, pr.Nombre FROM PedidoPrenda pp " +
+                    "INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda WHERE pp.IdPedido=@IdPedido",
+                    conexion, tx))
+                {
+                    cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                    using (var rd = cmd.ExecuteReader())
+                        while (rd.Read())
+                            lineas.Add((Convert.ToInt32(rd["IdPrenda"]), rd["Nombre"].ToString()));
+                }
+
+                foreach (var linea in lineas)
+                {
                     using (var cmdPr = new SqlCommand(
                         // IdUltimoCliente (a diferencia de IdClienteActual) NUNCA se limpia al
                         // devolverse — así BLL.CargoPrenda puede saber quién tuvo la prenda por
@@ -270,23 +462,159 @@ namespace DAL
                         conexion, tx))
                     {
                         cmdPr.Parameters.AddWithValue("@Estado",           (int)BE.EstadoPrenda.EnUso);
-                        cmdPr.Parameters.AddWithValue("@IdCliente",        pedido.IdCliente);
-                        cmdPr.Parameters.AddWithValue("@IdPrenda",         prenda.IdPrenda);
+                        cmdPr.Parameters.AddWithValue("@IdCliente",        idCliente);
+                        cmdPr.Parameters.AddWithValue("@IdPrenda",         linea.IdPrenda);
                         cmdPr.Parameters.AddWithValue("@EstadoDisponible", (int)BE.EstadoPrenda.Disponible);
                         // Control de concurrencia (anti-TOCTOU): si otra operación tomó la prenda
-                        // entre la validación y este UPDATE, no se afecta ninguna fila → se aborta
-                        // la transacción (rollback en EjecutarTransaccion) en vez de pisar el estado.
+                        // desde la revisión de stock, no se afecta ninguna fila → rollback de todo.
                         if (cmdPr.ExecuteNonQuery() == 0)
                             throw new BE.AppException("err.dal.pedido.prenda_tomada",
                                 "La prenda '{0}' ya no está disponible. Actualizá la selección e intentá de nuevo.",
-                                prenda.Nombre);
+                                linea.Nombre);
                     }
                 }
             });
-
-            RecalcularDVSilencioso();   // T07: DV multi-tabla (pedido + líneas)
-            return idNuevo;
+            RecalcularDVSilencioso();   // T07
         }
+
+        // "Formalizar el pedido": Separado → Pendiente (formalizado, pendiente de despacho).
+        public void Formalizar(int idPedido)
+        {
+            int afectadas = acceso.Escribir(
+                "UPDATE Pedido SET Estado=@Nuevo, FechaFormalizacion=@Ahora " +
+                "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                new SqlParameter[]
+                {
+                    // Pendiente vale 0: el literal 0 elegiría el constructor (nombre, SqlDbType) y el
+                    // parámetro quedaría sin valor, por eso se asigna Value explícitamente.
+                    new SqlParameter("@Nuevo",    System.Data.SqlDbType.Int) { Value = (int)BE.EstadoPedido.Pendiente },
+                    new SqlParameter("@Ahora",    DateTime.Now),
+                    new SqlParameter("@IdPedido", idPedido),
+                    new SqlParameter("@Esperado", (int)BE.EstadoPedido.Separado)
+                });
+            if (afectadas == 0) throw EstadoCambiado(idPedido);
+            RecalcularDVSilencioso();   // T07
+        }
+
+        // "Asentar desistimiento" de un pedido con faltantes informados: ConFaltantes → Desistido.
+        // No hay prendas que liberar: nunca se reservaron.
+        public void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa)
+        {
+            int afectadas = acceso.Escribir(
+                "UPDATE Pedido SET Estado=@Nuevo, MotivoDesistimiento=@Motivo, EtapaDesistimiento=@Etapa " +
+                "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                new SqlParameter[]
+                {
+                    new SqlParameter("@Nuevo",    (int)BE.EstadoPedido.Desistido),
+                    new SqlParameter("@Motivo",   (object)motivo ?? DBNull.Value),
+                    new SqlParameter("@Etapa",    etapa.ToString()),
+                    new SqlParameter("@IdPedido", idPedido),
+                    new SqlParameter("@Esperado", (int)BE.EstadoPedido.ConFaltantes)
+                });
+            if (afectadas == 0) throw EstadoCambiado(idPedido);
+            RecalcularDVSilencioso();   // T07
+        }
+
+        // "Informe de disponibilidad (prendas faltantes y alternativas)" de un pedido.
+        public List<BE.PedidoFaltante> ObtenerFaltantes(int idPedido)
+        {
+            var porPrenda = new Dictionary<int, BE.PedidoFaltante>();
+            var orden = new List<int>();
+            try
+            {
+                DataTable tabla = acceso.Leer(
+                    "SELECT pf.IdPrenda, pf.EstadoAlRevisar, pf.ReservadaParaOtro, " +
+                    "       f.Nombre, f.Talle, f.Color, f.Categoria, f.Estado, " +
+                    "       a.IdPrenda AS AltId, a.Nombre AS AltNombre, a.Talle AS AltTalle, " +
+                    "       a.Color AS AltColor, a.Categoria AS AltCategoria, a.Estado AS AltEstado " +
+                    "FROM PedidoFaltante pf " +
+                    "INNER JOIN Prenda f ON f.IdPrenda = pf.IdPrenda " +
+                    "LEFT JOIN PedidoFaltanteAlternativa pa ON pa.IdPedido = pf.IdPedido AND pa.IdPrenda = pf.IdPrenda " +
+                    "LEFT JOIN Prenda a ON a.IdPrenda = pa.IdPrendaAlternativa " +
+                    "WHERE pf.IdPedido = @IdPedido ORDER BY pf.IdPrenda, a.IdPrenda",
+                    new[] { new SqlParameter("@IdPedido", idPedido) });
+
+                foreach (DataRow row in tabla.Rows)
+                {
+                    int idPrenda = Convert.ToInt32(row["IdPrenda"]);
+                    if (!porPrenda.TryGetValue(idPrenda, out var faltante))
+                    {
+                        faltante = new BE.PedidoFaltante
+                        {
+                            IdPedido          = idPedido,
+                            EstadoAlRevisar   = (BE.EstadoPrenda)Convert.ToInt32(row["EstadoAlRevisar"]),
+                            ReservadaParaOtro = Convert.ToBoolean(row["ReservadaParaOtro"]),
+                            Prenda = new BE.Prenda
+                            {
+                                IdPrenda  = idPrenda,
+                                Nombre    = row["Nombre"].ToString(),
+                                Talle     = row["Talle"] != DBNull.Value ? row["Talle"].ToString() : null,
+                                Color     = row["Color"] != DBNull.Value ? row["Color"].ToString() : null,
+                                Categoria = row["Categoria"] != DBNull.Value ? row["Categoria"].ToString() : null,
+                                Estado    = (BE.EstadoPrenda)Convert.ToInt32(row["Estado"])
+                            }
+                        };
+                        porPrenda[idPrenda] = faltante;
+                        orden.Add(idPrenda);
+                    }
+
+                    if (row["AltId"] != DBNull.Value)
+                        faltante.Alternativas.Add(new BE.Prenda
+                        {
+                            IdPrenda  = Convert.ToInt32(row["AltId"]),
+                            Nombre    = row["AltNombre"].ToString(),
+                            Talle     = row["AltTalle"] != DBNull.Value ? row["AltTalle"].ToString() : null,
+                            Color     = row["AltColor"] != DBNull.Value ? row["AltColor"].ToString() : null,
+                            Categoria = row["AltCategoria"] != DBNull.Value ? row["AltCategoria"].ToString() : null,
+                            Estado    = (BE.EstadoPrenda)Convert.ToInt32(row["AltEstado"])
+                        });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al obtener el informe de faltantes del pedido ID {idPedido}.", ex);
+            }
+            return orden.ConvertAll(id => porPrenda[id]);
+        }
+
+        // Inserta las líneas del pedido (sin confirmar) sobre una transacción ya abierta.
+        private static void InsertarLineasEnTx(SqlConnection conexion, SqlTransaction tx,
+                                               int idPedido, List<BE.Prenda> prendas)
+        {
+            foreach (var prenda in prendas)
+            {
+                using (var cmdPP = new SqlCommand(
+                    "INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@IdPedido, @IdPrenda, 0)",
+                    conexion, tx))
+                {
+                    cmdPP.Parameters.AddWithValue("@IdPedido", idPedido);
+                    cmdPP.Parameters.AddWithValue("@IdPrenda", prenda.IdPrenda);
+                    cmdPP.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // Descarta el informe de faltantes anterior (alternativas primero, por la FK).
+        private static void BorrarInformeFaltantesEnTx(SqlConnection conexion, SqlTransaction tx, int idPedido)
+        {
+            Ejecutar(conexion, tx, "DELETE FROM PedidoFaltanteAlternativa WHERE IdPedido=@IdPedido", idPedido);
+            Ejecutar(conexion, tx, "DELETE FROM PedidoFaltante WHERE IdPedido=@IdPedido", idPedido);
+        }
+
+        // Ejecuta una sentencia parametrizada solo por @IdPedido sobre una transacción abierta.
+        private static void Ejecutar(SqlConnection conexion, SqlTransaction tx, string sql, int idPedido)
+        {
+            using (var cmd = new SqlCommand(sql, conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private static BE.AppException EstadoCambiado(int idPedido) =>
+            new BE.AppException("err.dal.pedido.estado_cambiado",
+                "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
+                idPedido);
 
         // Marca un pedido como Despachado y registra la fecha.
         public void Despachar(int idPedido)
@@ -404,6 +732,15 @@ namespace DAL
             }
 
             bool cancelado = estado == (int)BE.EstadoPedido.Cancelado;
+
+            // PN01: las prendas solo están reservadas (EnUso) desde que Depósito las separa. Un
+            // pedido que quedó en control de stock, con faltantes o desistido nunca reservó
+            // nada: no se tocan sus prendas (podrían estar en uso por otro pedido).
+            bool reservado = estado == (int)BE.EstadoPedido.Separado  ||
+                             estado == (int)BE.EstadoPedido.Pendiente ||
+                             estado == (int)BE.EstadoPedido.Despachado ||
+                             estado == (int)BE.EstadoPedido.Entregado;
+            if (!cancelado && !reservado) return;
 
             using (var cmd = new SqlCommand(
                 // IdUltimoCliente NUNCA se limpia (a diferencia de IdClienteActual): si se cancela,
@@ -654,9 +991,34 @@ namespace DAL
                 FechaEntrega = row["FechaEntrega"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaEntrega"]) : null,
                 MotivoCancelacion = row.Table.Columns.Contains("MotivoCancelacion") && row["MotivoCancelacion"] != DBNull.Value
                                         ? row["MotivoCancelacion"].ToString() : null,
+                FechaEnvioControl     = FechaNula(row, "FechaEnvioControl"),
+                FechaControl          = FechaNula(row, "FechaControl"),
+                IdEmpleadoControl     = row["IdEmpleadoControl"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdEmpleadoControl"]) : null,
+                NombreEmpleadoControl = row["NombreEmpleadoControl"] != DBNull.Value ? row["NombreEmpleadoControl"].ToString() : null,
+                FechaSeparacion       = FechaNula(row, "FechaSeparacion"),
+                FechaFormalizacion    = FechaNula(row, "FechaFormalizacion"),
+                MotivoDesistimiento   = row["MotivoDesistimiento"] != DBNull.Value ? row["MotivoDesistimiento"].ToString() : null,
+                EtapaDesistimiento    = row["EtapaDesistimiento"] != DBNull.Value
+                                        && Enum.TryParse(row["EtapaDesistimiento"].ToString(), out BE.EtapaDesistimiento etapa)
+                                            ? (BE.EtapaDesistimiento?)etapa : null,
                 NombreCliente = row["NombreCliente"].ToString(),
                 NombreEmpleado = row["NombreEmpleado"].ToString()
             };
+        }
+
+        private static DateTime? FechaNula(DataRow row, string columna) =>
+            row[columna] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row[columna]) : null;
+
+        // Ids de las líneas del pedido que Depósito confirmó como disponibles.
+        private List<int> ObtenerPrendasConfirmadas(int idPedido)
+        {
+            var ids = new List<int>();
+            DataTable tabla = acceso.Leer(
+                "SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido = @IdPedido AND Confirmada = 1",
+                new[] { new SqlParameter("@IdPedido", idPedido) });
+            if (tabla != null)
+                foreach (DataRow row in tabla.Rows) ids.Add(Convert.ToInt32(row["IdPrenda"]));
+            return ids;
         }
 
         // ── T07 — DV MULTI-TABLA del Pedido ─────────────────────────────────────

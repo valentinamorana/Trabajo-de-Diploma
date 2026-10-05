@@ -12,6 +12,9 @@ namespace BLL.Interfaces
         // Devuelve todos los clientes con plan y stock utilizado.
         List<BE.Cliente> ObtenerTodos();
 
+        // PN01 — "Recibir identificación": busca por DNI exacto, o por nombre o apellido.
+        List<BE.Cliente> BuscarPorIdentificacion(string texto);
+
         // Obtiene un cliente por su ID.
         BE.Cliente ObtenerPorId(int idCliente);
 

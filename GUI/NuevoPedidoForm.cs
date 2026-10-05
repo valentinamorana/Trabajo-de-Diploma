@@ -2,20 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
 
 namespace GUI
 {
     /// <summary>
-    /// Formulario de creación de Pedido de Venta.
+    /// PN01 — Armar pedido de prendas: actividades del carril Vendedor del diagrama de
+    /// actividad hasta "Enviar selección para control stock".
     ///
-    /// Flujo en 2 pasos visuales dentro del mismo form:
-    ///   PASO 1 — Seleccionar cliente
-    ///   PASO 2 — Seleccionar prendas disponibles (respeta límite del plan)
+    ///   PASO 1 — Recibir identificación (DNI, nombre o apellido) → Ficha del cliente →
+    ///            Verificar la vigencia de la suscripción → Revisar existencia de un pedido activo
+    ///   PASO 2 — Presentar catálogo → Anotar la selección + Comprobar el cupo del plan →
+    ///            ¿Excede el cupo? Sí: Informar exceso → el cliente ajusta la selección o
+    ///            desiste (Asentar desistimiento). No: Enviar selección para control stock.
     ///
-    /// Devuelve DialogResult.OK cuando el pedido fue creado exitosamente.
-    /// El ID del pedido creado queda en IdPedidoCreado.
+    /// Modo AJUSTE: para un pedido con faltantes informados por Depósito ("Recibir selección
+    /// ajustada por disponibilidad"): abre directamente el paso 2 con la selección sin los
+    /// faltantes y las alternativas resaltadas, y la reenvía a control de stock.
+    ///
+    /// Devuelve DialogResult.OK cuando se envió/reenvió la selección o se asentó el
+    /// desistimiento. El ID queda en IdPedidoCreado.
     /// </summary>
     /// <summary>
     /// Hereda de <see cref="FormBase"/>:
@@ -28,20 +36,36 @@ namespace GUI
 
         public int IdPedidoCreado { get; private set; }
 
+        // True si el resultado fue un desistimiento (no un envío a control).
+        public bool FueDesistimiento { get; private set; }
+
         // ── BLL ───────────────────────────────────────────────────────────────
         private readonly BLL.Interfaces.IClienteService clienteBLL = new BLL.Cliente();
         private readonly BLL.Interfaces.IPrendaService  prendaBLL  = new BLL.Prenda();
         private readonly BLL.Interfaces.IPedidoService  pedidoBLL  = new BLL.Pedido();
 
         // ── Estado interno ────────────────────────────────────────────────────
-        private List<BE.Cliente> _clientes    = new List<BE.Cliente>();
-        private List<BE.Prenda>  _disponibles = new List<BE.Prenda>();
-        private BE.Cliente       _clienteSel  = null;
-        private Idioma           _idioma      = GestorIdioma.IdiomaActual;
+        private List<BE.Cliente> _coincidencias = new List<BE.Cliente>();
+        private List<BE.Prenda>  _disponibles   = new List<BE.Prenda>();
+        private BE.Cliente       _clienteSel    = null;
+        private Idioma           _idioma        = GestorIdioma.IdiomaActual;
+
+        // Modo ajuste (pedido con faltantes).
+        private readonly BE.Pedido               _pedidoAjuste;
+        private readonly List<BE.PedidoFaltante> _faltantes;
+        private bool EsAjuste => _pedidoAjuste != null;
 
         public NuevoPedidoForm()
         {
             InitializeComponent();
+            AplicarIdioma(GestorIdioma.IdiomaActual);
+        }
+
+        // Modo ajuste: "Recibir selección ajustada por disponibilidad".
+        public NuevoPedidoForm(BE.Pedido pedidoConFaltantes, List<BE.PedidoFaltante> faltantes) : this()
+        {
+            _pedidoAjuste = pedidoConFaltantes ?? throw new ArgumentNullException(nameof(pedidoConFaltantes));
+            _faltantes    = faltantes ?? new List<BE.PedidoFaltante>();
             AplicarIdioma(GestorIdioma.IdiomaActual);
         }
 
@@ -71,13 +95,21 @@ namespace GUI
         private void AplicarIdioma(Idioma idioma)
         {
             _idioma = idioma;
-            this.Text                 = Tr("frm.nuevopedido",     "Nuevo Pedido de Venta");
-            lblPaso.Text              = Tr("paso1.texto",          "Paso 1 de 2 — Seleccionar Cliente");
-            lblSeleccionaCliente.Text = Tr("lbl.ped.selcliente",   "Seleccioná el cliente para este pedido:");
-            lblInstruccion.Text       = Tr("lbl.ped.selprendas",   "Seleccioná las prendas para incluir en el pedido (checkbox):");
+            this.Text                 = EsAjuste
+                ? Tr("frm.ajustarpedido", "Ajustar selección del pedido")
+                : Tr("frm.nuevopedido",   "Nuevo Pedido de Venta");
+            lblPaso.Text              = Tr("paso1.identificar",     "Paso 1 de 2 — Identificar al cliente");
+            lblSeleccionaCliente.Text = Tr("lbl.ped.identificacion","Identificación del cliente (DNI, nombre o apellido):");
+            lblInstruccion.Text       = EsAjuste
+                ? Tr("lbl.ped.ajuste", "Ajustá la selección: las prendas faltantes ya no figuran y las alternativas sugeridas están resaltadas.")
+                : Tr("lbl.ped.selprendas", "Seleccioná las prendas para incluir en el pedido (checkbox):");
+            btnBuscar.Text            = Tr("btn.ped.buscar",        "Buscar");
             btnSiguiente.Text         = Tr("btn.siguiente",         "Siguiente →");
             btnVolver.Text            = Tr("btn.volver",            "← Volver");
-            btnConfirmar.Text         = Tr("btn.confirmar.pedido",  "Confirmar Pedido");
+            btnConfirmar.Text         = EsAjuste
+                ? Tr("btn.ped.reenviarcontrol", "Reenviar a control de stock")
+                : Tr("btn.ped.enviarcontrol",   "Enviar a control de stock");
+            btnDesistir.Text          = Tr("btn.ped.desistir",      "Registrar desistimiento");
         }
 
         private void TraducirHeadersGrilla()
@@ -98,7 +130,23 @@ namespace GUI
 
         private void NuevoPedidoForm_Load(object sender, EventArgs e)
         {
-            CargarDatosIniciales();
+            if (!EsAjuste)
+            {
+                txtIdentificacion.Focus();
+                return;
+            }
+
+            // Modo ajuste: el cliente ya está identificado; se abre directamente el catálogo.
+            try
+            {
+                _clienteSel = clienteBLL.ObtenerPorId(_pedidoAjuste.IdCliente);
+                btnVolver.Visible = false;
+                MostrarPaso(2);
+            }
+            catch (Exception ex)
+            {
+                MostrarError(ex);
+            }
         }
 
         private void BtnVolver_Click(object sender, EventArgs e)
@@ -112,32 +160,171 @@ namespace GUI
                 dgvPrendas.CommitEdit(DataGridViewDataErrorContexts.Commit);
         }
 
-        // ── Carga de datos ────────────────────────────────────────────────────
+        // ── Paso 1: Recibir identificación ────────────────────────────────────
 
-        private void CargarDatosIniciales()
+        private void TxtIdentificacion_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode != Keys.Enter) return;
+            e.SuppressKeyPress = true;
+            BuscarCliente();
+        }
+
+        private void BtnBuscar_Click(object sender, EventArgs e) => BuscarCliente();
+
+        private void BuscarCliente()
+        {
+            _clienteSel = null;
+            btnSiguiente.Enabled     = false;
+            lstCoincidencias.Visible = false;
+            lstCoincidencias.Items.Clear();
+
             try
             {
-                string placeholder = Tr("combo.ped.placeholder", "— Seleccioná un cliente —");
-
-                _clientes = clienteBLL.ObtenerTodos();
-                cmbCliente.Items.Clear();
-                cmbCliente.Items.Add(placeholder);
-                foreach (var c in _clientes)
-                {
-                    string etiqueta = $"{c.NombreCompleto}  (DNI {c.DNI})";
-                    if (c.VencimientoExpirado)
-                        etiqueta += "  venc.";
-                    else if (c.SuscripcionProximaAVencer())
-                        etiqueta += $"  {c.DiasHastaVencimiento().Value}d";
-                    cmbCliente.Items.Add(etiqueta);
-                }
-                cmbCliente.SelectedIndex = 0;
+                _coincidencias = clienteBLL.BuscarPorIdentificacion(txtIdentificacion.Text);
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
+                return;
             }
+
+            if (_coincidencias.Count == 0)
+            {
+                MostrarAviso(Tr("err.ped.noencontrado",
+                    "No se encontró ningún cliente con esa identificación. Verificá el DNI, el nombre o el apellido."));
+                return;
+            }
+
+            if (_coincidencias.Count == 1)
+            {
+                SeleccionarCliente(_coincidencias[0]);
+                return;
+            }
+
+            // Varias coincidencias (por nombre o apellido): el Vendedor elige la correcta.
+            foreach (var c in _coincidencias)
+                lstCoincidencias.Items.Add($"{c.NombreCompleto}  (DNI {c.DNI})");
+            lstCoincidencias.Visible = true;
+            MostrarAviso(Tr("lbl.ped.variascoinc", "Hay varios clientes que coinciden: elegí el correcto en la lista."),
+                         Color.FromArgb(40, 80, 140));
+        }
+
+        private void LstCoincidencias_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int idx = lstCoincidencias.SelectedIndex;
+            if (idx >= 0 && idx < _coincidencias.Count)
+                SeleccionarCliente(_coincidencias[idx]);
+        }
+
+        // Ficha del cliente → ¿Suscripción vigente? → ¿Posee pedido activo?
+        private void SeleccionarCliente(BE.Cliente cliente)
+        {
+            _clienteSel = cliente;
+            btnSiguiente.Enabled = false;
+
+            string ficha = FichaCliente(cliente);
+
+            // "Verificar la vigencia de la suscripción" → No: "Informar imposibilidad de continuar".
+            try
+            {
+                _clienteSel = pedidoBLL.VerificarVigencia(cliente.IdCliente);
+            }
+            catch (BE.AppException ex)
+            {
+                MostrarAviso(ficha + "\n\n" + Tr("lbl.ped.imposible", "No se puede continuar:") + " " + Resolver(ex));
+                return;
+            }
+            catch (Exception ex) { MostrarError(ex); return; }
+
+            // "Revisar existencia de un pedido activo" → Sí: "Informar existencia de pedido activo".
+            try
+            {
+                pedidoBLL.RevisarPedidoActivo(_clienteSel);
+            }
+            catch (BE.AppException ex)
+            {
+                MostrarAviso(ficha + "\n\n" + Tr("lbl.ped.pedidoactivo", "Pedido activo:") + " " + Resolver(ex));
+                return;
+            }
+            catch (Exception ex) { MostrarError(ex); return; }
+
+            // Habilitado: se presenta el catálogo en el paso 2.
+            var estado = clienteBLL.ObtenerEstadoComercial(_clienteSel, 0);
+            lblInfoPlan.Visible = true;
+            if (estado.SuscripcionProximaAVencer)
+            {
+                lblInfoPlan.ForeColor = Color.FromArgb(160, 100, 0);
+                lblInfoPlan.Text = ficha + "\n" + string.Format(
+                    Tr("lbl.ped.proxvencer",
+                        "La suscripción vence en {0} día(s). Avisale al cliente para renovarla."),
+                    estado.DiasHastaVencimiento);
+            }
+            else
+            {
+                lblInfoPlan.ForeColor = Color.FromArgb(176, 62, 96);
+                lblInfoPlan.Text = ficha;
+            }
+            btnSiguiente.Enabled = true;
+        }
+
+        // Ficha del Cliente (suscripción, plan, pedidos, datos del cliente).
+        private string FichaCliente(BE.Cliente c)
+        {
+            string ultimoPedido = "—";
+            try
+            {
+                var ult = pedidoBLL.ObtenerTodos()
+                    .Where(p => p.IdCliente == c.IdCliente)
+                    .OrderByDescending(p => p.FechaPedido)
+                    .FirstOrDefault();
+                if (ult != null)
+                    ultimoPedido = $"#{ult.IdPedido} ({EstadoLabel(ult.Estado)}, {ult.FechaPedido:dd/MM/yyyy})";
+            }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[NuevoPedidoForm] Ficha: " + ex.Message); }
+
+            return string.Format(
+                Tr("lbl.ped.ficha",
+                    "Cliente: {0}  —  DNI {1}\nPlan: {2} (hasta {3} prendas)  —  Vence: {4}\n" +
+                    "Prendas en uso: {5}  —  Último pedido: {6}\nMétodo de pago: {7}  —  Alta: {8}"),
+                c.NombreCompleto, c.DNI,
+                c.NombrePlan ?? "—", c.LimitePrendas,
+                c.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—",
+                c.StockUtilizado, ultimoPedido,
+                c.MetodoPago ?? "—", c.FechaAlta.ToString("dd/MM/yyyy"));
+        }
+
+        private void MostrarAviso(string texto, Color? color = null)
+        {
+            lblInfoPlan.ForeColor = color ?? Color.DarkRed;
+            lblInfoPlan.Visible   = true;
+            lblInfoPlan.Text      = texto;
+        }
+
+        private static string Resolver(BE.AppException ex) =>
+            Traductor.Resolver(ex.Clave, ex.Message, ex.Args, GestorIdioma.IdiomaActual);
+
+        private void BtnSiguiente_Click(object sender, EventArgs e)
+        {
+            if (_clienteSel == null) return;
+            MostrarPaso(2);
+        }
+
+        // ── Paso 2: Presentar catálogo / selección / cupo ─────────────────────
+
+        private void MostrarPaso(int paso)
+        {
+            panelPaso1.Visible = paso == 1;
+            panelPaso2.Visible = paso == 2;
+            string paso1txt = Tr("paso1.identificar", "Paso 1 de 2 — Identificar al cliente");
+            string paso2txt = EsAjuste
+                ? string.Format(Tr("paso.ajuste.texto", "Ajustar selección del Pedido #{0}"), _pedidoAjuste.IdPedido)
+                : Tr("paso2.texto", "Paso 2 de 2 — Seleccionar Prendas");
+            lblPaso.Text = paso == 1
+                ? paso1txt
+                : $"{paso2txt}  ({_clienteSel?.NombreCompleto})";
+            lblMensaje.Text = string.Empty;
+
+            if (paso == 2) CargarPrendasDisponibles();
         }
 
         private void CargarPrendasDisponibles()
@@ -145,12 +332,31 @@ namespace GUI
             try
             {
                 _disponibles = prendaBLL.ObtenerDisponibles(_clienteSel?.IdCliente);
-                dgvPrendas.Rows.Clear();
 
+                var preseleccion  = new HashSet<int>();
+                var alternativas  = new HashSet<int>();
+                if (EsAjuste)
+                {
+                    var faltantes = new HashSet<int>(_faltantes.Select(f => f.Prenda.IdPrenda));
+                    foreach (var p in _pedidoAjuste.Prendas)
+                        if (!faltantes.Contains(p.IdPrenda)) preseleccion.Add(p.IdPrenda);
+                    foreach (var f in _faltantes)
+                        foreach (var a in f.Alternativas) alternativas.Add(a.IdPrenda);
+
+                    // Las alternativas sugeridas primero, para que el Vendedor las vea.
+                    _disponibles = _disponibles
+                        .OrderByDescending(p => alternativas.Contains(p.IdPrenda))
+                        .ThenByDescending(p => preseleccion.Contains(p.IdPrenda))
+                        .ToList();
+                }
+
+                dgvPrendas.Rows.Clear();
                 foreach (var p in _disponibles)
                 {
-                    dgvPrendas.Rows.Add(false, p.IdPrenda, p.Nombre,
+                    int i = dgvPrendas.Rows.Add(preseleccion.Contains(p.IdPrenda), p.IdPrenda, p.Nombre,
                         p.Categoria ?? "—", p.Talle ?? "—", p.Color ?? "—");
+                    if (alternativas.Contains(p.IdPrenda))
+                        dgvPrendas.Rows[i].DefaultCellStyle.BackColor = Color.FromArgb(255, 244, 200);
                 }
 
                 TraducirHeadersGrilla();
@@ -162,128 +368,17 @@ namespace GUI
             }
         }
 
-        // ── Navegación entre pasos ────────────────────────────────────────────
-
-        private void MostrarPaso(int paso)
-        {
-            panelPaso1.Visible = paso == 1;
-            panelPaso2.Visible = paso == 2;
-            string paso1txt = Tr("paso1.texto", "Paso 1 de 2 — Seleccionar Cliente");
-            string paso2txt = Tr("paso2.texto", "Paso 2 de 2 — Seleccionar Prendas");
-            lblPaso.Text = paso == 1
-                ? paso1txt
-                : $"{paso2txt}  ({_clienteSel?.NombreCompleto})";
-            lblMensaje.Text = string.Empty;
-
-            if (paso == 2) CargarPrendasDisponibles();
-        }
-
-        // ── Eventos ───────────────────────────────────────────────────────────
-
-        private void CmbCliente_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            int idx = cmbCliente.SelectedIndex - 1;
-            if (idx < 0)
-            {
-                lblInfoPlan.Visible  = false;
-                btnSiguiente.Enabled = false;
-                _clienteSel          = null;
-                return;
-            }
-
-            _clienteSel = _clientes[idx];
-
-            // Consultar la BLL — sin interpretar reglas de negocio en la GUI
-            var estado = clienteBLL.ObtenerEstadoComercial(_clienteSel, 0);
-
-            if (!estado.PuedeProceder)
-            {
-                btnSiguiente.Enabled  = false;
-                lblInfoPlan.ForeColor = Color.DarkRed;
-                lblInfoPlan.Visible   = true;
-
-                if (estado.MotivoBloqueo == "SIN_PLAN")
-                {
-                    lblInfoPlan.Text = string.Format(
-                        Tr("err.ped.sinplan",
-                            "{0} no tiene plan asignado.\nAsigná un plan en el módulo de Clientes antes de crear un pedido."),
-                        _clienteSel.NombreCompleto);
-                }
-                else if (estado.MotivoBloqueo == "SUSCRIPCION_VENCIDA")
-                {
-                    lblInfoPlan.Text = string.Format(
-                        Tr("err.ped.suscvencida",
-                            "La suscripción de {0} venció el {1}.\nRenovar en el módulo de Clientes."),
-                        _clienteSel.NombreCompleto,
-                        estado.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—");
-                }
-                return;
-            }
-
-            // PN01/PN04: cuenta bloqueada por prendas sin devolver, pedido despachado, pausa, etc.
-            // Se avisa acá y no recién al confirmar el pedido.
-            try
-            {
-                pedidoBLL.ValidarPuedeArmarPedido(_clienteSel.IdCliente);
-            }
-            catch (BE.AppException ex)
-            {
-                btnSiguiente.Enabled  = false;
-                lblInfoPlan.ForeColor = Color.DarkRed;
-                lblInfoPlan.Visible   = true;
-                lblInfoPlan.Text      = Servicios.Multiidioma.Traductor.Resolver(
-                    ex.Clave, ex.Message, ex.Args, Servicios.Multiidioma.GestorIdioma.IdiomaActual);
-                return;
-            }
-            catch (Exception ex)
-            {
-                btnSiguiente.Enabled = false;
-                MostrarError(ex);
-                return;
-            }
-
-            btnSiguiente.Enabled  = true;
-            lblInfoPlan.Visible   = true;
-
-            string infoBase = string.Format(
-                Tr("lbl.ped.infoplan",
-                    "Cliente: {0}\nPlan: {1}\nPrendas en uso actualmente: {2}\nMétodo de pago: {3}\nAlta: {4}"),
-                _clienteSel.NombreCompleto,
-                estado.NombrePlan ?? "—",
-                estado.StockUtilizado,
-                estado.MetodoPago,
-                estado.FechaAlta.ToString("dd/MM/yyyy"));
-
-            if (estado.SuscripcionProximaAVencer)
-            {
-                lblInfoPlan.ForeColor = Color.FromArgb(160, 100, 0);
-                lblInfoPlan.Text = infoBase + "\n" + string.Format(
-                    Tr("lbl.ped.proxvencer",
-                        "La suscripción vence en {0} día(s). Avisale al cliente para renovarla."),
-                    estado.DiasHastaVencimiento);
-            }
-            else
-            {
-                lblInfoPlan.ForeColor = Color.FromArgb(176, 62, 96);
-                lblInfoPlan.Text = infoBase;
-            }
-        }
-
-        private void BtnSiguiente_Click(object sender, EventArgs e)
-        {
-            if (_clienteSel == null) return;
-            MostrarPaso(2);
-        }
-
         private void DgvPrendas_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == dgvPrendas.Columns["Sel"].Index)
                 ActualizarResumen();
         }
 
+        // "Anotar la selección" ∥ "Comprobar el cupo del plan" → ¿Excede el cupo disponible?
         private void ActualizarResumen()
         {
-            int seleccionadas = ContarSeleccionadas();
+            var seleccion    = ObtenerPrendasSeleccionadas();
+            int seleccionadas = seleccion.Count;
 
             // La BLL evalúa todas las reglas de negocio y devuelve un DTO listo para mostrar
             var estado = clienteBLL.ObtenerEstadoComercial(_clienteSel, seleccionadas);
@@ -296,17 +391,20 @@ namespace GUI
                 Tr("lbl.ped.res.linea1", "Seleccionadas: {0}  |  Ya en uso: {1}  |  Total: {2}"),
                 seleccionadas, enUso, total);
             string linea2 = "";
+            bool excede = false;
 
             if (limite > 0)
             {
                 if (estado.SuperaLimite)
                 {
+                    // "Informar exceso de cupo" (Detalle de restricciones de cupo).
+                    excede = true;
                     linea2 = string.Format(
                         Tr("lbl.ped.res.limite",
                            "El plan '{0}' permite {1} prenda(s). Estás superando el límite por {2}."),
-                        estado.NombrePlan, limite, estado.Exceso);
+                        estado.NombrePlan, limite, estado.Exceso) + " " +
+                        Tr("lbl.ped.res.ajustar", "El cliente ajusta la selección o desiste.");
                     lblResumen.ForeColor = Color.DarkRed;
-                    btnConfirmar.Enabled = false;
                 }
                 else if (seleccionadas == 0)
                 {
@@ -314,7 +412,6 @@ namespace GUI
                         Tr("lbl.ped.res.vacio", "Podés agregar hasta {0} prenda(s) (plan {1})."),
                         estado.PrendasDisponibles, estado.NombrePlan);
                     lblResumen.ForeColor = Color.DimGray;
-                    btnConfirmar.Enabled = false;
                 }
                 else if (seleccionadas < estado.PrendasDisponibles)
                 {
@@ -323,7 +420,6 @@ namespace GUI
                            "El plan '{0}' permite {1}. Estás eligiendo {2} de {3} posibles — podés agregar más."),
                         estado.NombrePlan, limite, seleccionadas, estado.PrendasDisponibles);
                     lblResumen.ForeColor = Color.FromArgb(140, 100, 0);
-                    btnConfirmar.Enabled = true;
                 }
                 else
                 {
@@ -332,28 +428,33 @@ namespace GUI
                            "Alcanzás el máximo del plan '{0}' ({1} prendas)."),
                         estado.NombrePlan, limite);
                     lblResumen.ForeColor = Color.DarkGreen;
-                    btnConfirmar.Enabled = true;
                 }
             }
             else
             {
-                btnConfirmar.Enabled = seleccionadas > 0;
-                lblResumen.ForeColor = Color.FromArgb(176, 62, 96);
+                excede = seleccionadas > 0;   // plan sin cupo: cualquier selección lo excede
+                lblResumen.ForeColor = excede ? Color.DarkRed : Color.FromArgb(176, 62, 96);
             }
+
+            btnConfirmar.Enabled = seleccionadas > 0 && !excede;
+            btnDesistir.Visible  = excede;
+            btnDesistir.Enabled  = excede;
 
             lblResumen.Text = string.IsNullOrEmpty(linea2)
                 ? linea1
                 : linea1 + "\r\n" + linea2;
+
+            lblDetalle.Text = DetalleSeleccion(seleccion);
         }
 
-        private int ContarSeleccionadas()
+        // Detalle de selección (prenda, color, talle, cantidad).
+        private string DetalleSeleccion(List<BE.Prenda> seleccion)
         {
-            int count = 0;
-            foreach (DataGridViewRow row in dgvPrendas.Rows)
-            {
-                if (row.Cells["Sel"].Value is bool sel && sel) count++;
-            }
-            return count;
+            if (seleccion.Count == 0) return string.Empty;
+            var grupos = seleccion
+                .GroupBy(p => new { p.Nombre, p.Talle, p.Color })
+                .Select(g => $"{g.Key.Nombre} — {g.Key.Talle ?? "—"} / {g.Key.Color ?? "—"} ×{g.Count()}");
+            return Tr("lbl.ped.detalle", "Detalle de la selección:") + "  " + string.Join("   •   ", grupos);
         }
 
         private List<BE.Prenda> ObtenerPrendasSeleccionadas()
@@ -371,29 +472,29 @@ namespace GUI
             return lista;
         }
 
+        // ── "Enviar selección para control stock" ────────────────────────────
+
         private void BtnConfirmar_Click(object sender, EventArgs e)
         {
             var prendas = ObtenerPrendasSeleccionadas();
             if (prendas.Count == 0)
             {
-                var tSP = Traductor.ObtenerTraducciones(_idioma);
-                MostrarError(tSP.ContainsKey("err.ped.sinprendas") ? tSP["err.ped.sinprendas"].Texto : "Seleccioná al menos una prenda.");
+                MostrarError(Tr("err.ped.sinprendas", "Seleccioná al menos una prenda."));
                 return;
             }
 
-            // Confirmación final
             string detallesPrendas = string.Join("\n  • ",
                 prendas.ConvertAll(p => $"{p.Nombre} ({p.Talle} — {p.Color})"));
 
             var confirmar = MessageBox.Show(
                 string.Format(
-                    Tr("conf.ped.msg",
-                       "Confirmar pedido para {0}:\n\n  • {1}\n\nTotal: {2} prenda(s)\nMétodo de pago: {3}"),
+                    Tr("conf.ped.enviar.msg",
+                       "Enviar a control de stock la selección de {0}:\n\n  • {1}\n\nTotal: {2} prenda(s)\n\n" +
+                       "Depósito revisará la disponibilidad. Las prendas no quedan reservadas hasta que las separe."),
                     _clienteSel.NombreCompleto,
                     detallesPrendas,
-                    prendas.Count,
-                    _clienteSel.MetodoPago),
-                Tr("conf.ped.titulo", "Confirmar Pedido"),
+                    prendas.Count),
+                Tr("conf.ped.enviar.titulo", "Enviar a control de stock"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
@@ -403,14 +504,21 @@ namespace GUI
             try
             {
                 btnConfirmar.Enabled = false;
-                var tp = Traductor.ObtenerTraducciones(_idioma);
-                btnConfirmar.Text = tp.ContainsKey("btn.procesando") ? tp["btn.procesando"].Texto : "Procesando...";
-                // Sin este Refresh(), WinForms no repinta el cambio de Enabled/Text hasta que el
-                // hilo de UI vuelve al loop de mensajes — es decir, hasta que CrearPedido (llamada
-                // sincrónica a BD) ya terminó. El usuario nunca llegaba a ver realmente "Procesando…".
+                btnConfirmar.Text = Tr("btn.procesando", "Procesando...");
                 this.Refresh();
 
-                IdPedidoCreado = pedidoBLL.CrearPedido(this.Text, _clienteSel.IdCliente, prendas);
+                if (EsAjuste)
+                {
+                    pedidoBLL.AjustarSeleccion(this.Text, _pedidoAjuste, prendas);
+                    IdPedidoCreado = _pedidoAjuste.IdPedido;
+                }
+                else
+                {
+                    IdPedidoCreado = pedidoBLL.EnviarAControlStock(this.Text, _clienteSel.IdCliente, prendas);
+                }
+
+                OfrecerImprimir(Tr("conf.ped.planilla", "¿Imprimir la planilla de control de existencias?"),
+                    () => Exportacion.DocumentosPedido.PlanillaControl(pedidoBLL.ObtenerPorId(IdPedidoCreado)));
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -418,11 +526,67 @@ namespace GUI
             catch (Exception ex)
             {
                 btnConfirmar.Enabled = true;
-                var te = Traductor.ObtenerTraducciones(_idioma);
-                btnConfirmar.Text = te.ContainsKey("btn.confirmar.pedido") ? te["btn.confirmar.pedido"].Texto : "Confirmar Pedido";
+                btnConfirmar.Text = EsAjuste
+                    ? Tr("btn.ped.reenviarcontrol", "Reenviar a control de stock")
+                    : Tr("btn.ped.enviarcontrol",   "Enviar a control de stock");
                 MostrarError(ex);
             }
         }
 
+        // ── "Comunicar desistimiento" → "Asentar desistimiento" (exceso de cupo) ─
+
+        private void BtnDesistir_Click(object sender, EventArgs e)
+        {
+            var prendas = ObtenerPrendasSeleccionadas();
+            string motivo;
+            using (var dlg = new InputDialog(
+                Tr("dlg.desistir.titulo", "Asentar desistimiento"),
+                Tr("dlg.desistir.prompt", "Motivo del desistimiento que comunicó el cliente:"),
+                false))
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                motivo = dlg.InputText?.Trim();
+            }
+            if (string.IsNullOrWhiteSpace(motivo))
+            {
+                MostrarError(Tr("msg.desistir.req", "El desistimiento requiere un motivo."));
+                return;
+            }
+
+            try
+            {
+                if (EsAjuste)
+                {
+                    pedidoBLL.AsentarDesistimiento(this.Text, _pedidoAjuste, motivo, BE.EtapaDesistimiento.Cupo);
+                    IdPedidoCreado = _pedidoAjuste.IdPedido;
+                }
+                else
+                {
+                    IdPedidoCreado = pedidoBLL.AsentarDesistimiento(this.Text, _clienteSel.IdCliente, prendas, motivo);
+                }
+                FueDesistimiento = true;
+
+                OfrecerImprimir(Tr("conf.ped.aviso", "¿Imprimir el aviso de desistimiento?"),
+                    () => Exportacion.DocumentosPedido.AvisoDesistimiento(pedidoBLL.ObtenerPorId(IdPedidoCreado)));
+
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MostrarError(ex);
+            }
+        }
+
+        private void OfrecerImprimir(string pregunta, Func<Exportacion.ReporteExportable> armar)
+        {
+            if (MessageBox.Show(pregunta, this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                return;
+            try { Exportacion.DocumentosPedido.Imprimir(armar(), this); }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        private string EstadoLabel(BE.EstadoPedido estado) => EstadosPedido.Etiqueta(estado);
     }
 }

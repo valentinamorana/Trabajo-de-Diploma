@@ -20,9 +20,13 @@ desde Mi Perfil apenas se ingresa por primera vez.
 
 Usuarios sugeridos para probar los procesos de negocio
 -------------------------------------------------------
-  PN01 Armar pedido ............ vendedor (arma el pedido) y deposito (verifica
-                                 y reserva las prendas)
-  PN02 Comercialización ........ vendedor (crea la contratación) y caja (cobra)
+  PN01 Armar pedido ............ vendedor (identifica al cliente, arma la selección,
+                                 la envía a control de stock y formaliza) y deposito
+                                 (Inventario → Control de Stock: revisa, informa
+                                 faltantes, confirma y separa las prendas)
+  PN02 Comercialización ........ vendedor (identifica al cliente, presenta planes y
+                                 registra la contratación) y caja (cobra, emite el
+                                 comprobante o registra intentos; al 3.º cancela)
   PN03 Promociones ............. gcomercial (sugiere), admcomercial (crea),
                                  contable (aprueba), vendedor (sugiere la baja)
   PN04 Inspección de devolución  deposito
@@ -43,4 +47,5 @@ Requisitos previos a la instalación
 - .NET Framework 4.7.2 o superior.
 
 El instalador crea la base de datos WardrobeFlowDB, todas sus tablas y los
-datos de prueba de forma automática durante la instalación.
+datos de prueba de forma automática durante la instalación. Si el equipo ya
+tiene una versión anterior, actualiza la base existente (sin borrar datos).

@@ -333,6 +333,56 @@ namespace Tests
             Assert.AreEqual(0, dal.QuitarRelacionVeces);
         }
 
+        [TestMethod]
+        public void AgregarComponente_NoAdminAgregaUnaPatenteASuPropioRol_LanzaAutoescalacion()
+        {
+            // Antes AgregarComponente no pasaba por el guard: un rol con gestión de usuarios podía
+            // colgarse cualquier patente directamente.
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 4, Username = "vend", Perfil = "Vendedor",
+                Permisos = new List<BE.Permiso> { new BE.Permiso { NombreMenu = "mnuUsuarios" } }
+            });
+            var vendedor = new BE.Rol { Id = 1, Nombre = "Vendedor" };
+            vendedor.AgregarHijo(new BE.Patente { Id = 10, Nombre = "Usuarios", NombreMenu = "mnuUsuarios" });
+            var stock = new BE.Patente { Id = 2, Nombre = "Stock", NombreMenu = "mnuStock" };
+            var dal = new FakePermisoDAL { ArbolPersonalizado = new List<BE.Componente> { vendedor, stock } };
+
+            try { new BLL.Familia(dal).AgregarComponente(1, 2); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.familia.autoescalacion", ex.Clave); }
+            Assert.AreEqual(0, dal.AgregarRelacionVeces);
+        }
+
+        [TestMethod]
+        public void AgregarComponente_NoAdminEnUnRolAjeno_Permite()
+        {
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 4, Username = "vend", Perfil = "Vendedor",
+                Permisos = new List<BE.Permiso> { new BE.Permiso { NombreMenu = "mnuUsuarios" } }
+            });
+            var vendedor = new BE.Rol { Id = 1, Nombre = "Vendedor" };
+            vendedor.AgregarHijo(new BE.Patente { Id = 10, Nombre = "Usuarios", NombreMenu = "mnuUsuarios" });
+            var otro = new BE.Rol { Id = 5, Nombre = "Deposito" };
+            var stock = new BE.Patente { Id = 2, Nombre = "Stock", NombreMenu = "mnuStock" };
+            var dal = new FakePermisoDAL { ArbolPersonalizado = new List<BE.Componente> { vendedor, otro, stock } };
+
+            new BLL.Familia(dal).AgregarComponente(5, 2);
+            Assert.AreEqual(1, dal.AgregarRelacionVeces);
+        }
+
+        [TestMethod]
+        public void RenombrarComponente_CambiarNombreMenuDeUnaPatente_SeRechaza()
+        {
+            LoginComoAdministrador();
+            var pat = new BE.Patente { Id = 7, Nombre = "Reportes", NombreMenu = "mnuReportes" };
+            var dal = new FakePermisoDAL { ArbolPersonalizado = new List<BE.Componente> { pat } };
+            try { new BLL.Familia(dal).RenombrarComponente(7, "Reportes", "mnuUsuarios"); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.familia.patente_nombremenu", ex.Clave); }
+            // Cambiar solo el nombre visible sí se permite.
+            new BLL.Familia(dal).RenombrarComponente(7, "Reportes de ventas", "mnuReportes");
+        }
+
         // ── NoEscalaPrivilegios — núcleo puro del guard anti-autoescalación ────────────────
 
         [TestMethod]

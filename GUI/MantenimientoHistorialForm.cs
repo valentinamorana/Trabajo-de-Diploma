@@ -20,6 +20,8 @@ namespace GUI
         public MantenimientoHistorialForm(BE.Prenda prenda, BLL.Interfaces.IPrendaService prendaBLL)
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvHistorial);
             _prenda    = prenda;
             _prendaBLL = prendaBLL;
         }
@@ -33,15 +35,8 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
-            GestorIdioma.SuscribirObservador(this);
             AplicarIdioma(_idioma);
             CargarHistorial();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
@@ -122,7 +117,7 @@ namespace GUI
                 foreach (DataGridViewRow row in dgvHistorial.Rows)
                 {
                     if (row.Cells["Estado"].Value?.ToString() == abierto)
-                        row.DefaultCellStyle.ForeColor = Color.FromArgb(160, 100, 0);
+                        row.DefaultCellStyle.ForeColor = Tema.Alerta;
                 }
             }
             catch (Exception ex)
@@ -131,9 +126,7 @@ namespace GUI
                 string fmtErr = tErr.ContainsKey("err.mant.cargar")
                     ? tErr["err.mant.cargar"].Texto
                     : "Error al cargar historial: {0}";
-                string msg = ex is BE.AppException appEx
-                    ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, _idioma)
-                    : ex.Message;
+                string msg = MensajeDeError(ex);
                 lblSinRegistros.Text    = string.Format(fmtErr, msg);
                 lblSinRegistros.Visible = true;
                 dgvHistorial.Visible    = false;

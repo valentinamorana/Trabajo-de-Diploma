@@ -26,10 +26,16 @@ namespace GUI
             this.lblMotivo = new System.Windows.Forms.Label();
             this.txtMotivo = new System.Windows.Forms.TextBox();
             this.btnEnviar = new System.Windows.Forms.Button();
+            this.btnAnalizar = new System.Windows.Forms.Button();
+            this.lblOrigen = new System.Windows.Forms.Label();
+            this.lblSugerenciasTitulo = new System.Windows.Forms.Label();
+            this.btnImprimirSugerencia = new System.Windows.Forms.Button();
+            this.dgvSugerencias = new System.Windows.Forms.DataGridView();
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numBeneficioEstimado)).BeginInit();
             this.panelStatus.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSugerencias)).BeginInit();
             this.SuspendLayout();
             //
             // rbPlan
@@ -138,15 +144,82 @@ namespace GUI
             this.btnEnviar.UseVisualStyleBackColor = false;
             this.btnEnviar.Click += new System.EventHandler(this.BtnEnviar_Click);
             //
+            // btnAnalizar ("Analizar métricas" → «Reporte de métricas»)
+            //
+            this.btnAnalizar.FlatAppearance.BorderSize = 0;
+            this.btnAnalizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAnalizar.ForeColor = System.Drawing.Color.White;
+            this.btnAnalizar.Location = new System.Drawing.Point(452, 14);
+            this.btnAnalizar.Name = "btnAnalizar";
+            this.btnAnalizar.Size = new System.Drawing.Size(200, 30);
+            this.btnAnalizar.TabIndex = 12;
+            this.btnAnalizar.Tag = "promocion.btn.analizarmetricas";
+            this.btnAnalizar.Text = "Analizar métricas…";
+            this.btnAnalizar.UseVisualStyleBackColor = false;
+            this.btnAnalizar.Click += new System.EventHandler(this.BtnAnalizar_Click);
+            //
+            // lblOrigen (origen de la métrica de la sugerencia que se está armando)
+            //
+            this.lblOrigen.Location = new System.Drawing.Point(452, 52);
+            this.lblOrigen.Name = "lblOrigen";
+            this.lblOrigen.Size = new System.Drawing.Size(232, 80);
+            this.lblOrigen.TabIndex = 13;
+            //
+            // lblSugerenciasTitulo
+            //
+            this.lblSugerenciasTitulo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblSugerenciasTitulo.Location = new System.Drawing.Point(16, 254);
+            this.lblSugerenciasTitulo.Name = "lblSugerenciasTitulo";
+            this.lblSugerenciasTitulo.Size = new System.Drawing.Size(500, 20);
+            this.lblSugerenciasTitulo.TabIndex = 14;
+            this.lblSugerenciasTitulo.Tag = "promocion.titulosugregistradas";
+            this.lblSugerenciasTitulo.Text = "Sugerencias registradas";
+            //
+            // btnImprimirSugerencia
+            //
+            this.btnImprimirSugerencia.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnImprimirSugerencia.Enabled = false;
+            this.btnImprimirSugerencia.FlatAppearance.BorderSize = 0;
+            this.btnImprimirSugerencia.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimirSugerencia.ForeColor = System.Drawing.Color.White;
+            this.btnImprimirSugerencia.Location = new System.Drawing.Point(524, 248);
+            this.btnImprimirSugerencia.Name = "btnImprimirSugerencia";
+            this.btnImprimirSugerencia.Size = new System.Drawing.Size(160, 26);
+            this.btnImprimirSugerencia.TabIndex = 15;
+            this.btnImprimirSugerencia.Tag = "promocion.btn.imprimirsugerencia";
+            this.btnImprimirSugerencia.Text = "Imprimir sugerencia";
+            this.btnImprimirSugerencia.UseVisualStyleBackColor = false;
+            this.btnImprimirSugerencia.Click += new System.EventHandler(this.BtnImprimirSugerencia_Click);
+            //
+            // dgvSugerencias
+            //
+            this.dgvSugerencias.AllowUserToAddRows = false;
+            this.dgvSugerencias.AllowUserToDeleteRows = false;
+            this.dgvSugerencias.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvSugerencias.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvSugerencias.BackgroundColor = System.Drawing.Color.White;
+            this.dgvSugerencias.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvSugerencias.Location = new System.Drawing.Point(16, 278);
+            this.dgvSugerencias.MultiSelect = false;
+            this.dgvSugerencias.Name = "dgvSugerencias";
+            this.dgvSugerencias.ReadOnly = true;
+            this.dgvSugerencias.RowHeadersVisible = false;
+            this.dgvSugerencias.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvSugerencias.Size = new System.Drawing.Size(668, 168);
+            this.dgvSugerencias.TabIndex = 16;
+            this.dgvSugerencias.SelectionChanged += new System.EventHandler(this.DgvSugerencias_SelectionChanged);
+            //
             // panelStatus
             //
             this.panelStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(235)))), ((int)(((byte)(245)))));
             this.panelStatus.Controls.Add(this.lblMensaje);
             this.panelStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelStatus.Location = new System.Drawing.Point(0, 258);
+            this.panelStatus.Location = new System.Drawing.Point(0, 454);
             this.panelStatus.Name = "panelStatus";
             this.panelStatus.Padding = new System.Windows.Forms.Padding(8, 4, 8, 4);
-            this.panelStatus.Size = new System.Drawing.Size(452, 26);
+            this.panelStatus.Size = new System.Drawing.Size(700, 26);
             this.panelStatus.TabIndex = 11;
             //
             // lblMensaje
@@ -155,16 +228,21 @@ namespace GUI
             this.lblMensaje.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblMensaje.Location = new System.Drawing.Point(8, 4);
             this.lblMensaje.Name = "lblMensaje";
-            this.lblMensaje.Size = new System.Drawing.Size(436, 18);
+            this.lblMensaje.Size = new System.Drawing.Size(684, 18);
             this.lblMensaje.TabIndex = 0;
             //
             // SugerirPromocionForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(452, 284);
+            this.ClientSize = new System.Drawing.Size(700, 480);
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.btnEnviar);
+            this.Controls.Add(this.btnAnalizar);
+            this.Controls.Add(this.lblOrigen);
+            this.Controls.Add(this.lblSugerenciasTitulo);
+            this.Controls.Add(this.btnImprimirSugerencia);
+            this.Controls.Add(this.dgvSugerencias);
             this.AcceptButton = this.btnEnviar;
             this.Controls.Add(this.txtMotivo);
             this.Controls.Add(this.lblMotivo);
@@ -186,6 +264,7 @@ namespace GUI
             this.Load += new System.EventHandler(this.SugerirPromocionForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numBeneficioEstimado)).EndInit();
             this.panelStatus.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSugerencias)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -203,6 +282,11 @@ namespace GUI
         private System.Windows.Forms.Label lblMotivo;
         private System.Windows.Forms.TextBox txtMotivo;
         private System.Windows.Forms.Button btnEnviar;
+        private System.Windows.Forms.Button btnAnalizar;
+        private System.Windows.Forms.Label lblOrigen;
+        private System.Windows.Forms.Label lblSugerenciasTitulo;
+        private System.Windows.Forms.Button btnImprimirSugerencia;
+        private System.Windows.Forms.DataGridView dgvSugerencias;
         private System.Windows.Forms.Panel panelStatus;
         private System.Windows.Forms.Label lblMensaje;
     }

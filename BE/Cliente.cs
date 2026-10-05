@@ -70,6 +70,29 @@ namespace BE
             && FechaVencimiento.Value.Date >= DateTime.Today
             && (FechaVencimiento.Value.Date - DateTime.Today).TotalDays <= diasAlerta;
 
+        // True si la suscripción está vencida o próxima a vencer: es el momento de gestionar
+        // su cobro (PdN6) o su renovación (PdN5). Mismo criterio que DetectarCobroHandler y
+        // VerificarVencimientoHandler (antes estaba repetido en las pantallas).
+        public bool RequiereGestionDeVencimiento() => VencimientoExpirado || SuscripcionProximaAVencer();
+
+        // True si el plan del cliente fija un tope de prendas (para mostrar "en uso / límite").
+        public bool TieneLimiteDePrendas => TienePlan() && LimitePrendas > 0;
+
+        // Situación del vencimiento de la suscripción, sin considerar la pausa. Prioridad:
+        // sin fecha → vencida → próxima a vencer → vigente.
+        public EstadoVencimiento ObtenerEstadoVencimiento()
+        {
+            if (!FechaVencimiento.HasValue) return EstadoVencimiento.SinVencimiento;
+            if (VencimientoExpirado) return EstadoVencimiento.Vencida;
+            if (SuscripcionProximaAVencer()) return EstadoVencimiento.ProximaAVencer;
+            return EstadoVencimiento.Vigente;
+        }
+
+        // Igual que ObtenerEstadoVencimiento, pero una pausa vigente tiene prioridad sobre el
+        // vencimiento (es lo que importa al renovar: PdN5).
+        public EstadoVencimiento ObtenerEstadoSuscripcion() =>
+            EstaPausada ? EstadoVencimiento.Pausada : ObtenerEstadoVencimiento();
+
         // Días que faltan para que venza la suscripción; null si no hay fecha.
         public int? DiasHastaVencimiento() =>
             FechaVencimiento.HasValue

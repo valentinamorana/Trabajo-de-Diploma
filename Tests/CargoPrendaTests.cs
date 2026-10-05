@@ -138,5 +138,41 @@ namespace Tests
 
             Assert.AreEqual(1, resultado.Count);
         }
+
+        // ── ValidarDatos (antes CargoPrendaDialog repetía estas reglas) ─────────
+
+        [TestMethod]
+        public void ValidarDatos_Validos_NoLanza()
+        {
+            new BLL.CargoPrenda(new FakeCargoPrendaDAL()).ValidarDatos("Mancha", 100m);
+        }
+
+        [TestMethod]
+        public void ValidarDatos_MotivoVacio_LanzaMotivoRequerido()
+        {
+            try
+            {
+                new BLL.CargoPrenda(new FakeCargoPrendaDAL()).ValidarDatos("  ", 100m);
+                Assert.Fail("Debía exigir un motivo.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cargoprenda.motivo_requerido", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void ValidarDatos_MontoCero_LanzaMontoInvalido()
+        {
+            try
+            {
+                new BLL.CargoPrenda(new FakeCargoPrendaDAL()).ValidarDatos("Mancha", 0m);
+                Assert.Fail("Debía rechazar un monto de cero.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cargoprenda.monto_invalido", ex.Clave);
+            }
+        }
     }
 }

@@ -1,0 +1,22 @@
+sequenceDiagram
+  autonumber
+  actor A as Administración
+  participant F as Promociones<br/>AdministracionForm
+  participant B as BLL.Sugerencia<br/>Promocion
+  participant D as DAL.Sugerencia<br/>Promocion
+  A->>F: Elige la sugerencia, pulsa "Descartar sugerencia" e indica el motivo
+  F->>B: DescartarSugerencia(modulo, idSugerencia, motivo)
+  B->>D: ObtenerPorId(idSugerencia)
+  Note over B: Exigir(PromocionesAdminEditar) · sugerencia.PuedeEvaluarse() · motivo obligatorio
+  alt Ya evaluada / sin motivo
+    B-->>F: AppException(sugerencia_evaluada / motivodescarte_requerido)
+  else Pendiente y con motivo
+    B->>D: Descartar(idSugerencia, motivo, fecha)  [claim: WHERE Estado = Pendiente]
+    alt Otra sesión ya la evaluó
+      D-->>B: false
+      B-->>F: AppException(sugerencia_evaluada)
+    else Descartada
+      B-->>F: ok
+      F-->>A: Constancia de descarte (PDF): fin
+    end
+  end

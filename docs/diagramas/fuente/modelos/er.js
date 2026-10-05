@@ -10,7 +10,7 @@ module.exports = [
       // Negocio
       'PlanSuscripcion', 'Cliente', 'HistorialRenovacion', 'HistorialCobro', 'Contratacion',
       'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda',
-      'ListaEspera', 'SugerenciaPromocion', 'Promocion'
+      'ListaEspera', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion'
     ]
   },
   {
@@ -28,15 +28,15 @@ module.exports = [
   },
   {
     tipo: 'er', id: 'DER_pn01_pedidos', titulo: 'DER — PN01 Armar pedido', columnas: 3,
-    tablas: ['Cliente', 'Empleado', 'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'ListaEspera', 'MantenimientoPrenda']
+    tablas: ['Cliente', 'Empleado', 'Pedido', 'PedidoPrenda', 'PedidoFaltante', 'PedidoFaltanteAlternativa', 'PedidoHistorial', 'Prenda', 'ListaEspera', 'MantenimientoPrenda']
   },
   {
     tipo: 'er', id: 'DER_pn02_contrataciones', titulo: 'DER — PN02 Comercialización de la suscripción', columnas: 3,
-    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Contratacion', 'Promocion']
+    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Contratacion', 'MedioPago', 'ContratacionIntentoPago', 'DesistimientoContratacion', 'Promocion']
   },
   {
     tipo: 'er', id: 'DER_pn03_promociones', titulo: 'DER — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
-    tablas: ['PlanSuscripcion', 'SugerenciaPromocion', 'Promocion', 'Contratacion', 'Cliente']
+    tablas: ['Usuario', 'PlanSuscripcion', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion', 'Contratacion', 'Cliente']
   },
   {
     tipo: 'er', id: 'DER_pn04_devolucion', titulo: 'DER — PN04 Inspección de devolución', columnas: 3,

@@ -1,5 +1,19 @@
 classDiagram
   direction TB
+  class ReporteMetricas {
+    +DateTime Fecha
+    +List~MetricaAbandonoPlan~ AbandonoPorPlan
+    +List~MetricaRotacionCategoria~ RotacionPorCategoria
+    +List~CandidataSugerencia~ Oportunidades
+    +HayOportunidad() bool
+  }
+  class CandidataSugerencia {
+    +OrigenMetrica Origen
+    +int? IdPlan
+    +string CategoriaPrenda
+    +string Motivo
+    +decimal BeneficioEstimado
+  }
   class SugerenciaPromocion {
     +int IdSugerencia
     +int? IdPlan
@@ -9,6 +23,13 @@ classDiagram
     +decimal BeneficioEstimado
     +EstadoSugerencia Estado
     +DateTime FechaAlta
+    +OrigenMetrica OrigenMetrica
+    +int? IdUsuarioAlta
+    +string MotivoDescarte
+    +DateTime? FechaEvaluacion
+    +string NombreUsuarioAlta
+    +PuedeEvaluarse() bool
+    +TransicionValida(EstadoSugerencia) bool
   }
   class Promocion {
     +int IdPromocion
@@ -23,62 +44,114 @@ classDiagram
     +string CategoriaPrenda
     +decimal MargenEstimado
     +string ImpactoEconomico
-    +string Observacion
-    +string MotivoBaja
     +int? IdSugerenciaOrigen
+    +int? IdUsuarioAlta
     +DateTime FechaAlta
+    +string NombreUsuarioAlta
+    +EstaVigente() bool
+    +DebeVencer(DateTime) bool
+    +PuedeDictaminarla(int) bool
+    +PuedeSolicitarseBaja() bool
+    +PuedeResolverseBaja() bool
+    +PuedeDesactivarseDirecto() bool
+    +PuedeReformularse() bool
+    +PuedeDescartarse() bool
+    +SeSuperponeCon(Promocion) bool
+    +TransicionValida(EstadoPromocion) bool
   }
-  class PlanSuscripcion {
-    +int IdPlan
-    +string Nombre
-    +decimal Precio
+  class PromocionHistorial {
+    +int IdHistorial
+    +int IdPromocion
+    +EstadoPromocion? EstadoAnterior
+    +EstadoPromocion EstadoNuevo
+    +int? IdUsuario
+    +DateTime Fecha
+    +string Observacion
   }
-  class CandidataSugerencia {
-    +string Origen
-    +int? IdPlan
-    +string NombrePlan
-    +string CategoriaPrenda
+  class DictamenContable {
+    +int IdDictamen
+    +int IdPromocion
+    +int IdUsuario
+    +bool Aprobada
+    +string Observacion
+    +DateTime Fecha
+  }
+  class SolicitudBajaPromocion {
+    +int IdSolicitud
+    +int IdPromocion
+    +int IdUsuarioSolicita
     +string Motivo
-    +TipoDescuento TipoSugerido
-    +decimal BeneficioEstimado
-    +string Resumen
+    +DateTime FechaSolicitud
+    +EstadoSolicitudBaja Estado
+    +int? IdUsuarioResuelve
+    +string MotivoResolucion
+    +DateTime? FechaResolucion
+    +string NombreUsuarioResuelve
+  }
+  class AnalisisImpactoPromocion {
+    +Promocion Promocion
+    +decimal? BeneficioEstimadoSugerencia
+    +OrigenMetrica? OrigenSugerencia
+    +List~Promocion~ Superpuestas
+    +bool UsuarioPuedeDictaminar
+  }
+  class BLL_AnalisisPromociones["BLL.AnalisisPromociones"] {
+    +AnalizarMetricas(string) ReporteMetricas
+    +HayOportunidad(ReporteMetricas) bool
   }
   class BLL_SugerenciaPromocion["BLL.SugerenciaPromocion"] {
     +ObtenerPendientes() List~SugerenciaPromocion~
-    +Crear(string,  int?,  string,  string,  TipoDescuento,  decimal) int
-  }
-  class BLL_AnalisisPromociones["BLL.AnalisisPromociones"] {
-    +Detectar() List~CandidataSugerencia~
+    +RegistrarSugerencia(string,  OrigenMetrica,  int?,  string,  string,  TipoDescuento,  decimal) int
+    +DescartarSugerencia(string,  int,  string) void
   }
   class BLL_Promocion["BLL.Promocion"] {
+    +ObtenerTodas() List~Promocion~
+    +ObtenerParaVentas() List~Promocion~
+    +ObtenerPendientesRevisionContable() List~Promocion~
+    +ObtenerDescarte(int) PromocionHistorial
     +CrearDesdeSugerencia(string,  int,  string,  string,  TipoDescuento,  decimal,  DateTime,  DateTime,  decimal,  string) int
     +CrearManual(string,  string,  string,  TipoDescuento,  decimal,  DateTime,  DateTime,  int?,  string,  decimal,  string) int
-    +Modificar(string,  Promocion) void
+    +ValidarPromocion(Promocion) void
+    +AnalizarMargenEImpacto(int) AnalisisImpactoPromocion
+    +PuedeDictaminar(Promocion) bool
+    +AprobarContable(string,  Promocion,  string) int
+    +RechazarContable(string,  Promocion,  string) int
     +Reformular(string,  Promocion) void
-    +Desactivar(string,  Promocion) void
-    +AprobarContable(string,  Promocion,  string) void
-    +RechazarContable(string,  Promocion,  string) void
-    +SugerirBaja(string,  Promocion,  string) void
-    +AprobarBaja(string,  Promocion) void
-    +RechazarBaja(string,  Promocion,  string) void
+    +DescartarPromocion(string,  Promocion,  string) void
+    +SolicitarBaja(string,  Promocion,  string) int
+    +AprobarBaja(string,  Promocion,  string) int
+    +RechazarBaja(string,  Promocion,  string) int
+    +Desactivar(string,  Promocion,  string) void
+    +CerrarVencidas() int
   }
   class DAL_Interfaces_IPromocionDAL["DAL.Interfaces.IPromocionDAL"] {
     <<interface>>
-    +Alta(Promocion) int
-    +Modificar(Promocion) bool
-    +CambiarEstado(int,  EstadoPromocion,  EstadoPromocion,  string) bool
-    +SolicitarBaja(int,  string) bool
+    +ObtenerTodas() List~Promocion~
+    +ObtenerPorId(int) Promocion
+    +Alta(Promocion,  PromocionHistorial) int
+    +Reformular(Promocion,  PromocionHistorial) bool
+    +CambiarEstado(int,  EstadoPromocion,  PromocionHistorial) bool
+    +Dictaminar(DictamenContable,  PromocionHistorial) int
+    +SolicitarBaja(SolicitudBajaPromocion,  PromocionHistorial) int
+    +ResolverBaja(SolicitudBajaPromocion,  PromocionHistorial) bool
+    +ObtenerHistorial(int) List~PromocionHistorial~
+    +ObtenerSolicitudesBaja(int) List~SolicitudBajaPromocion~
   }
   class DAL_Interfaces_ISugerenciaPromocionDAL["DAL.Interfaces.ISugerenciaPromocionDAL"] {
     <<interface>>
+    +ObtenerPorId(int) SugerenciaPromocion
     +Alta(SugerenciaPromocion) int
-    +MarcarEvaluada(int) bool
+    +MarcarEvaluada(int,  DateTime) bool
     +ReabrirEvaluacion(int) void
+    +Descartar(int,  string,  DateTime) bool
   }
-  SugerenciaPromocion --> "0..1" PlanSuscripcion : IdPlan
-  Promocion --> "0..1" PlanSuscripcion : IdPlan
+  ReporteMetricas --> "*" CandidataSugerencia : Oportunidades
   Promocion --> "0..1" SugerenciaPromocion : IdSugerenciaOrigen
-  CandidataSugerencia --> "0..1" PlanSuscripcion : IdPlan
+  PromocionHistorial --> "1" Promocion : IdPromocion
+  DictamenContable --> "1" Promocion : IdPromocion
+  SolicitudBajaPromocion --> "1" Promocion : IdPromocion
+  AnalisisImpactoPromocion --> "1" Promocion : Promocion
+  AnalisisImpactoPromocion --> "*" Promocion : Superpuestas
   BLL_SugerenciaPromocion ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa
   BLL_Promocion ..> DAL_Interfaces_IPromocionDAL : usa
   BLL_Promocion ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa

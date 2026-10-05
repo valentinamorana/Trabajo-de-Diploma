@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as PedidosVenta / NuevoPedidoForm
+  participant B as BLL.Pedido
+  participant D as DAL.Pedido
+  participant H as DAL.Pedido<br/>Historial
+  V->>F: Ver faltantes de un pedido ConFaltantes
+  F->>B: ObtenerInformeFaltantes(idPedido)
+  B->>D: ObtenerFaltantes(idPedido)
+  B-->>F: faltantes con sus alternativas
+  F-->>V: Detalle de prendas no disponibles (pantalla y PDF)
+  alt El cliente ajusta la selección
+    V->>F: Ajustar selección (sin los faltantes, alternativas resaltadas)
+    F->>B: AjustarSeleccion(modulo, pedido, prendas)
+    Note over B: Exigir(PedidosVentaEditar) · solo ConFaltantes · vuelve al merge: solo ComprobarCupo(cliente, cantidad)
+    B->>D: ReemplazarSeleccion(idPedido, prendas)  [→ EnControlStock, informe anterior descartado]
+    B->>H: RegistrarCambios(AJUSTAR_SELECCION)
+    F-->>V: Pedido reenviado a control de stock
+  else El cliente desiste
+    V->>F: Registrar desistimiento + motivo
+    F->>B: AsentarDesistimiento(modulo, pedido, motivo, etapa, seleccionAjustada)  [Disponibilidad, o Cupo si al ajustar excede]
+    B->>D: RegistrarDesistimiento(idPedido, motivo, etapa, seleccionAjustada)  [→ Desistido]
+    B->>H: RegistrarCambios(DESISTIR)
+    F-->>V: Aviso de desistimiento (PDF)
+  end

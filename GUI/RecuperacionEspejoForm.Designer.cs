@@ -127,7 +127,7 @@ namespace GUI
             this.txtResumen.TabIndex     = 0;
 
             // ── panelBotones ───────────────────────────────────────────────────
-            this.panelBotones.BackColor      = System.Drawing.Color.FromArgb(245, 245, 250);
+            this.panelBotones.BackColor      = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(250)))));
             this.panelBotones.Controls.Add(this.btnCerrar);
             this.panelBotones.Controls.Add(this.btnBackup);
             this.panelBotones.Controls.Add(this.btnAsumir);

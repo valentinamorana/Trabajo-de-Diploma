@@ -17,12 +17,15 @@ namespace BLL.Manejadores
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
         private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
+        private readonly DAL.Interfaces.IPedidoDAL dalPedido;
 
         // Antes tomaba DAL.Prenda (clase concreta) en vez de IPrendaDAL — por eso no se podía
         // instanciar con un doble de prueba y quedaba sin ningún test.
         public BajaSuscripcionHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
-                                       DAL.Interfaces.IPrendaDAL dalPrenda)
+                                       DAL.Interfaces.IPrendaDAL dalPrenda,
+                                       DAL.Interfaces.IPedidoDAL dalPedido = null)
         {
+            this.dalPedido = dalPedido;
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
             this.dalPrenda = dalPrenda ?? throw new ArgumentNullException(nameof(dalPrenda));
@@ -30,6 +33,12 @@ namespace BLL.Manejadores
 
         public override ResultadoRenovacion Procesar(ContextoRenovacion contexto)
         {
+            // Con un pedido en el circuito no se da de baja: dejaría un pedido en curso sin suscripción.
+            if (dalPedido != null && dalPedido.TienePedidoActivo(contexto.Cliente.IdCliente))
+                throw new BE.AppException("err.bll.renovacion.pedido_activo",
+                    "No se puede pausar ni dar de baja la suscripción: el cliente tiene un pedido en curso. " +
+                    "Esperá a que termine su ciclo o cancelalo.");
+
             var cliente = contexto.Cliente;
             int? idPlanAnterior = cliente.IdPlan;
 
@@ -55,7 +64,7 @@ namespace BLL.Manejadores
                     Actor = contexto.Actor
                 });
             });
-            dalCliente.RecalcularDV();
+            dalCliente.RecalcularDV(cliente.IdCliente);
 
             var prendasEnUso = dalPrenda.ObtenerPorCliente(cliente.IdCliente);
             bool conPrendas = prendasEnUso.Count > 0;

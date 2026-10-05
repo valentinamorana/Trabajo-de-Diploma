@@ -23,7 +23,9 @@ namespace GUI
             this.lblMensaje = new System.Windows.Forms.Label();
             this.panelPaso1 = new System.Windows.Forms.Panel();
             this.lblSeleccionaCliente = new System.Windows.Forms.Label();
-            this.cmbCliente = new System.Windows.Forms.ComboBox();
+            this.txtIdentificacion = new System.Windows.Forms.TextBox();
+            this.btnBuscar = new System.Windows.Forms.Button();
+            this.lstCoincidencias = new System.Windows.Forms.ListBox();
             this.lblInfoPlan = new System.Windows.Forms.Label();
             this.btnSiguiente = new System.Windows.Forms.Button();
             this.panelPaso2 = new System.Windows.Forms.Panel();
@@ -38,6 +40,10 @@ namespace GUI
             this.lblResumen = new System.Windows.Forms.Label();
             this.btnVolver = new System.Windows.Forms.Button();
             this.btnConfirmar = new System.Windows.Forms.Button();
+            this.btnDesistir = new System.Windows.Forms.Button();
+            this.btnImprimirAviso = new System.Windows.Forms.Button();
+            this.btnImprimirCupo = new System.Windows.Forms.Button();
+            this.lblDetalle = new System.Windows.Forms.Label();
             this.panelHeader.SuspendLayout();
             this.panelStatus.SuspendLayout();
             this.panelPaso1.SuspendLayout();
@@ -91,9 +97,12 @@ namespace GUI
             // panelPaso1
             // 
             this.panelPaso1.Controls.Add(this.lblSeleccionaCliente);
-            this.panelPaso1.Controls.Add(this.cmbCliente);
+            this.panelPaso1.Controls.Add(this.txtIdentificacion);
+            this.panelPaso1.Controls.Add(this.btnBuscar);
+            this.panelPaso1.Controls.Add(this.lstCoincidencias);
             this.panelPaso1.Controls.Add(this.lblInfoPlan);
             this.panelPaso1.Controls.Add(this.btnSiguiente);
+            this.panelPaso1.Controls.Add(this.btnImprimirAviso);
             this.panelPaso1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelPaso1.Location = new System.Drawing.Point(0, 40);
             this.panelPaso1.Name = "panelPaso1";
@@ -109,29 +118,54 @@ namespace GUI
             this.lblSeleccionaCliente.Size = new System.Drawing.Size(600, 23);
             this.lblSeleccionaCliente.TabIndex = 0;
             this.lblSeleccionaCliente.Tag = "lbl.ped.selcliente";
-            this.lblSeleccionaCliente.Text = "Seleccioná el cliente para este pedido:";
-            // 
-            // cmbCliente
-            // 
-            this.cmbCliente.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbCliente.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.cmbCliente.Location = new System.Drawing.Point(20, 50);
-            this.cmbCliente.Name = "cmbCliente";
-            this.cmbCliente.Size = new System.Drawing.Size(500, 25);
-            this.cmbCliente.TabIndex = 1;
-            this.cmbCliente.SelectedIndexChanged += new System.EventHandler(this.CmbCliente_SelectedIndexChanged);
+            this.lblSeleccionaCliente.Text = "Identificación del cliente (DNI, nombre o apellido):";
+            //
+            // txtIdentificacion
+            //
+            this.txtIdentificacion.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.txtIdentificacion.Location = new System.Drawing.Point(20, 50);
+            this.txtIdentificacion.Name = "txtIdentificacion";
+            this.txtIdentificacion.Size = new System.Drawing.Size(380, 25);
+            this.txtIdentificacion.TabIndex = 1;
+            this.txtIdentificacion.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TxtIdentificacion_KeyDown);
+            //
+            // btnBuscar
+            //
+            this.btnBuscar.BackColor = System.Drawing.Color.SteelBlue;
+            this.btnBuscar.FlatAppearance.BorderSize = 0;
+            this.btnBuscar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBuscar.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.btnBuscar.ForeColor = System.Drawing.Color.White;
+            this.btnBuscar.Location = new System.Drawing.Point(410, 48);
+            this.btnBuscar.Name = "btnBuscar";
+            this.btnBuscar.Size = new System.Drawing.Size(120, 29);
+            this.btnBuscar.TabIndex = 2;
+            this.btnBuscar.Tag = "btn.ped.buscar";
+            this.btnBuscar.Text = "Buscar";
+            this.btnBuscar.UseVisualStyleBackColor = false;
+            this.btnBuscar.Click += new System.EventHandler(this.BtnBuscar_Click);
+            //
+            // lstCoincidencias
+            //
+            this.lstCoincidencias.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.lstCoincidencias.Location = new System.Drawing.Point(20, 84);
+            this.lstCoincidencias.Name = "lstCoincidencias";
+            this.lstCoincidencias.Size = new System.Drawing.Size(620, 72);
+            this.lstCoincidencias.TabIndex = 3;
+            this.lstCoincidencias.Visible = false;
+            this.lstCoincidencias.SelectedIndexChanged += new System.EventHandler(this.LstCoincidencias_SelectedIndexChanged);
             // 
             // lblInfoPlan
             // 
             this.lblInfoPlan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(246)))), ((int)(((byte)(255)))));
             this.lblInfoPlan.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblInfoPlan.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.lblInfoPlan.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(80)))), ((int)(((byte)(140)))));
-            this.lblInfoPlan.Location = new System.Drawing.Point(20, 90);
+            this.lblInfoPlan.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(100)))), ((int)(((byte)(170)))));
+            this.lblInfoPlan.Location = new System.Drawing.Point(20, 165);
             this.lblInfoPlan.Name = "lblInfoPlan";
             this.lblInfoPlan.Padding = new System.Windows.Forms.Padding(10);
-            this.lblInfoPlan.Size = new System.Drawing.Size(620, 120);
-            this.lblInfoPlan.TabIndex = 2;
+            this.lblInfoPlan.Size = new System.Drawing.Size(620, 150);
+            this.lblInfoPlan.TabIndex = 4;
             this.lblInfoPlan.Visible = false;
             // 
             // btnSiguiente
@@ -142,10 +176,10 @@ namespace GUI
             this.btnSiguiente.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSiguiente.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.btnSiguiente.ForeColor = System.Drawing.Color.White;
-            this.btnSiguiente.Location = new System.Drawing.Point(20, 240);
+            this.btnSiguiente.Location = new System.Drawing.Point(20, 330);
             this.btnSiguiente.Name = "btnSiguiente";
             this.btnSiguiente.Size = new System.Drawing.Size(160, 36);
-            this.btnSiguiente.TabIndex = 3;
+            this.btnSiguiente.TabIndex = 5;
             this.btnSiguiente.Tag = "btn.siguiente";
             this.btnSiguiente.Text = "Siguiente →";
             this.btnSiguiente.UseVisualStyleBackColor = false;
@@ -158,6 +192,9 @@ namespace GUI
             this.panelPaso2.Controls.Add(this.lblResumen);
             this.panelPaso2.Controls.Add(this.btnVolver);
             this.panelPaso2.Controls.Add(this.btnConfirmar);
+            this.panelPaso2.Controls.Add(this.btnDesistir);
+            this.panelPaso2.Controls.Add(this.btnImprimirCupo);
+            this.panelPaso2.Controls.Add(this.lblDetalle);
             this.panelPaso2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelPaso2.Location = new System.Drawing.Point(0, 40);
             this.panelPaso2.Name = "panelPaso2";
@@ -193,7 +230,7 @@ namespace GUI
             this.colColor});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(182)))), ((int)(((byte)(193)))));
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.Black;
@@ -203,7 +240,7 @@ namespace GUI
             this.dgvPrendas.Name = "dgvPrendas";
             this.dgvPrendas.RowHeadersVisible = false;
             this.dgvPrendas.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvPrendas.Size = new System.Drawing.Size(660, 340);
+            this.dgvPrendas.Size = new System.Drawing.Size(660, 262);
             this.dgvPrendas.TabIndex = 1;
             this.dgvPrendas.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvPrendas_CellValueChanged);
             this.dgvPrendas.CurrentCellDirtyStateChanged += new System.EventHandler(this.DgvPrendas_CurrentCellDirtyStateChanged);
@@ -254,7 +291,7 @@ namespace GUI
             // lblResumen
             // 
             this.lblResumen.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblResumen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(80)))), ((int)(((byte)(140)))));
+            this.lblResumen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(100)))), ((int)(((byte)(170)))));
             this.lblResumen.Location = new System.Drawing.Point(10, 374);
             this.lblResumen.Name = "lblResumen";
             this.lblResumen.Size = new System.Drawing.Size(660, 40);
@@ -280,12 +317,67 @@ namespace GUI
             this.btnConfirmar.ForeColor = System.Drawing.Color.White;
             this.btnConfirmar.Location = new System.Drawing.Point(130, 417);
             this.btnConfirmar.Name = "btnConfirmar";
-            this.btnConfirmar.Size = new System.Drawing.Size(190, 34);
+            this.btnConfirmar.Size = new System.Drawing.Size(200, 34);
             this.btnConfirmar.TabIndex = 4;
-            this.btnConfirmar.Tag = "btn.confirmar.pedido";
-            this.btnConfirmar.Text = "Confirmar Pedido";
+            this.btnConfirmar.Tag = "btn.ped.enviarcontrol";
+            this.btnConfirmar.Text = "Enviar a control de stock";
             this.btnConfirmar.UseVisualStyleBackColor = false;
             this.btnConfirmar.Click += new System.EventHandler(this.BtnConfirmar_Click);
+            //
+            // btnDesistir
+            //
+            this.btnDesistir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
+            this.btnDesistir.FlatAppearance.BorderSize = 0;
+            this.btnDesistir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDesistir.ForeColor = System.Drawing.Color.White;
+            this.btnDesistir.Location = new System.Drawing.Point(340, 417);
+            this.btnDesistir.Name = "btnDesistir";
+            this.btnDesistir.Size = new System.Drawing.Size(200, 34);
+            this.btnDesistir.TabIndex = 5;
+            this.btnDesistir.Tag = "btn.ped.desistir";
+            this.btnDesistir.Text = "Registrar desistimiento";
+            this.btnDesistir.UseVisualStyleBackColor = false;
+            this.btnDesistir.Visible = false;
+            this.btnDesistir.Click += new System.EventHandler(this.BtnDesistir_Click);
+            //
+            // btnImprimirAviso
+            //
+            this.btnImprimirAviso.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(110)))));
+            this.btnImprimirAviso.FlatAppearance.BorderSize = 0;
+            this.btnImprimirAviso.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimirAviso.ForeColor = System.Drawing.Color.White;
+            this.btnImprimirAviso.Location = new System.Drawing.Point(190, 330);
+            this.btnImprimirAviso.Name = "btnImprimirAviso";
+            this.btnImprimirAviso.Size = new System.Drawing.Size(180, 36);
+            this.btnImprimirAviso.Tag = "btn.ped.imprimiraviso";
+            this.btnImprimirAviso.Text = "Imprimir aviso";
+            this.btnImprimirAviso.UseVisualStyleBackColor = false;
+            this.btnImprimirAviso.Visible = false;
+            this.btnImprimirAviso.Click += new System.EventHandler(this.BtnImprimirAviso_Click);
+            //
+            // btnImprimirCupo
+            //
+            this.btnImprimirCupo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(110)))));
+            this.btnImprimirCupo.FlatAppearance.BorderSize = 0;
+            this.btnImprimirCupo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimirCupo.ForeColor = System.Drawing.Color.White;
+            this.btnImprimirCupo.Location = new System.Drawing.Point(550, 417);
+            this.btnImprimirCupo.Name = "btnImprimirCupo";
+            this.btnImprimirCupo.Size = new System.Drawing.Size(130, 34);
+            this.btnImprimirCupo.Tag = "btn.ped.imprimircupo";
+            this.btnImprimirCupo.Text = "Imprimir detalle";
+            this.btnImprimirCupo.UseVisualStyleBackColor = false;
+            this.btnImprimirCupo.Visible = false;
+            this.btnImprimirCupo.Click += new System.EventHandler(this.BtnImprimirCupo_Click);
+            //
+            // lblDetalle
+            //
+            this.lblDetalle.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lblDetalle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
+            this.lblDetalle.Location = new System.Drawing.Point(10, 292);
+            this.lblDetalle.Name = "lblDetalle";
+            this.lblDetalle.Size = new System.Drawing.Size(660, 80);
+            this.lblDetalle.TabIndex = 6;
             // 
             // NuevoPedidoForm
             // 
@@ -299,6 +391,7 @@ namespace GUI
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F);   // escala tipográfica de Tema (antes: Microsoft Sans Serif por defecto)
             this.Name = "NuevoPedidoForm";
             this.Load += new System.EventHandler(this.NuevoPedidoForm_Load);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -321,7 +414,13 @@ namespace GUI
         private System.Windows.Forms.Label          lblMensaje;
         private System.Windows.Forms.Panel          panelPaso1;
         private System.Windows.Forms.Label          lblSeleccionaCliente;
-        private System.Windows.Forms.ComboBox       cmbCliente;
+        private System.Windows.Forms.TextBox        txtIdentificacion;
+        private System.Windows.Forms.Button         btnBuscar;
+        private System.Windows.Forms.ListBox        lstCoincidencias;
+        private System.Windows.Forms.Button btnDesistir;
+        private System.Windows.Forms.Button btnImprimirAviso;
+        private System.Windows.Forms.Button btnImprimirCupo;
+        private System.Windows.Forms.Label          lblDetalle;
         private System.Windows.Forms.Label          lblInfoPlan;
         private System.Windows.Forms.Button         btnSiguiente;
         private System.Windows.Forms.Panel          panelPaso2;

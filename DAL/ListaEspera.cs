@@ -130,21 +130,26 @@ namespace DAL
                 : 0;
         }
 
-        public void CambiarEstado(int idListaEspera, BE.EstadoListaEspera nuevoEstado,
-                                   DateTime? fechaLimiteReserva, string actor)
+        // Claim atómico: solo cambia si la fila sigue en 'estadoEsperado' (si otra sesión ya la
+        // reservó, convirtió o canceló, no se afecta ninguna fila y devuelve false).
+        public bool CambiarEstado(int idListaEspera, BE.EstadoListaEspera nuevoEstado,
+                                   DateTime? fechaLimiteReserva, string actor, BE.EstadoListaEspera estadoEsperado)
         {
             SqlParameter[] p =
             {
-                new SqlParameter("@Estado",             (int)nuevoEstado),
+                new SqlParameter("@Estado",             SqlDbType.Int) { Value = (int)nuevoEstado },
                 new SqlParameter("@FechaLimiteReserva",  (object)fechaLimiteReserva ?? DBNull.Value),
                 new SqlParameter("@FechaResolucion",     nuevoEstado == BE.EstadoListaEspera.Reservada ? (object)DBNull.Value : DateTime.Now),
                 new SqlParameter("@Actor",               (object)actor ?? DBNull.Value),
-                new SqlParameter("@IdListaEspera",       idListaEspera)
+                new SqlParameter("@IdListaEspera",       idListaEspera),
+                // Pendiente vale 0: Value explícito (el literal 0 elegiría el constructor con SqlDbType).
+                new SqlParameter("@Esperado",            SqlDbType.Int) { Value = (int)estadoEsperado }
             };
-            acceso.Escribir(
+            return acceso.Escribir(
                 "UPDATE ListaEspera SET Estado = @Estado, FechaLimiteReserva = @FechaLimiteReserva, " +
-                "FechaResolucion = @FechaResolucion, Actor = @Actor WHERE IdListaEspera = @IdListaEspera",
-                p);
+                "FechaResolucion = @FechaResolucion, Actor = @Actor " +
+                "WHERE IdListaEspera = @IdListaEspera AND Estado = @Esperado",
+                p) > 0;
         }
 
         private BE.ListaEspera Mapear(DataRow row)

@@ -23,8 +23,8 @@ namespace GUI.Estilos
     public class MenuRenderer : ToolStripProfessionalRenderer
     {
         private static readonly Color AcentoPorDefecto = GUI.Tema.RosaPrimario;
-        private static readonly Color ResaltadoDropdown = Color.FromArgb(252, 228, 235);
-        private static readonly Color ColorResaltoSistema = Color.FromArgb(224, 231, 245);
+        private static readonly Color ResaltadoDropdown = Tema.RosaPalido;
+        private static readonly Color ColorResaltoSistema = Tema.FondoInfo;
 
         // Paleta por Name del ítem de primer nivel — un color por área funcional. Los
         // ítems que ya gestionan su propio texto dinámicamente (Sesión/Alertas) reciben
@@ -32,16 +32,16 @@ namespace GUI.Estilos
         private static readonly Dictionary<string, Color> _paleta =
             new Dictionary<string, Color>(StringComparer.OrdinalIgnoreCase)
         {
-            ["panelControlToolStripMenuItem"]     = Color.FromArgb(255, 255, 255),
-            ["ventanaToolStripMenuItem"]           = Color.FromArgb(238, 238, 242),
-            ["suscriptoresToolStripMenuItem"]      = Color.FromArgb(255, 205, 205),
-            ["inventarioToolStripMenuItem"]        = Color.FromArgb(255, 219, 173),
-            ["ventasToolStripMenuItem"]            = Color.FromArgb(190, 230, 200),
-            ["auditoriaToolStripMenuItem"]         = Color.FromArgb(190, 213, 240),
+            ["panelControlToolStripMenuItem"]     = Color.White,
+            ["ventanaToolStripMenuItem"]           = Tema.PanelClaro,
+            ["suscriptoresToolStripMenuItem"]      = Tema.FondoError,
+            ["inventarioToolStripMenuItem"]        = Tema.FondoAlerta,
+            ["ventasToolStripMenuItem"]            = Tema.FondoExito,
+            ["auditoriaToolStripMenuItem"]         = Tema.FondoInfo,
             ["analiticaNegocioToolStripMenuItem"]  = Color.FromArgb(215, 200, 240),
-            ["gestionToolStripMenuItem"]           = Color.FromArgb(220, 216, 226),
-            ["usuarioToolStripMenuItem"]           = Color.FromArgb(250, 250, 252),
-            ["alertasItem"]                        = Color.FromArgb(176, 62, 96),
+            ["gestionToolStripMenuItem"]           = Tema.Borde,
+            ["usuarioToolStripMenuItem"]           = Tema.PanelClaro,
+            ["alertasItem"]                        = Tema.RosaOscuro,
         };
 
         private static Color Aclarar(Color c, int cantidad) => Color.FromArgb(
@@ -117,7 +117,7 @@ namespace GUI.Estilos
 
             int cy = item.Height / 2;
             int cx = item.Width / 2;
-            using (var br = new SolidBrush(Color.FromArgb(200, 190, 200)))
+            using (var br = new SolidBrush(Tema.Borde))
             {
                 for (int i = -1; i <= 1; i++)
                     g.FillEllipse(br, cx + i * 10 - 2, cy - 2, 4, 4);
@@ -126,7 +126,7 @@ namespace GUI.Estilos
 
         protected override void OnRenderArrow(ToolStripArrowRenderEventArgs e)
         {
-            e.ArrowColor = Color.FromArgb(140, 90, 115);
+            e.ArrowColor = Tema.TextoMuted;
             base.OnRenderArrow(e);
         }
 

@@ -3,38 +3,30 @@ using System.Collections.Generic;
 namespace BLL.Interfaces
 {
     /// <summary>
-    /// PN02 — Comercialización de la suscripción.
-    ///
-    /// Casos de uso definidos:
-    ///   CrearContratacion()          — Venta capta al cliente y su plan elegido (CU01-VTA)
-    ///   ObtenerPendientesDePago()    — Caja consulta la cola de contrataciones a cobrar
-    ///   ConfirmarPago()              — Caja cobra y emite el comprobante (CU01-CAJ + CU02-CAJ),
-    ///                                   dispara BLL.Cliente.ActivarSuscripcion
-    ///   RegistrarIntentoFallido()    — Caja registra un intento de pago que no se concretó;
-    ///                                   al tercer intento cancela automáticamente (CU03-CAJ)
+    /// PN02 — Comercialización de la suscripción. Un método por actividad del diagrama de
+    /// actividad (ver el encabezado de <see cref="BLL.Contratacion"/>).
     /// </summary>
     public interface IContratacionService
     {
+        // ── Vendedor ──
+        List<BE.Cliente> IdentificarCliente(string identificacion);
+        List<BE.PlanSuscripcion> PresentarPlanes();
+        int AsentarDesistimiento(string modulo, int idCliente, int? idPlan, BE.Builders.ModalidadCobro? modalidad, string motivo);
+        BE.PlanSuscripcion ValidarContratacion(int idCliente, int idPlan);
+        int RegistrarContratacion(string modulo, int idCliente, int idPlan, BE.Builders.ModalidadCobro modalidad);
+        BE.LiquidacionContratacion EstimarImporte(int idCliente, int idPlan, BE.Builders.ModalidadCobro modalidad);
+
+        // ── Caja ──
         List<BE.Contratacion> ObtenerPendientesDePago();
-
+        List<BE.Contratacion> ObtenerResueltas();
         BE.Contratacion ObtenerPorId(int idContratacion);
-
-        // Crea una contratación pendiente de pago para un cliente y un plan. Devuelve el ID generado.
-        int CrearContratacion(string modulo, int idCliente, int idPlan, BE.Builders.ModalidadCobro modalidad);
-
-        // Confirma el pago: marca la contratación como Pagada, emite el comprobante y
-        // formaliza la suscripción del cliente (BLL.Cliente.ActivarSuscripcion).
-        // Devuelve la liquidación: comprobante emitido, importe cobrado y descuento aplicado (PN03).
-        BE.LiquidacionContratacion ConfirmarPago(string modulo, BE.Contratacion contratacion, string medioPago);
-
-        // Importe a cobrar (con el descuento aplicable) de una contratación pendiente.
+        List<BE.MedioPago> ObtenerMediosPago();
+        List<BE.IntentoPago> ObtenerIntentos(int idContratacion);
+        BE.DesistimientoContratacion ObtenerDesistimiento(int idDesistimiento);
         BE.LiquidacionContratacion CalcularImporte(BE.Contratacion contratacion);
-
-        // Igual para toda la cola de Caja (clave = IdContratacion), leyendo las promociones una sola vez.
-        System.Collections.Generic.Dictionary<int, BE.LiquidacionContratacion> CalcularImportes(System.Collections.Generic.List<BE.Contratacion> contrataciones);
-
-        // Registra un intento de pago fallido. Si se alcanzan los 3 intentos, cancela
-        // automáticamente la contratación.
-        void RegistrarIntentoFallido(string modulo, BE.Contratacion contratacion);
+        Dictionary<int, BE.LiquidacionContratacion> CalcularImportes(List<BE.Contratacion> contrataciones);
+        BE.LiquidacionContratacion ConfirmarCobro(string modulo, BE.Contratacion contratacion, int idMedioPago, decimal? importeConfirmado = null);
+        int ContarPendientesDePago();
+        BE.ResultadoIntentoPago RegistrarIntentoFallido(string modulo, BE.Contratacion contratacion, int? idMedioPago, string motivo);
     }
 }

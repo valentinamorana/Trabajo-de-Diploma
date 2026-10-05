@@ -26,7 +26,7 @@ namespace Tests
     [TestClass]
     public class UsuarioClavesTests
     {
-        [TestInitialize] public void Setup()   => SessionManager.Logout();
+        [TestInitialize] public void Setup() { SessionManager.Logout(); Seguridad.ContadorSesion.GetInstance().Resetear(); }
         [TestCleanup]    public void Cleanup() => SessionManager.Logout();
 
         private static void LoginComoAdministrador()

@@ -49,10 +49,13 @@ namespace GUI
             // (Vendedor) confirmada por Caja. En edición sí se puede corregir el plan
             // directamente (ajuste administrativo puntual, no pasa por Caja) junto con el
             // vencimiento, o mediante el proceso de Renovación (PdN5 — Chain of Responsibility).
-            lblPlan.Visible = _esEdicion;
-            cmbPlan.Visible = _esEdicion;
-            chkVencimiento.Visible = _esEdicion;
-            dtpVencimiento.Visible = _esEdicion;
+            // Corregir el plan o el vencimiento sin Contratación + Caja es una corrección
+            // administrativa: la BLL decide quién puede (solo Administrador, regla 6 de N01).
+            bool correccionAdmin = _esEdicion && new BLL.Cliente().PuedeCorregirPlanDirectamente();
+            lblPlan.Visible = correccionAdmin;
+            cmbPlan.Visible = correccionAdmin;
+            chkVencimiento.Visible = correccionAdmin;
+            dtpVencimiento.Visible = correccionAdmin;
 
             // Bloque 1 — Programa de referidos: el referente se fija una única vez, al alta
             // (ver DAL.Cliente.Alta/Modificar — IdClienteReferente no se puede editar después).
@@ -99,18 +102,17 @@ namespace GUI
 
         // Clave fija en BD ← muestra etiqueta traducida.
         // El SelectedValue siempre es la cadena en español almacenada en la BD ("Efectivo", etc.).
+        // La lista de métodos la define la BLL (BLL.Cliente.ObtenerMetodosPago); en edición se le
+        // pasa el valor guardado para que un valor anterior que ya no está en la lista se conserve.
         private void RellenarComboMetodoPago()
         {
             string prevValue = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value
                             ?? cmbMetodoPago.SelectedItem?.ToString();
 
-            var items = new[]
-            {
-                new MetodoItem("Efectivo",      Tr("metodo.efectivo",      "Efectivo")),
-                new MetodoItem("Débito",        Tr("metodo.debito",        "Débito")),
-                new MetodoItem("Crédito",       Tr("metodo.credito",       "Crédito")),
-                new MetodoItem("Transferencia", Tr("metodo.transferencia", "Transferencia")),
-            };
+            var items = new BLL.Cliente().ObtenerMetodosPago(_clienteOriginal?.MetodoPago)
+                .Select(m => new MetodoItem(m.Nombre,
+                    m.ClaveTraduccion != null ? Tr(m.ClaveTraduccion, m.Nombre) : m.Nombre))
+                .ToArray();
 
             cmbMetodoPago.DataSource    = null;
             cmbMetodoPago.DisplayMember = "Label";
@@ -186,7 +188,7 @@ namespace GUI
             catch
             {
                 cmbReferente.Items.Clear();
-                cmbReferente.Items.Add("— Ninguno —");
+                cmbReferente.Items.Add(Tr("combo.cli.sinreferente", "— Ninguno —"));
                 cmbReferente.SelectedIndex = 0;
             }
         }
@@ -250,7 +252,8 @@ namespace GUI
                     MetodoPago       = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value ?? "Efectivo",
                     IdPlan           = idPlan,
                     FechaNacimiento  = dtpFechaNacimiento.Value.Date,
-                    FechaAlta        = _esEdicion ? _clienteOriginal.FechaAlta : DateTime.Now,
+                    // En el alta la fija BLL.Cliente.Alta; en edición se conserva la original.
+                    FechaAlta        = _esEdicion ? _clienteOriginal.FechaAlta : default(DateTime),
                     FechaVencimiento = chkVencimiento.Checked ? dtpVencimiento.Value.Date : (DateTime?)null,
                     IdClienteReferente = idReferente
                 };

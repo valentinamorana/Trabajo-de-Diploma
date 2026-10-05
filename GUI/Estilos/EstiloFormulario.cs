@@ -13,10 +13,12 @@ namespace GUI.Estilos
     /// </summary>
     public static class EstiloFormulario
     {
-        public static readonly Color Rosa         = GUI.Tema.RosaPrimario;
-        public static readonly Color RosaOscuro   = Color.FromArgb(176, 62, 96);
-        public static readonly Color RosaClara    = Color.FromArgb(245, 222, 230);
-        public static readonly Color RosaMuyClara = Color.FromArgb(250, 244, 246);
+        // Alias de los tokens de GUI/Tema.cs (única fuente de la paleta): antes RosaOscuro y
+        // las variantes claras se redefinían acá como literales.
+        public static readonly Color Rosa         = Tema.RosaPrimario;
+        public static readonly Color RosaOscuro   = Tema.RosaOscuro;
+        public static readonly Color RosaClara    = Tema.RosaClara;
+        public static readonly Color RosaMuyClara = Tema.RosaMuyClara;
 
         /// <summary>Botón de acción principal (Generar/Procesar/Confirmar) — mismo patrón
         /// que ClienteForm.btnGuardar y CambioEstadoDialog.btnConfirmar.</summary>
@@ -50,7 +52,7 @@ namespace GUI.Estilos
             dgv.BorderStyle = BorderStyle.None;
             dgv.RowHeadersVisible = false;
             dgv.BackgroundColor = Color.White;
-            dgv.GridColor = Color.FromArgb(230, 225, 228);
+            dgv.GridColor = Tema.Borde;
 
             dgv.ColumnHeadersDefaultCellStyle.BackColor = RosaClara;
             dgv.ColumnHeadersDefaultCellStyle.ForeColor = RosaOscuro;

@@ -103,18 +103,41 @@ namespace BLL
 
         // Valida credenciales sin abrir sesión — para operaciones que requieren confirmación de admin.
         // Retorna true solo si el usuario existe, no está bloqueado, la clave es correcta y tiene rol Administrador.
+        // Cuenta los intentos fallidos en el contador de la sesión (el mismo del login: tras el
+        // límite deja de validar) y registra cada rechazo en la bitácora. Siempre corre PBKDF2,
+        // también con un usuario inexistente (hash señuelo), para no revelar qué usuarios existen.
         public bool ValidarCredencialesAdmin(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
                 return false;
 
+            if (ContadorSesion.GetInstance().LimiteAlcanzado)
+            {
+                RegistrarConfirmacionAdminFallida(username, "límite de intentos de la sesión alcanzado");
+                return false;
+            }
+
             var usuario = usuarioDAL.ObtenerPorUsername(username);
-            if (usuario == null) return false;
-            if (usuario.Bloqueado) return false;
+            bool claveOk = usuario != null
+                ? Encriptador.VerificarContrasena(password, usuario.Contraseña)
+                : Encriptador.VerificacionSenuelo(password) && false;
 
-            if (!Encriptador.VerificarContrasena(password, usuario.Contraseña)) return false;
+            if (claveOk && !usuario.Bloqueado && usuario.EsAdministrador)
+                return true;
 
-            return usuario.EsAdministrador;
+            ContadorSesion.GetInstance().RegistrarIntento();
+            RegistrarConfirmacionAdminFallida(username, "credenciales inválidas, cuenta bloqueada o sin rol Administrador");
+            return false;
+        }
+
+        private void RegistrarConfirmacionAdminFallida(string username, string motivo)
+        {
+            bitacora.RegistrarSinSesion(
+                modulo:     "Confirmación de Administrador",
+                actividad:  BE.ActividadesBitacora.IntentoFallidoLogin,
+                criticidad: BE.Criticidad.Alta,
+                detalle:    $"Confirmación de Administrador rechazada (usuario: huella {HuellaUsuario(username)}): " +
+                            $"{motivo}. {DateTime.Now:HH:mm:ss}.");
         }
     }
 }

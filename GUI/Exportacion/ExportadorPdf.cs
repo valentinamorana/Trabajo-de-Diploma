@@ -20,9 +20,9 @@ namespace GUI.Exportacion
     public class ExportadorPdf : Exportador
     {
         // Paleta vino del sistema (idéntica a la que usaban los formularios).
-        private static readonly Color VinoOscuro = Color.FromArgb(176, 62, 96);
-        private static readonly Color VinoClaro  = Color.FromArgb(252, 228, 235);
-        private static readonly Color VinoMedio  = Color.FromArgb(110, 40, 70);
+        private static readonly Color VinoOscuro = Tema.RosaOscuro;
+        private static readonly Color VinoClaro  = Tema.RosaPalido;
+        private static readonly Color VinoMedio  = Tema.RosaTinta;
 
         // Estado de paginación (instancia nueva por exportación → sin estado compartido).
         private ReporteExportable _reporte;
@@ -141,8 +141,8 @@ namespace GUI.Exportacion
                 float alturaCelda = fuenteCelda.GetHeight(g) + 5;
                 bool  alternar    = false;
                 using (var brushAlternar = new SolidBrush(VinoClaro))
-                using (var brushTexto    = new SolidBrush(Color.FromArgb(40, 15, 28)))
-                using (var penSeparador  = new Pen(Color.FromArgb(220, 180, 200), 0.5f))
+                using (var brushTexto    = new SolidBrush(Tema.Tinta))
+                using (var penSeparador  = new Pen(Tema.Borde, 0.5f))
                 {
                     while (_fila < tabla.Rows.Count)
                     {
@@ -182,7 +182,7 @@ namespace GUI.Exportacion
             using (var fuenteSub    = new Font("Segoe UI", 8f, FontStyle.Regular))
             using (var fuenteCuerpo = new Font("Consolas", 8.5f))
             using (var brMedio      = new SolidBrush(VinoMedio))
-            using (var brTexto      = new SolidBrush(Color.FromArgb(40, 15, 28)))
+            using (var brTexto      = new SolidBrush(Tema.Tinta))
             using (var penLinea     = new Pen(VinoOscuro, 1.5f))
             {
                 if (_pagina == 1)

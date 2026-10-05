@@ -99,7 +99,7 @@ namespace GUI
             this.btnBaja.Top       = 11;
             this.btnBaja.Width     = 110;
             this.btnBaja.Height    = 28;
-            this.btnBaja.BackColor = System.Drawing.Color.FromArgb(200, 60, 60);
+            this.btnBaja.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.btnBaja.ForeColor = System.Drawing.Color.White;
             this.btnBaja.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBaja.FlatAppearance.BorderSize = 0;

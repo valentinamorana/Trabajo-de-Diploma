@@ -46,7 +46,7 @@ namespace GUI
 
             // ── lblTitulo ────────────────────────────────────────────────────
             this.lblTitulo.Font      = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold);
-            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblTitulo.Location  = new System.Drawing.Point(12, 10);
             this.lblTitulo.Name      = "lblTitulo";
             this.lblTitulo.Size      = new System.Drawing.Size(760, 26);
@@ -71,7 +71,7 @@ namespace GUI
             this.cboUsuario.TabIndex  = 2;
 
             // ── btnCargar ────────────────────────────────────────────────────
-            this.btnCargar.BackColor                  = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnCargar.BackColor                  = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnCargar.FlatStyle                  = System.Windows.Forms.FlatStyle.Flat;
             this.btnCargar.FlatAppearance.BorderSize  = 0;
             this.btnCargar.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -93,7 +93,7 @@ namespace GUI
             this.dgv.AutoSizeColumnsMode   = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgv.BackgroundColor       = System.Drawing.Color.FromArgb(252, 250, 252);
             this.dgv.BorderStyle           = System.Windows.Forms.BorderStyle.None;
-            this.dgv.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.dgv.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.dgv.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
             this.dgv.ColumnHeadersDefaultCellStyle.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
             this.dgv.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
@@ -182,6 +182,7 @@ namespace GUI
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor           = System.Drawing.Color.FromArgb(252, 250, 252);
             this.ClientSize          = new System.Drawing.Size(800, 500);
+            this.MinimumSize         = new System.Drawing.Size(640, 400);   // listado MDI redimensionable (grilla Dock=Fill)
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.pnlBottom);
             this.Controls.Add(this.pnlTop);

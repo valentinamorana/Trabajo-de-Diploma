@@ -26,12 +26,15 @@ namespace GUI
         public FormIdiomas()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvIdiomas);
+            Estilos.EstiloFormulario.Grilla(dgvTraducciones);
+            Estilos.EstiloFormulario.Grilla(dgvControles);
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             ConfigurarGrillas();
             CargarIdiomas();
@@ -92,12 +95,6 @@ namespace GUI
         {
             using (var dlg = new InputDialog(titulo, prompt, esPassword: false))
                 return dlg.ShowDialog(this) == DialogResult.OK ? dlg.InputText : null;
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
@@ -180,7 +177,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 
@@ -244,7 +241,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 
@@ -265,7 +262,7 @@ namespace GUI
                 // Referencia: el texto del idioma por defecto (completo), para que un traductor vea
                 // el original mientras completa el idioma destino. Solo lectura.
                 var colReferencia= new DataGridViewTextBoxColumn { Name = "colReferencia",HeaderText = Tr("col.idiomas.referencia", "Referencia (por defecto)"), ReadOnly = true };
-                colReferencia.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(110, 110, 120);
+                colReferencia.DefaultCellStyle.ForeColor = Tema.TextoSecundario;
                 var colTexto     = new DataGridViewTextBoxColumn { Name = "colTexto",     HeaderText = Tr("col.idiomas.texto", "Texto / Traducción"), ReadOnly = false };
 
                 dgvTraducciones.Columns.AddRange(colIdControl, colClave, colFormulario, colReferencia, colTexto);
@@ -285,7 +282,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 

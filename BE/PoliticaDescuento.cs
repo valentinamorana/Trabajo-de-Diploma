@@ -33,6 +33,14 @@ namespace BE
         public bool UsaCreditoReferido { get; set; }
         /// <summary>Número de comprobante emitido (null mientras solo se está calculando el importe).</summary>
         public string NumeroComprobante { get; set; }
+
+        /// <summary>Período activado por el cobro (Constancia de suscripción).</summary>
+        public System.DateTime? VigenciaDesde { get; set; }
+        public System.DateTime? VigenciaHasta { get; set; }
+
+        /// <summary>"¿Referido? Sí → Acreditar crédito": el referente al que se le acreditó el
+        /// beneficio con este cobro, o null si no correspondía.</summary>
+        public string ReferenteAcreditado { get; set; }
     }
 
     /// <summary>
@@ -80,7 +88,7 @@ namespace BE
         /// <summary>
         /// Resuelve el descuento de un cobro. <paramref name="promocionesDelPlan"/> puede traer
         /// cualquier promoción: se ignoran las que no aplican a <paramref name="idPlan"/> o no están
-        /// vigentes hoy.
+        /// vigentes hoy. Una promoción Vencida (PN03: llegó su FechaFin) nunca se aplica.
         /// </summary>
         public static ResultadoDescuento Resolver(
             decimal bruto, int? idPlan, IEnumerable<Promocion> promocionesDelPlan, decimal creditoReferido, int meses = 1)
@@ -93,7 +101,8 @@ namespace BE
             if (idPlan.HasValue && promocionesDelPlan != null)
             {
                 foreach (var p in promocionesDelPlan.Where(x => x != null && x.AplicaAPlan()
-                                                                && x.IdPlan == idPlan && x.EstaVigente()))
+                                                                && x.IdPlan == idPlan && !x.EstaVencida()
+                                                                && x.EstaVigente()))
                 {
                     decimal d = DescuentoDe(p, bruto, meses);
                     if (d > descuentoMejor) { descuentoMejor = d; mejor = p; }

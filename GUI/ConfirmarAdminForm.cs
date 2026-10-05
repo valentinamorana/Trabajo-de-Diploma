@@ -99,9 +99,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                lblError.Text = ex is BE.AppException appEx
-                    ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
-                    : ex.Message;
+                lblError.Text = MensajeDeError(ex);
             }
         }
 

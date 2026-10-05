@@ -9,10 +9,20 @@ classDiagram
     +DateTime? FechaDespacho
     +DateTime? FechaEntrega
     +string MotivoCancelacion
+    +DateTime? FechaEnvioControl
+    +DateTime? FechaControl
+    +int? IdEmpleadoControl
+    +string NombreEmpleadoControl
+    +DateTime? FechaSeparacion
+    +DateTime? FechaFormalizacion
+    +string MotivoDesistimiento
+    +EtapaDesistimiento? EtapaDesistimiento
     +string NombreCliente
     +string NombreEmpleado
     +List~Prenda~ Prendas
+    +List~int~ PrendasConfirmadas
     +int CantidadPrendas
+    +bool TodasConfirmadas
     +string Resumen
     +int DiasDesdeAlta
     +bool EsUrgentePorAntiguedad
@@ -29,7 +39,6 @@ classDiagram
     +int? IdClienteActual
     +int? IdUltimoCliente
     +decimal? PrecioReposicion
-    +string ResumenEstado
   }
   class ListaEspera {
     +int IdListaEspera
@@ -42,6 +51,20 @@ classDiagram
     +string Actor
     +bool ReservaVigente
     +bool ReservaExpirada
+  }
+  class PedidoFaltante {
+    +int IdPedido
+    +Prenda Prenda
+    +EstadoPrenda EstadoAlRevisar
+    +bool ReservadaParaOtro
+    +List~Prenda~ Alternativas
+  }
+  class LineaControlStock {
+    +Prenda Prenda
+    +EstadoPrenda EstadoActual
+    +bool ReservadaParaOtro
+    +bool Confirmada
+    +bool Disponible
   }
   class Cliente {
     +int IdCliente
@@ -58,15 +81,28 @@ classDiagram
     +int LimitePrendas
   }
   class BLL_Pedido["BLL.Pedido"] {
-    +CrearPedido(string,  int,  List~Prenda~) int
+    +ObtenerPorId(int) Pedido
+    +VerificarVigencia(int) Cliente
+    +RevisarPedidoActivo(Cliente) void
     +ValidarPuedeArmarPedido(int) Cliente
+    +EnviarAControlStock(string,  int,  List~Prenda~) int
+    +AsentarDesistimiento(string,  int,  List~Prenda~,  string) int
+    +AsentarDesistimiento(string,  Pedido,  string,  EtapaDesistimiento,  List~Prenda~) void
+    +AjustarSeleccion(string,  Pedido,  List~Prenda~) void
+    +RevisarStock(Pedido) List~LineaControlStock~
+    +InformarFaltantes(string,  Pedido) List~PedidoFaltante~
+    +ConfirmarPrendasDisponibles(string,  Pedido) void
+    +SepararPrendas(string,  Pedido) void
+    +FormalizarPedido(string,  Pedido) void
+    +PrepararConfirmacion(string,  int) Pedido
+    +ObtenerColaControlStock() List~Pedido~
+    +ObtenerInformeFaltantes(int) List~PedidoFaltante~
     +Despachar(string,  Pedido) void
     +MarcarEntregado(string,  Pedido) void
     +RegistrarDevolucion(string,  Pedido) void
     +Cancelar(string,  Pedido,  string) void
     +DesCancelar(string,  Pedido) void
-    +ValidarCupoDisponible(Cliente,  int) PlanSuscripcion
-    +ReservarPrendas(List~Prenda~,  int) int
+    +ComprobarCupo(Cliente,  int) PlanSuscripcion
   }
   class BLL_Prenda["BLL.Prenda"] {
     +ObtenerDisponibles(int?) List~Prenda~
@@ -77,9 +113,9 @@ classDiagram
     +NotificarSiCorresponde(int,  string) void
     +EstaReservadaParaOtro(int,  int) bool
     +CerrarSiReservada(string,  int,  int,  string) void
-    +ObtenerIdsReservadosParaOtro(int?) List~int~
   }
   class BLL_Cliente["BLL.Cliente"] {
+    +BuscarPorIdentificacion(string) List~Cliente~
     +ObtenerEstadoComercial(Cliente,  int) EstadoComercialCliente
   }
   class DAL_Interfaces_IClienteDAL["DAL.Interfaces.IClienteDAL"] {
@@ -96,11 +132,20 @@ classDiagram
   }
   class DAL_Interfaces_IPedidoDAL["DAL.Interfaces.IPedidoDAL"] {
     <<interface>>
-    +Alta(Pedido) int
+    +ObtenerPorEstado(EstadoPedido) List~Pedido~
+    +ObtenerPorId(int) Pedido
+    +AltaSinReserva(Pedido) int
+    +ReemplazarSeleccion(int,  List~Prenda~) void
+    +RegistrarFaltantes(int,  int,  List~PedidoFaltante~) void
+    +ConfirmarPrendas(int,  int) void
+    +SepararPrendas(int,  int) void
+    +Formalizar(int) void
+    +RegistrarDesistimiento(int,  string,  EtapaDesistimiento,  List~Prenda~) void
+    +ObtenerFaltantes(int) List~PedidoFaltante~
     +Despachar(int) void
     +MarcarEntregado(int) void
     +RegistrarDevolucion(int,  int) int
-    +Cancelar(int,  string) void
+    +Cancelar(int,  int,  EstadoPedido,  string) void
     +DesCancelar(int,  int) bool
   }
   Pedido --> "1" Cliente : IdCliente
@@ -109,6 +154,10 @@ classDiagram
   Prenda --> "0..1" Cliente : IdUltimoCliente
   ListaEspera --> "1" Prenda : IdPrenda
   ListaEspera --> "1" Cliente : IdCliente
+  PedidoFaltante --> "1" Pedido : IdPedido
+  PedidoFaltante --> "1" Prenda : Prenda
+  PedidoFaltante --> "*" Prenda : Alternativas
+  LineaControlStock --> "1" Prenda : Prenda
   Cliente --> "0..1" PlanSuscripcion : IdPlan
   BLL_Pedido ..> DAL_Interfaces_IPedidoDAL : usa
   BLL_Pedido ..> DAL_Interfaces_IClienteDAL : usa

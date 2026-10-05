@@ -47,7 +47,7 @@ namespace Tests
             var r = Crear(rot, new AbandonoFake()).Detectar();
 
             Assert.AreEqual(1, r.Count);
-            Assert.AreEqual("Rotación", r[0].Origen);
+            Assert.AreEqual(BE.OrigenMetrica.Rotacion, r[0].Origen);
             Assert.AreEqual("Abrigo", r[0].CategoriaPrenda);
             Assert.IsNull(r[0].IdPlan);
             Assert.AreEqual(BE.TipoDescuento.MontoFijo, r[0].TipoSugerido);
@@ -76,7 +76,7 @@ namespace Tests
             var r = Crear(new RotacionFake(), ab, plan).Detectar();
 
             Assert.AreEqual(1, r.Count);
-            Assert.AreEqual("Abandono", r[0].Origen);
+            Assert.AreEqual(BE.OrigenMetrica.Abandono, r[0].Origen);
             Assert.AreEqual(7, r[0].IdPlan);
             Assert.AreEqual(BE.TipoDescuento.Porcentaje, r[0].TipoSugerido);
             Assert.AreEqual(16000m, r[0].BeneficioEstimado, "2 clientes × $8000 de ingreso mensual en riesgo.");
@@ -104,8 +104,66 @@ namespace Tests
 
             var r = Crear(rot, ab, plan).Detectar();
 
-            Assert.AreEqual("Abandono", r[0].Origen);   // 8000 > 2000
-            Assert.AreEqual("Rotación", r[1].Origen);
+            Assert.AreEqual(BE.OrigenMetrica.Abandono, r[0].Origen);   // 8000 > 2000
+            Assert.AreEqual(BE.OrigenMetrica.Rotacion, r[1].Origen);
+        }
+
+        // ── Analizar métricas («Reporte de métricas») → ¿Hay oportunidad? ────
+
+        private static void Login() => Seguridad.SessionManager.Login(new BE.Usuario
+        {
+            Id = 1, Username = "admin", Perfil = "Administrador", Contraseña = Seguridad.Encriptador.Hash("Admin1!")
+        });
+
+        [TestCleanup] public void Cleanup() => Seguridad.SessionManager.Logout();
+
+        [TestMethod]
+        public void AnalizarMetricas_SinCasos_NoHayOportunidad_FinSinPromocion()
+        {
+            Login();
+            var bll = Crear(new RotacionFake(), new AbandonoFake());
+
+            var reporte = bll.AnalizarMetricas("Test");
+
+            Assert.IsFalse(bll.HayOportunidad(reporte));
+            Assert.AreEqual(0, reporte.Oportunidades.Count);
+        }
+
+        [TestMethod]
+        public void AnalizarMetricas_ConCasos_ArmaElReporteDeAbandonoPorPlanYRotacionPorCategoria()
+        {
+            Login();
+            var rot = new RotacionFake();
+            rot.Resultado.Add(BajaDemanda("A", "Abrigo"));
+            rot.Resultado.Add(BajaDemanda("B", "Abrigo"));
+            rot.Resultado.Add(new BE.RotacionPrenda { NombrePrenda = "C", Categoria = "Vestido", Clave = "rotacion.motivo.altademanda" });
+            var ab = new AbandonoFake();
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 1, NombrePlan = "Básico" });
+            var plan = new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Precio = 8000m, Estado = true };
+            var bll = Crear(rot, ab, plan);
+
+            var reporte = bll.AnalizarMetricas("Test");
+
+            Assert.IsTrue(bll.HayOportunidad(reporte));
+            Assert.AreEqual(1, reporte.AbandonoPorPlan.Count);
+            Assert.AreEqual(1, reporte.AbandonoPorPlan[0].ClientesEnRiesgo);
+            Assert.AreEqual(8000m, reporte.AbandonoPorPlan[0].IngresoMensualEnRiesgo);
+            var abrigo = reporte.RotacionPorCategoria.Find(m => m.Categoria == "Abrigo");
+            Assert.AreEqual(2, abrigo.PrendasBajaDemanda);
+            Assert.AreEqual(1, reporte.RotacionPorCategoria.Find(m => m.Categoria == "Vestido").PrendasAltaDemanda);
+            Assert.AreEqual(2, reporte.Oportunidades.Count);
+        }
+
+        [TestMethod]
+        public void AnalizarMetricas_SinSesion_LanzaSesionExpirada()
+        {
+            Seguridad.SessionManager.Logout();
+            try
+            {
+                Crear(new RotacionFake(), new AbandonoFake()).AnalizarMetricas("Test");
+                Assert.Fail("Debía exigir sesión.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sesion_expirada", ex.Clave); }
         }
     }
 }

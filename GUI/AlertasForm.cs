@@ -23,15 +23,8 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarAlertas();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -44,6 +37,7 @@ namespace GUI
         {
             Text           = Tr("frm.alertas", "Centro de Alertas");
             lblTitulo.Text = Tr("frm.alertas", "Centro de Alertas");
+            btnActualizar.Text = Tr("btn.actualizar", "Actualizar");
         }
 
         private void BtnActualizar_Click(object sender, EventArgs e) => CargarAlertas();
@@ -55,7 +49,8 @@ namespace GUI
             flow.Controls.Clear();
 
             System.Collections.Generic.List<BE.Alerta> alertas;
-            try { alertas = new BLL.PanelAlertas().ObtenerAlertas(); }
+            // Solo las alertas que el rol del usuario puede atender (filtro por patentes en BLL).
+            try { alertas = new BLL.PanelAlertas().ObtenerAlertas(new BLL.Usuario().ObtenerUsuarioActivo()); }
             catch (Exception ex)
             {
                 // Excepción inesperada: se registra en bitácora (detalle técnico) y se muestra
@@ -82,7 +77,7 @@ namespace GUI
                 {
                     Text      = Tr("alert.sinalertas", "No hay alertas activas. Todo en orden."),
                     Font      = new Font("Segoe UI", 10F),
-                    ForeColor = Color.FromArgb(60, 110, 70),
+                    ForeColor = Tema.Exito,
                     AutoSize  = true,
                     Margin    = new Padding(6, 10, 6, 6)
                 };
@@ -111,16 +106,16 @@ namespace GUI
             switch (nivel)
             {
                 case BE.NivelAlerta.Critica:
-                    barra = Color.FromArgb(176, 62, 96); fondo = Color.FromArgb(252, 228, 235);
-                    tinta = Color.FromArgb(120, 30, 55); 
+                    barra = Tema.RosaOscuro; fondo = Tema.RosaPalido;
+                    tinta = Tema.RosaTinta; 
                     break;
                 case BE.NivelAlerta.Advertencia:
-                    barra = Color.FromArgb(214, 158, 46); fondo = Color.FromArgb(252, 245, 224);
-                    tinta = Color.FromArgb(120, 86, 10);  
+                    barra = Tema.Alerta; fondo = Tema.FondoAlerta;
+                    tinta = Tema.Alerta;  
                     break;
                 default:
-                    barra = Color.FromArgb(90, 120, 170); fondo = Color.FromArgb(232, 238, 248);
-                    tinta = Color.FromArgb(45, 65, 105);  
+                    barra = Tema.Info; fondo = Tema.FondoInfo;
+                    tinta = Tema.Info;  
                     break;
             }
 

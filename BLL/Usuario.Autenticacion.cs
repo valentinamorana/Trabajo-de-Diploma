@@ -14,13 +14,18 @@ namespace BLL
         // 1er bloqueo → 1 min, 2do → 5, 3ro → 15, 4to → 60; superada la escala, queda permanente.
         private static readonly int[] _minutosBloqueo = { 1, 5, 15, 60 };
 
+        // T07 — Lectores para el login con la integridad comprometida (reemplazables en tests).
+        // Espejo: último estado legítimo conocido del usuario (Usuario_Seguridad).
+        internal static Func<string, BE.FilaUsuarioDV> LectorEspejo =
+            u => new DAL.EspejoUsuario().ObtenerPorUsername(u);
+
         // Evalúa una cuenta bloqueada. Devuelve:
         //   expirado    = el bloqueo TEMPORAL ya venció → se puede reactivar y continuar.
         //   permanente  = no auto-expira (bloqueo manual del admin, sin fecha, o escala agotada).
         //   minutosRest = minutos que faltan si todavía no expiró.
         private static (bool expirado, bool permanente, int minutosRestantes) EvaluarBloqueo(BE.Usuario u)
         {
-            // Sin fecha de bloqueo (bloqueo manual del admin o BD sin migrar) → no auto-expira.
+            // Sin fecha de bloqueo (bloqueo manual del admin) → no auto-expira.
             if (!u.FechaBloqueo.HasValue) return (false, true, 0);
             // Escala agotada → bloqueo permanente.
             if (u.CantidadBloqueos <= 0 || u.CantidadBloqueos > _minutosBloqueo.Length)
@@ -31,6 +36,23 @@ namespace BLL
             if (transcurridos >= minutos) return (true, false, 0);
             return (false, false, (int)Math.Ceiling(minutos - transcurridos));
         }
+
+        // Huella corta (no reversible) de lo que se tipeó como usuario: permite correlacionar
+        // intentos en la bitácora sin guardar el texto, que podría ser una contraseña tipeada
+        // en el campo equivocado.
+        internal static string HuellaUsuario(string username)
+        {
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] h = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes((username ?? "").Trim().ToLowerInvariant()));
+                return BitConverter.ToString(h, 0, 4).Replace("-", "");
+            }
+        }
+
+        private BE.LoginException CredencialesInvalidas() =>
+            new BE.LoginException(BE.LoginException.TipoError.CredencialesInvalidas,
+                "Usuario o contraseña incorrectos.",
+                intentosRestantes: ContadorSesion.GetInstance().IntentosRestantes);
 
         /// <summary>Autentica al usuario y establece la sesión. Bloquea la cuenta tras 3 intentos fallidos.</summary>
         public bool Login(string modulo, string username, string contraseña)
@@ -44,37 +66,55 @@ namespace BLL
                     "Demasiados intentos fallidos en esta sesión.\n" +
                     "Reiniciá la aplicación para volver a intentarlo.");
 
+            // T07 — Si la verificación de arranque detectó que la tabla Usuario (u otra protegida)
+            // fue manipulada, NO se confía en ella para autenticar: un atacante podría haberse
+            // puesto rol Administrador y llegar a la consola de recuperación ("Asumir pérdida").
+            if (Configuracion.IntegridadComprometida)
+                return LoginConIntegridadComprometida(modulo, username, contraseña);
+
             BE.Usuario usuario = usuarioDAL.ObtenerPorUsername(username);
             if (usuario == null)
             {
                 // Anti-enumeración: igualar el costo temporal de un usuario real (corre PBKDF2
                 // contra un hash señuelo), contar el intento en la sesión y registrarlo. Se
                 // lanza EXACTAMENTE la misma excepción, mensaje y contador (de sesión) que para
-                // una contraseña incorrecta, de modo que el atacante no pueda distinguir si el
-                // usuario existe — ni por el texto, ni por la presencia del contador, ni por el tiempo.
+                // una contraseña incorrecta. En la bitácora NO se guarda lo tipeado (podría ser
+                // una contraseña): solo una huella.
                 Encriptador.VerificacionSenuelo(contraseña);
                 ContadorSesion.GetInstance().RegistrarIntento();
                 bitacora.RegistrarSinSesion(
                     modulo:     modulo ?? "Login",
                     actividad:  BE.ActividadesBitacora.IntentoFallidoLogin,
                     criticidad: BE.Criticidad.IntentosLogin,
-                    detalle:    $"Intento de login para usuario inexistente '{username}' a las {DateTime.Now:HH:mm:ss}.");
-                throw new BE.LoginException(BE.LoginException.TipoError.CredencialesInvalidas,
-                    "Usuario o contraseña incorrectos.",
-                    intentosRestantes: ContadorSesion.GetInstance().IntentosRestantes);
+                    detalle:    $"Intento de login para un usuario inexistente (huella {HuellaUsuario(username)}) " +
+                                $"a las {DateTime.Now:HH:mm:ss}.");
+                throw CredencialesInvalidas();
             }
+
+            // La contraseña se verifica SIEMPRE (mismo costo PBKDF2 en todos los caminos) y ANTES
+            // de revelar que la cuenta está bloqueada: sin la clave correcta, una cuenta bloqueada
+            // responde igual que cualquier otro intento fallido (no se enumera el estado).
+            bool esValido = Encriptador.VerificarContrasena(contraseña, usuario.Contraseña);
 
             if (usuario.Bloqueado)
             {
                 var (expirado, permanente, minutos) = EvaluarBloqueo(usuario);
-                if (permanente)
-                    throw new BE.LoginException(BE.LoginException.TipoError.CuentaBloqueada,
-                        $"La cuenta '{username}' está bloqueada.\n" +
-                        "Contactá al Administrador (o usá una clave de emergencia) para reactivarla.");
                 if (!expirado)
+                {
+                    ContadorSesion.GetInstance().RegistrarIntento();
+                    if (!esValido)
+                    {
+                        RegistrarIntentoFallidoInterno(modulo, username, usuario.IntentosFallidos, usuario.Id);
+                        throw CredencialesInvalidas();
+                    }
+                    if (permanente)
+                        throw new BE.LoginException(BE.LoginException.TipoError.CuentaBloqueada,
+                            $"La cuenta '{username}' está bloqueada.\n" +
+                            "Contactá al Administrador (o usá una clave de emergencia) para reactivarla.");
                     throw new BE.LoginException(BE.LoginException.TipoError.CuentaBloqueada,
                         $"La cuenta '{username}' está bloqueada temporalmente.\n" +
                         $"Reintentá en {minutos} minuto(s) o usá una clave de emergencia.");
+                }
 
                 // El bloqueo temporal EXPIRÓ → se reactiva sola y el login continúa normalmente.
                 usuarioDAL.AutoDesbloquear(usuario.Id);
@@ -82,53 +122,103 @@ namespace BLL
                 usuario.IntentosFallidos = 0;
             }
 
-            bool esValido = Encriptador.VerificarContrasena(contraseña, usuario.Contraseña);
-
             if (esValido)
             {
                 ContadorSesion.GetInstance().Resetear();
                 usuarioDAL.ResetearIntentosFallidos(username);
-                // T04 — Permisos EFECTIVOS resueltos recursivamente sobre el árbol Composite
-                // (rol → roles/familias → patentes), con deduplicación de permisos repetidos.
-                usuario.Permisos = perfilesBLL.ObtenerPermisosEfectivos(usuario.Rol ?? usuario.Perfil);
-                SessionManager.Login(usuario);
-                bitacora.Registrar(modulo, BE.ActividadesBitacora.InicioSesion, BE.Criticidad.None);
+                AbrirSesion(modulo, usuario);
+                return true;
             }
-            else
+
+            ContadorSesion.GetInstance().RegistrarIntento();
+            // Contador leído en la MISMA sentencia que lo incrementa (OUTPUT inserted): dos
+            // intentos simultáneos no deciden el bloqueo con un valor viejo.
+            int intentos = usuarioDAL.IncrementarIntentosFallidos(username) ?? (usuario.IntentosFallidos + 1);
+
+            RegistrarIntentoFallidoInterno(modulo, username, intentos, usuario.Id);
+
+            if (intentos >= MaxIntentosFallidos)
+            {
+                // Bloqueo PROGRESIVO: cada bloqueo dura más (1/5/15/60 min) y tras agotar la
+                // escala queda permanente (requiere admin / clave de emergencia).
+                usuarioDAL.BloquearConTiempo(usuario.Id);
+                RegistrarBloqueo(modulo, username, usuario.Id);
+            }
+
+            // Mismo mensaje y mismo contador (de sesión) que el caso "usuario inexistente":
+            // indistinguibles entre sí (anti-enumeración). Tampoco se informa acá el bloqueo:
+            // quien tenga la clave correcta lo verá al reintentar.
+            throw CredencialesInvalidas();
+        }
+
+        private void AbrirSesion(string modulo, BE.Usuario usuario)
+        {
+            // T04 — Permisos EFECTIVOS resueltos recursivamente sobre el árbol Composite
+            // (rol → roles/familias → patentes), con deduplicación de permisos repetidos.
+            usuario.Permisos = perfilesBLL.ObtenerPermisosEfectivos(usuario.Rol ?? usuario.Perfil);
+            PermisosAccion.LimpiarCacheVigencia();
+            SessionManager.Login(usuario);
+            bitacora.Registrar(modulo, BE.ActividadesBitacora.InicioSesion, BE.Criticidad.None);
+        }
+
+        // T07 — Login cuando la integridad está comprometida. Se autentica contra el ESPEJO de
+        // integridad (último estado legítimo conocido de cada usuario), cuyo propio DVH debe
+        // verificar: la clave, el rol y el estado salen de ahí y no de la tabla Usuario, que pudo
+        // haber sido alterada. Si el usuario no tiene fila íntegra en el espejo, se rechaza.
+        // No se escribe nada en Usuario (escribir recalcularía el DVH de una fila alterada).
+        private bool LoginConIntegridadComprometida(string modulo, string username, string contraseña)
+        {
+            BE.FilaUsuarioDV fila = null;
+            try { fila = LectorEspejo(username); }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.Usuario] Espejo: " + ex.Message); }
+
+            bool filaIntegra = fila != null && fila.DVHAlmacenado.HasValue
+                && Seguridad.CalculadorDV.Crear().CalcularDVH(fila.CamposParaDVH()) == fila.DVHAlmacenado.Value;
+
+            bool esValido = filaIntegra
+                ? Encriptador.VerificarContrasena(contraseña, fila.Clave)
+                : Encriptador.VerificacionSenuelo(contraseña) && false;
+
+            bool activo = filaIntegra && fila.Activo == "1" && fila.Estado == "1";
+            if (!esValido || !activo)
             {
                 ContadorSesion.GetInstance().RegistrarIntento();
-                usuarioDAL.IncrementarIntentosFallidos(username);
-                int intentos = usuario.IntentosFallidos + 1;
-
-                RegistrarIntentoFallidoInterno(modulo, username, intentos, usuario.Id);
-
-                if (intentos >= MaxIntentosFallidos)
-                {
-                    // Bloqueo PROGRESIVO: cada bloqueo dura más (1/5/15/60 min) y tras agotar la
-                    // escala queda permanente (requiere admin / clave de emergencia).
-                    usuarioDAL.BloquearConTiempo(usuario.Id);
-                    RegistrarBloqueo(modulo, username, usuario.Id);
-
-                    int nuevaCantidad = usuario.CantidadBloqueos + 1;
-                    string msgBloqueo = nuevaCantidad > _minutosBloqueo.Length
-                        ? $"La cuenta '{username}' fue bloqueada permanentemente tras varios bloqueos.\n" +
-                          "Contactá al Administrador (o usá una clave de emergencia) para reactivarla."
-                        : $"La cuenta '{username}' fue bloqueada por {_minutosBloqueo[nuevaCantidad - 1]} " +
-                          $"minuto(s) tras {MaxIntentosFallidos} intentos fallidos.\n" +
-                          "Reintentá más tarde o usá una clave de emergencia.";
-
-                    throw new BE.LoginException(BE.LoginException.TipoError.CuentaBloqueada, msgBloqueo);
-                }
-
-                // Mismo mensaje y mismo contador (de sesión) que el caso "usuario inexistente":
-                // indistinguibles entre sí (anti-enumeración). El bloqueo de la CUENTA ya se
-                // resolvió arriba; acá solo se informa el intento fallido genérico.
-                throw new BE.LoginException(BE.LoginException.TipoError.CredencialesInvalidas,
-                    "Usuario o contraseña incorrectos.",
-                    intentosRestantes: ContadorSesion.GetInstance().IntentosRestantes);
+                bitacora.RegistrarSinSesion(
+                    modulo:     modulo ?? "Login",
+                    actividad:  BE.ActividadesBitacora.IntentoFallidoLogin,
+                    criticidad: BE.Criticidad.Alta,
+                    idUsuario:  filaIntegra ? (int?)fila.Id : null,
+                    detalle:    "Login rechazado con la integridad de datos comprometida " +
+                                $"(huella {HuellaUsuario(username)}): " +
+                                (filaIntegra ? "credenciales inválidas o cuenta inactiva en el espejo."
+                                             : "el usuario no tiene una fila íntegra en el espejo de integridad.") +
+                                $" {DateTime.Now:HH:mm:ss}.");
+                throw CredencialesInvalidas();
             }
 
-            return esValido;
+            ContadorSesion.GetInstance().Resetear();
+            var usuario = new BE.Usuario
+            {
+                Id         = fila.Id,
+                Username   = fila.Username,
+                Contraseña = fila.Clave,
+                Rol        = string.IsNullOrEmpty(fila.Rol) ? null : fila.Rol,
+                Perfil     = string.IsNullOrEmpty(fila.Perfil) ? null : fila.Perfil,
+                IdIdioma   = "ES"
+            };
+            // Con la integridad comprometida el árbol de permisos tampoco es confiable: la sesión
+            // solo sirve para la consola de recuperación (exclusiva del Administrador según el espejo).
+            usuario.Permisos = new System.Collections.Generic.List<BE.Permiso>();
+            PermisosAccion.LimpiarCacheVigencia();
+            SessionManager.Login(usuario);
+            bitacora.RegistrarSinSesion(
+                modulo:     modulo ?? "Login",
+                actividad:  BE.ActividadesBitacora.InicioSesion,
+                criticidad: BE.Criticidad.Alta,
+                idUsuario:  usuario.Id,
+                detalle:    $"Inicio de sesión de '{usuario.Username}' validado contra el espejo de integridad " +
+                            $"(integridad comprometida) a las {DateTime.Now:HH:mm:ss}.");
+            return true;
         }
 
         // Cierra la sesión: registra en bitácora y destruye la sesión Singleton.
@@ -136,6 +226,7 @@ namespace BLL
         {
             bitacora.Registrar(modulo, BE.ActividadesBitacora.CierreSesion, BE.Criticidad.None);
             SessionManager.Logout();
+            PermisosAccion.LimpiarCacheVigencia();
         }
 
         // Retorna el usuario en sesión (con sus permisos) desde el SessionManager.
@@ -152,13 +243,20 @@ namespace BLL
             return SessionManager.GetInstance().FechaInicio;
         }
 
-        // Persiste la preferencia de idioma del usuario activo.
-        // También actualiza el objeto en sesión para que las consultas inmediatas reflejen el cambio.
+        // Persiste la preferencia de idioma del usuario activo. Solo el PROPIO usuario de la
+        // sesión puede cambiar su preferencia (antes cualquier llamador podía escribirla para
+        // cualquier IdUsuario).
         public void GuardarPreferenciaIdioma(int idUsuario, string idIdioma)
         {
+            if (!SessionManager.IsLoggedIn)
+                throw new BE.AppException("err.bll.sesion_expirada", "La sesión expiró. Volvé a iniciar sesión.");
+            var u = SessionManager.GetInstance().Usuario;
+            if (u.Id != idUsuario)
+                throw new BE.AppException("err.bll.usuario.preferencia_ajena",
+                    "Solo podés cambiar tu propia preferencia de idioma.");
+
             usuarioDAL.GuardarIdioma(idUsuario, idIdioma);
-            if (Seguridad.SessionManager.IsLoggedIn)
-                Seguridad.SessionManager.GetInstance().Usuario.IdIdioma = idIdioma;
+            u.IdIdioma = idIdioma;
         }
 
         // Registra un intento de login fallido en bitácora.

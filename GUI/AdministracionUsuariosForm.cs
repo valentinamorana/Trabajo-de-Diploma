@@ -32,8 +32,8 @@ namespace GUI
         private int  _idSeleccionado = 0;
         private bool _modoAlta = false;   // true mientras se cargan los datos de un usuario NUEVO
 
-        private static readonly Color RosaOscuro   = Color.FromArgb(176, 62, 96);
-        private static readonly Color PanelClaro   = Color.FromArgb(245, 245, 250);
+        private static readonly Color RosaOscuro   = Tema.RosaOscuro;
+        private static readonly Color PanelClaro   = Tema.PanelClaro;
 
         public AdministracionUsuariosForm()
         {
@@ -45,16 +45,9 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir();
             CargarRoles();
             CargarUsuarios();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma) { Traducir(); CargarUsuarios(); }

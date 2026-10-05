@@ -519,5 +519,182 @@ namespace Tests
             Assert.AreEqual(0, estado.Exceso);
             Assert.AreEqual(2, estado.PrendasDisponibles); // 3 - 1
         }
+
+        // ── Alta fija la fecha de alta (antes la ponía ClienteForm) ─────────────
+
+        [TestMethod]
+        public void Alta_FijaFechaAltaAunqueLaPantallaNoLaMande()
+        {
+            LoginComoAdministrador();
+            var fake = new FakeClienteDAL { AltaIdGenerado = 99 };
+            var bll = new BLL.Cliente(fake);
+            var cliente = ClienteValido();
+            cliente.FechaAlta = default(DateTime);
+            var antes = DateTime.Now;
+
+            bll.Alta("Test", cliente);
+
+            Assert.IsTrue(fake.UltimoAlta.FechaAlta >= antes && fake.UltimoAlta.FechaAlta <= DateTime.Now);
+        }
+
+        // ── Filtrar (antes filtrado en la pantalla Clientes) ─────────────────────
+
+        private static System.Collections.Generic.List<BE.Cliente> ClientesParaFiltrar() => new System.Collections.Generic.List<BE.Cliente>
+        {
+            new BE.Cliente { IdCliente = 1, Nombre = "Ana",  Apellido = "Gómez", DNI = "30111222", Email = "ana@mail.com" },
+            new BE.Cliente { IdCliente = 2, Nombre = "Luis", Apellido = "Pérez", DNI = "28999111", Email = null },
+            new BE.Cliente { IdCliente = 3, Nombre = "Sin",  Apellido = "Dni",   DNI = null,       Email = "SIN@MAIL.COM" }
+        };
+
+        [TestMethod]
+        public void Filtrar_TextoVacio_DevuelveTodos()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            Assert.AreEqual(3, bll.Filtrar(ClientesParaFiltrar(), "  ").Count);
+        }
+
+        [TestMethod]
+        public void Filtrar_PorNombreCompletoParcialSinMayusculas()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var r = bll.Filtrar(ClientesParaFiltrar(), "ANA GÓ");
+            Assert.AreEqual(1, r.Count);
+            Assert.AreEqual(1, r[0].IdCliente);
+        }
+
+        [TestMethod]
+        public void Filtrar_PorDniParcial()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var r = bll.Filtrar(ClientesParaFiltrar(), "9991");
+            Assert.AreEqual(1, r.Count);
+            Assert.AreEqual(2, r[0].IdCliente);
+        }
+
+        [TestMethod]
+        public void Filtrar_PorEmail_ToleraDniYEmailNulos()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var r = bll.Filtrar(ClientesParaFiltrar(), "sin@mail");
+            Assert.AreEqual(1, r.Count);
+            Assert.AreEqual(3, r[0].IdCliente);
+        }
+
+        // ── ObtenerMetodosPago (antes lista fija en ClienteForm) ─────────────────
+
+        [TestMethod]
+        public void ObtenerMetodosPago_DevuelveLosCuatroConSuClave()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var m = bll.ObtenerMetodosPago();
+            CollectionAssert.AreEqual(new[] { "Efectivo", "Débito", "Crédito", "Transferencia" },
+                m.ConvertAll(x => x.Nombre));
+            Assert.AreEqual("metodo.debito", m[1].ClaveTraduccion);
+        }
+
+        [TestMethod]
+        public void ObtenerMetodosPago_ValorGuardadoConocido_NoSeDuplica()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            Assert.AreEqual(4, bll.ObtenerMetodosPago("Crédito").Count);
+        }
+
+        [TestMethod]
+        public void ObtenerMetodosPago_ValorGuardadoAnterior_SeConservaAlFinalSinClave()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var m = bll.ObtenerMetodosPago("Mercado Pago");
+            Assert.AreEqual(5, m.Count);
+            Assert.AreEqual("Mercado Pago", m[4].Nombre);
+            Assert.IsNull(m[4].ClaveTraduccion);
+        }
+
+        // ── BE.Cliente: estado de la suscripción (antes calculado en Clientes/Renovación) ──
+
+        [TestMethod]
+        public void EstadoVencimiento_SegunFecha()
+        {
+            Assert.AreEqual(BE.EstadoVencimiento.SinVencimiento, new BE.Cliente { IdPlan = 1 }.ObtenerEstadoVencimiento());
+            Assert.AreEqual(BE.EstadoVencimiento.Vencida,
+                new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(-1) }.ObtenerEstadoVencimiento());
+            Assert.AreEqual(BE.EstadoVencimiento.ProximaAVencer,
+                new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(7) }.ObtenerEstadoVencimiento());
+            Assert.AreEqual(BE.EstadoVencimiento.Vigente,
+                new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(8) }.ObtenerEstadoVencimiento());
+        }
+
+        [TestMethod]
+        public void EstadoVencimiento_VencidaAunqueNoTengaPlan_IgualQueVencimientoExpirado()
+        {
+            var c = new BE.Cliente { FechaVencimiento = DateTime.Today.AddDays(-1) };
+            Assert.AreEqual(BE.EstadoVencimiento.Vencida, c.ObtenerEstadoVencimiento());
+        }
+
+        [TestMethod]
+        public void EstadoSuscripcion_LaPausaTienePrioridad()
+        {
+            var c = new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(-1), FechaPausaHasta = DateTime.Today.AddDays(5) };
+            Assert.AreEqual(BE.EstadoVencimiento.Pausada, c.ObtenerEstadoSuscripcion());
+            Assert.AreEqual(BE.EstadoVencimiento.Vencida, c.ObtenerEstadoVencimiento());
+        }
+
+        [TestMethod]
+        public void RequiereGestionDeVencimiento_VencidaOProxima()
+        {
+            Assert.IsTrue(new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(-3) }.RequiereGestionDeVencimiento());
+            Assert.IsTrue(new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(2) }.RequiereGestionDeVencimiento());
+            Assert.IsFalse(new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(30) }.RequiereGestionDeVencimiento());
+            Assert.IsFalse(new BE.Cliente { IdPlan = 1 }.RequiereGestionDeVencimiento());
+        }
+
+        [TestMethod]
+        public void TieneLimiteDePrendas_SoloConPlanYLimitePositivo()
+        {
+            Assert.IsTrue(new BE.Cliente { IdPlan = 1, LimitePrendas = 3 }.TieneLimiteDePrendas);
+            Assert.IsFalse(new BE.Cliente { IdPlan = 1, LimitePrendas = 0 }.TieneLimiteDePrendas);
+            Assert.IsFalse(new BE.Cliente { LimitePrendas = 3 }.TieneLimiteDePrendas);
+        }
+
+        // ── BLL.PlanSuscripcion: el estado lo decide la BLL (antes Planes mandaba Estado = true) ──
+
+        private static BE.PlanSuscripcion PlanEditado() =>
+            new BE.PlanSuscripcion { IdPlan = 4, Nombre = "Premium", LimitePrendas = 5, Precio = 9000m };
+
+        [TestMethod]
+        public void PlanAlta_QuedaActivo()
+        {
+            LoginComoAdministrador();
+            var dal = new FakePlanSuscripcionDAL();
+            var plan = PlanEditado();
+            plan.Estado = false;
+
+            new BLL.PlanSuscripcion(dal).Alta(plan);
+
+            Assert.IsTrue(dal.UltimoAlta.Estado);
+        }
+
+        [TestMethod]
+        public void PlanModificar_PlanInactivo_NoSeReactivaAlEditar()
+        {
+            LoginComoAdministrador();
+            var dal = new FakePlanSuscripcionDAL { PlanPorId = new BE.PlanSuscripcion { IdPlan = 4, Estado = false } };
+            var plan = PlanEditado();
+            plan.Estado = true;
+
+            new BLL.PlanSuscripcion(dal).Modificar(plan);
+
+            Assert.IsFalse(dal.UltimoModificado.Estado);
+        }
+
+        [TestMethod]
+        public void PlanModificar_PlanActivo_SigueActivo()
+        {
+            LoginComoAdministrador();
+            var dal = new FakePlanSuscripcionDAL { PlanPorId = new BE.PlanSuscripcion { IdPlan = 4, Estado = true } };
+
+            new BLL.PlanSuscripcion(dal).Modificar(PlanEditado());
+
+            Assert.IsTrue(dal.UltimoModificado.Estado);
+        }
     }
 }

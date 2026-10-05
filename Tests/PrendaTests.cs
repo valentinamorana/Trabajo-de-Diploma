@@ -212,5 +212,59 @@ namespace Tests
             Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
             Assert.AreEqual(BE.EstadoPrenda.Disponible, prenda.Estado);
         }
+
+        // ── ObtenerTransicionesManuales / CorrespondeOfrecerCargo (antes en GUI/Prendas.cs) ──
+
+        [TestMethod]
+        public void TransicionesManuales_Disponible_EnLimpiezaYBaja()
+        {
+            var bll = new Contexto().Crear();
+            var r = bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = BE.EstadoPrenda.Disponible });
+            CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.EnLimpieza, BE.EstadoPrenda.Baja }, r);
+        }
+
+        [TestMethod]
+        public void TransicionesManuales_EnLimpieza_SoloDisponible_LaBajaEsPorInspeccion()
+        {
+            var bll = new Contexto().Crear();
+            var r = bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = BE.EstadoPrenda.EnLimpieza });
+            CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.Disponible }, r);
+        }
+
+        [TestMethod]
+        public void TransicionesManuales_EnUso_Ninguna_LaBajaEsPorReportarPerdida()
+        {
+            var bll = new Contexto().Crear();
+            Assert.AreEqual(0, bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = BE.EstadoPrenda.EnUso }).Count);
+        }
+
+        [TestMethod]
+        public void TransicionesManuales_Baja_Ninguna()
+        {
+            var bll = new Contexto().Crear();
+            Assert.AreEqual(0, bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = BE.EstadoPrenda.Baja }).Count);
+        }
+
+        [TestMethod]
+        public void TransicionesManuales_TodasLasOfrecidasLasAceptaCambiarEstado()
+        {
+            LoginComoAdministrador();
+            foreach (var origen in new[] { BE.EstadoPrenda.Disponible, BE.EstadoPrenda.EnLimpieza })
+            {
+                var bll = new Contexto().Crear();
+                foreach (var destino in bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = origen }))
+                    bll.CambiarEstado("Test", new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = origen }, destino, "admin");
+            }
+        }
+
+        [TestMethod]
+        public void CorrespondeOfrecerCargo_SoloBajaConUltimoCliente()
+        {
+            var bll = new Contexto().Crear();
+            Assert.IsTrue(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.Baja, IdUltimoCliente = 3 }));
+            Assert.IsFalse(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.Baja }));
+            Assert.IsFalse(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 }));
+            Assert.IsFalse(bll.CorrespondeOfrecerCargo(null));
+        }
     }
 }

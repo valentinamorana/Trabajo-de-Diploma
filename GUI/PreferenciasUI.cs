@@ -64,21 +64,21 @@ namespace GUI
             if (oscuro)
             {
                 if (esRaiz || c is Form || c is Panel || c is GroupBox || c is TabPage)
-                    c.BackColor = Color.FromArgb(37, 37, 45);
+                    c.BackColor = Tema.OscuroFondo;
                 if (c is Label || c is CheckBox || c is RadioButton || c is LinkLabel)
                     c.ForeColor = Color.Gainsboro;
                 if (c is TextBox || c is ComboBox || c is ListBox || c is ListView)
                 {
-                    c.BackColor = Color.FromArgb(50, 50, 60);
+                    c.BackColor = Tema.OscuroControl;
                     c.ForeColor = Color.Gainsboro;
                 }
                 if (c is DataGridView grid)
                 {
-                    grid.BackgroundColor = Color.FromArgb(45, 45, 55);
-                    grid.DefaultCellStyle.BackColor = Color.FromArgb(50, 50, 60);
+                    grid.BackgroundColor = Tema.OscuroGrilla;
+                    grid.DefaultCellStyle.BackColor = Tema.OscuroControl;
                     grid.DefaultCellStyle.ForeColor = Color.Gainsboro;
                     grid.EnableHeadersVisualStyles = false;
-                    grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(60, 60, 72);
+                    grid.ColumnHeadersDefaultCellStyle.BackColor = Tema.OscuroEncabezado;
                     grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.Gainsboro;
                 }
             }

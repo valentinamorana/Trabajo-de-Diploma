@@ -152,7 +152,7 @@ namespace GUI
             {
                 ofd.Filter = "Copias de Seguridad (*.wfbak;*.bak)|*.wfbak;*.bak";
                 ofd.Title  = Tr("rec.backup.seleccionar", "Seleccionar Backup para Restaurar");
-                if (ofd.ShowDialog() != DialogResult.OK) return;
+                if (ofd.ShowDialog(this) != DialogResult.OK) return;
 
                 // RF-08 — Informar el ALCANCE de la pérdida (fecha del backup + registros actuales
                 // posteriores que se perderían al sobrescribir) antes de confirmar la restauración.

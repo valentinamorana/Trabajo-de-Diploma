@@ -25,6 +25,11 @@ namespace GUI
             this.btnIntentoFallido = new System.Windows.Forms.Button();
             this.btnRefrescar = new System.Windows.Forms.Button();
             this.lblConteo = new System.Windows.Forms.Label();
+            this.cmbVista = new System.Windows.Forms.ComboBox();
+            this.btnVerIntentos = new System.Windows.Forms.Button();
+            this.btnImprimirLiquidacion = new System.Windows.Forms.Button();
+            this.btnImprimirComprobante = new System.Windows.Forms.Button();
+            this.btnImprimirConstancia = new System.Windows.Forms.Button();
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
             this.dgvContrataciones = new System.Windows.Forms.DataGridView();
@@ -43,11 +48,16 @@ namespace GUI
             this.panelTop.Controls.Add(this.btnIntentoFallido);
             this.panelTop.Controls.Add(this.btnRefrescar);
             this.panelTop.Controls.Add(this.lblConteo);
+            this.panelTop.Controls.Add(this.cmbVista);
+            this.panelTop.Controls.Add(this.btnVerIntentos);
+            this.panelTop.Controls.Add(this.btnImprimirLiquidacion);
+            this.panelTop.Controls.Add(this.btnImprimirComprobante);
+            this.panelTop.Controls.Add(this.btnImprimirConstancia);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
             this.panelTop.Padding = new System.Windows.Forms.Padding(8, 6, 8, 4);
-            this.panelTop.Size = new System.Drawing.Size(900, 60);
+            this.panelTop.Size = new System.Drawing.Size(900, 92);
             this.panelTop.TabIndex = 0;
             //
             // lblMedioPago
@@ -72,7 +82,7 @@ namespace GUI
             //
             // btnCobrar
             //
-            this.btnCobrar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(140)))), ((int)(((byte)(60)))));
+            this.btnCobrar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(125)))), ((int)(((byte)(70)))));
             this.btnCobrar.Enabled = false;
             this.btnCobrar.FlatAppearance.BorderSize = 0;
             this.btnCobrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -117,11 +127,79 @@ namespace GUI
             //
             this.lblConteo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblConteo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblConteo.Location = new System.Drawing.Point(568, 18);
+            this.lblConteo.Location = new System.Drawing.Point(620, 18);
             this.lblConteo.Name = "lblConteo";
-            this.lblConteo.Size = new System.Drawing.Size(320, 23);
+            this.lblConteo.Size = new System.Drawing.Size(272, 23);
             this.lblConteo.TabIndex = 5;
             this.lblConteo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // cmbVista
+            //
+            this.cmbVista.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbVista.Location = new System.Drawing.Point(8, 56);
+            this.cmbVista.Name = "cmbVista";
+            this.cmbVista.Size = new System.Drawing.Size(150, 21);
+            this.cmbVista.SelectedIndexChanged += new System.EventHandler(this.CmbVista_SelectedIndexChanged);
+            //
+            // btnVerIntentos
+            //
+            this.btnVerIntentos.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(110)))));
+            this.btnVerIntentos.Enabled = false;
+            this.btnVerIntentos.FlatAppearance.BorderSize = 0;
+            this.btnVerIntentos.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVerIntentos.ForeColor = System.Drawing.Color.White;
+            this.btnVerIntentos.Location = new System.Drawing.Point(166, 52);
+            this.btnVerIntentos.Name = "btnVerIntentos";
+            this.btnVerIntentos.Size = new System.Drawing.Size(120, 28);
+            this.btnVerIntentos.Tag = "btn.contr.verintentos";
+            this.btnVerIntentos.Text = "Ver intentos";
+            this.btnVerIntentos.UseVisualStyleBackColor = false;
+            this.btnVerIntentos.Click += new System.EventHandler(this.BtnVerIntentos_Click);
+            //
+            // btnImprimirLiquidacion
+            //
+            this.btnImprimirLiquidacion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(110)))));
+            this.btnImprimirLiquidacion.Enabled = false;
+            this.btnImprimirLiquidacion.FlatAppearance.BorderSize = 0;
+            this.btnImprimirLiquidacion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimirLiquidacion.ForeColor = System.Drawing.Color.White;
+            this.btnImprimirLiquidacion.Location = new System.Drawing.Point(292, 52);
+            this.btnImprimirLiquidacion.Name = "btnImprimirLiquidacion";
+            this.btnImprimirLiquidacion.Size = new System.Drawing.Size(150, 28);
+            this.btnImprimirLiquidacion.Tag = "btn.contr.imprimirliq";
+            this.btnImprimirLiquidacion.Text = "Imprimir liquidación";
+            this.btnImprimirLiquidacion.UseVisualStyleBackColor = false;
+            this.btnImprimirLiquidacion.Click += new System.EventHandler(this.BtnImprimirLiquidacion_Click);
+            //
+            // btnImprimirComprobante
+            //
+            this.btnImprimirComprobante.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(110)))));
+            this.btnImprimirComprobante.Enabled = false;
+            this.btnImprimirComprobante.FlatAppearance.BorderSize = 0;
+            this.btnImprimirComprobante.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimirComprobante.ForeColor = System.Drawing.Color.White;
+            this.btnImprimirComprobante.Location = new System.Drawing.Point(448, 52);
+            this.btnImprimirComprobante.Name = "btnImprimirComprobante";
+            this.btnImprimirComprobante.Size = new System.Drawing.Size(160, 28);
+            this.btnImprimirComprobante.Tag = "btn.contr.imprimircomprobante";
+            this.btnImprimirComprobante.Text = "Imprimir comprobante";
+            this.btnImprimirComprobante.UseVisualStyleBackColor = false;
+            this.btnImprimirComprobante.Click += new System.EventHandler(this.BtnImprimirComprobante_Click);
+            //
+            // btnImprimirConstancia
+            //
+            this.btnImprimirConstancia.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.btnImprimirConstancia.Enabled = false;
+            this.btnImprimirConstancia.FlatAppearance.BorderSize = 0;
+            this.btnImprimirConstancia.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimirConstancia.ForeColor = System.Drawing.Color.White;
+            this.btnImprimirConstancia.Location = new System.Drawing.Point(614, 52);
+            this.btnImprimirConstancia.Name = "btnImprimirConstancia";
+            this.btnImprimirConstancia.Size = new System.Drawing.Size(160, 28);
+            this.btnImprimirConstancia.Tag = "btn.contr.imprimirconstancia";
+            this.btnImprimirConstancia.Text = "Imprimir constancia";
+            this.btnImprimirConstancia.UseVisualStyleBackColor = false;
+            this.btnImprimirConstancia.Click += new System.EventHandler(this.BtnImprimirConstancia_Click);
             //
             // panelStatus
             //
@@ -154,14 +232,14 @@ namespace GUI
             this.dgvContrataciones.BorderStyle = System.Windows.Forms.BorderStyle.None;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(182)))), ((int)(((byte)(193)))));
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.Black;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvContrataciones.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgvContrataciones.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvContrataciones.Location = new System.Drawing.Point(0, 60);
+            this.dgvContrataciones.Location = new System.Drawing.Point(0, 92);
             this.dgvContrataciones.Name = "dgvContrataciones";
             this.dgvContrataciones.ReadOnly = true;
             this.dgvContrataciones.RowHeadersVisible = false;
@@ -179,6 +257,7 @@ namespace GUI
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.panelTop);
             this.MinimumSize = new System.Drawing.Size(720, 400);
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F);   // escala tipográfica de Tema (antes: Microsoft Sans Serif por defecto)
             this.Name = "ContratacionesPendientesForm";
             this.Tag = "frm.contratacionespend";
             this.Text = "Contrataciones Pendientes de Pago";
@@ -198,6 +277,11 @@ namespace GUI
         private System.Windows.Forms.Button btnCobrar;
         private System.Windows.Forms.Button btnIntentoFallido;
         private System.Windows.Forms.Button btnRefrescar;
+        private System.Windows.Forms.ComboBox cmbVista;
+        private System.Windows.Forms.Button btnVerIntentos;
+        private System.Windows.Forms.Button btnImprimirLiquidacion;
+        private System.Windows.Forms.Button btnImprimirComprobante;
+        private System.Windows.Forms.Button btnImprimirConstancia;
         private System.Windows.Forms.ToolTip tip;
         private System.Windows.Forms.Label lblConteo;
         private System.Windows.Forms.Panel panelStatus;

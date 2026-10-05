@@ -39,7 +39,7 @@ namespace BE.Builders
                 ? _cliente.FechaVencimiento.Value.Date
                 : fechaActivacion;
             var fechaVencimiento = CalcularVencimiento(inicioPeriodo);
-            return new Suscripcion(_cliente, _plan, Modalidad, fechaActivacion, fechaVencimiento);
+            return new Suscripcion(_cliente, _plan, Modalidad, fechaActivacion, fechaVencimiento, inicioPeriodo);
         }
     }
 }

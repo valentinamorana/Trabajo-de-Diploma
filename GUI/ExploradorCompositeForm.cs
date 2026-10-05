@@ -43,15 +43,8 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             AplicarIdioma();
             CargarArbol();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
@@ -93,7 +86,7 @@ namespace GUI
                 var empresa = new TreeNode("WardrobeFlow")
                 {
                     NodeFont  = new Font("Segoe UI", 9f, FontStyle.Bold),
-                    ForeColor = Color.FromArgb(176, 62, 96)
+                    ForeColor = Tema.RosaOscuro
                 };
                 foreach (BE.Componente raiz in raices)
                     empresa.Nodes.Add(CrearNodoRecursivo(raiz, traducciones));
@@ -103,10 +96,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("err.explorador.cargar", "Error al cargar árbol Composite:\n{0}"), ex.Message),
-                    Tr("diag.err.titulo", "Error"),
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
 
             treeView.EndUpdate();
@@ -156,8 +146,8 @@ namespace GUI
                     ? new Font("Segoe UI", 9f, FontStyle.Bold)
                     : new Font("Segoe UI", 9f),
                 ForeColor = esFamilia
-                    ? Color.FromArgb(176, 62, 96)
-                    : Color.FromArgb(30, 110, 50)
+                    ? Tema.RosaOscuro
+                    : Tema.Exito
             };
 
             // Recursión sobre los hijos — profundidad arbitraria. Sin el `if (esFamilia)` que había

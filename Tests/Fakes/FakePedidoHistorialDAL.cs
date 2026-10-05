@@ -17,7 +17,9 @@ namespace Tests.Fakes
             RegistrarCambiosVeces++;
             UltimoCambiosRegistrados = cambios;
         }
-        public int ObtenerSiguienteIdOperacion(int idPedido) => 1;
+        // Siguiente IdOperacion a devolver (la "última" operación es este valor - 1).
+        public int SiguienteIdOperacion { get; set; } = 1;
+        public int ObtenerSiguienteIdOperacion(int idPedido) => SiguienteIdOperacion;
         public DataTable ObtenerPorPedido(int idPedido, string accion = null, DateTime? desde = null, DateTime? hasta = null) => new DataTable();
         public List<BE.PedidoHistorial> ObtenerPorOperacion(int idPedido, int idOperacion) => CambiosParaOperacion;
     }

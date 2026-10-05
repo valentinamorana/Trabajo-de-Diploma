@@ -29,13 +29,29 @@ namespace Tests.Fakes
         public void RegistrarDevolucion(string modulo, BE.Pedido pedido) => RegistrarDevolucionVeces++;
 
         // Resto del contrato: no ejercitado por estos tests, cuerpos mínimos.
-        public List<BE.Pedido> ObtenerTodos() => new List<BE.Pedido>();
+        public List<BE.Pedido> Pedidos { get; } = new List<BE.Pedido>();
+        public List<BE.Pedido> ObtenerTodos() => Pedidos;
         public List<BE.Pedido> ObtenerPendientes() => new List<BE.Pedido>();
         public BE.Pedido ObtenerPorId(int id) => null;
-        public int CrearPedido(string modulo, int idCliente, List<BE.Prenda> prendas) => 0;
+        public List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado) => new List<BE.Pedido>();
+        public BE.Cliente VerificarVigencia(int idCliente) => new BE.Cliente { IdCliente = idCliente };
+        public void RevisarPedidoActivo(BE.Cliente cliente) { }
         public BE.Cliente ValidarPuedeArmarPedido(int idCliente) => new BE.Cliente { IdCliente = idCliente };
-        public BE.PlanSuscripcion ValidarCupoDisponible(BE.Cliente cliente, int cantidadPrendas) => null;
-        public int ReservarPrendas(List<BE.Prenda> prendas, int idCliente) => 0;
+        public BE.PlanSuscripcion ComprobarCupo(BE.Cliente cliente, int cantidadPrendas) => null;
+        public int EnviarAControlStock(string modulo, int idCliente, List<BE.Prenda> prendas) => 0;
+        public int AsentarDesistimiento(string modulo, int idCliente, List<BE.Prenda> prendas, string motivo) => 0;
+        public void AsentarDesistimiento(string modulo, BE.Pedido pedido, string motivo, BE.EtapaDesistimiento etapa,
+                                         List<BE.Prenda> seleccionAjustada = null) { }
+        public void AjustarSeleccion(string modulo, BE.Pedido pedido, List<BE.Prenda> prendas) { }
+        public List<BE.LineaControlStock> RevisarStock(BE.Pedido pedido) => new List<BE.LineaControlStock>();
+        public List<BE.PedidoFaltante> InformarFaltantes(string modulo, BE.Pedido pedido) => new List<BE.PedidoFaltante>();
+        public void ConfirmarPrendasDisponibles(string modulo, BE.Pedido pedido) { }
+        public void SepararPrendas(string modulo, BE.Pedido pedido) { }
+        public void FormalizarPedido(string modulo, BE.Pedido pedido) { }
+        public BE.Pedido PrepararConfirmacion(string modulo, int idPedido) => null;
+        public List<BE.Pedido> ColaControlStock { get; set; } = new List<BE.Pedido>();
+        public List<BE.Pedido> ObtenerColaControlStock() => ColaControlStock;
+        public List<BE.PedidoFaltante> ObtenerInformeFaltantes(int idPedido) => new List<BE.PedidoFaltante>();
         public void Despachar(string modulo, BE.Pedido pedido) { }
         public void MarcarEntregado(string modulo, BE.Pedido pedido) { }
         public DataTable ObtenerHistorial(int idPedido, string accion = null, DateTime? desde = null, DateTime? hasta = null) => null;

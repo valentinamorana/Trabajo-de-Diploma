@@ -40,6 +40,10 @@ erDiagram
     int IntentosFallidos
     int DVH "NULL"
     datetime FechaActualizacion
+    bit Activo
+    bit RequiereCambioClave
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
   }
   Empleado {
     int IdEmpleado PK
@@ -73,6 +77,7 @@ erDiagram
   PermisoRelacion {
     int IdPadre PK,FK
     int IdHijo PK,FK
+    int DVH "NULL"
   }
   RolPermiso {
     nvarchar(100) Rol PK

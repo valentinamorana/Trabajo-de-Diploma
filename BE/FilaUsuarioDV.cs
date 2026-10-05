@@ -21,6 +21,13 @@ namespace BE
         public string Perfil           { get; set; }
         public string Estado           { get; set; }
         public string IntentosFallidos { get; set; }
+        // Formato 2 (T07): estado de la cuenta. Antes no se protegían, así que reactivar un usuario
+        // archivado, quitarle el cambio de clave obligatorio o borrar su bloqueo por SQL no se detectaba.
+        public string Activo              { get; set; }
+        public string RequiereCambioClave { get; set; }
+        public string CantidadBloqueos    { get; set; }
+        /// <summary>FechaBloqueo ya normalizada (formato invariante de DAL.DigitoVerificador.Formatear; "" si es NULL).</summary>
+        public string FechaBloqueo        { get; set; }
         public int?   DVHAlmacenado    { get; set; }
 
         /// <summary>
@@ -31,12 +38,14 @@ namespace BE
         /// Formato v2 — se incorpora <see cref="Rol"/> al cálculo: de Rol dependen los
         /// permisos efectivos del usuario, así una manipulación directa del rol en BD
         /// queda detectada por la verificación de integridad (antes Rol no se protegía).
+        /// Formato 2 — se agregan Activo, RequiereCambioClave, CantidadBloqueos y FechaBloqueo.
         /// </summary>
         public string[] CamposParaDVH()
         {
             return new[]
             {
-                Id.ToString(), Username, Clave, Rol ?? "", Perfil, Estado, IntentosFallidos
+                Id.ToString(System.Globalization.CultureInfo.InvariantCulture), Username, Clave, Rol ?? "", Perfil, Estado, IntentosFallidos,
+                Activo ?? "", RequiereCambioClave ?? "", CantidadBloqueos ?? "", FechaBloqueo ?? ""
             };
         }
     }

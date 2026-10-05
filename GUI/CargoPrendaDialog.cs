@@ -14,6 +14,8 @@ namespace GUI
         public string Motivo { get; private set; }
         public decimal Monto { get; private set; }
 
+        protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
+
         /// <param name="prenda">Prenda sobre la que se registra el cargo.</param>
         /// <param name="montoSugerido">
         /// PN04 — precio de reposición de la prenda (si está cargado), para no depender de
@@ -40,14 +42,15 @@ namespace GUI
 
         private void BtnConfirmar_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtMotivo.Text))
+            // Las reglas (motivo obligatorio, monto mayor a cero) son las de la BLL: se validan
+            // acá antes de cerrar para que el usuario pueda corregir sin perder lo que cargó.
+            try
             {
-                lblMensaje.Text = Tr("msg.cargoprenda.motivorequerido", "Indicá el motivo del cargo.");
-                return;
+                new BLL.CargoPrenda().ValidarDatos(txtMotivo.Text, numMonto.Value);
             }
-            if (numMonto.Value <= 0)
+            catch (Exception ex)
             {
-                lblMensaje.Text = Tr("msg.cargoprenda.montoinvalido", "El monto debe ser mayor a cero.");
+                MostrarError(ex);
                 return;
             }
 

@@ -12,7 +12,6 @@ classDiagram
     +int? IdClienteActual
     +int? IdUltimoCliente
     +decimal? PrecioReposicion
-    +string ResumenEstado
   }
   class MantenimientoPrenda {
     +int IdMantenimiento
@@ -49,10 +48,12 @@ classDiagram
   }
   class BLL_Prenda["BLL.Prenda"] {
     +CambiarEstado(string,  Prenda,  EstadoPrenda,  string,  bool,  bool) void
+    +ObtenerTransicionesManuales(Prenda) List~EstadoPrenda~
     +ObtenerEnLimpieza() List~Prenda~
     +ObtenerHistorialMantenimiento(int) List~MantenimientoPrenda~
   }
   class BLL_CargoPrenda["BLL.CargoPrenda"] {
+    +ValidarDatos(string,  decimal) void
     +RegistrarCargo(string,  Prenda,  string,  decimal,  string) void
     +ObtenerPendientesPorCliente(int) List~CargoPrenda~
   }

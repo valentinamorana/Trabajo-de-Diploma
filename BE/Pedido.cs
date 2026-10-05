@@ -25,6 +25,26 @@ namespace BE
 
         public string MotivoCancelacion { get; set; }
 
+        // ── PN01 — circuito de control de stock (diagrama de actividad) ─────────
+        // "Enviar selección para control stock".
+        public DateTime? FechaEnvioControl { get; set; }
+
+        // "Revisar stock de las prendas": quién (Depósito) y cuándo emitió el resultado
+        // (informe de faltantes o confirmación de las prendas disponibles).
+        public DateTime? FechaControl { get; set; }
+        public int? IdEmpleadoControl { get; set; }
+        public string NombreEmpleadoControl { get; set; }
+
+        // "Separar prendas del pedido" (constancia de prendas separadas).
+        public DateTime? FechaSeparacion { get; set; }
+
+        // "Formalizar el pedido": desde acá la selección no admite modificaciones.
+        public DateTime? FechaFormalizacion { get; set; }
+
+        // "Asentar desistimiento".
+        public string MotivoDesistimiento { get; set; }
+        public EtapaDesistimiento? EtapaDesistimiento { get; set; }
+
         public string NombreCliente { get; set; }
 
         public string NombreEmpleado { get; set; }
@@ -32,7 +52,14 @@ namespace BE
         // Prendas asociadas al pedido (cargadas desde PedidoPrenda).
         public List<Prenda> Prendas { get; set; } = new List<Prenda>();
 
+        // Ids de las prendas que Depósito confirmó como disponibles (PedidoPrenda.Confirmada).
+        public List<int> PrendasConfirmadas { get; set; } = new List<int>();
+
         public int CantidadPrendas => Prendas?.Count ?? 0;
+
+        // Todas las líneas del pedido fueron confirmadas por Depósito.
+        public bool TodasConfirmadas =>
+            CantidadPrendas > 0 && Prendas.TrueForAll(p => PrendasConfirmadas.Contains(p.IdPrenda));
 
         // Resumen para mostrar en grillas.
         public string Resumen =>
@@ -50,10 +77,11 @@ namespace BE
         // los 3 dashboards, sin una única fuente de verdad).
         public bool EsUrgentePorAntiguedad => DiasDesdeAlta >= 2;
 
-        // El pedido puede cancelarse solo si está Pendiente.
-        public bool PuedeCancelarse() => Estado == EstadoPedido.Pendiente;
+        // El pedido puede cancelarse si está Pendiente (formalizado, sin despachar) o Separado
+        // (Depósito ya reservó las prendas pero todavía no se formalizó: "Cancelar pedido separado").
+        public bool PuedeCancelarse() => Estado == EstadoPedido.Pendiente || Estado == EstadoPedido.Separado;
 
-        // El pedido puede despacharse solo si está Pendiente.
+        // El pedido puede despacharse solo si está Pendiente (formalizado).
         public bool PuedeDespachar() => Estado == EstadoPedido.Pendiente;
 
         // El pedido puede marcarse como entregado solo si está Despachado.
@@ -62,16 +90,74 @@ namespace BE
         // El pedido puede des-cancelarse solo si está Cancelado.
         public bool PuedeDesCancelarse() => Estado == EstadoPedido.Cancelado;
 
+        // Registrar la devolución (PN04): solo de un pedido entregado.
+        public bool PuedeDevolverse() => Estado == EstadoPedido.Entregado;
+
+        // Hay notificación de envío desde que se despachó.
+        public bool TieneNotificacionEnvio() => Estado == EstadoPedido.Despachado || Estado == EstadoPedido.Entregado;
+
+        // Ciclo logístico (Pedidos Realizados): pedidos formalizados en adelante. Los que siguen en
+        // el armado de PN01 (control de stock, faltantes, separados) o desistidos no son para despachar.
+        public bool EsDelCicloLogistico() =>
+            Estado == EstadoPedido.Pendiente || Estado == EstadoPedido.Despachado ||
+            Estado == EstadoPedido.Entregado || Estado == EstadoPedido.Cancelado;
+
+        // ── PN01 ──────────────────────────────────────────────────────────────
+        // Depósito revisa el stock, informa faltantes o confirma prendas: solo en control.
+        public bool PuedeControlarse() => Estado == EstadoPedido.EnControlStock;
+
+        // Separar prendas: en control y con todas las líneas confirmadas.
+        public bool PuedeSepararse() => Estado == EstadoPedido.EnControlStock && TodasConfirmadas;
+
+        // El cliente ajusta la selección por disponibilidad: solo con faltantes informados.
+        public bool PuedeAjustarse() => Estado == EstadoPedido.ConFaltantes;
+
+        // Asentar desistimiento de un pedido existente: solo con faltantes informados.
+        public bool PuedeDesistirse() => Estado == EstadoPedido.ConFaltantes;
+
+        // Formalizar: solo con las prendas ya separadas.
+        public bool PuedeFormalizarse() => Estado == EstadoPedido.Separado;
+
+        // "Pedido formalizado con selección cerrada": pasó por Formalizar y no fue cancelado.
+        // Es la condición para preparar la confirmación (BLL y pantalla usan este mismo criterio).
+        public bool EstaFormalizado() =>
+            FechaFormalizacion.HasValue &&
+            (Estado == EstadoPedido.Pendiente || Estado == EstadoPedido.Despachado ||
+             Estado == EstadoPedido.Entregado);
+
+        // "¿Posee pedido activo?": un pedido que todavía no terminó su ciclo bloquea al cliente.
+        // (Entregado sin devolver se controla aparte, por las prendas en uso.)
+        public bool EsActivo() =>
+            Estado == EstadoPedido.EnControlStock || Estado == EstadoPedido.ConFaltantes ||
+            Estado == EstadoPedido.Separado       || Estado == EstadoPedido.Pendiente    ||
+            Estado == EstadoPedido.Despachado;
+
         /// <summary>
         /// Valida que la transición de estado sea permitida según el flujo definido:
-        ///   Pendiente → Despachado → Entregado
-        ///   Pendiente → Cancelado  → Pendiente (des-cancelar)
-        /// Impide cualquier retroceso o salto de estado no contemplado.
+        ///   EnControlStock → ConFaltantes | Separado
+        ///   ConFaltantes   → EnControlStock (selección ajustada) | Desistido
+        ///   Separado       → Pendiente (formalizar) | Cancelado (cancelar pedido separado)
+        ///   Pendiente      → Despachado | Cancelado
+        ///   Despachado     → Entregado
+        ///   Cancelado      → EnControlStock (reactivar: vuelve a control de stock)
+        /// Entregado y Desistido son estados finales.
         /// </summary>
         public bool TransicionValida(EstadoPedido destino)
         {
             switch (Estado)
             {
+                case EstadoPedido.EnControlStock:
+                    return destino == EstadoPedido.ConFaltantes
+                        || destino == EstadoPedido.Separado;
+
+                case EstadoPedido.ConFaltantes:
+                    return destino == EstadoPedido.EnControlStock
+                        || destino == EstadoPedido.Desistido;
+
+                case EstadoPedido.Separado:
+                    return destino == EstadoPedido.Pendiente
+                        || destino == EstadoPedido.Cancelado;   // Cancelar pedido separado (libera las prendas)
+
                 case EstadoPedido.Pendiente:
                     return destino == EstadoPedido.Despachado
                         || destino == EstadoPedido.Cancelado;
@@ -79,11 +165,12 @@ namespace BE
                 case EstadoPedido.Despachado:
                     return destino == EstadoPedido.Entregado;
 
-                case EstadoPedido.Entregado:
-                    return false; // Estado final — no admite más transiciones
-
                 case EstadoPedido.Cancelado:
-                    return destino == EstadoPedido.Pendiente; // Des-cancelar
+                    return destino == EstadoPedido.EnControlStock; // Reactivar: vuelve a control de stock
+
+                case EstadoPedido.Entregado:
+                case EstadoPedido.Desistido:
+                    return false; // Estados finales — no admiten más transiciones
 
                 default:
                     return false;

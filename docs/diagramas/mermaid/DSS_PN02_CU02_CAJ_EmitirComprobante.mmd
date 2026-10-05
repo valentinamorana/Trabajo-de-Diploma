@@ -3,7 +3,7 @@ sequenceDiagram
   actor C as Caja
   participant B as BLL.<br/>Contratacion
   participant D as DAL.<br/>Contratacion
-  Note over C,B: Se dispara dentro de ConfirmarPago (CU01-CAJ): no requiere una acción independiente de Caja
-  B->>D: ConfirmarPago(..., numeroComprobante = CMP-{id:D6}-{yyyyMMdd}, fechaComprobante)
+  Note over C,B: Parte de ConfirmarCobro (CU01-CAJ): número CMP-{id:D6}-{yyyyMMdd} guardado en el mismo UPDATE del cobro
+  B->>D: ConfirmarCobro(..., numeroComprobante, ...)
   D-->>B: contratación Pagada con número y fecha de comprobante
-  B-->>C: comprobante visible en el mensaje de confirmación
+  B-->>C: Comprobante (PDF), reimprimible desde la vista Resueltas

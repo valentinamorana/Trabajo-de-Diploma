@@ -8,11 +8,27 @@ using System.Net.Sockets;
 namespace Servicios
 {
     /// <summary>Servicio para registrar y consultar la bitácora del sistema.</summary>
-    public class Bitacora
+    public class Bitacora : IRegistroBitacora
     {
         private readonly DAL.Bitacora bitacoraDAL = new DAL.Bitacora();
 
         private const string IP_DESCONOCIDA = "IP desconocida";
+
+        // Largos de las columnas de [Bitacora] (BD/00_Instalacion_Completa.sql): un texto más
+        // largo haría fallar el INSERT y la entrada se perdería; se recorta antes de insertar.
+        public const int LargoModulo    = 100;
+        public const int LargoActividad = 200;
+        public const int LargoDetalle   = 1000;
+        public const int LargoIP        = 50;
+
+        internal static BE.Bitacora Ajustar(BE.Bitacora b)
+        {
+            b.Modulo    = TextoSeguro.Recortar(b.Modulo, LargoModulo);
+            b.Actividad = TextoSeguro.Recortar(b.Actividad, LargoActividad);
+            b.Detalle   = TextoSeguro.Recortar(b.Detalle, LargoDetalle);
+            b.IP        = TextoSeguro.Recortar(b.IP, LargoIP);
+            return b;
+        }
 
         // >Registra una actividad del usuario en sesión. No lanza si no hay sesión activa.
         public void Registrar(string modulo, string actividad, Criticidad criticidad)
@@ -37,7 +53,7 @@ namespace Servicios
 
             try
             {
-                bitacoraDAL.Registrar(registro);
+                bitacoraDAL.Registrar(Ajustar(registro));
             }
             catch (Exception ex)
             {
@@ -53,7 +69,7 @@ namespace Servicios
             try
             {
                 string ip = ObtenerIPLocal();
-                bitacoraDAL.Registrar(new BE.Bitacora
+                bitacoraDAL.Registrar(Ajustar(new BE.Bitacora
                 {
                     Fecha      = DateTime.Now,
                     IdUsuario  = idUsuario,
@@ -64,7 +80,7 @@ namespace Servicios
                     Detalle    = detalle ??
                                  $"Actividad '{actividad}' en '{modulo}' desde {ip} " +
                                  $"a las {DateTime.Now:HH:mm:ss}."
-                });
+                }));
             }
             catch (Exception ex)
             {

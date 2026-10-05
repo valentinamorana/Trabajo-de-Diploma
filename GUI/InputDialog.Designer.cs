@@ -35,7 +35,7 @@ namespace GUI
             this.txtInput.TabIndex = 1;
 
             // ── btnAceptar ─────────────────────────────────────────────────────
-            this.btnAceptar.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnAceptar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnAceptar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnAceptar.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnAceptar.FlatAppearance.BorderSize = 0;
@@ -45,6 +45,7 @@ namespace GUI
             this.btnAceptar.Name      = "btnAceptar";
             this.btnAceptar.Size      = new System.Drawing.Size(84, 30);
             this.btnAceptar.TabIndex  = 2;
+            this.btnAceptar.Tag       = "btn.aceptar";
             this.btnAceptar.Text      = "Aceptar";
             this.btnAceptar.UseVisualStyleBackColor = false;
 
@@ -58,6 +59,7 @@ namespace GUI
             this.btnCancelar.Name      = "btnCancelar";
             this.btnCancelar.Size      = new System.Drawing.Size(84, 30);
             this.btnCancelar.TabIndex  = 3;
+            this.btnCancelar.Tag       = "btn.cancelar";
             this.btnCancelar.Text      = "Cancelar";
             this.btnCancelar.UseVisualStyleBackColor = true;
 

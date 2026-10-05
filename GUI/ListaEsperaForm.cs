@@ -28,20 +28,15 @@ namespace GUI
         public ListaEsperaForm()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvListaEspera);
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarFilas();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -179,9 +174,9 @@ namespace GUI
                 if (!int.TryParse(row.Cells["_EstadoKey"].Value?.ToString(), out int key)) continue;
                 row.DefaultCellStyle.ForeColor = key switch
                 {
-                    (int)BE.EstadoListaEspera.Pendiente  => Color.FromArgb(160, 100, 0),
-                    (int)BE.EstadoListaEspera.Reservada  => Color.FromArgb(30, 130, 30),
-                    (int)BE.EstadoListaEspera.Cancelada  => Color.FromArgb(150, 50, 50),
+                    (int)BE.EstadoListaEspera.Pendiente  => Tema.Alerta,
+                    (int)BE.EstadoListaEspera.Reservada  => Tema.Exito,
+                    (int)BE.EstadoListaEspera.Cancelada  => Tema.Error,
                     _                                     => Color.Black
                 };
             }
@@ -190,8 +185,7 @@ namespace GUI
         private void DgvListaEspera_SelectionChanged(object sender, EventArgs e)
         {
             var fila = ObtenerFilaSeleccionada();
-            btnCancelar.Enabled = fila != null &&
-                (fila.Estado == BE.EstadoListaEspera.Pendiente || fila.Estado == BE.EstadoListaEspera.Reservada);
+            btnCancelar.Enabled = fila != null && fila.PuedeCancelarse();
         }
 
         private BE.ListaEspera ObtenerFilaSeleccionada()
@@ -232,8 +226,7 @@ namespace GUI
 
             try
             {
-                string actor = Seguridad.SessionManager.IsLoggedIn
-                    ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
+                string actor = BLL.Sesion.Actor;
                 listaEsperaBLL.Cancelar(this.Text, fila.IdListaEspera, actor);
                 MostrarOk(Tr("msg.listaespera.cancelada", "Anotación de {0} cancelada.", new object[] { fila.NombreCliente }));
                 CargarFilas();

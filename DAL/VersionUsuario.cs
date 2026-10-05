@@ -13,18 +13,11 @@ namespace DAL
 {
     public class VersionUsuario : BaseDAL<BE.VersionUsuario>
     {
-        // Código de error nativo de SQL Server para "Invalid column name" — independiente del
-        // idioma del servidor, a diferencia de matchear texto contra SqlException.Message (ver
-        // el mismo criterio en DAL.Usuario.ColumnaInexistente).
-        private const int ColumnaInexistente = 207;
-
-        // Todas las columnas (perfil + seguridad). Tras 00_Instalacion_Completa la tabla las tiene.
+        // Columnas de HistorialUsuario (el script de instalación las crea todas; no hay variante
+        // "sin migrar").
         private const string Cols =
             "IdVersion, IdUsuario, Fecha, Actor, Detalle, UsernameSnap, " +
             "NombreSnap, ApellidoSnap, FechaNacSnap, EmailSnap, ClaveSnap, EstadoSnap, IntentosSnap";
-        // Subconjunto legacy (BD sin migrar a snapshots de perfil).
-        private const string ColsLegacy =
-            "IdVersion, IdUsuario, Fecha, Actor, Detalle, UsernameSnap, ClaveSnap, EstadoSnap, IntentosSnap";
 
         public override List<BE.VersionUsuario> ObtenerTodos()
             => LeerLista("ORDER BY Fecha DESC", null);
@@ -38,25 +31,10 @@ namespace DAL
         public List<BE.VersionUsuario> ObtenerPorUsuario(int idUsuario)
             => LeerLista("WHERE IdUsuario = @Id ORDER BY Fecha DESC", new[] { new SqlParameter("@Id", idUsuario) });
 
-        // Lector tolerante: intenta con las columnas de perfil; si la BD no está migrada, cae al legacy.
         private List<BE.VersionUsuario> LeerLista(string filtro, SqlParameter[] parametros)
         {
             var lista = new List<BE.VersionUsuario>();
-            DataTable dt;
-            try
-            {
-                dt = acceso.Leer($"SELECT {Cols} FROM HistorialUsuario {filtro}", parametros);
-            }
-            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
-            {
-                // Se copian TODOS los parámetros del filtro, no solo el primero: hoy los 3 callers
-                // usan a lo sumo uno, pero un fallback que solo reconstruye parametros[0] ignoraría
-                // silenciosamente el resto si algún filtro futuro usara 2+ (ej. un rango de fechas).
-                SqlParameter[] paramsLegacy = parametros == null
-                    ? null
-                    : Array.ConvertAll(parametros, p2 => new SqlParameter(p2.ParameterName, p2.Value));
-                dt = acceso.Leer($"SELECT {ColsLegacy} FROM HistorialUsuario {filtro}", paramsLegacy);
-            }
+            DataTable dt = acceso.Leer($"SELECT {Cols} FROM HistorialUsuario {filtro}", parametros);
             foreach (DataRow row in dt.Rows)
                 lista.Add(Mapear(row));
             return lista;
@@ -64,25 +42,13 @@ namespace DAL
 
         public void Insertar(BE.VersionUsuario v)
         {
-            try
-            {
-                acceso.Escribir(
-                    "INSERT INTO HistorialUsuario " +
-                    "(IdUsuario, Fecha, Actor, Detalle, UsernameSnap, NombreSnap, ApellidoSnap, " +
-                    " FechaNacSnap, EmailSnap, ClaveSnap, EstadoSnap, IntentosSnap) " +
-                    "VALUES (@IdUsuario, @Fecha, @Actor, @Detalle, @Username, @Nombre, @Apellido, " +
-                    " @FechaNac, @Email, @Clave, @Estado, @Intentos)",
-                    Parametros(v, conPerfil: true));
-            }
-            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
-            {
-                // BD sin migrar a snapshots de perfil: insertar solo las columnas legacy.
-                acceso.Escribir(
-                    "INSERT INTO HistorialUsuario " +
-                    "(IdUsuario, Fecha, Actor, Detalle, UsernameSnap, ClaveSnap, EstadoSnap, IntentosSnap) " +
-                    "VALUES (@IdUsuario, @Fecha, @Actor, @Detalle, @Username, @Clave, @Estado, @Intentos)",
-                    Parametros(v, conPerfil: false));
-            }
+            acceso.Escribir(
+                "INSERT INTO HistorialUsuario " +
+                "(IdUsuario, Fecha, Actor, Detalle, UsernameSnap, NombreSnap, ApellidoSnap, " +
+                " FechaNacSnap, EmailSnap, ClaveSnap, EstadoSnap, IntentosSnap) " +
+                "VALUES (@IdUsuario, @Fecha, @Actor, @Detalle, @Username, @Nombre, @Apellido, " +
+                " @FechaNac, @Email, @Clave, @Estado, @Intentos)",
+                Parametros(v, conPerfil: true));
         }
 
         private static SqlParameter[] Parametros(BE.VersionUsuario v, bool conPerfil)

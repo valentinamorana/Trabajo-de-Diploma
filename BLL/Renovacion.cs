@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -11,20 +12,24 @@ namespace BLL
     public class Renovacion : Interfaces.IRenovacionService
     {
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
         private readonly Manejadores.ManejadorRenovacion cadena;
 
-        public Renovacion() : this(new DAL.Cliente(), new DAL.Renovacion(), new DAL.PlanSuscripcion(), new DAL.Prenda()) { }
+        public Renovacion() : this(new DAL.Cliente(), new DAL.Renovacion(), new DAL.PlanSuscripcion(), new DAL.Prenda(), new DAL.Pedido()) { }
 
         // dalPlan/dalPrenda tipados por interfaz (antes eran DAL.PlanSuscripcion/DAL.Prenda
         // concretos): con eso, ni esta fachada ni CambioPlanHandler/BajaSuscripcionHandler se
         // podían instanciar con un doble de prueba — la cadena real quedaba sin ningún test que
         // la ejercitara de punta a punta (los tests reconstruían su propio orden de cadena en vez
         // de usar el que arma este constructor).
+        private readonly DAL.Interfaces.IClienteDAL dalCliente;
+
         public Renovacion(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
-                           DAL.Interfaces.IPlanSuscripcionDAL dalPlan, DAL.Interfaces.IPrendaDAL dalPrenda)
+                           DAL.Interfaces.IPlanSuscripcionDAL dalPlan, DAL.Interfaces.IPrendaDAL dalPrenda,
+                           DAL.Interfaces.IPedidoDAL dalPedido = null)
         {
+            this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
 
             // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
@@ -33,8 +38,8 @@ namespace BLL
             var verificar = new Manejadores.VerificarVencimientoHandler();
             var renovar   = new Manejadores.IntentarRenovarHandler(dalCliente, dalRenovacion);
             var cambio    = new Manejadores.CambioPlanHandler(dalCliente, dalPlan, dalRenovacion);
-            var pausar    = new Manejadores.PausarSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda);
-            var baja      = new Manejadores.BajaSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda);
+            var pausar    = new Manejadores.PausarSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda, dalPedido);
+            var baja      = new Manejadores.BajaSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda, dalPedido);
 
             pausar.AgregarSiguiente(baja);
             cambio.AgregarSiguiente(pausar);
@@ -59,6 +64,13 @@ namespace BLL
             if (!cliente.TienePlan())
                 throw new BE.AppException("err.bll.renovacion.sin_plan",
                     "{0} no tiene un plan de suscripción asignado. No corresponde procesar una renovación.",
+                    cliente.NombreCompleto);
+
+            // PN02: con una contratación pendiente de pago, el plan y el vencimiento los define el
+            // cobro de Caja. Procesar una renovación a la vez extendería o cambiaría la suscripción dos veces.
+            if (dalCliente.TieneContratacionPendiente(cliente.IdCliente))
+                throw new BE.AppException("err.bll.renovacion.contratacion_pendiente",
+                    "{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.",
                     cliente.NombreCompleto);
 
             var contexto = new Manejadores.ContextoRenovacion
@@ -87,5 +99,29 @@ namespace BLL
         }
 
         public List<BE.Renovacion> ObtenerHistorial(int idCliente) => dalRenovacion.ObtenerPorCliente(idCliente);
+
+        // Clientes a los que se les puede procesar la decisión indicada, con el mismo criterio
+        // que la cadena de manejadores (para no ofrecer una decisión que el sistema va a rechazar):
+        //   - solo clientes con plan y sin contratación PN02 pendiente de pago (Procesar los rechaza;
+        //     si el cliente estaba pausado, el cobro de Caja levanta la pausa al activar);
+        //   - Renovar / Cambiar plan / Baja: suscripción vencida o próxima a vencer
+        //     (VerificarVencimientoHandler);
+        //   - Pausar: cualquiera que no esté ya pausado (PausarSuscripcionHandler no re-pausa);
+        //   - SIEMPRE se suman los ya pausados: "Reanudar ahora" no depende de la decisión, y un
+        //     cliente pausado suele tener el vencimiento corrido hacia adelante.
+        // Antes este filtro lo armaba RenovacionSuscripcionForm.
+        public List<BE.Cliente> ObtenerElegibles(Manejadores.DecisionRenovacion decision)
+        {
+            var pendientes = dalCliente.ObtenerIdsConContratacionPendiente();   // una sola consulta
+            var conPlan = dalCliente.ObtenerTodos()
+                .Where(c => c.TienePlan() && !pendientes.Contains(c.IdCliente))
+                .ToList();
+
+            var porDecision = decision == Manejadores.DecisionRenovacion.Pausar
+                ? conPlan.Where(c => !c.EstaPausada)
+                : conPlan.Where(c => c.RequiereGestionDeVencimiento());
+
+            return porDecision.Union(conPlan.Where(c => c.EstaPausada)).ToList();
+        }
     }
 }

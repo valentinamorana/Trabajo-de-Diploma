@@ -51,7 +51,7 @@ namespace GUI
 
             // ── lblTitulo ────────────────────────────────────────────────────
             this.lblTitulo.Font      = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold);
-            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblTitulo.Location  = new System.Drawing.Point(20, 16);
             this.lblTitulo.Name      = "lblTitulo";
             this.lblTitulo.Size      = new System.Drawing.Size(460, 28);
@@ -60,7 +60,7 @@ namespace GUI
 
             // ── lblRutaLabel ─────────────────────────────────────────────────
             this.lblRutaLabel.Font      = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
-            this.lblRutaLabel.ForeColor = System.Drawing.Color.FromArgb(100, 80, 100);
+            this.lblRutaLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(116)))), ((int)(((byte)(128)))));
             this.lblRutaLabel.Location  = new System.Drawing.Point(20, 50);
             this.lblRutaLabel.Name      = "lblRutaLabel";
             this.lblRutaLabel.Size      = new System.Drawing.Size(130, 16);
@@ -119,7 +119,7 @@ namespace GUI
             this.lblConteo.Text      = "";
 
             // ── btnCrear ─────────────────────────────────────────────────────
-            this.btnCrear.BackColor                         = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnCrear.BackColor                         = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnCrear.FlatStyle                         = System.Windows.Forms.FlatStyle.Flat;
             this.btnCrear.FlatAppearance.BorderSize         = 0;
             this.btnCrear.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(120, 50, 78);
@@ -134,12 +134,12 @@ namespace GUI
             this.btnCrear.Click    += new System.EventHandler(this.btnCrear_Click);
 
             // ── btnRestaurar ─────────────────────────────────────────────────
-            this.btnRestaurar.BackColor                         = System.Drawing.Color.FromArgb(252, 228, 235);
+            this.btnRestaurar.BackColor                         = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(228)))), ((int)(((byte)(235)))));
             this.btnRestaurar.Enabled                           = false;
             this.btnRestaurar.FlatStyle                         = System.Windows.Forms.FlatStyle.Flat;
             this.btnRestaurar.FlatAppearance.BorderSize         = 1;
             this.btnRestaurar.FlatAppearance.BorderColor        = Tema.RosaPrimario;
-            this.btnRestaurar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(244, 212, 226);
+            this.btnRestaurar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(222)))), ((int)(((byte)(230)))));
             this.btnRestaurar.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnRestaurar.ForeColor = System.Drawing.Color.FromArgb(100, 40, 80);
             this.btnRestaurar.Location  = new System.Drawing.Point(20, 370);
@@ -158,7 +158,7 @@ namespace GUI
             this.btnEliminar.FlatAppearance.BorderColor        = System.Drawing.Color.FromArgb(200, 150, 150);
             this.btnEliminar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(240, 210, 210);
             this.btnEliminar.Font      = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnEliminar.ForeColor = System.Drawing.Color.FromArgb(160, 40, 40);
+            this.btnEliminar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.btnEliminar.Location  = new System.Drawing.Point(228, 370);
             this.btnEliminar.Name      = "btnEliminar";
             this.btnEliminar.Size      = new System.Drawing.Size(108, 32);

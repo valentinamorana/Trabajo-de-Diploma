@@ -5,16 +5,24 @@ flowchart LR
   V["Vendedor"]:::actor
   subgraph SIS["WardrobeFlow — PN03 Promociones"]
     c1(["CU01-GER Sugerir Promoción"])
+    c7(["CU03-GER Analizar Métricas"])
     c2(["CU01-ADM Gestionar Promociones"])
+    c8(["CU03-ADM Descartar Sugerencia"])
+    c9(["CU04-ADM Descartar Promoción Rechazada"])
+    c10(["CU05-ADM Desactivar Promoción"])
     c3(["CU01-CONT Analizar Promoción"])
-    c4(["CU01-VEN Sugerir Baja de Promoción"])
+    c4(["CU01-VEN Solicitar Baja de Promoción"])
     c5(["CU02-ADM Resolver Baja de Promoción"])
     c6(["CU02-GER Consultar Analítica de Negocio"])
   end
   G --- c1
   A --- c2
+  A --- c10
   K --- c3
   V --- c4
   A --- c5
   G --- c6
+  c1 -. "«include»" .-> c7
+  c8 -. "«extend»" .-> c2
+  c9 -. "«extend»" .-> c2
   classDef actor fill:#fff7e6,stroke:#b8860b

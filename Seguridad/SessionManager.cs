@@ -36,14 +36,16 @@ namespace Seguridad
         // T04 — Re-validación de permisos en el BACKEND.
         // Devuelve true si el usuario en sesión posee la patente indicada.
         // El Administrador tiene acceso total. Si no hay usuario, no tiene permiso.
-        // Captura _session en variable local para evitar race condition con Logout().
+        // Evalúa los permisos de ESTA sesión (la instancia), no de la sesión global vigente: una
+        // referencia vieja a una sesión ya cerrada no debe responder con los permisos de la
+        // sesión que se haya abierto después.
         public bool TienePermiso(string nombreMenu)
         {
-            var s = _session;
-            if (s?.Usuario == null) return false;
-            if (s.Usuario.EsAdministrador) return true;
-            return s.Usuario.Permisos != null &&
-                   s.Usuario.Permisos.Exists(p => string.Equals(p.NombreMenu, nombreMenu, StringComparison.OrdinalIgnoreCase));
+            var u = this.Usuario;
+            if (u == null) return false;
+            if (u.EsAdministrador) return true;
+            return u.Permisos != null &&
+                   u.Permisos.Exists(p => string.Equals(p.NombreMenu, nombreMenu, StringComparison.OrdinalIgnoreCase));
         }
 
         // Crea la sesión para el usuario autenticado.

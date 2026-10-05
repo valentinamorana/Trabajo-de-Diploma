@@ -31,7 +31,11 @@ module.exports = [
     tipo: 'secuencia', id: 'DSS_N01_CU02_RenovarSuscripcion', titulo: 'N01 · CU02-VEN Renovar suscripción (Chain of Responsibility)',
     participantes: [A('V', 'Vendedor'), P('F', 'RenovacionSuscripcionForm'), P('B', 'BLL.Renovacion'), P('H1', 'VerificarVencimientoHandler'), P('H2', 'IntentarRenovarHandler'), P('H3', 'CambioPlan / Pausar / Baja Handler'), P('D', 'DAL.Cliente + DAL.Renovacion')],
     pasos: [
-      c('V', 'F', 'Elige cliente y decisión (Renovar, Cambiar plan, Pausar, Baja)'),
+      c('V', 'F', 'Marca la decisión (Renovar, Cambiar plan, Pausar, Baja)'),
+      c('F', 'B', 'ObtenerElegibles(decision)'),
+      c('B', 'D', 'ObtenerTodos() · TieneContratacionPendiente(idCliente)'),
+      r('B', 'F', 'clientes con plan, sin contratación pendiente y en condiciones para esa decisión (más los pausados)'),
+      c('V', 'F', 'Elige el cliente'),
       c('F', 'B', 'Procesar(modulo, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta)'),
       nota('Exigir(ClientesEditar) · el cliente debe tener plan', 'B'),
       c('B', 'H1', 'Procesar(contexto)'),
@@ -53,10 +57,17 @@ module.exports = [
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_N01_CU03_CobrarSuscripcion', titulo: 'N01 · CU03-VEN Cobrar suscripción (cobro recurrente)',
-    participantes: [A('V', 'Vendedor'), P('F', 'CobroSuscripcionForm'), P('B', 'BLL.Cobro'), P('H1', 'DetectarCobroHandler'), P('H2', 'ProcesarPagoHandler'), P('H3', 'AplicarGracia / Suspender Handler'), P('D', 'DAL (Cliente, Cobro, CargoPrenda, Promocion)')],
+    tipo: 'secuencia', id: 'DSS_N01_CU03_CobrarSuscripcion', titulo: 'N01 · CU01-CAJ Cobrar suscripción (cobro recurrente)',
+    participantes: [A('V', 'Caja'), P('F', 'CobroSuscripcionForm'), P('B', 'BLL.Cobro'), P('H1', 'DetectarCobroHandler'), P('H2', 'ProcesarPagoHandler'), P('H3', 'AplicarGracia / Suspender Handler'), P('D', 'DAL (Cliente, Cobro, CargoPrenda, Promocion)')],
     pasos: [
-      c('V', 'F', 'Elige cliente, modalidad y resultado del cobro (Cobrado o Pago fallido)'),
+      c('F', 'B', 'ObtenerElegibles()'),
+      c('B', 'D', 'ObtenerTodos() · TieneContratacionPendiente(idCliente)'),
+      r('B', 'F', 'clientes con plan, vencidos o próximos a vencer y sin contratación pendiente'),
+      c('V', 'F', 'Elige el cliente'),
+      c('F', 'B', 'PrevisualizarCobro(idCliente)'),
+      c('B', 'D', 'ObtenerPendientesPorCliente(idCliente)'),
+      r('B', 'F', 'cantidad y total de cargos pendientes que sumará el cobro'),
+      c('V', 'F', 'Elige modalidad y resultado del cobro (Cobrado o Pago fallido)'),
       c('F', 'B', 'Procesar(modulo, cliente, decision, modalidad, actor)'),
       c('B', 'H1', 'Procesar(contexto)'),
       { alt: 'Todavía no corresponde cobrar', pasos: [r('H1', 'B', 'Resultado: Pendiente')],
@@ -81,37 +92,136 @@ module.exports = [
   },
 
   // ───────────────────────────── PN01 — Armar pedido ─────────────────────────────
+  // Sigue el diagrama de actividad de EA (Entrega1.eapx): el Vendedor arma y envía la selección,
+  // Depósito (carril "Controlador de Stock") la controla y la separa, y el Vendedor la formaliza.
   {
-    tipo: 'secuencia', id: 'DSS_PN01_CU01_ArmarPedido', titulo: 'PN01 · CU01-VEN Armar pedido',
-    participantes: [A('V', 'Vendedor'), P('F', 'NuevoPedidoForm'), P('B', 'BLL.Pedido'), P('PB', 'BLL.Prenda'), P('LE', 'BLL.ListaEspera'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    tipo: 'secuencia', id: 'DSS_PN01_CU01_ArmarPedido', titulo: 'PN01 · CU01-VEN Armar pedido y enviar a control de stock',
+    participantes: [A('V', 'Vendedor'), P('F', 'NuevoPedidoForm'), P('CB', 'BLL.Cliente'), P('B', 'BLL.Pedido'), P('PB', 'BLL.Prenda'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
     pasos: [
-      c('V', 'F', 'Elige al cliente'),
-      c('F', 'B', 'ValidarPuedeArmarPedido(idCliente)'),
-      nota('Suscripción vigente, sin pausa ni suspensión · sin pedido Despachado · sin prendas En uso (cuenta desbloqueada)', 'B'),
-      { alt: 'Cliente no apto', pasos: [r('B', 'F', 'AppException(motivo)'), r('F', 'V', 'Informa la situación y no permite avanzar')],
-        sino: [{ etiqueta: 'Cliente apto', pasos: [
-          r('B', 'F', 'cliente validado'),
-          c('V', 'F', 'Selecciona las prendas del catálogo y confirma'),
-          c('F', 'B', 'CrearPedido(modulo, idCliente, prendas)'),
-          nota('Exigir(PedidosVentaEditar) · ValidarCupoDisponible: cantidad ≤ LimitePrendas del plan', 'B'),
-          { alt: 'Excede el cupo del plan', pasos: [r('B', 'F', 'AppException(cupo)'), r('F', 'V', 'Informa el exceso: ajustar o desistir')],
-            sino: [{ etiqueta: 'Dentro del cupo', pasos: [
-              c('B', 'PB', 'VerificarDisponibilidad(prendas)  [relee el estado en la BD]'),
-              r('PB', 'B', '(disponible, noDisponibles)'),
-              c('B', 'LE', 'ObtenerIdsReservadosParaOtro(idCliente)'),
-              { alt: 'Alguna prenda no disponible o reservada para otro cliente', pasos: [r('B', 'F', 'AppException(prenda_no_disponible / prenda_reservada)'), r('F', 'V', 'Informa la falta: ajustar o desistir')],
-                sino: [{ etiqueta: 'Todas disponibles', pasos: [
-                  c('B', 'D', 'Alta(pedido)  [transacción: Pedido + PedidoPrenda + prendas a En uso, con reclamo por prenda]'),
-                  { alt: 'Otra sesión tomó una prenda', pasos: [r('D', 'B', 'error de concurrencia'), r('B', 'F', 'AppException'), r('F', 'V', 'Revierte todo el pedido')],
-                    sino: [{ etiqueta: 'Reserva confirmada', pasos: [
-                      r('D', 'B', 'idPedido'),
-                      c('B', 'H', 'RegistrarCambios(idPedido, "CREAR")'),
-                      c('B', 'LE', 'CerrarSiReservada(idPrenda, idCliente)'),
-                      r('B', 'F', 'idPedido'),
-                      r('F', 'V', 'Pedido creado: queda bloqueado y con número único')
-                    ] }] }
-                ] }] }
+      c('V', 'F', 'Ingresa la identificación del cliente (DNI, nombre o apellido)'),
+      c('F', 'CB', 'BuscarPorIdentificacion(texto)'),
+      r('CB', 'F', 'clientes que coinciden (DNI exacto o nombre/apellido parcial)'),
+      c('F', 'B', 'VerificarVigencia(idCliente)'),
+      nota('Exigir(PedidosVentaEditar) · vigente = con plan, sin suspensión por pago, sin pausa y sin vencer', 'B'),
+      { alt: 'Suscripción no vigente', pasos: [r('B', 'F', 'AppException(sin_plan / suscripcion_vencida / pausada / suspendida)'), r('F', 'V', 'Aviso de suscripción no vigente: no deja avanzar')],
+        sino: [{ etiqueta: 'Vigente', pasos: [
+          r('B', 'F', 'cliente (Ficha del cliente)'),
+          c('F', 'B', 'RevisarPedidoActivo(cliente)'),
+          { alt: 'Posee pedido activo o prendas sin devolver', pasos: [r('B', 'F', 'AppException(pedido_activo / ya_despachado / cuenta_bloqueada)'), r('F', 'V', 'Aviso de pedido activo: no deja avanzar')],
+            sino: [{ etiqueta: 'Sin pedido activo', pasos: [
+              c('F', 'PB', 'ObtenerDisponibles(idCliente)'),
+              r('PB', 'F', 'Catálogo: prendas Disponibles, sin las reservadas por Lista de Espera para otro'),
+              { loop: 'Por cada prenda que el Vendedor anota (o quita) de la selección', pasos: [
+                c('F', 'CB', 'ObtenerEstadoComercial(cliente, cantidadSeleccionada)'),
+                r('CB', 'F', 'cupo disponible del plan'),
+                r('F', 'V', 'Detalle de selección (prenda, talle, color, cantidad) y estado del cupo')
+              ] },
+              { alt: 'Excede el cupo y el cliente no ajusta', pasos: [
+                c('V', 'F', 'Registrar desistimiento + motivo'),
+                c('F', 'B', 'AsentarDesistimiento(modulo, idCliente, prendas, motivo)'),
+                nota('ValidarPuedeArmarPedido · solo si la selección excede el cupo (si no: desistimiento_sin_exceso)', 'B'),
+                c('B', 'D', 'AltaSinReserva(pedido Desistido, etapa Cupo)'),
+                r('D', 'B', 'idPedido'),
+                c('B', 'H', 'RegistrarCambios(DESISTIR)'),
+                r('B', 'F', 'idPedido'),
+                r('F', 'V', 'Aviso de desistimiento (PDF)')
+              ], sino: [{ etiqueta: 'Dentro del cupo', pasos: [
+                c('V', 'F', 'Enviar a control de stock'),
+                c('F', 'B', 'EnviarAControlStock(modulo, idCliente, prendas)'),
+                nota('Revalida: ValidarPuedeArmarPedido + ComprobarCupo(cliente, cantidad)', 'B'),
+                c('B', 'D', 'AltaSinReserva(pedido EnControlStock)  [Pedido + PedidoPrenda, prendas siguen Disponibles]'),
+                r('D', 'B', 'idPedido'),
+                c('B', 'H', 'RegistrarCambios(ENVIAR_CONTROL)'),
+                r('B', 'F', 'idPedido'),
+                r('F', 'V', 'Planilla de control de existencias (PDF): el pedido queda en la cola de Depósito')
+              ] }] }
             ] }] }
+        ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN01_CU08_ControlarStock', titulo: 'PN01 · CU04-DEP Controlar stock del pedido',
+    participantes: [A('DP', 'Depósito'), P('F', 'ControlStockForm'), P('B', 'BLL.Pedido'), P('PB', 'BLL.Prenda'), P('LE', 'BLL.ListaEspera'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    pasos: [
+      c('F', 'B', 'ObtenerColaControlStock()'),
+      r('B', 'F', 'pedidos EnControlStock (del más antiguo al más nuevo)'),
+      c('DP', 'F', 'Elige un pedido de la cola'),
+      c('F', 'B', 'RevisarStock(pedido)'),
+      nota('Exigir(ControlStockEditar) · solo pedidos EnControlStock', 'B'),
+      c('B', 'PB', 'VerificarDisponibilidad(prendas)  [relee el estado en la BD]'),
+      r('PB', 'B', '(disponible, noDisponibles)'),
+      c('B', 'LE', 'EstaReservadaParaOtro(idPrenda, idCliente)'),
+      r('B', 'F', 'líneas de la planilla (estado actual, reservada, confirmada)'),
+      { alt: '¿Selección disponible? No', pasos: [
+        c('DP', 'F', 'Informar faltantes'),
+        c('F', 'B', 'InformarFaltantes(modulo, pedido)'),
+        c('B', 'PB', 'ObtenerDisponibles(idCliente)  [alternativas: misma categoría y talle, máx. 3]'),
+        c('B', 'D', 'RegistrarFaltantes(idPedido, idEmpleadoControl, faltantes)  [→ ConFaltantes]'),
+        c('B', 'H', 'RegistrarCambios(INFORMAR_FALTANTES)'),
+        r('B', 'F', 'informe de faltantes y alternativas'),
+        r('F', 'DP', 'Informe de disponibilidad (PDF) para el Vendedor')
+      ], sino: [{ etiqueta: 'Sí', pasos: [
+        c('DP', 'F', 'Confirmar prendas disponibles'),
+        c('F', 'B', 'ConfirmarPrendasDisponibles(modulo, pedido)'),
+        c('B', 'D', 'ConfirmarPrendas(idPedido, idEmpleadoControl)'),
+        c('B', 'H', 'RegistrarCambios(CONFIRMAR_PRENDAS)'),
+        r('F', 'DP', 'Detalle de prendas confirmadas'),
+        c('DP', 'F', 'Separar prendas'),
+        c('F', 'B', 'SepararPrendas(modulo, pedido)'),
+        c('B', 'D', 'SepararPrendas(idPedido, idCliente)  [transacción: prendas a En uso con reclamo, → Separado]'),
+        { alt: 'Otra operación tomó una prenda', pasos: [
+          r('D', 'B', 'AppException(prenda_tomada)  [rollback: no se reserva nada]'),
+          c('B', 'B', 'InformarFaltantes(modulo, pedido)'),
+          r('B', 'F', 'AppException(separar_faltantes)'),
+          r('F', 'DP', 'Informa que el pedido pasó a faltantes')
+        ], sino: [{ etiqueta: 'Reserva confirmada', pasos: [
+          c('B', 'H', 'RegistrarCambios(SEPARAR)'),
+          c('B', 'LE', 'CerrarSiReservada(modulo, idPrenda, idCliente, actor)'),
+          r('F', 'DP', 'Constancia de prendas separadas (PDF)')
+        ] }] }
+      ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN01_CU09_GestionarFaltantes', titulo: 'PN01 · CU05-VEN Comunicar faltantes, ajustar selección o desistir',
+    participantes: [A('V', 'Vendedor'), P('F', 'PedidosVenta / NuevoPedidoForm'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    pasos: [
+      c('V', 'F', 'Ver faltantes de un pedido ConFaltantes'),
+      c('F', 'B', 'ObtenerInformeFaltantes(idPedido)'),
+      c('B', 'D', 'ObtenerFaltantes(idPedido)'),
+      r('B', 'F', 'faltantes con sus alternativas'),
+      r('F', 'V', 'Detalle de prendas no disponibles (pantalla y PDF)'),
+      { alt: 'El cliente ajusta la selección', pasos: [
+        c('V', 'F', 'Ajustar selección (sin los faltantes, alternativas resaltadas)'),
+        c('F', 'B', 'AjustarSeleccion(modulo, pedido, prendas)'),
+        nota('Exigir(PedidosVentaEditar) · solo ConFaltantes · vuelve al merge: solo ComprobarCupo(cliente, cantidad)', 'B'),
+        c('B', 'D', 'ReemplazarSeleccion(idPedido, prendas)  [→ EnControlStock, informe anterior descartado]'),
+        c('B', 'H', 'RegistrarCambios(AJUSTAR_SELECCION)'),
+        r('F', 'V', 'Pedido reenviado a control de stock')
+      ], sino: [{ etiqueta: 'El cliente desiste', pasos: [
+        c('V', 'F', 'Registrar desistimiento + motivo'),
+        c('F', 'B', 'AsentarDesistimiento(modulo, pedido, motivo, etapa, seleccionAjustada)  [Disponibilidad, o Cupo si al ajustar excede]'),
+        c('B', 'D', 'RegistrarDesistimiento(idPedido, motivo, etapa, seleccionAjustada)  [→ Desistido]'),
+        c('B', 'H', 'RegistrarCambios(DESISTIR)'),
+        r('F', 'V', 'Aviso de desistimiento (PDF)')
+      ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN01_CU10_FormalizarPedido', titulo: 'PN01 · CU06-VEN Formalizar pedido y preparar la confirmación',
+    participantes: [A('V', 'Vendedor'), P('F', 'PedidosVenta'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    pasos: [
+      c('V', 'F', 'Formalizar un pedido Separado'),
+      c('F', 'B', 'FormalizarPedido(modulo, pedido)'),
+      nota('Exigir(PedidosVentaEditar) · solo Separado', 'B'),
+      { alt: 'No está Separado', pasos: [r('B', 'F', 'AppException(formalizar_estado)'), r('F', 'V', 'Informa el estado')],
+        sino: [{ etiqueta: 'Separado', pasos: [
+          c('B', 'D', 'Formalizar(idPedido)  [→ Pendiente de despacho, selección cerrada]'),
+          c('B', 'H', 'RegistrarCambios(FORMALIZAR)'),
+          c('F', 'B', 'PrepararConfirmacion(modulo, idPedido)'),
+          c('B', 'D', 'ObtenerPorId(idPedido)'),
+          r('B', 'F', 'pedido formalizado'),
+          r('F', 'V', 'Confirmación y constancia del pedido (PDF) para el cliente')
         ] }] }
     ]
   },
@@ -132,7 +242,7 @@ module.exports = [
     tipo: 'secuencia', id: 'DSS_PN01_CU03_ConsultarSituacionCliente', titulo: 'PN01 · CU03-VEN Consultar situación del cliente',
     participantes: [A('V', 'Vendedor'), P('F', 'NuevoPedidoForm'), P('B', 'BLL.Cliente'), P('D', 'DAL.Cliente')],
     pasos: [
-      c('V', 'F', 'Ingresa DNI o código y confirma la consulta'),
+      c('V', 'F', 'Ingresa DNI, nombre o apellido y elige al cliente'),
       c('F', 'B', 'ObtenerEstadoComercial(cliente, prendasSolicitadas)'),
       c('B', 'D', 'ObtenerPorId(idCliente)'),
       r('D', 'B', 'cliente (plan, cupo, vencimiento, prendas en uso)'),
@@ -212,45 +322,59 @@ module.exports = [
   },
 
   // ───────────────────────────── PN02 — Comercialización de la suscripción ─────────────────────────────
+  // Sigue el flujo aprobado (adaptado a WardrobeFlow): Vendedor identifica, presenta planes y
+  // registra la contratación; Caja calcula, cobra o registra intentos (al tercero se cancela).
   {
     tipo: 'secuencia', id: 'DSS_PN02_CU01_VTA_GestionarSuscripcion', titulo: 'PN02 · CU01-VTA Gestionar suscripción (contratación)',
-    participantes: [A('V', 'Vendedor'), P('F', 'NuevaContratacionForm'), P('B', 'BLL.Contratacion'), P('DC', 'DAL.Cliente / DAL.PlanSuscripcion'), P('D', 'DAL.Contratacion')],
+    participantes: [A('V', 'Vendedor'), P('F', 'NuevaContratacionForm'), P('B', 'BLL.Contratacion'), P('CB', 'BLL.Cliente'), P('D', 'DAL.Contratacion')],
     pasos: [
-      c('V', 'F', 'Elige cliente, plan y modalidad (Mensual, Trimestral, Anual)'),
-      c('F', 'B', 'CrearContratacion(modulo, idCliente, idPlan, modalidad)'),
-      nota('Exigir(ClientesEditar)', 'B'),
-      c('B', 'DC', 'ObtenerPorId(idCliente) · ObtenerPorId(idPlan)'),
-      { alt: 'Cliente inexistente, plan inexistente o inactivo', pasos: [r('B', 'F', 'AppException(cliente_inexistente / plan_inexistente)')],
-        sino: [{ etiqueta: 'Datos válidos', pasos: [
-          nota('ValidarCupo: el plan debe alcanzar para las prendas que el cliente tiene en uso', 'B'),
-          c('B', 'D', 'ObtenerPendientesDePago()'),
-          { alt: 'El cliente ya tiene una contratación pendiente', pasos: [r('B', 'F', 'AppException(pendiente_existente)')],
-            sino: [{ etiqueta: 'Sin pendientes', pasos: [
-              c('B', 'D', 'Alta(contratación: estado PendientePago, IdVendedor)'),
-              r('D', 'B', 'idContratacion'),
-              r('B', 'F', 'idContratacion'),
-              r('F', 'V', 'Contratación pendiente de pago: derivar a Caja (la suscripción todavía no está vigente)')
-            ] }] }
-        ] }] }
+      c('V', 'F', 'Ingresa DNI, nombre o apellido del cliente'),
+      c('F', 'B', 'IdentificarCliente(identificacion)'),
+      c('B', 'CB', 'BuscarPorIdentificacion(texto)'),
+      { alt: '¿Registrado? No', pasos: [r('F', 'V', 'Registrar cliente (ABM de Clientes, referente opcional)')] },
+      c('F', 'B', 'PresentarPlanes()'),
+      r('B', 'F', 'Planes disponibles (nombre, precio mensual, límite de prendas)'),
+      { alt: '¿Elige plan y modalidad? No', pasos: [
+        c('V', 'F', 'El cliente desiste + motivo'),
+        c('F', 'B', 'AsentarDesistimiento(modulo, idCliente, idPlan, modalidad, motivo)'),
+        c('B', 'D', 'AltaDesistimiento(desistimiento)'),
+        r('F', 'V', 'Aviso de desistimiento (PDF)')
+      ], sino: [{ etiqueta: 'Sí', pasos: [
+        c('F', 'B', 'ValidarContratacion(idCliente, idPlan)  [¿Contratación válida?]'),
+        c('F', 'B', 'EstimarImporte(idCliente, idPlan, modalidad)'),
+        c('V', 'F', 'Registrar contratación'),
+        c('F', 'B', 'RegistrarContratacion(modulo, idCliente, idPlan, modalidad)'),
+        nota('Exigir(ClientesEditar) · cliente activo, plan activo, cupo, sin otra pendiente', 'B'),
+        { alt: 'No válida', pasos: [r('B', 'F', 'AppException(motivo)  [queda en la bitácora]'), r('F', 'V', 'Informar motivo')],
+          sino: [{ etiqueta: 'Válida', pasos: [
+            c('B', 'D', 'Alta(contratación PendientePago, PrecioMensual pactado)'),
+            r('B', 'F', 'idContratacion'),
+            r('F', 'V', 'Orden de cobro (PDF): el cliente abona en Caja')
+          ] }] }
+      ] }] }
     ]
   },
   {
     tipo: 'secuencia', id: 'DSS_PN02_CU01_CAJ_GestionarCobro', titulo: 'PN02 · CU01-CAJ Gestionar cobro (incluye CU02-CAJ Emitir comprobante)',
-    participantes: [A('C', 'Caja'), P('F', 'ContratacionesPendientesForm'), P('B', 'BLL.Contratacion'), P('PD', 'PoliticaDescuento'), P('CB', 'BLL.Cliente'), P('D', 'DAL.Contratacion'), P('DC', 'DAL.Cliente')],
+    participantes: [A('C', 'Caja'), P('F', 'ContratacionesPendientesForm'), P('B', 'BLL.Contratacion'), P('PD', 'PoliticaDescuento'), P('CB', 'BLL.Cliente'), P('D', 'DAL.Contratacion')],
     pasos: [
-      c('C', 'F', 'Consulta la cola, elige una contratación e indica el medio de pago'),
-      c('F', 'B', 'ConfirmarPago(modulo, idContratacion, medioPago)'),
-      nota('Exigir(CajaEditar) · medio de pago obligatorio · contratación PendientePago · plan activo · ValidarCupo', 'B'),
-      c('B', 'PD', 'Resolver(bruto = Precio × meses, promociones vigentes, crédito de referido)'),
-      r('PD', 'B', 'un solo descuento (el mayor) y total'),
-      c('B', 'D', 'ConfirmarPago(id, idCaja, medio, comprobante, total, descuento, idPromocion)  [reclamo atómico: WHERE Estado = PendientePago]'),
-      { alt: 'Otra sesión de Caja ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(cobrar_concurrente)'), r('F', 'C', 'Actualizá la cola de Caja')],
-        sino: [{ etiqueta: 'Reclamo obtenido (comprobante emitido)', pasos: [
-          c('B', 'CB', 'ActivarSuscripcionDesdeContratacion(cliente, idPlan, modalidad, consumoCredito)'),
-          nota('Builder según modalidad: vencimiento = fin del período vigente + 1, 3 o 12 meses; limpia gracia y pausa', 'CB'),
-          c('CB', 'DC', 'EjecutarTransaccion: ModificarEnTx + ConsumirCreditoEnTx + SumarCreditoEnTx (referente)'),
-          { alt: 'Falla la activación', pasos: [c('B', 'D', 'ReabrirPago(id)  [compensación: vuelve a PendientePago]'), r('B', 'F', 'error (o cobro_sin_activar si no se pudo reabrir)')],
-            sino: [{ etiqueta: 'Activada', pasos: [r('B', 'F', 'LiquidacionContratacion'), r('F', 'C', 'Suscripción formalizada y comprobante emitido')] }] }
+      c('F', 'B', 'ObtenerPendientesDePago()  [Consultar cola]'),
+      c('F', 'B', 'CalcularImportes(contrataciones)'),
+      c('B', 'PD', 'Resolver(bruto = PrecioMensual pactado × meses, promociones, crédito)'),
+      r('B', 'F', 'Liquidación: un solo descuento (el mayor)'),
+      c('C', 'F', 'El cliente abona: elige el medio de pago y confirma el importe'),
+      c('F', 'B', 'ConfirmarCobro(modulo, contratacion, idMedioPago, importeConfirmado)'),
+      nota('Exigir(CajaEditar) · PendientePago · medio del catálogo · plan activo · cupo · importe igual al confirmado', 'B'),
+      c('B', 'D', 'ConfirmarCobro(id, idCaja, idMedioPago, comprobante, total, descuento, idPromocion)  [claim: WHERE Estado = PendientePago]'),
+      { alt: 'Otra sesión ya la resolvió', pasos: [r('B', 'F', 'AppException(cobrar_concurrente)')],
+        sino: [{ etiqueta: 'Comprobante emitido', pasos: [
+          c('B', 'CB', 'ActivarSuscripcionDesdeContratacion(cliente, idPlan, modalidad, consumoCredito)  [+ acredita al referente]'),
+          { alt: 'Falla la activación', pasos: [c('B', 'D', 'ReabrirPago(id)  [compensación]'), r('B', 'F', 'error')],
+            sino: [{ etiqueta: 'Activada', pasos: [
+              c('B', 'D', 'RegistrarVigencia(id, desde, hasta, idReferenteAcreditado)'),
+              r('B', 'F', 'Liquidación con comprobante, vigencia y referente acreditado'),
+              r('F', 'C', 'Comprobante y Constancia de suscripción (PDF)')
+            ] }] }
         ] }] }
     ]
   },
@@ -258,102 +382,178 @@ module.exports = [
     tipo: 'secuencia', id: 'DSS_PN02_CU02_CAJ_EmitirComprobante', titulo: 'PN02 · CU02-CAJ Emitir comprobante',
     participantes: [A('C', 'Caja'), P('B', 'BLL.Contratacion'), P('D', 'DAL.Contratacion')],
     pasos: [
-      nota('Se dispara dentro de ConfirmarPago (CU01-CAJ): no requiere una acción independiente de Caja', 'C', 'B'),
-      c('B', 'D', 'ConfirmarPago(..., numeroComprobante = CMP-{id:D6}-{yyyyMMdd}, fechaComprobante)'),
+      nota('Parte de ConfirmarCobro (CU01-CAJ): número CMP-{id:D6}-{yyyyMMdd} guardado en el mismo UPDATE del cobro', 'C', 'B'),
+      c('B', 'D', 'ConfirmarCobro(..., numeroComprobante, ...)'),
       r('D', 'B', 'contratación Pagada con número y fecha de comprobante'),
-      r('B', 'C', 'comprobante visible en el mensaje de confirmación')
+      r('B', 'C', 'Comprobante (PDF), reimprimible desde la vista Resueltas')
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN02_CU03_CAJ_CancelarContratacion', titulo: 'PN02 · CU03-CAJ Cancelar contratación (intentos fallidos)',
+    tipo: 'secuencia', id: 'DSS_PN02_CU03_CAJ_CancelarContratacion', titulo: 'PN02 · CU03-CAJ Registrar intento y cancelar (3 intentos)',
     participantes: [A('C', 'Caja'), P('F', 'ContratacionesPendientesForm'), P('B', 'BLL.Contratacion'), P('D', 'DAL.Contratacion')],
     pasos: [
-      c('C', 'F', 'Registra el intento fallido de una contratación'),
-      c('F', 'B', 'RegistrarIntentoFallido(modulo, idContratacion)'),
-      nota('Exigir(CajaEditar)', 'B'),
-      c('B', 'D', 'IncrementarIntento(id)  [solo si sigue PendientePago y IntentosPago < 3]'),
-      { alt: 'La contratación ya no está pendiente', pasos: [r('D', 'B', '-1'), r('B', 'F', 'AppException(cobrar_concurrente)')],
+      c('C', 'F', 'El pago no se concretó: medio intentado + motivo'),
+      c('F', 'B', 'RegistrarIntentoFallido(modulo, contratacion, idMedioPago, motivo)'),
+      nota('Exigir(CajaEditar) · PendientePago · motivo obligatorio', 'B'),
+      c('B', 'D', 'RegistrarIntentoFallido(id, idMedioPago, motivo, idCaja, máximo 3)  [transacción con bloqueo de fila]'),
+      { alt: 'Ya no está pendiente', pasos: [r('D', 'B', 'null'), r('B', 'F', 'AppException(cobrar_concurrente)')],
         sino: [{ etiqueta: 'Intento registrado', pasos: [
-          r('D', 'B', 'intentos'),
-          { alt: 'intentos = 3', pasos: [c('B', 'D', 'Cancelar(id)  [WHERE Estado = PendientePago]'), r('B', 'F', 'Contratación Cancelada')],
-            sino: [{ etiqueta: 'intentos < 3', pasos: [r('B', 'F', 'Sigue pendiente, queda disponible otro intento')] }] }
+          { alt: '¿Alcanzó el máximo? Sí', pasos: [r('D', 'B', 'Cancelada (automática)'), r('F', 'C', 'Constancia de cancelación (PDF)')],
+            sino: [{ etiqueta: 'No', pasos: [r('F', 'C', 'Sigue en la cola: vuelve a Calcular importe')] }] }
         ] }] }
     ]
   },
 
   // ───────────────────────────── PN03 — Métricas, promociones y toma de decisiones ─────────────────────────────
+  // Sigue el flujo aprobado: cada mensaje a la BLL es un método por actividad; cada transición es un
+  // claim (UPDATE ... WHERE Estado = esperado) que inserta su fila de PromocionHistorial en la misma transacción.
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU01_GER_SugerirPromocion', titulo: 'PN03 · CU01-GER Sugerir promoción',
+    tipo: 'secuencia', id: 'DSS_PN03_CU01_GER_SugerirPromocion', titulo: 'PN03 · CU01-GER Sugerir promoción (incluye CU03-GER Analizar métricas)',
     participantes: [A('G', 'Gerencia'), P('F', 'SugerirPromocionForm'), P('AN', 'BLL.AnalisisPromociones'), P('B', 'BLL.SugerenciaPromocion'), P('D', 'DAL.SugerenciaPromocion')],
     pasos: [
-      { opt: 'Toma una idea del análisis de datos', pasos: [
-        c('G', 'F', 'Pulsa "Desde el análisis…"'),
-        c('F', 'AN', 'Detectar()'),
-        r('AN', 'F', 'candidatas (abandono por plan, baja rotación por categoría)'),
-        r('F', 'G', 'Precarga plan o categoría, motivo, tipo y beneficio estimado')
-      ] },
-      c('G', 'F', 'Indica destino (plan o categoría), motivo, tipo de descuento y beneficio'),
-      c('F', 'B', 'Crear(modulo, sugerencia)'),
-      nota('Exigir(SugerenciaPromocion) · destino único (plan o categoría) · motivo obligatorio · beneficio válido', 'B'),
-      { alt: 'Datos inválidos', pasos: [r('B', 'F', 'AppException(motivo específico)'), r('F', 'G', 'Informa y retoma la carga')],
-        sino: [{ etiqueta: 'Válidos', pasos: [
-          c('B', 'D', 'Alta(sugerencia: estado Pendiente)'),
-          r('B', 'F', 'ok'),
-          r('F', 'G', 'Sugerencia registrada para Administración')
+      c('G', 'F', 'Pulsa "Analizar métricas…"'),
+      c('F', 'AN', 'AnalizarMetricas(modulo)'),
+      nota('Exigir(SugerenciaPromocion) · abandono por plan (Strategy) y rotación por categoría', 'AN'),
+      r('AN', 'F', 'Reporte de métricas (abandono por plan, rotación por categoría, oportunidades)'),
+      c('F', 'AN', 'HayOportunidad(reporte)  [¿Hay oportunidad?]'),
+      { alt: 'No', pasos: [r('F', 'G', 'Reporte imprimible: fin sin promoción')],
+        sino: [{ etiqueta: 'Sí', pasos: [
+          r('F', 'G', 'Precarga la oportunidad elegida (origen Abandono o Rotación); si no usa ninguna, el origen es Manual'),
+          c('G', 'F', 'Ajusta destino (plan o categoría), motivo, tipo de descuento y beneficio estimado'),
+          c('F', 'B', 'RegistrarSugerencia(modulo, origen, idPlan, categoria, motivo, tipo, beneficio)'),
+          nota('Exigir(SugerenciaPromocion) · destino único · motivo obligatorio · beneficio > 0 · guarda OrigenMetrica e IdUsuarioAlta', 'B'),
+          { alt: 'Datos inválidos', pasos: [r('B', 'F', 'AppException(motivo específico)'), r('F', 'G', 'Informa y retoma la carga')],
+            sino: [{ etiqueta: 'Válidos', pasos: [
+              c('B', 'D', 'Alta(sugerencia: Pendiente)'),
+              r('B', 'F', 'idSugerencia'),
+              r('F', 'G', 'Sugerencia de promoción (PDF) enviada a Administración')
+            ] }] }
         ] }] }
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU01_ADM_GestionarPromociones', titulo: 'PN03 · CU01-ADM Gestionar promociones (alta desde sugerencia)',
-    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('DS', 'DAL.SugerenciaPromocion'), P('D', 'DAL.Promocion')],
+    tipo: 'secuencia', id: 'DSS_PN03_CU01_ADM_GestionarPromociones', titulo: 'PN03 · CU01-ADM Gestionar promociones (crear desde sugerencia o manual, reformular)',
+    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('AF', 'AltaPromocionForm'), P('B', 'BLL.Promocion'), P('DS', 'DAL.SugerenciaPromocion'), P('D', 'DAL.Promocion')],
     pasos: [
-      c('A', 'F', 'Consulta las sugerencias y elige "Alta desde sugerencia"'),
-      c('F', 'B', 'CrearDesdeSugerencia(modulo, promocion, idSugerencia)'),
-      nota('Exigir(PromocionesAdminEditar) · destino único · valor > 0 (≤ 100 si es Porcentaje) · fin ≥ inicio', 'B'),
-      c('B', 'DS', 'MarcarEvaluada(idSugerencia)  [reclamo: solo si sigue Pendiente]'),
-      { alt: 'Otra sesión ya la evaluó', pasos: [r('DS', 'B', 'false'), r('B', 'F', 'AppException(sugerencia_evaluada)')],
-        sino: [{ etiqueta: 'Reclamo obtenido', pasos: [
-          c('B', 'D', 'Alta(promoción: estado EnRevisionContable)'),
-          { alt: 'Falla el alta', pasos: [c('B', 'DS', 'ReabrirEvaluacion(idSugerencia)  [compensación]'), r('B', 'F', 'error')],
-            sino: [{ etiqueta: 'Alta correcta', pasos: [r('B', 'F', 'idPromocion'), r('F', 'A', 'Promoción pendiente de revisión contable')] }] }
+      c('A', 'F', '¿Acepta la sugerencia? Sí: "Alta desde sugerencia" (o "Alta manual")'),
+      c('A', 'AF', 'Completa nombre, tipo, valor, vigencia, margen e impacto'),
+      c('AF', 'B', 'CrearDesdeSugerencia(modulo, idSugerencia, nombre, ..., impacto)  [o CrearManual(...)]'),
+      nota('Exigir(PromocionesAdminEditar) · sugerencia.PuedeEvaluarse()', 'B'),
+      c('B', 'B', 'ValidarPromocion(promocion)  [destino único, valor, fechas]'),
+      { alt: 'Datos inválidos', pasos: [r('B', 'AF', 'AppException(motivo)  [la sugerencia sigue Pendiente]')],
+        sino: [{ etiqueta: 'Válidos', pasos: [
+          c('B', 'DS', 'MarcarEvaluada(idSugerencia, fecha)  [claim: WHERE Estado = Pendiente]'),
+          { alt: 'Otra sesión ya la evaluó', pasos: [r('DS', 'B', 'false'), r('B', 'AF', 'AppException(sugerencia_evaluada)')],
+            sino: [{ etiqueta: 'Claim obtenido', pasos: [
+              c('B', 'D', 'Alta(promocion: EnRevisionContable, IdUsuarioAlta, historial: — → EnRevisionContable)'),
+              { alt: 'Falla el alta', pasos: [c('B', 'DS', 'ReabrirEvaluacion(idSugerencia)  [compensación]'), r('B', 'AF', 'error')],
+                sino: [{ etiqueta: 'Alta correcta', pasos: [r('B', 'AF', 'idPromocion'), r('F', 'A', 'Ficha de promoción (PDF) para Contabilidad')] }] }
+            ] }] }
         ] }] },
-      nota('Variantes: CrearManual (sin sugerencia) · Modificar y Reformular (UPDATE solo si sigue EnRevisionContable) · Desactivar (Vigente → Desactivada)', 'A', 'D')
+      { opt: '¿Reformular? Sí (promoción Rechazada por Contabilidad)', pasos: [
+        c('AF', 'B', 'Reformular(modulo, promocion)'),
+        nota('promocion.PuedeReformularse() · ValidarPromocion(promocion)', 'B'),
+        c('B', 'D', 'Reformular(promocion, historial: RechazadaContabilidad → EnRevisionContable)  [claim]'),
+        r('F', 'A', 'Vuelve a revisión contable: nueva Ficha de promoción')
+      ] }
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU01_CONT_AnalizarPromocion', titulo: 'PN03 · CU01-CONT Analizar promoción',
-    participantes: [A('K', 'Contabilidad'), P('F', 'PromocionesContabilidadForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
+    tipo: 'secuencia', id: 'DSS_PN03_CU03_ADM_DescartarSugerencia', titulo: 'PN03 · CU03-ADM Descartar sugerencia (¿Acepta la sugerencia? No)',
+    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.SugerenciaPromocion'), P('D', 'DAL.SugerenciaPromocion')],
     pasos: [
-      c('K', 'F', 'Consulta la cola, analiza margen e impacto, ingresa la observación y decide'),
+      c('A', 'F', 'Elige la sugerencia, pulsa "Descartar sugerencia" e indica el motivo'),
+      c('F', 'B', 'DescartarSugerencia(modulo, idSugerencia, motivo)'),
+      c('B', 'D', 'ObtenerPorId(idSugerencia)'),
+      nota('Exigir(PromocionesAdminEditar) · sugerencia.PuedeEvaluarse() · motivo obligatorio', 'B'),
+      { alt: 'Ya evaluada / sin motivo', pasos: [r('B', 'F', 'AppException(sugerencia_evaluada / motivodescarte_requerido)')],
+        sino: [{ etiqueta: 'Pendiente y con motivo', pasos: [
+          c('B', 'D', 'Descartar(idSugerencia, motivo, fecha)  [claim: WHERE Estado = Pendiente]'),
+          { alt: 'Otra sesión ya la evaluó', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(sugerencia_evaluada)')],
+            sino: [{ etiqueta: 'Descartada', pasos: [r('B', 'F', 'ok'), r('F', 'A', 'Constancia de descarte (PDF): fin')] }] }
+        ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN03_CU01_CONT_AnalizarPromocion', titulo: 'PN03 · CU01-CONT Analizar promoción (margen e impacto → ¿Aprueba?)',
+    participantes: [A('K', 'Contabilidad'), P('F', 'PromocionesContabilidadForm'), P('B', 'BLL.Promocion'), P('DS', 'DAL.SugerenciaPromocion'), P('D', 'DAL.Promocion')],
+    pasos: [
+      c('F', 'B', 'ObtenerPendientesRevisionContable()'),
+      c('K', 'F', 'Selecciona una promoción'),
+      c('F', 'B', 'AnalizarMargenEImpacto(idPromocion)'),
+      c('B', 'D', 'ObtenerPorId(idPromocion) · ObtenerTodas()  [SeSuperponeCon: mismo plan, fechas cruzadas]'),
+      c('B', 'DS', 'ObtenerPorId(idSugerenciaOrigen)  [beneficio estimado y origen]'),
+      c('B', 'B', 'PuedeDictaminar(promocion)  [quien la creó no la dictamina]'),
+      r('B', 'F', 'Análisis: beneficio estimado, superposiciones (advertencia), ¿puede dictaminar?'),
+      c('K', 'F', 'Ingresa la observación y decide'),
       { alt: 'Aprueba', pasos: [c('F', 'B', 'AprobarContable(modulo, promocion, observacion)')],
         sino: [{ etiqueta: 'Rechaza', pasos: [c('F', 'B', 'RechazarContable(modulo, promocion, observacion)')] }] },
-      nota('Exigir(PromocionesContableEditar) · la observación es obligatoria · solo desde EnRevisionContable', 'B'),
-      c('B', 'D', 'CambiarEstado(id, esperado = EnRevisionContable, nuevo = Vigente o RechazadaContabilidad, observación)'),
-      { alt: 'Otra sesión ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
-        sino: [{ etiqueta: 'Estado cambiado', pasos: [r('B', 'F', 'ok'), r('F', 'K', 'Promoción Vigente (se aplica al cobro) o Rechazada (vuelve a Administración)')] }] }
+      nota('Exigir(PromocionesContableEditar) · EnRevisionContable · PuedeDictaminar · observación obligatoria', 'B'),
+      { alt: 'Es quien la creó', pasos: [r('B', 'F', 'AppException(creador_no_dictamina)')],
+        sino: [{ etiqueta: 'Otro usuario', pasos: [
+          c('B', 'D', 'Dictaminar(dictamen, historial: EnRevisionContable → Vigente o RechazadaContabilidad)  [claim]'),
+          { alt: 'Otra sesión ya la resolvió', pasos: [r('D', 'B', '0'), r('B', 'F', 'AppException(estado_concurrente)')],
+            sino: [{ etiqueta: 'Dictamen guardado', pasos: [r('B', 'F', 'idDictamen'), r('F', 'K', 'Dictamen contable (PDF): Vigente o vuelve a Administración')] }] }
+        ] }] }
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU01_VEN_SugerirBaja', titulo: 'PN03 · CU01-VEN Sugerir baja de promoción',
-    participantes: [A('V', 'Vendedor'), P('F', 'PromocionesVigentesForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
-    pasos: [
-      c('V', 'F', 'Consulta las promociones vigentes, elige una e indica el motivo'),
-      c('F', 'B', 'SugerirBaja(modulo, promocion, motivo)'),
-      nota('Exigir(PromocionesVigentesEditar) · el motivo es obligatorio · solo desde Vigente', 'B'),
-      c('B', 'D', 'SolicitarBaja(id, motivo)  [UPDATE condicionado a Vigente]'),
-      { alt: 'Ya no está Vigente', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
-        sino: [{ etiqueta: 'Solicitada', pasos: [r('B', 'F', 'ok'), r('F', 'V', 'Promoción en Baja solicitada: Administración la resuelve')] }] }
-    ]
-  },
-  {
-    tipo: 'secuencia', id: 'DSS_PN03_CU02_ADM_ResolverBaja', titulo: 'PN03 · CU02-ADM Resolver baja de promoción',
+    tipo: 'secuencia', id: 'DSS_PN03_CU04_ADM_DescartarPromocion', titulo: 'PN03 · CU04-ADM Descartar promoción rechazada (¿Reformular? No)',
     participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
     pasos: [
-      c('A', 'F', 'Consulta las promociones con baja solicitada y revisa el motivo'),
-      { alt: 'Aprueba la baja', pasos: [c('F', 'B', 'AprobarBaja(modulo, promocion)'), c('B', 'D', 'CambiarEstado(id, BajaSolicitada → Desactivada)')],
-        sino: [{ etiqueta: 'Rechaza la baja (exige motivo)', pasos: [c('F', 'B', 'RechazarBaja(modulo, promocion, motivo)'), c('B', 'D', 'CambiarEstado(id, BajaSolicitada → Vigente)  [conserva la observación de Contabilidad]')] }] },
+      c('A', 'F', 'Elige una promoción Rechazada por Contabilidad, pulsa "Descartar" e indica el motivo'),
+      c('F', 'B', 'DescartarPromocion(modulo, promocion, motivo)'),
+      nota('Exigir(PromocionesAdminEditar) · promocion.PuedeDescartarse() · motivo obligatorio', 'B'),
+      c('B', 'D', 'CambiarEstado(id, esperado = RechazadaContabilidad, historial: → Descartada con el motivo)  [claim]'),
+      { alt: 'Otra sesión ya la cambió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
+        sino: [{ etiqueta: 'Descartada', pasos: [
+          c('F', 'B', 'ObtenerDescarte(idPromocion)'),
+          r('F', 'A', 'Constancia de descarte (PDF): fin')
+        ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN03_CU01_VEN_SugerirBaja', titulo: 'PN03 · CU01-VEN Solicitar baja de promoción',
+    participantes: [A('V', 'Vendedor'), P('F', 'PromocionesVigentesForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
+    pasos: [
+      c('F', 'B', 'ObtenerParaVentas()  [cierra antes las vencidas]'),
+      c('V', 'F', 'Elige una promoción Vigente, pulsa "Solicitar baja" e indica el motivo'),
+      c('F', 'B', 'SolicitarBaja(modulo, promocion, motivo)'),
+      nota('Exigir(PromocionesVigentesEditar) · promocion.PuedeSolicitarseBaja() · motivo obligatorio', 'B'),
+      c('B', 'D', 'SolicitarBaja(solicitud, historial: Vigente → BajaSolicitada)  [claim]'),
+      { alt: 'Ya no está Vigente', pasos: [r('D', 'B', '0'), r('B', 'F', 'AppException(estado_concurrente)')],
+        sino: [{ etiqueta: 'Solicitada', pasos: [r('B', 'F', 'idSolicitud'), r('F', 'V', 'Solicitud de baja (PDF): Administración la resuelve')] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN03_CU02_ADM_ResolverBaja', titulo: 'PN03 · CU02-ADM Resolver baja de promoción (¿Aprueba la baja?)',
+    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
+    pasos: [
+      c('A', 'F', 'Elige una promoción con baja solicitada y revisa el motivo de Ventas'),
+      { alt: 'Aprueba la baja (observación opcional)', pasos: [c('F', 'B', 'AprobarBaja(modulo, promocion, observacion)')],
+        sino: [{ etiqueta: 'Rechaza la baja (motivo obligatorio)', pasos: [c('F', 'B', 'RechazarBaja(modulo, promocion, motivo)')] }] },
+      nota('Exigir(PromocionesAdminEditar) · promocion.PuedeResolverseBaja() · solicitud pendiente', 'B'),
+      c('B', 'D', 'ObtenerSolicitudesBaja(idPromocion)'),
+      c('B', 'D', 'ResolverBaja(resolucion, historial: BajaSolicitada → Desactivada o Vigente)  [claim; el dictamen contable no se toca]'),
       { alt: 'Otra sesión ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
-        sino: [{ etiqueta: 'Resuelta', pasos: [r('B', 'F', 'ok'), r('F', 'A', 'Promoción Desactivada o de nuevo Vigente')] }] }
+        sino: [{ etiqueta: 'Resuelta', pasos: [r('B', 'F', 'idSolicitud'), r('F', 'A', 'Resolución de baja (PDF): informe a Gerencia (aprobada) o a Ventas (rechazada)')] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN03_CU05_ADM_DesactivarYVencer', titulo: 'PN03 · CU05-ADM Desactivar promoción y cierre por fecha de fin',
+    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
+    pasos: [
+      c('F', 'B', 'ObtenerTodas()'),
+      c('B', 'B', 'CerrarVencidas()  [(c) llega la fecha de fin]'),
+      c('B', 'D', 'ObtenerTodas()  [DebeVencer(hoy): Vigente con FechaFin pasada]'),
+      { opt: 'Por cada vencida', pasos: [c('B', 'D', 'CambiarEstado(id, esperado = Vigente, historial: → Vencida)  [claim: no duplica si otra sesión la cerró]')] },
+      r('B', 'F', 'promociones (las vencidas ya no aplican en el cobro)'),
+      c('A', 'F', '(b) Elige una Vigente, pulsa "Desactivar" e indica el motivo'),
+      c('F', 'B', 'Desactivar(modulo, promocion, motivo)'),
+      nota('Exigir(PromocionesAdminEditar) · promocion.PuedeDesactivarseDirecto() · motivo obligatorio', 'B'),
+      c('B', 'D', 'CambiarEstado(id, esperado = Vigente, historial: → Desactivada con el motivo)  [claim]'),
+      { alt: 'Otra sesión ya la cambió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
+        sino: [{ etiqueta: 'Desactivada', pasos: [r('B', 'F', 'ok'), r('F', 'A', 'Promoción Desactivada: fin')] }] }
     ]
   },
 
@@ -402,7 +602,7 @@ module.exports = [
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_N01_CU04_GestionarPlanes', titulo: 'N01 · CU04-VEN Gestionar planes de suscripción',
+    tipo: 'secuencia', id: 'DSS_N01_CU04_GestionarPlanes', titulo: 'N01 · CU03-VEN Gestionar planes de suscripción',
     participantes: [A('V', 'Vendedor'), P('F', 'Planes'), P('B', 'BLL.PlanSuscripcion'), P('D', 'DAL.PlanSuscripcion')],
     pasos: [
       c('V', 'F', 'Completa nombre, límite de prendas y precio mensual, y pulsa Guardar Plan'),
@@ -410,9 +610,10 @@ module.exports = [
       nota('Exigir(PlanSuscripcionesEditar) · nombre obligatorio (solo letras) · límite de prendas válido · precio mayor a cero', 'B'),
       { alt: 'Datos inválidos', pasos: [r('B', 'F', 'AppException(nombre_requerido / limite_invalido / precio_cero)'), r('F', 'V', 'Informa el error')],
         sino: [{ etiqueta: 'Datos válidos', pasos: [
+          nota('Alta: el plan queda activo · Modificar: conserva el estado guardado (ObtenerPorId)', 'B'),
           c('B', 'D', 'Alta(plan) / Modificar(plan)'),
           r('B', 'F', 'ok'),
-          r('F', 'V', 'Plan guardado (queda activo)')
+          r('F', 'V', 'Plan guardado')
         ] }] },
       c('V', 'F', 'Pulsa Desactivar Plan'),
       c('F', 'B', 'Desactivar(modulo, plan)'),

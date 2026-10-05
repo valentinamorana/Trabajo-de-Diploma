@@ -49,7 +49,7 @@ namespace Tests
             {
                 var c = new BE.Contratacion
                 {
-                    IdContratacion = 7, IdCliente = 10, IdPlan = 1, IdVendedor = 5,
+                    IdContratacion = 7, IdCliente = 10, IdPlan = 1, IdVendedor = 6,
                     Modalidad = BE.Builders.ModalidadCobro.Mensual, Estado = BE.EstadoContratacion.PendientePago,
                     NombreCliente = "Ana Gómez", NombrePlan = "Básico"
                 };
@@ -66,14 +66,14 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_ConPromocionVigenteDelPlan_CobraElImporteConDescuentoYGuardaLaPromocion()
+        public void ConfirmarCobro_ConPromocionVigenteDelPlan_CobraElImporteConDescuentoYGuardaLaPromocion()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
             ctx.AgregarPromocion(BE.TipoDescuento.Porcentaje, 10);
             var contratacion = ctx.Pendiente();
 
-            var liq = ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            var liq = ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(9000m, ctx.DalContratacion.UltimoImporte);
             Assert.AreEqual(1000m, ctx.DalContratacion.UltimoDescuento);
@@ -84,13 +84,13 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_SinPromocionNiCredito_CobraElPrecioDelPlanCompleto()
+        public void ConfirmarCobro_SinPromocionNiCredito_CobraElPrecioDelPlanCompleto()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
             var contratacion = ctx.Pendiente();
 
-            ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(10000m, ctx.DalContratacion.UltimoImporte);
             Assert.AreEqual(0m, ctx.DalContratacion.UltimoDescuento);
@@ -98,7 +98,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_CreditoPorReferidoMayorQueLaPromocion_ConsumeSoloLoAplicado()
+        public void ConfirmarCobro_CreditoPorReferidoMayorQueLaPromocion_ConsumeSoloLoAplicado()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
@@ -106,7 +106,7 @@ namespace Tests
             ctx.AgregarPromocion(BE.TipoDescuento.MontoFijo, 500);
             var contratacion = ctx.Pendiente();
 
-            ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(7000m, ctx.DalContratacion.UltimoImporte, "Un solo descuento: el crédito (3000), no la suma con la promo.");
             Assert.IsNull(ctx.DalContratacion.UltimaPromocion);
@@ -114,7 +114,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_GanaLaPromocion_ElCreditoPorReferidoQuedaAcumulado()
+        public void ConfirmarCobro_GanaLaPromocion_ElCreditoPorReferidoQuedaAcumulado()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
@@ -122,21 +122,21 @@ namespace Tests
             ctx.AgregarPromocion(BE.TipoDescuento.Porcentaje, 10);
             var contratacion = ctx.Pendiente();
 
-            ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(9000m, ctx.DalContratacion.UltimoImporte);
             Assert.AreEqual(500m, ctx.Cliente.DescuentoProximoCobro, "No se consume el crédito si se aplicó la promoción.");
         }
 
         [TestMethod]
-        public void ConfirmarPago_CreditoMayorAlPrecio_ElExcedenteQuedaAcumulado()
+        public void ConfirmarCobro_CreditoMayorAlPrecio_ElExcedenteQuedaAcumulado()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
             ctx.Cliente.DescuentoProximoCobro = 12500m;   // el plan cuesta 10000
             var contratacion = ctx.Pendiente();
 
-            ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+            ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
 
             Assert.AreEqual(0m, ctx.DalContratacion.UltimoImporte);
             Assert.AreEqual(2500m, ctx.Cliente.DescuentoProximoCobro, "Los descuentos no usados quedan acumulados.");
@@ -155,7 +155,7 @@ namespace Tests
             Assert.AreEqual(10000m, liq.Bruto);
             Assert.AreEqual(2500m, liq.Descuento);
             Assert.AreEqual(7500m, liq.Total);
-            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarPagoVeces);
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces);
         }
 
         [TestMethod]
@@ -212,7 +212,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ConfirmarPago_FallaLaActivacionYTampocoSePuedeReabrir_AvisaQueElCobroQuedoSinActivar()
+        public void ConfirmarCobro_FallaLaActivacionYTampocoSePuedeReabrir_AvisaQueElCobroQuedoSinActivar()
         {
             LoginComoAdministrador();
             var ctx = new CtxCobro();
@@ -222,7 +222,7 @@ namespace Tests
 
             try
             {
-                ctx.Crear().ConfirmarPago("Test", contratacion, "Efectivo");
+                ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
                 Assert.Fail("Debía avisar que el cobro quedó sin activar.");
             }
             catch (BE.AppException ex)
@@ -292,18 +292,18 @@ namespace Tests
         }
 
         [TestMethod]
-        public void CrearDesdeSugerencia_FallaLaValidacion_DevuelveLaSugerenciaAPendiente()
+        public void CrearDesdeSugerencia_FallaLaValidacion_NoReclamaLaSugerencia()
         {
             LoginComoAdministrador();
             var ctx = new CtxPromo();
             ctx.DalSugerencia.SugerenciaPorId = Sugerencia(BE.EstadoSugerencia.Pendiente);
 
-            // porcentaje mayor a 100: la creación falla DESPUÉS de reclamar la sugerencia
+            // porcentaje mayor a 100: "Validar" falla ANTES de reclamar la sugerencia, que sigue Pendiente
             EsperarError(() => ctx.Crear().CrearDesdeSugerencia("Test", 5, "P", "d", BE.TipoDescuento.Porcentaje, 150m,
                 DateTime.Today, DateTime.Today.AddDays(5), 1m, "i"), "err.bll.promocion.porcentaje_invalido");
 
-            Assert.AreEqual(1, ctx.DalSugerencia.MarcarEvaluadaVeces);
-            Assert.AreEqual(1, ctx.DalSugerencia.ReabrirEvaluacionVeces, "La sugerencia debe poder reintentarse.");
+            Assert.AreEqual(0, ctx.DalSugerencia.MarcarEvaluadaVeces, "No se reclama una sugerencia para una promoción inválida.");
+            Assert.AreEqual(0, ctx.DalSugerencia.ReabrirEvaluacionVeces);
             Assert.AreEqual(0, ctx.DalPromocion.AltaVeces);
         }
 
@@ -312,20 +312,20 @@ namespace Tests
         {
             LoginComoAdministrador();
             var ctx = new CtxPromo();
-            ctx.DalPromocion.CambiarEstadoResultado = false;
+            ctx.DalPromocion.ClaimResultado = false;
 
             EsperarError(() => ctx.Crear().AprobarContable("Test", Promo(BE.EstadoPromocion.EnRevisionContable), "ok"),
                 "err.bll.promocion.estado_concurrente");
         }
 
         [TestMethod]
-        public void SugerirBaja_OtraSesionYaCambioElEstado_LanzaEstadoConcurrente()
+        public void SolicitarBaja_OtraSesionYaCambioElEstado_LanzaEstadoConcurrente()
         {
             LoginComoAdministrador();
             var ctx = new CtxPromo();
-            ctx.DalPromocion.CambiarEstadoResultado = false;
+            ctx.DalPromocion.ClaimResultado = false;
 
-            EsperarError(() => ctx.Crear().SugerirBaja("Test", Promo(BE.EstadoPromocion.Vigente), "motivo"),
+            EsperarError(() => ctx.Crear().SolicitarBaja("Test", Promo(BE.EstadoPromocion.Vigente), "motivo"),
                 "err.bll.promocion.estado_concurrente");
         }
 
@@ -339,11 +339,11 @@ namespace Tests
 
             ctx.Crear().Reformular("Test", promo);
 
-            Assert.AreEqual(1, ctx.DalPromocion.CambiarEstadoVeces);
-            Assert.AreEqual(BE.EstadoPromocion.RechazadaContabilidad, ctx.DalPromocion.UltimoEstadoEsperado);
-            Assert.AreEqual(BE.EstadoPromocion.EnRevisionContable, ctx.DalPromocion.UltimoNuevoEstado);
-            Assert.AreEqual(1, ctx.DalPromocion.ModificarVeces);
-            Assert.AreEqual(15m, ctx.DalPromocion.UltimoModificar.Valor);
+            Assert.AreEqual(1, ctx.DalPromocion.ReformularVeces);
+            Assert.AreEqual(15m, ctx.DalPromocion.UltimoReformular.Valor);
+            Assert.AreEqual(BE.EstadoPromocion.EnRevisionContable, promo.Estado);
+            Assert.AreEqual(BE.EstadoPromocion.RechazadaContabilidad, ctx.DalPromocion.Historial[0].EstadoAnterior);
+            Assert.AreEqual(BE.EstadoPromocion.EnRevisionContable, ctx.DalPromocion.Historial[0].EstadoNuevo);
         }
 
         [TestMethod]
@@ -354,7 +354,7 @@ namespace Tests
 
             EsperarError(() => ctx.Crear().Reformular("Test", Promo(BE.EstadoPromocion.Vigente)),
                 "err.bll.promocion.reformular_estado");
-            Assert.AreEqual(0, ctx.DalPromocion.CambiarEstadoVeces);
+            Assert.AreEqual(0, ctx.DalPromocion.Transiciones);
         }
 
         [TestMethod]
@@ -366,8 +366,8 @@ namespace Tests
             promo.Valor = 150;   // porcentaje > 100
 
             EsperarError(() => ctx.Crear().Reformular("Test", promo), "err.bll.promocion.porcentaje_invalido");
-            Assert.AreEqual(0, ctx.DalPromocion.CambiarEstadoVeces);
-            Assert.AreEqual(0, ctx.DalPromocion.ModificarVeces);
+            Assert.AreEqual(0, ctx.DalPromocion.Transiciones);
+            Assert.AreEqual(0, ctx.DalPromocion.ReformularVeces);
         }
 
         // ── N01/PN02: acreditación del beneficio por referido al activar la suscripción ────

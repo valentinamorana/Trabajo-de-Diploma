@@ -2,19 +2,25 @@ flowchart LR
   V["Vendedor"]:::actor
   D["Depósito / Logística"]:::actor
   subgraph SIS["WardrobeFlow — PN01 Armar pedido"]
-    c1(["CU01-VEN Armar Pedido"])
+    c1(["CU01-VEN Armar Pedido y Enviar a Control de Stock"])
     c2(["CU02-VEN Consultar Catálogo"])
     c3(["CU03-VEN Consultar Situación del Cliente"])
     c4(["CU04-VEN Cancelar Pedido"])
     c5(["CU01-DEP Despachar Pedido"])
     c6(["CU02-DEP Registrar Entrega"])
     c7(["CU03-DEP Registrar Devolución"])
+    c8(["CU04-DEP Controlar Stock del Pedido"])
+    c9(["CU05-VEN Comunicar Faltantes, Ajustar o Desistir"])
+    c10(["CU06-VEN Formalizar Pedido"])
   end
   V --- c1
   V --- c4
+  V --- c9
+  V --- c10
   D --- c5
   D --- c6
   D --- c7
+  D --- c8
   c1 -. "«include»" .-> c2
   c1 -. "«include»" .-> c3
   classDef actor fill:#fff7e6,stroke:#b8860b

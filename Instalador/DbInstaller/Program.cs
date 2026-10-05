@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Principal;
 using System.ServiceProcess;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DbInstaller
 {
@@ -18,12 +19,20 @@ namespace DbInstaller
     //   DbInstaller.exe run-script      <servidor> <script.sql> <log.txt>
     //   DbInstaller.exe check-service   <nombreServicio> <log.txt>
     //   DbInstaller.exe test-connection <servidor> <log.txt>
+    //   DbInstaller.exe check-perms     <servidor> <nombreBD> <log.txt>
+    //   DbInstaller.exe backup          <servidor> <nombreBD> <version> <log.txt>
     //   DbInstaller.exe drop-database   <servidor> <nombreBD> <log.txt>
     //   DbInstaller.exe grant-users     <servidor> <nombreBD> <log.txt>
     //   DbInstaller.exe verify          <servidor> <nombreBD> <log.txt>
     //
+    // Además del log (que se acumula), cada ejecución deja en "<log.txt>.out" (se
+    // sobrescribe) un resultado corto para que el instalador lo muestre en pantalla:
+    // los AVISO del script (run-script), la ruta del backup (backup) o el motivo de
+    // un rechazo (check-perms).
+    //
     // Códigos de salida (comunes a todos los subcomandos):
     //   0 = OK   1 = uso incorrecto   2/3 = falló la operación (ver log)
+    //   4 = backup: la base no existe (no hay nada que respaldar)
     internal static class Program
     {
         private static int Main(string[] args)
@@ -36,8 +45,10 @@ namespace DbInstaller
 
             string logPath = args[args.Length - 1];
             var log = new StringBuilder();
+            var salida = new StringBuilder();
             Action<string> registrar = mensaje =>
                 log.AppendLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {mensaje}");
+            Action<string> informar = mensaje => salida.AppendLine(mensaje);
 
             int resultado;
             try
@@ -45,13 +56,19 @@ namespace DbInstaller
                 switch (args[0])
                 {
                     case "run-script" when args.Length == 4:
-                        resultado = EjecutarScript(args[1], args[2], registrar);
+                        resultado = EjecutarScript(args[1], args[2], registrar, informar);
                         break;
                     case "check-service" when args.Length == 3:
                         resultado = ChequearYArrancarServicio(args[1], registrar);
                         break;
                     case "test-connection" when args.Length == 3:
                         resultado = ProbarConexion(args[1], registrar);
+                        break;
+                    case "check-perms" when args.Length == 4:
+                        resultado = ChequearPermisos(args[1], args[2], registrar, informar);
+                        break;
+                    case "backup" when args.Length == 5:
+                        resultado = RespaldarBaseDeDatos(args[1], args[2], args[3], registrar, informar);
                         break;
                     case "drop-database" when args.Length == 4:
                         resultado = BorrarBaseDeDatos(args[1], args[2], registrar);
@@ -83,6 +100,16 @@ namespace DbInstaller
                     // Si no se puede escribir el log no hay nada más que hacer acá;
                     // el código de salida ya le informa al instalador si falló.
                 }
+                try
+                {
+                    // Se escribe siempre (aunque quede vacío) para que el instalador no
+                    // lea el resultado de una ejecución anterior.
+                    File.WriteAllText(logPath + ".out", salida.ToString(), new UTF8Encoding(false));
+                }
+                catch
+                {
+                    // Igual que el log: el código de salida es lo que manda.
+                }
             }
 
             return resultado;
@@ -93,11 +120,13 @@ namespace DbInstaller
             "  DbInstaller.exe run-script      <servidor> <script.sql> <log.txt>\n" +
             "  DbInstaller.exe check-service   <nombreServicio> <log.txt>\n" +
             "  DbInstaller.exe test-connection <servidor> <log.txt>\n" +
+            "  DbInstaller.exe check-perms     <servidor> <nombreBD> <log.txt>\n" +
+            "  DbInstaller.exe backup          <servidor> <nombreBD> <version> <log.txt>\n" +
             "  DbInstaller.exe drop-database   <servidor> <nombreBD> <log.txt>\n" +
             "  DbInstaller.exe grant-users     <servidor> <nombreBD> <log.txt>\n" +
             "  DbInstaller.exe verify          <servidor> <nombreBD> <log.txt>";
 
-        private static int EjecutarScript(string servidor, string scriptPath, Action<string> registrar)
+        private static int EjecutarScript(string servidor, string scriptPath, Action<string> registrar, Action<string> informar)
         {
             if (!File.Exists(scriptPath))
             {
@@ -111,6 +140,17 @@ namespace DbInstaller
             registrar($"Conectando a '{servidor}'...");
             using (var conexion = new SqlConnection(CadenaConexion(servidor)))
             {
+                // Los PRINT del script llegan como mensajes informativos: se registran en el
+                // log y los "AVISO:" se pasan además al instalador (salida .out) para mostrarlos.
+                conexion.InfoMessage += (sender, e) =>
+                {
+                    foreach (SqlError mensaje in e.Errors)
+                    {
+                        registrar("SQL: " + mensaje.Message);
+                        if (mensaje.Message.TrimStart().StartsWith("AVISO", StringComparison.OrdinalIgnoreCase))
+                            informar(mensaje.Message.Trim());
+                    }
+                };
                 conexion.Open();
                 registrar($"Conexión establecida. Ejecutando script ({batches.Length} batches)...");
 
@@ -167,6 +207,161 @@ namespace DbInstaller
             catch (Exception ex)
             {
                 registrar("No se pudo conectar: " + ex.Message);
+                return 2;
+            }
+        }
+
+        // Pre-flight de PERMISOS: antes de copiar archivos, confirmar que la cuenta con la
+        // que corre el instalador puede crear la base (o actualizarla si ya existe). Sin esto,
+        // un usuario sin privilegios recién se enteraba con el script a medio ejecutar.
+        //   - Base nueva:     sysadmin o permiso CREATE ANY DATABASE (rol dbcreator).
+        //   - Base existente: sysadmin o db_owner de esa base (el script altera el esquema).
+        // Códigos: 0 = alcanza, 2 = no se pudo conectar, 3 = permisos insuficientes.
+        private static int ChequearPermisos(string servidor, string nombreBD, Action<string> registrar, Action<string> informar)
+        {
+            registrar($"Chequeando permisos en '{servidor}' para '{nombreBD}'...");
+            bool sysadmin, crearBases, existe;
+            string login;
+            try
+            {
+                using (var conexion = new SqlConnection(CadenaConexion(servidor)))
+                using (var cmd = new SqlCommand(
+                    "SELECT ISNULL(IS_SRVROLEMEMBER('sysadmin'), 0), " +
+                    "       ISNULL(HAS_PERMS_BY_NAME(NULL, NULL, 'CREATE ANY DATABASE'), 0), " +
+                    "       CASE WHEN DB_ID(@bd) IS NULL THEN 0 ELSE 1 END, SUSER_SNAME()", conexion))
+                {
+                    cmd.Parameters.AddWithValue("@bd", nombreBD);
+                    conexion.Open();
+                    using (var rd = cmd.ExecuteReader())
+                    {
+                        rd.Read();
+                        sysadmin = Convert.ToInt32(rd.GetValue(0)) == 1;
+                        crearBases = Convert.ToInt32(rd.GetValue(1)) == 1;
+                        existe = Convert.ToInt32(rd.GetValue(2)) == 1;
+                        login = rd.IsDBNull(3) ? "?" : rd.GetString(3);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                registrar("No se pudo conectar: " + ex.Message);
+                informar("No se pudo conectar al servidor: " + ex.Message);
+                return 2;
+            }
+
+            registrar($"Login: {login} | sysadmin: {sysadmin} | CREATE ANY DATABASE: {crearBases} | la base existe: {existe}");
+            if (sysadmin)
+            {
+                registrar("Permisos OK (sysadmin).");
+                return 0;
+            }
+
+            if (!existe)
+            {
+                if (crearBases)
+                {
+                    registrar("Permisos OK (puede crear bases).");
+                    informar("AVISO: el usuario no es sysadmin; dar acceso a los demás usuarios de Windows puede fallar " +
+                             "(requiere ALTER ANY LOGIN).");
+                    return 0;
+                }
+                informar($"El usuario de Windows '{login}' no tiene permiso para crear bases de datos en '{servidor}' " +
+                         "(hace falta ser sysadmin o miembro de dbcreator).");
+                registrar("Permisos INSUFICIENTES para crear la base.");
+                return 3;
+            }
+
+            bool dbOwner = false;
+            try
+            {
+                var cadena = new SqlConnectionStringBuilder(CadenaConexion(servidor)) { InitialCatalog = nombreBD };
+                using (var conexion = new SqlConnection(cadena.ConnectionString))
+                using (var cmd = new SqlCommand("SELECT ISNULL(IS_ROLEMEMBER('db_owner'), 0)", conexion))
+                {
+                    conexion.Open();
+                    dbOwner = Convert.ToInt32(cmd.ExecuteScalar()) == 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                registrar("No se pudo entrar a la base existente: " + ex.Message);
+            }
+
+            if (dbOwner)
+            {
+                registrar("Permisos OK (db_owner de la base existente).");
+                return 0;
+            }
+            informar($"La base {nombreBD} ya existe en '{servidor}' y el usuario de Windows '{login}' no es su dueño " +
+                     "(db_owner) ni sysadmin, así que no puede actualizarla.");
+            registrar("Permisos INSUFICIENTES para actualizar la base existente.");
+            return 3;
+        }
+
+        // Backup previo a una ACTUALIZACIÓN: si el script falla a mitad de camino la base
+        // queda migrada a medias, y este .bak es lo que permite volver atrás. Ruta relativa
+        // → SQL Server lo deja en su carpeta de backups por defecto (la cuenta del servicio
+        // siempre puede escribir ahí). El nombre lleva fecha y hora para que reintentar una
+        // actualización fallida NO pise el backup bueno con uno de la base ya a medio migrar.
+        // COPY_ONLY: no altera la cadena de backups que el cliente pudiera tener armada.
+        // Códigos: 0 = OK (la ruta completa va al .out), 4 = la base no existe, 2 = falló.
+        private static int RespaldarBaseDeDatos(string servidor, string nombreBD, string version,
+                                                Action<string> registrar, Action<string> informar)
+        {
+            if (!Regex.IsMatch(version, @"^[0-9A-Za-z._-]{1,30}$"))
+            {
+                registrar($"ERROR: versión inválida '{version}'.");
+                return 2;
+            }
+
+            string archivo = $"{nombreBD}_pre_{version}_{DateTime.Now:yyyyMMddHHmmss}.bak";
+            registrar($"Respaldando '{nombreBD}' en '{servidor}' ({archivo})...");
+            try
+            {
+                using (var conexion = new SqlConnection(CadenaConexion(servidor)))
+                {
+                    conexion.Open();
+                    using (var cmd = new SqlCommand("SELECT DB_ID(@bd)", conexion))
+                    {
+                        cmd.Parameters.AddWithValue("@bd", nombreBD);
+                        if (cmd.ExecuteScalar() is DBNull)
+                        {
+                            registrar("La base no existe: no hay nada que respaldar.");
+                            return 4;
+                        }
+                    }
+
+                    using (var cmd = new SqlCommand(
+                        "BACKUP DATABASE @bd TO DISK = @archivo WITH INIT, COPY_ONLY", conexion))
+                    {
+                        cmd.Parameters.AddWithValue("@bd", nombreBD);
+                        cmd.Parameters.AddWithValue("@archivo", archivo);
+                        cmd.CommandTimeout = 0; // una base grande puede tardar
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    // Ruta completa real (la carpeta la elige SQL Server), para informarla.
+                    string ruta = archivo;
+                    using (var cmd = new SqlCommand(
+                        "SELECT TOP 1 f.physical_device_name FROM msdb.dbo.backupset s " +
+                        "JOIN msdb.dbo.backupmediafamily f ON f.media_set_id = s.media_set_id " +
+                        "WHERE s.database_name = @bd AND f.physical_device_name LIKE '%' + @archivo " +
+                        "ORDER BY s.backup_finish_date DESC", conexion))
+                    {
+                        cmd.Parameters.AddWithValue("@bd", nombreBD);
+                        cmd.Parameters.AddWithValue("@archivo", archivo);
+                        object r = cmd.ExecuteScalar();
+                        if (r != null && !(r is DBNull)) ruta = (string)r;
+                    }
+
+                    registrar("Backup previo a la actualización generado: " + ruta);
+                    informar(ruta);
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                registrar("No se pudo generar el backup previo: " + ex.Message);
                 return 2;
             }
         }
@@ -236,6 +431,8 @@ namespace DbInstaller
         // quiere borrar también los datos (ver [Code] del .iss, opción "No" por
         // defecto). nombreBD siempre es la constante fija de la app (no viene
         // de input del usuario), así que la interpolación directa es segura acá.
+        // Después de borrar la base quita también el login del grupo "Usuarios" que
+        // creó grant-users, si ninguna otra base lo usa.
         private static int BorrarBaseDeDatos(string servidor, string nombreBD, Action<string> registrar)
         {
             registrar($"Conectando a '{servidor}' para eliminar la base '{nombreBD}'...");
@@ -252,8 +449,56 @@ namespace DbInstaller
                         cmd.CommandTimeout = 60;
                         cmd.ExecuteNonQuery();
                     }
+                    registrar("Base de datos eliminada (si existía).");
+
+                    // El login del grupo local "Usuarios" lo crea grant-users solo para esta base.
+                    // Se borra únicamente si ya no lo usa NINGUNA otra base del servidor ni tiene
+                    // roles/permisos de servidor propios (si los tiene, lo creó o lo usa otra cosa).
+                    string grupo = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null)
+                        .Translate(typeof(NTAccount)).Value;
+                    const string sqlLogin = @"
+DECLARE @sid varbinary(85) = (SELECT sid FROM sys.server_principals WHERE name = @grupo AND type = 'G');
+IF @sid IS NULL BEGIN PRINT 'El login del grupo no existe: nada que quitar.'; RETURN; END
+IF EXISTS (SELECT 1 FROM sys.server_role_members rm JOIN sys.server_principals p ON p.principal_id = rm.member_principal_id WHERE p.sid = @sid)
+   OR EXISTS (SELECT 1 FROM sys.server_permissions sp JOIN sys.server_principals p ON p.principal_id = sp.grantee_principal_id
+              WHERE p.sid = @sid AND sp.permission_name <> 'CONNECT SQL')
+BEGIN PRINT 'El login del grupo tiene roles o permisos de servidor propios: se conserva.'; RETURN; END
+DECLARE @usos int = 0, @n int, @db sysname, @q nvarchar(max);
+DECLARE c CURSOR LOCAL FAST_FORWARD FOR
+    SELECT name FROM sys.databases WHERE state = 0 AND HAS_DBACCESS(name) = 1;
+OPEN c; FETCH NEXT FROM c INTO @db;
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SET @q = N'SELECT @n = COUNT(*) FROM ' + QUOTENAME(@db) + N'.sys.database_principals WHERE sid = @sid';
+    EXEC sp_executesql @q, N'@sid varbinary(85), @n int OUTPUT', @sid = @sid, @n = @n OUTPUT;
+    SET @usos = @usos + ISNULL(@n, 0);
+    FETCH NEXT FROM c INTO @db;
+END
+CLOSE c; DEALLOCATE c;
+IF @usos = 0
+BEGIN
+    SET @q = N'DROP LOGIN ' + QUOTENAME(@grupo);
+    EXEC (@q);
+    PRINT 'Login del grupo de usuarios locales eliminado.';
+END
+ELSE
+    PRINT 'El login del grupo lo usan otras bases: se conserva.';";
+                    try
+                    {
+                        conexion.InfoMessage += (s, e) => registrar("SQL: " + e.Message);
+                        using (var cmd = new SqlCommand(sqlLogin, conexion))
+                        {
+                            cmd.Parameters.AddWithValue("@grupo", grupo);
+                            cmd.CommandTimeout = 60;
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // No es grave: la base ya se borró; el login sin base no da acceso a datos.
+                        registrar($"AVISO: no se pudo quitar el login '{grupo}': {ex.Message}");
+                    }
                 }
-                registrar("Base de datos eliminada (si existía).");
                 return 0;
             }
             catch (Exception ex)
@@ -270,27 +515,42 @@ namespace DbInstaller
         // da acceso al grupo local "Usuarios" (BUILTIN\Users o BUILTIN\Usuarios según el idioma
         // de Windows, por eso se resuelve por SID y no por nombre) solo sobre esta base. La
         // autorización de cada persona la sigue haciendo el login propio de la app.
+        //
+        // ROL db_owner, como el instalador que se probó en la computadora de la facultad (fe63121).
+        // Se evaluó dar solo db_datareader/db_datawriter/db_backupoperator, pero:
+        //   - Restaurar un backup desde la app (DAL.Backup: ALTER DATABASE ... SINGLE_USER +
+        //     RESTORE ... WITH REPLACE) sobre una base existente exige ser db_owner de ella (o
+        //     sysadmin/dbcreator, que son permisos de toda la instancia). Si instala una cuenta
+        //     y la app la usa otra, sin db_owner no se podría restaurar.
+        //   - Si la cuenta que reinstala no es sysadmin, su acceso a la base viene de este grupo:
+        //     quitárselo bloquearía la próxima actualización.
+        // Quién puede restaurar lo decide la patente de Backup dentro de la app. Riesgo aceptado
+        // y documentado: un usuario de Windows del equipo podría modificar la base por fuera de
+        // la app; los cambios de datos los detectan los dígitos verificadores (DVH/DVV).
         private static int OtorgarAccesoUsuariosLocales(string servidor, string nombreBD, Action<string> registrar)
         {
             string grupo = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null)
                 .Translate(typeof(NTAccount)).Value;
-            registrar($"Otorgando acceso a '{grupo}' sobre '{nombreBD}' en '{servidor}'...");
+            registrar($"Otorgando acceso (db_owner) a '{grupo}' sobre '{nombreBD}' en '{servidor}'...");
             try
             {
                 using (var conexion = new SqlConnection(CadenaConexion(servidor)))
                 {
+                    conexion.InfoMessage += (s, e) => registrar("SQL: " + e.Message);
                     conexion.Open();
                     const string sql = @"
 DECLARE @q nvarchar(max);
+DECLARE @g sysname = QUOTENAME(@grupo);
+DECLARE @lit nvarchar(300) = N'N''' + REPLACE(@grupo, '''', '''''') + N'''';
 IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = @grupo)
 BEGIN
-    SET @q = N'CREATE LOGIN ' + QUOTENAME(@grupo) + N' FROM WINDOWS';
+    SET @q = N'CREATE LOGIN ' + @g + N' FROM WINDOWS';
     EXEC (@q);
 END
 SET @q = N'USE ' + QUOTENAME(@bd) + N';
-IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = N''' + REPLACE(@grupo, '''', '''''') + N''')
-    CREATE USER ' + QUOTENAME(@grupo) + N' FOR LOGIN ' + QUOTENAME(@grupo) + N';
-ALTER ROLE db_owner ADD MEMBER ' + QUOTENAME(@grupo) + N';';
+IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = ' + @lit + N')
+    CREATE USER ' + @g + N' FOR LOGIN ' + @g + N';
+ALTER ROLE db_owner ADD MEMBER ' + @g + N';';
 EXEC (@q);";
                     using (var cmd = new SqlCommand(sql, conexion))
                     {
@@ -300,7 +560,7 @@ EXEC (@q);";
                         cmd.ExecuteNonQuery();
                     }
                 }
-                registrar("Acceso otorgado.");
+                registrar("Acceso otorgado: db_owner de la base (hace falta para restaurar backups desde la app).");
                 return 0;
             }
             catch (Exception ex)
@@ -350,8 +610,10 @@ EXEC (@q);";
             }
         }
 
+        // Connect Timeout=30: la primera conexión a LocalDB arranca la instancia en frío y
+        // puede tardar más de 15 s en un equipo lento.
         private static string CadenaConexion(string servidor) =>
-            $"Data Source={servidor};Integrated Security=True;TrustServerCertificate=True;Connect Timeout=15";
+            $"Data Source={servidor};Integrated Security=True;TrustServerCertificate=True;Connect Timeout=30";
 
         // Separa el script en batches por líneas que son "GO" (igual que
         // sqlcmd/SSMS). El script del proyecto solo usa "GO" simple, sin

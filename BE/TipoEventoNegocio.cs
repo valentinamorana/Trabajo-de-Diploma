@@ -33,6 +33,16 @@ namespace BE
         CobroSuscripcion = 12,
 
         // Mejora opcional, no requerida por la cátedra — ver README.
-        ListaEspera = 13
+        ListaEspera = 13,
+
+        // PN01 — circuito de control de stock (diagrama de actividad de Armar pedido).
+        // La formalización del pedido sigue registrándose como Venta.
+        EnvioControlStock = 14,
+
+        InformeFaltantes = 15,
+
+        SeparacionPrendas = 16,
+
+        Desistimiento = 17
     }
 }

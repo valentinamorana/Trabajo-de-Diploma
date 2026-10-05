@@ -115,5 +115,16 @@ namespace Tests
             Assert.IsFalse(estado.ControlarEstado(p2, BE.EstadoPrenda.EnUso));
             Assert.AreEqual(BE.EstadoPrenda.Disponible, p2.Estado);
         }
+
+        [TestMethod]
+        public void PuedeReportarsePerdidaYAnotarseEnEspera_SoloEnUso()
+        {
+            foreach (BE.EstadoPrenda estado in System.Enum.GetValues(typeof(BE.EstadoPrenda)))
+            {
+                var p = new BE.Prenda { Estado = estado };
+                Assert.AreEqual(estado == BE.EstadoPrenda.EnUso, p.PuedeReportarsePerdida(), estado.ToString());
+                Assert.AreEqual(estado == BE.EstadoPrenda.EnUso, p.PuedeAnotarseEnEspera(), estado.ToString());
+            }
+        }
     }
 }

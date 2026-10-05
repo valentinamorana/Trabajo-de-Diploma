@@ -37,7 +37,7 @@ namespace GUI
             // ── lblPedidoInfo — el texto final ("Pedido #N") se completa en el constructor ─
             this.lblPedidoInfo.AutoSize  = true;
             this.lblPedidoInfo.Font      = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold);
-            this.lblPedidoInfo.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.lblPedidoInfo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblPedidoInfo.Location  = new System.Drawing.Point(12, 12);
             this.lblPedidoInfo.Name      = "lblPedidoInfo";
             this.lblPedidoInfo.TabIndex  = 0;
@@ -135,7 +135,7 @@ namespace GUI
             this.cmbAccion.TabIndex      = 7;
 
             // ── btnBuscar ──────────────────────────────────────────────────────
-            this.btnBuscar.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnBuscar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnBuscar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnBuscar.FlatAppearance.BorderSize = 0;
             this.btnBuscar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -174,7 +174,7 @@ namespace GUI
             this.dgv.TabIndex    = 9;
             this.dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.None;
             this.dgv.ColumnHeadersDefaultCellStyle.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
-            this.dgv.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.dgv.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.dgv.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
             this.dgv.DefaultCellStyle.SelectionBackColor     = System.Drawing.Color.FromArgb(255, 182, 193);
             this.dgv.DefaultCellStyle.SelectionForeColor     = System.Drawing.Color.Black;

@@ -44,6 +44,8 @@ namespace GUI
         public Usuarios()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvUsuarios);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -51,14 +53,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -248,7 +243,7 @@ namespace GUI
                 {
                     if (fila.Cells["_BloqueadoKey"].Value?.ToString() == "1")
                     {
-                        fila.DefaultCellStyle.BackColor = _viendoArchivados ? Color.FromArgb(235, 235, 235) : Color.FromArgb(255, 220, 220);
+                        fila.DefaultCellStyle.BackColor = _viendoArchivados ? Tema.PanelClaro : Tema.FondoError;
                         fila.DefaultCellStyle.ForeColor = _viendoArchivados ? Color.DimGray : Color.DarkRed;
                     }
                 }
@@ -267,8 +262,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                var te = Traductor.ObtenerTraducciones(_idioma);
-                MostrarError(string.Format(te.ContainsKey("err.generico.cargar") ? te["err.generico.cargar"].Texto : "Error al cargar: {0}", ex.Message));
+                MostrarError(ex);
             }
         }
 

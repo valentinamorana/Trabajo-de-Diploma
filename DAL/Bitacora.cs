@@ -101,8 +101,9 @@ namespace DAL
             }
             if (!string.IsNullOrWhiteSpace(actividad))
             {
-                consulta += " AND actividad LIKE @actividad";
-                parametros.Add(new SqlParameter("@actividad", $"%{actividad}%"));
+                // Los comodines de LIKE (% _ [) que tipea el usuario se buscan literalmente.
+                consulta += " AND actividad LIKE @actividad ESCAPE '\\'";
+                parametros.Add(new SqlParameter("@actividad", "%" + EscaparLike(actividad) + "%"));
             }
             // criticidad == -1 significa "Todas" (sin filtro de criticidad)
             // criticidad >= 0 filtra por valor exacto del enum (incluye None=0)
@@ -123,6 +124,13 @@ namespace DAL
                 System.Diagnostics.Trace.TraceError($"[DAL.Bitacora] Error en búsqueda: {ex.Message}");
                 return new DataTable();
             }
+        }
+
+        // Escapa los comodines de LIKE para buscar el texto tal cual (escape: barra invertida).
+        public static string EscaparLike(string texto)
+        {
+            if (string.IsNullOrEmpty(texto)) return texto;
+            return texto.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace("[", "\\[");
         }
     }
 }

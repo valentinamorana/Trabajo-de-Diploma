@@ -35,6 +35,9 @@ namespace GUI
             this.cardMant     = new Panel();
             this.numMant      = new Label();
             this.txtMant      = new Label();
+            this.cardControl  = new Panel();
+            this.numControl   = new Label();
+            this.txtControl   = new Label();
             this.cardOcup     = new Panel();
             this.numOcup      = new Label();
             this.txtOcup      = new Label();
@@ -54,6 +57,7 @@ namespace GUI
             this.flowCards.SuspendLayout();
             this.cardDisp.SuspendLayout();
             this.cardMant.SuspendLayout();
+            this.cardControl.SuspendLayout();
             this.cardOcup.SuspendLayout();
             this.wrapper.SuspendLayout();
             this.tbl.SuspendLayout();
@@ -131,6 +135,7 @@ namespace GUI
 
             // ── flowCards ──────────────────────────────────────────────────────
             this.flowCards.BackColor = Color.FromArgb(240, 240, 245);
+            this.flowCards.Controls.Add(this.cardControl);
             this.flowCards.Controls.Add(this.cardDisp);
             this.flowCards.Controls.Add(this.cardMant);
             this.flowCards.Controls.Add(this.cardOcup);
@@ -207,6 +212,37 @@ namespace GUI
             this.txtMant.Size      = new Size(148, 44);
             this.txtMant.TabIndex  = 1;
             this.txtMant.TextAlign = ContentAlignment.TopCenter;
+
+            this.cardControl.BackColor = Color.FromArgb(252, 228, 235);
+            this.cardControl.Controls.Add(this.numControl);
+            this.cardControl.Controls.Add(this.txtControl);
+            this.cardControl.Margin  = new Padding(0, 0, 8, 0);
+            this.cardControl.Name    = "cardControl";
+            this.cardControl.Size    = new Size(148, 160);
+            this.cardControl.TabIndex = 3;
+            this.cardControl.Paint  += new PaintEventHandler(this.TarjetaKpi_Paint);
+            this.cardControl.Resize += new System.EventHandler(this.CardControl_Resize);
+
+            this.numControl.Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            this.numControl.BackColor = Color.Transparent;
+            this.numControl.Font      = new Font("Segoe UI", 30F, FontStyle.Bold);
+            this.numControl.ForeColor = Color.FromArgb(176, 62, 96);
+            this.numControl.Location  = new Point(0, 20);
+            this.numControl.Name      = "numControl";
+            this.numControl.Size      = new Size(148, 78);
+            this.numControl.TabIndex  = 0;
+            this.numControl.Text      = "…";
+            this.numControl.TextAlign = ContentAlignment.BottomCenter;
+
+            this.txtControl.Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            this.txtControl.BackColor = Color.Transparent;
+            this.txtControl.Font      = new Font("Segoe UI", 8F);
+            this.txtControl.ForeColor = Color.FromArgb(138, 116, 128);
+            this.txtControl.Location  = new Point(0, 102);
+            this.txtControl.Name      = "txtControl";
+            this.txtControl.Size      = new Size(148, 44);
+            this.txtControl.TabIndex  = 1;
+            this.txtControl.TextAlign = ContentAlignment.TopCenter;
 
             this.cardOcup.BackColor = Color.FromArgb(215, 240, 220);
             this.cardOcup.Controls.Add(this.numOcup);
@@ -382,6 +418,7 @@ namespace GUI
             this.flowCards.ResumeLayout(false);
             this.cardDisp.ResumeLayout(false);
             this.cardMant.ResumeLayout(false);
+            this.cardControl.ResumeLayout(false);
             this.cardOcup.ResumeLayout(false);
             this.wrapper.ResumeLayout(false);
             this.tbl.ResumeLayout(false);
@@ -406,6 +443,9 @@ namespace GUI
         private Panel    cardMant;
         private Label    numMant;
         private Label    txtMant;
+        private Panel    cardControl;
+        private Label    numControl;
+        private Label    txtControl;
         private Panel    cardOcup;
         private Label    numOcup;
         private Label    txtOcup;

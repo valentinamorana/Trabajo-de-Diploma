@@ -1,0 +1,17 @@
+sequenceDiagram
+  autonumber
+  actor A as Administración
+  participant F as Promociones<br/>AdministracionForm
+  participant B as BLL.Promocion
+  participant D as DAL.Promocion
+  A->>F: Elige una promoción Rechazada por Contabilidad, pulsa "Descartar" e indica el motivo
+  F->>B: DescartarPromocion(modulo, promocion, motivo)
+  Note over B: Exigir(PromocionesAdminEditar) · promocion.PuedeDescartarse() · motivo obligatorio
+  B->>D: CambiarEstado(id, esperado = RechazadaContabilidad, historial: → Descartada con el motivo)  [claim]
+  alt Otra sesión ya la cambió
+    D-->>B: false
+    B-->>F: AppException(estado_concurrente)
+  else Descartada
+    F->>B: ObtenerDescarte(idPromocion)
+    F-->>A: Constancia de descarte (PDF): fin
+  end

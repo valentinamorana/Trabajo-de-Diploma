@@ -36,6 +36,9 @@ namespace GUI
         public PedidosVenta()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvPedidos);
+            Estilos.EstiloFormulario.Grilla(dgvDetallePrendas);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -43,14 +46,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -72,6 +68,11 @@ namespace GUI
             Aplicar(btnDesCancelar,   t);
             Aplicar(lblDetalleTitulo, t);
             Aplicar(btnHistorial,     t);
+            Aplicar(btnVerFaltantes,  t);
+            Aplicar(btnAjustar,       t);
+            Aplicar(btnDesistirPedido, t);
+            Aplicar(btnFormalizar,    t);
+            Aplicar(btnConfirmacion,  t);
         }
 
         private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
@@ -123,7 +124,7 @@ namespace GUI
                         EstadoLabel(p.Estado),
                         p.FechaDespacho.HasValue ? p.FechaDespacho.Value.ToString("dd/MM/yyyy") : "—",
                         p.FechaEntrega.HasValue  ? p.FechaEntrega.Value.ToString("dd/MM/yyyy")  : "—",
-                        p.MotivoCancelacion ?? "",
+                        p.MotivoCancelacion ?? p.MotivoDesistimiento ?? "",
                         (int)p.Estado);
                 }
 
@@ -159,14 +160,7 @@ namespace GUI
                 // así el coloreado funciona independientemente del idioma activo.
                 if (!dgvPedidos.Columns.Contains("_EstadoKey")) continue;
                 if (!int.TryParse(row.Cells["_EstadoKey"].Value?.ToString(), out int estadoKey)) continue;
-                row.DefaultCellStyle.ForeColor = estadoKey switch
-                {
-                    (int)BE.EstadoPedido.Pendiente  => Color.FromArgb(160, 100, 0),
-                    (int)BE.EstadoPedido.Despachado => Color.FromArgb(30, 100, 170),
-                    (int)BE.EstadoPedido.Entregado  => Color.FromArgb(30, 130, 30),
-                    (int)BE.EstadoPedido.Cancelado  => Color.FromArgb(160, 50, 50),
-                    _                               => Color.Black
-                };
+                row.DefaultCellStyle.ForeColor = EstadosPedido.Color((BE.EstadoPedido)estadoKey);
             }
         }
 
@@ -199,20 +193,9 @@ namespace GUI
             bool hay = dgvPedidos.SelectedRows.Count > 0;
             dgvDetallePrendas.DataSource = null;
 
-            if (!hay)
-            {
-                btnCancelar.Enabled    = false;
-                btnDesCancelar.Enabled = false;
-                btnHistorial.Enabled   = false;
-                return;
-            }
-
-            var pedido = ObtenerPedidoSeleccionado();
+            var pedido = hay ? ObtenerPedidoSeleccionado() : null;
+            HabilitarAcciones(pedido);
             if (pedido == null) return;
-
-            btnCancelar.Enabled    = pedido.Estado == BE.EstadoPedido.Pendiente;
-            btnDesCancelar.Enabled = pedido.Estado == BE.EstadoPedido.Cancelado;
-            btnHistorial.Enabled   = true;
 
             // Cargar detalle de prendas del pedido seleccionado
             CargarDetallePrendas(pedido.IdPedido);
@@ -220,8 +203,24 @@ namespace GUI
             string motivoLabel = Tr("lbl.motivo", "Motivo:");
             lblDetalleTitulo.Text = Tr("lbl.ped.seleccionado", "Pedido #{0} — {1} — {2}",
                 new object[] { pedido.IdPedido, pedido.NombreCliente, EstadoLabel(pedido.Estado) }) +
-                (!string.IsNullOrEmpty(pedido.MotivoCancelacion)
-                    ? $"  |  {motivoLabel} {pedido.MotivoCancelacion}" : "");
+                (!string.IsNullOrEmpty(pedido.MotivoCancelacion ?? pedido.MotivoDesistimiento)
+                    ? $"  |  {motivoLabel} {pedido.MotivoCancelacion ?? pedido.MotivoDesistimiento}" : "");
+        }
+
+        // Acciones habilitadas según el estado del pedido (PN01 + ciclo posterior).
+        private void HabilitarAcciones(BE.Pedido pedido)
+        {
+            btnCancelar.Enabled       = pedido != null && pedido.PuedeCancelarse();
+            btnDesCancelar.Enabled    = pedido != null && pedido.PuedeDesCancelarse();
+            btnHistorial.Enabled      = pedido != null;
+            // "Comunicar faltantes" → el cliente ajusta la selección o desiste.
+            btnVerFaltantes.Enabled   = pedido != null && pedido.Estado == BE.EstadoPedido.ConFaltantes;
+            btnAjustar.Enabled        = pedido != null && pedido.PuedeAjustarse();
+            btnDesistirPedido.Enabled = pedido != null && pedido.PuedeDesistirse();
+            // "Formalizar el pedido" (prendas ya separadas por Depósito).
+            btnFormalizar.Enabled     = pedido != null && pedido.PuedeFormalizarse();
+            // "Preparar la confirmación" (pedido formalizado).
+            btnConfirmacion.Enabled   = pedido != null && pedido.EstaFormalizado();
         }
 
         private void CargarDetallePrendas(int idPedido)
@@ -274,9 +273,10 @@ namespace GUI
             {
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var tCreado = Traductor.ObtenerTraducciones(_idioma);
-                string fmtCreado = tCreado.ContainsKey("msg.ped.creado") ? tCreado["msg.ped.creado"].Texto : "Pedido #{0} creado. Estado: Pendiente.";
-                MostrarOk(string.Format(fmtCreado, form.IdPedidoCreado));
+                MostrarOk(form.FueDesistimiento
+                    ? Tr("msg.ped.desistido", "Pedido #{0}: desistimiento asentado.", new object[] { form.IdPedidoCreado })
+                    : Tr("msg.ped.encontrol", "Pedido #{0} enviado a control de stock. Depósito revisará la disponibilidad.",
+                         new object[] { form.IdPedidoCreado }));
                 CargarPedidos();
             }
         }
@@ -313,14 +313,7 @@ namespace GUI
                 Tr("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),
                 pedido.IdPedido, pedido.NombreCliente, motivo);
 
-            var confirmar = MessageBox.Show(
-                bodyCanc,
-                Tr("conf.cancelped.titulo", "Confirmar Cancelación"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);
-
-            if (confirmar != DialogResult.Yes) return;
+            if (!ConfirmarSiNo(bodyCanc, Tr("conf.cancelped.titulo", "Confirmar Cancelación"), porDefectoNo: true)) return;
 
             try
             {
@@ -356,22 +349,15 @@ namespace GUI
             }
 
             string bodyDesc = string.Format(
-                Tr("conf.descancelar.body", "¿Des-cancelar el Pedido #{0} de {1}?\n\nSe verificará que las prendas originales estén disponibles\ny el pedido volverá a estado Pendiente."),
+                Tr("conf.ped.reactivar", "¿Reactivar el Pedido #{0} de {1}?\n\nVuelve a control de stock: Depósito revisa otra vez la disponibilidad y separa las prendas."),
                 pedido.IdPedido, pedido.NombreCliente);
 
-            var confirmar = MessageBox.Show(
-                bodyDesc,
-                Tr("conf.descancelar.titulo", "Confirmar Des-cancelación"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-
-            if (confirmar != DialogResult.Yes) return;
+            if (!ConfirmarSiNo(bodyDesc, Tr("conf.ped.reactivar.titulo", "Reactivar pedido"))) return;
 
             try
             {
                 pedidoBLL.DesCancelar(this.Text, pedido);
-                string fmtReact = Tr("msg.ped.reactivado", "Pedido #{0} reactivado — volvió a Pendiente.");
+                string fmtReact = Tr("msg.ped.reactivadocontrol", "Pedido #{0} reactivado: volvió a control de stock.");
                 MostrarOk(string.Format(fmtReact, pedido.IdPedido));
                 CargarPedidos();
             }
@@ -390,17 +376,130 @@ namespace GUI
             return _pedidos.Find(p => p.IdPedido == id);
         }
 
-        private string EstadoLabel(BE.EstadoPedido estado)
+        private string EstadoLabel(BE.EstadoPedido estado) => EstadosPedido.Etiqueta(estado);
+
+        // ── PN01 — acciones del Vendedor sobre el armado del pedido ──────────
+
+        // Relee el pedido desde la base (la grilla puede estar desactualizada si Depósito u otra
+        // sesión ya lo movió). Null si ya no existe.
+        private BE.Pedido PedidoActual()
         {
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            switch (estado)
+            var seleccionado = ObtenerPedidoSeleccionado();
+            if (seleccionado == null) return null;
+            // La relectura toca la BD: si falla se informa acá (antes la excepción escapaba
+            // al manejador global porque los callers llaman a este método fuera de su try).
+            BE.Pedido pedido;
+            try { pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return null; }
+            if (pedido == null)
             {
-                case BE.EstadoPedido.Pendiente:  return t.ContainsKey("est.pendiente")  ? t["est.pendiente"].Texto  : "Pendiente";
-                case BE.EstadoPedido.Despachado: return t.ContainsKey("est.despachado") ? t["est.despachado"].Texto : "Despachado";
-                case BE.EstadoPedido.Entregado:  return t.ContainsKey("est.entregado")  ? t["est.entregado"].Texto  : "Entregado";
-                case BE.EstadoPedido.Cancelado:  return t.ContainsKey("est.cancelado")  ? t["est.cancelado"].Texto  : "Cancelado";
-                default: return estado.ToString();
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                CargarPedidos();
             }
+            return pedido;
+        }
+
+        // "Comunicar faltantes": informe de disponibilidad (prendas faltantes y alternativas).
+        private void BtnVerFaltantes_Click(object sender, EventArgs e)
+        {
+            var pedido = PedidoActual();
+            if (pedido == null) return;
+            try
+            {
+                var faltantes = pedidoBLL.ObtenerInformeFaltantes(pedido.IdPedido);
+                Exportacion.DocumentosPedido.Imprimir(Exportacion.DocumentosPedido.InformeFaltantes(pedido, faltantes), this);
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        // "Recibir selección ajustada por disponibilidad".
+        private void BtnAjustar_Click(object sender, EventArgs e)
+        {
+            var pedido = PedidoActual();
+            if (pedido == null) return;
+            try
+            {
+                var faltantes = pedidoBLL.ObtenerInformeFaltantes(pedido.IdPedido);
+                using (var form = new NuevoPedidoForm(pedido, faltantes))
+                {
+                    if (form.ShowDialog(this) != DialogResult.OK) return;
+                    MostrarOk(form.FueDesistimiento
+                        ? Tr("msg.ped.desistido", "Pedido #{0}: desistimiento asentado.", new object[] { pedido.IdPedido })
+                        : Tr("msg.ped.reenviado", "Pedido #{0}: selección ajustada y reenviada a control de stock.",
+                             new object[] { pedido.IdPedido }));
+                }
+                CargarPedidos();
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        // "Comunicar desistimiento" → "Asentar desistimiento" (no ajusta por disponibilidad).
+        private void BtnDesistirPedido_Click(object sender, EventArgs e)
+        {
+            var pedido = PedidoActual();
+            if (pedido == null) return;
+
+            string motivo = PedirTexto(
+                string.Format(Tr("dlg.desistir.pedido", "Motivo del desistimiento — Pedido #{0} ({1}):"),
+                    pedido.IdPedido, pedido.NombreCliente),
+                Tr("dlg.desistir.titulo", "Asentar desistimiento"));
+            if (string.IsNullOrWhiteSpace(motivo))
+            {
+                MostrarError(Tr("msg.desistir.req", "El desistimiento requiere un motivo."));
+                return;
+            }
+
+            try
+            {
+                pedidoBLL.AsentarDesistimiento(this.Text, pedido, motivo, BE.EtapaDesistimiento.Disponibilidad);
+                MostrarOk(Tr("msg.ped.desistido", "Pedido #{0}: desistimiento asentado.", new object[] { pedido.IdPedido }));
+                if (ConfirmarSiNo(Tr("conf.ped.aviso", "¿Imprimir el aviso de desistimiento?"), this.Text, porDefectoNo: true))
+                    Exportacion.DocumentosPedido.Imprimir(
+                        Exportacion.DocumentosPedido.AvisoDesistimiento(pedidoBLL.ObtenerPorId(pedido.IdPedido)), this);
+                CargarPedidos();
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        // "Formalizar el pedido" → "Preparar la confirmación".
+        private void BtnFormalizar_Click(object sender, EventArgs e)
+        {
+            var pedido = PedidoActual();
+            if (pedido == null) return;
+
+            if (!ConfirmarSiNo(
+                string.Format(Tr("conf.ped.formalizar",
+                    "¿Formalizar el Pedido #{0} de {1}?\n\nDepósito ya separó las {2} prenda(s). Desde aquí la " +
+                    "selección queda cerrada y no admite modificaciones."),
+                    pedido.IdPedido, pedido.NombreCliente, pedido.CantidadPrendas),
+                Tr("conf.ped.formalizar.titulo", "Formalizar pedido"))) return;
+
+            try
+            {
+                pedidoBLL.FormalizarPedido(this.Text, pedido);
+                MostrarOk(Tr("msg.ped.formalizado", "Pedido #{0} formalizado. Queda pendiente de despacho.",
+                    new object[] { pedido.IdPedido }));
+                PrepararConfirmacion(pedido.IdPedido);
+                CargarPedidos();
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        private void BtnConfirmacion_Click(object sender, EventArgs e)
+        {
+            var pedido = ObtenerPedidoSeleccionado();
+            if (pedido != null) PrepararConfirmacion(pedido.IdPedido);
+        }
+
+        // "Preparar la confirmación" (Confirmación y constancia del pedido para el cliente).
+        private void PrepararConfirmacion(int idPedido)
+        {
+            try
+            {
+                var formalizado = pedidoBLL.PrepararConfirmacion(this.Text, idPedido);
+                Exportacion.DocumentosPedido.Imprimir(Exportacion.DocumentosPedido.ConfirmacionPedido(formalizado), this);
+            }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         /// <summary>

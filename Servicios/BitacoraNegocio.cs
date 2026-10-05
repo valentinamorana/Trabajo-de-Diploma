@@ -14,9 +14,12 @@ namespace Servicios
     /// La GUI accede a este servicio únicamente a través de BLL.Bitacora.
     /// Los eventos de negocio están separados de la tabla [Bitacora] (seguridad/sistema).
     /// </summary>
-    public class BitacoraNegocio
+    public class BitacoraNegocio : IRegistroBitacoraNegocio
     {
         private readonly DAL.BitacoraNegocio dal = new DAL.BitacoraNegocio();
+
+        // Largo de [BitacoraNegocio].Descripcion: se recorta antes de insertar para no perder el evento.
+        public const int LargoDescripcion = 500;
 
         // Registra un evento de negocio.
         // IdUsuario se resuelve automáticamente desde SessionManager si hay sesión activa.
@@ -41,7 +44,7 @@ namespace Servicios
                     IdPedido    = idPedido,
                     IdPrenda    = idPrenda,
                     IdCliente   = idCliente,
-                    Descripcion = descripcion
+                    Descripcion = TextoSeguro.Recortar(descripcion ?? string.Empty, LargoDescripcion)
                 };
 
                 dal.Registrar(evento);

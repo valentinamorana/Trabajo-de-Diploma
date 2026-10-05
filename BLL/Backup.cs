@@ -12,8 +12,8 @@ namespace BLL
         private readonly DAL.Interfaces.IBackupDAL _dal;
         // Bitácora perezosa: solo se instancia cuando una operación de escritura la usa, para que
         // construir BLL.Backup (y testear el preview RF-08) no toque la BD ni el App.config.
-        private Servicios.Bitacora _bitacoraLazy;
-        private Servicios.Bitacora _bitacora => _bitacoraLazy ?? (_bitacoraLazy = new Servicios.Bitacora());
+        private Servicios.IRegistroBitacora _bitacoraLazy;
+        private Servicios.IRegistroBitacora _bitacora => _bitacoraLazy ?? (_bitacoraLazy = Servicios.FabricaBitacora.CrearSistema());
 
         // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble
         // de prueba (tests del preview de pérdida RF-08 sin tocar SQL Server).
@@ -26,6 +26,48 @@ namespace BLL
         // Extensión de los backups CIFRADOS (con contraseña). Los .bak planos legacy se siguen
         // pudiendo restaurar para no romper copias anteriores.
         public const string ExtensionCifrada = ".wfbak";
+
+        /// <summary>Carpeta única de los backups (al lado del ejecutable). Fuente única para la
+        /// BLL y la GUI (antes la ruta estaba repetida en cuatro lugares).</summary>
+        public static readonly string CarpetaBackups =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+
+        /// <summary>Backups de la carpeta (.bak legacy y cifrados), del más reciente al más viejo.
+        /// Lista vacía si la carpeta todavía no existe.</summary>
+        public static List<FileInfo> ObtenerBackups()
+        {
+            if (!Directory.Exists(CarpetaBackups)) return new List<FileInfo>();
+            var dir = new DirectoryInfo(CarpetaBackups);
+            return dir.GetFiles("*.bak")
+                .Concat(dir.GetFiles("*" + ExtensionCifrada))
+                .OrderByDescending(f => f.LastWriteTime)
+                .ToList();
+        }
+
+        /// <summary>Backup más reciente de la carpeta (.bak legacy o cifrado), o null si no hay.</summary>
+        public static FileInfo ObtenerUltimoBackup() => ObtenerBackups().FirstOrDefault();
+
+        /// <summary>Crea la carpeta de backups si no existe y devuelve su ruta.</summary>
+        public static string AsegurarCarpetaBackups()
+        {
+            Directory.CreateDirectory(CarpetaBackups);
+            return CarpetaBackups;
+        }
+
+        // ¿La ruta apunta a un archivo DENTRO de la carpeta de backups (sin "..", ni otra carpeta)?
+        internal static bool EstaDentroDeCarpetaBackups(string rutaArchivo, string carpeta = null)
+        {
+            if (string.IsNullOrWhiteSpace(rutaArchivo)) return false;
+            try
+            {
+                string baseDir = Path.GetFullPath(carpeta ?? CarpetaBackups)
+                                     .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string completa = Path.GetFullPath(rutaArchivo);
+                return string.Equals(Path.GetDirectoryName(completa)?.TrimEnd(Path.DirectorySeparatorChar), baseDir,
+                                     StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception) { return false; }
+        }
 
         private static void ValidarAdministrador()
         {
@@ -183,6 +225,14 @@ namespace BLL
         public void EliminarBackup(string modulo, string rutaArchivo)
         {
             ValidarAdministrador();
+            // Solo se borran backups de la carpeta de backups: la ruta llega de la pantalla y no
+            // debe poder apuntar a cualquier archivo del equipo.
+            string extension = Path.GetExtension(rutaArchivo ?? "");
+            if (!EstaDentroDeCarpetaBackups(rutaArchivo) ||
+                !(extension.Equals(".bak", StringComparison.OrdinalIgnoreCase) ||
+                  extension.Equals(ExtensionCifrada, StringComparison.OrdinalIgnoreCase)))
+                throw new BE.AppException("err.bll.backup.fuera_de_carpeta",
+                    "Solo se pueden eliminar archivos de backup de la carpeta de backups del sistema.");
             if (!File.Exists(rutaArchivo))
                 throw new FileNotFoundException("El archivo de backup no existe.", rutaArchivo);
 

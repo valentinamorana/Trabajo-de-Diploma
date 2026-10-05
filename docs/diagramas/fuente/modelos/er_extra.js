@@ -7,8 +7,8 @@ module.exports = [
   { tipo: 'er', id: 'DER_seg_auditoria', titulo: 'DER — Módulo de auditoría e integridad', columnas: 4,
     tablas: ['Bitacora', 'BitacoraNegocio', 'DVVertical', 'HistorialIntegridad'] },
   { tipo: 'er', id: 'DER_negocio', titulo: 'DER — Módulos de negocio: clientes, suscripciones, pedidos, prendas y promociones', columnas: 5,
-    tablas: ['PlanSuscripcion', 'Cliente', 'Empleado', 'Contratacion', 'Promocion', 'SugerenciaPromocion', 'HistorialRenovacion', 'HistorialCobro', 'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda', 'ListaEspera'] }
+    tablas: ['PlanSuscripcion', 'Cliente', 'Empleado', 'Contratacion', 'Promocion', 'SugerenciaPromocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion', 'HistorialRenovacion', 'HistorialCobro', 'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda', 'ListaEspera'] }
 ,
   { tipo: 'er', id: 'MC_negocio', titulo: 'Modelo conceptual — Módulos de negocio', sinColumnas: true, columnas: 5,
-    tablas: ['PlanSuscripcion', 'Cliente', 'Empleado', 'Contratacion', 'Promocion', 'SugerenciaPromocion', 'HistorialRenovacion', 'HistorialCobro', 'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda', 'ListaEspera'] }
+    tablas: ['PlanSuscripcion', 'Cliente', 'Empleado', 'Contratacion', 'Promocion', 'SugerenciaPromocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion', 'HistorialRenovacion', 'HistorialCobro', 'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda', 'ListaEspera'] }
 ];

@@ -3,7 +3,6 @@ classDiagram
   class GUI_VersionHistorialForm["GUI.VersionHistorialForm"] {
   }
   class BLL_VersionUsuario["BLL.VersionUsuario"] {
-    +GrabarVersion(int,  string,  string) void
     +ObtenerPorUsuario(int) List~VersionUsuario~
     +ObtenerTodos() List~VersionUsuario~
     +RestaurarVersion(string,  int) void

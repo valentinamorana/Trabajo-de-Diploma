@@ -104,8 +104,10 @@ namespace GUI
                     Talle = cmbTalle.SelectedItem?.ToString(),
                     Color = string.IsNullOrWhiteSpace(txtColor.Text) ? null : txtColor.Text.Trim(),
                     Categoria = cmbCategoria.SelectedItem?.ToString(),
-                    Estado = _esEdicion ? _original.Estado : BE.EstadoPrenda.Disponible,
-                    FechaAlta = _esEdicion ? _original.FechaAlta : DateTime.Now,
+                    // En el alta el estado inicial y la fecha los fija BLL.Prenda.Alta; en
+                    // edición se conservan los originales.
+                    Estado = _esEdicion ? _original.Estado : default(BE.EstadoPrenda),
+                    FechaAlta = _esEdicion ? _original.FechaAlta : default(DateTime),
                     PrecioReposicion = numPrecioReposicion.Value > 0 ? numPrecioReposicion.Value : (decimal?)null
                 };
 

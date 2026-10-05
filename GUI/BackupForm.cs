@@ -11,8 +11,7 @@ namespace GUI
     {
         private readonly BLL.Backup _bll = new BLL.Backup();
 
-        private static readonly string DirBackups =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+        private static string DirBackups => BLL.Backup.CarpetaBackups;
 
         public BackupForm()
         {
@@ -22,17 +21,10 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
-            GestorIdioma.SuscribirObservador(this);
 
             Traducir(GestorIdioma.IdiomaActual);
             lblRuta.Text = DirBackups;
             CargarLista();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -65,17 +57,8 @@ namespace GUI
             btnRestaurar.Enabled = false;
             btnEliminar.Enabled  = false;
 
-            if (!Directory.Exists(DirBackups))
-            {
-                lblConteo.Text = Tr("lbl.backup.sincopias", "Sin copias de seguridad generadas aún.");
-                return;
-            }
-
-            // Incluye los backups cifrados (.wfbak) y los .bak planos legacy.
-            var archivos = new DirectoryInfo(DirBackups).GetFiles("*.bak")
-                .Concat(new DirectoryInfo(DirBackups).GetFiles("*" + BLL.Backup.ExtensionCifrada))
-                .ToArray();
-            Array.Sort(archivos, (a, b) => b.LastWriteTime.CompareTo(a.LastWriteTime));
+            // Incluye los backups cifrados (.wfbak) y los .bak planos legacy, del más reciente al más viejo.
+            var archivos = BLL.Backup.ObtenerBackups();
 
             foreach (var fi in archivos)
             {
@@ -90,10 +73,10 @@ namespace GUI
                 lstBackups.Items.Add(item);
             }
 
-            lblConteo.Text = archivos.Length == 0
+            lblConteo.Text = archivos.Count == 0
                 ? Tr("lbl.backup.sincopias", "Sin copias de seguridad generadas aún.")
                 : string.Format(Tr("lbl.backup.conteo", "{0} copia(s) disponible(s). La más reciente: {1}"),
-                    archivos.Length, archivos[0].LastWriteTime.ToString("dd/MM/yyyy HH:mm"));
+                    archivos.Count, archivos[0].LastWriteTime.ToString("dd/MM/yyyy HH:mm"));
         }
 
         private void lstBackups_SelectedIndexChanged(object sender, EventArgs e)
@@ -107,8 +90,7 @@ namespace GUI
         {
             try
             {
-                if (!Directory.Exists(DirBackups))
-                    Directory.CreateDirectory(DirBackups);
+                BLL.Backup.AsegurarCarpetaBackups();
 
                 string clave = PedirClaveNueva();
                 if (clave == null) return;   // cancelado o inválido
@@ -121,9 +103,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("msg.backup.errorgenerar", "Error al generar copia de seguridad:\n{0}"), ex.Message),
-                    Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -131,8 +111,7 @@ namespace GUI
         {
             try
             {
-                if (!Directory.Exists(DirBackups))
-                    Directory.CreateDirectory(DirBackups);
+                BLL.Backup.AsegurarCarpetaBackups();
 
                 string clave = PedirClaveNueva();
                 if (clave == null) return;
@@ -145,9 +124,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("msg.backup.errorgenerar", "Error al generar copia de seguridad:\n{0}"), ex.Message),
-                    Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -178,9 +155,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("msg.backup.erroreliminar", "Error al eliminar:\n{0}"), ex.Message),
-                    Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -194,7 +169,7 @@ namespace GUI
                 if (Directory.Exists(DirBackups))
                     ofd.InitialDirectory = DirBackups;
 
-                if (ofd.ShowDialog() != DialogResult.OK) return;
+                if (ofd.ShowDialog(this) != DialogResult.OK) return;
                 await Restaurar(ofd.FileName);
             }
         }
@@ -254,9 +229,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("msg.backup.errorrestaurar", "Error al restaurar:\n{0}"), ex.Message),
-                    Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 

@@ -49,13 +49,15 @@ classDiagram
     +EstadoPromocion Estado
     +int? IdPlan
     +int? IdSugerenciaOrigen
-    +DateTime FechaAlta
+    +int? IdUsuarioAlta
   }
   class SugerenciaPromocion {
     +int IdSugerencia
     +int? IdPlan
     +EstadoSugerencia Estado
     +DateTime FechaAlta
+    +int? IdUsuarioAlta
+    +DateTime? FechaEvaluacion
   }
   class Empleado {
     +int IdEmpleado

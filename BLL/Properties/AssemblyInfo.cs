@@ -30,3 +30,7 @@ using System.Runtime.InteropServices;
 //
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
+// Los tests reemplazan algunos puntos de acceso a la base (bitácora, revalidación de la
+// sesión, espejo de integridad) por dobles en memoria a través de miembros internal.
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Tests")]

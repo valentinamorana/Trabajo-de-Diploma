@@ -31,12 +31,14 @@ namespace GUI
             this.panelBotonesIdioma = new System.Windows.Forms.Panel();
             this.panelTrad = new System.Windows.Forms.Panel();
             this.panelBottom = new System.Windows.Forms.Panel();
+            this.tlpTrad = new System.Windows.Forms.TableLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.dgvIdiomas)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTraducciones)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvControles)).BeginInit();
             this.panelIdiomas.SuspendLayout();
             this.panelBotonesIdioma.SuspendLayout();
             this.panelTrad.SuspendLayout();
+            this.tlpTrad.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -44,7 +46,7 @@ namespace GUI
             // 
             this.lblTituloIdiomas.AutoSize = true;
             this.lblTituloIdiomas.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblTituloIdiomas.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(60)))), ((int)(((byte)(100)))));
+            this.lblTituloIdiomas.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblTituloIdiomas.Location = new System.Drawing.Point(8, 8);
             this.lblTituloIdiomas.Name = "lblTituloIdiomas";
             this.lblTituloIdiomas.Size = new System.Drawing.Size(141, 19);
@@ -122,8 +124,10 @@ namespace GUI
             // 
             this.lblTituloTrad.AutoSize = true;
             this.lblTituloTrad.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblTituloTrad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(60)))), ((int)(((byte)(100)))));
-            this.lblTituloTrad.Location = new System.Drawing.Point(8, 8);
+            this.lblTituloTrad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.lblTituloTrad.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblTituloTrad.Location = new System.Drawing.Point(3, 3);
+            this.lblTituloTrad.Margin = new System.Windows.Forms.Padding(3, 3, 3, 6);
             this.lblTituloTrad.Name = "lblTituloTrad";
             this.lblTituloTrad.Size = new System.Drawing.Size(263, 19);
             this.lblTituloTrad.TabIndex = 0;
@@ -131,21 +135,21 @@ namespace GUI
             // 
             // dgvTraducciones
             // 
-            this.dgvTraducciones.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.dgvTraducciones.BackgroundColor = System.Drawing.Color.White;
-            this.dgvTraducciones.Location = new System.Drawing.Point(8, 35);
+            this.dgvTraducciones.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvTraducciones.Location = new System.Drawing.Point(3, 31);
             this.dgvTraducciones.Name = "dgvTraducciones";
-            this.dgvTraducciones.Size = new System.Drawing.Size(860, 585);
+            this.dgvTraducciones.Size = new System.Drawing.Size(555, 288);
             this.dgvTraducciones.TabIndex = 3;
             // 
             // lblTituloControles
             // 
-            this.lblTituloControles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblTituloControles.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblTituloControles.Margin = new System.Windows.Forms.Padding(3, 3, 3, 6);
             this.lblTituloControles.AutoSize = true;
             this.lblTituloControles.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblTituloControles.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(60)))), ((int)(((byte)(100)))));
-            this.lblTituloControles.Location = new System.Drawing.Point(1256, 8);
+            this.lblTituloControles.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.lblTituloControles.Location = new System.Drawing.Point(564, 3);
             this.lblTituloControles.Name = "lblTituloControles";
             this.lblTituloControles.Size = new System.Drawing.Size(151, 19);
             this.lblTituloControles.TabIndex = 4;
@@ -153,22 +157,21 @@ namespace GUI
             // 
             // dgvControles
             // 
-            this.dgvControles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvControles.BackgroundColor = System.Drawing.Color.White;
-            this.dgvControles.Location = new System.Drawing.Point(1256, 35);
+            this.dgvControles.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvControles.Location = new System.Drawing.Point(564, 31);
             this.dgvControles.Name = "dgvControles";
-            this.dgvControles.Size = new System.Drawing.Size(292, 585);
+            this.dgvControles.Size = new System.Drawing.Size(297, 288);
             this.dgvControles.TabIndex = 6;
             // 
             // btnGuardar
             // 
-            this.btnGuardar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnGuardar.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnGuardar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnGuardar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(8, 627);
+            this.btnGuardar.Location = new System.Drawing.Point(3, 325);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(138, 30);
             this.btnGuardar.TabIndex = 4;
@@ -211,18 +214,38 @@ namespace GUI
             // 
             // panelTrad
             // 
-            this.panelTrad.Controls.Add(this.lblTituloTrad);
-            this.panelTrad.Controls.Add(this.dgvTraducciones);
-            this.panelTrad.Controls.Add(this.lblTituloControles);
-            this.panelTrad.Controls.Add(this.dgvControles);
-            this.panelTrad.Controls.Add(this.btnGuardar);
+            this.panelTrad.Controls.Add(this.tlpTrad);
             this.panelTrad.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelTrad.Location = new System.Drawing.Point(0, 210);
             this.panelTrad.Name = "panelTrad";
             this.panelTrad.Padding = new System.Windows.Forms.Padding(8);
             this.panelTrad.Size = new System.Drawing.Size(880, 380);
             this.panelTrad.TabIndex = 1;
-            // 
+            //
+            // tlpTrad — antes los controles estaban posicionados a mano FUERA del panel
+            // (btnGuardar en y=627 y dgvControles en x=1256 dentro de un panel de 880x380), así
+            // que ni "Guardar cambios" ni la grilla de controles se veían. La TableLayoutPanel
+            // reparte el espacio: traducciones (65%) | controles (35%), títulos arriba y el
+            // botón abajo, y acompaña el redimensionado del formulario.
+            //
+            this.tlpTrad.ColumnCount = 2;
+            this.tlpTrad.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65F));
+            this.tlpTrad.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            this.tlpTrad.Controls.Add(this.lblTituloTrad, 0, 0);
+            this.tlpTrad.Controls.Add(this.lblTituloControles, 1, 0);
+            this.tlpTrad.Controls.Add(this.dgvTraducciones, 0, 1);
+            this.tlpTrad.Controls.Add(this.dgvControles, 1, 1);
+            this.tlpTrad.Controls.Add(this.btnGuardar, 0, 2);
+            this.tlpTrad.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpTrad.Location = new System.Drawing.Point(8, 8);
+            this.tlpTrad.Name = "tlpTrad";
+            this.tlpTrad.RowCount = 3;
+            this.tlpTrad.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.tlpTrad.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpTrad.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.tlpTrad.Size = new System.Drawing.Size(864, 364);
+            this.tlpTrad.TabIndex = 0;
+            //
             // panelBottom
             // 
             this.panelBottom.Controls.Add(this.lblMensaje);
@@ -252,8 +275,9 @@ namespace GUI
             this.panelIdiomas.ResumeLayout(false);
             this.panelIdiomas.PerformLayout();
             this.panelBotonesIdioma.ResumeLayout(false);
+            this.tlpTrad.ResumeLayout(false);
+            this.tlpTrad.PerformLayout();
             this.panelTrad.ResumeLayout(false);
-            this.panelTrad.PerformLayout();
             this.panelBottom.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -277,5 +301,6 @@ namespace GUI
         private System.Windows.Forms.Panel              panelTrad;
         private System.Windows.Forms.Panel              panelBotonesIdioma;
         private System.Windows.Forms.Panel              panelBottom;
+        private System.Windows.Forms.TableLayoutPanel   tlpTrad;
     }
 }

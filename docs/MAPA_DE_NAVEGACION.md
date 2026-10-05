@@ -22,14 +22,15 @@ El Administrador ve todo (bypass en las 3 capas). Un grupo del menú se muestra 
 | **Suscriptores** | Clientes | `Clientes` | mnuClientes | VEN, GCO, ADM | N01 |
 | | Planes | `Planes` | mnuPlanSuscripciones | VEN, GCO, ADM | N01 |
 | | Renovación de suscripción | `RenovacionSuscripcionForm` | mnuRenovacionSuscripcion | VEN, GCO, ADM | N01 |
-| | Cobro de suscripción | `CobroSuscripcionForm` | mnuCobroSuscripcion | VEN, GCO, ADM | N01 |
 | | Nueva contratación | `NuevaContratacionForm` (modal) | mnuClientes | VEN, GCO, ADM | PN02 |
 | **Inventario** | Prendas | `Prendas` | mnuPrendas | VEN, GCO, DEP, GIN, ADM | PN01 / PN04 |
 | | Inspección de Devolución | `InspeccionDevolucionForm` | mnuInspeccionDevolucion | DEP, GIN, ADM | PN04 |
 | | Lista de Espera | `ListaEsperaForm` | mnuListaEspera | VEN, GCO, DEP, GIN, ADM | EXT |
+| | Control de Stock | `ControlStockForm` | mnuControlStock (acciones: mnuControlStockEditar) | DEP, GIN, ADM | PN01 |
 | **Ventas** | Pedidos de Venta | `PedidosVenta` | mnuPedidosVenta | VEN, GCO, ADM | PN01 |
 | | Pedidos Realizados | `PedidosRealizados` | mnuPedidosRealizados | DEP, GCO, GIN, LOG, ADM | PN01 / PN04 |
 | **Caja** | Contrataciones Pendientes | `ContratacionesPendientesForm` | mnuCaja | CAJ, ADM | PN02 |
+| | Cobro de suscripción | `CobroSuscripcionForm` | mnuCobroSuscripcion (acciones: mnuCajaEditar) | CAJ, ADM | N01 |
 | **Promociones** | Sugerir promoción | `SugerirPromocionForm` (modal) | mnuSugerenciaPromocion | GCO, ADM | PN03 |
 | | Gestión de promociones | `PromocionesAdministracionForm` | mnuPromocionesAdmin | ACO, ADM | PN03 |
 | | Revisión contable | `PromocionesContabilidadForm` | mnuPromocionesContable | CON, ADM | PN03 |
@@ -69,10 +70,11 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 ### PN01 — Armar pedido y logística
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `PedidosVenta` | Lista pedidos y permite crearlos o cancelarlos. | + Nuevo Pedido · Cancelar · Des-cancelar · Historial · Actualizar |
-| `NuevoPedidoForm` (modal) | Asistente en pasos: cliente y prendas. Valida cuenta bloqueada, suscripción vigente y pedido abierto. | Siguiente → · ← Volver · Confirmar Pedido |
+| `PedidosVenta` | Lista los pedidos del Vendedor y las acciones que corresponden a cada estado del armado (PN01). | + Nuevo Pedido · Ver faltantes · Ajustar selección · Registrar desistimiento · Formalizar pedido · Confirmación del pedido · Cancelar · Reactivar (vuelve a control de stock) · Historial · Actualizar |
+| `NuevoPedidoForm` (modal) | Asistente en 2 pasos. Paso 1: identifica al cliente por DNI, nombre o apellido, muestra la ficha y verifica la vigencia y el pedido activo. Paso 2: catálogo, detalle de la selección y cupo del plan. Tiene un modo ajuste para los pedidos con faltantes, con las alternativas resaltadas. Imprime la planilla o el aviso de desistimiento. | Buscar · Siguiente → · ← Volver · Enviar a control de stock (o Reenviar) · Registrar desistimiento |
+| `ControlStockForm` | Pantalla de Depósito. Muestra la cola de pedidos enviados a control y la planilla con el estado real de cada prenda (disponible, reservada para otro o faltante). | Informar faltantes · Confirmar prendas disponibles · Separar prendas · Imprimir planilla · Actualizar |
 | `PedidoHistorialForm` | Historial de cambios de un pedido (solo lectura). | — |
-| `PedidosRealizados` | Vista de Depósito/Logística: despacho, entrega, devolución y pérdida, con nivel de urgencia. | Despachar · Marcar Entregado · Registrar Devolución · Reportar Pérdida · Ver Notificación · Historial · Actualizar |
+| `PedidosRealizados` | Vista de Depósito/Logística de los pedidos **formalizados**: despacho, entrega, devolución y pérdida, con nivel de urgencia. | Despachar · Marcar Entregado · Registrar Devolución · Reportar Pérdida · Ver Notificación · Historial · Actualizar |
 | `Prendas` | Catálogo con filtro por estado (State). Alta y edición requieren mnuStock. | Nueva Prenda · Editar · Estado · Mantenimiento · Lista de Espera · Actualizar |
 | `PrendaForm` (modal) | Alta y edición de una prenda. | Guardar Cambios · Cancelar |
 | `CambioEstadoDialog` | Elige el nuevo estado válido de la prenda. | — |
@@ -82,17 +84,17 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 ### PN02 — Comercialización de la suscripción
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `NuevaContratacionForm` | El vendedor elige cliente, plan y modalidad; queda pendiente de cobro. | Confirmar · Cancelar |
-| `ContratacionesPendientesForm` | Caja cobra, emite comprobante o registra intento fallido (máximo 3). Aplica el descuento de PN03. | Cobrar · Intento Fallido · Actualizar |
+| `NuevaContratacionForm` | Carril Vendedor de PN02. Identifica al cliente por DNI, nombre o apellido (si no está registrado, lo registra) y presenta los planes con precio y límite. Valida la contratación e informa el motivo si no es válida. Muestra el importe a abonar y registra la contratación («Orden de cobro»), o asienta el desistimiento. | Buscar · Registrar cliente · Imprimir planes · Registrar contratación · El cliente desiste · Cerrar |
+| `ContratacionesPendientesForm` | Carril Caja de PN02. Muestra la cola con la liquidación (un solo descuento) y cobra con un medio de pago del catálogo: emite el comprobante, activa la suscripción y acredita al referente. También registra intentos con motivo; al tercero cancela automáticamente. La vista Resueltas permite reimprimir. | Pendientes/Resueltas · Cobrar · Intento Fallido · Ver intentos · Imprimir liquidación · Imprimir comprobante · Imprimir constancia · Actualizar |
 
 ### PN03 — Métricas, promociones y decisiones
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `SugerirPromocionForm` | Gerencia sugiere una promoción a Administración, con candidatas del análisis de datos. | Enviar Sugerencia · "Desde el análisis…" |
-| `PromocionesAdministracionForm` | Administración da de alta (manual o desde sugerencia), reformula, desactiva y resuelve bajas. | Alta Manual · Alta desde Sugerencia · Reformular · Desactivar · Aprobar Baja · Rechazar Baja · Actualizar |
-| `AltaPromocionForm` (modal) | Alta o reformulación de una promoción. | — |
-| `PromocionesContabilidadForm` | Contabilidad analiza y activa o rechaza. | Aprobar y Activar · Rechazar · Actualizar |
-| `PromocionesVigentesForm` | Vendedor consulta las vigentes y sugiere una baja. | Sugerir Baja · Actualizar |
+| `SugerirPromocionForm` | Carril Gerencia de PN03. Analiza las métricas (abandono por plan, rotación por categoría) y muestra el «Reporte de métricas»; si no hay oportunidad, termina sin promoción. Registra la sugerencia con el origen de la métrica y lista las registradas con su estado. | Analizar métricas… (Imprimir reporte · Usar esta idea) · Enviar Sugerencia · Imprimir sugerencia (o constancia de descarte) |
+| `PromocionesAdministracionForm` | Carril Administración de PN03. Acepta (alta desde sugerencia) o descarta las sugerencias con motivo; da de alta manual; reformula o descarta las rechazadas por Contabilidad; desactiva con motivo; aprueba o rechaza las bajas pedidas por Ventas. Muestra el historial de estados e imprime los documentos de cada promoción. | Alta desde Sugerencia · Descartar sugerencia · Imprimir sugerencia · Alta Manual · Reformular · Descartar · Desactivar · Aprobar Baja · Rechazar Baja · Historial · Imprimir ▾ (ficha, dictamen, solicitud, resolución, constancia de descarte) · Actualizar |
+| `AltaPromocionForm` (modal) | Alta (desde sugerencia o manual) o reformulación de una promoción; la validación es de la BLL. | Registrar · Cancelar |
+| `PromocionesContabilidadForm` | Carril Contabilidad de PN03. Muestra el análisis de margen e impacto (beneficio estimado de la sugerencia y promociones vigentes superpuestas) y dictamina con observación; quien creó la promoción no puede dictaminarla. | Aprobar y Activar · Rechazar · Imprimir ▾ · Actualizar |
+| `PromocionesVigentesForm` | Carril Vendedor de PN03. Consulta las promociones vigentes y las que tienen la baja pedida; solicita la baja con motivo («Solicitud de baja»). | Solicitar baja · Imprimir ▾ (ficha, solicitud, resolución) · Actualizar |
 | `AnalisisAbandonoForm` | Lista de clientes en riesgo según criterio elegido (Strategy). | Generar · Exportar a PDF · Guardar como .CSV |
 | `ReporteVentasVendedorForm` | Desempeño por vendedor: totales, entregados, cancelados. | Generar · Exportar a PDF · Guardar como .CSV |
 | `AnalisisRotacionForm` | Prendas de baja o alta demanda. | Generar · Exportar a PDF · Guardar como .CSV |
@@ -132,8 +134,8 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | `ReporteJornadaForm` | Reporte de la jornada, tendencia por rango y comparación entre jornadas. | Generar · Tendencia (rango) · Comparar Jornadas · Exportar reporte… · Exportar comparación… · Volver al reporte · menú Guardar como .TXT / Imprimir |
 | `AlertasForm` | Centro de alertas (integridad, backups, stock, pedidos). | Actualizar |
 | `DashboardForm` | Panel genérico (ADM, AUD, GCO, GIN, CAJ, ACO, CON). | — |
-| `DashboardVendedor` | Pedidos pendientes, clientes, planes, suscripciones por vencer, Kanban de pedidos. | Actualizar |
-| `DashboardDeposito` | Tareas de Depósito. | — |
+| `DashboardVendedor` | Tareas de PN01 y PN02 (`BLL.PanelTareas`): pedidos para atender (con faltantes + separados), clientes, contrataciones esperando a Caja, suscripciones por vencer. Tablero: En control de stock · Con faltantes: comunicar · Separados: formalizar (cada pedido abre Pedidos de Venta). | Actualizar |
+| `DashboardDeposito` | Pedidos a controlar (abre Control de Stock), prendas disponibles, en mantenimiento, ocupación y tablero de mantenimiento por antigüedad. | Actualizar |
 | `DashboardLogistica` | Tareas de Logística. | — |
 
 ---
@@ -174,7 +176,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | VEN | `DashboardVendedor` | Suscriptores, Inventario (Prendas, Lista de Espera), Ventas (Pedidos de Venta), Promociones (vigentes), Analítica (Recomendación) |
 | GCO | genérico | lo de VEN + Pedidos Realizados, Sugerir promoción, Análisis de Abandono, Ventas por Vendedor |
 | LOG | `DashboardLogistica` | Ventas (Pedidos Realizados) |
-| DEP | `DashboardDeposito` | Inventario (Prendas, Inspección, Lista de Espera), Ventas (Pedidos Realizados) |
+| DEP | `DashboardDeposito` | Inventario (Prendas, Control de Stock, Inspección, Lista de Espera), Ventas (Pedidos Realizados) |
 | GIN | genérico | lo de DEP + Rotación, Mantenimiento, Escasez |
 | CAJ | genérico | Caja |
 | ACO | genérico | Promociones (Gestión) |
@@ -186,7 +188,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 
 Marcado con lo que sí verifiqué en el código y lo que no.
 
-1. **PN01, paso de Depósito:** no tiene pantalla propia. Lo cubre `PedidosRealizados` (despachar, entregar, devolver, perdida). Confirmar que la documentación lo describa así.
+1. **PN01, paso de Depósito:** resuelto. `ControlStockForm` (Inventario → Control de Stock) cubre el carril "Controlador de Stock" del diagrama de actividad: revisar stock, informar faltantes con alternativas, confirmar y separar.
 2. **Stock sin menú propio:** mnuStock no es una opción; solo habilita los botones de alta, edición y estado dentro de `Prendas`. Está bien, pero conviene aclararlo en la documentación.
 3. **Pausa y referidos (N01):** resuelto. La pausa se pide y se reanuda desde `RenovacionSuscripcionForm` ("Pausar hasta:" con tope de 3 meses y "Reanudar ahora"); el referente se elige en `ClienteForm` ("Referido por") y el crédito se ve al cobrar (`CobroSuscripcionForm`, `ContratacionesPendientesForm`).
 4. **Renovación y Cobro:** cada uno tiene un solo botón "Procesar" más los campos de decisión. No revisé que la cadena (Chain of Responsibility) muestre en pantalla cada paso.

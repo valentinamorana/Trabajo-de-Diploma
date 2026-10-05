@@ -83,7 +83,7 @@ namespace Tests
         public void Vendedor_VeSuscriptoresInventarioPrendasYSoloPedidosDeVenta()
         {
             var patentes = new[] { "mnuPrendas", "mnuClientes", "mnuPlanSuscripciones",
-                                    "mnuRenovacionSuscripcion", "mnuCobroSuscripcion", "mnuPedidosVenta",
+                                    "mnuRenovacionSuscripcion", "mnuPedidosVenta",
                                     "mnuRecomendacionPrendas" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
 
@@ -96,7 +96,8 @@ namespace Tests
             Assert.IsTrue(V(v, "clientesToolStripMenuItem"));
             Assert.IsTrue(V(v, "planesToolStripMenuItem"));
             Assert.IsTrue(V(v, "renovacionSuscripcionToolStripMenuItem"));
-            Assert.IsTrue(V(v, "cobroSuscripcionToolStripMenuItem"));
+            // El cobro recurrente (N01) es de Caja: quien vende no cobra.
+            Assert.IsFalse(V(v, "cobroSuscripcionToolStripMenuItem"));
             Assert.IsTrue(V(v, "inventarioToolStripMenuItem"));
             Assert.IsTrue(V(v, "prendasToolStripMenuItem"));
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
@@ -121,7 +122,7 @@ namespace Tests
             // Composite: GerenteComercial → Vendedor. Las patentes efectivas ya vienen
             // resueltas (recursivamente) antes de llegar acá — se simula el resultado final.
             var patentes = new[] { "mnuPrendas", "mnuClientes", "mnuPlanSuscripciones",
-                                    "mnuRenovacionSuscripcion", "mnuCobroSuscripcion",
+                                    "mnuRenovacionSuscripcion",
                                     "mnuPedidosVenta", "mnuPedidosRealizados", "mnuAnalisisAbandono",
                                     "mnuVentasVendedor", "mnuRecomendacionPrendas" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
@@ -242,6 +243,19 @@ namespace Tests
 
             foreach (var nombre in esperados)
                 Assert.IsTrue(v.ContainsKey(nombre), $"Falta '{nombre}' en el resultado de Resolver — revisar Menu.cs vs BLL.MenuVisibilidad.");
+        }
+
+        [TestMethod]
+        public void Caja_VeContratacionesPendientesYCobroDeSuscripcion()
+        {
+            // Caja confirma el cobro de la contratación (PN02) y el cobro recurrente (N01).
+            var v = BLL.MenuVisibilidad.Resolver(new[] { "mnuCaja", "mnuCajaEditar", "mnuCobroSuscripcion" }, esAdmin: false);
+
+            Assert.IsTrue(V(v, "cajaToolStripMenuItem"));
+            Assert.IsTrue(V(v, "contratacionesPendientesToolStripMenuItem"));
+            Assert.IsTrue(V(v, "cobroSuscripcionToolStripMenuItem"));
+            Assert.IsFalse(V(v, "suscriptoresToolStripMenuItem"));
+            Assert.IsFalse(V(v, "ventasToolStripMenuItem"));
         }
 
         [TestMethod]

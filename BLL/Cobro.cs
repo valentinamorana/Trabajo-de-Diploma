@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -11,8 +12,10 @@ namespace BLL
     public class Cobro : Interfaces.ICobroService
     {
         private readonly DAL.Interfaces.ICobroDAL dalCobro;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly DAL.Interfaces.IClienteDAL dalCliente;
+        private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
         private readonly Manejadores.ManejadorCobro cadena;
 
         public Cobro() : this(new DAL.Cliente(), new DAL.Cobro(), new DAL.CargoPrenda(), new DAL.Promocion()) { }
@@ -21,7 +24,9 @@ namespace BLL
                       DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda,
                       DAL.Interfaces.IPromocionDAL dalPromocion = null)
         {
+            this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalCobro = dalCobro ?? throw new ArgumentNullException(nameof(dalCobro));
+            this.dalCargoPrenda = dalCargoPrenda ?? throw new ArgumentNullException(nameof(dalCargoPrenda));
 
             // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
             // Program.cs del ejemplo de cátedra (director.AgregarSiguiente(directorGeneral);
@@ -41,11 +46,10 @@ namespace BLL
             string modulo, BE.Cliente cliente, Manejadores.DecisionCobro decision,
             BE.Builders.ModalidadCobro modalidad, string actor)
         {
-            // El cobro modifica datos del cliente (vencimiento / gracia): se gobierna por
-            // el mismo permiso de edición que Renovación (BLL.Renovacion.Procesar), no por
-            // mnuCobroSuscripcion — esa patente solo controla si el ítem de menú/pantalla
-            // es visible, igual que mnuRenovacionSuscripcion.
-            PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
+            // N01 — El cobro recurrente de la suscripción lo registra CAJA (decisión del proceso:
+            // quien vende no cobra). Se gobierna por la patente de edición de Caja; la de
+            // mnuCobroSuscripcion solo controla que el ítem de menú/pantalla sea visible.
+            PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
 
             // Guarda de entrada única para toda la cadena: sin plan asignado no hay
@@ -53,6 +57,13 @@ namespace BLL
             if (!cliente.TienePlan())
                 throw new BE.AppException("err.bll.cobro.sin_plan",
                     "{0} no tiene un plan de suscripción asignado. No corresponde procesar un cobro.",
+                    cliente.NombreCompleto);
+
+            // PN02: con una contratación pendiente de pago, el plan y el vencimiento los define el
+            // cobro de Caja. Procesar un cobro recurrente a la vez extendería o cambiaría la suscripción dos veces.
+            if (dalCliente.TieneContratacionPendiente(cliente.IdCliente))
+                throw new BE.AppException("err.bll.cobro.contratacion_pendiente",
+                    "{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.",
                     cliente.NombreCompleto);
 
             var contexto = new Manejadores.ContextoCobro
@@ -79,5 +90,30 @@ namespace BLL
         }
 
         public List<BE.Cobro> ObtenerHistorial(int idCliente) => dalCobro.ObtenerPorCliente(idCliente);
+
+        // Clientes a los que hoy corresponde procesarles un cobro: con plan, con la suscripción
+        // vencida o próxima a vencer (mismo criterio que DetectarCobroHandler) y sin una
+        // contratación PN02 pendiente de pago (Procesar los rechaza). Antes este filtro lo
+        // armaba CobroSuscripcionForm y no excluía las contrataciones pendientes.
+        public List<BE.Cliente> ObtenerElegibles()
+        {
+            var pendientes = dalCliente.ObtenerIdsConContratacionPendiente();   // una sola consulta
+            return dalCliente.ObtenerTodos()
+                .Where(c => c.TienePlan() && c.RequiereGestionDeVencimiento() && !pendientes.Contains(c.IdCliente))
+                .ToList();
+        }
+
+        // Anticipa lo que el próximo cobro del cliente va a sumar por cargos de daño/pérdida
+        // pendientes (los mismos que ProcesarPagoHandler suma al cobrar). Antes la suma la
+        // hacía CobroSuscripcionForm.
+        public BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente)
+        {
+            var pendientes = dalCargoPrenda.ObtenerPendientesPorCliente(idCliente) ?? new List<BE.CargoPrenda>();
+            return new BE.PrevisualizacionCobro
+            {
+                CantidadCargosPendientes = pendientes.Count,
+                TotalCargosPendientes    = pendientes.Sum(c => c.Monto)
+            };
+        }
     }
 }

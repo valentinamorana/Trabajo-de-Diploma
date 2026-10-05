@@ -143,5 +143,41 @@ namespace Tests
             Assert.AreEqual(800m, r.Descuento);
             Assert.AreEqual(0m, r.Total);
         }
+
+        // PN03 (c): una promoción Vencida no se aplica en el cobro de PN02, aunque sus fechas
+        // todavía cubrieran el día (por ejemplo, si la FechaFin se corrigió después de cerrarla).
+        [TestMethod]
+        public void Resolver_PromocionVencida_NoSeAplica()
+        {
+            var vencida = Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.Vencida);
+
+            var r = BE.PoliticaDescuento.Resolver(10000m, 1, new[] { vencida }, 0m);
+
+            Assert.AreEqual(0m, r.Descuento);
+            Assert.IsNull(r.Promocion);
+        }
+
+        [TestMethod]
+        public void Resolver_VigenteConFechaFinPasada_NoSeAplicaAunqueTodaviaNoSeHayaCerrado()
+        {
+            var pasada = Promo(BE.TipoDescuento.Porcentaje, 50, diasInicio: -30, diasFin: -1);
+
+            var r = BE.PoliticaDescuento.Resolver(10000m, 1, new[] { pasada }, 300m);
+
+            Assert.IsNull(r.Promocion);
+            Assert.IsTrue(r.UsaCreditoReferido, "Sin promoción aplicable, se usa el crédito por referido.");
+        }
+
+        [TestMethod]
+        public void Resolver_DescartadaODesactivada_NoSeAplican()
+        {
+            var promos = new[]
+            {
+                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.Descartada),
+                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.Desactivada),
+                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.BajaSolicitada)
+            };
+            Assert.AreEqual(0m, BE.PoliticaDescuento.Resolver(10000m, 1, promos, 0m).Descuento);
+        }
     }
 }

@@ -26,7 +26,7 @@ module.exports = [
     clases: [
       E('BE.Cliente', { attrs: 'all' }), E('BE.PlanSuscripcion', { attrs: 'all' }), E('BE.Renovacion', { attrs: 'all' }), E('BE.Cobro', { attrs: 'all' }),
       E('BLL.Cliente', { metodos: ['Alta', 'Modificar', 'Baja', 'ActivarSuscripcionDesdeContratacion', 'ReanudarPausa', 'ObtenerEstadoComercial'] }),
-      E('BLL.Renovacion', { metodos: ['Procesar', 'ObtenerHistorial'] }), E('BLL.Cobro', { metodos: ['Procesar', 'ObtenerHistorial'] }),
+      E('BLL.Renovacion', { metodos: ['Procesar', 'ObtenerHistorial', 'ObtenerElegibles'] }), E('BLL.Cobro', { metodos: ['Procesar', 'ObtenerHistorial', 'ObtenerElegibles', 'PrevisualizarCobro'] }),
       E('BLL.PlanSuscripcion', { metodos: 'all' }), E('IPlanSuscripcionDAL', { metodos: [] }), E('IClienteDAL', { metodos: ['SumarCreditoEnTx', 'ConsumirCreditoEnTx', 'EjecutarTransaccion'] })
     ]
   },
@@ -72,13 +72,20 @@ module.exports = [
     tipo: 'clases', id: 'CLASES_pn01_pedidos', procesos: ['PN01'], titulo: 'Diagrama de clases — PN01 Armar pedido', columnas: 3,
     clases: [
       E('BE.Pedido', { attrs: 'all' }), E('BE.Prenda', { attrs: 'all' }), E('BE.ListaEspera', { attrs: 'all' }),
+      E('BE.PedidoFaltante', { attrs: 'all' }), E('BE.LineaControlStock', { attrs: 'all' }),
       E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido', 'IdPlan', 'FechaVencimiento', 'FechaPausaHasta', 'StockUtilizado'] }),
       E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'LimitePrendas'] }),
-      E('BLL.Pedido', { metodos: ['CrearPedido', 'ValidarPuedeArmarPedido', 'ValidarCupoDisponible', 'ReservarPrendas', 'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] }),
+      E('BLL.Pedido', { metodos: ['VerificarVigencia', 'RevisarPedidoActivo', 'ValidarPuedeArmarPedido', 'ComprobarCupo', 'EnviarAControlStock', 'AsentarDesistimiento',
+                                  'AjustarSeleccion', 'RevisarStock', 'InformarFaltantes', 'ConfirmarPrendasDisponibles', 'SepararPrendas', 'FormalizarPedido',
+                                  'PrepararConfirmacion', 'ObtenerColaControlStock', 'ObtenerInformeFaltantes', 'ObtenerPorId',
+                                  'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] }),
       E('BLL.Prenda', { metodos: ['ObtenerDisponibles', 'VerificarDisponibilidad', 'CambiarEstado'] }),
       E('BLL.ListaEspera', { metodos: ['EstaReservadaParaOtro', 'CerrarSiReservada', 'NotificarSiCorresponde'] }),
-      E('BLL.Cliente', { metodos: [] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }), E('IPedidoHistorialDAL', { metodos: [] }),
-      E('IPedidoDAL', { metodos: ['Alta', 'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] })
+      E('BLL.Cliente', { metodos: ['BuscarPorIdentificacion', 'ObtenerEstadoComercial'] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }),
+      E('IPedidoHistorialDAL', { metodos: ['RegistrarCambios'] }),
+      E('IPedidoDAL', { metodos: ['AltaSinReserva', 'ReemplazarSeleccion', 'RegistrarFaltantes', 'ConfirmarPrendas', 'SepararPrendas', 'Formalizar',
+                                  'RegistrarDesistimiento', 'ObtenerFaltantes', 'ObtenerPorEstado', 'ObtenerPorId',
+                                  'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] })
     ]
   },
   {
@@ -104,20 +111,32 @@ module.exports = [
       E('BE.Contratacion', { attrs: 'all' }), E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido', 'IdPlan', 'FechaVencimiento', 'DescuentoProximoCobro'] }),
       E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'LimitePrendas', 'Precio'] }), E('BE.Promocion', { attrs: ['IdPromocion', 'Nombre', 'TipoDescuento', 'Valor'] }),
       E('BE.PoliticaDescuento', { metodos: 'all' }),
-      E('BLL.Cliente', { metodos: [] }),
-      E('BLL.Contratacion', { metodos: ['CrearContratacion', 'ConfirmarPago', 'CalcularImporte', 'RegistrarIntentoFallido'] }),
-      E('IContratacionDAL', { metodos: ['Alta', 'ConfirmarPago', 'IncrementarIntento', 'ReabrirPago', 'Cancelar'] })
+      E('BE.MedioPago', { attrs: 'all' }), E('BE.IntentoPago', { attrs: 'all' }), E('BE.DesistimientoContratacion', { attrs: 'all' }),
+      E('BLL.Cliente', { metodos: ['BuscarPorIdentificacion', 'ActivarSuscripcionDesdeContratacion'] }),
+      E('BLL.Contratacion', { metodos: ['IdentificarCliente', 'PresentarPlanes', 'AsentarDesistimiento', 'ValidarContratacion', 'RegistrarContratacion',
+                                        'EstimarImporte', 'ObtenerPendientesDePago', 'CalcularImporte', 'CalcularImportes', 'ConfirmarCobro', 'RegistrarIntentoFallido'] }),
+      E('IContratacionDAL', { metodos: ['Alta', 'ConfirmarCobro', 'RegistrarVigencia', 'ReabrirPago', 'RegistrarIntentoFallido', 'ObtenerIntentos',
+                                        'ObtenerMediosPago', 'AltaDesistimiento', 'ObtenerPendientesDePago'] })
     ]
   },
 
   // ───────────── PN03 ─────────────
   {
     tipo: 'clases', id: 'CLASES_pn03_promociones', procesos: ['PN03'], titulo: 'Diagrama de clases — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
+    // Diagrama de actividad aprobado: una clase de BLL por carril, un método por actividad y los
+    // objetos del flujo (reporte, sugerencia, dictamen, solicitud/resolución de baja, historial).
     clases: [
-      E('BE.SugerenciaPromocion', { attrs: 'all' }), E('BE.Promocion', { attrs: 'all' }), E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'Precio'] }), E('BE.CandidataSugerencia', { attrs: 'all' }),
-      E('BLL.SugerenciaPromocion', { metodos: ['Crear', 'ObtenerPendientes'] }), E('BLL.AnalisisPromociones', { metodos: 'all' }),
-      E('BLL.Promocion', { metodos: ['CrearDesdeSugerencia', 'CrearManual', 'Modificar', 'Reformular', 'Desactivar', 'AprobarContable', 'RechazarContable', 'SugerirBaja', 'AprobarBaja', 'RechazarBaja'] }),
-      E('IPromocionDAL', { metodos: ['Alta', 'Modificar', 'CambiarEstado', 'SolicitarBaja'] }), E('ISugerenciaPromocionDAL', { metodos: ['MarcarEvaluada', 'ReabrirEvaluacion'] })
+      E('BE.ReporteMetricas', { attrs: 'all', metodos: ['HayOportunidad'] }), E('BE.CandidataSugerencia', { attrs: ['Origen', 'IdPlan', 'CategoriaPrenda', 'Motivo', 'BeneficioEstimado'] }),
+      E('BE.SugerenciaPromocion', { attrs: 'all', metodos: ['PuedeEvaluarse', 'TransicionValida'] }),
+      E('BE.Promocion', { attrs: 'all', metodos: ['EstaVigente', 'DebeVencer', 'PuedeDictaminarla', 'PuedeReformularse', 'PuedeDescartarse', 'PuedeSolicitarseBaja', 'PuedeResolverseBaja', 'PuedeDesactivarseDirecto', 'SeSuperponeCon', 'TransicionValida'] }),
+      E('BE.PromocionHistorial', { attrs: 'all' }), E('BE.DictamenContable', { attrs: 'all' }), E('BE.SolicitudBajaPromocion', { attrs: 'all' }),
+      E('BE.AnalisisImpactoPromocion', { attrs: 'all' }),
+      E('BLL.AnalisisPromociones', { metodos: ['AnalizarMetricas', 'HayOportunidad'] }),
+      E('BLL.SugerenciaPromocion', { metodos: ['RegistrarSugerencia', 'DescartarSugerencia', 'ObtenerPendientes'] }),
+      E('BLL.Promocion', { metodos: ['CrearDesdeSugerencia', 'CrearManual', 'ValidarPromocion', 'AnalizarMargenEImpacto', 'PuedeDictaminar', 'AprobarContable', 'RechazarContable',
+                                     'Reformular', 'DescartarPromocion', 'SolicitarBaja', 'AprobarBaja', 'RechazarBaja', 'Desactivar', 'CerrarVencidas'] }),
+      E('IPromocionDAL', { metodos: ['Alta', 'Reformular', 'CambiarEstado', 'Dictaminar', 'SolicitarBaja', 'ResolverBaja', 'ObtenerHistorial'] }),
+      E('ISugerenciaPromocionDAL', { metodos: ['Alta', 'MarcarEvaluada', 'ReabrirEvaluacion', 'Descartar'] })
     ]
   },
   {
@@ -135,7 +154,7 @@ module.exports = [
     tipo: 'clases', id: 'CLASES_pn04_devolucion', procesos: ['PN04'], titulo: 'Diagrama de clases — PN04 Inspección de devolución', columnas: 3,
     clases: [
       E('BE.Prenda', { attrs: 'all' }), E('BE.MantenimientoPrenda', { attrs: 'all' }), E('BE.CargoPrenda', { attrs: 'all' }), E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido'] }),
-      E('BLL.ListaEspera', { metodos: [] }), E('BLL.Prenda', { metodos: ['ObtenerEnLimpieza', 'CambiarEstado', 'ObtenerHistorialMantenimiento'] }), E('BLL.CargoPrenda', { metodos: ['RegistrarCargo', 'ObtenerPendientesPorCliente'] }),
+      E('BLL.ListaEspera', { metodos: [] }), E('BLL.Prenda', { metodos: ['ObtenerEnLimpieza', 'CambiarEstado', 'ObtenerTransicionesManuales', 'ObtenerHistorialMantenimiento'] }), E('BLL.CargoPrenda', { metodos: ['RegistrarCargo', 'ValidarDatos', 'ObtenerPendientesPorCliente'] }),
       E('IPrendaDAL', { metodos: ['CambiarEstado'] }), E('ICargoPrendaDAL', { metodos: ['Alta', 'ObtenerPendientesPorCliente', 'MarcarCobradosEnTx'] })
     ]
   },

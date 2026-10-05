@@ -1,11 +1,14 @@
 namespace BE
 {
     /// <summary>
-    /// PN03 — Estado de una Promocion. EnRevisionContable es el estado inicial (Administración
-    /// la crea, desde una sugerencia de Gerencia o manual). Contabilidad aprueba (Vigente) o
-    /// rechaza (RechazadaContabilidad, vuelve a Administración). Desde Vigente, Vendedor puede
-    /// sugerir la baja (BajaSolicitada); Administración la aprueba (Desactivada) o la rechaza
-    /// (vuelve a Vigente). Administración también puede desactivar una Vigente directamente.
+    /// PN03 — Estado de una Promocion (diagrama de actividad aprobado):
+    ///   EnRevisionContable    → estado inicial tras "Validar" (alta o reformulación).
+    ///   Vigente               → Contabilidad aprobó; se aplica en el cobro de PN02.
+    ///   RechazadaContabilidad → Contabilidad rechazó; Administración decide si reformula.
+    ///   BajaSolicitada        → Vendedor pidió la baja; Administración la resuelve.
+    ///   Desactivada           → fin: baja aprobada o desactivación directa.
+    ///   Descartada            → fin: Administración no reformula una promoción rechazada.
+    ///   Vencida               → fin: llegó la FechaFin (BLL.Promocion.CerrarVencidas).
     /// </summary>
     public enum EstadoPromocion
     {
@@ -13,6 +16,8 @@ namespace BE
         Vigente = 1,
         RechazadaContabilidad = 2,
         BajaSolicitada = 3,
-        Desactivada = 4
+        Desactivada = 4,
+        Descartada = 5,
+        Vencida = 6
     }
 }

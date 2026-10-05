@@ -16,13 +16,16 @@ namespace BLL.Manejadores
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
         private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
+        private readonly DAL.Interfaces.IPedidoDAL dalPedido;
 
         // NUULY 4.8: la pausa tiene un máximo de 3 meses.
         public const int MaxMesesPausa = 3;
 
         public PausarSuscripcionHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
-                                        DAL.Interfaces.IPrendaDAL dalPrenda = null)
+                                        DAL.Interfaces.IPrendaDAL dalPrenda = null,
+                                        DAL.Interfaces.IPedidoDAL dalPedido = null)
         {
+            this.dalPedido = dalPedido;
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
             this.dalPrenda = dalPrenda;
@@ -57,6 +60,13 @@ namespace BLL.Manejadores
                 throw new BE.AppException("err.bll.renovacion.pausa_con_prendas",
                     "No se puede pausar: el cliente tiene prendas en uso pendientes de devolución.");
 
+            // Tampoco con un pedido en el circuito (en control, separado, formalizado o despachado):
+            // la pausa congelaría una suscripción que todavía tiene un pedido en curso.
+            if (dalPedido != null && dalPedido.TienePedidoActivo(contexto.Cliente.IdCliente))
+                throw new BE.AppException("err.bll.renovacion.pedido_activo",
+                    "No se puede pausar ni dar de baja la suscripción: el cliente tiene un pedido en curso. " +
+                    "Esperá a que termine su ciclo o cancelalo.");
+
             var cliente = contexto.Cliente;
             cliente.FechaPausaHasta = contexto.FechaPausaHasta;
 
@@ -86,7 +96,7 @@ namespace BLL.Manejadores
                     Actor = contexto.Actor
                 });
             });
-            dalCliente.RecalcularDV();
+            dalCliente.RecalcularDV(cliente.IdCliente);
 
             return new ResultadoRenovacion
             {

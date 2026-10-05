@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace DAL.Interfaces
@@ -6,12 +7,17 @@ namespace DAL.Interfaces
     public interface ISugerenciaPromocionDAL
     {
         List<BE.SugerenciaPromocion> ObtenerPendientes();
+        List<BE.SugerenciaPromocion> ObtenerTodas();
         BE.SugerenciaPromocion ObtenerPorId(int idSugerencia);
         int Alta(BE.SugerenciaPromocion sugerencia);
-        // Reclamo atómico: solo pasa de Pendiente a Evaluada UNA vez. Devuelve false si otra sesión ya la evaluó.
-        bool MarcarEvaluada(int idSugerencia);
+
+        // Claim atómico: Pendiente → Evaluada UNA sola vez. false si otra sesión ya la evaluó o descartó.
+        bool MarcarEvaluada(int idSugerencia, DateTime fecha);
 
         // Compensación: devuelve a Pendiente una sugerencia recién reclamada si la promoción no llegó a crearse.
         void ReabrirEvaluacion(int idSugerencia);
+
+        // Claim atómico: Pendiente → Descartada con su motivo. false si otra sesión ya la evaluó o descartó.
+        bool Descartar(int idSugerencia, string motivo, DateTime fecha);
     }
 }

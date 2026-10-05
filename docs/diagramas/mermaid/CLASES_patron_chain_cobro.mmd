@@ -2,6 +2,8 @@ classDiagram
   direction TB
   class BLL_Cobro["BLL.Cobro"] {
     +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string) ResultadoCobro
+    +ObtenerElegibles() List~Cliente~
+    +PrevisualizarCobro(int) PrevisualizacionCobro
   }
   class BLL_Manejadores_ManejadorCobro["BLL.Manejadores.ManejadorCobro"] {
     <<abstract>>

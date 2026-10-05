@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -7,7 +8,7 @@ namespace BLL
     /// Capa de Lógica de Negocio — T04 Gestión de Perfiles de Usuario (Patrón Composite).
     ///
     /// Responsabilidades:
-    ///   1. ObtenerArbol() / ObtenerArbolPorRol() — exponen el árbol Composite desde BD.
+    ///   1. ObtenerArbol() — expone el árbol Composite desde BD.
     ///   2. ObtenerPermisosEfectivos()            — resuelve recursivamente los permisos de un rol.
     ///   3. CRUD de componentes + AsignarPermiso() / QuitarPermiso() — operan sobre [PermisoRelacion],
     ///      el motor real de autorización.
@@ -17,8 +18,8 @@ namespace BLL
         private readonly DAL.Interfaces.IPermisoDAL permisoDAL;
         // Bitácora perezosa: solo se instancia cuando una operación de escritura la usa.
         // Así los métodos de lectura/resolución se pueden testear sin tocar la BD.
-        private Servicios.Bitacora _bitacoraLazy;
-        private Servicios.Bitacora _bitacora => _bitacoraLazy ?? (_bitacoraLazy = new Servicios.Bitacora());
+        private Servicios.IRegistroBitacora _bitacoraLazy;
+        private Servicios.IRegistroBitacora _bitacora => _bitacoraLazy ?? (_bitacoraLazy = Servicios.FabricaBitacora.CrearSistema());
 
         // Inyección de dependencias: el constructor por defecto usa el DAL real;
         // el segundo permite inyectar un doble de prueba (tests unitarios sin BD).
@@ -198,36 +199,7 @@ namespace BLL
                             Id = pat.Id, Nombre = pat.Nombre, NombreMenu = pat.NombreMenu, Estado = true
                         };
             }
-            else
-            {
-                // Fallback resiliente: BD sin migrar al Composite → asignación plana.
-                foreach (var p in permisoDAL.ObtenerPorRol(rol))
-                    if (!resultado.ContainsKey(p.Id)) resultado[p.Id] = p;
-            }
             return new List<BE.Permiso>(resultado.Values);
-        }
-
-        // Subárbol del rol (BE.Rol con sus descendientes) para visualización en vivo.
-        // Marca como Asignado=true toda Patente alcanzable (son permisos efectivos del rol).
-        public BE.Familia ObtenerArbolPorRol(string rol)
-        {
-            if (string.IsNullOrWhiteSpace(rol))
-                throw new ArgumentException("El rol no puede estar vacío.");
-
-            List<BE.Componente> arbol = permisoDAL.ObtenerArbol();
-            BE.Componente nodoRol = BuscarRol(arbol, rol, new HashSet<int>());
-
-            if (nodoRol is BE.Familia fam)
-            {
-                MarcarTodasAsignadas(fam, new HashSet<int>());
-                return fam;
-            }
-
-            // Rol sin nodo (BD sin migrar): construir desde asignación plana.
-            var raiz = new BE.Rol { Id = 0, Nombre = rol };
-            foreach (var p in permisoDAL.ObtenerPorRol(rol))
-                raiz.AgregarHijo(new BE.Patente { Id = p.Id, Nombre = p.Nombre, NombreMenu = p.NombreMenu, Asignado = true });
-            return raiz;
         }
 
         // Familias disponibles (compuestos que NO son roles) — para la Lista de Familias.
@@ -368,6 +340,15 @@ namespace BLL
         {
             VerificarPuedeGestionar();
             ValidarNombre(nombre);
+            // El NombreMenu de una PATENTE es la llave del permiso (lo que exigen los guards de la
+            // BLL y el menú): cambiarlo convertiría una patente en otra (por ejemplo, una de solo
+            // lectura en "mnuUsuarios"). Solo se puede cambiar el nombre visible.
+            var nodo = BuscarPorId(permisoDAL.ObtenerArbol(), idPermiso, new HashSet<int>());
+            if (nodo is BE.Patente pat &&
+                !string.Equals(pat.NombreMenu ?? "", nombreMenu ?? "", StringComparison.Ordinal))
+                throw new BE.AppException("err.bll.familia.patente_nombremenu",
+                    "No se puede cambiar el identificador de menú de una patente: define qué permiso otorga.");
+            if (nodo is BE.Patente p2) nombreMenu = p2.NombreMenu;
             permisoDAL.ModificarComponente(idPermiso, nombre, nombreMenu);
             _bitacora.Registrar("Gestión de Perfiles", $"Componente {idPermiso} modificado a '{nombre}'", BE.Criticidad.Media);
         }
@@ -378,6 +359,7 @@ namespace BLL
             VerificarPuedeGestionar();
             if (idPadre == idHijo)
                 throw new BE.AppException("err.bll.ciclo", "Un componente no puede contenerse a sí mismo.");
+            ExigirNoAutoescalar(idPadre, idHijo);   // antes de ValidarSinCiclo (que simula sobre el árbol)
             ValidarSinCiclo(idPadre, idHijo);
             permisoDAL.AgregarRelacion(idPadre, idHijo);
             _bitacora.Registrar("Gestión de Perfiles", $"Relación creada {idPadre}→{idHijo}", BE.Criticidad.Alta);
@@ -458,6 +440,40 @@ namespace BLL
                     $"Error al grabar snapshots de usuarios con rol '{rol}': {ex.Message}",
                     BE.Criticidad.Alta);
             }
+        }
+
+        // Anti-autoescalación para CUALQUIER mutación del árbol (no solo GuardarAsignacionRol): un
+        // usuario no Administrador no puede agregar un componente en un nodo que forma parte del
+        // árbol de su PROPIO rol (el rol mismo o un rol/familia anidado en él) si con eso su rol
+        // pasaría a resolver patentes que hoy no tiene. Se calcula sin mutar el árbol real.
+        private void ExigirNoAutoescalar(int idPadre, int idHijo)
+        {
+            if (EsAdminEnSesion()) return;
+            var u = Seguridad.SessionManager.GetInstance().Usuario;
+            string rolPropio = u.Rol ?? u.Perfil;
+            var arbol = permisoDAL.ObtenerArbol();
+            var nodoRol = BuscarRol(arbol, rolPropio, new HashSet<int>());
+            if (nodoRol == null) return;
+
+            var subarbol = new HashSet<int>();
+            RecolectarIds(nodoRol, subarbol);
+            if (!subarbol.Contains(idPadre)) return;   // el cambio no toca el árbol del propio rol
+
+            var antes   = new HashSet<int>(nodoRol.ObtenerPatentesEfectivas().Select(p => p.Id));
+            var despues = new HashSet<int>(antes);
+            var hijo = BuscarPorId(arbol, idHijo, new HashSet<int>());
+            if (hijo != null) foreach (var p in hijo.ObtenerPatentesEfectivas()) despues.Add(p.Id);
+
+            if (!NoEscalaPrivilegios(antes, despues))
+                throw new BE.AppException("err.bll.familia.autoescalacion",
+                    "No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando " +
+                    "tu propio rol. Pedile a otro administrador que lo haga.");
+        }
+
+        private static void RecolectarIds(BE.Componente nodo, HashSet<int> ids)
+        {
+            if (nodo == null || !ids.Add(nodo.Id)) return;
+            foreach (var h in nodo.Hijos ?? new List<BE.Componente>()) RecolectarIds(h, ids);
         }
 
         // Núcleo PURO y testeable (mismo estilo que SistemaConservaGestion): ¿el conjunto de

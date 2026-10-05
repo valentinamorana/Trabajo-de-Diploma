@@ -456,16 +456,17 @@ begin
 end;
 
 // Indices de PaginaSeleccionInstancia: primero las N instancias detectadas,
-// despues LocalDB (solo si esta instalado) y al final "Otra...".
+// despues LocalDB (usarlo si ya esta instalado, o instalarlo si no) y al final "Otra...".
+// LocalDB se ofrece SIEMPRE: si la cuenta no tiene permisos en la instancia existente
+// (p. ej. un SQL Server administrado por otra persona), es la salida para instalar igual.
 function IndiceLocalDbEnSeleccion(): Integer;
 begin
-  if LocalDbDisponible then Result := GetArrayLength(InstanciasDetectadas) else Result := -1;
+  Result := GetArrayLength(InstanciasDetectadas);
 end;
 
 function IndiceOtraEnSeleccion(): Integer;
 begin
-  Result := GetArrayLength(InstanciasDetectadas);
-  if LocalDbDisponible then Result := Result + 1;
+  Result := GetArrayLength(InstanciasDetectadas) + 1;
 end;
 
 // Indices de PaginaSinInstancias: la primera opcion es siempre LocalDB
@@ -592,11 +593,12 @@ begin
       IndicePrevio := I;
   end;
   if LocalDbDisponible then
-  begin
-    PaginaSeleccionInstancia.Add('(localdb)\MSSQLLocalDB   (SQL LocalDB, solo para tu usuario de Windows)');
-    if EsLocalDb(ServidorPrevio) then
-      IndicePrevio := IndiceLocalDbEnSeleccion();
-  end;
+    PaginaSeleccionInstancia.Add('(localdb)\MSSQLLocalDB   (SQL LocalDB, solo para tu usuario de Windows)')
+  else
+    PaginaSeleccionInstancia.Add('Instalar SQL Server Express LocalDB (incluido; solo para tu usuario de Windows; ' +
+                                 'sirve si no tenés permisos en la instancia de arriba)');
+  if EsLocalDb(ServidorPrevio) then
+    IndicePrevio := IndiceLocalDbEnSeleccion();
   PaginaSeleccionInstancia.Add('Otra instancia o servidor (ingresar manualmente)');
   // Servidor previo que no es ninguno de los detectados (remoto/manual):
   // queda preseleccionado "Otra..." con ese valor ya cargado.
@@ -745,7 +747,9 @@ begin
     SuppressibleMsgBox(
       'Permisos insuficientes en SQL Server (' + Servidor + ').' + #13#13 + Detalle + #13#13 +
       'Ejecutá el instalador con una cuenta de Windows que sea administradora de esa instancia (sysadmin), ' +
-      'pedile a quien administra SQL Server que te dé el rol dbcreator, o elegí otra instancia.',
+      'pedile a quien administra SQL Server que te dé el rol dbcreator, o elegí otra instancia.' + #13#13 +
+      'Si no tenés esos permisos, elegí la opción de SQL LocalDB de la lista: se instala para tu usuario ' +
+      'de Windows y no necesita permisos sobre el SQL Server existente.',
       mbError, MB_OK, IDOK);
     Result := False;
   end
@@ -771,6 +775,7 @@ begin
 
   if CurPageID = PaginaSeleccionInstancia.ID then
   begin
+    InstalarLocalDbPendiente := False;
     IndiceElegido := PaginaSeleccionInstancia.SelectedValueIndex;
     if IndiceElegido < GetArrayLength(InstanciasDetectadas) then
     begin
@@ -796,7 +801,9 @@ begin
     end
     else if IndiceElegido = IndiceLocalDbEnSeleccion() then
     begin
-      // LocalDB junto a otras instancias: no corre como servicio de Windows.
+      // LocalDB junto a otras instancias: no corre como servicio de Windows. Si no
+      // estaba instalado, se instala en PrepareToInstall (despues de confirmar).
+      InstalarLocalDbPendiente := not LocalDbDisponible;
       ServidorElegido := '(localdb)\MSSQLLocalDB';
       ServicioWindowsElegido := '';
       AvisarLocalDbPorUsuario();

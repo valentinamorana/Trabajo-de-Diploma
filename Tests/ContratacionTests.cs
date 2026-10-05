@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Seguridad;
@@ -869,6 +870,29 @@ namespace Tests
             EsperarError(() => new BLL.Cobro(dal, new FakeCobroDAL(), new FakeCargoPrendaDAL())
                     .Procesar("Test", cliente, BLL.Manejadores.DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja"),
                 "err.bll.cobro.contratacion_pendiente");
+        }
+
+        // N1 (re-auditoría): los listados de Cobro y Renovación consultan las contrataciones
+        // pendientes UNA sola vez, no una vez por cliente, y excluyen a esos clientes.
+        [TestMethod]
+        public void ObtenerElegibles_ConsultaPendientesUnaSolaVez()
+        {
+            LoginComoAdministrador();
+            var dal = new FakeClienteDAL();
+            for (int i = 1; i <= 20; i++)
+                dal.ClientesDevueltos.Add(new BE.Cliente { IdCliente = i, Nombre = "C" + i, Apellido = "X", IdPlan = 1,
+                                                           FechaVencimiento = DateTime.Today.AddDays(-1) });
+            dal.IdsConContratacionPendiente.Add(3);
+
+            var cobro = new BLL.Cobro(dal, new FakeCobroDAL(), new FakeCargoPrendaDAL()).ObtenerElegibles();
+            Assert.AreEqual(1, dal.ConsultasIdsConContratacionPendiente);
+            Assert.AreEqual(19, cobro.Count);
+            Assert.IsFalse(cobro.Any(c => c.IdCliente == 3));
+
+            var renov = new BLL.Renovacion(dal, new FakeRenovacionDAL(), new FakePlanSuscripcionDAL(), new FakePrendaDAL())
+                .ObtenerElegibles(BLL.Manejadores.DecisionRenovacion.Renovar);
+            Assert.AreEqual(2, dal.ConsultasIdsConContratacionPendiente);
+            Assert.IsFalse(renov.Any(c => c.IdCliente == 3));
         }
 
         [TestMethod]

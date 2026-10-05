@@ -95,12 +95,13 @@ namespace BLL
         // vencida o próxima a vencer (mismo criterio que DetectarCobroHandler) y sin una
         // contratación PN02 pendiente de pago (Procesar los rechaza). Antes este filtro lo
         // armaba CobroSuscripcionForm y no excluía las contrataciones pendientes.
-        public List<BE.Cliente> ObtenerElegibles() =>
-            dalCliente.ObtenerTodos()
-                .Where(c => c.TienePlan() && c.RequiereGestionDeVencimiento())
-                // Va al final para consultar la contratación pendiente solo de los candidatos.
-                .Where(c => !dalCliente.TieneContratacionPendiente(c.IdCliente))
+        public List<BE.Cliente> ObtenerElegibles()
+        {
+            var pendientes = dalCliente.ObtenerIdsConContratacionPendiente();   // una sola consulta
+            return dalCliente.ObtenerTodos()
+                .Where(c => c.TienePlan() && c.RequiereGestionDeVencimiento() && !pendientes.Contains(c.IdCliente))
                 .ToList();
+        }
 
         // Anticipa lo que el próximo cobro del cliente va a sumar por cargos de daño/pérdida
         // pendientes (los mismos que ProcesarPagoHandler suma al cobrar). Antes la suma la

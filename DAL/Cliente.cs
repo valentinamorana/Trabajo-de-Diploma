@@ -139,6 +139,19 @@ namespace DAL
             catch (Exception ex) { throw new Exception("Error al consultar las contrataciones del cliente.", ex); }
         }
 
+        public HashSet<int> ObtenerIdsConContratacionPendiente()
+        {
+            try
+            {
+                var ids = new HashSet<int>();
+                DataTable t = acceso.Leer("SELECT DISTINCT IdCliente FROM Contratacion WHERE Estado = 0", new SqlParameter[0]);
+                if (t != null)
+                    foreach (DataRow r in t.Rows) ids.Add(Convert.ToInt32(r["IdCliente"]));
+                return ids;
+            }
+            catch (Exception ex) { throw new Exception("Error al consultar las contrataciones pendientes.", ex); }
+        }
+
         // Busca un cliente activo con ese DNI (excluyendo el ID indicado). Devuelve 0 si no hay.
         private int BuscarIdPorDni(string dni, int idExcluir)
         {

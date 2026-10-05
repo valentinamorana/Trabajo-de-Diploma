@@ -112,9 +112,9 @@ namespace BLL
         // Antes este filtro lo armaba RenovacionSuscripcionForm.
         public List<BE.Cliente> ObtenerElegibles(Manejadores.DecisionRenovacion decision)
         {
+            var pendientes = dalCliente.ObtenerIdsConContratacionPendiente();   // una sola consulta
             var conPlan = dalCliente.ObtenerTodos()
-                .Where(c => c.TienePlan())
-                .Where(c => !dalCliente.TieneContratacionPendiente(c.IdCliente))
+                .Where(c => c.TienePlan() && !pendientes.Contains(c.IdCliente))
                 .ToList();
 
             var porDecision = decision == Manejadores.DecisionRenovacion.Pausar

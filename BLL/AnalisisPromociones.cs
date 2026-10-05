@@ -29,7 +29,7 @@ namespace BLL
         private readonly Interfaces.IAnalisisRotacionService rotacion;
         private readonly Interfaces.IAnalisisAbandonoService abandono;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
 
         public AnalisisPromociones()
             : this(new AnalisisRotacion(), new AnalisisAbandono(), new DAL.PlanSuscripcion()) { }

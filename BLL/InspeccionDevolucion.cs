@@ -21,10 +21,10 @@ namespace BLL
         private readonly Interfaces.IPrendaService _prenda;
         private readonly CargoPrenda _cargo;
 
-        private Servicios.Bitacora        _bitacoraLazy;
-        private Servicios.BitacoraNegocio _bitacoraNegLazy;
-        private Servicios.Bitacora        Bitacora    => _bitacoraLazy    ?? (_bitacoraLazy    = new Servicios.Bitacora());
-        private Servicios.BitacoraNegocio BitacoraNeg => _bitacoraNegLazy ?? (_bitacoraNegLazy = new Servicios.BitacoraNegocio());
+        private Servicios.IRegistroBitacora        _bitacoraLazy;
+        private Servicios.IRegistroBitacoraNegocio _bitacoraNegLazy;
+        private Servicios.IRegistroBitacora        Bitacora    => _bitacoraLazy    ?? (_bitacoraLazy    = Servicios.FabricaBitacora.CrearSistema());
+        private Servicios.IRegistroBitacoraNegocio BitacoraNeg => _bitacoraNegLazy ?? (_bitacoraNegLazy = Servicios.FabricaBitacora.CrearNegocio());
 
         public InspeccionDevolucion() : this(new DAL.InspeccionDevolucion(), new Prenda()) { }
 

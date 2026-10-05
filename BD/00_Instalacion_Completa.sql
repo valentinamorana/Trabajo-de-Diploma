@@ -12,7 +12,7 @@
 -- la carpeta BD/: los scripts individuales ya no existen (su historial está
 -- en git).
 --
--- Incluye al final (sección 21) los DATOS DE PRUEBA de todos los procesos,
+-- Incluye al final (sección 21e) los DATOS DE PRUEBA de todos los procesos,
 -- para que la base quede lista para probar apenas se instala.
 --
 -- Idempotente de punta a punta: correr este archivo dos veces no duplica
@@ -1166,7 +1166,8 @@ FROM (VALUES
     (N'Sweater Oversize Crema', N'Sweater de lana',          'L',  N'Crema',      N'Sweater'),
     (N'Gabardina Verde',        N'Gabardina impermeable',    'M',  N'Verde',      N'Abrigo')
 ) AS v(Nombre, Descripcion, Talle, Color, Categoria)
-WHERE NOT EXISTS (SELECT 1 FROM Prenda pr WHERE pr.Nombre = v.Nombre);
+WHERE NOT EXISTS (SELECT 1 FROM Prenda pr WHERE pr.Nombre = v.Nombre)
+  AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
 PRINT 'Demo: prendas (stock).';
 GO
 
@@ -2846,283 +2847,6 @@ GO
 PRINT 'Sección 20d: flujo aprobado de PN03 (historial, dictamen, solicitud de baja, vencimiento) verificado.';
 GO
 -- ============================================================
--- WardrobeFlow — 21. DATOS DE PRUEBA DE TODOS LOS PROCESOS
--- ------------------------------------------------------------
--- Deja la base instalada con escenarios listos para probar cada proceso sin
--- cargar nada a mano:
---   N01  suscripciones en distintos estados (vigente, por vencer, vencida, en
---        gracia, suspendida, pausada, referido) para Renovación y Cobro.
---   PN01 clientes aptos para armar un pedido, prendas disponibles y una prenda
---        en uso con lista de espera.
---   PN02 contrataciones pendientes de pago (una con un intento fallido) y una
---        ya cobrada con comprobante.
---   PN03 sugerencias de promoción y promociones en revisión, vigente y con baja
---        solicitada.
---   PN04 prendas En Limpieza pendientes de inspección, una dada de baja con
---        cargo y valor de reposición cargado en todo el catálogo.
---   Analítica: pedidos y mantenimientos repartidos en el tiempo.
--- Se aplica UNA sola vez y solo en una instalación NUEVA. Marca estable: ParametroSistema
--- 'SeedDemo21' (antes era el cliente "Julieta Navarro": si se lo renombraba, una reinstalación
--- volvía a sembrar y fallaba con ids NULL o duplicaba datos). Tampoco se siembra si la base ya
--- tiene datos de negocio propios (contrataciones, o pedidos además de los 3 demo de la sección
--- 01): no se mezclan datos de prueba con datos reales. Cada búsqueda por nombre se valida antes
--- de insertar (ningún INSERT recibe un id NULL en una columna NOT NULL).
--- También vincula un Empleado a los usuarios 'caja' y 'admin': sin ese vínculo
--- no pueden cobrar ni crear pedidos (BLLHelper.ResolverEmpleadoActivo).
--- DVH = 0: la app recalcula los dígitos verificadores en el primer arranque.
--- ============================================================
-DECLARE @sembrar21 BIT = 0;
-IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SeedDemo21')
-    PRINT 'Datos de prueba (sección 21) ya aplicados — sin cambios.';
-ELSE IF EXISTS (SELECT 1 FROM Cliente WHERE Nombre = N'Julieta' AND Apellido = N'Navarro')
-BEGIN
-    -- Base de una versión anterior que ya los tenía (marca vieja): se registra la marca nueva.
-    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada por una versión anterior', GETDATE());
-    PRINT 'Datos de prueba (sección 21) ya aplicados por una versión anterior — sin cambios.';
-END
-ELSE IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente')
-     OR EXISTS (SELECT 1 FROM Contratacion)
-     OR (SELECT COUNT(*) FROM Pedido) > 3
-BEGIN
-    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Omitida: la base ya tenía datos', GETDATE());
-    PRINT 'AVISO: la base ya tiene datos de negocio; no se cargan los datos de prueba (sección 21).';
-END
-ELSE
-    SET @sembrar21 = 1;
-
-IF @sembrar21 = 1
-BEGIN
-    -- ── Empleados de Caja y Administrador ───────────────────────────────────
-    INSERT INTO Empleado (Nombre, Apellido, DNI, Email, FechaIngreso, Puesto, Legajo, IdUsuario, DVH)
-    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, GETDATE(), v.Puesto, v.Legajo,
-           (SELECT TOP 1 IdUsuario FROM Usuario u WHERE u.Username = v.Username), 0
-    FROM (VALUES
-        (N'Carolina', N'Ibáñez',  '34555666', 'caja@wardrobeflow.com',  N'Caja',          'L-003', 'caja'),
-        (N'Admin',    N'Sistema', '30000001', 'admin@wardrobeflow.com', N'Administrador', 'L-004', 'admin')
-    ) AS v(Nombre, Apellido, DNI, Email, Puesto, Legajo, Username)
-    WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo);
-
-    DECLARE @vend INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-001');
-    DECLARE @caja INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-003');
-    DECLARE @hoy  DATE = CAST(GETDATE() AS DATE);
-    DECLARE @pBasico  INT = (SELECT IdPlan FROM PlanSuscripcion WHERE Nombre = N'Básico');
-    DECLARE @pEstand  INT = (SELECT IdPlan FROM PlanSuscripcion WHERE Nombre = N'Estándar');
-    DECLARE @pPremium INT = (SELECT IdPlan FROM PlanSuscripcion WHERE Nombre = N'Premium');
-
-    -- ── Clientes nuevos ──────────────────────────────────────────────────────
-    INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaNacimiento, Activo, DVH)
-    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, v.MetodoPago,
-           (SELECT TOP 1 IdPlan FROM PlanSuscripcion p WHERE p.Nombre = v.PlanNom),
-           DATEADD(DAY, -v.DiasAlta, GETDATE()), v.FechaNac, 1, 0
-    FROM (VALUES
-        (N'Julieta', N'Navarro', '31555777', 'julieta.navarro@mail.com', N'Crédito',       N'Estándar', 120, CONVERT(date,'1992-05-18')),
-        (N'Tomás',   N'Benítez', '33666888', 'tomas.benitez@mail.com',   N'Débito',        N'Básico',    90, CONVERT(date,'1995-09-03')),
-        (N'Renata',  N'Silva',   '36777999', 'renata.silva@mail.com',    'Efectivo',      NULL,          2, CONVERT(date,'1999-12-21')),
-        (N'Agustín', N'Molina',  '34888111', 'agustin.molina@mail.com',  'Transferencia', N'Estándar',  30, CONVERT(date,'1988-02-09')),
-        (N'Paula',   N'Herrera', '32999222', 'paula.herrera@mail.com',   N'Crédito',       N'Premium',   45, CONVERT(date,'1993-08-27')),
-        (N'Nicolás', N'Vega',    '38111333', 'nicolas.vega@mail.com',    N'Débito',        N'Básico',    60, CONVERT(date,'1997-04-14'))
-    ) AS v(Nombre, Apellido, DNI, Email, MetodoPago, PlanNom, DiasAlta, FechaNac)
-    WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE (c.Nombre = v.Nombre AND c.Apellido = v.Apellido) OR c.DNI = v.DNI);  -- también por DNI: un cliente demo renombrado no se duplica
-
-    DECLARE @cLucia  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Lucía'   AND Apellido=N'Fernández');
-    DECLARE @cMartin INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Martín'  AND Apellido=N'Gómez');
-    DECLARE @cSofia  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Sofía'   AND Apellido=N'Rossi');
-    DECLARE @cDiego  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Diego'   AND Apellido=N'Paz');
-    DECLARE @cCamila INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Camila'  AND Apellido=N'Torres');
-    DECLARE @cJulie  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Julieta' AND Apellido=N'Navarro');
-    DECLARE @cTomas  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Tomás'   AND Apellido=N'Benítez');
-    DECLARE @cRenata INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Renata'  AND Apellido=N'Silva');
-    DECLARE @cAgus   INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Agustín' AND Apellido=N'Molina');
-    DECLARE @cPaula  INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Paula'   AND Apellido=N'Herrera');
-    DECLARE @cNico   INT = (SELECT TOP 1 IdCliente FROM Cliente WHERE Nombre=N'Nicolás' AND Apellido=N'Vega');
-
-    -- ── Estado de la suscripción de cada cliente (N01: Renovación / Cobro) ──
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 25, @hoy)  WHERE IdCliente = @cLucia;   -- vigente
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 4,  @hoy)  WHERE IdCliente = @cMartin;  -- por vencer
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, -10, @hoy) WHERE IdCliente = @cSofia;   -- vencida
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, -20, @hoy),
-                       FechaLimiteGracia = DATEADD(DAY, 3, @hoy)  WHERE IdCliente = @cDiego;   -- en gracia
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 40, @hoy)  WHERE IdCliente = @cCamila;  -- vigente
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, -40, @hoy),
-                       FechaLimiteGracia = DATEADD(DAY, -5, @hoy) WHERE IdCliente = @cJulie;   -- suspendida por pago
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 20, @hoy),
-                       FechaPausaHasta = DATEADD(DAY, 10, GETDATE()) WHERE IdCliente = @cTomas; -- pausada
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 28, @hoy),
-                       IdClienteReferente = @cLucia, BeneficioReferidoOtorgado = 1,
-                       DescuentoProximoCobro = 1000               WHERE IdCliente = @cAgus;    -- referido
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 30, @hoy)  WHERE IdCliente = @cPaula;   -- vigente, sin pedidos
-    UPDATE Cliente SET FechaVencimiento = DATEADD(DAY, 18, @hoy)  WHERE IdCliente = @cNico;    -- vigente
-    -- Renata Silva: sin plan ni vencimiento, para probar la contratación (PN02).
-
-    -- ── Prendas: valor de reposición en todo el catálogo (PN04) ─────────────
-    UPDATE Prenda SET PrecioReposicion = CASE Categoria
-            WHEN N'Vestido' THEN 45000 WHEN N'Saco' THEN 38000 WHEN N'Abrigo' THEN 52000
-            WHEN N'Camisa'  THEN 18000 WHEN N'Pantalón' THEN 24000 WHEN N'Falda' THEN 20000
-            WHEN N'Sweater' THEN 22000 ELSE 30000 END
-    WHERE PrecioReposicion IS NULL;
-
-    -- ── Prendas nuevas: 3 En Limpieza (a inspeccionar), 1 de Baja y 4 Disponibles ──
-    INSERT INTO Prenda (Nombre, Descripcion, Talle, Color, Categoria, Estado, IdClienteActual, IdUltimoCliente, PrecioReposicion, FechaAlta)
-    SELECT v.Nombre, v.Descripcion, v.Talle, v.Color, v.Categoria, v.Estado, NULL, v.UltimoCliente, v.Precio, DATEADD(DAY, -70, GETDATE())
-    FROM (VALUES
-        (N'Vestido Rojo Cóctel',     N'Vestido corto de fiesta',  'S',  N'Rojo',      N'Vestido',  2, @cLucia,  45000.00),
-        (N'Blazer Azul Marino',      N'Blazer cruzado',           'M',  N'Azul',      N'Saco',     2, @cCamila, 38000.00),
-        (N'Campera de Cuero',        N'Campera biker de cuero',   'L',  N'Negro',     N'Abrigo',   2, @cDiego,  60000.00),
-        (N'Traje Gris Slim',         N'Traje de dos piezas',      'L',  N'Gris',      N'Saco',     3, @cCamila, 60000.00),
-        (N'Vestido Midi Verde',      N'Vestido midi de gasa',     'M',  N'Verde',     N'Vestido',  0, NULL,     42000.00),
-        (N'Tapado Rojo',             N'Tapado de paño',           'M',  N'Rojo',      N'Abrigo',   0, NULL,     55000.00),
-        (N'Camisa Estampada',        N'Camisa de viscosa',        'S',  N'Estampado', N'Camisa',   0, NULL,     19000.00),
-        (N'Pantalón Palazzo Blanco', N'Pantalón ancho de lino',   '40', N'Blanco',    N'Pantalón', 0, NULL,     26000.00)
-    ) AS v(Nombre, Descripcion, Talle, Color, Categoria, Estado, UltimoCliente, Precio)
-    WHERE NOT EXISTS (SELECT 1 FROM Prenda pr WHERE pr.Nombre = v.Nombre);
-
-    -- Las prendas que ya estaban en uso recuerdan quién las tiene (para cargos por daño/pérdida).
-    UPDATE Prenda SET IdUltimoCliente = IdClienteActual
-    WHERE IdClienteActual IS NOT NULL AND IdUltimoCliente IS NULL;
-
-    -- ── Mantenimiento: 3 abiertos (las En Limpieza) + histórico cerrado (analítica) ──
-    INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, FechaSalida, Actor)
-    SELECT pr.IdPrenda, DATEADD(DAY, -v.Dias, GETDATE()), NULL, 'deposito'
-    FROM (VALUES (N'Vestido Rojo Cóctel', 2), (N'Blazer Azul Marino', 1), (N'Campera de Cuero', 0)) AS v(Nombre, Dias)
-    JOIN Prenda pr ON pr.Nombre = v.Nombre;
-
-    INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, FechaSalida, Actor)
-    SELECT pr.IdPrenda, DATEADD(DAY, -v.Dias, GETDATE()), DATEADD(DAY, -v.Dias + v.Duracion, GETDATE()), 'deposito'
-    FROM (VALUES
-        (N'Vestido Floral', 50, 6), (N'Vestido Floral', 35, 7), (N'Vestido Floral', 20, 5),
-        (N'Blazer Beige',   45, 4), (N'Blazer Beige',   25, 6)
-    ) AS v(Nombre, Dias, Duracion)
-    JOIN Prenda pr ON pr.Nombre = v.Nombre;
-
-    -- ── Pedidos históricos (analítica de rotación y ventas por vendedor) ─────
-    DECLARE @vf  INT = (SELECT TOP 1 IdPrenda FROM Prenda WHERE Nombre = N'Vestido Floral');
-    DECLARE @gab INT = (SELECT TOP 1 IdPrenda FROM Prenda WHERE Nombre = N'Gabardina Verde');
-    DECLARE @ph TABLE (Cli INT, Dias INT, Estado INT);
-    INSERT INTO @ph VALUES (@cLucia, 55, 2), (@cMartin, 45, 2), (@cDiego, 35, 2),
-                           (@cCamila, 25, 2), (@cPaula, 15, 2), (@cNico, 10, 3);
-    DECLARE @cli INT, @dias INT, @est INT, @idp INT;
-    IF @vend IS NOT NULL AND @vf IS NOT NULL
-    BEGIN
-        DECLARE curPed CURSOR LOCAL FAST_FORWARD FOR SELECT Cli, Dias, Estado FROM @ph WHERE Cli IS NOT NULL;
-        OPEN curPed;
-        FETCH NEXT FROM curPed INTO @cli, @dias, @est;
-        WHILE @@FETCH_STATUS = 0
-        BEGIN
-            INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, MotivoCancelacion, DVH)
-            VALUES (@cli, @vend, @est, DATEADD(DAY, -@dias, GETDATE()),
-                    CASE WHEN @est = 2 THEN DATEADD(DAY, -@dias + 2, GETDATE()) END,
-                    CASE WHEN @est = 2 THEN DATEADD(DAY, -@dias + 4, GETDATE()) END,
-                    CASE WHEN @est = 3 THEN N'El cliente desistió del pedido' END, 0);
-            SET @idp = SCOPE_IDENTITY();
-            INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@idp, @vf);
-            IF @dias IN (45, 25) AND @gab IS NOT NULL INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@idp, @gab);
-            FETCH NEXT FROM curPed INTO @cli, @dias, @est;
-        END
-        CLOSE curPed;
-        DEALLOCATE curPed;
-    END
-
-    -- ── PN01: lista de espera sobre una prenda en uso ────────────────────────
-    INSERT INTO ListaEspera (IdPrenda, IdCliente, FechaAlta, Estado, Actor)
-    SELECT pr.IdPrenda, @cNico, DATEADD(DAY, -1, GETDATE()), 0, 'vendedor'
-    FROM Prenda pr WHERE pr.Nombre = N'Vestido Largo Negro' AND pr.Estado = 1 AND @cNico IS NOT NULL;
-
-    -- ── PN02: contrataciones (2 pendientes de pago y 1 cobrada) ─────────────
-    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion, IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado, VigenciaDesde, VigenciaHasta)
-    SELECT v.Cli, v.IdPlan, @vend, NULL, v.Modalidad, 0, v.FechaAlta, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-    FROM (VALUES (@cRenata, @pEstand,  0, DATEADD(HOUR, -3, GETDATE())),
-                 (@cJulie,  @pPremium, 2, DATEADD(DAY,  -1, GETDATE()))) AS v(Cli, IdPlan, Modalidad, FechaAlta)
-    WHERE v.Cli IS NOT NULL AND v.IdPlan IS NOT NULL AND @vend IS NOT NULL;
-
-    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion, IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado, VigenciaDesde, VigenciaHasta)
-    SELECT @cPaula, @pPremium, @vend, @caja, 1, 1, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
-           1, 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()),
-           pl.Precio * 3, 0,
-           CAST(DATEADD(DAY, -45, GETDATE()) AS DATE), CAST(DATEADD(MONTH, 3, DATEADD(DAY, -45, GETDATE())) AS DATE)
-    FROM PlanSuscripcion pl
-    WHERE pl.IdPlan = @pPremium AND @cPaula IS NOT NULL AND @vend IS NOT NULL AND @caja IS NOT NULL;
-
-    -- La contratación de Julieta ya tuvo un intento de cobro que no se concretó.
-    INSERT INTO ContratacionIntentoPago (IdContratacion, NroIntento, Fecha, IdMedioPago, Motivo, IdCaja)
-    SELECT c.IdContratacion, 1, DATEADD(HOUR, -20, GETDATE()), 2, N'Tarjeta rechazada', @caja
-    FROM Contratacion c WHERE c.IdCliente = @cJulie AND c.Estado = 0 AND @caja IS NOT NULL;
-
-    -- ── PN03: sugerencias y promociones en cada estado, con sus objetos e historial ──
-    -- Gerencia (gcomercial) sugiere, Administración (admcomercial) crea, Contabilidad
-    -- (contable) dictamina y Ventas (vendedor) pide la baja: quien crea no dictamina.
-    -- Si falta un plan, un usuario o una promoción, esa fila no se inserta (nunca ids NULL).
-    DECLARE @uGer  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'gcomercial');
-    DECLARE @uAdm  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'admcomercial');
-    DECLARE @uCont INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'contable');
-    DECLARE @uVend INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'vendedor');
-
-    INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
-    SELECT v.IdPlan, v.Categoria, v.Motivo, v.Tipo, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
-    FROM (VALUES
-        (@pBasico, NULL,      N'El plan Básico tiene la mayor tasa de abandono: un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE()), 0),
-        (NULL,     N'Abrigo', N'Los abrigos rotan poco fuera de temporada: conviene incentivar su alquiler.',                 1,  5000.00, DATEADD(DAY, -2, GETDATE()), 1)
-    ) AS v(IdPlan, Categoria, Motivo, Tipo, Beneficio, FechaAlta, Origen)
-    WHERE v.IdPlan IS NOT NULL OR v.Categoria IS NOT NULL;
-
-    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, CategoriaPrenda, MargenEstimado, ImpactoEconomico, IdUsuarioAlta, FechaAlta)
-    SELECT v.Nombre, v.Descripcion, v.TipoDescuento, v.Valor, v.FechaInicio, v.FechaFin, v.Estado, v.IdPlan, v.Categoria,
-           v.Margen, v.Impacto, v.IdUsuarioAlta, v.FechaAlta
-    FROM (VALUES
-        (N'Verano Estándar -10%', N'10% de descuento en el plan Estándar durante el verano.', 0, 10.00,
-         DATEADD(DAY, -10, @hoy), DATEADD(DAY, 50, @hoy), 1, @pEstand, NULL, 8000.00,
-         N'Reducción de ingresos compensada por mayor retención.', @uAdm, DATEADD(DAY, -12, GETDATE())),
-        (N'Abrigos $3000 off', N'Descuento fijo por prenda en la categoría Abrigo.', 1, 3000.00,
-         @hoy, DATEADD(DAY, 60, @hoy), 0, NULL, N'Abrigo', 4500.00,
-         N'Impacto bajo: la categoría tiene baja rotación.', @uAdm, DATEADD(DAY, -1, GETDATE())),
-        (N'Premium Bienvenida -15%', N'15% de descuento en el primer mes del plan Premium.', 0, 15.00,
-         DATEADD(DAY, -30, @hoy), DATEADD(DAY, 30, @hoy), 3, @pPremium, NULL, 6000.00,
-         N'Descuento de captación para nuevos clientes.', @uAdm, DATEADD(DAY, -32, GETDATE()))
-    ) AS v(Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, Categoria, Margen, Impacto, IdUsuarioAlta, FechaAlta)
-    WHERE (v.IdPlan IS NOT NULL OR v.Categoria IS NOT NULL)
-      AND NOT EXISTS (SELECT 1 FROM Promocion p WHERE p.Nombre = v.Nombre);
-
-    DECLARE @prVerano  INT = (SELECT TOP 1 IdPromocion FROM Promocion WHERE Nombre = N'Verano Estándar -10%');
-    DECLARE @prAbrigo  INT = (SELECT TOP 1 IdPromocion FROM Promocion WHERE Nombre = N'Abrigos $3000 off');
-    DECLARE @prPremium INT = (SELECT TOP 1 IdPromocion FROM Promocion WHERE Nombre = N'Premium Bienvenida -15%');
-
-    -- «Dictamen contable» de las dos aprobadas y «Solicitud de baja» pendiente de la Premium.
-    INSERT INTO DictamenContable (IdPromocion, IdUsuario, Aprobada, Observacion, Fecha)
-    SELECT v.IdPromocion, @uCont, 1, v.Observacion, v.Fecha
-    FROM (VALUES
-        (@prVerano,  N'Aprobada por Contabilidad: el margen estimado cubre la reducción de ingresos.', DATEADD(DAY, -11, GETDATE())),
-        (@prPremium, N'Aprobada por Contabilidad: descuento de captación acotado al primer mes.',     DATEADD(DAY, -31, GETDATE()))
-    ) AS v(IdPromocion, Observacion, Fecha)
-    WHERE v.IdPromocion IS NOT NULL AND @uCont IS NOT NULL;
-    INSERT INTO SolicitudBajaPromocion (IdPromocion, IdUsuarioSolicita, Motivo, FechaSolicitud, Estado)
-    SELECT @prPremium, @uVend, N'Se superpone con la promoción Verano y erosiona el margen.', DATEADD(DAY, -2, GETDATE()), 0
-    WHERE @prPremium IS NOT NULL AND @uVend IS NOT NULL;
-
-    -- Historial: una fila por transición (alta → dictamen → solicitud de baja).
-    INSERT INTO PromocionHistorial (IdPromocion, EstadoAnterior, EstadoNuevo, IdUsuario, Fecha, Observacion)
-    SELECT v.IdPromocion, v.Anterior, v.Nuevo, v.IdUsuario, v.Fecha, v.Observacion
-    FROM (VALUES
-        (@prVerano,  NULL, 0, @uAdm,  DATEADD(DAY, -12, GETDATE()), N'Alta manual'),
-        (@prVerano,  0,    1, @uCont, DATEADD(DAY, -11, GETDATE()), N'Aprobada por Contabilidad: el margen estimado cubre la reducción de ingresos.'),
-        (@prAbrigo,  NULL, 0, @uAdm,  DATEADD(DAY,  -1, GETDATE()), N'Alta manual'),
-        (@prPremium, NULL, 0, @uAdm,  DATEADD(DAY, -32, GETDATE()), N'Alta manual'),
-        (@prPremium, 0,    1, @uCont, DATEADD(DAY, -31, GETDATE()), N'Aprobada por Contabilidad: descuento de captación acotado al primer mes.'),
-        (@prPremium, 1,    3, @uVend, DATEADD(DAY,  -2, GETDATE()), N'Se superpone con la promoción Verano y erosiona el margen.')
-    ) AS v(IdPromocion, Anterior, Nuevo, IdUsuario, Fecha, Observacion)
-    WHERE v.IdPromocion IS NOT NULL
-      AND NOT EXISTS (SELECT 1 FROM PromocionHistorial h WHERE h.IdPromocion = v.IdPromocion AND h.EstadoNuevo = v.Nuevo);
-
-    -- ── PN04: cargo pendiente por la prenda dada de baja ─────────────────────
-    INSERT INTO CargoPrenda (IdPrenda, IdCliente, Motivo, Monto, FechaRegistro, Actor, Estado)
-    SELECT pr.IdPrenda, @cCamila, N'Daño irreparable detectado en la inspección', pr.PrecioReposicion,
-           DATEADD(DAY, -2, GETDATE()), 'deposito', 0
-    FROM Prenda pr WHERE pr.Nombre = N'Traje Gris Slim' AND @cCamila IS NOT NULL AND pr.PrecioReposicion IS NOT NULL;
-
-    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada', GETDATE());
-    PRINT 'Datos de prueba (sección 21) aplicados.';
-END
-GO
-
--- ============================================================
 -- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
 -- ------------------------------------------------------------
 -- Despachar, registrar la entrega y registrar la devolución (que abre PN04) se hacen desde Pedidos
@@ -3296,6 +3020,333 @@ JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 
 WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
                   WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
 PRINT 'Permiso mnuListaEsperaEditar asignado a Administrador, Vendedor y Deposito.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21e. DATOS DE DEMO: ESCENARIOS DE PN01, PN02 Y PN03
+-- ------------------------------------------------------------
+-- Escenarios listos para mostrar cada proceso de negocio. El APELLIDO de cada cliente y el
+-- NOMBRE de cada promoción dicen qué rama del diagrama de actividad muestran:
+--   PN01 Armar pedido (vendedor + deposito)
+--     Juan PedidoFeliz ............ suscripción vigente, sin pedidos: camino feliz completo
+--     Ana PrendasNoDisponibles .... pedido En control de stock con una prenda que ya tiene otro
+--                                   cliente → Depósito informa faltantes con alternativas
+--     Nicolas ExcedeCupo .......... plan Básico (5 prendas): elegir 6 → exceso de cupo / desistir
+--     Sofia ListaParaFormalizar ... pedido Separado → el Vendedor lo formaliza
+--     Pedro PedidoActivo .......... ya tiene un pedido formalizado → aviso de pedido activo
+--     Lucia SuscripcionVencida .... vencida → aviso de suscripción no vigente
+--     Tomas SuscripcionPausada .... pausada → aviso de suscripción no vigente
+--   PN02 Comercialización de la suscripción (vendedor + caja)
+--     Laura SinPlan ............... registrada sin plan → contratar
+--     Rocio ReferidaPorJuan ....... sin plan, referida por Juan → al cobrar se acredita el beneficio
+--     Diego PagoPendiente ......... contratación Estándar trimestral esperando a Caja
+--                                   (tiene la promoción vigente del plan Estándar)
+--     Elena TercerIntentoFallido .. contratación con 2 intentos fallidos → el 3.º la cancela
+--     (DNI 40000099: no existe → rama "¿Registrado? No")
+--   PN03 Promociones (gcomercial, admcomercial, contable, vendedor)
+--     2 sugerencias pendientes, y promociones En revisión contable, Vigente, Rechazada por
+--     Contabilidad y con Baja solicitada.
+-- Se carga UNA sola vez: en una instalación NUEVA, o cuando se pidió restablecer la demo con
+-- BD/Reset_Datos_Demo.sql (marca ParametroSistema 'ResetDatosDemo' = '1'). En ese caso primero se
+-- BORRAN los datos de negocio (clientes, prendas, pedidos, contrataciones, promociones y la
+-- bitácora de negocio); usuarios, planes, permisos, traducciones y bitácora del sistema se conservan.
+-- Nunca se mezclan con datos reales: con datos propios y sin pedido de restablecer, no hace nada.
+-- DVH = 0: se pide el recálculo de los dígitos verificadores (la app los calcula al arrancar).
+-- ============================================================
+DECLARE @sembrar21 BIT = 0;
+DECLARE @reset21   BIT = CASE WHEN EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'ResetDatosDemo' AND Valor = N'1') THEN 1 ELSE 0 END;
+IF @reset21 = 1
+    SET @sembrar21 = 1;
+ELSE IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SeedDemo21')
+    PRINT 'Datos de demo (sección 21e) ya aplicados — sin cambios.';
+ELSE IF EXISTS (SELECT 1 FROM Cliente WHERE Nombre = N'Julieta' AND Apellido = N'Navarro')
+BEGIN
+    -- Base de una versión anterior que ya tenía los datos de prueba viejos (marca vieja).
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada por una versión anterior', GETDATE());
+    PRINT 'Datos de prueba (sección 21e) ya aplicados por una versión anterior — sin cambios.';
+END
+ELSE IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente')
+     OR EXISTS (SELECT 1 FROM Contratacion)
+     OR (SELECT COUNT(*) FROM Pedido) > 3
+BEGIN
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Omitida: la base ya tenía datos', GETDATE());
+    PRINT 'AVISO: la base ya tiene datos de negocio; no se cargan los datos de demo (sección 21e).';
+END
+ELSE
+    SET @sembrar21 = 1;
+
+IF @sembrar21 = 1
+BEGIN
+    SET XACT_ABORT ON;   -- ante cualquier error se revierte todo el bloque
+    BEGIN TRANSACTION;
+
+    -- ── Se borran los datos de negocio (en una instalación nueva: los ejemplos de la sección 01) ──
+    DELETE FROM PedidoFaltanteAlternativa;
+    DELETE FROM PedidoFaltante;
+    DELETE FROM PedidoHistorial;
+    DELETE FROM PedidoPrenda;
+    DELETE FROM BitacoraNegocio;
+    DELETE FROM CargoPrenda;
+    DELETE FROM ListaEspera;
+    DELETE FROM MantenimientoPrenda;
+    DELETE FROM ContratacionIntentoPago;
+    DELETE FROM Contratacion;
+    DELETE FROM DesistimientoContratacion;
+    DELETE FROM HistorialCobro;
+    DELETE FROM HistorialRenovacion;
+    DELETE FROM PromocionHistorial;
+    DELETE FROM DictamenContable;
+    DELETE FROM SolicitudBajaPromocion;
+    DELETE FROM Promocion;
+    DELETE FROM SugerenciaPromocion;
+    DELETE FROM Pedido;
+    DELETE FROM Prenda;
+    UPDATE Cliente SET IdClienteReferente = NULL;
+    DELETE FROM Cliente;
+
+    -- ── Empleados de Caja y Administrador (Vendedor y Depósito vienen de la sección 01) ──
+    INSERT INTO Empleado (Nombre, Apellido, DNI, Email, FechaIngreso, Puesto, Legajo, IdUsuario, DVH)
+    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, GETDATE(), v.Puesto, v.Legajo,
+           (SELECT TOP 1 IdUsuario FROM Usuario u WHERE u.Username = v.Username), 0
+    FROM (VALUES
+        (N'Carolina', N'Ibáñez',  '34555666', 'caja@wardrobeflow.com',  N'Caja',          'L-003', 'caja'),
+        (N'Admin',    N'Sistema', '30000001', 'admin@wardrobeflow.com', N'Administrador', 'L-004', 'admin')
+    ) AS v(Nombre, Apellido, DNI, Email, Puesto, Legajo, Username)
+    WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo);
+
+    DECLARE @vend INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-001');
+    DECLARE @depo INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-002');
+    DECLARE @caja INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-003');
+    IF @vend IS NULL OR @depo IS NULL
+        PRINT 'AVISO: faltan los empleados L-001 (vendedor) o L-002 (deposito); no se cargan los pedidos ni las contrataciones de demo.';
+    DECLARE @hoy  DATE = CAST(GETDATE() AS DATE);
+    DECLARE @pBasico  INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Básico'   AND Estado = 1);
+    DECLARE @pEstand  INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Estándar' AND Estado = 1);
+    DECLARE @pPremium INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Premium'  AND Estado = 1);
+
+    -- ── Clientes: el apellido dice qué escenario muestran ────────────────────
+    INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaNacimiento,
+                         FechaVencimiento, FechaPausaHasta, Activo, DVH)
+    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, v.MetodoPago, v.IdPlan,
+           DATEADD(DAY, -v.DiasAlta, GETDATE()), v.FechaNac,
+           CASE WHEN v.DiasVence IS NULL THEN NULL ELSE DATEADD(DAY, v.DiasVence, @hoy) END,
+           CASE WHEN v.DiasPausa IS NULL THEN NULL ELSE DATEADD(DAY, v.DiasPausa, GETDATE()) END,
+           1, 0
+    FROM (VALUES
+        -- PN01
+        (N'Juan',    N'PedidoFeliz',          '40000001', 'juan.pedidofeliz@demo.com',          N'Crédito',       @pPremium, 120, CONVERT(date,'1990-03-12'),   30, NULL),
+        (N'Ana',     N'PrendasNoDisponibles', '40000002', 'ana.prendasnodisponibles@demo.com',  N'Débito',        @pEstand,   90, CONVERT(date,'1992-07-21'),   25, NULL),
+        (N'Nicolas', N'ExcedeCupo',           '40000003', 'nicolas.excedecupo@demo.com',        N'Débito',        @pBasico,   60, CONVERT(date,'1997-04-14'),   20, NULL),
+        (N'Sofia',   N'ListaParaFormalizar',  '40000004', 'sofia.listaparaformalizar@demo.com', N'Crédito',       @pPremium,  75, CONVERT(date,'1994-11-02'),   28, NULL),
+        (N'Pedro',   N'PedidoActivo',         '40000005', 'pedro.pedidoactivo@demo.com',        'Transferencia', @pEstand,  150, CONVERT(date,'1988-02-09'),   15, NULL),
+        (N'Lucia',   N'SuscripcionVencida',   '40000006', 'lucia.suscripcionvencida@demo.com',  N'Crédito',       @pEstand,  200, CONVERT(date,'1991-09-30'),  -10, NULL),
+        (N'Tomas',   N'SuscripcionPausada',   '40000007', 'tomas.suscripcionpausada@demo.com',  N'Débito',        @pBasico,  100, CONVERT(date,'1995-09-03'),   40,   20),
+        -- PN02
+        (N'Laura',   N'SinPlan',              '40000008', 'laura.sinplan@demo.com',             'Efectivo',      NULL,        3, CONVERT(date,'1999-12-21'), NULL, NULL),
+        (N'Rocio',   N'ReferidaPorJuan',      '40000009', 'rocio.referidaporjuan@demo.com',     'Efectivo',      NULL,        1, CONVERT(date,'2000-06-15'), NULL, NULL),
+        (N'Diego',   N'PagoPendiente',        '40000010', 'diego.pagopendiente@demo.com',       'Transferencia', NULL,        2, CONVERT(date,'1993-08-27'), NULL, NULL),
+        (N'Elena',   N'TercerIntentoFallido', '40000011', 'elena.tercerintentofallido@demo.com', N'Crédito',      NULL,        4, CONVERT(date,'1996-01-19'), NULL, NULL)
+    ) AS v(Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, DiasAlta, FechaNac, DiasVence, DiasPausa);
+
+    DECLARE @cJuan   INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000001');
+    DECLARE @cAna    INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000002');
+    DECLARE @cSofia  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000004');
+    DECLARE @cPedro  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000005');
+    DECLARE @cLucia  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000006');
+    DECLARE @cRocio  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000009');
+    DECLARE @cDiego  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000010');
+    DECLARE @cElena  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000011');
+    UPDATE Cliente SET IdClienteReferente = @cJuan WHERE IdCliente = @cRocio;   -- Rocío llegó por Juan
+
+    -- ── Prendas: por cada categoría y talle hay varias, para que existan alternativas ──
+    INSERT INTO Prenda (Nombre, Descripcion, Talle, Color, Categoria, Estado, IdClienteActual, IdUltimoCliente, PrecioReposicion, FechaAlta)
+    SELECT v.Nombre, v.Descripcion, v.Talle, v.Color, v.Categoria, v.Estado, v.Cli, v.Cli, v.Precio, DATEADD(DAY, -100, GETDATE())
+    FROM (VALUES
+        (N'Vestido Azul M',       N'Vestido midi de gasa',        'M',  N'Azul',    N'Vestido',  0, NULL,    42000.00),
+        (N'Vestido Verde M',      N'Vestido midi de gasa',        'M',  N'Verde',   N'Vestido',  0, NULL,    42000.00),
+        (N'Vestido Negro M',      N'Vestido largo de noche',      'M',  N'Negro',   N'Vestido',  0, NULL,    48000.00),
+        (N'Vestido Rojo S',       N'Vestido corto de fiesta',     'S',  N'Rojo',    N'Vestido',  1, @cSofia, 45000.00),
+        (N'Falda Plisada S',      N'Falda midi plisada',          'S',  N'Beige',   N'Falda',    1, @cSofia, 20000.00),
+        (N'Saco Negro M',         N'Blazer de vestir',            'M',  N'Negro',   N'Saco',     1, @cPedro, 38000.00),
+        (N'Saco Gris M',          N'Blazer de vestir',            'M',  N'Gris',    N'Saco',     0, NULL,    38000.00),
+        (N'Saco Beige M',         N'Blazer de lino',              'M',  N'Beige',   N'Saco',     0, NULL,    36000.00),
+        (N'Camisa Blanca S',      N'Camisa de algodón',           'S',  N'Blanco',  N'Camisa',   0, NULL,    18000.00),
+        (N'Camisa Celeste S',     N'Camisa de algodón',           'S',  N'Celeste', N'Camisa',   0, NULL,    18000.00),
+        (N'Camisa Rayada S',      N'Camisa de viscosa',           'S',  N'Rayado',  N'Camisa',   0, NULL,    19000.00),
+        (N'Pantalon Negro 40',    N'Pantalón sastrero',           '40', N'Negro',   N'Pantalón', 0, NULL,    24000.00),
+        (N'Pantalon Beige 40',    N'Pantalón de lino',            '40', N'Beige',   N'Pantalón', 0, NULL,    26000.00),
+        (N'Tapado Camel L',       N'Tapado de paño',              'L',  N'Camel',   N'Abrigo',   0, NULL,    55000.00),
+        (N'Campera Cuero L',      N'Campera biker de cuero',      'L',  N'Negro',   N'Abrigo',   0, NULL,    60000.00),
+        (N'Sweater Gris M',       N'Sweater de lana',             'M',  N'Gris',    N'Sweater',  0, NULL,    22000.00),
+        (N'Sweater Bordo M',      N'Sweater de lana',             'M',  N'Bordó',   N'Sweater',  0, NULL,    22000.00),
+        (N'Blazer Azul M',        N'Blazer cruzado (en limpieza)', 'M', N'Azul',    N'Saco',     2, NULL,    38000.00)
+    ) AS v(Nombre, Descripcion, Talle, Color, Categoria, Estado, Cli, Precio);
+
+    -- La prenda en limpieza tiene su mantenimiento abierto (pantalla de Inspección).
+    INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, FechaSalida, Actor)
+    SELECT IdPrenda, DATEADD(DAY, -1, GETDATE()), NULL, 'deposito' FROM Prenda WHERE Nombre = N'Blazer Azul M';
+
+    DECLARE @pzVestAzul  INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Vestido Azul M');
+    DECLARE @pzVestRojo  INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Vestido Rojo S');
+    DECLARE @pzFalda     INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Falda Plisada S');
+    DECLARE @pzSacoNegro INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Saco Negro M');
+    DECLARE @pzCamisa    INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Camisa Blanca S');
+    DECLARE @pzTapado    INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Tapado Camel L');
+    DECLARE @idp INT;
+
+    IF @vend IS NOT NULL AND @depo IS NOT NULL
+    BEGIN
+        -- ── PN01: Pedro ya tiene un pedido FORMALIZADO (Pendiente de despacho) → "pedido activo" ──
+        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, FechaControl, IdEmpleadoControl,
+                            FechaSeparacion, FechaFormalizacion, DVH)
+        VALUES (@cPedro, @vend, 0, DATEADD(DAY, -3, GETDATE()), DATEADD(DAY, -3, GETDATE()), DATEADD(DAY, -2, GETDATE()), @depo,
+                DATEADD(DAY, -2, GETDATE()), DATEADD(DAY, -1, GETDATE()), 0);
+        SET @idp = SCOPE_IDENTITY();
+        INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@idp, @pzSacoNegro, 1);
+
+        -- ── PN01: Sofía tiene un pedido SEPARADO (prendas ya En uso) → el Vendedor lo formaliza ──
+        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, FechaControl, IdEmpleadoControl,
+                            FechaSeparacion, DVH)
+        VALUES (@cSofia, @vend, 6, DATEADD(HOUR, -6, GETDATE()), DATEADD(HOUR, -6, GETDATE()), DATEADD(HOUR, -2, GETDATE()), @depo,
+                DATEADD(HOUR, -2, GETDATE()), 0);
+        SET @idp = SCOPE_IDENTITY();
+        INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@idp, @pzVestRojo, 1), (@idp, @pzFalda, 1);
+
+        -- ── PN01: Ana tiene un pedido EN CONTROL DE STOCK con el "Saco Negro M", que ya tiene Pedro ──
+        --    Depósito lo ve como no disponible → Informar faltantes (alternativas: Saco Gris M y Saco Beige M).
+        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, DVH)
+        VALUES (@cAna, @vend, 4, DATEADD(HOUR, -1, GETDATE()), DATEADD(HOUR, -1, GETDATE()), 0);
+        SET @idp = SCOPE_IDENTITY();
+        INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@idp, @pzVestAzul, 0), (@idp, @pzSacoNegro, 0);
+
+        -- ── Historial entregado (para que las métricas de PN03 tengan datos) ──
+        DECLARE @hist TABLE (Cli INT, Dias INT, Prenda INT);
+        INSERT INTO @hist VALUES (@cJuan, 60, @pzCamisa), (@cJuan, 30, @pzTapado), (@cLucia, 50, @pzVestAzul),
+                                 (@cPedro, 90, @pzCamisa), (@cLucia, 80, @pzTapado);
+        DECLARE @cli INT, @dias INT, @pz INT;
+        DECLARE curHist CURSOR LOCAL FAST_FORWARD FOR SELECT Cli, Dias, Prenda FROM @hist WHERE Cli IS NOT NULL AND Prenda IS NOT NULL;
+        OPEN curHist;
+        FETCH NEXT FROM curHist INTO @cli, @dias, @pz;
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, FechaControl, IdEmpleadoControl,
+                                FechaSeparacion, FechaFormalizacion, FechaDespacho, FechaEntrega, DVH)
+            VALUES (@cli, @vend, 2, DATEADD(DAY, -@dias, GETDATE()), DATEADD(DAY, -@dias, GETDATE()),
+                    DATEADD(DAY, -@dias, GETDATE()), @depo, DATEADD(DAY, -@dias, GETDATE()), DATEADD(DAY, -@dias, GETDATE()),
+                    DATEADD(DAY, -@dias + 1, GETDATE()), DATEADD(DAY, -@dias + 2, GETDATE()), 0);
+            SET @idp = SCOPE_IDENTITY();
+            INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@idp, @pz, 1);
+            FETCH NEXT FROM curHist INTO @cli, @dias, @pz;
+        END
+        CLOSE curHist;
+        DEALLOCATE curHist;
+    END
+
+    -- ── PN02: contrataciones ─────────────────────────────────────────────────
+    IF @vend IS NOT NULL
+    BEGIN
+        -- Juan: su suscripción vino de una contratación ya cobrada (vista "Resueltas" de Caja).
+        INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion,
+                                  IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado,
+                                  VigenciaDesde, VigenciaHasta, PrecioMensual)
+        SELECT @cJuan, pl.IdPlan, @vend, @caja, 0, 1, DATEADD(DAY, -120, GETDATE()), DATEADD(DAY, -120, GETDATE()),
+               2, 'CMP-0001-' + FORMAT(DATEADD(DAY, -120, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -120, GETDATE()),
+               pl.Precio, 0, DATEADD(DAY, -120, @hoy), DATEADD(DAY, 30, @hoy),   -- misma vigencia que la suscripción de Juan
+               pl.Precio
+        FROM PlanSuscripcion pl WHERE pl.IdPlan = @pPremium AND @caja IS NOT NULL AND @cJuan IS NOT NULL;
+
+        -- Diego: Estándar trimestral esperando a Caja (con la promoción vigente del plan Estándar).
+        -- Elena: Básico mensual esperando a Caja, ya con 2 intentos fallidos.
+        INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, PrecioMensual)
+        SELECT v.Cli, pl.IdPlan, @vend, NULL, v.Modalidad, 0, v.FechaAlta, pl.Precio
+        FROM (VALUES (@cDiego, @pEstand, 1, DATEADD(HOUR, -3, GETDATE())),
+                     (@cElena, @pBasico, 0, DATEADD(DAY,  -1, GETDATE()))) AS v(Cli, IdPlan, Modalidad, FechaAlta)
+        JOIN PlanSuscripcion pl ON pl.IdPlan = v.IdPlan
+        WHERE v.Cli IS NOT NULL;
+
+        INSERT INTO ContratacionIntentoPago (IdContratacion, NroIntento, Fecha, IdMedioPago, Motivo, IdCaja)
+        SELECT c.IdContratacion, v.Nro, DATEADD(HOUR, -v.Horas, GETDATE()), 2, v.Motivo, @caja
+        FROM Contratacion c
+        CROSS JOIN (VALUES (1, 20, N'Tarjeta rechazada'), (2, 4, N'Fondos insuficientes')) AS v(Nro, Horas, Motivo)
+        WHERE c.IdCliente = @cElena AND c.Estado = 0 AND @caja IS NOT NULL;
+    END
+
+    -- ── PN03: sugerencias y promociones en cada estado, con sus objetos e historial ──
+    -- Gerencia (gcomercial) sugiere, Administración (admcomercial) crea, Contabilidad (contable)
+    -- dictamina y Ventas (vendedor) pide la baja: quien crea no dictamina.
+    DECLARE @uGer  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'gcomercial');
+    DECLARE @uAdm  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'admcomercial');
+    DECLARE @uCont INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'contable');
+    DECLARE @uVend INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'vendedor');
+
+    INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
+    SELECT v.IdPlan, v.Categoria, v.Motivo, v.Tipo, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
+    FROM (VALUES
+        (@pBasico, NULL,      N'SUGERENCIA PendienteDeEvaluar: el plan Básico tiene la mayor tasa de abandono; un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE()), 0),
+        (NULL,     N'Abrigo', N'SUGERENCIA PendienteDeEvaluar: los abrigos rotan poco fuera de temporada; conviene incentivar su alquiler.',               1,  5000.00, DATEADD(DAY, -2, GETDATE()), 1)
+    ) AS v(IdPlan, Categoria, Motivo, Tipo, Beneficio, FechaAlta, Origen)
+    WHERE (v.IdPlan IS NOT NULL OR v.Categoria IS NOT NULL) AND @uGer IS NOT NULL;
+
+    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, CategoriaPrenda, MargenEstimado, ImpactoEconomico, IdUsuarioAlta, FechaAlta)
+    SELECT v.Nombre, v.Descripcion, v.TipoDescuento, v.Valor, v.FechaInicio, v.FechaFin, v.Estado, v.IdPlan, v.Categoria,
+           v.Margen, v.Impacto, @uAdm, v.FechaAlta
+    FROM (VALUES
+        (N'PROMO Vigente Estandar -10%',        N'10% en el plan Estándar. Vigente: Ventas puede pedir la baja y se aplica en el cobro.', 0, 10.00,
+         DATEADD(DAY, -10, @hoy), DATEADD(DAY, 50, @hoy), 1, @pEstand, NULL, 8000.00, N'Reducción compensada por mayor retención.', DATEADD(DAY, -12, GETDATE())),
+        (N'PROMO ParaDictaminar Premium -15%',  N'15% en el plan Premium. Espera el dictamen de Contabilidad.',                         0, 15.00,
+         @hoy, DATEADD(DAY, 30, @hoy), 0, @pPremium, NULL, 6000.00, N'Descuento de captación para nuevos clientes.', DATEADD(DAY, -1, GETDATE())),
+        (N'PROMO Rechazada Basico -20%',        N'20% en el plan Básico. Contabilidad la rechazó: Administración la reformula o descarta.', 0, 20.00,
+         @hoy, DATEADD(DAY, 30, @hoy), 2, @pBasico, NULL, 3000.00, N'El margen no cubre la reducción.', DATEADD(DAY, -5, GETDATE())),
+        (N'PROMO BajaSolicitada Abrigos $3000', N'$3000 menos por prenda Abrigo. Ventas pidió la baja: Administración la resuelve.',  1, 3000.00,
+         DATEADD(DAY, -20, @hoy), DATEADD(DAY, 40, @hoy), 3, NULL, N'Abrigo', 4500.00, N'Impacto bajo: categoría de baja rotación.', DATEADD(DAY, -22, GETDATE()))
+    ) AS v(Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, Categoria, Margen, Impacto, FechaAlta)
+    WHERE (v.IdPlan IS NOT NULL OR v.Categoria IS NOT NULL) AND @uAdm IS NOT NULL;
+
+    DECLARE @prVig  INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Vigente Estandar -10%');
+    DECLARE @prDict INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO ParaDictaminar Premium -15%');
+    DECLARE @prRech INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Rechazada Basico -20%');
+    DECLARE @prBaja INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO BajaSolicitada Abrigos $3000');
+
+    IF @uCont IS NOT NULL
+        INSERT INTO DictamenContable (IdPromocion, IdUsuario, Aprobada, Observacion, Fecha)
+        SELECT v.IdPromocion, @uCont, v.Aprobada, v.Observacion, v.Fecha
+        FROM (VALUES
+            (@prVig,  1, N'Aprobada: el margen estimado cubre la reducción de ingresos.',      DATEADD(DAY, -11, GETDATE())),
+            (@prRech, 0, N'Rechazada: un 20% en el plan más barato no cubre el costo.',         DATEADD(DAY,  -4, GETDATE())),
+            (@prBaja, 1, N'Aprobada: impacto bajo en una categoría de baja rotación.',          DATEADD(DAY, -21, GETDATE()))
+        ) AS v(IdPromocion, Aprobada, Observacion, Fecha)
+        WHERE v.IdPromocion IS NOT NULL;
+
+    INSERT INTO SolicitudBajaPromocion (IdPromocion, IdUsuarioSolicita, Motivo, FechaSolicitud, Estado)
+    SELECT @prBaja, @uVend, N'Los clientes no la usan y confunde en el mostrador.', DATEADD(DAY, -1, GETDATE()), 0
+    WHERE @prBaja IS NOT NULL AND @uVend IS NOT NULL;
+
+    INSERT INTO PromocionHistorial (IdPromocion, EstadoAnterior, EstadoNuevo, IdUsuario, Fecha, Observacion)
+    SELECT v.IdPromocion, v.Anterior, v.Nuevo, v.IdUsuario, v.Fecha, v.Observacion
+    FROM (VALUES
+        (@prVig,  NULL, 0, @uAdm,  DATEADD(DAY, -12, GETDATE()), N'Alta manual'),
+        (@prVig,  0,    1, @uCont, DATEADD(DAY, -11, GETDATE()), N'Aprobada por Contabilidad'),
+        (@prDict, NULL, 0, @uAdm,  DATEADD(DAY,  -1, GETDATE()), N'Alta manual'),
+        (@prRech, NULL, 0, @uAdm,  DATEADD(DAY,  -5, GETDATE()), N'Alta manual'),
+        (@prRech, 0,    2, @uCont, DATEADD(DAY,  -4, GETDATE()), N'Rechazada por Contabilidad'),
+        (@prBaja, NULL, 0, @uAdm,  DATEADD(DAY, -22, GETDATE()), N'Alta manual'),
+        (@prBaja, 0,    1, @uCont, DATEADD(DAY, -21, GETDATE()), N'Aprobada por Contabilidad'),
+        (@prBaja, 1,    3, @uVend, DATEADD(DAY,  -1, GETDATE()), N'Ventas solicitó la baja')
+    ) AS v(IdPromocion, Anterior, Nuevo, IdUsuario, Fecha, Observacion)
+    WHERE v.IdPromocion IS NOT NULL;
+
+    -- ── Marcas: datos de demo aplicados y recálculo de los dígitos verificadores ──
+    DELETE FROM ParametroSistema WHERE Clave IN (N'SeedDemo21', N'ResetDatosDemo');
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada', GETDATE());
+    IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'FormatoDV' AND TRY_CONVERT(INT, Valor) >= 2)
+        MERGE ParametroSistema AS t
+        USING (VALUES (N'DVReinicializar', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+        WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+        WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+
+    COMMIT TRANSACTION;
+    PRINT 'Datos de demo (sección 21e) aplicados: escenarios de PN01, PN02 y PN03.';
+END
 GO
 
 -- ============================================================

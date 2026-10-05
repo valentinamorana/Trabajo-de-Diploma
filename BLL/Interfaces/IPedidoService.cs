@@ -54,7 +54,8 @@ namespace BLL.Interfaces
         int AsentarDesistimiento(string modulo, int idCliente, List<BE.Prenda> prendas, string motivo);
 
         // "Asentar desistimiento" de un pedido con faltantes informados.
-        void AsentarDesistimiento(string modulo, BE.Pedido pedido, string motivo, BE.EtapaDesistimiento etapa);
+        void AsentarDesistimiento(string modulo, BE.Pedido pedido, string motivo, BE.EtapaDesistimiento etapa,
+                                  List<BE.Prenda> seleccionAjustada = null);
 
         // "Recibir selección ajustada por disponibilidad": vuelve a control de stock.
         void AjustarSeleccion(string modulo, BE.Pedido pedido, List<BE.Prenda> prendas);

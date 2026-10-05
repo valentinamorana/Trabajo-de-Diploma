@@ -106,7 +106,41 @@ namespace BLL
         public BE.Cliente VerificarVigencia(int idCliente)
         {
             PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
-            return ObtenerClienteValidado(idCliente);
+            try
+            {
+                return ObtenerClienteValidado(idCliente);
+            }
+            catch (BE.AppException ex)
+            {
+                // Aviso de suscripción no vigente: queda registrado aunque no se arme el pedido.
+                RegistrarAviso("Aviso de suscripción no vigente", idCliente, ex);
+                throw;
+            }
+        }
+
+        private const string ModuloArmado = "Armar pedido";
+
+        // Máquina de estados del diagrama (BE.Pedido.TransicionValida): ninguna operación del
+        // armado puede mover el pedido por una flecha que el diagrama no tiene.
+        private static void ExigirTransicion(BE.Pedido pedido, BE.EstadoPedido destino)
+        {
+            if (!pedido.TransicionValida(destino))
+                throw new BE.AppException("err.bll.pedido.transicion_invalida",
+                    "El Pedido #{0} no puede pasar de '{1}' a '{2}'.",
+                    pedido.IdPedido, pedido.Estado, destino);
+        }
+
+        // Los avisos del diagrama que cortan el circuito (suscripción no vigente, pedido activo)
+        // no generan pedido: se asientan en la bitácora del sistema con el motivo.
+        private void RegistrarAviso(string aviso, int idCliente, BE.AppException ex)
+        {
+            try
+            {
+                bitacora.Registrar(ModuloArmado,
+                    $"{aviso} — Cliente #{idCliente} — {ex.Clave}: {ex.Message}",
+                    BE.Criticidad.Baja);
+            }
+            catch (Exception e) { System.Diagnostics.Trace.TraceError($"[BLL.Pedido] Aviso: {e.Message}"); }
         }
 
         // "Revisar existencia de un pedido activo" → ¿Posee pedido activo? Si lo tiene, lanza el
@@ -114,7 +148,19 @@ namespace BLL
         // su ciclo (en control de stock, con faltantes, separado, formalizado o despachado). Además,
         // igual que NUULY (4.2/4.6), la cuenta sigue bloqueada mientras el cliente tenga prendas en
         // uso sin devolver (pedido Entregado): PN04 (RegistrarDevolucion) la desbloquea.
-        public void RevisarPedidoActivo(BE.Cliente cliente) => RevisarPedidoActivo(cliente, null);
+        public void RevisarPedidoActivo(BE.Cliente cliente)
+        {
+            try
+            {
+                RevisarPedidoActivo(cliente, null);
+            }
+            catch (BE.AppException ex) when (ex.Clave != "err.bll.sin_permiso" && ex.Clave != "err.bll.sesion_expirada")
+            {
+                // Aviso de pedido activo.
+                RegistrarAviso("Aviso de pedido activo", cliente.IdCliente, ex);
+                throw;
+            }
+        }
 
         private void RevisarPedidoActivo(BE.Cliente cliente, int? idPedidoExcluido)
         {
@@ -207,7 +253,8 @@ namespace BLL
             ValidarParametrosEntrada(prendas);
             ValidarMotivoDesistimiento(motivo);
 
-            var cliente = ObtenerClienteValidado(idCliente);
+            // Se llega acá después de "¿Suscripción vigente? Sí" y "¿Posee pedido activo? No".
+            var cliente = ValidarPuedeArmarPedido(idCliente);
             if (cliente.PuedeSolicitarPrendas(prendas.Count))
                 throw new BE.AppException("err.bll.pedido.desistimiento_sin_exceso",
                     "La selección está dentro del cupo del plan: el desistimiento por cupo solo se " +
@@ -238,26 +285,48 @@ namespace BLL
             return idNuevo;
         }
 
-        // "Asentar desistimiento" de un pedido con faltantes informados: el cliente no ajusta la
-        // selección (etapa Disponibilidad) o, al ajustarla, excede el cupo y no la corrige (etapa
-        // Cupo). No hay prendas que liberar: nunca se reservaron.
-        public void AsentarDesistimiento(string modulo, BE.Pedido pedido, string motivo, BE.EtapaDesistimiento etapa)
+        // "Asentar desistimiento" de un pedido con faltantes informados:
+        //   • etapa Disponibilidad: el cliente no ajusta la selección (¿Ajustar selección? No);
+        //   • etapa Cupo: al ajustarla excede el cupo y no la corrige (¿Desea ajustar? No). En ese
+        //     caso se pasa la selección ajustada: tiene que exceder el cupo y queda guardada como
+        //     la selección desistida (es la que figura en el Aviso de desistimiento).
+        // No hay prendas que liberar: nunca se reservaron.
+        public void AsentarDesistimiento(string modulo, BE.Pedido pedido, string motivo,
+                                         BE.EtapaDesistimiento etapa, List<BE.Prenda> seleccionAjustada = null)
         {
             PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
             if (!pedido.PuedeDesistirse())
                 throw new BE.AppException("err.bll.pedido.desistir_estado",
                     "Solo se asienta el desistimiento de un pedido con faltantes informados. Este pedido está '{0}'.",
                     pedido.Estado);
+            ExigirTransicion(pedido, BE.EstadoPedido.Desistido);
             ValidarMotivoDesistimiento(motivo);
 
-            dalPedido.RegistrarDesistimiento(pedido.IdPedido, motivo.Trim(), etapa);
+            if (etapa == BE.EtapaDesistimiento.Cupo)
+            {
+                ValidarParametrosEntrada(seleccionAjustada);
+                var cliente = dalCliente.ObtenerPorId(pedido.IdCliente);
+                if (cliente == null || cliente.PuedeSolicitarPrendas(seleccionAjustada.Count))
+                    throw new BE.AppException("err.bll.pedido.desistimiento_sin_exceso",
+                        "La selección está dentro del cupo del plan: el desistimiento por cupo solo se " +
+                        "asienta cuando la selección lo excede.");
+            }
+            else
+            {
+                seleccionAjustada = null;   // por disponibilidad se conserva la selección informada
+            }
 
-            RegistrarHistorial(pedido.IdPedido, "DESISTIR", new List<(string, string, string)>
+            dalPedido.RegistrarDesistimiento(pedido.IdPedido, motivo.Trim(), etapa, seleccionAjustada);
+
+            var cambios = new List<(string, string, string)>
             {
                 ("Estado",              pedido.Estado.ToString(), BE.EstadoPedido.Desistido.ToString()),
                 ("EtapaDesistimiento",  null,                     etapa.ToString()),
                 ("MotivoDesistimiento", null,                     motivo.Trim())
-            });
+            };
+            if (seleccionAjustada != null)
+                cambios.Add(("Prendas", IdsDe(pedido.Prendas), IdsDe(seleccionAjustada)));
+            RegistrarHistorial(pedido.IdPedido, "DESISTIR", cambios);
             LogDesistimiento(modulo, pedido.IdPedido, pedido.IdCliente, pedido.NombreCliente, etapa, motivo.Trim());
         }
 
@@ -272,10 +341,14 @@ namespace BLL
                 throw new BE.AppException("err.bll.pedido.ajustar_estado",
                     "Solo se ajusta la selección de un pedido con faltantes informados. Este pedido está '{0}'.",
                     pedido.Estado);
+            ExigirTransicion(pedido, BE.EstadoPedido.EnControlStock);
             ValidarParametrosEntrada(prendas);
 
-            var cliente = VerificarVigencia(pedido.IdCliente);
-            RevisarPedidoActivo(cliente, pedido.IdPedido);
+            // El flujo vuelve al punto de unión anterior a "Anotar la selección ∥ Comprobar el
+            // cupo": se comprueba solo el cupo (la vigencia y el pedido activo ya se verificaron
+            // al armar el pedido, que sigue siendo el mismo).
+            var cliente = dalCliente.ObtenerPorId(pedido.IdCliente)
+                ?? throw new BE.AppException("err.bll.pedido.cliente_inexistente", "El cliente seleccionado no existe.");
             ComprobarCupo(cliente, prendas.Count);
 
             dalPedido.ReemplazarSeleccion(pedido.IdPedido, prendas);
@@ -349,6 +422,7 @@ namespace BLL
                 throw new BE.AppException("err.bll.pedido.sin_faltantes",
                     "Todas las prendas del Pedido #{0} están disponibles: confirmalas en lugar de informar faltantes.",
                     pedido.IdPedido);
+            ExigirTransicion(pedido, BE.EstadoPedido.ConFaltantes);
 
             int idEmpleado = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
             dalPedido.RegistrarFaltantes(pedido.IdPedido, idEmpleado, faltantes);
@@ -414,6 +488,7 @@ namespace BLL
                 throw new BE.AppException("err.bll.pedido.sin_confirmar",
                     "Confirmá las prendas disponibles del Pedido #{0} antes de separarlas.",
                     pedido.IdPedido);
+            ExigirTransicion(pedido, BE.EstadoPedido.Separado);
 
             bool todasDisponibles = RevisarStock(pedido).TrueForAll(l => l.Disponible);
             if (todasDisponibles)
@@ -473,6 +548,7 @@ namespace BLL
                 throw new BE.AppException("err.bll.pedido.formalizar_estado",
                     "Solo se formaliza un pedido con las prendas ya separadas por Depósito. Este pedido está '{0}'.",
                     pedido.Estado);
+            ExigirTransicion(pedido, BE.EstadoPedido.Pendiente);
 
             dalPedido.Formalizar(pedido.IdPedido);
 

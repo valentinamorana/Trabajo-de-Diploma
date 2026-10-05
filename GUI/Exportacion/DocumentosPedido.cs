@@ -49,12 +49,32 @@ namespace GUI.Exportacion
             sb.AppendLine();
         }
 
-        public static ReporteExportable PlanillaControl(BE.Pedido pedido, List<BE.LineaControlStock> lineas = null)
+        // "Detalle de selección dentro del cupo": plan, límite, prendas en uso y seleccionadas.
+        private static void LineaCupo(StringBuilder sb, BE.Cliente cliente, int seleccionadas)
+        {
+            if (cliente == null) return;
+            sb.AppendLine(string.Format(
+                Tr("doc.ped.cupo", "Plan {0}: {1} prenda(s) seleccionadas + {2} en uso, de {3} permitidas."),
+                cliente.NombrePlan ?? "—", seleccionadas, cliente.StockUtilizado, cliente.LimitePrendas));
+            sb.AppendLine();
+        }
+
+        private static void CabeceraCliente(StringBuilder sb, BE.Cliente c)
+        {
+            sb.AppendLine($"{Tr("doc.ped.cliente", "Cliente")}: {c.NombreCompleto}  —  DNI {c.DNI}");
+            sb.AppendLine($"{Tr("doc.aviso.plan", "Plan")}: {c.NombrePlan ?? "—"}  —  {Tr("doc.aviso.vence", "Vence")}: {(c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : "—")}");
+            sb.AppendLine($"{Tr("doc.aviso.fecha", "Fecha del aviso")}: {Fecha(DateTime.Now)}");
+            sb.AppendLine();
+        }
+
+        public static ReporteExportable PlanillaControl(BE.Pedido pedido, List<BE.LineaControlStock> lineas = null,
+                                                        BE.Cliente cliente = null)
         {
             var sb = new StringBuilder();
             Cabecera(sb, pedido);
             sb.AppendLine($"{Tr("doc.ped.envio", "Enviado a control de stock")}: {Fecha(pedido.FechaEnvioControl)}");
             sb.AppendLine();
+            LineaCupo(sb, cliente, pedido.CantidadPrendas);
             DetalleAgrupado(sb, pedido.Prendas);
             sb.AppendLine(Tr("doc.ped.unidades", "Unidades a controlar:"));
             foreach (var p in pedido.Prendas)
@@ -161,6 +181,67 @@ namespace GUI.Exportacion
             {
                 Titulo        = $"{Tr("doc.desist.titulo", "Aviso de desistimiento")} — {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
                 NombreArchivo = $"Desistimiento_Pedido{pedido.IdPedido}",
+                TextoPlano    = sb.ToString()
+            };
+        }
+
+        // "Aviso de suscripción no vigente" / "Aviso de pedido activo": el cliente no puede seguir.
+        public static ReporteExportable AvisoImposibilidad(BE.Cliente cliente, bool porPedidoActivo, string motivo)
+        {
+            var sb = new StringBuilder();
+            CabeceraCliente(sb, cliente);
+            sb.AppendLine(motivo);
+            sb.AppendLine();
+            sb.AppendLine(Tr("doc.aviso.nocontinua", "No se puede armar un pedido nuevo en este momento."));
+
+            string titulo = porPedidoActivo
+                ? Tr("doc.aviso.activo.titulo", "Aviso de pedido activo")
+                : Tr("doc.aviso.novigente.titulo", "Aviso de suscripción no vigente");
+            return new ReporteExportable
+            {
+                Titulo        = $"{titulo} — {cliente.NombreCompleto}",
+                NombreArchivo = (porPedidoActivo ? "AvisoPedidoActivo_" : "AvisoSuscripcionNoVigente_") + cliente.IdCliente,
+                TextoPlano    = sb.ToString()
+            };
+        }
+
+        // "Detalle de restricciones de cupo": límite del plan, en uso, seleccionadas y exceso.
+        public static ReporteExportable RestriccionesCupo(BE.Cliente cliente, List<BE.Prenda> seleccion)
+        {
+            var sb = new StringBuilder();
+            CabeceraCliente(sb, cliente);
+            LineaCupo(sb, cliente, seleccion.Count);
+            int exceso = cliente.StockUtilizado + seleccion.Count - cliente.LimitePrendas;
+            sb.AppendLine(string.Format(Tr("doc.cupo.exceso", "La selección excede el cupo del plan en {0} prenda(s)."), exceso));
+            sb.AppendLine(Tr("doc.cupo.opciones", "El cliente puede ajustar la selección o desistir."));
+            sb.AppendLine();
+            DetalleAgrupado(sb, seleccion);
+
+            return new ReporteExportable
+            {
+                Titulo        = $"{Tr("doc.cupo.titulo", "Detalle de restricciones de cupo")} — {cliente.NombreCompleto}",
+                NombreArchivo = $"RestriccionesCupo_{cliente.IdCliente}",
+                TextoPlano    = sb.ToString()
+            };
+        }
+
+        // "Detalle de prendas confirmadas" (Depósito, antes de separarlas).
+        public static ReporteExportable DetallePrendasConfirmadas(BE.Pedido pedido)
+        {
+            var sb = new StringBuilder();
+            Cabecera(sb, pedido);
+            sb.AppendLine($"{Tr("doc.ped.controlo", "Controló")}: {pedido.NombreEmpleadoControl ?? "—"}  —  {Fecha(pedido.FechaControl)}");
+            sb.AppendLine();
+            sb.AppendLine(Tr("doc.confirmadas.lista", "Prendas confirmadas como disponibles (pendientes de separar):"));
+            foreach (var p in pedido.Prendas.Where(x => pedido.PrendasConfirmadas.Contains(x.IdPrenda)))
+                sb.AppendLine($"   {Prenda(p)}");
+            sb.AppendLine();
+            sb.AppendLine(string.Format(Tr("doc.ped.total", "Total: {0} prenda(s)"), pedido.PrendasConfirmadas.Count));
+
+            return new ReporteExportable
+            {
+                Titulo        = $"{Tr("doc.confirmadas.titulo", "Detalle de prendas confirmadas")} — {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
+                NombreArchivo = $"PrendasConfirmadas_Pedido{pedido.IdPedido}",
                 TextoPlano    = sb.ToString()
             };
         }

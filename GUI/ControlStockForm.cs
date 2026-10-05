@@ -23,6 +23,7 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPedidoService pedidoBLL = new BLL.Pedido();
+        private readonly BLL.Interfaces.IClienteService clienteBLL = new BLL.Cliente();
 
         private List<BE.Pedido>             _cola    = new List<BE.Pedido>();
         private BE.Pedido                   _pedido  = null;   // pedido seleccionado (releído de la base)
@@ -223,6 +224,9 @@ namespace GUI
                     "Pedido #{0}: {1} prenda(s) confirmadas como disponibles. Separalas para reservarlas.",
                     new object[] { _pedido.IdPedido, _pedido.CantidadPrendas }));
                 int id = _pedido.IdPedido;
+                if (Preguntar(Tr("conf.cs.imprimirconfirmadas", "¿Imprimir el detalle de prendas confirmadas?")))
+                    Exportacion.DocumentosPedido.Imprimir(
+                        Exportacion.DocumentosPedido.DetallePrendasConfirmadas(pedidoBLL.ObtenerPorId(id)), this);
                 CargarCola();
                 SeleccionarEnCola(id);
             }
@@ -250,6 +254,19 @@ namespace GUI
                     Exportacion.DocumentosPedido.Imprimir(
                         Exportacion.DocumentosPedido.ConstanciaSeparacion(pedidoBLL.ObtenerPorId(id)), this);
             }
+            catch (BE.AppException ex) when (ex.Clave == "err.bll.pedido.separar_faltantes")
+            {
+                // Al separar, otra operación tomó una prenda: el pedido volvió a "¿Selección
+                // disponible? No" y ya se emitió el informe de faltantes. Se ofrece imprimirlo.
+                MostrarError(ex);
+                try
+                {
+                    if (Preguntar(Tr("conf.cs.imprimirinforme", "¿Imprimir el informe de disponibilidad (faltantes y alternativas)?")))
+                        Exportacion.DocumentosPedido.Imprimir(
+                            Exportacion.DocumentosPedido.InformeFaltantes(pedidoBLL.ObtenerPorId(id), pedidoBLL.ObtenerInformeFaltantes(id)), this);
+                }
+                catch (Exception ex2) { MostrarError(ex2); }
+            }
             catch (Exception ex) { MostrarError(ex); }
             CargarCola();
         }
@@ -257,7 +274,11 @@ namespace GUI
         private void BtnImprimirPlanilla_Click(object sender, EventArgs e)
         {
             if (_pedido == null) return;
-            try { Exportacion.DocumentosPedido.Imprimir(Exportacion.DocumentosPedido.PlanillaControl(_pedido, _lineas), this); }
+            try
+            {
+                Exportacion.DocumentosPedido.Imprimir(
+                    Exportacion.DocumentosPedido.PlanillaControl(_pedido, _lineas, clienteBLL.ObtenerPorId(_pedido.IdCliente)), this);
+            }
             catch (Exception ex) { MostrarError(ex); }
         }
 

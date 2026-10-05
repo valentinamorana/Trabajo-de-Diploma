@@ -108,7 +108,7 @@ module.exports = [
               { alt: 'Excede el cupo y el cliente no ajusta', pasos: [
                 c('V', 'F', 'Registrar desistimiento + motivo'),
                 c('F', 'B', 'AsentarDesistimiento(modulo, idCliente, prendas, motivo)'),
-                nota('Solo si la selección excede el cupo (si no: desistimiento_sin_exceso)', 'B'),
+                nota('ValidarPuedeArmarPedido · solo si la selección excede el cupo (si no: desistimiento_sin_exceso)', 'B'),
                 c('B', 'D', 'AltaSinReserva(pedido Desistido, etapa Cupo)'),
                 r('D', 'B', 'idPedido'),
                 c('B', 'H', 'RegistrarCambios(DESISTIR)'),
@@ -183,14 +183,14 @@ module.exports = [
       { alt: 'El cliente ajusta la selección', pasos: [
         c('V', 'F', 'Ajustar selección (sin los faltantes, alternativas resaltadas)'),
         c('F', 'B', 'AjustarSeleccion(modulo, pedido, prendas)'),
-        nota('Exigir(PedidosVentaEditar) · solo ConFaltantes · VerificarVigencia + RevisarPedidoActivo + ComprobarCupo', 'B'),
+        nota('Exigir(PedidosVentaEditar) · solo ConFaltantes · vuelve al merge: solo ComprobarCupo(cliente, cantidad)', 'B'),
         c('B', 'D', 'ReemplazarSeleccion(idPedido, prendas)  [→ EnControlStock, informe anterior descartado]'),
         c('B', 'H', 'RegistrarCambios(AJUSTAR_SELECCION)'),
         r('F', 'V', 'Pedido reenviado a control de stock')
       ], sino: [{ etiqueta: 'El cliente desiste', pasos: [
         c('V', 'F', 'Registrar desistimiento + motivo'),
-        c('F', 'B', 'AsentarDesistimiento(modulo, pedido, motivo, etapa Disponibilidad)'),
-        c('B', 'D', 'RegistrarDesistimiento(idPedido, motivo, etapa)  [→ Desistido]'),
+        c('F', 'B', 'AsentarDesistimiento(modulo, pedido, motivo, etapa, seleccionAjustada)  [Disponibilidad, o Cupo si al ajustar excede]'),
+        c('B', 'D', 'RegistrarDesistimiento(idPedido, motivo, etapa, seleccionAjustada)  [→ Desistido]'),
         c('B', 'H', 'RegistrarCambios(DESISTIR)'),
         r('F', 'V', 'Aviso de desistimiento (PDF)')
       ] }] }

@@ -39,7 +39,8 @@ namespace Tests.Fakes
         public BE.PlanSuscripcion ComprobarCupo(BE.Cliente cliente, int cantidadPrendas) => null;
         public int EnviarAControlStock(string modulo, int idCliente, List<BE.Prenda> prendas) => 0;
         public int AsentarDesistimiento(string modulo, int idCliente, List<BE.Prenda> prendas, string motivo) => 0;
-        public void AsentarDesistimiento(string modulo, BE.Pedido pedido, string motivo, BE.EtapaDesistimiento etapa) { }
+        public void AsentarDesistimiento(string modulo, BE.Pedido pedido, string motivo, BE.EtapaDesistimiento etapa,
+                                         List<BE.Prenda> seleccionAjustada = null) { }
         public void AjustarSeleccion(string modulo, BE.Pedido pedido, List<BE.Prenda> prendas) { }
         public List<BE.LineaControlStock> RevisarStock(BE.Pedido pedido) => new List<BE.LineaControlStock>();
         public List<BE.PedidoFaltante> InformarFaltantes(string modulo, BE.Pedido pedido) => new List<BE.PedidoFaltante>();

@@ -41,6 +41,8 @@ namespace GUI
             this.btnVolver = new System.Windows.Forms.Button();
             this.btnConfirmar = new System.Windows.Forms.Button();
             this.btnDesistir = new System.Windows.Forms.Button();
+            this.btnImprimirAviso = new System.Windows.Forms.Button();
+            this.btnImprimirCupo = new System.Windows.Forms.Button();
             this.lblDetalle = new System.Windows.Forms.Label();
             this.panelHeader.SuspendLayout();
             this.panelStatus.SuspendLayout();
@@ -100,6 +102,7 @@ namespace GUI
             this.panelPaso1.Controls.Add(this.lstCoincidencias);
             this.panelPaso1.Controls.Add(this.lblInfoPlan);
             this.panelPaso1.Controls.Add(this.btnSiguiente);
+            this.panelPaso1.Controls.Add(this.btnImprimirAviso);
             this.panelPaso1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelPaso1.Location = new System.Drawing.Point(0, 40);
             this.panelPaso1.Name = "panelPaso1";
@@ -190,6 +193,7 @@ namespace GUI
             this.panelPaso2.Controls.Add(this.btnVolver);
             this.panelPaso2.Controls.Add(this.btnConfirmar);
             this.panelPaso2.Controls.Add(this.btnDesistir);
+            this.panelPaso2.Controls.Add(this.btnImprimirCupo);
             this.panelPaso2.Controls.Add(this.lblDetalle);
             this.panelPaso2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelPaso2.Location = new System.Drawing.Point(0, 40);
@@ -336,6 +340,36 @@ namespace GUI
             this.btnDesistir.Visible = false;
             this.btnDesistir.Click += new System.EventHandler(this.BtnDesistir_Click);
             //
+            // btnImprimirAviso
+            //
+            this.btnImprimirAviso.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(110)))));
+            this.btnImprimirAviso.FlatAppearance.BorderSize = 0;
+            this.btnImprimirAviso.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimirAviso.ForeColor = System.Drawing.Color.White;
+            this.btnImprimirAviso.Location = new System.Drawing.Point(190, 330);
+            this.btnImprimirAviso.Name = "btnImprimirAviso";
+            this.btnImprimirAviso.Size = new System.Drawing.Size(180, 36);
+            this.btnImprimirAviso.Tag = "btn.ped.imprimiraviso";
+            this.btnImprimirAviso.Text = "Imprimir aviso";
+            this.btnImprimirAviso.UseVisualStyleBackColor = false;
+            this.btnImprimirAviso.Visible = false;
+            this.btnImprimirAviso.Click += new System.EventHandler(this.BtnImprimirAviso_Click);
+            //
+            // btnImprimirCupo
+            //
+            this.btnImprimirCupo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(110)))));
+            this.btnImprimirCupo.FlatAppearance.BorderSize = 0;
+            this.btnImprimirCupo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimirCupo.ForeColor = System.Drawing.Color.White;
+            this.btnImprimirCupo.Location = new System.Drawing.Point(550, 417);
+            this.btnImprimirCupo.Name = "btnImprimirCupo";
+            this.btnImprimirCupo.Size = new System.Drawing.Size(130, 34);
+            this.btnImprimirCupo.Tag = "btn.ped.imprimircupo";
+            this.btnImprimirCupo.Text = "Imprimir detalle";
+            this.btnImprimirCupo.UseVisualStyleBackColor = false;
+            this.btnImprimirCupo.Visible = false;
+            this.btnImprimirCupo.Click += new System.EventHandler(this.BtnImprimirCupo_Click);
+            //
             // lblDetalle
             //
             this.lblDetalle.Font = new System.Drawing.Font("Segoe UI", 8.5F);
@@ -382,7 +416,9 @@ namespace GUI
         private System.Windows.Forms.TextBox        txtIdentificacion;
         private System.Windows.Forms.Button         btnBuscar;
         private System.Windows.Forms.ListBox        lstCoincidencias;
-        private System.Windows.Forms.Button         btnDesistir;
+        private System.Windows.Forms.Button btnDesistir;
+        private System.Windows.Forms.Button btnImprimirAviso;
+        private System.Windows.Forms.Button btnImprimirCupo;
         private System.Windows.Forms.Label          lblDetalle;
         private System.Windows.Forms.Label          lblInfoPlan;
         private System.Windows.Forms.Button         btnSiguiente;

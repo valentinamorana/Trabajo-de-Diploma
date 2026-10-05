@@ -210,6 +210,9 @@ El carril "Controlador de Stock" lo cumple el rol **Depósito**.
 - Constancia de prendas separadas.
 - Confirmación y constancia del pedido.
 - Aviso de desistimiento.
+- Aviso de suscripción no vigente y aviso de pedido activo.
+- Detalle de restricciones de cupo.
+- Detalle de prendas confirmadas.
 
 **Flujo (actividad del diagrama → método)**
 | Carril | Actividad del diagrama | Código |
@@ -224,8 +227,9 @@ El carril "Controlador de Stock" lo cumple el rol **Depósito**.
 | Depósito | Revisar stock → ¿Selección disponible? | `RevisarStock`: relee el estado de cada prenda (`VerificarDisponibilidad`) y si está reservada para otro cliente |
 | Depósito | Informe de prendas faltantes | `InformarFaltantes`: sugiere hasta 3 alternativas por faltante (misma categoría y talle, disponibles) y pasa el pedido a **ConFaltantes** |
 | Vendedor | Comunicar faltantes → ¿Ajustar? | Desde Pedidos de Venta: `ObtenerInformeFaltantes` |
-| Vendedor | Recibir selección ajustada por disponibilidad | `AjustarSeleccion`: vuelve a comprobar vigencia, pedido activo y cupo, reemplaza las líneas y el pedido vuelve a **EnControlStock** |
-| Vendedor | No ajusta → Asentar desistimiento | `AsentarDesistimiento(modulo, pedido, motivo, etapa)` pasa el pedido a **Desistido** |
+| Vendedor | Recibir selección ajustada por disponibilidad | `AjustarSeleccion`: vuelve al punto de unión del diagrama, así que **solo** vuelve a comprobar el cupo. Reemplaza las líneas, descarta el informe anterior y el pedido vuelve a **EnControlStock** |
+| Vendedor | Al ajustar excede el cupo y no lo corrige → Asentar desistimiento | `AsentarDesistimiento(modulo, pedido, motivo, Cupo, seleccionAjustada)`: exige que la selección ajustada exceda el cupo y la guarda como la selección desistida |
+| Vendedor | No ajusta → Asentar desistimiento | `AsentarDesistimiento(modulo, pedido, motivo, Disponibilidad)` pasa el pedido a **Desistido** y conserva el informe de faltantes |
 | Depósito | Confirmar prendas disponibles | `ConfirmarPrendasDisponibles`: marca `PedidoPrenda.Confirmada` y registra el empleado y la fecha de control |
 | Depósito | Separar prendas del pedido | `SepararPrendas`: es la **reserva**. Pasa las prendas a EnUso dentro de una transacción y el pedido a **Separado**. Si otra operación tomó una prenda, no se reserva nada y se emite el informe de faltantes. |
 | Vendedor | Formalizar el pedido (desde aquí no admite cambios) | `FormalizarPedido`: el pedido pasa de **Separado** a **Pendiente**, que significa "formalizado, pendiente de despacho" |
@@ -244,13 +248,15 @@ Cada transición registra:
 | 3 | **Cuenta bloqueada:** con prendas `EnUso` sin devolver no se arma otro pedido. Se desbloquea cuando PN04 registra la devolución. | `RevisarPedidoActivo` (`err.bll.pedido.cuenta_bloqueada`) | `RevisarPedidoActivo_ConPrendasPendientesDeDevolucion_LanzaCuentaBloqueada` |
 | 4 | La cantidad no puede superar el `LimitePrendas` del plan | `ComprobarCupo` | `ComprobarCupo_*`, `EnviarAControlStock_SuperaLimiteDelPlan_LanzaLimitePlan` |
 | 5 | Enviar a control **no reserva**: las prendas se reservan recién al separarlas | `EnviarAControlStock` → `AltaSinReserva` | `EnviarAControlStock_DatosValidos_CreaPedidoEnControlSinReservar` |
-| 6 | El desistimiento por cupo solo se asienta si la selección excede el cupo, y siempre exige un motivo | `AsentarDesistimiento` | `AsentarDesistimiento_*` |
+| 6 | El desistimiento por cupo solo se asienta si la selección (nueva o ajustada) excede el cupo, después de pasar por "¿Posee pedido activo? No", y siempre exige un motivo | `AsentarDesistimiento` | `AsentarDesistimiento_*` |
 | 7 | Solo Depósito revisa, informa faltantes, confirma y separa | `PermisosAccion.Exigir(ControlStockEditar)` | `AccionesDeDeposito_SinPermisoDeControlDeStock_Rechazan` |
 | 8 | Las alternativas son prendas Disponibles de la misma categoría y talle, que no están en el pedido (máximo 3) | `SugerirAlternativas` | `InformarFaltantes_SugiereAlternativasDeLaMismaCategoriaYTalle` |
 | 9 | Solo se separa lo confirmado. La separación es **atómica** (`UPDATE ... AND Estado = Disponible`): si otra operación tomó una prenda, se revierte todo y el pedido pasa a faltantes. | `SepararPrendas`, `DAL/Pedido.cs › SepararPrendas` | `SepararPrendas_*` |
-| 10 | Solo se formaliza un pedido Separado, y después de formalizar no hay operación que cambie la selección | `FormalizarPedido`, `BE.Pedido.TransicionValida` | `FormalizarPedido_*`, `TransicionesDelArmado_SiguenElDiagrama` |
+| 10 | Solo se formaliza un pedido Separado, y después de formalizar no hay operación que cambie la selección. Cada transición del armado exige `BE.Pedido.TransicionValida` (`err.bll.pedido.transicion_invalida`) | `FormalizarPedido`, `ExigirTransicion` | `FormalizarPedido_*`, `PedidoFormalizado_NoAdmiteModificaciones`, `TransicionesDelArmado_SiguenElDiagrama` |
 | 11 | Los pasos del armado no se pueden revertir desde el historial | `RestaurarOperacion` (`err.bll.pedido.restaurar_no_permitido`) | `RestaurarOperacion_PasoDelControlDeStock_NoSePuedeRevertir` |
 | 12 | Des-cancelar revalida la vigencia, el pedido activo y el cupo | `DesCancelar` | `DesCancelar_ClienteConOtroPedidoActivo_Rechaza`, `DesCancelar_SuscripcionVencida_Rechaza` |
+| 14 | Los avisos que cortan el circuito (suscripción no vigente, pedido activo) quedan en la bitácora y se pueden imprimir | `VerificarVigencia`, `RevisarPedidoActivo` (`RegistrarAviso`); `DocumentosPedido.AvisoImposibilidad` | Arnés contra la BD real |
+| 15 | Solo se prepara la confirmación de un pedido formalizado que no fue cancelado | `BE.Pedido.EstaFormalizado` | `PrepararConfirmacion_*` |
 | 13 | Una prenda que pasa de En Limpieza a Disponible se reserva 48 h para el primer anotado de la Lista de Espera. La reserva se cierra al separar. | `BLL/ListaEspera.cs › NotificarSiCorresponde`, `SepararPrendas` | `ListaEsperaTests`, `SepararPrendas_Confirmadas_ReservaYCierraLaListaDeEspera` |
 
 **Base de datos.**

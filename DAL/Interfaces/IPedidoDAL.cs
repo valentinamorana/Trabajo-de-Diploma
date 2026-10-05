@@ -29,7 +29,8 @@ namespace DAL.Interfaces
         // Separado → Pendiente (formalizado).
         void Formalizar(int idPedido);
         // ConFaltantes → Desistido.
-        void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa);
+        void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa,
+                                    List<BE.Prenda> seleccionAjustada = null);
         List<BE.PedidoFaltante> ObtenerFaltantes(int idPedido);
 
         void Despachar(int idPedido);

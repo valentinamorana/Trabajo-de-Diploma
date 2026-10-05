@@ -488,6 +488,95 @@ namespace Tests
             catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.ajustar_estado", ex.Clave); }
         }
 
+        // Nota del diagrama: "desde aquí la selección queda formalizada y no admite modificaciones".
+        [TestMethod]
+        public void PedidoFormalizado_NoAdmiteModificaciones()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente();
+            var formalizado = PedidoEn(BE.EstadoPedido.Pendiente, Prenda(1));
+            formalizado.FechaFormalizacion = DateTime.Now;
+            var bll = ctx.Crear();
+
+            try { bll.AjustarSeleccion("Test", formalizado, new List<BE.Prenda> { Prenda(2) }); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.ajustar_estado", ex.Clave); }
+            try { bll.AsentarDesistimiento("Test", formalizado, "x", BE.EtapaDesistimiento.Disponibilidad); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.desistir_estado", ex.Clave); }
+            try { bll.FormalizarPedido("Test", formalizado); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.formalizar_estado", ex.Clave); }
+
+            Assert.AreEqual(0, ctx.DalPedido.ReemplazarSeleccionVeces);
+            Assert.AreEqual(0, ctx.DalPedido.RegistrarDesistimientoVeces);
+            Assert.AreEqual(0, ctx.DalPedido.FormalizarVeces);
+        }
+
+        // La selección ajustada vuelve al merge del cupo, no a la verificación de vigencia.
+        [TestMethod]
+        public void AjustarSeleccion_SoloVuelveAComprobarElCupo()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.FechaVencimiento = DateTime.Today.AddDays(-1); // venció mientras tenía faltantes
+            ctx.DalCliente.ClientePorId = cliente;
+            var pedido = PedidoEn(BE.EstadoPedido.ConFaltantes, Prenda(1));
+
+            ctx.Crear().AjustarSeleccion("Test", pedido, new List<BE.Prenda> { Prenda(3) });
+
+            Assert.AreEqual(1, ctx.DalPedido.ReemplazarSeleccionVeces);
+        }
+
+        // ¿Desea ajustar la selección? No (al ajustar excede el cupo) → Asentar desistimiento.
+        [TestMethod]
+        public void AsentarDesistimiento_PorCupoAlAjustar_GuardaLaSeleccionAjustada()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.LimitePrendas = 1;
+            ctx.DalCliente.ClientePorId = cliente;
+            var ajustada = new List<BE.Prenda> { Prenda(3), Prenda(4) };
+
+            ctx.Crear().AsentarDesistimiento("Test", PedidoEn(BE.EstadoPedido.ConFaltantes, Prenda(1)),
+                                             "Quiere las dos", BE.EtapaDesistimiento.Cupo, ajustada);
+
+            Assert.AreEqual(BE.EtapaDesistimiento.Cupo, ctx.DalPedido.UltimaEtapaDesistimiento);
+            CollectionAssert.AreEqual(ajustada, ctx.DalPedido.UltimaSeleccionDesistida);
+        }
+
+        [TestMethod]
+        public void AsentarDesistimiento_PorCupoAlAjustar_SinExceso_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId = ClienteConPlanVigente(); // límite 3
+            try
+            {
+                ctx.Crear().AsentarDesistimiento("Test", PedidoEn(BE.EstadoPedido.ConFaltantes, Prenda(1)),
+                                                 "x", BE.EtapaDesistimiento.Cupo, new List<BE.Prenda> { Prenda(3) });
+                Assert.Fail();
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.desistimiento_sin_exceso", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.RegistrarDesistimientoVeces);
+        }
+
+        // El desistimiento por cupo ocurre después de "¿Posee pedido activo? No".
+        [TestMethod]
+        public void AsentarDesistimiento_PorCupo_ClienteConPedidoActivo_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var cliente = ClienteConPlanVigente();
+            cliente.LimitePrendas = 1;
+            ctx.DalCliente.ClientePorId = cliente;
+            ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 2, IdCliente = 10, Estado = BE.EstadoPedido.EnControlStock });
+
+            try { ctx.Crear().AsentarDesistimiento("Test", 10, new List<BE.Prenda> { Prenda(1), Prenda(2) }, "x"); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.pedido_activo", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPedido.AltaSinReservaVeces);
+        }
+
         // ── Depósito: Revisar stock → ¿Selección disponible? ──
 
         [TestMethod]
@@ -709,6 +798,18 @@ namespace Tests
             ctx.DalPedido.PedidosDevueltos.Add(pedido);
 
             Assert.AreEqual(50, ctx.Crear().PrepararConfirmacion("Test", 50).IdPedido);
+        }
+
+        [TestMethod]
+        public void PrepararConfirmacion_PedidoFormalizadoYCancelado_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var pedido = PedidoEn(BE.EstadoPedido.Cancelado, Prenda(1));
+            pedido.FechaFormalizacion = DateTime.Now;
+            ctx.DalPedido.PedidosDevueltos.Add(pedido);
+            try { ctx.Crear().PrepararConfirmacion("Test", 50); Assert.Fail(); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.pedido.confirmacion_estado", ex.Clave); }
         }
 
         // ── Máquina de estados del pedido (BE) ──

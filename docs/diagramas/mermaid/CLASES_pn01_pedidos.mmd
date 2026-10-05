@@ -88,7 +88,7 @@ classDiagram
     +ValidarPuedeArmarPedido(int) Cliente
     +EnviarAControlStock(string,  int,  List~Prenda~) int
     +AsentarDesistimiento(string,  int,  List~Prenda~,  string) int
-    +AsentarDesistimiento(string,  Pedido,  string,  EtapaDesistimiento) void
+    +AsentarDesistimiento(string,  Pedido,  string,  EtapaDesistimiento,  List~Prenda~) void
     +AjustarSeleccion(string,  Pedido,  List~Prenda~) void
     +RevisarStock(Pedido) List~LineaControlStock~
     +InformarFaltantes(string,  Pedido) List~PedidoFaltante~
@@ -141,7 +141,7 @@ classDiagram
     +ConfirmarPrendas(int,  int) void
     +SepararPrendas(int,  int) void
     +Formalizar(int) void
-    +RegistrarDesistimiento(int,  string,  EtapaDesistimiento) void
+    +RegistrarDesistimiento(int,  string,  EtapaDesistimiento,  List~Prenda~) void
     +ObtenerFaltantes(int) List~PedidoFaltante~
     +Despachar(int) void
     +MarcarEntregado(int) void

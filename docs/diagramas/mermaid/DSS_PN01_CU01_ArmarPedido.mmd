@@ -32,7 +32,7 @@ sequenceDiagram
       alt Excede el cupo y el cliente no ajusta
         V->>F: Registrar desistimiento + motivo
         F->>B: AsentarDesistimiento(modulo, idCliente, prendas, motivo)
-        Note over B: Solo si la selección excede el cupo (si no: desistimiento_sin_exceso)
+        Note over B: ValidarPuedeArmarPedido · solo si la selección excede el cupo (si no: desistimiento_sin_exceso)
         B->>D: AltaSinReserva(pedido Desistido, etapa Cupo)
         D-->>B: idPedido
         B->>H: RegistrarCambios(DESISTIR)

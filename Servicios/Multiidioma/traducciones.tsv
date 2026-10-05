@@ -5522,6 +5522,22 @@ ES	err.bll.pedido.inexistente	El Pedido #{0} no existe.
 ES	err.bll.pedido.confirmacion_estado	Solo se prepara la confirmación de un pedido formalizado. Este pedido está '{0}'.
 ES	err.bll.pedido.restaurar_no_permitido	La operación '{0}' es parte del armado del pedido (control de stock) y no se puede revertir desde el historial.
 ES	err.dal.pedido.estado_cambiado	El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.
+ES	err.bll.pedido.transicion_invalida	El Pedido #{0} no puede pasar de '{1}' a '{2}'.
+ES	btn.ped.imprimiraviso	Imprimir aviso
+ES	btn.ped.imprimircupo	Imprimir detalle
+ES	doc.ped.cupo	Plan {0}: {1} prenda(s) seleccionadas + {2} en uso, de {3} permitidas.
+ES	doc.aviso.plan	Plan
+ES	doc.aviso.vence	Vence
+ES	doc.aviso.fecha	Fecha del aviso
+ES	doc.aviso.nocontinua	No se puede armar un pedido nuevo en este momento.
+ES	doc.aviso.activo.titulo	Aviso de pedido activo
+ES	doc.aviso.novigente.titulo	Aviso de suscripción no vigente
+ES	doc.cupo.exceso	La selección excede el cupo del plan en {0} prenda(s).
+ES	doc.cupo.opciones	El cliente puede ajustar la selección o desistir.
+ES	doc.cupo.titulo	Detalle de restricciones de cupo
+ES	doc.confirmadas.lista	Prendas confirmadas como disponibles (pendientes de separar):
+ES	doc.confirmadas.titulo	Detalle de prendas confirmadas
+ES	conf.cs.imprimirconfirmadas	¿Imprimir el detalle de prendas confirmadas?
 EN	err.dal.prenda.estado_cambio	The garment's state changed since it was last read. Refresh the screen and try again.
 EN	paso1.identificar	Step 1 of 2 — Identify the client
 EN	paso.ajuste.texto	Adjust selection of Order #{0}
@@ -5636,6 +5652,22 @@ EN	err.bll.pedido.inexistente	Order #{0} does not exist.
 EN	err.bll.pedido.confirmacion_estado	A confirmation can only be prepared for a finalized order. This order is '{0}'.
 EN	err.bll.pedido.restaurar_no_permitido	Operation '{0}' is part of building the order (stock control) and cannot be reverted from the history.
 EN	err.dal.pedido.estado_cambiado	Order #{0} changed status in another session. Refresh the list and try again.
+EN	err.bll.pedido.transicion_invalida	Order #{0} cannot go from '{1}' to '{2}'.
+EN	btn.ped.imprimiraviso	Print notice
+EN	btn.ped.imprimircupo	Print detail
+EN	doc.ped.cupo	Plan {0}: {1} garment(s) selected + {2} in use, out of {3} allowed.
+EN	doc.aviso.plan	Plan
+EN	doc.aviso.vence	Expires
+EN	doc.aviso.fecha	Notice date
+EN	doc.aviso.nocontinua	A new order cannot be created at this time.
+EN	doc.aviso.activo.titulo	Active order notice
+EN	doc.aviso.novigente.titulo	Inactive subscription notice
+EN	doc.cupo.exceso	The selection exceeds the plan limit by {0} garment(s).
+EN	doc.cupo.opciones	The client can adjust the selection or withdraw.
+EN	doc.cupo.titulo	Plan limit restrictions
+EN	doc.confirmadas.lista	Garments confirmed as available (pending set-aside):
+EN	doc.confirmadas.titulo	Confirmed garments detail
+EN	conf.cs.imprimirconfirmadas	Print the confirmed garments detail?
 RU	err.dal.prenda.estado_cambio	Состояние вещи изменилось с момента последнего запроса. Обновите экран и повторите попытку.
 RU	paso1.identificar	Шаг 1 из 2 — Идентифицировать клиента
 RU	paso.ajuste.texto	Корректировка выбора заказа №{0}
@@ -5750,6 +5782,22 @@ RU	err.bll.pedido.inexistente	Заказ №{0} не существует.
 RU	err.bll.pedido.confirmacion_estado	Подтверждение готовится только для оформленного заказа. Состояние этого заказа: '{0}'.
 RU	err.bll.pedido.restaurar_no_permitido	Операция '{0}' — часть формирования заказа (контроль запасов) и не может быть отменена из истории.
 RU	err.dal.pedido.estado_cambiado	Состояние заказа №{0} изменилось в другом сеансе. Обновите список и повторите попытку.
+RU	err.bll.pedido.transicion_invalida	Заказ №{0} не может перейти из '{1}' в '{2}'.
+RU	btn.ped.imprimiraviso	Печать уведомления
+RU	btn.ped.imprimircupo	Печать деталей
+RU	doc.ped.cupo	План {0}: выбрано {1} вещ. + {2} в пользовании, из {3} допустимых.
+RU	doc.aviso.plan	План
+RU	doc.aviso.vence	Истекает
+RU	doc.aviso.fecha	Дата уведомления
+RU	doc.aviso.nocontinua	Сейчас нельзя оформить новый заказ.
+RU	doc.aviso.activo.titulo	Уведомление об активном заказе
+RU	doc.aviso.novigente.titulo	Уведомление о недействующей подписке
+RU	doc.cupo.exceso	Выбор превышает лимит плана на {0} вещ.
+RU	doc.cupo.opciones	Клиент может изменить выбор или отказаться.
+RU	doc.cupo.titulo	Ограничения лимита плана
+RU	doc.confirmadas.lista	Вещи, подтверждённые как доступные (ожидают откладывания):
+RU	doc.confirmadas.titulo	Подтверждённые вещи
+RU	conf.cs.imprimirconfirmadas	Распечатать список подтверждённых вещей?
 PT	err.dal.prenda.estado_cambio	O estado da peça mudou desde a última consulta. Atualize a tela e tente novamente.
 PT	paso1.identificar	Passo 1 de 2 — Identificar o cliente
 PT	paso.ajuste.texto	Ajustar seleção do Pedido #{0}
@@ -5864,3 +5912,19 @@ PT	err.bll.pedido.inexistente	O Pedido #{0} não existe.
 PT	err.bll.pedido.confirmacion_estado	Só se prepara a confirmação de um pedido formalizado. Este pedido está '{0}'.
 PT	err.bll.pedido.restaurar_no_permitido	A operação '{0}' faz parte da montagem do pedido (controle de estoque) e não pode ser revertida pelo histórico.
 PT	err.dal.pedido.estado_cambiado	O Pedido #{0} mudou de estado em outra sessão. Atualize a lista e tente novamente.
+PT	err.bll.pedido.transicion_invalida	O Pedido #{0} não pode passar de '{1}' para '{2}'.
+PT	btn.ped.imprimiraviso	Imprimir aviso
+PT	btn.ped.imprimircupo	Imprimir detalhe
+PT	doc.ped.cupo	Plano {0}: {1} peça(s) selecionadas + {2} em uso, de {3} permitidas.
+PT	doc.aviso.plan	Plano
+PT	doc.aviso.vence	Vence
+PT	doc.aviso.fecha	Data do aviso
+PT	doc.aviso.nocontinua	Não é possível montar um novo pedido neste momento.
+PT	doc.aviso.activo.titulo	Aviso de pedido ativo
+PT	doc.aviso.novigente.titulo	Aviso de assinatura não vigente
+PT	doc.cupo.exceso	A seleção excede o limite do plano em {0} peça(s).
+PT	doc.cupo.opciones	O cliente pode ajustar a seleção ou desistir.
+PT	doc.cupo.titulo	Detalhe das restrições de limite
+PT	doc.confirmadas.lista	Peças confirmadas como disponíveis (pendentes de separação):
+PT	doc.confirmadas.titulo	Detalhe das peças confirmadas
+PT	conf.cs.imprimirconfirmadas	Imprimir o detalhe das peças confirmadas?

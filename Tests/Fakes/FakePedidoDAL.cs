@@ -93,11 +93,15 @@ namespace Tests.Fakes
 
         public void Formalizar(int idPedido) => FormalizarVeces++;
 
-        public void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa)
+        public List<BE.Prenda> UltimaSeleccionDesistida { get; private set; }
+
+        public void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa,
+                                           List<BE.Prenda> seleccionAjustada = null)
         {
             RegistrarDesistimientoVeces++;
             UltimoMotivoDesistimiento = motivo;
             UltimaEtapaDesistimiento = etapa;
+            UltimaSeleccionDesistida = seleccionAjustada;
         }
 
         public List<BE.PedidoFaltante> ObtenerFaltantes(int idPedido) => FaltantesDevueltos;

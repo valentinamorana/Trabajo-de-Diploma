@@ -497,21 +497,36 @@ namespace DAL
         }
 
         // "Asentar desistimiento" de un pedido con faltantes informados: ConFaltantes → Desistido.
-        // No hay prendas que liberar: nunca se reservaron.
-        public void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa)
+        // Si se pasa la selección ajustada (desistimiento por cupo al ajustar), reemplaza las
+        // líneas (y descarta el informe anterior) en la misma transacción. No hay prendas que
+        // liberar: nunca se reservaron.
+        public void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa,
+                                           List<BE.Prenda> seleccionAjustada = null)
         {
-            int afectadas = acceso.Escribir(
-                "UPDATE Pedido SET Estado=@Nuevo, MotivoDesistimiento=@Motivo, EtapaDesistimiento=@Etapa " +
-                "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
-                new SqlParameter[]
+            acceso.EjecutarTransaccion((conexion, tx) =>
+            {
+                using (var cmd = new SqlCommand(
+                    "UPDATE Pedido SET Estado=@Nuevo, MotivoDesistimiento=@Motivo, EtapaDesistimiento=@Etapa " +
+                    "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                    conexion, tx))
                 {
-                    new SqlParameter("@Nuevo",    (int)BE.EstadoPedido.Desistido),
-                    new SqlParameter("@Motivo",   (object)motivo ?? DBNull.Value),
-                    new SqlParameter("@Etapa",    etapa.ToString()),
-                    new SqlParameter("@IdPedido", idPedido),
-                    new SqlParameter("@Esperado", (int)BE.EstadoPedido.ConFaltantes)
-                });
-            if (afectadas == 0) throw EstadoCambiado(idPedido);
+                    cmd.Parameters.AddWithValue("@Nuevo",    (int)BE.EstadoPedido.Desistido);
+                    cmd.Parameters.AddWithValue("@Motivo",   (object)motivo ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Etapa",    etapa.ToString());
+                    cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                    cmd.Parameters.AddWithValue("@Esperado", (int)BE.EstadoPedido.ConFaltantes);
+                    if (cmd.ExecuteNonQuery() == 0) throw EstadoCambiado(idPedido);
+                }
+
+                if (seleccionAjustada != null && seleccionAjustada.Count > 0)
+                {
+                    // Igual que ReemplazarSeleccion: la selección ajustada reemplaza a la informada,
+                    // así que el informe de faltantes anterior (que apunta a esas líneas) se descarta.
+                    BorrarInformeFaltantesEnTx(conexion, tx, idPedido);
+                    Ejecutar(conexion, tx, "DELETE FROM PedidoPrenda WHERE IdPedido=@IdPedido", idPedido);
+                    InsertarLineasEnTx(conexion, tx, idPedido, seleccionAjustada);
+                }
+            });
             RecalcularDVSilencioso();   // T07
         }
 

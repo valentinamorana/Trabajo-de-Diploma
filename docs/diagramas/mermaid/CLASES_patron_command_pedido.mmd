@@ -24,7 +24,7 @@ classDiagram
     +RevisarPedidoActivo(Cliente) void
     +EnviarAControlStock(string,  int,  List~Prenda~) int
     +AsentarDesistimiento(string,  int,  List~Prenda~,  string) int
-    +AsentarDesistimiento(string,  Pedido,  string,  EtapaDesistimiento) void
+    +AsentarDesistimiento(string,  Pedido,  string,  EtapaDesistimiento,  List~Prenda~) void
     +AjustarSeleccion(string,  Pedido,  List~Prenda~) void
     +RevisarStock(Pedido) List~LineaControlStock~
     +InformarFaltantes(string,  Pedido) List~PedidoFaltante~

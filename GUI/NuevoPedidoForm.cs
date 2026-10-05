@@ -175,6 +175,7 @@ namespace GUI
         {
             _clienteSel = null;
             btnSiguiente.Enabled     = false;
+            OcultarAviso();
             lstCoincidencias.Visible = false;
             lstCoincidencias.Items.Clear();
 
@@ -221,6 +222,7 @@ namespace GUI
         {
             _clienteSel = cliente;
             btnSiguiente.Enabled = false;
+            OcultarAviso();
 
             string ficha = FichaCliente(cliente);
 
@@ -231,7 +233,10 @@ namespace GUI
             }
             catch (BE.AppException ex)
             {
-                MostrarAviso(ficha + "\n\n" + Tr("lbl.ped.imposible", "No se puede continuar:") + " " + Resolver(ex));
+                string motivo = Resolver(ex);
+                MostrarAviso(ficha + "\n\n" + Tr("lbl.ped.imposible", "No se puede continuar:") + " " + motivo);
+                // Aviso de suscripción no vigente (imprimible para el cliente).
+                OfrecerAviso(() => Exportacion.DocumentosPedido.AvisoImposibilidad(cliente, false, motivo));
                 return;
             }
             catch (Exception ex) { MostrarError(ex); return; }
@@ -243,7 +248,10 @@ namespace GUI
             }
             catch (BE.AppException ex)
             {
-                MostrarAviso(ficha + "\n\n" + Tr("lbl.ped.pedidoactivo", "Pedido activo:") + " " + Resolver(ex));
+                string motivo = Resolver(ex);
+                MostrarAviso(ficha + "\n\n" + Tr("lbl.ped.pedidoactivo", "Pedido activo:") + " " + motivo);
+                // Aviso de pedido activo (imprimible para el cliente).
+                OfrecerAviso(() => Exportacion.DocumentosPedido.AvisoImposibilidad(_clienteSel, true, motivo));
                 return;
             }
             catch (Exception ex) { MostrarError(ex); return; }
@@ -291,6 +299,39 @@ namespace GUI
                 c.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—",
                 c.StockUtilizado, ultimoPedido,
                 c.MetodoPago ?? "—", c.FechaAlta.ToString("dd/MM/yyyy"));
+        }
+
+        private Func<Exportacion.ReporteExportable> _avisoActual;
+
+        private void OfrecerAviso(Func<Exportacion.ReporteExportable> armar)
+        {
+            _avisoActual = armar;
+            btnImprimirAviso.Visible = true;
+        }
+
+        private void OcultarAviso()
+        {
+            _avisoActual = null;
+            btnImprimirAviso.Visible = false;
+        }
+
+        private void BtnImprimirAviso_Click(object sender, EventArgs e)
+        {
+            if (_avisoActual == null) return;
+            try { Exportacion.DocumentosPedido.Imprimir(_avisoActual(), this); }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        // "Detalle de restricciones de cupo" (imprimible cuando la selección excede el cupo).
+        private void BtnImprimirCupo_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var cliente = clienteBLL.ObtenerPorId(_clienteSel.IdCliente) ?? _clienteSel;
+                Exportacion.DocumentosPedido.Imprimir(
+                    Exportacion.DocumentosPedido.RestriccionesCupo(cliente, ObtenerPrendasSeleccionadas()), this);
+            }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         private void MostrarAviso(string texto, Color? color = null)
@@ -439,6 +480,7 @@ namespace GUI
             btnConfirmar.Enabled = seleccionadas > 0 && !excede;
             btnDesistir.Visible  = excede;
             btnDesistir.Enabled  = excede;
+            btnImprimirCupo.Visible = excede;
 
             lblResumen.Text = string.IsNullOrEmpty(linea2)
                 ? linea1
@@ -518,7 +560,8 @@ namespace GUI
                 }
 
                 OfrecerImprimir(Tr("conf.ped.planilla", "¿Imprimir la planilla de control de existencias?"),
-                    () => Exportacion.DocumentosPedido.PlanillaControl(pedidoBLL.ObtenerPorId(IdPedidoCreado)));
+                    () => Exportacion.DocumentosPedido.PlanillaControl(pedidoBLL.ObtenerPorId(IdPedidoCreado), null,
+                                                                      clienteBLL.ObtenerPorId(_clienteSel.IdCliente)));
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -557,7 +600,8 @@ namespace GUI
             {
                 if (EsAjuste)
                 {
-                    pedidoBLL.AsentarDesistimiento(this.Text, _pedidoAjuste, motivo, BE.EtapaDesistimiento.Cupo);
+                    // Excede el cupo al ajustar: queda asentada la selección ajustada que el cliente no corrigió.
+                    pedidoBLL.AsentarDesistimiento(this.Text, _pedidoAjuste, motivo, BE.EtapaDesistimiento.Cupo, prendas);
                     IdPedidoCreado = _pedidoAjuste.IdPedido;
                 }
                 else

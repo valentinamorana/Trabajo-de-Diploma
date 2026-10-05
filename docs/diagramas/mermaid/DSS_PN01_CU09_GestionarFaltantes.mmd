@@ -13,14 +13,14 @@ sequenceDiagram
   alt El cliente ajusta la selección
     V->>F: Ajustar selección (sin los faltantes, alternativas resaltadas)
     F->>B: AjustarSeleccion(modulo, pedido, prendas)
-    Note over B: Exigir(PedidosVentaEditar) · solo ConFaltantes · VerificarVigencia + RevisarPedidoActivo + ComprobarCupo
+    Note over B: Exigir(PedidosVentaEditar) · solo ConFaltantes · vuelve al merge: solo ComprobarCupo(cliente, cantidad)
     B->>D: ReemplazarSeleccion(idPedido, prendas)  [→ EnControlStock, informe anterior descartado]
     B->>H: RegistrarCambios(AJUSTAR_SELECCION)
     F-->>V: Pedido reenviado a control de stock
   else El cliente desiste
     V->>F: Registrar desistimiento + motivo
-    F->>B: AsentarDesistimiento(modulo, pedido, motivo, etapa Disponibilidad)
-    B->>D: RegistrarDesistimiento(idPedido, motivo, etapa)  [→ Desistido]
+    F->>B: AsentarDesistimiento(modulo, pedido, motivo, etapa, seleccionAjustada)  [Disponibilidad, o Cupo si al ajustar excede]
+    B->>D: RegistrarDesistimiento(idPedido, motivo, etapa, seleccionAjustada)  [→ Desistido]
     B->>H: RegistrarCambios(DESISTIR)
     F-->>V: Aviso de desistimiento (PDF)
   end

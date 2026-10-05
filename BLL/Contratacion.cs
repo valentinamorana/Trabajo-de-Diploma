@@ -96,6 +96,17 @@ namespace BLL
         // "¿Elige plan y modalidad? No → Asentar desistimiento" («Aviso de desistimiento»). El
         // cliente ya fue identificado; el plan y la modalidad son los que estaba considerando,
         // si llegó a elegirlos. No genera contratación. Devuelve el ID del desistimiento.
+        // DesistimientoContratacion.Motivo y ContratacionIntentoPago.Motivo son NVARCHAR(200)
+        // (BD/00_Instalacion_Completa.sql): un texto más largo haría fallar la escritura.
+        public const int LargoMaximoMotivo = 200;
+
+        private static void ValidarLargoMotivo(string motivo)
+        {
+            if (motivo != null && motivo.Trim().Length > LargoMaximoMotivo)
+                throw new BE.AppException("err.bll.contratacion.motivo_largo",
+                    "El motivo no puede superar los {0} caracteres.", LargoMaximoMotivo);
+        }
+
         public int AsentarDesistimiento(string modulo, int idCliente, int? idPlan,
                                         BE.Builders.ModalidadCobro? modalidad, string motivo)
         {
@@ -103,6 +114,7 @@ namespace BLL
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.contratacion.desistir_sin_motivo",
                     "Es obligatorio indicar el motivo del desistimiento que comunicó el cliente.");
+            ValidarLargoMotivo(motivo);
 
             var cliente = dalCliente.ObtenerPorId(idCliente)
                 ?? throw new BE.AppException("err.bll.contratacion.cliente_inexistente", "El cliente seleccionado no existe.");
@@ -313,6 +325,11 @@ namespace BLL
             ValidarCupo(cliente, plan);
 
             int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
+            // Separación de funciones POR PERSONA: quien vendió la contratación no puede cobrarla,
+            // aunque tenga ambos permisos (por ejemplo un Administrador que hizo las dos cosas).
+            if (idCaja == actual.IdVendedor)
+                throw new BE.AppException("err.bll.contratacion.cobra_el_vendedor",
+                    "Quien registró la contratación no puede cobrarla: el cobro lo confirma otra persona de Caja.");
             var descuento = ResolverDescuento(actual, plan, cliente, ObtenerPromocionesVigentes());
             // Caja confirmó el importe de la «Liquidación» que vio: si cambió (venció una promoción,
             // se consumió el crédito), no se cobra un monto distinto del confirmado.
@@ -418,6 +435,7 @@ namespace BLL
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.contratacion.intento_sin_motivo",
                     "Indicá el motivo por el que no se concretó el pago.");
+            ValidarLargoMotivo(motivo);
             ValidarMedioPago(idMedioPago, requerido: false);
 
             var resultado = dalContratacion.RegistrarIntentoFallido(actual.IdContratacion, idMedioPago, motivo.Trim(),

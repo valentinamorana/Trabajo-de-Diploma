@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -368,6 +369,15 @@ namespace BLL
         {
             VerificarPuedeGestionar();
             ValidarNombre(nombre);
+            // El NombreMenu de una PATENTE es la llave del permiso (lo que exigen los guards de la
+            // BLL y el menú): cambiarlo convertiría una patente en otra (por ejemplo, una de solo
+            // lectura en "mnuUsuarios"). Solo se puede cambiar el nombre visible.
+            var nodo = BuscarPorId(permisoDAL.ObtenerArbol(), idPermiso, new HashSet<int>());
+            if (nodo is BE.Patente pat &&
+                !string.Equals(pat.NombreMenu ?? "", nombreMenu ?? "", StringComparison.Ordinal))
+                throw new BE.AppException("err.bll.familia.patente_nombremenu",
+                    "No se puede cambiar el identificador de menú de una patente: define qué permiso otorga.");
+            if (nodo is BE.Patente p2) nombreMenu = p2.NombreMenu;
             permisoDAL.ModificarComponente(idPermiso, nombre, nombreMenu);
             _bitacora.Registrar("Gestión de Perfiles", $"Componente {idPermiso} modificado a '{nombre}'", BE.Criticidad.Media);
         }
@@ -378,6 +388,7 @@ namespace BLL
             VerificarPuedeGestionar();
             if (idPadre == idHijo)
                 throw new BE.AppException("err.bll.ciclo", "Un componente no puede contenerse a sí mismo.");
+            ExigirNoAutoescalar(idPadre, idHijo);   // antes de ValidarSinCiclo (que simula sobre el árbol)
             ValidarSinCiclo(idPadre, idHijo);
             permisoDAL.AgregarRelacion(idPadre, idHijo);
             _bitacora.Registrar("Gestión de Perfiles", $"Relación creada {idPadre}→{idHijo}", BE.Criticidad.Alta);
@@ -458,6 +469,40 @@ namespace BLL
                     $"Error al grabar snapshots de usuarios con rol '{rol}': {ex.Message}",
                     BE.Criticidad.Alta);
             }
+        }
+
+        // Anti-autoescalación para CUALQUIER mutación del árbol (no solo GuardarAsignacionRol): un
+        // usuario no Administrador no puede agregar un componente en un nodo que forma parte del
+        // árbol de su PROPIO rol (el rol mismo o un rol/familia anidado en él) si con eso su rol
+        // pasaría a resolver patentes que hoy no tiene. Se calcula sin mutar el árbol real.
+        private void ExigirNoAutoescalar(int idPadre, int idHijo)
+        {
+            if (EsAdminEnSesion()) return;
+            var u = Seguridad.SessionManager.GetInstance().Usuario;
+            string rolPropio = u.Rol ?? u.Perfil;
+            var arbol = permisoDAL.ObtenerArbol();
+            var nodoRol = BuscarRol(arbol, rolPropio, new HashSet<int>());
+            if (nodoRol == null) return;
+
+            var subarbol = new HashSet<int>();
+            RecolectarIds(nodoRol, subarbol);
+            if (!subarbol.Contains(idPadre)) return;   // el cambio no toca el árbol del propio rol
+
+            var antes   = new HashSet<int>(nodoRol.ObtenerPatentesEfectivas().Select(p => p.Id));
+            var despues = new HashSet<int>(antes);
+            var hijo = BuscarPorId(arbol, idHijo, new HashSet<int>());
+            if (hijo != null) foreach (var p in hijo.ObtenerPatentesEfectivas()) despues.Add(p.Id);
+
+            if (!NoEscalaPrivilegios(antes, despues))
+                throw new BE.AppException("err.bll.familia.autoescalacion",
+                    "No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando " +
+                    "tu propio rol. Pedile a otro administrador que lo haga.");
+        }
+
+        private static void RecolectarIds(BE.Componente nodo, HashSet<int> ids)
+        {
+            if (nodo == null || !ids.Add(nodo.Id)) return;
+            foreach (var h in nodo.Hijos ?? new List<BE.Componente>()) RecolectarIds(h, ids);
         }
 
         // Núcleo PURO y testeable (mismo estilo que SistemaConservaGestion): ¿el conjunto de

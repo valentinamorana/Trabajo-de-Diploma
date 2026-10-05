@@ -26,6 +26,12 @@ namespace DAL.Interfaces
         /// No recalcula el DV — el caller debe llamar a <see cref="RecalcularDV"/> después de confirmar la transacción.</summary>
         void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente);
 
+        /// <summary>Cobro recurrente (N01): fija el nuevo vencimiento y limpia la gracia SOLO si el
+        /// vencimiento sigue siendo <paramref name="vencimientoLeido"/> (control optimista).
+        /// Devuelve false si otra sesión ya lo cambió.</summary>
+        bool RenovarVencimientoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente,
+                                    DateTime? vencimientoLeido, DateTime nuevoVencimiento);
+
         /// <summary>Suma <paramref name="monto"/> al crédito de referido de forma atómica (delta sobre el valor real de la BD).
         /// El UPDATE general de Cliente no escribe el crédito: solo estas dos operaciones lo modifican.</summary>
         void SumarCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto);

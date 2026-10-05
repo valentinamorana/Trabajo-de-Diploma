@@ -42,6 +42,9 @@ namespace BLL.Manejadores
                 return DelegarASucesor(contexto);
 
             var cliente = contexto.Cliente;
+            // Vencimiento LEÍDO antes de cobrar: el UPDATE del cobro se condiciona a que siga igual
+            // (si otra sesión ya cobró y extendió la suscripción, este cobro no se aplica).
+            DateTime? vencimientoLeido = cliente.FechaVencimiento;
 
             var plan = new BE.PlanSuscripcion
             {
@@ -76,7 +79,14 @@ namespace BLL.Manejadores
             int idCobro = 0;
             dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
-                dalCliente.ModificarEnTx(conexion, tx, cliente);
+                // Solo las columnas que el cobro modifica (vencimiento y gracia), condicionadas al
+                // vencimiento leído: antes se reescribía el cliente entero desde memoria y una
+                // edición concurrente (por ejemplo del email) se perdía; y dos cajeros confirmando
+                // a la vez generaban dos cobros.
+                if (!dalCliente.RenovarVencimientoEnTx(conexion, tx, cliente.IdCliente, vencimientoLeido,
+                                                       suscripcion.FechaVencimiento))
+                    throw new BE.AppException("err.bll.cobro.concurrente",
+                        "Otra sesión ya procesó el cobro de este cliente. Actualizá la lista y verificá su vencimiento.");
                 // Crédito de referido: delta atómico sobre el valor real de la BD.
                 if (resDescuento.UsaCreditoReferido)
                     dalCliente.ConsumirCreditoEnTx(conexion, tx, cliente.IdCliente, resDescuento.Descuento);

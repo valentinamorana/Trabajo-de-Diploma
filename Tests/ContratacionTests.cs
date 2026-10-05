@@ -79,7 +79,7 @@ namespace Tests
             IdContratacion = 7,
             IdCliente = 10,
             IdPlan = 1,
-            IdVendedor = 5,
+            IdVendedor = 6,   // distinto del empleado de Caja (5): quien vende no cobra
             Modalidad = BE.Builders.ModalidadCobro.Mensual,
             Estado = BE.EstadoContratacion.PendientePago,
             NombreCliente = "Ana Gómez",
@@ -796,6 +796,28 @@ namespace Tests
             var c = ctx.Pendiente();
             ctx.Crear().ConfirmarCobro("Test", c, 1, 1000m);
             Assert.AreEqual(1, ctx.DalContratacion.ConfirmarCobroVeces);
+        }
+
+        // Separación de funciones por persona: el empleado que vendió no puede cobrar su propia
+        // contratación, aunque tenga ambos permisos (un Administrador que hace las dos cosas).
+        [TestMethod]
+        public void ConfirmarCobro_ElMismoEmpleadoQueVendio_LanzaCobraElVendedor_SinCobrar()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            c.IdVendedor = 5;   // el empleado vinculado al usuario en sesión (Caja) es el 5
+            EsperarError(() => ctx.Crear().ConfirmarCobro("Test", c, 1), "err.bll.contratacion.cobra_el_vendedor");
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces);
+        }
+
+        [TestMethod]
+        public void AsentarDesistimiento_MotivoMasLargoQueLaColumna_SeRechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            EsperarError(() => ctx.Crear().AsentarDesistimiento("Test", 10, null, null,
+                new string('x', BLL.Contratacion.LargoMaximoMotivo + 1)), "err.bll.contratacion.motivo_largo");
         }
 
         // El cliente sumó prendas en uso después de registrar: al cobrar se revalida el cupo.

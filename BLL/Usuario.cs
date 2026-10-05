@@ -34,6 +34,12 @@ namespace BLL
             this.usuarioDAL = usuarioDAL;
         }
 
+        // Para pruebas: permite inyectar la resolución de permisos (BLL.Familia con un DAL doble).
+        internal Usuario(DAL.Interfaces.IUsuarioDAL usuarioDAL, BLL.Familia perfiles) : this(usuarioDAL)
+        {
+            _perfilesLazy = perfiles;
+        }
+
         // Re-validación en el BACKEND: la gestión de usuarios es una operación EXCLUSIVA del
         // Administrador. Se verifica el rol en sesión por Perfil, de forma consistente con
         // SessionManager.TienePermiso (que también identifica al admin por su Perfil).

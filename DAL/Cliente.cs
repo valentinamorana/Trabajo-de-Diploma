@@ -254,6 +254,25 @@ namespace DAL
             }
         }
 
+        // Cobro recurrente (N01): actualiza SOLO el vencimiento y la gracia, con control optimista
+        // sobre el vencimiento leído ("WHERE FechaVencimiento = @Leido"). Devuelve false si otra
+        // sesión ya cobró (o modificó el vencimiento) entre la lectura y este UPDATE.
+        public bool RenovarVencimientoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente,
+                                           DateTime? vencimientoLeido, DateTime nuevoVencimiento)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE Cliente SET FechaVencimiento = @Nuevo, FechaLimiteGracia = NULL " +
+                "WHERE IdCliente = @IdCliente " +
+                "  AND ((@Leido IS NULL AND FechaVencimiento IS NULL) OR FechaVencimiento = @Leido)",
+                conexion, tx))
+            {
+                cmd.Parameters.Add(new SqlParameter("@Nuevo", SqlDbType.Date) { Value = nuevoVencimiento.Date });
+                cmd.Parameters.Add(new SqlParameter("@Leido", SqlDbType.Date) { Value = (object)vencimientoLeido?.Date ?? DBNull.Value });
+                cmd.Parameters.AddWithValue("@IdCliente", idCliente);
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
         // Crédito de referido: se modifica SOLO con estas dos operaciones atómicas (el UPDATE general
         // de Cliente ya no lo escribe). Así dos sesiones que suman o consumen crédito a la vez no se
         // pisan: cada una aplica su delta sobre el valor real de la base, no sobre una copia leída antes.

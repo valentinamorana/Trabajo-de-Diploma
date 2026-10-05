@@ -46,11 +46,10 @@ namespace BLL
             string modulo, BE.Cliente cliente, Manejadores.DecisionCobro decision,
             BE.Builders.ModalidadCobro modalidad, string actor)
         {
-            // El cobro modifica datos del cliente (vencimiento / gracia): se gobierna por
-            // el mismo permiso de edición que Renovación (BLL.Renovacion.Procesar), no por
-            // mnuCobroSuscripcion — esa patente solo controla si el ítem de menú/pantalla
-            // es visible, igual que mnuRenovacionSuscripcion.
-            PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
+            // N01 — El cobro recurrente de la suscripción lo registra CAJA (decisión del proceso:
+            // quien vende no cobra). Se gobierna por la patente de edición de Caja; la de
+            // mnuCobroSuscripcion solo controla que el ítem de menú/pantalla sea visible.
+            PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
 
             // Guarda de entrada única para toda la cadena: sin plan asignado no hay

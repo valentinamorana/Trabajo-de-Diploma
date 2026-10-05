@@ -160,13 +160,8 @@ namespace GUI
 
         private void AplicarFiltro()
         {
-            string filtro = txtFiltro.Text.Trim().ToLower();
-            var lista = string.IsNullOrEmpty(filtro)
-                ? _clientes
-                : _clientes.FindAll(c =>
-                    c.NombreCompleto.ToLower().Contains(filtro) ||
-                    c.DNI.Contains(filtro) ||
-                    (c.Email ?? "").ToLower().Contains(filtro));
+            // El criterio de búsqueda lo define la BLL (BLL.Cliente.Filtrar).
+            var lista = clienteBLL.Filtrar(_clientes, txtFiltro.Text);
 
             var t = Traductor.ObtenerTraducciones(_idioma);
             string sinPlan = t.ContainsKey("lbl.sinplan") ? t["lbl.sinplan"].Texto : "Sin plan";
@@ -192,8 +187,10 @@ namespace GUI
 
             foreach (var c in lista)
             {
-                bool expirado    = c.VencimientoExpirado;
-                bool proxAVencer = !expirado && c.SuscripcionProximaAVencer();
+                // El estado del vencimiento lo deriva BE.Cliente; acá solo se arma el texto.
+                var estadoVenc   = c.ObtenerEstadoVencimiento();
+                bool expirado    = estadoVenc == BE.EstadoVencimiento.Vencida;
+                bool proxAVencer = estadoVenc == BE.EstadoVencimiento.ProximaAVencer;
 
                 string vencStr = c.FechaVencimiento.HasValue
                     ? (expirado
@@ -204,7 +201,7 @@ namespace GUI
                     : sinVenc;
 
                 // Mostrar "StockUtilizado / LimitePrendas" si tiene plan con límite
-                string capacidad = c.IdPlan.HasValue && c.LimitePrendas > 0
+                string capacidad = c.TieneLimiteDePrendas
                     ? $"{c.StockUtilizado} / {c.LimitePrendas}"
                     : c.StockUtilizado.ToString();
 

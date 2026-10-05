@@ -625,5 +625,60 @@ namespace Tests
             Assert.AreEqual(BE.EstadoRenovacion.Baja, resultado.Estado);
             Assert.AreEqual(1, dalRenovacion.AltaVeces);
         }
+
+        // ── ObtenerElegibles (antes filtrado en RenovacionSuscripcionForm) ─────────
+
+        private static BLL.Renovacion RenovacionConClientes(FakeClienteDAL dal) =>
+            new BLL.Renovacion(dal, new FakeRenovacionDAL(), new FakePlanSuscripcionDAL(), new FakePrendaDAL());
+
+        private static BE.Cliente ClientePausado() => new BE.Cliente
+        {
+            IdCliente = 30, Nombre = "Pau", Apellido = "Sada", IdPlan = 1,
+            FechaVencimiento = DateTime.Today.AddDays(90), FechaPausaHasta = DateTime.Today.AddDays(20)
+        };
+
+        [TestMethod]
+        public void ObtenerElegibles_Renovar_VencidosOProximosMasLosPausados()
+        {
+            var dal = new FakeClienteDAL();
+            var vencido = ClienteVencido();
+            var vigente = ClienteVigente();
+            var pausado = ClientePausado();
+            var sinPlan = new BE.Cliente { IdCliente = 31, Nombre = "Sin", Apellido = "Plan", FechaVencimiento = DateTime.Today.AddDays(-5) };
+            dal.ClientesDevueltos.AddRange(new[] { vencido, vigente, pausado, sinPlan });
+
+            var elegibles = RenovacionConClientes(dal).ObtenerElegibles(DecisionRenovacion.Renovar);
+
+            CollectionAssert.AreEqual(new[] { vencido, pausado }, elegibles);
+        }
+
+        [TestMethod]
+        public void ObtenerElegibles_Pausar_TodosLosNoPausadosYLuegoLosPausados()
+        {
+            var dal = new FakeClienteDAL();
+            var pausado = ClientePausado();
+            var vencido = ClienteVencido();
+            var vigente = ClienteVigente();
+            dal.ClientesDevueltos.AddRange(new[] { pausado, vencido, vigente });
+
+            var elegibles = RenovacionConClientes(dal).ObtenerElegibles(DecisionRenovacion.Pausar);
+
+            CollectionAssert.AreEqual(new[] { vencido, vigente, pausado }, elegibles);
+        }
+
+        [TestMethod]
+        public void ObtenerElegibles_ExcluyeClientesConContratacionPendiente()
+        {
+            var dal = new FakeClienteDAL();
+            var vencido = ClienteVencido();
+            var pausado = ClientePausado();
+            dal.ClientesDevueltos.AddRange(new[] { vencido, pausado });
+            dal.IdsConContratacionPendiente.Add(vencido.IdCliente);
+            dal.IdsConContratacionPendiente.Add(pausado.IdCliente);
+
+            var elegibles = RenovacionConClientes(dal).ObtenerElegibles(DecisionRenovacion.Baja);
+
+            Assert.AreEqual(0, elegibles.Count);
+        }
     }
 }

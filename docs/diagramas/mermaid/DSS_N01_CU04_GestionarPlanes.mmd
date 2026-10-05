@@ -11,9 +11,10 @@ sequenceDiagram
     B-->>F: AppException(nombre_requerido / limite_invalido / precio_cero)
     F-->>V: Informa el error
   else Datos válidos
+    Note over B: Alta: el plan queda activo · Modificar: conserva el estado guardado (ObtenerPorId)
     B->>D: Alta(plan) / Modificar(plan)
     B-->>F: ok
-    F-->>V: Plan guardado (queda activo)
+    F-->>V: Plan guardado
   end
   V->>F: Pulsa Desactivar Plan
   F->>B: Desactivar(modulo, plan)

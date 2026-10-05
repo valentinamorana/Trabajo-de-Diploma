@@ -13,7 +13,7 @@ namespace BLL.Manejadores
         {
             var cliente = contexto.Cliente;
 
-            if (!cliente.VencimientoExpirado && !cliente.SuscripcionProximaAVencer())
+            if (!cliente.RequiereGestionDeVencimiento())
             {
                 return new ResultadoCobro
                 {

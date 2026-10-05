@@ -190,8 +190,7 @@ namespace GUI
         private void DgvListaEspera_SelectionChanged(object sender, EventArgs e)
         {
             var fila = ObtenerFilaSeleccionada();
-            btnCancelar.Enabled = fila != null &&
-                (fila.Estado == BE.EstadoListaEspera.Pendiente || fila.Estado == BE.EstadoListaEspera.Reservada);
+            btnCancelar.Enabled = fila != null && fila.PuedeCancelarse();
         }
 
         private BE.ListaEspera ObtenerFilaSeleccionada()

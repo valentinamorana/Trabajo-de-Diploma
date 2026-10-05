@@ -14,8 +14,11 @@ namespace Tests.Fakes
         public List<BE.PlanSuscripcion> Planes { get; set; } = new List<BE.PlanSuscripcion>();
         public List<BE.PlanSuscripcion> ObtenerTodos() => Planes;
         public BE.PlanSuscripcion ObtenerPorId(int idPlan) => PlanPorId;
-        public void Alta(BE.PlanSuscripcion plan) { }
-        public void Modificar(BE.PlanSuscripcion plan) { }
+        // Espías de Alta/Modificar: el plan tal como llegó al DAL.
+        public BE.PlanSuscripcion UltimoAlta { get; private set; }
+        public BE.PlanSuscripcion UltimoModificado { get; private set; }
+        public void Alta(BE.PlanSuscripcion plan) => UltimoAlta = plan;
+        public void Modificar(BE.PlanSuscripcion plan) => UltimoModificado = plan;
         public void Desactivar(int idPlan) { }
         public void Activar(int idPlan) { }
     }

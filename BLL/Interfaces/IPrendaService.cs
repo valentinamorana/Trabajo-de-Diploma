@@ -46,5 +46,12 @@ namespace BLL.Interfaces
 
         // PN04, CU-DEP-01 Inspeccionar Devolución: prendas EnLimpieza pendientes de resolución.
         List<BE.Prenda> ObtenerEnLimpieza();
+
+        // Estados a los que se puede pasar la prenda desde el cambio de estado manual
+        // (sin las transiciones que solo existen por un flujo dedicado de PN04).
+        List<BE.EstadoPrenda> ObtenerTransicionesManuales(BE.Prenda prenda);
+
+        // True si, tras dar de baja la prenda, corresponde ofrecer un cargo por daño/pérdida.
+        bool CorrespondeOfrecerCargo(BE.Prenda prenda);
     }
 }

@@ -26,7 +26,7 @@ module.exports = [
     clases: [
       E('BE.Cliente', { attrs: 'all' }), E('BE.PlanSuscripcion', { attrs: 'all' }), E('BE.Renovacion', { attrs: 'all' }), E('BE.Cobro', { attrs: 'all' }),
       E('BLL.Cliente', { metodos: ['Alta', 'Modificar', 'Baja', 'ActivarSuscripcionDesdeContratacion', 'ReanudarPausa', 'ObtenerEstadoComercial'] }),
-      E('BLL.Renovacion', { metodos: ['Procesar', 'ObtenerHistorial'] }), E('BLL.Cobro', { metodos: ['Procesar', 'ObtenerHistorial'] }),
+      E('BLL.Renovacion', { metodos: ['Procesar', 'ObtenerHistorial', 'ObtenerElegibles'] }), E('BLL.Cobro', { metodos: ['Procesar', 'ObtenerHistorial', 'ObtenerElegibles', 'PrevisualizarCobro'] }),
       E('BLL.PlanSuscripcion', { metodos: 'all' }), E('IPlanSuscripcionDAL', { metodos: [] }), E('IClienteDAL', { metodos: ['SumarCreditoEnTx', 'ConsumirCreditoEnTx', 'EjecutarTransaccion'] })
     ]
   },
@@ -145,7 +145,7 @@ module.exports = [
     tipo: 'clases', id: 'CLASES_pn04_devolucion', procesos: ['PN04'], titulo: 'Diagrama de clases — PN04 Inspección de devolución', columnas: 3,
     clases: [
       E('BE.Prenda', { attrs: 'all' }), E('BE.MantenimientoPrenda', { attrs: 'all' }), E('BE.CargoPrenda', { attrs: 'all' }), E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido'] }),
-      E('BLL.ListaEspera', { metodos: [] }), E('BLL.Prenda', { metodos: ['ObtenerEnLimpieza', 'CambiarEstado', 'ObtenerHistorialMantenimiento'] }), E('BLL.CargoPrenda', { metodos: ['RegistrarCargo', 'ObtenerPendientesPorCliente'] }),
+      E('BLL.ListaEspera', { metodos: [] }), E('BLL.Prenda', { metodos: ['ObtenerEnLimpieza', 'CambiarEstado', 'ObtenerTransicionesManuales', 'ObtenerHistorialMantenimiento'] }), E('BLL.CargoPrenda', { metodos: ['RegistrarCargo', 'ValidarDatos', 'ObtenerPendientesPorCliente'] }),
       E('IPrendaDAL', { metodos: ['CambiarEstado'] }), E('ICargoPrendaDAL', { metodos: ['Alta', 'ObtenerPendientesPorCliente', 'MarcarCobradosEnTx'] })
     ]
   },

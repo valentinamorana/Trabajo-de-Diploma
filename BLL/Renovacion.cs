@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -97,5 +98,29 @@ namespace BLL
         }
 
         public List<BE.Renovacion> ObtenerHistorial(int idCliente) => dalRenovacion.ObtenerPorCliente(idCliente);
+
+        // Clientes a los que se les puede procesar la decisión indicada, con el mismo criterio
+        // que la cadena de manejadores (para no ofrecer una decisión que el sistema va a rechazar):
+        //   - solo clientes con plan y sin contratación PN02 pendiente de pago (Procesar los rechaza;
+        //     si el cliente estaba pausado, el cobro de Caja levanta la pausa al activar);
+        //   - Renovar / Cambiar plan / Baja: suscripción vencida o próxima a vencer
+        //     (VerificarVencimientoHandler);
+        //   - Pausar: cualquiera que no esté ya pausado (PausarSuscripcionHandler no re-pausa);
+        //   - SIEMPRE se suman los ya pausados: "Reanudar ahora" no depende de la decisión, y un
+        //     cliente pausado suele tener el vencimiento corrido hacia adelante.
+        // Antes este filtro lo armaba RenovacionSuscripcionForm.
+        public List<BE.Cliente> ObtenerElegibles(Manejadores.DecisionRenovacion decision)
+        {
+            var conPlan = dalCliente.ObtenerTodos()
+                .Where(c => c.TienePlan())
+                .Where(c => !dalCliente.TieneContratacionPendiente(c.IdCliente))
+                .ToList();
+
+            var porDecision = decision == Manejadores.DecisionRenovacion.Pausar
+                ? conPlan.Where(c => !c.EstaPausada)
+                : conPlan.Where(c => c.RequiereGestionDeVencimiento());
+
+            return porDecision.Union(conPlan.Where(c => c.EstaPausada)).ToList();
+        }
     }
 }

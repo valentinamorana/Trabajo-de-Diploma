@@ -7,7 +7,14 @@ sequenceDiagram
   participant H2 as Procesar<br/>PagoHandler
   participant H3 as AplicarGracia / Suspender Handler
   participant D as DAL (Cliente, Cobro, CargoPrenda, Promocion)
-  V->>F: Elige cliente, modalidad y resultado del cobro (Cobrado o Pago fallido)
+  F->>B: ObtenerElegibles()
+  B->>D: ObtenerTodos() · TieneContratacionPendiente(idCliente)
+  B-->>F: clientes con plan, vencidos o próximos a vencer y sin contratación pendiente
+  V->>F: Elige el cliente
+  F->>B: PrevisualizarCobro(idCliente)
+  B->>D: ObtenerPendientesPorCliente(idCliente)
+  B-->>F: cantidad y total de cargos pendientes que sumará el cobro
+  V->>F: Elige modalidad y resultado del cobro (Cobrado o Pago fallido)
   F->>B: Procesar(modulo, cliente, decision, modalidad, actor)
   B->>H1: Procesar(contexto)
   alt Todavía no corresponde cobrar

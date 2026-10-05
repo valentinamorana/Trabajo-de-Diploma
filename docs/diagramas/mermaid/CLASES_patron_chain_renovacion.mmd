@@ -2,6 +2,7 @@ classDiagram
   direction TB
   class BLL_Renovacion["BLL.Renovacion"] {
     +Procesar(string,  Cliente,  DecisionRenovacion,  int?,  ModalidadCobro,  string,  DateTime?) ResultadoRenovacion
+    +ObtenerElegibles(DecisionRenovacion) List~Cliente~
   }
   class BLL_Manejadores_ManejadorRenovacion["BLL.Manejadores.ManejadorRenovacion"] {
     <<abstract>>

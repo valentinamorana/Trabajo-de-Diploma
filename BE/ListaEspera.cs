@@ -33,6 +33,11 @@ namespace BE
             Estado == EstadoListaEspera.Reservada &&
             FechaLimiteReserva.HasValue && FechaLimiteReserva.Value > DateTime.Now;
 
+        /// <summary>True si la anotación todavía no se resolvió (Pendiente o Reservada) y por lo
+        /// tanto se puede cancelar. Mismo criterio que BLL.ListaEspera.Cancelar.</summary>
+        public bool PuedeCancelarse() =>
+            Estado == EstadoListaEspera.Pendiente || Estado == EstadoListaEspera.Reservada;
+
         /// <summary>True si estaba Reservada pero venció el plazo sin que el cliente la retirara.</summary>
         public bool ReservaExpirada =>
             Estado == EstadoListaEspera.Reservada &&

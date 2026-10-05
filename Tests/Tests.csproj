@@ -57,6 +57,8 @@
     <Compile Include="ClienteTests.cs" />
     <Compile Include="CargoPrendaTests.cs" />
     <Compile Include="PedidoTests.cs" />
+    <Compile Include="PanelTareasTests.cs" />
+    <Compile Include="AuditoriaGuiTests.cs" />
     <Compile Include="ContratacionTests.cs" />
     <Compile Include="PromocionTests.cs" />
     <Compile Include="PoliticaDescuentoTests.cs" />
@@ -91,6 +93,10 @@
     <Compile Include="ReporteTendenciaTests.cs" />
     <Compile Include="RecuperacionAdminTests.cs" />
     <Compile Include="Fakes\FakeBackupDAL.cs" />
+    <Compile Include="Fakes\FakeRegistroBitacora.cs" />
+    <Compile Include="ConfiguracionTests.cs" />
+    <Compile Include="LoginSeguridadTests.cs" />
+    <Compile Include="EndurecimientoBackendTests.cs" />
     <Compile Include="Fakes\FakeClaveRecuperacionDAL.cs" />
     <Compile Include="Fakes\FakePermisoDAL.cs" />
     <Compile Include="Fakes\FakeUsuarioDAL.cs" />

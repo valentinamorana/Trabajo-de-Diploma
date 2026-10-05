@@ -5,9 +5,11 @@ erDiagram
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
+  Cliente ||--o{ Contratacion : "IdCliente"
+  Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
-  Cliente ||--o{ Contratacion : "IdCliente"
+  Promocion ||--o{ DictamenContable : "IdPromocion"
   Cliente ||--o{ HistorialCobro : "IdCliente"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
@@ -15,15 +17,18 @@ erDiagram
   Cliente ||--o{ ListaEspera : "IdCliente"
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
-  Empleado ||--o{ Pedido : "IdEmpleado"
   Cliente ||--o{ Pedido : "IdCliente"
+  Empleado ||--o{ Pedido : "IdEmpleado"
+  Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
-  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  Promocion ||--o{ PromocionHistorial : "IdPromocion"
+  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
   PlanSuscripcion {
     int IdPlan PK
@@ -71,15 +76,19 @@ erDiagram
     int IdCaja FK "NULL"
     int Modalidad
     int Estado
-    int IntentosPago
     datetime FechaAlta
     datetime FechaResolucion "NULL"
-    nvarchar(50) MedioPago "NULL"
     nvarchar(50) NumeroComprobante "NULL"
     datetime FechaComprobante "NULL"
     decimal(10_2) Importe "NULL"
     decimal(10_2) DescuentoAplicado "NULL"
     int IdPromocion FK "NULL"
+    int IdMedioPago FK "NULL"
+    date VigenciaDesde "NULL"
+    date VigenciaHasta "NULL"
+    decimal(10_2) PrecioMensual "NULL"
+    int IdReferenteAcreditado FK "NULL"
+    int DVH "NULL"
   }
   Promocion {
     int IdPromocion PK
@@ -94,10 +103,9 @@ erDiagram
     nvarchar(100) CategoriaPrenda "NULL"
     decimal(10_2) MargenEstimado
     nvarchar(500) ImpactoEconomico "NULL"
-    nvarchar(500) Observacion "NULL"
-    nvarchar(500) MotivoBaja "NULL"
     int IdSugerenciaOrigen FK "NULL"
     datetime FechaAlta
+    int IdUsuarioAlta FK "NULL"
   }
   SugerenciaPromocion {
     int IdSugerencia PK
@@ -108,6 +116,38 @@ erDiagram
     decimal(10_2) BeneficioEstimado
     int Estado
     datetime FechaAlta
+    int OrigenMetrica
+    int IdUsuarioAlta FK "NULL"
+    nvarchar(500) MotivoDescarte "NULL"
+    datetime FechaEvaluacion "NULL"
+  }
+  PromocionHistorial {
+    int IdHistorial PK
+    int IdPromocion FK
+    int EstadoAnterior "NULL"
+    int EstadoNuevo
+    int IdUsuario FK "NULL"
+    datetime Fecha
+    nvarchar(500) Observacion "NULL"
+  }
+  DictamenContable {
+    int IdDictamen PK
+    int IdPromocion FK
+    int IdUsuario FK
+    bit Aprobada
+    nvarchar(500) Observacion
+    datetime Fecha
+  }
+  SolicitudBajaPromocion {
+    int IdSolicitud PK
+    int IdPromocion FK
+    int IdUsuarioSolicita FK
+    nvarchar(500) Motivo
+    datetime FechaSolicitud
+    int Estado
+    int IdUsuarioResuelve FK "NULL"
+    nvarchar(500) MotivoResolucion "NULL"
+    datetime FechaResolucion "NULL"
   }
   HistorialRenovacion {
     int IdRenovacion PK
@@ -138,10 +178,18 @@ erDiagram
     datetime FechaEntrega "NULL"
     nvarchar(500) MotivoCancelacion "NULL"
     int DVH "NULL"
+    datetime FechaEnvioControl "NULL"
+    datetime FechaControl "NULL"
+    int IdEmpleadoControl FK "NULL"
+    datetime FechaSeparacion "NULL"
+    datetime FechaFormalizacion "NULL"
+    nvarchar(500) MotivoDesistimiento "NULL"
+    nvarchar(20) EtapaDesistimiento "NULL"
   }
   PedidoPrenda {
     int IdPedido PK,FK
     int IdPrenda PK,FK
+    bit Confirmada
   }
   PedidoHistorial {
     int IdHistorial PK

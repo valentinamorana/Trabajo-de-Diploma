@@ -46,7 +46,6 @@ namespace GUI
         {
             // El ícono ahora lo aplica FormBase.OnLoad (esta clase no lo sobreescribe, así que
             // corre alrededor de este handler del Load del Designer) — no hace falta duplicarlo acá.
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
 
             dtpJornada.Value  = DateTime.Today;
@@ -61,7 +60,7 @@ namespace GUI
         {
             using (var br = new System.Drawing.Drawing2D.LinearGradientBrush(
                 panelTop.ClientRectangle,
-                Color.FromArgb(176, 62, 96),
+                Tema.RosaOscuro,
                 Color.FromArgb(242, 114, 153),
                 System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
                 e.Graphics.FillRectangle(br, panelTop.ClientRectangle);
@@ -74,20 +73,14 @@ namespace GUI
             const int n      = 4;
             int cellW = panelKpiBanner.Width / n;
 
-            using (var br = new SolidBrush(Color.FromArgb(176, 62, 96)))
+            using (var br = new SolidBrush(Tema.RosaOscuro))
                 e.Graphics.FillRectangle(br, 0, panelH - 3, panelKpiBanner.Width, 3);
-            using (var pen = new Pen(Color.FromArgb(220, 180, 200), 1))
+            using (var pen = new Pen(Tema.Borde, 1))
                 for (int i = 1; i < n; i++)
                     e.Graphics.DrawLine(pen, i * cellW, 8, i * cellW, panelH - 10);
         }
 
         private void BtnTendencia_Click(object sender, EventArgs e) => MostrarTendencia();
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
-        }
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
 

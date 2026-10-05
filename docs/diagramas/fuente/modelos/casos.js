@@ -2,22 +2,25 @@
 module.exports = [
   {
     tipo: 'casos', id: 'CU_n01_clientes_suscripciones', titulo: 'Casos de uso — N01 Clientes y suscripciones', sistema: 'WardrobeFlow — N01 Clientes y suscripciones',
-    actores: [{ id: 'V', nombre: 'Vendedor' }],
+    actores: [{ id: 'V', nombre: 'Vendedor' }, { id: 'C', nombre: 'Caja' }],
     casos: [
       { id: 'c1', nombre: 'CU01-VEN Gestionar Cliente' }, { id: 'c2', nombre: 'CU02-VEN Renovar Suscripción' },
-      { id: 'c3', nombre: 'CU03-VEN Cobrar Suscripción' }, { id: 'c4', nombre: 'CU04-VEN Gestionar Planes' }
+      { id: 'c4', nombre: 'CU03-VEN Gestionar Planes' }, { id: 'c3', nombre: 'CU01-CAJ Cobrar Suscripción' }
     ],
-    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c2' }, { actor: 'V', caso: 'c3' }, { actor: 'V', caso: 'c4' }]
+    // El cobro recurrente lo hace Caja: quien vende no cobra (mismo criterio que PN02).
+    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c2' }, { actor: 'V', caso: 'c4' }, { actor: 'C', caso: 'c3' }]
   },
   {
     tipo: 'casos', id: 'CU_pn01_armar_pedido', titulo: 'Casos de uso — PN01 Armar pedido', sistema: 'WardrobeFlow — PN01 Armar pedido',
     actores: [{ id: 'V', nombre: 'Vendedor' }, { id: 'D', nombre: 'Depósito / Logística' }],
     casos: [
-      { id: 'c1', nombre: 'CU01-VEN Armar Pedido' }, { id: 'c2', nombre: 'CU02-VEN Consultar Catálogo' }, { id: 'c3', nombre: 'CU03-VEN Consultar Situación del Cliente' },
+      { id: 'c1', nombre: 'CU01-VEN Armar Pedido y Enviar a Control de Stock' }, { id: 'c2', nombre: 'CU02-VEN Consultar Catálogo' }, { id: 'c3', nombre: 'CU03-VEN Consultar Situación del Cliente' },
       { id: 'c4', nombre: 'CU04-VEN Cancelar Pedido' }, { id: 'c5', nombre: 'CU01-DEP Despachar Pedido' }, { id: 'c6', nombre: 'CU02-DEP Registrar Entrega' },
-      { id: 'c7', nombre: 'CU03-DEP Registrar Devolución' }
+      { id: 'c7', nombre: 'CU03-DEP Registrar Devolución' }, { id: 'c8', nombre: 'CU04-DEP Controlar Stock del Pedido' },
+      { id: 'c9', nombre: 'CU05-VEN Comunicar Faltantes, Ajustar o Desistir' }, { id: 'c10', nombre: 'CU06-VEN Formalizar Pedido' }
     ],
-    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c4' }, { actor: 'D', caso: 'c5' }, { actor: 'D', caso: 'c6' }, { actor: 'D', caso: 'c7' }],
+    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c4' }, { actor: 'V', caso: 'c9' }, { actor: 'V', caso: 'c10' },
+              { actor: 'D', caso: 'c5' }, { actor: 'D', caso: 'c6' }, { actor: 'D', caso: 'c7' }, { actor: 'D', caso: 'c8' }],
     incluye: [{ de: 'c1', a: 'c2' }, { de: 'c1', a: 'c3' }]
   },
   {
@@ -25,20 +28,27 @@ module.exports = [
     actores: [{ id: 'V', nombre: 'Vendedor' }, { id: 'C', nombre: 'Caja' }],
     casos: [
       { id: 'c1', nombre: 'CU01-VTA Gestionar Suscripción' }, { id: 'c2', nombre: 'CU01-CAJ Gestionar Cobro' },
-      { id: 'c3', nombre: 'CU02-CAJ Emitir Comprobante' }, { id: 'c4', nombre: 'CU03-CAJ Cancelar Contratación' }
+      { id: 'c3', nombre: 'CU02-CAJ Emitir Comprobante' }, { id: 'c4', nombre: 'CU03-CAJ Registrar Intento y Cancelar Contratación' },
+      { id: 'c5', nombre: 'CU02-VTA Asentar Desistimiento' }
     ],
-    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'C', caso: 'c2' }, { actor: 'C', caso: 'c4' }],
+    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c5' }, { actor: 'C', caso: 'c2' }, { actor: 'C', caso: 'c4' }],
     incluye: [{ de: 'c2', a: 'c3' }]
   },
   {
     tipo: 'casos', id: 'CU_pn03_promociones', titulo: 'Casos de uso — PN03 Métricas, promociones y toma de decisiones', sistema: 'WardrobeFlow — PN03 Promociones',
     actores: [{ id: 'G', nombre: 'Gerencia' }, { id: 'A', nombre: 'Administración' }, { id: 'K', nombre: 'Contabilidad' }, { id: 'V', nombre: 'Vendedor' }],
     casos: [
-      { id: 'c1', nombre: 'CU01-GER Sugerir Promoción' }, { id: 'c2', nombre: 'CU01-ADM Gestionar Promociones' }, { id: 'c3', nombre: 'CU01-CONT Analizar Promoción' },
-      { id: 'c4', nombre: 'CU01-VEN Sugerir Baja de Promoción' }, { id: 'c5', nombre: 'CU02-ADM Resolver Baja de Promoción' },
+      { id: 'c1', nombre: 'CU01-GER Sugerir Promoción' }, { id: 'c7', nombre: 'CU03-GER Analizar Métricas' },
+      { id: 'c2', nombre: 'CU01-ADM Gestionar Promociones' }, { id: 'c8', nombre: 'CU03-ADM Descartar Sugerencia' },
+      { id: 'c9', nombre: 'CU04-ADM Descartar Promoción Rechazada' }, { id: 'c10', nombre: 'CU05-ADM Desactivar Promoción' },
+      { id: 'c3', nombre: 'CU01-CONT Analizar Promoción' },
+      { id: 'c4', nombre: 'CU01-VEN Solicitar Baja de Promoción' }, { id: 'c5', nombre: 'CU02-ADM Resolver Baja de Promoción' },
       { id: 'c6', nombre: 'CU02-GER Consultar Analítica de Negocio' }
     ],
-    enlaces: [{ actor: 'G', caso: 'c1' }, { actor: 'A', caso: 'c2' }, { actor: 'K', caso: 'c3' }, { actor: 'V', caso: 'c4' }, { actor: 'A', caso: 'c5' }, { actor: 'G', caso: 'c6' }]
+    enlaces: [{ actor: 'G', caso: 'c1' }, { actor: 'A', caso: 'c2' }, { actor: 'A', caso: 'c10' }, { actor: 'K', caso: 'c3' },
+              { actor: 'V', caso: 'c4' }, { actor: 'A', caso: 'c5' }, { actor: 'G', caso: 'c6' }],
+    incluye: [{ de: 'c1', a: 'c7' }],
+    extiende: [{ de: 'c8', a: 'c2' }, { de: 'c9', a: 'c2' }]
   },
   {
     tipo: 'casos', id: 'CU_pn04_devolucion', titulo: 'Casos de uso — PN04 Inspección de devolución', sistema: 'WardrobeFlow — PN04 Inspección de devolución',

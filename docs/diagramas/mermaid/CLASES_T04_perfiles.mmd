@@ -13,8 +13,9 @@ classDiagram
   }
   class BLL_PermisosAccion["BLL.PermisosAccion"] {
     <<static>>
-    +PermiteAccion(bool,  bool,  bool,  bool) bool
-    +InvalidarCache() void
+    +PermiteAccion(bool,  bool) bool
+    +LimpiarCacheVigencia() void
+    +ExigirUsuarioVigente(Usuario,  object) void
     +Exigir(string,  string) void
   }
   class Componente {

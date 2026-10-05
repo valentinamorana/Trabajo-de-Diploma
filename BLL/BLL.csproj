@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Bitacora.cs" />
     <Compile Include="PanelAlertas.cs" />
+    <Compile Include="PanelTareas.cs" />
     <Compile Include="MenuVisibilidad.cs" />
     <Compile Include="ReporteJornada.cs" />
     <Compile Include="Cliente.cs" />
@@ -88,6 +89,8 @@
     <Compile Include="Cobro.cs" />
     <Compile Include="ListaEspera.cs" />
     <Compile Include="CargoPrenda.cs" />
+    <Compile Include="InspeccionDevolucion.cs" />
+    <Compile Include="EvaluacionControlStock.cs" />
     <Compile Include="Interfaces\IAnalisisAbandonoService.cs" />
     <Compile Include="Estrategias\EstrategiaRiesgo.cs" />
     <Compile Include="Estrategias\EstrategiaVencimientoInactividad.cs" />
@@ -116,6 +119,7 @@
     <Compile Include="Prenda.cs" />
     <Compile Include="Backup.cs" />
     <Compile Include="BLLHelper.cs" />
+    <Compile Include="Sesion.cs" />
     <Compile Include="PermisosAccion.cs" />
     <Compile Include="ControlMapeado.cs" />
     <Compile Include="Usuario.cs" />

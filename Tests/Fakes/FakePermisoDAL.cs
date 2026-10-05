@@ -63,7 +63,6 @@ namespace Tests.Fakes
         }
 
         public List<string>     ObtenerRoles()                  => new List<string> { "Admin", "Gerente" };
-        public List<BE.Permiso> ObtenerPorRol(string rol)       => new List<BE.Permiso>();   // fallback vacío
         public int              ObtenerIdRol(string rolNombre)  => IdsPorRol.TryGetValue(rolNombre, out int id) ? id : 0;
         public List<int>        ObtenerIdsHijos(int idPadre)
             => HijosPorIdPadre.TryGetValue(idPadre, out var hijos) ? hijos : new List<int>();
@@ -96,6 +95,5 @@ namespace Tests.Fakes
 
         public int              ContarUsuariosPorRol(string r)  => ContarUsuariosPorRolRespuesta;
         public List<string>     ObtenerUsuariosPorRol(string r) => ObtenerUsuariosPorRolRespuesta;
-        public List<string>     ObtenerNombresMenuPatentes()    => new List<string>();
     }
 }

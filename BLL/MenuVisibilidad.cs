@@ -35,6 +35,8 @@ namespace BLL
             ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
             ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),
             ("promocionesVigentesToolStripMenuItem",            "mnuPromocionesVigentes"),
+            // PN01 — Control de Stock (Depósito = carril "Controlador de Stock" del diagrama).
+            ("controlStockToolStripMenuItem",          "mnuControlStock"),
             // PN04 — Inspección de Devolución (Depósito = rol Deposito).
             ("inspeccionDevolucionToolStripMenuItem",  "mnuInspeccionDevolucion"),
             // Mejora opcional (no requerida por la cátedra) — ver README.
@@ -68,12 +70,13 @@ namespace BLL
             ("suscriptoresToolStripMenuItem", new[]
             {
                 "clientesToolStripMenuItem", "planesToolStripMenuItem",
-                "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem",
+                "renovacionSuscripcionToolStripMenuItem",
                 "nuevaContratacionToolStripMenuItem"
             }),
             ("ventasToolStripMenuItem", new[] { "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem" }),
             // PN02 — rol Caja, separado de Vendedor.
-            ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem" }),
+            // El cobro recurrente (N01) también es de Caja: quien vende no cobra.
+            ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem", "cobroSuscripcionToolStripMenuItem" }),
             // PN03 — Gerencia (GerenteComercial), Administración y Contabilidad (roles nuevos)
             // y Vendedor conviven en un mismo grupo de menú; cada hoja sigue gobernada por su
             // propia patente, el grupo solo se muestra si al menos una de las 4 es visible.
@@ -125,7 +128,8 @@ namespace BLL
 
             visible["inventarioToolStripMenuItem"] =
                 visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] ||
-                visible["inspeccionDevolucionToolStripMenuItem"] || Permite("mnuStock");
+                visible["inspeccionDevolucionToolStripMenuItem"] || visible["controlStockToolStripMenuItem"] ||
+                Permite("mnuStock");
 
             foreach (var g in Grupos)
                 visible[g.Grupo] = g.Hijos.Any(h => visible.TryGetValue(h, out var v) && v);

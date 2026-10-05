@@ -24,6 +24,8 @@ namespace GUI
             this.btnAprobar = new System.Windows.Forms.Button();
             this.btnRechazar = new System.Windows.Forms.Button();
             this.btnRefrescar = new System.Windows.Forms.Button();
+            this.btnImprimir = new System.Windows.Forms.Button();
+            this.txtAnalisis = new System.Windows.Forms.TextBox();
             this.lblConteo = new System.Windows.Forms.Label();
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
@@ -42,6 +44,7 @@ namespace GUI
             this.panelTop.Controls.Add(this.btnAprobar);
             this.panelTop.Controls.Add(this.btnRechazar);
             this.panelTop.Controls.Add(this.btnRefrescar);
+            this.panelTop.Controls.Add(this.btnImprimir);
             this.panelTop.Controls.Add(this.lblConteo);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
@@ -110,6 +113,35 @@ namespace GUI
             this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
+            // btnImprimir
+            //
+            this.btnImprimir.Enabled = false;
+            this.btnImprimir.FlatAppearance.BorderSize = 0;
+            this.btnImprimir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimir.ForeColor = System.Drawing.Color.White;
+            this.btnImprimir.Location = new System.Drawing.Point(808, 7);
+            this.btnImprimir.Name = "btnImprimir";
+            this.btnImprimir.Size = new System.Drawing.Size(110, 28);
+            this.btnImprimir.TabIndex = 6;
+            this.btnImprimir.Tag = "promocion.btn.imprimir";
+            this.btnImprimir.Text = "Imprimir ▾";
+            this.btnImprimir.UseVisualStyleBackColor = false;
+            this.btnImprimir.Click += new System.EventHandler(this.BtnImprimir_Click);
+            //
+            // txtAnalisis («Analizar margen e impacto» de la promoción seleccionada)
+            //
+            this.txtAnalisis.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(247)))), ((int)(((byte)(248)))));
+            this.txtAnalisis.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.txtAnalisis.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtAnalisis.Location = new System.Drawing.Point(0, 334);
+            this.txtAnalisis.Multiline = true;
+            this.txtAnalisis.Name = "txtAnalisis";
+            this.txtAnalisis.ReadOnly = true;
+            this.txtAnalisis.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtAnalisis.Size = new System.Drawing.Size(960, 140);
+            this.txtAnalisis.TabIndex = 3;
+            this.txtAnalisis.TabStop = false;
+            //
             // lblConteo
             //
             this.lblConteo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
@@ -151,7 +183,7 @@ namespace GUI
             this.dgvPromociones.BorderStyle = System.Windows.Forms.BorderStyle.None;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(182)))), ((int)(((byte)(193)))));
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.Black;
@@ -173,6 +205,7 @@ namespace GUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(960, 500);
             this.Controls.Add(this.dgvPromociones);
+            this.Controls.Add(this.txtAnalisis);
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.panelTop);
             this.MinimumSize = new System.Drawing.Size(780, 400);
@@ -196,6 +229,8 @@ namespace GUI
         private System.Windows.Forms.Button btnAprobar;
         private System.Windows.Forms.Button btnRechazar;
         private System.Windows.Forms.Button btnRefrescar;
+        private System.Windows.Forms.Button btnImprimir;
+        private System.Windows.Forms.TextBox txtAnalisis;
         private System.Windows.Forms.ToolTip tip;
         private System.Windows.Forms.Label lblConteo;
         private System.Windows.Forms.Panel panelStatus;

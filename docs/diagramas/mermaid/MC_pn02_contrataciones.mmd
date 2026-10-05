@@ -3,12 +3,23 @@ erDiagram
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
+  Cliente ||--o{ Contratacion : "IdCliente"
+  Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
-  Cliente ||--o{ Contratacion : "IdCliente"
+  MedioPago |o--o{ Contratacion : "IdMedioPago"
+  MedioPago |o--o{ ContratacionIntentoPago : "IdMedioPago"
+  Empleado |o--o{ ContratacionIntentoPago : "IdCaja"
+  Contratacion ||--o{ ContratacionIntentoPago : "IdContratacion"
+  PlanSuscripcion |o--o{ DesistimientoContratacion : "IdPlan"
+  Empleado ||--o{ DesistimientoContratacion : "IdVendedor"
+  Cliente ||--o{ DesistimientoContratacion : "IdCliente"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Cliente
   PlanSuscripcion
   Empleado
   Contratacion
+  MedioPago
+  ContratacionIntentoPago
+  DesistimientoContratacion
   Promocion

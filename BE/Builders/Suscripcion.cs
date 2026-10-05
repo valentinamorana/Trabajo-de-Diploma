@@ -17,10 +17,13 @@ namespace BE.Builders
         public ModalidadCobro Modalidad { get; }
         public DateTime FechaActivacion { get; }
         public DateTime FechaVencimiento { get; }
+        /// <summary>Desde cuándo rige el período cobrado (a continuación del vencimiento vigente, si lo hay).</summary>
+        public DateTime InicioPeriodo { get; }
 
         public Suscripcion(Cliente cliente, PlanSuscripcion plan, ModalidadCobro modalidad,
-                            DateTime fechaActivacion, DateTime fechaVencimiento)
+                            DateTime fechaActivacion, DateTime fechaVencimiento, DateTime? inicioPeriodo = null)
         {
+            InicioPeriodo = inicioPeriodo ?? fechaActivacion;
             Cliente = cliente;
             Plan = plan;
             Modalidad = modalidad;

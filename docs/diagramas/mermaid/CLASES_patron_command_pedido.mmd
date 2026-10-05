@@ -20,8 +20,20 @@ classDiagram
     +Cancelar(string,  Pedido,  string) void
   }
   class BLL_Pedido["BLL.Pedido"] {
-    +CrearPedido(string,  int,  List~Prenda~) int
-    +ValidarPuedeArmarPedido(int) Cliente
+    +VerificarVigencia(int) Cliente
+    +RevisarPedidoActivo(Cliente) void
+    +EnviarAControlStock(string,  int,  List~Prenda~) int
+    +AsentarDesistimiento(string,  int,  List~Prenda~,  string) int
+    +AsentarDesistimiento(string,  Pedido,  string,  EtapaDesistimiento,  List~Prenda~) void
+    +AjustarSeleccion(string,  Pedido,  List~Prenda~) void
+    +RevisarStock(Pedido) List~LineaControlStock~
+    +InformarFaltantes(string,  Pedido) List~PedidoFaltante~
+    +ConfirmarPrendasDisponibles(string,  Pedido) void
+    +SepararPrendas(string,  Pedido) void
+    +FormalizarPedido(string,  Pedido) void
+    +PrepararConfirmacion(string,  int) Pedido
+    +ObtenerColaControlStock() List~Pedido~
+    +ObtenerInformeFaltantes(int) List~PedidoFaltante~
     +Despachar(string,  Pedido) void
     +MarcarEntregado(string,  Pedido) void
     +RegistrarDevolucion(string,  Pedido) void

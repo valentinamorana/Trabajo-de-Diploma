@@ -3,11 +3,17 @@ erDiagram
   Cliente ||--o{ ListaEspera : "IdCliente"
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
-  Empleado ||--o{ Pedido : "IdEmpleado"
   Cliente ||--o{ Pedido : "IdCliente"
+  Empleado ||--o{ Pedido : "IdEmpleado"
+  Empleado |o--o{ Pedido : "IdEmpleadoControl"
+  PedidoPrenda ||--o{ PedidoFaltante : "IdPedido"
+  PedidoPrenda ||--o{ PedidoFaltante : "IdPrenda"
+  PedidoFaltante ||--o{ PedidoFaltanteAlternativa : "IdPedido"
+  PedidoFaltante ||--o{ PedidoFaltanteAlternativa : "IdPrenda"
+  Prenda ||--o{ PedidoFaltanteAlternativa : "IdPrendaAlternativa"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
-  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
   Cliente {
@@ -51,10 +57,29 @@ erDiagram
     datetime FechaEntrega "NULL"
     nvarchar(500) MotivoCancelacion "NULL"
     int DVH "NULL"
+    datetime FechaEnvioControl "NULL"
+    datetime FechaControl "NULL"
+    int IdEmpleadoControl FK "NULL"
+    datetime FechaSeparacion "NULL"
+    datetime FechaFormalizacion "NULL"
+    nvarchar(500) MotivoDesistimiento "NULL"
+    nvarchar(20) EtapaDesistimiento "NULL"
   }
   PedidoPrenda {
     int IdPedido PK,FK
     int IdPrenda PK,FK
+    bit Confirmada
+  }
+  PedidoFaltante {
+    int IdPedido PK,FK
+    int IdPrenda PK,FK
+    int EstadoAlRevisar
+    bit ReservadaParaOtro
+  }
+  PedidoFaltanteAlternativa {
+    int IdPedido PK,FK
+    int IdPrenda PK,FK
+    int IdPrendaAlternativa PK,FK
   }
   PedidoHistorial {
     int IdHistorial PK

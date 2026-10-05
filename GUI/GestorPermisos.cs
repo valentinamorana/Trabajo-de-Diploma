@@ -43,10 +43,10 @@ namespace GUI
         }
 
         // ── Paleta de marca ────────────────────────────────────────────────────────
-        private static readonly Color RosaOscuro   = Color.FromArgb(176, 62, 96);    // #B03E60
-        private static readonly Color Peligro      = Color.FromArgb(200, 60, 60);    // #C83C3C
-        private static readonly Color PanelClaro   = Color.FromArgb(245, 245, 250);  // #F5F5FA
-        private static readonly Color Neutro       = Color.FromArgb(236, 236, 242);
+        private static readonly Color RosaOscuro   = Tema.RosaOscuro;    // #B03E60
+        private static readonly Color Peligro      = Tema.Error;    // #C83C3C
+        private static readonly Color PanelClaro   = Tema.PanelClaro;  // #F5F5FA
+        private static readonly Color Neutro       = Tema.PanelClaro;
 
         public GestorPermisos()
         {
@@ -58,15 +58,8 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir();
             CargarArbol();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma) { Traducir(); }
@@ -85,6 +78,7 @@ namespace GUI
             grpCrear.Text        = Tr("grp.permisos.crear",      "Crear rol");
             grpEditar.Text       = Tr("grp.permisos.editar",     "Editar rol");
             grpAsignar.Text      = Tr("grp.permisos.asignar",    "Asignar permiso o rol");
+            lblAsignar.Text      = Tr("lbl.permisos.elegiritem", "Elegí un ítem:");
 
             btnCrearRaiz.Text    = Tr("btn.permisos.crearraiz",  "Crear rol raíz");
             btnCrearSub.Text     = Tr("btn.permisos.crearsub",   "Crear sub-rol");
@@ -135,7 +129,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 
@@ -153,7 +147,7 @@ namespace GUI
             if (comp is BE.Rol)
             {
                 nodo.NodeFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
-                nodo.ForeColor = Color.FromArgb(176, 62, 96);
+                nodo.ForeColor = Tema.RosaOscuro;
             }
             if (comp.Id != 0 && vis.Add(comp.Id))
                 foreach (var h in comp.Hijos)

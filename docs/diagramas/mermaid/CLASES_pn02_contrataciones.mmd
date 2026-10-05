@@ -8,15 +8,25 @@ classDiagram
     +int? IdCaja
     +ModalidadCobro Modalidad
     +EstadoContratacion Estado
-    +int IntentosPago
     +DateTime FechaAlta
     +DateTime? FechaResolucion
-    +string MedioPago
+    +int? IdMedioPago
     +string NumeroComprobante
     +DateTime? FechaComprobante
     +decimal? Importe
     +decimal? DescuentoAplicado
     +int? IdPromocion
+    +DateTime? VigenciaDesde
+    +DateTime? VigenciaHasta
+    +int? IdReferenteAcreditado
+    +int IntentosPago
+    +string NombrePlan
+    +string NombreMedioPago
+    +string NombreVendedor
+    +string NombreCaja
+    +string NombreReferenteAcreditado
+    +decimal? PrecioMensual
+    +string MedioPago
   }
   class Cliente {
     +int IdCliente
@@ -43,26 +53,68 @@ classDiagram
     +DescuentoDe(Promocion,  decimal,  int) decimal
     +Resolver(decimal,  int?,  IEnumerable~Promocion~,  decimal,  int) ResultadoDescuento
   }
+  class MedioPago {
+    +int IdMedioPago
+    +string Nombre
+    +string ClaveTraduccion
+  }
+  class IntentoPago {
+    +int IdIntento
+    +int IdContratacion
+    +int NroIntento
+    +DateTime Fecha
+    +int? IdMedioPago
+    +string Motivo
+    +int IdCaja
+    +string NombreCaja
+  }
+  class DesistimientoContratacion {
+    +int IdDesistimiento
+    +int IdCliente
+    +int? IdPlan
+    +ModalidadCobro? Modalidad
+    +string Motivo
+    +DateTime Fecha
+    +int IdVendedor
+    +string NombrePlan
+    +string NombreVendedor
+  }
   class BLL_Cliente["BLL.Cliente"] {
+    +BuscarPorIdentificacion(string) List~Cliente~
     +ActivarSuscripcionDesdeContratacion(string,  Cliente,  int,  ModalidadCobro,  decimal) Suscripcion
   }
   class BLL_Contratacion["BLL.Contratacion"] {
-    +CrearContratacion(string,  int,  int,  ModalidadCobro) int
-    +ConfirmarPago(string,  Contratacion,  string) LiquidacionContratacion
+    +IdentificarCliente(string) List~Cliente~
+    +PresentarPlanes() List~PlanSuscripcion~
+    +AsentarDesistimiento(string,  int,  int?,  ModalidadCobro?,  string) int
+    +ValidarContratacion(int,  int) PlanSuscripcion
+    +RegistrarContratacion(string,  int,  int,  ModalidadCobro) int
+    +ObtenerPendientesDePago() List~Contratacion~
     +CalcularImporte(Contratacion) LiquidacionContratacion
-    +RegistrarIntentoFallido(string,  Contratacion) void
+    +EstimarImporte(int,  int,  ModalidadCobro) LiquidacionContratacion
+    +CalcularImportes(List~Contratacion~) Dictionary~int, LiquidacionContratacion~
+    +ConfirmarCobro(string,  Contratacion,  int,  decimal?) LiquidacionContratacion
+    +RegistrarIntentoFallido(string,  Contratacion,  int?,  string) ResultadoIntentoPago
   }
   class DAL_Interfaces_IContratacionDAL["DAL.Interfaces.IContratacionDAL"] {
     <<interface>>
     +ObtenerPendientesDePago() List~Contratacion~
     +Alta(Contratacion) int
-    +IncrementarIntento(int) int
-    +ConfirmarPago(int,  int,  string,  string,  decimal,  decimal,  int?) bool
+    +ConfirmarCobro(int,  int,  int,  string,  decimal,  decimal,  int?) bool
+    +RegistrarVigencia(int,  DateTime,  DateTime,  int?) void
     +ReabrirPago(int) void
-    +Cancelar(int) void
+    +RegistrarIntentoFallido(int,  int?,  string,  int,  int) ResultadoIntentoPago
+    +ObtenerIntentos(int) List~IntentoPago~
+    +ObtenerMediosPago() List~MedioPago~
+    +AltaDesistimiento(DesistimientoContratacion) int
   }
   Contratacion --> "1" Cliente : IdCliente
   Contratacion --> "1" PlanSuscripcion : IdPlan
+  Contratacion --> "0..1" MedioPago : IdMedioPago
   Contratacion --> "0..1" Promocion : IdPromocion
   Cliente --> "0..1" PlanSuscripcion : IdPlan
+  IntentoPago --> "1" Contratacion : IdContratacion
+  IntentoPago --> "0..1" MedioPago : IdMedioPago
+  DesistimientoContratacion --> "1" Cliente : IdCliente
+  DesistimientoContratacion --> "0..1" PlanSuscripcion : IdPlan
   BLL_Contratacion ..> DAL_Interfaces_IContratacionDAL : usa

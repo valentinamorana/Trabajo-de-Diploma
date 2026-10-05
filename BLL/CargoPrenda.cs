@@ -11,13 +11,27 @@ namespace BLL
     public class CargoPrenda : Interfaces.ICargoPrendaService
     {
         private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
-        private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
         public CargoPrenda() : this(new DAL.CargoPrenda()) { }
         public CargoPrenda(DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda)
         {
             this.dalCargoPrenda = dalCargoPrenda ?? throw new ArgumentNullException(nameof(dalCargoPrenda));
+        }
+
+        // Reglas de los datos de un cargo: motivo obligatorio y monto mayor a cero. Las usa
+        // RegistrarCargo y también CargoPrendaDialog, para avisar antes de cerrar el diálogo
+        // (antes el diálogo repetía estas reglas por su cuenta). Lanza AppException.
+        public void ValidarDatos(string motivo, decimal monto)
+        {
+            if (string.IsNullOrWhiteSpace(motivo))
+                throw new BE.AppException("err.bll.cargoprenda.motivo_requerido",
+                    "Debe indicar el motivo del cargo (daño o pérdida).");
+
+            if (monto <= 0)
+                throw new BE.AppException("err.bll.cargoprenda.monto_invalido",
+                    "El monto del cargo debe ser mayor a cero.");
         }
 
         public void RegistrarCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto, string actor = null)
@@ -30,13 +44,7 @@ namespace BLL
                     "La prenda '{0}' no tiene un último cliente registrado; no se le puede cargar el costo a nadie.",
                     prenda.Nombre);
 
-            if (string.IsNullOrWhiteSpace(motivo))
-                throw new BE.AppException("err.bll.cargoprenda.motivo_requerido",
-                    "Debe indicar el motivo del cargo (daño o pérdida).");
-
-            if (monto <= 0)
-                throw new BE.AppException("err.bll.cargoprenda.monto_invalido",
-                    "El monto del cargo debe ser mayor a cero.");
+            ValidarDatos(motivo, monto);
 
             var cargo = new BE.CargoPrenda
             {

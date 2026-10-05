@@ -43,15 +43,16 @@ namespace Tests.Fakes
         public int ContarReservadasVigentes() =>
             Registros.Count(f => f.Estado == BE.EstadoListaEspera.Reservada && f.ReservaVigente);
 
-        public void CambiarEstado(int idListaEspera, BE.EstadoListaEspera nuevoEstado,
-                                   DateTime? fechaLimiteReserva, string actor)
+        public bool CambiarEstado(int idListaEspera, BE.EstadoListaEspera nuevoEstado,
+                                   DateTime? fechaLimiteReserva, string actor, BE.EstadoListaEspera estadoEsperado)
         {
             CambiarEstadoVeces++;
             var fila = Registros.FirstOrDefault(f => f.IdListaEspera == idListaEspera);
-            if (fila == null) return;
+            if (fila == null || fila.Estado != estadoEsperado) return false;
             fila.Estado = nuevoEstado;
             fila.FechaLimiteReserva = fechaLimiteReserva;
             fila.Actor = actor;
+            return true;
         }
     }
 }

@@ -17,6 +17,7 @@ classDiagram
     +DateTime? FechaNacimiento
     +DateTime? FechaVencimiento
     +bool VencimientoExpirado
+    +bool TieneLimiteDePrendas
     +DateTime? FechaLimiteGracia
     +bool EstaEnGracia
     +bool EstaSuspendidoPorPago
@@ -64,10 +65,13 @@ classDiagram
   class BLL_Renovacion["BLL.Renovacion"] {
     +Procesar(string,  Cliente,  DecisionRenovacion,  int?,  ModalidadCobro,  string,  DateTime?) ResultadoRenovacion
     +ObtenerHistorial(int) List~Renovacion~
+    +ObtenerElegibles(DecisionRenovacion) List~Cliente~
   }
   class BLL_Cobro["BLL.Cobro"] {
     +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string) ResultadoCobro
     +ObtenerHistorial(int) List~Cobro~
+    +ObtenerElegibles() List~Cliente~
+    +PrevisualizarCobro(int) PrevisualizacionCobro
   }
   class BLL_PlanSuscripcion["BLL.PlanSuscripcion"] {
     +ObtenerActivos() List~PlanSuscripcion~
@@ -102,3 +106,4 @@ classDiagram
   BLL_Renovacion ..> DAL_Interfaces_IClienteDAL : usa
   BLL_Renovacion ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
   BLL_Cobro ..> DAL_Interfaces_IClienteDAL : usa
+  BLL_PlanSuscripcion ..> DAL_Interfaces_IPlanSuscripcionDAL : usa

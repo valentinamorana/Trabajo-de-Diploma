@@ -2,52 +2,79 @@ flowchart TD
   subgraph C["Cliente"]
     direction TB
     i((" "))
-    a1["Solicita prendas"]
-    a5["Selecciona las prendas"]
-    d4{"¿Ajusta la selección?"}
+    a1["Solicitar prendas"]
+    a3["Brindar documentación"]
+    a10["Seleccionar prendas"]
+    d4{"¿Ajustar selección?"}
+    d6{"¿Ajustar selección?"}
+    a23["Recibir confirmación"]
+    f(((" ")))
     f2(((" ")))
   end
   subgraph V["Vendedor"]
     direction TB
-    a2["Solicita la identificación y localiza la ficha"]
-    a3["Informa la situación al cliente"]
-    a4["Presenta el catálogo de prendas disponibles"]
-    a6["Registra la selección"]
-    a7["Informa el exceso o la falta"]
-    a9["Confirma el pedido al cliente"]
+    a2["Solicitar información del cliente"]
+    a4["Recibir identificación (DNI, nombre, apellido) → Ficha del cliente"]
+    a5["Verificar la vigencia de la suscripción"]
+    d1{"¿Suscripción vigente?"}
+    a6["Informar imposibilidad de continuar"]
+    a7["Revisar existencia de un pedido activo"]
+    d2{"¿Posee pedido activo?"}
+    a8["Informar existencia de pedido activo"]
+    a9["Presentar catálogo"]
+    a11["Anotar la selección y comprobar el cupo del plan"]
+    d3{"¿Excede el cupo?"}
+    a12["Informar exceso de cupo"]
+    a13["Asentar desistimiento (aviso)"]
+    a14["Enviar selección para control de stock (planilla)"]
+    a17["Comunicar faltantes"]
+    a18["Recibir selección ajustada por disponibilidad"]
+    a21["Formalizar el pedido (sin modificaciones desde aquí)"]
+    a22["Preparar la confirmación"]
   end
-  subgraph S["Sistema"]
+  subgraph D["Depósito (Controlador de Stock)"]
     direction TB
-    d1{"¿Cuenta apta? vigente, sin pausa, sin pedido despachado, sin prendas en uso"}
-    d2{"¿Dentro del cupo del plan?"}
-    d3{"¿Todas disponibles y no reservadas para otro?"}
-    a8["Reserva las prendas (En uso) y crea el pedido bloqueado, en una transacción"]
-  end
-  subgraph D["Depósito / Logística"]
-    direction TB
-    a10["Despacha el pedido (Despachado)"]
-    a11["Registra la entrega (Entregado)"]
-    f(((" ")))
+    a15["Revisar stock de las prendas"]
+    d5{"¿Selección disponible?"}
+    a16["Informe de prendas faltantes y alternativas"]
+    a19["Confirmar prendas disponibles"]
+    a20["Separar prendas del pedido (constancia)"]
   end
   i --> a1
   a1 --> a2
-  a2 --> d1
-  d1 -- "No" --> a3
-  a3 --> f2
-  d1 -- "Sí" --> a4
+  a2 --> a3
+  a3 --> a4
   a4 --> a5
-  a5 --> a6
-  a6 --> d2
-  d2 -- "Sí" --> d3
-  d2 -- "No" --> a7
-  d3 -- "No" --> a7
-  d3 -- "Sí" --> a8
-  a7 --> d4
-  d4 -- "Sí" --> a6
-  d4 -- "Desiste" --> f2
-  a8 --> a9
+  a5 --> d1
+  d1 -- "No" --> a6
+  a6 --> f2
+  d1 -- "Sí" --> a7
+  a7 --> d2
+  d2 -- "Sí" --> a8
+  a8 --> f2
+  d2 -- "No" --> a9
   a9 --> a10
   a10 --> a11
-  a11 --> f
+  a11 --> d3
+  d3 -- "Sí" --> a12
+  a12 --> d4
+  d4 -- "Sí" --> a11
+  d4 -- "No" --> a13
+  a13 --> f2
+  d3 -- "No" --> a14
+  a14 --> a15
+  a15 --> d5
+  d5 -- "No" --> a16
+  a16 --> a17
+  a17 --> d6
+  d6 -- "Sí" --> a18
+  a18 --> a11
+  d6 -- "No" --> a13
+  d5 -- "Sí" --> a19
+  a19 --> a20
+  a20 --> a21
+  a21 --> a22
+  a22 --> a23
+  a23 --> f
   classDef ini fill:#222,stroke:#222,color:#222
   class i,f,f2 ini

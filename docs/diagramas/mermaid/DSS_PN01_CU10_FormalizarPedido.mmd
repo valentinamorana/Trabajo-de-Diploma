@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor V as Vendedor
+  participant F as PedidosVenta
+  participant B as BLL.Pedido
+  participant D as DAL.Pedido
+  participant H as DAL.Pedido<br/>Historial
+  V->>F: Formalizar un pedido Separado
+  F->>B: FormalizarPedido(modulo, pedido)
+  Note over B: Exigir(PedidosVentaEditar) · solo Separado
+  alt No está Separado
+    B-->>F: AppException(formalizar_estado)
+    F-->>V: Informa el estado
+  else Separado
+    B->>D: Formalizar(idPedido)  [→ Pendiente de despacho, selección cerrada]
+    B->>H: RegistrarCambios(FORMALIZAR)
+    F->>B: PrepararConfirmacion(modulo, idPedido)
+    B->>D: ObtenerPorId(idPedido)
+    B-->>F: pedido formalizado
+    F-->>V: Confirmación y constancia del pedido (PDF) para el cliente
+  end

@@ -18,10 +18,27 @@ namespace Tests.Fakes
         public List<BE.DesempenoVendedor> EstadisticasPorEmpleado { get; set; } = new List<BE.DesempenoVendedor>();
         public Dictionary<int, int> CantidadPedidosPorPrenda { get; set; } = new Dictionary<int, int>();
         public List<BE.Prenda> PrendasHistoricasPorCliente { get; set; } = new List<BE.Prenda>();
+        public List<BE.PedidoFaltante> FaltantesDevueltos { get; set; } = new List<BE.PedidoFaltante>();
+        // Si se configura, SepararPrendas la lanza (por ej. la de concurrencia "prenda_tomada").
+        public Exception SepararPrendasLanza { get; set; }
+        // Se ejecuta al entrar a SepararPrendas: permite simular que otra operación tomó una
+        // prenda entre la revisión del stock y la reserva.
+        public Action AntesDeSeparar { get; set; }
 
         // ── Espías ────────────────────────────────────────────────────────────
-        public int AltaVeces { get; private set; }
-        public BE.Pedido UltimoAlta { get; private set; }
+        public int AltaSinReservaVeces { get; private set; }
+        public BE.Pedido UltimoAltaSinReserva { get; private set; }
+        public int ReemplazarSeleccionVeces { get; private set; }
+        public List<BE.Prenda> UltimaSeleccionReemplazada { get; private set; }
+        public int RegistrarFaltantesVeces { get; private set; }
+        public List<BE.PedidoFaltante> UltimosFaltantes { get; private set; }
+        public int UltimoIdEmpleadoControl { get; private set; }
+        public int ConfirmarPrendasVeces { get; private set; }
+        public int SepararPrendasVeces { get; private set; }
+        public int FormalizarVeces { get; private set; }
+        public int RegistrarDesistimientoVeces { get; private set; }
+        public string UltimoMotivoDesistimiento { get; private set; }
+        public BE.EtapaDesistimiento? UltimaEtapaDesistimiento { get; private set; }
         public int DespacharVeces { get; private set; }
         public int MarcarEntregadoVeces { get; private set; }
         public int RegistrarDevolucionVeces { get; private set; }
@@ -34,18 +51,61 @@ namespace Tests.Fakes
 
         public List<BE.Pedido> ObtenerTodos() => PedidosDevueltos;
         public List<BE.Pedido> ObtenerPendientes() => PedidosDevueltos.FindAll(p => p.Estado == BE.EstadoPedido.Pendiente);
+        public List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado) => PedidosDevueltos.FindAll(p => p.Estado == estado);
         public Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente() => FechaUltimoPedidoPorCliente;
         public List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado() => EstadisticasPorEmpleado;
         public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda() => CantidadPedidosPorPrenda;
         public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente) => PrendasHistoricasPorCliente;
         public BE.Pedido ObtenerPorId(int idPedido) => PedidosDevueltos.Find(p => p.IdPedido == idPedido);
+        public bool TienePedidoActivo(int idCliente) => PedidosDevueltos.Exists(p => p.IdCliente == idCliente && p.EsActivo());
 
-        public int Alta(BE.Pedido pedido)
+        public int AltaSinReserva(BE.Pedido pedido)
         {
-            AltaVeces++;
-            UltimoAlta = pedido;
+            AltaSinReservaVeces++;
+            UltimoAltaSinReserva = pedido;
             return AltaIdGenerado;
         }
+
+        public void ReemplazarSeleccion(int idPedido, List<BE.Prenda> prendas)
+        {
+            ReemplazarSeleccionVeces++;
+            UltimaSeleccionReemplazada = prendas;
+        }
+
+        public void RegistrarFaltantes(int idPedido, int idEmpleadoControl, List<BE.PedidoFaltante> faltantes)
+        {
+            RegistrarFaltantesVeces++;
+            UltimosFaltantes = faltantes;
+            UltimoIdEmpleadoControl = idEmpleadoControl;
+        }
+
+        public void ConfirmarPrendas(int idPedido, int idEmpleadoControl)
+        {
+            ConfirmarPrendasVeces++;
+            UltimoIdEmpleadoControl = idEmpleadoControl;
+        }
+
+        public void SepararPrendas(int idPedido, int idCliente)
+        {
+            AntesDeSeparar?.Invoke();
+            if (SepararPrendasLanza != null) throw SepararPrendasLanza;
+            SepararPrendasVeces++;
+        }
+
+        public void Formalizar(int idPedido) => FormalizarVeces++;
+
+        public List<BE.Prenda> UltimaSeleccionDesistida { get; private set; }
+
+        public void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa,
+                                           List<BE.Prenda> seleccionAjustada = null)
+        {
+            RegistrarDesistimientoVeces++;
+            UltimoMotivoDesistimiento = motivo;
+            UltimaEtapaDesistimiento = etapa;
+            UltimaSeleccionDesistida = seleccionAjustada;
+        }
+
+        public List<BE.PedidoFaltante> ObtenerFaltantes(int idPedido) => FaltantesDevueltos;
 
         public void Despachar(int idPedido) => DespacharVeces++;
         public void MarcarEntregado(int idPedido) => MarcarEntregadoVeces++;
@@ -56,18 +116,21 @@ namespace Tests.Fakes
             return RegistrarDevolucionRespuesta;
         }
 
-        public void ReconciliarPrendasConEstado(int idPedido) { }
-
-        public void RestaurarOperacionAtomica(int idPedido, IList<(string Campo, string ValorAnterior)> campos)
+        public BE.EstadoPedido? UltimoEstadoEsperadoRestaurar { get; private set; }
+        public void RestaurarOperacionAtomica(int idPedido, BE.EstadoPedido estadoEsperado,
+                                              IList<(string Campo, string ValorAnterior)> campos)
         {
             RestaurarOperacionAtomicaVeces++;
+            UltimoEstadoEsperadoRestaurar = estadoEsperado;
             UltimoRestaurarOperacionCampos = campos;
         }
 
-        public void Cancelar(int idPedido, string motivo)
+        public BE.EstadoPedido? UltimoEstadoEsperadoCancelar { get; private set; }
+        public void Cancelar(int idPedido, int idCliente, BE.EstadoPedido estadoEsperado, string motivo)
         {
             CancelarVeces++;
             UltimoMotivoCancelar = motivo;
+            UltimoEstadoEsperadoCancelar = estadoEsperado;
         }
 
         public bool DesCancelar(int idPedido, int idCliente)
@@ -78,5 +141,7 @@ namespace Tests.Fakes
 
         public List<BE.FilaDV> ObtenerFilasDV() => new List<BE.FilaDV>();
         public void RecalcularDV() => RecalcularDVVeces++;
+        public int ActualizarDVVeces { get; private set; }
+        public void ActualizarDV(int idPedido) => ActualizarDVVeces++;
     }
 }

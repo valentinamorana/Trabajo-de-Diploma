@@ -25,13 +25,24 @@ namespace DAL
     /// </summary>
     public class Usuario : BaseDAL<BE.Usuario>, Interfaces.IUsuarioDAL
     {
-        // Código de error nativo de SQL Server para "Invalid column name" — independiente del
-        // idioma del servidor, a diferencia de matchear texto contra SqlException.Message (antes:
-        // sqlEx.Message.Contains("NombreDeColumna"), frágil y podía confundirse con un error real
-        // que mencionara esa palabra por coincidencia). Los catches de "BD sin migrar" de esta
-        // clase no necesitan saber CUÁL columna falta —siempre caen al mismo fallback sin esa
-        // columna— así que basta con detectar el tipo de error, no el texto exacto.
-        private const int ColumnaInexistente = 207;
+        // Nota: el script de instalación garantiza todas las columnas de Usuario (bases nuevas y
+        // actualizadas), así que ya no hay consultas de "BD sin migrar". En particular, el viejo
+        // fallback de ObtenerPorUsername NO filtraba Activo=1 y habría dejado entrar a usuarios
+        // archivados si alguna vez se ejecutaba.
+
+        // Estado vigente de un usuario (para revalidar la sesión en BLL.PermisosAccion).
+        // Devuelve null si el usuario ya no existe.
+        public (bool Activo, string Perfil, string Rol)? ObtenerVigencia(int idUsuario)
+        {
+            DataTable t = acceso.Leer(
+                "SELECT Activo, Perfil, Rol FROM Usuario WHERE IdUsuario = @id",
+                new SqlParameter[] { new SqlParameter("@id", idUsuario) });
+            if (t == null || t.Rows.Count == 0) return null;
+            var r = t.Rows[0];
+            return (Convert.ToBoolean(r["Activo"]),
+                    r["Perfil"] != DBNull.Value ? r["Perfil"].ToString() : null,
+                    r["Rol"]    != DBNull.Value ? r["Rol"].ToString()    : null);
+        }
 
         // Inserta un nuevo usuario con contraseña hasheada y rol asignado.
         // Estado=1 (activo) e IntentosFallidos=0 por defecto al crear.
@@ -122,22 +133,8 @@ namespace DAL
                     "       Estado, IntentosFallidos, ISNULL(IdIdioma, 'ES') AS IdIdioma, " +
                     "       CantidadBloqueos, FechaBloqueo, RequiereCambioClave, " +
                     "       Nombre, Apellido, Email, FechaNacimiento " +
-                    "FROM Usuario WHERE Username = @Username AND ISNULL(Activo, 1) = 1",
+                    "FROM Usuario WHERE Username = @Username AND Activo = 1",
                     parametros);
-            }
-            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
-            {
-                // Columna IdIdioma/Activo no existe: migración pendiente. Funciona con "ES" por
-                // defecto y sin filtro de archivado (en una BD sin migrar nadie está archivado).
-                // IMPORTANTE: se crea un SqlParameter NUEVO — el del primer intento ya quedó
-                // adherido a su SqlCommand y reusarlo lanza "Otro SqlParameterCollection ya
-                // contiene SqlParameter".
-                return LeerUsuarioPorQuery(
-                    "SELECT IdUsuario AS Id, Username, Clave AS Contraseña, Rol, Perfil, " +
-                    "       Estado, IntentosFallidos " +
-                    "FROM Usuario WHERE Username = @Username",
-                    new SqlParameter[] { new SqlParameter("@Username", username) },
-                    idiomaDefault: "ES");
             }
             catch (Exception ex)
             {
@@ -163,26 +160,16 @@ namespace DAL
         }
 
         // Bloqueo PROGRESIVO: marca el bloqueo con timestamp e incrementa la escala (1/5/15/60 min).
-        // Reemplaza a Bloquear() en el flujo de login. Si la BD no está migrada, cae a bloqueo simple.
+        // Reemplaza a Bloquear() en el flujo de login.
         public void BloquearConTiempo(int idUsuario)
         {
             try
             {
-                try
-                {
-                    acceso.Escribir(
-                        "UPDATE Usuario SET Estado = 0, FechaBloqueo = GETDATE(), " +
-                        "       CantidadBloqueos = ISNULL(CantidadBloqueos, 0) + 1 " +
-                        "WHERE IdUsuario = @idUsuario",
-                        new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                }
-                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
-                {
-                    // BD sin migrar: bloqueo simple permanente (comportamiento anterior).
-                    acceso.Escribir(
-                        "UPDATE Usuario SET Estado = 0 WHERE IdUsuario = @idUsuario",
-                        new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                }
+                acceso.Escribir(
+                    "UPDATE Usuario SET Estado = 0, FechaBloqueo = GETDATE(), " +
+                    "       CantidadBloqueos = ISNULL(CantidadBloqueos, 0) + 1 " +
+                    "WHERE IdUsuario = @idUsuario",
+                    new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
                 RecalcularDVH(idUsuario);
             }
             catch (Exception ex)
@@ -197,19 +184,10 @@ namespace DAL
         {
             try
             {
-                try
-                {
-                    acceso.Escribir(
-                        "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0, FechaBloqueo = NULL " +
-                        "WHERE IdUsuario = @idUsuario",
-                        new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                }
-                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
-                {
-                    acceso.Escribir(
-                        "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0 WHERE IdUsuario = @idUsuario",
-                        new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                }
+                acceso.Escribir(
+                    "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0, FechaBloqueo = NULL " +
+                    "WHERE IdUsuario = @idUsuario",
+                    new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
                 RecalcularDVH(idUsuario);
             }
             catch (Exception ex)
@@ -225,19 +203,10 @@ namespace DAL
         {
             try
             {
-                try
-                {
-                    acceso.Escribir(
-                        "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0, " +
-                        "       CantidadBloqueos = 0, FechaBloqueo = NULL WHERE IdUsuario = @idUsuario",
-                        new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                }
-                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
-                {
-                    acceso.Escribir(
-                        "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0 WHERE IdUsuario = @idUsuario",
-                        new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                }
+                acceso.Escribir(
+                    "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0, " +
+                    "       CantidadBloqueos = 0, FechaBloqueo = NULL WHERE IdUsuario = @idUsuario",
+                    new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
                 RecalcularDVH(idUsuario);
             }
             catch (Exception ex)
@@ -269,60 +238,50 @@ namespace DAL
         // BLL.RecuperacionIntegridad.RepararDesdeEspejo para deshacer modificaciones externas.
         public void RevertirDesdeEspejoEnTx(SqlConnection conexion, SqlTransaction tx, BE.FilaUsuarioDV valoresEspejo)
         {
+            // Mismos parámetros que el espejo (incluye Activo/RequiereCambioClave/CantidadBloqueos/
+            // FechaBloqueo, que forman parte del DVH desde el formato 2). @dvh no se usa acá.
             using (var cmd = new SqlCommand(
                 "UPDATE Usuario SET Username=@u, Clave=@c, Rol=@r, Perfil=@p, Estado=@e, " +
-                "IntentosFallidos=@i WHERE IdUsuario=@id", conexion, tx))
+                "IntentosFallidos=@i, Activo=@a, RequiereCambioClave=@rc, CantidadBloqueos=@cb, " +
+                "FechaBloqueo=@fb WHERE IdUsuario=@id", conexion, tx))
             {
-                cmd.Parameters.AddWithValue("@u",  (object)valoresEspejo.Username ?? string.Empty);
-                cmd.Parameters.AddWithValue("@c",  (object)valoresEspejo.Clave    ?? string.Empty);
-                cmd.Parameters.AddWithValue("@r",  (object)valoresEspejo.Rol      ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@p",  (object)valoresEspejo.Perfil   ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@e",  int.TryParse(valoresEspejo.Estado, out int est) ? est : 1);
-                cmd.Parameters.AddWithValue("@i",  int.TryParse(valoresEspejo.IntentosFallidos, out int it) ? it : 0);
-                cmd.Parameters.AddWithValue("@id", valoresEspejo.Id);
+                cmd.Parameters.AddRange(EspejoUsuario.ParametrosFila(valoresEspejo));
                 cmd.ExecuteNonQuery();
             }
         }
 
-        // Incrementa en 1 el contador de intentos fallidos para el username dado.
+        // Incrementa en 1 el contador de intentos fallidos para el username dado y devuelve el
+        // valor RESULTANTE leído en la misma sentencia (OUTPUT inserted): así dos intentos
+        // simultáneos no deciden el bloqueo con una lectura vieja. Devuelve null si el usuario
+        // no existe (o está archivado).
         // El contador persiste en BD: sobrevive reinicios de la aplicación.
-        public void IncrementarIntentosFallidos(string username)
+        public int? IncrementarIntentosFallidos(string username)
         {
-            SqlParameter[] parametros = new SqlParameter[]
-            {
-                new SqlParameter("@username", username)
-            };
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Usuario SET IntentosFallidos = ISNULL(IntentosFallidos, 0) + 1 " +
-                    "WHERE Username = @username",
-                    parametros);
-                // T07 — IntentosFallidos forma parte del DVH: recalcular para no dejar la
-                // fila "corrupta" y bloquear la app en el próximo arranque.
-                RecalcularDVHPorUsername(username);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError($"[DAL.Usuario.IncrementarIntentosFallidos] {ex.Message}");
-            }
+            DataTable t = acceso.Leer(
+                "UPDATE Usuario SET IntentosFallidos = ISNULL(IntentosFallidos, 0) + 1 " +
+                "OUTPUT inserted.IdUsuario, inserted.IntentosFallidos " +
+                "WHERE Username = @username AND Activo = 1",
+                new SqlParameter[] { new SqlParameter("@username", username ?? string.Empty) });
+            if (t == null || t.Rows.Count == 0) return null;
+            // T07 — IntentosFallidos forma parte del DVH: recalcular para no dejar la
+            // fila "corrupta" y bloquear la app en el próximo arranque.
+            RecalcularDVH(Convert.ToInt32(t.Rows[0]["IdUsuario"]));
+            return Convert.ToInt32(t.Rows[0]["IntentosFallidos"]);
         }
 
         // Resetea a 0 el contador de intentos fallidos para el username dado.
         // Se llama tras un login exitoso.
         public void ResetearIntentosFallidos(string username)
         {
-            SqlParameter[] parametros = new SqlParameter[]
-            {
-                new SqlParameter("@username", username)
-            };
             try
             {
-                acceso.Escribir(
-                    "UPDATE Usuario SET IntentosFallidos = 0 WHERE Username = @username",
-                    parametros);
+                DataTable t = acceso.Leer(
+                    "UPDATE Usuario SET IntentosFallidos = 0 OUTPUT inserted.IdUsuario " +
+                    "WHERE Username = @username AND IntentosFallidos <> 0",
+                    new SqlParameter[] { new SqlParameter("@username", username ?? string.Empty) });
                 // T07 — IntentosFallidos forma parte del DVH: recalcular tras el reset.
-                RecalcularDVHPorUsername(username);
+                if (t != null)
+                    foreach (DataRow r in t.Rows) RecalcularDVH(Convert.ToInt32(r["IdUsuario"]));
             }
             catch (Exception ex)
             {
@@ -453,27 +412,17 @@ namespace DAL
             }
         }
 
-        // Marca/desmarca el flag de cambio obligatorio para un usuario. Tolerante a BD sin migrar:
-        // si la columna no existe, se ignora (la función simplemente no aplica). El flag NO entra
-        // al DVH, por lo que cambiarlo no requiere recalcular dígitos verificadores.
+        // Marca/desmarca el flag de cambio obligatorio para un usuario. Desde el formato 2 de DV
+        // el flag SÍ entra al DVH: todos los llamadores recalculan el DVH después.
         private void SetRequiereCambioClave(int idUsuario, bool requiere)
         {
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Usuario SET RequiereCambioClave = @r WHERE IdUsuario = @id",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@r",  requiere ? 1 : 0),
-                        new SqlParameter("@id", idUsuario)
-                    });
-            }
-            catch (System.Data.SqlClient.SqlException ex) when (ex.Number == ColumnaInexistente)
-            {
-                // BD sin migrar (falta la columna): el cambio obligatorio queda inactivo. No es crítico.
-                System.Diagnostics.Trace.TraceWarning(
-                    "[DAL.Usuario.SetRequiereCambioClave] Columna RequiereCambioClave ausente; ejecutá BD/00_Instalacion_Completa.sql.");
-            }
+            acceso.Escribir(
+                "UPDATE Usuario SET RequiereCambioClave = @r WHERE IdUsuario = @id",
+                new SqlParameter[]
+                {
+                    new SqlParameter("@r",  SqlDbType.Bit) { Value = requiere },
+                    new SqlParameter("@id", idUsuario)
+                });
         }
 
         public override BE.Usuario ObtenerPorId(int idUsuario)
@@ -490,18 +439,6 @@ namespace DAL
                     "       Nombre, Apellido, Email, FechaNacimiento " +
                     "FROM Usuario WHERE IdUsuario = @IdUsuario",
                     parametros);
-            }
-            catch (System.Data.SqlClient.SqlException sqlEx)
-                when (sqlEx.Number == ColumnaInexistente)
-            {
-                // SqlParameter NUEVO en el fallback (no reusar el del primer intento; ver nota
-                // en ObtenerPorUsername).
-                return LeerUsuarioPorQuery(
-                    "SELECT IdUsuario AS Id, Username, Clave AS Contraseña, Rol, Perfil, " +
-                    "       Estado, IntentosFallidos " +
-                    "FROM Usuario WHERE IdUsuario = @IdUsuario",
-                    new SqlParameter[] { new SqlParameter("@IdUsuario", idUsuario) },
-                    idiomaDefault: "ES");
             }
             catch (Exception ex)
             {
@@ -531,108 +468,46 @@ namespace DAL
             }
         }
 
-        // Recalcula el DVH de un usuario específico y actualiza DVV de la tabla.
+        // T07 — Recalcula SOLO el DVH de la fila del usuario y el DVV de la tabla a partir de los
+        // DVH ALMACENADOS, con el bloqueo del DV tomado (DigitoVerificador.EjecutarConBloqueo).
+        // Antes se recalculaba el DVV con todos los DVH, lo que no lavaba filas ajenas, pero el
+        // recálculo no estaba serializado: dos escrituras simultáneas podían pisarse el DVV.
         // Se llama después de cualquier operación de escritura sobre un usuario.
         private void RecalcularDVH(int idUsuario)
         {
             try
             {
-                var dvDAL = new DigitoVerificador();
-                var filas = dvDAL.ObtenerFilasUsuario();
-
-                // Buscar la fila del usuario modificado y recalcular su DVH
-                var svc = Seguridad.CalculadorDV.Crear();
-                foreach (var fila in filas)
+                BE.FilaUsuarioDV fila = null;
+                new DigitoVerificador().EjecutarConBloqueo("Usuario", (cn, tx) =>
                 {
-                    if (fila.Id == idUsuario)
+                    var dt = DigitoVerificador.LeerEnTx(cn, tx,
+                        DigitoVerificador.SelectFilasUsuario + " WHERE IdUsuario = @id",
+                        new SqlParameter("@id", idUsuario));
+                    if (dt.Rows.Count > 0)
                     {
-                        int dvh = svc.CalcularDVH(fila.CamposParaDVH());
-                        dvDAL.ActualizarDVH(idUsuario, dvh);
+                        fila = DigitoVerificador.MapearFilaUsuario(dt.Rows[0]);
+                        int dvh = Seguridad.CalculadorDV.Crear().CalcularDVH(fila.CamposParaDVH());
+                        using (var cmd = new SqlCommand("UPDATE Usuario SET DVH = @dvh WHERE IdUsuario = @id", cn, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@dvh", dvh);
+                            cmd.Parameters.AddWithValue("@id", idUsuario);
+                            cmd.ExecuteNonQuery();
+                        }
                         fila.DVHAlmacenado = dvh;
-                        // T07 — Espejo de integridad: registrar el nuevo estado legítimo de esta fila.
-                        new EspejoUsuario().Upsert(fila);
-                        break;
                     }
-                }
+                    DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, "Usuario", "IdUsuario");
+                });
 
-                // Recalcular DVV con todos los DVH (usar los recién leídos — pueden ser null para filas antiguas)
-                ActualizarDVV(dvDAL);
+                // T07 — Espejo de integridad: registrar el nuevo estado legítimo de esta fila
+                // (o quitarla si el usuario se eliminó físicamente).
+                var espejo = new EspejoUsuario();
+                if (fila != null) espejo.Upsert(fila);
+                else espejo.Eliminar(idUsuario);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError($"[DAL.Usuario.RecalcularDVH] {ex.Message}");
             }
-        }
-
-        // Igual que RecalcularDVH(int) pero resolviendo la fila por Username (los métodos de
-        // intentos de login operan por username y no tienen el IdUsuario a mano).
-        private void RecalcularDVHPorUsername(string username)
-        {
-            try
-            {
-                var dvDAL = new DigitoVerificador();
-                var filas = dvDAL.ObtenerFilasUsuario();
-                var svc   = Seguridad.CalculadorDV.Crear();
-                foreach (var fila in filas)
-                {
-                    if (string.Equals(fila.Username, username, StringComparison.OrdinalIgnoreCase))
-                    {
-                        int dvh = svc.CalcularDVH(fila.CamposParaDVH());
-                        dvDAL.ActualizarDVH(fila.Id, dvh);
-                        fila.DVHAlmacenado = dvh;
-                        // T07 — Espejo de integridad: registrar el nuevo estado legítimo de esta fila.
-                        new EspejoUsuario().Upsert(fila);
-                        break;
-                    }
-                }
-                ActualizarDVV(dvDAL);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError($"[DAL.Usuario.RecalcularDVHPorUsername] {ex.Message}");
-            }
-        }
-
-        // Recalcula el DVH de TODOS los usuarios y actualiza DVV.
-        // Se usa después de operaciones masivas sobre el conjunto de filas.
-        private void RecalcularTodosDVH()
-        {
-            try
-            {
-                var dvDAL = new DigitoVerificador();
-                var filas = dvDAL.ObtenerFilasUsuario();
-                var svc   = Seguridad.CalculadorDV.Crear();
-
-                foreach (var fila in filas)
-                {
-                    int dvh = svc.CalcularDVH(fila.CamposParaDVH());
-                    dvDAL.ActualizarDVH(fila.Id, dvh);
-                    fila.DVHAlmacenado = dvh;
-                }
-
-                ActualizarDVV(dvDAL);
-                // T07 — Cambió el conjunto de filas (p. ej. baja física o reset masivo): el espejo
-                // de integridad se reconstruye completo para reflejar el nuevo estado legítimo.
-                new EspejoUsuario().Reconstruir(filas);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError($"[DAL.Usuario.RecalcularTodosDVH] {ex.Message}");
-            }
-        }
-
-        // Recalcula y persiste el DVV de la tabla Usuario a partir de los DVH actuales.
-        private static void ActualizarDVV(DigitoVerificador dvDAL)
-        {
-            var filas = dvDAL.ObtenerFilasUsuario();
-            var svc   = Seguridad.CalculadorDV.Crear();
-
-            var dvhValues = new System.Collections.Generic.List<int>();
-            foreach (var fila in filas)
-                dvhValues.Add(fila.DVHAlmacenado ?? 0);
-
-            int dvv = svc.CalcularDVV(dvhValues);
-            dvDAL.GuardarDVV("Usuario", dvv);
         }
 
         // Lista los usuarios ACTIVOS del sistema (sin contraseña). RF-10: los archivados
@@ -653,46 +528,15 @@ namespace DAL
         private List<BE.Usuario> LeerListaUsuarios(bool soloActivos)
         {
             var lista = new List<BE.Usuario>();
-            string filtro = soloActivos ? "ISNULL(Activo, 1) = 1" : "ISNULL(Activo, 1) = 0";
+            string filtro = soloActivos ? "Activo = 1" : "Activo = 0";
             try
             {
-                DataTable tabla;
-                try
-                {
-                    tabla = acceso.Leer(
-                        "SELECT IdUsuario AS Id, Username, Perfil, Estado, IntentosFallidos, " +
-                        "       ISNULL(Activo, 1) AS Activo, FechaBaja, " +
-                        "       Nombre, Apellido, Email, FechaNacimiento " +
-                        "FROM Usuario WHERE " + filtro + " ORDER BY Username",
-                        null);
-                }
-                catch (System.Data.SqlClient.SqlException sqlEx)
-                    when (sqlEx.Number == ColumnaInexistente)
-                {
-                    // BD sin migrar: sin columnas de archivado/perfil. Si la migración base de
-                    // RF-10 (Activo) tampoco existe y se piden archivados, no hay ninguno.
-                    bool tieneArchivado = true;
-                    try
-                    {
-                        tabla = acceso.Leer(
-                            "SELECT IdUsuario AS Id, Username, Perfil, Estado, IntentosFallidos, " +
-                            "       ISNULL(Activo, 1) AS Activo, FechaBaja " +
-                            "FROM Usuario WHERE " + filtro + " ORDER BY Username", null);
-                    }
-                    catch (System.Data.SqlClient.SqlException sqlEx2)
-                        when (sqlEx2.Number == ColumnaInexistente)
-                    {
-                        tieneArchivado = false;
-                        tabla = null;
-                    }
-                    if (!tieneArchivado)
-                    {
-                        if (!soloActivos) return lista;
-                        tabla = acceso.Leer(
-                            "SELECT IdUsuario AS Id, Username, Perfil, Estado, IntentosFallidos " +
-                            "FROM Usuario ORDER BY Username", null);
-                    }
-                }
+                DataTable tabla = acceso.Leer(
+                    "SELECT IdUsuario AS Id, Username, Perfil, Estado, IntentosFallidos, " +
+                    "       Activo, FechaBaja, " +
+                    "       Nombre, Apellido, Email, FechaNacimiento " +
+                    "FROM Usuario WHERE " + filtro + " ORDER BY Username",
+                    null);
 
                 bool tieneActivo    = tabla.Columns.Contains("Activo");
                 bool tieneFechaBaja = tabla.Columns.Contains("FechaBaja");
@@ -753,8 +597,15 @@ namespace DAL
         {
             try
             {
+                var empleadosDesvinculados = new List<int>();
                 acceso.EjecutarTransaccion((conn, tx) =>
                 {
+                    using (var cmd = new SqlCommand("SELECT IdEmpleado FROM Empleado WHERE IdUsuario = @id", conn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@id", idUsuario);
+                        using (var rd = cmd.ExecuteReader())
+                            while (rd.Read()) empleadosDesvinculados.Add(rd.GetInt32(0));
+                    }
                     void Exec(string sql)
                     {
                         using (var cmd = new SqlCommand(sql, conn, tx))
@@ -773,8 +624,11 @@ namespace DAL
                     Exec("DELETE FROM Usuario WHERE IdUsuario = @id");
                 });
 
-                // Cambió el conjunto de filas → recalcular DVH de cada fila + DVV de la tabla.
-                RecalcularTodosDVH();
+                // La fila ya no existe: solo cambia el DVV (desde los DVH almacenados) y se quita
+                // del espejo. Los Empleados desvinculados cambian su DVH (IdUsuario entra al cálculo).
+                RecalcularDVH(idUsuario);
+                foreach (int idEmp in empleadosDesvinculados)
+                    new Empleado().ActualizarDV(idEmp);
             }
             catch (Exception ex)
             {
@@ -787,20 +641,10 @@ namespace DAL
         {
             try
             {
-                DataTable tabla;
-                try
-                {
-                    tabla = acceso.Leer(
-                        "SELECT COUNT(*) AS Total FROM Usuario " +
-                        "WHERE Perfil = @perfil AND ISNULL(Activo, 1) = 1",
-                        new SqlParameter[] { new SqlParameter("@perfil", BE.Roles.Administrador) });
-                }
-                catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
-                {
-                    tabla = acceso.Leer(
-                        "SELECT COUNT(*) AS Total FROM Usuario WHERE Perfil = @perfil",
-                        new SqlParameter[] { new SqlParameter("@perfil", BE.Roles.Administrador) });
-                }
+                DataTable tabla = acceso.Leer(
+                    "SELECT COUNT(*) AS Total FROM Usuario " +
+                    "WHERE Perfil = @perfil AND Activo = 1",
+                    new SqlParameter[] { new SqlParameter("@perfil", BE.Roles.Administrador) });
                 return tabla.Rows.Count == 0 ? 0 : Convert.ToInt32(tabla.Rows[0]["Total"]);
             }
             catch (Exception ex)
@@ -819,7 +663,7 @@ namespace DAL
                 DataTable tabla = acceso.Leer(
                     "SELECT IdUsuario AS Id, Username, Perfil, FechaBaja " +
                     "FROM Usuario " +
-                    "WHERE ISNULL(Activo, 1) = 0 AND FechaBaja IS NOT NULL " +
+                    "WHERE Activo = 0 AND FechaBaja IS NOT NULL " +
                     "  AND FechaBaja <= DATEADD(day, -@dias, GETDATE()) " +
                     "ORDER BY FechaBaja",
                     new SqlParameter[] { new SqlParameter("@dias", diasRetencion) });
@@ -835,10 +679,6 @@ namespace DAL
                         FechaBaja = row["FechaBaja"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaBaja"]) : null
                     });
                 }
-            }
-            catch (System.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == ColumnaInexistente)
-            {
-                // BD sin migrar: no hay archivados.
             }
             catch (Exception ex)
             {

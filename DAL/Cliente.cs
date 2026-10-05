@@ -12,17 +12,25 @@ namespace DAL
         // tanto para recalcular tras escrituras como para verificar al arrancar).
         public const  string   DV_Tabla    = "Cliente";
         public const  string   DV_Pk       = "IdCliente";
-        public static readonly string[] DV_Columnas = { "Nombre", "Apellido", "DNI", "Email", "MetodoPago" };
+        // Formato 2: además de los datos personales, el estado de la suscripción y el dinero
+        // (plan, vencimientos, gracia, pausa, crédito de referido, referente y baja lógica).
+        public static readonly string[] DV_Columnas =
+        {
+            "Nombre", "Apellido", "DNI", "Email", "MetodoPago",
+            "IdPlan", "FechaVencimiento", "FechaLimiteGracia", "FechaPausaHasta",
+            "DescuentoProximoCobro", "IdClienteReferente", "Activo"
+        };
 
-        // Recalcula DVH de cada fila + DVV de la tabla. Se llama tras Alta/Modificar/Baja.
+        // Recalcula el DVH de la fila del cliente + el DVV de la tabla desde los DVH almacenados
+        // (DigitoVerificador.ActualizarFila). Se llama tras Alta/Modificar/Baja.
         // No propaga errores: la falla del DV no debe abortar la operación de negocio
         // (la verificación de integridad al arranque la detectaría igual).
         // Público (antes privado): ModificarEnTx no lo llama internamente porque corre DENTRO
         // de una transacción todavía sin confirmar — el caller (ver EjecutarTransaccion) debe
         // invocarlo DESPUÉS del commit, mismo criterio que DAL.Pedido.Alta con su propio DV.
-        public void RecalcularDV()
+        public void RecalcularDV(int idCliente)
         {
-            try { new DigitoVerificador().RecalcularTabla(DV_Tabla, DV_Pk, DV_Columnas); }
+            try { new DigitoVerificador().ActualizarFila(DV_Tabla, DV_Pk, DV_Columnas, idCliente); }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Cliente.RecalcularDV] " + ex.Message); }
         }
 
@@ -120,6 +128,30 @@ namespace DAL
             return BuscarIdPorDni(dni, idExcluir) != 0;
         }
 
+        public bool TieneContratacionPendiente(int idCliente)
+        {
+            SqlParameter[] p = { new SqlParameter("@IdCliente", idCliente) };
+            try
+            {
+                DataTable t = acceso.Leer("SELECT COUNT(*) AS N FROM Contratacion WHERE IdCliente = @IdCliente AND Estado = 0", p);
+                return t != null && t.Rows.Count > 0 && Convert.ToInt32(t.Rows[0]["N"]) > 0;
+            }
+            catch (Exception ex) { throw new Exception("Error al consultar las contrataciones del cliente.", ex); }
+        }
+
+        public HashSet<int> ObtenerIdsConContratacionPendiente()
+        {
+            try
+            {
+                var ids = new HashSet<int>();
+                DataTable t = acceso.Leer("SELECT DISTINCT IdCliente FROM Contratacion WHERE Estado = 0", new SqlParameter[0]);
+                if (t != null)
+                    foreach (DataRow r in t.Rows) ids.Add(Convert.ToInt32(r["IdCliente"]));
+                return ids;
+            }
+            catch (Exception ex) { throw new Exception("Error al consultar las contrataciones pendientes.", ex); }
+        }
+
         // Busca un cliente activo con ese DNI (excluyendo el ID indicado). Devuelve 0 si no hay.
         private int BuscarIdPorDni(string dni, int idExcluir)
         {
@@ -162,7 +194,7 @@ namespace DAL
             int idNuevo = tabla != null && tabla.Rows.Count > 0
                 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"])
                 : 0;
-            RecalcularDV();   // T07
+            RecalcularDV(idNuevo);   // T07
             return idNuevo;
         }
 
@@ -192,7 +224,7 @@ namespace DAL
                 "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
                 "WHERE IdCliente=@IdCliente",
                 p);
-            RecalcularDV();   // T07
+            RecalcularDV(cliente.IdCliente);   // T07
         }
 
         // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
@@ -235,6 +267,25 @@ namespace DAL
             }
         }
 
+        // Cobro recurrente (N01): actualiza SOLO el vencimiento y la gracia, con control optimista
+        // sobre el vencimiento leído ("WHERE FechaVencimiento = @Leido"). Devuelve false si otra
+        // sesión ya cobró (o modificó el vencimiento) entre la lectura y este UPDATE.
+        public bool RenovarVencimientoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente,
+                                           DateTime? vencimientoLeido, DateTime nuevoVencimiento)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE Cliente SET FechaVencimiento = @Nuevo, FechaLimiteGracia = NULL " +
+                "WHERE IdCliente = @IdCliente " +
+                "  AND ((@Leido IS NULL AND FechaVencimiento IS NULL) OR FechaVencimiento = @Leido)",
+                conexion, tx))
+            {
+                cmd.Parameters.Add(new SqlParameter("@Nuevo", SqlDbType.Date) { Value = nuevoVencimiento.Date });
+                cmd.Parameters.Add(new SqlParameter("@Leido", SqlDbType.Date) { Value = (object)vencimientoLeido?.Date ?? DBNull.Value });
+                cmd.Parameters.AddWithValue("@IdCliente", idCliente);
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
         // Crédito de referido: se modifica SOLO con estas dos operaciones atómicas (el UPDATE general
         // de Cliente ya no lo escribe). Así dos sesiones que suman o consumen crédito a la vez no se
         // pisan: cada una aplica su delta sobre el valor real de la base, no sobre una copia leída antes.
@@ -270,7 +321,7 @@ namespace DAL
             SqlParameter[] p = { new SqlParameter("@IdCliente", idCliente) };
             acceso.Escribir(
                 "UPDATE Cliente SET Activo = 0 WHERE IdCliente = @IdCliente", p);
-            RecalcularDV();   // T07
+            RecalcularDV(idCliente);   // T07
         }
 
         private BE.Cliente Mapear(DataRow row)

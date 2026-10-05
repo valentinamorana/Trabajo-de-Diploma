@@ -49,6 +49,15 @@ namespace BLL
             return empleado.IdEmpleado;
         }
 
+        // IdUsuario en sesión (PN03: quién crea, dictamina, solicita o resuelve). Fail-closed.
+        internal static int ResolverUsuarioActivo()
+        {
+            if (!Seguridad.SessionManager.IsLoggedIn)
+                throw new BE.AppException("err.bll.sesion_expirada",
+                    "La sesión expiró. Volvé a iniciar sesión.");
+            return Seguridad.SessionManager.GetInstance().Usuario.Id;
+        }
+
         // Exige poder gestionar usuarios/permisos: Administrador (bypass) o un rol que tenga la
         // patente de Gestión de Usuarios (mnuUsuarios). Centraliza el guard duplicado en
         // BLL.Familia y BLL.ControlMapeado.

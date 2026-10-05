@@ -12,6 +12,19 @@ namespace BLL.Interfaces
         // Devuelve todos los clientes con plan y stock utilizado.
         List<BE.Cliente> ObtenerTodos();
 
+        // PN01 — "Recibir identificación": busca por DNI exacto, o por nombre o apellido.
+        List<BE.Cliente> BuscarPorIdentificacion(string texto);
+
+        // Filtra el listado por texto parcial en nombre completo, DNI o email (sin ir a la base).
+        List<BE.Cliente> Filtrar(IEnumerable<BE.Cliente> clientes, string texto);
+
+        // Métodos de pago preferidos elegibles para un cliente (valor guardado + clave de
+        // traducción). Incluye metodoActual si es un valor anterior que ya no está en la lista.
+        List<BE.MedioPago> ObtenerMetodosPago(string metodoActual = null);
+
+        // Solo el Administrador corrige plan/vencimiento sin pasar por Contratación + Caja.
+        bool PuedeCorregirPlanDirectamente();
+
         // Obtiene un cliente por su ID.
         BE.Cliente ObtenerPorId(int idCliente);
 
@@ -33,7 +46,7 @@ namespace BLL.Interfaces
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad);
 
         // PN02 — misma activación, pero gateada por CajaEditar/Caja en vez de ClientesEditar:
-        // la usa BLL.Contratacion.ConfirmarPago cuando Caja confirma el pago (Caja no tiene
+        // la usa BLL.Contratacion.ConfirmarCobro cuando Caja confirma el pago (Caja no tiene
         // el permiso de Vendedor, a propósito).
         BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m);

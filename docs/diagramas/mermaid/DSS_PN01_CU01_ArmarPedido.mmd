@@ -2,45 +2,51 @@ sequenceDiagram
   autonumber
   actor V as Vendedor
   participant F as NuevoPedidoForm
+  participant CB as BLL.Cliente
   participant B as BLL.Pedido
   participant PB as BLL.Prenda
-  participant LE as BLL.ListaEspera
   participant D as DAL.Pedido
   participant H as DAL.Pedido<br/>Historial
-  V->>F: Elige al cliente
-  F->>B: ValidarPuedeArmarPedido(idCliente)
-  Note over B: Suscripción vigente, sin pausa ni suspensión · sin pedido Despachado · sin prendas En uso (cuenta desbloqueada)
-  alt Cliente no apto
-    B-->>F: AppException(motivo)
-    F-->>V: Informa la situación y no permite avanzar
-  else Cliente apto
-    B-->>F: cliente validado
-    V->>F: Selecciona las prendas del catálogo y confirma
-    F->>B: CrearPedido(modulo, idCliente, prendas)
-    Note over B: Exigir(PedidosVentaEditar) · ValidarCupoDisponible: cantidad ≤ LimitePrendas del plan
-    alt Excede el cupo del plan
-      B-->>F: AppException(cupo)
-      F-->>V: Informa el exceso: ajustar o desistir
-    else Dentro del cupo
-      B->>PB: VerificarDisponibilidad(prendas)  [relee el estado en la BD]
-      PB-->>B: (disponible, noDisponibles)
-      B->>LE: ObtenerIdsReservadosParaOtro(idCliente)
-      alt Alguna prenda no disponible o reservada para otro cliente
-        B-->>F: AppException(prenda_no_disponible / prenda_reservada)
-        F-->>V: Informa la falta: ajustar o desistir
-      else Todas disponibles
-        B->>D: Alta(pedido)  [transacción: Pedido + PedidoPrenda + prendas a En uso, con reclamo por prenda]
-        alt Otra sesión tomó una prenda
-          D-->>B: error de concurrencia
-          B-->>F: AppException
-          F-->>V: Revierte todo el pedido
-        else Reserva confirmada
-          D-->>B: idPedido
-          B->>H: RegistrarCambios(idPedido, "CREAR")
-          B->>LE: CerrarSiReservada(idPrenda, idCliente)
-          B-->>F: idPedido
-          F-->>V: Pedido creado: queda bloqueado y con número único
-        end
+  V->>F: Ingresa la identificación del cliente (DNI, nombre o apellido)
+  F->>CB: BuscarPorIdentificacion(texto)
+  CB-->>F: clientes que coinciden (DNI exacto o nombre/apellido parcial)
+  F->>B: VerificarVigencia(idCliente)
+  Note over B: Exigir(PedidosVentaEditar) · vigente = con plan, sin suspensión por pago, sin pausa y sin vencer
+  alt Suscripción no vigente
+    B-->>F: AppException(sin_plan / suscripcion_vencida / pausada / suspendida)
+    F-->>V: Aviso de suscripción no vigente: no deja avanzar
+  else Vigente
+    B-->>F: cliente (Ficha del cliente)
+    F->>B: RevisarPedidoActivo(cliente)
+    alt Posee pedido activo o prendas sin devolver
+      B-->>F: AppException(pedido_activo / ya_despachado / cuenta_bloqueada)
+      F-->>V: Aviso de pedido activo: no deja avanzar
+    else Sin pedido activo
+      F->>PB: ObtenerDisponibles(idCliente)
+      PB-->>F: Catálogo: prendas Disponibles, sin las reservadas por Lista de Espera para otro
+      loop Por cada prenda que el Vendedor anota (o quita) de la selección
+        F->>CB: ObtenerEstadoComercial(cliente, cantidadSeleccionada)
+        CB-->>F: cupo disponible del plan
+        F-->>V: Detalle de selección (prenda, talle, color, cantidad) y estado del cupo
+      end
+      alt Excede el cupo y el cliente no ajusta
+        V->>F: Registrar desistimiento + motivo
+        F->>B: AsentarDesistimiento(modulo, idCliente, prendas, motivo)
+        Note over B: ValidarPuedeArmarPedido · solo si la selección excede el cupo (si no: desistimiento_sin_exceso)
+        B->>D: AltaSinReserva(pedido Desistido, etapa Cupo)
+        D-->>B: idPedido
+        B->>H: RegistrarCambios(DESISTIR)
+        B-->>F: idPedido
+        F-->>V: Aviso de desistimiento (PDF)
+      else Dentro del cupo
+        V->>F: Enviar a control de stock
+        F->>B: EnviarAControlStock(modulo, idCliente, prendas)
+        Note over B: Revalida: ValidarPuedeArmarPedido + ComprobarCupo(cliente, cantidad)
+        B->>D: AltaSinReserva(pedido EnControlStock)  [Pedido + PedidoPrenda, prendas siguen Disponibles]
+        D-->>B: idPedido
+        B->>H: RegistrarCambios(ENVIAR_CONTROL)
+        B-->>F: idPedido
+        F-->>V: Planilla de control de existencias (PDF): el pedido queda en la cola de Depósito
       end
     end
   end

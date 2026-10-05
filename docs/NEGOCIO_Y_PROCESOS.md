@@ -129,9 +129,9 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 ### 3.2 Máquinas de estado
 | Entidad | Estados (enum en `BE/`) | Transiciones válidas |
 |---|---|---|
-| **Prenda** (`EstadoPrenda`, patrón **State** en `BE/Estados/`) | Disponible 0 · EnUso 1 · EnLimpieza 2 · Baja 3 | Disponible→EnLimpieza\|Baja; EnLimpieza→Disponible\|Baja; EnUso→Baja (solo por *Reportar prenda perdida*); Baja = final. **→EnUso** solo al reservar por pedido (`DAL/Pedido.cs`); **EnUso→EnLimpieza** solo al registrar la devolución. Restricciones extra en `BLL/Prenda.cs › CambiarEstado`: EnUso→Baja exige `viaFlujoPerdida`; EnLimpieza→Baja exige `viaInspeccion` |
-| **Pedido** (`EstadoPedido`) | Pendiente 0 · Despachado 1 · Entregado 2 · Cancelado 3 | Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); `DesCancelar`; `RegistrarDevolucion` solo sobre Entregado (prendas EnUso→EnLimpieza). Implementado con **Command** (`BLL/Comandos/`) |
-| **Contratacion** (`EstadoContratacion`) | PendientePago 0 · Pagada 1 · Cancelada 2 | Pendiente→Pagada (cobro, claim atómico) · Pendiente→Cancelada (3.er intento fallido) · Pagada→Pendiente solo como **compensación** si falla la activación (`ReabrirPago`) |
+| **Prenda** (`EstadoPrenda`, patrón **State** en `BE/Estados/`) | Disponible 0 · EnUso 1 · EnLimpieza 2 · Baja 3 | Disponible→EnLimpieza\|Baja; EnLimpieza→Disponible\|Baja; EnUso→Baja (solo por *Reportar prenda perdida*); Baja = final. **→EnUso** solo al separar las prendas de un pedido (`DAL/Pedido.cs › SepararPrendas`); **EnUso→EnLimpieza** solo al registrar la devolución. Restricciones extra en `BLL/Prenda.cs › CambiarEstado`: EnUso→Baja exige `viaFlujoPerdida`; EnLimpieza→Baja exige `viaInspeccion` |
+| **Pedido** (`EstadoPedido`) | Pendiente 0 (formalizado) · Despachado 1 · Entregado 2 · Cancelado 3 · EnControlStock 4 · ConFaltantes 5 · Separado 6 · Desistido 7 | Armado (PN01): EnControlStock→ConFaltantes\|Separado; ConFaltantes→EnControlStock (ajuste)\|Desistido; Separado→Pendiente (formalizar). Ciclo: Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); Cancelado→EnControlStock (`DesCancelar` = "Reactivar": revalida y vuelve a control de stock, sin reservar); `RegistrarDevolucion` solo sobre Entregado (prendas EnUso→EnLimpieza). Entregado y Desistido son finales. Cancelar/devolver con **Command** (`BLL/Comandos/`) |
+| **Contratacion** (`EstadoContratacion`) | PendientePago 0 · Pagada 1 · Cancelada 2 | Pendiente→Pagada (cobro, claim atómico) · Pendiente→Cancelada (3.er intento fallido, automático) · Pagada→Pendiente solo como **compensación** si falla la activación (`ReabrirPago`). Regla en `BE.Contratacion.TransicionValida` |
 | **Promocion** (`EstadoPromocion`) | EnRevisionContable 0 · Vigente 1 · RechazadaContabilidad 2 · BajaSolicitada 3 · Desactivada 4 | EnRevisión→Vigente\|Rechazada (Contabilidad); Rechazada→EnRevisión (**Reformular**, Administración); Vigente→BajaSolicitada (Vendedor) → Desactivada (aprueba baja) \| Vigente (rechaza baja); Vigente→Desactivada (Administración, directo). Cada cambio es un `UPDATE ... WHERE Estado=@esperado` (`DAL/Promocion.cs`) |
 | **SugerenciaPromocion** (`EstadoSugerencia`) | Pendiente 0 · Evaluada 1 | Pendiente→Evaluada al crear una promoción desde ella (una sugerencia evaluada no se reutiliza) |
 | **ListaEspera** (`EstadoListaEspera`) | Pendiente 0 · Reservada 1 · Convertida 2 · Cancelada 3 | Pendiente→Reservada (al pasar la prenda a Disponible, FIFO, ventana `HORAS_RESERVA = 48` en `BLL/ListaEspera.cs`) → Convertida (el cliente arma su pedido) \| Cancelada |
@@ -194,123 +194,255 @@ Baja de suscripción, Cambiar plan (pantallas `Clientes`, `ClienteForm`, `Renova
 
 ### PN01 — Armar pedido de prendas
 
-**Objetivo.** Que un cliente con suscripción vigente reciba un pedido confirmado con sus prendas reservadas.
-**Actores.** Vendedor (arma el pedido). Depósito (rol `Deposito`) verifica disponibilidad y participa en la
-preparación física; en el código **no hay un paso separado de Depósito**: la verificación y la reserva las ejecuta la
-BLL en la confirmación.
-**Precondiciones.** Vendedor con sesión y vínculo `Empleado`; cliente registrado.
-**Pantallas.** `GUI/NuevoPedidoForm.cs` (asistente), `PedidosVenta.cs`, `PedidosRealizados.cs`.
+**Objetivo.** Que un cliente con suscripción vigente reciba un pedido formalizado, con sus prendas controladas y separadas.
+**Referencia.** El código sigue el diagrama de actividad de EA (`Entrega - Procesos de Negocio/Entrega1.eapx`, `PN01 - Diagrama de Actividad.bmp`).
+El carril "Controlador de Stock" lo cumple el rol **Depósito**.
+**Actores.** El Vendedor identifica al cliente, arma la selección, comunica faltantes, asienta desistimientos y formaliza. Depósito revisa el stock, informa faltantes, confirma y separa.
+**Precondiciones.** Vendedor y Depósito con sesión y vínculo `Empleado`; cliente registrado.
+**Pantallas.**
+- `GUI/NuevoPedidoForm.cs`: asistente de armado, y modo ajuste para los pedidos con faltantes.
+- `GUI/ControlStockForm.cs`: Inventario → Control de Stock, patentes `mnuControlStock` y `mnuControlStockEditar`.
+- `GUI/PedidosVenta.cs`: Ver faltantes · Ajustar · Desistir · Formalizar · Confirmación.
+- `PedidosRealizados.cs`: muestra solo los pedidos formalizados en adelante.
+**Documentos (PDF, Factory Method en `GUI/Exportacion/DocumentosPedido.cs`).**
+- Planilla de control de existencias.
+- Informe de disponibilidad, con los faltantes y sus alternativas.
+- Constancia de prendas separadas.
+- Confirmación y constancia del pedido.
+- Aviso de desistimiento.
+- Aviso de suscripción no vigente y aviso de pedido activo.
+- Detalle de restricciones de cupo.
+- Detalle de prendas confirmadas.
 
-**Flujo (código)**
-1. El asistente elige al cliente → `BLL.Pedido.ValidarPuedeArmarPedido` (avisa el motivo en pantalla si no puede).
-2. Selecciona prendas del catálogo (`BLL.Prenda.ObtenerDisponibles`, excluye las reservadas por Lista de Espera para otro cliente).
-3. `BLL.Pedido.CrearPedido`: valida **cupo** (`ValidarCupoDisponible`), **relee la disponibilidad por lote**
-   (`BLL.Prenda.VerificarDisponibilidad`) y **reserva** (`ReservarPrendas` → `DAL.Pedido.Alta`).
-4. Registra historial (`PedidoHistorial`), bitácora y cierra reservas de Lista de Espera del cliente.
-5. Postcondición: pedido `Pendiente` con número único; prendas `EnUso` a nombre del cliente.
+**Flujo (actividad del diagrama → método)**
+| Carril | Actividad del diagrama | Código |
+|---|---|---|
+| Vendedor | Recibir identificación → Ficha del cliente | `BLL.Cliente.BuscarPorIdentificacion` busca por DNI exacto, o por nombre o apellido parcial. La ficha se muestra en el paso 1 del asistente. |
+| Vendedor | Verificar la vigencia → *Informar imposibilidad* | `BLL.Pedido.VerificarVigencia`: sin plan, vencida, pausada o suspendida por pago |
+| Vendedor | Revisar existencia de pedido activo → *Informar existencia* | `BLL.Pedido.RevisarPedidoActivo`. Bloquea si hay un pedido EnControlStock, ConFaltantes, Separado, Pendiente o Despachado, o prendas sin devolver. |
+| Vendedor | Presentar catálogo | `BLL.Prenda.ObtenerDisponibles(idCliente)`: excluye las prendas reservadas por Lista de Espera para otro cliente |
+| Vendedor | Anotar la selección ∥ Comprobar el cupo | En cada tilde se recalcula el cupo con `BLL.Cliente.ObtenerEstadoComercial`. En el envío se vuelve a validar con `BLL.Pedido.ComprobarCupo`. |
+| Vendedor | ¿Excede el cupo? → Informar exceso → ¿Ajustar? No → Asentar desistimiento | `AsentarDesistimiento(modulo, idCliente, prendas, motivo)` crea un pedido **Desistido**, en la etapa Cupo y sin reservar nada |
+| Vendedor | Enviar selección para control de stock | `EnviarAControlStock` → `DAL.Pedido.AltaSinReserva`: el pedido queda **EnControlStock** y las prendas siguen Disponibles |
+| Depósito | Revisar stock → ¿Selección disponible? | `RevisarStock`: relee el estado de cada prenda (`VerificarDisponibilidad`) y si está reservada para otro cliente |
+| Depósito | Informe de prendas faltantes | `InformarFaltantes`: sugiere hasta 3 alternativas por faltante (misma categoría y talle, disponibles) y pasa el pedido a **ConFaltantes** |
+| Vendedor | Comunicar faltantes → ¿Ajustar? | Desde Pedidos de Venta: `ObtenerInformeFaltantes` |
+| Vendedor | Recibir selección ajustada por disponibilidad | `AjustarSeleccion`: vuelve al punto de unión del diagrama, así que **solo** vuelve a comprobar el cupo. Reemplaza las líneas, descarta el informe anterior y el pedido vuelve a **EnControlStock** |
+| Vendedor | Al ajustar excede el cupo y no lo corrige → Asentar desistimiento | `AsentarDesistimiento(modulo, pedido, motivo, Cupo, seleccionAjustada)`: exige que la selección ajustada exceda el cupo y la guarda como la selección desistida |
+| Vendedor | No ajusta → Asentar desistimiento | `AsentarDesistimiento(modulo, pedido, motivo, Disponibilidad)` pasa el pedido a **Desistido** y conserva el informe de faltantes |
+| Depósito | Confirmar prendas disponibles | `ConfirmarPrendasDisponibles`: marca `PedidoPrenda.Confirmada` y registra el empleado y la fecha de control |
+| Depósito | Separar prendas del pedido | `SepararPrendas`: es la **reserva**. Pasa las prendas a EnUso dentro de una transacción y el pedido a **Separado**. Si otra operación tomó una prenda, no se reserva nada y se emite el informe de faltantes. |
+| Vendedor | Formalizar el pedido (desde aquí no admite cambios) | `FormalizarPedido`: el pedido pasa de **Separado** a **Pendiente**, que significa "formalizado, pendiente de despacho" |
+| Vendedor | Preparar la confirmación | `PrepararConfirmacion` → Confirmación y constancia del pedido |
+
+Cada transición registra:
+- `PedidoHistorial`: ENVIAR_CONTROL, DESISTIR, AJUSTAR_SELECCION, INFORMAR_FALTANTES, CONFIRMAR_PRENDAS, SEPARAR y FORMALIZAR;
+- la bitácora;
+- la bitácora de negocio: `EnvioControlStock`, `InformeFaltantes`, `SeparacionPrendas`, `Desistimiento` y `Venta` (al formalizar).
 
 **Reglas de negocio PN01**
 | # | Regla | Ubicación | T: |
 |---|---|---|---|
-| 1 | No se arma pedido sin suscripción vigente ni con suscripción pausada ni suspendida por pago | `BLL/Pedido.cs › ObtenerClienteValidado` | `PedidoTests` (`SuscripcionVencida/Pausada/SuspendidoPorPago`) |
-| 2 | Con un pedido **Despachado** sin entregar no se arma otro | `BLL/Pedido.cs › ValidarPuedeArmarPedido` (`err.bll.pedido.ya_despachado`) | `PedidoTests › CrearPedido_ConDespachoActivo_LanzaYaDespachado` |
-| 3 | **Cuenta bloqueada:** con prendas `EnUso` (pendientes de devolución) no se arma otro pedido; se desbloquea cuando PN04 registra la devolución | `ValidarPuedeArmarPedido` (`err.bll.pedido.cuenta_bloqueada`); aviso en `NuevoPedidoForm › CmbCliente_SelectedIndexChanged` | `PedidoTests › CrearPedido_ConPrendasPendientesDeDevolucion_LanzaCuentaBloqueada`, `ValidarPuedeArmarPedido_*` |
-| 4 | La cantidad no puede superar el `LimitePrendas` del plan | `ValidarCupoDisponible` | `PedidoTests › CrearPedido_SuperaLimiteDelPlan_LanzaLimitePlan` |
-| 5 | La disponibilidad se relee **contra la BD** justo antes de confirmar (cierra la ventana TOCTOU) | `BLL/Prenda.cs › VerificarDisponibilidad` | `PedidoTests`, `PrendaTests` |
-| 6 | La reserva es **atómica**: `UPDATE ... AND Estado = Disponible` dentro de la transacción; si otra operación tomó la prenda se revierte todo | `DAL/Pedido.cs › Alta` | (sin test contra BD real; los tests usan fakes) |
-| 7 | Guardar una prenda como interés **no reserva stock** (solo la confirmación reserva) | diseño (no hay "closet" persistido) | — |
-| 8 | El pedido queda bloqueado al crearse: no existe API de edición de pedido | `BLL/Pedido.cs` (solo cancelar/despachar/entregar/devolver) | — |
-| 9 | Una prenda que sale de En Limpieza a Disponible se reserva 48 h para el primer anotado de la Lista de Espera | `BLL/ListaEspera.cs › NotificarSiCorresponde` | `ListaEsperaTests` (11) |
+| 1 | No se arma pedido sin suscripción vigente, ni con la suscripción pausada o suspendida por pago | `BLL/Pedido.cs › VerificarVigencia` | `PedidoTests › VerificarVigencia_*` |
+| 2 | No se arma pedido si el cliente tiene otro pedido activo (en cualquier estado del armado, o despachado) | `RevisarPedidoActivo` (`err.bll.pedido.pedido_activo` / `ya_despachado`) | `RevisarPedidoActivo_PedidoEnCadaEstadoDelArmado_LanzaPedidoActivo`, `RevisarPedidoActivo_ConDespachoActivo_LanzaYaDespachado` |
+| 3 | **Cuenta bloqueada:** con prendas `EnUso` sin devolver no se arma otro pedido. Se desbloquea cuando PN04 registra la devolución. | `RevisarPedidoActivo` (`err.bll.pedido.cuenta_bloqueada`) | `RevisarPedidoActivo_ConPrendasPendientesDeDevolucion_LanzaCuentaBloqueada` |
+| 4 | La cantidad no puede superar el `LimitePrendas` del plan | `ComprobarCupo` | `ComprobarCupo_*`, `EnviarAControlStock_SuperaLimiteDelPlan_LanzaLimitePlan` |
+| 5 | Enviar a control **no reserva**: las prendas se reservan recién al separarlas | `EnviarAControlStock` → `AltaSinReserva` | `EnviarAControlStock_DatosValidos_CreaPedidoEnControlSinReservar` |
+| 6 | El desistimiento por cupo solo se asienta si la selección (nueva o ajustada) excede el cupo, después de pasar por "¿Posee pedido activo? No", y siempre exige un motivo | `AsentarDesistimiento` | `AsentarDesistimiento_*` |
+| 7 | Solo Depósito revisa, informa faltantes, confirma y separa | `PermisosAccion.Exigir(ControlStockEditar)` | `AccionesDeDeposito_SinPermisoDeControlDeStock_Rechazan` |
+| 8 | Las alternativas son prendas Disponibles de la misma categoría y talle, que no están en el pedido (máximo 3) | `SugerirAlternativas` | `InformarFaltantes_SugiereAlternativasDeLaMismaCategoriaYTalle` |
+| 9 | Solo se separa lo confirmado. La separación es **atómica** (`UPDATE ... AND Estado = Disponible`): si otra operación tomó una prenda, se revierte todo y el pedido pasa a faltantes. | `SepararPrendas`, `DAL/Pedido.cs › SepararPrendas` | `SepararPrendas_*` |
+| 10 | Solo se formaliza un pedido Separado, y después de formalizar no hay operación que cambie la selección. Cada transición del armado exige `BE.Pedido.TransicionValida` (`err.bll.pedido.transicion_invalida`) | `FormalizarPedido`, `ExigirTransicion` | `FormalizarPedido_*`, `PedidoFormalizado_NoAdmiteModificaciones`, `TransicionesDelArmado_SiguenElDiagrama` |
+| 11 | Los pasos del armado no se pueden revertir desde el historial | `RestaurarOperacion` (`err.bll.pedido.restaurar_no_permitido`) | `RestaurarOperacion_PasoDelControlDeStock_NoSePuedeRevertir` |
+| 12 | Reactivar un pedido cancelado revalida la vigencia, el pedido activo y el cupo, y lo devuelve a control de stock sin reservar | `DesCancelar` | `DesCancelar_ClienteConOtroPedidoActivo_Rechaza`, `DesCancelar_SuscripcionVencida_Rechaza` |
+| 14 | Los avisos que cortan el circuito (suscripción no vigente, pedido activo) quedan en la bitácora y se pueden imprimir | `VerificarVigencia`, `RevisarPedidoActivo` (`RegistrarAviso`); `DocumentosPedido.AvisoImposibilidad` | Arnés contra la BD real |
+| 15 | Solo se prepara la confirmación de un pedido formalizado que no fue cancelado | `BE.Pedido.EstaFormalizado` | `PrepararConfirmacion_*` |
+| 13 | Una prenda que pasa de En Limpieza a Disponible se reserva 48 h para el primer anotado de la Lista de Espera. La reserva se cierra al separar. | `BLL/ListaEspera.cs › NotificarSiCorresponde`, `SepararPrendas` | `ListaEsperaTests`, `SepararPrendas_Confirmadas_ReservaYCierraLaListaDeEspera` |
 
-**Casos de uso** (nombres del documento): CU01-VEN Armar Pedido, CU02-VEN Consultar Catálogo, CU03-VEN Consultar
-Situación del Cliente, CU01-DEP Verificar Disponibilidad, CU02-DEP Reservar Prendas.
-**Estado de implementación:** CU01-VEN ; CU02-VEN (sin "valor de reposición" en la grilla); CU03-VEN **sin pantalla propia**
-(la situación se ve dentro del asistente); CU01/CU02-DEP **como lógica de BLL** pero **sin actor Depósito ni cola/pantalla**;
-no hay notificación a Depósito, planilla de existencias ni registro de desistimiento.
-**Alcance.** Abarca: validar cliente, catálogo disponible, cupo, disponibilidad, reserva y creación del pedido.
-**No abarca:** preparación/empaque físico, envío con tracking, email al cliente, sustitución por quiebre de stock.
-**Ciclo posterior del pedido** (pantalla `PedidosRealizados`, rol `OperadorLogistico`/Vendedor según patente): Despachar → Marcar entregado → Registrar devolución (PN04). No hay estados "En curso / On Hold" ni email de despacho.
+**Base de datos.**
+- `Pedido` tiene columnas nuevas: FechaEnvioControl, FechaControl, IdEmpleadoControl, FechaSeparacion, FechaFormalizacion, MotivoDesistimiento y EtapaDesistimiento.
+- `PedidoPrenda` suma la columna `Confirmada`.
+- El informe de faltantes se guarda en 3FN, en `PedidoFaltante` y `PedidoFaltanteAlternativa`.
+
+**Casos de uso:**
+- CU01-VEN Armar Pedido y Enviar a Control de Stock;
+- CU02-VEN Consultar Catálogo;
+- CU03-VEN Consultar Situación del Cliente;
+- CU04-DEP Controlar Stock del Pedido;
+- CU05-VEN Comunicar Faltantes, Ajustar o Desistir;
+- CU06-VEN Formalizar Pedido.
+
+**Alcance.** Abarca todo el diagrama de actividad, desde la solicitud hasta la confirmación al cliente.
+**No abarca:** empaque físico, envío con tracking ni email al cliente.
+**Ciclo posterior del pedido formalizado** (`PedidosRealizados`): Despachar → Marcar entregado → Registrar devolución (PN04). Un pedido formalizado todavía se puede cancelar desde Pedidos de Venta (patrón Command).
 
 ---
 
 ### PN02 — Comercialización de la suscripción
 
-**Objetivo.** Que un cliente registrado elija plan y modalidad, se derive el cobro a Caja (separada de quien vendió) y, recién al cobrar, se formalice la suscripción.
-**Actores.** Vendedor (crea la contratación), Caja (cobra), Cliente (externo).
-**Pantallas.** `GUI/NuevaContratacionForm.cs`, `GUI/ContratacionesPendientesForm.cs`.
-**Precondiciones.** Cliente existente (el alta de cliente **no** exige plan); al menos un plan activo.
+**Objetivo.** Que un cliente identificado elija un plan y una modalidad, abone en Caja (separada de quien vendió) y, recién al cobrar, quede vigente su suscripción.
+**Referencia.** Flujo aprobado por la alumna. El diagrama original venía de otro trabajo ("ExperienceHub") y se adaptó a WardrobeFlow:
+- se quitaron "Informar condiciones" y "¿Acepta condiciones?";
+- se agregaron la identificación por DNI, la validación, el descuento único, el referido y los intentos.
 
-**Flujo**
-1. Vendedor: `BLL.Contratacion.CrearContratacion(cliente, plan, modalidad)` → contratación `PendientePago`. La suscripción **aún no está vigente**.
-2. Caja ve la cola (`ObtenerPendientesDePago`) con el **importe a cobrar** (`CalcularImporte`: precio del plan menos un único descuento).
-3. Caja: `ConfirmarPago(medioPago)`:
-   a. revalida contra la BD que siga Pendiente y que el plan siga activo;
-   b. calcula importe y descuento;
-   c. **claim atómico** (`DAL.Contratacion.ConfirmarPago`: `UPDATE ... AND Estado = 0`, devuelve `false` si otra sesión ya la cobró);
-   d. activa la suscripción (`BLL.Cliente.ActivarSuscripcionDesdeContratacion`: Builder + crédito de referido);
-   e. si (d) falla, **compensa** con `ReabrirPago`;
-   f. emite comprobante `CMP-{id:D6}-{yyyyMMdd}` y lo devuelve; bitácora.
-4. Si el intento de cobro no se concreta: `RegistrarIntentoFallido` (UPDATE condicionado a Pendiente); al **3.er intento** la contratación pasa a `Cancelada`.
+**Actores.** Cliente (externo), Vendedor y Caja.
+**Pantallas.**
+- `GUI/NuevaContratacionForm.cs` (Vendedor). También se abre desde Clientes después de un alta.
+- `GUI/ContratacionesPendientesForm.cs` (Caja), con dos vistas: Pendientes y Resueltas, para volver a imprimir.
+
+**Documentos (PDF, Factory Method en `GUI/Exportacion/DocumentosContratacion.cs`):**
+- Planes disponibles;
+- Aviso de desistimiento;
+- Orden de cobro;
+- Liquidación (con los intentos);
+- Comprobante;
+- Constancia de suscripción;
+- Constancia de cancelación.
+
+**Flujo (actividad → método de `BLL/Contratacion.cs`)**
+| Carril | Actividad | Código |
+|---|---|---|
+| Vendedor | Identificar cliente → ¿Registrado? | `IdentificarCliente` (`BLL.Cliente.BuscarPorIdentificacion`). Si no está registrado: "Registrar cliente" (ABM, referente opcional). |
+| Vendedor | Presentar planes («Planes disponibles») | `PresentarPlanes`: planes activos con precio y límite |
+| Cliente/Vendedor | ¿Elige plan y modalidad? No → Asentar desistimiento | `AsentarDesistimiento` → tabla `DesistimientoContratacion` (motivo obligatorio) |
+| Vendedor | Registrar contratación → ¿Contratación válida? | `ValidarContratacion` (consulta) y `RegistrarContratacion`: guarda la contratación PendientePago con el **precio mensual pactado**. Si no es válida, "Informar motivo" queda en la bitácora. |
+| Caja | Consultar cola → Calcular importe («Liquidación») | `ObtenerPendientesDePago`, `CalcularImporte(s)`: precio pactado × meses menos **un** descuento (promoción PN03 o crédito por referido, el mayor) |
+| Cliente/Caja | Abonar → ¿Se concreta el pago? Sí | `ConfirmarCobro(idMedioPago, importeConfirmado)` (ver los pasos debajo de la tabla) |
+| Caja | ¿Se concreta? No → Registrar intento → ¿Máximo de 3? | `RegistrarIntentoFallido(idMedioPago, motivo)`: en una transacción con bloqueo de fila guarda el intento en `ContratacionIntentoPago` y, en el 3.º, **cancela automáticamente** («Constancia de cancelación»). Si no se llegó a 3, la contratación sigue en la cola. |
+
+Pasos de `ConfirmarCobro`:
+1. Revalida el estado, el medio de pago (catálogo `MedioPago`), el plan, el cupo y que el importe sea el confirmado.
+2. **Claim atómico** que emite el comprobante `CMP-NNNNNN-AAAAMMDD`.
+3. Activa la suscripción con el Builder (el período va a continuación del vencimiento vigente).
+4. ¿Referido? Sí: acredita $1000 al referente.
+5. Guarda la vigencia y el referente acreditado («Constancia de suscripción»).
+6. Si la activación falla, **compensa** con `ReabrirPago`.
 
 **Reglas de negocio PN02**
 | # | Regla | Ubicación | T: |
 |---|---|---|---|
-| 1 | La contratación exige cliente existente y plan **activo** | `BLL/Contratacion.cs › CrearContratacion` | `ContratacionTests` (`ClienteInexistente`, `PlanInexistente`, `PlanInactivo`) |
-| 2 | Un cliente no puede tener **dos** contrataciones pendientes | `CrearContratacion` + índice único `UX_Contratacion_UnaPendientePorCliente` | `ContratacionTests › ClienteYaTienePendiente` |
-| 3 | Solo se cobra una contratación **Pendiente de pago** (revalidada contra la BD) | `ConfirmarPago` (`err.bll.contratacion.cobrar_estado`) | `ContratacionTests` |
-| 4 | El medio de pago es obligatorio (texto no vacío; la pantalla ofrece las opciones habituales) | `ConfirmarPago` (`medio_pago_requerido`) | `ContratacionTests` |
-| 5 | Si el plan fue dado de baja antes del cobro se rechaza y la contratación sigue pendiente | `ConfirmarPago` (`err.bll.contratacion.plan_baja`) | `ContratacionTests › PlanDadoDeBaja...` |
-| 6 | **Doble cobro imposible:** solo una sesión de Caja gana el claim | `DAL/Contratacion.cs › ConfirmarPago`; `BLL` (`cobrar_concurrente`) | `ContratacionTests › OtraSesionGanoElClaim...` (con fake; no contra BD real) |
-| 7 | Si la activación falla, la contratación vuelve a Pendiente (nunca queda Pagada sin suscripción) | `ConfirmarPago` + `DAL.ReabrirPago` | `ContratacionTests › FallaLaActivacion_Reabre...`. Si además falla la compensación se deja constancia CRÍTICA en bitácora y Caja recibe `cobro_sin_activar` (`EndurecimientoPn02Pn03Tests`) |
-| 8 | Tercer intento fallido cancela automáticamente | `RegistrarIntentoFallido` (`MaxIntentosPago = 3`); CHECK `IntentosPago 0..3` y el UPDATE de `DAL.IncrementarIntento` respeta el tope (`IntentosPago < 3`; devuelve -1 si ya no está pendiente) | `ContratacionTests` |
-| 9 | Vendedor no cobra y Caja no vende (patentes) | ver §2.3 | `PermisosAccionTests` |
-| 10 | Al activar se acredita el referido (una sola vez) | `BLL/Cliente.cs` | `EndurecimientoPn02Pn03Tests › ActivarSuscripcion_ClienteReferido...` |
-| 11 | El importe cobrado, el descuento y la promoción aplicada **se guardan** en `Contratacion` | `DAL/Contratacion.cs` (columnas `Importe`, `DescuentoAplicado`, `IdPromocion`) | `ContratacionTests` (fake) |
+| 1 | La contratación exige un cliente activo y un plan activo, y que el plan alcance para las prendas en uso | `ValidarContratacion` | `ContratacionTests › ValidarContratacion_*` |
+| 2 | Un cliente no puede tener **dos** contrataciones pendientes | `ValidarContratacion` + índice único `UX_Contratacion_UnaPendientePorCliente` | `ValidarContratacion_ClienteYaTienePendiente_*` |
+| 3 | Desistir exige un motivo; no genera contratación ni cobro | `AsentarDesistimiento`; CHECK `CHK_DesistContr_ModalidadConPlan` | `AsentarDesistimiento_*` |
+| 4 | Caja cobra el **precio pactado** en la orden aunque el plan cambie de precio mientras espera | `Contratacion.PrecioMensual` | `ConfirmarCobro_ElPlanCambioDePrecio_CobraElPrecioPactado` |
+| 5 | Un solo descuento por cobro: el mayor entre la promoción vigente y el crédito por referido | `BE.PoliticaDescuento` | `EndurecimientoPn02Pn03Tests` |
+| 6 | No se cobra un importe distinto del confirmado por Caja | `ConfirmarCobro` (`importe_cambiado`) | `ConfirmarCobro_ImporteDistintoDelConfirmado_*` |
+| 7 | El medio de pago sale del catálogo `MedioPago` (3FN) | `ValidarMedioPago` (`medio_invalido`) | `ConfirmarCobro_MedioDePagoInexistente_*` |
+| 8 | **Doble cobro imposible:** solo una sesión de Caja gana el claim | `DAL.ConfirmarCobro` (`WHERE Estado = 0`) | `ConfirmarCobro_OtraSesion*` |
+| 9 | Si la activación falla, la contratación vuelve a Pendiente; si además no se puede reabrir, se registra un aviso CRÍTICO | `ConfirmarCobro` + `ReabrirPago` | `ConfirmarCobro_FallaLaActivacion_*` |
+| 10 | Cada intento queda registrado (número, medio, motivo, quién); al tercero se cancela automáticamente | `DAL.RegistrarIntentoFallido` (transacción, `UPDLOCK`); CHECK `NroIntento 1..3` | `RegistrarIntentoFallido_*` |
+| 11 | El referido se acredita una sola vez y queda registrado en la contratación | `BLL.Cliente.ActivarSuscripcionInterna`; `Contratacion.IdReferenteAcreditado` | `ConfirmarCobro_ClienteReferido*` |
+| 12 | Máquina de estados: PendientePago → Pagada \| Cancelada; Pagada → PendientePago solo como compensación | `BE.Contratacion.TransicionValida` | `TransicionValida_*` |
+| 13 | El Vendedor no cobra y Caja no vende (patentes) | `PermisosAccion` | `RegistrarContratacion_UsuarioDeCaja_*`, `ConfirmarCobroYRegistrarIntento_UsuarioVendedor_*` |
+| 14 | Con una contratación pendiente no se puede dar de baja al cliente, ni renovar ni cobrar por N01 | `Cliente.Baja`, `Renovacion.Procesar`, `Cobro.Procesar` | `Cliente_Baja_*`, `Renovacion_*`, `Cobro_*` |
+| 15 | Activar una suscripción o corregir el plan sin pasar por Contratación + Caja es exclusivo del Administrador | `Cliente.ActivarSuscripcion`, `PuedeCorregirPlanDirectamente` | `Cliente_ActivarSuscripcion_NoAdministrador_Rechaza` |
 
-**Casos de uso:** CU01-VTA Gestionar Suscripción, CU01-CAJ Gestionar Cobro, CU02-CAJ Emitir Comprobante, CU03-CAJ Cancelar Contratación.
-**Alcance.** Abarca: contratar, cobrar, comprobante numerado, cancelación por intentos, descuento en el cobro.
-**No abarca:** comprobante impreso/PDF, factura fiscal, conciliación con medios de pago reales. El comprobante es solo un número mostrado y guardado (sin entidad propia). El flujo alternativo del referido "en el momento" queda simplificado (§7).
+**Base de datos (3FN).**
+- `MedioPago` es un catálogo y reemplaza el texto libre.
+- `ContratacionIntentoPago` reemplaza al contador derivable `IntentosPago`.
+- Tabla nueva `DesistimientoContratacion`.
+- `Contratacion` suma `IdMedioPago`, `PrecioMensual`, `VigenciaDesde/Hasta` e `IdReferenteAcreditado`.
+- La sección 20c del script migra las bases ya instaladas.
+
+**Casos de uso:**
+- CU01-VTA Gestionar Suscripción;
+- CU02-VTA Asentar Desistimiento;
+- CU01-CAJ Gestionar Cobro;
+- CU02-CAJ Emitir Comprobante;
+- CU03-CAJ Registrar Intento y Cancelar Contratación.
+
+**No abarca:** factura fiscal ni conciliación con medios de pago reales.
 
 ---
 
 ### PN03 — Métricas, promociones y toma de decisiones
 
 **Objetivo.** Convertir los datos del negocio en decisiones comerciales: detectar una oportunidad con un dato, formalizarla,
-aprobar su impacto económico y **aplicarla realmente al cobro**.
-**Actores.** GerenteComercial ("Gerencia"), AdministracionComercial ("Administración"), Contabilidad, Vendedor.
-**Pantallas.** `SugerirPromocionForm`, `PromocionesAdministracionForm` + `AltaPromocionForm`, `PromocionesContabilidadForm`, `PromocionesVigentesForm`; reportes `Analisis*Form`.
+aprobar su impacto económico, **aplicarla al cobro** mientras está vigente y cerrarla (baja, desactivación o vencimiento).
+**Referencia.** Flujo corregido y aprobado por la alumna (salidas faltantes, vigencia con vencimiento, historial y objetos).
+Se mantiene que las promociones por categoría son informativas: no descuentan en el cobro.
 
-**Circuito:** *reporte → sugerencia → Administración → Contabilidad → Vigente → se aplica al cobro.*
-1. **Métricas → idea** (`BLL/AnalisisPromociones.cs › Detectar`, botón "Desde el análisis…" de `SugerirPromocionForm`):
-   - Rotación: ≥2 prendas de una categoría sin pedidos → candidata **por categoría** (monto fijo; beneficio inicial = n × 1000, editable).
-   - Abandono: clientes en riesgo agrupados por plan → candidata **por plan** (porcentaje; beneficio = n × precio del plan = ingreso mensual en riesgo).
-2. **Gerencia** crea la sugerencia (`BLL/SugerenciaPromocion.cs › Crear`, estado Pendiente). Puede partir de una idea del análisis o escribirla a mano.
-3. **Administración** crea la promoción desde la sugerencia o manual (`BLL/Promocion.cs › CrearDesdeSugerencia / CrearManual`) → `EnRevisionContable`; marca la sugerencia Evaluada.
-4. **Contabilidad** aprueba (→ `Vigente`) o rechaza (→ `RechazadaContabilidad`), siempre con observación.
-5. Si se rechazó, **Administración reformula** (`Reformular`, botón "Reformular" en `PromocionesAdministracionForm`) y vuelve a la cola.
-6. **Vendedor** ve las vigentes y puede **sugerir la baja** con motivo (`SugerirBaja` → `BajaSolicitada`); **Administración** la aprueba (→ `Desactivada`) o rechaza con motivo (vuelve a `Vigente` conservando la observación de Contabilidad). Administración también puede desactivar directo.
-7. **Aplicación al cobro:** en el cobro recurrente (`ProcesarPagoHandler`) y en el cobro de contratación (`BLL.Contratacion.ConfirmarPago`) se resuelve el descuento con `BE.PoliticaDescuento.Resolver`.
+**Actores.** Gerencia (rol GerenteComercial), Administración (AdministracionComercial), Contabilidad y Vendedor. El sistema actúa dentro de cada carril.
+**Pantallas.**
+- `GUI/SugerirPromocionForm.cs` (Gerencia): "Analizar métricas…", registrar la sugerencia y reimprimir las registradas.
+- `GUI/PromocionesAdministracionForm.cs` + `GUI/AltaPromocionForm.cs` (Administración): aceptar o descartar sugerencias, crear, reformular, descartar, desactivar y resolver bajas; historial e impresiones.
+- `GUI/PromocionesContabilidadForm.cs` (Contabilidad): análisis de margen e impacto y dictamen.
+- `GUI/PromocionesVigentesForm.cs` (Vendedor): vigentes y con baja pedida; solicitar la baja.
+
+**Documentos (PDF, Factory Method en `GUI/Exportacion/DocumentosPromocion.cs` + `GeneradorDocumentoPromocion.cs`):**
+- Reporte de métricas;
+- Sugerencia de promoción;
+- Ficha de promoción (con su historial de estados);
+- Dictamen contable;
+- Solicitud de baja;
+- Resolución de baja (informe a Gerencia si se aprueba, a Ventas si se rechaza);
+- Constancia de descarte (de sugerencia o de promoción).
+
+**Flujo (actividad → método)**
+| Carril | Actividad | Código |
+|---|---|---|
+| Gerencia | Analizar métricas («Reporte de métricas») | `BLL.AnalisisPromociones.AnalizarMetricas`: abandono por plan (Strategy) y rotación por categoría; arma las oportunidades |
+| Gerencia | ¿Hay oportunidad? No → fin "Sin promoción" | `AnalisisPromociones.HayOportunidad` (`BE.ReporteMetricas.HayOportunidad`) |
+| Gerencia | Registrar sugerencia («Sugerencia de promoción») | `BLL.SugerenciaPromocion.RegistrarSugerencia`: guarda `OrigenMetrica` (Abandono/Rotación/Manual) e `IdUsuarioAlta` |
+| Administración | ¿Acepta la sugerencia? No → Descartar sugerencia | `SugerenciaPromocion.DescartarSugerencia` (motivo obligatorio, claim `Pendiente → Descartada`) |
+| Administración | ¿Acepta? Sí → Crear promoción (o crearla manual) | `BLL.Promocion.CrearDesdeSugerencia` (claim `Pendiente → Evaluada`, compensación `ReabrirEvaluacion`) / `CrearManual` |
+| Sistema | Validar → En revisión contable («Ficha de promoción») | `Promocion.ValidarPromocion` (destino único, valor, fechas); guarda `IdUsuarioAlta` y el historial `— → EnRevisionContable` |
+| Contabilidad | Analizar margen e impacto | `Promocion.AnalizarMargenEImpacto`: beneficio estimado de la sugerencia y promociones Vigentes del mismo plan superpuestas en fechas (advertencia) |
+| Contabilidad | ¿Aprueba? (guarda: quien la creó no la dictamina) | `Promocion.PuedeDictaminar` (`BE.Promocion.PuedeDictaminarla`); `AprobarContable` → Vigente / `RechazarContable` → RechazadaContabilidad, ambas con «Dictamen contable» |
+| Administración | ¿Reformular? Sí → Reformular (vuelve a Validar) | `Promocion.Reformular` (claim `RechazadaContabilidad → EnRevisionContable`) |
+| Administración | ¿Reformular? No → Descartar promoción | `Promocion.DescartarPromocion` (motivo obligatorio → Descartada; «Constancia de descarte») |
+| Vendedor | (a) Solicitar la baja («Solicitud de baja») | `Promocion.SolicitarBaja` (motivo obligatorio → BajaSolicitada) |
+| Administración | ¿Aprueba la baja? Sí / No («Resolución de baja») | `Promocion.AprobarBaja` → Desactivada / `RechazarBaja` (motivo obligatorio) → Vigente |
+| Administración | (b) Desactivar directamente | `Promocion.Desactivar` (motivo obligatorio) |
+| Sistema | (c) Llega la FechaFin → Vencida | `Promocion.CerrarVencidas`, que se ejecuta al consultar las promociones (`ObtenerTodas`, `ObtenerVigentes`, `ObtenerParaVentas`) |
+
+Aplicación al cobro: mientras está **Vigente** y dentro de sus fechas, la promoción entra en `BE.PoliticaDescuento.Resolver`,
+que usan el cobro de contratación (`BLL.Contratacion.CalcularImporte/ConfirmarCobro`, PN02) y el cobro recurrente (`ProcesarPagoHandler`, N01).
+Una promoción con baja solicitada, desactivada, descartada o **vencida** no se aplica.
+
+Cada transición pasa por el DAL como un **claim atómico** (`UPDATE ... WHERE Estado = @esperado`) que, en la misma transacción,
+inserta su fila de `PromocionHistorial` y el objeto que genera (`DictamenContable`, `SolicitudBajaPromocion`).
 
 **Reglas de negocio PN03**
 | # | Regla | Ubicación | T: |
 |---|---|---|---|
-| 1 | Una promoción aplica a **un plan o una categoría, nunca a ambos ni a ninguno** | `BLL/Promocion.cs › ValidarCamposComunes`; CHECK `CHK_Promocion_Destino` | `PromocionTests`, `SugerenciaPromocionTests` |
-| 2 | `Valor > 0`; si es Porcentaje, ≤ 100 | ídem; CHECK `CHK_Promocion_Valor/Porcentaje` | `PromocionTests` |
-| 3 | Fecha fin ≥ fecha inicio | ídem; CHECK `CHK_Promocion_Fechas` | `PromocionTests` |
-| 4 | Toda promoción **nace En Revisión Contable** y no aplica descuento hasta ser aprobada | `CrearInterna`; DEFAULT 0 | `PromocionTests` |
-| 5 | Solo se aprueba/rechaza lo que está En Revisión y con observación obligatoria | `AprobarContable/RechazarContable` | `PromocionTests` |
-| 6 | Solo se sugiere la baja de una **Vigente**, con motivo | `SugerirBaja` | `PromocionTests` |
-| 7 | Solo se resuelve la baja de una **BajaSolicitada**; rechazarla exige motivo y **no pisa** la observación de Contabilidad (`COALESCE`) | `AprobarBaja/RechazarBaja`; `DAL/Promocion.cs › CambiarEstado` | `PromocionTests` |
-| 8 | Una sugerencia ya **evaluada** no se reutiliza | `CrearDesdeSugerencia`: reclamo atómico (`DAL.MarcarEvaluada ... AND Estado = 0`); si la creación falla se compensa con `ReabrirEvaluacion` | `EndurecimientoPn02Pn03Tests › CrearDesdeSugerencia_*` |
-| 9 | Solo una promoción **Rechazada** se puede reformular | `Reformular` (`reformular_estado`) | `EndurecimientoPn02Pn03Tests › Reformular_*` |
-| 10 | Los cambios de estado son atómicos frente a otra sesión (`UPDATE ... WHERE Estado=@esperado`) | `BLL/Promocion.cs › CambiarEstadoOFalla` | `PromocionTests` (con fake) |
-| 11 | **Un solo descuento por ciclo:** compiten la mejor promoción vigente **del plan del cliente** y el crédito por referido; se aplica el **mayor**; si gana la promoción el crédito **no se consume** (queda acumulado; si gana el crédito solo se descuenta lo aplicado y el excedente también queda acumulado); en empate gana la promoción | `BE/PoliticaDescuento.cs › Resolver` | `PoliticaDescuentoTests` (11), `CobroTests`, `ContratacionTests` |
-| 12 | Tipos de descuento: `Porcentaje` (% del bruto), `MontoFijo` (tope = bruto), `PrecioPromocional` (`Valor` = precio **mensual**; el descuento es bruto − `Valor` × meses de la modalidad) | `PoliticaDescuento.DescuentoDe` | `PoliticaDescuentoTests` |
-| 13 | Solo aplican promociones **Vigentes**, dentro de fechas y del **plan** del cliente; las de **categoría son informativas** (no tienen importe donde aplicarse en el cobro de suscripción) | `Promocion.EstaVigente`, `PoliticaDescuento.Resolver` | `PoliticaDescuentoTests` |
+| 1 | Una promoción aplica a **un plan o una categoría, nunca a ambos ni a ninguno** | `Promocion.ValidarPromocion`; CHECK `CHK_Promocion_Destino` | `PromocionTests › CrearManual_AmbosDestinos_*`, `SugerenciaPromocionTests` |
+| 2 | `Valor > 0`; si es Porcentaje, ≤ 100; fecha fin ≥ fecha inicio | ídem; CHECK `CHK_Promocion_Valor/Porcentaje/Fechas` | `PromocionTests › CrearManual_*` |
+| 3 | Sin oportunidad en el reporte, el flujo termina sin promoción; la sugerencia guarda el origen de la métrica y quién la creó | `AnalizarMetricas`, `HayOportunidad`, `RegistrarSugerencia` | `AnalisisPromocionesTests › AnalizarMetricas_*`, `SugerenciaPromocionTests › RegistrarSugerencia_DatosValidosConPlan_*` |
+| 4 | Solo una sugerencia **Pendiente** se acepta o se descarta; descartarla exige motivo | `BE.SugerenciaPromocion.PuedeEvaluarse`; `DAL.Descartar/MarcarEvaluada ... AND Estado = 0` | `SugerenciaPromocionTests › DescartarSugerencia_*`, `EndurecimientoPn02Pn03Tests › CrearDesdeSugerencia_*` |
+| 5 | Toda promoción **nace En Revisión Contable** (tras Validar) y no aplica descuento hasta ser aprobada | `CrearDesdeSugerencia/CrearManual` | `PromocionTests › CrearManual_GuardaElCreadorYEscribeHistorialDeAlta` |
+| 6 | **Quien creó la promoción no puede dictaminarla** (también el Administrador) | `Promocion.PuedeDictaminar`; `IdUsuarioAlta` | `PromocionTests › AprobarContable_QuienCreo*`, `RechazarContable_QuienCreo*` |
+| 7 | El dictamen exige observación y queda guardado (resultado, observación, usuario, fecha) | `AprobarContable/RechazarContable`; tabla `DictamenContable` | `PromocionTests › AprobarContable_GuardaElDictamen*`, `RechazarContable_*` |
+| 8 | Contabilidad ve el beneficio estimado de la sugerencia y las promociones vigentes del mismo plan superpuestas (no impide aprobar) | `AnalizarMargenEImpacto`, `BE.Promocion.SeSuperponeCon` | `PromocionTests › AnalizarMargenEImpacto_*` |
+| 9 | Solo una promoción **Rechazada** se reformula o se descarta; descartar exige motivo | `Reformular`, `DescartarPromocion` | `PromocionTests › DescartarPromocion_*`, `EndurecimientoPn02Pn03Tests › Reformular_*` |
+| 10 | Solo se pide la baja de una **Vigente**, con motivo; la solicitud queda guardada | `SolicitarBaja`; tabla `SolicitudBajaPromocion` (una pendiente por promoción) | `PromocionTests › SolicitarBaja_*` |
+| 11 | Solo se resuelve una **BajaSolicitada**; rechazarla exige motivo; la resolución queda guardada y **no se pierde** el dictamen contable | `AprobarBaja/RechazarBaja` | `PromocionTests › AprobarBaja_*`, `RechazarBaja_*` |
+| 12 | La desactivación directa exige motivo (queda en el historial) | `Desactivar` | `PromocionTests › Desactivar_*` |
+| 13 | Al llegar la FechaFin la promoción pasa a **Vencida** y no se aplica en el cobro | `CerrarVencidas`; `PoliticaDescuento.Resolver` (`!EstaVencida() && EstaVigente()`) | `PromocionTests › CerrarVencidas_*`, `PoliticaDescuentoTests › Resolver_PromocionVencida_NoSeAplica` |
+| 14 | **Cada transición escribe historial** y es atómica frente a otra sesión | `DAL/Promocion.cs` (claim + `PromocionHistorial` en una transacción) | `PromocionTests › RecorridoCompleto_CadaTransicionEscribeSuFilaDeHistorial`, `EndurecimientoPn02Pn03Tests › *_OtraSesion*` |
+| 15 | Máquina de estados: EnRevisión → Vigente \| Rechazada; Rechazada → EnRevisión \| Descartada; Vigente → BajaSolicitada \| Desactivada \| Vencida; BajaSolicitada → Desactivada \| Vigente. Desactivada, Descartada y Vencida son finales | `BE.Promocion.TransicionValida`, `BE.SugerenciaPromocion.TransicionValida` | `PromocionTests › TransicionValida_*` |
+| 16 | **Un solo descuento por ciclo:** compiten la mejor promoción vigente **del plan del cliente** y el crédito por referido; se aplica el **mayor**; si gana la promoción el crédito queda acumulado; en empate gana la promoción | `BE/PoliticaDescuento.cs › Resolver` | `PoliticaDescuentoTests`, `CobroTests`, `ContratacionTests` |
+| 17 | Tipos de descuento: `Porcentaje`, `MontoFijo` (tope = bruto), `PrecioPromocional` (`Valor` = precio **mensual**) | `PoliticaDescuento.DescuentoDe` | `PoliticaDescuentoTests` |
+| 18 | Las promociones por **categoría son informativas** (no descuentan en el cobro de la suscripción) | `PoliticaDescuento.Resolver` (solo `AplicaAPlan`) | `PoliticaDescuentoTests` |
 
-**Casos de uso:** CU01-GER Sugerir Promoción, CU01-ADM Gestionar Promociones, CU01-CONT Analizar Promoción, CU01-VEN Sugerir Baja, CU02-ADM Resolver Baja.
-**Alcance.** Abarca el circuito completo y su aplicación al importe del cobro. **No abarca:** aplicar promociones por categoría a un precio (no hay compra de prenda);
-descuentos acumulables; vigencia automática por calendario más allá de la fecha; el "margen estimado" es solo informativo para Contabilidad.
+**Base de datos (3FN).**
+- `SugerenciaPromocion` suma `OrigenMetrica`, `IdUsuarioAlta`, `MotivoDescarte`, `FechaEvaluacion` y el estado Descartada (2).
+- `Promocion` suma `IdUsuarioAlta` y los estados Descartada (5) y Vencida (6).
+- Tablas nuevas `PromocionHistorial`, `DictamenContable` y `SolicitudBajaPromocion`.
+- `Promocion.Observacion` y `Promocion.MotivoBaja` se migran a esas tablas y se quitan.
+- La sección 20d del script migra las bases ya instaladas.
+
+**Casos de uso:**
+- CU01-GER Sugerir Promoción (incluye CU03-GER Analizar Métricas);
+- CU02-GER Consultar Analítica de Negocio;
+- CU01-ADM Gestionar Promociones (crear desde sugerencia o manual, reformular), extendido por CU03-ADM Descartar Sugerencia y CU04-ADM Descartar Promoción Rechazada;
+- CU05-ADM Desactivar Promoción;
+- CU01-CONT Analizar Promoción;
+- CU01-VEN Solicitar Baja de Promoción;
+- CU02-ADM Resolver Baja de Promoción.
+
+**Alcance.** Abarca todo el diagrama de actividad y su aplicación al importe del cobro. **No abarca:** aplicar promociones por categoría a un precio (no hay compra de prenda);
+descuentos acumulables; el "margen estimado" es solo informativo para Contabilidad.
 Nota de origen: la estructura del circuito (sugerir → crear → aprobar → baja) se adaptó de otro proyecto de la cursada (SIRVI); la regla del descuento único viene de NUULY.
 
 ---
@@ -414,7 +546,8 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
   árbol de permisos, usuarios y datos demo. Migra bases instaladas con versiones previas (renombre de rol, retiro de roles viejos).
 - **Secciones** (numeración histórica): 01 base y núcleo · 05 renovación · 06 menú · 08 cobro · 09–14 analítica (PdN8–13) ·
   15 fidelización (pausa, referidos, cargo) · 16 lista de espera · 17 PN02 · 18 PN03 · 19 PN04 · 20 hardening de integridad ·
-  **20b** importe/promoción en `Contratacion`, CHECKs, índices únicos y de consulta · **21** datos de prueba.
+  **20b** importe/promoción en `Contratacion`, CHECKs, índices únicos y de consulta · **20c** PN02 (medios de pago, intentos, desistimientos) ·
+  **20d** PN03 (historial, dictamen, solicitud de baja, vencimiento) · **21** datos de prueba.
 - **Datos de prueba (sección 21):** 11 clientes en distintos estados de suscripción, 20 prendas (3 En Limpieza, 1 Baja con cargo),
   9 pedidos, 3 contrataciones (2 pendientes, 1 cobrada), 3 promociones y 2 sugerencias en distintos estados, 1 lista de espera, empleados
   vinculados a `caja`/`admin`. Se aplica una sola vez (marca: cliente Julieta Navarro).

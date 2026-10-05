@@ -4,7 +4,7 @@ sequenceDiagram
   participant F as NuevoPedidoForm
   participant B as BLL.Cliente
   participant D as DAL.Cliente
-  V->>F: Ingresa DNI o código y confirma la consulta
+  V->>F: Ingresa DNI, nombre o apellido y elige al cliente
   F->>B: ObtenerEstadoComercial(cliente, prendasSolicitadas)
   B->>D: ObtenerPorId(idCliente)
   D-->>B: cliente (plan, cupo, vencimiento, prendas en uso)

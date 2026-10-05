@@ -19,7 +19,7 @@ namespace GUI
     {
         private static readonly BLL.ControlMapeado _bll = new BLL.ControlMapeado();
 
-        // Caché en memoria de TODOS los mapeos (se recarga sólo cuando cambian, vía InvalidarCache).
+        // Caché en memoria de TODOS los mapeos (la app no los edita: los siembra el script de la base).
         // Evita leer la tabla completa en cada OnLoad de formulario.
         private static List<BE.ControlMapeado> _cacheMapeos;
 
@@ -37,9 +37,6 @@ namespace GUI
             if (_cacheMapeos == null) _cacheMapeos = _bll.ObtenerTodos();
             return _cacheMapeos;
         }
-
-        /// <summary>Invalida la caché de mapeos (llamar tras editar el mapeo de controles).</summary>
-        public static void InvalidarCache() { _cacheMapeos = null; }
 
         /// <summary>Aplica la seguridad de permisos a los controles mapeados de un formulario.</summary>
         public static void AplicarSeguridad(Form form, BE.Usuario usuario)

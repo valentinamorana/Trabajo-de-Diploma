@@ -12,6 +12,9 @@ namespace BLL.Interfaces
         // Registra un cargo Pendiente para la prenda indicada, contra su último cliente conocido.
         void RegistrarCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto, string actor = null);
 
+        // Valida motivo (obligatorio) y monto (mayor a cero); lanza AppException si no cumplen.
+        void ValidarDatos(string motivo, decimal monto);
+
         List<BE.CargoPrenda> ObtenerPendientesPorCliente(int idCliente);
         List<BE.CargoPrenda> ObtenerTodos();
     }

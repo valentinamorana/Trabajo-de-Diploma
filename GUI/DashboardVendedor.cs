@@ -11,9 +11,8 @@ namespace GUI
 {
     public partial class DashboardVendedor : FormBase, IIdiomaObserver
     {
-        private readonly BLL.Interfaces.IPedidoService         _bllPedido  = new BLL.Pedido();
+        private readonly BLL.PanelTareas                       _bllTareas  = new BLL.PanelTareas();
         private readonly BLL.Interfaces.IClienteService        _bllCliente = new BLL.Cliente();
-        private readonly BLL.Interfaces.IPlanSuscripcionService _bllPlan    = new BLL.PlanSuscripcion();
         private readonly BLL.Usuario                            _bllUsuario = new BLL.Usuario();
 
         private System.Windows.Forms.Timer _timer;
@@ -26,7 +25,6 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarEnBackground();
             _timer = new System.Windows.Forms.Timer { Interval = 2 * 60 * 1000 };
@@ -38,7 +36,6 @@ namespace GUI
         {
             _timer?.Stop();
             _timer?.Dispose();
-            GestorIdioma.DesuscribirObservador(this);
             base.OnFormClosing(e);
         }
 
@@ -54,13 +51,14 @@ namespace GUI
             lblTitulo.Text     = Tr("dash.vendedor.titulo", "Panel de Ventas");
             lblSub.Text        = Tr("dash.vendedor.subtitulo", "WardrobeFlow  —  Ventas");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",   "Actualizar");
-            txtPedidos.Text  = Tr("dash.pedidos",  "Pedidos\npendientes");
+            txtPedidos.Text  = Tr("dash.vend.paraatender", "Pedidos\npara atender");
             txtClientes.Text = Tr("dash.clientes", "Clientes\nregistrados");
-            txtPlanes.Text   = Tr("dash.planes",   "Planes\nactivos");
+            txtPlanes.Text   = Tr("dash.vend.encaja",      "Contrataciones\nesperando a Caja");
             txtSuscripciones.Text = Tr("dash.suscripciones", "Suscripciones\npor vencer");
-            lblColPend.Text = Tr("dash.kan.pendiente",  "Pendiente");
-            lblColDesp.Text = Tr("dash.kan.despachado", "Despachado");
-            lblColEntr.Text = Tr("dash.kan.entregado",  "Entregado");
+            // Tablero de PN01: lo que espera a Depósito y lo que tiene que hacer el Vendedor.
+            lblColPend.Text = Tr("dash.kan.encontrol",  "En control de stock");
+            lblColDesp.Text = Tr("dash.kan.faltantes",  "Con faltantes: comunicar");
+            lblColEntr.Text = Tr("dash.kan.separados",  "Separados: formalizar");
         }
 
         private void CargarEnBackground()
@@ -69,16 +67,15 @@ namespace GUI
             {
                 try
                 {
-                    var pedidos  = _bllPedido.ObtenerTodos();
+                    var tareas   = _bllTareas.ObtenerTareasVendedor();
                     var clientes = _bllCliente.ObtenerTodos();
-                    var planes   = _bllPlan.ObtenerActivos();
-                    this.BeginInvoke(new Action(() =>
+                    InvocarSeguro(() =>
                     {
                         if (IsDisposed) return;
-                        ActualizarCards(pedidos, clientes, planes);
-                        ActualizarKanban(pedidos);
+                        ActualizarCards(tareas, clientes);
+                        ActualizarKanban(tareas);
                         ActualizarSesion();
-                    }));
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -87,54 +84,37 @@ namespace GUI
             });
         }
 
-        private void ActualizarCards(List<BE.Pedido> pedidos, List<BE.Cliente> clientes, List<BE.PlanSuscripcion> planes)
+        private bool _clicTarjetaPedidos;
+
+        private void ActualizarCards(BE.TableroVendedor tareas, List<BE.Cliente> clientes)
         {
-            numPedidos.Text  = pedidos.FindAll(p => p.Estado == BE.EstadoPedido.Pendiente).Count.ToString();
+            numPedidos.Text  = tareas.PedidosParaAtender.ToString();
             numClientes.Text = clientes.Count.ToString();
-            numPlanes.Text   = planes.Count.ToString();
-            // Mismo criterio que BLL.PanelAlertas: vencida o vence en los próximos 7 días.
-            numSuscripciones.Text = clientes
-                .Count(c => c.VencimientoExpirado || c.SuscripcionProximaAVencer(7))
-                .ToString();
+            numPlanes.Text   = tareas.ContratacionesEnCaja.ToString();
+            if (!_clicTarjetaPedidos) { HabilitarClicAbrirPedidosVenta(cardPedidos); _clicTarjetaPedidos = true; }
+            // Regla de negocio (vencida o vence en 7 días) en BLL.PanelTareas / BE.Cliente.
+            numSuscripciones.Text = BLL.PanelTareas.ContarSuscripcionesAGestionar(clientes).ToString();
         }
 
-        private void ActualizarKanban(List<BE.Pedido> pedidos)
+        // Cada pedido abre Pedidos de Venta, donde el Vendedor ve los faltantes, ajusta, desiste o
+        // formaliza. Los que están en control de stock son de seguimiento (los atiende Depósito).
+        private void ActualizarKanban(BE.TableroVendedor tareas)
         {
-            colPendiente.Controls.Clear();
-            colDespachado.Controls.Clear();
-            colEntregado.Controls.Clear();
+            Columna(colPendiente,  tareas.EnControlStock, Tema.FondoInfo);
+            Columna(colDespachado, tareas.ConFaltantes,   Tema.FondoError);
+            Columna(colEntregado,  tareas.Separados,      Tema.FondoExito);
+        }
 
+        private void Columna(FlowLayoutPanel col, List<BE.Pedido> pedidos, Color fondo)
+        {
+            col.Controls.Clear();
             foreach (var p in pedidos)
             {
-                int  dias  = p.DiasDesdeAlta;
-                string tit = $"Pedido #{p.IdPedido}";
-                string sub = p.NombreCliente ?? $"Cliente {p.IdCliente}";
-
-                switch (p.Estado)
-                {
-                    case BE.EstadoPedido.Pendiente:
-                        var cardPendiente = CrearCard(tit, sub, dias,
-                            p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
-                        // Solo "Pendiente" es clickeable: abre Pedidos de Venta, permiso que el
-                        // Vendedor siempre tiene (es el único rol que ve este dashboard).
-                        // Despachado/Entregado viven en Pedidos Realizados — permiso que un
-                        // Vendedor base NO tiene (solo lo hereda GerenteComercial) — habilitar
-                        // el clic ahí sería un bypass de permisos, así que quedan solo informativas.
-                        HabilitarClicAbrirPedidosVenta(cardPendiente);
-                        colPendiente.Controls.Add(cardPendiente);
-                        break;
-                    case BE.EstadoPedido.Despachado:
-                        colDespachado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255)));
-                        break;
-                    case BE.EstadoPedido.Entregado:
-                        colEntregado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220)));
-                        break;
-                }
+                var card = CrearCard($"Pedido #{p.IdPedido}", p.NombreCliente ?? $"Cliente {p.IdCliente}", p.DiasDesdeAlta, fondo);
+                HabilitarClicAbrirPedidosVenta(card);
+                col.Controls.Add(card);
             }
-
-            if (colPendiente.Controls.Count  == 0) colPendiente.Controls.Add(CrearVacio());
-            if (colDespachado.Controls.Count == 0) colDespachado.Controls.Add(CrearVacio());
-            if (colEntregado.Controls.Count  == 0) colEntregado.Controls.Add(CrearVacio());
+            if (col.Controls.Count == 0) col.Controls.Add(CrearVacio());
         }
 
         private void ActualizarSesion()
@@ -182,7 +162,7 @@ namespace GUI
         private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
             using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
-                Tema.RosaPrimario, Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
+                Tema.RosaPrimario, Tema.RosaOscuro, LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
 
@@ -234,9 +214,9 @@ namespace GUI
                     pe.Graphics.FillPath(br, path);
             };
             card.Controls.Add(new Label { Text = titulo, Font = new Font("Segoe UI", 8.5f, FontStyle.Bold), AutoSize = true, Location = new Point(8, 6), BackColor = Color.Transparent });
-            card.Controls.Add(new Label { Text = sub, Font = new Font("Segoe UI", 7.5f), AutoSize = false, Size = new Size(164, 16), Location = new Point(8, 24), BackColor = Color.Transparent, ForeColor = Color.FromArgb(70, 70, 80) });
+            card.Controls.Add(new Label { Text = sub, Font = new Font("Segoe UI", 7.5f), AutoSize = false, Size = new Size(164, 16), Location = new Point(8, 24), BackColor = Color.Transparent, ForeColor = Tema.TextoSecundario });
             string dStr = dias == 0 ? "hoy" : $"hace {dias}d";
-            card.Controls.Add(new Label { Text = dStr, Font = new Font("Segoe UI", 7f, FontStyle.Italic), AutoSize = true, Location = new Point(8, 44), BackColor = Color.Transparent, ForeColor = Color.FromArgb(120, 100, 110) });
+            card.Controls.Add(new Label { Text = dStr, Font = new Font("Segoe UI", 7f, FontStyle.Italic), AutoSize = true, Location = new Point(8, 44), BackColor = Color.Transparent, ForeColor = Tema.TextoMuted });
             return card;
         }
 

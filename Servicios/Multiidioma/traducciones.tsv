@@ -5409,6 +5409,1502 @@ EN	btn.reportarperdida	Report Lost
 RU	btn.reportarperdida	Сообщить о потере
 PT	btn.reportarperdida	Reportar Perdida
 ES	err.dal.prenda.estado_cambio	El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.
+ES	paso1.identificar	Paso 1 de 2 — Identificar al cliente
+ES	paso.ajuste.texto	Ajustar selección del Pedido #{0}
+ES	frm.ajustarpedido	Ajustar selección del pedido
+ES	frm.controlstock	Control de Stock
+ES	mnu.controlstock	Control de Stock
+ES	lbl.ped.identificacion	Identificación del cliente (DNI, nombre o apellido):
+ES	btn.ped.buscar	Buscar
+ES	err.ped.noencontrado	No se encontró ningún cliente con esa identificación. Verificá el DNI, el nombre o el apellido.
+ES	lbl.ped.variascoinc	Hay varios clientes que coinciden: elegí el correcto en la lista.
+ES	lbl.ped.imposible	No se puede continuar:
+ES	lbl.ped.pedidoactivo	Pedido activo:
+ES	lbl.ped.ficha	Cliente: {0}  —  DNI {1}\nPlan: {2} (hasta {3} prendas)  —  Vence: {4}\nPrendas en uso: {5}  —  Último pedido: {6}\nMétodo de pago: {7}  —  Alta: {8}
+ES	lbl.ped.ajuste	Ajustá la selección: las prendas faltantes ya no figuran y las alternativas sugeridas están resaltadas.
+ES	lbl.ped.res.ajustar	El cliente ajusta la selección o desiste.
+ES	lbl.ped.detalle	Detalle de la selección:
+ES	btn.ped.enviarcontrol	Enviar a control de stock
+ES	btn.ped.reenviarcontrol	Reenviar a control de stock
+ES	btn.ped.desistir	Registrar desistimiento
+ES	btn.ped.verfaltantes	Ver faltantes
+ES	btn.ped.ajustar	Ajustar selección
+ES	btn.ped.formalizar	Formalizar pedido
+ES	btn.ped.confirmacion	Confirmación del pedido
+ES	conf.ped.enviar.msg	Enviar a control de stock la selección de {0}:\n\n  • {1}\n\nTotal: {2} prenda(s)\n\nDepósito revisará la disponibilidad. Las prendas no quedan reservadas hasta que las separe.
+ES	conf.ped.enviar.titulo	Enviar a control de stock
+ES	conf.ped.planilla	¿Imprimir la planilla de control de existencias?
+ES	conf.ped.aviso	¿Imprimir el aviso de desistimiento?
+ES	conf.ped.formalizar	¿Formalizar el Pedido #{0} de {1}?\n\nDepósito ya separó las {2} prenda(s). Desde aquí la selección queda cerrada y no admite modificaciones.
+ES	conf.ped.formalizar.titulo	Formalizar pedido
+ES	dlg.desistir.titulo	Asentar desistimiento
+ES	dlg.desistir.prompt	Motivo del desistimiento que comunicó el cliente:
+ES	dlg.desistir.pedido	Motivo del desistimiento — Pedido #{0} ({1}):
+ES	msg.desistir.req	El desistimiento requiere un motivo.
+ES	msg.ped.encontrol	Pedido #{0} enviado a control de stock. Depósito revisará la disponibilidad.
+ES	msg.ped.desistido	Pedido #{0}: desistimiento asentado.
+ES	msg.ped.reenviado	Pedido #{0}: selección ajustada y reenviada a control de stock.
+ES	msg.ped.formalizado	Pedido #{0} formalizado. Queda pendiente de despacho.
+ES	est.encontrol	En control de stock
+ES	est.confaltantes	Con faltantes
+ES	est.separado	Separado
+ES	est.desistido	Desistido
+ES	btn.cs.faltantes	Informar faltantes
+ES	btn.cs.confirmar	Confirmar prendas disponibles
+ES	btn.cs.separar	Separar prendas
+ES	btn.cs.planilla	Imprimir planilla
+ES	col.cs.enviado	Enviado a control
+ES	col.cs.confirmado	Prendas confirmadas
+ES	col.cs.estadoactual	Estado actual
+ES	col.cs.disponible	¿Disponible?
+ES	col.cs.confirmada	Confirmada
+ES	lbl.cs.planilla	Planilla de control de existencias — seleccioná un pedido de la cola
+ES	lbl.cs.planilla.pedido	Planilla de control — Pedido #{0} — {1} — ¿Selección disponible? {2}
+ES	lbl.cs.reservada	Reservada (Lista de Espera)
+ES	lbl.si	Sí
+ES	lbl.no	No
+ES	msg.cs.conteo	{0} pedido(s) para controlar
+ES	msg.cs.yanoencontrol	Este pedido ya no está en control de stock. Se actualiza la cola.
+ES	msg.cs.faltantes	Informe de faltantes del Pedido #{0} emitido: {1} prenda(s). El Vendedor lo comunicará al cliente.
+ES	msg.cs.confirmadas	Pedido #{0}: {1} prenda(s) confirmadas como disponibles. Separalas para reservarlas.
+ES	msg.cs.separadas	Pedido #{0}: prendas separadas. El Vendedor ya puede formalizar el pedido.
+ES	conf.cs.imprimirinforme	¿Imprimir el informe de disponibilidad (faltantes y alternativas)?
+ES	conf.cs.separar	¿Separar las {0} prenda(s) del Pedido #{1} para {2}?\n\nQuedan reservadas (en uso) a nombre del cliente.
+ES	conf.cs.imprimirconstancia	¿Imprimir la constancia de prendas separadas?
+ES	doc.ped.pedido	Pedido
+ES	doc.ped.cliente	Cliente
+ES	doc.ped.vendedor	Vendedor
+ES	doc.ped.fecha	Fecha del pedido
+ES	doc.ped.envio	Enviado a control de stock
+ES	doc.ped.detalle	Detalle de la selección (prenda, talle, color, cantidad):
+ES	doc.ped.unidades	Unidades a controlar:
+ES	doc.ped.disp	[Disponible]
+ES	doc.ped.nodisp	[NO disponible]
+ES	doc.ped.total	Total: {0} prenda(s)
+ES	doc.ped.controlo	Controló
+ES	doc.planilla.titulo	Planilla de control de existencias
+ES	doc.faltantes.titulo	Informe de disponibilidad (faltantes y alternativas)
+ES	doc.faltantes.lista	Prendas no disponibles y alternativas sugeridas:
+ES	doc.faltantes.reservada	reservada por Lista de Espera para otro cliente
+ES	doc.faltantes.estado	estado: {0}
+ES	doc.faltantes.sinalt	Sin alternativas disponibles de la misma categoría y talle.
+ES	doc.separacion.titulo	Constancia de prendas separadas
+ES	doc.separacion.fecha	Prendas separadas el
+ES	doc.separacion.lista	Prendas separadas para el pedido (quedan en uso a nombre del cliente):
+ES	doc.confirmacion.titulo	Confirmación y constancia del pedido
+ES	doc.confirmacion.formalizado	Pedido formalizado el
+ES	doc.confirmacion.cerrada	La selección quedó cerrada y no admite modificaciones.
+ES	doc.desist.titulo	Aviso de desistimiento
+ES	doc.desist.etapa	Desistió por
+ES	doc.desist.etapa.cupo	la selección excede el cupo del plan
+ES	doc.desist.etapa.disp	falta de disponibilidad de prendas
+ES	doc.desist.motivo	Motivo comunicado por el cliente
+ES	tevt.enviocontrol	Envío a control de stock
+ES	tevt.faltantes	Informe de faltantes
+ES	tevt.separacion	Separación de prendas
+ES	tevt.desistimiento	Desistimiento
+ES	alert.pedidos.control	{0} pedido(s) esperando el control de stock de Depósito.
+ES	alert.pedidos.faltantes	{0} pedido(s) con faltantes para comunicar al cliente.
+ES	alert.pedidos.formalizar	{0} pedido(s) con las prendas separadas, listos para formalizar.
+ES	alert.listaespera.reservadas	{0} prenda(s) reservada(s) por Lista de Espera esperando que el cliente pase a retirarlas.
+ES	err.bll.pedido.pedido_activo	{0} ya tiene el pedido #{1} en curso (estado: {2}). No se puede armar otro pedido hasta que ese termine su ciclo.
+ES	err.bll.pedido.desistimiento_sin_exceso	La selección está dentro del cupo del plan: el desistimiento por cupo solo se asienta cuando la selección lo excede.
+ES	err.bll.pedido.desistir_estado	Solo se asienta el desistimiento de un pedido con faltantes informados. Este pedido está '{0}'.
+ES	err.bll.pedido.desistir_sin_motivo	Es obligatorio indicar el motivo del desistimiento que comunicó el cliente.
+ES	err.bll.pedido.ajustar_estado	Solo se ajusta la selección de un pedido con faltantes informados. Este pedido está '{0}'.
+ES	err.bll.pedido.control_estado	Solo se revisa el stock de un pedido enviado a control. Este pedido está '{0}'.
+ES	err.bll.pedido.sin_faltantes	Todas las prendas del Pedido #{0} están disponibles: confirmalas en lugar de informar faltantes.
+ES	err.bll.pedido.hay_faltantes	La prenda '{0}' no está disponible: informá los faltantes en lugar de confirmar.
+ES	err.bll.pedido.sin_confirmar	Confirmá las prendas disponibles del Pedido #{0} antes de separarlas.
+ES	err.bll.pedido.separar_faltantes	Al separar, una o más prendas del Pedido #{0} ya no estaban disponibles. No se reservó nada y se emitió el informe de faltantes para el Vendedor.
+ES	err.bll.pedido.formalizar_estado	Solo se formaliza un pedido con las prendas ya separadas por Depósito. Este pedido está '{0}'.
+ES	err.bll.pedido.inexistente	El Pedido #{0} no existe.
+ES	err.bll.pedido.confirmacion_estado	Solo se prepara la confirmación de un pedido formalizado. Este pedido está '{0}'.
+ES	err.bll.pedido.restaurar_no_permitido	La operación '{0}' es parte del armado del pedido (control de stock) y no se puede revertir desde el historial.
+ES	err.dal.pedido.estado_cambiado	El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.
+ES	err.bll.pedido.transicion_invalida	El Pedido #{0} no puede pasar de '{1}' a '{2}'.
+ES	btn.ped.imprimiraviso	Imprimir aviso
+ES	btn.ped.imprimircupo	Imprimir detalle
+ES	doc.ped.cupo	Plan {0}: {1} prenda(s) seleccionadas + {2} en uso, de {3} permitidas.
+ES	doc.aviso.plan	Plan
+ES	doc.aviso.vence	Vence
+ES	doc.aviso.fecha	Fecha del aviso
+ES	doc.aviso.nocontinua	No se puede armar un pedido nuevo en este momento.
+ES	doc.aviso.activo.titulo	Aviso de pedido activo
+ES	doc.aviso.novigente.titulo	Aviso de suscripción no vigente
+ES	doc.cupo.exceso	La selección excede el cupo del plan en {0} prenda(s).
+ES	doc.cupo.opciones	El cliente puede ajustar la selección o desistir.
+ES	doc.cupo.titulo	Detalle de restricciones de cupo
+ES	doc.confirmadas.lista	Prendas confirmadas como disponibles (pendientes de separar):
+ES	doc.confirmadas.titulo	Detalle de prendas confirmadas
+ES	conf.cs.imprimirconfirmadas	¿Imprimir el detalle de prendas confirmadas?
+ES	err.bll.cliente.baja_contratacion	No se puede dar de baja a {0}: tiene una contratación pendiente de pago. Caja tiene que cobrarla o cancelarla primero.
+ES	err.bll.contratacion.desistir_sin_motivo	Es obligatorio indicar el motivo del desistimiento que comunicó el cliente.
+ES	err.bll.contratacion.intento_sin_motivo	Indicá el motivo por el que no se concretó el pago.
+ES	err.bll.contratacion.medio_invalido	El medio de pago indicado no existe.
+ES	tend.titulo	TENDENCIA DE ACTIVIDAD
+ES	tend.dias	Días analizados
+ES	tend.total	Total de eventos
+ES	tend.promedio	Promedio diario
+ES	tend.diapico	Día de mayor actividad
+ES	tend.diavalle	Día de menor actividad
+ES	tend.detalle	DETALLE POR DÍA
+ES	lbl.contr.vista.pendientes	Pendientes de pago
+ES	lbl.contr.vista.resueltas	Resueltas
+ES	lbl.contr.conteo.resueltas	{0} contratación(es) resuelta(s).
+ES	est.contr.pagada	Pagada
+ES	est.contr.cancelada	Cancelada
+ES	est.contr.pendiente	Pendiente de pago
+ES	msg.contr.referido	Se acreditó el beneficio por referido a {0}.
+ES	conf.contr.imprimircobro	¿Imprimir el comprobante y la constancia de suscripción para el cliente?
+ES	dlg.contr.intento.prompt	Motivo por el que no se concretó el pago (Contratación #{0}, intentos: {1}/{2}).\nAl tercer intento se cancela automáticamente:
+ES	msg.contr.cancelada	Contratación #{0} cancelada: no se concretó el pago en {1} intentos.
+ES	conf.contr.imprimircancelacion	¿Imprimir la constancia de cancelación?
+ES	msg.contr.intento	Intento {0} de {1} registrado para la Contratación #{2}. Sigue en la cola para volver a cobrarla.
+ES	lbl.contr.intentos.titulo	Intentos de cobro — Contratación #{0}
+ES	btn.contr.verintentos	Ver intentos
+ES	btn.contr.imprimirliq	Imprimir liquidación
+ES	btn.contr.imprimircomprobante	Imprimir comprobante
+ES	btn.contr.imprimirconstancia	Imprimir constancia
+ES	modalidad.trimestral	Trimestral
+ES	modalidad.anual	Anual
+ES	modalidad.mensual	Mensual
+ES	doc.contr.numero	Contratación
+ES	doc.contr.plan	Plan
+ES	doc.contr.modalidad	Modalidad
+ES	doc.contr.alta	Registrada el
+ES	doc.contr.bruto	Importe del plan
+ES	doc.contr.descuento	Descuento
+ES	doc.contr.total	Total a cobrar
+ES	doc.contr.undescuento	Se aplica un solo descuento por cobro: el mayor entre la promoción vigente del plan y el crédito por referido.
+ES	doc.contr.planlinea	• {0}: {1:C2} por mes — hasta {2} prenda(s) en simultáneo
+ES	doc.contr.modalidades	Modalidades de cobro: mensual, trimestral (3 meses) o anual (12 meses). Sin permanencia.
+ES	doc.contr.planes.titulo	Planes disponibles
+ES	doc.contr.planconsiderado	Plan considerado
+ES	doc.contr.desist.nota	No se registró ninguna contratación ni se generó un cobro.
+ES	doc.contr.orden.nota	La suscripción queda vigente recién cuando Caja confirma el cobro.
+ES	doc.contr.orden.titulo	Orden de cobro
+ES	doc.contr.intentos	Intentos de cobro fallidos
+ES	doc.contr.liq.titulo	Liquidación
+ES	doc.contr.comprobante	Comprobante
+ES	doc.contr.medio	Medio de pago
+ES	doc.contr.cobro	Cobró
+ES	doc.contr.importe	Importe cobrado
+ES	doc.contr.vigencia	Suscripción vigente desde el {0} hasta el {1}.
+ES	doc.contr.referido	Se acreditó el beneficio por referido a {0}.
+ES	doc.contr.constancia.titulo	Constancia de suscripción
+ES	doc.contr.cancelada	La contratación se canceló el {0} al no concretarse el pago en {1} intentos.
+ES	doc.contr.cancelacion.titulo	Constancia de cancelación
+ES	msg.contr.desistimiento	Desistimiento asentado: el cliente no contrató ningún plan.
+ES	msg.contr.noregistrado	El cliente no está registrado. Registralo para continuar con la contratación.
+ES	lbl.contr.ficha	Cliente: {0}  —  DNI {1}\nPlan actual: {2}  —  Vence: {3}  —  Prendas en uso: {4}
+ES	col.contr.preciomensual	Precio mensual
+ES	col.contr.limite	Límite de prendas
+ES	col.contr.estado	Estado
+ES	col.contr.comprobante	Comprobante
+ES	lbl.contr.importedesc	Importe a abonar en Caja: {0:C2}\n(incluye un descuento de {1:C2}: {2})
+ES	lbl.contr.importe	Importe a abonar en Caja: {0:C2}
+ES	conf.contr.imprimirorden	¿Imprimir la orden de cobro para que el cliente abone en Caja?
+ES	btn.contr.registrarcliente	Registrar cliente
+ES	lbl.contr.planes	Planes disponibles:
+ES	btn.contr.imprimirplanes	Imprimir planes
+ES	lbl.contratacion.modalidad	Modalidad de cobro:
+ES	btn.contr.registrar	Registrar contratación
+ES	btn.contr.desistir	El cliente desiste
+ES	conf.contr.cobro.confirmar	¿Confirmar el cobro de la Contratación #{0}?\n\nCliente: {1}\nPlan: {2}\nMonto: {3:C2}\nMedio de pago: {4}\n\nSe emitirá el comprobante y la suscripción quedará formalizada.
+ES	err.bll.cobro.contratacion_pendiente	{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.
+ES	err.bll.renovacion.contratacion_pendiente	{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.
+ES	alert.contr.pendientes	{0} contratación(es) esperando el cobro de Caja.
+ES	conf.cli.contratar	¿Continuar con la contratación de un plan para este cliente?
+ES	est.formalizado	Formalizado (pendiente de despacho)
+ES	conf.ped.reactivar	¿Reactivar el Pedido #{0} de {1}?\n\nVuelve a control de stock: Depósito revisa otra vez la disponibilidad y separa las prendas.
+ES	conf.ped.reactivar.titulo	Reactivar pedido
+ES	msg.ped.reactivadocontrol	Pedido #{0} reactivado: volvió a control de stock.
+ES	btn.ped.reactivar	Reactivar
+ES	err.bll.contratacion.importe_cambiado	El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Volvé a calcular el importe y confirmá de nuevo.
+ES	err.bll.pedido.estado_cambiado	El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.
+ES	msg.contr.vigencia	Vigente del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}.
+ES	col.contr.vigencia	Vigencia
+ES	dash.dep.acontrolar	Pedidos\na controlar
+ES	dash.vend.paraatender	Pedidos\npara atender
+ES	dash.vend.encaja	Contrataciones\nesperando a Caja
+ES	dash.kan.encontrol	En control de stock
+ES	dash.kan.faltantes	Con faltantes: comunicar
+ES	dash.kan.separados	Separados: formalizar
+ES	btn.actualizar	Actualizar
+ES	lbl.permisos.elegiritem	Elegí un ítem:
+ES	lbl.ver.campo.usuario	Usuario
+ES	lbl.ver.campo.nombre	Nombre
+ES	lbl.ver.campo.apellido	Apellido
+ES	lbl.ver.campo.email	Email
+ES	lbl.ver.campo.fechanac	Fecha nac.
+ES	perfil.tamano.chico	Chico
+ES	perfil.tamano.normal	Normal
+ES	perfil.tamano.grande	Grande
+ES	perfil.tema.claro	Claro
+ES	perfil.tema.oscuro	Oscuro
+ES	err.bll.insp.no_en_limpieza	Solo se puede dar de baja con cargo una prenda En Limpieza pendiente de inspección.
+ES	err.bll.insp.no_en_uso	Solo se puede reportar como perdida una prenda En Uso.
+ES	perm.pat.configurarlistadeespera	Configurar Lista de Espera
+ES	err.bll.backup.fuera_de_carpeta	Solo se pueden eliminar archivos de backup de la carpeta de backups del sistema.
+ES	err.bll.cobro.concurrente	Otra sesión ya procesó el cobro de este cliente. Actualizá la lista y verificá su vencimiento.
+ES	err.bll.contratacion.cobra_el_vendedor	Quien registró la contratación no puede cobrarla: el cobro lo confirma otra persona de Caja.
+ES	err.bll.contratacion.motivo_largo	El motivo no puede superar los {0} caracteres.
+ES	err.bll.emergencia.limite	Demasiados intentos fallidos en esta sesión. Reiniciá la aplicación para volver a intentarlo.
+ES	err.bll.familia.patente_nombremenu	No se puede cambiar el identificador de menú de una patente: define qué permiso otorga.
+ES	err.bll.listaespera.estado_cambiado	La anotación cambió en otra sesión. Actualizá la lista y volvé a intentarlo.
+ES	err.bll.pedido.cancelar_estado_separado	Solo se pueden cancelar pedidos Pendientes o con las prendas separadas. Este pedido está '{0}'.
+ES	err.bll.pedido.motivo_largo	El motivo no puede superar los {0} caracteres.
+ES	err.bll.pedido.restaurar_no_restaurable	La operación '{0}' no se puede revertir desde el historial: usá la acción correspondiente del pedido (reactivar, cancelar o registrar la devolución).
+ES	err.bll.pedido.restaurar_no_ultima	Solo se puede revertir la última operación del Pedido #{0} (la #{1}).
+ES	err.bll.permisos.no_verificable	No se pudo verificar tu usuario contra la base de datos. La operación no se ejecutó.
+ES	err.bll.permisos.usuario_no_vigente	Tu usuario fue desactivado o cambió de rol. Cerrá la sesión y volvé a ingresar.
+ES	err.bll.renovacion.pedido_activo	No se puede pausar ni dar de baja la suscripción: el cliente tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo.
+ES	err.bll.usuario.preferencia_ajena	Solo podés cambiar tu propia preferencia de idioma.
+ES	err.dal.pedido.restaurar_prendas	No se puede restaurar el Pedido #{0}: una o más de sus prendas ya no están disponibles para el cliente (las tiene otro pedido, están en limpieza o de baja).
 EN	err.dal.prenda.estado_cambio	The garment's state changed since it was last read. Refresh the screen and try again.
+EN	paso1.identificar	Step 1 of 2 — Identify the client
+EN	paso.ajuste.texto	Adjust selection of Order #{0}
+EN	frm.ajustarpedido	Adjust order selection
+EN	frm.controlstock	Stock Control
+EN	mnu.controlstock	Stock Control
+EN	lbl.ped.identificacion	Client identification (ID number, first or last name):
+EN	btn.ped.buscar	Search
+EN	err.ped.noencontrado	No client was found with that identification. Check the ID number, first name or last name.
+EN	lbl.ped.variascoinc	Several clients match: choose the right one from the list.
+EN	lbl.ped.imposible	Cannot continue:
+EN	lbl.ped.pedidoactivo	Active order:
+EN	lbl.ped.ficha	Client: {0}  —  ID {1}\nPlan: {2} (up to {3} garments)  —  Expires: {4}\nGarments in use: {5}  —  Last order: {6}\nPayment method: {7}  —  Joined: {8}
+EN	lbl.ped.ajuste	Adjust the selection: missing garments are no longer listed and the suggested alternatives are highlighted.
+EN	lbl.ped.res.ajustar	The client adjusts the selection or withdraws.
+EN	lbl.ped.detalle	Selection detail:
+EN	btn.ped.enviarcontrol	Send to stock control
+EN	btn.ped.reenviarcontrol	Resend to stock control
+EN	btn.ped.desistir	Record withdrawal
+EN	btn.ped.verfaltantes	View missing items
+EN	btn.ped.ajustar	Adjust selection
+EN	btn.ped.formalizar	Finalize order
+EN	btn.ped.confirmacion	Order confirmation
+EN	conf.ped.enviar.msg	Send {0}'s selection to stock control:\n\n  • {1}\n\nTotal: {2} garment(s)\n\nWarehouse will check availability. Garments are not reserved until they are set aside.
+EN	conf.ped.enviar.titulo	Send to stock control
+EN	conf.ped.planilla	Print the stock control sheet?
+EN	conf.ped.aviso	Print the withdrawal notice?
+EN	conf.ped.formalizar	Finalize Order #{0} for {1}?\n\nWarehouse already set aside the {2} garment(s). From here on the selection is closed and cannot be modified.
+EN	conf.ped.formalizar.titulo	Finalize order
+EN	dlg.desistir.titulo	Record withdrawal
+EN	dlg.desistir.prompt	Withdrawal reason given by the client:
+EN	dlg.desistir.pedido	Withdrawal reason — Order #{0} ({1}):
+EN	msg.desistir.req	A withdrawal requires a reason.
+EN	msg.ped.encontrol	Order #{0} sent to stock control. Warehouse will check availability.
+EN	msg.ped.desistido	Order #{0}: withdrawal recorded.
+EN	msg.ped.reenviado	Order #{0}: selection adjusted and resent to stock control.
+EN	msg.ped.formalizado	Order #{0} finalized. It is now pending dispatch.
+EN	est.encontrol	In stock control
+EN	est.confaltantes	Missing items
+EN	est.separado	Set aside
+EN	est.desistido	Withdrawn
+EN	btn.cs.faltantes	Report missing items
+EN	btn.cs.confirmar	Confirm available garments
+EN	btn.cs.separar	Set garments aside
+EN	btn.cs.planilla	Print sheet
+EN	col.cs.enviado	Sent to control
+EN	col.cs.confirmado	Garments confirmed
+EN	col.cs.estadoactual	Current status
+EN	col.cs.disponible	Available?
+EN	col.cs.confirmada	Confirmed
+EN	lbl.cs.planilla	Stock control sheet — select an order from the queue
+EN	lbl.cs.planilla.pedido	Control sheet — Order #{0} — {1} — Selection available? {2}
+EN	lbl.cs.reservada	Reserved (Waiting List)
+EN	lbl.si	Yes
+EN	lbl.no	No
+EN	msg.cs.conteo	{0} order(s) to check
+EN	msg.cs.yanoencontrol	This order is no longer in stock control. The queue is refreshed.
+EN	msg.cs.faltantes	Missing-items report for Order #{0} issued: {1} garment(s). The seller will tell the client.
+EN	msg.cs.confirmadas	Order #{0}: {1} garment(s) confirmed as available. Set them aside to reserve them.
+EN	msg.cs.separadas	Order #{0}: garments set aside. The seller can now finalize the order.
+EN	conf.cs.imprimirinforme	Print the availability report (missing items and alternatives)?
+EN	conf.cs.separar	Set aside the {0} garment(s) of Order #{1} for {2}?\n\nThey become reserved (in use) in the client's name.
+EN	conf.cs.imprimirconstancia	Print the set-aside garments receipt?
+EN	doc.ped.pedido	Order
+EN	doc.ped.cliente	Client
+EN	doc.ped.vendedor	Seller
+EN	doc.ped.fecha	Order date
+EN	doc.ped.envio	Sent to stock control
+EN	doc.ped.detalle	Selection detail (garment, size, color, quantity):
+EN	doc.ped.unidades	Units to check:
+EN	doc.ped.disp	[Available]
+EN	doc.ped.nodisp	[NOT available]
+EN	doc.ped.total	Total: {0} garment(s)
+EN	doc.ped.controlo	Checked by
+EN	doc.planilla.titulo	Stock control sheet
+EN	doc.faltantes.titulo	Availability report (missing items and alternatives)
+EN	doc.faltantes.lista	Unavailable garments and suggested alternatives:
+EN	doc.faltantes.reservada	reserved by the Waiting List for another client
+EN	doc.faltantes.estado	status: {0}
+EN	doc.faltantes.sinalt	No available alternatives of the same category and size.
+EN	doc.separacion.titulo	Set-aside garments receipt
+EN	doc.separacion.fecha	Garments set aside on
+EN	doc.separacion.lista	Garments set aside for the order (now in use in the client's name):
+EN	doc.confirmacion.titulo	Order confirmation and receipt
+EN	doc.confirmacion.formalizado	Order finalized on
+EN	doc.confirmacion.cerrada	The selection is closed and cannot be modified.
+EN	doc.desist.titulo	Withdrawal notice
+EN	doc.desist.etapa	Withdrew because of
+EN	doc.desist.etapa.cupo	the selection exceeds the plan limit
+EN	doc.desist.etapa.disp	garments not available
+EN	doc.desist.motivo	Reason given by the client
+EN	tevt.enviocontrol	Sent to stock control
+EN	tevt.faltantes	Missing-items report
+EN	tevt.separacion	Garments set aside
+EN	tevt.desistimiento	Withdrawal
+EN	alert.pedidos.control	{0} order(s) waiting for warehouse stock control.
+EN	alert.pedidos.faltantes	{0} order(s) with missing items to tell the client about.
+EN	alert.pedidos.formalizar	{0} order(s) with garments set aside, ready to finalize.
+EN	alert.listaespera.reservadas	{0} garment(s) reserved by the Waiting List waiting for the client to pick them up.
+EN	err.bll.pedido.pedido_activo	{0} already has order #{1} in progress (status: {2}). Another order cannot be created until that one finishes its cycle.
+EN	err.bll.pedido.desistimiento_sin_exceso	The selection is within the plan limit: a limit-based withdrawal is only recorded when the selection exceeds it.
+EN	err.bll.pedido.desistir_estado	A withdrawal can only be recorded for an order with reported missing items. This order is '{0}'.
+EN	err.bll.pedido.desistir_sin_motivo	You must enter the withdrawal reason given by the client.
+EN	err.bll.pedido.ajustar_estado	Only an order with reported missing items can have its selection adjusted. This order is '{0}'.
+EN	err.bll.pedido.control_estado	Stock can only be checked for an order sent to control. This order is '{0}'.
+EN	err.bll.pedido.sin_faltantes	All garments of Order #{0} are available: confirm them instead of reporting missing items.
+EN	err.bll.pedido.hay_faltantes	Garment '{0}' is not available: report the missing items instead of confirming.
+EN	err.bll.pedido.sin_confirmar	Confirm the available garments of Order #{0} before setting them aside.
+EN	err.bll.pedido.separar_faltantes	While setting aside, one or more garments of Order #{0} were no longer available. Nothing was reserved and a missing-items report was issued for the seller.
+EN	err.bll.pedido.formalizar_estado	Only an order whose garments were set aside by the warehouse can be finalized. This order is '{0}'.
+EN	err.bll.pedido.inexistente	Order #{0} does not exist.
+EN	err.bll.pedido.confirmacion_estado	A confirmation can only be prepared for a finalized order. This order is '{0}'.
+EN	err.bll.pedido.restaurar_no_permitido	Operation '{0}' is part of building the order (stock control) and cannot be reverted from the history.
+EN	err.dal.pedido.estado_cambiado	Order #{0} changed status in another session. Refresh the list and try again.
+EN	err.bll.pedido.transicion_invalida	Order #{0} cannot go from '{1}' to '{2}'.
+EN	btn.ped.imprimiraviso	Print notice
+EN	btn.ped.imprimircupo	Print detail
+EN	doc.ped.cupo	Plan {0}: {1} garment(s) selected + {2} in use, out of {3} allowed.
+EN	doc.aviso.plan	Plan
+EN	doc.aviso.vence	Expires
+EN	doc.aviso.fecha	Notice date
+EN	doc.aviso.nocontinua	A new order cannot be created at this time.
+EN	doc.aviso.activo.titulo	Active order notice
+EN	doc.aviso.novigente.titulo	Inactive subscription notice
+EN	doc.cupo.exceso	The selection exceeds the plan limit by {0} garment(s).
+EN	doc.cupo.opciones	The client can adjust the selection or withdraw.
+EN	doc.cupo.titulo	Plan limit restrictions
+EN	doc.confirmadas.lista	Garments confirmed as available (pending set-aside):
+EN	doc.confirmadas.titulo	Confirmed garments detail
+EN	conf.cs.imprimirconfirmadas	Print the confirmed garments detail?
+EN	err.bll.cliente.baja_contratacion	{0} cannot be removed: they have a contract pending payment. Cashier must charge or cancel it first.
+EN	err.bll.contratacion.desistir_sin_motivo	You must enter the withdrawal reason given by the client.
+EN	err.bll.contratacion.intento_sin_motivo	Enter the reason why the payment did not go through.
+EN	err.bll.contratacion.medio_invalido	The selected payment method does not exist.
+EN	tend.titulo	ACTIVITY TREND
+EN	tend.dias	Days analyzed
+EN	tend.total	Total events
+EN	tend.promedio	Daily average
+EN	tend.diapico	Busiest day
+EN	tend.diavalle	Quietest day
+EN	tend.detalle	DETAIL BY DAY
+EN	lbl.contr.vista.pendientes	Pending payment
+EN	lbl.contr.vista.resueltas	Resolved
+EN	lbl.contr.conteo.resueltas	{0} contract(s) resolved.
+EN	est.contr.pagada	Paid
+EN	est.contr.cancelada	Cancelled
+EN	est.contr.pendiente	Pending payment
+EN	msg.contr.referido	The referral benefit was credited to {0}.
+EN	conf.contr.imprimircobro	Print the receipt and the subscription certificate for the client?
+EN	dlg.contr.intento.prompt	Reason why the payment did not go through (Contract #{0}, attempts: {1}/{2}).\nOn the third attempt it is cancelled automatically:
+EN	msg.contr.cancelada	Contract #{0} cancelled: payment did not go through in {1} attempts.
+EN	conf.contr.imprimircancelacion	Print the cancellation certificate?
+EN	msg.contr.intento	Attempt {0} of {1} recorded for Contract #{2}. It stays in the queue to be charged again.
+EN	lbl.contr.intentos.titulo	Payment attempts — Contract #{0}
+EN	btn.contr.verintentos	View attempts
+EN	btn.contr.imprimirliq	Print statement
+EN	btn.contr.imprimircomprobante	Print receipt
+EN	btn.contr.imprimirconstancia	Print certificate
+EN	modalidad.trimestral	Quarterly
+EN	modalidad.anual	Annual
+EN	modalidad.mensual	Monthly
+EN	doc.contr.numero	Contract
+EN	doc.contr.plan	Plan
+EN	doc.contr.modalidad	Billing frequency
+EN	doc.contr.alta	Registered on
+EN	doc.contr.bruto	Plan amount
+EN	doc.contr.descuento	Discount
+EN	doc.contr.total	Total to charge
+EN	doc.contr.undescuento	Only one discount applies per charge: the greater of the plan's active promotion and the referral credit.
+EN	doc.contr.planlinea	• {0}: {1:C2} per month — up to {2} garment(s) at a time
+EN	doc.contr.modalidades	Billing options: monthly, quarterly (3 months) or annual (12 months). No minimum term.
+EN	doc.contr.planes.titulo	Available plans
+EN	doc.contr.planconsiderado	Plan considered
+EN	doc.contr.desist.nota	No contract was registered and no charge was generated.
+EN	doc.contr.orden.nota	The subscription only becomes active once the cashier confirms the charge.
+EN	doc.contr.orden.titulo	Payment order
+EN	doc.contr.intentos	Failed payment attempts
+EN	doc.contr.liq.titulo	Statement
+EN	doc.contr.comprobante	Receipt
+EN	doc.contr.medio	Payment method
+EN	doc.contr.cobro	Charged by
+EN	doc.contr.importe	Amount charged
+EN	doc.contr.vigencia	Subscription active from {0} to {1}.
+EN	doc.contr.referido	The referral benefit was credited to {0}.
+EN	doc.contr.constancia.titulo	Subscription certificate
+EN	doc.contr.cancelada	The contract was cancelled on {0} because the payment did not go through in {1} attempts.
+EN	doc.contr.cancelacion.titulo	Cancellation certificate
+EN	msg.contr.desistimiento	Withdrawal recorded: the client did not sign up for any plan.
+EN	msg.contr.noregistrado	The client is not registered. Register them to continue with the contract.
+EN	lbl.contr.ficha	Client: {0}  —  ID {1}\nCurrent plan: {2}  —  Expires: {3}  —  Garments in use: {4}
+EN	col.contr.preciomensual	Monthly price
+EN	col.contr.limite	Garment limit
+EN	col.contr.estado	Status
+EN	col.contr.comprobante	Receipt
+EN	lbl.contr.importedesc	Amount to pay at the cashier: {0:C2}\n(includes a {1:C2} discount: {2})
+EN	lbl.contr.importe	Amount to pay at the cashier: {0:C2}
+EN	conf.contr.imprimirorden	Print the payment order so the client can pay at the cashier?
+EN	btn.contr.registrarcliente	Register client
+EN	lbl.contr.planes	Available plans:
+EN	btn.contr.imprimirplanes	Print plans
+EN	lbl.contratacion.modalidad	Billing frequency:
+EN	btn.contr.registrar	Register contract
+EN	btn.contr.desistir	Client withdraws
+EN	conf.contr.cobro.confirmar	Confirm the charge for Contract #{0}?\n\nClient: {1}\nPlan: {2}\nAmount: {3:C2}\nPayment method: {4}\n\nA receipt will be issued and the subscription will be activated.
+EN	err.bll.cobro.contratacion_pendiente	{0} has a contract pending payment: the subscription is set when the cashier charges or cancels it.
+EN	err.bll.renovacion.contratacion_pendiente	{0} has a contract pending payment: the subscription is set when the cashier charges or cancels it.
+EN	alert.contr.pendientes	{0} contract(s) waiting for the cashier to charge them.
+EN	conf.cli.contratar	Continue with a plan contract for this client?
+EN	est.formalizado	Finalized (pending dispatch)
+EN	conf.ped.reactivar	Reactivate Order #{0} for {1}?\n\nIt goes back to stock control: the warehouse checks availability again and sets the garments aside.
+EN	conf.ped.reactivar.titulo	Reactivate order
+EN	msg.ped.reactivadocontrol	Order #{0} reactivated: it went back to stock control.
+EN	btn.ped.reactivar	Reactivate
+EN	err.bll.contratacion.importe_cambiado	The amount to charge changed since the statement ({0:C2} → {1:C2}). Recalculate the amount and confirm again.
+EN	err.bll.pedido.estado_cambiado	Order #{0} changed status in another session. Refresh the list and try again.
+EN	msg.contr.vigencia	Active from {0:dd/MM/yyyy} to {1:dd/MM/yyyy}.
+EN	col.contr.vigencia	Validity
+EN	dash.dep.acontrolar	Orders\nto check
+EN	dash.vend.paraatender	Orders\nto handle
+EN	dash.vend.encaja	Contracts\nwaiting for cashier
+EN	dash.kan.encontrol	In stock control
+EN	dash.kan.faltantes	Missing items: tell the client
+EN	dash.kan.separados	Set aside: finalize
+EN	btn.actualizar	Refresh
+EN	lbl.permisos.elegiritem	Choose an item:
+EN	lbl.ver.campo.usuario	User
+EN	lbl.ver.campo.nombre	First name
+EN	lbl.ver.campo.apellido	Last name
+EN	lbl.ver.campo.email	Email
+EN	lbl.ver.campo.fechanac	Date of birth
+EN	perfil.tamano.chico	Small
+EN	perfil.tamano.normal	Normal
+EN	perfil.tamano.grande	Large
+EN	perfil.tema.claro	Light
+EN	perfil.tema.oscuro	Dark
+EN	err.bll.insp.no_en_limpieza	Only a garment In Cleaning awaiting inspection can be written off with a charge.
+EN	err.bll.insp.no_en_uso	Only a garment In Use can be reported as lost.
+EN	perm.pat.configurarlistadeespera	Configure Waiting List
+EN	err.bll.backup.fuera_de_carpeta	Only backup files in the system backup folder can be deleted.
+EN	err.bll.cobro.concurrente	Another session already processed this customer's charge. Refresh the list and check the expiration date.
+EN	err.bll.contratacion.cobra_el_vendedor	The person who registered the subscription cannot collect it: another Cashier must confirm the payment.
+EN	err.bll.contratacion.motivo_largo	The reason cannot exceed {0} characters.
+EN	err.bll.emergencia.limite	Too many failed attempts in this session. Restart the application to try again.
+EN	err.bll.familia.patente_nombremenu	A permission's menu identifier cannot be changed: it defines which permission it grants.
+EN	err.bll.listaespera.estado_cambiado	The entry was changed in another session. Refresh the list and try again.
+EN	err.bll.pedido.cancelar_estado_separado	Only Pending orders or orders with set-aside garments can be cancelled. This order is '{0}'.
+EN	err.bll.pedido.motivo_largo	The reason cannot exceed {0} characters.
+EN	err.bll.pedido.restaurar_no_restaurable	Operation '{0}' cannot be reverted from the history: use the corresponding order action (reactivate, cancel or register the return).
+EN	err.bll.pedido.restaurar_no_ultima	Only the last operation of Order #{0} can be reverted (#{1}).
+EN	err.bll.permisos.no_verificable	Your user could not be verified against the database. The operation was not performed.
+EN	err.bll.permisos.usuario_no_vigente	Your user was deactivated or its role changed. Log out and sign in again.
+EN	err.bll.renovacion.pedido_activo	The subscription cannot be paused or cancelled: the customer has an order in progress. Wait for it to finish or cancel it.
+EN	err.bll.usuario.preferencia_ajena	You can only change your own language preference.
+EN	err.dal.pedido.restaurar_prendas	Order #{0} cannot be restored: one or more of its garments are no longer available to the customer (another order has them, or they are being cleaned or written off).
 RU	err.dal.prenda.estado_cambio	Состояние вещи изменилось с момента последнего запроса. Обновите экран и повторите попытку.
+RU	paso1.identificar	Шаг 1 из 2 — Идентифицировать клиента
+RU	paso.ajuste.texto	Корректировка выбора заказа №{0}
+RU	frm.ajustarpedido	Корректировка выбора заказа
+RU	frm.controlstock	Контроль запасов
+RU	mnu.controlstock	Контроль запасов
+RU	lbl.ped.identificacion	Идентификация клиента (номер документа, имя или фамилия):
+RU	btn.ped.buscar	Найти
+RU	err.ped.noencontrado	Клиент с такими данными не найден. Проверьте номер документа, имя или фамилию.
+RU	lbl.ped.variascoinc	Найдено несколько клиентов: выберите нужного из списка.
+RU	lbl.ped.imposible	Продолжить невозможно:
+RU	lbl.ped.pedidoactivo	Активный заказ:
+RU	lbl.ped.ficha	Клиент: {0}  —  Документ {1}\nПлан: {2} (до {3} вещей)  —  Истекает: {4}\nВещей в пользовании: {5}  —  Последний заказ: {6}\nСпособ оплаты: {7}  —  Регистрация: {8}
+RU	lbl.ped.ajuste	Скорректируйте выбор: недостающих вещей больше нет в списке, предложенные альтернативы выделены.
+RU	lbl.ped.res.ajustar	Клиент корректирует выбор или отказывается.
+RU	lbl.ped.detalle	Детали выбора:
+RU	btn.ped.enviarcontrol	Отправить на контроль запасов
+RU	btn.ped.reenviarcontrol	Повторно отправить на контроль запасов
+RU	btn.ped.desistir	Зарегистрировать отказ
+RU	btn.ped.verfaltantes	Недостающие вещи
+RU	btn.ped.ajustar	Изменить выбор
+RU	btn.ped.formalizar	Оформить заказ
+RU	btn.ped.confirmacion	Подтверждение заказа
+RU	conf.ped.enviar.msg	Отправить выбор клиента {0} на контроль запасов:\n\n  • {1}\n\nВсего: {2} вещ.\n\nСклад проверит наличие. Вещи не резервируются, пока склад их не отложит.
+RU	conf.ped.enviar.titulo	Отправить на контроль запасов
+RU	conf.ped.planilla	Распечатать лист контроля запасов?
+RU	conf.ped.aviso	Распечатать уведомление об отказе?
+RU	conf.ped.formalizar	Оформить заказ №{0} клиента {1}?\n\nСклад уже отложил {2} вещ. После этого выбор закрывается и не может быть изменён.
+RU	conf.ped.formalizar.titulo	Оформить заказ
+RU	dlg.desistir.titulo	Зарегистрировать отказ
+RU	dlg.desistir.prompt	Причина отказа, указанная клиентом:
+RU	dlg.desistir.pedido	Причина отказа — заказ №{0} ({1}):
+RU	msg.desistir.req	Для отказа нужна причина.
+RU	msg.ped.encontrol	Заказ №{0} отправлен на контроль запасов. Склад проверит наличие.
+RU	msg.ped.desistido	Заказ №{0}: отказ зарегистрирован.
+RU	msg.ped.reenviado	Заказ №{0}: выбор изменён и повторно отправлен на контроль запасов.
+RU	msg.ped.formalizado	Заказ №{0} оформлен и ожидает отправки.
+RU	est.encontrol	На контроле запасов
+RU	est.confaltantes	Есть недостача
+RU	est.separado	Отложен
+RU	est.desistido	Отказ
+RU	btn.cs.faltantes	Сообщить о недостаче
+RU	btn.cs.confirmar	Подтвердить наличие вещей
+RU	btn.cs.separar	Отложить вещи
+RU	btn.cs.planilla	Печать листа
+RU	col.cs.enviado	Отправлен на контроль
+RU	col.cs.confirmado	Вещи подтверждены
+RU	col.cs.estadoactual	Текущее состояние
+RU	col.cs.disponible	В наличии?
+RU	col.cs.confirmada	Подтверждена
+RU	lbl.cs.planilla	Лист контроля запасов — выберите заказ из очереди
+RU	lbl.cs.planilla.pedido	Лист контроля — заказ №{0} — {1} — Выбор в наличии? {2}
+RU	lbl.cs.reservada	Зарезервирована (лист ожидания)
+RU	lbl.si	Да
+RU	lbl.no	Нет
+RU	msg.cs.conteo	Заказов для контроля: {0}
+RU	msg.cs.yanoencontrol	Этот заказ больше не на контроле запасов. Очередь обновлена.
+RU	msg.cs.faltantes	Отчёт о недостаче по заказу №{0} создан: {1} вещ. Продавец сообщит клиенту.
+RU	msg.cs.confirmadas	Заказ №{0}: {1} вещ. подтверждены как доступные. Отложите их, чтобы зарезервировать.
+RU	msg.cs.separadas	Заказ №{0}: вещи отложены. Продавец может оформить заказ.
+RU	conf.cs.imprimirinforme	Распечатать отчёт о наличии (недостача и альтернативы)?
+RU	conf.cs.separar	Отложить {0} вещ. заказа №{1} для {2}?\n\nОни будут зарезервированы (в пользовании) на имя клиента.
+RU	conf.cs.imprimirconstancia	Распечатать акт об отложенных вещах?
+RU	doc.ped.pedido	Заказ
+RU	doc.ped.cliente	Клиент
+RU	doc.ped.vendedor	Продавец
+RU	doc.ped.fecha	Дата заказа
+RU	doc.ped.envio	Отправлен на контроль запасов
+RU	doc.ped.detalle	Детали выбора (вещь, размер, цвет, количество):
+RU	doc.ped.unidades	Единицы для проверки:
+RU	doc.ped.disp	[В наличии]
+RU	doc.ped.nodisp	[НЕТ в наличии]
+RU	doc.ped.total	Всего: {0} вещ.
+RU	doc.ped.controlo	Проверил
+RU	doc.planilla.titulo	Лист контроля запасов
+RU	doc.faltantes.titulo	Отчёт о наличии (недостача и альтернативы)
+RU	doc.faltantes.lista	Недоступные вещи и предложенные альтернативы:
+RU	doc.faltantes.reservada	зарезервирована по листу ожидания для другого клиента
+RU	doc.faltantes.estado	состояние: {0}
+RU	doc.faltantes.sinalt	Нет доступных альтернатив той же категории и размера.
+RU	doc.separacion.titulo	Акт об отложенных вещах
+RU	doc.separacion.fecha	Вещи отложены
+RU	doc.separacion.lista	Вещи, отложенные для заказа (в пользовании на имя клиента):
+RU	doc.confirmacion.titulo	Подтверждение и квитанция заказа
+RU	doc.confirmacion.formalizado	Заказ оформлен
+RU	doc.confirmacion.cerrada	Выбор закрыт и не может быть изменён.
+RU	doc.desist.titulo	Уведомление об отказе
+RU	doc.desist.etapa	Причина отказа
+RU	doc.desist.etapa.cupo	выбор превышает лимит плана
+RU	doc.desist.etapa.disp	отсутствие вещей в наличии
+RU	doc.desist.motivo	Причина, указанная клиентом
+RU	tevt.enviocontrol	Отправка на контроль запасов
+RU	tevt.faltantes	Отчёт о недостаче
+RU	tevt.separacion	Отложены вещи
+RU	tevt.desistimiento	Отказ
+RU	alert.pedidos.control	Заказов, ожидающих контроля запасов на складе: {0}.
+RU	alert.pedidos.faltantes	Заказов с недостачей, о которой нужно сообщить клиенту: {0}.
+RU	alert.pedidos.formalizar	Заказов с отложенными вещами, готовых к оформлению: {0}.
+RU	alert.listaespera.reservadas	Вещей, зарезервированных по листу ожидания и ожидающих клиента: {0}.
+RU	err.bll.pedido.pedido_activo	У клиента {0} уже есть заказ №{1} в работе (состояние: {2}). Новый заказ нельзя создать, пока этот не завершится.
+RU	err.bll.pedido.desistimiento_sin_exceso	Выбор в пределах лимита плана: отказ по лимиту регистрируется только при его превышении.
+RU	err.bll.pedido.desistir_estado	Отказ регистрируется только для заказа с сообщённой недостачей. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.desistir_sin_motivo	Необходимо указать причину отказа, названную клиентом.
+RU	err.bll.pedido.ajustar_estado	Изменить выбор можно только у заказа с сообщённой недостачей. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.control_estado	Проверять запасы можно только для заказа, отправленного на контроль. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.sin_faltantes	Все вещи заказа №{0} в наличии: подтвердите их вместо сообщения о недостаче.
+RU	err.bll.pedido.hay_faltantes	Вещь '{0}' недоступна: сообщите о недостаче вместо подтверждения.
+RU	err.bll.pedido.sin_confirmar	Подтвердите наличие вещей заказа №{0}, прежде чем откладывать их.
+RU	err.bll.pedido.separar_faltantes	При откладывании одна или несколько вещей заказа №{0} оказались недоступны. Ничего не зарезервировано, для продавца создан отчёт о недостаче.
+RU	err.bll.pedido.formalizar_estado	Оформить можно только заказ, вещи которого склад уже отложил. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.inexistente	Заказ №{0} не существует.
+RU	err.bll.pedido.confirmacion_estado	Подтверждение готовится только для оформленного заказа. Состояние этого заказа: '{0}'.
+RU	err.bll.pedido.restaurar_no_permitido	Операция '{0}' — часть формирования заказа (контроль запасов) и не может быть отменена из истории.
+RU	err.dal.pedido.estado_cambiado	Состояние заказа №{0} изменилось в другом сеансе. Обновите список и повторите попытку.
+RU	err.bll.pedido.transicion_invalida	Заказ №{0} не может перейти из '{1}' в '{2}'.
+RU	btn.ped.imprimiraviso	Печать уведомления
+RU	btn.ped.imprimircupo	Печать деталей
+RU	doc.ped.cupo	План {0}: выбрано {1} вещ. + {2} в пользовании, из {3} допустимых.
+RU	doc.aviso.plan	План
+RU	doc.aviso.vence	Истекает
+RU	doc.aviso.fecha	Дата уведомления
+RU	doc.aviso.nocontinua	Сейчас нельзя оформить новый заказ.
+RU	doc.aviso.activo.titulo	Уведомление об активном заказе
+RU	doc.aviso.novigente.titulo	Уведомление о недействующей подписке
+RU	doc.cupo.exceso	Выбор превышает лимит плана на {0} вещ.
+RU	doc.cupo.opciones	Клиент может изменить выбор или отказаться.
+RU	doc.cupo.titulo	Ограничения лимита плана
+RU	doc.confirmadas.lista	Вещи, подтверждённые как доступные (ожидают откладывания):
+RU	doc.confirmadas.titulo	Подтверждённые вещи
+RU	conf.cs.imprimirconfirmadas	Распечатать список подтверждённых вещей?
+RU	err.bll.cliente.baja_contratacion	Нельзя удалить клиента {0}: у него есть договор, ожидающий оплаты. Касса должна сначала принять оплату или отменить его.
+RU	err.bll.contratacion.desistir_sin_motivo	Необходимо указать причину отказа, названную клиентом.
+RU	err.bll.contratacion.intento_sin_motivo	Укажите причину, по которой оплата не прошла.
+RU	err.bll.contratacion.medio_invalido	Указанный способ оплаты не существует.
+RU	tend.titulo	ДИНАМИКА АКТИВНОСТИ
+RU	tend.dias	Проанализировано дней
+RU	tend.total	Всего событий
+RU	tend.promedio	Среднее за день
+RU	tend.diapico	День наибольшей активности
+RU	tend.diavalle	День наименьшей активности
+RU	tend.detalle	ПОДРОБНО ПО ДНЯМ
+RU	lbl.contr.vista.pendientes	Ожидают оплаты
+RU	lbl.contr.vista.resueltas	Завершённые
+RU	lbl.contr.conteo.resueltas	Завершённых договоров: {0}.
+RU	est.contr.pagada	Оплачен
+RU	est.contr.cancelada	Отменён
+RU	est.contr.pendiente	Ожидает оплаты
+RU	msg.contr.referido	Бонус за приглашение начислен клиенту {0}.
+RU	conf.contr.imprimircobro	Распечатать квитанцию и справку о подписке для клиента?
+RU	dlg.contr.intento.prompt	Причина, по которой оплата не прошла (договор №{0}, попыток: {1}/{2}).\nПосле третьей попытки договор отменяется автоматически:
+RU	msg.contr.cancelada	Договор №{0} отменён: оплата не прошла за {1} попытки.
+RU	conf.contr.imprimircancelacion	Распечатать справку об отмене?
+RU	msg.contr.intento	Попытка {0} из {1} зарегистрирована для договора №{2}. Он остаётся в очереди для повторной оплаты.
+RU	lbl.contr.intentos.titulo	Попытки оплаты — договор №{0}
+RU	btn.contr.verintentos	Попытки
+RU	btn.contr.imprimirliq	Печать расчёта
+RU	btn.contr.imprimircomprobante	Печать квитанции
+RU	btn.contr.imprimirconstancia	Печать справки
+RU	modalidad.trimestral	Ежеквартально
+RU	modalidad.anual	Ежегодно
+RU	modalidad.mensual	Ежемесячно
+RU	doc.contr.numero	Договор
+RU	doc.contr.plan	План
+RU	doc.contr.modalidad	Периодичность оплаты
+RU	doc.contr.alta	Зарегистрирован
+RU	doc.contr.bruto	Стоимость плана
+RU	doc.contr.descuento	Скидка
+RU	doc.contr.total	Итого к оплате
+RU	doc.contr.undescuento	К каждой оплате применяется только одна скидка: наибольшая из действующей акции плана и бонуса за приглашение.
+RU	doc.contr.planlinea	• {0}: {1:C2} в месяц — до {2} вещ. одновременно
+RU	doc.contr.modalidades	Варианты оплаты: ежемесячно, ежеквартально (3 месяца) или ежегодно (12 месяцев). Без минимального срока.
+RU	doc.contr.planes.titulo	Доступные планы
+RU	doc.contr.planconsiderado	Рассматриваемый план
+RU	doc.contr.desist.nota	Договор не зарегистрирован, оплата не создана.
+RU	doc.contr.orden.nota	Подписка начинает действовать только после подтверждения оплаты кассой.
+RU	doc.contr.orden.titulo	Распоряжение на оплату
+RU	doc.contr.intentos	Неудачные попытки оплаты
+RU	doc.contr.liq.titulo	Расчёт
+RU	doc.contr.comprobante	Квитанция
+RU	doc.contr.medio	Способ оплаты
+RU	doc.contr.cobro	Принял оплату
+RU	doc.contr.importe	Оплаченная сумма
+RU	doc.contr.vigencia	Подписка действует с {0} по {1}.
+RU	doc.contr.referido	Бонус за приглашение начислен клиенту {0}.
+RU	doc.contr.constancia.titulo	Справка о подписке
+RU	doc.contr.cancelada	Договор отменён {0}: оплата не прошла за {1} попытки.
+RU	doc.contr.cancelacion.titulo	Справка об отмене
+RU	msg.contr.desistimiento	Отказ зарегистрирован: клиент не оформил ни один план.
+RU	msg.contr.noregistrado	Клиент не зарегистрирован. Зарегистрируйте его, чтобы продолжить оформление.
+RU	lbl.contr.ficha	Клиент: {0}  —  Документ {1}\nТекущий план: {2}  —  Истекает: {3}  —  Вещей в пользовании: {4}
+RU	col.contr.preciomensual	Цена в месяц
+RU	col.contr.limite	Лимит вещей
+RU	col.contr.estado	Состояние
+RU	col.contr.comprobante	Квитанция
+RU	lbl.contr.importedesc	Сумма к оплате в кассе: {0:C2}\n(включая скидку {1:C2}: {2})
+RU	lbl.contr.importe	Сумма к оплате в кассе: {0:C2}
+RU	conf.contr.imprimirorden	Распечатать распоряжение на оплату для кассы?
+RU	btn.contr.registrarcliente	Зарегистрировать клиента
+RU	lbl.contr.planes	Доступные планы:
+RU	btn.contr.imprimirplanes	Печать планов
+RU	lbl.contratacion.modalidad	Периодичность оплаты:
+RU	btn.contr.registrar	Оформить договор
+RU	btn.contr.desistir	Клиент отказывается
+RU	conf.contr.cobro.confirmar	Подтвердить оплату договора №{0}?\n\nКлиент: {1}\nПлан: {2}\nСумма: {3:C2}\nСпособ оплаты: {4}\n\nБудет выдана квитанция, подписка будет активирована.
+RU	err.bll.cobro.contratacion_pendiente	У клиента {0} есть договор, ожидающий оплаты: подписка определится, когда касса примет оплату или отменит его.
+RU	err.bll.renovacion.contratacion_pendiente	У клиента {0} есть договор, ожидающий оплаты: подписка определится, когда касса примет оплату или отменит его.
+RU	alert.contr.pendientes	Договоров, ожидающих оплаты в кассе: {0}.
+RU	conf.cli.contratar	Продолжить оформление плана для этого клиента?
+RU	est.formalizado	Оформлен (ожидает отправки)
+RU	conf.ped.reactivar	Возобновить заказ №{0} клиента {1}?\n\nОн вернётся на контроль запасов: склад снова проверит наличие и отложит вещи.
+RU	conf.ped.reactivar.titulo	Возобновить заказ
+RU	msg.ped.reactivadocontrol	Заказ №{0} возобновлён: он вернулся на контроль запасов.
+RU	btn.ped.reactivar	Возобновить
+RU	err.bll.contratacion.importe_cambiado	Сумма к оплате изменилась после расчёта ({0:C2} → {1:C2}). Пересчитайте сумму и подтвердите снова.
+RU	err.bll.pedido.estado_cambiado	Состояние заказа №{0} изменилось в другом сеансе. Обновите список и повторите попытку.
+RU	msg.contr.vigencia	Действует с {0:dd/MM/yyyy} по {1:dd/MM/yyyy}.
+RU	col.contr.vigencia	Срок действия
+RU	dash.dep.acontrolar	Заказы\nна контроль
+RU	dash.vend.paraatender	Заказы\nк обработке
+RU	dash.vend.encaja	Договоры\nожидают кассу
+RU	dash.kan.encontrol	На контроле запасов
+RU	dash.kan.faltantes	Недостача: сообщить
+RU	dash.kan.separados	Отложены: оформить
+RU	btn.actualizar	Обновить
+RU	lbl.permisos.elegiritem	Выберите элемент:
+RU	lbl.ver.campo.usuario	Пользователь
+RU	lbl.ver.campo.nombre	Имя
+RU	lbl.ver.campo.apellido	Фамилия
+RU	lbl.ver.campo.email	Эл. почта
+RU	lbl.ver.campo.fechanac	Дата рожд.
+RU	perfil.tamano.chico	Мелкий
+RU	perfil.tamano.normal	Обычный
+RU	perfil.tamano.grande	Крупный
+RU	perfil.tema.claro	Светлая
+RU	perfil.tema.oscuro	Тёмная
+RU	err.bll.insp.no_en_limpieza	Списать с начислением можно только вещь «В чистке», ожидающую осмотра.
+RU	err.bll.insp.no_en_uso	Сообщить о потере можно только о вещи «В использовании».
+RU	perm.pat.configurarlistadeespera	Настроить лист ожидания
+RU	err.bll.backup.fuera_de_carpeta	Удалять можно только файлы резервных копий из системной папки резервных копий.
+RU	err.bll.cobro.concurrente	Другой сеанс уже провёл оплату этого клиента. Обновите список и проверьте дату окончания.
+RU	err.bll.contratacion.cobra_el_vendedor	Тот, кто оформил подписку, не может принять по ней оплату: оплату подтверждает другой сотрудник кассы.
+RU	err.bll.contratacion.motivo_largo	Причина не может превышать {0} символов.
+RU	err.bll.emergencia.limite	Слишком много неудачных попыток в этом сеансе. Перезапустите приложение, чтобы попробовать снова.
+RU	err.bll.familia.patente_nombremenu	Нельзя изменить идентификатор меню разрешения: он определяет, какое право предоставляется.
+RU	err.bll.listaespera.estado_cambiado	Запись была изменена в другом сеансе. Обновите список и повторите попытку.
+RU	err.bll.pedido.cancelar_estado_separado	Отменить можно только ожидающие заказы или заказы с отложенной одеждой. Этот заказ в состоянии '{0}'.
+RU	err.bll.pedido.motivo_largo	Причина не может превышать {0} символов.
+RU	err.bll.pedido.restaurar_no_restaurable	Операцию '{0}' нельзя отменить из истории: используйте соответствующее действие с заказом (повторно активировать, отменить или зарегистрировать возврат).
+RU	err.bll.pedido.restaurar_no_ultima	Можно отменить только последнюю операцию заказа №{0} (№{1}).
+RU	err.bll.permisos.no_verificable	Не удалось проверить вашего пользователя в базе данных. Операция не выполнена.
+RU	err.bll.permisos.usuario_no_vigente	Ваш пользователь был деактивирован или его роль изменилась. Выйдите и войдите снова.
+RU	err.bll.renovacion.pedido_activo	Нельзя приостановить или отменить подписку: у клиента есть заказ в работе. Дождитесь его завершения или отмените его.
+RU	err.bll.usuario.preferencia_ajena	Вы можете изменить только свои собственные языковые настройки.
+RU	err.dal.pedido.restaurar_prendas	Невозможно восстановить заказ №{0}: одна или несколько вещей больше не доступны клиенту (они в другом заказе, в чистке или списаны).
 PT	err.dal.prenda.estado_cambio	O estado da peça mudou desde a última consulta. Atualize a tela e tente novamente.
+PT	paso1.identificar	Passo 1 de 2 — Identificar o cliente
+PT	paso.ajuste.texto	Ajustar seleção do Pedido #{0}
+PT	frm.ajustarpedido	Ajustar seleção do pedido
+PT	frm.controlstock	Controle de Estoque
+PT	mnu.controlstock	Controle de Estoque
+PT	lbl.ped.identificacion	Identificação do cliente (documento, nome ou sobrenome):
+PT	btn.ped.buscar	Buscar
+PT	err.ped.noencontrado	Nenhum cliente encontrado com essa identificação. Verifique o documento, o nome ou o sobrenome.
+PT	lbl.ped.variascoinc	Há vários clientes que coincidem: escolha o correto na lista.
+PT	lbl.ped.imposible	Não é possível continuar:
+PT	lbl.ped.pedidoactivo	Pedido ativo:
+PT	lbl.ped.ficha	Cliente: {0}  —  Documento {1}\nPlano: {2} (até {3} peças)  —  Vence: {4}\nPeças em uso: {5}  —  Último pedido: {6}\nForma de pagamento: {7}  —  Cadastro: {8}
+PT	lbl.ped.ajuste	Ajuste a seleção: as peças em falta não aparecem mais e as alternativas sugeridas estão destacadas.
+PT	lbl.ped.res.ajustar	O cliente ajusta a seleção ou desiste.
+PT	lbl.ped.detalle	Detalhe da seleção:
+PT	btn.ped.enviarcontrol	Enviar ao controle de estoque
+PT	btn.ped.reenviarcontrol	Reenviar ao controle de estoque
+PT	btn.ped.desistir	Registrar desistência
+PT	btn.ped.verfaltantes	Ver faltantes
+PT	btn.ped.ajustar	Ajustar seleção
+PT	btn.ped.formalizar	Formalizar pedido
+PT	btn.ped.confirmacion	Confirmação do pedido
+PT	conf.ped.enviar.msg	Enviar ao controle de estoque a seleção de {0}:\n\n  • {1}\n\nTotal: {2} peça(s)\n\nO depósito verificará a disponibilidade. As peças só ficam reservadas quando forem separadas.
+PT	conf.ped.enviar.titulo	Enviar ao controle de estoque
+PT	conf.ped.planilla	Imprimir a planilha de controle de estoque?
+PT	conf.ped.aviso	Imprimir o aviso de desistência?
+PT	conf.ped.formalizar	Formalizar o Pedido #{0} de {1}?\n\nO depósito já separou as {2} peça(s). A partir daqui a seleção fica fechada e não admite alterações.
+PT	conf.ped.formalizar.titulo	Formalizar pedido
+PT	dlg.desistir.titulo	Registrar desistência
+PT	dlg.desistir.prompt	Motivo da desistência informado pelo cliente:
+PT	dlg.desistir.pedido	Motivo da desistência — Pedido #{0} ({1}):
+PT	msg.desistir.req	A desistência requer um motivo.
+PT	msg.ped.encontrol	Pedido #{0} enviado ao controle de estoque. O depósito verificará a disponibilidade.
+PT	msg.ped.desistido	Pedido #{0}: desistência registrada.
+PT	msg.ped.reenviado	Pedido #{0}: seleção ajustada e reenviada ao controle de estoque.
+PT	msg.ped.formalizado	Pedido #{0} formalizado. Fica pendente de despacho.
+PT	est.encontrol	Em controle de estoque
+PT	est.confaltantes	Com faltantes
+PT	est.separado	Separado
+PT	est.desistido	Desistido
+PT	btn.cs.faltantes	Informar faltantes
+PT	btn.cs.confirmar	Confirmar peças disponíveis
+PT	btn.cs.separar	Separar peças
+PT	btn.cs.planilla	Imprimir planilha
+PT	col.cs.enviado	Enviado ao controle
+PT	col.cs.confirmado	Peças confirmadas
+PT	col.cs.estadoactual	Estado atual
+PT	col.cs.disponible	Disponível?
+PT	col.cs.confirmada	Confirmada
+PT	lbl.cs.planilla	Planilha de controle de estoque — selecione um pedido da fila
+PT	lbl.cs.planilla.pedido	Planilha de controle — Pedido #{0} — {1} — Seleção disponível? {2}
+PT	lbl.cs.reservada	Reservada (Lista de Espera)
+PT	lbl.si	Sim
+PT	lbl.no	Não
+PT	msg.cs.conteo	{0} pedido(s) para controlar
+PT	msg.cs.yanoencontrol	Este pedido não está mais em controle de estoque. A fila foi atualizada.
+PT	msg.cs.faltantes	Relatório de faltantes do Pedido #{0} emitido: {1} peça(s). O vendedor informará o cliente.
+PT	msg.cs.confirmadas	Pedido #{0}: {1} peça(s) confirmadas como disponíveis. Separe-as para reservá-las.
+PT	msg.cs.separadas	Pedido #{0}: peças separadas. O vendedor já pode formalizar o pedido.
+PT	conf.cs.imprimirinforme	Imprimir o relatório de disponibilidade (faltantes e alternativas)?
+PT	conf.cs.separar	Separar as {0} peça(s) do Pedido #{1} para {2}?\n\nFicam reservadas (em uso) em nome do cliente.
+PT	conf.cs.imprimirconstancia	Imprimir o comprovante de peças separadas?
+PT	doc.ped.pedido	Pedido
+PT	doc.ped.cliente	Cliente
+PT	doc.ped.vendedor	Vendedor
+PT	doc.ped.fecha	Data do pedido
+PT	doc.ped.envio	Enviado ao controle de estoque
+PT	doc.ped.detalle	Detalhe da seleção (peça, tamanho, cor, quantidade):
+PT	doc.ped.unidades	Unidades a controlar:
+PT	doc.ped.disp	[Disponível]
+PT	doc.ped.nodisp	[NÃO disponível]
+PT	doc.ped.total	Total: {0} peça(s)
+PT	doc.ped.controlo	Controlou
+PT	doc.planilla.titulo	Planilha de controle de estoque
+PT	doc.faltantes.titulo	Relatório de disponibilidade (faltantes e alternativas)
+PT	doc.faltantes.lista	Peças indisponíveis e alternativas sugeridas:
+PT	doc.faltantes.reservada	reservada pela Lista de Espera para outro cliente
+PT	doc.faltantes.estado	estado: {0}
+PT	doc.faltantes.sinalt	Sem alternativas disponíveis da mesma categoria e tamanho.
+PT	doc.separacion.titulo	Comprovante de peças separadas
+PT	doc.separacion.fecha	Peças separadas em
+PT	doc.separacion.lista	Peças separadas para o pedido (ficam em uso em nome do cliente):
+PT	doc.confirmacion.titulo	Confirmação e comprovante do pedido
+PT	doc.confirmacion.formalizado	Pedido formalizado em
+PT	doc.confirmacion.cerrada	A seleção ficou fechada e não admite alterações.
+PT	doc.desist.titulo	Aviso de desistência
+PT	doc.desist.etapa	Desistiu por
+PT	doc.desist.etapa.cupo	a seleção excede o limite do plano
+PT	doc.desist.etapa.disp	falta de disponibilidade de peças
+PT	doc.desist.motivo	Motivo informado pelo cliente
+PT	tevt.enviocontrol	Envio ao controle de estoque
+PT	tevt.faltantes	Relatório de faltantes
+PT	tevt.separacion	Separação de peças
+PT	tevt.desistimiento	Desistência
+PT	alert.pedidos.control	{0} pedido(s) aguardando o controle de estoque do depósito.
+PT	alert.pedidos.faltantes	{0} pedido(s) com faltantes para informar ao cliente.
+PT	alert.pedidos.formalizar	{0} pedido(s) com as peças separadas, prontos para formalizar.
+PT	alert.listaespera.reservadas	{0} peça(s) reservada(s) pela Lista de Espera aguardando a retirada pelo cliente.
+PT	err.bll.pedido.pedido_activo	{0} já tem o pedido #{1} em andamento (estado: {2}). Não é possível montar outro pedido até que esse termine seu ciclo.
+PT	err.bll.pedido.desistimiento_sin_exceso	A seleção está dentro do limite do plano: a desistência por limite só é registrada quando a seleção o excede.
+PT	err.bll.pedido.desistir_estado	Só se registra a desistência de um pedido com faltantes informados. Este pedido está '{0}'.
+PT	err.bll.pedido.desistir_sin_motivo	É obrigatório indicar o motivo da desistência informado pelo cliente.
+PT	err.bll.pedido.ajustar_estado	Só se ajusta a seleção de um pedido com faltantes informados. Este pedido está '{0}'.
+PT	err.bll.pedido.control_estado	Só se verifica o estoque de um pedido enviado ao controle. Este pedido está '{0}'.
+PT	err.bll.pedido.sin_faltantes	Todas as peças do Pedido #{0} estão disponíveis: confirme-as em vez de informar faltantes.
+PT	err.bll.pedido.hay_faltantes	A peça '{0}' não está disponível: informe os faltantes em vez de confirmar.
+PT	err.bll.pedido.sin_confirmar	Confirme as peças disponíveis do Pedido #{0} antes de separá-las.
+PT	err.bll.pedido.separar_faltantes	Ao separar, uma ou mais peças do Pedido #{0} já não estavam disponíveis. Nada foi reservado e foi emitido o relatório de faltantes para o vendedor.
+PT	err.bll.pedido.formalizar_estado	Só se formaliza um pedido com as peças já separadas pelo depósito. Este pedido está '{0}'.
+PT	err.bll.pedido.inexistente	O Pedido #{0} não existe.
+PT	err.bll.pedido.confirmacion_estado	Só se prepara a confirmação de um pedido formalizado. Este pedido está '{0}'.
+PT	err.bll.pedido.restaurar_no_permitido	A operação '{0}' faz parte da montagem do pedido (controle de estoque) e não pode ser revertida pelo histórico.
+PT	err.dal.pedido.estado_cambiado	O Pedido #{0} mudou de estado em outra sessão. Atualize a lista e tente novamente.
+PT	err.bll.pedido.transicion_invalida	O Pedido #{0} não pode passar de '{1}' para '{2}'.
+PT	btn.ped.imprimiraviso	Imprimir aviso
+PT	btn.ped.imprimircupo	Imprimir detalhe
+PT	doc.ped.cupo	Plano {0}: {1} peça(s) selecionadas + {2} em uso, de {3} permitidas.
+PT	doc.aviso.plan	Plano
+PT	doc.aviso.vence	Vence
+PT	doc.aviso.fecha	Data do aviso
+PT	doc.aviso.nocontinua	Não é possível montar um novo pedido neste momento.
+PT	doc.aviso.activo.titulo	Aviso de pedido ativo
+PT	doc.aviso.novigente.titulo	Aviso de assinatura não vigente
+PT	doc.cupo.exceso	A seleção excede o limite do plano em {0} peça(s).
+PT	doc.cupo.opciones	O cliente pode ajustar a seleção ou desistir.
+PT	doc.cupo.titulo	Detalhe das restrições de limite
+PT	doc.confirmadas.lista	Peças confirmadas como disponíveis (pendentes de separação):
+PT	doc.confirmadas.titulo	Detalhe das peças confirmadas
+PT	conf.cs.imprimirconfirmadas	Imprimir o detalhe das peças confirmadas?
+PT	err.bll.cliente.baja_contratacion	Não é possível dar baixa em {0}: há uma contratação pendente de pagamento. O caixa precisa cobrá-la ou cancelá-la primeiro.
+PT	err.bll.contratacion.desistir_sin_motivo	É obrigatório indicar o motivo da desistência informado pelo cliente.
+PT	err.bll.contratacion.intento_sin_motivo	Indique o motivo pelo qual o pagamento não foi concluído.
+PT	err.bll.contratacion.medio_invalido	A forma de pagamento indicada não existe.
+PT	tend.titulo	TENDÊNCIA DE ATIVIDADE
+PT	tend.dias	Dias analisados
+PT	tend.total	Total de eventos
+PT	tend.promedio	Média diária
+PT	tend.diapico	Dia de maior atividade
+PT	tend.diavalle	Dia de menor atividade
+PT	tend.detalle	DETALHE POR DIA
+PT	lbl.contr.vista.pendientes	Pendentes de pagamento
+PT	lbl.contr.vista.resueltas	Resolvidas
+PT	lbl.contr.conteo.resueltas	{0} contratação(ões) resolvida(s).
+PT	est.contr.pagada	Paga
+PT	est.contr.cancelada	Cancelada
+PT	est.contr.pendiente	Pendente de pagamento
+PT	msg.contr.referido	O benefício por indicação foi creditado a {0}.
+PT	conf.contr.imprimircobro	Imprimir o comprovante e a constância de assinatura para o cliente?
+PT	dlg.contr.intento.prompt	Motivo pelo qual o pagamento não foi concluído (Contratação #{0}, tentativas: {1}/{2}).\nNa terceira tentativa é cancelada automaticamente:
+PT	msg.contr.cancelada	Contratação #{0} cancelada: o pagamento não foi concluído em {1} tentativas.
+PT	conf.contr.imprimircancelacion	Imprimir a constância de cancelamento?
+PT	msg.contr.intento	Tentativa {0} de {1} registrada para a Contratação #{2}. Continua na fila para ser cobrada novamente.
+PT	lbl.contr.intentos.titulo	Tentativas de cobrança — Contratação #{0}
+PT	btn.contr.verintentos	Ver tentativas
+PT	btn.contr.imprimirliq	Imprimir liquidação
+PT	btn.contr.imprimircomprobante	Imprimir comprovante
+PT	btn.contr.imprimirconstancia	Imprimir constância
+PT	modalidad.trimestral	Trimestral
+PT	modalidad.anual	Anual
+PT	modalidad.mensual	Mensal
+PT	doc.contr.numero	Contratação
+PT	doc.contr.plan	Plano
+PT	doc.contr.modalidad	Modalidade
+PT	doc.contr.alta	Registrada em
+PT	doc.contr.bruto	Valor do plano
+PT	doc.contr.descuento	Desconto
+PT	doc.contr.total	Total a cobrar
+PT	doc.contr.undescuento	Aplica-se um único desconto por cobrança: o maior entre a promoção vigente do plano e o crédito por indicação.
+PT	doc.contr.planlinea	• {0}: {1:C2} por mês — até {2} peça(s) simultâneas
+PT	doc.contr.modalidades	Modalidades de cobrança: mensal, trimestral (3 meses) ou anual (12 meses). Sem fidelidade.
+PT	doc.contr.planes.titulo	Planos disponíveis
+PT	doc.contr.planconsiderado	Plano considerado
+PT	doc.contr.desist.nota	Nenhuma contratação foi registrada nem gerada cobrança.
+PT	doc.contr.orden.nota	A assinatura só fica vigente quando o caixa confirma a cobrança.
+PT	doc.contr.orden.titulo	Ordem de cobrança
+PT	doc.contr.intentos	Tentativas de cobrança sem sucesso
+PT	doc.contr.liq.titulo	Liquidação
+PT	doc.contr.comprobante	Comprovante
+PT	doc.contr.medio	Forma de pagamento
+PT	doc.contr.cobro	Cobrado por
+PT	doc.contr.importe	Valor cobrado
+PT	doc.contr.vigencia	Assinatura vigente de {0} até {1}.
+PT	doc.contr.referido	O benefício por indicação foi creditado a {0}.
+PT	doc.contr.constancia.titulo	Constância de assinatura
+PT	doc.contr.cancelada	A contratação foi cancelada em {0} porque o pagamento não foi concluído em {1} tentativas.
+PT	doc.contr.cancelacion.titulo	Constância de cancelamento
+PT	msg.contr.desistimiento	Desistência registrada: o cliente não contratou nenhum plano.
+PT	msg.contr.noregistrado	O cliente não está cadastrado. Cadastre-o para continuar com a contratação.
+PT	lbl.contr.ficha	Cliente: {0}  —  Documento {1}\nPlano atual: {2}  —  Vence: {3}  —  Peças em uso: {4}
+PT	col.contr.preciomensual	Preço mensal
+PT	col.contr.limite	Limite de peças
+PT	col.contr.estado	Estado
+PT	col.contr.comprobante	Comprovante
+PT	lbl.contr.importedesc	Valor a pagar no caixa: {0:C2}\n(inclui um desconto de {1:C2}: {2})
+PT	lbl.contr.importe	Valor a pagar no caixa: {0:C2}
+PT	conf.contr.imprimirorden	Imprimir a ordem de cobrança para o cliente pagar no caixa?
+PT	btn.contr.registrarcliente	Cadastrar cliente
+PT	lbl.contr.planes	Planos disponíveis:
+PT	btn.contr.imprimirplanes	Imprimir planos
+PT	lbl.contratacion.modalidad	Modalidade de cobrança:
+PT	btn.contr.registrar	Registrar contratação
+PT	btn.contr.desistir	O cliente desiste
+PT	conf.contr.cobro.confirmar	Confirmar a cobrança da Contratação #{0}?\n\nCliente: {1}\nPlano: {2}\nValor: {3:C2}\nForma de pagamento: {4}\n\nO comprovante será emitido e a assinatura será ativada.
+PT	err.bll.cobro.contratacion_pendiente	{0} tem uma contratação pendente de pagamento: a assinatura é definida quando o caixa a cobrar ou cancelar.
+PT	err.bll.renovacion.contratacion_pendiente	{0} tem uma contratação pendente de pagamento: a assinatura é definida quando o caixa a cobrar ou cancelar.
+PT	alert.contr.pendientes	{0} contratação(ões) aguardando a cobrança do caixa.
+PT	conf.cli.contratar	Continuar com a contratação de um plano para este cliente?
+PT	est.formalizado	Formalizado (pendente de despacho)
+PT	conf.ped.reactivar	Reativar o Pedido #{0} de {1}?\n\nVolta ao controle de estoque: o depósito verifica novamente a disponibilidade e separa as peças.
+PT	conf.ped.reactivar.titulo	Reativar pedido
+PT	msg.ped.reactivadocontrol	Pedido #{0} reativado: voltou ao controle de estoque.
+PT	btn.ped.reactivar	Reativar
+PT	err.bll.contratacion.importe_cambiado	O valor a cobrar mudou desde a liquidação ({0:C2} → {1:C2}). Recalcule o valor e confirme novamente.
+PT	err.bll.pedido.estado_cambiado	O Pedido #{0} mudou de estado em outra sessão. Atualize a lista e tente novamente.
+PT	msg.contr.vigencia	Vigente de {0:dd/MM/yyyy} até {1:dd/MM/yyyy}.
+PT	col.contr.vigencia	Vigência
+PT	dash.dep.acontrolar	Pedidos\na controlar
+PT	dash.vend.paraatender	Pedidos\npara atender
+PT	dash.vend.encaja	Contratações\naguardando o caixa
+PT	dash.kan.encontrol	Em controle de estoque
+PT	dash.kan.faltantes	Com faltantes: comunicar
+PT	dash.kan.separados	Separados: formalizar
+PT	btn.actualizar	Atualizar
+PT	lbl.permisos.elegiritem	Escolha um item:
+PT	lbl.ver.campo.usuario	Usuário
+PT	lbl.ver.campo.nombre	Nome
+PT	lbl.ver.campo.apellido	Sobrenome
+PT	lbl.ver.campo.email	E-mail
+PT	lbl.ver.campo.fechanac	Data de nasc.
+PT	perfil.tamano.chico	Pequeno
+PT	perfil.tamano.normal	Normal
+PT	perfil.tamano.grande	Grande
+PT	perfil.tema.claro	Claro
+PT	perfil.tema.oscuro	Escuro
+PT	err.bll.insp.no_en_limpieza	Só é possível dar baixa com cobrança a uma peça Em Limpeza pendente de inspeção.
+PT	err.bll.insp.no_en_uso	Só é possível reportar como perdida uma peça Em Uso.
+PT	perm.pat.configurarlistadeespera	Configurar Lista de Espera
+PT	err.bll.backup.fuera_de_carpeta	Só é possível excluir arquivos de backup da pasta de backups do sistema.
+PT	err.bll.cobro.concurrente	Outra sessão já processou a cobrança deste cliente. Atualize a lista e verifique o vencimento.
+PT	err.bll.contratacion.cobra_el_vendedor	Quem registrou a contratação não pode cobrá-la: o pagamento deve ser confirmado por outra pessoa do Caixa.
+PT	err.bll.contratacion.motivo_largo	O motivo não pode ultrapassar {0} caracteres.
+PT	err.bll.emergencia.limite	Muitas tentativas malsucedidas nesta sessão. Reinicie o aplicativo para tentar novamente.
+PT	err.bll.familia.patente_nombremenu	Não é possível alterar o identificador de menu de uma permissão: ele define qual permissão concede.
+PT	err.bll.listaespera.estado_cambiado	O registro foi alterado em outra sessão. Atualize a lista e tente novamente.
+PT	err.bll.pedido.cancelar_estado_separado	Só é possível cancelar pedidos Pendentes ou com as peças separadas. Este pedido está '{0}'.
+PT	err.bll.pedido.motivo_largo	O motivo não pode ultrapassar {0} caracteres.
+PT	err.bll.pedido.restaurar_no_restaurable	A operação '{0}' não pode ser revertida pelo histórico: use a ação correspondente do pedido (reativar, cancelar ou registrar a devolução).
+PT	err.bll.pedido.restaurar_no_ultima	Só é possível reverter a última operação do Pedido #{0} (a #{1}).
+PT	err.bll.permisos.no_verificable	Não foi possível verificar seu usuário no banco de dados. A operação não foi executada.
+PT	err.bll.permisos.usuario_no_vigente	Seu usuário foi desativado ou mudou de perfil. Encerre a sessão e entre novamente.
+PT	err.bll.renovacion.pedido_activo	Não é possível pausar nem cancelar a assinatura: o cliente tem um pedido em andamento. Aguarde a conclusão ou cancele-o.
+PT	err.bll.usuario.preferencia_ajena	Você só pode alterar sua própria preferência de idioma.
+PT	err.dal.pedido.restaurar_prendas	Não é possível restaurar o Pedido #{0}: uma ou mais peças já não estão disponíveis para o cliente (estão em outro pedido, em limpeza ou baixadas).
+ES	dlg.promo.descartarsug.titulo	Descartar sugerencia
+ES	dlg.promo.descartarsug.prompt	Motivo por el que se descarta la sugerencia #{0}:
+ES	msg.promo.sugdescartada	Sugerencia #{0} descartada.
+ES	conf.promo.imprimirdescarte	¿Imprimir la constancia de descarte?
+ES	conf.promo.imprimirficha	¿Imprimir la ficha de la promoción para Contabilidad?
+ES	dlg.promo.descartar.titulo	Descartar promoción
+ES	dlg.promo.descartar.prompt	Motivo por el que no se reformula la promoción '{0}':
+ES	msg.promo.descartada	Promoción '{0}' descartada.
+ES	dlg.promo.desactivar.titulo	Desactivar promoción
+ES	dlg.promo.desactivar.prompt	Motivo para desactivar la promoción '{0}':
+ES	dlg.promo.aprobarbaja.titulo	Aprobar baja de promoción
+ES	dlg.promo.aprobarbaja.prompt	Ventas pidió la baja de '{0}'.\nMotivo: {1}\n\nObservación de la resolución (opcional):
+ES	conf.promo.imprimirresolucion.gerencia	¿Imprimir la resolución de baja como informe a Gerencia?
+ES	conf.promo.imprimirresolucion.ventas	¿Imprimir la resolución de baja como informe a Ventas?
+ES	lbl.promo.historial.titulo	Historial de estados — Promoción #{0}
+ES	promo.analisis.vacio	Seleccioná una promoción para analizar su margen e impacto.
+ES	promo.analisis.titulo	Análisis de margen e impacto — Promoción #{0} '{1}'
+ES	promo.analisis.margen	Margen estimado: {0:C2} — Impacto: {1}
+ES	promo.analisis.beneficio	Beneficio estimado por Gerencia en la sugerencia #{0}: {1:C2} ({2}).
+ES	promo.analisis.sinsugerencia	Alta manual: no hay beneficio estimado de Gerencia.
+ES	promo.analisis.superpuestas	ADVERTENCIA: se superpone en fechas con otras promociones vigentes del mismo plan:
+ES	promo.analisis.sinsuperposicion	No se superpone con otras promociones vigentes del mismo plan.
+ES	promo.analisis.creador	Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad.
+ES	conf.promo.imprimirdictamen	¿Imprimir el dictamen contable?
+ES	dlg.promo.solicitarbaja.titulo	Solicitar baja de promoción
+ES	conf.promo.imprimirsolicitud	¿Imprimir la solicitud de baja?
+ES	promocion.origenactual	Origen de la sugerencia: {0}
+ES	doc.promo.reporte.titulo	Reporte de métricas
+ES	promocion.btn.imprimirreporte	Imprimir reporte
+ES	conf.promo.imprimirsugerencia	¿Imprimir la sugerencia de promoción?
+ES	doc.promo.ficha.titulo	Ficha de promoción
+ES	doc.promo.dictamen.titulo	Dictamen contable
+ES	doc.promo.solicitud.titulo	Solicitud de baja
+ES	menu.promo.resolucion	Resolución de baja
+ES	doc.promo.constanciadescarte.titulo	Constancia de descarte
+ES	est.promo.enrevision	En revisión contable
+ES	est.promo.vigente	Vigente
+ES	est.promo.rechazada	Rechazada por Contabilidad
+ES	est.promo.bajasolicitada	Baja solicitada
+ES	est.promo.desactivada	Desactivada
+ES	est.promo.descartada	Descartada
+ES	est.promo.vencida	Vencida
+ES	est.sugpromo.evaluada	Aceptada (promoción creada)
+ES	est.sugpromo.descartada	Descartada
+ES	est.sugpromo.pendiente	Pendiente
+ES	origen.metrica.abandono	Abandono por plan
+ES	origen.metrica.rotacion	Rotación por categoría
+ES	origen.metrica.manual	Manual
+ES	tipodesc.porcentaje	Porcentaje
+ES	tipodesc.montofijo	Monto fijo
+ES	tipodesc.preciopromocional	Precio promocional
+ES	doc.promo.plan	Plan
+ES	doc.promo.categoria	Categoría
+ES	doc.promo.promocion	Promoción
+ES	doc.promo.beneficio	Beneficio
+ES	doc.promo.vigencia	Vigencia
+ES	doc.promo.estado	Estado
+ES	doc.promo.fechareporte	Fecha del reporte
+ES	doc.promo.abandonoplan	Abandono por plan (clientes en riesgo):
+ES	doc.promo.sindatos	Sin casos detectados.
+ES	doc.promo.abandonolinea	   • {0}: {1} cliente(s) en riesgo — {2:C2} de ingreso mensual en riesgo
+ES	doc.promo.rotacioncategoria	Rotación por categoría (prendas):
+ES	doc.promo.rotacionlinea	   • {0}: {1} de baja demanda, {2} de alta demanda
+ES	doc.promo.oportunidades	Oportunidades de promoción detectadas:
+ES	doc.promo.beneficioest	Beneficio estimado
+ES	doc.promo.sinoportunidad	¿Hay oportunidad? No: no se detectaron casos para promocionar. Fin sin promoción.
+ES	doc.promo.sugerencia.titulo	Sugerencia de promoción
+ES	doc.promo.sugerencia	Sugerencia
+ES	doc.promo.gerencia	Registrada por (Gerencia)
+ES	doc.promo.origen	Origen de la métrica
+ES	doc.promo.tiposugerido	Tipo de descuento sugerido
+ES	doc.promo.motivo	Motivo
+ES	doc.promo.descartesug	Administración descartó la sugerencia el {0}.
+ES	doc.promo.motivodescarte	Motivo del descarte
+ES	doc.promo.descripcion	Descripción
+ES	doc.promo.margen	Margen estimado
+ES	doc.promo.impacto	Impacto económico
+ES	doc.promo.creadapor	Creada por (Administración)
+ES	doc.promo.origensug	Origen
+ES	doc.promo.desdesugerencia	sugerencia de Gerencia #{0}
+ES	doc.promo.manual	alta manual
+ES	doc.promo.notacategoria	Promoción por categoría: es informativa, no descuenta en el cobro de la suscripción.
+ES	doc.promo.historial	Historial de estados:
+ES	doc.promo.resultado	Resultado
+ES	doc.promo.aprobada	APROBADA — la promoción queda Vigente.
+ES	doc.promo.rechazada	RECHAZADA — vuelve a Administración para reformularla o descartarla.
+ES	doc.promo.observacion	Observación
+ES	doc.promo.contable	Dictaminó (Contabilidad)
+ES	doc.promo.solicito	Solicitó (Ventas)
+ES	doc.promo.solicitud.nota	Mientras Administración resuelve la solicitud, la promoción no se aplica en los cobros.
+ES	doc.promo.destinatario	Destinatario
+ES	doc.promo.agerencia	Gerencia
+ES	doc.promo.aventas	Ventas
+ES	doc.promo.motivosolicitud	Motivo de la solicitud
+ES	doc.promo.bajaaprobada	Baja APROBADA — la promoción quedó Desactivada.
+ES	doc.promo.bajarechazada	Baja RECHAZADA — la promoción sigue Vigente.
+ES	doc.promo.motivoresolucion	Motivo de la resolución
+ES	doc.promo.resolvio	Resolvió (Administración)
+ES	doc.promo.resolucion.gerencia	Resolución de baja — Informe a Gerencia
+ES	doc.promo.resolucion.ventas	Resolución de baja — Informe a Ventas
+ES	doc.promo.descarteprom	Administración descartó la promoción el {0} tras el rechazo contable.
+ES	doc.promo.descartadapor	Descartó
+ES	err.bll.promocion.inexistente	La promoción ya no existe.
+ES	err.bll.promocion.creador_no_dictamina	Quien creó la promoción no puede dictaminarla: la tiene que analizar otro usuario de Contabilidad.
+ES	err.bll.promocion.descartar_estado	Solo se puede descartar una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.
+ES	err.bll.promocion.solicitud_inexistente	La promoción no tiene una solicitud de baja pendiente.
+ES	err.bll.promocion.motivodescarte_requerido	Debe indicar el motivo por el que se descarta la promoción.
+ES	err.bll.promocion.motivodesactivar_requerido	Debe indicar el motivo de la desactivación.
+ES	err.bll.sugerenciapromocion.motivodescarte_requerido	Debe indicar el motivo por el que se descarta la sugerencia.
+ES	promocion.btn.descartarsugerencia	Descartar sugerencia
+ES	promocion.btn.imprimirsugerencia	Imprimir sugerencia
+ES	promocion.btn.descartar	Descartar
+ES	promocion.btn.historial	Historial
+ES	promocion.btn.imprimir	Imprimir ▾
+ES	promocion.btn.solicitarbaja	Solicitar baja
+ES	promocion.btn.analizarmetricas	Analizar métricas…
+ES	promocion.titulosugregistradas	Sugerencias registradas
+ES	col.promo.origen	Origen
+ES	col.promo.sugeridapor	Sugerida por
+ES	col.promo.creadapor	Creada por
+ES	col.promo.fecha	Fecha
+EN	dlg.promo.descartarsug.titulo	Discard suggestion
+EN	dlg.promo.descartarsug.prompt	Reason for discarding suggestion #{0}:
+EN	msg.promo.sugdescartada	Suggestion #{0} discarded.
+EN	conf.promo.imprimirdescarte	Print the discard certificate?
+EN	conf.promo.imprimirficha	Print the promotion sheet for Accounting?
+EN	dlg.promo.descartar.titulo	Discard promotion
+EN	dlg.promo.descartar.prompt	Reason for not reformulating promotion '{0}':
+EN	msg.promo.descartada	Promotion '{0}' discarded.
+EN	dlg.promo.desactivar.titulo	Deactivate promotion
+EN	dlg.promo.desactivar.prompt	Reason for deactivating promotion '{0}':
+EN	dlg.promo.aprobarbaja.titulo	Approve promotion withdrawal
+EN	dlg.promo.aprobarbaja.prompt	Sales requested the withdrawal of '{0}'.\nReason: {1}\n\nResolution note (optional):
+EN	conf.promo.imprimirresolucion.gerencia	Print the withdrawal resolution as a report to Management?
+EN	conf.promo.imprimirresolucion.ventas	Print the withdrawal resolution as a report to Sales?
+EN	lbl.promo.historial.titulo	Status history — Promotion #{0}
+EN	promo.analisis.vacio	Select a promotion to analyze its margin and impact.
+EN	promo.analisis.titulo	Margin and impact analysis — Promotion #{0} '{1}'
+EN	promo.analisis.margen	Estimated margin: {0:C2} — Impact: {1}
+EN	promo.analisis.beneficio	Benefit estimated by Management in suggestion #{0}: {1:C2} ({2}).
+EN	promo.analisis.sinsugerencia	Manual entry: there is no benefit estimated by Management.
+EN	promo.analisis.superpuestas	WARNING: its dates overlap with other active promotions of the same plan:
+EN	promo.analisis.sinsuperposicion	It does not overlap with other active promotions of the same plan.
+EN	promo.analisis.creador	You created this promotion: another Accounting user must rule on it.
+EN	conf.promo.imprimirdictamen	Print the accounting ruling?
+EN	dlg.promo.solicitarbaja.titulo	Request promotion withdrawal
+EN	conf.promo.imprimirsolicitud	Print the withdrawal request?
+EN	promocion.origenactual	Suggestion source: {0}
+EN	doc.promo.reporte.titulo	Metrics report
+EN	promocion.btn.imprimirreporte	Print report
+EN	conf.promo.imprimirsugerencia	Print the promotion suggestion?
+EN	doc.promo.ficha.titulo	Promotion sheet
+EN	doc.promo.dictamen.titulo	Accounting ruling
+EN	doc.promo.solicitud.titulo	Withdrawal request
+EN	menu.promo.resolucion	Withdrawal resolution
+EN	doc.promo.constanciadescarte.titulo	Discard certificate
+EN	est.promo.enrevision	Under accounting review
+EN	est.promo.vigente	Active
+EN	est.promo.rechazada	Rejected by Accounting
+EN	est.promo.bajasolicitada	Withdrawal requested
+EN	est.promo.desactivada	Deactivated
+EN	est.promo.descartada	Discarded
+EN	est.promo.vencida	Expired
+EN	est.sugpromo.evaluada	Accepted (promotion created)
+EN	est.sugpromo.descartada	Discarded
+EN	est.sugpromo.pendiente	Pending
+EN	origen.metrica.abandono	Churn by plan
+EN	origen.metrica.rotacion	Turnover by category
+EN	origen.metrica.manual	Manual
+EN	tipodesc.porcentaje	Percentage
+EN	tipodesc.montofijo	Fixed amount
+EN	tipodesc.preciopromocional	Promotional price
+EN	doc.promo.plan	Plan
+EN	doc.promo.categoria	Category
+EN	doc.promo.promocion	Promotion
+EN	doc.promo.beneficio	Benefit
+EN	doc.promo.vigencia	Validity
+EN	doc.promo.estado	Status
+EN	doc.promo.fechareporte	Report date
+EN	doc.promo.abandonoplan	Churn by plan (customers at risk):
+EN	doc.promo.sindatos	No cases detected.
+EN	doc.promo.abandonolinea	   • {0}: {1} customer(s) at risk — {2:C2} of monthly revenue at risk
+EN	doc.promo.rotacioncategoria	Turnover by category (garments):
+EN	doc.promo.rotacionlinea	   • {0}: {1} low demand, {2} high demand
+EN	doc.promo.oportunidades	Promotion opportunities detected:
+EN	doc.promo.beneficioest	Estimated benefit
+EN	doc.promo.sinoportunidad	Is there an opportunity? No: no cases to promote were detected. End without promotion.
+EN	doc.promo.sugerencia.titulo	Promotion suggestion
+EN	doc.promo.sugerencia	Suggestion
+EN	doc.promo.gerencia	Registered by (Management)
+EN	doc.promo.origen	Metric source
+EN	doc.promo.tiposugerido	Suggested discount type
+EN	doc.promo.motivo	Reason
+EN	doc.promo.descartesug	Administration discarded the suggestion on {0}.
+EN	doc.promo.motivodescarte	Discard reason
+EN	doc.promo.descripcion	Description
+EN	doc.promo.margen	Estimated margin
+EN	doc.promo.impacto	Economic impact
+EN	doc.promo.creadapor	Created by (Administration)
+EN	doc.promo.origensug	Source
+EN	doc.promo.desdesugerencia	Management suggestion #{0}
+EN	doc.promo.manual	manual entry
+EN	doc.promo.notacategoria	Category promotion: informational only, it does not discount the subscription charge.
+EN	doc.promo.historial	Status history:
+EN	doc.promo.resultado	Result
+EN	doc.promo.aprobada	APPROVED — the promotion becomes Active.
+EN	doc.promo.rechazada	REJECTED — it goes back to Administration to be reformulated or discarded.
+EN	doc.promo.observacion	Note
+EN	doc.promo.contable	Ruled by (Accounting)
+EN	doc.promo.solicito	Requested by (Sales)
+EN	doc.promo.solicitud.nota	While Administration resolves the request, the promotion is not applied to charges.
+EN	doc.promo.destinatario	Recipient
+EN	doc.promo.agerencia	Management
+EN	doc.promo.aventas	Sales
+EN	doc.promo.motivosolicitud	Request reason
+EN	doc.promo.bajaaprobada	Withdrawal APPROVED — the promotion was Deactivated.
+EN	doc.promo.bajarechazada	Withdrawal REJECTED — the promotion remains Active.
+EN	doc.promo.motivoresolucion	Resolution reason
+EN	doc.promo.resolvio	Resolved by (Administration)
+EN	doc.promo.resolucion.gerencia	Withdrawal resolution — Report to Management
+EN	doc.promo.resolucion.ventas	Withdrawal resolution — Report to Sales
+EN	doc.promo.descarteprom	Administration discarded the promotion on {0} after the accounting rejection.
+EN	doc.promo.descartadapor	Discarded by
+EN	err.bll.promocion.inexistente	The promotion no longer exists.
+EN	err.bll.promocion.creador_no_dictamina	Whoever created the promotion cannot rule on it: another Accounting user must analyze it.
+EN	err.bll.promocion.descartar_estado	Only a promotion Rejected by Accounting can be discarded. This promotion is '{0}'.
+EN	err.bll.promocion.solicitud_inexistente	The promotion has no pending withdrawal request.
+EN	err.bll.promocion.motivodescarte_requerido	You must state the reason for discarding the promotion.
+EN	err.bll.promocion.motivodesactivar_requerido	You must state the reason for the deactivation.
+EN	err.bll.sugerenciapromocion.motivodescarte_requerido	You must state the reason for discarding the suggestion.
+EN	promocion.btn.descartarsugerencia	Discard suggestion
+EN	promocion.btn.imprimirsugerencia	Print suggestion
+EN	promocion.btn.descartar	Discard
+EN	promocion.btn.historial	History
+EN	promocion.btn.imprimir	Print ▾
+EN	promocion.btn.solicitarbaja	Request withdrawal
+EN	promocion.btn.analizarmetricas	Analyze metrics…
+EN	promocion.titulosugregistradas	Registered suggestions
+EN	col.promo.origen	Source
+EN	col.promo.sugeridapor	Suggested by
+EN	col.promo.creadapor	Created by
+EN	col.promo.fecha	Date
+RU	dlg.promo.descartarsug.titulo	Отклонить предложение
+RU	dlg.promo.descartarsug.prompt	Причина отклонения предложения №{0}:
+RU	msg.promo.sugdescartada	Предложение №{0} отклонено.
+RU	conf.promo.imprimirdescarte	Распечатать справку об отклонении?
+RU	conf.promo.imprimirficha	Распечатать карточку акции для бухгалтерии?
+RU	dlg.promo.descartar.titulo	Отклонить акцию
+RU	dlg.promo.descartar.prompt	Причина, по которой акция '{0}' не переформулируется:
+RU	msg.promo.descartada	Акция '{0}' отклонена.
+RU	dlg.promo.desactivar.titulo	Деактивировать акцию
+RU	dlg.promo.desactivar.prompt	Причина деактивации акции '{0}':
+RU	dlg.promo.aprobarbaja.titulo	Одобрить отмену акции
+RU	dlg.promo.aprobarbaja.prompt	Отдел продаж запросил отмену '{0}'.\nПричина: {1}\n\nКомментарий к решению (необязательно):
+RU	conf.promo.imprimirresolucion.gerencia	Распечатать решение об отмене как отчёт для руководства?
+RU	conf.promo.imprimirresolucion.ventas	Распечатать решение об отмене как отчёт для отдела продаж?
+RU	lbl.promo.historial.titulo	История статусов — акция №{0}
+RU	promo.analisis.vacio	Выберите акцию, чтобы проанализировать её маржу и влияние.
+RU	promo.analisis.titulo	Анализ маржи и влияния — акция №{0} '{1}'
+RU	promo.analisis.margen	Ожидаемая маржа: {0:C2} — Влияние: {1}
+RU	promo.analisis.beneficio	Выгода, оценённая руководством в предложении №{0}: {1:C2} ({2}).
+RU	promo.analisis.sinsugerencia	Создана вручную: оценки выгоды от руководства нет.
+RU	promo.analisis.superpuestas	ВНИМАНИЕ: даты пересекаются с другими действующими акциями того же плана:
+RU	promo.analisis.sinsuperposicion	Не пересекается с другими действующими акциями того же плана.
+RU	promo.analisis.creador	Вы создали эту акцию: решение по ней должен принять другой сотрудник бухгалтерии.
+RU	conf.promo.imprimirdictamen	Распечатать заключение бухгалтерии?
+RU	dlg.promo.solicitarbaja.titulo	Запросить отмену акции
+RU	conf.promo.imprimirsolicitud	Распечатать запрос на отмену?
+RU	promocion.origenactual	Источник предложения: {0}
+RU	doc.promo.reporte.titulo	Отчёт по метрикам
+RU	promocion.btn.imprimirreporte	Печать отчёта
+RU	conf.promo.imprimirsugerencia	Распечатать предложение акции?
+RU	doc.promo.ficha.titulo	Карточка акции
+RU	doc.promo.dictamen.titulo	Заключение бухгалтерии
+RU	doc.promo.solicitud.titulo	Запрос на отмену
+RU	menu.promo.resolucion	Решение об отмене
+RU	doc.promo.constanciadescarte.titulo	Справка об отклонении
+RU	est.promo.enrevision	На проверке бухгалтерии
+RU	est.promo.vigente	Действует
+RU	est.promo.rechazada	Отклонена бухгалтерией
+RU	est.promo.bajasolicitada	Запрошена отмена
+RU	est.promo.desactivada	Деактивирована
+RU	est.promo.descartada	Отклонена
+RU	est.promo.vencida	Истекла
+RU	est.sugpromo.evaluada	Принято (акция создана)
+RU	est.sugpromo.descartada	Отклонено
+RU	est.sugpromo.pendiente	Ожидает
+RU	origen.metrica.abandono	Отток по плану
+RU	origen.metrica.rotacion	Оборачиваемость по категории
+RU	origen.metrica.manual	Вручную
+RU	tipodesc.porcentaje	Процент
+RU	tipodesc.montofijo	Фиксированная сумма
+RU	tipodesc.preciopromocional	Акционная цена
+RU	doc.promo.plan	План
+RU	doc.promo.categoria	Категория
+RU	doc.promo.promocion	Акция
+RU	doc.promo.beneficio	Выгода
+RU	doc.promo.vigencia	Срок действия
+RU	doc.promo.estado	Статус
+RU	doc.promo.fechareporte	Дата отчёта
+RU	doc.promo.abandonoplan	Отток по плану (клиенты в зоне риска):
+RU	doc.promo.sindatos	Случаев не обнаружено.
+RU	doc.promo.abandonolinea	   • {0}: клиентов в зоне риска: {1} — под угрозой {2:C2} ежемесячного дохода
+RU	doc.promo.rotacioncategoria	Оборачиваемость по категории (вещи):
+RU	doc.promo.rotacionlinea	   • {0}: низкий спрос — {1}, высокий спрос — {2}
+RU	doc.promo.oportunidades	Обнаруженные возможности для акций:
+RU	doc.promo.beneficioest	Ожидаемая выгода
+RU	doc.promo.sinoportunidad	Есть возможность? Нет: случаев для продвижения не обнаружено. Завершено без акции.
+RU	doc.promo.sugerencia.titulo	Предложение акции
+RU	doc.promo.sugerencia	Предложение
+RU	doc.promo.gerencia	Зарегистрировано (руководство)
+RU	doc.promo.origen	Источник метрики
+RU	doc.promo.tiposugerido	Предлагаемый тип скидки
+RU	doc.promo.motivo	Причина
+RU	doc.promo.descartesug	Администрация отклонила предложение {0}.
+RU	doc.promo.motivodescarte	Причина отклонения
+RU	doc.promo.descripcion	Описание
+RU	doc.promo.margen	Ожидаемая маржа
+RU	doc.promo.impacto	Экономическое влияние
+RU	doc.promo.creadapor	Создано (администрация)
+RU	doc.promo.origensug	Источник
+RU	doc.promo.desdesugerencia	предложение руководства №{0}
+RU	doc.promo.manual	создана вручную
+RU	doc.promo.notacategoria	Акция по категории: носит информационный характер и не снижает оплату подписки.
+RU	doc.promo.historial	История статусов:
+RU	doc.promo.resultado	Результат
+RU	doc.promo.aprobada	ОДОБРЕНО — акция начинает действовать.
+RU	doc.promo.rechazada	ОТКЛОНЕНО — возвращается в администрацию для переформулирования или отклонения.
+RU	doc.promo.observacion	Комментарий
+RU	doc.promo.contable	Заключение дал (бухгалтерия)
+RU	doc.promo.solicito	Запросил (продажи)
+RU	doc.promo.solicitud.nota	Пока администрация рассматривает запрос, акция не применяется к оплатам.
+RU	doc.promo.destinatario	Получатель
+RU	doc.promo.agerencia	Руководство
+RU	doc.promo.aventas	Отдел продаж
+RU	doc.promo.motivosolicitud	Причина запроса
+RU	doc.promo.bajaaprobada	Отмена ОДОБРЕНА — акция деактивирована.
+RU	doc.promo.bajarechazada	Отмена ОТКЛОНЕНА — акция продолжает действовать.
+RU	doc.promo.motivoresolucion	Причина решения
+RU	doc.promo.resolvio	Решение принял (администрация)
+RU	doc.promo.resolucion.gerencia	Решение об отмене — отчёт для руководства
+RU	doc.promo.resolucion.ventas	Решение об отмене — отчёт для отдела продаж
+RU	doc.promo.descarteprom	Администрация отклонила акцию {0} после отказа бухгалтерии.
+RU	doc.promo.descartadapor	Отклонил
+RU	err.bll.promocion.inexistente	Акция больше не существует.
+RU	err.bll.promocion.creador_no_dictamina	Создатель акции не может выносить по ней заключение: её должен проанализировать другой сотрудник бухгалтерии.
+RU	err.bll.promocion.descartar_estado	Отклонить можно только акцию, отклонённую бухгалтерией. Статус этой акции: '{0}'.
+RU	err.bll.promocion.solicitud_inexistente	У акции нет ожидающего запроса на отмену.
+RU	err.bll.promocion.motivodescarte_requerido	Необходимо указать причину отклонения акции.
+RU	err.bll.promocion.motivodesactivar_requerido	Необходимо указать причину деактивации.
+RU	err.bll.sugerenciapromocion.motivodescarte_requerido	Необходимо указать причину отклонения предложения.
+RU	promocion.btn.descartarsugerencia	Отклонить предложение
+RU	promocion.btn.imprimirsugerencia	Печать предложения
+RU	promocion.btn.descartar	Отклонить
+RU	promocion.btn.historial	История
+RU	promocion.btn.imprimir	Печать ▾
+RU	promocion.btn.solicitarbaja	Запросить отмену
+RU	promocion.btn.analizarmetricas	Анализ метрик…
+RU	promocion.titulosugregistradas	Зарегистрированные предложения
+RU	col.promo.origen	Источник
+RU	col.promo.sugeridapor	Предложил
+RU	col.promo.creadapor	Создал
+RU	col.promo.fecha	Дата
+PT	dlg.promo.descartarsug.titulo	Descartar sugestão
+PT	dlg.promo.descartarsug.prompt	Motivo pelo qual a sugestão #{0} é descartada:
+PT	msg.promo.sugdescartada	Sugestão #{0} descartada.
+PT	conf.promo.imprimirdescarte	Imprimir o comprovante de descarte?
+PT	conf.promo.imprimirficha	Imprimir a ficha da promoção para a Contabilidade?
+PT	dlg.promo.descartar.titulo	Descartar promoção
+PT	dlg.promo.descartar.prompt	Motivo pelo qual a promoção '{0}' não é reformulada:
+PT	msg.promo.descartada	Promoção '{0}' descartada.
+PT	dlg.promo.desactivar.titulo	Desativar promoção
+PT	dlg.promo.desactivar.prompt	Motivo para desativar a promoção '{0}':
+PT	dlg.promo.aprobarbaja.titulo	Aprovar baixa da promoção
+PT	dlg.promo.aprobarbaja.prompt	Vendas pediu a baixa de '{0}'.\nMotivo: {1}\n\nObservação da resolução (opcional):
+PT	conf.promo.imprimirresolucion.gerencia	Imprimir a resolução de baixa como relatório para a Gerência?
+PT	conf.promo.imprimirresolucion.ventas	Imprimir a resolução de baixa como relatório para Vendas?
+PT	lbl.promo.historial.titulo	Histórico de estados — Promoção #{0}
+PT	promo.analisis.vacio	Selecione uma promoção para analisar sua margem e impacto.
+PT	promo.analisis.titulo	Análise de margem e impacto — Promoção #{0} '{1}'
+PT	promo.analisis.margen	Margem estimada: {0:C2} — Impacto: {1}
+PT	promo.analisis.beneficio	Benefício estimado pela Gerência na sugestão #{0}: {1:C2} ({2}).
+PT	promo.analisis.sinsugerencia	Cadastro manual: não há benefício estimado pela Gerência.
+PT	promo.analisis.superpuestas	ATENÇÃO: as datas se sobrepõem a outras promoções vigentes do mesmo plano:
+PT	promo.analisis.sinsuperposicion	Não se sobrepõe a outras promoções vigentes do mesmo plano.
+PT	promo.analisis.creador	Você criou esta promoção: outro usuário da Contabilidade deve emitir o parecer.
+PT	conf.promo.imprimirdictamen	Imprimir o parecer contábil?
+PT	dlg.promo.solicitarbaja.titulo	Solicitar baixa da promoção
+PT	conf.promo.imprimirsolicitud	Imprimir a solicitação de baixa?
+PT	promocion.origenactual	Origem da sugestão: {0}
+PT	doc.promo.reporte.titulo	Relatório de métricas
+PT	promocion.btn.imprimirreporte	Imprimir relatório
+PT	conf.promo.imprimirsugerencia	Imprimir a sugestão de promoção?
+PT	doc.promo.ficha.titulo	Ficha da promoção
+PT	doc.promo.dictamen.titulo	Parecer contábil
+PT	doc.promo.solicitud.titulo	Solicitação de baixa
+PT	menu.promo.resolucion	Resolução de baixa
+PT	doc.promo.constanciadescarte.titulo	Comprovante de descarte
+PT	est.promo.enrevision	Em revisão contábil
+PT	est.promo.vigente	Vigente
+PT	est.promo.rechazada	Rejeitada pela Contabilidade
+PT	est.promo.bajasolicitada	Baixa solicitada
+PT	est.promo.desactivada	Desativada
+PT	est.promo.descartada	Descartada
+PT	est.promo.vencida	Vencida
+PT	est.sugpromo.evaluada	Aceita (promoção criada)
+PT	est.sugpromo.descartada	Descartada
+PT	est.sugpromo.pendiente	Pendente
+PT	origen.metrica.abandono	Abandono por plano
+PT	origen.metrica.rotacion	Rotação por categoria
+PT	origen.metrica.manual	Manual
+PT	tipodesc.porcentaje	Porcentagem
+PT	tipodesc.montofijo	Valor fixo
+PT	tipodesc.preciopromocional	Preço promocional
+PT	doc.promo.plan	Plano
+PT	doc.promo.categoria	Categoria
+PT	doc.promo.promocion	Promoção
+PT	doc.promo.beneficio	Benefício
+PT	doc.promo.vigencia	Vigência
+PT	doc.promo.estado	Estado
+PT	doc.promo.fechareporte	Data do relatório
+PT	doc.promo.abandonoplan	Abandono por plano (clientes em risco):
+PT	doc.promo.sindatos	Nenhum caso detectado.
+PT	doc.promo.abandonolinea	   • {0}: {1} cliente(s) em risco — {2:C2} de receita mensal em risco
+PT	doc.promo.rotacioncategoria	Rotação por categoria (peças):
+PT	doc.promo.rotacionlinea	   • {0}: {1} de baixa demanda, {2} de alta demanda
+PT	doc.promo.oportunidades	Oportunidades de promoção detectadas:
+PT	doc.promo.beneficioest	Benefício estimado
+PT	doc.promo.sinoportunidad	Há oportunidade? Não: não foram detectados casos para promover. Fim sem promoção.
+PT	doc.promo.sugerencia.titulo	Sugestão de promoção
+PT	doc.promo.sugerencia	Sugestão
+PT	doc.promo.gerencia	Registrada por (Gerência)
+PT	doc.promo.origen	Origem da métrica
+PT	doc.promo.tiposugerido	Tipo de desconto sugerido
+PT	doc.promo.motivo	Motivo
+PT	doc.promo.descartesug	A Administração descartou a sugestão em {0}.
+PT	doc.promo.motivodescarte	Motivo do descarte
+PT	doc.promo.descripcion	Descrição
+PT	doc.promo.margen	Margem estimada
+PT	doc.promo.impacto	Impacto econômico
+PT	doc.promo.creadapor	Criada por (Administração)
+PT	doc.promo.origensug	Origem
+PT	doc.promo.desdesugerencia	sugestão da Gerência #{0}
+PT	doc.promo.manual	cadastro manual
+PT	doc.promo.notacategoria	Promoção por categoria: é informativa, não desconta na cobrança da assinatura.
+PT	doc.promo.historial	Histórico de estados:
+PT	doc.promo.resultado	Resultado
+PT	doc.promo.aprobada	APROVADA — a promoção fica Vigente.
+PT	doc.promo.rechazada	REJEITADA — volta à Administração para ser reformulada ou descartada.
+PT	doc.promo.observacion	Observação
+PT	doc.promo.contable	Parecer de (Contabilidade)
+PT	doc.promo.solicito	Solicitou (Vendas)
+PT	doc.promo.solicitud.nota	Enquanto a Administração resolve a solicitação, a promoção não é aplicada nas cobranças.
+PT	doc.promo.destinatario	Destinatário
+PT	doc.promo.agerencia	Gerência
+PT	doc.promo.aventas	Vendas
+PT	doc.promo.motivosolicitud	Motivo da solicitação
+PT	doc.promo.bajaaprobada	Baixa APROVADA — a promoção ficou Desativada.
+PT	doc.promo.bajarechazada	Baixa REJEITADA — a promoção continua Vigente.
+PT	doc.promo.motivoresolucion	Motivo da resolução
+PT	doc.promo.resolvio	Resolveu (Administração)
+PT	doc.promo.resolucion.gerencia	Resolução de baixa — Relatório para a Gerência
+PT	doc.promo.resolucion.ventas	Resolução de baixa — Relatório para Vendas
+PT	doc.promo.descarteprom	A Administração descartou a promoção em {0} após a rejeição contábil.
+PT	doc.promo.descartadapor	Descartou
+PT	err.bll.promocion.inexistente	A promoção não existe mais.
+PT	err.bll.promocion.creador_no_dictamina	Quem criou a promoção não pode emitir o parecer: outro usuário da Contabilidade deve analisá-la.
+PT	err.bll.promocion.descartar_estado	Só é possível descartar uma promoção Rejeitada pela Contabilidade. Esta promoção está '{0}'.
+PT	err.bll.promocion.solicitud_inexistente	A promoção não tem uma solicitação de baixa pendente.
+PT	err.bll.promocion.motivodescarte_requerido	É preciso indicar o motivo pelo qual a promoção é descartada.
+PT	err.bll.promocion.motivodesactivar_requerido	É preciso indicar o motivo da desativação.
+PT	err.bll.sugerenciapromocion.motivodescarte_requerido	É preciso indicar o motivo pelo qual a sugestão é descartada.
+PT	promocion.btn.descartarsugerencia	Descartar sugestão
+PT	promocion.btn.imprimirsugerencia	Imprimir sugestão
+PT	promocion.btn.descartar	Descartar
+PT	promocion.btn.historial	Histórico
+PT	promocion.btn.imprimir	Imprimir ▾
+PT	promocion.btn.solicitarbaja	Solicitar baixa
+PT	promocion.btn.analizarmetricas	Analisar métricas…
+PT	promocion.titulosugregistradas	Sugestões registradas
+PT	col.promo.origen	Origem
+PT	col.promo.sugeridapor	Sugerida por
+PT	col.promo.creadapor	Criada por
+PT	col.promo.fecha	Data

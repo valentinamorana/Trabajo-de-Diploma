@@ -267,6 +267,13 @@
     <Compile Include="PromocionesVigentesForm.Designer.cs">
       <DependentUpon>PromocionesVigentesForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ControlStockForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlStockForm.Designer.cs">
+      <DependentUpon>ControlStockForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EstadosPedido.cs" />
     <Compile Include="InspeccionDevolucionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -377,6 +384,13 @@
     <Compile Include="Exportacion\GeneradorReporte.cs" />
     <Compile Include="Exportacion\GeneradorBitacora.cs" />
     <Compile Include="Exportacion\GeneradorJornada.cs" />
+    <Compile Include="Exportacion\GeneradorDocumentoPedido.cs" />
+    <Compile Include="Exportacion\DocumentosPedido.cs" />
+    <Compile Include="Exportacion\GeneradorDocumentoContratacion.cs" />
+    <Compile Include="Exportacion\DocumentosContratacion.cs" />
+    <Compile Include="Exportacion\GeneradorDocumentoPromocion.cs" />
+    <Compile Include="Exportacion\DocumentosPromocion.cs" />
+    <Compile Include="MenuDocumentosPromocion.cs" />
     <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
     <Compile Include="Exportacion\GeneradorVentasVendedor.cs" />
     <Compile Include="Exportacion\GeneradorRotacion.cs" />
@@ -472,10 +486,6 @@
     <ProjectReference Include="..\Servicios\Servicios.csproj">
       <Project>{f41a7a3a-8ac1-4036-9fca-b81ee8812b8e}</Project>
       <Name>Servicios</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Seguridad\Seguridad.csproj">
-      <Project>{8d86288e-77ff-4076-b495-e881fc568379}</Project>
-      <Name>Seguridad</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

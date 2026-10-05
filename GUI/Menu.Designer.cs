@@ -42,6 +42,7 @@
             this.inventarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inspeccionDevolucionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.controlStockToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listaEsperaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.suscriptoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -185,6 +186,7 @@
             // 
             this.inventarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.prendasToolStripMenuItem,
+            this.controlStockToolStripMenuItem,
             this.inspeccionDevolucionToolStripMenuItem,
             this.listaEsperaToolStripMenuItem});
             this.inventarioToolStripMenuItem.Name = "inventarioToolStripMenuItem";
@@ -199,6 +201,14 @@
             this.prendasToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.prendasToolStripMenuItem.Text = "Prendas";
             this.prendasToolStripMenuItem.Click += new System.EventHandler(this.prendasToolStripMenuItem_Click);
+            //
+            // controlStockToolStripMenuItem — PN01, carril Depósito (Controlador de Stock)
+            //
+            this.controlStockToolStripMenuItem.Name = "controlStockToolStripMenuItem";
+            this.controlStockToolStripMenuItem.Tag = "mnu.controlstock";
+            this.controlStockToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.controlStockToolStripMenuItem.Text = "Control de Stock";
+            this.controlStockToolStripMenuItem.Click += new System.EventHandler(this.controlStockToolStripMenuItem_Click);
             //
             // inspeccionDevolucionToolStripMenuItem — PN04, CU-DEP-01 Inspeccionar Devolución
             //
@@ -224,7 +234,6 @@
             this.clientesToolStripMenuItem,
             this.planesToolStripMenuItem,
             this.renovacionSuscripcionToolStripMenuItem,
-            this.cobroSuscripcionToolStripMenuItem,
             this.nuevaContratacionToolStripMenuItem});
             this.suscriptoresToolStripMenuItem.Name = "suscriptoresToolStripMenuItem";
             this.suscriptoresToolStripMenuItem.Tag = "mnu.suscriptores";
@@ -299,8 +308,10 @@
             //
             // cajaToolStripMenuItem — PN02, rol Caja (separado de Vendedor: Caja cobra, Vendedor no)
             //
+            // El cobro recurrente (N01) también es de Caja: quien vende no cobra.
             this.cajaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.contratacionesPendientesToolStripMenuItem});
+            this.contratacionesPendientesToolStripMenuItem,
+            this.cobroSuscripcionToolStripMenuItem});
             this.cajaToolStripMenuItem.Name = "cajaToolStripMenuItem";
             this.cajaToolStripMenuItem.Tag = "mnu.caja";
             this.cajaToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
@@ -413,7 +424,7 @@
             // Resalte distintivo: los 3 ítems de este submenú (y el submenú en sí) se pintan
             // con un fondo propio para diferenciarlos de un vistazo del resto de "Administrar"
             // — son herramientas transversales del sistema, no ABM de usuarios.
-            this.grpSistema.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
+            this.grpSistema.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             //
             // perfilesToolStripMenuItem
             //
@@ -429,7 +440,7 @@
             this.idiomasToolStripMenuItem.Tag = "mnu.idiomas";
             this.idiomasToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.idiomasToolStripMenuItem.Text = "Gestión de Idiomas";
-            this.idiomasToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
+            this.idiomasToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             this.idiomasToolStripMenuItem.Click += new System.EventHandler(this.idiomasToolStripMenuItem_Click);
             //
             // historialUsuariosToolStripMenuItem
@@ -446,7 +457,7 @@
             this.backupToolStripMenuItem.Tag  = "mnu.backup";
             this.backupToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.backupToolStripMenuItem.Text = "Backup y Restauración";
-            this.backupToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
+            this.backupToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             this.backupToolStripMenuItem.Click += new System.EventHandler(this.backupToolStripMenuItem_Click);
             //
             // integridadToolStripMenuItem
@@ -455,7 +466,7 @@
             this.integridadToolStripMenuItem.Tag  = "mnu.integridad";
             this.integridadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.integridadToolStripMenuItem.Text = "Diagnóstico de Integridad";
-            this.integridadToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
+            this.integridadToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             this.integridadToolStripMenuItem.Click += new System.EventHandler(this.integridadToolStripMenuItem_Click);
             //
             // auditoriaToolStripMenuItem — antes vivía junto con los reportes de negocio dentro
@@ -638,6 +649,7 @@
         private System.Windows.Forms.ToolStripMenuItem inventarioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prendasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem inspeccionDevolucionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem controlStockToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem listaEsperaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem nuevaContratacionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cajaToolStripMenuItem;

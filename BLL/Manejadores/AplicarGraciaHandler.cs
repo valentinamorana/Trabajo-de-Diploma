@@ -63,7 +63,7 @@ namespace BLL.Manejadores
                     dalCliente.ModificarEnTx(conexion, tx, cliente);
                     idCobro = dalCobro.AltaEnTx(conexion, tx, cobro);
                 });
-                dalCliente.RecalcularDV();
+                dalCliente.RecalcularDV(cliente.IdCliente);
             }
             else
             {

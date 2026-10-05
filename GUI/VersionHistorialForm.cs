@@ -27,7 +27,6 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarUsuarios();
 
@@ -37,12 +36,6 @@ namespace GUI
                 cboUsuario.SelectedValue = _preseleccionarId;
                 if (cboUsuario.SelectedValue != null) btnCargar_Click(null, EventArgs.Empty);
             }
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
@@ -102,9 +95,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                string titErr = Tr("msg.error.titulo", "Error");
-                string fmtErr = Tr("msg.historial.errorcargar", "Error al cargar historial:\n{0}");
-                MessageBox.Show(string.Format(fmtErr, ex.Message), titErr, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -170,18 +161,17 @@ namespace GUI
             string fnac     = version.FechaNacSnapshot?.ToString("dd/MM/yyyy") ?? "—";
             // Estado completo al que volverá el usuario (datos administrativos no sensibles).
             string estado =
-                $"Usuario: {version.UsernameSnapshot}\n" +
-                $"Nombre: {version.NombreSnapshot}\n" +
-                $"Apellido: {version.ApellidoSnapshot}\n" +
-                $"Email: {version.EmailSnapshot}\n" +
-                $"Fecha nac.: {fnac}";
+                $"{Tr("lbl.ver.campo.usuario", "Usuario")}: {version.UsernameSnapshot}\n" +
+                $"{Tr("lbl.ver.campo.nombre", "Nombre")}: {version.NombreSnapshot}\n" +
+                $"{Tr("lbl.ver.campo.apellido", "Apellido")}: {version.ApellidoSnapshot}\n" +
+                $"{Tr("lbl.ver.campo.email", "Email")}: {version.EmailSnapshot}\n" +
+                $"{Tr("lbl.ver.campo.fechanac", "Fecha nac.")}: {fnac}";
 
             string msg = Tr("msg.historial.confirmar.restaurar",
                 "¿Restaurar al usuario al estado del {0}?\n\n{1}\n\nEl usuario quedará exactamente en este estado. Es reversible (queda registrado como un nuevo cambio en el historial).",
                 new object[] { fechaTxt, estado });
 
-            if (MessageBox.Show(msg, Tr("msg.backup.titulorestaura", "Confirmar Restauración"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+            if (!ConfirmarSiNo(msg, Tr("msg.backup.titulorestaura", "Confirmar Restauración"), porDefectoNo: true))
                 return;
 
             try
@@ -196,9 +186,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                string titErr = Tr("msg.error.titulo", "Error");
-                string fmtErr = Tr("msg.historial.errorrestaur", "Error al restaurar versión:\n{0}");
-                MessageBox.Show(string.Format(fmtErr, ex.Message), titErr, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
     }

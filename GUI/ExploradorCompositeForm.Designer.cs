@@ -32,7 +32,7 @@ namespace GUI
             this.SuspendLayout();
 
             // ── panelHeader ────────────────────────────────────────────────────
-            this.panelHeader.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.panelHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.panelHeader.Controls.Add(this.lblTitulo);
             this.panelHeader.Controls.Add(this.lblDescripcion);
             this.panelHeader.Dock     = System.Windows.Forms.DockStyle.Top;
@@ -54,7 +54,7 @@ namespace GUI
             // ── lblDescripcion ─────────────────────────────────────────────────
             this.lblDescripcion.AutoSize  = true;
             this.lblDescripcion.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            this.lblDescripcion.ForeColor = System.Drawing.Color.FromArgb(244, 212, 226);
+            this.lblDescripcion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(222)))), ((int)(((byte)(230)))));
             this.lblDescripcion.Location  = new System.Drawing.Point(16, 42);
             this.lblDescripcion.Name      = "lblDescripcion";
             this.lblDescripcion.TabIndex  = 1;
@@ -73,7 +73,7 @@ namespace GUI
             // ── lblLeyenda ─────────────────────────────────────────────────────
             this.lblLeyenda.AutoSize  = true;
             this.lblLeyenda.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
-            this.lblLeyenda.ForeColor = System.Drawing.Color.FromArgb(110, 42, 74);
+            this.lblLeyenda.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(30)))), ((int)(((byte)(55)))));
             this.lblLeyenda.Location  = new System.Drawing.Point(14, 6);
             this.lblLeyenda.Name      = "lblLeyenda";
             this.lblLeyenda.TabIndex  = 0;
@@ -139,7 +139,7 @@ namespace GUI
             this.btnColapsar.Click += new System.EventHandler(this.BtnColapsar_Click);
 
             // ── btnExpandir ────────────────────────────────────────────────────
-            this.btnExpandir.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnExpandir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnExpandir.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnExpandir.FlatAppearance.BorderSize = 0;
             this.btnExpandir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -157,10 +157,10 @@ namespace GUI
             this.btnActualizar.BackColor = System.Drawing.Color.White;
             this.btnActualizar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnActualizar.FlatAppearance.BorderSize  = 1;
-            this.btnActualizar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnActualizar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnActualizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnActualizar.Font      = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnActualizar.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnActualizar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnActualizar.Name      = "btnActualizar";
             this.btnActualizar.Size      = new System.Drawing.Size(120, 32);
             this.btnActualizar.TabIndex  = 0;

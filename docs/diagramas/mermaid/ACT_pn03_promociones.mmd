@@ -2,49 +2,70 @@ flowchart TD
   subgraph G["Gerencia"]
     direction TB
     i((" "))
-    a1["Detecta una oportunidad (análisis de abandono y rotación) y sugiere una promoción"]
+    a1["Analizar métricas: abandono por plan y rotación por categoría «Reporte de métricas»"]
+    d1{"¿Hay oportunidad?"}
+    f0(((" ")))
+    a2["Registrar sugerencia con el origen de la métrica «Sugerencia de promoción»"]
   end
   subgraph A["Administración"]
     direction TB
-    a2["Crea la promoción desde la sugerencia o en forma manual"]
-    a6["Reformula las condiciones"]
-    d3{"¿Aprueba la baja?"}
+    d2{"¿Acepta la sugerencia?"}
+    a3["Descartar sugerencia (motivo) «Constancia de descarte»"]
+    f1(((" ")))
+    a4["Crear promoción (desde la sugerencia o manual)"]
+    a5["Validar (destino único, valor, fechas) → En revisión contable «Ficha de promoción»"]
+    d4{"¿Reformular?"}
+    a8["Reformular las condiciones"]
+    a9["Descartar promoción (motivo) «Constancia de descarte»"]
+    f2(((" ")))
+    d5{"¿Qué interrumpe la vigencia?"}
+    d6{"¿Aprueba la baja?"}
+    a12["Desactivada «Resolución de baja» (informe a Gerencia)"]
+    a13["Sigue Vigente «Resolución de baja» con motivo (informe a Ventas)"]
+    a14["Desactivar directamente (motivo)"]
+    a15["Vencida: ya no aplica en el cobro"]
+    f3(((" ")))
+    f4(((" ")))
   end
   subgraph K["Contabilidad"]
     direction TB
-    a4["Analiza margen e impacto económico"]
-    d1{"¿Aprueba?"}
+    a6["Analizar margen e impacto (beneficio estimado, promociones superpuestas)"]
+    d3{"¿Aprueba? (quien la creó no la dictamina)"}
+    a7["Rechazada por Contabilidad «Dictamen contable»"]
+    a10["Vigente «Dictamen contable»: un solo descuento por cobro"]
   end
   subgraph V["Vendedor"]
     direction TB
-    d2{"¿Sugiere la baja?"}
-    a8["Sugiere la baja indicando el motivo (Baja solicitada)"]
-  end
-  subgraph S["Sistema"]
-    direction TB
-    a3["Valida (destino único, valor, fechas) y registra En revisión contable"]
-    a5["Rechazada por Contabilidad: vuelve a Administración"]
-    a7["Vigente: se aplica un solo descuento por cobro"]
-    a9["Desactivada"]
-    a10["Sigue Vigente (conserva la observación contable)"]
-    f(((" ")))
+    a11["Solicitar la baja (motivo) «Solicitud de baja»"]
   end
   i --> a1
-  a1 --> a2
-  a2 --> a3
-  a3 --> a4
-  a4 --> d1
-  d1 -- "No" --> a5
+  a1 --> d1
+  d1 -- "No: sin promoción" --> f0
+  d1 -- "Sí" --> a2
+  a2 --> d2
+  d2 -- "No" --> a3
+  a3 --> f1
+  d2 -- "Sí" --> a4
+  a4 --> a5
   a5 --> a6
-  a6 --> a3
-  d1 -- "Sí" --> a7
-  a7 --> d2
-  d2 -- "No" --> f
-  d2 -- "Sí" --> a8
-  a8 --> d3
-  d3 -- "Sí" --> a9
-  d3 -- "No" --> a10
-  a9 --> f
-  a10 --> f
+  a6 --> d3
+  d3 -- "No" --> a7
+  a7 --> d4
+  d4 -- "Sí" --> a8
+  a8 --> a5
+  d4 -- "No" --> a9
+  a9 --> f2
+  d3 -- "Sí" --> a10
+  a10 --> d5
+  d5 -- "Ventas pide la baja" --> a11
+  a11 --> d6
+  d6 -- "Sí" --> a12
+  a12 --> f3
+  d6 -- "No" --> a13
+  a13 --> a10
+  d5 -- "Administración la desactiva" --> a14
+  a14 --> f3
+  d5 -- "Llega la fecha de fin" --> a15
+  a15 --> f4
   classDef ini fill:#222,stroke:#222,color:#222
-  class i,f ini
+  class i,f0,f1,f2,f3,f4 ini

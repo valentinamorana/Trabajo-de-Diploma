@@ -15,6 +15,9 @@ namespace Tests
     [TestClass]
     public class RecuperacionAdminTests
     {
+        // El contador de intentos de la sesión es un singleton: cada prueba arranca de cero.
+        [TestInitialize] public void ReiniciarContador() => Seguridad.ContadorSesion.GetInstance().Resetear();
+
         private const string ClaveEnClaro = "ABC123XY";
 
         private static BE.Usuario AdminBloqueado() => new BE.Usuario

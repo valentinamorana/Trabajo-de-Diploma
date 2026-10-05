@@ -1,0 +1,46 @@
+sequenceDiagram
+  autonumber
+  actor DP as Depósito
+  participant F as Control<br/>StockForm
+  participant B as BLL.Pedido
+  participant PB as BLL.Prenda
+  participant LE as BLL.ListaEspera
+  participant D as DAL.Pedido
+  participant H as DAL.Pedido<br/>Historial
+  F->>B: ObtenerColaControlStock()
+  B-->>F: pedidos EnControlStock (del más antiguo al más nuevo)
+  DP->>F: Elige un pedido de la cola
+  F->>B: RevisarStock(pedido)
+  Note over B: Exigir(ControlStockEditar) · solo pedidos EnControlStock
+  B->>PB: VerificarDisponibilidad(prendas)  [relee el estado en la BD]
+  PB-->>B: (disponible, noDisponibles)
+  B->>LE: EstaReservadaParaOtro(idPrenda, idCliente)
+  B-->>F: líneas de la planilla (estado actual, reservada, confirmada)
+  alt ¿Selección disponible? No
+    DP->>F: Informar faltantes
+    F->>B: InformarFaltantes(modulo, pedido)
+    B->>PB: ObtenerDisponibles(idCliente)  [alternativas: misma categoría y talle, máx. 3]
+    B->>D: RegistrarFaltantes(idPedido, idEmpleadoControl, faltantes)  [→ ConFaltantes]
+    B->>H: RegistrarCambios(INFORMAR_FALTANTES)
+    B-->>F: informe de faltantes y alternativas
+    F-->>DP: Informe de disponibilidad (PDF) para el Vendedor
+  else Sí
+    DP->>F: Confirmar prendas disponibles
+    F->>B: ConfirmarPrendasDisponibles(modulo, pedido)
+    B->>D: ConfirmarPrendas(idPedido, idEmpleadoControl)
+    B->>H: RegistrarCambios(CONFIRMAR_PRENDAS)
+    F-->>DP: Detalle de prendas confirmadas
+    DP->>F: Separar prendas
+    F->>B: SepararPrendas(modulo, pedido)
+    B->>D: SepararPrendas(idPedido, idCliente)  [transacción: prendas a En uso con reclamo, → Separado]
+    alt Otra operación tomó una prenda
+      D-->>B: AppException(prenda_tomada)  [rollback: no se reserva nada]
+      B->>B: InformarFaltantes(modulo, pedido)
+      B-->>F: AppException(separar_faltantes)
+      F-->>DP: Informa que el pedido pasó a faltantes
+    else Reserva confirmada
+      B->>H: RegistrarCambios(SEPARAR)
+      B->>LE: CerrarSiReservada(modulo, idPrenda, idCliente, actor)
+      F-->>DP: Constancia de prendas separadas (PDF)
+    end
+  end

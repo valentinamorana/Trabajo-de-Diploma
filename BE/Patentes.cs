@@ -18,6 +18,7 @@ namespace BE
         public const string CobroSuscripcion  = "mnuCobroSuscripcion";
         public const string ListaEspera       = "mnuListaEspera";
         public const string Caja              = "mnuCaja";
+        public const string RenovacionSuscripcion = "mnuRenovacionSuscripcion";
 
         // PN03 — Métricas, promociones y toma de decisiones.
         public const string SugerenciaPromocion   = "mnuSugerenciaPromocion";
@@ -27,6 +28,10 @@ namespace BE
 
         // PN04 — Inspección de Devolución (Depósito = rol Deposito, sin rol nuevo).
         public const string InspeccionDevolucion  = "mnuInspeccionDevolucion";
+
+        // PN01 — Control de Stock: Depósito revisa el stock de la selección enviada por el
+        // Vendedor, informa faltantes o confirma y separa las prendas.
+        public const string ControlStock          = "mnuControlStock";
 
         // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────
         // Cada una gobierna las operaciones de escritura (alta/modificación/baja) del módulo.
@@ -41,6 +46,11 @@ namespace BE
         public const string PromocionesAdminEditar    = "mnuPromocionesAdminEditar";
         public const string PromocionesContableEditar = "mnuPromocionesContableEditar";
         public const string PromocionesVigentesEditar = "mnuPromocionesVigentesEditar";
+        public const string ControlStockEditar        = "mnuControlStockEditar";
+        // Lista de Espera: anotar / cancelar / reservar. Antes la escritura exigía StockEditar
+        // (patente de Depósito), así que el Vendedor —que ve la pantalla para anotar al
+        // cliente— recibía "sin permiso". Fallback: mnuListaEspera (ver PermisosAccion).
+        public const string ListaEsperaEditar         = "mnuListaEsperaEditar";
         // Nota: Inspección de Devolución (PN04) NO tiene patente de Editar propia — su
         // escritura (CambiarEstado/RegistrarCargo) ya está gobernada por StockEditar
         // (compartida con el módulo de Stock, ver InspeccionDevolucion arriba). Crear una

@@ -16,5 +16,12 @@ namespace BLL.Interfaces
 
         // Devuelve el historial de intentos de cobro de un cliente.
         List<BE.Cobro> ObtenerHistorial(int idCliente);
+
+        // Clientes a los que hoy corresponde procesarles un cobro (con plan, vencidos o
+        // próximos a vencer y sin contratación PN02 pendiente de pago).
+        List<BE.Cliente> ObtenerElegibles();
+
+        // Cargos por daño/pérdida pendientes que se sumarán al próximo cobro del cliente.
+        BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente);
     }
 }

@@ -12,8 +12,8 @@ namespace BLL
     {
         private readonly DAL.Interfaces.IClienteDAL        dalCliente;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
-        private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
         // Bloque 1 — Programa de referidos: descuento fijo que se acredita a quien refirió,
         // una única vez, cuando el referido activa su suscripción por primera vez (ver ActivarSuscripcion).
@@ -34,6 +34,60 @@ namespace BLL
         public List<BE.Cliente> ObtenerTodos()
         {
             return dalCliente.ObtenerTodos();
+        }
+
+        // PN01 — "Recibir identificación": el cliente brinda su documentación (DNI, nombre y
+        // apellido). Si el texto coincide exacto con un DNI devuelve ese cliente; si no, los que
+        // contienen el texto en el nombre o el apellido (sin distinguir mayúsculas).
+        public List<BE.Cliente> BuscarPorIdentificacion(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return new List<BE.Cliente>();
+            string t = texto.Trim();
+
+            var todos = ObtenerTodos();
+            var porDni = todos.FindAll(c => string.Equals((c.DNI ?? "").Trim(), t, StringComparison.OrdinalIgnoreCase));
+            if (porDni.Count > 0) return porDni;
+
+            return todos.FindAll(c =>
+                (c.Nombre ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                (c.Apellido ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                (c.NombreCompleto ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        // Filtro del listado de clientes (pantalla Clientes): el texto puede ser parte del nombre
+        // completo, del DNI o del email, sin distinguir mayúsculas. Distinto de
+        // BuscarPorIdentificacion (PN01), que exige el DNI exacto y no mira el email: este filtra
+        // la grilla mientras se escribe. Trabaja sobre la lista ya cargada, sin ir a la base.
+        public List<BE.Cliente> Filtrar(IEnumerable<BE.Cliente> clientes, string texto)
+        {
+            var lista = new List<BE.Cliente>(clientes ?? new List<BE.Cliente>());
+            if (string.IsNullOrWhiteSpace(texto)) return lista;
+            string t = texto.Trim();
+
+            bool Contiene(string campo) => (campo ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0;
+            return lista.FindAll(c => Contiene(c.NombreCompleto) || Contiene(c.DNI) || Contiene(c.Email));
+        }
+
+        // Métodos de pago preferidos que se pueden elegir para un cliente. El Nombre es el valor
+        // que se guarda en Cliente.MetodoPago (en español, igual que los datos ya cargados) y
+        // ClaveTraduccion la clave con la que la pantalla lo muestra traducido. Se reusa
+        // BE.MedioPago solo como par nombre/clave: no es el catálogo de Caja (IdMedioPago = 0).
+        // Si el cliente tiene guardado un valor que ya no está en la lista (dato anterior), se
+        // agrega al final sin clave, para que editar al cliente no lo pise con "Efectivo".
+        public List<BE.MedioPago> ObtenerMetodosPago(string metodoActual = null)
+        {
+            var metodos = new List<BE.MedioPago>
+            {
+                new BE.MedioPago { Nombre = "Efectivo",      ClaveTraduccion = "metodo.efectivo" },
+                new BE.MedioPago { Nombre = "Débito",        ClaveTraduccion = "metodo.debito" },
+                new BE.MedioPago { Nombre = "Crédito",       ClaveTraduccion = "metodo.credito" },
+                new BE.MedioPago { Nombre = "Transferencia", ClaveTraduccion = "metodo.transferencia" },
+            };
+
+            if (!string.IsNullOrWhiteSpace(metodoActual) && !metodos.Exists(m => m.Nombre == metodoActual))
+                metodos.Add(new BE.MedioPago { Nombre = metodoActual });
+
+            return metodos;
         }
 
         // Obtiene un cliente por ID.
@@ -57,9 +111,10 @@ namespace BLL
             int idNuevo = dalCliente.Alta(cliente);
             cliente.IdCliente = idNuevo;
 
-            // El DNI está cifrado en la tabla Cliente (Seguridad.Encriptador); no se incluye en
-            // texto plano acá para no anular esa protección en la Bitácora, que suele tener menos
-            // controles de acceso — el IdCliente ya identifica el registro sin exponerlo.
+            // El DNI del cliente se guarda en TEXTO PLANO en la tabla Cliente (a diferencia del
+            // Empleado, que sí se cifra): se busca por DNI exacto (PN01) y se valida su unicidad.
+            // Por eso no se copia a la Bitácora (dato personal; suele tener otros controles de
+            // acceso): el IdCliente ya identifica el registro sin exponerlo.
             bitacora.Registrar(modulo, $"Alta Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.AltaCliente,
                 $"Nuevo cliente: {cliente.NombreCompleto} — Plan: {cliente.NombrePlan ?? "Sin plan"}",
@@ -85,7 +140,7 @@ namespace BLL
             // beneficio de referido de ActivarSuscripcionInterna): reservado a Administrador
             // para no reabrir, con otro nombre, el mismo atajo que Vendedor tenía antes de
             // PN02 (activar una suscripción sin cobro real). La activación comercial normal
-            // sigue siendo exclusivamente BLL.Contratacion.ConfirmarPago →
+            // sigue siendo exclusivamente BLL.Contratacion.ConfirmarCobro →
             // ActivarSuscripcionDesdeContratacion.
             if (actual != null && (cliente.IdPlan != actual.IdPlan || cliente.FechaVencimiento != actual.FechaVencimiento))
                 BLLHelper.ExigirAdministrador("err.bll.cliente.plan_solo_admin",
@@ -129,6 +184,12 @@ namespace BLL
                     "No se puede eliminar a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.",
                     cliente.NombreCompleto, cliente.StockUtilizado);
 
+            // PN02: una contratación pendiente de pago quedaría sin poder cobrarse.
+            if (dalCliente.TieneContratacionPendiente(cliente.IdCliente))
+                throw new BE.AppException("err.bll.cliente.baja_contratacion",
+                    "No se puede dar de baja a {0}: tiene una contratación pendiente de pago. Caja tiene que cobrarla o cancelarla primero.",
+                    cliente.NombreCompleto);
+
             dalCliente.Baja(cliente.IdCliente);
             bitacora.Registrar(modulo, $"Baja Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.BajaCliente,
@@ -152,13 +213,22 @@ namespace BLL
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad)
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
+            // Activar sin pasar por Contratación + Caja es una corrección administrativa (PN02).
+            BLLHelper.ExigirAdministrador("err.bll.cliente.plan_solo_admin",
+                "Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. " +
+                "Para activar una suscripción nueva, usá el módulo de Contratación.");
             return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad);
         }
 
-        // PN02 — usada por BLL.Contratacion.ConfirmarPago cuando Caja confirma el pago de
+        // ¿El usuario puede corregir el plan o el vencimiento directamente (sin Contratación + Caja)?
+        // Solo el Administrador (regla 6 de N01). La pantalla usa esto para mostrar u ocultar esos campos.
+        public bool PuedeCorregirPlanDirectamente() =>
+            Seguridad.SessionManager.IsLoggedIn && Seguridad.SessionManager.GetInstance().Usuario.EsAdministrador;
+
+        // PN02 — usada por BLL.Contratacion.ConfirmarCobro cuando Caja confirma el pago de
         // una contratación y hay que formalizar la suscripción. Caja no tiene el permiso
         // ClientesEditar (separación de funciones a propósito frente a Vendedor): el gate acá
-        // es CajaEditar/Caja, ya exigido en BLL.Contratacion.ConfirmarPago antes de llamar a
+        // es CajaEditar/Caja, ya exigido en BLL.Contratacion.ConfirmarCobro antes de llamar a
         // este método — por eso NO vuelve a pedir el permiso de Vendedor.
         public BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
@@ -176,6 +246,12 @@ namespace BLL
             if (plan == null)
                 throw new BE.AppException("err.bll.cliente.plan_inexistente",
                     "No se encontró el plan de suscripción indicado.");
+
+            // Si estaba pausada, al pausar el vencimiento se corrió por TODA la pausa (no se cobra
+            // mientras dura). Activar ahora termina la pausa: los días de pausa que no se usaron se
+            // descuentan antes de sumar el período nuevo — igual que ReanudarPausa. Antes se
+            // "regalaban" (el período nuevo arrancaba desde el vencimiento ya corrido).
+            DescontarPausaNoUsada(cliente);
 
             var builder = BE.Builders.SuscripcionBuilderFactory.Crear(modalidad);
             var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, plan);
@@ -214,11 +290,12 @@ namespace BLL
                     dalCliente.SumarCreditoEnTx(conexion, tx, referente.IdCliente, MontoBeneficioReferido);
             });
             // La activación ya quedó confirmada: un fallo del registro posterior no debe propagarse,
-            // porque BLL.Contratacion.ConfirmarPago lo interpretaría como activación fallida y
+            // porque BLL.Contratacion.ConfirmarCobro lo interpretaría como activación fallida y
             // reabriría el cobro de una suscripción que sí quedó activa (doble cobro).
             try
             {
-                dalCliente.RecalcularDV();
+                dalCliente.RecalcularDV(cliente.IdCliente);
+                if (referente != null) dalCliente.RecalcularDV(referente.IdCliente);
 
                 bitacora.Registrar(modulo,
                     $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
@@ -246,6 +323,16 @@ namespace BLL
 
         // Bloque 1 — Reanuda una suscripción pausada. La fecha de vencimiento NO se toca:
         // el cliente retoma el mismo plazo que tenía al pausar, sin extensión.
+        // Devuelve los días de pausa que todavía no transcurrieron (el vencimiento se había corrido
+        // por toda la pausa al pausar; ver PausarSuscripcionHandler). No limpia FechaPausaHasta.
+        internal static void DescontarPausaNoUsada(BE.Cliente cliente)
+        {
+            if (!cliente.FechaPausaHasta.HasValue) return;
+            int diasSinUsar = (cliente.FechaPausaHasta.Value.Date - DateTime.Today).Days;
+            if (diasSinUsar > 0 && cliente.FechaVencimiento.HasValue)
+                cliente.FechaVencimiento = cliente.FechaVencimiento.Value.AddDays(-diasSinUsar);
+        }
+
         public void ReanudarPausa(string modulo, BE.Cliente cliente)
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
@@ -257,9 +344,7 @@ namespace BLL
 
             // Reanudar antes de tiempo: se devuelven los días de pausa no usados (al pausar, el vencimiento
             // se corrió por toda la pausa; ver PausarSuscripcionHandler).
-            int diasSinUsar = (cliente.FechaPausaHasta.Value.Date - DateTime.Today).Days;
-            if (diasSinUsar > 0 && cliente.FechaVencimiento.HasValue)
-                cliente.FechaVencimiento = cliente.FechaVencimiento.Value.AddDays(-diasSinUsar);
+            DescontarPausaNoUsada(cliente);
 
             cliente.FechaPausaHasta = null;
             dalCliente.Modificar(cliente);
@@ -347,7 +432,7 @@ namespace BLL
 
             // PN02 — el plan ya NO se asigna en el alta: un cliente se registra sin plan y
             // recién lo adquiere a través de una Contratación (Vendedor) confirmada por Caja
-            // (BLL.Contratacion.ConfirmarPago → ActivarSuscripcionDesdeContratacion). Ver
+            // (BLL.Contratacion.ConfirmarCobro → ActivarSuscripcionDesdeContratacion). Ver
             // BE.EstadoComercialCliente / BLL.Pedido.ObtenerClienteValidado: "sin plan" ya es
             // un estado de cliente válido y manejado en todo el resto del sistema.
             if (!cliente.FechaNacimiento.HasValue)

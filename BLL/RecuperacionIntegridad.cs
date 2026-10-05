@@ -90,7 +90,7 @@ namespace BLL
                 d.OtrasTablasCorruptas.AddRange(Configuracion.ObtenerTablasAdicionalesCorruptas());
                 if (d.OtrasTablasCorruptas.Count > 0)
                     d.Resumen.Add("Los dígitos verificadores de otras tablas protegidas no coinciden " +
-                                  "(Cliente, Empleado o Pedido). Si los datos son legítimos (por ejemplo, cargados por script), " +
+                                  "(" + string.Join(", ", d.OtrasTablasCorruptas) + "). Si los datos son legítimos (por ejemplo, cargados por script), " +
                                   "usá \"Asumir pérdida\" para recalcularlos.");
             }
             catch (Exception ex)
@@ -211,6 +211,10 @@ namespace BLL
             Cmp("Perfil",           a.Perfil,           e.Perfil);
             Cmp("Estado",           a.Estado,           e.Estado);
             Cmp("IntentosFallidos", a.IntentosFallidos, e.IntentosFallidos);
+            Cmp("Activo",           a.Activo,           e.Activo);
+            Cmp("RequiereCambioClave", a.RequiereCambioClave, e.RequiereCambioClave);
+            Cmp("CantidadBloqueos", a.CantidadBloqueos, e.CantidadBloqueos);
+            Cmp("FechaBloqueo",     a.FechaBloqueo,     e.FechaBloqueo);
             return l;
         }
 
@@ -264,7 +268,7 @@ namespace BLL
                            ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
             string actor = Seguridad.SessionManager.IsLoggedIn
                            ? Seguridad.SessionManager.GetInstance().Usuario.Username : "(arranque/sin sesión)";
-            new Servicios.Bitacora().RegistrarSinSesion(
+            Servicios.FabricaBitacora.CrearSistema().RegistrarSinSesion(
                 modulo:     "Integridad de Datos",
                 actividad:  "Reparación desde Espejo de Integridad",
                 criticidad: BE.Criticidad.Alta,
@@ -286,7 +290,7 @@ namespace BLL
                            ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
             string actor = Seguridad.SessionManager.IsLoggedIn
                            ? Seguridad.SessionManager.GetInstance().Usuario.Username : "(arranque/sin sesión)";
-            new Servicios.Bitacora().RegistrarSinSesion(
+            Servicios.FabricaBitacora.CrearSistema().RegistrarSinSesion(
                 modulo:     "Integridad de Datos",
                 actividad:  "Asumir pérdida (recálculo de DV sobre datos actuales)",
                 criticidad: BE.Criticidad.Alta,

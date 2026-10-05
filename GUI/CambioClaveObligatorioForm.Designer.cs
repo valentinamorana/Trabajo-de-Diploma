@@ -75,14 +75,14 @@ namespace GUI
             this.lblReglas.Text      = "Mínimo 8 caracteres, con al menos un número y un carácter especial.";
 
             // ── lblError ───────────────────────────────────────────────────────
-            this.lblError.ForeColor = System.Drawing.Color.FromArgb(180, 50, 50);
+            this.lblError.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.lblError.Location  = new System.Drawing.Point(16, 178);
             this.lblError.Name      = "lblError";
             this.lblError.Size      = new System.Drawing.Size(398, 18);
             this.lblError.TabIndex  = 6;
 
             // ── btnCambiar ─────────────────────────────────────────────────────
-            this.btnCambiar.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnCambiar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnCambiar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnCambiar.FlatAppearance.BorderSize = 0;
             this.btnCambiar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

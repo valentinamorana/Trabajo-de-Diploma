@@ -51,7 +51,8 @@ Tests/                                    Tests unitarios (MSTest) con fakes de 
 BD/00_Instalacion_Completa.sql            Único script: esquema, datos semilla y datos de prueba
 Instalador/                               Script de Inno Setup, DbInstaller (cliente SQL embebido)
                                           y credenciales iniciales. El .exe se genera en
-                                          Instalador/Salida/ y no se versiona
+                                          Instalador/Salida/ y no se versiona: el instalador
+                                          firmado se distribuye como GitHub Release
 docs/NEGOCIO_Y_PROCESOS.md               Documento de referencia: reglas y procesos de negocio, roles y arquitectura
 docs/MAPA_DE_NAVEGACION.md               Mapa de menús, formularios, procesos y roles
 WardrobeFlow.slnx                         Solución de Visual Studio
@@ -201,8 +202,10 @@ State ya entregado (PdN2/PdN4) sin tocarlo.
 - Contraseñas nunca en texto plano: PBKDF2-SHA256 con salt aleatorio y 100.000 iteraciones; verificación en tiempo constante
 - Bloqueo de login progresivo (1 → 5 → 15 → 60 min) con claves de emergencia de un solo uso
 - Handler global de excepciones no controladas: registra el detalle técnico en bitácora y muestra un mensaje genérico al usuario
-- Dígitos verificadores (DVH por fila + DVV por tabla) sobre `Usuario`, `Cliente` y `Empleado`
+- Dígitos verificadores (DVH por fila + DVV por tabla) sobre `Usuario`, `Cliente`, `Empleado`, `Pedido`, `Contratacion` y `PermisoRelacion`; cada escritura recalcula solo la fila afectada
 - Backups cifrados con contraseña (AES-128 + PBKDF2) y Clave Maestra de Recuperación opcional
+- **Usuarios demo con claves fijas (decisión deliberada para la defensa):** las cuentas de `Instalador/Credenciales_Iniciales.txt` no exigen cambio de clave en el primer ingreso. En una implementación real hay que cambiar todas esas contraseñas (desde Mi Perfil, o forzando el cambio desde Administrar → Usuarios) y borrar o restringir ese archivo. Las cuentas demo solo se crean en una instalación nueva; una actualización nunca las recrea.
+- **Acceso a la base:** el instalador da al grupo local "Usuarios" de Windows el rol `db_owner` sobre `WardrobeFlowDB` (hace falta para restaurar backups desde la app). Quién puede operar lo decide el login y las patentes de la aplicación; un cambio de datos hecho por fuera de la app lo detectan los dígitos verificadores al iniciar.
 
 ---
 

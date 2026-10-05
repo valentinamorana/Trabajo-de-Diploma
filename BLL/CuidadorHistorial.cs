@@ -15,7 +15,9 @@ namespace BLL
     /// Es REUTILIZABLE: cualquier IMemento puede almacenarse aquí; el detalle de
     /// cómo se serializa cada tipo concreto vive en el DAL correspondiente.
     /// </summary>
-    public class CuidadorHistorial
+    // Interno: el Caretaker solo lo usa BLL.VersionUsuario (la fachada valida los permisos);
+    // no debe poder invocarse una escritura del historial desde fuera de la BLL.
+    internal class CuidadorHistorial
     {
         private readonly DAL.VersionUsuario _dalVersion = new DAL.VersionUsuario();
 

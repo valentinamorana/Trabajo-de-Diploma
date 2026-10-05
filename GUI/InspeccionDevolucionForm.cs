@@ -17,7 +17,7 @@ namespace GUI
         protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPrendaService prendaBLL = new BLL.Prenda();
-        private readonly BLL.Interfaces.ICargoPrendaService cargoBLL = new BLL.CargoPrenda();
+        private readonly BLL.InspeccionDevolucion inspeccionBLL = new BLL.InspeccionDevolucion();
 
         private List<BE.Prenda> _prendas = new List<BE.Prenda>();
 
@@ -26,6 +26,8 @@ namespace GUI
         public InspeccionDevolucionForm()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvPrendas);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -33,14 +35,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -122,6 +117,9 @@ namespace GUI
                 lblConteo.Text = string.Format(
                     tCnt.ContainsKey("insp.conteo") ? tCnt["insp.conteo"].Texto : "{0} prenda(s) pendiente(s) de inspección.",
                     _prendas.Count);
+                // Sin selección tras recargar: si no, la primera fila queda seleccionada con
+                // los botones deshabilitados (estado inconsistente).
+                dgvPrendas.ClearSelection();
                 DeshabilitarBotones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -147,33 +145,31 @@ namespace GUI
             return _prendas.Find(p => p.IdPrenda == id);
         }
 
-        // Camino A — reingresa sin cargo. Mismo BLL.Prenda.CambiarEstado que ya usa GUI.Prendas,
-        // sin aprobación de nadie (Nuuly: desgaste normal cubierto por la cuota).
+        // Camino A — reingresa sin cargo (BLL.InspeccionDevolucion.AprobarReingreso), sin
+        // aprobación de nadie (Nuuly: desgaste normal cubierto por la cuota).
         private void BtnAprobarReingreso_Click(object sender, EventArgs e)
         {
             var prenda = ObtenerSeleccionada();
             if (prenda == null) return;
 
-            var confirmar = MessageBox.Show(
-                Tr("conf.insp.reingreso.msg", "¿Aprobar el reingreso de '{0}' a Disponible?", new object[] { prenda.Nombre }),
-                Tr("conf.insp.reingreso.titulo", "Confirmar Reingreso"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-            if (confirmar != DialogResult.Yes) return;
+            if (!ConfirmarSiNo(
+                    Tr("conf.insp.reingreso.msg", "¿Aprobar el reingreso de '{0}' a Disponible?", new object[] { prenda.Nombre }),
+                    Tr("conf.insp.reingreso.titulo", "Confirmar Reingreso")))
+                return;
 
             try
             {
-                string actor = Seguridad.SessionManager.IsLoggedIn
-                    ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
-                prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Disponible, actor);
+                inspeccionBLL.AprobarReingreso(this.Text, prenda);
                 MostrarOk(Tr("msg.insp.reingreso_ok", "'{0}' reingresó a Disponible.", new object[] { prenda.Nombre }));
                 CargarPrendas();
             }
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        // Camino B — se da de baja y se cobra el precio de reposición completo. Mismo
-        // BLL.CargoPrenda.RegistrarCargo que ya usa GUI.Prendas, sin aprobación de nadie
-        // (Nuuly: dañada sin reparación posible = cobro directo).
+        // Camino B — se da de baja y se cobra el precio de reposición completo, sin aprobación
+        // de nadie (Nuuly: dañada sin reparación posible = cobro directo). Cargo y baja se
+        // persisten en UNA transacción dentro de BLL.InspeccionDevolucion.DarDeBajaConCargo
+        // (antes eran dos llamadas sueltas desde acá, sin transacción).
         private void BtnDarDeBajaConCargo_Click(object sender, EventArgs e)
         {
             var prenda = ObtenerSeleccionada();
@@ -185,19 +181,7 @@ namespace GUI
 
                 try
                 {
-                    string actor = Seguridad.SessionManager.IsLoggedIn
-                        ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
-
-                    // Cobrar ANTES de dar de baja: si RegistrarCargo fallara después de la
-                    // baja, la prenda quedaría destruida sin cobro (Baja es estado final, sin
-                    // forma de reintentar el descarte). En este orden, si CambiarEstado fallara
-                    // después del cargo, la prenda queda EnLimpieza con un cargo ya registrado
-                    // — recuperable manualmente, y sin riesgo de "pérdida total silenciosa".
-                    // Riesgo residual aceptado: ambos pasos no corren en una única transacción
-                    // (BLL.Prenda y BLL.CargoPrenda son servicios distintos); no está más
-                    // desarrollado por quedar fuera de alcance de este TP.
-                    cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
-                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor, viaInspeccion: true);
+                    inspeccionBLL.DarDeBajaConCargo(this.Text, prenda, dlg.Motivo, dlg.Monto);
                     MostrarOk(Tr("msg.insp.baja_ok", "'{0}' dada de baja — cargo de ${1} registrado.",
                         new object[] { prenda.Nombre, dlg.Monto }));
                     CargarPrendas();

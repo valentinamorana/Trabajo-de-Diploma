@@ -27,7 +27,10 @@ namespace Tests.Fakes
         public int UltimoIdBaja { get; private set; }
 
         public List<BE.Cliente> ObtenerTodos() => ClientesDevueltos;
-        public BE.Cliente ObtenerPorId(int idCliente) => ClientePorId;
+        // Clientes adicionales por ID (p. ej. el referente en PN02); si el ID no está, devuelve ClientePorId.
+        public Dictionary<int, BE.Cliente> OtrosClientesPorId { get; } = new Dictionary<int, BE.Cliente>();
+        public BE.Cliente ObtenerPorId(int idCliente)
+            => OtrosClientesPorId.TryGetValue(idCliente, out var otro) ? otro : ClientePorId;
 
         public int Alta(BE.Cliente cliente)
         {
@@ -50,12 +53,40 @@ namespace Tests.Fakes
 
         public bool ExisteDNI(string dni) => ExisteDNIRespuesta;
         public bool ExisteDNIParaOtro(string dni, int idExcluir) => ExisteDNIParaOtroRespuesta;
+        public bool TieneContratacionPendienteRespuesta { get; set; }
+        // IDs puntuales con contratación pendiente (además de la respuesta global).
+        public HashSet<int> IdsConContratacionPendiente { get; } = new HashSet<int>();
+        public bool TieneContratacionPendiente(int idCliente)
+            => TieneContratacionPendienteRespuesta || IdsConContratacionPendiente.Contains(idCliente);
+        public int ConsultasIdsConContratacionPendiente { get; private set; }
+        public HashSet<int> ObtenerIdsConContratacionPendiente()
+        {
+            ConsultasIdsConContratacionPendiente++;
+            var ids = new HashSet<int>(IdsConContratacionPendiente);
+            if (TieneContratacionPendienteRespuesta)
+                foreach (var c in ClientesDevueltos) ids.Add(c.IdCliente);
+            return ids;
+        }
 
         // Sin BD real: no hay transacción que abrir, se ejecuta la acción directamente
         // (conexión/transacción null — los EnTx de estos fakes no las usan).
         public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion) => accion(null, null);
 
         public void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente) => Modificar(cliente);
+
+        // Cobro recurrente con control optimista: el doble compara contra el vencimiento "en la
+        // base" (VencimientoEnBase si se configura; si no, acepta) y registra la llamada.
+        public int RenovarVencimientoVeces { get; private set; }
+        public DateTime? VencimientoEnBase { get; set; }
+        public bool VencimientoEnBaseConfigurado { get; set; }
+        public bool RenovarVencimientoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente,
+                                           DateTime? vencimientoLeido, DateTime nuevoVencimiento)
+        {
+            if (VencimientoEnBaseConfigurado && VencimientoEnBase != vencimientoLeido) return false;
+            RenovarVencimientoVeces++;
+            VencimientoEnBase = nuevoVencimiento;
+            return true;
+        }
 
         // Espías del crédito de referido (en la BD real son UPDATEs atómicos).
         public List<KeyValuePair<int, decimal>> CreditosSumados { get; } = new List<KeyValuePair<int, decimal>>();
@@ -67,6 +98,7 @@ namespace Tests.Fakes
         public void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
             => CreditosConsumidos.Add(new KeyValuePair<int, decimal>(idCliente, monto));
 
-        public void RecalcularDV() => RecalcularDVVeces++;
+        public List<int> IdsDVRecalculados { get; } = new List<int>();
+        public void RecalcularDV(int idCliente) { RecalcularDVVeces++; IdsDVRecalculados.Add(idCliente); }
     }
 }

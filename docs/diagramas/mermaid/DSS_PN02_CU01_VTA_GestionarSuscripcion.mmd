@@ -3,23 +3,33 @@ sequenceDiagram
   actor V as Vendedor
   participant F as Nueva<br/>ContratacionForm
   participant B as BLL.<br/>Contratacion
-  participant DC as DAL.Cliente / DAL.PlanSuscripcion
+  participant CB as BLL.Cliente
   participant D as DAL.<br/>Contratacion
-  V->>F: Elige cliente, plan y modalidad (Mensual, Trimestral, Anual)
-  F->>B: CrearContratacion(modulo, idCliente, idPlan, modalidad)
-  Note over B: Exigir(ClientesEditar)
-  B->>DC: ObtenerPorId(idCliente) · ObtenerPorId(idPlan)
-  alt Cliente inexistente, plan inexistente o inactivo
-    B-->>F: AppException(cliente_inexistente / plan_inexistente)
-  else Datos válidos
-    Note over B: ValidarCupo: el plan debe alcanzar para las prendas que el cliente tiene en uso
-    B->>D: ObtenerPendientesDePago()
-    alt El cliente ya tiene una contratación pendiente
-      B-->>F: AppException(pendiente_existente)
-    else Sin pendientes
-      B->>D: Alta(contratación: estado PendientePago, IdVendedor)
-      D-->>B: idContratacion
+  V->>F: Ingresa DNI, nombre o apellido del cliente
+  F->>B: IdentificarCliente(identificacion)
+  B->>CB: BuscarPorIdentificacion(texto)
+  alt ¿Registrado? No
+    F-->>V: Registrar cliente (ABM de Clientes, referente opcional)
+  end
+  F->>B: PresentarPlanes()
+  B-->>F: Planes disponibles (nombre, precio mensual, límite de prendas)
+  alt ¿Elige plan y modalidad? No
+    V->>F: El cliente desiste + motivo
+    F->>B: AsentarDesistimiento(modulo, idCliente, idPlan, modalidad, motivo)
+    B->>D: AltaDesistimiento(desistimiento)
+    F-->>V: Aviso de desistimiento (PDF)
+  else Sí
+    F->>B: ValidarContratacion(idCliente, idPlan)  [¿Contratación válida?]
+    F->>B: EstimarImporte(idCliente, idPlan, modalidad)
+    V->>F: Registrar contratación
+    F->>B: RegistrarContratacion(modulo, idCliente, idPlan, modalidad)
+    Note over B: Exigir(ClientesEditar) · cliente activo, plan activo, cupo, sin otra pendiente
+    alt No válida
+      B-->>F: AppException(motivo)  [queda en la bitácora]
+      F-->>V: Informar motivo
+    else Válida
+      B->>D: Alta(contratación PendientePago, PrecioMensual pactado)
       B-->>F: idContratacion
-      F-->>V: Contratación pendiente de pago: derivar a Caja (la suscripción todavía no está vigente)
+      F-->>V: Orden de cobro (PDF): el cliente abona en Caja
     end
   end

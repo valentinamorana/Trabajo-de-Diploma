@@ -39,6 +39,8 @@ namespace GUI
         public Clientes()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvClientes);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -46,14 +48,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -153,20 +148,14 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                var te = Traductor.ObtenerTraducciones(_idioma);
-                MostrarError(string.Format(te.ContainsKey("err.generico.cargar") ? te["err.generico.cargar"].Texto : "Error al cargar: {0}", ex.Message));
+                MostrarError(ex);
             }
         }
 
         private void AplicarFiltro()
         {
-            string filtro = txtFiltro.Text.Trim().ToLower();
-            var lista = string.IsNullOrEmpty(filtro)
-                ? _clientes
-                : _clientes.FindAll(c =>
-                    c.NombreCompleto.ToLower().Contains(filtro) ||
-                    c.DNI.Contains(filtro) ||
-                    (c.Email ?? "").ToLower().Contains(filtro));
+            // El criterio de búsqueda lo define la BLL (BLL.Cliente.Filtrar).
+            var lista = clienteBLL.Filtrar(_clientes, txtFiltro.Text);
 
             var t = Traductor.ObtenerTraducciones(_idioma);
             string sinPlan = t.ContainsKey("lbl.sinplan") ? t["lbl.sinplan"].Texto : "Sin plan";
@@ -192,8 +181,10 @@ namespace GUI
 
             foreach (var c in lista)
             {
-                bool expirado    = c.VencimientoExpirado;
-                bool proxAVencer = !expirado && c.SuscripcionProximaAVencer();
+                // El estado del vencimiento lo deriva BE.Cliente; acá solo se arma el texto.
+                var estadoVenc   = c.ObtenerEstadoVencimiento();
+                bool expirado    = estadoVenc == BE.EstadoVencimiento.Vencida;
+                bool proxAVencer = estadoVenc == BE.EstadoVencimiento.ProximaAVencer;
 
                 string vencStr = c.FechaVencimiento.HasValue
                     ? (expirado
@@ -204,7 +195,7 @@ namespace GUI
                     : sinVenc;
 
                 // Mostrar "StockUtilizado / LimitePrendas" si tiene plan con límite
-                string capacidad = c.IdPlan.HasValue && c.LimitePrendas > 0
+                string capacidad = c.TieneLimiteDePrendas
                     ? $"{c.StockUtilizado} / {c.LimitePrendas}"
                     : c.StockUtilizado.ToString();
 
@@ -236,7 +227,7 @@ namespace GUI
                 if (row.Cells["_Vencido"].Value is bool exp && exp)
                     row.DefaultCellStyle.ForeColor = Color.DarkRed;
                 else if (row.Cells["_ProxVencer"].Value is bool prox && prox)
-                    row.DefaultCellStyle.ForeColor = Color.FromArgb(160, 100, 0);
+                    row.DefaultCellStyle.ForeColor = Tema.Alerta;
             }
 
             // Ajustar columnas
@@ -272,6 +263,12 @@ namespace GUI
                     string fmt = t.ContainsKey("msg.cli.registrado") ? t["msg.cli.registrado"].Texto : "Cliente '{0}' registrado correctamente.";
                     MostrarOk(string.Format(fmt, form.ClienteEditado.NombreCompleto));
                     CargarClientes();
+
+                    // PN02: "Registrar cliente" → sigue en "Presentar planes" para el mismo cliente.
+                    if (MessageBox.Show(Tr("conf.cli.contratar", "¿Continuar con la contratación de un plan para este cliente?"),
+                            this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        using (var contratacion = new NuevaContratacionForm(form.ClienteEditado.DNI))
+                            contratacion.ShowDialog(this);
                 }
                 catch (Exception ex)
                 {

@@ -28,5 +28,13 @@ namespace GUI
             // PreferenciasUI.Aplicar usa un default razonable si todavía no se cargó ninguna
             // preferencia, y ManejadorSeguridad.AplicarSeguridad se guarda con IsLoggedIn.
         }
+
+        // Botones traducidos por su Tag (antes "Aceptar"/"Cancelar" quedaban fijos en español).
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            btnAceptar.Text  = Tr(btnAceptar.Tag?.ToString()  ?? "btn.aceptar",  "Aceptar");
+            btnCancelar.Text = Tr(btnCancelar.Tag?.ToString() ?? "btn.cancelar", "Cancelar");
+        }
     }
 }

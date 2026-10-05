@@ -516,22 +516,22 @@ ELSE
         // de Windows, por eso se resuelve por SID y no por nombre) solo sobre esta base. La
         // autorización de cada persona la sigue haciendo el login propio de la app.
         //
-        // MÍNIMO PRIVILEGIO: antes se lo agregaba a db_owner, con lo que cualquier usuario de
-        // Windows podía reescribir la base por fuera de la app (DDL, borrar tablas, cambiar
-        // dueños). Ahora recibe solo lo que la app usa:
-        //   - db_datareader / db_datawriter: SELECT/INSERT/UPDATE/DELETE de la operación normal.
-        //   - GRANT EXECUTE: por si la app usa procedimientos/funciones.
-        //   - db_backupoperator: el backup desde la app (BACKUP DATABASE).
-        // RESTAURAR un backup NO queda habilitado para usuarios comunes: RESTORE sobre una base
-        // existente exige sysadmin/dbcreator (o ser el dueño de la base) y ALTER DATABASE para
-        // pasarla a SINGLE_USER. Solo un administrador de Windows (sysadmin de la instancia)
-        // puede restaurar; a cualquier otro la app le muestra el error de permisos de SQL.
-        // Migración: si una instalación anterior había dejado al grupo en db_owner, se lo quita.
+        // ROL db_owner, como el instalador que se probó en la computadora de la facultad (fe63121).
+        // Se evaluó dar solo db_datareader/db_datawriter/db_backupoperator, pero:
+        //   - Restaurar un backup desde la app (DAL.Backup: ALTER DATABASE ... SINGLE_USER +
+        //     RESTORE ... WITH REPLACE) sobre una base existente exige ser db_owner de ella (o
+        //     sysadmin/dbcreator, que son permisos de toda la instancia). Si instala una cuenta
+        //     y la app la usa otra, sin db_owner no se podría restaurar.
+        //   - Si la cuenta que reinstala no es sysadmin, su acceso a la base viene de este grupo:
+        //     quitárselo bloquearía la próxima actualización.
+        // Quién puede restaurar lo decide la patente de Backup dentro de la app. Riesgo aceptado
+        // y documentado: un usuario de Windows del equipo podría modificar la base por fuera de
+        // la app; los cambios de datos los detectan los dígitos verificadores (DVH/DVV).
         private static int OtorgarAccesoUsuariosLocales(string servidor, string nombreBD, Action<string> registrar)
         {
             string grupo = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null)
                 .Translate(typeof(NTAccount)).Value;
-            registrar($"Otorgando acceso (mínimo privilegio) a '{grupo}' sobre '{nombreBD}' en '{servidor}'...");
+            registrar($"Otorgando acceso (db_owner) a '{grupo}' sobre '{nombreBD}' en '{servidor}'...");
             try
             {
                 using (var conexion = new SqlConnection(CadenaConexion(servidor)))
@@ -550,18 +550,7 @@ END
 SET @q = N'USE ' + QUOTENAME(@bd) + N';
 IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = ' + @lit + N')
     CREATE USER ' + @g + N' FOR LOGIN ' + @g + N';
-ALTER ROLE db_datareader     ADD MEMBER ' + @g + N';
-ALTER ROLE db_datawriter     ADD MEMBER ' + @g + N';
-ALTER ROLE db_backupoperator ADD MEMBER ' + @g + N';
-GRANT EXECUTE TO ' + @g + N';
-IF EXISTS (SELECT 1 FROM sys.database_role_members rm
-           JOIN sys.database_principals r ON r.principal_id = rm.role_principal_id
-           JOIN sys.database_principals m ON m.principal_id = rm.member_principal_id
-           WHERE r.name = N''db_owner'' AND m.name = ' + @lit + N')
-BEGIN
-    ALTER ROLE db_owner DROP MEMBER ' + @g + N';
-    PRINT ''Se quitó al grupo del rol db_owner (instalación anterior).'';
-END';
+ALTER ROLE db_owner ADD MEMBER ' + @g + N';';
 EXEC (@q);";
                     using (var cmd = new SqlCommand(sql, conexion))
                     {
@@ -571,7 +560,7 @@ EXEC (@q);";
                         cmd.ExecuteNonQuery();
                     }
                 }
-                registrar("Acceso otorgado: db_datareader, db_datawriter, db_backupoperator y EXECUTE.");
+                registrar("Acceso otorgado: db_owner de la base (hace falta para restaurar backups desde la app).");
                 return 0;
             }
             catch (Exception ex)

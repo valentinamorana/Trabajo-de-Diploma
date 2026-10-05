@@ -72,12 +72,11 @@
 ;   uso la vez anterior (ahi estan los datos). Para instalaciones
 ;   desatendidas: Instalador.exe /VERYSILENT /SERVIDOR=.\SQLEXPRESS01
 ; - Despues del script: se da acceso a la base al grupo local "Usuarios"
-;   con MINIMO PRIVILEGIO (lectura/escritura de datos, EXECUTE y backup; no
-;   db_owner) — Integrated Security = el usuario de Windows que abre la app,
+;   como db_owner (igual que el instalador probado en la facultad, fe63121;
+;   hace falta para restaurar backups) — Integrated Security = el usuario de Windows que abre la app,
 ;   que puede no ser el administrador que instalo — y se corre una
 ;   verificacion final (admin semilla + datos); si falla, rollback.
-;   Restaurar un backup desde la app requiere un administrador de Windows
-;   (sysadmin de la instancia).
+;   Quien puede restaurar lo decide la patente de Backup dentro de la app.
 ; - {app}\Backups y {app}\TempBackups quedan escribibles para usuarios
 ;   comunes (la app guarda ahi sus backups; TempBackups es el temporal de
 ;   respaldo cuando C:\Users\Public no se puede usar). {app}\Logs tambien,
@@ -1260,7 +1259,7 @@ begin
                          'Detalle en: ' + LogPath, mbInformation, MB_OK, IDOK);
 
     // Acceso para cualquier usuario de Windows del equipo (ver
-    // OtorgarAccesoUsuariosLocales en DbInstaller), con mínimo privilegio:
+    // OtorgarAccesoUsuariosLocales en DbInstaller), como db_owner:
     // cubre el caso de instalar con la cuenta de otro administrador (UAC) y
     // abrir la app con la propia. No aplica a LocalDB (es una instancia
     // privada de cada usuario) y no es bloqueante: el que instaló ya tiene

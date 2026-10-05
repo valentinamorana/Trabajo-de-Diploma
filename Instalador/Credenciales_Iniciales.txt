@@ -1,9 +1,17 @@
-WardrobeFlow — Credenciales iniciales (usuarios semilla)
-==========================================================
+WardrobeFlow — Credenciales iniciales (usuarios semilla) — SOLO PARA LA DEMO
+==============================================================================
 
-Estas cuentas se crean automáticamente al instalar el sistema por primera vez
-(ver BD/00_Instalacion_Completa.sql). Se recomienda cambiar las contraseñas
-desde Mi Perfil apenas se ingresa por primera vez.
+ATENCIÓN: este archivo es SOLO PARA LA DEMOSTRACIÓN ACADÉMICA. Las cuentas y
+contraseñas de abajo son FIJAS a propósito, para la presentación y defensa del
+trabajo, y este archivo es público (lo puede leer cualquier usuario del
+equipo). En una implementación real hay que cambiar todas estas contraseñas
+desde Mi Perfil en el primer uso (o un Administrador debe forzar el cambio de
+clave de cada cuenta) y borrar o restringir este archivo.
+
+Estas cuentas se crean automáticamente SOLO en una instalación NUEVA (ver
+BD/00_Instalacion_Completa.sql). Al actualizar una base existente no se crea
+ni se recrea ninguna cuenta: si en producción se renombró o se dio de baja un
+usuario demo, una actualización no lo vuelve a crear.
 
   Usuario       Contraseña           Rol
   ------------- -------------------- -----------------------------------------
@@ -41,11 +49,25 @@ pendientes de pago, una lista de espera, sugerencias y promociones.
 
 Requisitos previos a la instalación
 ------------------------------------
-- SQL Server Express (o superior) o SQL LocalDB instalado. El instalador
-  detecta las instancias disponibles; si hay más de una permite elegir, y si
-  no encuentra ninguna permite ingresar el servidor a mano.
+- No hace falta tener SQL Server instalado: si el equipo no tiene ninguna
+  instancia, el instalador ofrece instalar SQL Server Express LocalDB (viene
+  incluido) y crea la base ahí. Una base en LocalDB es privada del usuario de
+  Windows que instala: otro usuario de Windows del equipo no la ve. Para
+  compartirla entre varios usuarios, usar SQL Server Express (o superior).
+- Si ya hay instancias de SQL Server (Express, LocalDB u otra), el
+  instalador las detecta; si hay más de una permite elegir, y también permite
+  ingresar el servidor a mano.
+- La cuenta de Windows que instala tiene que ser administradora de la
+  instancia elegida (sysadmin) o, al menos, poder crear bases (dbcreator);
+  el instalador lo verifica antes de copiar archivos.
 - .NET Framework 4.7.2 o superior.
 
 El instalador crea la base de datos WardrobeFlowDB, todas sus tablas y los
 datos de prueba de forma automática durante la instalación. Si el equipo ya
-tiene una versión anterior, actualiza la base existente (sin borrar datos).
+tiene una versión anterior, hace un backup de la base y la actualiza (sin
+borrar datos ni crear usuarios demo).
+
+Acceso de otros usuarios de Windows: el instalador les da acceso a la base
+con permisos mínimos (leer/escribir datos y hacer backups desde la app).
+RESTAURAR un backup requiere un administrador de Windows que sea sysadmin de
+la instancia de SQL Server.

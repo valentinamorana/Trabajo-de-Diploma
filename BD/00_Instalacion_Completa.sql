@@ -52,19 +52,37 @@ BEGIN
         PRINT 'Base de datos WardrobeFlowDB creada.';
     END TRY
     BEGIN CATCH
-        -- En la carpeta de datos quedaron archivos WardrobeFlowDB.mdf/.ldf huérfanos (una
-        -- desinstalación incompleta, una instancia LocalDB borrada a mano...): CREATE DATABASE
-        -- no puede reutilizarlos. Se crea la base con archivos de nombre nuevo, sin tocar los viejos.
+        -- En la carpeta de datos quedaron archivos WardrobeFlowDB.mdf/_log.ldf huérfanos (una
+        -- desinstalación incompleta, una instancia LocalDB borrada a mano...): CREATE DATABASE no
+        -- puede reutilizarlos. Esos archivos pueden tener los DATOS de una instalación anterior, así
+        -- que primero se intenta ADJUNTARLOS (y el resto del script los actualiza). Solo si no se
+        -- pueden adjuntar (dañados, de otra versión, en uso) se crea la base con archivos de nombre
+        -- nuevo, sin tocar los viejos. En los dos casos queda un AVISO en el log del instalador.
+        DECLARE @errCreate NVARCHAR(2048) = ERROR_MESSAGE();
         DECLARE @dir NVARCHAR(400) = CONVERT(NVARCHAR(400), SERVERPROPERTY('InstanceDefaultDataPath'));
         IF @dir IS NULL
             SELECT @dir = LEFT(physical_name, LEN(physical_name) - CHARINDEX('\', REVERSE(physical_name)) + 1)
             FROM sys.master_files WHERE database_id = DB_ID('master') AND file_id = 1;
-        DECLARE @sufijo NVARCHAR(20) = FORMAT(GETDATE(), 'yyyyMMddHHmmss');
-        DECLARE @sql NVARCHAR(MAX) =
-            N'CREATE DATABASE WardrobeFlowDB ON (NAME = WardrobeFlowDB, FILENAME = ''' + @dir + N'WardrobeFlowDB_' + @sufijo + N'.mdf'') ' +
-            N'LOG ON (NAME = WardrobeFlowDB_log, FILENAME = ''' + @dir + N'WardrobeFlowDB_' + @sufijo + N'_log.ldf'')';
-        EXEC (@sql);
-        PRINT 'AVISO: ya había archivos WardrobeFlowDB huérfanos en ' + @dir + '; la base se creó con archivos nuevos.';
+        IF RIGHT(@dir, 1) <> N'\' SET @dir = @dir + N'\';
+        DECLARE @sql NVARCHAR(MAX);
+        BEGIN TRY
+            SET @sql = N'CREATE DATABASE WardrobeFlowDB ON (FILENAME = ''' + REPLACE(@dir, '''', '''''') + N'WardrobeFlowDB.mdf''), ' +
+                       N'(FILENAME = ''' + REPLACE(@dir, '''', '''''') + N'WardrobeFlowDB_log.ldf'') FOR ATTACH';
+            EXEC (@sql);
+            PRINT N'AVISO: se encontraron archivos WardrobeFlowDB.mdf/_log.ldf existentes en ' + @dir +
+                  N' y se ADJUNTARON (conservan los datos de una instalación anterior; se actualizan a esta versión).';
+        END TRY
+        BEGIN CATCH
+            DECLARE @errAttach NVARCHAR(2048) = ERROR_MESSAGE();
+            DECLARE @sufijo NVARCHAR(20) = FORMAT(GETDATE(), 'yyyyMMddHHmmss');
+            SET @sql =
+                N'CREATE DATABASE WardrobeFlowDB ON (NAME = WardrobeFlowDB, FILENAME = ''' + REPLACE(@dir, '''', '''''') + N'WardrobeFlowDB_' + @sufijo + N'.mdf'') ' +
+                N'LOG ON (NAME = WardrobeFlowDB_log, FILENAME = ''' + REPLACE(@dir, '''', '''''') + N'WardrobeFlowDB_' + @sufijo + N'_log.ldf'')';
+            EXEC (@sql);
+            PRINT N'AVISO: no se pudo crear la base con los archivos por defecto (' + @errCreate + N') ni adjuntar los ' +
+                  N'existentes en ' + @dir + N' (' + @errAttach + N'). Se creó una base NUEVA y vacía con archivos ' +
+                  N'WardrobeFlowDB_' + @sufijo + N'.mdf/_log.ldf; los archivos viejos quedaron intactos por si tienen datos.';
+        END CATCH
     END CATCH
 END
 ELSE
@@ -524,6 +542,33 @@ ELSE
 GO
 
 -- ============================================================
+-- PARÁMETROS DEL SISTEMA / MARCAS DE MIGRACIÓN
+-- ParametroSistema guarda marcas estables de pasos que deben correr UNA sola vez
+-- (no en cada reinstalación/actualización): siembra de usuarios, migraciones de roles,
+-- datos de prueba. Idempotente.
+--
+-- 'SemillaUsuarios': las cuentas semilla/demo (y sus Empleado/Cliente demo) se crean SOLO en
+-- una instalación NUEVA. Se decide acá, antes de sembrar nada: si la tabla Usuario está vacía
+-- es una base nueva ('Pendiente'); si ya tiene usuarios es una actualización ('NoAplica') y NO
+-- se vuelve a crear ninguna cuenta. Antes, una actualización recreaba 'admin' (o cualquier usuario
+-- demo renombrado/borrado en producción) con la clave PUBLICADA y DVH = 0, lo que además dejaba
+-- la tabla "mezclada" y la app entraba en modo mantenimiento. La sección final del script pasa la
+-- marca a 'Aplicada'. Los roles y patentes nuevos SÍ se crean siempre (son esquema, no cuentas).
+-- Si una versión futura necesitara un usuario semilla NUEVO en una actualización, tiene que
+-- insertarlo con un DVH válido (calculado como lo hace la app), no con DVH = 0.
+-- ============================================================
+IF OBJECT_ID('ParametroSistema','U') IS NULL CREATE TABLE ParametroSistema (Clave NVARCHAR(100) NOT NULL PRIMARY KEY, Valor NVARCHAR(400) NULL, Fecha DATETIME NOT NULL DEFAULT GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios')
+BEGIN
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha)
+    SELECT N'SemillaUsuarios', CASE WHEN EXISTS (SELECT 1 FROM Usuario) THEN N'NoAplica' ELSE N'Pendiente' END, GETDATE();
+    IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'NoAplica')
+        PRINT 'Base existente: no se crean usuarios semilla/demo (solo se actualiza el esquema).';
+END
+GO
+
+-- ============================================================
 -- SEEDS INICIALES
 -- ============================================================
 
@@ -541,12 +586,12 @@ FROM (VALUES
     ('Gestionar Cobros',            'mnuCobroSuscripcion',   'Ventas'),
     ('Realizar Ventas',             'mnuPedidosVenta',       'Ventas'),
     ('Ver Pedidos Realizados',      'mnuPedidosRealizados',  'Ventas'),
-    ('Ver Análisis de Abandono',    'mnuAnalisisAbandono',   'Sistema'),
+    (N'Ver Análisis de Abandono',    'mnuAnalisisAbandono',   'Sistema'),
     ('Ver Ventas por Vendedor',     'mnuVentasVendedor',     'Sistema'),
-    ('Ver Rotación de Prendas',     'mnuAnalisisRotacion',   'Sistema'),
+    (N'Ver Rotación de Prendas',     'mnuAnalisisRotacion',   'Sistema'),
     ('Ver Tiempos de Mantenimiento','mnuAnalisisMantenimiento', 'Sistema'),
     ('Ver Escasez de Stock',        'mnuAnalisisEscasez',    'Sistema'),
-    ('Ver Recomendación de Prendas','mnuRecomendacionPrendas', 'Sistema')
+    (N'Ver Recomendación de Prendas','mnuRecomendacionPrendas', 'Sistema')
 ) AS v(Nombre, NombreMenu, Tipo)
 WHERE NOT EXISTS (SELECT 1 FROM Permiso p
                   WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0);
@@ -613,8 +658,9 @@ FROM (VALUES
     ('vendedor',   'VWyQxHK8Dxr+BBWgw63IMTgFG91ZeDZSxRtj5FIpH9qxHbayJVLUBFpErIgLdOmZ', 'Vendedor',             'Vendedor'),
     ('deposito',   'xL86BMbo9P5XpIZ7fW+jdMVNsgP+jhQykYOFpbClQoSsU44mv9HKYdU1aDgp4cBV', 'Deposito', 'Deposito')
 ) AS v(Username, Clave, Rol, Perfil)
-WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username);
-PRINT 'Usuarios iniciales creados.';
+WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username)
+  AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
+PRINT 'Usuarios iniciales: verificados.';
 GO
 
 -- Idiomas (ES, EN, RU)
@@ -774,7 +820,8 @@ FROM (VALUES
   ('ginventario', 'G89lxogCulMeAK+WA5rNHSyWpuz5QKF/DBH8PSfiPbUv5SBKStFVQYXylikq+OMw', 'GerenteInventario', 'GerenteInventario'),
   ('logistico',   'U3g703lDqDJfLgaXpOaNiAQpDOaBSq1LUMzEu3X7x8hh6097jTcMUNAsPfl1SCVG', 'OperadorLogistico', 'OperadorLogistico')
 ) AS v(Username, Clave, Rol, Perfil)
-WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username);
+WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username)
+  AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
 PRINT 'Usuarios demo de roles nuevos inicializados.';
 GO
 
@@ -791,7 +838,8 @@ JOIN (VALUES
     ('ginventario', N'Gisela',    N'Ortiz',        'ginventario@wardrobeflow.com', '1986-07-30'),
     ('logistico',   N'Lucas',     N'Gómez',        'logistico@wardrobeflow.com',   '1992-02-18')
 ) AS v(Username, Nombre, Apellido, Email, FechaNac) ON u.Username = v.Username
-WHERE u.Nombre IS NULL AND u.Apellido IS NULL;
+WHERE u.Nombre IS NULL AND u.Apellido IS NULL
+  AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
 PRINT 'Datos administrativos de usuarios semilla aplicados.';
 GO
 
@@ -814,51 +862,65 @@ SELECT 'Deposito', 'Deposito', 'Rol', 1, 1, 1
 WHERE NOT EXISTS (SELECT 1 FROM Permiso WHERE Nombre = 'Deposito' AND EsRol = 1);
 GO
 
--- (b) Deposito: sus patentes propias deben ser EXACTAMENTE Prendas + Stock.
---     Se quita cualquier patente vieja (p. ej. el legacy 'Ver Pedidos Realizados') y se agregan las nuevas.
-DELETE r FROM PermisoRelacion r
-JOIN Permiso rol ON rol.IdPermiso = r.IdPadre AND rol.Nombre = 'Deposito' AND rol.EsRol = 1
-JOIN Permiso pat ON pat.IdPermiso = r.IdHijo  AND ISNULL(pat.EsRol,0) = 0
--- Las patentes que las secciones posteriores le otorgan a Deposito (21b, 21c, Lista de Espera,
--- Inspección de Devolución, permisos de edición) no se borran: borrarlas y volver a insertarlas en
--- cada corrida dejaba aristas nuevas sin dígito verificador (falsa alarma de integridad).
-WHERE pat.NombreMenu NOT IN ('mnuPrendas','mnuStock','mnuStockEditar','mnuPedidosRealizados',
-                            'mnuPedidosRealizadosEditar','mnuListaEspera','mnuInspeccionDevolucion',
-                            'mnuControlStock','mnuControlStockEditar');
-INSERT INTO PermisoRelacion (IdPadre, IdHijo)
-SELECT rol.IdPermiso, pat.IdPermiso
-FROM (VALUES ('mnuPrendas'), ('mnuStock')) AS v(NombreMenu)
-JOIN Permiso rol ON rol.Nombre = 'Deposito' AND rol.EsRol = 1
-JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0
-WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
+-- (b)-(e) son una MIGRACIÓN de una sola vez (marca ParametroSistema 'ConsolidacionRolesV8'):
+-- antes corrían en cada reinstalación/actualización y borraban las personalizaciones que el
+-- Administrador hubiera hecho al rol Deposito desde el Gestor de Perfiles.
+-- (b) Deposito: sus patentes propias quedan en Prendas + Stock + Pedidos Realizados (Ver; la de
+--     Editar la asegura la sección 21b). Se quita cualquier otra patente vieja y se agregan las nuevas.
+--     Las patentes de secciones posteriores (Lista de Espera, Inspección, Control de Stock) se
+--     vuelven a asignar más abajo, en esas mismas secciones.
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'ConsolidacionRolesV8')
+BEGIN
+    DELETE r FROM PermisoRelacion r
+    JOIN Permiso rol ON rol.IdPermiso = r.IdPadre AND rol.Nombre = 'Deposito' AND rol.EsRol = 1
+    JOIN Permiso pat ON pat.IdPermiso = r.IdHijo  AND ISNULL(pat.EsRol,0) = 0
+    WHERE pat.NombreMenu NOT IN ('mnuPrendas','mnuStock','mnuStockEditar','mnuPedidosRealizados',
+                                'mnuPedidosRealizadosEditar','mnuListaEspera','mnuListaEsperaEditar',
+                                'mnuInspeccionDevolucion','mnuControlStock','mnuControlStockEditar');
+    INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+    SELECT rol.IdPermiso, pat.IdPermiso
+    FROM (VALUES ('mnuPrendas'), ('mnuStock'), ('mnuPedidosRealizados')) AS v(NombreMenu)
+    JOIN Permiso rol ON rol.Nombre = 'Deposito' AND rol.EsRol = 1
+    JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0
+    WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
+END
 GO
 
 -- (c) GerenteInventario ⊃ OperadorLogistico + Deposito (y se quita la arista vieja a EncargadoDeStock).
-DELETE r FROM PermisoRelacion r
-JOIN Permiso gi ON gi.IdPermiso = r.IdPadre AND gi.Nombre = 'GerenteInventario' AND gi.EsRol = 1
-JOIN Permiso ed ON ed.IdPermiso = r.IdHijo  AND ed.Nombre = 'EncargadoDeStock'  AND ed.EsRol = 1;
-INSERT INTO PermisoRelacion (IdPadre, IdHijo)
-SELECT gi.IdPermiso, h.IdPermiso
-FROM (VALUES ('OperadorLogistico'), ('Deposito')) AS v(Hijo)
-JOIN Permiso gi ON gi.Nombre = 'GerenteInventario' AND gi.EsRol = 1
-JOIN Permiso h  ON h.Nombre  = v.Hijo AND h.EsRol = 1
-WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = gi.IdPermiso AND x.IdHijo = h.IdPermiso);
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'ConsolidacionRolesV8')
+BEGIN
+    DELETE r FROM PermisoRelacion r
+    JOIN Permiso gi ON gi.IdPermiso = r.IdPadre AND gi.Nombre = 'GerenteInventario' AND gi.EsRol = 1
+    JOIN Permiso ed ON ed.IdPermiso = r.IdHijo  AND ed.Nombre = 'EncargadoDeStock'  AND ed.EsRol = 1;
+    INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+    SELECT gi.IdPermiso, h.IdPermiso
+    FROM (VALUES ('OperadorLogistico'), ('Deposito')) AS v(Hijo)
+    JOIN Permiso gi ON gi.Nombre = 'GerenteInventario' AND gi.EsRol = 1
+    JOIN Permiso h  ON h.Nombre  = v.Hijo AND h.EsRol = 1
+    WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = gi.IdPermiso AND x.IdHijo = h.IdPermiso);
+END
 GO
 
 -- (d) Migrar usuarios de los roles que se retiran ANTES de desactivarlos.
 DECLARE @rolesCambiados INT = 0;
-UPDATE Usuario SET Rol = 'Deposito', Perfil = 'Deposito'
-WHERE Rol IN ('EncargadoDeStock','ControladorDeStock') OR Perfil IN ('EncargadoDeStock','ControladorDeStock','Controlador de Stock');
-SET @rolesCambiados = @rolesCambiados + @@ROWCOUNT;
-UPDATE Usuario SET Rol = 'GerenteComercial', Perfil = 'GerenteComercial'
-WHERE Rol = 'Supervisor' OR Perfil = 'Supervisor';
-SET @rolesCambiados = @rolesCambiados + @@ROWCOUNT;
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'ConsolidacionRolesV8')
+BEGIN
+    UPDATE Usuario SET Rol = 'Deposito', Perfil = 'Deposito'
+    WHERE Rol IN ('EncargadoDeStock','ControladorDeStock') OR Perfil IN ('EncargadoDeStock','ControladorDeStock','Controlador de Stock');
+    SET @rolesCambiados = @rolesCambiados + @@ROWCOUNT;
+    UPDATE Usuario SET Rol = 'GerenteComercial', Perfil = 'GerenteComercial'
+    WHERE Rol = 'Supervisor' OR Perfil = 'Supervisor';
+    SET @rolesCambiados = @rolesCambiados + @@ROWCOUNT;
 
 -- (e) Retirar los roles redundantes: quitar TODAS sus aristas (como padre o como hijo) y desactivar el nodo.
-DELETE r FROM PermisoRelacion r
-JOIN Permiso p ON (p.IdPermiso = r.IdPadre OR p.IdPermiso = r.IdHijo)
-WHERE p.EsRol = 1 AND p.Nombre IN ('EncargadoDeStock','ControladorDeStock','Supervisor');
-UPDATE Permiso SET Estado = 0 WHERE EsRol = 1 AND Nombre IN ('EncargadoDeStock','ControladorDeStock','Supervisor');
+    DELETE r FROM PermisoRelacion r
+    JOIN Permiso p ON (p.IdPermiso = r.IdPadre OR p.IdPermiso = r.IdHijo)
+    WHERE p.EsRol = 1 AND p.Nombre IN ('EncargadoDeStock','ControladorDeStock','Supervisor');
+    UPDATE Permiso SET Estado = 0 WHERE EsRol = 1 AND Nombre IN ('EncargadoDeStock','ControladorDeStock','Supervisor');
+
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha)
+    VALUES (N'ConsolidacionRolesV8', N'Consolidación de roles v8 aplicada (bloques b-e)', GETDATE());
+END
 
 -- (f) Si cambió el Rol de algún usuario, el DVH (que incluye el Rol) quedó desfasado:
 --     resetear el DV de Usuario para que la app lo recalcule limpio en el próximo arranque.
@@ -1059,7 +1121,8 @@ FROM (VALUES
     (N'Valentina', N'Morana', '33111000', 'vendedor@wardrobeflow.com', N'Vendedora',           'L-001', 'vendedor'),
     (N'Bruno',     N'Díaz',   '31222000', 'deposito@wardrobeflow.com', N'Depósito',           'L-002', 'deposito')
 ) AS v(Nombre, Apellido, DNI, Email, Puesto, Legajo, Username)
-WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo);
+WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo)
+  AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
 PRINT 'Demo: empleados.';
 GO
 
@@ -1070,12 +1133,13 @@ SELECT v.Nombre, v.Apellido, v.DNI, v.Email, v.MetodoPago,
        GETDATE(), v.FechaNac, 1, 0
 FROM (VALUES
     (N'Lucía',  N'Fernández', '30111222', 'lucia.fernandez@mail.com', 'Efectivo',      N'Premium',  CONVERT(date,'1990-03-15')),
-    (N'Martín', N'Gómez',     '28999111', 'martin.gomez@mail.com',    'Crédito',       N'Estándar', CONVERT(date,'1985-07-22')),
-    (N'Sofía',  N'Rossi',     '35444555', 'sofia.rossi@mail.com',     'Débito',        N'Básico',   CONVERT(date,'1998-11-02')),
+    (N'Martín', N'Gómez',     '28999111', 'martin.gomez@mail.com',    N'Crédito',       N'Estándar', CONVERT(date,'1985-07-22')),
+    (N'Sofía',  N'Rossi',     '35444555', 'sofia.rossi@mail.com',     N'Débito',        N'Básico',   CONVERT(date,'1998-11-02')),
     (N'Diego',  N'Paz',       '27333444', 'diego.paz@mail.com',       'Transferencia', N'Estándar', CONVERT(date,'1982-01-30')),
     (N'Camila', N'Torres',    '40222333', 'camila.torres@mail.com',   'Efectivo',      N'Premium',  CONVERT(date,'2001-06-10'))
 ) AS v(Nombre, Apellido, DNI, Email, MetodoPago, PlanNom, FechaNac)
-WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE (c.Nombre = v.Nombre AND c.Apellido = v.Apellido) OR c.DNI = v.DNI);  -- también por DNI: un cliente demo renombrado no se duplica
+WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE (c.Nombre = v.Nombre AND c.Apellido = v.Apellido) OR c.DNI = v.DNI)  -- también por DNI: un cliente demo renombrado no se duplica
+  AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
 PRINT 'Demo: clientes.';
 GO
 
@@ -1103,6 +1167,7 @@ GO
 -- Pedidos demo (sólo si aún no hay pedidos) + prendas EnUso asignadas a su cliente,
 -- replicando lo que hace la app al crear/despachar (Prenda.Estado=EnUso, IdClienteActual).
 IF NOT EXISTS (SELECT 1 FROM Pedido)
+   AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente')  -- solo en instalación nueva
    AND EXISTS (SELECT 1 FROM Empleado WHERE Legajo = 'L-001')
    AND EXISTS (SELECT 1 FROM Cliente WHERE Nombre = N'Lucía' AND Apellido = N'Fernández')
 BEGIN
@@ -1230,13 +1295,13 @@ DECLARE @map TABLE (VerMenu NVARCHAR(100), EditarMenu NVARCHAR(100), EditarNombr
 INSERT INTO @map (VerMenu, EditarMenu, EditarNombre) VALUES
  ('mnuStock',             'mnuStockEditar',             'Configurar Prendas / Stock'),
  ('mnuClientes',          'mnuClientesEditar',          'Configurar Clientes'),
- ('mnuPlanSuscripciones', 'mnuPlanSuscripcionesEditar', 'Configurar Planes de Suscripción'),
+ ('mnuPlanSuscripciones', 'mnuPlanSuscripcionesEditar', N'Configurar Planes de Suscripción'),
  ('mnuPedidosVenta',      'mnuPedidosVentaEditar',      'Configurar Pedidos de Venta'),
  ('mnuPedidosRealizados', 'mnuPedidosRealizadosEditar', 'Configurar Pedidos Realizados');
 
 -- 1) Crear las patentes de EDICIÓN que falten (EsFamilia=0, EsRol=0 → hojas / patentes).
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT m.EditarNombre, m.EditarMenu, 'Acción', 1, 0, 0
+SELECT m.EditarNombre, m.EditarMenu, N'Acción', 1, 0, 0
 FROM   @map m
 WHERE  EXISTS     (SELECT 1 FROM Permiso v WHERE v.NombreMenu = m.VerMenu)
   AND  NOT EXISTS (SELECT 1 FROM Permiso e WHERE e.NombreMenu = m.EditarMenu);
@@ -1482,7 +1547,7 @@ GO
 
 -- ── 1) Patente de menú mnuAnalisisAbandono ───────────────────────────────
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT 'Ver Análisis de Abandono', 'mnuAnalisisAbandono', 'Sistema', 1, 0, 0
+SELECT N'Ver Análisis de Abandono', 'mnuAnalisisAbandono', 'Sistema', 1, 0, 0
 WHERE NOT EXISTS (SELECT 1 FROM Permiso WHERE NombreMenu = 'mnuAnalisisAbandono');
 GO
 
@@ -1576,7 +1641,7 @@ GO
 
 -- ── 1) Patente de menú mnuAnalisisRotacion ───────────────────────────────
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT 'Ver Rotación de Prendas', 'mnuAnalisisRotacion', 'Sistema', 1, 0, 0
+SELECT N'Ver Rotación de Prendas', 'mnuAnalisisRotacion', 'Sistema', 1, 0, 0
 WHERE NOT EXISTS (SELECT 1 FROM Permiso WHERE NombreMenu = 'mnuAnalisisRotacion');
 GO
 
@@ -1716,7 +1781,7 @@ GO
 
 -- ── 1) Patente de menú mnuRecomendacionPrendas ───────────────────────────
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
-SELECT 'Ver Recomendación de Prendas', 'mnuRecomendacionPrendas', 'Sistema', 1, 0, 0
+SELECT N'Ver Recomendación de Prendas', 'mnuRecomendacionPrendas', 'Sistema', 1, 0, 0
 WHERE NOT EXISTS (SELECT 1 FROM Permiso WHERE NombreMenu = 'mnuRecomendacionPrendas');
 GO
 
@@ -2049,7 +2114,8 @@ INSERT INTO Usuario (Username, Clave, Rol, Perfil, Nombre, Apellido, Email, Fech
                       Estado, IntentosFallidos, DVH, IdIdioma, Activo)
 SELECT 'caja', 'IVYc7mzk/g0OD/k6lOKrMK4xXI4dnw14xGccH3ZuTbVWsQyUpkNFKnY6hzQcYBG0', 'Caja', 'Caja',
        N'Carolina', N'Ibáñez', 'caja@wardrobeflow.com', '1991-04-12', 1, 0, 0, 'ES', 1
-WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE Username = 'caja');
+WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE Username = 'caja')
+  AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
 PRINT 'Usuario demo del rol Caja inicializado.';
 GO
 
@@ -2165,13 +2231,13 @@ GO
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
 SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, v.EsFamilia, v.EsRol
 FROM (VALUES
-    ('Sugerir Promoción',           'mnuSugerenciaPromocion',        'Promociones', 0, 0),
+    (N'Sugerir Promoción',           'mnuSugerenciaPromocion',        'Promociones', 0, 0),
     ('Gestionar Promociones',       'mnuPromocionesAdmin',           'Promociones', 0, 0),
     ('Configurar Promociones Admin','mnuPromocionesAdminEditar',     'Promociones', 0, 0),
-    ('Revisión Contable',           'mnuPromocionesContable',        'Promociones', 0, 0),
-    ('Configurar Revisión Contable','mnuPromocionesContableEditar',  'Promociones', 0, 0),
+    (N'Revisión Contable',           'mnuPromocionesContable',        'Promociones', 0, 0),
+    (N'Configurar Revisión Contable','mnuPromocionesContableEditar',  'Promociones', 0, 0),
     ('Ver Promociones Vigentes',    'mnuPromocionesVigentes',        'Promociones', 0, 0),
-    ('Sugerir Baja de Promoción',   'mnuPromocionesVigentesEditar',  'Promociones', 0, 0),
+    (N'Sugerir Baja de Promoción',   'mnuPromocionesVigentesEditar',  'Promociones', 0, 0),
     ('AdministracionComercial',     'AdministracionComercial',       'Rol',         1, 1),
     ('Contabilidad',                'Contabilidad',                  'Rol',         1, 1)
 ) AS v(Nombre, NombreMenu, Tipo, EsFamilia, EsRol)
@@ -2232,7 +2298,8 @@ FROM (VALUES
   ('admcomercial', 'gm4kogeeRRIphufl0aWPR2S0wW17VwHYqiSihJ3GXs3WzW85kcb+i/7yVDHRNDZA', 'AdministracionComercial', 'AdministracionComercial', N'Agustina', N'Ríos',   'admcomercial@wardrobeflow.com', '1989-08-22'),
   ('contable',     '9IehcthmyLV2v3I9zeWkUkelEhorzkOrjxcWqylFYwOVmVV/x1fGwsgCNOv+yvcM', 'Contabilidad',            'Contabilidad',            N'Carlos',   N'Suárez', 'contable@wardrobeflow.com',     '1984-05-14')
 ) AS v(Username, Clave, Rol, Perfil, Nombre, Apellido, Email, FechaNac)
-WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username);
+WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username)
+  AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
 PRINT 'Usuarios demo de AdministracionComercial y Contabilidad inicializados.';
 GO
 
@@ -2286,7 +2353,7 @@ GO
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
 SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, 0, 0
 FROM (VALUES
-    ('Inspección de Devolución', 'mnuInspeccionDevolucion', 'Inventario')
+    (N'Inspección de Devolución', 'mnuInspeccionDevolucion', 'Inventario')
 ) AS v(Nombre, NombreMenu, Tipo)
 WHERE NOT EXISTS (SELECT 1 FROM Permiso p
                   WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0);
@@ -2619,14 +2686,36 @@ GO
 --   PN04 prendas En Limpieza pendientes de inspección, una dada de baja con
 --        cargo y valor de reposición cargado en todo el catálogo.
 --   Analítica: pedidos y mantenimientos repartidos en el tiempo.
--- Idempotente: se aplica una sola vez (marca: cliente Julieta Navarro).
+-- Se aplica UNA sola vez y solo en una instalación NUEVA. Marca estable: ParametroSistema
+-- 'SeedDemo21' (antes era el cliente "Julieta Navarro": si se lo renombraba, una reinstalación
+-- volvía a sembrar y fallaba con ids NULL o duplicaba datos). Tampoco se siembra si la base ya
+-- tiene datos de negocio propios (contrataciones, o pedidos además de los 3 demo de la sección
+-- 01): no se mezclan datos de prueba con datos reales. Cada búsqueda por nombre se valida antes
+-- de insertar (ningún INSERT recibe un id NULL en una columna NOT NULL).
 -- También vincula un Empleado a los usuarios 'caja' y 'admin': sin ese vínculo
 -- no pueden cobrar ni crear pedidos (BLLHelper.ResolverEmpleadoActivo).
 -- DVH = 0: la app recalcula los dígitos verificadores en el primer arranque.
 -- ============================================================
-IF EXISTS (SELECT 1 FROM Cliente WHERE Nombre = N'Julieta' AND Apellido = N'Navarro')
+DECLARE @sembrar21 BIT = 0;
+IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SeedDemo21')
     PRINT 'Datos de prueba (sección 21) ya aplicados — sin cambios.';
+ELSE IF EXISTS (SELECT 1 FROM Cliente WHERE Nombre = N'Julieta' AND Apellido = N'Navarro')
+BEGIN
+    -- Base de una versión anterior que ya los tenía (marca vieja): se registra la marca nueva.
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada por una versión anterior', GETDATE());
+    PRINT 'Datos de prueba (sección 21) ya aplicados por una versión anterior — sin cambios.';
+END
+ELSE IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente')
+     OR EXISTS (SELECT 1 FROM Contratacion)
+     OR (SELECT COUNT(*) FROM Pedido) > 3
+BEGIN
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Omitida: la base ya tenía datos', GETDATE());
+    PRINT 'AVISO: la base ya tiene datos de negocio; no se cargan los datos de prueba (sección 21).';
+END
 ELSE
+    SET @sembrar21 = 1;
+
+IF @sembrar21 = 1
 BEGIN
     -- ── Empleados de Caja y Administrador ───────────────────────────────────
     INSERT INTO Empleado (Nombre, Apellido, DNI, Email, FechaIngreso, Puesto, Legajo, IdUsuario, DVH)
@@ -2651,12 +2740,12 @@ BEGIN
            (SELECT TOP 1 IdPlan FROM PlanSuscripcion p WHERE p.Nombre = v.PlanNom),
            DATEADD(DAY, -v.DiasAlta, GETDATE()), v.FechaNac, 1, 0
     FROM (VALUES
-        (N'Julieta', N'Navarro', '31555777', 'julieta.navarro@mail.com', 'Crédito',       N'Estándar', 120, CONVERT(date,'1992-05-18')),
-        (N'Tomás',   N'Benítez', '33666888', 'tomas.benitez@mail.com',   'Débito',        N'Básico',    90, CONVERT(date,'1995-09-03')),
+        (N'Julieta', N'Navarro', '31555777', 'julieta.navarro@mail.com', N'Crédito',       N'Estándar', 120, CONVERT(date,'1992-05-18')),
+        (N'Tomás',   N'Benítez', '33666888', 'tomas.benitez@mail.com',   N'Débito',        N'Básico',    90, CONVERT(date,'1995-09-03')),
         (N'Renata',  N'Silva',   '36777999', 'renata.silva@mail.com',    'Efectivo',      NULL,          2, CONVERT(date,'1999-12-21')),
         (N'Agustín', N'Molina',  '34888111', 'agustin.molina@mail.com',  'Transferencia', N'Estándar',  30, CONVERT(date,'1988-02-09')),
-        (N'Paula',   N'Herrera', '32999222', 'paula.herrera@mail.com',   'Crédito',       N'Premium',   45, CONVERT(date,'1993-08-27')),
-        (N'Nicolás', N'Vega',    '38111333', 'nicolas.vega@mail.com',    'Débito',        N'Básico',    60, CONVERT(date,'1997-04-14'))
+        (N'Paula',   N'Herrera', '32999222', 'paula.herrera@mail.com',   N'Crédito',       N'Premium',   45, CONVERT(date,'1993-08-27')),
+        (N'Nicolás', N'Vega',    '38111333', 'nicolas.vega@mail.com',    N'Débito',        N'Básico',    60, CONVERT(date,'1997-04-14'))
     ) AS v(Nombre, Apellido, DNI, Email, MetodoPago, PlanNom, DiasAlta, FechaNac)
     WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE (c.Nombre = v.Nombre AND c.Apellido = v.Apellido) OR c.DNI = v.DNI);  -- también por DNI: un cliente demo renombrado no se duplica
 
@@ -2731,58 +2820,71 @@ BEGIN
     JOIN Prenda pr ON pr.Nombre = v.Nombre;
 
     -- ── Pedidos históricos (analítica de rotación y ventas por vendedor) ─────
-    DECLARE @vf  INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Vestido Floral');
-    DECLARE @gab INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Gabardina Verde');
+    DECLARE @vf  INT = (SELECT TOP 1 IdPrenda FROM Prenda WHERE Nombre = N'Vestido Floral');
+    DECLARE @gab INT = (SELECT TOP 1 IdPrenda FROM Prenda WHERE Nombre = N'Gabardina Verde');
     DECLARE @ph TABLE (Cli INT, Dias INT, Estado INT);
     INSERT INTO @ph VALUES (@cLucia, 55, 2), (@cMartin, 45, 2), (@cDiego, 35, 2),
                            (@cCamila, 25, 2), (@cPaula, 15, 2), (@cNico, 10, 3);
     DECLARE @cli INT, @dias INT, @est INT, @idp INT;
-    DECLARE curPed CURSOR LOCAL FAST_FORWARD FOR SELECT Cli, Dias, Estado FROM @ph;
-    OPEN curPed;
-    FETCH NEXT FROM curPed INTO @cli, @dias, @est;
-    WHILE @@FETCH_STATUS = 0
+    IF @vend IS NOT NULL AND @vf IS NOT NULL
     BEGIN
-        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, MotivoCancelacion, DVH)
-        VALUES (@cli, @vend, @est, DATEADD(DAY, -@dias, GETDATE()),
-                CASE WHEN @est = 2 THEN DATEADD(DAY, -@dias + 2, GETDATE()) END,
-                CASE WHEN @est = 2 THEN DATEADD(DAY, -@dias + 4, GETDATE()) END,
-                CASE WHEN @est = 3 THEN N'El cliente desistió del pedido' END, 0);
-        SET @idp = SCOPE_IDENTITY();
-        INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@idp, @vf);
-        IF @dias IN (45, 25) INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@idp, @gab);
+        DECLARE curPed CURSOR LOCAL FAST_FORWARD FOR SELECT Cli, Dias, Estado FROM @ph WHERE Cli IS NOT NULL;
+        OPEN curPed;
         FETCH NEXT FROM curPed INTO @cli, @dias, @est;
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, MotivoCancelacion, DVH)
+            VALUES (@cli, @vend, @est, DATEADD(DAY, -@dias, GETDATE()),
+                    CASE WHEN @est = 2 THEN DATEADD(DAY, -@dias + 2, GETDATE()) END,
+                    CASE WHEN @est = 2 THEN DATEADD(DAY, -@dias + 4, GETDATE()) END,
+                    CASE WHEN @est = 3 THEN N'El cliente desistió del pedido' END, 0);
+            SET @idp = SCOPE_IDENTITY();
+            INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@idp, @vf);
+            IF @dias IN (45, 25) AND @gab IS NOT NULL INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@idp, @gab);
+            FETCH NEXT FROM curPed INTO @cli, @dias, @est;
+        END
+        CLOSE curPed;
+        DEALLOCATE curPed;
     END
-    CLOSE curPed;
-    DEALLOCATE curPed;
 
     -- ── PN01: lista de espera sobre una prenda en uso ────────────────────────
     INSERT INTO ListaEspera (IdPrenda, IdCliente, FechaAlta, Estado, Actor)
     SELECT pr.IdPrenda, @cNico, DATEADD(DAY, -1, GETDATE()), 0, 'vendedor'
-    FROM Prenda pr WHERE pr.Nombre = N'Vestido Largo Negro' AND pr.Estado = 1;
+    FROM Prenda pr WHERE pr.Nombre = N'Vestido Largo Negro' AND pr.Estado = 1 AND @cNico IS NOT NULL;
 
     -- ── PN02: contrataciones (2 pendientes de pago y 1 cobrada) ─────────────
     INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion, IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado, VigenciaDesde, VigenciaHasta)
-    VALUES
-        (@cRenata, @pEstand,  @vend, NULL,  0, 0, DATEADD(HOUR, -3, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-        (@cJulie,  @pPremium, @vend, NULL,  2, 0, DATEADD(DAY,  -1, GETDATE()), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-        (@cPaula,  @pPremium, @vend, @caja, 1, 1, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
-            1, 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()),
-            (SELECT Precio FROM PlanSuscripcion WHERE IdPlan = @pPremium) * 3, 0,
-            CAST(DATEADD(DAY, -45, GETDATE()) AS DATE), CAST(DATEADD(MONTH, 3, DATEADD(DAY, -45, GETDATE())) AS DATE));
+    SELECT v.Cli, v.IdPlan, @vend, NULL, v.Modalidad, 0, v.FechaAlta, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    FROM (VALUES (@cRenata, @pEstand,  0, DATEADD(HOUR, -3, GETDATE())),
+                 (@cJulie,  @pPremium, 2, DATEADD(DAY,  -1, GETDATE()))) AS v(Cli, IdPlan, Modalidad, FechaAlta)
+    WHERE v.Cli IS NOT NULL AND v.IdPlan IS NOT NULL AND @vend IS NOT NULL;
+
+    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion, IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado, VigenciaDesde, VigenciaHasta)
+    SELECT @cPaula, @pPremium, @vend, @caja, 1, 1, DATEADD(DAY, -45, GETDATE()), DATEADD(DAY, -45, GETDATE()),
+           1, 'CMP-0001-' + FORMAT(DATEADD(DAY, -45, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -45, GETDATE()),
+           pl.Precio * 3, 0,
+           CAST(DATEADD(DAY, -45, GETDATE()) AS DATE), CAST(DATEADD(MONTH, 3, DATEADD(DAY, -45, GETDATE())) AS DATE)
+    FROM PlanSuscripcion pl
+    WHERE pl.IdPlan = @pPremium AND @cPaula IS NOT NULL AND @vend IS NOT NULL AND @caja IS NOT NULL;
 
     -- La contratación de Julieta ya tuvo un intento de cobro que no se concretó.
     INSERT INTO ContratacionIntentoPago (IdContratacion, NroIntento, Fecha, IdMedioPago, Motivo, IdCaja)
     SELECT c.IdContratacion, 1, DATEADD(HOUR, -20, GETDATE()), 2, N'Tarjeta rechazada', @caja
-    FROM Contratacion c WHERE c.IdCliente = @cJulie AND c.Estado = 0;
+    FROM Contratacion c WHERE c.IdCliente = @cJulie AND c.Estado = 0 AND @caja IS NOT NULL;
 
     -- ── PN03: sugerencias y promociones en cada estado ──────────────────────
     INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta)
-    VALUES
-        (@pBasico, NULL,      N'El plan Básico tiene la mayor tasa de abandono: un descuento de retención puede sostenerlo.', 0, 12000.00, 0, DATEADD(DAY, -3, GETDATE())),
-        (NULL,     N'Abrigo', N'Los abrigos rotan poco fuera de temporada: conviene incentivar su alquiler.',                 1,  5000.00, 0, DATEADD(DAY, -2, GETDATE()));
+    SELECT v.IdPlan, v.Categoria, v.Motivo, v.Tipo, v.Beneficio, 0, v.FechaAlta
+    FROM (VALUES
+        (@pBasico, NULL,      N'El plan Básico tiene la mayor tasa de abandono: un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE())),
+        (NULL,     N'Abrigo', N'Los abrigos rotan poco fuera de temporada: conviene incentivar su alquiler.',                 1,  5000.00, DATEADD(DAY, -2, GETDATE()))
+    ) AS v(IdPlan, Categoria, Motivo, Tipo, Beneficio, FechaAlta)
+    WHERE v.IdPlan IS NOT NULL OR v.Categoria IS NOT NULL;
 
     INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, CategoriaPrenda, MargenEstimado, ImpactoEconomico, Observacion, MotivoBaja, FechaAlta)
-    VALUES
+    SELECT v.Nombre, v.Descripcion, v.TipoDescuento, v.Valor, v.FechaInicio, v.FechaFin, v.Estado, v.IdPlan, v.Categoria,
+           v.Margen, v.Impacto, v.Observacion, v.MotivoBaja, v.FechaAlta
+    FROM (VALUES
         (N'Verano Estándar -10%', N'10% de descuento en el plan Estándar durante el verano.', 0, 10.00,
          DATEADD(DAY, -10, @hoy), DATEADD(DAY, 50, @hoy), 1, @pEstand, NULL, 8000.00,
          N'Reducción de ingresos compensada por mayor retención.', N'Aprobada por Contabilidad.', NULL, DATEADD(DAY, -12, GETDATE())),
@@ -2792,14 +2894,18 @@ BEGIN
         (N'Premium Bienvenida -15%', N'15% de descuento en el primer mes del plan Premium.', 0, 15.00,
          DATEADD(DAY, -30, @hoy), DATEADD(DAY, 30, @hoy), 3, @pPremium, NULL, 6000.00,
          N'Descuento de captación para nuevos clientes.', N'Aprobada por Contabilidad.',
-         N'Se superpone con la promoción Verano y erosiona el margen.', DATEADD(DAY, -32, GETDATE()));
+         N'Se superpone con la promoción Verano y erosiona el margen.', DATEADD(DAY, -32, GETDATE()))
+    ) AS v(Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, Categoria, Margen, Impacto, Observacion, MotivoBaja, FechaAlta)
+    WHERE (v.IdPlan IS NOT NULL OR v.Categoria IS NOT NULL)
+      AND NOT EXISTS (SELECT 1 FROM Promocion p WHERE p.Nombre = v.Nombre);
 
     -- ── PN04: cargo pendiente por la prenda dada de baja ─────────────────────
     INSERT INTO CargoPrenda (IdPrenda, IdCliente, Motivo, Monto, FechaRegistro, Actor, Estado)
     SELECT pr.IdPrenda, @cCamila, N'Daño irreparable detectado en la inspección', pr.PrecioReposicion,
            DATEADD(DAY, -2, GETDATE()), 'deposito', 0
-    FROM Prenda pr WHERE pr.Nombre = N'Traje Gris Slim';
+    FROM Prenda pr WHERE pr.Nombre = N'Traje Gris Slim' AND @cCamila IS NOT NULL AND pr.PrecioReposicion IS NOT NULL;
 
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada', GETDATE());
     PRINT 'Datos de prueba (sección 21) aplicados.';
 END
 GO
@@ -2867,6 +2973,14 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Pedido_Desi
         CHECK (Estado <> 7 OR (EtapaDesistimiento IS NOT NULL AND MotivoDesistimiento IS NOT NULL));
 GO
 
+-- Backfill: los pedidos que ya estaban Pendientes/Despachados/Entregados antes de PN01 se
+-- formalizaron al crearlos (no pasaban por control de stock): FechaFormalizacion = FechaPedido.
+-- Idempotente (solo completa los NULL). FechaFormalizacion no forma parte del DVH de Pedido.
+UPDATE Pedido SET FechaFormalizacion = FechaPedido
+WHERE Estado IN (0,1,2) AND FechaFormalizacion IS NULL;
+IF @@ROWCOUNT > 0 PRINT 'Pedidos existentes: FechaFormalizacion completada con FechaPedido.';
+GO
+
 -- Informe de disponibilidad: una fila por prenda faltante del pedido...
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PedidoFaltante')
 BEGIN
@@ -2908,7 +3022,7 @@ INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRo
 SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, 0, 0
 FROM (VALUES
     ('Control de Stock',                'mnuControlStock',       'Inventario'),
-    ('Configurar Control de Stock',     'mnuControlStockEditar', 'Acción')
+    ('Configurar Control de Stock',     'mnuControlStockEditar', N'Acción')
 ) AS v(Nombre, NombreMenu, Tipo)
 WHERE NOT EXISTS (SELECT 1 FROM Permiso p
                   WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0);
@@ -2944,7 +3058,7 @@ GROUP BY v.Formulario, v.NombreControl;
 GO
 
 -- ============================================================
--- WardrobeFlow — 21b. PATENTE DE ESCRITURA DE LISTA DE ESPERA
+-- WardrobeFlow — 21c2. PATENTE DE ESCRITURA DE LISTA DE ESPERA
 -- ------------------------------------------------------------
 -- BLL.ListaEspera.Anotar/Cancelar exigían mnuStockEditar (patente de Depósito),
 -- así que el Vendedor —que ve Lista de Espera para anotar al cliente— recibía
@@ -2970,6 +3084,36 @@ JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 
 WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
                   WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
 PRINT 'Permiso mnuListaEsperaEditar asignado a Administrador, Vendedor y Deposito.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21d. AJUSTES FINALES DE PERMISOS Y MARCAS DE INSTALACIÓN
+-- ------------------------------------------------------------
+-- (1) GerenteComercial solo VE Pedidos Realizados: el "grandfather" de la sección 03 le copia
+--     mnuPedidosRealizadosEditar porque tiene la patente de Ver asignada directo. Se quita esa
+--     arista después del grandfather (en cada corrida, porque el grandfather corre siempre).
+-- (2) Deposito termina con Ver + Editar de Pedidos Realizados (despacha, entrega y registra la
+--     devolución que abre PN04). Idempotente.
+-- (3) Cierra la marca de siembra de usuarios: a partir de acá ninguna corrida del script
+--     vuelve a crear cuentas semilla/demo.
+-- ============================================================
+DELETE r FROM PermisoRelacion r
+JOIN Permiso rol ON rol.IdPermiso = r.IdPadre AND rol.Nombre = 'GerenteComercial' AND rol.EsRol = 1
+JOIN Permiso e   ON e.IdPermiso   = r.IdHijo  AND e.NombreMenu = 'mnuPedidosRealizadosEditar'
+                AND ISNULL(e.EsFamilia,0) = 0 AND ISNULL(e.EsRol,0) = 0;
+IF @@ROWCOUNT > 0 PRINT 'GerenteComercial: se quitó mnuPedidosRealizadosEditar (solo consulta Pedidos Realizados).';
+
+INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+SELECT rol.IdPermiso, pat.IdPermiso
+FROM (VALUES ('mnuPedidosRealizados'), ('mnuPedidosRealizadosEditar')) AS v(NombreMenu)
+JOIN Permiso rol ON rol.Nombre = 'Deposito' AND rol.EsRol = 1 AND rol.Estado = 1
+JOIN Permiso pat ON pat.IdPermiso = (SELECT TOP 1 p.IdPermiso FROM Permiso p
+                                     WHERE p.NombreMenu = v.NombreMenu AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0
+                                     ORDER BY p.Estado DESC, p.IdPermiso)
+WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
+
+UPDATE ParametroSistema SET Valor = N'Aplicada', Fecha = GETDATE()
+WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente';
 GO
 
 -- ============================================================

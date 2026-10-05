@@ -51,7 +51,8 @@ Tests/                                    Tests unitarios (MSTest) con fakes de 
 BD/00_Instalacion_Completa.sql            Único script: esquema, datos semilla y datos de prueba
 Instalador/                               Script de Inno Setup, DbInstaller (cliente SQL embebido)
                                           y credenciales iniciales. El .exe se genera en
-                                          Instalador/Salida/ y no se versiona
+                                          Instalador/Salida/ y no se versiona: el instalador
+                                          firmado se distribuye como GitHub Release
 docs/NEGOCIO_Y_PROCESOS.md               Documento de referencia: reglas y procesos de negocio, roles y arquitectura
 docs/MAPA_DE_NAVEGACION.md               Mapa de menús, formularios, procesos y roles
 WardrobeFlow.slnx                         Solución de Visual Studio

@@ -150,8 +150,11 @@ namespace BLL
 
         // ── Seeding ──────────────────────────────────────────────────────────
 
-        // Carga los diccionarios hardcodeados del Traductor y los persiste en BD.
-        // Solo se ejecuta una vez (cuando la tabla Traduccion está vacía).
+        // Carga los diccionarios hardcodeados del Traductor y persiste en BD SOLO las claves que
+        // faltan (nunca pisa un texto ya guardado: el Administrador puede haberlo editado).
+        // Corre en cada arranque, antes del login: por eso primero se lee de una vez lo que ya hay
+        // por idioma y solo se va a la BD clave por clave para lo que falta (una consulta por
+        // idioma si no falta nada). Antes hacía ~2 consultas por clave (≈6300 × 2) en cada inicio.
         public void SeedearDesdeHardcode()
         {
             try
@@ -160,16 +163,26 @@ namespace BLL
 
                 foreach (var idioma in idiomas)
                 {
-                    int idIdioma = dalIdioma.ObtenerOCrearPorCodigo(idioma.Id, idioma.Nombre);
-
                     // ObtenerTraduccionesHardcode → lee dicts estáticos (independiente del cache)
                     var traducciones = Traductor.ObtenerTraduccionesHardcode(idioma);
 
+                    // Claves que YA tienen fila de traducción en este idioma (aunque el texto esté
+                    // vacío): esas no se tocan. Sin distinguir mayúsculas, igual que la collation
+                    // de la BD en la búsqueda de InsertarSiNoExiste.
+                    var existentes = new HashSet<string>(
+                        dalTraduccion.ObtenerDiccionario(idioma.Id).Keys, StringComparer.OrdinalIgnoreCase);
+
+                    // El idioma (y su Id) solo se busca/crea si falta alguna clave: en un arranque
+                    // normal, con todo ya sembrado, cuesta una sola consulta por idioma.
+                    int? idIdioma = null;
                     foreach (var kv in traducciones)
                     {
+                        if (existentes.Contains(kv.Key)) continue;
+                        if (idIdioma == null)
+                            idIdioma = dalIdioma.ObtenerOCrearPorCodigo(idioma.Id, idioma.Nombre);
                         string formulario = Traductor.InferirFormulario(kv.Key);
                         int idControl = dalTraduccion.ObtenerOCrearControl(kv.Key, formulario);
-                        dalTraduccion.InsertarSiNoExiste(idControl, idIdioma, kv.Value.Texto);
+                        dalTraduccion.InsertarSiNoExiste(idControl, idIdioma.Value, kv.Value.Texto);
                     }
                 }
             }

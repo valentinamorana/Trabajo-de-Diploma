@@ -1,5 +1,5 @@
 {
- "bdHash": "c508ce9d6bc80f350c84a976b9dc87fd34199585",
+ "bdHash": "48accba11ad2ec18ad6fc667af5712fb74691028",
  "cols": [
   {
    "tabla": "Bitacora",
@@ -1791,7 +1791,7 @@
    "len": 8,
    "prec": 23,
    "sc": 3,
-   "nulo": true,
+   "nulo": false,
    "ident": false
   },
   {
@@ -3205,16 +3205,16 @@
  ],
  "pks": [
   {
-   "tabla": "DesistimientoContratacion",
-   "col": "IdDesistimiento"
-  },
-  {
    "tabla": "PedidoPrenda",
    "col": "IdPedido"
   },
   {
    "tabla": "PedidoPrenda",
    "col": "IdPrenda"
+  },
+  {
+   "tabla": "DesistimientoContratacion",
+   "col": "IdDesistimiento"
   },
   {
    "tabla": "PedidoHistorial",
@@ -3225,6 +3225,14 @@
    "col": "IdEvento"
   },
   {
+   "tabla": "RolPermiso",
+   "col": "Rol"
+  },
+  {
+   "tabla": "RolPermiso",
+   "col": "IdPermiso"
+  },
+  {
    "tabla": "PedidoFaltante",
    "col": "IdPedido"
   },
@@ -3233,12 +3241,12 @@
    "col": "IdPrenda"
   },
   {
-   "tabla": "RolPermiso",
-   "col": "Rol"
+   "tabla": "PermisoRelacion",
+   "col": "IdPadre"
   },
   {
-   "tabla": "RolPermiso",
-   "col": "IdPermiso"
+   "tabla": "PermisoRelacion",
+   "col": "IdHijo"
   },
   {
    "tabla": "PedidoFaltanteAlternativa",
@@ -3251,18 +3259,6 @@
   {
    "tabla": "PedidoFaltanteAlternativa",
    "col": "IdPrendaAlternativa"
-  },
-  {
-   "tabla": "PermisoRelacion",
-   "col": "IdPadre"
-  },
-  {
-   "tabla": "PermisoRelacion",
-   "col": "IdHijo"
-  },
-  {
-   "tabla": "ParametroSistema",
-   "col": "Clave"
   },
   {
    "tabla": "Traduccion",
@@ -3287,6 +3283,10 @@
   {
    "tabla": "Preferencia",
    "col": "IdUsuario"
+  },
+  {
+   "tabla": "ParametroSistema",
+   "col": "Clave"
   },
   {
    "tabla": "ControlMapeado",
@@ -3317,24 +3317,24 @@
    "col": "IdListaEspera"
   },
   {
-   "tabla": "Contratacion",
-   "col": "IdContratacion"
-  },
-  {
    "tabla": "Usuario_Seguridad",
    "col": "IdUsuario"
+  },
+  {
+   "tabla": "Contratacion",
+   "col": "IdContratacion"
   },
   {
    "tabla": "DVVertical",
    "col": "Id"
   },
   {
-   "tabla": "SugerenciaPromocion",
-   "col": "IdSugerencia"
-  },
-  {
    "tabla": "PlanSuscripcion",
    "col": "IdPlan"
+  },
+  {
+   "tabla": "SugerenciaPromocion",
+   "col": "IdSugerencia"
   },
   {
    "tabla": "Permiso",
@@ -3365,20 +3365,20 @@
    "col": "IdCliente"
   },
   {
-   "tabla": "MedioPago",
-   "col": "IdMedioPago"
-  },
-  {
    "tabla": "Prenda",
    "col": "IdPrenda"
   },
   {
-   "tabla": "ContratacionIntentoPago",
-   "col": "IdIntento"
+   "tabla": "MedioPago",
+   "col": "IdMedioPago"
   },
   {
    "tabla": "Pedido",
    "col": "IdPedido"
+  },
+  {
+   "tabla": "ContratacionIntentoPago",
+   "col": "IdIntento"
   }
  ],
  "fks": [
@@ -3418,21 +3418,21 @@
    "colpadre": "IdPedido"
   },
   {
-   "fk": "FK__CargoPren__IdPre__45BE5BA9",
+   "fk": "FK__CargoPren__IdPre__489AC854",
    "hija": "CargoPrenda",
    "colhija": "IdPrenda",
    "padre": "Prenda",
    "colpadre": "IdPrenda"
   },
   {
-   "fk": "FK__CargoPren__IdCli__46B27FE2",
+   "fk": "FK__CargoPren__IdCli__498EEC8D",
    "hija": "CargoPrenda",
    "colhija": "IdCliente",
    "padre": "Cliente",
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK__Cliente__IdClien__40058253",
+   "fk": "FK__Cliente__IdClien__42E1EEFE",
    "hija": "Cliente",
    "colhija": "IdClienteReferente",
    "padre": "Cliente",
@@ -3446,21 +3446,21 @@
    "colpadre": "IdPlan"
   },
   {
-   "fk": "FK__Contratac__IdPla__5224328E",
+   "fk": "FK__Contratac__IdPla__55009F39",
    "hija": "Contratacion",
    "colhija": "IdPlan",
    "padre": "PlanSuscripcion",
    "colpadre": "IdPlan"
   },
   {
-   "fk": "FK__Contratac__IdVen__531856C7",
+   "fk": "FK__Contratac__IdVen__55F4C372",
    "hija": "Contratacion",
    "colhija": "IdVendedor",
    "padre": "Empleado",
    "colpadre": "IdEmpleado"
   },
   {
-   "fk": "FK__Contratac__IdCaj__540C7B00",
+   "fk": "FK__Contratac__IdCaj__56E8E7AB",
    "hija": "Contratacion",
    "colhija": "IdCaja",
    "padre": "Empleado",
@@ -3474,7 +3474,7 @@
    "colpadre": "IdPromocion"
   },
   {
-   "fk": "FK__Contratac__IdCli__51300E55",
+   "fk": "FK__Contratac__IdCli__540C7B00",
    "hija": "Contratacion",
    "colhija": "IdCliente",
    "padre": "Cliente",
@@ -3551,28 +3551,28 @@
    "colpadre": "IdUsuario"
   },
   {
-   "fk": "FK__Historial__IdCli__3D2915A8",
+   "fk": "FK__Historial__IdCli__40058253",
    "hija": "HistorialCobro",
    "colhija": "IdCliente",
    "padre": "Cliente",
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK__Historial__IdCli__37703C52",
+   "fk": "FK__Historial__IdCli__3A4CA8FD",
    "hija": "HistorialRenovacion",
    "colhija": "IdCliente",
    "padre": "Cliente",
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK__Historial__IdPla__3864608B",
+   "fk": "FK__Historial__IdPla__3B40CD36",
    "hija": "HistorialRenovacion",
    "colhija": "IdPlanAnterior",
    "padre": "PlanSuscripcion",
    "colpadre": "IdPlan"
   },
   {
-   "fk": "FK__Historial__IdPla__395884C4",
+   "fk": "FK__Historial__IdPla__3C34F16F",
    "hija": "HistorialRenovacion",
    "colhija": "IdPlanNuevo",
    "padre": "PlanSuscripcion",
@@ -3586,21 +3586,21 @@
    "colpadre": "IdUsuario"
   },
   {
-   "fk": "FK__ListaEspe__IdCli__4C6B5938",
-   "hija": "ListaEspera",
-   "colhija": "IdCliente",
-   "padre": "Cliente",
-   "colpadre": "IdCliente"
-  },
-  {
-   "fk": "FK__ListaEspe__IdPre__4B7734FF",
+   "fk": "FK__ListaEspe__IdPre__4E53A1AA",
    "hija": "ListaEspera",
    "colhija": "IdPrenda",
    "padre": "Prenda",
    "colpadre": "IdPrenda"
   },
   {
-   "fk": "FK__Mantenimi__IdPre__32AB8735",
+   "fk": "FK__ListaEspe__IdCli__4F47C5E3",
+   "hija": "ListaEspera",
+   "colhija": "IdCliente",
+   "padre": "Cliente",
+   "colpadre": "IdCliente"
+  },
+  {
+   "fk": "FK__Mantenimi__IdPre__3587F3E0",
    "hija": "MantenimientoPrenda",
    "colhija": "IdPrenda",
    "padre": "Prenda",
@@ -3656,7 +3656,7 @@
    "colpadre": "IdPrenda"
   },
   {
-   "fk": "FK__PedidoFal__IdPre__15DA3E5D",
+   "fk": "FK__PedidoFal__IdPre__18B6AB08",
    "hija": "PedidoFaltanteAlternativa",
    "colhija": "IdPrendaAlternativa",
    "padre": "Prenda",
@@ -3712,7 +3712,7 @@
    "colpadre": "IdUsuario"
   },
   {
-   "fk": "FK__Prenda__IdUltimo__42E1EEFE",
+   "fk": "FK__Prenda__IdUltimo__45BE5BA9",
    "hija": "Prenda",
    "colhija": "IdUltimoCliente",
    "padre": "Cliente",
@@ -3726,14 +3726,14 @@
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK__Promocion__IdPla__65370702",
+   "fk": "FK__Promocion__IdPla__681373AD",
    "hija": "Promocion",
    "colhija": "IdPlan",
    "padre": "PlanSuscripcion",
    "colpadre": "IdPlan"
   },
   {
-   "fk": "FK__Promocion__IdSug__671F4F74",
+   "fk": "FK__Promocion__IdSug__69FBBC1F",
    "hija": "Promocion",
    "colhija": "IdSugerenciaOrigen",
    "padre": "SugerenciaPromocion",
@@ -3747,7 +3747,7 @@
    "colpadre": "IdPermiso"
   },
   {
-   "fk": "FK__Sugerenci__IdPla__5AB9788F",
+   "fk": "FK__Sugerenci__IdPla__5D95E53A",
    "hija": "SugerenciaPromocion",
    "colhija": "IdPlan",
    "padre": "PlanSuscripcion",

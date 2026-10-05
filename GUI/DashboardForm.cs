@@ -27,8 +27,6 @@ namespace GUI
     /// </summary>
     public partial class DashboardForm : FormBase, IIdiomaObserver
     {
-        private static readonly string DirBackups =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
 
         // ── Dependencias BLL ──────────────────────────────────────────────────
         private readonly BLL.Interfaces.IPrendaService  _bllPrenda   = new BLL.Prenda();
@@ -211,25 +209,12 @@ namespace GUI
             });
         }
 
-        // TODO(post-merge): esta tarjeta lee el disco y conoce las extensiones de backup (lógica
-        // que no le corresponde a la GUI). Reemplazar por BLL.Backup.ObtenerUltimoBackup() cuando
-        // se integre la rama de backend que lo expone.
         private void ActualizarTarjetaBackup()
         {
             try
             {
-                FileInfo ultimo = null;
-                if (Directory.Exists(DirBackups))
-                {
-                    var dirInfo = new DirectoryInfo(DirBackups);
-                    // Incluye los backups CIFRADOS (.wfbak, el formato actual) además de los .bak
-                    // planos legacy. Antes solo se miraban los .bak → la tarjeta ignoraba los
-                    // backups nuevos y mostraba "días sin backup" usando una copia vieja.
-                    ultimo = dirInfo.GetFiles("*.bak")
-                        .Concat(dirInfo.GetFiles("*" + BLL.Backup.ExtensionCifrada))
-                        .OrderByDescending(f => f.LastWriteTime)
-                        .FirstOrDefault();
-                }
+                // Incluye los backups cifrados (.wfbak) y los .bak legacy (lo resuelve la BLL).
+                FileInfo ultimo = BLL.Backup.ObtenerUltimoBackup();
 
                 int umbral = BLL.Configuracion.ObtenerDiasRecordatorio();
 

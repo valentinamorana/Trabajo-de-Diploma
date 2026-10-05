@@ -92,8 +92,7 @@ namespace GUI
                 // autenticado solo se ENRUTA la respuesta: el detalle y la reparación son solo-admin.
                 if (!integridadOk)
                 {
-                    var usuario = Seguridad.SessionManager.IsLoggedIn
-                        ? Seguridad.SessionManager.GetInstance().Usuario : null;
+                    var usuario = BLL.Sesion.Usuario;
 
                     // Solo un Administrador ve el detalle de los dígitos rotos y puede repararlos.
                     // A cualquier otro usuario se le bloquea el ingreso con un mensaje GENÉRICO de
@@ -160,8 +159,7 @@ namespace GUI
             if (ex == null) return;
             try
             {
-                int? idUsuario = Seguridad.SessionManager.IsLoggedIn
-                    ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
+                int? idUsuario = BLL.Sesion.IdUsuario;
                 new BLL.Bitacora().RegistrarSinSesion(
                     modulo:     "Aplicación",
                     actividad:  "Excepción no controlada: " + ex.GetType().Name,

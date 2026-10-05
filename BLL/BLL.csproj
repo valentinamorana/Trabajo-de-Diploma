@@ -119,6 +119,7 @@
     <Compile Include="Prenda.cs" />
     <Compile Include="Backup.cs" />
     <Compile Include="BLLHelper.cs" />
+    <Compile Include="Sesion.cs" />
     <Compile Include="PermisosAccion.cs" />
     <Compile Include="ControlMapeado.cs" />
     <Compile Include="Usuario.cs" />

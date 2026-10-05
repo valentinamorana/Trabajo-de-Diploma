@@ -307,10 +307,10 @@ namespace GUI
         /// </summary>
         public void RefrescarSeguridad()
         {
-            if (!Seguridad.SessionManager.IsLoggedIn) return;
+            if (!BLL.Sesion.Activa) return;
             try
             {
-                var usuario  = Seguridad.SessionManager.GetInstance().Usuario;
+                var usuario  = BLL.Sesion.Usuario;
                 var permisos = new BLL.Familia().ObtenerPermisosEfectivos(usuario.Rol ?? usuario.Perfil);
                 usuario.Permisos = permisos;   // _usuarioActivo es la MISMA referencia que la sesión
                 AplicarPermisos(permisos);

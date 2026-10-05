@@ -135,9 +135,7 @@ namespace GUI
             try
             {
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
-                var actor = Seguridad.SessionManager.IsLoggedIn
-                    ? Seguridad.SessionManager.GetInstance().Usuario.Username
-                    : null;
+                var actor = BLL.Sesion.Actor;
 
                 var resultado = _bllCobro.Procesar(this.Text, cliente, decision, modalidad, actor);
 

@@ -3,7 +3,9 @@ classDiagram
   class GUI_BackupForm["GUI.BackupForm"] {
   }
   class BLL_Backup["BLL.Backup"] {
+    +ObtenerBackups() List~FileInfo~
     +ObtenerUltimoBackup() FileInfo
+    +AsegurarCarpetaBackups() string
     +RealizarBackup(string,  string,  string) string
     +RealizarBackupInicial(string,  string,  string) string
     +ObtenerFechaBackup(string) DateTime?

@@ -219,9 +219,7 @@ namespace GUI
             try
             {
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
-                var actor = Seguridad.SessionManager.IsLoggedIn
-                    ? Seguridad.SessionManager.GetInstance().Usuario.Username
-                    : null;
+                var actor = BLL.Sesion.Actor;
 
                 var resultado = _bllRenovacion.Procesar(this.Text, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta);
 

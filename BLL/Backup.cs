@@ -32,15 +32,26 @@ namespace BLL
         public static readonly string CarpetaBackups =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
 
-        /// <summary>Backup más reciente de la carpeta (.bak legacy o cifrado), o null si no hay.</summary>
-        public static FileInfo ObtenerUltimoBackup()
+        /// <summary>Backups de la carpeta (.bak legacy y cifrados), del más reciente al más viejo.
+        /// Lista vacía si la carpeta todavía no existe.</summary>
+        public static List<FileInfo> ObtenerBackups()
         {
-            if (!Directory.Exists(CarpetaBackups)) return null;
+            if (!Directory.Exists(CarpetaBackups)) return new List<FileInfo>();
             var dir = new DirectoryInfo(CarpetaBackups);
             return dir.GetFiles("*.bak")
                 .Concat(dir.GetFiles("*" + ExtensionCifrada))
                 .OrderByDescending(f => f.LastWriteTime)
-                .FirstOrDefault();
+                .ToList();
+        }
+
+        /// <summary>Backup más reciente de la carpeta (.bak legacy o cifrado), o null si no hay.</summary>
+        public static FileInfo ObtenerUltimoBackup() => ObtenerBackups().FirstOrDefault();
+
+        /// <summary>Crea la carpeta de backups si no existe y devuelve su ruta.</summary>
+        public static string AsegurarCarpetaBackups()
+        {
+            Directory.CreateDirectory(CarpetaBackups);
+            return CarpetaBackups;
         }
 
         // ¿La ruta apunta a un archivo DENTRO de la carpeta de backups (sin "..", ni otra carpeta)?

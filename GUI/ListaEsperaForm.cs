@@ -226,8 +226,7 @@ namespace GUI
 
             try
             {
-                string actor = Seguridad.SessionManager.IsLoggedIn
-                    ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
+                string actor = BLL.Sesion.Actor;
                 listaEsperaBLL.Cancelar(this.Text, fila.IdListaEspera, actor);
                 MostrarOk(Tr("msg.listaespera.cancelada", "Anotación de {0} cancelada.", new object[] { fila.NombreCliente }));
                 CargarFilas();

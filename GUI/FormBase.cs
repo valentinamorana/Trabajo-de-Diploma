@@ -61,8 +61,8 @@ namespace GUI
             try
             {
                 RegistroControles.Registrar(this);
-                if (Seguridad.SessionManager.IsLoggedIn)
-                    ManejadorSeguridad.AplicarSeguridad(this, Seguridad.SessionManager.GetInstance().Usuario);
+                if (BLL.Sesion.Activa)
+                    ManejadorSeguridad.AplicarSeguridad(this, BLL.Sesion.Usuario);
             }
             catch (Exception ex)
             {
@@ -257,10 +257,8 @@ namespace GUI
             {
                 var bitacora = new BLL.Bitacora();
                 string modulo = this.GetType().Name;
-                int?   idUsuario = Seguridad.SessionManager.IsLoggedIn
-                                   ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
-                string usuario = Seguridad.SessionManager.IsLoggedIn
-                                   ? Seguridad.SessionManager.GetInstance().Usuario.Username : "(sin sesión)";
+                int?   idUsuario = BLL.Sesion.IdUsuario;
+                string usuario = BLL.Sesion.Actor ?? "(sin sesión)";
                 bitacora.RegistrarSinSesion(
                     modulo,
                     "Excepción: " + ex.GetType().Name,

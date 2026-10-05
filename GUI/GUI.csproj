@@ -487,10 +487,6 @@
       <Project>{f41a7a3a-8ac1-4036-9fca-b81ee8812b8e}</Project>
       <Name>Servicios</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Seguridad\Seguridad.csproj">
-      <Project>{8d86288e-77ff-4076-b495-e881fc568379}</Project>
-      <Name>Seguridad</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Login\03_clothing_rack_transparent.png" />

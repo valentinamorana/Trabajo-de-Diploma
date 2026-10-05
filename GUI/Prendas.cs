@@ -365,9 +365,7 @@ namespace GUI
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
-                    string actor = Seguridad.SessionManager.IsLoggedIn
-                        ? Seguridad.SessionManager.GetInstance().Usuario.Username
-                        : null;
+                    string actor = BLL.Sesion.Actor;
                     prendaBLL.CambiarEstado(this.Text, prenda, dlg.EstadoSeleccionado, actor);
                     string fmtEstAct = Tr("msg.prenda.estadoact", "Estado de '{0}' actualizado a {1}.");
                     MostrarOk(string.Format(fmtEstAct, prenda.Nombre, EstadoLabel(dlg.EstadoSeleccionado)));
@@ -398,9 +396,7 @@ namespace GUI
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
-                    string actor = Seguridad.SessionManager.IsLoggedIn
-                        ? Seguridad.SessionManager.GetInstance().Usuario.Username
-                        : null;
+                    string actor = BLL.Sesion.Actor;
                     cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
                     MostrarOk(Tr("msg.cargoprenda.registrado", "Cargo de ${0} registrado — se sumará al próximo cobro de {1}.",
                         new object[] { dlg.Monto, prenda.NombreUltimoCliente ?? "el cliente" }));
@@ -423,8 +419,7 @@ namespace GUI
 
             try
             {
-                string actor = Seguridad.SessionManager.IsLoggedIn
-                    ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
+                string actor = BLL.Sesion.Actor;
                 listaEsperaBLL.Anotar(this.Text, prenda.IdPrenda, cliente.IdCliente, actor);
                 MostrarOk(Tr("msg.listaespera.anotado", "{0} anotado en la lista de espera de '{1}'.",
                     new object[] { cliente.NombreCompleto, prenda.Nombre }));

@@ -738,14 +738,21 @@ SELECT DISTINCT rp.Rol, rp.Rol, 'Rol', 1, 1, 1
 FROM   RolPermiso rp
 WHERE  NOT EXISTS (SELECT 1 FROM Permiso p WHERE p.Nombre = rp.Rol AND p.EsRol = 1);
 
--- Migrar asignaciones planas a aristas Composite (idempotente)
-INSERT INTO PermisoRelacion (IdPadre, IdHijo)
-SELECT pr.IdPermiso, rp.IdPermiso
-FROM   RolPermiso rp
-INNER JOIN Permiso pr ON pr.Nombre = rp.Rol AND pr.EsRol = 1 AND pr.IdPermiso <> rp.IdPermiso
-WHERE  NOT EXISTS (SELECT 1 FROM PermisoRelacion x
-                   WHERE x.IdPadre = pr.IdPermiso AND x.IdHijo = rp.IdPermiso);
-PRINT 'Nodos-rol y aristas rol→permiso migrados (T04 v7.0).';
+-- Migrar asignaciones planas a aristas Composite. Corre UNA sola vez por base (marca
+-- 'MigracionRolPermiso', que se cierra en la sección de mnuRenovacionSuscripcion): PermisoRelacion
+-- es la única fuente de verdad y RolPermiso es legacy. Si corriera siempre, cada reinstalación le
+-- devolvería a un rol las patentes que el Administrador le quitó (y esas aristas nuevas, sin dígito
+-- verificador, darían una falsa alarma de integridad).
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'MigracionRolPermiso')
+BEGIN
+    INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+    SELECT pr.IdPermiso, rp.IdPermiso
+    FROM   RolPermiso rp
+    INNER JOIN Permiso pr ON pr.Nombre = rp.Rol AND pr.EsRol = 1 AND pr.IdPermiso <> rp.IdPermiso
+    WHERE  NOT EXISTS (SELECT 1 FROM PermisoRelacion x
+                       WHERE x.IdPadre = pr.IdPermiso AND x.IdHijo = rp.IdPermiso);
+    PRINT 'Nodos-rol y aristas rol→permiso migrados (T04 v7.0).';
+END
 GO
 
 -- ============================================================
@@ -1386,15 +1393,19 @@ JOIN Permiso p ON p.NombreMenu = r.NombreMenu AND ISNULL(p.EsFamilia,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM RolPermiso x WHERE x.Rol = r.Rol AND x.IdPermiso = p.IdPermiso);
 GO
 
--- Regenerar aristas Composite (rol → patente) a partir de RolPermiso, igual que
--- el resto de las migraciones de permisos de este proyecto.
-INSERT INTO PermisoRelacion (IdPadre, IdHijo)
-SELECT pr.IdPermiso, rp.IdPermiso
-FROM   RolPermiso rp
-INNER JOIN Permiso pr ON pr.Nombre = rp.Rol AND pr.EsRol = 1 AND pr.IdPermiso <> rp.IdPermiso
-WHERE  NOT EXISTS (SELECT 1 FROM PermisoRelacion x
-                   WHERE x.IdPadre = pr.IdPermiso AND x.IdHijo = rp.IdPermiso);
-PRINT 'Permiso mnuRenovacionSuscripcion asignado a Administrador y Vendedor (Supervisor lo hereda de Vendedor).';
+-- Regenerar aristas Composite (rol → patente) a partir de RolPermiso: solo en la primera corrida
+-- sobre esta base (ver 'MigracionRolPermiso' en la migración T04). Acá se cierra la marca.
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'MigracionRolPermiso')
+BEGIN
+    INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+    SELECT pr.IdPermiso, rp.IdPermiso
+    FROM   RolPermiso rp
+    INNER JOIN Permiso pr ON pr.Nombre = rp.Rol AND pr.EsRol = 1 AND pr.IdPermiso <> rp.IdPermiso
+    WHERE  NOT EXISTS (SELECT 1 FROM PermisoRelacion x
+                       WHERE x.IdPadre = pr.IdPermiso AND x.IdHijo = rp.IdPermiso);
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'MigracionRolPermiso', N'Aplicada', GETDATE());
+    PRINT 'Permiso mnuRenovacionSuscripcion asignado a Administrador y Vendedor (Supervisor lo hereda de Vendedor).';
+END
 GO
 
 INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
@@ -3330,6 +3341,10 @@ BEGIN
     JOIN Permiso pat ON pat.IdPermiso = r.IdHijo  AND pat.NombreMenu = 'mnuCobroSuscripcion'
                     AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0;
     SET @cambios = @cambios + @@ROWCOUNT;
+    -- Fila legacy (RolPermiso ya no es fuente de verdad, pero se deja coherente).
+    DELETE rp FROM RolPermiso rp
+    JOIN Permiso pat ON pat.IdPermiso = rp.IdPermiso AND pat.NombreMenu = 'mnuCobroSuscripcion'
+    WHERE rp.Rol = 'Vendedor';
 
     INSERT INTO PermisoRelacion (IdPadre, IdHijo)
     SELECT rol.IdPermiso, pat.IdPermiso

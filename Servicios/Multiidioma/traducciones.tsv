@@ -5631,6 +5631,22 @@ ES	dash.vend.encaja	Contrataciones\nesperando a Caja
 ES	dash.kan.encontrol	En control de stock
 ES	dash.kan.faltantes	Con faltantes: comunicar
 ES	dash.kan.separados	Separados: formalizar
+ES	err.bll.backup.fuera_de_carpeta	Solo se pueden eliminar archivos de backup de la carpeta de backups del sistema.
+ES	err.bll.cobro.concurrente	Otra sesión ya procesó el cobro de este cliente. Actualizá la lista y verificá su vencimiento.
+ES	err.bll.contratacion.cobra_el_vendedor	Quien registró la contratación no puede cobrarla: el cobro lo confirma otra persona de Caja.
+ES	err.bll.contratacion.motivo_largo	El motivo no puede superar los {0} caracteres.
+ES	err.bll.emergencia.limite	Demasiados intentos fallidos en esta sesión. Reiniciá la aplicación para volver a intentarlo.
+ES	err.bll.familia.patente_nombremenu	No se puede cambiar el identificador de menú de una patente: define qué permiso otorga.
+ES	err.bll.listaespera.estado_cambiado	La anotación cambió en otra sesión. Actualizá la lista y volvé a intentarlo.
+ES	err.bll.pedido.cancelar_estado_separado	Solo se pueden cancelar pedidos Pendientes o con las prendas separadas. Este pedido está '{0}'.
+ES	err.bll.pedido.motivo_largo	El motivo no puede superar los {0} caracteres.
+ES	err.bll.pedido.restaurar_no_restaurable	La operación '{0}' no se puede revertir desde el historial: usá la acción correspondiente del pedido (reactivar, cancelar o registrar la devolución).
+ES	err.bll.pedido.restaurar_no_ultima	Solo se puede revertir la última operación del Pedido #{0} (la #{1}).
+ES	err.bll.permisos.no_verificable	No se pudo verificar tu usuario contra la base de datos. La operación no se ejecutó.
+ES	err.bll.permisos.usuario_no_vigente	Tu usuario fue desactivado o cambió de rol. Cerrá la sesión y volvé a ingresar.
+ES	err.bll.renovacion.pedido_activo	No se puede pausar ni dar de baja la suscripción: el cliente tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo.
+ES	err.bll.usuario.preferencia_ajena	Solo podés cambiar tu propia preferencia de idioma.
+ES	err.dal.pedido.restaurar_prendas	No se puede restaurar el Pedido #{0}: una o más de sus prendas ya no están disponibles para el cliente (las tiene otro pedido, están en limpieza o de baja).
 EN	err.dal.prenda.estado_cambio	The garment's state changed since it was last read. Refresh the screen and try again.
 EN	paso1.identificar	Step 1 of 2 — Identify the client
 EN	paso.ajuste.texto	Adjust selection of Order #{0}
@@ -5854,6 +5870,22 @@ EN	dash.vend.encaja	Contracts\nwaiting for cashier
 EN	dash.kan.encontrol	In stock control
 EN	dash.kan.faltantes	Missing items: tell the client
 EN	dash.kan.separados	Set aside: finalize
+EN	err.bll.backup.fuera_de_carpeta	Only backup files in the system backup folder can be deleted.
+EN	err.bll.cobro.concurrente	Another session already processed this customer's charge. Refresh the list and check the expiration date.
+EN	err.bll.contratacion.cobra_el_vendedor	The person who registered the subscription cannot collect it: another Cashier must confirm the payment.
+EN	err.bll.contratacion.motivo_largo	The reason cannot exceed {0} characters.
+EN	err.bll.emergencia.limite	Too many failed attempts in this session. Restart the application to try again.
+EN	err.bll.familia.patente_nombremenu	A permission's menu identifier cannot be changed: it defines which permission it grants.
+EN	err.bll.listaespera.estado_cambiado	The entry was changed in another session. Refresh the list and try again.
+EN	err.bll.pedido.cancelar_estado_separado	Only Pending orders or orders with set-aside garments can be cancelled. This order is '{0}'.
+EN	err.bll.pedido.motivo_largo	The reason cannot exceed {0} characters.
+EN	err.bll.pedido.restaurar_no_restaurable	Operation '{0}' cannot be reverted from the history: use the corresponding order action (reactivate, cancel or register the return).
+EN	err.bll.pedido.restaurar_no_ultima	Only the last operation of Order #{0} can be reverted (#{1}).
+EN	err.bll.permisos.no_verificable	Your user could not be verified against the database. The operation was not performed.
+EN	err.bll.permisos.usuario_no_vigente	Your user was deactivated or its role changed. Log out and sign in again.
+EN	err.bll.renovacion.pedido_activo	The subscription cannot be paused or cancelled: the customer has an order in progress. Wait for it to finish or cancel it.
+EN	err.bll.usuario.preferencia_ajena	You can only change your own language preference.
+EN	err.dal.pedido.restaurar_prendas	Order #{0} cannot be restored: one or more of its garments are no longer available to the customer (another order has them, or they are being cleaned or written off).
 RU	err.dal.prenda.estado_cambio	Состояние вещи изменилось с момента последнего запроса. Обновите экран и повторите попытку.
 RU	paso1.identificar	Шаг 1 из 2 — Идентифицировать клиента
 RU	paso.ajuste.texto	Корректировка выбора заказа №{0}
@@ -6077,6 +6109,22 @@ RU	dash.vend.encaja	Договоры\nожидают кассу
 RU	dash.kan.encontrol	На контроле запасов
 RU	dash.kan.faltantes	Недостача: сообщить
 RU	dash.kan.separados	Отложены: оформить
+RU	err.bll.backup.fuera_de_carpeta	Удалять можно только файлы резервных копий из системной папки резервных копий.
+RU	err.bll.cobro.concurrente	Другой сеанс уже провёл оплату этого клиента. Обновите список и проверьте дату окончания.
+RU	err.bll.contratacion.cobra_el_vendedor	Тот, кто оформил подписку, не может принять по ней оплату: оплату подтверждает другой сотрудник кассы.
+RU	err.bll.contratacion.motivo_largo	Причина не может превышать {0} символов.
+RU	err.bll.emergencia.limite	Слишком много неудачных попыток в этом сеансе. Перезапустите приложение, чтобы попробовать снова.
+RU	err.bll.familia.patente_nombremenu	Нельзя изменить идентификатор меню разрешения: он определяет, какое право предоставляется.
+RU	err.bll.listaespera.estado_cambiado	Запись была изменена в другом сеансе. Обновите список и повторите попытку.
+RU	err.bll.pedido.cancelar_estado_separado	Отменить можно только ожидающие заказы или заказы с отложенной одеждой. Этот заказ в состоянии '{0}'.
+RU	err.bll.pedido.motivo_largo	Причина не может превышать {0} символов.
+RU	err.bll.pedido.restaurar_no_restaurable	Операцию '{0}' нельзя отменить из истории: используйте соответствующее действие с заказом (повторно активировать, отменить или зарегистрировать возврат).
+RU	err.bll.pedido.restaurar_no_ultima	Можно отменить только последнюю операцию заказа №{0} (№{1}).
+RU	err.bll.permisos.no_verificable	Не удалось проверить вашего пользователя в базе данных. Операция не выполнена.
+RU	err.bll.permisos.usuario_no_vigente	Ваш пользователь был деактивирован или его роль изменилась. Выйдите и войдите снова.
+RU	err.bll.renovacion.pedido_activo	Нельзя приостановить или отменить подписку: у клиента есть заказ в работе. Дождитесь его завершения или отмените его.
+RU	err.bll.usuario.preferencia_ajena	Вы можете изменить только свои собственные языковые настройки.
+RU	err.dal.pedido.restaurar_prendas	Невозможно восстановить заказ №{0}: одна или несколько вещей больше не доступны клиенту (они в другом заказе, в чистке или списаны).
 PT	err.dal.prenda.estado_cambio	O estado da peça mudou desde a última consulta. Atualize a tela e tente novamente.
 PT	paso1.identificar	Passo 1 de 2 — Identificar o cliente
 PT	paso.ajuste.texto	Ajustar seleção do Pedido #{0}
@@ -6300,3 +6348,19 @@ PT	dash.vend.encaja	Contratações\naguardando o caixa
 PT	dash.kan.encontrol	Em controle de estoque
 PT	dash.kan.faltantes	Com faltantes: comunicar
 PT	dash.kan.separados	Separados: formalizar
+PT	err.bll.backup.fuera_de_carpeta	Só é possível excluir arquivos de backup da pasta de backups do sistema.
+PT	err.bll.cobro.concurrente	Outra sessão já processou a cobrança deste cliente. Atualize a lista e verifique o vencimento.
+PT	err.bll.contratacion.cobra_el_vendedor	Quem registrou a contratação não pode cobrá-la: o pagamento deve ser confirmado por outra pessoa do Caixa.
+PT	err.bll.contratacion.motivo_largo	O motivo não pode ultrapassar {0} caracteres.
+PT	err.bll.emergencia.limite	Muitas tentativas malsucedidas nesta sessão. Reinicie o aplicativo para tentar novamente.
+PT	err.bll.familia.patente_nombremenu	Não é possível alterar o identificador de menu de uma permissão: ele define qual permissão concede.
+PT	err.bll.listaespera.estado_cambiado	O registro foi alterado em outra sessão. Atualize a lista e tente novamente.
+PT	err.bll.pedido.cancelar_estado_separado	Só é possível cancelar pedidos Pendentes ou com as peças separadas. Este pedido está '{0}'.
+PT	err.bll.pedido.motivo_largo	O motivo não pode ultrapassar {0} caracteres.
+PT	err.bll.pedido.restaurar_no_restaurable	A operação '{0}' não pode ser revertida pelo histórico: use a ação correspondente do pedido (reativar, cancelar ou registrar a devolução).
+PT	err.bll.pedido.restaurar_no_ultima	Só é possível reverter a última operação do Pedido #{0} (a #{1}).
+PT	err.bll.permisos.no_verificable	Não foi possível verificar seu usuário no banco de dados. A operação não foi executada.
+PT	err.bll.permisos.usuario_no_vigente	Seu usuário foi desativado ou mudou de perfil. Encerre a sessão e entre novamente.
+PT	err.bll.renovacion.pedido_activo	Não é possível pausar nem cancelar a assinatura: o cliente tem um pedido em andamento. Aguarde a conclusão ou cancele-o.
+PT	err.bll.usuario.preferencia_ajena	Você só pode alterar sua própria preferência de idioma.
+PT	err.dal.pedido.restaurar_prendas	Não é possível restaurar o Pedido #{0}: uma ou mais peças já não estão disponíveis para o cliente (estão em outro pedido, em limpeza ou baixadas).

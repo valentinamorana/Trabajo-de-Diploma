@@ -47,8 +47,25 @@
 
 IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = 'WardrobeFlowDB')
 BEGIN
-    CREATE DATABASE WardrobeFlowDB;
-    PRINT 'Base de datos WardrobeFlowDB creada.';
+    BEGIN TRY
+        CREATE DATABASE WardrobeFlowDB;
+        PRINT 'Base de datos WardrobeFlowDB creada.';
+    END TRY
+    BEGIN CATCH
+        -- En la carpeta de datos quedaron archivos WardrobeFlowDB.mdf/.ldf huérfanos (una
+        -- desinstalación incompleta, una instancia LocalDB borrada a mano...): CREATE DATABASE
+        -- no puede reutilizarlos. Se crea la base con archivos de nombre nuevo, sin tocar los viejos.
+        DECLARE @dir NVARCHAR(400) = CONVERT(NVARCHAR(400), SERVERPROPERTY('InstanceDefaultDataPath'));
+        IF @dir IS NULL
+            SELECT @dir = LEFT(physical_name, LEN(physical_name) - CHARINDEX('\', REVERSE(physical_name)) + 1)
+            FROM sys.master_files WHERE database_id = DB_ID('master') AND file_id = 1;
+        DECLARE @sufijo NVARCHAR(20) = FORMAT(GETDATE(), 'yyyyMMddHHmmss');
+        DECLARE @sql NVARCHAR(MAX) =
+            N'CREATE DATABASE WardrobeFlowDB ON (NAME = WardrobeFlowDB, FILENAME = ''' + @dir + N'WardrobeFlowDB_' + @sufijo + N'.mdf'') ' +
+            N'LOG ON (NAME = WardrobeFlowDB_log, FILENAME = ''' + @dir + N'WardrobeFlowDB_' + @sufijo + N'_log.ldf'')';
+        EXEC (@sql);
+        PRINT 'AVISO: ya había archivos WardrobeFlowDB huérfanos en ' + @dir + '; la base se creó con archivos nuevos.';
+    END CATCH
 END
 ELSE
     PRINT 'Base de datos WardrobeFlowDB ya existe — se actualiza su contenido.';
@@ -2558,6 +2575,13 @@ BEGIN
     );
     PRINT 'Tabla DesistimientoContratacion creada.';
 END
+GO
+
+-- Bases donde la tabla ya existía sin esta restricción (creada antes de agregarla).
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_DesistContr_ModalidadConPlan')
+   AND NOT EXISTS (SELECT 1 FROM DesistimientoContratacion WHERE IdPlan IS NULL AND Modalidad IS NOT NULL)
+    ALTER TABLE DesistimientoContratacion ADD CONSTRAINT CHK_DesistContr_ModalidadConPlan
+        CHECK (IdPlan IS NOT NULL OR Modalidad IS NULL);
 GO
 
 -- (5) Integridad: una contratación Pagada tiene medio de pago y comprobante; el comprobante es único.

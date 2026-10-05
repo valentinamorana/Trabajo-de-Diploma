@@ -204,46 +204,6 @@ namespace DAL
             return lista;
         }
 
-        // Patentes activas asignadas a un rol leídas desde [RolPermiso] (asignación PLANA, legacy).
-        // FALLBACK LEGACY: BLL.Familia solo llama acá cuando el rol NO existe como nodo del Composite
-        // (BD sin migrar). En una BD migrada la resolución es 100% por PermisoRelacion y este método
-        // no se invoca. No deprecar la lectura sin migrar antes las bases viejas.
-        public List<BE.Permiso> ObtenerPorRol(string rol)
-        {
-            var lista = new List<BE.Permiso>();
-            if (string.IsNullOrWhiteSpace(rol)) return lista;
-
-            try
-            {
-                DataTable tabla = acceso.Leer(
-                    "SELECT p.IdPermiso, p.Nombre, p.NombreMenu, p.TipoComponente, p.Estado " +
-                    "FROM Permiso p " +
-                    "INNER JOIN RolPermiso rp ON p.IdPermiso = rp.IdPermiso " +
-                    "WHERE rp.Rol = @rol AND p.Estado = 1 " +
-                    "ORDER BY p.TipoComponente, p.Nombre",
-                    new[] { new SqlParameter("@rol", rol) });
-
-                if (tabla == null) return lista;
-
-                foreach (DataRow row in tabla.Rows)
-                {
-                    lista.Add(new BE.Permiso
-                    {
-                        Id             = Convert.ToInt32(row["IdPermiso"]),
-                        Nombre         = row["Nombre"].ToString(),
-                        NombreMenu     = row["NombreMenu"].ToString(),
-                        TipoComponente = row["TipoComponente"].ToString(),
-                        Estado         = Convert.ToBoolean(row["Estado"])
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al obtener permisos para el rol '{rol}'.", ex);
-            }
-            return lista;
-        }
-
         // ── T04 — CRUD del Composite (Patentes / Familias / Roles) ──────────────
 
         // Devuelve el Id del nodo-rol cuyo Nombre coincide, o 0 si no existe.

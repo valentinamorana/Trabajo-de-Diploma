@@ -57,6 +57,7 @@ namespace Tests.Fakes
         public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda() => CantidadPedidosPorPrenda;
         public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente) => PrendasHistoricasPorCliente;
         public BE.Pedido ObtenerPorId(int idPedido) => PedidosDevueltos.Find(p => p.IdPedido == idPedido);
+        public bool TienePedidoActivo(int idCliente) => PedidosDevueltos.Exists(p => p.IdCliente == idCliente && p.EsActivo());
 
         public int AltaSinReserva(BE.Pedido pedido)
         {

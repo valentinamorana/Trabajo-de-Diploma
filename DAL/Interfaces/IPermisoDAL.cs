@@ -11,7 +11,6 @@ namespace DAL.Interfaces
     {
         List<BE.Componente> ObtenerArbol();
         List<string>        ObtenerRoles();
-        List<BE.Permiso>    ObtenerPorRol(string rol);
         int                 ObtenerIdRol(string rolNombre);
         List<int>           ObtenerIdsHijos(int idPadre);
         void                AgregarRelacion(int idPadre, int idHijo);

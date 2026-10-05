@@ -13,8 +13,6 @@ namespace BLL
         private readonly Interfaces.IPrendaService   _bllPrenda;
         private readonly Interfaces.IClienteService  _bllCliente;
 
-        private static readonly string DirBackups =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
 
         public ReporteJornada() : this(new Bitacora(), new Prenda(), new Cliente()) { }
 
@@ -62,17 +60,8 @@ namespace BLL
         {
             try
             {
-                if (!Directory.Exists(DirBackups)) return -1;
-                // El backup se genera siempre cifrado (Backup.ExtensionCifrada = ".wfbak"); el ".bak"
-                // intermedio se borra tras cifrarlo (ver BLL.Backup.GenerarBackupCifrado). Buscar solo
-                // "*.bak" hacía que esta alerta quedara en falso-positivo permanente ("sin backups")
-                // en cualquier instalación que solo tenga backups cifrados — mismo criterio que ya usa
-                // GUI.BackupForm al listarlos.
-                var dir = new DirectoryInfo(DirBackups);
-                FileInfo ultimo = dir.GetFiles("*.bak")
-                    .Concat(dir.GetFiles("*" + Backup.ExtensionCifrada))
-                    .OrderByDescending(f => f.LastWriteTime)
-                    .FirstOrDefault();
+                // Considera .bak legacy y cifrados (.wfbak): ver BLL.Backup.ObtenerUltimoBackup.
+                FileInfo ultimo = Backup.ObtenerUltimoBackup();
                 return ultimo == null ? -1 : (int)(DateTime.Now - ultimo.LastWriteTime).TotalDays;
             }
             catch { return -1; }

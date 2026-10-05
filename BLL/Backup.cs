@@ -27,6 +27,37 @@ namespace BLL
         // pudiendo restaurar para no romper copias anteriores.
         public const string ExtensionCifrada = ".wfbak";
 
+        /// <summary>Carpeta única de los backups (al lado del ejecutable). Fuente única para la
+        /// BLL y la GUI (antes la ruta estaba repetida en cuatro lugares).</summary>
+        public static readonly string CarpetaBackups =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+
+        /// <summary>Backup más reciente de la carpeta (.bak legacy o cifrado), o null si no hay.</summary>
+        public static FileInfo ObtenerUltimoBackup()
+        {
+            if (!Directory.Exists(CarpetaBackups)) return null;
+            var dir = new DirectoryInfo(CarpetaBackups);
+            return dir.GetFiles("*.bak")
+                .Concat(dir.GetFiles("*" + ExtensionCifrada))
+                .OrderByDescending(f => f.LastWriteTime)
+                .FirstOrDefault();
+        }
+
+        // ¿La ruta apunta a un archivo DENTRO de la carpeta de backups (sin "..", ni otra carpeta)?
+        internal static bool EstaDentroDeCarpetaBackups(string rutaArchivo, string carpeta = null)
+        {
+            if (string.IsNullOrWhiteSpace(rutaArchivo)) return false;
+            try
+            {
+                string baseDir = Path.GetFullPath(carpeta ?? CarpetaBackups)
+                                     .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string completa = Path.GetFullPath(rutaArchivo);
+                return string.Equals(Path.GetDirectoryName(completa)?.TrimEnd(Path.DirectorySeparatorChar), baseDir,
+                                     StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception) { return false; }
+        }
+
         private static void ValidarAdministrador()
         {
             BLLHelper.ExigirAdministrador("err.bll.backup.sin_permiso",
@@ -183,6 +214,14 @@ namespace BLL
         public void EliminarBackup(string modulo, string rutaArchivo)
         {
             ValidarAdministrador();
+            // Solo se borran backups de la carpeta de backups: la ruta llega de la pantalla y no
+            // debe poder apuntar a cualquier archivo del equipo.
+            string extension = Path.GetExtension(rutaArchivo ?? "");
+            if (!EstaDentroDeCarpetaBackups(rutaArchivo) ||
+                !(extension.Equals(".bak", StringComparison.OrdinalIgnoreCase) ||
+                  extension.Equals(ExtensionCifrada, StringComparison.OrdinalIgnoreCase)))
+                throw new BE.AppException("err.bll.backup.fuera_de_carpeta",
+                    "Solo se pueden eliminar archivos de backup de la carpeta de backups del sistema.");
             if (!File.Exists(rutaArchivo))
                 throw new FileNotFoundException("El archivo de backup no existe.", rutaArchivo);
 

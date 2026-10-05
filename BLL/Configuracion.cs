@@ -637,7 +637,7 @@ namespace BLL
         // ── Recordatorio de backup ────────────────────────────────────────────
 
         private static readonly string RutaConfigRecordatorio =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups", "recordatorio.cfg");
+            Path.Combine(Backup.CarpetaBackups, "recordatorio.cfg");
 
         private const int DiasRecordatorioDefault = 7;
 

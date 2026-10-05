@@ -244,6 +244,18 @@ namespace DAL
             return lista;
         }
 
+        // ¿El cliente tiene un pedido en el circuito (mismos estados que BE.Pedido.EsActivo)?
+        public bool TienePedidoActivo(int idCliente)
+        {
+            var activos = new[] { BE.EstadoPedido.EnControlStock, BE.EstadoPedido.ConFaltantes,
+                                  BE.EstadoPedido.Separado, BE.EstadoPedido.Pendiente, BE.EstadoPedido.Despachado };
+            var enLista = string.Join(",", Array.ConvertAll(activos, e => ((int)e).ToString(CultureInfo.InvariantCulture)));
+            DataTable t = acceso.Leer(
+                "SELECT COUNT(*) AS N FROM Pedido WHERE IdCliente = @IdCliente AND Estado IN (" + enLista + ")",
+                new[] { new SqlParameter("@IdCliente", idCliente) });
+            return t != null && t.Rows.Count > 0 && Convert.ToInt32(t.Rows[0]["N"]) > 0;
+        }
+
         // Obtiene un pedido por ID incluyendo sus prendas.
         public override BE.Pedido ObtenerPorId(int idPedido)
         {

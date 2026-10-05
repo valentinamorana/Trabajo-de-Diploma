@@ -31,7 +31,7 @@ namespace DAL.Interfaces
         /// <summary>Cantidad de filas Reservadas con la ventana todavía vigente (para PanelAlertas).</summary>
         int ContarReservadasVigentes();
 
-        void CambiarEstado(int idListaEspera, BE.EstadoListaEspera nuevoEstado,
-                            System.DateTime? fechaLimiteReserva, string actor);
+        bool CambiarEstado(int idListaEspera, BE.EstadoListaEspera nuevoEstado,
+                           System.DateTime? fechaLimiteReserva, string actor, BE.EstadoListaEspera estadoEsperado);
     }
 }

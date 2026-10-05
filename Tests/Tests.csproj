@@ -95,6 +95,7 @@
     <Compile Include="Fakes\FakeRegistroBitacora.cs" />
     <Compile Include="ConfiguracionTests.cs" />
     <Compile Include="LoginSeguridadTests.cs" />
+    <Compile Include="EndurecimientoBackendTests.cs" />
     <Compile Include="Fakes\FakeClaveRecuperacionDAL.cs" />
     <Compile Include="Fakes\FakePermisoDAL.cs" />
     <Compile Include="Fakes\FakeUsuarioDAL.cs" />

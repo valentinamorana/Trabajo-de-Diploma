@@ -16,10 +16,14 @@ namespace BLL
         private DAL.Cliente dalCliente => _dalCliente ?? (_dalCliente = new DAL.Cliente());
 
         // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble.
+        private readonly Servicios.IRegistroBitacora bitacora;
+        private const string Modulo = "Planes de Suscripción";
+
         public PlanSuscripcion() : this(new DAL.PlanSuscripcion()) { }
-        public PlanSuscripcion(DAL.Interfaces.IPlanSuscripcionDAL dalPlan)
+        public PlanSuscripcion(DAL.Interfaces.IPlanSuscripcionDAL dalPlan, Servicios.IRegistroBitacora bitacora = null)
         {
             this.dalPlan = dalPlan ?? throw new ArgumentNullException(nameof(dalPlan));
+            this.bitacora = bitacora ?? Servicios.FabricaBitacora.CrearSistema();
         }
 
         // Devuelve todos los planes activos (para combos/selección).
@@ -48,6 +52,9 @@ namespace BLL
             Validar(plan);
             plan.Estado = true;
             dalPlan.Alta(plan);
+            bitacora.Registrar(Modulo,
+                $"Alta de plan '{plan.Nombre}': {plan.LimitePrendas} prenda(s), precio {plan.Precio:N2}",
+                BE.Criticidad.Media);
         }
 
         // Modifica un plan existente.
@@ -63,6 +70,10 @@ namespace BLL
             if (actual != null) plan.Estado = actual.Estado;
 
             dalPlan.Modificar(plan);
+            bitacora.Registrar(Modulo,
+                $"Modificación del plan #{plan.IdPlan} '{plan.Nombre}': {plan.LimitePrendas} prenda(s), precio {plan.Precio:N2}" +
+                (actual != null ? $" (antes: '{actual.Nombre}', {actual.LimitePrendas} prenda(s), precio {actual.Precio:N2})" : ""),
+                BE.Criticidad.Media);
         }
 
         // Desactiva (baja lógica) un plan.
@@ -78,6 +89,7 @@ namespace BLL
                     clientesActivos);
 
             dalPlan.Desactivar(idPlan);
+            bitacora.Registrar(Modulo, $"Desactivación del plan #{idPlan}", BE.Criticidad.Media);
         }
 
         // Reactiva un plan previamente desactivado.
@@ -85,6 +97,7 @@ namespace BLL
         {
             PermisosAccion.Exigir(BE.Patentes.PlanSuscripcionesEditar, BE.Patentes.PlanSuscripciones);
             dalPlan.Activar(idPlan);
+            bitacora.Registrar(Modulo, $"Reactivación del plan #{idPlan}", BE.Criticidad.Media);
         }
 
         // Validaciones

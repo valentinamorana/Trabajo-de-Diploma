@@ -14,6 +14,8 @@ namespace DAL.Interfaces
         Dictionary<int, int> ObtenerCantidadPedidosPorPrenda();
         List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente);
         BE.Pedido ObtenerPorId(int idPedido);
+        // ¿El cliente tiene un pedido que todavía no terminó su ciclo (BE.Pedido.EsActivo)?
+        bool TienePedidoActivo(int idCliente);
 
         // ── PN01 — circuito de control de stock ─────────────────────────────
         // Inserta el pedido y sus líneas SIN reservar prendas (EnControlStock o Desistido).

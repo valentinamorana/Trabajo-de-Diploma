@@ -24,8 +24,10 @@ namespace BLL
         /// Captura el estado actual del usuario (Originator) en un Memento y lo guarda
         /// en el historial (Caretaker). Debe llamarse ANTES de una operación destructiva.
         /// FAIL-SAFE: si el Caretaker no puede guardar, lanza AppException y aborta.
+        /// Interno: solo lo invocan las operaciones de la BLL que ya validaron el permiso
+        /// (ABM de usuarios, gestión de perfiles); no es una escritura expuesta a la GUI.
         /// </summary>
-        public void GrabarVersion(int idUsuario, string actor, string detalle)
+        internal void GrabarVersion(int idUsuario, string actor, string detalle)
         {
             BE.Usuario originator = _dalUsuario.ObtenerPorId(idUsuario);
             if (originator == null) return;

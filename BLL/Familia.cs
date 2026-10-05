@@ -8,7 +8,7 @@ namespace BLL
     /// Capa de Lógica de Negocio — T04 Gestión de Perfiles de Usuario (Patrón Composite).
     ///
     /// Responsabilidades:
-    ///   1. ObtenerArbol() / ObtenerArbolPorRol() — exponen el árbol Composite desde BD.
+    ///   1. ObtenerArbol() — expone el árbol Composite desde BD.
     ///   2. ObtenerPermisosEfectivos()            — resuelve recursivamente los permisos de un rol.
     ///   3. CRUD de componentes + AsignarPermiso() / QuitarPermiso() — operan sobre [PermisoRelacion],
     ///      el motor real de autorización.
@@ -199,36 +199,7 @@ namespace BLL
                             Id = pat.Id, Nombre = pat.Nombre, NombreMenu = pat.NombreMenu, Estado = true
                         };
             }
-            else
-            {
-                // Fallback resiliente: BD sin migrar al Composite → asignación plana.
-                foreach (var p in permisoDAL.ObtenerPorRol(rol))
-                    if (!resultado.ContainsKey(p.Id)) resultado[p.Id] = p;
-            }
             return new List<BE.Permiso>(resultado.Values);
-        }
-
-        // Subárbol del rol (BE.Rol con sus descendientes) para visualización en vivo.
-        // Marca como Asignado=true toda Patente alcanzable (son permisos efectivos del rol).
-        public BE.Familia ObtenerArbolPorRol(string rol)
-        {
-            if (string.IsNullOrWhiteSpace(rol))
-                throw new ArgumentException("El rol no puede estar vacío.");
-
-            List<BE.Componente> arbol = permisoDAL.ObtenerArbol();
-            BE.Componente nodoRol = BuscarRol(arbol, rol, new HashSet<int>());
-
-            if (nodoRol is BE.Familia fam)
-            {
-                MarcarTodasAsignadas(fam, new HashSet<int>());
-                return fam;
-            }
-
-            // Rol sin nodo (BD sin migrar): construir desde asignación plana.
-            var raiz = new BE.Rol { Id = 0, Nombre = rol };
-            foreach (var p in permisoDAL.ObtenerPorRol(rol))
-                raiz.AgregarHijo(new BE.Patente { Id = p.Id, Nombre = p.Nombre, NombreMenu = p.NombreMenu, Asignado = true });
-            return raiz;
         }
 
         // Familias disponibles (compuestos que NO son roles) — para la Lista de Familias.

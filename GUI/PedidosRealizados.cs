@@ -30,8 +30,7 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPedidoService pedidoBLL = new BLL.Pedido();
-        private readonly BLL.Interfaces.IPrendaService prendaBLL = new BLL.Prenda();
-        private readonly BLL.Interfaces.ICargoPrendaService cargoBLL = new BLL.CargoPrenda();
+        private readonly BLL.InspeccionDevolucion inspeccionBLL = new BLL.InspeccionDevolucion();
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
 
@@ -429,7 +428,9 @@ namespace GUI
             // Releer el estado ACTUAL desde BD antes de actuar: `seleccionado` viene de la grilla
             // cacheada en memoria, que puede estar desactualizada si otro operador ya cambió este
             // pedido — mismo criterio que ya usa BtnDevolucion_Click acá abajo.
-            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
+            BE.Pedido pedido;
+            try { pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return; }
             if (pedido == null)
             {
                 MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
@@ -465,7 +466,9 @@ namespace GUI
             if (seleccionado == null) return;
 
             // Releer el estado ACTUAL desde BD antes de actuar (ver comentario en BtnDespachar_Click).
-            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
+            BE.Pedido pedido;
+            try { pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return; }
             if (pedido == null)
             {
                 MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
@@ -500,7 +503,9 @@ namespace GUI
             var pedido = ObtenerPedidoSeleccionado();
             if (pedido == null) return;
 
-            var pedidoCompleto = pedidoBLL.ObtenerPorId(pedido.IdPedido);
+            BE.Pedido pedidoCompleto;
+            try { pedidoCompleto = pedidoBLL.ObtenerPorId(pedido.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return; }
             if (pedidoCompleto == null) return;
 
             string bodyDev = string.Format(
@@ -546,16 +551,9 @@ namespace GUI
 
                 try
                 {
-                    string actor = Seguridad.SessionManager.IsLoggedIn
-                        ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
-
-                    // Cobrar ANTES de dar de baja — mismo motivo que
-                    // InspeccionDevolucionForm.BtnDarDeBajaConCargo_Click: si RegistrarCargo
-                    // fallara después de la baja, la prenda quedaría destruida sin cobro (Baja
-                    // es estado final). Riesgo residual aceptado: ambos pasos no corren en una
-                    // única transacción (servicios BLL distintos), fuera de alcance de este TP.
-                    cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
-                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor, viaFlujoPerdida: true);
+                    // CU-DEP-02: cargo de reposición + baja en UNA transacción (BLL.InspeccionDevolucion).
+                    // Antes eran dos llamadas sueltas desde acá (RegistrarCargo + CambiarEstado), sin transacción.
+                    inspeccionBLL.ReportarPerdida(this.Text, prenda, dlg.Motivo, dlg.Monto);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);
                     MostrarOk(string.Format(
                         tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de ${1} registrado.",
@@ -572,9 +570,10 @@ namespace GUI
             var pedido = ObtenerPedidoSeleccionado();
             if (pedido == null) return;
 
-            var completo = pedidoBLL.ObtenerPorId(pedido.IdPedido);
+            BE.Pedido completo;
+            try { completo = pedidoBLL.ObtenerPorId(pedido.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return; }
             if (completo == null) return;
-
 
             // Reutilizar claves de columnas existentes para las etiquetas de la notificación
             string notifTitulo   = Tr("notif.titulo",   "NOTIFICACIÓN DE PEDIDO");

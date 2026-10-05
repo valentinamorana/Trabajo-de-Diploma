@@ -68,8 +68,7 @@ namespace GUI
 
             if (_usuarioActivo != null)
             {
-                this.Text = "WardrobeFlow  —  " + _usuarioActivo.Username +
-                            (_usuarioActivo.Perfil != null ? "  [" + _usuarioActivo.Perfil + "]" : "");
+                ActualizarTitulo();
 
                 // Cargar y aplicar las preferencias de UI del usuario (fuente/tamaño/tema).
                 PreferenciasUI.Cargar(_usuarioActivo.Id);
@@ -86,10 +85,48 @@ namespace GUI
         // Abre el Centro de Alertas como hijo MDI (reusa la instancia abierta si existe).
         private void AlertasItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-                if (hijo is AlertasForm) { hijo.BringToFront(); return; }
-            new AlertasForm { MdiParent = this }.Show();
+            AbrirUnico(() => new AlertasForm());
             ActualizarBadgeAlertas(); // refrescar el badge tras consultar
+        }
+
+        /// <summary>
+        /// Abre un formulario hijo MDI de tipo <typeparamref name="T"/> o, si ya hay uno
+        /// abierto, lo trae al frente (y le aplica <paramref name="alReactivar"/>). Reemplaza
+        /// el bloque "foreach MdiChildren / if (hijo is X) BringToFront" que estaba copiado
+        /// en cada ítem del menú.
+        /// </summary>
+        private T AbrirUnico<T>(Func<T> crear, Action<T> alReactivar = null) where T : Form
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is T existente)
+                {
+                    alReactivar?.Invoke(existente);
+                    existente.BringToFront();
+                    return existente;
+                }
+            }
+            var nuevo = crear();
+            nuevo.MdiParent = this;
+            nuevo.Show();
+            return nuevo;
+        }
+
+        /// <summary>
+        /// Título de la ventana principal: usuario + rol TRADUCIDO (clave perm.rol.&lt;rol&gt;,
+        /// la misma que usa el explorador de permisos). Antes el rol quedaba en español.
+        /// </summary>
+        private void ActualizarTitulo()
+        {
+            if (_usuarioActivo == null) return;
+            string rol = _usuarioActivo.Perfil;
+            if (!string.IsNullOrEmpty(rol))
+            {
+                string clave = "perm.rol." + rol.ToLowerInvariant().Replace(" ", "").Replace("(", "").Replace(")", "");
+                rol = Tx(clave, rol);
+            }
+            this.Text = "WardrobeFlow  —  " + _usuarioActivo.Username +
+                        (!string.IsNullOrEmpty(rol) ? "  [" + rol + "]" : "");
         }
 
         // Compone el texto del ítem: icono + etiqueta traducida + (N) si hay alertas.
@@ -107,9 +144,11 @@ namespace GUI
             System.Threading.Tasks.Task.Run(() =>
             {
                 int n;
-                try { n = new BLL.PanelAlertas().Contar(); } catch { n = 0; }
+                // Solo las alertas que el rol puede atender (filtro por patentes en la BLL).
+                try { n = new BLL.PanelAlertas().Contar(_usuarioActivo); } catch { n = 0; }
                 try
                 {
+                    if (!IsHandleCreated || IsDisposed) return;
                     this.BeginInvoke(new Action(() =>
                     {
                         if (IsDisposed) return;
@@ -304,67 +343,15 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
 
-            if (ConfirmarSiNo(T("dlg.cerrarsesion.titulo", "Cerrar Sesión"),
-                               T("dlg.cerrarsesion.msg", "¿Está seguro que desea cerrar la sesión?")))
+            if (FormBase.MostrarConfirmacionSiNo(this,
+                    T("dlg.cerrarsesion.msg", "¿Está seguro que desea cerrar la sesión?"),
+                    T("dlg.cerrarsesion.titulo", "Cerrar Sesión")))
             {
-                new BLL.Usuario().Logout(this.Text);
+                new BLL.Usuario().Logout(nameof(Menu));
                 Application.Restart();
             }
         }
 
-        /// <summary>
-        /// Diálogo de confirmación Sí/No genérico, con botones traducidos al idioma activo.
-        /// Reemplaza MessageBox.Show() cuyo "Yes"/"No" es siempre en inglés (Windows). Compartido
-        /// por "Cerrar sesión" y "Cerrar todas las ventanas" — antes cada uno armaba el suyo a mano.
-        /// </summary>
-        private bool ConfirmarSiNo(string titulo, string mensaje)
-        {
-            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
-
-            using (var dlg = new Form())
-            {
-                dlg.Text            = titulo;
-                dlg.ClientSize      = new Size(340, 126);
-                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
-                dlg.StartPosition   = FormStartPosition.CenterParent;
-                dlg.MaximizeBox     = false;
-                dlg.MinimizeBox     = false;
-
-                var lbl = new Label
-                {
-                    Text      = mensaje,
-                    Left = 16, Top = 20, Width = 308, Height = 44,
-                    Font      = new System.Drawing.Font("Segoe UI", 9.5f),
-                    TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-                };
-
-                var btnSi = new Button
-                {
-                    Text         = T("btn.si", "Sí"),
-                    Left = 84, Top = 76, Width = 76, Height = 30,
-                    DialogResult = DialogResult.Yes,
-                    BackColor    = Tema.RosaPrimario,
-                    ForeColor    = Color.White,
-                    FlatStyle    = FlatStyle.Flat
-                };
-                btnSi.FlatAppearance.BorderSize = 0;
-
-                var btnNo = new Button
-                {
-                    Text         = T("btn.no", "No"),
-                    Left = 176, Top = 76, Width = 76, Height = 30,
-                    DialogResult = DialogResult.No,
-                    FlatStyle    = FlatStyle.Flat
-                };
-
-                dlg.Controls.AddRange(new Control[] { lbl, btnSi, btnNo });
-                dlg.AcceptButton = btnSi;
-                dlg.CancelButton = btnNo;
-
-                return dlg.ShowDialog(this) == DialogResult.Yes;
-            }
-        }
 
         private void panelControlToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -403,29 +390,17 @@ namespace GUI
 
         private void bitSistemaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is Bitacora b) { b.SeleccionarTab("sistema"); b.BringToFront(); return; }
-            }
-            new Bitacora("sistema") { MdiParent = this }.Show();
+            AbrirUnico(() => new Bitacora("sistema"), b => b.SeleccionarTab("sistema"));
         }
 
         private void bitNegocioToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is Bitacora b) { b.SeleccionarTab("negocio"); b.BringToFront(); return; }
-            }
-            new Bitacora("negocio") { MdiParent = this }.Show();
+            AbrirUnico(() => new Bitacora("negocio"), b => b.SeleccionarTab("negocio"));
         }
 
         private void reporteJornadaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is ReporteJornadaForm) { hijo.BringToFront(); return; }
-            }
-            new ReporteJornadaForm(_usuarioActivo?.Permisos) { MdiParent = this }.Show();
+            AbrirUnico(() => new ReporteJornadaForm(_usuarioActivo?.Permisos));
         }
 
         /// <summary>
@@ -433,61 +408,37 @@ namespace GUI
         /// </summary>
         private void analisisAbandonoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is AnalisisAbandonoForm) { hijo.BringToFront(); return; }
-            }
-            new AnalisisAbandonoForm { MdiParent = this }.Show();
+            AbrirUnico(() => new AnalisisAbandonoForm());
         }
 
         /// <summary>Abre el Reporte de Ventas por Vendedor (PdN8) como hijo MDI.</summary>
         private void ventasVendedorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is ReporteVentasVendedorForm) { hijo.BringToFront(); return; }
-            }
-            new ReporteVentasVendedorForm { MdiParent = this }.Show();
+            AbrirUnico(() => new ReporteVentasVendedorForm());
         }
 
         /// <summary>Abre el Análisis de Rotación de Prendas (PdN9) como hijo MDI.</summary>
         private void analisisRotacionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is AnalisisRotacionForm) { hijo.BringToFront(); return; }
-            }
-            new AnalisisRotacionForm { MdiParent = this }.Show();
+            AbrirUnico(() => new AnalisisRotacionForm());
         }
 
         /// <summary>Abre el Análisis de Tiempos de Mantenimiento (PdN11) como hijo MDI.</summary>
         private void analisisMantenimientoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is AnalisisMantenimientoForm) { hijo.BringToFront(); return; }
-            }
-            new AnalisisMantenimientoForm { MdiParent = this }.Show();
+            AbrirUnico(() => new AnalisisMantenimientoForm());
         }
 
         /// <summary>Abre la Detección de Escasez por Talle/Categoría (PdN12) como hijo MDI.</summary>
         private void analisisEscasezToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is AnalisisEscasezForm) { hijo.BringToFront(); return; }
-            }
-            new AnalisisEscasezForm { MdiParent = this }.Show();
+            AbrirUnico(() => new AnalisisEscasezForm());
         }
 
         /// <summary>Abre la Recomendación de Prendas para un Cliente (PdN13) como hijo MDI.</summary>
         private void recomendacionPrendasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is RecomendacionPrendasForm) { hijo.BringToFront(); return; }
-            }
-            new RecomendacionPrendasForm { MdiParent = this }.Show();
+            AbrirUnico(() => new RecomendacionPrendasForm());
         }
 
         /// <summary>
@@ -495,21 +446,13 @@ namespace GUI
         /// </summary>
         private void usuariosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is Usuarios) { hijo.BringToFront(); return; }
-            }
-            new Usuarios { MdiParent = this }.Show();
+            AbrirUnico(() => new Usuarios());
         }
 
         // Abre el panel de Administración de Usuarios (ABM de datos no sensibles + cambiar rol + historial).
         private void AdminUsuarios_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is AdministracionUsuariosForm) { hijo.BringToFront(); return; }
-            }
-            new AdministracionUsuariosForm { MdiParent = this }.Show();
+            AbrirUnico(() => new AdministracionUsuariosForm());
         }
 
         /// <summary>
@@ -518,29 +461,17 @@ namespace GUI
         /// </summary>
         private void perfilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is GestorPermisos) { hijo.BringToFront(); return; }
-            }
-            new GestorPermisos { MdiParent = this }.Show();
+            AbrirUnico(() => new GestorPermisos());
         }
 
         private void idiomasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is FormIdiomas) { hijo.BringToFront(); return; }
-            }
-            new FormIdiomas { MdiParent = this }.Show();
+            AbrirUnico(() => new FormIdiomas());
         }
 
         private void historialUsuariosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is VersionHistorialForm) { hijo.BringToFront(); return; }
-            }
-            new VersionHistorialForm { MdiParent = this }.Show();
+            AbrirUnico(() => new VersionHistorialForm());
         }
 
         private void backupToolStripMenuItem_Click(object sender, EventArgs e)
@@ -554,31 +485,19 @@ namespace GUI
         /// </summary>
         private void prendasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is Prendas) { hijo.BringToFront(); return; }
-            }
-            new Prendas { MdiParent = this }.Show();
+            AbrirUnico(() => new Prendas());
         }
 
         // PN04, CU-DEP-01 Inspeccionar Devolución.
         // PN01 — Control de Stock (Depósito): revisar stock, informar faltantes, confirmar y separar.
         private void controlStockToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is ControlStockForm) { hijo.BringToFront(); return; }
-            }
-            new ControlStockForm { MdiParent = this }.Show();
+            AbrirUnico(() => new ControlStockForm());
         }
 
         private void inspeccionDevolucionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is InspeccionDevolucionForm) { hijo.BringToFront(); return; }
-            }
-            new InspeccionDevolucionForm { MdiParent = this }.Show();
+            AbrirUnico(() => new InspeccionDevolucionForm());
         }
 
         /// <summary>
@@ -586,11 +505,7 @@ namespace GUI
         /// </summary>
         private void clientesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is Clientes) { hijo.BringToFront(); return; }
-            }
-            new Clientes { MdiParent = this }.Show();
+            AbrirUnico(() => new Clientes());
         }
 
         /// <summary>
@@ -598,11 +513,7 @@ namespace GUI
         /// </summary>
         private void planesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is Planes) { hijo.BringToFront(); return; }
-            }
-            new Planes { MdiParent = this }.Show();
+            AbrirUnico(() => new Planes());
         }
 
         /// <summary>
@@ -610,11 +521,7 @@ namespace GUI
         /// </summary>
         private void renovacionSuscripcionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is RenovacionSuscripcionForm) { hijo.BringToFront(); return; }
-            }
-            new RenovacionSuscripcionForm { MdiParent = this }.Show();
+            AbrirUnico(() => new RenovacionSuscripcionForm());
         }
 
         /// <summary>
@@ -622,11 +529,7 @@ namespace GUI
         /// </summary>
         private void cobroSuscripcionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is CobroSuscripcionForm) { hijo.BringToFront(); return; }
-            }
-            new CobroSuscripcionForm { MdiParent = this }.Show();
+            AbrirUnico(() => new CobroSuscripcionForm());
         }
 
         /// <summary>
@@ -635,11 +538,7 @@ namespace GUI
         /// </summary>
         private void listaEsperaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is ListaEsperaForm) { hijo.BringToFront(); return; }
-            }
-            new ListaEsperaForm { MdiParent = this }.Show();
+            AbrirUnico(() => new ListaEsperaForm());
         }
 
         /// <summary>
@@ -671,11 +570,7 @@ namespace GUI
         /// </summary>
         private void contratacionesPendientesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is ContratacionesPendientesForm) { hijo.BringToFront(); return; }
-            }
-            new ContratacionesPendientesForm { MdiParent = this }.Show();
+            AbrirUnico(() => new ContratacionesPendientesForm());
         }
 
         /// <summary>PN03 — Abre el diálogo para que Gerencia (GerenteComercial) sugiera una promoción.</summary>
@@ -688,31 +583,19 @@ namespace GUI
         /// <summary>PN03 — Abre la gestión de promociones (rol Administración) como hijo MDI.</summary>
         private void gestionPromocionesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is PromocionesAdministracionForm) { hijo.BringToFront(); return; }
-            }
-            new PromocionesAdministracionForm { MdiParent = this }.Show();
+            AbrirUnico(() => new PromocionesAdministracionForm());
         }
 
         /// <summary>PN03 — Abre la cola de revisión contable de promociones (rol Contabilidad) como hijo MDI.</summary>
         private void revisionContablePromocionesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is PromocionesContabilidadForm) { hijo.BringToFront(); return; }
-            }
-            new PromocionesContabilidadForm { MdiParent = this }.Show();
+            AbrirUnico(() => new PromocionesContabilidadForm());
         }
 
         /// <summary>PN03 — Abre la consulta de promociones vigentes (Vendedor) como hijo MDI.</summary>
         private void promocionesVigentesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is PromocionesVigentesForm) { hijo.BringToFront(); return; }
-            }
-            new PromocionesVigentesForm { MdiParent = this }.Show();
+            AbrirUnico(() => new PromocionesVigentesForm());
         }
 
         /// <summary>
@@ -720,11 +603,7 @@ namespace GUI
         /// </summary>
         private void pedidosVentaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is PedidosVenta) { hijo.BringToFront(); return; }
-            }
-            new PedidosVenta { MdiParent = this }.Show();
+            AbrirUnico(() => new PedidosVenta());
         }
 
         /// <summary>
@@ -733,11 +612,7 @@ namespace GUI
         /// </summary>
         private void pedidosRealizadosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is PedidosRealizados) { hijo.BringToFront(); return; }
-            }
-            new PedidosRealizados { MdiParent = this }.Show();
+            AbrirUnico(() => new PedidosRealizados());
         }
 
         // ══════════════════════════════════════════════════════════════════════
@@ -767,9 +642,15 @@ namespace GUI
 
             // 2. Observer + timer de integridad
             GestorIdioma.SuscribirObservador(this);
-            _timerIntegridad = new System.Windows.Forms.Timer { Interval = 30 * 60 * 1000 };
-            _timerIntegridad.Tick += TimerIntegridad_Tick;
-            _timerIntegridad.Start();
+            // El chequeo periódico de integridad (DV) y su aviso emergente solo corren para
+            // quien puede repararlo (patente de administración, ver BLL.PanelAlertas): para el
+            // resto de los roles el timer ni se crea.
+            if (BLL.PanelAlertas.PuedeVerIntegridad(_usuarioActivo))
+            {
+                _timerIntegridad = new System.Windows.Forms.Timer { Interval = 30 * 60 * 1000 };
+                _timerIntegridad.Tick += TimerIntegridad_Tick;
+                _timerIntegridad.Start();
+            }
 
             // 3. Abrir dashboard inmediatamente — sus datos cargan en background
             var dash = CrearDashboardDelRol();
@@ -791,6 +672,7 @@ namespace GUI
                     var dictTrad = svc.CargarTraducciones(codigoPref);
                     var idiomas  = svc.ObtenerIdiomasActivosComoIdioma();
 
+                    if (!IsHandleCreated || IsDisposed) return;
                     this.BeginInvoke(new Action(() =>
                     {
                         if (IsDisposed) return;
@@ -810,10 +692,17 @@ namespace GUI
                 }
                 catch
                 {
-                    this.BeginInvoke(new Action(() =>
+                    // El form pudo cerrarse mientras corría la tarea: BeginInvoke sobre un handle
+                    // destruido tira InvalidOperationException (no observada en el Task).
+                    try
                     {
-                        if (!IsDisposed) Traducir(GestorIdioma.IdiomaActual);
-                    }));
+                        if (IsHandleCreated && !IsDisposed)
+                            this.BeginInvoke(new Action(() =>
+                            {
+                                if (!IsDisposed) Traducir(GestorIdioma.IdiomaActual);
+                            }));
+                    }
+                    catch (InvalidOperationException) { }
                 }
             });
         }
@@ -831,8 +720,9 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string T(string key, string fallback) => t.ContainsKey(key) ? t[key].Texto : fallback;
 
-            if (!ConfirmarSiNo(T("dlg.cerrartodas.titulo", "Cerrar Todas las Ventanas"),
-                                T("dlg.cerrartodas.msg", "¿Cerrar todas las ventanas abiertas?")))
+            if (!FormBase.MostrarConfirmacionSiNo(this,
+                    T("dlg.cerrartodas.msg", "¿Cerrar todas las ventanas abiertas?"),
+                    T("dlg.cerrartodas.titulo", "Cerrar Todas las Ventanas")))
                 return;
 
             foreach (Form hijo in this.MdiChildren)
@@ -854,6 +744,10 @@ namespace GUI
 
         private void TimerIntegridad_Tick(object sender, EventArgs e)
         {
+            // Defensa extra: si el usuario no puede ver integridad (p. ej. le quitaron la patente
+            // en caliente), el tick no hace nada.
+            if (!BLL.PanelAlertas.PuedeVerIntegridad(_usuarioActivo)) return;
+
             try
             {
                 var diag = BLL.Configuracion.ObtenerDiagnostico();
@@ -889,11 +783,7 @@ namespace GUI
 
         private void integridadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is DiagnosticoIntegridadForm) { hijo.BringToFront(); return; }
-            }
-            new DiagnosticoIntegridadForm { MdiParent = this }.Show();
+            AbrirUnico(() => new DiagnosticoIntegridadForm());
         }
 
         /// <summary>
@@ -936,6 +826,7 @@ namespace GUI
             Aplicar(ventasToolStripMenuItem,            t);
             Aplicar(clientesToolStripMenuItem,          t);
             Aplicar(planesToolStripMenuItem,            t);
+            Aplicar(renovacionSuscripcionToolStripMenuItem, t);
             Aplicar(cobroSuscripcionToolStripMenuItem,  t);
             Aplicar(pedidosVentaToolStripMenuItem,      t);
             Aplicar(pedidosRealizadosToolStripMenuItem, t);
@@ -971,6 +862,9 @@ namespace GUI
             Aplicar(cerrarSesionToolStripMenuItem,      t);
             Aplicar(ventanaToolStripMenuItem,           t);
             Aplicar(cerrarTodasLasVentanasToolStripMenuItem, t);
+
+            // Título de la ventana: el rol se muestra traducido.
+            ActualizarTitulo();
 
             // Ítem de Alertas: tiene icono + badge, se compone aparte (no por Tag directo).
             RefrescarTextoAlertas();

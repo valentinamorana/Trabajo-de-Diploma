@@ -53,6 +53,7 @@ namespace GUI
             this.btnActualizar.Name      = "btnActualizar";
             this.btnActualizar.Size      = new System.Drawing.Size(96, 32);
             this.btnActualizar.TabIndex  = 1;
+            this.btnActualizar.Tag       = "btn.actualizar";
             this.btnActualizar.Text      = "Actualizar";
             this.btnActualizar.UseVisualStyleBackColor = false;
             this.btnActualizar.Click += new System.EventHandler(this.BtnActualizar_Click);

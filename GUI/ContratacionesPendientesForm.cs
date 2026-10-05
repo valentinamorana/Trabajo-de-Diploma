@@ -240,14 +240,13 @@ namespace GUI
                     new object[] { liq.Descuento, liq.NombrePromocion ?? Tr("lbl.contratacion.creditoreferido", "crédito por referido") })
                 : "";
 
-            if (MessageBox.Show(
+            if (!ConfirmarSiNo(
                     Tr("conf.contr.cobro.confirmar",
                        "¿Confirmar el cobro de la Contratación #{0}?\n\nCliente: {1}\nPlan: {2}\nMonto: {3:C2}\nMedio de pago: {4}\n\n" +
                        "Se emitirá el comprobante y la suscripción quedará formalizada.",
                        new object[] { contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan,
                                       liq.Total, cmbMedioPago.SelectedItem.ToString() }) + detalleDescuento,
-                    Tr("conf.contratacion.cobro.titulo", "Confirmar Cobro"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) != DialogResult.Yes)
+                    Tr("conf.contratacion.cobro.titulo", "Confirmar Cobro")))
                 return;
 
             try
@@ -378,7 +377,6 @@ namespace GUI
         }
 
         private bool Preguntar(string texto) =>
-            MessageBox.Show(texto, this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+            ConfirmarSiNo(texto, this.Text, porDefectoNo: true);
     }
 }

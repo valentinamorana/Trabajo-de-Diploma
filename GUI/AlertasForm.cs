@@ -44,6 +44,7 @@ namespace GUI
         {
             Text           = Tr("frm.alertas", "Centro de Alertas");
             lblTitulo.Text = Tr("frm.alertas", "Centro de Alertas");
+            btnActualizar.Text = Tr("btn.actualizar", "Actualizar");
         }
 
         private void BtnActualizar_Click(object sender, EventArgs e) => CargarAlertas();
@@ -55,7 +56,8 @@ namespace GUI
             flow.Controls.Clear();
 
             System.Collections.Generic.List<BE.Alerta> alertas;
-            try { alertas = new BLL.PanelAlertas().ObtenerAlertas(); }
+            // Solo las alertas que el rol del usuario puede atender (filtro por patentes en BLL).
+            try { alertas = new BLL.PanelAlertas().ObtenerAlertas(new BLL.Usuario().ObtenerUsuarioActivo()); }
             catch (Exception ex)
             {
                 // Excepción inesperada: se registra en bitácora (detalle técnico) y se muestra

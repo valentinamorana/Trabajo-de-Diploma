@@ -317,14 +317,7 @@ namespace GUI
                 Tr("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),
                 pedido.IdPedido, pedido.NombreCliente, motivo);
 
-            var confirmar = MessageBox.Show(
-                bodyCanc,
-                Tr("conf.cancelped.titulo", "Confirmar Cancelación"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);
-
-            if (confirmar != DialogResult.Yes) return;
+            if (!ConfirmarSiNo(bodyCanc, Tr("conf.cancelped.titulo", "Confirmar Cancelación"), porDefectoNo: true)) return;
 
             try
             {
@@ -363,14 +356,7 @@ namespace GUI
                 Tr("conf.ped.reactivar", "¿Reactivar el Pedido #{0} de {1}?\n\nVuelve a control de stock: Depósito revisa otra vez la disponibilidad y separa las prendas."),
                 pedido.IdPedido, pedido.NombreCliente);
 
-            var confirmar = MessageBox.Show(
-                bodyDesc,
-                Tr("conf.ped.reactivar.titulo", "Reactivar pedido"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-
-            if (confirmar != DialogResult.Yes) return;
+            if (!ConfirmarSiNo(bodyDesc, Tr("conf.ped.reactivar.titulo", "Reactivar pedido"))) return;
 
             try
             {
@@ -404,7 +390,11 @@ namespace GUI
         {
             var seleccionado = ObtenerPedidoSeleccionado();
             if (seleccionado == null) return null;
-            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
+            // La relectura toca la BD: si falla se informa acá (antes la excepción escapaba
+            // al manejador global porque los callers llaman a este método fuera de su try).
+            BE.Pedido pedido;
+            try { pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return null; }
             if (pedido == null)
             {
                 MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
@@ -467,8 +457,7 @@ namespace GUI
             {
                 pedidoBLL.AsentarDesistimiento(this.Text, pedido, motivo, BE.EtapaDesistimiento.Disponibilidad);
                 MostrarOk(Tr("msg.ped.desistido", "Pedido #{0}: desistimiento asentado.", new object[] { pedido.IdPedido }));
-                if (MessageBox.Show(Tr("conf.ped.aviso", "¿Imprimir el aviso de desistimiento?"), this.Text,
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+                if (ConfirmarSiNo(Tr("conf.ped.aviso", "¿Imprimir el aviso de desistimiento?"), this.Text, porDefectoNo: true))
                     Exportacion.DocumentosPedido.Imprimir(
                         Exportacion.DocumentosPedido.AvisoDesistimiento(pedidoBLL.ObtenerPorId(pedido.IdPedido)), this);
                 CargarPedidos();
@@ -482,14 +471,12 @@ namespace GUI
             var pedido = PedidoActual();
             if (pedido == null) return;
 
-            var confirmar = MessageBox.Show(
+            if (!ConfirmarSiNo(
                 string.Format(Tr("conf.ped.formalizar",
                     "¿Formalizar el Pedido #{0} de {1}?\n\nDepósito ya separó las {2} prenda(s). Desde aquí la " +
                     "selección queda cerrada y no admite modificaciones."),
                     pedido.IdPedido, pedido.NombreCliente, pedido.CantidadPrendas),
-                Tr("conf.ped.formalizar.titulo", "Formalizar pedido"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-            if (confirmar != DialogResult.Yes) return;
+                Tr("conf.ped.formalizar.titulo", "Formalizar pedido"))) return;
 
             try
             {

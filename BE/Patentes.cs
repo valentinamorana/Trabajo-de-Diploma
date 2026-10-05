@@ -18,6 +18,7 @@ namespace BE
         public const string CobroSuscripcion  = "mnuCobroSuscripcion";
         public const string ListaEspera       = "mnuListaEspera";
         public const string Caja              = "mnuCaja";
+        public const string RenovacionSuscripcion = "mnuRenovacionSuscripcion";
 
         // PN03 — Métricas, promociones y toma de decisiones.
         public const string SugerenciaPromocion   = "mnuSugerenciaPromocion";
@@ -46,6 +47,10 @@ namespace BE
         public const string PromocionesContableEditar = "mnuPromocionesContableEditar";
         public const string PromocionesVigentesEditar = "mnuPromocionesVigentesEditar";
         public const string ControlStockEditar        = "mnuControlStockEditar";
+        // Lista de Espera: anotar / cancelar / reservar. Antes la escritura exigía StockEditar
+        // (patente de Depósito), así que el Vendedor —que ve la pantalla para anotar al
+        // cliente— recibía "sin permiso". Fallback: mnuListaEspera (ver PermisosAccion).
+        public const string ListaEsperaEditar         = "mnuListaEsperaEditar";
         // Nota: Inspección de Devolución (PN04) NO tiene patente de Editar propia — su
         // escritura (CambiarEstado/RegistrarCargo) ya está gobernada por StockEditar
         // (compartida con el módulo de Stock, ver InspeccionDevolucion arriba). Crear una

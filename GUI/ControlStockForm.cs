@@ -285,8 +285,7 @@ namespace GUI
         // ── Helpers ───────────────────────────────────────────────────────────
 
         private bool Preguntar(string texto) =>
-            MessageBox.Show(texto, this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+            ConfirmarSiNo(texto, this.Text, porDefectoNo: true);
 
         private void SeleccionarEnCola(int idPedido)
         {

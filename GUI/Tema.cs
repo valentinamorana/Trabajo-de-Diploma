@@ -25,6 +25,15 @@ namespace GUI
         public static readonly Color Alerta = Color.FromArgb(166, 101, 14);
         public static readonly Color Error  = Color.FromArgb(178, 58, 58);
 
+        // ── Escala tipográfica (Segoe UI, 4 tamaños) ─────────────────────────────────────
+        // Antes convivían "Microsoft Sans Serif 8.25" (default de WinForms) con varios Segoe UI
+        // sueltos. Todo control nuevo o normalizado usa una de estas cuatro.
+        public const string FamiliaFuente = "Segoe UI";
+        public static readonly System.Drawing.Font FuentePequena  = new System.Drawing.Font(FamiliaFuente, 8.25F);
+        public static readonly System.Drawing.Font FuenteNormal   = new System.Drawing.Font(FamiliaFuente, 9F);
+        public static readonly System.Drawing.Font FuenteSubtitulo = new System.Drawing.Font(FamiliaFuente, 10F, FontStyle.Bold);
+        public static readonly System.Drawing.Font FuenteTitulo   = new System.Drawing.Font(FamiliaFuente, 12F, FontStyle.Bold);
+
         /// <summary>Radio de esquina estándar para botones/cards/inputs (sección 15 del rediseño).</summary>
         public const int RadioBoton = 6;
 

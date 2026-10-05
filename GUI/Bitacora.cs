@@ -338,9 +338,14 @@ namespace GUI
         private void BtnUltimosDias_Click(object sender, EventArgs e)
         {
             int dias = (int)nudDias.Value;
-            DataTable dt = dias == 0
-                ? bllBitacora.ObtenerTodosSistema()
-                : bllBitacora.ObtenerUltimosNDiasSistema(dias);
+            DataTable dt;
+            try
+            {
+                dt = dias == 0
+                    ? bllBitacora.ObtenerTodosSistema()
+                    : bllBitacora.ObtenerUltimosNDiasSistema(dias);
+            }
+            catch (Exception ex) { MostrarError(ex); return; }
             string contexto = dias > 0
                 ? Tr("msg.bit.ultimos", "últimos {0} días", new object[] { dias })
                 : Tr("msg.bit.todos", "todos los registros");
@@ -374,7 +379,9 @@ namespace GUI
         {
             int dias = (int)nudNegDias.Value;
             DateTime? desde = dias > 0 ? DateTime.Now.AddDays(-dias) : (DateTime?)null;
-            var dt = bllBitacora.BuscarPorFiltrosNegocio(desde, null, null, null, null);
+            DataTable dt;
+            try { dt = bllBitacora.BuscarPorFiltrosNegocio(desde, null, null, null, null); }
+            catch (Exception ex) { MostrarError(ex); return; }
             string contexto = dias > 0
                 ? Tr("msg.bit.ultimos", "últimos {0} días", new object[] { dias })
                 : Tr("msg.bit.todos", "todos los registros");

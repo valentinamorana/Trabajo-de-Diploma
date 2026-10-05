@@ -180,8 +180,7 @@ namespace GUI
                 "¿Restaurar al usuario al estado del {0}?\n\n{1}\n\nEl usuario quedará exactamente en este estado. Es reversible (queda registrado como un nuevo cambio en el historial).",
                 new object[] { fechaTxt, estado });
 
-            if (MessageBox.Show(msg, Tr("msg.backup.titulorestaura", "Confirmar Restauración"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+            if (!ConfirmarSiNo(msg, Tr("msg.backup.titulorestaura", "Confirmar Restauración"), porDefectoNo: true))
                 return;
 
             try

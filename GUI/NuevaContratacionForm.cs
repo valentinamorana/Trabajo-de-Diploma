@@ -267,12 +267,11 @@ namespace GUI
                 return;
             }
 
-            if (MessageBox.Show(
+            if (!ConfirmarSiNo(
                     Tr("conf.contratacion.crear.msg",
                        "¿Registrar la contratación del plan '{0}' ({1}) para {2}?\n\nQuedará pendiente de pago hasta que Caja confirme el cobro.",
                        new object[] { plan.Nombre, Exportacion.DocumentosContratacion.Modalidad(modalidad.Value), _cliente.NombreCompleto }),
-                    Tr("conf.contratacion.crear.titulo", "Confirmar Contratación"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) != DialogResult.Yes)
+                    Tr("conf.contratacion.crear.titulo", "Confirmar Contratación")))
                 return;
 
             try
@@ -318,8 +317,7 @@ namespace GUI
 
         private void OfrecerImprimir(string pregunta, Func<Exportacion.ReporteExportable> armar)
         {
-            if (MessageBox.Show(pregunta, this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+            if (!ConfirmarSiNo(pregunta, this.Text, porDefectoNo: true))
                 return;
             try { Exportacion.DocumentosContratacion.Imprimir(armar(), this); }
             catch (Exception ex) { MostrarError(ex); }

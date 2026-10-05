@@ -180,7 +180,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 
@@ -244,7 +244,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 
@@ -285,7 +285,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 

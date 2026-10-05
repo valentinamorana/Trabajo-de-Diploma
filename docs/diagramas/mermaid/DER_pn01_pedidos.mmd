@@ -1,11 +1,11 @@
 erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
-  Cliente ||--o{ ListaEspera : "IdCliente"
   Prenda ||--o{ ListaEspera : "IdPrenda"
+  Cliente ||--o{ ListaEspera : "IdCliente"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Empleado ||--o{ Pedido : "IdEmpleado"
+  Empleado |o--o{ Pedido : "IdEmpleadoControl"
   PedidoPrenda ||--o{ PedidoFaltante : "IdPedido"
   PedidoPrenda ||--o{ PedidoFaltante : "IdPrenda"
   PedidoFaltante ||--o{ PedidoFaltanteAlternativa : "IdPedido"
@@ -14,8 +14,8 @@ erDiagram
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
-  Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente {
     int IdCliente PK
     nvarchar(100) Nombre

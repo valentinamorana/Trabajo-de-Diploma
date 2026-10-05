@@ -57,6 +57,7 @@
     <Compile Include="ClienteTests.cs" />
     <Compile Include="CargoPrendaTests.cs" />
     <Compile Include="PedidoTests.cs" />
+    <Compile Include="PanelTareasTests.cs" />
     <Compile Include="ContratacionTests.cs" />
     <Compile Include="PromocionTests.cs" />
     <Compile Include="PoliticaDescuentoTests.cs" />

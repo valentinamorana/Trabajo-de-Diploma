@@ -11,9 +11,8 @@ namespace GUI
 {
     public partial class DashboardVendedor : FormBase, IIdiomaObserver
     {
-        private readonly BLL.Interfaces.IPedidoService         _bllPedido  = new BLL.Pedido();
+        private readonly BLL.PanelTareas                       _bllTareas  = new BLL.PanelTareas();
         private readonly BLL.Interfaces.IClienteService        _bllCliente = new BLL.Cliente();
-        private readonly BLL.Interfaces.IPlanSuscripcionService _bllPlan    = new BLL.PlanSuscripcion();
         private readonly BLL.Usuario                            _bllUsuario = new BLL.Usuario();
 
         private System.Windows.Forms.Timer _timer;
@@ -54,13 +53,14 @@ namespace GUI
             lblTitulo.Text     = Tr("dash.vendedor.titulo", "Panel de Ventas");
             lblSub.Text        = Tr("dash.vendedor.subtitulo", "WardrobeFlow  —  Ventas");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",   "Actualizar");
-            txtPedidos.Text  = Tr("dash.pedidos",  "Pedidos\npendientes");
+            txtPedidos.Text  = Tr("dash.vend.paraatender", "Pedidos\npara atender");
             txtClientes.Text = Tr("dash.clientes", "Clientes\nregistrados");
-            txtPlanes.Text   = Tr("dash.planes",   "Planes\nactivos");
+            txtPlanes.Text   = Tr("dash.vend.encaja",      "Contrataciones\nesperando a Caja");
             txtSuscripciones.Text = Tr("dash.suscripciones", "Suscripciones\npor vencer");
-            lblColPend.Text = Tr("dash.kan.pendiente",  "Pendiente");
-            lblColDesp.Text = Tr("dash.kan.despachado", "Despachado");
-            lblColEntr.Text = Tr("dash.kan.entregado",  "Entregado");
+            // Tablero de PN01: lo que espera a Depósito y lo que tiene que hacer el Vendedor.
+            lblColPend.Text = Tr("dash.kan.encontrol",  "En control de stock");
+            lblColDesp.Text = Tr("dash.kan.faltantes",  "Con faltantes: comunicar");
+            lblColEntr.Text = Tr("dash.kan.separados",  "Separados: formalizar");
         }
 
         private void CargarEnBackground()
@@ -69,14 +69,13 @@ namespace GUI
             {
                 try
                 {
-                    var pedidos  = _bllPedido.ObtenerTodos();
+                    var tareas   = _bllTareas.ObtenerTareasVendedor();
                     var clientes = _bllCliente.ObtenerTodos();
-                    var planes   = _bllPlan.ObtenerActivos();
                     this.BeginInvoke(new Action(() =>
                     {
                         if (IsDisposed) return;
-                        ActualizarCards(pedidos, clientes, planes);
-                        ActualizarKanban(pedidos);
+                        ActualizarCards(tareas, clientes);
+                        ActualizarKanban(tareas);
                         ActualizarSesion();
                     }));
                 }
@@ -87,54 +86,39 @@ namespace GUI
             });
         }
 
-        private void ActualizarCards(List<BE.Pedido> pedidos, List<BE.Cliente> clientes, List<BE.PlanSuscripcion> planes)
+        private bool _clicTarjetaPedidos;
+
+        private void ActualizarCards(BE.TableroVendedor tareas, List<BE.Cliente> clientes)
         {
-            numPedidos.Text  = pedidos.FindAll(p => p.Estado == BE.EstadoPedido.Pendiente).Count.ToString();
+            numPedidos.Text  = tareas.PedidosParaAtender.ToString();
             numClientes.Text = clientes.Count.ToString();
-            numPlanes.Text   = planes.Count.ToString();
+            numPlanes.Text   = tareas.ContratacionesEnCaja.ToString();
+            if (!_clicTarjetaPedidos) { HabilitarClicAbrirPedidosVenta(cardPedidos); _clicTarjetaPedidos = true; }
             // Mismo criterio que BLL.PanelAlertas: vencida o vence en los próximos 7 días.
             numSuscripciones.Text = clientes
                 .Count(c => c.VencimientoExpirado || c.SuscripcionProximaAVencer(7))
                 .ToString();
         }
 
-        private void ActualizarKanban(List<BE.Pedido> pedidos)
+        // Cada pedido abre Pedidos de Venta, donde el Vendedor ve los faltantes, ajusta, desiste o
+        // formaliza. Los que están en control de stock son de seguimiento (los atiende Depósito).
+        private void ActualizarKanban(BE.TableroVendedor tareas)
         {
-            colPendiente.Controls.Clear();
-            colDespachado.Controls.Clear();
-            colEntregado.Controls.Clear();
+            Columna(colPendiente,  tareas.EnControlStock, Color.FromArgb(205, 225, 255));
+            Columna(colDespachado, tareas.ConFaltantes,   Color.FromArgb(255, 205, 200));
+            Columna(colEntregado,  tareas.Separados,      Color.FromArgb(210, 240, 220));
+        }
 
+        private void Columna(FlowLayoutPanel col, List<BE.Pedido> pedidos, Color fondo)
+        {
+            col.Controls.Clear();
             foreach (var p in pedidos)
             {
-                int  dias  = p.DiasDesdeAlta;
-                string tit = $"Pedido #{p.IdPedido}";
-                string sub = p.NombreCliente ?? $"Cliente {p.IdCliente}";
-
-                switch (p.Estado)
-                {
-                    case BE.EstadoPedido.Pendiente:
-                        var cardPendiente = CrearCard(tit, sub, dias,
-                            p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
-                        // Solo "Pendiente" es clickeable: abre Pedidos de Venta, permiso que el
-                        // Vendedor siempre tiene (es el único rol que ve este dashboard).
-                        // Despachado/Entregado viven en Pedidos Realizados — permiso que un
-                        // Vendedor base NO tiene (solo lo hereda GerenteComercial) — habilitar
-                        // el clic ahí sería un bypass de permisos, así que quedan solo informativas.
-                        HabilitarClicAbrirPedidosVenta(cardPendiente);
-                        colPendiente.Controls.Add(cardPendiente);
-                        break;
-                    case BE.EstadoPedido.Despachado:
-                        colDespachado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255)));
-                        break;
-                    case BE.EstadoPedido.Entregado:
-                        colEntregado.Controls.Add(CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220)));
-                        break;
-                }
+                var card = CrearCard($"Pedido #{p.IdPedido}", p.NombreCliente ?? $"Cliente {p.IdCliente}", p.DiasDesdeAlta, fondo);
+                HabilitarClicAbrirPedidosVenta(card);
+                col.Controls.Add(card);
             }
-
-            if (colPendiente.Controls.Count  == 0) colPendiente.Controls.Add(CrearVacio());
-            if (colDespachado.Controls.Count == 0) colDespachado.Controls.Add(CrearVacio());
-            if (colEntregado.Controls.Count  == 0) colEntregado.Controls.Add(CrearVacio());
+            if (col.Controls.Count == 0) col.Controls.Add(CrearVacio());
         }
 
         private void ActualizarSesion()

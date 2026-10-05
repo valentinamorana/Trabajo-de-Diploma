@@ -12,6 +12,7 @@ namespace GUI
     {
         private readonly BLL.Interfaces.IPrendaService _bllPrenda  = new BLL.Prenda();
         private readonly BLL.Usuario                   _bllUsuario = new BLL.Usuario();
+        private readonly BLL.PanelTareas               _bllTareas  = new BLL.PanelTareas();
 
         private System.Windows.Forms.Timer _timer;
 
@@ -56,6 +57,7 @@ namespace GUI
             lblTitulo.Text     = Tr("dash.deposito.titulo",   "Panel de Depósito");
             lblSub.Text        = Tr("dash.deposito.subtitulo", "WardrobeFlow  —  Depósito");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",  "Actualizar");
+            txtControl.Text = Tr("dash.dep.acontrolar", "Pedidos\na controlar");
             txtDisp.Text = Tr("dash.prendas",    "Prendas\ndisponibles");
             txtMant.Text = Tr("dash.mant.activo", "En\nmantenimiento");
             txtOcup.Text = Tr("dash.ocupacion",  "ocupación\ndel stock");
@@ -73,9 +75,12 @@ namespace GUI
                     var disponibles  = _bllPrenda.ObtenerDisponibles();
                     var enMant       = _bllPrenda.ObtenerEnMantenimiento();
                     var ocupacion    = _bllPrenda.ObtenerOcupacion();
+                    int aControlar   = _bllTareas.ContarPedidosAControlar();
                     this.BeginInvoke(new Action(() =>
                     {
                         if (IsDisposed) return;
+                        numControl.Text = aControlar.ToString();
+                        if (!_clicControl) { HabilitarClic(cardControl, AbrirControlStock); _clicControl = true; }
                         ActualizarCards(disponibles, enMant, ocupacion);
                         ActualizarKanban(enMant);
                         ActualizarSesion();
@@ -215,6 +220,27 @@ namespace GUI
         private void CardDisp_Resize(object sender, EventArgs e) { numDisp.Width = cardDisp.Width; txtDisp.Width = cardDisp.Width; }
         private void CardMant_Resize(object sender, EventArgs e) { numMant.Width = cardMant.Width; txtMant.Width = cardMant.Width; }
         private void CardOcup_Resize(object sender, EventArgs e) { numOcup.Width = cardOcup.Width; txtOcup.Width = cardOcup.Width; }
+        private void CardControl_Resize(object sender, EventArgs e) { numControl.Width = cardControl.Width; txtControl.Width = cardControl.Width; }
+
+        // PN01 — "Revisar stock de las prendas": la tarjeta abre (o enfoca) Control de Stock.
+        private bool _clicControl;
+
+        private static void HabilitarClic(Panel card, Action accion)
+        {
+            EventHandler h = (s, e) => accion();
+            card.Cursor = Cursors.Hand;
+            card.Click += h;
+            foreach (Control c in card.Controls) { c.Cursor = Cursors.Hand; c.Click += h; }
+        }
+
+        private void AbrirControlStock()
+        {
+            var menu = this.MdiParent;
+            if (menu == null) return;
+            foreach (Form hijo in menu.MdiChildren)
+                if (hijo is ControlStockForm) { hijo.BringToFront(); return; }
+            new ControlStockForm { MdiParent = menu }.Show();
+        }
 
         private void ColReciente_Resize(object sender, EventArgs e) => AjustarAnchosCards(colReciente);
         private void ColEnCurso_Resize(object sender, EventArgs e) => AjustarAnchosCards(colEnCurso);

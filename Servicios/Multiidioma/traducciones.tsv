@@ -5625,6 +5625,12 @@ ES	err.bll.contratacion.importe_cambiado	El importe a cobrar cambió desde la li
 ES	err.bll.pedido.estado_cambiado	El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.
 ES	msg.contr.vigencia	Vigente del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}.
 ES	col.contr.vigencia	Vigencia
+ES	dash.dep.acontrolar	Pedidos\na controlar
+ES	dash.vend.paraatender	Pedidos\npara atender
+ES	dash.vend.encaja	Contrataciones\nesperando a Caja
+ES	dash.kan.encontrol	En control de stock
+ES	dash.kan.faltantes	Con faltantes: comunicar
+ES	dash.kan.separados	Separados: formalizar
 EN	err.dal.prenda.estado_cambio	The garment's state changed since it was last read. Refresh the screen and try again.
 EN	paso1.identificar	Step 1 of 2 — Identify the client
 EN	paso.ajuste.texto	Adjust selection of Order #{0}
@@ -5842,6 +5848,12 @@ EN	err.bll.contratacion.importe_cambiado	The amount to charge changed since the 
 EN	err.bll.pedido.estado_cambiado	Order #{0} changed status in another session. Refresh the list and try again.
 EN	msg.contr.vigencia	Active from {0:dd/MM/yyyy} to {1:dd/MM/yyyy}.
 EN	col.contr.vigencia	Validity
+EN	dash.dep.acontrolar	Orders\nto check
+EN	dash.vend.paraatender	Orders\nto handle
+EN	dash.vend.encaja	Contracts\nwaiting for cashier
+EN	dash.kan.encontrol	In stock control
+EN	dash.kan.faltantes	Missing items: tell the client
+EN	dash.kan.separados	Set aside: finalize
 RU	err.dal.prenda.estado_cambio	Состояние вещи изменилось с момента последнего запроса. Обновите экран и повторите попытку.
 RU	paso1.identificar	Шаг 1 из 2 — Идентифицировать клиента
 RU	paso.ajuste.texto	Корректировка выбора заказа №{0}
@@ -6059,6 +6071,12 @@ RU	err.bll.contratacion.importe_cambiado	Сумма к оплате измени
 RU	err.bll.pedido.estado_cambiado	Состояние заказа №{0} изменилось в другом сеансе. Обновите список и повторите попытку.
 RU	msg.contr.vigencia	Действует с {0:dd/MM/yyyy} по {1:dd/MM/yyyy}.
 RU	col.contr.vigencia	Срок действия
+RU	dash.dep.acontrolar	Заказы\nна контроль
+RU	dash.vend.paraatender	Заказы\nк обработке
+RU	dash.vend.encaja	Договоры\nожидают кассу
+RU	dash.kan.encontrol	На контроле запасов
+RU	dash.kan.faltantes	Недостача: сообщить
+RU	dash.kan.separados	Отложены: оформить
 PT	err.dal.prenda.estado_cambio	O estado da peça mudou desde a última consulta. Atualize a tela e tente novamente.
 PT	paso1.identificar	Passo 1 de 2 — Identificar o cliente
 PT	paso.ajuste.texto	Ajustar seleção do Pedido #{0}
@@ -6276,3 +6294,9 @@ PT	err.bll.contratacion.importe_cambiado	O valor a cobrar mudou desde a liquida�
 PT	err.bll.pedido.estado_cambiado	O Pedido #{0} mudou de estado em outra sessão. Atualize a lista e tente novamente.
 PT	msg.contr.vigencia	Vigente de {0:dd/MM/yyyy} até {1:dd/MM/yyyy}.
 PT	col.contr.vigencia	Vigência
+PT	dash.dep.acontrolar	Pedidos\na controlar
+PT	dash.vend.paraatender	Pedidos\npara atender
+PT	dash.vend.encaja	Contratações\naguardando o caixa
+PT	dash.kan.encontrol	Em controle de estoque
+PT	dash.kan.faltantes	Com faltantes: comunicar
+PT	dash.kan.separados	Separados: formalizar

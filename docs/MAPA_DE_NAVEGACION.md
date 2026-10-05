@@ -134,8 +134,8 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | `ReporteJornadaForm` | Reporte de la jornada, tendencia por rango y comparación entre jornadas. | Generar · Tendencia (rango) · Comparar Jornadas · Exportar reporte… · Exportar comparación… · Volver al reporte · menú Guardar como .TXT / Imprimir |
 | `AlertasForm` | Centro de alertas (integridad, backups, stock, pedidos). | Actualizar |
 | `DashboardForm` | Panel genérico (ADM, AUD, GCO, GIN, CAJ, ACO, CON). | — |
-| `DashboardVendedor` | Pedidos pendientes, clientes, planes, suscripciones por vencer, Kanban de pedidos. | Actualizar |
-| `DashboardDeposito` | Tareas de Depósito. | — |
+| `DashboardVendedor` | Tareas de PN01 y PN02 (`BLL.PanelTareas`): pedidos para atender (con faltantes + separados), clientes, contrataciones esperando a Caja, suscripciones por vencer. Tablero: En control de stock · Con faltantes: comunicar · Separados: formalizar (cada pedido abre Pedidos de Venta). | Actualizar |
+| `DashboardDeposito` | Pedidos a controlar (abre Control de Stock), prendas disponibles, en mantenimiento, ocupación y tablero de mantenimiento por antigüedad. | Actualizar |
 | `DashboardLogistica` | Tareas de Logística. | — |
 
 ---
@@ -176,7 +176,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | VEN | `DashboardVendedor` | Suscriptores, Inventario (Prendas, Lista de Espera), Ventas (Pedidos de Venta), Promociones (vigentes), Analítica (Recomendación) |
 | GCO | genérico | lo de VEN + Pedidos Realizados, Sugerir promoción, Análisis de Abandono, Ventas por Vendedor |
 | LOG | `DashboardLogistica` | Ventas (Pedidos Realizados) |
-| DEP | `DashboardDeposito` | Inventario (Prendas, Inspección, Lista de Espera), Ventas (Pedidos Realizados) |
+| DEP | `DashboardDeposito` | Inventario (Prendas, Control de Stock, Inspección, Lista de Espera), Ventas (Pedidos Realizados) |
 | GIN | genérico | lo de DEP + Rotación, Mantenimiento, Escasez |
 | CAJ | genérico | Caja |
 | ACO | genérico | Promociones (Gestión) |

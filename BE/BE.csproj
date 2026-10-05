@@ -69,6 +69,7 @@
     <Compile Include="MedioPago.cs" />
     <Compile Include="IntentoPago.cs" />
     <Compile Include="DesistimientoContratacion.cs" />
+    <Compile Include="TableroTareas.cs" />
     <Compile Include="TipoDescuento.cs" />
     <Compile Include="EstadoPromocion.cs" />
     <Compile Include="EstadoSugerencia.cs" />

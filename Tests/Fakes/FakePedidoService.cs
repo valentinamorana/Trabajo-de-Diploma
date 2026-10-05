@@ -29,7 +29,8 @@ namespace Tests.Fakes
         public void RegistrarDevolucion(string modulo, BE.Pedido pedido) => RegistrarDevolucionVeces++;
 
         // Resto del contrato: no ejercitado por estos tests, cuerpos mínimos.
-        public List<BE.Pedido> ObtenerTodos() => new List<BE.Pedido>();
+        public List<BE.Pedido> Pedidos { get; } = new List<BE.Pedido>();
+        public List<BE.Pedido> ObtenerTodos() => Pedidos;
         public List<BE.Pedido> ObtenerPendientes() => new List<BE.Pedido>();
         public BE.Pedido ObtenerPorId(int id) => null;
         public List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado) => new List<BE.Pedido>();
@@ -48,7 +49,8 @@ namespace Tests.Fakes
         public void SepararPrendas(string modulo, BE.Pedido pedido) { }
         public void FormalizarPedido(string modulo, BE.Pedido pedido) { }
         public BE.Pedido PrepararConfirmacion(string modulo, int idPedido) => null;
-        public List<BE.Pedido> ObtenerColaControlStock() => new List<BE.Pedido>();
+        public List<BE.Pedido> ColaControlStock { get; set; } = new List<BE.Pedido>();
+        public List<BE.Pedido> ObtenerColaControlStock() => ColaControlStock;
         public List<BE.PedidoFaltante> ObtenerInformeFaltantes(int idPedido) => new List<BE.PedidoFaltante>();
         public void Despachar(string modulo, BE.Pedido pedido) { }
         public void MarcarEntregado(string modulo, BE.Pedido pedido) { }

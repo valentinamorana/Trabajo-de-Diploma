@@ -182,6 +182,7 @@ namespace GUI
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor           = System.Drawing.Color.FromArgb(252, 250, 252);
             this.ClientSize          = new System.Drawing.Size(800, 500);
+            this.MinimumSize         = new System.Drawing.Size(640, 400);   // listado MDI redimensionable (grilla Dock=Fill)
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.pnlBottom);
             this.Controls.Add(this.pnlTop);

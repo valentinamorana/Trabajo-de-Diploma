@@ -20,6 +20,8 @@ namespace GUI
         public MantenimientoHistorialForm(BE.Prenda prenda, BLL.Interfaces.IPrendaService prendaBLL)
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvHistorial);
             _prenda    = prenda;
             _prendaBLL = prendaBLL;
         }

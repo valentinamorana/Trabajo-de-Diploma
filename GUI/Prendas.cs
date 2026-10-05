@@ -52,6 +52,8 @@ namespace GUI
         public Prendas()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvPrendas);
 
             // Verificar si el usuario activo tiene permiso de stock
             var bllUsuario = new BLL.Usuario();

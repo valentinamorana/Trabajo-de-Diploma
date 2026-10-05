@@ -41,6 +41,8 @@ namespace GUI
         public Planes()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvPlanes);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────

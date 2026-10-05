@@ -44,6 +44,8 @@ namespace GUI
         public Usuarios()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvUsuarios);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────

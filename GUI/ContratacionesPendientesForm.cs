@@ -32,6 +32,8 @@ namespace GUI
         public ContratacionesPendientesForm()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvContrataciones);
             // Paleta centralizada (GUI/Tema.cs).
             btnCobrar.BackColor = Tema.Exito;
             btnIntentoFallido.BackColor = Tema.RosaPrimario;

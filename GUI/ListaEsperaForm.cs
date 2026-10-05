@@ -28,6 +28,8 @@ namespace GUI
         public ListaEsperaForm()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvListaEspera);
         }
 
         protected override void OnLoad(EventArgs e)

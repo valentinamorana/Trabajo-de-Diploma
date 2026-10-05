@@ -26,6 +26,10 @@ namespace GUI
         public FormIdiomas()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvIdiomas);
+            Estilos.EstiloFormulario.Grilla(dgvTraducciones);
+            Estilos.EstiloFormulario.Grilla(dgvControles);
         }
 
         protected override void OnLoad(EventArgs e)

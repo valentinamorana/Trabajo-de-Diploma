@@ -36,6 +36,9 @@ namespace GUI
         public PedidosVenta()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvPedidos);
+            Estilos.EstiloFormulario.Grilla(dgvDetallePrendas);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────

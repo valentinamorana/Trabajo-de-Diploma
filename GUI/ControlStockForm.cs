@@ -36,6 +36,9 @@ namespace GUI
         public ControlStockForm()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvCola);
+            Estilos.EstiloFormulario.Grilla(dgvPlanilla);
         }
 
         protected override void OnLoad(EventArgs e)

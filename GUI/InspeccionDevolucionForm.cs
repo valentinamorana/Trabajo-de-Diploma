@@ -26,6 +26,8 @@ namespace GUI
         public InspeccionDevolucionForm()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvPrendas);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────

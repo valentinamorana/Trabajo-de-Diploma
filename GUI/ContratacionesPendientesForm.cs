@@ -44,14 +44,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -72,11 +65,15 @@ namespace GUI
             tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
             btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
 
+            // Reconstruir el combo SIN disparar SelectedIndexChanged: antes eso recargaba la
+            // grilla y UpdateLanguage la volvía a cargar (doble consulta al cambiar de idioma).
             int vista = Math.Max(0, cmbVista.SelectedIndex);
+            cmbVista.SelectedIndexChanged -= CmbVista_SelectedIndexChanged;
             cmbVista.Items.Clear();
             cmbVista.Items.Add(Tr("lbl.contr.vista.pendientes", "Pendientes de pago"));
             cmbVista.Items.Add(Tr("lbl.contr.vista.resueltas", "Resueltas"));
             cmbVista.SelectedIndex = vista;
+            cmbVista.SelectedIndexChanged += CmbVista_SelectedIndexChanged;
             CargarMediosPago();
         }
 

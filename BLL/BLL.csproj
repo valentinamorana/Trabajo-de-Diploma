@@ -90,6 +90,7 @@
     <Compile Include="ListaEspera.cs" />
     <Compile Include="CargoPrenda.cs" />
     <Compile Include="InspeccionDevolucion.cs" />
+    <Compile Include="EvaluacionControlStock.cs" />
     <Compile Include="Interfaces\IAnalisisAbandonoService.cs" />
     <Compile Include="Estrategias\EstrategiaRiesgo.cs" />
     <Compile Include="Estrategias\EstrategiaVencimientoInactividad.cs" />

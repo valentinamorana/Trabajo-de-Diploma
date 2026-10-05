@@ -130,7 +130,7 @@ namespace GUI
             this.lblTamanoCap.Text      = "Tamaño de letra:";
 
             this.cmbTamano.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbTamano.Items.AddRange(new object[] { "Chico", "Normal", "Grande" });
+            // Ítems (valor guardado fijo + texto traducido) los carga MiPerfilForm.PoblarOpciones().
             this.cmbTamano.Location      = new System.Drawing.Point(170, 202);
             this.cmbTamano.Name          = "cmbTamano";
             this.cmbTamano.Size          = new System.Drawing.Size(244, 21);
@@ -146,7 +146,7 @@ namespace GUI
             this.lblTemaCap.Text      = "Tema:";
 
             this.cmbTema.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbTema.Items.AddRange(new object[] { "Claro", "Oscuro" });
+            // Ítems (valor guardado fijo + texto traducido) los carga MiPerfilForm.PoblarOpciones().
             this.cmbTema.Location      = new System.Drawing.Point(170, 234);
             this.cmbTema.Name          = "cmbTema";
             this.cmbTema.Size          = new System.Drawing.Size(244, 21);

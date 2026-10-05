@@ -103,10 +103,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("err.explorador.cargar", "Error al cargar árbol Composite:\n{0}"), ex.Message),
-                    Tr("diag.err.titulo", "Error"),
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
 
             treeView.EndUpdate();

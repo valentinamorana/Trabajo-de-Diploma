@@ -102,9 +102,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                string titErr = Tr("msg.error.titulo", "Error");
-                string fmtErr = Tr("msg.historial.errorcargar", "Error al cargar historial:\n{0}");
-                MessageBox.Show(string.Format(fmtErr, ex.Message), titErr, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -170,11 +168,11 @@ namespace GUI
             string fnac     = version.FechaNacSnapshot?.ToString("dd/MM/yyyy") ?? "—";
             // Estado completo al que volverá el usuario (datos administrativos no sensibles).
             string estado =
-                $"Usuario: {version.UsernameSnapshot}\n" +
-                $"Nombre: {version.NombreSnapshot}\n" +
-                $"Apellido: {version.ApellidoSnapshot}\n" +
-                $"Email: {version.EmailSnapshot}\n" +
-                $"Fecha nac.: {fnac}";
+                $"{Tr("lbl.ver.campo.usuario", "Usuario")}: {version.UsernameSnapshot}\n" +
+                $"{Tr("lbl.ver.campo.nombre", "Nombre")}: {version.NombreSnapshot}\n" +
+                $"{Tr("lbl.ver.campo.apellido", "Apellido")}: {version.ApellidoSnapshot}\n" +
+                $"{Tr("lbl.ver.campo.email", "Email")}: {version.EmailSnapshot}\n" +
+                $"{Tr("lbl.ver.campo.fechanac", "Fecha nac.")}: {fnac}";
 
             string msg = Tr("msg.historial.confirmar.restaurar",
                 "¿Restaurar al usuario al estado del {0}?\n\n{1}\n\nEl usuario quedará exactamente en este estado. Es reversible (queda registrado como un nuevo cambio en el historial).",
@@ -195,9 +193,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                string titErr = Tr("msg.error.titulo", "Error");
-                string fmtErr = Tr("msg.historial.errorrestaur", "Error al restaurar versión:\n{0}");
-                MessageBox.Show(string.Format(fmtErr, ex.Message), titErr, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
     }

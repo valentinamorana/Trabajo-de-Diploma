@@ -138,10 +138,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("diag.err.cargar", "Error al cargar diagnóstico: {0}"), ex.Message),
-                    Tr("diag.err.titulo", "Error"),
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
             finally
             {
@@ -264,10 +261,7 @@ namespace GUI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(
-                        string.Format(Tr("diag.err.recalcular", "Error al recalcular: {0}"), ex.Message),
-                        Tr("diag.err.titulo", "Error"),
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MostrarError(ex);
                 }
             }
 

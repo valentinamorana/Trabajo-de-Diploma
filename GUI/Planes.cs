@@ -164,7 +164,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(Tr("err.generico.cargar", "Error al cargar: {0}", new object[] { ex.Message }));
+                MostrarError(ex);
             }
         }
 

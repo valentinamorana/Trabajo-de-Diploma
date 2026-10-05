@@ -2939,6 +2939,35 @@ GROUP BY v.Formulario, v.NombreControl;
 GO
 
 -- ============================================================
+-- WardrobeFlow — 21b. PATENTE DE ESCRITURA DE LISTA DE ESPERA
+-- ------------------------------------------------------------
+-- BLL.ListaEspera.Anotar/Cancelar exigían mnuStockEditar (patente de Depósito),
+-- así que el Vendedor —que ve Lista de Espera para anotar al cliente— recibía
+-- "sin permiso". Ahora exigen mnuListaEsperaEditar (fallback: mnuListaEspera,
+-- ver BLL.PermisosAccion). Se asigna a Administrador, Vendedor y Deposito
+-- (GerenteComercial/GerenteInventario la heredan por Composite). Idempotente.
+-- ============================================================
+INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
+SELECT 'Configurar Lista de Espera', 'mnuListaEsperaEditar', 'Acción', 1, 0, 0
+WHERE NOT EXISTS (SELECT 1 FROM Permiso p
+                  WHERE p.NombreMenu = 'mnuListaEsperaEditar' AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0);
+GO
+
+INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+SELECT rol.IdPermiso, pat.IdPermiso
+FROM (VALUES
+    ('Administrador', 'mnuListaEsperaEditar'),
+    ('Vendedor',      'mnuListaEsperaEditar'),
+    ('Deposito',      'mnuListaEsperaEditar')
+) AS v(Rol, NombreMenu)
+JOIN Permiso rol ON rol.Nombre = v.Rol AND rol.EsRol = 1
+JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0
+WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
+                  WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
+PRINT 'Permiso mnuListaEsperaEditar asignado a Administrador, Vendedor y Deposito.';
+GO
+
+-- ============================================================
 -- WardrobeFlow — 22. NORMALIZACIÓN DE LOS DÍGITOS VERIFICADORES
 -- ------------------------------------------------------------
 -- Las filas que siembra este script (usuarios, empleados, clientes y pedidos demo) llevan DVH = 0.

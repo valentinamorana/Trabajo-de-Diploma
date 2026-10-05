@@ -106,7 +106,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.recup.verificar", "Error al verificar el usuario: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 

@@ -45,5 +45,35 @@ namespace BLL
 
         // Depósito: "Revisar stock de las prendas" — pedidos en la cola de control de stock.
         public int ContarPedidosAControlar() => _pedido.ObtenerColaControlStock().Count;
+
+        // Operador Logístico: pedidos formalizados por etapa del despacho. Antes el panel
+        // contaba los estados por su cuenta (DashboardLogistica.ActualizarCards).
+        public BE.TableroLogistica ObtenerTableroLogistica() => ClasificarLogistica(_pedido.ObtenerTodos());
+
+        /// <summary>
+        /// Regla PURA del tablero logístico: solo pedidos formalizados (Pendiente de despacho,
+        /// Despachado, Entregado), en orden de antigüedad. Los de armado y los cancelados quedan afuera.
+        /// </summary>
+        public static BE.TableroLogistica ClasificarLogistica(IEnumerable<BE.Pedido> pedidos)
+        {
+            var lista = (pedidos ?? Enumerable.Empty<BE.Pedido>()).Where(p => p != null).ToList();
+            List<BE.Pedido> En(BE.EstadoPedido e) =>
+                lista.Where(p => p.Estado == e).OrderBy(p => p.FechaPedido).ToList();
+
+            return new BE.TableroLogistica
+            {
+                Pendientes  = En(BE.EstadoPedido.Pendiente),
+                Despachados = En(BE.EstadoPedido.Despachado),
+                Entregados  = En(BE.EstadoPedido.Entregado)
+            };
+        }
+
+        /// <summary>
+        /// Vendedor: suscripciones a gestionar (vencidas o que vencen en los próximos 7 días).
+        /// La regla es el predicado BE.Cliente.RequiereGestionDeVencimiento — el mismo criterio
+        /// de las alertas de suscripción (BLL.PanelAlertas); antes el panel lo repetía a mano.
+        /// </summary>
+        public static int ContarSuscripcionesAGestionar(IEnumerable<BE.Cliente> clientes) =>
+            (clientes ?? Enumerable.Empty<BE.Cliente>()).Count(c => c != null && c.RequiereGestionDeVencimiento());
     }
 }

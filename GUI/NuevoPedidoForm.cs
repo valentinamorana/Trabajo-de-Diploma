@@ -411,8 +411,11 @@ namespace GUI
 
         private void DgvPrendas_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == dgvPrendas.Columns["Sel"].Index)
-                ActualizarResumen();
+            if (e.ColumnIndex != dgvPrendas.Columns["Sel"].Index) return;
+            // ActualizarResumen consulta la BLL (estado comercial del cliente): si falla, se
+            // informa acá en vez de dejar que la excepción llegue al manejador global.
+            try { ActualizarResumen(); }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         // "Anotar la selección" ∥ "Comprobar el cupo del plan" → ¿Excede el cupo disponible?

@@ -341,6 +341,7 @@ namespace GUI
             this.lblAsignar.Location = new Point(12, 26);
             this.lblAsignar.Name     = "lblAsignar";
             this.lblAsignar.TabIndex = 0;
+            this.lblAsignar.Tag      = "lbl.permisos.elegiritem";
             this.lblAsignar.Text     = "Elegí un ítem:";
 
             this.cmbAsignables.DropDownStyle = ComboBoxStyle.DropDownList;

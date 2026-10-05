@@ -90,7 +90,7 @@ namespace GUI
             //
             this.lblConteo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblConteo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblConteo.Location = new System.Drawing.Point(404, 14);
+            this.lblConteo.Location = new System.Drawing.Point(456, 14);
             this.lblConteo.Name = "lblConteo";
             this.lblConteo.Size = new System.Drawing.Size(300, 23);
             this.lblConteo.TabIndex = 3;

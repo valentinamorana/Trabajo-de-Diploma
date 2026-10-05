@@ -10,7 +10,7 @@ namespace GUI
 {
     public partial class DashboardLogistica : FormBase, IIdiomaObserver
     {
-        private readonly BLL.Interfaces.IPedidoService _bllPedido  = new BLL.Pedido();
+        private readonly BLL.PanelTareas               _bllTareas  = new BLL.PanelTareas();
         private readonly BLL.Usuario                   _bllUsuario = new BLL.Usuario();
 
         private System.Windows.Forms.Timer _timer;
@@ -65,14 +65,15 @@ namespace GUI
             {
                 try
                 {
-                    var pedidos = _bllPedido.ObtenerTodos();
-                    this.BeginInvoke(new Action(() =>
+                    // La clasificación por etapa (solo pedidos formalizados) la hace la BLL.
+                    var tablero = _bllTareas.ObtenerTableroLogistica();
+                    InvocarSeguro(() =>
                     {
                         if (IsDisposed) return;
-                        ActualizarCards(pedidos);
-                        ActualizarKanban(pedidos);
+                        ActualizarCards(tablero);
+                        ActualizarKanban(tablero);
                         ActualizarSesion();
-                    }));
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -81,26 +82,23 @@ namespace GUI
             });
         }
 
-        private void ActualizarCards(List<BE.Pedido> pedidos)
+        private void ActualizarCards(BE.TableroLogistica tablero)
         {
-            int pend = 0, desp = 0, entr = 0;
-            foreach (var p in pedidos)
-            {
-                if (p.Estado == BE.EstadoPedido.Pendiente)  pend++;
-                else if (p.Estado == BE.EstadoPedido.Despachado) desp++;
-                else if (p.Estado == BE.EstadoPedido.Entregado)  entr++;
-            }
-            numPend.Text = pend.ToString();
-            numDesp.Text = desp.ToString();
-            numEntr.Text = entr.ToString();
+            numPend.Text = tablero.CantidadPendientes.ToString();
+            numDesp.Text = tablero.CantidadDespachados.ToString();
+            numEntr.Text = tablero.CantidadEntregados.ToString();
         }
 
-        private void ActualizarKanban(List<BE.Pedido> pedidos)
+        private void ActualizarKanban(BE.TableroLogistica tablero)
         {
             colPendiente.Controls.Clear();
             colDespachado.Controls.Clear();
             colEntregado.Controls.Clear();
 
+            var pedidos = new List<BE.Pedido>();
+            pedidos.AddRange(tablero.Pendientes);
+            pedidos.AddRange(tablero.Despachados);
+            pedidos.AddRange(tablero.Entregados);
             foreach (var p in pedidos)
             {
                 int    dias = p.DiasDesdeAlta;

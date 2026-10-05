@@ -108,6 +108,21 @@ namespace GUI
         }
 
         /// <summary>
+        /// Ejecuta <paramref name="accion"/> en el hilo de UI desde una tarea en background, sin
+        /// romper si el formulario ya se cerró: BeginInvoke sobre un handle no creado o
+        /// destruido lanza InvalidOperationException (no observada dentro del Task).
+        /// </summary>
+        protected void InvocarSeguro(Action accion)
+        {
+            if (accion == null || IsDisposed || !IsHandleCreated) return;
+            try
+            {
+                BeginInvoke(new Action(() => { if (!IsDisposed) accion(); }));
+            }
+            catch (InvalidOperationException) { /* el form se cerró entre el chequeo y la llamada (incluye ObjectDisposedException) */ }
+        }
+
+        /// <summary>
         /// Confirmación Sí/No con los botones traducidos al idioma activo (MessageBox usa
         /// el idioma de Windows: "Yes"/"No"). Disponible para todos los formularios hijos.
         /// </summary>
@@ -209,27 +224,26 @@ namespace GUI
 
         /// <summary>
         /// Sobrecarga que traduce AppException al idioma activo antes de mostrar.
-        /// Para otras excepciones muestra ex.Message directamente.
+        /// Para otras excepciones muestra un mensaje genérico (y las registra en bitácora).
         /// </summary>
-        protected void MostrarError(Exception ex)
+        protected void MostrarError(Exception ex) => MostrarError(MensajeDeError(ex));
+
+        /// <summary>
+        /// Texto apto para el usuario a partir de una excepción, para formularios que muestran el
+        /// error en un control propio (no en MensajeLabel):
+        ///   • AppException (error de negocio esperado: validación, permiso…) → su mensaje
+        ///     traducido, sin registrar en bitácora para no generar ruido.
+        ///   • Cualquier otra → se registra en la bitácora con el detalle técnico y se devuelve
+        ///     SOLO un mensaje genérico traducido, sin exponer información técnica (#6).
+        /// </summary>
+        protected string MensajeDeError(Exception ex)
         {
             if (ex is BE.AppException appEx)
-            {
-                // AppException = error de negocio esperado (validación, permiso…): se
-                // muestra traducido y NO se registra en bitácora para no generar ruido.
-                string msg = Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual);
-                MostrarError(msg);
-                return;
-            }
+                return Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual);
 
-            // Excepción INESPERADA: se registra en la bitácora (con el detalle técnico) y al
-            // usuario se le muestra SOLO un mensaje GENÉRICO, sin exponer información técnica (#6).
             RegistrarExcepcion(ex);
-            var tg = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-            string generico = tg.ContainsKey("msg.error.inesperado")
-                ? tg["msg.error.inesperado"].Texto
-                : "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.";
-            MostrarError(generico);
+            return Tr("msg.error.inesperado",
+                "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.");
         }
 
         // Registra una excepción inesperada en la bitácora con criticidad Alta.

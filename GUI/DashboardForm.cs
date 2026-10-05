@@ -78,19 +78,25 @@ namespace GUI
 
         public DashboardForm(List<BE.Permiso> permisos)
         {
-            var nombres = new HashSet<string>();
+            // Mismo criterio que BLL.MenuVisibilidad: NombreMenu sin distinguir mayúsculas y
+            // bypass total para el Administrador (antes un admin cuyas patentes no estuvieran
+            // todas asignadas veía un panel incompleto).
+            var nombres = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (permisos != null)
                 foreach (var p in permisos)
-                    if (p.NombreMenu != null) nombres.Add(p.NombreMenu);
+                    if (p?.NombreMenu != null) nombres.Add(p.NombreMenu);
+            bool esAdmin = false;
+            try { esAdmin = new BLL.Usuario().ObtenerUsuarioActivo()?.EsAdministrador == true; } catch { }
+            bool Tiene(string patente) => esAdmin || nombres.Contains(patente);
 
-            _verPrendas  = nombres.Contains("mnuPrendas");
-            _verClientes = nombres.Contains("mnuClientes");
-            _verPedidos  = nombres.Contains("mnuPedidosVenta") || nombres.Contains("mnuPedidosRealizados");
-            _verBackup   = nombres.Contains("mnuUsuarios");
-            _verStock    = nombres.Contains("mnuStock");
-            _verActividad = nombres.Contains("mnuAuditoria");
-            _tienePedidosVenta      = nombres.Contains("mnuPedidosVenta");
-            _tienePedidosRealizados = nombres.Contains("mnuPedidosRealizados");
+            _verPrendas  = Tiene(BE.Patentes.Prendas);
+            _verClientes = Tiene(BE.Patentes.Clientes);
+            _verPedidos  = Tiene(BE.Patentes.PedidosVenta) || Tiene(BE.Patentes.PedidosRealizados);
+            _verBackup   = Tiene(BE.Patentes.Usuarios);
+            _verStock    = Tiene(BE.Patentes.Stock);
+            _verActividad = Tiene(BE.Patentes.Auditoria);
+            _tienePedidosVenta      = Tiene(BE.Patentes.PedidosVenta);
+            _tienePedidosRealizados = Tiene(BE.Patentes.PedidosRealizados);
 
             InitializeComponent();
 
@@ -192,7 +198,7 @@ namespace GUI
                 if (_verPrendas)  try { ocup      = _bllPrenda.ObtenerOcupacion(); } catch (Exception ex) { LogWidget("ocupación de stock", ex); }
                 try { usuario = _bllUsuario.ObtenerUsuarioActivo(); hora = _bllUsuario.ObtenerFechaInicioSesion(); } catch (Exception ex) { LogWidget("usuario activo", ex); }
 
-                this.BeginInvoke(new Action(() =>
+                InvocarSeguro(() =>
                 {
                     if (IsDisposed) return;
                     if (_numPrendas  != null) _numPrendas.Text  = nPrendas.HasValue  ? nPrendas.Value.ToString()  : "—";
@@ -203,10 +209,13 @@ namespace GUI
                         lblSesion.Text =
                             $"{usuario.Username}  ·  {usuario.Perfil ?? "—"}" +
                             (hora.HasValue ? $"  ·  {Tr("dash.sesion.iniciada", "Sesión iniciada:")} {hora.Value:HH:mm}" : "");
-                }));
+                });
             });
         }
 
+        // TODO(post-merge): esta tarjeta lee el disco y conoce las extensiones de backup (lógica
+        // que no le corresponde a la GUI). Reemplazar por BLL.Backup.ObtenerUltimoBackup() cuando
+        // se integre la rama de backend que lo expone.
         private void ActualizarTarjetaBackup()
         {
             try
@@ -562,7 +571,7 @@ namespace GUI
                 if (_verStock)   try { enMant  = _bllPrenda.ObtenerEnMantenimiento(); } catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DashboardForm.CargarTareasPendientes] " + ex.Message); }
                 if (_verPedidos) try { pedPend = _bllPedido.ObtenerPendientes(); }       catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DashboardForm.CargarTareasPendientes] " + ex.Message); }
 
-                this.BeginInvoke(new Action(() =>
+                InvocarSeguro(() =>
                 {
                     if (IsDisposed || !panelTareas.Visible) return;
                     dgvTareas.Rows.Clear();
@@ -601,7 +610,7 @@ namespace GUI
                     lblTareasTitulo.Text = string.Format(
                         Tr("dash.tareas.titulo", "Mis Tareas Pendientes ({0})"),
                         dgvTareas.Rows.Count == 1 && dgvTareas.Rows[0].Cells["colTipo"].Value?.ToString() == "—" ? 0 : dgvTareas.Rows.Count);
-                }));
+                });
             });
         }
 
@@ -690,7 +699,7 @@ namespace GUI
                 try { dt = _bllBitacora.ObtenerUltimosNDiasSistema(7); }
                 catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DashboardForm.CargarActividadReciente] " + ex.Message); }
 
-                this.BeginInvoke(new Action(() =>
+                InvocarSeguro(() =>
                 {
                     if (IsDisposed || _dgvActividad == null) return;
                     _dgvActividad.Rows.Clear();
@@ -702,7 +711,7 @@ namespace GUI
                         _dgvActividad.Rows.Add(row["fecha"]?.ToString() ?? "", TraducirActividad(row["actividad"]?.ToString() ?? ""), row["usuario"]?.ToString() ?? "");
                         n++;
                     }
-                }));
+                });
             });
         }
 
@@ -714,7 +723,7 @@ namespace GUI
                 try { dtN   = _bllBitacora.ObtenerUltimosNDiasSistema(30); } catch (Exception ex) { LogWidget("bitácora del sistema (30d)", ex); }
                 try { dtNeg = _bllBitacora.ObtenerTodosNegocio(); } catch (Exception ex) { LogWidget("bitácora de negocio", ex); }
 
-                this.BeginInvoke(new Action(() =>
+                InvocarSeguro(() =>
                 {
                     if (IsDisposed) return;
                     flStats.Controls.Clear();
@@ -736,7 +745,7 @@ namespace GUI
                         foreach (var kv in conteos)
                             flStats.Controls.Add(CrearMiniStatRow(kv.Key, kv.Value.ToString(), Color.FromArgb(176, 62, 96)));
                     }
-                }));
+                });
             });
         }
 

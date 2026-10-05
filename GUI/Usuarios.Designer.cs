@@ -173,12 +173,13 @@ namespace GUI
             this.btnRefrescar.Text = "Refrescar Lista";
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
+            // (+38px: antes separador1 y lblResetTitulo quedaban DEBAJO de btnRefrescar, superpuestos.)
             // separador1 — posiciones subidas 230px respecto al Designer original: con el
             // alta oculta (lblTitulo..btnAgregar) este bloque de reset/desbloqueo pasa a ser
             // lo primero visible del panel, y así no queda un hueco vacío arriba.
             //
             this.separador1.BackColor = System.Drawing.Color.Silver;
-            this.separador1.Location = new System.Drawing.Point(12, 12);
+            this.separador1.Location = new System.Drawing.Point(12, 50);
             this.separador1.Name = "separador1";
             this.separador1.Size = new System.Drawing.Size(210, 1);
             this.separador1.TabIndex = 9;
@@ -186,7 +187,7 @@ namespace GUI
             // lblResetTitulo
             //
             this.lblResetTitulo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblResetTitulo.Location = new System.Drawing.Point(12, 22);
+            this.lblResetTitulo.Location = new System.Drawing.Point(12, 60);
             this.lblResetTitulo.Name = "lblResetTitulo";
             this.lblResetTitulo.Size = new System.Drawing.Size(210, 23);
             this.lblResetTitulo.TabIndex = 10;
@@ -197,7 +198,7 @@ namespace GUI
             //
             this.lblResetInfo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblResetInfo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblResetInfo.Location = new System.Drawing.Point(12, 45);
+            this.lblResetInfo.Location = new System.Drawing.Point(12, 83);
             this.lblResetInfo.Name = "lblResetInfo";
             this.lblResetInfo.Size = new System.Drawing.Size(210, 36);
             this.lblResetInfo.TabIndex = 11;
@@ -211,7 +212,7 @@ namespace GUI
             this.btnResetearClave.FlatAppearance.BorderSize = 0;
             this.btnResetearClave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnResetearClave.ForeColor = System.Drawing.Color.White;
-            this.btnResetearClave.Location = new System.Drawing.Point(12, 86);
+            this.btnResetearClave.Location = new System.Drawing.Point(12, 124);
             this.btnResetearClave.Name = "btnResetearClave";
             this.btnResetearClave.Size = new System.Drawing.Size(210, 34);
             this.btnResetearClave.TabIndex = 12;
@@ -223,7 +224,7 @@ namespace GUI
             // separador2
             //
             this.separador2.BackColor = System.Drawing.Color.Silver;
-            this.separador2.Location = new System.Drawing.Point(12, 128);
+            this.separador2.Location = new System.Drawing.Point(12, 166);
             this.separador2.Name = "separador2";
             this.separador2.Size = new System.Drawing.Size(210, 1);
             this.separador2.TabIndex = 13;
@@ -231,7 +232,7 @@ namespace GUI
             // lblDesbloquearTitulo
             //
             this.lblDesbloquearTitulo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblDesbloquearTitulo.Location = new System.Drawing.Point(12, 138);
+            this.lblDesbloquearTitulo.Location = new System.Drawing.Point(12, 176);
             this.lblDesbloquearTitulo.Name = "lblDesbloquearTitulo";
             this.lblDesbloquearTitulo.Size = new System.Drawing.Size(210, 23);
             this.lblDesbloquearTitulo.TabIndex = 14;
@@ -242,7 +243,7 @@ namespace GUI
             //
             this.lblDesbloquearInfo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblDesbloquearInfo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblDesbloquearInfo.Location = new System.Drawing.Point(12, 161);
+            this.lblDesbloquearInfo.Location = new System.Drawing.Point(12, 199);
             this.lblDesbloquearInfo.Name = "lblDesbloquearInfo";
             this.lblDesbloquearInfo.Size = new System.Drawing.Size(210, 36);
             this.lblDesbloquearInfo.TabIndex = 15;
@@ -256,7 +257,7 @@ namespace GUI
             this.btnDesbloquear.FlatAppearance.BorderSize = 0;
             this.btnDesbloquear.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDesbloquear.ForeColor = System.Drawing.Color.White;
-            this.btnDesbloquear.Location = new System.Drawing.Point(12, 202);
+            this.btnDesbloquear.Location = new System.Drawing.Point(12, 240);
             this.btnDesbloquear.Name = "btnDesbloquear";
             this.btnDesbloquear.Size = new System.Drawing.Size(210, 34);
             this.btnDesbloquear.TabIndex = 16;
@@ -274,7 +275,7 @@ namespace GUI
             this.btnArchivar.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
             this.btnArchivar.ForeColor = System.Drawing.Color.White;
             this.btnArchivar.Cursor    = System.Windows.Forms.Cursors.Hand;
-            this.btnArchivar.Location  = new System.Drawing.Point(12, 256);
+            this.btnArchivar.Location  = new System.Drawing.Point(12, 294);
             this.btnArchivar.Name      = "btnArchivar";
             this.btnArchivar.Size      = new System.Drawing.Size(210, 30);
             this.btnArchivar.TabIndex  = 17;
@@ -291,7 +292,7 @@ namespace GUI
             this.btnVerArchivados.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
             this.btnVerArchivados.ForeColor = System.Drawing.Color.White;
             this.btnVerArchivados.Cursor    = System.Windows.Forms.Cursors.Hand;
-            this.btnVerArchivados.Location  = new System.Drawing.Point(12, 294);
+            this.btnVerArchivados.Location  = new System.Drawing.Point(12, 332);
             this.btnVerArchivados.Name      = "btnVerArchivados";
             this.btnVerArchivados.Size      = new System.Drawing.Size(102, 28);
             this.btnVerArchivados.TabIndex  = 18;
@@ -308,7 +309,7 @@ namespace GUI
             this.btnPurgar.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
             this.btnPurgar.ForeColor = System.Drawing.Color.White;
             this.btnPurgar.Cursor    = System.Windows.Forms.Cursors.Hand;
-            this.btnPurgar.Location  = new System.Drawing.Point(120, 294);
+            this.btnPurgar.Location  = new System.Drawing.Point(120, 332);
             this.btnPurgar.Name      = "btnPurgar";
             this.btnPurgar.Size      = new System.Drawing.Size(102, 28);
             this.btnPurgar.TabIndex  = 19;
@@ -321,7 +322,7 @@ namespace GUI
             //
             this.lblMensaje.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblMensaje.ForeColor = System.Drawing.Color.DarkGreen;
-            this.lblMensaje.Location  = new System.Drawing.Point(12, 336);
+            this.lblMensaje.Location  = new System.Drawing.Point(12, 374);
             this.lblMensaje.Name      = "lblMensaje";
             this.lblMensaje.Size      = new System.Drawing.Size(210, 48);
             this.lblMensaje.TabIndex  = 20;

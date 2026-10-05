@@ -29,6 +29,10 @@ namespace GUI
         private BE.Pedido                   _pedido  = null;   // pedido seleccionado (releído de la base)
         private List<BE.LineaControlStock>  _lineas  = new List<BE.LineaControlStock>();
 
+        // true mientras se recarga la cola: evita la recursión CargarCola → SelectionChanged →
+        // RevisarStock → (falla o pedido movido) → CargarCola → ...
+        private bool _cargando;
+
         public ControlStockForm()
         {
             InitializeComponent();
@@ -37,14 +41,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -70,6 +67,8 @@ namespace GUI
 
         private void CargarCola()
         {
+            if (_cargando) return;
+            _cargando = true;
             try
             {
                 _cola = pedidoBLL.ObtenerColaControlStock();
@@ -97,16 +96,24 @@ namespace GUI
                 });
 
                 lblConteo.Text = Tr("msg.cs.conteo", "{0} pedido(s) para controlar", new object[] { _cola.Count });
-                if (_cola.Count == 0) LimpiarPlanilla();
+                // Tras recargar no queda ninguna fila seleccionada: el usuario elige el pedido
+                // (antes el DataBinding seleccionaba la primera y disparaba RevisarStock solo).
+                dgvCola.ClearSelection();
+                LimpiarPlanilla();
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
             }
+            finally
+            {
+                _cargando = false;
+            }
         }
 
         private void DgvCola_SelectionChanged(object sender, EventArgs e)
         {
+            if (_cargando) return;
             if (dgvCola.SelectedRows.Count == 0) { LimpiarPlanilla(); return; }
             int id = Convert.ToInt32(dgvCola.SelectedRows[0].Cells["ID"].Value);
             RevisarStock(id);
@@ -160,19 +167,21 @@ namespace GUI
                 });
                 for (int i = 0; i < _lineas.Count; i++)
                     if (!_lineas[i].Disponible)
-                        dgvPlanilla.Rows[i].DefaultCellStyle.ForeColor = Color.FromArgb(180, 40, 40);
+                        dgvPlanilla.Rows[i].DefaultCellStyle.ForeColor = Tema.Error;
 
-                bool disponible = _lineas.Count > 0 && _lineas.TrueForAll(l => l.Disponible);
+                // "¿Selección disponible?" y las acciones habilitadas las decide la BLL.
+                var evaluacion = BLL.EvaluacionControlStock.Evaluar(_lineas, _pedido);
+                bool disponible = evaluacion.SeleccionDisponible;
                 lblPlanillaTitulo.Text = string.Format(
                     Tr("lbl.cs.planilla.pedido",
                        "Planilla de control — Pedido #{0} — {1} — ¿Selección disponible? {2}"),
                     _pedido.IdPedido, _pedido.NombreCliente, disponible ? si : no);
-                lblPlanillaTitulo.ForeColor = disponible ? Color.FromArgb(30, 130, 30) : Color.FromArgb(180, 40, 40);
+                lblPlanillaTitulo.ForeColor = disponible ? Tema.Exito : Tema.Error;
 
                 // Decisión del diagrama: No → Informe de faltantes; Sí → Confirmar → Separar.
-                btnInformarFaltantes.Enabled = !disponible;
-                btnConfirmarPrendas.Enabled  = disponible && !_pedido.TodasConfirmadas;
-                btnSepararPrendas.Enabled    = disponible && _pedido.TodasConfirmadas;
+                btnInformarFaltantes.Enabled = evaluacion.PuedeInformarFaltantes;
+                btnConfirmarPrendas.Enabled  = evaluacion.PuedeConfirmar;
+                btnSepararPrendas.Enabled    = evaluacion.PuedeSeparar;
                 btnImprimirPlanilla.Enabled  = true;
             }
             catch (Exception ex)
@@ -187,7 +196,7 @@ namespace GUI
             _lineas = new List<BE.LineaControlStock>();
             dgvPlanilla.DataSource = null;
             lblPlanillaTitulo.Text = Tr("lbl.cs.planilla", "Planilla de control de existencias — seleccioná un pedido de la cola");
-            lblPlanillaTitulo.ForeColor = Color.FromArgb(176, 62, 96);
+            lblPlanillaTitulo.ForeColor = Tema.RosaOscuro;
             btnInformarFaltantes.Enabled = btnConfirmarPrendas.Enabled =
                 btnSepararPrendas.Enabled = btnImprimirPlanilla.Enabled = false;
         }

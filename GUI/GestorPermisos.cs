@@ -85,6 +85,7 @@ namespace GUI
             grpCrear.Text        = Tr("grp.permisos.crear",      "Crear rol");
             grpEditar.Text       = Tr("grp.permisos.editar",     "Editar rol");
             grpAsignar.Text      = Tr("grp.permisos.asignar",    "Asignar permiso o rol");
+            lblAsignar.Text      = Tr("lbl.permisos.elegiritem", "Elegí un ítem:");
 
             btnCrearRaiz.Text    = Tr("btn.permisos.crearraiz",  "Crear rol raíz");
             btnCrearSub.Text     = Tr("btn.permisos.crearsub",   "Crear sub-rol");
@@ -135,7 +136,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(string.Format(Tr("err.generico.cargar", "Error al cargar: {0}"), ex.Message));
+                MostrarError(ex);
             }
         }
 

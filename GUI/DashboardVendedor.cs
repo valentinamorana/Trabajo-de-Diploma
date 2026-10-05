@@ -71,13 +71,13 @@ namespace GUI
                 {
                     var tareas   = _bllTareas.ObtenerTareasVendedor();
                     var clientes = _bllCliente.ObtenerTodos();
-                    this.BeginInvoke(new Action(() =>
+                    InvocarSeguro(() =>
                     {
                         if (IsDisposed) return;
                         ActualizarCards(tareas, clientes);
                         ActualizarKanban(tareas);
                         ActualizarSesion();
-                    }));
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -94,10 +94,8 @@ namespace GUI
             numClientes.Text = clientes.Count.ToString();
             numPlanes.Text   = tareas.ContratacionesEnCaja.ToString();
             if (!_clicTarjetaPedidos) { HabilitarClicAbrirPedidosVenta(cardPedidos); _clicTarjetaPedidos = true; }
-            // Mismo criterio que BLL.PanelAlertas: vencida o vence en los próximos 7 días.
-            numSuscripciones.Text = clientes
-                .Count(c => c.VencimientoExpirado || c.SuscripcionProximaAVencer(7))
-                .ToString();
+            // Regla de negocio (vencida o vence en 7 días) en BLL.PanelTareas / BE.Cliente.
+            numSuscripciones.Text = BLL.PanelTareas.ContarSuscripcionesAGestionar(clientes).ToString();
         }
 
         // Cada pedido abre Pedidos de Venta, donde el Vendedor ve los faltantes, ajusta, desiste o

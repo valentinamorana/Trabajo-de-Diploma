@@ -76,7 +76,7 @@ namespace GUI
                     var enMant       = _bllPrenda.ObtenerEnMantenimiento();
                     var ocupacion    = _bllPrenda.ObtenerOcupacion();
                     int aControlar   = _bllTareas.ContarPedidosAControlar();
-                    this.BeginInvoke(new Action(() =>
+                    InvocarSeguro(() =>
                     {
                         if (IsDisposed) return;
                         numControl.Text = aControlar.ToString();
@@ -84,7 +84,7 @@ namespace GUI
                         ActualizarCards(disponibles, enMant, ocupacion);
                         ActualizarKanban(enMant);
                         ActualizarSesion();
-                    }));
+                    });
                 }
                 catch (Exception ex)
                 {

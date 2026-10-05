@@ -121,9 +121,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("msg.backup.errorgenerar", "Error al generar copia de seguridad:\n{0}"), ex.Message),
-                    Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -145,9 +143,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("msg.backup.errorgenerar", "Error al generar copia de seguridad:\n{0}"), ex.Message),
-                    Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -178,9 +174,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("msg.backup.erroreliminar", "Error al eliminar:\n{0}"), ex.Message),
-                    Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 
@@ -194,7 +188,7 @@ namespace GUI
                 if (Directory.Exists(DirBackups))
                     ofd.InitialDirectory = DirBackups;
 
-                if (ofd.ShowDialog() != DialogResult.OK) return;
+                if (ofd.ShowDialog(this) != DialogResult.OK) return;
                 await Restaurar(ofd.FileName);
             }
         }
@@ -254,9 +248,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    string.Format(Tr("msg.backup.errorrestaurar", "Error al restaurar:\n{0}"), ex.Message),
-                    Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MostrarError(ex);
             }
         }
 

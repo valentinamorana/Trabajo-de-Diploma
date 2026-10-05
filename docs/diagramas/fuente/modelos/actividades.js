@@ -105,25 +105,47 @@ module.exports = [
   },
   {
     tipo: 'actividad', id: 'ACT_pn03_promociones', titulo: 'Actividad — PN03 Métricas, promociones y toma de decisiones',
-    carriles: [{ id: 'G', nombre: 'Gerencia' }, { id: 'A', nombre: 'Administración' }, { id: 'K', nombre: 'Contabilidad' }, { id: 'V', nombre: 'Vendedor' }, { id: 'S', nombre: 'Sistema' }],
+    // Flujo corregido y aprobado: el sistema actúa dentro de cada carril. Cada acción es un método de
+    // BLL.AnalisisPromociones / BLL.SugerenciaPromocion / BLL.Promocion y cada decisión, una guarda.
+    // La vigencia es una región interrumpible: termina por la baja pedida por Ventas, la
+    // desactivación directa o la llegada de la fecha de fin.
+    carriles: [{ id: 'G', nombre: 'Gerencia' }, { id: 'A', nombre: 'Administración' }, { id: 'K', nombre: 'Contabilidad' }, { id: 'V', nombre: 'Vendedor' }],
     nodos: [
-      N('i', 'inicio', 'G'), N('a1', 'accion', 'G', 'Detecta una oportunidad (análisis de abandono y rotación) y sugiere una promoción'),
-      N('a2', 'accion', 'A', 'Crea la promoción desde la sugerencia o en forma manual'),
-      N('a3', 'accion', 'S', 'Valida (destino único, valor, fechas) y registra En revisión contable'),
-      N('a4', 'accion', 'K', 'Analiza margen e impacto económico'),
-      N('d1', 'decision', 'K', '¿Aprueba?'),
-      N('a5', 'accion', 'S', 'Rechazada por Contabilidad: vuelve a Administración'),
-      N('a6', 'accion', 'A', 'Reformula las condiciones'),
-      N('a7', 'accion', 'S', 'Vigente: se aplica un solo descuento por cobro'),
-      N('d2', 'decision', 'V', '¿Sugiere la baja?'),
-      N('a8', 'accion', 'V', 'Sugiere la baja indicando el motivo (Baja solicitada)'),
-      N('d3', 'decision', 'A', '¿Aprueba la baja?'),
-      N('a9', 'accion', 'S', 'Desactivada'), N('a10', 'accion', 'S', 'Sigue Vigente (conserva la observación contable)'),
-      N('f', 'fin', 'S')
+      N('i', 'inicio', 'G'),
+      N('a1', 'accion', 'G', 'Analizar métricas: abandono por plan y rotación por categoría «Reporte de métricas»'),
+      N('d1', 'decision', 'G', '¿Hay oportunidad?'),
+      N('f0', 'fin', 'G'),
+      N('a2', 'accion', 'G', 'Registrar sugerencia con el origen de la métrica «Sugerencia de promoción»'),
+      N('d2', 'decision', 'A', '¿Acepta la sugerencia?'),
+      N('a3', 'accion', 'A', 'Descartar sugerencia (motivo) «Constancia de descarte»'),
+      N('f1', 'fin', 'A'),
+      N('a4', 'accion', 'A', 'Crear promoción (desde la sugerencia o manual)'),
+      N('a5', 'accion', 'A', 'Validar (destino único, valor, fechas) → En revisión contable «Ficha de promoción»'),
+      N('a6', 'accion', 'K', 'Analizar margen e impacto (beneficio estimado, promociones superpuestas)'),
+      N('d3', 'decision', 'K', '¿Aprueba? (quien la creó no la dictamina)'),
+      N('a7', 'accion', 'K', 'Rechazada por Contabilidad «Dictamen contable»'),
+      N('d4', 'decision', 'A', '¿Reformular?'),
+      N('a8', 'accion', 'A', 'Reformular las condiciones'),
+      N('a9', 'accion', 'A', 'Descartar promoción (motivo) «Constancia de descarte»'),
+      N('f2', 'fin', 'A'),
+      N('a10', 'accion', 'K', 'Vigente «Dictamen contable»: un solo descuento por cobro'),
+      N('d5', 'decision', 'A', '¿Qué interrumpe la vigencia?'),
+      N('a11', 'accion', 'V', 'Solicitar la baja (motivo) «Solicitud de baja»'),
+      N('d6', 'decision', 'A', '¿Aprueba la baja?'),
+      N('a12', 'accion', 'A', 'Desactivada «Resolución de baja» (informe a Gerencia)'),
+      N('a13', 'accion', 'A', 'Sigue Vigente «Resolución de baja» con motivo (informe a Ventas)'),
+      N('a14', 'accion', 'A', 'Desactivar directamente (motivo)'),
+      N('a15', 'accion', 'A', 'Vencida: ya no aplica en el cobro'),
+      N('f3', 'fin', 'A'), N('f4', 'fin', 'A')
     ],
     flujos: [
-      F('i', 'a1'), F('a1', 'a2'), F('a2', 'a3'), F('a3', 'a4'), F('a4', 'd1'), F('d1', 'a5', 'No'), F('a5', 'a6'), F('a6', 'a3'),
-      F('d1', 'a7', 'Sí'), F('a7', 'd2'), F('d2', 'f', 'No'), F('d2', 'a8', 'Sí'), F('a8', 'd3'), F('d3', 'a9', 'Sí'), F('d3', 'a10', 'No'), F('a9', 'f'), F('a10', 'f')
+      F('i', 'a1'), F('a1', 'd1'), F('d1', 'f0', 'No: sin promoción'), F('d1', 'a2', 'Sí'), F('a2', 'd2'),
+      F('d2', 'a3', 'No'), F('a3', 'f1'), F('d2', 'a4', 'Sí'), F('a4', 'a5'), F('a5', 'a6'), F('a6', 'd3'),
+      F('d3', 'a7', 'No'), F('a7', 'd4'), F('d4', 'a8', 'Sí'), F('a8', 'a5'), F('d4', 'a9', 'No'), F('a9', 'f2'),
+      F('d3', 'a10', 'Sí'), F('a10', 'd5'),
+      F('d5', 'a11', 'Ventas pide la baja'), F('a11', 'd6'), F('d6', 'a12', 'Sí'), F('a12', 'f3'), F('d6', 'a13', 'No'), F('a13', 'a10'),
+      F('d5', 'a14', 'Administración la desactiva'), F('a14', 'f3'),
+      F('d5', 'a15', 'Llega la fecha de fin'), F('a15', 'f4')
     ]
   },
   {

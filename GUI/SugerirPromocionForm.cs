@@ -1,129 +1,42 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
+using Docs = GUI.Exportacion.DocumentosPromocion;
 
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN03, CU-GE-01-Sugerir Promoción a la Administración.
-    /// Actor: GerenteComercial (Gerencia reusa este rol ya existente).
+    /// Capa de Presentación — PN03, carril Gerencia del diagrama de actividad (rol GerenteComercial):
+    ///   Analizar métricas («Reporte de métricas», imprimible) → ¿Hay oportunidad?
+    ///   No: fin "Sin promoción". Sí: Registrar sugerencia («Sugerencia de promoción»), con el
+    ///   origen de la métrica (abandono, rotación) o Manual si Gerencia la carga sin el reporte.
+    /// Lista las sugerencias registradas para volver a imprimirlas (o su constancia de descarte).
     /// </summary>
     public partial class SugerirPromocionForm : FormBase, IIdiomaObserver
     {
-        protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
+        protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.ISugerenciaPromocionService sugerenciaBLL = new BLL.SugerenciaPromocion();
         private readonly BLL.Interfaces.IPlanSuscripcionService planBLL = new BLL.PlanSuscripcion();
+        private readonly BLL.AnalisisPromociones analisisBLL = new BLL.AnalisisPromociones();
 
         private List<BE.PlanSuscripcion> _planes = new List<BE.PlanSuscripcion>();
+        private List<BE.SugerenciaPromocion> _sugerencias = new List<BE.SugerenciaPromocion>();
 
-        private readonly BLL.AnalisisPromociones analisisBLL = new BLL.AnalisisPromociones();
-        private Button btnDesdeAnalisis;
+        // Origen de la sugerencia que se está armando: Manual hasta que se use una oportunidad del reporte.
+        private BE.OrigenMetrica _origen = BE.OrigenMetrica.Manual;
 
         public SugerirPromocionForm()
         {
             InitializeComponent();
-            CrearBotonDesdeAnalisis();
-        }
-
-        // PN03: en vez de partir de una hoja en blanco, Gerencia puede cargar una idea detectada por los
-        // reportes de rotación y abandono (un dato concreto) y ajustarla antes de enviarla.
-        private void CrearBotonDesdeAnalisis()
-        {
-            btnDesdeAnalisis = new Button
-            {
-                Name = "btnDesdeAnalisis",
-                Tag = "promocion.btn.desdeanalisis",
-                Text = "Desde el análisis…",
-                Location = new System.Drawing.Point(btnEnviar.Right + 8, btnEnviar.Top),
-                Size = new System.Drawing.Size(160, btnEnviar.Height)
-            };
-            btnDesdeAnalisis.Click += BtnDesdeAnalisis_Click;
-            Controls.Add(btnDesdeAnalisis);
-        }
-
-        private void BtnDesdeAnalisis_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var candidatas = analisisBLL.Detectar();
-                if (candidatas.Count == 0)
-                {
-                    MostrarOk(Tr("msg.sugerencia.sinanalisis",
-                        "Los reportes de rotación y abandono no detectan casos para sugerir por ahora."));
-                    return;
-                }
-
-                var elegida = ElegirCandidata(candidatas);
-                if (elegida == null) return;
-
-                if (elegida.IdPlan.HasValue)
-                {
-                    rbPlan.Checked = true;
-                    cmbPlan.SelectedValue = elegida.IdPlan.Value;
-                }
-                else
-                {
-                    rbCategoria.Checked = true;
-                    txtCategoria.Text = elegida.CategoriaPrenda;
-                }
-                cmbTipoDescuento.SelectedItem = elegida.TipoSugerido;
-                numBeneficioEstimado.Value = Math.Min(numBeneficioEstimado.Maximum, elegida.BeneficioEstimado);
-                txtMotivo.Text = elegida.Motivo;
-            }
-            catch (Exception ex) { MostrarError(ex); }
-        }
-
-        // Las promociones por categoría de prenda son informativas: no reducen el importe del cobro de la suscripción.
-        private string NotaCategoria(BE.CandidataSugerencia c)
-            => c != null && !c.IdPlan.HasValue
-                ? "\n\n" + Tr("promocion.desdeanalisis.notacategoria",
-                    "Ojo: una promoción por categoría es informativa (no se descuenta del cobro de la suscripción).")
-                : "";
-
-        private BE.CandidataSugerencia ElegirCandidata(List<BE.CandidataSugerencia> candidatas)
-        {
-            using (var dlg = new Form
-            {
-                Text = Tr("promocion.desdeanalisis.titulo", "Ideas detectadas por los reportes"),
-                StartPosition = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                MaximizeBox = false,
-                MinimizeBox = false,
-                ClientSize = new System.Drawing.Size(560, 300)
-            })
-            {
-                var lista = new ListBox { Dock = DockStyle.Top, Height = 170, DisplayMember = nameof(BE.CandidataSugerencia.Resumen) };
-                foreach (var c in candidatas) lista.Items.Add(c);
-                lista.SelectedIndex = 0;
-
-                var detalle = new Label { Dock = DockStyle.Fill, Padding = new Padding(8) };
-                lista.SelectedIndexChanged += (s, ev) =>
-                {
-                    var c = lista.SelectedItem as BE.CandidataSugerencia;
-                    detalle.Text = c == null ? "" : c.Motivo + "\n\n" + Tr("promocion.desdeanalisis.beneficio",
-                        "Beneficio estimado inicial: {0:C2} (editable antes de enviar).", new object[] { c.BeneficioEstimado })
-                        + NotaCategoria(c);
-                };
-                detalle.Text = candidatas[0].Motivo + "\n\n" + Tr("promocion.desdeanalisis.beneficio",
-                    "Beneficio estimado inicial: {0:C2} (editable antes de enviar).", new object[] { candidatas[0].BeneficioEstimado })
-                    + NotaCategoria(candidatas[0]);
-
-                var ok = new Button { Text = Tr("promocion.desdeanalisis.usar", "Usar esta idea"), DialogResult = DialogResult.OK, Dock = DockStyle.Right, Width = 150 };
-                var cancelar = new Button { Text = Tr("btn.cancelar", "Cancelar"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 100 };
-                var panel = new Panel { Dock = DockStyle.Bottom, Height = 40 };
-                panel.Controls.Add(ok);
-                panel.Controls.Add(cancelar);
-
-                dlg.Controls.Add(detalle);
-                dlg.Controls.Add(panel);
-                dlg.Controls.Add(lista);
-                dlg.AcceptButton = ok;
-                dlg.CancelButton = cancelar;
-
-                return dlg.ShowDialog(this) == DialogResult.OK ? lista.SelectedItem as BE.CandidataSugerencia : null;
-            }
+            // Paleta centralizada (GUI/Tema.cs).
+            btnEnviar.BackColor = Tema.Exito;
+            btnAnalizar.BackColor = Tema.RosaPrimario;
+            btnImprimirSugerencia.BackColor = Tema.RosaOscuro;
+            lblOrigen.ForeColor = Tema.TextoMuted;
+            lblSugerenciasTitulo.ForeColor = Tema.Tinta;
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -144,6 +57,7 @@ namespace GUI
         public void UpdateLanguage(Idioma idioma)
         {
             Traducir(idioma);
+            CargarSugerencias();
         }
 
         private void Traducir(Idioma idioma)
@@ -151,19 +65,30 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(idioma);
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
-            Aplicar(rbPlan,              t);
-            Aplicar(rbCategoria,         t);
-            Aplicar(lblTipoDescuento,    t);
-            Aplicar(lblBeneficioEstimado, t);
-            Aplicar(lblMotivo,           t);
-            Aplicar(btnEnviar,           t);
-            Aplicar(btnDesdeAnalisis, t);
+            foreach (Control c in Controls)
+                if (c.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                    c.Text = t[c.Tag.ToString()].Texto;
+            MostrarOrigen();
+            TraducirHeaders();
         }
 
-        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        private void MostrarOrigen()
         {
-            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
-                c.Text = t[c.Tag.ToString()].Texto;
+            lblOrigen.Text = Tr("promocion.origenactual", "Origen de la sugerencia: {0}", new object[] { Docs.Origen(_origen) });
+        }
+
+        private void TraducirHeaders()
+        {
+            void RH(string col, string clave, string fb)
+            {
+                if (dgvSugerencias.Columns.Contains(col)) dgvSugerencias.Columns[col].HeaderText = Tr(clave, fb);
+            }
+            RH("ID", "col.promo.id", "ID");
+            RH("Fecha", "col.promo.fecha", "Fecha");
+            RH("Aplica a", "col.promo.aplicaa", "Aplica a");
+            RH("Origen", "col.promo.origen", "Origen");
+            RH("Beneficio Est.", "col.promo.beneficioest", "Beneficio Est.");
+            RH("Estado", "col.promo.estado", "Estado");
         }
 
         private void SugerirPromocionForm_Load(object sender, EventArgs e)
@@ -177,6 +102,7 @@ namespace GUI
                 cmbTipoDescuento.DataSource = Enum.GetValues(typeof(BE.TipoDescuento));
             }
             catch (Exception ex) { MostrarError(ex); }
+            CargarSugerencias();
         }
 
         private void RbPlan_CheckedChanged(object sender, EventArgs e)
@@ -185,23 +111,175 @@ namespace GUI
             txtCategoria.Enabled = !rbPlan.Checked;
         }
 
+        // ── Analizar métricas → ¿Hay oportunidad? ────────────────────────────
+
+        private void BtnAnalizar_Click(object sender, EventArgs e)
+        {
+            BE.ReporteMetricas reporte;
+            try { reporte = analisisBLL.AnalizarMetricas(this.Text); }
+            catch (Exception ex) { MostrarError(ex); return; }
+
+            var elegida = MostrarReporte(reporte, analisisBLL.HayOportunidad(reporte));
+            if (!analisisBLL.HayOportunidad(reporte))
+            {
+                // ¿Hay oportunidad? No → fin "Sin promoción".
+                MostrarOk(Tr("msg.sugerencia.sinanalisis",
+                    "Los reportes de rotación y abandono no detectan casos para sugerir por ahora."));
+                return;
+            }
+            if (elegida == null) return;
+
+            // ¿Hay oportunidad? Sí → se precarga la sugerencia con el dato del reporte (editable).
+            if (elegida.IdPlan.HasValue)
+            {
+                rbPlan.Checked = true;
+                cmbPlan.SelectedValue = elegida.IdPlan.Value;
+            }
+            else
+            {
+                rbCategoria.Checked = true;
+                txtCategoria.Text = elegida.CategoriaPrenda;
+            }
+            cmbTipoDescuento.SelectedItem = elegida.TipoSugerido;
+            numBeneficioEstimado.Value = Math.Min(numBeneficioEstimado.Maximum, elegida.BeneficioEstimado);
+            txtMotivo.Text = elegida.Motivo;
+            _origen = elegida.Origen;
+            MostrarOrigen();
+        }
+
+        // «Reporte de métricas» en pantalla, con la lista de oportunidades para elegir y la opción de imprimirlo.
+        private BE.CandidataSugerencia MostrarReporte(BE.ReporteMetricas reporte, bool hayOportunidad)
+        {
+            using (var dlg = new Form
+            {
+                Text = Tr("doc.promo.reporte.titulo", "Reporte de métricas"),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                BackColor = Tema.Papel,
+                ClientSize = new System.Drawing.Size(640, 460)
+            })
+            {
+                var texto = new TextBox
+                {
+                    Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical,
+                    BackColor = Tema.Papel, ForeColor = Tema.Tinta, Text = Docs.ReporteMetricas(reporte).TextoPlano
+                };
+                var lista = new ListBox { Dock = DockStyle.Bottom, Height = 120, FormattingEnabled = true, Visible = hayOportunidad };
+                lista.Format += (s, ev) =>
+                {
+                    if (ev.ListItem is BE.CandidataSugerencia c)
+                        ev.Value = $"[{Docs.Origen(c.Origen)}] {Docs.AplicaA(c.IdPlan, c.NombrePlan, c.CategoriaPrenda)} — {c.BeneficioEstimado:C2}";
+                };
+                foreach (var c in reporte.Oportunidades) lista.Items.Add(c);
+                if (lista.Items.Count > 0) lista.SelectedIndex = 0;
+
+                var usar = new Button
+                {
+                    Text = Tr("promocion.desdeanalisis.usar", "Usar esta idea"), DialogResult = DialogResult.OK,
+                    Dock = DockStyle.Right, Width = 150, Visible = hayOportunidad,
+                    FlatStyle = FlatStyle.Flat, BackColor = Tema.Exito, ForeColor = System.Drawing.Color.White
+                };
+                var imprimir = new Button
+                {
+                    Text = Tr("promocion.btn.imprimirreporte", "Imprimir reporte"), Dock = DockStyle.Left, Width = 150,
+                    FlatStyle = FlatStyle.Flat, BackColor = Tema.RosaOscuro, ForeColor = System.Drawing.Color.White
+                };
+                imprimir.Click += (s, ev) =>
+                {
+                    try { Docs.Imprimir(Docs.ReporteMetricas(reporte), dlg); }
+                    catch (Exception ex) { MostrarError(ex); }
+                };
+                var cerrar = new Button { Text = Tr("btn.cerrar", "Cerrar"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 100 };
+                var panel = new Panel { Dock = DockStyle.Bottom, Height = 36, Padding = new Padding(4) };
+                panel.Controls.Add(usar);
+                panel.Controls.Add(cerrar);
+                panel.Controls.Add(imprimir);
+
+                dlg.Controls.Add(texto);
+                dlg.Controls.Add(lista);
+                dlg.Controls.Add(panel);
+                dlg.AcceptButton = hayOportunidad ? usar : null;
+                dlg.CancelButton = cerrar;
+
+                return dlg.ShowDialog(this) == DialogResult.OK ? lista.SelectedItem as BE.CandidataSugerencia : null;
+            }
+        }
+
+        // ── Registrar sugerencia ─────────────────────────────────────────────
+
         private void BtnEnviar_Click(object sender, EventArgs e)
         {
+            int id;
             try
             {
                 int? idPlan = rbPlan.Checked ? (int?)cmbPlan.SelectedValue : null;
                 string categoria = rbPlan.Checked ? null : txtCategoria.Text;
                 var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
-                decimal beneficio = numBeneficioEstimado.Value;
 
-                int id = sugerenciaBLL.Crear(this.Text, idPlan, categoria, txtMotivo.Text, tipo, beneficio);
-
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                MostrarOk(string.Format(
-                    t.ContainsKey("msg.sugerencia.enviada") ? t["msg.sugerencia.enviada"].Texto : "Sugerencia #{0} enviada a Administración.",
-                    id));
+                id = sugerenciaBLL.RegistrarSugerencia(this.Text, _origen, idPlan, categoria, txtMotivo.Text,
+                                                      tipo, numBeneficioEstimado.Value);
+                MostrarOk(Tr("msg.sugerencia.enviada", "Sugerencia #{0} enviada a Administración.", new object[] { id }));
                 txtMotivo.Clear();
+                _origen = BE.OrigenMetrica.Manual;
+                MostrarOrigen();
+                CargarSugerencias();
             }
+            catch (Exception ex) { MostrarError(ex); return; }
+
+            if (MessageBox.Show(Tr("conf.promo.imprimirsugerencia", "¿Imprimir la sugerencia de promoción?"), this.Text,
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+                Imprimir(sugerenciaBLL.ObtenerPorId(id));
+        }
+
+        // ── Sugerencias registradas ──────────────────────────────────────────
+
+        private void CargarSugerencias()
+        {
+            try
+            {
+                _sugerencias = sugerenciaBLL.ObtenerTodas();
+                var tabla = new DataTable();
+                tabla.Columns.Add("ID", typeof(int));
+                tabla.Columns.Add("Fecha", typeof(string));
+                tabla.Columns.Add("Aplica a", typeof(string));
+                tabla.Columns.Add("Origen", typeof(string));
+                tabla.Columns.Add("Beneficio Est.", typeof(decimal));
+                tabla.Columns.Add("Estado", typeof(string));
+                foreach (var s in _sugerencias)
+                    tabla.Rows.Add(s.IdSugerencia, s.FechaAlta.ToString("dd/MM/yyyy"),
+                        Docs.AplicaA(s.IdPlan, s.NombrePlan, s.CategoriaPrenda), Docs.Origen(s.OrigenMetrica),
+                        s.BeneficioEstimado, Docs.EstadoSugerencia(s.Estado));
+                dgvSugerencias.DataSource = tabla;
+                if (dgvSugerencias.Columns.Contains("ID")) dgvSugerencias.Columns["ID"].Width = 44;
+                TraducirHeaders();
+                dgvSugerencias.ClearSelection();
+                btnImprimirSugerencia.Enabled = false;
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        private BE.SugerenciaPromocion ObtenerSugerenciaSeleccionada()
+        {
+            if (dgvSugerencias.SelectedRows.Count == 0) return null;
+            int id = Convert.ToInt32(dgvSugerencias.SelectedRows[0].Cells["ID"].Value);
+            return _sugerencias.Find(s => s.IdSugerencia == id);
+        }
+
+        private void DgvSugerencias_SelectionChanged(object sender, EventArgs e)
+            => btnImprimirSugerencia.Enabled = ObtenerSugerenciaSeleccionada() != null;
+
+        private void BtnImprimirSugerencia_Click(object sender, EventArgs e)
+        {
+            var s = ObtenerSugerenciaSeleccionada();
+            if (s != null) Imprimir(s);
+        }
+
+        // La sugerencia descartada se imprime como «Constancia de descarte»; las demás, como «Sugerencia de promoción».
+        private void Imprimir(BE.SugerenciaPromocion s)
+        {
+            try { Docs.Imprimir(s.EstaDescartada() ? Docs.ConstanciaDescarteSugerencia(s) : Docs.Sugerencia(s), this); }
             catch (Exception ex) { MostrarError(ex); }
         }
     }

@@ -1,5 +1,5 @@
 {
- "bdHash": "48accba11ad2ec18ad6fc667af5712fb74691028",
+ "bdHash": "0335e70b92cfe2d26273e01daf745bea74628ba8",
  "cols": [
   {
    "tabla": "Bitacora",
@@ -977,6 +977,72 @@
    "len": 4,
    "prec": 10,
    "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "DictamenContable",
+   "ord": 1,
+   "col": "IdDictamen",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": true
+  },
+  {
+   "tabla": "DictamenContable",
+   "ord": 2,
+   "col": "IdPromocion",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "DictamenContable",
+   "ord": 3,
+   "col": "IdUsuario",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "DictamenContable",
+   "ord": 4,
+   "col": "Aprobada",
+   "tipo": "bit",
+   "len": 1,
+   "prec": 1,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "DictamenContable",
+   "ord": 5,
+   "col": "Observacion",
+   "tipo": "nvarchar",
+   "len": 1000,
+   "prec": 0,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "DictamenContable",
+   "ord": 6,
+   "col": "Fecha",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
    "nulo": false,
    "ident": false
   },
@@ -2676,28 +2742,6 @@
   },
   {
    "tabla": "Promocion",
-   "ord": 13,
-   "col": "Observacion",
-   "tipo": "nvarchar",
-   "len": 1000,
-   "prec": 0,
-   "sc": 0,
-   "nulo": true,
-   "ident": false
-  },
-  {
-   "tabla": "Promocion",
-   "ord": 14,
-   "col": "MotivoBaja",
-   "tipo": "nvarchar",
-   "len": 1000,
-   "prec": 0,
-   "sc": 0,
-   "nulo": true,
-   "ident": false
-  },
-  {
-   "tabla": "Promocion",
    "ord": 15,
    "col": "IdSugerenciaOrigen",
    "tipo": "int",
@@ -2716,6 +2760,94 @@
    "prec": 23,
    "sc": 3,
    "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "Promocion",
+   "ord": 17,
+   "col": "IdUsuarioAlta",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "PromocionHistorial",
+   "ord": 1,
+   "col": "IdHistorial",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": true
+  },
+  {
+   "tabla": "PromocionHistorial",
+   "ord": 2,
+   "col": "IdPromocion",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "PromocionHistorial",
+   "ord": 3,
+   "col": "EstadoAnterior",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "PromocionHistorial",
+   "ord": 4,
+   "col": "EstadoNuevo",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "PromocionHistorial",
+   "ord": 5,
+   "col": "IdUsuario",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "PromocionHistorial",
+   "ord": 6,
+   "col": "Fecha",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "PromocionHistorial",
+   "ord": 7,
+   "col": "Observacion",
+   "tipo": "nvarchar",
+   "len": 1000,
+   "prec": 0,
+   "sc": 0,
+   "nulo": true,
    "ident": false
   },
   {
@@ -2738,6 +2870,105 @@
    "prec": 10,
    "sc": 0,
    "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 1,
+   "col": "IdSolicitud",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": true
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 2,
+   "col": "IdPromocion",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 3,
+   "col": "IdUsuarioSolicita",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 4,
+   "col": "Motivo",
+   "tipo": "nvarchar",
+   "len": 1000,
+   "prec": 0,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 5,
+   "col": "FechaSolicitud",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 6,
+   "col": "Estado",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 7,
+   "col": "IdUsuarioResuelve",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 8,
+   "col": "MotivoResolucion",
+   "tipo": "nvarchar",
+   "len": 1000,
+   "prec": 0,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "ord": 9,
+   "col": "FechaResolucion",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
+   "nulo": true,
    "ident": false
   },
   {
@@ -2826,6 +3057,50 @@
    "prec": 23,
    "sc": 3,
    "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "SugerenciaPromocion",
+   "ord": 9,
+   "col": "OrigenMetrica",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "SugerenciaPromocion",
+   "ord": 10,
+   "col": "IdUsuarioAlta",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "SugerenciaPromocion",
+   "ord": 11,
+   "col": "MotivoDescarte",
+   "tipo": "nvarchar",
+   "len": 1000,
+   "prec": 0,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "SugerenciaPromocion",
+   "ord": 12,
+   "col": "FechaEvaluacion",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
+   "nulo": true,
    "ident": false
   },
   {
@@ -3233,12 +3508,8 @@
    "col": "IdPermiso"
   },
   {
-   "tabla": "PedidoFaltante",
-   "col": "IdPedido"
-  },
-  {
-   "tabla": "PedidoFaltante",
-   "col": "IdPrenda"
+   "tabla": "PromocionHistorial",
+   "col": "IdHistorial"
   },
   {
    "tabla": "PermisoRelacion",
@@ -3249,18 +3520,6 @@
    "col": "IdHijo"
   },
   {
-   "tabla": "PedidoFaltanteAlternativa",
-   "col": "IdPedido"
-  },
-  {
-   "tabla": "PedidoFaltanteAlternativa",
-   "col": "IdPrenda"
-  },
-  {
-   "tabla": "PedidoFaltanteAlternativa",
-   "col": "IdPrendaAlternativa"
-  },
-  {
    "tabla": "Traduccion",
    "col": "IdControl"
   },
@@ -3269,8 +3528,16 @@
    "col": "IdIdioma"
   },
   {
+   "tabla": "DictamenContable",
+   "col": "IdDictamen"
+  },
+  {
    "tabla": "HistorialUsuario",
    "col": "IdVersion"
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "col": "IdSolicitud"
   },
   {
    "tabla": "HistorialIntegridad",
@@ -3289,8 +3556,28 @@
    "col": "Clave"
   },
   {
+   "tabla": "PedidoFaltante",
+   "col": "IdPedido"
+  },
+  {
+   "tabla": "PedidoFaltante",
+   "col": "IdPrenda"
+  },
+  {
    "tabla": "ControlMapeado",
    "col": "IdControlMapeado"
+  },
+  {
+   "tabla": "PedidoFaltanteAlternativa",
+   "col": "IdPedido"
+  },
+  {
+   "tabla": "PedidoFaltanteAlternativa",
+   "col": "IdPrenda"
+  },
+  {
+   "tabla": "PedidoFaltanteAlternativa",
+   "col": "IdPrendaAlternativa"
   },
   {
    "tabla": "MantenimientoPrenda",
@@ -3453,20 +3740,6 @@
    "colpadre": "IdPlan"
   },
   {
-   "fk": "FK__Contratac__IdVen__55F4C372",
-   "hija": "Contratacion",
-   "colhija": "IdVendedor",
-   "padre": "Empleado",
-   "colpadre": "IdEmpleado"
-  },
-  {
-   "fk": "FK__Contratac__IdCaj__56E8E7AB",
-   "hija": "Contratacion",
-   "colhija": "IdCaja",
-   "padre": "Empleado",
-   "colpadre": "IdEmpleado"
-  },
-  {
    "fk": "FK_Contratacion_Promocion",
    "hija": "Contratacion",
    "colhija": "IdPromocion",
@@ -3486,6 +3759,20 @@
    "colhija": "IdReferenteAcreditado",
    "padre": "Cliente",
    "colpadre": "IdCliente"
+  },
+  {
+   "fk": "FK__Contratac__IdVen__55F4C372",
+   "hija": "Contratacion",
+   "colhija": "IdVendedor",
+   "padre": "Empleado",
+   "colpadre": "IdEmpleado"
+  },
+  {
+   "fk": "FK__Contratac__IdCaj__56E8E7AB",
+   "hija": "Contratacion",
+   "colhija": "IdCaja",
+   "padre": "Empleado",
+   "colpadre": "IdEmpleado"
   },
   {
    "fk": "FK_Contratacion_MedioPago",
@@ -3523,6 +3810,13 @@
    "colpadre": "IdPermiso"
   },
   {
+   "fk": "FK_DesistContr_Plan",
+   "hija": "DesistimientoContratacion",
+   "colhija": "IdPlan",
+   "padre": "PlanSuscripcion",
+   "colpadre": "IdPlan"
+  },
+  {
    "fk": "FK_DesistContr_Vendedor",
    "hija": "DesistimientoContratacion",
    "colhija": "IdVendedor",
@@ -3537,11 +3831,18 @@
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK_DesistContr_Plan",
-   "hija": "DesistimientoContratacion",
-   "colhija": "IdPlan",
-   "padre": "PlanSuscripcion",
-   "colpadre": "IdPlan"
+   "fk": "FK_DictamenContable_Usuario",
+   "hija": "DictamenContable",
+   "colhija": "IdUsuario",
+   "padre": "Usuario",
+   "colpadre": "IdUsuario"
+  },
+  {
+   "fk": "FK_DictamenContable_Promocion",
+   "hija": "DictamenContable",
+   "colhija": "IdPromocion",
+   "padre": "Promocion",
+   "colpadre": "IdPromocion"
   },
   {
    "fk": "FK__Empleado__IdUsua__72C60C4A",
@@ -3586,18 +3887,18 @@
    "colpadre": "IdUsuario"
   },
   {
-   "fk": "FK__ListaEspe__IdPre__4E53A1AA",
-   "hija": "ListaEspera",
-   "colhija": "IdPrenda",
-   "padre": "Prenda",
-   "colpadre": "IdPrenda"
-  },
-  {
    "fk": "FK__ListaEspe__IdCli__4F47C5E3",
    "hija": "ListaEspera",
    "colhija": "IdCliente",
    "padre": "Cliente",
    "colpadre": "IdCliente"
+  },
+  {
+   "fk": "FK__ListaEspe__IdPre__4E53A1AA",
+   "hija": "ListaEspera",
+   "colhija": "IdPrenda",
+   "padre": "Prenda",
+   "colpadre": "IdPrenda"
   },
   {
    "fk": "FK__Mantenimi__IdPre__3587F3E0",
@@ -3656,7 +3957,7 @@
    "colpadre": "IdPrenda"
   },
   {
-   "fk": "FK__PedidoFal__IdPre__18B6AB08",
+   "fk": "FK__PedidoFal__IdPre__345EC57D",
    "hija": "PedidoFaltanteAlternativa",
    "colhija": "IdPrendaAlternativa",
    "padre": "Prenda",
@@ -3712,16 +4013,16 @@
    "colpadre": "IdUsuario"
   },
   {
-   "fk": "FK__Prenda__IdUltimo__45BE5BA9",
+   "fk": "FK__Prenda__IdClient__7B5B524B",
    "hija": "Prenda",
-   "colhija": "IdUltimoCliente",
+   "colhija": "IdClienteActual",
    "padre": "Cliente",
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK__Prenda__IdClient__7B5B524B",
+   "fk": "FK__Prenda__IdUltimo__45BE5BA9",
    "hija": "Prenda",
-   "colhija": "IdClienteActual",
+   "colhija": "IdUltimoCliente",
    "padre": "Cliente",
    "colpadre": "IdCliente"
   },
@@ -3740,11 +4041,60 @@
    "colpadre": "IdSugerencia"
   },
   {
+   "fk": "FK_Promocion_UsuarioAlta",
+   "hija": "Promocion",
+   "colhija": "IdUsuarioAlta",
+   "padre": "Usuario",
+   "colpadre": "IdUsuario"
+  },
+  {
+   "fk": "FK_PromocionHistorial_Usuario",
+   "hija": "PromocionHistorial",
+   "colhija": "IdUsuario",
+   "padre": "Usuario",
+   "colpadre": "IdUsuario"
+  },
+  {
+   "fk": "FK_PromocionHistorial_Promocion",
+   "hija": "PromocionHistorial",
+   "colhija": "IdPromocion",
+   "padre": "Promocion",
+   "colpadre": "IdPromocion"
+  },
+  {
    "fk": "FK__RolPermis__IdPer__14270015",
    "hija": "RolPermiso",
    "colhija": "IdPermiso",
    "padre": "Permiso",
    "colpadre": "IdPermiso"
+  },
+  {
+   "fk": "FK_SolicitudBaja_Promocion",
+   "hija": "SolicitudBajaPromocion",
+   "colhija": "IdPromocion",
+   "padre": "Promocion",
+   "colpadre": "IdPromocion"
+  },
+  {
+   "fk": "FK_SolicitudBaja_Solicita",
+   "hija": "SolicitudBajaPromocion",
+   "colhija": "IdUsuarioSolicita",
+   "padre": "Usuario",
+   "colpadre": "IdUsuario"
+  },
+  {
+   "fk": "FK_SolicitudBaja_Resuelve",
+   "hija": "SolicitudBajaPromocion",
+   "colhija": "IdUsuarioResuelve",
+   "padre": "Usuario",
+   "colpadre": "IdUsuario"
+  },
+  {
+   "fk": "FK_SugerenciaPromocion_UsuarioAlta",
+   "hija": "SugerenciaPromocion",
+   "colhija": "IdUsuarioAlta",
+   "padre": "Usuario",
+   "colpadre": "IdUsuario"
   },
   {
    "fk": "FK__Sugerenci__IdPla__5D95E53A",

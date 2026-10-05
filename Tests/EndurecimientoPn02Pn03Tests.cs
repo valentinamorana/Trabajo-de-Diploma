@@ -292,18 +292,18 @@ namespace Tests
         }
 
         [TestMethod]
-        public void CrearDesdeSugerencia_FallaLaValidacion_DevuelveLaSugerenciaAPendiente()
+        public void CrearDesdeSugerencia_FallaLaValidacion_NoReclamaLaSugerencia()
         {
             LoginComoAdministrador();
             var ctx = new CtxPromo();
             ctx.DalSugerencia.SugerenciaPorId = Sugerencia(BE.EstadoSugerencia.Pendiente);
 
-            // porcentaje mayor a 100: la creación falla DESPUÉS de reclamar la sugerencia
+            // porcentaje mayor a 100: "Validar" falla ANTES de reclamar la sugerencia, que sigue Pendiente
             EsperarError(() => ctx.Crear().CrearDesdeSugerencia("Test", 5, "P", "d", BE.TipoDescuento.Porcentaje, 150m,
                 DateTime.Today, DateTime.Today.AddDays(5), 1m, "i"), "err.bll.promocion.porcentaje_invalido");
 
-            Assert.AreEqual(1, ctx.DalSugerencia.MarcarEvaluadaVeces);
-            Assert.AreEqual(1, ctx.DalSugerencia.ReabrirEvaluacionVeces, "La sugerencia debe poder reintentarse.");
+            Assert.AreEqual(0, ctx.DalSugerencia.MarcarEvaluadaVeces, "No se reclama una sugerencia para una promoción inválida.");
+            Assert.AreEqual(0, ctx.DalSugerencia.ReabrirEvaluacionVeces);
             Assert.AreEqual(0, ctx.DalPromocion.AltaVeces);
         }
 
@@ -312,20 +312,20 @@ namespace Tests
         {
             LoginComoAdministrador();
             var ctx = new CtxPromo();
-            ctx.DalPromocion.CambiarEstadoResultado = false;
+            ctx.DalPromocion.ClaimResultado = false;
 
             EsperarError(() => ctx.Crear().AprobarContable("Test", Promo(BE.EstadoPromocion.EnRevisionContable), "ok"),
                 "err.bll.promocion.estado_concurrente");
         }
 
         [TestMethod]
-        public void SugerirBaja_OtraSesionYaCambioElEstado_LanzaEstadoConcurrente()
+        public void SolicitarBaja_OtraSesionYaCambioElEstado_LanzaEstadoConcurrente()
         {
             LoginComoAdministrador();
             var ctx = new CtxPromo();
-            ctx.DalPromocion.CambiarEstadoResultado = false;
+            ctx.DalPromocion.ClaimResultado = false;
 
-            EsperarError(() => ctx.Crear().SugerirBaja("Test", Promo(BE.EstadoPromocion.Vigente), "motivo"),
+            EsperarError(() => ctx.Crear().SolicitarBaja("Test", Promo(BE.EstadoPromocion.Vigente), "motivo"),
                 "err.bll.promocion.estado_concurrente");
         }
 
@@ -339,11 +339,11 @@ namespace Tests
 
             ctx.Crear().Reformular("Test", promo);
 
-            Assert.AreEqual(1, ctx.DalPromocion.CambiarEstadoVeces);
-            Assert.AreEqual(BE.EstadoPromocion.RechazadaContabilidad, ctx.DalPromocion.UltimoEstadoEsperado);
-            Assert.AreEqual(BE.EstadoPromocion.EnRevisionContable, ctx.DalPromocion.UltimoNuevoEstado);
-            Assert.AreEqual(1, ctx.DalPromocion.ModificarVeces);
-            Assert.AreEqual(15m, ctx.DalPromocion.UltimoModificar.Valor);
+            Assert.AreEqual(1, ctx.DalPromocion.ReformularVeces);
+            Assert.AreEqual(15m, ctx.DalPromocion.UltimoReformular.Valor);
+            Assert.AreEqual(BE.EstadoPromocion.EnRevisionContable, promo.Estado);
+            Assert.AreEqual(BE.EstadoPromocion.RechazadaContabilidad, ctx.DalPromocion.Historial[0].EstadoAnterior);
+            Assert.AreEqual(BE.EstadoPromocion.EnRevisionContable, ctx.DalPromocion.Historial[0].EstadoNuevo);
         }
 
         [TestMethod]
@@ -354,7 +354,7 @@ namespace Tests
 
             EsperarError(() => ctx.Crear().Reformular("Test", Promo(BE.EstadoPromocion.Vigente)),
                 "err.bll.promocion.reformular_estado");
-            Assert.AreEqual(0, ctx.DalPromocion.CambiarEstadoVeces);
+            Assert.AreEqual(0, ctx.DalPromocion.Transiciones);
         }
 
         [TestMethod]
@@ -366,8 +366,8 @@ namespace Tests
             promo.Valor = 150;   // porcentaje > 100
 
             EsperarError(() => ctx.Crear().Reformular("Test", promo), "err.bll.promocion.porcentaje_invalido");
-            Assert.AreEqual(0, ctx.DalPromocion.CambiarEstadoVeces);
-            Assert.AreEqual(0, ctx.DalPromocion.ModificarVeces);
+            Assert.AreEqual(0, ctx.DalPromocion.Transiciones);
+            Assert.AreEqual(0, ctx.DalPromocion.ReformularVeces);
         }
 
         // ── N01/PN02: acreditación del beneficio por referido al activar la suscripción ────

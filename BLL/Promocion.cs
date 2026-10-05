@@ -1,12 +1,40 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
     /// <summary>
     /// Lógica de negocio para PN03 — Métricas, promociones y toma de decisiones.
-    /// Administración crea/gestiona, Contabilidad aprueba o rechaza, Vendedor puede sugerir la
-    /// baja de una promoción vigente y Administración resuelve esa solicitud.
+    ///
+    /// Cada método público corresponde a una actividad del diagrama de actividad aprobado de PN03
+    /// (carriles Gerencia, Administración, Contabilidad y Vendedor) y cada decisión tiene su guarda:
+    ///
+    ///   Gerencia        Analizar métricas («Reporte de métricas») ........ AnalisisPromociones.AnalizarMetricas
+    ///                   ¿Hay oportunidad? (No → fin "Sin promoción") ..... AnalisisPromociones.HayOportunidad
+    ///                   Registrar sugerencia («Sugerencia de promoción») . SugerenciaPromocion.RegistrarSugerencia
+    ///   Administración  ¿Acepta la sugerencia? (guarda: Pendiente) ....... BE.SugerenciaPromocion.PuedeEvaluarse
+    ///                     No → Descartar sugerencia ...................... SugerenciaPromocion.DescartarSugerencia
+    ///                     Sí → Crear promoción desde la sugerencia ....... CrearDesdeSugerencia
+    ///                   Crear promoción manual ........................... CrearManual
+    ///   Sistema         Validar → EnRevisionContable («Ficha») ........... ValidarPromocion
+    ///   Contabilidad    Analizar margen e impacto ........................ AnalizarMargenEImpacto
+    ///                   ¿Aprueba? (guarda: el creador no dictamina) ...... PuedeDictaminar
+    ///                     Sí → Vigente («Dictamen contable») ............. AprobarContable
+    ///                     No → RechazadaContabilidad («Dictamen») ........ RechazarContable
+    ///   Administración  ¿Reformular? (guarda: RechazadaContabilidad) ..... BE.Promocion.PuedeReformularse
+    ///                     Sí → Reformular (vuelve a Validar) ............. Reformular
+    ///                     No → Descartar promoción ....................... DescartarPromocion
+    ///   Vigencia        (a) Vendedor solicita la baja («Solicitud») ...... SolicitarBaja
+    ///                       ¿Aprueba la baja? (guarda: BajaSolicitada) ... BE.Promocion.PuedeResolverseBaja
+    ///                         Sí → Desactivada («Resolución de baja») .... AprobarBaja
+    ///                         No → Vigente («Resolución de baja») ........ RechazarBaja
+    ///                   (b) Administración desactiva directamente ........ Desactivar
+    ///                   (c) Llega la FechaFin → Vencida .................. CerrarVencidas
+    ///
+    /// Cada transición es un claim atómico en el DAL (UPDATE ... WHERE Estado = esperado) que inserta,
+    /// en la misma transacción, su fila de PromocionHistorial. Quien crea la promoción no puede
+    /// dictaminarla (separación de funciones), sin excepción para el Administrador.
     /// </summary>
     public class Promocion : Interfaces.IPromocionService
     {
@@ -15,6 +43,8 @@ namespace BLL
         private readonly DAL.Interfaces.IPlanSuscripcionDAL     dalPlan;
         private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
+
+        private const string ModuloPromociones = "Promociones";
 
         public Promocion() : this(new DAL.Promocion(), new DAL.SugerenciaPromocion(), new DAL.PlanSuscripcion()) { }
 
@@ -26,40 +56,81 @@ namespace BLL
             this.dalPlan       = dalPlan       ?? throw new ArgumentNullException(nameof(dalPlan));
         }
 
-        public List<BE.Promocion> ObtenerTodas() => dalPromocion.ObtenerTodas();
-        public List<BE.Promocion> ObtenerVigentes() => dalPromocion.ObtenerVigentes();
+        // ══════════════════════════════════════════════════════════════════════
+        // Consultas (antes de listar se cierran las vencidas: evento (c))
+        // ══════════════════════════════════════════════════════════════════════
+
+        public List<BE.Promocion> ObtenerTodas()
+        {
+            CerrarVencidasSinFallar();
+            return dalPromocion.ObtenerTodas();
+        }
+
+        // Las que aplican hoy en el cobro (Vigente y dentro de sus fechas).
+        public List<BE.Promocion> ObtenerVigentes()
+        {
+            CerrarVencidasSinFallar();
+            return dalPromocion.ObtenerVigentes();
+        }
+
+        // Pantalla de Ventas: las Vigentes (puede pedir la baja) y las que tienen la baja pedida.
+        public List<BE.Promocion> ObtenerParaVentas()
+        {
+            CerrarVencidasSinFallar();
+            return dalPromocion.ObtenerTodas()
+                .Where(p => p.Estado == BE.EstadoPromocion.Vigente || p.Estado == BE.EstadoPromocion.BajaSolicitada)
+                .OrderBy(p => p.FechaFin).ToList();
+        }
+
         public List<BE.Promocion> ObtenerPendientesRevisionContable() => dalPromocion.ObtenerPendientesRevisionContable();
         public BE.Promocion ObtenerPorId(int idPromocion) => dalPromocion.ObtenerPorId(idPromocion);
+        public List<BE.PromocionHistorial> ObtenerHistorial(int idPromocion) => dalPromocion.ObtenerHistorial(idPromocion);
+        public List<BE.DictamenContable> ObtenerDictamenes(int idPromocion) => dalPromocion.ObtenerDictamenes(idPromocion);
+        public List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBaja(int idPromocion) => dalPromocion.ObtenerSolicitudesBaja(idPromocion);
 
-        // CU-ADM-Gestionar Promociones (a partir de una sugerencia de Gerencia).
+        public BE.DictamenContable ObtenerUltimoDictamen(int idPromocion) =>
+            dalPromocion.ObtenerDictamenes(idPromocion).OrderBy(d => d.Fecha).ThenBy(d => d.IdDictamen).LastOrDefault();
+
+        public BE.SolicitudBajaPromocion ObtenerUltimaSolicitudBaja(int idPromocion) =>
+            dalPromocion.ObtenerSolicitudesBaja(idPromocion).OrderBy(s => s.FechaSolicitud).ThenBy(s => s.IdSolicitud).LastOrDefault();
+
+        // Transición a Descartada (motivo y quién): base de la «Constancia de descarte».
+        public BE.PromocionHistorial ObtenerDescarte(int idPromocion) =>
+            dalPromocion.ObtenerHistorial(idPromocion).LastOrDefault(h => h.EstadoNuevo == BE.EstadoPromocion.Descartada);
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Administración: Crear promoción (desde sugerencia / manual) → Validar
+        // ══════════════════════════════════════════════════════════════════════
+
+        // "¿Acepta la sugerencia? Sí → Crear promoción" desde la sugerencia de Gerencia.
         public int CrearDesdeSugerencia(string modulo, int idSugerencia, string nombre, string descripcion,
                                          BE.TipoDescuento tipo, decimal valor, DateTime fechaInicio, DateTime fechaFin,
                                          decimal margenEstimado, string impactoEconomico)
         {
             PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
 
-            var sugerencia = dalSugerencia.ObtenerPorId(idSugerencia);
-            if (sugerencia == null)
-                throw new BE.AppException("err.bll.promocion.sugerencia_inexistente",
+            var sugerencia = dalSugerencia.ObtenerPorId(idSugerencia)
+                ?? throw new BE.AppException("err.bll.promocion.sugerencia_inexistente",
                     "La sugerencia seleccionada no existe.");
 
-            // CU01-ADM flujo 2.1: la sugerencia ya fue evaluada (otra sesión, o esta misma antes): no
-            // se puede reutilizar para crear otra promoción.
-            if (sugerencia.Estado != BE.EstadoSugerencia.Pendiente)
+            // Guarda de "¿Acepta la sugerencia?": solo una sugerencia Pendiente se acepta o descarta.
+            if (!sugerencia.PuedeEvaluarse() || !sugerencia.TransicionValida(BE.EstadoSugerencia.Evaluada))
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
                     "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
 
-            // Reclamo atómico (UPDATE ... WHERE Estado = Pendiente): dos administradores que abren la misma
-            // sugerencia no pueden crear dos promociones. Si la creación falla (validación, BD), se
-            // compensa devolviendo la sugerencia a Pendiente para que pueda reintentarse.
-            if (!dalSugerencia.MarcarEvaluada(idSugerencia))
+            var promocion = Armar(nombre, descripcion, tipo, valor, fechaInicio, fechaFin,
+                sugerencia.IdPlan, sugerencia.CategoriaPrenda, margenEstimado, impactoEconomico);
+            promocion.IdSugerenciaOrigen = idSugerencia;
+            ValidarPromocion(promocion);
+
+            // Claim atómico de la sugerencia: dos administradores no crean dos promociones con ella.
+            // Si el alta falla, se compensa devolviéndola a Pendiente para que pueda reintentarse.
+            if (!dalSugerencia.MarcarEvaluada(idSugerencia, DateTime.Now))
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
                     "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
-
             try
             {
-                return CrearInterna(modulo, nombre, descripcion, tipo, valor, fechaInicio, fechaFin,
-                    sugerencia.IdPlan, sugerencia.CategoriaPrenda, margenEstimado, impactoEconomico, idSugerencia);
+                return Registrar(modulo, promocion, $"Alta desde la sugerencia #{idSugerencia}");
             }
             catch
             {
@@ -69,61 +140,56 @@ namespace BLL
             }
         }
 
-        // CU-ADM-Gestionar Promociones (manual, sin sugerencia previa).
+        // "Crear promoción" manual, sin sugerencia previa.
         public int CrearManual(string modulo, string nombre, string descripcion, BE.TipoDescuento tipo, decimal valor,
                                 DateTime fechaInicio, DateTime fechaFin, int? idPlan, string categoriaPrenda,
                                 decimal margenEstimado, string impactoEconomico)
         {
             PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
-
-            return CrearInterna(modulo, nombre, descripcion, tipo, valor, fechaInicio, fechaFin,
-                idPlan, categoriaPrenda, margenEstimado, impactoEconomico, idSugerenciaOrigen: null);
+            var promocion = Armar(nombre, descripcion, tipo, valor, fechaInicio, fechaFin,
+                idPlan, categoriaPrenda, margenEstimado, impactoEconomico);
+            ValidarPromocion(promocion);
+            return Registrar(modulo, promocion, "Alta manual");
         }
 
-        // Validación común a CrearInterna y Modificar (antes duplicada entre las dos, con riesgo de
-        // que una cambiara un umbral/regla y la otra quedara desincronizada). No muta nada — solo
-        // valida y lanza; el caller decide qué hacer con los valores ya validados.
-        private void ValidarCamposComunes(string nombre, int? idPlan, string categoriaPrenda,
-                                           decimal valor, BE.TipoDescuento tipo, DateTime fechaInicio, DateTime fechaFin)
+        // "Validar": destino único (plan o categoría), plan existente, valor y fechas. No muta nada.
+        public void ValidarPromocion(BE.Promocion promocion)
         {
-            bool aplicaPlan = idPlan.HasValue;
-            bool aplicaCategoria = !string.IsNullOrWhiteSpace(categoriaPrenda);
+            if (promocion == null) throw new ArgumentNullException(nameof(promocion));
 
-            if (string.IsNullOrWhiteSpace(nombre))
+            if (string.IsNullOrWhiteSpace(promocion.Nombre))
                 throw new BE.AppException("err.bll.promocion.nombre_requerido",
                     "El nombre de la promoción es obligatorio.");
 
-            if (aplicaPlan == aplicaCategoria)
+            if (promocion.AplicaAPlan() == promocion.AplicaACategoria())
                 throw new BE.AppException("err.bll.promocion.destino_invalido",
                     "La promoción debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.");
 
-            if (aplicaPlan && dalPlan.ObtenerPorId(idPlan.Value) == null)
+            if (promocion.AplicaAPlan() && dalPlan.ObtenerPorId(promocion.IdPlan.Value) == null)
                 throw new BE.AppException("err.bll.promocion.plan_inexistente",
                     "El plan seleccionado no existe.");
 
-            if (valor <= 0)
+            if (promocion.Valor <= 0)
                 throw new BE.AppException("err.bll.promocion.valor_invalido",
                     "El beneficio de la promoción debe ser mayor a cero.");
 
-            if (tipo == BE.TipoDescuento.Porcentaje && valor > 100)
+            if (promocion.TipoDescuento == BE.TipoDescuento.Porcentaje && promocion.Valor > 100)
                 throw new BE.AppException("err.bll.promocion.porcentaje_invalido",
                     "Un descuento por porcentaje no puede superar el 100%.");
 
-            if (fechaFin.Date < fechaInicio.Date)
+            if (promocion.FechaFin.Date < promocion.FechaInicio.Date)
                 throw new BE.AppException("err.bll.promocion.rango_fechas_invalido",
                     "La fecha de fin no puede ser anterior a la fecha de inicio.");
         }
 
-        private int CrearInterna(string modulo, string nombre, string descripcion, BE.TipoDescuento tipo, decimal valor,
-                                  DateTime fechaInicio, DateTime fechaFin, int? idPlan, string categoriaPrenda,
-                                  decimal margenEstimado, string impactoEconomico, int? idSugerenciaOrigen)
+        private static BE.Promocion Armar(string nombre, string descripcion, BE.TipoDescuento tipo, decimal valor,
+                                          DateTime fechaInicio, DateTime fechaFin, int? idPlan, string categoriaPrenda,
+                                          decimal margenEstimado, string impactoEconomico)
         {
             bool aplicaCategoria = !string.IsNullOrWhiteSpace(categoriaPrenda);
-            ValidarCamposComunes(nombre, idPlan, categoriaPrenda, valor, tipo, fechaInicio, fechaFin);
-
-            var promocion = new BE.Promocion
+            return new BE.Promocion
             {
-                Nombre = nombre.Trim(),
+                Nombre = nombre?.Trim(),
                 Descripcion = descripcion?.Trim(),
                 TipoDescuento = tipo,
                 Valor = valor,
@@ -133,204 +199,330 @@ namespace BLL
                 IdPlan = idPlan,
                 CategoriaPrenda = aplicaCategoria ? categoriaPrenda.Trim() : null,
                 MargenEstimado = margenEstimado,
-                ImpactoEconomico = impactoEconomico?.Trim(),
-                IdSugerenciaOrigen = idSugerenciaOrigen,
-                FechaAlta = DateTime.Now
+                ImpactoEconomico = impactoEconomico?.Trim()
             };
+        }
 
-            int idNuevo = dalPromocion.Alta(promocion);
+        // Alta validada → EnRevisionContable («Ficha de promoción») + historial (sin estado anterior).
+        private int Registrar(string modulo, BE.Promocion promocion, string observacion)
+        {
+            int idUsuario = BLLHelper.ResolverUsuarioActivo();
+            promocion.IdUsuarioAlta = idUsuario;
+            promocion.FechaAlta = DateTime.Now;
+            int idNuevo = dalPromocion.Alta(promocion,
+                Historial(0, null, BE.EstadoPromocion.EnRevisionContable, idUsuario, observacion));
+            promocion.IdPromocion = idNuevo;
 
-            bitacora.Registrar(modulo, $"Alta Promoción #{idNuevo}: {promocion.Nombre}", BE.Criticidad.Media);
+            bitacora.Registrar(modulo, $"Alta Promoción #{idNuevo}: {promocion.Nombre} — {observacion}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
                 $"Promoción #{idNuevo} '{promocion.Nombre}' registrada, pendiente de revisión contable");
-
             return idNuevo;
         }
 
-        public void Modificar(string modulo, BE.Promocion promocion)
+        // ══════════════════════════════════════════════════════════════════════
+        // Contabilidad: Analizar margen e impacto → ¿Aprueba?
+        // ══════════════════════════════════════════════════════════════════════
+
+        // "Analizar margen e impacto": beneficio estimado de la sugerencia (si la hay) y las otras
+        // promociones Vigentes del mismo plan que se superponen en fechas (advertencia).
+        public BE.AnalisisImpactoPromocion AnalizarMargenEImpacto(int idPromocion)
         {
-            PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
+            PermisosAccion.Exigir(BE.Patentes.PromocionesContable, BE.Patentes.PromocionesContable);
 
-            // Guarda de estado que faltaba (a diferencia de Desactivar/AprobarContable/etc., todos
-            // con su Puede...() antes de mutar): sin esto se podía modificar precio/fechas/tipo de
-            // descuento de una promoción ya Vigente (aprobada por Contabilidad) o Desactivada sin
-            // pasar de nuevo por revisión contable. Mismo estado que exige AprobarContable/
-            // RechazarContable — modificar solo tiene sentido mientras todavía está en revisión.
-            if (!promocion.PuedeAprobarseORechazarseContable())
-                throw new BE.AppException("err.bll.promocion.modificar_estado",
-                    "Solo se puede modificar una promoción mientras está en revisión contable. Estado actual: '{0}'.",
-                    promocion.Estado);
+            var promocion = dalPromocion.ObtenerPorId(idPromocion)
+                ?? throw new BE.AppException("err.bll.promocion.inexistente", "La promoción ya no existe.");
 
-            bool aplicaCategoria = !string.IsNullOrWhiteSpace(promocion.CategoriaPrenda);
-            ValidarCamposComunes(promocion.Nombre, promocion.IdPlan, promocion.CategoriaPrenda,
-                promocion.Valor, promocion.TipoDescuento, promocion.FechaInicio, promocion.FechaFin);
-
-            promocion.CategoriaPrenda = aplicaCategoria ? promocion.CategoriaPrenda.Trim() : null;
-            promocion.Nombre = promocion.Nombre.Trim();
-
-            // El UPDATE exige que siga en revisión contable: si otra sesión la aprobó o rechazó mientras tanto, no se pisa.
-            if (!dalPromocion.Modificar(promocion))
-                throw EstadoConcurrente();
-
-            bitacora.Registrar(modulo, $"Modificar Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
+            var analisis = new BE.AnalisisImpactoPromocion
+            {
+                Promocion = promocion,
+                UsuarioPuedeDictaminar = PuedeDictaminar(promocion),
+                Superpuestas = dalPromocion.ObtenerTodas().Where(promocion.SeSuperponeCon).ToList()
+            };
+            if (promocion.IdSugerenciaOrigen.HasValue)
+            {
+                var sugerencia = dalSugerencia.ObtenerPorId(promocion.IdSugerenciaOrigen.Value);
+                analisis.BeneficioEstimadoSugerencia = sugerencia?.BeneficioEstimado;
+                analisis.OrigenSugerencia = sugerencia?.OrigenMetrica;
+            }
+            return analisis;
         }
 
-        // CU01-ADM (PN03): una promoción Rechazada por Contabilidad vuelve a Administración para
-        // REFORMULARSE: se corrigen sus condiciones y vuelve a la cola de revisión contable. Conserva la
-        // observación de Contabilidad (queda como referencia de qué había que corregir).
+        // Guarda de "¿Aprueba?": quien creó la promoción no puede dictaminarla (separación de
+        // funciones; se aplica a todos los usuarios, también al Administrador).
+        public bool PuedeDictaminar(BE.Promocion promocion)
+        {
+            if (promocion == null || !Seguridad.SessionManager.IsLoggedIn) return false;
+            return promocion.PuedeDictaminarla(Seguridad.SessionManager.GetInstance().Usuario.Id);
+        }
+
+        // "¿Aprueba? Sí" → Vigente + «Dictamen contable».
+        public int AprobarContable(string modulo, BE.Promocion promocion, string observacion)
+        {
+            int id = Dictaminar(promocion, observacion, aprobada: true);
+            bitacora.Registrar(modulo, $"Aprobar Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
+                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' aprobada por Contabilidad y ya está Vigente");
+            return id;
+        }
+
+        // "¿Aprueba? No" → RechazadaContabilidad + «Dictamen contable» (vuelve a Administración).
+        public int RechazarContable(string modulo, BE.Promocion promocion, string observacion)
+        {
+            int id = Dictaminar(promocion, observacion, aprobada: false);
+            bitacora.Registrar(modulo, $"Rechazar Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
+                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' rechazada por Contabilidad: {observacion}");
+            return id;
+        }
+
+        private int Dictaminar(BE.Promocion promocion, string observacion, bool aprobada)
+        {
+            PermisosAccion.Exigir(BE.Patentes.PromocionesContableEditar, BE.Patentes.PromocionesContable);
+            var destino = aprobada ? BE.EstadoPromocion.Vigente : BE.EstadoPromocion.RechazadaContabilidad;
+
+            if (!promocion.PuedeAprobarseORechazarseContable() || !promocion.TransicionValida(destino))
+                throw new BE.AppException("err.bll.promocion.revisioncontable_estado",
+                    "Solo se pueden aprobar o rechazar promociones En Revisión Contable. Esta promoción está '{0}'.",
+                    promocion.Estado);
+            if (!PuedeDictaminar(promocion))
+                throw new BE.AppException("err.bll.promocion.creador_no_dictamina",
+                    "Quien creó la promoción no puede dictaminarla: la tiene que analizar otro usuario de Contabilidad.");
+            ExigirTexto(observacion, "err.bll.promocion.observacion_requerida",
+                "Debe ingresar una observación para esta decisión.");
+
+            int idUsuario = BLLHelper.ResolverUsuarioActivo();
+            var dictamen = new BE.DictamenContable
+            {
+                IdPromocion = promocion.IdPromocion,
+                IdUsuario = idUsuario,
+                Aprobada = aprobada,
+                Observacion = observacion.Trim(),
+                Fecha = DateTime.Now
+            };
+            int idDictamen = dalPromocion.Dictaminar(dictamen,
+                Historial(promocion.IdPromocion, BE.EstadoPromocion.EnRevisionContable, destino, idUsuario, dictamen.Observacion));
+            if (idDictamen <= 0) throw EstadoConcurrente();
+            promocion.Estado = destino;
+            return idDictamen;
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Administración: ¿Reformular?
+        // ══════════════════════════════════════════════════════════════════════
+
+        // "¿Reformular? Sí": se corrigen las condiciones y vuelve a Validar → EnRevisionContable.
         public void Reformular(string modulo, BE.Promocion promocion)
         {
             PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
 
-            if (!promocion.PuedeReformularse())
+            if (!promocion.PuedeReformularse() || !promocion.TransicionValida(BE.EstadoPromocion.EnRevisionContable))
                 throw new BE.AppException("err.bll.promocion.reformular_estado",
                     "Solo se puede reformular una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.",
                     promocion.Estado);
 
-            bool aplicaCategoria = !string.IsNullOrWhiteSpace(promocion.CategoriaPrenda);
-            ValidarCamposComunes(promocion.Nombre, promocion.IdPlan, promocion.CategoriaPrenda,
-                promocion.Valor, promocion.TipoDescuento, promocion.FechaInicio, promocion.FechaFin);
+            promocion.Nombre = promocion.Nombre?.Trim();
+            promocion.CategoriaPrenda = promocion.AplicaACategoria() ? promocion.CategoriaPrenda.Trim() : null;
+            promocion.FechaInicio = promocion.FechaInicio.Date;
+            promocion.FechaFin = promocion.FechaFin.Date;
+            ValidarPromocion(promocion);
 
-            promocion.CategoriaPrenda = aplicaCategoria ? promocion.CategoriaPrenda.Trim() : null;
-            promocion.Nombre = promocion.Nombre.Trim();
-
-            // Primero se reclama el cambio de estado (UPDATE condicionado a Rechazada) y recién después
-            // se guardan las condiciones nuevas, así dos sesiones no pisan la reformulación de la otra.
-            CambiarEstadoOFalla(promocion, BE.EstadoPromocion.EnRevisionContable, null);
-            if (!dalPromocion.Modificar(promocion))
+            int idUsuario = BLLHelper.ResolverUsuarioActivo();
+            if (!dalPromocion.Reformular(promocion, Historial(promocion.IdPromocion, BE.EstadoPromocion.RechazadaContabilidad,
+                    BE.EstadoPromocion.EnRevisionContable, idUsuario, "Reformulada tras el rechazo contable")))
                 throw EstadoConcurrente();
+            promocion.Estado = BE.EstadoPromocion.EnRevisionContable;
 
             bitacora.Registrar(modulo, $"Reformular Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
                 $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' reformulada por Administración: vuelve a revisión contable");
         }
 
-        // Cambia el estado con UPDATE condicionado al estado que tenía la promoción al leerla.
-        private void CambiarEstadoOFalla(BE.Promocion promocion, BE.EstadoPromocion nuevo, string observacionOMotivo)
+        // "¿Reformular? No → Descartar promoción" (motivo obligatorio) → Descartada (fin).
+        public void DescartarPromocion(string modulo, BE.Promocion promocion, string motivo)
         {
-            if (!dalPromocion.CambiarEstado(promocion.IdPromocion, promocion.Estado, nuevo, observacionOMotivo))
-                throw EstadoConcurrente();
+            PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
+
+            if (!promocion.PuedeDescartarse() || !promocion.TransicionValida(BE.EstadoPromocion.Descartada))
+                throw new BE.AppException("err.bll.promocion.descartar_estado",
+                    "Solo se puede descartar una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.",
+                    promocion.Estado);
+            ExigirTexto(motivo, "err.bll.promocion.motivodescarte_requerido",
+                "Debe indicar el motivo por el que se descarta la promoción.");
+
+            Transicionar(promocion, BE.EstadoPromocion.Descartada, motivo.Trim());
+
+            bitacora.Registrar(modulo, $"Descartar Promoción #{promocion.IdPromocion}: {promocion.Nombre} — Motivo: {motivo.Trim()}",
+                BE.Criticidad.Media);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
+                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' descartada por Administración tras el rechazo contable: {motivo.Trim()}");
         }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Vigencia: región interrumpible
+        // ══════════════════════════════════════════════════════════════════════
+
+        // (a) "Vendedor solicita la baja" (motivo obligatorio) → «Solicitud de baja» → BajaSolicitada.
+        public int SolicitarBaja(string modulo, BE.Promocion promocion, string motivo)
+        {
+            PermisosAccion.Exigir(BE.Patentes.PromocionesVigentesEditar, BE.Patentes.PromocionesVigentes);
+
+            if (!promocion.PuedeSolicitarseBaja() || !promocion.TransicionValida(BE.EstadoPromocion.BajaSolicitada))
+                throw new BE.AppException("err.bll.promocion.sugerirbaja_estado",
+                    "Solo se puede sugerir la baja de promociones Vigentes. Esta promoción está '{0}'.", promocion.Estado);
+            ExigirTexto(motivo, "err.bll.promocion.motivobaja_requerido", "Debe indicar el motivo de la baja sugerida.");
+
+            int idUsuario = BLLHelper.ResolverUsuarioActivo();
+            var solicitud = new BE.SolicitudBajaPromocion
+            {
+                IdPromocion = promocion.IdPromocion,
+                IdUsuarioSolicita = idUsuario,
+                Motivo = motivo.Trim(),
+                FechaSolicitud = DateTime.Now,
+                Estado = BE.EstadoSolicitudBaja.Pendiente
+            };
+            int idSolicitud = dalPromocion.SolicitarBaja(solicitud, Historial(promocion.IdPromocion,
+                BE.EstadoPromocion.Vigente, BE.EstadoPromocion.BajaSolicitada, idUsuario, solicitud.Motivo));
+            if (idSolicitud <= 0) throw EstadoConcurrente();
+            promocion.Estado = BE.EstadoPromocion.BajaSolicitada;
+
+            bitacora.Registrar(modulo, $"Solicitar baja Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Baja);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
+                $"Vendedor solicita dar de baja la Promoción #{promocion.IdPromocion} '{promocion.Nombre}': {solicitud.Motivo}");
+            return idSolicitud;
+        }
+
+        // "¿Aprueba la baja? Sí" → Desactivada + «Resolución de baja» (informe a Gerencia).
+        public int AprobarBaja(string modulo, BE.Promocion promocion, string observacion)
+        {
+            var solicitud = ResolverBaja(promocion, BE.EstadoSolicitudBaja.Aprobada, BE.EstadoPromocion.Desactivada,
+                string.IsNullOrWhiteSpace(observacion) ? null : observacion.Trim());
+
+            bitacora.Registrar(modulo, $"Aprobar baja Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
+                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' dada de baja (Administración aprobó la solicitud de Ventas)");
+            return solicitud.IdSolicitud;
+        }
+
+        // "¿Aprueba la baja? No" (motivo obligatorio) → vuelve a Vigente + «Resolución de baja»
+        // (informe a Ventas). El dictamen contable de la promoción no se toca.
+        public int RechazarBaja(string modulo, BE.Promocion promocion, string motivo)
+        {
+            ExigirTexto(motivo, "err.bll.promocion.motivorechazobaja_requerido",
+                "Debe indicar el motivo por el cual la promoción sigue vigente.");
+            var solicitud = ResolverBaja(promocion, BE.EstadoSolicitudBaja.Rechazada, BE.EstadoPromocion.Vigente, motivo.Trim());
+
+            bitacora.Registrar(modulo, $"Rechazar baja Promoción #{promocion.IdPromocion}: {promocion.Nombre} — Motivo: {motivo.Trim()}",
+                BE.Criticidad.Baja);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
+                $"Administración rechaza la baja de la Promoción #{promocion.IdPromocion} '{promocion.Nombre}', sigue Vigente: {motivo.Trim()}");
+            return solicitud.IdSolicitud;
+        }
+
+        private BE.SolicitudBajaPromocion ResolverBaja(BE.Promocion promocion, BE.EstadoSolicitudBaja resultado,
+                                                       BE.EstadoPromocion destino, string motivoResolucion)
+        {
+            PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
+
+            if (!promocion.PuedeResolverseBaja() || !promocion.TransicionValida(destino))
+                throw new BE.AppException("err.bll.promocion.resolverbaja_estado",
+                    "Solo se puede resolver la baja de promociones con baja Solicitada. Esta promoción está '{0}'.", promocion.Estado);
+
+            var solicitud = dalPromocion.ObtenerSolicitudesBaja(promocion.IdPromocion).LastOrDefault(s => s.EstaPendiente())
+                ?? throw new BE.AppException("err.bll.promocion.solicitud_inexistente",
+                    "La promoción no tiene una solicitud de baja pendiente.");
+
+            int idUsuario = BLLHelper.ResolverUsuarioActivo();
+            solicitud.Estado = resultado;
+            solicitud.IdUsuarioResuelve = idUsuario;
+            solicitud.MotivoResolucion = motivoResolucion;
+            solicitud.FechaResolucion = DateTime.Now;
+
+            if (!dalPromocion.ResolverBaja(solicitud, Historial(promocion.IdPromocion, BE.EstadoPromocion.BajaSolicitada,
+                    destino, idUsuario, motivoResolucion ?? "Baja aprobada")))
+                throw EstadoConcurrente();
+            promocion.Estado = destino;
+            return solicitud;
+        }
+
+        // (b) "Administración desactiva directamente" una promoción Vigente (motivo obligatorio).
+        public void Desactivar(string modulo, BE.Promocion promocion, string motivo)
+        {
+            PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
+
+            if (!promocion.PuedeDesactivarseDirecto() || !promocion.TransicionValida(BE.EstadoPromocion.Desactivada))
+                throw new BE.AppException("err.bll.promocion.desactivar_estado",
+                    "Solo se pueden desactivar promociones Vigentes. Esta promoción está '{0}'.", promocion.Estado);
+            ExigirTexto(motivo, "err.bll.promocion.motivodesactivar_requerido",
+                "Debe indicar el motivo de la desactivación.");
+
+            Transicionar(promocion, BE.EstadoPromocion.Desactivada, motivo.Trim());
+
+            bitacora.Registrar(modulo, $"Desactivar Promoción #{promocion.IdPromocion}: {promocion.Nombre} — Motivo: {motivo.Trim()}",
+                BE.Criticidad.Media);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
+                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' desactivada por Administración: {motivo.Trim()}");
+        }
+
+        // (c) "Llega la FechaFin" → Vencida. Se ejecuta al consultar las promociones; cada una se
+        // cierra con su propio claim, así dos sesiones que consultan a la vez no duplican el historial.
+        public int CerrarVencidas()
+        {
+            int? idUsuario = Seguridad.SessionManager.IsLoggedIn
+                ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
+            DateTime hoy = DateTime.Today;
+            int cerradas = 0;
+            foreach (var p in dalPromocion.ObtenerTodas().Where(x => x.DebeVencer(hoy)))
+            {
+                if (!dalPromocion.CambiarEstado(p.IdPromocion, BE.EstadoPromocion.Vigente,
+                        Historial(p.IdPromocion, BE.EstadoPromocion.Vigente, BE.EstadoPromocion.Vencida, idUsuario,
+                                  $"Llegó la fecha de fin ({p.FechaFin:dd/MM/yyyy})")))
+                    continue;   // otra sesión la cerró (o cambió de estado) primero
+                cerradas++;
+                bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
+                    $"Promoción #{p.IdPromocion} '{p.Nombre}' vencida: terminó el {p.FechaFin:dd/MM/yyyy}");
+            }
+            if (cerradas > 0)
+                bitacora.Registrar(ModuloPromociones, $"{cerradas} promoción(es) pasaron a Vencida por fecha de fin", BE.Criticidad.Baja);
+            return cerradas;
+        }
+
+        // Las consultas no deben fallar porque no se pudo cerrar una vencida (se reintenta en la próxima).
+        private void CerrarVencidasSinFallar()
+        {
+            try { CerrarVencidas(); }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.Promocion] CerrarVencidas: {ex.Message}"); }
+        }
+
+        // ── Auxiliares ─────────────────────────────────────────────────────────
+
+        private void Transicionar(BE.Promocion promocion, BE.EstadoPromocion destino, string observacion)
+        {
+            int idUsuario = BLLHelper.ResolverUsuarioActivo();
+            if (!dalPromocion.CambiarEstado(promocion.IdPromocion, promocion.Estado,
+                    Historial(promocion.IdPromocion, promocion.Estado, destino, idUsuario, observacion)))
+                throw EstadoConcurrente();
+            promocion.Estado = destino;
+        }
+
+        private static BE.PromocionHistorial Historial(int idPromocion, BE.EstadoPromocion? anterior, BE.EstadoPromocion nuevo,
+                                                       int? idUsuario, string observacion) =>
+            new BE.PromocionHistorial
+            {
+                IdPromocion = idPromocion,
+                EstadoAnterior = anterior,
+                EstadoNuevo = nuevo,
+                IdUsuario = idUsuario,
+                Fecha = DateTime.Now,
+                Observacion = observacion
+            };
 
         private static BE.AppException EstadoConcurrente()
             => new BE.AppException("err.bll.promocion.estado_concurrente",
                 "La promoción cambió de estado desde otra sesión. Actualizá la lista e intentá de nuevo.");
 
-        // A8 del documento fuente: Administración desactiva una promoción Vigente directamente.
-        public void Desactivar(string modulo, BE.Promocion promocion)
+        private static void ExigirTexto(string texto, string clave, string mensaje)
         {
-            PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
-
-            if (!promocion.PuedeDesactivarseDirecto())
-                throw new BE.AppException("err.bll.promocion.desactivar_estado",
-                    "Solo se pueden desactivar promociones Vigentes. Esta promoción está '{0}'.", promocion.Estado);
-
-            CambiarEstadoOFalla(promocion, BE.EstadoPromocion.Desactivada, null);
-
-            bitacora.Registrar(modulo, $"Desactivar Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
-            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
-                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' desactivada por Administración");
-        }
-
-        // CU-CONT-03-Analizar Promoción.
-        public void AprobarContable(string modulo, BE.Promocion promocion, string observacion)
-        {
-            PermisosAccion.Exigir(BE.Patentes.PromocionesContableEditar, BE.Patentes.PromocionesContable);
-            ExigirEnRevisionContable(promocion);
-            ExigirObservacion(observacion);
-
-            CambiarEstadoOFalla(promocion, BE.EstadoPromocion.Vigente, observacion.Trim());
-
-            bitacora.Registrar(modulo, $"Aprobar Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
-            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
-                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' aprobada por Contabilidad y ya está Vigente");
-        }
-
-        public void RechazarContable(string modulo, BE.Promocion promocion, string observacion)
-        {
-            PermisosAccion.Exigir(BE.Patentes.PromocionesContableEditar, BE.Patentes.PromocionesContable);
-            ExigirEnRevisionContable(promocion);
-            ExigirObservacion(observacion);
-
-            CambiarEstadoOFalla(promocion, BE.EstadoPromocion.RechazadaContabilidad, observacion.Trim());
-
-            bitacora.Registrar(modulo, $"Rechazar Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
-            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
-                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' rechazada por Contabilidad: {observacion}");
-        }
-
-        // CU-VEND-04-Sugerir Baja de Promoción.
-        public void SugerirBaja(string modulo, BE.Promocion promocion, string motivo)
-        {
-            PermisosAccion.Exigir(BE.Patentes.PromocionesVigentesEditar, BE.Patentes.PromocionesVigentes);
-
-            if (!promocion.PuedeSugerirseBaja())
-                throw new BE.AppException("err.bll.promocion.sugerirbaja_estado",
-                    "Solo se puede sugerir la baja de promociones Vigentes. Esta promoción está '{0}'.", promocion.Estado);
-
-            if (string.IsNullOrWhiteSpace(motivo))
-                throw new BE.AppException("err.bll.promocion.motivobaja_requerido",
-                    "Debe indicar el motivo de la baja sugerida.");
-
-            if (!dalPromocion.SolicitarBaja(promocion.IdPromocion, motivo.Trim()))
-                throw EstadoConcurrente();
-
-            bitacora.Registrar(modulo, $"Sugerir baja Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Baja);
-            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
-                $"Vendedor sugiere dar de baja la Promoción #{promocion.IdPromocion} '{promocion.Nombre}': {motivo}");
-        }
-
-        public void AprobarBaja(string modulo, BE.Promocion promocion)
-        {
-            PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
-
-            if (!promocion.PuedeResolverseBaja())
-                throw new BE.AppException("err.bll.promocion.resolverbaja_estado",
-                    "Solo se puede resolver la baja de promociones con baja Solicitada. Esta promoción está '{0}'.", promocion.Estado);
-
-            CambiarEstadoOFalla(promocion, BE.EstadoPromocion.Desactivada, null);
-
-            bitacora.Registrar(modulo, $"Aprobar baja Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Media);
-            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
-                $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' dada de baja (Administración aprobó la solicitud de Ventas)");
-        }
-
-        public void RechazarBaja(string modulo, BE.Promocion promocion, string motivo)
-        {
-            PermisosAccion.Exigir(BE.Patentes.PromocionesAdminEditar, BE.Patentes.PromocionesAdmin);
-
-            if (!promocion.PuedeResolverseBaja())
-                throw new BE.AppException("err.bll.promocion.resolverbaja_estado",
-                    "Solo se puede resolver la baja de promociones con baja Solicitada. Esta promoción está '{0}'.", promocion.Estado);
-
-            if (string.IsNullOrWhiteSpace(motivo))
-                throw new BE.AppException("err.bll.promocion.motivorechazobaja_requerido",
-                    "Debe indicar el motivo por el cual la promoción sigue vigente.");
-
-            // No se pasa "motivo" a CambiarEstado: Observacion ya guarda la evaluación de
-            // Contabilidad (AprobarContable/RechazarContable) y no hay un campo propio para el
-            // motivo de rechazo de una baja — pisarla acá perdería esa evaluación. El motivo
-            // queda igual registrado en bitácora y bitácora de negocio, abajo.
-            CambiarEstadoOFalla(promocion, BE.EstadoPromocion.Vigente, null);
-
-            bitacora.Registrar(modulo, $"Rechazar baja Promoción #{promocion.IdPromocion}: {promocion.Nombre} — Motivo: {motivo}", BE.Criticidad.Baja);
-            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
-                $"Administración rechaza la baja de la Promoción #{promocion.IdPromocion} '{promocion.Nombre}', sigue Vigente: {motivo}");
-        }
-
-        private static void ExigirEnRevisionContable(BE.Promocion promocion)
-        {
-            if (!promocion.PuedeAprobarseORechazarseContable())
-                throw new BE.AppException("err.bll.promocion.revisioncontable_estado",
-                    "Solo se pueden aprobar o rechazar promociones En Revisión Contable. Esta promoción está '{0}'.",
-                    promocion.Estado);
-        }
-
-        private static void ExigirObservacion(string observacion)
-        {
-            if (string.IsNullOrWhiteSpace(observacion))
-                throw new BE.AppException("err.bll.promocion.observacion_requerida",
-                    "Debe ingresar una observación para esta decisión.");
+            if (string.IsNullOrWhiteSpace(texto)) throw new BE.AppException(clave, mensaje);
         }
     }
 }

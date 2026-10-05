@@ -2,24 +2,36 @@ sequenceDiagram
   autonumber
   actor A as Administración
   participant F as Promociones<br/>AdministracionForm
+  participant AF as Alta<br/>PromocionForm
   participant B as BLL.Promocion
   participant DS as DAL.Sugerencia<br/>Promocion
   participant D as DAL.Promocion
-  A->>F: Consulta las sugerencias y elige "Alta desde sugerencia"
-  F->>B: CrearDesdeSugerencia(modulo, promocion, idSugerencia)
-  Note over B: Exigir(PromocionesAdminEditar) · destino único · valor > 0 (≤ 100 si es Porcentaje) · fin ≥ inicio
-  B->>DS: MarcarEvaluada(idSugerencia)  [reclamo: solo si sigue Pendiente]
-  alt Otra sesión ya la evaluó
-    DS-->>B: false
-    B-->>F: AppException(sugerencia_evaluada)
-  else Reclamo obtenido
-    B->>D: Alta(promoción: estado EnRevisionContable)
-    alt Falla el alta
-      B->>DS: ReabrirEvaluacion(idSugerencia)  [compensación]
-      B-->>F: error
-    else Alta correcta
-      B-->>F: idPromocion
-      F-->>A: Promoción pendiente de revisión contable
+  A->>F: ¿Acepta la sugerencia? Sí: "Alta desde sugerencia" (o "Alta manual")
+  A->>AF: Completa nombre, tipo, valor, vigencia, margen e impacto
+  AF->>B: CrearDesdeSugerencia(modulo, idSugerencia, nombre, ..., impacto)  [o CrearManual(...)]
+  Note over B: Exigir(PromocionesAdminEditar) · sugerencia.PuedeEvaluarse()
+  B->>B: ValidarPromocion(promocion)  [destino único, valor, fechas]
+  alt Datos inválidos
+    B-->>AF: AppException(motivo)  [la sugerencia sigue Pendiente]
+  else Válidos
+    B->>DS: MarcarEvaluada(idSugerencia, fecha)  [claim: WHERE Estado = Pendiente]
+    alt Otra sesión ya la evaluó
+      DS-->>B: false
+      B-->>AF: AppException(sugerencia_evaluada)
+    else Claim obtenido
+      B->>D: Alta(promocion: EnRevisionContable, IdUsuarioAlta, historial: — → EnRevisionContable)
+      alt Falla el alta
+        B->>DS: ReabrirEvaluacion(idSugerencia)  [compensación]
+        B-->>AF: error
+      else Alta correcta
+        B-->>AF: idPromocion
+        F-->>A: Ficha de promoción (PDF) para Contabilidad
+      end
     end
   end
-  Note over A,D: Variantes: CrearManual (sin sugerencia) · Modificar y Reformular (UPDATE solo si sigue EnRevisionContable) · Desactivar (Vigente → Desactivada)
+  opt ¿Reformular? Sí (promoción Rechazada por Contabilidad)
+    AF->>B: Reformular(modulo, promocion)
+    Note over B: promocion.PuedeReformularse() · ValidarPromocion(promocion)
+    B->>D: Reformular(promocion, historial: RechazadaContabilidad → EnRevisionContable)  [claim]
+    F-->>A: Vuelve a revisión contable: nueva Ficha de promoción
+  end

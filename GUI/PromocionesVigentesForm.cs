@@ -3,18 +3,22 @@ using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
+using Docs = GUI.Exportacion.DocumentosPromocion;
 
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN03, CU-VEND-04-Sugerir Baja de Promoción. Actor: Vendedor
-    /// (consulta las promociones Vigentes y puede sugerir que Administración dé de baja una).
+    /// Capa de Presentación — PN03, carril Vendedor de la región de vigencia: consulta las
+    /// promociones Vigentes (y las que tienen la baja pedida) y puede solicitar la baja de una
+    /// Vigente con motivo («Solicitud de baja»). Imprime la solicitud y la «Resolución de baja»
+    /// (informe a Ventas cuando Administración la rechaza).
     /// </summary>
     public partial class PromocionesVigentesForm : FormBase, IIdiomaObserver
     {
-        protected override System.Windows.Forms.Label MensajeLabel => lblMensaje;
+        protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPromocionService promocionBLL = new BLL.Promocion();
+        private readonly MenuDocumentosPromocion menuDocumentos;
 
         private List<BE.Promocion> _promociones = new List<BE.Promocion>();
 
@@ -23,6 +27,11 @@ namespace GUI
         public PromocionesVigentesForm()
         {
             InitializeComponent();
+            // Paleta centralizada (GUI/Tema.cs).
+            btnSugerirBaja.BackColor = Tema.RosaPrimario;
+            btnImprimir.BackColor = Tema.RosaOscuro;
+            menuDocumentos = new MenuDocumentosPromocion(promocionBLL, ObtenerSeleccionada, this,
+                ex => MostrarError(ex), (k, f) => Tr(k, f));
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -52,52 +61,39 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(idioma);
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
-            Aplicar(btnSugerirBaja, t);
-            // btnRefrescar es el único botón solo-ícono ("") de las 10 pantallas de este
-            // alcance sin texto traducible ni tooltip — se le agrega tooltip.
+            foreach (Control c in panelTop.Controls)
+                if (c.Tag != null && t.ContainsKey(c.Tag.ToString()))
+                    c.Text = t[c.Tag.ToString()].Texto;
             tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
             btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
-            TraducirHeadersGrilla(t);
+            menuDocumentos.Traducir();
+            TraducirHeadersGrilla();
         }
 
-        private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
+        private void TraducirHeadersGrilla()
         {
-            if (c?.Tag != null && t.ContainsKey(c.Tag.ToString()))
-                c.Text = t[c.Tag.ToString()].Texto;
-        }
-
-        /// <summary>Renombra el HeaderText de las columnas de dgvPromociones según el idioma activo.</summary>
-        private void TraducirHeadersGrilla(IDictionary<string, Traduccion> t)
-        {
-            void RH(string col, string clave)
+            void RH(string col, string clave, string fb)
             {
-                if (dgvPromociones.Columns.Contains(col) && t.ContainsKey(clave))
-                    dgvPromociones.Columns[col].HeaderText = t[clave].Texto;
+                if (dgvPromociones.Columns.Contains(col)) dgvPromociones.Columns[col].HeaderText = Tr(clave, fb);
             }
-
-            RH("ID",       "col.promo.id");
-            RH("Nombre",   "col.promo.nombre");
-            RH("Aplica a", "col.promo.aplicaa");
-            RH("Tipo",     "col.promo.tipo");
-            RH("Valor",    "col.promo.valor");
-            RH("Vigencia", "col.promo.vigencia");
+            RH("ID", "col.promo.id", "ID");
+            RH("Nombre", "col.promo.nombre", "Nombre");
+            RH("Aplica a", "col.promo.aplicaa", "Aplica a");
+            RH("Tipo", "col.promo.tipo", "Tipo");
+            RH("Valor", "col.promo.valor", "Valor");
+            RH("Vigencia", "col.promo.vigencia", "Vigencia");
+            RH("Estado", "col.promo.estado", "Estado");
         }
 
-        private void PromocionesVigentesForm_Load(object sender, EventArgs e)
-        {
-            CargarPromociones();
-        }
+        private void PromocionesVigentesForm_Load(object sender, EventArgs e) => CargarPromociones();
 
-        private void BtnRefrescar_Click(object sender, EventArgs e)
-        {
-            CargarPromociones();
-        }
+        private void BtnRefrescar_Click(object sender, EventArgs e) => CargarPromociones();
 
         private void CargarPromociones()
         {
             try
             {
-                _promociones = promocionBLL.ObtenerVigentes();
+                _promociones = promocionBLL.ObtenerParaVentas();
 
                 var tabla = new DataTable();
                 tabla.Columns.Add("ID", typeof(int));
@@ -106,31 +102,22 @@ namespace GUI
                 tabla.Columns.Add("Tipo", typeof(string));
                 tabla.Columns.Add("Valor", typeof(decimal));
                 tabla.Columns.Add("Vigencia", typeof(string));
+                tabla.Columns.Add("Estado", typeof(string));
 
                 foreach (var p in _promociones)
-                    tabla.Rows.Add(
-                        p.IdPromocion, p.Nombre,
-                        p.AplicaAPlan() ? $"Plan: {p.NombrePlan}" : $"Categoría: {p.CategoriaPrenda}",
-                        p.TipoDescuento.ToString(), p.Valor,
-                        $"{p.FechaInicio:dd/MM/yyyy} - {p.FechaFin:dd/MM/yyyy}");
+                    tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan, p.CategoriaPrenda),
+                        Docs.Tipo(p.TipoDescuento), p.Valor, $"{p.FechaInicio:dd/MM/yyyy} - {p.FechaFin:dd/MM/yyyy}",
+                        Docs.Estado(p.Estado));
 
                 dgvPromociones.DataSource = tabla;
-                if (dgvPromociones.Columns.Contains("ID"))
-                    dgvPromociones.Columns["ID"].Width = 44;
-                TraducirHeadersGrilla(Traductor.ObtenerTraducciones(_idioma));
+                if (dgvPromociones.Columns.Contains("ID")) dgvPromociones.Columns["ID"].Width = 44;
+                TraducirHeadersGrilla();
 
-                var tCnt = Traductor.ObtenerTraducciones(_idioma);
-                lblConteo.Text = string.Format(
-                    tCnt.ContainsKey("promo.conteo.vigentes") ? tCnt["promo.conteo.vigentes"].Texto : "{0} promoción(es) vigente(s).",
-                    _promociones.Count);
-                btnSugerirBaja.Enabled = false;
+                lblConteo.Text = Tr("promo.conteo.vigentes", "{0} promoción(es) vigente(s).", new object[] { _promociones.Count });
+                dgvPromociones.ClearSelection();
+                Habilitar(null);
             }
             catch (Exception ex) { MostrarError(ex); }
-        }
-
-        private void DgvPromociones_SelectionChanged(object sender, EventArgs e)
-        {
-            btnSugerirBaja.Enabled = dgvPromociones.SelectedRows.Count > 0;
         }
 
         private BE.Promocion ObtenerSeleccionada()
@@ -140,6 +127,15 @@ namespace GUI
             return _promociones.Find(p => p.IdPromocion == id);
         }
 
+        private void DgvPromociones_SelectionChanged(object sender, EventArgs e) => Habilitar(ObtenerSeleccionada());
+
+        private void Habilitar(BE.Promocion p)
+        {
+            btnSugerirBaja.Enabled = p != null && p.PuedeSolicitarseBaja();
+            btnImprimir.Enabled = p != null;
+        }
+
+        // (a) Vendedor solicita la baja (motivo obligatorio) → «Solicitud de baja».
         private void BtnSugerirBaja_Click(object sender, EventArgs e)
         {
             var promocion = ObtenerSeleccionada();
@@ -147,22 +143,33 @@ namespace GUI
 
             string motivo;
             using (var dlg = new InputDialog(
-                Tr("inputdlg.sugerirbaja.titulo", "Sugerir Baja de Promoción"),
+                Tr("dlg.promo.solicitarbaja.titulo", "Solicitar baja de promoción"),
                 Tr("inputdlg.sugerirbaja.prompt", "Motivo para sugerir la baja de '{0}':", new object[] { promocion.Nombre }),
                 esPassword: false))
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 motivo = dlg.InputText;
             }
-            if (string.IsNullOrWhiteSpace(motivo)) return;
 
             try
             {
-                promocionBLL.SugerirBaja(this.Text, promocion, motivo);
+                promocionBLL.SolicitarBaja(this.Text, promocion, motivo);
                 MostrarOk(Tr("msg.promo.sugerenciabaja_enviada", "Se envió a Administración la sugerencia de baja de '{0}'.", new object[] { promocion.Nombre }));
                 CargarPromociones();
             }
+            catch (Exception ex) { MostrarError(ex); return; }
+
+            if (MessageBox.Show(Tr("conf.promo.imprimirsolicitud", "¿Imprimir la solicitud de baja?"), this.Text,
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                return;
+            try
+            {
+                Docs.Imprimir(Docs.SolicitudBaja(promocionBLL.ObtenerPorId(promocion.IdPromocion),
+                                                 promocionBLL.ObtenerUltimaSolicitudBaja(promocion.IdPromocion)), this);
+            }
             catch (Exception ex) { MostrarError(ex); }
         }
+
+        private void BtnImprimir_Click(object sender, EventArgs e) => menuDocumentos.Mostrar(btnImprimir);
     }
 }

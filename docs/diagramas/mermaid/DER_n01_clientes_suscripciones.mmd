@@ -7,8 +7,8 @@ erDiagram
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
-  Cliente |o--o{ Prenda : "IdUltimoCliente"
   Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
   PlanSuscripcion {
     int IdPlan PK
     nvarchar(100) Nombre

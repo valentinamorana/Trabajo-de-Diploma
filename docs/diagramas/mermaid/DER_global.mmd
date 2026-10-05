@@ -9,20 +9,22 @@ erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
-  Empleado ||--o{ Contratacion : "IdVendedor"
-  Empleado |o--o{ Contratacion : "IdCaja"
   Promocion |o--o{ Contratacion : "IdPromocion"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
+  Empleado ||--o{ Contratacion : "IdVendedor"
+  Empleado |o--o{ Contratacion : "IdCaja"
   Permiso ||--o{ ControlMapeado : "IdPermiso"
+  Usuario ||--o{ DictamenContable : "IdUsuario"
+  Promocion ||--o{ DictamenContable : "IdPromocion"
   Usuario |o--o{ Empleado : "IdUsuario"
   Cliente ||--o{ HistorialCobro : "IdCliente"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
   Usuario ||--o{ HistorialUsuario : "IdUsuario"
-  Prenda ||--o{ ListaEspera : "IdPrenda"
   Cliente ||--o{ ListaEspera : "IdCliente"
+  Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
   Empleado ||--o{ Pedido : "IdEmpleado"
@@ -34,11 +36,18 @@ erDiagram
   Permiso ||--o{ PermisoRelacion : "IdPadre"
   Permiso ||--o{ PermisoRelacion : "IdHijo"
   Usuario ||--o{ Preferencia : "IdUsuario"
-  Cliente |o--o{ Prenda : "IdUltimoCliente"
   Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  Usuario |o--o{ Promocion : "IdUsuarioAlta"
+  Usuario |o--o{ PromocionHistorial : "IdUsuario"
+  Promocion ||--o{ PromocionHistorial : "IdPromocion"
   Permiso ||--o{ RolPermiso : "IdPermiso"
+  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
+  Usuario ||--o{ SolicitudBajaPromocion : "IdUsuarioSolicita"
+  Usuario |o--o{ SolicitudBajaPromocion : "IdUsuarioResuelve"
+  Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
   Idioma ||--o{ Traduccion : "IdIdioma"
   Control ||--o{ Traduccion : "IdControl"
@@ -349,6 +358,10 @@ erDiagram
     decimal(10_2) BeneficioEstimado
     int Estado
     datetime FechaAlta
+    int OrigenMetrica
+    int IdUsuarioAlta FK "NULL"
+    nvarchar(500) MotivoDescarte "NULL"
+    datetime FechaEvaluacion "NULL"
   }
   Promocion {
     int IdPromocion PK
@@ -363,8 +376,35 @@ erDiagram
     nvarchar(100) CategoriaPrenda "NULL"
     decimal(10_2) MargenEstimado
     nvarchar(500) ImpactoEconomico "NULL"
-    nvarchar(500) Observacion "NULL"
-    nvarchar(500) MotivoBaja "NULL"
     int IdSugerenciaOrigen FK "NULL"
     datetime FechaAlta
+    int IdUsuarioAlta FK "NULL"
+  }
+  PromocionHistorial {
+    int IdHistorial PK
+    int IdPromocion FK
+    int EstadoAnterior "NULL"
+    int EstadoNuevo
+    int IdUsuario FK "NULL"
+    datetime Fecha
+    nvarchar(500) Observacion "NULL"
+  }
+  DictamenContable {
+    int IdDictamen PK
+    int IdPromocion FK
+    int IdUsuario FK
+    bit Aprobada
+    nvarchar(500) Observacion
+    datetime Fecha
+  }
+  SolicitudBajaPromocion {
+    int IdSolicitud PK
+    int IdPromocion FK
+    int IdUsuarioSolicita FK
+    nvarchar(500) Motivo
+    datetime FechaSolicitud
+    int Estado
+    int IdUsuarioResuelve FK "NULL"
+    nvarchar(500) MotivoResolucion "NULL"
+    datetime FechaResolucion "NULL"
   }

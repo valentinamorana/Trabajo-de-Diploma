@@ -10,7 +10,7 @@ module.exports = [
       // Negocio
       'PlanSuscripcion', 'Cliente', 'HistorialRenovacion', 'HistorialCobro', 'Contratacion',
       'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda',
-      'ListaEspera', 'SugerenciaPromocion', 'Promocion'
+      'ListaEspera', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion'
     ]
   },
   {
@@ -36,7 +36,7 @@ module.exports = [
   },
   {
     tipo: 'er', id: 'DER_pn03_promociones', titulo: 'DER — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
-    tablas: ['PlanSuscripcion', 'SugerenciaPromocion', 'Promocion', 'Contratacion', 'Cliente']
+    tablas: ['Usuario', 'PlanSuscripcion', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion', 'Contratacion', 'Cliente']
   },
   {
     tipo: 'er', id: 'DER_pn04_devolucion', titulo: 'DER — PN04 Inspección de devolución', columnas: 3,

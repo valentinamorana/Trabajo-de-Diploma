@@ -37,11 +37,17 @@ module.exports = [
     tipo: 'casos', id: 'CU_pn03_promociones', titulo: 'Casos de uso — PN03 Métricas, promociones y toma de decisiones', sistema: 'WardrobeFlow — PN03 Promociones',
     actores: [{ id: 'G', nombre: 'Gerencia' }, { id: 'A', nombre: 'Administración' }, { id: 'K', nombre: 'Contabilidad' }, { id: 'V', nombre: 'Vendedor' }],
     casos: [
-      { id: 'c1', nombre: 'CU01-GER Sugerir Promoción' }, { id: 'c2', nombre: 'CU01-ADM Gestionar Promociones' }, { id: 'c3', nombre: 'CU01-CONT Analizar Promoción' },
-      { id: 'c4', nombre: 'CU01-VEN Sugerir Baja de Promoción' }, { id: 'c5', nombre: 'CU02-ADM Resolver Baja de Promoción' },
+      { id: 'c1', nombre: 'CU01-GER Sugerir Promoción' }, { id: 'c7', nombre: 'CU03-GER Analizar Métricas' },
+      { id: 'c2', nombre: 'CU01-ADM Gestionar Promociones' }, { id: 'c8', nombre: 'CU03-ADM Descartar Sugerencia' },
+      { id: 'c9', nombre: 'CU04-ADM Descartar Promoción Rechazada' }, { id: 'c10', nombre: 'CU05-ADM Desactivar Promoción' },
+      { id: 'c3', nombre: 'CU01-CONT Analizar Promoción' },
+      { id: 'c4', nombre: 'CU01-VEN Solicitar Baja de Promoción' }, { id: 'c5', nombre: 'CU02-ADM Resolver Baja de Promoción' },
       { id: 'c6', nombre: 'CU02-GER Consultar Analítica de Negocio' }
     ],
-    enlaces: [{ actor: 'G', caso: 'c1' }, { actor: 'A', caso: 'c2' }, { actor: 'K', caso: 'c3' }, { actor: 'V', caso: 'c4' }, { actor: 'A', caso: 'c5' }, { actor: 'G', caso: 'c6' }]
+    enlaces: [{ actor: 'G', caso: 'c1' }, { actor: 'A', caso: 'c2' }, { actor: 'A', caso: 'c10' }, { actor: 'K', caso: 'c3' },
+              { actor: 'V', caso: 'c4' }, { actor: 'A', caso: 'c5' }, { actor: 'G', caso: 'c6' }],
+    incluye: [{ de: 'c1', a: 'c7' }],
+    extiende: [{ de: 'c8', a: 'c2' }, { de: 'c9', a: 'c2' }]
   },
   {
     tipo: 'casos', id: 'CU_pn04_devolucion', titulo: 'Casos de uso — PN04 Inspección de devolución', sistema: 'WardrobeFlow — PN04 Inspección de devolución',

@@ -21,6 +21,7 @@ namespace GUI
             this.panelTop = new System.Windows.Forms.Panel();
             this.btnSugerirBaja = new System.Windows.Forms.Button();
             this.btnRefrescar = new System.Windows.Forms.Button();
+            this.btnImprimir = new System.Windows.Forms.Button();
             this.lblConteo = new System.Windows.Forms.Label();
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
@@ -36,6 +37,7 @@ namespace GUI
             this.panelTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(235)))), ((int)(((byte)(245)))));
             this.panelTop.Controls.Add(this.btnSugerirBaja);
             this.panelTop.Controls.Add(this.btnRefrescar);
+            this.panelTop.Controls.Add(this.btnImprimir);
             this.panelTop.Controls.Add(this.lblConteo);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
@@ -55,8 +57,8 @@ namespace GUI
             this.btnSugerirBaja.Name = "btnSugerirBaja";
             this.btnSugerirBaja.Size = new System.Drawing.Size(150, 28);
             this.btnSugerirBaja.TabIndex = 0;
-            this.btnSugerirBaja.Tag = "promocion.btn.sugerirbaja";
-            this.btnSugerirBaja.Text = "Sugerir Baja";
+            this.btnSugerirBaja.Tag = "promocion.btn.solicitarbaja";
+            this.btnSugerirBaja.Text = "Solicitar baja";
             this.btnSugerirBaja.UseVisualStyleBackColor = false;
             this.btnSugerirBaja.Click += new System.EventHandler(this.BtnSugerirBaja_Click);
             //
@@ -71,11 +73,26 @@ namespace GUI
             this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
             //
+            // btnImprimir
+            //
+            this.btnImprimir.Enabled = false;
+            this.btnImprimir.FlatAppearance.BorderSize = 0;
+            this.btnImprimir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImprimir.ForeColor = System.Drawing.Color.White;
+            this.btnImprimir.Location = new System.Drawing.Point(262, 10);
+            this.btnImprimir.Name = "btnImprimir";
+            this.btnImprimir.Size = new System.Drawing.Size(110, 28);
+            this.btnImprimir.TabIndex = 3;
+            this.btnImprimir.Tag = "promocion.btn.imprimir";
+            this.btnImprimir.Text = "Imprimir ▾";
+            this.btnImprimir.UseVisualStyleBackColor = false;
+            this.btnImprimir.Click += new System.EventHandler(this.BtnImprimir_Click);
+            //
             // lblConteo
             //
             this.lblConteo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblConteo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblConteo.Location = new System.Drawing.Point(208, 14);
+            this.lblConteo.Location = new System.Drawing.Point(384, 14);
             this.lblConteo.Name = "lblConteo";
             this.lblConteo.Size = new System.Drawing.Size(300, 23);
             this.lblConteo.TabIndex = 2;
@@ -153,6 +170,7 @@ namespace GUI
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.Button btnSugerirBaja;
         private System.Windows.Forms.Button btnRefrescar;
+        private System.Windows.Forms.Button btnImprimir;
         private System.Windows.Forms.ToolTip tip;
         private System.Windows.Forms.Label lblConteo;
         private System.Windows.Forms.Panel panelStatus;

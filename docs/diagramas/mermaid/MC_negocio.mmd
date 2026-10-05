@@ -4,17 +4,18 @@ erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
-  Empleado ||--o{ Contratacion : "IdVendedor"
-  Empleado |o--o{ Contratacion : "IdCaja"
   Promocion |o--o{ Contratacion : "IdPromocion"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
+  Empleado ||--o{ Contratacion : "IdVendedor"
+  Empleado |o--o{ Contratacion : "IdCaja"
+  Promocion ||--o{ DictamenContable : "IdPromocion"
   Cliente ||--o{ HistorialCobro : "IdCliente"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
-  Prenda ||--o{ ListaEspera : "IdPrenda"
   Cliente ||--o{ ListaEspera : "IdCliente"
+  Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
   Empleado ||--o{ Pedido : "IdEmpleado"
@@ -22,10 +23,12 @@ erDiagram
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
-  Cliente |o--o{ Prenda : "IdUltimoCliente"
   Cliente |o--o{ Prenda : "IdClienteActual"
+  Cliente |o--o{ Prenda : "IdUltimoCliente"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  Promocion ||--o{ PromocionHistorial : "IdPromocion"
+  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
   PlanSuscripcion
   Cliente
@@ -33,6 +36,9 @@ erDiagram
   Contratacion
   Promocion
   SugerenciaPromocion
+  PromocionHistorial
+  DictamenContable
+  SolicitudBajaPromocion
   HistorialRenovacion
   HistorialCobro
   Pedido

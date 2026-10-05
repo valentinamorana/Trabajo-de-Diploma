@@ -90,16 +90,23 @@ $iscc = @(
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $iscc) { throw 'No se encontró Inno Setup 6 (ISCC.exe).' }
 
+# Sin .pfx: se usa el certificado de firma de código ya instalado en el almacén del usuario
+# (con su clave privada). Así no hace falta contraseña ni archivo.
+$certInstalado = $null
 if (-not (Test-Path $Pfx)) {
-    Write-Host 'Compilando el instalador...' -ForegroundColor Cyan
-    & $iscc $iss | Select-Object -Last 3
-    if ($LASTEXITCODE -ne 0 -or -not (Test-Path $exe)) { throw 'Falló la compilación del instalador.' }
-    Write-Warning "No se encontró el certificado ($Pfx): el instalador queda SIN firmar."
-    Write-Host $exe
-    return
-}
-
-if ($env:WF_PFX_PASS) {
+    $certInstalado = Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert |
+        Where-Object { $_.HasPrivateKey -and $_.Subject -like '*O=WardrobeFlow*' -and $_.NotAfter -gt (Get-Date) } |
+        Sort-Object NotAfter -Descending | Select-Object -First 1
+    if (-not $certInstalado) {
+        Write-Host 'Compilando el instalador...' -ForegroundColor Cyan
+        & $iscc $iss | Select-Object -Last 3
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path $exe)) { throw 'Falló la compilación del instalador.' }
+        Write-Warning "No se encontró el certificado ($Pfx ni uno instalado de WardrobeFlow): el instalador queda SIN firmar."
+        Write-Host $exe
+        return
+    }
+    Write-Host ("Usando el certificado instalado: {0} ({1})" -f $certInstalado.Subject, $certInstalado.Thumbprint) -ForegroundColor Cyan
+} elseif ($env:WF_PFX_PASS) {
     $secPass = ConvertTo-SecureString $env:WF_PFX_PASS -AsPlainText -Force
 } else {
     $secPass = Read-Host 'Contraseña del certificado' -AsSecureString
@@ -110,9 +117,20 @@ $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurs
     Select-Object -First 1 -ExpandProperty FullName
 
 if ($signtool) {
-    # Import temporal al almacén del usuario: signtool firma por huella y nunca ve la contraseña.
-    $cert = Import-PfxCertificate -FilePath $Pfx -CertStoreLocation 'Cert:\CurrentUser\My' -Password $secPass
-    $huella = $cert.Thumbprint
+    # Con .pfx: import temporal al almacén del usuario (signtool firma por huella y nunca ve la
+    # contraseña). Solo se borra al final si NO estaba instalado antes: nunca se quita un
+    # certificado que el usuario ya tenía.
+    $importado = $false
+    if ($certInstalado) {
+        $huella = $certInstalado.Thumbprint
+    } else {
+        $pfxInfo = Get-PfxData -FilePath $Pfx -Password $secPass
+        $huella = $pfxInfo.EndEntityCertificates[0].Thumbprint
+        if (-not (Test-Path "Cert:\CurrentUser\My\$huella")) {
+            Import-PfxCertificate -FilePath $Pfx -CertStoreLocation 'Cert:\CurrentUser\My' -Password $secPass | Out-Null
+            $importado = $true
+        }
+    }
     try {
         # $q = comillas y $f = archivo a firmar (sintaxis de la directiva SignTool de Inno).
         $comando = "`$q$signtool`$q sign /sha1 $huella /s My /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 `$f"
@@ -120,7 +138,7 @@ if ($signtool) {
         & $iscc '/DFIRMAR' "/Swfsign=$comando" $iss | Select-Object -Last 3
         if ($LASTEXITCODE -ne 0 -or -not (Test-Path $exe)) { throw 'Falló la compilación/firma del instalador.' }
     } finally {
-        Remove-Item "Cert:\CurrentUser\My\$huella" -ErrorAction SilentlyContinue
+        if ($importado) { Remove-Item "Cert:\CurrentUser\My\$huella" -ErrorAction SilentlyContinue }
     }
 } else {
     # Sin Windows SDK: se compila sin firmar el desinstalador y se firma el instalador con el
@@ -128,7 +146,7 @@ if ($signtool) {
     Write-Warning 'No se encontró SignTool (Windows SDK): el desinstalador queda sin firmar.'
     & $iscc $iss | Select-Object -Last 3
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path $exe)) { throw 'Falló la compilación del instalador.' }
-    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($Pfx, $secPass)
+    $cert = if ($certInstalado) { $certInstalado } else { New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($Pfx, $secPass) }
     $r = Set-AuthenticodeSignature -FilePath $exe -Certificate $cert -HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
     # Con certificado autofirmado el estado es UnknownError (raíz no confiable) pero la firma queda aplicada.
     if (-not $r.SignerCertificate) { throw "Falló la firma: $($r.StatusMessage)" }

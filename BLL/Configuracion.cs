@@ -175,14 +175,6 @@ namespace BLL
             };
         }
 
-        /// <summary>Nombres de todas las tablas protegidas con dígitos verificadores.</summary>
-        public static List<string> NombresTablasProtegidas()
-        {
-            var l = new List<string> { "Usuario" };
-            foreach (var t in TablasAdicionales()) l.Add(t.Nombre);
-            return l;
-        }
-
         // Pura (testeable): resultado de comparar los DVH almacenados con los recalculados y el DVV.
         internal static (List<int> Rotas, int DvvCalculado, bool DvvOk) Comparar(
             IList<string[]> campos, IList<int?> dvhAlmacenados, int? dvvAlmacenado, Seguridad.ICalculadorDV svc)

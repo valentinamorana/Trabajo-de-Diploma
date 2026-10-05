@@ -17,7 +17,6 @@ namespace GUI
         {
             public string Nombre { get; set; }
             public string Texto  { get; set; }
-            public string Display => string.IsNullOrWhiteSpace(Texto) ? Nombre : $"{Nombre}  —  {Texto}";
         }
 
         // Form.Name → controles mapeables (por nombre).
@@ -43,8 +42,6 @@ namespace GUI
             }
         }
 
-        /// <summary>Formularios registrados hasta ahora (ordenados).</summary>
-        public static List<string> Formularios() => _registro.Keys.OrderBy(k => k).ToList();
 
         /// <summary>Controles mapeables de un formulario registrado.</summary>
         public static List<ControlInfo> Controles(string formulario)

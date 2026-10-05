@@ -76,19 +76,6 @@ namespace DAL
             }
         }
 
-        // Almacena (upsert) el DVV calculado para una tabla junto con la fecha.
-        public void GuardarDVV(string nombreTabla, int dvv)
-        {
-            try
-            {
-                acceso.EjecutarTransaccion((cn, tx) => GuardarDVVEnTx(cn, tx, nombreTabla, dvv));
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al guardar DVV de la tabla '{nombreTabla}'.", ex);
-            }
-        }
-
         internal static void GuardarDVVEnTx(SqlConnection cn, SqlTransaction tx, string nombreTabla, int dvv)
         {
             using (var cmd = new SqlCommand(
@@ -261,25 +248,6 @@ namespace DAL
             return filas;
         }
 
-        // Actualiza el DVH de un usuario específico.
-        public void ActualizarDVH(int idUsuario, int dvh)
-        {
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Usuario SET DVH = @dvh WHERE IdUsuario = @id",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@dvh", dvh),
-                        new SqlParameter("@id",  idUsuario)
-                    });
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al actualizar DVH del usuario ID {idUsuario}.", ex);
-            }
-        }
-
         // ── DV GENÉRICO (reutilizable para cualquier tabla protegida) ───────────
         // tabla / pkCol / columnas son CONSTANTES del sistema (no entradas de usuario).
         // Como acá los identificadores NO pueden ir parametrizados (SQL no admite @param
@@ -318,14 +286,6 @@ namespace DAL
             if (dt == null) return lista;
             foreach (DataRow row in dt.Rows) lista.Add(MapearGenerico(row, tabla, pkCol, columnas));
             return lista;
-        }
-
-        // Actualiza el DVH de una fila de cualquier tabla.
-        public void ActualizarDVH(string tabla, string pkCol, int id, int dvh)
-        {
-            acceso.Escribir(
-                "UPDATE " + SqlIdentificador.Validar(tabla) + " SET DVH = @dvh WHERE " + SqlIdentificador.Validar(pkCol) + " = @id",
-                new SqlParameter[] { new SqlParameter("@dvh", dvh), new SqlParameter("@id", id) });
         }
 
         /// <summary>

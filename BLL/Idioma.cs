@@ -28,11 +28,6 @@ namespace BLL
 
         // ── Idiomas ──────────────────────────────────────────────────────────
 
-        public List<BE.Idioma> ObtenerIdiomasActivos()
-        {
-            return dalIdioma.ObtenerActivos();
-        }
-
         // Devuelve los idiomas activos ya convertidos al tipo que usa el sistema de idiomas.
         // Centraliza el mapeo BE.Idioma → Servicios.Multiidioma.Idioma para que la GUI no lo haga.
         public List<Idioma> ObtenerIdiomasActivosComoIdioma()

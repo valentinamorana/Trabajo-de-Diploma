@@ -223,8 +223,8 @@ namespace GUI
                     IdPlan        = _idEnEdicion,
                     Nombre        = txtNombre.Text.Trim(),
                     LimitePrendas = (int)nudLimite.Value,
-                    Precio        = nudPrecio.Value,
-                    Estado        = true
+                    Precio        = nudPrecio.Value
+                    // Estado: lo decide la BLL (Alta lo deja activo; Modificar conserva el guardado).
                 };
 
                 if (_idEnEdicion == 0)

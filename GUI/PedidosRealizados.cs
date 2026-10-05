@@ -406,7 +406,7 @@ namespace GUI
         private void DgvDetalle_SelectionChanged(object sender, EventArgs e)
         {
             var prenda = ObtenerPrendaDetalleSeleccionada();
-            btnReportarPerdida.Enabled = prenda != null && prenda.Estado == BE.EstadoPrenda.EnUso;
+            btnReportarPerdida.Enabled = prenda != null && prenda.PuedeReportarsePerdida();
         }
 
         // Resuelve por IdPrenda (columna oculta), no por índice de fila: dgvDetalle permite
@@ -538,7 +538,7 @@ namespace GUI
         private void BtnReportarPerdida_Click(object sender, EventArgs e)
         {
             var prenda = ObtenerPrendaDetalleSeleccionada();
-            if (prenda == null || prenda.Estado != BE.EstadoPrenda.EnUso) return;
+            if (prenda == null || !prenda.PuedeReportarsePerdida()) return;
 
             using (var dlg = new CargoPrendaDialog(prenda, prenda.PrecioReposicion))
             {

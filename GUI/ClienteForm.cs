@@ -102,18 +102,17 @@ namespace GUI
 
         // Clave fija en BD ← muestra etiqueta traducida.
         // El SelectedValue siempre es la cadena en español almacenada en la BD ("Efectivo", etc.).
+        // La lista de métodos la define la BLL (BLL.Cliente.ObtenerMetodosPago); en edición se le
+        // pasa el valor guardado para que un valor anterior que ya no está en la lista se conserve.
         private void RellenarComboMetodoPago()
         {
             string prevValue = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value
                             ?? cmbMetodoPago.SelectedItem?.ToString();
 
-            var items = new[]
-            {
-                new MetodoItem("Efectivo",      Tr("metodo.efectivo",      "Efectivo")),
-                new MetodoItem("Débito",        Tr("metodo.debito",        "Débito")),
-                new MetodoItem("Crédito",       Tr("metodo.credito",       "Crédito")),
-                new MetodoItem("Transferencia", Tr("metodo.transferencia", "Transferencia")),
-            };
+            var items = new BLL.Cliente().ObtenerMetodosPago(_clienteOriginal?.MetodoPago)
+                .Select(m => new MetodoItem(m.Nombre,
+                    m.ClaveTraduccion != null ? Tr(m.ClaveTraduccion, m.Nombre) : m.Nombre))
+                .ToArray();
 
             cmbMetodoPago.DataSource    = null;
             cmbMetodoPago.DisplayMember = "Label";
@@ -253,7 +252,8 @@ namespace GUI
                     MetodoPago       = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value ?? "Efectivo",
                     IdPlan           = idPlan,
                     FechaNacimiento  = dtpFechaNacimiento.Value.Date,
-                    FechaAlta        = _esEdicion ? _clienteOriginal.FechaAlta : DateTime.Now,
+                    // En el alta la fija BLL.Cliente.Alta; en edición se conserva la original.
+                    FechaAlta        = _esEdicion ? _clienteOriginal.FechaAlta : default(DateTime),
                     FechaVencimiento = chkVencimiento.Checked ? dtpVencimiento.Value.Date : (DateTime?)null,
                     IdClienteReferente = idReferente
                 };

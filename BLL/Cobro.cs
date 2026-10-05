@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -12,6 +13,7 @@ namespace BLL
     {
         private readonly DAL.Interfaces.ICobroDAL dalCobro;
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
+        private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
         private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
         private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
         private readonly Manejadores.ManejadorCobro cadena;
@@ -24,6 +26,7 @@ namespace BLL
         {
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalCobro = dalCobro ?? throw new ArgumentNullException(nameof(dalCobro));
+            this.dalCargoPrenda = dalCargoPrenda ?? throw new ArgumentNullException(nameof(dalCargoPrenda));
 
             // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
             // Program.cs del ejemplo de cátedra (director.AgregarSiguiente(directorGeneral);
@@ -88,5 +91,29 @@ namespace BLL
         }
 
         public List<BE.Cobro> ObtenerHistorial(int idCliente) => dalCobro.ObtenerPorCliente(idCliente);
+
+        // Clientes a los que hoy corresponde procesarles un cobro: con plan, con la suscripción
+        // vencida o próxima a vencer (mismo criterio que DetectarCobroHandler) y sin una
+        // contratación PN02 pendiente de pago (Procesar los rechaza). Antes este filtro lo
+        // armaba CobroSuscripcionForm y no excluía las contrataciones pendientes.
+        public List<BE.Cliente> ObtenerElegibles() =>
+            dalCliente.ObtenerTodos()
+                .Where(c => c.TienePlan() && c.RequiereGestionDeVencimiento())
+                // Va al final para consultar la contratación pendiente solo de los candidatos.
+                .Where(c => !dalCliente.TieneContratacionPendiente(c.IdCliente))
+                .ToList();
+
+        // Anticipa lo que el próximo cobro del cliente va a sumar por cargos de daño/pérdida
+        // pendientes (los mismos que ProcesarPagoHandler suma al cobrar). Antes la suma la
+        // hacía CobroSuscripcionForm.
+        public BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente)
+        {
+            var pendientes = dalCargoPrenda.ObtenerPendientesPorCliente(idCliente) ?? new List<BE.CargoPrenda>();
+            return new BE.PrevisualizacionCobro
+            {
+                CantidadCargosPendientes = pendientes.Count,
+                TotalCargosPendientes    = pendientes.Sum(c => c.Monto)
+            };
+        }
     }
 }

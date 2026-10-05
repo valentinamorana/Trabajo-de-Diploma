@@ -218,5 +218,14 @@ namespace Tests
 
             AssertThrows(() => bll.Cancelar("Test", 1, "admin"));
         }
+
+        [TestMethod]
+        public void PuedeCancelarse_SoloPendienteOReservada()
+        {
+            Assert.IsTrue(new BE.ListaEspera { Estado = BE.EstadoListaEspera.Pendiente }.PuedeCancelarse());
+            Assert.IsTrue(new BE.ListaEspera { Estado = BE.EstadoListaEspera.Reservada }.PuedeCancelarse());
+            Assert.IsFalse(new BE.ListaEspera { Estado = BE.EstadoListaEspera.Convertida }.PuedeCancelarse());
+            Assert.IsFalse(new BE.ListaEspera { Estado = BE.EstadoListaEspera.Cancelada }.PuedeCancelarse());
+        }
     }
 }

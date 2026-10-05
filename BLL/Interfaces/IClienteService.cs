@@ -15,6 +15,13 @@ namespace BLL.Interfaces
         // PN01 — "Recibir identificación": busca por DNI exacto, o por nombre o apellido.
         List<BE.Cliente> BuscarPorIdentificacion(string texto);
 
+        // Filtra el listado por texto parcial en nombre completo, DNI o email (sin ir a la base).
+        List<BE.Cliente> Filtrar(IEnumerable<BE.Cliente> clientes, string texto);
+
+        // Métodos de pago preferidos elegibles para un cliente (valor guardado + clave de
+        // traducción). Incluye metodoActual si es un valor anterior que ya no está en la lista.
+        List<BE.MedioPago> ObtenerMetodosPago(string metodoActual = null);
+
         // Solo el Administrador corrige plan/vencimiento sin pasar por Contratación + Caja.
         bool PuedeCorregirPlanDirectamente();
 

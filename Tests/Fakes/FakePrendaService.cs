@@ -27,5 +27,7 @@ namespace Tests.Fakes
         public List<BE.MantenimientoPrenda> ObtenerEnMantenimiento() => new List<BE.MantenimientoPrenda>();
         public BE.OcupacionStock ObtenerOcupacion() => new BE.OcupacionStock();
         public List<BE.Prenda> ObtenerEnLimpieza() => new List<BE.Prenda>();
+        public List<BE.EstadoPrenda> ObtenerTransicionesManuales(BE.Prenda prenda) => new List<BE.EstadoPrenda>();
+        public bool CorrespondeOfrecerCargo(BE.Prenda prenda) => false;
     }
 }

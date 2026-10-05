@@ -9,8 +9,18 @@ namespace BLL
     /// </summary>
     public class PlanSuscripcion : Interfaces.IPlanSuscripcionService
     {
-        private readonly DAL.PlanSuscripcion dalPlan   = new DAL.PlanSuscripcion();
-        private readonly DAL.Cliente         dalCliente = new DAL.Cliente();
+        private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
+        // Concreto: ContarClientesActivosPorPlan no forma parte de IClienteDAL. Se crea recién
+        // cuando se usa (Desactivar), así los tests con un doble de plan no lo necesitan.
+        private DAL.Cliente _dalCliente;
+        private DAL.Cliente dalCliente => _dalCliente ?? (_dalCliente = new DAL.Cliente());
+
+        // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble.
+        public PlanSuscripcion() : this(new DAL.PlanSuscripcion()) { }
+        public PlanSuscripcion(DAL.Interfaces.IPlanSuscripcionDAL dalPlan)
+        {
+            this.dalPlan = dalPlan ?? throw new ArgumentNullException(nameof(dalPlan));
+        }
 
         // Devuelve todos los planes activos (para combos/selección).
         public List<BE.PlanSuscripcion> ObtenerActivos()
@@ -45,6 +55,13 @@ namespace BLL
         {
             PermisosAccion.Exigir(BE.Patentes.PlanSuscripcionesEditar, BE.Patentes.PlanSuscripciones);
             Validar(plan);
+
+            // Editar nombre, límite o precio no cambia si el plan está activo: se conserva el
+            // estado guardado. Antes la pantalla mandaba siempre Estado = true y editar un plan
+            // inactivo lo reactivaba sin pasar por Activar (ni por su confirmación).
+            var actual = dalPlan.ObtenerPorId(plan.IdPlan);
+            if (actual != null) plan.Estado = actual.Estado;
+
             dalPlan.Modificar(plan);
         }
 

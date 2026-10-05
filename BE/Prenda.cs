@@ -45,6 +45,15 @@ namespace BE
         /// <summary>Indica si la prenda puede ser asignada a un pedido.</summary>
         public bool EstaDisponible() => Estado == EstadoPrenda.Disponible;
 
+        /// <summary>PN04, CU-DEP-02 Reportar Prenda Perdida: solo una prenda EnUso (en poder de
+        /// un cliente) puede reportarse como perdida — es la única transición manual que admite
+        /// ese estado (ver <see cref="Estados.EstadoEnUso"/>).</summary>
+        public bool PuedeReportarsePerdida() => Estado == EstadoPrenda.EnUso;
+
+        /// <summary>Lista de Espera: solo tiene sentido anotarse por una prenda EnUso (si no
+        /// está en uso, se puede pedir directamente). Mismo criterio que BLL.ListaEspera.Anotar.</summary>
+        public bool PuedeAnotarseEnEspera() => Estado == EstadoPrenda.EnUso;
+
         /// <summary>
         /// Indica si el cambio al nuevo estado está permitido, SIN modificar nada.
         /// Consulta de solo lectura para pantallas que arman opciones válidas antes de

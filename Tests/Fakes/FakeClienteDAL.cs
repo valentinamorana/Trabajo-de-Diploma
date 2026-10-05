@@ -54,7 +54,10 @@ namespace Tests.Fakes
         public bool ExisteDNI(string dni) => ExisteDNIRespuesta;
         public bool ExisteDNIParaOtro(string dni, int idExcluir) => ExisteDNIParaOtroRespuesta;
         public bool TieneContratacionPendienteRespuesta { get; set; }
-        public bool TieneContratacionPendiente(int idCliente) => TieneContratacionPendienteRespuesta;
+        // IDs puntuales con contratación pendiente (además de la respuesta global).
+        public HashSet<int> IdsConContratacionPendiente { get; } = new HashSet<int>();
+        public bool TieneContratacionPendiente(int idCliente)
+            => TieneContratacionPendienteRespuesta || IdsConContratacionPendiente.Contains(idCliente);
 
         // Sin BD real: no hay transacción que abrir, se ejecuta la acción directamente
         // (conexión/transacción null — los EnTx de estos fakes no las usan).

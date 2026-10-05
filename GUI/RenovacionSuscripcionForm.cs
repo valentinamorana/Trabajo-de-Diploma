@@ -63,37 +63,45 @@ namespace GUI
 
         private void CmbCliente_SelectedIndexChanged(object sender, EventArgs e) => MostrarEstadoActual();
 
-        private void RbRenovar_CheckedChanged(object sender, EventArgs e) => AplicarFiltroPorDecision();
+        // CheckedChanged se dispara dos veces por cambio (el radio que se desmarca y el que se
+        // marca): solo se recarga con el que queda marcado.
+        private void RbRenovar_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbRenovar.Checked) CargarClientes();
+        }
 
         private void RbCambiarPlan_CheckedChanged(object sender, EventArgs e)
         {
             cmbPlanNuevo.Enabled = rbCambiarPlan.Checked;
-            AplicarFiltroPorDecision();
+            if (rbCambiarPlan.Checked) CargarClientes();
         }
 
-        private void RbBaja_CheckedChanged(object sender, EventArgs e) => AplicarFiltroPorDecision();
+        private void RbBaja_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbBaja.Checked) CargarClientes();
+        }
 
         private void RbPausar_CheckedChanged(object sender, EventArgs e)
         {
             dtpPausaHasta.Enabled = rbPausar.Checked;
-            AplicarFiltroPorDecision();
+            if (rbPausar.Checked) CargarClientes();
         }
 
-        // Todos los clientes con plan asignado (sin filtrar por decisión todavía). Se recarga
-        // desde la BD en CargarClientes(); AplicarFiltroPorDecision() reusa esta lista en
-        // memoria cada vez que cambia la decisión marcada, sin volver a consultar la BD.
-        private System.Collections.Generic.List<BE.Cliente> _clientesConPlan =
-            new System.Collections.Generic.List<BE.Cliente>();
+        // Decisión marcada en los radio buttons.
+        private BLL.Manejadores.DecisionRenovacion DecisionMarcada() =>
+              rbRenovar.Checked     ? BLL.Manejadores.DecisionRenovacion.Renovar
+            : rbCambiarPlan.Checked ? BLL.Manejadores.DecisionRenovacion.CambiarPlan
+            : rbPausar.Checked      ? BLL.Manejadores.DecisionRenovacion.Pausar
+                                    : BLL.Manejadores.DecisionRenovacion.Baja;
 
+        // Carga los clientes elegibles para la decisión marcada. Qué clientes son elegibles lo
+        // decide la BLL (BLL.Renovacion.ObtenerElegibles). Conserva la selección si el cliente
+        // sigue en la lista.
         private void CargarClientes()
         {
             try
             {
-                // Solo clientes con un plan asignado: sin plan no hay suscripción que renovar,
-                // cambiar, pausar o dar de baja (mismo criterio que BLL.Renovacion.Procesar,
-                // que rechaza a un cliente sin plan con err.bll.renovacion.sin_plan).
-                _clientesConPlan = _bllCliente.ObtenerTodos().Where(c => c.TienePlan()).ToList();
-                AplicarFiltroPorDecision();
+                MostrarElegibles(_bllRenovacion.ObtenerElegibles(DecisionMarcada()));
             }
             catch (Exception ex)
             {
@@ -101,25 +109,9 @@ namespace GUI
             }
         }
 
-        // Filtra _clientesConPlan según la decisión marcada, con el mismo criterio que aplica
-        // la cadena de manejadores al procesar (para no ofrecer una decisión que el sistema va
-        // a rechazar igual): Renovar/Cambiar plan/Baja solo corresponden con la suscripción
-        // vencida o próxima a vencer (VerificarVencimientoHandler); Pausar se puede pedir en
-        // cualquier momento salvo que ya esté pausada (PausarSuscripcionHandler no permite
-        // re-pausar: err.bll.renovacion.ya_pausada). SIEMPRE se incluye además a los clientes
-        // ya pausados, sea cual sea la decisión marcada: "Reanudar ahora" es una acción aparte
-        // que no depende del radio button, y un cliente pausado suele quedar con el vencimiento
-        // corrido bastante hacia adelante (PausarSuscripcionHandler), así que sin esto quedaba
-        // inalcanzable para reanudarlo desde esta pantalla. Conserva la selección si el cliente
-        // sigue siendo elegible con la nueva decisión.
-        private void AplicarFiltroPorDecision()
+        private void MostrarElegibles(System.Collections.Generic.List<BE.Cliente> elegibles)
         {
             int? idPrevio = (cmbCliente.SelectedItem as ClienteItem)?.Cliente.IdCliente;
-
-            var elegibles = (rbPausar.Checked
-                ? _clientesConPlan.Where(c => !c.EstaPausada)
-                : _clientesConPlan.Where(c => c.VencimientoExpirado || c.SuscripcionProximaAVencer()))
-                .Union(_clientesConPlan.Where(c => c.EstaPausada));
 
             cmbCliente.Items.Clear();
             foreach (var c in elegibles)
@@ -174,10 +166,15 @@ namespace GUI
             string Tr(string clave, string fallback, object[] args = null) => Traductor.Resolver(clave, fallback, args, t);
 
             string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : Tr("susc.sinfecha", "sin fecha");
-            string estado = c.EstaPausada ? Tr("renov.estado.pausada", "PAUSADA")
-                           : c.VencimientoExpirado ? Tr("renov.estado.vencida", "VENCIDA")
-                           : c.SuscripcionProximaAVencer() ? Tr("renov.estado.porvencer", "próxima a vencer")
-                                                            : Tr("renov.estado.vigente", "vigente");
+            // El estado lo deriva BE.Cliente; acá solo se elige el texto.
+            string estado;
+            switch (c.ObtenerEstadoSuscripcion())
+            {
+                case BE.EstadoVencimiento.Pausada:        estado = Tr("renov.estado.pausada",   "PAUSADA");          break;
+                case BE.EstadoVencimiento.Vencida:        estado = Tr("renov.estado.vencida",   "VENCIDA");          break;
+                case BE.EstadoVencimiento.ProximaAVencer: estado = Tr("renov.estado.porvencer", "próxima a vencer"); break;
+                default:                                  estado = Tr("renov.estado.vigente",   "vigente");          break;
+            }
             lblEstadoActual.Text = Tr("renov.estado.resumen", "Plan actual: {0} — Vencimiento: {1} ({2})",
                 new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estado });
             if (c.EstaPausada)
@@ -195,10 +192,7 @@ namespace GUI
             if (!(cmbCliente.SelectedItem is ClienteItem item))
                 return;
 
-            var decision = rbRenovar.Checked      ? BLL.Manejadores.DecisionRenovacion.Renovar
-                          : rbCambiarPlan.Checked  ? BLL.Manejadores.DecisionRenovacion.CambiarPlan
-                          : rbPausar.Checked       ? BLL.Manejadores.DecisionRenovacion.Pausar
-                                                     : BLL.Manejadores.DecisionRenovacion.Baja;
+            var decision = DecisionMarcada();
 
             int? idPlanNuevo = (decision == BLL.Manejadores.DecisionRenovacion.CambiarPlan
                                  && cmbPlanNuevo.SelectedItem is PlanItem planItem)

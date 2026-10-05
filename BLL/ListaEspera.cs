@@ -38,7 +38,7 @@ namespace BLL
             if (prenda == null)
                 throw new BE.AppException("err.bll.listaespera.prenda_inexistente",
                     "La prenda no existe.");
-            if (prenda.Estado != BE.EstadoPrenda.EnUso)
+            if (!prenda.PuedeAnotarseEnEspera())
                 throw new BE.AppException("err.bll.listaespera.prenda_no_enuso",
                     "'{0}' está {1} — no hace falta anotarse, ya se puede pedir directamente.",
                     prenda.Nombre, prenda.Estado);
@@ -84,7 +84,7 @@ namespace BLL
             if (fila == null)
                 throw new BE.AppException("err.bll.listaespera.inexistente",
                     "La anotación no existe.");
-            if (fila.Estado == BE.EstadoListaEspera.Convertida || fila.Estado == BE.EstadoListaEspera.Cancelada)
+            if (!fila.PuedeCancelarse())
                 throw new BE.AppException("err.bll.listaespera.ya_resuelta",
                     "Esta anotación ya está {0} — no se puede cancelar.", fila.Estado);
 

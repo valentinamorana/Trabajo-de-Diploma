@@ -107,6 +107,8 @@
     <Compile Include="Renovacion.cs" />
     <Compile Include="EstadoCobro.cs" />
     <Compile Include="Cobro.cs" />
+    <Compile Include="EstadoVencimiento.cs" />
+    <Compile Include="PrevisualizacionCobro.cs" />
     <Compile Include="EstadoListaEspera.cs" />
     <Compile Include="ListaEspera.cs" />
     <Compile Include="DatosClienteRiesgo.cs" />

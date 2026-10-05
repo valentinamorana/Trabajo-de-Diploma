@@ -299,7 +299,7 @@ namespace GUI
                 panelDetalle.Visible = true;
                 // Lista de Espera (mejora opcional): solo tiene sentido anotarse mientras
                 // la prenda está EnUso — ver README.
-                btnAnotarEspera.Visible = _tieneStock;
+                btnAnotarEspera.Visible = _tieneStock && prenda.PuedeAnotarseEnEspera();
             }
         }
 
@@ -347,33 +347,11 @@ namespace GUI
             var prenda = ObtenerPrendaSeleccionada();
             if (prenda == null) return;
 
-            // Construir opciones de transición válidas usando la lógica de BE
+            // Qué transiciones se ofrecen lo decide la BLL (BLL.Prenda.ObtenerTransicionesManuales,
+            // que ya excluye las de los flujos dedicados de PN04); acá solo se les pone el texto.
             var opciones = new List<(string texto, BE.EstadoPrenda estado)>();
-
-            var candidatos = new (BE.EstadoPrenda estado, string clave, string fb)[]
-            {
-                (BE.EstadoPrenda.Disponible,  "opt.marcardisp",     "Marcar Disponible"),
-                (BE.EstadoPrenda.EnLimpieza,  "opt.enviarlimpieza", "Enviar a Limpieza"),
-                (BE.EstadoPrenda.Baja,        "opt.darbaja",        "Dar de Baja"),
-            };
-
-            foreach (var cand in candidatos)
-            {
-                // PN04 — EnUso → Baja SOLO existe para CU-DEP-02 Reportar Prenda Perdida
-                // (Menú → Ventas → Pedidos Realizados, prenda puntual con confirmación propia).
-                // Este diálogo genérico de Stock no debe ofrecerla: daría de baja una prenda
-                // que un cliente todavía tiene, sin pasar por ese flujo dedicado.
-                if (prenda.Estado == BE.EstadoPrenda.EnUso && cand.estado == BE.EstadoPrenda.Baja)
-                    continue;
-
-                // PN04 — En Limpieza → Baja solo desde Inspección de Devolución (registra el cargo
-                // por el daño antes de retirar la prenda); la BLL también lo exige.
-                if (prenda.Estado == BE.EstadoPrenda.EnLimpieza && cand.estado == BE.EstadoPrenda.Baja)
-                    continue;
-
-                if (cand.estado != prenda.Estado && prenda.TransicionPermitida(cand.estado))
-                    opciones.Add((Tr(cand.clave, cand.fb), cand.estado));
-            }
+            foreach (var destino in prendaBLL.ObtenerTransicionesManuales(prenda))
+                opciones.Add((TextoOpcionEstado(destino), destino));
 
             if (opciones.Count == 0)
             {
@@ -399,10 +377,9 @@ namespace GUI
                     string fmtEstAct = Tr("msg.prenda.estadoact", "Estado de '{0}' actualizado a {1}.");
                     MostrarOk(string.Format(fmtEstAct, prenda.Nombre, EstadoLabel(dlg.EstadoSeleccionado)));
 
-                    // Bloque 1 — al dar de baja, ofrecer cargar un cargo por daño/pérdida contra
-                    // el último cliente que tuvo la prenda (prenda.IdUltimoCliente ya venía cargado
-                    // desde la grilla — CambiarEstado no lo toca cuando pasa a Baja).
-                    if (dlg.EstadoSeleccionado == BE.EstadoPrenda.Baja && prenda.IdUltimoCliente.HasValue)
+                    // Bloque 1 — si la BLL indica que corresponde (baja de una prenda con último
+                    // cliente conocido), ofrecer cargar un cargo por daño/pérdida.
+                    if (prendaBLL.CorrespondeOfrecerCargo(prenda))
                         OfrecerCargoPorDanioOPerdida(prenda);
 
                     CargarPrendas();
@@ -537,6 +514,18 @@ namespace GUI
                 case BE.EstadoPrenda.EnLimpieza:  return Tr("prenda.enlimpieza",  "En Limpieza");
                 case BE.EstadoPrenda.Baja:        return Tr("prenda.baja",        "Baja");
                 default:                          return estado.ToString();
+            }
+        }
+
+        // Texto de la opción del diálogo de cambio de estado según el estado destino.
+        private string TextoOpcionEstado(BE.EstadoPrenda destino)
+        {
+            switch (destino)
+            {
+                case BE.EstadoPrenda.Disponible: return Tr("opt.marcardisp",     "Marcar Disponible");
+                case BE.EstadoPrenda.EnLimpieza: return Tr("opt.enviarlimpieza", "Enviar a Limpieza");
+                case BE.EstadoPrenda.Baja:       return Tr("opt.darbaja",        "Dar de Baja");
+                default:                         return EstadoLabel(destino);
             }
         }
 

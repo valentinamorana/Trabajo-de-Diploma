@@ -482,5 +482,56 @@ namespace Tests
 
             Assert.AreEqual(BE.EstadoCobro.Suspendido, resultado.Estado);
         }
+
+        // ── ObtenerElegibles / PrevisualizarCobro (antes calculados en CobroSuscripcionForm) ──
+
+        [TestMethod]
+        public void ObtenerElegibles_SoloConPlanVencidosOProximosYSinContratacionPendiente()
+        {
+            var dal = new FakeClienteDAL();
+            var vencido = ClienteVencido();
+            var vigente = ClienteVigente();
+            var proximo = new BE.Cliente { IdCliente = 5, Nombre = "Eva", Apellido = "Sosa", IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(3) };
+            var sinPlan = new BE.Cliente { IdCliente = 6, Nombre = "Sin", Apellido = "Plan", FechaVencimiento = DateTime.Today.AddDays(-10) };
+            var conContratacion = new BE.Cliente { IdCliente = 7, Nombre = "Con", Apellido = "Contrato", IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(-1) };
+            dal.ClientesDevueltos.AddRange(new[] { vencido, vigente, proximo, sinPlan, conContratacion });
+            dal.IdsConContratacionPendiente.Add(7);
+            var bll = new BLL.Cobro(dal, new FakeCobroDAL(), new FakeCargoPrendaDAL());
+
+            var elegibles = bll.ObtenerElegibles();
+
+            CollectionAssert.AreEqual(new[] { vencido, proximo }, elegibles);
+        }
+
+        [TestMethod]
+        public void PrevisualizarCobro_SumaSoloLosCargosPendientesDelCliente()
+        {
+            var dalCargo = new FakeCargoPrendaDAL();
+            dalCargo.Alta(new BE.CargoPrenda { IdCliente = 1, Monto = 1500m });
+            dalCargo.Alta(new BE.CargoPrenda { IdCliente = 1, Monto = 500m });
+            dalCargo.Alta(new BE.CargoPrenda { IdCliente = 2, Monto = 9999m });
+            var cobrado = new BE.CargoPrenda { IdCliente = 1, Monto = 700m };
+            dalCargo.Alta(cobrado);
+            cobrado.Estado = BE.EstadoCargo.Cobrado;
+            var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), dalCargo);
+
+            var previa = bll.PrevisualizarCobro(1);
+
+            Assert.AreEqual(2, previa.CantidadCargosPendientes);
+            Assert.AreEqual(2000m, previa.TotalCargosPendientes);
+            Assert.IsTrue(previa.TieneCargosPendientes);
+        }
+
+        [TestMethod]
+        public void PrevisualizarCobro_SinCargos_DevuelveCero()
+        {
+            var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
+
+            var previa = bll.PrevisualizarCobro(1);
+
+            Assert.AreEqual(0, previa.CantidadCargosPendientes);
+            Assert.AreEqual(0m, previa.TotalCargosPendientes);
+            Assert.IsFalse(previa.TieneCargosPendientes);
+        }
     }
 }

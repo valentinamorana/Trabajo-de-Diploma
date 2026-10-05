@@ -54,6 +54,42 @@ namespace BLL
                 (c.NombreCompleto ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
+        // Filtro del listado de clientes (pantalla Clientes): el texto puede ser parte del nombre
+        // completo, del DNI o del email, sin distinguir mayúsculas. Distinto de
+        // BuscarPorIdentificacion (PN01), que exige el DNI exacto y no mira el email: este filtra
+        // la grilla mientras se escribe. Trabaja sobre la lista ya cargada, sin ir a la base.
+        public List<BE.Cliente> Filtrar(IEnumerable<BE.Cliente> clientes, string texto)
+        {
+            var lista = new List<BE.Cliente>(clientes ?? new List<BE.Cliente>());
+            if (string.IsNullOrWhiteSpace(texto)) return lista;
+            string t = texto.Trim();
+
+            bool Contiene(string campo) => (campo ?? "").IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0;
+            return lista.FindAll(c => Contiene(c.NombreCompleto) || Contiene(c.DNI) || Contiene(c.Email));
+        }
+
+        // Métodos de pago preferidos que se pueden elegir para un cliente. El Nombre es el valor
+        // que se guarda en Cliente.MetodoPago (en español, igual que los datos ya cargados) y
+        // ClaveTraduccion la clave con la que la pantalla lo muestra traducido. Se reusa
+        // BE.MedioPago solo como par nombre/clave: no es el catálogo de Caja (IdMedioPago = 0).
+        // Si el cliente tiene guardado un valor que ya no está en la lista (dato anterior), se
+        // agrega al final sin clave, para que editar al cliente no lo pise con "Efectivo".
+        public List<BE.MedioPago> ObtenerMetodosPago(string metodoActual = null)
+        {
+            var metodos = new List<BE.MedioPago>
+            {
+                new BE.MedioPago { Nombre = "Efectivo",      ClaveTraduccion = "metodo.efectivo" },
+                new BE.MedioPago { Nombre = "Débito",        ClaveTraduccion = "metodo.debito" },
+                new BE.MedioPago { Nombre = "Crédito",       ClaveTraduccion = "metodo.credito" },
+                new BE.MedioPago { Nombre = "Transferencia", ClaveTraduccion = "metodo.transferencia" },
+            };
+
+            if (!string.IsNullOrWhiteSpace(metodoActual) && !metodos.Exists(m => m.Nombre == metodoActual))
+                metodos.Add(new BE.MedioPago { Nombre = metodoActual });
+
+            return metodos;
+        }
+
         // Obtiene un cliente por ID.
         public BE.Cliente ObtenerPorId(int idCliente)
         {

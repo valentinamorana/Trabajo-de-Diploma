@@ -31,7 +31,11 @@ module.exports = [
     tipo: 'secuencia', id: 'DSS_N01_CU02_RenovarSuscripcion', titulo: 'N01 · CU02-VEN Renovar suscripción (Chain of Responsibility)',
     participantes: [A('V', 'Vendedor'), P('F', 'RenovacionSuscripcionForm'), P('B', 'BLL.Renovacion'), P('H1', 'VerificarVencimientoHandler'), P('H2', 'IntentarRenovarHandler'), P('H3', 'CambioPlan / Pausar / Baja Handler'), P('D', 'DAL.Cliente + DAL.Renovacion')],
     pasos: [
-      c('V', 'F', 'Elige cliente y decisión (Renovar, Cambiar plan, Pausar, Baja)'),
+      c('V', 'F', 'Marca la decisión (Renovar, Cambiar plan, Pausar, Baja)'),
+      c('F', 'B', 'ObtenerElegibles(decision)'),
+      c('B', 'D', 'ObtenerTodos() · TieneContratacionPendiente(idCliente)'),
+      r('B', 'F', 'clientes con plan, sin contratación pendiente y en condiciones para esa decisión (más los pausados)'),
+      c('V', 'F', 'Elige el cliente'),
       c('F', 'B', 'Procesar(modulo, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta)'),
       nota('Exigir(ClientesEditar) · el cliente debe tener plan', 'B'),
       c('B', 'H1', 'Procesar(contexto)'),
@@ -56,7 +60,14 @@ module.exports = [
     tipo: 'secuencia', id: 'DSS_N01_CU03_CobrarSuscripcion', titulo: 'N01 · CU03-VEN Cobrar suscripción (cobro recurrente)',
     participantes: [A('V', 'Vendedor'), P('F', 'CobroSuscripcionForm'), P('B', 'BLL.Cobro'), P('H1', 'DetectarCobroHandler'), P('H2', 'ProcesarPagoHandler'), P('H3', 'AplicarGracia / Suspender Handler'), P('D', 'DAL (Cliente, Cobro, CargoPrenda, Promocion)')],
     pasos: [
-      c('V', 'F', 'Elige cliente, modalidad y resultado del cobro (Cobrado o Pago fallido)'),
+      c('F', 'B', 'ObtenerElegibles()'),
+      c('B', 'D', 'ObtenerTodos() · TieneContratacionPendiente(idCliente)'),
+      r('B', 'F', 'clientes con plan, vencidos o próximos a vencer y sin contratación pendiente'),
+      c('V', 'F', 'Elige el cliente'),
+      c('F', 'B', 'PrevisualizarCobro(idCliente)'),
+      c('B', 'D', 'ObtenerPendientesPorCliente(idCliente)'),
+      r('B', 'F', 'cantidad y total de cargos pendientes que sumará el cobro'),
+      c('V', 'F', 'Elige modalidad y resultado del cobro (Cobrado o Pago fallido)'),
       c('F', 'B', 'Procesar(modulo, cliente, decision, modalidad, actor)'),
       c('B', 'H1', 'Procesar(contexto)'),
       { alt: 'Todavía no corresponde cobrar', pasos: [r('H1', 'B', 'Resultado: Pendiente')],
@@ -522,9 +533,10 @@ module.exports = [
       nota('Exigir(PlanSuscripcionesEditar) · nombre obligatorio (solo letras) · límite de prendas válido · precio mayor a cero', 'B'),
       { alt: 'Datos inválidos', pasos: [r('B', 'F', 'AppException(nombre_requerido / limite_invalido / precio_cero)'), r('F', 'V', 'Informa el error')],
         sino: [{ etiqueta: 'Datos válidos', pasos: [
+          nota('Alta: el plan queda activo · Modificar: conserva el estado guardado (ObtenerPorId)', 'B'),
           c('B', 'D', 'Alta(plan) / Modificar(plan)'),
           r('B', 'F', 'ok'),
-          r('F', 'V', 'Plan guardado (queda activo)')
+          r('F', 'V', 'Plan guardado')
         ] }] },
       c('V', 'F', 'Pulsa Desactivar Plan'),
       c('F', 'B', 'Desactivar(modulo, plan)'),

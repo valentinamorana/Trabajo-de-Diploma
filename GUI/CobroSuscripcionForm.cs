@@ -16,7 +16,6 @@ namespace GUI
     {
         private readonly BLL.Interfaces.IClienteService _bllCliente = new BLL.Cliente();
         private readonly BLL.Interfaces.ICobroService    _bllCobro  = new BLL.Cobro();
-        private readonly BLL.Interfaces.ICargoPrendaService _bllCargoPrenda = new BLL.CargoPrenda();
 
         protected override Label MensajeLabel => lblResultado;
 
@@ -66,11 +65,8 @@ namespace GUI
             try
             {
                 cmbCliente.Items.Clear();
-                // Solo clientes con plan y con la suscripción vencida o próxima a vencer:
-                // mismo criterio que DetectarCobroHandler, que rechaza cualquier cobro con
-                // cobro.msg.pendiente si todavía no corresponde procesarlo.
-                foreach (var c in _bllCliente.ObtenerTodos()
-                    .Where(c => c.TienePlan() && (c.VencimientoExpirado || c.SuscripcionProximaAVencer())))
+                // Qué clientes son elegibles lo decide la BLL (BLL.Cobro.ObtenerElegibles).
+                foreach (var c in _bllCobro.ObtenerElegibles())
                     cmbCliente.Items.Add(new ClienteItem(c));
                 btnProcesar.Enabled = cmbCliente.Items.Count > 0;
                 if (cmbCliente.Items.Count > 0) cmbCliente.SelectedIndex = 0;
@@ -108,15 +104,11 @@ namespace GUI
 
             try
             {
-                var cargosPendientes = _bllCargoPrenda.ObtenerPendientesPorCliente(c.IdCliente);
-                if (cargosPendientes.Count > 0)
-                {
-                    decimal total = 0;
-                    foreach (var cargo in cargosPendientes) total += cargo.Monto;
+                var previa = _bllCobro.PrevisualizarCobro(c.IdCliente);
+                if (previa.TieneCargosPendientes)
                     lblEstadoActual.Text += "\n" + Tr("cobro.estado.cargospendientes",
                         "Tiene {0} cargo(s) por daño/pérdida pendiente(s) por ${1} que se sumarán a este cobro.",
-                        new object[] { cargosPendientes.Count, total });
-                }
+                        new object[] { previa.CantidadCargosPendientes, previa.TotalCargosPendientes });
             }
             catch (Exception ex)
             {

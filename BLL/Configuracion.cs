@@ -67,7 +67,7 @@ namespace BLL
     ///
     /// Responsabilidades de arranque (Program.Main):
     ///   1. VerificarConexionDAL()  — confirma que SQL Server responde antes del Login.
-    ///   2. VerificarIntegridadDV() — T07: controla DVH/DVV de la tabla Usuario. Se ejecuta
+    ///   2. VerificarIntegridadDV() — T07: controla DVH/DVV de las tablas protegidas. Se ejecuta
     ///      ANTES de mostrar la ventana de Login (requisito de cátedra). Retorna false si detecta
     ///      manipulación externa; Program deja constancia en bitácora y, tras autenticarse,
     ///      reserva el detalle y la reparación al Administrador.
@@ -119,15 +119,101 @@ namespace BLL
             AppDomain.CurrentDomain.SetupInformation.ConfigurationFile +
             "\n(o reinstale WardrobeFlow y elija otra instancia de SQL Server).";
 
-        // T07 — Versión del FORMATO del DVH de Usuario. Se incrementa cuando cambian los
-        // campos que entran al cálculo (v2 = se agregó Rol). Se persiste como marcador en
-        // DVVertical para poder migrar UNA vez (recalcular) en bases existentes sin bloquear.
-        private const string FormatoDVUsuarioMarcador = "__FormatoDVUsuario__";
-        private const int    FormatoDVUsuarioActual   = 2;
+        // ── T07 — Dígitos verificadores ────────────────────────────────────────────
+        //
+        // REGLAS DE VERIFICACIÓN (formato 2):
+        //   • El script de instalación deja en ParametroSistema la versión del formato ('FormatoDV')
+        //     y, cuando instala o actualiza el formato, la marca 'DVInicializacionPendiente' = 1 con
+        //     las tablas protegidas "sin calcular" (sin fila en DVVertical y DVH = 0).
+        //   • Solo en ese caso la app INICIALIZA los dígitos de una tabla (y lo deja asentado en la
+        //     bitácora y en el historial de integridad). Al terminar, baja la marca.
+        //   • Cualquier otra anomalía —DVV ausente sin marca, DVH en cero, formato distinto, error al
+        //     leer— es "NO íntegro" y va a la consola de recuperación. Ya no se recalcula solo nada
+        //     por heurística (antes, poner todos los DVH en 0, o todos < 10, o borrar el marcador de
+        //     formato, hacía que la app "sellara" en silencio una base manipulada).
 
         /// <summary>
-        /// T07 — Verifica la integridad de la tabla Usuario mediante DVH y DVV.
-        /// Devuelve datos estructurados para que la consola de recuperación formatee el mensaje.
+        /// true si la última verificación de integridad (la de arranque) detectó una base no íntegra.
+        /// Con la integridad comprometida, el login se valida contra el espejo de integridad
+        /// (BLL.Usuario.Login), no contra la tabla Usuario, que pudo haber sido alterada.
+        /// </summary>
+        public static bool IntegridadComprometida { get; internal set; }
+
+        // Descriptor de una tabla protegida además de Usuario.
+        private sealed class TablaProtegida
+        {
+            public string Nombre;
+            public Func<List<BE.FilaDV>> ObtenerFilas;
+            public Action RecalcularTodo;
+        }
+
+        // Tablas protegidas además de Usuario (fuente única para verificar, diagnosticar y recalcular).
+        private static List<TablaProtegida> TablasAdicionales()
+        {
+            var dv = new DAL.DigitoVerificador();
+            var pedido = new DAL.Pedido();
+            var permiso = new DAL.Permiso();
+            return new List<TablaProtegida>
+            {
+                new TablaProtegida { Nombre = DAL.Cliente.DV_Tabla,
+                    ObtenerFilas   = () => dv.ObtenerFilas(DAL.Cliente.DV_Tabla, DAL.Cliente.DV_Pk, DAL.Cliente.DV_Columnas),
+                    RecalcularTodo = () => dv.RecalcularTabla(DAL.Cliente.DV_Tabla, DAL.Cliente.DV_Pk, DAL.Cliente.DV_Columnas) },
+                new TablaProtegida { Nombre = DAL.Empleado.DV_Tabla,
+                    ObtenerFilas   = () => dv.ObtenerFilas(DAL.Empleado.DV_Tabla, DAL.Empleado.DV_Pk, DAL.Empleado.DV_Columnas),
+                    RecalcularTodo = () => dv.RecalcularTabla(DAL.Empleado.DV_Tabla, DAL.Empleado.DV_Pk, DAL.Empleado.DV_Columnas) },
+                new TablaProtegida { Nombre = DAL.Contratacion.DV_Tabla,
+                    ObtenerFilas   = () => dv.ObtenerFilas(DAL.Contratacion.DV_Tabla, DAL.Contratacion.DV_Pk, DAL.Contratacion.DV_Columnas),
+                    RecalcularTodo = () => dv.RecalcularTabla(DAL.Contratacion.DV_Tabla, DAL.Contratacion.DV_Pk, DAL.Contratacion.DV_Columnas) },
+                // Pedido: objeto MULTI-TABLA (pedido + líneas PedidoPrenda).
+                new TablaProtegida { Nombre = DAL.Pedido.DV_Tabla,
+                    ObtenerFilas   = () => pedido.ObtenerFilasDV(),
+                    RecalcularTodo = () => pedido.RecalcularDV() },
+                // PermisoRelacion: árbol de roles y patentes (clave compuesta).
+                new TablaProtegida { Nombre = DAL.Permiso.DV_TablaRelacion,
+                    ObtenerFilas   = () => permiso.ObtenerFilasDVRelacion(),
+                    RecalcularTodo = () => permiso.RecalcularDVRelaciones() },
+            };
+        }
+
+        /// <summary>Nombres de todas las tablas protegidas con dígitos verificadores.</summary>
+        public static List<string> NombresTablasProtegidas()
+        {
+            var l = new List<string> { "Usuario" };
+            foreach (var t in TablasAdicionales()) l.Add(t.Nombre);
+            return l;
+        }
+
+        // Pura (testeable): resultado de comparar los DVH almacenados con los recalculados y el DVV.
+        internal static (List<int> Rotas, int DvvCalculado, bool DvvOk) Comparar(
+            IList<string[]> campos, IList<int?> dvhAlmacenados, int? dvvAlmacenado, Seguridad.ICalculadorDV svc)
+        {
+            var rotas = new List<int>();
+            var dvhs  = new List<int>(campos.Count);
+            for (int i = 0; i < campos.Count; i++)
+            {
+                int calc = svc.CalcularDVH(campos[i]);
+                dvhs.Add(calc);
+                if (dvhAlmacenado(dvhAlmacenados, i) != calc) rotas.Add(i);
+            }
+            int dvv = svc.CalcularDVV(dvhs);
+            return (rotas, dvv, dvvAlmacenado.HasValue && dvvAlmacenado.Value == dvv);
+        }
+
+        private static int? dvhAlmacenado(IList<int?> l, int i) => l[i];
+
+        // Pura (testeable): ¿corresponde inicializar la tabla? Solo si el instalador dejó la marca
+        // de inicialización pendiente, la tabla no tiene DVV y ninguna fila tiene DVH calculado.
+        internal static bool CorrespondeInicializar(bool pendiente, int? dvvAlmacenado, IEnumerable<int?> dvhs)
+        {
+            if (!pendiente || dvvAlmacenado.HasValue) return false;
+            foreach (var d in dvhs) if (d.HasValue && d.Value != 0) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// T07 — Verifica la integridad de TODAS las tablas protegidas (Usuario, Cliente, Empleado,
+        /// Contratacion, Pedido, PermisoRelacion) mediante DVH y DVV. Inicializa solo las tablas que
+        /// el instalador dejó pendientes. Ante cualquier error, la base se considera NO íntegra.
         /// </summary>
         public static bool VerificarIntegridadDV(out ResultadoIntegridad resultado)
         {
@@ -136,125 +222,143 @@ namespace BLL
             {
                 var dvDAL = new DAL.DigitoVerificador();
                 var svc   = Seguridad.CalculadorDV.Crear();
-                var filas = dvDAL.ObtenerFilasUsuario();
 
-                if (filas.Count == 0) return VerificarTablasAdicionales(out resultado);
-
-                // Primer arranque sin DVH: todos null o cero + sin DVV → recalcular.
-                bool todosEnCero = true;
-                foreach (var f in filas)
-                    if (f.DVHAlmacenado != null && f.DVHAlmacenado != 0) { todosEnCero = false; break; }
-
-                int? dvvIni = dvDAL.ObtenerDVV("Usuario");
-                if (todosEnCero && (dvvIni == null || dvvIni == 0))
+                string formato = dvDAL.ObtenerParametro(DAL.DigitoVerificador.ClaveFormato);
+                if (formato != DAL.DigitoVerificador.FormatoActual.ToString())
                 {
-                    RecalcularTodoDV(dvDAL, svc, filas);
-                    int? dvvInicializado = dvDAL.ObtenerDVV("Usuario");
-                    LogearVerificacion("Usuario", dvvInicializado, dvvInicializado ?? 0, true, 0, "Arranque");
-                    return VerificarTablasAdicionales(out resultado);
-                }
-
-                // Migración de algoritmo: si todos los DVH almacenados son < 10
-                // (valores del algoritmo anterior mod 10), recalcular automáticamente
-                // con el nuevo algoritmo en lugar de bloquear el login.
-                bool todosConAlgoritmoAntiguo = true;
-                foreach (var f in filas)
-                {
-                    if (f.DVHAlmacenado == null || f.DVHAlmacenado >= 10)
+                    resultado = new ResultadoIntegridad
                     {
-                        todosConAlgoritmoAntiguo = false;
-                        break;
-                    }
+                        HayDvhInvalido = true,
+                        FilasCorruptas = new List<string>
+                        {
+                            $"Formato de dígitos verificadores de la base: '{formato ?? "(sin marca)"}'; " +
+                            $"esta versión requiere el formato {DAL.DigitoVerificador.FormatoActual}. " +
+                            "Ejecutá el instalador (script de la base) antes de usar el sistema."
+                        }
+                    };
+                    LogearVerificacion("Formato DV", null, 0, false, 1, "Arranque");
+                    IntegridadComprometida = true;
+                    return false;
                 }
-                if (todosConAlgoritmoAntiguo)
+
+                bool pendiente = dvDAL.ObtenerParametro(DAL.DigitoVerificador.ClavePendiente) == "1";
+                var corruptas = new List<string>();
+                var inicializadas = new List<string>();
+
+                // ── Usuario ──
+                var filas = dvDAL.ObtenerFilasUsuario();
+                int? dvvUsuario = dvDAL.ObtenerDVV("Usuario");
+                int dvvUsuarioCalc = 0;
+                bool dvhUsuarioOk = true, dvvUsuarioOk = true;
+                if (CorrespondeInicializar(pendiente, dvvUsuario, filas.ConvertAll(f => f.DVHAlmacenado)))
                 {
-                    System.Diagnostics.Trace.TraceInformation(
-                        "[Configuracion] Detectados DVH del algoritmo anterior (mod 10). " +
-                        "Recalculando con nuevo algoritmo (mod 999.983)...");
                     RecalcularTodoDV(dvDAL, svc, filas);
-                    int? dvvMigAlg = dvDAL.ObtenerDVV("Usuario");
-                    LogearVerificacion("Usuario", dvvMigAlg, dvvMigAlg ?? 0, true, 0, "Arranque");
-                    return VerificarTablasAdicionales(out resultado);
+                    inicializadas.Add("Usuario");
+                    LogearVerificacion("Usuario", dvDAL.ObtenerDVV("Usuario"), dvDAL.ObtenerDVV("Usuario") ?? 0, true, 0, "Inicialización");
+                }
+                else
+                {
+                    var cmp = Comparar(filas.ConvertAll(f => f.CamposParaDVH()), filas.ConvertAll(f => f.DVHAlmacenado), dvvUsuario, svc);
+                    foreach (int i in cmp.Rotas) corruptas.Add($"Usuario '{filas[i].Username}' (ID {filas[i].Id})");
+                    dvvUsuarioCalc = cmp.DvvCalculado;
+                    dvhUsuarioOk   = cmp.Rotas.Count == 0;
+                    dvvUsuarioOk   = cmp.DvvOk;
+                    if (!dvvUsuarioOk) corruptas.Add(dvvUsuario.HasValue ? "Usuario (DVV)" : "Usuario (DVV ausente)");
+                    LogearVerificacion("Usuario", dvvUsuario, dvvUsuarioCalc, dvhUsuarioOk && dvvUsuarioOk,
+                                       cmp.Rotas.Count, "Arranque");
+                    // Base sana pero sin espejo todavía → sembrarlo desde estas filas íntegras.
+                    if (dvhUsuarioOk && dvvUsuarioOk) SeedEspejoSiVacio(filas);
                 }
 
-                // Migración de FORMATO del DVH (v2: el cálculo ahora incluye Rol). Si la base
-                // trae un formato anterior — o sin marcador —, se recalcula UNA sola vez en
-                // lugar de bloquear, y se sella el formato nuevo (RecalcularTodoDV graba el
-                // marcador). Misma estrategia que la migración de algoritmo de arriba. A partir
-                // de acá, manipular el Rol en BD queda detectado por la verificación de integridad.
-                int? formatoDV = dvDAL.ObtenerDVV(FormatoDVUsuarioMarcador);
-                if (formatoDV == null || formatoDV < FormatoDVUsuarioActual)
+                // ── Tablas adicionales ──
+                foreach (var t in TablasAdicionales())
+                    VerificarUnaTabla(dvDAL, svc, t, pendiente, corruptas, inicializadas);
+
+                if (inicializadas.Count > 0)
+                    RegistrarInicializacion(inicializadas);
+
+                if (pendiente && corruptas.Count == 0)
+                    dvDAL.GuardarParametro(DAL.DigitoVerificador.ClavePendiente, "0");
+
+                if (corruptas.Count == 0)
                 {
-                    System.Diagnostics.Trace.TraceInformation(
-                        $"[Configuracion] Migrando formato del DVH de Usuario a v{FormatoDVUsuarioActual} " +
-                        "(ahora incluye Rol). Recalculando una vez...");
-                    RecalcularTodoDV(dvDAL, svc, filas);
-                    int? dvvMigFmt = dvDAL.ObtenerDVV("Usuario");
-                    LogearVerificacion("Usuario", dvvMigFmt, dvvMigFmt ?? 0, true, 0, "Arranque");
-                    return VerificarTablasAdicionales(out resultado);
-                }
-
-                var dvhsRecalculados = new List<int>();
-                var filasCorruptas   = new List<string>();
-
-                foreach (var fila in filas)
-                {
-                    int dvhCalculado = svc.CalcularDVH(fila.CamposParaDVH());
-                    dvhsRecalculados.Add(dvhCalculado);
-                    if (fila.DVHAlmacenado == null || fila.DVHAlmacenado != dvhCalculado)
-                        filasCorruptas.Add($"'{fila.Username}' (ID {fila.Id})");
-                }
-
-                int  dvvCalculado  = svc.CalcularDVV(dvhsRecalculados);
-                int? dvvAlmacenado = dvDAL.ObtenerDVV("Usuario");
-
-                bool dvhOk = filasCorruptas.Count == 0;
-                bool dvvOk = dvvAlmacenado != null && dvvAlmacenado == dvvCalculado;
-
-                if (dvhOk && dvvOk)
-                {
-                    LogearVerificacion("Usuario", dvvAlmacenado, dvvCalculado, true, 0, "Arranque");
-                    // Base sana ya migrada pero sin espejo todavía → sembrarlo desde estas filas íntegras.
-                    SeedEspejoSiVacio(filas);
-                    return VerificarTablasAdicionales(out resultado);
+                    IntegridadComprometida = false;
+                    return true;
                 }
 
                 resultado = new ResultadoIntegridad
                 {
-                    FilasCorruptas = filasCorruptas,
-                    DvvAlmacenado  = dvvAlmacenado,
-                    DvvCalculado   = dvvCalculado,
-                    HayDvhInvalido = !dvhOk,
-                    HayDvvInvalido = !dvvOk
+                    FilasCorruptas = corruptas,
+                    DvvAlmacenado  = dvvUsuario,
+                    DvvCalculado   = dvvUsuarioCalc,
+                    HayDvhInvalido = true,
+                    HayDvvInvalido = !dvvUsuarioOk
                 };
-                LogearVerificacion("Usuario", dvvAlmacenado, dvvCalculado, false, filasCorruptas.Count, "Arranque");
+                IntegridadComprometida = true;
                 return false;
             }
             catch (Exception ex)
             {
+                // FAIL-SAFE: ante CUALQUIER error (incluida una columna DVH o la tabla DVVertical
+                // ausente) NO se asume integridad: se bloquea el acceso y se informa al administrador.
                 System.Diagnostics.Trace.TraceError($"[Configuracion.VerificarIntegridadDV] {ex.Message}");
-
-                // Tolerancia: la columna DVH / la tabla DVVertical aún no existen (BD sin
-                // migrar) → no hay integridad que verificar todavía, no se bloquea.
-                string msg = (ex.Message ?? "") + " " + (ex.InnerException?.Message ?? "");
-                if (msg.Contains("DVH") || msg.Contains("DVVertical"))
-                    return true;
-
-                // FAIL-SAFE: ante cualquier otro error NO se asume integridad. Se bloquea el
-                // acceso y se informa al administrador (la consola de recuperación muestra el detalle).
                 resultado = new ResultadoIntegridad
                 {
                     HayDvhInvalido = true,
                     FilasCorruptas = new List<string> { "Error técnico al verificar la integridad: " + ex.Message },
                     DvvAlmacenado  = null,
-                    DvvCalculado   = 0
+                    DvvCalculado   = 0,
+                    ErrorTecnico   = ex.Message
                 };
+                IntegridadComprometida = true;
                 return false;
             }
         }
 
+        private static void VerificarUnaTabla(DAL.DigitoVerificador dvDAL, Seguridad.ICalculadorDV svc,
+            TablaProtegida t, bool pendiente, List<string> corruptas, List<string> inicializadas)
+        {
+            var filas = t.ObtenerFilas();   // un error de lectura se propaga: NO íntegro
+            int? dvvAlm = dvDAL.ObtenerDVV(t.Nombre);
+
+            if (CorrespondeInicializar(pendiente, dvvAlm, filas.ConvertAll(f => f.DVHAlmacenado)))
+            {
+                t.RecalcularTodo();
+                inicializadas.Add(t.Nombre);
+                int? dvvNuevo = dvDAL.ObtenerDVV(t.Nombre);
+                LogearVerificacion(t.Nombre, dvvNuevo, dvvNuevo ?? 0, true, 0, "Inicialización");
+                return;
+            }
+
+            var cmp = Comparar(filas.ConvertAll(f => f.Campos), filas.ConvertAll(f => f.DVHAlmacenado), dvvAlm, svc);
+            foreach (int i in cmp.Rotas) corruptas.Add(filas[i].Descripcion + " (DVH)");
+            if (!cmp.DvvOk) corruptas.Add(t.Nombre + (dvvAlm.HasValue ? " (DVV)" : " (DVV ausente)"));
+            int rotas = cmp.Rotas.Count + (cmp.DvvOk ? 0 : 1);
+            LogearVerificacion(t.Nombre, dvvAlm, cmp.DvvCalculado, rotas == 0, rotas, "Arranque");
+        }
+
+        // Deja constancia (bitácora, criticidad Alta) de que se inicializaron dígitos verificadores
+        // tras una instalación o actualización del formato: si alguien forzara una
+        // "inicialización" para sellar datos manipulados, queda el rastro.
+        private static void RegistrarInicializacion(List<string> tablas)
+        {
+            try
+            {
+                FabricaBitacora().RegistrarSinSesion(
+                    modulo:     "Integridad de Datos",
+                    actividad:  "Inicialización de Dígitos Verificadores",
+                    criticidad: BE.Criticidad.Alta,
+                    detalle:    "El instalador dejó pendiente la inicialización de los dígitos verificadores " +
+                                $"(formato {DAL.DigitoVerificador.FormatoActual}). Se calcularon para: " +
+                                string.Join(", ", tablas) + $" a las {DateTime.Now:HH:mm:ss}.");
+            }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[Configuracion] " + ex.Message); }
+        }
+
+        private static Servicios.IRegistroBitacora FabricaBitacora() => Servicios.FabricaBitacora.CrearSistema();
+
         /// <summary>
-        /// T07 — Asegura la integridad de la tabla Usuario ANTES de una operación sensible
+        /// T07 — Asegura la integridad de las tablas protegidas ANTES de una operación sensible
         /// (alta/reset/desbloqueo de usuarios). Lanza AppException si la base fue manipulada,
         /// de modo que la operación no se ejecute sobre datos corruptos.
         /// </summary>
@@ -266,27 +370,47 @@ namespace BLL
                     "(dígito verificador inválido). Reiniciá el sistema para reparar la integridad antes de continuar.");
         }
 
-        // Garantiza que exista al menos un segundo Administrador ("admin2") en la BD.
-        // Se llama al arrancar la app, antes del Login, para que si admin1 queda bloqueado
-        // siempre haya otro admin que pueda desbloquearlo.
-        // Retorna la ruta del archivo de credenciales si admin2 se creó en esta ejecución,
-        // o null si ya existía (no hace nada).
+        // ── Siembra inicial (primer arranque) ───────────────────────────────────────
+        // Marcas persistentes (ParametroSistema): se siembra UNA sola vez en la vida de la base.
+        // Antes se sembraba cada vez que faltaba admin2 o no había claves, así que quien borrara
+        // admin2 o las claves y abriera la app recibía credenciales nuevas en texto plano.
+        internal const string MarcaAdmin2   = "SeedAdmin2";
+        internal const string MarcaClaves   = "SeedClavesEmergencia";
+
+        // Garantiza que exista un segundo Administrador ("admin2") en una instalación nueva, para
+        // que si admin1 queda bloqueado haya otro admin que pueda desbloquearlo. Solo corre si la
+        // marca de siembra no existe (nunca se sembró) y admin2 no existe; deja la marca y lo
+        // registra en la bitácora. El archivo de credenciales queda accesible solo para el usuario
+        // de Windows actual. Retorna la ruta del archivo, o null si no sembró nada.
         public static string SeedAdminSecundario()
         {
             const string Username = "admin2";
-            const string Perfil   = BE.Roles.Administrador;
-
             try
             {
+                var dv = new DAL.DigitoVerificador();
+                if (dv.ObtenerParametro(MarcaAdmin2) != null) return null;
+
                 var usuarioDAL = new DAL.Usuario();
                 if (usuarioDAL.ObtenerPorUsername(Username) != null)
+                {
+                    // Base actualizada que ya tenía admin2: solo se deja la marca.
+                    dv.GuardarParametro(MarcaAdmin2, "existente");
                     return null;
+                }
 
                 string contrasena    = Servicios.GeneradorCredenciales.GenerarContrasena();
                 string claveHasheada = Seguridad.Encriptador.Hash(contrasena);
-                usuarioDAL.Alta(Username, claveHasheada, Perfil);
+                usuarioDAL.Alta(Username, claveHasheada, BE.Roles.Administrador);
+                dv.GuardarParametro(MarcaAdmin2, DateTime.Now.ToString("s"));
 
-                return Servicios.GeneradorCredenciales.ExportarCredenciales(Username, contrasena);
+                string ruta = Servicios.GeneradorCredenciales.ExportarCredenciales(Username, contrasena);
+                FabricaBitacora().RegistrarSinSesion(
+                    modulo:     "Arranque",
+                    actividad:  "Alta del administrador de respaldo (admin2)",
+                    criticidad: BE.Criticidad.Alta,
+                    detalle:    $"Primer arranque: se creó 'admin2' y sus credenciales se exportaron a '{ruta}' " +
+                                $"(acceso restringido al usuario de Windows {Environment.UserName}) a las {DateTime.Now:HH:mm:ss}.");
+                return ruta;
             }
             catch (Exception ex)
             {
@@ -295,16 +419,31 @@ namespace BLL
             }
         }
 
-        // RF-10 — Genera el set inicial de claves de emergencia (10) si todavía no existe ninguna.
-        // Se llama al arrancar, antes del Login. Devuelve la ruta del .txt si se generaron en esta
-        // ejecución, o null si ya existían (no hace nada) o si la tabla aún no está migrada.
+        // RF-10 — Genera el set inicial de claves de emergencia (10) una sola vez en la vida de la
+        // base (marca persistente), lo registra en la bitácora y exporta el .txt con acceso solo
+        // para el usuario actual. Devuelve la ruta del .txt, o null si no generó nada.
         public static string SeedClavesEmergencia()
         {
             try
             {
-                var dal = new DAL.ClaveRecuperacion();
-                if (dal.ContarTotal() > 0) return null;   // ya hay un set cargado
-                return RecuperacionAdmin.GenerarClavesEmergencia(10);
+                var dv = new DAL.DigitoVerificador();
+                if (dv.ObtenerParametro(MarcaClaves) != null) return null;
+
+                if (new DAL.ClaveRecuperacion().ContarTotal() > 0)
+                {
+                    dv.GuardarParametro(MarcaClaves, "existente");
+                    return null;
+                }
+
+                string ruta = RecuperacionAdmin.GenerarClavesEmergencia(10);
+                dv.GuardarParametro(MarcaClaves, DateTime.Now.ToString("s"));
+                FabricaBitacora().RegistrarSinSesion(
+                    modulo:     "Arranque",
+                    actividad:  "Generación del set inicial de claves de emergencia",
+                    criticidad: BE.Criticidad.Alta,
+                    detalle:    $"Primer arranque: se generaron 10 claves de emergencia exportadas a '{ruta}' " +
+                                $"(acceso restringido al usuario de Windows {Environment.UserName}) a las {DateTime.Now:HH:mm:ss}.");
+                return ruta;
             }
             catch (Exception ex)
             {
@@ -315,95 +454,55 @@ namespace BLL
 
         // ── Métodos de diagnóstico y reparación granular ──────────────────────
 
+        // Diagnóstico SOLO LECTURA (sin inicializar ni escribir) de todas las tablas protegidas.
         public static ResultadoDiagnostico ObtenerDiagnostico()
         {
             var dvDAL = new DAL.DigitoVerificador();
             var svc   = Seguridad.CalculadorDV.Crear();
             var filas = dvDAL.ObtenerFilasUsuario();
+            bool pendiente = dvDAL.ObtenerParametro(DAL.DigitoVerificador.ClavePendiente) == "1";
+            bool formatoOk = dvDAL.ObtenerParametro(DAL.DigitoVerificador.ClaveFormato)
+                             == DAL.DigitoVerificador.FormatoActual.ToString();
 
-            var rotas      = new List<BE.FilaUsuarioDV>();
-            var dvhsRecalc = new List<int>();
+            int? dvvAlmacenado = dvDAL.ObtenerDVV("Usuario");
+            var cmp = Comparar(filas.ConvertAll(f => f.CamposParaDVH()), filas.ConvertAll(f => f.DVHAlmacenado), dvvAlmacenado, svc);
+            var rotas = cmp.Rotas.ConvertAll(i => filas[i]);
 
-            foreach (var fila in filas)
+            var adicionales = new List<string>();
+            foreach (var t in TablasAdicionales())
             {
-                int dvhCalc = svc.CalcularDVH(fila.CamposParaDVH());
-
-                dvhsRecalc.Add(dvhCalc);
-
-                if (fila.DVHAlmacenado == null || fila.DVHAlmacenado != dvhCalc)
-                    rotas.Add(fila);
+                List<BE.FilaDV> ft;
+                try { ft = t.ObtenerFilas(); }
+                catch { adicionales.Add(t.Nombre); continue; }   // no se pudo leer → no íntegra
+                int? dvv = dvDAL.ObtenerDVV(t.Nombre);
+                if (CorrespondeInicializar(pendiente, dvv, ft.ConvertAll(f => f.DVHAlmacenado))) continue;
+                var c = Comparar(ft.ConvertAll(f => f.Campos), ft.ConvertAll(f => f.DVHAlmacenado), dvv, svc);
+                if (c.Rotas.Count > 0 || !c.DvvOk) adicionales.Add(t.Nombre);
             }
 
-            int  dvvCalculado  = svc.CalcularDVV(dvhsRecalc);
-            int? dvvAlmacenado = dvDAL.ObtenerDVV("Usuario");
-
-            // También diagnosticar Cliente/Empleado/Pedido (solo lectura, sin efectos),
-            // para que una corrupción ahí marque el estado y habilite "Recalcular Todo".
-            var adicionales = DiagnosticarTablasAdicionales();
-
-            bool usuarioOk = rotas.Count == 0 && dvvAlmacenado != null && dvvAlmacenado == dvvCalculado;
+            bool usuarioPendiente = CorrespondeInicializar(pendiente, dvvAlmacenado, filas.ConvertAll(f => f.DVHAlmacenado));
+            bool usuarioOk = usuarioPendiente || (rotas.Count == 0 && cmp.DvvOk);
+            if (!formatoOk) adicionales.Add("Formato DV");
             return new ResultadoDiagnostico
             {
                 Integro       = usuarioOk && adicionales.Count == 0,
                 DVVAlmacenado = dvvAlmacenado,
-                DVVCalculado  = dvvCalculado,
-                FilasRotas    = rotas,
+                DVVCalculado  = cmp.DvvCalculado,
+                FilasRotas    = usuarioPendiente ? new List<BE.FilaUsuarioDV>() : rotas,
                 TablasAdicionalesCorruptas = adicionales
             };
         }
 
-        // Verificación SOLO LECTURA (sin inicializar ni loguear) de las tablas adicionales
-        // protegidas con DV. Devuelve los nombres de las que tienen DVH/DVV inválido.
-        private static List<string> DiagnosticarTablasAdicionales()
-        {
-            var corruptas = new List<string>();
-            var dvDAL = new DAL.DigitoVerificador();
-            var svc   = Seguridad.CalculadorDV.Crear();
-            var pedidoDAL = new DAL.Pedido();
-
-            VerificarTablaSoloLectura(corruptas, dvDAL, svc, DAL.Cliente.DV_Tabla,
-                () => dvDAL.ObtenerFilas(DAL.Cliente.DV_Tabla, DAL.Cliente.DV_Pk, DAL.Cliente.DV_Columnas));
-            VerificarTablaSoloLectura(corruptas, dvDAL, svc, DAL.Empleado.DV_Tabla,
-                () => dvDAL.ObtenerFilas(DAL.Empleado.DV_Tabla, DAL.Empleado.DV_Pk, DAL.Empleado.DV_Columnas));
-            VerificarTablaSoloLectura(corruptas, dvDAL, svc, DAL.Pedido.DV_Tabla,
-                () => pedidoDAL.ObtenerFilasDV());
-
-            return corruptas;
-        }
-
-        private static void VerificarTablaSoloLectura(List<string> corruptas, DAL.DigitoVerificador dvDAL,
-            Seguridad.ICalculadorDV svc, string tabla, Func<List<BE.FilaDV>> obtenerFilas)
-        {
-            List<BE.FilaDV> filas;
-            try { filas = obtenerFilas(); } catch { return; }   // tabla sin migrar → no se evalúa
-            if (filas.Count == 0) return;
-
-            int? dvvAlm = dvDAL.ObtenerDVV(tabla);
-            // Primer arranque sin DV (todo en null/0) → no es corrupción.
-            bool todosNull = filas.TrueForAll(f => f.DVHAlmacenado == null || f.DVHAlmacenado == 0);
-            if (todosNull && (dvvAlm == null || dvvAlm == 0)) return;
-
-            var dvhs = new List<int>();
-            bool rota = false;
-            foreach (var f in filas)
-            {
-                int calc = svc.CalcularDVH(f.Campos);
-                dvhs.Add(calc);
-                if (f.DVHAlmacenado == null || f.DVHAlmacenado != calc) rota = true;
-            }
-            if (dvvAlm == null || dvvAlm != svc.CalcularDVV(dvhs)) rota = true;
-            if (rota) corruptas.Add(tabla);
-        }
-
-        // #5 — Guard fail-closed para operaciones sobre Dígitos Verificadores.
-        // Si hay una sesión iniciada, EXIGE que sea Administrador: un usuario autenticado sin
-        // permiso queda BLOQUEADO, el intento se REGISTRA en bitácora (criticidad Alta, visible
-        // para el administrador) y se lanza una AppException con mensaje genérico. Si NO hay sesión,
-        // es el flujo de reparación de ARRANQUE (break-glass), ya autorizado por ConfirmarAdminForm
-        // / Clave Maestra antes de llegar acá, por lo que se permite.
+        // #5 — Guard fail-closed para operaciones sobre Dígitos Verificadores: exige una sesión
+        // de Administrador. Un usuario autenticado sin permiso queda BLOQUEADO y el intento se
+        // REGISTRA en bitácora (criticidad Alta). Antes, sin sesión se permitía todo ("break-glass
+        // de arranque"); hoy la consola de recuperación solo se abre después de un login de
+        // Administrador validado contra el espejo de integridad, así que no hace falta esa excepción.
         private static void ExigirAdminParaDV(string operacion)
         {
-            if (!Seguridad.SessionManager.IsLoggedIn) return;   // break-glass de arranque
+            if (!Seguridad.SessionManager.IsLoggedIn)
+                throw new BE.AppException("err.bll.sesion_expirada",
+                    "La sesión expiró. Volvé a iniciar sesión.");
 
             var u = Seguridad.SessionManager.GetInstance().Usuario;
             if (u != null && u.EsAdministrador) return;
@@ -411,7 +510,7 @@ namespace BLL
             // Acceso no autorizado: registrar el evento para que el administrador lo vea.
             try
             {
-                new Servicios.Bitacora().RegistrarSinSesion(
+                FabricaBitacora().RegistrarSinSesion(
                     modulo:     "Integridad de Datos",
                     actividad:  "Acceso DENEGADO a Dígitos Verificadores",
                     criticidad: BE.Criticidad.Alta,
@@ -426,83 +525,68 @@ namespace BLL
                 "Esta acción es exclusiva del Administrador y quedó registrada.");
         }
 
-        // Recalcula y persiste DVH de cada fila de Usuario y el DVV de la tabla.
-        // Llamado por el Administrador desde Diagnóstico de Integridad → "Recalcular DV".
+        // "Recalcular todo": acepta los datos ACTUALES de todas las tablas protegidas como
+        // legítimos, recalcula sus DVH/DVV, sella el formato vigente y baja la marca de
+        // inicialización pendiente. Exclusivo de un Administrador con sesión (recuperación).
         public static void RecalcularIntegridadDV()
         {
             ExigirAdminParaDV("Recalcular DV");
             var dvDAL = new DAL.DigitoVerificador();
             var svc   = Seguridad.CalculadorDV.Crear();
-            var filas = dvDAL.ObtenerFilasUsuario();
-            RecalcularTodoDV(dvDAL, svc, filas);
+            RecalcularTodoDV(dvDAL, svc, dvDAL.ObtenerFilasUsuario());
 
-            // T07 — Tablas adicionales protegidas con DV.
-            dvDAL.RecalcularTabla(DAL.Cliente.DV_Tabla,  DAL.Cliente.DV_Pk,  DAL.Cliente.DV_Columnas);
-            dvDAL.RecalcularTabla(DAL.Empleado.DV_Tabla, DAL.Empleado.DV_Pk, DAL.Empleado.DV_Columnas);
-            new DAL.Pedido().RecalcularDV();   // objeto multi-tabla (pedido + líneas)
+            var tablas = new List<string> { "Usuario" };
+            foreach (var t in TablasAdicionales())
+            {
+                t.RecalcularTodo();
+                tablas.Add(t.Nombre);
+            }
+            dvDAL.GuardarParametro(DAL.DigitoVerificador.ClaveFormato, DAL.DigitoVerificador.FormatoActual.ToString());
+            dvDAL.GuardarParametro(DAL.DigitoVerificador.ClavePendiente, "0");
+            IntegridadComprometida = false;
 
-            // Trazabilidad: dejar constancia en bitácora del recálculo de dígitos verificadores.
-            // Se usa RegistrarSinSesion porque esta operación también puede dispararse desde el
-            // form de integridad en el ARRANQUE, antes de que haya una sesión iniciada.
-            int? idActor = Seguridad.SessionManager.IsLoggedIn
-                           ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
-            string actor = Seguridad.SessionManager.IsLoggedIn
-                           ? Seguridad.SessionManager.GetInstance().Usuario.Username : "(arranque/sin sesión)";
-            new Servicios.Bitacora().RegistrarSinSesion(
+            var u = Seguridad.SessionManager.GetInstance().Usuario;
+            FabricaBitacora().RegistrarSinSesion(
                 modulo:     "Integridad de Datos",
                 actividad:  "Recálculo de Dígitos Verificadores",
                 criticidad: BE.Criticidad.Alta,
-                idUsuario:  idActor,
-                detalle:    $"{actor} ejecutó el recálculo de DVH/DVV (Usuario, Cliente, Empleado, Pedido) a las {DateTime.Now:HH:mm:ss}.");
+                idUsuario:  u.Id,
+                detalle:    $"{u.Username} ejecutó el recálculo de DVH/DVV ({string.Join(", ", tablas)}) " +
+                            $"a las {DateTime.Now:HH:mm:ss}.");
         }
 
-        // Helper compartido entre VerificarIntegridadDV (primer arranque) y RecalcularIntegridadDV.
+        // Helper compartido entre la inicialización y RecalcularIntegridadDV: recalcula TODOS los
+        // DVH de Usuario y su DVV (con el bloqueo del DV tomado) y reconstruye el espejo.
         private static void RecalcularTodoDV(DAL.DigitoVerificador dvDAL,
                                               Seguridad.ICalculadorDV svc,
                                               List<BE.FilaUsuarioDV> filas)
         {
-            var dvhValues = new List<int>();
-            foreach (var fila in filas)
-            {
-                int dvh = svc.CalcularDVH(fila.CamposParaDVH());
-                dvDAL.ActualizarDVH(fila.Id, dvh);
-                fila.DVHAlmacenado = dvh;
-                dvhValues.Add(dvh);
-            }
-            int dvv = svc.CalcularDVV(dvhValues);
-            dvDAL.GuardarDVV("Usuario", dvv);
-            // Sellar el formato vigente del DVH: marca que estas filas se calcularon con la
-            // fórmula actual (incluye Rol), para que la migración no vuelva a dispararse.
-            dvDAL.GuardarDVV(FormatoDVUsuarioMarcador, FormatoDVUsuarioActual);
+            filas.Clear();
+            filas.AddRange(dvDAL.RecalcularTablaUsuario());
             // T07 — Reconstruir el espejo de integridad para que refleje el estado recién
-            // aceptado como legítimo (primer arranque, migración o "Asumir pérdida"/"Recalcular Todo").
+            // aceptado como legítimo (inicialización o "Asumir pérdida"/"Recalcular Todo").
             new DAL.EspejoUsuario().Reconstruir(filas);
         }
 
         // T07 — Recalcula DVH/DVV SOLO de la tabla Usuario y reconstruye su espejo de integridad.
-        // Lo usa la recuperación asistida tras restaurar valores desde el espejo (no toca las demás
-        // tablas protegidas, ya verificadas aparte). Exige permiso de Administrador.
+        // Lo usa la recuperación asistida tras restaurar valores desde el espejo. Exige Administrador.
         public static void RecalcularUsuario()
         {
             ExigirAdminParaDV("Recalcular Usuario (DV)");
             var dvDAL = new DAL.DigitoVerificador();
-            var svc   = Seguridad.CalculadorDV.Crear();
-            RecalcularTodoDV(dvDAL, svc, dvDAL.ObtenerFilasUsuario());
+            RecalcularTodoDV(dvDAL, Seguridad.CalculadorDV.Crear(), dvDAL.ObtenerFilasUsuario());
         }
 
-        // Expone el guard de autorización de DV para la recuperación asistida (mismo fail-closed:
-        // con sesión exige Administrador y registra el intento; sin sesión es break-glass de arranque).
+        // Expone el guard de autorización de DV para la recuperación asistida (mismo fail-closed).
         public static void ExigirAdminDV(string operacion) => ExigirAdminParaDV(operacion);
 
-        // T07 — Siembra el espejo de integridad SOLO si está vacío y la tabla existe, a partir de
-        // filas ya verificadas como íntegras. Permite que bases sanas ya migradas obtengan su espejo
-        // sin forzar un recálculo. Nunca siembra desde datos corruptos (se llama solo en el camino OK).
+        // T07 — Siembra el espejo de integridad SOLO si está vacío, a partir de filas ya verificadas
+        // como íntegras. Nunca siembra desde datos corruptos (se llama solo en el camino OK).
         private static void SeedEspejoSiVacio(List<BE.FilaUsuarioDV> filas)
         {
             try
             {
                 var esp = new DAL.EspejoUsuario();
-                if (!esp.Existe()) return;
                 if (filas != null && filas.Count > 0 && esp.ObtenerFilas().Count == 0)
                     esp.Reconstruir(filas);
             }
@@ -512,88 +596,13 @@ namespace BLL
             }
         }
 
-        // ── DV en tablas ADICIONALES (Cliente, Empleado) — T07 ──────────────────
-
-        // Verifica las tablas protegidas además de Usuario. Si alguna está corrupta,
-        // arma el resultado y devuelve false; si están OK (o se inicializan en el primer
-        // arranque), devuelve true. Las definiciones de columnas viven en cada DAL.
         /// <summary>
-        /// Detalle de las tablas protegidas ADICIONALES a Usuario (Cliente, Empleado, Pedido) cuyo dígito
-        /// verificador no cierra. Lista vacía si están íntegras. Lo usa la consola de recuperación: si solo
-        /// falla una de estas tablas, el diagnóstico de Usuario no alcanza para explicar el bloqueo.
+        /// Detalle de las tablas protegidas ADICIONALES a Usuario cuyo dígito verificador no cierra
+        /// (solo lectura). Lista vacía si están íntegras. Lo usa la consola de recuperación.
         /// </summary>
         public static List<string> ObtenerTablasAdicionalesCorruptas()
         {
-            return VerificarTablasAdicionales(out ResultadoIntegridad r)
-                ? new List<string>()
-                : (r?.FilasCorruptas ?? new List<string>());
-        }
-
-        private static bool VerificarTablasAdicionales(out ResultadoIntegridad resultado)
-        {
-            resultado = null;
-            var dvDAL = new DAL.DigitoVerificador();
-            var svc   = Seguridad.CalculadorDV.Crear();
-            var corruptas = new List<string>();
-
-            var pedidoDAL = new DAL.Pedido();
-            VerificarUnaTabla(dvDAL, svc, DAL.Cliente.DV_Tabla,
-                () => dvDAL.ObtenerFilas(DAL.Cliente.DV_Tabla, DAL.Cliente.DV_Pk, DAL.Cliente.DV_Columnas),
-                () => dvDAL.RecalcularTabla(DAL.Cliente.DV_Tabla, DAL.Cliente.DV_Pk, DAL.Cliente.DV_Columnas), corruptas);
-            VerificarUnaTabla(dvDAL, svc, DAL.Empleado.DV_Tabla,
-                () => dvDAL.ObtenerFilas(DAL.Empleado.DV_Tabla, DAL.Empleado.DV_Pk, DAL.Empleado.DV_Columnas),
-                () => dvDAL.RecalcularTabla(DAL.Empleado.DV_Tabla, DAL.Empleado.DV_Pk, DAL.Empleado.DV_Columnas), corruptas);
-            // T07 — Pedido: objeto MULTI-TABLA (pedido + líneas PedidoPrenda).
-            VerificarUnaTabla(dvDAL, svc, DAL.Pedido.DV_Tabla,
-                () => pedidoDAL.ObtenerFilasDV(),
-                () => pedidoDAL.RecalcularDV(), corruptas);
-
-            if (corruptas.Count == 0) return true;
-
-            resultado = new ResultadoIntegridad
-            {
-                HayDvhInvalido = true,
-                FilasCorruptas = corruptas,
-                DvvAlmacenado  = null,
-                DvvCalculado   = 0
-            };
-            return false;
-        }
-
-        private static void VerificarUnaTabla(DAL.DigitoVerificador dvDAL, Seguridad.ICalculadorDV svc,
-            string tabla, System.Func<List<BE.FilaDV>> obtenerFilas, System.Action recalcular, List<string> corruptas)
-        {
-            List<BE.FilaDV> filas;
-            try { filas = obtenerFilas(); }
-            catch { return; }   // tabla/columna DVH sin migrar → no se verifica
-            if (filas.Count == 0) return;
-
-            // Primer arranque: sin DVH ni DVV → inicializar (no es corrupción).
-            bool todosNull = filas.TrueForAll(f => f.DVHAlmacenado == null || f.DVHAlmacenado == 0);
-            int? dvvAlm = dvDAL.ObtenerDVV(tabla);
-            if (todosNull && (dvvAlm == null || dvvAlm == 0))
-            {
-                recalcular();
-                int? dvvNuevoTbl = dvDAL.ObtenerDVV(tabla);
-                LogearVerificacion(tabla, dvvNuevoTbl, dvvNuevoTbl ?? 0, true, 0, "Arranque");
-                return;
-            }
-
-            int antes = corruptas.Count;
-            var dvhs  = new List<int>();
-            foreach (var f in filas)
-            {
-                int calc = svc.CalcularDVH(f.Campos);
-                dvhs.Add(calc);
-                if (f.DVHAlmacenado == null || f.DVHAlmacenado != calc)
-                    corruptas.Add(f.Descripcion + " (DVH)");
-            }
-            int dvvCalc = svc.CalcularDVV(dvhs);
-            bool dvvOk  = dvvAlm != null && dvvAlm == dvvCalc;
-            if (!dvvOk) corruptas.Add(tabla + " (DVV)");
-
-            int rotasTabla = corruptas.Count - antes;
-            LogearVerificacion(tabla, dvvAlm, dvvCalc, rotasTabla == 0, rotasTabla, "Arranque");
+            return ObtenerDiagnostico().TablasAdicionalesCorruptas;
         }
 
         // Devuelve los últimos N registros del historial de verificaciones DV.
@@ -607,6 +616,9 @@ namespace BLL
         // Centraliza el acceso a DAL para que Menu.cs no dependa de DAL directamente.
         public static void RegistrarVerificacionPeriodica(ResultadoDiagnostico diag)
         {
+            // Solo con una sesión iniciada (lo dispara el Timer del menú).
+            if (!Seguridad.SessionManager.IsLoggedIn)
+                throw new BE.AppException("err.bll.sesion_expirada", "La sesión expiró. Volvé a iniciar sesión.");
             try
             {
                 new DAL.HistorialIntegridad().Insertar(new BE.HistorialIntegridad
@@ -615,7 +627,7 @@ namespace BLL
                     DVVAlmacenado  = diag.DVVAlmacenado,
                     DVVCalculado   = diag.DVVCalculado,
                     Resultado      = diag.Integro,
-                    FilasCorruptas = diag.FilasRotas.Count,
+                    FilasCorruptas = diag.FilasRotas.Count + diag.TablasAdicionalesCorruptas.Count,
                     DisparadoPor   = "Timer"
                 });
             }
@@ -625,7 +637,7 @@ namespace BLL
         // ── Recordatorio de backup ────────────────────────────────────────────
 
         private static readonly string RutaConfigRecordatorio =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups", "recordatorio.cfg");
+            Path.Combine(Backup.CarpetaBackups, "recordatorio.cfg");
 
         private const int DiasRecordatorioDefault = 7;
 
@@ -643,6 +655,8 @@ namespace BLL
 
         public static void GuardarDiasRecordatorio(int dias)
         {
+            BLLHelper.ExigirAdministrador("err.bll.backup.sin_permiso",
+                "Solo un Administrador puede configurar el recordatorio de backup.");
             try
             {
                 string dir = Path.GetDirectoryName(RutaConfigRecordatorio);

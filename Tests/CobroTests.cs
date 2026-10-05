@@ -125,7 +125,8 @@ namespace Tests
             Assert.AreEqual(BE.EstadoCobro.Cobrado, resultado.Estado);
             Assert.AreEqual(DateTime.Today.AddMonths(1), cliente.FechaVencimiento);
             Assert.IsNull(cliente.FechaLimiteGracia);
-            Assert.AreEqual(1, dalCliente.ModificarVeces);
+            Assert.AreEqual(1, dalCliente.RenovarVencimientoVeces, "Actualiza solo vencimiento y gracia.");
+            Assert.AreEqual(0, dalCliente.ModificarVeces, "Ya no reescribe el cliente entero desde memoria.");
             Assert.AreEqual(1, dalCobro.AltaVeces);
 
             var registro = dalCobro.Registros[0];
@@ -420,6 +421,57 @@ namespace Tests
         // alguien invierte el orden real en el constructor de producción, ningún test de los de
         // arriba lo detecta. Estos instancian la clase fachada REAL y ejercitan Procesar(...) de
         // punta a punta, más el guard de entrada (permisos + sin_plan) que tampoco tenía cobertura.
+
+        [TestMethod]
+        public void ProcesarPago_OtraSesionYaCobro_NoRegistraUnSegundoCobro()
+        {
+            var dalCliente = new FakeClienteDAL
+            {
+                // En la base el vencimiento ya fue extendido por otro cajero.
+                VencimientoEnBaseConfigurado = true,
+                VencimientoEnBase = DateTime.Today.AddMonths(1)
+            };
+            var dalCobro = new FakeCobroDAL();
+            var handler = new ProcesarPagoHandler(dalCliente, dalCobro, new FakeCargoPrendaDAL());
+            try
+            {
+                handler.Procesar(new ContextoCobro
+                {
+                    Cliente = ClienteVencido(), Decision = DecisionCobro.Cobrado,
+                    Modalidad = BE.Builders.ModalidadCobro.Mensual, Actor = "caja"
+                });
+                Assert.Fail("Debía rechazar el cobro duplicado.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.cobro.concurrente", ex.Clave); }
+            Assert.AreEqual(0, dalCobro.AltaVeces, "No se registra un segundo Cobrado.");
+        }
+
+        [TestMethod]
+        public void Real_Vendedor_NoPuedeCobrar_LoHaceCaja()
+        {
+            var permisos = new System.Collections.Generic.List<BE.Permiso>
+            {
+                new BE.Permiso { NombreMenu = BE.Patentes.ClientesEditar },
+                new BE.Permiso { NombreMenu = BE.Patentes.CobroSuscripcion }
+            };
+            SessionManager.Login(new BE.Usuario { Id = 20, Username = "vendedor", Perfil = "Vendedor", Rol = "Vendedor", Permisos = permisos });
+            var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
+            try
+            {
+                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "vendedor");
+                Assert.Fail("El Vendedor ya no registra el cobro recurrente.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }
+            SessionManager.Logout();
+
+            SessionManager.Login(new BE.Usuario
+            {
+                Id = 21, Username = "caja", Perfil = "Caja", Rol = "Caja",
+                Permisos = new System.Collections.Generic.List<BE.Permiso> { new BE.Permiso { NombreMenu = BE.Patentes.CajaEditar } }
+            });
+            var r = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja");
+            Assert.AreEqual(BE.EstadoCobro.Cobrado, r.Estado);
+        }
 
         [TestMethod]
         public void Real_SinSesion_LanzaSesionExpirada()

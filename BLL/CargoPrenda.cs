@@ -11,8 +11,8 @@ namespace BLL
     public class CargoPrenda : Interfaces.ICargoPrendaService
     {
         private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
-        private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
         public CargoPrenda() : this(new DAL.CargoPrenda()) { }
         public CargoPrenda(DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda)

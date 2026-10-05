@@ -57,6 +57,7 @@ namespace Tests.Fakes
         public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda() => CantidadPedidosPorPrenda;
         public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente) => PrendasHistoricasPorCliente;
         public BE.Pedido ObtenerPorId(int idPedido) => PedidosDevueltos.Find(p => p.IdPedido == idPedido);
+        public bool TienePedidoActivo(int idCliente) => PedidosDevueltos.Exists(p => p.IdCliente == idCliente && p.EsActivo());
 
         public int AltaSinReserva(BE.Pedido pedido)
         {
@@ -115,18 +116,21 @@ namespace Tests.Fakes
             return RegistrarDevolucionRespuesta;
         }
 
-        public void ReconciliarPrendasConEstado(int idPedido) { }
-
-        public void RestaurarOperacionAtomica(int idPedido, IList<(string Campo, string ValorAnterior)> campos)
+        public BE.EstadoPedido? UltimoEstadoEsperadoRestaurar { get; private set; }
+        public void RestaurarOperacionAtomica(int idPedido, BE.EstadoPedido estadoEsperado,
+                                              IList<(string Campo, string ValorAnterior)> campos)
         {
             RestaurarOperacionAtomicaVeces++;
+            UltimoEstadoEsperadoRestaurar = estadoEsperado;
             UltimoRestaurarOperacionCampos = campos;
         }
 
-        public void Cancelar(int idPedido, string motivo)
+        public BE.EstadoPedido? UltimoEstadoEsperadoCancelar { get; private set; }
+        public void Cancelar(int idPedido, int idCliente, BE.EstadoPedido estadoEsperado, string motivo)
         {
             CancelarVeces++;
             UltimoMotivoCancelar = motivo;
+            UltimoEstadoEsperadoCancelar = estadoEsperado;
         }
 
         public bool DesCancelar(int idPedido, int idCliente)
@@ -137,5 +141,7 @@ namespace Tests.Fakes
 
         public List<BE.FilaDV> ObtenerFilasDV() => new List<BE.FilaDV>();
         public void RecalcularDV() => RecalcularDVVeces++;
+        public int ActualizarDVVeces { get; private set; }
+        public void ActualizarDV(int idPedido) => ActualizarDVVeces++;
     }
 }

@@ -680,5 +680,44 @@ namespace Tests
 
             Assert.AreEqual(0, elegibles.Count);
         }
+
+        // ── Pausa / baja con un pedido todavía en el circuito ───────────────
+
+        [TestMethod]
+        public void Pausar_ConPedidoEnCurso_Rechaza()
+        {
+            var dalPedido = new FakePedidoDAL();
+            dalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 1, IdCliente = 1, Estado = BE.EstadoPedido.Separado });
+            var cliente = new BE.Cliente { IdCliente = 1, IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(20) };
+            var handler = new PausarSuscripcionHandler(new FakeClienteDAL(), new FakeRenovacionDAL(), null, dalPedido);
+            try
+            {
+                handler.Procesar(new ContextoRenovacion { Cliente = cliente, Decision = DecisionRenovacion.Pausar,
+                                                          FechaPausaHasta = DateTime.Today.AddDays(10) });
+                Assert.Fail("Debía rechazar la pausa con un pedido en curso.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.renovacion.pedido_activo", ex.Clave); }
+        }
+
+        [TestMethod]
+        public void Baja_ConPedidoEnCurso_Rechaza_YConPedidoEntregadoPermite()
+        {
+            var dalPedido = new FakePedidoDAL();
+            dalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 1, IdCliente = 1, Estado = BE.EstadoPedido.Pendiente });
+            var dalCliente = new FakeClienteDAL();
+            var handler = new BajaSuscripcionHandler(dalCliente, new FakeRenovacionDAL(), new FakePrendaDAL(), dalPedido);
+            var cliente = new BE.Cliente { IdCliente = 1, IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(20) };
+            try
+            {
+                handler.Procesar(new ContextoRenovacion { Cliente = cliente, Decision = DecisionRenovacion.Baja });
+                Assert.Fail("Debía rechazar la baja con un pedido en curso.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.renovacion.pedido_activo", ex.Clave); }
+            Assert.AreEqual(1, cliente.IdPlan, "No toca la suscripción.");
+
+            dalPedido.PedidosDevueltos[0].Estado = BE.EstadoPedido.Entregado;
+            handler.Procesar(new ContextoRenovacion { Cliente = cliente, Decision = DecisionRenovacion.Baja });
+            Assert.IsNull(cliente.IdPlan);
+        }
     }
 }

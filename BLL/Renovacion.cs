@@ -12,11 +12,11 @@ namespace BLL
     public class Renovacion : Interfaces.IRenovacionService
     {
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
         private readonly Manejadores.ManejadorRenovacion cadena;
 
-        public Renovacion() : this(new DAL.Cliente(), new DAL.Renovacion(), new DAL.PlanSuscripcion(), new DAL.Prenda()) { }
+        public Renovacion() : this(new DAL.Cliente(), new DAL.Renovacion(), new DAL.PlanSuscripcion(), new DAL.Prenda(), new DAL.Pedido()) { }
 
         // dalPlan/dalPrenda tipados por interfaz (antes eran DAL.PlanSuscripcion/DAL.Prenda
         // concretos): con eso, ni esta fachada ni CambioPlanHandler/BajaSuscripcionHandler se
@@ -26,7 +26,8 @@ namespace BLL
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
 
         public Renovacion(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
-                           DAL.Interfaces.IPlanSuscripcionDAL dalPlan, DAL.Interfaces.IPrendaDAL dalPrenda)
+                           DAL.Interfaces.IPlanSuscripcionDAL dalPlan, DAL.Interfaces.IPrendaDAL dalPrenda,
+                           DAL.Interfaces.IPedidoDAL dalPedido = null)
         {
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
@@ -37,8 +38,8 @@ namespace BLL
             var verificar = new Manejadores.VerificarVencimientoHandler();
             var renovar   = new Manejadores.IntentarRenovarHandler(dalCliente, dalRenovacion);
             var cambio    = new Manejadores.CambioPlanHandler(dalCliente, dalPlan, dalRenovacion);
-            var pausar    = new Manejadores.PausarSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda);
-            var baja      = new Manejadores.BajaSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda);
+            var pausar    = new Manejadores.PausarSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda, dalPedido);
+            var baja      = new Manejadores.BajaSuscripcionHandler(dalCliente, dalRenovacion, dalPrenda, dalPedido);
 
             pausar.AgregarSiguiente(baja);
             cambio.AgregarSiguiente(pausar);

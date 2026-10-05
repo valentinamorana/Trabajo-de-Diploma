@@ -116,6 +116,7 @@ namespace Tests
         [TestMethod]
         public void NotificarSiCorresponde_HayPendiente_ReservaElMasAntiguoFIFO()
         {
+            LoginComoAdministrador();
             var ctx = new Contexto();
             var masViejo = new BE.ListaEspera { IdListaEspera = 1, IdPrenda = 1, IdCliente = 10, Estado = BE.EstadoListaEspera.Pendiente, FechaAlta = DateTime.Now.AddHours(-2) };
             var masNuevo = new BE.ListaEspera { IdListaEspera = 2, IdPrenda = 1, IdCliente = 20, Estado = BE.EstadoListaEspera.Pendiente, FechaAlta = DateTime.Now.AddHours(-1) };
@@ -132,6 +133,7 @@ namespace Tests
         [TestMethod]
         public void NotificarSiCorresponde_NadieEspera_NoHaceNada()
         {
+            LoginComoAdministrador();
             var ctx = new Contexto();
             var bll = ctx.Crear();
 
@@ -160,6 +162,7 @@ namespace Tests
         [TestMethod]
         public void CerrarSiReservada_ReservaDelCliente_PasaAConvertida()
         {
+            LoginComoAdministrador();
             var ctx = new Contexto();
             var fila = new BE.ListaEspera
             {
@@ -177,6 +180,7 @@ namespace Tests
         [TestMethod]
         public void CerrarSiReservada_ReservaExpirada_NoLaCierra()
         {
+            LoginComoAdministrador();
             var ctx = new Contexto();
             var fila = new BE.ListaEspera
             {
@@ -189,6 +193,50 @@ namespace Tests
             bll.CerrarSiReservada("Test", 1, 10, "admin");
 
             Assert.AreEqual(BE.EstadoListaEspera.Reservada, fila.Estado); // sigue igual, no se tocó
+        }
+
+        [TestMethod]
+        public void NotificarSiCorresponde_SinSesion_Rechaza()
+        {
+            var ctx = new Contexto();
+            ctx.DalListaEspera.Registros.Add(new BE.ListaEspera { IdListaEspera = 1, IdPrenda = 1, IdCliente = 10, Estado = BE.EstadoListaEspera.Pendiente });
+            AssertThrows(() => ctx.Crear().NotificarSiCorresponde(1, "x"));
+            Assert.AreEqual(BE.EstadoListaEspera.Pendiente, ctx.DalListaEspera.Registros[0].Estado);
+        }
+
+        [TestMethod]
+        public void ReservaVencida_SeLiberaYPasaAlSiguiente()
+        {
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 1, Nombre = "Vestido", Estado = BE.EstadoPrenda.Disponible } };
+            var vencida = new BE.ListaEspera { IdListaEspera = 1, IdPrenda = 1, IdCliente = 10, Estado = BE.EstadoListaEspera.Reservada,
+                                               FechaLimiteReserva = DateTime.Now.AddHours(-1), FechaAlta = DateTime.Now.AddDays(-3) };
+            var siguiente = new BE.ListaEspera { IdListaEspera = 2, IdPrenda = 1, IdCliente = 20, Estado = BE.EstadoListaEspera.Pendiente,
+                                                 FechaAlta = DateTime.Now.AddDays(-2) };
+            ctx.DalListaEspera.Registros.AddRange(new[] { vencida, siguiente });
+
+            ctx.Crear().ObtenerActivas();   // al consultar la lista se liberan las vencidas
+
+            Assert.AreEqual(BE.EstadoListaEspera.Cancelada, vencida.Estado);
+            Assert.AreEqual(BE.EstadoListaEspera.Reservada, siguiente.Estado, "El siguiente de la lista recibe la reserva.");
+        }
+
+        [TestMethod]
+        public void Cancelar_UnaReserva_AvisaAlSiguiente()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 1, Nombre = "Vestido", Estado = BE.EstadoPrenda.Disponible } };
+            var reservada = new BE.ListaEspera { IdListaEspera = 1, IdPrenda = 1, IdCliente = 10, Estado = BE.EstadoListaEspera.Reservada,
+                                                 FechaLimiteReserva = DateTime.Now.AddHours(20) };
+            var siguiente = new BE.ListaEspera { IdListaEspera = 2, IdPrenda = 1, IdCliente = 20, Estado = BE.EstadoListaEspera.Pendiente,
+                                                 FechaAlta = DateTime.Now.AddDays(-1) };
+            ctx.DalListaEspera.Registros.AddRange(new[] { reservada, siguiente });
+
+            ctx.Crear().Cancelar("Test", 1, "admin");
+
+            Assert.AreEqual(BE.EstadoListaEspera.Cancelada, reservada.Estado);
+            Assert.AreEqual(BE.EstadoListaEspera.Reservada, siguiente.Estado);
         }
 
         // ── Cancelar ──────────────────────────────────────────────────────────

@@ -65,6 +65,20 @@ namespace Tests.Fakes
 
         public void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente) => Modificar(cliente);
 
+        // Cobro recurrente con control optimista: el doble compara contra el vencimiento "en la
+        // base" (VencimientoEnBase si se configura; si no, acepta) y registra la llamada.
+        public int RenovarVencimientoVeces { get; private set; }
+        public DateTime? VencimientoEnBase { get; set; }
+        public bool VencimientoEnBaseConfigurado { get; set; }
+        public bool RenovarVencimientoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente,
+                                           DateTime? vencimientoLeido, DateTime nuevoVencimiento)
+        {
+            if (VencimientoEnBaseConfigurado && VencimientoEnBase != vencimientoLeido) return false;
+            RenovarVencimientoVeces++;
+            VencimientoEnBase = nuevoVencimiento;
+            return true;
+        }
+
         // Espías del crédito de referido (en la BD real son UPDATEs atómicos).
         public List<KeyValuePair<int, decimal>> CreditosSumados { get; } = new List<KeyValuePair<int, decimal>>();
         public List<KeyValuePair<int, decimal>> CreditosConsumidos { get; } = new List<KeyValuePair<int, decimal>>();
@@ -75,6 +89,7 @@ namespace Tests.Fakes
         public void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
             => CreditosConsumidos.Add(new KeyValuePair<int, decimal>(idCliente, monto));
 
-        public void RecalcularDV() => RecalcularDVVeces++;
+        public List<int> IdsDVRecalculados { get; } = new List<int>();
+        public void RecalcularDV(int idCliente) { RecalcularDVVeces++; IdsDVRecalculados.Add(idCliente); }
     }
 }

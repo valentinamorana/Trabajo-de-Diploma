@@ -14,6 +14,8 @@ namespace DAL.Interfaces
         Dictionary<int, int> ObtenerCantidadPedidosPorPrenda();
         List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente);
         BE.Pedido ObtenerPorId(int idPedido);
+        // ¿El cliente tiene un pedido que todavía no terminó su ciclo (BE.Pedido.EsActivo)?
+        bool TienePedidoActivo(int idCliente);
 
         // ── PN01 — circuito de control de stock ─────────────────────────────
         // Inserta el pedido y sus líneas SIN reservar prendas (EnControlStock o Desistido).
@@ -33,14 +35,19 @@ namespace DAL.Interfaces
                                     List<BE.Prenda> seleccionAjustada = null);
         List<BE.PedidoFaltante> ObtenerFaltantes(int idPedido);
 
+        // Claims atómicos: lanzan "estado_cambiado" si el pedido ya no está en el estado esperado.
         void Despachar(int idPedido);
         void MarcarEntregado(int idPedido);
         int RegistrarDevolucion(int idPedido, int idCliente);
-        void ReconciliarPrendasConEstado(int idPedido);
-        void RestaurarOperacionAtomica(int idPedido, IList<(string Campo, string ValorAnterior)> campos);
-        void Cancelar(int idPedido, string motivo);
+        // Revierte campos desde el historial solo si el pedido sigue en 'estadoEsperado'.
+        void RestaurarOperacionAtomica(int idPedido, BE.EstadoPedido estadoEsperado,
+                                       IList<(string Campo, string ValorAnterior)> campos);
+        // Pendiente|Separado → Cancelado, liberando solo las prendas EnUso de ese cliente.
+        void Cancelar(int idPedido, int idCliente, BE.EstadoPedido estadoEsperado, string motivo);
         bool DesCancelar(int idPedido, int idCliente);
         List<BE.FilaDV> ObtenerFilasDV();
+        // T07: DVH de un pedido + DVV (tras cada escritura) / recálculo total (solo administrativo).
+        void ActualizarDV(int idPedido);
         void RecalcularDV();
     }
 }

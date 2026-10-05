@@ -244,6 +244,18 @@ namespace DAL
             return lista;
         }
 
+        // ¿El cliente tiene un pedido en el circuito (mismos estados que BE.Pedido.EsActivo)?
+        public bool TienePedidoActivo(int idCliente)
+        {
+            var activos = new[] { BE.EstadoPedido.EnControlStock, BE.EstadoPedido.ConFaltantes,
+                                  BE.EstadoPedido.Separado, BE.EstadoPedido.Pendiente, BE.EstadoPedido.Despachado };
+            var enLista = string.Join(",", Array.ConvertAll(activos, e => ((int)e).ToString(CultureInfo.InvariantCulture)));
+            DataTable t = acceso.Leer(
+                "SELECT COUNT(*) AS N FROM Pedido WHERE IdCliente = @IdCliente AND Estado IN (" + enLista + ")",
+                new[] { new SqlParameter("@IdCliente", idCliente) });
+            return t != null && t.Rows.Count > 0 && Convert.ToInt32(t.Rows[0]["N"]) > 0;
+        }
+
         // Obtiene un pedido por ID incluyendo sus prendas.
         public override BE.Pedido ObtenerPorId(int idPedido)
         {
@@ -312,7 +324,7 @@ namespace DAL
                 InsertarLineasEnTx(conexion, tx, idNuevo, pedido.Prendas);
             });
 
-            RecalcularDVSilencioso();   // T07: DV multi-tabla (pedido + líneas)
+            ActualizarDV(idNuevo);   // T07: DV multi-tabla (pedido + líneas)
             return idNuevo;
         }
 
@@ -339,7 +351,7 @@ namespace DAL
                 Ejecutar(conexion, tx, "DELETE FROM PedidoPrenda WHERE IdPedido=@IdPedido", idPedido);
                 InsertarLineasEnTx(conexion, tx, idPedido, prendas);
             });
-            RecalcularDVSilencioso();   // T07 — cambiaron las líneas del pedido
+            ActualizarDV(idPedido);   // T07 — cambiaron las líneas del pedido
         }
 
         // "Informe de prendas faltantes": EnControlStock → ConFaltantes. Guarda una fila por
@@ -393,7 +405,7 @@ namespace DAL
                     }
                 }
             });
-            RecalcularDVSilencioso();   // T07
+            ActualizarDV(idPedido);   // T07
         }
 
         // "Confirmar prendas disponibles": marca todas las líneas como confirmadas por Depósito.
@@ -416,6 +428,7 @@ namespace DAL
 
                 Ejecutar(conexion, tx, "UPDATE PedidoPrenda SET Confirmada=1 WHERE IdPedido=@IdPedido", idPedido);
             });
+            ActualizarDV(idPedido);   // T07 — la confirmación de las líneas entra al DVH
         }
 
         // "Separar prendas del pedido": EnControlStock → Separado y cada prenda Disponible → EnUso
@@ -474,7 +487,7 @@ namespace DAL
                     }
                 }
             });
-            RecalcularDVSilencioso();   // T07
+            ActualizarDV(idPedido);   // T07
         }
 
         // "Formalizar el pedido": Separado → Pendiente (formalizado, pendiente de despacho).
@@ -493,7 +506,7 @@ namespace DAL
                     new SqlParameter("@Esperado", (int)BE.EstadoPedido.Separado)
                 });
             if (afectadas == 0) throw EstadoCambiado(idPedido);
-            RecalcularDVSilencioso();   // T07
+            ActualizarDV(idPedido);   // T07
         }
 
         // "Asentar desistimiento" de un pedido con faltantes informados: ConFaltantes → Desistido.
@@ -527,7 +540,7 @@ namespace DAL
                     InsertarLineasEnTx(conexion, tx, idPedido, seleccionAjustada);
                 }
             });
-            RecalcularDVSilencioso();   // T07
+            ActualizarDV(idPedido);   // T07
         }
 
         // "Informe de disponibilidad (prendas faltantes y alternativas)" de un pedido.
@@ -631,48 +644,41 @@ namespace DAL
                 "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
                 idPedido);
 
-        // Marca un pedido como Despachado y registra la fecha.
+        // Marca un pedido como Despachado y registra la fecha. Claim atómico: solo pasa si sigue
+        // Pendiente (formalizado); si otra sesión lo movió, no se afecta ninguna fila y se rechaza.
         public void Despachar(int idPedido)
         {
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Pedido SET Estado=@Estado, FechaDespacho=@FechaDespacho " +
-                    "WHERE IdPedido=@IdPedido",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@Estado",        (int)BE.EstadoPedido.Despachado),
-                        new SqlParameter("@FechaDespacho", DateTime.Now),
-                        new SqlParameter("@IdPedido",      idPedido)
-                    });
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al despachar el pedido ID {idPedido}.", ex);
-            }
-            RecalcularDVSilencioso();   // T07
+            int afectadas = acceso.Escribir(
+                "UPDATE Pedido SET Estado=@Estado, FechaDespacho=@FechaDespacho " +
+                "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                new SqlParameter[]
+                {
+                    new SqlParameter("@Estado",        SqlDbType.Int) { Value = (int)BE.EstadoPedido.Despachado },
+                    new SqlParameter("@FechaDespacho", DateTime.Now),
+                    new SqlParameter("@IdPedido",      idPedido),
+                    // Pendiente vale 0: se asigna Value explícito (el literal 0 elegiría el
+                    // constructor (nombre, SqlDbType) y el parámetro quedaría sin valor).
+                    new SqlParameter("@Esperado",      SqlDbType.Int) { Value = (int)BE.EstadoPedido.Pendiente }
+                });
+            if (afectadas == 0) throw EstadoCambiado(idPedido);
+            ActualizarDV(idPedido);   // T07
         }
 
-        // Marca un pedido como Entregado y registra la fecha.
+        // Marca un pedido como Entregado y registra la fecha. Claim atómico: solo si sigue Despachado.
         public void MarcarEntregado(int idPedido)
         {
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Pedido SET Estado=@Estado, FechaEntrega=@FechaEntrega " +
-                    "WHERE IdPedido=@IdPedido",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@Estado",       (int)BE.EstadoPedido.Entregado),
-                        new SqlParameter("@FechaEntrega", DateTime.Now),
-                        new SqlParameter("@IdPedido",     idPedido)
-                    });
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al marcar como entregado el pedido ID {idPedido}.", ex);
-            }
-            RecalcularDVSilencioso();   // T07
+            int afectadas = acceso.Escribir(
+                "UPDATE Pedido SET Estado=@Estado, FechaEntrega=@FechaEntrega " +
+                "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                new SqlParameter[]
+                {
+                    new SqlParameter("@Estado",       SqlDbType.Int) { Value = (int)BE.EstadoPedido.Entregado },
+                    new SqlParameter("@FechaEntrega", DateTime.Now),
+                    new SqlParameter("@IdPedido",     idPedido),
+                    new SqlParameter("@Esperado",     SqlDbType.Int) { Value = (int)BE.EstadoPedido.Despachado }
+                });
+            if (afectadas == 0) throw EstadoCambiado(idPedido);
+            ActualizarDV(idPedido);   // T07
         }
 
         // Pasa a EnLimpieza SOLO las prendas del pedido que siguen EnUso por este cliente.
@@ -716,21 +722,19 @@ namespace DAL
                     afectadas = cmd.ExecuteNonQuery();
                 }
             });
-            if (afectadas > 0) RecalcularDVSilencioso();   // T07 — mantener el DV del pedido consistente
+            if (afectadas > 0) ActualizarDV(idPedido);   // T07 — mantener el DV del pedido consistente
             return afectadas;
         }
 
-        // Reconcilia el estado de las prendas del pedido con el estado ACTUAL del pedido.
-        // Se usa tras restaurar un pedido desde el historial: si quedó en un estado activo
-        // (Pendiente/Despachado/Entregado) sus prendas deben estar EnUso del cliente; si quedó
-        // Cancelado, deben estar Disponibles. Evita dejar el stock inconsistente.
-        public void ReconciliarPrendasConEstado(int idPedido)
-        {
-            acceso.EjecutarTransaccion((conexion, tx) => ReconciliarEnTx(conexion, tx, idPedido));
-        }
-
-        // Núcleo de la reconciliación, sobre una transacción YA abierta. Reutilizable por la
-        // restauración atómica (RestaurarOperacionAtomica) para no abrir una segunda transacción.
+        // Reconcilia el estado de las prendas del pedido con el estado ACTUAL del pedido, sobre
+        // una transacción YA abierta (la de RestaurarOperacionAtomica). Nunca reasigna a ciegas:
+        //   • estado con prendas reservadas (Separado/Pendiente/Despachado/Entregado): las que
+        //     están Disponibles se reservan con "WHERE Estado=Disponible"; si al final no TODAS
+        //     las líneas quedaron EnUso a nombre de este cliente (alguna la tiene otro cliente,
+        //     está en limpieza, de baja, etc.) se lanza y la transacción se revierte entera;
+        //   • Cancelado: se liberan SOLO las prendas que siguen EnUso por ESTE cliente
+        //     ("WHERE Estado=EnUso AND IdClienteActual=@IdCliente"), sin pisar las de otros.
+        // PN01: un pedido en control de stock, con faltantes o desistido nunca reservó nada.
         private void ReconciliarEnTx(SqlConnection conexion, SqlTransaction tx, int idPedido)
         {
             int estado, idCliente;
@@ -746,49 +750,93 @@ namespace DAL
                 }
             }
 
-            bool cancelado = estado == (int)BE.EstadoPedido.Cancelado;
+            if (estado == (int)BE.EstadoPedido.Cancelado)
+            {
+                LiberarPrendasEnTx(conexion, tx, idPedido, idCliente);
+                return;
+            }
 
-            // PN01: las prendas solo están reservadas (EnUso) desde que Depósito las separa. Un
-            // pedido que quedó en control de stock, con faltantes o desistido nunca reservó
-            // nada: no se tocan sus prendas (podrían estar en uso por otro pedido).
             bool reservado = estado == (int)BE.EstadoPedido.Separado  ||
                              estado == (int)BE.EstadoPedido.Pendiente ||
                              estado == (int)BE.EstadoPedido.Despachado ||
                              estado == (int)BE.EstadoPedido.Entregado;
-            if (!cancelado && !reservado) return;
+            if (!reservado) return;
 
             using (var cmd = new SqlCommand(
-                // IdUltimoCliente NUNCA se limpia (a diferencia de IdClienteActual): si se cancela,
-                // @IdClienteUltimo llega NULL y COALESCE conserva el valor que ya tenía la prenda.
-                "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, " +
-                "IdUltimoCliente=COALESCE(@IdClienteUltimo, IdUltimoCliente) " +
-                "WHERE IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
+                // IdUltimoCliente NUNCA se limpia: registra quién tuvo la prenda por última vez.
+                "UPDATE Prenda SET Estado=@EnUso, IdClienteActual=@IdCliente, IdUltimoCliente=@IdCliente " +
+                "WHERE Estado=@Disponible AND IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
                 conexion, tx))
             {
-                cmd.Parameters.AddWithValue("@Estado",
-                    cancelado ? (int)BE.EstadoPrenda.Disponible : (int)BE.EstadoPrenda.EnUso);
-                cmd.Parameters.AddWithValue("@IdCliente",
-                    cancelado ? (object)DBNull.Value : idCliente);
-                cmd.Parameters.AddWithValue("@IdClienteUltimo",
-                    cancelado ? (object)DBNull.Value : idCliente);
-                cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                cmd.Parameters.AddWithValue("@EnUso",      (int)BE.EstadoPrenda.EnUso);
+                cmd.Parameters.AddWithValue("@Disponible", (int)BE.EstadoPrenda.Disponible);
+                cmd.Parameters.AddWithValue("@IdCliente",  idCliente);
+                cmd.Parameters.AddWithValue("@IdPedido",   idPedido);
+                cmd.ExecuteNonQuery();
+            }
+
+            using (var cmd = new SqlCommand(
+                "SELECT COUNT(*) AS Lineas, " +
+                "       SUM(CASE WHEN pr.Estado=@EnUso AND pr.IdClienteActual=@IdCliente THEN 1 ELSE 0 END) AS Reservadas " +
+                "FROM PedidoPrenda pp INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda WHERE pp.IdPedido=@IdPedido",
+                conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@EnUso",     (int)BE.EstadoPrenda.EnUso);
+                cmd.Parameters.AddWithValue("@IdCliente", idCliente);
+                cmd.Parameters.AddWithValue("@IdPedido",  idPedido);
+                using (var rd = cmd.ExecuteReader())
+                {
+                    rd.Read();
+                    int lineas     = Convert.ToInt32(rd["Lineas"]);
+                    int reservadas = rd["Reservadas"] == DBNull.Value ? 0 : Convert.ToInt32(rd["Reservadas"]);
+                    if (reservadas < lineas)
+                        throw new BE.AppException("err.dal.pedido.restaurar_prendas",
+                            "No se puede restaurar el Pedido #{0}: una o más de sus prendas ya no están disponibles " +
+                            "para el cliente (las tiene otro pedido, están en limpieza o de baja).", idPedido);
+                }
+            }
+        }
+
+        // Libera a Disponible SOLO las prendas del pedido que siguen EnUso por este cliente.
+        private static void LiberarPrendasEnTx(SqlConnection conexion, SqlTransaction tx, int idPedido, int idCliente)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE Prenda SET Estado=@Disponible, IdClienteActual=NULL " +
+                "WHERE Estado=@EnUso AND IdClienteActual=@IdCliente " +
+                "  AND IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
+                conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@Disponible", (int)BE.EstadoPrenda.Disponible);
+                cmd.Parameters.AddWithValue("@EnUso",      (int)BE.EstadoPrenda.EnUso);
+                cmd.Parameters.AddWithValue("@IdCliente",  idCliente);
+                cmd.Parameters.AddWithValue("@IdPedido",   idPedido);
                 cmd.ExecuteNonQuery();
             }
         }
 
         // ── T06b — Restauración ATÓMICA desde el historial ──────────────────────
-        // Revierte TODOS los campos del pedido a sus valores anteriores Y reconcilia el estado
-        // de sus prendas dentro de UNA ÚNICA transacción: si cualquier paso falla, se revierte
-        // todo (EjecutarTransaccion hace Rollback), evitando que el pedido quede con un estado y
-        // las prendas con otro. El DV se recalcula aparte (es recomputable y no debe abortar el rollback).
-        public void RestaurarOperacionAtomica(int idPedido, IList<(string Campo, string ValorAnterior)> campos)
+        // Revierte los campos del pedido a sus valores anteriores Y reconcilia sus prendas dentro de
+        // UNA ÚNICA transacción. Claim atómico: el primer paso exige que el pedido siga en
+        // 'estadoEsperado' (el ValorNuevo de la operación que se revierte); si otra sesión lo movió,
+        // no se toca nada. El DV se recalcula después de confirmar.
+        public void RestaurarOperacionAtomica(int idPedido, BE.EstadoPedido estadoEsperado,
+                                              IList<(string Campo, string ValorAnterior)> campos)
         {
             acceso.EjecutarTransaccion((conexion, tx) =>
             {
+                using (var cmd = new SqlCommand(
+                    "UPDATE Pedido SET Estado = Estado WHERE IdPedido=@IdPedido AND Estado=@Esperado",
+                    conexion, tx))
+                {
+                    cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                    cmd.Parameters.AddWithValue("@Esperado", (int)estadoEsperado);
+                    if (cmd.ExecuteNonQuery() == 0) throw EstadoCambiado(idPedido);
+                }
                 foreach (var c in campos)
                     RestaurarCampoEnTx(conexion, tx, idPedido, c.Campo, c.ValorAnterior);
                 ReconciliarEnTx(conexion, tx, idPedido);
             });
+            ActualizarDV(idPedido);   // T07
         }
 
         // Restaura un campo de [Pedido] a su valor anterior, sobre una transacción YA abierta.
@@ -861,36 +909,31 @@ namespace DAL
             }
         }
 
-        // Cancela el pedido, guarda el motivo y libera las prendas a Disponible.
-        // Ambas operaciones se ejecutan en una única transacción: si falla alguna,
-        // ningún cambio queda aplicado (integridad transaccional).
-        public void Cancelar(int idPedido, string motivo)
+        // Cancela el pedido (formalizado = Pendiente, o con las prendas ya separadas = Separado),
+        // guarda el motivo y libera las prendas. Todo en una transacción:
+        //   • claim atómico "WHERE Estado=@Esperado": si otra sesión ya lo despachó/canceló, no se
+        //     toca nada y se rechaza;
+        //   • solo se liberan las prendas que siguen EnUso por ESTE cliente (no se pisa una prenda
+        //     que ya volvió a circular en otro pedido).
+        public void Cancelar(int idPedido, int idCliente, BE.EstadoPedido estadoEsperado, string motivo)
         {
             acceso.EjecutarTransaccion((conexion, tx) =>
             {
                 using (var cmdPedido = new SqlCommand(
                     "UPDATE Pedido SET Estado=@Estado, MotivoCancelacion=@Motivo " +
-                    "WHERE IdPedido=@IdPedido",
+                    "WHERE IdPedido=@IdPedido AND Estado=@Esperado",
                     conexion, tx))
                 {
                     cmdPedido.Parameters.AddWithValue("@Estado",   (int)BE.EstadoPedido.Cancelado);
                     cmdPedido.Parameters.AddWithValue("@Motivo",   (object)motivo ?? DBNull.Value);
                     cmdPedido.Parameters.AddWithValue("@IdPedido", idPedido);
-                    cmdPedido.ExecuteNonQuery();
+                    cmdPedido.Parameters.AddWithValue("@Esperado", (int)estadoEsperado);
+                    if (cmdPedido.ExecuteNonQuery() == 0) throw EstadoCambiado(idPedido);
                 }
 
-                // Liberar prendas del pedido → Disponible
-                using (var cmdPrendas = new SqlCommand(
-                    "UPDATE Prenda SET Estado=@Estado, IdClienteActual=NULL " +
-                    "WHERE IdPrenda IN (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido)",
-                    conexion, tx))
-                {
-                    cmdPrendas.Parameters.AddWithValue("@Estado",   (int)BE.EstadoPrenda.Disponible);
-                    cmdPrendas.Parameters.AddWithValue("@IdPedido", idPedido);
-                    cmdPrendas.ExecuteNonQuery();
-                }
+                LiberarPrendasEnTx(conexion, tx, idPedido, idCliente);
             });
-            RecalcularDVSilencioso();   // T07
+            ActualizarDV(idPedido);   // T07
         }
 
         // Revierte la cancelación. Devuelve false si alguna prenda ya no está Disponible.
@@ -921,7 +964,7 @@ namespace DAL
                 BorrarInformeFaltantesEnTx(conexion, tx, idPedido);
                 Ejecutar(conexion, tx, "UPDATE PedidoPrenda SET Confirmada = 0 WHERE IdPedido=@IdPedido", idPedido);
             });
-            if (ok) RecalcularDVSilencioso();   // T07
+            if (ok) ActualizarDV(idPedido);   // T07
             return ok;
         }
 
@@ -1016,78 +1059,125 @@ namespace DAL
 
         // ── T07 — DV MULTI-TABLA del Pedido ─────────────────────────────────────
         // El estado de un Pedido se compone de su fila MÁS sus líneas (PedidoPrenda).
-        // El DVH incorpora un digest de las líneas: así, agregar / quitar / intercambiar
-        // prendas del pedido por fuera del sistema cambia el DVH y se detecta.
+        // El DVH incorpora un digest de las líneas (prenda y si Depósito la confirmó): así,
+        // agregar / quitar / intercambiar / confirmar prendas por fuera del sistema se detecta.
+        // Formato 2: además de cliente/empleado/estado entran las fechas del ciclo, los motivos y
+        // las columnas del circuito de control de stock (PN01), con formato invariante.
         public const string DV_Tabla = "Pedido";
+
+        private const string SELECT_DV =
+            "SELECT IdPedido, IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, " +
+            "       MotivoCancelacion, FechaEnvioControl, FechaControl, IdEmpleadoControl, FechaSeparacion, " +
+            "       FechaFormalizacion, MotivoDesistimiento, EtapaDesistimiento, DVH FROM Pedido";
+
+        private static readonly string[] ColumnasDV =
+        {
+            "IdPedido", "IdCliente", "IdEmpleado", "Estado", "FechaPedido", "FechaDespacho", "FechaEntrega",
+            "MotivoCancelacion", "FechaEnvioControl", "FechaControl", "IdEmpleadoControl", "FechaSeparacion",
+            "FechaFormalizacion", "MotivoDesistimiento", "EtapaDesistimiento"
+        };
+
+        private static BE.FilaDV MapearFilaDV(DataRow row, string digestLineas)
+        {
+            int id = Convert.ToInt32(row["IdPedido"]);
+            var campos = new List<string>();
+            foreach (var c in ColumnasDV) campos.Add(DigitoVerificador.Formatear(row[c]));
+            campos.Add(digestLineas ?? "");
+            return new BE.FilaDV
+            {
+                Id            = id,
+                Campos        = campos.ToArray(),
+                DVHAlmacenado = row["DVH"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["DVH"]),
+                Descripcion   = "Pedido #" + id
+            };
+        }
+
+        // Huellas de las líneas de todos los pedidos (o de uno): "IdPrenda:Confirmada" ordenadas.
+        private static Dictionary<int, string> Digests(DataTable lineas)
+        {
+            var porPedido = new Dictionary<int, List<string>>();
+            foreach (DataRow r in lineas.Rows)
+            {
+                int id = Convert.ToInt32(r["IdPedido"]);
+                if (!porPedido.TryGetValue(id, out var l)) porPedido[id] = l = new List<string>();
+                l.Add(DigitoVerificador.Formatear(r["IdPrenda"]) + ":" + DigitoVerificador.Formatear(r["Confirmada"]));
+            }
+            var res = new Dictionary<int, string>();
+            foreach (var kv in porPedido) res[kv.Key] = string.Join(",", kv.Value);
+            return res;
+        }
+
+        private const string SELECT_LINEAS_DV = "SELECT IdPedido, IdPrenda, Confirmada FROM PedidoPrenda";
 
         public List<BE.FilaDV> ObtenerFilasDV()
         {
             var lista = new List<BE.FilaDV>();
-            DataTable dt = acceso.Leer(
-                "SELECT IdPedido, IdCliente, IdEmpleado, Estado, DVH FROM Pedido ORDER BY IdPedido", null);
-            if (dt == null) return lista;
+            DataTable dt = acceso.Leer(SELECT_DV + " ORDER BY IdPedido", null);
+            var digests = Digests(acceso.Leer(SELECT_LINEAS_DV + " ORDER BY IdPedido, IdPrenda", null));
             foreach (DataRow row in dt.Rows)
             {
-                int id = Convert.ToInt32(row["IdPedido"]);
-                lista.Add(new BE.FilaDV
-                {
-                    Id = id,
-                    Campos = new[]
-                    {
-                        id.ToString(),
-                        row["IdCliente"].ToString(),
-                        row["IdEmpleado"].ToString(),
-                        row["Estado"].ToString(),
-                        DigestLineas(id)
-                    },
-                    DVHAlmacenado = row["DVH"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["DVH"]),
-                    Descripcion = "Pedido #" + id
-                });
+                digests.TryGetValue(Convert.ToInt32(row["IdPedido"]), out var d);
+                lista.Add(MapearFilaDV(row, d));
             }
             return lista;
         }
 
-        // Huella de las líneas del pedido: IdPrenda concatenados y ordenados.
-        private string DigestLineas(int idPedido)
+        // Recalcula el DVH de UN pedido (fila + líneas) y el DVV de la tabla desde los DVH
+        // almacenados, con el bloqueo del DV tomado. Best-effort: la operación de negocio ya
+        // quedó confirmada; si el recálculo falla, la verificación de integridad lo detecta.
+        public void ActualizarDV(int idPedido)
         {
-            DataTable dt = acceso.Leer(
-                "SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido = @id ORDER BY IdPrenda",
-                new SqlParameter[] { new SqlParameter("@id", idPedido) });
-            var ids = new List<string>();
-            if (dt != null)
-                foreach (DataRow r in dt.Rows) ids.Add(r["IdPrenda"].ToString());
-            return string.Join(",", ids);
+            try
+            {
+                new DigitoVerificador().EjecutarConBloqueo(DV_Tabla, (cn, tx) =>
+                {
+                    var p = new SqlParameter("@id", idPedido);
+                    var dt = DigitoVerificador.LeerEnTx(cn, tx, SELECT_DV + " WHERE IdPedido = @id", p);
+                    if (dt.Rows.Count > 0)
+                    {
+                        var lineas = DigitoVerificador.LeerEnTx(cn, tx,
+                            SELECT_LINEAS_DV + " WHERE IdPedido = @id ORDER BY IdPrenda", new SqlParameter("@id", idPedido));
+                        Digests(lineas).TryGetValue(idPedido, out var d);
+                        var fila = MapearFilaDV(dt.Rows[0], d);
+                        using (var cmd = new SqlCommand("UPDATE Pedido SET DVH=@dvh WHERE IdPedido=@id", cn, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@dvh", Seguridad.CalculadorDV.Crear().CalcularDVH(fila.Campos));
+                            cmd.Parameters.AddWithValue("@id", idPedido);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, "IdPedido");
+                });
+            }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Pedido.ActualizarDV] " + ex.Message); }
         }
 
-        // Recalcula el DVH de cada Pedido y el DVV de la tabla.
-        // Propaga cualquier excepción: el caller decide si ignorarla (post-restauración)
-        // o dejarla subir (recálculo administrativo desde BLL.Configuracion).
+        // Recalcula el DVH de TODOS los pedidos y el DVV. Acepta los datos actuales como legítimos:
+        // solo para el recálculo administrativo explícito y la inicialización tras instalar.
+        // Propaga cualquier excepción (el administrador necesita enterarse si falla).
         public void RecalcularDV()
         {
-            var svc   = Seguridad.CalculadorDV.Crear();
-            var dvDAL = new DigitoVerificador();
-            var dvhs  = new List<int>();
-            foreach (var f in ObtenerFilasDV())
+            new DigitoVerificador().EjecutarConBloqueo(DV_Tabla, (cn, tx) =>
             {
-                int dvh = svc.CalcularDVH(f.Campos);
-                acceso.Escribir("UPDATE Pedido SET DVH=@dvh WHERE IdPedido=@id",
-                    new SqlParameter[] { new SqlParameter("@dvh", dvh), new SqlParameter("@id", f.Id) });
-                dvhs.Add(dvh);
-            }
-            dvDAL.GuardarDVV(DV_Tabla, svc.CalcularDVV(dvhs));
-        }
-
-        // Variante "best-effort" para los puntos internos de esta clase que llaman a
-        // RecalcularDV() inmediatamente después de haber confirmado (Commit) la operación de
-        // negocio principal: si el recálculo del DV falla, no debe reportarse como si la
-        // operación ya persistida (Alta/Despachar/Entregar/Devolución/Cancelar/DesCancelar)
-        // hubiera fallado — mismo criterio que DAL.Cliente.RecalcularDV/DAL.Empleado.RecalcularDV.
-        // RecalcularDV() en sí sigue propagando: la usa el recálculo administrativo manual desde
-        // BLL.Configuracion, que sí necesita enterarse si falla.
-        private void RecalcularDVSilencioso()
-        {
-            try { RecalcularDV(); }
-            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Pedido.RecalcularDV] " + ex.Message); }
+                var svc = Seguridad.CalculadorDV.Crear();
+                var dt = DigitoVerificador.LeerEnTx(cn, tx, SELECT_DV + " ORDER BY IdPedido");
+                var digests = Digests(DigitoVerificador.LeerEnTx(cn, tx, SELECT_LINEAS_DV + " ORDER BY IdPedido, IdPrenda"));
+                var dvhs = new List<int>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    int id = Convert.ToInt32(row["IdPedido"]);
+                    digests.TryGetValue(id, out var d);
+                    int dvh = svc.CalcularDVH(MapearFilaDV(row, d).Campos);
+                    using (var cmd = new SqlCommand("UPDATE Pedido SET DVH=@dvh WHERE IdPedido=@id", cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@dvh", dvh);
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+                    dvhs.Add(dvh);
+                }
+                DigitoVerificador.GuardarDVVEnTx(cn, tx, DV_Tabla, svc.CalcularDVV(dvhs));
+            });
         }
     }
 }

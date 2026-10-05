@@ -32,6 +32,10 @@ erDiagram
     int IntentosFallidos
     int DVH "NULL"
     datetime FechaActualizacion
+    bit Activo
+    bit RequiereCambioClave
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
   }
   Empleado {
     int IdEmpleado PK

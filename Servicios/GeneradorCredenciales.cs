@@ -66,7 +66,7 @@ namespace Servicios
             sb.AppendLine("Contraseña: " + contrasena);
             sb.AppendLine("Fecha: "      + DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
 
-            File.WriteAllText(ruta, sb.ToString(), Encoding.UTF8);
+            EscribirPrivado(ruta, sb.ToString());
             return ruta;
         }
 
@@ -109,8 +109,36 @@ namespace Servicios
             sb.AppendLine(new string('-', 44));
             sb.AppendLine("Uso: en el Login → \"¿Cuenta bloqueada? Usar clave de emergencia\".");
 
-            File.WriteAllText(ruta, sb.ToString(), Encoding.UTF8);
+            EscribirPrivado(ruta, sb.ToString());
             return ruta;
+        }
+
+        // Escribe un archivo con secretos en texto plano dejando acceso SOLO al usuario de Windows
+        // actual (se cortan los permisos heredados de la carpeta). Si no se puede restringir el
+        // permiso, el archivo NO se deja escrito: se borra y se lanza el error.
+        public static void EscribirPrivado(string ruta, string contenido)
+        {
+            var yo = System.Security.Principal.WindowsIdentity.GetCurrent().User;
+            var seguridad = new System.Security.AccessControl.FileSecurity();
+            seguridad.SetAccessRuleProtection(true, false);   // sin herencia
+            seguridad.AddAccessRule(new System.Security.AccessControl.FileSystemAccessRule(
+                yo, System.Security.AccessControl.FileSystemRights.FullControl,
+                System.Security.AccessControl.AccessControlType.Allow));
+            seguridad.SetOwner(yo);
+
+            // Se crea vacío con la ACL ya aplicada y recién después se escribe el contenido.
+            using (var fs = new FileStream(ruta, FileMode.Create, FileAccess.Write, FileShare.None))
+            { }
+            try
+            {
+                File.SetAccessControl(ruta, seguridad);
+                File.WriteAllText(ruta, contenido, Encoding.UTF8);
+            }
+            catch
+            {
+                try { File.Delete(ruta); } catch { /* ya se informa el error original */ }
+                throw;
+            }
         }
 
         // Carpeta de salida de credenciales/claves: Documentos\WardrobeFlow\CredencialesGeneradas.

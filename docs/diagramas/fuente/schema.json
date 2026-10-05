@@ -1,5 +1,5 @@
 {
- "bdHash": "0672602e9c79fb2da5de5e47752fd04775c8af20",
+ "bdHash": "c508ce9d6bc80f350c84a976b9dc87fd34199585",
  "cols": [
   {
    "tabla": "Bitacora",
@@ -731,6 +731,17 @@
    "tabla": "Contratacion",
    "ord": 19,
    "col": "IdReferenteAcreditado",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "Contratacion",
+   "ord": 20,
+   "col": "DVH",
    "tipo": "int",
    "len": 4,
    "prec": 10,
@@ -1751,6 +1762,39 @@
    "ident": false
   },
   {
+   "tabla": "ParametroSistema",
+   "ord": 1,
+   "col": "Clave",
+   "tipo": "nvarchar",
+   "len": 200,
+   "prec": 0,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "ParametroSistema",
+   "ord": 2,
+   "col": "Valor",
+   "tipo": "nvarchar",
+   "len": 800,
+   "prec": 0,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "ParametroSistema",
+   "ord": 3,
+   "col": "Fecha",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
+   "nulo": true,
+   "ident": false
+  },
+  {
    "tabla": "Pedido",
    "ord": 1,
    "col": "IdPedido",
@@ -2243,6 +2287,17 @@
    "prec": 10,
    "sc": 0,
    "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "PermisoRelacion",
+   "ord": 3,
+   "col": "DVH",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
    "ident": false
   },
   {
@@ -3102,6 +3157,50 @@
    "sc": 3,
    "nulo": false,
    "ident": false
+  },
+  {
+   "tabla": "Usuario_Seguridad",
+   "ord": 10,
+   "col": "Activo",
+   "tipo": "bit",
+   "len": 1,
+   "prec": 1,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "Usuario_Seguridad",
+   "ord": 11,
+   "col": "RequiereCambioClave",
+   "tipo": "bit",
+   "len": 1,
+   "prec": 1,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "Usuario_Seguridad",
+   "ord": 12,
+   "col": "CantidadBloqueos",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "Usuario_Seguridad",
+   "ord": 13,
+   "col": "FechaBloqueo",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
+   "nulo": true,
+   "ident": false
   }
  ],
  "pks": [
@@ -3160,6 +3259,10 @@
   {
    "tabla": "PermisoRelacion",
    "col": "IdHijo"
+  },
+  {
+   "tabla": "ParametroSistema",
+   "col": "Clave"
   },
   {
    "tabla": "Traduccion",

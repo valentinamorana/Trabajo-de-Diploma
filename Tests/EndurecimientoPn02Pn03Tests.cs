@@ -49,7 +49,7 @@ namespace Tests
             {
                 var c = new BE.Contratacion
                 {
-                    IdContratacion = 7, IdCliente = 10, IdPlan = 1, IdVendedor = 5,
+                    IdContratacion = 7, IdCliente = 10, IdPlan = 1, IdVendedor = 6,
                     Modalidad = BE.Builders.ModalidadCobro.Mensual, Estado = BE.EstadoContratacion.PendientePago,
                     NombreCliente = "Ana Gómez", NombrePlan = "Básico"
                 };

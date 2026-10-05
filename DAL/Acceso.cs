@@ -144,7 +144,5 @@ namespace DAL
                 }
             }
         }
-
-        public void CerrarConexion() { /* no-op: cada operación gestiona su propia conexión */ }
     }
 }

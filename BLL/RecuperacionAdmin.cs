@@ -17,7 +17,7 @@ namespace BLL
     {
         private readonly DAL.Interfaces.IUsuarioDAL           usuarioDAL;
         private readonly DAL.Interfaces.IClaveRecuperacionDAL claveDAL;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
 
         // DI: el constructor por defecto usa los DAL reales; el otro permite inyectar dobles.
         public RecuperacionAdmin() : this(new DAL.Usuario(), new DAL.ClaveRecuperacion()) { }
@@ -78,6 +78,38 @@ namespace BLL
             string user  = username.Trim();
             string clave = clavePlana.Trim().ToUpperInvariant();   // las claves son en mayúsculas
 
+            // Límite de intentos de la sesión (el mismo contador que el login): sin esto se podía
+            // probar claves sin fin.
+            if (ContadorSesion.GetInstance().LimiteAlcanzado)
+                throw new BE.AppException("err.bll.emergencia.limite",
+                    "Demasiados intentos fallidos en esta sesión. Reiniciá la aplicación para volver a intentarlo.");
+
+            var disponibles = claveDAL.ObtenerDisponibles();
+            if (disponibles.Count == 0)
+                throw new BE.AppException("err.bll.emergencia.sin_claves",
+                    "No quedan claves de emergencia. Pedile a otro Administrador que genere un nuevo set.");
+
+            // PRIMERO se valida la clave (PBKDF2 contra cada hash disponible, mismo costo para todo
+            // intento); recién con una clave válida se informa el estado de la cuenta. Antes se
+            // revelaba si el usuario existía, si era Administrador y si estaba bloqueado sin
+            // necesidad de tener ninguna clave.
+            int idClave = -1;
+            foreach (var kv in disponibles)
+                if (Encriptador.VerificarContrasena(clave, kv.Value)) { idClave = kv.Key; break; }
+
+            if (idClave < 0)
+            {
+                ContadorSesion.GetInstance().RegistrarIntento();
+                bitacora.RegistrarSinSesion(
+                    modulo:     modulo ?? "Login",
+                    actividad:  "Clave de emergencia inválida",
+                    criticidad: BE.Criticidad.Alta,
+                    detalle:    $"Intento de desbloqueo con una clave de emergencia inválida (usuario: huella " +
+                                $"{Usuario.HuellaUsuario(user)}) a las {DateTime.Now:HH:mm:ss}.");
+                throw new BE.AppException("err.bll.emergencia.invalida",
+                    "Usuario o clave de emergencia inválidos.");
+            }
+
             var usuario = usuarioDAL.ObtenerPorUsername(user);
             if (usuario == null)
                 throw new BE.AppException("err.bll.emergencia.invalida",
@@ -92,39 +124,23 @@ namespace BLL
                 throw new BE.AppException("err.bll.emergencia.no_bloqueada",
                     "La cuenta no está bloqueada: podés iniciar sesión normalmente.");
 
-            var disponibles = claveDAL.ObtenerDisponibles();
-            if (disponibles.Count == 0)
-                throw new BE.AppException("err.bll.emergencia.sin_claves",
-                    "No quedan claves de emergencia. Pedile a otro Administrador que genere un nuevo set.");
+            // Consumir la clave (uso único). Si otro la consumió en paralelo, abortar.
+            if (!claveDAL.MarcarUsada(idClave, user))
+                throw new BE.AppException("err.bll.emergencia.invalida",
+                    "Usuario o clave de emergencia inválidos.");
 
-            foreach (var kv in disponibles)
-            {
-                if (!Encriptador.VerificarContrasena(clave, kv.Value)) continue;
+            usuarioDAL.Desbloquear(usuario.Id);
 
-                // Consumir la clave (uso único). Si otro la consumió en paralelo, abortar.
-                if (!claveDAL.MarcarUsada(kv.Key, user))
-                    break;
+            // Resetear el contador de intentos EN MEMORIA de esta ejecución de la app.
+            ContadorSesion.GetInstance().Resetear();
 
-                usuarioDAL.Desbloquear(usuario.Id);
-
-                // Resetear el contador de intentos EN MEMORIA de esta ejecución de la app.
-                // La cuenta ya quedó desbloqueada en BD (Desbloquear pone IntentosFallidos=0),
-                // pero ContadorSesion es un singleton por ejecución: si quedó en el límite, el
-                // próximo login dispararía "demasiados intentos, la app se cerrará" aunque la
-                // cuenta ya esté desbloqueada. Reseteamos para permitir reingresar de inmediato.
-                ContadorSesion.GetInstance().Resetear();
-
-                bitacora.RegistrarSinSesion(
-                    modulo:     modulo ?? "Login",
-                    actividad:  BE.ActividadesBitacora.DesbloqueoConClaveDeEmergencia,
-                    criticidad: BE.Criticidad.Alta,
-                    idUsuario:  usuario.Id,
-                    detalle:    $"La cuenta '{user}' se autodesbloqueó con una clave de emergencia a las {DateTime.Now:HH:mm:ss}. Claves restantes: {claveDAL.ContarDisponibles()}.");
-                return true;
-            }
-
-            throw new BE.AppException("err.bll.emergencia.invalida",
-                "Usuario o clave de emergencia inválidos.");
+            bitacora.RegistrarSinSesion(
+                modulo:     modulo ?? "Login",
+                actividad:  BE.ActividadesBitacora.DesbloqueoConClaveDeEmergencia,
+                criticidad: BE.Criticidad.Alta,
+                idUsuario:  usuario.Id,
+                detalle:    $"La cuenta '{user}' se autodesbloqueó con una clave de emergencia a las {DateTime.Now:HH:mm:ss}. Claves restantes: {claveDAL.ContarDisponibles()}.");
+            return true;
         }
     }
 }

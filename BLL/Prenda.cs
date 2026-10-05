@@ -9,8 +9,8 @@ namespace BLL
     {
         private readonly DAL.Interfaces.IPrendaDAL              dalPrenda;
         private readonly DAL.Interfaces.IMantenimientoPrendaDAL dalMantenimiento;
-        private readonly Servicios.Bitacora          bitacora         = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio   bitacoraNeg      = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora          bitacora         = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio   bitacoraNeg      = Servicios.FabricaBitacora.CrearNegocio();
 
         // Lista de Espera (mejora opcional) — composición lazy, mismo criterio que
         // BLL.Usuario.perfilesBLL => new BLL.Familia().

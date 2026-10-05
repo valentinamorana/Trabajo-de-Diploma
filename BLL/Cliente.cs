@@ -12,8 +12,8 @@ namespace BLL
     {
         private readonly DAL.Interfaces.IClienteDAL        dalCliente;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
-        private readonly Servicios.Bitacora        bitacora    = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
         // Bloque 1 — Programa de referidos: descuento fijo que se acredita a quien refirió,
         // una única vez, cuando el referido activa su suscripción por primera vez (ver ActivarSuscripcion).
@@ -111,9 +111,10 @@ namespace BLL
             int idNuevo = dalCliente.Alta(cliente);
             cliente.IdCliente = idNuevo;
 
-            // El DNI está cifrado en la tabla Cliente (Seguridad.Encriptador); no se incluye en
-            // texto plano acá para no anular esa protección en la Bitácora, que suele tener menos
-            // controles de acceso — el IdCliente ya identifica el registro sin exponerlo.
+            // El DNI del cliente se guarda en TEXTO PLANO en la tabla Cliente (a diferencia del
+            // Empleado, que sí se cifra): se busca por DNI exacto (PN01) y se valida su unicidad.
+            // Por eso no se copia a la Bitácora (dato personal; suele tener otros controles de
+            // acceso): el IdCliente ya identifica el registro sin exponerlo.
             bitacora.Registrar(modulo, $"Alta Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.AltaCliente,
                 $"Nuevo cliente: {cliente.NombreCompleto} — Plan: {cliente.NombrePlan ?? "Sin plan"}",
@@ -246,6 +247,12 @@ namespace BLL
                 throw new BE.AppException("err.bll.cliente.plan_inexistente",
                     "No se encontró el plan de suscripción indicado.");
 
+            // Si estaba pausada, al pausar el vencimiento se corrió por TODA la pausa (no se cobra
+            // mientras dura). Activar ahora termina la pausa: los días de pausa que no se usaron se
+            // descuentan antes de sumar el período nuevo — igual que ReanudarPausa. Antes se
+            // "regalaban" (el período nuevo arrancaba desde el vencimiento ya corrido).
+            DescontarPausaNoUsada(cliente);
+
             var builder = BE.Builders.SuscripcionBuilderFactory.Crear(modalidad);
             var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, plan);
 
@@ -287,7 +294,8 @@ namespace BLL
             // reabriría el cobro de una suscripción que sí quedó activa (doble cobro).
             try
             {
-                dalCliente.RecalcularDV();
+                dalCliente.RecalcularDV(cliente.IdCliente);
+                if (referente != null) dalCliente.RecalcularDV(referente.IdCliente);
 
                 bitacora.Registrar(modulo,
                     $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
@@ -315,6 +323,16 @@ namespace BLL
 
         // Bloque 1 — Reanuda una suscripción pausada. La fecha de vencimiento NO se toca:
         // el cliente retoma el mismo plazo que tenía al pausar, sin extensión.
+        // Devuelve los días de pausa que todavía no transcurrieron (el vencimiento se había corrido
+        // por toda la pausa al pausar; ver PausarSuscripcionHandler). No limpia FechaPausaHasta.
+        internal static void DescontarPausaNoUsada(BE.Cliente cliente)
+        {
+            if (!cliente.FechaPausaHasta.HasValue) return;
+            int diasSinUsar = (cliente.FechaPausaHasta.Value.Date - DateTime.Today).Days;
+            if (diasSinUsar > 0 && cliente.FechaVencimiento.HasValue)
+                cliente.FechaVencimiento = cliente.FechaVencimiento.Value.AddDays(-diasSinUsar);
+        }
+
         public void ReanudarPausa(string modulo, BE.Cliente cliente)
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
@@ -326,9 +344,7 @@ namespace BLL
 
             // Reanudar antes de tiempo: se devuelven los días de pausa no usados (al pausar, el vencimiento
             // se corrió por toda la pausa; ver PausarSuscripcionHandler).
-            int diasSinUsar = (cliente.FechaPausaHasta.Value.Date - DateTime.Today).Days;
-            if (diasSinUsar > 0 && cliente.FechaVencimiento.HasValue)
-                cliente.FechaVencimiento = cliente.FechaVencimiento.Value.AddDays(-diasSinUsar);
+            DescontarPausaNoUsada(cliente);
 
             cliente.FechaPausaHasta = null;
             dalCliente.Modificar(cliente);

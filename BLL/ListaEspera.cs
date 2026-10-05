@@ -17,8 +17,8 @@ namespace BLL
         private readonly DAL.Interfaces.IListaEsperaDAL dalListaEspera;
         private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
-        private readonly Servicios.Bitacora bitacora = new Servicios.Bitacora();
-        private readonly Servicios.BitacoraNegocio bitacoraNeg = new Servicios.BitacoraNegocio();
+        private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
+        private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
         public ListaEspera() : this(new DAL.ListaEspera(), new DAL.Prenda(), new DAL.Cliente()) { }
 
@@ -90,22 +90,67 @@ namespace BLL
                 throw new BE.AppException("err.bll.listaespera.ya_resuelta",
                     "Esta anotación ya está {0} — no se puede cancelar.", fila.Estado);
 
-            dalListaEspera.CambiarEstado(idListaEspera, BE.EstadoListaEspera.Cancelada, fila.FechaLimiteReserva, actor);
+            var estadoPrevio = fila.Estado;
+            if (!dalListaEspera.CambiarEstado(idListaEspera, BE.EstadoListaEspera.Cancelada, fila.FechaLimiteReserva, actor, estadoPrevio))
+                throw new BE.AppException("err.bll.listaespera.estado_cambiado",
+                    "La anotación cambió en otra sesión. Actualizá la lista y volvé a intentarlo.");
 
             bitacora.Registrar(modulo,
                 $"Cancelar Lista de Espera #{idListaEspera} — Prenda '{fila.NombrePrenda}' — Cliente: {fila.NombreCliente}",
                 BE.Criticidad.Baja);
+
+            // Si se cancela una RESERVA, la prenda queda libre: se avisa al siguiente de la lista.
+            if (estadoPrevio == BE.EstadoListaEspera.Reservada)
+                ReservarSiguienteSiDisponible(fila.IdPrenda, actor);
+        }
+
+        // La prenda (Disponible) pasa al siguiente de la lista, si hay alguien esperando.
+        private void ReservarSiguienteSiDisponible(int idPrenda, string actor)
+        {
+            var prenda = dalPrenda.ObtenerPorId(idPrenda);
+            if (prenda != null && prenda.Estado == BE.EstadoPrenda.Disponible)
+                ReservarSiguiente(idPrenda, actor);
+        }
+
+        // Reservas vencidas (BE.ListaEspera.ReservaExpirada): el cliente no retiró la prenda en las
+        // HORAS_RESERVA. Se cancelan (claim sobre "Reservada") y la prenda pasa al siguiente de la
+        // lista. Antes quedaban "Reservadas" para siempre y nadie más era avisado. Se ejecuta al
+        // consultar la lista (best-effort). Devuelve cuántas reservas se liberaron.
+        public int LiberarReservasVencidas(string actor = "sistema")
+        {
+            int liberadas = 0;
+            foreach (var fila in dalListaEspera.ObtenerActivas().Where(f => f.ReservaExpirada).ToList())
+            {
+                if (!dalListaEspera.CambiarEstado(fila.IdListaEspera, BE.EstadoListaEspera.Cancelada,
+                                                  fila.FechaLimiteReserva, actor, BE.EstadoListaEspera.Reservada))
+                    continue;   // otra sesión ya la resolvió
+                liberadas++;
+                bitacoraNeg.Registrar(BE.TipoEventoNegocio.ListaEspera,
+                    $"Venció la reserva de '{fila.NombrePrenda}' para {fila.NombreCliente}: pasa al siguiente de la lista",
+                    idPrenda: fila.IdPrenda, idCliente: fila.IdCliente);
+                ReservarSiguienteSiDisponible(fila.IdPrenda, actor);
+            }
+            return liberadas;
         }
 
         // Al liberarse una prenda (BLL.Prenda.CambiarEstado, EnLimpieza → Disponible), reserva
         // la fila Pendiente más antigua (FIFO) durante HORAS_RESERVA. No hace nada si nadie espera.
+        // Escritura: exige el mismo permiso que liberar la prenda (BLL.Prenda.CambiarEstado).
         public void NotificarSiCorresponde(int idPrenda, string actor)
+        {
+            PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
+            ReservarSiguiente(idPrenda, actor);
+        }
+
+        private void ReservarSiguiente(int idPrenda, string actor)
         {
             var fila = dalListaEspera.ObtenerPendienteMasAntigua(idPrenda);
             if (fila == null) return;
 
             var limite = DateTime.Now.AddHours(HORAS_RESERVA);
-            dalListaEspera.CambiarEstado(fila.IdListaEspera, BE.EstadoListaEspera.Reservada, limite, actor);
+            if (!dalListaEspera.CambiarEstado(fila.IdListaEspera, BE.EstadoListaEspera.Reservada, limite, actor,
+                                              BE.EstadoListaEspera.Pendiente))
+                return;   // otra sesión ya la reservó o canceló
 
             bitacora.Registrar("Prendas",
                 $"Lista de Espera #{fila.IdListaEspera}: '{fila.NombrePrenda}' reservada para " +
@@ -122,12 +167,16 @@ namespace BLL
 
         // Tras crear el pedido (BLL.Pedido.CrearPedido), cierra la reserva si esta prenda
         // estaba retenida para este mismo cliente. No hace nada si no había reserva.
+        // Escritura: la dispara "Separar prendas" (Depósito), con el permiso de Control de Stock.
         public void CerrarSiReservada(string modulo, int idPrenda, int idCliente, string actor)
         {
+            PermisosAccion.Exigir(BE.Patentes.ControlStockEditar, BE.Patentes.ControlStock);
             var fila = dalListaEspera.ObtenerReservaVigenteDeCliente(idPrenda, idCliente);
             if (fila == null) return;
 
-            dalListaEspera.CambiarEstado(fila.IdListaEspera, BE.EstadoListaEspera.Convertida, fila.FechaLimiteReserva, actor);
+            if (!dalListaEspera.CambiarEstado(fila.IdListaEspera, BE.EstadoListaEspera.Convertida, fila.FechaLimiteReserva,
+                                              actor, BE.EstadoListaEspera.Reservada))
+                return;   // ya resuelta por otra sesión
 
             bitacora.Registrar(modulo,
                 $"Lista de Espera #{fila.IdListaEspera} cerrada: {fila.NombreCliente} retiró '{fila.NombrePrenda}'.",
@@ -141,6 +190,7 @@ namespace BLL
         {
             try
             {
+                LiberarVencidasBestEffort();
                 return dalListaEspera.ObtenerActivas()
                     .Where(le => le.ReservaVigente &&
                                  (!idClienteSolicitante.HasValue || le.IdCliente != idClienteSolicitante.Value))
@@ -151,7 +201,17 @@ namespace BLL
             catch { return new List<int>(); }
         }
 
-        public List<BE.ListaEspera> ObtenerActivas() => dalListaEspera.ObtenerActivas();
+        public List<BE.ListaEspera> ObtenerActivas()
+        {
+            LiberarVencidasBestEffort();
+            return dalListaEspera.ObtenerActivas();
+        }
+
+        private void LiberarVencidasBestEffort()
+        {
+            try { LiberarReservasVencidas(); }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.ListaEspera] Reservas vencidas: " + ex.Message); }
+        }
         public List<BE.ListaEspera> ObtenerPorPrenda(int idPrenda) => dalListaEspera.ObtenerPorPrenda(idPrenda);
 
         public int ContarReservadasVigentes()

@@ -34,11 +34,6 @@ namespace BE
         /// cargado, el inspector puede tipear el monto igual al registrar el cargo.</summary>
         public decimal?     PrecioReposicion { get; set; }
 
-        /// <summary>Descripción para mostrar en grillas: "Vestido azul – en uso"</summary>
-        public string ResumenEstado =>
-            Estado == EstadoPrenda.EnUso && !string.IsNullOrEmpty(NombreCliente)
-                ? $"{Nombre} — en uso ({NombreCliente})"
-                : $"{Nombre} — {Estado}";
 
         // ── Comportamiento ────────────────────────────────────────────────────
 

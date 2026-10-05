@@ -819,7 +819,12 @@ GO
 DELETE r FROM PermisoRelacion r
 JOIN Permiso rol ON rol.IdPermiso = r.IdPadre AND rol.Nombre = 'Deposito' AND rol.EsRol = 1
 JOIN Permiso pat ON pat.IdPermiso = r.IdHijo  AND ISNULL(pat.EsRol,0) = 0
-WHERE pat.NombreMenu NOT IN ('mnuPrendas','mnuStock');
+-- Las patentes que las secciones posteriores le otorgan a Deposito (21b, 21c, Lista de Espera,
+-- Inspección de Devolución, permisos de edición) no se borran: borrarlas y volver a insertarlas en
+-- cada corrida dejaba aristas nuevas sin dígito verificador (falsa alarma de integridad).
+WHERE pat.NombreMenu NOT IN ('mnuPrendas','mnuStock','mnuStockEditar','mnuPedidosRealizados',
+                            'mnuPedidosRealizadosEditar','mnuListaEspera','mnuInspeccionDevolucion',
+                            'mnuControlStock','mnuControlStockEditar');
 INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT rol.IdPermiso, pat.IdPermiso
 FROM (VALUES ('mnuPrendas'), ('mnuStock')) AS v(NombreMenu)
@@ -2939,39 +2944,94 @@ GROUP BY v.Formulario, v.NombreControl;
 GO
 
 -- ============================================================
--- WardrobeFlow — 22. NORMALIZACIÓN DE LOS DÍGITOS VERIFICADORES
+-- WardrobeFlow — 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA
 -- ------------------------------------------------------------
--- Las filas que siembra este script (usuarios, empleados, clientes y pedidos demo) llevan DVH = 0.
--- En una base NUEVA (todo en 0, sin DVV) la app las inicializa sola en el primer arranque. Pero en una
--- base que YA tenía dígitos verificadores calculados, esas filas dejan la tabla "mezclada" (unas con
--- DVH válido y otras en 0) y el arranque la marca como manipulada: el sistema bloquea el ingreso y la
--- consola de recuperación solo ofrece restaurar un backup.
--- Por eso, si una tabla protegida quedó mezclada, se la deja en el estado "sin calcular" (DVH = 0 y
--- DVV = 0) para que la app la recalcule limpia en el próximo arranque, igual que hacen los bloques de
--- migración de Usuario más arriba. Idempotente: solo actúa sobre tablas mezcladas.
+-- Formato 2 de los dígitos verificadores (DAL.DigitoVerificador.FormatoActual = 2):
+--   • Usuario  también protege Activo, RequiereCambioClave, CantidadBloqueos y FechaBloqueo.
+--   • Cliente  también protege plan, vencimientos, gracia, pausa, crédito, referente y Activo.
+--   • Pedido   también protege las columnas del circuito PN01 y la confirmación de cada línea.
+--   • Empleado también protege IdUsuario.
+--   • Nuevas tablas protegidas: Contratacion (dinero, vendedor y cajero) y PermisoRelacion (roles).
+--   • Fechas y decimales en formato invariante (no dependen de la configuración regional).
+--
+-- MIGRACIÓN ÚNICA, controlada por marca (ParametroSistema 'FormatoDV'):
+--   Si la base no tiene la marca (instalación nueva o base de una versión anterior) o la marca es
+--   menor que 2, se dejan TODAS las tablas protegidas "sin calcular" (DVH = 0, sin fila en
+--   DVVertical, espejo vacío) y se registra 'DVInicializacionPendiente' = 1. En el próximo arranque
+--   la app calcula los dígitos, lo asienta en la bitácora y baja la marca.
+--   Con la marca ya en 2, este bloque NO toca nada: correr el script de nuevo no "lava" una
+--   manipulación previa (la verificación de arranque la sigue detectando). Cualquier otra tabla en
+--   cero o sin DVV es una anomalía y va a la consola de recuperación.
+--
+-- Si una actualización futura del script MODIFICA filas de tablas protegidas en una base ya
+-- instalada (por ejemplo, mover una patente de un rol a otro), debe pedir el recálculo con:
+--     UPDATE/INSERT ParametroSistema 'DVReinicializar' = '1'
+-- (o subir FormatoActual y esta marca). Este bloque lo atiende una sola vez y borra el pedido.
+-- Idempotente.
 -- ============================================================
-IF EXISTS (SELECT 1 FROM Usuario WHERE ISNULL(DVH, 0) = 0) AND EXISTS (SELECT 1 FROM Usuario WHERE ISNULL(DVH, 0) <> 0)
+IF OBJECT_ID('ParametroSistema') IS NULL
+    CREATE TABLE ParametroSistema (
+        Clave NVARCHAR(100) NOT NULL PRIMARY KEY,
+        Valor NVARCHAR(400) NULL,
+        Fecha DATETIME      NULL DEFAULT GETDATE()
+    );
+GO
+
+-- Columnas DVH de las tablas que se protegen desde el formato 2.
+IF COL_LENGTH('Contratacion', 'DVH') IS NULL
+    ALTER TABLE Contratacion ADD DVH INT NULL;
+IF COL_LENGTH('PermisoRelacion', 'DVH') IS NULL
+    ALTER TABLE PermisoRelacion ADD DVH INT NULL;
+
+-- El espejo de integridad (Usuario_Seguridad) guarda los mismos campos que el DVH de Usuario.
+IF COL_LENGTH('Usuario_Seguridad', 'Activo') IS NULL
+    ALTER TABLE Usuario_Seguridad ADD Activo BIT NOT NULL CONSTRAINT DF_UsuarioSeg_Activo DEFAULT 1;
+IF COL_LENGTH('Usuario_Seguridad', 'RequiereCambioClave') IS NULL
+    ALTER TABLE Usuario_Seguridad ADD RequiereCambioClave BIT NOT NULL CONSTRAINT DF_UsuarioSeg_RCC DEFAULT 0;
+IF COL_LENGTH('Usuario_Seguridad', 'CantidadBloqueos') IS NULL
+    ALTER TABLE Usuario_Seguridad ADD CantidadBloqueos INT NOT NULL CONSTRAINT DF_UsuarioSeg_CB DEFAULT 0;
+IF COL_LENGTH('Usuario_Seguridad', 'FechaBloqueo') IS NULL
+    ALTER TABLE Usuario_Seguridad ADD FechaBloqueo DATETIME NULL;
+GO
+
+DECLARE @formato INT = TRY_CONVERT(INT, (SELECT Valor FROM ParametroSistema WHERE Clave = 'FormatoDV'));
+DECLARE @pedido  NVARCHAR(400) = (SELECT Valor FROM ParametroSistema WHERE Clave = 'DVReinicializar');
+IF ISNULL(@formato, 0) < 2 OR @pedido = '1'
 BEGIN
-    UPDATE Usuario SET DVH = 0;
-    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Usuario';
-    PRINT 'DV de Usuario normalizado (recálculo en el próximo arranque).';
+    BEGIN TRANSACTION;
+    UPDATE Usuario         SET DVH = 0;
+    UPDATE Cliente         SET DVH = 0;
+    UPDATE Empleado        SET DVH = 0;
+    UPDATE Pedido          SET DVH = 0;
+    UPDATE Contratacion    SET DVH = 0;
+    UPDATE PermisoRelacion SET DVH = 0;
+    DELETE FROM DVVertical
+    WHERE NombreTabla IN ('Usuario', 'Cliente', 'Empleado', 'Pedido', 'Contratacion', 'PermisoRelacion',
+                          '__FormatoDVUsuario__');
+    DELETE FROM Usuario_Seguridad;   -- la app lo reconstruye al inicializar
+
+    MERGE ParametroSistema AS t
+    USING (VALUES ('FormatoDV', '2'), ('DVInicializacionPendiente', '1')) AS s(Clave, Valor)
+       ON t.Clave = s.Clave
+    WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+    WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    DELETE FROM ParametroSistema WHERE Clave = 'DVReinicializar';
+    COMMIT TRANSACTION;
+    PRINT 'Dígitos verificadores: formato 2 aplicado; la app los inicializa en el próximo arranque.';
 END
-IF EXISTS (SELECT 1 FROM Cliente WHERE ISNULL(DVH, 0) = 0) AND EXISTS (SELECT 1 FROM Cliente WHERE ISNULL(DVH, 0) <> 0)
+ELSE IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = 'DVInicializacionPendiente' AND Valor = '1')
 BEGIN
-    UPDATE Cliente SET DVH = 0;
-    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Cliente';
-    PRINT 'DV de Cliente normalizado (recálculo en el próximo arranque).';
+    -- El script se volvió a correr ANTES de que la app inicializara los dígitos (por ejemplo, dos
+    -- corridas seguidas del instalador): alguna sección vieja pudo volver a crear un DVV en 0
+    -- (sección de usuarios iniciales). Las tablas todavía sin calcular vuelven a quedar sin DVV.
+    DELETE FROM DVVertical WHERE NombreTabla = 'Usuario'         AND NOT EXISTS (SELECT 1 FROM Usuario         WHERE ISNULL(DVH, 0) <> 0);
+    DELETE FROM DVVertical WHERE NombreTabla = 'Cliente'         AND NOT EXISTS (SELECT 1 FROM Cliente         WHERE ISNULL(DVH, 0) <> 0);
+    DELETE FROM DVVertical WHERE NombreTabla = 'Empleado'        AND NOT EXISTS (SELECT 1 FROM Empleado        WHERE ISNULL(DVH, 0) <> 0);
+    DELETE FROM DVVertical WHERE NombreTabla = 'Pedido'          AND NOT EXISTS (SELECT 1 FROM Pedido          WHERE ISNULL(DVH, 0) <> 0);
+    DELETE FROM DVVertical WHERE NombreTabla = 'Contratacion'    AND NOT EXISTS (SELECT 1 FROM Contratacion    WHERE ISNULL(DVH, 0) <> 0);
+    DELETE FROM DVVertical WHERE NombreTabla = 'PermisoRelacion' AND NOT EXISTS (SELECT 1 FROM PermisoRelacion WHERE ISNULL(DVH, 0) <> 0);
+    PRINT 'Dígitos verificadores: inicialización todavía pendiente (la hace la app en el próximo arranque).';
 END
-IF EXISTS (SELECT 1 FROM Empleado WHERE ISNULL(DVH, 0) = 0) AND EXISTS (SELECT 1 FROM Empleado WHERE ISNULL(DVH, 0) <> 0)
-BEGIN
-    UPDATE Empleado SET DVH = 0;
-    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Empleado';
-    PRINT 'DV de Empleado normalizado (recálculo en el próximo arranque).';
-END
-IF EXISTS (SELECT 1 FROM Pedido WHERE ISNULL(DVH, 0) = 0) AND EXISTS (SELECT 1 FROM Pedido WHERE ISNULL(DVH, 0) <> 0)
-BEGIN
-    UPDATE Pedido SET DVH = 0;
-    UPDATE DVVertical SET DVV = 0 WHERE NombreTabla = 'Pedido';
-    PRINT 'DV de Pedido normalizado (recálculo en el próximo arranque).';
-END
+ELSE
+    PRINT 'Dígitos verificadores: formato 2 ya aplicado — sin cambios.';
 GO

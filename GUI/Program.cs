@@ -29,37 +29,14 @@ namespace GUI
             // sigue cayendo a los diccionarios hardcodeados (fallback de seguridad).
             InicializarIdiomaDesdeBD();
 
-            // Garantiza que exista admin2 (admin de respaldo para desbloquear al admin1 si se bloquea).
-            string rutaAdmin2 = BLL.Configuracion.SeedAdminSecundario();
-            if (rutaAdmin2 != null)
-                MessageBox.Show(
-                    "Se creó el usuario administrador de respaldo 'admin2'.\n" +
-                    "Sus credenciales fueron guardadas en:\n\n" + rutaAdmin2 +
-                    "\n\nGuardá ese archivo en un lugar seguro.",
-                    "Administrador de respaldo creado",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
-            // RF-10 — Genera el set inicial de 10 claves de emergencia (1 solo uso) para que un
-            // Administrador bloqueado pueda autodesbloquearse sin depender de otro admin.
-            string rutaClaves = BLL.Configuracion.SeedClavesEmergencia();
-            if (rutaClaves != null)
-                MessageBox.Show(
-                    "Se generaron 10 claves de emergencia de un solo uso.\n" +
-                    "Sirven para desbloquear una cuenta de Administrador bloqueada.\n\n" +
-                    "Se guardaron en:\n" + rutaClaves +
-                    "\n\nGuardá ese archivo en un lugar seguro.",
-                    "Claves de emergencia generadas",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
             // T07 — VERIFICACIÓN DE INTEGRIDAD ANTES DEL LOGIN (requisito de cátedra).
             // "Al iniciar la aplicación, y antes de dar acceso a la ventana de log-in, se debe
             //  realizar el proceso de verificación de integridad de la base de datos."
-            // El proceso de cálculo/comparación de DVH+DVV se ejecuta ACÁ, previo a mostrar el Login.
-            // Por seguridad, el DETALLE de las filas rotas y la REPARACIÓN siguen reservados a un
-            // Administrador autenticado: si la verificación falla, se deja constancia en la bitácora
-            // (informar al administrador) y, tras el login, se enruta según el rol (ver más abajo).
+            // Va ANTES de cualquier escritura de arranque (siembra de admin2 / claves): en una
+            // instalación nueva primero se inicializan los dígitos verificadores y recién después se
+            // agregan filas, y con la base comprometida no se escribe nada (escribir recalcularía el
+            // DVH de filas posiblemente alteradas). Con la integridad comprometida, el login se valida
+            // contra el espejo de integridad (BLL.Usuario.Login), no contra la tabla Usuario.
             bool integridadOk = BLL.Configuracion.VerificarIntegridadDV(out BLL.ResultadoIntegridad _);
             if (!integridadOk)
             {
@@ -78,6 +55,32 @@ namespace GUI
                     System.Diagnostics.Trace.TraceError(
                         "[Program] No se pudo auditar la falla de integridad de arranque: " + ex.Message);
                 }
+            }
+            else
+            {
+                // Primer arranque de una instalación nueva: admin de respaldo y claves de emergencia.
+                // Se siembran UNA sola vez en la vida de la base (marca persistente), quedan en la
+                // bitácora y el archivo con las credenciales solo lo puede leer el usuario actual.
+                string rutaAdmin2 = BLL.Configuracion.SeedAdminSecundario();
+                if (rutaAdmin2 != null)
+                    MessageBox.Show(
+                        "Se creó el usuario administrador de respaldo 'admin2'.\n" +
+                        "Sus credenciales fueron guardadas en:\n\n" + rutaAdmin2 +
+                        "\n\nGuardá ese archivo en un lugar seguro.",
+                        "Administrador de respaldo creado",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+
+                string rutaClaves = BLL.Configuracion.SeedClavesEmergencia();
+                if (rutaClaves != null)
+                    MessageBox.Show(
+                        "Se generaron 10 claves de emergencia de un solo uso.\n" +
+                        "Sirven para desbloquear una cuenta de Administrador bloqueada.\n\n" +
+                        "Se guardaron en:\n" + rutaClaves +
+                        "\n\nGuardá ese archivo en un lugar seguro.",
+                        "Claves de emergencia generadas",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
             }
 
             using (var frmLogin = new Login())
@@ -164,7 +167,9 @@ namespace GUI
                     actividad:  "Excepción no controlada: " + ex.GetType().Name,
                     criticidad: BE.Criticidad.Alta,
                     idUsuario:  idUsuario,
-                    detalle:    ex.ToString());
+                    // Solo tipo y mensaje: el ToString() completo puede arrastrar datos (valores de
+                    // parámetros, rutas, contenido de excepciones internas) a la bitácora.
+                    detalle:    ex.GetType().FullName + ": " + ex.Message);
             }
             catch { /* si falla el logueo, igual mostramos el error */ }
 

@@ -2,18 +2,18 @@ erDiagram
   Usuario |o--o{ Bitacora : "usuario"
   Usuario |o--o{ BitacoraNegocio : "IdUsuario"
   Cliente |o--o{ BitacoraNegocio : "IdCliente"
-  Pedido |o--o{ BitacoraNegocio : "IdPedido"
   Prenda |o--o{ BitacoraNegocio : "IdPrenda"
+  Pedido |o--o{ BitacoraNegocio : "IdPedido"
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
-  Cliente ||--o{ Contratacion : "IdCliente"
-  Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
-  Promocion |o--o{ Contratacion : "IdPromocion"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
+  Promocion |o--o{ Contratacion : "IdPromocion"
+  Cliente ||--o{ Contratacion : "IdCliente"
+  Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Permiso ||--o{ ControlMapeado : "IdPermiso"
   Usuario |o--o{ Empleado : "IdUsuario"
   Cliente ||--o{ HistorialCobro : "IdCliente"
@@ -25,8 +25,8 @@ erDiagram
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Empleado ||--o{ Pedido : "IdEmpleado"
+  Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Usuario |o--o{ PedidoHistorial : "IdUsuario"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
@@ -34,8 +34,8 @@ erDiagram
   Permiso ||--o{ PermisoRelacion : "IdPadre"
   Permiso ||--o{ PermisoRelacion : "IdHijo"
   Usuario ||--o{ Preferencia : "IdUsuario"
-  Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Cliente |o--o{ Prenda : "IdClienteActual"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
   Permiso ||--o{ RolPermiso : "IdPermiso"
@@ -72,6 +72,10 @@ erDiagram
     int IntentosFallidos
     int DVH "NULL"
     datetime FechaActualizacion
+    bit Activo
+    bit RequiereCambioClave
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
   }
   Empleado {
     int IdEmpleado PK
@@ -97,6 +101,7 @@ erDiagram
   PermisoRelacion {
     int IdPadre PK,FK
     int IdHijo PK,FK
+    int DVH "NULL"
   }
   RolPermiso {
     nvarchar(100) Rol PK
@@ -257,6 +262,7 @@ erDiagram
     date VigenciaHasta "NULL"
     decimal(10_2) PrecioMensual "NULL"
     int IdReferenteAcreditado FK "NULL"
+    int DVH "NULL"
   }
   Pedido {
     int IdPedido PK

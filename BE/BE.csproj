@@ -76,6 +76,13 @@
     <Compile Include="PoliticaDescuento.cs" />
     <Compile Include="SugerenciaPromocion.cs" />
     <Compile Include="CandidataSugerencia.cs" />
+    <Compile Include="OrigenMetrica.cs" />
+    <Compile Include="EstadoSolicitudBaja.cs" />
+    <Compile Include="PromocionHistorial.cs" />
+    <Compile Include="DictamenContable.cs" />
+    <Compile Include="SolicitudBajaPromocion.cs" />
+    <Compile Include="ReporteMetricas.cs" />
+    <Compile Include="AnalisisImpactoPromocion.cs" />
     <Compile Include="MantenimientoPrenda.cs" />
     <Compile Include="NivelUrgencia.cs" />
     <Compile Include="EstadoPrenda.cs" />

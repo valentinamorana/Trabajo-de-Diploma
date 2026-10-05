@@ -6276,3 +6276,487 @@ PT	err.bll.contratacion.importe_cambiado	O valor a cobrar mudou desde a liquida�
 PT	err.bll.pedido.estado_cambiado	O Pedido #{0} mudou de estado em outra sessão. Atualize a lista e tente novamente.
 PT	msg.contr.vigencia	Vigente de {0:dd/MM/yyyy} até {1:dd/MM/yyyy}.
 PT	col.contr.vigencia	Vigência
+ES	dlg.promo.descartarsug.titulo	Descartar sugerencia
+ES	dlg.promo.descartarsug.prompt	Motivo por el que se descarta la sugerencia #{0}:
+ES	msg.promo.sugdescartada	Sugerencia #{0} descartada.
+ES	conf.promo.imprimirdescarte	¿Imprimir la constancia de descarte?
+ES	conf.promo.imprimirficha	¿Imprimir la ficha de la promoción para Contabilidad?
+ES	dlg.promo.descartar.titulo	Descartar promoción
+ES	dlg.promo.descartar.prompt	Motivo por el que no se reformula la promoción '{0}':
+ES	msg.promo.descartada	Promoción '{0}' descartada.
+ES	dlg.promo.desactivar.titulo	Desactivar promoción
+ES	dlg.promo.desactivar.prompt	Motivo para desactivar la promoción '{0}':
+ES	dlg.promo.aprobarbaja.titulo	Aprobar baja de promoción
+ES	dlg.promo.aprobarbaja.prompt	Ventas pidió la baja de '{0}'.\nMotivo: {1}\n\nObservación de la resolución (opcional):
+ES	conf.promo.imprimirresolucion.gerencia	¿Imprimir la resolución de baja como informe a Gerencia?
+ES	conf.promo.imprimirresolucion.ventas	¿Imprimir la resolución de baja como informe a Ventas?
+ES	lbl.promo.historial.titulo	Historial de estados — Promoción #{0}
+ES	promo.analisis.vacio	Seleccioná una promoción para analizar su margen e impacto.
+ES	promo.analisis.titulo	Análisis de margen e impacto — Promoción #{0} '{1}'
+ES	promo.analisis.margen	Margen estimado: {0:C2} — Impacto: {1}
+ES	promo.analisis.beneficio	Beneficio estimado por Gerencia en la sugerencia #{0}: {1:C2} ({2}).
+ES	promo.analisis.sinsugerencia	Alta manual: no hay beneficio estimado de Gerencia.
+ES	promo.analisis.superpuestas	ADVERTENCIA: se superpone en fechas con otras promociones vigentes del mismo plan:
+ES	promo.analisis.sinsuperposicion	No se superpone con otras promociones vigentes del mismo plan.
+ES	promo.analisis.creador	Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad.
+ES	conf.promo.imprimirdictamen	¿Imprimir el dictamen contable?
+ES	dlg.promo.solicitarbaja.titulo	Solicitar baja de promoción
+ES	conf.promo.imprimirsolicitud	¿Imprimir la solicitud de baja?
+ES	promocion.origenactual	Origen de la sugerencia: {0}
+ES	doc.promo.reporte.titulo	Reporte de métricas
+ES	promocion.btn.imprimirreporte	Imprimir reporte
+ES	conf.promo.imprimirsugerencia	¿Imprimir la sugerencia de promoción?
+ES	doc.promo.ficha.titulo	Ficha de promoción
+ES	doc.promo.dictamen.titulo	Dictamen contable
+ES	doc.promo.solicitud.titulo	Solicitud de baja
+ES	menu.promo.resolucion	Resolución de baja
+ES	doc.promo.constanciadescarte.titulo	Constancia de descarte
+ES	est.promo.enrevision	En revisión contable
+ES	est.promo.vigente	Vigente
+ES	est.promo.rechazada	Rechazada por Contabilidad
+ES	est.promo.bajasolicitada	Baja solicitada
+ES	est.promo.desactivada	Desactivada
+ES	est.promo.descartada	Descartada
+ES	est.promo.vencida	Vencida
+ES	est.sugpromo.evaluada	Aceptada (promoción creada)
+ES	est.sugpromo.descartada	Descartada
+ES	est.sugpromo.pendiente	Pendiente
+ES	origen.metrica.abandono	Abandono por plan
+ES	origen.metrica.rotacion	Rotación por categoría
+ES	origen.metrica.manual	Manual
+ES	tipodesc.porcentaje	Porcentaje
+ES	tipodesc.montofijo	Monto fijo
+ES	tipodesc.preciopromocional	Precio promocional
+ES	doc.promo.plan	Plan
+ES	doc.promo.categoria	Categoría
+ES	doc.promo.promocion	Promoción
+ES	doc.promo.beneficio	Beneficio
+ES	doc.promo.vigencia	Vigencia
+ES	doc.promo.estado	Estado
+ES	doc.promo.fechareporte	Fecha del reporte
+ES	doc.promo.abandonoplan	Abandono por plan (clientes en riesgo):
+ES	doc.promo.sindatos	Sin casos detectados.
+ES	doc.promo.abandonolinea	   • {0}: {1} cliente(s) en riesgo — {2:C2} de ingreso mensual en riesgo
+ES	doc.promo.rotacioncategoria	Rotación por categoría (prendas):
+ES	doc.promo.rotacionlinea	   • {0}: {1} de baja demanda, {2} de alta demanda
+ES	doc.promo.oportunidades	Oportunidades de promoción detectadas:
+ES	doc.promo.beneficioest	Beneficio estimado
+ES	doc.promo.sinoportunidad	¿Hay oportunidad? No: no se detectaron casos para promocionar. Fin sin promoción.
+ES	doc.promo.sugerencia.titulo	Sugerencia de promoción
+ES	doc.promo.sugerencia	Sugerencia
+ES	doc.promo.gerencia	Registrada por (Gerencia)
+ES	doc.promo.origen	Origen de la métrica
+ES	doc.promo.tiposugerido	Tipo de descuento sugerido
+ES	doc.promo.motivo	Motivo
+ES	doc.promo.descartesug	Administración descartó la sugerencia el {0}.
+ES	doc.promo.motivodescarte	Motivo del descarte
+ES	doc.promo.descripcion	Descripción
+ES	doc.promo.margen	Margen estimado
+ES	doc.promo.impacto	Impacto económico
+ES	doc.promo.creadapor	Creada por (Administración)
+ES	doc.promo.origensug	Origen
+ES	doc.promo.desdesugerencia	sugerencia de Gerencia #{0}
+ES	doc.promo.manual	alta manual
+ES	doc.promo.notacategoria	Promoción por categoría: es informativa, no descuenta en el cobro de la suscripción.
+ES	doc.promo.historial	Historial de estados:
+ES	doc.promo.resultado	Resultado
+ES	doc.promo.aprobada	APROBADA — la promoción queda Vigente.
+ES	doc.promo.rechazada	RECHAZADA — vuelve a Administración para reformularla o descartarla.
+ES	doc.promo.observacion	Observación
+ES	doc.promo.contable	Dictaminó (Contabilidad)
+ES	doc.promo.solicito	Solicitó (Ventas)
+ES	doc.promo.solicitud.nota	Mientras Administración resuelve la solicitud, la promoción no se aplica en los cobros.
+ES	doc.promo.destinatario	Destinatario
+ES	doc.promo.agerencia	Gerencia
+ES	doc.promo.aventas	Ventas
+ES	doc.promo.motivosolicitud	Motivo de la solicitud
+ES	doc.promo.bajaaprobada	Baja APROBADA — la promoción quedó Desactivada.
+ES	doc.promo.bajarechazada	Baja RECHAZADA — la promoción sigue Vigente.
+ES	doc.promo.motivoresolucion	Motivo de la resolución
+ES	doc.promo.resolvio	Resolvió (Administración)
+ES	doc.promo.resolucion.gerencia	Resolución de baja — Informe a Gerencia
+ES	doc.promo.resolucion.ventas	Resolución de baja — Informe a Ventas
+ES	doc.promo.descarteprom	Administración descartó la promoción el {0} tras el rechazo contable.
+ES	doc.promo.descartadapor	Descartó
+ES	err.bll.promocion.inexistente	La promoción ya no existe.
+ES	err.bll.promocion.creador_no_dictamina	Quien creó la promoción no puede dictaminarla: la tiene que analizar otro usuario de Contabilidad.
+ES	err.bll.promocion.descartar_estado	Solo se puede descartar una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.
+ES	err.bll.promocion.solicitud_inexistente	La promoción no tiene una solicitud de baja pendiente.
+ES	err.bll.promocion.motivodescarte_requerido	Debe indicar el motivo por el que se descarta la promoción.
+ES	err.bll.promocion.motivodesactivar_requerido	Debe indicar el motivo de la desactivación.
+ES	err.bll.sugerenciapromocion.motivodescarte_requerido	Debe indicar el motivo por el que se descarta la sugerencia.
+ES	promocion.btn.descartarsugerencia	Descartar sugerencia
+ES	promocion.btn.imprimirsugerencia	Imprimir sugerencia
+ES	promocion.btn.descartar	Descartar
+ES	promocion.btn.historial	Historial
+ES	promocion.btn.imprimir	Imprimir ▾
+ES	promocion.btn.solicitarbaja	Solicitar baja
+ES	promocion.btn.analizarmetricas	Analizar métricas…
+ES	promocion.titulosugregistradas	Sugerencias registradas
+ES	col.promo.origen	Origen
+ES	col.promo.sugeridapor	Sugerida por
+ES	col.promo.creadapor	Creada por
+ES	col.promo.fecha	Fecha
+EN	dlg.promo.descartarsug.titulo	Discard suggestion
+EN	dlg.promo.descartarsug.prompt	Reason for discarding suggestion #{0}:
+EN	msg.promo.sugdescartada	Suggestion #{0} discarded.
+EN	conf.promo.imprimirdescarte	Print the discard certificate?
+EN	conf.promo.imprimirficha	Print the promotion sheet for Accounting?
+EN	dlg.promo.descartar.titulo	Discard promotion
+EN	dlg.promo.descartar.prompt	Reason for not reformulating promotion '{0}':
+EN	msg.promo.descartada	Promotion '{0}' discarded.
+EN	dlg.promo.desactivar.titulo	Deactivate promotion
+EN	dlg.promo.desactivar.prompt	Reason for deactivating promotion '{0}':
+EN	dlg.promo.aprobarbaja.titulo	Approve promotion withdrawal
+EN	dlg.promo.aprobarbaja.prompt	Sales requested the withdrawal of '{0}'.\nReason: {1}\n\nResolution note (optional):
+EN	conf.promo.imprimirresolucion.gerencia	Print the withdrawal resolution as a report to Management?
+EN	conf.promo.imprimirresolucion.ventas	Print the withdrawal resolution as a report to Sales?
+EN	lbl.promo.historial.titulo	Status history — Promotion #{0}
+EN	promo.analisis.vacio	Select a promotion to analyze its margin and impact.
+EN	promo.analisis.titulo	Margin and impact analysis — Promotion #{0} '{1}'
+EN	promo.analisis.margen	Estimated margin: {0:C2} — Impact: {1}
+EN	promo.analisis.beneficio	Benefit estimated by Management in suggestion #{0}: {1:C2} ({2}).
+EN	promo.analisis.sinsugerencia	Manual entry: there is no benefit estimated by Management.
+EN	promo.analisis.superpuestas	WARNING: its dates overlap with other active promotions of the same plan:
+EN	promo.analisis.sinsuperposicion	It does not overlap with other active promotions of the same plan.
+EN	promo.analisis.creador	You created this promotion: another Accounting user must rule on it.
+EN	conf.promo.imprimirdictamen	Print the accounting ruling?
+EN	dlg.promo.solicitarbaja.titulo	Request promotion withdrawal
+EN	conf.promo.imprimirsolicitud	Print the withdrawal request?
+EN	promocion.origenactual	Suggestion source: {0}
+EN	doc.promo.reporte.titulo	Metrics report
+EN	promocion.btn.imprimirreporte	Print report
+EN	conf.promo.imprimirsugerencia	Print the promotion suggestion?
+EN	doc.promo.ficha.titulo	Promotion sheet
+EN	doc.promo.dictamen.titulo	Accounting ruling
+EN	doc.promo.solicitud.titulo	Withdrawal request
+EN	menu.promo.resolucion	Withdrawal resolution
+EN	doc.promo.constanciadescarte.titulo	Discard certificate
+EN	est.promo.enrevision	Under accounting review
+EN	est.promo.vigente	Active
+EN	est.promo.rechazada	Rejected by Accounting
+EN	est.promo.bajasolicitada	Withdrawal requested
+EN	est.promo.desactivada	Deactivated
+EN	est.promo.descartada	Discarded
+EN	est.promo.vencida	Expired
+EN	est.sugpromo.evaluada	Accepted (promotion created)
+EN	est.sugpromo.descartada	Discarded
+EN	est.sugpromo.pendiente	Pending
+EN	origen.metrica.abandono	Churn by plan
+EN	origen.metrica.rotacion	Turnover by category
+EN	origen.metrica.manual	Manual
+EN	tipodesc.porcentaje	Percentage
+EN	tipodesc.montofijo	Fixed amount
+EN	tipodesc.preciopromocional	Promotional price
+EN	doc.promo.plan	Plan
+EN	doc.promo.categoria	Category
+EN	doc.promo.promocion	Promotion
+EN	doc.promo.beneficio	Benefit
+EN	doc.promo.vigencia	Validity
+EN	doc.promo.estado	Status
+EN	doc.promo.fechareporte	Report date
+EN	doc.promo.abandonoplan	Churn by plan (customers at risk):
+EN	doc.promo.sindatos	No cases detected.
+EN	doc.promo.abandonolinea	   • {0}: {1} customer(s) at risk — {2:C2} of monthly revenue at risk
+EN	doc.promo.rotacioncategoria	Turnover by category (garments):
+EN	doc.promo.rotacionlinea	   • {0}: {1} low demand, {2} high demand
+EN	doc.promo.oportunidades	Promotion opportunities detected:
+EN	doc.promo.beneficioest	Estimated benefit
+EN	doc.promo.sinoportunidad	Is there an opportunity? No: no cases to promote were detected. End without promotion.
+EN	doc.promo.sugerencia.titulo	Promotion suggestion
+EN	doc.promo.sugerencia	Suggestion
+EN	doc.promo.gerencia	Registered by (Management)
+EN	doc.promo.origen	Metric source
+EN	doc.promo.tiposugerido	Suggested discount type
+EN	doc.promo.motivo	Reason
+EN	doc.promo.descartesug	Administration discarded the suggestion on {0}.
+EN	doc.promo.motivodescarte	Discard reason
+EN	doc.promo.descripcion	Description
+EN	doc.promo.margen	Estimated margin
+EN	doc.promo.impacto	Economic impact
+EN	doc.promo.creadapor	Created by (Administration)
+EN	doc.promo.origensug	Source
+EN	doc.promo.desdesugerencia	Management suggestion #{0}
+EN	doc.promo.manual	manual entry
+EN	doc.promo.notacategoria	Category promotion: informational only, it does not discount the subscription charge.
+EN	doc.promo.historial	Status history:
+EN	doc.promo.resultado	Result
+EN	doc.promo.aprobada	APPROVED — the promotion becomes Active.
+EN	doc.promo.rechazada	REJECTED — it goes back to Administration to be reformulated or discarded.
+EN	doc.promo.observacion	Note
+EN	doc.promo.contable	Ruled by (Accounting)
+EN	doc.promo.solicito	Requested by (Sales)
+EN	doc.promo.solicitud.nota	While Administration resolves the request, the promotion is not applied to charges.
+EN	doc.promo.destinatario	Recipient
+EN	doc.promo.agerencia	Management
+EN	doc.promo.aventas	Sales
+EN	doc.promo.motivosolicitud	Request reason
+EN	doc.promo.bajaaprobada	Withdrawal APPROVED — the promotion was Deactivated.
+EN	doc.promo.bajarechazada	Withdrawal REJECTED — the promotion remains Active.
+EN	doc.promo.motivoresolucion	Resolution reason
+EN	doc.promo.resolvio	Resolved by (Administration)
+EN	doc.promo.resolucion.gerencia	Withdrawal resolution — Report to Management
+EN	doc.promo.resolucion.ventas	Withdrawal resolution — Report to Sales
+EN	doc.promo.descarteprom	Administration discarded the promotion on {0} after the accounting rejection.
+EN	doc.promo.descartadapor	Discarded by
+EN	err.bll.promocion.inexistente	The promotion no longer exists.
+EN	err.bll.promocion.creador_no_dictamina	Whoever created the promotion cannot rule on it: another Accounting user must analyze it.
+EN	err.bll.promocion.descartar_estado	Only a promotion Rejected by Accounting can be discarded. This promotion is '{0}'.
+EN	err.bll.promocion.solicitud_inexistente	The promotion has no pending withdrawal request.
+EN	err.bll.promocion.motivodescarte_requerido	You must state the reason for discarding the promotion.
+EN	err.bll.promocion.motivodesactivar_requerido	You must state the reason for the deactivation.
+EN	err.bll.sugerenciapromocion.motivodescarte_requerido	You must state the reason for discarding the suggestion.
+EN	promocion.btn.descartarsugerencia	Discard suggestion
+EN	promocion.btn.imprimirsugerencia	Print suggestion
+EN	promocion.btn.descartar	Discard
+EN	promocion.btn.historial	History
+EN	promocion.btn.imprimir	Print ▾
+EN	promocion.btn.solicitarbaja	Request withdrawal
+EN	promocion.btn.analizarmetricas	Analyze metrics…
+EN	promocion.titulosugregistradas	Registered suggestions
+EN	col.promo.origen	Source
+EN	col.promo.sugeridapor	Suggested by
+EN	col.promo.creadapor	Created by
+EN	col.promo.fecha	Date
+RU	dlg.promo.descartarsug.titulo	Отклонить предложение
+RU	dlg.promo.descartarsug.prompt	Причина отклонения предложения №{0}:
+RU	msg.promo.sugdescartada	Предложение №{0} отклонено.
+RU	conf.promo.imprimirdescarte	Распечатать справку об отклонении?
+RU	conf.promo.imprimirficha	Распечатать карточку акции для бухгалтерии?
+RU	dlg.promo.descartar.titulo	Отклонить акцию
+RU	dlg.promo.descartar.prompt	Причина, по которой акция '{0}' не переформулируется:
+RU	msg.promo.descartada	Акция '{0}' отклонена.
+RU	dlg.promo.desactivar.titulo	Деактивировать акцию
+RU	dlg.promo.desactivar.prompt	Причина деактивации акции '{0}':
+RU	dlg.promo.aprobarbaja.titulo	Одобрить отмену акции
+RU	dlg.promo.aprobarbaja.prompt	Отдел продаж запросил отмену '{0}'.\nПричина: {1}\n\nКомментарий к решению (необязательно):
+RU	conf.promo.imprimirresolucion.gerencia	Распечатать решение об отмене как отчёт для руководства?
+RU	conf.promo.imprimirresolucion.ventas	Распечатать решение об отмене как отчёт для отдела продаж?
+RU	lbl.promo.historial.titulo	История статусов — акция №{0}
+RU	promo.analisis.vacio	Выберите акцию, чтобы проанализировать её маржу и влияние.
+RU	promo.analisis.titulo	Анализ маржи и влияния — акция №{0} '{1}'
+RU	promo.analisis.margen	Ожидаемая маржа: {0:C2} — Влияние: {1}
+RU	promo.analisis.beneficio	Выгода, оценённая руководством в предложении №{0}: {1:C2} ({2}).
+RU	promo.analisis.sinsugerencia	Создана вручную: оценки выгоды от руководства нет.
+RU	promo.analisis.superpuestas	ВНИМАНИЕ: даты пересекаются с другими действующими акциями того же плана:
+RU	promo.analisis.sinsuperposicion	Не пересекается с другими действующими акциями того же плана.
+RU	promo.analisis.creador	Вы создали эту акцию: решение по ней должен принять другой сотрудник бухгалтерии.
+RU	conf.promo.imprimirdictamen	Распечатать заключение бухгалтерии?
+RU	dlg.promo.solicitarbaja.titulo	Запросить отмену акции
+RU	conf.promo.imprimirsolicitud	Распечатать запрос на отмену?
+RU	promocion.origenactual	Источник предложения: {0}
+RU	doc.promo.reporte.titulo	Отчёт по метрикам
+RU	promocion.btn.imprimirreporte	Печать отчёта
+RU	conf.promo.imprimirsugerencia	Распечатать предложение акции?
+RU	doc.promo.ficha.titulo	Карточка акции
+RU	doc.promo.dictamen.titulo	Заключение бухгалтерии
+RU	doc.promo.solicitud.titulo	Запрос на отмену
+RU	menu.promo.resolucion	Решение об отмене
+RU	doc.promo.constanciadescarte.titulo	Справка об отклонении
+RU	est.promo.enrevision	На проверке бухгалтерии
+RU	est.promo.vigente	Действует
+RU	est.promo.rechazada	Отклонена бухгалтерией
+RU	est.promo.bajasolicitada	Запрошена отмена
+RU	est.promo.desactivada	Деактивирована
+RU	est.promo.descartada	Отклонена
+RU	est.promo.vencida	Истекла
+RU	est.sugpromo.evaluada	Принято (акция создана)
+RU	est.sugpromo.descartada	Отклонено
+RU	est.sugpromo.pendiente	Ожидает
+RU	origen.metrica.abandono	Отток по плану
+RU	origen.metrica.rotacion	Оборачиваемость по категории
+RU	origen.metrica.manual	Вручную
+RU	tipodesc.porcentaje	Процент
+RU	tipodesc.montofijo	Фиксированная сумма
+RU	tipodesc.preciopromocional	Акционная цена
+RU	doc.promo.plan	План
+RU	doc.promo.categoria	Категория
+RU	doc.promo.promocion	Акция
+RU	doc.promo.beneficio	Выгода
+RU	doc.promo.vigencia	Срок действия
+RU	doc.promo.estado	Статус
+RU	doc.promo.fechareporte	Дата отчёта
+RU	doc.promo.abandonoplan	Отток по плану (клиенты в зоне риска):
+RU	doc.promo.sindatos	Случаев не обнаружено.
+RU	doc.promo.abandonolinea	   • {0}: клиентов в зоне риска: {1} — под угрозой {2:C2} ежемесячного дохода
+RU	doc.promo.rotacioncategoria	Оборачиваемость по категории (вещи):
+RU	doc.promo.rotacionlinea	   • {0}: низкий спрос — {1}, высокий спрос — {2}
+RU	doc.promo.oportunidades	Обнаруженные возможности для акций:
+RU	doc.promo.beneficioest	Ожидаемая выгода
+RU	doc.promo.sinoportunidad	Есть возможность? Нет: случаев для продвижения не обнаружено. Завершено без акции.
+RU	doc.promo.sugerencia.titulo	Предложение акции
+RU	doc.promo.sugerencia	Предложение
+RU	doc.promo.gerencia	Зарегистрировано (руководство)
+RU	doc.promo.origen	Источник метрики
+RU	doc.promo.tiposugerido	Предлагаемый тип скидки
+RU	doc.promo.motivo	Причина
+RU	doc.promo.descartesug	Администрация отклонила предложение {0}.
+RU	doc.promo.motivodescarte	Причина отклонения
+RU	doc.promo.descripcion	Описание
+RU	doc.promo.margen	Ожидаемая маржа
+RU	doc.promo.impacto	Экономическое влияние
+RU	doc.promo.creadapor	Создано (администрация)
+RU	doc.promo.origensug	Источник
+RU	doc.promo.desdesugerencia	предложение руководства №{0}
+RU	doc.promo.manual	создана вручную
+RU	doc.promo.notacategoria	Акция по категории: носит информационный характер и не снижает оплату подписки.
+RU	doc.promo.historial	История статусов:
+RU	doc.promo.resultado	Результат
+RU	doc.promo.aprobada	ОДОБРЕНО — акция начинает действовать.
+RU	doc.promo.rechazada	ОТКЛОНЕНО — возвращается в администрацию для переформулирования или отклонения.
+RU	doc.promo.observacion	Комментарий
+RU	doc.promo.contable	Заключение дал (бухгалтерия)
+RU	doc.promo.solicito	Запросил (продажи)
+RU	doc.promo.solicitud.nota	Пока администрация рассматривает запрос, акция не применяется к оплатам.
+RU	doc.promo.destinatario	Получатель
+RU	doc.promo.agerencia	Руководство
+RU	doc.promo.aventas	Отдел продаж
+RU	doc.promo.motivosolicitud	Причина запроса
+RU	doc.promo.bajaaprobada	Отмена ОДОБРЕНА — акция деактивирована.
+RU	doc.promo.bajarechazada	Отмена ОТКЛОНЕНА — акция продолжает действовать.
+RU	doc.promo.motivoresolucion	Причина решения
+RU	doc.promo.resolvio	Решение принял (администрация)
+RU	doc.promo.resolucion.gerencia	Решение об отмене — отчёт для руководства
+RU	doc.promo.resolucion.ventas	Решение об отмене — отчёт для отдела продаж
+RU	doc.promo.descarteprom	Администрация отклонила акцию {0} после отказа бухгалтерии.
+RU	doc.promo.descartadapor	Отклонил
+RU	err.bll.promocion.inexistente	Акция больше не существует.
+RU	err.bll.promocion.creador_no_dictamina	Создатель акции не может выносить по ней заключение: её должен проанализировать другой сотрудник бухгалтерии.
+RU	err.bll.promocion.descartar_estado	Отклонить можно только акцию, отклонённую бухгалтерией. Статус этой акции: '{0}'.
+RU	err.bll.promocion.solicitud_inexistente	У акции нет ожидающего запроса на отмену.
+RU	err.bll.promocion.motivodescarte_requerido	Необходимо указать причину отклонения акции.
+RU	err.bll.promocion.motivodesactivar_requerido	Необходимо указать причину деактивации.
+RU	err.bll.sugerenciapromocion.motivodescarte_requerido	Необходимо указать причину отклонения предложения.
+RU	promocion.btn.descartarsugerencia	Отклонить предложение
+RU	promocion.btn.imprimirsugerencia	Печать предложения
+RU	promocion.btn.descartar	Отклонить
+RU	promocion.btn.historial	История
+RU	promocion.btn.imprimir	Печать ▾
+RU	promocion.btn.solicitarbaja	Запросить отмену
+RU	promocion.btn.analizarmetricas	Анализ метрик…
+RU	promocion.titulosugregistradas	Зарегистрированные предложения
+RU	col.promo.origen	Источник
+RU	col.promo.sugeridapor	Предложил
+RU	col.promo.creadapor	Создал
+RU	col.promo.fecha	Дата
+PT	dlg.promo.descartarsug.titulo	Descartar sugestão
+PT	dlg.promo.descartarsug.prompt	Motivo pelo qual a sugestão #{0} é descartada:
+PT	msg.promo.sugdescartada	Sugestão #{0} descartada.
+PT	conf.promo.imprimirdescarte	Imprimir o comprovante de descarte?
+PT	conf.promo.imprimirficha	Imprimir a ficha da promoção para a Contabilidade?
+PT	dlg.promo.descartar.titulo	Descartar promoção
+PT	dlg.promo.descartar.prompt	Motivo pelo qual a promoção '{0}' não é reformulada:
+PT	msg.promo.descartada	Promoção '{0}' descartada.
+PT	dlg.promo.desactivar.titulo	Desativar promoção
+PT	dlg.promo.desactivar.prompt	Motivo para desativar a promoção '{0}':
+PT	dlg.promo.aprobarbaja.titulo	Aprovar baixa da promoção
+PT	dlg.promo.aprobarbaja.prompt	Vendas pediu a baixa de '{0}'.\nMotivo: {1}\n\nObservação da resolução (opcional):
+PT	conf.promo.imprimirresolucion.gerencia	Imprimir a resolução de baixa como relatório para a Gerência?
+PT	conf.promo.imprimirresolucion.ventas	Imprimir a resolução de baixa como relatório para Vendas?
+PT	lbl.promo.historial.titulo	Histórico de estados — Promoção #{0}
+PT	promo.analisis.vacio	Selecione uma promoção para analisar sua margem e impacto.
+PT	promo.analisis.titulo	Análise de margem e impacto — Promoção #{0} '{1}'
+PT	promo.analisis.margen	Margem estimada: {0:C2} — Impacto: {1}
+PT	promo.analisis.beneficio	Benefício estimado pela Gerência na sugestão #{0}: {1:C2} ({2}).
+PT	promo.analisis.sinsugerencia	Cadastro manual: não há benefício estimado pela Gerência.
+PT	promo.analisis.superpuestas	ATENÇÃO: as datas se sobrepõem a outras promoções vigentes do mesmo plano:
+PT	promo.analisis.sinsuperposicion	Não se sobrepõe a outras promoções vigentes do mesmo plano.
+PT	promo.analisis.creador	Você criou esta promoção: outro usuário da Contabilidade deve emitir o parecer.
+PT	conf.promo.imprimirdictamen	Imprimir o parecer contábil?
+PT	dlg.promo.solicitarbaja.titulo	Solicitar baixa da promoção
+PT	conf.promo.imprimirsolicitud	Imprimir a solicitação de baixa?
+PT	promocion.origenactual	Origem da sugestão: {0}
+PT	doc.promo.reporte.titulo	Relatório de métricas
+PT	promocion.btn.imprimirreporte	Imprimir relatório
+PT	conf.promo.imprimirsugerencia	Imprimir a sugestão de promoção?
+PT	doc.promo.ficha.titulo	Ficha da promoção
+PT	doc.promo.dictamen.titulo	Parecer contábil
+PT	doc.promo.solicitud.titulo	Solicitação de baixa
+PT	menu.promo.resolucion	Resolução de baixa
+PT	doc.promo.constanciadescarte.titulo	Comprovante de descarte
+PT	est.promo.enrevision	Em revisão contábil
+PT	est.promo.vigente	Vigente
+PT	est.promo.rechazada	Rejeitada pela Contabilidade
+PT	est.promo.bajasolicitada	Baixa solicitada
+PT	est.promo.desactivada	Desativada
+PT	est.promo.descartada	Descartada
+PT	est.promo.vencida	Vencida
+PT	est.sugpromo.evaluada	Aceita (promoção criada)
+PT	est.sugpromo.descartada	Descartada
+PT	est.sugpromo.pendiente	Pendente
+PT	origen.metrica.abandono	Abandono por plano
+PT	origen.metrica.rotacion	Rotação por categoria
+PT	origen.metrica.manual	Manual
+PT	tipodesc.porcentaje	Porcentagem
+PT	tipodesc.montofijo	Valor fixo
+PT	tipodesc.preciopromocional	Preço promocional
+PT	doc.promo.plan	Plano
+PT	doc.promo.categoria	Categoria
+PT	doc.promo.promocion	Promoção
+PT	doc.promo.beneficio	Benefício
+PT	doc.promo.vigencia	Vigência
+PT	doc.promo.estado	Estado
+PT	doc.promo.fechareporte	Data do relatório
+PT	doc.promo.abandonoplan	Abandono por plano (clientes em risco):
+PT	doc.promo.sindatos	Nenhum caso detectado.
+PT	doc.promo.abandonolinea	   • {0}: {1} cliente(s) em risco — {2:C2} de receita mensal em risco
+PT	doc.promo.rotacioncategoria	Rotação por categoria (peças):
+PT	doc.promo.rotacionlinea	   • {0}: {1} de baixa demanda, {2} de alta demanda
+PT	doc.promo.oportunidades	Oportunidades de promoção detectadas:
+PT	doc.promo.beneficioest	Benefício estimado
+PT	doc.promo.sinoportunidad	Há oportunidade? Não: não foram detectados casos para promover. Fim sem promoção.
+PT	doc.promo.sugerencia.titulo	Sugestão de promoção
+PT	doc.promo.sugerencia	Sugestão
+PT	doc.promo.gerencia	Registrada por (Gerência)
+PT	doc.promo.origen	Origem da métrica
+PT	doc.promo.tiposugerido	Tipo de desconto sugerido
+PT	doc.promo.motivo	Motivo
+PT	doc.promo.descartesug	A Administração descartou a sugestão em {0}.
+PT	doc.promo.motivodescarte	Motivo do descarte
+PT	doc.promo.descripcion	Descrição
+PT	doc.promo.margen	Margem estimada
+PT	doc.promo.impacto	Impacto econômico
+PT	doc.promo.creadapor	Criada por (Administração)
+PT	doc.promo.origensug	Origem
+PT	doc.promo.desdesugerencia	sugestão da Gerência #{0}
+PT	doc.promo.manual	cadastro manual
+PT	doc.promo.notacategoria	Promoção por categoria: é informativa, não desconta na cobrança da assinatura.
+PT	doc.promo.historial	Histórico de estados:
+PT	doc.promo.resultado	Resultado
+PT	doc.promo.aprobada	APROVADA — a promoção fica Vigente.
+PT	doc.promo.rechazada	REJEITADA — volta à Administração para ser reformulada ou descartada.
+PT	doc.promo.observacion	Observação
+PT	doc.promo.contable	Parecer de (Contabilidade)
+PT	doc.promo.solicito	Solicitou (Vendas)
+PT	doc.promo.solicitud.nota	Enquanto a Administração resolve a solicitação, a promoção não é aplicada nas cobranças.
+PT	doc.promo.destinatario	Destinatário
+PT	doc.promo.agerencia	Gerência
+PT	doc.promo.aventas	Vendas
+PT	doc.promo.motivosolicitud	Motivo da solicitação
+PT	doc.promo.bajaaprobada	Baixa APROVADA — a promoção ficou Desativada.
+PT	doc.promo.bajarechazada	Baixa REJEITADA — a promoção continua Vigente.
+PT	doc.promo.motivoresolucion	Motivo da resolução
+PT	doc.promo.resolvio	Resolveu (Administração)
+PT	doc.promo.resolucion.gerencia	Resolução de baixa — Relatório para a Gerência
+PT	doc.promo.resolucion.ventas	Resolução de baixa — Relatório para Vendas
+PT	doc.promo.descarteprom	A Administração descartou a promoção em {0} após a rejeição contábil.
+PT	doc.promo.descartadapor	Descartou
+PT	err.bll.promocion.inexistente	A promoção não existe mais.
+PT	err.bll.promocion.creador_no_dictamina	Quem criou a promoção não pode emitir o parecer: outro usuário da Contabilidade deve analisá-la.
+PT	err.bll.promocion.descartar_estado	Só é possível descartar uma promoção Rejeitada pela Contabilidade. Esta promoção está '{0}'.
+PT	err.bll.promocion.solicitud_inexistente	A promoção não tem uma solicitação de baixa pendente.
+PT	err.bll.promocion.motivodescarte_requerido	É preciso indicar o motivo pelo qual a promoção é descartada.
+PT	err.bll.promocion.motivodesactivar_requerido	É preciso indicar o motivo da desativação.
+PT	err.bll.sugerenciapromocion.motivodescarte_requerido	É preciso indicar o motivo pelo qual a sugestão é descartada.
+PT	promocion.btn.descartarsugerencia	Descartar sugestão
+PT	promocion.btn.imprimirsugerencia	Imprimir sugestão
+PT	promocion.btn.descartar	Descartar
+PT	promocion.btn.historial	Histórico
+PT	promocion.btn.imprimir	Imprimir ▾
+PT	promocion.btn.solicitarbaja	Solicitar baixa
+PT	promocion.btn.analizarmetricas	Analisar métricas…
+PT	promocion.titulosugregistradas	Sugestões registradas
+PT	col.promo.origen	Origem
+PT	col.promo.sugeridapor	Sugerida por
+PT	col.promo.creadapor	Criada por
+PT	col.promo.fecha	Data

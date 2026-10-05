@@ -1,14 +1,15 @@
 namespace BE
 {
     /// <summary>
-    /// PN03 — Idea de promoción detectada a partir de los reportes del negocio (rotación, abandono).
+    /// PN03 — Oportunidad de promoción detectada en el «Reporte de métricas» (rotación, abandono).
     /// Es una PROPUESTA de datos para que Gerencia arme su sugerencia con un dato concreto; no se
-    /// persiste: Gerencia la revisa, la ajusta y recién ahí se crea la SugerenciaPromocion.
+    /// persiste: Gerencia la revisa, la ajusta y recién ahí se registra la SugerenciaPromocion
+    /// (que guarda el origen en OrigenMetrica).
     /// </summary>
     public class CandidataSugerencia
     {
-        /// <summary>Reporte del que sale el dato: "Rotación" o "Abandono".</summary>
-        public string Origen { get; set; }
+        /// <summary>Reporte del que sale el dato: abandono por plan o rotación por categoría.</summary>
+        public OrigenMetrica Origen { get; set; }
 
         public int? IdPlan { get; set; }
         public string NombrePlan { get; set; }

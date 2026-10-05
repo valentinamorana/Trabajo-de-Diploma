@@ -4,14 +4,15 @@ sequenceDiagram
   participant F as Promociones<br/>VigentesForm
   participant B as BLL.Promocion
   participant D as DAL.Promocion
-  V->>F: Consulta las promociones vigentes, elige una e indica el motivo
-  F->>B: SugerirBaja(modulo, promocion, motivo)
-  Note over B: Exigir(PromocionesVigentesEditar) · el motivo es obligatorio · solo desde Vigente
-  B->>D: SolicitarBaja(id, motivo)  [UPDATE condicionado a Vigente]
+  F->>B: ObtenerParaVentas()  [cierra antes las vencidas]
+  V->>F: Elige una promoción Vigente, pulsa "Solicitar baja" e indica el motivo
+  F->>B: SolicitarBaja(modulo, promocion, motivo)
+  Note over B: Exigir(PromocionesVigentesEditar) · promocion.PuedeSolicitarseBaja() · motivo obligatorio
+  B->>D: SolicitarBaja(solicitud, historial: Vigente → BajaSolicitada)  [claim]
   alt Ya no está Vigente
-    D-->>B: false
+    D-->>B: 0
     B-->>F: AppException(estado_concurrente)
   else Solicitada
-    B-->>F: ok
-    F-->>V: Promoción en Baja solicitada: Administración la resuelve
+    B-->>F: idSolicitud
+    F-->>V: Solicitud de baja (PDF): Administración la resuelve
   end

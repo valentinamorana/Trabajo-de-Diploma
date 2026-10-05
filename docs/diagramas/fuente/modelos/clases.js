@@ -123,11 +123,20 @@ module.exports = [
   // ───────────── PN03 ─────────────
   {
     tipo: 'clases', id: 'CLASES_pn03_promociones', procesos: ['PN03'], titulo: 'Diagrama de clases — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
+    // Diagrama de actividad aprobado: una clase de BLL por carril, un método por actividad y los
+    // objetos del flujo (reporte, sugerencia, dictamen, solicitud/resolución de baja, historial).
     clases: [
-      E('BE.SugerenciaPromocion', { attrs: 'all' }), E('BE.Promocion', { attrs: 'all' }), E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'Precio'] }), E('BE.CandidataSugerencia', { attrs: 'all' }),
-      E('BLL.SugerenciaPromocion', { metodos: ['Crear', 'ObtenerPendientes'] }), E('BLL.AnalisisPromociones', { metodos: 'all' }),
-      E('BLL.Promocion', { metodos: ['CrearDesdeSugerencia', 'CrearManual', 'Modificar', 'Reformular', 'Desactivar', 'AprobarContable', 'RechazarContable', 'SugerirBaja', 'AprobarBaja', 'RechazarBaja'] }),
-      E('IPromocionDAL', { metodos: ['Alta', 'Modificar', 'CambiarEstado', 'SolicitarBaja'] }), E('ISugerenciaPromocionDAL', { metodos: ['MarcarEvaluada', 'ReabrirEvaluacion'] })
+      E('BE.ReporteMetricas', { attrs: 'all', metodos: ['HayOportunidad'] }), E('BE.CandidataSugerencia', { attrs: ['Origen', 'IdPlan', 'CategoriaPrenda', 'Motivo', 'BeneficioEstimado'] }),
+      E('BE.SugerenciaPromocion', { attrs: 'all', metodos: ['PuedeEvaluarse', 'TransicionValida'] }),
+      E('BE.Promocion', { attrs: 'all', metodos: ['EstaVigente', 'DebeVencer', 'PuedeDictaminarla', 'PuedeReformularse', 'PuedeDescartarse', 'PuedeSolicitarseBaja', 'PuedeResolverseBaja', 'PuedeDesactivarseDirecto', 'SeSuperponeCon', 'TransicionValida'] }),
+      E('BE.PromocionHistorial', { attrs: 'all' }), E('BE.DictamenContable', { attrs: 'all' }), E('BE.SolicitudBajaPromocion', { attrs: 'all' }),
+      E('BE.AnalisisImpactoPromocion', { attrs: 'all' }),
+      E('BLL.AnalisisPromociones', { metodos: ['AnalizarMetricas', 'HayOportunidad'] }),
+      E('BLL.SugerenciaPromocion', { metodos: ['RegistrarSugerencia', 'DescartarSugerencia', 'ObtenerPendientes'] }),
+      E('BLL.Promocion', { metodos: ['CrearDesdeSugerencia', 'CrearManual', 'ValidarPromocion', 'AnalizarMargenEImpacto', 'PuedeDictaminar', 'AprobarContable', 'RechazarContable',
+                                     'Reformular', 'DescartarPromocion', 'SolicitarBaja', 'AprobarBaja', 'RechazarBaja', 'Desactivar', 'CerrarVencidas'] }),
+      E('IPromocionDAL', { metodos: ['Alta', 'Reformular', 'CambiarEstado', 'Dictaminar', 'SolicitarBaja', 'ResolverBaja', 'ObtenerHistorial'] }),
+      E('ISugerenciaPromocionDAL', { metodos: ['Alta', 'MarcarEvaluada', 'ReabrirEvaluacion', 'Descartar'] })
     ]
   },
   {

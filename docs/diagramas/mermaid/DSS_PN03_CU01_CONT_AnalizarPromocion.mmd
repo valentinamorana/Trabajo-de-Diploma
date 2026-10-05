@@ -3,19 +3,31 @@ sequenceDiagram
   actor K as Contabilidad
   participant F as Promociones<br/>ContabilidadForm
   participant B as BLL.Promocion
+  participant DS as DAL.Sugerencia<br/>Promocion
   participant D as DAL.Promocion
-  K->>F: Consulta la cola, analiza margen e impacto, ingresa la observación y decide
+  F->>B: ObtenerPendientesRevisionContable()
+  K->>F: Selecciona una promoción
+  F->>B: AnalizarMargenEImpacto(idPromocion)
+  B->>D: ObtenerPorId(idPromocion) · ObtenerTodas()  [SeSuperponeCon: mismo plan, fechas cruzadas]
+  B->>DS: ObtenerPorId(idSugerenciaOrigen)  [beneficio estimado y origen]
+  B->>B: PuedeDictaminar(promocion)  [quien la creó no la dictamina]
+  B-->>F: Análisis: beneficio estimado, superposiciones (advertencia), ¿puede dictaminar?
+  K->>F: Ingresa la observación y decide
   alt Aprueba
     F->>B: AprobarContable(modulo, promocion, observacion)
   else Rechaza
     F->>B: RechazarContable(modulo, promocion, observacion)
   end
-  Note over B: Exigir(PromocionesContableEditar) · la observación es obligatoria · solo desde EnRevisionContable
-  B->>D: CambiarEstado(id, esperado = EnRevisionContable, nuevo = Vigente o RechazadaContabilidad, observación)
-  alt Otra sesión ya la resolvió
-    D-->>B: false
-    B-->>F: AppException(estado_concurrente)
-  else Estado cambiado
-    B-->>F: ok
-    F-->>K: Promoción Vigente (se aplica al cobro) o Rechazada (vuelve a Administración)
+  Note over B: Exigir(PromocionesContableEditar) · EnRevisionContable · PuedeDictaminar · observación obligatoria
+  alt Es quien la creó
+    B-->>F: AppException(creador_no_dictamina)
+  else Otro usuario
+    B->>D: Dictaminar(dictamen, historial: EnRevisionContable → Vigente o RechazadaContabilidad)  [claim]
+    alt Otra sesión ya la resolvió
+      D-->>B: 0
+      B-->>F: AppException(estado_concurrente)
+    else Dictamen guardado
+      B-->>F: idDictamen
+      F-->>K: Dictamen contable (PDF): Vigente o vuelve a Administración
+    end
   end

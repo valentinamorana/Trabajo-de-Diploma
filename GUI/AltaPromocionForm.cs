@@ -6,8 +6,9 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN03, CU-ADM-Gestionar Promociones (alta, desde una sugerencia de
-    /// Gerencia o manual). Actor: Administración (rol AdministracionComercial).
+    /// Capa de Presentación — PN03, carril Administración: "Crear promoción" (desde una
+    /// sugerencia de Gerencia o manual) y "Reformular" una promoción rechazada por Contabilidad.
+    /// La actividad "Validar" y el paso a EnRevisionContable son de BLL.Promocion.
     /// </summary>
     public partial class AltaPromocionForm : FormBase, IIdiomaObserver
     {
@@ -123,12 +124,7 @@ namespace GUI
                     cmbPlan.Enabled = _sugerenciaOrigen.AplicaAPlan();
                     txtCategoria.Enabled = _sugerenciaOrigen.AplicaACategoria();
                     cmbTipoDescuento.SelectedItem = _sugerenciaOrigen.TipoDescuentoSugerido;
-                    // El beneficio estimado es un importe en $; si el descuento sugerido es un PORCENTAJE no se
-                    // puede precargar como valor (16000 % es inválido): se propone 10 % y Administración lo ajusta.
-                    decimal valorInicial = _sugerenciaOrigen.BeneficioEstimado;
-                    if (_sugerenciaOrigen.TipoDescuentoSugerido == BE.TipoDescuento.Porcentaje && valorInicial > 100)
-                        valorInicial = 10;
-                    numValor.Value = Math.Min(numValor.Maximum, valorInicial);
+                    numValor.Value = Math.Min(numValor.Maximum, _sugerenciaOrigen.ValorInicialPromocion());
                 }
                 else
                 {
@@ -149,20 +145,8 @@ namespace GUI
         {
             var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
 
-            // Validación inline antes de invocar BLL: ambas reglas ya existen del lado de
-            // BLL.Promocion (CrearInterna) y bloqueaban correctamente, pero recién al enviar —
-            // con un cartel de error genérico tras el roundtrip, en vez de feedback inmediato.
-            if (dtpFin.Value.Date < dtpInicio.Value.Date)
-            {
-                MostrarError(Tr("err.bll.promocion.rango_fechas_invalido", "La fecha de fin no puede ser anterior a la fecha de inicio."));
-                return;
-            }
-            if (tipo == BE.TipoDescuento.Porcentaje && numValor.Value > 100)
-            {
-                MostrarError(Tr("err.bll.promocion.porcentaje_invalido", "Un descuento por porcentaje no puede superar el 100%."));
-                return;
-            }
-
+            // Sin validaciones acá: la actividad "Validar" es BLL.Promocion.ValidarPromocion
+            // (destino único, valor y fechas); si falla, se muestra su mensaje traducido.
             try
             {
                 if (_reformular != null)

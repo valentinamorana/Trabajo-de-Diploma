@@ -2047,6 +2047,9 @@ GO
 -- Tabla Promocion: aplica a UN plan o a UNA categoría de prenda, nunca ambos.
 --   Estado: 0=EnRevisionContable, 1=Vigente, 2=RechazadaContabilidad,
 --           3=BajaSolicitada, 4=Desactivada (BE.EstadoPromocion).
+--   La sección 20d agrega el flujo aprobado: 5=Descartada, 6=Vencida, sugerencia
+--   Descartada (2), y las tablas PromocionHistorial, DictamenContable y
+--   SolicitudBajaPromocion (reemplazan Promocion.Observacion y MotivoBaja).
 --
 -- Idempotente: se puede volver a ejecutar sin duplicar nada.
 -- ============================================================
@@ -2575,6 +2578,170 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_IntentoPago_Contrataci
 PRINT 'Sección 20c: medios de pago, intentos y desistimientos de PN02 verificados.';
 GO
 -- ============================================================
+-- WardrobeFlow — 20d. PN03: FLUJO APROBADO DE PROMOCIONES
+-- ------------------------------------------------------------
+-- Diagrama de actividad de PN03 (corregido y aprobado):
+--   · SugerenciaPromocion: estado Descartada (2) con motivo obligatorio, origen de la
+--     métrica (0=Abandono, 1=Rotación, 2=Manual, BE.OrigenMetrica), quién la creó y
+--     cuándo la evaluó Administración.
+--   · Promocion: estados Descartada (5) y Vencida (6); quién la creó (IdUsuarioAlta: no
+--     puede dictaminarla).
+--   · PromocionHistorial: una fila por transición de estado.
+--   · DictamenContable: «Dictamen contable» (resultado, observación, usuario, fecha).
+--   · SolicitudBajaPromocion: «Solicitud de baja» y su «Resolución de baja»
+--     (0=Pendiente, 1=Aprobada, 2=Rechazada, BE.EstadoSolicitudBaja).
+--   Promocion.Observacion y Promocion.MotivoBaja se migran a esas tablas y se quitan (3FN).
+-- Idempotente: sirve para una instalación nueva y migra una base existente sin perder datos.
+-- Las sentencias que nombran columnas que pueden no existir todavía van con EXEC (dinámico).
+-- ============================================================
+SET QUOTED_IDENTIFIER ON;
+GO
+
+-- (1) Estados nuevos en los CHECK.
+IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SugerenciaPromocion_Estado' AND definition NOT LIKE '%(2)%')
+    ALTER TABLE SugerenciaPromocion DROP CONSTRAINT CHK_SugerenciaPromocion_Estado;
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SugerenciaPromocion_Estado')
+    ALTER TABLE SugerenciaPromocion ADD CONSTRAINT CHK_SugerenciaPromocion_Estado CHECK (Estado IN (0,1,2));
+IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Estado' AND definition NOT LIKE '%(6)%')
+    ALTER TABLE Promocion DROP CONSTRAINT CHK_Promocion_Estado;
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Estado')
+    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Estado CHECK (Estado IN (0,1,2,3,4,5,6));
+GO
+
+-- (2) SugerenciaPromocion: origen de la métrica, creador, motivo de descarte y fecha de evaluación.
+IF COL_LENGTH('SugerenciaPromocion', 'OrigenMetrica') IS NULL
+    ALTER TABLE SugerenciaPromocion ADD OrigenMetrica INT NOT NULL
+        CONSTRAINT DF_SugerenciaPromocion_Origen DEFAULT 2;   -- las existentes quedan como Manual
+IF COL_LENGTH('SugerenciaPromocion', 'IdUsuarioAlta') IS NULL
+    ALTER TABLE SugerenciaPromocion ADD IdUsuarioAlta INT NULL;
+IF COL_LENGTH('SugerenciaPromocion', 'MotivoDescarte') IS NULL
+    ALTER TABLE SugerenciaPromocion ADD MotivoDescarte NVARCHAR(500) NULL;
+IF COL_LENGTH('SugerenciaPromocion', 'FechaEvaluacion') IS NULL
+    ALTER TABLE SugerenciaPromocion ADD FechaEvaluacion DATETIME NULL;
+-- (3) Promocion: quién la creó.
+IF COL_LENGTH('Promocion', 'IdUsuarioAlta') IS NULL
+    ALTER TABLE Promocion ADD IdUsuarioAlta INT NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SugerenciaPromocion_Origen')
+    EXEC(N'ALTER TABLE SugerenciaPromocion ADD CONSTRAINT CHK_SugerenciaPromocion_Origen CHECK (OrigenMetrica IN (0,1,2))');
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SugerenciaPromocion_Descarte')
+    EXEC(N'ALTER TABLE SugerenciaPromocion ADD CONSTRAINT CHK_SugerenciaPromocion_Descarte
+           CHECK (Estado <> 2 OR (MotivoDescarte IS NOT NULL AND FechaEvaluacion IS NOT NULL))');
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_SugerenciaPromocion_UsuarioAlta')
+    EXEC(N'ALTER TABLE SugerenciaPromocion ADD CONSTRAINT FK_SugerenciaPromocion_UsuarioAlta
+           FOREIGN KEY (IdUsuarioAlta) REFERENCES Usuario(IdUsuario)');
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Promocion_UsuarioAlta')
+    EXEC(N'ALTER TABLE Promocion ADD CONSTRAINT FK_Promocion_UsuarioAlta
+           FOREIGN KEY (IdUsuarioAlta) REFERENCES Usuario(IdUsuario)');
+GO
+
+-- (4) Historial de estados: una fila por transición.
+IF OBJECT_ID('PromocionHistorial', 'U') IS NULL
+BEGIN
+    CREATE TABLE PromocionHistorial (
+        IdHistorial    INT IDENTITY(1,1) PRIMARY KEY,
+        IdPromocion    INT           NOT NULL CONSTRAINT FK_PromocionHistorial_Promocion REFERENCES Promocion(IdPromocion),
+        EstadoAnterior INT           NULL     CONSTRAINT CHK_PromocionHistorial_Anterior CHECK (EstadoAnterior IN (0,1,2,3,4,5,6)),
+        EstadoNuevo    INT           NOT NULL CONSTRAINT CHK_PromocionHistorial_Nuevo CHECK (EstadoNuevo IN (0,1,2,3,4,5,6)),
+        IdUsuario      INT           NULL     CONSTRAINT FK_PromocionHistorial_Usuario REFERENCES Usuario(IdUsuario),
+        Fecha          DATETIME      NOT NULL DEFAULT GETDATE(),
+        Observacion    NVARCHAR(500) NULL
+    );
+    CREATE NONCLUSTERED INDEX IX_PromocionHistorial_Promocion ON PromocionHistorial(IdPromocion);
+    PRINT 'Tabla PromocionHistorial creada.';
+END
+GO
+
+-- (5) «Dictamen contable».
+IF OBJECT_ID('DictamenContable', 'U') IS NULL
+BEGIN
+    CREATE TABLE DictamenContable (
+        IdDictamen  INT IDENTITY(1,1) PRIMARY KEY,
+        IdPromocion INT           NOT NULL CONSTRAINT FK_DictamenContable_Promocion REFERENCES Promocion(IdPromocion),
+        IdUsuario   INT           NOT NULL CONSTRAINT FK_DictamenContable_Usuario REFERENCES Usuario(IdUsuario),
+        Aprobada    BIT           NOT NULL,
+        Observacion NVARCHAR(500) NOT NULL,
+        Fecha       DATETIME      NOT NULL DEFAULT GETDATE()
+    );
+    CREATE NONCLUSTERED INDEX IX_DictamenContable_Promocion ON DictamenContable(IdPromocion);
+    PRINT 'Tabla DictamenContable creada.';
+END
+GO
+
+-- (6) «Solicitud de baja» y su «Resolución de baja».
+IF OBJECT_ID('SolicitudBajaPromocion', 'U') IS NULL
+BEGIN
+    CREATE TABLE SolicitudBajaPromocion (
+        IdSolicitud       INT IDENTITY(1,1) PRIMARY KEY,
+        IdPromocion       INT           NOT NULL CONSTRAINT FK_SolicitudBaja_Promocion REFERENCES Promocion(IdPromocion),
+        IdUsuarioSolicita INT           NOT NULL CONSTRAINT FK_SolicitudBaja_Solicita REFERENCES Usuario(IdUsuario),
+        Motivo            NVARCHAR(500) NOT NULL,
+        FechaSolicitud    DATETIME      NOT NULL DEFAULT GETDATE(),
+        Estado            INT           NOT NULL DEFAULT 0 CONSTRAINT CHK_SolicitudBaja_Estado CHECK (Estado IN (0,1,2)),
+        IdUsuarioResuelve INT           NULL     CONSTRAINT FK_SolicitudBaja_Resuelve REFERENCES Usuario(IdUsuario),
+        MotivoResolucion  NVARCHAR(500) NULL,
+        FechaResolucion   DATETIME      NULL,
+        -- Pendiente sin resolver; resuelta con quién y cuándo; el rechazo exige motivo.
+        CONSTRAINT CHK_SolicitudBaja_Resolucion CHECK (
+            (Estado = 0 AND IdUsuarioResuelve IS NULL AND FechaResolucion IS NULL) OR
+            (Estado <> 0 AND IdUsuarioResuelve IS NOT NULL AND FechaResolucion IS NOT NULL)),
+        CONSTRAINT CHK_SolicitudBaja_MotivoRechazo CHECK (Estado <> 2 OR MotivoResolucion IS NOT NULL)
+    );
+    CREATE NONCLUSTERED INDEX IX_SolicitudBaja_Promocion ON SolicitudBajaPromocion(IdPromocion);
+    -- Una sola solicitud pendiente por promoción.
+    CREATE UNIQUE NONCLUSTERED INDEX UX_SolicitudBaja_UnaPendiente ON SolicitudBajaPromocion(IdPromocion) WHERE Estado = 0;
+    PRINT 'Tabla SolicitudBajaPromocion creada.';
+END
+GO
+
+-- (7) Migración de datos existentes.
+-- Historial inicial de las promociones que todavía no tienen ninguna transición registrada.
+INSERT INTO PromocionHistorial (IdPromocion, EstadoAnterior, EstadoNuevo, IdUsuario, Fecha, Observacion)
+SELECT p.IdPromocion, NULL, p.Estado, NULL, p.FechaAlta, N'Estado al incorporar el historial de PN03'
+FROM Promocion p
+WHERE NOT EXISTS (SELECT 1 FROM PromocionHistorial h WHERE h.IdPromocion = p.IdPromocion);
+GO
+
+-- Promocion.Observacion → «Dictamen contable» (la firma un usuario de Contabilidad o, si no hay, el primero).
+IF COL_LENGTH('Promocion', 'Observacion') IS NOT NULL
+BEGIN
+    EXEC(N'DECLARE @u INT = COALESCE((SELECT TOP 1 IdUsuario FROM Usuario WHERE Rol = ''Contabilidad'' ORDER BY IdUsuario),
+                                     (SELECT MIN(IdUsuario) FROM Usuario));
+           INSERT INTO DictamenContable (IdPromocion, IdUsuario, Aprobada, Observacion, Fecha)
+           SELECT p.IdPromocion, @u, CASE WHEN p.Estado = 2 THEN 0 ELSE 1 END, p.Observacion, p.FechaAlta
+           FROM Promocion p
+           WHERE @u IS NOT NULL AND p.Observacion IS NOT NULL AND p.Estado <> 0
+             AND NOT EXISTS (SELECT 1 FROM DictamenContable d WHERE d.IdPromocion = p.IdPromocion);');
+    ALTER TABLE Promocion DROP COLUMN Observacion;
+    PRINT 'Promocion.Observacion migrada a DictamenContable.';
+END
+GO
+
+-- Promocion.MotivoBaja → «Solicitud de baja» (pendiente si sigue con baja solicitada; aprobada si
+-- quedó desactivada; rechazada si volvió a estar vigente).
+IF COL_LENGTH('Promocion', 'MotivoBaja') IS NOT NULL
+BEGIN
+    EXEC(N'DECLARE @vend INT = COALESCE((SELECT TOP 1 IdUsuario FROM Usuario WHERE Rol = ''Vendedor'' ORDER BY IdUsuario),
+                                        (SELECT MIN(IdUsuario) FROM Usuario));
+           DECLARE @adm INT = COALESCE((SELECT TOP 1 IdUsuario FROM Usuario WHERE Rol = ''AdministracionComercial'' ORDER BY IdUsuario),
+                                       (SELECT MIN(IdUsuario) FROM Usuario));
+           INSERT INTO SolicitudBajaPromocion (IdPromocion, IdUsuarioSolicita, Motivo, FechaSolicitud, Estado,
+                                               IdUsuarioResuelve, MotivoResolucion, FechaResolucion)
+           SELECT p.IdPromocion, @vend, p.MotivoBaja, p.FechaAlta,
+                  CASE p.Estado WHEN 3 THEN 0 WHEN 4 THEN 1 ELSE 2 END,
+                  CASE WHEN p.Estado = 3 THEN NULL ELSE @adm END,
+                  CASE WHEN p.Estado IN (3, 4) THEN NULL ELSE N''Resolución anterior al registro de la solicitud de baja'' END,
+                  CASE WHEN p.Estado = 3 THEN NULL ELSE GETDATE() END
+           FROM Promocion p
+           WHERE @vend IS NOT NULL AND p.MotivoBaja IS NOT NULL
+             AND NOT EXISTS (SELECT 1 FROM SolicitudBajaPromocion s WHERE s.IdPromocion = p.IdPromocion);');
+    ALTER TABLE Promocion DROP COLUMN MotivoBaja;
+    PRINT 'Promocion.MotivoBaja migrado a SolicitudBajaPromocion.';
+END
+GO
+PRINT 'Sección 20d: flujo aprobado de PN03 (historial, dictamen, solicitud de baja, vencimiento) verificado.';
+GO
+-- ============================================================
 -- WardrobeFlow — 21. DATOS DE PRUEBA DE TODOS LOS PROCESOS
 -- ------------------------------------------------------------
 -- Deja la base instalada con escenarios listos para probar cada proceso sin
@@ -2746,24 +2913,52 @@ BEGIN
     SELECT c.IdContratacion, 1, DATEADD(HOUR, -20, GETDATE()), 2, N'Tarjeta rechazada', @caja
     FROM Contratacion c WHERE c.IdCliente = @cJulie AND c.Estado = 0;
 
-    -- ── PN03: sugerencias y promociones en cada estado ──────────────────────
-    INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta)
-    VALUES
-        (@pBasico, NULL,      N'El plan Básico tiene la mayor tasa de abandono: un descuento de retención puede sostenerlo.', 0, 12000.00, 0, DATEADD(DAY, -3, GETDATE())),
-        (NULL,     N'Abrigo', N'Los abrigos rotan poco fuera de temporada: conviene incentivar su alquiler.',                 1,  5000.00, 0, DATEADD(DAY, -2, GETDATE()));
+    -- ── PN03: sugerencias y promociones en cada estado, con sus objetos e historial ──
+    -- Gerencia (gcomercial) sugiere, Administración (admcomercial) crea, Contabilidad
+    -- (contable) dictamina y Ventas (vendedor) pide la baja: quien crea no dictamina.
+    DECLARE @uGer  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'gcomercial');
+    DECLARE @uAdm  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'admcomercial');
+    DECLARE @uCont INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'contable');
+    DECLARE @uVend INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'vendedor');
 
-    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, CategoriaPrenda, MargenEstimado, ImpactoEconomico, Observacion, MotivoBaja, FechaAlta)
+    INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
+    VALUES
+        (@pBasico, NULL,      N'El plan Básico tiene la mayor tasa de abandono: un descuento de retención puede sostenerlo.', 0, 12000.00, 0, DATEADD(DAY, -3, GETDATE()), 0, @uGer),
+        (NULL,     N'Abrigo', N'Los abrigos rotan poco fuera de temporada: conviene incentivar su alquiler.',                 1,  5000.00, 0, DATEADD(DAY, -2, GETDATE()), 1, @uGer);
+
+    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, CategoriaPrenda, MargenEstimado, ImpactoEconomico, IdUsuarioAlta, FechaAlta)
     VALUES
         (N'Verano Estándar -10%', N'10% de descuento en el plan Estándar durante el verano.', 0, 10.00,
          DATEADD(DAY, -10, @hoy), DATEADD(DAY, 50, @hoy), 1, @pEstand, NULL, 8000.00,
-         N'Reducción de ingresos compensada por mayor retención.', N'Aprobada por Contabilidad.', NULL, DATEADD(DAY, -12, GETDATE())),
+         N'Reducción de ingresos compensada por mayor retención.', @uAdm, DATEADD(DAY, -12, GETDATE())),
         (N'Abrigos $3000 off', N'Descuento fijo por prenda en la categoría Abrigo.', 1, 3000.00,
          @hoy, DATEADD(DAY, 60, @hoy), 0, NULL, N'Abrigo', 4500.00,
-         N'Impacto bajo: la categoría tiene baja rotación.', NULL, NULL, DATEADD(DAY, -1, GETDATE())),
+         N'Impacto bajo: la categoría tiene baja rotación.', @uAdm, DATEADD(DAY, -1, GETDATE())),
         (N'Premium Bienvenida -15%', N'15% de descuento en el primer mes del plan Premium.', 0, 15.00,
          DATEADD(DAY, -30, @hoy), DATEADD(DAY, 30, @hoy), 3, @pPremium, NULL, 6000.00,
-         N'Descuento de captación para nuevos clientes.', N'Aprobada por Contabilidad.',
-         N'Se superpone con la promoción Verano y erosiona el margen.', DATEADD(DAY, -32, GETDATE()));
+         N'Descuento de captación para nuevos clientes.', @uAdm, DATEADD(DAY, -32, GETDATE()));
+
+    DECLARE @prVerano  INT = (SELECT TOP 1 IdPromocion FROM Promocion WHERE Nombre = N'Verano Estándar -10%');
+    DECLARE @prAbrigo  INT = (SELECT TOP 1 IdPromocion FROM Promocion WHERE Nombre = N'Abrigos $3000 off');
+    DECLARE @prPremium INT = (SELECT TOP 1 IdPromocion FROM Promocion WHERE Nombre = N'Premium Bienvenida -15%');
+
+    -- «Dictamen contable» de las dos aprobadas y «Solicitud de baja» pendiente de la Premium.
+    INSERT INTO DictamenContable (IdPromocion, IdUsuario, Aprobada, Observacion, Fecha)
+    VALUES
+        (@prVerano,  @uCont, 1, N'Aprobada por Contabilidad: el margen estimado cubre la reducción de ingresos.', DATEADD(DAY, -11, GETDATE())),
+        (@prPremium, @uCont, 1, N'Aprobada por Contabilidad: descuento de captación acotado al primer mes.',     DATEADD(DAY, -31, GETDATE()));
+    INSERT INTO SolicitudBajaPromocion (IdPromocion, IdUsuarioSolicita, Motivo, FechaSolicitud, Estado)
+    VALUES (@prPremium, @uVend, N'Se superpone con la promoción Verano y erosiona el margen.', DATEADD(DAY, -2, GETDATE()), 0);
+
+    -- Historial: una fila por transición (alta → dictamen → solicitud de baja).
+    INSERT INTO PromocionHistorial (IdPromocion, EstadoAnterior, EstadoNuevo, IdUsuario, Fecha, Observacion)
+    VALUES
+        (@prVerano,  NULL, 0, @uAdm,  DATEADD(DAY, -12, GETDATE()), N'Alta manual'),
+        (@prVerano,  0,    1, @uCont, DATEADD(DAY, -11, GETDATE()), N'Aprobada por Contabilidad: el margen estimado cubre la reducción de ingresos.'),
+        (@prAbrigo,  NULL, 0, @uAdm,  DATEADD(DAY,  -1, GETDATE()), N'Alta manual'),
+        (@prPremium, NULL, 0, @uAdm,  DATEADD(DAY, -32, GETDATE()), N'Alta manual'),
+        (@prPremium, 0,    1, @uCont, DATEADD(DAY, -31, GETDATE()), N'Aprobada por Contabilidad: descuento de captación acotado al primer mes.'),
+        (@prPremium, 1,    3, @uVend, DATEADD(DAY,  -2, GETDATE()), N'Se superpone con la promoción Verano y erosiona el margen.');
 
     -- ── PN04: cargo pendiente por la prenda dada de baja ─────────────────────
     INSERT INTO CargoPrenda (IdPrenda, IdCliente, Motivo, Monto, FechaRegistro, Actor, Estado)

@@ -2,12 +2,41 @@ erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  Promocion |o--o{ Contratacion : "IdPromocion"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
-  Promocion |o--o{ Contratacion : "IdPromocion"
+  Promocion ||--o{ DictamenContable : "IdPromocion"
+  Usuario ||--o{ DictamenContable : "IdUsuario"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
+  Usuario |o--o{ Promocion : "IdUsuarioAlta"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  Usuario |o--o{ PromocionHistorial : "IdUsuario"
+  Promocion ||--o{ PromocionHistorial : "IdPromocion"
+  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
+  Usuario ||--o{ SolicitudBajaPromocion : "IdUsuarioSolicita"
+  Usuario |o--o{ SolicitudBajaPromocion : "IdUsuarioResuelve"
+  Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
+  Usuario {
+    int IdUsuario PK
+    nvarchar(100) Username
+    nvarchar(500) Clave
+    nvarchar(100) Rol "NULL"
+    nvarchar(100) Perfil "NULL"
+    bit Estado
+    int IntentosFallidos
+    int DVH "NULL"
+    varchar(5) IdIdioma "NULL"
+    bit Activo
+    datetime FechaBaja "NULL"
+    int CantidadBloqueos
+    datetime FechaBloqueo "NULL"
+    bit RequiereCambioClave
+    nvarchar(100) Nombre "NULL"
+    nvarchar(100) Apellido "NULL"
+    date FechaNacimiento "NULL"
+    nvarchar(200) Email "NULL"
+  }
   PlanSuscripcion {
     int IdPlan PK
     nvarchar(100) Nombre
@@ -24,6 +53,10 @@ erDiagram
     decimal(10_2) BeneficioEstimado
     int Estado
     datetime FechaAlta
+    int OrigenMetrica
+    int IdUsuarioAlta FK "NULL"
+    nvarchar(500) MotivoDescarte "NULL"
+    datetime FechaEvaluacion "NULL"
   }
   Promocion {
     int IdPromocion PK
@@ -38,10 +71,37 @@ erDiagram
     nvarchar(100) CategoriaPrenda "NULL"
     decimal(10_2) MargenEstimado
     nvarchar(500) ImpactoEconomico "NULL"
-    nvarchar(500) Observacion "NULL"
-    nvarchar(500) MotivoBaja "NULL"
     int IdSugerenciaOrigen FK "NULL"
     datetime FechaAlta
+    int IdUsuarioAlta FK "NULL"
+  }
+  PromocionHistorial {
+    int IdHistorial PK
+    int IdPromocion FK
+    int EstadoAnterior "NULL"
+    int EstadoNuevo
+    int IdUsuario FK "NULL"
+    datetime Fecha
+    nvarchar(500) Observacion "NULL"
+  }
+  DictamenContable {
+    int IdDictamen PK
+    int IdPromocion FK
+    int IdUsuario FK
+    bit Aprobada
+    nvarchar(500) Observacion
+    datetime Fecha
+  }
+  SolicitudBajaPromocion {
+    int IdSolicitud PK
+    int IdPromocion FK
+    int IdUsuarioSolicita FK
+    nvarchar(500) Motivo
+    datetime FechaSolicitud
+    int Estado
+    int IdUsuarioResuelve FK "NULL"
+    nvarchar(500) MotivoResolucion "NULL"
+    datetime FechaResolucion "NULL"
   }
   Contratacion {
     int IdContratacion PK

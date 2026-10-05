@@ -2,14 +2,27 @@ erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  Promocion |o--o{ Contratacion : "IdPromocion"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
-  Promocion |o--o{ Contratacion : "IdPromocion"
+  Promocion ||--o{ DictamenContable : "IdPromocion"
+  Usuario ||--o{ DictamenContable : "IdUsuario"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
+  Usuario |o--o{ Promocion : "IdUsuarioAlta"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  Usuario |o--o{ PromocionHistorial : "IdUsuario"
+  Promocion ||--o{ PromocionHistorial : "IdPromocion"
+  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
+  Usuario ||--o{ SolicitudBajaPromocion : "IdUsuarioSolicita"
+  Usuario |o--o{ SolicitudBajaPromocion : "IdUsuarioResuelve"
+  Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
+  Usuario
   PlanSuscripcion
   SugerenciaPromocion
   Promocion
+  PromocionHistorial
+  DictamenContable
+  SolicitudBajaPromocion
   Contratacion
   Cliente

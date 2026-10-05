@@ -394,78 +394,155 @@ module.exports = [
   },
 
   // ───────────────────────────── PN03 — Métricas, promociones y toma de decisiones ─────────────────────────────
+  // Sigue el flujo aprobado: cada mensaje a la BLL es un método por actividad; cada transición es un
+  // claim (UPDATE ... WHERE Estado = esperado) que inserta su fila de PromocionHistorial en la misma transacción.
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU01_GER_SugerirPromocion', titulo: 'PN03 · CU01-GER Sugerir promoción',
+    tipo: 'secuencia', id: 'DSS_PN03_CU01_GER_SugerirPromocion', titulo: 'PN03 · CU01-GER Sugerir promoción (incluye CU03-GER Analizar métricas)',
     participantes: [A('G', 'Gerencia'), P('F', 'SugerirPromocionForm'), P('AN', 'BLL.AnalisisPromociones'), P('B', 'BLL.SugerenciaPromocion'), P('D', 'DAL.SugerenciaPromocion')],
     pasos: [
-      { opt: 'Toma una idea del análisis de datos', pasos: [
-        c('G', 'F', 'Pulsa "Desde el análisis…"'),
-        c('F', 'AN', 'Detectar()'),
-        r('AN', 'F', 'candidatas (abandono por plan, baja rotación por categoría)'),
-        r('F', 'G', 'Precarga plan o categoría, motivo, tipo y beneficio estimado')
-      ] },
-      c('G', 'F', 'Indica destino (plan o categoría), motivo, tipo de descuento y beneficio'),
-      c('F', 'B', 'Crear(modulo, sugerencia)'),
-      nota('Exigir(SugerenciaPromocion) · destino único (plan o categoría) · motivo obligatorio · beneficio válido', 'B'),
-      { alt: 'Datos inválidos', pasos: [r('B', 'F', 'AppException(motivo específico)'), r('F', 'G', 'Informa y retoma la carga')],
-        sino: [{ etiqueta: 'Válidos', pasos: [
-          c('B', 'D', 'Alta(sugerencia: estado Pendiente)'),
-          r('B', 'F', 'ok'),
-          r('F', 'G', 'Sugerencia registrada para Administración')
+      c('G', 'F', 'Pulsa "Analizar métricas…"'),
+      c('F', 'AN', 'AnalizarMetricas(modulo)'),
+      nota('Exigir(SugerenciaPromocion) · abandono por plan (Strategy) y rotación por categoría', 'AN'),
+      r('AN', 'F', 'Reporte de métricas (abandono por plan, rotación por categoría, oportunidades)'),
+      c('F', 'AN', 'HayOportunidad(reporte)  [¿Hay oportunidad?]'),
+      { alt: 'No', pasos: [r('F', 'G', 'Reporte imprimible: fin sin promoción')],
+        sino: [{ etiqueta: 'Sí', pasos: [
+          r('F', 'G', 'Precarga la oportunidad elegida (origen Abandono o Rotación); si no usa ninguna, el origen es Manual'),
+          c('G', 'F', 'Ajusta destino (plan o categoría), motivo, tipo de descuento y beneficio estimado'),
+          c('F', 'B', 'RegistrarSugerencia(modulo, origen, idPlan, categoria, motivo, tipo, beneficio)'),
+          nota('Exigir(SugerenciaPromocion) · destino único · motivo obligatorio · beneficio > 0 · guarda OrigenMetrica e IdUsuarioAlta', 'B'),
+          { alt: 'Datos inválidos', pasos: [r('B', 'F', 'AppException(motivo específico)'), r('F', 'G', 'Informa y retoma la carga')],
+            sino: [{ etiqueta: 'Válidos', pasos: [
+              c('B', 'D', 'Alta(sugerencia: Pendiente)'),
+              r('B', 'F', 'idSugerencia'),
+              r('F', 'G', 'Sugerencia de promoción (PDF) enviada a Administración')
+            ] }] }
         ] }] }
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU01_ADM_GestionarPromociones', titulo: 'PN03 · CU01-ADM Gestionar promociones (alta desde sugerencia)',
-    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('DS', 'DAL.SugerenciaPromocion'), P('D', 'DAL.Promocion')],
+    tipo: 'secuencia', id: 'DSS_PN03_CU01_ADM_GestionarPromociones', titulo: 'PN03 · CU01-ADM Gestionar promociones (crear desde sugerencia o manual, reformular)',
+    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('AF', 'AltaPromocionForm'), P('B', 'BLL.Promocion'), P('DS', 'DAL.SugerenciaPromocion'), P('D', 'DAL.Promocion')],
     pasos: [
-      c('A', 'F', 'Consulta las sugerencias y elige "Alta desde sugerencia"'),
-      c('F', 'B', 'CrearDesdeSugerencia(modulo, promocion, idSugerencia)'),
-      nota('Exigir(PromocionesAdminEditar) · destino único · valor > 0 (≤ 100 si es Porcentaje) · fin ≥ inicio', 'B'),
-      c('B', 'DS', 'MarcarEvaluada(idSugerencia)  [reclamo: solo si sigue Pendiente]'),
-      { alt: 'Otra sesión ya la evaluó', pasos: [r('DS', 'B', 'false'), r('B', 'F', 'AppException(sugerencia_evaluada)')],
-        sino: [{ etiqueta: 'Reclamo obtenido', pasos: [
-          c('B', 'D', 'Alta(promoción: estado EnRevisionContable)'),
-          { alt: 'Falla el alta', pasos: [c('B', 'DS', 'ReabrirEvaluacion(idSugerencia)  [compensación]'), r('B', 'F', 'error')],
-            sino: [{ etiqueta: 'Alta correcta', pasos: [r('B', 'F', 'idPromocion'), r('F', 'A', 'Promoción pendiente de revisión contable')] }] }
+      c('A', 'F', '¿Acepta la sugerencia? Sí: "Alta desde sugerencia" (o "Alta manual")'),
+      c('A', 'AF', 'Completa nombre, tipo, valor, vigencia, margen e impacto'),
+      c('AF', 'B', 'CrearDesdeSugerencia(modulo, idSugerencia, nombre, ..., impacto)  [o CrearManual(...)]'),
+      nota('Exigir(PromocionesAdminEditar) · sugerencia.PuedeEvaluarse()', 'B'),
+      c('B', 'B', 'ValidarPromocion(promocion)  [destino único, valor, fechas]'),
+      { alt: 'Datos inválidos', pasos: [r('B', 'AF', 'AppException(motivo)  [la sugerencia sigue Pendiente]')],
+        sino: [{ etiqueta: 'Válidos', pasos: [
+          c('B', 'DS', 'MarcarEvaluada(idSugerencia, fecha)  [claim: WHERE Estado = Pendiente]'),
+          { alt: 'Otra sesión ya la evaluó', pasos: [r('DS', 'B', 'false'), r('B', 'AF', 'AppException(sugerencia_evaluada)')],
+            sino: [{ etiqueta: 'Claim obtenido', pasos: [
+              c('B', 'D', 'Alta(promocion: EnRevisionContable, IdUsuarioAlta, historial: — → EnRevisionContable)'),
+              { alt: 'Falla el alta', pasos: [c('B', 'DS', 'ReabrirEvaluacion(idSugerencia)  [compensación]'), r('B', 'AF', 'error')],
+                sino: [{ etiqueta: 'Alta correcta', pasos: [r('B', 'AF', 'idPromocion'), r('F', 'A', 'Ficha de promoción (PDF) para Contabilidad')] }] }
+            ] }] }
         ] }] },
-      nota('Variantes: CrearManual (sin sugerencia) · Modificar y Reformular (UPDATE solo si sigue EnRevisionContable) · Desactivar (Vigente → Desactivada)', 'A', 'D')
+      { opt: '¿Reformular? Sí (promoción Rechazada por Contabilidad)', pasos: [
+        c('AF', 'B', 'Reformular(modulo, promocion)'),
+        nota('promocion.PuedeReformularse() · ValidarPromocion(promocion)', 'B'),
+        c('B', 'D', 'Reformular(promocion, historial: RechazadaContabilidad → EnRevisionContable)  [claim]'),
+        r('F', 'A', 'Vuelve a revisión contable: nueva Ficha de promoción')
+      ] }
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU01_CONT_AnalizarPromocion', titulo: 'PN03 · CU01-CONT Analizar promoción',
-    participantes: [A('K', 'Contabilidad'), P('F', 'PromocionesContabilidadForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
+    tipo: 'secuencia', id: 'DSS_PN03_CU03_ADM_DescartarSugerencia', titulo: 'PN03 · CU03-ADM Descartar sugerencia (¿Acepta la sugerencia? No)',
+    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.SugerenciaPromocion'), P('D', 'DAL.SugerenciaPromocion')],
     pasos: [
-      c('K', 'F', 'Consulta la cola, analiza margen e impacto, ingresa la observación y decide'),
+      c('A', 'F', 'Elige la sugerencia, pulsa "Descartar sugerencia" e indica el motivo'),
+      c('F', 'B', 'DescartarSugerencia(modulo, idSugerencia, motivo)'),
+      c('B', 'D', 'ObtenerPorId(idSugerencia)'),
+      nota('Exigir(PromocionesAdminEditar) · sugerencia.PuedeEvaluarse() · motivo obligatorio', 'B'),
+      { alt: 'Ya evaluada / sin motivo', pasos: [r('B', 'F', 'AppException(sugerencia_evaluada / motivodescarte_requerido)')],
+        sino: [{ etiqueta: 'Pendiente y con motivo', pasos: [
+          c('B', 'D', 'Descartar(idSugerencia, motivo, fecha)  [claim: WHERE Estado = Pendiente]'),
+          { alt: 'Otra sesión ya la evaluó', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(sugerencia_evaluada)')],
+            sino: [{ etiqueta: 'Descartada', pasos: [r('B', 'F', 'ok'), r('F', 'A', 'Constancia de descarte (PDF): fin')] }] }
+        ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN03_CU01_CONT_AnalizarPromocion', titulo: 'PN03 · CU01-CONT Analizar promoción (margen e impacto → ¿Aprueba?)',
+    participantes: [A('K', 'Contabilidad'), P('F', 'PromocionesContabilidadForm'), P('B', 'BLL.Promocion'), P('DS', 'DAL.SugerenciaPromocion'), P('D', 'DAL.Promocion')],
+    pasos: [
+      c('F', 'B', 'ObtenerPendientesRevisionContable()'),
+      c('K', 'F', 'Selecciona una promoción'),
+      c('F', 'B', 'AnalizarMargenEImpacto(idPromocion)'),
+      c('B', 'D', 'ObtenerPorId(idPromocion) · ObtenerTodas()  [SeSuperponeCon: mismo plan, fechas cruzadas]'),
+      c('B', 'DS', 'ObtenerPorId(idSugerenciaOrigen)  [beneficio estimado y origen]'),
+      c('B', 'B', 'PuedeDictaminar(promocion)  [quien la creó no la dictamina]'),
+      r('B', 'F', 'Análisis: beneficio estimado, superposiciones (advertencia), ¿puede dictaminar?'),
+      c('K', 'F', 'Ingresa la observación y decide'),
       { alt: 'Aprueba', pasos: [c('F', 'B', 'AprobarContable(modulo, promocion, observacion)')],
         sino: [{ etiqueta: 'Rechaza', pasos: [c('F', 'B', 'RechazarContable(modulo, promocion, observacion)')] }] },
-      nota('Exigir(PromocionesContableEditar) · la observación es obligatoria · solo desde EnRevisionContable', 'B'),
-      c('B', 'D', 'CambiarEstado(id, esperado = EnRevisionContable, nuevo = Vigente o RechazadaContabilidad, observación)'),
-      { alt: 'Otra sesión ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
-        sino: [{ etiqueta: 'Estado cambiado', pasos: [r('B', 'F', 'ok'), r('F', 'K', 'Promoción Vigente (se aplica al cobro) o Rechazada (vuelve a Administración)')] }] }
+      nota('Exigir(PromocionesContableEditar) · EnRevisionContable · PuedeDictaminar · observación obligatoria', 'B'),
+      { alt: 'Es quien la creó', pasos: [r('B', 'F', 'AppException(creador_no_dictamina)')],
+        sino: [{ etiqueta: 'Otro usuario', pasos: [
+          c('B', 'D', 'Dictaminar(dictamen, historial: EnRevisionContable → Vigente o RechazadaContabilidad)  [claim]'),
+          { alt: 'Otra sesión ya la resolvió', pasos: [r('D', 'B', '0'), r('B', 'F', 'AppException(estado_concurrente)')],
+            sino: [{ etiqueta: 'Dictamen guardado', pasos: [r('B', 'F', 'idDictamen'), r('F', 'K', 'Dictamen contable (PDF): Vigente o vuelve a Administración')] }] }
+        ] }] }
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU01_VEN_SugerirBaja', titulo: 'PN03 · CU01-VEN Sugerir baja de promoción',
-    participantes: [A('V', 'Vendedor'), P('F', 'PromocionesVigentesForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
-    pasos: [
-      c('V', 'F', 'Consulta las promociones vigentes, elige una e indica el motivo'),
-      c('F', 'B', 'SugerirBaja(modulo, promocion, motivo)'),
-      nota('Exigir(PromocionesVigentesEditar) · el motivo es obligatorio · solo desde Vigente', 'B'),
-      c('B', 'D', 'SolicitarBaja(id, motivo)  [UPDATE condicionado a Vigente]'),
-      { alt: 'Ya no está Vigente', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
-        sino: [{ etiqueta: 'Solicitada', pasos: [r('B', 'F', 'ok'), r('F', 'V', 'Promoción en Baja solicitada: Administración la resuelve')] }] }
-    ]
-  },
-  {
-    tipo: 'secuencia', id: 'DSS_PN03_CU02_ADM_ResolverBaja', titulo: 'PN03 · CU02-ADM Resolver baja de promoción',
+    tipo: 'secuencia', id: 'DSS_PN03_CU04_ADM_DescartarPromocion', titulo: 'PN03 · CU04-ADM Descartar promoción rechazada (¿Reformular? No)',
     participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
     pasos: [
-      c('A', 'F', 'Consulta las promociones con baja solicitada y revisa el motivo'),
-      { alt: 'Aprueba la baja', pasos: [c('F', 'B', 'AprobarBaja(modulo, promocion)'), c('B', 'D', 'CambiarEstado(id, BajaSolicitada → Desactivada)')],
-        sino: [{ etiqueta: 'Rechaza la baja (exige motivo)', pasos: [c('F', 'B', 'RechazarBaja(modulo, promocion, motivo)'), c('B', 'D', 'CambiarEstado(id, BajaSolicitada → Vigente)  [conserva la observación de Contabilidad]')] }] },
+      c('A', 'F', 'Elige una promoción Rechazada por Contabilidad, pulsa "Descartar" e indica el motivo'),
+      c('F', 'B', 'DescartarPromocion(modulo, promocion, motivo)'),
+      nota('Exigir(PromocionesAdminEditar) · promocion.PuedeDescartarse() · motivo obligatorio', 'B'),
+      c('B', 'D', 'CambiarEstado(id, esperado = RechazadaContabilidad, historial: → Descartada con el motivo)  [claim]'),
+      { alt: 'Otra sesión ya la cambió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
+        sino: [{ etiqueta: 'Descartada', pasos: [
+          c('F', 'B', 'ObtenerDescarte(idPromocion)'),
+          r('F', 'A', 'Constancia de descarte (PDF): fin')
+        ] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN03_CU01_VEN_SugerirBaja', titulo: 'PN03 · CU01-VEN Solicitar baja de promoción',
+    participantes: [A('V', 'Vendedor'), P('F', 'PromocionesVigentesForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
+    pasos: [
+      c('F', 'B', 'ObtenerParaVentas()  [cierra antes las vencidas]'),
+      c('V', 'F', 'Elige una promoción Vigente, pulsa "Solicitar baja" e indica el motivo'),
+      c('F', 'B', 'SolicitarBaja(modulo, promocion, motivo)'),
+      nota('Exigir(PromocionesVigentesEditar) · promocion.PuedeSolicitarseBaja() · motivo obligatorio', 'B'),
+      c('B', 'D', 'SolicitarBaja(solicitud, historial: Vigente → BajaSolicitada)  [claim]'),
+      { alt: 'Ya no está Vigente', pasos: [r('D', 'B', '0'), r('B', 'F', 'AppException(estado_concurrente)')],
+        sino: [{ etiqueta: 'Solicitada', pasos: [r('B', 'F', 'idSolicitud'), r('F', 'V', 'Solicitud de baja (PDF): Administración la resuelve')] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN03_CU02_ADM_ResolverBaja', titulo: 'PN03 · CU02-ADM Resolver baja de promoción (¿Aprueba la baja?)',
+    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
+    pasos: [
+      c('A', 'F', 'Elige una promoción con baja solicitada y revisa el motivo de Ventas'),
+      { alt: 'Aprueba la baja (observación opcional)', pasos: [c('F', 'B', 'AprobarBaja(modulo, promocion, observacion)')],
+        sino: [{ etiqueta: 'Rechaza la baja (motivo obligatorio)', pasos: [c('F', 'B', 'RechazarBaja(modulo, promocion, motivo)')] }] },
+      nota('Exigir(PromocionesAdminEditar) · promocion.PuedeResolverseBaja() · solicitud pendiente', 'B'),
+      c('B', 'D', 'ObtenerSolicitudesBaja(idPromocion)'),
+      c('B', 'D', 'ResolverBaja(resolucion, historial: BajaSolicitada → Desactivada o Vigente)  [claim; el dictamen contable no se toca]'),
       { alt: 'Otra sesión ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
-        sino: [{ etiqueta: 'Resuelta', pasos: [r('B', 'F', 'ok'), r('F', 'A', 'Promoción Desactivada o de nuevo Vigente')] }] }
+        sino: [{ etiqueta: 'Resuelta', pasos: [r('B', 'F', 'idSolicitud'), r('F', 'A', 'Resolución de baja (PDF): informe a Gerencia (aprobada) o a Ventas (rechazada)')] }] }
+    ]
+  },
+  {
+    tipo: 'secuencia', id: 'DSS_PN03_CU05_ADM_DesactivarYVencer', titulo: 'PN03 · CU05-ADM Desactivar promoción y cierre por fecha de fin',
+    participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
+    pasos: [
+      c('F', 'B', 'ObtenerTodas()'),
+      c('B', 'B', 'CerrarVencidas()  [(c) llega la fecha de fin]'),
+      c('B', 'D', 'ObtenerTodas()  [DebeVencer(hoy): Vigente con FechaFin pasada]'),
+      { opt: 'Por cada vencida', pasos: [c('B', 'D', 'CambiarEstado(id, esperado = Vigente, historial: → Vencida)  [claim: no duplica si otra sesión la cerró]')] },
+      r('B', 'F', 'promociones (las vencidas ya no aplican en el cobro)'),
+      c('A', 'F', '(b) Elige una Vigente, pulsa "Desactivar" e indica el motivo'),
+      c('F', 'B', 'Desactivar(modulo, promocion, motivo)'),
+      nota('Exigir(PromocionesAdminEditar) · promocion.PuedeDesactivarseDirecto() · motivo obligatorio', 'B'),
+      c('B', 'D', 'CambiarEstado(id, esperado = Vigente, historial: → Desactivada con el motivo)  [claim]'),
+      { alt: 'Otra sesión ya la cambió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)')],
+        sino: [{ etiqueta: 'Desactivada', pasos: [r('B', 'F', 'ok'), r('F', 'A', 'Promoción Desactivada: fin')] }] }
     ]
   },
 

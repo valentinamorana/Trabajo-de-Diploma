@@ -90,11 +90,11 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 ### PN03 — Métricas, promociones y decisiones
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `SugerirPromocionForm` | Gerencia sugiere una promoción a Administración, con candidatas del análisis de datos. | Enviar Sugerencia · "Desde el análisis…" |
-| `PromocionesAdministracionForm` | Administración da de alta (manual o desde sugerencia), reformula, desactiva y resuelve bajas. | Alta Manual · Alta desde Sugerencia · Reformular · Desactivar · Aprobar Baja · Rechazar Baja · Actualizar |
-| `AltaPromocionForm` (modal) | Alta o reformulación de una promoción. | — |
-| `PromocionesContabilidadForm` | Contabilidad analiza y activa o rechaza. | Aprobar y Activar · Rechazar · Actualizar |
-| `PromocionesVigentesForm` | Vendedor consulta las vigentes y sugiere una baja. | Sugerir Baja · Actualizar |
+| `SugerirPromocionForm` | Carril Gerencia de PN03. Analiza las métricas (abandono por plan, rotación por categoría) y muestra el «Reporte de métricas»; si no hay oportunidad, termina sin promoción. Registra la sugerencia con el origen de la métrica y lista las registradas con su estado. | Analizar métricas… (Imprimir reporte · Usar esta idea) · Enviar Sugerencia · Imprimir sugerencia (o constancia de descarte) |
+| `PromocionesAdministracionForm` | Carril Administración de PN03. Acepta (alta desde sugerencia) o descarta las sugerencias con motivo; da de alta manual; reformula o descarta las rechazadas por Contabilidad; desactiva con motivo; aprueba o rechaza las bajas pedidas por Ventas. Muestra el historial de estados e imprime los documentos de cada promoción. | Alta desde Sugerencia · Descartar sugerencia · Imprimir sugerencia · Alta Manual · Reformular · Descartar · Desactivar · Aprobar Baja · Rechazar Baja · Historial · Imprimir ▾ (ficha, dictamen, solicitud, resolución, constancia de descarte) · Actualizar |
+| `AltaPromocionForm` (modal) | Alta (desde sugerencia o manual) o reformulación de una promoción; la validación es de la BLL. | Registrar · Cancelar |
+| `PromocionesContabilidadForm` | Carril Contabilidad de PN03. Muestra el análisis de margen e impacto (beneficio estimado de la sugerencia y promociones vigentes superpuestas) y dictamina con observación; quien creó la promoción no puede dictaminarla. | Aprobar y Activar · Rechazar · Imprimir ▾ · Actualizar |
+| `PromocionesVigentesForm` | Carril Vendedor de PN03. Consulta las promociones vigentes y las que tienen la baja pedida; solicita la baja con motivo («Solicitud de baja»). | Solicitar baja · Imprimir ▾ (ficha, solicitud, resolución) · Actualizar |
 | `AnalisisAbandonoForm` | Lista de clientes en riesgo según criterio elegido (Strategy). | Generar · Exportar a PDF · Guardar como .CSV |
 | `ReporteVentasVendedorForm` | Desempeño por vendedor: totales, entregados, cancelados. | Generar · Exportar a PDF · Guardar como .CSV |
 | `AnalisisRotacionForm` | Prendas de baja o alta demanda. | Generar · Exportar a PDF · Guardar como .CSV |

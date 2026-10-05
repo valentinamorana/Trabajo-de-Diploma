@@ -287,27 +287,42 @@
   {
     "id": "DSS_PN03_CU01_GER_SugerirPromocion",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU01-GER Sugerir promoción"
+    "titulo": "PN03 · CU01-GER Sugerir promoción (incluye CU03-GER Analizar métricas)"
   },
   {
     "id": "DSS_PN03_CU01_ADM_GestionarPromociones",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU01-ADM Gestionar promociones (alta desde sugerencia)"
+    "titulo": "PN03 · CU01-ADM Gestionar promociones (crear desde sugerencia o manual, reformular)"
+  },
+  {
+    "id": "DSS_PN03_CU03_ADM_DescartarSugerencia",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU03-ADM Descartar sugerencia (¿Acepta la sugerencia? No)"
   },
   {
     "id": "DSS_PN03_CU01_CONT_AnalizarPromocion",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU01-CONT Analizar promoción"
+    "titulo": "PN03 · CU01-CONT Analizar promoción (margen e impacto → ¿Aprueba?)"
+  },
+  {
+    "id": "DSS_PN03_CU04_ADM_DescartarPromocion",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU04-ADM Descartar promoción rechazada (¿Reformular? No)"
   },
   {
     "id": "DSS_PN03_CU01_VEN_SugerirBaja",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU01-VEN Sugerir baja de promoción"
+    "titulo": "PN03 · CU01-VEN Solicitar baja de promoción"
   },
   {
     "id": "DSS_PN03_CU02_ADM_ResolverBaja",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU02-ADM Resolver baja de promoción"
+    "titulo": "PN03 · CU02-ADM Resolver baja de promoción (¿Aprueba la baja?)"
+  },
+  {
+    "id": "DSS_PN03_CU05_ADM_DesactivarYVencer",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU05-ADM Desactivar promoción y cierre por fecha de fin"
   },
   {
     "id": "DSS_PN04_CU01_DEP_InspeccionarDevolucion",

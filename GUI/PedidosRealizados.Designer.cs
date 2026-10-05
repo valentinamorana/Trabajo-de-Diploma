@@ -157,7 +157,7 @@ namespace GUI
             // 
             // btnEntregado
             // 
-            this.btnEntregado.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(140)))), ((int)(((byte)(60)))));
+            this.btnEntregado.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(125)))), ((int)(((byte)(70)))));
             this.btnEntregado.Enabled = false;
             this.btnEntregado.FlatAppearance.BorderSize = 0;
             this.btnEntregado.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

@@ -211,7 +211,7 @@ namespace GUI
             this.dgvTareas.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvTareas.EnableHeadersVisualStyles = false;
             this.dgvTareas.Font = new System.Drawing.Font("Segoe UI", 8F);
-            this.dgvTareas.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(225)))), ((int)(((byte)(232)))));
+            this.dgvTareas.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(228)))), ((int)(((byte)(211)))), ((int)(((byte)(217)))));
             this.dgvTareas.Location = new System.Drawing.Point(0, 26);
             this.dgvTareas.Name = "dgvTareas";
             this.dgvTareas.ReadOnly = true;
@@ -244,7 +244,7 @@ namespace GUI
             // 
             // lblTareasTitulo
             // 
-            this.lblTareasTitulo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(240)))), ((int)(((byte)(248)))));
+            this.lblTareasTitulo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(244)))), ((int)(((byte)(246)))));
             this.lblTareasTitulo.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblTareasTitulo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblTareasTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
@@ -269,7 +269,7 @@ namespace GUI
             // 
             this.lblSesion.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSesion.Font = new System.Drawing.Font("Segoe UI", 8F);
-            this.lblSesion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(212)))), ((int)(((byte)(226)))));
+            this.lblSesion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(222)))), ((int)(((byte)(230)))));
             this.lblSesion.Location = new System.Drawing.Point(0, 0);
             this.lblSesion.Name = "lblSesion";
             this.lblSesion.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);

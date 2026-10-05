@@ -33,15 +33,8 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
-            GestorIdioma.SuscribirObservador(this);
             AplicarIdioma(_idioma);
             CargarHistorial();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
@@ -122,7 +115,7 @@ namespace GUI
                 foreach (DataGridViewRow row in dgvHistorial.Rows)
                 {
                     if (row.Cells["Estado"].Value?.ToString() == abierto)
-                        row.DefaultCellStyle.ForeColor = Color.FromArgb(160, 100, 0);
+                        row.DefaultCellStyle.ForeColor = Tema.Alerta;
                 }
             }
             catch (Exception ex)

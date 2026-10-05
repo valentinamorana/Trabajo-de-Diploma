@@ -134,7 +134,7 @@ namespace GUI
         {
             string baseTxt = Tx("mnu.alertas", "Alertas");
             alertasItem.Text      = _alertasCount > 0 ? $"{baseTxt} ({_alertasCount})" : baseTxt;
-            alertasItem.ForeColor = _alertasCount > 0 ? Color.FromArgb(255, 235, 130) : Color.White;
+            alertasItem.ForeColor = _alertasCount > 0 ? Tema.Dorado : Color.White;
         }
 
         // Calcula la cantidad de alertas en background (la lógica vive en BLL.PanelAlertas)
@@ -179,7 +179,7 @@ namespace GUI
 
             using (var g = Graphics.FromImage(bmp))
             {
-                g.Clear(Color.FromArgb(252, 228, 235));
+                g.Clear(Tema.RosaPalido);
                 g.SmoothingMode     = SmoothingMode.AntiAlias;
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
 
@@ -218,7 +218,7 @@ namespace GUI
         {
             menuStrip1.Renderer = new Estilos.MenuRenderer();
 
-            var textoOscuro = Color.FromArgb(55, 45, 55);
+            var textoOscuro = Tema.Tinta;
             var margenChip = new Padding(3, 3, 3, 3);
 
             void Estilizar(ToolStripMenuItem item, Color? foreColor = null)
@@ -633,7 +633,7 @@ namespace GUI
             {
                 if (c.GetType().Name == "MdiClient")
                 {
-                    c.BackColor             = Color.FromArgb(252, 228, 235);
+                    c.BackColor             = Tema.RosaPalido;
                     c.BackgroundImage       = GenerarTileWF();
                     c.BackgroundImageLayout = ImageLayout.Tile;
                     break;

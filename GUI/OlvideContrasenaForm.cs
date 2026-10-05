@@ -37,14 +37,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
@@ -98,7 +91,7 @@ namespace GUI
                 // no se distingue esa respuesta.
                 new BLL.Usuario().SolicitarRecuperacionClave(username);
 
-                lblMensaje.ForeColor = Color.FromArgb(30, 120, 60);
+                lblMensaje.ForeColor = Tema.Exito;
                 lblMensaje.Text = Tr("msg.recup.exito",
                     "Si el usuario existe, contactá al administrador para que resetee\ntu contraseña desde Administrar -> Usuarios.");
 

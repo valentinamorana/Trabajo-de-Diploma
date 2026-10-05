@@ -82,7 +82,7 @@ namespace GUI
             // 
             // btnCancelar
             // 
-            this.btnCancelar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnCancelar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.btnCancelar.Enabled = false;
             this.btnCancelar.FlatAppearance.BorderSize = 0;
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -141,7 +141,7 @@ namespace GUI
             // 
             // btnVerFaltantes
             // 
-            this.btnVerFaltantes.BackColor = System.Drawing.Color.FromArgb(200, 80, 0);
+            this.btnVerFaltantes.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(166)))), ((int)(((byte)(101)))), ((int)(((byte)(14)))));
             this.btnVerFaltantes.Enabled = false;
             this.btnVerFaltantes.FlatAppearance.BorderSize = 0;
             this.btnVerFaltantes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -173,7 +173,7 @@ namespace GUI
             // 
             // btnDesistirPedido
             // 
-            this.btnDesistirPedido.BackColor = System.Drawing.Color.FromArgb(120, 120, 120);
+            this.btnDesistirPedido.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(80)))));
             this.btnDesistirPedido.Enabled = false;
             this.btnDesistirPedido.FlatAppearance.BorderSize = 0;
             this.btnDesistirPedido.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -189,7 +189,7 @@ namespace GUI
             // 
             // btnFormalizar
             // 
-            this.btnFormalizar.BackColor = System.Drawing.Color.FromArgb(30, 130, 30);
+            this.btnFormalizar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(125)))), ((int)(((byte)(70)))));
             this.btnFormalizar.Enabled = false;
             this.btnFormalizar.FlatAppearance.BorderSize = 0;
             this.btnFormalizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -205,7 +205,7 @@ namespace GUI
             // 
             // btnConfirmacion
             // 
-            this.btnConfirmacion.BackColor = System.Drawing.Color.FromArgb(30, 100, 170);
+            this.btnConfirmacion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(100)))), ((int)(((byte)(170)))));
             this.btnConfirmacion.Enabled = false;
             this.btnConfirmacion.FlatAppearance.BorderSize = 0;
             this.btnConfirmacion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

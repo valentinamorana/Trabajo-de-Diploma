@@ -27,7 +27,6 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarUsuarios();
 
@@ -37,12 +36,6 @@ namespace GUI
                 cboUsuario.SelectedValue = _preseleccionarId;
                 if (cboUsuario.SelectedValue != null) btnCargar_Click(null, EventArgs.Empty);
             }
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);

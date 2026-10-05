@@ -24,6 +24,29 @@ namespace GUI
         public static readonly Color Exito  = Color.FromArgb(46, 125, 70);
         public static readonly Color Alerta = Color.FromArgb(166, 101, 14);
         public static readonly Color Error  = Color.FromArgb(178, 58, 58);
+        public static readonly Color Info   = Color.FromArgb(30, 100, 170);
+
+        // ── Fondos de estado (cards de alertas, tarjetas de kanban, celdas resaltadas) ──────
+        // Antes había 5 verdes de "éxito", varios rojos y amarillos distintos repartidos por
+        // los formularios; ahora cada estado tiene un único fondo claro que combina con su
+        // color de texto (Exito/Error/Alerta/Info).
+        public static readonly Color FondoExito  = Color.FromArgb(215, 240, 220);
+        public static readonly Color FondoError  = Color.FromArgb(255, 218, 218);
+        public static readonly Color FondoAlerta = Color.FromArgb(255, 248, 210);
+        public static readonly Color FondoInfo   = Color.FromArgb(225, 240, 255);
+
+        // ── Variantes de marca y neutros ────────────────────────────────────────────────────
+        public static readonly Color RosaClara       = Color.FromArgb(245, 222, 230);   // encabezado de grillas
+        public static readonly Color RosaMuyClara    = Color.FromArgb(250, 244, 246);   // filas alternadas
+        public static readonly Color RosaTinta       = Color.FromArgb(120, 30, 55);     // texto sobre RosaPalido
+        public static readonly Color TextoSecundario = Color.FromArgb(70, 70, 80);
+        public static readonly Color Dorado          = Color.FromArgb(255, 235, 130);   // badge de alertas del menú
+
+        // ── Tema oscuro (Mi Perfil → Tema: Oscuro) ──────────────────────────────────────────
+        public static readonly Color OscuroFondo      = Color.FromArgb(37, 37, 45);
+        public static readonly Color OscuroControl    = Color.FromArgb(50, 50, 60);
+        public static readonly Color OscuroGrilla     = Color.FromArgb(45, 45, 55);
+        public static readonly Color OscuroEncabezado = Color.FromArgb(60, 60, 72);
 
         // ── Escala tipográfica (Segoe UI, 4 tamaños) ─────────────────────────────────────
         // Antes convivían "Microsoft Sans Serif 8.25" (default de WinForms) con varios Segoe UI

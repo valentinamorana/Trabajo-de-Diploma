@@ -252,7 +252,7 @@ namespace GUI
             //
             // btnDesbloquear
             //
-            this.btnDesbloquear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnDesbloquear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.btnDesbloquear.Enabled = false;
             this.btnDesbloquear.FlatAppearance.BorderSize = 0;
             this.btnDesbloquear.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -286,7 +286,7 @@ namespace GUI
             //
             // btnVerArchivados
             //
-            this.btnVerArchivados.BackColor = System.Drawing.Color.FromArgb(110, 110, 120);
+            this.btnVerArchivados.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(80)))));
             this.btnVerArchivados.FlatAppearance.BorderSize = 0;
             this.btnVerArchivados.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnVerArchivados.Font      = new System.Drawing.Font("Segoe UI", 8.5F);

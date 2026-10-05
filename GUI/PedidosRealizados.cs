@@ -52,18 +52,11 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             // Re-aplicar después de que el combo queda correctamente inicializado
             // (el Designer no fija SelectedIndex=0, por eso AplicarFiltro del Load
             //  veía estadoIdx=-1 y mostraba 0 filas)
             AplicarFiltro();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -290,9 +283,9 @@ namespace GUI
                 int.TryParse(row.Cells["_UrgenciaKey"].Value?.ToString(), out int urgenciaKey);
                 // El nivel (int del enum) es independiente del idioma de la etiqueta visible.
                 if (urgenciaKey == (int)BE.NivelUrgencia.Urgente)
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 225, 225);
+                    row.DefaultCellStyle.BackColor = Tema.FondoError;
                 else if (urgenciaKey == (int)BE.NivelUrgencia.Normal)
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 250, 210);
+                    row.DefaultCellStyle.BackColor = Tema.FondoAlerta;
 
                 // Coloreado por estado usando la columna interna _EstadoKey (int enum)
                 // para ser independiente del idioma de la etiqueta visible.
@@ -300,10 +293,10 @@ namespace GUI
                 if (!int.TryParse(row.Cells["_EstadoKey"].Value?.ToString(), out int estadoKey)) continue;
                 row.DefaultCellStyle.ForeColor = estadoKey switch
                 {
-                    (int)BE.EstadoPedido.Pendiente  => Color.FromArgb(160, 100, 0),
-                    (int)BE.EstadoPedido.Despachado => Color.FromArgb(30, 100, 170),
-                    (int)BE.EstadoPedido.Entregado  => Color.FromArgb(30, 130, 30),
-                    (int)BE.EstadoPedido.Cancelado  => Color.FromArgb(150, 50, 50),
+                    (int)BE.EstadoPedido.Pendiente  => Tema.Alerta,
+                    (int)BE.EstadoPedido.Despachado => Tema.Info,
+                    (int)BE.EstadoPedido.Entregado  => Tema.Exito,
+                    (int)BE.EstadoPedido.Cancelado  => Tema.Error,
                     _                               => Color.Black
                 };
             }

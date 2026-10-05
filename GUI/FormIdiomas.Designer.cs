@@ -46,7 +46,7 @@ namespace GUI
             // 
             this.lblTituloIdiomas.AutoSize = true;
             this.lblTituloIdiomas.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblTituloIdiomas.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(60)))), ((int)(((byte)(100)))));
+            this.lblTituloIdiomas.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblTituloIdiomas.Location = new System.Drawing.Point(8, 8);
             this.lblTituloIdiomas.Name = "lblTituloIdiomas";
             this.lblTituloIdiomas.Size = new System.Drawing.Size(141, 19);
@@ -124,7 +124,7 @@ namespace GUI
             // 
             this.lblTituloTrad.AutoSize = true;
             this.lblTituloTrad.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblTituloTrad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(60)))), ((int)(((byte)(100)))));
+            this.lblTituloTrad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblTituloTrad.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblTituloTrad.Location = new System.Drawing.Point(3, 3);
             this.lblTituloTrad.Margin = new System.Windows.Forms.Padding(3, 3, 3, 6);
@@ -148,7 +148,7 @@ namespace GUI
             this.lblTituloControles.Margin = new System.Windows.Forms.Padding(3, 3, 3, 6);
             this.lblTituloControles.AutoSize = true;
             this.lblTituloControles.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblTituloControles.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(60)))), ((int)(((byte)(100)))));
+            this.lblTituloControles.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblTituloControles.Location = new System.Drawing.Point(564, 3);
             this.lblTituloControles.Name = "lblTituloControles";
             this.lblTituloControles.Size = new System.Drawing.Size(151, 19);

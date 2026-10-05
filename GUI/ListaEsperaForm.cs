@@ -33,15 +33,8 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarFilas();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -179,9 +172,9 @@ namespace GUI
                 if (!int.TryParse(row.Cells["_EstadoKey"].Value?.ToString(), out int key)) continue;
                 row.DefaultCellStyle.ForeColor = key switch
                 {
-                    (int)BE.EstadoListaEspera.Pendiente  => Color.FromArgb(160, 100, 0),
-                    (int)BE.EstadoListaEspera.Reservada  => Color.FromArgb(30, 130, 30),
-                    (int)BE.EstadoListaEspera.Cancelada  => Color.FromArgb(150, 50, 50),
+                    (int)BE.EstadoListaEspera.Pendiente  => Tema.Alerta,
+                    (int)BE.EstadoListaEspera.Reservada  => Tema.Exito,
+                    (int)BE.EstadoListaEspera.Cancelada  => Tema.Error,
                     _                                     => Color.Black
                 };
             }

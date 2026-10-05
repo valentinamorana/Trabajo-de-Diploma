@@ -32,14 +32,14 @@ namespace GUI
         {
             switch (estado)
             {
-                case BE.EstadoPedido.Pendiente:      return System.Drawing.Color.FromArgb(160, 100, 0);
-                case BE.EstadoPedido.Despachado:     return System.Drawing.Color.FromArgb(30, 100, 170);
-                case BE.EstadoPedido.Entregado:      return System.Drawing.Color.FromArgb(30, 130, 30);
-                case BE.EstadoPedido.Cancelado:      return System.Drawing.Color.FromArgb(160, 50, 50);
+                case BE.EstadoPedido.Pendiente:      return Tema.Alerta;
+                case BE.EstadoPedido.Despachado:     return Tema.Info;
+                case BE.EstadoPedido.Entregado:      return Tema.Exito;
+                case BE.EstadoPedido.Cancelado:      return Tema.Error;
                 case BE.EstadoPedido.EnControlStock: return System.Drawing.Color.FromArgb(110, 60, 150);
-                case BE.EstadoPedido.ConFaltantes:   return System.Drawing.Color.FromArgb(200, 80, 0);
+                case BE.EstadoPedido.ConFaltantes:   return Tema.Alerta;
                 case BE.EstadoPedido.Separado:       return System.Drawing.Color.FromArgb(0, 120, 120);
-                case BE.EstadoPedido.Desistido:      return System.Drawing.Color.FromArgb(120, 120, 120);
+                case BE.EstadoPedido.Desistido:      return Tema.TextoSecundario;
                 default:                             return System.Drawing.Color.Black;
             }
         }

@@ -191,7 +191,7 @@ namespace GUI
             // 
             // btnDesactivar
             // 
-            this.btnDesactivar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnDesactivar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.btnDesactivar.Enabled = false;
             this.btnDesactivar.FlatAppearance.BorderSize = 0;
             this.btnDesactivar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

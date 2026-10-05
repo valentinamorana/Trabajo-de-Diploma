@@ -82,7 +82,7 @@ namespace GUI
             //
             // btnCobrar
             //
-            this.btnCobrar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(140)))), ((int)(((byte)(60)))));
+            this.btnCobrar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(125)))), ((int)(((byte)(70)))));
             this.btnCobrar.Enabled = false;
             this.btnCobrar.FlatAppearance.BorderSize = 0;
             this.btnCobrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

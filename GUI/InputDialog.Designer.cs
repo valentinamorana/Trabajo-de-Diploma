@@ -35,7 +35,7 @@ namespace GUI
             this.txtInput.TabIndex = 1;
 
             // ── btnAceptar ─────────────────────────────────────────────────────
-            this.btnAceptar.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnAceptar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnAceptar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnAceptar.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnAceptar.FlatAppearance.BorderSize = 0;

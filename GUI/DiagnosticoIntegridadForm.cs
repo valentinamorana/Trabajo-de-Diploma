@@ -18,16 +18,9 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             UpdateLanguage(GestorIdioma.IdiomaActual);
             CargarDiagnostico();
             CargarHistorial();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
@@ -85,8 +78,8 @@ namespace GUI
                     ? Tr("diag.estado.integro",      "Estado: INTEGRO")
                     : Tr("diag.estado.comprometido", "Estado: COMPROMETIDO");
                 lblEstadoDVV.ForeColor = diag.Integro
-                    ? Color.FromArgb(40, 140, 60)
-                    : Color.FromArgb(180, 50, 50);
+                    ? Tema.Exito
+                    : Tema.Error;
 
                 lblDVVDetalle.Text = string.Format(
                     Tr("diag.dvv.detalle", "DVV almacenado: {0}   |   DVV calculado: {1}   |   Filas con DVH inválido: {2}"),
@@ -121,7 +114,7 @@ namespace GUI
                         string.Format(Tr("diag.tabla.corrupta", "Tabla '{0}'"), tablaCorrupta),
                         "—", "—",
                         Tr("diag.tabla.dvinvalido", "DV inválido — usá «Recalcular Todo»"));
-                    gridRotas.Rows[tIdx].DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(180, 50, 50);
+                    gridRotas.Rows[tIdx].DefaultCellStyle.ForeColor = Tema.Error;
                     gridRotas.Rows[tIdx].ReadOnly = true;
                 }
 
@@ -217,8 +210,8 @@ namespace GUI
             string ok  = Tr("diag.hist.ok", "OK");
             string val = e.Value?.ToString() ?? "";
             e.CellStyle.ForeColor = val == ok
-                ? Color.FromArgb(30, 130, 50)
-                : Color.FromArgb(180, 50, 50);
+                ? Tema.Exito
+                : Tema.Error;
             e.CellStyle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
         }
 

@@ -23,7 +23,7 @@ namespace GUI
             this.SuspendLayout();
 
             // ── header ─────────────────────────────────────────────────────────
-            this.header.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.header.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.header.Controls.Add(this.lblTitulo);
             this.header.Controls.Add(this.btnActualizar);
             this.header.Dock     = System.Windows.Forms.DockStyle.Top;

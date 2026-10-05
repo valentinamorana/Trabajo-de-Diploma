@@ -55,7 +55,6 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);  // calls RellenarComboCriticidad internally
             InicializarDisenoMockup();
         }
@@ -67,7 +66,7 @@ namespace GUI
             {
                 using (var br = new System.Drawing.Drawing2D.LinearGradientBrush(
                     panelTop.ClientRectangle,
-                    Color.FromArgb(176, 62, 96),
+                    Tema.RosaOscuro,
                     Color.FromArgb(242, 114, 153),
                     System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
                     pe.Graphics.FillRectangle(br, panelTop.ClientRectangle);
@@ -78,10 +77,10 @@ namespace GUI
             foreach (var dgv in new[] { dgvSistema, dgvNegocio })
             {
                 dgv.EnableHeadersVisualStyles = false;
-                dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(176, 62, 96);
+                dgv.ColumnHeadersDefaultCellStyle.BackColor = Tema.RosaOscuro;
                 dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
                 dgv.ColumnHeadersDefaultCellStyle.Font      = new Font("Segoe UI", 8.5f, FontStyle.Bold);
-                dgv.GridColor = Color.FromArgb(230, 210, 220);
+                dgv.GridColor = Tema.Borde;
             }
 
             // ── Leyenda de criticidad en tab Sistema ──────────────────────────
@@ -89,7 +88,7 @@ namespace GUI
             {
                 Dock      = DockStyle.Top,
                 Height    = 28,
-                BackColor = Color.FromArgb(245, 238, 242)
+                BackColor = Tema.RosaMuyClara
             };
             leyenda.Paint += (s, pe) =>
             {
@@ -98,13 +97,13 @@ namespace GUI
                 // (trad-key, fallback, back, fore)
                 var niveles = new (string key, string fb, Color back, Color fore)[]
                 {
-                    ("stat.ninguno",    "Ninguno",     Color.FromArgb(245,245,245), Color.Gray),
-                    ("stat.baja",       "Baja",        Color.FromArgb(220,255,220), Color.DarkGreen),
-                    ("stat.media",      "Media",       Color.FromArgb(255,255,200), Color.DarkGoldenrod),
-                    ("stat.alta",       "Alta",        Color.FromArgb(255,220,170), Color.DarkOrange),
-                    ("stat.intlogin",   "Int.Login",   Color.FromArgb(255,205,205), Color.DarkRed),
-                    ("stat.recupclave", "Recup.Clave", Color.FromArgb(210,225,255), Color.DarkBlue),
-                    ("stat.bloqueos",   "Bloqueos",    Color.FromArgb(200,0,20),    Color.White),
+                    ("stat.ninguno",    "Ninguno",     Tema.PanelClaro, Color.Gray),
+                    ("stat.baja",       "Baja",        Tema.FondoExito, Color.DarkGreen),
+                    ("stat.media",      "Media",       Tema.FondoAlerta, Color.DarkGoldenrod),
+                    ("stat.alta",       "Alta",        Tema.FondoAlerta, Color.DarkOrange),
+                    ("stat.intlogin",   "Int.Login",   Tema.FondoError, Color.DarkRed),
+                    ("stat.recupclave", "Recup.Clave", Tema.FondoInfo, Color.DarkBlue),
+                    ("stat.bloqueos",   "Bloqueos",    Tema.Error,    Color.White),
                 };
                 using (var fnt = new Font("Segoe UI", 7.5f))
                 {
@@ -115,7 +114,7 @@ namespace GUI
                         g.DrawRectangle(Pens.Gray, x, 7, 10, 10);
                         x += 13;
                         string etiqueta = Tr(n.key, n.fb);
-                        using (var br = new SolidBrush(Color.FromArgb(60,40,50)))
+                        using (var br = new SolidBrush(Tema.Tinta))
                             g.DrawString(etiqueta, fnt, br, x, 6);
                         x += (int)g.MeasureString(etiqueta, fnt).Width + 6;
                     }
@@ -135,12 +134,12 @@ namespace GUI
             {
                 Dock      = DockStyle.Bottom,
                 Height    = 26,
-                BackColor = Color.FromArgb(176, 62, 96)
+                BackColor = Tema.RosaOscuro
             };
             var lblSb = new Label
             {
                 Dock      = DockStyle.Fill,
-                ForeColor = Color.FromArgb(244, 212, 226),
+                ForeColor = Tema.RosaClara,
                 Font      = new Font("Segoe UI", 8f),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Padding   = new Padding(10, 0, 0, 0)
@@ -164,26 +163,20 @@ namespace GUI
                 Color back, fore;
                 switch (tipo)
                 {
-                    case "Venta":               back = Color.FromArgb(225, 240, 255); fore = Color.FromArgb(30,100,170);  break;
-                    case "Despacho":            back = Color.FromArgb(225, 240, 255); fore = Color.FromArgb(30,100,170);  break;
-                    case "Entrega":             back = Color.FromArgb(220, 248, 220); fore = Color.FromArgb(30,130,30);   break;
-                    case "Cancelacion":         back = Color.FromArgb(255, 225, 225); fore = Color.FromArgb(160,50,50);   break;
-                    case "AltaCliente":         back = Color.FromArgb(225, 248, 225); fore = Color.FromArgb(30,130,30);   break;
+                    case "Venta":               back = Tema.FondoInfo; fore = Tema.Info;  break;
+                    case "Despacho":            back = Tema.FondoInfo; fore = Tema.Info;  break;
+                    case "Entrega":             back = Tema.FondoExito; fore = Tema.Exito;   break;
+                    case "Cancelacion":         back = Tema.FondoError; fore = Tema.Error;   break;
+                    case "AltaCliente":         back = Tema.FondoExito; fore = Tema.Exito;   break;
                     case "ModificacionCliente": back = Color.FromArgb(240, 232, 255); fore = Color.FromArgb(100,80,160);  break;
-                    case "AltaPrenda":          back = Color.FromArgb(225, 248, 225); fore = Color.FromArgb(30,130,30);   break;
-                    case "ModificacionPrenda":  back = Color.FromArgb(255, 240, 225); fore = Color.FromArgb(160,100,20);  break;
-                    case "CambioEstadoPrenda":  back = Color.FromArgb(225, 240, 255); fore = Color.FromArgb(30,100,170);  break;
+                    case "AltaPrenda":          back = Tema.FondoExito; fore = Tema.Exito;   break;
+                    case "ModificacionPrenda":  back = Tema.FondoAlerta; fore = Tema.Alerta;  break;
+                    case "CambioEstadoPrenda":  back = Tema.FondoInfo; fore = Tema.Info;  break;
                     default: continue;
                 }
                 fila.DefaultCellStyle.BackColor = back;
                 fila.DefaultCellStyle.ForeColor = fore;
             }
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -660,13 +653,13 @@ namespace GUI
                 Color back, fore;
                 switch (crit)
                 {
-                    case 0:  back = Color.FromArgb(245, 245, 245); fore = Color.Gray;           break;
-                    case 1:  back = Color.FromArgb(220, 255, 220); fore = Color.DarkGreen;      break;
-                    case 2:  back = Color.FromArgb(255, 255, 200); fore = Color.DarkGoldenrod;  break;
-                    case 3:  back = Color.FromArgb(255, 220, 170); fore = Color.DarkOrange;     break;
-                    case 4:  back = Color.FromArgb(255, 205, 205); fore = Color.DarkRed;        break;
-                    case 5:  back = Color.FromArgb(210, 225, 255); fore = Color.DarkBlue;       break;
-                    case 6:  back = Color.FromArgb(200, 0,   20);  fore = Color.White;          break;
+                    case 0:  back = Tema.PanelClaro; fore = Color.Gray;           break;
+                    case 1:  back = Tema.FondoExito; fore = Color.DarkGreen;      break;
+                    case 2:  back = Tema.FondoAlerta; fore = Color.DarkGoldenrod;  break;
+                    case 3:  back = Tema.FondoAlerta; fore = Color.DarkOrange;     break;
+                    case 4:  back = Tema.FondoError; fore = Color.DarkRed;        break;
+                    case 5:  back = Tema.FondoInfo; fore = Color.DarkBlue;       break;
+                    case 6:  back = Tema.Error;  fore = Color.White;          break;
                     default: continue;
                 }
                 fila.DefaultCellStyle.BackColor = back;

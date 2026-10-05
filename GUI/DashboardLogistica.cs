@@ -23,7 +23,6 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarEnBackground();
             _timer = new System.Windows.Forms.Timer { Interval = 2 * 60 * 1000 };
@@ -35,7 +34,6 @@ namespace GUI
         {
             _timer?.Stop();
             _timer?.Dispose();
-            GestorIdioma.DesuscribirObservador(this);
             base.OnFormClosing(e);
         }
 
@@ -112,17 +110,17 @@ namespace GUI
                 {
                     case BE.EstadoPedido.Pendiente:
                         var cPend = CrearCard(tit, sub, dias,
-                            p.EsUrgentePorAntiguedad ? Color.FromArgb(255, 205, 200) : Color.FromArgb(255, 242, 200));
+                            p.EsUrgentePorAntiguedad ? Tema.FondoError : Tema.FondoAlerta);
                         HabilitarClicAbrirPedidosRealizados(cPend);
                         colPendiente.Controls.Add(cPend);
                         break;
                     case BE.EstadoPedido.Despachado:
-                        var cDesp = CrearCard(tit, sub, dias, Color.FromArgb(205, 225, 255));
+                        var cDesp = CrearCard(tit, sub, dias, Tema.FondoInfo);
                         HabilitarClicAbrirPedidosRealizados(cDesp);
                         colDespachado.Controls.Add(cDesp);
                         break;
                     case BE.EstadoPedido.Entregado:
-                        var cEntr = CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220));
+                        var cEntr = CrearCard(tit, sub, dias, Tema.FondoExito);
                         HabilitarClicAbrirPedidosRealizados(cEntr);
                         colEntregado.Controls.Add(cEntr);
                         break;
@@ -177,7 +175,7 @@ namespace GUI
         private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
             using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
-                Tema.RosaPrimario, Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
+                Tema.RosaPrimario, Tema.RosaOscuro, LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
 
@@ -227,7 +225,7 @@ namespace GUI
                     pe.Graphics.FillPath(br, path);
             };
             card.Controls.Add(new Label { Text = titulo, Font = new Font("Segoe UI", 8.5f, FontStyle.Bold), AutoSize = true, Location = new Point(8, 6), BackColor = Color.Transparent });
-            card.Controls.Add(new Label { Text = sub, Font = new Font("Segoe UI", 7.5f), AutoSize = false, Size = new Size(164, 16), Location = new Point(8, 24), BackColor = Color.Transparent, ForeColor = Color.FromArgb(70, 70, 80) });
+            card.Controls.Add(new Label { Text = sub, Font = new Font("Segoe UI", 7.5f), AutoSize = false, Size = new Size(164, 16), Location = new Point(8, 24), BackColor = Color.Transparent, ForeColor = Tema.TextoSecundario });
             string dStr = dias == 0 ? "hoy" : $"hace {dias}d";
             card.Controls.Add(new Label { Text = dStr, Font = new Font("Segoe UI", 7f, FontStyle.Italic), AutoSize = true, Location = new Point(8, 44), BackColor = Color.Transparent, ForeColor = Color.FromArgb(110, 100, 100) });
             return card;

@@ -122,7 +122,7 @@ namespace GUI
             //
             this.kpiPrendasVal.BackColor = System.Drawing.Color.Transparent;
             this.kpiPrendasVal.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
-            this.kpiPrendasVal.ForeColor = System.Drawing.Color.FromArgb(80, 28, 52);
+            this.kpiPrendasVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(30)))), ((int)(((byte)(55)))));
             this.kpiPrendasVal.Location = new System.Drawing.Point(0, 5);
             this.kpiPrendasVal.Name = "kpiPrendasVal";
             this.kpiPrendasVal.Size = new System.Drawing.Size(235, 34);
@@ -134,7 +134,7 @@ namespace GUI
             //
             this.kpiClientesVal.BackColor = System.Drawing.Color.Transparent;
             this.kpiClientesVal.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
-            this.kpiClientesVal.ForeColor = System.Drawing.Color.FromArgb(80, 28, 52);
+            this.kpiClientesVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(30)))), ((int)(((byte)(55)))));
             this.kpiClientesVal.Location = new System.Drawing.Point(235, 5);
             this.kpiClientesVal.Name = "kpiClientesVal";
             this.kpiClientesVal.Size = new System.Drawing.Size(235, 34);
@@ -146,7 +146,7 @@ namespace GUI
             //
             this.kpiEventosVal.BackColor = System.Drawing.Color.Transparent;
             this.kpiEventosVal.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
-            this.kpiEventosVal.ForeColor = System.Drawing.Color.FromArgb(80, 28, 52);
+            this.kpiEventosVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(30)))), ((int)(((byte)(55)))));
             this.kpiEventosVal.Location = new System.Drawing.Point(470, 5);
             this.kpiEventosVal.Name = "kpiEventosVal";
             this.kpiEventosVal.Size = new System.Drawing.Size(235, 34);
@@ -158,7 +158,7 @@ namespace GUI
             //
             this.kpiBackupVal.BackColor = System.Drawing.Color.Transparent;
             this.kpiBackupVal.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
-            this.kpiBackupVal.ForeColor = System.Drawing.Color.FromArgb(80, 28, 52);
+            this.kpiBackupVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(30)))), ((int)(((byte)(55)))));
             this.kpiBackupVal.Location = new System.Drawing.Point(705, 5);
             this.kpiBackupVal.Name = "kpiBackupVal";
             this.kpiBackupVal.Size = new System.Drawing.Size(235, 34);
@@ -170,7 +170,7 @@ namespace GUI
             //
             this.kpiPrendasLbl.BackColor = System.Drawing.Color.Transparent;
             this.kpiPrendasLbl.Font = new System.Drawing.Font("Segoe UI", 7.5F);
-            this.kpiPrendasLbl.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.kpiPrendasLbl.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.kpiPrendasLbl.Location = new System.Drawing.Point(0, 39);
             this.kpiPrendasLbl.Name = "kpiPrendasLbl";
             this.kpiPrendasLbl.Size = new System.Drawing.Size(235, 20);
@@ -182,7 +182,7 @@ namespace GUI
             //
             this.kpiClientesLbl.BackColor = System.Drawing.Color.Transparent;
             this.kpiClientesLbl.Font = new System.Drawing.Font("Segoe UI", 7.5F);
-            this.kpiClientesLbl.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.kpiClientesLbl.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.kpiClientesLbl.Location = new System.Drawing.Point(235, 39);
             this.kpiClientesLbl.Name = "kpiClientesLbl";
             this.kpiClientesLbl.Size = new System.Drawing.Size(235, 20);
@@ -194,7 +194,7 @@ namespace GUI
             //
             this.kpiEventosLbl.BackColor = System.Drawing.Color.Transparent;
             this.kpiEventosLbl.Font = new System.Drawing.Font("Segoe UI", 7.5F);
-            this.kpiEventosLbl.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.kpiEventosLbl.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.kpiEventosLbl.Location = new System.Drawing.Point(470, 39);
             this.kpiEventosLbl.Name = "kpiEventosLbl";
             this.kpiEventosLbl.Size = new System.Drawing.Size(235, 20);
@@ -206,7 +206,7 @@ namespace GUI
             //
             this.kpiBackupLbl.BackColor = System.Drawing.Color.Transparent;
             this.kpiBackupLbl.Font = new System.Drawing.Font("Segoe UI", 7.5F);
-            this.kpiBackupLbl.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.kpiBackupLbl.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.kpiBackupLbl.Location = new System.Drawing.Point(705, 39);
             this.kpiBackupLbl.Name = "kpiBackupLbl";
             this.kpiBackupLbl.Size = new System.Drawing.Size(235, 20);
@@ -231,7 +231,7 @@ namespace GUI
             //
             // panelTop
             //
-            this.panelTop.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.panelTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.panelTop.Controls.Add(this.lblTitulo);
             this.panelTop.Controls.Add(this.lblSubtitulo);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
@@ -304,7 +304,7 @@ namespace GUI
             //
             // btnGenerar
             //
-            this.btnGenerar.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnGenerar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnGenerar.FlatAppearance.BorderSize = 0;
             this.btnGenerar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnGenerar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -319,7 +319,7 @@ namespace GUI
             //
             // btnExportar
             //
-            this.btnExportar.BackColor = System.Drawing.Color.FromArgb(110, 40, 70);
+            this.btnExportar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(30)))), ((int)(((byte)(55)))));
             this.btnExportar.FlatAppearance.BorderSize = 0;
             this.btnExportar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExportar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -369,7 +369,7 @@ namespace GUI
             //
             // btnExportarComp
             //
-            this.btnExportarComp.BackColor = System.Drawing.Color.FromArgb(110, 40, 70);
+            this.btnExportarComp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(30)))), ((int)(((byte)(55)))));
             this.btnExportarComp.FlatAppearance.BorderSize = 0;
             this.btnExportarComp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExportarComp.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -402,7 +402,7 @@ namespace GUI
             this.rtbReporte.BackColor = System.Drawing.Color.FromArgb(255, 250, 253);
             this.rtbReporte.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtbReporte.Font = new System.Drawing.Font("Consolas", 9.5F);
-            this.rtbReporte.ForeColor = System.Drawing.Color.FromArgb(40, 15, 28);
+            this.rtbReporte.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(26)))), ((int)(((byte)(32)))));
             this.rtbReporte.Anchor = ((System.Windows.Forms.AnchorStyles)(
                 System.Windows.Forms.AnchorStyles.Top    |
                 System.Windows.Forms.AnchorStyles.Bottom |

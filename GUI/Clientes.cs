@@ -46,14 +46,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -232,7 +225,7 @@ namespace GUI
                 if (row.Cells["_Vencido"].Value is bool exp && exp)
                     row.DefaultCellStyle.ForeColor = Color.DarkRed;
                 else if (row.Cells["_ProxVencer"].Value is bool prox && prox)
-                    row.DefaultCellStyle.ForeColor = Color.FromArgb(160, 100, 0);
+                    row.DefaultCellStyle.ForeColor = Tema.Alerta;
             }
 
             // Ajustar columnas

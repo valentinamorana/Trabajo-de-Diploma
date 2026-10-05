@@ -46,7 +46,7 @@ namespace GUI
             //
             // btnAprobarReingreso
             //
-            this.btnAprobarReingreso.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(140)))), ((int)(((byte)(60)))));
+            this.btnAprobarReingreso.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(125)))), ((int)(((byte)(70)))));
             this.btnAprobarReingreso.Enabled = false;
             this.btnAprobarReingreso.FlatAppearance.BorderSize = 0;
             this.btnAprobarReingreso.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

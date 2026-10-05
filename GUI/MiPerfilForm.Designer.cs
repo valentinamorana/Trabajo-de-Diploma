@@ -40,7 +40,7 @@ namespace GUI
             // ── lblTitulo ──────────────────────────────────────────────────────
             this.lblTitulo.AutoSize  = true;
             this.lblTitulo.Font      = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold);
-            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblTitulo.Location  = new System.Drawing.Point(20, 14);
             this.lblTitulo.Name      = "lblTitulo";
             this.lblTitulo.TabIndex  = 0;
@@ -82,7 +82,7 @@ namespace GUI
             // ── lblSeccion ─────────────────────────────────────────────────────
             this.lblSeccion.AutoSize  = true;
             this.lblSeccion.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblSeccion.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.lblSeccion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblSeccion.Location  = new System.Drawing.Point(20, 108);
             this.lblSeccion.Name      = "lblSeccion";
             this.lblSeccion.TabIndex  = 5;
@@ -177,7 +177,7 @@ namespace GUI
             this.chkNotif.Text     = "Recibir notificaciones";
 
             // ── btnGuardar ─────────────────────────────────────────────────────
-            this.btnGuardar.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnGuardar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnGuardar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnGuardar.FlatAppearance.BorderSize = 0;
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -196,7 +196,7 @@ namespace GUI
             this.btnDefault.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnDefault.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(210, 180, 195);
             this.btnDefault.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDefault.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnDefault.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnDefault.Location  = new System.Drawing.Point(170, 372);
             this.btnDefault.Name      = "btnDefault";
             this.btnDefault.Size      = new System.Drawing.Size(244, 30);
@@ -207,7 +207,7 @@ namespace GUI
             this.btnDefault.Click += new System.EventHandler(this.BtnDefault_Click);
 
             // ── lblEstado ──────────────────────────────────────────────────────
-            this.lblEstado.ForeColor = System.Drawing.Color.FromArgb(40, 140, 60);
+            this.lblEstado.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(125)))), ((int)(((byte)(70)))));
             this.lblEstado.Location  = new System.Drawing.Point(24, 410);
             this.lblEstado.Name      = "lblEstado";
             this.lblEstado.Size      = new System.Drawing.Size(392, 28);

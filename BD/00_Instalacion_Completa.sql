@@ -638,7 +638,6 @@ FROM (VALUES
     -- Vendedor: prendas + clientes + planes + ventas
     ('Vendedor','mnuPrendas'),('Vendedor','mnuClientes'),
     ('Vendedor','mnuPlanSuscripciones'),('Vendedor','mnuRenovacionSuscripcion'),
-    ('Vendedor','mnuCobroSuscripcion'),
     ('Vendedor','mnuPedidosVenta'),
     -- Deposito: solo despacho
     ('Deposito','mnuPedidosRealizados')
@@ -1502,20 +1501,18 @@ SELECT 'Gestionar Cobros', 'mnuCobroSuscripcion', 'Ventas', 1, 0, 0
 WHERE NOT EXISTS (SELECT 1 FROM Permiso WHERE NombreMenu = 'mnuCobroSuscripcion');
 GO
 
--- ── 4) Asignación directa a PermisoRelacion (Administrador y Vendedor;
---     GerenteComercial la hereda de Vendedor por la arista Composite ya
---     existente, igual que ya pasa con mnuRenovacionSuscripcion) ─────────
+-- ── 4) Asignación directa a PermisoRelacion (Administrador; el rol Caja la
+--     recibe en la sección 21d: el cobro recurrente lo hace Caja, no el Vendedor) ─
 INSERT INTO PermisoRelacion (IdPadre, IdHijo)
 SELECT rol.IdPermiso, pat.IdPermiso
 FROM (VALUES
-    ('Administrador', 'mnuCobroSuscripcion'),
-    ('Vendedor',       'mnuCobroSuscripcion')
+    ('Administrador', 'mnuCobroSuscripcion')
 ) AS v(Rol, NombreMenu)
 JOIN Permiso rol ON rol.Nombre = v.Rol AND rol.EsRol = 1
 JOIN Permiso pat ON pat.NombreMenu = v.NombreMenu AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0
 WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x
                   WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
-PRINT 'Permiso mnuCobroSuscripcion asignado a Administrador y Vendedor (GerenteComercial lo hereda de Vendedor).';
+PRINT 'Permiso mnuCobroSuscripcion asignado a Administrador.';
 GO
 
 -- ── 5) Mapeo de control (pantalla "Perfiles y Permisos" → control mapeado) ─
@@ -3318,6 +3315,42 @@ WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = rol.IdPermis
 
 UPDATE ParametroSistema SET Valor = N'Aplicada', Fecha = GETDATE()
 WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente';
+GO
+
+-- (4) Cobro recurrente N01 → rol Caja (quien vende no cobra; mismo criterio que PN02).
+--     Migración de una sola vez (marca 'CobroN01Caja'): se quita la patente al Vendedor y
+--     se le da a Caja. Después, el Administrador puede reasignarla desde el Gestor de Perfiles
+--     sin que una reinstalación se lo deshaga. Si la base ya tenía dígitos verificadores
+--     calculados (formato 2), se pide el recálculo para que el cambio no dé falsa alarma.
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'CobroN01Caja')
+BEGIN
+    DECLARE @cambios INT = 0;
+    DELETE r FROM PermisoRelacion r
+    JOIN Permiso rol ON rol.IdPermiso = r.IdPadre AND rol.Nombre = 'Vendedor' AND rol.EsRol = 1
+    JOIN Permiso pat ON pat.IdPermiso = r.IdHijo  AND pat.NombreMenu = 'mnuCobroSuscripcion'
+                    AND ISNULL(pat.EsFamilia,0) = 0 AND ISNULL(pat.EsRol,0) = 0;
+    SET @cambios = @cambios + @@ROWCOUNT;
+
+    INSERT INTO PermisoRelacion (IdPadre, IdHijo)
+    SELECT rol.IdPermiso, pat.IdPermiso
+    FROM Permiso rol
+    JOIN Permiso pat ON pat.IdPermiso = (SELECT TOP 1 p.IdPermiso FROM Permiso p
+                                         WHERE p.NombreMenu = 'mnuCobroSuscripcion' AND ISNULL(p.EsFamilia,0) = 0 AND ISNULL(p.EsRol,0) = 0
+                                         ORDER BY p.Estado DESC, p.IdPermiso)
+    WHERE rol.Nombre = 'Caja' AND rol.EsRol = 1
+      AND NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = rol.IdPermiso AND x.IdHijo = pat.IdPermiso);
+    SET @cambios = @cambios + @@ROWCOUNT;
+
+    IF @cambios > 0 AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'FormatoDV' AND TRY_CONVERT(INT, Valor) >= 2)
+    BEGIN
+        MERGE ParametroSistema AS t
+        USING (VALUES (N'DVReinicializar', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+        WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+        WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    END
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'CobroN01Caja', N'Aplicada', GETDATE());
+    PRINT 'Cobro de suscripción (N01): la patente pasó del Vendedor a Caja.';
+END
 GO
 
 -- ============================================================

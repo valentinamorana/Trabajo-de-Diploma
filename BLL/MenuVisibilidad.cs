@@ -70,12 +70,13 @@ namespace BLL
             ("suscriptoresToolStripMenuItem", new[]
             {
                 "clientesToolStripMenuItem", "planesToolStripMenuItem",
-                "renovacionSuscripcionToolStripMenuItem", "cobroSuscripcionToolStripMenuItem",
+                "renovacionSuscripcionToolStripMenuItem",
                 "nuevaContratacionToolStripMenuItem"
             }),
             ("ventasToolStripMenuItem", new[] { "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem" }),
             // PN02 — rol Caja, separado de Vendedor.
-            ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem" }),
+            // El cobro recurrente (N01) también es de Caja: quien vende no cobra.
+            ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem", "cobroSuscripcionToolStripMenuItem" }),
             // PN03 — Gerencia (GerenteComercial), Administración y Contabilidad (roles nuevos)
             // y Vendedor conviven en un mismo grupo de menú; cada hoja sigue gobernada por su
             // propia patente, el grupo solo se muestra si al menos una de las 4 es visible.

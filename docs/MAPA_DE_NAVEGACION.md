@@ -22,7 +22,6 @@ El Administrador ve todo (bypass en las 3 capas). Un grupo del menú se muestra 
 | **Suscriptores** | Clientes | `Clientes` | mnuClientes | VEN, GCO, ADM | N01 |
 | | Planes | `Planes` | mnuPlanSuscripciones | VEN, GCO, ADM | N01 |
 | | Renovación de suscripción | `RenovacionSuscripcionForm` | mnuRenovacionSuscripcion | VEN, GCO, ADM | N01 |
-| | Cobro de suscripción | `CobroSuscripcionForm` | mnuCobroSuscripcion | VEN, GCO, ADM | N01 |
 | | Nueva contratación | `NuevaContratacionForm` (modal) | mnuClientes | VEN, GCO, ADM | PN02 |
 | **Inventario** | Prendas | `Prendas` | mnuPrendas | VEN, GCO, DEP, GIN, ADM | PN01 / PN04 |
 | | Inspección de Devolución | `InspeccionDevolucionForm` | mnuInspeccionDevolucion | DEP, GIN, ADM | PN04 |
@@ -31,6 +30,7 @@ El Administrador ve todo (bypass en las 3 capas). Un grupo del menú se muestra 
 | **Ventas** | Pedidos de Venta | `PedidosVenta` | mnuPedidosVenta | VEN, GCO, ADM | PN01 |
 | | Pedidos Realizados | `PedidosRealizados` | mnuPedidosRealizados | DEP, GCO, GIN, LOG, ADM | PN01 / PN04 |
 | **Caja** | Contrataciones Pendientes | `ContratacionesPendientesForm` | mnuCaja | CAJ, ADM | PN02 |
+| | Cobro de suscripción | `CobroSuscripcionForm` | mnuCobroSuscripcion (acciones: mnuCajaEditar) | CAJ, ADM | N01 |
 | **Promociones** | Sugerir promoción | `SugerirPromocionForm` (modal) | mnuSugerenciaPromocion | GCO, ADM | PN03 |
 | | Gestión de promociones | `PromocionesAdministracionForm` | mnuPromocionesAdmin | ACO, ADM | PN03 |
 | | Revisión contable | `PromocionesContabilidadForm` | mnuPromocionesContable | CON, ADM | PN03 |

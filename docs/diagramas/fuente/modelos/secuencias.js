@@ -57,8 +57,8 @@ module.exports = [
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_N01_CU03_CobrarSuscripcion', titulo: 'N01 · CU03-VEN Cobrar suscripción (cobro recurrente)',
-    participantes: [A('V', 'Vendedor'), P('F', 'CobroSuscripcionForm'), P('B', 'BLL.Cobro'), P('H1', 'DetectarCobroHandler'), P('H2', 'ProcesarPagoHandler'), P('H3', 'AplicarGracia / Suspender Handler'), P('D', 'DAL (Cliente, Cobro, CargoPrenda, Promocion)')],
+    tipo: 'secuencia', id: 'DSS_N01_CU03_CobrarSuscripcion', titulo: 'N01 · CU01-CAJ Cobrar suscripción (cobro recurrente)',
+    participantes: [A('V', 'Caja'), P('F', 'CobroSuscripcionForm'), P('B', 'BLL.Cobro'), P('H1', 'DetectarCobroHandler'), P('H2', 'ProcesarPagoHandler'), P('H3', 'AplicarGracia / Suspender Handler'), P('D', 'DAL (Cliente, Cobro, CargoPrenda, Promocion)')],
     pasos: [
       c('F', 'B', 'ObtenerElegibles()'),
       c('B', 'D', 'ObtenerTodos() · TieneContratacionPendiente(idCliente)'),
@@ -602,7 +602,7 @@ module.exports = [
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_N01_CU04_GestionarPlanes', titulo: 'N01 · CU04-VEN Gestionar planes de suscripción',
+    tipo: 'secuencia', id: 'DSS_N01_CU04_GestionarPlanes', titulo: 'N01 · CU03-VEN Gestionar planes de suscripción',
     participantes: [A('V', 'Vendedor'), P('F', 'Planes'), P('B', 'BLL.PlanSuscripcion'), P('D', 'DAL.PlanSuscripcion')],
     pasos: [
       c('V', 'F', 'Completa nombre, límite de prendas y precio mensual, y pulsa Guardar Plan'),

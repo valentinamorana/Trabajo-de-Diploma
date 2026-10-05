@@ -2,12 +2,13 @@
 module.exports = [
   {
     tipo: 'casos', id: 'CU_n01_clientes_suscripciones', titulo: 'Casos de uso — N01 Clientes y suscripciones', sistema: 'WardrobeFlow — N01 Clientes y suscripciones',
-    actores: [{ id: 'V', nombre: 'Vendedor' }],
+    actores: [{ id: 'V', nombre: 'Vendedor' }, { id: 'C', nombre: 'Caja' }],
     casos: [
       { id: 'c1', nombre: 'CU01-VEN Gestionar Cliente' }, { id: 'c2', nombre: 'CU02-VEN Renovar Suscripción' },
-      { id: 'c3', nombre: 'CU03-VEN Cobrar Suscripción' }, { id: 'c4', nombre: 'CU04-VEN Gestionar Planes' }
+      { id: 'c4', nombre: 'CU03-VEN Gestionar Planes' }, { id: 'c3', nombre: 'CU01-CAJ Cobrar Suscripción' }
     ],
-    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c2' }, { actor: 'V', caso: 'c3' }, { actor: 'V', caso: 'c4' }]
+    // El cobro recurrente lo hace Caja: quien vende no cobra (mismo criterio que PN02).
+    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'V', caso: 'c2' }, { actor: 'V', caso: 'c4' }, { actor: 'C', caso: 'c3' }]
   },
   {
     tipo: 'casos', id: 'CU_pn01_armar_pedido', titulo: 'Casos de uso — PN01 Armar pedido', sistema: 'WardrobeFlow — PN01 Armar pedido',

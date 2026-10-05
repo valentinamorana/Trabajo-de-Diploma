@@ -10,8 +10,10 @@ module.exports = {
     roles: [
       ['Cliente (externo)', 'Contrata y usa la suscripción y decide qué hacer cuando vence. No accede al sistema; interactúa por medios externos.',
         ['Brindar sus datos y, si corresponde, quién lo refirió', 'Elegir plan y modalidad de cobro', 'Comunicar su decisión al vencer: renovar, cambiar de plan, pausar o darse de baja', 'Abonar el cobro']],
-      ['Vendedor (incluido en el Gerente Comercial)', 'Registra y mantiene los clientes, administra los planes y procesa la renovación y el cobro recurrente de cada suscripción.',
-        ['Registrar, modificar y dar de baja clientes', 'Administrar los planes (precio mensual y límite de prendas)', 'Procesar la renovación: renovar, cambiar de plan, pausar o dar de baja', 'Reanudar una pausa', 'Procesar el cobro recurrente y sus resultados']]
+      ['Vendedor (incluido en el Gerente Comercial)', 'Registra y mantiene los clientes, administra los planes y procesa la renovación de cada suscripción.',
+        ['Registrar, modificar y dar de baja clientes', 'Administrar los planes (precio mensual y límite de prendas)', 'Procesar la renovación: renovar, cambiar de plan, pausar o dar de baja', 'Reanudar una pausa']],
+      ['Caja', 'Procesa el cobro recurrente de cada suscripción. Lo hace Caja y no el Vendedor: quien vende no cobra (mismo criterio que PN02).',
+        ['Procesar el cobro recurrente y sus resultados (cobrado o pago fallido)']]
     ],
     descripcion: [
       'El Vendedor registra al cliente con sus datos (nombre, apellido, DNI, email, medio de pago y fecha de nacimiento). Si el cliente llegó por recomendación de otro, indica quién lo refirió: ese dato se fija una sola vez, al alta. El alta no exige asignar un plan.',
@@ -36,7 +38,7 @@ module.exports = {
       'El beneficio por referido se acredita una única vez por cliente referido, al activar su suscripción por primera vez.'
     ],
     actividad: 'ACT_n01_renovacion_cobro',
-    cuLista: [['CU01-VEN', 'Gestionar Cliente', 'Vendedor'], ['CU02-VEN', 'Renovar Suscripción', 'Vendedor'], ['CU03-VEN', 'Cobrar Suscripción', 'Vendedor'], ['CU04-VEN', 'Gestionar Planes', 'Vendedor']],
+    cuLista: [['CU01-VEN', 'Gestionar Cliente', 'Vendedor'], ['CU02-VEN', 'Renovar Suscripción', 'Vendedor'], ['CU03-VEN', 'Gestionar Planes', 'Vendedor'], ['CU01-CAJ', 'Cobrar Suscripción', 'Caja']],
     cuDiagrama: 'CU_n01_clientes_suscripciones',
     specs: [
       spec('CU01-VEN-GESTIONAR CLIENTE', 'Gestionar Cliente', {
@@ -51,13 +53,13 @@ module.exports = {
         esc: ['1. El Vendedor selecciona al cliente y el sistema muestra su estado (vigente, por vencer, vencida o pausada).', '2. El Vendedor registra la decisión que el cliente comunicó por fuera del sistema.', '3. El sistema verifica que la suscripción esté vencida o próxima a vencer (7 días); la pausa puede pedirse siempre.', '4. Según la decisión: Renovar calcula el nuevo vencimiento a continuación del vigente según la modalidad; Cambiar plan valida que el plan nuevo alcance para las prendas en uso; Pausar indica hasta cuándo (máximo 3 meses) y corre el vencimiento; Baja exige que el cliente haya devuelto todas las prendas.', '5. El sistema registra el resultado en el historial de renovaciones junto con la actualización del cliente, en una única transacción.', '6. El sistema informa el resultado.'],
         alt: ['3.1 Todavía no corresponde renovar: el sistema informa "Pendiente" y no modifica nada.', '4.1 Pausa que supera los 3 meses, ya pausada o con prendas en uso: el sistema rechaza la operación.', '4.2 Baja con prendas sin devolver: el sistema informa que deben devolverse y no la efectiviza.', '4.3 Cliente pausado: puede reanudarse desde la misma pantalla ("Reanudar ahora"); se devuelven los días de pausa no usados.'],
         post: ['El resultado (Renovada, Cambio de plan, Pausada o Baja) queda en el historial de renovaciones.', 'El vencimiento y el plan del cliente reflejan la decisión.'], dss: 'DSS_N01_CU02_RenovarSuscripcion' }),
-      spec('CU03-VEN-COBRAR SUSCRIPCIÓN', 'Cobrar Suscripción', {
-        desc: 'Permite al Vendedor cargar el resultado del cobro recurrente de una suscripción (efectuado fuera del sistema) y procesarlo mediante una cadena de responsabilidad.',
-        actor: 'Vendedor', pre: ['El Vendedor tiene sesión activa con permiso de edición de clientes.', 'El cliente tiene un plan asignado.'],
-        esc: ['1. El Vendedor selecciona al cliente y la modalidad de cobro.', '2. El Vendedor indica si el cobro se concretó o si el pago falló.', '3. El sistema verifica que corresponda cobrar (suscripción vencida o próxima a vencer).', '4. Si el cobro se concretó, el sistema calcula el importe: precio mensual por los meses de la modalidad, menos un único descuento, más los cargos pendientes.', '5. El sistema extiende el vencimiento, limpia la gracia y, en una única transacción, registra el cobro, consume el crédito usado y liquida los cargos.', '6. El sistema informa el resultado y el detalle del importe.'],
+      spec('CU01-CAJ-COBRAR SUSCRIPCIÓN', 'Cobrar Suscripción', {
+        desc: 'Permite a Caja cargar el resultado del cobro recurrente de una suscripción (efectuado fuera del sistema) y procesarlo mediante una cadena de responsabilidad. Lo hace Caja y no el Vendedor: quien vende no cobra.',
+        actor: 'Caja', pre: ['Caja tiene sesión activa con permiso de edición de Caja.', 'El cliente tiene un plan asignado y no tiene una contratación pendiente de pago.'],
+        esc: ['1. Caja selecciona al cliente y la modalidad de cobro.', '2. Caja indica si el cobro se concretó o si el pago falló.', '3. El sistema verifica que corresponda cobrar (suscripción vencida o próxima a vencer).', '4. Si el cobro se concretó, el sistema calcula el importe: precio mensual por los meses de la modalidad, menos un único descuento, más los cargos pendientes.', '5. El sistema extiende el vencimiento, limpia la gracia y, en una única transacción, registra el cobro, consume el crédito usado y liquida los cargos.', '6. El sistema informa el resultado y el detalle del importe.'],
         alt: ['3.1 Todavía no corresponde cobrar: el sistema informa "Pendiente".', '5.1 Otra sesión ya cobró los cargos pendientes: el sistema rechaza el cobro completo.', '2.1 El pago falló: el sistema otorga 5 días de gracia (primer fallo) o suspende la cuenta si la gracia ya venció.'],
         post: ['El cobro queda registrado en el historial de cobros.', 'La cuenta queda al día, en gracia o suspendida según el resultado.'], dss: 'DSS_N01_CU03_CobrarSuscripcion' }),
-      spec('CU04-VEN-GESTIONAR PLANES', 'Gestionar Planes', {
+      spec('CU03-VEN-GESTIONAR PLANES', 'Gestionar Planes', {
         desc: 'Permite al Vendedor crear y modificar los planes de suscripción, y activarlos o desactivarlos.',
         actor: 'Vendedor', pre: ['El Vendedor tiene sesión activa con permiso de edición de planes.'],
         esc: ['1. El Vendedor abre el módulo Planes y consulta el listado.', '2. El Vendedor completa nombre, límite de prendas y precio mensual.', '3. El sistema valida que el nombre sea obligatorio y solo con letras, que el límite sea válido y que el precio sea mayor a cero.', '4. El sistema guarda el plan (activo) y deja constancia en bitácora.', '5. El sistema informa que el plan fue guardado.'],

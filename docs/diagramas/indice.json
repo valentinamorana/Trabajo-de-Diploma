@@ -212,7 +212,7 @@
   {
     "id": "DSS_N01_CU03_CobrarSuscripcion",
     "tipo": "secuencia",
-    "titulo": "N01 · CU03-VEN Cobrar suscripción (cobro recurrente)"
+    "titulo": "N01 · CU01-CAJ Cobrar suscripción (cobro recurrente)"
   },
   {
     "id": "DSS_PN01_CU01_ArmarPedido",
@@ -337,7 +337,7 @@
   {
     "id": "DSS_N01_CU04_GestionarPlanes",
     "tipo": "secuencia",
-    "titulo": "N01 · CU04-VEN Gestionar planes de suscripción"
+    "titulo": "N01 · CU03-VEN Gestionar planes de suscripción"
   },
   {
     "id": "DSS_PN03_CU02_GER_ConsultarAnalitica",

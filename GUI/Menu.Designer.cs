@@ -234,7 +234,6 @@
             this.clientesToolStripMenuItem,
             this.planesToolStripMenuItem,
             this.renovacionSuscripcionToolStripMenuItem,
-            this.cobroSuscripcionToolStripMenuItem,
             this.nuevaContratacionToolStripMenuItem});
             this.suscriptoresToolStripMenuItem.Name = "suscriptoresToolStripMenuItem";
             this.suscriptoresToolStripMenuItem.Tag = "mnu.suscriptores";
@@ -309,8 +308,10 @@
             //
             // cajaToolStripMenuItem — PN02, rol Caja (separado de Vendedor: Caja cobra, Vendedor no)
             //
+            // El cobro recurrente (N01) también es de Caja: quien vende no cobra.
             this.cajaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.contratacionesPendientesToolStripMenuItem});
+            this.contratacionesPendientesToolStripMenuItem,
+            this.cobroSuscripcionToolStripMenuItem});
             this.cajaToolStripMenuItem.Name = "cajaToolStripMenuItem";
             this.cajaToolStripMenuItem.Tag = "mnu.caja";
             this.cajaToolStripMenuItem.Size = new System.Drawing.Size(45, 20);

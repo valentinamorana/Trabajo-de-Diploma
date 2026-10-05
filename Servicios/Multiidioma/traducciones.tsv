@@ -5631,6 +5631,21 @@ ES	dash.vend.encaja	Contrataciones\nesperando a Caja
 ES	dash.kan.encontrol	En control de stock
 ES	dash.kan.faltantes	Con faltantes: comunicar
 ES	dash.kan.separados	Separados: formalizar
+ES	btn.actualizar	Actualizar
+ES	lbl.permisos.elegiritem	Elegí un ítem:
+ES	lbl.ver.campo.usuario	Usuario
+ES	lbl.ver.campo.nombre	Nombre
+ES	lbl.ver.campo.apellido	Apellido
+ES	lbl.ver.campo.email	Email
+ES	lbl.ver.campo.fechanac	Fecha nac.
+ES	perfil.tamano.chico	Chico
+ES	perfil.tamano.normal	Normal
+ES	perfil.tamano.grande	Grande
+ES	perfil.tema.claro	Claro
+ES	perfil.tema.oscuro	Oscuro
+ES	err.bll.insp.no_en_limpieza	Solo se puede dar de baja con cargo una prenda En Limpieza pendiente de inspección.
+ES	err.bll.insp.no_en_uso	Solo se puede reportar como perdida una prenda En Uso.
+ES	perm.pat.configurarlistadeespera	Configurar Lista de Espera
 EN	err.dal.prenda.estado_cambio	The garment's state changed since it was last read. Refresh the screen and try again.
 EN	paso1.identificar	Step 1 of 2 — Identify the client
 EN	paso.ajuste.texto	Adjust selection of Order #{0}
@@ -5854,6 +5869,21 @@ EN	dash.vend.encaja	Contracts\nwaiting for cashier
 EN	dash.kan.encontrol	In stock control
 EN	dash.kan.faltantes	Missing items: tell the client
 EN	dash.kan.separados	Set aside: finalize
+EN	btn.actualizar	Refresh
+EN	lbl.permisos.elegiritem	Choose an item:
+EN	lbl.ver.campo.usuario	User
+EN	lbl.ver.campo.nombre	First name
+EN	lbl.ver.campo.apellido	Last name
+EN	lbl.ver.campo.email	Email
+EN	lbl.ver.campo.fechanac	Date of birth
+EN	perfil.tamano.chico	Small
+EN	perfil.tamano.normal	Normal
+EN	perfil.tamano.grande	Large
+EN	perfil.tema.claro	Light
+EN	perfil.tema.oscuro	Dark
+EN	err.bll.insp.no_en_limpieza	Only a garment In Cleaning awaiting inspection can be written off with a charge.
+EN	err.bll.insp.no_en_uso	Only a garment In Use can be reported as lost.
+EN	perm.pat.configurarlistadeespera	Configure Waiting List
 RU	err.dal.prenda.estado_cambio	Состояние вещи изменилось с момента последнего запроса. Обновите экран и повторите попытку.
 RU	paso1.identificar	Шаг 1 из 2 — Идентифицировать клиента
 RU	paso.ajuste.texto	Корректировка выбора заказа №{0}
@@ -6077,6 +6107,21 @@ RU	dash.vend.encaja	Договоры\nожидают кассу
 RU	dash.kan.encontrol	На контроле запасов
 RU	dash.kan.faltantes	Недостача: сообщить
 RU	dash.kan.separados	Отложены: оформить
+RU	btn.actualizar	Обновить
+RU	lbl.permisos.elegiritem	Выберите элемент:
+RU	lbl.ver.campo.usuario	Пользователь
+RU	lbl.ver.campo.nombre	Имя
+RU	lbl.ver.campo.apellido	Фамилия
+RU	lbl.ver.campo.email	Эл. почта
+RU	lbl.ver.campo.fechanac	Дата рожд.
+RU	perfil.tamano.chico	Мелкий
+RU	perfil.tamano.normal	Обычный
+RU	perfil.tamano.grande	Крупный
+RU	perfil.tema.claro	Светлая
+RU	perfil.tema.oscuro	Тёмная
+RU	err.bll.insp.no_en_limpieza	Списать с начислением можно только вещь «В чистке», ожидающую осмотра.
+RU	err.bll.insp.no_en_uso	Сообщить о потере можно только о вещи «В использовании».
+RU	perm.pat.configurarlistadeespera	Настроить лист ожидания
 PT	err.dal.prenda.estado_cambio	O estado da peça mudou desde a última consulta. Atualize a tela e tente novamente.
 PT	paso1.identificar	Passo 1 de 2 — Identificar o cliente
 PT	paso.ajuste.texto	Ajustar seleção do Pedido #{0}
@@ -6300,3 +6345,18 @@ PT	dash.vend.encaja	Contratações\naguardando o caixa
 PT	dash.kan.encontrol	Em controle de estoque
 PT	dash.kan.faltantes	Com faltantes: comunicar
 PT	dash.kan.separados	Separados: formalizar
+PT	btn.actualizar	Atualizar
+PT	lbl.permisos.elegiritem	Escolha um item:
+PT	lbl.ver.campo.usuario	Usuário
+PT	lbl.ver.campo.nombre	Nome
+PT	lbl.ver.campo.apellido	Sobrenome
+PT	lbl.ver.campo.email	E-mail
+PT	lbl.ver.campo.fechanac	Data de nasc.
+PT	perfil.tamano.chico	Pequeno
+PT	perfil.tamano.normal	Normal
+PT	perfil.tamano.grande	Grande
+PT	perfil.tema.claro	Claro
+PT	perfil.tema.oscuro	Escuro
+PT	err.bll.insp.no_en_limpieza	Só é possível dar baixa com cobrança a uma peça Em Limpeza pendente de inspeção.
+PT	err.bll.insp.no_en_uso	Só é possível reportar como perdida uma peça Em Uso.
+PT	perm.pat.configurarlistadeespera	Configurar Lista de Espera

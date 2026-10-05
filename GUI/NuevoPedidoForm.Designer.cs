@@ -160,7 +160,7 @@ namespace GUI
             this.lblInfoPlan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(246)))), ((int)(((byte)(255)))));
             this.lblInfoPlan.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblInfoPlan.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.lblInfoPlan.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(80)))), ((int)(((byte)(140)))));
+            this.lblInfoPlan.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(100)))), ((int)(((byte)(170)))));
             this.lblInfoPlan.Location = new System.Drawing.Point(20, 165);
             this.lblInfoPlan.Name = "lblInfoPlan";
             this.lblInfoPlan.Padding = new System.Windows.Forms.Padding(10);
@@ -230,7 +230,7 @@ namespace GUI
             this.colColor});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(182)))), ((int)(((byte)(193)))));
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.Black;
@@ -291,7 +291,7 @@ namespace GUI
             // lblResumen
             // 
             this.lblResumen.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblResumen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(80)))), ((int)(((byte)(140)))));
+            this.lblResumen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(100)))), ((int)(((byte)(170)))));
             this.lblResumen.Location = new System.Drawing.Point(10, 374);
             this.lblResumen.Name = "lblResumen";
             this.lblResumen.Size = new System.Drawing.Size(660, 40);
@@ -326,7 +326,7 @@ namespace GUI
             //
             // btnDesistir
             //
-            this.btnDesistir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.btnDesistir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.btnDesistir.FlatAppearance.BorderSize = 0;
             this.btnDesistir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDesistir.ForeColor = System.Drawing.Color.White;
@@ -391,6 +391,7 @@ namespace GUI
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F);   // escala tipográfica de Tema (antes: Microsoft Sans Serif por defecto)
             this.Name = "NuevoPedidoForm";
             this.Load += new System.EventHandler(this.NuevoPedidoForm_Load);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

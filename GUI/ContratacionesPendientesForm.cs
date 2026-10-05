@@ -32,6 +32,8 @@ namespace GUI
         public ContratacionesPendientesForm()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvContrataciones);
             // Paleta centralizada (GUI/Tema.cs).
             btnCobrar.BackColor = Tema.Exito;
             btnIntentoFallido.BackColor = Tema.RosaPrimario;
@@ -44,14 +46,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -72,11 +67,15 @@ namespace GUI
             tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
             btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
 
+            // Reconstruir el combo SIN disparar SelectedIndexChanged: antes eso recargaba la
+            // grilla y UpdateLanguage la volvía a cargar (doble consulta al cambiar de idioma).
             int vista = Math.Max(0, cmbVista.SelectedIndex);
+            cmbVista.SelectedIndexChanged -= CmbVista_SelectedIndexChanged;
             cmbVista.Items.Clear();
             cmbVista.Items.Add(Tr("lbl.contr.vista.pendientes", "Pendientes de pago"));
             cmbVista.Items.Add(Tr("lbl.contr.vista.resueltas", "Resueltas"));
             cmbVista.SelectedIndex = vista;
+            cmbVista.SelectedIndexChanged += CmbVista_SelectedIndexChanged;
             CargarMediosPago();
         }
 
@@ -240,14 +239,13 @@ namespace GUI
                     new object[] { liq.Descuento, liq.NombrePromocion ?? Tr("lbl.contratacion.creditoreferido", "crédito por referido") })
                 : "";
 
-            if (MessageBox.Show(
+            if (!ConfirmarSiNo(
                     Tr("conf.contr.cobro.confirmar",
                        "¿Confirmar el cobro de la Contratación #{0}?\n\nCliente: {1}\nPlan: {2}\nMonto: {3:C2}\nMedio de pago: {4}\n\n" +
                        "Se emitirá el comprobante y la suscripción quedará formalizada.",
                        new object[] { contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan,
                                       liq.Total, cmbMedioPago.SelectedItem.ToString() }) + detalleDescuento,
-                    Tr("conf.contratacion.cobro.titulo", "Confirmar Cobro"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) != DialogResult.Yes)
+                    Tr("conf.contratacion.cobro.titulo", "Confirmar Cobro")))
                 return;
 
             try
@@ -378,7 +376,6 @@ namespace GUI
         }
 
         private bool Preguntar(string texto) =>
-            MessageBox.Show(texto, this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+            ConfirmarSiNo(texto, this.Text, porDefectoNo: true);
     }
 }

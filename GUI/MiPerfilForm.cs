@@ -28,21 +28,60 @@ namespace GUI
 
             lblUsuarioVal.Text = _usuario?.Username ?? "—";
             lblPerfilVal.Text  = TraductorPerfil.Nombre(_usuario?.Perfil);
+            PoblarOpciones();
+        }
+
+        // Opción de combo con VALOR guardado fijo (el que entiende BE.Preferencia: "Chico",
+        // "Normal", "Grande", "Claro", "Oscuro") y TEXTO traducido. Antes el combo mostraba y
+        // guardaba el texto en español, así que no se podía traducir sin romper lo guardado.
+        private sealed class Opcion
+        {
+            public string Valor { get; }
+            public string Texto { get; }
+            public Opcion(string valor, string texto) { Valor = valor; Texto = texto; }
+            public override string ToString() => Texto;
+        }
+
+        // (Re)carga los combos de tamaño y tema con el texto del idioma activo, conservando
+        // la opción elegida.
+        private void PoblarOpciones()
+        {
+            string tamSel  = ValorSeleccionado(cmbTamano);
+            string temaSel = ValorSeleccionado(cmbTema);
+
+            cmbTamano.Items.Clear();
+            cmbTamano.Items.Add(new Opcion("Chico",  Tr("perfil.tamano.chico",  "Chico")));
+            cmbTamano.Items.Add(new Opcion("Normal", Tr("perfil.tamano.normal", "Normal")));
+            cmbTamano.Items.Add(new Opcion("Grande", Tr("perfil.tamano.grande", "Grande")));
+
+            cmbTema.Items.Clear();
+            cmbTema.Items.Add(new Opcion("Claro",  Tr("perfil.tema.claro",  "Claro")));
+            cmbTema.Items.Add(new Opcion("Oscuro", Tr("perfil.tema.oscuro", "Oscuro")));
+
+            if (tamSel  != null) SeleccionarValor(cmbTamano, tamSel,  "Normal");
+            if (temaSel != null) SeleccionarValor(cmbTema,   temaSel, "Claro");
+        }
+
+        private static string ValorSeleccionado(ComboBox cmb) =>
+            (cmb.SelectedItem as Opcion)?.Valor ?? cmb.SelectedItem?.ToString();
+
+        // Selecciona por valor guardado (sin distinguir mayúsculas). Un valor desconocido
+        // (guardado por una versión anterior) se agrega tal cual para no perderlo.
+        private static void SeleccionarValor(ComboBox cmb, string valor, string fallback)
+        {
+            string v = string.IsNullOrEmpty(valor) ? fallback : valor;
+            for (int i = 0; i < cmb.Items.Count; i++)
+                if (cmb.Items[i] is Opcion o && string.Equals(o.Valor, v, StringComparison.OrdinalIgnoreCase))
+                { cmb.SelectedIndex = i; return; }
+            cmb.SelectedIndex = cmb.Items.Add(new Opcion(v, v));
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             CargarIdiomas();
             CargarPreferencias();
             try { PreferenciasUI.Aplicar(this); } catch { }
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         // Combo de idioma: cargado EN VIVO desde la tabla Idioma (un idioma nuevo aparece solo).
@@ -65,8 +104,8 @@ namespace GUI
         private void CargarPreferencias()
         {
             SeleccionarOAgregar(cmbFuente, _pref.FuenteFamilia, "Segoe UI");
-            SeleccionarOAgregar(cmbTamano, _pref.FuenteTamano,  "Normal");
-            SeleccionarOAgregar(cmbTema,   _pref.Tema,          "Claro");
+            SeleccionarValor(cmbTamano, _pref.FuenteTamano, "Normal");
+            SeleccionarValor(cmbTema,   _pref.Tema,         "Claro");
             SeleccionarOAgregar(cmbFecha,  _pref.FormatoFecha,  "dd/MM/yyyy");
             chkNotif.Checked = _pref.Notificaciones;
         }
@@ -90,8 +129,8 @@ namespace GUI
                 {
                     IdUsuario      = _usuario.Id,
                     FuenteFamilia  = cmbFuente.SelectedItem?.ToString() ?? "Segoe UI",
-                    FuenteTamano   = cmbTamano.SelectedItem?.ToString() ?? "Normal",
-                    Tema           = cmbTema.SelectedItem?.ToString()   ?? "Claro",
+                    FuenteTamano   = ValorSeleccionado(cmbTamano) ?? "Normal",
+                    Tema           = ValorSeleccionado(cmbTema)   ?? "Claro",
                     FormatoFecha   = cmbFecha.SelectedItem?.ToString()  ?? "dd/MM/yyyy",
                     Notificaciones = chkNotif.Checked
                 };
@@ -112,16 +151,13 @@ namespace GUI
                 // 3) Aplicar fuente/tema en vivo a todos los formularios abiertos.
                 PreferenciasUI.ReaplicarTodo();
 
-                lblEstado.ForeColor = Color.FromArgb(40, 140, 60);
+                lblEstado.ForeColor = Tema.Exito;
                 lblEstado.Text = Tr("perfil.guardado", "Preferencias guardadas.");
             }
             catch (Exception ex)
             {
-                lblEstado.ForeColor = Color.FromArgb(180, 50, 50);
-                string msg = ex is BE.AppException appEx
-                    ? Traductor.Resolver(appEx.Clave, ex.Message, appEx.Args, GestorIdioma.IdiomaActual)
-                    : ex.Message;
-                lblEstado.Text = msg;
+                lblEstado.ForeColor = Tema.Error;
+                lblEstado.Text = MensajeDeError(ex);
             }
         }
 
@@ -141,6 +177,7 @@ namespace GUI
             chkNotif.Text      = Tr("perfil.notif", "Recibir notificaciones");
             btnGuardar.Text    = Tr("perfil.btn.guardar", "Guardar preferencias");
             btnDefault.Text    = Tr("perfil.btn.default", "Restaurar valores de fábrica");
+            PoblarOpciones();
         }
 
         private void BtnDefault_Click(object sender, EventArgs e) => RestaurarDefault();
@@ -150,8 +187,8 @@ namespace GUI
         private void RestaurarDefault()
         {
             SeleccionarOAgregar(cmbFuente, "Segoe UI",   "Segoe UI");
-            SeleccionarOAgregar(cmbTamano, "Normal",     "Normal");
-            SeleccionarOAgregar(cmbTema,   "Claro",      "Claro");
+            SeleccionarValor(cmbTamano, "Normal", "Normal");
+            SeleccionarValor(cmbTema,   "Claro",  "Claro");
             SeleccionarOAgregar(cmbFecha,  "dd/MM/yyyy", "dd/MM/yyyy");
             chkNotif.Checked = true;
             Guardar();

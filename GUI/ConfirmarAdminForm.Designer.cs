@@ -30,7 +30,7 @@ namespace GUI
             this.SuspendLayout();
 
             // pnlHeader
-            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.pnlHeader.Controls.Add(this.lblSubtitulo);
             this.pnlHeader.Controls.Add(this.lblTitulo);
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
@@ -97,7 +97,7 @@ namespace GUI
             // lblError
             this.lblError.AutoSize = false;
             this.lblError.Font = new System.Drawing.Font("Segoe UI", 8f);
-            this.lblError.ForeColor = System.Drawing.Color.FromArgb(180, 40, 40);
+            this.lblError.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.lblError.Location = new System.Drawing.Point(20, 128);
             this.lblError.Size = new System.Drawing.Size(340, 34);
             this.lblError.Text = string.Empty;
@@ -111,7 +111,7 @@ namespace GUI
             this.pnlBotones.Controls.Add(this.btnConfirmar);
 
             // btnConfirmar
-            this.btnConfirmar.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnConfirmar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnConfirmar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnConfirmar.FlatAppearance.BorderSize = 0;
             this.btnConfirmar.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold);
@@ -123,7 +123,7 @@ namespace GUI
             this.btnConfirmar.Click += new System.EventHandler(this.btnConfirmar_Click);
 
             // btnCancelar
-            this.btnCancelar.BackColor = System.Drawing.Color.FromArgb(252, 228, 235);
+            this.btnCancelar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(228)))), ((int)(((byte)(235)))));
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCancelar.FlatAppearance.BorderColor = Tema.RosaPrimario;
             this.btnCancelar.FlatAppearance.BorderSize = 1;

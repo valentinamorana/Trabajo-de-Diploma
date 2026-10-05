@@ -92,6 +92,7 @@
     <Compile Include="Cobro.cs" />
     <Compile Include="ListaEspera.cs" />
     <Compile Include="CargoPrenda.cs" />
+    <Compile Include="InspeccionDevolucion.cs" />
     <Compile Include="HistorialIntegridad.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="VersionUsuario.cs" />

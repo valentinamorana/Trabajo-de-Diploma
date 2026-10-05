@@ -30,7 +30,7 @@ namespace GUI
             // ── lblTitulo ──────────────────────────────────────────────────────
             this.lblTitulo.AutoSize  = true;
             this.lblTitulo.Font      = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.lblTitulo.Location  = new System.Drawing.Point(20, 18);
             this.lblTitulo.Name      = "lblTitulo";
             this.lblTitulo.TabIndex  = 0;
@@ -96,14 +96,14 @@ namespace GUI
             this.btnMostrarClave.Click += new System.EventHandler(this.BtnMostrarClave_Click);
 
             // ── lblError ───────────────────────────────────────────────────────
-            this.lblError.ForeColor = System.Drawing.Color.FromArgb(180, 50, 50);
+            this.lblError.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.lblError.Location  = new System.Drawing.Point(22, 200);
             this.lblError.Name      = "lblError";
             this.lblError.Size      = new System.Drawing.Size(386, 32);
             this.lblError.TabIndex  = 6;
 
             // ── btnDesbloquear ─────────────────────────────────────────────────
-            this.btnDesbloquear.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.btnDesbloquear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.btnDesbloquear.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnDesbloquear.FlatAppearance.BorderSize = 0;
             this.btnDesbloquear.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

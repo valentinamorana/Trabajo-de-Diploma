@@ -29,7 +29,6 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarEnBackground();
             _timer = new System.Windows.Forms.Timer { Interval = 2 * 60 * 1000 };
@@ -41,7 +40,6 @@ namespace GUI
         {
             _timer?.Stop();
             _timer?.Dispose();
-            GestorIdioma.DesuscribirObservador(this);
             base.OnFormClosing(e);
         }
 
@@ -76,7 +74,7 @@ namespace GUI
                     var enMant       = _bllPrenda.ObtenerEnMantenimiento();
                     var ocupacion    = _bllPrenda.ObtenerOcupacion();
                     int aControlar   = _bllTareas.ContarPedidosAControlar();
-                    this.BeginInvoke(new Action(() =>
+                    InvocarSeguro(() =>
                     {
                         if (IsDisposed) return;
                         numControl.Text = aControlar.ToString();
@@ -84,7 +82,7 @@ namespace GUI
                         ActualizarCards(disponibles, enMant, ocupacion);
                         ActualizarKanban(enMant);
                         ActualizarSesion();
-                    }));
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -105,8 +103,8 @@ namespace GUI
             // todas son recientes) — es intencional, no el mismo drift de umbrales que ya se corrigió
             // entre dashboards distintos.
             Color fondo = enMant.Count == 0
-                ? Color.FromArgb(215, 240, 220)
-                : enMant.Count > 5 ? Color.FromArgb(255, 218, 218) : Color.FromArgb(255, 248, 210);
+                ? Tema.FondoExito
+                : enMant.Count > 5 ? Tema.FondoError : Tema.FondoAlerta;
             cardMant.BackColor = fondo;
 
             if (ocup != null)
@@ -133,10 +131,10 @@ namespace GUI
                 // Las tres columnas abren Prendas: Deposito siempre tiene ese
                 // permiso (mnuPrendas), así que no hay riesgo de exponer una pantalla sin acceso.
                 Panel card = nivel == BE.NivelUrgencia.Reciente
-                    ? CrearCard(tit, sub, dias, Color.FromArgb(210, 240, 220))
+                    ? CrearCard(tit, sub, dias, Tema.FondoExito)
                     : nivel == BE.NivelUrgencia.Normal
-                        ? CrearCard(tit, sub, dias, Color.FromArgb(255, 248, 210))
-                        : CrearCard(tit, sub, dias, Color.FromArgb(255, 205, 200));
+                        ? CrearCard(tit, sub, dias, Tema.FondoAlerta)
+                        : CrearCard(tit, sub, dias, Tema.FondoError);
                 HabilitarClicAbrirPrendas(card);
 
                 if (nivel == BE.NivelUrgencia.Reciente)     colReciente.Controls.Add(card);
@@ -192,7 +190,7 @@ namespace GUI
         private void PanelHeader_Paint(object sender, PaintEventArgs pe)
         {
             using (var br = new LinearGradientBrush(panelHeader.ClientRectangle,
-                Tema.RosaPrimario, Color.FromArgb(176, 62, 96), LinearGradientMode.Horizontal))
+                Tema.RosaPrimario, Tema.RosaOscuro, LinearGradientMode.Horizontal))
                 pe.Graphics.FillRectangle(br, panelHeader.ClientRectangle);
         }
 
@@ -263,7 +261,7 @@ namespace GUI
                     pe.Graphics.FillPath(br, path);
             };
             card.Controls.Add(new Label { Text = titulo, Font = new Font("Segoe UI", 8.5f, FontStyle.Bold), AutoSize = true, Location = new Point(8, 6), BackColor = Color.Transparent });
-            card.Controls.Add(new Label { Text = sub, Font = new Font("Segoe UI", 7.5f), AutoSize = false, Size = new Size(164, 16), Location = new Point(8, 24), BackColor = Color.Transparent, ForeColor = Color.FromArgb(70, 70, 80) });
+            card.Controls.Add(new Label { Text = sub, Font = new Font("Segoe UI", 7.5f), AutoSize = false, Size = new Size(164, 16), Location = new Point(8, 24), BackColor = Color.Transparent, ForeColor = Tema.TextoSecundario });
             string dStr = dias == 0 ? "hoy" : $"hace {dias}d";
             card.Controls.Add(new Label { Text = dStr, Font = new Font("Segoe UI", 7f, FontStyle.Italic), AutoSize = true, Location = new Point(8, 44), BackColor = Color.Transparent, ForeColor = Color.FromArgb(110, 100, 80) });
             return card;

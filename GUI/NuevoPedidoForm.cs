@@ -72,13 +72,6 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────
@@ -207,7 +200,7 @@ namespace GUI
                 lstCoincidencias.Items.Add($"{c.NombreCompleto}  (DNI {c.DNI})");
             lstCoincidencias.Visible = true;
             MostrarAviso(Tr("lbl.ped.variascoinc", "Hay varios clientes que coinciden: elegí el correcto en la lista."),
-                         Color.FromArgb(40, 80, 140));
+                         Tema.Info);
         }
 
         private void LstCoincidencias_SelectedIndexChanged(object sender, EventArgs e)
@@ -261,7 +254,7 @@ namespace GUI
             lblInfoPlan.Visible = true;
             if (estado.SuscripcionProximaAVencer)
             {
-                lblInfoPlan.ForeColor = Color.FromArgb(160, 100, 0);
+                lblInfoPlan.ForeColor = Tema.Alerta;
                 lblInfoPlan.Text = ficha + "\n" + string.Format(
                     Tr("lbl.ped.proxvencer",
                         "La suscripción vence en {0} día(s). Avisale al cliente para renovarla."),
@@ -269,7 +262,7 @@ namespace GUI
             }
             else
             {
-                lblInfoPlan.ForeColor = Color.FromArgb(176, 62, 96);
+                lblInfoPlan.ForeColor = Tema.RosaOscuro;
                 lblInfoPlan.Text = ficha;
             }
             btnSiguiente.Enabled = true;
@@ -397,7 +390,7 @@ namespace GUI
                     int i = dgvPrendas.Rows.Add(preseleccion.Contains(p.IdPrenda), p.IdPrenda, p.Nombre,
                         p.Categoria ?? "—", p.Talle ?? "—", p.Color ?? "—");
                     if (alternativas.Contains(p.IdPrenda))
-                        dgvPrendas.Rows[i].DefaultCellStyle.BackColor = Color.FromArgb(255, 244, 200);
+                        dgvPrendas.Rows[i].DefaultCellStyle.BackColor = Tema.FondoAlerta;
                 }
 
                 TraducirHeadersGrilla();
@@ -411,8 +404,11 @@ namespace GUI
 
         private void DgvPrendas_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == dgvPrendas.Columns["Sel"].Index)
-                ActualizarResumen();
+            if (e.ColumnIndex != dgvPrendas.Columns["Sel"].Index) return;
+            // ActualizarResumen consulta la BLL (estado comercial del cliente): si falla, se
+            // informa acá en vez de dejar que la excepción llegue al manejador global.
+            try { ActualizarResumen(); }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         // "Anotar la selección" ∥ "Comprobar el cupo del plan" → ¿Excede el cupo disponible?
@@ -460,7 +456,7 @@ namespace GUI
                         Tr("lbl.ped.res.parcial",
                            "El plan '{0}' permite {1}. Estás eligiendo {2} de {3} posibles — podés agregar más."),
                         estado.NombrePlan, limite, seleccionadas, estado.PrendasDisponibles);
-                    lblResumen.ForeColor = Color.FromArgb(140, 100, 0);
+                    lblResumen.ForeColor = Tema.Alerta;
                 }
                 else
                 {
@@ -474,7 +470,7 @@ namespace GUI
             else
             {
                 excede = seleccionadas > 0;   // plan sin cupo: cualquier selección lo excede
-                lblResumen.ForeColor = excede ? Color.DarkRed : Color.FromArgb(176, 62, 96);
+                lblResumen.ForeColor = excede ? Color.DarkRed : Tema.RosaOscuro;
             }
 
             btnConfirmar.Enabled = seleccionadas > 0 && !excede;

@@ -423,7 +423,7 @@
             // Resalte distintivo: los 3 ítems de este submenú (y el submenú en sí) se pintan
             // con un fondo propio para diferenciarlos de un vistazo del resto de "Administrar"
             // — son herramientas transversales del sistema, no ABM de usuarios.
-            this.grpSistema.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
+            this.grpSistema.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             //
             // perfilesToolStripMenuItem
             //
@@ -439,7 +439,7 @@
             this.idiomasToolStripMenuItem.Tag = "mnu.idiomas";
             this.idiomasToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.idiomasToolStripMenuItem.Text = "Gestión de Idiomas";
-            this.idiomasToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
+            this.idiomasToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             this.idiomasToolStripMenuItem.Click += new System.EventHandler(this.idiomasToolStripMenuItem_Click);
             //
             // historialUsuariosToolStripMenuItem
@@ -456,7 +456,7 @@
             this.backupToolStripMenuItem.Tag  = "mnu.backup";
             this.backupToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.backupToolStripMenuItem.Text = "Backup y Restauración";
-            this.backupToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
+            this.backupToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             this.backupToolStripMenuItem.Click += new System.EventHandler(this.backupToolStripMenuItem_Click);
             //
             // integridadToolStripMenuItem
@@ -465,7 +465,7 @@
             this.integridadToolStripMenuItem.Tag  = "mnu.integridad";
             this.integridadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.integridadToolStripMenuItem.Text = "Diagnóstico de Integridad";
-            this.integridadToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(224, 231, 245);
+            this.integridadToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             this.integridadToolStripMenuItem.Click += new System.EventHandler(this.integridadToolStripMenuItem_Click);
             //
             // auditoriaToolStripMenuItem — antes vivía junto con los reportes de negocio dentro

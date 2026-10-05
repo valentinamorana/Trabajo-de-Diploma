@@ -30,8 +30,7 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPedidoService pedidoBLL = new BLL.Pedido();
-        private readonly BLL.Interfaces.IPrendaService prendaBLL = new BLL.Prenda();
-        private readonly BLL.Interfaces.ICargoPrendaService cargoBLL = new BLL.CargoPrenda();
+        private readonly BLL.InspeccionDevolucion inspeccionBLL = new BLL.InspeccionDevolucion();
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
 
@@ -46,6 +45,9 @@ namespace GUI
         public PedidosRealizados()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvPedidos);
+            Estilos.EstiloFormulario.Grilla(dgvDetalle);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -53,18 +55,11 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             // Re-aplicar después de que el combo queda correctamente inicializado
             // (el Designer no fija SelectedIndex=0, por eso AplicarFiltro del Load
             //  veía estadoIdx=-1 y mostraba 0 filas)
             AplicarFiltro();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -291,9 +286,9 @@ namespace GUI
                 int.TryParse(row.Cells["_UrgenciaKey"].Value?.ToString(), out int urgenciaKey);
                 // El nivel (int del enum) es independiente del idioma de la etiqueta visible.
                 if (urgenciaKey == (int)BE.NivelUrgencia.Urgente)
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 225, 225);
+                    row.DefaultCellStyle.BackColor = Tema.FondoError;
                 else if (urgenciaKey == (int)BE.NivelUrgencia.Normal)
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 250, 210);
+                    row.DefaultCellStyle.BackColor = Tema.FondoAlerta;
 
                 // Coloreado por estado usando la columna interna _EstadoKey (int enum)
                 // para ser independiente del idioma de la etiqueta visible.
@@ -301,10 +296,10 @@ namespace GUI
                 if (!int.TryParse(row.Cells["_EstadoKey"].Value?.ToString(), out int estadoKey)) continue;
                 row.DefaultCellStyle.ForeColor = estadoKey switch
                 {
-                    (int)BE.EstadoPedido.Pendiente  => Color.FromArgb(160, 100, 0),
-                    (int)BE.EstadoPedido.Despachado => Color.FromArgb(30, 100, 170),
-                    (int)BE.EstadoPedido.Entregado  => Color.FromArgb(30, 130, 30),
-                    (int)BE.EstadoPedido.Cancelado  => Color.FromArgb(150, 50, 50),
+                    (int)BE.EstadoPedido.Pendiente  => Tema.Alerta,
+                    (int)BE.EstadoPedido.Despachado => Tema.Info,
+                    (int)BE.EstadoPedido.Entregado  => Tema.Exito,
+                    (int)BE.EstadoPedido.Cancelado  => Tema.Error,
                     _                               => Color.Black
                 };
             }
@@ -429,7 +424,9 @@ namespace GUI
             // Releer el estado ACTUAL desde BD antes de actuar: `seleccionado` viene de la grilla
             // cacheada en memoria, que puede estar desactualizada si otro operador ya cambió este
             // pedido — mismo criterio que ya usa BtnDevolucion_Click acá abajo.
-            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
+            BE.Pedido pedido;
+            try { pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return; }
             if (pedido == null)
             {
                 MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
@@ -465,7 +462,9 @@ namespace GUI
             if (seleccionado == null) return;
 
             // Releer el estado ACTUAL desde BD antes de actuar (ver comentario en BtnDespachar_Click).
-            var pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido);
+            BE.Pedido pedido;
+            try { pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return; }
             if (pedido == null)
             {
                 MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
@@ -500,7 +499,9 @@ namespace GUI
             var pedido = ObtenerPedidoSeleccionado();
             if (pedido == null) return;
 
-            var pedidoCompleto = pedidoBLL.ObtenerPorId(pedido.IdPedido);
+            BE.Pedido pedidoCompleto;
+            try { pedidoCompleto = pedidoBLL.ObtenerPorId(pedido.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return; }
             if (pedidoCompleto == null) return;
 
             string bodyDev = string.Format(
@@ -546,16 +547,9 @@ namespace GUI
 
                 try
                 {
-                    string actor = Seguridad.SessionManager.IsLoggedIn
-                        ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
-
-                    // Cobrar ANTES de dar de baja — mismo motivo que
-                    // InspeccionDevolucionForm.BtnDarDeBajaConCargo_Click: si RegistrarCargo
-                    // fallara después de la baja, la prenda quedaría destruida sin cobro (Baja
-                    // es estado final). Riesgo residual aceptado: ambos pasos no corren en una
-                    // única transacción (servicios BLL distintos), fuera de alcance de este TP.
-                    cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
-                    prendaBLL.CambiarEstado(this.Text, prenda, BE.EstadoPrenda.Baja, actor, viaFlujoPerdida: true);
+                    // CU-DEP-02: cargo de reposición + baja en UNA transacción (BLL.InspeccionDevolucion).
+                    // Antes eran dos llamadas sueltas desde acá (RegistrarCargo + CambiarEstado), sin transacción.
+                    inspeccionBLL.ReportarPerdida(this.Text, prenda, dlg.Motivo, dlg.Monto);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);
                     MostrarOk(string.Format(
                         tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de ${1} registrado.",
@@ -572,9 +566,10 @@ namespace GUI
             var pedido = ObtenerPedidoSeleccionado();
             if (pedido == null) return;
 
-            var completo = pedidoBLL.ObtenerPorId(pedido.IdPedido);
+            BE.Pedido completo;
+            try { completo = pedidoBLL.ObtenerPorId(pedido.IdPedido); }
+            catch (Exception ex) { MostrarError(ex); return; }
             if (completo == null) return;
-
 
             // Reutilizar claves de columnas existentes para las etiquetas de la notificación
             string notifTitulo   = Tr("notif.titulo",   "NOTIFICACIÓN DE PEDIDO");

@@ -41,6 +41,8 @@ namespace GUI
         public Planes()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvPlanes);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -48,14 +50,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
@@ -164,7 +159,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MostrarError(Tr("err.generico.cargar", "Error al cargar: {0}", new object[] { ex.Message }));
+                MostrarError(ex);
             }
         }
 

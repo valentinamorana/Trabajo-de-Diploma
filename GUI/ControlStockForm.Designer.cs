@@ -54,7 +54,7 @@ namespace GUI
             //
             // btnInformarFaltantes
             //
-            this.btnInformarFaltantes.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(80)))), ((int)(((byte)(0)))));
+            this.btnInformarFaltantes.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(166)))), ((int)(((byte)(101)))), ((int)(((byte)(14)))));
             this.btnInformarFaltantes.Enabled = false;
             this.btnInformarFaltantes.FlatAppearance.BorderSize = 0;
             this.btnInformarFaltantes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -86,7 +86,7 @@ namespace GUI
             //
             // btnSepararPrendas
             //
-            this.btnSepararPrendas.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(130)))), ((int)(((byte)(30)))));
+            this.btnSepararPrendas.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(125)))), ((int)(((byte)(70)))));
             this.btnSepararPrendas.Enabled = false;
             this.btnSepararPrendas.FlatAppearance.BorderSize = 0;
             this.btnSepararPrendas.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

@@ -32,7 +32,9 @@ namespace BLL
 
         public void Anotar(string modulo, int idPrenda, int idCliente, string actor)
         {
-            PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
+            // Patente propia de escritura de Lista de Espera (fallback: la de VER el módulo). Antes
+            // exigía StockEditar, que el Vendedor no tiene, y "Anotar en espera" le fallaba.
+            PermisosAccion.Exigir(BE.Patentes.ListaEsperaEditar, BE.Patentes.ListaEspera);
 
             var prenda = dalPrenda.ObtenerPorId(idPrenda);
             if (prenda == null)
@@ -78,7 +80,7 @@ namespace BLL
 
         public void Cancelar(string modulo, int idListaEspera, string actor)
         {
-            PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
+            PermisosAccion.Exigir(BE.Patentes.ListaEsperaEditar, BE.Patentes.ListaEspera);
 
             var fila = dalListaEspera.ObtenerPorId(idListaEspera);
             if (fila == null)

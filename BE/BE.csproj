@@ -63,6 +63,8 @@
     <Compile Include="EstadoPedido.cs" />
     <Compile Include="EtapaDesistimiento.cs" />
     <Compile Include="LineaControlStock.cs" />
+    <Compile Include="EvaluacionControlStock.cs" />
+    <Compile Include="TableroLogistica.cs" />
     <Compile Include="PedidoFaltante.cs" />
     <Compile Include="EstadoContratacion.cs" />
     <Compile Include="Contratacion.cs" />

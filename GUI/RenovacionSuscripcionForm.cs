@@ -22,6 +22,9 @@ namespace GUI
         public RenovacionSuscripcionForm()
         {
             InitializeComponent();
+            // Rango de la pausa (antes en el Designer, donde rompía el diseñador de VS).
+            dtpPausaHasta.MinDate = DateTime.Today;
+            dtpPausaHasta.MaxDate = DateTime.Today.AddMonths(BLL.Manejadores.PausarSuscripcionHandler.MaxMesesPausa);
             cmbModalidad.Items.AddRange(Enum.GetValues(typeof(BE.Builders.ModalidadCobro)).Cast<object>().ToArray());
             cmbModalidad.SelectedIndex = 0;
             Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
@@ -31,16 +34,9 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
             CargarClientes();
             CargarPlanes();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);

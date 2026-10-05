@@ -6,8 +6,8 @@ erDiagram
   Cliente ||--o{ Pedido : "IdCliente"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
-  Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente {
     int IdCliente PK
     nvarchar(100) Nombre

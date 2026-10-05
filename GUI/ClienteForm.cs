@@ -188,7 +188,7 @@ namespace GUI
             catch
             {
                 cmbReferente.Items.Clear();
-                cmbReferente.Items.Add("— Ninguno —");
+                cmbReferente.Items.Add(Tr("combo.cli.sinreferente", "— Ninguno —"));
                 cmbReferente.SelectedIndex = 0;
             }
         }

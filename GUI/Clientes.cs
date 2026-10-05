@@ -39,6 +39,8 @@ namespace GUI
         public Clientes()
         {
             InitializeComponent();
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            Estilos.EstiloFormulario.Grilla(dgvClientes);
         }
 
         // ── Observer de idioma ────────────────────────────────────────────────
@@ -46,14 +48,7 @@ namespace GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GestorIdioma.SuscribirObservador(this);
             Traducir(GestorIdioma.IdiomaActual);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            GestorIdioma.DesuscribirObservador(this);
-            base.OnFormClosing(e);
         }
 
         public void UpdateLanguage(Idioma idioma)
@@ -153,8 +148,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                var te = Traductor.ObtenerTraducciones(_idioma);
-                MostrarError(string.Format(te.ContainsKey("err.generico.cargar") ? te["err.generico.cargar"].Texto : "Error al cargar: {0}", ex.Message));
+                MostrarError(ex);
             }
         }
 
@@ -233,7 +227,7 @@ namespace GUI
                 if (row.Cells["_Vencido"].Value is bool exp && exp)
                     row.DefaultCellStyle.ForeColor = Color.DarkRed;
                 else if (row.Cells["_ProxVencer"].Value is bool prox && prox)
-                    row.DefaultCellStyle.ForeColor = Color.FromArgb(160, 100, 0);
+                    row.DefaultCellStyle.ForeColor = Tema.Alerta;
             }
 
             // Ajustar columnas

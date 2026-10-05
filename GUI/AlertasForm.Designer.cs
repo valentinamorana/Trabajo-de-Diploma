@@ -23,7 +23,7 @@ namespace GUI
             this.SuspendLayout();
 
             // ── header ─────────────────────────────────────────────────────────
-            this.header.BackColor = System.Drawing.Color.FromArgb(176, 62, 96);
+            this.header.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
             this.header.Controls.Add(this.lblTitulo);
             this.header.Controls.Add(this.btnActualizar);
             this.header.Dock     = System.Windows.Forms.DockStyle.Top;
@@ -53,6 +53,7 @@ namespace GUI
             this.btnActualizar.Name      = "btnActualizar";
             this.btnActualizar.Size      = new System.Drawing.Size(96, 32);
             this.btnActualizar.TabIndex  = 1;
+            this.btnActualizar.Tag       = "btn.actualizar";
             this.btnActualizar.Text      = "Actualizar";
             this.btnActualizar.UseVisualStyleBackColor = false;
             this.btnActualizar.Click += new System.EventHandler(this.BtnActualizar_Click);

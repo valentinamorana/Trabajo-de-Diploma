@@ -28,8 +28,8 @@ namespace BLL
             this.dalPedido = dalPedido ?? throw new ArgumentNullException(nameof(dalPedido));
         }
 
-        // desde: cuenta solo los pedidos del período (PN03 "Analizar métricas"). Con período, una
-        // prenda es de baja demanda si estuvo en catálogo todo el período y no tuvo pedidos en él.
+        // desde: cuenta solo los pedidos del período (PN03 "Analizar métricas"). Con período, una prenda
+        // es de baja demanda si no tuvo pedidos en él y lleva al menos 30 días en el catálogo.
         public List<BE.RotacionPrenda> Detectar(DateTime? desde = null)
         {
             var cantidadPorPrenda = dalPedido.ObtenerCantidadPedidosPorPrenda(desde);
@@ -40,7 +40,12 @@ namespace BLL
                 int cantidad = cantidadPorPrenda.TryGetValue(prenda.IdPrenda, out var c) ? c : 0;
                 int diasEnCatalogo = (int)(DateTime.Today - prenda.FechaAlta.Date).TotalDays;
 
-                if (cantidad == 0 && desde.HasValue && prenda.FechaAlta.Date <= desde.Value.Date)
+                // Con período: sin pedidos en él y con la antigüedad mínima (una prenda que entró a mitad
+                // del período cuenta desde su alta; antes quedaba afuera aunque nunca la pidieran).
+                DateTime? sinPedidosDesde = desde.HasValue
+                    ? (prenda.FechaAlta.Date > desde.Value.Date ? prenda.FechaAlta.Date : desde.Value.Date)
+                    : (DateTime?)null;
+                if (cantidad == 0 && desde.HasValue && diasEnCatalogo >= DiasAntiguedadMinimaParaBajaDemanda)
                 {
                     resultado.Add(new BE.RotacionPrenda
                     {
@@ -48,9 +53,9 @@ namespace BLL
                         NombrePrenda = prenda.Nombre,
                         Categoria = prenda.Categoria,
                         CantidadPedidos = 0,
-                        Motivo = $"{prenda.Nombre} no registra pedidos desde el {desde.Value:dd/MM/yyyy} — candidata a baja.",
+                        Motivo = $"{prenda.Nombre} no registra pedidos desde el {sinPedidosDesde.Value:dd/MM/yyyy} — candidata a baja.",
                         Clave = "rotacion.motivo.bajademanda.periodo",
-                        Args = new object[] { prenda.Nombre, desde.Value }
+                        Args = new object[] { prenda.Nombre, sinPedidosDesde.Value }
                     });
                 }
                 else if (cantidad == 0 && !desde.HasValue && diasEnCatalogo >= DiasAntiguedadMinimaParaBajaDemanda)

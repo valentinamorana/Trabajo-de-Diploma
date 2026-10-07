@@ -106,7 +106,7 @@ namespace GUI.Exportacion
             sb.AppendLine(string.Format(Tr("doc.promo.periodo", "Período analizado: del {0:d} al {1:d}"), r.Desde, r.Hasta));
             sb.AppendLine();
             // Impacto de las promociones en los cobros del período (PN02 + N01).
-            sb.AppendLine(Tr("doc.promo.impacto", "Impacto de las promociones en el período (cobros que las usaron):"));
+            sb.AppendLine(Tr("doc.promo.impactoperiodo", "Impacto de las promociones en el período (cobros que las usaron):"));
             if (r.ImpactoPromociones.Count == 0) sb.AppendLine("   " + Tr("doc.promo.impacto.sindatos", "Ningún cobro del período usó una promoción."));
             foreach (var m in r.ImpactoPromociones)
                 sb.AppendLine(string.Format(Tr("doc.promo.impactolinea", "   • {0} ({1}): {2} cobro(s) — {3:C2} descontados — {4:C2} cobrados"),

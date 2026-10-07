@@ -48,6 +48,18 @@ namespace Tests
         }
 
         [TestMethod]
+        public void Detectar_PeriodoMasLargoQueLaAntiguedad_IgualMarcaLaPrendaSinPedidos()
+        {
+            // Período de un año; la prenda entró hace 100 días y nunca la pidieron.
+            var dalPrenda = new FakePrendaDAL();
+            dalPrenda.Todas.Add(Prenda(1, "Tapado", 100));
+            var resultado = new BLL.AnalisisRotacion(dalPrenda, new FakePedidoDAL()).Detectar(DateTime.Today.AddDays(-365));
+
+            Assert.AreEqual(1, resultado.Count);
+            Assert.AreEqual(DateTime.Today.AddDays(-100), resultado[0].Args[1], "Cuenta desde su alta, no desde el inicio del período.");
+        }
+
+        [TestMethod]
         public void Detectar_SinPedidosPeroReciente_NoFlaggeada()
         {
             var dalPrenda = new FakePrendaDAL();

@@ -38,7 +38,7 @@ flowchart TD
   subgraph J["Caja"]
     direction TB
     a16["Consultar cola de pendientes de pago"]
-    a8["Calcular importe (un solo descuento)"]
+    a8["Calcular importe (un solo descuento; crédito si cambia a un plan más caro)"]
     d9{"¿Paga con tarjeta de crédito?"}
     a20["Ofrecer planes de cuotas (hasta los meses de la modalidad)"]
     a22["Calcular recargo y valor de cuota"]
@@ -46,7 +46,7 @@ flowchart TD
     a10["Confirmar cobro"]
     d7{"¿Cambió el importe?"}
     a17["Emitir comprobante y registrar el cobro"]
-    a11["Activar suscripción"]
+    a11["Activar suscripción (al vencer la vigente, o desde hoy si es un plan más caro)"]
     d8{"¿Se activó la suscripción?"}
     a18["Reabrir el pago (vuelve a Pendiente de pago)"]
     d5{"¿Referido?"}
@@ -54,13 +54,16 @@ flowchart TD
     a13["Registrar intento"]
     d6{"¿Alcanzó el máximo de 3 intentos?"}
     a14["Cancelar contratación"]
-    o9[/"Liquidación (un solo descuento)"/]:::doc
+    d10{"¿Se anula la contratación?"}
+    a23["Anular con motivo (no se cobra y sale de la cola)"]
+    o9[/"Liquidación (un solo descuento y crédito por cambio de plan)"/]:::doc
     o11[/"Comprobante (CMP-NNNNNN-AAAAMMDD, cuotas y recargo)"/]:::doc
     o12[/"Constancia de suscripción (vigencia)"/]:::doc
     o13[/"Intento de pago (número, medio, motivo)"/]:::doc
     o14[/"Constancia de cancelación"/]:::doc
     o15[/"Planes de cuotas (1 sin interés; 3: 5 %; 6: 10 %; 12: 20 %)"/]:::doc
     o17[/"Detalle de financiación (cuotas, recargo, valor de cuota)"/]:::doc
+    o18[/"Motivo de anulación"/]:::doc
   end
   i --> a1
   a1 --> a2
@@ -79,7 +82,10 @@ flowchart TD
   d3 -- "No" --> a7
   a7 --> d2
   d3 -- "Sí" --> a16
-  a16 --> a8
+  a16 --> d10
+  d10 -- "No" --> a8
+  d10 -- "Sí" --> a23
+  a23 --> r3
   a8 --> a9
   a9 --> d9
   d9 -- "Sí" --> a20
@@ -146,6 +152,8 @@ flowchart TD
   o13 -.-> d6
   a14 -.-> o14
   o14 -.-> r3
+  a23 -.-> o18
+  a23 -.-> o14
   classDef doc fill:#d4efe8,stroke:#307060
   classDef ini fill:#222,stroke:#222,color:#222
   class i,f,f2 ini

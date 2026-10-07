@@ -7096,10 +7096,10 @@ ES	doc.promo.periodo	Período analizado: del {0:d} al {1:d}
 EN	doc.promo.periodo	Period analyzed: from {0:d} to {1:d}
 RU	doc.promo.periodo	Анализируемый период: с {0:d} по {1:d}
 PT	doc.promo.periodo	Período analisado: de {0:d} a {1:d}
-ES	doc.promo.impacto	Impacto de las promociones en el período (cobros que las usaron):
-EN	doc.promo.impacto	Impact of promotions in the period (charges that used them):
-RU	doc.promo.impacto	Эффект акций за период (оплаты, в которых они применялись):
-PT	doc.promo.impacto	Impacto das promoções no período (cobranças que as usaram):
+ES	doc.promo.impactoperiodo	Impacto de las promociones en el período (cobros que las usaron):
+EN	doc.promo.impactoperiodo	Impact of promotions in the period (charges that used them):
+RU	doc.promo.impactoperiodo	Эффект акций за период (оплаты, в которых они применялись):
+PT	doc.promo.impactoperiodo	Impacto das promoções no período (cobranças que as usaram):
 ES	doc.promo.impacto.sindatos	Ningún cobro del período usó una promoción.
 EN	doc.promo.impacto.sindatos	No charge in the period used a promotion.
 RU	doc.promo.impacto.sindatos	Ни одна оплата за период не использовала акцию.

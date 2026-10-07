@@ -3,13 +3,13 @@ flowchart TD
     direction TB
     i((" "))
     d0{"¿Cómo surge la promoción?"}
-    a1["Analizar métricas: abandono por plan y rotación por categoría"]
+    a1["Analizar métricas del período (por defecto 90 días): abandono por plan, rotación por categoría e impacto de las promociones"]
     d1{"¿Hay oportunidad?"}
     f0(((" ")))
     a2["Registrar sugerencia: queda Pendiente"]
     g1["Recibir constancia de descarte de la sugerencia"]
     g2["Recibir informe de la baja (promoción desactivada)"]
-    o1[/"Reporte de métricas (abandono por plan, rotación por categoría)"/]:::doc
+    o1[/"Reporte de métricas (período, abandono por plan, rotación por categoría, impacto de las promociones)"/]:::doc
     o2[/"Sugerencia de promoción (Pendiente)"/]:::doc
   end
   subgraph A["Administración"]
@@ -19,7 +19,7 @@ flowchart TD
     f1(((" ")))
     a4["Crear promoción desde la sugerencia"]
     a4m["Crear promoción manual, sin sugerencia"]
-    a5["Validar (destino único, valor, fechas) → En revisión contable"]
+    a5["Validar (destino único, valor, fecha de fin desde hoy) → En revisión contable"]
     d4{"¿Reformular?"}
     a8["Reformular las condiciones"]
     a9["Descartar promoción con motivo: Descartada"]
@@ -40,7 +40,7 @@ flowchart TD
   subgraph K["Contabilidad"]
     direction TB
     a6["Analizar margen e impacto (beneficio estimado, promociones superpuestas)"]
-    d3{"¿Aprueba? (quien la creó no la dictamina)"}
+    d3{"¿Aprueba? (quien la creó no la dictamina; si ya pasó su fecha de fin, se rechaza)"}
     a7["Rechazada por Contabilidad"]
     a10["Vigente: un solo descuento por cobro"]
     o5[/"Dictamen contable (rechazo con observación)"/]:::doc

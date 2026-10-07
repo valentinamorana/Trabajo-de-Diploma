@@ -78,6 +78,7 @@ module.exports = [
     // Documentos: los PDF de GUI/Exportacion/DocumentosContratacion.cs (Planes disponibles, Aviso de desistimiento, Orden de cobro,
     // Liquidación, Comprobante, Constancia de suscripción, Constancia de cancelación) y la información que circula entre carriles.
     // Pago en cuotas: solo Tarjeta de crédito (MedioPago.PermiteCuotas), planes de BLL.Politicas.PoliticaCuotas.Disponibles.
+    // Anular: Caja anula una contratación Pendiente de pago con motivo (BLL/Contratacion.cs › Anular). Upgrade: BLL.Politicas.PoliticaCambioPlan.
     carriles: [{ id: 'C', nombre: 'Cliente' }, { id: 'V', nombre: 'Vendedor' }, { id: 'J', nombre: 'Caja' }],
     nodos: [
       N('i', 'inicio', 'C'), N('a1', 'accion', 'C', 'Solicitar información'),
@@ -93,7 +94,7 @@ module.exports = [
       N('d3', 'decision', 'V', '¿Contratación válida?'),
       N('a7', 'accion', 'V', 'Informar motivo'),
       N('a16', 'accion', 'J', 'Consultar cola de pendientes de pago'),
-      N('a8', 'accion', 'J', 'Calcular importe (un solo descuento)'),
+      N('a8', 'accion', 'J', 'Calcular importe (un solo descuento; crédito si cambia a un plan más caro)'),
       N('a9', 'accion', 'C', 'Abonar'),
       N('d9', 'decision', 'J', '¿Paga con tarjeta de crédito?'),
       N('a20', 'accion', 'J', 'Ofrecer planes de cuotas (hasta los meses de la modalidad)'),
@@ -103,7 +104,7 @@ module.exports = [
       N('a10', 'accion', 'J', 'Confirmar cobro'),
       N('d7', 'decision', 'J', '¿Cambió el importe?'),
       N('a17', 'accion', 'J', 'Emitir comprobante y registrar el cobro'),
-      N('a11', 'accion', 'J', 'Activar suscripción'),
+      N('a11', 'accion', 'J', 'Activar suscripción (al vencer la vigente, o desde hoy si es un plan más caro)'),
       N('d8', 'decision', 'J', '¿Se activó la suscripción?'),
       N('a18', 'accion', 'J', 'Reabrir el pago (vuelve a Pendiente de pago)'),
       N('d5', 'decision', 'J', '¿Referido?'),
@@ -112,6 +113,8 @@ module.exports = [
       N('a13', 'accion', 'J', 'Registrar intento'),
       N('d6', 'decision', 'J', '¿Alcanzó el máximo de 3 intentos?'),
       N('a14', 'accion', 'J', 'Cancelar contratación'),
+      N('d10', 'decision', 'J', '¿Se anula la contratación?'),
+      N('a23', 'accion', 'J', 'Anular con motivo (no se cobra y sale de la cola)'),
       N('r3', 'accion', 'C', 'Recibir constancia de cancelación'),
       N('f', 'fin', 'C'), N('f2', 'fin', 'C'),
       // documentos (Artifact «Document», como en el PN01)
@@ -123,7 +126,7 @@ module.exports = [
       N('o6', 'documento', 'V', 'Orden de cobro (importe estimado)'),
       N('o7', 'documento', 'V', 'Contratación pendiente de pago (precio mensual pactado)'),
       N('o8', 'documento', 'V', 'Motivo de rechazo'),
-      N('o9', 'documento', 'J', 'Liquidación (un solo descuento)'),
+      N('o9', 'documento', 'J', 'Liquidación (un solo descuento y crédito por cambio de plan)'),
       N('o10', 'documento', 'C', 'Medio de pago e importe'),
       N('o11', 'documento', 'J', 'Comprobante (CMP-NNNNNN-AAAAMMDD, cuotas y recargo)'),
       N('o12', 'documento', 'J', 'Constancia de suscripción (vigencia)'),
@@ -131,12 +134,13 @@ module.exports = [
       N('o14', 'documento', 'J', 'Constancia de cancelación'),
       N('o15', 'documento', 'J', 'Planes de cuotas (1 sin interés; 3: 5 %; 6: 10 %; 12: 20 %)'),
       N('o16', 'documento', 'C', 'Cuotas elegidas'),
-      N('o17', 'documento', 'J', 'Detalle de financiación (cuotas, recargo, valor de cuota)')
+      N('o17', 'documento', 'J', 'Detalle de financiación (cuotas, recargo, valor de cuota)'),
+      N('o18', 'documento', 'J', 'Motivo de anulación')
     ],
     flujos: [
       F('i', 'a1'), F('a1', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'No'), F('a3', 'a2'), F('d1', 'a4', 'Sí'), F('a4', 'd2'),
       F('d2', 'a5', 'No'), F('a5', 'r1'), F('r1', 'f2'), F('d2', 'a19', 'Sí'), F('a19', 'a15'), F('a15', 'a6'), F('a6', 'd3'), F('d3', 'a7', 'No'), F('a7', 'd2'),
-      F('d3', 'a16', 'Sí'), F('a16', 'a8'), F('a8', 'a9'), F('a9', 'd9'), F('d9', 'a20', 'Sí'), F('a20', 'a21'), F('a21', 'a22'), F('a22', 'd4'), F('d9', 'd4', 'No'), F('d4', 'a10', 'Sí'), F('a10', 'd7'),
+      F('d3', 'a16', 'Sí'), F('a16', 'd10'), F('d10', 'a8', 'No'), F('d10', 'a23', 'Sí'), F('a23', 'r3'), F('a8', 'a9'), F('a9', 'd9'), F('d9', 'a20', 'Sí'), F('a20', 'a21'), F('a21', 'a22'), F('a22', 'd4'), F('d9', 'd4', 'No'), F('d4', 'a10', 'Sí'), F('a10', 'd7'),
       F('d7', 'a8', 'Sí'), F('d7', 'a17', 'No'), F('a17', 'a11'), F('a11', 'd8'), F('d8', 'a18', 'No'), F('a18', 'a16'),
       F('d8', 'd5', 'Sí'), F('d5', 'a12', 'Sí'), F('a12', 'r2'), F('d5', 'r2', 'No'), F('r2', 'f'),
       F('d4', 'a13', 'No'), F('a13', 'd6'), F('d6', 'a16', 'No'), F('d6', 'a14', 'Sí'), F('a14', 'r3'), F('r3', 'f2')
@@ -157,7 +161,7 @@ module.exports = [
       O('a17', 'o11'), O('o11', 'r2'),
       O('a11', 'o12'), O('o12', 'r2'),
       O('a13', 'o13'), O('o13', 'd6'),
-      O('a14', 'o14'), O('o14', 'r3')
+      O('a14', 'o14'), O('o14', 'r3'), O('a23', 'o18'), O('a23', 'o14')
     ]
   },
   {
@@ -174,7 +178,7 @@ module.exports = [
     nodos: [
       N('i', 'inicio', 'G'),
       N('d0', 'decision', 'G', '¿Cómo surge la promoción?'),
-      N('a1', 'accion', 'G', 'Analizar métricas: abandono por plan y rotación por categoría'),
+      N('a1', 'accion', 'G', 'Analizar métricas del período (por defecto 90 días): abandono por plan, rotación por categoría e impacto de las promociones'),
       N('d1', 'decision', 'G', '¿Hay oportunidad?'),
       N('f0', 'fin', 'G'),
       N('a2', 'accion', 'G', 'Registrar sugerencia: queda Pendiente'),
@@ -183,9 +187,9 @@ module.exports = [
       N('f1', 'fin', 'A'),
       N('a4', 'accion', 'A', 'Crear promoción desde la sugerencia'),
       N('a4m', 'accion', 'A', 'Crear promoción manual, sin sugerencia'),
-      N('a5', 'accion', 'A', 'Validar (destino único, valor, fechas) → En revisión contable'),
+      N('a5', 'accion', 'A', 'Validar (destino único, valor, fecha de fin desde hoy) → En revisión contable'),
       N('a6', 'accion', 'K', 'Analizar margen e impacto (beneficio estimado, promociones superpuestas)'),
-      N('d3', 'decision', 'K', '¿Aprueba? (quien la creó no la dictamina)'),
+      N('d3', 'decision', 'K', '¿Aprueba? (quien la creó no la dictamina; si ya pasó su fecha de fin, se rechaza)'),
       N('a7', 'accion', 'K', 'Rechazada por Contabilidad'),
       N('d4', 'decision', 'A', '¿Reformular?'),
       N('a8', 'accion', 'A', 'Reformular las condiciones'),
@@ -205,7 +209,7 @@ module.exports = [
       N('g2', 'accion', 'G', 'Recibir informe de la baja (promoción desactivada)'),
       N('v1', 'accion', 'V', 'Recibir resolución de baja rechazada (sigue vigente)'),
       // documentos (Artifact «Document», como en el PN01)
-      N('o1', 'documento', 'G', 'Reporte de métricas (abandono por plan, rotación por categoría)'),
+      N('o1', 'documento', 'G', 'Reporte de métricas (período, abandono por plan, rotación por categoría, impacto de las promociones)'),
       N('o2', 'documento', 'G', 'Sugerencia de promoción (Pendiente)'),
       N('o3', 'documento', 'A', 'Constancia de descarte de la sugerencia'),
       N('o4', 'documento', 'A', 'Ficha de promoción (En revisión contable)'),

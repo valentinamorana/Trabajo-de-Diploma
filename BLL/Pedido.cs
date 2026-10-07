@@ -605,9 +605,11 @@ namespace BLL
             try { return listaEsperaBLL.EstaReservadaParaOtro(idPrenda, idCliente); }
             catch (Exception ex)
             {
-                // BD sin migrar (tabla ListaEspera inexistente) → no bloquea, pero se loguea.
+                // Falla CERRADA: si no se puede verificar la reserva, la prenda se trata como
+                // reservada (no disponible) y Depósito informa el faltante. Antes devolvía false y
+                // podía entregarse una prenda reservada para otro cliente.
                 System.Diagnostics.Trace.TraceWarning($"[BLL.Pedido] Lista de Espera (validación de reserva): {ex.Message}");
-                return false;
+                return true;
             }
         }
 

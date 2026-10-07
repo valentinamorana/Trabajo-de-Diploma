@@ -258,7 +258,7 @@ namespace BLL
             return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad, consumoCredito, iniciarHoy);
         }
 
-        // iniciarHoy: upgrade (BE.PoliticaCambioPlan) — el período arranca hoy, no al vencer el actual.
+        // iniciarHoy: upgrade (BLL.Politicas.PoliticaCambioPlan) — el período arranca hoy, no al vencer el actual.
         private BE.Builders.Suscripcion ActivarSuscripcionInterna(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m,
             bool iniciarHoy = false)

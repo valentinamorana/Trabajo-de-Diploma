@@ -244,7 +244,7 @@ namespace BLL
         // "Ofrecer planes de cuotas": con tarjeta de crédito, los planes activos que no superan los
         // meses que cubre la modalidad (Mensual: 1; Trimestral: hasta 3; Anual: hasta 12).
         public List<BE.PlanCuotas> ObtenerPlanesCuotas(BE.Builders.ModalidadCobro modalidad)
-            => BE.PoliticaCuotas.Disponibles(dalContratacion.ObtenerPlanesCuotas(), modalidad);
+            => Politicas.PoliticaCuotas.Disponibles(dalContratacion.ObtenerPlanesCuotas(), modalidad);
 
         public List<BE.IntentoPago> ObtenerIntentos(int idContratacion)
         {
@@ -271,7 +271,7 @@ namespace BLL
             if (idMedioPago.HasValue)
             {
                 var medio = ValidarMedioPago(idMedioPago, requerido: true);
-                liq.AplicarFinanciacion(BE.PoliticaCuotas.Financiar(liq.Total, ResolverCuotas(medio, idPlanCuotas, contratacion.Modalidad)));
+                liq.AplicarFinanciacion(Politicas.PoliticaCuotas.Financiar(liq.Total, ResolverCuotas(medio, idPlanCuotas, contratacion.Modalidad)));
             }
             return liq;
         }
@@ -356,7 +356,7 @@ namespace BLL
 
             // "Calcular recargo y valor de cuota" («Detalle de financiación»): el recargo se suma al total
             // confirmado; con un medio que no financia, financiacion queda en 1 pago sin recargo.
-            var financiacion = BE.PoliticaCuotas.Financiar(descuento.Total, planCuotas);
+            var financiacion = Politicas.PoliticaCuotas.Financiar(descuento.Total, planCuotas);
 
             // "Emitir comprobante".
             string numeroComprobante = EmitirComprobante(actual.IdContratacion);
@@ -572,7 +572,7 @@ namespace BLL
             if (plan == null || !plan.Activo)
                 throw new BE.AppException("err.bll.contratacion.cuotas_invalidas",
                     "El plan de cuotas elegido no existe o no está disponible.");
-            if (!BE.PoliticaCuotas.PermiteModalidad(plan, modalidad))
+            if (!Politicas.PoliticaCuotas.PermiteModalidad(plan, modalidad))
                 throw new BE.AppException("err.bll.contratacion.cuotas_modalidad",
                     "Con la modalidad {0} se puede pagar en hasta {1} cuota(s); se eligieron {2}.",
                     modalidad, BE.Builders.ModalidadCobroExtensiones.Meses(modalidad), plan.CantidadCuotas);
@@ -621,13 +621,13 @@ namespace BLL
             // Precio pactado al registrar la contratación; si no lo tiene (datos previos), el del plan.
             decimal precio = c.PrecioMensual ?? (plan != null ? plan.Precio : c.MontoPlan);
             decimal bruto = precio * meses;
-            var r = BE.PoliticaDescuento.Resolver(bruto, c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m, meses);
+            var r = Politicas.PoliticaDescuento.Resolver(bruto, c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m, meses);
 
             // Upgrade: pasa a un plan más caro con el período vigente → el plan nuevo rige desde hoy y
-            // los días no usados del plan actual se descuentan del cobro (BE.PoliticaCambioPlan).
+            // los días no usados del plan actual se descuentan del cobro (BLL.Politicas.PoliticaCambioPlan).
             var planActual = cliente?.IdPlan != null && cliente.IdPlan.Value != c.IdPlan
                 ? dalPlan.ObtenerPorId(cliente.IdPlan.Value) : null;
-            r.CreditoCambioPlan = BE.PoliticaCambioPlan.Credito(cliente, planActual, c.IdPlan, precio, DateTime.Today, r.Total);
+            r.CreditoCambioPlan = Politicas.PoliticaCambioPlan.Credito(cliente, planActual, c.IdPlan, precio, DateTime.Today, r.Total);
             return r;
         }
 

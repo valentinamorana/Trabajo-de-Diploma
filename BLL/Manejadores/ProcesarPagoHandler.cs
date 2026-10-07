@@ -196,7 +196,7 @@ namespace BLL.Manejadores
                                                                 System.Collections.Generic.List<BE.Promocion> promociones)
         {
             int meses = BE.Builders.ModalidadCobroExtensiones.Meses(modalidad);
-            return BE.PoliticaDescuento.Resolver(cliente.PrecioPlan * meses, cliente.IdPlan, promociones,
+            return Politicas.PoliticaDescuento.Resolver(cliente.PrecioPlan * meses, cliente.IdPlan, promociones,
                                                  cliente.DescuentoProximoCobro, meses);
         }
 

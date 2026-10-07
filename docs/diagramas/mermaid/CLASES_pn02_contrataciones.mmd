@@ -55,7 +55,7 @@ classDiagram
     +TipoDescuento TipoDescuento
     +decimal Valor
   }
-  class PoliticaDescuento {
+  class BLL_Politicas_PoliticaDescuento["BLL.Politicas.PoliticaDescuento"] {
     <<static>>
     +DescuentoDe(Promocion,  decimal,  int) decimal
     +Resolver(decimal,  int?,  IEnumerable~Promocion~,  decimal,  int) ResultadoDescuento
@@ -95,7 +95,7 @@ classDiagram
     +bool Activo
     +bool SinInteres
   }
-  class PoliticaCuotas {
+  class BLL_Politicas_PoliticaCuotas["BLL.Politicas.PoliticaCuotas"] {
     <<static>>
     +PermiteModalidad(PlanCuotas,  ModalidadCobro) bool
     +Disponibles(IEnumerable~PlanCuotas~,  ModalidadCobro) List~PlanCuotas~

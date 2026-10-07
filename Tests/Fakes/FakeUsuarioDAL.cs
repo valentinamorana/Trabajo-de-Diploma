@@ -58,7 +58,6 @@ namespace Tests.Fakes
         public BE.Usuario       ObtenerPorUsername(string username)  => Usuarios.Find(x => string.Equals(x.Username, username, StringComparison.OrdinalIgnoreCase));
         public BE.Usuario       ObtenerPorId(int idUsuario)          => Usuarios.Find(x => x.Id == idUsuario);
         public void             Alta(string u, string c, string p)   { }
-        public void             Bloquear(int id)                     { }
         public void             BloquearConTiempo(int id)            { BloquearConTiempoVeces++; var x = Usuarios.Find(y => y.Id == id); if (x != null) { x.Bloqueado = true; x.CantidadBloqueos++; x.FechaBloqueo = DateTime.Now; } }
         public void             AutoDesbloquear(int id)              { }
 

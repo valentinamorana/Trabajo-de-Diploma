@@ -77,7 +77,7 @@ module.exports = [
     // Pasos de GUI/NuevaContratacionForm.cs, GUI/ContratacionesPendientesForm.cs y BLL/Contratacion.cs.
     // Documentos: los PDF de GUI/Exportacion/DocumentosContratacion.cs (Planes disponibles, Aviso de desistimiento, Orden de cobro,
     // Liquidación, Comprobante, Constancia de suscripción, Constancia de cancelación) y la información que circula entre carriles.
-    // Pago en cuotas: solo Tarjeta de crédito (MedioPago.PermiteCuotas), planes de BE.PoliticaCuotas.Disponibles.
+    // Pago en cuotas: solo Tarjeta de crédito (MedioPago.PermiteCuotas), planes de BLL.Politicas.PoliticaCuotas.Disponibles.
     carriles: [{ id: 'C', nombre: 'Cliente' }, { id: 'V', nombre: 'Vendedor' }, { id: 'J', nombre: 'Caja' }],
     nodos: [
       N('i', 'inicio', 'C'), N('a1', 'accion', 'C', 'Solicitar información'),

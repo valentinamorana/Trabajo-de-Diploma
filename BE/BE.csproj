@@ -76,8 +76,7 @@
     <Compile Include="EstadoPromocion.cs" />
     <Compile Include="EstadoSugerencia.cs" />
     <Compile Include="Promocion.cs" />
-    <Compile Include="PoliticaDescuento.cs" />
-    <Compile Include="PoliticaCambioPlan.cs" />
+    <Compile Include="LiquidacionContratacion.cs" />
     <Compile Include="PlanCuotas.cs" />
     <Compile Include="SugerenciaPromocion.cs" />
     <Compile Include="CandidataSugerencia.cs" />

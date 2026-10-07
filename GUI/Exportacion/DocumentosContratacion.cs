@@ -122,7 +122,7 @@ namespace GUI.Exportacion
                 sb.AppendLine(Tr("doc.contr.cuotas.opciones", "Con tarjeta de crédito se puede pagar en:"));
                 foreach (var p in planesCuotas)
                 {
-                    var f = BE.PoliticaCuotas.Financiar(l.Total, p);
+                    var f = BLL.Politicas.PoliticaCuotas.Financiar(l.Total, p);
                     sb.AppendLine(string.Format(Tr("doc.contr.cuotas.opcion", "   {0} cuota(s) de {1:C2}  —  recargo {2:0.##} %  —  total {3:C2}"),
                         f.CantidadCuotas, f.ValorCuota, f.RecargoPorcentaje, f.TotalFinanciado));
                 }

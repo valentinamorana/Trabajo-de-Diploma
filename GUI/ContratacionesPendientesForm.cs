@@ -142,7 +142,7 @@ namespace GUI
             var idPlan = PlanCuotasSeleccionado();
             if (c == null || !idPlan.HasValue || !_importes.TryGetValue(c.IdContratacion, out var liq)) return;
             var plan = _planesCuotas.Find(p => p.IdPlanCuotas == idPlan.Value);
-            var f = BE.PoliticaCuotas.Financiar(liq.Total, plan);
+            var f = BLL.Politicas.PoliticaCuotas.Financiar(liq.Total, plan);
             lblDetalleCuotas.Text = string.Format(
                 Tr("lbl.contr.cuotas.detalle", "{0} cuota(s) de {1:C2} — recargo {2:C2} — total a abonar {3:C2}"),
                 f.CantidadCuotas, f.ValorCuota, f.Recargo, f.TotalFinanciado);

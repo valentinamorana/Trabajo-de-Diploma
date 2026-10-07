@@ -1,6 +1,6 @@
 using System;
 
-namespace BE
+namespace BLL.Politicas
 {
     /// <summary>
     /// PN02 — Cambio a un plan superior (upgrade) durante un período ya pagado (decisión de la alumna,
@@ -21,7 +21,7 @@ namespace BE
         /// vencimiento se corrió por toda la pausa; los días de pausa que todavía no pasaron no son
         /// días pagados (misma cuenta que BLL.Cliente.DescontarPausaNoUsada).
         /// </summary>
-        public static DateTime? VencimientoPagado(Cliente cliente, DateTime hoy)
+        public static DateTime? VencimientoPagado(BE.Cliente cliente, DateTime hoy)
         {
             if (cliente?.FechaVencimiento == null) return null;
             var vence = cliente.FechaVencimiento.Value.Date;
@@ -34,14 +34,14 @@ namespace BE
         }
 
         /// <summary>Días pagados del plan actual que todavía no se usaron (0 si ya venció).</summary>
-        public static int DiasRestantes(Cliente cliente, DateTime hoy)
+        public static int DiasRestantes(BE.Cliente cliente, DateTime hoy)
         {
             var vence = VencimientoPagado(cliente, hoy);
             return vence.HasValue ? Math.Max(0, (vence.Value - hoy.Date).Days) : 0;
         }
 
         /// <summary>¿Contratar <paramref name="idPlanNuevo"/> es pasar a un plan superior con período vigente?</summary>
-        public static bool EsUpgrade(Cliente cliente, PlanSuscripcion planActual, int idPlanNuevo,
+        public static bool EsUpgrade(BE.Cliente cliente, BE.PlanSuscripcion planActual, int idPlanNuevo,
                                      decimal precioMensualNuevo, DateTime hoy)
         {
             return cliente?.IdPlan != null
@@ -56,7 +56,7 @@ namespace BE
         /// Crédito por los días no usados del plan actual (0 si no es upgrade). Nunca supera
         /// <paramref name="tope"/> (lo que queda por cobrar), para que el total no sea negativo.
         /// </summary>
-        public static decimal Credito(Cliente cliente, PlanSuscripcion planActual, int idPlanNuevo,
+        public static decimal Credito(BE.Cliente cliente, BE.PlanSuscripcion planActual, int idPlanNuevo,
                                       decimal precioMensualNuevo, DateTime hoy, decimal tope)
         {
             if (tope <= 0 || !EsUpgrade(cliente, planActual, idPlanNuevo, precioMensualNuevo, hoy)) return 0m;

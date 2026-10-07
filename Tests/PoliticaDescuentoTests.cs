@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// PN03 — BE.PoliticaDescuento: regla de NUULY "un solo descuento por ciclo de facturación;
+    /// PN03 — BLL.Politicas.PoliticaDescuento: regla de NUULY "un solo descuento por ciclo de facturación;
     /// los no usados quedan acumulados". Compiten la promoción vigente del plan y el crédito por referidos.
     /// </summary>
     [TestClass]
@@ -27,34 +27,34 @@ namespace Tests
 
         [TestMethod]
         public void DescuentoDe_Porcentaje_CalculaSobreElBruto()
-            => Assert.AreEqual(1500m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.Porcentaje, 10), 15000m));
+            => Assert.AreEqual(1500m, BLL.Politicas.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.Porcentaje, 10), 15000m));
 
         [TestMethod]
         public void DescuentoDe_MontoFijo_NoSuperaElBruto()
         {
-            Assert.AreEqual(3000m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.MontoFijo, 3000), 15000m));
-            Assert.AreEqual(2000m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.MontoFijo, 9000), 2000m));
+            Assert.AreEqual(3000m, BLL.Politicas.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.MontoFijo, 3000), 15000m));
+            Assert.AreEqual(2000m, BLL.Politicas.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.MontoFijo, 9000), 2000m));
         }
 
         [TestMethod]
         public void DescuentoDe_PrecioPromocional_EsPrecioMensual_EscalaPorMeses()
         {
             // Plan a 1000/mes, cobro anual (bruto 12000), promo a 800/mes: paga 9600, no 800.
-            Assert.AreEqual(2400m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 800), 12000m, 12));
-            Assert.AreEqual(600m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 800), 3000m, 3));
+            Assert.AreEqual(2400m, BLL.Politicas.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 800), 12000m, 12));
+            Assert.AreEqual(600m, BLL.Politicas.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 800), 3000m, 3));
         }
         [TestMethod]
         public void DescuentoDe_PrecioPromocional_EsLaDiferenciaConElBruto()
         {
-            Assert.AreEqual(5000m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 10000), 15000m));
-            Assert.AreEqual(0m, BE.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 20000), 15000m),
+            Assert.AreEqual(5000m, BLL.Politicas.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 10000), 15000m));
+            Assert.AreEqual(0m, BLL.Politicas.PoliticaDescuento.DescuentoDe(Promo(BE.TipoDescuento.PrecioPromocional, 20000), 15000m),
                 "Un precio promocional mayor al bruto no genera descuento.");
         }
 
         [TestMethod]
         public void Resolver_SoloPromocion_LaAplica()
         {
-            var r = BE.PoliticaDescuento.Resolver(15000m, 1, new[] { Promo(BE.TipoDescuento.Porcentaje, 10) }, 0m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(15000m, 1, new[] { Promo(BE.TipoDescuento.Porcentaje, 10) }, 0m);
 
             Assert.AreEqual(1500m, r.Descuento);
             Assert.IsNotNull(r.Promocion);
@@ -65,7 +65,7 @@ namespace Tests
         [TestMethod]
         public void Resolver_SoloCreditoReferido_LoAplica()
         {
-            var r = BE.PoliticaDescuento.Resolver(15000m, 1, new List<BE.Promocion>(), 1000m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(15000m, 1, new List<BE.Promocion>(), 1000m);
 
             Assert.AreEqual(1000m, r.Descuento);
             Assert.IsNull(r.Promocion);
@@ -76,7 +76,7 @@ namespace Tests
         public void Resolver_GanaLaPromocion_ElCreditoNoSeConsume()
         {
             // Un solo descuento por ciclo: la promoción (1500) supera al crédito (1000) → el crédito se conserva.
-            var r = BE.PoliticaDescuento.Resolver(15000m, 1, new[] { Promo(BE.TipoDescuento.Porcentaje, 10) }, 1000m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(15000m, 1, new[] { Promo(BE.TipoDescuento.Porcentaje, 10) }, 1000m);
 
             Assert.AreEqual(1500m, r.Descuento);
             Assert.IsFalse(r.UsaCreditoReferido, "El crédito por referido queda acumulado para el próximo ciclo.");
@@ -85,7 +85,7 @@ namespace Tests
         [TestMethod]
         public void Resolver_GanaElCredito_SeConsumeElCreditoYNoSeSuman()
         {
-            var r = BE.PoliticaDescuento.Resolver(15000m, 1, new[] { Promo(BE.TipoDescuento.MontoFijo, 500) }, 2000m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(15000m, 1, new[] { Promo(BE.TipoDescuento.MontoFijo, 500) }, 2000m);
 
             Assert.AreEqual(2000m, r.Descuento, "No se acumulan los dos descuentos.");
             Assert.IsTrue(r.UsaCreditoReferido);
@@ -95,7 +95,7 @@ namespace Tests
         [TestMethod]
         public void Resolver_Empate_PrefierePromocionParaNoPerderElCredito()
         {
-            var r = BE.PoliticaDescuento.Resolver(15000m, 1, new[] { Promo(BE.TipoDescuento.MontoFijo, 1000) }, 1000m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(15000m, 1, new[] { Promo(BE.TipoDescuento.MontoFijo, 1000) }, 1000m);
 
             Assert.IsNotNull(r.Promocion);
             Assert.IsFalse(r.UsaCreditoReferido);
@@ -108,7 +108,7 @@ namespace Tests
             var grande = Promo(BE.TipoDescuento.Porcentaje, 20);
             grande.IdPromocion = 2;
 
-            var r = BE.PoliticaDescuento.Resolver(10000m, 1, new[] { chica, grande }, 0m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(10000m, 1, new[] { chica, grande }, 0m);
 
             Assert.AreEqual(2000m, r.Descuento);
             Assert.AreEqual(2, r.Promocion.IdPromocion);
@@ -128,7 +128,7 @@ namespace Tests
             };
             promos[5].CategoriaPrenda = "Abrigo";
 
-            var r = BE.PoliticaDescuento.Resolver(10000m, 1, promos, 0m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(10000m, 1, promos, 0m);
 
             Assert.AreEqual(0m, r.Descuento);
             Assert.IsNull(r.Promocion);
@@ -138,7 +138,7 @@ namespace Tests
         [TestMethod]
         public void Resolver_CreditoMayorAlBruto_SeTopeaYElTotalNoEsNegativo()
         {
-            var r = BE.PoliticaDescuento.Resolver(800m, 1, new List<BE.Promocion>(), 5000m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(800m, 1, new List<BE.Promocion>(), 5000m);
 
             Assert.AreEqual(800m, r.Descuento);
             Assert.AreEqual(0m, r.Total);
@@ -151,7 +151,7 @@ namespace Tests
         {
             var vencida = Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.Vencida);
 
-            var r = BE.PoliticaDescuento.Resolver(10000m, 1, new[] { vencida }, 0m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(10000m, 1, new[] { vencida }, 0m);
 
             Assert.AreEqual(0m, r.Descuento);
             Assert.IsNull(r.Promocion);
@@ -162,7 +162,7 @@ namespace Tests
         {
             var pasada = Promo(BE.TipoDescuento.Porcentaje, 50, diasInicio: -30, diasFin: -1);
 
-            var r = BE.PoliticaDescuento.Resolver(10000m, 1, new[] { pasada }, 300m);
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(10000m, 1, new[] { pasada }, 300m);
 
             Assert.IsNull(r.Promocion);
             Assert.IsTrue(r.UsaCreditoReferido, "Sin promoción aplicable, se usa el crédito por referido.");
@@ -177,7 +177,7 @@ namespace Tests
                 Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.Desactivada),
                 Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.BajaSolicitada)
             };
-            Assert.AreEqual(0m, BE.PoliticaDescuento.Resolver(10000m, 1, promos, 0m).Descuento);
+            Assert.AreEqual(0m, BLL.Politicas.PoliticaDescuento.Resolver(10000m, 1, promos, 0m).Descuento);
         }
     }
 }

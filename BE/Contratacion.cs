@@ -37,7 +37,7 @@ namespace BE
         /// <summary>Promoción vigente aplicada al cobro (PN03), o null si no se aplicó ninguna.</summary>
         public int? IdPromocion { get; set; }
 
-        /// <summary>Upgrade (BE.PoliticaCambioPlan): crédito por los días no usados del plan anterior,
+        /// <summary>Upgrade (BLL.Politicas.PoliticaCambioPlan): crédito por los días no usados del plan anterior,
         /// ya descontado del Importe. Null si el cobro no fue un cambio a un plan superior.</summary>
         public decimal? CreditoCambioPlan { get; set; }
 

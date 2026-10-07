@@ -947,19 +947,19 @@ namespace Tests
         [TestMethod]
         public void PoliticaCuotas_Financiar_CalculaRecargoTotalYValorDeCuota()
         {
-            var f = BE.PoliticaCuotas.Financiar(1000m, new BE.PlanCuotas { IdPlanCuotas = 4, CantidadCuotas = 12, RecargoPorcentaje = 20m });
+            var f = BLL.Politicas.PoliticaCuotas.Financiar(1000m, new BE.PlanCuotas { IdPlanCuotas = 4, CantidadCuotas = 12, RecargoPorcentaje = 20m });
             Assert.AreEqual(12, f.CantidadCuotas);
             Assert.AreEqual(200m, f.Recargo);
             Assert.AreEqual(1200m, f.TotalFinanciado);
             Assert.AreEqual(100m, f.ValorCuota);
 
-            var unPago = BE.PoliticaCuotas.Financiar(1000m, null);
+            var unPago = BLL.Politicas.PoliticaCuotas.Financiar(1000m, null);
             Assert.AreEqual(1, unPago.CantidadCuotas);
             Assert.AreEqual(0m, unPago.Recargo);
             Assert.AreEqual(1000m, unPago.ValorCuota);
 
             // Redondeo a 2 decimales: 3 cuotas con 5 % sobre 999,99
-            var r = BE.PoliticaCuotas.Financiar(999.99m, new BE.PlanCuotas { CantidadCuotas = 3, RecargoPorcentaje = 5m });
+            var r = BLL.Politicas.PoliticaCuotas.Financiar(999.99m, new BE.PlanCuotas { CantidadCuotas = 3, RecargoPorcentaje = 5m });
             Assert.AreEqual(50.00m, r.Recargo);
             Assert.AreEqual(350.00m, r.ValorCuota);
         }
@@ -1136,22 +1136,22 @@ namespace Tests
         {
             var cliente = new BE.Cliente { IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(15) };
             // 1000 por mes × 15 días / 30 = 500
-            Assert.AreEqual(500m, BE.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
+            Assert.AreEqual(500m, BLL.Politicas.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
         }
 
         [TestMethod]
         public void PoliticaCambioPlan_PlanIgualOMasBarato_NoEsUpgrade()
         {
             var cliente = new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(15) };
-            Assert.IsFalse(BE.PoliticaCambioPlan.EsUpgrade(cliente, PlanPremium(), 2, 1000m, DateTime.Today), "Más barato.");
-            Assert.IsFalse(BE.PoliticaCambioPlan.EsUpgrade(cliente, PlanPremium(), 1, 3000m, DateTime.Today), "Mismo plan (renovación).");
+            Assert.IsFalse(BLL.Politicas.PoliticaCambioPlan.EsUpgrade(cliente, PlanPremium(), 2, 1000m, DateTime.Today), "Más barato.");
+            Assert.IsFalse(BLL.Politicas.PoliticaCambioPlan.EsUpgrade(cliente, PlanPremium(), 1, 3000m, DateTime.Today), "Mismo plan (renovación).");
         }
 
         [TestMethod]
         public void PoliticaCambioPlan_PlanVencido_NoHayCredito()
         {
             var cliente = new BE.Cliente { IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(-3) };
-            Assert.AreEqual(0m, BE.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
+            Assert.AreEqual(0m, BLL.Politicas.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
         }
 
         [TestMethod]
@@ -1162,15 +1162,15 @@ namespace Tests
             {
                 IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(25), FechaPausaHasta = DateTime.Today.AddDays(10)
             };
-            Assert.AreEqual(15, BE.PoliticaCambioPlan.DiasRestantes(cliente, DateTime.Today));
-            Assert.AreEqual(500m, BE.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
+            Assert.AreEqual(15, BLL.Politicas.PoliticaCambioPlan.DiasRestantes(cliente, DateTime.Today));
+            Assert.AreEqual(500m, BLL.Politicas.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
         }
 
         [TestMethod]
         public void PoliticaCambioPlan_CreditoMayorQueLoQueQuedaPorCobrar_SeLimita()
         {
             var cliente = new BE.Cliente { IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(300) };
-            Assert.AreEqual(3000m, BE.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
+            Assert.AreEqual(3000m, BLL.Politicas.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
         }
 
         [TestMethod]

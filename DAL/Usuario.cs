@@ -142,23 +142,6 @@ namespace DAL
             }
         }
 
-        // Bloquea la cuenta de un usuario (Estado=0).
-        // Se llama tras superar el máximo de intentos fallidos.
-        public void Bloquear(int idUsuario)
-        {
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Usuario SET Estado = 0 WHERE IdUsuario = @idUsuario",
-                    new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                RecalcularDVH(idUsuario);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al bloquear el usuario ID {idUsuario}.", ex);
-            }
-        }
-
         // Bloqueo PROGRESIVO: marca el bloqueo con timestamp e incrementa la escala (1/5/15/60 min).
         // Reemplaza a Bloquear() en el flujo de login.
         public void BloquearConTiempo(int idUsuario)

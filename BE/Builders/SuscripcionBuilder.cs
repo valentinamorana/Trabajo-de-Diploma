@@ -26,7 +26,7 @@ namespace BE.Builders
 
         public virtual void AsignarPlan(PlanSuscripcion plan) => _plan = plan;
 
-        /// <summary>Upgrade (BE.PoliticaCambioPlan): el período del plan nuevo arranca hoy, no al
+        /// <summary>Upgrade (BLL.Politicas.PoliticaCambioPlan): el período del plan nuevo arranca hoy, no al
         /// vencer el actual; los días no usados ya se descontaron del cobro como crédito.</summary>
         public bool IniciarHoy { get; set; }
 

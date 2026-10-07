@@ -58,12 +58,12 @@ module.exports = [
       E('BLL.Cobro', { metodos: ['Procesar'] }), E('BLL.Manejadores.ManejadorCobro', { metodos: 'all' }),
       E('BLL.Manejadores.DetectarCobroHandler', { metodos: 'all' }), E('BLL.Manejadores.ProcesarPagoHandler', { metodos: 'all' }),
       E('BLL.Manejadores.AplicarGraciaHandler', { metodos: 'all' }), E('BLL.Manejadores.SuspenderHandler', { metodos: 'all' }),
-      E('BLL.Manejadores.ContextoCobro', { attrs: 'all' }), E('BE.PoliticaDescuento', { metodos: 'all' })
+      E('BLL.Manejadores.ContextoCobro', { attrs: 'all' }), E('BLL.Politicas.PoliticaDescuento', { metodos: 'all' })
     ],
     relaciones: [
       { tipo: 'asocia', de: 'BLL_Cobro', a: 'BLL_Manejadores_DetectarCobroHandler', etiqueta: 'primer eslabón', mult: '1' },
       { tipo: 'asocia', de: 'BLL_Manejadores_ManejadorCobro', a: 'BLL_Manejadores_ManejadorCobro', etiqueta: 'sucesor', mult: '0..1' },
-      { tipo: 'depende', de: 'BLL_Manejadores_ProcesarPagoHandler', a: 'PoliticaDescuento' }
+      { tipo: 'depende', de: 'BLL_Manejadores_ProcesarPagoHandler', a: 'BLL_Politicas_PoliticaDescuento' }
     ]
   },
 
@@ -110,9 +110,9 @@ module.exports = [
     clases: [
       E('BE.Contratacion', { attrs: 'all' }), E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido', 'IdPlan', 'FechaVencimiento', 'DescuentoProximoCobro'] }),
       E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'LimitePrendas', 'Precio'] }), E('BE.Promocion', { attrs: ['IdPromocion', 'Nombre', 'TipoDescuento', 'Valor'] }),
-      E('BE.PoliticaDescuento', { metodos: 'all' }),
+      E('BLL.Politicas.PoliticaDescuento', { metodos: 'all' }),
       E('BE.MedioPago', { attrs: 'all' }), E('BE.IntentoPago', { attrs: 'all' }), E('BE.DesistimientoContratacion', { attrs: 'all' }),
-      E('BE.PlanCuotas', { attrs: 'all' }), E('BE.PoliticaCuotas', { metodos: 'all' }),
+      E('BE.PlanCuotas', { attrs: 'all' }), E('BLL.Politicas.PoliticaCuotas', { metodos: 'all' }),
       E('BLL.Cliente', { metodos: ['BuscarPorIdentificacion', 'ActivarSuscripcionDesdeContratacion'] }),
       E('BLL.Contratacion', { metodos: ['IdentificarCliente', 'PresentarPlanes', 'AsentarDesistimiento', 'ValidarContratacion', 'RegistrarContratacion',
                                         'EstimarImporte', 'ObtenerPendientesDePago', 'CalcularImporte', 'CalcularImportes', 'ConfirmarCobro', 'RegistrarIntentoFallido', 'ObtenerPlanesCuotas'] }),

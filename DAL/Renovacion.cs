@@ -42,36 +42,6 @@ namespace DAL
             return lista;
         }
 
-        // Inserta el intento de renovación con su resultado ya definido (los tres
-        // manejadores que persisten — Renovar/CambioPlan/Baja — resuelven en el mismo
-        // paso en que detectan el caso, no hay un estado "Pendiente" intermedio que
-        // requiera un UPDATE posterior). FechaResolucion se completa acá directamente
-        // para evitar un segundo round-trip a la base solo para timestampear.
-        public int Alta(BE.Renovacion renovacion)
-        {
-            SqlParameter[] p =
-            {
-                new SqlParameter("@IdCliente",       renovacion.IdCliente),
-                new SqlParameter("@IdPlanAnterior",   (object)renovacion.IdPlanAnterior ?? DBNull.Value),
-                new SqlParameter("@IdPlanNuevo",      (object)renovacion.IdPlanNuevo    ?? DBNull.Value),
-                new SqlParameter("@FechaDeteccion",   renovacion.FechaDeteccion),
-                new SqlParameter("@FechaResolucion",  (object)renovacion.FechaResolucion ?? DBNull.Value),
-                new SqlParameter("@Resultado",        (int)renovacion.Resultado),
-                new SqlParameter("@Actor",            (object)renovacion.Actor ?? DBNull.Value)
-            };
-
-            DataTable tabla = acceso.Leer(
-                "INSERT INTO HistorialRenovacion " +
-                "(IdCliente, IdPlanAnterior, IdPlanNuevo, FechaDeteccion, FechaResolucion, Resultado, Actor) " +
-                "VALUES (@IdCliente, @IdPlanAnterior, @IdPlanNuevo, @FechaDeteccion, @FechaResolucion, @Resultado, @Actor); " +
-                "SELECT SCOPE_IDENTITY() AS IdNuevo",
-                p);
-
-            return tabla != null && tabla.Rows.Count > 0
-                ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"])
-                : 0;
-        }
-
         // Igual que Alta, pero sobre una transacción ya abierta por el caller — usada por
         // los manejadores de Renovación para que el UPDATE de Cliente y este INSERT sean
         // atómicos (ver DAL.Cliente.EjecutarTransaccion/ModificarEnTx).
@@ -95,21 +65,6 @@ namespace DAL
                 var resultadoId = cmd.ExecuteScalar();
                 return resultadoId == null || resultadoId == DBNull.Value ? 0 : Convert.ToInt32(resultadoId);
             }
-        }
-
-        public void Resolver(int idRenovacion, BE.EstadoRenovacion resultado, int? idPlanNuevo)
-        {
-            SqlParameter[] p =
-            {
-                new SqlParameter("@Resultado",       (int)resultado),
-                new SqlParameter("@IdPlanNuevo",      (object)idPlanNuevo ?? DBNull.Value),
-                new SqlParameter("@FechaResolucion",  DateTime.Now),
-                new SqlParameter("@IdRenovacion",     idRenovacion)
-            };
-            acceso.Escribir(
-                "UPDATE HistorialRenovacion SET Resultado=@Resultado, IdPlanNuevo=@IdPlanNuevo, " +
-                "FechaResolucion=@FechaResolucion WHERE IdRenovacion=@IdRenovacion",
-                p);
         }
 
         private BE.Renovacion Mapear(DataRow row)

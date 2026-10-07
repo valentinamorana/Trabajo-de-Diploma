@@ -6,14 +6,15 @@ sequenceDiagram
   participant AR as BLL.Analisis<br/>Rotacion
   participant AA as BLL.Analisis<br/>Abandono
   participant DP as DAL.Plan<br/>Suscripcion
+  participant DPR as DAL.Promocion
   participant B as BLL.Sugerencia<br/>Promocion
   participant D as DAL.Sugerencia<br/>Promocion
   Note over G,F: «extend» CU03-GER Analizar Métricas (opcional): AnalizarMetricas y ¿Hay oportunidad? (HayOportunidad). Sin análisis, la sugerencia queda con origen Manual
   opt Gerencia analiza las métricas (opcional)
-    G->>F: Pulsa "Analizar métricas…"
-    F->>AN: AnalizarMetricas(modulo)
+    G->>F: Elige el período (30, 90, 180 o 365 días, por defecto 90) y pulsa "Analizar métricas…"
+    F->>AN: AnalizarMetricas(modulo, desde, hasta)
     Note over AN: PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)
-    AN->>AR: Detectar()
+    AN->>AR: Detectar(desde)
     AR-->>AN: List<RotacionPrenda>
     AN->>AA: Detectar()  [criterio por defecto: EstrategiaVencimientoInactividad]
     AA-->>AN: List<ClienteEnRiesgo>
@@ -21,8 +22,10 @@ sequenceDiagram
     DP-->>AN: planes
     AN->>AN: AbandonoPorPlan(enRiesgo, planes)
     AN->>AN: Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría, abandono: clientes en riesgo por plan]
+    AN->>DPR: ObtenerImpacto(desde, hasta)
+    DPR-->>AN: impacto de cada promoción: cobros, total descontado y total cobrado
     Note over AN: bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"
-    AN-->>F: ReporteMetricas (abandono por plan, rotación por categoría, oportunidades)
+    AN-->>F: ReporteMetricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades)
     F->>AN: HayOportunidad(reporte)
     AN-->>F: hayOportunidad
     F->>F: MostrarReporte(reporte, hayOportunidad)
@@ -59,10 +62,5 @@ sequenceDiagram
       B-->>F: id de la sugerencia
       F-->>G: "Sugerencia nro.id enviada a Administración"
       F->>B: ObtenerTodas()  [refresca las sugerencias registradas]
-      opt ¿Imprimir la sugerencia? Sí
-        F->>B: ObtenerPorId(idSugerencia)
-        B-->>F: sugerencia
-        F-->>G: Sugerencia de promoción (PDF)
-      end
     end
   end

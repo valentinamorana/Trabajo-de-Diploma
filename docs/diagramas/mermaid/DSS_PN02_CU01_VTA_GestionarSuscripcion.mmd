@@ -45,9 +45,5 @@ sequenceDiagram
     B->>D: Alta(contratacion)  [Estado = PendientePago, PrecioMensual = precio del plan pactado]
     D-->>B: idContratacion
     B-->>F: idContratacion
-    F->>B: ObtenerPorId(idContratacion)
-    B-->>F: contratación
-    F->>B: CalcularImporte(contratacion)
-    B-->>F: liquidación
-    F-->>V: Orden de cobro (PDF): el cliente abona en Caja
+    F-->>V: Contratación Pendiente de Pago: el cliente abona en Caja (la liquidación se imprime desde la cola de Caja)
   end

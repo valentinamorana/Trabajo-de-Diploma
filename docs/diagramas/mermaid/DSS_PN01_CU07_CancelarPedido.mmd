@@ -8,7 +8,7 @@ sequenceDiagram
   participant D as DAL.Pedido
   participant H as DAL.Pedido<br/>Historial
   Note over F,K: Patrón Command: PedidosVenta (Client) arma CancelacionCommand y se lo entrega a InvocadorPedido (Invoker), BLL.Pedido es el Receiver
-  V->>F: Selecciona un pedido Pendiente o Separado y pulsa Cancelar
+  V->>F: Selecciona un pedido En Control de Stock, Separado o Pendiente y pulsa Cancelar
   F->>B: ObtenerPorId(id)  [relee el estado actual]
   B-->>F: pedido
   V->>F: Indica el motivo y confirma
@@ -16,8 +16,8 @@ sequenceDiagram
   F->>I: ProcesarOrdenes()
   I->>K: Ejecutar()
   K->>B: Cancelar(modulo, pedido, motivo)
-  Note over B: Exigir(PedidosVentaEditar) · pedido.PuedeCancelarse(): Pendiente o Separado · motivo obligatorio (hasta 500 caracteres)
-  alt No está Pendiente ni Separado o falta el motivo
+  Note over B: Exigir(PedidosVentaEditar) · pedido.PuedeCancelarse(): En Control de Stock, Separado o Pendiente · motivo obligatorio (hasta 500 caracteres)
+  alt No se puede cancelar en su estado o falta el motivo
     B-->>F: AppException(cancelar_estado_separado / cancelar_sin_motivo / motivo_largo)
     F-->>V: Informa el error
   else Válido

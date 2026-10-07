@@ -105,7 +105,6 @@ classDiagram
   class BLL_SugerenciaPromocion["BLL.SugerenciaPromocion"] {
     +ObtenerPendientes() List~SugerenciaPromocion~
     +ObtenerTodas() List~SugerenciaPromocion~
-    +ObtenerPorId(int) SugerenciaPromocion
     +RegistrarSugerencia(string,  OrigenMetrica,  int?,  string,  string,  TipoDescuento,  decimal) int
     +DescartarSugerencia(string,  int,  string) void
   }
@@ -113,11 +112,6 @@ classDiagram
     +ObtenerTodas() List~Promocion~
     +ObtenerParaVentas() List~Promocion~
     +ObtenerPendientesRevisionContable() List~Promocion~
-    +ObtenerPorId(int) Promocion
-    +ObtenerHistorial(int) List~PromocionHistorial~
-    +ObtenerUltimoDictamen(int) DictamenContable
-    +ObtenerUltimaSolicitudBaja(int) SolicitudBajaPromocion
-    +ObtenerDescarte(int) PromocionHistorial
     +CrearDesdeSugerencia(string,  int,  string,  string,  TipoDescuento,  decimal,  DateTime,  DateTime,  decimal,  string) int
     +CrearManual(string,  string,  string,  TipoDescuento,  decimal,  DateTime,  DateTime,  int?,  string,  decimal,  string) int
     +ValidarPromocion(Promocion) void
@@ -136,6 +130,7 @@ classDiagram
   class DAL_Interfaces_IPromocionDAL["DAL.Interfaces.IPromocionDAL"] {
     <<interface>>
     +ObtenerTodas() List~Promocion~
+    +ObtenerImpacto(DateTime,  DateTime) List~MetricaImpactoPromocion~
     +ObtenerPendientesRevisionContable() List~Promocion~
     +ObtenerPorId(int) Promocion
     +Alta(Promocion,  PromocionHistorial) int

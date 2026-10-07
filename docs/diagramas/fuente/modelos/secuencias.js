@@ -268,7 +268,7 @@ module.exports = [
     tipo: 'secuencia', id: 'DSS_PN01_CU10_FormalizarPedido', titulo: 'PN01 · CU06-VEN Formalizar Pedido',
     participantes: [A('V', 'Vendedor'), P('F', 'PedidosVenta'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
     pasos: [
-      nota('Formaliza el pedido y prepara la confirmación para el cliente', 'V', 'F'),
+      nota('Formaliza el pedido: la selección queda cerrada', 'V', 'F'),
       c('V', 'F', 'Selecciona un pedido Separado y pulsa Formalizar'),
       c('F', 'B', 'ObtenerPorId(id)  [relee el pedido]'),
       r('B', 'F', 'pedido'),
@@ -280,10 +280,7 @@ module.exports = [
           c('B', 'D', 'Formalizar(idPedido)  [→ Pendiente de despacho, selección cerrada]'),
           c('B', 'H', 'RegistrarCambios(cambios)  [Accion = FORMALIZAR]'),
           r('B', 'F', 'ok'),
-          c('F', 'B', 'PrepararConfirmacion(modulo, idPedido)'),
-          c('B', 'D', 'ObtenerPorId(idPedido)'),
-          r('B', 'F', 'pedido formalizado'),
-          r('F', 'V', 'Confirmación y constancia del pedido (PDF) para el cliente')
+          r('F', 'V', 'Pedido Pendiente de despacho (la confirmación para el cliente queda en «Documentos»)')
         ] }] }
     ]
   },
@@ -401,7 +398,7 @@ module.exports = [
     participantes: [A('V', 'Vendedor'), P('F', 'PedidosVenta'), P('I', 'InvocadorPedido'), P('K', 'CancelacionCommand'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
     pasos: [
       nota('Patrón Command: PedidosVenta (Client) arma CancelacionCommand y se lo entrega a InvocadorPedido (Invoker); BLL.Pedido es el Receiver', 'F', 'I', 'K'),
-      c('V', 'F', 'Selecciona un pedido Pendiente o Separado y pulsa Cancelar'),
+      c('V', 'F', 'Selecciona un pedido En Control de Stock, Separado o Pendiente y pulsa Cancelar'),
       c('F', 'B', 'ObtenerPorId(id)  [relee el estado actual]'),
       r('B', 'F', 'pedido'),
       c('V', 'F', 'Indica el motivo y confirma'),
@@ -409,8 +406,8 @@ module.exports = [
       c('F', 'I', 'ProcesarOrdenes()'),
       c('I', 'K', 'Ejecutar()'),
       c('K', 'B', 'Cancelar(modulo, pedido, motivo)'),
-      nota('Exigir(PedidosVentaEditar) · pedido.PuedeCancelarse(): Pendiente o Separado · motivo obligatorio (hasta 500 caracteres)', 'B'),
-      { alt: 'No está Pendiente ni Separado o falta el motivo', pasos: [r('B', 'F', 'AppException(cancelar_estado_separado / cancelar_sin_motivo / motivo_largo)'), r('F', 'V', 'Informa el error')],
+      nota('Exigir(PedidosVentaEditar) · pedido.PuedeCancelarse(): En Control de Stock, Separado o Pendiente · motivo obligatorio (hasta 500 caracteres)', 'B'),
+      { alt: 'No se puede cancelar en su estado o falta el motivo', pasos: [r('B', 'F', 'AppException(cancelar_estado_separado / cancelar_sin_motivo / motivo_largo)'), r('F', 'V', 'Informa el error')],
         sino: [{ etiqueta: 'Válido', pasos: [
           c('B', 'D', 'Cancelar(idPedido, idCliente, estadoEsperado, motivo)  [libera las prendas a Disponible]'),
           c('B', 'H', 'RegistrarCambios(cambios)  [Accion = CANCELAR]'),
@@ -465,11 +462,7 @@ module.exports = [
         c('B', 'D', 'Alta(contratacion)  [Estado = PendientePago, PrecioMensual = precio del plan pactado]'),
         r('D', 'B', 'idContratacion'),
         r('B', 'F', 'idContratacion'),
-        c('F', 'B', 'ObtenerPorId(idContratacion)'),
-        r('B', 'F', 'contratación'),
-        c('F', 'B', 'CalcularImporte(contratacion)'),
-        r('B', 'F', 'liquidación'),
-        r('F', 'V', 'Orden de cobro (PDF): el cliente abona en Caja')
+        r('F', 'V', 'Contratación Pendiente de Pago: el cliente abona en Caja (la liquidación se imprime desde la cola de Caja)')
       ] }] }
     ]
   },
@@ -622,14 +615,14 @@ module.exports = [
   {
     tipo: 'secuencia', id: 'DSS_PN03_CU01_GER_SugerirPromocion', titulo: 'PN03 · CU01-GER Sugerir Promoción',
     participantes: [A('G', 'Gerencia'), P('F', 'SugerirPromocionForm'), P('AN', 'BLL.AnalisisPromociones'), P('AR', 'BLL.AnalisisRotacion'), P('AA', 'BLL.AnalisisAbandono'),
-                    P('DP', 'DAL.PlanSuscripcion'), P('B', 'BLL.SugerenciaPromocion'), P('D', 'DAL.SugerenciaPromocion')],
+                    P('DP', 'DAL.PlanSuscripcion'), P('DPR', 'DAL.Promocion'), P('B', 'BLL.SugerenciaPromocion'), P('D', 'DAL.SugerenciaPromocion')],
     pasos: [
       nota('«extend» CU03-GER Analizar Métricas (opcional): AnalizarMetricas y ¿Hay oportunidad? (HayOportunidad). Sin análisis, la sugerencia queda con origen Manual', 'G', 'F'),
       { opt: 'Gerencia analiza las métricas (opcional)', pasos: [
-        c('G', 'F', 'Pulsa "Analizar métricas…"'),
-        c('F', 'AN', 'AnalizarMetricas(modulo)'),
+        c('G', 'F', 'Elige el período (30, 90, 180 o 365 días; por defecto 90) y pulsa "Analizar métricas…"'),
+        c('F', 'AN', 'AnalizarMetricas(modulo, desde, hasta)'),
         nota('PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)', 'AN'),
-        c('AN', 'AR', 'Detectar()'),
+        c('AN', 'AR', 'Detectar(desde)'),
         r('AR', 'AN', 'List<RotacionPrenda>'),
         c('AN', 'AA', 'Detectar()  [criterio por defecto: EstrategiaVencimientoInactividad]'),
         r('AA', 'AN', 'List<ClienteEnRiesgo>'),
@@ -637,8 +630,10 @@ module.exports = [
         r('DP', 'AN', 'planes'),
         c('AN', 'AN', 'AbandonoPorPlan(enRiesgo, planes)'),
         c('AN', 'AN', 'Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría; abandono: clientes en riesgo por plan]'),
+      c('AN', 'DPR', 'ObtenerImpacto(desde, hasta)'),
+      r('DPR', 'AN', 'impacto de cada promoción: cobros, total descontado y total cobrado'),
         nota('bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"', 'AN'),
-        r('AN', 'F', 'ReporteMetricas (abandono por plan, rotación por categoría, oportunidades)'),
+        r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades)'),
         c('F', 'AN', 'HayOportunidad(reporte)'),
         r('AN', 'F', 'hayOportunidad'),
         c('F', 'F', 'MostrarReporte(reporte, hayOportunidad)'),
@@ -664,8 +659,7 @@ module.exports = [
               nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta, …)', 'B'),
               r('B', 'F', 'id de la sugerencia'),
               r('F', 'G', '"Sugerencia #id enviada a Administración"'),
-              c('F', 'B', 'ObtenerTodas()  [refresca las sugerencias registradas]'),
-              { opt: '¿Imprimir la sugerencia? Sí', pasos: [c('F', 'B', 'ObtenerPorId(idSugerencia)'), r('B', 'F', 'sugerencia'), r('F', 'G', 'Sugerencia de promoción (PDF)')] }
+              c('F', 'B', 'ObtenerTodas()  [refresca las sugerencias registradas]')
             ] }] }
         ] }] }
     ]
@@ -744,12 +738,7 @@ module.exports = [
       r('AF', 'F', 'DialogResult.OK + IdPromocionCreada'),
       r('F', 'A', '"Promoción #id registrada (o reformulada): pendiente de revisión contable"'),
       c('F', 'BS', 'ObtenerPendientes()  [recarga]'),
-      c('F', 'B', 'ObtenerTodas()  [recarga]'),
-      { opt: '¿Imprimir la ficha para Contabilidad? Sí', pasos: [
-        c('F', 'B', 'ObtenerPorId(idPromocion)'),
-        c('F', 'B', 'ObtenerHistorial(idPromocion)'),
-        r('F', 'A', 'Ficha de promoción (PDF) para Contabilidad')
-      ] }
+      c('F', 'B', 'ObtenerTodas()  [recarga]')
     ]
   },
   {
@@ -776,8 +765,7 @@ module.exports = [
               nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion, …)', 'B'),
               r('B', 'F', 'ok'),
               r('F', 'A', '"Sugerencia #id descartada"'),
-              c('F', 'B', 'ObtenerPendientes()  [recarga]'),
-              { opt: '¿Imprimir la constancia de descarte? Sí', pasos: [c('F', 'B', 'ObtenerPorId(idSugerencia)'), r('B', 'F', 'sugerencia Descartada'), r('F', 'A', 'Constancia de descarte (PDF): fin')] }
+              c('F', 'B', 'ObtenerPendientes()  [recarga]')
             ] }] }
         ] }] }
     ]
@@ -823,11 +811,7 @@ module.exports = [
               nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta o Cancelacion, …)', 'B'),
               r('B', 'F', 'idDictamen'),
               r('F', 'K', '"Promoción aprobada y activada" o "Promoción rechazada"'),
-              c('F', 'B', 'ObtenerPendientesRevisionContable()  [recarga la cola]'),
-              { opt: '¿Imprimir el dictamen contable? Sí', pasos: [
-                c('F', 'B', 'ObtenerPorId(idPromocion)'),
-                c('F', 'B', 'ObtenerUltimoDictamen(idPromocion)'),
-                r('F', 'K', 'Dictamen contable (PDF): Vigente, o vuelve a Administración')] }
+              c('F', 'B', 'ObtenerPendientesRevisionContable()  [recarga la cola]')
             ] }] }
         ] }] }
     ]
@@ -852,11 +836,7 @@ module.exports = [
               nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion, …)', 'B'),
               r('B', 'F', 'ok'),
               r('F', 'A', '"Promoción descartada"'),
-              c('F', 'B', 'ObtenerTodas()  [recarga]'),
-              { opt: '¿Imprimir la constancia de descarte? Sí', pasos: [
-                c('F', 'B', 'ObtenerPorId(idPromocion)'),
-                c('F', 'B', 'ObtenerDescarte(idPromocion)'),
-                r('F', 'A', 'Constancia de descarte (PDF): fin')] }
+              c('F', 'B', 'ObtenerTodas()  [recarga]')
             ] }] }
         ] }] }
     ]
@@ -884,11 +864,7 @@ module.exports = [
               nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta, …)', 'B'),
               r('B', 'F', 'idSolicitud'),
               r('F', 'V', '"Se envió a Administración la sugerencia de baja"'),
-              c('F', 'B', 'ObtenerParaVentas()  [recarga]'),
-              { opt: '¿Imprimir la solicitud de baja? Sí', pasos: [
-                c('F', 'B', 'ObtenerPorId(idPromocion)'),
-                c('F', 'B', 'ObtenerUltimaSolicitudBaja(idPromocion)'),
-                r('F', 'V', 'Solicitud de baja (PDF): Administración la resuelve')] }
+              c('F', 'B', 'ObtenerParaVentas()  [recarga]')
             ] }] }
         ] }] }
     ]
@@ -924,11 +900,7 @@ module.exports = [
                   nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion o Venta, …)', 'B'),
                   r('B', 'F', 'idSolicitud'),
                   r('F', 'A', '"Promoción dada de baja" o "Se rechazó la baja: sigue vigente"'),
-                  c('F', 'B', 'ObtenerTodas()  [recarga]'),
-                  { opt: '¿Imprimir la resolución de baja? Sí', pasos: [
-                    c('F', 'B', 'ObtenerPorId(idPromocion)'),
-                    c('F', 'B', 'ObtenerUltimaSolicitudBaja(idPromocion)'),
-                    r('F', 'A', 'Resolución de baja (PDF): informe a Gerencia (aprobada) o a Ventas (rechazada)')] }
+                  c('F', 'B', 'ObtenerTodas()  [recarga]')
                 ] }] }
             ] }] }
         ] }] }
@@ -1087,15 +1059,15 @@ module.exports = [
     // (BLL.AnalisisAbandono.Detectar, Strategy con el criterio por defecto) + planes → «Reporte de métricas».
     participantes: [A('G', 'Gerencia'), P('F', 'SugerirPromocionForm'), P('AN', 'BLL.AnalisisPromociones'), P('AR', 'BLL.AnalisisRotacion'),
                     P('AA', 'BLL.AnalisisAbandono'), P('ER', 'EstrategiaRiesgo'), P('DPE', 'DAL.Pedido'), P('DR', 'DAL.Prenda'), P('DC', 'DAL.Cliente'),
-                    P('DP', 'DAL.PlanSuscripcion')],
+                    P('DP', 'DAL.PlanSuscripcion'), P('DPR', 'DAL.Promocion')],
     pasos: [
       nota('Punto de extensión de CU01-GER: Gerencia pulsa "Analizar métricas…" antes de cargar la sugerencia', 'G', 'F'),
-      c('G', 'F', 'Pulsa "Analizar métricas…"'),
-      c('F', 'AN', 'AnalizarMetricas(modulo)'),
+      c('G', 'F', 'Elige el período (30, 90, 180 o 365 días; por defecto 90) y pulsa "Analizar métricas…"'),
+      c('F', 'AN', 'AnalizarMetricas(modulo, desde, hasta)'),
       nota('PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)', 'AN'),
-      c('AN', 'AR', 'Detectar()'),
-      c('AR', 'DPE', 'ObtenerCantidadPedidosPorPrenda()'),
-      r('DPE', 'AR', 'pedidos por prenda'),
+      c('AN', 'AR', 'Detectar(desde)'),
+      c('AR', 'DPE', 'ObtenerCantidadPedidosPorPrenda(desde)'),
+      r('DPE', 'AR', 'pedidos por prenda en el período'),
       c('AR', 'DR', 'ObtenerTodos()'),
       r('DR', 'AR', 'prendas'),
       r('AR', 'AN', 'List<RotacionPrenda>'),
@@ -1113,8 +1085,10 @@ module.exports = [
       r('DP', 'AN', 'planes'),
       c('AN', 'AN', 'AbandonoPorPlan(enRiesgo, planes)'),
       c('AN', 'AN', 'Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría; abandono: clientes en riesgo por plan]'),
+      c('AN', 'DPR', 'ObtenerImpacto(desde, hasta)'),
+      r('DPR', 'AN', 'impacto de cada promoción: cobros, total descontado y total cobrado'),
       nota('bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"', 'AN'),
-      r('AN', 'F', 'ReporteMetricas (abandono por plan, rotación por categoría, oportunidades)'),
+      r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades)'),
       c('F', 'AN', 'HayOportunidad(reporte)'),
       r('AN', 'F', 'hayOportunidad'),
       c('F', 'F', 'MostrarReporte(reporte, hayOportunidad)'),

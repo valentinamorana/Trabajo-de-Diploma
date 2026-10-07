@@ -48,6 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <!-- PDF generado directamente (Entrega 3: sin impresora virtual). Fuentes de Windows embebidas (Unicode). -->
+    <PackageReference Include="iTextSharp" Version="5.5.13.3" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="DashboardForm.cs">
       <SubType>Form</SubType>
     </Compile>

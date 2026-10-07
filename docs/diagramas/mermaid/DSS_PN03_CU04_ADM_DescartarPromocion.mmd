@@ -25,10 +25,5 @@ sequenceDiagram
       B-->>F: ok
       F-->>A: "Promoción descartada"
       F->>B: ObtenerTodas()  [recarga]
-      opt ¿Imprimir la constancia de descarte? Sí
-        F->>B: ObtenerPorId(idPromocion)
-        F->>B: ObtenerDescarte(idPromocion)
-        F-->>A: Constancia de descarte (PDF): fin
-      end
     end
   end

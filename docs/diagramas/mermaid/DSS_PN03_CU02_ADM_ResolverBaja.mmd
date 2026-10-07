@@ -43,11 +43,6 @@ sequenceDiagram
         B-->>F: idSolicitud
         F-->>A: "Promoción dada de baja" o "Se rechazó la baja: sigue vigente"
         F->>B: ObtenerTodas()  [recarga]
-        opt ¿Imprimir la resolución de baja? Sí
-          F->>B: ObtenerPorId(idPromocion)
-          F->>B: ObtenerUltimaSolicitudBaja(idPromocion)
-          F-->>A: Resolución de baja (PDF): informe a Gerencia (aprobada) o a Ventas (rechazada)
-        end
       end
     end
   end

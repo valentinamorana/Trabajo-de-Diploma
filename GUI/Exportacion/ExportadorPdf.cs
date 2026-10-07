@@ -1,35 +1,33 @@
 using System;
 using System.Data;
-using System.Drawing;
-using System.Drawing.Printing;
+using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 using Servicios.Multiidioma;
+using Color = System.Drawing.Color;
 
 namespace GUI.Exportacion
 {
     /// <summary>
     /// Patrón FACTORY METHOD — rol "ConcreteProduct".
     ///
-    /// Exporta un reporte a PDF mediante <see cref="PrintDocument"/> + vista previa
-    /// (desde la cual el usuario imprime o elige "Microsoft Print to PDF"). Sabe
-    /// representar tanto reportes TABULARES (grilla, ej. Bitácora) como de TEXTO
-    /// (líneas monoespaciadas, ej. Reporte de Jornada). El encabezado, el pie
-    /// "Página N" y la vista previa —antes duplicados en cada formulario— viven
-    /// ahora en un solo lugar.
+    /// Genera el archivo PDF directamente (iTextSharp), sin vista previa de impresión ni impresora
+    /// virtual ("Microsoft Print to PDF" no está permitido en la Entrega 3). Pide dónde guardarlo,
+    /// lo escribe y lo abre con el visor predeterminado. Sabe representar reportes TABULARES (grilla,
+    /// ej. Bitácora) y de TEXTO (líneas monoespaciadas, ej. documentos de PN01–PN03), con el mismo
+    /// encabezado y pie "Página N" en todos. Las fuentes de Windows se embeben (Identity-H), así que
+    /// salen bien los acentos y el ruso.
     /// </summary>
     public class ExportadorPdf : Exportador
     {
-        // Paleta vino del sistema (idéntica a la que usaban los formularios).
-        private static readonly Color VinoOscuro = Tema.RosaOscuro;
-        private static readonly Color VinoClaro  = Tema.RosaPalido;
-        private static readonly Color VinoMedio  = Tema.RosaTinta;
-
-        // Estado de paginación (instancia nueva por exportación → sin estado compartido).
-        private ReporteExportable _reporte;
-        private int _pagina;
-        private int _fila;        // próxima fila tabular a imprimir
-        private string[] _lineas; // líneas de texto (modo texto)
-        private int _linea;       // próxima línea de texto a imprimir
+        // Paleta vino del sistema.
+        private static readonly BaseColor VinoOscuro = Convertir(Tema.RosaOscuro);
+        private static readonly BaseColor VinoClaro  = Convertir(Tema.RosaPalido);
+        private static readonly BaseColor VinoMedio  = Convertir(Tema.RosaTinta);
+        private static readonly BaseColor Tinta      = Convertir(Tema.Tinta);
+        private static readonly BaseColor Borde      = Convertir(Tema.Borde);
 
         public ExportadorPdf(string origen)
         {
@@ -39,195 +37,176 @@ namespace GUI.Exportacion
 
         public override string Exportar(ReporteExportable reporte, IWin32Window propietario)
         {
-            _reporte = reporte;
-
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
 
             if (reporte.EsTabular && (reporte.Datos == null || reporte.Datos.Rows.Count == 0))
             {
-                MessageBox.Show(
+                MessageBox.Show(propietario,
                     T("err.pdf.sinDatos", "No hay datos para exportar."),
                     T("lbl.exportarpdf",  "Exportar PDF"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return null;
             }
 
-            if (!reporte.EsTabular)
-                _lineas = (reporte.TextoPlano ?? string.Empty)
-                          .Replace("\r\n", "\n").Split('\n');
-
-            using (var doc = new PrintDocument())
+            string ruta;
+            using (var dlg = new SaveFileDialog
             {
-                doc.DocumentName = reporte.NombreArchivo ?? reporte.Titulo ?? "Reporte";
-                doc.DefaultPageSettings.Landscape = reporte.EsTabular; // tabular en horizontal
-                doc.DefaultPageSettings.Margins   = new Margins(40, 40, 40, 40);
-                doc.BeginPrint += (s, e) => { _pagina = 1; _fila = 0; _linea = 0; };
-                doc.PrintPage  += (s, e) =>
-                {
-                    if (reporte.EsTabular) DibujarPaginaTabular(e, T);
-                    else                   DibujarPaginaTexto(e, T);
-                };
-
-                using (var preview = new PrintPreviewDialog())
-                {
-                    preview.Document = doc;
-                    preview.Width    = 1050;
-                    preview.Height   = 780;
-                    preview.Text     = $"{T("bit.pdf.vistaprevia", "Vista Previa")} — {reporte.Titulo}";
-                    preview.ShowDialog(propietario);
-                }
+                Title            = T("lbl.exportarpdf", "Exportar PDF"),
+                Filter           = "PDF (*.pdf)|*.pdf",
+                FileName         = NombreSeguro(reporte.NombreArchivo ?? reporte.Titulo ?? "Reporte") + ".pdf",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                OverwritePrompt  = true
+            })
+            {
+                if (dlg.ShowDialog(propietario) != DialogResult.OK) return null;
+                ruta = dlg.FileName;
             }
 
-            return null; // el PDF lo materializa el usuario desde la vista previa
+            Generar(reporte, ruta, T);
+
+            // Se abre con el visor de PDF del equipo (si no hay ninguno, el archivo igual quedó guardado).
+            try { Process.Start(new ProcessStartInfo(ruta) { UseShellExecute = true }); }
+            catch (Exception ex) { Trace.TraceWarning("[ExportadorPdf] No se pudo abrir el PDF: " + ex.Message); }
+            return ruta;
         }
 
-        // ── Modo TABULAR (grilla con encabezados + filas alternadas) ──────────────
-        private void DibujarPaginaTabular(PrintPageEventArgs e, Func<string, string, string> T)
+        // Escribe el PDF en 'ruta'. Público para poder generarlo sin diálogo (por ejemplo, en pruebas).
+        public static void Generar(ReporteExportable reporte, string ruta, Func<string, string, string> T)
         {
-            Graphics  g      = e.Graphics;
-            Rectangle margen = e.MarginBounds;
-            float y          = margen.Top;
-            float xIzq       = margen.Left;
-            float anchoTotal = margen.Width;
-
-            DataTable tabla = _reporte.Datos;
-
-            using (var fuenteTitulo = new Font("Segoe UI", 13, FontStyle.Bold))
-            using (var fuenteHeader = new Font("Segoe UI", 8,  FontStyle.Bold))
-            using (var fuenteCelda  = new Font("Segoe UI", 7.5f))
+            var tamanio = reporte.EsTabular ? PageSize.A4.Rotate() : PageSize.A4;   // tabular en horizontal
+            using (var fs = new FileStream(ruta, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var doc = new Document(tamanio, 30, 30, 30, 40))
             {
-                // Título (solo en la primera página)
-                if (_pagina == 1)
+                var writer = PdfWriter.GetInstance(doc, fs);
+                writer.PageEvent = new PiePagina(string.Format(T("bit.pdf.pagina", "WardrobeFlow — Página {0}"), "{0}"));
+                doc.AddTitle(reporte.Titulo ?? "");
+                doc.AddCreator("WardrobeFlow");
+                doc.Open();
+
+                Encabezado(doc, reporte, T);
+                if (reporte.EsTabular) Tabla(doc, reporte);
+                else                   Texto(doc, reporte);
+
+                doc.Close();
+            }
+        }
+
+        // Barra de título + fecha de generación (+ cantidad de registros si es tabular).
+        private static void Encabezado(Document doc, ReporteExportable reporte, Func<string, string, string> T)
+        {
+            var barra = new PdfPTable(1) { WidthPercentage = 100, SpacingAfter = 4 };
+            barra.AddCell(new PdfPCell(new Phrase(reporte.Titulo ?? "", Fuente(Fuentes.TituloNegrita, 13, BaseColor.WHITE)))
+            {
+                BackgroundColor = VinoOscuro, Border = Rectangle.NO_BORDER,
+                PaddingTop = 5, PaddingBottom = 7, PaddingLeft = 6
+            });
+            doc.Add(barra);
+
+            string sub = $"{T("rpt.txt.generado", "Generado")}: {DateTime.Now:dd/MM/yyyy HH:mm}";
+            if (reporte.EsTabular)
+                sub += "   |   " + string.Format(T("msg.bit.registros", "{0} registro(s)"), reporte.Datos.Rows.Count);
+            doc.Add(new Paragraph(sub, Fuente(Fuentes.Normal, 8, VinoMedio)) { SpacingAfter = 6 });
+        }
+
+        // Modo TABULAR: encabezados vino, filas alternadas, se repite el encabezado en cada página.
+        private static void Tabla(Document doc, ReporteExportable reporte)
+        {
+            DataTable datos = reporte.Datos;
+            int nCols = datos.Columns.Count;
+            var tabla = new PdfPTable(nCols) { WidthPercentage = 100, HeaderRows = 1 };
+
+            for (int c = 0; c < nCols; c++)
+            {
+                string nombre = reporte.Encabezados != null && c < reporte.Encabezados.Length
+                    ? reporte.Encabezados[c] : datos.Columns[c].ColumnName;
+                tabla.AddCell(new PdfPCell(new Phrase(nombre, Fuente(Fuentes.TituloNegrita, 8, BaseColor.WHITE)))
                 {
-                    using (var brTitulo = new SolidBrush(VinoOscuro))
-                        g.DrawString(_reporte.Titulo, fuenteTitulo, brTitulo, xIzq, y);
-                    y += fuenteTitulo.GetHeight(g) + 4;
+                    BackgroundColor = VinoOscuro, BorderColor = VinoOscuro, Padding = 4
+                });
+            }
 
-                    using (var brSub = new SolidBrush(VinoMedio))
-                        g.DrawString(
-                            $"{T("rpt.txt.generado", "Generado")}: {DateTime.Now:dd/MM/yyyy HH:mm}   |   " +
-                            string.Format(T("msg.bit.registros", "{0} registro(s)"), tabla.Rows.Count),
-                            fuenteCelda, brSub, xIzq, y);
-                    y += fuenteCelda.GetHeight(g) + 6;
-
-                    using (var penLinea = new Pen(VinoOscuro, 1.5f))
-                        g.DrawLine(penLinea, xIzq, y, xIzq + anchoTotal, y);
-                    y += 5;
-                }
-
-                int nCols      = tabla.Columns.Count;
-                float colAncho = anchoTotal / nCols;
-
-                // Encabezados
-                float alturaHeader = fuenteHeader.GetHeight(g) + 8;
-                using (var brushHeaderBg = new SolidBrush(VinoOscuro))
-                using (var brushHeaderFg = new SolidBrush(Color.White))
-                {
-                    g.FillRectangle(brushHeaderBg, xIzq, y, anchoTotal, alturaHeader);
-                    for (int col = 0; col < nCols; col++)
+            bool alternar = false;
+            foreach (DataRow fila in datos.Rows)
+            {
+                for (int c = 0; c < nCols; c++)
+                    tabla.AddCell(new PdfPCell(new Phrase(fila[c]?.ToString() ?? "", Fuente(Fuentes.Normal, 7.5f, Tinta)))
                     {
-                        string nombre = (_reporte.Encabezados != null && col < _reporte.Encabezados.Length)
-                            ? _reporte.Encabezados[col]
-                            : tabla.Columns[col].ColumnName;
-                        var rect = new RectangleF(xIzq + col * colAncho + 3, y + 3, colAncho - 6, alturaHeader - 6);
-                        g.DrawString(nombre, fuenteHeader, brushHeaderFg, rect,
-                            new StringFormat { Trimming = StringTrimming.EllipsisCharacter });
-                    }
-                }
-                y += alturaHeader + 2;
-
-                // Filas
-                float alturaCelda = fuenteCelda.GetHeight(g) + 5;
-                bool  alternar    = false;
-                using (var brushAlternar = new SolidBrush(VinoClaro))
-                using (var brushTexto    = new SolidBrush(Tema.Tinta))
-                using (var penSeparador  = new Pen(Tema.Borde, 0.5f))
-                {
-                    while (_fila < tabla.Rows.Count)
-                    {
-                        if (y + alturaCelda > margen.Bottom - 20) break;
-                        DataRow fila = tabla.Rows[_fila];
-                        if (alternar)
-                            g.FillRectangle(brushAlternar, xIzq, y, anchoTotal, alturaCelda);
-                        for (int col = 0; col < nCols; col++)
-                        {
-                            string valor = fila[col]?.ToString() ?? "";
-                            var rect = new RectangleF(xIzq + col * colAncho + 3, y + 1, colAncho - 6, alturaCelda - 2);
-                            g.DrawString(valor, fuenteCelda, brushTexto, rect,
-                                new StringFormat { Trimming = StringTrimming.EllipsisCharacter });
-                        }
-                        g.DrawLine(penSeparador, xIzq, y + alturaCelda, xIzq + anchoTotal, y + alturaCelda);
-                        y += alturaCelda;
-                        alternar = !alternar;
-                        _fila++;
-                    }
-                }
-
-                DibujarPie(g, margen, fuenteCelda, T);
+                        BackgroundColor = alternar ? VinoClaro : BaseColor.WHITE,
+                        BorderColor = Borde, BorderWidth = 0.5f, Padding = 3
+                    });
+                alternar = !alternar;
             }
-
-            e.HasMorePages = _fila < tabla.Rows.Count;
-            if (e.HasMorePages) _pagina++;
+            doc.Add(tabla);
         }
 
-        // ── Modo TEXTO (líneas monoespaciadas con barra de título) ────────────────
-        private void DibujarPaginaTexto(PrintPageEventArgs e, Func<string, string, string> T)
+        // Modo TEXTO: líneas monoespaciadas (respeta la alineación de los documentos).
+        private static void Texto(Document doc, ReporteExportable reporte)
         {
-            Graphics  g      = e.Graphics;
-            Rectangle margen = e.MarginBounds;
-            float y          = margen.Top;
-
-            using (var fuenteTitulo = new Font("Segoe UI", 13f, FontStyle.Bold))
-            using (var fuenteSub    = new Font("Segoe UI", 8f, FontStyle.Regular))
-            using (var fuenteCuerpo = new Font("Consolas", 8.5f))
-            using (var brMedio      = new SolidBrush(VinoMedio))
-            using (var brTexto      = new SolidBrush(Tema.Tinta))
-            using (var penLinea     = new Pen(VinoOscuro, 1.5f))
-            {
-                if (_pagina == 1)
-                {
-                    float headerH = fuenteTitulo.GetHeight(g) + 14;
-                    using (var brHeaderBg = new SolidBrush(VinoOscuro))
-                        g.FillRectangle(brHeaderBg, margen.Left, y, margen.Width, headerH);
-                    g.DrawString(_reporte.Titulo, fuenteTitulo, Brushes.White, margen.Left + 6, y + 5);
-                    y += headerH + 4;
-
-                    g.DrawString(
-                        $"{T("rpt.txt.generado", "Generado")}: {DateTime.Now:dd/MM/yyyy HH:mm}",
-                        fuenteSub, brMedio, margen.Left, y);
-                    y += fuenteSub.GetHeight(g) + 4;
-                    g.DrawLine(penLinea, margen.Left, y, margen.Right, y);
-                    y += 6;
-                }
-
-                float lineH = fuenteCuerpo.GetHeight(g);
-                while (_linea < _lineas.Length)
-                {
-                    if (y + lineH > margen.Bottom - 20) break;
-                    g.DrawString(_lineas[_linea], fuenteCuerpo, brTexto, margen.Left, y);
-                    _linea++;
-                    y += lineH;
-                }
-
-                DibujarPie(g, margen, fuenteSub, T);
-            }
-
-            e.HasMorePages = _linea < _lineas.Length;
-            if (e.HasMorePages) _pagina++;
+            var fuente = Fuente(Fuentes.Mono, 8.5f, Tinta);
+            foreach (string linea in (reporte.TextoPlano ?? string.Empty).Replace("\r\n", "\n").Split('\n'))
+                doc.Add(new Paragraph(linea.Length == 0 ? " " : linea, fuente) { Leading = 11.5f });
         }
 
-        // Pie de página común a ambos modos (antes duplicado en cada formulario).
-        private void DibujarPie(Graphics g, Rectangle margen, Font fuente, Func<string, string, string> T)
+        // Pie "WardrobeFlow — Página N" con una línea, en todas las páginas.
+        private sealed class PiePagina : PdfPageEventHelper
         {
-            using (var penPie = new Pen(VinoOscuro, 1f))
-            using (var brPie  = new SolidBrush(VinoMedio))
+            private readonly string _formato;
+            public PiePagina(string formato) { _formato = formato; }
+
+            public override void OnEndPage(PdfWriter writer, Document document)
             {
-                g.DrawLine(penPie, margen.Left, margen.Bottom - 16, margen.Right, margen.Bottom - 16);
-                g.DrawString(
-                    string.Format(T("bit.pdf.pagina", "WardrobeFlow — Página {0}"), _pagina),
-                    fuente, brPie, margen.Left, margen.Bottom - 14);
+                var cb = writer.DirectContent;
+                float y = document.BottomMargin - 14;
+                cb.SetColorStroke(VinoOscuro);
+                cb.SetLineWidth(1f);
+                cb.MoveTo(document.LeftMargin, y + 10);
+                cb.LineTo(document.PageSize.Width - document.RightMargin, y + 10);
+                cb.Stroke();
+                ColumnText.ShowTextAligned(cb, Element.ALIGN_LEFT,
+                    new Phrase(_formato.Replace("{0}", writer.PageNumber.ToString()), Fuente(Fuentes.Normal, 8, VinoMedio)),
+                    document.LeftMargin, y, 0);
             }
+        }
+
+        // ── Fuentes (embebidas, Unicode) ───────────────────────────────────────────
+        private enum Fuentes { Normal, TituloNegrita, Mono }
+
+        private static Font Fuente(Fuentes tipo, float tamanio, BaseColor color) =>
+            new Font(Base(tipo), tamanio, Font.NORMAL, color);
+
+        private static BaseFont _normal, _negrita, _mono;
+
+        private static BaseFont Base(Fuentes tipo)
+        {
+            switch (tipo)
+            {
+                case Fuentes.TituloNegrita: return _negrita ?? (_negrita = Cargar("segoeuib.ttf", "arialbd.ttf"));
+                case Fuentes.Mono:          return _mono    ?? (_mono    = Cargar("consola.ttf", "cour.ttf"));
+                default:                    return _normal  ?? (_normal  = Cargar("segoeui.ttf", "arial.ttf"));
+            }
+        }
+
+        // Fuente TrueType de Windows (con alternativa); si no hay ninguna, Helvetica (sin cirílico).
+        private static BaseFont Cargar(params string[] archivos)
+        {
+            string carpeta = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+            foreach (string a in archivos)
+            {
+                string ruta = Path.Combine(carpeta, a);
+                if (File.Exists(ruta))
+                    return BaseFont.CreateFont(ruta, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            }
+            return BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+        }
+
+        private static BaseColor Convertir(Color c) => new BaseColor(c.R, c.G, c.B);
+
+        // Nombre de archivo sin caracteres inválidos.
+        private static string NombreSeguro(string nombre)
+        {
+            foreach (char c in Path.GetInvalidFileNameChars()) nombre = nombre.Replace(c, '_');
+            return nombre.Trim();
         }
     }
 }

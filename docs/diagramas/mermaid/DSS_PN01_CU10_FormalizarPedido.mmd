@@ -5,7 +5,7 @@ sequenceDiagram
   participant B as BLL.Pedido
   participant D as DAL.Pedido
   participant H as DAL.Pedido<br/>Historial
-  Note over V,F: Formaliza el pedido y prepara la confirmación para el cliente
+  Note over V,F: Formaliza el pedido: la selección queda cerrada
   V->>F: Selecciona un pedido Separado y pulsa Formalizar
   F->>B: ObtenerPorId(id)  [relee el pedido]
   B-->>F: pedido
@@ -19,8 +19,5 @@ sequenceDiagram
     B->>D: Formalizar(idPedido)  [→ Pendiente de despacho, selección cerrada]
     B->>H: RegistrarCambios(cambios)  [Accion = FORMALIZAR]
     B-->>F: ok
-    F->>B: PrepararConfirmacion(modulo, idPedido)
-    B->>D: ObtenerPorId(idPedido)
-    B-->>F: pedido formalizado
-    F-->>V: Confirmación y constancia del pedido (PDF) para el cliente
+    F-->>V: Pedido Pendiente de despacho (la confirmación para el cliente queda en «Documentos»)
   end

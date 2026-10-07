@@ -9,7 +9,7 @@ namespace GUI.Exportacion
 {
     /// <summary>
     /// PN01 — arma los objetos de información del diagrama de actividad de Armar pedido como
-    /// documentos imprimibles (vista previa → imprimir o "Microsoft Print to PDF"):
+    /// documentos PDF generados directamente (ExportadorPdf, sin impresora virtual):
     ///   • Planilla de control de existencias + detalle de selección   (Vendedor → Depósito)
     ///   • Informe de disponibilidad (prendas faltantes y alternativas) (Depósito → Vendedor)
     ///   • Constancia de prendas separadas                             (Depósito)

@@ -28,10 +28,5 @@ sequenceDiagram
       B-->>F: idSolicitud
       F-->>V: "Se envió a Administración la sugerencia de baja"
       F->>B: ObtenerParaVentas()  [recarga]
-      opt ¿Imprimir la solicitud de baja? Sí
-        F->>B: ObtenerPorId(idPromocion)
-        F->>B: ObtenerUltimaSolicitudBaja(idPromocion)
-        F-->>V: Solicitud de baja (PDF): Administración la resuelve
-      end
     end
   end

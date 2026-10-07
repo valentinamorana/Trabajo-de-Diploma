@@ -8,8 +8,8 @@ namespace GUI.Exportacion
 {
     /// <summary>
     /// PN03 — arma los objetos de información del diagrama de actividad de Métricas, promociones
-    /// y toma de decisiones como documentos imprimibles (vista previa → imprimir o "Microsoft
-    /// Print to PDF"):
+    /// y toma de decisiones como documentos PDF generados directamente
+    /// (ExportadorPdf, sin impresora virtual):
     ///   • Reporte de métricas                               (Gerencia)
     ///   • Sugerencia de promoción                           (Gerencia → Administración)
     ///   • Constancia de descarte (de sugerencia o promoción) (Administración)

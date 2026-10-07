@@ -10,13 +10,14 @@ sequenceDiagram
   participant DR as DAL.Prenda
   participant DC as DAL.Cliente
   participant DP as DAL.Plan<br/>Suscripcion
+  participant DPR as DAL.Promocion
   Note over G,F: Punto de extensión de CU01-GER: Gerencia pulsa "Analizar métricas…" antes de cargar la sugerencia
-  G->>F: Pulsa "Analizar métricas…"
-  F->>AN: AnalizarMetricas(modulo)
+  G->>F: Elige el período (30, 90, 180 o 365 días, por defecto 90) y pulsa "Analizar métricas…"
+  F->>AN: AnalizarMetricas(modulo, desde, hasta)
   Note over AN: PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)
-  AN->>AR: Detectar()
-  AR->>DPE: ObtenerCantidadPedidosPorPrenda()
-  DPE-->>AR: pedidos por prenda
+  AN->>AR: Detectar(desde)
+  AR->>DPE: ObtenerCantidadPedidosPorPrenda(desde)
+  DPE-->>AR: pedidos por prenda en el período
   AR->>DR: ObtenerTodos()
   DR-->>AR: prendas
   AR-->>AN: List<RotacionPrenda>
@@ -34,8 +35,10 @@ sequenceDiagram
   DP-->>AN: planes
   AN->>AN: AbandonoPorPlan(enRiesgo, planes)
   AN->>AN: Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría, abandono: clientes en riesgo por plan]
+  AN->>DPR: ObtenerImpacto(desde, hasta)
+  DPR-->>AN: impacto de cada promoción: cobros, total descontado y total cobrado
   Note over AN: bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"
-  AN-->>F: ReporteMetricas (abandono por plan, rotación por categoría, oportunidades)
+  AN-->>F: ReporteMetricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades)
   F->>AN: HayOportunidad(reporte)
   AN-->>F: hayOportunidad
   F->>F: MostrarReporte(reporte, hayOportunidad)

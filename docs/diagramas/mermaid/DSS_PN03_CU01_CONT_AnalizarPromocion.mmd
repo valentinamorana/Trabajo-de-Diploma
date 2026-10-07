@@ -52,10 +52,5 @@ sequenceDiagram
       B-->>F: idDictamen
       F-->>K: "Promoción aprobada y activada" o "Promoción rechazada"
       F->>B: ObtenerPendientesRevisionContable()  [recarga la cola]
-      opt ¿Imprimir el dictamen contable? Sí
-        F->>B: ObtenerPorId(idPromocion)
-        F->>B: ObtenerUltimoDictamen(idPromocion)
-        F-->>K: Dictamen contable (PDF): Vigente, o vuelve a Administración
-      end
     end
   end

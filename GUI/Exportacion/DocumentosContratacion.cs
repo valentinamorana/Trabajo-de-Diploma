@@ -8,7 +8,7 @@ namespace GUI.Exportacion
 {
     /// <summary>
     /// PN02 — arma los objetos de información del diagrama de actividad de Comercialización de
-    /// la suscripción como documentos imprimibles (vista previa → imprimir o "Microsoft Print to PDF"):
+    /// la suscripción como documentos PDF generados directamente (ExportadorPdf, sin impresora virtual):
     ///   • Planes disponibles                        (Vendedor → Cliente)
     ///   • Aviso de desistimiento                    (Vendedor)
     ///   • Orden de cobro (contratación pendiente)   (Vendedor → Caja)

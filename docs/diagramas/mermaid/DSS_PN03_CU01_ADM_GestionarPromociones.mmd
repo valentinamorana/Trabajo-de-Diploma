@@ -93,8 +93,3 @@ sequenceDiagram
   F-->>A: "Promoción nro.id registrada (o reformulada): pendiente de revisión contable"
   F->>BS: ObtenerPendientes()  [recarga]
   F->>B: ObtenerTodas()  [recarga]
-  opt ¿Imprimir la ficha para Contabilidad? Sí
-    F->>B: ObtenerPorId(idPromocion)
-    F->>B: ObtenerHistorial(idPromocion)
-    F-->>A: Ficha de promoción (PDF) para Contabilidad
-  end

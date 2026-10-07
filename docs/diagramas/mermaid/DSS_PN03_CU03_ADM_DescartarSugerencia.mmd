@@ -29,10 +29,5 @@ sequenceDiagram
       B-->>F: ok
       F-->>A: "Sugerencia nro.id descartada"
       F->>B: ObtenerPendientes()  [recarga]
-      opt ¿Imprimir la constancia de descarte? Sí
-        F->>B: ObtenerPorId(idSugerencia)
-        B-->>F: sugerencia Descartada
-        F-->>A: Constancia de descarte (PDF): fin
-      end
     end
   end

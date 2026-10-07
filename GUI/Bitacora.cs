@@ -17,7 +17,7 @@ namespace GUI
     ///
     /// Filtro de fecha unificado: sólo "Últimos N días" (0 = sin filtro de fecha).
     /// Criticidad: "Todas" + valores reales 1-6, sin "None (0)".
-    /// Exportación PDF: vía PrintPreviewDialog (imprimir → "Microsoft Print to PDF").
+    /// Exportación PDF: genera el archivo directamente (ExportadorPdf, sin impresora virtual).
     ///
     /// Accesible para Administrador y Auditor (mnuAuditoria).
     /// </summary>

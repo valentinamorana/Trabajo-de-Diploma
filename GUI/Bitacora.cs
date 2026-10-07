@@ -17,7 +17,7 @@ namespace GUI
     ///
     /// Filtro de fecha unificado: sólo "Últimos N días" (0 = sin filtro de fecha).
     /// Criticidad: "Todas" + valores reales 1-6, sin "None (0)".
-    /// Exportación PDF: vía PrintPreviewDialog (imprimir → "Microsoft Print to PDF").
+    /// Exportación PDF: genera el archivo directamente (ExportadorPdf, sin impresora virtual).
     ///
     /// Accesible para Administrador y Auditor (mnuAuditoria).
     /// </summary>
@@ -266,7 +266,7 @@ namespace GUI
             cmbCriticidad.Items.Add(Tr("crit.media",      "Media (2)"));
             cmbCriticidad.Items.Add(Tr("crit.alta",       "Alta (3)"));
             cmbCriticidad.Items.Add(Tr("crit.intlogin",   "Intentos Login (4)"));
-            cmbCriticidad.Items.Add(Tr("crit.recupclave", "Recuperacion Clave (5)"));
+            cmbCriticidad.Items.Add(Tr("crit.recupclave", "Recuperación Clave (5)"));
             cmbCriticidad.Items.Add(Tr("crit.bloqueos",   "Bloqueos Cuenta (6)"));
             cmbCriticidad.SelectedIndex =
                 (idx >= 0 && idx < cmbCriticidad.Items.Count) ? idx : 0;

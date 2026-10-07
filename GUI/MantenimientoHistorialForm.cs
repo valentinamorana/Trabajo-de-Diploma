@@ -103,8 +103,8 @@ namespace GUI
                 foreach (var r in registros)
                 {
                     tabla.Rows.Add(
-                        r.FechaEntrada.ToString("dd/MM/yyyy HH:mm"),
-                        r.FechaSalida.HasValue ? r.FechaSalida.Value.ToString("dd/MM/yyyy HH:mm") : sinFecha,
+                        r.FechaEntrada.ToString("g"),
+                        r.FechaSalida.HasValue ? r.FechaSalida.Value.ToString("g") : sinFecha,
                         r.DuracionDias.HasValue ? r.DuracionDias.Value.ToString() : "—",
                         r.Actor ?? "—",
                         r.EstaAbierto ? abierto : cerrado);

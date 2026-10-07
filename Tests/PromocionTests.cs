@@ -310,6 +310,30 @@ namespace Tests
             Assert.AreEqual(1, ctx.DalPromocion.Dictamenes.Count);
         }
 
+        [TestMethod]
+        public void CrearManual_FechaFinYaPasada_LanzaFechaFinPasada()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            EsperarError(() => ctx.Crear().CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 10m,
+                    DateTime.Today.AddDays(-10), DateTime.Today.AddDays(-1), 1, null, 500m, "impacto"),
+                "err.bll.promocion.fecha_fin_pasada");
+            Assert.AreEqual(0, ctx.DalPromocion.AltaVeces);
+        }
+
+        [TestMethod]
+        public void AprobarContable_FechaFinYaPasada_LanzaAprobarVencida_SinDictamen()
+        {
+            LoginComo(1);
+            var ctx = new Contexto();
+            var promo = Promo(BE.EstadoPromocion.EnRevisionContable, 1);
+            promo.FechaInicio = DateTime.Today.AddDays(-10);
+            promo.FechaFin = DateTime.Today.AddDays(-1);   // terminó mientras esperaba la revisión
+
+            EsperarError(() => ctx.Crear().AprobarContable("Test", promo, "ok"), "err.bll.promocion.aprobar_vencida");
+            Assert.AreEqual(0, ctx.DalPromocion.Dictamenes.Count);
+        }
+
         private static void LoginComo(int idUsuario)
         {
             SessionManager.Logout();

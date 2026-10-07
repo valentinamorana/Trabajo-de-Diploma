@@ -11,7 +11,8 @@ namespace DAL.Interfaces
         List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado);
         Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente();
         List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado();
-        Dictionary<int, int> ObtenerCantidadPedidosPorPrenda();
+        // desde: solo los pedidos de esa fecha en adelante (PN03: métricas por período); null = toda la historia.
+        Dictionary<int, int> ObtenerCantidadPedidosPorPrenda(DateTime? desde = null);
         List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente);
         BE.Pedido ObtenerPorId(int idPedido);
         // ¿El cliente tiene un pedido que todavía no terminó su ciclo (BE.Pedido.EsActivo)?

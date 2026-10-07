@@ -1,25 +1,99 @@
 sequenceDiagram
   autonumber
   actor G as Gerencia
-  participant F as Analisis*Form / ReporteVentasVendedorForm
-  participant B as BLL.Analisis* / ReporteVentasVendedor
-  participant D as DAL (Cliente, Pedido, Prenda, Mantenimiento)
-  participant X as GeneradorReporte / Exportador
-  G->>F: Elige el reporte (abandono, ventas por vendedor, rotación, mantenimiento, escasez o recomendación)
-  opt Análisis de abandono: elige el criterio de riesgo (Strategy)
-    F->>B: CambiarEstrategia(estrategia)
+  participant M as Menu
+  participant FA as Analisis<br/>AbandonoForm
+  participant BA as BLL.Analisis<br/>Abandono
+  participant ER as Estrategia<br/>Riesgo
+  participant DC as DAL.Cliente
+  participant GR as Generador<br/>Reporte
+  participant EX as Exportador
+  participant FV as ReporteVentas<br/>VendedorForm
+  participant BV as BLL.Reporte<br/>VentasVendedor
+  participant FR as Analisis<br/>RotacionForm
+  participant BR as BLL.Analisis<br/>Rotacion
+  participant FM as Analisis<br/>MantenimientoForm
+  participant BM as BLL.Analisis<br/>Mantenimiento
+  participant DM as DAL.Mantenimiento<br/>Prenda
+  participant FE as Analisis<br/>EscasezForm
+  participant BE as BLL.Analisis<br/>Escasez
+  participant FC as Recomendacion<br/>PrendasForm
+  participant BC as BLL.Recomendacion<br/>Prendas
+  participant DP as DAL.Pedido
+  participant DR as DAL.Prenda
+  Note over G,M: Menú "Analítica de Negocio": seis reportes de solo lectura, cada ítem se muestra según los permisos del usuario
+  alt Análisis de Abandono
+    G->>M: Analítica de Negocio → Análisis de Abandono
+    M->>FA: new AnalisisAbandonoForm()  [AbrirUnico: hijo MDI]
+    Note over FA: Al cargar, CargarEstrategias() ofrece EstrategiaVencimientoInactividad (por defecto), EstrategiaInactividadPura y EstrategiaClienteNuevoInactivo
+    G->>FA: Elige el criterio de riesgo y pulsa Generar
+    FA->>BA: CambiarEstrategia(estrategia)  [patrón Strategy: la elegida en el combo]
+    FA->>BA: Detectar()
+    BA->>DP: ObtenerFechaUltimoPedidoPorCliente()
+    DP-->>BA: fecha del último pedido de cada cliente
+    BA->>DC: ObtenerTodos()
+    DC-->>BA: clientes
+    loop Por cada cliente con plan (TienePlan)
+      BA->>ER: Evaluar(datos)  [cliente + fecha de su último pedido]
+      ER-->>BA: ResultadoRiesgo (EnRiesgo, Motivo)
+    end
+    BA-->>FA: List<ClienteEnRiesgo>
+    FA-->>G: Grilla de clientes en riesgo y cantidad según el criterio (exportar habilitado si hay resultados)
+    opt Exportar a PDF o Guardar como .CSV
+      G->>FA: Pulsa "Exportar a PDF" o "Guardar como .CSV"
+      FA->>FA: Exportar(formato)  [formato = "pdf" o "csv", arma el ReporteExportable con la grilla]
+      FA->>GR: CrearExportador(formato)  [generador: GeneradorAnalisisAbandono, Factory Method]
+      GR-->>FA: Exportador (PDF o CSV)
+      FA->>EX: Exportar(reporte, propietario)
+      EX-->>G: PDF (vista previa) o archivo .CSV
+    end
+  else Ventas por Vendedor
+    G->>M: Analítica de Negocio → Ventas por Vendedor
+    M->>FV: new ReporteVentasVendedorForm()
+    G->>FV: Pulsa Generar
+    FV->>BV: Obtener()
+    BV->>DP: ObtenerEstadisticasPorEmpleado()
+    BV-->>FV: List<DesempenoVendedor>
+    FV-->>G: Grilla por vendedor: pedidos, entregados, cancelados y tasa de cancelación
+  else Rotación de Prendas
+    G->>M: Analítica de Negocio → Rotación de Prendas
+    M->>FR: new AnalisisRotacionForm()
+    G->>FR: Pulsa Generar
+    FR->>BR: Detectar()
+    BR->>DP: ObtenerCantidadPedidosPorPrenda()
+    BR->>DR: ObtenerTodos()  [la BLL descarta las de Baja]
+    BR-->>FR: List<RotacionPrenda>  [baja demanda: sin pedidos y 30 días o más en catálogo, alta: 5 pedidos o más]
+    FR-->>G: Grilla de prendas marcadas por rotación
+  else Tiempos de Mantenimiento
+    G->>M: Analítica de Negocio → Tiempos de Mantenimiento
+    M->>FM: new AnalisisMantenimientoForm()
+    G->>FM: Pulsa Generar
+    FM->>BM: Detectar()
+    BM->>DM: ObtenerTodos()
+    BM-->>FM: List<TiempoMantenimientoPrenda>  [3 mantenimientos o más, o promedio de 5 días o más]
+    FM-->>G: Grilla de prendas con mantenimientos excesivos
+  else Escasez de Stock
+    G->>M: Analítica de Negocio → Escasez de Stock
+    M->>FE: new AnalisisEscasezForm()
+    G->>FE: Indica el umbral mínimo (por defecto 3) y pulsa Generar
+    FE->>BE: Detectar(umbralMinimo)  [(int)numUmbral.Value]
+    BE->>DR: ObtenerConteoDisponiblesPorTalleCategoria()
+    BE-->>FE: List<EscasezStock>  [talle + categoría con menos disponibles que el umbral]
+    FE-->>G: Grilla de combinaciones en escasez
+  else Recomendación de Prendas
+    G->>M: Analítica de Negocio → Recomendación de Prendas
+    M->>FC: new RecomendacionPrendasForm()
+    Note over FC: Al cargar, CargarClientes() llena el combo con BLL.Cliente.ObtenerTodos()
+    G->>FC: Elige el cliente y pulsa Generar
+    FC->>BC: Recomendar(idCliente)  [item.Cliente.IdCliente]
+    BC->>DP: ObtenerPrendasHistoricasPorCliente(idCliente)
+    alt Sin historial de pedidos
+      BC-->>FC: lista vacía
+      FC-->>G: "El cliente no tiene historial de pedidos suficiente para recomendar"
+    else Con historial
+      BC->>DR: ObtenerDisponibles()
+      BC-->>FC: List<PrendaRecomendada>  [categoría y/o color favoritos, sin las ya pedidas]
+      FC-->>G: Grilla de prendas recomendadas
+    end
   end
-  opt Escasez de stock: indica el umbral mínimo
-    Note over F,B: Detectar(umbralMinimo)
-  end
-  G->>F: Pulsa Generar
-  F->>B: Detectar() / Obtener() / Recomendar(idCliente)
-  B->>D: Consulta los datos agregados
-  D-->>B: datos
-  B-->>F: lista de resultados (clientes en riesgo, desempeño, prendas, combinaciones talle+categoría)
-  F-->>G: Muestra la grilla (sin resultados: lo informa)
-  opt Exporta el resultado
-    G->>F: Pulsa Exportar a PDF o Guardar como .CSV
-    F->>X: CrearExportador(formato) y exportar el ReporteExportable
-    X-->>G: Archivo generado
-  end
+  Note over G: Los otros cinco formularios exportan igual: Exportar(formato) → CrearExportador(formato) → Exportar(reporte, propietario), con GeneradorVentasVendedor, GeneradorRotacion, GeneradorMantenimiento, GeneradorEscasez y GeneradorRecomendacion

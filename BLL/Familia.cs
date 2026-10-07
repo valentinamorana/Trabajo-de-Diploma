@@ -349,6 +349,22 @@ namespace BLL
                 throw new BE.AppException("err.bll.familia.patente_nombremenu",
                     "No se puede cambiar el identificador de menú de una patente: define qué permiso otorga.");
             if (nodo is BE.Patente p2) nombreMenu = p2.NombreMenu;
+
+            // Rol: Usuario.Rol guarda el NOMBRE del rol, así que renombrarlo dejaría a sus usuarios
+            // sin permisos (y su sesión dejaría de ser vigente). Mismo criterio que EliminarRol.
+            bool esRol = nodo != null && !(nodo is BE.Patente) && permisoDAL.ObtenerIdRol(nodo.Nombre) == idPermiso;
+            if (esRol && !string.Equals(nodo.Nombre, nombre, StringComparison.Ordinal))
+            {
+                if (!string.Equals(nodo.Nombre, nombre, StringComparison.OrdinalIgnoreCase) && permisoDAL.ObtenerIdRol(nombre) != 0)
+                    throw new BE.AppException("err.bll.rol_duplicado", "Ya existe un rol llamado '{0}'.", nombre);
+                int usuarios = permisoDAL.ContarUsuariosPorRol(nodo.Nombre);
+                if (usuarios > 0)
+                    throw new BE.AppException("err.bll.rol_renombrar_en_uso",
+                        "No se puede renombrar el rol '{0}': está asignado a {1} usuario(s) ({2}). " +
+                        "Reasigná esos usuarios a otro rol antes de renombrarlo.",
+                        nodo.Nombre, usuarios, string.Join(", ", permisoDAL.ObtenerUsuariosPorRol(nodo.Nombre)));
+            }
+
             permisoDAL.ModificarComponente(idPermiso, nombre, nombreMenu);
             _bitacora.Registrar("Gestión de Perfiles", $"Componente {idPermiso} modificado a '{nombre}'", BE.Criticidad.Media);
         }

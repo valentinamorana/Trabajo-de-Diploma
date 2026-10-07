@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Servicios.Multiidioma;
 
@@ -91,34 +92,30 @@ namespace GUI
         // Recarga cmbPerfil con etiquetas traducidas manteniendo los valores internos (DB keys).
         private void RellenarComboPerfil()
         {
-            var items = new[]
+            // Los roles salen del Gestor de Perfiles (antes la lista estaba escrita a mano y un rol
+            // nuevo no aparecía). La etiqueta se traduce con "perfil.<rol>" si existe.
+            List<PerfilItem> items;
+            try
             {
-                // Jerarquía consolidada (2da entrega):
-                //   Comercial:   GerenteComercial ⊃ Vendedor
-                //   Inventario:  GerenteInventario ⊃ OperadorLogistico + Deposito
-                //   Transversal: Auditor (solo lectura) · Administrador (todo)
-                new PerfilItem("Administrador",       Tr("perfil.administrador",       "Administrador")),
-                new PerfilItem("Auditor",             Tr("perfil.auditor",             "Auditor")),
-                new PerfilItem("GerenteComercial",    Tr("perfil.gerentecomercial",    "Gerente Comercial")),
-                new PerfilItem("Vendedor",            Tr("perfil.vendedor",            "Vendedor")),
-                new PerfilItem("GerenteInventario",   Tr("perfil.gerenteinventario",   "Gerente de Inventario")),
-                new PerfilItem("Deposito",          Tr("perfil.deposito",            "Depósito")),
-                new PerfilItem("OperadorLogistico",   Tr("perfil.operadorlogistico",   "Operador Logístico")),
-                // PN02 — Caja: separado de Vendedor a propósito (Vendedor es "operador" de la
-                // venta, Caja cobra).
-                new PerfilItem("Caja",                Tr("perfil.caja",                "Caja")),
-                // PN03 — Administración y Contabilidad: roles nuevos, separados de Gerencia
-                // (que reusa GerenteComercial) y de Administrador (superusuario técnico).
-                new PerfilItem("AdministracionComercial", Tr("perfil.administracioncomercial", "Administración")),
-                new PerfilItem("Contabilidad",             Tr("perfil.contabilidad",            "Contabilidad")),
-            };
+                items = new BLL.Familia().ObtenerRoles()
+                    .OrderBy(r => r == "Administrador" ? 0 : 1).ThenBy(r => r, StringComparer.CurrentCultureIgnoreCase)
+                    .Select(r => new PerfilItem(r, Tr("perfil." + r.ToLowerInvariant(), r)))
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                MostrarError(ex);
+                items = new List<PerfilItem>();
+            }
 
-            int prevIdx = cmbPerfil.SelectedIndex < 0 ? 2 : cmbPerfil.SelectedIndex;
+            // Por defecto un rol sin privilegios de administración (Vendedor), nunca Administrador.
+            int porDefecto = Math.Max(0, items.FindIndex(i => i.Value == "Vendedor"));
+            int prevIdx = cmbPerfil.SelectedIndex < 0 ? porDefecto : cmbPerfil.SelectedIndex;
             cmbPerfil.DataSource    = null;
             cmbPerfil.DisplayMember = "Label";
             cmbPerfil.ValueMember   = "Value";
             cmbPerfil.DataSource    = items;
-            cmbPerfil.SelectedIndex = prevIdx < items.Length ? prevIdx : 2;
+            if (items.Count > 0) cmbPerfil.SelectedIndex = prevIdx < items.Count ? prevIdx : porDefecto;
         }
 
         private class PerfilItem
@@ -225,7 +222,7 @@ namespace GUI
                 foreach (var u in usuarios)
                 {
                     string estado = _viendoArchivados
-                        ? (u.FechaBaja.HasValue ? $"{lblArchivado} ({u.FechaBaja.Value:dd/MM/yyyy})" : lblArchivado)
+                        ? (u.FechaBaja.HasValue ? $"{lblArchivado} ({u.FechaBaja.Value:d})" : lblArchivado)
                         : (u.Bloqueado ? lblBloqueada : lblActivo);
                     tabla.Rows.Add(
                         u.Id,
@@ -251,8 +248,7 @@ namespace GUI
                 string fmt = _viendoArchivados
                     ? Tr("msg.usr.archivados", "{0} usuario(s) archivado(s).")
                     : Tr("msg.usr.cargados",   "{0} usuario(s) registrado(s).");
-                lblMensaje.ForeColor = Color.DarkGreen;
-                lblMensaje.Text      = string.Format(fmt, usuarios.Count);
+                MostrarCarga(string.Format(fmt, usuarios.Count));
 
                 // En vista de archivados, las acciones sobre activos no aplican.
                 btnAgregar.Enabled       = !_viendoArchivados;
@@ -341,12 +337,9 @@ namespace GUI
             int    idUsuario = Convert.ToInt32(dgvUsuarios.SelectedRows[0].Cells["ID"].Value);
             string username  = dgvUsuarios.SelectedRows[0].Cells["Username"].Value?.ToString() ?? "";
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(Tr("conf.desbloquear.body",  "¿Desbloquear la cuenta de '{0}'?"), username),
-                Tr("conf.desbloquear.titulo", "Confirmar Desbloqueo"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
+                Tr("conf.desbloquear.titulo", "Confirmar Desbloqueo"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirm != DialogResult.Yes) return;
 
@@ -372,11 +365,10 @@ namespace GUI
             int    idUsuario = Convert.ToInt32(dgvUsuarios.SelectedRows[0].Cells["ID"].Value);
             string username  = dgvUsuarios.SelectedRows[0].Cells["Username"].Value?.ToString() ?? "";
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(Tr("conf.usr.archivar.body",
                     "¿Archivar al usuario '{0}'?\n\nNo podrá iniciar sesión y saldrá de la lista, pero se conserva su historial.\nPodrá eliminarse definitivamente tras 1 año."), username),
-                Tr("conf.usr.archivar.titulo", "Confirmar Archivado"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                Tr("conf.usr.archivar.titulo", "Confirmar Archivado"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirm != DialogResult.Yes) return;
 
@@ -415,11 +407,10 @@ namespace GUI
                 return;
             }
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(Tr("conf.usr.purgar.body",
                     "Se eliminarán DEFINITIVAMENTE {0} usuario(s) archivado(s) hace más de 1 año.\nEsta acción no se puede deshacer.\n\n¿Continuar?"), elegibles),
-                Tr("conf.usr.purgar.titulo", "Confirmar Purga"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                Tr("conf.usr.purgar.titulo", "Confirmar Purga"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirm != DialogResult.Yes) return;
 

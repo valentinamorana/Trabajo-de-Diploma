@@ -5,11 +5,12 @@ erDiagram
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
-  Cliente ||--o{ Contratacion : "IdCliente"
-  Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
+  Cliente ||--o{ Contratacion : "IdCliente"
+  Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Promocion ||--o{ DictamenContable : "IdPromocion"
+  Promocion |o--o{ HistorialCobro : "IdPromocion"
   Cliente ||--o{ HistorialCobro : "IdCliente"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
@@ -21,12 +22,12 @@ erDiagram
   Empleado ||--o{ Pedido : "IdEmpleado"
   Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
-  Pedido ||--o{ PedidoPrenda : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
+  Pedido ||--o{ PedidoPrenda : "IdPedido"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
-  PlanSuscripcion |o--o{ Promocion : "IdPlan"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
+  PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Promocion ||--o{ PromocionHistorial : "IdPromocion"
   Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
@@ -88,6 +89,10 @@ erDiagram
     date VigenciaHasta "NULL"
     decimal(10_2) PrecioMensual "NULL"
     int IdReferenteAcreditado FK "NULL"
+    int IdPlanCuotas FK "NULL"
+    decimal(10_2) RecargoCuotas "NULL"
+    decimal(10_2) CreditoCambioPlan "NULL"
+    nvarchar(200) MotivoAnulacion "NULL"
     int DVH "NULL"
   }
   Promocion {
@@ -167,6 +172,11 @@ erDiagram
     datetime FechaResolucion "NULL"
     int Resultado
     nvarchar(100) Actor "NULL"
+    int IdMedioPago FK "NULL"
+    nvarchar(50) NumeroComprobante "NULL"
+    int Modalidad "NULL"
+    decimal(10_2) DescuentoAplicado "NULL"
+    int IdPromocion FK "NULL"
   }
   Pedido {
     int IdPedido PK

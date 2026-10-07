@@ -63,7 +63,7 @@ if (Test-Path $vswhere) {
 if (-not $msbuild) { throw 'No se encontró MSBuild (Visual Studio).' }
 
 Write-Host 'Compilando la solución (Rebuild, Release)...' -ForegroundColor Cyan
-& $msbuild (Join-Path $raiz 'WardrobeFlow.slnx') -t:Rebuild -p:Configuration=Release -v:minimal -nologo
+& $msbuild (Join-Path $raiz 'WardrobeFlow.slnx') -restore -t:Rebuild -p:Configuration=Release -v:minimal -nologo
 if ($LASTEXITCODE -ne 0) { throw 'Falló la compilación de la solución.' }
 & $msbuild (Join-Path $dir 'DbInstaller\DbInstaller.csproj') -t:Rebuild -p:Configuration=Release -v:minimal -nologo
 if ($LASTEXITCODE -ne 0) { throw 'Falló la compilación de DbInstaller.' }

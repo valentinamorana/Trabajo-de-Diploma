@@ -14,6 +14,7 @@ namespace BLL
         private readonly DAL.Interfaces.ICobroDAL dalCobro;
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
+        private readonly DAL.Interfaces.IPromocionDAL dalPromocion;   // null: cobro sin promociones
         private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
         private readonly Manejadores.ManejadorCobro cadena;
@@ -27,6 +28,7 @@ namespace BLL
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalCobro = dalCobro ?? throw new ArgumentNullException(nameof(dalCobro));
             this.dalCargoPrenda = dalCargoPrenda ?? throw new ArgumentNullException(nameof(dalCargoPrenda));
+            this.dalPromocion = dalPromocion;
 
             // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
             // Program.cs del ejemplo de cátedra (director.AgregarSiguiente(directorGeneral);
@@ -44,7 +46,7 @@ namespace BLL
 
         public Manejadores.ResultadoCobro Procesar(
             string modulo, BE.Cliente cliente, Manejadores.DecisionCobro decision,
-            BE.Builders.ModalidadCobro modalidad, string actor)
+            BE.Builders.ModalidadCobro modalidad, string actor, int? idMedioPago = null)
         {
             // N01 — El cobro recurrente de la suscripción lo registra CAJA (decisión del proceso:
             // quien vende no cobra). Se gobierna por la patente de edición de Caja; la de
@@ -66,13 +68,25 @@ namespace BLL
                     "{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.",
                     cliente.NombreCompleto);
 
+            // N01 — como en PN02, un cobro exitoso registra con qué medio pagó el cliente.
+            if (decision == Manejadores.DecisionCobro.Cobrado)
+            {
+                if (!idMedioPago.HasValue)
+                    throw new BE.AppException("err.bll.cobro.medio_requerido",
+                        "Indicá el medio de pago con el que abonó el cliente.");
+                if (!ObtenerMediosPago().Exists(m => m.IdMedioPago == idMedioPago.Value))
+                    throw new BE.AppException("err.bll.contratacion.medio_invalido",
+                        "El medio de pago indicado no existe.");
+            }
+
             var contexto = new Manejadores.ContextoCobro
             {
                 Cliente = cliente,
                 Decision = decision,
                 Modalidad = modalidad,
                 Actor = actor,
-                Modulo = modulo
+                Modulo = modulo,
+                IdMedioPago = decision == Manejadores.DecisionCobro.Cobrado ? idMedioPago : null
             };
 
             var resultado = cadena.Procesar(contexto);
@@ -91,6 +105,13 @@ namespace BLL
 
         public List<BE.Cobro> ObtenerHistorial(int idCliente) => dalCobro.ObtenerPorCliente(idCliente);
 
+        // Un cobro (para reimprimir su comprobante).
+        public BE.Cobro ObtenerCobro(int idCobro) => dalCobro.ObtenerPorId(idCobro);
+
+        // Medios de pago vigentes (el mismo catálogo que Caja usa en PN02).
+        public List<BE.MedioPago> ObtenerMediosPago() =>
+            (dalCobro.ObtenerMediosPago() ?? new List<BE.MedioPago>()).Where(m => m.Activo).ToList();
+
         // Clientes a los que hoy corresponde procesarles un cobro: con plan, con la suscripción
         // vencida o próxima a vencer (mismo criterio que DetectarCobroHandler) y sin una
         // contratación PN02 pendiente de pago (Procesar los rechaza). Antes este filtro lo
@@ -103,17 +124,41 @@ namespace BLL
                 .ToList();
         }
 
-        // Anticipa lo que el próximo cobro del cliente va a sumar por cargos de daño/pérdida
-        // pendientes (los mismos que ProcesarPagoHandler suma al cobrar). Antes la suma la
-        // hacía CobroSuscripcionForm.
-        public BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente)
+        // Anticipa el próximo cobro del cliente con la misma cuenta que ProcesarPagoHandler:
+        // período (precio × meses) con el único descuento del ciclo + cargos por daño/pérdida
+        // pendientes. Así el operador ve el total ANTES de procesar.
+        public BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente,
+            BE.Builders.ModalidadCobro modalidad = BE.Builders.ModalidadCobro.Mensual)
         {
             var pendientes = dalCargoPrenda.ObtenerPendientesPorCliente(idCliente) ?? new List<BE.CargoPrenda>();
-            return new BE.PrevisualizacionCobro
+            var previa = new BE.PrevisualizacionCobro
             {
                 CantidadCargosPendientes = pendientes.Count,
                 TotalCargosPendientes    = pendientes.Sum(c => c.Monto)
             };
+
+            var cliente = dalCliente.ObtenerPorId(idCliente);
+            if (cliente != null && cliente.TienePlan())
+            {
+                var r = Manejadores.ProcesarPagoHandler.CalcularDescuento(cliente, modalidad, ObtenerPromocionesVigentes());
+                previa.Bruto = r.Bruto;
+                previa.Descuento = r.Descuento;
+                previa.NombrePromocion = r.Promocion?.Nombre;
+                previa.UsaCreditoReferido = r.UsaCreditoReferido;
+            }
+            return previa;
+        }
+
+        // Igual que ProcesarPagoHandler: sin DAL de promociones o si falla la consulta, sin promociones.
+        private List<BE.Promocion> ObtenerPromocionesVigentes()
+        {
+            if (dalPromocion == null) return new List<BE.Promocion>();
+            try { return dalPromocion.ObtenerVigentes(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning("[BLL.Cobro] Promociones no disponibles: " + ex.Message);
+                return new List<BE.Promocion>();
+            }
         }
     }
 }

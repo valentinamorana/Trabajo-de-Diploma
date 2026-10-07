@@ -259,6 +259,46 @@ namespace Tests
             Assert.AreEqual(cliente.IdCliente, fake.UltimoIdBaja);
         }
 
+        [TestMethod]
+        public void Baja_ConPedidoEnCurso_LanzaBajaPedido_SinTocarElDAL()
+        {
+            // PN01: el pedido quedaría huérfano en la cola de Depósito.
+            LoginComoAdministrador();
+            var fake = new FakeClienteDAL();
+            var cliente = ClienteValido();
+            cliente.StockUtilizado = 0;
+            var pedidos = new FakePedidoDAL();
+            pedidos.PedidosDevueltos.Add(new BE.Pedido { IdCliente = cliente.IdCliente, Estado = BE.EstadoPedido.EnControlStock });
+            var bll = new BLL.Cliente(fake, new FakePlanSuscripcionDAL(), pedidos);
+
+            try
+            {
+                bll.Baja("Test", cliente);
+                Assert.Fail("Debía bloquear la baja con un pedido en curso.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cliente.baja_pedido", ex.Clave);
+            }
+            Assert.AreEqual(0, fake.BajaVeces);
+        }
+
+        [TestMethod]
+        public void Baja_ConPedidosTerminados_DaDeBaja()
+        {
+            LoginComoAdministrador();
+            var fake = new FakeClienteDAL();
+            var cliente = ClienteValido();
+            cliente.StockUtilizado = 0;
+            var pedidos = new FakePedidoDAL();
+            pedidos.PedidosDevueltos.Add(new BE.Pedido { IdCliente = cliente.IdCliente, Estado = BE.EstadoPedido.Entregado });
+            pedidos.PedidosDevueltos.Add(new BE.Pedido { IdCliente = cliente.IdCliente, Estado = BE.EstadoPedido.Cancelado });
+
+            new BLL.Cliente(fake, new FakePlanSuscripcionDAL(), pedidos).Baja("Test", cliente);
+
+            Assert.AreEqual(1, fake.BajaVeces);
+        }
+
         // ── Modificar (sin cambio de plan — no toca DAL.PlanSuscripcion) ────────
 
         [TestMethod]
@@ -293,6 +333,30 @@ namespace Tests
 
             Assert.AreEqual(1, fake.ModificarVeces);
             Assert.AreSame(cliente, fake.UltimoModificado);
+        }
+
+        [TestMethod]
+        public void Modificar_DesdeElFormulario_ConservaGraciaPausaYBeneficioReferidoDeLaBD()
+        {
+            // El formulario de edición arma un BE.Cliente nuevo sin la gracia, la pausa ni el
+            // beneficio por referido: el BLL no tiene que pisarlos con vacíos.
+            LoginComoAdministrador();
+            var enBD = ClienteValido();
+            enBD.FechaLimiteGracia = new DateTime(2026, 10, 20);
+            enBD.FechaPausaHasta = new DateTime(2026, 11, 15);
+            enBD.BeneficioReferidoOtorgado = true;
+            var fake = new FakeClienteDAL { ClientePorId = enBD };
+            var bll = new BLL.Cliente(fake);
+
+            var delFormulario = ClienteValido();
+            delFormulario.Email = "nuevo@mail.com";
+            bll.Modificar("Test", delFormulario);
+
+            Assert.AreEqual(1, fake.ModificarVeces);
+            Assert.AreEqual("nuevo@mail.com", fake.UltimoModificado.Email);
+            Assert.AreEqual(new DateTime(2026, 10, 20), fake.UltimoModificado.FechaLimiteGracia);
+            Assert.AreEqual(new DateTime(2026, 11, 15), fake.UltimoModificado.FechaPausaHasta);
+            Assert.IsTrue(fake.UltimoModificado.BeneficioReferidoOtorgado);
         }
 
         [TestMethod]
@@ -695,6 +759,25 @@ namespace Tests
             new BLL.PlanSuscripcion(dal).Modificar(PlanEditado());
 
             Assert.IsTrue(dal.UltimoModificado.Estado);
+        }
+
+        // PN02: una contratación pendiente de un plan desactivado ya no se podría cobrar.
+        [TestMethod]
+        public void PlanDesactivar_ConContratacionPendiente_LanzaTieneContrataciones_SinDesactivar()
+        {
+            LoginComoAdministrador();
+            var dal = new FakePlanSuscripcionDAL();
+            var contrataciones = new FakeContratacionDAL();
+            contrataciones.PendientesDePago.Add(new BE.Contratacion { IdContratacion = 1, IdPlan = 4 });
+            contrataciones.PendientesDePago.Add(new BE.Contratacion { IdContratacion = 2, IdPlan = 9 });
+
+            try
+            {
+                new BLL.PlanSuscripcion(dal, null, contrataciones).Desactivar(4);
+                Assert.Fail("Debía bloquear la desactivación.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.plan.tiene_contrataciones", ex.Clave); }
+            Assert.AreEqual(0, dal.DesactivarVeces);
         }
     }
 }

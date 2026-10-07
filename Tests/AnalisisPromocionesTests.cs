@@ -14,7 +14,8 @@ namespace Tests
         private class RotacionFake : BLL.Interfaces.IAnalisisRotacionService
         {
             public List<BE.RotacionPrenda> Resultado { get; set; } = new List<BE.RotacionPrenda>();
-            public List<BE.RotacionPrenda> Detectar() => Resultado;
+            public System.DateTime? UltimoDesde { get; private set; }
+            public List<BE.RotacionPrenda> Detectar(System.DateTime? desde = null) { UltimoDesde = desde; return Resultado; }
         }
 
         private class AbandonoFake : BLL.Interfaces.IAnalisisAbandonoService
@@ -164,6 +165,50 @@ namespace Tests
                 Assert.Fail("Debía exigir sesión.");
             }
             catch (BE.AppException ex) { Assert.AreEqual("err.bll.sesion_expirada", ex.Clave); }
+        }
+
+        [TestMethod]
+        public void AnalizarMetricas_SinPeriodo_AnalizaLosUltimos90DiasEIncluyeElImpactoDeLasPromociones()
+        {
+            Login();
+            var rot = new RotacionFake();
+            var promos = new FakePromocionDAL();
+            promos.Impacto.Add(new BE.MetricaImpactoPromocion
+            {
+                IdPromocion = 3, Nombre = "Verano", Estado = BE.EstadoPromocion.Vigente, Cobros = 4, TotalDescontado = 2000m, TotalCobrado = 18000m
+            });
+            var bll = new BLL.AnalisisPromociones(rot, new AbandonoFake(), new FakePlanSuscripcionDAL(), promos);
+
+            var reporte = bll.AnalizarMetricas("Test");
+
+            var desde = System.DateTime.Today.AddDays(-BLL.AnalisisPromociones.DiasPeriodoPorDefecto);
+            Assert.AreEqual(desde, reporte.Desde);
+            Assert.AreEqual(System.DateTime.Today, reporte.Hasta);
+            Assert.AreEqual(desde, rot.UltimoDesde, "La rotación cuenta solo los pedidos del período.");
+            Assert.AreEqual(desde, promos.UltimoDesdeImpacto);
+            Assert.AreEqual(1, reporte.ImpactoPromociones.Count);
+            Assert.AreEqual(2000m, reporte.ImpactoPromociones[0].TotalDescontado);
+        }
+
+        [TestMethod]
+        public void AnalizarMetricas_PeriodoInvertido_LanzaRangoInvalido()
+        {
+            Login();
+            try
+            {
+                Crear(new RotacionFake(), new AbandonoFake()).AnalizarMetricas("Test", System.DateTime.Today, System.DateTime.Today.AddDays(-1));
+                Assert.Fail("Debía rechazar un período invertido.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.promocion.rango_fechas_invalido", ex.Clave); }
+        }
+
+        [TestMethod]
+        public void Detectar_PrendaSinPedidosEnElPeriodo_CuentaComoBajaDemanda()
+        {
+            var rot = new RotacionFake();
+            rot.Resultado.Add(new BE.RotacionPrenda { NombrePrenda = "A", Categoria = "Saco", Clave = "rotacion.motivo.bajademanda.periodo" });
+            rot.Resultado.Add(new BE.RotacionPrenda { NombrePrenda = "B", Categoria = "Saco", Clave = "rotacion.motivo.bajademanda.periodo" });
+            Assert.AreEqual(1, Crear(rot, new AbandonoFake()).Detectar().Count);
         }
     }
 }

@@ -54,7 +54,12 @@ namespace Tests.Fakes
         public List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado) => PedidosDevueltos.FindAll(p => p.Estado == estado);
         public Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente() => FechaUltimoPedidoPorCliente;
         public List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado() => EstadisticasPorEmpleado;
-        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda() => CantidadPedidosPorPrenda;
+        public DateTime? UltimoDesdeRotacion { get; private set; }
+        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda(DateTime? desde = null)
+        {
+            UltimoDesdeRotacion = desde;
+            return CantidadPedidosPorPrenda;
+        }
         public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente) => PrendasHistoricasPorCliente;
         public BE.Pedido ObtenerPorId(int idPedido) => PedidosDevueltos.Find(p => p.IdPedido == idPedido);
         public bool TienePedidoActivo(int idCliente) => PedidosDevueltos.Exists(p => p.IdCliente == idCliente && p.EsActivo());

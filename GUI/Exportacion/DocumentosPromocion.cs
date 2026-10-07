@@ -8,8 +8,8 @@ namespace GUI.Exportacion
 {
     /// <summary>
     /// PN03 — arma los objetos de información del diagrama de actividad de Métricas, promociones
-    /// y toma de decisiones como documentos imprimibles (vista previa → imprimir o "Microsoft
-    /// Print to PDF"):
+    /// y toma de decisiones como documentos PDF generados directamente
+    /// (ExportadorPdf, sin impresora virtual):
     ///   • Reporte de métricas                               (Gerencia)
     ///   • Sugerencia de promoción                           (Gerencia → Administración)
     ///   • Constancia de descarte (de sugerencia o promoción) (Administración)
@@ -29,7 +29,7 @@ namespace GUI.Exportacion
         }
 
         private static string Fecha(DateTime? f, bool conHora = true) =>
-            f.HasValue ? f.Value.ToString(conHora ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy") : "—";
+            f.HasValue ? f.Value.ToString(conHora ? "g" : "d") : "—";
 
         // ── Textos de los enums (los usan también las pantallas de PN03) ───────
 
@@ -103,6 +103,14 @@ namespace GUI.Exportacion
         {
             var sb = new StringBuilder();
             sb.AppendLine($"{Tr("doc.promo.fechareporte", "Fecha del reporte")}: {Fecha(r.Fecha)}");
+            sb.AppendLine(string.Format(Tr("doc.promo.periodo", "Período analizado: del {0:d} al {1:d}"), r.Desde, r.Hasta));
+            sb.AppendLine();
+            // Impacto de las promociones en los cobros del período (PN02 + N01).
+            sb.AppendLine(Tr("doc.promo.impactoperiodo", "Impacto de las promociones en el período (cobros que las usaron):"));
+            if (r.ImpactoPromociones.Count == 0) sb.AppendLine("   " + Tr("doc.promo.impacto.sindatos", "Ningún cobro del período usó una promoción."));
+            foreach (var m in r.ImpactoPromociones)
+                sb.AppendLine(string.Format(Tr("doc.promo.impactolinea", "   • {0} ({1}): {2} cobro(s) — {3:C2} descontados — {4:C2} cobrados"),
+                                            m.Nombre, Estado(m.Estado), m.Cobros, m.TotalDescontado, m.TotalCobrado));
             sb.AppendLine();
             sb.AppendLine(Tr("doc.promo.abandonoplan", "Abandono por plan (clientes en riesgo):"));
             if (r.AbandonoPorPlan.Count == 0) sb.AppendLine("   " + Tr("doc.promo.sindatos", "Sin casos detectados."));

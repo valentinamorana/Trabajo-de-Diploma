@@ -1,0 +1,38 @@
+sequenceDiagram
+  autonumber
+  actor C as Caja
+  participant F as Contrataciones<br/>PendientesForm
+  participant B as BLL.<br/>Contratacion
+  participant PC as PoliticaCuotas
+  participant D as DAL.<br/>Contratacion
+  Note over C,F: Punto de extensión de CU01-CAJ: el medio de pago elegido es Tarjeta de crédito (PermiteCuotas)
+  C->>F: Elige Tarjeta de crédito como medio de pago
+  F->>B: ObtenerPlanesCuotas(modalidad)
+  B->>D: ObtenerPlanesCuotas()
+  D-->>B: planes de cuotas
+  B->>PC: Disponibles(planes, modalidad)
+  Note over PC: Solo planes activos y sin superar los meses de la modalidad: Mensual 1, Trimestral hasta 3, Anual hasta 12
+  PC-->>B: planes disponibles
+  B-->>F: planes de cuotas
+  F-->>C: Planes de cuotas (1 sin interés, 3: 5 %, 6: 10 %, 12: 20 %)
+  C->>F: Elige la cantidad de cuotas
+  F->>PC: Financiar(total, plan)
+  PC-->>F: detalle de financiación
+  F-->>C: Valor de cuota, recargo y total a abonar
+  C->>F: Pulsa Cobrar
+  F->>B: ConfirmarCobro(modulo, contratacion, idMedioPago, importeConfirmado, idPlanCuotas)
+  B->>B: ResolverCuotas(medio, idPlanCuotas, modalidad)
+  B->>D: ObtenerPlanesCuotas()
+  D-->>B: planes de cuotas
+  alt El medio no financia, el plan no existe o supera los meses de la modalidad
+    B-->>F: AppException(cuotas_medio / cuotas_invalidas / cuotas_modalidad)
+    F-->>C: Informa el motivo: no se cobra
+  else Plan válido
+    B->>PC: Financiar(total, plan)
+    PC-->>B: recargo y valor de cuota
+    B->>D: ConfirmarCobro(idContratacion, idCaja, idMedioPago, numeroComprobante, importe, descuento, idPromocion, idPlanCuotas, recargoCuotas)
+    D-->>B: true
+    Note over B: Sigue la emisión del comprobante y la activación de la suscripción (CU01-CAJ / CU02-CAJ)
+    B-->>F: Liquidación con cuotas, recargo y valor de cuota
+    F-->>C: Comprobante (PDF) con las cuotas y el recargo
+  end

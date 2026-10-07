@@ -1,9 +1,9 @@
 classDiagram
   direction TB
   class BLL_Cobro["BLL.Cobro"] {
-    +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string) ResultadoCobro
+    +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string,  int?) ResultadoCobro
     +ObtenerElegibles() List~Cliente~
-    +PrevisualizarCobro(int) PrevisualizacionCobro
+    +PrevisualizarCobro(int,  ModalidadCobro) PrevisualizacionCobro
   }
   class BLL_Manejadores_ManejadorCobro["BLL.Manejadores.ManejadorCobro"] {
     <<abstract>>
@@ -28,8 +28,9 @@ classDiagram
     +ModalidadCobro Modalidad
     +string Actor
     +string Modulo
+    +int? IdMedioPago
   }
-  class PoliticaDescuento {
+  class BLL_Politicas_PoliticaDescuento["BLL.Politicas.PoliticaDescuento"] {
     <<static>>
     +DescuentoDe(Promocion,  decimal,  int) decimal
     +Resolver(decimal,  int?,  IEnumerable~Promocion~,  decimal,  int) ResultadoDescuento
@@ -40,4 +41,4 @@ classDiagram
   BLL_Manejadores_ManejadorCobro <|-- BLL_Manejadores_SuspenderHandler
   BLL_Cobro --> "1" BLL_Manejadores_DetectarCobroHandler : primer eslabón
   BLL_Manejadores_ManejadorCobro --> "0..1" BLL_Manejadores_ManejadorCobro : sucesor
-  BLL_Manejadores_ProcesarPagoHandler ..> PoliticaDescuento : usa
+  BLL_Manejadores_ProcesarPagoHandler ..> BLL_Politicas_PoliticaDescuento : usa

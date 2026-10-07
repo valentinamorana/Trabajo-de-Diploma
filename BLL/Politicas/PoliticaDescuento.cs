@@ -2,47 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BE
+namespace BLL.Politicas
 {
-    /// <summary>Resultado de resolver qué descuento corresponde a un cobro.</summary>
-    public class ResultadoDescuento
-    {
-        /// <summary>Importe bruto sobre el que se calculó (precio del plan por cobro).</summary>
-        public decimal Bruto { get; set; }
-
-        /// <summary>Descuento aplicado (0 si no corresponde ninguno).</summary>
-        public decimal Descuento { get; set; }
-
-        /// <summary>Importe a cobrar sin cargos adicionales: Bruto - Descuento (nunca negativo).</summary>
-        public decimal Total => Math.Max(0, Bruto - Descuento);
-
-        /// <summary>Promoción vigente aplicada, o null si se aplicó el crédito por referido (o ninguno).</summary>
-        public Promocion Promocion { get; set; }
-
-        /// <summary>true si el descuento aplicado es el crédito acumulado por referidos.</summary>
-        public bool UsaCreditoReferido { get; set; }
-    }
-
-    /// <summary>Liquidación de una contratación: qué se cobra, con qué descuento y qué comprobante se emitió.</summary>
-    public class LiquidacionContratacion
-    {
-        public decimal Bruto { get; set; }
-        public decimal Descuento { get; set; }
-        public decimal Total => System.Math.Max(0, Bruto - Descuento);
-        public string NombrePromocion { get; set; }
-        public bool UsaCreditoReferido { get; set; }
-        /// <summary>Número de comprobante emitido (null mientras solo se está calculando el importe).</summary>
-        public string NumeroComprobante { get; set; }
-
-        /// <summary>Período activado por el cobro (Constancia de suscripción).</summary>
-        public System.DateTime? VigenciaDesde { get; set; }
-        public System.DateTime? VigenciaHasta { get; set; }
-
-        /// <summary>"¿Referido? Sí → Acreditar crédito": el referente al que se le acreditó el
-        /// beneficio con este cobro, o null si no correspondía.</summary>
-        public string ReferenteAcreditado { get; set; }
-    }
-
     /// <summary>
     /// PN03 — Política de descuentos del cobro. Regla tomada de NUULY (5.1): "solo se puede aplicar
     /// UN descuento por ciclo de facturación; los no usados quedan acumulados para un ciclo futuro".
@@ -59,7 +20,7 @@ namespace BE
     public static class PoliticaDescuento
     {
         /// <summary>Descuento que aporta una promoción sobre un importe bruto.</summary>
-        public static decimal DescuentoDe(Promocion promocion, decimal bruto, int meses = 1)
+        public static decimal DescuentoDe(BE.Promocion promocion, decimal bruto, int meses = 1)
         {
             if (promocion == null) throw new ArgumentNullException(nameof(promocion));
             if (bruto <= 0) return 0;
@@ -67,13 +28,13 @@ namespace BE
             decimal d;
             switch (promocion.TipoDescuento)
             {
-                case TipoDescuento.Porcentaje:
+                case BE.TipoDescuento.Porcentaje:
                     d = Math.Round(bruto * promocion.Valor / 100m, 2);
                     break;
-                case TipoDescuento.MontoFijo:
+                case BE.TipoDescuento.MontoFijo:
                     d = promocion.Valor;
                     break;
-                case TipoDescuento.PrecioPromocional:
+                case BE.TipoDescuento.PrecioPromocional:
                     // Valor = precio promocional MENSUAL (como Plan.Precio): el descuento es la diferencia
                     // con el bruto, que cubre `meses` meses.
                     d = bruto - promocion.Valor * Math.Max(1, meses);
@@ -90,13 +51,13 @@ namespace BE
         /// cualquier promoción: se ignoran las que no aplican a <paramref name="idPlan"/> o no están
         /// vigentes hoy. Una promoción Vencida (PN03: llegó su FechaFin) nunca se aplica.
         /// </summary>
-        public static ResultadoDescuento Resolver(
-            decimal bruto, int? idPlan, IEnumerable<Promocion> promocionesDelPlan, decimal creditoReferido, int meses = 1)
+        public static BE.ResultadoDescuento Resolver(
+            decimal bruto, int? idPlan, IEnumerable<BE.Promocion> promocionesDelPlan, decimal creditoReferido, int meses = 1)
         {
-            var resultado = new ResultadoDescuento { Bruto = bruto };
+            var resultado = new BE.ResultadoDescuento { Bruto = bruto };
             if (bruto <= 0) return resultado;
 
-            Promocion mejor = null;
+            BE.Promocion mejor = null;
             decimal descuentoMejor = 0;
             if (idPlan.HasValue && promocionesDelPlan != null)
             {

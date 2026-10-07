@@ -31,9 +31,30 @@ namespace GUI
         {
             try { Actual = new BLL.Preferencia().Obtener(idUsuario) ?? new BE.Preferencia(); }
             catch { Actual = new BE.Preferencia(); }
+            AplicarFormatoFecha();
         }
 
-        public static void Set(BE.Preferencia p) { if (p != null) Actual = p; }
+        public static void Set(BE.Preferencia p)
+        {
+            if (p == null) return;
+            Actual = p;
+            AplicarFormatoFecha();
+        }
+
+        // "Formato de fecha" de Mi Perfil: pasa a ser el formato corto de la cultura de la app, que es
+        // el que usan las fechas de la GUI ("d"/"g") y las columnas de fecha de las grillas.
+        private static void AplicarFormatoFecha()
+        {
+            string fmt = string.IsNullOrEmpty(Actual.FormatoFecha) ? "dd/MM/yyyy" : Actual.FormatoFecha;
+            try
+            {
+                var cultura = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+                cultura.DateTimeFormat.ShortDatePattern = fmt;
+                System.Threading.Thread.CurrentThread.CurrentCulture = cultura;
+                System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultura;
+            }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceWarning("[PreferenciasUI] Formato de fecha inválido: " + ex.Message); }
+        }
 
         // Formatea una fecha según el formato preferido del usuario.
         public static string Fecha(DateTime f)
@@ -77,6 +98,10 @@ namespace GUI
                     grid.BackgroundColor = Tema.OscuroGrilla;
                     grid.DefaultCellStyle.BackColor = Tema.OscuroControl;
                     grid.DefaultCellStyle.ForeColor = Color.Gainsboro;
+                    // Filas alternadas: el estilo claro (rosa muy claro) con texto Gainsboro dejaba
+                    // una fila de cada dos ilegible.
+                    grid.AlternatingRowsDefaultCellStyle.BackColor = Tema.OscuroGrilla;
+                    grid.AlternatingRowsDefaultCellStyle.ForeColor = Color.Gainsboro;
                     grid.EnableHeadersVisualStyles = false;
                     grid.ColumnHeadersDefaultCellStyle.BackColor = Tema.OscuroEncabezado;
                     grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.Gainsboro;

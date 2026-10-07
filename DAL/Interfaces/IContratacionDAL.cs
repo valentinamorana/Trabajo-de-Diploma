@@ -18,10 +18,13 @@ namespace DAL.Interfaces
         int Alta(BE.Contratacion contratacion);
 
         // "Confirmar cobro" + "Emitir comprobante": marca la contratación como Pagada con el medio
-        // de pago, el comprobante y quién cobró. "Claim" atómico: el UPDATE exige que siga
-        // PendientePago; devuelve false si otra sesión de Caja ya la resolvió.
+        // de pago, el comprobante, quién cobró y, si pagó con tarjeta de crédito, el plan de cuotas y
+        // el recargo. "Claim" atómico: el UPDATE exige que siga PendientePago; devuelve false si otra
+        // sesión de Caja ya la resolvió.
         bool ConfirmarCobro(int idContratacion, int idCaja, int idMedioPago, string numeroComprobante,
-                            decimal importe, decimal descuento, int? idPromocion);
+                            decimal importe, decimal descuento, int? idPromocion,
+                            int? idPlanCuotas = null, decimal? recargoCuotas = null,
+                            decimal? creditoCambioPlan = null);
 
         // "Activar suscripción" («Constancia de suscripción»): guarda el período activado y, si hubo
         // "¿Referido? Sí → Acreditar crédito", a qué referente se le acreditó el beneficio.
@@ -31,6 +34,9 @@ namespace DAL.Interfaces
         // Pagada) cuando la activación de la suscripción falló después del claim.
         void ReabrirPago(int idContratacion);
 
+        // "Anular contratación" (Caja, con motivo): claim atómico sobre Pendiente de pago.
+        bool Anular(int idContratacion, string motivo, int idCaja);
+
         // "Registrar intento" → ¿Alcanzó el máximo? En una transacción: exige que siga
         // PendientePago, guarda el intento con el número siguiente y, si llega al máximo, la
         // cancela. Devuelve null si ya no estaba pendiente (otra sesión la resolvió).
@@ -39,6 +45,9 @@ namespace DAL.Interfaces
         List<BE.IntentoPago> ObtenerIntentos(int idContratacion);
 
         List<BE.MedioPago> ObtenerMediosPago();
+
+        // Catálogo de planes de cuotas (pago con tarjeta de crédito).
+        List<BE.PlanCuotas> ObtenerPlanesCuotas();
 
         // "Asentar desistimiento": el cliente identificado no elige plan y modalidad.
         int AltaDesistimiento(BE.DesistimientoContratacion desistimiento);

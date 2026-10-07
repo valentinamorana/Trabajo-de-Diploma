@@ -4,26 +4,60 @@ sequenceDiagram
   participant F as Contrataciones<br/>PendientesForm
   participant B as BLL.<br/>Contratacion
   participant PD as Politica<br/>Descuento
+  participant PC as PoliticaCuotas
   participant CB as BLL.Cliente
   participant D as DAL.<br/>Contratacion
+  Note over B: «include» CU02-CAJ Emitir Comprobante: se ejecuta dentro de ConfirmarCobro · «extend» CU04-CAJ Financiar en Cuotas: con tarjeta de crédito
   F->>B: ObtenerPendientesDePago()  [Consultar cola]
+  B->>D: ObtenerPendientesDePago()
+  B-->>F: contrataciones Pendientes de pago (de la más antigua a la más nueva)
   F->>B: CalcularImportes(contrataciones)
-  B->>PD: Resolver(bruto = PrecioMensual pactado × meses, promociones, crédito)
-  B-->>F: Liquidación: un solo descuento (el mayor)
-  C->>F: El cliente abona: elige el medio de pago y confirma el importe
-  F->>B: ConfirmarCobro(modulo, contratacion, idMedioPago, importeConfirmado)
-  Note over B: Exigir(CajaEditar) · PendientePago · medio del catálogo · plan activo · cupo · importe igual al confirmado
-  B->>D: ConfirmarCobro(id, idCaja, idMedioPago, comprobante, total, descuento, idPromocion)  [claim: WHERE Estado = PendientePago]
-  alt Otra sesión ya la resolvió
-    B-->>F: AppException(cobrar_concurrente)
-  else Comprobante emitido
-    B->>CB: ActivarSuscripcionDesdeContratacion(cliente, idPlan, modalidad, consumoCredito)  [+ acredita al referente]
-    alt Falla la activación
-      B->>D: ReabrirPago(id)  [compensación]
-      B-->>F: error
-    else Activada
-      B->>D: RegistrarVigencia(id, desde, hasta, idReferenteAcreditado)
-      B-->>F: Liquidación con comprobante, vigencia y referente acreditado
-      F-->>C: Comprobante y Constancia de suscripción (PDF)
+  loop Por cada contratación de la cola
+    B->>PD: Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)  [bruto = PrecioMensual pactado × meses]
+  end
+  B-->>F: importe de cada una: un solo descuento (el mayor)
+  C->>F: Elige la contratación y el medio de pago
+  opt Tarjeta de crédito: «extend» CU04-CAJ Financiar en Cuotas
+    F->>B: ObtenerPlanesCuotas(modalidad)
+    B->>D: ObtenerPlanesCuotas()
+    D-->>B: planes de cuotas
+    B->>PC: Disponibles(planes, modalidad)
+    B-->>F: planes de hasta los meses de la modalidad
+    C->>F: Elige la cantidad de cuotas
+  end
+  C->>F: Pulsa Cobrar
+  F->>B: CalcularImporte(contratacion, idMedioPago, idPlanCuotas)
+  B->>PD: Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)
+  B->>B: ResolverCuotas(medio, idPlanCuotas, modalidad)
+  B->>PC: Financiar(total, plan)
+  B-->>F: Liquidación con el detalle de financiación
+  C->>F: El cliente abona: confirma el importe
+  F->>B: ConfirmarCobro(modulo, contratacion, idMedioPago, importeConfirmado, idPlanCuotas)  [importeConfirmado = Total de la Liquidación]
+  Note over B: Exigir(CajaEditar) · medio de pago del catálogo · quien registró la contratación no la cobra, salvo el Administrador
+  B->>D: ObtenerPorId(idContratacion)  [relee el estado]
+  D-->>B: contratación actual
+  B->>B: ResolverCuotas(medio, idPlanCuotas, modalidad)
+  B->>PD: Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)  [vuelve a liquidar]
+  alt No se puede cobrar o cambió el importe
+    B-->>F: AppException(cobrar_estado / plan_baja / plan_insuficiente / cobra_el_vendedor / importe_cambiado / cuotas_medio / cuotas_invalidas / cuotas_modalidad)
+    F-->>C: Informa el motivo, si cambió el importe: volver a Calcular importe y confirmar
+  else Mismo importe
+    B->>PC: Financiar(total, plan)  [recargo y valor de cuota]
+    B->>B: EmitirComprobante(idContratacion)  [privado: → numeroComprobante, CU02-CAJ]
+    B->>D: ConfirmarCobro(idContratacion, idCaja, idMedioPago, numeroComprobante, importe, descuento, idPromocion, idPlanCuotas, recargoCuotas)  [claim: WHERE Estado = PendientePago]
+    alt false: otra sesión ya la resolvió
+      D-->>B: false
+      B-->>F: AppException(cobrar_concurrente)
+    else true
+      D-->>B: true
+      B->>CB: ActivarSuscripcionDesdeContratacion(modulo, cliente, idPlan, modalidad, consumoCredito)  [Builder, + crédito al referente]
+      alt Falla la activación
+        B->>D: ReabrirPago(idContratacion)  [compensación: vuelve a Pendiente de pago]
+        B-->>F: relanza el error (o AppException(cobro_sin_activar) si no pudo reabrir)
+      else Activada
+        B->>D: RegistrarVigencia(idContratacion, desde, hasta, idReferenteAcreditado)
+        B-->>F: Liquidación con comprobante, vigencia y referente acreditado
+        F-->>C: Comprobante (con las cuotas y el recargo) y Constancia de suscripción (PDF)
+      end
     end
   end

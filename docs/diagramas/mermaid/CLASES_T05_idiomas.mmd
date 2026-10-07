@@ -52,10 +52,10 @@ classDiagram
   }
   Servicios_Multiidioma_IIdiomaObserver <|.. GUI_FormIdiomas
   FilaTraduccion --> "1" Control : IdControl
-  _______________ ..> _________________ : usa
-  _______________ ..> __________________________________ : usa
-  __________________________________ ..> _____________________________________ : usa
-  __________________________________ ..> ____________________________ : usa
-  _______________________________ ..> __________________________________ : usa
-  _________________ ..> Control : usa
-  _________________ ..> FilaTraduccion : usa
+  GUI_FormIdiomas ..> BLL_IdiomaService : usa
+  GUI_FormIdiomas ..> Servicios_Multiidioma_GestorIdioma : usa
+  Servicios_Multiidioma_GestorIdioma ..> Servicios_Multiidioma_IIdiomaObserver : usa
+  Servicios_Multiidioma_GestorIdioma ..> Servicios_Multiidioma_Idioma : usa
+  Servicios_Multiidioma_Traductor ..> Servicios_Multiidioma_GestorIdioma : usa
+  BLL_IdiomaService ..> Control : usa
+  BLL_IdiomaService ..> FilaTraduccion : usa

@@ -125,7 +125,7 @@ namespace GUI
             {
                 int    dias  = m.DiasTranscurridos;
                 string tit   = m.NombrePrenda ?? $"Prenda #{m.IdPrenda}";
-                string sub   = $"Entrada: {m.FechaEntrada:dd/MM/yyyy}";
+                string sub   = $"Entrada: {m.FechaEntrada:d}";
                 var nivel    = m.NivelUrgencia;
 
                 // Las tres columnas abren Prendas: Deposito siempre tiene ese

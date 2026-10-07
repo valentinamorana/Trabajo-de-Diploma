@@ -14,6 +14,10 @@ namespace GUI
     {
         public BE.Prenda PrendaEditada { get; private set; }
 
+        // Persistencia de la pantalla que abrió el formulario: se ejecuta antes de cerrar, así un
+        // error de validación se muestra acá sin perder lo cargado (igual que ClienteForm).
+        public Action<BE.Prenda> Guardar { get; set; }
+
         private readonly bool _esEdicion;
         private readonly BE.Prenda _original;
 
@@ -111,6 +115,7 @@ namespace GUI
                     PrecioReposicion = numPrecioReposicion.Value > 0 ? numPrecioReposicion.Value : (decimal?)null
                 };
 
+                Guardar?.Invoke(PrendaEditada);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

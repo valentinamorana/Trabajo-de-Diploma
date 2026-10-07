@@ -8,8 +8,5 @@ namespace DAL.Interfaces
         List<BE.Empleado> ObtenerTodos();
         BE.Empleado ObtenerPorId(int idEmpleado);
         BE.Empleado ObtenerPorUsuario(int idUsuario);
-        bool ExisteDNI(string dni);
-        int Alta(BE.Empleado empleado);
-        void Modificar(BE.Empleado empleado);
     }
 }

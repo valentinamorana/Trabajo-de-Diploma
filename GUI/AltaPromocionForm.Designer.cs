@@ -23,7 +23,7 @@ namespace GUI
             this.rbPlan = new System.Windows.Forms.RadioButton();
             this.cmbPlan = new System.Windows.Forms.ComboBox();
             this.rbCategoria = new System.Windows.Forms.RadioButton();
-            this.txtCategoria = new System.Windows.Forms.TextBox();
+            this.cmbCategoria = new System.Windows.Forms.ComboBox();
             this.lblTipoDescuento = new System.Windows.Forms.Label();
             this.cmbTipoDescuento = new System.Windows.Forms.ComboBox();
             this.lblValor = new System.Windows.Forms.Label();
@@ -115,13 +115,16 @@ namespace GUI
             this.rbCategoria.Tag = "promocion.categoria";
             this.rbCategoria.Text = "Categoría:";
             //
-            // txtCategoria
+            // cmbCategoria
             //
-            this.txtCategoria.Enabled = false;
-            this.txtCategoria.Location = new System.Drawing.Point(108, 130);
-            this.txtCategoria.Name = "txtCategoria";
-            this.txtCategoria.Size = new System.Drawing.Size(220, 20);
-            this.txtCategoria.TabIndex = 8;
+            this.cmbCategoria.Enabled = false;
+            this.cmbCategoria.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            this.cmbCategoria.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.cmbCategoria.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.cmbCategoria.Location = new System.Drawing.Point(108, 130);
+            this.cmbCategoria.Name = "cmbCategoria";
+            this.cmbCategoria.Size = new System.Drawing.Size(220, 20);
+            this.cmbCategoria.TabIndex = 8;
             //
             // lblTipoDescuento
             //
@@ -301,7 +304,7 @@ namespace GUI
             this.Controls.Add(this.lblValor);
             this.Controls.Add(this.cmbTipoDescuento);
             this.Controls.Add(this.lblTipoDescuento);
-            this.Controls.Add(this.txtCategoria);
+            this.Controls.Add(this.cmbCategoria);
             this.Controls.Add(this.rbCategoria);
             this.Controls.Add(this.cmbPlan);
             this.Controls.Add(this.rbPlan);
@@ -335,7 +338,7 @@ namespace GUI
         private System.Windows.Forms.RadioButton rbPlan;
         private System.Windows.Forms.ComboBox cmbPlan;
         private System.Windows.Forms.RadioButton rbCategoria;
-        private System.Windows.Forms.TextBox txtCategoria;
+        private System.Windows.Forms.ComboBox cmbCategoria;
         private System.Windows.Forms.Label lblTipoDescuento;
         private System.Windows.Forms.ComboBox cmbTipoDescuento;
         private System.Windows.Forms.Label lblValor;

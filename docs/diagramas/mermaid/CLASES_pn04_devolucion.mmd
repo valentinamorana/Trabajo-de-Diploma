@@ -12,6 +12,8 @@ classDiagram
     +int? IdClienteActual
     +int? IdUltimoCliente
     +decimal? PrecioReposicion
+    +PuedeReportarsePerdida() bool
+    +ControlarEstado(EstadoPrenda) bool
   }
   class MantenimientoPrenda {
     +int IdMantenimiento
@@ -43,8 +45,10 @@ classDiagram
     +string Nombre
     +string Apellido
   }
-  class BLL_ListaEspera["BLL.ListaEspera"] {
-    +NotificarSiCorresponde(int,  string) void
+  class BLL_InspeccionDevolucion["BLL.InspeccionDevolucion"] {
+    +AprobarReingreso(string,  Prenda,  string) void
+    +DarDeBajaConCargo(string,  Prenda,  string,  decimal,  string) int
+    +ReportarPerdida(string,  Prenda,  string,  decimal,  string) int
   }
   class BLL_Prenda["BLL.Prenda"] {
     +CambiarEstado(string,  Prenda,  EstadoPrenda,  string,  bool,  bool) void
@@ -54,12 +58,35 @@ classDiagram
   }
   class BLL_CargoPrenda["BLL.CargoPrenda"] {
     +ValidarDatos(string,  decimal) void
-    +RegistrarCargo(string,  Prenda,  string,  decimal,  string) void
     +ObtenerPendientesPorCliente(int) List~CargoPrenda~
+  }
+  class BLL_ListaEspera["BLL.ListaEspera"] {
+    +NotificarSiCorresponde(int,  string) void
+  }
+  class BLL_Pedido["BLL.Pedido"] {
+    +ObtenerPorId(int) Pedido
+  }
+  class DAL_IInspeccionDevolucionDAL["DAL.IInspeccionDevolucionDAL"] {
+    <<interface>>
+    +DarDeBajaConCargo(CargoPrenda,  EstadoPrenda) int
   }
   class DAL_Interfaces_IPrendaDAL["DAL.Interfaces.IPrendaDAL"] {
     <<interface>>
+    +ObtenerTodos() List~Prenda~
     +CambiarEstado(int,  EstadoPrenda,  EstadoPrenda,  int?) void
+  }
+  class DAL_Interfaces_IMantenimientoPrendaDAL["DAL.Interfaces.IMantenimientoPrendaDAL"] {
+    <<interface>>
+    +CerrarMantenimiento(int) void
+  }
+  class DAL_Interfaces_IListaEsperaDAL["DAL.Interfaces.IListaEsperaDAL"] {
+    <<interface>>
+    +ObtenerPendienteMasAntigua(int) ListaEspera
+    +CambiarEstado(int,  EstadoListaEspera,  DateTime?,  string,  EstadoListaEspera) bool
+  }
+  class DAL_Interfaces_IPedidoDAL["DAL.Interfaces.IPedidoDAL"] {
+    <<interface>>
+    +ObtenerPorId(int) Pedido
   }
   class DAL_Interfaces_ICargoPrendaDAL["DAL.Interfaces.ICargoPrendaDAL"] {
     <<interface>>
@@ -72,6 +99,10 @@ classDiagram
   MantenimientoPrenda --> "1" Prenda : IdPrenda
   CargoPrenda --> "1" Prenda : IdPrenda
   CargoPrenda --> "1" Cliente : IdCliente
-  BLL_ListaEspera ..> DAL_Interfaces_IPrendaDAL : usa
+  BLL_InspeccionDevolucion ..> DAL_IInspeccionDevolucionDAL : usa
   BLL_Prenda ..> DAL_Interfaces_IPrendaDAL : usa
+  BLL_Prenda ..> DAL_Interfaces_IMantenimientoPrendaDAL : usa
   BLL_CargoPrenda ..> DAL_Interfaces_ICargoPrendaDAL : usa
+  BLL_ListaEspera ..> DAL_Interfaces_IListaEsperaDAL : usa
+  BLL_ListaEspera ..> DAL_Interfaces_IPrendaDAL : usa
+  BLL_Pedido ..> DAL_Interfaces_IPedidoDAL : usa

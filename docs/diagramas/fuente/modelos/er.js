@@ -28,11 +28,11 @@ module.exports = [
   },
   {
     tipo: 'er', id: 'DER_pn01_pedidos', titulo: 'DER — PN01 Armar pedido', columnas: 3,
-    tablas: ['Cliente', 'Empleado', 'Pedido', 'PedidoPrenda', 'PedidoFaltante', 'PedidoFaltanteAlternativa', 'PedidoHistorial', 'Prenda', 'ListaEspera', 'MantenimientoPrenda']
+    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Pedido', 'PedidoPrenda', 'PedidoFaltante', 'PedidoFaltanteAlternativa', 'PedidoHistorial', 'Prenda', 'ListaEspera', 'MantenimientoPrenda']
   },
   {
     tipo: 'er', id: 'DER_pn02_contrataciones', titulo: 'DER — PN02 Comercialización de la suscripción', columnas: 3,
-    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Contratacion', 'MedioPago', 'ContratacionIntentoPago', 'DesistimientoContratacion', 'Promocion']
+    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Contratacion', 'MedioPago', 'PlanCuotas', 'ContratacionIntentoPago', 'DesistimientoContratacion', 'Promocion']
   },
   {
     tipo: 'er', id: 'DER_pn03_promociones', titulo: 'DER — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
@@ -40,7 +40,7 @@ module.exports = [
   },
   {
     tipo: 'er', id: 'DER_pn04_devolucion', titulo: 'DER — PN04 Inspección de devolución', columnas: 3,
-    tablas: ['Cliente', 'Pedido', 'PedidoPrenda', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda']
+    tablas: ['Cliente', 'Pedido', 'PedidoPrenda', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda', 'ListaEspera']
   }
 ];
 

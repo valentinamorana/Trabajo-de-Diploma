@@ -6,6 +6,8 @@ sequenceDiagram
   participant D as DAL.Pedido
   participant H as DAL.Pedido<br/>Historial
   L->>F: Selecciona un pedido Despachado y pulsa Marcar Entregado
+  F->>B: ObtenerPorId(id)  [relee el estado actual]
+  B-->>F: pedido
   F->>B: MarcarEntregado(modulo, pedido)
   Note over B: Exigir(PedidosRealizadosEditar) · pedido.PuedeEntregarse()
   alt El pedido no está Despachado
@@ -13,7 +15,7 @@ sequenceDiagram
     F-->>L: Informa el estado actual
   else Despachado
     B->>D: MarcarEntregado(idPedido)
-    B->>H: RegistrarCambios(idPedido, "ENTREGAR")
+    B->>H: RegistrarCambios(cambios)  [Accion = ENTREGAR]
     B-->>F: ok
     F-->>L: Pedido Entregado
   end

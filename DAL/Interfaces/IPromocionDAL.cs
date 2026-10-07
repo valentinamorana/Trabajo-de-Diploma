@@ -15,6 +15,8 @@ namespace DAL.Interfaces
         List<BE.Promocion> ObtenerTodas();
         // Vigentes que aplican HOY (Estado Vigente y dentro de sus fechas): las usa el cobro de PN02.
         List<BE.Promocion> ObtenerVigentes();
+        // PN03 — impacto de cada promoción en los cobros del período [desde, hasta] (PN02 + N01).
+        List<BE.MetricaImpactoPromocion> ObtenerImpacto(System.DateTime desde, System.DateTime hasta);
         List<BE.Promocion> ObtenerPendientesRevisionContable();
         BE.Promocion ObtenerPorId(int idPromocion);
 

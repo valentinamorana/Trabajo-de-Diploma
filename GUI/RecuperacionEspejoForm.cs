@@ -108,10 +108,9 @@ namespace GUI
 
         private void BtnReparar_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show(
+            if (!FormBase.MostrarConfirmacionSiNo(this,
                     Tr("rec.conf.reparar", "¿Restaurar la tabla Usuario a los valores legítimos del espejo?\n\nSe revertirán las filas modificadas y se eliminarán las inserciones externas."),
-                    Tr("rec.conf.reparar.titulo", "Confirmar Reparación"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                    Tr("rec.conf.reparar.titulo", "Confirmar Reparación"), porDefectoNo: true)) return;
             if (!ConfirmarAdmin()) return;
 
             try
@@ -127,10 +126,9 @@ namespace GUI
 
         private void BtnAsumir_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show(
+            if (!FormBase.MostrarConfirmacionSiNo(this,
                     Tr("rec.conf.asumir", "ATENCIÓN: se aceptarán los datos ACTUALES como legítimos y se recalcularán todos los dígitos verificadores.\n\nSi hubo manipulación, quedará consolidada. ¿Continuar?"),
-                    Tr("rec.conf.asumir.titulo", "Confirmar Asumir Pérdida"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes) return;
+                    Tr("rec.conf.asumir.titulo", "Confirmar Asumir Pérdida"), porDefectoNo: true)) return;
             if (!ConfirmarAdmin()) return;
 
             try
@@ -158,10 +156,9 @@ namespace GUI
                 // posteriores que se perderían al sobrescribir) antes de confirmar la restauración.
                 string alcance = ConstruirAlcancePerdida(ofd.FileName);
 
-                if (MessageBox.Show(
+                if (!FormBase.MostrarConfirmacionSiNo(this,
                         Tr("conf.rest.sobreescribir", "¿Está seguro? Esta operación sobrescribirá todos los datos actuales y reiniciará la aplicación.") + alcance,
-                        Tr("msg.backup.titulorestaura", "Confirmar Restauración"),
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                        Tr("msg.backup.titulorestaura", "Confirmar Restauración"), porDefectoNo: true)) return;
 
                 string clave = null;
                 if (BLL.Backup.EsCifrado(ofd.FileName))
@@ -205,7 +202,7 @@ namespace GUI
                 sb.Append(string.Format(
                     Tr("msg.backup.alcance",
                       "\n\nEl backup es del {0} (hace {1} día(s)).\nSe PERDERÁN todos los cambios posteriores a esa fecha."),
-                    fecha.Value.ToString("dd/MM/yyyy HH:mm"),
+                    fecha.Value.ToString("g"),
                     Math.Max(0, (int)(DateTime.Now - fecha.Value).TotalDays)));
 
                 var cambios = bll.ObtenerCambiosDesde(fecha);

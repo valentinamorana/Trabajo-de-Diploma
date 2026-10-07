@@ -41,6 +41,17 @@ namespace GUI
     /// </summary>
     public partial class Menu : Form, IIdiomaObserver
     {
+        // D02 — F1 en el menú principal (sin una pantalla activa que lo atienda): ayuda general.
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.F1)
+            {
+                Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General");
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         // Timer de verificación periódica de integridad (C — background check)
         private System.Windows.Forms.Timer _timerIntegridad;
 

@@ -30,7 +30,7 @@ sequenceDiagram
       B->>S: RegistrarIntento()
       B->>D: IncrementarIntentosFallidos(username)
       alt 3 intentos fallidos
-        B->>D: BloquearConTiempo(id)  [1, 5, 15 o 60 min, luego permanente]
+        B->>D: BloquearConTiempo(idUsuario)  [1, 5, 15 o 60 min, luego permanente]
         B->>L: RegistrarSinSesion(BloqueoDeCuenta)
         B-->>F: LoginException(CuentaBloqueada)
       else Menos de 3

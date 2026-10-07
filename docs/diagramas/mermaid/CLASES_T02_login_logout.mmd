@@ -61,11 +61,12 @@ classDiagram
     +Registrar(string,  string,  Criticidad) void
     +RegistrarSinSesion(string,  string,  Criticidad,  int?,  string) void
   }
-  _________ ..> ___________ : usa
-  ___________ ..> __________________________ : usa
-  ___________ ..> ________________________ : usa
-  ___________ ..> _____________________ : usa
-  ___________ ..> __________________ : usa
-  ___________ ..> LoginException : usa
-  ________________________ ..> SesionException : usa
-  ________________________ ..> Usuario : usa
+  GUI_Login ..> BLL_Usuario : usa
+  BLL_Usuario ..> DAL_Interfaces_IUsuarioDAL : usa
+  BLL_Usuario ..> Seguridad_SessionManager : usa
+  BLL_Usuario ..> Seguridad_ContadorSesion : usa
+  BLL_Usuario ..> Seguridad_Encriptador : usa
+  BLL_Usuario ..> Servicios_Bitacora : usa
+  BLL_Usuario ..> LoginException : usa
+  Seguridad_SessionManager ..> SesionException : usa
+  Seguridad_SessionManager ..> Usuario : usa

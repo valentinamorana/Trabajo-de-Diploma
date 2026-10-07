@@ -299,6 +299,9 @@ Cada transición registra:
 - Constancia de suscripción;
 - Constancia de cancelación.
 
+La Liquidación lista los **planes de cuotas** de la modalidad y el Comprobante muestra las cuotas, el recargo y el
+valor de cada cuota cuando se pagó con tarjeta de crédito.
+
 **Flujo (actividad → método de `BLL/Contratacion.cs`)**
 | Carril | Actividad | Código |
 |---|---|---|
@@ -307,12 +310,13 @@ Cada transición registra:
 | Cliente/Vendedor | ¿Elige plan y modalidad? No → Asentar desistimiento | `AsentarDesistimiento` → tabla `DesistimientoContratacion` (motivo obligatorio) |
 | Vendedor | Registrar contratación → ¿Contratación válida? | `ValidarContratacion` (consulta) y `RegistrarContratacion`: guarda la contratación PendientePago con el **precio mensual pactado**. Si no es válida, "Informar motivo" queda en la bitácora. |
 | Caja | Consultar cola → Calcular importe («Liquidación») | `ObtenerPendientesDePago`, `CalcularImporte(s)`: precio pactado × meses menos **un** descuento (promoción PN03 o crédito por referido, el mayor) |
-| Cliente/Caja | Abonar → ¿Se concreta el pago? Sí | `ConfirmarCobro(idMedioPago, importeConfirmado)` (ver los pasos debajo de la tabla) |
+| Cliente/Caja | Abonar → ¿Paga con tarjeta de crédito? Sí → Ofrecer planes de cuotas («Planes de cuotas») → Elegir cantidad de cuotas → Calcular recargo y valor de cuota («Detalle de financiación») | `ObtenerPlanesCuotas(modalidad)` (`BE.PoliticaCuotas.Disponibles`), `CalcularImporte(contratacion, idMedioPago, idPlanCuotas)` (`BE.PoliticaCuotas.Financiar`). La tarjeta financia: Caja cobra el total en un solo cobro y se registra el plan y el recargo. |
+| Cliente/Caja | ¿Se concreta el pago? Sí | `ConfirmarCobro(idMedioPago, importeConfirmado, idPlanCuotas)` (ver los pasos debajo de la tabla) |
 | Caja | ¿Se concreta? No → Registrar intento → ¿Máximo de 3? | `RegistrarIntentoFallido(idMedioPago, motivo)`: en una transacción con bloqueo de fila guarda el intento en `ContratacionIntentoPago` y, en el 3.º, **cancela automáticamente** («Constancia de cancelación»). Si no se llegó a 3, la contratación sigue en la cola. |
 
 Pasos de `ConfirmarCobro`:
-1. Revalida el estado, el medio de pago (catálogo `MedioPago`), el plan, el cupo y que el importe sea el confirmado.
-2. **Claim atómico** que emite el comprobante `CMP-NNNNNN-AAAAMMDD`.
+1. Revalida el estado, el medio de pago (catálogo `MedioPago`), el plan de cuotas (`ResolverCuotas`), el plan, el cupo y que el importe sea el confirmado.
+2. **Claim atómico** que emite el comprobante `CMP-NNNNNN-AAAAMMDD` y guarda el plan de cuotas y el recargo (si pagó con tarjeta de crédito).
 3. Activa la suscripción con el Builder (el período va a continuación del vencimiento vigente).
 4. ¿Referido? Sí: acredita $1000 al referente.
 5. Guarda la vigencia y el referente acreditado («Constancia de suscripción»).
@@ -336,9 +340,13 @@ Pasos de `ConfirmarCobro`:
 | 13 | El Vendedor no cobra y Caja no vende (patentes) | `PermisosAccion` | `RegistrarContratacion_UsuarioDeCaja_*`, `ConfirmarCobroYRegistrarIntento_UsuarioVendedor_*` |
 | 14 | Con una contratación pendiente no se puede dar de baja al cliente, ni renovar ni cobrar por N01 | `Cliente.Baja`, `Renovacion.Procesar`, `Cobro.Procesar` | `Cliente_Baja_*`, `Renovacion_*`, `Cobro_*` |
 | 15 | Activar una suscripción o corregir el plan sin pasar por Contratación + Caja es exclusivo del Administrador | `Cliente.ActivarSuscripcion`, `PuedeCorregirPlanDirectamente` | `Cliente_ActivarSuscripcion_NoAdministrador_Rechaza` |
+| 16 | Solo la **tarjeta de crédito** permite pagar en cuotas (`MedioPago.PermiteCuotas`); con otro medio se cobra en un solo pago | `ResolverCuotas` (`cuotas_medio`) | `ConfirmarCobro_CuotasConTarjetaDeDebito_*`, `ConfirmarCobro_MedioQueNoFinancia_*` |
+| 17 | No más cuotas que los meses que cubre la modalidad (Mensual 1, Trimestral hasta 3, Anual hasta 12) y solo planes activos | `BE.PoliticaCuotas.PermiteModalidad` (`cuotas_modalidad`, `cuotas_invalidas`) | `ObtenerPlanesCuotas_*`, `ConfirmarCobro_MasCuotasQueMeses*`, `ConfirmarCobro_PlanDeCuotasInexistenteOInactivo_*` |
+| 18 | Recargo por financiación según el plan (1 cuota sin interés; 3 cuotas 5 %; 6 cuotas 10 %; 12 cuotas 20 %), sobre el total con el descuento, redondeado a 2 decimales; la tarjeta financia y Caja cobra el total en un solo cobro | `BE.PoliticaCuotas.Financiar`, catálogo `PlanCuotas` | `PoliticaCuotas_Financiar_*`, `ConfirmarCobro_TarjetaCreditoEn3Cuotas*` |
 
 **Base de datos (3FN).**
-- `MedioPago` es un catálogo y reemplaza el texto libre.
+- `MedioPago` es un catálogo y reemplaza el texto libre: Efectivo, Tarjeta de débito, Transferencia y Tarjeta de crédito (`PermiteCuotas`).
+- `PlanCuotas` (catálogo): cantidad de cuotas, % de recargo y si está activo. `Contratacion` suma `IdPlanCuotas` (FK) y `RecargoCuotas` (el valor de cada cuota se deriva). Sección 20c2 del script.
 - `ContratacionIntentoPago` reemplaza al contador derivable `IntentosPago`.
 - Tabla nueva `DesistimientoContratacion`.
 - `Contratacion` suma `IdMedioPago`, `PrecioMensual`, `VigenciaDesde/Hasta` e `IdReferenteAcreditado`.
@@ -349,7 +357,8 @@ Pasos de `ConfirmarCobro`:
 - CU02-VTA Asentar Desistimiento;
 - CU01-CAJ Gestionar Cobro;
 - CU02-CAJ Emitir Comprobante;
-- CU03-CAJ Registrar Intento y Cancelar Contratación.
+- CU03-CAJ Registrar Intento y Cancelar Contratación;
+- CU04-CAJ Financiar en Cuotas («extend» de CU01-CAJ: solo con tarjeta de crédito).
 
 **No abarca:** factura fiscal ni conciliación con medios de pago reales.
 

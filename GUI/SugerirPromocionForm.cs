@@ -63,6 +63,27 @@ namespace GUI
                     c.Text = t[c.Tag.ToString()].Texto;
             MostrarOrigen();
             TraducirHeaders();
+            CargarPeriodos();
+        }
+
+        // PN03 — período de "Analizar métricas" (conserva la elección al cambiar de idioma).
+        private sealed class PeriodoItem
+        {
+            public int Dias { get; set; }
+            public string Texto { get; set; }
+            public override string ToString() => Texto;
+        }
+
+        private void CargarPeriodos()
+        {
+            int elegido = (cmbPeriodo.SelectedItem as PeriodoItem)?.Dias ?? BLL.AnalisisPromociones.DiasPeriodoPorDefecto;
+            cmbPeriodo.Items.Clear();
+            foreach (int dias in new[] { 30, 90, 180, 365 })
+            {
+                var item = new PeriodoItem { Dias = dias, Texto = Tr("promocion.periodo." + dias, dias == 365 ? "Último año" : $"Últimos {dias} días") };
+                cmbPeriodo.Items.Add(item);
+                if (dias == elegido) cmbPeriodo.SelectedItem = item;
+            }
         }
 
         private void MostrarOrigen()
@@ -93,6 +114,13 @@ namespace GUI
                 cmbPlan.DisplayMember = nameof(BE.PlanSuscripcion.Nombre);
                 cmbPlan.ValueMember = nameof(BE.PlanSuscripcion.IdPlan);
                 cmbTipoDescuento.DataSource = Enum.GetValues(typeof(BE.TipoDescuento));
+                // Categorías del catálogo como sugerencias (se puede escribir otra).
+                cmbCategoria.Items.Clear();
+                foreach (string categoria in new BLL.Prenda().ObtenerCategorias()) cmbCategoria.Items.Add(categoria);
+                // Se muestra traducido ("Monto fijo"); el ítem sigue siendo el enum.
+                cmbTipoDescuento.FormattingEnabled = true;
+                cmbTipoDescuento.Format -= FormatearTipo;
+                cmbTipoDescuento.Format += FormatearTipo;
             }
             catch (Exception ex) { MostrarError(ex); }
             CargarSugerencias();
@@ -101,7 +129,7 @@ namespace GUI
         private void RbPlan_CheckedChanged(object sender, EventArgs e)
         {
             cmbPlan.Enabled = rbPlan.Checked;
-            txtCategoria.Enabled = !rbPlan.Checked;
+            cmbCategoria.Enabled = !rbPlan.Checked;
         }
 
         // ── Analizar métricas → ¿Hay oportunidad? ────────────────────────────
@@ -109,7 +137,9 @@ namespace GUI
         private void BtnAnalizar_Click(object sender, EventArgs e)
         {
             BE.ReporteMetricas reporte;
-            try { reporte = analisisBLL.AnalizarMetricas(this.Text); }
+            // Período elegido (días hacia atrás desde hoy); por defecto, los últimos 90.
+            int dias = (cmbPeriodo.SelectedItem as PeriodoItem)?.Dias ?? BLL.AnalisisPromociones.DiasPeriodoPorDefecto;
+            try { reporte = analisisBLL.AnalizarMetricas(this.Text, DateTime.Today.AddDays(-dias), DateTime.Today); }
             catch (Exception ex) { MostrarError(ex); return; }
 
             var elegida = MostrarReporte(reporte, analisisBLL.HayOportunidad(reporte));
@@ -131,7 +161,7 @@ namespace GUI
             else
             {
                 rbCategoria.Checked = true;
-                txtCategoria.Text = elegida.CategoriaPrenda;
+                cmbCategoria.Text = elegida.CategoriaPrenda;
             }
             cmbTipoDescuento.SelectedItem = elegida.TipoSugerido;
             numBeneficioEstimado.Value = Math.Min(numBeneficioEstimado.Maximum, elegida.BeneficioEstimado);
@@ -208,7 +238,7 @@ namespace GUI
             try
             {
                 int? idPlan = rbPlan.Checked ? (int?)cmbPlan.SelectedValue : null;
-                string categoria = rbPlan.Checked ? null : txtCategoria.Text;
+                string categoria = rbPlan.Checked ? null : cmbCategoria.Text;
                 var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
 
                 id = sugerenciaBLL.RegistrarSugerencia(this.Text, _origen, idPlan, categoria, txtMotivo.Text,
@@ -219,11 +249,8 @@ namespace GUI
                 MostrarOrigen();
                 CargarSugerencias();
             }
-            catch (Exception ex) { MostrarError(ex); return; }
-
-            if (MessageBox.Show(Tr("conf.promo.imprimirsugerencia", "¿Imprimir la sugerencia de promoción?"), this.Text,
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
-                Imprimir(sugerenciaBLL.ObtenerPorId(id));
+            catch (Exception ex) { MostrarError(ex); }
+            // La sugerencia se imprime con "Imprimir sugerencia".
         }
 
         // ── Sugerencias registradas ──────────────────────────────────────────
@@ -241,7 +268,7 @@ namespace GUI
                 tabla.Columns.Add("Beneficio Est.", typeof(decimal));
                 tabla.Columns.Add("Estado", typeof(string));
                 foreach (var s in _sugerencias)
-                    tabla.Rows.Add(s.IdSugerencia, s.FechaAlta.ToString("dd/MM/yyyy"),
+                    tabla.Rows.Add(s.IdSugerencia, s.FechaAlta.ToString("d"),
                         Docs.AplicaA(s.IdPlan, s.NombrePlan, s.CategoriaPrenda), Docs.Origen(s.OrigenMetrica),
                         s.BeneficioEstimado, Docs.EstadoSugerencia(s.Estado));
                 dgvSugerencias.DataSource = tabla;
@@ -274,6 +301,11 @@ namespace GUI
         {
             try { Docs.Imprimir(s.EstaDescartada() ? Docs.ConstanciaDescarteSugerencia(s) : Docs.Sugerencia(s), this); }
             catch (Exception ex) { MostrarError(ex); }
+        }
+
+        private static void FormatearTipo(object sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is BE.TipoDescuento t) e.Value = Exportacion.DocumentosPromocion.Tipo(t);
         }
     }
 }

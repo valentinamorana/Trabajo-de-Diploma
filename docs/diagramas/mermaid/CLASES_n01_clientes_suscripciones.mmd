@@ -53,12 +53,17 @@ classDiagram
     +DateTime? FechaResolucion
     +EstadoCobro Resultado
     +string Actor
+    +int? IdMedioPago
+    +string NumeroComprobante
+    +ModalidadCobro? Modalidad
+    +decimal? DescuentoAplicado
+    +int? IdPromocion
   }
   class BLL_Cliente["BLL.Cliente"] {
     +Alta(string,  Cliente) void
     +Modificar(string,  Cliente) void
     +Baja(string,  Cliente) void
-    +ActivarSuscripcionDesdeContratacion(string,  Cliente,  int,  ModalidadCobro,  decimal) Suscripcion
+    +ActivarSuscripcionDesdeContratacion(string,  Cliente,  int,  ModalidadCobro,  decimal,  bool) Suscripcion
     +ReanudarPausa(string,  Cliente) void
     +ObtenerEstadoComercial(Cliente,  int) EstadoComercialCliente
   }
@@ -68,10 +73,10 @@ classDiagram
     +ObtenerElegibles(DecisionRenovacion) List~Cliente~
   }
   class BLL_Cobro["BLL.Cobro"] {
-    +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string) ResultadoCobro
+    +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string,  int?) ResultadoCobro
     +ObtenerHistorial(int) List~Cobro~
     +ObtenerElegibles() List~Cliente~
-    +PrevisualizarCobro(int) PrevisualizacionCobro
+    +PrevisualizarCobro(int,  ModalidadCobro) PrevisualizacionCobro
   }
   class BLL_PlanSuscripcion["BLL.PlanSuscripcion"] {
     +ObtenerActivos() List~PlanSuscripcion~

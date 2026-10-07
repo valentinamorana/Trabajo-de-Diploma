@@ -22,11 +22,14 @@ namespace GUI
             this.lblCliente      = new Label();
             this.cmbCliente      = new ComboBox();
             this.lblEstadoActual = new Label();
+            this.lblTotal = new Label();
             this.grpDecision     = new GroupBox();
             this.rbCobrado       = new RadioButton();
             this.rbPagoFallido   = new RadioButton();
             this.lblModalidad    = new Label();
             this.cmbModalidad    = new ComboBox();
+            this.lblMedioPago    = new Label();
+            this.cmbMedioPago    = new ComboBox();
             this.btnProcesar     = new Button();
             this.lblResultado    = new Label();
             this.grpDecision.SuspendLayout();
@@ -57,13 +60,13 @@ namespace GUI
             this.lblEstadoActual.ForeColor = Color.DimGray;
             this.lblEstadoActual.Location  = new Point(15, 80);
             this.lblEstadoActual.Name      = "lblEstadoActual";
-            this.lblEstadoActual.Size      = new Size(430, 34);
+            this.lblEstadoActual.Size      = new Size(430, 52);
             this.lblEstadoActual.TabIndex  = 3;
 
             // ── grpDecision ───────────────────────────────────────────────────
             this.grpDecision.Controls.Add(this.rbCobrado);
             this.grpDecision.Controls.Add(this.rbPagoFallido);
-            this.grpDecision.Location = new Point(15, 120);
+            this.grpDecision.Location = new Point(15, 138);
             this.grpDecision.Name     = "grpDecision";
             this.grpDecision.Size     = new Size(430, 80);
             this.grpDecision.TabIndex = 4;
@@ -86,7 +89,7 @@ namespace GUI
 
             // ── lblModalidad / cmbModalidad ───────────────────────────────────
             this.lblModalidad.AutoSize = true;
-            this.lblModalidad.Location = new Point(15, 215);
+            this.lblModalidad.Location = new Point(15, 233);
             this.lblModalidad.Name     = "lblModalidad";
             this.lblModalidad.TabIndex = 5;
 
@@ -94,16 +97,37 @@ namespace GUI
             // Enum.GetValues en vez de una lista hardcodeada (antes la única de las 3 pantallas
             // que no lo hacía así — NuevaContratacionForm ya usaba este criterio): un valor nuevo
             // en BE.Builders.ModalidadCobro se refleja acá sin tener que acordarse de tocar esta lista.
-            this.cmbModalidad.Location     = new Point(120, 212);
+            this.cmbModalidad.Location     = new Point(120, 230);
             this.cmbModalidad.Name         = "cmbModalidad";
             this.cmbModalidad.TabIndex     = 6;
             this.cmbModalidad.Width        = 200;
+            this.cmbModalidad.SelectedIndexChanged += new System.EventHandler(this.CmbModalidad_SelectedIndexChanged);
+
+            // ── lblMedioPago / cmbMedioPago (N01: con qué pagó el cliente) ──────
+            this.lblMedioPago.AutoSize = true;
+            this.lblMedioPago.Location = new Point(15, 263);
+            this.lblMedioPago.Name     = "lblMedioPago";
+            this.lblMedioPago.TabIndex = 10;
+
+            this.cmbMedioPago.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cmbMedioPago.Location      = new Point(120, 260);
+            this.cmbMedioPago.Name          = "cmbMedioPago";
+            this.cmbMedioPago.TabIndex      = 7;
+            this.cmbMedioPago.Width         = 200;
+
+            // ── lblTotal: total a cobrar (período con descuento + cargos pendientes) ──
+            this.lblTotal.AutoSize  = false;
+            this.lblTotal.Font      = new Font(this.Font, FontStyle.Bold);
+            this.lblTotal.Location  = new Point(15, 292);
+            this.lblTotal.Name      = "lblTotal";
+            this.lblTotal.Size      = new Size(430, 36);
+            this.lblTotal.TabIndex  = 9;
 
             // ── btnProcesar ────────────────────────────────────────────────────
             this.btnProcesar.Height   = 32;
-            this.btnProcesar.Location = new Point(15, 250);
+            this.btnProcesar.Location = new Point(15, 334);
             this.btnProcesar.Name     = "btnProcesar";
-            this.btnProcesar.TabIndex = 7;
+            this.btnProcesar.TabIndex = 8;
             this.btnProcesar.Width    = 150;
             this.btnProcesar.UseVisualStyleBackColor = true;
             this.btnProcesar.Click += new System.EventHandler(this.BtnProcesar_Click);
@@ -111,17 +135,20 @@ namespace GUI
             // ── lblResultado ───────────────────────────────────────────────────
             this.lblResultado.AutoSize  = false;
             this.lblResultado.ForeColor = Color.DarkGreen;
-            this.lblResultado.Location  = new Point(15, 290);
+            this.lblResultado.Location  = new Point(15, 374);
             this.lblResultado.Name      = "lblResultado";
             this.lblResultado.Size      = new Size(430, 55);
             this.lblResultado.TabIndex  = 8;
 
             // ── CobroSuscripcionForm ───────────────────────────────────────────
-            this.ClientSize      = new Size(480, 360);
+            this.ClientSize      = new Size(480, 444);
             this.Controls.Add(this.lblTitulo);
             this.Controls.Add(this.lblCliente);
             this.Controls.Add(this.cmbCliente);
             this.Controls.Add(this.lblEstadoActual);
+            this.Controls.Add(this.lblTotal);
+            this.Controls.Add(this.lblMedioPago);
+            this.Controls.Add(this.cmbMedioPago);
             this.Controls.Add(this.grpDecision);
             this.Controls.Add(this.lblModalidad);
             this.Controls.Add(this.cmbModalidad);
@@ -146,6 +173,9 @@ namespace GUI
         private Label      lblCliente;
         private ComboBox   cmbCliente;
         private Label      lblEstadoActual;
+        private Label      lblTotal;
+        private Label      lblMedioPago;
+        private ComboBox   cmbMedioPago;
         private GroupBox   grpDecision;
         private RadioButton rbCobrado;
         private RadioButton rbPagoFallido;

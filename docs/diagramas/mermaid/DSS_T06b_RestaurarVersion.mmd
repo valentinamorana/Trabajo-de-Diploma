@@ -14,7 +14,7 @@ sequenceDiagram
   C-->>B: memento (IMemento)
   B->>D: ObtenerPorId(idUsuario)
   B->>U: RestaurarDesde(memento)
-  B->>D: RestaurarVersion(memento)
+  B->>D: RestaurarVersion(v)
   B->>C: Guardar(idUsuario, memento del estado restaurado)
   B->>L: Registrar(Restauración a versión, Criticidad.Alta)
   B-->>F: usuario restaurado

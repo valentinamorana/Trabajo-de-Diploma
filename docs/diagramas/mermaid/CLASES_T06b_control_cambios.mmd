@@ -48,9 +48,9 @@ classDiagram
   }
   IMemento <|.. VersionUsuario
   VersionUsuario --> "1" Usuario : IdUsuario
-  ________________________ ..> __________________ : usa
-  __________________ ..> _____________________ : usa
-  __________________ ..> Usuario : usa
-  __________________ ..> __________________ : usa
-  _____________________ ..> IMemento : usa
+  GUI_VersionHistorialForm ..> BLL_VersionUsuario : usa
+  BLL_VersionUsuario ..> BLL_CuidadorHistorial : usa
+  BLL_VersionUsuario ..> Usuario : usa
+  BLL_VersionUsuario ..> DAL_VersionUsuario : usa
+  BLL_CuidadorHistorial ..> IMemento : usa
   Usuario ..> IMemento : usa

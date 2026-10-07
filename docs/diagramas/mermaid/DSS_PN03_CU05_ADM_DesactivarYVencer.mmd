@@ -4,21 +4,37 @@ sequenceDiagram
   participant F as Promociones<br/>AdministracionForm
   participant B as BLL.Promocion
   participant D as DAL.Promocion
+  Note over A,F: Desactivación directa (b) y cierre por fecha de fin (c): al consultar, las Vigentes vencidas pasan a Vencida
+  A->>F: Abre Gestión de Promociones (o pulsa Actualizar)
   F->>B: ObtenerTodas()
+  B->>B: CerrarVencidasSinFallar()  [si falla, lo deja en el Trace y la consulta sigue]
   B->>B: CerrarVencidas()  [(c) llega la fecha de fin]
-  B->>D: ObtenerTodas()  [DebeVencer(hoy): Vigente con FechaFin pasada]
-  opt Por cada vencida
-    B->>D: CambiarEstado(id, esperado = Vigente, historial: → Vencida)  [claim: no duplica si otra sesión la cerró]
+  B->>D: ObtenerTodas()  [se quedan las que cumplen DebeVencer(hoy): Vigente con FechaFin pasada]
+  loop Por cada promoción que debe vencer
+    B->>D: CambiarEstado(idPromocion, estadoEsperado, historial)  [claim: estadoEsperado = Vigente, historial: Vigente → Vencida]
+    D-->>B: true, o false si otra sesión ya la cerró (no duplica el historial)
   end
+  Note over B: bitacoraNeg.Registrar(Cancelacion, …) por cada vencida · bitacora.Registrar("Promociones", …) si cerró alguna
+  B->>D: ObtenerTodas()
   B-->>F: promociones (las vencidas ya no aplican en el cobro)
-  A->>F: (b) Elige una Vigente, pulsa "Desactivar" e indica el motivo
+  A->>F: (b) Elige una Vigente, pulsa "Desactivar" e ingresa el motivo
   F->>B: Desactivar(modulo, promocion, motivo)
-  Note over B: Exigir(PromocionesAdminEditar) · promocion.PuedeDesactivarseDirecto() · motivo obligatorio
-  B->>D: CambiarEstado(id, esperado = Vigente, historial: → Desactivada con el motivo)  [claim]
-  alt Otra sesión ya la cambió
-    D-->>B: false
-    B-->>F: AppException(estado_concurrente)
-  else Desactivada
-    B-->>F: ok
-    F-->>A: Promoción Desactivada: fin
+  Note over B: PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)
+  alt No está Vigente (PuedeDesactivarseDirecto / TransicionValida(Desactivada)) o sin motivo
+    B-->>F: AppException(desactivar_estado / motivodesactivar_requerido)
+    F-->>A: Informa el motivo
+  else Vigente y con motivo
+    B->>B: Transicionar(promocion, destino, observacion)  [destino = Desactivada, observacion = motivo]
+    B->>D: CambiarEstado(idPromocion, estadoEsperado, historial)  [claim: estadoEsperado = Vigente, historial: Vigente → Desactivada, con el motivo]
+    alt false: otra sesión ya la cambió
+      D-->>B: false
+      B-->>F: AppException(estado_concurrente)
+      F-->>A: Informa el motivo
+    else true
+      D-->>B: true
+      Note over B: bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion, …)
+      B-->>F: ok
+      F-->>A: "Promoción desactivada": fin
+      F->>B: ObtenerTodas()  [recarga]
+    end
   end

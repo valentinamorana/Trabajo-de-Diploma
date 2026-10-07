@@ -2,32 +2,60 @@ sequenceDiagram
   autonumber
   actor D as Depósito
   participant F as Inspeccion<br/>DevolucionForm
+  participant CD as CargoPrenda<br/>Dialog
+  participant IN as BLL.Inspeccion<br/>Devolucion
   participant PB as BLL.Prenda
+  participant PR as BE.Prenda
   participant CG as BLL.CargoPrenda
-  participant DA as DAL (Prenda, Mantenimiento, CargoPrenda)
   participant LE as BLL.ListaEspera
-  D->>F: Abre la cola de prendas En limpieza
+  participant DP as DAL.Prenda
+  participant DM as DAL.Mantenimiento<br/>Prenda
+  participant DL as DAL.ListaEspera
+  participant DI as DAL.Inspeccion<br/>Devolucion
+  D->>F: Abre Inspección de Devolución
   F->>PB: ObtenerEnLimpieza()
+  PB->>DP: ObtenerTodos()
+  DP-->>PB: prendas
   PB-->>F: prendas En limpieza
-  D->>F: Inspecciona una prenda y decide
+  F-->>D: Cola de prendas pendientes de inspección (con su último cliente)
+  D->>F: Selecciona una prenda y la inspecciona
   alt Desgaste normal: Aprobar reingreso
-    F->>PB: CambiarEstado(modulo, prenda, Disponible, actor, viaInspeccion: true)
-    Note over PB: Exigir(StockEditar) · patrón State: EnLimpieza → Disponible
-    PB->>DA: CambiarEstado(id, esperado = EnLimpieza, nuevo = Disponible)  [UPDATE condicionado] · CerrarMantenimiento(id)
-    PB->>LE: NotificarSiCorresponde(idPrenda)  [reserva 48 h si hay lista de espera]
-    PB-->>F: ok
-    F-->>D: Prenda de nuevo en el catálogo, sin cargo
-  else Daño irreparable: Dar de baja y cobrar
-    F->>CG: RegistrarCargo(modulo, prenda, motivo, monto, actor)  [primero el cargo]
-    Note over CG: Exigir(StockEditar) · la prenda debe tener último cliente · motivo obligatorio · monto > 0
-    CG->>DA: Alta(cargo: Pendiente, IdCliente = último cliente)
-    F->>PB: CambiarEstado(modulo, prenda, Baja, actor, viaInspeccion: true)  [después la baja]
-    PB->>DA: CambiarEstado(id, esperado = EnLimpieza, nuevo = Baja)
-    PB-->>F: ok
+    D->>F: Pulsa "Aprobar reingreso" y confirma
+    F->>IN: AprobarReingreso(modulo, prenda)
+    IN->>PB: CambiarEstado(modulo, prenda, Disponible, actor)
+    Note over PB: Exigir(StockEditar) · una prenda En limpieza solo se da de baja desde la Inspección
+    PB->>PR: ControlarEstado(Disponible)
+    Note over PR: Patrón State: EstadoEnLimpieza permite EnLimpieza → Disponible
+    PR-->>PB: true
+    PB->>DP: CambiarEstado(idPrenda, EnLimpieza, Disponible, null)
+    PB->>DM: CerrarMantenimiento(idPrenda)
+    PB->>LE: NotificarSiCorresponde(idPrenda, actor)
+    LE->>DL: ObtenerPendienteMasAntigua(idPrenda)
+    DL-->>LE: primer cliente en espera (si hay)
+    alt Hay un cliente en espera
+      LE->>DL: CambiarEstado(idListaEspera, Reservada, limite, actor, Pendiente)  [reserva por 48 h]
+    end
+    PB-->>IN: ok
+    IN-->>F: ok
+    F-->>D: La prenda reingresó a Disponible, sin cargo
+  else Daño irreparable: Dar de baja con cargo
+    D->>F: Pulsa "Dar de baja con cargo"
+    F->>CD: Abre el diálogo con el precio de reposición precargado
+    D->>CD: Ingresa el motivo del daño y confirma o ajusta el monto
+    CD->>CG: ValidarDatos(motivo, monto)
+    CG-->>CD: ok (motivo obligatorio, monto > 0)
+    CD-->>F: motivo y monto
+    F->>IN: DarDeBajaConCargo(modulo, prenda, motivo, monto)
+    IN->>IN: BajaConCargo(modulo, prenda, motivo, monto, actor, EnLimpieza)
+    Note over IN: Exigir(StockEditar) · la prenda sigue En limpieza y tiene último cliente
+    IN->>CG: ValidarDatos(motivo, monto)
+    IN->>DI: DarDeBajaConCargo(cargo, estadoEsperado)
+    Note over DI: Una sola transacción: primero el cargo (Pendiente, al último cliente) y después la baja condicionada
+    DI-->>IN: idCargo
+    IN-->>F: idCargo
     F-->>D: Prenda dada de baja: el cargo se suma al próximo cobro del cliente
   end
-  alt Otra sesión ya la resolvió
-    DA-->>PB: UPDATE sin filas
-    PB-->>F: AppException(estado_cambio)
-    F-->>D: Actualizá la cola
+  alt Otra sesión ya la resolvió (el UPDATE no afecta filas)
+    IN-->>F: AppException(estado_cambio): no queda ni el cargo ni la baja
+    F-->>D: Informa el error y actualiza la cola
   end

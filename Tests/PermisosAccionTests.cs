@@ -83,6 +83,27 @@ namespace Tests
         }
 
         [TestMethod]
+        public void ExigirAdministrador_AdministradorArchivadoConSesionAbierta_Rechaza()
+        {
+            // Backups, alta de usuarios, versiones: antes este guard no revalidaba contra la base.
+            Login("Administrador");
+            BLL.PermisosAccion.LectorUsuarioVigente = id => new BLL.UsuarioVigente(false, "Administrador", "Administrador");
+            var ex = Capturar(() => BLL.BLLHelper.ExigirAdministrador("err.bll.backup.sin_permiso", "sin permiso"));
+            Assert.AreEqual("err.bll.permisos.usuario_no_vigente", ex?.Clave);
+        }
+
+        [TestMethod]
+        public void ExigirAdministrador_ConIntegridadComprometida_NoRevalida()
+        {
+            // Consola de recuperación: la tabla Usuario no es confiable; el Administrador tiene que poder restaurar.
+            Login("Administrador");
+            BLL.PermisosAccion.LectorUsuarioVigente = id => new BLL.UsuarioVigente(false, "Administrador", "Administrador");
+            BLL.Configuracion.IntegridadComprometida = true;
+            try { BLL.BLLHelper.ExigirAdministrador("err.bll.backup.sin_permiso", "sin permiso"); }
+            finally { BLL.Configuracion.IntegridadComprometida = false; }
+        }
+
+        [TestMethod]
         public void Exigir_UsuarioEliminado_Rechaza()
         {
             Login("Administrador");

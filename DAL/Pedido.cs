@@ -183,7 +183,7 @@ namespace DAL
         // PdN9 — Cantidad de veces que cada prenda fue pedida (solo ventas concretadas: un
         // pedido cancelado, desistido o en control no representa demanda real).
         // Usada por BLL.AnalisisRotacion.
-        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda()
+        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda(DateTime? desde = null)
         {
             var resultado = new Dictionary<int, int>();
             try
@@ -193,8 +193,9 @@ namespace DAL
                     "FROM PedidoPrenda pp " +
                     "INNER JOIN Pedido p ON p.IdPedido = pp.IdPedido " +
                     "WHERE p.Estado IN " + ESTADOS_VENTA + " " +
+                    (desde.HasValue ? "AND p.FechaPedido >= @Desde " : "") +
                     "GROUP BY pp.IdPrenda",
-                    null);
+                    desde.HasValue ? new[] { new SqlParameter("@Desde", desde.Value.Date) } : null);
 
                 if (tabla != null)
                     foreach (DataRow row in tabla.Rows)
@@ -293,7 +294,7 @@ namespace DAL
         {
             int idNuevo = 0;
 
-            acceso.EjecutarTransaccion((conexion, tx) =>
+            ConPedidoActivoUnico(() => acceso.EjecutarTransaccion((conexion, tx) =>
             {
                 using (var cmd = new SqlCommand(
                     "INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, " +
@@ -322,10 +323,23 @@ namespace DAL
                 }
 
                 InsertarLineasEnTx(conexion, tx, idNuevo, pedido.Prendas);
-            });
+            }));
 
             ActualizarDV(idNuevo);   // T07: DV multi-tabla (pedido + líneas)
             return idNuevo;
+        }
+
+        // UX_Pedido_ClienteActivo: si dos operadores envían a la vez un pedido del mismo cliente,
+        // la BLL valida antes pero solo el índice único filtrado garantiza un pedido en curso.
+        private static void ConPedidoActivoUnico(Action accion)
+        {
+            try { accion(); }
+            catch (SqlException ex) when ((ex.Number == 2601 || ex.Number == 2627)
+                                          && ex.Message.Contains("UX_Pedido_ClienteActivo"))
+            {
+                throw new BE.AppException("err.dal.pedido.pedido_activo_concurrente",
+                    "El cliente ya tiene otro pedido en curso: otro operador lo registró recién. Actualizá la lista.");
+            }
         }
 
         // "Recibir selección ajustada por disponibilidad": reemplaza las líneas de un pedido con
@@ -946,7 +960,7 @@ namespace DAL
         public bool DesCancelar(int idPedido, int idCliente)
         {
             bool ok = false;
-            acceso.EjecutarTransaccion((conexion, tx) =>
+            ConPedidoActivoUnico(() => acceso.EjecutarTransaccion((conexion, tx) =>
             {
                 using (var cmd = new SqlCommand(
                     "UPDATE Pedido SET Estado=@Nuevo, MotivoCancelacion=NULL, FechaEnvioControl=@Ahora, " +
@@ -963,7 +977,7 @@ namespace DAL
                 if (!ok) return;
                 BorrarInformeFaltantesEnTx(conexion, tx, idPedido);
                 Ejecutar(conexion, tx, "UPDATE PedidoPrenda SET Confirmada = 0 WHERE IdPedido=@IdPedido", idPedido);
-            });
+            }));
             if (ok) ActualizarDV(idPedido);   // T07
             return ok;
         }

@@ -49,8 +49,8 @@ classDiagram
   class ActividadesBitacora {
     <<static>>
   }
-  ____________ ..> ____________ : usa
-  ____________ ..> __________________ : usa
-  ____________ ..> _________________________ : usa
-  __________________ ..> Bitacora : usa
-  _________________________ ..> BitacoraNegocio : usa
+  GUI_Bitacora ..> BLL_Bitacora : usa
+  BLL_Bitacora ..> Servicios_Bitacora : usa
+  BLL_Bitacora ..> Servicios_BitacoraNegocio : usa
+  Servicios_Bitacora ..> Bitacora : usa
+  Servicios_BitacoraNegocio ..> BitacoraNegocio : usa

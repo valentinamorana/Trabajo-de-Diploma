@@ -29,6 +29,13 @@ const idx = cs.indice();
 const metodos = new Set(), clases = new Set();
 for (const lista of Object.values(idx)) for (const c of lista) { clases.add(c.nombre); c.metodos.forEach(m => metodos.add(m.nombre)); }
 const permitidos = new Set(['AppException']);
+const _priv = {};
+function privadosDe(etiqueta) {
+  if (!etiqueta) return new Set(); if (_priv[etiqueta]) return _priv[etiqueta];
+  const c = cs.buscar(etiqueta); if (!c) return (_priv[etiqueta] = new Set());
+  const src = fs.readFileSync(path.join(cs.RAIZ, c.archivo), 'utf8');
+  return (_priv[etiqueta] = new Set([...src.matchAll(/\b(?:private|protected)\s+(?:static\s+|async\s+|override\s+|virtual\s+)*[\w<>\[\],.?() ]+?\s+(\w+)\s*\(/g)].map(m => m[1])));
+}
 const secuencias = require('./modelos/secuencias').concat(require('./modelos/seguridad_secuencias'));
 const recorrer = (pasos, cb) => { for (const s of pasos) { cb(s); if (s.pasos) recorrer(s.pasos, cb); for (const e of (s.sino || [])) recorrer(e.pasos, cb); } };
 for (const d of secuencias) {
@@ -36,10 +43,13 @@ for (const d of secuencias) {
     const m = /^(?:BLL|DAL|BE)\.(\w+)$/.exec(p.etiqueta) || (/^[A-Za-z]\w*$/.test(p.etiqueta) && !p.actor ? [null, p.etiqueta] : null);
     if (m && !clases.has(m[1])) errores.push(`${d.id}: la clase "${p.etiqueta}" ya no existe en el código.`);
   }
+  const etq = Object.fromEntries(d.participantes.map(p => [p.id, p.etiqueta]));
   recorrer(d.pasos, (s) => {
     if (!s.msg) return;
     for (const m of s.msg.matchAll(/\b([A-Z][A-Za-z0-9_]+)\(/g)) {
       const n = m[1];
+      // un mensaje a sí mismo puede ser un método privado real de esa clase
+      if (s.de === s.a && privadosDe(etq[s.a]).has(n)) continue;
       if (!metodos.has(n) && !clases.has(n) && !permitidos.has(n)) errores.push(`${d.id}: el mensaje "${s.msg.slice(0, 60)}" cita ${n}(), que no existe en el código.`);
     }
   });

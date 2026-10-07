@@ -126,7 +126,7 @@ namespace GUI
             foreach (var f in lista)
                 tabla.Rows.Add(
                     f.IdListaEspera, f.NombrePrenda, f.NombreCliente,
-                    f.FechaAlta.ToString("dd/MM/yyyy HH:mm"),
+                    f.FechaAlta.ToString("g"),
                     EstadoLabel(f.Estado),
                     f.ReservaVigente ? f.FechaLimiteReserva.Value.ToString("dd/MM HH:mm") : "—",
                     (int)f.Estado);
@@ -218,9 +218,8 @@ namespace GUI
             string body = Tr("conf.listaespera.cancelar.body", "¿Cancelar la anotación de {0} por '{1}'?",
                 new object[] { fila.NombreCliente, fila.NombrePrenda });
 
-            var confirmar = MessageBox.Show(body,
-                Tr("conf.listaespera.cancelar.titulo", "Confirmar Cancelación"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+            var confirmar = (FormBase.MostrarConfirmacionSiNo(this, body,
+                Tr("conf.listaespera.cancelar.titulo", "Confirmar Cancelación"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirmar != DialogResult.Yes) return;
 

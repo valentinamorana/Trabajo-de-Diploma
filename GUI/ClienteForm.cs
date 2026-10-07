@@ -17,6 +17,11 @@ namespace GUI
         // ── Resultado del diálogo ─────────────────────────────────────────────
         public BE.Cliente ClienteEditado { get; private set; }
 
+        // Lo que hace la pantalla que abrió el formulario para persistir (BLL Alta/Modificar). Se
+        // ejecuta ANTES de cerrar: si falla (DNI duplicado, email inválido…) el error se muestra acá
+        // y no se pierde lo cargado. Sin esto, el formulario se cerraba y había que tipear todo.
+        public Action<BE.Cliente> Guardar { get; set; }
+
         // ── Modo del formulario ───────────────────────────────────────────────
         private readonly bool _esEdicion;
         private readonly BE.Cliente _clienteOriginal;
@@ -258,6 +263,7 @@ namespace GUI
                     IdClienteReferente = idReferente
                 };
 
+                Guardar?.Invoke(ClienteEditado);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

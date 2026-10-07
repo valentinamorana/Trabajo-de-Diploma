@@ -174,7 +174,7 @@ namespace GUI
             {
                 _prendas = prendaBLL.ObtenerTodos();
                 AplicarFiltro();
-                MostrarOk(Tr("msg.prenda.cargadas", "{0} prenda(s) en el catálogo.", new object[] { _prendas.Count }));
+                MostrarCarga(Tr("msg.prenda.cargadas", "{0} prenda(s) en el catálogo.", new object[] { _prendas.Count }));
             }
             catch (Exception ex)
             {
@@ -228,7 +228,7 @@ namespace GUI
                     p.Color ?? "—",
                     EstadoLabel(p.Estado),
                     p.NombreCliente ?? "—",
-                    p.FechaAlta.ToString("dd/MM/yyyy"),
+                    p.FechaAlta.ToString("d"),
                     (int)p.Estado);
             }
 
@@ -304,10 +304,10 @@ namespace GUI
         {
             using (var form = new PrendaForm())
             {
+                form.Guardar = p => prendaBLL.Alta(this.Text, p);   // si falla, el formulario sigue abierto
                 if (form.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
-                    prendaBLL.Alta(this.Text, form.PrendaEditada);
                     var tAlt = Traductor.ObtenerTraducciones(_idioma);
                     string fmtAlt = tAlt.ContainsKey("msg.prenda.agregada") ? tAlt["msg.prenda.agregada"].Texto : "Prenda '{0}' agregada al catálogo.";
                     MostrarOk(string.Format(fmtAlt, form.PrendaEditada.Nombre));
@@ -324,10 +324,10 @@ namespace GUI
 
             using (var form = new PrendaForm(prenda))
             {
+                form.Guardar = p => prendaBLL.Modificar(this.Text, p);
                 if (form.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
-                    prendaBLL.Modificar(this.Text, form.PrendaEditada);
                     var tMod = Traductor.ObtenerTraducciones(_idioma);
                     string fmtMod = tMod.ContainsKey("msg.prenda.actualizada") ? tMod["msg.prenda.actualizada"].Texto : "Prenda '{0}' actualizada.";
                     MostrarOk(string.Format(fmtMod, form.PrendaEditada.Nombre));
@@ -384,11 +384,10 @@ namespace GUI
         // Bloque 1 — Cargo por daño/pérdida: se ofrece opcionalmente tras confirmar una Baja.
         private void OfrecerCargoPorDanioOPerdida(BE.Prenda prenda)
         {
-            var conf = MessageBox.Show(
+            var conf = (FormBase.MostrarConfirmacionSiNo(this,
                 Tr("msg.cargoprenda.preguntar", "¿Corresponde cobrarle a {0} por daño o pérdida de esta prenda?")
                     .Replace("{0}", prenda.NombreUltimoCliente ?? "el último cliente"),
-                Tr("frm.cargoprenda", "Cargo por Daño/Pérdida"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                Tr("frm.cargoprenda", "Cargo por Daño/Pérdida"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
             if (conf != DialogResult.Yes) return;
 
             using (var dlg = new CargoPrendaDialog(prenda))

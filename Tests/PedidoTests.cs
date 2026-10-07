@@ -823,6 +823,7 @@ namespace Tests
             Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.ConFaltantes));
             Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.Separado));
             Assert.IsFalse(p.TransicionValida(BE.EstadoPedido.Pendiente), "No se formaliza sin separar.");
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.Cancelado), "Sin esta salida el pedido queda trabado si el cliente vence en la cola.");
 
             p.Estado = BE.EstadoPedido.ConFaltantes;
             Assert.IsTrue(p.TransicionValida(BE.EstadoPedido.EnControlStock));
@@ -1245,6 +1246,25 @@ namespace Tests
             Assert.AreEqual(BE.EstadoPedido.Separado, ctx.DalPedido.UltimoEstadoEsperadoCancelar, "Claim: solo si sigue Separado.");
             var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
             Assert.AreEqual("Separado", estado.ValorAnterior);
+            Assert.AreEqual("Cancelado", estado.ValorNuevo);
+        }
+
+        [TestMethod]
+        public void Cancelar_PedidoEnControlDeStock_CancelaConClaim()
+        {
+            // El cliente venció o se suspendió mientras el pedido esperaba a Depósito: Separar lo
+            // rechaza y no hay faltantes que informar, así que la única salida es cancelarlo.
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var pedido = new BE.Pedido { IdPedido = 4, IdCliente = 10, Estado = BE.EstadoPedido.EnControlStock, NombreCliente = "Ana" };
+            Assert.IsTrue(pedido.PuedeCancelarse());
+
+            ctx.Crear().Cancelar("Test", pedido, "Suscripción vencida mientras esperaba el control");
+
+            Assert.AreEqual(1, ctx.DalPedido.CancelarVeces);
+            Assert.AreEqual(BE.EstadoPedido.EnControlStock, ctx.DalPedido.UltimoEstadoEsperadoCancelar, "Claim: solo si sigue en control.");
+            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual("EnControlStock", estado.ValorAnterior);
             Assert.AreEqual("Cancelado", estado.ValorNuevo);
         }
 

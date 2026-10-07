@@ -11,7 +11,8 @@ namespace BE.Builders
     /// </summary>
     public static class DirectorSuscripcion
     {
-        public static Suscripcion Construir(SuscripcionBuilder builder, Cliente cliente, PlanSuscripcion plan)
+        public static Suscripcion Construir(SuscripcionBuilder builder, Cliente cliente, PlanSuscripcion plan,
+                                            bool iniciarHoy = false)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
@@ -19,6 +20,7 @@ namespace BE.Builders
 
             builder.AsignarCliente(cliente);
             builder.AsignarPlan(plan);
+            builder.IniciarHoy = iniciarHoy;
             return builder.BuildSuscripcion();
         }
     }

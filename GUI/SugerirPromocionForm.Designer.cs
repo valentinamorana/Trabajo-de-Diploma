@@ -18,7 +18,7 @@ namespace GUI
             this.rbPlan = new System.Windows.Forms.RadioButton();
             this.rbCategoria = new System.Windows.Forms.RadioButton();
             this.cmbPlan = new System.Windows.Forms.ComboBox();
-            this.txtCategoria = new System.Windows.Forms.TextBox();
+            this.cmbCategoria = new System.Windows.Forms.ComboBox();
             this.lblTipoDescuento = new System.Windows.Forms.Label();
             this.cmbTipoDescuento = new System.Windows.Forms.ComboBox();
             this.lblBeneficioEstimado = new System.Windows.Forms.Label();
@@ -27,6 +27,7 @@ namespace GUI
             this.txtMotivo = new System.Windows.Forms.TextBox();
             this.btnEnviar = new System.Windows.Forms.Button();
             this.btnAnalizar = new System.Windows.Forms.Button();
+            this.cmbPeriodo = new System.Windows.Forms.ComboBox();
             this.lblOrigen = new System.Windows.Forms.Label();
             this.lblSugerenciasTitulo = new System.Windows.Forms.Label();
             this.btnImprimirSugerencia = new System.Windows.Forms.Button();
@@ -67,13 +68,16 @@ namespace GUI
             this.rbCategoria.Tag = "promocion.categoria";
             this.rbCategoria.Text = "Categoría:";
             //
-            // txtCategoria
+            // cmbCategoria
             //
-            this.txtCategoria.Enabled = false;
-            this.txtCategoria.Location = new System.Drawing.Point(112, 48);
-            this.txtCategoria.Name = "txtCategoria";
-            this.txtCategoria.Size = new System.Drawing.Size(220, 20);
-            this.txtCategoria.TabIndex = 3;
+            this.cmbCategoria.Enabled = false;
+            this.cmbCategoria.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            this.cmbCategoria.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.cmbCategoria.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.cmbCategoria.Location = new System.Drawing.Point(112, 48);
+            this.cmbCategoria.Name = "cmbCategoria";
+            this.cmbCategoria.Size = new System.Drawing.Size(220, 20);
+            this.cmbCategoria.TabIndex = 3;
             //
             // lblTipoDescuento
             //
@@ -160,9 +164,16 @@ namespace GUI
             //
             // lblOrigen (origen de la métrica de la sugerencia que se está armando)
             //
-            this.lblOrigen.Location = new System.Drawing.Point(452, 52);
+            this.lblOrigen.Location = new System.Drawing.Point(452, 80);
             this.lblOrigen.Name = "lblOrigen";
-            this.lblOrigen.Size = new System.Drawing.Size(232, 80);
+            this.lblOrigen.Size = new System.Drawing.Size(232, 56);
+            //
+            // cmbPeriodo (PN03: período de "Analizar métricas")
+            //
+            this.cmbPeriodo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPeriodo.Location = new System.Drawing.Point(452, 50);
+            this.cmbPeriodo.Name = "cmbPeriodo";
+            this.cmbPeriodo.Size = new System.Drawing.Size(200, 21);
             this.lblOrigen.TabIndex = 13;
             //
             // lblSugerenciasTitulo
@@ -239,6 +250,7 @@ namespace GUI
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.btnEnviar);
             this.Controls.Add(this.btnAnalizar);
+            this.Controls.Add(this.cmbPeriodo);
             this.Controls.Add(this.lblOrigen);
             this.Controls.Add(this.lblSugerenciasTitulo);
             this.Controls.Add(this.btnImprimirSugerencia);
@@ -250,7 +262,7 @@ namespace GUI
             this.Controls.Add(this.lblBeneficioEstimado);
             this.Controls.Add(this.cmbTipoDescuento);
             this.Controls.Add(this.lblTipoDescuento);
-            this.Controls.Add(this.txtCategoria);
+            this.Controls.Add(this.cmbCategoria);
             this.Controls.Add(this.rbCategoria);
             this.Controls.Add(this.cmbPlan);
             this.Controls.Add(this.rbPlan);
@@ -274,7 +286,7 @@ namespace GUI
         private System.Windows.Forms.RadioButton rbPlan;
         private System.Windows.Forms.RadioButton rbCategoria;
         private System.Windows.Forms.ComboBox cmbPlan;
-        private System.Windows.Forms.TextBox txtCategoria;
+        private System.Windows.Forms.ComboBox cmbCategoria;
         private System.Windows.Forms.Label lblTipoDescuento;
         private System.Windows.Forms.ComboBox cmbTipoDescuento;
         private System.Windows.Forms.Label lblBeneficioEstimado;
@@ -283,6 +295,7 @@ namespace GUI
         private System.Windows.Forms.TextBox txtMotivo;
         private System.Windows.Forms.Button btnEnviar;
         private System.Windows.Forms.Button btnAnalizar;
+        private System.Windows.Forms.ComboBox cmbPeriodo;
         private System.Windows.Forms.Label lblOrigen;
         private System.Windows.Forms.Label lblSugerenciasTitulo;
         private System.Windows.Forms.Button btnImprimirSugerencia;

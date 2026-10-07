@@ -53,6 +53,11 @@ erDiagram
     datetime FechaResolucion "NULL"
     int Resultado
     nvarchar(100) Actor "NULL"
+    int IdMedioPago FK "NULL"
+    nvarchar(50) NumeroComprobante "NULL"
+    int Modalidad "NULL"
+    decimal(10_2) DescuentoAplicado "NULL"
+    int IdPromocion FK "NULL"
   }
   CargoPrenda {
     int IdCargo PK

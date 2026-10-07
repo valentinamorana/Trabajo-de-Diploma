@@ -77,9 +77,12 @@ namespace BE
         // los 3 dashboards, sin una única fuente de verdad).
         public bool EsUrgentePorAntiguedad => DiasDesdeAlta >= 2;
 
-        // El pedido puede cancelarse si está Pendiente (formalizado, sin despachar) o Separado
-        // (Depósito ya reservó las prendas pero todavía no se formalizó: "Cancelar pedido separado").
-        public bool PuedeCancelarse() => Estado == EstadoPedido.Pendiente || Estado == EstadoPedido.Separado;
+        // El pedido puede cancelarse si está Pendiente (formalizado, sin despachar), Separado
+        // (Depósito ya reservó las prendas pero todavía no se formalizó: "Cancelar pedido separado")
+        // o En Control de Stock (todavía sin prendas reservadas): si mientras espera a Depósito el
+        // cliente vence, se suspende o se arrepiente, el pedido no queda trabado en la cola.
+        public bool PuedeCancelarse() => Estado == EstadoPedido.Pendiente || Estado == EstadoPedido.Separado
+                                      || Estado == EstadoPedido.EnControlStock;
 
         // El pedido puede despacharse solo si está Pendiente (formalizado).
         public bool PuedeDespachar() => Estado == EstadoPedido.Pendiente;
@@ -148,7 +151,8 @@ namespace BE
             {
                 case EstadoPedido.EnControlStock:
                     return destino == EstadoPedido.ConFaltantes
-                        || destino == EstadoPedido.Separado;
+                        || destino == EstadoPedido.Separado
+                        || destino == EstadoPedido.Cancelado;   // Cancelar pedido en control (sin prendas reservadas)
 
                 case EstadoPedido.ConFaltantes:
                     return destino == EstadoPedido.EnControlStock

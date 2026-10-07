@@ -60,6 +60,5 @@ classDiagram
   Componente <|-- Patente
   Patente --> "*" Componente : Hijos
   BLL_Familia <|-- Rol
-  __________________ ..> ___________ : usa
-  ___________ ..> __________________________ : usa
-  ___________ ..> Componente : usa
+  GUI_GestorPermisos ..> BLL_Familia : usa
+  BLL_Familia ..> Componente : usa

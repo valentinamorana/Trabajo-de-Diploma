@@ -279,7 +279,7 @@ namespace GUI
                     .OrderByDescending(p => p.FechaPedido)
                     .FirstOrDefault();
                 if (ult != null)
-                    ultimoPedido = $"#{ult.IdPedido} ({EstadoLabel(ult.Estado)}, {ult.FechaPedido:dd/MM/yyyy})";
+                    ultimoPedido = $"#{ult.IdPedido} ({EstadoLabel(ult.Estado)}, {ult.FechaPedido:d})";
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[NuevoPedidoForm] Ficha: " + ex.Message); }
 
@@ -289,9 +289,9 @@ namespace GUI
                     "Prendas en uso: {5}  —  Último pedido: {6}\nMétodo de pago: {7}  —  Alta: {8}"),
                 c.NombreCompleto, c.DNI,
                 c.NombrePlan ?? "—", c.LimitePrendas,
-                c.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—",
+                c.FechaVencimiento?.ToString("d") ?? "—",
                 c.StockUtilizado, ultimoPedido,
-                c.MetodoPago ?? "—", c.FechaAlta.ToString("dd/MM/yyyy"));
+                c.MetodoPago ?? "—", c.FechaAlta.ToString("d"));
         }
 
         private Func<Exportacion.ReporteExportable> _avisoActual;
@@ -524,7 +524,7 @@ namespace GUI
             string detallesPrendas = string.Join("\n  • ",
                 prendas.ConvertAll(p => $"{p.Nombre} ({p.Talle} — {p.Color})"));
 
-            var confirmar = MessageBox.Show(
+            var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(
                     Tr("conf.ped.enviar.msg",
                        "Enviar a control de stock la selección de {0}:\n\n  • {1}\n\nTotal: {2} prenda(s)\n\n" +
@@ -532,10 +532,7 @@ namespace GUI
                     _clienteSel.NombreCompleto,
                     detallesPrendas,
                     prendas.Count),
-                Tr("conf.ped.enviar.titulo", "Enviar a control de stock"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
+                Tr("conf.ped.enviar.titulo", "Enviar a control de stock"), porDefectoNo: false) ? DialogResult.Yes : DialogResult.No);
 
             if (confirmar != DialogResult.Yes) return;
 
@@ -555,9 +552,7 @@ namespace GUI
                     IdPedidoCreado = pedidoBLL.EnviarAControlStock(this.Text, _clienteSel.IdCliente, prendas);
                 }
 
-                OfrecerImprimir(Tr("conf.ped.planilla", "¿Imprimir la planilla de control de existencias?"),
-                    () => Exportacion.DocumentosPedido.PlanillaControl(pedidoBLL.ObtenerPorId(IdPedidoCreado), null,
-                                                                      clienteBLL.ObtenerPorId(_clienteSel.IdCliente)));
+                // La planilla de control se imprime desde "Documentos ▾" (Control de stock / Pedidos de venta).
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -605,9 +600,7 @@ namespace GUI
                     IdPedidoCreado = pedidoBLL.AsentarDesistimiento(this.Text, _clienteSel.IdCliente, prendas, motivo);
                 }
                 FueDesistimiento = true;
-
-                OfrecerImprimir(Tr("conf.ped.aviso", "¿Imprimir el aviso de desistimiento?"),
-                    () => Exportacion.DocumentosPedido.AvisoDesistimiento(pedidoBLL.ObtenerPorId(IdPedidoCreado)));
+                // El aviso de desistimiento se imprime desde "Documentos ▾" en Pedidos de venta.
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -616,15 +609,6 @@ namespace GUI
             {
                 MostrarError(ex);
             }
-        }
-
-        private void OfrecerImprimir(string pregunta, Func<Exportacion.ReporteExportable> armar)
-        {
-            if (MessageBox.Show(pregunta, this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-                return;
-            try { Exportacion.DocumentosPedido.Imprimir(armar(), this); }
-            catch (Exception ex) { MostrarError(ex); }
         }
 
         private string EstadoLabel(BE.EstadoPedido estado) => EstadosPedido.Etiqueta(estado);

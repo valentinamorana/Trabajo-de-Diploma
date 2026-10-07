@@ -108,8 +108,8 @@ namespace GUI
             this.btnImprimirPlanilla.Name = "btnImprimirPlanilla";
             this.btnImprimirPlanilla.Size = new System.Drawing.Size(130, 28);
             this.btnImprimirPlanilla.TabIndex = 3;
-            this.btnImprimirPlanilla.Tag = "btn.cs.planilla";
-            this.btnImprimirPlanilla.Text = "Imprimir planilla";
+            this.btnImprimirPlanilla.Tag = "btn.documentos";
+            this.btnImprimirPlanilla.Text = "Documentos ▾";
             this.btnImprimirPlanilla.Click += new System.EventHandler(this.BtnImprimirPlanilla_Click);
             //
             // btnRefrescar

@@ -290,7 +290,7 @@ namespace GUI
             "Media (2)",
             "Alta (3)",
             "Intentos Login (4)",
-            "Recuperacion Clave (5)",
+            "Recuperación Clave (5)",
             "Bloqueos Cuenta (6)"});
             this.cmbCriticidad.Location = new System.Drawing.Point(368, 50);
             this.cmbCriticidad.Name = "cmbCriticidad";

@@ -1,9 +1,24 @@
 sequenceDiagram
   autonumber
   actor C as Caja
+  participant F as Contrataciones<br/>PendientesForm
   participant B as BLL.<br/>Contratacion
   participant D as DAL.<br/>Contratacion
-  Note over C,B: Parte de ConfirmarCobro (CU01-CAJ): número CMP-{id:D6}-{yyyyMMdd} guardado en el mismo UPDATE del cobro
-  B->>D: ConfirmarCobro(..., numeroComprobante, ...)
-  D-->>B: contratación Pagada con número y fecha de comprobante
-  B-->>C: Comprobante (PDF), reimprimible desde la vista Resueltas
+  Note over C,F: Incluido en CU01-CAJ Gestionar Cobro: el comprobante se emite dentro de ConfirmarCobro
+  C->>F: Confirma el cobro
+  F->>B: ConfirmarCobro(modulo, contratacion, idMedioPago, importeConfirmado, idPlanCuotas)
+  B->>B: EmitirComprobante(idContratacion)  [privado: → numeroComprobante = CMP-{id:D6}-{yyyyMMdd}]
+  B->>D: ConfirmarCobro(idContratacion, idCaja, idMedioPago, numeroComprobante, importe, descuento, idPromocion, idPlanCuotas, recargoCuotas)  [el número se guarda en el mismo UPDATE del cobro]
+  alt false
+    D-->>B: false  [otra sesión ya la resolvió]
+    B-->>F: AppException(cobrar_concurrente)
+    F-->>C: Informa: actualizar la cola
+  else true
+    D-->>B: true
+    Note over B: Sigue la activación de la suscripción (CU01-CAJ Gestionar Cobro)
+    B-->>F: Liquidación con NumeroComprobante
+    C->>F: Imprimir el comprobante
+    F->>B: ObtenerPorId(idContratacion)
+    B-->>F: contratación Pagada (número y fecha del comprobante)
+    F-->>C: Comprobante (PDF) armado por la pantalla, reimprimible desde la vista Resueltas
+  end

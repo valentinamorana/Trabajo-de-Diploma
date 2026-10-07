@@ -19,5 +19,8 @@ namespace BLL.Manejadores
 
         /// <summary>0 si no se llegó a persistir ningún registro de historial (caso Pendiente).</summary>
         public int IdCobro { get; set; }
+
+        // N01 — comprobante emitido al cobrar (null si no se cobró).
+        public string NumeroComprobante { get; set; }
     }
 }

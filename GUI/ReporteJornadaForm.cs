@@ -159,7 +159,7 @@ namespace GUI
 
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:dd/MM/yyyy}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:d}",
                     NombreArchivo = nombreBase,
                     TextoPlano    = rtbReporte.Text
                 };
@@ -184,7 +184,7 @@ namespace GUI
             {
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:dd/MM/yyyy}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:d}",
                     NombreArchivo = $"ReporteJornada_{dtpJornada.Value:yyyyMMdd}",
                     TextoPlano    = rtbReporte.Text
                 };
@@ -243,7 +243,7 @@ namespace GUI
 
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {fecha:dd/MM/yyyy}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {fecha:d}",
                     NombreArchivo = $"EventosJornada_{fecha:yyyyMMdd}",
                     Encabezados   = headers,
                     Datos         = eventos

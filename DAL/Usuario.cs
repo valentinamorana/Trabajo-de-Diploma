@@ -142,23 +142,6 @@ namespace DAL
             }
         }
 
-        // Bloquea la cuenta de un usuario (Estado=0).
-        // Se llama tras superar el máximo de intentos fallidos.
-        public void Bloquear(int idUsuario)
-        {
-            try
-            {
-                acceso.Escribir(
-                    "UPDATE Usuario SET Estado = 0 WHERE IdUsuario = @idUsuario",
-                    new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                RecalcularDVH(idUsuario);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al bloquear el usuario ID {idUsuario}.", ex);
-            }
-        }
-
         // Bloqueo PROGRESIVO: marca el bloqueo con timestamp e incrementa la escala (1/5/15/60 min).
         // Reemplaza a Bloquear() en el flujo de login.
         public void BloquearConTiempo(int idUsuario)
@@ -634,6 +617,22 @@ namespace DAL
             {
                 throw new Exception($"Error al eliminar definitivamente el usuario ID {idUsuario}.", ex);
             }
+        }
+
+        // RF-10 — Registros de negocio de PN03 firmados por el usuario: son la traza de quién creó,
+        // sugirió, dictaminó o resolvió cada promoción. Un usuario con alguno no se purga.
+        public bool TieneRegistrosDeNegocio(int idUsuario)
+        {
+            DataTable t = acceso.Leer(
+                "SELECT CASE WHEN " +
+                "  EXISTS (SELECT 1 FROM DictamenContable WHERE IdUsuario = @id) OR " +
+                "  EXISTS (SELECT 1 FROM SolicitudBajaPromocion WHERE IdUsuarioSolicita = @id OR IdUsuarioResuelve = @id) OR " +
+                "  EXISTS (SELECT 1 FROM Promocion WHERE IdUsuarioAlta = @id) OR " +
+                "  EXISTS (SELECT 1 FROM PromocionHistorial WHERE IdUsuario = @id) OR " +
+                "  EXISTS (SELECT 1 FROM SugerenciaPromocion WHERE IdUsuarioAlta = @id) " +
+                "THEN 1 ELSE 0 END AS Tiene",
+                new[] { new SqlParameter("@id", idUsuario) });
+            return t != null && t.Rows.Count > 0 && Convert.ToInt32(t.Rows[0]["Tiene"]) == 1;
         }
 
         // RF-10 — Cuenta los Administradores ACTIVOS (para impedir borrar el último).

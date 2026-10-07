@@ -15,7 +15,6 @@ namespace DAL.Interfaces
         // ABM — modificación de datos administrativos NO sensibles y cambio de rol.
         void             Modificar(int idUsuario, string nombre, string apellido, string username, DateTime? fechaNacimiento, string email);
         void             CambiarRol(int idUsuario, string rol);
-        void             Bloquear(int idUsuario);
         // Bloqueo progresivo: marca el bloqueo con timestamp e incrementa la escala / auto-desbloqueo al expirar.
         void             BloquearConTiempo(int idUsuario);
         void             AutoDesbloquear(int idUsuario);
@@ -30,6 +29,8 @@ namespace DAL.Interfaces
         // RF-10 — baja lógica (archivar) y purga física diferida.
         void             BajaLogica(int idUsuario);
         void             EliminarFisico(int idUsuario);
+        // RF-10: ¿el usuario firmó registros de PN03 (promociones, sugerencias, dictámenes, bajas)?
+        bool             TieneRegistrosDeNegocio(int idUsuario);
         int              ContarAdministradoresActivos();
         List<BE.Usuario> ObtenerArchivadosParaPurga(int diasRetencion);
 

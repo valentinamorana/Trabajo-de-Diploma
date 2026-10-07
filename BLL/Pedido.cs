@@ -605,9 +605,11 @@ namespace BLL
             try { return listaEsperaBLL.EstaReservadaParaOtro(idPrenda, idCliente); }
             catch (Exception ex)
             {
-                // BD sin migrar (tabla ListaEspera inexistente) → no bloquea, pero se loguea.
+                // Falla CERRADA: si no se puede verificar la reserva, la prenda se trata como
+                // reservada (no disponible) y Depósito informa el faltante. Antes devolvía false y
+                // podía entregarse una prenda reservada para otro cliente.
                 System.Diagnostics.Trace.TraceWarning($"[BLL.Pedido] Lista de Espera (validación de reserva): {ex.Message}");
-                return false;
+                return true;
             }
         }
 
@@ -743,14 +745,16 @@ namespace BLL
 
         // Cancelar
         // Cancela un pedido formalizado (Pendiente) o con las prendas ya separadas por Depósito
-        // (Separado: "Cancelar pedido separado", su única salida además de formalizar). Requiere
-        // motivo. Libera las prendas que el pedido tenía reservadas.
+        // (Separado: "Cancelar pedido separado", su única salida además de formalizar), o uno que
+        // todavía espera en control de stock (si el cliente vence o se suspende en la cola, Separar
+        // lo rechaza: sin esta salida quedaba trabado). Requiere motivo. Libera las prendas que el
+        // pedido tenía reservadas (en control de stock todavía no hay ninguna).
         public void Cancelar(string modulo, BE.Pedido pedido, string motivo)
         {
             PermisosAccion.Exigir(BE.Patentes.PedidosVentaEditar, BE.Patentes.PedidosVenta);
             if (!pedido.PuedeCancelarse())
                 throw new BE.AppException("err.bll.pedido.cancelar_estado_separado",
-                    "Solo se pueden cancelar pedidos Pendientes o con las prendas separadas. Este pedido está '{0}'.",
+                    "Solo se pueden cancelar pedidos en control de stock, con las prendas separadas o Pendientes. Este pedido está '{0}'.",
                     pedido.Estado);
             ExigirTransicion(pedido, BE.EstadoPedido.Cancelado);
 

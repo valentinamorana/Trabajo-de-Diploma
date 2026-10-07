@@ -191,16 +191,31 @@ function actividad(m) {
   let cambio = true, it = 0;
   while (cambio && it++ < 200) { cambio = false; for (const f of m.flujos) { if (atras.has(f.de + '>' + f.a)) continue; if (rango[f.a] < rango[f.de] + 1) { rango[f.a] = rango[f.de] + 1; cambio = true; } } }
   const carrilIdx = {}; m.carriles.forEach((c, i) => { carrilIdx[c.id] = i; });
-  const LANE_W = 260, GAP = 92, TOP = 60;
-  const ocupado = {};
+  // Documentos (Artifact «Document»): no ordenan el flujo; van a la derecha del carril, a la altura de quien los produce.
+  const objetos = m.objetos || [];
+  const esDoc = (n) => n.tipo === 'documento';
+  for (const d of m.nodos.filter(esDoc)) {
+    const prod = objetos.find(o => o.a === d.id) || objetos.find(o => o.de === d.id);
+    const ref = prod ? (prod.a === d.id ? prod.de : prod.a) : null;
+    rango[d.id] = ref ? rango[ref] : 0;
+    if (!d.carril && ref) d.carril = idx[ref].carril;
+  }
+  const hayDocs = m.nodos.some(esDoc);
+  const LANE_W = hayDocs ? 420 : 260, GAP = 92, TOP = 60, CTRL_X = hayDocs ? 130 : 130;
+  const ocupado = {}, ocupadoDoc = {};
   const pos = {};
-  const dimN = (n) => n.tipo === 'inicio' || n.tipo === 'fin' ? [26, 26] : n.tipo === 'decision' ? [190, 84] : [200, 52];
+  const dimN = (n) => n.tipo === 'inicio' || n.tipo === 'fin' ? [26, 26] : n.tipo === 'decision' ? [190, 84] : esDoc(n) ? [140, 48] : [200, 52];
   for (const n of m.nodos) {
+    const [w, h] = dimN(n);
+    if (esDoc(n)) {
+      let r = rango[n.id]; while (ocupadoDoc[n.carril + ':' + r]) r++; ocupadoDoc[n.carril + ':' + r] = 1; rango[n.id] = r;
+      pos[n.id] = { x: carrilIdx[n.carril] * LANE_W + LANE_W - w - 14, y: TOP + r * GAP, w, h };
+      continue;
+    }
     const r = rango[n.id]; const k = n.carril + ':' + r;
     const off = ocupado[k] = (ocupado[k] || 0);
     ocupado[k]++;
-    const [w, h] = dimN(n);
-    const cx = carrilIdx[n.carril] * LANE_W + LANE_W / 2 + off * 30;
+    const cx = carrilIdx[n.carril] * LANE_W + (hayDocs ? CTRL_X : LANE_W / 2) + off * 30;
     pos[n.id] = { x: cx - w / 2, y: TOP + r * GAP + (off * 0), w, h };
   }
   const maxR = Math.max(...Object.values(rango));
@@ -215,12 +230,16 @@ function actividad(m) {
     if (n.tipo === 'inicio') est = 'ellipse;html=1;fillColor=#222222;strokeColor=#222222;';
     else if (n.tipo === 'fin') est = 'ellipse;html=1;fillColor=#FFFFFF;strokeColor=#222222;strokeWidth=4;';
     else if (n.tipo === 'decision') est = 'rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#d6b656;fontSize=10;';
+    else if (n.tipo === 'documento') est = 'shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#D4EFE8;strokeColor=#307060;fontSize=9;size=0.15;';
     else est = 'rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#7a3d68;fontSize=10;arcSize=20;';
     ids[n.id] = L.vertice(n.tipo === 'inicio' || n.tipo === 'fin' ? '' : html(n.texto), est, p.x, p.y, p.w, p.h);
   }
   for (const f of m.flujos) {
     L.borde(html(f.texto || ''), 'edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#444;', ids[f.de], ids[f.a]);
   }
+  // flujos de documentos (como en el PN01): punteados, la acción lo produce / la acción lo usa
+  for (const o of objetos)
+    L.borde('', 'edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#307060;', ids[o.de], ids[o.a]);
   return L.xml();
 }
 

@@ -4,18 +4,27 @@ sequenceDiagram
   participant F as Contrataciones<br/>PendientesForm
   participant B as BLL.<br/>Contratacion
   participant D as DAL.<br/>Contratacion
+  Note over B: Máximo de 3 intentos (Contratacion.MaxIntentosPago): al tercero la contratación se cancela
   C->>F: El pago no se concretó: medio intentado + motivo
   F->>B: RegistrarIntentoFallido(modulo, contratacion, idMedioPago, motivo)
-  Note over B: Exigir(CajaEditar) · PendientePago · motivo obligatorio
-  B->>D: RegistrarIntentoFallido(id, idMedioPago, motivo, idCaja, máximo 3)  [transacción con bloqueo de fila]
-  alt Ya no está pendiente
-    D-->>B: null
-    B-->>F: AppException(cobrar_concurrente)
-  else Intento registrado
-    alt ¿Alcanzó el máximo? Sí
-      D-->>B: Cancelada (automática)
-      F-->>C: Constancia de cancelación (PDF)
-    else No
-      F-->>C: Sigue en la cola: vuelve a Calcular importe
+  Note over B: Exigir(CajaEditar)
+  B->>D: ObtenerPorId(idContratacion)  [relee el estado]
+  D-->>B: contratación actual
+  alt No está pendiente o falta el motivo
+    B-->>F: AppException(cobrar_estado / intento_sin_motivo / motivo_largo)
+    F-->>C: Informa el error
+  else Válido
+    B->>D: RegistrarIntentoFallido(idContratacion, idMedioPago, motivo, idCaja, maximo)  [maximo = MaxIntentosPago = 3, transacción con bloqueo de fila]
+    alt Ya no está pendiente
+      D-->>B: null
+      B-->>F: AppException(cobrar_concurrente)
+    else Intento registrado
+      D-->>B: resultado (NroIntento, Maximo, Cancelada)
+      B-->>F: resultado (NroIntento, Maximo, Cancelada)
+      alt ¿Alcanzó el máximo? Sí (Cancelada)
+        F-->>C: Contratación cancelada: Constancia de cancelación (PDF)
+      else No
+        F-->>C: Intento N de 3 registrado: sigue en la cola para volver a cobrarla
+      end
     end
   end

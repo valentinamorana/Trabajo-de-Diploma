@@ -1,26 +1,50 @@
 sequenceDiagram
   autonumber
   actor V as Vendedor
-  participant F as PedidosVenta / NuevoPedidoForm
+  participant PV as PedidosVenta
+  participant NF as NuevoPedidoForm
+  participant CB as BLL.Cliente
+  participant PB as BLL.Prenda
   participant B as BLL.Pedido
   participant D as DAL.Pedido
   participant H as DAL.Pedido<br/>Historial
-  V->>F: Ver faltantes de un pedido ConFaltantes
-  F->>B: ObtenerInformeFaltantes(idPedido)
+  V->>PV: Selecciona un pedido ConFaltantes (Ver faltantes / Ajustar)
+  PV->>B: ObtenerPorId(id)  [relee el pedido]
+  B-->>PV: pedido
+  PV->>B: ObtenerInformeFaltantes(idPedido)
   B->>D: ObtenerFaltantes(idPedido)
-  B-->>F: faltantes con sus alternativas
-  F-->>V: Detalle de prendas no disponibles (pantalla y PDF)
+  B-->>PV: faltantes con sus alternativas
+  PV-->>V: Informe de disponibilidad (pantalla y PDF) para comunicar al cliente
   alt El cliente ajusta la selección
-    V->>F: Ajustar selección (sin los faltantes, alternativas resaltadas)
-    F->>B: AjustarSeleccion(modulo, pedido, prendas)
-    Note over B: Exigir(PedidosVentaEditar) · solo ConFaltantes · vuelve al merge: solo ComprobarCupo(cliente, cantidad)
-    B->>D: ReemplazarSeleccion(idPedido, prendas)  [→ EnControlStock, informe anterior descartado]
-    B->>H: RegistrarCambios(AJUSTAR_SELECCION)
-    F-->>V: Pedido reenviado a control de stock
+    PV->>NF: new NuevoPedidoForm(pedidoConFaltantes, faltantes)  [modo ajuste]
+    NF->>CB: ObtenerPorId(idCliente)
+    CB-->>NF: cliente
+    NF->>PB: ObtenerDisponibles(idClienteSolicitante)
+    PB-->>NF: catálogo sin los faltantes, alternativas resaltadas primero
+    loop Por cada prenda que el Vendedor anota o quita
+      NF->>CB: ObtenerEstadoComercial(cliente, prendasSolicitadas)
+      CB-->>NF: estado del cupo
+    end
+    alt Dentro del cupo
+      V->>NF: Reenviar a control de stock
+      NF->>B: AjustarSeleccion(modulo, pedido, prendas)
+      Note over B: Exigir(PedidosVentaEditar) · solo ConFaltantes (ajustar_estado) · vuelve al punto de unión: solo comprueba el cupo
+      B->>B: ComprobarCupo(cliente, cantidadPrendas)
+      B->>D: ReemplazarSeleccion(idPedido, prendas)  [→ EnControlStock, informe anterior descartado]
+      B->>H: RegistrarCambios(cambios)  [Accion = AJUSTAR_SELECCION]
+      NF-->>V: Pedido reenviado a control de stock (planilla PDF)
+    else Excede el cupo y no lo corrige
+      V->>NF: Registrar desistimiento + motivo
+      NF->>B: AsentarDesistimiento(modulo, pedido, motivo, etapa, seleccionAjustada)  [etapa = Cupo]
+      B->>D: RegistrarDesistimiento(idPedido, motivo, etapa, seleccionAjustada)  [→ Desistido]
+      B->>H: RegistrarCambios(cambios)  [Accion = DESISTIR]
+      NF-->>V: Aviso de desistimiento (PDF)
+    end
   else El cliente desiste
-    V->>F: Registrar desistimiento + motivo
-    F->>B: AsentarDesistimiento(modulo, pedido, motivo, etapa, seleccionAjustada)  [Disponibilidad, o Cupo si al ajustar excede]
-    B->>D: RegistrarDesistimiento(idPedido, motivo, etapa, seleccionAjustada)  [→ Desistido]
-    B->>H: RegistrarCambios(DESISTIR)
-    F-->>V: Aviso de desistimiento (PDF)
+    V->>PV: Registrar desistimiento + motivo
+    PV->>B: AsentarDesistimiento(modulo, pedido, motivo, etapa)  [etapa = Disponibilidad]
+    Note over B: Exigir(PedidosVentaEditar) · solo ConFaltantes (desistir_estado) · motivo obligatorio (desistir_sin_motivo, motivo_largo)
+    B->>D: RegistrarDesistimiento(idPedido, motivo, etapa, seleccionAjustada)  [seleccionAjustada = null, → Desistido]
+    B->>H: RegistrarCambios(cambios)  [Accion = DESISTIR]
+    PV-->>V: Aviso de desistimiento (PDF)
   end

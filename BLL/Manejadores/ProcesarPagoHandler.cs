@@ -61,8 +61,7 @@ namespace BLL.Manejadores
 
             // PN03 + NUULY 5.1: un solo descuento por ciclo — el mayor entre la promoción vigente del
             // plan y el crédito por referidos. Si gana la promoción, el crédito queda acumulado.
-            var resDescuento = BE.PoliticaDescuento.Resolver(
-                plan.Precio * BE.Builders.ModalidadCobroExtensiones.Meses(contexto.Modalidad), cliente.IdPlan, ObtenerPromocionesVigentes(), cliente.DescuentoProximoCobro, BE.Builders.ModalidadCobroExtensiones.Meses(contexto.Modalidad));
+            var resDescuento = CalcularDescuento(cliente, contexto.Modalidad, ObtenerPromocionesVigentes());
             decimal descuento = resDescuento.Descuento;
             var cargosPendientes = dalCargoPrenda.ObtenerPendientesPorCliente(cliente.IdCliente);
             decimal totalCargos = cargosPendientes.Sum(c => c.Monto);
@@ -77,6 +76,7 @@ namespace BLL.Manejadores
             // medio podía dejar el historial de auditoría desincronizado del estado real.
             var ahora = DateTime.Now;
             int idCobro = 0;
+            string numeroComprobante = null;
             dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
                 // Solo las columnas que el cobro modifica (vencimiento y gracia), condicionadas al
@@ -97,8 +97,15 @@ namespace BLL.Manejadores
                     FechaDeteccion = ahora,
                     FechaResolucion = ahora,
                     Resultado = BE.EstadoCobro.Cobrado,
-                    Actor = contexto.Actor
+                    Actor = contexto.Actor,
+                    IdMedioPago = contexto.IdMedioPago,
+                    Modalidad = contexto.Modalidad,
+                    DescuentoAplicado = resDescuento.Descuento > 0 ? resDescuento.Descuento : (decimal?)null,
+                    IdPromocion = resDescuento.Promocion?.IdPromocion
                 });
+                // "Emitir comprobante" (mismo formato que PN02: prefijo + ID + fecha).
+                numeroComprobante = $"CBR-{idCobro:D6}-{ahora:yyyyMMdd}";
+                dalCobro.AsignarComprobanteEnTx(conexion, tx, idCobro, numeroComprobante);
                 if (cargosPendientes.Count > 0 &&
 
                     !dalCargoPrenda.MarcarCobradosEnTx(conexion, tx,
@@ -173,6 +180,7 @@ namespace BLL.Manejadores
                 Resuelto = true,
                 Estado = BE.EstadoCobro.Cobrado,
                 IdCobro = idCobro,
+                NumeroComprobante = numeroComprobante,
                 Mensaje = mensaje,
                 Clave = clave,
                 Args = args
@@ -181,6 +189,17 @@ namespace BLL.Manejadores
 
         // Best-effort: si la tabla Promocion no existe todavía (BD sin migrar) o falla la lectura, el
         // cobro sigue sin promociones en vez de romperse.
+        // Importe del período (precio del plan × meses de la modalidad) con el único descuento que
+        // corresponde. Compartido con BLL.Cobro.PrevisualizarCobro: lo que se muestra antes de
+        // procesar es exactamente lo que se cobra.
+        internal static BE.ResultadoDescuento CalcularDescuento(BE.Cliente cliente, BE.Builders.ModalidadCobro modalidad,
+                                                                System.Collections.Generic.List<BE.Promocion> promociones)
+        {
+            int meses = BE.Builders.ModalidadCobroExtensiones.Meses(modalidad);
+            return Politicas.PoliticaDescuento.Resolver(cliente.PrecioPlan * meses, cliente.IdPlan, promociones,
+                                                 cliente.DescuentoProximoCobro, meses);
+        }
+
         private System.Collections.Generic.List<BE.Promocion> ObtenerPromocionesVigentes()
         {
             if (dalPromocion == null) return new System.Collections.Generic.List<BE.Promocion>();

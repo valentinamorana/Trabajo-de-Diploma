@@ -10,8 +10,6 @@ namespace Tests.Fakes
         public readonly List<BE.Renovacion> Registros = new List<BE.Renovacion>();
 
         public int AltaVeces { get; private set; }
-        public int ResolverVeces { get; private set; }
-        public BE.EstadoRenovacion? UltimoResultadoResuelto { get; private set; }
 
         public int Alta(BE.Renovacion renovacion)
         {
@@ -22,12 +20,6 @@ namespace Tests.Fakes
         }
 
         public int AltaEnTx(SqlConnection conexion, SqlTransaction tx, BE.Renovacion renovacion) => Alta(renovacion);
-
-        public void Resolver(int idRenovacion, BE.EstadoRenovacion resultado, int? idPlanNuevo)
-        {
-            ResolverVeces++;
-            UltimoResultadoResuelto = resultado;
-        }
 
         public List<BE.Renovacion> ObtenerPorCliente(int idCliente) => Registros.FindAll(r => r.IdCliente == idCliente);
         public List<BE.Renovacion> ObtenerTodos() => Registros;

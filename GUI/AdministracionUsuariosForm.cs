@@ -133,7 +133,7 @@ namespace GUI
                 TraducirHeaders();
 
                 lblMensaje.ForeColor = Color.DarkGreen;
-                lblMensaje.Text = string.Format(Tr("msg.adminusr.cargados", "{0} usuario(s)."), _usuarios.Count);
+                MostrarCarga(string.Format(Tr("msg.adminusr.cargados", "{0} usuario(s)."), _usuarios.Count));
                 LimpiarEdicion();
             }
             catch (Exception ex)

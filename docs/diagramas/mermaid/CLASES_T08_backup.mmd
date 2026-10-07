@@ -35,8 +35,6 @@ classDiagram
   }
   BLL_Backup ..> DAL_Interfaces_IBackupDAL : usa
   DAL_Interfaces_IBackupDAL <|.. DAL_Backup
-  ______________ ..> __________ : usa
-  __________ ..> _________________________ : usa
-  __________ ..> __________________________ : usa
-  __________ ..> __________________ : usa
-  _________________________ <|.. __________
+  GUI_BackupForm ..> BLL_Backup : usa
+  BLL_Backup ..> Seguridad_CifradorArchivos : usa
+  BLL_Backup ..> Servicios_Bitacora : usa

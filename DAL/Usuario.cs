@@ -636,6 +636,22 @@ namespace DAL
             }
         }
 
+        // RF-10 — Registros de negocio de PN03 firmados por el usuario: son la traza de quién creó,
+        // sugirió, dictaminó o resolvió cada promoción. Un usuario con alguno no se purga.
+        public bool TieneRegistrosDeNegocio(int idUsuario)
+        {
+            DataTable t = acceso.Leer(
+                "SELECT CASE WHEN " +
+                "  EXISTS (SELECT 1 FROM DictamenContable WHERE IdUsuario = @id) OR " +
+                "  EXISTS (SELECT 1 FROM SolicitudBajaPromocion WHERE IdUsuarioSolicita = @id OR IdUsuarioResuelve = @id) OR " +
+                "  EXISTS (SELECT 1 FROM Promocion WHERE IdUsuarioAlta = @id) OR " +
+                "  EXISTS (SELECT 1 FROM PromocionHistorial WHERE IdUsuario = @id) OR " +
+                "  EXISTS (SELECT 1 FROM SugerenciaPromocion WHERE IdUsuarioAlta = @id) " +
+                "THEN 1 ELSE 0 END AS Tiene",
+                new[] { new SqlParameter("@id", idUsuario) });
+            return t != null && t.Rows.Count > 0 && Convert.ToInt32(t.Rows[0]["Tiene"]) == 1;
+        }
+
         // RF-10 — Cuenta los Administradores ACTIVOS (para impedir borrar el último).
         public int ContarAdministradoresActivos()
         {

@@ -72,15 +72,15 @@ classDiagram
     +int? DVHAlmacenado
   }
   Seguridad_ICalculadorDV <|.. Seguridad_DigitoVerificador
-  _____________________________ ..> _________________ : usa
-  _____________________________ ..> __________________________ : usa
-  __________________________ ..> __________________________ : usa
-  __________________________ ..> _________________ : usa
-  _________________ ..> _________________ : usa
-  _________________ ..> ______________________ : usa
-  _________________ ..> _____________________ : usa
-  __________________________ ..> _____________________ : usa
-  _________________ ..> _______________________ : usa
-  _______________________ <|.. ______________________
-  ______________________ ..> ___________________________ : usa
-  _____________________ ..> FilaUsuarioDV : usa
+  GUI_DiagnosticoIntegridadForm ..> BLL_Configuracion : usa
+  GUI_DiagnosticoIntegridadForm ..> GUI_RecuperacionEspejoForm : usa
+  GUI_RecuperacionEspejoForm ..> BLL_RecuperacionIntegridad : usa
+  BLL_RecuperacionIntegridad ..> DAL_EspejoUsuario : usa
+  BLL_Configuracion ..> DAL_EspejoUsuario : usa
+  BLL_Configuracion ..> Seguridad_CalculadorDV : usa
+  BLL_Configuracion ..> DAL_DigitoVerificador : usa
+  BLL_RecuperacionIntegridad ..> DAL_DigitoVerificador : usa
+  BLL_Configuracion ..> DAL_HistorialIntegridad : usa
+  Seguridad_ICalculadorDV <|.. Seguridad_CalculadorDV
+  Seguridad_CalculadorDV ..> Seguridad_DigitoVerificador : usa
+  DAL_DigitoVerificador ..> FilaUsuarioDV : usa

@@ -30,6 +30,8 @@ namespace DAL.Interfaces
         // RF-10 — baja lógica (archivar) y purga física diferida.
         void             BajaLogica(int idUsuario);
         void             EliminarFisico(int idUsuario);
+        // RF-10: ¿el usuario firmó registros de PN03 (promociones, sugerencias, dictámenes, bajas)?
+        bool             TieneRegistrosDeNegocio(int idUsuario);
         int              ContarAdministradoresActivos();
         List<BE.Usuario> ObtenerArchivadosParaPurga(int diasRetencion);
 

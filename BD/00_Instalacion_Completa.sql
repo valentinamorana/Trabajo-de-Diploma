@@ -93,6 +93,34 @@ USE WardrobeFlowDB;
 GO
 
 -- ============================================================
+-- REINSTALACIÓN: FOTO DE LOS PERMISOS
+-- ------------------------------------------------------------
+-- Varias secciones otorgan permisos con "INSERT INTO PermisoRelacion ... WHERE NOT EXISTS" en
+-- cada corrida. Sobre una base ya instalada eso devolvía las patentes que el Administrador había
+-- quitado desde el Gestor de Perfiles. Acá se guarda cómo estaban los permisos antes de correr el
+-- script; al final (sección 21d) se quitan las relaciones que el script volvió a agregar entre
+-- roles y patentes que ya existían. Lo nuevo de una actualización (patentes o roles creados en
+-- esta corrida) se conserva. Solo aplica si la base ya pasó por una instalación completa.
+-- Las migraciones de una sola vez que otorguen permisos van DESPUÉS de esa limpieza (como 21d-4).
+-- ============================================================
+IF OBJECT_ID('ReinstalacionPermisos', 'U') IS NOT NULL DROP TABLE ReinstalacionPermisos;
+-- IF anidados a propósito: SQL Server no corta el AND, y en una instalación nueva ParametroSistema
+-- todavía no existe (la consulta fallaría aunque el primer OBJECT_ID diera NULL).
+IF OBJECT_ID('ParametroSistema', 'U') IS NOT NULL AND OBJECT_ID('PermisoRelacion', 'U') IS NOT NULL
+BEGIN
+    -- Ya instalada: la marca quedó en Aplicada (instalación completa) o NoAplica (base anterior a la marca).
+    IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor IN (N'Aplicada', N'NoAplica'))
+    BEGIN
+        SELECT IdPadre, IdHijo INTO ReinstalacionPermisos FROM PermisoRelacion;
+        DELETE FROM ParametroSistema WHERE Clave = N'ReinstalacionMaxIdPermiso';
+        INSERT INTO ParametroSistema (Clave, Valor, Fecha)
+        SELECT N'ReinstalacionMaxIdPermiso', CONVERT(NVARCHAR(20), ISNULL(MAX(IdPermiso), 0)), GETDATE() FROM Permiso;
+        PRINT 'Reinstalación: se guardó la configuración de permisos actual para respetarla.';
+    END
+END
+GO
+
+-- ============================================================
 -- TABLAS BASE
 -- ============================================================
 
@@ -3546,6 +3574,30 @@ WHERE NOT EXISTS (SELECT 1 FROM PermisoRelacion x WHERE x.IdPadre = rol.IdPermis
 
 UPDATE ParametroSistema SET Valor = N'Aplicada', Fecha = GETDATE()
 WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente';
+GO
+
+-- (3b) Reinstalación: se restaura la configuración de permisos del Administrador (ver la foto al
+--      principio del script). Se quitan las relaciones entre roles/patentes que ya existían y que
+--      esta corrida volvió a agregar; las de componentes nuevos de esta versión se conservan.
+IF OBJECT_ID('ReinstalacionPermisos', 'U') IS NOT NULL
+BEGIN
+    DECLARE @maxIdAntes INT = (SELECT TRY_CONVERT(INT, Valor) FROM ParametroSistema WHERE Clave = N'ReinstalacionMaxIdPermiso');
+    DECLARE @restituidas INT = 0;
+    IF @maxIdAntes IS NOT NULL
+    BEGIN
+        DELETE r FROM PermisoRelacion r
+        WHERE r.IdPadre <= @maxIdAntes AND r.IdHijo <= @maxIdAntes
+          AND NOT EXISTS (SELECT 1 FROM ReinstalacionPermisos s WHERE s.IdPadre = r.IdPadre AND s.IdHijo = r.IdHijo);
+        SET @restituidas = @@ROWCOUNT;
+    END
+    -- Las filas quitadas son las que esta corrida acababa de insertar: la tabla vuelve a su estado
+    -- anterior y sus dígitos verificadores siguen valiendo (no se pide recálculo, que "lavaría" una
+    -- manipulación previa).
+    IF @restituidas > 0
+        PRINT 'Reinstalación: se respetaron los permisos que el Administrador había quitado (' + CONVERT(NVARCHAR(10), @restituidas) + ' relación/es).';
+    DROP TABLE ReinstalacionPermisos;
+    DELETE FROM ParametroSistema WHERE Clave = N'ReinstalacionMaxIdPermiso';
+END
 GO
 
 -- (4) Cobro recurrente N01 → rol Caja (quien vende no cobra; mismo criterio que PN02).

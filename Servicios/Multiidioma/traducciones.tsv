@@ -7128,3 +7128,7 @@ ES	promocion.periodo.365	Último año
 EN	promocion.periodo.365	Last year
 RU	promocion.periodo.365	Последний год
 PT	promocion.periodo.365	Último ano
+ES	err.bll.rol_renombrar_en_uso	No se puede renombrar el rol '{0}': está asignado a {1} usuario(s) ({2}). Reasigná esos usuarios a otro rol antes de renombrarlo.
+EN	err.bll.rol_renombrar_en_uso	The role '{0}' cannot be renamed: it is assigned to {1} user(s) ({2}). Reassign those users to another role before renaming it.
+RU	err.bll.rol_renombrar_en_uso	Нельзя переименовать роль «{0}»: она назначена {1} пользователю(ям) ({2}). Сначала назначьте этим пользователям другую роль.
+PT	err.bll.rol_renombrar_en_uso	Não é possível renomear o perfil '{0}': está atribuído a {1} usuário(s) ({2}). Reatribua esses usuários a outro perfil antes de renomeá-lo.

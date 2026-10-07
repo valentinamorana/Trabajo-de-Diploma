@@ -2,7 +2,7 @@
 const cs = require('../lib/csharp');
 const E = (ref, extra = {}) => ({ ref, ...extra });
 // Identificador de la caja en el diagrama (igual criterio que lib/modelo.js)
-const idDe = (ref) => { const c = cs.buscar(ref); if (!c) throw new Error('Clase no encontrada: ' + ref); return (c.ns === 'BE' || c.ns.startsWith('BE.')) ? c.nombre : (c.ns + '_' + c.nombre).replace(/./g, '_'); };
+const idDe = (ref) => { const c = cs.buscar(ref); if (!c) throw new Error('Clase no encontrada: ' + ref); return (c.ns === 'BE' || c.ns.startsWith('BE.')) ? c.nombre : (c.ns + '_' + c.nombre).replace(/\./g, '_'); };
 // Dependencias de uso entre las clases de cada diagrama (quién invoca a quién en el código)
 const USOS = {
   CLASES_T02_login_logout: [['GUI.Login', 'BLL.Usuario'], ['BLL.Usuario', 'IUsuarioDAL'], ['BLL.Usuario', 'SessionManager'], ['BLL.Usuario', 'ContadorSesion'], ['BLL.Usuario', 'Encriptador'], ['BLL.Usuario', 'Servicios.Bitacora'], ['BLL.Usuario', 'BE.LoginException'], ['SessionManager', 'BE.SesionException'], ['SessionManager', 'BE.Usuario']],

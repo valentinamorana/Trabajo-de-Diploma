@@ -85,9 +85,13 @@ namespace Tests.Fakes
         public void             ResetearClave(int id, string hash)   { }
         public void             GuardarIdioma(int id, string idi)    { }
         public void             BajaLogica(int id)                   { }
-        public void             EliminarFisico(int id)               { }
+        public List<int> EliminadosFisico { get; } = new List<int>();
+        public void             EliminarFisico(int id)               { EliminadosFisico.Add(id); }
+        public HashSet<int> ConRegistrosDeNegocio { get; } = new HashSet<int>();
+        public bool             TieneRegistrosDeNegocio(int id)      => ConRegistrosDeNegocio.Contains(id);
+        public List<BE.Usuario> Purgables { get; set; } = new List<BE.Usuario>();
         public int              ContarAdministradoresActivos()       => AdministradoresActivos;
-        public List<BE.Usuario> ObtenerArchivadosParaPurga(int dias) => new List<BE.Usuario>();
+        public List<BE.Usuario> ObtenerArchivadosParaPurga(int dias) => Purgables;
 
         // Soporte transaccional (BLL.RecuperacionIntegridad): sin BD real en el fake, la
         // "transacción" solo ejecuta la acción con conn/tx nulos — nadie los usa fuera de

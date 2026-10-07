@@ -107,18 +107,34 @@ namespace BLL
 
             var admin = SessionManager.GetInstance().Usuario;
             int eliminados = 0;
+            var conservados = new List<string>();   // firmaron registros de PN03: quedan archivados
+            var fallidos = new List<string>();
             foreach (var u in purgables)
             {
-                usuarioDAL.EliminarFisico(u.Id);
-                eliminados++;
+                try
+                {
+                    if (usuarioDAL.TieneRegistrosDeNegocio(u.Id)) { conservados.Add(u.Username); continue; }
+                    usuarioDAL.EliminarFisico(u.Id);
+                    eliminados++;
+                }
+                catch (System.Exception ex)
+                {
+                    // Uno que falla no corta la purga de los demás, y queda asentado.
+                    fallidos.Add($"{u.Username} ({ex.Message})");
+                }
             }
 
+            string detalle = $"Admin '{admin.Username}' purgó definitivamente {eliminados} usuario(s) archivado(s) con más de {DiasRetencionPurga} días a las {System.DateTime.Now:HH:mm:ss}.";
+            if (conservados.Count > 0)
+                detalle += $" Se conservaron archivados {conservados.Count} por tener registros de promociones a su nombre: {string.Join(", ", conservados)}.";
+            if (fallidos.Count > 0)
+                detalle += $" No se pudieron eliminar: {string.Join("; ", fallidos)}.";
             bitacora.RegistrarSinSesion(
                 modulo:     modulo,
                 actividad:  BE.ActividadesBitacora.PurgaUsuariosArchivados,
                 criticidad: BE.Criticidad.Alta,
                 idUsuario:  admin.Id,
-                detalle:    $"Admin '{admin.Username}' purgó definitivamente {eliminados} usuario(s) archivado(s) con más de {DiasRetencionPurga} días a las {System.DateTime.Now:HH:mm:ss}.");
+                detalle:    detalle);
 
             return eliminados;
         }

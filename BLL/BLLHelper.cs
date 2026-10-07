@@ -17,6 +17,20 @@ namespace BLL
             if (!Seguridad.SessionManager.GetInstance().TienePermiso(nombrePatente))
                 throw new BE.AppException("err.bll.sin_permiso",
                     "No tiene permiso para ejecutar esta operación ('{0}').", nombrePatente);
+            ExigirVigente();
+        }
+
+        // El usuario de la sesión tiene que seguir activo y con el mismo rol en la base: un usuario
+        // archivado (o al que le cambiaron el rol) con la sesión abierta no puede seguir operando.
+        // Mismo control que PermisosAccion.Exigir; antes estos guards lo salteaban.
+        // Excepción: con la integridad comprometida la tabla Usuario no es confiable (el ingreso se
+        // validó contra el espejo) y revalidar podría dejar afuera al Administrador justo cuando
+        // tiene que reparar o restaurar la base.
+        private static void ExigirVigente()
+        {
+            if (Configuracion.IntegridadComprometida) return;
+            var sm = Seguridad.SessionManager.GetInstance();
+            PermisosAccion.ExigirUsuarioVigente(sm.Usuario, sm);
         }
 
         // Exige una sesión activa de ADMINISTRADOR (fail-closed). Centraliza el guard que antes
@@ -29,6 +43,7 @@ namespace BLL
                     "La sesión expiró. Volvé a iniciar sesión.");
             if (!Seguridad.SessionManager.GetInstance().Usuario.EsAdministrador)
                 throw new BE.AppException(claveSinPermiso, mensajeSinPermiso);
+            ExigirVigente();   // p. ej. un Administrador archivado no restaura backups ni crea usuarios
         }
 
         // Resuelve el IdEmpleado vinculado al usuario en sesión. Centraliza el guard que antes
@@ -67,11 +82,12 @@ namespace BLL
                 throw new BE.AppException("err.bll.sesion_expirada",
                     "La sesión expiró. Volvé a iniciar sesión.");
             var u = Seguridad.SessionManager.GetInstance().Usuario;
-            if (u.EsAdministrador) return;
-            bool tieneGestion = u.Permisos != null && u.Permisos.Exists(p => p.NombreMenu == "mnuUsuarios");
+            bool tieneGestion = u.EsAdministrador
+                                || (u.Permisos != null && u.Permisos.Exists(p => p.NombreMenu == "mnuUsuarios"));
             if (!tieneGestion)
                 throw new BE.AppException("err.bll.familia.sin_permiso",
                     "No tenés permiso para gestionar usuarios y permisos.");
+            ExigirVigente();
         }
     }
 }

@@ -125,10 +125,10 @@ namespace GUI
         {
             using (var form = new ClienteForm())
             {
+                form.Guardar = c => clienteBLL.Alta(this.Text, c);   // si falla, el formulario sigue abierto
                 if (form.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
-                    clienteBLL.Alta(this.Text, form.ClienteEditado);
                     txtIdentificacion.Text = form.ClienteEditado.DNI;
                     BuscarCliente();
                 }
@@ -149,7 +149,7 @@ namespace GUI
         private string Ficha(BE.Cliente c) => string.Format(
             Tr("lbl.contr.ficha", "Cliente: {0}  —  DNI {1}\nPlan actual: {2}  —  Vence: {3}  —  Prendas en uso: {4}"),
             c.NombreCompleto, c.DNI, c.NombrePlan ?? "—",
-            c.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—", c.StockUtilizado);
+            c.FechaVencimiento?.ToString("d") ?? "—", c.StockUtilizado);
 
         // ── "Presentar planes" («Planes disponibles») ────────────────────────
 

@@ -188,10 +188,10 @@ namespace GUI
 
                 string vencStr = c.FechaVencimiento.HasValue
                     ? (expirado
-                        ? $"{c.FechaVencimiento.Value:dd/MM/yyyy} ({vencido})"
+                        ? $"{c.FechaVencimiento.Value:d} ({vencido})"
                         : proxAVencer
-                            ? $"{c.FechaVencimiento.Value:dd/MM/yyyy} ({proxVencer})"
-                            : c.FechaVencimiento.Value.ToString("dd/MM/yyyy"))
+                            ? $"{c.FechaVencimiento.Value:d} ({proxVencer})"
+                            : c.FechaVencimiento.Value.ToString("d"))
                     : sinVenc;
 
                 // Mostrar "StockUtilizado / LimitePrendas" si tiene plan con límite
@@ -208,7 +208,7 @@ namespace GUI
                     c.NombrePlan ?? sinPlan,
                     capacidad,
                     c.MetodoPago,
-                    c.FechaAlta.ToString("dd/MM/yyyy"),
+                    c.FechaAlta.ToString("d"),
                     vencStr,
                     expirado,
                     proxAVencer);
@@ -248,6 +248,8 @@ namespace GUI
         {
             using (var form = new ClienteForm())
             {
+                // El alta se hace dentro del formulario: si falla, sigue abierto con los datos.
+                form.Guardar = c => clienteBLL.Alta(this.Text, c);
                 if (form.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
@@ -257,16 +259,13 @@ namespace GUI
                     // correspondiente, Caja confirma el cobro y recién ahí se activa) — así no
                     // hay forma de que un cliente quede con una suscripción vigente sin haber
                     // pasado por Caja.
-                    clienteBLL.Alta(this.Text, form.ClienteEditado);
-
                     var t = Traductor.ObtenerTraducciones(_idioma);
                     string fmt = t.ContainsKey("msg.cli.registrado") ? t["msg.cli.registrado"].Texto : "Cliente '{0}' registrado correctamente.";
                     MostrarOk(string.Format(fmt, form.ClienteEditado.NombreCompleto));
                     CargarClientes();
 
                     // PN02: "Registrar cliente" → sigue en "Presentar planes" para el mismo cliente.
-                    if (MessageBox.Show(Tr("conf.cli.contratar", "¿Continuar con la contratación de un plan para este cliente?"),
-                            this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    if (ConfirmarSiNo(Tr("conf.cli.contratar", "¿Continuar con la contratación de un plan para este cliente?"), this.Text))
                         using (var contratacion = new NuevaContratacionForm(form.ClienteEditado.DNI))
                             contratacion.ShowDialog(this);
                 }
@@ -284,13 +283,14 @@ namespace GUI
 
             using (var form = new ClienteForm(cliente))
             {
+                form.Guardar = c =>
+                {
+                    c.StockUtilizado = cliente.StockUtilizado;   // no viene del form
+                    clienteBLL.Modificar(this.Text, c);
+                };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
-                    // Preservar stock utilizado (no viene del form)
-                    form.ClienteEditado.StockUtilizado = cliente.StockUtilizado;
-
-                    clienteBLL.Modificar(this.Text, form.ClienteEditado);
                     var t = Traductor.ObtenerTraducciones(_idioma);
                     string fmt = t.ContainsKey("msg.cli.actualizado") ? t["msg.cli.actualizado"].Texto : "Cliente '{0}' actualizado.";
                     MostrarOk(string.Format(fmt, form.ClienteEditado.NombreCompleto));
@@ -308,13 +308,10 @@ namespace GUI
             var cliente = ObtenerClienteSeleccionado();
             if (cliente == null) return;
 
-            var confirmacion = MessageBox.Show(
+            var confirmacion = (FormBase.MostrarConfirmacionSiNo(this,
                 Tr("conf.baja.cli.msg", "¿Dar de baja a {0} (DNI {1})?\n\nEsta acción no se puede deshacer.",
                     new object[] { cliente.NombreCompleto, cliente.DNI }),
-                Tr("conf.baja.cli.titulo", "Confirmar Baja"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);
+                Tr("conf.baja.cli.titulo", "Confirmar Baja"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirmacion != DialogResult.Yes) return;
 

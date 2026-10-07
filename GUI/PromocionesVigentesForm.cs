@@ -99,7 +99,7 @@ namespace GUI
 
                 foreach (var p in _promociones)
                     tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan, p.CategoriaPrenda),
-                        Docs.Tipo(p.TipoDescuento), p.Valor, $"{p.FechaInicio:dd/MM/yyyy} - {p.FechaFin:dd/MM/yyyy}",
+                        Docs.Tipo(p.TipoDescuento), p.Valor, $"{p.FechaInicio:d} - {p.FechaFin:d}",
                         Docs.Estado(p.Estado));
 
                 dgvPromociones.DataSource = tabla;

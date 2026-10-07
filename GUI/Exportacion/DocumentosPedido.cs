@@ -26,7 +26,7 @@ namespace GUI.Exportacion
             return t.ContainsKey(clave) ? t[clave].Texto : fallback;
         }
 
-        private static string Fecha(DateTime? f) => f.HasValue ? f.Value.ToString("dd/MM/yyyy HH:mm") : "—";
+        private static string Fecha(DateTime? f) => f.HasValue ? f.Value.ToString("g") : "—";
 
         private static string Prenda(BE.Prenda p) =>
             $"#{p.IdPrenda}  {p.Nombre}  —  {p.Categoria ?? "—"} / {Tr("col.prenda.talle", "Talle")} {p.Talle ?? "—"} / {p.Color ?? "—"}";
@@ -62,7 +62,7 @@ namespace GUI.Exportacion
         private static void CabeceraCliente(StringBuilder sb, BE.Cliente c)
         {
             sb.AppendLine($"{Tr("doc.ped.cliente", "Cliente")}: {c.NombreCompleto}  —  DNI {c.DNI}");
-            sb.AppendLine($"{Tr("doc.aviso.plan", "Plan")}: {c.NombrePlan ?? "—"}  —  {Tr("doc.aviso.vence", "Vence")}: {(c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : "—")}");
+            sb.AppendLine($"{Tr("doc.aviso.plan", "Plan")}: {c.NombrePlan ?? "—"}  —  {Tr("doc.aviso.vence", "Vence")}: {(c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("d") : "—")}");
             sb.AppendLine($"{Tr("doc.aviso.fecha", "Fecha del aviso")}: {Fecha(DateTime.Now)}");
             sb.AppendLine();
         }

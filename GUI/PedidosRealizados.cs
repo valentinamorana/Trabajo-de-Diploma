@@ -193,13 +193,13 @@ namespace GUI
                 tabla.Rows.Add(
                     p.IdPedido,
                     ComputarUrgencia(p),
-                    p.FechaPedido.ToString("dd/MM/yyyy HH:mm"),
+                    p.FechaPedido.ToString("g"),
                     p.NombreCliente,
                     p.NombreEmpleado,
                     p.CantidadPrendas,
                     EstadoLabel(p.Estado),
-                    p.FechaDespacho?.ToString("dd/MM/yyyy") ?? "—",
-                    p.FechaEntrega?.ToString("dd/MM/yyyy")  ?? "—",
+                    p.FechaDespacho?.ToString("d") ?? "—",
+                    p.FechaEntrega?.ToString("d")  ?? "—",
                     (int)p.Estado,
                     (int)pedidoBLL.CalcularNivelUrgencia(p));
             }
@@ -438,12 +438,9 @@ namespace GUI
                 Tr("conf.despachar.body", "¿Despachar el Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nEl pedido pasará a estado Despachado."),
                 pedido.IdPedido, pedido.NombreCliente, pedido.CantidadPrendas);
 
-            var confirmar = MessageBox.Show(
+            var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
                 bodyDesp,
-                Tr("conf.despachar.titulo", "Confirmar Despacho"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
+                Tr("conf.despachar.titulo", "Confirmar Despacho"), porDefectoNo: false) ? DialogResult.Yes : DialogResult.No);
 
             if (confirmar != DialogResult.Yes) return;
 
@@ -476,12 +473,9 @@ namespace GUI
                 Tr("conf.entrega.body", "¿Confirmar entrega del Pedido #{0} a {1}?"),
                 pedido.IdPedido, pedido.NombreCliente);
 
-            var confirmar = MessageBox.Show(
+            var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
                 bodyEntr,
-                Tr("conf.entrega.titulo", "Confirmar Entrega"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
+                Tr("conf.entrega.titulo", "Confirmar Entrega"), porDefectoNo: false) ? DialogResult.Yes : DialogResult.No);
 
             if (confirmar != DialogResult.Yes) return;
 
@@ -508,12 +502,9 @@ namespace GUI
                 Tr("conf.devolucion.body", "¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado EnLimpieza."),
                 pedidoCompleto.IdPedido, pedidoCompleto.NombreCliente, pedidoCompleto.CantidadPrendas);
 
-            var confirmar = MessageBox.Show(
+            var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
                 bodyDev,
-                Tr("conf.devolucion.titulo", "Confirmar Devolución"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
+                Tr("conf.devolucion.titulo", "Confirmar Devolución"), porDefectoNo: false) ? DialogResult.Yes : DialogResult.No);
 
             if (confirmar != DialogResult.Yes) return;
 
@@ -586,9 +577,9 @@ namespace GUI
                 $"{notifNumero,-12}{completo.IdPedido}\n" +
                 $"{notifCliente,-12}{completo.NombreCliente}\n" +
                 $"{notifEstado,-12}{EstadoLabel(completo.Estado)}\n" +
-                $"{notifFecha,-12}{completo.FechaPedido:dd/MM/yyyy HH:mm}\n" +
-                $"{notifDespacho,-12}{(completo.FechaDespacho.HasValue ? completo.FechaDespacho.Value.ToString("dd/MM/yyyy") : "—")}\n" +
-                $"{notifEntrega,-12}{(completo.FechaEntrega.HasValue  ? completo.FechaEntrega.Value.ToString("dd/MM/yyyy")  : "—")}\n" +
+                $"{notifFecha,-12}{completo.FechaPedido:g}\n" +
+                $"{notifDespacho,-12}{(completo.FechaDespacho.HasValue ? completo.FechaDespacho.Value.ToString("d") : "—")}\n" +
+                $"{notifEntrega,-12}{(completo.FechaEntrega.HasValue  ? completo.FechaEntrega.Value.ToString("d")  : "—")}\n" +
                 $"{notifPrendas,-12}{completo.CantidadPrendas}\n";
 
             string tituloMsgBox = string.Format(Tr("notif.msgbox.titulo", "Notificación — Pedido #{0}"), completo.IdPedido);

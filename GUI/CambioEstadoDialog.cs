@@ -48,11 +48,9 @@ namespace GUI
             // Confirmación extra para Baja (irreversible)
             if (EstadoSeleccionado == BE.EstadoPrenda.Baja)
             {
-                var conf = MessageBox.Show(
+                var conf = (FormBase.MostrarConfirmacionSiNo(this,
                     Tr("msg.cambioest.bajairrev", "La baja es irreversible. ¿Confirmar?"),
-                    Tr("conf.baja.titulo", "Dar de Baja"),
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                    Tr("conf.baja.titulo", "Dar de Baja"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
                 if (conf != DialogResult.Yes) return;
             }
 

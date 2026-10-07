@@ -90,7 +90,7 @@ namespace GUI
 
                 foreach (var p in _cola)
                     tabla.Rows.Add(p.IdPedido,
-                        (p.FechaEnvioControl ?? p.FechaPedido).ToString("dd/MM/yyyy HH:mm"),
+                        (p.FechaEnvioControl ?? p.FechaPedido).ToString("g"),
                         p.NombreCliente, p.NombreEmpleado,
                         p.FechaControl.HasValue ? p.FechaControl.Value.ToString("dd/MM HH:mm") : "—");
 

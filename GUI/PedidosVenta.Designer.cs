@@ -30,6 +30,7 @@ namespace GUI
             this.btnDesistirPedido = new System.Windows.Forms.Button();
             this.btnFormalizar = new System.Windows.Forms.Button();
             this.btnConfirmacion = new System.Windows.Forms.Button();
+            this.txtBuscar = new System.Windows.Forms.TextBox();
             this.lblConteo = new System.Windows.Forms.Label();
             this.panelDetalle = new System.Windows.Forms.Panel();
             this.dgvDetallePrendas = new System.Windows.Forms.DataGridView();
@@ -57,6 +58,15 @@ namespace GUI
             this.panelTop.Controls.Add(this.btnDesistirPedido);
             this.panelTop.Controls.Add(this.btnFormalizar);
             this.panelTop.Controls.Add(this.btnConfirmacion);
+            this.panelTop.Controls.Add(this.txtBuscar);
+            //
+            // txtBuscar: filtra la grilla por número, cliente, vendedor o estado
+            //
+            this.txtBuscar.Location = new System.Drawing.Point(790, 54);
+            this.txtBuscar.Name = "txtBuscar";
+            this.txtBuscar.Size = new System.Drawing.Size(200, 23);
+            this.txtBuscar.TabIndex = 11;
+            this.txtBuscar.TextChanged += new System.EventHandler(this.TxtBuscar_TextChanged);
             this.panelTop.Controls.Add(this.lblConteo);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
@@ -367,6 +377,7 @@ namespace GUI
         private System.Windows.Forms.Button       btnDesistirPedido;
         private System.Windows.Forms.Button       btnFormalizar;
         private System.Windows.Forms.Button       btnConfirmacion;
+        private System.Windows.Forms.TextBox      txtBuscar;
         private System.Windows.Forms.Label        lblConteo;
         private System.Windows.Forms.Panel        panelDetalle;
         private System.Windows.Forms.Label        lblDetalleTitulo;

@@ -197,8 +197,8 @@ namespace GUI
                         Exportacion.DocumentosContratacion.Modalidad(c.Modalidad),
                         $"{c.IntentosPago}/{BE.Contratacion.MaxIntentosPago}",
                         EstadoTexto(c.Estado), c.NumeroComprobante ?? "—",
-                        c.VigenciaHasta.HasValue ? $"{c.VigenciaDesde:dd/MM/yyyy} → {c.VigenciaHasta:dd/MM/yyyy}" : "—",
-                        (c.FechaResolucion ?? c.FechaAlta).ToString("dd/MM/yyyy HH:mm"));
+                        c.VigenciaHasta.HasValue ? $"{c.VigenciaDesde:d} → {c.VigenciaHasta:d}" : "—",
+                        (c.FechaResolucion ?? c.FechaAlta).ToString("g"));
 
                 dgvContrataciones.DataSource = tabla;
                 if (dgvContrataciones.Columns.Contains("ID")) dgvContrataciones.Columns["ID"].Width = 44;
@@ -326,7 +326,7 @@ namespace GUI
                     "Contratación #{0} cobrada por {1:C2}. Comprobante {2}. Suscripción formalizada.",
                     new object[] { contratacion.IdContratacion, cobro.TotalConRecargo, cobro.NumeroComprobante }) +
                     (cobro.VigenciaHasta.HasValue
-                        ? " " + Tr("msg.contr.vigencia", "Vigente del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}.", new object[] { cobro.VigenciaDesde, cobro.VigenciaHasta })
+                        ? " " + Tr("msg.contr.vigencia", "Vigente del {0:d} al {1:d}.", new object[] { cobro.VigenciaDesde, cobro.VigenciaHasta })
                         : "") +
                     (cobro.ReferenteAcreditado != null
                         ? " " + Tr("msg.contr.referido", "Se acreditó el beneficio por referido a {0}.", new object[] { cobro.ReferenteAcreditado })
@@ -428,7 +428,7 @@ namespace GUI
             try
             {
                 var lineas = contratacionBLL.ObtenerIntentos(c.IdContratacion).ConvertAll(i =>
-                    $"{i.NroIntento}. {i.Fecha:dd/MM/yyyy HH:mm} — {i.NombreMedioPago ?? "—"} — {i.Motivo} ({i.NombreCaja ?? "—"})");
+                    $"{i.NroIntento}. {i.Fecha:g} — {i.NombreMedioPago ?? "—"} — {i.Motivo} ({i.NombreCaja ?? "—"})");
                 MessageBox.Show(string.Join("\n", lineas),
                     string.Format(Tr("lbl.contr.intentos.titulo", "Intentos de cobro — Contratación #{0}"), c.IdContratacion),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);

@@ -103,7 +103,7 @@ namespace GUI.Exportacion
             });
             doc.Add(barra);
 
-            string sub = $"{T("rpt.txt.generado", "Generado")}: {DateTime.Now:dd/MM/yyyy HH:mm}";
+            string sub = $"{T("rpt.txt.generado", "Generado")}: {DateTime.Now:g}";
             if (reporte.EsTabular)
                 sub += "   |   " + string.Format(T("msg.bit.registros", "{0} registro(s)"), reporte.Datos.Rows.Count);
             doc.Add(new Paragraph(sub, Fuente(Fuentes.Normal, 8, VinoMedio)) { SpacingAfter = 6 });

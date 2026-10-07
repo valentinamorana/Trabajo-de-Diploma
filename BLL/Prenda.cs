@@ -37,6 +37,16 @@ namespace BLL
         }
 
         public List<BE.Prenda> ObtenerTodos()                   => dalPrenda.ObtenerTodos();
+
+        // Categorías que hoy existen en el catálogo (sin las de prendas dadas de baja), para elegir
+        // la de una promoción sin errores de tipeo (PN03). Sin distinguir mayúsculas.
+        public List<string> ObtenerCategorias() =>
+            dalPrenda.ObtenerTodos()
+                .Where(p => p.Estado != BE.EstadoPrenda.Baja && !string.IsNullOrWhiteSpace(p.Categoria))
+                .Select(p => p.Categoria.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
         public List<BE.Prenda> ObtenerPorCliente(int id)       => dalPrenda.ObtenerPorCliente(id);
         public BE.Prenda       ObtenerPorId(int idPrenda)      => dalPrenda.ObtenerPorId(idPrenda);
 

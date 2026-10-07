@@ -225,7 +225,7 @@ namespace GUI
                 foreach (var u in usuarios)
                 {
                     string estado = _viendoArchivados
-                        ? (u.FechaBaja.HasValue ? $"{lblArchivado} ({u.FechaBaja.Value:dd/MM/yyyy})" : lblArchivado)
+                        ? (u.FechaBaja.HasValue ? $"{lblArchivado} ({u.FechaBaja.Value:d})" : lblArchivado)
                         : (u.Bloqueado ? lblBloqueada : lblActivo);
                     tabla.Rows.Add(
                         u.Id,
@@ -251,8 +251,7 @@ namespace GUI
                 string fmt = _viendoArchivados
                     ? Tr("msg.usr.archivados", "{0} usuario(s) archivado(s).")
                     : Tr("msg.usr.cargados",   "{0} usuario(s) registrado(s).");
-                lblMensaje.ForeColor = Color.DarkGreen;
-                lblMensaje.Text      = string.Format(fmt, usuarios.Count);
+                MostrarCarga(string.Format(fmt, usuarios.Count));
 
                 // En vista de archivados, las acciones sobre activos no aplican.
                 btnAgregar.Enabled       = !_viendoArchivados;
@@ -341,12 +340,9 @@ namespace GUI
             int    idUsuario = Convert.ToInt32(dgvUsuarios.SelectedRows[0].Cells["ID"].Value);
             string username  = dgvUsuarios.SelectedRows[0].Cells["Username"].Value?.ToString() ?? "";
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(Tr("conf.desbloquear.body",  "¿Desbloquear la cuenta de '{0}'?"), username),
-                Tr("conf.desbloquear.titulo", "Confirmar Desbloqueo"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
+                Tr("conf.desbloquear.titulo", "Confirmar Desbloqueo"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirm != DialogResult.Yes) return;
 
@@ -372,11 +368,10 @@ namespace GUI
             int    idUsuario = Convert.ToInt32(dgvUsuarios.SelectedRows[0].Cells["ID"].Value);
             string username  = dgvUsuarios.SelectedRows[0].Cells["Username"].Value?.ToString() ?? "";
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(Tr("conf.usr.archivar.body",
                     "¿Archivar al usuario '{0}'?\n\nNo podrá iniciar sesión y saldrá de la lista, pero se conserva su historial.\nPodrá eliminarse definitivamente tras 1 año."), username),
-                Tr("conf.usr.archivar.titulo", "Confirmar Archivado"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                Tr("conf.usr.archivar.titulo", "Confirmar Archivado"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirm != DialogResult.Yes) return;
 
@@ -415,11 +410,10 @@ namespace GUI
                 return;
             }
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(Tr("conf.usr.purgar.body",
                     "Se eliminarán DEFINITIVAMENTE {0} usuario(s) archivado(s) hace más de 1 año.\nEsta acción no se puede deshacer.\n\n¿Continuar?"), elegibles),
-                Tr("conf.usr.purgar.titulo", "Confirmar Purga"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                Tr("conf.usr.purgar.titulo", "Confirmar Purga"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirm != DialogResult.Yes) return;
 

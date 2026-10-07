@@ -23,6 +23,12 @@ namespace GUI
         {
             InitializeComponent();
             cmbModalidad.Items.AddRange(Enum.GetValues(typeof(BE.Builders.ModalidadCobro)).Cast<object>().ToArray());
+            // Se muestra traducida ("Trimestral"); el ítem sigue siendo el enum.
+            cmbModalidad.FormattingEnabled = true;
+            cmbModalidad.Format += (s, e) =>
+            {
+                if (e.ListItem is BE.Builders.ModalidadCobro m) e.Value = Exportacion.DocumentosContratacion.Modalidad(m);
+            };
             cmbModalidad.SelectedIndex = 0;
             Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
         }
@@ -97,9 +103,9 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string Tr(string clave, string fallback, object[] args = null) => Traductor.Resolver(clave, fallback, args, t);
 
-            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : Tr("susc.sinfecha", "sin fecha");
+            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("d") : Tr("susc.sinfecha", "sin fecha");
             string estadoPago = c.EstaSuspendidoPorPago ? Tr("cobro.estado.suspendido", "SUSPENDIDO por falta de pago")
-                               : c.EstaEnGracia          ? Tr("cobro.estado.engracia", "en gracia hasta {0:dd/MM/yyyy}", new object[] { c.FechaLimiteGracia })
+                               : c.EstaEnGracia          ? Tr("cobro.estado.engracia", "en gracia hasta {0:d}", new object[] { c.FechaLimiteGracia })
                                                           : Tr("cobro.estado.aldia", "al día");
             lblEstadoActual.Text = Tr("cobro.estado.resumen", "Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}",
                 new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estadoPago });
@@ -161,10 +167,9 @@ namespace GUI
             string pregunta = Tr("conf.cobro.procesar.msg", "¿Procesar este cobro para {0}?", new object[] { item.Cliente.NombreCompleto });
             if (decision == BLL.Manejadores.DecisionCobro.Cobrado && !string.IsNullOrEmpty(lblTotal.Text))
                 pregunta += "\n\n" + lblTotal.Text;   // el total que se va a cobrar
-            var confirmar = MessageBox.Show(
+            var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
                 pregunta,
-                Tr("conf.cobro.procesar.tit", "Confirmar Cobro"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                Tr("conf.cobro.procesar.tit", "Confirmar Cobro"), porDefectoNo: false) ? DialogResult.Yes : DialogResult.No);
             if (confirmar != DialogResult.Yes) return;
 
             try

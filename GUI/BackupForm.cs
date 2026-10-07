@@ -67,7 +67,7 @@ namespace GUI
                     : $"{fi.Length / 1024.0:F0} KB";
 
                 var item = new ListViewItem(fi.Name) { Tag = fi.FullName };
-                item.SubItems.Add(fi.LastWriteTime.ToString("dd/MM/yyyy HH:mm"));
+                item.SubItems.Add(fi.LastWriteTime.ToString("g"));
                 item.SubItems.Add(_bll.ExtraerAutorDeNombre(fi.Name));
                 item.SubItems.Add(tamanio);
                 lstBackups.Items.Add(item);
@@ -76,7 +76,7 @@ namespace GUI
             lblConteo.Text = archivos.Count == 0
                 ? Tr("lbl.backup.sincopias", "Sin copias de seguridad generadas aún.")
                 : string.Format(Tr("lbl.backup.conteo", "{0} copia(s) disponible(s). La más reciente: {1}"),
-                    archivos.Count, archivos[0].LastWriteTime.ToString("dd/MM/yyyy HH:mm"));
+                    archivos.Count, archivos[0].LastWriteTime.ToString("g"));
         }
 
         private void lstBackups_SelectedIndexChanged(object sender, EventArgs e)
@@ -141,11 +141,10 @@ namespace GUI
             string ruta     = lstBackups.SelectedItems[0].Tag as string;
             string filename = Path.GetFileName(ruta);
 
-            if (MessageBox.Show(
+            if (!FormBase.MostrarConfirmacionSiNo(this,
                     string.Format(Tr("msg.backup.confirmeliminar",
                         "¿Eliminar la copia de seguridad?\n\"{0}\"\n\nEsta acción no se puede deshacer."), filename),
-                    Tr("msg.backup.tituloeliminar", "Confirmar Eliminación"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    Tr("msg.backup.tituloeliminar", "Confirmar Eliminación"), porDefectoNo: true))
                 return;
 
             try
@@ -189,7 +188,7 @@ namespace GUI
                 alcance = string.Format(
                     Tr("msg.backup.alcance",
                       "\n\nEl backup es del {0} (hace {1} día(s)).\nSe PERDERÁN todos los cambios posteriores a esa fecha."),
-                    fechaBackup.Value.ToString("dd/MM/yyyy HH:mm"),
+                    fechaBackup.Value.ToString("g"),
                     Math.Max(0, (int)antiguedad.TotalDays));
 
                 // RF-08 — Detalle a nivel REGISTRO: qué se perderá concretamente, no solo "todo lo
@@ -207,8 +206,7 @@ namespace GUI
                     "¿Restaurar la base de datos desde:\n\"{0}\"?\n\nEsta operación sobrescribirá todos los datos actuales\ny reiniciará la aplicación."),
                 Path.GetFileName(ruta)) + alcance;
 
-            if (MessageBox.Show(msg, Tr("msg.backup.titulorestaura", "Confirmar Restauración"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+            if (!FormBase.MostrarConfirmacionSiNo(this, msg, Tr("msg.backup.titulorestaura", "Confirmar Restauración"), porDefectoNo: true))
                 return;
 
             // Si el backup está cifrado (.wfbak), pedir la contraseña para descifrarlo.

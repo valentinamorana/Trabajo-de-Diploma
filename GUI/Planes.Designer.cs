@@ -29,6 +29,7 @@ namespace GUI
             this.btnNuevo = new System.Windows.Forms.Button();
             this.separador = new System.Windows.Forms.Label();
             this.lblAcciones = new System.Windows.Forms.Label();
+            this.btnEditar = new System.Windows.Forms.Button();
             this.btnDesactivar = new System.Windows.Forms.Button();
             this.btnActivar = new System.Windows.Forms.Button();
             this.lblMensaje = new System.Windows.Forms.Label();
@@ -54,6 +55,7 @@ namespace GUI
             this.panelForm.Controls.Add(this.btnNuevo);
             this.panelForm.Controls.Add(this.separador);
             this.panelForm.Controls.Add(this.lblAcciones);
+            this.panelForm.Controls.Add(this.btnEditar);
             this.panelForm.Controls.Add(this.btnDesactivar);
             this.panelForm.Controls.Add(this.btnActivar);
             this.panelForm.Controls.Add(this.lblMensaje);
@@ -189,6 +191,18 @@ namespace GUI
             this.lblAcciones.Tag = "lbl.acciones";
             this.lblAcciones.Text = "Acciones sobre plan seleccionado";
             // 
+            // btnEditar (antes editar un plan solo se podía con doble clic en la grilla)
+            // 
+            this.btnEditar.Enabled = false;
+            this.btnEditar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEditar.Location = new System.Drawing.Point(14, 344);
+            this.btnEditar.Name = "btnEditar";
+            this.btnEditar.Size = new System.Drawing.Size(286, 32);
+            this.btnEditar.TabIndex = 11;
+            this.btnEditar.Tag = "btn.planes.editar";
+            this.btnEditar.Text = "Editar plan";
+            this.btnEditar.Click += new System.EventHandler(this.BtnEditar_Click);
+            // 
             // btnDesactivar
             // 
             this.btnDesactivar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
@@ -196,7 +210,7 @@ namespace GUI
             this.btnDesactivar.FlatAppearance.BorderSize = 0;
             this.btnDesactivar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDesactivar.ForeColor = System.Drawing.Color.White;
-            this.btnDesactivar.Location = new System.Drawing.Point(14, 344);
+            this.btnDesactivar.Location = new System.Drawing.Point(14, 384);
             this.btnDesactivar.Name = "btnDesactivar";
             this.btnDesactivar.Size = new System.Drawing.Size(286, 34);
             this.btnDesactivar.TabIndex = 11;
@@ -212,7 +226,7 @@ namespace GUI
             this.btnActivar.FlatAppearance.BorderSize = 0;
             this.btnActivar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnActivar.ForeColor = System.Drawing.Color.White;
-            this.btnActivar.Location = new System.Drawing.Point(14, 386);
+            this.btnActivar.Location = new System.Drawing.Point(14, 426);
             this.btnActivar.Name = "btnActivar";
             this.btnActivar.Size = new System.Drawing.Size(286, 34);
             this.btnActivar.TabIndex = 12;
@@ -307,6 +321,7 @@ namespace GUI
         private System.Windows.Forms.Button         btnNuevo;
         private System.Windows.Forms.Label          separador;
         private System.Windows.Forms.Label          lblAcciones;
+        private System.Windows.Forms.Button         btnEditar;
         private System.Windows.Forms.Button         btnDesactivar;
         private System.Windows.Forms.Button         btnActivar;
         private System.Windows.Forms.Label          lblMensaje;

@@ -158,7 +158,7 @@ namespace GUI
             if (version == null) return;
 
             string fechaTxt = version.Fecha.ToString("dd/MM/yyyy HH:mm:ss");
-            string fnac     = version.FechaNacSnapshot?.ToString("dd/MM/yyyy") ?? "—";
+            string fnac     = version.FechaNacSnapshot?.ToString("d") ?? "—";
             // Estado completo al que volverá el usuario (datos administrativos no sensibles).
             string estado =
                 $"{Tr("lbl.ver.campo.usuario", "Usuario")}: {version.UsernameSnapshot}\n" +

@@ -16,6 +16,9 @@ namespace GUI
             // useUserOverride: false → ignora símbolos personalizados en el Panel de control.
             // El idioma de la interfaz (ES/EN/RU/PT) es aparte: lo maneja GestorIdioma.
             var culturaNegocio = new System.Globalization.CultureInfo("es-AR", false);
+            // Formato corto de fecha ("d" en toda la GUI): dd/MM/yyyy (es-AR trae d/M/yyyy). La
+            // preferencia de Mi Perfil lo cambia al iniciar sesión (PreferenciasUI.AplicarFormatoFecha).
+            culturaNegocio.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
             System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culturaNegocio;
             System.Threading.Thread.CurrentThread.CurrentCulture         = culturaNegocio;
 

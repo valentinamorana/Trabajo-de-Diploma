@@ -360,10 +360,9 @@ namespace GUI
             if (!(_seleccionado is BE.Rol rol))
             { MostrarError(Tr("perm.msg.selelirol", "Seleccioná un ROL del árbol para eliminar (los permisos no se eliminan).")); return; }
 
-            if (MessageBox.Show(
+            if (!FormBase.MostrarConfirmacionSiNo(this,
                     string.Format(Tr("perm.conf.elirol", "¿Eliminar el rol '{0}'? No se permite si tiene usuarios asignados."), rol.Nombre),
-                    Tr("perm.conf.titulo", "Confirmar"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                    Tr("perm.conf.titulo", "Confirmar"), porDefectoNo: true)) return;
             try
             {
                 string nombre = rol.Nombre;
@@ -402,10 +401,9 @@ namespace GUI
             var hijo  = node.Tag as BE.Componente;
             if (padre == null || hijo == null) return;
 
-            if (MessageBox.Show(
+            if (!FormBase.MostrarConfirmacionSiNo(this,
                     string.Format(Tr("perm.conf.quitar", "¿Quitar '{0}' del rol '{1}'?"), hijo.Nombre, padre.Nombre),
-                    Tr("perm.conf.titulo", "Confirmar"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+                    Tr("perm.conf.titulo", "Confirmar"), porDefectoNo: false)) return;
             try
             {
                 _familiaBLL.QuitarComponente(padre.Id, hijo.Id);

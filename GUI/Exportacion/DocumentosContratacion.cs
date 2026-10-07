@@ -28,7 +28,7 @@ namespace GUI.Exportacion
         }
 
         private static string Fecha(DateTime? f, bool conHora = true) =>
-            f.HasValue ? f.Value.ToString(conHora ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy") : "—";
+            f.HasValue ? f.Value.ToString(conHora ? "g" : "d") : "—";
 
         public static string Modalidad(BE.Builders.ModalidadCobro m)
         {

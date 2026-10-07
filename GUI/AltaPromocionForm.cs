@@ -80,6 +80,13 @@ namespace GUI
                 cmbPlan.DisplayMember = nameof(BE.PlanSuscripcion.Nombre);
                 cmbPlan.ValueMember = nameof(BE.PlanSuscripcion.IdPlan);
                 cmbTipoDescuento.DataSource = Enum.GetValues(typeof(BE.TipoDescuento));
+                // Categorías del catálogo como sugerencias (se puede escribir otra).
+                cmbCategoria.Items.Clear();
+                foreach (string categoria in new BLL.Prenda().ObtenerCategorias()) cmbCategoria.Items.Add(categoria);
+                // Se muestra traducido ("Monto fijo"); el ítem sigue siendo el enum.
+                cmbTipoDescuento.FormattingEnabled = true;
+                cmbTipoDescuento.Format -= FormatearTipo;
+                cmbTipoDescuento.Format += FormatearTipo;
                 dtpInicio.Value = DateTime.Today;
                 dtpFin.Value = DateTime.Today.AddMonths(1);
 
@@ -90,11 +97,11 @@ namespace GUI
                     rbPlan.Checked = _reformular.AplicaAPlan();
                     rbCategoria.Checked = _reformular.AplicaACategoria();
                     if (_reformular.AplicaAPlan()) cmbPlan.SelectedValue = _reformular.IdPlan.Value;
-                    else txtCategoria.Text = _reformular.CategoriaPrenda;
+                    else cmbCategoria.Text = _reformular.CategoriaPrenda;
                     rbPlan.Enabled = false;
                     rbCategoria.Enabled = false;
                     cmbPlan.Enabled = _reformular.AplicaAPlan();
-                    txtCategoria.Enabled = _reformular.AplicaACategoria();
+                    cmbCategoria.Enabled = _reformular.AplicaACategoria();
                     txtNombre.Text = _reformular.Nombre;
                     txtDescripcion.Text = _reformular.Descripcion;
                     cmbTipoDescuento.SelectedItem = _reformular.TipoDescuento;
@@ -111,11 +118,11 @@ namespace GUI
                     rbPlan.Checked = _sugerenciaOrigen.AplicaAPlan();
                     rbCategoria.Checked = _sugerenciaOrigen.AplicaACategoria();
                     if (_sugerenciaOrigen.AplicaAPlan()) cmbPlan.SelectedValue = _sugerenciaOrigen.IdPlan.Value;
-                    else txtCategoria.Text = _sugerenciaOrigen.CategoriaPrenda;
+                    else cmbCategoria.Text = _sugerenciaOrigen.CategoriaPrenda;
                     rbPlan.Enabled = false;
                     rbCategoria.Enabled = false;
                     cmbPlan.Enabled = _sugerenciaOrigen.AplicaAPlan();
-                    txtCategoria.Enabled = _sugerenciaOrigen.AplicaACategoria();
+                    cmbCategoria.Enabled = _sugerenciaOrigen.AplicaACategoria();
                     cmbTipoDescuento.SelectedItem = _sugerenciaOrigen.TipoDescuentoSugerido;
                     numValor.Value = Math.Min(numValor.Maximum, _sugerenciaOrigen.ValorInicialPromocion());
                 }
@@ -131,7 +138,7 @@ namespace GUI
         private void RbPlan_CheckedChanged(object sender, EventArgs e)
         {
             cmbPlan.Enabled = rbPlan.Checked;
-            txtCategoria.Enabled = !rbPlan.Checked;
+            cmbCategoria.Enabled = !rbPlan.Checked;
         }
 
         private void BtnConfirmar_Click(object sender, EventArgs e)
@@ -164,7 +171,7 @@ namespace GUI
                 else
                 {
                     int? idPlan = rbPlan.Checked ? (int?)cmbPlan.SelectedValue : null;
-                    string categoria = rbPlan.Checked ? null : txtCategoria.Text;
+                    string categoria = rbPlan.Checked ? null : cmbCategoria.Text;
                     IdPromocionCreada = promocionBLL.CrearManual(this.Text, txtNombre.Text, txtDescripcion.Text,
                         tipo, numValor.Value, dtpInicio.Value, dtpFin.Value, idPlan, categoria,
                         numMargenEstimado.Value, txtImpactoEconomico.Text);
@@ -184,6 +191,11 @@ namespace GUI
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
+        }
+
+        private static void FormatearTipo(object sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is BE.TipoDescuento t) e.Value = Exportacion.DocumentosPromocion.Tipo(t);
         }
     }
 }

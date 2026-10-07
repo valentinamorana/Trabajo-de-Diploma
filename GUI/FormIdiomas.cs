@@ -330,12 +330,10 @@ namespace GUI
                 int faltantes = _bllIdioma.ContarTraduccionesFaltantes(_idIdiomaSeleccionado);
                 if (faltantes > 0)
                 {
-                    var confirm = MessageBox.Show(
+                    var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                         string.Format(Tr("idiomas.conf.incompleto",
                             "Este idioma tiene {0} control(es) sin traducir.\nSi lo activás, esos textos se mostrarán en el idioma por defecto.\n\n¿Activar de todos modos?"), faltantes),
-                        Tr("idiomas.conf.incompleto.t", "Traducciones incompletas"),
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-                        MessageBoxDefaultButton.Button2);
+                        Tr("idiomas.conf.incompleto.t", "Traducciones incompletas"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
                     if (confirm != DialogResult.Yes) return;
                 }
 
@@ -352,11 +350,9 @@ namespace GUI
         {
             if (_idIdiomaSeleccionado == 0) return;
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 Tr("conf.idiomas.desactivar", "¿Desactivar este idioma? Los usuarios no podrán seleccionarlo."),
-                Tr("conf.idiomas.titulo", "Confirmar"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);
+                Tr("conf.idiomas.titulo", "Confirmar"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
             if (confirm != DialogResult.Yes) return;
             try
             {

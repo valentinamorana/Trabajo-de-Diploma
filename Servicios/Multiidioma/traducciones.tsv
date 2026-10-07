@@ -123,12 +123,12 @@ ES	mnu.prendas	Prendas
 ES	mnu.suscriptores	Suscriptores
 ES	mnu.ventas	Ventas
 ES	mnu.clientes	Clientes
-ES	mnu.planes	Planes de Suscripcion
+ES	mnu.planes	Planes de Suscripción
 ES	mnu.pedidosventa	Pedidos de Venta
 ES	mnu.pedidosreal	Pedidos Realizados
 ES	mnu.administrar	Administrar
 ES	mnu.perfiles	Perfiles y Permisos
-ES	mnu.cerrarsesion	Cerrar Sesion
+ES	mnu.cerrarsesion	Cerrar Sesión
 ES	mnu.ventana	Ventanas Abiertas
 ES	mnu.ventana.cerrartodas	Cerrar Todas
 ES	mnu.idiomas	Gestión de Idiomas
@@ -349,7 +349,7 @@ ES	crit.baja	Baja (1)
 ES	crit.media	Media (2)
 ES	crit.alta	Alta (3)
 ES	crit.intlogin	Intentos Login (4)
-ES	crit.recupclave	Recuperacion Clave (5)
+ES	crit.recupclave	Recuperación Clave (5)
 ES	crit.bloqueos	Bloqueos Cuenta (6)
 ES	btn.exportar.pdf	Exportar PDF
 ES	msg.ped.conteo	{0} pedido(s)
@@ -4026,7 +4026,7 @@ ES	renov.plannuevo	Plan nuevo:
 ES	renov.modalidad	Modalidad de cobro:
 ES	cobro.modalidad	Modalidad de cobro:
 ES	renov.procesar	Procesar
-ES	mnu.cobro	Cobro de Suscripción
+ES	mnu.cobro	Cobro de Renovaciones
 ES	cobro.titulo	Cobro de Suscripción
 ES	conf.cobro.procesar.msg	¿Procesar este cobro para {0}?
 ES	conf.cobro.procesar.tit	Confirmar Cobro
@@ -4047,7 +4047,7 @@ ES	renov.msg.cambioplan	Plan cambiado a '{0}'. Nueva vigencia hasta {1:d}.
 ES	renov.msg.baja	Suscripción dada de baja. El cliente no podrá generar nuevos pedidos.
 ES	renov.msg.baja_conprendas	Suscripción dada de baja. El cliente no podrá generar nuevos pedidos. Tiene {0} prenda(s) en uso — solicitar la devolución.
 ES	cobro.estado.suspendido	SUSPENDIDO por falta de pago
-ES	cobro.estado.engracia	en gracia hasta {0:dd/MM/yyyy}
+ES	cobro.estado.engracia	en gracia hasta {0:d}
 ES	cobro.estado.aldia	al día
 ES	cobro.sinelegibles	No hay clientes con un cobro pendiente de procesar.
 ES	cobro.estado.resumen	Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}
@@ -4087,7 +4087,7 @@ EN	renov.plannuevo	New plan:
 EN	renov.modalidad	Billing method:
 EN	cobro.modalidad	Billing method:
 EN	renov.procesar	Process
-EN	mnu.cobro	Subscription Payment
+EN	mnu.cobro	Renewal Charges
 EN	cobro.titulo	Subscription Payment
 EN	conf.cobro.procesar.msg	Process this payment for {0}?
 EN	conf.cobro.procesar.tit	Confirm Payment
@@ -4108,7 +4108,7 @@ EN	renov.msg.cambioplan	Plan changed to '{0}'. New validity until {1:d}.
 EN	renov.msg.baja	Subscription cancelled. The client won't be able to place new orders.
 EN	renov.msg.baja_conprendas	Subscription cancelled. The client won't be able to place new orders. They have {0} garment(s) in use — request the return.
 EN	cobro.estado.suspendido	SUSPENDED for non-payment
-EN	cobro.estado.engracia	in grace period until {0:dd/MM/yyyy}
+EN	cobro.estado.engracia	in grace period until {0:d}
 EN	cobro.estado.aldia	up to date
 EN	cobro.sinelegibles	No clients have a charge pending to process.
 EN	cobro.estado.resumen	Plan: {0} — Expiration: {1}\nPayment status: {2}
@@ -4148,7 +4148,7 @@ RU	renov.plannuevo	Новый план:
 RU	renov.modalidad	Способ оплаты:
 RU	cobro.modalidad	Способ оплаты:
 RU	renov.procesar	Обработать
-RU	mnu.cobro	Оплата подписки
+RU	mnu.cobro	Оплата продлений
 RU	cobro.titulo	Оплата подписки
 RU	conf.cobro.procesar.msg	Обработать этот платёж для {0}?
 RU	conf.cobro.procesar.tit	Подтвердить оплату
@@ -4169,7 +4169,7 @@ RU	renov.msg.cambioplan	План изменён на «{0}». Новый сро�
 RU	renov.msg.baja	Подписка отменена. Клиент не сможет оформлять новые заказы.
 RU	renov.msg.baja_conprendas	Подписка отменена. Клиент не сможет оформлять новые заказы. У него {0} вещь(ей) в использовании — запросите возврат.
 RU	cobro.estado.suspendido	ПРИОСТАНОВЛЕНО из-за неоплаты
-RU	cobro.estado.engracia	льготный период до {0:dd/MM/yyyy}
+RU	cobro.estado.engracia	льготный период до {0:d}
 RU	cobro.estado.aldia	оплачено
 RU	cobro.sinelegibles	Нет клиентов с ожидающим оплаты платежом.
 RU	cobro.estado.resumen	План: {0} — Срок действия: {1}\nСтатус оплаты: {2}
@@ -4209,7 +4209,7 @@ PT	renov.plannuevo	Novo plano:
 PT	renov.modalidad	Modalidade de cobrança:
 PT	cobro.modalidad	Modalidade de cobrança:
 PT	renov.procesar	Processar
-PT	mnu.cobro	Cobrança de Assinatura
+PT	mnu.cobro	Cobrança de Renovações
 PT	cobro.titulo	Cobrança de Assinatura
 PT	conf.cobro.procesar.msg	Processar esta cobrança para {0}?
 PT	conf.cobro.procesar.tit	Confirmar Cobrança
@@ -4230,7 +4230,7 @@ PT	renov.msg.cambioplan	Plano alterado para '{0}'. Nova vigência até {1:d}.
 PT	renov.msg.baja	Assinatura cancelada. O cliente não poderá fazer novos pedidos.
 PT	renov.msg.baja_conprendas	Assinatura cancelada. O cliente não poderá fazer novos pedidos. Ele tem {0} peça(s) em uso — solicite a devolução.
 PT	cobro.estado.suspendido	SUSPENSO por falta de pagamento
-PT	cobro.estado.engracia	em carência até {0:dd/MM/yyyy}
+PT	cobro.estado.engracia	em carência até {0:d}
 PT	cobro.estado.aldia	em dia
 PT	cobro.sinelegibles	Não há clientes com uma cobrança pendente de processar.
 PT	cobro.estado.resumen	Plano: {0} — Vencimento: {1}\nStatus de pagamento: {2}
@@ -5344,10 +5344,10 @@ ES	mnu.caja	Caja
 EN	mnu.caja	Cashier
 RU	mnu.caja	Касса
 PT	mnu.caja	Caixa
-ES	mnu.contratacionespendientes	Contrataciones Pendientes
-EN	mnu.contratacionespendientes	Pending Contracts
-RU	mnu.contratacionespendientes	Ожидающие договоры
-PT	mnu.contratacionespendientes	Contratações Pendentes
+ES	mnu.contratacionespendientes	Cobro de Contrataciones
+EN	mnu.contratacionespendientes	Contract Charges
+RU	mnu.contratacionespendientes	Оплата договоров
+PT	mnu.contratacionespendientes	Cobrança de Contratações
 ES	mnu.promociones	Promociones
 EN	mnu.promociones	Promotions
 RU	mnu.promociones	Акции
@@ -5632,7 +5632,7 @@ ES	msg.ped.reactivadocontrol	Pedido #{0} reactivado: volvió a control de stock.
 ES	btn.ped.reactivar	Reactivar
 ES	err.bll.contratacion.importe_cambiado	El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Volvé a calcular el importe y confirmá de nuevo.
 ES	err.bll.pedido.estado_cambiado	El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.
-ES	msg.contr.vigencia	Vigente del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}.
+ES	msg.contr.vigencia	Vigente del {0:d} al {1:d}.
 ES	col.contr.vigencia	Vigencia
 ES	dash.dep.acontrolar	Pedidos\na controlar
 ES	dash.vend.paraatender	Pedidos\npara atender
@@ -5887,7 +5887,7 @@ EN	msg.ped.reactivadocontrol	Order #{0} reactivated: it went back to stock contr
 EN	btn.ped.reactivar	Reactivate
 EN	err.bll.contratacion.importe_cambiado	The amount to charge changed since the statement ({0:C2} → {1:C2}). Recalculate the amount and confirm again.
 EN	err.bll.pedido.estado_cambiado	Order #{0} changed status in another session. Refresh the list and try again.
-EN	msg.contr.vigencia	Active from {0:dd/MM/yyyy} to {1:dd/MM/yyyy}.
+EN	msg.contr.vigencia	Active from {0:d} to {1:d}.
 EN	col.contr.vigencia	Validity
 EN	dash.dep.acontrolar	Orders\nto check
 EN	dash.vend.paraatender	Orders\nto handle
@@ -6142,7 +6142,7 @@ RU	msg.ped.reactivadocontrol	Заказ №{0} возобновлён: он ве
 RU	btn.ped.reactivar	Возобновить
 RU	err.bll.contratacion.importe_cambiado	Сумма к оплате изменилась после расчёта ({0:C2} → {1:C2}). Пересчитайте сумму и подтвердите снова.
 RU	err.bll.pedido.estado_cambiado	Состояние заказа №{0} изменилось в другом сеансе. Обновите список и повторите попытку.
-RU	msg.contr.vigencia	Действует с {0:dd/MM/yyyy} по {1:dd/MM/yyyy}.
+RU	msg.contr.vigencia	Действует с {0:d} по {1:d}.
 RU	col.contr.vigencia	Срок действия
 RU	dash.dep.acontrolar	Заказы\nна контроль
 RU	dash.vend.paraatender	Заказы\nк обработке
@@ -6397,7 +6397,7 @@ PT	msg.ped.reactivadocontrol	Pedido #{0} reativado: voltou ao controle de estoqu
 PT	btn.ped.reactivar	Reativar
 PT	err.bll.contratacion.importe_cambiado	O valor a cobrar mudou desde a liquidação ({0:C2} → {1:C2}). Recalcule o valor e confirme novamente.
 PT	err.bll.pedido.estado_cambiado	O Pedido #{0} mudou de estado em outra sessão. Atualize a lista e tente novamente.
-PT	msg.contr.vigencia	Vigente de {0:dd/MM/yyyy} até {1:dd/MM/yyyy}.
+PT	msg.contr.vigencia	Vigente de {0:d} até {1:d}.
 PT	col.contr.vigencia	Vigência
 PT	dash.dep.acontrolar	Pedidos\na controlar
 PT	dash.vend.paraatender	Pedidos\npara atender
@@ -7056,14 +7056,14 @@ ES	err.bll.plan.tiene_contrataciones	No se puede desactivar el plan: tiene {0} c
 EN	err.bll.plan.tiene_contrataciones	The plan cannot be deactivated: it has {0} contract(s) pending payment. The Cashier must charge or void them first.
 RU	err.bll.plan.tiene_contrataciones	Нельзя отключить тариф: по нему {0} договор(ов) ожидают оплаты. Касса должна сначала принять оплату или аннулировать их.
 PT	err.bll.plan.tiene_contrataciones	Não é possível desativar o plano: há {0} contratação(ões) pendente(s) de pagamento. O caixa precisa cobrá-las ou anulá-las antes.
-ES	err.bll.promocion.fecha_fin_pasada	La fecha de fin ({0:dd/MM/yyyy}) ya pasó. Elegí una fecha de hoy en adelante.
-EN	err.bll.promocion.fecha_fin_pasada	The end date ({0:dd/MM/yyyy}) has already passed. Choose today or a later date.
-RU	err.bll.promocion.fecha_fin_pasada	Дата окончания ({0:dd/MM/yyyy}) уже прошла. Выберите сегодняшнюю или более позднюю дату.
-PT	err.bll.promocion.fecha_fin_pasada	A data de término ({0:dd/MM/yyyy}) já passou. Escolha hoje ou uma data posterior.
-ES	err.bll.promocion.aprobar_vencida	La promoción terminó el {0:dd/MM/yyyy}: no se puede aprobar. Rechazala para que Administración la reformule con fechas nuevas.
-EN	err.bll.promocion.aprobar_vencida	The promotion ended on {0:dd/MM/yyyy}: it cannot be approved. Reject it so Administration can reformulate it with new dates.
-RU	err.bll.promocion.aprobar_vencida	Акция закончилась {0:dd/MM/yyyy}: её нельзя одобрить. Отклоните её, чтобы Администрация переоформила её с новыми датами.
-PT	err.bll.promocion.aprobar_vencida	A promoção terminou em {0:dd/MM/yyyy}: não pode ser aprovada. Rejeite-a para que a Administração a reformule com novas datas.
+ES	err.bll.promocion.fecha_fin_pasada	La fecha de fin ({0:d}) ya pasó. Elegí una fecha de hoy en adelante.
+EN	err.bll.promocion.fecha_fin_pasada	The end date ({0:d}) has already passed. Choose today or a later date.
+RU	err.bll.promocion.fecha_fin_pasada	Дата окончания ({0:d}) уже прошла. Выберите сегодняшнюю или более позднюю дату.
+PT	err.bll.promocion.fecha_fin_pasada	A data de término ({0:d}) já passou. Escolha hoje ou uma data posterior.
+ES	err.bll.promocion.aprobar_vencida	La promoción terminó el {0:d}: no se puede aprobar. Rechazala para que Administración la reformule con fechas nuevas.
+EN	err.bll.promocion.aprobar_vencida	The promotion ended on {0:d}: it cannot be approved. Reject it so Administration can reformulate it with new dates.
+RU	err.bll.promocion.aprobar_vencida	Акция закончилась {0:d}: её нельзя одобрить. Отклоните её, чтобы Администрация переоформила её с новыми датами.
+PT	err.bll.promocion.aprobar_vencida	A promoção terminou em {0:d}: não pode ser aprovada. Rejeite-a para que a Administração a reformule com novas datas.
 ES	cobro.total	Total a cobrar: {0:C2}\n({1})
 EN	cobro.total	Total to charge: {0:C2}\n({1})
 RU	cobro.total	К оплате: {0:C2}\n({1})
@@ -7092,10 +7092,10 @@ ES	doc.cobro.vigencia	Suscripción vigente hasta el {0}.
 EN	doc.cobro.vigencia	Subscription valid until {0}.
 RU	doc.cobro.vigencia	Подписка действует до {0}.
 PT	doc.cobro.vigencia	Assinatura válida até {0}.
-ES	doc.promo.periodo	Período analizado: del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}
-EN	doc.promo.periodo	Period analyzed: from {0:dd/MM/yyyy} to {1:dd/MM/yyyy}
-RU	doc.promo.periodo	Анализируемый период: с {0:dd/MM/yyyy} по {1:dd/MM/yyyy}
-PT	doc.promo.periodo	Período analisado: de {0:dd/MM/yyyy} a {1:dd/MM/yyyy}
+ES	doc.promo.periodo	Período analizado: del {0:d} al {1:d}
+EN	doc.promo.periodo	Period analyzed: from {0:d} to {1:d}
+RU	doc.promo.periodo	Анализируемый период: с {0:d} по {1:d}
+PT	doc.promo.periodo	Período analisado: de {0:d} a {1:d}
 ES	doc.promo.impacto	Impacto de las promociones en el período (cobros que las usaron):
 EN	doc.promo.impacto	Impact of promotions in the period (charges that used them):
 RU	doc.promo.impacto	Эффект акций за период (оплаты, в которых они применялись):
@@ -7108,10 +7108,10 @@ ES	doc.promo.impactolinea	   • {0} ({1}): {2} cobro(s) — {3:C2} descontados 
 EN	doc.promo.impactolinea	   • {0} ({1}): {2} charge(s) — {3:C2} discounted — {4:C2} charged
 RU	doc.promo.impactolinea	   • {0} ({1}): {2} оплат(а) — скидок на {3:C2} — получено {4:C2}
 PT	doc.promo.impactolinea	   • {0} ({1}): {2} cobrança(s) — {3:C2} descontados — {4:C2} cobrados
-ES	rotacion.motivo.bajademanda.periodo	{0} no registra pedidos desde el {1:dd/MM/yyyy} — candidata a baja.
-EN	rotacion.motivo.bajademanda.periodo	{0} has no orders since {1:dd/MM/yyyy} — candidate for removal.
-RU	rotacion.motivo.bajademanda.periodo	{0}: нет заказов с {1:dd/MM/yyyy} — кандидат на списание.
-PT	rotacion.motivo.bajademanda.periodo	{0} não tem pedidos desde {1:dd/MM/yyyy} — candidata a baixa.
+ES	rotacion.motivo.bajademanda.periodo	{0} no registra pedidos desde el {1:d} — candidata a baja.
+EN	rotacion.motivo.bajademanda.periodo	{0} has no orders since {1:d} — candidate for removal.
+RU	rotacion.motivo.bajademanda.periodo	{0}: нет заказов с {1:d} — кандидат на списание.
+PT	rotacion.motivo.bajademanda.periodo	{0} não tem pedidos desde {1:d} — candidata a baixa.
 ES	promocion.periodo.30	Últimos 30 días
 EN	promocion.periodo.30	Last 30 days
 RU	promocion.periodo.30	Последние 30 дней
@@ -7132,3 +7132,11 @@ ES	err.bll.rol_renombrar_en_uso	No se puede renombrar el rol '{0}': está asigna
 EN	err.bll.rol_renombrar_en_uso	The role '{0}' cannot be renamed: it is assigned to {1} user(s) ({2}). Reassign those users to another role before renaming it.
 RU	err.bll.rol_renombrar_en_uso	Нельзя переименовать роль «{0}»: она назначена {1} пользователю(ям) ({2}). Сначала назначьте этим пользователям другую роль.
 PT	err.bll.rol_renombrar_en_uso	Não é possível renomear o perfil '{0}': está atribuído a {1} usuário(s) ({2}). Reatribua esses usuários a outro perfil antes de renomeá-lo.
+ES	btn.planes.editar	Editar plan
+EN	btn.planes.editar	Edit plan
+RU	btn.planes.editar	Изменить тариф
+PT	btn.planes.editar	Editar plano
+ES	ped.buscar.ayuda	Buscar pedido, cliente o estado…
+EN	ped.buscar.ayuda	Search order, customer or status…
+RU	ped.buscar.ayuda	Поиск по заказу, клиенту или статусу…
+PT	ped.buscar.ayuda	Buscar pedido, cliente ou status…

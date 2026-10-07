@@ -107,7 +107,7 @@ namespace GUI
 
                 foreach (var p in _promociones)
                     tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan, p.CategoriaPrenda),
-                        Docs.Tipo(p.TipoDescuento), p.Valor, $"{p.FechaInicio:dd/MM/yyyy} - {p.FechaFin:dd/MM/yyyy}",
+                        Docs.Tipo(p.TipoDescuento), p.Valor, $"{p.FechaInicio:d} - {p.FechaFin:d}",
                         p.MargenEstimado, p.ImpactoEconomico ?? "—", p.NombreUsuarioAlta ?? "—");
 
                 dgvPromociones.DataSource = tabla;
@@ -161,7 +161,7 @@ namespace GUI
             {
                 sb.AppendLine(Tr("promo.analisis.superpuestas", "ADVERTENCIA: se superpone en fechas con otras promociones vigentes del mismo plan:"));
                 foreach (var o in a.Superpuestas)
-                    sb.AppendLine($"   • #{o.IdPromocion} {o.Nombre} ({o.FechaInicio:dd/MM/yyyy} - {o.FechaFin:dd/MM/yyyy}, {Docs.Estado(o.Estado)})");
+                    sb.AppendLine($"   • #{o.IdPromocion} {o.Nombre} ({o.FechaInicio:d} - {o.FechaFin:d}, {Docs.Estado(o.Estado)})");
             }
             else
                 sb.AppendLine(Tr("promo.analisis.sinsuperposicion", "No se superpone con otras promociones vigentes del mismo plan."));
@@ -175,10 +175,9 @@ namespace GUI
         {
             var promocion = ObtenerSeleccionada();
             if (promocion == null) return;
-            if (MessageBox.Show(
+            if (!FormBase.MostrarConfirmacionSiNo(this,
                     Tr("conf.promo.aprobarcontable.msg", "¿Aprobar y activar la promoción '{0}'?", new object[] { promocion.Nombre }),
-                    Tr("conf.promo.aprobarcontable.titulo", "Confirmar Aprobación"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) != DialogResult.Yes)
+                    Tr("conf.promo.aprobarcontable.titulo", "Confirmar Aprobación"), porDefectoNo: false))
                 return;
             Dictaminar(promocion, () => promocionBLL.AprobarContable(this.Text, promocion, txtObservacion.Text),
                 Tr("msg.promo.aprobada", "Promoción '{0}' aprobada y activada.", new object[] { promocion.Nombre }));
@@ -189,10 +188,9 @@ namespace GUI
         {
             var promocion = ObtenerSeleccionada();
             if (promocion == null) return;
-            if (MessageBox.Show(
+            if (!FormBase.MostrarConfirmacionSiNo(this,
                     Tr("conf.promo.rechazarcontable.msg", "¿Rechazar la promoción '{0}'? Vuelve a Administración para reformularla.", new object[] { promocion.Nombre }),
-                    Tr("conf.promo.rechazarcontable.titulo", "Confirmar Rechazo"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) != DialogResult.Yes)
+                    Tr("conf.promo.rechazarcontable.titulo", "Confirmar Rechazo"), porDefectoNo: false))
                 return;
             Dictaminar(promocion, () => promocionBLL.RechazarContable(this.Text, promocion, txtObservacion.Text),
                 Tr("msg.promo.rechazada", "Promoción '{0}' rechazada.", new object[] { promocion.Nombre }));

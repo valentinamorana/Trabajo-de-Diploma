@@ -279,7 +279,7 @@ namespace GUI
                     .OrderByDescending(p => p.FechaPedido)
                     .FirstOrDefault();
                 if (ult != null)
-                    ultimoPedido = $"#{ult.IdPedido} ({EstadoLabel(ult.Estado)}, {ult.FechaPedido:dd/MM/yyyy})";
+                    ultimoPedido = $"#{ult.IdPedido} ({EstadoLabel(ult.Estado)}, {ult.FechaPedido:d})";
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[NuevoPedidoForm] Ficha: " + ex.Message); }
 
@@ -289,9 +289,9 @@ namespace GUI
                     "Prendas en uso: {5}  —  Último pedido: {6}\nMétodo de pago: {7}  —  Alta: {8}"),
                 c.NombreCompleto, c.DNI,
                 c.NombrePlan ?? "—", c.LimitePrendas,
-                c.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—",
+                c.FechaVencimiento?.ToString("d") ?? "—",
                 c.StockUtilizado, ultimoPedido,
-                c.MetodoPago ?? "—", c.FechaAlta.ToString("dd/MM/yyyy"));
+                c.MetodoPago ?? "—", c.FechaAlta.ToString("d"));
         }
 
         private Func<Exportacion.ReporteExportable> _avisoActual;
@@ -524,7 +524,7 @@ namespace GUI
             string detallesPrendas = string.Join("\n  • ",
                 prendas.ConvertAll(p => $"{p.Nombre} ({p.Talle} — {p.Color})"));
 
-            var confirmar = MessageBox.Show(
+            var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(
                     Tr("conf.ped.enviar.msg",
                        "Enviar a control de stock la selección de {0}:\n\n  • {1}\n\nTotal: {2} prenda(s)\n\n" +
@@ -532,10 +532,7 @@ namespace GUI
                     _clienteSel.NombreCompleto,
                     detallesPrendas,
                     prendas.Count),
-                Tr("conf.ped.enviar.titulo", "Enviar a control de stock"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
+                Tr("conf.ped.enviar.titulo", "Enviar a control de stock"), porDefectoNo: false) ? DialogResult.Yes : DialogResult.No);
 
             if (confirmar != DialogResult.Yes) return;
 

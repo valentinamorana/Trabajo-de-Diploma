@@ -179,7 +179,7 @@
             this.cerrarSesionToolStripMenuItem.Name = "cerrarSesionToolStripMenuItem";
             this.cerrarSesionToolStripMenuItem.Tag = "mnu.cerrarsesion";
             this.cerrarSesionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.cerrarSesionToolStripMenuItem.Text = "Cerrar Sesion";
+            this.cerrarSesionToolStripMenuItem.Text = "Cerrar Sesión";
             this.cerrarSesionToolStripMenuItem.Click += new System.EventHandler(this.cerrarSesionToolStripMenuItem_Click);
             // 
             // inventarioToolStripMenuItem
@@ -263,7 +263,7 @@
             this.planesToolStripMenuItem.Name = "planesToolStripMenuItem";
             this.planesToolStripMenuItem.Tag = "mnu.planes";
             this.planesToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.planesToolStripMenuItem.Text = "Planes de Suscripcion";
+            this.planesToolStripMenuItem.Text = "Planes de Suscripción";
             this.planesToolStripMenuItem.Click += new System.EventHandler(this.planesToolStripMenuItem_Click);
             //
             // renovacionSuscripcionToolStripMenuItem
@@ -279,7 +279,7 @@
             this.cobroSuscripcionToolStripMenuItem.Name = "cobroSuscripcionToolStripMenuItem";
             this.cobroSuscripcionToolStripMenuItem.Tag = "mnu.cobro";
             this.cobroSuscripcionToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.cobroSuscripcionToolStripMenuItem.Text = "Cobro de Suscripción";
+            this.cobroSuscripcionToolStripMenuItem.Text = "Cobro de Renovaciones";
             this.cobroSuscripcionToolStripMenuItem.Click += new System.EventHandler(this.cobroSuscripcionToolStripMenuItem_Click);
             //
             // nuevaContratacionToolStripMenuItem — PN02 (Venta capta cliente + plan elegido)
@@ -322,7 +322,7 @@
             this.contratacionesPendientesToolStripMenuItem.Name = "contratacionesPendientesToolStripMenuItem";
             this.contratacionesPendientesToolStripMenuItem.Tag = "mnu.contratacionespendientes";
             this.contratacionesPendientesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
-            this.contratacionesPendientesToolStripMenuItem.Text = "Contrataciones Pendientes";
+            this.contratacionesPendientesToolStripMenuItem.Text = "Cobro de Contrataciones";
             this.contratacionesPendientesToolStripMenuItem.Click += new System.EventHandler(this.contratacionesPendientesToolStripMenuItem_Click);
             //
             // promocionesToolStripMenuItem — PN03: Gerencia, Administración, Contabilidad y

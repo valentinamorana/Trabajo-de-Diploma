@@ -201,7 +201,59 @@ namespace GUI
         {
             if (MensajeLabel == null) return;
             MensajeLabel.ForeColor = Tema.Exito;
-            MensajeLabel.Text      = $"{msg}";
+            EscribirMensaje(msg);
+            _ultimoMensaje         = DateTime.Now;
+        }
+
+        // Cuánto dura en pantalla el resultado de una acción antes de que una recarga lo reemplace.
+        private static readonly TimeSpan PermanenciaMensaje = TimeSpan.FromSeconds(8);
+        private DateTime _ultimoMensaje = DateTime.MinValue;
+        private bool HayMensajeReciente => DateTime.Now - _ultimoMensaje < PermanenciaMensaje;
+
+        /// <summary>
+        /// Mensaje informativo de una recarga ("N registros cargados"). No pisa el resultado de una
+        /// acción o un error recientes: antes "Pedido #N enviado a control de stock" lo reemplazaba
+        /// al instante el conteo de la grilla recargada.
+        /// </summary>
+        protected void MostrarCarga(string msg)
+        {
+            if (MensajeLabel == null || HayMensajeReciente) return;
+            MensajeLabel.ForeColor = Tema.Exito;
+            EscribirMensaje(msg);
+        }
+
+        // Texto de ayuda gris dentro de un TextBox vacío ("Buscar…"); desaparece al escribir.
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, string lParam);
+        private const int EM_SETCUEBANNER = 0x1501;
+
+        protected static void EstablecerAyuda(TextBox txt, string ayuda)
+        {
+            if (txt == null) return;
+            if (txt.IsHandleCreated) SendMessage(txt.Handle, EM_SETCUEBANNER, IntPtr.Zero, ayuda ?? "");
+            else txt.HandleCreated += (s, e) => SendMessage(txt.Handle, EM_SETCUEBANNER, IntPtr.Zero, ayuda ?? "");
+        }
+
+        // Un mensaje largo no se corta a mitad de palabra: termina en "…" y el texto completo se ve
+        // al pasar el mouse (antes la barra de estado de PN02 y otras lo cortaban sin aviso).
+        private ToolTip _tipMensaje;
+        private void EscribirMensaje(string msg)
+        {
+            MensajeLabel.AutoEllipsis = true;
+            MensajeLabel.Text = msg ?? string.Empty;
+            if (_tipMensaje == null)
+            {
+                _tipMensaje = new ToolTip { AutoPopDelay = 15000 };
+                Disposed += (s, e) => _tipMensaje.Dispose();
+            }
+            _tipMensaje.SetToolTip(MensajeLabel, MensajeLabel.Text);
+        }
+
+        /// <summary>Limpia el mensaje, salvo que muestre el resultado reciente de una acción.</summary>
+        protected void LimpiarMensaje()
+        {
+            if (MensajeLabel == null || HayMensajeReciente) return;
+            MensajeLabel.Text = string.Empty;
         }
 
         /// <summary>
@@ -219,7 +271,8 @@ namespace GUI
                 return;
             }
             MensajeLabel.ForeColor = Tema.Error;
-            MensajeLabel.Text      = $"{msg}";
+            EscribirMensaje(msg);
+            _ultimoMensaje         = DateTime.Now;
         }
 
         /// <summary>

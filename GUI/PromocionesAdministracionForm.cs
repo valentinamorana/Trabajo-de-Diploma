@@ -224,7 +224,7 @@ namespace GUI
 
                 foreach (var p in _promociones)
                     tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan, p.CategoriaPrenda),
-                        Docs.Estado(p.Estado), $"{p.FechaInicio:dd/MM/yyyy} - {p.FechaFin:dd/MM/yyyy}",
+                        Docs.Estado(p.Estado), $"{p.FechaInicio:d} - {p.FechaFin:d}",
                         p.NombreUsuarioAlta ?? "—", p.MotivoBaja ?? "—");
 
                 dgvPromociones.DataSource = tabla;
@@ -364,7 +364,7 @@ namespace GUI
             try
             {
                 var lineas = promocionBLL.ObtenerHistorial(p.IdPromocion).ConvertAll(h =>
-                    $"{h.Fecha:dd/MM/yyyy HH:mm} — {(h.EstadoAnterior.HasValue ? Docs.Estado(h.EstadoAnterior.Value) : "—")} → " +
+                    $"{h.Fecha:g} — {(h.EstadoAnterior.HasValue ? Docs.Estado(h.EstadoAnterior.Value) : "—")} → " +
                     $"{Docs.Estado(h.EstadoNuevo)} ({h.NombreUsuario ?? "—"}){(string.IsNullOrWhiteSpace(h.Observacion) ? "" : ": " + h.Observacion)}");
                 MessageBox.Show(lineas.Count == 0 ? "—" : string.Join("\n", lineas),
                     Tr("lbl.promo.historial.titulo", "Historial de estados — Promoción #{0}", new object[] { p.IdPromocion }),
@@ -394,7 +394,6 @@ namespace GUI
         }
 
         private bool Preguntar(string texto) =>
-            MessageBox.Show(texto, this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+            (FormBase.MostrarConfirmacionSiNo(this, texto, this.Text, porDefectoNo: true) ? DialogResult.Yes : DialogResult.No) == DialogResult.Yes;
     }
 }

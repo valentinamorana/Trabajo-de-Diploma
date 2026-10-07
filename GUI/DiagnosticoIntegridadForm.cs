@@ -233,11 +233,10 @@ namespace GUI
 
         private void BtnRecalcularTodo_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show(
+            if (!FormBase.MostrarConfirmacionSiNo(this,
                     Tr("diag.conf.recalcular",
                       "¿Recalcular todos los DVH y el DVV de la tabla Usuario?\n\nEsta operación sobreescribirá todos los dígitos verificadores almacenados."),
-                    Tr("diag.conf.recalcular.titulo", "Confirmar Recálculo Total"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    Tr("diag.conf.recalcular.titulo", "Confirmar Recálculo Total"), porDefectoNo: true))
                 return;
 
             using (var admin = new ConfirmarAdminForm())

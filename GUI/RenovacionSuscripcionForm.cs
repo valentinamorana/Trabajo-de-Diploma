@@ -26,6 +26,12 @@ namespace GUI
             dtpPausaHasta.MinDate = DateTime.Today;
             dtpPausaHasta.MaxDate = DateTime.Today.AddMonths(BLL.Manejadores.PausarSuscripcionHandler.MaxMesesPausa);
             cmbModalidad.Items.AddRange(Enum.GetValues(typeof(BE.Builders.ModalidadCobro)).Cast<object>().ToArray());
+            // Se muestra traducida ("Trimestral"); el ítem sigue siendo el enum.
+            cmbModalidad.FormattingEnabled = true;
+            cmbModalidad.Format += (s, e) =>
+            {
+                if (e.ListItem is BE.Builders.ModalidadCobro m) e.Value = Exportacion.DocumentosContratacion.Modalidad(m);
+            };
             cmbModalidad.SelectedIndex = 0;
             Estilos.EstiloFormulario.BotonPrimario(btnProcesar);
             Estilos.EstiloFormulario.BotonSecundario(btnReanudar);
@@ -171,7 +177,7 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string Tr(string clave, string fallback, object[] args = null) => Traductor.Resolver(clave, fallback, args, t);
 
-            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : Tr("susc.sinfecha", "sin fecha");
+            string vencimiento = c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("d") : Tr("susc.sinfecha", "sin fecha");
             // El estado lo deriva BE.Cliente; acá solo se elige el texto.
             string estado;
             switch (c.ObtenerEstadoSuscripcion())
@@ -185,7 +191,7 @@ namespace GUI
                 new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estado });
             if (c.EstaPausada)
                 lblEstadoActual.Text += " — " + Tr("renov.estado.pausadahasta", "pausada hasta {0}",
-                    new object[] { c.FechaPausaHasta.Value.ToString("dd/MM/yyyy") });
+                    new object[] { c.FechaPausaHasta.Value.ToString("d") });
 
             btnReanudar.Enabled = c.EstaPausada;
         }
@@ -218,12 +224,9 @@ namespace GUI
             string bodyConf = esBaja
                 ? Tr("conf.renov.baja.msg", "¿Dar de baja la suscripción de {0}?\n\nEsta acción es irreversible.", new object[] { item.Cliente.NombreCompleto })
                 : Tr("conf.renov.procesar.msg", "¿Procesar esta decisión para {0}?", new object[] { item.Cliente.NombreCompleto });
-            var confirmar = MessageBox.Show(
+            var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
                 bodyConf,
-                Tr("conf.renov.procesar.tit", "Confirmar Renovación"),
-                MessageBoxButtons.YesNo,
-                esBaja ? MessageBoxIcon.Warning : MessageBoxIcon.Question,
-                esBaja ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1);
+                Tr("conf.renov.procesar.tit", "Confirmar Renovación"), porDefectoNo: esBaja) ? DialogResult.Yes : DialogResult.No);
             if (confirmar != DialogResult.Yes) return;
 
             try

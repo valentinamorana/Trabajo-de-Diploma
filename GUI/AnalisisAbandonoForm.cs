@@ -105,8 +105,8 @@ namespace GUI
                     tabla.Rows.Add(
                         r.NombreCliente,
                         r.NombrePlan ?? "",
-                        r.FechaVencimiento.HasValue ? r.FechaVencimiento.Value.ToString("dd/MM/yyyy") : Tr("susc.sinfecha", "sin fecha"),
-                        r.FechaUltimoPedido.HasValue ? r.FechaUltimoPedido.Value.ToString("dd/MM/yyyy") : Tr("abandono.nuncapidio", "nunca"),
+                        r.FechaVencimiento.HasValue ? r.FechaVencimiento.Value.ToString("d") : Tr("susc.sinfecha", "sin fecha"),
+                        r.FechaUltimoPedido.HasValue ? r.FechaUltimoPedido.Value.ToString("d") : Tr("abandono.nuncapidio", "nunca"),
                         Tr(r.Clave, r.Motivo, r.Args));
                 }
                 dgv.DataSource = tabla;

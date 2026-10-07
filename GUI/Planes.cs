@@ -69,6 +69,7 @@ namespace GUI
             Aplicar(btnNuevo,       t);
             Aplicar(lblAcciones,    t);
             Aplicar(btnDesactivar,  t);
+            Aplicar(btnEditar,      t);
             Aplicar(btnActivar,     t);
             Aplicar(lblTituloGrilla,t);
             TraducirHeadersGrilla();
@@ -116,6 +117,9 @@ namespace GUI
             CargarPlanEnFormulario();
         }
 
+        // "Editar plan": carga el plan seleccionado en el formulario de la derecha (igual que el doble clic).
+        private void BtnEditar_Click(object sender, EventArgs e) => CargarPlanEnFormulario();
+
         // ── Carga ─────────────────────────────────────────────────────────────
 
         private void CargarPlanes()
@@ -155,7 +159,7 @@ namespace GUI
                     rowIdx++;
                 }
 
-                MostrarOk(Tr("msg.planes.cargados", "{0} plan(es) cargado(s).", new object[] { _planes.Count }));
+                MostrarCarga(Tr("msg.planes.cargados", "{0} plan(es) cargado(s).", new object[] { _planes.Count }));
             }
             catch (Exception ex)
             {
@@ -169,6 +173,7 @@ namespace GUI
             {
                 btnDesactivar.Enabled = false;
                 btnActivar.Enabled    = false;
+                btnEditar.Enabled     = false;
                 return;
             }
 
@@ -179,6 +184,7 @@ namespace GUI
             // Solo se muestra el botón relevante según el estado actual
             btnDesactivar.Enabled = plan.Estado;   // activo → puede desactivar
             btnActivar.Enabled    = !plan.Estado;  // inactivo → puede activar
+            btnEditar.Enabled     = true;
         }
 
         private void CargarPlanEnFormulario()
@@ -202,7 +208,7 @@ namespace GUI
             txtNombre.Clear();
             nudLimite.Value    = 3;
             nudPrecio.Value    = 0;
-            lblMensaje.Text    = string.Empty;
+            LimpiarMensaje();   // no borra el "Plan guardado" recién mostrado
             dgvPlanes.ClearSelection();
         }
 
@@ -249,11 +255,9 @@ namespace GUI
             var plan = _planes.Find(p => p.IdPlan == id);
             if (plan == null) return;
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 Tr("conf.planes.desat.msg", "¿Desactivar el plan '{0}'?\n\nLos clientes con este plan no serán afectados.", new object[] { plan.Nombre }),
-                Tr("conf.planes.desat.tit", "Confirmar Desactivación"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);
+                Tr("conf.planes.desat.tit", "Confirmar Desactivación"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
 
             if (confirm != DialogResult.Yes) return;
 
@@ -274,11 +278,9 @@ namespace GUI
             var plan = _planes.Find(p => p.IdPlan == id);
             if (plan == null) return;
 
-            var confirm = MessageBox.Show(
+            var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                 Tr("conf.planes.act.msg", "¿Reactivar el plan '{0}'?\n\nEl plan volverá a estar disponible para nuevas suscripciones.", new object[] { plan.Nombre }),
-                Tr("conf.planes.act.tit", "Confirmar Activación"),
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
+                Tr("conf.planes.act.tit", "Confirmar Activación"), porDefectoNo: false) ? DialogResult.Yes : DialogResult.No);
 
             if (confirm != DialogResult.Yes) return;
 

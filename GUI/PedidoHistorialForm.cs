@@ -134,7 +134,7 @@ namespace GUI
                 TraducirHeadersGrilla();
 
                 var tb = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                MostrarOk(string.Format(tb.ContainsKey("pedidos.hist.encontrados") ? tb["pedidos.hist.encontrados"].Texto : "{0} registro(s) encontrado(s).", dt.Rows.Count));
+                MostrarCarga(string.Format(tb.ContainsKey("pedidos.hist.encontrados") ? tb["pedidos.hist.encontrados"].Texto : "{0} registro(s) encontrado(s).", dt.Rows.Count));
                 btnRestaurar.Enabled = false;
             }
             catch (Exception ex)
@@ -185,9 +185,7 @@ namespace GUI
                 "¿Restaurar el pedido #{0} al estado anterior a '{1}' (op. #{2})?\n\nNota: esta operación modifica el estado del Pedido en la base de datos.\nEl estado de las Prendas asociadas NO se revierte automáticamente.\n\n¿Confirmar?",
                 new object[] { _idPedido, accion, idOperacion });
 
-            if (MessageBox.Show(advertencia, Tr("msg.backup.titulorestaura", "Confirmar Restauración"),
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+            if (!FormBase.MostrarConfirmacionSiNo(this, advertencia, Tr("msg.backup.titulorestaura", "Confirmar Restauración"), porDefectoNo: true))
                 return;
 
             try

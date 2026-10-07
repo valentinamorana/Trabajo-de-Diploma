@@ -78,6 +78,7 @@ namespace GUI
             Aplicar(btnDesistirPedido, t);
             Aplicar(btnFormalizar,    t);
             Aplicar(btnConfirmacion,  t);
+            EstablecerAyuda(txtBuscar, Tr("ped.buscar.ayuda", "Buscar pedido, cliente o estado…"));
             menuDocumentos.Traducir();
         }
 
@@ -123,19 +124,19 @@ namespace GUI
                 {
                     tabla.Rows.Add(
                         p.IdPedido,
-                        p.FechaPedido.ToString("dd/MM/yyyy HH:mm"),
+                        p.FechaPedido.ToString("g"),
                         p.NombreCliente,
                         p.NombreEmpleado,
                         p.CantidadPrendas,
                         EstadoLabel(p.Estado),
-                        p.FechaDespacho.HasValue ? p.FechaDespacho.Value.ToString("dd/MM/yyyy") : "—",
-                        p.FechaEntrega.HasValue  ? p.FechaEntrega.Value.ToString("dd/MM/yyyy")  : "—",
+                        p.FechaDespacho.HasValue ? p.FechaDespacho.Value.ToString("d") : "—",
+                        p.FechaEntrega.HasValue  ? p.FechaEntrega.Value.ToString("d")  : "—",
                         p.MotivoCancelacion ?? p.MotivoDesistimiento ?? "",
                         (int)p.Estado);
                 }
 
                 dgvPedidos.DataSource = tabla;
-                ColorearFilasPedidos();
+                AplicarFiltro();
 
                 if (dgvPedidos.Columns.Contains("ID"))
                     dgvPedidos.Columns["ID"].Width = 44;
@@ -150,12 +151,30 @@ namespace GUI
                 // lblDetalleTitulo se traduce via Tag en Traducir(); no hardcodear aquí
                 Aplicar(lblDetalleTitulo, Traductor.ObtenerTraducciones(_idioma));
 
-                MostrarOk(Tr("msg.ped.cargados", "{0} pedido(s) cargado(s).", new object[] { _pedidos.Count }));
+                MostrarCarga(Tr("msg.ped.cargados", "{0} pedido(s) cargado(s).", new object[] { _pedidos.Count }));
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
             }
+        }
+
+        // ── Buscador ──────────────────────────────────────────────────────────
+        // Filtra la grilla mientras se escribe: número de pedido, cliente, vendedor o estado.
+        private void TxtBuscar_TextChanged(object sender, EventArgs e) => AplicarFiltro();
+
+        private void AplicarFiltro()
+        {
+            if (dgvPedidos.DataSource is DataTable tabla)
+            {
+                string texto = (txtBuscar.Text ?? "").Trim();
+                // Escapa los caracteres especiales de RowFilter (comillas y comodines).
+                string v = texto.Replace("'", "''").Replace("[", "[[]").Replace("*", "[*]").Replace("%", "[%]");
+                tabla.DefaultView.RowFilter = texto.Length == 0 ? "" :
+                    $"Convert(ID, 'System.String') LIKE '%{v}%' OR Cliente LIKE '%{v}%' " +
+                    $"OR Vendedor LIKE '%{v}%' OR Estado LIKE '%{v}%'";
+            }
+            ColorearFilasPedidos();
         }
 
         private void ColorearFilasPedidos()

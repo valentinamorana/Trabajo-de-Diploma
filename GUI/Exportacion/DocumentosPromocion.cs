@@ -29,7 +29,7 @@ namespace GUI.Exportacion
         }
 
         private static string Fecha(DateTime? f, bool conHora = true) =>
-            f.HasValue ? f.Value.ToString(conHora ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy") : "—";
+            f.HasValue ? f.Value.ToString(conHora ? "g" : "d") : "—";
 
         // ── Textos de los enums (los usan también las pantallas de PN03) ───────
 
@@ -103,7 +103,7 @@ namespace GUI.Exportacion
         {
             var sb = new StringBuilder();
             sb.AppendLine($"{Tr("doc.promo.fechareporte", "Fecha del reporte")}: {Fecha(r.Fecha)}");
-            sb.AppendLine(string.Format(Tr("doc.promo.periodo", "Período analizado: del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}"), r.Desde, r.Hasta));
+            sb.AppendLine(string.Format(Tr("doc.promo.periodo", "Período analizado: del {0:d} al {1:d}"), r.Desde, r.Hasta));
             sb.AppendLine();
             // Impacto de las promociones en los cobros del período (PN02 + N01).
             sb.AppendLine(Tr("doc.promo.impacto", "Impacto de las promociones en el período (cobros que las usaron):"));

@@ -33,6 +33,17 @@ namespace GUI
     /// </summary>
     public class FormBase : Form
     {
+        // D02 — Ayuda en línea: F1 abre la ayuda de esta pantalla (Ayuda.AyudaEnLinea).
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.F1)
+            {
+                Ayuda.AyudaEnLinea.Mostrar(this, GetType().Name);
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);

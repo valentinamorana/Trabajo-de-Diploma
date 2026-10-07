@@ -7080,3 +7080,51 @@ ES	cobro.total.cargos	{0} cargo(s) por daño/pérdida {1:C2}
 EN	cobro.total.cargos	{0} damage/loss charge(s) {1:C2}
 RU	cobro.total.cargos	{0} начисл. за повреждение/утерю {1:C2}
 PT	cobro.total.cargos	{0} cobrança(s) por dano/perda {1:C2}
+ES	err.bll.cobro.medio_requerido	Indicá el medio de pago con el que abonó el cliente.
+EN	err.bll.cobro.medio_requerido	Select the payment method the customer used.
+RU	err.bll.cobro.medio_requerido	Укажите способ оплаты, которым воспользовался клиент.
+PT	err.bll.cobro.medio_requerido	Informe o meio de pagamento usado pelo cliente.
+ES	cobro.comprobante	Comprobante {0}.
+EN	cobro.comprobante	Receipt {0}.
+RU	cobro.comprobante	Квитанция {0}.
+PT	cobro.comprobante	Comprovante {0}.
+ES	doc.cobro.vigencia	Suscripción vigente hasta el {0}.
+EN	doc.cobro.vigencia	Subscription valid until {0}.
+RU	doc.cobro.vigencia	Подписка действует до {0}.
+PT	doc.cobro.vigencia	Assinatura válida até {0}.
+ES	doc.promo.periodo	Período analizado: del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}
+EN	doc.promo.periodo	Period analyzed: from {0:dd/MM/yyyy} to {1:dd/MM/yyyy}
+RU	doc.promo.periodo	Анализируемый период: с {0:dd/MM/yyyy} по {1:dd/MM/yyyy}
+PT	doc.promo.periodo	Período analisado: de {0:dd/MM/yyyy} a {1:dd/MM/yyyy}
+ES	doc.promo.impacto	Impacto de las promociones en el período (cobros que las usaron):
+EN	doc.promo.impacto	Impact of promotions in the period (charges that used them):
+RU	doc.promo.impacto	Эффект акций за период (оплаты, в которых они применялись):
+PT	doc.promo.impacto	Impacto das promoções no período (cobranças que as usaram):
+ES	doc.promo.impacto.sindatos	Ningún cobro del período usó una promoción.
+EN	doc.promo.impacto.sindatos	No charge in the period used a promotion.
+RU	doc.promo.impacto.sindatos	Ни одна оплата за период не использовала акцию.
+PT	doc.promo.impacto.sindatos	Nenhuma cobrança do período usou uma promoção.
+ES	doc.promo.impactolinea	   • {0} ({1}): {2} cobro(s) — {3:C2} descontados — {4:C2} cobrados
+EN	doc.promo.impactolinea	   • {0} ({1}): {2} charge(s) — {3:C2} discounted — {4:C2} charged
+RU	doc.promo.impactolinea	   • {0} ({1}): {2} оплат(а) — скидок на {3:C2} — получено {4:C2}
+PT	doc.promo.impactolinea	   • {0} ({1}): {2} cobrança(s) — {3:C2} descontados — {4:C2} cobrados
+ES	rotacion.motivo.bajademanda.periodo	{0} no registra pedidos desde el {1:dd/MM/yyyy} — candidata a baja.
+EN	rotacion.motivo.bajademanda.periodo	{0} has no orders since {1:dd/MM/yyyy} — candidate for removal.
+RU	rotacion.motivo.bajademanda.periodo	{0}: нет заказов с {1:dd/MM/yyyy} — кандидат на списание.
+PT	rotacion.motivo.bajademanda.periodo	{0} não tem pedidos desde {1:dd/MM/yyyy} — candidata a baixa.
+ES	promocion.periodo.30	Últimos 30 días
+EN	promocion.periodo.30	Last 30 days
+RU	promocion.periodo.30	Последние 30 дней
+PT	promocion.periodo.30	Últimos 30 dias
+ES	promocion.periodo.90	Últimos 90 días
+EN	promocion.periodo.90	Last 90 days
+RU	promocion.periodo.90	Последние 90 дней
+PT	promocion.periodo.90	Últimos 90 dias
+ES	promocion.periodo.180	Últimos 180 días
+EN	promocion.periodo.180	Last 180 days
+RU	promocion.periodo.180	Последние 180 дней
+PT	promocion.periodo.180	Últimos 180 dias
+ES	promocion.periodo.365	Último año
+EN	promocion.periodo.365	Last year
+RU	promocion.periodo.365	Последний год
+PT	promocion.periodo.365	Último ano

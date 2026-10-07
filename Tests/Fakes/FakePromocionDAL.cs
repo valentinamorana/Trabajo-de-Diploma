@@ -36,6 +36,13 @@ namespace Tests.Fakes
 
         public List<BE.Promocion> ObtenerTodas() => Todas;
         public List<BE.Promocion> ObtenerVigentes() => Todas.FindAll(p => p.EstaVigente());
+        public List<BE.MetricaImpactoPromocion> Impacto { get; set; } = new List<BE.MetricaImpactoPromocion>();
+        public System.DateTime? UltimoDesdeImpacto { get; private set; }
+        public List<BE.MetricaImpactoPromocion> ObtenerImpacto(System.DateTime desde, System.DateTime hasta)
+        {
+            UltimoDesdeImpacto = desde;
+            return Impacto;
+        }
         public List<BE.Promocion> ObtenerPendientesRevisionContable() => Todas.FindAll(p => p.Estado == BE.EstadoPromocion.EnRevisionContable);
         public BE.Promocion ObtenerPorId(int idPromocion) => Todas.Find(p => p.IdPromocion == idPromocion);
 

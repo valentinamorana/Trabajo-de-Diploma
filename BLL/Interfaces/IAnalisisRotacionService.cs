@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace BLL.Interfaces
@@ -7,6 +8,7 @@ namespace BLL.Interfaces
     public interface IAnalisisRotacionService
     {
         /// <summary>Devuelve las prendas marcadas de alta o baja demanda.</summary>
-        List<BE.RotacionPrenda> Detectar();
+        // desde: período analizado (PN03); null = toda la historia (reporte PdN9).
+        List<BE.RotacionPrenda> Detectar(DateTime? desde = null);
     }
 }

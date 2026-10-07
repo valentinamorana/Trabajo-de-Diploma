@@ -27,6 +27,7 @@ namespace GUI
             this.txtMotivo = new System.Windows.Forms.TextBox();
             this.btnEnviar = new System.Windows.Forms.Button();
             this.btnAnalizar = new System.Windows.Forms.Button();
+            this.cmbPeriodo = new System.Windows.Forms.ComboBox();
             this.lblOrigen = new System.Windows.Forms.Label();
             this.lblSugerenciasTitulo = new System.Windows.Forms.Label();
             this.btnImprimirSugerencia = new System.Windows.Forms.Button();
@@ -160,9 +161,16 @@ namespace GUI
             //
             // lblOrigen (origen de la métrica de la sugerencia que se está armando)
             //
-            this.lblOrigen.Location = new System.Drawing.Point(452, 52);
+            this.lblOrigen.Location = new System.Drawing.Point(452, 80);
             this.lblOrigen.Name = "lblOrigen";
-            this.lblOrigen.Size = new System.Drawing.Size(232, 80);
+            this.lblOrigen.Size = new System.Drawing.Size(232, 56);
+            //
+            // cmbPeriodo (PN03: período de "Analizar métricas")
+            //
+            this.cmbPeriodo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPeriodo.Location = new System.Drawing.Point(452, 50);
+            this.cmbPeriodo.Name = "cmbPeriodo";
+            this.cmbPeriodo.Size = new System.Drawing.Size(200, 21);
             this.lblOrigen.TabIndex = 13;
             //
             // lblSugerenciasTitulo
@@ -239,6 +247,7 @@ namespace GUI
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.btnEnviar);
             this.Controls.Add(this.btnAnalizar);
+            this.Controls.Add(this.cmbPeriodo);
             this.Controls.Add(this.lblOrigen);
             this.Controls.Add(this.lblSugerenciasTitulo);
             this.Controls.Add(this.btnImprimirSugerencia);
@@ -283,6 +292,7 @@ namespace GUI
         private System.Windows.Forms.TextBox txtMotivo;
         private System.Windows.Forms.Button btnEnviar;
         private System.Windows.Forms.Button btnAnalizar;
+        private System.Windows.Forms.ComboBox cmbPeriodo;
         private System.Windows.Forms.Label lblOrigen;
         private System.Windows.Forms.Label lblSugerenciasTitulo;
         private System.Windows.Forms.Button btnImprimirSugerencia;

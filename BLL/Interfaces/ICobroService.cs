@@ -12,10 +12,14 @@ namespace BLL.Interfaces
         // Procesa un intento de cobro para el cliente indicado según la decisión tomada.
         Manejadores.ResultadoCobro Procesar(
             string modulo, BE.Cliente cliente, Manejadores.DecisionCobro decision,
-            BE.Builders.ModalidadCobro modalidad, string actor);
+            BE.Builders.ModalidadCobro modalidad, string actor, int? idMedioPago = null);
 
         // Devuelve el historial de intentos de cobro de un cliente.
         List<BE.Cobro> ObtenerHistorial(int idCliente);
+
+        // Un cobro por ID (comprobante) y los medios de pago vigentes (N01).
+        BE.Cobro ObtenerCobro(int idCobro);
+        List<BE.MedioPago> ObtenerMediosPago();
 
         // Clientes a los que hoy corresponde procesarles un cobro (con plan, vencidos o
         // próximos a vencer y sin contratación PN02 pendiente de pago).

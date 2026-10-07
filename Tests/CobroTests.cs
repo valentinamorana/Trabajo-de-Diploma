@@ -232,6 +232,9 @@ namespace Tests
             Assert.AreEqual(4500m, dalCobro.Registros[0].Importe); // 5000 - 10% (500): un solo descuento
             Assert.AreEqual(500m, cliente.DescuentoProximoCobro, "El crédito por referido queda acumulado para el próximo ciclo.");
             Assert.AreEqual("cobro.msg.cobrado.promo", resultado.Clave);
+            // PN03: el cobro guarda qué promoción aplicó y cuánto descontó (para medir su impacto).
+            Assert.AreEqual(1, dalCobro.Registros[0].IdPromocion);
+            Assert.AreEqual(500m, dalCobro.Registros[0].DescuentoAplicado);
         }
 
         [TestMethod]
@@ -469,7 +472,7 @@ namespace Tests
                 Id = 21, Username = "caja", Perfil = "Caja", Rol = "Caja",
                 Permisos = new System.Collections.Generic.List<BE.Permiso> { new BE.Permiso { NombreMenu = BE.Patentes.CajaEditar } }
             });
-            var r = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja");
+            var r = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja", 1);
             Assert.AreEqual(BE.EstadoCobro.Cobrado, r.Estado);
         }
 
@@ -517,10 +520,54 @@ namespace Tests
             var dalCobro = new FakeCobroDAL();
             var bll = new BLL.Cobro(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL());
 
-            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Anual, "vendedor1");
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Anual, "vendedor1", 3);
 
             Assert.AreEqual(BE.EstadoCobro.Cobrado, resultado.Estado);
             Assert.AreEqual(1, dalCobro.AltaVeces);
+            // N01: queda registrado con qué medio pagó, la modalidad y el comprobante emitido.
+            var cobro = dalCobro.Registros[0];
+            Assert.AreEqual(3, cobro.IdMedioPago);
+            Assert.AreEqual(BE.Builders.ModalidadCobro.Anual, cobro.Modalidad);
+            Assert.IsNotNull(resultado.NumeroComprobante);
+            StringAssert.StartsWith(resultado.NumeroComprobante, "CBR-000001-");
+            Assert.AreEqual(resultado.NumeroComprobante, cobro.NumeroComprobante);
+        }
+
+        [TestMethod]
+        public void Real_CobradoSinMedioDePago_LanzaMedioRequerido_SinCobrar()
+        {
+            LoginComoAdministrador();
+            var dalCobro = new FakeCobroDAL();
+            var bll = new BLL.Cobro(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL());
+            try
+            {
+                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja");
+                Assert.Fail("Debía exigir el medio de pago.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.cobro.medio_requerido", ex.Clave); }
+            Assert.AreEqual(0, dalCobro.AltaVeces);
+        }
+
+        [TestMethod]
+        public void Real_CobradoConMedioInexistente_LanzaMedioInvalido()
+        {
+            LoginComoAdministrador();
+            var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
+            try
+            {
+                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja", 99);
+                Assert.Fail("Debía rechazar un medio inexistente.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.contratacion.medio_invalido", ex.Clave); }
+        }
+
+        [TestMethod]
+        public void Real_PagoFallido_NoPideMedioDePago()
+        {
+            LoginComoAdministrador();
+            var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
+            var r = bll.Procesar("Test", ClienteEnGracia(-1), DecisionCobro.PagoFallido, BE.Builders.ModalidadCobro.Mensual, "caja");
+            Assert.AreEqual(BE.EstadoCobro.Suspendido, r.Estado);
         }
 
         [TestMethod]

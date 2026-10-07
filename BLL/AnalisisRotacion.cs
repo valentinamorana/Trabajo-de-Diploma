@@ -28,9 +28,11 @@ namespace BLL
             this.dalPedido = dalPedido ?? throw new ArgumentNullException(nameof(dalPedido));
         }
 
-        public List<BE.RotacionPrenda> Detectar()
+        // desde: cuenta solo los pedidos del período (PN03 "Analizar métricas"). Con período, una
+        // prenda es de baja demanda si estuvo en catálogo todo el período y no tuvo pedidos en él.
+        public List<BE.RotacionPrenda> Detectar(DateTime? desde = null)
         {
-            var cantidadPorPrenda = dalPedido.ObtenerCantidadPedidosPorPrenda();
+            var cantidadPorPrenda = dalPedido.ObtenerCantidadPedidosPorPrenda(desde);
 
             var resultado = new List<BE.RotacionPrenda>();
             foreach (var prenda in dalPrenda.ObtenerTodos().Where(p => p.Estado != BE.EstadoPrenda.Baja))
@@ -38,7 +40,20 @@ namespace BLL
                 int cantidad = cantidadPorPrenda.TryGetValue(prenda.IdPrenda, out var c) ? c : 0;
                 int diasEnCatalogo = (int)(DateTime.Today - prenda.FechaAlta.Date).TotalDays;
 
-                if (cantidad == 0 && diasEnCatalogo >= DiasAntiguedadMinimaParaBajaDemanda)
+                if (cantidad == 0 && desde.HasValue && prenda.FechaAlta.Date <= desde.Value.Date)
+                {
+                    resultado.Add(new BE.RotacionPrenda
+                    {
+                        IdPrenda = prenda.IdPrenda,
+                        NombrePrenda = prenda.Nombre,
+                        Categoria = prenda.Categoria,
+                        CantidadPedidos = 0,
+                        Motivo = $"{prenda.Nombre} no registra pedidos desde el {desde.Value:dd/MM/yyyy} — candidata a baja.",
+                        Clave = "rotacion.motivo.bajademanda.periodo",
+                        Args = new object[] { prenda.Nombre, desde.Value }
+                    });
+                }
+                else if (cantidad == 0 && !desde.HasValue && diasEnCatalogo >= DiasAntiguedadMinimaParaBajaDemanda)
                 {
                     resultado.Add(new BE.RotacionPrenda
                     {

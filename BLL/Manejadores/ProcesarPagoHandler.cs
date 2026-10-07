@@ -76,6 +76,7 @@ namespace BLL.Manejadores
             // medio podía dejar el historial de auditoría desincronizado del estado real.
             var ahora = DateTime.Now;
             int idCobro = 0;
+            string numeroComprobante = null;
             dalCliente.EjecutarTransaccion((conexion, tx) =>
             {
                 // Solo las columnas que el cobro modifica (vencimiento y gracia), condicionadas al
@@ -96,8 +97,15 @@ namespace BLL.Manejadores
                     FechaDeteccion = ahora,
                     FechaResolucion = ahora,
                     Resultado = BE.EstadoCobro.Cobrado,
-                    Actor = contexto.Actor
+                    Actor = contexto.Actor,
+                    IdMedioPago = contexto.IdMedioPago,
+                    Modalidad = contexto.Modalidad,
+                    DescuentoAplicado = resDescuento.Descuento > 0 ? resDescuento.Descuento : (decimal?)null,
+                    IdPromocion = resDescuento.Promocion?.IdPromocion
                 });
+                // "Emitir comprobante" (mismo formato que PN02: prefijo + ID + fecha).
+                numeroComprobante = $"CBR-{idCobro:D6}-{ahora:yyyyMMdd}";
+                dalCobro.AsignarComprobanteEnTx(conexion, tx, idCobro, numeroComprobante);
                 if (cargosPendientes.Count > 0 &&
 
                     !dalCargoPrenda.MarcarCobradosEnTx(conexion, tx,
@@ -172,6 +180,7 @@ namespace BLL.Manejadores
                 Resuelto = true,
                 Estado = BE.EstadoCobro.Cobrado,
                 IdCobro = idCobro,
+                NumeroComprobante = numeroComprobante,
                 Mensaje = mensaje,
                 Clave = clave,
                 Args = args

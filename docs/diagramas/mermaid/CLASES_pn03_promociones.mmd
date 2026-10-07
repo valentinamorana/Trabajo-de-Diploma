@@ -2,6 +2,9 @@ classDiagram
   direction TB
   class ReporteMetricas {
     +DateTime Fecha
+    +DateTime Desde
+    +DateTime Hasta
+    +List~MetricaImpactoPromocion~ ImpactoPromociones
     +List~MetricaAbandonoPlan~ AbandonoPorPlan
     +List~MetricaRotacionCategoria~ RotacionPorCategoria
     +List~CandidataSugerencia~ Oportunidades
@@ -96,7 +99,7 @@ classDiagram
     +bool UsuarioPuedeDictaminar
   }
   class BLL_AnalisisPromociones["BLL.AnalisisPromociones"] {
-    +AnalizarMetricas(string) ReporteMetricas
+    +AnalizarMetricas(string,  DateTime?,  DateTime?) ReporteMetricas
     +HayOportunidad(ReporteMetricas) bool
   }
   class BLL_SugerenciaPromocion["BLL.SugerenciaPromocion"] {
@@ -154,7 +157,7 @@ classDiagram
     +Descartar(int,  string,  DateTime) bool
   }
   class BLL_AnalisisRotacion["BLL.AnalisisRotacion"] {
-    +Detectar() List~RotacionPrenda~
+    +Detectar(DateTime?) List~RotacionPrenda~
   }
   class DAL_Interfaces_IPlanSuscripcionDAL["DAL.Interfaces.IPlanSuscripcionDAL"] {
     <<interface>>
@@ -177,7 +180,7 @@ classDiagram
     <<interface>>
     +ObtenerFechaUltimoPedidoPorCliente() Dictionary~int, DateTime~
     +ObtenerEstadisticasPorEmpleado() List~DesempenoVendedor~
-    +ObtenerCantidadPedidosPorPrenda() Dictionary~int, int~
+    +ObtenerCantidadPedidosPorPrenda(DateTime?) Dictionary~int, int~
     +ObtenerPrendasHistoricasPorCliente(int) List~Prenda~
   }
   class DAL_Interfaces_IClienteDAL["DAL.Interfaces.IClienteDAL"] {
@@ -202,6 +205,7 @@ classDiagram
   AnalisisImpactoPromocion --> "1" Promocion : Promocion
   AnalisisImpactoPromocion --> "*" Promocion : Superpuestas
   BLL_AnalisisPromociones ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
+  BLL_AnalisisPromociones ..> DAL_Interfaces_IPromocionDAL : usa
   BLL_SugerenciaPromocion ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa
   BLL_SugerenciaPromocion ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
   BLL_Promocion ..> DAL_Interfaces_IPromocionDAL : usa

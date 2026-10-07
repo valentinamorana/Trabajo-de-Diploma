@@ -46,7 +46,7 @@ namespace BLL
 
         public Manejadores.ResultadoCobro Procesar(
             string modulo, BE.Cliente cliente, Manejadores.DecisionCobro decision,
-            BE.Builders.ModalidadCobro modalidad, string actor)
+            BE.Builders.ModalidadCobro modalidad, string actor, int? idMedioPago = null)
         {
             // N01 — El cobro recurrente de la suscripción lo registra CAJA (decisión del proceso:
             // quien vende no cobra). Se gobierna por la patente de edición de Caja; la de
@@ -68,13 +68,25 @@ namespace BLL
                     "{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.",
                     cliente.NombreCompleto);
 
+            // N01 — como en PN02, un cobro exitoso registra con qué medio pagó el cliente.
+            if (decision == Manejadores.DecisionCobro.Cobrado)
+            {
+                if (!idMedioPago.HasValue)
+                    throw new BE.AppException("err.bll.cobro.medio_requerido",
+                        "Indicá el medio de pago con el que abonó el cliente.");
+                if (!ObtenerMediosPago().Exists(m => m.IdMedioPago == idMedioPago.Value))
+                    throw new BE.AppException("err.bll.contratacion.medio_invalido",
+                        "El medio de pago indicado no existe.");
+            }
+
             var contexto = new Manejadores.ContextoCobro
             {
                 Cliente = cliente,
                 Decision = decision,
                 Modalidad = modalidad,
                 Actor = actor,
-                Modulo = modulo
+                Modulo = modulo,
+                IdMedioPago = decision == Manejadores.DecisionCobro.Cobrado ? idMedioPago : null
             };
 
             var resultado = cadena.Procesar(contexto);
@@ -92,6 +104,13 @@ namespace BLL
         }
 
         public List<BE.Cobro> ObtenerHistorial(int idCliente) => dalCobro.ObtenerPorCliente(idCliente);
+
+        // Un cobro (para reimprimir su comprobante).
+        public BE.Cobro ObtenerCobro(int idCobro) => dalCobro.ObtenerPorId(idCobro);
+
+        // Medios de pago vigentes (el mismo catálogo que Caja usa en PN02).
+        public List<BE.MedioPago> ObtenerMediosPago() =>
+            (dalCobro.ObtenerMediosPago() ?? new List<BE.MedioPago>()).Where(m => m.Activo).ToList();
 
         // Clientes a los que hoy corresponde procesarles un cobro: con plan, con la suscripción
         // vencida o próxima a vencer (mismo criterio que DetectarCobroHandler) y sin una

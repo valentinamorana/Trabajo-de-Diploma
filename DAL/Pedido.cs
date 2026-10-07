@@ -183,7 +183,7 @@ namespace DAL
         // PdN9 — Cantidad de veces que cada prenda fue pedida (solo ventas concretadas: un
         // pedido cancelado, desistido o en control no representa demanda real).
         // Usada por BLL.AnalisisRotacion.
-        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda()
+        public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda(DateTime? desde = null)
         {
             var resultado = new Dictionary<int, int>();
             try
@@ -193,8 +193,9 @@ namespace DAL
                     "FROM PedidoPrenda pp " +
                     "INNER JOIN Pedido p ON p.IdPedido = pp.IdPedido " +
                     "WHERE p.Estado IN " + ESTADOS_VENTA + " " +
+                    (desde.HasValue ? "AND p.FechaPedido >= @Desde " : "") +
                     "GROUP BY pp.IdPrenda",
-                    null);
+                    desde.HasValue ? new[] { new SqlParameter("@Desde", desde.Value.Date) } : null);
 
                 if (tabla != null)
                     foreach (DataRow row in tabla.Rows)

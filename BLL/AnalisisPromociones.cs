@@ -23,39 +23,56 @@ namespace BLL
         /// <summary>Valor de referencia (editable por Gerencia) por prenda parada, para la estimación inicial.</summary>
         public const decimal ValorReferenciaPorPrenda = 1000m;
 
-        private const string ClaveBajaDemanda = "rotacion.motivo.bajademanda";
+        /// <summary>Período por defecto de "Analizar métricas" (días hacia atrás desde hoy).</summary>
+        public const int DiasPeriodoPorDefecto = 90;
+
+        // Baja demanda: sin pedidos desde el alta (reporte PdN9) o en el período analizado (PN03).
+        private static bool EsBajaDemanda(BE.RotacionPrenda r) =>
+            r.Clave != null && r.Clave.StartsWith("rotacion.motivo.bajademanda", StringComparison.Ordinal);
         private const string ModuloGerencia = "Promociones";
 
         private readonly Interfaces.IAnalisisRotacionService rotacion;
         private readonly Interfaces.IAnalisisAbandonoService abandono;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
+        private readonly DAL.Interfaces.IPromocionDAL dalPromocion;   // null: sin impacto de promociones
         private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
 
         public AnalisisPromociones()
-            : this(new AnalisisRotacion(), new AnalisisAbandono(), new DAL.PlanSuscripcion()) { }
+            : this(new AnalisisRotacion(), new AnalisisAbandono(), new DAL.PlanSuscripcion(), new DAL.Promocion()) { }
 
         public AnalisisPromociones(Interfaces.IAnalisisRotacionService rotacion,
                                    Interfaces.IAnalisisAbandonoService abandono,
-                                   DAL.Interfaces.IPlanSuscripcionDAL dalPlan)
+                                   DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
+                                   DAL.Interfaces.IPromocionDAL dalPromocion = null)
         {
+            this.dalPromocion = dalPromocion;
             this.rotacion = rotacion ?? throw new ArgumentNullException(nameof(rotacion));
             this.abandono = abandono ?? throw new ArgumentNullException(nameof(abandono));
             this.dalPlan  = dalPlan  ?? throw new ArgumentNullException(nameof(dalPlan));
         }
 
-        // "Analizar métricas": abandono por plan y rotación por categoría → «Reporte de métricas»
-        // con las oportunidades detectadas. Si no hay ninguna, el flujo termina "Sin promoción".
-        public BE.ReporteMetricas AnalizarMetricas(string modulo)
+        // "Analizar métricas": abandono por plan, rotación por categoría e impacto de las promociones
+        // en el período [desde, hasta] (por defecto, los últimos 90 días) → «Reporte de métricas» con
+        // las oportunidades detectadas. Si no hay ninguna, el flujo termina "Sin promoción".
+        public BE.ReporteMetricas AnalizarMetricas(string modulo, DateTime? desde = null, DateTime? hasta = null)
         {
             PermisosAccion.Exigir(BE.Patentes.SugerenciaPromocion, BE.Patentes.SugerenciaPromocion);
+            DateTime fin = (hasta ?? DateTime.Today).Date;
+            DateTime inicio = (desde ?? fin.AddDays(-DiasPeriodoPorDefecto)).Date;
+            if (inicio > fin)
+                throw new BE.AppException("err.bll.promocion.rango_fechas_invalido",
+                    "La fecha de fin no puede ser anterior a la fecha de inicio.");
 
-            var rot = rotacion.Detectar();
+            var rot = rotacion.Detectar(inicio);
             var ab = abandono.Detectar();
             var planes = dalPlan.ObtenerTodos();
 
             var reporte = new BE.ReporteMetricas
             {
                 Fecha = DateTime.Now,
+                Desde = inicio,
+                Hasta = fin,
+                ImpactoPromociones = ImpactoPromociones(inicio, fin),
                 AbandonoPorPlan = AbandonoPorPlan(ab, planes),
                 RotacionPorCategoria = rot
                     .Where(r => !string.IsNullOrWhiteSpace(r.Categoria))
@@ -63,8 +80,8 @@ namespace BLL
                     .Select(g => new BE.MetricaRotacionCategoria
                     {
                         Categoria = g.Key,
-                        PrendasBajaDemanda = g.Count(r => r.Clave == ClaveBajaDemanda),
-                        PrendasAltaDemanda = g.Count(r => r.Clave != ClaveBajaDemanda)
+                        PrendasBajaDemanda = g.Count(EsBajaDemanda),
+                        PrendasAltaDemanda = g.Count(r => !EsBajaDemanda(r))
                     })
                     .OrderByDescending(m => m.PrendasBajaDemanda).ToList(),
                 Oportunidades = Oportunidades(rot, ab, planes)
@@ -79,6 +96,18 @@ namespace BLL
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.AnalisisPromociones] {ex.Message}"); }
             return reporte;
+        }
+
+        // Best-effort: sin DAL de promociones o si la consulta falla, el reporte sale sin esta sección.
+        private List<BE.MetricaImpactoPromocion> ImpactoPromociones(DateTime desde, DateTime hasta)
+        {
+            if (dalPromocion == null) return new List<BE.MetricaImpactoPromocion>();
+            try { return dalPromocion.ObtenerImpacto(desde, hasta) ?? new List<BE.MetricaImpactoPromocion>(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[BLL.AnalisisPromociones] Impacto de promociones: {ex.Message}");
+                return new List<BE.MetricaImpactoPromocion>();
+            }
         }
 
         // "¿Hay oportunidad?": el reporte detectó al menos un caso para sugerir.
@@ -113,7 +142,7 @@ namespace BLL
 
             // Rotación: prendas de baja demanda agrupadas por categoría.
             var bajaDemanda = rot
-                .Where(r => r.Clave == ClaveBajaDemanda && !string.IsNullOrWhiteSpace(r.Categoria))
+                .Where(r => EsBajaDemanda(r) && !string.IsNullOrWhiteSpace(r.Categoria))
                 .GroupBy(r => r.Categoria.Trim(), StringComparer.OrdinalIgnoreCase)
                 .Where(g => g.Count() >= MinimoPrendasPorCategoria);
             foreach (var g in bajaDemanda)

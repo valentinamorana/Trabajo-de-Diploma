@@ -103,6 +103,14 @@ namespace GUI.Exportacion
         {
             var sb = new StringBuilder();
             sb.AppendLine($"{Tr("doc.promo.fechareporte", "Fecha del reporte")}: {Fecha(r.Fecha)}");
+            sb.AppendLine(string.Format(Tr("doc.promo.periodo", "Período analizado: del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}"), r.Desde, r.Hasta));
+            sb.AppendLine();
+            // Impacto de las promociones en los cobros del período (PN02 + N01).
+            sb.AppendLine(Tr("doc.promo.impacto", "Impacto de las promociones en el período (cobros que las usaron):"));
+            if (r.ImpactoPromociones.Count == 0) sb.AppendLine("   " + Tr("doc.promo.impacto.sindatos", "Ningún cobro del período usó una promoción."));
+            foreach (var m in r.ImpactoPromociones)
+                sb.AppendLine(string.Format(Tr("doc.promo.impactolinea", "   • {0} ({1}): {2} cobro(s) — {3:C2} descontados — {4:C2} cobrados"),
+                                            m.Nombre, Estado(m.Estado), m.Cobros, m.TotalDescontado, m.TotalCobrado));
             sb.AppendLine();
             sb.AppendLine(Tr("doc.promo.abandonoplan", "Abandono por plan (clientes en riesgo):"));
             if (r.AbandonoPorPlan.Count == 0) sb.AppendLine("   " + Tr("doc.promo.sindatos", "Sin casos detectados."));

@@ -11,9 +11,12 @@ namespace DAL
         private const string SELECT_BASE =
             "SELECT c.IdCobro, c.IdCliente, c.Importe, " +
             "       c.FechaDeteccion, c.FechaResolucion, c.Resultado, c.Actor, " +
+            "       c.IdMedioPago, mp.Nombre AS NombreMedioPago, c.NumeroComprobante, c.Modalidad, " +
+            "       c.DescuentoAplicado, c.IdPromocion, " +
             "       cl.Nombre + ' ' + cl.Apellido AS NombreCliente " +
             "FROM HistorialCobro c " +
-            "INNER JOIN Cliente cl ON cl.IdCliente = c.IdCliente";
+            "INNER JOIN Cliente cl ON cl.IdCliente = c.IdCliente " +
+            "LEFT JOIN MedioPago mp ON mp.IdMedioPago = c.IdMedioPago";
 
         public override List<BE.Cobro> ObtenerTodos()
         {
@@ -78,11 +81,18 @@ namespace DAL
         {
             using (var cmd = new SqlCommand(
                 "INSERT INTO HistorialCobro " +
-                "(IdCliente, Importe, FechaDeteccion, FechaResolucion, Resultado, Actor) " +
-                "VALUES (@IdCliente, @Importe, @FechaDeteccion, @FechaResolucion, @Resultado, @Actor); " +
+                "(IdCliente, Importe, FechaDeteccion, FechaResolucion, Resultado, Actor, " +
+                " IdMedioPago, NumeroComprobante, Modalidad, DescuentoAplicado, IdPromocion) " +
+                "VALUES (@IdCliente, @Importe, @FechaDeteccion, @FechaResolucion, @Resultado, @Actor, " +
+                "        @IdMedioPago, @NumeroComprobante, @Modalidad, @DescuentoAplicado, @IdPromocion); " +
                 "SELECT SCOPE_IDENTITY();",
                 conexion, tx))
             {
+                cmd.Parameters.AddWithValue("@IdMedioPago", (object)cobro.IdMedioPago ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@NumeroComprobante", (object)cobro.NumeroComprobante ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Modalidad", cobro.Modalidad.HasValue ? (object)(int)cobro.Modalidad.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@DescuentoAplicado", (object)cobro.DescuentoAplicado ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IdPromocion", (object)cobro.IdPromocion ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IdCliente", cobro.IdCliente);
                 cmd.Parameters.AddWithValue("@Importe", cobro.Importe);
                 cmd.Parameters.AddWithValue("@FechaDeteccion", cobro.FechaDeteccion);
@@ -95,6 +105,20 @@ namespace DAL
             }
         }
 
+        public void AsignarComprobanteEnTx(SqlConnection conexion, SqlTransaction tx, int idCobro, string numeroComprobante)
+        {
+            using (var cmd = new SqlCommand(
+                "UPDATE HistorialCobro SET NumeroComprobante = @Numero WHERE IdCobro = @Id", conexion, tx))
+            {
+                cmd.Parameters.AddWithValue("@Numero", numeroComprobante);
+                cmd.Parameters.AddWithValue("@Id", idCobro);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // Mismo catálogo que PN02 (una sola consulta, en DAL.Contratacion).
+        public List<BE.MedioPago> ObtenerMediosPago() => new Contratacion().ObtenerMediosPago();
+
         private BE.Cobro Mapear(DataRow row)
         {
             return new BE.Cobro
@@ -105,6 +129,12 @@ namespace DAL
                 Importe         = Convert.ToDecimal(row["Importe"]),
                 FechaDeteccion  = Convert.ToDateTime(row["FechaDeteccion"]),
                 FechaResolucion = row["FechaResolucion"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaResolucion"]) : null,
+                IdMedioPago       = row["IdMedioPago"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdMedioPago"]) : null,
+                NombreMedioPago   = row["NombreMedioPago"] != DBNull.Value ? row["NombreMedioPago"].ToString() : null,
+                NumeroComprobante = row["NumeroComprobante"] != DBNull.Value ? row["NumeroComprobante"].ToString() : null,
+                Modalidad         = row["Modalidad"] != DBNull.Value ? (BE.Builders.ModalidadCobro?)Convert.ToInt32(row["Modalidad"]) : null,
+                DescuentoAplicado = row["DescuentoAplicado"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["DescuentoAplicado"]) : null,
+                IdPromocion       = row["IdPromocion"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPromocion"]) : null,
                 Resultado       = (BE.EstadoCobro)Convert.ToInt32(row["Resultado"]),
                 Actor           = row["Actor"] != DBNull.Value ? row["Actor"].ToString() : null
             };

@@ -2822,6 +2822,36 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacio
 PRINT 'Sección 20c3: upgrade con crédito y anulación de contrataciones verificado.';
 GO
 -- ============================================================
+-- WardrobeFlow — 20c4. N01: COBRO RECURRENTE CON MEDIO DE PAGO, COMPROBANTE Y PROMOCIÓN APLICADA
+-- ------------------------------------------------------------
+--   HistorialCobro guarda, igual que Contratacion en PN02, con qué medio pagó el cliente, el
+--   comprobante emitido, la modalidad cobrada y el descuento aplicado (promoción vigente o crédito
+--   por referido). Con IdPromocion + DescuentoAplicado se puede medir el impacto de cada promoción
+--   en los cobros (PN03). Las filas viejas quedan en NULL. HistorialCobro no lleva DVH.
+-- Idempotente.
+-- ============================================================
+IF COL_LENGTH('HistorialCobro', 'IdMedioPago') IS NULL
+    ALTER TABLE HistorialCobro ADD IdMedioPago INT NULL
+        CONSTRAINT FK_HistorialCobro_MedioPago REFERENCES MedioPago(IdMedioPago);
+IF COL_LENGTH('HistorialCobro', 'NumeroComprobante') IS NULL
+    ALTER TABLE HistorialCobro ADD NumeroComprobante NVARCHAR(50) NULL;
+IF COL_LENGTH('HistorialCobro', 'Modalidad') IS NULL
+    ALTER TABLE HistorialCobro ADD Modalidad INT NULL;
+IF COL_LENGTH('HistorialCobro', 'DescuentoAplicado') IS NULL
+    ALTER TABLE HistorialCobro ADD DescuentoAplicado DECIMAL(10,2) NULL;
+IF COL_LENGTH('HistorialCobro', 'IdPromocion') IS NULL
+    ALTER TABLE HistorialCobro ADD IdPromocion INT NULL
+        CONSTRAINT FK_HistorialCobro_Promocion REFERENCES Promocion(IdPromocion);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_HistorialCobro_Modalidad')
+    ALTER TABLE HistorialCobro ADD CONSTRAINT CHK_HistorialCobro_Modalidad CHECK (Modalidad IS NULL OR Modalidad IN (0,1,2));
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_HistorialCobro_Descuento')
+    ALTER TABLE HistorialCobro ADD CONSTRAINT CHK_HistorialCobro_Descuento CHECK (DescuentoAplicado IS NULL OR DescuentoAplicado > 0);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_HistorialCobro_IdPromocion' AND object_id = OBJECT_ID('HistorialCobro'))
+    CREATE NONCLUSTERED INDEX IX_HistorialCobro_IdPromocion ON HistorialCobro(IdPromocion);
+PRINT 'Sección 20c4: medio de pago, comprobante y promoción del cobro recurrente verificados.';
+GO
+-- ============================================================
 -- WardrobeFlow — 20d. PN03: FLUJO APROBADO DE PROMOCIONES
 -- ------------------------------------------------------------
 -- Diagrama de actividad de PN03 (corregido y aprobado):

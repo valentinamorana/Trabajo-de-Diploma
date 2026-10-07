@@ -43,6 +43,43 @@ namespace DAL
             Listar(SELECT_BASE + "WHERE p.Estado = 1 AND CAST(GETDATE() AS DATE) BETWEEN p.FechaInicio AND p.FechaFin " +
                    "ORDER BY p.FechaFin", "Error al obtener las promociones vigentes.");
 
+        public List<BE.MetricaImpactoPromocion> ObtenerImpacto(DateTime desde, DateTime hasta)
+        {
+            SqlParameter[] p =
+            {
+                new SqlParameter("@Desde", desde.Date),
+                new SqlParameter("@HastaExcl", hasta.Date.AddDays(1))
+            };
+            var lista = new List<BE.MetricaImpactoPromocion>();
+            try
+            {
+                DataTable t = acceso.Leer(
+                    "SELECT pr.IdPromocion, pr.Nombre, pr.Estado, COUNT(*) AS Cobros, " +
+                    "       SUM(ISNULL(x.Descuento, 0)) AS TotalDescontado, SUM(x.Importe) AS TotalCobrado " +
+                    "FROM (" +
+                    "  SELECT IdPromocion, DescuentoAplicado AS Descuento, Importe FROM Contratacion " +
+                    "  WHERE Estado = 1 AND IdPromocion IS NOT NULL AND FechaComprobante >= @Desde AND FechaComprobante < @HastaExcl " +
+                    "  UNION ALL " +
+                    "  SELECT IdPromocion, DescuentoAplicado, Importe FROM HistorialCobro " +
+                    "  WHERE Resultado = 1 AND IdPromocion IS NOT NULL AND FechaResolucion >= @Desde AND FechaResolucion < @HastaExcl" +
+                    ") x INNER JOIN Promocion pr ON pr.IdPromocion = x.IdPromocion " +
+                    "GROUP BY pr.IdPromocion, pr.Nombre, pr.Estado " +
+                    "ORDER BY TotalDescontado DESC", p);
+                foreach (DataRow r in t.Rows)
+                    lista.Add(new BE.MetricaImpactoPromocion
+                    {
+                        IdPromocion     = Convert.ToInt32(r["IdPromocion"]),
+                        Nombre          = r["Nombre"].ToString(),
+                        Estado          = (BE.EstadoPromocion)Convert.ToInt32(r["Estado"]),
+                        Cobros          = Convert.ToInt32(r["Cobros"]),
+                        TotalDescontado = Convert.ToDecimal(r["TotalDescontado"]),
+                        TotalCobrado    = r["TotalCobrado"] != DBNull.Value ? Convert.ToDecimal(r["TotalCobrado"]) : 0m
+                    });
+            }
+            catch (Exception ex) { throw new Exception("Error al calcular el impacto de las promociones.", ex); }
+            return lista;
+        }
+
         public List<BE.Promocion> ObtenerPendientesRevisionContable() =>
             Listar(SELECT_BASE + "WHERE p.Estado = 0 ORDER BY p.FechaAlta",
                    "Error al obtener las promociones pendientes de revisión contable.");

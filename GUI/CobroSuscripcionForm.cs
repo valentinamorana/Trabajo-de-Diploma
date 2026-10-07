@@ -31,7 +31,20 @@ namespace GUI
         {
             base.OnLoad(e);
             Traducir(GestorIdioma.IdiomaActual);
+            CargarMediosPago();
             CargarClientes();
+        }
+
+        // N01 — medios de pago vigentes (el mismo catálogo que Caja usa en PN02).
+        private void CargarMediosPago()
+        {
+            try
+            {
+                cmbMedioPago.Items.Clear();
+                foreach (var m in _bllCobro.ObtenerMediosPago()) cmbMedioPago.Items.Add(m);
+                cmbMedioPago.SelectedIndex = -1;   // que Caja lo elija: no se asume efectivo
+            }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         public void UpdateLanguage(Idioma idioma) => Traducir(idioma);
@@ -45,13 +58,16 @@ namespace GUI
             rbCobrado.Text     = Tr("cobro.cobrado", "Cobrado");
             rbPagoFallido.Text = Tr("cobro.pagofallido", "Pago fallido");
             lblModalidad.Text  = Tr("cobro.modalidad", "Modalidad de cobro:");
+            lblMedioPago.Text  = Tr("contratacion.mediopago", "Medio de pago:");
             btnProcesar.Text   = Tr("cobro.procesar", "Procesar");
         }
 
         private void CmbCliente_SelectedIndexChanged(object sender, EventArgs e) => MostrarEstadoActual();
 
         // El cobro solo usa la modalidad cuando el resultado extiende la vigencia.
-        private void RbCobrado_CheckedChanged(object sender, EventArgs e) => cmbModalidad.Enabled = rbCobrado.Checked;
+        // El medio de pago también: un pago fallido no se cobró con ningún medio.
+        private void RbCobrado_CheckedChanged(object sender, EventArgs e) =>
+            cmbModalidad.Enabled = cmbMedioPago.Enabled = rbCobrado.Checked;
 
         private void CargarClientes()
         {
@@ -132,6 +148,12 @@ namespace GUI
                 : BLL.Manejadores.DecisionCobro.PagoFallido;
 
             var modalidad = (BE.Builders.ModalidadCobro)cmbModalidad.SelectedItem;
+            int? idMedioPago = (cmbMedioPago.SelectedItem as BE.MedioPago)?.IdMedioPago;
+            if (decision == BLL.Manejadores.DecisionCobro.Cobrado && !idMedioPago.HasValue)
+            {
+                MostrarError(Tr("err.bll.cobro.medio_requerido", "Indicá el medio de pago con el que abonó el cliente."));
+                return;
+            }
 
             // Confirmación antes de procesar — antes se ejecutaba sin ninguna, en la pantalla que
             // efectivamente mueve dinero (mismo criterio que ya aplican Planes/Promociones/
@@ -150,15 +172,29 @@ namespace GUI
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
                 var actor = BLL.Sesion.Actor;
 
-                var resultado = _bllCobro.Procesar(this.Text, cliente, decision, modalidad, actor);
+                var resultado = _bllCobro.Procesar(this.Text, cliente, decision, modalidad, actor, idMedioPago);
 
                 lblResultado.ForeColor = resultado.Estado == BE.EstadoCobro.Pendiente ? Color.DarkOrange
                                          : resultado.Estado == BE.EstadoCobro.Suspendido ? Color.DarkRed
                                          : resultado.Estado == BE.EstadoCobro.Gracia ? Color.DarkOrange
                                          : Color.DarkGreen;
                 lblResultado.Text = Tr(resultado.Clave, resultado.Mensaje, resultado.Args);
+                if (resultado.NumeroComprobante != null)
+                    lblResultado.Text += " " + Tr("cobro.comprobante", "Comprobante {0}.", new object[] { resultado.NumeroComprobante });
 
                 CargarClientes();
+
+                // Igual que en Caja (PN02): la única impresión que se ofrece es el comprobante para el cliente.
+                if (resultado.Estado == BE.EstadoCobro.Cobrado && resultado.IdCobro > 0 &&
+                    ConfirmarSiNo(Tr("conf.contr.imprimircomprobante", "¿Imprimir el comprobante para el cliente?"), this.Text, porDefectoNo: true))
+                {
+                    try
+                    {
+                        Exportacion.DocumentosContratacion.Imprimir(
+                            Exportacion.DocumentosContratacion.ComprobanteCobro(_bllCobro.ObtenerCobro(resultado.IdCobro), cliente), this);
+                    }
+                    catch (Exception ex) { MostrarError(ex); }
+                }
             }
             catch (Exception ex)
             {

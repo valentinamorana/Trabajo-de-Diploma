@@ -16,5 +16,12 @@ namespace DAL.Interfaces
 
         List<BE.Cobro> ObtenerPorCliente(int idCliente);
         List<BE.Cobro> ObtenerTodos();
+        BE.Cobro ObtenerPorId(int id);
+
+        /// <summary>N01 — "Emitir comprobante": numera el cobro recién insertado, en la misma transacción.</summary>
+        void AsignarComprobanteEnTx(SqlConnection conexion, SqlTransaction tx, int idCobro, string numeroComprobante);
+
+        /// <summary>Catálogo de medios de pago (el mismo de PN02).</summary>
+        List<BE.MedioPago> ObtenerMediosPago();
     }
 }

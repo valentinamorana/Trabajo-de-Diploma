@@ -11,5 +11,8 @@ namespace BLL.Manejadores
 
         public string Actor { get; set; }
         public string Modulo { get; set; }
+
+        // N01 — medio con el que pagó el cliente (obligatorio si la decisión es Cobrado).
+        public int? IdMedioPago { get; set; }
     }
 }

@@ -40,6 +40,8 @@ classDiagram
     +int IdCliente
     +DateTime FechaDeteccion
     +DateTime? FechaResolucion
+    +int? IdMedioPago
+    +int? IdPromocion
   }
   class Promocion {
     +int IdPromocion
@@ -74,6 +76,7 @@ classDiagram
   Renovacion --> "0..1" PlanSuscripcion : IdPlanAnterior
   Renovacion --> "0..1" PlanSuscripcion : IdPlanNuevo
   Cobro --> "1" Cliente : IdCliente
+  Cobro --> "0..1" Promocion : IdPromocion
   Promocion --> "0..1" PlanSuscripcion : IdPlan
   Promocion --> "0..1" SugerenciaPromocion : IdSugerenciaOrigen
   SugerenciaPromocion --> "0..1" PlanSuscripcion : IdPlan

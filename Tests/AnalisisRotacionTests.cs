@@ -32,6 +32,22 @@ namespace Tests
         }
 
         [TestMethod]
+        public void Detectar_ConPeriodo_SinPedidosEnElPeriodo_CandidataABaja_YCuentaDesdeEsaFecha()
+        {
+            var dalPrenda = new FakePrendaDAL();
+            dalPrenda.Todas.Add(Prenda(1, "Remera vieja", 200));   // en catálogo todo el período
+            dalPrenda.Todas.Add(Prenda(2, "Remera nueva", 10));    // entró en medio del período: no se juzga
+            var dalPedido = new FakePedidoDAL();
+            var desde = DateTime.Today.AddDays(-90);
+
+            var resultado = new BLL.AnalisisRotacion(dalPrenda, dalPedido).Detectar(desde);
+
+            Assert.AreEqual(desde, dalPedido.UltimoDesdeRotacion, "Solo cuenta los pedidos del período.");
+            Assert.AreEqual(1, resultado.Count);
+            Assert.AreEqual("rotacion.motivo.bajademanda.periodo", resultado[0].Clave);
+        }
+
+        [TestMethod]
         public void Detectar_SinPedidosPeroReciente_NoFlaggeada()
         {
             var dalPrenda = new FakePrendaDAL();

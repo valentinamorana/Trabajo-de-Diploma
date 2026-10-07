@@ -63,6 +63,27 @@ namespace GUI
                     c.Text = t[c.Tag.ToString()].Texto;
             MostrarOrigen();
             TraducirHeaders();
+            CargarPeriodos();
+        }
+
+        // PN03 — período de "Analizar métricas" (conserva la elección al cambiar de idioma).
+        private sealed class PeriodoItem
+        {
+            public int Dias { get; set; }
+            public string Texto { get; set; }
+            public override string ToString() => Texto;
+        }
+
+        private void CargarPeriodos()
+        {
+            int elegido = (cmbPeriodo.SelectedItem as PeriodoItem)?.Dias ?? BLL.AnalisisPromociones.DiasPeriodoPorDefecto;
+            cmbPeriodo.Items.Clear();
+            foreach (int dias in new[] { 30, 90, 180, 365 })
+            {
+                var item = new PeriodoItem { Dias = dias, Texto = Tr("promocion.periodo." + dias, dias == 365 ? "Último año" : $"Últimos {dias} días") };
+                cmbPeriodo.Items.Add(item);
+                if (dias == elegido) cmbPeriodo.SelectedItem = item;
+            }
         }
 
         private void MostrarOrigen()
@@ -109,7 +130,9 @@ namespace GUI
         private void BtnAnalizar_Click(object sender, EventArgs e)
         {
             BE.ReporteMetricas reporte;
-            try { reporte = analisisBLL.AnalizarMetricas(this.Text); }
+            // Período elegido (días hacia atrás desde hoy); por defecto, los últimos 90.
+            int dias = (cmbPeriodo.SelectedItem as PeriodoItem)?.Dias ?? BLL.AnalisisPromociones.DiasPeriodoPorDefecto;
+            try { reporte = analisisBLL.AnalizarMetricas(this.Text, DateTime.Today.AddDays(-dias), DateTime.Today); }
             catch (Exception ex) { MostrarError(ex); return; }
 
             var elegida = MostrarReporte(reporte, analisisBLL.HayOportunidad(reporte));

@@ -134,6 +134,26 @@ namespace GUI.Exportacion
         }
 
         // «Comprobante»: emitido al confirmar el cobro.
+        // N01 — «Comprobante» del cobro recurrente de la suscripción (mismo formato que el de PN02).
+        public static ReporteExportable ComprobanteCobro(BE.Cobro c, BE.Cliente cliente)
+        {
+            if (c == null) throw new ArgumentNullException(nameof(c));
+            var sb = new StringBuilder();
+            sb.AppendLine($"{Tr("doc.contr.comprobante", "Comprobante")}: {c.NumeroComprobante ?? "—"}  —  {Fecha(c.FechaResolucion)}");
+            sb.AppendLine();
+            sb.AppendLine($"{Tr("doc.ped.cliente", "Cliente")}: {c.NombreCliente ?? cliente?.NombreCompleto}");
+            sb.AppendLine($"{Tr("doc.contr.plan", "Plan")}: {cliente?.NombrePlan ?? "—"}" +
+                          (c.Modalidad.HasValue ? $"  —  {Tr("doc.contr.modalidad", "Modalidad")}: {Modalidad(c.Modalidad.Value)}" : ""));
+            if (cliente?.FechaVencimiento != null)
+                sb.AppendLine(string.Format(Tr("doc.cobro.vigencia", "Suscripción vigente hasta el {0}."), Fecha(cliente.FechaVencimiento, false)));
+            sb.AppendLine($"{Tr("doc.contr.medio", "Medio de pago")}: {c.NombreMedioPago ?? "—"}");
+            sb.AppendLine($"{Tr("doc.contr.cobro", "Cobró")}: {c.Actor ?? "—"}");
+            if (c.DescuentoAplicado.HasValue)
+                sb.AppendLine($"{Tr("doc.contr.descuento", "Descuento")}: -{c.DescuentoAplicado.Value:C2}");
+            sb.AppendLine($"{Tr("doc.contr.importe", "Importe cobrado")}: {c.Importe:C2}");
+            return Doc($"{Tr("doc.contr.comprobante", "Comprobante")} {c.NumeroComprobante}", $"Comprobante_{c.NumeroComprobante ?? c.IdCobro.ToString()}", sb);
+        }
+
         public static ReporteExportable Comprobante(BE.Contratacion c)
         {
             var sb = new StringBuilder();

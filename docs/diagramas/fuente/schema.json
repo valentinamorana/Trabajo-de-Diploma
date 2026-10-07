@@ -1,5 +1,5 @@
 {
- "bdHash": "8e60bd101c0052796780680466814a37d6f002a0",
+ "bdHash": "14ad1f512e2870d295ca9964e55d47469ebd9ef3",
  "cols": [
   {
    "tabla": "Bitacora",
@@ -1317,6 +1317,61 @@
    "tipo": "nvarchar",
    "len": 200,
    "prec": 0,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "HistorialCobro",
+   "ord": 8,
+   "col": "IdMedioPago",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "HistorialCobro",
+   "ord": 9,
+   "col": "NumeroComprobante",
+   "tipo": "nvarchar",
+   "len": 100,
+   "prec": 0,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "HistorialCobro",
+   "ord": 10,
+   "col": "Modalidad",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "HistorialCobro",
+   "ord": 11,
+   "col": "DescuentoAplicado",
+   "tipo": "decimal",
+   "len": 9,
+   "prec": 10,
+   "sc": 2,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "HistorialCobro",
+   "ord": 12,
+   "col": "IdPromocion",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
    "sc": 0,
    "nulo": true,
    "ident": false
@@ -3594,20 +3649,20 @@
    "col": "IdClave"
   },
   {
-   "tabla": "DictamenContable",
-   "col": "IdDictamen"
-  },
-  {
    "tabla": "Preferencia",
    "col": "IdUsuario"
   },
   {
-   "tabla": "SolicitudBajaPromocion",
-   "col": "IdSolicitud"
+   "tabla": "DictamenContable",
+   "col": "IdDictamen"
   },
   {
    "tabla": "ParametroSistema",
    "col": "Clave"
+  },
+  {
+   "tabla": "SolicitudBajaPromocion",
+   "col": "IdSolicitud"
   },
   {
    "tabla": "ControlMapeado",
@@ -3630,6 +3685,10 @@
    "col": "IdPrenda"
   },
   {
+   "tabla": "HistorialCobro",
+   "col": "IdCobro"
+  },
+  {
    "tabla": "PedidoFaltanteAlternativa",
    "col": "IdPedido"
   },
@@ -3640,10 +3699,6 @@
   {
    "tabla": "PedidoFaltanteAlternativa",
    "col": "IdPrendaAlternativa"
-  },
-  {
-   "tabla": "HistorialCobro",
-   "col": "IdCobro"
   },
   {
    "tabla": "CargoPrenda",
@@ -3774,12 +3829,12 @@
    "col": "IdVersion"
   },
   {
-   "tabla": "PromocionHistorial",
-   "col": "IdHistorial"
-  },
-  {
    "tabla": "HistorialIntegridad",
    "col": "Id"
+  },
+  {
+   "tabla": "PromocionHistorial",
+   "col": "IdHistorial"
   }
  ],
  "fks": [
@@ -3847,6 +3902,13 @@
    "colpadre": "IdPlan"
   },
   {
+   "fk": "FK__Contratac__IdPla__2EDAF651",
+   "hija": "Contratacion",
+   "colhija": "IdPlan",
+   "padre": "PlanSuscripcion",
+   "colpadre": "IdPlan"
+  },
+  {
    "fk": "FK_Contratacion_Promocion",
    "hija": "Contratacion",
    "colhija": "IdPromocion",
@@ -3866,13 +3928,6 @@
    "colhija": "IdCaja",
    "padre": "Empleado",
    "colpadre": "IdEmpleado"
-  },
-  {
-   "fk": "FK__Contratac__IdPla__2EDAF651",
-   "hija": "Contratacion",
-   "colhija": "IdPlan",
-   "padre": "PlanSuscripcion",
-   "colpadre": "IdPlan"
   },
   {
    "fk": "FK__Contratac__IdCli__2DE6D218",
@@ -3931,18 +3986,18 @@
    "colpadre": "IdPermiso"
   },
   {
-   "fk": "FK_DesistContr_Plan",
-   "hija": "DesistimientoContratacion",
-   "colhija": "IdPlan",
-   "padre": "PlanSuscripcion",
-   "colpadre": "IdPlan"
-  },
-  {
    "fk": "FK_DesistContr_Vendedor",
    "hija": "DesistimientoContratacion",
    "colhija": "IdVendedor",
    "padre": "Empleado",
    "colpadre": "IdEmpleado"
+  },
+  {
+   "fk": "FK_DesistContr_Plan",
+   "hija": "DesistimientoContratacion",
+   "colhija": "IdPlan",
+   "padre": "PlanSuscripcion",
+   "colpadre": "IdPlan"
   },
   {
    "fk": "FK_DesistContr_Cliente",
@@ -3952,18 +4007,18 @@
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK_DictamenContable_Promocion",
-   "hija": "DictamenContable",
-   "colhija": "IdPromocion",
-   "padre": "Promocion",
-   "colpadre": "IdPromocion"
-  },
-  {
    "fk": "FK_DictamenContable_Usuario",
    "hija": "DictamenContable",
    "colhija": "IdUsuario",
    "padre": "Usuario",
    "colpadre": "IdUsuario"
+  },
+  {
+   "fk": "FK_DictamenContable_Promocion",
+   "hija": "DictamenContable",
+   "colhija": "IdPromocion",
+   "padre": "Promocion",
+   "colpadre": "IdPromocion"
   },
   {
    "fk": "FK__Empleado__IdUsua__4CA06362",
@@ -3973,11 +4028,25 @@
    "colpadre": "IdUsuario"
   },
   {
+   "fk": "FK_HistorialCobro_Promocion",
+   "hija": "HistorialCobro",
+   "colhija": "IdPromocion",
+   "padre": "Promocion",
+   "colpadre": "IdPromocion"
+  },
+  {
    "fk": "FK__Historial__IdCli__19DFD96B",
    "hija": "HistorialCobro",
    "colhija": "IdCliente",
    "padre": "Cliente",
    "colpadre": "IdCliente"
+  },
+  {
+   "fk": "FK_HistorialCobro_MedioPago",
+   "hija": "HistorialCobro",
+   "colhija": "IdMedioPago",
+   "padre": "MedioPago",
+   "colpadre": "IdMedioPago"
   },
   {
    "fk": "FK__Historial__IdCli__14270015",
@@ -4036,16 +4105,16 @@
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK_Pedido_EmpleadoControl",
+   "fk": "FK__Pedido__IdEmplea__59FA5E80",
    "hija": "Pedido",
-   "colhija": "IdEmpleadoControl",
+   "colhija": "IdEmpleado",
    "padre": "Empleado",
    "colpadre": "IdEmpleado"
   },
   {
-   "fk": "FK__Pedido__IdEmplea__59FA5E80",
+   "fk": "FK_Pedido_EmpleadoControl",
    "hija": "Pedido",
-   "colhija": "IdEmpleado",
+   "colhija": "IdEmpleadoControl",
    "padre": "Empleado",
    "colpadre": "IdEmpleado"
   },
@@ -4064,7 +4133,7 @@
    "colpadre": "IdPrenda"
   },
   {
-   "fk": "FK__PedidoFal__IdPre__19AACF41",
+   "fk": "FK__PedidoFal__IdPre__1D7B6025",
    "hija": "PedidoFaltanteAlternativa",
    "colhija": "IdPrendaAlternativa",
    "padre": "Prenda",
@@ -4099,18 +4168,18 @@
    "colpadre": "IdPedido"
   },
   {
-   "fk": "FK__PedidoPre__IdPed__5EBF139D",
-   "hija": "PedidoPrenda",
-   "colhija": "IdPedido",
-   "padre": "Pedido",
-   "colpadre": "IdPedido"
-  },
-  {
    "fk": "FK__PedidoPre__IdPre__5FB337D6",
    "hija": "PedidoPrenda",
    "colhija": "IdPrenda",
    "padre": "Prenda",
    "colpadre": "IdPrenda"
+  },
+  {
+   "fk": "FK__PedidoPre__IdPed__5EBF139D",
+   "hija": "PedidoPrenda",
+   "colhija": "IdPedido",
+   "padre": "Pedido",
+   "colpadre": "IdPedido"
   },
   {
    "fk": "FK__PermisoRe__IdPad__70DDC3D8",
@@ -4148,18 +4217,18 @@
    "colpadre": "IdCliente"
   },
   {
-   "fk": "FK__Promocion__IdSug__43D61337",
-   "hija": "Promocion",
-   "colhija": "IdSugerenciaOrigen",
-   "padre": "SugerenciaPromocion",
-   "colpadre": "IdSugerencia"
-  },
-  {
    "fk": "FK_Promocion_UsuarioAlta",
    "hija": "Promocion",
    "colhija": "IdUsuarioAlta",
    "padre": "Usuario",
    "colpadre": "IdUsuario"
+  },
+  {
+   "fk": "FK__Promocion__IdSug__43D61337",
+   "hija": "Promocion",
+   "colhija": "IdSugerenciaOrigen",
+   "padre": "SugerenciaPromocion",
+   "colpadre": "IdSugerencia"
   },
   {
    "fk": "FK__Promocion__IdPla__41EDCAC5",

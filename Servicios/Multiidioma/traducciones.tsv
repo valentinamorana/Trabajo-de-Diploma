@@ -3903,6 +3903,7 @@ ES	err.bll.usuario.clave_sinnumero	La contraseña debe contener al menos un núm
 ES	err.bll.usuario.clave_sinespecial	La contraseña debe contener al menos un carácter especial (!@#$%...).
 ES	err.bll.cliente.plan_inexistente	No se encontró el plan de suscripción indicado.
 ES	err.bll.cliente.plan_solo_admin	Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. Para activar una suscripción nueva, usá el módulo de Contratación.
+ES	err.bll.renovacion.solo_admin	Renovar o cambiar el plan extiende la suscripción y tiene que pasar por Caja: registrá una Nueva Contratación. Desde Renovación solo puede hacerlo un Administrador.
 ES	err.bll.cliente.fechanac_requerida	La fecha de nacimiento es obligatoria.
 ES	err.bll.cliente.menor_edad	El cliente debe ser mayor de 18 años.
 ES	err.bll.plan.nombre_letras	El nombre del plan solo puede contener letras y espacios.
@@ -3920,6 +3921,7 @@ ES	err.bll.backup.clave_invalida	La contraseña del backup es incorrecta o el ar
 ES	err.bll.dv.sin_permiso	No tenés permiso para ejecutar operaciones sobre los Dígitos Verificadores. Esta acción es exclusiva del Administrador y quedó registrada.
 ES	err.bll.pref.nula	No hay preferencias para guardar.
 ES	err.dal.pedido.prenda_tomada	La prenda '{0}' ya no está disponible. Actualizá la selección e intentá de nuevo.
+ES	err.dal.pedido.pedido_activo_concurrente	El cliente ya tiene otro pedido en curso: otro operador lo registró recién. Actualizá la lista.
 EN	err.bll.usuario.email_invalido	The email address is not in a valid format.
 EN	err.bll.usuario.fechanac_futura	The date of birth cannot be in the future.
 EN	err.bll.usuario.fechanac_menor	The user must be of legal age (18 years).
@@ -3931,6 +3933,7 @@ EN	err.bll.usuario.clave_sinnumero	The password must contain at least one number
 EN	err.bll.usuario.clave_sinespecial	The password must contain at least one special character (!@#$%...).
 EN	err.bll.cliente.plan_inexistente	The specified subscription plan was not found.
 EN	err.bll.cliente.plan_solo_admin	Only an Administrator can change a client's plan or expiration date directly. To activate a new subscription, use the Contracting module.
+EN	err.bll.renovacion.solo_admin	Renewing or changing the plan extends the subscription and must go through the Cashier: register a New Contracting. From Renewal, only an Administrator can do it.
 EN	err.bll.cliente.fechanac_requerida	The date of birth is required.
 EN	err.bll.cliente.menor_edad	The client must be over 18 years old.
 EN	err.bll.plan.nombre_letras	The plan name can only contain letters and spaces.
@@ -3948,6 +3951,7 @@ EN	err.bll.backup.clave_invalida	The backup password is incorrect or the file is
 EN	err.bll.dv.sin_permiso	You do not have permission to perform operations on the Check Digits. This action is exclusive to the Administrator and has been logged.
 EN	err.bll.pref.nula	There are no preferences to save.
 EN	err.dal.pedido.prenda_tomada	The garment '{0}' is no longer available. Refresh the selection and try again.
+EN	err.dal.pedido.pedido_activo_concurrente	The customer already has another order in progress: another operator just registered it. Refresh the list.
 RU	err.bll.usuario.email_invalido	Адрес электронной почты имеет неверный формат.
 RU	err.bll.usuario.fechanac_futura	Дата рождения не может быть в будущем.
 RU	err.bll.usuario.fechanac_menor	Пользователь должен быть совершеннолетним (18 лет).
@@ -3959,6 +3963,7 @@ RU	err.bll.usuario.clave_sinnumero	Пароль должен содержать 
 RU	err.bll.usuario.clave_sinespecial	Пароль должен содержать хотя бы один специальный символ (!@#$%...).
 RU	err.bll.cliente.plan_inexistente	Указанный план подписки не найден.
 RU	err.bll.cliente.plan_solo_admin	Только администратор может напрямую изменить план или срок действия клиента. Для активации новой подписки используйте модуль Оформление договора.
+RU	err.bll.renovacion.solo_admin	Продление или смена плана продлевает подписку и должно проходить через кассу: оформите новый договор. Из раздела Продление это может сделать только администратор.
 RU	err.bll.cliente.fechanac_requerida	Дата рождения обязательна.
 RU	err.bll.cliente.menor_edad	Клиент должен быть старше 18 лет.
 RU	err.bll.plan.nombre_letras	Название плана может содержать только буквы и пробелы.
@@ -3976,6 +3981,7 @@ RU	err.bll.backup.clave_invalida	Пароль бэкапа неверен или
 RU	err.bll.dv.sin_permiso	У вас нет прав на операции с контрольными разрядами. Это действие доступно только Администратору и было зафиксировано в журнале.
 RU	err.bll.pref.nula	Нет настроек для сохранения.
 RU	err.dal.pedido.prenda_tomada	Вещь «{0}» больше недоступна. Обновите выбор и попробуйте снова.
+RU	err.dal.pedido.pedido_activo_concurrente	У клиента уже есть другой заказ в работе: его только что оформил другой оператор. Обновите список.
 PT	err.bll.usuario.email_invalido	O endereço de e-mail não tem um formato válido.
 PT	err.bll.usuario.fechanac_futura	A data de nascimento não pode ser no futuro.
 PT	err.bll.usuario.fechanac_menor	O usuário deve ser maior de idade (18 anos).
@@ -3987,6 +3993,7 @@ PT	err.bll.usuario.clave_sinnumero	A senha deve conter pelo menos um número.
 PT	err.bll.usuario.clave_sinespecial	A senha deve conter pelo menos um caractere especial (!@#$%...).
 PT	err.bll.cliente.plan_inexistente	O plano de assinatura indicado não foi encontrado.
 PT	err.bll.cliente.plan_solo_admin	Somente um Administrador pode modificar o plano ou o vencimento de um cliente diretamente. Para ativar uma nova assinatura, use o módulo de Contratação.
+PT	err.bll.renovacion.solo_admin	Renovar ou trocar o plano estende a assinatura e precisa passar pelo Caixa: registre uma Nova Contratação. Pela Renovação, somente um Administrador pode fazer isso.
 PT	err.bll.cliente.fechanac_requerida	A data de nascimento é obrigatória.
 PT	err.bll.cliente.menor_edad	O cliente deve ter mais de 18 anos.
 PT	err.bll.plan.nombre_letras	O nome do plano só pode conter letras e espaços.
@@ -4004,6 +4011,7 @@ PT	err.bll.backup.clave_invalida	A senha do backup está incorreta ou o arquivo 
 PT	err.bll.dv.sin_permiso	Você não tem permissão para executar operações sobre os Dígitos Verificadores. Esta ação é exclusiva do Administrador e foi registrada.
 PT	err.bll.pref.nula	Não há preferências para salvar.
 PT	err.dal.pedido.prenda_tomada	A peça '{0}' não está mais disponível. Atualize a seleção e tente novamente.
+PT	err.dal.pedido.pedido_activo_concurrente	O cliente já tem outro pedido em andamento: outro operador acabou de registrá-lo. Atualize a lista.
 ES	mnu.renovacion	Renovación de Suscripción
 ES	renov.titulo	Renovación de Suscripción
 ES	conf.renov.baja.msg	¿Dar de baja la suscripción de {0}?\n\nEsta acción es irreversible.
@@ -4723,7 +4731,7 @@ ES	err.bll.contratacion.plan_baja	El plan '{0}' fue dado de baja: no se puede fo
 ES	err.bll.contratacion.cobrar_concurrente	Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.
 ES	err.bll.contratacion.cobro_sin_activar	El cobro de la contratación #{0} quedó registrado pero la suscripción NO se activó. Avisá al Administrador para completar el alta del plan.
 ES	err.bll.contratacion.inexistente	La contratación ya no existe.
-ES	err.bll.contratacion.medio_pago_requerido	Debe indicar el medio de pago (efectivo, tarjeta o transferencia).
+ES	err.bll.contratacion.medio_pago_requerido	Debe indicar el medio de pago (efectivo, tarjeta de débito, tarjeta de crédito o transferencia).
 ES	err.bll.contratacion.plan_inexistente	El plan seleccionado no existe o no está activo.
 EN	err.bll.contratacion.pendiente_existente	This client already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
 EN	err.bll.contratacion.cliente_inexistente	The selected client does not exist.
@@ -4732,7 +4740,7 @@ EN	err.bll.contratacion.plan_baja	Plan '{0}' has been discontinued: the subscrip
 EN	err.bll.contratacion.cobrar_concurrente	Another Cashier session has already resolved this contracting. Refresh the Cashier queue.
 EN	err.bll.contratacion.cobro_sin_activar	The payment for contracting #{0} was recorded but the subscription was NOT activated. Notify the Administrator to complete the plan activation.
 EN	err.bll.contratacion.inexistente	The contract no longer exists.
-EN	err.bll.contratacion.medio_pago_requerido	You must indicate the payment method (cash, card or transfer).
+EN	err.bll.contratacion.medio_pago_requerido	You must indicate the payment method (cash, debit card, credit card or transfer).
 EN	err.bll.contratacion.plan_inexistente	The selected plan does not exist or is not active.
 RU	err.bll.contratacion.pendiente_existente	У этого клиента уже есть договор, ожидающий оплаты. Его нужно разрешить (оплатить или отменить) перед оформлением нового.
 RU	err.bll.contratacion.cliente_inexistente	Выбранный клиент не существует.
@@ -4741,7 +4749,7 @@ RU	err.bll.contratacion.plan_baja	Тариф '{0}' снят с продажи: �
 RU	err.bll.contratacion.cobrar_concurrente	Другой сеанс кассы уже обработал этот заказ. Обновите очередь кассы.
 RU	err.bll.contratacion.cobro_sin_activar	Оплата заказа #{0} зафиксирована, но подписка НЕ активирована. Сообщите администратору, чтобы завершить активацию тарифа.
 RU	err.bll.contratacion.inexistente	Контракт больше не существует.
-RU	err.bll.contratacion.medio_pago_requerido	Необходимо указать способ оплаты (наличные, карта или перевод).
+RU	err.bll.contratacion.medio_pago_requerido	Необходимо указать способ оплаты (наличные, дебетовая карта, кредитная карта или перевод).
 RU	err.bll.contratacion.plan_inexistente	Выбранный план не существует или неактивен.
 PT	err.bll.contratacion.pendiente_existente	Este cliente já tem uma contratação pendente de pagamento. É preciso resolvê-la (cobrar ou cancelar) antes de registrar uma nova.
 PT	err.bll.contratacion.cliente_inexistente	O cliente selecionado não existe.
@@ -4750,7 +4758,7 @@ PT	err.bll.contratacion.plan_baja	O plano '{0}' foi desativado: não é possíve
 PT	err.bll.contratacion.cobrar_concurrente	Outra sessão do Caixa já resolveu esta contratação. Atualize a fila do Caixa.
 PT	err.bll.contratacion.cobro_sin_activar	A cobrança da contratação #{0} foi registrada, mas a assinatura NÃO foi ativada. Avise o Administrador para concluir a ativação do plano.
 PT	err.bll.contratacion.inexistente	A contratação não existe mais.
-PT	err.bll.contratacion.medio_pago_requerido	Deve indicar o meio de pagamento (dinheiro, cartão ou transferência).
+PT	err.bll.contratacion.medio_pago_requerido	Deve indicar o meio de pagamento (dinheiro, cartão de débito, cartão de crédito ou transferência).
 PT	err.bll.contratacion.plan_inexistente	O plano selecionado não existe ou não está ativo.
 ES	err.contratacion.faltandatos	Seleccioná un cliente y un plan para continuar.
 EN	err.contratacion.faltandatos	Select a client and a plan to continue.
@@ -5539,6 +5547,7 @@ ES	doc.confirmadas.lista	Prendas confirmadas como disponibles (pendientes de sep
 ES	doc.confirmadas.titulo	Detalle de prendas confirmadas
 ES	conf.cs.imprimirconfirmadas	¿Imprimir el detalle de prendas confirmadas?
 ES	err.bll.cliente.baja_contratacion	No se puede dar de baja a {0}: tiene una contratación pendiente de pago. Caja tiene que cobrarla o cancelarla primero.
+ES	err.bll.cliente.baja_pedido	No se puede dar de baja a {0}: tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo primero.
 ES	err.bll.contratacion.desistir_sin_motivo	Es obligatorio indicar el motivo del desistimiento que comunicó el cliente.
 ES	err.bll.contratacion.intento_sin_motivo	Indicá el motivo por el que no se concretó el pago.
 ES	err.bll.contratacion.medio_invalido	El medio de pago indicado no existe.
@@ -5653,7 +5662,7 @@ ES	err.bll.contratacion.motivo_largo	El motivo no puede superar los {0} caracter
 ES	err.bll.emergencia.limite	Demasiados intentos fallidos en esta sesión. Reiniciá la aplicación para volver a intentarlo.
 ES	err.bll.familia.patente_nombremenu	No se puede cambiar el identificador de menú de una patente: define qué permiso otorga.
 ES	err.bll.listaespera.estado_cambiado	La anotación cambió en otra sesión. Actualizá la lista y volvé a intentarlo.
-ES	err.bll.pedido.cancelar_estado_separado	Solo se pueden cancelar pedidos Pendientes o con las prendas separadas. Este pedido está '{0}'.
+ES	err.bll.pedido.cancelar_estado_separado	Solo se pueden cancelar pedidos en control de stock, con las prendas separadas o Pendientes. Este pedido está '{0}'.
 ES	err.bll.pedido.motivo_largo	El motivo no puede superar los {0} caracteres.
 ES	err.bll.pedido.restaurar_no_restaurable	La operación '{0}' no se puede revertir desde el historial: usá la acción correspondiente del pedido (reactivar, cancelar o registrar la devolución).
 ES	err.bll.pedido.restaurar_no_ultima	Solo se puede revertir la última operación del Pedido #{0} (la #{1}).
@@ -5793,6 +5802,7 @@ EN	doc.confirmadas.lista	Garments confirmed as available (pending set-aside):
 EN	doc.confirmadas.titulo	Confirmed garments detail
 EN	conf.cs.imprimirconfirmadas	Print the confirmed garments detail?
 EN	err.bll.cliente.baja_contratacion	{0} cannot be removed: they have a contract pending payment. Cashier must charge or cancel it first.
+EN	err.bll.cliente.baja_pedido	{0} cannot be removed: they have an order in progress. Wait for it to finish or cancel it first.
 EN	err.bll.contratacion.desistir_sin_motivo	You must enter the withdrawal reason given by the client.
 EN	err.bll.contratacion.intento_sin_motivo	Enter the reason why the payment did not go through.
 EN	err.bll.contratacion.medio_invalido	The selected payment method does not exist.
@@ -5907,7 +5917,7 @@ EN	err.bll.contratacion.motivo_largo	The reason cannot exceed {0} characters.
 EN	err.bll.emergencia.limite	Too many failed attempts in this session. Restart the application to try again.
 EN	err.bll.familia.patente_nombremenu	A permission's menu identifier cannot be changed: it defines which permission it grants.
 EN	err.bll.listaespera.estado_cambiado	The entry was changed in another session. Refresh the list and try again.
-EN	err.bll.pedido.cancelar_estado_separado	Only Pending orders or orders with set-aside garments can be cancelled. This order is '{0}'.
+EN	err.bll.pedido.cancelar_estado_separado	Only orders in stock control, with set-aside garments or Pending can be cancelled. This order is '{0}'.
 EN	err.bll.pedido.motivo_largo	The reason cannot exceed {0} characters.
 EN	err.bll.pedido.restaurar_no_restaurable	Operation '{0}' cannot be reverted from the history: use the corresponding order action (reactivate, cancel or register the return).
 EN	err.bll.pedido.restaurar_no_ultima	Only the last operation of Order #{0} can be reverted (#{1}).
@@ -6047,6 +6057,7 @@ RU	doc.confirmadas.lista	Вещи, подтверждённые как дост�
 RU	doc.confirmadas.titulo	Подтверждённые вещи
 RU	conf.cs.imprimirconfirmadas	Распечатать список подтверждённых вещей?
 RU	err.bll.cliente.baja_contratacion	Нельзя удалить клиента {0}: у него есть договор, ожидающий оплаты. Касса должна сначала принять оплату или отменить его.
+RU	err.bll.cliente.baja_pedido	Нельзя удалить клиента {0}: у него есть заказ в работе. Дождитесь его завершения или сначала отмените его.
 RU	err.bll.contratacion.desistir_sin_motivo	Необходимо указать причину отказа, названную клиентом.
 RU	err.bll.contratacion.intento_sin_motivo	Укажите причину, по которой оплата не прошла.
 RU	err.bll.contratacion.medio_invalido	Указанный способ оплаты не существует.
@@ -6161,7 +6172,7 @@ RU	err.bll.contratacion.motivo_largo	Причина не может превыш
 RU	err.bll.emergencia.limite	Слишком много неудачных попыток в этом сеансе. Перезапустите приложение, чтобы попробовать снова.
 RU	err.bll.familia.patente_nombremenu	Нельзя изменить идентификатор меню разрешения: он определяет, какое право предоставляется.
 RU	err.bll.listaespera.estado_cambiado	Запись была изменена в другом сеансе. Обновите список и повторите попытку.
-RU	err.bll.pedido.cancelar_estado_separado	Отменить можно только ожидающие заказы или заказы с отложенной одеждой. Этот заказ в состоянии '{0}'.
+RU	err.bll.pedido.cancelar_estado_separado	Отменить можно только заказы на проверке склада, с отложенной одеждой или ожидающие. Этот заказ в состоянии '{0}'.
 RU	err.bll.pedido.motivo_largo	Причина не может превышать {0} символов.
 RU	err.bll.pedido.restaurar_no_restaurable	Операцию '{0}' нельзя отменить из истории: используйте соответствующее действие с заказом (повторно активировать, отменить или зарегистрировать возврат).
 RU	err.bll.pedido.restaurar_no_ultima	Можно отменить только последнюю операцию заказа №{0} (№{1}).
@@ -6301,6 +6312,7 @@ PT	doc.confirmadas.lista	Peças confirmadas como disponíveis (pendentes de sepa
 PT	doc.confirmadas.titulo	Detalhe das peças confirmadas
 PT	conf.cs.imprimirconfirmadas	Imprimir o detalhe das peças confirmadas?
 PT	err.bll.cliente.baja_contratacion	Não é possível dar baixa em {0}: há uma contratação pendente de pagamento. O caixa precisa cobrá-la ou cancelá-la primeiro.
+PT	err.bll.cliente.baja_pedido	Não é possível dar baixa em {0}: há um pedido em andamento. Aguarde a conclusão ou cancele-o primeiro.
 PT	err.bll.contratacion.desistir_sin_motivo	É obrigatório indicar o motivo da desistência informado pelo cliente.
 PT	err.bll.contratacion.intento_sin_motivo	Indique o motivo pelo qual o pagamento não foi concluído.
 PT	err.bll.contratacion.medio_invalido	A forma de pagamento indicada não existe.
@@ -6415,7 +6427,7 @@ PT	err.bll.contratacion.motivo_largo	O motivo não pode ultrapassar {0} caracter
 PT	err.bll.emergencia.limite	Muitas tentativas malsucedidas nesta sessão. Reinicie o aplicativo para tentar novamente.
 PT	err.bll.familia.patente_nombremenu	Não é possível alterar o identificador de menu de uma permissão: ele define qual permissão concede.
 PT	err.bll.listaespera.estado_cambiado	O registro foi alterado em outra sessão. Atualize a lista e tente novamente.
-PT	err.bll.pedido.cancelar_estado_separado	Só é possível cancelar pedidos Pendentes ou com as peças separadas. Este pedido está '{0}'.
+PT	err.bll.pedido.cancelar_estado_separado	Só é possível cancelar pedidos em controle de estoque, com as peças separadas ou Pendentes. Este pedido está '{0}'.
 PT	err.bll.pedido.motivo_largo	O motivo não pode ultrapassar {0} caracteres.
 PT	err.bll.pedido.restaurar_no_restaurable	A operação '{0}' não pode ser revertida pelo histórico: use a ação correspondente do pedido (reativar, cancelar ou registrar a devolução).
 PT	err.bll.pedido.restaurar_no_ultima	Só é possível reverter a última operação do Pedido #{0} (a #{1}).
@@ -6908,3 +6920,163 @@ PT	col.promo.origen	Origem
 PT	col.promo.sugeridapor	Sugerida por
 PT	col.promo.creadapor	Criada por
 PT	col.promo.fecha	Data
+ES	medio.tarjeta_debito	Tarjeta de débito
+ES	medio.tarjeta_credito	Tarjeta de crédito
+ES	lbl.contr.cuotas	Cuotas:
+ES	lbl.contr.cuotas.sininteres	{0} cuota(s) sin interés
+ES	lbl.contr.cuotas.recargo	{0} cuotas (recargo {1:0.##} %)
+ES	lbl.contr.cuotas.detalle	{0} cuota(s) de {1:C2} — recargo {2:C2} — total a abonar {3:C2}
+ES	lbl.contr.monto.cuotas	{0:C2} en {1} cuotas
+ES	conf.contr.cobro.cuotas	Tarjeta de crédito en {0} cuota(s) de {1:C2} (recargo {2:C2}). Total a abonar: {3:C2}.
+ES	doc.contr.cuotas.detalle	Tarjeta de crédito en {0} cuota(s) de {1:C2} — recargo {2:C2} — total a abonar {3:C2}
+ES	doc.contr.cuotas.plan	Cuotas: {0}  —  recargo por financiación {1:0.##} %: {2:C2}
+ES	doc.contr.cuotas.valor	Valor de cada cuota: {0:C2}
+ES	doc.contr.totalabonado	Total abonado
+ES	doc.contr.cuotas.opciones	Con tarjeta de crédito se puede pagar en:
+ES	doc.contr.cuotas.opcion	   {0} cuota(s) de {1:C2}  —  recargo {2:0.##} %  —  total {3:C2}
+ES	err.bll.contratacion.cuotas_medio	El medio de pago '{0}' no permite pagar en cuotas: las cuotas son solo con tarjeta de crédito.
+ES	err.bll.contratacion.cuotas_invalidas	El plan de cuotas elegido no existe o no está disponible.
+ES	err.bll.contratacion.cuotas_modalidad	Con la modalidad {0} se puede pagar en hasta {1} cuota(s); se eligieron {2}.
+EN	medio.tarjeta_debito	Debit card
+EN	medio.tarjeta_credito	Credit card
+EN	lbl.contr.cuotas	Installments:
+EN	lbl.contr.cuotas.sininteres	{0} installment(s), interest-free
+EN	lbl.contr.cuotas.recargo	{0} installments ({1:0.##} % surcharge)
+EN	lbl.contr.cuotas.detalle	{0} installment(s) of {1:C2} — surcharge {2:C2} — total to pay {3:C2}
+EN	lbl.contr.monto.cuotas	{0:C2} in {1} installments
+EN	conf.contr.cobro.cuotas	Credit card in {0} installment(s) of {1:C2} ({2:C2} surcharge). Total to pay: {3:C2}.
+EN	doc.contr.cuotas.detalle	Credit card in {0} installment(s) of {1:C2} — surcharge {2:C2} — total to pay {3:C2}
+EN	doc.contr.cuotas.plan	Installments: {0}  —  financing surcharge {1:0.##} %: {2:C2}
+EN	doc.contr.cuotas.valor	Amount of each installment: {0:C2}
+EN	doc.contr.totalabonado	Total paid
+EN	doc.contr.cuotas.opciones	With a credit card you can pay in:
+EN	doc.contr.cuotas.opcion	   {0} installment(s) of {1:C2}  —  surcharge {2:0.##} %  —  total {3:C2}
+EN	err.bll.contratacion.cuotas_medio	The payment method '{0}' does not allow installments: installments are only available with a credit card.
+EN	err.bll.contratacion.cuotas_invalidas	The selected installment plan does not exist or is not available.
+EN	err.bll.contratacion.cuotas_modalidad	With the {0} billing mode you can pay in up to {1} installment(s); {2} were selected.
+RU	medio.tarjeta_debito	Дебетовая карта
+RU	medio.tarjeta_credito	Кредитная карта
+RU	lbl.contr.cuotas	Рассрочка:
+RU	lbl.contr.cuotas.sininteres	{0} платеж(а) без процентов
+RU	lbl.contr.cuotas.recargo	{0} платежей (наценка {1:0.##} %)
+RU	lbl.contr.cuotas.detalle	{0} платеж(ей) по {1:C2} — наценка {2:C2} — итого к оплате {3:C2}
+RU	lbl.contr.monto.cuotas	{0:C2} в {1} платежей
+RU	conf.contr.cobro.cuotas	Кредитная карта: {0} платеж(ей) по {1:C2} (наценка {2:C2}). Итого к оплате: {3:C2}.
+RU	doc.contr.cuotas.detalle	Кредитная карта: {0} платеж(ей) по {1:C2} — наценка {2:C2} — итого к оплате {3:C2}
+RU	doc.contr.cuotas.plan	Платежей: {0}  —  наценка за рассрочку {1:0.##} %: {2:C2}
+RU	doc.contr.cuotas.valor	Сумма каждого платежа: {0:C2}
+RU	doc.contr.totalabonado	Итого оплачено
+RU	doc.contr.cuotas.opciones	Кредитной картой можно оплатить в:
+RU	doc.contr.cuotas.opcion	   {0} платеж(ей) по {1:C2}  —  наценка {2:0.##} %  —  итого {3:C2}
+RU	err.bll.contratacion.cuotas_medio	Способ оплаты '{0}' не допускает рассрочку: рассрочка возможна только по кредитной карте.
+RU	err.bll.contratacion.cuotas_invalidas	Выбранный план рассрочки не существует или недоступен.
+RU	err.bll.contratacion.cuotas_modalidad	При периодичности {0} можно оплатить не более чем в {1} платеж(а); выбрано {2}.
+PT	medio.tarjeta_debito	Cartão de débito
+PT	medio.tarjeta_credito	Cartão de crédito
+PT	lbl.contr.cuotas	Parcelas:
+PT	lbl.contr.cuotas.sininteres	{0} parcela(s) sem juros
+PT	lbl.contr.cuotas.recargo	{0} parcelas (acréscimo de {1:0.##} %)
+PT	lbl.contr.cuotas.detalle	{0} parcela(s) de {1:C2} — acréscimo {2:C2} — total a pagar {3:C2}
+PT	lbl.contr.monto.cuotas	{0:C2} em {1} parcelas
+PT	conf.contr.cobro.cuotas	Cartão de crédito em {0} parcela(s) de {1:C2} (acréscimo {2:C2}). Total a pagar: {3:C2}.
+PT	doc.contr.cuotas.detalle	Cartão de crédito em {0} parcela(s) de {1:C2} — acréscimo {2:C2} — total a pagar {3:C2}
+PT	doc.contr.cuotas.plan	Parcelas: {0}  —  acréscimo de financiamento {1:0.##} %: {2:C2}
+PT	doc.contr.cuotas.valor	Valor de cada parcela: {0:C2}
+PT	doc.contr.totalabonado	Total pago
+PT	doc.contr.cuotas.opciones	Com cartão de crédito é possível pagar em:
+PT	doc.contr.cuotas.opcion	   {0} parcela(s) de {1:C2}  —  acréscimo {2:0.##} %  —  total {3:C2}
+PT	err.bll.contratacion.cuotas_medio	O meio de pagamento '{0}' não permite parcelamento: as parcelas são só com cartão de crédito.
+PT	err.bll.contratacion.cuotas_invalidas	O plano de parcelas escolhido não existe ou não está disponível.
+PT	err.bll.contratacion.cuotas_modalidad	Com a modalidade {0} é possível pagar em até {1} parcela(s); foram escolhidas {2}.
+ES	medio.tarjeta_historica	Tarjeta (anterior a débito/crédito)
+EN	medio.tarjeta_historica	Card (before debit/credit split)
+RU	medio.tarjeta_historica	Карта (до разделения на дебетовую/кредитную)
+PT	medio.tarjeta_historica	Cartão (anterior a débito/crédito)
+ES	contratacion.btn.anular	Anular
+EN	contratacion.btn.anular	Void
+RU	contratacion.btn.anular	Аннулировать
+PT	contratacion.btn.anular	Anular
+ES	dlg.contr.anular.titulo	Anular contratación
+EN	dlg.contr.anular.titulo	Void contract
+RU	dlg.contr.anular.titulo	Аннулировать договор
+PT	dlg.contr.anular.titulo	Anular contratação
+ES	dlg.contr.anular.prompt	Motivo por el que se anula la Contratación #{0} de {1} (no se cobra y sale de la cola):
+EN	dlg.contr.anular.prompt	Reason for voiding Contract #{0} for {1} (it is not charged and leaves the queue):
+RU	dlg.contr.anular.prompt	Причина аннулирования договора №{0} клиента {1} (оплата не взимается, договор уходит из очереди):
+PT	dlg.contr.anular.prompt	Motivo da anulação da Contratação #{0} de {1} (não é cobrada e sai da fila):
+ES	msg.contr.anulada	Contratación #{0} anulada. La constancia se imprime desde "Imprimir constancia" en las resueltas.
+EN	msg.contr.anulada	Contract #{0} voided. The certificate can be printed from "Print certificate" in the resolved list.
+RU	msg.contr.anulada	Договор №{0} аннулирован. Справку можно распечатать кнопкой «Печать справки» в списке завершённых.
+PT	msg.contr.anulada	Contratação #{0} anulada. A constância é impressa em "Imprimir constância" nas resolvidas.
+ES	err.bll.contratacion.anular_estado	Solo se pueden anular contrataciones Pendientes de pago. Esta contratación está '{0}'.
+EN	err.bll.contratacion.anular_estado	Only contracts pending payment can be voided. This contract is '{0}'.
+RU	err.bll.contratacion.anular_estado	Аннулировать можно только договоры, ожидающие оплаты. Этот договор в состоянии «{0}».
+PT	err.bll.contratacion.anular_estado	Só é possível anular contratações pendentes de pagamento. Esta contratação está '{0}'.
+ES	err.bll.contratacion.anular_sin_motivo	Indicá el motivo por el que se anula la contratación.
+EN	err.bll.contratacion.anular_sin_motivo	Enter the reason for voiding the contract.
+RU	err.bll.contratacion.anular_sin_motivo	Укажите причину аннулирования договора.
+PT	err.bll.contratacion.anular_sin_motivo	Informe o motivo da anulação da contratação.
+ES	doc.contr.anulada	La contratación fue anulada por Caja el {0}. Motivo: {1}
+EN	doc.contr.anulada	The contract was voided by the Cashier on {0}. Reason: {1}
+RU	doc.contr.anulada	Договор аннулирован кассой {0}. Причина: {1}
+PT	doc.contr.anulada	A contratação foi anulada pelo Caixa em {0}. Motivo: {1}
+ES	doc.contr.anulo	Anuló
+EN	doc.contr.anulo	Voided by
+RU	doc.contr.anulo	Аннулировал
+PT	doc.contr.anulo	Anulou
+ES	conf.contr.cobro.upgrade	Cambio a un plan superior: rige desde hoy. Crédito por los días no usados del plan anterior: {0:C2}.
+EN	conf.contr.cobro.upgrade	Upgrade to a higher plan: effective today. Credit for the unused days of the previous plan: {0:C2}.
+RU	conf.contr.cobro.upgrade	Переход на более дорогой тариф: действует с сегодняшнего дня. Зачёт за неиспользованные дни прежнего тарифа: {0:C2}.
+PT	conf.contr.cobro.upgrade	Mudança para um plano superior: vale a partir de hoje. Crédito pelos dias não usados do plano anterior: {0:C2}.
+ES	doc.contr.creditoupgrade	Crédito por cambio a un plan superior (días no usados del plan anterior): -{0:C2}. El plan nuevo rige desde hoy.
+EN	doc.contr.creditoupgrade	Credit for upgrading to a higher plan (unused days of the previous plan): -{0:C2}. The new plan is effective today.
+RU	doc.contr.creditoupgrade	Зачёт за переход на более дорогой тариф (неиспользованные дни прежнего тарифа): -{0:C2}. Новый тариф действует с сегодняшнего дня.
+PT	doc.contr.creditoupgrade	Crédito pela mudança para um plano superior (dias não usados do plano anterior): -{0:C2}. O novo plano vale a partir de hoje.
+ES	doc.contr.creditoupgrade.cobrado	Crédito por cambio a un plan superior: -{0:C2}
+EN	doc.contr.creditoupgrade.cobrado	Credit for upgrading to a higher plan: -{0:C2}
+RU	doc.contr.creditoupgrade.cobrado	Зачёт за переход на более дорогой тариф: -{0:C2}
+PT	doc.contr.creditoupgrade.cobrado	Crédito pela mudança para um plano superior: -{0:C2}
+ES	lbl.contr.upgrade	Plan superior: rige desde hoy (crédito de {0:C2} por los días no usados).
+EN	lbl.contr.upgrade	Higher plan: effective today (credit of {0:C2} for the unused days).
+RU	lbl.contr.upgrade	Более дорогой тариф: действует с сегодняшнего дня (зачёт {0:C2} за неиспользованные дни).
+PT	lbl.contr.upgrade	Plano superior: vale a partir de hoje (crédito de {0:C2} pelos dias não usados).
+ES	btn.documentos	Documentos ▾
+EN	btn.documentos	Documents ▾
+RU	btn.documentos	Документы ▾
+PT	btn.documentos	Documentos ▾
+ES	msg.ped.formalizado.doc	Pedido #{0} formalizado. Queda pendiente de despacho. La confirmación para el cliente está en "Documentos".
+EN	msg.ped.formalizado.doc	Order #{0} finalized. It is pending dispatch. The customer confirmation is under "Documents".
+RU	msg.ped.formalizado.doc	Заказ №{0} оформлен и ожидает отправки. Подтверждение для клиента — в меню «Документы».
+PT	msg.ped.formalizado.doc	Pedido #{0} formalizado. Fica pendente de despacho. A confirmação para o cliente está em "Documentos".
+ES	conf.contr.imprimircomprobante	¿Imprimir el comprobante para el cliente?
+EN	conf.contr.imprimircomprobante	Print the receipt for the customer?
+RU	conf.contr.imprimircomprobante	Распечатать квитанцию для клиента?
+PT	conf.contr.imprimircomprobante	Imprimir o comprovante para o cliente?
+ES	err.bll.plan.tiene_contrataciones	No se puede desactivar el plan: tiene {0} contratación(es) pendiente(s) de pago. Caja tiene que cobrarlas o anularlas antes.
+EN	err.bll.plan.tiene_contrataciones	The plan cannot be deactivated: it has {0} contract(s) pending payment. The Cashier must charge or void them first.
+RU	err.bll.plan.tiene_contrataciones	Нельзя отключить тариф: по нему {0} договор(ов) ожидают оплаты. Касса должна сначала принять оплату или аннулировать их.
+PT	err.bll.plan.tiene_contrataciones	Não é possível desativar o plano: há {0} contratação(ões) pendente(s) de pagamento. O caixa precisa cobrá-las ou anulá-las antes.
+ES	err.bll.promocion.fecha_fin_pasada	La fecha de fin ({0:dd/MM/yyyy}) ya pasó. Elegí una fecha de hoy en adelante.
+EN	err.bll.promocion.fecha_fin_pasada	The end date ({0:dd/MM/yyyy}) has already passed. Choose today or a later date.
+RU	err.bll.promocion.fecha_fin_pasada	Дата окончания ({0:dd/MM/yyyy}) уже прошла. Выберите сегодняшнюю или более позднюю дату.
+PT	err.bll.promocion.fecha_fin_pasada	A data de término ({0:dd/MM/yyyy}) já passou. Escolha hoje ou uma data posterior.
+ES	err.bll.promocion.aprobar_vencida	La promoción terminó el {0:dd/MM/yyyy}: no se puede aprobar. Rechazala para que Administración la reformule con fechas nuevas.
+EN	err.bll.promocion.aprobar_vencida	The promotion ended on {0:dd/MM/yyyy}: it cannot be approved. Reject it so Administration can reformulate it with new dates.
+RU	err.bll.promocion.aprobar_vencida	Акция закончилась {0:dd/MM/yyyy}: её нельзя одобрить. Отклоните её, чтобы Администрация переоформила её с новыми датами.
+PT	err.bll.promocion.aprobar_vencida	A promoção terminou em {0:dd/MM/yyyy}: não pode ser aprovada. Rejeite-a para que a Administração a reformule com novas datas.
+ES	cobro.total	Total a cobrar: {0:C2}\n({1})
+EN	cobro.total	Total to charge: {0:C2}\n({1})
+RU	cobro.total	К оплате: {0:C2}\n({1})
+PT	cobro.total	Total a cobrar: {0:C2}\n({1})
+ES	cobro.total.periodo	período {0:C2}
+EN	cobro.total.periodo	period {0:C2}
+RU	cobro.total.periodo	период {0:C2}
+PT	cobro.total.periodo	período {0:C2}
+ES	cobro.total.descuento	descuento {0:C2} ({1})
+EN	cobro.total.descuento	discount {0:C2} ({1})
+RU	cobro.total.descuento	скидка {0:C2} ({1})
+PT	cobro.total.descuento	desconto {0:C2} ({1})
+ES	cobro.total.cargos	{0} cargo(s) por daño/pérdida {1:C2}
+EN	cobro.total.cargos	{0} damage/loss charge(s) {1:C2}
+RU	cobro.total.cargos	{0} начисл. за повреждение/утерю {1:C2}
+PT	cobro.total.cargos	{0} cobrança(s) por dano/perda {1:C2}

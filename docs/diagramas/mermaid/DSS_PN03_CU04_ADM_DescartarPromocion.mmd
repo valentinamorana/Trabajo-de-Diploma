@@ -4,14 +4,31 @@ sequenceDiagram
   participant F as Promociones<br/>AdministracionForm
   participant B as BLL.Promocion
   participant D as DAL.Promocion
-  A->>F: Elige una promoción Rechazada por Contabilidad, pulsa "Descartar" e indica el motivo
+  Note over A,F: «extend» de CU01-ADM Gestionar Promociones: ¿Reformular? No
+  A->>F: Elige una promoción Rechazada por Contabilidad y pulsa "Descartar"
+  A->>F: Ingresa el motivo (InputDialog), si cancela, no se descarta
   F->>B: DescartarPromocion(modulo, promocion, motivo)
-  Note over B: Exigir(PromocionesAdminEditar) · promocion.PuedeDescartarse() · motivo obligatorio
-  B->>D: CambiarEstado(id, esperado = RechazadaContabilidad, historial: → Descartada con el motivo)  [claim]
-  alt Otra sesión ya la cambió
-    D-->>B: false
-    B-->>F: AppException(estado_concurrente)
-  else Descartada
-    F->>B: ObtenerDescarte(idPromocion)
-    F-->>A: Constancia de descarte (PDF): fin
+  Note over B: PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)
+  alt No está Rechazada (PuedeDescartarse / TransicionValida(Descartada)) o sin motivo
+    B-->>F: AppException(descartar_estado / motivodescarte_requerido)
+    F-->>A: Informa el motivo
+  else Rechazada y con motivo
+    B->>B: Transicionar(promocion, destino, observacion)  [destino = Descartada, observacion = motivo]
+    B->>D: CambiarEstado(idPromocion, estadoEsperado, historial)  [claim: estadoEsperado = RechazadaContabilidad, historial: RechazadaContabilidad → Descartada, con el motivo]
+    alt false: otra sesión ya la cambió
+      D-->>B: false
+      B-->>F: AppException(estado_concurrente)
+      F-->>A: Informa el motivo
+    else true
+      D-->>B: true
+      Note over B: bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion, …)
+      B-->>F: ok
+      F-->>A: "Promoción descartada"
+      F->>B: ObtenerTodas()  [recarga]
+      opt ¿Imprimir la constancia de descarte? Sí
+        F->>B: ObtenerPorId(idPromocion)
+        F->>B: ObtenerDescarte(idPromocion)
+        F-->>A: Constancia de descarte (PDF): fin
+      end
+    end
   end

@@ -22,9 +22,19 @@ namespace Tests.Fakes
         // Catálogo MedioPago (mismo contenido que el seed de la BD).
         public List<BE.MedioPago> MediosPago { get; set; } = new List<BE.MedioPago>
         {
-            new BE.MedioPago { IdMedioPago = 1, Nombre = "Efectivo",      ClaveTraduccion = "medio.efectivo" },
-            new BE.MedioPago { IdMedioPago = 2, Nombre = "Tarjeta",       ClaveTraduccion = "medio.tarjeta" },
-            new BE.MedioPago { IdMedioPago = 3, Nombre = "Transferencia", ClaveTraduccion = "medio.transferencia" }
+            new BE.MedioPago { IdMedioPago = 1, Nombre = "Efectivo",           ClaveTraduccion = "medio.efectivo" },
+            new BE.MedioPago { IdMedioPago = 2, Nombre = "Tarjeta de débito",  ClaveTraduccion = "medio.tarjeta_debito" },
+            new BE.MedioPago { IdMedioPago = 3, Nombre = "Transferencia",      ClaveTraduccion = "medio.transferencia" },
+            new BE.MedioPago { IdMedioPago = 4, Nombre = "Tarjeta de crédito", ClaveTraduccion = "medio.tarjeta_credito", PermiteCuotas = true }
+        };
+
+        // Catálogo PlanCuotas (mismo contenido que el seed de la BD).
+        public List<BE.PlanCuotas> PlanesCuotas { get; set; } = new List<BE.PlanCuotas>
+        {
+            new BE.PlanCuotas { IdPlanCuotas = 1, CantidadCuotas = 1,  RecargoPorcentaje = 0m },
+            new BE.PlanCuotas { IdPlanCuotas = 2, CantidadCuotas = 3,  RecargoPorcentaje = 5m },
+            new BE.PlanCuotas { IdPlanCuotas = 3, CantidadCuotas = 6,  RecargoPorcentaje = 10m },
+            new BE.PlanCuotas { IdPlanCuotas = 4, CantidadCuotas = 12, RecargoPorcentaje = 20m }
         };
 
         // "Registrar intento": si se asigna, RegistrarIntentoFallido devuelve este resultado tal
@@ -46,6 +56,13 @@ namespace Tests.Fakes
         public decimal UltimoImporte { get; private set; }
         public decimal UltimoDescuento { get; private set; }
         public int? UltimaPromocion { get; private set; }
+        public int? UltimoIdPlanCuotas { get; private set; }
+        public decimal? UltimoRecargoCuotas { get; private set; }
+        public decimal? UltimoCreditoCambioPlan { get; private set; }
+
+        public bool AnularResultado { get; set; } = true;
+        public int AnularVeces { get; private set; }
+        public string UltimoMotivoAnulacion { get; private set; }
 
         public int RegistrarVigenciaVeces { get; private set; }
         public DateTime? UltimaVigenciaDesde { get; private set; }
@@ -80,8 +97,13 @@ namespace Tests.Fakes
         }
 
         public bool ConfirmarCobro(int idContratacion, int idCaja, int idMedioPago, string numeroComprobante,
-                                   decimal importe, decimal descuento, int? idPromocion)
+                                   decimal importe, decimal descuento, int? idPromocion,
+                                   int? idPlanCuotas = null, decimal? recargoCuotas = null,
+                                   decimal? creditoCambioPlan = null)
         {
+            UltimoCreditoCambioPlan = creditoCambioPlan;
+            UltimoIdPlanCuotas = idPlanCuotas;
+            UltimoRecargoCuotas = recargoCuotas;
             ConfirmarCobroVeces++;
             UltimoIdContratacionConfirmado = idContratacion;
             UltimoIdCaja = idCaja;
@@ -100,6 +122,14 @@ namespace Tests.Fakes
             RegistrarVigenciaVeces++;
             UltimaVigenciaDesde = desde;
             UltimaVigenciaHasta = hasta;
+        }
+
+        public bool Anular(int idContratacion, string motivo, int idCaja)
+        {
+            AnularVeces++;
+            UltimoMotivoAnulacion = motivo;
+            UltimoIdCaja = idCaja;
+            return AnularResultado;
         }
 
         // Si se asigna, ReabrirPago lanza (simula que la compensación también falla).
@@ -149,6 +179,8 @@ namespace Tests.Fakes
             => Intentos.FindAll(i => i.IdContratacion == idContratacion);
 
         public List<BE.MedioPago> ObtenerMediosPago() => MediosPago;
+
+        public List<BE.PlanCuotas> ObtenerPlanesCuotas() => PlanesCuotas;
 
         public int AltaDesistimiento(BE.DesistimientoContratacion desistimiento)
         {

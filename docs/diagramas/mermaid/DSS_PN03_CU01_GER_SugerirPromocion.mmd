@@ -3,26 +3,66 @@ sequenceDiagram
   actor G as Gerencia
   participant F as Sugerir<br/>PromocionForm
   participant AN as BLL.Analisis<br/>Promociones
+  participant AR as BLL.Analisis<br/>Rotacion
+  participant AA as BLL.Analisis<br/>Abandono
+  participant DP as DAL.Plan<br/>Suscripcion
   participant B as BLL.Sugerencia<br/>Promocion
   participant D as DAL.Sugerencia<br/>Promocion
-  G->>F: Pulsa "Analizar métricas…"
-  F->>AN: AnalizarMetricas(modulo)
-  Note over AN: Exigir(SugerenciaPromocion) · abandono por plan (Strategy) y rotación por categoría
-  AN-->>F: Reporte de métricas (abandono por plan, rotación por categoría, oportunidades)
-  F->>AN: HayOportunidad(reporte)  [¿Hay oportunidad?]
-  alt No
-    F-->>G: Reporte imprimible: fin sin promoción
-  else Sí
-    F-->>G: Precarga la oportunidad elegida (origen Abandono o Rotación), si no usa ninguna, el origen es Manual
-    G->>F: Ajusta destino (plan o categoría), motivo, tipo de descuento y beneficio estimado
-    F->>B: RegistrarSugerencia(modulo, origen, idPlan, categoria, motivo, tipo, beneficio)
-    Note over B: Exigir(SugerenciaPromocion) · destino único · motivo obligatorio · beneficio > 0 · guarda OrigenMetrica e IdUsuarioAlta
-    alt Datos inválidos
-      B-->>F: AppException(motivo específico)
-      F-->>G: Informa y retoma la carga
+  Note over G,F: «extend» CU03-GER Analizar Métricas (opcional): AnalizarMetricas y ¿Hay oportunidad? (HayOportunidad). Sin análisis, la sugerencia queda con origen Manual
+  opt Gerencia analiza las métricas (opcional)
+    G->>F: Pulsa "Analizar métricas…"
+    F->>AN: AnalizarMetricas(modulo)
+    Note over AN: PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)
+    AN->>AR: Detectar()
+    AR-->>AN: List<RotacionPrenda>
+    AN->>AA: Detectar()  [criterio por defecto: EstrategiaVencimientoInactividad]
+    AA-->>AN: List<ClienteEnRiesgo>
+    AN->>DP: ObtenerTodos()
+    DP-->>AN: planes
+    AN->>AN: AbandonoPorPlan(enRiesgo, planes)
+    AN->>AN: Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría, abandono: clientes en riesgo por plan]
+    Note over AN: bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"
+    AN-->>F: ReporteMetricas (abandono por plan, rotación por categoría, oportunidades)
+    F->>AN: HayOportunidad(reporte)
+    AN-->>F: hayOportunidad
+    F->>F: MostrarReporte(reporte, hayOportunidad)
+    F-->>G: «Reporte de métricas» en pantalla (imprimible) con las oportunidades para elegir
+    G->>F: Pulsa "Usar esta idea" sobre una oportunidad, o Cerrar
+    F->>AN: HayOportunidad(reporte)  [¿Hay oportunidad?]
+    alt ¿Hay oportunidad? No
+      F-->>G: "Los reportes de rotación y abandono no detectan casos": fin sin promoción
+    else Sí
+      opt Eligió una oportunidad
+        F-->>G: Precarga destino (plan o categoría), tipo, beneficio estimado y motivo, origen = Abandono o Rotación
+      end
+    end
+  end
+  Note over G,F: Sin usar el reporte (o sin elegir una oportunidad) Gerencia carga los datos a mano: el origen queda Manual
+  G->>F: Ajusta destino (plan o categoría), motivo, tipo de descuento y beneficio estimado, pulsa "Enviar Sugerencia"
+  F->>B: RegistrarSugerencia(modulo, origen, idPlan, categoriaPrenda, motivo, tipoSugerido, beneficioEstimado)  [origen = Abandono, Rotación o Manual]
+  Note over B: PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)
+  alt Plan y categoría a la vez, o ninguno
+    B-->>F: AppException(destino_invalido)
+    F-->>G: Informa el motivo y retoma la carga
+  else Destino único
+    opt Aplica a un plan
+      B->>DP: ObtenerPorId(idPlan)
+      DP-->>B: plan (null si no existe)
+    end
+    alt Plan inexistente, sin motivo o beneficio ≤ 0
+      B-->>F: AppException(plan_inexistente / motivo_requerido / beneficio_invalido)
+      F-->>G: Informa el motivo y retoma la carga
     else Válidos
-      B->>D: Alta(sugerencia: Pendiente)
-      B-->>F: idSugerencia
-      F-->>G: Sugerencia de promoción (PDF) enviada a Administración
+      B->>D: Alta(sugerencia)  [Estado = Pendiente, OrigenMetrica = origen, IdUsuarioAlta = usuario de la sesión]
+      D-->>B: idNuevo
+      Note over B: bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta, …)
+      B-->>F: id de la sugerencia
+      F-->>G: "Sugerencia nro.id enviada a Administración"
+      F->>B: ObtenerTodas()  [refresca las sugerencias registradas]
+      opt ¿Imprimir la sugerencia? Sí
+        F->>B: ObtenerPorId(idSugerencia)
+        B-->>F: sugerencia
+        F-->>G: Sugerencia de promoción (PDF)
+      end
     end
   end

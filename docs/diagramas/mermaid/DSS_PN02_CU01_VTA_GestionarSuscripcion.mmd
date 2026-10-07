@@ -5,31 +5,49 @@ sequenceDiagram
   participant B as BLL.<br/>Contratacion
   participant CB as BLL.Cliente
   participant D as DAL.<br/>Contratacion
+  Note over V,F: Contratación: el Vendedor la registra Pendiente de pago, la suscripción se activa cuando Caja cobra (CU01-CAJ Gestionar Cobro)
+  V->>F: Abre Nueva contratación
+  F->>B: PresentarPlanes()
+  B-->>F: Planes disponibles (nombre, precio mensual, límite de prendas)
   V->>F: Ingresa DNI, nombre o apellido del cliente
   F->>B: IdentificarCliente(identificacion)
   B->>CB: BuscarPorIdentificacion(texto)
+  CB-->>B: clientes que coinciden
+  B-->>F: List<Cliente>  [vacía = no registrado]
   alt ¿Registrado? No
-    F-->>V: Registrar cliente (ABM de Clientes, referente opcional)
+    F-->>V: El cliente no está registrado: Registrar cliente
+    V->>F: Carga los datos del cliente (referente opcional)
+    F->>CB: Alta(modulo, cliente)
+    CB-->>F: ok
+    F->>B: IdentificarCliente(identificacion)  [busca por el DNI registrado]
+    B-->>F: List<Cliente>
   end
-  F->>B: PresentarPlanes()
-  B-->>F: Planes disponibles (nombre, precio mensual, límite de prendas)
-  alt ¿Elige plan y modalidad? No
-    V->>F: El cliente desiste + motivo
-    F->>B: AsentarDesistimiento(modulo, idCliente, idPlan, modalidad, motivo)
-    B->>D: AltaDesistimiento(desistimiento)
-    F-->>V: Aviso de desistimiento (PDF)
+  V->>F: Elige el cliente, el plan y la modalidad
+  F->>B: ValidarContratacion(idCliente, idPlan)
+  alt ¿Contratación válida? No
+    B-->>F: AppException(cliente_inexistente / plan_inexistente / plan_insuficiente / pendiente_existente)
+    F-->>V: Informar motivo (Registrar queda deshabilitado)
   else Sí
-    F->>B: ValidarContratacion(idCliente, idPlan)  [¿Contratación válida?]
-    F->>B: EstimarImporte(idCliente, idPlan, modalidad)
-    V->>F: Registrar contratación
-    F->>B: RegistrarContratacion(modulo, idCliente, idPlan, modalidad)
-    Note over B: Exigir(ClientesEditar) · cliente activo, plan activo, cupo, sin otra pendiente
-    alt No válida
-      B-->>F: AppException(motivo)  [queda en la bitácora]
-      F-->>V: Informar motivo
-    else Válida
-      B->>D: Alta(contratación PendientePago, PrecioMensual pactado)
-      B-->>F: idContratacion
-      F-->>V: Orden de cobro (PDF): el cliente abona en Caja
-    end
+    B-->>F: plan
+  end
+  F->>B: EstimarImporte(idCliente, idPlan, modalidad)
+  B-->>F: liquidación estimada (un solo descuento)
+  F-->>V: Importe a abonar en Caja
+  Note over V,F: ¿Elige plan y modalidad? No → «extend» CU02-VTA Asentar Desistimiento (botón Desistir)
+  V->>F: Registrar contratación
+  F->>B: RegistrarContratacion(modulo, idCliente, idPlan, modalidad)
+  Note over B: Exigir(ClientesEditar)
+  B->>B: ValidarContratacion(idCliente, idPlan)  [revalida]
+  alt No válida
+    B-->>F: AppException(cliente_inexistente / plan_inexistente / plan_insuficiente / pendiente_existente)  [queda en la bitácora]
+    F-->>V: Informar motivo: el formulario sigue abierto y vuelve a validar
+  else Válida
+    B->>D: Alta(contratacion)  [Estado = PendientePago, PrecioMensual = precio del plan pactado]
+    D-->>B: idContratacion
+    B-->>F: idContratacion
+    F->>B: ObtenerPorId(idContratacion)
+    B-->>F: contratación
+    F->>B: CalcularImporte(contratacion)
+    B-->>F: liquidación
+    F-->>V: Orden de cobro (PDF): el cliente abona en Caja
   end

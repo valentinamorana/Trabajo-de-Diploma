@@ -1,10 +1,17 @@
 classDiagram
   direction TB
+  class GUI_DiagnosticoIntegridadForm["GUI.DiagnosticoIntegridadForm"] {
+  }
+  class GUI_RecuperacionEspejoForm["GUI.RecuperacionEspejoForm"] {
+    +bool RecuperadoExitosamente
+  }
   class BLL_Configuracion["BLL.Configuracion"] {
     +bool IntegridadComprometida
     +VerificarIntegridadDV(ResultadoIntegridad) bool
     +AsegurarIntegridadUsuarios() void
+    +ObtenerDiagnostico() ResultadoDiagnostico
     +RecalcularIntegridadDV() void
+    +RecalcularUsuario() void
   }
   class BLL_RecuperacionIntegridad["BLL.RecuperacionIntegridad"] {
     <<static>>
@@ -37,6 +44,15 @@ classDiagram
     +ActualizarFila(string,  string,  string[],  int) void
     +RecalcularTabla(string,  string,  string[]) void
   }
+  class DAL_EspejoUsuario["DAL.EspejoUsuario"] {
+    +Existe() bool
+    +ObtenerFilas() List~FilaUsuarioDV~
+    +ObtenerPorUsername(string) FilaUsuarioDV
+    +Upsert(FilaUsuarioDV) void
+    +Eliminar(int) void
+    +Reconstruir(List~FilaUsuarioDV~) void
+    +FechaDesdeTexto(string) object
+  }
   class DAL_HistorialIntegridad["DAL.HistorialIntegridad"] {
     +Insertar(HistorialIntegridad) void
     +ObtenerUltimos(int) List~HistorialIntegridad~
@@ -56,6 +72,11 @@ classDiagram
     +int? DVHAlmacenado
   }
   Seguridad_ICalculadorDV <|.. Seguridad_DigitoVerificador
+  _____________________________ ..> _________________ : usa
+  _____________________________ ..> __________________________ : usa
+  __________________________ ..> __________________________ : usa
+  __________________________ ..> _________________ : usa
+  _________________ ..> _________________ : usa
   _________________ ..> ______________________ : usa
   _________________ ..> _____________________ : usa
   __________________________ ..> _____________________ : usa

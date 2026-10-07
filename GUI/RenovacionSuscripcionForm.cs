@@ -35,6 +35,16 @@ namespace GUI
         {
             base.OnLoad(e);
             Traducir(GestorIdioma.IdiomaActual);
+            // Renovar o cambiar de plan sin cobro es solo del Administrador (lo exige BLL.Renovacion);
+            // el resto renueva con una Nueva Contratación que cobra Caja.
+            bool esAdmin = false;
+            try { esAdmin = new BLL.Usuario().ObtenerUsuarioActivo()?.EsAdministrador == true; } catch { }
+            if (!esAdmin)
+            {
+                rbRenovar.Enabled = false;
+                rbCambiarPlan.Enabled = false;
+                if (rbRenovar.Checked || rbCambiarPlan.Checked) rbPausar.Checked = true;
+            }
             CargarClientes();
             CargarPlanes();
         }

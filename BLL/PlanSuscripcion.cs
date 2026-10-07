@@ -14,15 +14,20 @@ namespace BLL
         // cuando se usa (Desactivar), así los tests con un doble de plan no lo necesitan.
         private DAL.Cliente _dalCliente;
         private DAL.Cliente dalCliente => _dalCliente ?? (_dalCliente = new DAL.Cliente());
+        // Idem para las contrataciones pendientes de pago (inyectable en tests).
+        private DAL.Interfaces.IContratacionDAL _dalContratacion;
+        private DAL.Interfaces.IContratacionDAL dalContratacion => _dalContratacion ?? (_dalContratacion = new DAL.Contratacion());
 
         // DI: el constructor por defecto usa el DAL real; el otro permite inyectar un doble.
         private readonly Servicios.IRegistroBitacora bitacora;
         private const string Modulo = "Planes de Suscripción";
 
         public PlanSuscripcion() : this(new DAL.PlanSuscripcion()) { }
-        public PlanSuscripcion(DAL.Interfaces.IPlanSuscripcionDAL dalPlan, Servicios.IRegistroBitacora bitacora = null)
+        public PlanSuscripcion(DAL.Interfaces.IPlanSuscripcionDAL dalPlan, Servicios.IRegistroBitacora bitacora = null,
+                               DAL.Interfaces.IContratacionDAL dalContratacion = null)
         {
             this.dalPlan = dalPlan ?? throw new ArgumentNullException(nameof(dalPlan));
+            _dalContratacion = dalContratacion;
             this.bitacora = bitacora ?? Servicios.FabricaBitacora.CrearSistema();
         }
 
@@ -77,10 +82,17 @@ namespace BLL
         }
 
         // Desactiva (baja lógica) un plan.
-        // Falla si hay clientes activos asignados a ese plan.
+        // Falla si hay clientes activos asignados a ese plan o contrataciones de ese plan pendientes
+        // de pago (Caja ya no podría cobrarlas: ConfirmarCobro rechaza un plan dado de baja).
         public void Desactivar(int idPlan)
         {
             PermisosAccion.Exigir(BE.Patentes.PlanSuscripcionesEditar, BE.Patentes.PlanSuscripciones);
+            int pendientes = dalContratacion.ObtenerPendientesDePago().FindAll(c => c.IdPlan == idPlan).Count;
+            if (pendientes > 0)
+                throw new BE.AppException("err.bll.plan.tiene_contrataciones",
+                    "No se puede desactivar el plan: tiene {0} contratación(es) pendiente(s) de pago. " +
+                    "Caja tiene que cobrarlas o anularlas antes.",
+                    pendientes);
             int clientesActivos = dalCliente.ContarClientesActivosPorPlan(idPlan);
             if (clientesActivos > 0)
                 throw new BE.AppException("err.bll.plan.tiene_clientes",

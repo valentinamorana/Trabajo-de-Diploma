@@ -1,6 +1,7 @@
 flowchart LR
   V["Vendedor"]:::actor
   D["Depósito / Logística"]:::actor
+  DP["Depósito"]:::actor
   subgraph SIS["WardrobeFlow — PN01 Armar pedido"]
     c1(["CU01-VEN Armar Pedido y Enviar a Control de Stock"])
     c2(["CU02-VEN Consultar Catálogo"])
@@ -20,7 +21,7 @@ flowchart LR
   D --- c5
   D --- c6
   D --- c7
-  D --- c8
+  DP --- c8
   c1 -. "«include»" .-> c2
   c1 -. "«include»" .-> c3
   classDef actor fill:#fff7e6,stroke:#b8860b

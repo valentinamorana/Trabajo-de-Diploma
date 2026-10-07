@@ -2,17 +2,35 @@ sequenceDiagram
   autonumber
   actor V as Vendedor
   participant F as NuevoPedidoForm
-  participant B as BLL.Cliente
+  participant CB as BLL.Cliente
+  participant B as BLL.Pedido
   participant D as DAL.Cliente
-  V->>F: Ingresa DNI, nombre o apellido y elige al cliente
-  F->>B: ObtenerEstadoComercial(cliente, prendasSolicitadas)
-  B->>D: ObtenerPorId(idCliente)
-  D-->>B: cliente (plan, cupo, vencimiento, prendas en uso)
-  alt Sin plan
-    B-->>F: MotivoBloqueo = SIN_PLAN
-  else Suscripción vencida
-    B-->>F: MotivoBloqueo = SUSCRIPCION_VENCIDA + fecha
-  else Vigente
-    B-->>F: EstadoComercialCliente (PuedeProceder, cupo disponible)
+  V->>F: Ingresa DNI, nombre o apellido
+  F->>CB: BuscarPorIdentificacion(texto)
+  CB->>D: ObtenerTodos()
+  D-->>CB: clientes (plan, vencimiento, prendas en uso)
+  CB-->>F: coincidencias: DNI exacto o nombre/apellido parcial
+  alt Ninguna coincidencia
+    F-->>V: No se encontró ningún cliente con esa identificación
+  else Una o varias (el Vendedor elige al cliente)
+    F->>B: ObtenerTodos()  [último pedido del cliente, para la ficha]
+    B-->>F: pedidos
+    F->>B: VerificarVigencia(idCliente)
+    B->>D: ObtenerPorId(idCliente)  [relee al cliente]
+    D-->>B: cliente
+    alt Suscripción no vigente
+      B-->>F: AppException(cliente_inexistente / sin_plan / pago_suspendido / suscripcion_pausada / suscripcion_vencida)
+      F-->>V: Ficha + motivo: no se puede continuar (aviso imprimible)
+    else Vigente
+      B-->>F: cliente
+      F->>B: RevisarPedidoActivo(cliente)
+      alt Posee pedido activo o prendas sin devolver
+        B-->>F: AppException(ya_despachado / pedido_activo / cuenta_bloqueada)
+        F-->>V: Ficha + pedido activo (aviso imprimible)
+      else Sin pedido activo
+        F->>CB: ObtenerEstadoComercial(cliente, prendasSolicitadas)  [prendasSolicitadas = 0]
+        CB-->>F: EstadoComercialCliente (próxima a vencer, días hasta el vencimiento)
+        F-->>V: Ficha: plan, límite, vencimiento, prendas en uso y último pedido, aviso si vence pronto
+      end
+    end
   end
-  F-->>V: Muestra plan, cupo disponible, vigencia y pedido activo

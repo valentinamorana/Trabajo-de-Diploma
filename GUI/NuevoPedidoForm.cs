@@ -555,9 +555,7 @@ namespace GUI
                     IdPedidoCreado = pedidoBLL.EnviarAControlStock(this.Text, _clienteSel.IdCliente, prendas);
                 }
 
-                OfrecerImprimir(Tr("conf.ped.planilla", "¿Imprimir la planilla de control de existencias?"),
-                    () => Exportacion.DocumentosPedido.PlanillaControl(pedidoBLL.ObtenerPorId(IdPedidoCreado), null,
-                                                                      clienteBLL.ObtenerPorId(_clienteSel.IdCliente)));
+                // La planilla de control se imprime desde "Documentos ▾" (Control de stock / Pedidos de venta).
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -605,9 +603,7 @@ namespace GUI
                     IdPedidoCreado = pedidoBLL.AsentarDesistimiento(this.Text, _clienteSel.IdCliente, prendas, motivo);
                 }
                 FueDesistimiento = true;
-
-                OfrecerImprimir(Tr("conf.ped.aviso", "¿Imprimir el aviso de desistimiento?"),
-                    () => Exportacion.DocumentosPedido.AvisoDesistimiento(pedidoBLL.ObtenerPorId(IdPedidoCreado)));
+                // El aviso de desistimiento se imprime desde "Documentos ▾" en Pedidos de venta.
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -616,15 +612,6 @@ namespace GUI
             {
                 MostrarError(ex);
             }
-        }
-
-        private void OfrecerImprimir(string pregunta, Func<Exportacion.ReporteExportable> armar)
-        {
-            if (MessageBox.Show(pregunta, this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-                return;
-            try { Exportacion.DocumentosPedido.Imprimir(armar(), this); }
-            catch (Exception ex) { MostrarError(ex); }
         }
 
         private string EstadoLabel(BE.EstadoPedido estado) => EstadosPedido.Etiqueta(estado);

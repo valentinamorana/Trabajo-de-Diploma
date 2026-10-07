@@ -3,34 +3,74 @@ flowchart TD
     direction TB
     i((" "))
     d0{"¿Devuelve las prendas?"}
+    a0["Devolver las prendas del pedido"]
+    r1["Recibir el próximo cobro con el cargo de reposición"]
+    f2(((" ")))
+    o1[/"Prendas devueltas (pedido)"/]:::doc
   end
   subgraph D["Depósito"]
     direction TB
     a1["Registra la devolución: las prendas pasan a En limpieza"]
+    a8["Consultar la cola de prendas En limpieza"]
     a2["Inspecciona cada prenda"]
     d1{"¿Desgaste normal?"}
     a3["Aprueba el reingreso"]
-    a5["Indica motivo del daño y monto (o reporta la prenda perdida)"]
+    a9["Consultar el detalle de prendas del pedido (En uso)"]
+    a5["Indica motivo del daño o de la pérdida y monto"]
+    a10["Recibir el rechazo"]
+    f3(((" ")))
+    o2[/"Cola de prendas En limpieza (último cliente)"/]:::doc
+    o3[/"Detalle de prendas del pedido (estado)"/]:::doc
+    o4[/"Motivo y monto (precio de reposición)"/]:::doc
   end
   subgraph S["Sistema"]
     direction TB
     a4["Prenda Disponible sin cargo (cierra mantenimiento y avisa a la lista de espera)"]
-    a6["Registra el cargo contra el último cliente y luego da la prenda de baja"]
+    d2{"¿Tiene último cliente y datos válidos?"}
+    a6["Registra el cargo contra el último cliente y da la prenda de baja (una transacción)"]
     a7["El cargo se suma al próximo cobro de la suscripción"]
     f(((" ")))
-    f2(((" ")))
+    o5[/"Cargo de reposición (Pendiente, último cliente)"/]:::doc
+    o6[/"Detalle del próximo cobro (cargos sumados)"/]:::doc
+    o7[/"Motivo de rechazo"/]:::doc
+    o8[/"Reserva para la lista de espera (48 h)"/]:::doc
   end
   i --> d0
-  d0 -- "Sí" --> a1
-  a1 --> a2
+  d0 -- "Sí" --> a0
+  a0 --> a1
+  a1 --> a8
+  a8 --> a2
   a2 --> d1
   d1 -- "Sí" --> a3
   a3 --> a4
   a4 --> f
   d1 -- "No, dañada" --> a5
-  d0 -- "No, perdida" --> a5
-  a5 --> a6
+  d0 -- "No, perdida" --> a9
+  a9 --> a5
+  a5 --> d2
+  d2 -- "No" --> a10
+  a10 --> f3
+  d2 -- "Sí" --> a6
   a6 --> a7
-  a7 --> f2
+  a7 --> r1
+  r1 --> f2
+  a0 -.-> o1
+  o1 -.-> a1
+  a1 -.-> o2
+  o2 -.-> a8
+  o2 -.-> a2
+  a9 -.-> o3
+  o3 -.-> a5
+  a5 -.-> o4
+  o4 -.-> d2
+  o4 -.-> a6
+  d2 -.-> o7
+  o7 -.-> a10
+  a6 -.-> o5
+  o5 -.-> a7
+  a7 -.-> o6
+  o6 -.-> r1
+  a4 -.-> o8
+  classDef doc fill:#d4efe8,stroke:#307060
   classDef ini fill:#222,stroke:#222,color:#222
-  class i,f,f2 ini
+  class i,f,f2,f3 ini

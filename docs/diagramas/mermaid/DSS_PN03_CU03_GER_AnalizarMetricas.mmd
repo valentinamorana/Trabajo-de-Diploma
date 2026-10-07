@@ -1,0 +1,49 @@
+sequenceDiagram
+  autonumber
+  actor G as Gerencia
+  participant F as Sugerir<br/>PromocionForm
+  participant AN as BLL.Analisis<br/>Promociones
+  participant AR as BLL.Analisis<br/>Rotacion
+  participant AA as BLL.Analisis<br/>Abandono
+  participant ER as Estrategia<br/>Riesgo
+  participant DPE as DAL.Pedido
+  participant DR as DAL.Prenda
+  participant DC as DAL.Cliente
+  participant DP as DAL.Plan<br/>Suscripcion
+  Note over G,F: Punto de extensión de CU01-GER: Gerencia pulsa "Analizar métricas…" antes de cargar la sugerencia
+  G->>F: Pulsa "Analizar métricas…"
+  F->>AN: AnalizarMetricas(modulo)
+  Note over AN: PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)
+  AN->>AR: Detectar()
+  AR->>DPE: ObtenerCantidadPedidosPorPrenda()
+  DPE-->>AR: pedidos por prenda
+  AR->>DR: ObtenerTodos()
+  DR-->>AR: prendas
+  AR-->>AN: List<RotacionPrenda>
+  AN->>AA: Detectar()  [criterio por defecto: EstrategiaVencimientoInactividad]
+  AA->>DPE: ObtenerFechaUltimoPedidoPorCliente()
+  DPE-->>AA: fecha del último pedido de cada cliente
+  AA->>DC: ObtenerTodos()
+  DC-->>AA: clientes
+  loop Por cada cliente con plan (TienePlan)
+    AA->>ER: Evaluar(datos)
+    ER-->>AA: ResultadoRiesgo (EnRiesgo, Motivo)
+  end
+  AA-->>AN: List<ClienteEnRiesgo>
+  AN->>DP: ObtenerTodos()
+  DP-->>AN: planes
+  AN->>AN: AbandonoPorPlan(enRiesgo, planes)
+  AN->>AN: Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría, abandono: clientes en riesgo por plan]
+  Note over AN: bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"
+  AN-->>F: ReporteMetricas (abandono por plan, rotación por categoría, oportunidades)
+  F->>AN: HayOportunidad(reporte)
+  AN-->>F: hayOportunidad
+  F->>F: MostrarReporte(reporte, hayOportunidad)
+  alt ¿Hay oportunidad? No
+    F-->>G: «Reporte de métricas»: "Los reportes de rotación y abandono no detectan casos" (fin sin promoción)
+  else Sí
+    F-->>G: «Reporte de métricas» (imprimible) con las oportunidades para elegir
+    G->>F: Pulsa "Usar esta idea" sobre una oportunidad
+    F-->>G: Precarga destino (plan o categoría), tipo, beneficio estimado y motivo, origen = Abandono o Rotación
+    Note over G,F: Sigue CU01-GER Sugerir Promoción: RegistrarSugerencia con el origen de la métrica
+  end

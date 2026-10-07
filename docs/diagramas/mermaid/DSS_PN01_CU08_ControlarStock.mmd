@@ -2,45 +2,73 @@ sequenceDiagram
   autonumber
   actor DP as Depósito
   participant F as Control<br/>StockForm
+  participant EV as BLL.Evaluacion<br/>ControlStock
   participant B as BLL.Pedido
   participant PB as BLL.Prenda
   participant LE as BLL.ListaEspera
   participant D as DAL.Pedido
   participant H as DAL.Pedido<br/>Historial
   F->>B: ObtenerColaControlStock()
-  B-->>F: pedidos EnControlStock (del más antiguo al más nuevo)
+  B->>D: ObtenerPorEstado(estado)  [estado = EnControlStock]
+  B-->>F: cola: pedidos EnControlStock (del más antiguo al más nuevo)
   DP->>F: Elige un pedido de la cola
+  F->>B: ObtenerPorId(id)  [relee el pedido, si ya no está EnControlStock recarga la cola]
+  B-->>F: pedido
   F->>B: RevisarStock(pedido)
-  Note over B: Exigir(ControlStockEditar) · solo pedidos EnControlStock
-  B->>PB: VerificarDisponibilidad(prendas)  [relee el estado en la BD]
-  PB-->>B: (disponible, noDisponibles)
-  B->>LE: EstaReservadaParaOtro(idPrenda, idCliente)
+  Note over B: Exigir(ControlStockEditar) · solo EnControlStock (si no: AppException(control_estado))
+  B->>PB: VerificarDisponibilidad(seleccion)  [prendas del pedido, relee su estado en la BD]
+  PB-->>B: (Disponible, NoDisponibles)
+  loop Por cada prenda que sigue Disponible
+    B->>LE: EstaReservadaParaOtro(idPrenda, idClienteSolicitante)
+    LE-->>B: ¿reservada por Lista de Espera para otro cliente?
+  end
   B-->>F: líneas de la planilla (estado actual, reservada, confirmada)
+  F->>EV: Evaluar(lineas, pedido)
+  EV-->>F: ¿Selección disponible? y acciones habilitadas
+  F-->>DP: Planilla de control de existencias
   alt ¿Selección disponible? No
     DP->>F: Informar faltantes
     F->>B: InformarFaltantes(modulo, pedido)
-    B->>PB: ObtenerDisponibles(idCliente)  [alternativas: misma categoría y talle, máx. 3]
+    B->>B: RevisarStock(pedido)
+    loop Por cada prenda no disponible
+      B->>PB: ObtenerDisponibles(idClienteSolicitante)  [alternativas: misma categoría y talle, máx. 3]
+    end
     B->>D: RegistrarFaltantes(idPedido, idEmpleadoControl, faltantes)  [→ ConFaltantes]
-    B->>H: RegistrarCambios(INFORMAR_FALTANTES)
-    B-->>F: informe de faltantes y alternativas
+    B->>H: RegistrarCambios(cambios)  [Accion = INFORMAR_FALTANTES]
+    B-->>F: faltantes con sus alternativas
     F-->>DP: Informe de disponibilidad (PDF) para el Vendedor
   else Sí
     DP->>F: Confirmar prendas disponibles
     F->>B: ConfirmarPrendasDisponibles(modulo, pedido)
+    B->>B: RevisarStock(pedido)  [si alguna falta: AppException(hay_faltantes)]
     B->>D: ConfirmarPrendas(idPedido, idEmpleadoControl)
-    B->>H: RegistrarCambios(CONFIRMAR_PRENDAS)
-    F-->>DP: Detalle de prendas confirmadas
+    B->>H: RegistrarCambios(cambios)  [Accion = CONFIRMAR_PRENDAS]
+    F-->>DP: Detalle de prendas confirmadas (PDF)
     DP->>F: Separar prendas
     F->>B: SepararPrendas(modulo, pedido)
-    B->>D: SepararPrendas(idPedido, idCliente)  [transacción: prendas a En uso con reclamo, → Separado]
-    alt Otra operación tomó una prenda
-      D-->>B: AppException(prenda_tomada)  [rollback: no se reserva nada]
-      B->>B: InformarFaltantes(modulo, pedido)
-      B-->>F: AppException(separar_faltantes)
-      F-->>DP: Informa que el pedido pasó a faltantes
-    else Reserva confirmada
-      B->>H: RegistrarCambios(SEPARAR)
-      B->>LE: CerrarSiReservada(modulo, idPrenda, idCliente, actor)
-      F-->>DP: Constancia de prendas separadas (PDF)
+    Note over B: Exigir(ControlStockEditar) · EnControlStock con todas las líneas confirmadas (control_estado / sin_confirmar)
+    B->>B: ObtenerClienteValidado(idCliente)  [privado: revalida la vigencia, pudo cambiar en la cola]
+    alt Suscripción no vigente
+      B-->>F: AppException(cliente_inexistente / sin_plan / pago_suspendido / suscripcion_pausada / suscripcion_vencida)
+      F-->>DP: Informa el motivo: no se reserva nada
+    else Vigente
+      B->>B: RevisarStock(pedido)
+      alt Todas disponibles
+        B->>D: SepararPrendas(idPedido, idCliente)  [transacción: prendas a En uso con reclamo, → Separado]
+        D-->>B: ok, o AppException(prenda_tomada)  [rollback: no se reserva nada]
+      end
+      alt Alguna prenda ya no está disponible (al revisar o prenda_tomada)
+        B->>D: ObtenerPorId(idPedido)  [pedido releído]
+        B->>B: InformarFaltantes(modulo, pedido)
+        B-->>F: AppException(separar_faltantes)
+        F-->>DP: Informa que el pedido pasó a faltantes (informe imprimible)
+      else Separadas
+        B->>H: RegistrarCambios(cambios)  [Accion = SEPARAR]
+        loop Por cada prenda del pedido
+          B->>LE: CerrarSiReservada(modulo, idPrenda, idCliente, actor)
+        end
+        B-->>F: ok
+        F-->>DP: Constancia de prendas separadas (PDF)
+      end
     end
   end

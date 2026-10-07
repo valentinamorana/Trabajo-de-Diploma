@@ -9,6 +9,7 @@ namespace GUI
     /// <summary>
     /// Capa de Presentación — PN02, carril Caja del diagrama de actividad:
     ///   Consultar cola → Calcular importe («Liquidación») → el cliente abona (medio de pago) →
+    ///   ¿Tarjeta de crédito? Sí: ofrecer planes de cuotas → elegir cuotas → recargo y valor de cuota →
     ///   ¿Se concreta el pago? Sí: Confirmar cobro → «Comprobante» → «Constancia de suscripción»;
     ///   No: Registrar intento («Intento») → ¿3 intentos? Sí: «Constancia de cancelación».
     /// Vista "Resueltas" para volver a imprimir comprobantes y constancias.
@@ -24,6 +25,7 @@ namespace GUI
 
         private List<BE.Contratacion> _contrataciones = new List<BE.Contratacion>();
         private List<BE.MedioPago> _medios = new List<BE.MedioPago>();
+        private List<BE.PlanCuotas> _planesCuotas = new List<BE.PlanCuotas>();
         private Dictionary<int, BE.LiquidacionContratacion> _importes = new Dictionary<int, BE.LiquidacionContratacion>();
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
@@ -92,6 +94,58 @@ namespace GUI
             if (actual.HasValue)
                 for (int i = 0; i < cmbMedioPago.Items.Count; i++)
                     if (((MedioItem)cmbMedioPago.Items[i]).Id == actual.Value) cmbMedioPago.SelectedIndex = i;
+            CargarCuotas();
+        }
+
+        // ── ¿Tarjeta de crédito? → Ofrecer planes de cuotas según la modalidad ──
+
+        private BE.MedioPago MedioActual()
+        {
+            var id = MedioSeleccionado();
+            return id.HasValue ? _medios.Find(m => m.IdMedioPago == id.Value) : null;
+        }
+
+        private void CmbMedioPago_SelectedIndexChanged(object sender, EventArgs e) => CargarCuotas();
+
+        private void CmbCuotas_SelectedIndexChanged(object sender, EventArgs e) => ActualizarDetalleCuotas();
+
+        // Los planes dependen del medio (solo tarjeta de crédito) y de la modalidad de la contratación
+        // seleccionada (no más cuotas que meses que cubre el cobro). BLL aplica las mismas reglas al cobrar.
+        private void CargarCuotas()
+        {
+            cmbCuotas.Items.Clear();
+            _planesCuotas = new List<BE.PlanCuotas>();
+            var medio = MedioActual();
+            var c = ObtenerSeleccionada();
+            if (medio != null && medio.PermiteCuotas && c != null && c.PuedeCobrarse() && !VistaResueltas)
+            {
+                try { _planesCuotas = contratacionBLL.ObtenerPlanesCuotas(c.Modalidad); }
+                catch (Exception ex) { MostrarError(ex); }
+                foreach (var p in _planesCuotas) cmbCuotas.Items.Add(new MedioItem(p.IdPlanCuotas, TextoPlan(p)));
+                if (cmbCuotas.Items.Count > 0) cmbCuotas.SelectedIndex = 0;
+            }
+            cmbCuotas.Enabled = cmbCuotas.Items.Count > 1;
+            ActualizarDetalleCuotas();
+        }
+
+        private string TextoPlan(BE.PlanCuotas p) => p.SinInteres
+            ? string.Format(Tr("lbl.contr.cuotas.sininteres", "{0} cuota(s) sin interés"), p.CantidadCuotas)
+            : string.Format(Tr("lbl.contr.cuotas.recargo", "{0} cuotas (recargo {1:0.##} %)"), p.CantidadCuotas, p.RecargoPorcentaje);
+
+        private int? PlanCuotasSeleccionado() => cmbCuotas.Items.Count > 0 ? (cmbCuotas.SelectedItem as MedioItem)?.Id : null;
+
+        // «Detalle de financiación»: valor de cuota, recargo y total que abona el cliente.
+        private void ActualizarDetalleCuotas()
+        {
+            lblDetalleCuotas.Text = "";
+            var c = ObtenerSeleccionada();
+            var idPlan = PlanCuotasSeleccionado();
+            if (c == null || !idPlan.HasValue || !_importes.TryGetValue(c.IdContratacion, out var liq)) return;
+            var plan = _planesCuotas.Find(p => p.IdPlanCuotas == idPlan.Value);
+            var f = BE.PoliticaCuotas.Financiar(liq.Total, plan);
+            lblDetalleCuotas.Text = string.Format(
+                Tr("lbl.contr.cuotas.detalle", "{0} cuota(s) de {1:C2} — recargo {2:C2} — total a abonar {3:C2}"),
+                f.CantidadCuotas, f.ValorCuota, f.Recargo, f.TotalFinanciado);
         }
 
         private sealed class MedioItem
@@ -193,9 +247,16 @@ namespace GUI
         // Importe a cobrar con el descuento aplicable (pendientes) o el importe cobrado (resueltas).
         private string FormatearMonto(BE.Contratacion c)
         {
-            if (VistaResueltas) return c.Importe.HasValue ? c.Importe.Value.ToString("C2") : "—";
+            if (VistaResueltas)
+            {
+                if (!c.Importe.HasValue) return "—";
+                return (c.CantidadCuotas ?? 1) > 1
+                    ? string.Format(Tr("lbl.contr.monto.cuotas", "{0:C2} en {1} cuotas"), c.TotalAbonado, c.CantidadCuotas)
+                    : c.Importe.Value.ToString("C2");
+            }
             if (!_importes.TryGetValue(c.IdContratacion, out var liq)) return "—";
-            return liq.Descuento > 0 ? $"{liq.Total:C2} (-{liq.Descuento:C2})" : liq.Total.ToString("C2");
+            decimal rebaja = liq.Descuento + liq.CreditoCambioPlan;   // promoción/referido + crédito por upgrade
+            return rebaja > 0 ? $"{liq.Total:C2} (-{rebaja:C2})" : liq.Total.ToString("C2");
         }
 
         private BE.Contratacion ObtenerSeleccionada()
@@ -211,11 +272,12 @@ namespace GUI
         private void HabilitarAcciones(BE.Contratacion c)
         {
             bool pendiente = c != null && c.PuedeCobrarse();
-            btnCobrar.Enabled = btnIntentoFallido.Enabled = btnImprimirLiquidacion.Enabled = pendiente;
+            btnCobrar.Enabled = btnIntentoFallido.Enabled = btnImprimirLiquidacion.Enabled = btnAnular.Enabled = pendiente;
             cmbMedioPago.Enabled = !VistaResueltas;
             btnVerIntentos.Enabled = c != null && c.TieneIntentos();
             btnImprimirComprobante.Enabled = c != null && c.EstaPagada();
             btnImprimirConstancia.Enabled = c != null && !c.PuedeCobrarse();
+            CargarCuotas();
         }
 
         // ── ¿Se concreta el pago? Sí → Confirmar cobro → Comprobante → Constancia ─
@@ -231,29 +293,38 @@ namespace GUI
                 return;
             }
 
+            var idPlanCuotas = PlanCuotasSeleccionado();
             BE.LiquidacionContratacion liq;
-            try { liq = contratacionBLL.CalcularImporte(contratacion); }
+            try { liq = contratacionBLL.CalcularImporte(contratacion, idMedio.Value, idPlanCuotas); }
             catch (Exception ex) { MostrarError(ex); return; }
             string detalleDescuento = liq.Descuento > 0
                 ? "\n" + Tr("conf.contratacion.cobro.desc", "Descuento aplicado: {0:C2} ({1}).",
                     new object[] { liq.Descuento, liq.NombrePromocion ?? Tr("lbl.contratacion.creditoreferido", "crédito por referido") })
                 : "";
+            if (liq.CreditoCambioPlan > 0)
+                detalleDescuento += "\n" + Tr("conf.contr.cobro.upgrade",
+                    "Cambio a un plan superior: rige desde hoy. Crédito por los días no usados del plan anterior: {0:C2}.",
+                    new object[] { liq.CreditoCambioPlan });
+            if (liq.CantidadCuotas > 1 || liq.RecargoCuotas > 0)
+                detalleDescuento += "\n" + Tr("conf.contr.cobro.cuotas",
+                    "Tarjeta de crédito en {0} cuota(s) de {1:C2} (recargo {2:C2}). Total a abonar: {3:C2}.",
+                    new object[] { liq.CantidadCuotas, liq.ValorCuota, liq.RecargoCuotas, liq.TotalConRecargo });
 
             if (!ConfirmarSiNo(
                     Tr("conf.contr.cobro.confirmar",
                        "¿Confirmar el cobro de la Contratación #{0}?\n\nCliente: {1}\nPlan: {2}\nMonto: {3:C2}\nMedio de pago: {4}\n\n" +
                        "Se emitirá el comprobante y la suscripción quedará formalizada.",
                        new object[] { contratacion.IdContratacion, contratacion.NombreCliente, contratacion.NombrePlan,
-                                      liq.Total, cmbMedioPago.SelectedItem.ToString() }) + detalleDescuento,
+                                      liq.TotalConRecargo, cmbMedioPago.SelectedItem.ToString() }) + detalleDescuento,
                     Tr("conf.contratacion.cobro.titulo", "Confirmar Cobro")))
                 return;
 
             try
             {
-                var cobro = contratacionBLL.ConfirmarCobro(this.Text, contratacion, idMedio.Value, liq.Total);
+                var cobro = contratacionBLL.ConfirmarCobro(this.Text, contratacion, idMedio.Value, liq.Total, idPlanCuotas);
                 MostrarOk(Tr("msg.contratacion.cobrada.comprobante",
                     "Contratación #{0} cobrada por {1:C2}. Comprobante {2}. Suscripción formalizada.",
-                    new object[] { contratacion.IdContratacion, cobro.Total, cobro.NumeroComprobante }) +
+                    new object[] { contratacion.IdContratacion, cobro.TotalConRecargo, cobro.NumeroComprobante }) +
                     (cobro.VigenciaHasta.HasValue
                         ? " " + Tr("msg.contr.vigencia", "Vigente del {0:dd/MM/yyyy} al {1:dd/MM/yyyy}.", new object[] { cobro.VigenciaDesde, cobro.VigenciaHasta })
                         : "") +
@@ -265,14 +336,15 @@ namespace GUI
             }
             catch (Exception ex) { MostrarError(ex); return; }
 
-            // La impresión va aparte: un error al imprimir no es un error del cobro, que ya quedó hecho.
-            if (Preguntar(Tr("conf.contr.imprimircobro", "¿Imprimir el comprobante y la constancia de suscripción para el cliente?")))
+            // La única impresión que se ofrece tras una acción: el comprobante que se lleva el cliente.
+            // La constancia de suscripción queda en "Imprimir constancia". Va aparte: un error al
+            // imprimir no es un error del cobro, que ya quedó hecho.
+            if (Preguntar(Tr("conf.contr.imprimircomprobante", "¿Imprimir el comprobante para el cliente?")))
             {
                 try
                 {
                     var pagada = contratacionBLL.ObtenerPorId(contratacion.IdContratacion);
                     Exportacion.DocumentosContratacion.Imprimir(Exportacion.DocumentosContratacion.Comprobante(pagada), this);
-                    Exportacion.DocumentosContratacion.Imprimir(Exportacion.DocumentosContratacion.ConstanciaSuscripcion(pagada), this);
                 }
                 catch (Exception ex) { MostrarError(ex); }
             }
@@ -305,8 +377,7 @@ namespace GUI
                     MostrarError(Tr("msg.contr.cancelada",
                         "Contratación #{0} cancelada: no se concretó el pago en {1} intentos.",
                         new object[] { contratacion.IdContratacion, r.Maximo }));
-                    if (Preguntar(Tr("conf.contr.imprimircancelacion", "¿Imprimir la constancia de cancelación?")))
-                        ImprimirConstancia(contratacionBLL.ObtenerPorId(contratacion.IdContratacion));
+                    // La constancia de cancelación se imprime desde "Imprimir constancia".
                 }
                 else
                 {
@@ -314,6 +385,35 @@ namespace GUI
                         "Intento {0} de {1} registrado para la Contratación #{2}. Sigue en la cola para volver a cobrarla.",
                         new object[] { r.NroIntento, r.Maximo, contratacion.IdContratacion }));
                 }
+                CargarContrataciones();
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        // "Anular contratación": el cliente se arrepintió o hubo un error de carga (sin intentos de pago).
+        private void BtnAnular_Click(object sender, EventArgs e)
+        {
+            var contratacion = ObtenerSeleccionada();
+            if (contratacion == null) return;
+
+            string motivo;
+            using (var dlg = new InputDialog(
+                Tr("dlg.contr.anular.titulo", "Anular contratación"),
+                string.Format(Tr("dlg.contr.anular.prompt",
+                    "Motivo por el que se anula la Contratación #{0} de {1} (no se cobra y sale de la cola):"),
+                    contratacion.IdContratacion, contratacion.NombreCliente),
+                false))
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                motivo = dlg.InputText;
+            }
+
+            try
+            {
+                contratacionBLL.Anular(this.Text, contratacion, motivo);
+                MostrarOk(Tr("msg.contr.anulada",
+                    "Contratación #{0} anulada. La constancia se imprime desde \"Imprimir constancia\" en las resueltas.",
+                    new object[] { contratacion.IdContratacion }));
                 CargarContrataciones();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -343,7 +443,8 @@ namespace GUI
             try
             {
                 Exportacion.DocumentosContratacion.Imprimir(Exportacion.DocumentosContratacion.Liquidacion(
-                    c, contratacionBLL.CalcularImporte(c), contratacionBLL.ObtenerIntentos(c.IdContratacion)), this);
+                    c, contratacionBLL.CalcularImporte(c), contratacionBLL.ObtenerIntentos(c.IdContratacion),
+                    contratacionBLL.ObtenerPlanesCuotas(c.Modalidad)), this);
             }
             catch (Exception ex) { MostrarError(ex); }
         }

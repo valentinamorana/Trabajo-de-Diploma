@@ -21,7 +21,7 @@ namespace DAL
             "IdCliente", "IdPlan", "IdVendedor", "IdCaja", "Modalidad", "Estado", "FechaAlta",
             "FechaResolucion", "IdMedioPago", "NumeroComprobante", "FechaComprobante", "Importe",
             "DescuentoAplicado", "IdPromocion", "VigenciaDesde", "VigenciaHasta", "PrecioMensual",
-            "IdReferenteAcreditado"
+            "IdReferenteAcreditado", "IdPlanCuotas", "RecargoCuotas", "CreditoCambioPlan", "MotivoAnulacion"
         };
 
         // Recalcula el DVH de la fila y el DVV de la tabla. Best-effort: la escritura de negocio
@@ -37,6 +37,8 @@ namespace DAL
             "c.Estado, c.FechaAlta, c.FechaResolucion, c.IdMedioPago, mp.Nombre AS NombreMedioPago, " +
             "c.NumeroComprobante, c.FechaComprobante, c.Importe, c.DescuentoAplicado, c.IdPromocion, " +
             "c.VigenciaDesde, c.VigenciaHasta, c.PrecioMensual, c.IdReferenteAcreditado, " +
+            "c.IdPlanCuotas, c.RecargoCuotas, pc.CantidadCuotas, pc.RecargoPorcentaje, " +
+            "c.CreditoCambioPlan, c.MotivoAnulacion, " +
             "rf.Nombre + ' ' + rf.Apellido AS NombreReferenteAcreditado, " +
             "(SELECT COUNT(*) FROM ContratacionIntentoPago i WHERE i.IdContratacion = c.IdContratacion) AS IntentosPago, " +
             "cli.Nombre + ' ' + cli.Apellido AS NombreCliente, pl.Nombre AS NombrePlan, pl.Precio AS MontoPlan, " +
@@ -47,6 +49,7 @@ namespace DAL
             "JOIN Empleado ven ON ven.IdEmpleado = c.IdVendedor " +
             "LEFT JOIN Empleado caj ON caj.IdEmpleado = c.IdCaja " +
             "LEFT JOIN MedioPago mp ON mp.IdMedioPago = c.IdMedioPago " +
+            "LEFT JOIN PlanCuotas pc ON pc.IdPlanCuotas = c.IdPlanCuotas " +
             "LEFT JOIN Cliente rf ON rf.IdCliente = c.IdReferenteAcreditado ";
 
         public List<BE.Contratacion> ObtenerPendientesDePago() =>
@@ -103,7 +106,9 @@ namespace DAL
         }
 
         public bool ConfirmarCobro(int idContratacion, int idCaja, int idMedioPago, string numeroComprobante,
-                                   decimal importe, decimal descuento, int? idPromocion)
+                                   decimal importe, decimal descuento, int? idPromocion,
+                                   int? idPlanCuotas = null, decimal? recargoCuotas = null,
+                                   decimal? creditoCambioPlan = null)
         {
             SqlParameter[] p =
             {
@@ -115,7 +120,10 @@ namespace DAL
                 new SqlParameter("@Ahora",             DateTime.Now),
                 new SqlParameter("@Importe",           importe),
                 new SqlParameter("@Descuento",         descuento),
-                new SqlParameter("@IdPromocion",       (object)idPromocion ?? DBNull.Value)
+                new SqlParameter("@IdPromocion",       (object)idPromocion ?? DBNull.Value),
+                new SqlParameter("@IdPlanCuotas",      (object)idPlanCuotas ?? DBNull.Value),
+                new SqlParameter("@RecargoCuotas",     (object)recargoCuotas ?? DBNull.Value),
+                new SqlParameter("@CreditoCambioPlan", (object)creditoCambioPlan ?? DBNull.Value)
             };
             try
             {
@@ -124,6 +132,7 @@ namespace DAL
                     "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, IdMedioPago = @IdMedioPago, " +
                     "NumeroComprobante = @NumeroComprobante, FechaComprobante = @Ahora, " +
                     "Importe = @Importe, DescuentoAplicado = @Descuento, IdPromocion = @IdPromocion, " +
+                    "IdPlanCuotas = @IdPlanCuotas, RecargoCuotas = @RecargoCuotas, CreditoCambioPlan = @CreditoCambioPlan, " +
                     "FechaResolucion = @Ahora WHERE IdContratacion = @IdContratacion AND Estado = 0", p) > 0;
                 if (ok) ActualizarDV(idContratacion);
                 return ok;
@@ -158,11 +167,35 @@ namespace DAL
                 acceso.Escribir(
                     "UPDATE Contratacion SET Estado = 0, IdCaja = NULL, IdMedioPago = NULL, NumeroComprobante = NULL, " +
                     "FechaComprobante = NULL, Importe = NULL, DescuentoAplicado = NULL, IdPromocion = NULL, " +
-                    "FechaResolucion = NULL, VigenciaDesde = NULL, VigenciaHasta = NULL, IdReferenteAcreditado = NULL " +
+                    "FechaResolucion = NULL, VigenciaDesde = NULL, VigenciaHasta = NULL, IdReferenteAcreditado = NULL, " +
+                    "IdPlanCuotas = NULL, RecargoCuotas = NULL, CreditoCambioPlan = NULL " +
                     "WHERE IdContratacion = @IdContratacion AND Estado = 1", p);
                 ActualizarDV(idContratacion);
             }
             catch (Exception ex) { throw new Exception("Error al reabrir la contratación tras un cobro fallido.", ex); }
+        }
+
+        // "Anular contratación": Caja la cancela sin cobrarla, con motivo. Claim atómico: solo pasa si
+        // sigue Pendiente de pago (otra sesión pudo cobrarla o cancelarla). Devuelve false si no.
+        public bool Anular(int idContratacion, string motivo, int idCaja)
+        {
+            SqlParameter[] p =
+            {
+                new SqlParameter("@IdContratacion", idContratacion),
+                new SqlParameter("@Cancelada",      (int)BE.EstadoContratacion.Cancelada),
+                new SqlParameter("@Motivo",         motivo),
+                new SqlParameter("@IdCaja",         idCaja),
+                new SqlParameter("@Ahora",          DateTime.Now)
+            };
+            try
+            {
+                bool ok = acceso.Escribir(
+                    "UPDATE Contratacion SET Estado = @Cancelada, MotivoAnulacion = @Motivo, IdCaja = @IdCaja, " +
+                    "FechaResolucion = @Ahora WHERE IdContratacion = @IdContratacion AND Estado = 0", p) > 0;
+                if (ok) ActualizarDV(idContratacion);
+                return ok;
+            }
+            catch (Exception ex) { throw new Exception("Error al anular la contratación.", ex); }
         }
 
         public BE.ResultadoIntentoPago RegistrarIntentoFallido(int idContratacion, int? idMedioPago, string motivo, int idCaja, int maximo)
@@ -261,15 +294,36 @@ namespace DAL
             var lista = new List<BE.MedioPago>();
             try
             {
-                foreach (DataRow r in acceso.Leer("SELECT IdMedioPago, Nombre, ClaveTraduccion FROM MedioPago ORDER BY IdMedioPago", null).Rows)
+                foreach (DataRow r in acceso.Leer("SELECT IdMedioPago, Nombre, ClaveTraduccion, PermiteCuotas, Activo FROM MedioPago ORDER BY IdMedioPago", null).Rows)
                     lista.Add(new BE.MedioPago
                     {
                         IdMedioPago     = Convert.ToInt32(r["IdMedioPago"]),
                         Nombre          = r["Nombre"].ToString(),
-                        ClaveTraduccion = r["ClaveTraduccion"].ToString()
+                        ClaveTraduccion = r["ClaveTraduccion"].ToString(),
+                        PermiteCuotas   = r["PermiteCuotas"] != DBNull.Value && Convert.ToBoolean(r["PermiteCuotas"]),
+                        Activo          = r["Activo"] == DBNull.Value || Convert.ToBoolean(r["Activo"])
                     });
             }
             catch (Exception ex) { throw new Exception("Error al obtener los medios de pago.", ex); }
+            return lista;
+        }
+
+        public List<BE.PlanCuotas> ObtenerPlanesCuotas()
+        {
+            var lista = new List<BE.PlanCuotas>();
+            try
+            {
+                foreach (DataRow r in acceso.Leer(
+                    "SELECT IdPlanCuotas, CantidadCuotas, RecargoPorcentaje, Activo FROM PlanCuotas ORDER BY CantidadCuotas", null).Rows)
+                    lista.Add(new BE.PlanCuotas
+                    {
+                        IdPlanCuotas      = Convert.ToInt32(r["IdPlanCuotas"]),
+                        CantidadCuotas    = Convert.ToInt32(r["CantidadCuotas"]),
+                        RecargoPorcentaje = Convert.ToDecimal(r["RecargoPorcentaje"]),
+                        Activo            = Convert.ToBoolean(r["Activo"])
+                    });
+            }
+            catch (Exception ex) { throw new Exception("Error al obtener los planes de cuotas.", ex); }
             return lista;
         }
 
@@ -351,6 +405,12 @@ namespace DAL
                 Importe           = row["Importe"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["Importe"]) : null,
                 DescuentoAplicado = row["DescuentoAplicado"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["DescuentoAplicado"]) : null,
                 IdPromocion       = row["IdPromocion"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPromocion"]) : null,
+                IdPlanCuotas      = row["IdPlanCuotas"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPlanCuotas"]) : null,
+                RecargoCuotas     = row["RecargoCuotas"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["RecargoCuotas"]) : null,
+                CantidadCuotas    = row["CantidadCuotas"] != DBNull.Value ? (int?)Convert.ToInt32(row["CantidadCuotas"]) : null,
+                RecargoPorcentaje = row["RecargoPorcentaje"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["RecargoPorcentaje"]) : null,
+                CreditoCambioPlan = row["CreditoCambioPlan"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["CreditoCambioPlan"]) : null,
+                MotivoAnulacion   = Texto("MotivoAnulacion"),
                 VigenciaDesde     = Fecha("VigenciaDesde"),
                 VigenciaHasta     = Fecha("VigenciaHasta"),
                 PrecioMensual     = row["PrecioMensual"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["PrecioMensual"]) : null,

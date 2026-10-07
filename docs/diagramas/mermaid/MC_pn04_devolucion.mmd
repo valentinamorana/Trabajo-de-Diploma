@@ -2,6 +2,8 @@ erDiagram
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
+  Cliente ||--o{ ListaEspera : "IdCliente"
+  Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
@@ -14,3 +16,4 @@ erDiagram
   Prenda
   MantenimientoPrenda
   CargoPrenda
+  ListaEspera

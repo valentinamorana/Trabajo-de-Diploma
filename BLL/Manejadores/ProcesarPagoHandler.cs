@@ -61,8 +61,7 @@ namespace BLL.Manejadores
 
             // PN03 + NUULY 5.1: un solo descuento por ciclo — el mayor entre la promoción vigente del
             // plan y el crédito por referidos. Si gana la promoción, el crédito queda acumulado.
-            var resDescuento = BE.PoliticaDescuento.Resolver(
-                plan.Precio * BE.Builders.ModalidadCobroExtensiones.Meses(contexto.Modalidad), cliente.IdPlan, ObtenerPromocionesVigentes(), cliente.DescuentoProximoCobro, BE.Builders.ModalidadCobroExtensiones.Meses(contexto.Modalidad));
+            var resDescuento = CalcularDescuento(cliente, contexto.Modalidad, ObtenerPromocionesVigentes());
             decimal descuento = resDescuento.Descuento;
             var cargosPendientes = dalCargoPrenda.ObtenerPendientesPorCliente(cliente.IdCliente);
             decimal totalCargos = cargosPendientes.Sum(c => c.Monto);
@@ -181,6 +180,17 @@ namespace BLL.Manejadores
 
         // Best-effort: si la tabla Promocion no existe todavía (BD sin migrar) o falla la lectura, el
         // cobro sigue sin promociones en vez de romperse.
+        // Importe del período (precio del plan × meses de la modalidad) con el único descuento que
+        // corresponde. Compartido con BLL.Cobro.PrevisualizarCobro: lo que se muestra antes de
+        // procesar es exactamente lo que se cobra.
+        internal static BE.ResultadoDescuento CalcularDescuento(BE.Cliente cliente, BE.Builders.ModalidadCobro modalidad,
+                                                                System.Collections.Generic.List<BE.Promocion> promociones)
+        {
+            int meses = BE.Builders.ModalidadCobroExtensiones.Meses(modalidad);
+            return BE.PoliticaDescuento.Resolver(cliente.PrecioPlan * meses, cliente.IdPlan, promociones,
+                                                 cliente.DescuentoProximoCobro, meses);
+        }
+
         private System.Collections.Generic.List<BE.Promocion> ObtenerPromocionesVigentes()
         {
             if (dalPromocion == null) return new System.Collections.Generic.List<BE.Promocion>();

@@ -2,6 +2,8 @@ erDiagram
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
+  Cliente ||--o{ ListaEspera : "IdCliente"
+  Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
@@ -80,4 +82,14 @@ erDiagram
     datetime FechaCobro "NULL"
     nvarchar(100) Actor "NULL"
     int Estado
+  }
+  ListaEspera {
+    int IdListaEspera PK
+    int IdPrenda FK
+    int IdCliente FK
+    datetime FechaAlta
+    int Estado
+    datetime FechaLimiteReserva "NULL"
+    datetime FechaResolucion "NULL"
+    nvarchar(100) Actor "NULL"
   }

@@ -21,7 +21,8 @@ namespace BLL.Interfaces
         // próximos a vencer y sin contratación PN02 pendiente de pago).
         List<BE.Cliente> ObtenerElegibles();
 
-        // Cargos por daño/pérdida pendientes que se sumarán al próximo cobro del cliente.
-        BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente);
+        // Total del próximo cobro del cliente (período con descuento + cargos por daño/pérdida pendientes).
+        BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente,
+            BE.Builders.ModalidadCobro modalidad = BE.Builders.ModalidadCobro.Mensual);
     }
 }

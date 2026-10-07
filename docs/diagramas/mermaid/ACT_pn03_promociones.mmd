@@ -2,50 +2,69 @@ flowchart TD
   subgraph G["Gerencia"]
     direction TB
     i((" "))
-    a1["Analizar métricas: abandono por plan y rotación por categoría «Reporte de métricas»"]
+    d0{"¿Cómo surge la promoción?"}
+    a1["Analizar métricas: abandono por plan y rotación por categoría"]
     d1{"¿Hay oportunidad?"}
     f0(((" ")))
-    a2["Registrar sugerencia con el origen de la métrica «Sugerencia de promoción»"]
+    a2["Registrar sugerencia: queda Pendiente"]
+    g1["Recibir constancia de descarte de la sugerencia"]
+    g2["Recibir informe de la baja (promoción desactivada)"]
+    o1[/"Reporte de métricas (abandono por plan, rotación por categoría)"/]:::doc
+    o2[/"Sugerencia de promoción (Pendiente)"/]:::doc
   end
   subgraph A["Administración"]
     direction TB
     d2{"¿Acepta la sugerencia?"}
-    a3["Descartar sugerencia (motivo) «Constancia de descarte»"]
+    a3["Descartar sugerencia con motivo: Descartada"]
     f1(((" ")))
-    a4["Crear promoción (desde la sugerencia o manual)"]
-    a5["Validar (destino único, valor, fechas) → En revisión contable «Ficha de promoción»"]
+    a4["Crear promoción desde la sugerencia"]
+    a4m["Crear promoción manual, sin sugerencia"]
+    a5["Validar (destino único, valor, fechas) → En revisión contable"]
     d4{"¿Reformular?"}
     a8["Reformular las condiciones"]
-    a9["Descartar promoción (motivo) «Constancia de descarte»"]
+    a9["Descartar promoción con motivo: Descartada"]
     f2(((" ")))
-    d5{"¿Qué interrumpe la vigencia?"}
+    d5{"¿Qué la interrumpe?"}
     d6{"¿Aprueba la baja?"}
-    a12["Desactivada «Resolución de baja» (informe a Gerencia)"]
-    a13["Sigue Vigente «Resolución de baja» con motivo (informe a Ventas)"]
-    a14["Desactivar directamente (motivo)"]
-    a15["Vencida: ya no aplica en el cobro"]
+    a12["Desactivada (informe a Gerencia)"]
+    a13["Sigue Vigente con motivo (informe a Ventas)"]
+    a14["Desactivar directamente con motivo: Desactivada"]
+    a15["Vencida (el sistema la cierra al consultar): ya no aplica en el cobro"]
     f3(((" ")))
     f4(((" ")))
+    o3[/"Constancia de descarte de la sugerencia"/]:::doc
+    o4[/"Ficha de promoción (En revisión contable)"/]:::doc
+    o7[/"Constancia de descarte de la promoción"/]:::doc
+    o9[/"Resolución de baja"/]:::doc
   end
   subgraph K["Contabilidad"]
     direction TB
     a6["Analizar margen e impacto (beneficio estimado, promociones superpuestas)"]
     d3{"¿Aprueba? (quien la creó no la dictamina)"}
-    a7["Rechazada por Contabilidad «Dictamen contable»"]
-    a10["Vigente «Dictamen contable»: un solo descuento por cobro"]
+    a7["Rechazada por Contabilidad"]
+    a10["Vigente: un solo descuento por cobro"]
+    o5[/"Dictamen contable (rechazo con observación)"/]:::doc
+    o6[/"Dictamen contable (aprobada: Vigente)"/]:::doc
   end
   subgraph V["Vendedor"]
     direction TB
-    a11["Solicitar la baja (motivo) «Solicitud de baja»"]
+    a11["Solicitar la baja con motivo: Baja solicitada"]
+    v1["Recibir resolución de baja rechazada (sigue vigente)"]
+    o8[/"Solicitud de baja (motivo)"/]:::doc
   end
-  i --> a1
+  i --> d0
+  d0 -- "Gerencia analiza las métricas" --> a1
+  d0 -- "Idea propia de Gerencia (origen Manual)" --> a2
+  d0 -- "Alta manual de Administración" --> a4m
+  a4m --> a5
   a1 --> d1
   d1 -- "No: sin promoción" --> f0
-  d1 -- "Sí" --> a2
+  d1 -- "Sí: elige una (origen Abandono o Rotación)" --> a2
   a2 --> d2
   d2 -- "No" --> a3
-  a3 --> f1
-  d2 -- "Sí" --> a4
+  a3 --> g1
+  g1 --> f1
+  d2 -- "Sí: la sugerencia queda Evaluada" --> a4
   a4 --> a5
   a5 --> a6
   a6 --> d3
@@ -57,15 +76,39 @@ flowchart TD
   a9 --> f2
   d3 -- "Sí" --> a10
   a10 --> d5
-  d5 -- "Ventas pide la baja" --> a11
+  d5 -- "El Vendedor pide la baja" --> a11
   a11 --> d6
   d6 -- "Sí" --> a12
-  a12 --> f3
+  a12 --> g2
+  g2 --> f3
   d6 -- "No" --> a13
-  a13 --> a10
+  a13 --> v1
+  v1 --> a10
   d5 -- "Administración la desactiva" --> a14
   a14 --> f3
   d5 -- "Llega la fecha de fin" --> a15
   a15 --> f4
+  a1 -.-> o1
+  o1 -.-> a2
+  a2 -.-> o2
+  o2 -.-> d2
+  o2 -.-> a4
+  a3 -.-> o3
+  o3 -.-> g1
+  a5 -.-> o4
+  o4 -.-> a6
+  a7 -.-> o5
+  o5 -.-> d4
+  o5 -.-> a8
+  a10 -.-> o6
+  o6 -.-> a11
+  a9 -.-> o7
+  a11 -.-> o8
+  o8 -.-> d6
+  a12 -.-> o9
+  a13 -.-> o9
+  o9 -.-> g2
+  o9 -.-> v1
+  classDef doc fill:#d4efe8,stroke:#307060
   classDef ini fill:#222,stroke:#222,color:#222
   class i,f0,f1,f2,f3,f4 ini

@@ -2,6 +2,8 @@
 // (ver docs/NEGOCIO_Y_PROCESOS.md): los rótulos de decisión son las condiciones reales que evalúa la BLL.
 const N = (id, tipo, carril, texto) => ({ id, tipo, carril, texto });
 const F = (de, a, texto) => ({ de, a, texto });
+// flujo de documento: de acción a documento (la produce) o de documento a acción (la usa)
+const O = (de, a) => ({ de, a });
 
 module.exports = [
   {
@@ -72,100 +74,219 @@ module.exports = [
   },
   {
     tipo: 'actividad', id: 'ACT_pn02_comercializacion', titulo: 'Actividad — PN02 Comercialización de la suscripción',
+    // Pasos de GUI/NuevaContratacionForm.cs, GUI/ContratacionesPendientesForm.cs y BLL/Contratacion.cs.
+    // Documentos: los PDF de GUI/Exportacion/DocumentosContratacion.cs (Planes disponibles, Aviso de desistimiento, Orden de cobro,
+    // Liquidación, Comprobante, Constancia de suscripción, Constancia de cancelación) y la información que circula entre carriles.
+    // Pago en cuotas: solo Tarjeta de crédito (MedioPago.PermiteCuotas), planes de BE.PoliticaCuotas.Disponibles.
     carriles: [{ id: 'C', nombre: 'Cliente' }, { id: 'V', nombre: 'Vendedor' }, { id: 'J', nombre: 'Caja' }],
     nodos: [
       N('i', 'inicio', 'C'), N('a1', 'accion', 'C', 'Solicitar información'),
       N('a2', 'accion', 'V', 'Identificar cliente (DNI, nombre o apellido)'),
       N('d1', 'decision', 'V', '¿Registrado?'), N('a3', 'accion', 'V', 'Registrar cliente (referente opcional)'),
-      N('a4', 'accion', 'V', 'Presentar planes (Planes disponibles)'),
+      N('a4', 'accion', 'V', 'Presentar planes'),
       N('d2', 'decision', 'C', '¿Elige plan y modalidad?'),
-      N('a5', 'accion', 'V', 'Asentar desistimiento (aviso)'),
+      N('a5', 'accion', 'V', 'Asentar desistimiento'),
+      N('r1', 'accion', 'C', 'Recibir aviso de desistimiento'),
+      N('a19', 'accion', 'C', 'Elegir plan y modalidad'),
+      N('a15', 'accion', 'V', 'Estimar importe a abonar en Caja'),
       N('a6', 'accion', 'V', 'Registrar contratación'),
       N('d3', 'decision', 'V', '¿Contratación válida?'),
       N('a7', 'accion', 'V', 'Informar motivo'),
-      N('a8', 'accion', 'J', 'Calcular importe (Liquidación: un solo descuento)'),
-      N('a9', 'accion', 'C', 'Abonar (medio de pago)'),
+      N('a16', 'accion', 'J', 'Consultar cola de pendientes de pago'),
+      N('a8', 'accion', 'J', 'Calcular importe (un solo descuento)'),
+      N('a9', 'accion', 'C', 'Abonar'),
+      N('d9', 'decision', 'J', '¿Paga con tarjeta de crédito?'),
+      N('a20', 'accion', 'J', 'Ofrecer planes de cuotas (hasta los meses de la modalidad)'),
+      N('a21', 'accion', 'C', 'Elegir cantidad de cuotas'),
+      N('a22', 'accion', 'J', 'Calcular recargo y valor de cuota'),
       N('d4', 'decision', 'J', '¿Se concreta el pago?'),
-      N('a10', 'accion', 'J', 'Confirmar cobro y emitir comprobante'),
-      N('a11', 'accion', 'J', 'Activar suscripción (Constancia de suscripción)'),
+      N('a10', 'accion', 'J', 'Confirmar cobro'),
+      N('d7', 'decision', 'J', '¿Cambió el importe?'),
+      N('a17', 'accion', 'J', 'Emitir comprobante y registrar el cobro'),
+      N('a11', 'accion', 'J', 'Activar suscripción'),
+      N('d8', 'decision', 'J', '¿Se activó la suscripción?'),
+      N('a18', 'accion', 'J', 'Reabrir el pago (vuelve a Pendiente de pago)'),
       N('d5', 'decision', 'J', '¿Referido?'),
       N('a12', 'accion', 'J', 'Acreditar crédito al referente'),
+      N('r2', 'accion', 'C', 'Recibir comprobante y constancia de suscripción'),
       N('a13', 'accion', 'J', 'Registrar intento'),
       N('d6', 'decision', 'J', '¿Alcanzó el máximo de 3 intentos?'),
-      N('a14', 'accion', 'J', 'Cancelar contratación (Constancia de cancelación)'),
-      N('f', 'fin', 'C'), N('f2', 'fin', 'C')
+      N('a14', 'accion', 'J', 'Cancelar contratación'),
+      N('r3', 'accion', 'C', 'Recibir constancia de cancelación'),
+      N('f', 'fin', 'C'), N('f2', 'fin', 'C'),
+      // documentos (Artifact «Document», como en el PN01)
+      N('o1', 'documento', 'C', 'Identificación (DNI, nombre o apellido)'),
+      N('o2', 'documento', 'V', 'Ficha del cliente (plan, vencimiento, estado)'),
+      N('o3', 'documento', 'V', 'Planes disponibles (precio y límite de prendas)'),
+      N('o4', 'documento', 'C', 'Plan y modalidad elegidos'),
+      N('o5', 'documento', 'V', 'Aviso de desistimiento (motivo)'),
+      N('o6', 'documento', 'V', 'Orden de cobro (importe estimado)'),
+      N('o7', 'documento', 'V', 'Contratación pendiente de pago (precio mensual pactado)'),
+      N('o8', 'documento', 'V', 'Motivo de rechazo'),
+      N('o9', 'documento', 'J', 'Liquidación (un solo descuento)'),
+      N('o10', 'documento', 'C', 'Medio de pago e importe'),
+      N('o11', 'documento', 'J', 'Comprobante (CMP-NNNNNN-AAAAMMDD, cuotas y recargo)'),
+      N('o12', 'documento', 'J', 'Constancia de suscripción (vigencia)'),
+      N('o13', 'documento', 'J', 'Intento de pago (número, medio, motivo)'),
+      N('o14', 'documento', 'J', 'Constancia de cancelación'),
+      N('o15', 'documento', 'J', 'Planes de cuotas (1 sin interés; 3: 5 %; 6: 10 %; 12: 20 %)'),
+      N('o16', 'documento', 'C', 'Cuotas elegidas'),
+      N('o17', 'documento', 'J', 'Detalle de financiación (cuotas, recargo, valor de cuota)')
     ],
     flujos: [
-      F('i', 'a1'), F('a1', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'No'), F('a3', 'a4'), F('d1', 'a4', 'Sí'), F('a4', 'd2'),
-      F('d2', 'a5', 'No'), F('a5', 'f2'), F('d2', 'a6', 'Sí'), F('a6', 'd3'), F('d3', 'a7', 'No'), F('a7', 'f2'),
-      F('d3', 'a8', 'Sí'), F('a8', 'a9'), F('a9', 'd4'), F('d4', 'a10', 'Sí'), F('a10', 'a11'), F('a11', 'd5'),
-      F('d5', 'a12', 'Sí'), F('a12', 'f'), F('d5', 'f', 'No'),
-      F('d4', 'a13', 'No'), F('a13', 'd6'), F('d6', 'a8', 'No'), F('d6', 'a14', 'Sí'), F('a14', 'f2')
+      F('i', 'a1'), F('a1', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'No'), F('a3', 'a2'), F('d1', 'a4', 'Sí'), F('a4', 'd2'),
+      F('d2', 'a5', 'No'), F('a5', 'r1'), F('r1', 'f2'), F('d2', 'a19', 'Sí'), F('a19', 'a15'), F('a15', 'a6'), F('a6', 'd3'), F('d3', 'a7', 'No'), F('a7', 'd2'),
+      F('d3', 'a16', 'Sí'), F('a16', 'a8'), F('a8', 'a9'), F('a9', 'd9'), F('d9', 'a20', 'Sí'), F('a20', 'a21'), F('a21', 'a22'), F('a22', 'd4'), F('d9', 'd4', 'No'), F('d4', 'a10', 'Sí'), F('a10', 'd7'),
+      F('d7', 'a8', 'Sí'), F('d7', 'a17', 'No'), F('a17', 'a11'), F('a11', 'd8'), F('d8', 'a18', 'No'), F('a18', 'a16'),
+      F('d8', 'd5', 'Sí'), F('d5', 'a12', 'Sí'), F('a12', 'r2'), F('d5', 'r2', 'No'), F('r2', 'f'),
+      F('d4', 'a13', 'No'), F('a13', 'd6'), F('d6', 'a16', 'No'), F('d6', 'a14', 'Sí'), F('a14', 'r3'), F('r3', 'f2')
+    ],
+    // ida y vuelta de información: { de: acción, a: documento } = la produce; { de: documento, a: acción } = la usa
+    objetos: [
+      O('a1', 'o1'), O('o1', 'a2'),
+      O('a2', 'o2'), O('a3', 'o2'), O('o2', 'a4'), O('o2', 'a6'),
+      O('a4', 'o3'), O('o3', 'd2'),
+      O('a19', 'o4'), O('o4', 'a15'), O('o4', 'a6'),
+      O('a5', 'o5'), O('o5', 'r1'),
+      O('a15', 'o6'), O('o6', 'a9'),
+      O('a6', 'o7'), O('o7', 'a16'),
+      O('a7', 'o8'), O('o8', 'd2'),
+      O('a8', 'o9'), O('o9', 'a9'), O('o9', 'a10'),
+      O('a9', 'o10'), O('o10', 'd9'), O('o10', 'a10'), O('o10', 'a13'),
+      O('a20', 'o15'), O('o15', 'a21'), O('a21', 'o16'), O('o16', 'a22'), O('a22', 'o17'), O('o17', 'a10'),
+      O('a17', 'o11'), O('o11', 'r2'),
+      O('a11', 'o12'), O('o12', 'r2'),
+      O('a13', 'o13'), O('o13', 'd6'),
+      O('a14', 'o14'), O('o14', 'r3')
     ]
   },
   {
     tipo: 'actividad', id: 'ACT_pn03_promociones', titulo: 'Actividad — PN03 Métricas, promociones y toma de decisiones',
-    // Flujo corregido y aprobado: el sistema actúa dentro de cada carril. Cada acción es un método de
-    // BLL.AnalisisPromociones / BLL.SugerenciaPromocion / BLL.Promocion y cada decisión, una guarda.
-    // La vigencia es una región interrumpible: termina por la baja pedida por Ventas, la
-    // desactivación directa o la llegada de la fecha de fin.
+    // El sistema actúa dentro de cada carril. Cada acción es un método de BLL.AnalisisPromociones /
+    // BLL.SugerenciaPromocion / BLL.Promocion y cada decisión, una guarda de BE (PuedeEvaluarse, PuedeDictaminar,
+    // PuedeReformularse, PuedeResolverseBaja, PuedeDesactivarseDirecto, DebeVencer). Estados: SugerenciaPromocion
+    // Pendiente → Evaluada | Descartada; Promocion según Promocion.TransicionValida (BE/Promocion.cs:91-107).
+    // La promoción nace de una sugerencia de Gerencia (con el reporte de métricas: origen Abandono o Rotación;
+    // sin él: Manual) o del alta manual de Administración (CrearManual, sin sugerencia). La vigencia termina por
+    // la baja pedida por el Vendedor, la desactivación directa o la fecha de fin (CerrarVencidas, que corre al
+    // consultar las promociones); si se rechaza la baja vuelve a Vigente con el mismo dictamen contable.
     carriles: [{ id: 'G', nombre: 'Gerencia' }, { id: 'A', nombre: 'Administración' }, { id: 'K', nombre: 'Contabilidad' }, { id: 'V', nombre: 'Vendedor' }],
     nodos: [
       N('i', 'inicio', 'G'),
-      N('a1', 'accion', 'G', 'Analizar métricas: abandono por plan y rotación por categoría «Reporte de métricas»'),
+      N('d0', 'decision', 'G', '¿Cómo surge la promoción?'),
+      N('a1', 'accion', 'G', 'Analizar métricas: abandono por plan y rotación por categoría'),
       N('d1', 'decision', 'G', '¿Hay oportunidad?'),
       N('f0', 'fin', 'G'),
-      N('a2', 'accion', 'G', 'Registrar sugerencia con el origen de la métrica «Sugerencia de promoción»'),
+      N('a2', 'accion', 'G', 'Registrar sugerencia: queda Pendiente'),
       N('d2', 'decision', 'A', '¿Acepta la sugerencia?'),
-      N('a3', 'accion', 'A', 'Descartar sugerencia (motivo) «Constancia de descarte»'),
+      N('a3', 'accion', 'A', 'Descartar sugerencia con motivo: Descartada'),
       N('f1', 'fin', 'A'),
-      N('a4', 'accion', 'A', 'Crear promoción (desde la sugerencia o manual)'),
-      N('a5', 'accion', 'A', 'Validar (destino único, valor, fechas) → En revisión contable «Ficha de promoción»'),
+      N('a4', 'accion', 'A', 'Crear promoción desde la sugerencia'),
+      N('a4m', 'accion', 'A', 'Crear promoción manual, sin sugerencia'),
+      N('a5', 'accion', 'A', 'Validar (destino único, valor, fechas) → En revisión contable'),
       N('a6', 'accion', 'K', 'Analizar margen e impacto (beneficio estimado, promociones superpuestas)'),
       N('d3', 'decision', 'K', '¿Aprueba? (quien la creó no la dictamina)'),
-      N('a7', 'accion', 'K', 'Rechazada por Contabilidad «Dictamen contable»'),
+      N('a7', 'accion', 'K', 'Rechazada por Contabilidad'),
       N('d4', 'decision', 'A', '¿Reformular?'),
       N('a8', 'accion', 'A', 'Reformular las condiciones'),
-      N('a9', 'accion', 'A', 'Descartar promoción (motivo) «Constancia de descarte»'),
+      N('a9', 'accion', 'A', 'Descartar promoción con motivo: Descartada'),
       N('f2', 'fin', 'A'),
-      N('a10', 'accion', 'K', 'Vigente «Dictamen contable»: un solo descuento por cobro'),
-      N('d5', 'decision', 'A', '¿Qué interrumpe la vigencia?'),
-      N('a11', 'accion', 'V', 'Solicitar la baja (motivo) «Solicitud de baja»'),
+      N('a10', 'accion', 'K', 'Vigente: un solo descuento por cobro'),
+      N('d5', 'decision', 'A', '¿Qué la interrumpe?'),
+      N('a11', 'accion', 'V', 'Solicitar la baja con motivo: Baja solicitada'),
       N('d6', 'decision', 'A', '¿Aprueba la baja?'),
-      N('a12', 'accion', 'A', 'Desactivada «Resolución de baja» (informe a Gerencia)'),
-      N('a13', 'accion', 'A', 'Sigue Vigente «Resolución de baja» con motivo (informe a Ventas)'),
-      N('a14', 'accion', 'A', 'Desactivar directamente (motivo)'),
-      N('a15', 'accion', 'A', 'Vencida: ya no aplica en el cobro'),
-      N('f3', 'fin', 'A'), N('f4', 'fin', 'A')
+      N('a12', 'accion', 'A', 'Desactivada (informe a Gerencia)'),
+      N('a13', 'accion', 'A', 'Sigue Vigente con motivo (informe a Ventas)'),
+      N('a14', 'accion', 'A', 'Desactivar directamente con motivo: Desactivada'),
+      N('a15', 'accion', 'A', 'Vencida (el sistema la cierra al consultar): ya no aplica en el cobro'),
+      N('f3', 'fin', 'A'), N('f4', 'fin', 'A'),
+      // la información vuelve a quien la pidió (como en el PN01): Gerencia y Ventas reciben las resoluciones
+      N('g1', 'accion', 'G', 'Recibir constancia de descarte de la sugerencia'),
+      N('g2', 'accion', 'G', 'Recibir informe de la baja (promoción desactivada)'),
+      N('v1', 'accion', 'V', 'Recibir resolución de baja rechazada (sigue vigente)'),
+      // documentos (Artifact «Document», como en el PN01)
+      N('o1', 'documento', 'G', 'Reporte de métricas (abandono por plan, rotación por categoría)'),
+      N('o2', 'documento', 'G', 'Sugerencia de promoción (Pendiente)'),
+      N('o3', 'documento', 'A', 'Constancia de descarte de la sugerencia'),
+      N('o4', 'documento', 'A', 'Ficha de promoción (En revisión contable)'),
+      N('o5', 'documento', 'K', 'Dictamen contable (rechazo con observación)'),
+      N('o6', 'documento', 'K', 'Dictamen contable (aprobada: Vigente)'),
+      N('o7', 'documento', 'A', 'Constancia de descarte de la promoción'),
+      N('o8', 'documento', 'V', 'Solicitud de baja (motivo)'),
+      N('o9', 'documento', 'A', 'Resolución de baja')
     ],
+    // El orden de nodos y flujos fija la grilla de conv-actividad.js (EA-generador): no reordenar sin volver a revisar el layout.
     flujos: [
-      F('i', 'a1'), F('a1', 'd1'), F('d1', 'f0', 'No: sin promoción'), F('d1', 'a2', 'Sí'), F('a2', 'd2'),
-      F('d2', 'a3', 'No'), F('a3', 'f1'), F('d2', 'a4', 'Sí'), F('a4', 'a5'), F('a5', 'a6'), F('a6', 'd3'),
+      F('i', 'd0'), F('d0', 'a1', 'Gerencia analiza las métricas'), F('d0', 'a2', 'Idea propia de Gerencia (origen Manual)'),
+      F('d0', 'a4m', 'Alta manual de Administración'), F('a4m', 'a5'),
+      F('a1', 'd1'), F('d1', 'f0', 'No: sin promoción'), F('d1', 'a2', 'Sí: elige una (origen Abandono o Rotación)'), F('a2', 'd2'),
+      F('d2', 'a3', 'No'), F('a3', 'g1'), F('g1', 'f1'), F('d2', 'a4', 'Sí: la sugerencia queda Evaluada'), F('a4', 'a5'), F('a5', 'a6'), F('a6', 'd3'),
       F('d3', 'a7', 'No'), F('a7', 'd4'), F('d4', 'a8', 'Sí'), F('a8', 'a5'), F('d4', 'a9', 'No'), F('a9', 'f2'),
       F('d3', 'a10', 'Sí'), F('a10', 'd5'),
-      F('d5', 'a11', 'Ventas pide la baja'), F('a11', 'd6'), F('d6', 'a12', 'Sí'), F('a12', 'f3'), F('d6', 'a13', 'No'), F('a13', 'a10'),
+      F('d5', 'a11', 'El Vendedor pide la baja'), F('a11', 'd6'), F('d6', 'a12', 'Sí'), F('a12', 'g2'), F('g2', 'f3'), F('d6', 'a13', 'No'), F('a13', 'v1'), F('v1', 'a10'),
       F('d5', 'a14', 'Administración la desactiva'), F('a14', 'f3'),
       F('d5', 'a15', 'Llega la fecha de fin'), F('a15', 'f4')
+    ],
+    // ida y vuelta de información: { de: acción, a: documento } = la produce; { de: documento, a: acción } = la usa
+    objetos: [
+      O('a1', 'o1'), O('o1', 'a2'),
+      O('a2', 'o2'), O('o2', 'd2'), O('o2', 'a4'),
+      O('a3', 'o3'), O('o3', 'g1'),
+      O('a5', 'o4'), O('o4', 'a6'),
+      O('a7', 'o5'), O('o5', 'd4'), O('o5', 'a8'),
+      O('a10', 'o6'), O('o6', 'a11'),
+      O('a9', 'o7'),
+      O('a11', 'o8'), O('o8', 'd6'),
+      O('a12', 'o9'), O('a13', 'o9'), O('o9', 'g2'), O('o9', 'v1')
     ]
   },
   {
     tipo: 'actividad', id: 'ACT_pn04_devolucion', titulo: 'Actividad — PN04 Inspección de devolución',
+    // GUI/InspeccionDevolucionForm.cs (CU05-DEP), GUI/PedidosRealizados.cs › BtnReportarPerdida_Click (CU06-DEP),
+    // GUI/CargoPrendaDialog.cs y BLL/InspeccionDevolucion.cs: cargo y baja en UNA transacción (DAL/InspeccionDevolucion.cs).
+    // El cargo Pendiente lo suma el próximo cobro de la suscripción (BLL/Cobro.cs, CargoPrenda.ObtenerPendientesPorCliente).
     carriles: [{ id: 'C', nombre: 'Cliente' }, { id: 'D', nombre: 'Depósito' }, { id: 'S', nombre: 'Sistema' }],
     nodos: [
       N('i', 'inicio', 'C'), N('d0', 'decision', 'C', '¿Devuelve las prendas?'),
+      N('a0', 'accion', 'C', 'Devolver las prendas del pedido'),
       N('a1', 'accion', 'D', 'Registra la devolución: las prendas pasan a En limpieza'),
+      N('a8', 'accion', 'D', 'Consultar la cola de prendas En limpieza'),
       N('a2', 'accion', 'D', 'Inspecciona cada prenda'),
       N('d1', 'decision', 'D', '¿Desgaste normal?'),
       N('a3', 'accion', 'D', 'Aprueba el reingreso'),
       N('a4', 'accion', 'S', 'Prenda Disponible sin cargo (cierra mantenimiento y avisa a la lista de espera)'),
-      N('a5', 'accion', 'D', 'Indica motivo del daño y monto (o reporta la prenda perdida)'),
-      N('a6', 'accion', 'S', 'Registra el cargo contra el último cliente y luego da la prenda de baja'),
+      N('a9', 'accion', 'D', 'Consultar el detalle de prendas del pedido (En uso)'),
+      N('a5', 'accion', 'D', 'Indica motivo del daño o de la pérdida y monto'),
+      N('d2', 'decision', 'S', '¿Tiene último cliente y datos válidos?'),
+      N('a10', 'accion', 'D', 'Recibir el rechazo'),
+      N('a6', 'accion', 'S', 'Registra el cargo contra el último cliente y da la prenda de baja (una transacción)'),
       N('a7', 'accion', 'S', 'El cargo se suma al próximo cobro de la suscripción'),
-      N('f', 'fin', 'S'), N('f2', 'fin', 'S')
+      N('r1', 'accion', 'C', 'Recibir el próximo cobro con el cargo de reposición'),
+      N('f', 'fin', 'S'), N('f2', 'fin', 'C'), N('f3', 'fin', 'D'),
+      // documentos (Artifact «Document», como en el PN01)
+      N('o1', 'documento', 'C', 'Prendas devueltas (pedido)'),
+      N('o2', 'documento', 'D', 'Cola de prendas En limpieza (último cliente)'),
+      N('o3', 'documento', 'D', 'Detalle de prendas del pedido (estado)'),
+      N('o4', 'documento', 'D', 'Motivo y monto (precio de reposición)'),
+      N('o5', 'documento', 'S', 'Cargo de reposición (Pendiente, último cliente)'),
+      N('o6', 'documento', 'S', 'Detalle del próximo cobro (cargos sumados)'),
+      N('o7', 'documento', 'S', 'Motivo de rechazo'),
+      N('o8', 'documento', 'S', 'Reserva para la lista de espera (48 h)')
     ],
     flujos: [
-      F('i', 'd0'), F('d0', 'a1', 'Sí'), F('a1', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'Sí'), F('a3', 'a4'), F('a4', 'f'),
-      F('d1', 'a5', 'No, dañada'), F('d0', 'a5', 'No, perdida'), F('a5', 'a6'), F('a6', 'a7'), F('a7', 'f2')
+      F('i', 'd0'), F('d0', 'a0', 'Sí'), F('a0', 'a1'), F('a1', 'a8'), F('a8', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'Sí'), F('a3', 'a4'), F('a4', 'f'),
+      F('d1', 'a5', 'No, dañada'), F('d0', 'a9', 'No, perdida'), F('a9', 'a5'), F('a5', 'd2'), F('d2', 'a10', 'No'), F('a10', 'f3'),
+      F('d2', 'a6', 'Sí'), F('a6', 'a7'), F('a7', 'r1'), F('r1', 'f2')
+    ],
+    objetos: [
+      O('a0', 'o1'), O('o1', 'a1'),
+      O('a1', 'o2'), O('o2', 'a8'), O('o2', 'a2'),
+      O('a9', 'o3'), O('o3', 'a5'),
+      O('a5', 'o4'), O('o4', 'd2'), O('o4', 'a6'),
+      O('d2', 'o7'), O('o7', 'a10'),
+      O('a6', 'o5'), O('o5', 'a7'),
+      O('a7', 'o6'), O('o6', 'r1'),
+      O('a4', 'o8')
     ]
   }
 ];

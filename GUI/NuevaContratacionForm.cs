@@ -244,6 +244,10 @@ namespace GUI
                     ? string.Format(Tr("lbl.contr.importedesc", "Importe a abonar en Caja: {0:C2}\n(incluye un descuento de {1:C2}: {2})"),
                                     liq.Total, liq.Descuento, liq.NombrePromocion ?? Tr("lbl.contratacion.creditoreferido", "crédito por referido"))
                     : string.Format(Tr("lbl.contr.importe", "Importe a abonar en Caja: {0:C2}"), liq.Total);
+                // Upgrade: el plan nuevo rige desde hoy y se descuentan los días no usados del actual.
+                if (liq.CreditoCambioPlan > 0)
+                    lblImporte.Text += "\n" + string.Format(Tr("lbl.contr.upgrade",
+                        "Plan superior: rige desde hoy (crédito de {0:C2} por los días no usados)."), liq.CreditoCambioPlan);
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[NuevaContratacionForm] Importe: " + ex.Message); }
         }
@@ -270,11 +274,7 @@ namespace GUI
             try
             {
                 IdContratacionCreada = contratacionBLL.RegistrarContratacion(this.Text, _cliente.IdCliente, plan.IdPlan, modalidad.Value);
-                OfrecerImprimir(Tr("conf.contr.imprimirorden", "¿Imprimir la orden de cobro para que el cliente abone en Caja?"), () =>
-                {
-                    var c = contratacionBLL.ObtenerPorId(IdContratacionCreada);
-                    return Exportacion.DocumentosContratacion.OrdenDeCobro(c, contratacionBLL.CalcularImporte(c));
-                });
+                // La orden de cobro ya no se pregunta: Caja imprime la liquidación desde su cola si hace falta.
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -300,19 +300,9 @@ namespace GUI
                 int id = contratacionBLL.AsentarDesistimiento(this.Text, _cliente.IdCliente,
                     PlanSeleccionado()?.IdPlan, ModalidadSeleccionada(), motivo);
                 FueDesistimiento = true;
-                OfrecerImprimir(Tr("conf.ped.aviso", "¿Imprimir el aviso de desistimiento?"),
-                    () => Exportacion.DocumentosContratacion.AvisoDesistimiento(contratacionBLL.ObtenerDesistimiento(id)));
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
-            catch (Exception ex) { MostrarError(ex); }
-        }
-
-        private void OfrecerImprimir(string pregunta, Func<Exportacion.ReporteExportable> armar)
-        {
-            if (!ConfirmarSiNo(pregunta, this.Text, porDefectoNo: true))
-                return;
-            try { Exportacion.DocumentosContratacion.Imprimir(armar(), this); }
             catch (Exception ex) { MostrarError(ex); }
         }
 

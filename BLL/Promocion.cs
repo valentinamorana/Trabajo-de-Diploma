@@ -180,6 +180,12 @@ namespace BLL
             if (promocion.FechaFin.Date < promocion.FechaInicio.Date)
                 throw new BE.AppException("err.bll.promocion.rango_fechas_invalido",
                     "La fecha de fin no puede ser anterior a la fecha de inicio.");
+
+            // Una promoción que ya terminó nunca llegaría a aplicarse: se vencería al aprobarla.
+            if (promocion.FechaFin.Date < DateTime.Today)
+                throw new BE.AppException("err.bll.promocion.fecha_fin_pasada",
+                    "La fecha de fin ({0:dd/MM/yyyy}) ya pasó. Elegí una fecha de hoy en adelante.",
+                    promocion.FechaFin);
         }
 
         private static BE.Promocion Armar(string nombre, string descripcion, BE.TipoDescuento tipo, decimal valor,
@@ -286,6 +292,12 @@ namespace BLL
                 throw new BE.AppException("err.bll.promocion.revisioncontable_estado",
                     "Solo se pueden aprobar o rechazar promociones En Revisión Contable. Esta promoción está '{0}'.",
                     promocion.Estado);
+            // Mientras esperaba la revisión contable llegó su fecha de fin: aprobarla la dejaría
+            // Vigente un instante y se vencería sola. Se rechaza para que Administración la reformule.
+            if (aprobada && promocion.FechaFin.Date < DateTime.Today)
+                throw new BE.AppException("err.bll.promocion.aprobar_vencida",
+                    "La promoción terminó el {0:dd/MM/yyyy}: no se puede aprobar. Rechazala para que Administración la reformule con fechas nuevas.",
+                    promocion.FechaFin);
             if (!PuedeDictaminar(promocion))
                 throw new BE.AppException("err.bll.promocion.creador_no_dictamina",
                     "Quien creó la promoción no puede dictaminarla: la tiene que analizar otro usuario de Contabilidad.");

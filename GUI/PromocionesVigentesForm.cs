@@ -150,17 +150,8 @@ namespace GUI
                 MostrarOk(Tr("msg.promo.sugerenciabaja_enviada", "Se envió a Administración la sugerencia de baja de '{0}'.", new object[] { promocion.Nombre }));
                 CargarPromociones();
             }
-            catch (Exception ex) { MostrarError(ex); return; }
-
-            if (MessageBox.Show(Tr("conf.promo.imprimirsolicitud", "¿Imprimir la solicitud de baja?"), this.Text,
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-                return;
-            try
-            {
-                Docs.Imprimir(Docs.SolicitudBaja(promocionBLL.ObtenerPorId(promocion.IdPromocion),
-                                                 promocionBLL.ObtenerUltimaSolicitudBaja(promocion.IdPromocion)), this);
-            }
             catch (Exception ex) { MostrarError(ex); }
+            // La solicitud de baja está en el menú "Imprimir".
         }
 
         private void BtnImprimir_Click(object sender, EventArgs e) => menuDocumentos.Mostrar(btnImprimir);

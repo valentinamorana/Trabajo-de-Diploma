@@ -217,122 +217,127 @@
   {
     "id": "DSS_PN01_CU01_ArmarPedido",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU01-VEN Armar pedido y enviar a control de stock"
+    "titulo": "PN01 · CU01-VEN Armar Pedido y Enviar a Control de Stock"
   },
   {
     "id": "DSS_PN01_CU08_ControlarStock",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU04-DEP Controlar stock del pedido"
+    "titulo": "PN01 · CU04-DEP Controlar Stock del Pedido"
   },
   {
     "id": "DSS_PN01_CU09_GestionarFaltantes",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU05-VEN Comunicar faltantes, ajustar selección o desistir"
+    "titulo": "PN01 · CU05-VEN Comunicar Faltantes, Ajustar o Desistir"
   },
   {
     "id": "DSS_PN01_CU10_FormalizarPedido",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU06-VEN Formalizar pedido y preparar la confirmación"
+    "titulo": "PN01 · CU06-VEN Formalizar Pedido"
   },
   {
     "id": "DSS_PN01_CU02_ConsultarCatalogo",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU02-VEN Consultar catálogo"
+    "titulo": "PN01 · CU02-VEN Consultar Catálogo"
   },
   {
     "id": "DSS_PN01_CU03_ConsultarSituacionCliente",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU03-VEN Consultar situación del cliente"
+    "titulo": "PN01 · CU03-VEN Consultar Situación del Cliente"
   },
   {
     "id": "DSS_PN01_CU04_DespacharPedido",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU01-DEP Despachar pedido"
+    "titulo": "PN01 · CU01-DEP Despachar Pedido"
   },
   {
     "id": "DSS_PN01_CU05_RegistrarEntrega",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU02-DEP Registrar entrega"
+    "titulo": "PN01 · CU02-DEP Registrar Entrega"
   },
   {
     "id": "DSS_PN01_CU06_RegistrarDevolucion",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU03-DEP Registrar devolución (desbloquea la cuenta)"
+    "titulo": "PN01 · CU03-DEP Registrar Devolución"
   },
   {
     "id": "DSS_PN01_CU07_CancelarPedido",
     "tipo": "secuencia",
-    "titulo": "PN01 · CU04-VEN Cancelar pedido (patrón Command)"
+    "titulo": "PN01 · CU04-VEN Cancelar Pedido"
   },
   {
     "id": "DSS_PN02_CU01_VTA_GestionarSuscripcion",
     "tipo": "secuencia",
-    "titulo": "PN02 · CU01-VTA Gestionar suscripción (contratación)"
+    "titulo": "PN02 · CU01-VTA Gestionar Suscripción"
   },
   {
     "id": "DSS_PN02_CU01_CAJ_GestionarCobro",
     "tipo": "secuencia",
-    "titulo": "PN02 · CU01-CAJ Gestionar cobro (incluye CU02-CAJ Emitir comprobante)"
+    "titulo": "PN02 · CU01-CAJ Gestionar Cobro"
   },
   {
     "id": "DSS_PN02_CU02_CAJ_EmitirComprobante",
     "tipo": "secuencia",
-    "titulo": "PN02 · CU02-CAJ Emitir comprobante"
+    "titulo": "PN02 · CU02-CAJ Emitir Comprobante"
+  },
+  {
+    "id": "DSS_PN02_CU04_CAJ_FinanciarEnCuotas",
+    "tipo": "secuencia",
+    "titulo": "PN02 · CU04-CAJ Financiar en Cuotas"
   },
   {
     "id": "DSS_PN02_CU03_CAJ_CancelarContratacion",
     "tipo": "secuencia",
-    "titulo": "PN02 · CU03-CAJ Registrar intento y cancelar (3 intentos)"
+    "titulo": "PN02 · CU03-CAJ Registrar Intento y Cancelar Contratación"
   },
   {
     "id": "DSS_PN03_CU01_GER_SugerirPromocion",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU01-GER Sugerir promoción (incluye CU03-GER Analizar métricas)"
+    "titulo": "PN03 · CU01-GER Sugerir Promoción"
   },
   {
     "id": "DSS_PN03_CU01_ADM_GestionarPromociones",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU01-ADM Gestionar promociones (crear desde sugerencia o manual, reformular)"
+    "titulo": "PN03 · CU01-ADM Gestionar Promociones"
   },
   {
     "id": "DSS_PN03_CU03_ADM_DescartarSugerencia",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU03-ADM Descartar sugerencia (¿Acepta la sugerencia? No)"
+    "titulo": "PN03 · CU03-ADM Descartar Sugerencia"
   },
   {
     "id": "DSS_PN03_CU01_CONT_AnalizarPromocion",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU01-CONT Analizar promoción (margen e impacto → ¿Aprueba?)"
+    "titulo": "PN03 · CU01-CONT Analizar Promoción"
   },
   {
     "id": "DSS_PN03_CU04_ADM_DescartarPromocion",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU04-ADM Descartar promoción rechazada (¿Reformular? No)"
+    "titulo": "PN03 · CU04-ADM Descartar Promoción Rechazada"
   },
   {
     "id": "DSS_PN03_CU01_VEN_SugerirBaja",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU01-VEN Solicitar baja de promoción"
+    "titulo": "PN03 · CU07-VEN Solicitar Baja de Promoción"
   },
   {
     "id": "DSS_PN03_CU02_ADM_ResolverBaja",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU02-ADM Resolver baja de promoción (¿Aprueba la baja?)"
+    "titulo": "PN03 · CU02-ADM Resolver Baja de Promoción"
   },
   {
     "id": "DSS_PN03_CU05_ADM_DesactivarYVencer",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU05-ADM Desactivar promoción y cierre por fecha de fin"
+    "titulo": "PN03 · CU05-ADM Desactivar Promoción"
   },
   {
     "id": "DSS_PN04_CU01_DEP_InspeccionarDevolucion",
     "tipo": "secuencia",
-    "titulo": "PN04 · CU-DEP-01 Inspeccionar devolución"
+    "titulo": "PN04 · CU05-DEP Inspeccionar devolución"
   },
   {
     "id": "DSS_PN04_CU02_DEP_ReportarPrendaPerdida",
     "tipo": "secuencia",
-    "titulo": "PN04 · CU-DEP-02 Reportar prenda perdida"
+    "titulo": "PN04 · CU06-DEP Reportar prenda perdida"
   },
   {
     "id": "DSS_N01_CU04_GestionarPlanes",
@@ -340,9 +345,14 @@
     "titulo": "N01 · CU03-VEN Gestionar planes de suscripción"
   },
   {
+    "id": "DSS_PN03_CU03_GER_AnalizarMetricas",
+    "tipo": "secuencia",
+    "titulo": "PN03 · CU03-GER Analizar Métricas"
+  },
+  {
     "id": "DSS_PN03_CU02_GER_ConsultarAnalitica",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU02-GER Consultar analítica de negocio"
+    "titulo": "PN03 · CU02-GER Consultar Analítica de Negocio"
   },
   {
     "id": "CLASES_T02_login_logout",

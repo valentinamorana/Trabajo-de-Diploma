@@ -10,7 +10,7 @@ const USOS = {
   CLASES_T05_idiomas: [['GUI.FormIdiomas', 'BLL.IdiomaService'], ['GUI.FormIdiomas', 'GestorIdioma'], ['GestorIdioma', 'IIdiomaObserver'], ['GestorIdioma', 'Servicios.Multiidioma.Idioma'], ['Traductor', 'GestorIdioma'], ['BLL.IdiomaService', 'BE.Control'], ['BLL.IdiomaService', 'BE.FilaTraduccion']],
   CLASES_T06a_bitacora: [['GUI.Bitacora', 'BLL.Bitacora'], ['BLL.Bitacora', 'Servicios.Bitacora'], ['BLL.Bitacora', 'Servicios.BitacoraNegocio'], ['Servicios.Bitacora', 'BE.Bitacora'], ['Servicios.BitacoraNegocio', 'BE.BitacoraNegocio']],
   CLASES_T06b_control_cambios: [['GUI.VersionHistorialForm', 'BLL.VersionUsuario'], ['BLL.VersionUsuario', 'BLL.CuidadorHistorial'], ['BLL.VersionUsuario', 'BE.Usuario'], ['BLL.VersionUsuario', 'DAL.VersionUsuario'], ['BLL.CuidadorHistorial', 'IMemento'], ['BE.Usuario', 'IMemento']],
-  CLASES_T07_digitos_verificadores: [['BLL.Configuracion', 'CalculadorDV'], ['BLL.Configuracion', 'DAL.DigitoVerificador'], ['BLL.RecuperacionIntegridad', 'DAL.DigitoVerificador'], ['BLL.Configuracion', 'DAL.HistorialIntegridad'], ['CalculadorDV', 'ICalculadorDV'], ['CalculadorDV', 'Seguridad.DigitoVerificador'], ['DAL.DigitoVerificador', 'BE.FilaUsuarioDV']],
+  CLASES_T07_digitos_verificadores: [['GUI.DiagnosticoIntegridadForm', 'BLL.Configuracion'], ['GUI.DiagnosticoIntegridadForm', 'GUI.RecuperacionEspejoForm'], ['GUI.RecuperacionEspejoForm', 'BLL.RecuperacionIntegridad'], ['BLL.RecuperacionIntegridad', 'DAL.EspejoUsuario'], ['BLL.Configuracion', 'DAL.EspejoUsuario'], ['BLL.Configuracion', 'CalculadorDV'], ['BLL.Configuracion', 'DAL.DigitoVerificador'], ['BLL.RecuperacionIntegridad', 'DAL.DigitoVerificador'], ['BLL.Configuracion', 'DAL.HistorialIntegridad'], ['CalculadorDV', 'ICalculadorDV'], ['CalculadorDV', 'Seguridad.DigitoVerificador'], ['DAL.DigitoVerificador', 'BE.FilaUsuarioDV']],
   CLASES_T08_backup: [['GUI.BackupForm', 'BLL.Backup'], ['BLL.Backup', 'IBackupDAL'], ['BLL.Backup', 'CifradorArchivos'], ['BLL.Backup', 'Servicios.Bitacora'], ['DAL.Backup', 'IBackupDAL']]
 };
 
@@ -60,9 +60,10 @@ module.exports = [
   {
     tipo: 'clases', id: 'CLASES_T07_digitos_verificadores', titulo: 'Diagrama de clases — T07 Dígitos verificadores', columnas: 3,
     clases: [
-      E('BLL.Configuracion', { metodos: ['VerificarIntegridadDV', 'RecalcularIntegridadDV', 'AsegurarIntegridadUsuarios'] }), E('BLL.RecuperacionIntegridad', { metodos: 'all' }),
+      E('GUI.DiagnosticoIntegridadForm', { metodos: 'none' }), E('GUI.RecuperacionEspejoForm', { metodos: 'none' }),
+      E('BLL.Configuracion', { metodos: ['VerificarIntegridadDV', 'ObtenerDiagnostico', 'RecalcularIntegridadDV', 'RecalcularUsuario', 'AsegurarIntegridadUsuarios'] }), E('BLL.RecuperacionIntegridad', { metodos: 'all' }),
       E('ICalculadorDV', { metodos: 'all' }), E('CalculadorDV', { metodos: 'all' }), E('Seguridad.DigitoVerificador', { metodos: 'all' }),
-      E('DAL.DigitoVerificador', { metodos: 'all' }), E('DAL.HistorialIntegridad', { metodos: 'all' }), E('BE.FilaUsuarioDV', { attrs: 'all' })
+      E('DAL.DigitoVerificador', { metodos: 'all' }), E('DAL.EspejoUsuario', { metodos: 'all' }), E('DAL.HistorialIntegridad', { metodos: 'all' }), E('BE.FilaUsuarioDV', { attrs: 'all' })
     ]
   },
   {

@@ -4,59 +4,148 @@ flowchart TD
     i((" "))
     a1["Solicitar información"]
     d2{"¿Elige plan y modalidad?"}
-    a9["Abonar (medio de pago)"]
+    r1["Recibir aviso de desistimiento"]
+    a19["Elegir plan y modalidad"]
+    a9["Abonar"]
+    a21["Elegir cantidad de cuotas"]
+    r2["Recibir comprobante y constancia de suscripción"]
+    r3["Recibir constancia de cancelación"]
     f(((" ")))
     f2(((" ")))
+    o1[/"Identificación (DNI, nombre o apellido)"/]:::doc
+    o4[/"Plan y modalidad elegidos"/]:::doc
+    o10[/"Medio de pago e importe"/]:::doc
+    o16[/"Cuotas elegidas"/]:::doc
   end
   subgraph V["Vendedor"]
     direction TB
     a2["Identificar cliente (DNI, nombre o apellido)"]
     d1{"¿Registrado?"}
     a3["Registrar cliente (referente opcional)"]
-    a4["Presentar planes (Planes disponibles)"]
-    a5["Asentar desistimiento (aviso)"]
+    a4["Presentar planes"]
+    a5["Asentar desistimiento"]
+    a15["Estimar importe a abonar en Caja"]
     a6["Registrar contratación"]
     d3{"¿Contratación válida?"}
     a7["Informar motivo"]
+    o2[/"Ficha del cliente (plan, vencimiento, estado)"/]:::doc
+    o3[/"Planes disponibles (precio y límite de prendas)"/]:::doc
+    o5[/"Aviso de desistimiento (motivo)"/]:::doc
+    o6[/"Orden de cobro (importe estimado)"/]:::doc
+    o7[/"Contratación pendiente de pago (precio mensual pactado)"/]:::doc
+    o8[/"Motivo de rechazo"/]:::doc
   end
   subgraph J["Caja"]
     direction TB
-    a8["Calcular importe (Liquidación: un solo descuento)"]
+    a16["Consultar cola de pendientes de pago"]
+    a8["Calcular importe (un solo descuento)"]
+    d9{"¿Paga con tarjeta de crédito?"}
+    a20["Ofrecer planes de cuotas (hasta los meses de la modalidad)"]
+    a22["Calcular recargo y valor de cuota"]
     d4{"¿Se concreta el pago?"}
-    a10["Confirmar cobro y emitir comprobante"]
-    a11["Activar suscripción (Constancia de suscripción)"]
+    a10["Confirmar cobro"]
+    d7{"¿Cambió el importe?"}
+    a17["Emitir comprobante y registrar el cobro"]
+    a11["Activar suscripción"]
+    d8{"¿Se activó la suscripción?"}
+    a18["Reabrir el pago (vuelve a Pendiente de pago)"]
     d5{"¿Referido?"}
     a12["Acreditar crédito al referente"]
     a13["Registrar intento"]
     d6{"¿Alcanzó el máximo de 3 intentos?"}
-    a14["Cancelar contratación (Constancia de cancelación)"]
+    a14["Cancelar contratación"]
+    o9[/"Liquidación (un solo descuento)"/]:::doc
+    o11[/"Comprobante (CMP-NNNNNN-AAAAMMDD, cuotas y recargo)"/]:::doc
+    o12[/"Constancia de suscripción (vigencia)"/]:::doc
+    o13[/"Intento de pago (número, medio, motivo)"/]:::doc
+    o14[/"Constancia de cancelación"/]:::doc
+    o15[/"Planes de cuotas (1 sin interés; 3: 5 %; 6: 10 %; 12: 20 %)"/]:::doc
+    o17[/"Detalle de financiación (cuotas, recargo, valor de cuota)"/]:::doc
   end
   i --> a1
   a1 --> a2
   a2 --> d1
   d1 -- "No" --> a3
-  a3 --> a4
+  a3 --> a2
   d1 -- "Sí" --> a4
   a4 --> d2
   d2 -- "No" --> a5
-  a5 --> f2
-  d2 -- "Sí" --> a6
+  a5 --> r1
+  r1 --> f2
+  d2 -- "Sí" --> a19
+  a19 --> a15
+  a15 --> a6
   a6 --> d3
   d3 -- "No" --> a7
-  a7 --> f2
-  d3 -- "Sí" --> a8
+  a7 --> d2
+  d3 -- "Sí" --> a16
+  a16 --> a8
   a8 --> a9
-  a9 --> d4
+  a9 --> d9
+  d9 -- "Sí" --> a20
+  a20 --> a21
+  a21 --> a22
+  a22 --> d4
+  d9 -- "No" --> d4
   d4 -- "Sí" --> a10
-  a10 --> a11
-  a11 --> d5
+  a10 --> d7
+  d7 -- "Sí" --> a8
+  d7 -- "No" --> a17
+  a17 --> a11
+  a11 --> d8
+  d8 -- "No" --> a18
+  a18 --> a16
+  d8 -- "Sí" --> d5
   d5 -- "Sí" --> a12
-  a12 --> f
-  d5 -- "No" --> f
+  a12 --> r2
+  d5 -- "No" --> r2
+  r2 --> f
   d4 -- "No" --> a13
   a13 --> d6
-  d6 -- "No" --> a8
+  d6 -- "No" --> a16
   d6 -- "Sí" --> a14
-  a14 --> f2
+  a14 --> r3
+  r3 --> f2
+  a1 -.-> o1
+  o1 -.-> a2
+  a2 -.-> o2
+  a3 -.-> o2
+  o2 -.-> a4
+  o2 -.-> a6
+  a4 -.-> o3
+  o3 -.-> d2
+  a19 -.-> o4
+  o4 -.-> a15
+  o4 -.-> a6
+  a5 -.-> o5
+  o5 -.-> r1
+  a15 -.-> o6
+  o6 -.-> a9
+  a6 -.-> o7
+  o7 -.-> a16
+  a7 -.-> o8
+  o8 -.-> d2
+  a8 -.-> o9
+  o9 -.-> a9
+  o9 -.-> a10
+  a9 -.-> o10
+  o10 -.-> d9
+  o10 -.-> a10
+  o10 -.-> a13
+  a20 -.-> o15
+  o15 -.-> a21
+  a21 -.-> o16
+  o16 -.-> a22
+  a22 -.-> o17
+  o17 -.-> a10
+  a17 -.-> o11
+  o11 -.-> r2
+  a11 -.-> o12
+  o12 -.-> r2
+  a13 -.-> o13
+  o13 -.-> d6
+  a14 -.-> o14
+  o14 -.-> r3
+  classDef doc fill:#d4efe8,stroke:#307060
   classDef ini fill:#222,stroke:#222,color:#222
   class i,f,f2 ini

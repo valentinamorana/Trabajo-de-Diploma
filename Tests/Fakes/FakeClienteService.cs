@@ -36,8 +36,13 @@ namespace Tests.Fakes
         // PN02 — mismo espía: a los tests de ConfirmarCobro les alcanza con saber que
         // "algo tipo ActivarSuscripcion" fue invocado, sin importar cuál de los dos overloads.
         public BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
-            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
-            => ActivarSuscripcion(modulo, cliente, idPlan, modalidad);
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m,
+            bool iniciarHoy = false)
+        {
+            UltimoIniciarHoy = iniciarHoy;
+            return ActivarSuscripcion(modulo, cliente, idPlan, modalidad);
+        }
+        public bool UltimoIniciarHoy { get; private set; }
 
         // Resto del contrato: no ejercitado por estos tests, cuerpos mínimos.
         public List<BE.Cliente> ObtenerTodos() => new List<BE.Cliente>();

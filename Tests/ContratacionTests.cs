@@ -19,7 +19,10 @@ namespace Tests
     public class ContratacionTests
     {
         private const int IdEfectivo = 1;
-        private const int IdTarjeta  = 2;
+        private const int IdTarjeta  = 2;   // Tarjeta de débito: no financia
+        private const int IdTarjetaCredito = 4;
+        // PlanCuotas del seed: 1 → 1 cuota 0 %; 2 → 3 cuotas 5 %; 3 → 6 cuotas 10 %; 4 → 12 cuotas 20 %.
+        private const int Plan1Cuota = 1, Plan3Cuotas = 2, Plan6Cuotas = 3, Plan12Cuotas = 4;
 
         [TestInitialize] public void Setup()   => SessionManager.Logout();
         [TestCleanup]    public void Cleanup() => SessionManager.Logout();
@@ -938,6 +941,350 @@ namespace Tests
             SessionManager.Logout();
             LoginComoAdministrador();
             Assert.IsTrue(new BLL.Cliente(new FakeClienteDAL()).PuedeCorregirPlanDirectamente());
+        }
+        // ══ Caja: ¿Tarjeta de crédito? → planes de cuotas → recargo y valor de cuota ══
+
+        [TestMethod]
+        public void PoliticaCuotas_Financiar_CalculaRecargoTotalYValorDeCuota()
+        {
+            var f = BE.PoliticaCuotas.Financiar(1000m, new BE.PlanCuotas { IdPlanCuotas = 4, CantidadCuotas = 12, RecargoPorcentaje = 20m });
+            Assert.AreEqual(12, f.CantidadCuotas);
+            Assert.AreEqual(200m, f.Recargo);
+            Assert.AreEqual(1200m, f.TotalFinanciado);
+            Assert.AreEqual(100m, f.ValorCuota);
+
+            var unPago = BE.PoliticaCuotas.Financiar(1000m, null);
+            Assert.AreEqual(1, unPago.CantidadCuotas);
+            Assert.AreEqual(0m, unPago.Recargo);
+            Assert.AreEqual(1000m, unPago.ValorCuota);
+
+            // Redondeo a 2 decimales: 3 cuotas con 5 % sobre 999,99
+            var r = BE.PoliticaCuotas.Financiar(999.99m, new BE.PlanCuotas { CantidadCuotas = 3, RecargoPorcentaje = 5m });
+            Assert.AreEqual(50.00m, r.Recargo);
+            Assert.AreEqual(350.00m, r.ValorCuota);
+        }
+
+        [TestMethod]
+        public void ObtenerPlanesCuotas_NoOfreceMasCuotasQueMesesDeLaModalidad()
+        {
+            var bll = new Contexto().Crear();
+            CollectionAssert.AreEqual(new[] { 1 },
+                bll.ObtenerPlanesCuotas(BE.Builders.ModalidadCobro.Mensual).Select(p => p.CantidadCuotas).ToArray());
+            CollectionAssert.AreEqual(new[] { 1, 3 },
+                bll.ObtenerPlanesCuotas(BE.Builders.ModalidadCobro.Trimestral).Select(p => p.CantidadCuotas).ToArray());
+            CollectionAssert.AreEqual(new[] { 1, 3, 6, 12 },
+                bll.ObtenerPlanesCuotas(BE.Builders.ModalidadCobro.Anual).Select(p => p.CantidadCuotas).ToArray());
+        }
+
+        [TestMethod]
+        public void ObtenerPlanesCuotas_PlanInactivo_NoSeOfrece()
+        {
+            var ctx = new Contexto();
+            ctx.DalContratacion.PlanesCuotas.Find(p => p.CantidadCuotas == 6).Activo = false;
+            CollectionAssert.AreEqual(new[] { 1, 3, 12 },
+                ctx.Crear().ObtenerPlanesCuotas(BE.Builders.ModalidadCobro.Anual).Select(p => p.CantidadCuotas).ToArray());
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_TarjetaCreditoEn3CuotasTrimestral_RegistraPlanYRecargoDel5PorCiento()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var contratacion = ctx.Pendiente();
+            contratacion.Modalidad = BE.Builders.ModalidadCobro.Trimestral;
+
+            var liq = ctx.Crear().ConfirmarCobro("Test", contratacion, IdTarjetaCredito, null, Plan3Cuotas);
+
+            Assert.IsTrue(liq.Total > 0);
+            Assert.AreEqual(1, ctx.DalContratacion.ConfirmarCobroVeces);
+            Assert.AreEqual(IdTarjetaCredito, ctx.DalContratacion.UltimoIdMedioPago);
+            Assert.AreEqual(Plan3Cuotas, ctx.DalContratacion.UltimoIdPlanCuotas);
+            decimal recargo = Math.Round(liq.Total * 0.05m, 2, MidpointRounding.AwayFromZero);
+            Assert.AreEqual(recargo, ctx.DalContratacion.UltimoRecargoCuotas);
+            // El importe del cobro (sin recargo) es el mismo: el recargo se guarda aparte.
+            Assert.AreEqual(liq.Total, ctx.DalContratacion.UltimoImporte);
+            Assert.AreEqual(3, liq.CantidadCuotas);
+            Assert.AreEqual(recargo, liq.RecargoCuotas);
+            Assert.AreEqual(liq.Total + recargo, liq.TotalConRecargo);
+            Assert.AreEqual(Math.Round((liq.Total + recargo) / 3, 2, MidpointRounding.AwayFromZero), liq.ValorCuota);
+            Assert.AreEqual(1, ctx.ClienteBLL.ActivarSuscripcionVeces);
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_TarjetaCreditoSinElegirCuotas_UnSoloPagoSinRecargo()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var contratacion = ctx.Pendiente();
+
+            var liq = ctx.Crear().ConfirmarCobro("Test", contratacion, IdTarjetaCredito);
+
+            Assert.AreEqual(Plan1Cuota, ctx.DalContratacion.UltimoIdPlanCuotas);
+            Assert.AreEqual(0m, ctx.DalContratacion.UltimoRecargoCuotas);
+            Assert.AreEqual(1, liq.CantidadCuotas);
+            Assert.AreEqual(liq.Total, liq.TotalConRecargo);
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_MedioQueNoFinancia_NoRegistraPlanNiRecargo()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var contratacion = ctx.Pendiente();
+
+            var liq = ctx.Crear().ConfirmarCobro("Test", contratacion, IdEfectivo);
+
+            Assert.IsNull(ctx.DalContratacion.UltimoIdPlanCuotas);
+            Assert.IsNull(ctx.DalContratacion.UltimoRecargoCuotas);
+            Assert.AreEqual(1, liq.CantidadCuotas);
+            Assert.AreEqual(0m, liq.RecargoCuotas);
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_CuotasConTarjetaDeDebito_LanzaCuotasMedio_SinCobrar()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var contratacion = ctx.Pendiente();
+            contratacion.Modalidad = BE.Builders.ModalidadCobro.Anual;
+
+            EsperarError(() => ctx.Crear().ConfirmarCobro("Test", contratacion, IdTarjeta, null, Plan6Cuotas),
+                "err.bll.contratacion.cuotas_medio");
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces);
+            Assert.AreEqual(0, ctx.ClienteBLL.ActivarSuscripcionVeces);
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_MasCuotasQueMesesDeLaModalidad_LanzaCuotasModalidad_SinCobrar()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var contratacion = ctx.Pendiente();   // Mensual: 1 cuota como máximo
+
+            EsperarError(() => ctx.Crear().ConfirmarCobro("Test", contratacion, IdTarjetaCredito, null, Plan3Cuotas),
+                "err.bll.contratacion.cuotas_modalidad");
+            contratacion.Modalidad = BE.Builders.ModalidadCobro.Trimestral;   // hasta 3
+            EsperarError(() => ctx.Crear().ConfirmarCobro("Test", contratacion, IdTarjetaCredito, null, Plan12Cuotas),
+                "err.bll.contratacion.cuotas_modalidad");
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces);
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_PlanDeCuotasInexistenteOInactivo_LanzaCuotasInvalidas_SinCobrar()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var contratacion = ctx.Pendiente();
+            contratacion.Modalidad = BE.Builders.ModalidadCobro.Anual;
+
+            EsperarError(() => ctx.Crear().ConfirmarCobro("Test", contratacion, IdTarjetaCredito, null, 99),
+                "err.bll.contratacion.cuotas_invalidas");
+            ctx.DalContratacion.PlanesCuotas.Find(p => p.IdPlanCuotas == Plan6Cuotas).Activo = false;
+            EsperarError(() => ctx.Crear().ConfirmarCobro("Test", contratacion, IdTarjetaCredito, null, Plan6Cuotas),
+                "err.bll.contratacion.cuotas_invalidas");
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces);
+        }
+
+        [TestMethod]
+        public void CalcularImporte_TarjetaCreditoEn12CuotasAnual_DevuelveDetalleDeFinanciacion()
+        {
+            var ctx = new Contexto();
+            var contratacion = ContratacionPendiente();
+            contratacion.Modalidad = BE.Builders.ModalidadCobro.Anual;
+
+            var liq = ctx.Crear().CalcularImporte(contratacion, IdTarjetaCredito, Plan12Cuotas);
+
+            Assert.AreEqual(12, liq.CantidadCuotas);
+            Assert.AreEqual(20m, liq.RecargoPorcentaje);
+            Assert.AreEqual(Math.Round(liq.Total * 0.20m, 2, MidpointRounding.AwayFromZero), liq.RecargoCuotas);
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces, "Calcular no cobra.");
+        }
+        [TestMethod]
+        public void MedioDePagoHistorico_NoSeOfreceNiSeAceptaEnUnCobroNuevo()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalContratacion.MediosPago.Add(new BE.MedioPago { IdMedioPago = 9, Nombre = "Tarjeta (anterior a débito/crédito)", ClaveTraduccion = "medio.tarjeta_historica", Activo = false });
+            var contratacion = ctx.Pendiente();
+            var bll = ctx.Crear();
+
+            Assert.IsFalse(bll.ObtenerMediosPago().Any(m => m.IdMedioPago == 9), "Un medio histórico no se ofrece en Caja.");
+            EsperarError(() => bll.ConfirmarCobro("Test", contratacion, 9), "err.bll.contratacion.medio_invalido");
+            Assert.AreEqual(0, ctx.DalContratacion.ConfirmarCobroVeces);
+        }
+
+        // ══ Upgrade: el plan nuevo rige desde hoy y se cobra la diferencia ═════
+
+        private static BE.PlanSuscripcion PlanBasico()  => new BE.PlanSuscripcion { IdPlan = 2, Nombre = "Básico",  LimitePrendas = 3, Precio = 1000m, Estado = true };
+        private static BE.PlanSuscripcion PlanPremium() => new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Premium", LimitePrendas = 6, Precio = 3000m, Estado = true };
+
+        // Cliente con el Básico vigente por 15 días más que contrata el Premium (IdPlan 1).
+        private static Contexto ContextoUpgrade(out BE.Contratacion c)
+        {
+            var ctx = new Contexto();
+            ctx.DalPlan.PlanPorId = PlanPremium();
+            ctx.DalPlan.Planes = new List<BE.PlanSuscripcion> { PlanPremium(), PlanBasico() };
+            ctx.DalCliente.ClientePorId.IdPlan = 2;
+            ctx.DalCliente.ClientePorId.FechaVencimiento = DateTime.Today.AddDays(15);
+            c = ctx.Pendiente();
+            c.PrecioMensual = 3000m;
+            return ctx;
+        }
+
+        [TestMethod]
+        public void PoliticaCambioPlan_PlanMasCaroConPeriodoVigente_CreditoPorDiasNoUsados()
+        {
+            var cliente = new BE.Cliente { IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(15) };
+            // 1000 por mes × 15 días / 30 = 500
+            Assert.AreEqual(500m, BE.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
+        }
+
+        [TestMethod]
+        public void PoliticaCambioPlan_PlanIgualOMasBarato_NoEsUpgrade()
+        {
+            var cliente = new BE.Cliente { IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(15) };
+            Assert.IsFalse(BE.PoliticaCambioPlan.EsUpgrade(cliente, PlanPremium(), 2, 1000m, DateTime.Today), "Más barato.");
+            Assert.IsFalse(BE.PoliticaCambioPlan.EsUpgrade(cliente, PlanPremium(), 1, 3000m, DateTime.Today), "Mismo plan (renovación).");
+        }
+
+        [TestMethod]
+        public void PoliticaCambioPlan_PlanVencido_NoHayCredito()
+        {
+            var cliente = new BE.Cliente { IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(-3) };
+            Assert.AreEqual(0m, BE.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
+        }
+
+        [TestMethod]
+        public void PoliticaCambioPlan_SuscripcionPausada_NoAcreditaLosDiasDePausa()
+        {
+            // Vence en 25 días, pero 10 de esos son pausa que todavía no pasó: pagados quedan 15.
+            var cliente = new BE.Cliente
+            {
+                IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(25), FechaPausaHasta = DateTime.Today.AddDays(10)
+            };
+            Assert.AreEqual(15, BE.PoliticaCambioPlan.DiasRestantes(cliente, DateTime.Today));
+            Assert.AreEqual(500m, BE.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
+        }
+
+        [TestMethod]
+        public void PoliticaCambioPlan_CreditoMayorQueLoQueQuedaPorCobrar_SeLimita()
+        {
+            var cliente = new BE.Cliente { IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(300) };
+            Assert.AreEqual(3000m, BE.PoliticaCambioPlan.Credito(cliente, PlanBasico(), 1, 3000m, DateTime.Today, 3000m));
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_Upgrade_CobraLaDiferenciaYElPlanNuevoRigeDesdeHoy()
+        {
+            LoginComoAdministrador();
+            var ctx = ContextoUpgrade(out var c);
+
+            var liq = ctx.Crear().ConfirmarCobro("Test", c, IdEfectivo);
+
+            Assert.AreEqual(3000m, liq.Bruto);
+            Assert.AreEqual(500m, liq.CreditoCambioPlan);
+            Assert.AreEqual(2500m, liq.Total);
+            Assert.AreEqual(2500m, ctx.DalContratacion.UltimoImporte);
+            Assert.AreEqual(500m, ctx.DalContratacion.UltimoCreditoCambioPlan);
+            Assert.IsTrue(ctx.ClienteBLL.UltimoIniciarHoy, "El período del plan nuevo arranca hoy.");
+        }
+
+        [TestMethod]
+        public void CalcularImporte_Upgrade_LaLiquidacionYaMuestraElCredito()
+        {
+            LoginComoAdministrador();
+            var ctx = ContextoUpgrade(out var c);
+            var liq = ctx.Crear().CalcularImporte(c);
+            Assert.AreEqual(500m, liq.CreditoCambioPlan);
+            Assert.AreEqual(2500m, liq.Total);
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_RenovacionDelMismoPlan_SinCreditoYAContinuacion()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCliente.ClientePorId.IdPlan = 1;
+            ctx.DalCliente.ClientePorId.FechaVencimiento = DateTime.Today.AddDays(15);
+            var c = ctx.Pendiente();
+
+            var liq = ctx.Crear().ConfirmarCobro("Test", c, IdEfectivo);
+
+            Assert.AreEqual(0m, liq.CreditoCambioPlan);
+            Assert.IsNull(ctx.DalContratacion.UltimoCreditoCambioPlan);
+            Assert.IsFalse(ctx.ClienteBLL.UltimoIniciarHoy);
+        }
+
+        [TestMethod]
+        public void Builder_IniciarHoy_ElPeriodoArrancaHoyAunqueQuedeTiempoPagado()
+        {
+            var cliente = new BE.Cliente { IdPlan = 2, FechaVencimiento = DateTime.Today.AddDays(15) };
+
+            var upgrade = BE.Builders.DirectorSuscripcion.Construir(
+                BE.Builders.SuscripcionBuilderFactory.Crear(BE.Builders.ModalidadCobro.Mensual), cliente, PlanPremium(), iniciarHoy: true);
+            var renovacion = BE.Builders.DirectorSuscripcion.Construir(
+                BE.Builders.SuscripcionBuilderFactory.Crear(BE.Builders.ModalidadCobro.Mensual), cliente, PlanPremium());
+
+            Assert.AreEqual(DateTime.Today, upgrade.InicioPeriodo);
+            Assert.AreEqual(DateTime.Today.AddDays(15), renovacion.InicioPeriodo, "Sin upgrade sigue a continuación.");
+        }
+
+        // ══ Anular contratación (Caja, con motivo) ═══════════════════════════
+
+        [TestMethod]
+        public void Anular_Pendiente_LaCancelaConMotivo()
+        {
+            LoginComoCaja();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+
+            ctx.Crear().Anular("Test", c, "  El cliente se arrepintió  ");
+
+            Assert.AreEqual(1, ctx.DalContratacion.AnularVeces);
+            Assert.AreEqual("El cliente se arrepintió", ctx.DalContratacion.UltimoMotivoAnulacion);
+            Assert.AreEqual(5, ctx.DalContratacion.UltimoIdCaja);
+            Assert.AreEqual(0, ctx.DalContratacion.RegistrarIntentoVeces, "No inventa intentos de pago.");
+        }
+
+        [TestMethod]
+        public void Anular_SinMotivo_LanzaSinMotivo_SinTocarElDAL()
+        {
+            LoginComoCaja();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            EsperarError(() => ctx.Crear().Anular("Test", c, "   "), "err.bll.contratacion.anular_sin_motivo");
+            Assert.AreEqual(0, ctx.DalContratacion.AnularVeces);
+        }
+
+        [TestMethod]
+        public void Anular_ContratacionYaPagada_LanzaAnularEstado()
+        {
+            LoginComoCaja();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            c.Estado = BE.EstadoContratacion.Pagada;
+            EsperarError(() => ctx.Crear().Anular("Test", c, "Error de carga"), "err.bll.contratacion.anular_estado");
+            Assert.AreEqual(0, ctx.DalContratacion.AnularVeces);
+        }
+
+        [TestMethod]
+        public void Anular_OtraSesionLaResolvio_LanzaCobrarConcurrente()
+        {
+            LoginComoCaja();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            ctx.DalContratacion.AnularResultado = false;
+            EsperarError(() => ctx.Crear().Anular("Test", c, "Error de carga"), "err.bll.contratacion.cobrar_concurrente");
+        }
+
+        [TestMethod]
+        public void Anular_Vendedor_NoTienePermiso()
+        {
+            LoginComoVendedor();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            EsperarError(() => ctx.Crear().Anular("Test", c, "Error de carga"), "err.bll.sin_permiso");
+            Assert.AreEqual(0, ctx.DalContratacion.AnularVeces);
         }
     }
 }

@@ -12,6 +12,7 @@ namespace BLL
     {
         private readonly DAL.Interfaces.IClienteDAL        dalCliente;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
+        private readonly DAL.Interfaces.IPedidoDAL          dalPedido;   // null en tests que no lo inyectan: no se consulta
         private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
@@ -23,11 +24,13 @@ namespace BLL
         // (antes dalPlan era un DAL.PlanSuscripcion concreto fijo — ActivarSuscripcion y la
         // rama de cambio de plan de Modificar quedaban sin poder testearse con un Fake, mismo
         // problema que ya se había resuelto en BLL.Renovacion/CambioPlanHandler).
-        public Cliente() : this(new DAL.Cliente(), new DAL.PlanSuscripcion()) { }
-        public Cliente(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPlanSuscripcionDAL dalPlan = null)
+        public Cliente() : this(new DAL.Cliente(), new DAL.PlanSuscripcion(), new DAL.Pedido()) { }
+        public Cliente(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPlanSuscripcionDAL dalPlan = null,
+                       DAL.Interfaces.IPedidoDAL dalPedido = null)
         {
             this.dalCliente = dalCliente;
             this.dalPlan    = dalPlan ?? new DAL.PlanSuscripcion();
+            this.dalPedido  = dalPedido;
         }
 
         // Devuelve todos los clientes con plan y stock utilizado.
@@ -135,6 +138,17 @@ namespace BLL
 
             var actual = dalCliente.ObtenerPorId(cliente.IdCliente);
 
+            // El formulario de edición no maneja la gracia por falta de pago, la pausa ni el beneficio
+            // por referido (los fijan el cobro, la renovación y Caja): se conservan los de la BD. Si
+            // llegaran vacíos, editar un email levantaría una suspensión, borraría la pausa o haría
+            // que el referente cobre el beneficio otra vez en la próxima activación.
+            if (actual != null)
+            {
+                cliente.FechaLimiteGracia         = actual.FechaLimiteGracia;
+                cliente.FechaPausaHasta           = actual.FechaPausaHasta;
+                cliente.BeneficioReferidoOtorgado = actual.BeneficioReferidoOtorgado;
+            }
+
             // PN02 — cambiar el plan o el vencimiento desde acá es una corrección
             // administrativa puntual (no pasa por Caja, no dispara el Builder ni el
             // beneficio de referido de ActivarSuscripcionInterna): reservado a Administrador
@@ -174,7 +188,7 @@ namespace BLL
         }
 
         // Da de baja a un cliente.
-        // No se puede eliminar si tiene prendas actualmente en uso.
+        // No se puede eliminar si tiene prendas en uso, una contratación pendiente o un pedido en curso.
         public void Baja(string modulo, BE.Cliente cliente)
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
@@ -188,6 +202,12 @@ namespace BLL
             if (dalCliente.TieneContratacionPendiente(cliente.IdCliente))
                 throw new BE.AppException("err.bll.cliente.baja_contratacion",
                     "No se puede dar de baja a {0}: tiene una contratación pendiente de pago. Caja tiene que cobrarla o cancelarla primero.",
+                    cliente.NombreCompleto);
+
+            // PN01: un pedido en el circuito quedaría huérfano en la cola de Depósito.
+            if (dalPedido != null && dalPedido.TienePedidoActivo(cliente.IdCliente))
+                throw new BE.AppException("err.bll.cliente.baja_pedido",
+                    "No se puede dar de baja a {0}: tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo primero.",
                     cliente.NombreCompleto);
 
             dalCliente.Baja(cliente.IdCliente);
@@ -231,14 +251,17 @@ namespace BLL
         // es CajaEditar/Caja, ya exigido en BLL.Contratacion.ConfirmarCobro antes de llamar a
         // este método — por eso NO vuelve a pedir el permiso de Vendedor.
         public BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
-            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m,
+            bool iniciarHoy = false)
         {
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
-            return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad, consumoCredito);
+            return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad, consumoCredito, iniciarHoy);
         }
 
+        // iniciarHoy: upgrade (BE.PoliticaCambioPlan) — el período arranca hoy, no al vencer el actual.
         private BE.Builders.Suscripcion ActivarSuscripcionInterna(
-            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m)
+            string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m,
+            bool iniciarHoy = false)
         {
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
 
@@ -254,7 +277,7 @@ namespace BLL
             DescontarPausaNoUsada(cliente);
 
             var builder = BE.Builders.SuscripcionBuilderFactory.Crear(modalidad);
-            var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, plan);
+            var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, plan, iniciarHoy);
 
             cliente.IdPlan           = plan.IdPlan;
             cliente.NombrePlan       = plan.Nombre;

@@ -2,20 +2,39 @@ sequenceDiagram
   autonumber
   actor A as Administrador
   participant F as Diagnostico<br/>IntegridadForm
+  participant C as BLL.<br/>Configuracion
+  participant X as Recuperacion<br/>EspejoForm
   participant R as BLL.Recuperacion<br/>Integridad
   participant D as DAL.Digito<br/>Verificador
-  participant H as DAL.Historial<br/>Integridad
+  participant E as DAL.Espejo<br/>Usuario
+  participant U as DAL.Usuario
   A->>F: Abre el diagnóstico de integridad
-  F->>R: Diagnosticar()
-  R->>D: ObtenerFilasUsuario()
-  R->>D: ObtenerDVV("Usuario")
-  R-->>F: DiagnosticoEspejo (filas alteradas, faltantes, DVV)
-  alt Hay alteraciones
-    A->>F: Elige reparar desde el espejo o asumir la pérdida
-    F->>R: RepararDesdeEspejo() o AsumirPerdida()
-    R->>D: RecalcularTabla(tabla, pkCol, columnas)
-    R->>H: Insertar(entrada)
-    R-->>F: integridad restablecida
-  else Sin alteraciones
-    R-->>F: Integro = true
+  F->>C: ObtenerDiagnostico()
+  C->>D: ObtenerFilasUsuario()
+  C->>D: ObtenerDVV("Usuario")
+  C-->>F: ResultadoDiagnostico (ÍNTEGRO o COMPROMETIDO, filas con DVH inválido)
+  F-->>A: Estado general y filas con inconsistencias
+  alt Recalcular todo
+    A->>F: Recalcular Todo y confirma con credenciales de Administrador (BtnRecalcularTodo_Click)
+    F->>C: RecalcularIntegridadDV()
+    C->>D: RecalcularTablaUsuario()
+    C->>E: Reconstruir(filas)
+    C-->>F: dígitos recalculados
+  else Recuperar datos desde el espejo
+    A->>F: Abre la consola del espejo (BtnEspejo_Click)
+    F->>X: Abre la consola del espejo (ventana modal)
+    X->>R: Diagnosticar()
+    R->>D: ObtenerFilasUsuario()
+    R->>E: ObtenerFilas()
+    R-->>X: DiagnosticoEspejo (filas alteradas, faltantes, DVV)
+    alt Reparar desde el espejo
+      X->>R: RepararDesdeEspejo()
+      R->>E: ObtenerFilas()
+      R->>U: RevertirDesdeEspejoEnTx(conexion, tx, valoresEspejo)
+      R->>C: RecalcularUsuario()
+    else Asumir la pérdida
+      X->>R: AsumirPerdida()
+      R->>C: RecalcularIntegridadDV()
+    end
+    X-->>A: Diagnóstico actualizado
   end

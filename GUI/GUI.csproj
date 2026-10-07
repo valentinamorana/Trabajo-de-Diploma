@@ -391,6 +391,7 @@
     <Compile Include="Exportacion\GeneradorDocumentoPromocion.cs" />
     <Compile Include="Exportacion\DocumentosPromocion.cs" />
     <Compile Include="MenuDocumentosPromocion.cs" />
+    <Compile Include="MenuDocumentosPedido.cs" />
     <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
     <Compile Include="Exportacion\GeneradorVentasVendedor.cs" />
     <Compile Include="Exportacion\GeneradorRotacion.cs" />

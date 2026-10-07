@@ -101,6 +101,8 @@ classDiagram
   }
   class BLL_SugerenciaPromocion["BLL.SugerenciaPromocion"] {
     +ObtenerPendientes() List~SugerenciaPromocion~
+    +ObtenerTodas() List~SugerenciaPromocion~
+    +ObtenerPorId(int) SugerenciaPromocion
     +RegistrarSugerencia(string,  OrigenMetrica,  int?,  string,  string,  TipoDescuento,  decimal) int
     +DescartarSugerencia(string,  int,  string) void
   }
@@ -108,6 +110,10 @@ classDiagram
     +ObtenerTodas() List~Promocion~
     +ObtenerParaVentas() List~Promocion~
     +ObtenerPendientesRevisionContable() List~Promocion~
+    +ObtenerPorId(int) Promocion
+    +ObtenerHistorial(int) List~PromocionHistorial~
+    +ObtenerUltimoDictamen(int) DictamenContable
+    +ObtenerUltimaSolicitudBaja(int) SolicitudBajaPromocion
     +ObtenerDescarte(int) PromocionHistorial
     +CrearDesdeSugerencia(string,  int,  string,  string,  TipoDescuento,  decimal,  DateTime,  DateTime,  decimal,  string) int
     +CrearManual(string,  string,  string,  TipoDescuento,  decimal,  DateTime,  DateTime,  int?,  string,  decimal,  string) int
@@ -127,6 +133,7 @@ classDiagram
   class DAL_Interfaces_IPromocionDAL["DAL.Interfaces.IPromocionDAL"] {
     <<interface>>
     +ObtenerTodas() List~Promocion~
+    +ObtenerPendientesRevisionContable() List~Promocion~
     +ObtenerPorId(int) Promocion
     +Alta(Promocion,  PromocionHistorial) int
     +Reformular(Promocion,  PromocionHistorial) bool
@@ -139,11 +146,53 @@ classDiagram
   }
   class DAL_Interfaces_ISugerenciaPromocionDAL["DAL.Interfaces.ISugerenciaPromocionDAL"] {
     <<interface>>
+    +ObtenerPendientes() List~SugerenciaPromocion~
     +ObtenerPorId(int) SugerenciaPromocion
     +Alta(SugerenciaPromocion) int
     +MarcarEvaluada(int,  DateTime) bool
     +ReabrirEvaluacion(int) void
     +Descartar(int,  string,  DateTime) bool
+  }
+  class BLL_AnalisisRotacion["BLL.AnalisisRotacion"] {
+    +Detectar() List~RotacionPrenda~
+  }
+  class DAL_Interfaces_IPlanSuscripcionDAL["DAL.Interfaces.IPlanSuscripcionDAL"] {
+    <<interface>>
+    +ObtenerTodos() List~PlanSuscripcion~
+    +ObtenerPorId(int) PlanSuscripcion
+  }
+  class BLL_ReporteVentasVendedor["BLL.ReporteVentasVendedor"] {
+    +Obtener() List~DesempenoVendedor~
+  }
+  class BLL_AnalisisMantenimiento["BLL.AnalisisMantenimiento"] {
+    +Detectar() List~TiempoMantenimientoPrenda~
+  }
+  class BLL_AnalisisEscasez["BLL.AnalisisEscasez"] {
+    +Detectar(int) List~EscasezStock~
+  }
+  class BLL_RecomendacionPrendas["BLL.RecomendacionPrendas"] {
+    +Recomendar(int) List~PrendaRecomendada~
+  }
+  class DAL_Interfaces_IPedidoDAL["DAL.Interfaces.IPedidoDAL"] {
+    <<interface>>
+    +ObtenerFechaUltimoPedidoPorCliente() Dictionary~int, DateTime~
+    +ObtenerEstadisticasPorEmpleado() List~DesempenoVendedor~
+    +ObtenerCantidadPedidosPorPrenda() Dictionary~int, int~
+    +ObtenerPrendasHistoricasPorCliente(int) List~Prenda~
+  }
+  class DAL_Interfaces_IClienteDAL["DAL.Interfaces.IClienteDAL"] {
+    <<interface>>
+    +ObtenerTodos() List~Cliente~
+  }
+  class DAL_Interfaces_IPrendaDAL["DAL.Interfaces.IPrendaDAL"] {
+    <<interface>>
+    +ObtenerTodos() List~Prenda~
+    +ObtenerDisponibles(int?) List~Prenda~
+    +ObtenerConteoDisponiblesPorTalleCategoria() List~StockPorTalleCategoria~
+  }
+  class DAL_Interfaces_IMantenimientoPrendaDAL["DAL.Interfaces.IMantenimientoPrendaDAL"] {
+    <<interface>>
+    +ObtenerTodos() List~MantenimientoPrenda~
   }
   ReporteMetricas --> "*" CandidataSugerencia : Oportunidades
   Promocion --> "0..1" SugerenciaPromocion : IdSugerenciaOrigen
@@ -152,6 +201,16 @@ classDiagram
   SolicitudBajaPromocion --> "1" Promocion : IdPromocion
   AnalisisImpactoPromocion --> "1" Promocion : Promocion
   AnalisisImpactoPromocion --> "*" Promocion : Superpuestas
+  BLL_AnalisisPromociones ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
   BLL_SugerenciaPromocion ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa
+  BLL_SugerenciaPromocion ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
   BLL_Promocion ..> DAL_Interfaces_IPromocionDAL : usa
   BLL_Promocion ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa
+  BLL_Promocion ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
+  BLL_AnalisisRotacion ..> DAL_Interfaces_IPrendaDAL : usa
+  BLL_AnalisisRotacion ..> DAL_Interfaces_IPedidoDAL : usa
+  BLL_ReporteVentasVendedor ..> DAL_Interfaces_IPedidoDAL : usa
+  BLL_AnalisisMantenimiento ..> DAL_Interfaces_IMantenimientoPrendaDAL : usa
+  BLL_AnalisisEscasez ..> DAL_Interfaces_IPrendaDAL : usa
+  BLL_RecomendacionPrendas ..> DAL_Interfaces_IPedidoDAL : usa
+  BLL_RecomendacionPrendas ..> DAL_Interfaces_IPrendaDAL : usa

@@ -14,6 +14,7 @@ namespace BLL
         private readonly DAL.Interfaces.ICobroDAL dalCobro;
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
         private readonly DAL.Interfaces.ICargoPrendaDAL dalCargoPrenda;
+        private readonly DAL.Interfaces.IPromocionDAL dalPromocion;   // null: cobro sin promociones
         private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
         private readonly Manejadores.ManejadorCobro cadena;
@@ -27,6 +28,7 @@ namespace BLL
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalCobro = dalCobro ?? throw new ArgumentNullException(nameof(dalCobro));
             this.dalCargoPrenda = dalCargoPrenda ?? throw new ArgumentNullException(nameof(dalCargoPrenda));
+            this.dalPromocion = dalPromocion;
 
             // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
             // Program.cs del ejemplo de cátedra (director.AgregarSiguiente(directorGeneral);
@@ -103,17 +105,41 @@ namespace BLL
                 .ToList();
         }
 
-        // Anticipa lo que el próximo cobro del cliente va a sumar por cargos de daño/pérdida
-        // pendientes (los mismos que ProcesarPagoHandler suma al cobrar). Antes la suma la
-        // hacía CobroSuscripcionForm.
-        public BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente)
+        // Anticipa el próximo cobro del cliente con la misma cuenta que ProcesarPagoHandler:
+        // período (precio × meses) con el único descuento del ciclo + cargos por daño/pérdida
+        // pendientes. Así el operador ve el total ANTES de procesar.
+        public BE.PrevisualizacionCobro PrevisualizarCobro(int idCliente,
+            BE.Builders.ModalidadCobro modalidad = BE.Builders.ModalidadCobro.Mensual)
         {
             var pendientes = dalCargoPrenda.ObtenerPendientesPorCliente(idCliente) ?? new List<BE.CargoPrenda>();
-            return new BE.PrevisualizacionCobro
+            var previa = new BE.PrevisualizacionCobro
             {
                 CantidadCargosPendientes = pendientes.Count,
                 TotalCargosPendientes    = pendientes.Sum(c => c.Monto)
             };
+
+            var cliente = dalCliente.ObtenerPorId(idCliente);
+            if (cliente != null && cliente.TienePlan())
+            {
+                var r = Manejadores.ProcesarPagoHandler.CalcularDescuento(cliente, modalidad, ObtenerPromocionesVigentes());
+                previa.Bruto = r.Bruto;
+                previa.Descuento = r.Descuento;
+                previa.NombrePromocion = r.Promocion?.Nombre;
+                previa.UsaCreditoReferido = r.UsaCreditoReferido;
+            }
+            return previa;
+        }
+
+        // Igual que ProcesarPagoHandler: sin DAL de promociones o si falla la consulta, sin promociones.
+        private List<BE.Promocion> ObtenerPromocionesVigentes()
+        {
+            if (dalPromocion == null) return new List<BE.Promocion>();
+            try { return dalPromocion.ObtenerVigentes(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning("[BLL.Cobro] Promociones no disponibles: " + ex.Message);
+                return new List<BE.Promocion>();
+            }
         }
     }
 }

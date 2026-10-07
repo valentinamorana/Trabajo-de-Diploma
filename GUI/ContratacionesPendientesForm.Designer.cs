@@ -21,6 +21,9 @@ namespace GUI
             this.panelTop = new System.Windows.Forms.Panel();
             this.lblMedioPago = new System.Windows.Forms.Label();
             this.cmbMedioPago = new System.Windows.Forms.ComboBox();
+            this.lblCuotas = new System.Windows.Forms.Label();
+            this.cmbCuotas = new System.Windows.Forms.ComboBox();
+            this.lblDetalleCuotas = new System.Windows.Forms.Label();
             this.btnCobrar = new System.Windows.Forms.Button();
             this.btnIntentoFallido = new System.Windows.Forms.Button();
             this.btnRefrescar = new System.Windows.Forms.Button();
@@ -30,6 +33,7 @@ namespace GUI
             this.btnImprimirLiquidacion = new System.Windows.Forms.Button();
             this.btnImprimirComprobante = new System.Windows.Forms.Button();
             this.btnImprimirConstancia = new System.Windows.Forms.Button();
+            this.btnAnular = new System.Windows.Forms.Button();
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
             this.dgvContrataciones = new System.Windows.Forms.DataGridView();
@@ -44,6 +48,9 @@ namespace GUI
             this.panelTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(235)))), ((int)(((byte)(245)))));
             this.panelTop.Controls.Add(this.lblMedioPago);
             this.panelTop.Controls.Add(this.cmbMedioPago);
+            this.panelTop.Controls.Add(this.lblCuotas);
+            this.panelTop.Controls.Add(this.cmbCuotas);
+            this.panelTop.Controls.Add(this.lblDetalleCuotas);
             this.panelTop.Controls.Add(this.btnCobrar);
             this.panelTop.Controls.Add(this.btnIntentoFallido);
             this.panelTop.Controls.Add(this.btnRefrescar);
@@ -53,11 +60,12 @@ namespace GUI
             this.panelTop.Controls.Add(this.btnImprimirLiquidacion);
             this.panelTop.Controls.Add(this.btnImprimirComprobante);
             this.panelTop.Controls.Add(this.btnImprimirConstancia);
+            this.panelTop.Controls.Add(this.btnAnular);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
             this.panelTop.Padding = new System.Windows.Forms.Padding(8, 6, 8, 4);
-            this.panelTop.Size = new System.Drawing.Size(900, 92);
+            this.panelTop.Size = new System.Drawing.Size(900, 124);
             this.panelTop.TabIndex = 0;
             //
             // lblMedioPago
@@ -79,6 +87,35 @@ namespace GUI
             this.cmbMedioPago.Name = "cmbMedioPago";
             this.cmbMedioPago.Size = new System.Drawing.Size(140, 21);
             this.cmbMedioPago.TabIndex = 1;
+            this.cmbMedioPago.SelectedIndexChanged += new System.EventHandler(this.CmbMedioPago_SelectedIndexChanged);
+            //
+            // lblCuotas — PN02: pago en cuotas con tarjeta de crédito
+            //
+            this.lblCuotas.Location = new System.Drawing.Point(8, 90);
+            this.lblCuotas.Name = "lblCuotas";
+            this.lblCuotas.Size = new System.Drawing.Size(90, 23);
+            this.lblCuotas.TabIndex = 12;
+            this.lblCuotas.Tag = "lbl.contr.cuotas";
+            this.lblCuotas.Text = "Cuotas:";
+            this.lblCuotas.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // cmbCuotas — los planes se cargan en runtime (ContratacionesPendientesForm.CargarCuotas)
+            //
+            this.cmbCuotas.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbCuotas.Enabled = false;
+            this.cmbCuotas.Location = new System.Drawing.Point(102, 91);
+            this.cmbCuotas.Name = "cmbCuotas";
+            this.cmbCuotas.Size = new System.Drawing.Size(190, 21);
+            this.cmbCuotas.TabIndex = 2;
+            this.cmbCuotas.SelectedIndexChanged += new System.EventHandler(this.CmbCuotas_SelectedIndexChanged);
+            //
+            // lblDetalleCuotas — «Detalle de financiación»
+            //
+            this.lblDetalleCuotas.Location = new System.Drawing.Point(300, 90);
+            this.lblDetalleCuotas.Name = "lblDetalleCuotas";
+            this.lblDetalleCuotas.Size = new System.Drawing.Size(592, 23);
+            this.lblDetalleCuotas.TabIndex = 14;
+            this.lblDetalleCuotas.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // btnCobrar
             //
@@ -90,7 +127,7 @@ namespace GUI
             this.btnCobrar.Location = new System.Drawing.Point(252, 15);
             this.btnCobrar.Name = "btnCobrar";
             this.btnCobrar.Size = new System.Drawing.Size(100, 28);
-            this.btnCobrar.TabIndex = 2;
+            this.btnCobrar.TabIndex = 3;
             this.btnCobrar.Tag = "contratacion.btn.cobrar";
             this.btnCobrar.Text = "Cobrar";
             this.btnCobrar.UseVisualStyleBackColor = false;
@@ -106,7 +143,7 @@ namespace GUI
             this.btnIntentoFallido.Location = new System.Drawing.Point(360, 15);
             this.btnIntentoFallido.Name = "btnIntentoFallido";
             this.btnIntentoFallido.Size = new System.Drawing.Size(160, 28);
-            this.btnIntentoFallido.TabIndex = 3;
+            this.btnIntentoFallido.TabIndex = 4;
             this.btnIntentoFallido.Tag = "contratacion.btn.intentofallido";
             this.btnIntentoFallido.Text = "Intento Fallido";
             this.btnIntentoFallido.UseVisualStyleBackColor = false;
@@ -118,7 +155,7 @@ namespace GUI
             this.btnRefrescar.Location = new System.Drawing.Point(528, 15);
             this.btnRefrescar.Name = "btnRefrescar";
             this.btnRefrescar.Size = new System.Drawing.Size(84, 28);
-            this.btnRefrescar.TabIndex = 4;
+            this.btnRefrescar.TabIndex = 5;
             this.btnRefrescar.Text = "Actualizar";
             this.tip.SetToolTip(this.btnRefrescar, "Actualizar");
             this.btnRefrescar.Click += new System.EventHandler(this.BtnRefrescar_Click);
@@ -130,7 +167,7 @@ namespace GUI
             this.lblConteo.Location = new System.Drawing.Point(620, 18);
             this.lblConteo.Name = "lblConteo";
             this.lblConteo.Size = new System.Drawing.Size(272, 23);
-            this.lblConteo.TabIndex = 5;
+            this.lblConteo.TabIndex = 6;
             this.lblConteo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // cmbVista
@@ -201,6 +238,21 @@ namespace GUI
             this.btnImprimirConstancia.UseVisualStyleBackColor = false;
             this.btnImprimirConstancia.Click += new System.EventHandler(this.BtnImprimirConstancia_Click);
             //
+            // btnAnular
+            //
+            this.btnAnular.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(150)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnAnular.Enabled = false;
+            this.btnAnular.FlatAppearance.BorderSize = 0;
+            this.btnAnular.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAnular.ForeColor = System.Drawing.Color.White;
+            this.btnAnular.Location = new System.Drawing.Point(780, 52);
+            this.btnAnular.Name = "btnAnular";
+            this.btnAnular.Size = new System.Drawing.Size(110, 28);
+            this.btnAnular.Tag = "contratacion.btn.anular";
+            this.btnAnular.Text = "Anular";
+            this.btnAnular.UseVisualStyleBackColor = false;
+            this.btnAnular.Click += new System.EventHandler(this.BtnAnular_Click);
+            //
             // panelStatus
             //
             this.panelStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(235)))), ((int)(((byte)(245)))));
@@ -239,12 +291,12 @@ namespace GUI
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvContrataciones.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgvContrataciones.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvContrataciones.Location = new System.Drawing.Point(0, 92);
+            this.dgvContrataciones.Location = new System.Drawing.Point(0, 124);
             this.dgvContrataciones.Name = "dgvContrataciones";
             this.dgvContrataciones.ReadOnly = true;
             this.dgvContrataciones.RowHeadersVisible = false;
             this.dgvContrataciones.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvContrataciones.Size = new System.Drawing.Size(900, 414);
+            this.dgvContrataciones.Size = new System.Drawing.Size(900, 350);
             this.dgvContrataciones.TabIndex = 1;
             this.dgvContrataciones.SelectionChanged += new System.EventHandler(this.DgvContrataciones_SelectionChanged);
             //
@@ -274,6 +326,9 @@ namespace GUI
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.Label lblMedioPago;
         private System.Windows.Forms.ComboBox cmbMedioPago;
+        private System.Windows.Forms.Label lblCuotas;
+        private System.Windows.Forms.ComboBox cmbCuotas;
+        private System.Windows.Forms.Label lblDetalleCuotas;
         private System.Windows.Forms.Button btnCobrar;
         private System.Windows.Forms.Button btnIntentoFallido;
         private System.Windows.Forms.Button btnRefrescar;
@@ -282,6 +337,7 @@ namespace GUI
         private System.Windows.Forms.Button btnImprimirLiquidacion;
         private System.Windows.Forms.Button btnImprimirComprobante;
         private System.Windows.Forms.Button btnImprimirConstancia;
+        private System.Windows.Forms.Button btnAnular;
         private System.Windows.Forms.ToolTip tip;
         private System.Windows.Forms.Label lblConteo;
         private System.Windows.Forms.Panel panelStatus;

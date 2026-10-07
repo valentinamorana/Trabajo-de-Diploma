@@ -20,8 +20,11 @@ classDiagram
     +Cancelar(string,  Pedido,  string) void
   }
   class BLL_Pedido["BLL.Pedido"] {
+    +ObtenerTodos() List~Pedido~
+    +ObtenerPorId(int) Pedido
     +VerificarVigencia(int) Cliente
     +RevisarPedidoActivo(Cliente) void
+    +ValidarPuedeArmarPedido(int) Cliente
     +EnviarAControlStock(string,  int,  List~Prenda~) int
     +AsentarDesistimiento(string,  int,  List~Prenda~,  string) int
     +AsentarDesistimiento(string,  Pedido,  string,  EtapaDesistimiento,  List~Prenda~) void
@@ -38,6 +41,7 @@ classDiagram
     +MarcarEntregado(string,  Pedido) void
     +RegistrarDevolucion(string,  Pedido) void
     +Cancelar(string,  Pedido,  string) void
+    +ComprobarCupo(Cliente,  int) PlanSuscripcion
   }
   class Pedido {
     +int IdPedido
@@ -52,6 +56,6 @@ classDiagram
   BLL_Comandos_DevolucionCommand ..> BLL_Interfaces_IPedidoService : usa
   BLL_Comandos_DevolucionCommand ..> BLL_Pedido : usa
   BLL_Interfaces_IPedidoService <|.. BLL_Pedido
-  BLL_Comandos_InvocadorPedido --> "*" BLL_Comandos_PedidoCommand : órdenes
-  BLL_Comandos_PedidoCommand --> "1" BLL_Interfaces_IPedidoService : receptor
-  BLL_Comandos_PedidoCommand --> "1" Pedido : pedido
+  BLL_Comandos_InvocadorPedido --> "*" BLL_Comandos_PedidoCommand : _ordenes
+  BLL_Comandos_PedidoCommand --> "1" BLL_Interfaces_IPedidoService : _receptor
+  BLL_Comandos_PedidoCommand --> "1" Pedido : _pedido

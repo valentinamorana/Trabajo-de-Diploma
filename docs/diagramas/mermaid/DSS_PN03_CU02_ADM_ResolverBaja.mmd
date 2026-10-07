@@ -4,19 +4,50 @@ sequenceDiagram
   participant F as Promociones<br/>AdministracionForm
   participant B as BLL.Promocion
   participant D as DAL.Promocion
+  Note over A,F: ¿Aprueba la baja? (solicitada por Ventas en CU07-VEN)
+  F->>B: ObtenerTodas()
+  B-->>F: promociones (las de baja solicitada muestran el motivo de Ventas)
   A->>F: Elige una promoción con baja solicitada y revisa el motivo de Ventas
-  alt Aprueba la baja (observación opcional)
+  alt Aprueba la baja: "Aprobar Baja"
+    A->>F: Ingresa una observación (opcional)
     F->>B: AprobarBaja(modulo, promocion, observacion)
-  else Rechaza la baja (motivo obligatorio)
+    B->>B: ResolverBaja(promocion, resultado, destino, motivoResolucion)  [Aprobada → Desactivada, observación vacía = null]
+  else Rechaza la baja: "Rechazar Baja"
+    A->>F: Ingresa el motivo (obligatorio)
     F->>B: RechazarBaja(modulo, promocion, motivo)
+    alt Sin motivo
+      B-->>F: AppException(motivorechazobaja_requerido)
+      F-->>A: Informa el motivo
+    else Con motivo
+      B->>B: ResolverBaja(promocion, resultado, destino, motivoResolucion)  [Rechazada → Vigente, el dictamen contable no se toca]
+    end
   end
-  Note over B: Exigir(PromocionesAdminEditar) · promocion.PuedeResolverseBaja() · solicitud pendiente
-  B->>D: ObtenerSolicitudesBaja(idPromocion)
-  B->>D: ResolverBaja(resolucion, historial: BajaSolicitada → Desactivada o Vigente)  [claim, el dictamen contable no se toca]
-  alt Otra sesión ya la resolvió
-    D-->>B: false
-    B-->>F: AppException(estado_concurrente)
-  else Resuelta
-    B-->>F: idSolicitud
-    F-->>A: Resolución de baja (PDF): informe a Gerencia (aprobada) o a Ventas (rechazada)
+  Note over B: ResolverBaja: PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)
+  alt No está con baja solicitada (PuedeResolverseBaja / TransicionValida(destino))
+    B-->>F: AppException(resolverbaja_estado)
+    F-->>A: Informa el motivo
+  else Baja solicitada
+    B->>D: ObtenerSolicitudesBaja(idPromocion)  [la última pendiente]
+    alt Sin solicitud pendiente
+      B-->>F: AppException(solicitud_inexistente)
+      F-->>A: Informa el motivo
+    else Solicitud pendiente
+      B->>D: ResolverBaja(resolucion, historial)  [claim: WHERE Estado = BajaSolicitada, actualiza la solicitud, historial: BajaSolicitada → Desactivada o Vigente]
+      alt false: otra sesión ya la resolvió
+        D-->>B: false
+        B-->>F: AppException(estado_concurrente)
+        F-->>A: Informa el motivo
+      else true
+        D-->>B: true
+        Note over B: bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion o Venta, …)
+        B-->>F: idSolicitud
+        F-->>A: "Promoción dada de baja" o "Se rechazó la baja: sigue vigente"
+        F->>B: ObtenerTodas()  [recarga]
+        opt ¿Imprimir la resolución de baja? Sí
+          F->>B: ObtenerPorId(idPromocion)
+          F->>B: ObtenerUltimaSolicitudBaja(idPromocion)
+          F-->>A: Resolución de baja (PDF): informe a Gerencia (aprobada) o a Ventas (rechazada)
+        end
+      end
+    end
   end

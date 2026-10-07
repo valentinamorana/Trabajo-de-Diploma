@@ -6,17 +6,24 @@ sequenceDiagram
   participant K as Cancelacion<br/>Command
   participant B as BLL.Pedido
   participant D as DAL.Pedido
-  V->>F: Selecciona un pedido Pendiente, indica el motivo y pulsa Cancelar
-  F->>I: TomarOrden(new CancelacionCommand(pedido, motivo))
+  participant H as DAL.Pedido<br/>Historial
+  Note over F,K: Patrón Command: PedidosVenta (Client) arma CancelacionCommand y se lo entrega a InvocadorPedido (Invoker), BLL.Pedido es el Receiver
+  V->>F: Selecciona un pedido Pendiente o Separado y pulsa Cancelar
+  F->>B: ObtenerPorId(id)  [relee el estado actual]
+  B-->>F: pedido
+  V->>F: Indica el motivo y confirma
+  F->>I: TomarOrden(new CancelacionCommand(receptor, pedido, modulo, motivo))
   F->>I: ProcesarOrdenes()
   I->>K: Ejecutar()
   K->>B: Cancelar(modulo, pedido, motivo)
-  Note over B: Exigir(PedidosVentaEditar) · pedido.PuedeCancelarse() · el motivo es obligatorio
-  alt No está Pendiente o falta el motivo
-    B-->>F: AppException(cancelar_estado / cancelar_sin_motivo)
+  Note over B: Exigir(PedidosVentaEditar) · pedido.PuedeCancelarse(): Pendiente o Separado · motivo obligatorio (hasta 500 caracteres)
+  alt No está Pendiente ni Separado o falta el motivo
+    B-->>F: AppException(cancelar_estado_separado / cancelar_sin_motivo / motivo_largo)
     F-->>V: Informa el error
   else Válido
-    B->>D: Cancelar(idPedido, motivo)  [libera las prendas a Disponible]
+    B->>D: Cancelar(idPedido, idCliente, estadoEsperado, motivo)  [libera las prendas a Disponible]
+    B->>H: RegistrarCambios(cambios)  [Accion = CANCELAR]
     B-->>F: ok
-    F-->>V: Pedido Cancelado (se puede des-cancelar si las prendas siguen disponibles)
+    F-->>V: Pedido Cancelado: prendas liberadas
+    Note over B: Reactivar (DesCancelar, otra acción): vuelve a EnControlStock revalidando vigencia, pedido activo y cupo, Depósito revisa el stock de nuevo
   end

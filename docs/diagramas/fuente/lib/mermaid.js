@@ -72,7 +72,8 @@ function secuencia(m) {
       } else if (s.loop) {
         L.push(`${pad}loop ${seq(s.loop)}`); emitir(s.pasos, sang + 1); L.push(`${pad}end`);
       } else if (s.nota) {
-        L.push(`${pad}Note over ${s.sobre.join(',')}: ${seq(s.nota)}`);
+        // Mermaid acepta a lo sumo dos participantes en "Note over": con más, la nota abarca del primero al último.
+        L.push(`${pad}Note over ${(s.sobre.length > 2 ? [s.sobre[0], s.sobre[s.sobre.length - 1]] : s.sobre).join(',')}: ${seq(s.nota)}`);
       } else if (s.ret) {
         L.push(`${pad}${s.de}-->>${s.a}: ${seq(s.ret)}`);
       } else {
@@ -93,6 +94,7 @@ function actividad(m) {
       case 'inicio': return `${n.id}((" "))`;
       case 'fin': return `${n.id}(((" ")))`;
       case 'decision': return `${n.id}{"${t}"}`;
+      case 'documento': return `${n.id}[/"${t}"/]:::doc`;   // documento (Artifact «Document»)
       default: return `${n.id}["${t}"]`;
     }
   };
@@ -103,6 +105,9 @@ function actividad(m) {
     L.push('  end');
   }
   for (const f of m.flujos) L.push(`  ${f.de} ${f.texto ? `-- "${q(f.texto)}" -->` : '-->'} ${f.a}`);
+  // flujos de documentos (punteados): la acción lo produce / la acción lo usa
+  for (const o of (m.objetos || [])) L.push(`  ${o.de} -.-> ${o.a}`);
+  L.push('  classDef doc fill:#d4efe8,stroke:#307060');
   L.push('  classDef ini fill:#222,stroke:#222,color:#222');
   const ini = m.nodos.filter(n => n.tipo === 'inicio' || n.tipo === 'fin').map(n => n.id);
   if (ini.length) L.push(`  class ${ini.join(',')} ini`);

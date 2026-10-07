@@ -585,5 +585,24 @@ namespace Tests
             Assert.AreEqual(0m, previa.TotalCargosPendientes);
             Assert.IsFalse(previa.TieneCargosPendientes);
         }
+
+        [TestMethod]
+        public void PrevisualizarCobro_Trimestral_TotalEsPeriodoMenosDescuentoMasCargos()
+        {
+            var dalCargo = new FakeCargoPrendaDAL();
+            dalCargo.Alta(new BE.CargoPrenda { IdCliente = 1, Monto = 500m });
+            var dalCliente = new FakeClienteDAL
+            {
+                ClientePorId = new BE.Cliente { IdCliente = 1, IdPlan = 2, PrecioPlan = 1000m, DescuentoProximoCobro = 200m }
+            };
+            var bll = new BLL.Cobro(dalCliente, new FakeCobroDAL(), dalCargo);
+
+            var previa = bll.PrevisualizarCobro(1, BE.Builders.ModalidadCobro.Trimestral);
+
+            Assert.AreEqual(3000m, previa.Bruto);
+            Assert.AreEqual(200m, previa.Descuento);
+            Assert.IsTrue(previa.UsaCreditoReferido);
+            Assert.AreEqual(3300m, previa.Total, "3000 − 200 de referido + 500 de cargos.");
+        }
     }
 }

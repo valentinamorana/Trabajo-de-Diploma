@@ -6,6 +6,8 @@ sequenceDiagram
   participant D as DAL.Pedido
   participant H as DAL.Pedido<br/>Historial
   L->>F: Selecciona un pedido Pendiente y pulsa Despachar
+  F->>B: ObtenerPorId(id)  [relee el estado actual]
+  B-->>F: pedido
   F->>B: Despachar(modulo, pedido)
   Note over B: Exigir(PedidosRealizadosEditar) · pedido.PuedeDespachar()
   alt El pedido no está Pendiente
@@ -13,7 +15,7 @@ sequenceDiagram
     F-->>L: Informa el estado actual
   else Pendiente
     B->>D: Despachar(idPedido)
-    B->>H: RegistrarCambios(idPedido, "DESPACHAR")
+    B->>H: RegistrarCambios(cambios)  [Accion = DESPACHAR]
     B-->>F: ok
     F-->>L: Pedido Despachado
   end

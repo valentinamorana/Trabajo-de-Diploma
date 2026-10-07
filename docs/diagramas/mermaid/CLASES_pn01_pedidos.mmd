@@ -81,6 +81,7 @@ classDiagram
     +int LimitePrendas
   }
   class BLL_Pedido["BLL.Pedido"] {
+    +ObtenerTodos() List~Pedido~
     +ObtenerPorId(int) Pedido
     +VerificarVigencia(int) Cliente
     +RevisarPedidoActivo(Cliente) void
@@ -113,18 +114,25 @@ classDiagram
     +NotificarSiCorresponde(int,  string) void
     +EstaReservadaParaOtro(int,  int) bool
     +CerrarSiReservada(string,  int,  int,  string) void
+    +ObtenerIdsReservadosParaOtro(int?) List~int~
   }
   class BLL_Cliente["BLL.Cliente"] {
     +BuscarPorIdentificacion(string) List~Cliente~
+    +ObtenerPorId(int) Cliente
     +ObtenerEstadoComercial(Cliente,  int) EstadoComercialCliente
+  }
+  class BLL_EvaluacionControlStock["BLL.EvaluacionControlStock"] {
+    <<static>>
+    +Evaluar(List~LineaControlStock~,  Pedido) EvaluacionControlStock
   }
   class DAL_Interfaces_IClienteDAL["DAL.Interfaces.IClienteDAL"] {
     <<interface>>
+    +ObtenerTodos() List~Cliente~
     +ObtenerPorId(int) Cliente
   }
   class DAL_Interfaces_IPrendaDAL["DAL.Interfaces.IPrendaDAL"] {
     <<interface>>
-    +ObtenerTodos() List~Prenda~
+    +ObtenerDisponibles(int?) List~Prenda~
   }
   class DAL_Interfaces_IPedidoHistorialDAL["DAL.Interfaces.IPedidoHistorialDAL"] {
     <<interface>>
@@ -166,3 +174,4 @@ classDiagram
   BLL_ListaEspera ..> DAL_Interfaces_IPrendaDAL : usa
   BLL_ListaEspera ..> DAL_Interfaces_IClienteDAL : usa
   BLL_Cliente ..> DAL_Interfaces_IClienteDAL : usa
+  BLL_Cliente ..> DAL_Interfaces_IPedidoDAL : usa

@@ -13,8 +13,11 @@ namespace BE
         /// <summary>Descuento aplicado (0 si no corresponde ninguno).</summary>
         public decimal Descuento { get; set; }
 
-        /// <summary>Importe a cobrar sin cargos adicionales: Bruto - Descuento (nunca negativo).</summary>
-        public decimal Total => Math.Max(0, Bruto - Descuento);
+        /// <summary>Upgrade: crédito por los días no usados del plan actual (BE.PoliticaCambioPlan); 0 si no corresponde.</summary>
+        public decimal CreditoCambioPlan { get; set; }
+
+        /// <summary>Importe a cobrar sin cargos adicionales: Bruto - Descuento - crédito por cambio de plan (nunca negativo).</summary>
+        public decimal Total => Math.Max(0, Bruto - Descuento - CreditoCambioPlan);
 
         /// <summary>Promoción vigente aplicada, o null si se aplicó el crédito por referido (o ninguno).</summary>
         public Promocion Promocion { get; set; }
@@ -28,7 +31,9 @@ namespace BE
     {
         public decimal Bruto { get; set; }
         public decimal Descuento { get; set; }
-        public decimal Total => System.Math.Max(0, Bruto - Descuento);
+        /// <summary>Upgrade: crédito por los días no usados del plan actual; el plan nuevo rige desde hoy.</summary>
+        public decimal CreditoCambioPlan { get; set; }
+        public decimal Total => System.Math.Max(0, Bruto - Descuento - CreditoCambioPlan);
         public string NombrePromocion { get; set; }
         public bool UsaCreditoReferido { get; set; }
         /// <summary>Número de comprobante emitido (null mientras solo se está calculando el importe).</summary>
@@ -41,6 +46,25 @@ namespace BE
         /// <summary>"¿Referido? Sí → Acreditar crédito": el referente al que se le acreditó el
         /// beneficio con este cobro, o null si no correspondía.</summary>
         public string ReferenteAcreditado { get; set; }
+
+        /// <summary>Pago en cuotas con Tarjeta de crédito (1 = un solo pago). El recargo se suma al Total.</summary>
+        public int CantidadCuotas { get; set; } = 1;
+        public decimal RecargoPorcentaje { get; set; }
+        public decimal RecargoCuotas { get; set; }
+        public decimal ValorCuota { get; set; }
+
+        /// <summary>Lo que abona el cliente: Total (con el descuento) + recargo por cuotas.</summary>
+        public decimal TotalConRecargo => Total + RecargoCuotas;
+
+        /// <summary>Copia el «Detalle de financiación» en la liquidación.</summary>
+        public void AplicarFinanciacion(FinanciacionCuotas f)
+        {
+            if (f == null) return;
+            CantidadCuotas = f.CantidadCuotas;
+            RecargoPorcentaje = f.RecargoPorcentaje;
+            RecargoCuotas = f.Recargo;
+            ValorCuota = f.ValorCuota;
+        }
     }
 
     /// <summary>

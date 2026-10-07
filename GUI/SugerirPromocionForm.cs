@@ -219,11 +219,8 @@ namespace GUI
                 MostrarOrigen();
                 CargarSugerencias();
             }
-            catch (Exception ex) { MostrarError(ex); return; }
-
-            if (MessageBox.Show(Tr("conf.promo.imprimirsugerencia", "¿Imprimir la sugerencia de promoción?"), this.Text,
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
-                Imprimir(sugerenciaBLL.ObtenerPorId(id));
+            catch (Exception ex) { MostrarError(ex); }
+            // La sugerencia se imprime con "Imprimir sugerencia".
         }
 
         // ── Sugerencias registradas ──────────────────────────────────────────

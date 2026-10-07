@@ -81,7 +81,7 @@ module.exports = [
                                   'Despachar', 'MarcarEntregado', 'RegistrarDevolucion', 'Cancelar', 'DesCancelar'] }),
       E('BLL.Prenda', { metodos: ['ObtenerDisponibles', 'VerificarDisponibilidad', 'CambiarEstado'] }),
       E('BLL.ListaEspera', { metodos: ['EstaReservadaParaOtro', 'CerrarSiReservada', 'NotificarSiCorresponde'] }),
-      E('BLL.Cliente', { metodos: ['BuscarPorIdentificacion', 'ObtenerEstadoComercial'] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }),
+      E('BLL.Cliente', { metodos: ['BuscarPorIdentificacion', 'ObtenerEstadoComercial'] }), E('BLL.EvaluacionControlStock', { metodos: ['Evaluar'] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }),
       E('IPedidoHistorialDAL', { metodos: ['RegistrarCambios'] }),
       E('IPedidoDAL', { metodos: ['AltaSinReserva', 'ReemplazarSeleccion', 'RegistrarFaltantes', 'ConfirmarPrendas', 'SepararPrendas', 'Formalizar',
                                   'RegistrarDesistimiento', 'ObtenerFaltantes', 'ObtenerPorEstado', 'ObtenerPorId',
@@ -97,9 +97,9 @@ module.exports = [
       E('BE.Pedido', { attrs: ['IdPedido', 'Estado'] })
     ],
     relaciones: [
-      { tipo: 'asocia', de: 'BLL_Comandos_InvocadorPedido', a: 'BLL_Comandos_PedidoCommand', etiqueta: 'órdenes', mult: '*' },
-      { tipo: 'asocia', de: 'BLL_Comandos_PedidoCommand', a: 'BLL_Interfaces_IPedidoService', etiqueta: 'receptor', mult: '1' },
-      { tipo: 'asocia', de: 'BLL_Comandos_PedidoCommand', a: 'Pedido', etiqueta: 'pedido', mult: '1' },
+      { tipo: 'asocia', de: 'BLL_Comandos_InvocadorPedido', a: 'BLL_Comandos_PedidoCommand', etiqueta: '_ordenes', mult: '*' },
+      { tipo: 'asocia', de: 'BLL_Comandos_PedidoCommand', a: 'BLL_Interfaces_IPedidoService', etiqueta: '_receptor', mult: '1' },
+      { tipo: 'asocia', de: 'BLL_Comandos_PedidoCommand', a: 'Pedido', etiqueta: '_pedido', mult: '1' },
       { tipo: 'implementa', de: 'BLL_Pedido', a: 'BLL_Interfaces_IPedidoService' }
     ]
   },
@@ -112,11 +112,12 @@ module.exports = [
       E('BE.PlanSuscripcion', { attrs: ['IdPlan', 'Nombre', 'LimitePrendas', 'Precio'] }), E('BE.Promocion', { attrs: ['IdPromocion', 'Nombre', 'TipoDescuento', 'Valor'] }),
       E('BE.PoliticaDescuento', { metodos: 'all' }),
       E('BE.MedioPago', { attrs: 'all' }), E('BE.IntentoPago', { attrs: 'all' }), E('BE.DesistimientoContratacion', { attrs: 'all' }),
+      E('BE.PlanCuotas', { attrs: 'all' }), E('BE.PoliticaCuotas', { metodos: 'all' }),
       E('BLL.Cliente', { metodos: ['BuscarPorIdentificacion', 'ActivarSuscripcionDesdeContratacion'] }),
       E('BLL.Contratacion', { metodos: ['IdentificarCliente', 'PresentarPlanes', 'AsentarDesistimiento', 'ValidarContratacion', 'RegistrarContratacion',
-                                        'EstimarImporte', 'ObtenerPendientesDePago', 'CalcularImporte', 'CalcularImportes', 'ConfirmarCobro', 'RegistrarIntentoFallido'] }),
+                                        'EstimarImporte', 'ObtenerPendientesDePago', 'CalcularImporte', 'CalcularImportes', 'ConfirmarCobro', 'RegistrarIntentoFallido', 'ObtenerPlanesCuotas'] }),
       E('IContratacionDAL', { metodos: ['Alta', 'ConfirmarCobro', 'RegistrarVigencia', 'ReabrirPago', 'RegistrarIntentoFallido', 'ObtenerIntentos',
-                                        'ObtenerMediosPago', 'AltaDesistimiento', 'ObtenerPendientesDePago'] })
+                                        'ObtenerMediosPago', 'ObtenerPlanesCuotas', 'AltaDesistimiento', 'ObtenerPendientesDePago'] })
     ]
   },
 
@@ -136,7 +137,10 @@ module.exports = [
       E('BLL.Promocion', { metodos: ['CrearDesdeSugerencia', 'CrearManual', 'ValidarPromocion', 'AnalizarMargenEImpacto', 'PuedeDictaminar', 'AprobarContable', 'RechazarContable',
                                      'Reformular', 'DescartarPromocion', 'SolicitarBaja', 'AprobarBaja', 'RechazarBaja', 'Desactivar', 'CerrarVencidas'] }),
       E('IPromocionDAL', { metodos: ['Alta', 'Reformular', 'CambiarEstado', 'Dictaminar', 'SolicitarBaja', 'ResolverBaja', 'ObtenerHistorial'] }),
-      E('ISugerenciaPromocionDAL', { metodos: ['Alta', 'MarcarEvaluada', 'ReabrirEvaluacion', 'Descartar'] })
+      E('ISugerenciaPromocionDAL', { metodos: ['Alta', 'MarcarEvaluada', 'ReabrirEvaluacion', 'Descartar'] }),
+      E('BLL.AnalisisRotacion', { metodos: [] }), E('IPlanSuscripcionDAL', { metodos: [] }),
+      E('BLL.ReporteVentasVendedor', { metodos: [] }), E('BLL.AnalisisMantenimiento', { metodos: [] }), E('BLL.AnalisisEscasez', { metodos: [] }), E('BLL.RecomendacionPrendas', { metodos: [] }),
+      E('IPedidoDAL', { metodos: [] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }), E('IMantenimientoPrendaDAL', { metodos: [] })
     ]
   },
   {
@@ -153,9 +157,12 @@ module.exports = [
   {
     tipo: 'clases', id: 'CLASES_pn04_devolucion', procesos: ['PN04'], titulo: 'Diagrama de clases — PN04 Inspección de devolución', columnas: 3,
     clases: [
-      E('BE.Prenda', { attrs: 'all' }), E('BE.MantenimientoPrenda', { attrs: 'all' }), E('BE.CargoPrenda', { attrs: 'all' }), E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido'] }),
-      E('BLL.ListaEspera', { metodos: [] }), E('BLL.Prenda', { metodos: ['ObtenerEnLimpieza', 'CambiarEstado', 'ObtenerTransicionesManuales', 'ObtenerHistorialMantenimiento'] }), E('BLL.CargoPrenda', { metodos: ['RegistrarCargo', 'ValidarDatos', 'ObtenerPendientesPorCliente'] }),
-      E('IPrendaDAL', { metodos: ['CambiarEstado'] }), E('ICargoPrendaDAL', { metodos: ['Alta', 'ObtenerPendientesPorCliente', 'MarcarCobradosEnTx'] })
+      E('BE.Prenda', { attrs: 'all', metodos: ['ControlarEstado', 'PuedeReportarsePerdida'] }), E('BE.MantenimientoPrenda', { attrs: 'all' }), E('BE.CargoPrenda', { attrs: 'all' }),
+      E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido'] }),
+      E('BLL.InspeccionDevolucion', { metodos: 'auto' }), E('BLL.Prenda', { metodos: ['ObtenerEnLimpieza', 'CambiarEstado', 'ObtenerTransicionesManuales', 'ObtenerHistorialMantenimiento'] }),
+      E('BLL.CargoPrenda', { metodos: ['ValidarDatos', 'ObtenerPendientesPorCliente'] }), E('BLL.ListaEspera', { metodos: 'auto' }), E('BLL.Pedido', { metodos: 'auto' }),
+      E('IInspeccionDevolucionDAL', { metodos: 'auto' }), E('IPrendaDAL', { metodos: ['CambiarEstado'] }), E('IMantenimientoPrendaDAL', { metodos: 'auto' }),
+      E('IListaEsperaDAL', { metodos: 'auto' }), E('IPedidoDAL', { metodos: 'auto' }), E('ICargoPrendaDAL', { metodos: ['Alta', 'ObtenerPendientesPorCliente', 'MarcarCobradosEnTx'] })
     ]
   },
   {

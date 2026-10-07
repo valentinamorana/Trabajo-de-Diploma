@@ -37,6 +37,34 @@ namespace BE
         /// <summary>Promoción vigente aplicada al cobro (PN03), o null si no se aplicó ninguna.</summary>
         public int? IdPromocion { get; set; }
 
+        /// <summary>Upgrade (BE.PoliticaCambioPlan): crédito por los días no usados del plan anterior,
+        /// ya descontado del Importe. Null si el cobro no fue un cambio a un plan superior.</summary>
+        public decimal? CreditoCambioPlan { get; set; }
+
+        /// <summary>Motivo por el que Caja anuló la contratación antes de cobrarla (el cliente se
+        /// arrepintió, error de carga). Null si se canceló por agotar los intentos de pago.</summary>
+        public string MotivoAnulacion { get; set; }
+
+        /// <summary>Pago en cuotas (solo Tarjeta de crédito): plan de cuotas elegido (FK a PlanCuotas),
+        /// o null si se pagó con un medio que no financia.</summary>
+        public int? IdPlanCuotas { get; set; }
+
+        /// <summary>Recargo por financiación cobrado sobre el Importe (en pesos). Se guarda porque el
+        /// porcentaje del plan puede cambiar después y el comprobante se puede reimprimir.</summary>
+        public decimal? RecargoCuotas { get; set; }
+
+        /// <summary>Cargados por JOIN con PlanCuotas, no persisten.</summary>
+        public int? CantidadCuotas { get; set; }
+        public decimal? RecargoPorcentaje { get; set; }
+
+        /// <summary>Total que abonó el cliente: importe del cobro + recargo por cuotas.</summary>
+        public decimal? TotalAbonado => Importe.HasValue ? Importe.Value + (RecargoCuotas ?? 0m) : (decimal?)null;
+
+        /// <summary>Valor de cada cuota (null si no se pagó en cuotas).</summary>
+        public decimal? ValorCuota => TotalAbonado.HasValue && (CantidadCuotas ?? 1) > 1
+            ? Math.Round(TotalAbonado.Value / CantidadCuotas.Value, 2, MidpointRounding.AwayFromZero)
+            : (decimal?)null;
+
         /// <summary>Período que activó el cobro («Constancia de suscripción»). Se guarda porque el
         /// vencimiento del cliente cambia con cada renovación y la constancia se puede reimprimir.</summary>
         public DateTime? VigenciaDesde { get; set; }

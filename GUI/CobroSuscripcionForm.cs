@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// PdN6 — Cobro de suscripción. El Vendedor intenta cobrar (fuera del sistema:
+    /// PdN6 — Cobro de suscripción. Caja intenta cobrar (fuera del sistema:
     /// efectivo/transferencia, sin pasarela) y carga acá el resultado; el patrón Chain
     /// of Responsibility (BLL.Manejadores) resuelve el resto: confirma la renovación,
     /// aplica un período de gracia, o suspende nuevos pedidos.
@@ -88,24 +88,34 @@ namespace GUI
             lblEstadoActual.Text = Tr("cobro.estado.resumen", "Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}",
                 new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estadoPago });
 
-            // Bloque 1 — anticipar en pantalla lo que este cobro va a sumar/restar, antes de
-            // procesarlo: descuento por referido pendiente y cargos por daño/pérdida pendientes.
-            if (c.TieneDescuentoPendiente)
-                lblEstadoActual.Text += "\n" + Tr("cobro.estado.descuentopendiente",
-                    "Tiene un descuento de ${0} pendiente para este cobro (programa de referidos).",
-                    new object[] { c.DescuentoProximoCobro });
+            MostrarTotal();
+        }
 
+        // La modalidad cambia los meses que se cobran: se recalcula el total.
+        private void CmbModalidad_SelectedIndexChanged(object sender, EventArgs e) => MostrarTotal();
+
+        // "Total a cobrar" ANTES de procesar, con la misma cuenta que el cobro (BLL.Cobro.PrevisualizarCobro):
+        // período con el único descuento del ciclo + cargos por daño/pérdida pendientes.
+        private void MostrarTotal()
+        {
+            lblTotal.Text = string.Empty;
+            if (!(cmbCliente.SelectedItem is ClienteItem item) || !(cmbModalidad.SelectedItem is BE.Builders.ModalidadCobro modalidad))
+                return;
             try
             {
-                var previa = _bllCobro.PrevisualizarCobro(c.IdCliente);
+                var previa = _bllCobro.PrevisualizarCobro(item.Cliente.IdCliente, modalidad);
+                string detalle = string.Format(Tr("cobro.total.periodo", "período {0:C2}"), previa.Bruto);
+                if (previa.Descuento > 0)
+                    detalle += " − " + string.Format(Tr("cobro.total.descuento", "descuento {0:C2} ({1})"), previa.Descuento,
+                        previa.NombrePromocion ?? Tr("lbl.contratacion.creditoreferido", "crédito por referido"));
                 if (previa.TieneCargosPendientes)
-                    lblEstadoActual.Text += "\n" + Tr("cobro.estado.cargospendientes",
-                        "Tiene {0} cargo(s) por daño/pérdida pendiente(s) por ${1} que se sumarán a este cobro.",
-                        new object[] { previa.CantidadCargosPendientes, previa.TotalCargosPendientes });
+                    detalle += " + " + string.Format(Tr("cobro.total.cargos", "{0} cargo(s) por daño/pérdida {1:C2}"),
+                        previa.CantidadCargosPendientes, previa.TotalCargosPendientes);
+                lblTotal.Text = string.Format(Tr("cobro.total", "Total a cobrar: {0:C2}\n({1})"), previa.Total, detalle);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.TraceWarning($"[CobroSuscripcionForm] No se pudieron cargar los cargos pendientes: {ex.Message}");
+                System.Diagnostics.Trace.TraceWarning($"[CobroSuscripcionForm] No se pudo calcular el total: {ex.Message}");
             }
         }
 
@@ -126,8 +136,11 @@ namespace GUI
             // Confirmación antes de procesar — antes se ejecutaba sin ninguna, en la pantalla que
             // efectivamente mueve dinero (mismo criterio que ya aplican Planes/Promociones/
             // Contrataciones para acciones sensibles).
+            string pregunta = Tr("conf.cobro.procesar.msg", "¿Procesar este cobro para {0}?", new object[] { item.Cliente.NombreCompleto });
+            if (decision == BLL.Manejadores.DecisionCobro.Cobrado && !string.IsNullOrEmpty(lblTotal.Text))
+                pregunta += "\n\n" + lblTotal.Text;   // el total que se va a cobrar
             var confirmar = MessageBox.Show(
-                Tr("conf.cobro.procesar.msg", "¿Procesar este cobro para {0}?", new object[] { item.Cliente.NombreCompleto }),
+                pregunta,
                 Tr("conf.cobro.procesar.tit", "Confirmar Cobro"),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
             if (confirmar != DialogResult.Yes) return;

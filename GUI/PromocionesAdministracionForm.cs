@@ -189,16 +189,20 @@ namespace GUI
                 MostrarOk(Tr("msg.promo.sugdescartada", "Sugerencia #{0} descartada.", new object[] { sugerencia.IdSugerencia }));
                 CargarSugerencias();
             }
-            catch (Exception ex) { MostrarError(ex); return; }
-
-            if (Preguntar(Tr("conf.promo.imprimirdescarte", "¿Imprimir la constancia de descarte?")))
-                Imprimir(() => Docs.ConstanciaDescarteSugerencia(sugerenciaBLL.ObtenerPorId(sugerencia.IdSugerencia)));
+            catch (Exception ex) { MostrarError(ex); }
+            // La constancia de descarte se imprime con "Imprimir sugerencia" (sale la de descarte).
         }
 
         private void BtnImprimirSugerencia_Click(object sender, EventArgs e)
         {
             var sugerencia = ObtenerSugerenciaSeleccionada();
-            if (sugerencia != null) Imprimir(() => Docs.Sugerencia(sugerencia));
+            if (sugerencia == null) return;
+            // Descartada: sale la «Constancia de descarte» (ya no se pregunta al descartar).
+            Imprimir(() =>
+            {
+                var s = sugerenciaBLL.ObtenerPorId(sugerencia.IdSugerencia) ?? sugerencia;
+                return s.EstaDescartada() ? Docs.ConstanciaDescarteSugerencia(s) : Docs.Sugerencia(s);
+            });
         }
 
         // ── Promociones ──────────────────────────────────────────────────────
@@ -274,10 +278,7 @@ namespace GUI
             MostrarOk(reformular != null
                 ? Tr("msg.promo.reformulada", "Promoción #{0} reformulada: vuelve a revisión contable.", new object[] { idPromocion })
                 : Tr("msg.promo.creada", "Promoción #{0} registrada, pendiente de revisión contable.", new object[] { idPromocion }));
-            CargarTodo();
-
-            if (Preguntar(Tr("conf.promo.imprimirficha", "¿Imprimir la ficha de la promoción para Contabilidad?")))
-                Imprimir(() => Docs.FichaPromocion(promocionBLL.ObtenerPorId(idPromocion), promocionBLL.ObtenerHistorial(idPromocion)));
+            CargarTodo();   // la ficha para Contabilidad está en el menú "Imprimir"
         }
 
         // ¿Reformular? No → Descartar promoción (motivo obligatorio) → «Constancia de descarte».
@@ -295,11 +296,8 @@ namespace GUI
                 MostrarOk(Tr("msg.promo.descartada", "Promoción '{0}' descartada.", new object[] { promocion.Nombre }));
                 CargarPromociones();
             }
-            catch (Exception ex) { MostrarError(ex); return; }
-
-            if (Preguntar(Tr("conf.promo.imprimirdescarte", "¿Imprimir la constancia de descarte?")))
-                Imprimir(() => Docs.ConstanciaDescartePromocion(promocionBLL.ObtenerPorId(promocion.IdPromocion),
-                                                                promocionBLL.ObtenerDescarte(promocion.IdPromocion)));
+            catch (Exception ex) { MostrarError(ex); }
+            // La constancia de descarte está en el menú "Imprimir".
         }
 
         // (b) Administración desactiva directamente (motivo obligatorio).
@@ -331,8 +329,7 @@ namespace GUI
             if (observacion == null) return;
 
             ResolverBaja(promocion, () => promocionBLL.AprobarBaja(this.Text, promocion, observacion),
-                Tr("msg.promo.dadabaja", "Promoción '{0}' dada de baja.", new object[] { promocion.Nombre }),
-                Tr("conf.promo.imprimirresolucion.gerencia", "¿Imprimir la resolución de baja como informe a Gerencia?"));
+                Tr("msg.promo.dadabaja", "Promoción '{0}' dada de baja.", new object[] { promocion.Nombre }));
         }
 
         // ¿Aprueba la baja? No (motivo obligatorio) → vuelve a Vigente + «Resolución de baja» (informe a Ventas).
@@ -345,11 +342,11 @@ namespace GUI
             if (motivo == null) return;
 
             ResolverBaja(promocion, () => promocionBLL.RechazarBaja(this.Text, promocion, motivo),
-                Tr("msg.promo.bajarechazada", "Se rechazó la baja de '{0}': sigue vigente.", new object[] { promocion.Nombre }),
-                Tr("conf.promo.imprimirresolucion.ventas", "¿Imprimir la resolución de baja como informe a Ventas?"));
+                Tr("msg.promo.bajarechazada", "Se rechazó la baja de '{0}': sigue vigente.", new object[] { promocion.Nombre }));
         }
 
-        private void ResolverBaja(BE.Promocion promocion, Func<int> resolver, string mensajeOk, string preguntaImprimir)
+        // La resolución de baja (informe a Gerencia o a Ventas) está en el menú "Imprimir".
+        private void ResolverBaja(BE.Promocion promocion, Func<int> resolver, string mensajeOk)
         {
             try
             {
@@ -357,11 +354,7 @@ namespace GUI
                 MostrarOk(mensajeOk);
                 CargarPromociones();
             }
-            catch (Exception ex) { MostrarError(ex); return; }
-
-            if (Preguntar(preguntaImprimir))
-                Imprimir(() => Docs.ResolucionBaja(promocionBLL.ObtenerPorId(promocion.IdPromocion),
-                                                   promocionBLL.ObtenerUltimaSolicitudBaja(promocion.IdPromocion)));
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         private void BtnHistorial_Click(object sender, EventArgs e)

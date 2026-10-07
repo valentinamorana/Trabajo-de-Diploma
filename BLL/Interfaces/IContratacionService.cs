@@ -21,12 +21,15 @@ namespace BLL.Interfaces
         List<BE.Contratacion> ObtenerResueltas();
         BE.Contratacion ObtenerPorId(int idContratacion);
         List<BE.MedioPago> ObtenerMediosPago();
+        List<BE.PlanCuotas> ObtenerPlanesCuotas(BE.Builders.ModalidadCobro modalidad);
         List<BE.IntentoPago> ObtenerIntentos(int idContratacion);
         BE.DesistimientoContratacion ObtenerDesistimiento(int idDesistimiento);
-        BE.LiquidacionContratacion CalcularImporte(BE.Contratacion contratacion);
+        BE.LiquidacionContratacion CalcularImporte(BE.Contratacion contratacion, int? idMedioPago = null, int? idPlanCuotas = null);
         Dictionary<int, BE.LiquidacionContratacion> CalcularImportes(List<BE.Contratacion> contrataciones);
-        BE.LiquidacionContratacion ConfirmarCobro(string modulo, BE.Contratacion contratacion, int idMedioPago, decimal? importeConfirmado = null);
+        BE.LiquidacionContratacion ConfirmarCobro(string modulo, BE.Contratacion contratacion, int idMedioPago,
+                                                  decimal? importeConfirmado = null, int? idPlanCuotas = null);
         int ContarPendientesDePago();
         BE.ResultadoIntentoPago RegistrarIntentoFallido(string modulo, BE.Contratacion contratacion, int? idMedioPago, string motivo);
+        void Anular(string modulo, BE.Contratacion contratacion, string motivo);
     }
 }

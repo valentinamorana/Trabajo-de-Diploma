@@ -11,6 +11,14 @@ namespace GUI
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            // El negocio opera en Argentina: montos en pesos ($ 1.500,00) y fechas dd/MM/yyyy sin
+            // importar la configuración regional de la PC (con Windows en España, "C2" salía en €).
+            // useUserOverride: false → ignora símbolos personalizados en el Panel de control.
+            // El idioma de la interfaz (ES/EN/RU/PT) es aparte: lo maneja GestorIdioma.
+            var culturaNegocio = new System.Globalization.CultureInfo("es-AR", false);
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culturaNegocio;
+            System.Threading.Thread.CurrentThread.CurrentCulture         = culturaNegocio;
+
             // Handler GLOBAL de excepciones no controladas: las registra en la bitácora (criticidad
             // Alta) y muestra un aviso, en vez de cerrar la app de forma muda. (Patrón de Stach.)
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);

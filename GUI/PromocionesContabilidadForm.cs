@@ -207,17 +207,8 @@ namespace GUI
                 txtObservacion.Clear();
                 CargarPromociones();
             }
-            catch (Exception ex) { MostrarError(ex); return; }
-
-            if (MessageBox.Show(Tr("conf.promo.imprimirdictamen", "¿Imprimir el dictamen contable?"), this.Text,
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-                return;
-            try
-            {
-                Docs.Imprimir(Docs.DictamenContable(promocionBLL.ObtenerPorId(promocion.IdPromocion),
-                                                    promocionBLL.ObtenerUltimoDictamen(promocion.IdPromocion)), this);
-            }
             catch (Exception ex) { MostrarError(ex); }
+            // El dictamen contable está en el menú "Imprimir".
         }
 
         private void BtnImprimir_Click(object sender, EventArgs e) => menuDocumentos.Mostrar(btnImprimir);

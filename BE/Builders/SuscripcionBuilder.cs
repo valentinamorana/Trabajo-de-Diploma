@@ -26,6 +26,10 @@ namespace BE.Builders
 
         public virtual void AsignarPlan(PlanSuscripcion plan) => _plan = plan;
 
+        /// <summary>Upgrade (BE.PoliticaCambioPlan): el período del plan nuevo arranca hoy, no al
+        /// vencer el actual; los días no usados ya se descontaron del cobro como crédito.</summary>
+        public bool IniciarHoy { get; set; }
+
         /// <summary>Único paso que varía por modalidad: calcula el vencimiento a partir de la activación.</summary>
         protected abstract DateTime CalcularVencimiento(DateTime fechaActivacion);
 
@@ -34,7 +38,7 @@ namespace BE.Builders
             var fechaActivacion = DateTime.Today;
             // Si todavía tiene tiempo pagado, el nuevo período se suma a continuación del actual:
             // no se pierden los días ya abonados al renovar por adelantado.
-            var inicioPeriodo = _cliente != null && _cliente.FechaVencimiento.HasValue
+            var inicioPeriodo = !IniciarHoy && _cliente != null && _cliente.FechaVencimiento.HasValue
                                 && _cliente.FechaVencimiento.Value.Date > fechaActivacion
                 ? _cliente.FechaVencimiento.Value.Date
                 : fechaActivacion;

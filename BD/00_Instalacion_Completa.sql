@@ -1239,6 +1239,11 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Traduccion_IdIdioma' A
     CREATE NONCLUSTERED INDEX IX_Traduccion_IdIdioma ON Traduccion(IdIdioma);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Pedido_IdCliente' AND object_id = OBJECT_ID('Pedido'))
     CREATE NONCLUSTERED INDEX IX_Pedido_IdCliente ON Pedido(IdCliente);
+-- PN01: un solo pedido en curso por cliente (EnControlStock, ConFaltantes, Separado, Pendiente,
+-- Despachado). La BLL ya lo valida; el índice cierra la carrera de dos operadores enviando a la vez.
+SET QUOTED_IDENTIFIER ON;   -- los índices filtrados lo exigen (sqlcmd lo trae en OFF)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Pedido_ClienteActivo' AND object_id = OBJECT_ID('Pedido'))
+    CREATE UNIQUE NONCLUSTERED INDEX UX_Pedido_ClienteActivo ON Pedido(IdCliente) WHERE Estado IN (0, 1, 4, 5, 6);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Pedido_IdEmpleado' AND object_id = OBJECT_ID('Pedido'))
     CREATE NONCLUSTERED INDEX IX_Pedido_IdEmpleado ON Pedido(IdEmpleado);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Pedido_FechaPedido' AND object_id = OBJECT_ID('Pedido'))
@@ -2681,6 +2686,140 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Contratacion_Comproban
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_IntentoPago_Contratacion' AND object_id = OBJECT_ID('ContratacionIntentoPago'))
     CREATE NONCLUSTERED INDEX IX_IntentoPago_Contratacion ON ContratacionIntentoPago(IdContratacion);
 PRINT 'Sección 20c: medios de pago, intentos y desistimientos de PN02 verificados.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20c2. PN02: PAGO EN CUOTAS CON TARJETA DE CRÉDITO
+-- ------------------------------------------------------------
+-- La tarjeta financia: Caja cobra el total en un solo cobro y se registra el plan de cuotas
+-- elegido y el recargo por financiación (decisión de la alumna).
+--   · MedioPago: se separa «Tarjeta» en «Tarjeta de débito» y «Tarjeta de crédito», el único medio que
+--     permite cuotas (PermiteCuotas = 1). Si la base YA tiene cobros o intentos con «Tarjeta», no se sabe
+--     si fueron débito o crédito: «Tarjeta» queda como medio histórico (Activo = 0: no se ofrece ni se
+--     acepta en cobros nuevos) y «Tarjeta de débito» se crea aparte. Sin cobros, «Tarjeta» se renombra.
+--   · PlanCuotas: catálogo de planes (1 cuota sin interés; 3 cuotas 5 %; 6 cuotas 10 %; 12 cuotas 20 %).
+--   · Contratacion: IdPlanCuotas (FK) y RecargoCuotas (recargo cobrado, en pesos; se guarda porque
+--     el porcentaje puede cambiar y el comprobante se reimprime). El valor de cada cuota se deriva.
+--   Regla de BLL (BE.PoliticaCuotas): no más cuotas que los meses de la modalidad (1 / 3 / 12).
+--   Las columnas nuevas entran al DVH de Contratacion: si se agregan sobre una base que ya tenía
+--   los dígitos calculados, se pide el recálculo ('DVReinicializar', ver sección de DV).
+-- Idempotente.
+-- ============================================================
+IF COL_LENGTH('MedioPago', 'PermiteCuotas') IS NULL
+    ALTER TABLE MedioPago ADD PermiteCuotas BIT NOT NULL CONSTRAINT DF_MedioPago_PermiteCuotas DEFAULT 0;
+IF COL_LENGTH('MedioPago', 'Activo') IS NULL
+    ALTER TABLE MedioPago ADD Activo BIT NOT NULL CONSTRAINT DF_MedioPago_Activo DEFAULT 1;
+GO
+IF EXISTS (SELECT 1 FROM MedioPago WHERE IdMedioPago = 2 AND Nombre = N'Tarjeta')
+BEGIN
+    IF EXISTS (SELECT 1 FROM Contratacion WHERE IdMedioPago = 2)
+       OR EXISTS (SELECT 1 FROM ContratacionIntentoPago WHERE IdMedioPago = 2)
+    BEGIN
+        UPDATE MedioPago SET Nombre = N'Tarjeta (anterior a débito/crédito)', ClaveTraduccion = 'medio.tarjeta_historica', Activo = 0
+        WHERE IdMedioPago = 2;
+        IF NOT EXISTS (SELECT 1 FROM MedioPago WHERE IdMedioPago = 5)
+            INSERT INTO MedioPago (IdMedioPago, Nombre, ClaveTraduccion, PermiteCuotas, Activo)
+            VALUES (5, N'Tarjeta de débito', 'medio.tarjeta_debito', 0, 1);
+        PRINT 'MedioPago: «Tarjeta» tiene cobros o intentos: queda como medio histórico; se creó «Tarjeta de débito».';
+    END
+    ELSE
+        UPDATE MedioPago SET Nombre = N'Tarjeta de débito', ClaveTraduccion = 'medio.tarjeta_debito' WHERE IdMedioPago = 2;
+END
+IF NOT EXISTS (SELECT 1 FROM MedioPago WHERE IdMedioPago = 4)
+    INSERT INTO MedioPago (IdMedioPago, Nombre, ClaveTraduccion, PermiteCuotas)
+    VALUES (4, N'Tarjeta de crédito', 'medio.tarjeta_credito', 1);
+UPDATE MedioPago SET PermiteCuotas = 1 WHERE IdMedioPago = 4 AND PermiteCuotas = 0;
+GO
+
+IF OBJECT_ID('PlanCuotas', 'U') IS NULL
+BEGIN
+    CREATE TABLE PlanCuotas (
+        IdPlanCuotas      INT          NOT NULL PRIMARY KEY,
+        CantidadCuotas    INT          NOT NULL CONSTRAINT UX_PlanCuotas_Cantidad UNIQUE,
+        RecargoPorcentaje DECIMAL(5,2) NOT NULL,
+        Activo            BIT          NOT NULL CONSTRAINT DF_PlanCuotas_Activo DEFAULT 1,
+        CONSTRAINT CHK_PlanCuotas_Cantidad CHECK (CantidadCuotas >= 1),
+        CONSTRAINT CHK_PlanCuotas_Recargo  CHECK (RecargoPorcentaje >= 0 AND RecargoPorcentaje <= 100)
+    );
+    PRINT 'Tabla PlanCuotas creada.';
+END
+GO
+INSERT INTO PlanCuotas (IdPlanCuotas, CantidadCuotas, RecargoPorcentaje)
+SELECT v.Id, v.Cuotas, v.Recargo
+FROM (VALUES (1, 1, 0.00), (2, 3, 5.00), (3, 6, 10.00), (4, 12, 20.00)) AS v(Id, Cuotas, Recargo)
+WHERE NOT EXISTS (SELECT 1 FROM PlanCuotas p WHERE p.IdPlanCuotas = v.Id);
+GO
+
+DECLARE @cuotasNuevas BIT = 0;
+IF COL_LENGTH('Contratacion', 'IdPlanCuotas') IS NULL
+BEGIN
+    ALTER TABLE Contratacion ADD IdPlanCuotas INT NULL
+        CONSTRAINT FK_Contratacion_PlanCuotas REFERENCES PlanCuotas(IdPlanCuotas);
+    SET @cuotasNuevas = 1;
+END
+IF COL_LENGTH('Contratacion', 'RecargoCuotas') IS NULL
+BEGIN
+    ALTER TABLE Contratacion ADD RecargoCuotas DECIMAL(10,2) NULL;   -- igual que Importe
+    SET @cuotasNuevas = 1;
+END
+-- Base ya instalada con los dígitos calculados: las columnas nuevas cambian el DVH de Contratacion.
+IF @cuotasNuevas = 1 AND OBJECT_ID('ParametroSistema') IS NOT NULL
+   AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'FormatoDV' AND TRY_CONVERT(INT, Valor) >= 2)
+BEGIN
+    MERGE ParametroSistema AS t
+    USING (VALUES ('DVReinicializar', '1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+    WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+    WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    PRINT 'Contratacion: columnas de cuotas agregadas; se pidió el recálculo de los dígitos verificadores.';
+END
+GO
+
+-- Las dos columnas van juntas: con plan de cuotas hay recargo (0 si es sin interés); sin plan, ninguno.
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacion_Cuotas')
+    ALTER TABLE Contratacion ADD CONSTRAINT CHK_Contratacion_Cuotas
+        CHECK ((IdPlanCuotas IS NULL AND RecargoCuotas IS NULL) OR (IdPlanCuotas IS NOT NULL AND RecargoCuotas >= 0));
+PRINT 'Sección 20c2: pago en cuotas con tarjeta de crédito verificado.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20c3. PN02: UPGRADE CON CRÉDITO Y ANULACIÓN DE CONTRATACIONES
+-- ------------------------------------------------------------
+--   · Contratacion.CreditoCambioPlan: al pasar a un plan más caro con el período vigente, el plan
+--     nuevo rige desde hoy y los días no usados del plan anterior se descuentan del cobro
+--     (BE.PoliticaCambioPlan). Se guarda para el comprobante.
+--   · Contratacion.MotivoAnulacion: Caja puede anular una contratación pendiente (el cliente se
+--     arrepintió, error de carga) sin inventar intentos de pago fallidos.
+--   Las columnas entran al DVH de Contratacion: si se agregan sobre una base con los dígitos ya
+--   calculados, se pide el recálculo (igual que la sección 20c2).
+-- Idempotente.
+-- ============================================================
+DECLARE @colsNuevas BIT = 0;
+IF COL_LENGTH('Contratacion', 'CreditoCambioPlan') IS NULL
+BEGIN
+    ALTER TABLE Contratacion ADD CreditoCambioPlan DECIMAL(10,2) NULL;   -- igual que Importe
+    SET @colsNuevas = 1;
+END
+IF COL_LENGTH('Contratacion', 'MotivoAnulacion') IS NULL
+BEGIN
+    ALTER TABLE Contratacion ADD MotivoAnulacion NVARCHAR(200) NULL;    -- BLL.Contratacion.LargoMaximoMotivo
+    SET @colsNuevas = 1;
+END
+IF @colsNuevas = 1 AND OBJECT_ID('ParametroSistema') IS NOT NULL
+   AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'FormatoDV' AND TRY_CONVERT(INT, Valor) >= 2)
+BEGIN
+    MERGE ParametroSistema AS t
+    USING (VALUES ('DVReinicializar', '1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+    WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+    WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    PRINT 'Contratacion: columnas de upgrade/anulación agregadas; se pidió el recálculo de los dígitos verificadores.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacion_CreditoCambioPlan')
+    ALTER TABLE Contratacion ADD CONSTRAINT CHK_Contratacion_CreditoCambioPlan
+        CHECK (CreditoCambioPlan IS NULL OR CreditoCambioPlan > 0);
+-- Solo una contratación Cancelada (2) puede tener motivo de anulación.
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacion_MotivoAnulacion')
+    ALTER TABLE Contratacion ADD CONSTRAINT CHK_Contratacion_MotivoAnulacion
+        CHECK (MotivoAnulacion IS NULL OR Estado = 2);
+PRINT 'Sección 20c3: upgrade con crédito y anulación de contrataciones verificado.';
 GO
 -- ============================================================
 -- WardrobeFlow — 20d. PN03: FLUJO APROBADO DE PROMOCIONES

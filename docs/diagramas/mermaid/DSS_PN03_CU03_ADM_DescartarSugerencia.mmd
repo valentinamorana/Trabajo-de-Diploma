@@ -4,19 +4,35 @@ sequenceDiagram
   participant F as Promociones<br/>AdministracionForm
   participant B as BLL.Sugerencia<br/>Promocion
   participant D as DAL.Sugerencia<br/>Promocion
-  A->>F: Elige la sugerencia, pulsa "Descartar sugerencia" e indica el motivo
+  Note over A,F: «extend» de CU01-ADM Gestionar Promociones: ¿Acepta la sugerencia? No
+  F->>B: ObtenerPendientes()
+  B->>D: ObtenerPendientes()
+  B-->>F: sugerencias Pendientes
+  A->>F: Elige la sugerencia y pulsa "Descartar sugerencia"
+  A->>F: Ingresa el motivo (InputDialog), si cancela, no se descarta
   F->>B: DescartarSugerencia(modulo, idSugerencia, motivo)
+  Note over B: PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)
   B->>D: ObtenerPorId(idSugerencia)
-  Note over B: Exigir(PromocionesAdminEditar) · sugerencia.PuedeEvaluarse() · motivo obligatorio
-  alt Ya evaluada / sin motivo
-    B-->>F: AppException(sugerencia_evaluada / motivodescarte_requerido)
+  D-->>B: sugerencia
+  alt No existe, ya no está Pendiente (PuedeEvaluarse / TransicionValida(Descartada)) o sin motivo
+    B-->>F: AppException(sugerencia_inexistente / sugerencia_evaluada / motivodescarte_requerido)
+    F-->>A: Informa el motivo
   else Pendiente y con motivo
     B->>D: Descartar(idSugerencia, motivo, fecha)  [claim: WHERE Estado = Pendiente]
-    alt Otra sesión ya la evaluó
+    alt false: otra sesión ya la evaluó
       D-->>B: false
       B-->>F: AppException(sugerencia_evaluada)
-    else Descartada
+      F-->>A: Informa el motivo
+    else true
+      D-->>B: true
+      Note over B: bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion, …)
       B-->>F: ok
-      F-->>A: Constancia de descarte (PDF): fin
+      F-->>A: "Sugerencia nro.id descartada"
+      F->>B: ObtenerPendientes()  [recarga]
+      opt ¿Imprimir la constancia de descarte? Sí
+        F->>B: ObtenerPorId(idSugerencia)
+        B-->>F: sugerencia Descartada
+        F-->>A: Constancia de descarte (PDF): fin
+      end
     end
   end

@@ -25,7 +25,7 @@ module.exports = [
             r('B', 'F', 'true'), r('F', 'U', 'Abre el menú principal') ],
             sino: [{ etiqueta: 'Contraseña incorrecta', pasos: [
               c('B', 'S', 'RegistrarIntento()'), c('B', 'D', 'IncrementarIntentosFallidos(username)'),
-              { alt: '3 intentos fallidos', pasos: [ c('B', 'D', 'BloquearConTiempo(id)  [1, 5, 15 o 60 min; luego permanente]'), c('B', 'L', 'RegistrarSinSesion(BloqueoDeCuenta)'), r('B', 'F', 'LoginException(CuentaBloqueada)') ],
+              { alt: '3 intentos fallidos', pasos: [ c('B', 'D', 'BloquearConTiempo(idUsuario)  [1, 5, 15 o 60 min; luego permanente]'), c('B', 'L', 'RegistrarSinSesion(BloqueoDeCuenta)'), r('B', 'F', 'LoginException(CuentaBloqueada)') ],
                 sino: [{ etiqueta: 'Menos de 3', pasos: [ r('B', 'F', 'LoginException(CredencialesInvalidas)') ] }] }
             ] }] }
         ] }] }
@@ -84,7 +84,7 @@ module.exports = [
   },
   {
     tipo: 'secuencia', id: 'DSS_T06a_ConsultarBitacora', titulo: 'T06a · Consultar la bitácora del sistema',
-    participantes: [A('A', 'Administrador'), P('F', 'Bitacora'), P('B', 'BLL.Bitacora'), P('S', 'Servicios.Bitacora'), P('D', 'DAL.Bitacora')],
+    participantes: [A('A', 'Administrador'), P('F', 'GUI.Bitacora'), P('B', 'BLL.Bitacora'), P('S', 'Servicios.Bitacora'), P('D', 'DAL.Bitacora')],
     pasos: [
       c('A', 'F', 'Abre la bitácora y filtra por días (BtnUltimosDias_Click)'),
       c('F', 'B', 'UsuarioPuedeVerSistema()'),
@@ -116,7 +116,7 @@ module.exports = [
       r('C', 'B', 'memento (IMemento)'),
       c('B', 'D', 'ObtenerPorId(idUsuario)'),
       c('B', 'U', 'RestaurarDesde(memento)'),
-      c('B', 'D', 'RestaurarVersion(memento)'),
+      c('B', 'D', 'RestaurarVersion(v)'),
       c('B', 'C', 'Guardar(idUsuario, memento del estado restaurado)'),
       c('B', 'L', 'Registrar(Restauración a versión, Criticidad.Alta)'),
       r('B', 'F', 'usuario restaurado'),
@@ -140,20 +140,37 @@ module.exports = [
   },
   {
     tipo: 'secuencia', id: 'DSS_T07_RecuperarIntegridad', titulo: 'T07 · Diagnóstico y reparación de la integridad',
-    participantes: [A('A', 'Administrador'), P('F', 'DiagnosticoIntegridadForm'), P('R', 'BLL.RecuperacionIntegridad'), P('D', 'DAL.DigitoVerificador'), P('H', 'DAL.HistorialIntegridad')],
+    participantes: [A('A', 'Administrador'), P('F', 'DiagnosticoIntegridadForm'), P('C', 'BLL.Configuracion'), P('X', 'RecuperacionEspejoForm'),
+                    P('R', 'BLL.RecuperacionIntegridad'), P('D', 'DAL.DigitoVerificador'), P('E', 'DAL.EspejoUsuario'), P('U', 'DAL.Usuario')],
     pasos: [
       c('A', 'F', 'Abre el diagnóstico de integridad'),
-      c('F', 'R', 'Diagnosticar()'),
-      c('R', 'D', 'ObtenerFilasUsuario()'),
-      c('R', 'D', 'ObtenerDVV("Usuario")'),
-      r('R', 'F', 'DiagnosticoEspejo (filas alteradas, faltantes, DVV)'),
-      { alt: 'Hay alteraciones', pasos: [
-        c('A', 'F', 'Elige reparar desde el espejo o asumir la pérdida'),
-        c('F', 'R', 'RepararDesdeEspejo() o AsumirPerdida()'),
-        c('R', 'D', 'RecalcularTabla(tabla, pkCol, columnas)'),
-        c('R', 'H', 'Insertar(entrada)'),
-        r('R', 'F', 'integridad restablecida') ],
-        sino: [{ etiqueta: 'Sin alteraciones', pasos: [ r('R', 'F', 'Integro = true') ] }] }
+      c('F', 'C', 'ObtenerDiagnostico()'),
+      c('C', 'D', 'ObtenerFilasUsuario()'),
+      c('C', 'D', 'ObtenerDVV("Usuario")'),
+      r('C', 'F', 'ResultadoDiagnostico (ÍNTEGRO o COMPROMETIDO, filas con DVH inválido)'),
+      r('F', 'A', 'Estado general y filas con inconsistencias'),
+      { alt: 'Recalcular todo', pasos: [
+        c('A', 'F', 'Recalcular Todo y confirma con credenciales de Administrador (BtnRecalcularTodo_Click)'),
+        c('F', 'C', 'RecalcularIntegridadDV()'),
+        c('C', 'D', 'RecalcularTablaUsuario()'),
+        c('C', 'E', 'Reconstruir(filas)'),
+        r('C', 'F', 'dígitos recalculados') ],
+        sino: [{ etiqueta: 'Recuperar datos desde el espejo', pasos: [
+          c('A', 'F', 'Abre la consola del espejo (BtnEspejo_Click)'),
+          c('F', 'X', 'Abre la consola del espejo (ventana modal)'),
+          c('X', 'R', 'Diagnosticar()'),
+          c('R', 'D', 'ObtenerFilasUsuario()'),
+          c('R', 'E', 'ObtenerFilas()'),
+          r('R', 'X', 'DiagnosticoEspejo (filas alteradas, faltantes, DVV)'),
+          { alt: 'Reparar desde el espejo', pasos: [
+            c('X', 'R', 'RepararDesdeEspejo()'),
+            c('R', 'E', 'ObtenerFilas()'),
+            c('R', 'U', 'RevertirDesdeEspejoEnTx(conexion, tx, valoresEspejo)'),
+            c('R', 'C', 'RecalcularUsuario()') ],
+            sino: [{ etiqueta: 'Asumir la pérdida', pasos: [
+              c('X', 'R', 'AsumirPerdida()'),
+              c('R', 'C', 'RecalcularIntegridadDV()') ] }] },
+          r('X', 'A', 'Diagnóstico actualizado') ] }] }
     ]
   },
   {

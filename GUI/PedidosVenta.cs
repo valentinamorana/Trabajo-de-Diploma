@@ -33,9 +33,14 @@ namespace GUI
         // Idioma activo — se actualiza en Traducir() para usarlo en EstadoLabel() y ColorearFilasPedidos()
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
+        // "Documentos ▾": los documentos del pedido se imprimen a pedido, no tras cada acción.
+        private readonly MenuDocumentosPedido menuDocumentos;
+
         public PedidosVenta()
         {
             InitializeComponent();
+            menuDocumentos = new MenuDocumentosPedido(pedidoBLL, new BLL.Cliente(), ObtenerPedidoSeleccionado,
+                () => this.Text, this, ex => MostrarError(ex), (k, f) => Tr(k, f));
             // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvPedidos);
             Estilos.EstiloFormulario.Grilla(dgvDetallePrendas);
@@ -73,6 +78,7 @@ namespace GUI
             Aplicar(btnDesistirPedido, t);
             Aplicar(btnFormalizar,    t);
             Aplicar(btnConfirmacion,  t);
+            menuDocumentos.Traducir();
         }
 
         private static void Aplicar(Control c, IDictionary<string, Traduccion> t)
@@ -219,8 +225,8 @@ namespace GUI
             btnDesistirPedido.Enabled = pedido != null && pedido.PuedeDesistirse();
             // "Formalizar el pedido" (prendas ya separadas por Depósito).
             btnFormalizar.Enabled     = pedido != null && pedido.PuedeFormalizarse();
-            // "Preparar la confirmación" (pedido formalizado).
-            btnConfirmacion.Enabled   = pedido != null && pedido.EstaFormalizado();
+            // "Documentos ▾": el menú habilita cada documento según el estado del pedido.
+            btnConfirmacion.Enabled   = pedido != null;
         }
 
         private void CargarDetallePrendas(int idPedido)
@@ -453,10 +459,7 @@ namespace GUI
             {
                 pedidoBLL.AsentarDesistimiento(this.Text, pedido, motivo, BE.EtapaDesistimiento.Disponibilidad);
                 MostrarOk(Tr("msg.ped.desistido", "Pedido #{0}: desistimiento asentado.", new object[] { pedido.IdPedido }));
-                if (ConfirmarSiNo(Tr("conf.ped.aviso", "¿Imprimir el aviso de desistimiento?"), this.Text, porDefectoNo: true))
-                    Exportacion.DocumentosPedido.Imprimir(
-                        Exportacion.DocumentosPedido.AvisoDesistimiento(pedidoBLL.ObtenerPorId(pedido.IdPedido)), this);
-                CargarPedidos();
+                CargarPedidos();   // el aviso de desistimiento se imprime desde "Documentos ▾"
             }
             catch (Exception ex) { MostrarError(ex); }
         }
@@ -477,30 +480,17 @@ namespace GUI
             try
             {
                 pedidoBLL.FormalizarPedido(this.Text, pedido);
-                MostrarOk(Tr("msg.ped.formalizado", "Pedido #{0} formalizado. Queda pendiente de despacho.",
+                // La «Confirmación y constancia del pedido» ya no se abre sola: está en "Documentos ▾".
+                MostrarOk(Tr("msg.ped.formalizado.doc",
+                    "Pedido #{0} formalizado. Queda pendiente de despacho. La confirmación para el cliente está en \"Documentos\".",
                     new object[] { pedido.IdPedido }));
-                PrepararConfirmacion(pedido.IdPedido);
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        private void BtnConfirmacion_Click(object sender, EventArgs e)
-        {
-            var pedido = ObtenerPedidoSeleccionado();
-            if (pedido != null) PrepararConfirmacion(pedido.IdPedido);
-        }
-
-        // "Preparar la confirmación" (Confirmación y constancia del pedido para el cliente).
-        private void PrepararConfirmacion(int idPedido)
-        {
-            try
-            {
-                var formalizado = pedidoBLL.PrepararConfirmacion(this.Text, idPedido);
-                Exportacion.DocumentosPedido.Imprimir(Exportacion.DocumentosPedido.ConfirmacionPedido(formalizado), this);
-            }
-            catch (Exception ex) { MostrarError(ex); }
-        }
+        // "Documentos ▾": planilla, faltantes, separación, confirmación del pedido, aviso de desistimiento.
+        private void BtnConfirmacion_Click(object sender, EventArgs e) => menuDocumentos.Mostrar(btnConfirmacion);
 
         /// <summary>
         /// Muestra un dialog simple para pedir texto al usuario.

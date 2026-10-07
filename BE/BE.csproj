@@ -77,6 +77,8 @@
     <Compile Include="EstadoSugerencia.cs" />
     <Compile Include="Promocion.cs" />
     <Compile Include="PoliticaDescuento.cs" />
+    <Compile Include="PoliticaCambioPlan.cs" />
+    <Compile Include="PlanCuotas.cs" />
     <Compile Include="SugerenciaPromocion.cs" />
     <Compile Include="CandidataSugerencia.cs" />
     <Compile Include="OrigenMetrica.cs" />

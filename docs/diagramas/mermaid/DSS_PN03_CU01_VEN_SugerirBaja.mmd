@@ -4,15 +4,34 @@ sequenceDiagram
   participant F as Promociones<br/>VigentesForm
   participant B as BLL.Promocion
   participant D as DAL.Promocion
-  F->>B: ObtenerParaVentas()  [cierra antes las vencidas]
-  V->>F: Elige una promoción Vigente, pulsa "Solicitar baja" e indica el motivo
+  V->>F: Abre Promociones Vigentes (o pulsa Actualizar)
+  F->>B: ObtenerParaVentas()
+  B->>B: CerrarVencidasSinFallar()  [CerrarVencidas(): las Vigentes con fecha de fin pasada pasan a Vencida, ver CU05-ADM]
+  B->>D: ObtenerTodas()  [quedan las Vigentes y las de baja solicitada, por fecha de fin]
+  B-->>F: promociones para Ventas
+  V->>F: Elige una promoción Vigente y pulsa "Solicitar baja"
+  V->>F: Ingresa el motivo (InputDialog), si cancela, no se solicita
   F->>B: SolicitarBaja(modulo, promocion, motivo)
-  Note over B: Exigir(PromocionesVigentesEditar) · promocion.PuedeSolicitarseBaja() · motivo obligatorio
-  B->>D: SolicitarBaja(solicitud, historial: Vigente → BajaSolicitada)  [claim]
-  alt Ya no está Vigente
-    D-->>B: 0
-    B-->>F: AppException(estado_concurrente)
-  else Solicitada
-    B-->>F: idSolicitud
-    F-->>V: Solicitud de baja (PDF): Administración la resuelve
+  Note over B: PermisosAccion.Exigir(PromocionesVigentesEditar, PromocionesVigentes)
+  alt No está Vigente (PuedeSolicitarseBaja / TransicionValida(BajaSolicitada)) o sin motivo
+    B-->>F: AppException(sugerirbaja_estado / motivobaja_requerido)
+    F-->>V: Informa el motivo
+  else Vigente y con motivo
+    B->>D: SolicitarBaja(solicitud, historial)  [claim: WHERE Estado = Vigente, + SolicitudBajaPromocion Pendiente, historial: Vigente → BajaSolicitada]
+    alt Ya no está Vigente
+      D-->>B: 0
+      B-->>F: AppException(estado_concurrente)
+      F-->>V: Informa el motivo
+    else Solicitada
+      D-->>B: idSolicitud
+      Note over B: bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta, …)
+      B-->>F: idSolicitud
+      F-->>V: "Se envió a Administración la sugerencia de baja"
+      F->>B: ObtenerParaVentas()  [recarga]
+      opt ¿Imprimir la solicitud de baja? Sí
+        F->>B: ObtenerPorId(idPromocion)
+        F->>B: ObtenerUltimaSolicitudBaja(idPromocion)
+        F-->>V: Solicitud de baja (PDF): Administración la resuelve
+      end
+    end
   end

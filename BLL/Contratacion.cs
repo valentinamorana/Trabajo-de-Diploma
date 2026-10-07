@@ -238,7 +238,13 @@ namespace BLL
 
         public BE.Contratacion ObtenerPorId(int idContratacion) => dalContratacion.ObtenerPorId(idContratacion);
 
-        public List<BE.MedioPago> ObtenerMediosPago() => dalContratacion.ObtenerMediosPago();
+        // Medios que se ofrecen en Caja: los activos (un medio histórico solo aparece en cobros viejos).
+        public List<BE.MedioPago> ObtenerMediosPago() => dalContratacion.ObtenerMediosPago().Where(m => m.Activo).ToList();
+
+        // "Ofrecer planes de cuotas": con tarjeta de crédito, los planes activos que no superan los
+        // meses que cubre la modalidad (Mensual: 1; Trimestral: hasta 3; Anual: hasta 12).
+        public List<BE.PlanCuotas> ObtenerPlanesCuotas(BE.Builders.ModalidadCobro modalidad)
+            => BE.PoliticaCuotas.Disponibles(dalContratacion.ObtenerPlanesCuotas(), modalidad);
 
         public List<BE.IntentoPago> ObtenerIntentos(int idContratacion)
         {
@@ -249,17 +255,25 @@ namespace BLL
         public BE.DesistimientoContratacion ObtenerDesistimiento(int idDesistimiento) => dalContratacion.ObtenerDesistimiento(idDesistimiento);
 
         // "Calcular importe" («Liquidación»): precio mensual × meses de la modalidad menos UN solo
-        // descuento (la promoción vigente del plan o el crédito por referidos, el mayor).
-        public BE.LiquidacionContratacion CalcularImporte(BE.Contratacion contratacion)
+        // descuento (la promoción vigente del plan o el crédito por referidos, el mayor). Si se indica
+        // el medio de pago y es tarjeta de crédito, "Calcular recargo y valor de cuota" con el plan de
+        // cuotas elegido («Detalle de financiación»).
+        public BE.LiquidacionContratacion CalcularImporte(BE.Contratacion contratacion, int? idMedioPago = null, int? idPlanCuotas = null)
         {
             var plan = dalPlan.ObtenerPorId(contratacion.IdPlan);
             var cliente = dalCliente.ObtenerPorId(contratacion.IdCliente);
             var r = ResolverDescuento(contratacion, plan, cliente, ObtenerPromocionesVigentes());
-            return new BE.LiquidacionContratacion
+            var liq = new BE.LiquidacionContratacion
             {
-                Bruto = r.Bruto, Descuento = r.Descuento,
+                Bruto = r.Bruto, Descuento = r.Descuento, CreditoCambioPlan = r.CreditoCambioPlan,
                 NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido
             };
+            if (idMedioPago.HasValue)
+            {
+                var medio = ValidarMedioPago(idMedioPago, requerido: true);
+                liq.AplicarFinanciacion(BE.PoliticaCuotas.Financiar(liq.Total, ResolverCuotas(medio, idPlanCuotas, contratacion.Modalidad)));
+            }
+            return liq;
         }
 
         // Importe que el Vendedor informa al presentar el plan elegido (antes de registrar la
@@ -286,7 +300,7 @@ namespace BLL
                 var r = ResolverDescuento(c, dalPlan.ObtenerPorId(c.IdPlan), dalCliente.ObtenerPorId(c.IdCliente), promos);
                 resultado[c.IdContratacion] = new BE.LiquidacionContratacion
                 {
-                    Bruto = r.Bruto, Descuento = r.Descuento,
+                    Bruto = r.Bruto, Descuento = r.Descuento, CreditoCambioPlan = r.CreditoCambioPlan,
                     NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido
                 };
             }
@@ -296,7 +310,7 @@ namespace BLL
         // "¿Se concreta el pago? Sí" → "Confirmar cobro" → "Emitir comprobante" («Comprobante») →
         // "Activar suscripción" («Constancia de suscripción») → "¿Referido? Sí → Acreditar crédito".
         public BE.LiquidacionContratacion ConfirmarCobro(string modulo, BE.Contratacion contratacion, int idMedioPago,
-                                                         decimal? importeConfirmado = null)
+                                                         decimal? importeConfirmado = null, int? idPlanCuotas = null)
         {
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
 
@@ -310,6 +324,8 @@ namespace BLL
                     actual.Estado);
 
             var medio = ValidarMedioPago(idMedioPago, requerido: true);
+            // ¿Paga con tarjeta de crédito en cuotas? El plan de cuotas se valida ANTES de tocar nada.
+            var planCuotas = ResolverCuotas(medio, idPlanCuotas, actual.Modalidad);
 
             // El plan fue dado de baja entre que el Vendedor registró la contratación y que Caja la
             // cobra: se rechaza ANTES de tocar nada y la contratación sigue Pendiente de pago.
@@ -338,12 +354,18 @@ namespace BLL
                     "El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Volvé a calcular el importe y confirmá de nuevo.",
                     importeConfirmado.Value, descuento.Total);
 
+            // "Calcular recargo y valor de cuota" («Detalle de financiación»): el recargo se suma al total
+            // confirmado; con un medio que no financia, financiacion queda en 1 pago sin recargo.
+            var financiacion = BE.PoliticaCuotas.Financiar(descuento.Total, planCuotas);
+
             // "Emitir comprobante".
             string numeroComprobante = EmitirComprobante(actual.IdContratacion);
 
             // "Confirmar cobro": claim atómico (el UPDATE exige que siga PendientePago).
             if (!dalContratacion.ConfirmarCobro(actual.IdContratacion, idCaja, medio.IdMedioPago, numeroComprobante,
-                    descuento.Total, descuento.Descuento, descuento.Promocion?.IdPromocion))
+                    descuento.Total, descuento.Descuento, descuento.Promocion?.IdPromocion,
+                    planCuotas?.IdPlanCuotas, planCuotas != null ? financiacion.Recargo : (decimal?)null,
+                    descuento.CreditoCambioPlan > 0 ? descuento.CreditoCambioPlan : (decimal?)null))
                 throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
                     "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
 
@@ -363,8 +385,9 @@ namespace BLL
                 // El crédito consumido se descuenta en la BD (ConsumirCreditoEnTx); acá se refleja en el objeto.
                 if (descuento.UsaCreditoReferido)
                     cliente.DescuentoProximoCobro = Math.Max(0, cliente.DescuentoProximoCobro - descuento.Descuento);
+                // Upgrade (hubo crédito por el plan anterior): el período del plan nuevo arranca hoy.
                 suscripcion = clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad,
-                    descuento.UsaCreditoReferido ? descuento.Descuento : 0m);
+                    descuento.UsaCreditoReferido ? descuento.Descuento : 0m, iniciarHoy: descuento.CreditoCambioPlan > 0);
             }
             catch
             {
@@ -393,21 +416,29 @@ namespace BLL
 
             bitacora.Registrar(modulo,
                 $"Cobro Contratación #{actual.IdContratacion} — Cliente: {actual.NombreCliente} — " +
-                $"Medio: {medio.Nombre} — Comprobante: {numeroComprobante}",
+                $"Medio: {medio.Nombre}" +
+                (planCuotas != null ? $" en {financiacion.CantidadCuotas} cuota(s) de ${financiacion.ValorCuota} (recargo ${financiacion.Recargo})" : "") +
+                $" — Comprobante: {numeroComprobante}",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.CobroSuscripcion,
                 $"Contratación #{actual.IdContratacion} cobrada y suscripción activada — " +
                 $"{actual.NombreCliente} — Plan {actual.NombrePlan} — Comprobante {numeroComprobante} — " +
                 $"Importe ${descuento.Total}" +
+                (planCuotas != null && financiacion.CantidadCuotas > 1
+                    ? $" en {financiacion.CantidadCuotas} cuotas con tarjeta de crédito (recargo ${financiacion.Recargo})" : "") +
                 (descuento.Descuento > 0
                     ? $" (descuento ${descuento.Descuento}: {(descuento.Promocion != null ? $"promoción '{descuento.Promocion.Nombre}'" : "crédito por referido")})"
+                    : "") +
+                (descuento.CreditoCambioPlan > 0
+                    ? $" (cambio a un plan superior: crédito ${descuento.CreditoCambioPlan} por los días no usados del plan anterior)"
                     : ""),
                 idCliente: actual.IdCliente);
 
-            return new BE.LiquidacionContratacion
+            var resultado = new BE.LiquidacionContratacion
             {
                 Bruto = descuento.Bruto,
                 Descuento = descuento.Descuento,
+                CreditoCambioPlan = descuento.CreditoCambioPlan,
                 NombrePromocion = descuento.Promocion?.Nombre,
                 UsaCreditoReferido = descuento.UsaCreditoReferido,
                 NumeroComprobante = numeroComprobante,
@@ -415,6 +446,8 @@ namespace BLL
                 VigenciaHasta = hasta,
                 ReferenteAcreditado = referente?.NombreCompleto
             };
+            resultado.AplicarFinanciacion(financiacion);
+            return resultado;
         }
 
         // "¿Se concreta el pago? No" → "Registrar intento" («Intento») → "¿Alcanzó el máximo de 3
@@ -463,6 +496,37 @@ namespace BLL
             return resultado;
         }
 
+        // "Anular contratación": el cliente se arrepintió antes de pagar o hubo un error de carga. Caja
+        // la cancela con motivo, sin registrar intentos de pago que no existieron. Queda Cancelada
+        // («Constancia de cancelación» con el motivo) y el cliente puede volver a contratar.
+        public void Anular(string modulo, BE.Contratacion contratacion, string motivo)
+        {
+            PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
+
+            var actual = dalContratacion.ObtenerPorId(contratacion.IdContratacion);
+            if (actual == null)
+                throw new BE.AppException("err.bll.contratacion.inexistente", "La contratación ya no existe.");
+            if (!actual.PuedeCobrarse() || !actual.TransicionValida(BE.EstadoContratacion.Cancelada))
+                throw new BE.AppException("err.bll.contratacion.anular_estado",
+                    "Solo se pueden anular contrataciones Pendientes de pago. Esta contratación está '{0}'.",
+                    actual.Estado);
+            if (string.IsNullOrWhiteSpace(motivo))
+                throw new BE.AppException("err.bll.contratacion.anular_sin_motivo",
+                    "Indicá el motivo por el que se anula la contratación.");
+            ValidarLargoMotivo(motivo);
+
+            if (!dalContratacion.Anular(actual.IdContratacion, motivo.Trim(), BLLHelper.ResolverEmpleadoActivo(dalEmpleado)))
+                throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
+                    "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
+
+            bitacora.Registrar(modulo,
+                $"Anular Contratación #{actual.IdContratacion} — Cliente: {actual.NombreCliente} — Motivo: {motivo.Trim()}",
+                BE.Criticidad.Media);
+            bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
+                $"Contratación #{actual.IdContratacion} anulada por Caja — {actual.NombreCliente} — {motivo.Trim()}",
+                idCliente: actual.IdCliente);
+        }
+
         // ── Auxiliares ─────────────────────────────────────────────────────────
 
         // "Emitir comprobante": número simple y legible (prefijo + ID de contratación + fecha).
@@ -475,12 +539,44 @@ namespace BLL
             {
                 if (requerido)
                     throw new BE.AppException("err.bll.contratacion.medio_pago_requerido",
-                        "Debe indicar el medio de pago (efectivo, tarjeta o transferencia).");
+                        "Debe indicar el medio de pago (efectivo, tarjeta de débito, tarjeta de crédito o transferencia).");
                 return null;
             }
-            return dalContratacion.ObtenerMediosPago().FirstOrDefault(m => m.IdMedioPago == idMedioPago.Value)
+            return ObtenerMediosPago().FirstOrDefault(m => m.IdMedioPago == idMedioPago.Value)
                 ?? throw new BE.AppException("err.bll.contratacion.medio_invalido",
                     "El medio de pago indicado no existe.");
+        }
+
+        // "¿Paga con tarjeta de crédito en cuotas?": devuelve el plan de cuotas a aplicar, o null si el
+        // medio no financia (se cobra en un solo pago). Con tarjeta de crédito y sin plan elegido, un
+        // solo pago (el plan de 1 cuota). Reglas: solo los medios que permiten cuotas; el plan tiene
+        // que existir y estar activo; no más cuotas que los meses que cubre la modalidad.
+        private BE.PlanCuotas ResolverCuotas(BE.MedioPago medio, int? idPlanCuotas, BE.Builders.ModalidadCobro modalidad)
+        {
+            var planes = dalContratacion.ObtenerPlanesCuotas() ?? new List<BE.PlanCuotas>();
+            var plan = idPlanCuotas.HasValue
+                ? planes.FirstOrDefault(p => p.IdPlanCuotas == idPlanCuotas.Value)
+                : null;
+
+            if (!medio.PermiteCuotas)
+            {
+                if (idPlanCuotas.HasValue && (plan == null || plan.CantidadCuotas > 1))
+                    throw new BE.AppException("err.bll.contratacion.cuotas_medio",
+                        "El medio de pago '{0}' no permite pagar en cuotas: las cuotas son solo con tarjeta de crédito.",
+                        medio.Nombre);
+                return null;
+            }
+
+            if (!idPlanCuotas.HasValue)
+                plan = planes.Where(p => p.Activo && p.CantidadCuotas == 1).FirstOrDefault();
+            if (plan == null || !plan.Activo)
+                throw new BE.AppException("err.bll.contratacion.cuotas_invalidas",
+                    "El plan de cuotas elegido no existe o no está disponible.");
+            if (!BE.PoliticaCuotas.PermiteModalidad(plan, modalidad))
+                throw new BE.AppException("err.bll.contratacion.cuotas_modalidad",
+                    "Con la modalidad {0} se puede pagar en hasta {1} cuota(s); se eligieron {2}.",
+                    modalidad, BE.Builders.ModalidadCobroExtensiones.Meses(modalidad), plan.CantidadCuotas);
+            return plan;
         }
 
         private void Compensar(string modulo, BE.Contratacion actual)
@@ -518,14 +614,21 @@ namespace BLL
 
         // Precio mensual del plan × meses de la modalidad (NUULY cobra por mes) menos un único
         // descuento: promoción vigente del plan o crédito por referido.
-        private static BE.ResultadoDescuento ResolverDescuento(BE.Contratacion c, BE.PlanSuscripcion plan,
-                                                               BE.Cliente cliente, List<BE.Promocion> promos)
+        private BE.ResultadoDescuento ResolverDescuento(BE.Contratacion c, BE.PlanSuscripcion plan,
+                                                        BE.Cliente cliente, List<BE.Promocion> promos)
         {
             int meses = BE.Builders.ModalidadCobroExtensiones.Meses(c.Modalidad);
             // Precio pactado al registrar la contratación; si no lo tiene (datos previos), el del plan.
             decimal precio = c.PrecioMensual ?? (plan != null ? plan.Precio : c.MontoPlan);
             decimal bruto = precio * meses;
-            return BE.PoliticaDescuento.Resolver(bruto, c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m, meses);
+            var r = BE.PoliticaDescuento.Resolver(bruto, c.IdPlan, promos, cliente?.DescuentoProximoCobro ?? 0m, meses);
+
+            // Upgrade: pasa a un plan más caro con el período vigente → el plan nuevo rige desde hoy y
+            // los días no usados del plan actual se descuentan del cobro (BE.PoliticaCambioPlan).
+            var planActual = cliente?.IdPlan != null && cliente.IdPlan.Value != c.IdPlan
+                ? dalPlan.ObtenerPorId(cliente.IdPlan.Value) : null;
+            r.CreditoCambioPlan = BE.PoliticaCambioPlan.Credito(cliente, planActual, c.IdPlan, precio, DateTime.Today, r.Total);
+            return r;
         }
 
         // Best-effort: sin DAL de promociones, o si la tabla aún no existe, se cobra sin promociones.

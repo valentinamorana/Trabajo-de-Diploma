@@ -56,6 +56,15 @@ namespace BLL
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
 
+            // PN02: renovar el mismo plan o cambiar de plan extiende o cambia la suscripción, y eso
+            // solo se hace cobrando (Vendedor registra la contratación → Caja cobra). Por acá, sin
+            // cobro, queda como corrección administrativa: solo el Administrador (mismo criterio que
+            // Cliente.Modificar). Pausar y dar de baja no tocan el cobro y siguen abiertos al Vendedor.
+            if (decision == Manejadores.DecisionRenovacion.Renovar || decision == Manejadores.DecisionRenovacion.CambiarPlan)
+                BLLHelper.ExigirAdministrador("err.bll.renovacion.solo_admin",
+                    "Renovar o cambiar el plan extiende la suscripción y tiene que pasar por Caja: " +
+                    "registrá una Nueva Contratación. Desde Renovación solo puede hacerlo un Administrador.");
+
             // Guarda de entrada única para toda la cadena: sin plan asignado no hay
             // suscripción que renovar, cambiar o dar de baja. Sin este chequeo, un cliente
             // con IdPlan=null pero FechaVencimiento vencida (estado inconsistente, pero no

@@ -214,8 +214,8 @@ namespace GUI
             this.btnConfirmacion.Name = "btnConfirmacion";
             this.btnConfirmacion.Size = new System.Drawing.Size(170, 28);
             this.btnConfirmacion.TabIndex = 10;
-            this.btnConfirmacion.Tag  = "btn.ped.confirmacion";
-            this.btnConfirmacion.Text = "Confirmación del pedido";
+            this.btnConfirmacion.Tag  = "btn.documentos";
+            this.btnConfirmacion.Text = "Documentos ▾";
             this.btnConfirmacion.UseVisualStyleBackColor = false;
             this.btnConfirmacion.Click += new System.EventHandler(this.BtnConfirmacion_Click);
             //

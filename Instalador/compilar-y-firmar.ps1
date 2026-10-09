@@ -5,7 +5,8 @@
 .DESCRIPTION
     0. Verifica que no haya cambios sin commitear en BD, Instalador, GUI, BLL, DAL y BE
        (el instalador tiene que salir de un estado versionado, no de archivos sueltos).
-    1. Recompila (Rebuild, Release) la solución completa y DbInstaller.
+    1. Recompila (Rebuild, Release) la solución completa y DbInstaller, y corre las pruebas
+       (si alguna falla, no se genera el instalador).
     2. Descarga SQL Server LocalDB si falta y verifica que su firma sea válida Y de Microsoft.
     3. Compila WardrobeFlow_Setup.iss  ->  Salida\Instalador_WardrobeFlow_<version>.exe
        Si hay certificado y SignTool, Inno firma con él el instalador Y el desinstalador
@@ -67,6 +68,20 @@ Write-Host 'Compilando la solución (Rebuild, Release)...' -ForegroundColor Cyan
 if ($LASTEXITCODE -ne 0) { throw 'Falló la compilación de la solución.' }
 & $msbuild (Join-Path $dir 'DbInstaller\DbInstaller.csproj') -t:Rebuild -p:Configuration=Release -v:minimal -nologo
 if ($LASTEXITCODE -ne 0) { throw 'Falló la compilación de DbInstaller.' }
+
+# ── 1b) Pruebas: no se empaqueta una versión con tests rotos ─────────────────
+$vstest = $null
+if (Test-Path $vswhere) {
+    $vstest = & $vswhere -latest -prerelease -find '**\TestPlatform\vstest.console.exe' | Select-Object -First 1
+}
+$testsDll = Join-Path $raiz 'Tests\bin\Release\Tests.dll'
+if ($vstest -and (Test-Path $testsDll)) {
+    Write-Host 'Corriendo las pruebas...' -ForegroundColor Cyan
+    & $vstest $testsDll /Logger:"console;verbosity=minimal"
+    if ($LASTEXITCODE -ne 0) { throw 'Fallan pruebas: corregilas antes de generar el instalador.' }
+} else {
+    Write-Host 'AVISO: no se encontró vstest.console.exe; se sigue sin correr las pruebas.' -ForegroundColor Yellow
+}
 
 # ── 2) SQL Server 2022 Express LocalDB (va embebido para equipos sin SQL) ────
 $msi = Join-Path $dir 'Redist\SqlLocalDB.msi'

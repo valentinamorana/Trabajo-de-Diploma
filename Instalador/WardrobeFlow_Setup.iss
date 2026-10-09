@@ -94,7 +94,7 @@
 ; =====================================================================
 
 #define MyAppName "WardrobeFlow"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Valentina Morana"
 #define MyAppExeName "GUI.exe"
 #define MyDatabaseName "WardrobeFlowDB"

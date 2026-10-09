@@ -45,6 +45,12 @@
 --   • Con sqlcmd usar el codepage UTF-8:  sqlcmd -S .\SQLEXPRESS -E -f 65001 -i 00_Instalacion_Completa.sql
 -- ============================================================
 
+-- Opciones de sesión que exigen los índices filtrados y las columnas calculadas. sqlcmd arranca con
+-- QUOTED_IDENTIFIER OFF: sin esto, correr el script por segunda vez con sqlcmd fallaba (Msg 1934).
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
 IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = 'WardrobeFlowDB')
 BEGIN
     BEGIN TRY

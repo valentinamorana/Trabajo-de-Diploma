@@ -34,7 +34,10 @@ namespace Tests
             public FakePrendaDAL DalPrenda = new FakePrendaDAL();
             public FakeMantenimientoPrendaDAL DalMantenimiento = new FakeMantenimientoPrendaDAL();
 
-            public BLL.Prenda Crear() => new BLL.Prenda(DalPrenda, DalMantenimiento);
+            // Lista de espera falsa: sin ella, pasar una prenda a Disponible abría la base _Tests.
+            public FakeListaEsperaService ListaEspera = new FakeListaEsperaService();
+
+            public BLL.Prenda Crear() => new BLL.Prenda(DalPrenda, DalMantenimiento, ListaEspera);
         }
 
         [TestMethod]

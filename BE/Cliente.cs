@@ -11,7 +11,15 @@ namespace BE
         public string Apellido { get; set; }
         public string DNI { get; set; }
         public string Email { get; set; }
-        public string MetodoPago { get; set; } = "Efectivo";
+
+        // Medio de pago preferido: FK al catálogo MedioPago (3FN; antes texto libre "Efectivo",
+        // "Crédito"...). Null en clientes cargados sin preferencia. Por defecto Efectivo, como antes.
+        public int? IdMedioPagoPreferido { get; set; } = MedioPago.IdEfectivo;
+
+        // Nombre y clave de traducción del medio preferido (cargados por JOIN con MedioPago, no
+        // persisten): solo para mostrar. La pantalla traduce con la clave y cae al nombre.
+        public string MetodoPago { get; set; }
+        public string ClaveTraduccionMedioPago { get; set; }
 
         // Null si no tiene plan asignado.
         public int? IdPlan { get; set; }

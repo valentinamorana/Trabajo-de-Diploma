@@ -16,7 +16,6 @@ erDiagram
     nvarchar(100) Apellido
     nvarchar(200) DNI
     nvarchar(200) Email "NULL"
-    nvarchar(100) MetodoPago "NULL"
     int IdPlan FK "NULL"
     datetime FechaAlta
     date FechaNacimiento
@@ -28,6 +27,7 @@ erDiagram
     int IdClienteReferente FK "NULL"
     decimal(10_2) DescuentoProximoCobro
     bit BeneficioReferidoOtorgado
+    int IdMedioPagoPreferido FK "NULL"
     int IdPlanSiguiente FK "NULL"
     datetime FechaCambioPlan "NULL"
   }
@@ -61,7 +61,7 @@ erDiagram
     nvarchar(500) Descripcion "NULL"
     nvarchar(20) Talle "NULL"
     nvarchar(50) Color "NULL"
-    nvarchar(100) Categoria "NULL"
+    nvarchar(100) Categoria FK "NULL"
     int Estado
     int IdClienteActual FK "NULL"
     datetime FechaAlta
@@ -74,6 +74,7 @@ erDiagram
     datetime FechaEntrada
     datetime FechaSalida "NULL"
     nvarchar(100) Actor "NULL"
+    tinyint Origen
   }
   CargoPrenda {
     int IdCargo PK

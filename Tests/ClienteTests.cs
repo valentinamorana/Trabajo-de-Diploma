@@ -665,33 +665,96 @@ namespace Tests
             Assert.AreEqual(3, r[0].IdCliente);
         }
 
-        // ── ObtenerMetodosPago (antes lista fija en ClienteForm) ─────────────────
+        // ── ObtenerMetodosPago: catálogo MedioPago (3FN; antes lista fija de textos) ──
+
+        // Clave de la BE.AppException que lanza la acción (falla el test si no lanza).
+        private static string ClaveDeError(Action accion)
+        {
+            try { accion(); }
+            catch (BE.AppException ex) { return ex.Clave; }
+            Assert.Fail("Se esperaba una BE.AppException.");
+            return null;
+        }
+
+        private static FakeClienteDAL FakeConMedioHistorico()
+        {
+            var fake = new FakeClienteDAL();
+            fake.MediosPago.Add(new BE.MedioPago { IdMedioPago = 100, Nombre = "Mercado Pago", ClaveTraduccion = "medio.historico.100", Activo = false });
+            return fake;
+        }
 
         [TestMethod]
-        public void ObtenerMetodosPago_DevuelveLosCuatroConSuClave()
+        public void ObtenerMetodosPago_DevuelveLosActivosDelCatalogoConSuClave()
         {
-            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var bll = new BLL.Cliente(FakeConMedioHistorico());
             var m = bll.ObtenerMetodosPago();
-            CollectionAssert.AreEqual(new[] { "Efectivo", "Débito", "Crédito", "Transferencia" },
-                m.ConvertAll(x => x.Nombre));
-            Assert.AreEqual("metodo.debito", m[1].ClaveTraduccion);
+            CollectionAssert.AreEqual(new[] { 1, 2, 3, 4 }, m.ConvertAll(x => x.IdMedioPago));
+            Assert.AreEqual("medio.tarjeta_debito", m[1].ClaveTraduccion);
         }
 
         [TestMethod]
-        public void ObtenerMetodosPago_ValorGuardadoConocido_NoSeDuplica()
+        public void ObtenerMetodosPago_MedioActivoGuardado_NoSeDuplica()
         {
-            var bll = new BLL.Cliente(new FakeClienteDAL());
-            Assert.AreEqual(4, bll.ObtenerMetodosPago("Crédito").Count);
+            var bll = new BLL.Cliente(FakeConMedioHistorico());
+            Assert.AreEqual(4, bll.ObtenerMetodosPago(4).Count);
         }
 
         [TestMethod]
-        public void ObtenerMetodosPago_ValorGuardadoAnterior_SeConservaAlFinalSinClave()
+        public void ObtenerMetodosPago_MedioHistoricoGuardado_SeConservaAlFinal()
         {
-            var bll = new BLL.Cliente(new FakeClienteDAL());
-            var m = bll.ObtenerMetodosPago("Mercado Pago");
+            var bll = new BLL.Cliente(FakeConMedioHistorico());
+            var m = bll.ObtenerMetodosPago(100);
             Assert.AreEqual(5, m.Count);
+            Assert.AreEqual(100, m[4].IdMedioPago);
             Assert.AreEqual("Mercado Pago", m[4].Nombre);
-            Assert.IsNull(m[4].ClaveTraduccion);
+        }
+
+        [TestMethod]
+        public void Alta_SinMedioDePago_Lanza()
+        {
+            LoginComoAdministrador();
+            var fake = new FakeClienteDAL();
+            var c = ClienteValido();
+            c.IdMedioPagoPreferido = null;
+            Assert.AreEqual("err.bll.cliente.medio_requerido", ClaveDeError(() => new BLL.Cliente(fake).Alta("Test", c)));
+            Assert.AreEqual(0, fake.AltaVeces);
+        }
+
+        [TestMethod]
+        public void Alta_MedioFueraDelCatalogo_Lanza()
+        {
+            LoginComoAdministrador();
+            var fake = new FakeClienteDAL();
+            var c = ClienteValido();
+            c.IdMedioPagoPreferido = 99;
+            Assert.AreEqual("err.bll.cliente.medio_invalido", ClaveDeError(() => new BLL.Cliente(fake).Alta("Test", c)));
+        }
+
+        [TestMethod]
+        public void Alta_MedioHistoricoInactivo_Lanza()
+        {
+            LoginComoAdministrador();
+            var fake = FakeConMedioHistorico();
+            var c = ClienteValido();
+            c.IdMedioPagoPreferido = 100;
+            Assert.AreEqual("err.bll.cliente.medio_invalido", ClaveDeError(() => new BLL.Cliente(fake).Alta("Test", c)));
+        }
+
+        [TestMethod]
+        public void Modificar_ConservaElMedioHistoricoQueYaTenia()
+        {
+            LoginComoAdministrador();
+            var fake = FakeConMedioHistorico();
+            var actual = ClienteValido();
+            actual.IdMedioPagoPreferido = 100;
+            fake.ClientePorId = actual;
+            var editado = ClienteValido();
+            editado.IdMedioPagoPreferido = 100;
+
+            new BLL.Cliente(fake).Modificar("Test", editado);
+
+            Assert.AreEqual(1, fake.ModificarVeces);
+            Assert.AreEqual(100, fake.UltimoModificado.IdMedioPagoPreferido);
         }
 
         // ── BE.Cliente: estado de la suscripción (antes calculado en Clientes/Renovación) ──

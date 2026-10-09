@@ -2,17 +2,20 @@ erDiagram
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
+  MedioPago |o--o{ Cliente : "IdMedioPagoPreferido"
   PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
-  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  MedioPago |o--o{ Contratacion : "IdMedioPago"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Promocion ||--o{ DictamenContable : "IdPromocion"
   Promocion |o--o{ HistorialCobro : "IdPromocion"
   Cliente ||--o{ HistorialCobro : "IdCliente"
+  MedioPago |o--o{ HistorialCobro : "IdMedioPago"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
@@ -20,17 +23,20 @@ erDiagram
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Empleado ||--o{ Pedido : "IdEmpleado"
   Empleado |o--o{ Pedido : "IdEmpleadoControl"
+  Empleado ||--o{ Pedido : "IdEmpleado"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Categoria |o--o{ Prenda : "Categoria"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Categoria |o--o{ Promocion : "CategoriaPrenda"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Promocion ||--o{ PromocionHistorial : "IdPromocion"
   Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
+  Categoria |o--o{ SugerenciaPromocion : "CategoriaPrenda"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
   PlanSuscripcion {
     int IdPlan PK
@@ -45,7 +51,6 @@ erDiagram
     nvarchar(100) Apellido
     nvarchar(200) DNI
     nvarchar(200) Email "NULL"
-    nvarchar(100) MetodoPago "NULL"
     int IdPlan FK "NULL"
     datetime FechaAlta
     date FechaNacimiento
@@ -57,8 +62,16 @@ erDiagram
     int IdClienteReferente FK "NULL"
     decimal(10_2) DescuentoProximoCobro
     bit BeneficioReferidoOtorgado
+    int IdMedioPagoPreferido FK "NULL"
     int IdPlanSiguiente FK "NULL"
     datetime FechaCambioPlan "NULL"
+  }
+  MedioPago {
+    int IdMedioPago PK
+    nvarchar(50) Nombre
+    nvarchar(100) ClaveTraduccion
+    bit PermiteCuotas
+    bit Activo
   }
   Empleado {
     int IdEmpleado PK
@@ -108,7 +121,7 @@ erDiagram
     date FechaFin
     int Estado
     int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda "NULL"
+    nvarchar(100) CategoriaPrenda FK "NULL"
     decimal(10_2) MargenEstimado
     nvarchar(500) ImpactoEconomico "NULL"
     int IdSugerenciaOrigen FK "NULL"
@@ -118,7 +131,7 @@ erDiagram
   SugerenciaPromocion {
     int IdSugerencia PK
     int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda "NULL"
+    nvarchar(100) CategoriaPrenda FK "NULL"
     nvarchar(500) Motivo
     int TipoDescuentoSugerido
     decimal(10_2) BeneficioEstimado
@@ -223,12 +236,17 @@ erDiagram
     nvarchar(500) Descripcion "NULL"
     nvarchar(20) Talle "NULL"
     nvarchar(50) Color "NULL"
-    nvarchar(100) Categoria "NULL"
+    nvarchar(100) Categoria FK "NULL"
     int Estado
     int IdClienteActual FK "NULL"
     datetime FechaAlta
     int IdUltimoCliente FK "NULL"
     decimal(10_2) PrecioReposicion "NULL"
+  }
+  Categoria {
+    int IdCategoria PK
+    nvarchar(100) Nombre
+    bit Activo
   }
   MantenimientoPrenda {
     int IdMantenimiento PK
@@ -236,6 +254,7 @@ erDiagram
     datetime FechaEntrada
     datetime FechaSalida "NULL"
     nvarchar(100) Actor "NULL"
+    tinyint Origen
   }
   CargoPrenda {
     int IdCargo PK

@@ -6,8 +6,8 @@ erDiagram
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Empleado ||--o{ Pedido : "IdEmpleado"
   Empleado |o--o{ Pedido : "IdEmpleadoControl"
+  Empleado ||--o{ Pedido : "IdEmpleado"
   PedidoPrenda ||--o{ PedidoFaltante : "IdPedido"
   PedidoPrenda ||--o{ PedidoFaltante : "IdPrenda"
   Prenda ||--o{ PedidoFaltanteAlternativa : "IdPrendaAlternativa"
@@ -16,6 +16,7 @@ erDiagram
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Categoria |o--o{ Prenda : "Categoria"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
   Cliente {
@@ -24,7 +25,6 @@ erDiagram
     nvarchar(100) Apellido
     nvarchar(200) DNI
     nvarchar(200) Email "NULL"
-    nvarchar(100) MetodoPago "NULL"
     int IdPlan FK "NULL"
     datetime FechaAlta
     date FechaNacimiento
@@ -36,6 +36,7 @@ erDiagram
     int IdClienteReferente FK "NULL"
     decimal(10_2) DescuentoProximoCobro
     bit BeneficioReferidoOtorgado
+    int IdMedioPagoPreferido FK "NULL"
     int IdPlanSiguiente FK "NULL"
     datetime FechaCambioPlan "NULL"
   }
@@ -111,12 +112,17 @@ erDiagram
     nvarchar(500) Descripcion "NULL"
     nvarchar(20) Talle "NULL"
     nvarchar(50) Color "NULL"
-    nvarchar(100) Categoria "NULL"
+    nvarchar(100) Categoria FK "NULL"
     int Estado
     int IdClienteActual FK "NULL"
     datetime FechaAlta
     int IdUltimoCliente FK "NULL"
     decimal(10_2) PrecioReposicion "NULL"
+  }
+  Categoria {
+    int IdCategoria PK
+    nvarchar(100) Nombre
+    bit Activo
   }
   ListaEspera {
     int IdListaEspera PK
@@ -134,4 +140,5 @@ erDiagram
     datetime FechaEntrada
     datetime FechaSalida "NULL"
     nvarchar(100) Actor "NULL"
+    tinyint Origen
   }

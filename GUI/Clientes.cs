@@ -207,7 +207,7 @@ namespace GUI
                     c.Email ?? "—",
                     c.NombrePlan ?? sinPlan,
                     capacidad,
-                    c.MetodoPago,
+                    c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "—",
                     c.FechaAlta.ToString("d"),
                     vencStr,
                     expirado,

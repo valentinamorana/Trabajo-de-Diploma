@@ -170,6 +170,26 @@ namespace DAL
             return lista;
         }
 
+        // Catálogo de categorías ACTIVAS (tabla Categoria, 3FN): lo que se ofrece al cargar una prenda,
+        // una promoción o una sugerencia. Prenda.Categoria y Promocion/SugerenciaPromocion.CategoriaPrenda
+        // referencian Categoria.Nombre (FK por clave natural).
+        public List<string> ObtenerCategorias()
+        {
+            var lista = new List<string>();
+            try
+            {
+                DataTable tabla = acceso.Leer("SELECT Nombre FROM Categoria WHERE Activo = 1 ORDER BY Nombre", null);
+                if (tabla != null)
+                    foreach (DataRow row in tabla.Rows)
+                        lista.Add(row["Nombre"].ToString());
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener las categorías de prenda.", ex);
+            }
+            return lista;
+        }
+
         // PdN12 — Stock Disponible agrupado por Talle+Categoría. Usada por
         // BLL.AnalisisEscasez para detectar combinaciones por debajo del umbral mínimo.
         public List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria()

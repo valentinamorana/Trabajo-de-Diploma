@@ -140,17 +140,6 @@ namespace GUI
             // 
             this.cmbCategoria.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbCategoria.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.cmbCategoria.Items.AddRange(new object[] {
-            "Vestidos",
-            "Faldas",
-            "Pantalones",
-            "Tops",
-            "Blazers",
-            "Abrigos",
-            "Conjuntos",
-            "Ropa Deportiva",
-            "Accesorios",
-            "Otro"});
             this.cmbCategoria.Location = new System.Drawing.Point(16, 224);
             this.cmbCategoria.Name = "cmbCategoria";
             this.cmbCategoria.Size = new System.Drawing.Size(360, 25);

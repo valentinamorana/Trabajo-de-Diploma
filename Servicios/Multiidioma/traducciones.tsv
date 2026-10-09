@@ -7276,3 +7276,27 @@ ES	combo.ped.atrasados	Atrasados (30+ días sin devolver)
 EN	combo.ped.atrasados	Overdue (30+ days not returned)
 RU	combo.ped.atrasados	Просроченные (30+ дней без возврата)
 PT	combo.ped.atrasados	Atrasados (30+ dias sem devolver)
+ES	err.bll.cliente.medio_requerido	Elegí el medio de pago preferido del cliente.
+ES	err.bll.cliente.medio_invalido	El medio de pago elegido no está disponible. Elegí otro del catálogo.
+ES	err.bll.prenda.categoria_invalida	La categoría '{0}' no está en el catálogo de categorías.
+ES	col.mant.origen	Origen
+ES	mant.origen.devolucion	Devolución de pedido
+ES	mant.origen.manual	Manual
+EN	err.bll.cliente.medio_requerido	Choose the customer's preferred payment method.
+EN	err.bll.cliente.medio_invalido	The selected payment method is not available. Choose another one from the list.
+EN	err.bll.prenda.categoria_invalida	Category '{0}' is not in the category list.
+EN	col.mant.origen	Origin
+EN	mant.origen.devolucion	Order return
+EN	mant.origen.manual	Manual
+RU	err.bll.cliente.medio_requerido	Выберите предпочтительный способ оплаты клиента.
+RU	err.bll.cliente.medio_invalido	Выбранный способ оплаты недоступен. Выберите другой из списка.
+RU	err.bll.prenda.categoria_invalida	Категории «{0}» нет в справочнике категорий.
+RU	col.mant.origen	Источник
+RU	mant.origen.devolucion	Возврат заказа
+RU	mant.origen.manual	Вручную
+PT	err.bll.cliente.medio_requerido	Escolha a forma de pagamento preferida do cliente.
+PT	err.bll.cliente.medio_invalido	A forma de pagamento escolhida não está disponível. Escolha outra da lista.
+PT	err.bll.prenda.categoria_invalida	A categoria '{0}' não está no catálogo de categorias.
+PT	col.mant.origen	Origem
+PT	mant.origen.devolucion	Devolução de pedido
+PT	mant.origen.manual	Manual

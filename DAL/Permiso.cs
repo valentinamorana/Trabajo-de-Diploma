@@ -11,10 +11,11 @@ namespace DAL
     /// FUENTE DE VERDAD EN RUNTIME: la tabla [PermisoRelacion] (aristas padre→hijo). Todo el CRUD
     /// de autorización lee/escribe ahí.
     ///
-    /// [RolPermiso] es LEGACY y de SEED/BOOTSTRAP únicamente: los scripts SQL la usan para sembrar
-    /// las asignaciones planas rol→patente y, desde ellas, generar los nodos-rol y las aristas de
-    /// [PermisoRelacion]. En runtime el C# no la lee ni la escribe: el Composite sale siempre de
-    /// [PermisoRelacion].
+    /// [RolPermiso] (asignación plana rol→patente) es solo una tabla DE PASO del instalador: el
+    /// script la crea, la usa para sembrar los nodos-rol y las aristas de [PermisoRelacion] y la
+    /// BORRA al terminar (sección 21z5), así que en una base instalada no existe. El C# nunca la
+    /// leyó ni la escribe: el Composite sale siempre de [PermisoRelacion] (3FN: la asignación de
+    /// patentes a roles se guarda una sola vez).
     /// </summary>
     public class Permiso : BaseDAL, Interfaces.IPermisoDAL
     {

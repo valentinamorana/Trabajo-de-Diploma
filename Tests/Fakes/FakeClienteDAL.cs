@@ -68,6 +68,16 @@ namespace Tests.Fakes
             return ids;
         }
 
+        // Catálogo de medios de pago como lo deja el script en una base nueva (sección 20c/20c2).
+        public List<BE.MedioPago> MediosPago { get; } = new List<BE.MedioPago>
+        {
+            new BE.MedioPago { IdMedioPago = 1, Nombre = "Efectivo",           ClaveTraduccion = "medio.efectivo" },
+            new BE.MedioPago { IdMedioPago = 2, Nombre = "Tarjeta de débito",  ClaveTraduccion = "medio.tarjeta_debito" },
+            new BE.MedioPago { IdMedioPago = 3, Nombre = "Transferencia",      ClaveTraduccion = "medio.transferencia" },
+            new BE.MedioPago { IdMedioPago = 4, Nombre = "Tarjeta de crédito", ClaveTraduccion = "medio.tarjeta_credito", PermiteCuotas = true },
+        };
+        public List<BE.MedioPago> ObtenerMediosPago() => MediosPago;
+
         // Sin BD real: no hay transacción que abrir, se ejecuta la acción directamente
         // (conexión/transacción null — los EnTx de estos fakes no las usan).
         public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion) => accion(null, null);

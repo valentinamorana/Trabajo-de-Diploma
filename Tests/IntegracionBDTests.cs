@@ -101,5 +101,73 @@ namespace Tests
             var despues = dal.ObtenerPorId(antes.IdCliente);
             Assert.AreEqual(antes.DescuentoProximoCobro, despues.DescuentoProximoCobro, "Rollback del crédito.");
         }
+
+        // PN04: la devolución completa Pedido.FechaDevolucion en la misma transacción que las prendas,
+        // el DV del pedido queda al día y el pedido devuelto deja de ser el "pedido en curso" de la prenda.
+        [TestMethod]
+        public void Pedido_RegistrarDevolucion_CompletaLaFechaYDejaDeEstarEnCurso()
+        {
+            ExigirBase();
+            var acceso = DAL.Acceso.GetInstance();
+            var dt = acceso.Leer(
+                "SELECT TOP 1 (SELECT TOP 1 IdCliente FROM Cliente ORDER BY IdCliente) AS IdCliente, " +
+                "       (SELECT TOP 1 IdEmpleado FROM Empleado ORDER BY IdEmpleado) AS IdEmpleado, " +
+                "       IdPrenda FROM Prenda WHERE Estado = 0 ORDER BY IdPrenda", null);
+            if (dt.Rows.Count == 0) Assert.Inconclusive("La base de pruebas no tiene prendas disponibles.");
+            int idCliente  = Convert.ToInt32(dt.Rows[0]["IdCliente"]);
+            int idEmpleado = Convert.ToInt32(dt.Rows[0]["IdEmpleado"]);
+            int idPrenda   = Convert.ToInt32(dt.Rows[0]["IdPrenda"]);
+
+            var dal = new DAL.Pedido();
+            int idPedido = 0;
+            try
+            {
+                // Pedido Entregado hace 40 días con la prenda En uso a nombre del cliente (atrasado).
+                var r = acceso.Leer(
+                    "INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, DVH) " +
+                    "VALUES (@Cli, @Emp, 2, DATEADD(DAY,-42,GETDATE()), DATEADD(DAY,-41,GETDATE()), DATEADD(DAY,-40,GETDATE()), 0); " +
+                    "DECLARE @Id INT = SCOPE_IDENTITY(); " +
+                    "INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@Id, @Prenda, 1); " +
+                    "UPDATE Prenda SET Estado = 1, IdClienteActual = @Cli WHERE IdPrenda = @Prenda; " +
+                    "SELECT @Id AS IdPedido;",
+                    new[]
+                    {
+                        new SqlParameter("@Cli", idCliente), new SqlParameter("@Emp", idEmpleado),
+                        new SqlParameter("@Prenda", idPrenda)
+                    });
+                idPedido = Convert.ToInt32(r.Rows[0]["IdPedido"]);
+                dal.ActualizarDV(idPedido);
+
+                var antes = dal.ObtenerPorId(idPedido);
+                Assert.IsNull(antes.FechaDevolucion);
+                Assert.IsTrue(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(antes, DateTime.Today));
+                Assert.AreEqual(idPedido, new DAL.InspeccionDevolucion().ObtenerPedidoEnCurso(idPrenda)?.IdPedido);
+
+                Assert.AreEqual(1, dal.RegistrarDevolucion(idPedido, idCliente));
+
+                var despues = dal.ObtenerPorId(idPedido);
+                Assert.AreEqual(BE.EstadoPedido.Entregado, despues.Estado, "El estado no cambia.");
+                Assert.IsTrue(despues.FechaDevolucion.HasValue, "La devolución completa la fecha.");
+                Assert.IsFalse(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(despues, DateTime.Today));
+                var fila = dal.ObtenerFilasDV().Single(f => f.Id == idPedido);
+                Assert.AreEqual(Seguridad.CalculadorDV.Crear().CalcularDVH(fila.Campos), fila.DVHAlmacenado,
+                    "El DVH del pedido incluye la fecha de devolución y quedó al día.");
+                Assert.AreNotEqual(idPedido, new DAL.InspeccionDevolucion().ObtenerPedidoEnCurso(idPrenda)?.IdPedido,
+                    "Un pedido ya devuelto no es el pedido en curso de la prenda.");
+            }
+            finally
+            {
+                // Deja la base de pruebas como estaba (la prenda vuelve a Disponible).
+                if (idPedido != 0)
+                {
+                    acceso.Escribir(
+                        "DELETE FROM MantenimientoPrenda WHERE IdPrenda = @Prenda AND FechaSalida IS NULL; " +
+                        "UPDATE Prenda SET Estado = 0, IdClienteActual = NULL WHERE IdPrenda = @Prenda; " +
+                        "DELETE FROM PedidoPrenda WHERE IdPedido = @Id; DELETE FROM Pedido WHERE IdPedido = @Id;",
+                        new[] { new SqlParameter("@Prenda", idPrenda), new SqlParameter("@Id", idPedido) });
+                    dal.ActualizarDV(idPedido);
+                }
+            }
+        }
     }
 }

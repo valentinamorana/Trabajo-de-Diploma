@@ -937,6 +937,101 @@ namespace Tests
         }
 
         [TestMethod]
+        public void RegistrarDevolucion_PedidoYaDevuelto_LanzaDevolucionYaHechaSinTocarElDAL()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var pedido = new BE.Pedido
+            {
+                IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Entregado,
+                FechaEntrega = DateTime.Today.AddDays(-10), FechaDevolucion = DateTime.Today.AddDays(-2)
+            };
+
+            try
+            {
+                bll.RegistrarDevolucion("Test", pedido);
+                Assert.Fail("Un pedido con FechaDevolucion ya está devuelto.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.pedido.devolucion_ya_hecha", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPedido.RegistrarDevolucionVeces);
+            Assert.AreEqual(0, ctx.DalHistorial.RegistrarCambiosVeces);
+        }
+
+        // ── PN04 — fecha de devolución: devuelto vs en poder del cliente ──────
+
+        [TestMethod]
+        public void Pedido_Entregado_SinDevolucion_EstaEnPoderDelClienteYSePuedeDevolver()
+        {
+            var hoy = new DateTime(2026, 10, 9);
+            var p = new BE.Pedido { Estado = BE.EstadoPedido.Entregado, FechaEntrega = hoy.AddDays(-12).AddHours(18) };
+
+            Assert.IsTrue(p.EnPoderDelCliente);
+            Assert.IsFalse(p.FueDevuelto);
+            Assert.IsTrue(p.PuedeDevolverse());
+            Assert.AreEqual(12, p.DiasEnPoderDelCliente(hoy), "Cuenta días calendario desde la entrega.");
+        }
+
+        [TestMethod]
+        public void Pedido_Devuelto_SigueEntregadoPeroYaNoSePuedeDevolver()
+        {
+            var hoy = new DateTime(2026, 10, 9);
+            var p = new BE.Pedido
+            {
+                Estado = BE.EstadoPedido.Entregado, FechaEntrega = hoy.AddDays(-40), FechaDevolucion = hoy.AddDays(-35)
+            };
+
+            Assert.AreEqual(BE.EstadoPedido.Entregado, p.Estado, "No hay estado nuevo: la máquina de estados no cambia.");
+            Assert.IsTrue(p.FueDevuelto);
+            Assert.IsFalse(p.EnPoderDelCliente);
+            Assert.IsFalse(p.PuedeDevolverse());
+            Assert.IsNull(p.DiasEnPoderDelCliente(hoy));
+        }
+
+        [TestMethod]
+        public void Pedido_NoEntregado_NoEstaEnPoderDelCliente()
+        {
+            var p = new BE.Pedido { Estado = BE.EstadoPedido.Despachado, FechaDespacho = DateTime.Today };
+            Assert.IsFalse(p.EnPoderDelCliente);
+            Assert.IsNull(p.DiasEnPoderDelCliente(DateTime.Today));
+        }
+
+        [TestMethod]
+        public void Atrasado_EntregadoHace30DiasSinDevolucion()
+        {
+            var hoy = new DateTime(2026, 10, 9);
+            var p = new BE.Pedido { Estado = BE.EstadoPedido.Entregado, FechaEntrega = hoy.AddDays(-30).AddHours(20) };
+            Assert.IsTrue(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(p, hoy), "A los 30 días rige la compra tácita.");
+
+            p.FechaEntrega = hoy.AddDays(-29);
+            Assert.IsFalse(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(p, hoy), "Con 29 días todavía es un alquiler en curso.");
+        }
+
+        [TestMethod]
+        public void Atrasado_NoCuentaDevueltosNiNoEntregados()
+        {
+            var hoy = new DateTime(2026, 10, 9);
+            var devuelto = new BE.Pedido
+            {
+                Estado = BE.EstadoPedido.Entregado, FechaEntrega = hoy.AddDays(-60), FechaDevolucion = hoy.AddDays(-50)
+            };
+            var despachado = new BE.Pedido { Estado = BE.EstadoPedido.Despachado, FechaDespacho = hoy.AddDays(-60) };
+            var atrasado = new BE.Pedido { IdPedido = 7, Estado = BE.EstadoPedido.Entregado, FechaEntrega = hoy.AddDays(-45) };
+
+            Assert.IsFalse(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(devuelto, hoy));
+            Assert.IsFalse(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(despachado, hoy));
+            Assert.IsFalse(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(null, hoy));
+
+            var lista = BLL.Politicas.PoliticaCompraTacita.Atrasados(new[] { devuelto, despachado, atrasado, null }, hoy);
+            Assert.AreEqual(1, lista.Count);
+            Assert.AreEqual(7, lista[0].IdPedido);
+            Assert.AreEqual(0, BLL.Politicas.PoliticaCompraTacita.Atrasados(null, hoy).Count);
+        }
+
+        [TestMethod]
         public void RegistrarDevolucion_PedidoNoEntregado_LanzaDevolucionEstado()
         {
             LoginComoAdministrador();

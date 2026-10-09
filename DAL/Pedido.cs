@@ -22,7 +22,7 @@ namespace DAL
         // SELECT base compartido por todos los métodos de lectura
         private const string SELECT_BASE =
             "SELECT ped.IdPedido, ped.IdCliente, ped.IdEmpleado, ped.Estado, " +
-            "       ped.FechaPedido, ped.FechaDespacho, ped.FechaEntrega, " +
+            "       ped.FechaPedido, ped.FechaDespacho, ped.FechaEntrega, ped.FechaDevolucion, " +
             "       ped.MotivoCancelacion, " +
             "       ped.FechaEnvioControl, ped.FechaControl, ped.IdEmpleadoControl, " +
             "       ped.FechaSeparacion, ped.FechaFormalizacion, " +
@@ -695,7 +695,8 @@ namespace DAL
             ActualizarDV(idPedido);   // T07
         }
 
-        // Pasa a EnLimpieza SOLO las prendas del pedido que siguen EnUso por este cliente.
+        // Pasa a EnLimpieza SOLO las prendas del pedido que siguen EnUso por este cliente y registra
+        // la FechaDevolucion del pedido (PN04), todo en la misma transacción.
         // Es idempotente: una segunda devolución del mismo pedido no afecta filas (las prendas
         // ya no están EnUso) y no pisa prendas que ya hayan vuelto a circular en otro pedido.
         // Devuelve la cantidad de prendas efectivamente devueltas.
@@ -735,6 +736,22 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@IdCliente",   idCliente);
                     cmd.Parameters.AddWithValue("@IdPedido",    idPedido);
                     afectadas = cmd.ExecuteNonQuery();
+                }
+
+                // PN04: el pedido sigue Entregado pero queda marcado como devuelto (misma transacción
+                // que las prendas). Solo si efectivamente volvió alguna prenda y la fecha no estaba:
+                // una segunda devolución no la pisa.
+                if (afectadas > 0)
+                {
+                    using (var cmd = new SqlCommand(
+                        "UPDATE Pedido SET FechaDevolucion=@FechaDevolucion " +
+                        "WHERE IdPedido=@IdPedido AND FechaDevolucion IS NULL",
+                        conexion, tx))
+                    {
+                        cmd.Parameters.Add("@FechaDevolucion", SqlDbType.DateTime).Value = DateTime.Now;
+                        cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             });
             if (afectadas > 0) ActualizarDV(idPedido);   // T07 — mantener el DV del pedido consistente
@@ -1040,6 +1057,7 @@ namespace DAL
                 FechaPedido = Convert.ToDateTime(row["FechaPedido"]),
                 FechaDespacho = row["FechaDespacho"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaDespacho"]) : null,
                 FechaEntrega = row["FechaEntrega"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaEntrega"]) : null,
+                FechaDevolucion = FechaNula(row, "FechaDevolucion"),
                 MotivoCancelacion = row.Table.Columns.Contains("MotivoCancelacion") && row["MotivoCancelacion"] != DBNull.Value
                                         ? row["MotivoCancelacion"].ToString() : null,
                 FechaEnvioControl     = FechaNula(row, "FechaEnvioControl"),
@@ -1083,13 +1101,15 @@ namespace DAL
         private const string SELECT_DV =
             "SELECT IdPedido, IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, " +
             "       MotivoCancelacion, FechaEnvioControl, FechaControl, IdEmpleadoControl, FechaSeparacion, " +
-            "       FechaFormalizacion, MotivoDesistimiento, EtapaDesistimiento, DVH FROM Pedido";
+            "       FechaFormalizacion, MotivoDesistimiento, EtapaDesistimiento, FechaDevolucion, DVH FROM Pedido";
 
+        // PN04: FechaDevolucion también entra (falsearla escondería un pedido atrasado); el script
+        // pidió el recálculo único al agregar la columna (sección 21z3).
         private static readonly string[] ColumnasDV =
         {
             "IdPedido", "IdCliente", "IdEmpleado", "Estado", "FechaPedido", "FechaDespacho", "FechaEntrega",
             "MotivoCancelacion", "FechaEnvioControl", "FechaControl", "IdEmpleadoControl", "FechaSeparacion",
-            "FechaFormalizacion", "MotivoDesistimiento", "EtapaDesistimiento"
+            "FechaFormalizacion", "MotivoDesistimiento", "EtapaDesistimiento", "FechaDevolucion"
         };
 
         private static BE.FilaDV MapearFilaDV(DataRow row, string digestLineas)

@@ -3540,6 +3540,8 @@ BEGIN
 
     -- ── Marcas: datos de demo aplicados y recálculo de los dígitos verificadores ──
     DELETE FROM ParametroSistema WHERE Clave IN (N'SeedDemo21', N'ResetDatosDemo');
+    -- PN04: la sección 21z3 vuelve a completar la FechaDevolucion del historial entregado de la demo.
+    DELETE FROM ParametroSistema WHERE Clave = N'PedidoFechaDevolucion';
     INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada', GETDATE());
     IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'FormatoDV' AND TRY_CONVERT(INT, Valor) >= 2)
         MERGE ParametroSistema AS t
@@ -3681,6 +3683,58 @@ BEGIN
     WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
     INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'DVClienteBeneficio', N'Aplicada', GETDATE());
     PRINT 'DV de Cliente: incluye el beneficio por referido; DV a recalcular.';
+END
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21z3. FECHA DE DEVOLUCIÓN DEL PEDIDO (PN04)
+-- ------------------------------------------------------------
+-- Tras "Registrar devolución" el pedido sigue Entregado (no hay estado nuevo: la máquina de
+-- estados y los diagramas aprobados no cambian); Pedido.FechaDevolucion distingue un pedido
+-- devuelto de uno con las prendas todavía en poder del cliente, y permite listar los atrasados
+-- (Entregado, sin devolución, con 30 días o más desde la entrega: compra tácita).
+-- La columna entra en el dígito verificador de Pedido: al agregarla se pide el recálculo
+-- (sección 22, 'DVReinicializar').
+-- Datos previos: un Entregado al que ya no le queda ninguna prenda En uso a nombre de su cliente
+-- se tomó como devuelto; la fecha sale del mantenimiento que abrió la devolución (o, si no hay,
+-- de la entrega). Se completa una sola vez (marca 'PedidoFechaDevolucion'); la sección 21e borra
+-- la marca al restablecer la demo, para que su historial entregado quede devuelto. Idempotente.
+-- ============================================================
+IF COL_LENGTH('Pedido', 'FechaDevolucion') IS NULL
+BEGIN
+    ALTER TABLE Pedido ADD FechaDevolucion DATETIME NULL;
+    PRINT 'Pedido: columna FechaDevolucion agregada.';
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'PedidoFechaDevolucion')
+BEGIN
+    UPDATE ped
+       SET FechaDevolucion = ISNULL(
+               (SELECT MAX(m.FechaEntrada)
+                  FROM MantenimientoPrenda m
+                  INNER JOIN PedidoPrenda pp ON pp.IdPrenda = m.IdPrenda AND pp.IdPedido = ped.IdPedido
+                 WHERE m.Actor = N'Devolución' AND m.FechaEntrada >= ped.FechaEntrega),
+               ped.FechaEntrega)
+      FROM Pedido ped
+     WHERE ped.Estado = 2                       -- Entregado
+       AND ped.FechaEntrega IS NOT NULL
+       AND ped.FechaDevolucion IS NULL
+       AND NOT EXISTS (SELECT 1
+                         FROM PedidoPrenda pp
+                         INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda
+                        WHERE pp.IdPedido = ped.IdPedido
+                          AND pr.Estado = 1     -- En uso
+                          AND pr.IdClienteActual = ped.IdCliente);
+    DECLARE @devueltos INT = @@ROWCOUNT;
+
+    -- Recálculo del DV de Pedido: la columna nueva entra en el DVH (y cambian las filas completadas).
+    MERGE ParametroSistema AS t
+    USING (VALUES (N'DVReinicializar', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+    WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+    WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'PedidoFechaDevolucion', N'Aplicada', GETDATE());
+    PRINT 'Pedido: FechaDevolucion completada en ' + CAST(@devueltos AS VARCHAR(10)) + ' pedido(s) ya devuelto(s); DV a recalcular.';
 END
 GO
 

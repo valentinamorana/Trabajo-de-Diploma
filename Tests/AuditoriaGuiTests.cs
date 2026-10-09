@@ -34,7 +34,8 @@ namespace Tests
         // Todas las alertas posibles activas a la vez.
         private static List<BE.Alerta> TodasLasAlertas() =>
             BLL.PanelAlertas.EvaluarAlertas(vencidas: 1, porVencer: 1, diasSinBackup: -1, enLimpieza: 1, dvRotas: 2,
-                reservadasEspera: 1, enControl: 1, conFaltantes: 1, separados: 1, contratacionesPendientes: 1);
+                reservadasEspera: 1, enControl: 1, conFaltantes: 1, separados: 1, contratacionesPendientes: 1,
+                atrasados: 1);
 
         private static string[] Claves(IEnumerable<BE.Alerta> a) => a.Select(x => x.ClaveI18n).ToArray();
 
@@ -71,6 +72,17 @@ namespace Tests
             CollectionAssert.Contains(claves, "alert.prendas.limpieza");
             CollectionAssert.DoesNotContain(claves, "alert.pedidos.faltantes");
             CollectionAssert.DoesNotContain(claves, "alert.dv.corruptos");
+        }
+
+        [TestMethod]
+        public void Alertas_PedidosAtrasados_LosVenPedidosRealizadosYDeposito_NoElVendedor()
+        {
+            CollectionAssert.Contains(Claves(BLL.PanelAlertas.FiltrarPorPatentes(TodasLasAlertas(),
+                new[] { BE.Patentes.PedidosRealizados }, false)), "alert.pedidos.atrasados");
+            CollectionAssert.Contains(Claves(BLL.PanelAlertas.FiltrarPorPatentes(TodasLasAlertas(),
+                new[] { BE.Patentes.InspeccionDevolucion }, false)), "alert.pedidos.atrasados");
+            CollectionAssert.DoesNotContain(Claves(BLL.PanelAlertas.FiltrarPorPatentes(TodasLasAlertas(),
+                new[] { BE.Patentes.PedidosVenta, BE.Patentes.Clientes }, false)), "alert.pedidos.atrasados");
         }
 
         [TestMethod]

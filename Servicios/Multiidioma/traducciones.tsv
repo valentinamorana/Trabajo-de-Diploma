@@ -6111,6 +6111,17 @@ ES	promo.analisis.sinsugerencia	Alta manual: no hay beneficio estimado de Gerenc
 ES	promo.analisis.superpuestas	ADVERTENCIA: se superpone en fechas con otras promociones vigentes del mismo plan:
 ES	promo.analisis.sinsuperposicion	No se superpone con otras promociones vigentes del mismo plan.
 ES	promo.analisis.creador	Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad.
+ES	promo.analisis.calc.titulo	Margen proyectado (por mes):
+ES	promo.analisis.calc.informativa	Promoción por categoría: es informativa (no descuenta en el cobro); no tiene costo proyectado ni resultado.
+ES	promo.analisis.calc.sinplan	No se puede calcular el margen: el plan de la promoción ya no existe.
+ES	promo.analisis.calc.descuento	Descuento por cliente: {0:C2} ({1} {2} sobre el precio del plan, {3:C2})
+ES	promo.analisis.calc.costo	Costo del descuento: {0:C2} × {1} cliente(s) activo(s) del plan = {2:C2}
+ES	promo.analisis.calc.beneficiosug	Beneficio estimado (sugerencia de Gerencia): {0:C2}
+ES	promo.analisis.calc.beneficioadm	Beneficio estimado (margen cargado por Administración): {0:C2}
+ES	promo.analisis.calc.margen	Margen proyectado: {0:C2} − {1:C2} = {2:C2}
+ES	promo.analisis.calc.conviene	Resultado: CONVIENE (el beneficio estimado cubre el costo del descuento).
+ES	promo.analisis.calc.noconviene	Resultado: NO CONVIENE (el descuento cuesta igual o más de lo que se espera ganar).
+ES	promo.analisis.calc.nota	Es una recomendación: la decisión es de Contabilidad.
 ES	dlg.promo.solicitarbaja.titulo	Solicitar baja de promoción
 ES	promocion.origenactual	Origen de la sugerencia: {0}
 ES	doc.promo.reporte.titulo	Reporte de métricas
@@ -6225,6 +6236,17 @@ EN	promo.analisis.sinsugerencia	Manual entry: there is no benefit estimated by M
 EN	promo.analisis.superpuestas	WARNING: its dates overlap with other active promotions of the same plan:
 EN	promo.analisis.sinsuperposicion	It does not overlap with other active promotions of the same plan.
 EN	promo.analisis.creador	You created this promotion: another Accounting user must rule on it.
+EN	promo.analisis.calc.titulo	Projected margin (per month):
+EN	promo.analisis.calc.informativa	Category promotion: it is informative (no discount at billing); it has no projected cost or result.
+EN	promo.analisis.calc.sinplan	The margin cannot be calculated: the promotion plan no longer exists.
+EN	promo.analisis.calc.descuento	Discount per customer: {0:C2} ({1} {2} on the plan price, {3:C2})
+EN	promo.analisis.calc.costo	Discount cost: {0:C2} × {1} active customer(s) of the plan = {2:C2}
+EN	promo.analisis.calc.beneficiosug	Estimated benefit (Management suggestion): {0:C2}
+EN	promo.analisis.calc.beneficioadm	Estimated benefit (margin entered by Administration): {0:C2}
+EN	promo.analisis.calc.margen	Projected margin: {0:C2} − {1:C2} = {2:C2}
+EN	promo.analisis.calc.conviene	Result: WORTHWHILE (the estimated benefit covers the discount cost).
+EN	promo.analisis.calc.noconviene	Result: NOT WORTHWHILE (the discount costs as much as or more than the expected gain).
+EN	promo.analisis.calc.nota	This is a recommendation: the decision belongs to Accounting.
 EN	dlg.promo.solicitarbaja.titulo	Request promotion withdrawal
 EN	promocion.origenactual	Suggestion source: {0}
 EN	doc.promo.reporte.titulo	Metrics report
@@ -6339,6 +6361,17 @@ RU	promo.analisis.sinsugerencia	Создана вручную: оценки вы
 RU	promo.analisis.superpuestas	ВНИМАНИЕ: даты пересекаются с другими действующими акциями того же плана:
 RU	promo.analisis.sinsuperposicion	Не пересекается с другими действующими акциями того же плана.
 RU	promo.analisis.creador	Вы создали эту акцию: решение по ней должен принять другой сотрудник бухгалтерии.
+RU	promo.analisis.calc.titulo	Прогнозируемая маржа (в месяц):
+RU	promo.analisis.calc.informativa	Акция по категории: носит информационный характер (не даёт скидки при оплате); прогнозируемых затрат и результата нет.
+RU	promo.analisis.calc.sinplan	Невозможно рассчитать маржу: план акции больше не существует.
+RU	promo.analisis.calc.descuento	Скидка на клиента: {0:C2} ({1} {2} от цены плана, {3:C2})
+RU	promo.analisis.calc.costo	Стоимость скидки: {0:C2} × {1} активн. клиент(ов) плана = {2:C2}
+RU	promo.analisis.calc.beneficiosug	Ожидаемая выгода (предложение руководства): {0:C2}
+RU	promo.analisis.calc.beneficioadm	Ожидаемая выгода (маржа, указанная администрацией): {0:C2}
+RU	promo.analisis.calc.margen	Прогнозируемая маржа: {0:C2} − {1:C2} = {2:C2}
+RU	promo.analisis.calc.conviene	Результат: ВЫГОДНО (ожидаемая выгода покрывает стоимость скидки).
+RU	promo.analisis.calc.noconviene	Результат: НЕВЫГОДНО (скидка стоит столько же или больше ожидаемой выгоды).
+RU	promo.analisis.calc.nota	Это рекомендация: решение принимает бухгалтерия.
 RU	dlg.promo.solicitarbaja.titulo	Запросить отмену акции
 RU	promocion.origenactual	Источник предложения: {0}
 RU	doc.promo.reporte.titulo	Отчёт по метрикам
@@ -6453,6 +6486,17 @@ PT	promo.analisis.sinsugerencia	Cadastro manual: não há benefício estimado pe
 PT	promo.analisis.superpuestas	ATENÇÃO: as datas se sobrepõem a outras promoções vigentes do mesmo plano:
 PT	promo.analisis.sinsuperposicion	Não se sobrepõe a outras promoções vigentes do mesmo plano.
 PT	promo.analisis.creador	Você criou esta promoção: outro usuário da Contabilidade deve emitir o parecer.
+PT	promo.analisis.calc.titulo	Margem projetada (por mês):
+PT	promo.analisis.calc.informativa	Promoção por categoria: é informativa (não dá desconto na cobrança); não tem custo projetado nem resultado.
+PT	promo.analisis.calc.sinplan	Não é possível calcular a margem: o plano da promoção não existe mais.
+PT	promo.analisis.calc.descuento	Desconto por cliente: {0:C2} ({1} {2} sobre o preço do plano, {3:C2})
+PT	promo.analisis.calc.costo	Custo do desconto: {0:C2} × {1} cliente(s) ativo(s) do plano = {2:C2}
+PT	promo.analisis.calc.beneficiosug	Benefício estimado (sugestão da Gerência): {0:C2}
+PT	promo.analisis.calc.beneficioadm	Benefício estimado (margem informada pela Administração): {0:C2}
+PT	promo.analisis.calc.margen	Margem projetada: {0:C2} − {1:C2} = {2:C2}
+PT	promo.analisis.calc.conviene	Resultado: VALE A PENA (o benefício estimado cobre o custo do desconto).
+PT	promo.analisis.calc.noconviene	Resultado: NÃO VALE A PENA (o desconto custa o mesmo ou mais do que o ganho esperado).
+PT	promo.analisis.calc.nota	É uma recomendação: a decisão é da Contabilidade.
 PT	dlg.promo.solicitarbaja.titulo	Solicitar baixa da promoção
 PT	promocion.origenactual	Origem da sugestão: {0}
 PT	doc.promo.reporte.titulo	Relatório de métricas

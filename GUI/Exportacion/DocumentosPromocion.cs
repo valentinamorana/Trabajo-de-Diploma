@@ -86,7 +86,7 @@ namespace GUI.Exportacion
                 ? $"{Tr("doc.promo.plan", "Plan")}: {nombrePlan ?? "#" + idPlan}"
                 : $"{Tr("doc.promo.categoria", "Categoría")}: {categoria}";
 
-        private static string Valor(BE.Promocion p) =>
+        internal static string Valor(BE.Promocion p) =>
             p.TipoDescuento == BE.TipoDescuento.Porcentaje ? $"{p.Valor:0.##} %" : p.Valor.ToString("C2");
 
         private static ReporteExportable Doc(string titulo, string archivo, StringBuilder sb) =>

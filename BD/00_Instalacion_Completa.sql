@@ -3725,7 +3725,16 @@ BEGIN
                          INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda
                         WHERE pp.IdPedido = ped.IdPedido
                           AND pr.Estado = 1     -- En uso
-                          AND pr.IdClienteActual = ped.IdCliente);
+                          AND pr.IdClienteActual = ped.IdCliente
+                          -- La prenda cuenta para ESTE pedido solo si no la volvió a pedir el cliente
+                          -- en un pedido posterior (si no, el pedido viejo quedaría "atrasado" para siempre).
+                          AND NOT EXISTS (SELECT 1
+                                            FROM PedidoPrenda pp2
+                                            INNER JOIN Pedido p2 ON p2.IdPedido = pp2.IdPedido
+                                           WHERE pp2.IdPrenda = pp.IdPrenda
+                                             AND p2.IdPedido <> ped.IdPedido
+                                             AND p2.FechaPedido > ped.FechaPedido
+                                             AND p2.Estado IN (0, 1, 2, 4, 5, 6)));
     DECLARE @devueltos INT = @@ROWCOUNT;
 
     -- Recálculo del DV de Pedido: la columna nueva entra en el DVH (y cambian las filas completadas).

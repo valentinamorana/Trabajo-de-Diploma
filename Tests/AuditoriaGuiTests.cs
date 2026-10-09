@@ -196,9 +196,11 @@ namespace Tests
         {
             public readonly List<(BE.CargoPrenda Cargo, BE.EstadoPrenda Esperado)> Llamadas = new List<(BE.CargoPrenda, BE.EstadoPrenda)>();
             public Exception Falla;
-            public int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado)
+            public int? UltimoPedidoACerrar;
+            public int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado, int? idPedidoACerrar = null)
             {
                 if (Falla != null) throw Falla;
+                UltimoPedidoACerrar = idPedidoACerrar;
                 Llamadas.Add((cargo, estadoEsperado));
                 return 99;
             }
@@ -332,6 +334,8 @@ namespace Tests
             dal.PedidoEnCurso.FechaEntrega = Hoy.AddDays(-30).AddHours(15);   // la hora no cuenta
             Inspeccion(dal).ReportarPerdida("Test", Prenda(BE.EstadoPrenda.EnUso), "Perdida", 2000m);
             Assert.AreEqual(1, dal.Llamadas.Count);
+            // Si era la última prenda en poder del cliente, el DAL cierra el pedido (deja de contar como atrasado).
+            Assert.AreEqual(dal.PedidoEnCurso.IdPedido, dal.UltimoPedidoACerrar);
         }
 
         [TestMethod]

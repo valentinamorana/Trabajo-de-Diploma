@@ -705,6 +705,9 @@ namespace DAL
             int afectadas = 0;
             acceso.EjecutarTransaccion((conexion, tx) =>
             {
+                // T07: bloqueo del DV de Pedido primero; el DV se recalcula antes del commit (abajo).
+                DigitoVerificador.Bloquear(conexion, tx, DV_Tabla);
+
                 // Abre el registro de mantenimiento de cada prenda que entra a limpieza (antes que el
                 // UPDATE, con el mismo criterio de selección): sin esto las devoluciones no quedaban en
                 // el historial de mantenimiento ni en el análisis de tiempos (PdN11), porque el cambio de
@@ -752,9 +755,9 @@ namespace DAL
                         cmd.Parameters.AddWithValue("@IdPedido", idPedido);
                         cmd.ExecuteNonQuery();
                     }
+                    ActualizarDVEnTx(conexion, tx, idPedido);   // T07, en la misma transacción
                 }
             });
-            if (afectadas > 0) ActualizarDV(idPedido);   // T07 — mantener el DV del pedido consistente
             return afectadas;
         }
 
@@ -1164,27 +1167,31 @@ namespace DAL
         {
             try
             {
-                new DigitoVerificador().EjecutarConBloqueo(DV_Tabla, (cn, tx) =>
-                {
-                    var p = new SqlParameter("@id", idPedido);
-                    var dt = DigitoVerificador.LeerEnTx(cn, tx, SELECT_DV + " WHERE IdPedido = @id", p);
-                    if (dt.Rows.Count > 0)
-                    {
-                        var lineas = DigitoVerificador.LeerEnTx(cn, tx,
-                            SELECT_LINEAS_DV + " WHERE IdPedido = @id ORDER BY IdPrenda", new SqlParameter("@id", idPedido));
-                        Digests(lineas).TryGetValue(idPedido, out var d);
-                        var fila = MapearFilaDV(dt.Rows[0], d);
-                        using (var cmd = new SqlCommand("UPDATE Pedido SET DVH=@dvh WHERE IdPedido=@id", cn, tx))
-                        {
-                            cmd.Parameters.AddWithValue("@dvh", Seguridad.CalculadorDV.Crear().CalcularDVH(fila.Campos));
-                            cmd.Parameters.AddWithValue("@id", idPedido);
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, "IdPedido");
-                });
+                new DigitoVerificador().EjecutarConBloqueo(DV_Tabla, (cn, tx) => ActualizarDVEnTx(cn, tx, idPedido));
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Pedido.ActualizarDV] " + ex.Message); }
+        }
+
+        // Recalcula el DVH del pedido (con sus líneas) y el DVV DENTRO de una transacción que ya tiene
+        // tomado el bloqueo del DV de Pedido (DigitoVerificador.Bloquear al empezar la transacción).
+        internal void ActualizarDVEnTx(SqlConnection cn, SqlTransaction tx, int idPedido)
+        {
+            var p = new SqlParameter("@id", idPedido);
+            var dt = DigitoVerificador.LeerEnTx(cn, tx, SELECT_DV + " WHERE IdPedido = @id", p);
+            if (dt.Rows.Count > 0)
+            {
+                var lineas = DigitoVerificador.LeerEnTx(cn, tx,
+                    SELECT_LINEAS_DV + " WHERE IdPedido = @id ORDER BY IdPrenda", new SqlParameter("@id", idPedido));
+                Digests(lineas).TryGetValue(idPedido, out var d);
+                var fila = MapearFilaDV(dt.Rows[0], d);
+                using (var cmd = new SqlCommand("UPDATE Pedido SET DVH=@dvh WHERE IdPedido=@id", cn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@dvh", Seguridad.CalculadorDV.Crear().CalcularDVH(fila.Campos));
+                    cmd.Parameters.AddWithValue("@id", idPedido);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, "IdPedido");
         }
 
         // Recalcula el DVH de TODOS los pedidos y el DVV. Acepta los datos actuales como legítimos:

@@ -79,11 +79,13 @@ namespace BLL
                 throw new BE.AppException("err.bll.insp.no_en_uso", "Solo se puede reportar como perdida una prenda En Uso.");
 
             // Se relee el pedido desde la base (no se confía en lo que muestra la pantalla).
-            Politicas.PoliticaCompraTacita.Exigir(_dal.ObtenerPedidoEnCurso(prenda.IdPrenda), _hoy());
+            var pedido = _dal.ObtenerPedidoEnCurso(prenda.IdPrenda);
+            Politicas.PoliticaCompraTacita.Exigir(pedido, _hoy());
 
+            // Si era la última prenda en poder del cliente, el pedido queda cerrado (no sigue "atrasado").
             return BajaConCargo(modulo, prenda, motivo, monto, BE.EstadoPrenda.EnUso,
                                 "err.bll.insp.no_en_uso",
-                                "Solo se puede reportar como perdida una prenda En Uso.");
+                                "Solo se puede reportar como perdida una prenda En Uso.", pedido?.IdPedido);
         }
 
         /// <summary>
@@ -95,7 +97,8 @@ namespace BLL
             Politicas.PoliticaCompraTacita.PlazoVencido(pedido, _hoy());
 
         private int BajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto,
-                                 BE.EstadoPrenda estadoEsperado, string claveEstado, string fallbackEstado)
+                                 BE.EstadoPrenda estadoEsperado, string claveEstado, string fallbackEstado,
+                                 int? idPedidoACerrar = null)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
@@ -124,7 +127,7 @@ namespace BLL
             };
 
             // Cargo + baja en una sola transacción: si cualquiera falla no queda ninguno.
-            int idCargo = _dal.DarDeBajaConCargo(cargo, estadoEsperado);
+            int idCargo = _dal.DarDeBajaConCargo(cargo, estadoEsperado, idPedidoACerrar);
             cargo.IdCargo = idCargo;
 
             // Reflejar en el objeto en memoria lo que ya quedó persistido, a través del State

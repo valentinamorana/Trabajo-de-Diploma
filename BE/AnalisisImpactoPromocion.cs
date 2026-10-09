@@ -57,7 +57,12 @@ namespace BE
             BeneficioEstimadoSugerencia ?? (Promocion != null ? Promocion.MargenEstimado : 0m);
 
         /// <summary>Hay datos para calcular el margen: promoción por plan con su precio.</summary>
-        public bool MargenCalculable => !EsInformativa && PrecioPlan.HasValue;
+        public bool MargenCalculable => !EsInformativa && PrecioPlan.HasValue && !SugerenciaOrigenPerdida;
+
+        /// <summary>La promoción nació de una sugerencia que ya no se encuentra: no hay beneficio de
+        /// referencia confiable (el margen que carga Administración no aplica a ese caso).</summary>
+        public bool SugerenciaOrigenPerdida =>
+            Promocion?.IdSugerenciaOrigen != null && !BeneficioEstimadoSugerencia.HasValue;
 
         /// <summary>Beneficio estimado − costo proyectado del descuento (mensual).</summary>
         public decimal MargenProyectado => MargenCalculable ? BeneficioEstimado - CostoDescuentoProyectado : 0m;

@@ -17,7 +17,7 @@ namespace DAL
             /// (el estado cambió entre la lectura y la escritura) se hace rollback de AMBAS
             /// escrituras y se lanza AppException. Devuelve el Id del cargo creado.
             /// </summary>
-            int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado);
+            int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado, int? idPedidoACerrar = null);
 
             /// <summary>
             /// Último pedido que tiene la prenda asignada (Separado, Pendiente, Despachado o
@@ -38,13 +38,19 @@ namespace DAL
     /// </summary>
     public class InspeccionDevolucion : BaseDAL, Interfaces.IInspeccionDevolucionDAL
     {
-        public int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado)
+        // idPedidoACerrar (Reportar Prenda Perdida): si con esta baja al pedido ya no le queda ninguna
+        // prenda en poder del cliente, se completa su FechaDevolucion (queda cerrado: deja de contar
+        // como atrasado). Se recalcula el DV de Pedido en la misma transacción.
+        public int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado, int? idPedidoACerrar = null)
         {
             if (cargo == null) throw new ArgumentNullException(nameof(cargo));
             int idNuevo = 0;
 
             acceso.EjecutarTransaccion((cn, tx) =>
             {
+                if (idPedidoACerrar.HasValue)
+                    DigitoVerificador.Bloquear(cn, tx, Pedido.DV_Tabla);   // antes de escribir nada
+
                 using (var cmd = new SqlCommand(
                     "INSERT INTO CargoPrenda (IdPrenda, IdCliente, Motivo, Monto, FechaRegistro, Actor, Estado) " +
                     "VALUES (@IdPrenda, @IdCliente, @Motivo, @Monto, @FechaRegistro, @Actor, @Estado); " +
@@ -91,6 +97,24 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@Reservada", (int)BE.EstadoListaEspera.Reservada);
                     cmd.Parameters.AddWithValue("@Actor",     (object)cargo.Actor ?? DBNull.Value);
                     cmd.ExecuteNonQuery();
+                }
+
+                if (idPedidoACerrar.HasValue)
+                {
+                    int cerrado;
+                    using (var cmd = new SqlCommand(
+                        "UPDATE Pedido SET FechaDevolucion = GETDATE() " +
+                        "WHERE IdPedido = @IdPedido AND FechaDevolucion IS NULL " +
+                        "AND NOT EXISTS (SELECT 1 FROM PedidoPrenda pp INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda " +
+                        "                WHERE pp.IdPedido = @IdPedido AND pr.Estado = @EnUso AND pr.IdClienteActual = @IdCliente)",
+                        cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@IdPedido",  idPedidoACerrar.Value);
+                        cmd.Parameters.AddWithValue("@EnUso",     (int)BE.EstadoPrenda.EnUso);
+                        cmd.Parameters.AddWithValue("@IdCliente", cargo.IdCliente);
+                        cerrado = cmd.ExecuteNonQuery();
+                    }
+                    if (cerrado > 0) new Pedido().ActualizarDVEnTx(cn, tx, idPedidoACerrar.Value);
                 }
             });
 

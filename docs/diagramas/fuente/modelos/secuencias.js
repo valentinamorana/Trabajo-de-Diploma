@@ -545,7 +545,7 @@ module.exports = [
         { alt: 'false: otra sesión ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(cobrar_concurrente)')],
           sino: [{ etiqueta: 'true', pasos: [
             r('D', 'B', 'true'),
-            c('B', 'CB', 'ActivarSuscripcionDesdeContratacion(modulo, cliente, idPlan, modalidad, consumoCredito)  [Builder; + crédito al referente]'),
+            c('B', 'CB', 'ActivarSuscripcionDesdeContratacion(modulo, cliente, idPlan, modalidad, consumoCredito)  [Builder; + crédito al referente; a11: plan igual o más barato con período vigente → queda programado (IdPlanSiguiente, rige al vencer); upgrade → rige hoy]'),
             { alt: 'Falla la activación', pasos: [
               c('B', 'D', 'ReabrirPago(idContratacion)  [compensación: vuelve a Pendiente de pago]'),
               r('B', 'F', 'relanza el error (o AppException(cobro_sin_activar) si no pudo reabrir)')

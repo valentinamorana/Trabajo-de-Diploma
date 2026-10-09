@@ -51,7 +51,7 @@ sequenceDiagram
       B-->>F: AppException(cobrar_concurrente)
     else true
       D-->>B: true
-      B->>CB: ActivarSuscripcionDesdeContratacion(modulo, cliente, idPlan, modalidad, consumoCredito)  [Builder, + crédito al referente]
+      B->>CB: ActivarSuscripcionDesdeContratacion(modulo, cliente, idPlan, modalidad, consumoCredito)  [Builder, + crédito al referente, a11: plan igual o más barato con período vigente → queda programado (IdPlanSiguiente, rige al vencer), upgrade → rige hoy]
       alt Falla la activación
         B->>D: ReabrirPago(idContratacion)  [compensación: vuelve a Pendiente de pago]
         B-->>F: relanza el error (o AppException(cobro_sin_activar) si no pudo reabrir)

@@ -7176,3 +7176,11 @@ PT	ayuda.ListaEsperaForm.titulo	Lista de espera
 PT	ayuda.ListaEsperaForm	Clientes inscritos para uma peça que hoje está em uso. Quando a peça volta a ficar disponível, é reservada para o primeiro da lista por 48 horas. Se a peça for baixada por dano ou perda, as inscrições são canceladas.
 PT	ayuda.ReporteJornadaForm.titulo	Relatório do dia
 PT	ayuda.ReporteJornadaForm	Resumo de um dia: eventos de negócio do dia, peças disponíveis, clientes e dias sem cópia de segurança.\n\n• Comparar dias: dois dias lado a lado.\n• Tendência (intervalo): evolução dos eventos entre duas datas.\n• Exportar TXT: salva o relatório em um arquivo.
+ES	btn.contr.imprimirorden	Imprimir orden de cobro
+EN	btn.contr.imprimirorden	Print payment order
+RU	btn.contr.imprimirorden	Печать распоряжения на оплату
+PT	btn.contr.imprimirorden	Imprimir ordem de cobrança
+ES	btn.contr.imprimiraviso	Imprimir aviso de desistimiento
+EN	btn.contr.imprimiraviso	Print withdrawal notice
+RU	btn.contr.imprimiraviso	Печать уведомления об отказе
+PT	btn.contr.imprimiraviso	Imprimir aviso de desistência

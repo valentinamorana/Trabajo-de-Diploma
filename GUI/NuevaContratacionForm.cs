@@ -29,6 +29,7 @@ namespace GUI
 
         public int IdContratacionCreada { get; private set; }
         public bool FueDesistimiento { get; private set; }
+        public int IdDesistimientoCreado { get; private set; }
 
         public NuevaContratacionForm()
         {
@@ -279,7 +280,6 @@ namespace GUI
             try
             {
                 IdContratacionCreada = contratacionBLL.RegistrarContratacion(this.Text, _cliente.IdCliente, plan.IdPlan, modalidad.Value);
-                // La orden de cobro ya no se pregunta: Caja imprime la liquidación desde su cola si hace falta.
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -305,10 +305,63 @@ namespace GUI
                 int id = contratacionBLL.AsentarDesistimiento(this.Text, _cliente.IdCliente,
                     PlanSeleccionado()?.IdPlan, ModalidadSeleccionada(), motivo);
                 FueDesistimiento = true;
+                IdDesistimientoCreado = id;
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
             catch (Exception ex) { MostrarError(ex); }
+        }
+
+        // PN02 — Resultado de la venta, con el documento que el cliente se lleva: «Orden de cobro» (la
+        // presenta en Caja) o «Aviso de desistimiento». No es una pregunta después de la acción: el
+        // botón está ahí por si hace falta imprimirlo.
+        public void MostrarResultado(IWin32Window propietario)
+        {
+            string mensaje = FueDesistimiento
+                ? Tr("msg.contr.desistimiento", "Desistimiento asentado: el cliente no contrató ningún plan.")
+                : Tr("msg.contratacion.creada", "Contratación #{0} registrada, pendiente de pago.", new object[] { IdContratacionCreada });
+            string boton = FueDesistimiento
+                ? Tr("btn.contr.imprimiraviso", "Imprimir aviso de desistimiento")
+                : Tr("btn.contr.imprimirorden", "Imprimir orden de cobro");
+
+            using (var dlg = new Form
+            {
+                Text = Tr("msg.ok.titulo", "Listo"), FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterParent, MaximizeBox = false, MinimizeBox = false,
+                ShowInTaskbar = false, ClientSize = new System.Drawing.Size(440, 130), BackColor = System.Drawing.Color.White
+            })
+            {
+                var lbl = new Label { Text = mensaje, Left = 16, Top = 16, Width = 408, Height = 50, Font = Tema.FuenteNormal };
+                var imprimir = new Button { Text = boton, Left = 16, Top = 82, Width = 250, Height = 32 };
+                var cerrar = new Button { Text = Tr("btn.cerrar", "Cerrar"), Left = 324, Top = 82, Width = 100, Height = 32, DialogResult = DialogResult.OK };
+                Estilos.EstiloFormulario.BotonPrimario(imprimir);
+                Estilos.EstiloFormulario.BotonSecundario(cerrar);
+                imprimir.Click += (s, e) => ImprimirDocumentoDelResultado(dlg);
+                dlg.Controls.AddRange(new Control[] { lbl, imprimir, cerrar });
+                dlg.AcceptButton = cerrar;
+                dlg.CancelButton = cerrar;
+                dlg.ShowDialog(propietario);
+            }
+        }
+
+        private void ImprimirDocumentoDelResultado(IWin32Window propietario)
+        {
+            try
+            {
+                Exportacion.ReporteExportable doc;
+                if (FueDesistimiento)
+                    doc = Exportacion.DocumentosContratacion.AvisoDesistimiento(contratacionBLL.ObtenerDesistimiento(IdDesistimientoCreado));
+                else
+                {
+                    var c = contratacionBLL.ObtenerPorId(IdContratacionCreada);
+                    doc = Exportacion.DocumentosContratacion.OrdenDeCobro(c, contratacionBLL.CalcularImporte(c));
+                }
+                Exportacion.DocumentosContratacion.Imprimir(doc, propietario);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(MensajeDeError(ex), Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void BtnCancelar_Click(object sender, EventArgs e)

@@ -56,13 +56,6 @@ namespace GUI
             catch (Exception ex) { System.Diagnostics.Trace.TraceWarning("[PreferenciasUI] Formato de fecha inválido: " + ex.Message); }
         }
 
-        // Formatea una fecha según el formato preferido del usuario.
-        public static string Fecha(DateTime f)
-        {
-            string fmt = string.IsNullOrEmpty(Actual.FormatoFecha) ? "dd/MM/yyyy" : Actual.FormatoFecha;
-            try { return f.ToString(fmt); } catch { return f.ToString("dd/MM/yyyy"); }
-        }
-
         // Aplica fuente (y tema si es oscuro) a un formulario y todos sus controles.
         public static void Aplicar(Control root)
         {

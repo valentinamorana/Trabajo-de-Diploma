@@ -31,9 +31,6 @@ namespace BLL.Interfaces
         // Obtiene un pedido por ID con sus prendas asociadas.
         BE.Pedido ObtenerPorId(int id);
 
-        // Pedidos en un estado dado.
-        List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado);
-
         // ── PN01 — Armar pedido de prendas (una operación por actividad del diagrama) ──
         // "Verificar la vigencia de la suscripción": devuelve el cliente o lanza el motivo.
         BE.Cliente VerificarVigencia(int idCliente);

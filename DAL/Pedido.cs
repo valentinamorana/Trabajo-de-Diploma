@@ -22,7 +22,7 @@ namespace DAL
         // SELECT base compartido por todos los métodos de lectura
         private const string SELECT_BASE =
             "SELECT ped.IdPedido, ped.IdCliente, ped.IdEmpleado, ped.Estado, " +
-            "       ped.FechaPedido, ped.FechaDespacho, ped.FechaEntrega, " +
+            "       ped.FechaPedido, ped.FechaDespacho, ped.FechaEntrega, ped.FechaDevolucion, " +
             "       ped.MotivoCancelacion, " +
             "       ped.FechaEnvioControl, ped.FechaControl, ped.IdEmpleadoControl, " +
             "       ped.FechaSeparacion, ped.FechaFormalizacion, " +
@@ -695,7 +695,8 @@ namespace DAL
             ActualizarDV(idPedido);   // T07
         }
 
-        // Pasa a EnLimpieza SOLO las prendas del pedido que siguen EnUso por este cliente.
+        // Pasa a EnLimpieza SOLO las prendas del pedido que siguen EnUso por este cliente y registra
+        // la FechaDevolucion del pedido (PN04), todo en la misma transacción.
         // Es idempotente: una segunda devolución del mismo pedido no afecta filas (las prendas
         // ya no están EnUso) y no pisa prendas que ya hayan vuelto a circular en otro pedido.
         // Devuelve la cantidad de prendas efectivamente devueltas.
@@ -704,13 +705,16 @@ namespace DAL
             int afectadas = 0;
             acceso.EjecutarTransaccion((conexion, tx) =>
             {
+                // T07: bloqueo del DV de Pedido primero; el DV se recalcula antes del commit (abajo).
+                DigitoVerificador.Bloquear(conexion, tx, DV_Tabla);
+
                 // Abre el registro de mantenimiento de cada prenda que entra a limpieza (antes que el
                 // UPDATE, con el mismo criterio de selección): sin esto las devoluciones no quedaban en
                 // el historial de mantenimiento ni en el análisis de tiempos (PdN11), porque el cambio de
                 // estado se hace en SQL directo y no pasa por BLL.Prenda.CambiarEstado.
                 using (var cmd = new SqlCommand(
-                    "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor) " +
-                    "SELECT IdPrenda, GETDATE(), N'Devolución' FROM Prenda " +
+                    "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor, Origen) " +
+                    "SELECT IdPrenda, GETDATE(), NULL, @OrigenDevolucion FROM Prenda " +
                     "WHERE Estado=@EstadoEnUso AND IdClienteActual=@IdCliente AND IdPrenda IN " +
                     "  (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido) " +
                     "AND NOT EXISTS (SELECT 1 FROM MantenimientoPrenda m " +
@@ -720,6 +724,8 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@EstadoEnUso", (int)BE.EstadoPrenda.EnUso);
                     cmd.Parameters.AddWithValue("@IdCliente",   idCliente);
                     cmd.Parameters.AddWithValue("@IdPedido",    idPedido);
+                    // Origen = Devolución: es lo que lleva la prenda a la Inspección de Devolución (PN04).
+                    cmd.Parameters.Add(new SqlParameter("@OrigenDevolucion", SqlDbType.TinyInt) { Value = (byte)BE.OrigenMantenimiento.Devolucion });
                     cmd.ExecuteNonQuery();
                 }
 
@@ -735,8 +741,24 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@IdPedido",    idPedido);
                     afectadas = cmd.ExecuteNonQuery();
                 }
+
+                // PN04: el pedido sigue Entregado pero queda marcado como devuelto (misma transacción
+                // que las prendas). Solo si efectivamente volvió alguna prenda y la fecha no estaba:
+                // una segunda devolución no la pisa.
+                if (afectadas > 0)
+                {
+                    using (var cmd = new SqlCommand(
+                        "UPDATE Pedido SET FechaDevolucion=@FechaDevolucion " +
+                        "WHERE IdPedido=@IdPedido AND FechaDevolucion IS NULL",
+                        conexion, tx))
+                    {
+                        cmd.Parameters.Add("@FechaDevolucion", SqlDbType.DateTime).Value = DateTime.Now;
+                        cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                        cmd.ExecuteNonQuery();
+                    }
+                    ActualizarDVEnTx(conexion, tx, idPedido);   // T07, en la misma transacción
+                }
             });
-            if (afectadas > 0) ActualizarDV(idPedido);   // T07 — mantener el DV del pedido consistente
             return afectadas;
         }
 
@@ -1039,6 +1061,7 @@ namespace DAL
                 FechaPedido = Convert.ToDateTime(row["FechaPedido"]),
                 FechaDespacho = row["FechaDespacho"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaDespacho"]) : null,
                 FechaEntrega = row["FechaEntrega"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaEntrega"]) : null,
+                FechaDevolucion = FechaNula(row, "FechaDevolucion"),
                 MotivoCancelacion = row.Table.Columns.Contains("MotivoCancelacion") && row["MotivoCancelacion"] != DBNull.Value
                                         ? row["MotivoCancelacion"].ToString() : null,
                 FechaEnvioControl     = FechaNula(row, "FechaEnvioControl"),
@@ -1082,13 +1105,15 @@ namespace DAL
         private const string SELECT_DV =
             "SELECT IdPedido, IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, " +
             "       MotivoCancelacion, FechaEnvioControl, FechaControl, IdEmpleadoControl, FechaSeparacion, " +
-            "       FechaFormalizacion, MotivoDesistimiento, EtapaDesistimiento, DVH FROM Pedido";
+            "       FechaFormalizacion, MotivoDesistimiento, EtapaDesistimiento, FechaDevolucion, DVH FROM Pedido";
 
+        // PN04: FechaDevolucion también entra (falsearla escondería un pedido atrasado); el script
+        // pidió el recálculo único al agregar la columna (sección 21z3).
         private static readonly string[] ColumnasDV =
         {
             "IdPedido", "IdCliente", "IdEmpleado", "Estado", "FechaPedido", "FechaDespacho", "FechaEntrega",
             "MotivoCancelacion", "FechaEnvioControl", "FechaControl", "IdEmpleadoControl", "FechaSeparacion",
-            "FechaFormalizacion", "MotivoDesistimiento", "EtapaDesistimiento"
+            "FechaFormalizacion", "MotivoDesistimiento", "EtapaDesistimiento", "FechaDevolucion"
         };
 
         private static BE.FilaDV MapearFilaDV(DataRow row, string digestLineas)
@@ -1143,27 +1168,31 @@ namespace DAL
         {
             try
             {
-                new DigitoVerificador().EjecutarConBloqueo(DV_Tabla, (cn, tx) =>
-                {
-                    var p = new SqlParameter("@id", idPedido);
-                    var dt = DigitoVerificador.LeerEnTx(cn, tx, SELECT_DV + " WHERE IdPedido = @id", p);
-                    if (dt.Rows.Count > 0)
-                    {
-                        var lineas = DigitoVerificador.LeerEnTx(cn, tx,
-                            SELECT_LINEAS_DV + " WHERE IdPedido = @id ORDER BY IdPrenda", new SqlParameter("@id", idPedido));
-                        Digests(lineas).TryGetValue(idPedido, out var d);
-                        var fila = MapearFilaDV(dt.Rows[0], d);
-                        using (var cmd = new SqlCommand("UPDATE Pedido SET DVH=@dvh WHERE IdPedido=@id", cn, tx))
-                        {
-                            cmd.Parameters.AddWithValue("@dvh", Seguridad.CalculadorDV.Crear().CalcularDVH(fila.Campos));
-                            cmd.Parameters.AddWithValue("@id", idPedido);
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, "IdPedido");
-                });
+                new DigitoVerificador().EjecutarConBloqueo(DV_Tabla, (cn, tx) => ActualizarDVEnTx(cn, tx, idPedido));
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Pedido.ActualizarDV] " + ex.Message); }
+        }
+
+        // Recalcula el DVH del pedido (con sus líneas) y el DVV DENTRO de una transacción que ya tiene
+        // tomado el bloqueo del DV de Pedido (DigitoVerificador.Bloquear al empezar la transacción).
+        internal void ActualizarDVEnTx(SqlConnection cn, SqlTransaction tx, int idPedido)
+        {
+            var p = new SqlParameter("@id", idPedido);
+            var dt = DigitoVerificador.LeerEnTx(cn, tx, SELECT_DV + " WHERE IdPedido = @id", p);
+            if (dt.Rows.Count > 0)
+            {
+                var lineas = DigitoVerificador.LeerEnTx(cn, tx,
+                    SELECT_LINEAS_DV + " WHERE IdPedido = @id ORDER BY IdPrenda", new SqlParameter("@id", idPedido));
+                Digests(lineas).TryGetValue(idPedido, out var d);
+                var fila = MapearFilaDV(dt.Rows[0], d);
+                using (var cmd = new SqlCommand("UPDATE Pedido SET DVH=@dvh WHERE IdPedido=@id", cn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@dvh", Seguridad.CalculadorDV.Crear().CalcularDVH(fila.Campos));
+                    cmd.Parameters.AddWithValue("@id", idPedido);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, "IdPedido");
         }
 
         // Recalcula el DVH de TODOS los pedidos y el DVV. Acepta los datos actuales como legítimos:

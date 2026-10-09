@@ -29,7 +29,6 @@ namespace BLL
         // Baja demanda: sin pedidos desde el alta (reporte PdN9) o en el período analizado (PN03).
         private static bool EsBajaDemanda(BE.RotacionPrenda r) =>
             r.Clave != null && r.Clave.StartsWith("rotacion.motivo.bajademanda", StringComparison.Ordinal);
-        private const string ModuloGerencia = "Promociones";
 
         private readonly Interfaces.IAnalisisRotacionService rotacion;
         private readonly Interfaces.IAnalisisAbandonoService abandono;
@@ -154,7 +153,9 @@ namespace BLL
                     CategoriaPrenda = g.Key,
                     TipoSugerido = BE.TipoDescuento.MontoFijo,
                     BeneficioEstimado = g.Count() * ValorReferenciaPorPrenda,
-                    Motivo = $"Análisis de rotación: {g.Count()} prenda(s) de la categoría {g.Key} sin pedidos ({ejemplos})."
+                    Motivo = $"Análisis de rotación: {g.Count()} prenda(s) de la categoría {g.Key} sin pedidos ({ejemplos}).",
+                    ClaveMotivo = "promo.cand.rotacion",
+                    ArgsMotivo = new object[] { g.Count(), g.Key, ejemplos }
                 });
             }
 
@@ -169,7 +170,9 @@ namespace BLL
                     TipoSugerido = BE.TipoDescuento.Porcentaje,
                     BeneficioEstimado = m.IngresoMensualEnRiesgo,
                     Motivo = $"Análisis de abandono: {m.ClientesEnRiesgo} cliente(s) del plan {m.NombrePlan} en riesgo de abandono " +
-                             $"(${m.IngresoMensualEnRiesgo} de ingreso mensual en riesgo)."
+                             $"({m.IngresoMensualEnRiesgo:C2} de ingreso mensual en riesgo).",
+                    ClaveMotivo = "promo.cand.abandono",
+                    ArgsMotivo = new object[] { m.ClientesEnRiesgo, m.NombrePlan, m.IngresoMensualEnRiesgo }
                 });
             }
 

@@ -7,9 +7,9 @@ erDiagram
   Permiso ||--o{ PermisoRelacion : "IdPadre"
   Permiso ||--o{ PermisoRelacion : "IdHijo"
   Usuario ||--o{ Preferencia : "IdUsuario"
-  Permiso ||--o{ RolPermiso : "IdPermiso"
-  Idioma ||--o{ Traduccion : "IdIdioma"
   Control ||--o{ Traduccion : "IdControl"
+  Idioma ||--o{ Traduccion : "IdIdioma"
+  Idioma |o--o{ Usuario : "IdIdioma"
   Usuario {
     int IdUsuario PK
     nvarchar(100) Username
@@ -19,7 +19,7 @@ erDiagram
     bit Estado
     int IntentosFallidos
     int DVH "NULL"
-    varchar(5) IdIdioma "NULL"
+    varchar(5) IdIdioma FK "NULL"
     bit Activo
     datetime FechaBaja "NULL"
     int CantidadBloqueos
@@ -78,10 +78,6 @@ erDiagram
     int IdPadre PK,FK
     int IdHijo PK,FK
     int DVH "NULL"
-  }
-  RolPermiso {
-    nvarchar(100) Rol PK
-    int IdPermiso PK,FK
   }
   ControlMapeado {
     int IdControlMapeado PK

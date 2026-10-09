@@ -59,6 +59,10 @@ namespace BLL
                     usuarioDAL.Modificar(nuevo.Id, Limpiar(nombre), Limpiar(apellido), username.Trim(),
                                          fechaNacimiento, Limpiar(email));
 
+                // Todo usuario del sistema es un empleado: sin el vínculo no puede vender, cobrar
+                // ni controlar stock (BLLHelper.ResolverEmpleadoActivo lo rechaza).
+                AsegurarEmpleado(empleadoDAL, nuevo.Id, nombre, apellido, email, perfil);
+
                 try
                 {
                     new VersionUsuario().GrabarVersion(nuevo.Id,
@@ -161,12 +165,25 @@ namespace BLL
 
             usuarioDAL.CambiarRol(idUsuario, perfilNorm);
 
+            // Usuarios creados antes de que el alta generara su Empleado: se vincula al pasar a un
+            // rol operativo (si ya tiene uno, no hace nada).
+            AsegurarEmpleado(empleadoDAL, idUsuario, antes.Nombre, antes.Apellido, antes.Email, perfilNorm);
+
             bitacora.RegistrarSinSesion(
                 modulo:     modulo,
                 actividad:  BE.ActividadesBitacora.CambioDeRolDeUsuario,
                 criticidad: BE.Criticidad.Alta,
                 idUsuario:  SessionManager.GetInstance().Usuario.Id,
                 detalle:    $"Usuario ID {idUsuario} ('{antes.Username}'): rol '{antes.Perfil}' → '{perfilNorm}'.");
+        }
+
+        // Crea el Empleado vinculado al usuario si todavía no tiene uno. Devuelve true si lo creó.
+        internal static bool AsegurarEmpleado(DAL.Interfaces.IEmpleadoDAL empleados, int idUsuario,
+                                              string nombre, string apellido, string email, string puesto)
+        {
+            if (empleados.ObtenerPorUsuario(idUsuario) != null) return false;
+            empleados.CrearParaUsuario(idUsuario, nombre, apellido, email, puesto);
+            return true;
         }
 
         // Búsqueda por datos NO sensibles (nombre, apellido, email, username). Filtra en

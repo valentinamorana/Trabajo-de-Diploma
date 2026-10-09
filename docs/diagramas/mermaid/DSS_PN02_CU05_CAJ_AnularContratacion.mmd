@@ -1,0 +1,28 @@
+sequenceDiagram
+  autonumber
+  actor C as Caja
+  participant F as Contrataciones<br/>PendientesForm
+  participant B as BLL.<br/>Contratacion
+  participant D as DAL.<br/>Contratacion
+  Note over C,F: El cliente se arrepintió antes de pagar o hubo un error de carga: se cancela sin registrar intentos de pago
+  C->>F: Selecciona una contratación pendiente y pulsa Anular
+  F-->>C: Solicita el motivo de la anulación
+  C->>F: Ingresa el motivo
+  F->>B: Anular(modulo, contratacion, motivo)
+  Note over B: Exigir(CajaEditar)
+  B->>D: ObtenerPorId(idContratacion)  [relee el estado]
+  D-->>B: contratación actual
+  alt No está pendiente o el motivo no es válido
+    B-->>F: AppException(inexistente / anular_estado / anular_sin_motivo / motivo_largo)
+    F-->>C: Informa el error
+  else Válida
+    B->>D: Anular(idContratacion, motivo, idCaja)  [claim: WHERE Estado = PendientePago]
+    alt false: otra sesión ya la resolvió
+      D-->>B: false
+      B-->>F: AppException(cobrar_concurrente)
+    else true
+      D-->>B: true
+      B-->>F: ok
+      F-->>C: Contratación Cancelada: sale de la cola (constancia de cancelación imprimible)
+    end
+  end

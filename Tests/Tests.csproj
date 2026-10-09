@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
@@ -55,6 +56,7 @@
     <Compile Include="ComandoPedidoTests.cs" />
     <Compile Include="RenovacionTests.cs" />
     <Compile Include="ClienteTests.cs" />
+    <Compile Include="CambioPlanProgramadoTests.cs" />
     <Compile Include="CargoPrendaTests.cs" />
     <Compile Include="PedidoTests.cs" />
     <Compile Include="PanelTareasTests.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="RecomendacionPrendasTests.cs" />
     <Compile Include="ReporteVentasVendedorTests.cs" />
     <Compile Include="CobroTests.cs" />
+    <Compile Include="IntegracionBDTests.cs" />
     <Compile Include="ListaEsperaTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="ReporteJornadaTests.cs" />
@@ -87,6 +90,7 @@
     <Compile Include="UltimoAdminGuardTests.cs" />
     <Compile Include="PermisosAccionTests.cs" />
     <Compile Include="TraductorI18nTests.cs" />
+    <Compile Include="SerializacionTests.cs" />
     <Compile Include="SerializadorCsvTests.cs" />
     <Compile Include="PanelAlertasTests.cs" />
     <Compile Include="MenuVisibilidadTests.cs" />

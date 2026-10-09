@@ -551,7 +551,7 @@ namespace Tests
 
             try
             {
-                bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+                bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual);
                 Assert.Fail("Debía exigir sesión iniciada.");
             }
             catch (BE.AppException ex)
@@ -571,7 +571,7 @@ namespace Tests
 
             try
             {
-                bll.Procesar("Test", cliente, DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+                bll.Procesar("Test", cliente, DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual);
                 Assert.Fail("Debía rechazar un cliente sin plan asignado.");
             }
             catch (BE.AppException ex)
@@ -587,7 +587,7 @@ namespace Tests
             var dalRenovacion = new FakeRenovacionDAL();
             var bll = new BLL.Renovacion(new FakeClienteDAL(), dalRenovacion, new FakePlanSuscripcionDAL(), new FakePrendaDAL());
 
-            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Anual, "vendedor1");
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Anual);
 
             Assert.AreEqual(BE.EstadoRenovacion.Renovada, resultado.Estado);
             Assert.AreEqual(1, dalRenovacion.AltaVeces);
@@ -607,7 +607,7 @@ namespace Tests
             var dalPlan = new FakePlanSuscripcionDAL { PlanPorId = PlanPremium() };
             var bll = new BLL.Renovacion(new FakeClienteDAL(), dalRenovacion, dalPlan, new FakePrendaDAL());
 
-            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.CambiarPlan, 2, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.CambiarPlan, 2, BE.Builders.ModalidadCobro.Mensual);
 
             Assert.AreEqual(BE.EstadoRenovacion.CambioPlan, resultado.Estado);
             Assert.AreEqual(1, dalRenovacion.AltaVeces);
@@ -620,7 +620,7 @@ namespace Tests
             var dalRenovacion = new FakeRenovacionDAL();
             var bll = new BLL.Renovacion(new FakeClienteDAL(), dalRenovacion, new FakePlanSuscripcionDAL(), new FakePrendaDAL());
 
-            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Baja, null, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionRenovacion.Baja, null, BE.Builders.ModalidadCobro.Mensual);
 
             Assert.AreEqual(BE.EstadoRenovacion.Baja, resultado.Estado);
             Assert.AreEqual(1, dalRenovacion.AltaVeces);

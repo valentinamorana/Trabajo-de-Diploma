@@ -10,14 +10,11 @@ namespace BLL.Interfaces
     public interface IRenovacionService
     {
         // Procesa una renovación para el cliente indicado según la decisión tomada.
-        // fechaPausaHasta solo se usa cuando decision == Pausar.
+        // fechaPausaHasta solo se usa cuando decision == Pausar. El actor lo toma la BLL de la sesión.
         Manejadores.ResultadoRenovacion Procesar(
             string modulo, BE.Cliente cliente, Manejadores.DecisionRenovacion decision,
-            int? idPlanNuevo, BE.Builders.ModalidadCobro modalidad, string actor,
+            int? idPlanNuevo, BE.Builders.ModalidadCobro modalidad,
             DateTime? fechaPausaHasta = null);
-
-        // Devuelve el historial de intentos de renovación de un cliente.
-        List<BE.Renovacion> ObtenerHistorial(int idCliente);
 
         // Clientes a los que se les puede procesar la decisión indicada (más los pausados,
         // que siempre se pueden reanudar).

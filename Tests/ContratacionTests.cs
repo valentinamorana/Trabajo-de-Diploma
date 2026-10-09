@@ -97,9 +97,10 @@ namespace Tests
             public FakeEmpleadoDAL DalEmpleado = new FakeEmpleadoDAL { EmpleadoPorUsuario = new BE.Empleado { IdEmpleado = 5 } };
             public FakePlanSuscripcionDAL DalPlan = new FakePlanSuscripcionDAL { PlanPorId = PlanActivo() };
             public FakeClienteService ClienteBLL = new FakeClienteService();
+            public FakeCargoPrendaDAL DalCargos = new FakeCargoPrendaDAL();
 
             public BLL.Contratacion Crear()
-                => new BLL.Contratacion(DalContratacion, DalCliente, DalEmpleado, DalPlan, ClienteBLL);
+                => new BLL.Contratacion(DalContratacion, DalCliente, DalEmpleado, DalPlan, ClienteBLL) { DalCargos = DalCargos };
 
             // Deja la contratación pendiente como "estado fresco de la BD" y la devuelve.
             public BE.Contratacion Pendiente()
@@ -883,7 +884,7 @@ namespace Tests
             var cliente = ClienteExistente();
             cliente.IdPlan = 1;
             EsperarError(() => new BLL.Cobro(dal, new FakeCobroDAL(), new FakeCargoPrendaDAL())
-                    .Procesar("Test", cliente, BLL.Manejadores.DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja"),
+                    .Procesar("Test", cliente, BLL.Manejadores.DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual),
                 "err.bll.cobro.contratacion_pendiente");
         }
 
@@ -918,7 +919,7 @@ namespace Tests
             var cliente = ClienteExistente();
             cliente.IdPlan = 1;
             EsperarError(() => new BLL.Renovacion(dal, new FakeRenovacionDAL(), new FakePlanSuscripcionDAL(), new FakePrendaDAL())
-                    .Procesar("Test", cliente, BLL.Manejadores.DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual, "vendedor"),
+                    .Procesar("Test", cliente, BLL.Manejadores.DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual),
                 "err.bll.renovacion.contratacion_pendiente");
         }
 
@@ -1213,6 +1214,95 @@ namespace Tests
             Assert.AreEqual(0m, liq.CreditoCambioPlan);
             Assert.IsNull(ctx.DalContratacion.UltimoCreditoCambioPlan);
             Assert.IsFalse(ctx.ClienteBLL.UltimoIniciarHoy);
+        }
+
+        // ══ Cargos de PN04 en el cobro de PN02 ════════════════════════════════
+        // Antes solo el cobro de N01 los sumaba: renovar o cambiar de plan por PN02 los dejaba sin cobrar.
+
+        [TestMethod]
+        public void CalcularImporte_ConCargosPendientes_LosSumaAlTotal()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalCargos.Alta(new BE.CargoPrenda { IdCliente = 10, IdPrenda = 1, Motivo = "Rotura", Monto = 400m });
+            ctx.DalCargos.Alta(new BE.CargoPrenda { IdCliente = 99, IdPrenda = 2, Motivo = "Otro cliente", Monto = 999m });
+
+            var liq = ctx.Crear().CalcularImporte(ctx.Pendiente());
+
+            Assert.AreEqual(1, liq.CantidadCargos);
+            Assert.AreEqual(400m, liq.Cargos);
+            Assert.AreEqual(1000m + 400m, liq.Total);
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_ConCargosPendientes_CobraYLiquidaLosCargos()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            int idCargo = ctx.DalCargos.Alta(new BE.CargoPrenda { IdCliente = 10, IdPrenda = 1, Motivo = "Rotura", Monto = 400m });
+
+            var liq = ctx.Crear().ConfirmarCobro("Test", ctx.Pendiente(), IdEfectivo, importeConfirmado: 1400m);
+
+            Assert.AreEqual(1400m, liq.Total);
+            Assert.AreEqual(1400m, ctx.DalContratacion.UltimoImporte);
+            CollectionAssert.AreEqual(new[] { idCargo }, ctx.DalContratacion.UltimosCargos.ToArray());
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_FallaLaActivacion_LosCargosVuelvenAPendientes()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            int idCargo = ctx.DalCargos.Alta(new BE.CargoPrenda { IdCliente = 10, IdPrenda = 1, Motivo = "Rotura", Monto = 400m });
+            ctx.ClienteBLL.ActivarSuscripcionLanza = new InvalidOperationException("falla");
+
+            try { ctx.Crear().ConfirmarCobro("Test", ctx.Pendiente(), IdEfectivo); Assert.Fail("Debía propagar la falla."); }
+            catch (InvalidOperationException) { }
+
+            CollectionAssert.AreEqual(new[] { idCargo }, ctx.DalContratacion.CargosReabiertos.ToArray());
+        }
+
+        // Downgrade o cambio lateral con el período vigente: se contrata y se cobra, y el plan nuevo rige
+        // al vencer la vigente (nodo a11 del diagrama). La liquidación avisa desde cuándo.
+        [TestMethod]
+        public void PlanMasBaratoConPeriodoVigente_SeContrata_YLaLiquidacionDiceDesdeCuandoRige()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPlan.Planes = new List<BE.PlanSuscripcion> { PlanPremium(), PlanBasico() };
+            ctx.DalCliente.ClientePorId.IdPlan = 1;   // Premium vigente 15 días más
+            ctx.DalCliente.ClientePorId.FechaVencimiento = DateTime.Today.AddDays(15);
+
+            Assert.AreEqual(2, ctx.Crear().ValidarContratacion(10, 2).IdPlan);
+            var c = ctx.Pendiente();
+            c.IdPlan = 2;
+            var liq = ctx.Crear().CalcularImporte(c);
+            Assert.AreEqual(DateTime.Today.AddDays(15), liq.CambioProgramadoDesde);
+            Assert.AreEqual(0m, liq.CreditoCambioPlan, "No es upgrade: sin crédito.");
+        }
+
+        [TestMethod]
+        public void ValidarContratacion_PlanMasBaratoConPeriodoVencido_LoPermite()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPlan.Planes = new List<BE.PlanSuscripcion> { PlanPremium(), PlanBasico() };
+            ctx.DalCliente.ClientePorId.IdPlan = 1;
+            ctx.DalCliente.ClientePorId.FechaVencimiento = DateTime.Today.AddDays(-2);
+            Assert.AreEqual(2, ctx.Crear().ValidarContratacion(10, 2).IdPlan);
+        }
+
+        [TestMethod]
+        public void ConfirmarCobro_UpgradeConTotalCero_IgualArrancaHoy()
+        {
+            LoginComoAdministrador();
+            var ctx = ContextoUpgrade(out var c);
+            ctx.DalCliente.ClientePorId.DescuentoProximoCobro = 100000m;   // crédito por referidos que cubre todo
+
+            var liq = ctx.Crear().ConfirmarCobro("Test", c, IdEfectivo);
+
+            Assert.AreEqual(0m, liq.Total);
+            Assert.IsTrue(ctx.ClienteBLL.UltimoIniciarHoy, "Es upgrade aunque no haya crédito por cambio de plan.");
         }
 
         [TestMethod]

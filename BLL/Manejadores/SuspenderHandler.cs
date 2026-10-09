@@ -9,7 +9,7 @@ namespace BLL.Manejadores
     /// último de la cadena. El cliente ya quedó con FechaLimiteGracia vencida (la fijó
     /// AplicarGraciaHandler en un intento anterior), así que Cliente.EstaSuspendidoPorPago
     /// ya es true sin tocar la BD de nuevo: acá solo se deja constancia en el historial.
-    /// El bloqueo real de nuevos pedidos lo hace BLL.Pedido.CrearPedido consultando esa
+    /// El bloqueo real de nuevos pedidos lo hace BLL.Pedido.VerificarVigencia consultando esa
     /// propiedad, igual que ya hace con SuscripcionVigente().
     /// </summary>
     public sealed class SuspenderHandler : ManejadorCobro

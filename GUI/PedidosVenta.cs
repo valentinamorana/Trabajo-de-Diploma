@@ -27,6 +27,9 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPedidoService pedidoBLL = new BLL.Pedido();
+        // Patrón Command: el invocador vive con la pantalla y guarda el historial para poder deshacer
+        // una cancelación (Reactivar).
+        private readonly BLL.Comandos.InvocadorPedido _invocador = new BLL.Comandos.InvocadorPedido();
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
 
@@ -334,8 +337,11 @@ namespace GUI
                 return;
             }
 
-            string bodyCanc = string.Format(
-                Tr("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),
+            // En control de stock o con faltantes todavía no hay prendas separadas: no hay nada que liberar.
+            bool sinReserva = pedido.Estado == BE.EstadoPedido.EnControlStock || pedido.Estado == BE.EstadoPedido.ConFaltantes;
+            string bodyCanc = string.Format(sinReserva
+                    ? Tr("conf.cancelped.body.sinreserva", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nTodavía no tiene prendas separadas.")
+                    : Tr("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),
                 pedido.IdPedido, pedido.NombreCliente, motivo);
 
             if (!ConfirmarSiNo(bodyCanc, Tr("conf.cancelped.titulo", "Confirmar Cancelación"), porDefectoNo: true)) return;
@@ -345,11 +351,12 @@ namespace GUI
                 // Patrón Command (PdN3): la GUI arma el pedido de cancelación y se lo entrega
                 // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
                 // ejecución real siguen 100% en BLL.Pedido.Cancelar, adentro del Command.
-                var invocador = new BLL.Comandos.InvocadorPedido();
-                invocador.TomarOrden(new BLL.Comandos.CancelacionCommand(pedidoBLL, pedido, this.Text, motivo));
-                invocador.ProcesarOrdenes();
+                _invocador.TomarOrden(new BLL.Comandos.CancelacionCommand(pedidoBLL, pedido, this.Text, motivo));
+                _invocador.ProcesarOrdenes();
 
-                MostrarOk(Tr("msg.ped.cancelado", "Pedido #{0} cancelado. Prendas liberadas.", new object[] { pedido.IdPedido }));
+                MostrarOk(sinReserva
+                    ? Tr("msg.ped.cancelado.sinreserva", "Pedido #{0} cancelado.", new object[] { pedido.IdPedido })
+                    : Tr("msg.ped.cancelado", "Pedido #{0} cancelado. Prendas liberadas.", new object[] { pedido.IdPedido }));
                 CargarPedidos();
             }
             catch (Exception ex)
@@ -381,7 +388,12 @@ namespace GUI
 
             try
             {
-                pedidoBLL.DesCancelar(this.Text, pedido);
+                // Si la cancelación se hizo en esta pantalla, se deshace el comando (Command con
+                // deshacer); si viene de antes o de otra sesión, se reactiva directamente.
+                if (_invocador.PuedeDeshacer(pedido.IdPedido))
+                    _invocador.DeshacerUltima(pedido.IdPedido);
+                else
+                    pedidoBLL.DesCancelar(this.Text, pedido);
                 string fmtReact = Tr("msg.ped.reactivadocontrol", "Pedido #{0} reactivado: volvió a control de stock.");
                 MostrarOk(string.Format(fmtReact, pedido.IdPedido));
                 CargarPedidos();

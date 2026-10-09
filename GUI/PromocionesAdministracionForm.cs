@@ -33,6 +33,9 @@ namespace GUI
         public PromocionesAdministracionForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(dgvSugerencias);
+            GUI.Estilos.EstiloFormulario.Grilla(dgvPromociones);
             // Paleta centralizada (GUI/Tema.cs).
             btnUsarSugerencia.BackColor = btnNuevaManual.BackColor = btnReformular.BackColor = Tema.RosaPrimario;
             btnAprobarBaja.BackColor = Tema.Exito;
@@ -393,7 +396,5 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        private bool Preguntar(string texto) =>
-            (FormBase.MostrarConfirmacionSiNo(this, texto, this.Text, porDefectoNo: true) ? DialogResult.Yes : DialogResult.No) == DialogResult.Yes;
     }
 }

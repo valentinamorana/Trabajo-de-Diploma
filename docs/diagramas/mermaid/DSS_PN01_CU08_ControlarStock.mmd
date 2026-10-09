@@ -65,7 +65,7 @@ sequenceDiagram
       else Separadas
         B->>H: RegistrarCambios(cambios)  [Accion = SEPARAR]
         loop Por cada prenda del pedido
-          B->>LE: CerrarSiReservada(modulo, idPrenda, idCliente, actor)
+          B->>LE: CerrarSiReservada(modulo, idPrenda, idCliente)
         end
         B-->>F: ok
         F-->>DP: Constancia de prendas separadas (PDF)

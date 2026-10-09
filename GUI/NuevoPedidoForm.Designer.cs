@@ -348,6 +348,7 @@ namespace GUI
             this.btnImprimirAviso.ForeColor = System.Drawing.Color.White;
             this.btnImprimirAviso.Location = new System.Drawing.Point(190, 330);
             this.btnImprimirAviso.Name = "btnImprimirAviso";
+            this.btnImprimirAviso.TabIndex = 6;
             this.btnImprimirAviso.Size = new System.Drawing.Size(180, 36);
             this.btnImprimirAviso.Tag = "btn.ped.imprimiraviso";
             this.btnImprimirAviso.Text = "Imprimir aviso";
@@ -363,6 +364,7 @@ namespace GUI
             this.btnImprimirCupo.ForeColor = System.Drawing.Color.White;
             this.btnImprimirCupo.Location = new System.Drawing.Point(550, 417);
             this.btnImprimirCupo.Name = "btnImprimirCupo";
+            this.btnImprimirCupo.TabIndex = 6;
             this.btnImprimirCupo.Size = new System.Drawing.Size(130, 34);
             this.btnImprimirCupo.Tag = "btn.ped.imprimircupo";
             this.btnImprimirCupo.Text = "Imprimir detalle";
@@ -377,7 +379,7 @@ namespace GUI
             this.lblDetalle.Location = new System.Drawing.Point(10, 292);
             this.lblDetalle.Name = "lblDetalle";
             this.lblDetalle.Size = new System.Drawing.Size(660, 80);
-            this.lblDetalle.TabIndex = 6;
+            this.lblDetalle.TabIndex = 7;
             // 
             // NuevoPedidoForm
             // 

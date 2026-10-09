@@ -34,7 +34,8 @@ namespace Tests
         // Todas las alertas posibles activas a la vez.
         private static List<BE.Alerta> TodasLasAlertas() =>
             BLL.PanelAlertas.EvaluarAlertas(vencidas: 1, porVencer: 1, diasSinBackup: -1, enLimpieza: 1, dvRotas: 2,
-                reservadasEspera: 1, enControl: 1, conFaltantes: 1, separados: 1, contratacionesPendientes: 1);
+                reservadasEspera: 1, enControl: 1, conFaltantes: 1, separados: 1, contratacionesPendientes: 1,
+                atrasados: 1);
 
         private static string[] Claves(IEnumerable<BE.Alerta> a) => a.Select(x => x.ClaveI18n).ToArray();
 
@@ -71,6 +72,17 @@ namespace Tests
             CollectionAssert.Contains(claves, "alert.prendas.limpieza");
             CollectionAssert.DoesNotContain(claves, "alert.pedidos.faltantes");
             CollectionAssert.DoesNotContain(claves, "alert.dv.corruptos");
+        }
+
+        [TestMethod]
+        public void Alertas_PedidosAtrasados_LosVenPedidosRealizadosYDeposito_NoElVendedor()
+        {
+            CollectionAssert.Contains(Claves(BLL.PanelAlertas.FiltrarPorPatentes(TodasLasAlertas(),
+                new[] { BE.Patentes.PedidosRealizados }, false)), "alert.pedidos.atrasados");
+            CollectionAssert.Contains(Claves(BLL.PanelAlertas.FiltrarPorPatentes(TodasLasAlertas(),
+                new[] { BE.Patentes.InspeccionDevolucion }, false)), "alert.pedidos.atrasados");
+            CollectionAssert.DoesNotContain(Claves(BLL.PanelAlertas.FiltrarPorPatentes(TodasLasAlertas(),
+                new[] { BE.Patentes.PedidosVenta, BE.Patentes.Clientes }, false)), "alert.pedidos.atrasados");
         }
 
         [TestMethod]
@@ -184,21 +196,37 @@ namespace Tests
         {
             public readonly List<(BE.CargoPrenda Cargo, BE.EstadoPrenda Esperado)> Llamadas = new List<(BE.CargoPrenda, BE.EstadoPrenda)>();
             public Exception Falla;
-            public int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado)
+            public int? UltimoPedidoACerrar;
+            public int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado, int? idPedidoACerrar = null)
             {
                 if (Falla != null) throw Falla;
+                UltimoPedidoACerrar = idPedidoACerrar;
                 Llamadas.Add((cargo, estadoEsperado));
                 return 99;
             }
+
+            // Por defecto, la prenda es de un pedido entregado hace 45 días (compra tácita vencida).
+            public BE.Pedido PedidoEnCurso = new BE.Pedido
+            {
+                IdPedido = 10, IdCliente = 3, Estado = BE.EstadoPedido.Entregado, FechaEntrega = Hoy.AddDays(-45)
+            };
+            public BE.Pedido ObtenerPedidoEnCurso(int idPrenda) => PedidoEnCurso;
         }
+
+        private static readonly DateTime Hoy = new DateTime(2026, 10, 9);
+
+        private static BLL.InspeccionDevolucion Inspeccion(FakeInspeccionDAL dal) =>
+            new BLL.InspeccionDevolucion(dal, new PrendaServiceEspia(), () => Hoy);
 
         // Espía de CambiarEstado (re-implementa la interfaz sobre el fake existente).
         private sealed class PrendaServiceEspia : FakePrendaService, BLL.Interfaces.IPrendaService
         {
             public readonly List<BE.EstadoPrenda> Cambios = new List<BE.EstadoPrenda>();
-            public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null,
-                                          bool viaFlujoPerdida = false, bool viaInspeccion = false)
+            public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado)
                 => Cambios.Add(nuevoEstado);
+            // Cola de inspección: por defecto la prenda 5 (la de los tests) volvió de una devolución.
+            public List<BE.Prenda> ColaInspeccion = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 5 } };
+            public new List<BE.Prenda> ObtenerEnLimpieza() => ColaInspeccion;
         }
 
         private static BE.Prenda Prenda(BE.EstadoPrenda estado, int? ultimoCliente = 3) => new BE.Prenda
@@ -226,6 +254,23 @@ namespace Tests
             Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
         }
 
+        // PN04 — una prenda que entró a limpieza en el depósito (no por devolución) no se le cobra al último cliente.
+        [TestMethod]
+        public void DarDeBajaConCargo_PrendaQueNoVieneDeUnaDevolucion_Rechaza()
+        {
+            LoginComoAdministrador();
+            var dal = new FakeInspeccionDAL();
+            var espia = new PrendaServiceEspia();
+            espia.ColaInspeccion.Clear();
+            try
+            {
+                new BLL.InspeccionDevolucion(dal, espia).DarDeBajaConCargo("Test", Prenda(BE.EstadoPrenda.EnLimpieza), "Mancha", 100m);
+                Assert.Fail("Debía rechazar el cargo a una prenda que no volvió de un cliente.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.insp.no_devuelta", ex.Clave); }
+            Assert.AreEqual(0, dal.Llamadas.Count);
+        }
+
         [TestMethod]
         public void ReportarPerdida_EnUso_DaDeBajaYLimpiaClienteActual()
         {
@@ -233,11 +278,78 @@ namespace Tests
             var dal = new FakeInspeccionDAL();
             var prenda = Prenda(BE.EstadoPrenda.EnUso);
 
-            new BLL.InspeccionDevolucion(dal, new PrendaServiceEspia()).ReportarPerdida("Test", prenda, "Perdida", 2000m);
+            Inspeccion(dal).ReportarPerdida("Test", prenda, "Perdida", 2000m);
 
             Assert.AreEqual(BE.EstadoPrenda.EnUso, dal.Llamadas.Single().Esperado);
             Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
             Assert.IsNull(prenda.IdClienteActual);
+        }
+
+        // PN04 — compra tácita: el cliente nunca recibió la prenda (pedido Separado, Pendiente o
+        // Despachado). Antes se podía cobrar la reposición completa y despachar el pedido igual.
+        [TestMethod]
+        public void ReportarPerdida_PedidoNoEntregado_RechazaSinTocarElDAL()
+        {
+            LoginComoAdministrador();
+            foreach (var estado in new[] { BE.EstadoPedido.Separado, BE.EstadoPedido.Pendiente, BE.EstadoPedido.Despachado })
+            {
+                var dal = new FakeInspeccionDAL();
+                dal.PedidoEnCurso = new BE.Pedido { IdPedido = 10, IdCliente = 3, Estado = estado };
+                var prenda = Prenda(BE.EstadoPrenda.EnUso);
+                try
+                {
+                    Inspeccion(dal).ReportarPerdida("Test", prenda, "Perdida", 2000m);
+                    Assert.Fail("Debía rechazar una prenda que el cliente todavía no recibió (pedido " + estado + ").");
+                }
+                catch (BE.AppException ex) { Assert.AreEqual("err.bll.insp.perdida_no_entregado", ex.Clave); }
+                Assert.AreEqual(0, dal.Llamadas.Count);
+                Assert.AreEqual(BE.EstadoPrenda.EnUso, prenda.Estado);
+            }
+        }
+
+        [TestMethod]
+        public void ReportarPerdida_AntesDeLos30Dias_RechazaConLosDiasQueFaltan()
+        {
+            LoginComoAdministrador();
+            var dal = new FakeInspeccionDAL();
+            dal.PedidoEnCurso.FechaEntrega = Hoy.AddDays(-29);
+            try
+            {
+                Inspeccion(dal).ReportarPerdida("Test", Prenda(BE.EstadoPrenda.EnUso), "Perdida", 2000m);
+                Assert.Fail("Debía rechazar: el plazo de compra tácita no venció.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.insp.perdida_plazo", ex.Clave);
+                StringAssert.Contains(ex.Message, "Faltan 1 día");
+            }
+            Assert.AreEqual(0, dal.Llamadas.Count);
+        }
+
+        [TestMethod]
+        public void ReportarPerdida_ElDia30_Permite()
+        {
+            LoginComoAdministrador();
+            var dal = new FakeInspeccionDAL();
+            dal.PedidoEnCurso.FechaEntrega = Hoy.AddDays(-30).AddHours(15);   // la hora no cuenta
+            Inspeccion(dal).ReportarPerdida("Test", Prenda(BE.EstadoPrenda.EnUso), "Perdida", 2000m);
+            Assert.AreEqual(1, dal.Llamadas.Count);
+            // Si era la última prenda en poder del cliente, el DAL cierra el pedido (deja de contar como atrasado).
+            Assert.AreEqual(dal.PedidoEnCurso.IdPedido, dal.UltimoPedidoACerrar);
+        }
+
+        [TestMethod]
+        public void PuedeReportarPerdida_SoloConPedidoEntregadoHace30Dias()
+        {
+            var bll = Inspeccion(new FakeInspeccionDAL());
+            var prenda = Prenda(BE.EstadoPrenda.EnUso);
+            var entregado = new BE.Pedido { Estado = BE.EstadoPedido.Entregado, FechaEntrega = Hoy.AddDays(-30) };
+            Assert.IsTrue(bll.PuedeReportarPerdida(prenda, entregado));
+            entregado.FechaEntrega = Hoy.AddDays(-10);
+            Assert.IsFalse(bll.PuedeReportarPerdida(prenda, entregado));
+            Assert.IsFalse(bll.PuedeReportarPerdida(prenda, new BE.Pedido { Estado = BE.EstadoPedido.Despachado }));
+            Assert.IsFalse(bll.PuedeReportarPerdida(Prenda(BE.EstadoPrenda.EnLimpieza), entregado));
+            Assert.IsFalse(bll.PuedeReportarPerdida(prenda, null));
         }
 
         [TestMethod]
@@ -262,7 +374,7 @@ namespace Tests
             var dal = new FakeInspeccionDAL();
             try
             {
-                new BLL.InspeccionDevolucion(dal, new PrendaServiceEspia())
+                Inspeccion(dal)
                     .ReportarPerdida("Test", Prenda(BE.EstadoPrenda.EnUso, ultimoCliente: null), "x", 10m);
                 Assert.Fail("Debía rechazar una prenda sin último cliente.");
             }
@@ -381,7 +493,7 @@ namespace Tests
             var dalPrenda = new FakePrendaDAL { Todas = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 1, Nombre = "Vestido", Estado = BE.EstadoPrenda.EnUso } } };
             var dalCliente = new FakeClienteDAL { ClientePorId = new BE.Cliente { IdCliente = 10, Nombre = "Ana", Apellido = "G", IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(30) } };
 
-            new BLL.ListaEspera(dalLe, dalPrenda, dalCliente).Anotar("Test", 1, 10, "vendedor");
+            new BLL.ListaEspera(dalLe, dalPrenda, dalCliente).Anotar("Test", 1, 10);
 
             Assert.AreEqual(1, dalLe.AltaVeces, "Antes exigía mnuStockEditar y al Vendedor le fallaba.");
         }
@@ -393,7 +505,7 @@ namespace Tests
             var dalLe = new FakeListaEsperaDAL();
             try
             {
-                new BLL.ListaEspera(dalLe, new FakePrendaDAL(), new FakeClienteDAL()).Anotar("Test", 1, 10, "x");
+                new BLL.ListaEspera(dalLe, new FakePrendaDAL(), new FakeClienteDAL()).Anotar("Test", 1, 10);
                 Assert.Fail("Debía exigir la patente de Lista de Espera.");
             }
             catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }

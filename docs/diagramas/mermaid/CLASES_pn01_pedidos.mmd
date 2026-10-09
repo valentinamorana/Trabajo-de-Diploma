@@ -8,6 +8,7 @@ classDiagram
     +DateTime FechaPedido
     +DateTime? FechaDespacho
     +DateTime? FechaEntrega
+    +DateTime? FechaDevolucion
     +string MotivoCancelacion
     +DateTime? FechaEnvioControl
     +DateTime? FechaControl
@@ -23,9 +24,10 @@ classDiagram
     +List~int~ PrendasConfirmadas
     +int CantidadPrendas
     +bool TodasConfirmadas
-    +string Resumen
     +int DiasDesdeAlta
     +bool EsUrgentePorAntiguedad
+    +bool FueDevuelto
+    +bool EnPoderDelCliente
   }
   class Prenda {
     +int IdPrenda
@@ -107,13 +109,13 @@ classDiagram
   }
   class BLL_Prenda["BLL.Prenda"] {
     +ObtenerDisponibles(int?) List~Prenda~
-    +CambiarEstado(string,  Prenda,  EstadoPrenda,  string,  bool,  bool) void
+    +CambiarEstado(string,  Prenda,  EstadoPrenda) void
     +VerificarDisponibilidad(List~Prenda~) bool Disponible, List~Prenda~ NoDisponibles
   }
   class BLL_ListaEspera["BLL.ListaEspera"] {
-    +NotificarSiCorresponde(int,  string) void
+    +NotificarSiCorresponde(int) void
     +EstaReservadaParaOtro(int,  int) bool
-    +CerrarSiReservada(string,  int,  int,  string) void
+    +CerrarSiReservada(string,  int,  int) void
     +ObtenerIdsReservadosParaOtro(int?) List~int~
   }
   class BLL_Cliente["BLL.Cliente"] {

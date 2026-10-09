@@ -94,7 +94,7 @@ namespace GUI
             this.lblCuotas.Location = new System.Drawing.Point(8, 90);
             this.lblCuotas.Name = "lblCuotas";
             this.lblCuotas.Size = new System.Drawing.Size(90, 23);
-            this.lblCuotas.TabIndex = 12;
+            this.lblCuotas.TabIndex = 13;
             this.lblCuotas.Tag = "lbl.contr.cuotas";
             this.lblCuotas.Text = "Cuotas:";
             this.lblCuotas.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -175,6 +175,7 @@ namespace GUI
             this.cmbVista.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbVista.Location = new System.Drawing.Point(8, 56);
             this.cmbVista.Name = "cmbVista";
+            this.cmbVista.TabIndex = 7;
             this.cmbVista.Size = new System.Drawing.Size(150, 21);
             this.cmbVista.SelectedIndexChanged += new System.EventHandler(this.CmbVista_SelectedIndexChanged);
             //
@@ -187,6 +188,7 @@ namespace GUI
             this.btnVerIntentos.ForeColor = System.Drawing.Color.White;
             this.btnVerIntentos.Location = new System.Drawing.Point(166, 52);
             this.btnVerIntentos.Name = "btnVerIntentos";
+            this.btnVerIntentos.TabIndex = 8;
             this.btnVerIntentos.Size = new System.Drawing.Size(120, 28);
             this.btnVerIntentos.Tag = "btn.contr.verintentos";
             this.btnVerIntentos.Text = "Ver intentos";
@@ -202,6 +204,7 @@ namespace GUI
             this.btnImprimirLiquidacion.ForeColor = System.Drawing.Color.White;
             this.btnImprimirLiquidacion.Location = new System.Drawing.Point(292, 52);
             this.btnImprimirLiquidacion.Name = "btnImprimirLiquidacion";
+            this.btnImprimirLiquidacion.TabIndex = 9;
             this.btnImprimirLiquidacion.Size = new System.Drawing.Size(150, 28);
             this.btnImprimirLiquidacion.Tag = "btn.contr.imprimirliq";
             this.btnImprimirLiquidacion.Text = "Imprimir liquidación";
@@ -217,6 +220,7 @@ namespace GUI
             this.btnImprimirComprobante.ForeColor = System.Drawing.Color.White;
             this.btnImprimirComprobante.Location = new System.Drawing.Point(448, 52);
             this.btnImprimirComprobante.Name = "btnImprimirComprobante";
+            this.btnImprimirComprobante.TabIndex = 10;
             this.btnImprimirComprobante.Size = new System.Drawing.Size(160, 28);
             this.btnImprimirComprobante.Tag = "btn.contr.imprimircomprobante";
             this.btnImprimirComprobante.Text = "Imprimir comprobante";
@@ -232,6 +236,7 @@ namespace GUI
             this.btnImprimirConstancia.ForeColor = System.Drawing.Color.White;
             this.btnImprimirConstancia.Location = new System.Drawing.Point(614, 52);
             this.btnImprimirConstancia.Name = "btnImprimirConstancia";
+            this.btnImprimirConstancia.TabIndex = 11;
             this.btnImprimirConstancia.Size = new System.Drawing.Size(160, 28);
             this.btnImprimirConstancia.Tag = "btn.contr.imprimirconstancia";
             this.btnImprimirConstancia.Text = "Imprimir constancia";
@@ -247,6 +252,7 @@ namespace GUI
             this.btnAnular.ForeColor = System.Drawing.Color.White;
             this.btnAnular.Location = new System.Drawing.Point(780, 52);
             this.btnAnular.Name = "btnAnular";
+            this.btnAnular.TabIndex = 12;
             this.btnAnular.Size = new System.Drawing.Size(110, 28);
             this.btnAnular.Tag = "contratacion.btn.anular";
             this.btnAnular.Text = "Anular";

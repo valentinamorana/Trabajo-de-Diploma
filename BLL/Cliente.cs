@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -24,7 +25,10 @@ namespace BLL
         // (antes dalPlan era un DAL.PlanSuscripcion concreto fijo — ActivarSuscripcion y la
         // rama de cambio de plan de Modificar quedaban sin poder testearse con un Fake, mismo
         // problema que ya se había resuelto en BLL.Renovacion/CambioPlanHandler).
-        public Cliente() : this(new DAL.Cliente(), new DAL.PlanSuscripcion(), new DAL.Pedido()) { }
+        // PN04: cargos por daño o pérdida. Null en tests que no lo inyectan: no se consulta.
+        internal DAL.Interfaces.ICargoPrendaDAL DalCargos { get; set; }
+
+        public Cliente() : this(new DAL.Cliente(), new DAL.PlanSuscripcion(), new DAL.Pedido()) { DalCargos = new DAL.CargoPrenda(); }
         public Cliente(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPlanSuscripcionDAL dalPlan = null,
                        DAL.Interfaces.IPedidoDAL dalPedido = null)
         {
@@ -71,26 +75,37 @@ namespace BLL
             return lista.FindAll(c => Contiene(c.NombreCompleto) || Contiene(c.DNI) || Contiene(c.Email));
         }
 
-        // Métodos de pago preferidos que se pueden elegir para un cliente. El Nombre es el valor
-        // que se guarda en Cliente.MetodoPago (en español, igual que los datos ya cargados) y
-        // ClaveTraduccion la clave con la que la pantalla lo muestra traducido. Se reusa
-        // BE.MedioPago solo como par nombre/clave: no es el catálogo de Caja (IdMedioPago = 0).
-        // Si el cliente tiene guardado un valor que ya no está en la lista (dato anterior), se
-        // agrega al final sin clave, para que editar al cliente no lo pise con "Efectivo".
-        public List<BE.MedioPago> ObtenerMetodosPago(string metodoActual = null)
+        // Medios de pago que se pueden elegir como preferidos de un cliente: el catálogo MedioPago
+        // (el mismo de Caja) con los medios ACTIVOS. Cliente.IdMedioPagoPreferido guarda el Id; la
+        // pantalla muestra el medio traducido con su ClaveTraduccion. Si el cliente tiene guardado un
+        // medio que ya no está activo (histórico, p. ej. un texto viejo migrado), se agrega al final
+        // para que editar al cliente no se lo cambie por otro.
+        public List<BE.MedioPago> ObtenerMetodosPago(int? idMedioActual = null)
         {
-            var metodos = new List<BE.MedioPago>
+            var catalogo = dalCliente.ObtenerMediosPago() ?? new List<BE.MedioPago>();
+            var metodos = catalogo.Where(m => m.Activo).ToList();
+
+            if (idMedioActual.HasValue && !metodos.Exists(m => m.IdMedioPago == idMedioActual.Value))
             {
-                new BE.MedioPago { Nombre = "Efectivo",      ClaveTraduccion = "metodo.efectivo" },
-                new BE.MedioPago { Nombre = "Débito",        ClaveTraduccion = "metodo.debito" },
-                new BE.MedioPago { Nombre = "Crédito",       ClaveTraduccion = "metodo.credito" },
-                new BE.MedioPago { Nombre = "Transferencia", ClaveTraduccion = "metodo.transferencia" },
-            };
-
-            if (!string.IsNullOrWhiteSpace(metodoActual) && !metodos.Exists(m => m.Nombre == metodoActual))
-                metodos.Add(new BE.MedioPago { Nombre = metodoActual });
-
+                var actual = catalogo.Find(m => m.IdMedioPago == idMedioActual.Value);
+                if (actual != null) metodos.Add(actual);
+            }
             return metodos;
+        }
+
+        // El medio de pago preferido es obligatorio y tiene que ser del catálogo. Uno inactivo solo
+        // se acepta si es el que el cliente ya tenía (idMedioActual): no se asigna uno histórico nuevo.
+        private void ValidarMedioPago(BE.Cliente cliente, int? idMedioActual)
+        {
+            if (!cliente.IdMedioPagoPreferido.HasValue)
+                throw new BE.AppException("err.bll.cliente.medio_requerido",
+                    "Elegí el medio de pago preferido del cliente.");
+
+            var medio = (dalCliente.ObtenerMediosPago() ?? new List<BE.MedioPago>())
+                .Find(m => m.IdMedioPago == cliente.IdMedioPagoPreferido.Value);
+            if (medio == null || (!medio.Activo && medio.IdMedioPago != idMedioActual))
+                throw new BE.AppException("err.bll.cliente.medio_invalido",
+                    "El medio de pago elegido no está disponible. Elegí otro del catálogo.");
         }
 
         // Obtiene un cliente por ID.
@@ -105,6 +120,7 @@ namespace BLL
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
             Validar(cliente);
+            ValidarMedioPago(cliente, null);
 
             if (dalCliente.ExisteDNI(cliente.DNI))
                 throw new BE.AppException("err.bll.cliente.dni_duplicado",
@@ -137,6 +153,7 @@ namespace BLL
                     "El DNI {0} ya está registrado para otro cliente.", cliente.DNI);
 
             var actual = dalCliente.ObtenerPorId(cliente.IdCliente);
+            ValidarMedioPago(cliente, actual?.IdMedioPagoPreferido);
 
             // El formulario de edición no maneja la gracia por falta de pago, la pausa ni el beneficio
             // por referido (los fijan el cobro, la renovación y Caja): se conservan los de la BD. Si
@@ -195,7 +212,7 @@ namespace BLL
             // Bloquear baja si el cliente tiene prendas en uso actualmente
             if (cliente.StockUtilizado > 0)
                 throw new BE.AppException("err.bll.cliente.baja_prendas",
-                    "No se puede eliminar a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.",
+                    "No se puede dar de baja a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.",
                     cliente.NombreCompleto, cliente.StockUtilizado);
 
             // PN02: una contratación pendiente de pago quedaría sin poder cobrarse.
@@ -209,6 +226,13 @@ namespace BLL
                 throw new BE.AppException("err.bll.cliente.baja_pedido",
                     "No se puede dar de baja a {0}: tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo primero.",
                     cliente.NombreCompleto);
+
+            // PN04: un cargo por daño o pérdida pendiente no se cobraría nunca (se suma al próximo cobro).
+            var cargos = DalCargos?.ObtenerPendientesPorCliente(cliente.IdCliente);
+            if (cargos != null && cargos.Count > 0)
+                throw new BE.AppException("err.bll.cliente.baja_cargos",
+                    "No se puede dar de baja a {0}: tiene {1} cargo(s) por daño o pérdida pendientes ({2:C2}). Se cobran con la próxima renovación o contratación.",
+                    cliente.NombreCompleto, cargos.Count, cargos.Sum(c => c.Monto));
 
             dalCliente.Baja(cliente.IdCliente);
             bitacora.Registrar(modulo, $"Baja Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Media);
@@ -225,7 +249,7 @@ namespace BLL
         //
         // Sin caller en la GUI desde PN02: la activación comercial normal pasa por
         // ActivarSuscripcionDesdeContratacion (Caja, tras confirmar el pago). Este método
-        // queda disponible con permiso ClientesEditar (Vendedor) para un futuro caso de uso
+        // queda disponible SOLO para el Administrador (lo exige abajo) para un caso de uso
         // administrativo puntual (ej. reactivar manualmente con Builder sin pasar por una
         // Contratación) — no lo uses como atajo para evitar Caja: para eso ya existe el guard
         // de Administrador en Modificar().
@@ -276,12 +300,33 @@ namespace BLL
             // "regalaban" (el período nuevo arrancaba desde el vencimiento ya corrido).
             DescontarPausaNoUsada(cliente);
 
+            // PN02, nodo a11: un plan igual o más barato con el período vigente rige al vencer la vigente.
+            // Hasta ese día sigue el plan actual (con su límite de prendas) y el nuevo queda programado.
+            // Un upgrade (iniciarHoy) rige desde hoy. Renovar el mismo plan, o activar con el período
+            // vencido, rige ya y descarta un cambio que estuviera programado.
+            DateTime? rigeDesde = null;
+            if (!iniciarHoy && cliente.IdPlan.HasValue && cliente.IdPlan.Value != plan.IdPlan
+                && cliente.FechaVencimiento.HasValue && cliente.FechaVencimiento.Value.Date > DateTime.Today)
+                rigeDesde = cliente.FechaVencimiento.Value.Date;
+
             var builder = BE.Builders.SuscripcionBuilderFactory.Crear(modalidad);
             var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, plan, iniciarHoy);
 
-            cliente.IdPlan           = plan.IdPlan;
-            cliente.NombrePlan       = plan.Nombre;
-            cliente.LimitePrendas    = plan.LimitePrendas;
+            if (rigeDesde.HasValue)
+            {
+                cliente.IdPlanSiguiente     = plan.IdPlan;
+                cliente.NombrePlanSiguiente = plan.Nombre;
+                cliente.FechaCambioPlan     = rigeDesde;
+            }
+            else
+            {
+                cliente.IdPlan              = plan.IdPlan;
+                cliente.NombrePlan          = plan.Nombre;
+                cliente.LimitePrendas       = plan.LimitePrendas;
+                cliente.IdPlanSiguiente     = null;
+                cliente.NombrePlanSiguiente = null;
+                cliente.FechaCambioPlan     = null;
+            }
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
             // Un cobro exitoso deja la cuenta al día: limpia la gracia y cualquier pausa
             // (ProcesarPagoHandler ya hacía lo mismo con la gracia).
@@ -322,7 +367,8 @@ namespace BLL
 
                 bitacora.Registrar(modulo,
                     $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
-                    $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}",
+                    $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}" +
+                    (rigeDesde.HasValue ? $" — el plan rige desde el {rigeDesde:d} (cambio programado)" : ""),
                     BE.Criticidad.Media);
                 bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
                     $"Activación de suscripción: {cliente.NombreCompleto} — Plan {plan.Nombre} — " +
@@ -342,6 +388,35 @@ namespace BLL
             }
 
             return suscripcion;
+        }
+
+        // PN02, nodo a11 — Aplica los cambios de plan programados cuya fecha llegó: el plan siguiente
+        // pasa a ser el plan del cliente. Lo hace el sistema (al iniciar sesión), sin permiso de
+        // pantalla. Devuelve cuántos aplicó. Un cliente con más prendas en uso que el plan nuevo no
+        // puede armar pedidos hasta devolver (PN01 controla el cupo).
+        public int AplicarCambiosDePlanProgramados(DateTime hoy)
+        {
+            int aplicados = 0;
+            foreach (var c in dalCliente.ObtenerTodos().Where(x => x.TieneCambioDePlanProgramado && x.FechaCambioPlan.Value.Date <= hoy.Date))
+            {
+                string anterior = c.NombrePlan;
+                c.IdPlan          = c.IdPlanSiguiente;
+                c.IdPlanSiguiente = null;
+                c.FechaCambioPlan = null;
+                dalCliente.Modificar(c);   // recalcula el DV
+                aplicados++;
+                try
+                {
+                    bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
+                        $"Cambio de plan programado aplicado: {c.NombreCompleto} pasa de '{anterior}' a '{c.NombrePlanSiguiente}'",
+                        idCliente: c.IdCliente);
+                }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.Cliente] Bitácora: " + ex.Message); }
+            }
+            if (aplicados > 0)
+                try { bitacora.Registrar("Suscripciones", $"{aplicados} cambio(s) de plan programado(s) aplicado(s)", BE.Criticidad.Baja); }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.Cliente] Bitácora: " + ex.Message); }
+            return aplicados;
         }
 
         // Bloque 1 — Reanuda una suscripción pausada. La fecha de vencimiento NO se toca:

@@ -207,7 +207,7 @@ namespace GUI
                     c.Email ?? "—",
                     c.NombrePlan ?? sinPlan,
                     capacidad,
-                    c.MetodoPago,
+                    c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "—",
                     c.FechaAlta.ToString("d"),
                     vencStr,
                     expirado,
@@ -267,7 +267,8 @@ namespace GUI
                     // PN02: "Registrar cliente" → sigue en "Presentar planes" para el mismo cliente.
                     if (ConfirmarSiNo(Tr("conf.cli.contratar", "¿Continuar con la contratación de un plan para este cliente?"), this.Text))
                         using (var contratacion = new NuevaContratacionForm(form.ClienteEditado.DNI))
-                            contratacion.ShowDialog(this);
+                            if (contratacion.ShowDialog(this) == DialogResult.OK)
+                                contratacion.MostrarResultado(this);
                 }
                 catch (Exception ex)
                 {
@@ -318,7 +319,7 @@ namespace GUI
             try
             {
                 clienteBLL.Baja(this.Text, cliente);
-                MostrarOk(Tr("msg.cli.eliminado", "Cliente '{0}' eliminado.", new object[] { cliente.NombreCompleto }));
+                MostrarOk(Tr("msg.cli.eliminado", "Cliente '{0}' dado de baja.", new object[] { cliente.NombreCompleto }));
                 CargarClientes();
             }
             catch (Exception ex)

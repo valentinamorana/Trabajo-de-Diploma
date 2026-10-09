@@ -18,9 +18,9 @@ namespace BLL.Interfaces
         // Filtra el listado por texto parcial en nombre completo, DNI o email (sin ir a la base).
         List<BE.Cliente> Filtrar(IEnumerable<BE.Cliente> clientes, string texto);
 
-        // Métodos de pago preferidos elegibles para un cliente (valor guardado + clave de
-        // traducción). Incluye metodoActual si es un valor anterior que ya no está en la lista.
-        List<BE.MedioPago> ObtenerMetodosPago(string metodoActual = null);
+        // Medios de pago elegibles como preferidos de un cliente: los activos del catálogo MedioPago
+        // (Id + clave de traducción). Incluye idMedioActual si es un medio histórico (inactivo).
+        List<BE.MedioPago> ObtenerMetodosPago(int? idMedioActual = null);
 
         // Solo el Administrador corrige plan/vencimiento sin pasar por Contratación + Caja.
         bool PuedeCorregirPlanDirectamente();
@@ -54,5 +54,8 @@ namespace BLL.Interfaces
 
         // Bloque 1 — Reanuda una suscripción pausada, sin modificar la fecha de vencimiento.
         void ReanudarPausa(string modulo, BE.Cliente cliente);
+
+        // PN02, nodo a11 — aplica los cambios de plan programados cuya fecha llegó.
+        int AplicarCambiosDePlanProgramados(System.DateTime hoy);
     }
 }

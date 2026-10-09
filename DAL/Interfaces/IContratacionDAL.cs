@@ -24,7 +24,7 @@ namespace DAL.Interfaces
         bool ConfirmarCobro(int idContratacion, int idCaja, int idMedioPago, string numeroComprobante,
                             decimal importe, decimal descuento, int? idPromocion,
                             int? idPlanCuotas = null, decimal? recargoCuotas = null,
-                            decimal? creditoCambioPlan = null);
+                            decimal? creditoCambioPlan = null, IList<int> idsCargo = null);
 
         // "Activar suscripción" («Constancia de suscripción»): guarda el período activado y, si hubo
         // "¿Referido? Sí → Acreditar crédito", a qué referente se le acreditó el beneficio.
@@ -32,7 +32,7 @@ namespace DAL.Interfaces
 
         // Compensación técnica: revierte un cobro recién confirmado a PendientePago (solo si está
         // Pagada) cuando la activación de la suscripción falló después del claim.
-        void ReabrirPago(int idContratacion);
+        void ReabrirPago(int idContratacion, IList<int> idsCargo = null);
 
         // "Anular contratación" (Caja, con motivo): claim atómico sobre Pendiente de pago.
         bool Anular(int idContratacion, string motivo, int idCaja);

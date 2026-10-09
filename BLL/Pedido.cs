@@ -57,8 +57,6 @@ namespace BLL
         public List<BE.Pedido> ObtenerPendientes() => dalPedido.ObtenerPendientes();
         public BE.Pedido ObtenerPorId(int id) => dalPedido.ObtenerPorId(id);
 
-        public List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado) => dalPedido.ObtenerPorEstado(estado);
-
         // ══════════════════════════════════════════════════════════════════════
         // PN01 — Armar pedido de prendas. Cada método público corresponde a una actividad del
         // diagrama de actividad (carriles Vendedor y Depósito = "Controlador de Stock"):
@@ -324,8 +322,8 @@ namespace BLL
             ValidarParametrosEntrada(prendas);
 
             // El flujo vuelve al punto de unión anterior a "Anotar la selección ∥ Comprobar el
-            // cupo": se comprueba solo el cupo (la vigencia y el pedido activo ya se verificaron
-            // al armar el pedido, que sigue siendo el mismo).
+            // cupo" (diagrama de PN01): se comprueba solo el cupo. Si la suscripción venció mientras
+            // esperaba, lo frenan Separar y Formalizar, que vuelven a verificar la vigencia.
             var cliente = dalCliente.ObtenerPorId(pedido.IdCliente)
                 ?? throw new BE.AppException("err.bll.pedido.cliente_inexistente", "El cliente seleccionado no existe.");
             ComprobarCupo(cliente, prendas.Count);
@@ -502,11 +500,9 @@ namespace BLL
 
             // Lista de Espera (mejora opcional): si alguna prenda separada estaba reservada para
             // este cliente, cierra el ciclo (Convertida).
-            string actorEspera = Seguridad.SessionManager.IsLoggedIn
-                ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
             foreach (var p in pedido.Prendas)
             {
-                try { listaEsperaBLL.CerrarSiReservada(modulo, p.IdPrenda, pedido.IdCliente, actorEspera); }
+                try { listaEsperaBLL.CerrarSiReservada(modulo, p.IdPrenda, pedido.IdCliente); }
                 catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.Pedido] Lista de Espera: {ex.Message}"); }
             }
 
@@ -717,7 +713,14 @@ namespace BLL
                 throw new BE.AppException("err.bll.pedido.devolucion_estado",
                     "Solo se puede registrar la devolución de pedidos ya Entregados. Este pedido está '{0}'.",
                     pedido.Estado);
+            // PN04: la devolución ya registrada se ve en el pedido (FechaDevolucion), sin ir a la base.
+            if (pedido.FechaDevolucion.HasValue)
+                throw new BE.AppException("err.bll.pedido.devolucion_ya_hecha",
+                    "El Pedido #{0} no tiene prendas en uso para devolver " +
+                    "(es posible que la devolución ya se haya registrado).",
+                    pedido.IdPedido);
 
+            // El DAL pasa las prendas a EnLimpieza y completa Pedido.FechaDevolucion en la misma transacción.
             int devueltas = dalPedido.RegistrarDevolucion(pedido.IdPedido, pedido.IdCliente);
             if (devueltas == 0)
                 throw new BE.AppException("err.bll.pedido.devolucion_ya_hecha",
@@ -727,7 +730,8 @@ namespace BLL
 
             RegistrarHistorial(pedido.IdPedido, "DEVOLUCION", new List<(string, string, string)>
             {
-                ("Prendas", "EnUso", $"EnLimpieza ({devueltas} prenda(s))")
+                ("Prendas",         "EnUso", $"EnLimpieza ({devueltas} prenda(s))"),
+                ("FechaDevolucion", null,    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
             });
 
             bitacora.Registrar(modulo,

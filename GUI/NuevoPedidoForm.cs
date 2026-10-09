@@ -103,6 +103,8 @@ namespace GUI
                 ? Tr("btn.ped.reenviarcontrol", "Reenviar a control de stock")
                 : Tr("btn.ped.enviarcontrol",   "Enviar a control de stock");
             btnDesistir.Text          = Tr("btn.ped.desistir",      "Registrar desistimiento");
+            btnImprimirAviso.Text     = Tr("btn.ped.imprimiraviso", "Imprimir aviso");
+            btnImprimirCupo.Text      = Tr("btn.ped.imprimircupo",  "Imprimir detalle");
         }
 
         private void TraducirHeadersGrilla()
@@ -291,7 +293,7 @@ namespace GUI
                 c.NombrePlan ?? "—", c.LimitePrendas,
                 c.FechaVencimiento?.ToString("d") ?? "—",
                 c.StockUtilizado, ultimoPedido,
-                c.MetodoPago ?? "—", c.FechaAlta.ToString("d"));
+                c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "—", c.FechaAlta.ToString("d"));
         }
 
         private Func<Exportacion.ReporteExportable> _avisoActual;

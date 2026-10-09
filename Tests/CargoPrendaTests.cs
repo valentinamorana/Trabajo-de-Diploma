@@ -43,7 +43,7 @@ namespace Tests
             var bll = new BLL.CargoPrenda(fake);
             var prenda = PrendaConUltimoCliente();
 
-            bll.RegistrarCargo("Test", prenda, "Rotura en el cierre", 500m, "operador1");
+            bll.RegistrarCargo("Test", prenda, "Rotura en el cierre", 500m);
 
             Assert.AreEqual(1, fake.Registros.Count);
             var cargo = fake.Registros[0];
@@ -51,6 +51,7 @@ namespace Tests
             Assert.AreEqual(5, cargo.IdPrenda);
             Assert.AreEqual(500m, cargo.Monto);
             Assert.AreEqual(BE.EstadoCargo.Pendiente, cargo.Estado);
+            Assert.AreEqual("admin", cargo.Actor, "El actor lo resuelve la BLL desde la sesión, no lo pasa la GUI.");
         }
 
         [TestMethod]

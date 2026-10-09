@@ -94,7 +94,7 @@ module.exports = [
       N('d3', 'decision', 'V', '¿Contratación válida?'),
       N('a7', 'accion', 'V', 'Informar motivo'),
       N('a16', 'accion', 'J', 'Consultar cola de pendientes de pago'),
-      N('a8', 'accion', 'J', 'Calcular importe (un solo descuento; crédito si cambia a un plan más caro)'),
+      N('a8', 'accion', 'J', 'Calcular importe (un solo descuento; crédito si cambia a un plan más caro; más los cargos por daño o pérdida pendientes)'),
       N('a9', 'accion', 'C', 'Abonar'),
       N('d9', 'decision', 'J', '¿Paga con tarjeta de crédito?'),
       N('a20', 'accion', 'J', 'Ofrecer planes de cuotas (hasta los meses de la modalidad)'),
@@ -188,7 +188,7 @@ module.exports = [
       N('a4', 'accion', 'A', 'Crear promoción desde la sugerencia'),
       N('a4m', 'accion', 'A', 'Crear promoción manual, sin sugerencia'),
       N('a5', 'accion', 'A', 'Validar (destino único, valor, fecha de fin desde hoy) → En revisión contable'),
-      N('a6', 'accion', 'K', 'Analizar margen e impacto (beneficio estimado, promociones superpuestas)'),
+      N('a6', 'accion', 'K', 'Analizar margen e impacto (beneficio estimado vs. costo del descuento, promociones superpuestas)'),
       N('d3', 'decision', 'K', '¿Aprueba? (quien la creó no la dictamina; si ya pasó su fecha de fin, se rechaza)'),
       N('a7', 'accion', 'K', 'Rechazada por Contabilidad'),
       N('d4', 'decision', 'A', '¿Reformular?'),
@@ -217,7 +217,11 @@ module.exports = [
       N('o6', 'documento', 'K', 'Dictamen contable (aprobada: Vigente)'),
       N('o7', 'documento', 'A', 'Constancia de descarte de la promoción'),
       N('o8', 'documento', 'V', 'Solicitud de baja (motivo)'),
-      N('o9', 'documento', 'A', 'Resolución de baja')
+      N('o9', 'documento', 'A', 'Resolución de baja'),
+      N('o10', 'documento', 'K', 'Análisis de impacto (beneficio estimado, costo del descuento, promociones superpuestas)'),
+      N('o11', 'documento', 'A', 'Condiciones reformuladas'),
+      N('o12', 'documento', 'A', 'Constancia de desactivación (motivo)'),
+      N('o13', 'documento', 'A', 'Ficha de promoción (Vencida)')
     ],
     // El orden de nodos y flujos fija la grilla de conv-actividad.js (EA-generador): no reordenar sin volver a revisar el layout.
     flujos: [
@@ -241,13 +245,18 @@ module.exports = [
       O('a10', 'o6'), O('o6', 'a11'),
       O('a9', 'o7'),
       O('a11', 'o8'), O('o8', 'd6'),
-      O('a12', 'o9'), O('a13', 'o9'), O('o9', 'g2'), O('o9', 'v1')
+      O('a12', 'o9'), O('a13', 'o9'), O('o9', 'g2'), O('o9', 'v1'),
+      O('a6', 'o10'), O('o10', 'd3'),
+      O('a8', 'o11'), O('o11', 'a5'),
+      O('a14', 'o12'),
+      O('a15', 'o13')
     ]
   },
   {
     tipo: 'actividad', id: 'ACT_pn04_devolucion', titulo: 'Actividad — PN04 Inspección de devolución',
     // GUI/InspeccionDevolucionForm.cs (CU05-DEP), GUI/PedidosRealizados.cs › BtnReportarPerdida_Click (CU06-DEP),
     // GUI/CargoPrendaDialog.cs y BLL/InspeccionDevolucion.cs: cargo y baja en UNA transacción (DAL/InspeccionDevolucion.cs).
+    // Compra tácita (BLL/Politicas/PoliticaCompraTacita.cs): la pérdida solo con el pedido Entregado hace 30 días o más.
     // El cargo Pendiente lo suma el próximo cobro de la suscripción (BLL/Cobro.cs, CargoPrenda.ObtenerPendientesPorCliente).
     carriles: [{ id: 'C', nombre: 'Cliente' }, { id: 'D', nombre: 'Depósito' }, { id: 'S', nombre: 'Sistema' }],
     nodos: [
@@ -259,11 +268,12 @@ module.exports = [
       N('d1', 'decision', 'D', '¿Desgaste normal?'),
       N('a3', 'accion', 'D', 'Aprueba el reingreso'),
       N('a4', 'accion', 'S', 'Prenda Disponible sin cargo (cierra mantenimiento y avisa a la lista de espera)'),
-      N('a9', 'accion', 'D', 'Consultar el detalle de prendas del pedido (En uso)'),
+      N('dt', 'decision', 'D', '¿Pasaron 30 días desde la entrega? (compra tácita)'),
+      N('a9', 'accion', 'D', 'Consultar el detalle de prendas del pedido Entregado (En uso)'),
       N('a5', 'accion', 'D', 'Indica motivo del daño o de la pérdida y monto'),
       N('d2', 'decision', 'S', '¿Tiene último cliente y datos válidos?'),
       N('a10', 'accion', 'D', 'Recibir el rechazo'),
-      N('a6', 'accion', 'S', 'Registra el cargo contra el último cliente y da la prenda de baja (una transacción)'),
+      N('a6', 'accion', 'S', 'Registra el cargo contra el último cliente, da la prenda de baja, cierra su mantenimiento y cancela su lista de espera (una transacción)'),
       N('a7', 'accion', 'S', 'El cargo se suma al próximo cobro de la suscripción'),
       N('r1', 'accion', 'C', 'Recibir el próximo cobro con el cargo de reposición'),
       N('f', 'fin', 'S'), N('f2', 'fin', 'C'), N('f3', 'fin', 'D'),
@@ -275,11 +285,15 @@ module.exports = [
       N('o5', 'documento', 'S', 'Cargo de reposición (Pendiente, último cliente)'),
       N('o6', 'documento', 'S', 'Detalle del próximo cobro (cargos sumados)'),
       N('o7', 'documento', 'S', 'Motivo de rechazo'),
-      N('o8', 'documento', 'S', 'Reserva para la lista de espera (48 h)')
+      N('o8', 'documento', 'S', 'Reserva para la lista de espera (48 h)'),
+      N('o9', 'documento', 'D', 'Informe de inspección (estado de cada prenda)'),
+      N('o10', 'documento', 'D', 'Prenda apta para reingreso'),
+      N('o11', 'documento', 'D', 'Pedido Entregado (fecha de entrega)'),
+      N('o12', 'documento', 'S', 'Constancia de baja de la prenda (cargo registrado)')
     ],
     flujos: [
       F('i', 'd0'), F('d0', 'a0', 'Sí'), F('a0', 'a1'), F('a1', 'a8'), F('a8', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'Sí'), F('a3', 'a4'), F('a4', 'f'),
-      F('d1', 'a5', 'No, dañada'), F('d0', 'a9', 'No, perdida'), F('a9', 'a5'), F('a5', 'd2'), F('d2', 'a10', 'No'), F('a10', 'f3'),
+      F('d1', 'a5', 'No, dañada'), F('d0', 'dt', 'No'), F('dt', 'd0', 'No, sigue en alquiler'), F('dt', 'a9', 'Sí'), F('a9', 'a5'), F('a5', 'd2'), F('d2', 'a10', 'No'), F('a10', 'f3'),
       F('d2', 'a6', 'Sí'), F('a6', 'a7'), F('a7', 'r1'), F('r1', 'f2')
     ],
     objetos: [
@@ -290,7 +304,11 @@ module.exports = [
       O('d2', 'o7'), O('o7', 'a10'),
       O('a6', 'o5'), O('o5', 'a7'),
       O('a7', 'o6'), O('o6', 'r1'),
-      O('a4', 'o8')
+      O('a4', 'o8'),
+      O('a2', 'o9'), O('o9', 'd1'), O('o9', 'a5'),
+      O('a3', 'o10'), O('o10', 'a4'),
+      O('o11', 'dt'), O('o11', 'a9'),
+      O('a6', 'o12'), O('o12', 'a7')
     ]
   }
 ];

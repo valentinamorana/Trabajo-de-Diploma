@@ -67,11 +67,10 @@ namespace GUI
             // Aplica las preferencias de UI del usuario (fuente/tamaño/tema) a este formulario.
             try { PreferenciasUI.Aplicar(this); } catch { }
 
-            // Etapa 4 — Registrar los controles de este form (C1) y aplicar la seguridad a nivel de
-            // control: muestra/oculta los mapeados a patentes que el usuario no tiene. Sin mapeos, no hace nada.
+            // Etapa 4 — Seguridad a nivel de control: muestra/oculta los controles mapeados a
+            // patentes que el usuario no tiene. Sin mapeos, no hace nada.
             try
             {
-                RegistroControles.Registrar(this);
                 if (BLL.Sesion.Activa)
                     ManejadorSeguridad.AplicarSeguridad(this, BLL.Sesion.Usuario);
             }
@@ -332,6 +331,9 @@ namespace GUI
                     (ex.InnerException != null ? $" | Causa: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}" : ""));
             }
             catch { /* el fallo al registrar no debe romper el manejo del error */ }
+
+            // A02 Serialización: el error también queda serializado en XML (Bitácora › Errores (XML)).
+            Servicios.Serializacion.RegistroErrores.Registrar(ex, this.GetType().Name, BLL.Sesion.Actor);
         }
     }
 }

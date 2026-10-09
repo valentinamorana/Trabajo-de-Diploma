@@ -30,6 +30,8 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPedidoService pedidoBLL = new BLL.Pedido();
+        // Patrón Command: despachar, entregar y registrar la devolución pasan por el mismo invocador.
+        private readonly BLL.Comandos.InvocadorPedido _invocador = new BLL.Comandos.InvocadorPedido();
         private readonly BLL.InspeccionDevolucion inspeccionBLL = new BLL.InspeccionDevolucion();
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
@@ -37,6 +39,7 @@ namespace GUI
         // PN04, CU-DEP-02 Reportar Prenda Perdida: prendas del pedido actualmente mostrado
         // en dgvDetalle, para resolver la selección sin agregar una columna ID visible.
         private List<BE.Prenda> _prendasDetalleActual = new List<BE.Prenda>();
+        private BE.Pedido _pedidoDetalleActual;
 
         // Idioma activo — se actualiza en UpdateLanguage para poder usarlo
         // en los helpers EstadoLabel() y ComputarUrgencia() que no reciben parámetro.
@@ -92,7 +95,8 @@ namespace GUI
 
         /// <summary>
         /// Rellena el combo de filtro de estado con valores traducidos.
-        /// Mantiene el orden fijo (índice 0–4) para que el filtro por índice siga funcionando.
+        /// Mantiene el orden fijo (índice 0–5) para que el filtro por índice siga funcionando.
+        /// El 5 no es un estado: son los Entregados atrasados (PN04, compra tácita sin devolución).
         /// </summary>
         private void RellenarComboEstado()
         {
@@ -104,6 +108,7 @@ namespace GUI
             cmbFiltroEstado.Items.Add(Tr("est.despachado", "Despachado"));
             cmbFiltroEstado.Items.Add(Tr("est.entregado",  "Entregado"));
             cmbFiltroEstado.Items.Add(Tr("est.cancelado",  "Cancelado"));
+            cmbFiltroEstado.Items.Add(Tr("combo.ped.atrasados", "Atrasados (30+ días sin devolver)"));
             cmbFiltroEstado.SelectedIndex = idx >= 0 && idx < cmbFiltroEstado.Items.Count ? idx : 0;
             cmbFiltroEstado.SelectedIndexChanged += CmbFiltroEstado_SelectedIndexChanged;
         }
@@ -167,7 +172,8 @@ namespace GUI
                     (estadoIdx == 1 && p.Estado == BE.EstadoPedido.Pendiente)  ||
                     (estadoIdx == 2 && p.Estado == BE.EstadoPedido.Despachado) ||
                     (estadoIdx == 3 && p.Estado == BE.EstadoPedido.Entregado)  ||
-                    (estadoIdx == 4 && p.Estado == BE.EstadoPedido.Cancelado);
+                    (estadoIdx == 4 && p.Estado == BE.EstadoPedido.Cancelado)  ||
+                    (estadoIdx == 5 && BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(p, DateTime.Today));
 
                 bool pasaDias = corte == null || p.FechaPedido >= corte;
 
@@ -187,6 +193,8 @@ namespace GUI
             // Columna interna: almacena el int del enum para colorear sin depender del idioma
             tabla.Columns.Add("_EstadoKey", typeof(int));
             tabla.Columns.Add("_UrgenciaKey", typeof(int));
+            // PN04: entregado hace 30 días o más sin devolución (se resalta como urgente).
+            tabla.Columns.Add("_Atrasado",    typeof(bool));
 
             foreach (var p in lista)
             {
@@ -197,11 +205,12 @@ namespace GUI
                     p.NombreCliente,
                     p.NombreEmpleado,
                     p.CantidadPrendas,
-                    EstadoLabel(p.Estado),
+                    EstadoTexto(p),
                     p.FechaDespacho?.ToString("d") ?? "—",
                     p.FechaEntrega?.ToString("d")  ?? "—",
                     (int)p.Estado,
-                    (int)pedidoBLL.CalcularNivelUrgencia(p));
+                    (int)pedidoBLL.CalcularNivelUrgencia(p),
+                    BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(p, DateTime.Today));
             }
 
             dgvPedidos.DataSource = tabla;
@@ -277,6 +286,8 @@ namespace GUI
                 dgvPedidos.Columns["_EstadoKey"].Visible = false;
             if (dgvPedidos.Columns.Contains("_UrgenciaKey"))
                 dgvPedidos.Columns["_UrgenciaKey"].Visible = false;
+            if (dgvPedidos.Columns.Contains("_Atrasado"))
+                dgvPedidos.Columns["_Atrasado"].Visible = false;
         }
 
         private void ColorearFilas()
@@ -289,6 +300,9 @@ namespace GUI
                     row.DefaultCellStyle.BackColor = Tema.FondoError;
                 else if (urgenciaKey == (int)BE.NivelUrgencia.Normal)
                     row.DefaultCellStyle.BackColor = Tema.FondoAlerta;
+                // PN04: pedido atrasado (compra tácita cumplida sin devolución).
+                if (dgvPedidos.Columns.Contains("_Atrasado") && row.Cells["_Atrasado"].Value is bool atrasado && atrasado)
+                    row.DefaultCellStyle.BackColor = Tema.FondoError;
 
                 // Coloreado por estado usando la columna interna _EstadoKey (int enum)
                 // para ser independiente del idioma de la etiqueta visible.
@@ -336,11 +350,12 @@ namespace GUI
                 if (pedido == null) return;
 
                 _prendasDetalleActual = pedido.Prendas;
+                _pedidoDetalleActual  = pedido;
 
                 string prendasLbl = Tr("col.ped.prendas", "prenda(s)");
                 lblDetalleTitulo.Text = Tr("lbl.ped.detalletitulo", "Pedido #{0}  ·  {1}  ·  {2}  ·  {3} {4}",
                     new object[] { pedido.IdPedido, pedido.NombreCliente,
-                                    EstadoLabel(pedido.Estado), pedido.CantidadPrendas, prendasLbl });
+                                    EstadoTexto(pedido), pedido.CantidadPrendas, prendasLbl });
 
                 var tabla = new DataTable();
                 tabla.Columns.Add("IdPrenda",  typeof(int));
@@ -401,7 +416,8 @@ namespace GUI
         private void DgvDetalle_SelectionChanged(object sender, EventArgs e)
         {
             var prenda = ObtenerPrendaDetalleSeleccionada();
-            btnReportarPerdida.Enabled = prenda != null && prenda.PuedeReportarsePerdida();
+            // Compra tácita (PN04): solo con el pedido Entregado hace 30 días o más.
+            btnReportarPerdida.Enabled = inspeccionBLL.PuedeReportarPerdida(prenda, _pedidoDetalleActual);
         }
 
         // Resuelve por IdPrenda (columna oculta), no por índice de fila: dgvDetalle permite
@@ -446,7 +462,8 @@ namespace GUI
 
             try
             {
-                pedidoBLL.Despachar(this.Text, pedido);
+                _invocador.TomarOrden(new BLL.Comandos.DespachoCommand(pedidoBLL, pedido, this.Text));
+                _invocador.ProcesarOrdenes();
                 MostrarOk(string.Format(Tr("msg.ped.despachado", "Pedido #{0} despachado correctamente."), pedido.IdPedido));
                 CargarPedidos();
             }
@@ -481,7 +498,8 @@ namespace GUI
 
             try
             {
-                pedidoBLL.MarcarEntregado(this.Text, pedido);
+                _invocador.TomarOrden(new BLL.Comandos.EntregaCommand(pedidoBLL, pedido, this.Text));
+                _invocador.ProcesarOrdenes();
                 MostrarOk(string.Format(Tr("msg.ped.entregado", "Pedido #{0} marcado como Entregado."), pedido.IdPedido));
                 CargarPedidos();
             }
@@ -499,7 +517,7 @@ namespace GUI
             if (pedidoCompleto == null) return;
 
             string bodyDev = string.Format(
-                Tr("conf.devolucion.body", "¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado EnLimpieza."),
+                Tr("conf.devolucion.body", "¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado En limpieza."),
                 pedidoCompleto.IdPedido, pedidoCompleto.NombreCliente, pedidoCompleto.CantidadPrendas);
 
             var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
@@ -513,11 +531,10 @@ namespace GUI
                 // Patrón Command (PdN3): la GUI arma el pedido de devolución y se lo entrega
                 // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
                 // ejecución real siguen 100% en BLL.Pedido.RegistrarDevolucion, adentro del Command.
-                var invocador = new BLL.Comandos.InvocadorPedido();
-                invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
-                invocador.ProcesarOrdenes();
+                _invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
+                _invocador.ProcesarOrdenes();
 
-                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a EnLimpieza."), pedidoCompleto.CantidadPrendas));
+                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a En limpieza."), pedidoCompleto.CantidadPrendas));
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -530,7 +547,7 @@ namespace GUI
         private void BtnReportarPerdida_Click(object sender, EventArgs e)
         {
             var prenda = ObtenerPrendaDetalleSeleccionada();
-            if (prenda == null || !prenda.PuedeReportarsePerdida()) return;
+            if (!inspeccionBLL.PuedeReportarPerdida(prenda, _pedidoDetalleActual)) return;
 
             using (var dlg = new CargoPrendaDialog(prenda, prenda.PrecioReposicion))
             {
@@ -543,7 +560,7 @@ namespace GUI
                     inspeccionBLL.ReportarPerdida(this.Text, prenda, dlg.Motivo, dlg.Monto);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);
                     MostrarOk(string.Format(
-                        tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de ${1} registrado.",
+                        tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de {1:C2} registrado.",
                         prenda.Nombre, dlg.Monto));
                     var pedidoSel = ObtenerPedidoSeleccionado();
                     if (pedidoSel != null) CargarDetallePrendas(pedidoSel);
@@ -623,6 +640,26 @@ namespace GUI
                 case BE.EstadoPedido.Cancelado:  return t.ContainsKey("est.cancelado")  ? t["est.cancelado"].Texto  : "Cancelado";
                 default: return estado.ToString();
             }
+        }
+
+        /// <summary>
+        /// PN04 — texto del estado con el detalle de la devolución: un Entregado se muestra como
+        /// "Entregado (devuelto el dd/mm)" o "Entregado — en poder del cliente (N días)". El estado
+        /// del pedido no cambia (sigue Entregado); lo distingue Pedido.FechaDevolucion.
+        /// </summary>
+        private string EstadoTexto(BE.Pedido p)
+        {
+            if (p.Estado == BE.EstadoPedido.Entregado)
+            {
+                if (p.FechaDevolucion.HasValue)
+                    return Tr("est.entregado.devuelto", "Entregado (devuelto el {0:dd/MM})",
+                              new object[] { p.FechaDevolucion.Value });
+                int? dias = p.DiasEnPoderDelCliente(DateTime.Today);
+                if (dias.HasValue)
+                    return Tr("est.entregado.enpoder", "Entregado — en poder del cliente ({0} días)",
+                              new object[] { dias.Value });
+            }
+            return EstadoLabel(p.Estado);
         }
 
         private string EstadoPrendaLabel(BE.EstadoPrenda estado)

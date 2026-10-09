@@ -68,6 +68,7 @@ namespace GUI
             RH("Entrada",  "col.mant.entrada",  "Entrada");
             RH("Salida",   "col.mant.salida",   "Salida");
             RH("Duracion", "col.mant.duracion", "Duración (días)");
+            RH("Origen",   "col.mant.origen",   "Origen");
             RH("Actor",    "col.mant.actor",    "Responsable");
             RH("Estado",   "col.mant.estado",   "Estado");
         }
@@ -92,11 +93,16 @@ namespace GUI
                 string abierto  = Tr("mant.abierto",  "En limpieza");
                 string cerrado  = Tr("mant.cerrado",  "Finalizado");
                 string sinFecha = "—";
+                // Origen del mantenimiento (MantenimientoPrenda.Origen): los de una devolución son los
+                // que pasan por la Inspección de Devolución (PN04).
+                string origenDevolucion = Tr("mant.origen.devolucion", "Devolución de pedido");
+                string origenManual     = Tr("mant.origen.manual",     "Manual");
 
                 var tabla = new DataTable();
                 tabla.Columns.Add("Entrada",  typeof(string));
                 tabla.Columns.Add("Salida",   typeof(string));
                 tabla.Columns.Add("Duracion", typeof(string));
+                tabla.Columns.Add("Origen",   typeof(string));
                 tabla.Columns.Add("Actor",    typeof(string));
                 tabla.Columns.Add("Estado",   typeof(string));
 
@@ -106,6 +112,7 @@ namespace GUI
                         r.FechaEntrada.ToString("g"),
                         r.FechaSalida.HasValue ? r.FechaSalida.Value.ToString("g") : sinFecha,
                         r.DuracionDias.HasValue ? r.DuracionDias.Value.ToString() : "—",
+                        r.VieneDeDevolucion ? origenDevolucion : origenManual,
                         r.Actor ?? "—",
                         r.EstaAbierto ? abierto : cerrado);
                 }

@@ -18,7 +18,7 @@ namespace BLL
     ///                     Sí → Crear promoción desde la sugerencia ....... CrearDesdeSugerencia
     ///                   Crear promoción manual ........................... CrearManual
     ///   Sistema         Validar → EnRevisionContable («Ficha») ........... ValidarPromocion
-    ///   Contabilidad    Analizar margen e impacto ........................ AnalizarMargenEImpacto
+    ///   Contabilidad    Analizar margen e impacto (margen proyectado) .... AnalizarMargenEImpacto
     ///                   ¿Aprueba? (guarda: el creador no dictamina) ...... PuedeDictaminar
     ///                     Sí → Vigente («Dictamen contable») ............. AprobarContable
     ///                     No → RechazadaContabilidad («Dictamen») ........ RechazarContable
@@ -44,16 +44,23 @@ namespace BLL
         private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
+        // "Analizar margen e impacto": clientes activos del plan destino. ContarClientesActivosPorPlan
+        // no forma parte de IClienteDAL (mismo criterio que BLL.PlanSuscripcion): por defecto se usa
+        // el DAL concreto, creado recién al analizar; las pruebas inyectan el conteo.
+        private readonly Func<int, int> contarClientesActivosPorPlan;
+
         private const string ModuloPromociones = "Promociones";
 
         public Promocion() : this(new DAL.Promocion(), new DAL.SugerenciaPromocion(), new DAL.PlanSuscripcion()) { }
 
         public Promocion(DAL.Interfaces.IPromocionDAL dalPromocion, DAL.Interfaces.ISugerenciaPromocionDAL dalSugerencia,
-                          DAL.Interfaces.IPlanSuscripcionDAL dalPlan)
+                          DAL.Interfaces.IPlanSuscripcionDAL dalPlan, Func<int, int> contarClientesActivosPorPlan = null)
         {
             this.dalPromocion  = dalPromocion  ?? throw new ArgumentNullException(nameof(dalPromocion));
             this.dalSugerencia = dalSugerencia ?? throw new ArgumentNullException(nameof(dalSugerencia));
             this.dalPlan       = dalPlan       ?? throw new ArgumentNullException(nameof(dalPlan));
+            this.contarClientesActivosPorPlan = contarClientesActivosPorPlan
+                ?? (idPlan => new DAL.Cliente().ContarClientesActivosPorPlan(idPlan));
         }
 
         // ══════════════════════════════════════════════════════════════════════
@@ -66,13 +73,6 @@ namespace BLL
             return dalPromocion.ObtenerTodas();
         }
 
-        // Las que aplican hoy en el cobro (Vigente y dentro de sus fechas).
-        public List<BE.Promocion> ObtenerVigentes()
-        {
-            CerrarVencidasSinFallar();
-            return dalPromocion.ObtenerVigentes();
-        }
-
         // Pantalla de Ventas: las Vigentes (puede pedir la baja) y las que tienen la baja pedida.
         public List<BE.Promocion> ObtenerParaVentas()
         {
@@ -83,10 +83,7 @@ namespace BLL
         }
 
         public List<BE.Promocion> ObtenerPendientesRevisionContable() => dalPromocion.ObtenerPendientesRevisionContable();
-        public BE.Promocion ObtenerPorId(int idPromocion) => dalPromocion.ObtenerPorId(idPromocion);
         public List<BE.PromocionHistorial> ObtenerHistorial(int idPromocion) => dalPromocion.ObtenerHistorial(idPromocion);
-        public List<BE.DictamenContable> ObtenerDictamenes(int idPromocion) => dalPromocion.ObtenerDictamenes(idPromocion);
-        public List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBaja(int idPromocion) => dalPromocion.ObtenerSolicitudesBaja(idPromocion);
 
         public BE.DictamenContable ObtenerUltimoDictamen(int idPromocion) =>
             dalPromocion.ObtenerDictamenes(idPromocion).OrderBy(d => d.Fecha).ThenBy(d => d.IdDictamen).LastOrDefault();
@@ -229,8 +226,9 @@ namespace BLL
         // Contabilidad: Analizar margen e impacto → ¿Aprueba?
         // ══════════════════════════════════════════════════════════════════════
 
-        // "Analizar margen e impacto": beneficio estimado de la sugerencia (si la hay) y las otras
-        // promociones Vigentes del mismo plan que se superponen en fechas (advertencia).
+        // "Analizar margen e impacto": beneficio estimado de la sugerencia (si la hay), las otras
+        // promociones Vigentes del mismo plan que se superponen en fechas (advertencia) y el margen
+        // proyectado = beneficio estimado − costo del descuento (ver BE.AnalisisImpactoPromocion).
         public BE.AnalisisImpactoPromocion AnalizarMargenEImpacto(int idPromocion)
         {
             PermisosAccion.Exigir(BE.Patentes.PromocionesContable, BE.Patentes.PromocionesContable);
@@ -250,11 +248,32 @@ namespace BLL
                 analisis.BeneficioEstimadoSugerencia = sugerencia?.BeneficioEstimado;
                 analisis.OrigenSugerencia = sugerencia?.OrigenMetrica;
             }
+            ProyectarCostoDelDescuento(analisis);
             return analisis;
         }
 
+        // Costo mensual proyectado del descuento: lo que la promoción descuenta sobre el precio
+        // mensual del plan (la misma regla que el cobro, PoliticaDescuento.DescuentoDe) por la
+        // cantidad de clientes activos del plan. Una promoción por categoría es informativa (no
+        // descuenta en el cobro): no tiene costo y el margen no se calcula.
+        private void ProyectarCostoDelDescuento(BE.AnalisisImpactoPromocion analisis)
+        {
+            var promocion = analisis.Promocion;
+            if (!promocion.AplicaAPlan())
+            {
+                analisis.EsInformativa = true;
+                return;
+            }
+            var plan = dalPlan.ObtenerPorId(promocion.IdPlan.Value);
+            if (plan == null) return;   // el plan ya no existe: sin datos para calcular el margen
+
+            analisis.PrecioPlan = plan.Precio;
+            analisis.DescuentoPorCliente = Politicas.PoliticaDescuento.DescuentoDe(promocion, plan.Precio);
+            analisis.ClientesActivosPlan = Math.Max(0, contarClientesActivosPorPlan(plan.IdPlan));
+        }
+
         // Guarda de "¿Aprueba?": quien creó la promoción no puede dictaminarla (separación de
-        // funciones; se aplica a todos los usuarios, también al Administrador).
+        // funciones). Excepción: el Administrador sí puede (decisión de la alumna, 05/10).
         public bool PuedeDictaminar(BE.Promocion promocion)
         {
             if (promocion == null || !Seguridad.SessionManager.IsLoggedIn) return false;
@@ -481,8 +500,9 @@ namespace BLL
         // cierra con su propio claim, así dos sesiones que consultan a la vez no duplican el historial.
         public int CerrarVencidas()
         {
-            int? idUsuario = Seguridad.SessionManager.IsLoggedIn
-                ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
+            // El vencimiento lo hace el sistema (llegó la fecha), no quien abrió la pantalla: el
+            // historial queda sin usuario.
+            int? idUsuario = null;
             DateTime hoy = DateTime.Today;
             int cerradas = 0;
             foreach (var p in dalPromocion.ObtenerTodas().Where(x => x.DebeVencer(hoy)))

@@ -53,6 +53,22 @@ namespace BLL.Politicas
         }
 
         /// <summary>
+        /// ¿Contratar <paramref name="idPlanNuevo"/> es pasar a un plan IGUAL O MÁS BARATO mientras el actual
+        /// sigue vigente? Entonces el plan nuevo queda PROGRAMADO: rige al vencer el período pagado (nodo a11
+        /// del diagrama de PN02) y hasta ese día sigue el plan actual (BE.Cliente.IdPlanSiguiente).
+        /// </summary>
+        public static bool EsCambioProgramado(BE.Cliente cliente, BE.PlanSuscripcion planActual,
+                                                                int idPlanNuevo, decimal precioMensualNuevo, DateTime hoy)
+        {
+            return cliente?.IdPlan != null
+                && planActual != null
+                && cliente.IdPlan.Value == planActual.IdPlan
+                && planActual.IdPlan != idPlanNuevo
+                && precioMensualNuevo <= planActual.Precio
+                && DiasRestantes(cliente, hoy) > 0;
+        }
+
+        /// <summary>
         /// Crédito por los días no usados del plan actual (0 si no es upgrade). Nunca supera
         /// <paramref name="tope"/> (lo que queda por cobrar), para que el total no sea negativo.
         /// </summary>

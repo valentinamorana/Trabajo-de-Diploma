@@ -307,6 +307,12 @@ namespace GUI
             int    idUsuario = Convert.ToInt32(dgvUsuarios.SelectedRows[0].Cells["ID"].Value);
             string username  = dgvUsuarios.SelectedRows[0].Cells["Username"].Value?.ToString() ?? "";
 
+            if (!ConfirmarSiNo(Tr("conf.usr.resetclave",
+                    "¿Generar una contraseña nueva para '{0}'?\n\nLa actual deja de funcionar y la nueva se exporta a un archivo.",
+                    new object[] { username }),
+                    Tr("conf.usr.resetclave.titulo", "Resetear contraseña"), porDefectoNo: true))
+                return;
+
             try
             {
                 string rutaArchivo = usuarioBLL.ResetearClave(this.Text, idUsuario, username);

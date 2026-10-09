@@ -18,6 +18,8 @@ namespace DAL.Interfaces
         bool             TieneContratacionPendiente(int idCliente);
         // Los mismos clientes en una sola consulta (para filtrar listados sin una consulta por cliente).
         HashSet<int>     ObtenerIdsConContratacionPendiente();
+        // Catálogo de medios de pago (activos e históricos) para el medio de pago preferido.
+        List<BE.MedioPago> ObtenerMediosPago();
 
         /// <summary>Ejecuta una acción dentro de una única transacción de BD (commit si no lanza, rollback si lanza).
         /// Permite que los manejadores de Renovación/Cobro actualicen Cliente y su historial de forma atómica —

@@ -34,6 +34,7 @@ namespace GUI
             this.pnlHeader.Controls.Add(this.lblSubtitulo);
             this.pnlHeader.Controls.Add(this.lblTitulo);
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlHeader.TabIndex = 2;
             this.pnlHeader.Height = 64;
             this.pnlHeader.Padding = new System.Windows.Forms.Padding(16, 10, 16, 8);
 
@@ -42,6 +43,7 @@ namespace GUI
             this.lblTitulo.Font = new System.Drawing.Font("Segoe UI", 11f, System.Drawing.FontStyle.Bold);
             this.lblTitulo.ForeColor = System.Drawing.Color.White;
             this.lblTitulo.Location = new System.Drawing.Point(16, 10);
+            this.lblTitulo.TabIndex = 0;
             this.lblTitulo.Tag = "frm.confirmaradmin";
             this.lblTitulo.Text = "Confirmar Administrador";
 
@@ -50,12 +52,14 @@ namespace GUI
             this.lblSubtitulo.Font = new System.Drawing.Font("Segoe UI", 8f);
             this.lblSubtitulo.ForeColor = System.Drawing.Color.FromArgb(220, 200, 210);
             this.lblSubtitulo.Location = new System.Drawing.Point(17, 36);
+            this.lblSubtitulo.TabIndex = 1;
             this.lblSubtitulo.Tag = "lbl.confirmaradmin.subtitulo";
             this.lblSubtitulo.Text = "Solo un Administrador puede continuar";
 
             // pnlBody
             this.pnlBody.BackColor = System.Drawing.Color.FromArgb(252, 250, 252);
             this.pnlBody.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlBody.TabIndex = 0;
             this.pnlBody.Padding = new System.Windows.Forms.Padding(20, 14, 20, 0);
             this.pnlBody.Controls.Add(this.lblError);
             this.pnlBody.Controls.Add(this.txtClave);
@@ -68,6 +72,7 @@ namespace GUI
             this.lblUsuario.Font = new System.Drawing.Font("Segoe UI", 8.5f, System.Drawing.FontStyle.Bold);
             this.lblUsuario.ForeColor = System.Drawing.Color.FromArgb(80, 40, 60);
             this.lblUsuario.Location = new System.Drawing.Point(20, 18);
+            this.lblUsuario.TabIndex = 0;
             this.lblUsuario.Tag = "lbl.confirmaradmin.usuario";
             this.lblUsuario.Text = "Usuario";
 
@@ -75,6 +80,7 @@ namespace GUI
             this.txtUsuario.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtUsuario.Font = new System.Drawing.Font("Segoe UI", 9.5f);
             this.txtUsuario.Location = new System.Drawing.Point(20, 36);
+            this.txtUsuario.TabIndex = 1;
             this.txtUsuario.MaxLength = 100;
             this.txtUsuario.Size = new System.Drawing.Size(340, 26);
 
@@ -83,6 +89,7 @@ namespace GUI
             this.lblClave.Font = new System.Drawing.Font("Segoe UI", 8.5f, System.Drawing.FontStyle.Bold);
             this.lblClave.ForeColor = System.Drawing.Color.FromArgb(80, 40, 60);
             this.lblClave.Location = new System.Drawing.Point(20, 74);
+            this.lblClave.TabIndex = 2;
             this.lblClave.Tag = "lbl.confirmaradmin.clave";
             this.lblClave.Text = "Contraseña";
 
@@ -90,6 +97,7 @@ namespace GUI
             this.txtClave.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtClave.Font = new System.Drawing.Font("Segoe UI", 9.5f);
             this.txtClave.Location = new System.Drawing.Point(20, 92);
+            this.txtClave.TabIndex = 3;
             this.txtClave.MaxLength = 100;
             this.txtClave.PasswordChar = '●';
             this.txtClave.Size = new System.Drawing.Size(340, 26);
@@ -99,12 +107,14 @@ namespace GUI
             this.lblError.Font = new System.Drawing.Font("Segoe UI", 8f);
             this.lblError.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
             this.lblError.Location = new System.Drawing.Point(20, 128);
+            this.lblError.TabIndex = 4;
             this.lblError.Size = new System.Drawing.Size(340, 34);
             this.lblError.Text = string.Empty;
 
             // pnlBotones
             this.pnlBotones.BackColor = System.Drawing.Color.FromArgb(245, 240, 248);
             this.pnlBotones.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlBotones.TabIndex = 1;
             this.pnlBotones.Height = 52;
             this.pnlBotones.Padding = new System.Windows.Forms.Padding(16, 10, 16, 10);
             this.pnlBotones.Controls.Add(this.btnCancelar);
@@ -117,6 +127,7 @@ namespace GUI
             this.btnConfirmar.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold);
             this.btnConfirmar.ForeColor = System.Drawing.Color.White;
             this.btnConfirmar.Location = new System.Drawing.Point(204, 10);
+            this.btnConfirmar.TabIndex = 1;
             this.btnConfirmar.Size = new System.Drawing.Size(156, 32);
             this.btnConfirmar.Tag = "btn.confirmaradmin.ok";
             this.btnConfirmar.Text = "Confirmar";
@@ -130,6 +141,7 @@ namespace GUI
             this.btnCancelar.Font = new System.Drawing.Font("Segoe UI", 9f);
             this.btnCancelar.ForeColor = System.Drawing.Color.FromArgb(100, 40, 80);
             this.btnCancelar.Location = new System.Drawing.Point(40, 10);
+            this.btnCancelar.TabIndex = 0;
             this.btnCancelar.Size = new System.Drawing.Size(120, 32);
             this.btnCancelar.Tag = "btn.confirmaradmin.cancelar";
             this.btnCancelar.Text = "Cancelar";

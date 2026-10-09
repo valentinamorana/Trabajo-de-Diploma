@@ -213,7 +213,7 @@ namespace GUI
             this.btnDesactivar.Location = new System.Drawing.Point(14, 384);
             this.btnDesactivar.Name = "btnDesactivar";
             this.btnDesactivar.Size = new System.Drawing.Size(286, 34);
-            this.btnDesactivar.TabIndex = 11;
+            this.btnDesactivar.TabIndex = 12;
             this.btnDesactivar.Tag = "btn.desactivar";
             this.btnDesactivar.Text = "Desactivar Plan";
             this.btnDesactivar.UseVisualStyleBackColor = false;
@@ -229,7 +229,7 @@ namespace GUI
             this.btnActivar.Location = new System.Drawing.Point(14, 426);
             this.btnActivar.Name = "btnActivar";
             this.btnActivar.Size = new System.Drawing.Size(286, 34);
-            this.btnActivar.TabIndex = 12;
+            this.btnActivar.TabIndex = 13;
             this.btnActivar.Tag = "btn.activar";
             this.btnActivar.Text = "Activar Plan";
             this.btnActivar.UseVisualStyleBackColor = false;
@@ -241,7 +241,7 @@ namespace GUI
             this.lblMensaje.Location = new System.Drawing.Point(14, 432);
             this.lblMensaje.Name = "lblMensaje";
             this.lblMensaje.Size = new System.Drawing.Size(286, 90);
-            this.lblMensaje.TabIndex = 13;
+            this.lblMensaje.TabIndex = 14;
             // 
             // dgvPlanes
             // 

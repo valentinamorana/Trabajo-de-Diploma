@@ -11,13 +11,29 @@ namespace BE
         public string Apellido { get; set; }
         public string DNI { get; set; }
         public string Email { get; set; }
-        public string MetodoPago { get; set; } = "Efectivo";
+
+        // Medio de pago preferido: FK al catálogo MedioPago (3FN; antes texto libre "Efectivo",
+        // "Crédito"...). Null en clientes cargados sin preferencia. Por defecto Efectivo, como antes.
+        public int? IdMedioPagoPreferido { get; set; } = MedioPago.IdEfectivo;
+
+        // Nombre y clave de traducción del medio preferido (cargados por JOIN con MedioPago, no
+        // persisten): solo para mostrar. La pantalla traduce con la clave y cae al nombre.
+        public string MetodoPago { get; set; }
+        public string ClaveTraduccionMedioPago { get; set; }
 
         // Null si no tiene plan asignado.
         public int? IdPlan { get; set; }
 
         // Nombre del plan (cargado por JOIN, no persiste) La tabla no guarda NombrePlan, ya está en la tabla PlanSuscripcion
         public string NombrePlan { get; set; }
+
+        // PN02 (nodo a11): cambio a un plan igual o más barato con el período vigente. El plan actual
+        // sigue hasta FechaCambioPlan (fin del período pagado) y desde ese día rige IdPlanSiguiente
+        // (lo aplica BLL.Cliente.AplicarCambiosDePlanProgramados). Null si no hay cambio programado.
+        public int? IdPlanSiguiente { get; set; }
+        public string NombrePlanSiguiente { get; set; }   // por JOIN, no persiste
+        public DateTime? FechaCambioPlan { get; set; }
+        public bool TieneCambioDePlanProgramado => IdPlanSiguiente.HasValue && FechaCambioPlan.HasValue;
 
         // Cantidad de prendas actualmente en uso por este cliente.
         public int StockUtilizado { get; set; }
@@ -111,7 +127,7 @@ namespace BE
             FechaLimiteGracia.HasValue && FechaLimiteGracia.Value.Date >= DateTime.Today;
 
         // True si venció el período de gracia sin que se haya registrado un cobro
-        // exitoso: a partir de acá se bloquean nuevos pedidos (BLL.Pedido.CrearPedido).
+        // exitoso: a partir de acá se bloquean nuevos pedidos (BLL.Pedido.VerificarVigencia).
         public bool EstaSuspendidoPorPago =>
             FechaLimiteGracia.HasValue && FechaLimiteGracia.Value.Date < DateTime.Today;
 
@@ -119,7 +135,7 @@ namespace BE
         // etc.) sin darse de baja del todo. Null = nunca pausado / pausa ya terminada.
         public DateTime? FechaPausaHasta { get; set; }
 
-        // True mientras la pausa está vigente: bloquea pedidos nuevos (BLL.Pedido.CrearPedido)
+        // True mientras la pausa está vigente: bloquea pedidos nuevos (BLL.Pedido.VerificarVigencia)
         // y el vencimiento se corre por los días pausados (NUULY: no se cobra mientras está pausada;
         // ver BLL.Manejadores.PausarSuscripcionHandler y BLL.Cliente.ReanudarPausa).
         public bool EstaPausada =>

@@ -41,11 +41,6 @@ namespace BLL
             return _dalVersion.ObtenerPorUsuario(idUsuario);
         }
 
-        public List<BE.VersionUsuario> ObtenerTodos()
-        {
-            return _dalVersion.ObtenerTodos();
-        }
-
         /// <summary>
         /// Restaura un usuario al estado de una versión histórica (deshacer).
         /// Antes de restaurar, guarda un Memento del estado actual (para poder deshacer

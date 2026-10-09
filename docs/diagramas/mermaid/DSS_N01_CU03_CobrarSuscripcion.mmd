@@ -15,7 +15,7 @@ sequenceDiagram
   B->>D: ObtenerPendientesPorCliente(idCliente)
   B-->>F: cantidad y total de cargos pendientes que sumará el cobro
   V->>F: Elige modalidad y resultado del cobro (Cobrado o Pago fallido)
-  F->>B: Procesar(modulo, cliente, decision, modalidad, actor)
+  F->>B: Procesar(modulo, cliente, decision, modalidad, idMedioPago)
   B->>H1: Procesar(contexto)
   alt Todavía no corresponde cobrar
     H1-->>B: Resultado: Pendiente

@@ -30,5 +30,9 @@ namespace Tests.Fakes
             UltimoNuevoEstado = nuevoEstado;
         }
         public List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria() => ConteoDisponiblesPorTalleCategoria;
+
+        // Catálogo de categorías activas (en la base: tabla Categoria).
+        public List<string> Categorias { get; set; } = new List<string> { "Abrigo", "Camisa", "Falda", "Pantalón", "Saco", "Vestido" };
+        public List<string> ObtenerCategorias() => Categorias;
     }
 }

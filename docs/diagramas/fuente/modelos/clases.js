@@ -89,15 +89,18 @@ module.exports = [
     ]
   },
   {
-    tipo: 'clases', id: 'CLASES_patron_command_pedido', procesos: ['PN01'], titulo: 'Patrón Command — Cancelar pedido y registrar devolución', columnas: 3,
+    tipo: 'clases', id: 'CLASES_patron_command_pedido', procesos: ['PN01'], titulo: 'Patrón Command — Cancelar (con deshacer), despachar, entregar y registrar la devolución', columnas: 3,
     clases: [
       E('BLL.Comandos.InvocadorPedido', { metodos: 'all' }), E('BLL.Comandos.PedidoCommand', { metodos: 'all' }),
       E('BLL.Comandos.CancelacionCommand', { metodos: 'all' }), E('BLL.Comandos.DevolucionCommand', { metodos: 'all' }),
-      E('BLL.Interfaces.IPedidoService', { metodos: ['Cancelar', 'RegistrarDevolucion'] }), E('BLL.Pedido', { metodos: ['Cancelar', 'RegistrarDevolucion'] }),
+      E('BLL.Comandos.DespachoCommand', { metodos: 'all' }), E('BLL.Comandos.EntregaCommand', { metodos: 'all' }),
+      E('BLL.Interfaces.IPedidoService', { metodos: ['Cancelar', 'DesCancelar', 'Despachar', 'MarcarEntregado', 'RegistrarDevolucion'] }),
+      E('BLL.Pedido', { metodos: ['Cancelar', 'DesCancelar', 'Despachar', 'MarcarEntregado', 'RegistrarDevolucion'] }),
       E('BE.Pedido', { attrs: ['IdPedido', 'Estado'] })
     ],
     relaciones: [
       { tipo: 'asocia', de: 'BLL_Comandos_InvocadorPedido', a: 'BLL_Comandos_PedidoCommand', etiqueta: '_ordenes', mult: '*' },
+      { tipo: 'asocia', de: 'BLL_Comandos_InvocadorPedido', a: 'BLL_Comandos_PedidoCommand', etiqueta: '_historial', mult: '*' },
       { tipo: 'asocia', de: 'BLL_Comandos_PedidoCommand', a: 'BLL_Interfaces_IPedidoService', etiqueta: '_receptor', mult: '1' },
       { tipo: 'asocia', de: 'BLL_Comandos_PedidoCommand', a: 'Pedido', etiqueta: '_pedido', mult: '1' },
       { tipo: 'implementa', de: 'BLL_Pedido', a: 'BLL_Interfaces_IPedidoService' }

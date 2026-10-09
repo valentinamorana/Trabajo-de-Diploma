@@ -133,12 +133,12 @@ namespace GUI
             this.txtAnalisis.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(247)))), ((int)(((byte)(248)))));
             this.txtAnalisis.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.txtAnalisis.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtAnalisis.Location = new System.Drawing.Point(0, 334);
+            this.txtAnalisis.Location = new System.Drawing.Point(0, 264);
             this.txtAnalisis.Multiline = true;
             this.txtAnalisis.Name = "txtAnalisis";
             this.txtAnalisis.ReadOnly = true;
             this.txtAnalisis.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtAnalisis.Size = new System.Drawing.Size(960, 140);
+            this.txtAnalisis.Size = new System.Drawing.Size(960, 210);
             this.txtAnalisis.TabIndex = 3;
             this.txtAnalisis.TabStop = false;
             //

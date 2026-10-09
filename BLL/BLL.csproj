@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Bitacora.cs" />
     <Compile Include="Politicas\PoliticaCambioPlan.cs" />
+    <Compile Include="Politicas\PoliticaCompraTacita.cs" />
     <Compile Include="Politicas\PoliticaCuotas.cs" />
     <Compile Include="Politicas\PoliticaDescuento.cs" />
     <Compile Include="PanelAlertas.cs" />
@@ -66,6 +67,8 @@
     <Compile Include="Comandos\PedidoCommand.cs" />
     <Compile Include="Comandos\CancelacionCommand.cs" />
     <Compile Include="Comandos\DevolucionCommand.cs" />
+    <Compile Include="Comandos\DespachoCommand.cs" />
+    <Compile Include="Comandos\EntregaCommand.cs" />
     <Compile Include="Comandos\InvocadorPedido.cs" />
     <Compile Include="Interfaces\IRenovacionService.cs" />
     <Compile Include="Manejadores\DecisionRenovacion.cs" />
@@ -114,6 +117,7 @@
     <Compile Include="Pedido.cs" />
     <Compile Include="Contratacion.cs" />
     <Compile Include="Promocion.cs" />
+    <Compile Include="ErroresSerializados.cs" />
     <Compile Include="SugerenciaPromocion.cs" />
     <Compile Include="PlanSuscripcion.cs" />
     <Compile Include="Preferencia.cs" />

@@ -71,6 +71,16 @@ namespace GUI
                 c.Text = t[c.Tag.ToString()].Texto;
         }
 
+// Selecciona la categoría en el combo (lista cerrada del catálogo Categoria). Si es una
+        // categoría que ya no está activa, se agrega para no cambiarla por otra.
+        private void SeleccionarCategoria(string categoria)
+        {
+            if (string.IsNullOrWhiteSpace(categoria)) { cmbCategoria.SelectedIndex = -1; return; }
+            int idx = cmbCategoria.FindStringExact(categoria.Trim());
+            if (idx < 0) idx = cmbCategoria.Items.Add(categoria.Trim());
+            cmbCategoria.SelectedIndex = idx;
+        }
+
         private void AltaPromocionForm_Load(object sender, EventArgs e)
         {
             try
@@ -80,7 +90,7 @@ namespace GUI
                 cmbPlan.DisplayMember = nameof(BE.PlanSuscripcion.Nombre);
                 cmbPlan.ValueMember = nameof(BE.PlanSuscripcion.IdPlan);
                 cmbTipoDescuento.DataSource = Enum.GetValues(typeof(BE.TipoDescuento));
-                // Categorías del catálogo como sugerencias (se puede escribir otra).
+                // Categorías del catálogo (tabla Categoria): lista cerrada, la FK de la base no acepta otra.
                 cmbCategoria.Items.Clear();
                 foreach (string categoria in new BLL.Prenda().ObtenerCategorias()) cmbCategoria.Items.Add(categoria);
                 // Se muestra traducido ("Monto fijo"); el ítem sigue siendo el enum.
@@ -97,7 +107,7 @@ namespace GUI
                     rbPlan.Checked = _reformular.AplicaAPlan();
                     rbCategoria.Checked = _reformular.AplicaACategoria();
                     if (_reformular.AplicaAPlan()) cmbPlan.SelectedValue = _reformular.IdPlan.Value;
-                    else cmbCategoria.Text = _reformular.CategoriaPrenda;
+                    else SeleccionarCategoria(_reformular.CategoriaPrenda);
                     rbPlan.Enabled = false;
                     rbCategoria.Enabled = false;
                     cmbPlan.Enabled = _reformular.AplicaAPlan();
@@ -118,7 +128,7 @@ namespace GUI
                     rbPlan.Checked = _sugerenciaOrigen.AplicaAPlan();
                     rbCategoria.Checked = _sugerenciaOrigen.AplicaACategoria();
                     if (_sugerenciaOrigen.AplicaAPlan()) cmbPlan.SelectedValue = _sugerenciaOrigen.IdPlan.Value;
-                    else cmbCategoria.Text = _sugerenciaOrigen.CategoriaPrenda;
+                    else SeleccionarCategoria(_sugerenciaOrigen.CategoriaPrenda);
                     rbPlan.Enabled = false;
                     rbCategoria.Enabled = false;
                     cmbPlan.Enabled = _sugerenciaOrigen.AplicaAPlan();

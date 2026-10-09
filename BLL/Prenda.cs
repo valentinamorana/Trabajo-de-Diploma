@@ -38,17 +38,26 @@ namespace BLL
 
         public List<BE.Prenda> ObtenerTodos()                   => dalPrenda.ObtenerTodos();
 
-        // Categorías que hoy existen en el catálogo (sin las de prendas dadas de baja), para elegir
-        // la de una promoción sin errores de tipeo (PN03). Sin distinguir mayúsculas.
+        // Catálogo de categorías activas (tabla Categoria, 3FN): las que se ofrecen al cargar una prenda,
+        // una promoción o una sugerencia (PN03). Antes el formulario de prendas tenía su propia lista
+        // fija ("Vestidos", en plural) distinta de los datos ("Vestido") y las promociones derivaban
+        // las suyas de las prendas cargadas.
         public List<string> ObtenerCategorias() =>
-            dalPrenda.ObtenerTodos()
-                .Where(p => p.Estado != BE.EstadoPrenda.Baja && !string.IsNullOrWhiteSpace(p.Categoria))
-                .Select(p => p.Categoria.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
+            (dalPrenda.ObtenerCategorias() ?? new List<string>())
                 .OrderBy(c => c, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
+
+        // Lista para un combo: el catálogo activo más la categoría que ya tiene el registro que se
+        // edita, si dejó de estar activa (así editar no la cambia por otra).
+        public List<string> ObtenerCategoriasParaEditar(string categoriaActual)
+        {
+            var lista = ObtenerCategorias();
+            if (!string.IsNullOrWhiteSpace(categoriaActual)
+                && !lista.Exists(c => string.Equals(c, categoriaActual.Trim(), StringComparison.CurrentCultureIgnoreCase)))
+                lista.Add(categoriaActual.Trim());
+            return lista;
+        }
         public List<BE.Prenda> ObtenerPorCliente(int id)       => dalPrenda.ObtenerPorCliente(id);
-        public BE.Prenda       ObtenerPorId(int idPrenda)      => dalPrenda.ObtenerPorId(idPrenda);
 
         // Prendas Disponible, excluyendo las reservadas por Lista de Espera para OTRO
         // cliente (mejora opcional). Filtrado en memoria para no acoplar la query ya
@@ -104,18 +113,14 @@ namespace BLL
         // Cambia el estado de una prenda validando la transición.
         // Al entrar a EnLimpieza abre un registro de mantenimiento;
         // al volver a Disponible desde EnLimpieza lo cierra.
-        // viaFlujoPerdida=true SOLO lo pasa el flujo dedicado de "Reportar Prenda Perdida"
-        // (CU-DEP-02, GUI.PedidosRealizados.BtnReportarPerdida_Click). El patrón State (BE.Estados)
-        // permite la transición EnUso→Baja a nivel de datos (una prenda perdida/destruida
-        // efectivamente termina en Baja), pero saltarse el cobro de reposición no es una decisión
-        // que el modelo de estados deba tomar — antes la única barrera era un `continue` en la
-        // lista de opciones de GUI/Prendas.cs (el diálogo GENÉRICO de cambio de estado), así que
-        // cualquier código que llamara CambiarEstado directo (otra pantalla, un script, un test)
-        // podía dar de baja una prenda que un cliente todavía tiene, sin pasar por ese flujo.
-        public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null,
-                                   bool viaFlujoPerdida = false, bool viaInspeccion = false)
+        // EnUso → Baja (Reportar Prenda Perdida) y EnLimpieza → Baja (Inspección de Devolución)
+        // NUNCA pasan por acá: el patrón State (BE.Estados) las permite a nivel de datos, pero las
+        // dos llevan un cargo al cliente en la misma transacción, así que solo las hace
+        // BLL.InspeccionDevolucion. Acá se rechazan siempre, venga de la pantalla que venga.
+        public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
+            string actor = Sesion.Actor;   // quién abre el mantenimiento: lo resuelve la BLL, no la GUI
 
             // Patrón State: el propio objeto Estado actual decide si la transición es
             // válida y, si lo es, muta prenda.Estado directamente (igual que el ejemplo
@@ -124,7 +129,7 @@ namespace BLL
             // prenda.Estado ya vale nuevoEstado.
             BE.EstadoPrenda estadoAnterior = prenda.Estado;
 
-            if (RequiereFlujoPerdida(estadoAnterior, nuevoEstado) && !viaFlujoPerdida)
+            if (RequiereFlujoPerdida(estadoAnterior, nuevoEstado))
                 throw new BE.AppException("err.bll.prenda.baja_requiere_flujoperdida",
                     "Una prenda en uso solo puede darse de baja a través de 'Reportar Prenda Perdida' " +
                     "(con cargo de reposición al cliente), no directamente.");
@@ -132,7 +137,7 @@ namespace BLL
             // PN04: una prenda que volvió del cliente (En Limpieza) solo se da de baja desde la
             // Inspección de Devolución, que registra ANTES el cargo por el daño irreparable. Sin
             // esta barrera en la BLL, cualquier otra pantalla podía retirarla del catálogo sin cargo.
-            if (RequiereInspeccion(estadoAnterior, nuevoEstado) && !viaInspeccion)
+            if (RequiereInspeccion(prenda, nuevoEstado))
                 throw new BE.AppException("err.bll.prenda.baja_requiere_inspeccion",
                     "Una prenda En Limpieza solo puede darse de baja desde la Inspección de Devolución " +
                     "(que registra el cargo por el daño), no directamente.");
@@ -176,6 +181,12 @@ namespace BLL
             {
                 dalMantenimiento.IniciarMantenimiento(prenda.IdPrenda, actor);
             }
+            else if (estadoAnterior == BE.EstadoPrenda.EnLimpieza && nuevoEstado == BE.EstadoPrenda.Baja)
+            {
+                // Baja de una prenda que entró a limpieza en el depósito (no por devolución): se
+                // cierra el mantenimiento para que no quede abierto en el tablero.
+                dalMantenimiento.CerrarMantenimiento(prenda.IdPrenda);
+            }
             else if (estadoAnterior == BE.EstadoPrenda.EnLimpieza &&
                      nuevoEstado == BE.EstadoPrenda.Disponible)
             {
@@ -184,7 +195,7 @@ namespace BLL
                 // Lista de Espera (mejora opcional): si alguien esperaba esta prenda,
                 // se la reserva (ventana de HORAS_RESERVA). No hace nada si nadie espera,
                 // ni si la tabla ListaEspera todavía no existe (BD sin migrar).
-                try { listaEsperaBLL.NotificarSiCorresponde(prenda.IdPrenda, actor); }
+                try { listaEsperaBLL.NotificarSiCorresponde(prenda.IdPrenda); }
                 catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.Prenda] Lista de Espera: {ex.Message}"); }
             }
 
@@ -202,9 +213,15 @@ namespace BLL
         private static bool RequiereFlujoPerdida(BE.EstadoPrenda desde, BE.EstadoPrenda hacia) =>
             desde == BE.EstadoPrenda.EnUso && hacia == BE.EstadoPrenda.Baja;
 
-        // PN04 — EnLimpieza → Baja solo desde Inspección de Devolución (registra el cargo por daño).
-        private static bool RequiereInspeccion(BE.EstadoPrenda desde, BE.EstadoPrenda hacia) =>
-            desde == BE.EstadoPrenda.EnLimpieza && hacia == BE.EstadoPrenda.Baja;
+        // PN04 — Una prenda que volvió de un cliente (mantenimiento abierto por la devolución) solo se
+        // da de baja desde la Inspección de Devolución, que registra el cargo por daño. Si entró a
+        // limpieza en el depósito, la baja es manual y sin cargo: el cliente no tuvo nada que ver.
+        private bool RequiereInspeccion(BE.Prenda prenda, BE.EstadoPrenda hacia) =>
+            prenda.Estado == BE.EstadoPrenda.EnLimpieza && hacia == BE.EstadoPrenda.Baja
+            && VieneDeDevolucion(prenda.IdPrenda);
+
+        private bool VieneDeDevolucion(int idPrenda) =>
+            dalMantenimiento.ObtenerPorPrenda(idPrenda).Any(m => m.EstaAbierto && m.VieneDeDevolucion);
 
         // Destinos que el cambio de estado MANUAL (pantalla Prendas) puede ofrecer para la prenda,
         // en este orden: Disponible, EnLimpieza, Baja. Parte de las transiciones del patrón State
@@ -220,16 +237,10 @@ namespace BLL
             return candidatos
                 .Where(destino => destino != prenda.Estado
                                && !RequiereFlujoPerdida(prenda.Estado, destino)
-                               && !RequiereInspeccion(prenda.Estado, destino)
+                               && !RequiereInspeccion(prenda, destino)
                                && prenda.TransicionPermitida(destino))
                 .ToList();
         }
-
-        // Bloque 1 — después de dar de baja una prenda, corresponde ofrecer un cargo por daño o
-        // pérdida si se sabe quién la tuvo por última vez (IdUltimoCliente no se limpia al pasar
-        // a Baja). Antes la decisión la tomaba GUI/Prendas.cs.
-        public bool CorrespondeOfrecerCargo(BE.Prenda prenda) =>
-            prenda != null && prenda.Estado == BE.EstadoPrenda.Baja && prenda.IdUltimoCliente.HasValue;
 
         // CU01-CS-Verificar Disponibilidad (PN01): relee el estado real de toda la selección
         // desde la base en una sola consulta batch (no confía en el objeto en memoria que pasó
@@ -250,11 +261,16 @@ namespace BLL
             return (noDisponibles.Count == 0, noDisponibles);
         }
 
-        // PN04, CU-DEP-01 Inspeccionar Devolución: prendas EnLimpieza pendientes de
-        // resolución (reingresan sin cargo o se dan de baja con cargo). Filtrado en memoria,
-        // mismo criterio que ObtenerOcupacion() — no hace falta una query SQL dedicada.
-        public List<BE.Prenda> ObtenerEnLimpieza() =>
-            dalPrenda.ObtenerTodos().FindAll(p => p.Estado == BE.EstadoPrenda.EnLimpieza);
+        // PN04, CU-DEP-01 Inspeccionar Devolución: prendas EnLimpieza que volvieron de un cliente
+        // (mantenimiento abierto por la devolución), pendientes de resolución: reingresan sin cargo o
+        // se dan de baja con cargo al último cliente. Las que entraron a limpieza en el depósito no
+        // están acá: no hay a quién cobrarle.
+        public List<BE.Prenda> ObtenerEnLimpieza()
+        {
+            var devueltas = new HashSet<int>(dalMantenimiento.ObtenerTodos()
+                .Where(m => m.EstaAbierto && m.VieneDeDevolucion).Select(m => m.IdPrenda));
+            return dalPrenda.ObtenerTodos().FindAll(p => p.Estado == BE.EstadoPrenda.EnLimpieza && devueltas.Contains(p.IdPrenda));
+        }
 
         public List<BE.MantenimientoPrenda> ObtenerHistorialMantenimiento(int idPrenda)
             => dalMantenimiento.ObtenerPorPrenda(idPrenda);
@@ -304,6 +320,18 @@ namespace BLL
             if (string.IsNullOrWhiteSpace(prenda.Categoria))
                 throw new BE.AppException("err.bll.prenda.categoria_requerida",
                     "La categoría es obligatoria.");
+
+            // Del catálogo (Categoria); una categoría desactivada solo se acepta si es la que la prenda
+            // ya tenía. La FK de la base lo respalda, pero acá el error sale claro y traducido.
+            prenda.Categoria = prenda.Categoria.Trim();
+            bool enCatalogo = ObtenerCategorias().Exists(c => string.Equals(c, prenda.Categoria, StringComparison.CurrentCultureIgnoreCase));
+            if (!enCatalogo)
+            {
+                string actual = prenda.IdPrenda > 0 ? dalPrenda.ObtenerPorId(prenda.IdPrenda)?.Categoria : null;
+                if (!string.Equals(actual?.Trim(), prenda.Categoria, StringComparison.CurrentCultureIgnoreCase))
+                    throw new BE.AppException("err.bll.prenda.categoria_invalida",
+                        "La categoría '{0}' no está en el catálogo de categorías.", prenda.Categoria);
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Seguridad;
@@ -33,7 +34,10 @@ namespace Tests
             public FakePrendaDAL DalPrenda = new FakePrendaDAL();
             public FakeMantenimientoPrendaDAL DalMantenimiento = new FakeMantenimientoPrendaDAL();
 
-            public BLL.Prenda Crear() => new BLL.Prenda(DalPrenda, DalMantenimiento);
+            // Lista de espera falsa: sin ella, pasar una prenda a Disponible abría la base _Tests.
+            public FakeListaEsperaService ListaEspera = new FakeListaEsperaService();
+
+            public BLL.Prenda Crear() => new BLL.Prenda(DalPrenda, DalMantenimiento, ListaEspera);
         }
 
         [TestMethod]
@@ -104,6 +108,8 @@ namespace Tests
             ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 2, Estado = BE.EstadoPrenda.Disponible });
             ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 3, Estado = BE.EstadoPrenda.EnLimpieza });
             ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 4, Estado = BE.EstadoPrenda.EnUso });
+            foreach (int id in new[] { 1, 2, 3, 4 })   // todas con mantenimiento abierto por devolución
+                ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = id, Origen = BE.OrigenMantenimiento.Devolucion });
             var bll = ctx.Crear();
 
             var enLimpieza = bll.ObtenerEnLimpieza();
@@ -120,6 +126,84 @@ namespace Tests
             var bll = ctx.Crear();
 
             Assert.AreEqual(0, bll.ObtenerEnLimpieza().Count);
+        }
+
+        // El origen del mantenimiento es un dato propio (MantenimientoPrenda.Origen), no el Actor: una
+        // limpieza manual de un usuario que se llame "Devolución" no la convierte en una devolución.
+        [TestMethod]
+        public void ObtenerEnLimpieza_MantenimientoManualConActorDevolucion_NoVaALaInspeccion()
+        {
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 1, Estado = BE.EstadoPrenda.EnLimpieza });
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda
+            {
+                IdPrenda = 1, Actor = "Devolución", Origen = BE.OrigenMantenimiento.Manual
+            });
+            var bll = ctx.Crear();
+
+            Assert.AreEqual(0, bll.ObtenerEnLimpieza().Count);
+            CollectionAssert.Contains(bll.ObtenerTransicionesManuales(ctx.DalPrenda.Todas[0]), BE.EstadoPrenda.Baja,
+                "Sin devolución, la baja manual no exige la Inspección (no hay cliente a quien cobrarle).");
+        }
+
+        // ── Catálogo de categorías (tabla Categoria, 3FN) ─────────────────────────
+
+        [TestMethod]
+        public void ObtenerCategorias_SaleDelCatalogoOrdenado()
+        {
+            var ctx = new Contexto();
+            ctx.DalPrenda.Categorias = new List<string> { "Vestido", "Abrigo", "Saco" };
+            CollectionAssert.AreEqual(new[] { "Abrigo", "Saco", "Vestido" }, ctx.Crear().ObtenerCategorias());
+        }
+
+        [TestMethod]
+        public void ObtenerCategoriasParaEditar_ConservaLaCategoriaActualInactiva()
+        {
+            var ctx = new Contexto();
+            ctx.DalPrenda.Categorias = new List<string> { "Abrigo", "Vestido" };
+            var bll = ctx.Crear();
+
+            Assert.AreEqual(2, bll.ObtenerCategoriasParaEditar("vestido").Count, "Sin distinguir mayúsculas, no se duplica.");
+            CollectionAssert.Contains(bll.ObtenerCategoriasParaEditar("Kimono"), "Kimono");
+        }
+
+        [TestMethod]
+        public void Alta_CategoriaFueraDelCatalogo_Lanza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var prenda = new BE.Prenda { Nombre = "Vestido Azul", Talle = "M", Categoria = "Vestidos" };
+            try
+            {
+                ctx.Crear().Alta("Test", prenda);
+                Assert.Fail("Debía rechazar una categoría que no está en el catálogo.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.prenda.categoria_invalida", ex.Clave);
+            }
+        }
+
+        [TestMethod]
+        public void Modificar_ConservaLaCategoriaQueYaTeniaAunqueEsteInactiva()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 5, Nombre = "Kimono", Talle = "M", Categoria = "Kimono" });
+            var editada = new BE.Prenda { IdPrenda = 5, Nombre = "Kimono rojo", Talle = "M", Categoria = "Kimono" };
+            var otra    = new BE.Prenda { IdPrenda = 5, Nombre = "Kimono rojo", Talle = "M", Categoria = "Poncho" };
+            var bll = ctx.Crear();
+
+            bll.Modificar("Test", editada);   // no lanza: es la categoría que ya tenía
+            try
+            {
+                bll.Modificar("Test", otra);
+                Assert.Fail("Debía rechazar pasar a una categoría fuera del catálogo.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.prenda.categoria_invalida", ex.Clave);
+            }
         }
 
         // ── CambiarEstado — guard EnUso→Baja (CU-DEP-02, Reportar Prenda Perdida) ───────────
@@ -155,11 +239,12 @@ namespace Tests
             var ctx = new Contexto();
             var bll = ctx.Crear();
             var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Origen = BE.OrigenMantenimiento.Devolucion });
 
             try
             {
                 bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja);
-                Assert.Fail("Debía exigir la Inspección de Devolución para dar de baja una prenda En Limpieza.");
+                Assert.Fail("Debía exigir la Inspección de Devolución para dar de baja una prenda devuelta En Limpieza.");
             }
             catch (BE.AppException ex)
             {
@@ -167,34 +252,6 @@ namespace Tests
             }
             Assert.AreEqual(0, ctx.DalPrenda.CambiarEstadoVeces);
             Assert.AreEqual(BE.EstadoPrenda.EnLimpieza, prenda.Estado);
-        }
-
-        [TestMethod]
-        public void CambiarEstado_EnLimpiezaABajaViaInspeccion_Permite()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
-            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
-
-            bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja, actor: "deposito", viaInspeccion: true);
-
-            Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
-            Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
-        }
-
-        [TestMethod]
-        public void CambiarEstado_EnUsoABajaViaFlujoPerdida_Permite()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
-            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnUso };
-
-            bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja, actor: "vendedor1", viaFlujoPerdida: true);
-
-            Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
-            Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
         }
 
         [TestMethod]
@@ -224,11 +281,19 @@ namespace Tests
         }
 
         [TestMethod]
-        public void TransicionesManuales_EnLimpieza_SoloDisponible_LaBajaEsPorInspeccion()
+        public void TransicionesManuales_EnLimpiezaDevuelta_SoloDisponible_LaBajaEsPorInspeccion()
         {
-            var bll = new Contexto().Crear();
-            var r = bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = BE.EstadoPrenda.EnLimpieza });
+            var ctx = new Contexto();
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 9, Origen = BE.OrigenMantenimiento.Devolucion });
+            var r = ctx.Crear().ObtenerTransicionesManuales(new BE.Prenda { IdPrenda = 9, Estado = BE.EstadoPrenda.EnLimpieza });
             CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.Disponible }, r);
+        }
+
+        [TestMethod]
+        public void TransicionesManuales_EnLimpiezaDelDeposito_DisponibleYBaja()
+        {
+            var r = new Contexto().Crear().ObtenerTransicionesManuales(new BE.Prenda { IdPrenda = 9, Estado = BE.EstadoPrenda.EnLimpieza });
+            CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.Disponible, BE.EstadoPrenda.Baja }, r);
         }
 
         [TestMethod]
@@ -253,18 +318,36 @@ namespace Tests
             {
                 var bll = new Contexto().Crear();
                 foreach (var destino in bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = origen }))
-                    bll.CambiarEstado("Test", new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = origen }, destino, "admin");
+                    bll.CambiarEstado("Test", new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = origen }, destino);
             }
         }
 
+        // PN04 — la cola de inspección son solo las prendas devueltas por un cliente; una prenda que
+        // entró a limpieza en el depósito no se le puede cobrar a nadie y se da de baja a mano.
         [TestMethod]
-        public void CorrespondeOfrecerCargo_SoloBajaConUltimoCliente()
+        public void ObtenerEnLimpieza_SoloLasQueVienenDeUnaDevolucion()
         {
-            var bll = new Contexto().Crear();
-            Assert.IsTrue(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.Baja, IdUltimoCliente = 3 }));
-            Assert.IsFalse(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.Baja }));
-            Assert.IsFalse(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 }));
-            Assert.IsFalse(bll.CorrespondeOfrecerCargo(null));
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 1, Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 });
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 2, Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 });
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Origen = BE.OrigenMantenimiento.Devolucion });
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 2, Actor = "deposito" });
+
+            CollectionAssert.AreEqual(new[] { 1 }, ctx.Crear().ObtenerEnLimpieza().Select(p => p.IdPrenda).ToArray());
+        }
+
+        [TestMethod]
+        public void CambiarEstado_EnLimpiezaDelDepositoABaja_PermiteYCierraElMantenimiento()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Actor = "deposito" });
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 };
+
+            ctx.Crear().CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja);
+
+            Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
+            Assert.AreEqual(1, ctx.DalMantenimiento.CerrarMantenimientoVeces);
         }
     }
 }

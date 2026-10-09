@@ -16,9 +16,14 @@ namespace DAL
         // (plan, vencimientos, gracia, pausa, crédito de referido, referente y baja lógica).
         public static readonly string[] DV_Columnas =
         {
-            "Nombre", "Apellido", "DNI", "Email", "MetodoPago",
+            "Nombre", "Apellido", "DNI", "Email", "IdMedioPagoPreferido",
             "IdPlan", "FechaVencimiento", "FechaLimiteGracia", "FechaPausaHasta",
-            "DescuentoProximoCobro", "IdClienteReferente", "Activo"
+            "DescuentoProximoCobro", "IdClienteReferente", "Activo",
+            // Formato 3 de Cliente: el beneficio por referido ya acreditado (si se borrara, se volvería
+            // a acreditar el descuento al referente sin que la verificación lo detecte).
+            "BeneficioReferidoOtorgado",
+            // PN02: el cambio de plan programado también define qué plan rige (y qué se cobra).
+            "IdPlanSiguiente", "FechaCambioPlan"
         };
 
         // Recalcula el DVH de la fila del cliente + el DVV de la tabla desde los DVH almacenados
@@ -43,15 +48,19 @@ namespace DAL
                 SqlParameter[] p = { new SqlParameter("@EstadoEnUso", (int)BE.EstadoPrenda.EnUso) };
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
-                    "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
+                    "       c.IdMedioPagoPreferido, mp.Nombre AS MetodoPago, mp.ClaveTraduccion AS ClaveMedioPago, " +
+                    "       c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
                     "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
                     "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
+                    "       c.IdPlanSiguiente, c.FechaCambioPlan, ps.Nombre AS NombrePlanSiguiente, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
                     "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
                     "       ISNULL(stock.StockUtilizado, 0) AS StockUtilizado " +
                     "FROM Cliente c " +
                     "LEFT JOIN PlanSuscripcion p ON p.IdPlan = c.IdPlan " +
+                    "LEFT JOIN PlanSuscripcion ps ON ps.IdPlan = c.IdPlanSiguiente " +
+                    "LEFT JOIN MedioPago mp ON mp.IdMedioPago = c.IdMedioPagoPreferido " +
                     "LEFT JOIN ( " +
                     "    SELECT IdClienteActual, COUNT(*) AS StockUtilizado " +
                     "    FROM Prenda " +
@@ -84,9 +93,11 @@ namespace DAL
             {
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
-                    "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
+                    "       c.IdMedioPagoPreferido, mp.Nombre AS MetodoPago, mp.ClaveTraduccion AS ClaveMedioPago, " +
+                    "       c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
                     "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
                     "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
+                    "       c.IdPlanSiguiente, c.FechaCambioPlan, ps.Nombre AS NombrePlanSiguiente, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
                     "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
@@ -94,6 +105,8 @@ namespace DAL
                     "        AND pr.Estado = @EstadoEnUso) AS StockUtilizado " +
                     "FROM Cliente c " +
                     "LEFT JOIN PlanSuscripcion p ON p.IdPlan = c.IdPlan " +
+                    "LEFT JOIN PlanSuscripcion ps ON ps.IdPlan = c.IdPlanSiguiente " +
+                    "LEFT JOIN MedioPago mp ON mp.IdMedioPago = c.IdMedioPagoPreferido " +
                     "WHERE c.IdCliente = @IdCliente AND c.Activo = 1",
                     p);
 
@@ -177,7 +190,7 @@ namespace DAL
                 new SqlParameter("@Apellido",          cliente.Apellido),
                 new SqlParameter("@DNI",               cliente.DNI),
                 new SqlParameter("@Email",             (object)cliente.Email ?? DBNull.Value),
-                new SqlParameter("@MetodoPago",        cliente.MetodoPago),
+                new SqlParameter("@IdMedioPagoPreferido", (object)cliente.IdMedioPagoPreferido ?? DBNull.Value),
                 new SqlParameter("@IdPlan",            (object)cliente.IdPlan ?? DBNull.Value),
                 new SqlParameter("@FechaAlta",         cliente.FechaAlta),
                 new SqlParameter("@FechaVencimiento",  (object)cliente.FechaVencimiento  ?? DBNull.Value),
@@ -186,8 +199,8 @@ namespace DAL
             };
 
             DataTable tabla = acceso.Leer(
-                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento, IdClienteReferente) " +
-                "VALUES (@Nombre, @Apellido, @DNI, @Email, @MetodoPago, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento, @IdClienteReferente); " +
+                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, IdMedioPagoPreferido, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento, IdClienteReferente) " +
+                "VALUES (@Nombre, @Apellido, @DNI, @Email, @IdMedioPagoPreferido, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento, @IdClienteReferente); " +
                 "SELECT SCOPE_IDENTITY() AS IdNuevo",
                 p);
 
@@ -207,21 +220,24 @@ namespace DAL
                 new SqlParameter("@Apellido",         cliente.Apellido),
                 new SqlParameter("@DNI",              cliente.DNI),
                 new SqlParameter("@Email",            (object)cliente.Email ?? DBNull.Value),
-                new SqlParameter("@MetodoPago",       cliente.MetodoPago),
+                new SqlParameter("@IdMedioPagoPreferido", (object)cliente.IdMedioPagoPreferido ?? DBNull.Value),
                 new SqlParameter("@IdPlan",           (object)cliente.IdPlan ?? DBNull.Value),
                 new SqlParameter("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value),
                 new SqlParameter("@FechaNacimiento",  (object)cliente.FechaNacimiento  ?? DBNull.Value),
                 new SqlParameter("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value),
                 new SqlParameter("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value),
                 new SqlParameter("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado),
+                new SqlParameter("@IdPlanSiguiente",  (object)cliente.IdPlanSiguiente ?? DBNull.Value),
+                new SqlParameter("@FechaCambioPlan",  (object)cliente.FechaCambioPlan ?? DBNull.Value),
                 new SqlParameter("@IdCliente",        cliente.IdCliente)
             };
             acceso.Escribir(
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
-                "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
+                "Email=@Email, IdMedioPagoPreferido=@IdMedioPagoPreferido, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
                 "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
-                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
+                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado, " +
+                "IdPlanSiguiente=@IdPlanSiguiente, FechaCambioPlan=@FechaCambioPlan " +
                 "WHERE IdCliente=@IdCliente",
                 p);
             RecalcularDV(cliente.IdCliente);   // T07
@@ -230,8 +246,34 @@ namespace DAL
         // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
         // Le da a las capas superiores (BLL.Manejadores) una forma de componer, DESDE AFUERA
         // de esta clase, varias escrituras de distintos DAL en una sola operación atómica.
+        //
+        // T07 — El dígito verificador se recalcula DENTRO de esta misma transacción: se toma primero el
+        // bloqueo del DV de Cliente (antes de escribir nada, así no hay bloqueos mutuos con otro
+        // recálculo), los métodos ...EnTx anotan qué filas tocaron y, antes del commit, se recalculan
+        // sus DVH y el DVV. Si el recálculo falla, se revierte todo: no queda una fila cambiada con
+        // el DV viejo (antes el DV se recalculaba después del commit y su error se tragaba).
         public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion)
-            => acceso.EjecutarTransaccion(accion);
+        {
+            acceso.EjecutarTransaccion((cn, tx) =>
+            {
+                DigitoVerificador.Bloquear(cn, tx, DV_Tabla);
+                var anteriores = _filasEnTx;
+                _filasEnTx = new HashSet<int>();
+                try
+                {
+                    accion(cn, tx);
+                    foreach (int id in _filasEnTx)
+                        DigitoVerificador.ActualizarFilaEnTx(cn, tx, DV_Tabla, DV_Pk, DV_Columnas, id);
+                    if (_filasEnTx.Count > 0)
+                        DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, DigitoVerificador.OrdenPor(DV_Pk));
+                }
+                finally { _filasEnTx = anteriores; }
+            });
+        }
+
+        // Filas de Cliente escritas en la transacción en curso (null fuera de EjecutarTransaccion).
+        private HashSet<int> _filasEnTx;
+        private void AnotarFila(int idCliente) => _filasEnTx?.Add(idCliente);
 
         // Igual que Modificar, pero sobre una transacción ya abierta por el caller (ver
         // EjecutarTransaccion) — usado por los manejadores de Renovación/Cobro para que el
@@ -244,10 +286,11 @@ namespace DAL
         {
             using (var cmd = new SqlCommand(
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
-                "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
+                "Email=@Email, IdMedioPagoPreferido=@IdMedioPagoPreferido, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
                 "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
-                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
+                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado, " +
+                "IdPlanSiguiente=@IdPlanSiguiente, FechaCambioPlan=@FechaCambioPlan " +
                 "WHERE IdCliente=@IdCliente",
                 conexion, tx))
             {
@@ -255,16 +298,19 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@Apellido", cliente.Apellido);
                 cmd.Parameters.AddWithValue("@DNI", cliente.DNI);
                 cmd.Parameters.AddWithValue("@Email", (object)cliente.Email ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@MetodoPago", cliente.MetodoPago);
+                cmd.Parameters.AddWithValue("@IdMedioPagoPreferido", (object)cliente.IdMedioPagoPreferido ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IdPlan", (object)cliente.IdPlan ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaNacimiento", (object)cliente.FechaNacimiento ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado);
+                cmd.Parameters.AddWithValue("@IdPlanSiguiente", (object)cliente.IdPlanSiguiente ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaCambioPlan", (object)cliente.FechaCambioPlan ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IdCliente", cliente.IdCliente);
                 cmd.ExecuteNonQuery();
             }
+            AnotarFila(cliente.IdCliente);
         }
 
         // Cobro recurrente (N01): actualiza SOLO el vencimiento y la gracia, con control optimista
@@ -282,7 +328,9 @@ namespace DAL
                 cmd.Parameters.Add(new SqlParameter("@Nuevo", SqlDbType.Date) { Value = nuevoVencimiento.Date });
                 cmd.Parameters.Add(new SqlParameter("@Leido", SqlDbType.Date) { Value = (object)vencimientoLeido?.Date ?? DBNull.Value });
                 cmd.Parameters.AddWithValue("@IdCliente", idCliente);
-                return cmd.ExecuteNonQuery() > 0;
+                bool ok = cmd.ExecuteNonQuery() > 0;
+                if (ok) AnotarFila(idCliente);
+                return ok;
             }
         }
 
@@ -298,6 +346,7 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@Monto", monto);
                 cmd.Parameters.AddWithValue("@IdCliente", idCliente);
                 cmd.ExecuteNonQuery();
+                AnotarFila(idCliente);
             }
         }
 
@@ -312,8 +361,13 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@Monto", monto);
                 cmd.Parameters.AddWithValue("@IdCliente", idCliente);
                 cmd.ExecuteNonQuery();
+                AnotarFila(idCliente);
             }
         }
+
+        // Catálogo de medios de pago completo (activos e históricos) para elegir y validar el medio
+        // preferido del cliente. Es el mismo catálogo que usa Caja (DAL.Contratacion).
+        public List<BE.MedioPago> ObtenerMediosPago() => new Contratacion().ObtenerMediosPago();
 
         // Baja lógica del cliente (Activo=0).
         public void Baja(int idCliente)
@@ -333,7 +387,9 @@ namespace DAL
                 Apellido       = row["Apellido"].ToString(),
                 DNI            = row["DNI"].ToString(),
                 Email          = row["Email"] != DBNull.Value ? row["Email"].ToString() : null,
-                MetodoPago     = row["MetodoPago"].ToString(),
+                IdMedioPagoPreferido = row["IdMedioPagoPreferido"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdMedioPagoPreferido"]) : null,
+                MetodoPago     = row["MetodoPago"] != DBNull.Value ? row["MetodoPago"].ToString() : null,
+                ClaveTraduccionMedioPago = row["ClaveMedioPago"] != DBNull.Value ? row["ClaveMedioPago"].ToString() : null,
                 IdPlan         = row["IdPlan"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPlan"]) : null,
                 NombrePlan     = row["NombrePlan"] != DBNull.Value ? row["NombrePlan"].ToString() : null,
                 LimitePrendas  = row.Table.Columns.Contains("LimitePrendas")
@@ -363,6 +419,15 @@ namespace DAL
                                       : 0,
                 BeneficioReferidoOtorgado = row.Table.Columns.Contains("BeneficioReferidoOtorgado") && row["BeneficioReferidoOtorgado"] != DBNull.Value
                                       && Convert.ToBoolean(row["BeneficioReferidoOtorgado"]),
+                IdPlanSiguiente = row.Table.Columns.Contains("IdPlanSiguiente") && row["IdPlanSiguiente"] != DBNull.Value
+                                      ? (int?)Convert.ToInt32(row["IdPlanSiguiente"])
+                                      : null,
+                NombrePlanSiguiente = row.Table.Columns.Contains("NombrePlanSiguiente") && row["NombrePlanSiguiente"] != DBNull.Value
+                                      ? row["NombrePlanSiguiente"].ToString()
+                                      : null,
+                FechaCambioPlan = row.Table.Columns.Contains("FechaCambioPlan") && row["FechaCambioPlan"] != DBNull.Value
+                                      ? (DateTime?)Convert.ToDateTime(row["FechaCambioPlan"])
+                                      : null,
                 StockUtilizado = Convert.ToInt32(row["StockUtilizado"])
             };
         }

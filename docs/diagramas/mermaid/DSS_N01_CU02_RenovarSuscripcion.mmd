@@ -12,8 +12,8 @@ sequenceDiagram
   B->>D: ObtenerTodos() · TieneContratacionPendiente(idCliente)
   B-->>F: clientes con plan, sin contratación pendiente y en condiciones para esa decisión (más los pausados)
   V->>F: Elige el cliente
-  F->>B: Procesar(modulo, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta)
-  Note over B: Exigir(ClientesEditar) · el cliente debe tener plan
+  F->>B: Procesar(modulo, cliente, decision, idPlanNuevo, modalidad, fechaPausaHasta)
+  Note over B: Exigir(ClientesEditar) · el cliente debe tener plan · el actor sale de la sesión (BLL.Sesion), no de la GUI
   B->>H1: Procesar(contexto)
   alt Ni vencida ni próxima a vencer (y la decisión no es Pausar)
     H1-->>B: Resultado: Pendiente (todavía no corresponde renovar)

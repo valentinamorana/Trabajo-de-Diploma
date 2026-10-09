@@ -262,6 +262,7 @@ namespace GUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(880, 620);
+            this.MinimumSize = new System.Drawing.Size(720, 520);
             this.Controls.Add(this.panelTrad);
             this.Controls.Add(this.panelBottom);
             this.Controls.Add(this.panelIdiomas);

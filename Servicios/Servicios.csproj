@@ -44,6 +44,8 @@
     <Compile Include="Bitacora.cs" />
     <Compile Include="BitacoraNegocio.cs" />
     <Compile Include="Exportacion\SerializadorCsv.cs" />
+    <Compile Include="Serializacion\RegistroErrores.cs" />
+    <Compile Include="Serializacion\SerializadorXml.cs" />
     <Compile Include="GeneradorCredenciales.cs" />
     <Compile Include="RegistroBitacora.cs" />
     <Compile Include="Multiidioma\GestorIdioma.cs" />

@@ -19,6 +19,8 @@ namespace BLL
     public partial class Usuario
     {
         private readonly DAL.Interfaces.IUsuarioDAL usuarioDAL;
+        private DAL.Interfaces.IEmpleadoDAL _empleadoDALLazy;
+        private DAL.Interfaces.IEmpleadoDAL empleadoDAL => _empleadoDALLazy ?? (_empleadoDALLazy = new DAL.Empleado());
         // perfilesBLL y bitacora son PEREZOSOS: solo se instancian cuando una operación los usa
         // (Login resuelve permisos; las escrituras registran bitácora). Así construir BLL.Usuario
         // —y testear con un IUsuarioDAL falso— no toca la BD a través de sus DAL internos.
@@ -38,6 +40,12 @@ namespace BLL
         internal Usuario(DAL.Interfaces.IUsuarioDAL usuarioDAL, BLL.Familia perfiles) : this(usuarioDAL)
         {
             _perfilesLazy = perfiles;
+        }
+
+        // Para pruebas: permite inyectar el DAL de empleados.
+        internal Usuario(DAL.Interfaces.IUsuarioDAL usuarioDAL, DAL.Interfaces.IEmpleadoDAL empleados) : this(usuarioDAL)
+        {
+            _empleadoDALLazy = empleados;
         }
 
         // Re-validación en el BACKEND: la gestión de usuarios es una operación EXCLUSIVA del

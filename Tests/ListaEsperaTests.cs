@@ -66,7 +66,7 @@ namespace Tests
             ctx.DalCliente.ClientePorId = ClienteVigente();
             var bll = ctx.Crear();
 
-            bll.Anotar("Test", idPrenda: 1, idCliente: 10, actor: "admin");
+            bll.Anotar("Test", idPrenda: 1, idCliente: 10);
 
             Assert.AreEqual(1, ctx.DalListaEspera.AltaVeces);
             Assert.AreEqual(BE.EstadoListaEspera.Pendiente, ctx.DalListaEspera.Registros[0].Estado);
@@ -81,7 +81,7 @@ namespace Tests
             ctx.DalCliente.ClientePorId = ClienteVigente();
             var bll = ctx.Crear();
 
-            AssertThrows(() => bll.Anotar("Test", 1, 10, "admin"));
+            AssertThrows(() => bll.Anotar("Test", 1, 10));
             Assert.AreEqual(0, ctx.DalListaEspera.AltaVeces);
         }
 
@@ -94,7 +94,7 @@ namespace Tests
             ctx.DalCliente.ClientePorId = new BE.Cliente { IdCliente = 10, IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(-5) };
             var bll = ctx.Crear();
 
-            AssertThrows(() => bll.Anotar("Test", 1, 10, "admin"));
+            AssertThrows(() => bll.Anotar("Test", 1, 10));
         }
 
         [TestMethod]
@@ -106,8 +106,8 @@ namespace Tests
             ctx.DalCliente.ClientePorId = ClienteVigente();
             var bll = ctx.Crear();
 
-            bll.Anotar("Test", 1, 10, "admin");
-            AssertThrows(() => bll.Anotar("Test", 1, 10, "admin"));
+            bll.Anotar("Test", 1, 10);
+            AssertThrows(() => bll.Anotar("Test", 1, 10));
             Assert.AreEqual(1, ctx.DalListaEspera.AltaVeces);
         }
 
@@ -123,7 +123,7 @@ namespace Tests
             ctx.DalListaEspera.Registros.AddRange(new[] { masNuevo, masViejo });
             var bll = ctx.Crear();
 
-            bll.NotificarSiCorresponde(1, "sistema");
+            bll.NotificarSiCorresponde(1);
 
             Assert.AreEqual(BE.EstadoListaEspera.Reservada, masViejo.Estado);
             Assert.AreEqual(BE.EstadoListaEspera.Pendiente, masNuevo.Estado);
@@ -137,7 +137,7 @@ namespace Tests
             var ctx = new Contexto();
             var bll = ctx.Crear();
 
-            bll.NotificarSiCorresponde(1, "sistema");
+            bll.NotificarSiCorresponde(1);
 
             Assert.AreEqual(0, ctx.DalListaEspera.CambiarEstadoVeces);
         }
@@ -172,7 +172,7 @@ namespace Tests
             ctx.DalListaEspera.Registros.Add(fila);
             var bll = ctx.Crear();
 
-            bll.CerrarSiReservada("Test", 1, 10, "admin");
+            bll.CerrarSiReservada("Test", 1, 10);
 
             Assert.AreEqual(BE.EstadoListaEspera.Convertida, fila.Estado);
         }
@@ -190,7 +190,7 @@ namespace Tests
             ctx.DalListaEspera.Registros.Add(fila);
             var bll = ctx.Crear();
 
-            bll.CerrarSiReservada("Test", 1, 10, "admin");
+            bll.CerrarSiReservada("Test", 1, 10);
 
             Assert.AreEqual(BE.EstadoListaEspera.Reservada, fila.Estado); // sigue igual, no se tocó
         }
@@ -200,7 +200,7 @@ namespace Tests
         {
             var ctx = new Contexto();
             ctx.DalListaEspera.Registros.Add(new BE.ListaEspera { IdListaEspera = 1, IdPrenda = 1, IdCliente = 10, Estado = BE.EstadoListaEspera.Pendiente });
-            AssertThrows(() => ctx.Crear().NotificarSiCorresponde(1, "x"));
+            AssertThrows(() => ctx.Crear().NotificarSiCorresponde(1));
             Assert.AreEqual(BE.EstadoListaEspera.Pendiente, ctx.DalListaEspera.Registros[0].Estado);
         }
 
@@ -233,7 +233,7 @@ namespace Tests
                                                  FechaAlta = DateTime.Now.AddDays(-1) };
             ctx.DalListaEspera.Registros.AddRange(new[] { reservada, siguiente });
 
-            ctx.Crear().Cancelar("Test", 1, "admin");
+            ctx.Crear().Cancelar("Test", 1);
 
             Assert.AreEqual(BE.EstadoListaEspera.Cancelada, reservada.Estado);
             Assert.AreEqual(BE.EstadoListaEspera.Reservada, siguiente.Estado);
@@ -250,7 +250,7 @@ namespace Tests
             ctx.DalListaEspera.Registros.Add(fila);
             var bll = ctx.Crear();
 
-            bll.Cancelar("Test", 1, "admin");
+            bll.Cancelar("Test", 1);
 
             Assert.AreEqual(BE.EstadoListaEspera.Cancelada, fila.Estado);
         }
@@ -264,7 +264,7 @@ namespace Tests
             ctx.DalListaEspera.Registros.Add(fila);
             var bll = ctx.Crear();
 
-            AssertThrows(() => bll.Cancelar("Test", 1, "admin"));
+            AssertThrows(() => bll.Cancelar("Test", 1));
         }
 
         [TestMethod]

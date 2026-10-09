@@ -7,7 +7,8 @@ namespace BE
     ///                                              → Separado → Pendiente (formalizado)
     ///   ConFaltantes / selección que excede el cupo → Desistido
     ///   Pendiente → Despachado → Entregado        (ciclo logístico, posterior a PN01)
-    ///   Pendiente → Cancelado → Pendiente         (cancelar / des-cancelar)
+    ///   EnControlStock / Separado / Pendiente → Cancelado (cancelar; ConFaltantes se desiste)
+    ///   Cancelado → EnControlStock (reactivar: vuelve a control de stock)
     ///
     /// Los valores numéricos se persisten en Pedido.Estado: los existentes (0-3) no cambian.
     /// </summary>

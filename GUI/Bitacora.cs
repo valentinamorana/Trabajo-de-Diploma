@@ -59,8 +59,32 @@ namespace GUI
             InicializarDisenoMockup();
         }
 
+        // A02 Serialización: abre los errores inesperados serializados en XML (ErroresXmlForm).
+        private Button _btnErroresXml;
+
+        private void AgregarBotonErroresXml()
+        {
+            btnExportSistema.Height = 32;
+            _btnErroresXml = new Button
+            {
+                Name = "btnErroresXml",
+                Text = Tr("btn.errxml", "Errores (XML)"),
+                Location = new Point(btnExportSistema.Left, btnExportSistema.Bottom + 2),
+                Size = new Size(btnExportSistema.Width, 32),
+                Anchor = btnExportSistema.Anchor,
+                TabIndex = btnExportSistema.TabIndex + 1
+            };
+            GUI.Estilos.EstiloFormulario.BotonSecundario(_btnErroresXml);
+            _btnErroresXml.Click += (s, e) =>
+            {
+                using (var frm = new ErroresXmlForm()) frm.ShowDialog(this);
+            };
+            panelFiltrosSistema.Controls.Add(_btnErroresXml);
+        }
+
         private void InicializarDisenoMockup()
         {
+            AgregarBotonErroresXml();
             // ── Gradient en panelTop ──────────────────────────────────────────
             panelTop.Paint += (s, pe) =>
             {
@@ -245,6 +269,7 @@ namespace GUI
             string exportPdf = Tr("btn.exportar.pdf", "Exportar PDF");
             btnExportSistema.Text  = exportPdf;
             btnExportNegocio.Text  = exportPdf;
+            if (_btnErroresXml != null) _btnErroresXml.Text = Tr("btn.errxml", "Errores (XML)");
 
             RellenarComboCriticidad();
             RellenarComboTipoEvento();

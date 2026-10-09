@@ -3668,6 +3668,23 @@ END
 GO
 
 -- ============================================================
+-- WardrobeFlow — 21z2. DV DE CLIENTE: TAMBIÉN EL BENEFICIO POR REFERIDO
+-- ------------------------------------------------------------
+-- BeneficioReferidoOtorgado pasa a formar parte del dígito verificador de Cliente. En una base ya
+-- instalada se pide UNA vez el recálculo (marca 'DVClienteBeneficio'). Idempotente.
+-- ============================================================
+IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'DVClienteBeneficio')
+BEGIN
+    MERGE ParametroSistema AS t
+    USING (VALUES (N'DVReinicializar', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+    WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+    WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'DVClienteBeneficio', N'Aplicada', GETDATE());
+    PRINT 'DV de Cliente: incluye el beneficio por referido; DV a recalcular.';
+END
+GO
+
+-- ============================================================
 -- WardrobeFlow — 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA
 -- ------------------------------------------------------------
 -- Formato 2 de los dígitos verificadores (DAL.DigitoVerificador.FormatoActual = 2):

@@ -19,6 +19,9 @@ namespace DAL
             "Nombre", "Apellido", "DNI", "Email", "MetodoPago",
             "IdPlan", "FechaVencimiento", "FechaLimiteGracia", "FechaPausaHasta",
             "DescuentoProximoCobro", "IdClienteReferente", "Activo",
+            // Formato 3 de Cliente: el beneficio por referido ya acreditado (si se borrara, se volvería
+            // a acreditar el descuento al referente sin que la verificación lo detecte).
+            "BeneficioReferidoOtorgado",
             // PN02: el cambio de plan programado también define qué plan rige (y qué se cobra).
             "IdPlanSiguiente", "FechaCambioPlan"
         };
@@ -239,8 +242,34 @@ namespace DAL
         // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
         // Le da a las capas superiores (BLL.Manejadores) una forma de componer, DESDE AFUERA
         // de esta clase, varias escrituras de distintos DAL en una sola operación atómica.
+        //
+        // T07 — El dígito verificador se recalcula DENTRO de esta misma transacción: se toma primero el
+        // bloqueo del DV de Cliente (antes de escribir nada, así no hay bloqueos mutuos con otro
+        // recálculo), los métodos ...EnTx anotan qué filas tocaron y, antes del commit, se recalculan
+        // sus DVH y el DVV. Si el recálculo falla, se revierte todo: no queda una fila cambiada con
+        // el DV viejo (antes el DV se recalculaba después del commit y su error se tragaba).
         public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion)
-            => acceso.EjecutarTransaccion(accion);
+        {
+            acceso.EjecutarTransaccion((cn, tx) =>
+            {
+                DigitoVerificador.Bloquear(cn, tx, DV_Tabla);
+                var anteriores = _filasEnTx;
+                _filasEnTx = new HashSet<int>();
+                try
+                {
+                    accion(cn, tx);
+                    foreach (int id in _filasEnTx)
+                        DigitoVerificador.ActualizarFilaEnTx(cn, tx, DV_Tabla, DV_Pk, DV_Columnas, id);
+                    if (_filasEnTx.Count > 0)
+                        DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, DigitoVerificador.OrdenPor(DV_Pk));
+                }
+                finally { _filasEnTx = anteriores; }
+            });
+        }
+
+        // Filas de Cliente escritas en la transacción en curso (null fuera de EjecutarTransaccion).
+        private HashSet<int> _filasEnTx;
+        private void AnotarFila(int idCliente) => _filasEnTx?.Add(idCliente);
 
         // Igual que Modificar, pero sobre una transacción ya abierta por el caller (ver
         // EjecutarTransaccion) — usado por los manejadores de Renovación/Cobro para que el
@@ -277,6 +306,7 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@IdCliente", cliente.IdCliente);
                 cmd.ExecuteNonQuery();
             }
+            AnotarFila(cliente.IdCliente);
         }
 
         // Cobro recurrente (N01): actualiza SOLO el vencimiento y la gracia, con control optimista
@@ -294,7 +324,9 @@ namespace DAL
                 cmd.Parameters.Add(new SqlParameter("@Nuevo", SqlDbType.Date) { Value = nuevoVencimiento.Date });
                 cmd.Parameters.Add(new SqlParameter("@Leido", SqlDbType.Date) { Value = (object)vencimientoLeido?.Date ?? DBNull.Value });
                 cmd.Parameters.AddWithValue("@IdCliente", idCliente);
-                return cmd.ExecuteNonQuery() > 0;
+                bool ok = cmd.ExecuteNonQuery() > 0;
+                if (ok) AnotarFila(idCliente);
+                return ok;
             }
         }
 
@@ -310,6 +342,7 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@Monto", monto);
                 cmd.Parameters.AddWithValue("@IdCliente", idCliente);
                 cmd.ExecuteNonQuery();
+                AnotarFila(idCliente);
             }
         }
 
@@ -324,6 +357,7 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@Monto", monto);
                 cmd.Parameters.AddWithValue("@IdCliente", idCliente);
                 cmd.ExecuteNonQuery();
+                AnotarFila(idCliente);
             }
         }
 

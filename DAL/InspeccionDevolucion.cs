@@ -102,7 +102,7 @@ namespace DAL
             {
                 new SqlParameter("@IdPrenda",   idPrenda),
                 new SqlParameter("@Separado",   (int)BE.EstadoPedido.Separado),
-                new SqlParameter("@Pendiente",  (int)BE.EstadoPedido.Pendiente),
+                new SqlParameter("@Pendiente",  (object)(int)BE.EstadoPedido.Pendiente),   // (object): un 0 constante se tomaría como SqlDbType
                 new SqlParameter("@Despachado", (int)BE.EstadoPedido.Despachado),
                 new SqlParameter("@Entregado",  (int)BE.EstadoPedido.Entregado)
             };

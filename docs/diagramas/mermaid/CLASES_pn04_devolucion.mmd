@@ -49,9 +49,10 @@ classDiagram
     +AprobarReingreso(string,  Prenda,  string) void
     +DarDeBajaConCargo(string,  Prenda,  string,  decimal,  string) int
     +ReportarPerdida(string,  Prenda,  string,  decimal,  string) int
+    +PuedeReportarPerdida(Prenda,  Pedido) bool
   }
   class BLL_Prenda["BLL.Prenda"] {
-    +CambiarEstado(string,  Prenda,  EstadoPrenda,  string,  bool,  bool) void
+    +CambiarEstado(string,  Prenda,  EstadoPrenda,  string) void
     +ObtenerTransicionesManuales(Prenda) List~EstadoPrenda~
     +ObtenerEnLimpieza() List~Prenda~
     +ObtenerHistorialMantenimiento(int) List~MantenimientoPrenda~
@@ -69,6 +70,7 @@ classDiagram
   class DAL_IInspeccionDevolucionDAL["DAL.IInspeccionDevolucionDAL"] {
     <<interface>>
     +DarDeBajaConCargo(CargoPrenda,  EstadoPrenda) int
+    +ObtenerPedidoEnCurso(int) Pedido
   }
   class DAL_Interfaces_IPrendaDAL["DAL.Interfaces.IPrendaDAL"] {
     <<interface>>

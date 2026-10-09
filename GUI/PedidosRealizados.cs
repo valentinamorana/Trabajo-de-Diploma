@@ -37,6 +37,7 @@ namespace GUI
         // PN04, CU-DEP-02 Reportar Prenda Perdida: prendas del pedido actualmente mostrado
         // en dgvDetalle, para resolver la selección sin agregar una columna ID visible.
         private List<BE.Prenda> _prendasDetalleActual = new List<BE.Prenda>();
+        private BE.Pedido _pedidoDetalleActual;
 
         // Idioma activo — se actualiza en UpdateLanguage para poder usarlo
         // en los helpers EstadoLabel() y ComputarUrgencia() que no reciben parámetro.
@@ -336,6 +337,7 @@ namespace GUI
                 if (pedido == null) return;
 
                 _prendasDetalleActual = pedido.Prendas;
+                _pedidoDetalleActual  = pedido;
 
                 string prendasLbl = Tr("col.ped.prendas", "prenda(s)");
                 lblDetalleTitulo.Text = Tr("lbl.ped.detalletitulo", "Pedido #{0}  ·  {1}  ·  {2}  ·  {3} {4}",
@@ -401,7 +403,8 @@ namespace GUI
         private void DgvDetalle_SelectionChanged(object sender, EventArgs e)
         {
             var prenda = ObtenerPrendaDetalleSeleccionada();
-            btnReportarPerdida.Enabled = prenda != null && prenda.PuedeReportarsePerdida();
+            // Compra tácita (PN04): solo con el pedido Entregado hace 30 días o más.
+            btnReportarPerdida.Enabled = inspeccionBLL.PuedeReportarPerdida(prenda, _pedidoDetalleActual);
         }
 
         // Resuelve por IdPrenda (columna oculta), no por índice de fila: dgvDetalle permite
@@ -530,7 +533,7 @@ namespace GUI
         private void BtnReportarPerdida_Click(object sender, EventArgs e)
         {
             var prenda = ObtenerPrendaDetalleSeleccionada();
-            if (prenda == null || !prenda.PuedeReportarsePerdida()) return;
+            if (!inspeccionBLL.PuedeReportarPerdida(prenda, _pedidoDetalleActual)) return;
 
             using (var dlg = new CargoPrendaDialog(prenda, prenda.PrecioReposicion))
             {

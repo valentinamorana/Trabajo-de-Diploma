@@ -15,7 +15,8 @@ flowchart TD
     a2["Inspecciona cada prenda"]
     d1{"¿Desgaste normal?"}
     a3["Aprueba el reingreso"]
-    a9["Consultar el detalle de prendas del pedido (En uso)"]
+    dt{"¿Pasaron 30 días desde la entrega? (compra tácita)"}
+    a9["Consultar el detalle de prendas del pedido Entregado (En uso)"]
     a5["Indica motivo del daño o de la pérdida y monto"]
     a10["Recibir el rechazo"]
     f3(((" ")))
@@ -27,7 +28,7 @@ flowchart TD
     direction TB
     a4["Prenda Disponible sin cargo (cierra mantenimiento y avisa a la lista de espera)"]
     d2{"¿Tiene último cliente y datos válidos?"}
-    a6["Registra el cargo contra el último cliente y da la prenda de baja (una transacción)"]
+    a6["Registra el cargo contra el último cliente, da la prenda de baja, cierra su mantenimiento y cancela su lista de espera (una transacción)"]
     a7["El cargo se suma al próximo cobro de la suscripción"]
     f(((" ")))
     o5[/"Cargo de reposición (Pendiente, último cliente)"/]:::doc
@@ -45,7 +46,9 @@ flowchart TD
   a3 --> a4
   a4 --> f
   d1 -- "No, dañada" --> a5
-  d0 -- "No, perdida" --> a9
+  d0 -- "No" --> dt
+  dt -- "No, sigue en alquiler" --> d0
+  dt -- "Sí" --> a9
   a9 --> a5
   a5 --> d2
   d2 -- "No" --> a10

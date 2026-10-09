@@ -7148,3 +7148,11 @@ ES	ayuda.pie	Para la ayuda general, presioná F1 en el menú principal.
 EN	ayuda.pie	For general help, press F1 in the main menu.
 RU	ayuda.pie	Для общей справки нажмите F1 в главном меню.
 PT	ayuda.pie	Para a ajuda geral, pressione F1 no menu principal.
+ES	err.bll.insp.perdida_no_entregado	Solo se puede reportar como perdida una prenda de un pedido Entregado: el cliente todavía no la recibió.
+EN	err.bll.insp.perdida_no_entregado	Only a garment from a Delivered order can be reported as lost: the customer has not received it yet.
+RU	err.bll.insp.perdida_no_entregado	Сообщить о потере можно только для вещи из доставленного заказа: клиент ещё не получил её.
+PT	err.bll.insp.perdida_no_entregado	Só é possível reportar como perdida uma peça de um pedido Entregue: o cliente ainda não a recebeu.
+ES	err.bll.insp.perdida_plazo	La compra tácita rige a los {0} días de la entrega: desde el {1:d}. Faltan {2} día(s).
+EN	err.bll.insp.perdida_plazo	The implied purchase applies {0} days after delivery: from {1:d}. {2} day(s) to go.
+RU	err.bll.insp.perdida_plazo	Подразумеваемая покупка действует через {0} дней после доставки: с {1:d}. Осталось дней: {2}.
+PT	err.bll.insp.perdida_plazo	A compra tácita vale {0} dias após a entrega: a partir de {1:d}. Faltam {2} dia(s).

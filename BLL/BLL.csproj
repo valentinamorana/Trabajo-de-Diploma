@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Bitacora.cs" />
     <Compile Include="Politicas\PoliticaCambioPlan.cs" />
+    <Compile Include="Politicas\PoliticaCompraTacita.cs" />
     <Compile Include="Politicas\PoliticaCuotas.cs" />
     <Compile Include="Politicas\PoliticaDescuento.cs" />
     <Compile Include="PanelAlertas.cs" />

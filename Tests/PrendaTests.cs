@@ -170,34 +170,6 @@ namespace Tests
         }
 
         [TestMethod]
-        public void CambiarEstado_EnLimpiezaABajaViaInspeccion_Permite()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
-            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
-
-            bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja, actor: "deposito", viaInspeccion: true);
-
-            Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
-            Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
-        }
-
-        [TestMethod]
-        public void CambiarEstado_EnUsoABajaViaFlujoPerdida_Permite()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
-            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnUso };
-
-            bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja, actor: "vendedor1", viaFlujoPerdida: true);
-
-            Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
-            Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
-        }
-
-        [TestMethod]
         public void CambiarEstado_EnLimpiezaADisponible_NoRequiereFlujoPerdida()
         {
             // La guarda es específica de EnUso→Baja; otras transiciones válidas del patrón State

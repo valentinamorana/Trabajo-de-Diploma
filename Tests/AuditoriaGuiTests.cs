@@ -190,14 +190,25 @@ namespace Tests
                 Llamadas.Add((cargo, estadoEsperado));
                 return 99;
             }
+
+            // Por defecto, la prenda es de un pedido entregado hace 45 días (compra tácita vencida).
+            public BE.Pedido PedidoEnCurso = new BE.Pedido
+            {
+                IdPedido = 10, IdCliente = 3, Estado = BE.EstadoPedido.Entregado, FechaEntrega = Hoy.AddDays(-45)
+            };
+            public BE.Pedido ObtenerPedidoEnCurso(int idPrenda) => PedidoEnCurso;
         }
+
+        private static readonly DateTime Hoy = new DateTime(2026, 10, 9);
+
+        private static BLL.InspeccionDevolucion Inspeccion(FakeInspeccionDAL dal) =>
+            new BLL.InspeccionDevolucion(dal, new PrendaServiceEspia(), () => Hoy);
 
         // Espía de CambiarEstado (re-implementa la interfaz sobre el fake existente).
         private sealed class PrendaServiceEspia : FakePrendaService, BLL.Interfaces.IPrendaService
         {
             public readonly List<BE.EstadoPrenda> Cambios = new List<BE.EstadoPrenda>();
-            public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null,
-                                          bool viaFlujoPerdida = false, bool viaInspeccion = false)
+            public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null)
                 => Cambios.Add(nuevoEstado);
         }
 
@@ -233,11 +244,76 @@ namespace Tests
             var dal = new FakeInspeccionDAL();
             var prenda = Prenda(BE.EstadoPrenda.EnUso);
 
-            new BLL.InspeccionDevolucion(dal, new PrendaServiceEspia()).ReportarPerdida("Test", prenda, "Perdida", 2000m);
+            Inspeccion(dal).ReportarPerdida("Test", prenda, "Perdida", 2000m);
 
             Assert.AreEqual(BE.EstadoPrenda.EnUso, dal.Llamadas.Single().Esperado);
             Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
             Assert.IsNull(prenda.IdClienteActual);
+        }
+
+        // PN04 — compra tácita: el cliente nunca recibió la prenda (pedido Separado, Pendiente o
+        // Despachado). Antes se podía cobrar la reposición completa y despachar el pedido igual.
+        [TestMethod]
+        public void ReportarPerdida_PedidoNoEntregado_RechazaSinTocarElDAL()
+        {
+            LoginComoAdministrador();
+            foreach (var estado in new[] { BE.EstadoPedido.Separado, BE.EstadoPedido.Pendiente, BE.EstadoPedido.Despachado })
+            {
+                var dal = new FakeInspeccionDAL();
+                dal.PedidoEnCurso = new BE.Pedido { IdPedido = 10, IdCliente = 3, Estado = estado };
+                var prenda = Prenda(BE.EstadoPrenda.EnUso);
+                try
+                {
+                    Inspeccion(dal).ReportarPerdida("Test", prenda, "Perdida", 2000m);
+                    Assert.Fail("Debía rechazar una prenda que el cliente todavía no recibió (pedido " + estado + ").");
+                }
+                catch (BE.AppException ex) { Assert.AreEqual("err.bll.insp.perdida_no_entregado", ex.Clave); }
+                Assert.AreEqual(0, dal.Llamadas.Count);
+                Assert.AreEqual(BE.EstadoPrenda.EnUso, prenda.Estado);
+            }
+        }
+
+        [TestMethod]
+        public void ReportarPerdida_AntesDeLos30Dias_RechazaConLosDiasQueFaltan()
+        {
+            LoginComoAdministrador();
+            var dal = new FakeInspeccionDAL();
+            dal.PedidoEnCurso.FechaEntrega = Hoy.AddDays(-29);
+            try
+            {
+                Inspeccion(dal).ReportarPerdida("Test", Prenda(BE.EstadoPrenda.EnUso), "Perdida", 2000m);
+                Assert.Fail("Debía rechazar: el plazo de compra tácita no venció.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.insp.perdida_plazo", ex.Clave);
+                StringAssert.Contains(ex.Message, "Faltan 1 día");
+            }
+            Assert.AreEqual(0, dal.Llamadas.Count);
+        }
+
+        [TestMethod]
+        public void ReportarPerdida_ElDia30_Permite()
+        {
+            LoginComoAdministrador();
+            var dal = new FakeInspeccionDAL();
+            dal.PedidoEnCurso.FechaEntrega = Hoy.AddDays(-30).AddHours(15);   // la hora no cuenta
+            Inspeccion(dal).ReportarPerdida("Test", Prenda(BE.EstadoPrenda.EnUso), "Perdida", 2000m);
+            Assert.AreEqual(1, dal.Llamadas.Count);
+        }
+
+        [TestMethod]
+        public void PuedeReportarPerdida_SoloConPedidoEntregadoHace30Dias()
+        {
+            var bll = Inspeccion(new FakeInspeccionDAL());
+            var prenda = Prenda(BE.EstadoPrenda.EnUso);
+            var entregado = new BE.Pedido { Estado = BE.EstadoPedido.Entregado, FechaEntrega = Hoy.AddDays(-30) };
+            Assert.IsTrue(bll.PuedeReportarPerdida(prenda, entregado));
+            entregado.FechaEntrega = Hoy.AddDays(-10);
+            Assert.IsFalse(bll.PuedeReportarPerdida(prenda, entregado));
+            Assert.IsFalse(bll.PuedeReportarPerdida(prenda, new BE.Pedido { Estado = BE.EstadoPedido.Despachado }));
+            Assert.IsFalse(bll.PuedeReportarPerdida(Prenda(BE.EstadoPrenda.EnLimpieza), entregado));
+            Assert.IsFalse(bll.PuedeReportarPerdida(prenda, null));
         }
 
         [TestMethod]
@@ -262,7 +338,7 @@ namespace Tests
             var dal = new FakeInspeccionDAL();
             try
             {
-                new BLL.InspeccionDevolucion(dal, new PrendaServiceEspia())
+                Inspeccion(dal)
                     .ReportarPerdida("Test", Prenda(BE.EstadoPrenda.EnUso, ultimoCliente: null), "x", 10m);
                 Assert.Fail("Debía rechazar una prenda sin último cliente.");
             }

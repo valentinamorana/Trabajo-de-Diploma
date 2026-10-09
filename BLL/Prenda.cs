@@ -38,15 +38,25 @@ namespace BLL
 
         public List<BE.Prenda> ObtenerTodos()                   => dalPrenda.ObtenerTodos();
 
-        // Categorías que hoy existen en el catálogo (sin las de prendas dadas de baja), para elegir
-        // la de una promoción sin errores de tipeo (PN03). Sin distinguir mayúsculas.
+        // Catálogo de categorías activas (tabla Categoria, 3FN): las que se ofrecen al cargar una prenda,
+        // una promoción o una sugerencia (PN03). Antes el formulario de prendas tenía su propia lista
+        // fija ("Vestidos", en plural) distinta de los datos ("Vestido") y las promociones derivaban
+        // las suyas de las prendas cargadas.
         public List<string> ObtenerCategorias() =>
-            dalPrenda.ObtenerTodos()
-                .Where(p => p.Estado != BE.EstadoPrenda.Baja && !string.IsNullOrWhiteSpace(p.Categoria))
-                .Select(p => p.Categoria.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
+            (dalPrenda.ObtenerCategorias() ?? new List<string>())
                 .OrderBy(c => c, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
+
+        // Lista para un combo: el catálogo activo más la categoría que ya tiene el registro que se
+        // edita, si dejó de estar activa (así editar no la cambia por otra).
+        public List<string> ObtenerCategoriasParaEditar(string categoriaActual)
+        {
+            var lista = ObtenerCategorias();
+            if (!string.IsNullOrWhiteSpace(categoriaActual)
+                && !lista.Exists(c => string.Equals(c, categoriaActual.Trim(), StringComparison.CurrentCultureIgnoreCase)))
+                lista.Add(categoriaActual.Trim());
+            return lista;
+        }
         public List<BE.Prenda> ObtenerPorCliente(int id)       => dalPrenda.ObtenerPorCliente(id);
 
         // Prendas Disponible, excluyendo las reservadas por Lista de Espera para OTRO
@@ -310,6 +320,18 @@ namespace BLL
             if (string.IsNullOrWhiteSpace(prenda.Categoria))
                 throw new BE.AppException("err.bll.prenda.categoria_requerida",
                     "La categoría es obligatoria.");
+
+            // Del catálogo (Categoria); una categoría desactivada solo se acepta si es la que la prenda
+            // ya tenía. La FK de la base lo respalda, pero acá el error sale claro y traducido.
+            prenda.Categoria = prenda.Categoria.Trim();
+            bool enCatalogo = ObtenerCategorias().Exists(c => string.Equals(c, prenda.Categoria, StringComparison.CurrentCultureIgnoreCase));
+            if (!enCatalogo)
+            {
+                string actual = prenda.IdPrenda > 0 ? dalPrenda.ObtenerPorId(prenda.IdPrenda)?.Categoria : null;
+                if (!string.Equals(actual?.Trim(), prenda.Categoria, StringComparison.CurrentCultureIgnoreCase))
+                    throw new BE.AppException("err.bll.prenda.categoria_invalida",
+                        "La categoría '{0}' no está en el catálogo de categorías.", prenda.Categoria);
+            }
         }
     }
 }

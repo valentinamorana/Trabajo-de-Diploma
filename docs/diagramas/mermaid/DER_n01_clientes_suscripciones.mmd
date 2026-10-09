@@ -2,9 +2,11 @@ erDiagram
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
+  MedioPago |o--o{ Cliente : "IdMedioPagoPreferido"
   PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   Cliente ||--o{ HistorialCobro : "IdCliente"
+  MedioPago |o--o{ HistorialCobro : "IdMedioPago"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
@@ -23,7 +25,6 @@ erDiagram
     nvarchar(100) Apellido
     nvarchar(200) DNI
     nvarchar(200) Email "NULL"
-    nvarchar(100) MetodoPago "NULL"
     int IdPlan FK "NULL"
     datetime FechaAlta
     date FechaNacimiento
@@ -35,8 +36,16 @@ erDiagram
     int IdClienteReferente FK "NULL"
     decimal(10_2) DescuentoProximoCobro
     bit BeneficioReferidoOtorgado
+    int IdMedioPagoPreferido FK "NULL"
     int IdPlanSiguiente FK "NULL"
     datetime FechaCambioPlan "NULL"
+  }
+  MedioPago {
+    int IdMedioPago PK
+    nvarchar(50) Nombre
+    nvarchar(100) ClaveTraduccion
+    bit PermiteCuotas
+    bit Activo
   }
   HistorialRenovacion {
     int IdRenovacion PK
@@ -79,7 +88,7 @@ erDiagram
     nvarchar(500) Descripcion "NULL"
     nvarchar(20) Talle "NULL"
     nvarchar(50) Color "NULL"
-    nvarchar(100) Categoria "NULL"
+    nvarchar(100) Categoria FK "NULL"
     int Estado
     int IdClienteActual FK "NULL"
     datetime FechaAlta

@@ -63,6 +63,25 @@ namespace Tests
             new DAL.Contratacion().ReabrirPago(-1, new System.Collections.Generic.List<int> { -1 });
         }
 
+        // Normalización 3FN: catálogo de categorías, medio de pago preferido por FK y origen del
+        // mantenimiento, leídos por los DAL contra la base instalada por el script.
+        [TestMethod]
+        public void Normalizacion3FN_LosDalLeenLosCatalogos()
+        {
+            ExigirBase();
+            CollectionAssert.Contains(new DAL.Prenda().ObtenerCategorias(), "Vestido");
+
+            var dalCliente = new DAL.Cliente();
+            Assert.IsTrue(dalCliente.ObtenerMediosPago().Exists(m => m.IdMedioPago == BE.MedioPago.IdEfectivo && m.Activo));
+            Assert.IsTrue(dalCliente.ObtenerTodos().All(c => c.IdMedioPagoPreferido.HasValue && c.MetodoPago != null
+                                                            && c.ClaveTraduccionMedioPago != null),
+                "Los clientes de demo tienen su medio de pago preferido del catálogo (con nombre y clave por JOIN).");
+
+            // La prenda de demo en limpieza la mandó el depósito a mano: no viene de una devolución.
+            var mantenimientos = new DAL.MantenimientoPrenda().ObtenerTodos();
+            Assert.IsTrue(mantenimientos.Exists(m => m.Actor == "deposito" && m.Origen == BE.OrigenMantenimiento.Manual));
+        }
+
         [TestMethod]
         public void Cliente_EscrituraEnTransaccion_DejaElDvhAlDiaAntesDelCommit()
         {
@@ -144,6 +163,10 @@ namespace Tests
                 Assert.AreEqual(idPedido, new DAL.InspeccionDevolucion().ObtenerPedidoEnCurso(idPrenda)?.IdPedido);
 
                 Assert.AreEqual(1, dal.RegistrarDevolucion(idPedido, idCliente));
+                var abierto = new DAL.MantenimientoPrenda().ObtenerPorPrenda(idPrenda).Single(m => m.EstaAbierto);
+                Assert.AreEqual(BE.OrigenMantenimiento.Devolucion, abierto.Origen,
+                    "La devolución abre el mantenimiento con Origen = Devolución (lo que la lleva a la Inspección).");
+                Assert.IsNull(abierto.Actor, "Actor ya no lleva una marca de texto.");
 
                 var despues = dal.ObtenerPorId(idPedido);
                 Assert.AreEqual(BE.EstadoPedido.Entregado, despues.Estado, "El estado no cambia.");

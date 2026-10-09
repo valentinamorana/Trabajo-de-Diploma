@@ -339,7 +339,8 @@ BEGIN
         Apellido         NVARCHAR(100) NOT NULL,
         DNI              NVARCHAR(200) NOT NULL,  -- T03: almacena el DNI CIFRADO (AES Base64)
         Email            NVARCHAR(200) NULL,
-        MetodoPago       NVARCHAR(100) NULL,
+        -- El medio de pago preferido (IdMedioPagoPreferido, FK a MedioPago) lo agrega la sección
+        -- 20c5: el catálogo MedioPago se crea recién en la 20c.
         IdPlan           INT           NULL REFERENCES PlanSuscripcion(IdPlan),
         FechaAlta        DATETIME      NOT NULL DEFAULT GETDATE(),
         FechaNacimiento  DATE          NOT NULL,  -- obligatoria: validar mayoría de edad
@@ -446,10 +447,10 @@ ELSE
     PRINT 'Tabla BitacoraNegocio ya existe — sin cambios.';
 GO
 
--- RolPermiso (asignación PLANA rol→patente) — LEGACY / SOLO SEED-BOOTSTRAP.
+-- RolPermiso (asignación PLANA rol→patente) — TABLA DE PASO DEL INSTALADOR.
 -- Se usa únicamente para sembrar el árbol: desde estas asignaciones se generan los nodos-rol y
 -- las aristas de [PermisoRelacion], que es la ÚNICA fuente de verdad de autorización en runtime.
--- El sistema NO escribe esta tabla en runtime y solo la lee en fallbacks para BDs sin migrar.
+-- El sistema no la lee ni la escribe; la sección 21z5 la borra al final del script (3FN).
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'RolPermiso')
 BEGIN
     CREATE TABLE RolPermiso (
@@ -702,7 +703,8 @@ SELECT v.Codigo, v.Nombre, v.Activo, v.EsDefault
 FROM (VALUES
     ('ES', N'Español', 1, 1),
     ('EN', N'English', 1, 0),
-    ('RU', N'Русский', 1, 0)
+    ('RU', N'Русский', 1, 0),
+    ('PT', N'Português', 1, 0)   -- la app también lo crea al sembrar traducciones; acá queda para la FK de Usuario.IdIdioma
 ) AS v(Codigo, Nombre, Activo, EsDefault)
 WHERE NOT EXISTS (SELECT 1 FROM Idioma WHERE Codigo = v.Codigo);
 PRINT 'Idiomas inicializados (ES, EN, RU, PT).';
@@ -1166,18 +1168,20 @@ WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo)
 PRINT 'Demo: empleados.';
 GO
 
--- Clientes (todos mayores de edad; FechaNacimiento obligatoria)
-INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaNacimiento, Activo, DVH)
-SELECT v.Nombre, v.Apellido, v.DNI, v.Email, v.MetodoPago,
+-- Clientes (todos mayores de edad; FechaNacimiento obligatoria). Sin medio de pago preferido: el
+-- catálogo MedioPago todavía no existe (sección 20c) y en una instalación nueva la sección 21e
+-- reemplaza estos clientes por los de los escenarios de demo.
+INSERT INTO Cliente (Nombre, Apellido, DNI, Email, IdPlan, FechaAlta, FechaNacimiento, Activo, DVH)
+SELECT v.Nombre, v.Apellido, v.DNI, v.Email,
        (SELECT TOP 1 IdPlan FROM PlanSuscripcion p WHERE p.Nombre = v.PlanNom),
        GETDATE(), v.FechaNac, 1, 0
 FROM (VALUES
-    (N'Lucía',  N'Fernández', '30111222', 'lucia.fernandez@mail.com', 'Efectivo',      N'Premium',  CONVERT(date,'1990-03-15')),
-    (N'Martín', N'Gómez',     '28999111', 'martin.gomez@mail.com',    N'Crédito',       N'Estándar', CONVERT(date,'1985-07-22')),
-    (N'Sofía',  N'Rossi',     '35444555', 'sofia.rossi@mail.com',     N'Débito',        N'Básico',   CONVERT(date,'1998-11-02')),
-    (N'Diego',  N'Paz',       '27333444', 'diego.paz@mail.com',       'Transferencia', N'Estándar', CONVERT(date,'1982-01-30')),
-    (N'Camila', N'Torres',    '40222333', 'camila.torres@mail.com',   'Efectivo',      N'Premium',  CONVERT(date,'2001-06-10'))
-) AS v(Nombre, Apellido, DNI, Email, MetodoPago, PlanNom, FechaNac)
+    (N'Lucía',  N'Fernández', '30111222', 'lucia.fernandez@mail.com', N'Premium',  CONVERT(date,'1990-03-15')),
+    (N'Martín', N'Gómez',     '28999111', 'martin.gomez@mail.com',    N'Estándar', CONVERT(date,'1985-07-22')),
+    (N'Sofía',  N'Rossi',     '35444555', 'sofia.rossi@mail.com',     N'Básico',   CONVERT(date,'1998-11-02')),
+    (N'Diego',  N'Paz',       '27333444', 'diego.paz@mail.com',       N'Estándar', CONVERT(date,'1982-01-30')),
+    (N'Camila', N'Torres',    '40222333', 'camila.torres@mail.com',   N'Premium',  CONVERT(date,'2001-06-10'))
+) AS v(Nombre, Apellido, DNI, Email, PlanNom, FechaNac)
 WHERE NOT EXISTS (SELECT 1 FROM Cliente c WHERE (c.Nombre = v.Nombre AND c.Apellido = v.Apellido) OR c.DNI = v.DNI)  -- también por DNI: un cliente demo renombrado no se duplica
   AND EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente');  -- solo en instalación nueva
 PRINT 'Demo: clientes.';
@@ -2886,6 +2890,93 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_HistorialCobro_IdPromo
 PRINT 'Sección 20c4: medio de pago, comprobante y promoción del cobro recurrente verificados.';
 GO
 -- ============================================================
+-- WardrobeFlow — 20c5. CLIENTE: MEDIO DE PAGO PREFERIDO POR CATÁLOGO (3FN)
+-- ------------------------------------------------------------
+--   Cliente.MetodoPago era texto libre ("Efectivo", "Crédito"...) con los mismos valores que el
+--   catálogo MedioPago de Caja escrito de otra forma: el nombre del medio dependía del cliente y no
+--   de la clave. Pasa a Cliente.IdMedioPagoPreferido (FK a MedioPago).
+--   Migración del texto (sin perder datos): se mapea por la clave de traducción del catálogo
+--   (el Id de «Tarjeta de débito» puede ser 2 o 5 según la base, ver 20c2) y después por nombre;
+--   un texto que no está en el catálogo se conserva como medio HISTÓRICO (Activo = 0: no se ofrece
+--   en cobros nuevos ni en el alta de clientes; Ids desde 100). Vacío → NULL. Después se quita la
+--   columna vieja (y su DEFAULT, si lo tenía).
+--   La columna entra en el dígito verificador de Cliente (DAL.Cliente.DV_Columnas): si la base ya
+--   tenía la columna vieja, se pide el recálculo ('DVReinicializar', sección 22).
+-- Idempotente.
+-- ============================================================
+IF COL_LENGTH('Cliente', 'IdMedioPagoPreferido') IS NULL
+BEGIN
+    ALTER TABLE Cliente ADD IdMedioPagoPreferido INT NULL
+        CONSTRAINT FK_Cliente_MedioPagoPreferido REFERENCES MedioPago(IdMedioPago);
+    PRINT 'Cliente: columna IdMedioPagoPreferido agregada.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Cliente_IdMedioPagoPreferido' AND object_id = OBJECT_ID('Cliente'))
+    CREATE NONCLUSTERED INDEX IX_Cliente_IdMedioPagoPreferido ON Cliente(IdMedioPagoPreferido);
+GO
+
+IF COL_LENGTH('Cliente', 'MetodoPago') IS NOT NULL
+BEGIN
+    -- Dinámico: en una base nueva la columna ya no existe y el lote no compilaría.
+    EXEC(N'
+        DECLARE @mapa TABLE (Texto NVARCHAR(100) COLLATE DATABASE_DEFAULT NOT NULL PRIMARY KEY, IdMedioPago INT NULL);
+        INSERT INTO @mapa (Texto)
+        SELECT DISTINCT LTRIM(RTRIM(MetodoPago)) FROM Cliente
+        WHERE MetodoPago IS NOT NULL AND LTRIM(RTRIM(MetodoPago)) <> N'''';
+
+        -- 1) Por la clave del catálogo (los valores que ofrecía el formulario de clientes).
+        UPDATE m SET m.IdMedioPago = mp.IdMedioPago
+        FROM @mapa m
+        JOIN MedioPago mp ON mp.ClaveTraduccion =
+             CASE m.Texto
+                  WHEN N''Efectivo''      THEN ''medio.efectivo''
+                  WHEN N''Débito''        THEN ''medio.tarjeta_debito''
+                  WHEN N''Debito''        THEN ''medio.tarjeta_debito''
+                  WHEN N''Crédito''       THEN ''medio.tarjeta_credito''
+                  WHEN N''Credito''       THEN ''medio.tarjeta_credito''
+                  WHEN N''Transferencia'' THEN ''medio.transferencia''
+             END;
+
+        -- 2) Por el nombre del catálogo ("Tarjeta de débito", "Tarjeta de crédito"...).
+        UPDATE m SET m.IdMedioPago = mp.IdMedioPago
+        FROM @mapa m JOIN MedioPago mp ON mp.Nombre = LEFT(m.Texto, 50)
+        WHERE m.IdMedioPago IS NULL;
+
+        -- 3) Fuera del catálogo: medio histórico inactivo, para no perder el dato del cliente.
+        DECLARE @base INT = (SELECT CASE WHEN ISNULL(MAX(IdMedioPago), 0) < 100 THEN 100 ELSE MAX(IdMedioPago) + 1 END FROM MedioPago);
+        INSERT INTO MedioPago (IdMedioPago, Nombre, ClaveTraduccion, PermiteCuotas, Activo)
+        SELECT @base + ROW_NUMBER() OVER (ORDER BY n.Nombre) - 1, n.Nombre,
+               N''medio.historico.'' + CAST(@base + ROW_NUMBER() OVER (ORDER BY n.Nombre) - 1 AS NVARCHAR(10)), 0, 0
+        FROM (SELECT DISTINCT LEFT(Texto, 50) AS Nombre FROM @mapa WHERE IdMedioPago IS NULL) n
+        WHERE NOT EXISTS (SELECT 1 FROM MedioPago mp WHERE mp.Nombre = n.Nombre);
+        DECLARE @historicos INT = @@ROWCOUNT;
+        UPDATE m SET m.IdMedioPago = mp.IdMedioPago
+        FROM @mapa m JOIN MedioPago mp ON mp.Nombre = LEFT(m.Texto, 50)
+        WHERE m.IdMedioPago IS NULL;
+
+        UPDATE c SET c.IdMedioPagoPreferido = m.IdMedioPago
+        FROM Cliente c JOIN @mapa m ON m.Texto = LTRIM(RTRIM(c.MetodoPago))
+        WHERE c.IdMedioPagoPreferido IS NULL;
+        DECLARE @migrados INT = @@ROWCOUNT;
+        PRINT ''Cliente.MetodoPago migrado a IdMedioPagoPreferido: '' + CAST(@migrados AS NVARCHAR(10)) +
+              '' cliente(s); medios históricos creados: '' + CAST(@historicos AS NVARCHAR(10)) + ''.'';');
+
+    DECLARE @dfMetodo SYSNAME = (SELECT d.name FROM sys.default_constraints d
+                                 JOIN sys.columns col ON col.object_id = d.parent_object_id AND col.column_id = d.parent_column_id
+                                 WHERE d.parent_object_id = OBJECT_ID('Cliente') AND col.name = 'MetodoPago');
+    IF @dfMetodo IS NOT NULL EXEC(N'ALTER TABLE Cliente DROP CONSTRAINT [' + @dfMetodo + N']');
+    ALTER TABLE Cliente DROP COLUMN MetodoPago;
+
+    -- El DVH de Cliente cambia de columna: recálculo en la sección 22.
+    MERGE ParametroSistema AS t
+    USING (VALUES (N'DVReinicializar', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+    WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+    WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    PRINT 'Cliente: columna MetodoPago quitada; DV a recalcular.';
+END
+PRINT 'Sección 20c5: medio de pago preferido del cliente por catálogo verificado.';
+GO
+-- ============================================================
 -- WardrobeFlow — 20d. PN03: FLUJO APROBADO DE PROMOCIONES
 -- ------------------------------------------------------------
 -- Diagrama de actividad de PN03 (corregido y aprobado):
@@ -3048,6 +3139,118 @@ BEGIN
 END
 GO
 PRINT 'Sección 20d: flujo aprobado de PN03 (historial, dictamen, solicitud de baja, vencimiento) verificado.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20e. CATÁLOGO DE CATEGORÍAS DE PRENDA (3FN)
+-- ------------------------------------------------------------
+--   Prenda.Categoria, Promocion.CategoriaPrenda y SugerenciaPromocion.CategoriaPrenda eran texto
+--   libre: la misma categoría podía escribirse de varias formas ("Vestido" en los datos y
+--   "Vestidos" en el formulario de prendas), y una promoción por categoría podía no aplicar a
+--   ninguna prenda. Pasa a ser un catálogo (Categoria) referenciado por CLAVE NATURAL
+--   (Categoria.Nombre, UNIQUE) con ON UPDATE CASCADE: renombrar una categoría actualiza sus
+--   prendas y promociones, y no hace falta cambiar el tipo de las columnas existentes.
+--   Migración: se recortan los espacios; el plural que ofrecía el formulario viejo pasa al
+--   singular de los datos ("Vestidos" → "Vestido", "Blazers" → "Saco"); todo texto que quede y
+--   no esté en el catálogo se agrega (no se pierde ningún dato). Una prenda sin categoría queda
+--   NULL; una promoción o sugerencia con la categoría en blanco pasa a "Otro" (el CHECK de
+--   destino exige categoría cuando no hay plan). Va antes de la 21e: los datos de demo usan
+--   las categorías del catálogo. Prenda y Promocion no tienen dígito verificador.
+-- Idempotente.
+-- ============================================================
+IF OBJECT_ID('Categoria', 'U') IS NULL
+BEGIN
+    CREATE TABLE Categoria (
+        IdCategoria INT IDENTITY(1,1) CONSTRAINT PK_Categoria PRIMARY KEY,
+        Nombre      NVARCHAR(100) NOT NULL CONSTRAINT UX_Categoria_Nombre UNIQUE,
+        Activo      BIT           NOT NULL CONSTRAINT DF_Categoria_Activo DEFAULT 1,
+        CONSTRAINT CHK_Categoria_Nombre CHECK (LEN(LTRIM(RTRIM(Nombre))) > 0)
+    );
+    PRINT 'Tabla Categoria creada.';
+END
+GO
+
+-- Catálogo inicial (solo con la tabla vacía: después lo administra el negocio).
+IF NOT EXISTS (SELECT 1 FROM Categoria)
+    INSERT INTO Categoria (Nombre)
+    VALUES (N'Abrigo'), (N'Accesorio'), (N'Camisa'), (N'Conjunto'), (N'Falda'), (N'Pantalón'),
+           (N'Ropa deportiva'), (N'Saco'), (N'Sweater'), (N'Top'), (N'Vestido'), (N'Otro');
+GO
+
+-- Normalización de los textos existentes (antes de las FK; sobre datos ya normalizados no cambia nada).
+DECLARE @plural TABLE (Plural NVARCHAR(100) COLLATE DATABASE_DEFAULT PRIMARY KEY, Singular NVARCHAR(100) NOT NULL);
+INSERT INTO @plural VALUES (N'Vestidos', N'Vestido'), (N'Faldas', N'Falda'), (N'Pantalones', N'Pantalón'),
+                           (N'Tops', N'Top'), (N'Blazers', N'Saco'), (N'Abrigos', N'Abrigo'),
+                           (N'Conjuntos', N'Conjunto'), (N'Accesorios', N'Accesorio');
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Prenda_Categoria')
+BEGIN
+    UPDATE Prenda SET Categoria = NULLIF(LTRIM(RTRIM(Categoria)), N'')
+    WHERE Categoria IS NOT NULL AND (DATALENGTH(Categoria) <> DATALENGTH(LTRIM(RTRIM(Categoria))) OR LTRIM(RTRIM(Categoria)) = N'');
+    UPDATE p SET p.Categoria = m.Singular FROM Prenda p JOIN @plural m ON m.Plural = p.Categoria;
+END
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Promocion_Categoria')
+BEGIN
+    UPDATE Promocion SET CategoriaPrenda = ISNULL(NULLIF(LTRIM(RTRIM(CategoriaPrenda)), N''), N'Otro')
+    WHERE CategoriaPrenda IS NOT NULL AND (DATALENGTH(CategoriaPrenda) <> DATALENGTH(LTRIM(RTRIM(CategoriaPrenda))) OR LTRIM(RTRIM(CategoriaPrenda)) = N'');
+    UPDATE p SET p.CategoriaPrenda = m.Singular FROM Promocion p JOIN @plural m ON m.Plural = p.CategoriaPrenda;
+END
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_SugerenciaPromocion_Categoria')
+BEGIN
+    UPDATE SugerenciaPromocion SET CategoriaPrenda = ISNULL(NULLIF(LTRIM(RTRIM(CategoriaPrenda)), N''), N'Otro')
+    WHERE CategoriaPrenda IS NOT NULL AND (DATALENGTH(CategoriaPrenda) <> DATALENGTH(LTRIM(RTRIM(CategoriaPrenda))) OR LTRIM(RTRIM(CategoriaPrenda)) = N'');
+    UPDATE s SET s.CategoriaPrenda = m.Singular FROM SugerenciaPromocion s JOIN @plural m ON m.Plural = s.CategoriaPrenda;
+END
+
+-- Textos fuera del catálogo: se agregan como categorías (no se pierde el dato).
+INSERT INTO Categoria (Nombre)
+SELECT DISTINCT x.Nombre
+FROM (SELECT Categoria AS Nombre FROM Prenda WHERE Categoria IS NOT NULL
+      UNION SELECT CategoriaPrenda FROM Promocion WHERE CategoriaPrenda IS NOT NULL
+      UNION SELECT CategoriaPrenda FROM SugerenciaPromocion WHERE CategoriaPrenda IS NOT NULL) x
+WHERE NOT EXISTS (SELECT 1 FROM Categoria c WHERE c.Nombre = x.Nombre);
+IF @@ROWCOUNT > 0 PRINT 'Categoria: se agregaron al catálogo categorías que ya usaban las prendas o promociones.';
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Prenda_Categoria')
+    ALTER TABLE Prenda ADD CONSTRAINT FK_Prenda_Categoria
+        FOREIGN KEY (Categoria) REFERENCES Categoria(Nombre) ON UPDATE CASCADE;
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Promocion_Categoria')
+    ALTER TABLE Promocion ADD CONSTRAINT FK_Promocion_Categoria
+        FOREIGN KEY (CategoriaPrenda) REFERENCES Categoria(Nombre) ON UPDATE CASCADE;
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_SugerenciaPromocion_Categoria')
+    ALTER TABLE SugerenciaPromocion ADD CONSTRAINT FK_SugerenciaPromocion_Categoria
+        FOREIGN KEY (CategoriaPrenda) REFERENCES Categoria(Nombre) ON UPDATE CASCADE;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Promocion_CategoriaPrenda' AND object_id = OBJECT_ID('Promocion'))
+    CREATE NONCLUSTERED INDEX IX_Promocion_CategoriaPrenda ON Promocion(CategoriaPrenda);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_SugerenciaPromocion_CategoriaPrenda' AND object_id = OBJECT_ID('SugerenciaPromocion'))
+    CREATE NONCLUSTERED INDEX IX_SugerenciaPromocion_CategoriaPrenda ON SugerenciaPromocion(CategoriaPrenda);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Prenda_Categoria' AND object_id = OBJECT_ID('Prenda'))
+    CREATE NONCLUSTERED INDEX IX_Prenda_Categoria ON Prenda(Categoria);
+PRINT 'Sección 20e: catálogo de categorías de prenda verificado.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 20f. ORIGEN DEL MANTENIMIENTO DE UNA PRENDA (PN04)
+-- ------------------------------------------------------------
+--   La devolución de un pedido (DAL.Pedido.RegistrarDevolucion) abría el mantenimiento con
+--   Actor = 'Devolución', y esa MARCA en una columna de texto libre decidía qué prendas van a la
+--   Inspección de Devolución (y a quién se le cobra el daño). Un usuario llamado "Devolución" que
+--   mandara una prenda a limpieza a mano la hacía pasar por devuelta y se le cobraba al último
+--   cliente. Ahora el origen es un dato propio: MantenimientoPrenda.Origen (0 = manual desde
+--   Prendas/Stock, 1 = devolución de un pedido, BE.OrigenMantenimiento) y Actor queda solo como
+--   quién lo abrió. Migración UNA sola vez, al crear la columna: Actor = 'Devolución' → Origen = 1
+--   y Actor = NULL. Va antes de la 21z3, que usa el origen. Idempotente.
+-- ============================================================
+IF COL_LENGTH('MantenimientoPrenda', 'Origen') IS NULL
+BEGIN
+    ALTER TABLE MantenimientoPrenda ADD Origen TINYINT NOT NULL
+        CONSTRAINT DF_MantenimientoPrenda_Origen DEFAULT 0
+        CONSTRAINT CHK_MantenimientoPrenda_Origen CHECK (Origen IN (0, 1));
+    EXEC(N'UPDATE MantenimientoPrenda SET Origen = 1, Actor = NULL WHERE Actor = N''Devolución'';
+           DECLARE @n INT = @@ROWCOUNT;
+           PRINT ''MantenimientoPrenda: columna Origen agregada; '' + CAST(@n AS NVARCHAR(10)) + '' mantenimiento(s) de devolución migrados.'';');
+END
+GO
+PRINT 'Sección 20f: origen del mantenimiento de prendas verificado.';
 GO
 -- ============================================================
 -- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
@@ -3326,30 +3529,33 @@ BEGIN
     DECLARE @pBasico  INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Básico'   AND Estado = 1);
     DECLARE @pEstand  INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Estándar' AND Estado = 1);
     DECLARE @pPremium INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Premium'  AND Estado = 1);
+    -- «Tarjeta de débito» es el Id 2 o el 5 según la base (sección 20c2): se busca por su clave.
+    DECLARE @mDebito  INT = (SELECT TOP 1 IdMedioPago FROM MedioPago WHERE ClaveTraduccion = 'medio.tarjeta_debito' AND Activo = 1);
 
     -- ── Clientes: el apellido dice qué escenario muestran ────────────────────
-    INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaNacimiento,
+    INSERT INTO Cliente (Nombre, Apellido, DNI, Email, IdMedioPagoPreferido, IdPlan, FechaAlta, FechaNacimiento,
                          FechaVencimiento, FechaPausaHasta, Activo, DVH)
-    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, v.MetodoPago, v.IdPlan,
+    SELECT v.Nombre, v.Apellido, v.DNI, v.Email,
+           (SELECT TOP 1 mp.IdMedioPago FROM MedioPago mp WHERE mp.ClaveTraduccion = v.ClaveMedio AND mp.Activo = 1), v.IdPlan,
            DATEADD(DAY, -v.DiasAlta, GETDATE()), v.FechaNac,
            CASE WHEN v.DiasVence IS NULL THEN NULL ELSE DATEADD(DAY, v.DiasVence, @hoy) END,
            CASE WHEN v.DiasPausa IS NULL THEN NULL ELSE DATEADD(DAY, v.DiasPausa, GETDATE()) END,
            1, 0
     FROM (VALUES
         -- PN01
-        (N'Juan',    N'PedidoFeliz',          '40000001', 'juan.pedidofeliz@demo.com',          N'Crédito',       @pPremium, 120, CONVERT(date,'1990-03-12'),   30, NULL),
-        (N'Ana',     N'PrendasNoDisponibles', '40000002', 'ana.prendasnodisponibles@demo.com',  N'Débito',        @pEstand,   90, CONVERT(date,'1992-07-21'),   25, NULL),
-        (N'Nicolas', N'ExcedeCupo',           '40000003', 'nicolas.excedecupo@demo.com',        N'Débito',        @pBasico,   60, CONVERT(date,'1997-04-14'),   20, NULL),
-        (N'Sofia',   N'ListaParaFormalizar',  '40000004', 'sofia.listaparaformalizar@demo.com', N'Crédito',       @pPremium,  75, CONVERT(date,'1994-11-02'),   28, NULL),
-        (N'Pedro',   N'PedidoActivo',         '40000005', 'pedro.pedidoactivo@demo.com',        'Transferencia', @pEstand,  150, CONVERT(date,'1988-02-09'),   15, NULL),
-        (N'Lucia',   N'SuscripcionVencida',   '40000006', 'lucia.suscripcionvencida@demo.com',  N'Crédito',       @pEstand,  200, CONVERT(date,'1991-09-30'),  -10, NULL),
-        (N'Tomas',   N'SuscripcionPausada',   '40000007', 'tomas.suscripcionpausada@demo.com',  N'Débito',        @pBasico,  100, CONVERT(date,'1995-09-03'),   40,   20),
+        (N'Juan',    N'PedidoFeliz',          '40000001', 'juan.pedidofeliz@demo.com',          'medio.tarjeta_credito', @pPremium, 120, CONVERT(date,'1990-03-12'),   30, NULL),
+        (N'Ana',     N'PrendasNoDisponibles', '40000002', 'ana.prendasnodisponibles@demo.com',  'medio.tarjeta_debito',  @pEstand,   90, CONVERT(date,'1992-07-21'),   25, NULL),
+        (N'Nicolas', N'ExcedeCupo',           '40000003', 'nicolas.excedecupo@demo.com',        'medio.tarjeta_debito',  @pBasico,   60, CONVERT(date,'1997-04-14'),   20, NULL),
+        (N'Sofia',   N'ListaParaFormalizar',  '40000004', 'sofia.listaparaformalizar@demo.com', 'medio.tarjeta_credito', @pPremium,  75, CONVERT(date,'1994-11-02'),   28, NULL),
+        (N'Pedro',   N'PedidoActivo',         '40000005', 'pedro.pedidoactivo@demo.com',        'medio.transferencia',   @pEstand,  150, CONVERT(date,'1988-02-09'),   15, NULL),
+        (N'Lucia',   N'SuscripcionVencida',   '40000006', 'lucia.suscripcionvencida@demo.com',  'medio.tarjeta_credito', @pEstand,  200, CONVERT(date,'1991-09-30'),  -10, NULL),
+        (N'Tomas',   N'SuscripcionPausada',   '40000007', 'tomas.suscripcionpausada@demo.com',  'medio.tarjeta_debito',  @pBasico,  100, CONVERT(date,'1995-09-03'),   40,   20),
         -- PN02
-        (N'Laura',   N'SinPlan',              '40000008', 'laura.sinplan@demo.com',             'Efectivo',      NULL,        3, CONVERT(date,'1999-12-21'), NULL, NULL),
-        (N'Rocio',   N'ReferidaPorJuan',      '40000009', 'rocio.referidaporjuan@demo.com',     'Efectivo',      NULL,        1, CONVERT(date,'2000-06-15'), NULL, NULL),
-        (N'Diego',   N'PagoPendiente',        '40000010', 'diego.pagopendiente@demo.com',       'Transferencia', NULL,        2, CONVERT(date,'1993-08-27'), NULL, NULL),
-        (N'Elena',   N'TercerIntentoFallido', '40000011', 'elena.tercerintentofallido@demo.com', N'Crédito',      NULL,        4, CONVERT(date,'1996-01-19'), NULL, NULL)
-    ) AS v(Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, DiasAlta, FechaNac, DiasVence, DiasPausa);
+        (N'Laura',   N'SinPlan',              '40000008', 'laura.sinplan@demo.com',             'medio.efectivo',        NULL,        3, CONVERT(date,'1999-12-21'), NULL, NULL),
+        (N'Rocio',   N'ReferidaPorJuan',      '40000009', 'rocio.referidaporjuan@demo.com',     'medio.efectivo',        NULL,        1, CONVERT(date,'2000-06-15'), NULL, NULL),
+        (N'Diego',   N'PagoPendiente',        '40000010', 'diego.pagopendiente@demo.com',       'medio.transferencia',   NULL,        2, CONVERT(date,'1993-08-27'), NULL, NULL),
+        (N'Elena',   N'TercerIntentoFallido', '40000011', 'elena.tercerintentofallido@demo.com', 'medio.tarjeta_credito',NULL,        4, CONVERT(date,'1996-01-19'), NULL, NULL)
+    ) AS v(Nombre, Apellido, DNI, Email, ClaveMedio, IdPlan, DiasAlta, FechaNac, DiasVence, DiasPausa);
 
     DECLARE @cJuan   INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000001');
     DECLARE @cAna    INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000002');
@@ -3453,7 +3659,7 @@ BEGIN
                                   IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado,
                                   VigenciaDesde, VigenciaHasta, PrecioMensual)
         SELECT @cJuan, pl.IdPlan, @vend, @caja, 0, 1, DATEADD(DAY, -120, GETDATE()), DATEADD(DAY, -120, GETDATE()),
-               2, 'CMP-0001-' + FORMAT(DATEADD(DAY, -120, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -120, GETDATE()),
+               @mDebito, 'CMP-0001-' + FORMAT(DATEADD(DAY, -120, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -120, GETDATE()),
                pl.Precio, 0, DATEADD(DAY, -120, @hoy), DATEADD(DAY, 30, @hoy),   -- misma vigencia que la suscripción de Juan
                pl.Precio
         FROM PlanSuscripcion pl WHERE pl.IdPlan = @pPremium AND @caja IS NOT NULL AND @cJuan IS NOT NULL;
@@ -3468,7 +3674,7 @@ BEGIN
         WHERE v.Cli IS NOT NULL;
 
         INSERT INTO ContratacionIntentoPago (IdContratacion, NroIntento, Fecha, IdMedioPago, Motivo, IdCaja)
-        SELECT c.IdContratacion, v.Nro, DATEADD(HOUR, -v.Horas, GETDATE()), 2, v.Motivo, @caja
+        SELECT c.IdContratacion, v.Nro, DATEADD(HOUR, -v.Horas, GETDATE()), @mDebito, v.Motivo, @caja
         FROM Contratacion c
         CROSS JOIN (VALUES (1, 20, N'Tarjeta rechazada'), (2, 4, N'Fondos insuficientes')) AS v(Nro, Horas, Motivo)
         WHERE c.IdCliente = @cElena AND c.Estado = 0 AND @caja IS NOT NULL;
@@ -3714,7 +3920,7 @@ BEGIN
                (SELECT MAX(m.FechaEntrada)
                   FROM MantenimientoPrenda m
                   INNER JOIN PedidoPrenda pp ON pp.IdPrenda = m.IdPrenda AND pp.IdPedido = ped.IdPedido
-                 WHERE m.Actor = N'Devolución' AND m.FechaEntrada >= ped.FechaEntrega),
+                 WHERE m.Origen = 1 AND m.FechaEntrada >= ped.FechaEntrega),   -- 1 = devolución (sección 20f)
                ped.FechaEntrega)
       FROM Pedido ped
      WHERE ped.Estado = 2                       -- Entregado
@@ -3930,6 +4136,91 @@ BEGIN
     WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
     PRINT CONCAT('Traducciones de fábrica corregidas: ', @@ROWCOUNT, ' fila(s).');
 END
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21z5. RESTRICCIONES DE NORMALIZACIÓN SOBRE SEGURIDAD (3FN)
+-- ------------------------------------------------------------
+-- Sin cambios de código: el motor respalda lo que la aplicación ya cumple.
+--   · UX_Permiso_NombreRol: el nombre de un rol es único (índice filtrado EsRol = 1). Hace de
+--     Permiso.Nombre una clave candidata para los roles, que es lo que referencia Usuario.Rol.
+--   · CK_Usuario_PerfilEsRol: Perfil es siempre el mismo valor que Rol (DAL.Usuario los escribe
+--     juntos); el CHECK impide que diverjan por SQL directo.
+--   · FK_Usuario_Idioma: Usuario.IdIdioma (código 'ES', 'EN'...) referencia Idioma(Codigo), que es
+--     UNIQUE. Antes se normalizan los códigos que no existen al idioma por defecto (IdIdioma no
+--     entra en el dígito verificador de Usuario: no hace falta recalcularlo).
+--   Si los datos existentes no cumplen una restricción, no se crea y queda un AVISO.
+--   · RolPermiso (asignación plana rol→patente) es una tabla DE PASO del instalador: las
+--     secciones 01, 05 y 21d la usan para sembrar los nodos-rol y las aristas de PermisoRelacion,
+--     que es la única fuente de verdad. Se borra al final (después de su último uso, 21d-4), así la
+--     base instalada no guarda la asignación duplicada. Cada corrida del script la vuelve a crear.
+-- Idempotente.
+-- ============================================================
+SET QUOTED_IDENTIFIER ON;   -- el índice filtrado lo exige (sqlcmd lo trae en OFF)
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Permiso_NombreRol' AND object_id = OBJECT_ID('Permiso'))
+BEGIN
+    IF EXISTS (SELECT 1 FROM Permiso WHERE EsRol = 1 GROUP BY Nombre HAVING COUNT(*) > 1)
+        PRINT 'AVISO: UX_Permiso_NombreRol no creado: hay roles con el mismo nombre en Permiso (EsRol = 1).';
+    ELSE
+    BEGIN
+        CREATE UNIQUE NONCLUSTERED INDEX UX_Permiso_NombreRol ON Permiso(Nombre) WHERE EsRol = 1;
+        PRINT 'Permiso: índice único UX_Permiso_NombreRol creado (nombre de rol único).';
+    END
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Usuario_PerfilEsRol')
+BEGIN
+    IF EXISTS (SELECT 1 FROM Usuario WHERE Rol IS NOT NULL AND Perfil IS NOT NULL AND Rol <> Perfil)
+        PRINT 'AVISO: CK_Usuario_PerfilEsRol no creado: hay usuarios con Perfil distinto de Rol.';
+    ELSE
+    BEGIN
+        ALTER TABLE Usuario ADD CONSTRAINT CK_Usuario_PerfilEsRol CHECK (Rol IS NULL OR Perfil IS NULL OR Rol = Perfil);
+        PRINT 'Usuario: CHECK CK_Usuario_PerfilEsRol creado (Perfil = Rol).';
+    END
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Usuario_Idioma')
+BEGIN
+    -- La FK necesita una clave única en Idioma.Codigo (UQ_Idioma_Codigo desde la creación de la tabla).
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes i
+                   JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+                   JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+                   WHERE i.object_id = OBJECT_ID('Idioma') AND i.is_unique = 1 AND i.has_filter = 0
+                     AND c.name = 'Codigo'
+                     AND (SELECT COUNT(*) FROM sys.index_columns x WHERE x.object_id = i.object_id AND x.index_id = i.index_id) = 1)
+    BEGIN
+        IF EXISTS (SELECT 1 FROM Idioma GROUP BY Codigo HAVING COUNT(*) > 1)
+            PRINT 'AVISO: FK_Usuario_Idioma no creada: Idioma.Codigo tiene códigos repetidos.';
+        ELSE
+            ALTER TABLE Idioma ADD CONSTRAINT UQ_Idioma_Codigo UNIQUE (Codigo);
+    END
+    IF EXISTS (SELECT 1 FROM sys.indexes i JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+               JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+               WHERE i.object_id = OBJECT_ID('Idioma') AND i.is_unique = 1 AND i.has_filter = 0 AND c.name = 'Codigo')
+    BEGIN
+        DECLARE @idiomaDefault VARCHAR(5) = COALESCE(
+            (SELECT TOP 1 Codigo FROM Idioma WHERE EsDefault = 1 ORDER BY IdIdioma),
+            (SELECT TOP 1 Codigo FROM Idioma WHERE Codigo = 'ES'),
+            (SELECT TOP 1 Codigo FROM Idioma ORDER BY IdIdioma));
+        UPDATE u SET u.IdIdioma = @idiomaDefault
+        FROM Usuario u
+        WHERE u.IdIdioma IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Idioma i WHERE i.Codigo = u.IdIdioma);
+        IF @@ROWCOUNT > 0 PRINT 'Usuario: preferencias de idioma con un código inexistente pasaron al idioma por defecto.';
+        ALTER TABLE Usuario ADD CONSTRAINT FK_Usuario_Idioma FOREIGN KEY (IdIdioma) REFERENCES Idioma(Codigo);
+        PRINT 'Usuario: FK_Usuario_Idioma creada (IdIdioma → Idioma.Codigo).';
+    END
+END
+GO
+
+IF OBJECT_ID('RolPermiso', 'U') IS NOT NULL
+BEGIN
+    DROP TABLE RolPermiso;
+    PRINT 'RolPermiso (tabla de paso del instalador) eliminada: la composición vive en PermisoRelacion.';
+END
+PRINT 'Sección 21z5: restricciones de normalización verificadas.';
 GO
 
 -- ============================================================

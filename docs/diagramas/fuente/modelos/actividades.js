@@ -217,7 +217,11 @@ module.exports = [
       N('o6', 'documento', 'K', 'Dictamen contable (aprobada: Vigente)'),
       N('o7', 'documento', 'A', 'Constancia de descarte de la promoción'),
       N('o8', 'documento', 'V', 'Solicitud de baja (motivo)'),
-      N('o9', 'documento', 'A', 'Resolución de baja')
+      N('o9', 'documento', 'A', 'Resolución de baja'),
+      N('o10', 'documento', 'K', 'Análisis de impacto (beneficio estimado, costo del descuento, promociones superpuestas)'),
+      N('o11', 'documento', 'A', 'Condiciones reformuladas'),
+      N('o12', 'documento', 'A', 'Constancia de desactivación (motivo)'),
+      N('o13', 'documento', 'A', 'Ficha de promoción (Vencida)')
     ],
     // El orden de nodos y flujos fija la grilla de conv-actividad.js (EA-generador): no reordenar sin volver a revisar el layout.
     flujos: [
@@ -241,7 +245,11 @@ module.exports = [
       O('a10', 'o6'), O('o6', 'a11'),
       O('a9', 'o7'),
       O('a11', 'o8'), O('o8', 'd6'),
-      O('a12', 'o9'), O('a13', 'o9'), O('o9', 'g2'), O('o9', 'v1')
+      O('a12', 'o9'), O('a13', 'o9'), O('o9', 'g2'), O('o9', 'v1'),
+      O('a6', 'o10'), O('o10', 'd3'),
+      O('a8', 'o11'), O('o11', 'a5'),
+      O('a14', 'o12'),
+      O('a15', 'o13')
     ]
   },
   {
@@ -277,7 +285,11 @@ module.exports = [
       N('o5', 'documento', 'S', 'Cargo de reposición (Pendiente, último cliente)'),
       N('o6', 'documento', 'S', 'Detalle del próximo cobro (cargos sumados)'),
       N('o7', 'documento', 'S', 'Motivo de rechazo'),
-      N('o8', 'documento', 'S', 'Reserva para la lista de espera (48 h)')
+      N('o8', 'documento', 'S', 'Reserva para la lista de espera (48 h)'),
+      N('o9', 'documento', 'D', 'Informe de inspección (estado de cada prenda)'),
+      N('o10', 'documento', 'D', 'Prenda apta para reingreso'),
+      N('o11', 'documento', 'D', 'Pedido Entregado (fecha de entrega)'),
+      N('o12', 'documento', 'S', 'Constancia de baja de la prenda (cargo registrado)')
     ],
     flujos: [
       F('i', 'd0'), F('d0', 'a0', 'Sí'), F('a0', 'a1'), F('a1', 'a8'), F('a8', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'Sí'), F('a3', 'a4'), F('a4', 'f'),
@@ -292,7 +304,11 @@ module.exports = [
       O('d2', 'o7'), O('o7', 'a10'),
       O('a6', 'o5'), O('o5', 'a7'),
       O('a7', 'o6'), O('o6', 'r1'),
-      O('a4', 'o8')
+      O('a4', 'o8'),
+      O('a2', 'o9'), O('o9', 'd1'), O('o9', 'a5'),
+      O('a3', 'o10'), O('o10', 'a4'),
+      O('o11', 'dt'), O('o11', 'a9'),
+      O('a6', 'o12'), O('o12', 'a7')
     ]
   }
 ];

@@ -713,8 +713,8 @@ namespace DAL
                 // el historial de mantenimiento ni en el análisis de tiempos (PdN11), porque el cambio de
                 // estado se hace en SQL directo y no pasa por BLL.Prenda.CambiarEstado.
                 using (var cmd = new SqlCommand(
-                    "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor) " +
-                    "SELECT IdPrenda, GETDATE(), @ActorDevolucion FROM Prenda " +
+                    "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor, Origen) " +
+                    "SELECT IdPrenda, GETDATE(), NULL, @OrigenDevolucion FROM Prenda " +
                     "WHERE Estado=@EstadoEnUso AND IdClienteActual=@IdCliente AND IdPrenda IN " +
                     "  (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido) " +
                     "AND NOT EXISTS (SELECT 1 FROM MantenimientoPrenda m " +
@@ -724,7 +724,8 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@EstadoEnUso", (int)BE.EstadoPrenda.EnUso);
                     cmd.Parameters.AddWithValue("@IdCliente",   idCliente);
                     cmd.Parameters.AddWithValue("@IdPedido",    idPedido);
-                    cmd.Parameters.AddWithValue("@ActorDevolucion", BE.MantenimientoPrenda.ActorDevolucion);
+                    // Origen = Devolución: es lo que lleva la prenda a la Inspección de Devolución (PN04).
+                    cmd.Parameters.Add(new SqlParameter("@OrigenDevolucion", SqlDbType.TinyInt) { Value = (byte)BE.OrigenMantenimiento.Devolucion });
                     cmd.ExecuteNonQuery();
                 }
 

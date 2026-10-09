@@ -2,9 +2,8 @@ erDiagram
   Permiso ||--o{ ControlMapeado : "IdPermiso"
   Permiso ||--o{ PermisoRelacion : "IdPadre"
   Permiso ||--o{ PermisoRelacion : "IdHijo"
-  Permiso ||--o{ RolPermiso : "IdPermiso"
-  Idioma ||--o{ Traduccion : "IdIdioma"
   Control ||--o{ Traduccion : "IdControl"
+  Idioma ||--o{ Traduccion : "IdIdioma"
   Permiso {
     int IdPermiso PK
     nvarchar(100) Nombre
@@ -18,10 +17,6 @@ erDiagram
     int IdPadre PK,FK
     int IdHijo PK,FK
     int DVH "NULL"
-  }
-  RolPermiso {
-    nvarchar(100) Rol PK
-    int IdPermiso PK,FK
   }
   Control {
     int IdControl PK

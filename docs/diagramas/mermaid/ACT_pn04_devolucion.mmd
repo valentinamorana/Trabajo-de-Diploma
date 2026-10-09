@@ -23,6 +23,9 @@ flowchart TD
     o2[/"Cola de prendas En limpieza (último cliente)"/]:::doc
     o3[/"Detalle de prendas del pedido (estado)"/]:::doc
     o4[/"Motivo y monto (precio de reposición)"/]:::doc
+    o9[/"Informe de inspección (estado de cada prenda)"/]:::doc
+    o10[/"Prenda apta para reingreso"/]:::doc
+    o11[/"Pedido Entregado (fecha de entrega)"/]:::doc
   end
   subgraph S["Sistema"]
     direction TB
@@ -35,6 +38,7 @@ flowchart TD
     o6[/"Detalle del próximo cobro (cargos sumados)"/]:::doc
     o7[/"Motivo de rechazo"/]:::doc
     o8[/"Reserva para la lista de espera (48 h)"/]:::doc
+    o12[/"Constancia de baja de la prenda (cargo registrado)"/]:::doc
   end
   i --> d0
   d0 -- "Sí" --> a0
@@ -74,6 +78,15 @@ flowchart TD
   a7 -.-> o6
   o6 -.-> r1
   a4 -.-> o8
+  a2 -.-> o9
+  o9 -.-> d1
+  o9 -.-> a5
+  a3 -.-> o10
+  o10 -.-> a4
+  o11 -.-> dt
+  o11 -.-> a9
+  a6 -.-> o12
+  o12 -.-> a7
   classDef doc fill:#d4efe8,stroke:#307060
   classDef ini fill:#222,stroke:#222,color:#222
   class i,f,f2,f3 ini

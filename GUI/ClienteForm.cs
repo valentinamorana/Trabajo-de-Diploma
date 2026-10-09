@@ -101,39 +101,45 @@ namespace GUI
             if (cmbReferente.Items.Count > 0)
                 cmbReferente.Items[0] = Tr("combo.cli.sinreferente", "— Ninguno —");
 
-            // Recargar cmbMetodoPago con etiquetas traducidas (valor interno = clave de BD en español)
+            // Recargar cmbMetodoPago con etiquetas traducidas (valor interno = IdMedioPago del catálogo)
             RellenarComboMetodoPago();
         }
 
-        // Clave fija en BD ← muestra etiqueta traducida.
-        // El SelectedValue siempre es la cadena en español almacenada en la BD ("Efectivo", etc.).
-        // La lista de métodos la define la BLL (BLL.Cliente.ObtenerMetodosPago); en edición se le
-        // pasa el valor guardado para que un valor anterior que ya no está en la lista se conserve.
+        // Catálogo MedioPago (BLL.Cliente.ObtenerMetodosPago): el valor de cada ítem es el IdMedioPago
+        // que se guarda en Cliente.IdMedioPagoPreferido y la etiqueta, el medio traducido por su clave.
+        // En edición se le pasa el medio guardado para que uno histórico (inactivo) se conserve.
         private void RellenarComboMetodoPago()
         {
-            string prevValue = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value
-                            ?? cmbMetodoPago.SelectedItem?.ToString();
+            int? prevValue = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value ?? _clienteOriginal?.IdMedioPagoPreferido;
 
-            var items = new BLL.Cliente().ObtenerMetodosPago(_clienteOriginal?.MetodoPago)
-                .Select(m => new MetodoItem(m.Nombre,
-                    m.ClaveTraduccion != null ? Tr(m.ClaveTraduccion, m.Nombre) : m.Nombre))
-                .ToArray();
+            MetodoItem[] items;
+            try
+            {
+                items = new BLL.Cliente().ObtenerMetodosPago(_clienteOriginal?.IdMedioPagoPreferido)
+                    .Select(m => new MetodoItem(m.IdMedioPago, Tr(m.ClaveTraduccion, m.Nombre)))
+                    .ToArray();
+            }
+            catch (Exception ex)
+            {
+                MostrarError(ex);
+                items = new MetodoItem[0];
+            }
 
             cmbMetodoPago.DataSource    = null;
             cmbMetodoPago.DisplayMember = "Label";
             cmbMetodoPago.ValueMember   = "Value";
             cmbMetodoPago.DataSource    = items;
 
-            // Restaurar selección previa por valor interno
+            // Restaurar la selección previa por Id (independiente del idioma mostrado)
             int idx = Array.FindIndex(items, m => m.Value == prevValue);
-            cmbMetodoPago.SelectedIndex = idx >= 0 ? idx : 0;
+            cmbMetodoPago.SelectedIndex = idx >= 0 ? idx : (items.Length > 0 ? 0 : -1);
         }
 
         private class MetodoItem
         {
-            public string Value { get; }
+            public int    Value { get; }
             public string Label { get; }
-            public MetodoItem(string value, string label) { Value = value; Label = label; }
+            public MetodoItem(int value, string label) { Value = value; Label = label; }
             public override string ToString() => Label;
         }
 
@@ -205,11 +211,12 @@ namespace GUI
             txtDNI.Text      = _clienteOriginal.DNI;
             txtEmail.Text    = _clienteOriginal.Email ?? "";
 
-            // Buscar por Value interno (independiente del idioma mostrado)
+            // Buscar por Id del medio (independiente del idioma mostrado)
             int idxPago = -1;
             for (int pi = 0; pi < cmbMetodoPago.Items.Count; pi++)
-                if ((cmbMetodoPago.Items[pi] as MetodoItem)?.Value == _clienteOriginal.MetodoPago) { idxPago = pi; break; }
-            cmbMetodoPago.SelectedIndex = idxPago >= 0 ? idxPago : 0;
+                if ((cmbMetodoPago.Items[pi] as MetodoItem)?.Value == _clienteOriginal.IdMedioPagoPreferido) { idxPago = pi; break; }
+            if (idxPago >= 0 || cmbMetodoPago.Items.Count > 0)
+                cmbMetodoPago.SelectedIndex = idxPago >= 0 ? idxPago : 0;
 
             // Seleccionar plan actual
             if (_clienteOriginal.IdPlan.HasValue && _planes != null)
@@ -254,7 +261,8 @@ namespace GUI
                     Apellido         = txtApellido.Text.Trim(),
                     DNI              = txtDNI.Text.Trim(),
                     Email            = string.IsNullOrWhiteSpace(txtEmail.Text) ? null : txtEmail.Text.Trim(),
-                    MetodoPago       = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value ?? "Efectivo",
+                    // Sin selección queda null y la BLL pide elegir uno (err.bll.cliente.medio_requerido).
+                    IdMedioPagoPreferido = (cmbMetodoPago.SelectedItem as MetodoItem)?.Value,
                     IdPlan           = idPlan,
                     FechaNacimiento  = dtpFechaNacimiento.Value.Date,
                     // En el alta la fija BLL.Cliente.Alta; en edición se conserva la original.

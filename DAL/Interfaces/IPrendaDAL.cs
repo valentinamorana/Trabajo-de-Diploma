@@ -24,5 +24,8 @@ namespace DAL.Interfaces
         void Modificar(BE.Prenda prenda);
         void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null);
         List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria();
+
+        /// <summary>Nombres del catálogo de categorías activas (tabla Categoria), ordenados.</summary>
+        List<string> ObtenerCategorias();
     }
 }

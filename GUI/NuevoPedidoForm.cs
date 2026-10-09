@@ -293,7 +293,7 @@ namespace GUI
                 c.NombrePlan ?? "—", c.LimitePrendas,
                 c.FechaVencimiento?.ToString("d") ?? "—",
                 c.StockUtilizado, ultimoPedido,
-                c.MetodoPago ?? "—", c.FechaAlta.ToString("d"));
+                c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "—", c.FechaAlta.ToString("d"));
         }
 
         private Func<Exportacion.ReporteExportable> _avisoActual;

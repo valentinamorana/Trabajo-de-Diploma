@@ -36,6 +36,9 @@ flowchart TD
     o4[/"Ficha de promoción (En revisión contable)"/]:::doc
     o7[/"Constancia de descarte de la promoción"/]:::doc
     o9[/"Resolución de baja"/]:::doc
+    o11[/"Condiciones reformuladas"/]:::doc
+    o12[/"Constancia de desactivación (motivo)"/]:::doc
+    o13[/"Ficha de promoción (Vencida)"/]:::doc
   end
   subgraph K["Contabilidad"]
     direction TB
@@ -45,6 +48,7 @@ flowchart TD
     a10["Vigente: un solo descuento por cobro"]
     o5[/"Dictamen contable (rechazo con observación)"/]:::doc
     o6[/"Dictamen contable (aprobada: Vigente)"/]:::doc
+    o10[/"Análisis de impacto (beneficio estimado, costo del descuento, promociones superpuestas)"/]:::doc
   end
   subgraph V["Vendedor"]
     direction TB
@@ -109,6 +113,12 @@ flowchart TD
   a13 -.-> o9
   o9 -.-> g2
   o9 -.-> v1
+  a6 -.-> o10
+  o10 -.-> d3
+  a8 -.-> o11
+  o11 -.-> a5
+  a14 -.-> o12
+  a15 -.-> o13
   classDef doc fill:#d4efe8,stroke:#307060
   classDef ini fill:#222,stroke:#222,color:#222
   class i,f0,f1,f2,f3,f4 ini

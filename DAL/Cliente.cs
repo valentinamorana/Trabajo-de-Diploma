@@ -16,7 +16,7 @@ namespace DAL
         // (plan, vencimientos, gracia, pausa, crédito de referido, referente y baja lógica).
         public static readonly string[] DV_Columnas =
         {
-            "Nombre", "Apellido", "DNI", "Email", "MetodoPago",
+            "Nombre", "Apellido", "DNI", "Email", "IdMedioPagoPreferido",
             "IdPlan", "FechaVencimiento", "FechaLimiteGracia", "FechaPausaHasta",
             "DescuentoProximoCobro", "IdClienteReferente", "Activo",
             // Formato 3 de Cliente: el beneficio por referido ya acreditado (si se borrara, se volvería
@@ -48,7 +48,8 @@ namespace DAL
                 SqlParameter[] p = { new SqlParameter("@EstadoEnUso", (int)BE.EstadoPrenda.EnUso) };
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
-                    "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
+                    "       c.IdMedioPagoPreferido, mp.Nombre AS MetodoPago, mp.ClaveTraduccion AS ClaveMedioPago, " +
+                    "       c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
                     "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
                     "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
                     "       c.IdPlanSiguiente, c.FechaCambioPlan, ps.Nombre AS NombrePlanSiguiente, " +
@@ -59,6 +60,7 @@ namespace DAL
                     "FROM Cliente c " +
                     "LEFT JOIN PlanSuscripcion p ON p.IdPlan = c.IdPlan " +
                     "LEFT JOIN PlanSuscripcion ps ON ps.IdPlan = c.IdPlanSiguiente " +
+                    "LEFT JOIN MedioPago mp ON mp.IdMedioPago = c.IdMedioPagoPreferido " +
                     "LEFT JOIN ( " +
                     "    SELECT IdClienteActual, COUNT(*) AS StockUtilizado " +
                     "    FROM Prenda " +
@@ -91,7 +93,8 @@ namespace DAL
             {
                 DataTable tabla = acceso.Leer(
                     "SELECT c.IdCliente, c.Nombre, c.Apellido, c.DNI, c.Email, " +
-                    "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
+                    "       c.IdMedioPagoPreferido, mp.Nombre AS MetodoPago, mp.ClaveTraduccion AS ClaveMedioPago, " +
+                    "       c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
                     "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
                     "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
                     "       c.IdPlanSiguiente, c.FechaCambioPlan, ps.Nombre AS NombrePlanSiguiente, " +
@@ -103,6 +106,7 @@ namespace DAL
                     "FROM Cliente c " +
                     "LEFT JOIN PlanSuscripcion p ON p.IdPlan = c.IdPlan " +
                     "LEFT JOIN PlanSuscripcion ps ON ps.IdPlan = c.IdPlanSiguiente " +
+                    "LEFT JOIN MedioPago mp ON mp.IdMedioPago = c.IdMedioPagoPreferido " +
                     "WHERE c.IdCliente = @IdCliente AND c.Activo = 1",
                     p);
 
@@ -186,7 +190,7 @@ namespace DAL
                 new SqlParameter("@Apellido",          cliente.Apellido),
                 new SqlParameter("@DNI",               cliente.DNI),
                 new SqlParameter("@Email",             (object)cliente.Email ?? DBNull.Value),
-                new SqlParameter("@MetodoPago",        cliente.MetodoPago),
+                new SqlParameter("@IdMedioPagoPreferido", (object)cliente.IdMedioPagoPreferido ?? DBNull.Value),
                 new SqlParameter("@IdPlan",            (object)cliente.IdPlan ?? DBNull.Value),
                 new SqlParameter("@FechaAlta",         cliente.FechaAlta),
                 new SqlParameter("@FechaVencimiento",  (object)cliente.FechaVencimiento  ?? DBNull.Value),
@@ -195,8 +199,8 @@ namespace DAL
             };
 
             DataTable tabla = acceso.Leer(
-                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, MetodoPago, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento, IdClienteReferente) " +
-                "VALUES (@Nombre, @Apellido, @DNI, @Email, @MetodoPago, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento, @IdClienteReferente); " +
+                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, IdMedioPagoPreferido, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento, IdClienteReferente) " +
+                "VALUES (@Nombre, @Apellido, @DNI, @Email, @IdMedioPagoPreferido, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento, @IdClienteReferente); " +
                 "SELECT SCOPE_IDENTITY() AS IdNuevo",
                 p);
 
@@ -216,7 +220,7 @@ namespace DAL
                 new SqlParameter("@Apellido",         cliente.Apellido),
                 new SqlParameter("@DNI",              cliente.DNI),
                 new SqlParameter("@Email",            (object)cliente.Email ?? DBNull.Value),
-                new SqlParameter("@MetodoPago",       cliente.MetodoPago),
+                new SqlParameter("@IdMedioPagoPreferido", (object)cliente.IdMedioPagoPreferido ?? DBNull.Value),
                 new SqlParameter("@IdPlan",           (object)cliente.IdPlan ?? DBNull.Value),
                 new SqlParameter("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value),
                 new SqlParameter("@FechaNacimiento",  (object)cliente.FechaNacimiento  ?? DBNull.Value),
@@ -229,7 +233,7 @@ namespace DAL
             };
             acceso.Escribir(
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
-                "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
+                "Email=@Email, IdMedioPagoPreferido=@IdMedioPagoPreferido, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
                 "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
                 "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado, " +
@@ -282,7 +286,7 @@ namespace DAL
         {
             using (var cmd = new SqlCommand(
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
-                "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
+                "Email=@Email, IdMedioPagoPreferido=@IdMedioPagoPreferido, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
                 "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
                 "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado, " +
@@ -294,7 +298,7 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@Apellido", cliente.Apellido);
                 cmd.Parameters.AddWithValue("@DNI", cliente.DNI);
                 cmd.Parameters.AddWithValue("@Email", (object)cliente.Email ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@MetodoPago", cliente.MetodoPago);
+                cmd.Parameters.AddWithValue("@IdMedioPagoPreferido", (object)cliente.IdMedioPagoPreferido ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IdPlan", (object)cliente.IdPlan ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaVencimiento", (object)cliente.FechaVencimiento ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaNacimiento", (object)cliente.FechaNacimiento ?? DBNull.Value);
@@ -361,6 +365,10 @@ namespace DAL
             }
         }
 
+        // Catálogo de medios de pago completo (activos e históricos) para elegir y validar el medio
+        // preferido del cliente. Es el mismo catálogo que usa Caja (DAL.Contratacion).
+        public List<BE.MedioPago> ObtenerMediosPago() => new Contratacion().ObtenerMediosPago();
+
         // Baja lógica del cliente (Activo=0).
         public void Baja(int idCliente)
         {
@@ -379,7 +387,9 @@ namespace DAL
                 Apellido       = row["Apellido"].ToString(),
                 DNI            = row["DNI"].ToString(),
                 Email          = row["Email"] != DBNull.Value ? row["Email"].ToString() : null,
-                MetodoPago     = row["MetodoPago"].ToString(),
+                IdMedioPagoPreferido = row["IdMedioPagoPreferido"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdMedioPagoPreferido"]) : null,
+                MetodoPago     = row["MetodoPago"] != DBNull.Value ? row["MetodoPago"].ToString() : null,
+                ClaveTraduccionMedioPago = row["ClaveMedioPago"] != DBNull.Value ? row["ClaveMedioPago"].ToString() : null,
                 IdPlan         = row["IdPlan"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPlan"]) : null,
                 NombrePlan     = row["NombrePlan"] != DBNull.Value ? row["NombrePlan"].ToString() : null,
                 LimitePrendas  = row.Table.Columns.Contains("LimitePrendas")

@@ -9,15 +9,15 @@ erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
   PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
-  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Permiso ||--o{ ControlMapeado : "IdPermiso"
-  Usuario ||--o{ DictamenContable : "IdUsuario"
   Promocion ||--o{ DictamenContable : "IdPromocion"
+  Usuario ||--o{ DictamenContable : "IdUsuario"
   Usuario |o--o{ Empleado : "IdUsuario"
   Promocion |o--o{ HistorialCobro : "IdPromocion"
   Cliente ||--o{ HistorialCobro : "IdCliente"
@@ -29,8 +29,8 @@ erDiagram
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Empleado ||--o{ Pedido : "IdEmpleado"
   Empleado |o--o{ Pedido : "IdEmpleadoControl"
+  Empleado ||--o{ Pedido : "IdEmpleado"
   Usuario |o--o{ PedidoHistorial : "IdUsuario"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
@@ -38,21 +38,24 @@ erDiagram
   Permiso ||--o{ PermisoRelacion : "IdPadre"
   Permiso ||--o{ PermisoRelacion : "IdHijo"
   Usuario ||--o{ Preferencia : "IdUsuario"
+  Categoria |o--o{ Prenda : "Categoria"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Categoria |o--o{ Promocion : "CategoriaPrenda"
   Usuario |o--o{ Promocion : "IdUsuarioAlta"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Promocion ||--o{ PromocionHistorial : "IdPromocion"
   Usuario |o--o{ PromocionHistorial : "IdUsuario"
-  Permiso ||--o{ RolPermiso : "IdPermiso"
-  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
   Usuario ||--o{ SolicitudBajaPromocion : "IdUsuarioSolicita"
   Usuario |o--o{ SolicitudBajaPromocion : "IdUsuarioResuelve"
+  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
+  Categoria |o--o{ SugerenciaPromocion : "CategoriaPrenda"
   Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
-  Idioma ||--o{ Traduccion : "IdIdioma"
   Control ||--o{ Traduccion : "IdControl"
+  Idioma ||--o{ Traduccion : "IdIdioma"
+  Idioma |o--o{ Usuario : "IdIdioma"
   Usuario {
     int IdUsuario PK
     nvarchar(100) Username
@@ -62,7 +65,7 @@ erDiagram
     bit Estado
     int IntentosFallidos
     int DVH "NULL"
-    varchar(5) IdIdioma "NULL"
+    varchar(5) IdIdioma FK "NULL"
     bit Activo
     datetime FechaBaja "NULL"
     int CantidadBloqueos
@@ -113,10 +116,6 @@ erDiagram
     int IdPadre PK,FK
     int IdHijo PK,FK
     int DVH "NULL"
-  }
-  RolPermiso {
-    nvarchar(100) Rol PK
-    int IdPermiso PK,FK
   }
   Control {
     int IdControl PK
@@ -221,7 +220,6 @@ erDiagram
     nvarchar(100) Apellido
     nvarchar(200) DNI
     nvarchar(200) Email "NULL"
-    nvarchar(100) MetodoPago "NULL"
     int IdPlan FK "NULL"
     datetime FechaAlta
     date FechaNacimiento
@@ -233,6 +231,7 @@ erDiagram
     int IdClienteReferente FK "NULL"
     decimal(10_2) DescuentoProximoCobro
     bit BeneficioReferidoOtorgado
+    int IdMedioPagoPreferido FK "NULL"
     int IdPlanSiguiente FK "NULL"
     datetime FechaCambioPlan "NULL"
   }
@@ -328,12 +327,17 @@ erDiagram
     nvarchar(500) Descripcion "NULL"
     nvarchar(20) Talle "NULL"
     nvarchar(50) Color "NULL"
-    nvarchar(100) Categoria "NULL"
+    nvarchar(100) Categoria FK "NULL"
     int Estado
     int IdClienteActual FK "NULL"
     datetime FechaAlta
     int IdUltimoCliente FK "NULL"
     decimal(10_2) PrecioReposicion "NULL"
+  }
+  Categoria {
+    int IdCategoria PK
+    nvarchar(100) Nombre
+    bit Activo
   }
   MantenimientoPrenda {
     int IdMantenimiento PK
@@ -341,6 +345,7 @@ erDiagram
     datetime FechaEntrada
     datetime FechaSalida "NULL"
     nvarchar(100) Actor "NULL"
+    tinyint Origen
   }
   CargoPrenda {
     int IdCargo PK
@@ -366,7 +371,7 @@ erDiagram
   SugerenciaPromocion {
     int IdSugerencia PK
     int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda "NULL"
+    nvarchar(100) CategoriaPrenda FK "NULL"
     nvarchar(500) Motivo
     int TipoDescuentoSugerido
     decimal(10_2) BeneficioEstimado
@@ -387,7 +392,7 @@ erDiagram
     date FechaFin
     int Estado
     int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda "NULL"
+    nvarchar(100) CategoriaPrenda FK "NULL"
     decimal(10_2) MargenEstimado
     nvarchar(500) ImpactoEconomico "NULL"
     int IdSugerenciaOrigen FK "NULL"

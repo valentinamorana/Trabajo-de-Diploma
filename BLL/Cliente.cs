@@ -75,26 +75,37 @@ namespace BLL
             return lista.FindAll(c => Contiene(c.NombreCompleto) || Contiene(c.DNI) || Contiene(c.Email));
         }
 
-        // Métodos de pago preferidos que se pueden elegir para un cliente. El Nombre es el valor
-        // que se guarda en Cliente.MetodoPago (en español, igual que los datos ya cargados) y
-        // ClaveTraduccion la clave con la que la pantalla lo muestra traducido. Se reusa
-        // BE.MedioPago solo como par nombre/clave: no es el catálogo de Caja (IdMedioPago = 0).
-        // Si el cliente tiene guardado un valor que ya no está en la lista (dato anterior), se
-        // agrega al final sin clave, para que editar al cliente no lo pise con "Efectivo".
-        public List<BE.MedioPago> ObtenerMetodosPago(string metodoActual = null)
+        // Medios de pago que se pueden elegir como preferidos de un cliente: el catálogo MedioPago
+        // (el mismo de Caja) con los medios ACTIVOS. Cliente.IdMedioPagoPreferido guarda el Id; la
+        // pantalla muestra el medio traducido con su ClaveTraduccion. Si el cliente tiene guardado un
+        // medio que ya no está activo (histórico, p. ej. un texto viejo migrado), se agrega al final
+        // para que editar al cliente no se lo cambie por otro.
+        public List<BE.MedioPago> ObtenerMetodosPago(int? idMedioActual = null)
         {
-            var metodos = new List<BE.MedioPago>
+            var catalogo = dalCliente.ObtenerMediosPago() ?? new List<BE.MedioPago>();
+            var metodos = catalogo.Where(m => m.Activo).ToList();
+
+            if (idMedioActual.HasValue && !metodos.Exists(m => m.IdMedioPago == idMedioActual.Value))
             {
-                new BE.MedioPago { Nombre = "Efectivo",      ClaveTraduccion = "metodo.efectivo" },
-                new BE.MedioPago { Nombre = "Débito",        ClaveTraduccion = "metodo.debito" },
-                new BE.MedioPago { Nombre = "Crédito",       ClaveTraduccion = "metodo.credito" },
-                new BE.MedioPago { Nombre = "Transferencia", ClaveTraduccion = "metodo.transferencia" },
-            };
-
-            if (!string.IsNullOrWhiteSpace(metodoActual) && !metodos.Exists(m => m.Nombre == metodoActual))
-                metodos.Add(new BE.MedioPago { Nombre = metodoActual });
-
+                var actual = catalogo.Find(m => m.IdMedioPago == idMedioActual.Value);
+                if (actual != null) metodos.Add(actual);
+            }
             return metodos;
+        }
+
+        // El medio de pago preferido es obligatorio y tiene que ser del catálogo. Uno inactivo solo
+        // se acepta si es el que el cliente ya tenía (idMedioActual): no se asigna uno histórico nuevo.
+        private void ValidarMedioPago(BE.Cliente cliente, int? idMedioActual)
+        {
+            if (!cliente.IdMedioPagoPreferido.HasValue)
+                throw new BE.AppException("err.bll.cliente.medio_requerido",
+                    "Elegí el medio de pago preferido del cliente.");
+
+            var medio = (dalCliente.ObtenerMediosPago() ?? new List<BE.MedioPago>())
+                .Find(m => m.IdMedioPago == cliente.IdMedioPagoPreferido.Value);
+            if (medio == null || (!medio.Activo && medio.IdMedioPago != idMedioActual))
+                throw new BE.AppException("err.bll.cliente.medio_invalido",
+                    "El medio de pago elegido no está disponible. Elegí otro del catálogo.");
         }
 
         // Obtiene un cliente por ID.
@@ -109,6 +120,7 @@ namespace BLL
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
             Validar(cliente);
+            ValidarMedioPago(cliente, null);
 
             if (dalCliente.ExisteDNI(cliente.DNI))
                 throw new BE.AppException("err.bll.cliente.dni_duplicado",
@@ -141,6 +153,7 @@ namespace BLL
                     "El DNI {0} ya está registrado para otro cliente.", cliente.DNI);
 
             var actual = dalCliente.ObtenerPorId(cliente.IdCliente);
+            ValidarMedioPago(cliente, actual?.IdMedioPagoPreferido);
 
             // El formulario de edición no maneja la gracia por falta de pago, la pausa ni el beneficio
             // por referido (los fijan el cobro, la renovación y Caja): se conservan los de la BD. Si

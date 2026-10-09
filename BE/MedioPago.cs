@@ -7,6 +7,9 @@ namespace BE
     /// </summary>
     public class MedioPago
     {
+        /// <summary>Id fijo de «Efectivo» en el catálogo (lo siembra la sección 20c del script).</summary>
+        public const int IdEfectivo = 1;
+
         public int    IdMedioPago     { get; set; }
         public string Nombre          { get; set; }
         public string ClaveTraduccion { get; set; }

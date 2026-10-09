@@ -30,6 +30,8 @@ namespace GUI
         protected override Label MensajeLabel => lblMensaje;
 
         private readonly BLL.Interfaces.IPedidoService pedidoBLL = new BLL.Pedido();
+        // Patrón Command: despachar, entregar y registrar la devolución pasan por el mismo invocador.
+        private readonly BLL.Comandos.InvocadorPedido _invocador = new BLL.Comandos.InvocadorPedido();
         private readonly BLL.InspeccionDevolucion inspeccionBLL = new BLL.InspeccionDevolucion();
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
@@ -449,7 +451,8 @@ namespace GUI
 
             try
             {
-                pedidoBLL.Despachar(this.Text, pedido);
+                _invocador.TomarOrden(new BLL.Comandos.DespachoCommand(pedidoBLL, pedido, this.Text));
+                _invocador.ProcesarOrdenes();
                 MostrarOk(string.Format(Tr("msg.ped.despachado", "Pedido #{0} despachado correctamente."), pedido.IdPedido));
                 CargarPedidos();
             }
@@ -484,7 +487,8 @@ namespace GUI
 
             try
             {
-                pedidoBLL.MarcarEntregado(this.Text, pedido);
+                _invocador.TomarOrden(new BLL.Comandos.EntregaCommand(pedidoBLL, pedido, this.Text));
+                _invocador.ProcesarOrdenes();
                 MostrarOk(string.Format(Tr("msg.ped.entregado", "Pedido #{0} marcado como Entregado."), pedido.IdPedido));
                 CargarPedidos();
             }
@@ -516,9 +520,8 @@ namespace GUI
                 // Patrón Command (PdN3): la GUI arma el pedido de devolución y se lo entrega
                 // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
                 // ejecución real siguen 100% en BLL.Pedido.RegistrarDevolucion, adentro del Command.
-                var invocador = new BLL.Comandos.InvocadorPedido();
-                invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
-                invocador.ProcesarOrdenes();
+                _invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
+                _invocador.ProcesarOrdenes();
 
                 MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a EnLimpieza."), pedidoCompleto.CantidadPrendas));
                 CargarPedidos();

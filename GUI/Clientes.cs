@@ -267,7 +267,8 @@ namespace GUI
                     // PN02: "Registrar cliente" → sigue en "Presentar planes" para el mismo cliente.
                     if (ConfirmarSiNo(Tr("conf.cli.contratar", "¿Continuar con la contratación de un plan para este cliente?"), this.Text))
                         using (var contratacion = new NuevaContratacionForm(form.ClienteEditado.DNI))
-                            contratacion.ShowDialog(this);
+                            if (contratacion.ShowDialog(this) == DialogResult.OK)
+                                contratacion.MostrarResultado(this);
                 }
                 catch (Exception ex)
                 {

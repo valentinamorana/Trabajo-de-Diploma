@@ -169,7 +169,7 @@ pausa, referidos. **No abarca:** pasarela de pago, factura fiscal, cobro automá
 | PdN5 Renovación | **Chain of Responsibility** — `VerificarVencimientoHandler` → `IntentarRenovarHandler` → `CambioPlanHandler` / `BajaSuscripcionHandler` / `PausarSuscripcionHandler` (`BLL/Manejadores/`) | `BLL/Renovacion.cs` | `RenovacionTests` (23) |
 | PdN6 Cobro | **Chain of Responsibility** — `DetectarCobroHandler` → `ProcesarPagoHandler` → `AplicarGraciaHandler` → `SuspenderHandler` | `BLL/Cobro.cs` | `CobroTests` (19) |
 | PdN2/PdN4 Estados de prenda | **State** | `BE/Estados/*`, `BE/Prenda.cs › ControlarEstado` | `PrendaEstadoTests` |
-| PdN3 Pedidos (cancelar/devolver) | **Command** — `PedidoCommand` (abstracta), `CancelacionCommand`, `DevolucionCommand`, `InvocadorPedido` | `BLL/Comandos/` | `ComandoPedidoTests` |
+| PdN3 Pedidos (cancelar/reactivar, despachar, entregar, devolver) | **Command** — `PedidoCommand` (abstracta, con `Deshacer`/`EsReversible`), `CancelacionCommand` (reversible: deshacer = reactivar), `DespachoCommand`, `EntregaCommand`, `DevolucionCommand`, `InvocadorPedido` (cola + historial para deshacer) | `BLL/Comandos/` | `ComandoPedidoTests` |
 | Pausa / reanudación | — | `BLL/Cliente.cs › ReanudarPausa`; `PausarSuscripcionHandler` | `ClienteTests`, `RenovacionTests` |
 | Referidos | — | `BLL/Cliente.cs › ActivarSuscripcionInterna` | `EndurecimientoPn02Pn03Tests › ActivarSuscripcion_*` |
 
@@ -545,7 +545,7 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 |---|---|---|
 | **Builder** | `BE/Builders/` (`SuscripcionBuilder` + 3 concretos + `DirectorSuscripcion` + `SuscripcionBuilderFactory`) | Bloque 1 TD |
 | **State** | `BE/Estados/` (`Estado`, `EstadoDisponible/EnUso/EnLimpieza/Baja`), usado por `BE.Prenda` | Bloque 1 TD |
-| **Command** | `BLL/Comandos/` (`PedidoCommand`, `CancelacionCommand`, `DevolucionCommand`, `InvocadorPedido`) | Bloque 1 TD |
+| **Command** | `BLL/Comandos/` (`PedidoCommand`, `CancelacionCommand`, `DespachoCommand`, `EntregaCommand`, `DevolucionCommand`, `InvocadorPedido` con historial y deshacer) | Bloque 1 TD |
 | **Chain of Responsibility** | `BLL/Manejadores/` (cadena de Renovación y cadena de Cobro) | Bloque 1 TD |
 | **Strategy** | `BLL/Estrategias/` (`EstrategiaRiesgo` + 3 concretas) para el análisis de abandono | Bloque 3 |
 | **Observer** | `Servicios/Multiidioma/GestorIdioma` + `IIdiomaObserver` (cambio de idioma en vivo) | Ing. de Software |

@@ -67,9 +67,14 @@ namespace GUI
         // Usuario cargado en el constructor; reutilizado en OnLoad para no hacer dos SELECT
         private BE.Usuario _usuarioActivo;
 
+        // D02 — "Ayuda (F1)" en el menú Sesión (lo ven todos los roles): ayuda de la pantalla activa.
+        private readonly ToolStripMenuItem ayudaItem = new ToolStripMenuItem { Name = "ayudaItem", Tag = "mnu.ayuda", Text = "Ayuda (F1)" };
+
         public Menu()
         {
             InitializeComponent();
+            ayudaItem.Click += (s, e) => Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General");
+            usuarioToolStripMenuItem.DropDownItems.Insert(1, ayudaItem);
             AplicarEstiloMenu();
 
             ReconstruirComboIdioma(Traductor.ObtenerIdiomas());
@@ -561,17 +566,8 @@ namespace GUI
             using (var form = new NuevaContratacionForm())
             {
                 if (form.ShowDialog(this) != DialogResult.OK) return;
-
-                var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
-                MessageBox.Show(
-                    form.FueDesistimiento
-                        ? T("msg.contr.desistimiento", "Desistimiento asentado: el cliente no contrató ningún plan.")
-                        : string.Format(T("msg.contratacion.creada", "Contratación #{0} registrada, pendiente de pago."),
-                            form.IdContratacionCreada),
-                    T("msg.ok.titulo", "Listo"),
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                // Resultado con el botón para imprimir la orden de cobro o el aviso de desistimiento.
+                form.MostrarResultado(this);
             }
         }
 
@@ -826,6 +822,7 @@ namespace GUI
 
             Aplicar(usuarioToolStripMenuItem,           t);
             Aplicar(miPerfilItem,                       t);
+            Aplicar(ayudaItem,                          t);
             Aplicar(panelControlToolStripMenuItem,      t);
             Aplicar(inventarioToolStripMenuItem,        t);
             Aplicar(prendasToolStripMenuItem,           t);

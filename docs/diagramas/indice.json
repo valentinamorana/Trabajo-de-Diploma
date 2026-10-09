@@ -122,7 +122,7 @@
   {
     "id": "CLASES_patron_command_pedido",
     "tipo": "clases",
-    "titulo": "Patrón Command — Cancelar pedido y registrar devolución"
+    "titulo": "Patrón Command — Cancelar (con deshacer), despachar, entregar y registrar la devolución"
   },
   {
     "id": "CLASES_pn02_contrataciones",

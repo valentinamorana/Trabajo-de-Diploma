@@ -6784,10 +6784,6 @@ ES	err.bll.insp.perdida_plazo	La compra tácita rige a los {0} días de la entre
 EN	err.bll.insp.perdida_plazo	The implied purchase applies {0} days after delivery: from {1:d}. {2} day(s) to go.
 RU	err.bll.insp.perdida_plazo	Подразумеваемая покупка действует через {0} дней после доставки: с {1:d}. Осталось дней: {2}.
 PT	err.bll.insp.perdida_plazo	A compra tácita vale {0} dias após a entrega: a partir de {1:d}. Faltam {2} dia(s).
-ES	err.bll.contratacion.cambio_plan_vigente	El cambio a un plan igual o más barato rige al vencer el período pagado de '{0}' (el {1:d}). Registralo a partir de esa fecha.
-EN	err.bll.contratacion.cambio_plan_vigente	A change to an equal or cheaper plan applies when the paid period of '{0}' ends ({1:d}). Register it from that date.
-RU	err.bll.contratacion.cambio_plan_vigente	Переход на такой же или более дешёвый тариф вступает в силу по окончании оплаченного периода «{0}» ({1:d}). Оформите его с этой даты.
-PT	err.bll.contratacion.cambio_plan_vigente	A mudança para um plano igual ou mais barato vale ao fim do período pago de '{0}' ({1:d}). Registre-a a partir dessa data.
 ES	doc.contr.cargos	Cargos por daño o pérdida de prendas: {0} cargo(s), +{1:C2}
 EN	doc.contr.cargos	Charges for damaged or lost garments: {0} charge(s), +{1:C2}
 RU	doc.contr.cargos	Сборы за повреждённые или утерянные вещи: {0} шт., +{1:C2}
@@ -7208,3 +7204,15 @@ ES	err.bll.comando.no_reversible	Esta operación sobre el pedido no se puede des
 EN	err.bll.comando.no_reversible	This operation on the order cannot be undone.
 RU	err.bll.comando.no_reversible	Эту операцию с заказом нельзя отменить.
 PT	err.bll.comando.no_reversible	Esta operação no pedido não pode ser desfeita.
+ES	lbl.contr.programado	Plan igual o más barato: el plan actual sigue hasta el {0:d} y desde ese día rige el nuevo.
+EN	lbl.contr.programado	Equal or cheaper plan: the current plan continues until {0:d} and the new one applies from that day.
+RU	lbl.contr.programado	Такой же или более дешёвый тариф: текущий действует до {0:d}, новый — с этого дня.
+PT	lbl.contr.programado	Plano igual ou mais barato: o atual continua até {0:d} e o novo vale a partir desse dia.
+ES	conf.contr.cobro.programado	Plan igual o más barato: el actual sigue hasta el {0:d} y desde ese día rige el nuevo.
+EN	conf.contr.cobro.programado	Equal or cheaper plan: the current one continues until {0:d} and the new one applies from that day.
+RU	conf.contr.cobro.programado	Такой же или более дешёвый тариф: текущий действует до {0:d}, новый — с этого дня.
+PT	conf.contr.cobro.programado	Plano igual ou mais barato: o atual continua até {0:d} e o novo vale a partir desse dia.
+ES	doc.contr.programado	Cambio a un plan igual o más barato: el plan actual sigue hasta el {0:d}; desde ese día rige el nuevo.
+EN	doc.contr.programado	Change to an equal or cheaper plan: the current plan continues until {0:d}; the new one applies from that day.
+RU	doc.contr.programado	Переход на такой же или более дешёвый тариф: текущий действует до {0:d}; новый — с этого дня.
+PT	doc.contr.programado	Mudança para um plano igual ou mais barato: o atual continua até {0:d}; o novo vale a partir desse dia.

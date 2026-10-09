@@ -1,5 +1,5 @@
 {
- "bdHash": "8dc6ea34b5eba4f563bb477f299053a09525ab26",
+ "bdHash": "6260604273b376372c6c0c9fa0744c41c160581d",
  "cols": [
   {
    "tabla": "Bitacora",
@@ -527,6 +527,28 @@
    "prec": 1,
    "sc": 0,
    "nulo": false,
+   "ident": false
+  },
+  {
+   "tabla": "Cliente",
+   "ord": 18,
+   "col": "IdPlanSiguiente",
+   "tipo": "int",
+   "len": 4,
+   "prec": 10,
+   "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "Cliente",
+   "ord": 19,
+   "col": "FechaCambioPlan",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
+   "nulo": true,
    "ident": false
   },
   {
@@ -3893,6 +3915,13 @@
    "colhija": "IdClienteReferente",
    "padre": "Cliente",
    "colpadre": "IdCliente"
+  },
+  {
+   "fk": "FK_Cliente_PlanSiguiente",
+   "hija": "Cliente",
+   "colhija": "IdPlanSiguiente",
+   "padre": "PlanSuscripcion",
+   "colpadre": "IdPlan"
   },
   {
    "fk": "FK__Cliente__IdPlan__4F7CD00D",

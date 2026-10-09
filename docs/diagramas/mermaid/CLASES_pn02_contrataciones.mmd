@@ -119,6 +119,7 @@ classDiagram
     +CalcularImportes(List~Contratacion~) Dictionary~int, LiquidacionContratacion~
     +ConfirmarCobro(string,  Contratacion,  int,  decimal?,  int?) LiquidacionContratacion
     +RegistrarIntentoFallido(string,  Contratacion,  int?,  string) ResultadoIntentoPago
+    +Anular(string,  Contratacion,  string) void
   }
   class DAL_Interfaces_IContratacionDAL["DAL.Interfaces.IContratacionDAL"] {
     <<interface>>
@@ -128,6 +129,7 @@ classDiagram
     +ConfirmarCobro(int,  int,  int,  string,  decimal,  decimal,  int?,  int?,  decimal?,  decimal?,  IList~int~) bool
     +RegistrarVigencia(int,  DateTime,  DateTime,  int?) void
     +ReabrirPago(int,  IList~int~) void
+    +Anular(int,  string,  int) bool
     +RegistrarIntentoFallido(int,  int?,  string,  int,  int) ResultadoIntentoPago
     +ObtenerIntentos(int) List~IntentoPago~
     +ObtenerMediosPago() List~MedioPago~

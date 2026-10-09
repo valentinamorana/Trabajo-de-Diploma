@@ -91,6 +91,11 @@ namespace GUI
                 PreferenciasUI.Aplicar(this);
             }
 
+            // PN02, nodo a11: los cambios de plan programados cuya fecha llegó se aplican al iniciar sesión.
+            if (_usuarioActivo != null)
+                try { new BLL.Cliente().AplicarCambiosDePlanProgramados(DateTime.Today); }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError("[Menu] Cambios de plan programados: " + ex.Message); }
+
             RefrescarTextoAlertas();
 
             // Construir menú dinámico según permisos del rol

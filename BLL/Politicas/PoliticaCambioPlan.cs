@@ -54,10 +54,10 @@ namespace BLL.Politicas
 
         /// <summary>
         /// ¿Contratar <paramref name="idPlanNuevo"/> es pasar a un plan IGUAL O MÁS BARATO mientras el actual
-        /// sigue vigente? Esa contratación se rechaza: la regla dice que rige al vencer el período pagado, y
-        /// el sistema no guarda un "plan siguiente"; se registra cuando venza (o al renovar).
+        /// sigue vigente? Entonces el plan nuevo queda PROGRAMADO: rige al vencer el período pagado (nodo a11
+        /// del diagrama de PN02) y hasta ese día sigue el plan actual (BE.Cliente.IdPlanSiguiente).
         /// </summary>
-        public static bool EsCambioSinUpgradeConPeriodoVigente(BE.Cliente cliente, BE.PlanSuscripcion planActual,
+        public static bool EsCambioProgramado(BE.Cliente cliente, BE.PlanSuscripcion planActual,
                                                                 int idPlanNuevo, decimal precioMensualNuevo, DateTime hoy)
         {
             return cliente?.IdPlan != null

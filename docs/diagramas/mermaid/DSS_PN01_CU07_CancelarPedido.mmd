@@ -25,5 +25,24 @@ sequenceDiagram
     B->>H: RegistrarCambios(cambios)  [Accion = CANCELAR]
     B-->>F: ok
     F-->>V: Pedido Cancelado: prendas liberadas
-    Note over B: Reactivar (DesCancelar, otra acción): vuelve a EnControlStock revalidando vigencia, pedido activo y cupo, Depósito revisa el stock de nuevo
+  end
+  opt Reactivar un pedido Cancelado (deshacer la cancelación)
+    V->>F: Selecciona el pedido Cancelado, pulsa Reactivar y confirma
+    F->>B: ObtenerPorId(id)  [relee el estado actual]
+    B-->>F: pedido
+    F->>I: PuedeDeshacer(idPedido)
+    I-->>F: bool  [la última orden de ese pedido en esta pantalla es reversible]
+    alt Se canceló en esta pantalla: se deshace el comando
+      F->>I: DeshacerUltima(idPedido)
+      I->>K: Deshacer()
+      K->>B: ObtenerPorId(idPedido)
+      K->>B: DesCancelar(modulo, pedido)
+    else Cancelado antes o en otra sesión
+      F->>B: DesCancelar(modulo, pedido)
+    end
+    Note over B: Exigir(PedidosVentaEditar) · VerificarVigencia · RevisarPedidoActivo · ComprobarCupo
+    B->>D: DesCancelar(idPedido, idCliente)  [vuelve a En Control de Stock, claim WHERE Estado = Cancelado]
+    B->>H: RegistrarCambios(cambios)  [Accion = DESCANCELAR]
+    B-->>F: ok
+    F-->>V: Pedido reactivado: vuelve a control de stock (CU04-DEP)
   end

@@ -14,9 +14,11 @@ sequenceDiagram
   participant DI as DAL.Inspeccion<br/>Devolucion
   D->>F: Abre Inspección de Devolución
   F->>PB: ObtenerEnLimpieza()
+  PB->>DM: ObtenerTodos()
+  DM-->>PB: mantenimientos (abiertos por una devolución)
   PB->>DP: ObtenerTodos()
   DP-->>PB: prendas
-  PB-->>F: prendas En limpieza
+  PB-->>F: prendas En limpieza que volvieron de un cliente
   F-->>D: Cola de prendas pendientes de inspección (con su último cliente)
   D->>F: Selecciona una prenda y la inspecciona
   alt Desgaste normal: Aprobar reingreso
@@ -46,12 +48,20 @@ sequenceDiagram
     CG-->>CD: ok (motivo obligatorio, monto > 0)
     CD-->>F: motivo y monto
     F->>IN: DarDeBajaConCargo(modulo, prenda, motivo, monto)
+    IN->>PB: ObtenerEnLimpieza()  [¿la prenda volvió de un cliente?]
+    alt No viene de una devolución
+      IN-->>F: AppException(no_devuelta): se da de baja sin cargo desde Prendas
+      F-->>D: Informa el motivo
+    end
     IN->>IN: BajaConCargo(modulo, prenda, motivo, monto, actor, EnLimpieza)
     Note over IN: Exigir(StockEditar) · la prenda sigue En limpieza y tiene último cliente
+    IN->>PR: TransicionPermitida(Baja)
+    PR-->>IN: true  [patrón State: EstadoEnLimpieza permite pasar a Baja]
     IN->>CG: ValidarDatos(motivo, monto)
     IN->>DI: DarDeBajaConCargo(cargo, estadoEsperado)
     Note over DI: Una sola transacción: el cargo (Pendiente, al último cliente), la baja condicionada, el cierre del mantenimiento y la cancelación de la lista de espera
     DI-->>IN: idCargo
+    IN->>PR: ControlarEstado(Baja)  [refleja la baja en el objeto]
     IN-->>F: idCargo
     F-->>D: Prenda dada de baja: el cargo se suma al próximo cobro del cliente
   end

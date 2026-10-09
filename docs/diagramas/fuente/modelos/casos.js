@@ -31,12 +31,13 @@ module.exports = [
     casos: [
       { id: 'c1', nombre: 'CU01-VTA Gestionar Suscripción' }, { id: 'c2', nombre: 'CU01-CAJ Gestionar Cobro' },
       { id: 'c3', nombre: 'CU02-CAJ Emitir Comprobante' }, { id: 'c4', nombre: 'CU03-CAJ Registrar Intento y Cancelar Contratación' },
-      { id: 'c5', nombre: 'CU02-VTA Asentar Desistimiento' }, { id: 'c6', nombre: 'CU04-CAJ Financiar en Cuotas' }
+      { id: 'c5', nombre: 'CU02-VTA Asentar Desistimiento' }, { id: 'c6', nombre: 'CU04-CAJ Financiar en Cuotas' },
+      { id: 'c7', nombre: 'CU05-CAJ Anular Contratación' }
     ],
     // CU02-VTA solo se alcanza desde la contratación (botón Desistir de NuevaContratacionForm.cs:286-309,
     // habilitado con el cliente identificado): es «extend» de CU01-VTA, sin asociación directa con el actor.
     // CU04-CAJ es «extend» de CU01-CAJ: solo si el medio de pago es Tarjeta de crédito (MedioPago.PermiteCuotas).
-    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'C', caso: 'c2' }, { actor: 'C', caso: 'c4' }],
+    enlaces: [{ actor: 'V', caso: 'c1' }, { actor: 'C', caso: 'c2' }, { actor: 'C', caso: 'c4' }, { actor: 'C', caso: 'c7' }],
     incluye: [{ de: 'c2', a: 'c3' }],
     extiende: [{ de: 'c5', a: 'c1' }, { de: 'c6', a: 'c2' }]
   },

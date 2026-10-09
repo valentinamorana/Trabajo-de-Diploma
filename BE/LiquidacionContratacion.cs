@@ -19,6 +19,9 @@ namespace BE
         /// <summary>Upgrade (plan más caro con período vigente): el período del plan nuevo arranca hoy, haya o no crédito.</summary>
         public bool EsUpgrade { get; set; }
 
+        /// <summary>Plan igual o más barato con el período vigente: fecha desde la que rige (null si rige ya).</summary>
+        public DateTime? CambioProgramadoDesde { get; set; }
+
         /// <summary>Importe a cobrar sin cargos adicionales: Bruto - Descuento - crédito por cambio de plan (nunca negativo).</summary>
         public decimal Total => Math.Max(0, Bruto - Descuento - CreditoCambioPlan);
 
@@ -36,6 +39,8 @@ namespace BE
         public decimal Descuento { get; set; }
         /// <summary>Upgrade: crédito por los días no usados del plan actual; el plan nuevo rige desde hoy.</summary>
         public decimal CreditoCambioPlan { get; set; }
+        /// <summary>Plan igual o más barato con el período vigente: rige desde esta fecha (nodo a11 de PN02).</summary>
+        public System.DateTime? CambioProgramadoDesde { get; set; }
         /// <summary>PN04: cargos por daño o pérdida pendientes del cliente que se suman a este cobro.</summary>
         public decimal Cargos { get; set; }
         public int CantidadCargos { get; set; }

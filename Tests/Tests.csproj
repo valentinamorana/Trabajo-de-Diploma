@@ -55,6 +55,7 @@
     <Compile Include="ComandoPedidoTests.cs" />
     <Compile Include="RenovacionTests.cs" />
     <Compile Include="ClienteTests.cs" />
+    <Compile Include="CambioPlanProgramadoTests.cs" />
     <Compile Include="CargoPrendaTests.cs" />
     <Compile Include="PedidoTests.cs" />
     <Compile Include="PanelTareasTests.cs" />

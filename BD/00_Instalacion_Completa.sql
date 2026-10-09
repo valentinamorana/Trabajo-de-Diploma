@@ -3647,6 +3647,27 @@ END
 GO
 
 -- ============================================================
+-- WardrobeFlow — 21z. CAMBIO DE PLAN PROGRAMADO (PN02, nodo a11)
+-- ------------------------------------------------------------
+-- Pasar a un plan igual o más barato con el período vigente: el plan nuevo rige al vencer el
+-- período pagado. Cliente guarda el plan siguiente y desde cuándo rige (la app lo aplica ese día).
+-- Las dos columnas entran en el dígito verificador de Cliente: si se agregan a una base ya
+-- instalada, se pide el recálculo (sección 22, 'DVReinicializar'). Idempotente.
+-- ============================================================
+IF COL_LENGTH('Cliente', 'IdPlanSiguiente') IS NULL
+BEGIN
+    ALTER TABLE Cliente ADD
+        IdPlanSiguiente INT      NULL CONSTRAINT FK_Cliente_PlanSiguiente REFERENCES PlanSuscripcion(IdPlan),
+        FechaCambioPlan DATETIME NULL;
+    MERGE ParametroSistema AS t
+    USING (VALUES (N'DVReinicializar', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+    WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+    WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    PRINT 'Cliente: cambio de plan programado (IdPlanSiguiente, FechaCambioPlan); DV a recalcular.';
+END
+GO
+
+-- ============================================================
 -- WardrobeFlow — 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA
 -- ------------------------------------------------------------
 -- Formato 2 de los dígitos verificadores (DAL.DigitoVerificador.FormatoActual = 2):

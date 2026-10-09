@@ -2,6 +2,7 @@ erDiagram
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
+  PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   Cliente ||--o{ HistorialCobro : "IdCliente"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
@@ -34,6 +35,8 @@ erDiagram
     int IdClienteReferente FK "NULL"
     decimal(10_2) DescuentoProximoCobro
     bit BeneficioReferidoOtorgado
+    int IdPlanSiguiente FK "NULL"
+    datetime FechaCambioPlan "NULL"
   }
   HistorialRenovacion {
     int IdRenovacion PK

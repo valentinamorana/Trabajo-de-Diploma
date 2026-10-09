@@ -290,6 +290,11 @@
     "titulo": "PN02 · CU03-CAJ Registrar Intento y Cancelar Contratación"
   },
   {
+    "id": "DSS_PN02_CU05_CAJ_AnularContratacion",
+    "tipo": "secuencia",
+    "titulo": "PN02 · CU05-CAJ Anular Contratación"
+  },
+  {
     "id": "DSS_PN03_CU01_GER_SugerirPromocion",
     "tipo": "secuencia",
     "titulo": "PN03 · CU01-GER Sugerir Promoción"

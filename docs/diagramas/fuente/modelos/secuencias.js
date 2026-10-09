@@ -331,12 +331,19 @@ module.exports = [
   },
   {
     tipo: 'secuencia', id: 'DSS_PN01_CU04_DespacharPedido', titulo: 'PN01 · CU01-DEP Despachar Pedido',
-    participantes: [A('L', 'Depósito / Logística'), P('F', 'PedidosRealizados'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    // GUI/PedidosRealizados.cs › BtnDespachar_Click: relee el pedido, confirma y ejecuta DespachoCommand con el InvocadorPedido.
+    participantes: [A('L', 'Depósito / Logística'), P('F', 'PedidosRealizados'), P('I', 'InvocadorPedido'), P('K', 'DespachoCommand'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
     pasos: [
+      nota('Patrón Command: PedidosRealizados (Client) arma DespachoCommand y se lo entrega a InvocadorPedido (Invoker); BLL.Pedido es el Receiver. No es reversible', 'F', 'I', 'K'),
       c('L', 'F', 'Selecciona un pedido Pendiente y pulsa Despachar'),
       c('F', 'B', 'ObtenerPorId(id)  [relee el estado actual]'),
       r('B', 'F', 'pedido'),
-      c('F', 'B', 'Despachar(modulo, pedido)'),
+      r('F', 'L', 'Solicita confirmar el despacho'),
+      c('L', 'F', 'Confirma'),
+      c('F', 'I', 'TomarOrden(new DespachoCommand(receptor, pedido, modulo))'),
+      c('F', 'I', 'ProcesarOrdenes()'),
+      c('I', 'K', 'Ejecutar()'),
+      c('K', 'B', 'Despachar(modulo, pedido)'),
       nota('Exigir(PedidosRealizadosEditar) · pedido.PuedeDespachar()', 'B'),
       { alt: 'El pedido no está Pendiente', pasos: [r('B', 'F', 'AppException(despachar_estado)'), r('F', 'L', 'Informa el estado actual')],
         sino: [{ etiqueta: 'Pendiente', pasos: [
@@ -349,12 +356,19 @@ module.exports = [
   },
   {
     tipo: 'secuencia', id: 'DSS_PN01_CU05_RegistrarEntrega', titulo: 'PN01 · CU02-DEP Registrar Entrega',
-    participantes: [A('L', 'Depósito / Logística'), P('F', 'PedidosRealizados'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
+    // GUI/PedidosRealizados.cs › BtnEntregado_Click: relee el pedido, confirma y ejecuta EntregaCommand con el InvocadorPedido.
+    participantes: [A('L', 'Depósito / Logística'), P('F', 'PedidosRealizados'), P('I', 'InvocadorPedido'), P('K', 'EntregaCommand'), P('B', 'BLL.Pedido'), P('D', 'DAL.Pedido'), P('H', 'DAL.PedidoHistorial')],
     pasos: [
+      nota('Patrón Command: PedidosRealizados (Client) arma EntregaCommand y se lo entrega a InvocadorPedido (Invoker); BLL.Pedido es el Receiver. No es reversible', 'F', 'I', 'K'),
       c('L', 'F', 'Selecciona un pedido Despachado y pulsa Marcar Entregado'),
       c('F', 'B', 'ObtenerPorId(id)  [relee el estado actual]'),
       r('B', 'F', 'pedido'),
-      c('F', 'B', 'MarcarEntregado(modulo, pedido)'),
+      r('F', 'L', 'Solicita confirmar la entrega'),
+      c('L', 'F', 'Confirma'),
+      c('F', 'I', 'TomarOrden(new EntregaCommand(receptor, pedido, modulo))'),
+      c('F', 'I', 'ProcesarOrdenes()'),
+      c('I', 'K', 'Ejecutar()'),
+      c('K', 'B', 'MarcarEntregado(modulo, pedido)'),
       nota('Exigir(PedidosRealizadosEditar) · pedido.PuedeEntregarse()', 'B'),
       { alt: 'El pedido no está Despachado', pasos: [r('B', 'F', 'AppException(entregar_estado)'), r('F', 'L', 'Informa el estado actual')],
         sino: [{ etiqueta: 'Despachado', pasos: [
@@ -412,9 +426,28 @@ module.exports = [
           c('B', 'D', 'Cancelar(idPedido, idCliente, estadoEsperado, motivo)  [libera las prendas a Disponible]'),
           c('B', 'H', 'RegistrarCambios(cambios)  [Accion = CANCELAR]'),
           r('B', 'F', 'ok'),
-          r('F', 'V', 'Pedido Cancelado: prendas liberadas'),
-          nota('Reactivar (DesCancelar, otra acción): vuelve a EnControlStock revalidando vigencia, pedido activo y cupo; Depósito revisa el stock de nuevo', 'B')
-        ] }] }
+          r('F', 'V', 'Pedido Cancelado: prendas liberadas')
+        ] }] },
+      { opt: 'Reactivar un pedido Cancelado (deshacer la cancelación)', pasos: [
+        c('V', 'F', 'Selecciona el pedido Cancelado, pulsa Reactivar y confirma'),
+        c('F', 'B', 'ObtenerPorId(id)  [relee el estado actual]'),
+        r('B', 'F', 'pedido'),
+        c('F', 'I', 'PuedeDeshacer(idPedido)'),
+        r('I', 'F', 'bool  [la última orden de ese pedido en esta pantalla es reversible]'),
+        { alt: 'Se canceló en esta pantalla: se deshace el comando', pasos: [
+          c('F', 'I', 'DeshacerUltima(idPedido)'),
+          c('I', 'K', 'Deshacer()'),
+          c('K', 'B', 'ObtenerPorId(idPedido)'),
+          c('K', 'B', 'DesCancelar(modulo, pedido)')
+        ], sino: [{ etiqueta: 'Cancelado antes o en otra sesión', pasos: [
+          c('F', 'B', 'DesCancelar(modulo, pedido)')
+        ] }] },
+        nota('Exigir(PedidosVentaEditar) · VerificarVigencia · RevisarPedidoActivo · ComprobarCupo', 'B'),
+        c('B', 'D', 'DesCancelar(idPedido, idCliente)  [vuelve a En Control de Stock; claim WHERE Estado = Cancelado]'),
+        c('B', 'H', 'RegistrarCambios(cambios)  [Accion = DESCANCELAR]'),
+        r('B', 'F', 'ok'),
+        r('F', 'V', 'Pedido reactivado: vuelve a control de stock (CU04-DEP)')
+      ] }
     ]
   },
 
@@ -448,7 +481,7 @@ module.exports = [
       { alt: '¿Contratación válida? No', pasos: [r('B', 'F', 'AppException(cliente_inexistente / plan_inexistente / plan_insuficiente / pendiente_existente)'), r('F', 'V', 'Informar motivo (Registrar queda deshabilitado)')],
         sino: [{ etiqueta: 'Sí', pasos: [r('B', 'F', 'plan')] }] },
       c('F', 'B', 'EstimarImporte(idCliente, idPlan, modalidad)'),
-      r('B', 'F', 'liquidación estimada (un solo descuento)'),
+      r('B', 'F', 'liquidación estimada (un solo descuento + cargos pendientes de PN04)'),
       r('F', 'V', 'Importe a abonar en Caja'),
       nota('¿Elige plan y modalidad? No → «extend» CU02-VTA Asentar Desistimiento (botón Desistir)', 'V', 'F'),
       c('V', 'F', 'Registrar contratación'),
@@ -462,7 +495,7 @@ module.exports = [
         c('B', 'D', 'Alta(contratacion)  [Estado = PendientePago, PrecioMensual = precio del plan pactado]'),
         r('D', 'B', 'idContratacion'),
         r('B', 'F', 'idContratacion'),
-        r('F', 'V', 'Contratación Pendiente de Pago: el cliente abona en Caja (la liquidación se imprime desde la cola de Caja)')
+        r('F', 'V', 'Contratación Pendiente de Pago: el cliente abona en Caja (orden de cobro imprimible)')
       ] }] }
     ]
   },
@@ -478,7 +511,7 @@ module.exports = [
       { loop: 'Por cada contratación de la cola', pasos: [
         c('B', 'PD', 'Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)  [bruto = PrecioMensual pactado × meses]')
       ] },
-      r('B', 'F', 'importe de cada una: un solo descuento (el mayor)'),
+      r('B', 'F', 'importe de cada una: un solo descuento (el mayor) + cargos pendientes de PN04'),
       c('C', 'F', 'Elige la contratación y el medio de pago'),
       { opt: 'Tarjeta de crédito: «extend» CU04-CAJ Financiar en Cuotas', pasos: [
         c('F', 'B', 'ObtenerPlanesCuotas(modalidad)'),
@@ -501,6 +534,7 @@ module.exports = [
       r('D', 'B', 'contratación actual'),
       c('B', 'B', 'ResolverCuotas(medio, idPlanCuotas, modalidad)'),
       c('B', 'PD', 'Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)  [vuelve a liquidar]'),
+      c('B', 'B', 'CargosPendientes(idCliente)  [privado: cargos de PN04 que se cobran con el período]'),
       { alt: 'No se puede cobrar o cambió el importe', pasos: [
         r('B', 'F', 'AppException(cobrar_estado / plan_baja / plan_insuficiente / cobra_el_vendedor / importe_cambiado / cuotas_medio / cuotas_invalidas / cuotas_modalidad)'),
         r('F', 'C', 'Informa el motivo; si cambió el importe: volver a Calcular importe y confirmar')
@@ -518,7 +552,7 @@ module.exports = [
             ], sino: [{ etiqueta: 'Activada', pasos: [
               c('B', 'D', 'RegistrarVigencia(idContratacion, desde, hasta, idReferenteAcreditado)'),
               r('B', 'F', 'Liquidación con comprobante, vigencia y referente acreditado'),
-              r('F', 'C', 'Comprobante (con las cuotas y el recargo) y Constancia de suscripción (PDF)')
+              r('F', 'C', 'Comprobante (opcional, con las cuotas y el recargo)')
             ] }] }
           ] }] }
       ] }] }
@@ -604,6 +638,32 @@ module.exports = [
               r('B', 'F', 'resultado (NroIntento, Maximo, Cancelada)'),
               { alt: '¿Alcanzó el máximo? Sí (Cancelada)', pasos: [r('F', 'C', 'Contratación cancelada: Constancia de cancelación (PDF)')],
                 sino: [{ etiqueta: 'No', pasos: [r('F', 'C', 'Intento N de 3 registrado: sigue en la cola para volver a cobrarla')] }] }
+            ] }] }
+        ] }] }
+    ]
+  },
+
+  {
+    tipo: 'secuencia', id: 'DSS_PN02_CU05_CAJ_AnularContratacion', titulo: 'PN02 · CU05-CAJ Anular Contratación',
+    // GUI/ContratacionesPendientesForm.cs › BtnAnular_Click; BLL/Contratacion.cs › Anular; DAL/Contratacion.cs › Anular.
+    participantes: [A('C', 'Caja'), P('F', 'ContratacionesPendientesForm'), P('B', 'BLL.Contratacion'), P('D', 'DAL.Contratacion')],
+    pasos: [
+      nota('El cliente se arrepintió antes de pagar o hubo un error de carga: se cancela sin registrar intentos de pago', 'C', 'F'),
+      c('C', 'F', 'Selecciona una contratación pendiente y pulsa Anular'),
+      r('F', 'C', 'Solicita el motivo de la anulación'),
+      c('C', 'F', 'Ingresa el motivo'),
+      c('F', 'B', 'Anular(modulo, contratacion, motivo)'),
+      nota('Exigir(CajaEditar)', 'B'),
+      c('B', 'D', 'ObtenerPorId(idContratacion)  [relee el estado]'),
+      r('D', 'B', 'contratación actual'),
+      { alt: 'No está pendiente o el motivo no es válido', pasos: [r('B', 'F', 'AppException(inexistente / anular_estado / anular_sin_motivo / motivo_largo)'), r('F', 'C', 'Informa el error')],
+        sino: [{ etiqueta: 'Válida', pasos: [
+          c('B', 'D', 'Anular(idContratacion, motivo, idCaja)  [claim: WHERE Estado = PendientePago]'),
+          { alt: 'false: otra sesión ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(cobrar_concurrente)')],
+            sino: [{ etiqueta: 'true', pasos: [
+              r('D', 'B', 'true'),
+              r('B', 'F', 'ok'),
+              r('F', 'C', 'Contratación Cancelada: sale de la cola (constancia de cancelación imprimible)')
             ] }] }
         ] }] }
     ]
@@ -955,9 +1015,11 @@ module.exports = [
     pasos: [
       c('D', 'F', 'Abre Inspección de Devolución'),
       c('F', 'PB', 'ObtenerEnLimpieza()'),
+      c('PB', 'DM', 'ObtenerTodos()'),
+      r('DM', 'PB', 'mantenimientos (abiertos por una devolución)'),
       c('PB', 'DP', 'ObtenerTodos()'),
       r('DP', 'PB', 'prendas'),
-      r('PB', 'F', 'prendas En limpieza'),
+      r('PB', 'F', 'prendas En limpieza que volvieron de un cliente'),
       r('F', 'D', 'Cola de prendas pendientes de inspección (con su último cliente)'),
       c('D', 'F', 'Selecciona una prenda y la inspecciona'),
       { alt: 'Desgaste normal: Aprobar reingreso', pasos: [
@@ -985,12 +1047,17 @@ module.exports = [
         r('CG', 'CD', 'ok (motivo obligatorio, monto > 0)'),
         r('CD', 'F', 'motivo y monto'),
         c('F', 'IN', 'DarDeBajaConCargo(modulo, prenda, motivo, monto)'),
+        c('IN', 'PB', 'ObtenerEnLimpieza()  [¿la prenda volvió de un cliente?]'),
+        { alt: 'No viene de una devolución', pasos: [r('IN', 'F', 'AppException(no_devuelta): se da de baja sin cargo desde Prendas'), r('F', 'D', 'Informa el motivo')] },
         c('IN', 'IN', 'BajaConCargo(modulo, prenda, motivo, monto, actor, EnLimpieza)'),
         nota('Exigir(StockEditar) · la prenda sigue En limpieza y tiene último cliente', 'IN'),
+        c('IN', 'PR', 'TransicionPermitida(Baja)'),
+        r('PR', 'IN', 'true  [patrón State: EstadoEnLimpieza permite pasar a Baja]'),
         c('IN', 'CG', 'ValidarDatos(motivo, monto)'),
         c('IN', 'DI', 'DarDeBajaConCargo(cargo, estadoEsperado)'),
         nota('Una sola transacción: el cargo (Pendiente, al último cliente), la baja condicionada, el cierre del mantenimiento y la cancelación de la lista de espera', 'DI'),
         r('DI', 'IN', 'idCargo'),
+        c('IN', 'PR', 'ControlarEstado(Baja)  [refleja la baja en el objeto]'),
         r('IN', 'F', 'idCargo'),
         r('F', 'D', 'Prenda dada de baja: el cargo se suma al próximo cobro del cliente')
       ] }] },
@@ -1002,7 +1069,7 @@ module.exports = [
     // GUI/PedidosRealizados.cs › CargarDetallePrendas, BtnReportarPerdida_Click; BLL/InspeccionDevolucion.cs › ReportarPerdida
     // (En uso → Baja con cargo, en la misma transacción que CU05-DEP).
     participantes: [A('D', 'Depósito'), P('F', 'PedidosRealizados'), P('CD', 'CargoPrendaDialog'), P('PE', 'BLL.Pedido'), P('IN', 'BLL.InspeccionDevolucion'),
-                    P('PC', 'BLL.Politicas.PoliticaCompraTacita'), P('CG', 'BLL.CargoPrenda'), P('DPE', 'DAL.Pedido'), P('DI', 'DAL.InspeccionDevolucion')],
+                    P('PC', 'BLL.Politicas.PoliticaCompraTacita'), P('PR', 'BE.Prenda'), P('CG', 'BLL.CargoPrenda'), P('DPE', 'DAL.Pedido'), P('DI', 'DAL.InspeccionDevolucion')],
     pasos: [
       c('D', 'F', 'Consulta los pedidos realizados y elige un pedido'),
       c('F', 'PE', 'ObtenerPorId(id)'),
@@ -1027,10 +1094,13 @@ module.exports = [
       c('IN', 'IN', 'BajaConCargo(modulo, prenda, motivo, monto, actor, EnUso)'),
       { alt: 'Sin último cliente registrado', pasos: [r('IN', 'F', 'AppException(sin_cliente)'), r('F', 'D', 'Rechaza la operación (fin del caso de uso)')],
         sino: [{ etiqueta: 'Con último cliente', pasos: [
+          c('IN', 'PR', 'TransicionPermitida(Baja)'),
+          r('PR', 'IN', 'true  [patrón State: EstadoEnUso permite pasar a Baja]'),
           c('IN', 'CG', 'ValidarDatos(motivo, monto)'),
           c('IN', 'DI', 'DarDeBajaConCargo(cargo, estadoEsperado)'),
           nota('Una sola transacción: el cargo (Pendiente, al último cliente), la baja En uso → Baja y la cancelación de su lista de espera', 'DI'),
           r('DI', 'IN', 'idCargo'),
+          c('IN', 'PR', 'ControlarEstado(Baja)  [refleja la baja en el objeto]'),
           r('IN', 'F', 'idCargo'),
           r('F', 'D', 'Prenda reportada como perdida: el cargo se suma al próximo cobro')
         ] }] }

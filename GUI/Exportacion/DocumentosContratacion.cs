@@ -59,6 +59,10 @@ namespace GUI.Exportacion
                 sb.AppendLine(string.Format(Tr("doc.contr.creditoupgrade",
                     "Crédito por cambio a un plan superior (días no usados del plan anterior): -{0:C2}. El plan nuevo rige desde hoy."),
                     l.CreditoCambioPlan));
+            if (l.CambioProgramadoDesde.HasValue)
+                sb.AppendLine(string.Format(Tr("doc.contr.programado",
+                    "Cambio a un plan igual o más barato: el plan actual sigue hasta el {0:d}; desde ese día rige el nuevo."),
+                    l.CambioProgramadoDesde.Value));
             if (l.Cargos > 0)
                 sb.AppendLine(string.Format(Tr("doc.contr.cargos",
                     "Cargos por daño o pérdida de prendas: {0} cargo(s), +{1:C2}"), l.CantidadCargos, l.Cargos));

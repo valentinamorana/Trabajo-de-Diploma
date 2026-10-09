@@ -32,11 +32,11 @@ module.exports = [
   },
   {
     tipo: 'er', id: 'DER_pn02_contrataciones', titulo: 'DER — PN02 Comercialización de la suscripción', columnas: 3,
-    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Contratacion', 'MedioPago', 'PlanCuotas', 'ContratacionIntentoPago', 'DesistimientoContratacion', 'Promocion']
+    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Contratacion', 'MedioPago', 'PlanCuotas', 'ContratacionIntentoPago', 'DesistimientoContratacion', 'Promocion', 'CargoPrenda']
   },
   {
     tipo: 'er', id: 'DER_pn03_promociones', titulo: 'DER — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
-    tablas: ['Usuario', 'PlanSuscripcion', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion', 'Contratacion', 'Cliente']
+    tablas: ['Usuario', 'PlanSuscripcion', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion', 'Contratacion', 'Cliente', 'HistorialCobro']
   },
   {
     tipo: 'er', id: 'DER_pn04_devolucion', titulo: 'DER — PN04 Inspección de devolución', columnas: 3,

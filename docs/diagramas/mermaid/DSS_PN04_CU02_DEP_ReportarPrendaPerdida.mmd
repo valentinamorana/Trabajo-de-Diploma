@@ -6,6 +6,7 @@ sequenceDiagram
   participant PE as BLL.Pedido
   participant IN as BLL.Inspeccion<br/>Devolucion
   participant PC as BLL.Politicas.<br/>PoliticaCompraTacita
+  participant PR as BE.Prenda
   participant CG as BLL.CargoPrenda
   participant DPE as DAL.Pedido
   participant DI as DAL.Inspeccion<br/>Devolucion
@@ -38,10 +39,13 @@ sequenceDiagram
     IN-->>F: AppException(sin_cliente)
     F-->>D: Rechaza la operación (fin del caso de uso)
   else Con último cliente
+    IN->>PR: TransicionPermitida(Baja)
+    PR-->>IN: true  [patrón State: EstadoEnUso permite pasar a Baja]
     IN->>CG: ValidarDatos(motivo, monto)
     IN->>DI: DarDeBajaConCargo(cargo, estadoEsperado)
     Note over DI: Una sola transacción: el cargo (Pendiente, al último cliente), la baja En uso → Baja y la cancelación de su lista de espera
     DI-->>IN: idCargo
+    IN->>PR: ControlarEstado(Baja)  [refleja la baja en el objeto]
     IN-->>F: idCargo
     F-->>D: Prenda reportada como perdida: el cargo se suma al próximo cobro
   end

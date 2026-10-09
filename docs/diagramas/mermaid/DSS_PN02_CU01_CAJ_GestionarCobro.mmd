@@ -15,7 +15,7 @@ sequenceDiagram
   loop Por cada contratación de la cola
     B->>PD: Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)  [bruto = PrecioMensual pactado × meses]
   end
-  B-->>F: importe de cada una: un solo descuento (el mayor)
+  B-->>F: importe de cada una: un solo descuento (el mayor) + cargos pendientes de PN04
   C->>F: Elige la contratación y el medio de pago
   opt Tarjeta de crédito: «extend» CU04-CAJ Financiar en Cuotas
     F->>B: ObtenerPlanesCuotas(modalidad)
@@ -38,6 +38,7 @@ sequenceDiagram
   D-->>B: contratación actual
   B->>B: ResolverCuotas(medio, idPlanCuotas, modalidad)
   B->>PD: Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)  [vuelve a liquidar]
+  B->>B: CargosPendientes(idCliente)  [privado: cargos de PN04 que se cobran con el período]
   alt No se puede cobrar o cambió el importe
     B-->>F: AppException(cobrar_estado / plan_baja / plan_insuficiente / cobra_el_vendedor / importe_cambiado / cuotas_medio / cuotas_invalidas / cuotas_modalidad)
     F-->>C: Informa el motivo, si cambió el importe: volver a Calcular importe y confirmar
@@ -57,7 +58,7 @@ sequenceDiagram
       else Activada
         B->>D: RegistrarVigencia(idContratacion, desde, hasta, idReferenteAcreditado)
         B-->>F: Liquidación con comprobante, vigencia y referente acreditado
-        F-->>C: Comprobante (con las cuotas y el recargo) y Constancia de suscripción (PDF)
+        F-->>C: Comprobante (opcional, con las cuotas y el recargo)
       end
     end
   end

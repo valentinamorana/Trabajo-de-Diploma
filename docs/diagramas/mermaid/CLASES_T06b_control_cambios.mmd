@@ -4,12 +4,10 @@ classDiagram
   }
   class BLL_VersionUsuario["BLL.VersionUsuario"] {
     +ObtenerPorUsuario(int) List~VersionUsuario~
-    +ObtenerTodos() List~VersionUsuario~
     +RestaurarVersion(string,  int) void
   }
   class BLL_CuidadorHistorial["BLL.CuidadorHistorial"] {
     +Guardar(int,  IMemento) void
-    +ObtenerHistorial(int) List~IMemento~
     +Obtener(int) IMemento
   }
   class Usuario {

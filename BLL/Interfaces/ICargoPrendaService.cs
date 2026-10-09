@@ -16,6 +16,5 @@ namespace BLL.Interfaces
         void ValidarDatos(string motivo, decimal monto);
 
         List<BE.CargoPrenda> ObtenerPendientesPorCliente(int idCliente);
-        List<BE.CargoPrenda> ObtenerTodos();
     }
 }

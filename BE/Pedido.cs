@@ -61,10 +61,6 @@ namespace BE
         public bool TodasConfirmadas =>
             CantidadPrendas > 0 && Prendas.TrueForAll(p => PrendasConfirmadas.Contains(p.IdPrenda));
 
-        // Resumen para mostrar en grillas.
-        public string Resumen =>
-            $"Pedido #{IdPedido} — {NombreCliente ?? $"Cliente {IdCliente}"} — {Estado}";
-
         // Comportamiento
         // Días transcurridos desde que se generó el pedido — usado por los dashboards de
         // rol (Kanban) para mostrar antigüedad y decidir el color de la tarjeta, en vez de

@@ -236,7 +236,7 @@ namespace BLL
         //
         // Sin caller en la GUI desde PN02: la activación comercial normal pasa por
         // ActivarSuscripcionDesdeContratacion (Caja, tras confirmar el pago). Este método
-        // queda disponible con permiso ClientesEditar (Vendedor) para un futuro caso de uso
+        // queda disponible SOLO para el Administrador (lo exige abajo) para un caso de uso
         // administrativo puntual (ej. reactivar manualmente con Builder sin pasar por una
         // Contratación) — no lo uses como atajo para evitar Caja: para eso ya existe el guard
         // de Administrador en Modificar().

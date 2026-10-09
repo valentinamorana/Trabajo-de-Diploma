@@ -15,6 +15,5 @@ namespace BLL
 
         public List<BE.ControlMapeado> ObtenerTodos() => _dal.ObtenerTodos();
 
-        public List<BE.ControlMapeado> ObtenerPorPermiso(int idPermiso) => _dal.ObtenerPorPermiso(idPermiso);
     }
 }

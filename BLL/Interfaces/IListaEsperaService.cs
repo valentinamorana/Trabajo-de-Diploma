@@ -32,7 +32,6 @@ namespace BLL.Interfaces
         List<int> ObtenerIdsReservadosParaOtro(int? idClienteSolicitante);
 
         List<BE.ListaEspera> ObtenerActivas();
-        List<BE.ListaEspera> ObtenerPorPrenda(int idPrenda);
 
         // Cantidad de prendas reservadas esperando retiro (para PanelAlertas).
         int ContarReservadasVigentes();

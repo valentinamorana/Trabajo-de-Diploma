@@ -103,8 +103,6 @@ namespace BLL
             return resultado;
         }
 
-        public List<BE.Cobro> ObtenerHistorial(int idCliente) => dalCobro.ObtenerPorCliente(idCliente);
-
         // Un cobro (para reimprimir su comprobante).
         public BE.Cobro ObtenerCobro(int idCobro) => dalCobro.ObtenerPorId(idCobro);
 

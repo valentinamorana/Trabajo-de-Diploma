@@ -334,8 +334,11 @@ namespace GUI
                 return;
             }
 
-            string bodyCanc = string.Format(
-                Tr("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),
+            // En control de stock o con faltantes todavía no hay prendas separadas: no hay nada que liberar.
+            bool sinReserva = pedido.Estado == BE.EstadoPedido.EnControlStock || pedido.Estado == BE.EstadoPedido.ConFaltantes;
+            string bodyCanc = string.Format(sinReserva
+                    ? Tr("conf.cancelped.body.sinreserva", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nTodavía no tiene prendas separadas.")
+                    : Tr("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),
                 pedido.IdPedido, pedido.NombreCliente, motivo);
 
             if (!ConfirmarSiNo(bodyCanc, Tr("conf.cancelped.titulo", "Confirmar Cancelación"), porDefectoNo: true)) return;
@@ -349,7 +352,9 @@ namespace GUI
                 invocador.TomarOrden(new BLL.Comandos.CancelacionCommand(pedidoBLL, pedido, this.Text, motivo));
                 invocador.ProcesarOrdenes();
 
-                MostrarOk(Tr("msg.ped.cancelado", "Pedido #{0} cancelado. Prendas liberadas.", new object[] { pedido.IdPedido }));
+                MostrarOk(sinReserva
+                    ? Tr("msg.ped.cancelado.sinreserva", "Pedido #{0} cancelado.", new object[] { pedido.IdPedido })
+                    : Tr("msg.ped.cancelado", "Pedido #{0} cancelado. Prendas liberadas.", new object[] { pedido.IdPedido }));
                 CargarPedidos();
             }
             catch (Exception ex)

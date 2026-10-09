@@ -7320,3 +7320,11 @@ ES	err.bll.cliente.baja_cargos	No se puede dar de baja a {0}: tiene {1} cargo(s)
 EN	err.bll.cliente.baja_cargos	{0} cannot be deactivated: they have {1} pending damage or loss charge(s) ({2:C2}). They are collected with the next renewal or subscription.
 RU	err.bll.cliente.baja_cargos	Нельзя деактивировать {0}: есть неоплаченные сборы за повреждение или потерю ({1} шт., {2:C2}). Они взимаются при следующем продлении или оформлении.
 PT	err.bll.cliente.baja_cargos	Não é possível desativar {0}: há {1} cobrança(s) por dano ou perda pendente(s) ({2:C2}). São cobradas na próxima renovação ou contratação.
+ES	conf.cancelped.body.sinreserva	¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nTodavía no tiene prendas separadas.
+EN	conf.cancelped.body.sinreserva	Cancel Order #{0} for {1}?\n\nReason: {2}\n\nNo garments have been set aside yet.
+RU	conf.cancelped.body.sinreserva	Отменить заказ №{0} клиента {1}?\n\nПричина: {2}\n\nВещи ещё не отложены.
+PT	conf.cancelped.body.sinreserva	Cancelar o Pedido #{0} de {1}?\n\nMotivo: {2}\n\nAinda não há peças separadas.
+ES	msg.ped.cancelado.sinreserva	Pedido #{0} cancelado.
+EN	msg.ped.cancelado.sinreserva	Order #{0} cancelled.
+RU	msg.ped.cancelado.sinreserva	Заказ №{0} отменён.
+PT	msg.ped.cancelado.sinreserva	Pedido #{0} cancelado.

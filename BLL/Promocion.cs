@@ -254,7 +254,7 @@ namespace BLL
         }
 
         // Guarda de "¿Aprueba?": quien creó la promoción no puede dictaminarla (separación de
-        // funciones; se aplica a todos los usuarios, también al Administrador).
+        // funciones). Excepción: el Administrador sí puede (decisión de la alumna, 05/10).
         public bool PuedeDictaminar(BE.Promocion promocion)
         {
             if (promocion == null || !Seguridad.SessionManager.IsLoggedIn) return false;
@@ -481,8 +481,9 @@ namespace BLL
         // cierra con su propio claim, así dos sesiones que consultan a la vez no duplican el historial.
         public int CerrarVencidas()
         {
-            int? idUsuario = Seguridad.SessionManager.IsLoggedIn
-                ? (int?)Seguridad.SessionManager.GetInstance().Usuario.Id : null;
+            // El vencimiento lo hace el sistema (llegó la fecha), no quien abrió la pantalla: el
+            // historial queda sin usuario.
+            int? idUsuario = null;
             DateTime hoy = DateTime.Today;
             int cerradas = 0;
             foreach (var p in dalPromocion.ObtenerTodas().Where(x => x.DebeVencer(hoy)))

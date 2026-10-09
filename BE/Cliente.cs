@@ -111,7 +111,7 @@ namespace BE
             FechaLimiteGracia.HasValue && FechaLimiteGracia.Value.Date >= DateTime.Today;
 
         // True si venció el período de gracia sin que se haya registrado un cobro
-        // exitoso: a partir de acá se bloquean nuevos pedidos (BLL.Pedido.CrearPedido).
+        // exitoso: a partir de acá se bloquean nuevos pedidos (BLL.Pedido.VerificarVigencia).
         public bool EstaSuspendidoPorPago =>
             FechaLimiteGracia.HasValue && FechaLimiteGracia.Value.Date < DateTime.Today;
 
@@ -119,7 +119,7 @@ namespace BE
         // etc.) sin darse de baja del todo. Null = nunca pausado / pausa ya terminada.
         public DateTime? FechaPausaHasta { get; set; }
 
-        // True mientras la pausa está vigente: bloquea pedidos nuevos (BLL.Pedido.CrearPedido)
+        // True mientras la pausa está vigente: bloquea pedidos nuevos (BLL.Pedido.VerificarVigencia)
         // y el vencimiento se corre por los días pausados (NUULY: no se cobra mientras está pausada;
         // ver BLL.Manejadores.PausarSuscripcionHandler y BLL.Cliente.ReanudarPausa).
         public bool EstaPausada =>

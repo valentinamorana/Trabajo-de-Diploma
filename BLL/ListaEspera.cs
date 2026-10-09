@@ -165,7 +165,7 @@ namespace BLL
         public bool EstaReservadaParaOtro(int idPrenda, int idClienteSolicitante)
             => dalListaEspera.ObtenerReservaVigenteDeOtro(idPrenda, idClienteSolicitante) != null;
 
-        // Tras crear el pedido (BLL.Pedido.CrearPedido), cierra la reserva si esta prenda
+        // Tras crear el pedido (BLL.Pedido.SepararPrendas), cierra la reserva si esta prenda
         // estaba retenida para este mismo cliente. No hace nada si no había reserva.
         // Escritura: la dispara "Separar prendas" (Depósito), con el permiso de Control de Stock.
         public void CerrarSiReservada(string modulo, int idPrenda, int idCliente, string actor)

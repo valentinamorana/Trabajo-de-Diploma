@@ -8,7 +8,7 @@ namespace BLL.Manejadores
     /// delegación — igual que DirectorGeneral del ejemplo de cátedra, que aprueba
     /// cualquier compra sin evaluar nada porque es el último de la cadena. Da de baja el
     /// plan del cliente — lo que automáticamente bloquea nuevos pedidos, porque
-    /// BLL.Pedido.CrearPedido exige Cliente.TienePlan() — y señala si hay prendas en
+    /// BLL.Pedido.VerificarVigencia exige Cliente.TienePlan() — y señala si hay prendas en
     /// uso para solicitar la devolución (el pedido de devolución en sí es manual: el
     /// cliente es externo al sistema).
     /// </summary>

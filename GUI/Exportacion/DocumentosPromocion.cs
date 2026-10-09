@@ -22,6 +22,10 @@ namespace GUI.Exportacion
     /// </summary>
     public static class DocumentosPromocion
     {
+        // Motivo de la candidata en el idioma activo (la BLL deja la clave y sus argumentos).
+        private static string MotivoCandidata(BE.CandidataSugerencia c) =>
+            c.ClaveMotivo == null ? c.Motivo : string.Format(Tr(c.ClaveMotivo, c.Motivo), c.ArgsMotivo ?? new object[0]);
+
         private static string Tr(string clave, string fallback)
         {
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
@@ -128,7 +132,7 @@ namespace GUI.Exportacion
             {
                 sb.AppendLine(Tr("doc.promo.oportunidades", "Oportunidades de promoción detectadas:"));
                 foreach (var c in r.Oportunidades)
-                    sb.AppendLine($"   • [{Origen(c.Origen)}] {c.Motivo} ({Tr("doc.promo.beneficioest", "Beneficio estimado")}: {c.BeneficioEstimado:C2})");
+                    sb.AppendLine($"   • [{Origen(c.Origen)}] {MotivoCandidata(c)} ({Tr("doc.promo.beneficioest", "Beneficio estimado")}: {c.BeneficioEstimado:C2})");
             }
             else
                 sb.AppendLine(Tr("doc.promo.sinoportunidad", "¿Hay oportunidad? No: no se detectaron casos para promocionar. Fin sin promoción."));

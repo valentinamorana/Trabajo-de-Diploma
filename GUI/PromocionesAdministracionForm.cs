@@ -33,6 +33,9 @@ namespace GUI
         public PromocionesAdministracionForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(dgvSugerencias);
+            GUI.Estilos.EstiloFormulario.Grilla(dgvPromociones);
             // Paleta centralizada (GUI/Tema.cs).
             btnUsarSugerencia.BackColor = btnNuevaManual.BackColor = btnReformular.BackColor = Tema.RosaPrimario;
             btnAprobarBaja.BackColor = Tema.Exito;

@@ -110,7 +110,7 @@ namespace GUI
             col.Controls.Clear();
             foreach (var p in pedidos)
             {
-                var card = CrearCard($"Pedido #{p.IdPedido}", p.NombreCliente ?? $"Cliente {p.IdCliente}", p.DiasDesdeAlta, fondo);
+                var card = CrearCard(Tr("dash.card.pedido", "Pedido #{0}", new object[] { p.IdPedido }), p.NombreCliente ?? Tr("dash.card.cliente", "Cliente {0}", new object[] { p.IdCliente }), p.DiasDesdeAlta, fondo);
                 HabilitarClicAbrirPedidosVenta(card);
                 col.Controls.Add(card);
             }
@@ -203,7 +203,7 @@ namespace GUI
             foreach (Control c in col.Controls) c.Width = w;
         }
 
-        private static Panel CrearCard(string titulo, string sub, int dias, Color fondo)
+        private Panel CrearCard(string titulo, string sub, int dias, Color fondo)
         {
             var card = new Panel { Width = 180, Height = 64, BackColor = fondo, Margin = new Padding(0, 0, 0, 6) };
             card.Paint += (s, pe) =>
@@ -215,15 +215,15 @@ namespace GUI
             };
             card.Controls.Add(new Label { Text = titulo, Font = new Font("Segoe UI", 8.5f, FontStyle.Bold), AutoSize = true, Location = new Point(8, 6), BackColor = Color.Transparent });
             card.Controls.Add(new Label { Text = sub, Font = new Font("Segoe UI", 7.5f), AutoSize = false, Size = new Size(164, 16), Location = new Point(8, 24), BackColor = Color.Transparent, ForeColor = Tema.TextoSecundario });
-            string dStr = dias == 0 ? "hoy" : $"hace {dias}d";
+            string dStr = dias == 0 ? Tr("dash.hoy", "hoy") : Tr("dash.hace_dias", "hace {0}d", new object[] { dias });
             card.Controls.Add(new Label { Text = dStr, Font = new Font("Segoe UI", 7f, FontStyle.Italic), AutoSize = true, Location = new Point(8, 44), BackColor = Color.Transparent, ForeColor = Tema.TextoMuted });
             return card;
         }
 
-        private static Panel CrearVacio()
+        private Panel CrearVacio()
         {
             var p = new Panel { Width = 180, Height = 28, BackColor = Color.Transparent };
-            p.Controls.Add(new Label { Text = "— sin tareas —", Font = new Font("Segoe UI", 8f, FontStyle.Italic), ForeColor = Color.Silver, AutoSize = true, Location = new Point(6, 6), BackColor = Color.Transparent });
+            p.Controls.Add(new Label { Text = Tr("dash.tareas.sinpendientes", "Sin tareas pendientes"), Font = new Font("Segoe UI", 8f, FontStyle.Italic), ForeColor = Color.Silver, AutoSize = true, Location = new Point(6, 6), BackColor = Color.Transparent });
             return p;
         }
 

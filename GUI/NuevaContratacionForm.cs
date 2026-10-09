@@ -33,6 +33,8 @@ namespace GUI
         public NuevaContratacionForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(dgvPlanes);
         }
 
         // Abre el asistente con el cliente ya identificado (por ejemplo, recién registrado en Clientes).

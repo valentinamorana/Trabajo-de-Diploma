@@ -38,6 +38,8 @@ namespace GUI
         public AdministracionUsuariosForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(dgv);
             HabilitarEdicion(false);
         }
 
@@ -301,6 +303,11 @@ namespace GUI
             string rol = (cmbRol.SelectedItem as RolItem)?.Value;
             if (string.IsNullOrWhiteSpace(rol))
             { MostrarError(Tr("err.adminusr.rol_vacio", "Seleccioná un rol.")); return; }
+            if (!ConfirmarSiNo(Tr("conf.adminusr.cambiarrol",
+                    "¿Cambiar el rol de '{0}' a '{1}'?\n\nSus permisos cambian en el próximo ingreso.",
+                    new object[] { txtUsername.Text.Trim(), cmbRol.SelectedItem?.ToString() }),
+                    Tr("conf.adminusr.cambiarrol.titulo", "Cambiar rol"), porDefectoNo: true))
+                return;
             try
             {
                 _usuarioBLL.CambiarRol(this.Text, _idSeleccionado, rol);

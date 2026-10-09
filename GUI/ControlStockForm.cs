@@ -215,6 +215,11 @@ namespace GUI
         private void BtnInformarFaltantes_Click(object sender, EventArgs e)
         {
             if (_pedido == null) return;
+            if (!ConfirmarSiNo(Tr("conf.cs.faltantes",
+                    "¿Emitir el informe de prendas faltantes del Pedido #{0}?\n\nEl pedido vuelve al Vendedor para ajustar la selección o desistir.",
+                    new object[] { _pedido.IdPedido }),
+                    Tr("conf.cs.faltantes.titulo", "Informar faltantes")))
+                return;
             try
             {
                 var faltantes = pedidoBLL.InformarFaltantes(this.Text, _pedido);

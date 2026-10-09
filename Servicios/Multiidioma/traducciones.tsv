@@ -7264,3 +7264,51 @@ ES	err.serial.sin_datos	No hay errores para exportar.
 EN	err.serial.sin_datos	There are no errors to export.
 RU	err.serial.sin_datos	Нет ошибок для экспорта.
 PT	err.serial.sin_datos	Não há erros para exportar.
+ES	conf.usr.resetclave	¿Generar una contraseña nueva para '{0}'?\n\nLa actual deja de funcionar y la nueva se exporta a un archivo.
+EN	conf.usr.resetclave	Generate a new password for '{0}'?\n\nThe current one stops working and the new one is exported to a file.
+RU	conf.usr.resetclave	Создать новый пароль для «{0}»?\n\nТекущий перестанет действовать, новый будет сохранён в файл.
+PT	conf.usr.resetclave	Gerar uma nova senha para '{0}'?\n\nA atual deixa de funcionar e a nova é exportada para um arquivo.
+ES	conf.usr.resetclave.titulo	Resetear contraseña
+EN	conf.usr.resetclave.titulo	Reset password
+RU	conf.usr.resetclave.titulo	Сброс пароля
+PT	conf.usr.resetclave.titulo	Redefinir senha
+ES	conf.adminusr.cambiarrol	¿Cambiar el rol de '{0}' a '{1}'?\n\nSus permisos cambian en el próximo ingreso.
+EN	conf.adminusr.cambiarrol	Change the role of '{0}' to '{1}'?\n\nTheir permissions change at their next sign-in.
+RU	conf.adminusr.cambiarrol	Изменить роль «{0}» на «{1}»?\n\nПрава изменятся при следующем входе.
+PT	conf.adminusr.cambiarrol	Mudar o perfil de '{0}' para '{1}'?\n\nAs permissões mudam no próximo acesso.
+ES	conf.adminusr.cambiarrol.titulo	Cambiar rol
+EN	conf.adminusr.cambiarrol.titulo	Change role
+RU	conf.adminusr.cambiarrol.titulo	Изменить роль
+PT	conf.adminusr.cambiarrol.titulo	Mudar perfil
+ES	conf.cs.faltantes	¿Emitir el informe de prendas faltantes del Pedido #{0}?\n\nEl pedido vuelve al Vendedor para ajustar la selección o desistir.
+EN	conf.cs.faltantes	Issue the missing-garments report for Order #{0}?\n\nThe order goes back to the Salesperson to adjust the selection or withdraw.
+RU	conf.cs.faltantes	Сформировать отчёт о недостающих вещах по заказу №{0}?\n\nЗаказ вернётся продавцу для корректировки выбора или отказа.
+PT	conf.cs.faltantes	Emitir o relatório de peças faltantes do Pedido #{0}?\n\nO pedido volta ao Vendedor para ajustar a seleção ou desistir.
+ES	conf.cs.faltantes.titulo	Informar faltantes
+EN	conf.cs.faltantes.titulo	Report missing items
+RU	conf.cs.faltantes.titulo	Сообщить о нехватке
+PT	conf.cs.faltantes.titulo	Informar faltantes
+ES	promo.cand.rotacion	Análisis de rotación: {0} prenda(s) de la categoría {1} sin pedidos ({2}).
+EN	promo.cand.rotacion	Rotation analysis: {0} garment(s) in category {1} with no orders ({2}).
+RU	promo.cand.rotacion	Анализ оборачиваемости: {0} вещ. категории {1} без заказов ({2}).
+PT	promo.cand.rotacion	Análise de rotação: {0} peça(s) da categoria {1} sem pedidos ({2}).
+ES	promo.cand.abandono	Análisis de abandono: {0} cliente(s) del plan {1} en riesgo de abandono ({2:C2} de ingreso mensual en riesgo).
+EN	promo.cand.abandono	Churn analysis: {0} customer(s) on plan {1} at risk of leaving ({2:C2} of monthly revenue at risk).
+RU	promo.cand.abandono	Анализ оттока: {0} клиент(ов) тарифа {1} под риском ухода ({2:C2} ежемесячного дохода под угрозой).
+PT	promo.cand.abandono	Análise de abandono: {0} cliente(s) do plano {1} em risco de abandono ({2:C2} de receita mensal em risco).
+ES	dash.card.pedido	Pedido #{0}
+EN	dash.card.pedido	Order #{0}
+RU	dash.card.pedido	Заказ №{0}
+PT	dash.card.pedido	Pedido #{0}
+ES	dash.card.cliente	Cliente {0}
+EN	dash.card.cliente	Customer {0}
+RU	dash.card.cliente	Клиент {0}
+PT	dash.card.cliente	Cliente {0}
+ES	dash.card.prenda	Prenda #{0}
+EN	dash.card.prenda	Garment #{0}
+RU	dash.card.prenda	Вещь №{0}
+PT	dash.card.prenda	Peça #{0}
+ES	dash.dep.entrada	Entrada: {0:d}
+EN	dash.dep.entrada	Received: {0:d}
+RU	dash.dep.entrada	Поступление: {0:d}
+PT	dash.dep.entrada	Entrada: {0:d}

@@ -5,6 +5,8 @@ sequenceDiagram
   participant B as BLL.Promocion
   participant D as DAL.Promocion
   participant DS as DAL.Sugerencia<br/>Promocion
+  participant DP as DAL.Plan<br/>Suscripcion
+  participant DC as DAL.Cliente
   Note over K,F: Analiza el margen y el impacto → ¿Aprueba?
   F->>B: ObtenerPendientesRevisionContable()
   B->>D: ObtenerPendientesRevisionContable()
@@ -25,7 +27,18 @@ sequenceDiagram
       B->>DS: ObtenerPorId(idSugerencia)  [idSugerencia = promocion.IdSugerenciaOrigen.Value]
       DS-->>B: sugerencia (beneficio estimado y origen)
     end
-    B-->>F: AnalisisImpactoPromocion (beneficio estimado, superpuestas, UsuarioPuedeDictaminar)
+    B->>B: ProyectarCostoDelDescuento(analisis)
+    alt Aplica a un plan (promocion.AplicaAPlan())
+      B->>DP: ObtenerPorId(idPlan)  [idPlan = promocion.IdPlan.Value]
+      DP-->>B: plan (precio mensual)
+      B->>B: PoliticaDescuento.DescuentoDe(promocion, plan.Precio)  [descuento por cliente]
+      B->>DC: ContarClientesActivosPorPlan(idPlan)
+      DC-->>B: clientes activos del plan
+      Note over B: margen proyectado = beneficio estimado − descuento por cliente × clientes activos, conviene si es > 0
+    else Por categoría
+      Note over B: EsInformativa: no descuenta en el cobro, sin costo proyectado ni resultado
+    end
+    B-->>F: AnalisisImpactoPromocion (beneficio estimado, margen proyectado, superpuestas, UsuarioPuedeDictaminar)
     F-->>K: Análisis de margen e impacto, Aprobar y Rechazar habilitados solo si puede dictaminar
   end
   K->>F: Ingresa la observación, decide y confirma

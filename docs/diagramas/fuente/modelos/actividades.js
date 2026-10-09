@@ -188,7 +188,7 @@ module.exports = [
       N('a4', 'accion', 'A', 'Crear promoción desde la sugerencia'),
       N('a4m', 'accion', 'A', 'Crear promoción manual, sin sugerencia'),
       N('a5', 'accion', 'A', 'Validar (destino único, valor, fecha de fin desde hoy) → En revisión contable'),
-      N('a6', 'accion', 'K', 'Analizar margen e impacto (beneficio estimado, promociones superpuestas)'),
+      N('a6', 'accion', 'K', 'Analizar margen e impacto (beneficio estimado vs. costo del descuento, promociones superpuestas)'),
       N('d3', 'decision', 'K', '¿Aprueba? (quien la creó no la dictamina; si ya pasó su fecha de fin, se rechaza)'),
       N('a7', 'accion', 'K', 'Rechazada por Contabilidad'),
       N('d4', 'decision', 'A', '¿Reformular?'),

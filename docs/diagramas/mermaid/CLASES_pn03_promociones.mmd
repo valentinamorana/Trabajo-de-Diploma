@@ -97,6 +97,16 @@ classDiagram
     +OrigenMetrica? OrigenSugerencia
     +List~Promocion~ Superpuestas
     +bool UsuarioPuedeDictaminar
+    +bool EsInformativa
+    +decimal? PrecioPlan
+    +int ClientesActivosPlan
+    +decimal DescuentoPorCliente
+    +decimal CostoDescuentoProyectado
+    +bool BeneficioDeSugerencia
+    +decimal BeneficioEstimado
+    +bool MargenCalculable
+    +decimal MargenProyectado
+    +bool? Conviene
   }
   class BLL_AnalisisPromociones["BLL.AnalisisPromociones"] {
     +AnalizarMetricas(string,  DateTime?,  DateTime?) ReporteMetricas

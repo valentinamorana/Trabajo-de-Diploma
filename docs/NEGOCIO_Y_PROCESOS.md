@@ -377,7 +377,7 @@ Se mantiene que las promociones por categoría son informativas: no descuentan e
 **Pantallas.**
 - `GUI/SugerirPromocionForm.cs` (Gerencia): "Analizar métricas…", registrar la sugerencia y reimprimir las registradas.
 - `GUI/PromocionesAdministracionForm.cs` + `GUI/AltaPromocionForm.cs` (Administración): aceptar o descartar sugerencias, crear, reformular, descartar, desactivar y resolver bajas; historial e impresiones.
-- `GUI/PromocionesContabilidadForm.cs` (Contabilidad): análisis de margen e impacto y dictamen.
+- `GUI/PromocionesContabilidadForm.cs` (Contabilidad): análisis de margen e impacto (con el margen proyectado paso a paso) y dictamen.
 - `GUI/PromocionesVigentesForm.cs` (Vendedor): vigentes y con baja pedida; solicitar la baja.
 
 **Documentos (PDF, Factory Method en `GUI/Exportacion/DocumentosPromocion.cs` + `GeneradorDocumentoPromocion.cs`):**
@@ -398,7 +398,7 @@ Se mantiene que las promociones por categoría son informativas: no descuentan e
 | Administración | ¿Acepta la sugerencia? No → Descartar sugerencia | `SugerenciaPromocion.DescartarSugerencia` (motivo obligatorio, claim `Pendiente → Descartada`) |
 | Administración | ¿Acepta? Sí → Crear promoción (o crearla manual) | `BLL.Promocion.CrearDesdeSugerencia` (claim `Pendiente → Evaluada`, compensación `ReabrirEvaluacion`) / `CrearManual` |
 | Sistema | Validar → En revisión contable («Ficha de promoción») | `Promocion.ValidarPromocion` (destino único, valor, fechas); guarda `IdUsuarioAlta` y el historial `— → EnRevisionContable` |
-| Contabilidad | Analizar margen e impacto | `Promocion.AnalizarMargenEImpacto`: beneficio estimado de la sugerencia y promociones Vigentes del mismo plan superpuestas en fechas (advertencia) |
+| Contabilidad | Analizar margen e impacto | `Promocion.AnalizarMargenEImpacto`: **margen proyectado** (beneficio estimado − costo del descuento, ver abajo) y promociones Vigentes del mismo plan superpuestas en fechas (advertencia) |
 | Contabilidad | ¿Aprueba? (guarda: quien la creó no la dictamina) | `Promocion.PuedeDictaminar` (`BE.Promocion.PuedeDictaminarla`); `AprobarContable` → Vigente / `RechazarContable` → RechazadaContabilidad, ambas con «Dictamen contable» |
 | Administración | ¿Reformular? Sí → Reformular (vuelve a Validar) | `Promocion.Reformular` (claim `RechazadaContabilidad → EnRevisionContable`) |
 | Administración | ¿Reformular? No → Descartar promoción | `Promocion.DescartarPromocion` (motivo obligatorio → Descartada; «Constancia de descarte») |
@@ -406,6 +406,19 @@ Se mantiene que las promociones por categoría son informativas: no descuentan e
 | Administración | ¿Aprueba la baja? Sí / No («Resolución de baja») | `Promocion.AprobarBaja` → Desactivada / `RechazarBaja` (motivo obligatorio) → Vigente |
 | Administración | (b) Desactivar directamente | `Promocion.Desactivar` (motivo obligatorio) |
 | Sistema | (c) Llega la FechaFin → Vencida | `Promocion.CerrarVencidas`, que se ejecuta al consultar las promociones (`ObtenerTodas`, `ObtenerVigentes`, `ObtenerParaVentas`) |
+
+**Cálculo del margen proyectado ("Analizar margen e impacto").** Todo en importes **mensuales**, la misma base que el
+beneficio de Gerencia (en una oportunidad de abandono es el ingreso mensual en riesgo del plan):
+- *Descuento por cliente* = lo que la promoción descuenta sobre el **precio mensual del plan destino**, con la misma regla
+  que el cobro (`PoliticaDescuento.DescuentoDe`: Porcentaje = precio × valor / 100; MontoFijo = valor, con tope en el precio;
+  PrecioPromocional = precio − valor).
+- *Costo del descuento* = descuento por cliente × **clientes activos del plan** (`DAL.Cliente.ContarClientesActivosPorPlan`).
+- *Beneficio estimado* = el de la sugerencia de Gerencia; en un alta manual, el **margen estimado que cargó Administración**.
+- *Margen proyectado* = beneficio estimado − costo del descuento; **conviene** si es mayor a cero (con margen 0 no conviene).
+- Una promoción **por categoría** es informativa (no descuenta en el cobro): no tiene costo proyectado ni resultado.
+- Es una **recomendación** que se muestra en `PromocionesContabilidadForm`: la decisión (¿Aprueba?) sigue siendo de Contabilidad.
+  No se guarda con el dictamen: el «Dictamen contable» impreso no la incluye porque los clientes activos cambian con el
+  tiempo y el documento se reimprime desde otras pantallas (Administración, Vendedor) que no tienen la patente contable.
 
 Aplicación al cobro: mientras está **Vigente** y dentro de sus fechas, la promoción entra en `BE.PoliticaDescuento.Resolver`,
 que usan el cobro de contratación (`BLL.Contratacion.CalcularImporte/ConfirmarCobro`, PN02) y el cobro recurrente (`ProcesarPagoHandler`, N01).
@@ -424,7 +437,7 @@ inserta su fila de `PromocionHistorial` y el objeto que genera (`DictamenContabl
 | 5 | Toda promoción **nace En Revisión Contable** (tras Validar) y no aplica descuento hasta ser aprobada | `CrearDesdeSugerencia/CrearManual` | `PromocionTests › CrearManual_GuardaElCreadorYEscribeHistorialDeAlta` |
 | 6 | **Quien creó la promoción no puede dictaminarla**, salvo el **Administrador** (decisión del 05/10: el Administrador puede hacer todo) | `Promocion.PuedeDictaminar`; `IdUsuarioAlta` | `PromocionTests › AprobarContable_QuienCreo*`, `RechazarContable_QuienCreo*` |
 | 7 | El dictamen exige observación y queda guardado (resultado, observación, usuario, fecha) | `AprobarContable/RechazarContable`; tabla `DictamenContable` | `PromocionTests › AprobarContable_GuardaElDictamen*`, `RechazarContable_*` |
-| 8 | Contabilidad ve el beneficio estimado de la sugerencia y las promociones vigentes del mismo plan superpuestas (no impide aprobar) | `AnalizarMargenEImpacto`, `BE.Promocion.SeSuperponeCon` | `PromocionTests › AnalizarMargenEImpacto_*` |
+| 8 | Contabilidad ve el beneficio estimado, el **margen proyectado** (beneficio − descuento por cliente × clientes activos del plan; conviene si es > 0; informativo si es por categoría) y las promociones vigentes del mismo plan superpuestas. Nada de esto impide aprobar | `AnalizarMargenEImpacto`, `BE.AnalisisImpactoPromocion`, `BE.Promocion.SeSuperponeCon` | `PromocionTests › AnalizarMargenEImpacto_*` |
 | 9 | Solo una promoción **Rechazada** se reformula o se descarta; descartar exige motivo | `Reformular`, `DescartarPromocion` | `PromocionTests › DescartarPromocion_*`, `EndurecimientoPn02Pn03Tests › Reformular_*` |
 | 10 | Solo se pide la baja de una **Vigente**, con motivo; la solicitud queda guardada | `SolicitarBaja`; tabla `SolicitudBajaPromocion` (una pendiente por promoción) | `PromocionTests › SolicitarBaja_*` |
 | 11 | Solo se resuelve una **BajaSolicitada**; rechazarla exige motivo; la resolución queda guardada y **no se pierde** el dictamen contable | `AprobarBaja/RechazarBaja` | `PromocionTests › AprobarBaja_*`, `RechazarBaja_*` |

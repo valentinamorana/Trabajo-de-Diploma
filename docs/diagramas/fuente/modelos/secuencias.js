@@ -832,7 +832,8 @@ module.exports = [
   },
   {
     tipo: 'secuencia', id: 'DSS_PN03_CU01_CONT_AnalizarPromocion', titulo: 'PN03 · CU01-CONT Analizar Promoción',
-    participantes: [A('K', 'Contabilidad'), P('F', 'PromocionesContabilidadForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion'), P('DS', 'DAL.SugerenciaPromocion')],
+    participantes: [A('K', 'Contabilidad'), P('F', 'PromocionesContabilidadForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion'), P('DS', 'DAL.SugerenciaPromocion'),
+                    P('DP', 'DAL.PlanSuscripcion'), P('DC', 'DAL.Cliente')],
     pasos: [
       nota('Analiza el margen y el impacto → ¿Aprueba?', 'K', 'F'),
       c('F', 'B', 'ObtenerPendientesRevisionContable()'),
@@ -850,7 +851,17 @@ module.exports = [
           { opt: 'Viene de una sugerencia (IdSugerenciaOrigen.HasValue)', pasos: [
             c('B', 'DS', 'ObtenerPorId(idSugerencia)  [idSugerencia = promocion.IdSugerenciaOrigen.Value]'),
             r('DS', 'B', 'sugerencia (beneficio estimado y origen)')] },
-          r('B', 'F', 'AnalisisImpactoPromocion (beneficio estimado, superpuestas, UsuarioPuedeDictaminar)'),
+          c('B', 'B', 'ProyectarCostoDelDescuento(analisis)'),
+          { alt: 'Aplica a un plan (promocion.AplicaAPlan())', pasos: [
+            c('B', 'DP', 'ObtenerPorId(idPlan)  [idPlan = promocion.IdPlan.Value]'),
+            r('DP', 'B', 'plan (precio mensual)'),
+            c('B', 'B', 'PoliticaDescuento.DescuentoDe(promocion, plan.Precio)  [descuento por cliente]'),
+            c('B', 'DC', 'ContarClientesActivosPorPlan(idPlan)'),
+            r('DC', 'B', 'clientes activos del plan'),
+            nota('margen proyectado = beneficio estimado − descuento por cliente × clientes activos; conviene si es > 0', 'B')],
+            sino: [{ etiqueta: 'Por categoría', pasos: [
+              nota('EsInformativa: no descuenta en el cobro, sin costo proyectado ni resultado', 'B')] }] },
+          r('B', 'F', 'AnalisisImpactoPromocion (beneficio estimado, margen proyectado, superpuestas, UsuarioPuedeDictaminar)'),
           r('F', 'K', 'Análisis de margen e impacto; Aprobar y Rechazar habilitados solo si puede dictaminar')
         ] }] },
       c('K', 'F', 'Ingresa la observación, decide y confirma'),

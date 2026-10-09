@@ -10,8 +10,9 @@ namespace GUI
 {
     /// <summary>
     /// Capa de Presentación — PN03, carril Contabilidad del diagrama de actividad:
-    ///   Analizar margen e impacto (beneficio estimado de la sugerencia y promociones Vigentes del
-    ///   mismo plan superpuestas en fechas) → ¿Aprueba? Sí: Vigente; No: RechazadaContabilidad.
+    ///   Analizar margen e impacto (beneficio estimado, margen proyectado = beneficio − costo del
+    ///   descuento sobre los clientes activos del plan, y promociones Vigentes del mismo plan
+    ///   superpuestas en fechas) → ¿Aprueba? Sí: Vigente; No: RechazadaContabilidad.
     ///   Cada decisión genera el «Dictamen contable», que se puede imprimir.
     /// Quien creó la promoción no puede dictaminarla: la guarda es BLL.Promocion.PuedeDictaminar.
     /// </summary>
@@ -159,6 +160,7 @@ namespace GUI
                      new object[] { p.IdSugerenciaOrigen, a.BeneficioEstimadoSugerencia.Value,
                                     a.OrigenSugerencia.HasValue ? Docs.Origen(a.OrigenSugerencia.Value) : "—" })
                 : Tr("promo.analisis.sinsugerencia", "Alta manual: no hay beneficio estimado de Gerencia."));
+            AgregarMargenProyectado(sb, a);
             if (a.TieneSuperposicion())
             {
                 sb.AppendLine(Tr("promo.analisis.superpuestas", "ADVERTENCIA: se superpone en fechas con otras promociones vigentes del mismo plan:"));
@@ -170,6 +172,44 @@ namespace GUI
             if (!a.UsuarioPuedeDictaminar)
                 sb.AppendLine(Tr("promo.analisis.creador", "Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad."));
             txtAnalisis.Text = sb.ToString();
+        }
+
+        // Margen proyectado (mensual) que calcula BLL.Promocion.AnalizarMargenEImpacto, paso a paso:
+        // descuento por cliente → costo del descuento → beneficio estimado → margen → ¿conviene?
+        private const string Sangria = "   ";
+
+        private void AgregarMargenProyectado(StringBuilder sb, BE.AnalisisImpactoPromocion a)
+        {
+            var p = a.Promocion;
+            sb.AppendLine();
+            sb.AppendLine(Tr("promo.analisis.calc.titulo", "Margen proyectado (por mes):"));
+            if (a.EsInformativa)
+            {
+                sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.informativa",
+                    "Promoción por categoría: es informativa (no descuenta en el cobro); no tiene costo proyectado ni resultado."));
+                sb.AppendLine();
+                return;
+            }
+            if (!a.MargenCalculable)
+            {
+                sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.sinplan", "No se puede calcular el margen: el plan de la promoción ya no existe."));
+                sb.AppendLine();
+                return;
+            }
+            sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.descuento", "Descuento por cliente: {0:C2} ({1} {2} sobre el precio del plan, {3:C2})",
+                new object[] { a.DescuentoPorCliente, Docs.Tipo(p.TipoDescuento), Docs.Valor(p), a.PrecioPlan.Value }));
+            sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.costo", "Costo del descuento: {0:C2} × {1} cliente(s) activo(s) del plan = {2:C2}",
+                new object[] { a.DescuentoPorCliente, a.ClientesActivosPlan, a.CostoDescuentoProyectado }));
+            sb.Append(Sangria).AppendLine(a.BeneficioDeSugerencia
+                ? Tr("promo.analisis.calc.beneficiosug", "Beneficio estimado (sugerencia de Gerencia): {0:C2}", new object[] { a.BeneficioEstimado })
+                : Tr("promo.analisis.calc.beneficioadm", "Beneficio estimado (margen cargado por Administración): {0:C2}", new object[] { a.BeneficioEstimado }));
+            sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.margen", "Margen proyectado: {0:C2} − {1:C2} = {2:C2}",
+                new object[] { a.BeneficioEstimado, a.CostoDescuentoProyectado, a.MargenProyectado }));
+            sb.Append(Sangria).AppendLine(a.Conviene == true
+                ? Tr("promo.analisis.calc.conviene", "Resultado: CONVIENE (el beneficio estimado cubre el costo del descuento).")
+                : Tr("promo.analisis.calc.noconviene", "Resultado: NO CONVIENE (el descuento cuesta igual o más de lo que se espera ganar)."));
+            sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.nota", "Es una recomendación: la decisión es de Contabilidad."));
+            sb.AppendLine();
         }
 
         // ¿Aprueba? Sí → Vigente + «Dictamen contable».

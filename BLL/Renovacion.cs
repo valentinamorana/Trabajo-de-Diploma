@@ -107,8 +107,6 @@ namespace BLL
             return resultado;
         }
 
-        public List<BE.Renovacion> ObtenerHistorial(int idCliente) => dalRenovacion.ObtenerPorCliente(idCliente);
-
         // Clientes a los que se les puede procesar la decisión indicada, con el mismo criterio
         // que la cadena de manejadores (para no ofrecer una decisión que el sistema va a rechazar):
         //   - solo clientes con plan y sin contratación PN02 pendiente de pago (Procesar los rechaza;

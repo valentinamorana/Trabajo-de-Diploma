@@ -11,13 +11,9 @@ namespace BLL.Interfaces
     {
         // ── Consultas (cada una cierra antes las promociones vencidas) ─────────
         List<BE.Promocion> ObtenerTodas();
-        List<BE.Promocion> ObtenerVigentes();
         List<BE.Promocion> ObtenerParaVentas();
         List<BE.Promocion> ObtenerPendientesRevisionContable();
-        BE.Promocion ObtenerPorId(int idPromocion);
         List<BE.PromocionHistorial> ObtenerHistorial(int idPromocion);
-        List<BE.DictamenContable> ObtenerDictamenes(int idPromocion);
-        List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBaja(int idPromocion);
         BE.DictamenContable ObtenerUltimoDictamen(int idPromocion);
         BE.SolicitudBajaPromocion ObtenerUltimaSolicitudBaja(int idPromocion);
         BE.PromocionHistorial ObtenerDescarte(int idPromocion);

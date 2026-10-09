@@ -212,7 +212,6 @@ namespace BLL
             try { LiberarReservasVencidas(); }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.ListaEspera] Reservas vencidas: " + ex.Message); }
         }
-        public List<BE.ListaEspera> ObtenerPorPrenda(int idPrenda) => dalListaEspera.ObtenerPorPrenda(idPrenda);
 
         public int ContarReservadasVigentes()
         {

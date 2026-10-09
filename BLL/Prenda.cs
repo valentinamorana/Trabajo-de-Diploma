@@ -48,7 +48,6 @@ namespace BLL
                 .OrderBy(c => c, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
         public List<BE.Prenda> ObtenerPorCliente(int id)       => dalPrenda.ObtenerPorCliente(id);
-        public BE.Prenda       ObtenerPorId(int idPrenda)      => dalPrenda.ObtenerPorId(idPrenda);
 
         // Prendas Disponible, excluyendo las reservadas por Lista de Espera para OTRO
         // cliente (mejora opcional). Filtrado en memoria para no acoplar la query ya

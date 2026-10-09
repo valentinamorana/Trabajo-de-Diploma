@@ -10,7 +10,6 @@ namespace BLL.Interfaces
     {
         List<BE.PlanSuscripcion> ObtenerActivos();
         List<BE.PlanSuscripcion> ObtenerTodos();
-        BE.PlanSuscripcion ObtenerPorId(int idPlan);
         void Alta(BE.PlanSuscripcion plan);
         void Modificar(BE.PlanSuscripcion plan);
         void Desactivar(int idPlan);

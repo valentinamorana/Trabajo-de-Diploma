@@ -19,9 +19,6 @@ namespace GUI.Exportacion
         protected string _formato;   // "PDF" / "TXT"  (como _medio en el parcial)
         protected string _origen;    // "Bitácora" / "Reporte de Jornada"  (como _sucursal)
 
-        /// <summary>Formato del producto concreto (informativo).</summary>
-        public string Formato => _formato;
-
         /// <summary>
         /// Exporta el reporte a este formato. Devuelve la ruta del archivo escrito,
         /// o null si no se generó archivo (vista previa, sin datos o cancelado).

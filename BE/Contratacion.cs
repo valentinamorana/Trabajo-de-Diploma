@@ -91,9 +91,6 @@ namespace BE
         /// <summary>Precio mensual del plan al consultar (JOIN con PlanSuscripcion), no persiste.</summary>
         public decimal MontoPlan { get; set; }
 
-        /// <summary>Alias del nombre del medio de pago (compatibilidad con pantallas y reportes).</summary>
-        public string MedioPago => NombreMedioPago;
-
         public bool PuedeCobrarse() => Estado == EstadoContratacion.PendientePago;
         public bool EstaPagada()    => Estado == EstadoContratacion.Pagada;
         public bool EstaCancelada() => Estado == EstadoContratacion.Cancelada;

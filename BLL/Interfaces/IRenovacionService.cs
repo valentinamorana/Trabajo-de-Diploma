@@ -16,9 +16,6 @@ namespace BLL.Interfaces
             int? idPlanNuevo, BE.Builders.ModalidadCobro modalidad, string actor,
             DateTime? fechaPausaHasta = null);
 
-        // Devuelve el historial de intentos de renovación de un cliente.
-        List<BE.Renovacion> ObtenerHistorial(int idCliente);
-
         // Clientes a los que se les puede procesar la decisión indicada (más los pausados,
         // que siempre se pueden reanudar).
         List<BE.Cliente> ObtenerElegibles(Manejadores.DecisionRenovacion decision);

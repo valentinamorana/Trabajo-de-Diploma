@@ -28,10 +28,5 @@ namespace BE
         /// <summary>Estimación inicial editable: ingreso mensual en riesgo (abandono) o un valor de
         /// referencia por prenda parada (rotación). Gerencia la ajusta antes de enviar.</summary>
         public decimal BeneficioEstimado { get; set; }
-
-        /// <summary>Texto corto para listar la candidata.</summary>
-        public string Resumen => IdPlan.HasValue
-            ? $"[{Origen}] Plan {NombrePlan}"
-            : $"[{Origen}] Categoría {CategoriaPrenda}";
     }
 }

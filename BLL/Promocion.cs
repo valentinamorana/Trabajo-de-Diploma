@@ -66,13 +66,6 @@ namespace BLL
             return dalPromocion.ObtenerTodas();
         }
 
-        // Las que aplican hoy en el cobro (Vigente y dentro de sus fechas).
-        public List<BE.Promocion> ObtenerVigentes()
-        {
-            CerrarVencidasSinFallar();
-            return dalPromocion.ObtenerVigentes();
-        }
-
         // Pantalla de Ventas: las Vigentes (puede pedir la baja) y las que tienen la baja pedida.
         public List<BE.Promocion> ObtenerParaVentas()
         {
@@ -83,10 +76,7 @@ namespace BLL
         }
 
         public List<BE.Promocion> ObtenerPendientesRevisionContable() => dalPromocion.ObtenerPendientesRevisionContable();
-        public BE.Promocion ObtenerPorId(int idPromocion) => dalPromocion.ObtenerPorId(idPromocion);
         public List<BE.PromocionHistorial> ObtenerHistorial(int idPromocion) => dalPromocion.ObtenerHistorial(idPromocion);
-        public List<BE.DictamenContable> ObtenerDictamenes(int idPromocion) => dalPromocion.ObtenerDictamenes(idPromocion);
-        public List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBaja(int idPromocion) => dalPromocion.ObtenerSolicitudesBaja(idPromocion);
 
         public BE.DictamenContable ObtenerUltimoDictamen(int idPromocion) =>
             dalPromocion.ObtenerDictamenes(idPromocion).OrderBy(d => d.Fecha).ThenBy(d => d.IdDictamen).LastOrDefault();

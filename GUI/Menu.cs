@@ -89,7 +89,6 @@ namespace GUI
             RefrescarTextoAlertas();
 
             // Construir menú dinámico según permisos del rol
-            RegistroControles.Registrar(this);   // Etapa 4 (C1) — registra los ítems del menú para la pantalla de mapeo
             AplicarPermisos(_usuarioActivo?.Permisos);
         }
 

@@ -159,7 +159,6 @@
       <DependentUpon>CambioClaveObligatorioForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ManejadorSeguridad.cs" />
-    <Compile Include="RegistroControles.cs" />
     <Compile Include="ExploradorCompositeForm.cs">
       <SubType>Form</SubType>
     </Compile>

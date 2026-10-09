@@ -48,15 +48,6 @@ namespace BLL
             }
         }
 
-        /// <summary>Historial completo de Mementos de un usuario (orden cronológico inverso del DAL).</summary>
-        public List<IMemento> ObtenerHistorial(int idUsuario)
-        {
-            var lista = new List<IMemento>();
-            foreach (var v in _dalVersion.ObtenerPorUsuario(idUsuario))
-                lista.Add(v);
-            return lista;
-        }
-
         /// <summary>Recupera un Memento puntual por su identificador de persistencia.</summary>
         public IMemento Obtener(int idVersion)
         {

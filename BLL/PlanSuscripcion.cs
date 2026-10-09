@@ -43,12 +43,6 @@ namespace BLL
             return dalPlan.ObtenerTodos();
         }
 
-        // Obtiene un plan por ID. Devuelve null si no existe.
-        public BE.PlanSuscripcion ObtenerPorId(int idPlan)
-        {
-            return dalPlan.ObtenerPorId(idPlan);
-        }
-
         // Crea un nuevo plan de suscripción.
         // Valida que nombre no esté vacío, límite > 0 y precio >= 0.
         public void Alta(BE.PlanSuscripcion plan)

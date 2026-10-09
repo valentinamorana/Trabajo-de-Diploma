@@ -1,33 +1,3 @@
-/*
- * SCRIPT SQL — ejecutar en WardrobeFlowDB para migrar al Composite relacional:
- *
- *   -- 1. Agregar discriminador EsFamilia
- *   ALTER TABLE Permiso ADD EsFamilia BIT NOT NULL DEFAULT 0;
- *
- *   -- 2. Crear tabla de relaciones padre-hijo
- *   CREATE TABLE PermisoRelacion (
- *       IdPadre INT NOT NULL REFERENCES Permiso(IdPermiso),
- *       IdHijo  INT NOT NULL REFERENCES Permiso(IdPermiso),
- *       PRIMARY KEY (IdPadre, IdHijo)
- *   );
- *
- *   -- 3. Crear nodos Familia por cada grupo TipoComponente existente
- *   DECLARE @mapa TABLE (Grupo NVARCHAR(100), IdFamilia INT);
- *
- *   INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia)
- *   OUTPUT INSERTED.Nombre, INSERTED.IdPermiso INTO @mapa (Grupo, IdFamilia)
- *   SELECT DISTINCT TipoComponente, TipoComponente, TipoComponente, 1, 1
- *   FROM   Permiso
- *   WHERE  TipoComponente IS NOT NULL AND LTRIM(RTRIM(TipoComponente)) <> ''
- *   AND    EsFamilia = 0;
- *
- *   -- 4. Vincular cada Patente con su Familia
- *   INSERT INTO PermisoRelacion (IdPadre, IdHijo)
- *   SELECT m.IdFamilia, p.IdPermiso
- *   FROM   Permiso p
- *   INNER JOIN @mapa m ON p.TipoComponente = m.Grupo
- *   WHERE  p.EsFamilia = 0;
- */
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -43,9 +13,8 @@ namespace DAL
     ///
     /// [RolPermiso] es LEGACY y de SEED/BOOTSTRAP únicamente: los scripts SQL la usan para sembrar
     /// las asignaciones planas rol→patente y, desde ellas, generar los nodos-rol y las aristas de
-    /// [PermisoRelacion]. En runtime NO se escribe nunca y solo se LEE en ramas de fallback, para
-    /// bases todavía sin migrar al Composite (sin columna EsRol / sin PermisoRelacion poblada).
-    /// En una base migrada esas ramas no se ejecutan.
+    /// [PermisoRelacion]. En runtime el C# no la lee ni la escribe: el Composite sale siempre de
+    /// [PermisoRelacion].
     /// </summary>
     public class Permiso : BaseDAL, Interfaces.IPermisoDAL
     {

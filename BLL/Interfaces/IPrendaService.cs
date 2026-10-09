@@ -18,9 +18,6 @@ namespace BLL.Interfaces
         // Devuelve las prendas actualmente asignadas a un cliente.
         List<BE.Prenda> ObtenerPorCliente(int idCliente);
 
-        // Obtiene una prenda por ID.
-        BE.Prenda ObtenerPorId(int idPrenda);
-
         // Da de alta una nueva prenda. Estado inicial siempre Disponible.
         void Alta(string modulo, BE.Prenda prenda);
 

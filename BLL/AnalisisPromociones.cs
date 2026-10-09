@@ -29,7 +29,6 @@ namespace BLL
         // Baja demanda: sin pedidos desde el alta (reporte PdN9) o en el período analizado (PN03).
         private static bool EsBajaDemanda(BE.RotacionPrenda r) =>
             r.Clave != null && r.Clave.StartsWith("rotacion.motivo.bajademanda", StringComparison.Ordinal);
-        private const string ModuloGerencia = "Promociones";
 
         private readonly Interfaces.IAnalisisRotacionService rotacion;
         private readonly Interfaces.IAnalisisAbandonoService abandono;

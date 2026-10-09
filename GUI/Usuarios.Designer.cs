@@ -21,7 +21,6 @@ namespace GUI
             this.lblTitulo = new System.Windows.Forms.Label();
             this.lblUser = new System.Windows.Forms.Label();
             this.txtUsername = new System.Windows.Forms.TextBox();
-            this.lblPass = new System.Windows.Forms.Label();
             this.txtContraseña = new System.Windows.Forms.TextBox();
             this.lblPerfil = new System.Windows.Forms.Label();
             this.cmbPerfil = new System.Windows.Forms.ComboBox();
@@ -51,7 +50,6 @@ namespace GUI
             this.panelAlta.Controls.Add(this.lblTitulo);
             this.panelAlta.Controls.Add(this.lblUser);
             this.panelAlta.Controls.Add(this.txtUsername);
-            this.panelAlta.Controls.Add(this.lblPass);
             this.panelAlta.Controls.Add(this.txtContraseña);
             this.panelAlta.Controls.Add(this.lblPerfil);
             this.panelAlta.Controls.Add(this.cmbPerfil);
@@ -107,16 +105,6 @@ namespace GUI
             this.txtUsername.Size = new System.Drawing.Size(210, 20);
             this.txtUsername.TabIndex = 2;
             this.txtUsername.Visible = false;
-            //
-            // lblPass — campo de contraseña oculto: se genera automáticamente en la BLL.
-            //
-            this.lblPass.Location = new System.Drawing.Point(12, 100);
-            this.lblPass.Name = "lblPass";
-            this.lblPass.Size = new System.Drawing.Size(200, 15);
-            this.lblPass.TabIndex = 3;
-            this.lblPass.Tag = "lbl.contrasena";
-            this.lblPass.Text = "Contraseña:";
-            this.lblPass.Visible = false;
             //
             // txtContraseña
             //
@@ -394,7 +382,6 @@ namespace GUI
         private System.Windows.Forms.Label        lblTitulo;
         private System.Windows.Forms.Label        lblUser;
         private System.Windows.Forms.TextBox      txtUsername;
-        private System.Windows.Forms.Label        lblPass;
         private System.Windows.Forms.TextBox      txtContraseña;
         private System.Windows.Forms.Label        lblPerfil;
         private System.Windows.Forms.ComboBox     cmbPerfil;

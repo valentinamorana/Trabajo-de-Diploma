@@ -396,7 +396,5 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        private bool Preguntar(string texto) =>
-            (FormBase.MostrarConfirmacionSiNo(this, texto, this.Text, porDefectoNo: true) ? DialogResult.Yes : DialogResult.No) == DialogResult.Yes;
     }
 }

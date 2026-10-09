@@ -94,7 +94,6 @@ ES	col.idiomas.referencia	Referencia (por defecto)
 ES	col.idiomas.texto	Texto / Traducción
 ES	lbl.idiomas.si	Sí
 ES	lbl.idiomas.no	No
-ES	err.generico.cargar	Error al cargar: {0}
 ES	pedidos.hist.encontrados	{0} registro(s) encontrado(s).
 ES	frm.login	WardrobeFlow
 ES	lbl.usuario	Usuario
@@ -327,10 +326,8 @@ ES	lbl.prenda.color	Color
 ES	lbl.prenda.categoria	Categoría *
 ES	btn.agregar.prenda	Agregar Prenda
 ES	frm.nuevopedido	Nuevo Pedido de Venta
-ES	paso1.texto	Paso 1 de 2 — Seleccionar Cliente
 ES	paso2.texto	Paso 2 de 2 — Seleccionar Prendas
 ES	lbl.ped.selcliente	Seleccioná el cliente para este pedido:
-ES	combo.ped.placeholder	— Seleccioná un cliente —
 ES	lbl.ped.selprendas	Seleccioná las prendas para incluir en el pedido (checkbox):
 ES	btn.siguiente	Siguiente →
 ES	btn.volver	← Volver
@@ -354,7 +351,6 @@ ES	crit.bloqueos	Bloqueos Cuenta (6)
 ES	btn.exportar.pdf	Exportar PDF
 ES	msg.ped.conteo	{0} pedido(s)
 ES	msg.ped.cargados	{0} pedido(s) cargado(s).
-ES	msg.ped.creado	Pedido #{0} creado. Estado: Pendiente.
 ES	msg.ped.cancelado	Pedido #{0} cancelado. Prendas liberadas.
 ES	msg.ped.yanoexiste	Este pedido ya no existe. Actualizá la grilla.
 ES	msg.ped.reactivado	Pedido #{0} reactivado — volvió a Pendiente.
@@ -372,8 +368,6 @@ ES	lbl.ped.seleccionado	Pedido #{0} — {1} — {2}
 ES	lbl.motivo	Motivo:
 ES	conf.cancelped.titulo	Confirmar Cancelación
 ES	conf.cancelped.body	¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible.
-ES	conf.descancelar.titulo	Confirmar Des-cancelación
-ES	conf.descancelar.body	¿Des-cancelar el Pedido #{0} de {1}?\n\nSe verificará que las prendas originales estén disponibles\ny el pedido volverá a estado Pendiente.
 ES	conf.despachar.titulo	Confirmar Despacho
 ES	conf.despachar.body	¿Despachar el Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nEl pedido pasará a estado Despachado.
 ES	conf.entrega.titulo	Confirmar Entrega
@@ -392,11 +386,9 @@ ES	lbl.cambioest.info	Prenda: {0}  —  Estado actual: {1}
 ES	msg.cambioest.selecciona	Seleccioná una opción.
 ES	msg.cambioest.bajairrev	La baja es irreversible. ¿Confirmar?
 ES	conf.baja.titulo	Dar de Baja
-ES	frm.resetclave	Resetear Contraseña
 ES	lbl.nueva.clave	Nueva contraseña (mín. 6 caracteres):
 ES	lbl.confirmar.clave	Confirmar contraseña:
 ES	btn.confirmar.reset	Confirmar Reset
-ES	err.clave.nomatch	Las contraseñas no coinciden.
 ES	notif.titulo	NOTIFICACIÓN DE PEDIDO
 ES	notif.numero	Pedido #:
 ES	notif.msgbox.titulo	Notificación — Pedido #{0}
@@ -421,25 +413,7 @@ ES	lbl.editplan	Editar Plan
 ES	msg.bit.registros	  {0} registro(s)
 ES	msg.bit.ultimos	últimos {0} días
 ES	msg.bit.todos	todos los registros
-ES	notif.frm.titulo	Notificación — Pedido #{0}
-ES	notif.header.entregado	Pedido #{0} — ENTREGADO
-ES	notif.header.despachado	Pedido #{0} — DESPACHADO
-ES	btn.copiar.porta	Copiar al portapapeles
 ES	btn.copiado	Copiado
-ES	notif.gen.saludo	Estimado/a {0},
-ES	notif.gen.entregado	Queremos confirmarle que su pedido fue entregado.\nGracias por elegir WardrobeFlow.
-ES	notif.gen.despachado	Le informamos que su pedido ha sido despachado y\nestará llegando a su domicilio en breve.
-ES	notif.gen.nropedido	Número de pedido
-ES	notif.gen.fechapedido	Fecha de pedido
-ES	notif.gen.fechadespacho	Fecha despacho
-ES	notif.gen.fechaentrega	Fecha entrega
-ES	notif.gen.estado	Estado
-ES	notif.gen.prendas	Prendas incluidas ({0}):
-ES	notif.gen.talle	Talle
-ES	notif.gen.color	Color
-ES	notif.gen.categoria	Categoría
-ES	notif.gen.footer	Ante cualquier consulta, comuníquese con nosotros.
-ES	notif.gen.slogan	WardrobeFlow — Tu guardarropa, sin límites.
 ES	perfil.administrador	Administrador
 ES	perfil.vendedor	Vendedor
 ES	perfil.deposito	Depósito
@@ -447,17 +421,13 @@ ES	metodo.efectivo	Efectivo
 ES	metodo.debito	Débito
 ES	metodo.credito	Crédito
 ES	metodo.transferencia	Transferencia
-ES	msg.modulo.outfits	El módulo de Outfits aún no está disponible.
-ES	msg.modulo.categorias	El módulo de Categorías aún no está disponible.
 ES	lbl.proximamente	Próximamente
 ES	err.pdf.sinDatos	No hay datos para exportar.
 ES	lbl.exportarpdf	Exportar PDF
 ES	lbl.ped.infoplan	Cliente: {0}\nPlan: {1}\nPrendas en uso actualmente: {2}\nMétodo de pago: {3}\nAlta: {4}
 ES	err.ped.sinplan	{0} no tiene plan asignado.\nAsigná un plan en el módulo de Clientes antes de crear un pedido.
 ES	err.recup.nousername	Ingresá tu nombre de usuario.
-ES	err.recup.nousuario	No se encontró el usuario '{0}'.\nVerificá que escribiste tu nombre correctamente.
 ES	msg.recup.exito	Si el usuario existe, contactá al administrador para que resetee\ntu contraseña desde Administrar -> Usuarios.
-ES	err.recup.verificar	Error al verificar el usuario: {0}
 ES	msg.usr.creado.exportado	Usuario '{0}' [{1}] creado.\nCredenciales guardadas en:\n{2}
 ES	msg.usr.clave.exportada	Contraseña de '{0}' regenerada automáticamente.\nCredenciales guardadas en:\n{1}
 ES	err.usr.selecciona	Seleccioná un usuario de la lista.
@@ -492,7 +462,6 @@ ES	lbl.explorador.leyenda	Familia (nodo compuesto — Área o Rol)    Patente (h
 ES	btn.explorador.cerrar	Cerrar
 ES	btn.explorador.colapsar	⊟ Colapsar todo
 ES	btn.explorador.expandir	⊞ Expandir todo
-ES	err.explorador.cargar	Error al cargar árbol Composite:\n{0}
 ES	perfil.auditor	Auditor
 ES	perfil.gerentecomercial	Gerente Comercial
 ES	perfil.gerenteinventario	Gerente de Inventario
@@ -623,7 +592,6 @@ ES	rpt.txt.impresionenv	Impresión enviada
 ES	bit.pdf.titulosistema	Bitácora del Sistema — WardrobeFlow
 ES	bit.pdf.titulonegocio	Bitácora de Negocio — WardrobeFlow
 ES	bit.pdf.pagina	WardrobeFlow — Página {0}
-ES	bit.pdf.vistaprevia	Vista Previa
 ES	dash.backup.hoy	Hoy
 ES	dash.sesion.iniciada	Sesión iniciada:
 ES	dash.tareas.titulo	Mis Tareas Pendientes ({0})
@@ -695,11 +663,6 @@ ES	conf.idiomas.titulo	Confirmar
 ES	msg.hist.restaurado	Pedido #{0} restaurado correctamente.
 ES	conf.hist.restaurar.msg	¿Restaurar el pedido #{0} al estado anterior a '{1}' (op. #{2})?\n\nNota: esta operación modifica el estado del Pedido en la base de datos.\nEl estado de las Prendas asociadas NO se revierte automáticamente.\n\n¿Confirmar?
 ES	conf.rest.sobreescribir	¿Está seguro? Esta operación sobrescribirá todos los datos actuales y reiniciará la aplicación.
-ES	msg.backup.errorgenerar	Error al generar copia de seguridad:\n{0}
-ES	msg.backup.erroreliminar	Error al eliminar:\n{0}
-ES	msg.backup.errorrestaurar	Error al restaurar:\n{0}
-ES	msg.historial.errorcargar	Error al cargar historial:\n{0}
-ES	msg.historial.errorrestaur	Error al restaurar versión:\n{0}
 ES	msg.error.titulo	Error
 ES	lbl.cli.vencimiento	Fecha de Vencimiento
 ES	col.cli.vencimiento	Vencimiento
@@ -739,7 +702,6 @@ ES	err.bll.pedido.cliente_inexistente	El cliente seleccionado no existe.
 ES	err.bll.pedido.sin_plan	El cliente {0} no tiene plan asignado. Asignale un plan antes de crear un pedido.
 ES	err.bll.pedido.suscripcion_vencida	La suscripción de {0} venció el {1}. Renovar en el módulo de Clientes.
 ES	err.bll.pedido.limite_plan	El plan '{0}' permite {1} prenda(s). El cliente ya tiene {2} en uso y agrega {3} más. Máximo posible: {4}.
-ES	err.bll.pedido.prenda_no_disponible	La prenda '{0}' ya no está disponible (estado: {1}). Actualizá la selección.
 ES	err.bll.listaespera.cliente_inexistente	El cliente no existe.
 ES	err.bll.listaespera.inexistente	La anotación no existe.
 ES	err.bll.listaespera.prenda_inexistente	La prenda no existe.
@@ -754,7 +716,6 @@ ES	err.bll.pedido.devolucion_estado	Solo se puede registrar la devolución de pe
 ES	err.bll.pedido.cancelar_estado	Solo se pueden cancelar pedidos en estado Pendiente. Este pedido está '{0}'.
 ES	err.bll.pedido.cancelar_sin_motivo	Es obligatorio ingresar un motivo de cancelación.
 ES	err.bll.pedido.descancelar_estado	Solo se pueden des-cancelar pedidos Cancelados. Este pedido está '{0}'.
-ES	err.bll.pedido.descancelar_prendas	No se puede des-cancelar el Pedido #{0}. Una o más prendas ya no están disponibles.
 ES	err.bll.plan.nombre_requerido	El nombre del plan es obligatorio.
 ES	err.bll.plan.limite_invalido	El límite de prendas debe ser mayor que cero.
 ES	diag.estado.integro	Estado: INTEGRO
@@ -789,9 +750,6 @@ ES	diag.conf.recalcular	¿Recalcular todos los DVH y el DVV de la tabla Usuario?
 ES	diag.conf.recalcular.titulo	Confirmar Recálculo Total
 ES	diag.msg.recalc.exito	Dígitos verificadores recalculados con éxito.
 ES	diag.msg.exito.titulo	Éxito
-ES	diag.err.cargar	Error al cargar diagnóstico: {0}
-ES	diag.err.recalcular	Error al recalcular: {0}
-ES	diag.err.titulo	Error
 ES	diag.fila.sinDVH	Sin DVH
 ES	diag.fila.nocoincide	DVH no coincide
 ES	diag.hist.ok	OK
@@ -900,7 +858,6 @@ EN	col.idiomas.referencia	Reference (default)
 EN	col.idiomas.texto	Text / Translation
 EN	lbl.idiomas.si	Yes
 EN	lbl.idiomas.no	No
-EN	err.generico.cargar	Error loading: {0}
 EN	pedidos.hist.encontrados	{0} record(s) found.
 EN	frm.login	WardrobeFlow — Login
 EN	lbl.usuario	Username
@@ -1124,9 +1081,7 @@ EN	lbl.recup.desc	Enter your username. An administrator\ncan reset your password
 EN	lbl.recup.usuario	Username:
 EN	btn.enviar.solicitud	Submit request
 EN	err.recup.nousername	Enter your username.
-EN	err.recup.nousuario	User '{0}' not found.\nCheck that you typed your username correctly.
 EN	msg.recup.exito	If the user exists, contact the administrator to reset\nyour password from Manage -> Users.
-EN	err.recup.verificar	Error verifying user: {0}
 EN	col.det.prenda	Garment
 EN	frm.nuevaprenda	New Garment
 EN	frm.editarprenda	Edit Garment
@@ -1137,10 +1092,8 @@ EN	lbl.prenda.color	Color
 EN	lbl.prenda.categoria	Category *
 EN	btn.agregar.prenda	Add Garment
 EN	frm.nuevopedido	New Sales Order
-EN	paso1.texto	Step 1 of 2 — Select Client
 EN	paso2.texto	Step 2 of 2 — Select Garments
 EN	lbl.ped.selcliente	Select the client for this order:
-EN	combo.ped.placeholder	— Select a client —
 EN	lbl.ped.selprendas	Select the garments to include in the order (checkbox):
 EN	btn.siguiente	Next →
 EN	btn.volver	← Back
@@ -1164,7 +1117,6 @@ EN	crit.bloqueos	Account Lockouts (6)
 EN	btn.exportar.pdf	Export PDF
 EN	msg.ped.conteo	{0} order(s)
 EN	msg.ped.cargados	{0} order(s) loaded.
-EN	msg.ped.creado	Order #{0} created. Status: Pending.
 EN	msg.ped.cancelado	Order #{0} cancelled. Garments released.
 EN	msg.ped.yanoexiste	This order no longer exists. Refresh the grid.
 EN	msg.ped.reactivado	Order #{0} reactivated — back to Pending.
@@ -1182,8 +1134,6 @@ EN	lbl.ped.seleccionado	Order #{0} — {1} — {2}
 EN	lbl.motivo	Reason:
 EN	conf.cancelped.titulo	Confirm Cancellation
 EN	conf.cancelped.body	Cancel Order #{0} for {1}?\n\nReason: {2}\n\nGarments will return to Available status.
-EN	conf.descancelar.titulo	Confirm Restore
-EN	conf.descancelar.body	Restore Order #{0} for {1}?\n\nAvailability of original garments will be verified\nand the order will return to Pending.
 EN	conf.despachar.titulo	Confirm Dispatch
 EN	conf.despachar.body	Dispatch Order #{0}?\n\nClient: {1}\nGarments: {2}\n\nOrder will move to Dispatched status.
 EN	conf.entrega.titulo	Confirm Delivery
@@ -1202,11 +1152,9 @@ EN	lbl.cambioest.info	Garment: {0}  —  Current status: {1}
 EN	msg.cambioest.selecciona	Select an option.
 EN	msg.cambioest.bajairrev	Retirement is irreversible. Confirm?
 EN	conf.baja.titulo	Retire Garment
-EN	frm.resetclave	Reset Password
 EN	lbl.nueva.clave	New password (min. 6 chars):
 EN	lbl.confirmar.clave	Confirm password:
 EN	btn.confirmar.reset	Confirm Reset
-EN	err.clave.nomatch	Passwords do not match.
 EN	notif.titulo	ORDER NOTIFICATION
 EN	notif.numero	Order #:
 EN	notif.msgbox.titulo	Notification — Order #{0}
@@ -1231,25 +1179,7 @@ EN	lbl.editplan	Edit Plan
 EN	msg.bit.registros	  {0} record(s)
 EN	msg.bit.ultimos	last {0} days
 EN	msg.bit.todos	all records
-EN	notif.frm.titulo	Notification — Order #{0}
-EN	notif.header.entregado	Order #{0} — DELIVERED
-EN	notif.header.despachado	Order #{0} — DISPATCHED
-EN	btn.copiar.porta	Copy to clipboard
 EN	btn.copiado	Copied
-EN	notif.gen.saludo	Dear {0},
-EN	notif.gen.entregado	We'd like to confirm that your order has been delivered.\nThank you for choosing WardrobeFlow.
-EN	notif.gen.despachado	We'd like to inform you that your order has been dispatched\nand will arrive at your address shortly.
-EN	notif.gen.nropedido	Order number
-EN	notif.gen.fechapedido	Order date
-EN	notif.gen.fechadespacho	Dispatch date
-EN	notif.gen.fechaentrega	Delivery date
-EN	notif.gen.estado	Status
-EN	notif.gen.prendas	Included items ({0}):
-EN	notif.gen.talle	Size
-EN	notif.gen.color	Color
-EN	notif.gen.categoria	Category
-EN	notif.gen.footer	For any questions, please contact us.
-EN	notif.gen.slogan	WardrobeFlow — Your wardrobe, without limits.
 EN	perfil.administrador	Administrator
 EN	perfil.vendedor	Sales Rep
 EN	perfil.deposito	Warehouse
@@ -1257,8 +1187,6 @@ EN	metodo.efectivo	Cash
 EN	metodo.debito	Debit
 EN	metodo.credito	Credit
 EN	metodo.transferencia	Wire Transfer
-EN	msg.modulo.outfits	The Outfits module is not yet available.
-EN	msg.modulo.categorias	The Categories module is not yet available.
 EN	lbl.proximamente	Coming Soon
 EN	err.pdf.sinDatos	No data to export.
 EN	lbl.exportarpdf	Export PDF
@@ -1298,7 +1226,6 @@ EN	lbl.explorador.leyenda	Family (composite node — Area or Role)    Patent (le
 EN	btn.explorador.cerrar	Close
 EN	btn.explorador.colapsar	⊟ Collapse all
 EN	btn.explorador.expandir	⊞ Expand all
-EN	err.explorador.cargar	Error loading Composite tree:\n{0}
 EN	perfil.auditor	Auditor
 EN	perfil.gerentecomercial	Sales Manager
 EN	perfil.gerenteinventario	Inventory Manager
@@ -1429,7 +1356,6 @@ EN	rpt.txt.impresionenv	Print sent
 EN	bit.pdf.titulosistema	System Log — WardrobeFlow
 EN	bit.pdf.titulonegocio	Business Log — WardrobeFlow
 EN	bit.pdf.pagina	WardrobeFlow — Page {0}
-EN	bit.pdf.vistaprevia	Print Preview
 EN	dash.backup.hoy	Today
 EN	dash.sesion.iniciada	Session started:
 EN	dash.tareas.titulo	My Pending Tasks ({0})
@@ -1501,11 +1427,6 @@ EN	conf.idiomas.titulo	Confirm
 EN	msg.hist.restaurado	Order #{0} successfully restored.
 EN	conf.hist.restaurar.msg	Restore order #{0} to the state before '{1}' (op. #{2})?\n\nNote: this operation modifies the Order status in the database.\nThe status of associated Garments is NOT automatically reverted.\n\nConfirm?
 EN	conf.rest.sobreescribir	Are you sure? This operation will overwrite all current data and restart the application.
-EN	msg.backup.errorgenerar	Error creating backup:\n{0}
-EN	msg.backup.erroreliminar	Error deleting:\n{0}
-EN	msg.backup.errorrestaurar	Error restoring:\n{0}
-EN	msg.historial.errorcargar	Error loading history:\n{0}
-EN	msg.historial.errorrestaur	Error restoring version:\n{0}
 EN	msg.error.titulo	Error
 EN	lbl.cli.vencimiento	Expiry Date
 EN	col.cli.vencimiento	Expiry
@@ -1545,7 +1466,6 @@ EN	err.bll.pedido.cliente_inexistente	The selected customer does not exist.
 EN	err.bll.pedido.sin_plan	Customer {0} has no plan assigned. Assign a plan before creating an order.
 EN	err.bll.pedido.suscripcion_vencida	Subscription for {0} expired on {1}. Renew in the Customers module.
 EN	err.bll.pedido.limite_plan	Plan '{0}' allows {1} garment(s). Customer already has {2} in use and is adding {3} more. Maximum allowed: {4}.
-EN	err.bll.pedido.prenda_no_disponible	Garment '{0}' is no longer available (status: {1}). Update your selection.
 EN	err.bll.listaespera.cliente_inexistente	The client does not exist.
 EN	err.bll.listaespera.inexistente	The entry does not exist.
 EN	err.bll.listaespera.prenda_inexistente	The garment does not exist.
@@ -1560,7 +1480,6 @@ EN	err.bll.pedido.devolucion_estado	Returns can only be registered for Delivered
 EN	err.bll.pedido.cancelar_estado	Only Pending orders can be cancelled. This order is '{0}'.
 EN	err.bll.pedido.cancelar_sin_motivo	A cancellation reason is required.
 EN	err.bll.pedido.descancelar_estado	Only Cancelled orders can be un-cancelled. This order is '{0}'.
-EN	err.bll.pedido.descancelar_prendas	Cannot un-cancel Order #{0}. One or more garments are no longer available.
 EN	err.bll.plan.nombre_requerido	Plan name is required.
 EN	err.bll.plan.limite_invalido	Garment limit must be greater than zero.
 EN	diag.estado.integro	Status: INTACT
@@ -1595,9 +1514,6 @@ EN	diag.conf.recalcular	Recalculate all DVH and DVV for the Usuario table?\n\nTh
 EN	diag.conf.recalcular.titulo	Confirm Full Recalculation
 EN	diag.msg.recalc.exito	Check digits recalculated successfully.
 EN	diag.msg.exito.titulo	Success
-EN	diag.err.cargar	Error loading diagnostics: {0}
-EN	diag.err.recalcular	Error recalculating: {0}
-EN	diag.err.titulo	Error
 EN	diag.fila.sinDVH	No DVH
 EN	diag.fila.nocoincide	DVH mismatch
 EN	diag.hist.ok	OK
@@ -1706,7 +1622,6 @@ RU	col.idiomas.referencia	Образец (по умолчанию)
 RU	col.idiomas.texto	Текст / Перевод
 RU	lbl.idiomas.si	Да
 RU	lbl.idiomas.no	Нет
-RU	err.generico.cargar	Ошибка загрузки: {0}
 RU	pedidos.hist.encontrados	Найдено записей: {0}.
 RU	frm.login	WardrobeFlow — Вход
 RU	lbl.usuario	Пользователь
@@ -1932,9 +1847,7 @@ RU	lbl.recup.desc	Введите имя пользователя. Админис
 RU	lbl.recup.usuario	Имя пользователя:
 RU	btn.enviar.solicitud	Отправить запрос
 RU	err.recup.nousername	Введите имя пользователя.
-RU	err.recup.nousuario	Пользователь '{0}' не найден.\nПроверьте правильность написания имени.
 RU	msg.recup.exito	Если такой пользователь существует, обратитесь к администратору для сброса\nпароля через Управление -> Пользователи.
-RU	err.recup.verificar	Ошибка при проверке пользователя: {0}
 RU	col.det.prenda	Одежда
 RU	frm.nuevaprenda	Новая одежда
 RU	frm.editarprenda	Редактировать одежду
@@ -1945,10 +1858,8 @@ RU	lbl.prenda.color	Цвет
 RU	lbl.prenda.categoria	Категория *
 RU	btn.agregar.prenda	Добавить одежду
 RU	frm.nuevopedido	Новый заказ на продажу
-RU	paso1.texto	Шаг 1 из 2 — Выбрать клиента
 RU	paso2.texto	Шаг 2 из 2 — Выбрать одежду
 RU	lbl.ped.selcliente	Выберите клиента для этого заказа:
-RU	combo.ped.placeholder	— Выберите клиента —
 RU	lbl.ped.selprendas	Выберите одежду для включения в заказ (флажок):
 RU	btn.siguiente	Далее →
 RU	btn.volver	← Назад
@@ -1972,7 +1883,6 @@ RU	crit.bloqueos	Блокировки аккаунта (6)
 RU	btn.exportar.pdf	Экспорт PDF
 RU	msg.ped.conteo	{0} заказ(ов)
 RU	msg.ped.cargados	{0} заказ(ов) загружено.
-RU	msg.ped.creado	Заказ #{0} создан. Статус: Ожидание.
 RU	msg.ped.cancelado	Заказ #{0} отменён. Вещи освобождены.
 RU	msg.ped.yanoexiste	Этот заказ больше не существует. Обновите таблицу.
 RU	msg.ped.reactivado	Заказ #{0} реактивирован — статус: Ожидание.
@@ -1988,8 +1898,6 @@ RU	msg.cancelped.req	Для отмены требуется причина.
 RU	lbl.motivo	Причина:
 RU	conf.cancelped.titulo	Подтвердить отмену
 RU	conf.cancelped.body	Отменить заказ #{0} для {1}?\n\nПричина: {2}\n\nВещи вернутся в статус Доступна.
-RU	conf.descancelar.titulo	Подтвердить восстановление
-RU	conf.descancelar.body	Восстановить заказ #{0} для {1}?\n\nДоступность оригинальных вещей будет проверена\nи заказ вернётся в статус Ожидание.
 RU	conf.despachar.titulo	Подтвердить отправку
 RU	conf.despachar.body	Отправить заказ #{0}?\n\nКлиент: {1}\nВещей: {2}\n\nЗаказ перейдёт в статус Отправлен.
 RU	conf.entrega.titulo	Подтвердить доставку
@@ -2008,11 +1916,9 @@ RU	lbl.cambioest.info	Вещь: {0}  —  Текущий статус: {1}
 RU	msg.cambioest.selecciona	Выберите вариант.
 RU	msg.cambioest.bajairrev	Списание необратимо. Подтвердить?
 RU	conf.baja.titulo	Списать
-RU	frm.resetclave	Сброс пароля
 RU	lbl.nueva.clave	Новый пароль (мин. 6 символов):
 RU	lbl.confirmar.clave	Подтвердить пароль:
 RU	btn.confirmar.reset	Подтвердить сброс
-RU	err.clave.nomatch	Пароли не совпадают.
 RU	notif.titulo	УВЕДОМЛЕНИЕ О ЗАКАЗЕ
 RU	notif.numero	Заказ #:
 RU	notif.msgbox.titulo	Уведомление — Заказ #{0}
@@ -2037,25 +1943,7 @@ RU	lbl.editplan	Редактировать план
 RU	msg.bit.registros	  {0} запись(ей)
 RU	msg.bit.ultimos	последние {0} дней
 RU	msg.bit.todos	все записи
-RU	notif.frm.titulo	Уведомление — Заказ #{0}
-RU	notif.header.entregado	Заказ #{0} — ДОСТАВЛЕН
-RU	notif.header.despachado	Заказ #{0} — ОТПРАВЛЕН
-RU	btn.copiar.porta	Копировать в буфер обмена
 RU	btn.copiado	Скопировано
-RU	notif.gen.saludo	Уважаемый/ая {0},
-RU	notif.gen.entregado	Рады подтвердить, что ваш заказ был доставлен.\nСпасибо, что выбрали WardrobeFlow.
-RU	notif.gen.despachado	Сообщаем, что ваш заказ был отправлен\nи прибудет к вам в ближайшее время.
-RU	notif.gen.nropedido	Номер заказа
-RU	notif.gen.fechapedido	Дата заказа
-RU	notif.gen.fechadespacho	Дата отправки
-RU	notif.gen.fechaentrega	Дата доставки
-RU	notif.gen.estado	Статус
-RU	notif.gen.prendas	Вещи в заказе ({0}):
-RU	notif.gen.talle	Размер
-RU	notif.gen.color	Цвет
-RU	notif.gen.categoria	Категория
-RU	notif.gen.footer	По любым вопросам обращайтесь к нам.
-RU	notif.gen.slogan	WardrobeFlow — Ваш гардероб без ограничений.
 RU	perfil.administrador	Администратор
 RU	perfil.vendedor	Продавец
 RU	perfil.deposito	Склад
@@ -2063,8 +1951,6 @@ RU	metodo.efectivo	Наличные
 RU	metodo.debito	Дебетовая карта
 RU	metodo.credito	Кредитная карта
 RU	metodo.transferencia	Банковский перевод
-RU	msg.modulo.outfits	Модуль Наряды ещё недоступен.
-RU	msg.modulo.categorias	Модуль Категории ещё недоступен.
 RU	lbl.proximamente	Скоро
 RU	err.pdf.sinDatos	Нет данных для экспорта.
 RU	lbl.exportarpdf	Экспорт PDF
@@ -2104,7 +1990,6 @@ RU	lbl.explorador.leyenda	Семья (составной узел — Облас
 RU	btn.explorador.cerrar	Закрыть
 RU	btn.explorador.colapsar	⊟ Свернуть всё
 RU	btn.explorador.expandir	⊞ Развернуть всё
-RU	err.explorador.cargar	Ошибка загрузки дерева Composite:\n{0}
 RU	perfil.auditor	Аудитор
 RU	perfil.gerentecomercial	Коммерческий менеджер
 RU	perfil.gerenteinventario	Менеджер склада
@@ -2235,7 +2120,6 @@ RU	rpt.txt.impresionenv	Печать отправлена
 RU	bit.pdf.titulosistema	Системный журнал — WardrobeFlow
 RU	bit.pdf.titulonegocio	Бизнес-журнал — WardrobeFlow
 RU	bit.pdf.pagina	WardrobeFlow — Страница {0}
-RU	bit.pdf.vistaprevia	Предварительный просмотр
 RU	dash.backup.hoy	Сегодня
 RU	dash.sesion.iniciada	Сеанс начат:
 RU	dash.tareas.titulo	Мои незавершённые задачи ({0})
@@ -2307,11 +2191,6 @@ RU	conf.idiomas.titulo	Подтверждение
 RU	msg.hist.restaurado	Заказ #{0} успешно восстановлен.
 RU	conf.hist.restaurar.msg	Восстановить заказ #{0} к состоянию до '{1}' (оп. #{2})?\n\nПримечание: эта операция изменяет статус Заказа в базе данных.\nСтатус связанных Предметов одежды НЕ откатывается автоматически.\n\nПодтвердить?
 RU	conf.rest.sobreescribir	Вы уверены? Эта операция перезапишет все текущие данные и перезапустит приложение.
-RU	msg.backup.errorgenerar	Ошибка при создании резервной копии:\n{0}
-RU	msg.backup.erroreliminar	Ошибка при удалении:\n{0}
-RU	msg.backup.errorrestaurar	Ошибка при восстановлении:\n{0}
-RU	msg.historial.errorcargar	Ошибка загрузки истории:\n{0}
-RU	msg.historial.errorrestaur	Ошибка восстановления версии:\n{0}
 RU	msg.error.titulo	Ошибка
 RU	lbl.cli.vencimiento	Дата истечения
 RU	col.cli.vencimiento	Истекает
@@ -2351,7 +2230,6 @@ RU	err.bll.pedido.cliente_inexistente	Выбранный клиент не су�
 RU	err.bll.pedido.sin_plan	У клиента {0} нет назначенного плана. Назначьте план перед созданием заказа.
 RU	err.bll.pedido.suscripcion_vencida	Подписка {0} истекла {1}. Обновите в модуле Клиентов.
 RU	err.bll.pedido.limite_plan	План '{0}' разрешает {1} вещь(ей). У клиента уже {2} в использовании, добавляется ещё {3}. Максимум: {4}.
-RU	err.bll.pedido.prenda_no_disponible	Вещь '{0}' недоступна (статус: {1}). Обновите выбор.
 RU	err.bll.listaespera.cliente_inexistente	Клиент не существует.
 RU	err.bll.listaespera.inexistente	Запись не существует.
 RU	err.bll.listaespera.prenda_inexistente	Вещь не существует.
@@ -2366,7 +2244,6 @@ RU	err.bll.pedido.devolucion_estado	Возврат можно зарегистр
 RU	err.bll.pedido.cancelar_estado	Отменить можно только заказы в статусе Ожидания. Этот заказ: '{0}'.
 RU	err.bll.pedido.cancelar_sin_motivo	Необходимо указать причину отмены.
 RU	err.bll.pedido.descancelar_estado	Восстановить можно только Отменённые заказы. Этот заказ: '{0}'.
-RU	err.bll.pedido.descancelar_prendas	Невозможно восстановить Заказ #{0}. Одна или несколько вещей больше недоступны.
 RU	err.bll.plan.nombre_requerido	Название плана обязательно.
 RU	err.bll.plan.limite_invalido	Лимит вещей должен быть больше нуля.
 RU	diag.estado.integro	Статус: ЦЕЛО
@@ -2401,9 +2278,6 @@ RU	diag.conf.recalcular	Пересчитать все DVH и DVV таблицы 
 RU	diag.conf.recalcular.titulo	Подтвердить пересчёт
 RU	diag.msg.recalc.exito	Проверочные цифры успешно пересчитаны.
 RU	diag.msg.exito.titulo	Успешно
-RU	diag.err.cargar	Ошибка загрузки диагностики: {0}
-RU	diag.err.recalcular	Ошибка пересчёта: {0}
-RU	diag.err.titulo	Ошибка
 RU	diag.fila.sinDVH	Без DVH
 RU	diag.fila.nocoincide	DVH не совпадает
 RU	diag.hist.ok	OK
@@ -2512,7 +2386,6 @@ PT	col.idiomas.referencia	Referência (padrão)
 PT	col.idiomas.texto	Texto / Tradução
 PT	lbl.idiomas.si	Sim
 PT	lbl.idiomas.no	Não
-PT	err.generico.cargar	Erro ao carregar: {0}
 PT	pedidos.hist.encontrados	{0} registro(s) encontrado(s).
 PT	diag.frm.titulo	Diagnóstico de Integridade
 PT	diag.tab.diagnostico	Diagnóstico
@@ -2537,9 +2410,6 @@ PT	diag.conf.recalcular	Recalcular todos os DVH e o DVV da tabela Usuário?\n\nE
 PT	diag.conf.recalcular.titulo	Confirmar Recálculo Total
 PT	diag.msg.recalc.exito	Dígitos verificadores recalculados com sucesso.
 PT	diag.msg.exito.titulo	Sucesso
-PT	diag.err.cargar	Erro ao carregar diagnóstico: {0}
-PT	diag.err.recalcular	Erro ao recalcular: {0}
-PT	diag.err.titulo	Erro
 PT	diag.fila.sinDVH	Sem DVH
 PT	diag.fila.nocoincide	DVH não coincide
 PT	diag.hist.ok	OK
@@ -2780,9 +2650,7 @@ PT	lbl.recup.desc	Informe seu nome de usuário. Um administrador\npoderá redefi
 PT	lbl.recup.usuario	Nome de usuário:
 PT	btn.enviar.solicitud	Enviar solicitação
 PT	err.recup.nousername	Informe seu nome de usuário.
-PT	err.recup.nousuario	Usuário '{0}' não encontrado.\nVerifique se digitou corretamente.
 PT	msg.recup.exito	Se o usuário existir, contate o administrador para redefinir\nsua senha em Administrar -> Usuários.
-PT	err.recup.verificar	Erro ao verificar usuário: {0}
 PT	col.det.prenda	Roupa
 PT	frm.nuevaprenda	Nova Roupa
 PT	frm.editarprenda	Editar Roupa
@@ -2793,10 +2661,8 @@ PT	lbl.prenda.color	Cor
 PT	lbl.prenda.categoria	Categoria *
 PT	btn.agregar.prenda	Adicionar Roupa
 PT	frm.nuevopedido	Novo Pedido de Venda
-PT	paso1.texto	Passo 1 de 2 — Selecionar Cliente
 PT	paso2.texto	Passo 2 de 2 — Selecionar Roupas
 PT	lbl.ped.selcliente	Selecione o cliente para este pedido:
-PT	combo.ped.placeholder	— Selecione um cliente —
 PT	lbl.ped.selprendas	Selecione as roupas para incluir no pedido (checkbox):
 PT	btn.siguiente	Próximo →
 PT	btn.volver	← Voltar
@@ -2820,7 +2686,6 @@ PT	crit.bloqueos	Bloqueio Conta (6)
 PT	btn.exportar.pdf	Exportar PDF
 PT	msg.ped.conteo	{0} pedido(s)
 PT	msg.ped.cargados	{0} pedido(s) carregado(s).
-PT	msg.ped.creado	Pedido #{0} criado. Estado: Pendente.
 PT	msg.ped.cancelado	Pedido #{0} cancelado. Roupas liberadas.
 PT	msg.ped.yanoexiste	Este pedido não existe mais. Atualize a grade.
 PT	msg.ped.reactivado	Pedido #{0} reativado — voltou a Pendente.
@@ -2838,8 +2703,6 @@ PT	lbl.ped.seleccionado	Pedido #{0} — {1} — {2}
 PT	lbl.motivo	Motivo:
 PT	conf.cancelped.titulo	Confirmar Cancelamento
 PT	conf.cancelped.body	Cancelar Pedido #{0} de {1}?\n\nMotivo: {2}\n\nAs roupas voltarão ao estado Disponível.
-PT	conf.descancelar.titulo	Confirmar Reativação
-PT	conf.descancelar.body	Reativar Pedido #{0} de {1}?\n\nSerá verificada a disponibilidade das roupas\ne o pedido voltará a Pendente.
 PT	conf.despachar.titulo	Confirmar Despacho
 PT	conf.despachar.body	Despachar Pedido #{0}?\n\nCliente: {1}\nRoupas: {2}\n\nO pedido passará a Despachado.
 PT	conf.entrega.titulo	Confirmar Entrega
@@ -2858,11 +2721,9 @@ PT	lbl.cambioest.info	Roupa: {0}  —  Estado atual: {1}
 PT	msg.cambioest.selecciona	Selecione uma opção.
 PT	msg.cambioest.bajairrev	A baixa é irreversível. Confirmar?
 PT	conf.baja.titulo	Dar Baixa
-PT	frm.resetclave	Redefinir Senha
 PT	lbl.nueva.clave	Nova senha (mín. 6 caracteres):
 PT	lbl.confirmar.clave	Confirmar senha:
 PT	btn.confirmar.reset	Confirmar Redefinição
-PT	err.clave.nomatch	As senhas não coincidem.
 PT	notif.titulo	NOTIFICAÇÃO DE PEDIDO
 PT	notif.numero	Pedido #:
 PT	notif.msgbox.titulo	Notificação — Pedido #{0}
@@ -2887,25 +2748,7 @@ PT	lbl.editplan	Editar Plano
 PT	msg.bit.registros	  {0} registro(s)
 PT	msg.bit.ultimos	últimos {0} dias
 PT	msg.bit.todos	todos os registros
-PT	notif.frm.titulo	Notificação — Pedido #{0}
-PT	notif.header.entregado	Pedido #{0} — ENTREGUE
-PT	notif.header.despachado	Pedido #{0} — DESPACHADO
-PT	btn.copiar.porta	Copiar para área de transferência
 PT	btn.copiado	Copiado
-PT	notif.gen.saludo	Prezado(a) {0},
-PT	notif.gen.entregado	Confirmamos que seu pedido foi entregue.\nObrigado por escolher WardrobeFlow.
-PT	notif.gen.despachado	Informamos que seu pedido foi despachado e\nestará chegando em breve.
-PT	notif.gen.nropedido	Número do pedido
-PT	notif.gen.fechapedido	Data do pedido
-PT	notif.gen.fechadespacho	Data de despacho
-PT	notif.gen.fechaentrega	Data de entrega
-PT	notif.gen.estado	Estado
-PT	notif.gen.prendas	Roupas incluídas ({0}):
-PT	notif.gen.talle	Tamanho
-PT	notif.gen.color	Cor
-PT	notif.gen.categoria	Categoria
-PT	notif.gen.footer	Em caso de dúvidas, entre em contato conosco.
-PT	notif.gen.slogan	WardrobeFlow — Seu guarda-roupa, sem limites.
 PT	perfil.administrador	Administrador
 PT	perfil.vendedor	Vendedor
 PT	perfil.deposito	Depósito
@@ -2913,8 +2756,6 @@ PT	metodo.efectivo	Dinheiro
 PT	metodo.debito	Débito
 PT	metodo.credito	Crédito
 PT	metodo.transferencia	Transferência
-PT	msg.modulo.outfits	O módulo Outfits ainda não está disponível.
-PT	msg.modulo.categorias	O módulo Categorias ainda não está disponível.
 PT	lbl.proximamente	Em breve
 PT	err.pdf.sinDatos	Sem dados para exportar.
 PT	lbl.exportarpdf	Exportar PDF
@@ -2954,7 +2795,6 @@ PT	lbl.explorador.leyenda	Família (nó composto — Área ou Papel)    Patente 
 PT	btn.explorador.cerrar	Fechar
 PT	btn.explorador.colapsar	⊟ Recolher tudo
 PT	btn.explorador.expandir	⊞ Expandir tudo
-PT	err.explorador.cargar	Erro ao carregar árvore Composite:\n{0}
 PT	perfil.auditor	Auditor
 PT	perfil.gerentecomercial	Gerente Comercial
 PT	perfil.gerenteinventario	Gerente de Estoque
@@ -3080,7 +2920,6 @@ PT	rpt.txt.impresionenv	Impressão enviada
 PT	bit.pdf.titulosistema	Registro do Sistema — WardrobeFlow
 PT	bit.pdf.titulonegocio	Registro de Negócio — WardrobeFlow
 PT	bit.pdf.pagina	WardrobeFlow — Página {0}
-PT	bit.pdf.vistaprevia	Pré-visualização
 PT	dash.backup.hoy	Hoje
 PT	dash.sesion.iniciada	Sessão iniciada:
 PT	dash.tareas.titulo	Minhas Tarefas Pendentes ({0})
@@ -3151,11 +2990,6 @@ PT	conf.idiomas.titulo	Confirmar
 PT	msg.hist.restaurado	Pedido #{0} restaurado com sucesso.
 PT	conf.hist.restaurar.msg	Restaurar o pedido #{0} ao estado anterior a '{1}' (op. #{2})?\n\nNota: esta operação modifica o estado do Pedido no banco de dados.\nO estado das Roupas associadas NÃO é revertido automaticamente.\n\nConfirmar?
 PT	conf.rest.sobreescribir	Tem certeza? Esta operação sobrescreverá todos os dados atuais e reiniciará o aplicativo.
-PT	msg.backup.errorgenerar	Erro ao gerar backup:\n{0}
-PT	msg.backup.erroreliminar	Erro ao excluir:\n{0}
-PT	msg.backup.errorrestaurar	Erro ao restaurar:\n{0}
-PT	msg.historial.errorcargar	Erro ao carregar histórico:\n{0}
-PT	msg.historial.errorrestaur	Erro ao restaurar versão:\n{0}
 PT	msg.error.titulo	Erro
 PT	lbl.cli.vencimiento	Data de Vencimento
 PT	col.cli.vencimiento	Vencimento
@@ -3195,7 +3029,6 @@ PT	err.bll.pedido.cliente_inexistente	O cliente selecionado não existe.
 PT	err.bll.pedido.sin_plan	O cliente {0} não tem plano atribuído. Atribua um plano antes de criar um pedido.
 PT	err.bll.pedido.suscripcion_vencida	A assinatura de {0} venceu em {1}. Renovar no módulo de Clientes.
 PT	err.bll.pedido.limite_plan	O plano '{0}' permite {1} roupa(s). O cliente já tem {2} em uso e adiciona {3} mais. Máximo permitido: {4}.
-PT	err.bll.pedido.prenda_no_disponible	A roupa '{0}' não está disponível (estado: {1}). Atualize a seleção.
 PT	err.bll.listaespera.cliente_inexistente	O cliente não existe.
 PT	err.bll.listaespera.inexistente	O registro não existe.
 PT	err.bll.listaespera.prenda_inexistente	A peça não existe.
@@ -3210,7 +3043,6 @@ PT	err.bll.pedido.devolucion_estado	Só é possível registrar devolução de pe
 PT	err.bll.pedido.cancelar_estado	Só é possível cancelar pedidos Pendentes. Este pedido está '{0}'.
 PT	err.bll.pedido.cancelar_sin_motivo	É obrigatório informar um motivo de cancelamento.
 PT	err.bll.pedido.descancelar_estado	Só é possível reativar pedidos Cancelados. Este pedido está '{0}'.
-PT	err.bll.pedido.descancelar_prendas	Não é possível reativar o Pedido #{0}. Uma ou mais roupas não estão mais disponíveis.
 PT	err.bll.plan.nombre_requerido	O nome do plano é obrigatório.
 PT	err.bll.plan.limite_invalido	O limite de roupas deve ser maior que zero.
 PT	diag.estado.integro	Estado: ÍNTEGRO
@@ -3337,7 +3169,6 @@ ES	dash.mant.reciente	Reciente (< 2d)
 ES	dash.mant.urgente	Urgente (> 7d)
 ES	dash.logistica.titulo	Panel de Logística
 ES	dash.logistica.subtitulo	WardrobeFlow  —  Logística
-ES	dash.planes	Planes activos
 ES	dash.deposito.titulo	Panel de Depósito
 ES	dash.deposito.subtitulo	WardrobeFlow  —  Depósito
 ES	dash.vendedor.titulo	Panel de Ventas
@@ -3353,7 +3184,6 @@ EN	dash.mant.reciente	Recent (< 2d)
 EN	dash.mant.urgente	Urgent (> 7d)
 EN	dash.logistica.titulo	Logistics Panel
 EN	dash.logistica.subtitulo	WardrobeFlow  —  Logistics
-EN	dash.planes	Active plans
 EN	dash.deposito.titulo	Warehouse Panel
 EN	dash.deposito.subtitulo	WardrobeFlow  —  Warehouse
 EN	dash.vendedor.titulo	Sales Panel
@@ -3370,7 +3200,6 @@ PT	dash.mant.reciente	Recente (< 2d)
 PT	dash.mant.urgente	Urgente (> 7d)
 PT	dash.logistica.titulo	Painel de Logística
 PT	dash.logistica.subtitulo	WardrobeFlow  —  Logística
-PT	dash.planes	Planos ativos
 PT	dash.deposito.titulo	Painel de Depósito
 PT	dash.deposito.subtitulo	WardrobeFlow  —  Depósito
 PT	dash.vendedor.titulo	Painel de Vendas
@@ -3386,7 +3215,6 @@ RU	dash.mant.reciente	Недавно (< 2д)
 RU	dash.mant.urgente	Срочно (> 7д)
 RU	dash.logistica.titulo	Панель логистики
 RU	dash.logistica.subtitulo	WardrobeFlow — Логистика
-RU	dash.planes	Активных планов
 RU	dash.deposito.titulo	Панель склада
 RU	dash.deposito.subtitulo	WardrobeFlow — Склад
 RU	dash.vendedor.titulo	Панель продаж
@@ -3588,10 +3416,6 @@ ES	frm.cambioclave.titulo	Cambio de contraseña obligatorio
 EN	frm.cambioclave.titulo	Mandatory password change
 RU	frm.cambioclave.titulo	Обязательная смена пароля
 PT	frm.cambioclave.titulo	Alteração de senha obrigatória
-ES	frm.mapeocontroles	Mapeo de controles por permiso
-EN	frm.mapeocontroles	Control mapping by permission
-RU	frm.mapeocontroles	Сопоставление элементов по разрешению
-PT	frm.mapeocontroles	Mapeamento de controles por permissão
 ES	lbl.cambioclave.info	Tu contraseña es temporal. Definí una nueva para continuar.
 EN	lbl.cambioclave.info	Your password is temporary. Set a new one to continue.
 RU	lbl.cambioclave.info	Ваш пароль временный. Задайте новый, чтобы продолжить.
@@ -3612,34 +3436,6 @@ ES	lbl.cli.fechanac	Fecha de Nacimiento *
 EN	lbl.cli.fechanac	Date of Birth *
 RU	lbl.cli.fechanac	Дата рождения *
 PT	lbl.cli.fechanac	Data de Nascimento *
-ES	map.asociados	Asociados a la patente
-EN	map.asociados	Linked to the permission
-RU	map.asociados	Связаны с разрешением
-PT	map.asociados	Associados à permissão
-ES	map.disponibles	Controles disponibles
-EN	map.disponibles	Available controls
-RU	map.disponibles	Доступные элементы
-PT	map.disponibles	Controles disponíveis
-ES	map.formulario	Formulario:
-EN	map.formulario	Form:
-RU	map.formulario	Форма:
-PT	map.formulario	Formulário:
-ES	map.guardado	Mapeo guardado.
-EN	map.guardado	Mapping saved.
-RU	map.guardado	Сопоставление сохранено.
-PT	map.guardado	Mapeamento salvo.
-ES	map.guardar	Guardar
-EN	map.guardar	Save
-RU	map.guardar	Сохранить
-PT	map.guardar	Salvar
-ES	map.patente	Patente:
-EN	map.patente	Permission:
-RU	map.patente	Разрешение:
-PT	map.patente	Permissão:
-ES	map.sinforms	Abrí los formularios que quieras mapear y volvé a entrar acá.
-EN	map.sinforms	Open the forms you want to map and come back here.
-RU	map.sinforms	Откройте формы, которые хотите сопоставить, и вернитесь сюда.
-PT	map.sinforms	Abra os formulários que deseja mapear e volte aqui.
 ES	msg.backup.perdida.titulo	\n\nSe perderán estos registros creados después del backup:
 EN	msg.backup.perdida.titulo	\n\nThese records created after the backup will be lost:
 RU	msg.backup.perdida.titulo	\n\nБудут потеряны записи, созданные после бэкапа:
@@ -3707,7 +3503,6 @@ ES	dash.act.dbrestore	Base de datos restaurada desde {0}
 ES	dash.act.accountunlock	Desbloqueo de cuenta: {0}
 ES	dash.act.useradd	Alta de usuario: {0}
 ES	dash.act.userrestore	Restauración a versión {0}
-ES	dash.act.emergencykeys	Regeneración de {0} claves de emergencia
 EN	dash.act.login	Login
 EN	dash.act.logout	Logout
 EN	dash.act.pwchange	Own password change
@@ -3727,7 +3522,6 @@ EN	dash.act.dbrestore	Database restored from {0}
 EN	dash.act.accountunlock	Account unlock: {0}
 EN	dash.act.useradd	User added: {0}
 EN	dash.act.userrestore	Restored to version {0}
-EN	dash.act.emergencykeys	Regeneration of {0} emergency keys
 PT	dash.act.login	Início de sessão
 PT	dash.act.logout	Encerramento de sessão
 PT	dash.act.pwchange	Alteração da própria senha
@@ -3747,7 +3541,6 @@ PT	dash.act.dbrestore	Banco de dados restaurado de {0}
 PT	dash.act.accountunlock	Desbloqueio de conta: {0}
 PT	dash.act.useradd	Cadastro de usuário: {0}
 PT	dash.act.userrestore	Restauração para versão {0}
-PT	dash.act.emergencykeys	Regeneração de {0} chaves de emergência
 RU	dash.act.login	Вход в систему
 RU	dash.act.logout	Выход из системы
 RU	dash.act.pwchange	Смена собственного пароля
@@ -3767,7 +3560,6 @@ RU	dash.act.dbrestore	База данных восстановлена из {0}
 RU	dash.act.accountunlock	Разблокировка учётной записи: {0}
 RU	dash.act.useradd	Создан пользователь: {0}
 RU	dash.act.userrestore	Восстановление до версии {0}
-RU	dash.act.emergencykeys	Перевыпуск аварийных ключей: {0}
 ES	rec.frm.titulo	Recuperación de Integridad (Espejo)
 ES	rec.col.id	ID
 ES	rec.col.usuario	Usuario
@@ -3788,8 +3580,6 @@ ES	rec.tipo.insertada	Inserción externa
 ES	rec.tipo.eliminada	Eliminada (falta)
 ES	rec.fila.ausente	(ausente en la tabla actual)
 ES	rec.fila.enespejo	(presente en el espejo)
-ES	rec.err.cargar	Error al diagnosticar: {0}
-ES	rec.err.titulo	Error
 ES	rec.backup.seleccionar	Seleccionar Backup para Restaurar
 ES	dlg.backup.seleccionarexterno	Seleccionar Copia de Seguridad para Restaurar
 ES	rec.conf.asumir	ATENCIÓN: se aceptarán los datos ACTUALES como legítimos y se recalcularán todos los dígitos verificadores.\n\nSi hubo manipulación, quedará consolidada. ¿Continuar?
@@ -3819,8 +3609,6 @@ EN	rec.tipo.insertada	External insertion
 EN	rec.tipo.eliminada	Deleted (missing)
 EN	rec.fila.ausente	(missing from current table)
 EN	rec.fila.enespejo	(present in mirror)
-EN	rec.err.cargar	Error diagnosing: {0}
-EN	rec.err.titulo	Error
 EN	rec.backup.seleccionar	Select Backup to Restore
 EN	dlg.backup.seleccionarexterno	Select Backup File to Restore
 EN	rec.conf.asumir	WARNING: the CURRENT data will be accepted as legitimate and all check digits will be recalculated.\n\nIf there was tampering, it will be consolidated. Continue?
@@ -3850,8 +3638,6 @@ RU	rec.tipo.insertada	Внешняя вставка
 RU	rec.tipo.eliminada	Удалена (отсутствует)
 RU	rec.fila.ausente	(отсутствует в текущей таблице)
 RU	rec.fila.enespejo	(присутствует в зеркале)
-RU	rec.err.cargar	Ошибка диагностики: {0}
-RU	rec.err.titulo	Ошибка
 RU	rec.backup.seleccionar	Выбрать бэкап для восстановления
 RU	dlg.backup.seleccionarexterno	Выбрать файл резервной копии для восстановления
 RU	rec.conf.asumir	ВНИМАНИЕ: ТЕКУЩИЕ данные будут приняты как законные, и все контрольные разряды будут пересчитаны.\n\nЕсли имела место фальсификация данных, она будет закреплена. Продолжить?
@@ -3881,8 +3667,6 @@ PT	rec.tipo.insertada	Inserção externa
 PT	rec.tipo.eliminada	Excluída (ausente)
 PT	rec.fila.ausente	(ausente na tabela atual)
 PT	rec.fila.enespejo	(presente no espelho)
-PT	rec.err.cargar	Erro ao diagnosticar: {0}
-PT	rec.err.titulo	Erro
 PT	rec.backup.seleccionar	Selecionar Backup para Restaurar
 PT	dlg.backup.seleccionarexterno	Selecionar Cópia de Segurança para Restaurar
 PT	rec.conf.asumir	ATENÇÃO: os dados ATUAIS serão aceitos como legítimos e todos os dígitos verificadores serão recalculados.\n\nSe houve manipulação, ela será consolidada. Continuar?
@@ -4550,15 +4334,11 @@ ES	lbl.cargoprenda.motivo	Motivo (daño o pérdida) *
 ES	lbl.cargoprenda.monto	Monto a cobrar *
 ES	lbl.cargoprenda.info	Prenda: {0}\nÚltimo cliente: {1}
 ES	btn.registrar.cargo	Registrar Cargo
-ES	msg.cargoprenda.motivorequerido	Indicá el motivo del cargo.
-ES	msg.cargoprenda.montoinvalido	El monto debe ser mayor a cero.
 ES	msg.cargoprenda.preguntar	¿Corresponde cobrarle a {0} por daño o pérdida de esta prenda?
 ES	msg.cargoprenda.registrado	Cargo de ${0} registrado — se sumará al próximo cobro de {1}.
 ES	err.bll.cargoprenda.sin_cliente	La prenda '{0}' no tiene un último cliente registrado; no se le puede cargar el costo a nadie.
 ES	err.bll.cargoprenda.motivo_requerido	Debe indicar el motivo del cargo (daño o pérdida).
 ES	err.bll.cargoprenda.monto_invalido	El monto del cargo debe ser mayor a cero.
-ES	cobro.estado.descuentopendiente	Tiene un descuento de ${0} pendiente para este cobro (programa de referidos).
-ES	cobro.estado.cargospendientes	Tiene {0} cargo(s) por daño/pérdida pendiente(s) por ${1} que se sumarán a este cobro.
 ES	cobro.msg.cobrado.descuento	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2}.
 ES	cobro.msg.cobrado.cargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye {2} cargo(s) por daño/pérdida (${3}).
 ES	cobro.msg.cobrado.descuentoycargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2} y {3} cargo(s) por daño/pérdida (${4}).
@@ -4586,15 +4366,11 @@ EN	lbl.cargoprenda.motivo	Reason (damage or loss) *
 EN	lbl.cargoprenda.monto	Amount to charge *
 EN	lbl.cargoprenda.info	Garment: {0}\nLast client: {1}
 EN	btn.registrar.cargo	Register Charge
-EN	msg.cargoprenda.motivorequerido	Enter the reason for the charge.
-EN	msg.cargoprenda.montoinvalido	The amount must be greater than zero.
 EN	msg.cargoprenda.preguntar	Should {0} be charged for damage or loss of this garment?
 EN	msg.cargoprenda.registrado	Charge of ${0} registered — it will be added to {1}'s next payment.
 EN	err.bll.cargoprenda.sin_cliente	Garment '{0}' has no last known client; there's no one to charge for it.
 EN	err.bll.cargoprenda.motivo_requerido	You must indicate the reason for the charge (damage or loss).
 EN	err.bll.cargoprenda.monto_invalido	The charge amount must be greater than zero.
-EN	cobro.estado.descuentopendiente	Has a pending ${0} discount for this payment (referral program).
-EN	cobro.estado.cargospendientes	Has {0} pending damage/loss charge(s) for ${1} that will be added to this payment.
 EN	cobro.msg.cobrado.descuento	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2}.
 EN	cobro.msg.cobrado.cargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes {2} damage/loss charge(s) (${3}).
 EN	cobro.msg.cobrado.descuentoycargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2} and {3} damage/loss charge(s) (${4}).
@@ -4622,15 +4398,11 @@ RU	lbl.cargoprenda.motivo	Причина (повреждение или утра
 RU	lbl.cargoprenda.monto	Сумма к оплате *
 RU	lbl.cargoprenda.info	Одежда: {0}\nПоследний клиент: {1}
 RU	btn.registrar.cargo	Зарегистрировать штраф
-RU	msg.cargoprenda.motivorequerido	Укажите причину штрафа.
-RU	msg.cargoprenda.montoinvalido	Сумма должна быть больше нуля.
 RU	msg.cargoprenda.preguntar	Нужно ли взыскать с {0} штраф за повреждение или утрату этой вещи?
 RU	msg.cargoprenda.registrado	Штраф на сумму ${0} зарегистрирован — будет добавлен к следующему платежу {1}.
 RU	err.bll.cargoprenda.sin_cliente	У вещи «{0}» нет последнего известного клиента; взыскать не с кого.
 RU	err.bll.cargoprenda.motivo_requerido	Укажите причину штрафа (повреждение или утрата).
 RU	err.bll.cargoprenda.monto_invalido	Сумма штрафа должна быть больше нуля.
-RU	cobro.estado.descuentopendiente	Есть ожидающая скидка ${0} на этот платёж (реферальная программа).
-RU	cobro.estado.cargospendientes	Есть {0} ожидающих штраф(ов) за повреждение/утрату на сумму ${1}, которые будут добавлены к этому платежу.
 RU	cobro.msg.cobrado.descuento	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2}.
 RU	cobro.msg.cobrado.cargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает {2} штраф(ов) за повреждение/утрату (${3}).
 RU	cobro.msg.cobrado.descuentoycargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2} и {3} штраф(ов) за повреждение/утрату (${4}).
@@ -4658,15 +4430,11 @@ PT	lbl.cargoprenda.motivo	Motivo (dano ou perda) *
 PT	lbl.cargoprenda.monto	Valor a cobrar *
 PT	lbl.cargoprenda.info	Peça: {0}\nÚltimo cliente: {1}
 PT	btn.registrar.cargo	Registrar Cobrança
-PT	msg.cargoprenda.motivorequerido	Informe o motivo da cobrança.
-PT	msg.cargoprenda.montoinvalido	O valor deve ser maior que zero.
 PT	msg.cargoprenda.preguntar	Cabe cobrar de {0} por dano ou perda desta peça?
 PT	msg.cargoprenda.registrado	Cobrança de ${0} registrada — será somada à próxima cobrança de {1}.
 PT	err.bll.cargoprenda.sin_cliente	A peça '{0}' não tem um último cliente registrado; não há quem cobrar.
 PT	err.bll.cargoprenda.motivo_requerido	Você deve indicar o motivo da cobrança (dano ou perda).
 PT	err.bll.cargoprenda.monto_invalido	O valor da cobrança deve ser maior que zero.
-PT	cobro.estado.descuentopendiente	Tem um desconto de ${0} pendente para esta cobrança (programa de indicações).
-PT	cobro.estado.cargospendientes	Tem {0} cobrança(s) por dano/perda pendente(s) de ${1} que serão somadas a esta cobrança.
 PT	cobro.msg.cobrado.descuento	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2}.
 PT	cobro.msg.cobrado.cargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui {2} cobrança(s) por dano/perda (${3}).
 PT	cobro.msg.cobrado.descuentoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2} e {3} cobrança(s) por dano/perda (${4}).
@@ -4696,10 +4464,6 @@ ES	contratacion.modalidad	Modalidad:
 EN	contratacion.modalidad	Payment Mode:
 RU	contratacion.modalidad	Способ оплаты:
 PT	contratacion.modalidad	Modalidade:
-ES	contratacion.btn.confirmar	Confirmar
-EN	contratacion.btn.confirmar	Confirm
-RU	contratacion.btn.confirmar	Подтвердить
-PT	contratacion.btn.confirmar	Confirmar
 ES	frm.contratacionespend	Contrataciones Pendientes de Pago
 EN	frm.contratacionespend	Contracts Pending Payment
 RU	frm.contratacionespend	Договоры, ожидающие оплаты
@@ -4784,10 +4548,6 @@ ES	conf.contratacion.cobro.titulo	Confirmar Cobro
 EN	conf.contratacion.cobro.titulo	Confirm Charge
 RU	conf.contratacion.cobro.titulo	Подтвердить оплату
 PT	conf.contratacion.cobro.titulo	Confirmar Cobrança
-ES	conf.contratacion.cobro.msg	¿Confirmar el cobro de la Contratación #{0}?\n\nCliente: {1}\nPlan: {2}\nMedio de pago: {3}\n\nSe emitirá el comprobante y la suscripción quedará formalizada.
-EN	conf.contratacion.cobro.msg	Confirm the charge for Contract #{0}?\n\nClient: {1}\nPlan: {2}\nPayment method: {3}\n\nA receipt will be issued and the subscription will be formalized.
-RU	conf.contratacion.cobro.msg	Подтвердить оплату договора №{0}?\n\nКлиент: {1}\nПлан: {2}\nСпособ оплаты: {3}\n\nБудет выдана квитанция, подписка будет оформлена.
-PT	conf.contratacion.cobro.msg	Confirmar a cobrança da Contratação #{0}?\n\nCliente: {1}\nPlano: {2}\nForma de pagamento: {3}\n\nO comprovante será emitido e a assinatura será formalizada.
 ES	msg.contratacion.cobrada	Contratación #{0} cobrada. Suscripción formalizada.
 ES	msg.contratacion.cobrada.comprobante	Contratación #{0} cobrada por {1:C2}. Comprobante {2}. Suscripción formalizada.
 ES	conf.contratacion.cobro.desc	Descuento aplicado: {0:C2} ({1}).
@@ -4808,14 +4568,6 @@ ES	conf.contratacion.intentofallido.titulo	Registrar Intento Fallido
 EN	conf.contratacion.intentofallido.titulo	Record Failed Attempt
 RU	conf.contratacion.intentofallido.titulo	Зарегистрировать неудачную попытку
 PT	conf.contratacion.intentofallido.titulo	Registrar Tentativa Falhada
-ES	conf.contratacion.intentofallido.msg	¿Registrar un intento de pago fallido para la Contratación #{0}?\n\nIntentos hasta ahora: {1}/3. Al llegar a 3 se cancela automáticamente.
-EN	conf.contratacion.intentofallido.msg	Record a failed payment attempt for Contract #{0}?\n\nAttempts so far: {1}/3. It cancels automatically at 3.
-RU	conf.contratacion.intentofallido.msg	Зарегистрировать неудачную попытку оплаты договора №{0}?\n\nПопыток на данный момент: {1}/3. При достижении 3 договор отменяется автоматически.
-PT	conf.contratacion.intentofallido.msg	Registrar uma tentativa de pagamento falhada para a Contratação #{0}?\n\nTentativas até agora: {1}/3. Ao chegar a 3, cancela automaticamente.
-ES	msg.contratacion.intentofallido_registrado	Intento fallido registrado para la Contratación #{0}.
-EN	msg.contratacion.intentofallido_registrado	Failed attempt recorded for Contract #{0}.
-RU	msg.contratacion.intentofallido_registrado	Неудачная попытка зарегистрирована для договора №{0}.
-PT	msg.contratacion.intentofallido_registrado	Tentativa falhada registrada para a Contratação #{0}.
 ES	insp.conteo	{0} prenda(s) pendiente(s) de inspección.
 EN	insp.conteo	{0} garment(s) pending inspection.
 RU	insp.conteo	{0} вещь(ей) ожидают проверки.
@@ -4856,30 +4608,10 @@ ES	promo.conteo	{0} promoción(es) en total.
 EN	promo.conteo	{0} promotion(s) in total.
 RU	promo.conteo	Всего акций: {0}.
 PT	promo.conteo	{0} promoção(ões) no total.
-ES	msg.promo.registrada	Promoción #{0} registrada.
-EN	msg.promo.registrada	Promotion #{0} registered.
-RU	msg.promo.registrada	Акция №{0} зарегистрирована.
-PT	msg.promo.registrada	Promoção #{0} registrada.
-ES	conf.promo.desactivar.titulo	Confirmar Desactivación
-EN	conf.promo.desactivar.titulo	Confirm Deactivation
-RU	conf.promo.desactivar.titulo	Подтвердить отключение
-PT	conf.promo.desactivar.titulo	Confirmar Desativação
-ES	conf.promo.desactivar.msg	¿Desactivar la promoción '{0}'?
-EN	conf.promo.desactivar.msg	Deactivate promotion '{0}'?
-RU	conf.promo.desactivar.msg	Отключить акцию '{0}'?
-PT	conf.promo.desactivar.msg	Desativar a promoção '{0}'?
 ES	msg.promo.desactivada	Promoción '{0}' desactivada.
 EN	msg.promo.desactivada	Promotion '{0}' deactivated.
 RU	msg.promo.desactivada	Акция '{0}' отключена.
 PT	msg.promo.desactivada	Promoção '{0}' desativada.
-ES	conf.promo.aprobarbaja.titulo	Confirmar Baja
-EN	conf.promo.aprobarbaja.titulo	Confirm Discontinuation
-RU	conf.promo.aprobarbaja.titulo	Подтвердить отмену
-PT	conf.promo.aprobarbaja.titulo	Confirmar Baixa
-ES	conf.promo.aprobarbaja.msg	¿Aprobar la baja de '{0}' sugerida por Ventas?\nMotivo: {1}
-EN	conf.promo.aprobarbaja.msg	Approve discontinuing '{0}' as suggested by Sales?\nReason: {1}
-RU	conf.promo.aprobarbaja.msg	Одобрить отмену '{0}', предложенную отделом продаж?\nПричина: {1}
-PT	conf.promo.aprobarbaja.msg	Aprovar a baixa de '{0}' sugerida pelas Vendas?\nMotivo: {1}
 ES	msg.promo.dadabaja	Promoción '{0}' dada de baja.
 EN	msg.promo.dadabaja	Promotion '{0}' discontinued.
 RU	msg.promo.dadabaja	Акция '{0}' отменена.
@@ -4900,14 +4632,6 @@ ES	promo.conteo.revisioncontable	{0} promoción(es) pendiente(s) de revisión co
 EN	promo.conteo.revisioncontable	{0} promotion(s) pending accounting review.
 RU	promo.conteo.revisioncontable	{0} акци(й/я) ожидают проверки бухгалтерии.
 PT	promo.conteo.revisioncontable	{0} promoção(ões) pendente(s) de revisão contábil.
-ES	err.promo.observacion_requerida_aprobar	Ingresá una observación antes de aprobar.
-EN	err.promo.observacion_requerida_aprobar	Enter a note before approving.
-RU	err.promo.observacion_requerida_aprobar	Введите комментарий перед одобрением.
-PT	err.promo.observacion_requerida_aprobar	Insira uma observação antes de aprovar.
-ES	err.promo.observacion_requerida_rechazar	Ingresá una observación antes de rechazar.
-EN	err.promo.observacion_requerida_rechazar	Enter a note before rejecting.
-RU	err.promo.observacion_requerida_rechazar	Введите комментарий перед отклонением.
-PT	err.promo.observacion_requerida_rechazar	Insira uma observação antes de rejeitar.
 ES	conf.promo.aprobarcontable.titulo	Confirmar Aprobación
 EN	conf.promo.aprobarcontable.titulo	Confirm Approval
 RU	conf.promo.aprobarcontable.titulo	Подтвердить одобрение
@@ -4936,10 +4660,6 @@ ES	promo.conteo.vigentes	{0} promoción(es) vigente(s).
 EN	promo.conteo.vigentes	{0} active promotion(s).
 RU	promo.conteo.vigentes	{0} действующих акций.
 PT	promo.conteo.vigentes	{0} promoção(ões) vigente(s).
-ES	inputdlg.sugerirbaja.titulo	Sugerir Baja de Promoción
-EN	inputdlg.sugerirbaja.titulo	Suggest Promotion Discontinuation
-RU	inputdlg.sugerirbaja.titulo	Предложить отмену акции
-PT	inputdlg.sugerirbaja.titulo	Sugerir Baixa de Promoção
 ES	inputdlg.sugerirbaja.prompt	Motivo para sugerir la baja de '{0}':
 EN	inputdlg.sugerirbaja.prompt	Reason to suggest discontinuing '{0}':
 RU	inputdlg.sugerirbaja.prompt	Причина для предложения отмены '{0}':
@@ -5020,7 +4740,6 @@ ES	err.bll.promocion.plan_inexistente	El plan seleccionado no existe.
 ES	err.bll.promocion.valor_invalido	El beneficio de la promoción debe ser mayor a cero.
 ES	err.bll.promocion.porcentaje_invalido	Un descuento por porcentaje no puede superar el 100%.
 ES	err.bll.promocion.rango_fechas_invalido	La fecha de fin no puede ser anterior a la fecha de inicio.
-ES	err.bll.promocion.modificar_estado	Solo se puede modificar una promoción mientras está en revisión contable. Estado actual: '{0}'.
 ES	err.bll.promocion.reformular_estado	Solo se puede reformular una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.
 ES	err.bll.promocion.estado_concurrente	La promoción cambió de estado desde otra sesión. Actualizá la lista e intentá de nuevo.
 ES	err.bll.promocion.sugerencia_evaluada	La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.
@@ -5047,7 +4766,6 @@ EN	err.bll.promocion.plan_inexistente	The selected plan does not exist.
 EN	err.bll.promocion.valor_invalido	The promotion's benefit must be greater than zero.
 EN	err.bll.promocion.porcentaje_invalido	A percentage discount cannot exceed 100%.
 EN	err.bll.promocion.rango_fechas_invalido	The end date cannot be earlier than the start date.
-EN	err.bll.promocion.modificar_estado	A promotion can only be modified while it is under accounting review. Current state: '{0}'.
 EN	err.bll.promocion.reformular_estado	Only a promotion Rejected by Accounting can be reformulated. This promotion is '{0}'.
 EN	err.bll.promocion.estado_concurrente	The promotion changed state from another session. Refresh the list and try again.
 EN	err.bll.promocion.sugerencia_evaluada	The selected suggestion has already been evaluated. Refresh the suggestions list.
@@ -5074,7 +4792,6 @@ RU	err.bll.promocion.plan_inexistente	Выбранный план не суще�
 RU	err.bll.promocion.valor_invalido	Выгода по акции должна быть больше нуля.
 RU	err.bll.promocion.porcentaje_invalido	Процентная скидка не может превышать 100%.
 RU	err.bll.promocion.rango_fechas_invalido	Дата окончания не может быть раньше даты начала.
-RU	err.bll.promocion.modificar_estado	Акцию можно изменять только пока она на бухгалтерской проверке. Текущий статус: '{0}'.
 RU	err.bll.promocion.reformular_estado	Переработать можно только акцию, отклонённую бухгалтерией. Эта акция в статусе '{0}'.
 RU	err.bll.promocion.estado_concurrente	Статус акции изменён в другом сеансе. Обновите список и повторите.
 RU	err.bll.promocion.sugerencia_evaluada	Выбранное предложение уже рассмотрено. Обновите список предложений.
@@ -5101,7 +4818,6 @@ PT	err.bll.promocion.plan_inexistente	O plano selecionado não existe.
 PT	err.bll.promocion.valor_invalido	O benefício da promoção deve ser maior que zero.
 PT	err.bll.promocion.porcentaje_invalido	Um desconto percentual não pode superar 100%.
 PT	err.bll.promocion.rango_fechas_invalido	A data de término não pode ser anterior à data de início.
-PT	err.bll.promocion.modificar_estado	Só é possível modificar uma promoção enquanto está em revisão contábil. Estado atual: '{0}'.
 PT	err.bll.promocion.reformular_estado	Somente uma promoção Rejeitada pela Contabilidade pode ser reformulada. Esta promoção está '{0}'.
 PT	err.bll.promocion.estado_concurrente	A promoção mudou de estado em outra sessão. Atualize a lista e tente novamente.
 PT	err.bll.promocion.sugerencia_evaluada	A sugestão selecionada já foi avaliada. Atualize a lista de sugestões.
@@ -5149,42 +4865,26 @@ EN	promocion.beneficioestimado	Est. benefit:
 RU	promocion.beneficioestimado	Ожид. выгода:
 PT	promocion.beneficioestimado	Benefício est.:
 ES	promocion.btn.enviarsugerencia	Enviar Sugerencia
-ES	promocion.btn.desdeanalisis	Desde el análisis…
 ES	promocion.btn.reformular	Reformular
-ES	promocion.desdeanalisis.titulo	Ideas detectadas por los reportes
 ES	promocion.desdeanalisis.usar	Usar esta idea
-ES	promocion.desdeanalisis.beneficio	Beneficio estimado inicial: {0:C2} (editable antes de enviar).
-ES	promocion.desdeanalisis.notacategoria	Ojo: una promoción por categoría es informativa (no se descuenta del cobro de la suscripción).
 ES	msg.sugerencia.sinanalisis	Los reportes de rotación y abandono no detectan casos para sugerir por ahora.
 ES	msg.promo.reformulada	Promoción #{0} reformulada: vuelve a revisión contable.
 ES	promo.reformular	Reformulando la promoción #{0}. Observación de Contabilidad: {1}
 EN	promocion.btn.enviarsugerencia	Send Suggestion
-EN	promocion.btn.desdeanalisis	From the analysis…
 EN	promocion.btn.reformular	Reformulate
-EN	promocion.desdeanalisis.titulo	Ideas detected by the reports
 EN	promocion.desdeanalisis.usar	Use this idea
-EN	promocion.desdeanalisis.beneficio	Initial estimated benefit: {0:C2} (editable before sending).
-EN	promocion.desdeanalisis.notacategoria	Note: a category promotion is informational (it is not deducted from the subscription payment).
 EN	msg.sugerencia.sinanalisis	The rotation and churn reports do not detect any cases to suggest for now.
 EN	msg.promo.reformulada	Promotion #{0} reformulated: back to accounting review.
 EN	promo.reformular	Reformulating promotion #{0}. Accounting note: {1}
 RU	promocion.btn.enviarsugerencia	Отправить предложение
-RU	promocion.btn.desdeanalisis	Из анализа…
 RU	promocion.btn.reformular	Переработать
-RU	promocion.desdeanalisis.titulo	Идеи, выявленные отчётами
 RU	promocion.desdeanalisis.usar	Использовать эту идею
-RU	promocion.desdeanalisis.beneficio	Начальная оценка выгоды: {0:C2} (можно изменить перед отправкой).
-RU	promocion.desdeanalisis.notacategoria	Внимание: акция по категории носит информационный характер (не вычитается из оплаты подписки).
 RU	msg.sugerencia.sinanalisis	Отчёты по обороту и оттоку пока не выявляют случаев для предложения.
 RU	msg.promo.reformulada	Акция #{0} переработана: возвращена на бухгалтерскую проверку.
 RU	promo.reformular	Переработка акции #{0}. Замечание бухгалтерии: {1}
 PT	promocion.btn.enviarsugerencia	Enviar Sugestão
-PT	promocion.btn.desdeanalisis	Da análise…
 PT	promocion.btn.reformular	Reformular
-PT	promocion.desdeanalisis.titulo	Ideias detectadas pelos relatórios
 PT	promocion.desdeanalisis.usar	Usar esta ideia
-PT	promocion.desdeanalisis.beneficio	Benefício estimado inicial: {0:C2} (editável antes de enviar).
-PT	promocion.desdeanalisis.notacategoria	Atenção: uma promoção por categoria é informativa (não é descontada da cobrança da assinatura).
 PT	msg.sugerencia.sinanalisis	Os relatórios de rotação e abandono não detectam casos para sugerir por enquanto.
 PT	msg.promo.reformulada	Promoção #{0} reformulada: volta para a revisão contábil.
 PT	promo.reformular	Reformulando a promoção #{0}. Observação da Contabilidade: {1}
@@ -5328,10 +5028,6 @@ ES	frm.promovigentes	Promociones Vigentes
 EN	frm.promovigentes	Active Promotions
 RU	frm.promovigentes	Действующие акции
 PT	frm.promovigentes	Promoções Vigentes
-ES	promocion.btn.sugerirbaja	Sugerir Baja
-EN	promocion.btn.sugerirbaja	Suggest Deactivation
-RU	promocion.btn.sugerirbaja	Предложить отмену
-PT	promocion.btn.sugerirbaja	Sugerir Baixa
 ES	col.promo.vigencia	Vigencia
 EN	col.promo.vigencia	Validity
 RU	col.promo.vigencia	Срок действия
@@ -5438,11 +5134,8 @@ ES	btn.ped.desistir	Registrar desistimiento
 ES	btn.ped.verfaltantes	Ver faltantes
 ES	btn.ped.ajustar	Ajustar selección
 ES	btn.ped.formalizar	Formalizar pedido
-ES	btn.ped.confirmacion	Confirmación del pedido
 ES	conf.ped.enviar.msg	Enviar a control de stock la selección de {0}:\n\n  • {1}\n\nTotal: {2} prenda(s)\n\nDepósito revisará la disponibilidad. Las prendas no quedan reservadas hasta que las separe.
 ES	conf.ped.enviar.titulo	Enviar a control de stock
-ES	conf.ped.planilla	¿Imprimir la planilla de control de existencias?
-ES	conf.ped.aviso	¿Imprimir el aviso de desistimiento?
 ES	conf.ped.formalizar	¿Formalizar el Pedido #{0} de {1}?\n\nDepósito ya separó las {2} prenda(s). Desde aquí la selección queda cerrada y no admite modificaciones.
 ES	conf.ped.formalizar.titulo	Formalizar pedido
 ES	dlg.desistir.titulo	Asentar desistimiento
@@ -5460,7 +5153,6 @@ ES	est.desistido	Desistido
 ES	btn.cs.faltantes	Informar faltantes
 ES	btn.cs.confirmar	Confirmar prendas disponibles
 ES	btn.cs.separar	Separar prendas
-ES	btn.cs.planilla	Imprimir planilla
 ES	col.cs.enviado	Enviado a control
 ES	col.cs.confirmado	Prendas confirmadas
 ES	col.cs.estadoactual	Estado actual
@@ -5476,9 +5168,7 @@ ES	msg.cs.yanoencontrol	Este pedido ya no está en control de stock. Se actualiz
 ES	msg.cs.faltantes	Informe de faltantes del Pedido #{0} emitido: {1} prenda(s). El Vendedor lo comunicará al cliente.
 ES	msg.cs.confirmadas	Pedido #{0}: {1} prenda(s) confirmadas como disponibles. Separalas para reservarlas.
 ES	msg.cs.separadas	Pedido #{0}: prendas separadas. El Vendedor ya puede formalizar el pedido.
-ES	conf.cs.imprimirinforme	¿Imprimir el informe de disponibilidad (faltantes y alternativas)?
 ES	conf.cs.separar	¿Separar las {0} prenda(s) del Pedido #{1} para {2}?\n\nQuedan reservadas (en uso) a nombre del cliente.
-ES	conf.cs.imprimirconstancia	¿Imprimir la constancia de prendas separadas?
 ES	doc.ped.pedido	Pedido
 ES	doc.ped.cliente	Cliente
 ES	doc.ped.vendedor	Vendedor
@@ -5545,7 +5235,6 @@ ES	doc.cupo.opciones	El cliente puede ajustar la selección o desistir.
 ES	doc.cupo.titulo	Detalle de restricciones de cupo
 ES	doc.confirmadas.lista	Prendas confirmadas como disponibles (pendientes de separar):
 ES	doc.confirmadas.titulo	Detalle de prendas confirmadas
-ES	conf.cs.imprimirconfirmadas	¿Imprimir el detalle de prendas confirmadas?
 ES	err.bll.cliente.baja_contratacion	No se puede dar de baja a {0}: tiene una contratación pendiente de pago. Caja tiene que cobrarla o cancelarla primero.
 ES	err.bll.cliente.baja_pedido	No se puede dar de baja a {0}: tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo primero.
 ES	err.bll.contratacion.desistir_sin_motivo	Es obligatorio indicar el motivo del desistimiento que comunicó el cliente.
@@ -5565,10 +5254,8 @@ ES	est.contr.pagada	Pagada
 ES	est.contr.cancelada	Cancelada
 ES	est.contr.pendiente	Pendiente de pago
 ES	msg.contr.referido	Se acreditó el beneficio por referido a {0}.
-ES	conf.contr.imprimircobro	¿Imprimir el comprobante y la constancia de suscripción para el cliente?
 ES	dlg.contr.intento.prompt	Motivo por el que no se concretó el pago (Contratación #{0}, intentos: {1}/{2}).\nAl tercer intento se cancela automáticamente:
 ES	msg.contr.cancelada	Contratación #{0} cancelada: no se concretó el pago en {1} intentos.
-ES	conf.contr.imprimircancelacion	¿Imprimir la constancia de cancelación?
 ES	msg.contr.intento	Intento {0} de {1} registrado para la Contratación #{2}. Sigue en la cola para volver a cobrarla.
 ES	lbl.contr.intentos.titulo	Intentos de cobro — Contratación #{0}
 ES	btn.contr.verintentos	Ver intentos
@@ -5613,7 +5300,6 @@ ES	col.contr.estado	Estado
 ES	col.contr.comprobante	Comprobante
 ES	lbl.contr.importedesc	Importe a abonar en Caja: {0:C2}\n(incluye un descuento de {1:C2}: {2})
 ES	lbl.contr.importe	Importe a abonar en Caja: {0:C2}
-ES	conf.contr.imprimirorden	¿Imprimir la orden de cobro para que el cliente abone en Caja?
 ES	btn.contr.registrarcliente	Registrar cliente
 ES	lbl.contr.planes	Planes disponibles:
 ES	btn.contr.imprimirplanes	Imprimir planes
@@ -5693,11 +5379,8 @@ EN	btn.ped.desistir	Record withdrawal
 EN	btn.ped.verfaltantes	View missing items
 EN	btn.ped.ajustar	Adjust selection
 EN	btn.ped.formalizar	Finalize order
-EN	btn.ped.confirmacion	Order confirmation
 EN	conf.ped.enviar.msg	Send {0}'s selection to stock control:\n\n  • {1}\n\nTotal: {2} garment(s)\n\nWarehouse will check availability. Garments are not reserved until they are set aside.
 EN	conf.ped.enviar.titulo	Send to stock control
-EN	conf.ped.planilla	Print the stock control sheet?
-EN	conf.ped.aviso	Print the withdrawal notice?
 EN	conf.ped.formalizar	Finalize Order #{0} for {1}?\n\nWarehouse already set aside the {2} garment(s). From here on the selection is closed and cannot be modified.
 EN	conf.ped.formalizar.titulo	Finalize order
 EN	dlg.desistir.titulo	Record withdrawal
@@ -5715,7 +5398,6 @@ EN	est.desistido	Withdrawn
 EN	btn.cs.faltantes	Report missing items
 EN	btn.cs.confirmar	Confirm available garments
 EN	btn.cs.separar	Set garments aside
-EN	btn.cs.planilla	Print sheet
 EN	col.cs.enviado	Sent to control
 EN	col.cs.confirmado	Garments confirmed
 EN	col.cs.estadoactual	Current status
@@ -5731,9 +5413,7 @@ EN	msg.cs.yanoencontrol	This order is no longer in stock control. The queue is r
 EN	msg.cs.faltantes	Missing-items report for Order #{0} issued: {1} garment(s). The seller will tell the client.
 EN	msg.cs.confirmadas	Order #{0}: {1} garment(s) confirmed as available. Set them aside to reserve them.
 EN	msg.cs.separadas	Order #{0}: garments set aside. The seller can now finalize the order.
-EN	conf.cs.imprimirinforme	Print the availability report (missing items and alternatives)?
 EN	conf.cs.separar	Set aside the {0} garment(s) of Order #{1} for {2}?\n\nThey become reserved (in use) in the client's name.
-EN	conf.cs.imprimirconstancia	Print the set-aside garments receipt?
 EN	doc.ped.pedido	Order
 EN	doc.ped.cliente	Client
 EN	doc.ped.vendedor	Seller
@@ -5800,7 +5480,6 @@ EN	doc.cupo.opciones	The client can adjust the selection or withdraw.
 EN	doc.cupo.titulo	Plan limit restrictions
 EN	doc.confirmadas.lista	Garments confirmed as available (pending set-aside):
 EN	doc.confirmadas.titulo	Confirmed garments detail
-EN	conf.cs.imprimirconfirmadas	Print the confirmed garments detail?
 EN	err.bll.cliente.baja_contratacion	{0} cannot be removed: they have a contract pending payment. Cashier must charge or cancel it first.
 EN	err.bll.cliente.baja_pedido	{0} cannot be removed: they have an order in progress. Wait for it to finish or cancel it first.
 EN	err.bll.contratacion.desistir_sin_motivo	You must enter the withdrawal reason given by the client.
@@ -5820,10 +5499,8 @@ EN	est.contr.pagada	Paid
 EN	est.contr.cancelada	Cancelled
 EN	est.contr.pendiente	Pending payment
 EN	msg.contr.referido	The referral benefit was credited to {0}.
-EN	conf.contr.imprimircobro	Print the receipt and the subscription certificate for the client?
 EN	dlg.contr.intento.prompt	Reason why the payment did not go through (Contract #{0}, attempts: {1}/{2}).\nOn the third attempt it is cancelled automatically:
 EN	msg.contr.cancelada	Contract #{0} cancelled: payment did not go through in {1} attempts.
-EN	conf.contr.imprimircancelacion	Print the cancellation certificate?
 EN	msg.contr.intento	Attempt {0} of {1} recorded for Contract #{2}. It stays in the queue to be charged again.
 EN	lbl.contr.intentos.titulo	Payment attempts — Contract #{0}
 EN	btn.contr.verintentos	View attempts
@@ -5868,7 +5545,6 @@ EN	col.contr.estado	Status
 EN	col.contr.comprobante	Receipt
 EN	lbl.contr.importedesc	Amount to pay at the cashier: {0:C2}\n(includes a {1:C2} discount: {2})
 EN	lbl.contr.importe	Amount to pay at the cashier: {0:C2}
-EN	conf.contr.imprimirorden	Print the payment order so the client can pay at the cashier?
 EN	btn.contr.registrarcliente	Register client
 EN	lbl.contr.planes	Available plans:
 EN	btn.contr.imprimirplanes	Print plans
@@ -5948,11 +5624,8 @@ RU	btn.ped.desistir	Зарегистрировать отказ
 RU	btn.ped.verfaltantes	Недостающие вещи
 RU	btn.ped.ajustar	Изменить выбор
 RU	btn.ped.formalizar	Оформить заказ
-RU	btn.ped.confirmacion	Подтверждение заказа
 RU	conf.ped.enviar.msg	Отправить выбор клиента {0} на контроль запасов:\n\n  • {1}\n\nВсего: {2} вещ.\n\nСклад проверит наличие. Вещи не резервируются, пока склад их не отложит.
 RU	conf.ped.enviar.titulo	Отправить на контроль запасов
-RU	conf.ped.planilla	Распечатать лист контроля запасов?
-RU	conf.ped.aviso	Распечатать уведомление об отказе?
 RU	conf.ped.formalizar	Оформить заказ №{0} клиента {1}?\n\nСклад уже отложил {2} вещ. После этого выбор закрывается и не может быть изменён.
 RU	conf.ped.formalizar.titulo	Оформить заказ
 RU	dlg.desistir.titulo	Зарегистрировать отказ
@@ -5970,7 +5643,6 @@ RU	est.desistido	Отказ
 RU	btn.cs.faltantes	Сообщить о недостаче
 RU	btn.cs.confirmar	Подтвердить наличие вещей
 RU	btn.cs.separar	Отложить вещи
-RU	btn.cs.planilla	Печать листа
 RU	col.cs.enviado	Отправлен на контроль
 RU	col.cs.confirmado	Вещи подтверждены
 RU	col.cs.estadoactual	Текущее состояние
@@ -5986,9 +5658,7 @@ RU	msg.cs.yanoencontrol	Этот заказ больше не на контро�
 RU	msg.cs.faltantes	Отчёт о недостаче по заказу №{0} создан: {1} вещ. Продавец сообщит клиенту.
 RU	msg.cs.confirmadas	Заказ №{0}: {1} вещ. подтверждены как доступные. Отложите их, чтобы зарезервировать.
 RU	msg.cs.separadas	Заказ №{0}: вещи отложены. Продавец может оформить заказ.
-RU	conf.cs.imprimirinforme	Распечатать отчёт о наличии (недостача и альтернативы)?
 RU	conf.cs.separar	Отложить {0} вещ. заказа №{1} для {2}?\n\nОни будут зарезервированы (в пользовании) на имя клиента.
-RU	conf.cs.imprimirconstancia	Распечатать акт об отложенных вещах?
 RU	doc.ped.pedido	Заказ
 RU	doc.ped.cliente	Клиент
 RU	doc.ped.vendedor	Продавец
@@ -6055,7 +5725,6 @@ RU	doc.cupo.opciones	Клиент может изменить выбор или 
 RU	doc.cupo.titulo	Ограничения лимита плана
 RU	doc.confirmadas.lista	Вещи, подтверждённые как доступные (ожидают откладывания):
 RU	doc.confirmadas.titulo	Подтверждённые вещи
-RU	conf.cs.imprimirconfirmadas	Распечатать список подтверждённых вещей?
 RU	err.bll.cliente.baja_contratacion	Нельзя удалить клиента {0}: у него есть договор, ожидающий оплаты. Касса должна сначала принять оплату или отменить его.
 RU	err.bll.cliente.baja_pedido	Нельзя удалить клиента {0}: у него есть заказ в работе. Дождитесь его завершения или сначала отмените его.
 RU	err.bll.contratacion.desistir_sin_motivo	Необходимо указать причину отказа, названную клиентом.
@@ -6075,10 +5744,8 @@ RU	est.contr.pagada	Оплачен
 RU	est.contr.cancelada	Отменён
 RU	est.contr.pendiente	Ожидает оплаты
 RU	msg.contr.referido	Бонус за приглашение начислен клиенту {0}.
-RU	conf.contr.imprimircobro	Распечатать квитанцию и справку о подписке для клиента?
 RU	dlg.contr.intento.prompt	Причина, по которой оплата не прошла (договор №{0}, попыток: {1}/{2}).\nПосле третьей попытки договор отменяется автоматически:
 RU	msg.contr.cancelada	Договор №{0} отменён: оплата не прошла за {1} попытки.
-RU	conf.contr.imprimircancelacion	Распечатать справку об отмене?
 RU	msg.contr.intento	Попытка {0} из {1} зарегистрирована для договора №{2}. Он остаётся в очереди для повторной оплаты.
 RU	lbl.contr.intentos.titulo	Попытки оплаты — договор №{0}
 RU	btn.contr.verintentos	Попытки
@@ -6123,7 +5790,6 @@ RU	col.contr.estado	Состояние
 RU	col.contr.comprobante	Квитанция
 RU	lbl.contr.importedesc	Сумма к оплате в кассе: {0:C2}\n(включая скидку {1:C2}: {2})
 RU	lbl.contr.importe	Сумма к оплате в кассе: {0:C2}
-RU	conf.contr.imprimirorden	Распечатать распоряжение на оплату для кассы?
 RU	btn.contr.registrarcliente	Зарегистрировать клиента
 RU	lbl.contr.planes	Доступные планы:
 RU	btn.contr.imprimirplanes	Печать планов
@@ -6203,11 +5869,8 @@ PT	btn.ped.desistir	Registrar desistência
 PT	btn.ped.verfaltantes	Ver faltantes
 PT	btn.ped.ajustar	Ajustar seleção
 PT	btn.ped.formalizar	Formalizar pedido
-PT	btn.ped.confirmacion	Confirmação do pedido
 PT	conf.ped.enviar.msg	Enviar ao controle de estoque a seleção de {0}:\n\n  • {1}\n\nTotal: {2} peça(s)\n\nO depósito verificará a disponibilidade. As peças só ficam reservadas quando forem separadas.
 PT	conf.ped.enviar.titulo	Enviar ao controle de estoque
-PT	conf.ped.planilla	Imprimir a planilha de controle de estoque?
-PT	conf.ped.aviso	Imprimir o aviso de desistência?
 PT	conf.ped.formalizar	Formalizar o Pedido #{0} de {1}?\n\nO depósito já separou as {2} peça(s). A partir daqui a seleção fica fechada e não admite alterações.
 PT	conf.ped.formalizar.titulo	Formalizar pedido
 PT	dlg.desistir.titulo	Registrar desistência
@@ -6225,7 +5888,6 @@ PT	est.desistido	Desistido
 PT	btn.cs.faltantes	Informar faltantes
 PT	btn.cs.confirmar	Confirmar peças disponíveis
 PT	btn.cs.separar	Separar peças
-PT	btn.cs.planilla	Imprimir planilha
 PT	col.cs.enviado	Enviado ao controle
 PT	col.cs.confirmado	Peças confirmadas
 PT	col.cs.estadoactual	Estado atual
@@ -6241,9 +5903,7 @@ PT	msg.cs.yanoencontrol	Este pedido não está mais em controle de estoque. A fi
 PT	msg.cs.faltantes	Relatório de faltantes do Pedido #{0} emitido: {1} peça(s). O vendedor informará o cliente.
 PT	msg.cs.confirmadas	Pedido #{0}: {1} peça(s) confirmadas como disponíveis. Separe-as para reservá-las.
 PT	msg.cs.separadas	Pedido #{0}: peças separadas. O vendedor já pode formalizar o pedido.
-PT	conf.cs.imprimirinforme	Imprimir o relatório de disponibilidade (faltantes e alternativas)?
 PT	conf.cs.separar	Separar as {0} peça(s) do Pedido #{1} para {2}?\n\nFicam reservadas (em uso) em nome do cliente.
-PT	conf.cs.imprimirconstancia	Imprimir o comprovante de peças separadas?
 PT	doc.ped.pedido	Pedido
 PT	doc.ped.cliente	Cliente
 PT	doc.ped.vendedor	Vendedor
@@ -6310,7 +5970,6 @@ PT	doc.cupo.opciones	O cliente pode ajustar a seleção ou desistir.
 PT	doc.cupo.titulo	Detalhe das restrições de limite
 PT	doc.confirmadas.lista	Peças confirmadas como disponíveis (pendentes de separação):
 PT	doc.confirmadas.titulo	Detalhe das peças confirmadas
-PT	conf.cs.imprimirconfirmadas	Imprimir o detalhe das peças confirmadas?
 PT	err.bll.cliente.baja_contratacion	Não é possível dar baixa em {0}: há uma contratação pendente de pagamento. O caixa precisa cobrá-la ou cancelá-la primeiro.
 PT	err.bll.cliente.baja_pedido	Não é possível dar baixa em {0}: há um pedido em andamento. Aguarde a conclusão ou cancele-o primeiro.
 PT	err.bll.contratacion.desistir_sin_motivo	É obrigatório indicar o motivo da desistência informado pelo cliente.
@@ -6330,10 +5989,8 @@ PT	est.contr.pagada	Paga
 PT	est.contr.cancelada	Cancelada
 PT	est.contr.pendiente	Pendente de pagamento
 PT	msg.contr.referido	O benefício por indicação foi creditado a {0}.
-PT	conf.contr.imprimircobro	Imprimir o comprovante e a constância de assinatura para o cliente?
 PT	dlg.contr.intento.prompt	Motivo pelo qual o pagamento não foi concluído (Contratação #{0}, tentativas: {1}/{2}).\nNa terceira tentativa é cancelada automaticamente:
 PT	msg.contr.cancelada	Contratação #{0} cancelada: o pagamento não foi concluído em {1} tentativas.
-PT	conf.contr.imprimircancelacion	Imprimir a constância de cancelamento?
 PT	msg.contr.intento	Tentativa {0} de {1} registrada para a Contratação #{2}. Continua na fila para ser cobrada novamente.
 PT	lbl.contr.intentos.titulo	Tentativas de cobrança — Contratação #{0}
 PT	btn.contr.verintentos	Ver tentativas
@@ -6378,7 +6035,6 @@ PT	col.contr.estado	Estado
 PT	col.contr.comprobante	Comprovante
 PT	lbl.contr.importedesc	Valor a pagar no caixa: {0:C2}\n(inclui um desconto de {1:C2}: {2})
 PT	lbl.contr.importe	Valor a pagar no caixa: {0:C2}
-PT	conf.contr.imprimirorden	Imprimir a ordem de cobrança para o cliente pagar no caixa?
 PT	btn.contr.registrarcliente	Cadastrar cliente
 PT	lbl.contr.planes	Planos disponíveis:
 PT	btn.contr.imprimirplanes	Imprimir planos
@@ -6439,8 +6095,6 @@ PT	err.dal.pedido.restaurar_prendas	Não é possível restaurar o Pedido #{0}: u
 ES	dlg.promo.descartarsug.titulo	Descartar sugerencia
 ES	dlg.promo.descartarsug.prompt	Motivo por el que se descarta la sugerencia #{0}:
 ES	msg.promo.sugdescartada	Sugerencia #{0} descartada.
-ES	conf.promo.imprimirdescarte	¿Imprimir la constancia de descarte?
-ES	conf.promo.imprimirficha	¿Imprimir la ficha de la promoción para Contabilidad?
 ES	dlg.promo.descartar.titulo	Descartar promoción
 ES	dlg.promo.descartar.prompt	Motivo por el que no se reformula la promoción '{0}':
 ES	msg.promo.descartada	Promoción '{0}' descartada.
@@ -6448,8 +6102,6 @@ ES	dlg.promo.desactivar.titulo	Desactivar promoción
 ES	dlg.promo.desactivar.prompt	Motivo para desactivar la promoción '{0}':
 ES	dlg.promo.aprobarbaja.titulo	Aprobar baja de promoción
 ES	dlg.promo.aprobarbaja.prompt	Ventas pidió la baja de '{0}'.\nMotivo: {1}\n\nObservación de la resolución (opcional):
-ES	conf.promo.imprimirresolucion.gerencia	¿Imprimir la resolución de baja como informe a Gerencia?
-ES	conf.promo.imprimirresolucion.ventas	¿Imprimir la resolución de baja como informe a Ventas?
 ES	lbl.promo.historial.titulo	Historial de estados — Promoción #{0}
 ES	promo.analisis.vacio	Seleccioná una promoción para analizar su margen e impacto.
 ES	promo.analisis.titulo	Análisis de margen e impacto — Promoción #{0} '{1}'
@@ -6459,13 +6111,10 @@ ES	promo.analisis.sinsugerencia	Alta manual: no hay beneficio estimado de Gerenc
 ES	promo.analisis.superpuestas	ADVERTENCIA: se superpone en fechas con otras promociones vigentes del mismo plan:
 ES	promo.analisis.sinsuperposicion	No se superpone con otras promociones vigentes del mismo plan.
 ES	promo.analisis.creador	Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad.
-ES	conf.promo.imprimirdictamen	¿Imprimir el dictamen contable?
 ES	dlg.promo.solicitarbaja.titulo	Solicitar baja de promoción
-ES	conf.promo.imprimirsolicitud	¿Imprimir la solicitud de baja?
 ES	promocion.origenactual	Origen de la sugerencia: {0}
 ES	doc.promo.reporte.titulo	Reporte de métricas
 ES	promocion.btn.imprimirreporte	Imprimir reporte
-ES	conf.promo.imprimirsugerencia	¿Imprimir la sugerencia de promoción?
 ES	doc.promo.ficha.titulo	Ficha de promoción
 ES	doc.promo.dictamen.titulo	Dictamen contable
 ES	doc.promo.solicitud.titulo	Solicitud de baja
@@ -6560,8 +6209,6 @@ ES	col.promo.fecha	Fecha
 EN	dlg.promo.descartarsug.titulo	Discard suggestion
 EN	dlg.promo.descartarsug.prompt	Reason for discarding suggestion #{0}:
 EN	msg.promo.sugdescartada	Suggestion #{0} discarded.
-EN	conf.promo.imprimirdescarte	Print the discard certificate?
-EN	conf.promo.imprimirficha	Print the promotion sheet for Accounting?
 EN	dlg.promo.descartar.titulo	Discard promotion
 EN	dlg.promo.descartar.prompt	Reason for not reformulating promotion '{0}':
 EN	msg.promo.descartada	Promotion '{0}' discarded.
@@ -6569,8 +6216,6 @@ EN	dlg.promo.desactivar.titulo	Deactivate promotion
 EN	dlg.promo.desactivar.prompt	Reason for deactivating promotion '{0}':
 EN	dlg.promo.aprobarbaja.titulo	Approve promotion withdrawal
 EN	dlg.promo.aprobarbaja.prompt	Sales requested the withdrawal of '{0}'.\nReason: {1}\n\nResolution note (optional):
-EN	conf.promo.imprimirresolucion.gerencia	Print the withdrawal resolution as a report to Management?
-EN	conf.promo.imprimirresolucion.ventas	Print the withdrawal resolution as a report to Sales?
 EN	lbl.promo.historial.titulo	Status history — Promotion #{0}
 EN	promo.analisis.vacio	Select a promotion to analyze its margin and impact.
 EN	promo.analisis.titulo	Margin and impact analysis — Promotion #{0} '{1}'
@@ -6580,13 +6225,10 @@ EN	promo.analisis.sinsugerencia	Manual entry: there is no benefit estimated by M
 EN	promo.analisis.superpuestas	WARNING: its dates overlap with other active promotions of the same plan:
 EN	promo.analisis.sinsuperposicion	It does not overlap with other active promotions of the same plan.
 EN	promo.analisis.creador	You created this promotion: another Accounting user must rule on it.
-EN	conf.promo.imprimirdictamen	Print the accounting ruling?
 EN	dlg.promo.solicitarbaja.titulo	Request promotion withdrawal
-EN	conf.promo.imprimirsolicitud	Print the withdrawal request?
 EN	promocion.origenactual	Suggestion source: {0}
 EN	doc.promo.reporte.titulo	Metrics report
 EN	promocion.btn.imprimirreporte	Print report
-EN	conf.promo.imprimirsugerencia	Print the promotion suggestion?
 EN	doc.promo.ficha.titulo	Promotion sheet
 EN	doc.promo.dictamen.titulo	Accounting ruling
 EN	doc.promo.solicitud.titulo	Withdrawal request
@@ -6681,8 +6323,6 @@ EN	col.promo.fecha	Date
 RU	dlg.promo.descartarsug.titulo	Отклонить предложение
 RU	dlg.promo.descartarsug.prompt	Причина отклонения предложения №{0}:
 RU	msg.promo.sugdescartada	Предложение №{0} отклонено.
-RU	conf.promo.imprimirdescarte	Распечатать справку об отклонении?
-RU	conf.promo.imprimirficha	Распечатать карточку акции для бухгалтерии?
 RU	dlg.promo.descartar.titulo	Отклонить акцию
 RU	dlg.promo.descartar.prompt	Причина, по которой акция '{0}' не переформулируется:
 RU	msg.promo.descartada	Акция '{0}' отклонена.
@@ -6690,8 +6330,6 @@ RU	dlg.promo.desactivar.titulo	Деактивировать акцию
 RU	dlg.promo.desactivar.prompt	Причина деактивации акции '{0}':
 RU	dlg.promo.aprobarbaja.titulo	Одобрить отмену акции
 RU	dlg.promo.aprobarbaja.prompt	Отдел продаж запросил отмену '{0}'.\nПричина: {1}\n\nКомментарий к решению (необязательно):
-RU	conf.promo.imprimirresolucion.gerencia	Распечатать решение об отмене как отчёт для руководства?
-RU	conf.promo.imprimirresolucion.ventas	Распечатать решение об отмене как отчёт для отдела продаж?
 RU	lbl.promo.historial.titulo	История статусов — акция №{0}
 RU	promo.analisis.vacio	Выберите акцию, чтобы проанализировать её маржу и влияние.
 RU	promo.analisis.titulo	Анализ маржи и влияния — акция №{0} '{1}'
@@ -6701,13 +6339,10 @@ RU	promo.analisis.sinsugerencia	Создана вручную: оценки вы
 RU	promo.analisis.superpuestas	ВНИМАНИЕ: даты пересекаются с другими действующими акциями того же плана:
 RU	promo.analisis.sinsuperposicion	Не пересекается с другими действующими акциями того же плана.
 RU	promo.analisis.creador	Вы создали эту акцию: решение по ней должен принять другой сотрудник бухгалтерии.
-RU	conf.promo.imprimirdictamen	Распечатать заключение бухгалтерии?
 RU	dlg.promo.solicitarbaja.titulo	Запросить отмену акции
-RU	conf.promo.imprimirsolicitud	Распечатать запрос на отмену?
 RU	promocion.origenactual	Источник предложения: {0}
 RU	doc.promo.reporte.titulo	Отчёт по метрикам
 RU	promocion.btn.imprimirreporte	Печать отчёта
-RU	conf.promo.imprimirsugerencia	Распечатать предложение акции?
 RU	doc.promo.ficha.titulo	Карточка акции
 RU	doc.promo.dictamen.titulo	Заключение бухгалтерии
 RU	doc.promo.solicitud.titulo	Запрос на отмену
@@ -6802,8 +6437,6 @@ RU	col.promo.fecha	Дата
 PT	dlg.promo.descartarsug.titulo	Descartar sugestão
 PT	dlg.promo.descartarsug.prompt	Motivo pelo qual a sugestão #{0} é descartada:
 PT	msg.promo.sugdescartada	Sugestão #{0} descartada.
-PT	conf.promo.imprimirdescarte	Imprimir o comprovante de descarte?
-PT	conf.promo.imprimirficha	Imprimir a ficha da promoção para a Contabilidade?
 PT	dlg.promo.descartar.titulo	Descartar promoção
 PT	dlg.promo.descartar.prompt	Motivo pelo qual a promoção '{0}' não é reformulada:
 PT	msg.promo.descartada	Promoção '{0}' descartada.
@@ -6811,8 +6444,6 @@ PT	dlg.promo.desactivar.titulo	Desativar promoção
 PT	dlg.promo.desactivar.prompt	Motivo para desativar a promoção '{0}':
 PT	dlg.promo.aprobarbaja.titulo	Aprovar baixa da promoção
 PT	dlg.promo.aprobarbaja.prompt	Vendas pediu a baixa de '{0}'.\nMotivo: {1}\n\nObservação da resolução (opcional):
-PT	conf.promo.imprimirresolucion.gerencia	Imprimir a resolução de baixa como relatório para a Gerência?
-PT	conf.promo.imprimirresolucion.ventas	Imprimir a resolução de baixa como relatório para Vendas?
 PT	lbl.promo.historial.titulo	Histórico de estados — Promoção #{0}
 PT	promo.analisis.vacio	Selecione uma promoção para analisar sua margem e impacto.
 PT	promo.analisis.titulo	Análise de margem e impacto — Promoção #{0} '{1}'
@@ -6822,13 +6453,10 @@ PT	promo.analisis.sinsugerencia	Cadastro manual: não há benefício estimado pe
 PT	promo.analisis.superpuestas	ATENÇÃO: as datas se sobrepõem a outras promoções vigentes do mesmo plano:
 PT	promo.analisis.sinsuperposicion	Não se sobrepõe a outras promoções vigentes do mesmo plano.
 PT	promo.analisis.creador	Você criou esta promoção: outro usuário da Contabilidade deve emitir o parecer.
-PT	conf.promo.imprimirdictamen	Imprimir o parecer contábil?
 PT	dlg.promo.solicitarbaja.titulo	Solicitar baixa da promoção
-PT	conf.promo.imprimirsolicitud	Imprimir a solicitação de baixa?
 PT	promocion.origenactual	Origem da sugestão: {0}
 PT	doc.promo.reporte.titulo	Relatório de métricas
 PT	promocion.btn.imprimirreporte	Imprimir relatório
-PT	conf.promo.imprimirsugerencia	Imprimir a sugestão de promoção?
 PT	doc.promo.ficha.titulo	Ficha da promoção
 PT	doc.promo.dictamen.titulo	Parecer contábil
 PT	doc.promo.solicitud.titulo	Solicitação de baixa

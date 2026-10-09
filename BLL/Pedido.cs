@@ -57,8 +57,6 @@ namespace BLL
         public List<BE.Pedido> ObtenerPendientes() => dalPedido.ObtenerPendientes();
         public BE.Pedido ObtenerPorId(int id) => dalPedido.ObtenerPorId(id);
 
-        public List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado) => dalPedido.ObtenerPorEstado(estado);
-
         // ══════════════════════════════════════════════════════════════════════
         // PN01 — Armar pedido de prendas. Cada método público corresponde a una actividad del
         // diagrama de actividad (carriles Vendedor y Depósito = "Controlador de Stock"):

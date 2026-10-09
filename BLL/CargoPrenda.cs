@@ -70,6 +70,5 @@ namespace BLL
         public List<BE.CargoPrenda> ObtenerPendientesPorCliente(int idCliente) =>
             dalCargoPrenda.ObtenerPendientesPorCliente(idCliente);
 
-        public List<BE.CargoPrenda> ObtenerTodos() => dalCargoPrenda.ObtenerTodos();
     }
 }

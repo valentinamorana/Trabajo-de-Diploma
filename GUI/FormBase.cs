@@ -332,6 +332,9 @@ namespace GUI
                     (ex.InnerException != null ? $" | Causa: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}" : ""));
             }
             catch { /* el fallo al registrar no debe romper el manejo del error */ }
+
+            // A02 Serialización: el error también queda serializado en XML (Bitácora › Errores (XML)).
+            Servicios.Serializacion.RegistroErrores.Registrar(ex, this.GetType().Name, BLL.Sesion.Actor);
         }
     }
 }

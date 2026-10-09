@@ -50,7 +50,7 @@ sequenceDiagram
     Note over IN: Exigir(StockEditar) · la prenda sigue En limpieza y tiene último cliente
     IN->>CG: ValidarDatos(motivo, monto)
     IN->>DI: DarDeBajaConCargo(cargo, estadoEsperado)
-    Note over DI: Una sola transacción: primero el cargo (Pendiente, al último cliente) y después la baja condicionada
+    Note over DI: Una sola transacción: el cargo (Pendiente, al último cliente), la baja condicionada, el cierre del mantenimiento y la cancelación de la lista de espera
     DI-->>IN: idCargo
     IN-->>F: idCargo
     F-->>D: Prenda dada de baja: el cargo se suma al próximo cobro del cliente

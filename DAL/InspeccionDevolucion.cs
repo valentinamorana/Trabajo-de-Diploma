@@ -18,6 +18,13 @@ namespace DAL
             /// escrituras y se lanza AppException. Devuelve el Id del cargo creado.
             /// </summary>
             int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado);
+
+            /// <summary>
+            /// Último pedido que tiene la prenda asignada (Separado, Pendiente, Despachado o
+            /// Entregado: un pedido devuelto queda Entregado, por eso se toma el más reciente), con su estado y su fecha de entrega. Null si no hay ninguno.
+            /// PN04 lo usa para la compra tácita: solo se reporta perdida una prenda entregada.
+            /// </summary>
+            BE.Pedido ObtenerPedidoEnCurso(int idPrenda);
         }
     }
 
@@ -66,9 +73,54 @@ namespace DAL
                         throw new BE.AppException("err.dal.prenda.estado_cambio",
                             "El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.");
                 }
+
+                // Una prenda dada de baja sale del circuito: se cierra el mantenimiento abierto (si
+                // venía de la cola de inspección, si no quedaba para siempre en el tablero de Depósito
+                // y en Tareas pendientes) y se cancelan las anotaciones de la lista de espera, que ya
+                // no se pueden cumplir.
+                using (var cmd = new SqlCommand(
+                    "UPDATE MantenimientoPrenda SET FechaSalida = GETDATE() " +
+                    "WHERE IdPrenda = @IdPrenda AND FechaSalida IS NULL; " +
+                    "UPDATE ListaEspera SET Estado = @Cancelada, FechaResolucion = GETDATE(), Actor = @Actor " +
+                    "WHERE IdPrenda = @IdPrenda AND Estado IN (@Pendiente, @Reservada);", cn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@IdPrenda",  cargo.IdPrenda);
+                    cmd.Parameters.AddWithValue("@Cancelada", (int)BE.EstadoListaEspera.Cancelada);
+                    cmd.Parameters.AddWithValue("@Pendiente", (int)BE.EstadoListaEspera.Pendiente);
+                    cmd.Parameters.AddWithValue("@Reservada", (int)BE.EstadoListaEspera.Reservada);
+                    cmd.Parameters.AddWithValue("@Actor",     (object)cargo.Actor ?? DBNull.Value);
+                    cmd.ExecuteNonQuery();
+                }
             });
 
             return idNuevo;
+        }
+
+        public BE.Pedido ObtenerPedidoEnCurso(int idPrenda)
+        {
+            SqlParameter[] p =
+            {
+                new SqlParameter("@IdPrenda",   idPrenda),
+                new SqlParameter("@Separado",   (int)BE.EstadoPedido.Separado),
+                new SqlParameter("@Pendiente",  (int)BE.EstadoPedido.Pendiente),
+                new SqlParameter("@Despachado", (int)BE.EstadoPedido.Despachado),
+                new SqlParameter("@Entregado",  (int)BE.EstadoPedido.Entregado)
+            };
+            var dt = acceso.Leer(
+                "SELECT TOP 1 p.IdPedido, p.IdCliente, p.Estado, p.FechaEntrega " +
+                "FROM Pedido p INNER JOIN PedidoPrenda pp ON pp.IdPedido = p.IdPedido " +
+                "WHERE pp.IdPrenda = @IdPrenda AND p.Estado IN (@Separado, @Pendiente, @Despachado, @Entregado) " +
+                "ORDER BY p.FechaPedido DESC, p.IdPedido DESC", p);
+            if (dt.Rows.Count == 0) return null;
+
+            var r = dt.Rows[0];
+            return new BE.Pedido
+            {
+                IdPedido     = Convert.ToInt32(r["IdPedido"]),
+                IdCliente    = Convert.ToInt32(r["IdCliente"]),
+                Estado       = (BE.EstadoPedido)Convert.ToInt32(r["Estado"]),
+                FechaEntrega = r["FechaEntrega"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaEntrega"])
+            };
         }
     }
 }

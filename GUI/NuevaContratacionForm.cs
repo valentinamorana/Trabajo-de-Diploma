@@ -33,6 +33,8 @@ namespace GUI
         public NuevaContratacionForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(dgvPlanes);
         }
 
         // Abre el asistente con el cliente ya identificado (por ejemplo, recién registrado en Clientes).
@@ -248,6 +250,9 @@ namespace GUI
                 if (liq.CreditoCambioPlan > 0)
                     lblImporte.Text += "\n" + string.Format(Tr("lbl.contr.upgrade",
                         "Plan superior: rige desde hoy (crédito de {0:C2} por los días no usados)."), liq.CreditoCambioPlan);
+                if (liq.Cargos > 0)
+                    lblImporte.Text += "\n" + string.Format(Tr("lbl.contr.cargos",
+                        "Incluye {0} cargo(s) por daño o pérdida de prendas: {1:C2}."), liq.CantidadCargos, liq.Cargos);
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[NuevaContratacionForm] Importe: " + ex.Message); }
         }

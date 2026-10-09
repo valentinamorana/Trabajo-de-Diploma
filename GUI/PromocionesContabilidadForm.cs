@@ -29,6 +29,8 @@ namespace GUI
         public PromocionesContabilidadForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(dgvPromociones);
             // Paleta centralizada (GUI/Tema.cs).
             btnAprobar.BackColor = Tema.Exito;
             btnRechazar.BackColor = Tema.Error;

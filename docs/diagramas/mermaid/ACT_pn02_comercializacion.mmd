@@ -26,7 +26,7 @@ flowchart TD
     a5["Asentar desistimiento"]
     a15["Estimar importe a abonar en Caja"]
     a6["Registrar contratación"]
-    d3{"¿Contratación válida?"}
+    d3{"¿Contratación válida? (cliente y plan activos, cupo, sin otra pendiente, sin bajar de plan con el período vigente)"}
     a7["Informar motivo"]
     o2[/"Ficha del cliente (plan, vencimiento, estado)"/]:::doc
     o3[/"Planes disponibles (precio y límite de prendas)"/]:::doc
@@ -38,7 +38,7 @@ flowchart TD
   subgraph J["Caja"]
     direction TB
     a16["Consultar cola de pendientes de pago"]
-    a8["Calcular importe (un solo descuento; crédito si cambia a un plan más caro)"]
+    a8["Calcular importe (un solo descuento; crédito si cambia a un plan más caro; más los cargos por daño o pérdida pendientes)"]
     d9{"¿Paga con tarjeta de crédito?"}
     a20["Ofrecer planes de cuotas (hasta los meses de la modalidad)"]
     a22["Calcular recargo y valor de cuota"]

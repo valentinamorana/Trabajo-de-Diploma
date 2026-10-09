@@ -4,8 +4,8 @@ sequenceDiagram
   participant F as Pedidos<br/>Realizados
   participant CD as CargoPrenda<br/>Dialog
   participant PE as BLL.Pedido
-  participant PR as BE.Prenda
   participant IN as BLL.Inspeccion<br/>Devolucion
+  participant PC as BLL.Politicas.<br/>PoliticaCompraTacita
   participant CG as BLL.CargoPrenda
   participant DPE as DAL.Pedido
   participant DI as DAL.Inspeccion<br/>Devolucion
@@ -16,23 +16,31 @@ sequenceDiagram
   PE-->>F: pedido
   F-->>D: Detalle de prendas del pedido con su estado
   D->>F: Selecciona la prenda En uso que no va a volver y pulsa "Reportar pérdida"
-  F->>PR: PuedeReportarsePerdida()
-  PR-->>F: true (está En uso)
+  F->>IN: PuedeReportarPerdida(prenda, pedido)
+  IN-->>F: true (En uso y pedido Entregado hace 30 días o más: compra tácita)
   F->>CD: Abre el diálogo con el precio de reposición precargado
   D->>CD: Ingresa el motivo de la pérdida y confirma o ajusta el monto
   CD->>CG: ValidarDatos(motivo, monto)
   CG-->>CD: ok (motivo obligatorio, monto > 0)
   CD-->>F: motivo y monto
   F->>IN: ReportarPerdida(modulo, prenda, motivo, monto)
-  IN->>IN: BajaConCargo(modulo, prenda, motivo, monto, actor, EnUso)
   Note over IN: Exigir(StockEditar) · la prenda sigue En uso
+  IN->>DI: ObtenerPedidoEnCurso(idPrenda)
+  DI-->>IN: pedido (estado y fecha de entrega)
+  IN->>PC: Exigir(pedido, hoy)
+  alt Pedido no entregado o plazo de 30 días sin vencer
+    PC-->>IN: AppException(perdida_no_entregado | perdida_plazo)
+    IN-->>F: AppException
+    F-->>D: Rechaza la operación con el motivo (fin del caso de uso)
+  end
+  IN->>IN: BajaConCargo(modulo, prenda, motivo, monto, actor, EnUso)
   alt Sin último cliente registrado
     IN-->>F: AppException(sin_cliente)
     F-->>D: Rechaza la operación (fin del caso de uso)
   else Con último cliente
     IN->>CG: ValidarDatos(motivo, monto)
     IN->>DI: DarDeBajaConCargo(cargo, estadoEsperado)
-    Note over DI: Una sola transacción: el cargo (Pendiente, al último cliente) y la baja En uso → Baja
+    Note over DI: Una sola transacción: el cargo (Pendiente, al último cliente), la baja En uso → Baja y la cancelación de su lista de espera
     DI-->>IN: idCargo
     IN-->>F: idCargo
     F-->>D: Prenda reportada como perdida: el cargo se suma al próximo cobro

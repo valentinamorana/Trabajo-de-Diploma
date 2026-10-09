@@ -16,6 +16,9 @@ namespace BE
         /// <summary>Upgrade: crédito por los días no usados del plan actual (BLL.Politicas.PoliticaCambioPlan); 0 si no corresponde.</summary>
         public decimal CreditoCambioPlan { get; set; }
 
+        /// <summary>Upgrade (plan más caro con período vigente): el período del plan nuevo arranca hoy, haya o no crédito.</summary>
+        public bool EsUpgrade { get; set; }
+
         /// <summary>Importe a cobrar sin cargos adicionales: Bruto - Descuento - crédito por cambio de plan (nunca negativo).</summary>
         public decimal Total => Math.Max(0, Bruto - Descuento - CreditoCambioPlan);
 
@@ -33,7 +36,11 @@ namespace BE
         public decimal Descuento { get; set; }
         /// <summary>Upgrade: crédito por los días no usados del plan actual; el plan nuevo rige desde hoy.</summary>
         public decimal CreditoCambioPlan { get; set; }
-        public decimal Total => System.Math.Max(0, Bruto - Descuento - CreditoCambioPlan);
+        /// <summary>PN04: cargos por daño o pérdida pendientes del cliente que se suman a este cobro.</summary>
+        public decimal Cargos { get; set; }
+        public int CantidadCargos { get; set; }
+        /// <summary>Período (Bruto - Descuento - crédito, nunca negativo) más los cargos pendientes.</summary>
+        public decimal Total => System.Math.Max(0, Bruto - Descuento - CreditoCambioPlan) + Cargos;
         public string NombrePromocion { get; set; }
         public bool UsaCreditoReferido { get; set; }
         /// <summary>Número de comprobante emitido (null mientras solo se está calculando el importe).</summary>

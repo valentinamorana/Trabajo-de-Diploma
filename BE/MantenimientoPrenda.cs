@@ -13,6 +13,11 @@ namespace BE
 
         public bool EstaAbierto => !FechaSalida.HasValue;
 
+        /// <summary>Actor con que RegistrarDevolucion abre el mantenimiento (PN04): solo esas prendas
+        /// van a la Inspección de Devolución y se le pueden cobrar al último cliente.</summary>
+        public const string ActorDevolucion = "Devolución";
+        public bool VieneDeDevolucion => Actor == ActorDevolucion;
+
         public int? DuracionDias => FechaSalida.HasValue
             ? (int?)(FechaSalida.Value.Date - FechaEntrada.Date).TotalDays
             : null;

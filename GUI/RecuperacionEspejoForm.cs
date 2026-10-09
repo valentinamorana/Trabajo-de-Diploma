@@ -25,6 +25,8 @@ namespace GUI
         public RecuperacionEspejoForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(grid);
 
             this.Text            = Tr("rec.frm.titulo",    this.Text);
             btnCerrar.Text       = Tr("rec.btn.cerrar",     btnCerrar.Text);

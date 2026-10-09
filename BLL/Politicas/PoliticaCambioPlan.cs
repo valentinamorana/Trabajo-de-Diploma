@@ -53,6 +53,22 @@ namespace BLL.Politicas
         }
 
         /// <summary>
+        /// ¿Contratar <paramref name="idPlanNuevo"/> es pasar a un plan IGUAL O MÁS BARATO mientras el actual
+        /// sigue vigente? Esa contratación se rechaza: la regla dice que rige al vencer el período pagado, y
+        /// el sistema no guarda un "plan siguiente"; se registra cuando venza (o al renovar).
+        /// </summary>
+        public static bool EsCambioSinUpgradeConPeriodoVigente(BE.Cliente cliente, BE.PlanSuscripcion planActual,
+                                                                int idPlanNuevo, decimal precioMensualNuevo, DateTime hoy)
+        {
+            return cliente?.IdPlan != null
+                && planActual != null
+                && cliente.IdPlan.Value == planActual.IdPlan
+                && planActual.IdPlan != idPlanNuevo
+                && precioMensualNuevo <= planActual.Precio
+                && DiasRestantes(cliente, hoy) > 0;
+        }
+
+        /// <summary>
         /// Crédito por los días no usados del plan actual (0 si no es upgrade). Nunca supera
         /// <paramref name="tope"/> (lo que queda por cobrar), para que el total no sea negativo.
         /// </summary>

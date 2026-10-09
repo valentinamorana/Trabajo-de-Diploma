@@ -324,8 +324,8 @@ namespace BLL
             ValidarParametrosEntrada(prendas);
 
             // El flujo vuelve al punto de unión anterior a "Anotar la selección ∥ Comprobar el
-            // cupo": se comprueba solo el cupo (la vigencia y el pedido activo ya se verificaron
-            // al armar el pedido, que sigue siendo el mismo).
+            // cupo" (diagrama de PN01): se comprueba solo el cupo. Si la suscripción venció mientras
+            // esperaba, lo frenan Separar y Formalizar, que vuelven a verificar la vigencia.
             var cliente = dalCliente.ObtenerPorId(pedido.IdCliente)
                 ?? throw new BE.AppException("err.bll.pedido.cliente_inexistente", "El cliente seleccionado no existe.");
             ComprobarCupo(cliente, prendas.Count);

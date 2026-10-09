@@ -31,6 +31,8 @@ namespace GUI
         public SugerirPromocionForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(dgvSugerencias);
             // Paleta centralizada (GUI/Tema.cs).
             btnEnviar.BackColor = Tema.Exito;
             btnAnalizar.BackColor = Tema.RosaPrimario;
@@ -165,7 +167,9 @@ namespace GUI
             }
             cmbTipoDescuento.SelectedItem = elegida.TipoSugerido;
             numBeneficioEstimado.Value = Math.Min(numBeneficioEstimado.Maximum, elegida.BeneficioEstimado);
-            txtMotivo.Text = elegida.Motivo;
+            txtMotivo.Text = elegida.ClaveMotivo != null
+                ? Tr(elegida.ClaveMotivo, elegida.Motivo, elegida.ArgsMotivo)
+                : elegida.Motivo;
             _origen = elegida.Origen;
             MostrarOrigen();
         }

@@ -28,8 +28,8 @@ namespace BLL.Interfaces
         void Modificar(string modulo, BE.Prenda prenda);
 
         // Cambia el estado de una prenda validando las transiciones permitidas por negocio.
-        void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null,
-                            bool viaFlujoPerdida = false, bool viaInspeccion = false);
+        // EnUso → Baja y EnLimpieza → Baja no pasan por acá: son de BLL.InspeccionDevolucion (con cargo).
+        void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null);
 
         // CU01-CS-Verificar Disponibilidad (PN01): releyendo el estado real desde la base,
         // confirma si cada prenda de la selección sigue Disponible. Solo lectura.
@@ -50,8 +50,5 @@ namespace BLL.Interfaces
         // Estados a los que se puede pasar la prenda desde el cambio de estado manual
         // (sin las transiciones que solo existen por un flujo dedicado de PN04).
         List<BE.EstadoPrenda> ObtenerTransicionesManuales(BE.Prenda prenda);
-
-        // True si, tras dar de baja la prenda, corresponde ofrecer un cargo por daño/pérdida.
-        bool CorrespondeOfrecerCargo(BE.Prenda prenda);
     }
 }

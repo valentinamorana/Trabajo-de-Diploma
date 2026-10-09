@@ -99,8 +99,9 @@ namespace Tests.Fakes
         public bool ConfirmarCobro(int idContratacion, int idCaja, int idMedioPago, string numeroComprobante,
                                    decimal importe, decimal descuento, int? idPromocion,
                                    int? idPlanCuotas = null, decimal? recargoCuotas = null,
-                                   decimal? creditoCambioPlan = null)
+                                   decimal? creditoCambioPlan = null, IList<int> idsCargo = null)
         {
+            UltimosCargos = idsCargo;
             UltimoCreditoCambioPlan = creditoCambioPlan;
             UltimoIdPlanCuotas = idPlanCuotas;
             UltimoRecargoCuotas = recargoCuotas;
@@ -134,8 +135,11 @@ namespace Tests.Fakes
 
         // Si se asigna, ReabrirPago lanza (simula que la compensación también falla).
         public Exception ReabrirPagoLanza { get; set; }
-        public void ReabrirPago(int idContratacion)
+        public IList<int> UltimosCargos { get; private set; }
+        public IList<int> CargosReabiertos { get; private set; }
+        public void ReabrirPago(int idContratacion, IList<int> idsCargo = null)
         {
+            CargosReabiertos = idsCargo;
             ReabrirPagoVeces++;
             if (ReabrirPagoLanza != null) throw ReabrirPagoLanza;
         }

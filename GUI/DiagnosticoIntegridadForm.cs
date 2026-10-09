@@ -11,6 +11,8 @@ namespace GUI
         public DiagnosticoIntegridadForm()
         {
             InitializeComponent();
+            // Mismo estilo de grilla que el resto de las pantallas.
+            GUI.Estilos.EstiloFormulario.Grilla(gridRotas);
         }
 
         // ── Ciclo de vida ─────────────────────────────────────────────────────

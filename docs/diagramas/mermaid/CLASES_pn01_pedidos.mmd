@@ -107,7 +107,7 @@ classDiagram
   }
   class BLL_Prenda["BLL.Prenda"] {
     +ObtenerDisponibles(int?) List~Prenda~
-    +CambiarEstado(string,  Prenda,  EstadoPrenda,  string,  bool,  bool) void
+    +CambiarEstado(string,  Prenda,  EstadoPrenda,  string) void
     +VerificarDisponibilidad(List~Prenda~) bool Disponible, List~Prenda~ NoDisponibles
   }
   class BLL_ListaEspera["BLL.ListaEspera"] {

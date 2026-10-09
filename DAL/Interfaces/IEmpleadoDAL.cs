@@ -8,5 +8,8 @@ namespace DAL.Interfaces
         List<BE.Empleado> ObtenerTodos();
         BE.Empleado ObtenerPorId(int idEmpleado);
         BE.Empleado ObtenerPorUsuario(int idUsuario);
+
+        // Crea el Empleado vinculado a un usuario del sistema (si no tiene uno) y devuelve su Id.
+        int CrearParaUsuario(int idUsuario, string nombre, string apellido, string email, string puesto);
     }
 }

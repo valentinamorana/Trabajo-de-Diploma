@@ -7148,3 +7148,183 @@ ES	ayuda.pie	Para la ayuda general, presioná F1 en el menú principal.
 EN	ayuda.pie	For general help, press F1 in the main menu.
 RU	ayuda.pie	Для общей справки нажмите F1 в главном меню.
 PT	ayuda.pie	Para a ajuda geral, pressione F1 no menu principal.
+ES	err.bll.insp.perdida_no_entregado	Solo se puede reportar como perdida una prenda de un pedido Entregado: el cliente todavía no la recibió.
+EN	err.bll.insp.perdida_no_entregado	Only a garment from a Delivered order can be reported as lost: the customer has not received it yet.
+RU	err.bll.insp.perdida_no_entregado	Сообщить о потере можно только для вещи из доставленного заказа: клиент ещё не получил её.
+PT	err.bll.insp.perdida_no_entregado	Só é possível reportar como perdida uma peça de um pedido Entregue: o cliente ainda não a recebeu.
+ES	err.bll.insp.perdida_plazo	La compra tácita rige a los {0} días de la entrega: desde el {1:d}. Faltan {2} día(s).
+EN	err.bll.insp.perdida_plazo	The implied purchase applies {0} days after delivery: from {1:d}. {2} day(s) to go.
+RU	err.bll.insp.perdida_plazo	Подразумеваемая покупка действует через {0} дней после доставки: с {1:d}. Осталось дней: {2}.
+PT	err.bll.insp.perdida_plazo	A compra tácita vale {0} dias após a entrega: a partir de {1:d}. Faltam {2} dia(s).
+ES	err.bll.contratacion.cambio_plan_vigente	El cambio a un plan igual o más barato rige al vencer el período pagado de '{0}' (el {1:d}). Registralo a partir de esa fecha.
+EN	err.bll.contratacion.cambio_plan_vigente	A change to an equal or cheaper plan applies when the paid period of '{0}' ends ({1:d}). Register it from that date.
+RU	err.bll.contratacion.cambio_plan_vigente	Переход на такой же или более дешёвый тариф вступает в силу по окончании оплаченного периода «{0}» ({1:d}). Оформите его с этой даты.
+PT	err.bll.contratacion.cambio_plan_vigente	A mudança para um plano igual ou mais barato vale ao fim do período pago de '{0}' ({1:d}). Registre-a a partir dessa data.
+ES	doc.contr.cargos	Cargos por daño o pérdida de prendas: {0} cargo(s), +{1:C2}
+EN	doc.contr.cargos	Charges for damaged or lost garments: {0} charge(s), +{1:C2}
+RU	doc.contr.cargos	Сборы за повреждённые или утерянные вещи: {0} шт., +{1:C2}
+PT	doc.contr.cargos	Cobranças por dano ou perda de peças: {0} cobrança(s), +{1:C2}
+ES	conf.contr.cobro.cargos	Incluye {0} cargo(s) por daño o pérdida de prendas: {1:C2}.
+EN	conf.contr.cobro.cargos	Includes {0} charge(s) for damaged or lost garments: {1:C2}.
+RU	conf.contr.cobro.cargos	Включает сборы за повреждённые или утерянные вещи ({0} шт.): {1:C2}.
+PT	conf.contr.cobro.cargos	Inclui {0} cobrança(s) por dano ou perda de peças: {1:C2}.
+ES	lbl.contr.cargos	Incluye {0} cargo(s) por daño o pérdida de prendas: {1:C2}.
+EN	lbl.contr.cargos	Includes {0} charge(s) for damaged or lost garments: {1:C2}.
+RU	lbl.contr.cargos	Включает сборы за повреждённые или утерянные вещи ({0} шт.): {1:C2}.
+PT	lbl.contr.cargos	Inclui {0} cobrança(s) por dano ou perda de peças: {1:C2}.
+ES	btn.errxml	Errores (XML)
+EN	btn.errxml	Errors (XML)
+RU	btn.errxml	Ошибки (XML)
+PT	btn.errxml	Erros (XML)
+ES	frm.errxml	Errores (XML)
+EN	frm.errxml	Errors (XML)
+RU	frm.errxml	Ошибки (XML)
+PT	frm.errxml	Erros (XML)
+ES	frm.errxml.titulo	Errores inesperados serializados en XML
+EN	frm.errxml.titulo	Unexpected errors serialized to XML
+RU	frm.errxml.titulo	Непредвиденные ошибки, сериализованные в XML
+PT	frm.errxml.titulo	Erros inesperados serializados em XML
+ES	btn.errxml.estapc	Ver los de esta PC
+EN	btn.errxml.estapc	Show this PC's
+RU	btn.errxml.estapc	Ошибки этого ПК
+PT	btn.errxml.estapc	Ver os deste PC
+ES	btn.errxml.importar	Importar XML…
+EN	btn.errxml.importar	Import XML…
+RU	btn.errxml.importar	Импорт XML…
+PT	btn.errxml.importar	Importar XML…
+ES	btn.errxml.exportar	Exportar XML…
+EN	btn.errxml.exportar	Export XML…
+RU	btn.errxml.exportar	Экспорт XML…
+PT	btn.errxml.exportar	Exportar XML…
+ES	dlg.filtro.xml	Archivos XML (*.xml)|*.xml
+EN	dlg.filtro.xml	XML files (*.xml)|*.xml
+RU	dlg.filtro.xml	Файлы XML (*.xml)|*.xml
+PT	dlg.filtro.xml	Arquivos XML (*.xml)|*.xml
+ES	msg.errxml.importado	Se importaron {0} error(es).
+EN	msg.errxml.importado	{0} error(s) imported.
+RU	msg.errxml.importado	Импортировано ошибок: {0}.
+PT	msg.errxml.importado	{0} erro(s) importado(s).
+ES	msg.errxml.exportado	Se exportaron {0} error(es) a XML.
+EN	msg.errxml.exportado	{0} error(s) exported to XML.
+RU	msg.errxml.exportado	Экспортировано ошибок в XML: {0}.
+PT	msg.errxml.exportado	{0} erro(s) exportado(s) para XML.
+ES	lbl.errxml.origen.pc	Errores registrados en esta PC: {0}
+EN	lbl.errxml.origen.pc	Errors recorded on this PC: {0}
+RU	lbl.errxml.origen.pc	Ошибок на этом ПК: {0}
+PT	lbl.errxml.origen.pc	Erros registrados neste PC: {0}
+ES	lbl.errxml.origen.archivo	Archivo importado: {0} — {1} error(es)
+EN	lbl.errxml.origen.archivo	Imported file: {0} — {1} error(s)
+RU	lbl.errxml.origen.archivo	Импортированный файл: {0} — ошибок: {1}
+PT	lbl.errxml.origen.archivo	Arquivo importado: {0} — {1} erro(s)
+ES	col.errxml.fecha	Fecha
+EN	col.errxml.fecha	Date
+RU	col.errxml.fecha	Дата
+PT	col.errxml.fecha	Data
+ES	col.errxml.usuario	Usuario
+EN	col.errxml.usuario	User
+RU	col.errxml.usuario	Пользователь
+PT	col.errxml.usuario	Usuário
+ES	col.errxml.modulo	Pantalla
+EN	col.errxml.modulo	Screen
+RU	col.errxml.modulo	Экран
+PT	col.errxml.modulo	Tela
+ES	col.errxml.tipo	Tipo
+EN	col.errxml.tipo	Type
+RU	col.errxml.tipo	Тип
+PT	col.errxml.tipo	Tipo
+ES	col.errxml.mensaje	Mensaje
+EN	col.errxml.mensaje	Message
+RU	col.errxml.mensaje	Сообщение
+PT	col.errxml.mensaje	Mensagem
+ES	lbl.errxml.vacio	No hay errores registrados.
+EN	lbl.errxml.vacio	No errors recorded.
+RU	lbl.errxml.vacio	Ошибок не зарегистрировано.
+PT	lbl.errxml.vacio	Não há erros registrados.
+ES	lbl.errxml.equipo	Equipo
+EN	lbl.errxml.equipo	Computer
+RU	lbl.errxml.equipo	Компьютер
+PT	lbl.errxml.equipo	Computador
+ES	lbl.errxml.causa	Causa
+EN	lbl.errxml.causa	Cause
+RU	lbl.errxml.causa	Причина
+PT	lbl.errxml.causa	Causa
+ES	err.serial.vacio	El archivo XML está vacío.
+EN	err.serial.vacio	The XML file is empty.
+RU	err.serial.vacio	Файл XML пуст.
+PT	err.serial.vacio	O arquivo XML está vazio.
+ES	err.serial.formato	El archivo no tiene el formato XML esperado: {0}
+EN	err.serial.formato	The file does not have the expected XML format: {0}
+RU	err.serial.formato	Файл не соответствует ожидаемому формату XML: {0}
+PT	err.serial.formato	O arquivo não tem o formato XML esperado: {0}
+ES	err.serial.no_existe	No se encontró el archivo '{0}'.
+EN	err.serial.no_existe	File '{0}' was not found.
+RU	err.serial.no_existe	Файл «{0}» не найден.
+PT	err.serial.no_existe	O arquivo '{0}' não foi encontrado.
+ES	err.serial.sin_datos	No hay errores para exportar.
+EN	err.serial.sin_datos	There are no errors to export.
+RU	err.serial.sin_datos	Нет ошибок для экспорта.
+PT	err.serial.sin_datos	Não há erros para exportar.
+ES	conf.usr.resetclave	¿Generar una contraseña nueva para '{0}'?\n\nLa actual deja de funcionar y la nueva se exporta a un archivo.
+EN	conf.usr.resetclave	Generate a new password for '{0}'?\n\nThe current one stops working and the new one is exported to a file.
+RU	conf.usr.resetclave	Создать новый пароль для «{0}»?\n\nТекущий перестанет действовать, новый будет сохранён в файл.
+PT	conf.usr.resetclave	Gerar uma nova senha para '{0}'?\n\nA atual deixa de funcionar e a nova é exportada para um arquivo.
+ES	conf.usr.resetclave.titulo	Resetear contraseña
+EN	conf.usr.resetclave.titulo	Reset password
+RU	conf.usr.resetclave.titulo	Сброс пароля
+PT	conf.usr.resetclave.titulo	Redefinir senha
+ES	conf.adminusr.cambiarrol	¿Cambiar el rol de '{0}' a '{1}'?\n\nSus permisos cambian en el próximo ingreso.
+EN	conf.adminusr.cambiarrol	Change the role of '{0}' to '{1}'?\n\nTheir permissions change at their next sign-in.
+RU	conf.adminusr.cambiarrol	Изменить роль «{0}» на «{1}»?\n\nПрава изменятся при следующем входе.
+PT	conf.adminusr.cambiarrol	Mudar o perfil de '{0}' para '{1}'?\n\nAs permissões mudam no próximo acesso.
+ES	conf.adminusr.cambiarrol.titulo	Cambiar rol
+EN	conf.adminusr.cambiarrol.titulo	Change role
+RU	conf.adminusr.cambiarrol.titulo	Изменить роль
+PT	conf.adminusr.cambiarrol.titulo	Mudar perfil
+ES	conf.cs.faltantes	¿Emitir el informe de prendas faltantes del Pedido #{0}?\n\nEl pedido vuelve al Vendedor para ajustar la selección o desistir.
+EN	conf.cs.faltantes	Issue the missing-garments report for Order #{0}?\n\nThe order goes back to the Salesperson to adjust the selection or withdraw.
+RU	conf.cs.faltantes	Сформировать отчёт о недостающих вещах по заказу №{0}?\n\nЗаказ вернётся продавцу для корректировки выбора или отказа.
+PT	conf.cs.faltantes	Emitir o relatório de peças faltantes do Pedido #{0}?\n\nO pedido volta ao Vendedor para ajustar a seleção ou desistir.
+ES	conf.cs.faltantes.titulo	Informar faltantes
+EN	conf.cs.faltantes.titulo	Report missing items
+RU	conf.cs.faltantes.titulo	Сообщить о нехватке
+PT	conf.cs.faltantes.titulo	Informar faltantes
+ES	promo.cand.rotacion	Análisis de rotación: {0} prenda(s) de la categoría {1} sin pedidos ({2}).
+EN	promo.cand.rotacion	Rotation analysis: {0} garment(s) in category {1} with no orders ({2}).
+RU	promo.cand.rotacion	Анализ оборачиваемости: {0} вещ. категории {1} без заказов ({2}).
+PT	promo.cand.rotacion	Análise de rotação: {0} peça(s) da categoria {1} sem pedidos ({2}).
+ES	promo.cand.abandono	Análisis de abandono: {0} cliente(s) del plan {1} en riesgo de abandono ({2:C2} de ingreso mensual en riesgo).
+EN	promo.cand.abandono	Churn analysis: {0} customer(s) on plan {1} at risk of leaving ({2:C2} of monthly revenue at risk).
+RU	promo.cand.abandono	Анализ оттока: {0} клиент(ов) тарифа {1} под риском ухода ({2:C2} ежемесячного дохода под угрозой).
+PT	promo.cand.abandono	Análise de abandono: {0} cliente(s) do plano {1} em risco de abandono ({2:C2} de receita mensal em risco).
+ES	dash.card.pedido	Pedido #{0}
+EN	dash.card.pedido	Order #{0}
+RU	dash.card.pedido	Заказ №{0}
+PT	dash.card.pedido	Pedido #{0}
+ES	dash.card.cliente	Cliente {0}
+EN	dash.card.cliente	Customer {0}
+RU	dash.card.cliente	Клиент {0}
+PT	dash.card.cliente	Cliente {0}
+ES	dash.card.prenda	Prenda #{0}
+EN	dash.card.prenda	Garment #{0}
+RU	dash.card.prenda	Вещь №{0}
+PT	dash.card.prenda	Peça #{0}
+ES	dash.dep.entrada	Entrada: {0:d}
+EN	dash.dep.entrada	Received: {0:d}
+RU	dash.dep.entrada	Поступление: {0:d}
+PT	dash.dep.entrada	Entrada: {0:d}
+ES	err.bll.insp.no_devuelta	La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dala de baja desde Prendas.
+EN	err.bll.insp.no_devuelta	Garment '{0}' did not come from a return: the last customer cannot be charged. If it is no longer usable, retire it from Garments.
+RU	err.bll.insp.no_devuelta	Вещь «{0}» поступила не по возврату: последнему клиенту нельзя выставить сбор. Если она непригодна, спишите её в разделе «Вещи».
+PT	err.bll.insp.no_devuelta	A peça '{0}' não veio de uma devolução: não é possível cobrar o último cliente. Se não servir mais, dê baixa em Peças.
+ES	err.bll.cliente.baja_cargos	No se puede dar de baja a {0}: tiene {1} cargo(s) por daño o pérdida pendientes ({2:C2}). Se cobran con la próxima renovación o contratación.
+EN	err.bll.cliente.baja_cargos	{0} cannot be deactivated: they have {1} pending damage or loss charge(s) ({2:C2}). They are collected with the next renewal or subscription.
+RU	err.bll.cliente.baja_cargos	Нельзя деактивировать {0}: есть неоплаченные сборы за повреждение или потерю ({1} шт., {2:C2}). Они взимаются при следующем продлении или оформлении.
+PT	err.bll.cliente.baja_cargos	Não é possível desativar {0}: há {1} cobrança(s) por dano ou perda pendente(s) ({2:C2}). São cobradas na próxima renovação ou contratação.
+ES	conf.cancelped.body.sinreserva	¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nTodavía no tiene prendas separadas.
+EN	conf.cancelped.body.sinreserva	Cancel Order #{0} for {1}?\n\nReason: {2}\n\nNo garments have been set aside yet.
+RU	conf.cancelped.body.sinreserva	Отменить заказ №{0} клиента {1}?\n\nПричина: {2}\n\nВещи ещё не отложены.
+PT	conf.cancelped.body.sinreserva	Cancelar o Pedido #{0} de {1}?\n\nMotivo: {2}\n\nAinda não há peças separadas.
+ES	msg.ped.cancelado.sinreserva	Pedido #{0} cancelado.
+EN	msg.ped.cancelado.sinreserva	Order #{0} cancelled.
+RU	msg.ped.cancelado.sinreserva	Заказ №{0} отменён.
+PT	msg.ped.cancelado.sinreserva	Pedido #{0} cancelado.

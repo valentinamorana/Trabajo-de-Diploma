@@ -777,7 +777,8 @@ namespace Tests
             Assert.AreEqual(BE.EstadoPromocion.Vencida, vencida.Estado);
             Assert.AreEqual(BE.EstadoPromocion.Vigente, enCurso.Estado);
             Assert.AreEqual(BE.EstadoPromocion.EnRevisionContable, enRevision.Estado);
-            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.Vigente, BE.EstadoPromocion.Vencida, 1);
+            // El vencimiento lo firma el sistema, no quien abrió la pantalla.
+            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.Vigente, BE.EstadoPromocion.Vencida, null);
         }
 
         [TestMethod]

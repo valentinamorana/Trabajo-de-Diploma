@@ -182,6 +182,11 @@ namespace GUI
             }
             catch { /* si falla el logueo, igual mostramos el error */ }
 
+            // A02 Serialización: el error también queda serializado en XML (nunca lanza).
+            string actor = null;
+            try { actor = BLL.Sesion.Actor; } catch { }
+            Servicios.Serializacion.RegistroErrores.Registrar(ex, "Aplicación", actor);
+
             // #6 — Ante un error NO controlado se muestra un mensaje GENÉRICO (no se expone
             // información técnica al usuario). El detalle técnico ya quedó en la bitácora.
             string titulo  = "Error inesperado";

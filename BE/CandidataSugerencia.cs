@@ -18,6 +18,11 @@ namespace BE
         /// <summary>Motivo redactado con el dato concreto (cantidades, categoría o plan afectado).</summary>
         public string Motivo { get; set; }
 
+        /// <summary>Clave de traducción del motivo (formato con {0}, {1}…) y sus argumentos: la
+        /// pantalla y el PDF lo muestran en el idioma activo; Motivo queda como texto en español.</summary>
+        public string ClaveMotivo { get; set; }
+        public object[] ArgsMotivo { get; set; }
+
         public TipoDescuento TipoSugerido { get; set; }
 
         /// <summary>Estimación inicial editable: ingreso mensual en riesgo (abandono) o un valor de

@@ -44,6 +44,12 @@ namespace GUI
         // Actividad reciente = bitácora del sistema (dato sensible de auditoría): solo se muestra
         // a quien tiene permiso de ver la auditoría (Administrador / Auditor), no a roles operativos.
         private readonly bool _verActividad;
+        // Tareas de los roles sin panel propio (Caja, Administración Comercial, Contabilidad): antes
+        // entraban a un panel vacío. El Administrador ya ve todo el resto del tablero.
+        private readonly bool _verCaja, _verPromoAdmin, _verPromoContable;
+        private Label _numContrCobrar, _txtContrCobrar, _numRenovCobrar, _txtRenovCobrar;
+        private Label _numSugerencias, _txtSugerencias, _numBajasPromo, _txtBajasPromo;
+        private Label _numRevContable, _txtRevContable;
 
         // ── Controles condicionados por PERMISOS (null si el rol no tiene acceso) ──────────
         // No son parte del Diseñador: su EXISTENCIA (no solo su visibilidad) depende de los
@@ -95,6 +101,9 @@ namespace GUI
             _verActividad = Tiene(BE.Patentes.Auditoria);
             _tienePedidosVenta      = Tiene(BE.Patentes.PedidosVenta);
             _tienePedidosRealizados = Tiene(BE.Patentes.PedidosRealizados);
+            _verCaja          = !esAdmin && nombres.Contains(BE.Patentes.Caja);
+            _verPromoAdmin    = !esAdmin && nombres.Contains(BE.Patentes.PromocionesAdmin);
+            _verPromoContable = !esAdmin && nombres.Contains(BE.Patentes.PromocionesContable);
 
             InitializeComponent();
 
@@ -147,6 +156,11 @@ namespace GUI
             if (_txtPedidos   != null) _txtPedidos.Text   = Tr("dash.pedidos",    "Pedidos\npendientes");
             if (_txtBackup    != null) _txtBackup.Text    = Tr("dash.backup",     "días sin\nbackup");
             if (_txtOcupacion != null) _txtOcupacion.Text = Tr("dash.ocupacion",  "ocupación\ndel stock");
+            if (_txtContrCobrar != null) _txtContrCobrar.Text = Tr("dash.caja.contrataciones", "contrataciones\npor cobrar");
+            if (_txtRenovCobrar != null) _txtRenovCobrar.Text = Tr("dash.caja.renovaciones",   "renovaciones\npor cobrar");
+            if (_txtSugerencias != null) _txtSugerencias.Text = Tr("dash.aco.sugerencias",     "sugerencias\npendientes");
+            if (_txtBajasPromo  != null) _txtBajasPromo.Text  = Tr("dash.aco.bajas",           "bajas de promo\nsolicitadas");
+            if (_txtRevContable != null) _txtRevContable.Text = Tr("dash.con.revision",        "promociones\nen revisión");
 
             if (_lblActTitulo != null) _lblActTitulo.Text = Tr("dash.actividad.titulo", "Actividad reciente");
             lblStTitulo.Text  = Tr("dash.stats.titulo",     "Resumen de eventos");
@@ -194,9 +208,30 @@ namespace GUI
                 if (_verPrendas)  try { ocup      = _bllPrenda.ObtenerOcupacion(); } catch (Exception ex) { LogWidget("ocupación de stock", ex); }
                 try { usuario = _bllUsuario.ObtenerUsuarioActivo(); hora = _bllUsuario.ObtenerFechaInicioSesion(); } catch (Exception ex) { LogWidget("usuario activo", ex); }
 
+                // Tareas de Caja, Administración Comercial y Contabilidad.
+                int? nContr = null, nRenov = null, nSug = null, nBajas = null, nRev = null;
+                if (_verCaja)
+                {
+                    try { nContr = new BLL.Contratacion().ContarPendientesDePago(); } catch (Exception ex) { LogWidget("contrataciones por cobrar", ex); }
+                    try { nRenov = new BLL.Cobro().ObtenerElegibles().Count; } catch (Exception ex) { LogWidget("renovaciones por cobrar", ex); }
+                }
+                if (_verPromoAdmin)
+                {
+                    try { nSug = new BLL.SugerenciaPromocion().ObtenerPendientes().Count; } catch (Exception ex) { LogWidget("sugerencias pendientes", ex); }
+                    try { nBajas = new BLL.Promocion().ObtenerTodas().Count(p => p.Estado == BE.EstadoPromocion.BajaSolicitada); } catch (Exception ex) { LogWidget("bajas de promociones", ex); }
+                }
+                if (_verPromoContable)
+                    try { nRev = new BLL.Promocion().ObtenerPendientesRevisionContable().Count; } catch (Exception ex) { LogWidget("promociones en revisión", ex); }
+
                 InvocarSeguro(() =>
                 {
                     if (IsDisposed) return;
+                    string N(int? n) => n.HasValue ? n.Value.ToString() : "—";
+                    if (_numContrCobrar != null) _numContrCobrar.Text = N(nContr);
+                    if (_numRenovCobrar != null) _numRenovCobrar.Text = N(nRenov);
+                    if (_numSugerencias != null) _numSugerencias.Text = N(nSug);
+                    if (_numBajasPromo  != null) _numBajasPromo.Text  = N(nBajas);
+                    if (_numRevContable != null) _numRevContable.Text = N(nRev);
                     if (_numPrendas  != null) _numPrendas.Text  = nPrendas.HasValue  ? nPrendas.Value.ToString()  : "—";
                     if (_numClientes != null) _numClientes.Text = nClientes.HasValue ? nClientes.Value.ToString() : "—";
                     if (_numPedidos  != null) _numPedidos.Text  = nPedidos.HasValue  ? nPedidos.Value.ToString()  : "—";
@@ -433,6 +468,19 @@ namespace GUI
         // panel de Actividad Reciente, y la visibilidad del panel de Tareas Pendientes.
         private void ConstruirElementosCondicionales()
         {
+            if (_verCaja)
+            {
+                flowCards.Controls.Add(CrearTarjeta(Tema.FondoInfo, Tema.Info, out _numContrCobrar, out _txtContrCobrar, out _));
+                flowCards.Controls.Add(CrearTarjeta(Tema.FondoAlerta, Tema.Alerta, out _numRenovCobrar, out _txtRenovCobrar, out _));
+            }
+            if (_verPromoAdmin)
+            {
+                flowCards.Controls.Add(CrearTarjeta(Tema.FondoInfo, Tema.Info, out _numSugerencias, out _txtSugerencias, out _));
+                flowCards.Controls.Add(CrearTarjeta(Tema.FondoAlerta, Tema.Alerta, out _numBajasPromo, out _txtBajasPromo, out _));
+            }
+            if (_verPromoContable)
+                flowCards.Controls.Add(CrearTarjeta(Tema.FondoInfo, Tema.Info, out _numRevContable, out _txtRevContable, out _));
+
             if (_verPrendas)
                 flowCards.Controls.Add(CrearTarjeta(
                     Tema.RosaPalido, Tema.RosaTinta,

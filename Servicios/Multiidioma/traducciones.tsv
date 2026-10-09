@@ -7184,3 +7184,23 @@ ES	btn.contr.imprimiraviso	Imprimir aviso de desistimiento
 EN	btn.contr.imprimiraviso	Print withdrawal notice
 RU	btn.contr.imprimiraviso	Печать уведомления об отказе
 PT	btn.contr.imprimiraviso	Imprimir aviso de desistência
+ES	dash.caja.contrataciones	contrataciones\npor cobrar
+EN	dash.caja.contrataciones	subscriptions\nto collect
+RU	dash.caja.contrataciones	подписок\nк оплате
+PT	dash.caja.contrataciones	contratações\na cobrar
+ES	dash.caja.renovaciones	renovaciones\npor cobrar
+EN	dash.caja.renovaciones	renewals\nto collect
+RU	dash.caja.renovaciones	продлений\nк оплате
+PT	dash.caja.renovaciones	renovações\na cobrar
+ES	dash.aco.sugerencias	sugerencias\npendientes
+EN	dash.aco.sugerencias	pending\nsuggestions
+RU	dash.aco.sugerencias	предложений\nв ожидании
+PT	dash.aco.sugerencias	sugestões\npendentes
+ES	dash.aco.bajas	bajas de promo\nsolicitadas
+EN	dash.aco.bajas	promotion withdrawals\nrequested
+RU	dash.aco.bajas	запросов\nна отмену акций
+PT	dash.aco.bajas	baixas de promo\nsolicitadas
+ES	dash.con.revision	promociones\nen revisión
+EN	dash.con.revision	promotions\nunder review
+RU	dash.con.revision	акций\nна проверке
+PT	dash.con.revision	promoções\nem revisão

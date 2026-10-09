@@ -52,6 +52,9 @@ namespace BLL
                 ["alert.pedidos.formalizar"] = new[] { BE.Patentes.PedidosVenta },
                 // PN02 — cola de cobro: rol Caja.
                 ["alert.contr.pendientes"]   = new[] { BE.Patentes.Caja },
+                // PN04 — pedidos atrasados (entregados hace 30 días o más sin devolución): quien registra
+                // la devolución (Pedidos realizados) y Depósito, que reporta la prenda perdida.
+                ["alert.pedidos.atrasados"]  = new[] { BE.Patentes.PedidosRealizados, BE.Patentes.InspeccionDevolucion },
             };
 
         /// <summary>
@@ -111,7 +114,7 @@ namespace BLL
             int vencidas = Desconocido, porVencer = Desconocido, diasSinBackup = Desconocido,
                 enLimpieza = Desconocido, dvRotas = Desconocido, reservadasEspera = Desconocido,
                 enControl = Desconocido, conFaltantes = Desconocido, separados = Desconocido,
-                contratacionesPendientes = Desconocido;
+                contratacionesPendientes = Desconocido, atrasados = Desconocido;
 
             if (Ve("alert.subs.vencidas") || Ve("alert.subs.porvencer"))
             {
@@ -154,14 +157,22 @@ namespace BLL
 
             // PN01 — pedidos esperando una acción en el armado: Depósito (control de stock) o
             // Vendedor (comunicar faltantes / formalizar).
-            if (Ve("alert.pedidos.control") || Ve("alert.pedidos.faltantes") || Ve("alert.pedidos.formalizar"))
+            // PN04 — pedidos atrasados: entregados sin devolución y con la compra tácita cumplida.
+            bool veArmado    = Ve("alert.pedidos.control") || Ve("alert.pedidos.faltantes") || Ve("alert.pedidos.formalizar");
+            bool veAtrasados = Ve("alert.pedidos.atrasados");
+            if (veArmado || veAtrasados)
             {
                 try
                 {
                     var pedidos = _pedido.ObtenerTodos();
-                    enControl    = pedidos.Count(p => p.Estado == BE.EstadoPedido.EnControlStock);
-                    conFaltantes = pedidos.Count(p => p.Estado == BE.EstadoPedido.ConFaltantes);
-                    separados    = pedidos.Count(p => p.Estado == BE.EstadoPedido.Separado);
+                    if (veArmado)
+                    {
+                        enControl    = pedidos.Count(p => p.Estado == BE.EstadoPedido.EnControlStock);
+                        conFaltantes = pedidos.Count(p => p.Estado == BE.EstadoPedido.ConFaltantes);
+                        separados    = pedidos.Count(p => p.Estado == BE.EstadoPedido.Separado);
+                    }
+                    if (veAtrasados)
+                        atrasados = Politicas.PoliticaCompraTacita.Atrasados(pedidos, DateTime.Today).Count;
                 }
                 catch { }
             }
@@ -171,7 +182,7 @@ namespace BLL
                 try { contratacionesPendientes = new Contratacion().ContarPendientesDePago(); } catch { }
 
             var todas = EvaluarAlertas(vencidas, porVencer, diasSinBackup, enLimpieza, dvRotas, reservadasEspera,
-                                       enControl, conFaltantes, separados, contratacionesPendientes);
+                                       enControl, conFaltantes, separados, contratacionesPendientes, atrasados);
             return FiltrarPorPatentes(todas, patentes, esAdmin);
         }
 
@@ -186,7 +197,8 @@ namespace BLL
         /// </summary>
         public static List<BE.Alerta> EvaluarAlertas(int vencidas, int porVencer,
             int diasSinBackup, int enLimpieza, int dvRotas, int reservadasEspera = 0,
-            int enControl = 0, int conFaltantes = 0, int separados = 0, int contratacionesPendientes = 0)
+            int enControl = 0, int conFaltantes = 0, int separados = 0, int contratacionesPendientes = 0,
+            int atrasados = 0)
         {
             var alertas = new List<BE.Alerta>();
 
@@ -240,6 +252,12 @@ namespace BLL
             if (contratacionesPendientes > 0)
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.contr.pendientes",
                     "{0} contratación(es) esperando el cobro de Caja.", contratacionesPendientes, contratacionesPendientes));
+
+            // 8) PN04 — pedidos atrasados (compra tácita: 30 días desde la entrega sin devolución)
+            if (atrasados > 0)
+                alertas.Add(new BE.Alerta(BE.NivelAlerta.Advertencia, "alert.pedidos.atrasados",
+                    "{0} pedido(s) atrasado(s): entregados hace 30 días o más, sin devolución registrada.",
+                    atrasados, atrasados));
 
             return alertas;
         }

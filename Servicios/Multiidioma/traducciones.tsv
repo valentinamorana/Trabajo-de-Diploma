@@ -7260,3 +7260,19 @@ ES	doc.contr.programado	Cambio a un plan igual o más barato: el plan actual sig
 EN	doc.contr.programado	Change to an equal or cheaper plan: the current plan continues until {0:d}; the new one applies from that day.
 RU	doc.contr.programado	Переход на такой же или более дешёвый тариф: текущий действует до {0:d}; новый — с этого дня.
 PT	doc.contr.programado	Mudança para um plano igual ou mais barato: o atual continua até {0:d}; o novo vale a partir desse dia.
+ES	alert.pedidos.atrasados	{0} pedido(s) atrasado(s): entregados hace 30 días o más, sin devolución registrada.
+EN	alert.pedidos.atrasados	{0} overdue order(s): delivered 30 or more days ago with no return recorded.
+RU	alert.pedidos.atrasados	Просроченных заказов (доставлены 30 и более дней назад, возврат не зарегистрирован): {0}.
+PT	alert.pedidos.atrasados	{0} pedido(s) atrasado(s): entregues há 30 dias ou mais, sem devolução registrada.
+ES	est.entregado.devuelto	Entregado (devuelto el {0:dd/MM})
+EN	est.entregado.devuelto	Delivered (returned on {0:dd/MM})
+RU	est.entregado.devuelto	Доставлен (возвращён {0:dd/MM})
+PT	est.entregado.devuelto	Entregue (devolvido em {0:dd/MM})
+ES	est.entregado.enpoder	Entregado — en poder del cliente ({0} días)
+EN	est.entregado.enpoder	Delivered — with the client ({0} days)
+RU	est.entregado.enpoder	Доставлен — у клиента ({0} дн.)
+PT	est.entregado.enpoder	Entregue — em poder do cliente ({0} dias)
+ES	combo.ped.atrasados	Atrasados (30+ días sin devolver)
+EN	combo.ped.atrasados	Overdue (30+ days not returned)
+RU	combo.ped.atrasados	Просроченные (30+ дней без возврата)
+PT	combo.ped.atrasados	Atrasados (30+ dias sem devolver)

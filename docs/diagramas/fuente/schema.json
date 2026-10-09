@@ -1,5 +1,5 @@
 {
- "bdHash": "e80b6146f74cf3814c664df5e383a9f3132060d3",
+ "bdHash": "0eec849edbc83e799db4094548adf707c1392e20",
  "cols": [
   {
    "tabla": "Bitacora",
@@ -2176,6 +2176,17 @@
    "len": 40,
    "prec": 0,
    "sc": 0,
+   "nulo": true,
+   "ident": false
+  },
+  {
+   "tabla": "Pedido",
+   "ord": 17,
+   "col": "FechaDevolucion",
+   "tipo": "datetime",
+   "len": 8,
+   "prec": 23,
+   "sc": 3,
    "nulo": true,
    "ident": false
   },

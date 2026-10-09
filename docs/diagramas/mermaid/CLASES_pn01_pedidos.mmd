@@ -8,6 +8,7 @@ classDiagram
     +DateTime FechaPedido
     +DateTime? FechaDespacho
     +DateTime? FechaEntrega
+    +DateTime? FechaDevolucion
     +string MotivoCancelacion
     +DateTime? FechaEnvioControl
     +DateTime? FechaControl
@@ -25,6 +26,8 @@ classDiagram
     +bool TodasConfirmadas
     +int DiasDesdeAlta
     +bool EsUrgentePorAntiguedad
+    +bool FueDevuelto
+    +bool EnPoderDelCliente
   }
   class Prenda {
     +int IdPrenda

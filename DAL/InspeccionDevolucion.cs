@@ -21,7 +21,8 @@ namespace DAL
 
             /// <summary>
             /// Último pedido que tiene la prenda asignada (Separado, Pendiente, Despachado o
-            /// Entregado: un pedido devuelto queda Entregado, por eso se toma el más reciente), con su estado y su fecha de entrega. Null si no hay ninguno.
+            /// Entregado SIN devolución registrada: un pedido devuelto sigue Entregado pero con
+            /// FechaDevolucion, y se ignora), con su estado y su fecha de entrega. Null si no hay ninguno.
             /// PN04 lo usa para la compra tácita: solo se reporta perdida una prenda entregada.
             /// </summary>
             BE.Pedido ObtenerPedidoEnCurso(int idPrenda);
@@ -107,19 +108,22 @@ namespace DAL
                 new SqlParameter("@Entregado",  (int)BE.EstadoPedido.Entregado)
             };
             var dt = acceso.Leer(
-                "SELECT TOP 1 p.IdPedido, p.IdCliente, p.Estado, p.FechaEntrega " +
+                "SELECT TOP 1 p.IdPedido, p.IdCliente, p.Estado, p.FechaEntrega, p.FechaDevolucion " +
                 "FROM Pedido p INNER JOIN PedidoPrenda pp ON pp.IdPedido = p.IdPedido " +
                 "WHERE pp.IdPrenda = @IdPrenda AND p.Estado IN (@Separado, @Pendiente, @Despachado, @Entregado) " +
+                // PN04: un pedido ya devuelto no está "en curso" (la prenda volvió con ese pedido).
+                "AND p.FechaDevolucion IS NULL " +
                 "ORDER BY p.FechaPedido DESC, p.IdPedido DESC", p);
             if (dt.Rows.Count == 0) return null;
 
             var r = dt.Rows[0];
             return new BE.Pedido
             {
-                IdPedido     = Convert.ToInt32(r["IdPedido"]),
-                IdCliente    = Convert.ToInt32(r["IdCliente"]),
-                Estado       = (BE.EstadoPedido)Convert.ToInt32(r["Estado"]),
-                FechaEntrega = r["FechaEntrega"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaEntrega"])
+                IdPedido        = Convert.ToInt32(r["IdPedido"]),
+                IdCliente       = Convert.ToInt32(r["IdCliente"]),
+                Estado          = (BE.EstadoPedido)Convert.ToInt32(r["Estado"]),
+                FechaEntrega    = r["FechaEntrega"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaEntrega"]),
+                FechaDevolucion = r["FechaDevolucion"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaDevolucion"])
             };
         }
     }

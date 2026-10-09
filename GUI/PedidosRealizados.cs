@@ -95,7 +95,8 @@ namespace GUI
 
         /// <summary>
         /// Rellena el combo de filtro de estado con valores traducidos.
-        /// Mantiene el orden fijo (índice 0–4) para que el filtro por índice siga funcionando.
+        /// Mantiene el orden fijo (índice 0–5) para que el filtro por índice siga funcionando.
+        /// El 5 no es un estado: son los Entregados atrasados (PN04, compra tácita sin devolución).
         /// </summary>
         private void RellenarComboEstado()
         {
@@ -107,6 +108,7 @@ namespace GUI
             cmbFiltroEstado.Items.Add(Tr("est.despachado", "Despachado"));
             cmbFiltroEstado.Items.Add(Tr("est.entregado",  "Entregado"));
             cmbFiltroEstado.Items.Add(Tr("est.cancelado",  "Cancelado"));
+            cmbFiltroEstado.Items.Add(Tr("combo.ped.atrasados", "Atrasados (30+ días sin devolver)"));
             cmbFiltroEstado.SelectedIndex = idx >= 0 && idx < cmbFiltroEstado.Items.Count ? idx : 0;
             cmbFiltroEstado.SelectedIndexChanged += CmbFiltroEstado_SelectedIndexChanged;
         }
@@ -170,7 +172,8 @@ namespace GUI
                     (estadoIdx == 1 && p.Estado == BE.EstadoPedido.Pendiente)  ||
                     (estadoIdx == 2 && p.Estado == BE.EstadoPedido.Despachado) ||
                     (estadoIdx == 3 && p.Estado == BE.EstadoPedido.Entregado)  ||
-                    (estadoIdx == 4 && p.Estado == BE.EstadoPedido.Cancelado);
+                    (estadoIdx == 4 && p.Estado == BE.EstadoPedido.Cancelado)  ||
+                    (estadoIdx == 5 && BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(p, DateTime.Today));
 
                 bool pasaDias = corte == null || p.FechaPedido >= corte;
 
@@ -190,6 +193,8 @@ namespace GUI
             // Columna interna: almacena el int del enum para colorear sin depender del idioma
             tabla.Columns.Add("_EstadoKey", typeof(int));
             tabla.Columns.Add("_UrgenciaKey", typeof(int));
+            // PN04: entregado hace 30 días o más sin devolución (se resalta como urgente).
+            tabla.Columns.Add("_Atrasado",    typeof(bool));
 
             foreach (var p in lista)
             {
@@ -200,11 +205,12 @@ namespace GUI
                     p.NombreCliente,
                     p.NombreEmpleado,
                     p.CantidadPrendas,
-                    EstadoLabel(p.Estado),
+                    EstadoTexto(p),
                     p.FechaDespacho?.ToString("d") ?? "—",
                     p.FechaEntrega?.ToString("d")  ?? "—",
                     (int)p.Estado,
-                    (int)pedidoBLL.CalcularNivelUrgencia(p));
+                    (int)pedidoBLL.CalcularNivelUrgencia(p),
+                    BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(p, DateTime.Today));
             }
 
             dgvPedidos.DataSource = tabla;
@@ -280,6 +286,8 @@ namespace GUI
                 dgvPedidos.Columns["_EstadoKey"].Visible = false;
             if (dgvPedidos.Columns.Contains("_UrgenciaKey"))
                 dgvPedidos.Columns["_UrgenciaKey"].Visible = false;
+            if (dgvPedidos.Columns.Contains("_Atrasado"))
+                dgvPedidos.Columns["_Atrasado"].Visible = false;
         }
 
         private void ColorearFilas()
@@ -292,6 +300,9 @@ namespace GUI
                     row.DefaultCellStyle.BackColor = Tema.FondoError;
                 else if (urgenciaKey == (int)BE.NivelUrgencia.Normal)
                     row.DefaultCellStyle.BackColor = Tema.FondoAlerta;
+                // PN04: pedido atrasado (compra tácita cumplida sin devolución).
+                if (dgvPedidos.Columns.Contains("_Atrasado") && row.Cells["_Atrasado"].Value is bool atrasado && atrasado)
+                    row.DefaultCellStyle.BackColor = Tema.FondoError;
 
                 // Coloreado por estado usando la columna interna _EstadoKey (int enum)
                 // para ser independiente del idioma de la etiqueta visible.
@@ -344,7 +355,7 @@ namespace GUI
                 string prendasLbl = Tr("col.ped.prendas", "prenda(s)");
                 lblDetalleTitulo.Text = Tr("lbl.ped.detalletitulo", "Pedido #{0}  ·  {1}  ·  {2}  ·  {3} {4}",
                     new object[] { pedido.IdPedido, pedido.NombreCliente,
-                                    EstadoLabel(pedido.Estado), pedido.CantidadPrendas, prendasLbl });
+                                    EstadoTexto(pedido), pedido.CantidadPrendas, prendasLbl });
 
                 var tabla = new DataTable();
                 tabla.Columns.Add("IdPrenda",  typeof(int));
@@ -629,6 +640,26 @@ namespace GUI
                 case BE.EstadoPedido.Cancelado:  return t.ContainsKey("est.cancelado")  ? t["est.cancelado"].Texto  : "Cancelado";
                 default: return estado.ToString();
             }
+        }
+
+        /// <summary>
+        /// PN04 — texto del estado con el detalle de la devolución: un Entregado se muestra como
+        /// "Entregado (devuelto el dd/mm)" o "Entregado — en poder del cliente (N días)". El estado
+        /// del pedido no cambia (sigue Entregado); lo distingue Pedido.FechaDevolucion.
+        /// </summary>
+        private string EstadoTexto(BE.Pedido p)
+        {
+            if (p.Estado == BE.EstadoPedido.Entregado)
+            {
+                if (p.FechaDevolucion.HasValue)
+                    return Tr("est.entregado.devuelto", "Entregado (devuelto el {0:dd/MM})",
+                              new object[] { p.FechaDevolucion.Value });
+                int? dias = p.DiasEnPoderDelCliente(DateTime.Today);
+                if (dias.HasValue)
+                    return Tr("est.entregado.enpoder", "Entregado — en poder del cliente ({0} días)",
+                              new object[] { dias.Value });
+            }
+            return EstadoLabel(p.Estado);
         }
 
         private string EstadoPrendaLabel(BE.EstadoPrenda estado)

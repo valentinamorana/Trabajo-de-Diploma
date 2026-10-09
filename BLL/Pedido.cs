@@ -713,7 +713,14 @@ namespace BLL
                 throw new BE.AppException("err.bll.pedido.devolucion_estado",
                     "Solo se puede registrar la devolución de pedidos ya Entregados. Este pedido está '{0}'.",
                     pedido.Estado);
+            // PN04: la devolución ya registrada se ve en el pedido (FechaDevolucion), sin ir a la base.
+            if (pedido.FechaDevolucion.HasValue)
+                throw new BE.AppException("err.bll.pedido.devolucion_ya_hecha",
+                    "El Pedido #{0} no tiene prendas en uso para devolver " +
+                    "(es posible que la devolución ya se haya registrado).",
+                    pedido.IdPedido);
 
+            // El DAL pasa las prendas a EnLimpieza y completa Pedido.FechaDevolucion en la misma transacción.
             int devueltas = dalPedido.RegistrarDevolucion(pedido.IdPedido, pedido.IdCliente);
             if (devueltas == 0)
                 throw new BE.AppException("err.bll.pedido.devolucion_ya_hecha",
@@ -723,7 +730,8 @@ namespace BLL
 
             RegistrarHistorial(pedido.IdPedido, "DEVOLUCION", new List<(string, string, string)>
             {
-                ("Prendas", "EnUso", $"EnLimpieza ({devueltas} prenda(s))")
+                ("Prendas",         "EnUso", $"EnLimpieza ({devueltas} prenda(s))"),
+                ("FechaDevolucion", null,    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
             });
 
             bitacora.Registrar(modulo,

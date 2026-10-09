@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Seguridad;
@@ -104,6 +105,8 @@ namespace Tests
             ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 2, Estado = BE.EstadoPrenda.Disponible });
             ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 3, Estado = BE.EstadoPrenda.EnLimpieza });
             ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 4, Estado = BE.EstadoPrenda.EnUso });
+            foreach (int id in new[] { 1, 2, 3, 4 })   // todas con mantenimiento abierto por devolución
+                ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = id, Actor = BE.MantenimientoPrenda.ActorDevolucion });
             var bll = ctx.Crear();
 
             var enLimpieza = bll.ObtenerEnLimpieza();
@@ -155,11 +158,12 @@ namespace Tests
             var ctx = new Contexto();
             var bll = ctx.Crear();
             var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Actor = BE.MantenimientoPrenda.ActorDevolucion });
 
             try
             {
                 bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja);
-                Assert.Fail("Debía exigir la Inspección de Devolución para dar de baja una prenda En Limpieza.");
+                Assert.Fail("Debía exigir la Inspección de Devolución para dar de baja una prenda devuelta En Limpieza.");
             }
             catch (BE.AppException ex)
             {
@@ -196,11 +200,19 @@ namespace Tests
         }
 
         [TestMethod]
-        public void TransicionesManuales_EnLimpieza_SoloDisponible_LaBajaEsPorInspeccion()
+        public void TransicionesManuales_EnLimpiezaDevuelta_SoloDisponible_LaBajaEsPorInspeccion()
         {
-            var bll = new Contexto().Crear();
-            var r = bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = BE.EstadoPrenda.EnLimpieza });
+            var ctx = new Contexto();
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 9, Actor = BE.MantenimientoPrenda.ActorDevolucion });
+            var r = ctx.Crear().ObtenerTransicionesManuales(new BE.Prenda { IdPrenda = 9, Estado = BE.EstadoPrenda.EnLimpieza });
             CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.Disponible }, r);
+        }
+
+        [TestMethod]
+        public void TransicionesManuales_EnLimpiezaDelDeposito_DisponibleYBaja()
+        {
+            var r = new Contexto().Crear().ObtenerTransicionesManuales(new BE.Prenda { IdPrenda = 9, Estado = BE.EstadoPrenda.EnLimpieza });
+            CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.Disponible, BE.EstadoPrenda.Baja }, r);
         }
 
         [TestMethod]
@@ -229,14 +241,32 @@ namespace Tests
             }
         }
 
+        // PN04 — la cola de inspección son solo las prendas devueltas por un cliente; una prenda que
+        // entró a limpieza en el depósito no se le puede cobrar a nadie y se da de baja a mano.
         [TestMethod]
-        public void CorrespondeOfrecerCargo_SoloBajaConUltimoCliente()
+        public void ObtenerEnLimpieza_SoloLasQueVienenDeUnaDevolucion()
         {
-            var bll = new Contexto().Crear();
-            Assert.IsTrue(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.Baja, IdUltimoCliente = 3 }));
-            Assert.IsFalse(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.Baja }));
-            Assert.IsFalse(bll.CorrespondeOfrecerCargo(new BE.Prenda { Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 }));
-            Assert.IsFalse(bll.CorrespondeOfrecerCargo(null));
+            var ctx = new Contexto();
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 1, Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 });
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 2, Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 });
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Actor = BE.MantenimientoPrenda.ActorDevolucion });
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 2, Actor = "deposito" });
+
+            CollectionAssert.AreEqual(new[] { 1 }, ctx.Crear().ObtenerEnLimpieza().Select(p => p.IdPrenda).ToArray());
+        }
+
+        [TestMethod]
+        public void CambiarEstado_EnLimpiezaDelDepositoABaja_PermiteYCierraElMantenimiento()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Actor = "deposito" });
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza, IdUltimoCliente = 3 };
+
+            ctx.Crear().CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja);
+
+            Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
+            Assert.AreEqual(1, ctx.DalMantenimiento.CerrarMantenimientoVeces);
         }
     }
 }

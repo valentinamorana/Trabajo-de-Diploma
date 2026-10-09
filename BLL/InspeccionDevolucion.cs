@@ -49,11 +49,22 @@ namespace BLL
             _prenda.CambiarEstado(modulo, prenda, BE.EstadoPrenda.Disponible, actor ?? ActorEnSesion());
         }
 
-        /// <summary>Camino B — En Limpieza → Baja + cargo de reposición, atómico.</summary>
+        /// <summary>
+        /// Camino B — En Limpieza → Baja + cargo de reposición, atómico. Solo para una prenda de la cola
+        /// de inspección (volvió de un cliente): a una que entró a limpieza en el depósito no se le
+        /// puede cobrar al último cliente.
+        /// </summary>
         public int DarDeBajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto, string actor = null)
-            => BajaConCargo(modulo, prenda, motivo, monto, actor, BE.EstadoPrenda.EnLimpieza,
+        {
+            if (prenda != null && prenda.Estado == BE.EstadoPrenda.EnLimpieza &&
+                !_prenda.ObtenerEnLimpieza().Exists(p => p.IdPrenda == prenda.IdPrenda))
+                throw new BE.AppException("err.bll.insp.no_devuelta",
+                    "La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dala de baja desde Prendas.",
+                    prenda.Nombre);
+            return BajaConCargo(modulo, prenda, motivo, monto, actor, BE.EstadoPrenda.EnLimpieza,
                             "err.bll.insp.no_en_limpieza",
                             "Solo se puede dar de baja con cargo una prenda En Limpieza pendiente de inspección.");
+        }
 
         /// <summary>
         /// CU-DEP-02 — En Uso → Baja + cargo de reposición, atómico. Solo para una prenda de un

@@ -710,7 +710,7 @@ namespace DAL
                 // estado se hace en SQL directo y no pasa por BLL.Prenda.CambiarEstado.
                 using (var cmd = new SqlCommand(
                     "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor) " +
-                    "SELECT IdPrenda, GETDATE(), N'Devolución' FROM Prenda " +
+                    "SELECT IdPrenda, GETDATE(), @ActorDevolucion FROM Prenda " +
                     "WHERE Estado=@EstadoEnUso AND IdClienteActual=@IdCliente AND IdPrenda IN " +
                     "  (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido) " +
                     "AND NOT EXISTS (SELECT 1 FROM MantenimientoPrenda m " +
@@ -720,6 +720,7 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@EstadoEnUso", (int)BE.EstadoPrenda.EnUso);
                     cmd.Parameters.AddWithValue("@IdCliente",   idCliente);
                     cmd.Parameters.AddWithValue("@IdPedido",    idPedido);
+                    cmd.Parameters.AddWithValue("@ActorDevolucion", BE.MantenimientoPrenda.ActorDevolucion);
                     cmd.ExecuteNonQuery();
                 }
 

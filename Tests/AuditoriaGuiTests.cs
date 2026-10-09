@@ -210,6 +210,9 @@ namespace Tests
             public readonly List<BE.EstadoPrenda> Cambios = new List<BE.EstadoPrenda>();
             public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null)
                 => Cambios.Add(nuevoEstado);
+            // Cola de inspección: por defecto la prenda 5 (la de los tests) volvió de una devolución.
+            public List<BE.Prenda> ColaInspeccion = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 5 } };
+            public new List<BE.Prenda> ObtenerEnLimpieza() => ColaInspeccion;
         }
 
         private static BE.Prenda Prenda(BE.EstadoPrenda estado, int? ultimoCliente = 3) => new BE.Prenda
@@ -235,6 +238,23 @@ namespace Tests
             Assert.AreEqual(1500m, dal.Llamadas[0].Cargo.Monto);
             Assert.AreEqual(BE.EstadoCargo.Pendiente, dal.Llamadas[0].Cargo.Estado);
             Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
+        }
+
+        // PN04 — una prenda que entró a limpieza en el depósito (no por devolución) no se le cobra al último cliente.
+        [TestMethod]
+        public void DarDeBajaConCargo_PrendaQueNoVieneDeUnaDevolucion_Rechaza()
+        {
+            LoginComoAdministrador();
+            var dal = new FakeInspeccionDAL();
+            var espia = new PrendaServiceEspia();
+            espia.ColaInspeccion.Clear();
+            try
+            {
+                new BLL.InspeccionDevolucion(dal, espia).DarDeBajaConCargo("Test", Prenda(BE.EstadoPrenda.EnLimpieza), "Mancha", 100m);
+                Assert.Fail("Debía rechazar el cargo a una prenda que no volvió de un cliente.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.insp.no_devuelta", ex.Clave); }
+            Assert.AreEqual(0, dal.Llamadas.Count);
         }
 
         [TestMethod]

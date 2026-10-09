@@ -39,7 +39,6 @@ namespace GUI
         // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README).
         private readonly BLL.Interfaces.IListaEsperaService listaEsperaBLL = new BLL.ListaEspera();
         private readonly BLL.Interfaces.IClienteService clienteBLL = new BLL.Cliente();
-        private readonly BLL.Interfaces.ICargoPrendaService cargoBLL = new BLL.CargoPrenda();
 
         // Determina si el usuario puede cambiar estados (Depósito)
         private readonly bool _tieneStock;
@@ -370,35 +369,7 @@ namespace GUI
                     string fmtEstAct = Tr("msg.prenda.estadoact", "Estado de '{0}' actualizado a {1}.");
                     MostrarOk(string.Format(fmtEstAct, prenda.Nombre, EstadoLabel(dlg.EstadoSeleccionado)));
 
-                    // Bloque 1 — si la BLL indica que corresponde (baja de una prenda con último
-                    // cliente conocido), ofrecer cargar un cargo por daño/pérdida.
-                    if (prendaBLL.CorrespondeOfrecerCargo(prenda))
-                        OfrecerCargoPorDanioOPerdida(prenda);
-
                     CargarPrendas();
-                }
-                catch (Exception ex) { MostrarError(ex); }
-            }
-        }
-
-        // Bloque 1 — Cargo por daño/pérdida: se ofrece opcionalmente tras confirmar una Baja.
-        private void OfrecerCargoPorDanioOPerdida(BE.Prenda prenda)
-        {
-            var conf = (FormBase.MostrarConfirmacionSiNo(this,
-                Tr("msg.cargoprenda.preguntar", "¿Corresponde cobrarle a {0} por daño o pérdida de esta prenda?")
-                    .Replace("{0}", prenda.NombreUltimoCliente ?? "el último cliente"),
-                Tr("frm.cargoprenda", "Cargo por Daño/Pérdida"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
-            if (conf != DialogResult.Yes) return;
-
-            using (var dlg = new CargoPrendaDialog(prenda))
-            {
-                if (dlg.ShowDialog(this) != DialogResult.OK) return;
-                try
-                {
-                    string actor = BLL.Sesion.Actor;
-                    cargoBLL.RegistrarCargo(this.Text, prenda, dlg.Motivo, dlg.Monto, actor);
-                    MostrarOk(Tr("msg.cargoprenda.registrado", "Cargo de ${0} registrado — se sumará al próximo cobro de {1}.",
-                        new object[] { dlg.Monto, prenda.NombreUltimoCliente ?? "el cliente" }));
                 }
                 catch (Exception ex) { MostrarError(ex); }
             }

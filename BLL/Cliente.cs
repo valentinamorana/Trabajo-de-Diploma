@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -24,7 +25,10 @@ namespace BLL
         // (antes dalPlan era un DAL.PlanSuscripcion concreto fijo — ActivarSuscripcion y la
         // rama de cambio de plan de Modificar quedaban sin poder testearse con un Fake, mismo
         // problema que ya se había resuelto en BLL.Renovacion/CambioPlanHandler).
-        public Cliente() : this(new DAL.Cliente(), new DAL.PlanSuscripcion(), new DAL.Pedido()) { }
+        // PN04: cargos por daño o pérdida. Null en tests que no lo inyectan: no se consulta.
+        internal DAL.Interfaces.ICargoPrendaDAL DalCargos { get; set; }
+
+        public Cliente() : this(new DAL.Cliente(), new DAL.PlanSuscripcion(), new DAL.Pedido()) { DalCargos = new DAL.CargoPrenda(); }
         public Cliente(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPlanSuscripcionDAL dalPlan = null,
                        DAL.Interfaces.IPedidoDAL dalPedido = null)
         {
@@ -209,6 +213,13 @@ namespace BLL
                 throw new BE.AppException("err.bll.cliente.baja_pedido",
                     "No se puede dar de baja a {0}: tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo primero.",
                     cliente.NombreCompleto);
+
+            // PN04: un cargo por daño o pérdida pendiente no se cobraría nunca (se suma al próximo cobro).
+            var cargos = DalCargos?.ObtenerPendientesPorCliente(cliente.IdCliente);
+            if (cargos != null && cargos.Count > 0)
+                throw new BE.AppException("err.bll.cliente.baja_cargos",
+                    "No se puede dar de baja a {0}: tiene {1} cargo(s) por daño o pérdida pendientes ({2:C2}). Se cobran con la próxima renovación o contratación.",
+                    cliente.NombreCompleto, cargos.Count, cargos.Sum(c => c.Monto));
 
             dalCliente.Baja(cliente.IdCliente);
             bitacora.Registrar(modulo, $"Baja Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Media);

@@ -7312,3 +7312,11 @@ ES	dash.dep.entrada	Entrada: {0:d}
 EN	dash.dep.entrada	Received: {0:d}
 RU	dash.dep.entrada	Поступление: {0:d}
 PT	dash.dep.entrada	Entrada: {0:d}
+ES	err.bll.insp.no_devuelta	La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dala de baja desde Prendas.
+EN	err.bll.insp.no_devuelta	Garment '{0}' did not come from a return: the last customer cannot be charged. If it is no longer usable, retire it from Garments.
+RU	err.bll.insp.no_devuelta	Вещь «{0}» поступила не по возврату: последнему клиенту нельзя выставить сбор. Если она непригодна, спишите её в разделе «Вещи».
+PT	err.bll.insp.no_devuelta	A peça '{0}' não veio de uma devolução: não é possível cobrar o último cliente. Se não servir mais, dê baixa em Peças.
+ES	err.bll.cliente.baja_cargos	No se puede dar de baja a {0}: tiene {1} cargo(s) por daño o pérdida pendientes ({2:C2}). Se cobran con la próxima renovación o contratación.
+EN	err.bll.cliente.baja_cargos	{0} cannot be deactivated: they have {1} pending damage or loss charge(s) ({2:C2}). They are collected with the next renewal or subscription.
+RU	err.bll.cliente.baja_cargos	Нельзя деактивировать {0}: есть неоплаченные сборы за повреждение или потерю ({1} шт., {2:C2}). Они взимаются при следующем продлении или оформлении.
+PT	err.bll.cliente.baja_cargos	Não é possível desativar {0}: há {1} cobrança(s) por dano ou perda pendente(s) ({2:C2}). São cobradas na próxima renovação ou contratação.

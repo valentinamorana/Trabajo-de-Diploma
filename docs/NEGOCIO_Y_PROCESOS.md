@@ -484,6 +484,8 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 | 7 | Baja es estado final | `BE/Estados/EstadoBaja.cs` | `PrendaEstadoTests` |
 | 8 | Al registrar la devolución la cuenta se **desbloquea** (las prendas dejan de estar EnUso) | `BLL/Pedido.cs › RegistrarDevolucion` | `PedidoTests` (`ValidarPuedeArmarPedido_..._SeDesbloquea`) |
 | 9 | **No hay cargos por demora** en la devolución | (ausencia de lógica) | — |
+| 10 | La cola de inspección son **solo las prendas que volvieron de un cliente** (mantenimiento abierto por la devolución); una prenda que entró a limpieza en el depósito se da de baja a mano y **sin cargo**. Ya no se ofrece un cargo suelto al dar de baja desde Prendas | `BLL/Prenda.cs › ObtenerEnLimpieza/RequiereInspeccion`, `BLL/InspeccionDevolucion.cs` (`no_devuelta`) | `PrendaTests › ObtenerEnLimpieza_*`, `AuditoriaGuiTests › DarDeBajaConCargo_PrendaQueNoVieneDeUnaDevolucion_Rechaza` |
+| 11 | No se da de baja a un cliente con **cargos pendientes** (se cobran con la próxima renovación o contratación) | `BLL/Cliente.cs › Baja` (`baja_cargos`) | `ClienteTests › Baja_ConCargosPendientes_*` |
 
 **Casos de uso:** CU-DEP-01 Inspeccionar Devolución, CU-DEP-02 Reportar Prenda Perdida.
 **Alcance.** Abarca: reingreso, baja con cargo, prenda perdida, desbloqueo. **No abarca:** reparación/limpieza detallada, cobro inmediato del cargo (se difiere al próximo cobro), reposición automática de stock, cargo por demora.

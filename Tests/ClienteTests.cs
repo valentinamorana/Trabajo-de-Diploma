@@ -259,6 +259,27 @@ namespace Tests
             Assert.AreEqual(cliente.IdCliente, fake.UltimoIdBaja);
         }
 
+        // PN04: el cargo por daño o pérdida se cobra con la próxima renovación; dar de baja lo dejaría sin cobrar.
+        [TestMethod]
+        public void Baja_ConCargosPendientes_LanzaBajaCargos_SinTocarElDAL()
+        {
+            LoginComoAdministrador();
+            var fake = new FakeClienteDAL();
+            var cliente = ClienteValido();
+            cliente.StockUtilizado = 0;
+            var cargos = new FakeCargoPrendaDAL();
+            cargos.Alta(new BE.CargoPrenda { IdCliente = cliente.IdCliente, IdPrenda = 1, Motivo = "Rotura", Monto = 500m });
+            var bll = new BLL.Cliente(fake) { DalCargos = cargos };
+
+            try
+            {
+                bll.Baja("Test", cliente);
+                Assert.Fail("Debía bloquear la baja con cargos pendientes.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.cliente.baja_cargos", ex.Clave); }
+            Assert.AreEqual(0, fake.BajaVeces);
+        }
+
         [TestMethod]
         public void Baja_ConPedidoEnCurso_LanzaBajaPedido_SinTocarElDAL()
         {

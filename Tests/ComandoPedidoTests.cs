@@ -77,5 +77,52 @@ namespace Tests
 
             Assert.AreEqual(1, receptor.RegistrarDevolucionVeces);
         }
+
+        // ── Despacho y entrega como comandos; deshacer la cancelación (auditoría 09/10) ──
+
+        [TestMethod]
+        public void DespachoYEntrega_Ejecutar_LlamanAlReceptor()
+        {
+            var receptor = new FakePedidoService();
+            var invocador = new InvocadorPedido();
+            invocador.TomarOrden(new DespachoCommand(receptor, PedidoDePrueba(), "Test"));
+            invocador.TomarOrden(new EntregaCommand(receptor, PedidoDePrueba(), "Test"));
+
+            invocador.ProcesarOrdenes();
+
+            Assert.AreEqual(1, receptor.DespacharVeces);
+            Assert.AreEqual(1, receptor.EntregarVeces);
+        }
+
+        [TestMethod]
+        public void Cancelacion_SeDeshace_Reactivando()
+        {
+            var receptor = new FakePedidoService();
+            var invocador = new InvocadorPedido();
+            invocador.TomarOrden(new CancelacionCommand(receptor, PedidoDePrueba(), "Test", "motivo"));
+            invocador.ProcesarOrdenes();
+
+            Assert.IsTrue(invocador.PuedeDeshacer(1));
+            invocador.DeshacerUltima(1);
+
+            Assert.AreEqual(1, receptor.DesCancelarVeces);
+            Assert.IsFalse(invocador.PuedeDeshacer(1), "Ya se deshizo: sale del historial.");
+        }
+
+        [TestMethod]
+        public void UltimaOrdenNoReversible_NoSeDeshace()
+        {
+            var receptor = new FakePedidoService();
+            var invocador = new InvocadorPedido();
+            invocador.TomarOrden(new CancelacionCommand(receptor, PedidoDePrueba(), "Test", "motivo"));
+            invocador.TomarOrden(new DespachoCommand(receptor, PedidoDePrueba(), "Test"));
+            invocador.ProcesarOrdenes();
+
+            Assert.IsFalse(invocador.PuedeDeshacer(1));
+            try { invocador.DeshacerUltima(1); Assert.Fail("El despacho no se deshace."); }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.comando.no_reversible", ex.Clave); }
+            Assert.AreEqual(0, receptor.DesCancelarVeces);
+            Assert.IsFalse(invocador.PuedeDeshacer(99), "Sin historial para otro pedido.");
+        }
     }
 }

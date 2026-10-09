@@ -67,6 +67,8 @@
     <Compile Include="Comandos\PedidoCommand.cs" />
     <Compile Include="Comandos\CancelacionCommand.cs" />
     <Compile Include="Comandos\DevolucionCommand.cs" />
+    <Compile Include="Comandos\DespachoCommand.cs" />
+    <Compile Include="Comandos\EntregaCommand.cs" />
     <Compile Include="Comandos\InvocadorPedido.cs" />
     <Compile Include="Interfaces\IRenovacionService.cs" />
     <Compile Include="Manejadores\DecisionRenovacion.cs" />

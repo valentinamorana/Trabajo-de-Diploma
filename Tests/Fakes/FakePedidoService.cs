@@ -52,8 +52,10 @@ namespace Tests.Fakes
         public List<BE.Pedido> ColaControlStock { get; set; } = new List<BE.Pedido>();
         public List<BE.Pedido> ObtenerColaControlStock() => ColaControlStock;
         public List<BE.PedidoFaltante> ObtenerInformeFaltantes(int idPedido) => new List<BE.PedidoFaltante>();
-        public void Despachar(string modulo, BE.Pedido pedido) { }
-        public void MarcarEntregado(string modulo, BE.Pedido pedido) { }
+        public int DespacharVeces { get; private set; }
+        public int EntregarVeces { get; private set; }
+        public void Despachar(string modulo, BE.Pedido pedido) => DespacharVeces++;
+        public void MarcarEntregado(string modulo, BE.Pedido pedido) => EntregarVeces++;
         public DataTable ObtenerHistorial(int idPedido, string accion = null, DateTime? desde = null, DateTime? hasta = null) => null;
         public void RestaurarOperacion(string modulo, int idPedido, int idOperacion) { }
         public BE.NivelUrgencia CalcularNivelUrgencia(BE.Pedido pedido) => BE.NivelUrgencia.NoAplica;

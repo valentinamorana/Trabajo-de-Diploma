@@ -7204,3 +7204,7 @@ ES	dash.con.revision	promociones\nen revisión
 EN	dash.con.revision	promotions\nunder review
 RU	dash.con.revision	акций\nна проверке
 PT	dash.con.revision	promoções\nem revisão
+ES	err.bll.comando.no_reversible	Esta operación sobre el pedido no se puede deshacer.
+EN	err.bll.comando.no_reversible	This operation on the order cannot be undone.
+RU	err.bll.comando.no_reversible	Эту операцию с заказом нельзя отменить.
+PT	err.bll.comando.no_reversible	Esta operação no pedido não pode ser desfeita.

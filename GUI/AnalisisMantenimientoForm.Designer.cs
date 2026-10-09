@@ -83,6 +83,7 @@ namespace GUI
 
             // ── AnalisisMantenimientoForm ──────────────────────────────────────
             this.ClientSize = new Size(880, 560);
+            this.MinimumSize = new Size(660, 400);
             this.Controls.Add(this.lblTitulo);
             this.Controls.Add(this.btnGenerar);
             this.Controls.Add(this.lblResultado);

@@ -182,7 +182,7 @@ namespace GUI
                 try
                 {
                     inspeccionBLL.DarDeBajaConCargo(this.Text, prenda, dlg.Motivo, dlg.Monto);
-                    MostrarOk(Tr("msg.insp.baja_ok", "'{0}' dada de baja — cargo de ${1} registrado.",
+                    MostrarOk(Tr("msg.insp.baja_ok", "'{0}' dada de baja — cargo de {1:C2} registrado.",
                         new object[] { prenda.Nombre, dlg.Monto }));
                     CargarPrendas();
                 }

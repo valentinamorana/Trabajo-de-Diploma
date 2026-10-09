@@ -34,6 +34,7 @@ namespace GUI
             this.chkNotif      = new System.Windows.Forms.CheckBox();
             this.btnGuardar    = new System.Windows.Forms.Button();
             this.btnDefault    = new System.Windows.Forms.Button();
+            this.btnCerrar     = new System.Windows.Forms.Button();
             this.lblEstado     = new System.Windows.Forms.Label();
             this.SuspendLayout();
 
@@ -213,6 +214,21 @@ namespace GUI
             this.lblEstado.Size      = new System.Drawing.Size(392, 28);
             this.lblEstado.TabIndex  = 19;
 
+            // ── btnCerrar (CancelButton: Escape cierra el diálogo) ─────────────
+            this.btnCerrar.BackColor = System.Drawing.Color.White;
+            this.btnCerrar.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnCerrar.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCerrar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(210, 180, 195);
+            this.btnCerrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCerrar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.btnCerrar.Location  = new System.Drawing.Point(314, 440);
+            this.btnCerrar.Name      = "btnCerrar";
+            this.btnCerrar.Size      = new System.Drawing.Size(100, 28);
+            this.btnCerrar.TabIndex  = 20;
+            this.btnCerrar.Tag       = "btn.cerrar";
+            this.btnCerrar.Text      = "Cerrar";
+            this.btnCerrar.UseVisualStyleBackColor = false;
+
             // ── MiPerfilForm ───────────────────────────────────────────────────
             this.BackColor       = System.Drawing.Color.White;
             this.ClientSize      = new System.Drawing.Size(440, 474);
@@ -236,6 +252,9 @@ namespace GUI
             this.Controls.Add(this.btnGuardar);
             this.Controls.Add(this.btnDefault);
             this.Controls.Add(this.lblEstado);
+            this.Controls.Add(this.btnCerrar);
+            this.AcceptButton    = this.btnGuardar;
+            this.CancelButton    = this.btnCerrar;
             this.Font            = new System.Drawing.Font("Segoe UI", 9F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox     = false;
@@ -269,6 +288,7 @@ namespace GUI
         private System.Windows.Forms.CheckBox chkNotif;
         private System.Windows.Forms.Button   btnGuardar;
         private System.Windows.Forms.Button   btnDefault;
+        private System.Windows.Forms.Button   btnCerrar;
         private System.Windows.Forms.Label    lblEstado;
     }
 }

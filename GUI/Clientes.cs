@@ -319,7 +319,7 @@ namespace GUI
             try
             {
                 clienteBLL.Baja(this.Text, cliente);
-                MostrarOk(Tr("msg.cli.eliminado", "Cliente '{0}' eliminado.", new object[] { cliente.NombreCompleto }));
+                MostrarOk(Tr("msg.cli.eliminado", "Cliente '{0}' dado de baja.", new object[] { cliente.NombreCompleto }));
                 CargarClientes();
             }
             catch (Exception ex)

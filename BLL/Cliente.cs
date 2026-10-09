@@ -199,7 +199,7 @@ namespace BLL
             // Bloquear baja si el cliente tiene prendas en uso actualmente
             if (cliente.StockUtilizado > 0)
                 throw new BE.AppException("err.bll.cliente.baja_prendas",
-                    "No se puede eliminar a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.",
+                    "No se puede dar de baja a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.",
                     cliente.NombreCompleto, cliente.StockUtilizado);
 
             // PN02: una contratación pendiente de pago quedaría sin poder cobrarse.

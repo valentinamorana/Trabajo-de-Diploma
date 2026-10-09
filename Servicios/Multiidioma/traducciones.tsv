@@ -7172,3 +7172,95 @@ ES	lbl.contr.cargos	Incluye {0} cargo(s) por daño o pérdida de prendas: {1:C2}
 EN	lbl.contr.cargos	Includes {0} charge(s) for damaged or lost garments: {1:C2}.
 RU	lbl.contr.cargos	Включает сборы за повреждённые или утерянные вещи ({0} шт.): {1:C2}.
 PT	lbl.contr.cargos	Inclui {0} cobrança(s) por dano ou perda de peças: {1:C2}.
+ES	btn.errxml	Errores (XML)
+EN	btn.errxml	Errors (XML)
+RU	btn.errxml	Ошибки (XML)
+PT	btn.errxml	Erros (XML)
+ES	frm.errxml	Errores (XML)
+EN	frm.errxml	Errors (XML)
+RU	frm.errxml	Ошибки (XML)
+PT	frm.errxml	Erros (XML)
+ES	frm.errxml.titulo	Errores inesperados serializados en XML
+EN	frm.errxml.titulo	Unexpected errors serialized to XML
+RU	frm.errxml.titulo	Непредвиденные ошибки, сериализованные в XML
+PT	frm.errxml.titulo	Erros inesperados serializados em XML
+ES	btn.errxml.estapc	Ver los de esta PC
+EN	btn.errxml.estapc	Show this PC's
+RU	btn.errxml.estapc	Ошибки этого ПК
+PT	btn.errxml.estapc	Ver os deste PC
+ES	btn.errxml.importar	Importar XML…
+EN	btn.errxml.importar	Import XML…
+RU	btn.errxml.importar	Импорт XML…
+PT	btn.errxml.importar	Importar XML…
+ES	btn.errxml.exportar	Exportar XML…
+EN	btn.errxml.exportar	Export XML…
+RU	btn.errxml.exportar	Экспорт XML…
+PT	btn.errxml.exportar	Exportar XML…
+ES	dlg.filtro.xml	Archivos XML (*.xml)|*.xml
+EN	dlg.filtro.xml	XML files (*.xml)|*.xml
+RU	dlg.filtro.xml	Файлы XML (*.xml)|*.xml
+PT	dlg.filtro.xml	Arquivos XML (*.xml)|*.xml
+ES	msg.errxml.importado	Se importaron {0} error(es).
+EN	msg.errxml.importado	{0} error(s) imported.
+RU	msg.errxml.importado	Импортировано ошибок: {0}.
+PT	msg.errxml.importado	{0} erro(s) importado(s).
+ES	msg.errxml.exportado	Se exportaron {0} error(es) a XML.
+EN	msg.errxml.exportado	{0} error(s) exported to XML.
+RU	msg.errxml.exportado	Экспортировано ошибок в XML: {0}.
+PT	msg.errxml.exportado	{0} erro(s) exportado(s) para XML.
+ES	lbl.errxml.origen.pc	Errores registrados en esta PC: {0}
+EN	lbl.errxml.origen.pc	Errors recorded on this PC: {0}
+RU	lbl.errxml.origen.pc	Ошибок на этом ПК: {0}
+PT	lbl.errxml.origen.pc	Erros registrados neste PC: {0}
+ES	lbl.errxml.origen.archivo	Archivo importado: {0} — {1} error(es)
+EN	lbl.errxml.origen.archivo	Imported file: {0} — {1} error(s)
+RU	lbl.errxml.origen.archivo	Импортированный файл: {0} — ошибок: {1}
+PT	lbl.errxml.origen.archivo	Arquivo importado: {0} — {1} erro(s)
+ES	col.errxml.fecha	Fecha
+EN	col.errxml.fecha	Date
+RU	col.errxml.fecha	Дата
+PT	col.errxml.fecha	Data
+ES	col.errxml.usuario	Usuario
+EN	col.errxml.usuario	User
+RU	col.errxml.usuario	Пользователь
+PT	col.errxml.usuario	Usuário
+ES	col.errxml.modulo	Pantalla
+EN	col.errxml.modulo	Screen
+RU	col.errxml.modulo	Экран
+PT	col.errxml.modulo	Tela
+ES	col.errxml.tipo	Tipo
+EN	col.errxml.tipo	Type
+RU	col.errxml.tipo	Тип
+PT	col.errxml.tipo	Tipo
+ES	col.errxml.mensaje	Mensaje
+EN	col.errxml.mensaje	Message
+RU	col.errxml.mensaje	Сообщение
+PT	col.errxml.mensaje	Mensagem
+ES	lbl.errxml.vacio	No hay errores registrados.
+EN	lbl.errxml.vacio	No errors recorded.
+RU	lbl.errxml.vacio	Ошибок не зарегистрировано.
+PT	lbl.errxml.vacio	Não há erros registrados.
+ES	lbl.errxml.equipo	Equipo
+EN	lbl.errxml.equipo	Computer
+RU	lbl.errxml.equipo	Компьютер
+PT	lbl.errxml.equipo	Computador
+ES	lbl.errxml.causa	Causa
+EN	lbl.errxml.causa	Cause
+RU	lbl.errxml.causa	Причина
+PT	lbl.errxml.causa	Causa
+ES	err.serial.vacio	El archivo XML está vacío.
+EN	err.serial.vacio	The XML file is empty.
+RU	err.serial.vacio	Файл XML пуст.
+PT	err.serial.vacio	O arquivo XML está vazio.
+ES	err.serial.formato	El archivo no tiene el formato XML esperado: {0}
+EN	err.serial.formato	The file does not have the expected XML format: {0}
+RU	err.serial.formato	Файл не соответствует ожидаемому формату XML: {0}
+PT	err.serial.formato	O arquivo não tem o formato XML esperado: {0}
+ES	err.serial.no_existe	No se encontró el archivo '{0}'.
+EN	err.serial.no_existe	File '{0}' was not found.
+RU	err.serial.no_existe	Файл «{0}» не найден.
+PT	err.serial.no_existe	O arquivo '{0}' não foi encontrado.
+ES	err.serial.sin_datos	No hay errores para exportar.
+EN	err.serial.sin_datos	There are no errors to export.
+RU	err.serial.sin_datos	Нет ошибок для экспорта.
+PT	err.serial.sin_datos	Não há erros para exportar.

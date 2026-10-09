@@ -296,6 +296,9 @@
     <Compile Include="BackupForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ErroresXmlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="BackupForm.Designer.cs">
       <DependentUpon>BackupForm.cs</DependentUpon>
     </Compile>

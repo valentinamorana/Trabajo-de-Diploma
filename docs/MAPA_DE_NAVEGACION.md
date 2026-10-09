@@ -130,7 +130,8 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 ### AUD — Auditoría y transversales
 | Formulario | Qué hace | Acciones |
 |---|---|---|
-| `Bitacora` | Bitácora de Sistema o de Negocio, con filtros. | Buscar · Limpiar · Ver · Exportar PDF |
+| `Bitacora` | Bitácora de Sistema o de Negocio, con filtros. | Buscar · Limpiar · Ver · Exportar PDF · Errores (XML) |
+| `ErroresXmlForm` | A02 Serialización: errores inesperados serializados en XML (se abre desde la Bitácora del Sistema). | Ver los de esta PC · Importar XML · Exportar XML · Cerrar |
 | `ReporteJornadaForm` | Reporte de la jornada, tendencia por rango y comparación entre jornadas. | Generar · Tendencia (rango) · Comparar Jornadas · Exportar reporte… · Exportar comparación… · Volver al reporte · menú Guardar como .TXT / Imprimir |
 | `AlertasForm` | Centro de alertas (integridad, backups, stock, pedidos). | Actualizar |
 | `DashboardForm` | Panel genérico (ADM, AUD, GCO, GIN, CAJ, ACO, CON). | — |

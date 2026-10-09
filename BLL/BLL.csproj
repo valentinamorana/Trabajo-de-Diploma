@@ -115,6 +115,7 @@
     <Compile Include="Pedido.cs" />
     <Compile Include="Contratacion.cs" />
     <Compile Include="Promocion.cs" />
+    <Compile Include="ErroresSerializados.cs" />
     <Compile Include="SugerenciaPromocion.cs" />
     <Compile Include="PlanSuscripcion.cs" />
     <Compile Include="Preferencia.cs" />

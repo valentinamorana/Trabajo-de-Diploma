@@ -7156,3 +7156,19 @@ ES	err.bll.insp.perdida_plazo	La compra tácita rige a los {0} días de la entre
 EN	err.bll.insp.perdida_plazo	The implied purchase applies {0} days after delivery: from {1:d}. {2} day(s) to go.
 RU	err.bll.insp.perdida_plazo	Подразумеваемая покупка действует через {0} дней после доставки: с {1:d}. Осталось дней: {2}.
 PT	err.bll.insp.perdida_plazo	A compra tácita vale {0} dias após a entrega: a partir de {1:d}. Faltam {2} dia(s).
+ES	err.bll.contratacion.cambio_plan_vigente	El cambio a un plan igual o más barato rige al vencer el período pagado de '{0}' (el {1:d}). Registralo a partir de esa fecha.
+EN	err.bll.contratacion.cambio_plan_vigente	A change to an equal or cheaper plan applies when the paid period of '{0}' ends ({1:d}). Register it from that date.
+RU	err.bll.contratacion.cambio_plan_vigente	Переход на такой же или более дешёвый тариф вступает в силу по окончании оплаченного периода «{0}» ({1:d}). Оформите его с этой даты.
+PT	err.bll.contratacion.cambio_plan_vigente	A mudança para um plano igual ou mais barato vale ao fim do período pago de '{0}' ({1:d}). Registre-a a partir dessa data.
+ES	doc.contr.cargos	Cargos por daño o pérdida de prendas: {0} cargo(s), +{1:C2}
+EN	doc.contr.cargos	Charges for damaged or lost garments: {0} charge(s), +{1:C2}
+RU	doc.contr.cargos	Сборы за повреждённые или утерянные вещи: {0} шт., +{1:C2}
+PT	doc.contr.cargos	Cobranças por dano ou perda de peças: {0} cobrança(s), +{1:C2}
+ES	conf.contr.cobro.cargos	Incluye {0} cargo(s) por daño o pérdida de prendas: {1:C2}.
+EN	conf.contr.cobro.cargos	Includes {0} charge(s) for damaged or lost garments: {1:C2}.
+RU	conf.contr.cobro.cargos	Включает сборы за повреждённые или утерянные вещи ({0} шт.): {1:C2}.
+PT	conf.contr.cobro.cargos	Inclui {0} cobrança(s) por dano ou perda de peças: {1:C2}.
+ES	lbl.contr.cargos	Incluye {0} cargo(s) por daño o pérdida de prendas: {1:C2}.
+EN	lbl.contr.cargos	Includes {0} charge(s) for damaged or lost garments: {1:C2}.
+RU	lbl.contr.cargos	Включает сборы за повреждённые или утерянные вещи ({0} шт.): {1:C2}.
+PT	lbl.contr.cargos	Inclui {0} cobrança(s) por dano ou perda de peças: {1:C2}.

@@ -23,6 +23,27 @@ namespace Tests
             return null;
         }
 
+        // ── Vínculo Usuario ↔ Empleado (auditoría 09/10, B-01) ─────────────────────
+        // Sin Empleado, un Vendedor o Cajero creado desde la app no puede operar PN01/PN02.
+        [TestMethod]
+        public void AsegurarEmpleado_UsuarioSinEmpleado_LoCreaConSuRol()
+        {
+            var fake = new Tests.Fakes.FakeEmpleadoDAL();
+            Assert.IsTrue(BLL.Usuario.AsegurarEmpleado(fake, 7, "Ana", "Paz", "ana@x.com", "Vendedor"));
+            Assert.AreEqual(1, fake.Creados.Count);
+            Assert.AreEqual(7, fake.Creados[0].IdUsuario);
+            Assert.AreEqual("Vendedor", fake.Creados[0].Puesto);
+            Assert.IsNotNull(fake.ObtenerPorUsuario(7));
+        }
+
+        [TestMethod]
+        public void AsegurarEmpleado_UsuarioYaVinculado_NoDuplica()
+        {
+            var fake = new Tests.Fakes.FakeEmpleadoDAL { EmpleadoPorUsuario = new BE.Empleado { IdEmpleado = 1, IdUsuario = 7 } };
+            Assert.IsFalse(BLL.Usuario.AsegurarEmpleado(fake, 7, null, null, null, "Caja"));
+            Assert.AreEqual(0, fake.Creados.Count);
+        }
+
         // ── ValidarDatosAdministrativos ──────────────────────────────────────────
         [TestMethod]
         public void Validar_DatosCorrectos_NoLanza()

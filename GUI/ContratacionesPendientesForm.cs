@@ -305,6 +305,10 @@ namespace GUI
                 detalleDescuento += "\n" + Tr("conf.contr.cobro.upgrade",
                     "Cambio a un plan superior: rige desde hoy. Crédito por los días no usados del plan anterior: {0:C2}.",
                     new object[] { liq.CreditoCambioPlan });
+            if (liq.Cargos > 0)
+                detalleDescuento += "\n" + Tr("conf.contr.cobro.cargos",
+                    "Incluye {0} cargo(s) por daño o pérdida de prendas: {1:C2}.",
+                    new object[] { liq.CantidadCargos, liq.Cargos });
             if (liq.CantidadCuotas > 1 || liq.RecargoCuotas > 0)
                 detalleDescuento += "\n" + Tr("conf.contr.cobro.cuotas",
                     "Tarjeta de crédito en {0} cuota(s) de {1:C2} (recargo {2:C2}). Total a abonar: {3:C2}.",

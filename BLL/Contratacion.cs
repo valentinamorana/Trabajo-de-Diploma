@@ -35,6 +35,8 @@ namespace BLL
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
         // PN03: promociones vigentes que se aplican al importe del cobro. Opcional (null = sin promociones).
         private DAL.Interfaces.IPromocionDAL dalPromocion;
+        // PN04: cargos por daño o pérdida pendientes que se suman al cobro. Opcional (null = sin cargos).
+        internal DAL.Interfaces.ICargoPrendaDAL DalCargos { get; set; }
         private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
@@ -47,6 +49,7 @@ namespace BLL
         public Contratacion() : this(new DAL.Contratacion(), new DAL.Cliente(), new DAL.Empleado(), new DAL.PlanSuscripcion())
         {
             dalPromocion = new DAL.Promocion();
+            DalCargos    = new DAL.CargoPrenda();
         }
 
         public Contratacion(DAL.Interfaces.IContratacionDAL dalContratacion, DAL.Interfaces.IClienteDAL dalCliente,
@@ -162,6 +165,15 @@ namespace BLL
 
                 ValidarCupo(cliente, plan);
 
+                // Plan igual o más barato con el período vigente: rige al vencer, así que no se registra
+                // ahora (antes el plan y su límite cambiaban el mismo día del cobro).
+                var planActual = cliente.IdPlan.HasValue && cliente.IdPlan.Value != idPlan
+                    ? dalPlan.ObtenerPorId(cliente.IdPlan.Value) : null;
+                if (Politicas.PoliticaCambioPlan.EsCambioSinUpgradeConPeriodoVigente(cliente, planActual, idPlan, plan.Precio, DateTime.Today))
+                    throw new BE.AppException("err.bll.contratacion.cambio_plan_vigente",
+                        "El cambio a un plan igual o más barato rige al vencer el período pagado de '{0}' (el {1:d}). Registralo a partir de esa fecha.",
+                        planActual.Nombre, Politicas.PoliticaCambioPlan.VencimientoPagado(cliente, DateTime.Today));
+
                 // Un cliente no puede tener dos contrataciones pendientes de pago a la vez (además
                 // lo garantiza el índice único UX_Contratacion_UnaPendientePorCliente).
                 if (dalContratacion.ObtenerPendientesDePago().Exists(c => c.IdCliente == idCliente))
@@ -268,6 +280,7 @@ namespace BLL
                 Bruto = r.Bruto, Descuento = r.Descuento, CreditoCambioPlan = r.CreditoCambioPlan,
                 NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido
             };
+            SumarCargos(liq, CargosPendientes(contratacion.IdCliente));
             if (idMedioPago.HasValue)
             {
                 var medio = ValidarMedioPago(idMedioPago, requerido: true);
@@ -298,11 +311,13 @@ namespace BLL
             foreach (var c in contrataciones)
             {
                 var r = ResolverDescuento(c, dalPlan.ObtenerPorId(c.IdPlan), dalCliente.ObtenerPorId(c.IdCliente), promos);
-                resultado[c.IdContratacion] = new BE.LiquidacionContratacion
+                var liq = new BE.LiquidacionContratacion
                 {
                     Bruto = r.Bruto, Descuento = r.Descuento, CreditoCambioPlan = r.CreditoCambioPlan,
                     NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido
                 };
+                SumarCargos(liq, CargosPendientes(c.IdCliente));
+                resultado[c.IdContratacion] = liq;
             }
             return resultado;
         }
@@ -347,25 +362,31 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.cobra_el_vendedor",
                     "Quien registró la contratación no puede cobrarla: el cobro lo confirma otra persona de Caja.");
             var descuento = ResolverDescuento(actual, plan, cliente, ObtenerPromocionesVigentes());
+            // PN04: los cargos por daño o pérdida pendientes se cobran junto con el período (igual que
+            // el cobro de N01); se liquidan en la misma transacción del cobro.
+            var cargos = CargosPendientes(cliente.IdCliente);
+            decimal totalCargos = cargos.Sum(x => x.Monto);
+            decimal totalACobrar = descuento.Total + totalCargos;
             // Caja confirmó el importe de la «Liquidación» que vio: si cambió (venció una promoción,
-            // se consumió el crédito), no se cobra un monto distinto del confirmado.
-            if (importeConfirmado.HasValue && descuento.Total != importeConfirmado.Value)
+            // se consumió el crédito, apareció un cargo), no se cobra un monto distinto del confirmado.
+            if (importeConfirmado.HasValue && totalACobrar != importeConfirmado.Value)
                 throw new BE.AppException("err.bll.contratacion.importe_cambiado",
                     "El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Volvé a calcular el importe y confirmá de nuevo.",
-                    importeConfirmado.Value, descuento.Total);
+                    importeConfirmado.Value, totalACobrar);
 
             // "Calcular recargo y valor de cuota" («Detalle de financiación»): el recargo se suma al total
             // confirmado; con un medio que no financia, financiacion queda en 1 pago sin recargo.
-            var financiacion = Politicas.PoliticaCuotas.Financiar(descuento.Total, planCuotas);
+            var financiacion = Politicas.PoliticaCuotas.Financiar(totalACobrar, planCuotas);
+            var idsCargo = cargos.Select(x => x.IdCargo).ToList();
 
             // "Emitir comprobante".
             string numeroComprobante = EmitirComprobante(actual.IdContratacion);
 
             // "Confirmar cobro": claim atómico (el UPDATE exige que siga PendientePago).
             if (!dalContratacion.ConfirmarCobro(actual.IdContratacion, idCaja, medio.IdMedioPago, numeroComprobante,
-                    descuento.Total, descuento.Descuento, descuento.Promocion?.IdPromocion,
+                    totalACobrar, descuento.Descuento, descuento.Promocion?.IdPromocion,
                     planCuotas?.IdPlanCuotas, planCuotas != null ? financiacion.Recargo : (decimal?)null,
-                    descuento.CreditoCambioPlan > 0 ? descuento.CreditoCambioPlan : (decimal?)null))
+                    descuento.CreditoCambioPlan > 0 ? descuento.CreditoCambioPlan : (decimal?)null, idsCargo))
                 throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
                     "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
 
@@ -385,13 +406,13 @@ namespace BLL
                 // El crédito consumido se descuenta en la BD (ConsumirCreditoEnTx); acá se refleja en el objeto.
                 if (descuento.UsaCreditoReferido)
                     cliente.DescuentoProximoCobro = Math.Max(0, cliente.DescuentoProximoCobro - descuento.Descuento);
-                // Upgrade (hubo crédito por el plan anterior): el período del plan nuevo arranca hoy.
+                // Upgrade: el período del plan nuevo arranca hoy (aunque el crédito sea 0 porque el total ya era 0).
                 suscripcion = clienteBLL.ActivarSuscripcionDesdeContratacion(modulo, cliente, actual.IdPlan, actual.Modalidad,
-                    descuento.UsaCreditoReferido ? descuento.Descuento : 0m, iniciarHoy: descuento.CreditoCambioPlan > 0);
+                    descuento.UsaCreditoReferido ? descuento.Descuento : 0m, iniciarHoy: descuento.EsUpgrade);
             }
             catch
             {
-                Compensar(modulo, actual);
+                Compensar(modulo, actual, idsCargo);
                 throw;
             }
 
@@ -423,7 +444,8 @@ namespace BLL
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.CobroSuscripcion,
                 $"Contratación #{actual.IdContratacion} cobrada y suscripción activada — " +
                 $"{actual.NombreCliente} — Plan {actual.NombrePlan} — Comprobante {numeroComprobante} — " +
-                $"Importe ${descuento.Total}" +
+                $"Importe ${totalACobrar}" +
+                (cargos.Count > 0 ? $" (incluye {cargos.Count} cargo(s) por daño o pérdida: ${totalCargos})" : "") +
                 (planCuotas != null && financiacion.CantidadCuotas > 1
                     ? $" en {financiacion.CantidadCuotas} cuotas con tarjeta de crédito (recargo ${financiacion.Recargo})" : "") +
                 (descuento.Descuento > 0
@@ -439,6 +461,8 @@ namespace BLL
                 Bruto = descuento.Bruto,
                 Descuento = descuento.Descuento,
                 CreditoCambioPlan = descuento.CreditoCambioPlan,
+                Cargos = totalCargos,
+                CantidadCargos = cargos.Count,
                 NombrePromocion = descuento.Promocion?.Nombre,
                 UsaCreditoReferido = descuento.UsaCreditoReferido,
                 NumeroComprobante = numeroComprobante,
@@ -579,9 +603,9 @@ namespace BLL
             return plan;
         }
 
-        private void Compensar(string modulo, BE.Contratacion actual)
+        private void Compensar(string modulo, BE.Contratacion actual, IList<int> idsCargo = null)
         {
-            try { dalContratacion.ReabrirPago(actual.IdContratacion); }
+            try { dalContratacion.ReabrirPago(actual.IdContratacion, idsCargo); }
             catch (Exception ex)
             {
                 // Peor caso: el cobro quedó registrado y no se pudo reabrir. Se deja constancia de
@@ -627,8 +651,19 @@ namespace BLL
             // los días no usados del plan actual se descuentan del cobro (BLL.Politicas.PoliticaCambioPlan).
             var planActual = cliente?.IdPlan != null && cliente.IdPlan.Value != c.IdPlan
                 ? dalPlan.ObtenerPorId(cliente.IdPlan.Value) : null;
+            r.EsUpgrade         = Politicas.PoliticaCambioPlan.EsUpgrade(cliente, planActual, c.IdPlan, precio, DateTime.Today);
             r.CreditoCambioPlan = Politicas.PoliticaCambioPlan.Credito(cliente, planActual, c.IdPlan, precio, DateTime.Today, r.Total);
             return r;
+        }
+
+        // PN04: cargos por daño o pérdida pendientes del cliente (vacío si no hay DAL de cargos).
+        private List<BE.CargoPrenda> CargosPendientes(int idCliente) =>
+            DalCargos?.ObtenerPendientesPorCliente(idCliente) ?? new List<BE.CargoPrenda>();
+
+        private static void SumarCargos(BE.LiquidacionContratacion liq, List<BE.CargoPrenda> cargos)
+        {
+            liq.Cargos         = cargos.Sum(x => x.Monto);
+            liq.CantidadCargos = cargos.Count;
         }
 
         // Best-effort: sin DAL de promociones, o si la tabla aún no existe, se cobra sin promociones.

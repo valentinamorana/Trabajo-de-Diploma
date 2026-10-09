@@ -316,7 +316,7 @@ valor de cada cuota cuando se pagó con tarjeta de crédito.
 
 Pasos de `ConfirmarCobro`:
 1. Revalida el estado, el medio de pago (catálogo `MedioPago`), el plan de cuotas (`ResolverCuotas`), el plan, el cupo y que el importe sea el confirmado.
-2. **Claim atómico** que emite el comprobante `CMP-NNNNNN-AAAAMMDD` y guarda el plan de cuotas y el recargo (si pagó con tarjeta de crédito).
+2. **Claim atómico** que emite el comprobante `CMP-NNNNNN-AAAAMMDD`, guarda el plan de cuotas y el recargo (si pagó con tarjeta de crédito) y, en la misma transacción, liquida los cargos por daño o pérdida pendientes del cliente (PN04) que se sumaron al importe.
 3. Activa la suscripción con el Builder (el período va a continuación del vencimiento vigente).
 4. ¿Referido? Sí: acredita $1000 al referente.
 5. Guarda la vigencia y el referente acreditado («Constancia de suscripción»).
@@ -342,6 +342,8 @@ Pasos de `ConfirmarCobro`:
 | 15 | Activar una suscripción o corregir el plan sin pasar por Contratación + Caja es exclusivo del Administrador | `Cliente.ActivarSuscripcion`, `PuedeCorregirPlanDirectamente` | `Cliente_ActivarSuscripcion_NoAdministrador_Rechaza` |
 | 16 | Solo la **tarjeta de crédito** permite pagar en cuotas (`MedioPago.PermiteCuotas`); con otro medio se cobra en un solo pago | `ResolverCuotas` (`cuotas_medio`) | `ConfirmarCobro_CuotasConTarjetaDeDebito_*`, `ConfirmarCobro_MedioQueNoFinancia_*` |
 | 17 | No más cuotas que los meses que cubre la modalidad (Mensual 1, Trimestral hasta 3, Anual hasta 12) y solo planes activos | `BE.PoliticaCuotas.PermiteModalidad` (`cuotas_modalidad`, `cuotas_invalidas`) | `ObtenerPlanesCuotas_*`, `ConfirmarCobro_MasCuotasQueMeses*`, `ConfirmarCobro_PlanDeCuotasInexistenteOInactivo_*` |
+| 19 | **Cambio a un plan igual o más barato con el período vigente: no se registra**; rige al vencer el período pagado (el sistema no guarda un "plan siguiente"). Un plan más caro rige desde hoy con crédito por los días no usados (upgrade), aunque el total quede en 0 | `ValidarContratacion` (`cambio_plan_vigente`), `BLL.Politicas.PoliticaCambioPlan` | `ValidarContratacion_PlanMasBarato*`, `ConfirmarCobro_UpgradeConTotalCero_IgualArrancaHoy` |
+| 20 | **Los cargos por daño o pérdida pendientes (PN04) se suman al cobro** y se liquidan en la misma transacción; si la activación falla vuelven a Pendiente | `ConfirmarCobro`, `DAL.Contratacion.ConfirmarCobro`/`ReabrirPago` | `CalcularImporte_ConCargosPendientes_*`, `ConfirmarCobro_ConCargosPendientes_*`, `ConfirmarCobro_FallaLaActivacion_LosCargosVuelvenAPendientes` |
 | 18 | Recargo por financiación según el plan (1 cuota sin interés; 3 cuotas 5 %; 6 cuotas 10 %; 12 cuotas 20 %), sobre el total con el descuento, redondeado a 2 decimales; la tarjeta financia y Caja cobra el total en un solo cobro | `BE.PoliticaCuotas.Financiar`, catálogo `PlanCuotas` | `PoliticaCuotas_Financiar_*`, `ConfirmarCobro_TarjetaCreditoEn3Cuotas*` |
 
 **Base de datos (3FN).**

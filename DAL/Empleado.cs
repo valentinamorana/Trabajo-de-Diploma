@@ -75,6 +75,32 @@ namespace DAL
             }
         }
 
+        // Crea el Empleado de un usuario nuevo del sistema: sin él, el usuario no puede figurar como
+        // vendedor, cajero o depósito de ninguna operación (BLL.BLLHelper.ResolverEmpleadoActivo).
+        // Idempotente: si el usuario ya tiene un Empleado vinculado, devuelve ese. El legajo se arma
+        // con el Id del usuario (U-0007) y el DNI queda vacío hasta que se cargue el legajo completo.
+        public int CrearParaUsuario(int idUsuario, string nombre, string apellido, string email, string puesto)
+        {
+            SqlParameter[] p =
+            {
+                new SqlParameter("@IdUsuario", idUsuario),
+                new SqlParameter("@Nombre",    string.IsNullOrWhiteSpace(nombre)   ? "-" : nombre.Trim()),
+                new SqlParameter("@Apellido",  string.IsNullOrWhiteSpace(apellido) ? "-" : apellido.Trim()),
+                new SqlParameter("@Email",     string.IsNullOrWhiteSpace(email) ? (object)DBNull.Value : email.Trim()),
+                new SqlParameter("@Puesto",    string.IsNullOrWhiteSpace(puesto) ? (object)DBNull.Value : puesto.Trim()),
+                new SqlParameter("@Legajo",    "U-" + idUsuario.ToString("0000"))
+            };
+            DataTable tabla = acceso.Leer(
+                "IF NOT EXISTS (SELECT 1 FROM Empleado WHERE IdUsuario = @IdUsuario) " +
+                "    INSERT INTO Empleado (Nombre, Apellido, DNI, Email, FechaIngreso, Puesto, Legajo, IdUsuario, DVH) " +
+                "    VALUES (@Nombre, @Apellido, N'', @Email, GETDATE(), @Puesto, @Legajo, @IdUsuario, 0); " +
+                "SELECT TOP 1 IdEmpleado FROM Empleado WHERE IdUsuario = @IdUsuario ORDER BY IdEmpleado;",
+                p);
+            int id = Convert.ToInt32(tabla.Rows[0]["IdEmpleado"]);
+            ActualizarDV(id);
+            return id;
+        }
+
         // Obtiene el empleado vinculado a un usuario del sistema.
         public BE.Empleado ObtenerPorUsuario(int idUsuario)
         {

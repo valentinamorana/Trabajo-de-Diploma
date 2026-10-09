@@ -108,7 +108,7 @@ namespace DAL
         public bool ConfirmarCobro(int idContratacion, int idCaja, int idMedioPago, string numeroComprobante,
                                    decimal importe, decimal descuento, int? idPromocion,
                                    int? idPlanCuotas = null, decimal? recargoCuotas = null,
-                                   decimal? creditoCambioPlan = null)
+                                   decimal? creditoCambioPlan = null, IList<int> idsCargo = null)
         {
             SqlParameter[] p =
             {
@@ -125,19 +125,35 @@ namespace DAL
                 new SqlParameter("@RecargoCuotas",     (object)recargoCuotas ?? DBNull.Value),
                 new SqlParameter("@CreditoCambioPlan", (object)creditoCambioPlan ?? DBNull.Value)
             };
+            bool ok = false;
             try
             {
-                // "Claim" atómico: solo una sesión puede pasar de PendientePago (0) a Pagada.
-                bool ok = acceso.Escribir(
-                    "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, IdMedioPago = @IdMedioPago, " +
-                    "NumeroComprobante = @NumeroComprobante, FechaComprobante = @Ahora, " +
-                    "Importe = @Importe, DescuentoAplicado = @Descuento, IdPromocion = @IdPromocion, " +
-                    "IdPlanCuotas = @IdPlanCuotas, RecargoCuotas = @RecargoCuotas, CreditoCambioPlan = @CreditoCambioPlan, " +
-                    "FechaResolucion = @Ahora WHERE IdContratacion = @IdContratacion AND Estado = 0", p) > 0;
-                if (ok) ActualizarDV(idContratacion);
-                return ok;
+                // "Claim" atómico: solo una sesión puede pasar de PendientePago (0) a Pagada. En la misma
+                // transacción se liquidan los cargos por daño o pérdida (PN04) que se suman a este cobro.
+                acceso.EjecutarTransaccion((cn, tx) =>
+                {
+                    using (var cmd = new SqlCommand(
+                        "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, IdMedioPago = @IdMedioPago, " +
+                        "NumeroComprobante = @NumeroComprobante, FechaComprobante = @Ahora, " +
+                        "Importe = @Importe, DescuentoAplicado = @Descuento, IdPromocion = @IdPromocion, " +
+                        "IdPlanCuotas = @IdPlanCuotas, RecargoCuotas = @RecargoCuotas, CreditoCambioPlan = @CreditoCambioPlan, " +
+                        "FechaResolucion = @Ahora WHERE IdContratacion = @IdContratacion AND Estado = 0", cn, tx))
+                    {
+                        cmd.Parameters.AddRange(p);
+                        ok = cmd.ExecuteNonQuery() > 0;
+                        cmd.Parameters.Clear();
+                    }
+                    if (!ok) return;
+                    if (idsCargo != null && idsCargo.Count > 0 &&
+                        !new CargoPrenda().MarcarCobradosEnTx(cn, tx, new List<int>(idsCargo), DateTime.Now))
+                        throw new BE.AppException("err.bll.cobro.cargo_concurrente",
+                            "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.");
+                });
             }
+            catch (BE.AppException) { throw; }
             catch (Exception ex) { throw new Exception("Error al confirmar el cobro de la contratación.", ex); }
+            if (ok) ActualizarDV(idContratacion);
+            return ok;
         }
 
         public void RegistrarVigencia(int idContratacion, DateTime desde, DateTime hasta, int? idReferenteAcreditado = null)
@@ -159,11 +175,19 @@ namespace DAL
             catch (Exception ex) { throw new Exception("Error al registrar la vigencia de la contratación.", ex); }
         }
 
-        public void ReabrirPago(int idContratacion)
+        public void ReabrirPago(int idContratacion, IList<int> idsCargo = null)
         {
             SqlParameter[] p = { new SqlParameter("@IdContratacion", idContratacion) };
             try
             {
+                // Los cargos de PN04 que se habían liquidado con este cobro vuelven a quedar pendientes.
+                if (idsCargo != null)
+                    foreach (int idCargo in idsCargo)
+                        acceso.Escribir(
+                            "UPDATE CargoPrenda SET Estado = @Pendiente, FechaCobro = NULL WHERE IdCargo = @IdCargo AND Estado = @Cobrado",
+                            new[] { new SqlParameter("@IdCargo", idCargo),
+                                    new SqlParameter("@Pendiente", (int)BE.EstadoCargo.Pendiente),
+                                    new SqlParameter("@Cobrado", (int)BE.EstadoCargo.Cobrado) });
                 acceso.Escribir(
                     "UPDATE Contratacion SET Estado = 0, IdCaja = NULL, IdMedioPago = NULL, NumeroComprobante = NULL, " +
                     "FechaComprobante = NULL, Importe = NULL, DescuentoAplicado = NULL, IdPromocion = NULL, " +

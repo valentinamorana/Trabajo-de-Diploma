@@ -126,9 +126,9 @@ classDiagram
     +ObtenerPendientesDePago() List~Contratacion~
     +ObtenerPorId(int) Contratacion
     +Alta(Contratacion) int
-    +ConfirmarCobro(int,  int,  int,  string,  decimal,  decimal,  int?,  int?,  decimal?,  decimal?) bool
+    +ConfirmarCobro(int,  int,  int,  string,  decimal,  decimal,  int?,  int?,  decimal?,  decimal?,  IList~int~) bool
     +RegistrarVigencia(int,  DateTime,  DateTime,  int?) void
-    +ReabrirPago(int) void
+    +ReabrirPago(int,  IList~int~) void
     +RegistrarIntentoFallido(int,  int?,  string,  int,  int) ResultadoIntentoPago
     +ObtenerIntentos(int) List~IntentoPago~
     +ObtenerMediosPago() List~MedioPago~

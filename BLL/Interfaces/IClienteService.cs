@@ -54,5 +54,8 @@ namespace BLL.Interfaces
 
         // Bloque 1 — Reanuda una suscripción pausada, sin modificar la fecha de vencimiento.
         void ReanudarPausa(string modulo, BE.Cliente cliente);
+
+        // PN02, nodo a11 — aplica los cambios de plan programados cuya fecha llegó.
+        int AplicarCambiosDePlanProgramados(System.DateTime hoy);
     }
 }

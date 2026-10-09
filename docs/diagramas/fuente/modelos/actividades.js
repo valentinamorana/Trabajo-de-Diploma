@@ -91,7 +91,7 @@ module.exports = [
       N('a19', 'accion', 'C', 'Elegir plan y modalidad'),
       N('a15', 'accion', 'V', 'Estimar importe a abonar en Caja'),
       N('a6', 'accion', 'V', 'Registrar contratación'),
-      N('d3', 'decision', 'V', '¿Contratación válida? (cliente y plan activos, cupo, sin otra pendiente, sin bajar de plan con el período vigente)'),
+      N('d3', 'decision', 'V', '¿Contratación válida?'),
       N('a7', 'accion', 'V', 'Informar motivo'),
       N('a16', 'accion', 'J', 'Consultar cola de pendientes de pago'),
       N('a8', 'accion', 'J', 'Calcular importe (un solo descuento; crédito si cambia a un plan más caro; más los cargos por daño o pérdida pendientes)'),

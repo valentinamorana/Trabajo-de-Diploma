@@ -251,6 +251,9 @@ namespace GUI
                 if (liq.CreditoCambioPlan > 0)
                     lblImporte.Text += "\n" + string.Format(Tr("lbl.contr.upgrade",
                         "Plan superior: rige desde hoy (crédito de {0:C2} por los días no usados)."), liq.CreditoCambioPlan);
+                if (liq.CambioProgramadoDesde.HasValue)
+                    lblImporte.Text += "\n" + string.Format(Tr("lbl.contr.programado",
+                        "Plan igual o más barato: el plan actual sigue hasta el {0:d} y desde ese día rige el nuevo."), liq.CambioProgramadoDesde.Value);
                 if (liq.Cargos > 0)
                     lblImporte.Text += "\n" + string.Format(Tr("lbl.contr.cargos",
                         "Incluye {0} cargo(s) por daño o pérdida de prendas: {1:C2}."), liq.CantidadCargos, liq.Cargos);

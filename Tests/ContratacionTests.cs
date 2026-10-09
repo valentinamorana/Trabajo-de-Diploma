@@ -1262,17 +1262,23 @@ namespace Tests
             CollectionAssert.AreEqual(new[] { idCargo }, ctx.DalContratacion.CargosReabiertos.ToArray());
         }
 
-        // Downgrade o cambio lateral con el período vigente: rige al vencer, así que no se registra
-        // (antes el plan y su límite cambiaban el día del cobro, contra el nodo a11 del diagrama).
+        // Downgrade o cambio lateral con el período vigente: se contrata y se cobra, y el plan nuevo rige
+        // al vencer la vigente (nodo a11 del diagrama). La liquidación avisa desde cuándo.
         [TestMethod]
-        public void ValidarContratacion_PlanMasBaratoConPeriodoVigente_LoRechaza()
+        public void PlanMasBaratoConPeriodoVigente_SeContrata_YLaLiquidacionDiceDesdeCuandoRige()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
             ctx.DalPlan.Planes = new List<BE.PlanSuscripcion> { PlanPremium(), PlanBasico() };
             ctx.DalCliente.ClientePorId.IdPlan = 1;   // Premium vigente 15 días más
             ctx.DalCliente.ClientePorId.FechaVencimiento = DateTime.Today.AddDays(15);
-            EsperarError(() => ctx.Crear().ValidarContratacion(10, 2), "err.bll.contratacion.cambio_plan_vigente");
+
+            Assert.AreEqual(2, ctx.Crear().ValidarContratacion(10, 2).IdPlan);
+            var c = ctx.Pendiente();
+            c.IdPlan = 2;
+            var liq = ctx.Crear().CalcularImporte(c);
+            Assert.AreEqual(DateTime.Today.AddDays(15), liq.CambioProgramadoDesde);
+            Assert.AreEqual(0m, liq.CreditoCambioPlan, "No es upgrade: sin crédito.");
         }
 
         [TestMethod]

@@ -63,6 +63,7 @@ namespace Tests.Fakes
         public void Baja(string modulo, BE.Cliente cliente) { }
         public BE.EstadoComercialCliente ObtenerEstadoComercial(BE.Cliente cliente, int prendasSolicitadas) => null;
         public void ReanudarPausa(string modulo, BE.Cliente cliente) { }
+        public int AplicarCambiosDePlanProgramados(System.DateTime hoy) => 0;
         public List<BE.Cliente> Filtrar(IEnumerable<BE.Cliente> clientes, string texto) => new List<BE.Cliente>(clientes ?? new List<BE.Cliente>());
         public List<BE.MedioPago> ObtenerMetodosPago(string metodoActual = null) => new List<BE.MedioPago>();
     }

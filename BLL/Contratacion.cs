@@ -165,15 +165,6 @@ namespace BLL
 
                 ValidarCupo(cliente, plan);
 
-                // Plan igual o más barato con el período vigente: rige al vencer, así que no se registra
-                // ahora (antes el plan y su límite cambiaban el mismo día del cobro).
-                var planActual = cliente.IdPlan.HasValue && cliente.IdPlan.Value != idPlan
-                    ? dalPlan.ObtenerPorId(cliente.IdPlan.Value) : null;
-                if (Politicas.PoliticaCambioPlan.EsCambioSinUpgradeConPeriodoVigente(cliente, planActual, idPlan, plan.Precio, DateTime.Today))
-                    throw new BE.AppException("err.bll.contratacion.cambio_plan_vigente",
-                        "El cambio a un plan igual o más barato rige al vencer el período pagado de '{0}' (el {1:d}). Registralo a partir de esa fecha.",
-                        planActual.Nombre, Politicas.PoliticaCambioPlan.VencimientoPagado(cliente, DateTime.Today));
-
                 // Un cliente no puede tener dos contrataciones pendientes de pago a la vez (además
                 // lo garantiza el índice único UX_Contratacion_UnaPendientePorCliente).
                 if (dalContratacion.ObtenerPendientesDePago().Exists(c => c.IdCliente == idCliente))
@@ -278,7 +269,8 @@ namespace BLL
             var liq = new BE.LiquidacionContratacion
             {
                 Bruto = r.Bruto, Descuento = r.Descuento, CreditoCambioPlan = r.CreditoCambioPlan,
-                NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido
+                NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido,
+                CambioProgramadoDesde = r.CambioProgramadoDesde
             };
             SumarCargos(liq, CargosPendientes(contratacion.IdCliente));
             if (idMedioPago.HasValue)
@@ -314,7 +306,8 @@ namespace BLL
                 var liq = new BE.LiquidacionContratacion
                 {
                     Bruto = r.Bruto, Descuento = r.Descuento, CreditoCambioPlan = r.CreditoCambioPlan,
-                    NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido
+                    NombrePromocion = r.Promocion?.Nombre, UsaCreditoReferido = r.UsaCreditoReferido,
+                    CambioProgramadoDesde = r.CambioProgramadoDesde
                 };
                 SumarCargos(liq, CargosPendientes(c.IdCliente));
                 resultado[c.IdContratacion] = liq;
@@ -461,6 +454,7 @@ namespace BLL
                 Bruto = descuento.Bruto,
                 Descuento = descuento.Descuento,
                 CreditoCambioPlan = descuento.CreditoCambioPlan,
+                CambioProgramadoDesde = descuento.CambioProgramadoDesde,
                 Cargos = totalCargos,
                 CantidadCargos = cargos.Count,
                 NombrePromocion = descuento.Promocion?.Nombre,
@@ -652,6 +646,9 @@ namespace BLL
             var planActual = cliente?.IdPlan != null && cliente.IdPlan.Value != c.IdPlan
                 ? dalPlan.ObtenerPorId(cliente.IdPlan.Value) : null;
             r.EsUpgrade         = Politicas.PoliticaCambioPlan.EsUpgrade(cliente, planActual, c.IdPlan, precio, DateTime.Today);
+            // Plan igual o más barato con el período vigente: rige al vencer (nodo a11), no hoy.
+            if (Politicas.PoliticaCambioPlan.EsCambioProgramado(cliente, planActual, c.IdPlan, precio, DateTime.Today))
+                r.CambioProgramadoDesde = Politicas.PoliticaCambioPlan.VencimientoPagado(cliente, DateTime.Today);
             r.CreditoCambioPlan = Politicas.PoliticaCambioPlan.Credito(cliente, planActual, c.IdPlan, precio, DateTime.Today, r.Total);
             return r;
         }

@@ -19,6 +19,14 @@ namespace BE
         // Nombre del plan (cargado por JOIN, no persiste) La tabla no guarda NombrePlan, ya está en la tabla PlanSuscripcion
         public string NombrePlan { get; set; }
 
+        // PN02 (nodo a11): cambio a un plan igual o más barato con el período vigente. El plan actual
+        // sigue hasta FechaCambioPlan (fin del período pagado) y desde ese día rige IdPlanSiguiente
+        // (lo aplica BLL.Cliente.AplicarCambiosDePlanProgramados). Null si no hay cambio programado.
+        public int? IdPlanSiguiente { get; set; }
+        public string NombrePlanSiguiente { get; set; }   // por JOIN, no persiste
+        public DateTime? FechaCambioPlan { get; set; }
+        public bool TieneCambioDePlanProgramado => IdPlanSiguiente.HasValue && FechaCambioPlan.HasValue;
+
         // Cantidad de prendas actualmente en uso por este cliente.
         public int StockUtilizado { get; set; }
 

@@ -8,10 +8,12 @@ flowchart LR
     c4(["CU03-CAJ Registrar Intento y Cancelar Contratación"])
     c5(["CU02-VTA Asentar Desistimiento"])
     c6(["CU04-CAJ Financiar en Cuotas"])
+    c7(["CU05-CAJ Anular Contratación"])
   end
   V --- c1
   C --- c2
   C --- c4
+  C --- c7
   c2 -. "«include»" .-> c3
   c5 -. "«extend»" .-> c1
   c6 -. "«extend»" .-> c2

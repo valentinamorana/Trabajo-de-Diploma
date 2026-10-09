@@ -18,7 +18,9 @@ namespace DAL
         {
             "Nombre", "Apellido", "DNI", "Email", "MetodoPago",
             "IdPlan", "FechaVencimiento", "FechaLimiteGracia", "FechaPausaHasta",
-            "DescuentoProximoCobro", "IdClienteReferente", "Activo"
+            "DescuentoProximoCobro", "IdClienteReferente", "Activo",
+            // PN02: el cambio de plan programado también define qué plan rige (y qué se cobra).
+            "IdPlanSiguiente", "FechaCambioPlan"
         };
 
         // Recalcula el DVH de la fila del cliente + el DVV de la tabla desde los DVH almacenados
@@ -46,12 +48,14 @@ namespace DAL
                     "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
                     "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
                     "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
+                    "       c.IdPlanSiguiente, c.FechaCambioPlan, ps.Nombre AS NombrePlanSiguiente, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
                     "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
                     "       ISNULL(stock.StockUtilizado, 0) AS StockUtilizado " +
                     "FROM Cliente c " +
                     "LEFT JOIN PlanSuscripcion p ON p.IdPlan = c.IdPlan " +
+                    "LEFT JOIN PlanSuscripcion ps ON ps.IdPlan = c.IdPlanSiguiente " +
                     "LEFT JOIN ( " +
                     "    SELECT IdClienteActual, COUNT(*) AS StockUtilizado " +
                     "    FROM Prenda " +
@@ -87,6 +91,7 @@ namespace DAL
                     "       c.MetodoPago, c.IdPlan, c.FechaAlta, c.FechaVencimiento, c.FechaNacimiento, " +
                     "       c.FechaLimiteGracia, c.FechaPausaHasta, c.IdClienteReferente, " +
                     "       c.DescuentoProximoCobro, c.BeneficioReferidoOtorgado, " +
+                    "       c.IdPlanSiguiente, c.FechaCambioPlan, ps.Nombre AS NombrePlanSiguiente, " +
                     "       p.Nombre AS NombrePlan, " +
                     "       ISNULL(p.LimitePrendas, 0) AS LimitePrendas, " +
                     "       ISNULL(p.Precio, 0) AS PrecioPlan, " +
@@ -94,6 +99,7 @@ namespace DAL
                     "        AND pr.Estado = @EstadoEnUso) AS StockUtilizado " +
                     "FROM Cliente c " +
                     "LEFT JOIN PlanSuscripcion p ON p.IdPlan = c.IdPlan " +
+                    "LEFT JOIN PlanSuscripcion ps ON ps.IdPlan = c.IdPlanSiguiente " +
                     "WHERE c.IdCliente = @IdCliente AND c.Activo = 1",
                     p);
 
@@ -214,6 +220,8 @@ namespace DAL
                 new SqlParameter("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value),
                 new SqlParameter("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value),
                 new SqlParameter("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado),
+                new SqlParameter("@IdPlanSiguiente",  (object)cliente.IdPlanSiguiente ?? DBNull.Value),
+                new SqlParameter("@FechaCambioPlan",  (object)cliente.FechaCambioPlan ?? DBNull.Value),
                 new SqlParameter("@IdCliente",        cliente.IdCliente)
             };
             acceso.Escribir(
@@ -221,7 +229,8 @@ namespace DAL
                 "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
                 "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
-                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
+                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado, " +
+                "IdPlanSiguiente=@IdPlanSiguiente, FechaCambioPlan=@FechaCambioPlan " +
                 "WHERE IdCliente=@IdCliente",
                 p);
             RecalcularDV(cliente.IdCliente);   // T07
@@ -247,7 +256,8 @@ namespace DAL
                 "Email=@Email, MetodoPago=@MetodoPago, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
                 "FechaLimiteGracia=@FechaLimiteGracia, FechaPausaHasta=@FechaPausaHasta, " +
-                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado " +
+                "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado, " +
+                "IdPlanSiguiente=@IdPlanSiguiente, FechaCambioPlan=@FechaCambioPlan " +
                 "WHERE IdCliente=@IdCliente",
                 conexion, tx))
             {
@@ -262,6 +272,8 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@FechaLimiteGracia", (object)cliente.FechaLimiteGracia ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FechaPausaHasta", (object)cliente.FechaPausaHasta ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@BeneficioReferidoOtorgado", cliente.BeneficioReferidoOtorgado);
+                cmd.Parameters.AddWithValue("@IdPlanSiguiente", (object)cliente.IdPlanSiguiente ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@FechaCambioPlan", (object)cliente.FechaCambioPlan ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IdCliente", cliente.IdCliente);
                 cmd.ExecuteNonQuery();
             }
@@ -363,6 +375,15 @@ namespace DAL
                                       : 0,
                 BeneficioReferidoOtorgado = row.Table.Columns.Contains("BeneficioReferidoOtorgado") && row["BeneficioReferidoOtorgado"] != DBNull.Value
                                       && Convert.ToBoolean(row["BeneficioReferidoOtorgado"]),
+                IdPlanSiguiente = row.Table.Columns.Contains("IdPlanSiguiente") && row["IdPlanSiguiente"] != DBNull.Value
+                                      ? (int?)Convert.ToInt32(row["IdPlanSiguiente"])
+                                      : null,
+                NombrePlanSiguiente = row.Table.Columns.Contains("NombrePlanSiguiente") && row["NombrePlanSiguiente"] != DBNull.Value
+                                      ? row["NombrePlanSiguiente"].ToString()
+                                      : null,
+                FechaCambioPlan = row.Table.Columns.Contains("FechaCambioPlan") && row["FechaCambioPlan"] != DBNull.Value
+                                      ? (DateTime?)Convert.ToDateTime(row["FechaCambioPlan"])
+                                      : null,
                 StockUtilizado = Convert.ToInt32(row["StockUtilizado"])
             };
         }

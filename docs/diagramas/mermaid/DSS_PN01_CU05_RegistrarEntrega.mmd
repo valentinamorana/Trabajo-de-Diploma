@@ -2,13 +2,21 @@ sequenceDiagram
   autonumber
   actor L as Depósito / Logística
   participant F as Pedidos<br/>Realizados
+  participant I as InvocadorPedido
+  participant K as EntregaCommand
   participant B as BLL.Pedido
   participant D as DAL.Pedido
   participant H as DAL.Pedido<br/>Historial
+  Note over F,K: Patrón Command: PedidosRealizados (Client) arma EntregaCommand y se lo entrega a InvocadorPedido (Invoker), BLL.Pedido es el Receiver. No es reversible
   L->>F: Selecciona un pedido Despachado y pulsa Marcar Entregado
   F->>B: ObtenerPorId(id)  [relee el estado actual]
   B-->>F: pedido
-  F->>B: MarcarEntregado(modulo, pedido)
+  F-->>L: Solicita confirmar la entrega
+  L->>F: Confirma
+  F->>I: TomarOrden(new EntregaCommand(receptor, pedido, modulo))
+  F->>I: ProcesarOrdenes()
+  I->>K: Ejecutar()
+  K->>B: MarcarEntregado(modulo, pedido)
   Note over B: Exigir(PedidosRealizadosEditar) · pedido.PuedeEntregarse()
   alt El pedido no está Despachado
     B-->>F: AppException(entregar_estado)

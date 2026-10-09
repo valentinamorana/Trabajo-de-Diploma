@@ -287,12 +287,33 @@ namespace BLL
             // "regalaban" (el período nuevo arrancaba desde el vencimiento ya corrido).
             DescontarPausaNoUsada(cliente);
 
+            // PN02, nodo a11: un plan igual o más barato con el período vigente rige al vencer la vigente.
+            // Hasta ese día sigue el plan actual (con su límite de prendas) y el nuevo queda programado.
+            // Un upgrade (iniciarHoy) rige desde hoy. Renovar el mismo plan, o activar con el período
+            // vencido, rige ya y descarta un cambio que estuviera programado.
+            DateTime? rigeDesde = null;
+            if (!iniciarHoy && cliente.IdPlan.HasValue && cliente.IdPlan.Value != plan.IdPlan
+                && cliente.FechaVencimiento.HasValue && cliente.FechaVencimiento.Value.Date > DateTime.Today)
+                rigeDesde = cliente.FechaVencimiento.Value.Date;
+
             var builder = BE.Builders.SuscripcionBuilderFactory.Crear(modalidad);
             var suscripcion = BE.Builders.DirectorSuscripcion.Construir(builder, cliente, plan, iniciarHoy);
 
-            cliente.IdPlan           = plan.IdPlan;
-            cliente.NombrePlan       = plan.Nombre;
-            cliente.LimitePrendas    = plan.LimitePrendas;
+            if (rigeDesde.HasValue)
+            {
+                cliente.IdPlanSiguiente     = plan.IdPlan;
+                cliente.NombrePlanSiguiente = plan.Nombre;
+                cliente.FechaCambioPlan     = rigeDesde;
+            }
+            else
+            {
+                cliente.IdPlan              = plan.IdPlan;
+                cliente.NombrePlan          = plan.Nombre;
+                cliente.LimitePrendas       = plan.LimitePrendas;
+                cliente.IdPlanSiguiente     = null;
+                cliente.NombrePlanSiguiente = null;
+                cliente.FechaCambioPlan     = null;
+            }
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
             // Un cobro exitoso deja la cuenta al día: limpia la gracia y cualquier pausa
             // (ProcesarPagoHandler ya hacía lo mismo con la gracia).
@@ -333,7 +354,8 @@ namespace BLL
 
                 bitacora.Registrar(modulo,
                     $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
-                    $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}",
+                    $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}" +
+                    (rigeDesde.HasValue ? $" — el plan rige desde el {rigeDesde:d} (cambio programado)" : ""),
                     BE.Criticidad.Media);
                 bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
                     $"Activación de suscripción: {cliente.NombreCompleto} — Plan {plan.Nombre} — " +
@@ -353,6 +375,35 @@ namespace BLL
             }
 
             return suscripcion;
+        }
+
+        // PN02, nodo a11 — Aplica los cambios de plan programados cuya fecha llegó: el plan siguiente
+        // pasa a ser el plan del cliente. Lo hace el sistema (al iniciar sesión), sin permiso de
+        // pantalla. Devuelve cuántos aplicó. Un cliente con más prendas en uso que el plan nuevo no
+        // puede armar pedidos hasta devolver (PN01 controla el cupo).
+        public int AplicarCambiosDePlanProgramados(DateTime hoy)
+        {
+            int aplicados = 0;
+            foreach (var c in dalCliente.ObtenerTodos().Where(x => x.TieneCambioDePlanProgramado && x.FechaCambioPlan.Value.Date <= hoy.Date))
+            {
+                string anterior = c.NombrePlan;
+                c.IdPlan          = c.IdPlanSiguiente;
+                c.IdPlanSiguiente = null;
+                c.FechaCambioPlan = null;
+                dalCliente.Modificar(c);   // recalcula el DV
+                aplicados++;
+                try
+                {
+                    bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
+                        $"Cambio de plan programado aplicado: {c.NombreCompleto} pasa de '{anterior}' a '{c.NombrePlanSiguiente}'",
+                        idCliente: c.IdCliente);
+                }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.Cliente] Bitácora: " + ex.Message); }
+            }
+            if (aplicados > 0)
+                try { bitacora.Registrar("Suscripciones", $"{aplicados} cambio(s) de plan programado(s) aplicado(s)", BE.Criticidad.Baja); }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.Cliente] Bitácora: " + ex.Message); }
+            return aplicados;
         }
 
         // Bloque 1 — Reanuda una suscripción pausada. La fecha de vencimiento NO se toca:

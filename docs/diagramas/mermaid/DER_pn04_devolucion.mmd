@@ -28,6 +28,8 @@ erDiagram
     int IdClienteReferente FK "NULL"
     decimal(10_2) DescuentoProximoCobro
     bit BeneficioReferidoOtorgado
+    int IdPlanSiguiente FK "NULL"
+    datetime FechaCambioPlan "NULL"
   }
   Pedido {
     int IdPedido PK

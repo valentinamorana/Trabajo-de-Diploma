@@ -1,5 +1,6 @@
 erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
+  PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
@@ -7,6 +8,8 @@ erDiagram
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Usuario ||--o{ DictamenContable : "IdUsuario"
   Promocion ||--o{ DictamenContable : "IdPromocion"
+  Promocion |o--o{ HistorialCobro : "IdPromocion"
+  Cliente ||--o{ HistorialCobro : "IdCliente"
   Usuario |o--o{ Promocion : "IdUsuarioAlta"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
@@ -147,4 +150,20 @@ erDiagram
     int IdClienteReferente FK "NULL"
     decimal(10_2) DescuentoProximoCobro
     bit BeneficioReferidoOtorgado
+    int IdPlanSiguiente FK "NULL"
+    datetime FechaCambioPlan "NULL"
+  }
+  HistorialCobro {
+    int IdCobro PK
+    int IdCliente FK
+    decimal(10_2) Importe
+    datetime FechaDeteccion
+    datetime FechaResolucion "NULL"
+    int Resultado
+    nvarchar(100) Actor "NULL"
+    int IdMedioPago FK "NULL"
+    nvarchar(50) NumeroComprobante "NULL"
+    int Modalidad "NULL"
+    decimal(10_2) DescuentoAplicado "NULL"
+    int IdPromocion FK "NULL"
   }

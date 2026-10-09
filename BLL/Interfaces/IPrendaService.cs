@@ -26,7 +26,7 @@ namespace BLL.Interfaces
 
         // Cambia el estado de una prenda validando las transiciones permitidas por negocio.
         // EnUso → Baja y EnLimpieza → Baja no pasan por acá: son de BLL.InspeccionDevolucion (con cargo).
-        void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null);
+        void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado);
 
         // CU01-CS-Verificar Disponibilidad (PN01): releyendo el estado real desde la base,
         // confirma si cada prenda de la selección sigue Disponible. Solo lectura.

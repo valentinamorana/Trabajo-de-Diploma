@@ -240,7 +240,7 @@ namespace Tests
             {
                 var bll = new Contexto().Crear();
                 foreach (var destino in bll.ObtenerTransicionesManuales(new BE.Prenda { Estado = origen }))
-                    bll.CambiarEstado("Test", new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = origen }, destino, "admin");
+                    bll.CambiarEstado("Test", new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = origen }, destino);
             }
         }
 

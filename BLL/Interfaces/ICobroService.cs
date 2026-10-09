@@ -10,9 +10,10 @@ namespace BLL.Interfaces
     public interface ICobroService
     {
         // Procesa un intento de cobro para el cliente indicado según la decisión tomada.
+        // El actor (quién cobró) lo toma la BLL de la sesión activa.
         Manejadores.ResultadoCobro Procesar(
             string modulo, BE.Cliente cliente, Manejadores.DecisionCobro decision,
-            BE.Builders.ModalidadCobro modalidad, string actor, int? idMedioPago = null);
+            BE.Builders.ModalidadCobro modalidad, int? idMedioPago = null);
 
         // Un cobro por ID (comprobante) y los medios de pago vigentes (N01).
         BE.Cobro ObtenerCobro(int idCobro);

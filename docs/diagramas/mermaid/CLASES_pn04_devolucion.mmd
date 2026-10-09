@@ -47,13 +47,13 @@ classDiagram
     +string Apellido
   }
   class BLL_InspeccionDevolucion["BLL.InspeccionDevolucion"] {
-    +AprobarReingreso(string,  Prenda,  string) void
-    +DarDeBajaConCargo(string,  Prenda,  string,  decimal,  string) int
-    +ReportarPerdida(string,  Prenda,  string,  decimal,  string) int
+    +AprobarReingreso(string,  Prenda) void
+    +DarDeBajaConCargo(string,  Prenda,  string,  decimal) int
+    +ReportarPerdida(string,  Prenda,  string,  decimal) int
     +PuedeReportarPerdida(Prenda,  Pedido) bool
   }
   class BLL_Prenda["BLL.Prenda"] {
-    +CambiarEstado(string,  Prenda,  EstadoPrenda,  string) void
+    +CambiarEstado(string,  Prenda,  EstadoPrenda) void
     +ObtenerTransicionesManuales(Prenda) List~EstadoPrenda~
     +ObtenerEnLimpieza() List~Prenda~
     +ObtenerHistorialMantenimiento(int) List~MantenimientoPrenda~
@@ -63,7 +63,7 @@ classDiagram
     +ObtenerPendientesPorCliente(int) List~CargoPrenda~
   }
   class BLL_ListaEspera["BLL.ListaEspera"] {
-    +NotificarSiCorresponde(int,  string) void
+    +NotificarSiCorresponde(int) void
   }
   class BLL_Pedido["BLL.Pedido"] {
     +ObtenerPorId(int) Pedido

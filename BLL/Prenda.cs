@@ -107,9 +107,10 @@ namespace BLL
         // NUNCA pasan por acá: el patrón State (BE.Estados) las permite a nivel de datos, pero las
         // dos llevan un cargo al cliente en la misma transacción, así que solo las hace
         // BLL.InspeccionDevolucion. Acá se rechazan siempre, venga de la pantalla que venga.
-        public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null)
+        public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
+            string actor = Sesion.Actor;   // quién abre el mantenimiento: lo resuelve la BLL, no la GUI
 
             // Patrón State: el propio objeto Estado actual decide si la transición es
             // válida y, si lo es, muta prenda.Estado directamente (igual que el ejemplo
@@ -184,7 +185,7 @@ namespace BLL
                 // Lista de Espera (mejora opcional): si alguien esperaba esta prenda,
                 // se la reserva (ventana de HORAS_RESERVA). No hace nada si nadie espera,
                 // ni si la tabla ListaEspera todavía no existe (BD sin migrar).
-                try { listaEsperaBLL.NotificarSiCorresponde(prenda.IdPrenda, actor); }
+                try { listaEsperaBLL.NotificarSiCorresponde(prenda.IdPrenda); }
                 catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.Prenda] Lista de Espera: {ex.Message}"); }
             }
 

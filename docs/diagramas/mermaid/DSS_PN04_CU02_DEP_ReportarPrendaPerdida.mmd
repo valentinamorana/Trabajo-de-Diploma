@@ -34,7 +34,7 @@ sequenceDiagram
     IN-->>F: AppException
     F-->>D: Rechaza la operación con el motivo (fin del caso de uso)
   end
-  IN->>IN: BajaConCargo(modulo, prenda, motivo, monto, actor, EnUso)
+  IN->>IN: BajaConCargo(modulo, prenda, motivo, monto, EnUso)
   alt Sin último cliente registrado
     IN-->>F: AppException(sin_cliente)
     F-->>D: Rechaza la operación (fin del caso de uso)

@@ -72,11 +72,11 @@ classDiagram
     +ObtenerEstadoComercial(Cliente,  int) EstadoComercialCliente
   }
   class BLL_Renovacion["BLL.Renovacion"] {
-    +Procesar(string,  Cliente,  DecisionRenovacion,  int?,  ModalidadCobro,  string,  DateTime?) ResultadoRenovacion
+    +Procesar(string,  Cliente,  DecisionRenovacion,  int?,  ModalidadCobro,  DateTime?) ResultadoRenovacion
     +ObtenerElegibles(DecisionRenovacion) List~Cliente~
   }
   class BLL_Cobro["BLL.Cobro"] {
-    +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  string,  int?) ResultadoCobro
+    +Procesar(string,  Cliente,  DecisionCobro,  ModalidadCobro,  int?) ResultadoCobro
     +ObtenerElegibles() List~Cliente~
     +PrevisualizarCobro(int,  ModalidadCobro) PrevisualizacionCobro
   }

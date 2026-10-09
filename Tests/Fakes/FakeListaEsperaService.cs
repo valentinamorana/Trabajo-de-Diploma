@@ -19,7 +19,7 @@ namespace Tests.Fakes
         public int CerrarSiReservadaVeces { get; private set; }
         public int EstaReservadaParaOtroVeces { get; private set; }
 
-        public void CerrarSiReservada(string modulo, int idPrenda, int idCliente, string actor)
+        public void CerrarSiReservada(string modulo, int idPrenda, int idCliente)
         {
             CerrarSiReservadaVeces++;
             if (CerrarSiReservadaLanza) throw new InvalidOperationException("Fallo simulado de Lista de Espera.");
@@ -33,9 +33,9 @@ namespace Tests.Fakes
         }
 
         // Resto del contrato: no ejercitado por estos tests, cuerpos mínimos.
-        public void Anotar(string modulo, int idPrenda, int idCliente, string actor) { }
-        public void Cancelar(string modulo, int idListaEspera, string actor) { }
-        public void NotificarSiCorresponde(int idPrenda, string actor) { }
+        public void Anotar(string modulo, int idPrenda, int idCliente) { }
+        public void Cancelar(string modulo, int idListaEspera) { }
+        public void NotificarSiCorresponde(int idPrenda) { }
         public List<int> ObtenerIdsReservadosParaOtro(int? idClienteSolicitante) => new List<int>();
         public List<BE.ListaEspera> ObtenerActivas() => new List<BE.ListaEspera>();
         public List<BE.ListaEspera> ObtenerPorPrenda(int idPrenda) => new List<BE.ListaEspera>();

@@ -10,7 +10,7 @@ namespace BLL.Interfaces
     public interface ICargoPrendaService
     {
         // Registra un cargo Pendiente para la prenda indicada, contra su último cliente conocido.
-        void RegistrarCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto, string actor = null);
+        void RegistrarCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto);
 
         // Valida motivo (obligatorio) y monto (mayor a cero); lanza AppException si no cumplen.
         void ValidarDatos(string motivo, decimal monto);

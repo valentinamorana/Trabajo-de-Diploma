@@ -130,11 +130,6 @@ namespace GUI
             // cmbMetodoPago
             //
             this.cmbMetodoPago.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbMetodoPago.Items.AddRange(new object[] {
-            "Efectivo",
-            "Débito",
-            "Crédito",
-            "Transferencia"});
             this.cmbMetodoPago.Location = new System.Drawing.Point(16, 298);
             this.cmbMetodoPago.Name = "cmbMetodoPago";
             this.cmbMetodoPago.Size = new System.Drawing.Size(340, 21);

@@ -132,6 +132,8 @@ namespace DAL
                 // transacción se liquidan los cargos por daño o pérdida (PN04) que se suman a este cobro.
                 acceso.EjecutarTransaccion((cn, tx) =>
                 {
+                    // T07: bloqueo del DV primero; el DV se recalcula antes del commit (más abajo).
+                    DigitoVerificador.Bloquear(cn, tx, DV_Tabla);
                     using (var cmd = new SqlCommand(
                         "UPDATE Contratacion SET Estado = @Estado, IdCaja = @IdCaja, IdMedioPago = @IdMedioPago, " +
                         "NumeroComprobante = @NumeroComprobante, FechaComprobante = @Ahora, " +
@@ -148,11 +150,12 @@ namespace DAL
                         !new CargoPrenda().MarcarCobradosEnTx(cn, tx, new List<int>(idsCargo), DateTime.Now))
                         throw new BE.AppException("err.bll.cobro.cargo_concurrente",
                             "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.");
+                    DigitoVerificador.ActualizarFilaEnTx(cn, tx, DV_Tabla, DV_Pk, DV_Columnas, idContratacion);
+                    DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, DigitoVerificador.OrdenPor(DV_Pk));
                 });
             }
             catch (BE.AppException) { throw; }
             catch (Exception ex) { throw new Exception("Error al confirmar el cobro de la contratación.", ex); }
-            if (ok) ActualizarDV(idContratacion);
             return ok;
         }
 
@@ -186,7 +189,7 @@ namespace DAL
                         acceso.Escribir(
                             "UPDATE CargoPrenda SET Estado = @Pendiente, FechaCobro = NULL WHERE IdCargo = @IdCargo AND Estado = @Cobrado",
                             new[] { new SqlParameter("@IdCargo", idCargo),
-                                    new SqlParameter("@Pendiente", (int)BE.EstadoCargo.Pendiente),
+                                    new SqlParameter("@Pendiente", (object)(int)BE.EstadoCargo.Pendiente),
                                     new SqlParameter("@Cobrado", (int)BE.EstadoCargo.Cobrado) });
                 acceso.Escribir(
                     "UPDATE Contratacion SET Estado = 0, IdCaja = NULL, IdMedioPago = NULL, NumeroComprobante = NULL, " +

@@ -2,9 +2,11 @@ erDiagram
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
+  MedioPago |o--o{ Cliente : "IdMedioPagoPreferido"
   PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   Cliente ||--o{ HistorialCobro : "IdCliente"
+  MedioPago |o--o{ HistorialCobro : "IdMedioPago"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
@@ -12,6 +14,7 @@ erDiagram
   Cliente |o--o{ Prenda : "IdUltimoCliente"
   PlanSuscripcion
   Cliente
+  MedioPago
   HistorialRenovacion
   HistorialCobro
   CargoPrenda

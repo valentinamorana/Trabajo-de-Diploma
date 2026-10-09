@@ -175,9 +175,8 @@ namespace GUI
             try
             {
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
-                var actor = BLL.Sesion.Actor;
-
-                var resultado = _bllCobro.Procesar(this.Text, cliente, decision, modalidad, actor, idMedioPago);
+                // El actor (quién cobra) lo resuelve la BLL desde la sesión.
+                var resultado = _bllCobro.Procesar(this.Text, cliente, decision, modalidad, idMedioPago);
 
                 lblResultado.ForeColor = resultado.Estado == BE.EstadoCobro.Pendiente ? Color.DarkOrange
                                          : resultado.Estado == BE.EstadoCobro.Suspendido ? Color.DarkRed

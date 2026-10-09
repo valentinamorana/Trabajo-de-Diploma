@@ -207,7 +207,7 @@ namespace GUI
                     c.Email ?? "—",
                     c.NombrePlan ?? sinPlan,
                     capacidad,
-                    c.MetodoPago,
+                    c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "—",
                     c.FechaAlta.ToString("d"),
                     vencStr,
                     expirado,
@@ -319,7 +319,7 @@ namespace GUI
             try
             {
                 clienteBLL.Baja(this.Text, cliente);
-                MostrarOk(Tr("msg.cli.eliminado", "Cliente '{0}' eliminado.", new object[] { cliente.NombreCompleto }));
+                MostrarOk(Tr("msg.cli.eliminado", "Cliente '{0}' dado de baja.", new object[] { cliente.NombreCompleto }));
                 CargarClientes();
             }
             catch (Exception ex)

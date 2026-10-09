@@ -6,8 +6,8 @@ erDiagram
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Empleado ||--o{ Pedido : "IdEmpleado"
   Empleado |o--o{ Pedido : "IdEmpleadoControl"
+  Empleado ||--o{ Pedido : "IdEmpleado"
   PedidoPrenda ||--o{ PedidoFaltante : "IdPedido"
   PedidoPrenda ||--o{ PedidoFaltante : "IdPrenda"
   Prenda ||--o{ PedidoFaltanteAlternativa : "IdPrendaAlternativa"
@@ -16,6 +16,7 @@ erDiagram
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Categoria |o--o{ Prenda : "Categoria"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
   Cliente
@@ -27,5 +28,6 @@ erDiagram
   PedidoFaltanteAlternativa
   PedidoHistorial
   Prenda
+  Categoria
   ListaEspera
   MantenimientoPrenda

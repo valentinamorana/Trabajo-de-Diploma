@@ -9,15 +9,18 @@ namespace BLL.Interfaces
     /// </summary>
     public interface IListaEsperaService
     {
+        // Ninguna operación recibe el actor: la BLL lo toma de la sesión (o usa el actor de
+        // sistema en los procesos automáticos, como liberar reservas vencidas).
+
         // Anota un cliente en la lista de espera de una prenda EnUso.
-        void Anotar(string modulo, int idPrenda, int idCliente, string actor);
+        void Anotar(string modulo, int idPrenda, int idCliente);
 
         // Cancela una anotación Pendiente o Reservada.
-        void Cancelar(string modulo, int idListaEspera, string actor);
+        void Cancelar(string modulo, int idListaEspera);
 
         // Si hay alguien esperando esta prenda, reserva la fila más antigua (FIFO).
         // Llamado desde BLL.Prenda.CambiarEstado al liberarse una prenda.
-        void NotificarSiCorresponde(int idPrenda, string actor);
+        void NotificarSiCorresponde(int idPrenda);
 
         // True si la prenda está reservada por Lista de Espera para un cliente distinto
         // al indicado — bloquea la asignación en BLL.Pedido.
@@ -25,7 +28,7 @@ namespace BLL.Interfaces
 
         // Si esta prenda estaba reservada para este cliente, cierra el ciclo (Convertida).
         // Llamado desde BLL.Pedido tras crear el pedido.
-        void CerrarSiReservada(string modulo, int idPrenda, int idCliente, string actor);
+        void CerrarSiReservada(string modulo, int idPrenda, int idCliente);
 
         // IDs de prenda reservados para otro cliente distinto al indicado (o todos, si es null).
         // Usado por BLL.Prenda.ObtenerDisponibles para ocultarlas a terceros.

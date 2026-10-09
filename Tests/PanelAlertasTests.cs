@@ -112,5 +112,22 @@ namespace Tests
         {
             Assert.AreEqual(0, Evaluar(0, 0, 2, 0, 0, reservadasEspera: 0).Count);
         }
+
+        // PN04 — pedidos atrasados (compra tácita: 30 días desde la entrega sin devolución).
+        [TestMethod]
+        public void Evaluar_PedidosAtrasados_AlertaAdvertencia()
+        {
+            var a = BLL.PanelAlertas.EvaluarAlertas(0, 0, 2, 0, 0, atrasados: 4).Single();
+            Assert.AreEqual(BE.NivelAlerta.Advertencia, a.Nivel);
+            Assert.AreEqual("alert.pedidos.atrasados", a.ClaveI18n);
+            Assert.AreEqual(4, a.Cantidad);
+        }
+
+        [TestMethod]
+        public void Evaluar_AtrasadosDesconocidoOCero_NoAlerta()
+        {
+            Assert.AreEqual(0, BLL.PanelAlertas.EvaluarAlertas(0, 0, 2, 0, 0, atrasados: 0).Count);
+            Assert.AreEqual(0, BLL.PanelAlertas.EvaluarAlertas(0, 0, 2, 0, 0, atrasados: X).Count);
+        }
     }
 }

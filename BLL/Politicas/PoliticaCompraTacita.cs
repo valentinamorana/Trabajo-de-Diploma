@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL.Politicas
 {
@@ -27,6 +29,18 @@ namespace BLL.Politicas
             var desde = FechaCompraTacita(pedido);
             return desde.HasValue && hoy.Date >= desde.Value;
         }
+
+        /// <summary>
+        /// PN04 — pedido atrasado: Entregado, SIN devolución registrada y con el plazo de la compra
+        /// tácita cumplido (30 días o más desde la entrega). Es el mismo umbral que habilita Reportar
+        /// Prenda Perdida: la lista de atrasados es la cola de "reclamar o reportar perdida".
+        /// </summary>
+        public static bool EstaAtrasado(BE.Pedido pedido, DateTime hoy) =>
+            pedido != null && !pedido.FechaDevolucion.HasValue && PlazoVencido(pedido, hoy);
+
+        /// <summary>Filtra los pedidos atrasados (ver <see cref="EstaAtrasado"/>).</summary>
+        public static List<BE.Pedido> Atrasados(IEnumerable<BE.Pedido> pedidos, DateTime hoy) =>
+            (pedidos ?? Enumerable.Empty<BE.Pedido>()).Where(p => EstaAtrasado(p, hoy)).ToList();
 
         /// <summary>
         /// Valida la regla y lanza AppException con el motivo: pedido no entregado (el cliente nunca

@@ -43,8 +43,12 @@ namespace Tests
             public FakeSugerenciaPromocionDAL DalSugerencia = new FakeSugerenciaPromocionDAL();
             public FakePlanSuscripcionDAL DalPlan = new FakePlanSuscripcionDAL { PlanPorId = PlanActivo() };
 
+            // "Analizar margen e impacto": clientes activos del plan (sin base de datos).
+            public int ClientesActivos;
+            public int ConteosDeClientes;
+
             public BLL.Promocion Crear()
-                => new BLL.Promocion(DalPromocion, DalSugerencia, DalPlan);
+                => new BLL.Promocion(DalPromocion, DalSugerencia, DalPlan, idPlan => { ConteosDeClientes++; return ClientesActivos; });
         }
 
         // ── CrearManual ───────────────────────────────────────────────────────
@@ -482,6 +486,142 @@ namespace Tests
             ctx.DalPromocion.Todas.Add(Promo(BE.EstadoPromocion.EnRevisionContable, idUsuarioAlta: 1));
 
             Assert.IsFalse(ctx.Crear().AnalizarMargenEImpacto(42).UsuarioPuedeDictaminar);
+        }
+
+        // ── Margen proyectado = beneficio estimado − costo del descuento (mensual) ──
+
+        [TestMethod]
+        public void AnalizarMargenEImpacto_Porcentaje_CalculaCostoSobreLosClientesActivosYConviene()
+        {
+            LoginComo(2);
+            var ctx = new Contexto { ClientesActivos = 8 };
+            var promo = Promo(BE.EstadoPromocion.EnRevisionContable);   // 10 % sobre el plan 1 (precio 1000)
+            promo.IdSugerenciaOrigen = 9;
+            ctx.DalPromocion.Todas.Add(promo);
+            ctx.DalSugerencia.SugerenciaPorId = new BE.SugerenciaPromocion
+            {
+                IdSugerencia = 9, BeneficioEstimado = 12000m, OrigenMetrica = BE.OrigenMetrica.Abandono
+            };
+
+            var a = ctx.Crear().AnalizarMargenEImpacto(42);
+
+            Assert.IsFalse(a.EsInformativa);
+            Assert.IsTrue(a.MargenCalculable);
+            Assert.AreEqual(1000m, a.PrecioPlan);
+            Assert.AreEqual(100m, a.DescuentoPorCliente, "10 % de 1000.");
+            Assert.AreEqual(8, a.ClientesActivosPlan);
+            Assert.AreEqual(800m, a.CostoDescuentoProyectado, "100 × 8 clientes.");
+            Assert.IsTrue(a.BeneficioDeSugerencia);
+            Assert.AreEqual(12000m, a.BeneficioEstimado);
+            Assert.AreEqual(11200m, a.MargenProyectado, "12000 − 800.");
+            Assert.AreEqual(true, a.Conviene);
+        }
+
+        [TestMethod]
+        public void AnalizarMargenEImpacto_MontoFijoAltaManual_UsaElMargenDeAdministracionYNoConviene()
+        {
+            LoginComo(2);
+            var ctx = new Contexto { ClientesActivos = 30 };
+            var promo = Promo(BE.EstadoPromocion.EnRevisionContable);
+            promo.TipoDescuento = BE.TipoDescuento.MontoFijo;
+            promo.Valor = 500m;
+            promo.MargenEstimado = 10000m;
+            ctx.DalPromocion.Todas.Add(promo);
+
+            var a = ctx.Crear().AnalizarMargenEImpacto(42);
+
+            Assert.IsFalse(a.BeneficioDeSugerencia, "Alta manual: no hay sugerencia de Gerencia.");
+            Assert.AreEqual(10000m, a.BeneficioEstimado, "Se usa el margen estimado que cargó Administración.");
+            Assert.AreEqual(500m, a.DescuentoPorCliente);
+            Assert.AreEqual(15000m, a.CostoDescuentoProyectado, "500 × 30 clientes.");
+            Assert.AreEqual(-5000m, a.MargenProyectado);
+            Assert.AreEqual(false, a.Conviene);
+        }
+
+        [TestMethod]
+        public void AnalizarMargenEImpacto_MontoFijoMayorAlPrecio_SeTopeaAlPrecioDelPlan()
+        {
+            LoginComo(2);
+            var ctx = new Contexto { ClientesActivos = 2 };
+            var promo = Promo(BE.EstadoPromocion.EnRevisionContable);
+            promo.TipoDescuento = BE.TipoDescuento.MontoFijo;
+            promo.Valor = 5000m;
+            promo.MargenEstimado = 3000m;
+            ctx.DalPromocion.Todas.Add(promo);
+
+            var a = ctx.Crear().AnalizarMargenEImpacto(42);
+
+            Assert.AreEqual(1000m, a.DescuentoPorCliente, "Igual que en el cobro: el descuento no supera el precio del plan.");
+            Assert.AreEqual(2000m, a.CostoDescuentoProyectado);
+            Assert.AreEqual(1000m, a.MargenProyectado);
+        }
+
+        [TestMethod]
+        public void AnalizarMargenEImpacto_MargenCero_NoConviene()
+        {
+            LoginComo(2);
+            var ctx = new Contexto { ClientesActivos = 5 };
+            var promo = Promo(BE.EstadoPromocion.EnRevisionContable);   // 100 por cliente → costo 500
+            promo.MargenEstimado = 500m;
+            ctx.DalPromocion.Todas.Add(promo);
+
+            var a = ctx.Crear().AnalizarMargenEImpacto(42);
+
+            Assert.AreEqual(0m, a.MargenProyectado);
+            Assert.AreEqual(false, a.Conviene, "Si el beneficio apenas cubre el descuento, no conviene.");
+        }
+
+        [TestMethod]
+        public void AnalizarMargenEImpacto_SinClientesActivos_ElCostoEsCeroYConvieneSiHayBeneficio()
+        {
+            LoginComo(2);
+            var ctx = new Contexto { ClientesActivos = 0 };
+            var promo = Promo(BE.EstadoPromocion.EnRevisionContable);
+            promo.MargenEstimado = 200m;
+            ctx.DalPromocion.Todas.Add(promo);
+
+            var a = ctx.Crear().AnalizarMargenEImpacto(42);
+
+            Assert.AreEqual(0m, a.CostoDescuentoProyectado);
+            Assert.AreEqual(200m, a.MargenProyectado);
+            Assert.AreEqual(true, a.Conviene);
+        }
+
+        [TestMethod]
+        public void AnalizarMargenEImpacto_PorCategoria_EsInformativaSinCostoNiResultado()
+        {
+            LoginComo(2);
+            var ctx = new Contexto { ClientesActivos = 50 };
+            var promo = Promo(BE.EstadoPromocion.EnRevisionContable);
+            promo.IdPlan = null;
+            promo.CategoriaPrenda = "Abrigos";
+            promo.MargenEstimado = 4000m;
+            ctx.DalPromocion.Todas.Add(promo);
+
+            var a = ctx.Crear().AnalizarMargenEImpacto(42);
+
+            Assert.IsTrue(a.EsInformativa);
+            Assert.IsFalse(a.MargenCalculable);
+            Assert.IsNull(a.PrecioPlan);
+            Assert.AreEqual(0m, a.CostoDescuentoProyectado);
+            Assert.IsNull(a.Conviene, "Una promoción por categoría no descuenta en el cobro: no hay resultado.");
+            Assert.AreEqual(0, ctx.ConteosDeClientes, "No consulta clientes de un plan que no existe en la promoción.");
+        }
+
+        [TestMethod]
+        public void AnalizarMargenEImpacto_PlanInexistente_NoCalculaElMargen()
+        {
+            LoginComo(2);
+            var ctx = new Contexto { ClientesActivos = 10 };
+            ctx.DalPlan.PlanPorId = null;
+            ctx.DalPromocion.Todas.Add(Promo(BE.EstadoPromocion.EnRevisionContable));
+
+            var a = ctx.Crear().AnalizarMargenEImpacto(42);
+
+            Assert.IsFalse(a.EsInformativa);
+            Assert.IsFalse(a.MargenCalculable);
+            Assert.IsNull(a.Conviene);
+            Assert.AreEqual(0m, a.CostoDescuentoProyectado);
         }
 
         // ¿Aprueba?

@@ -34,8 +34,23 @@ namespace GUI
             _original  = prenda;
 
             AplicarIdioma(GestorIdioma.IdiomaActual);
+            CargarCategorias();
 
             if (_esEdicion) CargarDatos();
+        }
+
+        // Categorías del catálogo (tabla Categoria) que da la BLL. Antes la lista estaba fija en el
+        // Designer, en plural ("Vestidos") mientras los datos usaban el singular ("Vestido"): al
+        // editar una prenda no se encontraba su categoría y se le asignaba la primera de la lista.
+        private void CargarCategorias()
+        {
+            cmbCategoria.Items.Clear();
+            try
+            {
+                foreach (string categoria in new BLL.Prenda().ObtenerCategoriasParaEditar(_original?.Categoria))
+                    cmbCategoria.Items.Add(categoria);
+            }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         // ── Traducción ────────────────────────────────────────────────────────
@@ -87,8 +102,13 @@ namespace GUI
             int idxTalle = cmbTalle.Items.IndexOf(_original.Talle ?? "");
             cmbTalle.SelectedIndex = idxTalle >= 0 ? idxTalle : 2;
 
-            int idxCat = cmbCategoria.Items.IndexOf(_original.Categoria ?? "");
-            cmbCategoria.SelectedIndex = idxCat >= 0 ? idxCat : 0;
+            // Sin distinguir mayúsculas (como la base). Si no está, queda sin elegir: nunca se le
+            // cambia la categoría a la prenda en silencio.
+            int idxCat = -1;
+            for (int i = 0; i < cmbCategoria.Items.Count; i++)
+                if (string.Equals(cmbCategoria.Items[i]?.ToString(), (_original.Categoria ?? "").Trim(), StringComparison.CurrentCultureIgnoreCase))
+                { idxCat = i; break; }
+            cmbCategoria.SelectedIndex = idxCat;
 
             numPrecioReposicion.Value = _original.PrecioReposicion.HasValue
                 ? Math.Min(_original.PrecioReposicion.Value, numPrecioReposicion.Maximum)

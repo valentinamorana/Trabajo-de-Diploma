@@ -225,8 +225,7 @@ namespace GUI
 
             try
             {
-                string actor = BLL.Sesion.Actor;
-                listaEsperaBLL.Cancelar(this.Text, fila.IdListaEspera, actor);
+                listaEsperaBLL.Cancelar(this.Text, fila.IdListaEspera);
                 MostrarOk(Tr("msg.listaespera.cancelada", "Anotación de {0} cancelada.", new object[] { fila.NombreCliente }));
                 CargarFilas();
             }

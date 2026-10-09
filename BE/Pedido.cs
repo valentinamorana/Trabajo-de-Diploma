@@ -23,6 +23,11 @@ namespace BE
 
         public DateTime? FechaEntrega { get; set; }
 
+        // PN04 — "Registrar devolución": cuándo volvieron las prendas. El pedido sigue Entregado
+        // (no hay estado nuevo, la máquina de estados no cambia); esta fecha es la que distingue un
+        // pedido devuelto de uno con las prendas todavía en poder del cliente.
+        public DateTime? FechaDevolucion { get; set; }
+
         public string MotivoCancelacion { get; set; }
 
         // ── PN01 — circuito de control de stock (diagrama de actividad) ─────────
@@ -89,8 +94,20 @@ namespace BE
         // El pedido puede des-cancelarse solo si está Cancelado.
         public bool PuedeDesCancelarse() => Estado == EstadoPedido.Cancelado;
 
-        // Registrar la devolución (PN04): solo de un pedido entregado.
-        public bool PuedeDevolverse() => Estado == EstadoPedido.Entregado;
+        // Registrar la devolución (PN04): solo de un pedido entregado que todavía no se devolvió.
+        public bool PuedeDevolverse() => Estado == EstadoPedido.Entregado && !FechaDevolucion.HasValue;
+
+        // PN04 — el pedido ya se devolvió (sigue en estado Entregado, con la fecha de devolución).
+        public bool FueDevuelto => FechaDevolucion.HasValue;
+
+        // PN04 — entregado y sin devolver: las prendas siguen en poder del cliente.
+        public bool EnPoderDelCliente => Estado == EstadoPedido.Entregado && !FechaDevolucion.HasValue;
+
+        // Días que lleva el cliente con las prendas (desde la entrega). Null si no están en su poder.
+        public int? DiasEnPoderDelCliente(DateTime hoy) =>
+            EnPoderDelCliente && FechaEntrega.HasValue
+                ? (int?)Math.Max(0, (int)(hoy.Date - FechaEntrega.Value.Date).TotalDays)
+                : null;
 
         // Hay notificación de envío desde que se despachó.
         public bool TieneNotificacionEnvio() => Estado == EstadoPedido.Despachado || Estado == EstadoPedido.Entregado;

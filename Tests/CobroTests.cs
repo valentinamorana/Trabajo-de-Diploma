@@ -461,7 +461,7 @@ namespace Tests
             var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
             try
             {
-                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "vendedor");
+                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual);
                 Assert.Fail("El Vendedor ya no registra el cobro recurrente.");
             }
             catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }
@@ -472,7 +472,7 @@ namespace Tests
                 Id = 21, Username = "caja", Perfil = "Caja", Rol = "Caja",
                 Permisos = new System.Collections.Generic.List<BE.Permiso> { new BE.Permiso { NombreMenu = BE.Patentes.CajaEditar } }
             });
-            var r = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja", 1);
+            var r = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, 1);
             Assert.AreEqual(BE.EstadoCobro.Cobrado, r.Estado);
         }
 
@@ -484,7 +484,7 @@ namespace Tests
 
             try
             {
-                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual);
                 Assert.Fail("Debía exigir sesión iniciada.");
             }
             catch (BE.AppException ex)
@@ -504,7 +504,7 @@ namespace Tests
 
             try
             {
-                bll.Procesar("Test", cliente, DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+                bll.Procesar("Test", cliente, DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual);
                 Assert.Fail("Debía rechazar un cliente sin plan asignado.");
             }
             catch (BE.AppException ex)
@@ -520,7 +520,7 @@ namespace Tests
             var dalCobro = new FakeCobroDAL();
             var bll = new BLL.Cobro(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL());
 
-            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Anual, "vendedor1", 3);
+            var resultado = bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Anual, 3);
 
             Assert.AreEqual(BE.EstadoCobro.Cobrado, resultado.Estado);
             Assert.AreEqual(1, dalCobro.AltaVeces);
@@ -541,7 +541,7 @@ namespace Tests
             var bll = new BLL.Cobro(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL());
             try
             {
-                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja");
+                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual);
                 Assert.Fail("Debía exigir el medio de pago.");
             }
             catch (BE.AppException ex) { Assert.AreEqual("err.bll.cobro.medio_requerido", ex.Clave); }
@@ -555,7 +555,7 @@ namespace Tests
             var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
             try
             {
-                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja", 99);
+                bll.Procesar("Test", ClienteVencido(), DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, 99);
                 Assert.Fail("Debía rechazar un medio inexistente.");
             }
             catch (BE.AppException ex) { Assert.AreEqual("err.bll.contratacion.medio_invalido", ex.Clave); }
@@ -566,7 +566,7 @@ namespace Tests
         {
             LoginComoAdministrador();
             var bll = new BLL.Cobro(new FakeClienteDAL(), new FakeCobroDAL(), new FakeCargoPrendaDAL());
-            var r = bll.Procesar("Test", ClienteEnGracia(-1), DecisionCobro.PagoFallido, BE.Builders.ModalidadCobro.Mensual, "caja");
+            var r = bll.Procesar("Test", ClienteEnGracia(-1), DecisionCobro.PagoFallido, BE.Builders.ModalidadCobro.Mensual);
             Assert.AreEqual(BE.EstadoCobro.Suspendido, r.Estado);
         }
 
@@ -577,7 +577,7 @@ namespace Tests
             var dalCobro = new FakeCobroDAL();
             var bll = new BLL.Cobro(new FakeClienteDAL(), dalCobro, new FakeCargoPrendaDAL());
 
-            var resultado = bll.Procesar("Test", ClienteEnGracia(-1), DecisionCobro.PagoFallido, BE.Builders.ModalidadCobro.Mensual, "vendedor1");
+            var resultado = bll.Procesar("Test", ClienteEnGracia(-1), DecisionCobro.PagoFallido, BE.Builders.ModalidadCobro.Mensual);
 
             Assert.AreEqual(BE.EstadoCobro.Suspendido, resultado.Estado);
         }

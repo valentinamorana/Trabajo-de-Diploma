@@ -4,12 +4,12 @@ module.exports = [
     tipo: 'er', id: 'DER_global', titulo: 'DER global — WardrobeFlow', columnas: 6,
     tablas: [
       // Seguridad y administración
-      'Usuario', 'Usuario_Seguridad', 'Empleado', 'Permiso', 'PermisoRelacion', 'RolPermiso',
+      'Usuario', 'Usuario_Seguridad', 'Empleado', 'Permiso', 'PermisoRelacion',
       'Control', 'ControlMapeado', 'Idioma', 'Traduccion', 'Preferencia', 'ClaveRecuperacion',
       'HistorialUsuario', 'DVVertical', 'HistorialIntegridad', 'Bitacora', 'BitacoraNegocio',
       // Negocio
       'PlanSuscripcion', 'Cliente', 'HistorialRenovacion', 'HistorialCobro', 'Contratacion',
-      'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'MantenimientoPrenda', 'CargoPrenda',
+      'Pedido', 'PedidoPrenda', 'PedidoHistorial', 'Prenda', 'Categoria', 'MantenimientoPrenda', 'CargoPrenda',
       'ListaEspera', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion'
     ]
   },
@@ -17,18 +17,18 @@ module.exports = [
     tipo: 'er', id: 'DER_seguridad', titulo: 'DER — Seguridad, usuarios, permisos, idiomas y auditoría', columnas: 4,
     tablas: [
       'Usuario', 'Usuario_Seguridad', 'Empleado', 'Preferencia',
-      'Permiso', 'PermisoRelacion', 'RolPermiso', 'ControlMapeado', 'Control',
+      'Permiso', 'PermisoRelacion', 'ControlMapeado', 'Control',
       'Idioma', 'Traduccion', 'ClaveRecuperacion', 'HistorialUsuario',
       'Bitacora', 'BitacoraNegocio', 'DVVertical', 'HistorialIntegridad'
     ]
   },
   {
     tipo: 'er', id: 'DER_n01_clientes_suscripciones', titulo: 'DER — N01 Clientes y suscripciones', columnas: 3,
-    tablas: ['PlanSuscripcion', 'Cliente', 'HistorialRenovacion', 'HistorialCobro', 'CargoPrenda', 'Prenda']
+    tablas: ['PlanSuscripcion', 'Cliente', 'MedioPago', 'HistorialRenovacion', 'HistorialCobro', 'CargoPrenda', 'Prenda']
   },
   {
     tipo: 'er', id: 'DER_pn01_pedidos', titulo: 'DER — PN01 Armar pedido', columnas: 3,
-    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Pedido', 'PedidoPrenda', 'PedidoFaltante', 'PedidoFaltanteAlternativa', 'PedidoHistorial', 'Prenda', 'ListaEspera', 'MantenimientoPrenda']
+    tablas: ['Cliente', 'PlanSuscripcion', 'Empleado', 'Pedido', 'PedidoPrenda', 'PedidoFaltante', 'PedidoFaltanteAlternativa', 'PedidoHistorial', 'Prenda', 'Categoria', 'ListaEspera', 'MantenimientoPrenda']
   },
   {
     tipo: 'er', id: 'DER_pn02_contrataciones', titulo: 'DER — PN02 Comercialización de la suscripción', columnas: 3,
@@ -36,7 +36,7 @@ module.exports = [
   },
   {
     tipo: 'er', id: 'DER_pn03_promociones', titulo: 'DER — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
-    tablas: ['Usuario', 'PlanSuscripcion', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion', 'Contratacion', 'Cliente', 'HistorialCobro']
+    tablas: ['Usuario', 'PlanSuscripcion', 'Categoria', 'SugerenciaPromocion', 'Promocion', 'PromocionHistorial', 'DictamenContable', 'SolicitudBajaPromocion', 'Contratacion', 'Cliente', 'HistorialCobro']
   },
   {
     tipo: 'er', id: 'DER_pn04_devolucion', titulo: 'DER — PN04 Inspección de devolución', columnas: 3,

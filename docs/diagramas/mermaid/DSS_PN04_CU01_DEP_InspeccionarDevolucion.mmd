@@ -24,14 +24,14 @@ sequenceDiagram
   alt Desgaste normal: Aprobar reingreso
     D->>F: Pulsa "Aprobar reingreso" y confirma
     F->>IN: AprobarReingreso(modulo, prenda)
-    IN->>PB: CambiarEstado(modulo, prenda, Disponible, actor)
+    IN->>PB: CambiarEstado(modulo, prenda, Disponible)
     Note over PB: Exigir(StockEditar) · una prenda En limpieza solo se da de baja desde la Inspección
     PB->>PR: ControlarEstado(Disponible)
     Note over PR: Patrón State: EstadoEnLimpieza permite EnLimpieza → Disponible
     PR-->>PB: true
     PB->>DP: CambiarEstado(idPrenda, EnLimpieza, Disponible, null)
     PB->>DM: CerrarMantenimiento(idPrenda)
-    PB->>LE: NotificarSiCorresponde(idPrenda, actor)
+    PB->>LE: NotificarSiCorresponde(idPrenda)
     LE->>DL: ObtenerPendienteMasAntigua(idPrenda)
     DL-->>LE: primer cliente en espera (si hay)
     alt Hay un cliente en espera
@@ -53,7 +53,7 @@ sequenceDiagram
       IN-->>F: AppException(no_devuelta): se da de baja sin cargo desde Prendas
       F-->>D: Informa el motivo
     end
-    IN->>IN: BajaConCargo(modulo, prenda, motivo, monto, actor, EnLimpieza)
+    IN->>IN: BajaConCargo(modulo, prenda, motivo, monto, EnLimpieza)
     Note over IN: Exigir(StockEditar) · la prenda sigue En limpieza y tiene último cliente
     IN->>PR: TransicionPermitida(Baja)
     PR-->>IN: true  [patrón State: EstadoEnLimpieza permite pasar a Baja]

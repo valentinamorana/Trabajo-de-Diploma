@@ -364,8 +364,7 @@ namespace GUI
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
-                    string actor = BLL.Sesion.Actor;
-                    prendaBLL.CambiarEstado(this.Text, prenda, dlg.EstadoSeleccionado, actor);
+                    prendaBLL.CambiarEstado(this.Text, prenda, dlg.EstadoSeleccionado);
                     string fmtEstAct = Tr("msg.prenda.estadoact", "Estado de '{0}' actualizado a {1}.");
                     MostrarOk(string.Format(fmtEstAct, prenda.Nombre, EstadoLabel(dlg.EstadoSeleccionado)));
 
@@ -389,8 +388,7 @@ namespace GUI
 
             try
             {
-                string actor = BLL.Sesion.Actor;
-                listaEsperaBLL.Anotar(this.Text, prenda.IdPrenda, cliente.IdCliente, actor);
+                listaEsperaBLL.Anotar(this.Text, prenda.IdPrenda, cliente.IdCliente);
                 MostrarOk(Tr("msg.listaespera.anotado", "{0} anotado en la lista de espera de '{1}'.",
                     new object[] { cliente.NombreCompleto, prenda.Nombre }));
             }

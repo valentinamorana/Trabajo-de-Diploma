@@ -2,17 +2,20 @@ erDiagram
   Prenda ||--o{ CargoPrenda : "IdPrenda"
   Cliente ||--o{ CargoPrenda : "IdCliente"
   Cliente |o--o{ Cliente : "IdClienteReferente"
+  MedioPago |o--o{ Cliente : "IdMedioPagoPreferido"
   PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
-  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  MedioPago |o--o{ Contratacion : "IdMedioPago"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Promocion ||--o{ DictamenContable : "IdPromocion"
   Promocion |o--o{ HistorialCobro : "IdPromocion"
   Cliente ||--o{ HistorialCobro : "IdCliente"
+  MedioPago |o--o{ HistorialCobro : "IdMedioPago"
   Cliente ||--o{ HistorialRenovacion : "IdCliente"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanAnterior"
   PlanSuscripcion |o--o{ HistorialRenovacion : "IdPlanNuevo"
@@ -20,20 +23,24 @@ erDiagram
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Empleado ||--o{ Pedido : "IdEmpleado"
   Empleado |o--o{ Pedido : "IdEmpleadoControl"
+  Empleado ||--o{ Pedido : "IdEmpleado"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
   Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Categoria |o--o{ Prenda : "Categoria"
   Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
+  Categoria |o--o{ Promocion : "CategoriaPrenda"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Promocion ||--o{ PromocionHistorial : "IdPromocion"
   Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
+  Categoria |o--o{ SugerenciaPromocion : "CategoriaPrenda"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
   PlanSuscripcion
   Cliente
+  MedioPago
   Empleado
   Contratacion
   Promocion
@@ -47,6 +54,7 @@ erDiagram
   PedidoPrenda
   PedidoHistorial
   Prenda
+  Categoria
   MantenimientoPrenda
   CargoPrenda
   ListaEspera

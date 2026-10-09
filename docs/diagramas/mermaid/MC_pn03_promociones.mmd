@@ -2,26 +2,29 @@ erDiagram
   Cliente |o--o{ Cliente : "IdClienteReferente"
   PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
-  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
-  Usuario ||--o{ DictamenContable : "IdUsuario"
   Promocion ||--o{ DictamenContable : "IdPromocion"
+  Usuario ||--o{ DictamenContable : "IdUsuario"
   Promocion |o--o{ HistorialCobro : "IdPromocion"
   Cliente ||--o{ HistorialCobro : "IdCliente"
+  Categoria |o--o{ Promocion : "CategoriaPrenda"
   Usuario |o--o{ Promocion : "IdUsuarioAlta"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
   PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Promocion ||--o{ PromocionHistorial : "IdPromocion"
   Usuario |o--o{ PromocionHistorial : "IdUsuario"
-  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
   Usuario ||--o{ SolicitudBajaPromocion : "IdUsuarioSolicita"
   Usuario |o--o{ SolicitudBajaPromocion : "IdUsuarioResuelve"
+  Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
+  Categoria |o--o{ SugerenciaPromocion : "CategoriaPrenda"
   Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
   Usuario
   PlanSuscripcion
+  Categoria
   SugerenciaPromocion
   Promocion
   PromocionHistorial

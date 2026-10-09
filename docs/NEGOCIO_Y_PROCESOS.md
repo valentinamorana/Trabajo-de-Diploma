@@ -113,11 +113,12 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 | Tabla | Entidad `BE` | Campos clave |
 |---|---|---|
 | `PlanSuscripcion` | `PlanSuscripcion` | `Nombre`, `LimitePrendas`, `Precio` (= **precio de un mes**; cada cobro = `Precio` × meses de la modalidad), `Estado` (activo) |
-| `Cliente` | `Cliente` | `DNI`, `IdPlan`, `FechaVencimiento`, `FechaLimiteGracia`, `FechaPausaHasta`, `IdClienteReferente`, `DescuentoProximoCobro`, `BeneficioReferidoOtorgado`, `DVH` |
+| `Cliente` | `Cliente` | `DNI`, `IdMedioPagoPreferido` (FK `MedioPago`), `IdPlan`, `FechaVencimiento`, `FechaLimiteGracia`, `FechaPausaHasta`, `IdClienteReferente`, `DescuentoProximoCobro`, `BeneficioReferidoOtorgado`, `DVH` |
 | `Empleado` | `Empleado` | `IdUsuario` (vínculo con `Usuario`), `Legajo` |
-| `Prenda` | `Prenda` | `Estado` (0–3), `IdClienteActual` (quién la tiene), `IdUltimoCliente` (nunca se limpia), `PrecioReposicion`, `Talle/Color/Categoria` |
+| `Prenda` | `Prenda` | `Estado` (0–3), `IdClienteActual` (quién la tiene), `IdUltimoCliente` (nunca se limpia), `PrecioReposicion`, `Talle/Color`, `Categoria` (FK al catálogo `Categoria` por nombre) |
 | `Pedido` / `PedidoPrenda` / `PedidoHistorial` | `Pedido`, `PedidoHistorial` | `Estado` (0–3), fechas de despacho/entrega, `MotivoCancelacion`; el historial permite restaurar operaciones |
-| `MantenimientoPrenda` | `MantenimientoPrenda` | ciclo En Limpieza: `FechaEntrada`, `FechaSalida` (abierto si es NULL) |
+| `MantenimientoPrenda` | `MantenimientoPrenda` | ciclo En Limpieza: `FechaEntrada`, `FechaSalida` (abierto si es NULL), `Origen` (0 manual / 1 devolución de PN04), `Actor` |
+| `Categoria` | — (`BLL.Prenda.ObtenerCategorias`) | `Nombre` (UNIQUE, clave natural que referencian `Prenda`, `Promocion` y `SugerenciaPromocion`), `Activo` |
 | `CargoPrenda` | `CargoPrenda` | `IdPrenda`, `IdCliente`, `Motivo`, `Monto` (>0, CHECK), `Estado` (0 Pendiente / 1 Cobrado) |
 | `ListaEspera` | `ListaEspera` | `Estado` (0–3), `FechaLimiteReserva`; índice único de anotación activa por (prenda, cliente) |
 | `Contratacion` | `Contratacion` | `IdVendedor`, `IdCaja`, `Modalidad` (0 mensual/1 trimestral/2 anual), `Estado`, `IntentosPago` (0..3, CHECK), `MedioPago`, `NumeroComprobante`, `Importe`, `DescuentoAplicado`, `IdPromocion`; índice único: **una pendiente por cliente** |
@@ -130,7 +131,7 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 | Entidad | Estados (enum en `BE/`) | Transiciones válidas |
 |---|---|---|
 | **Prenda** (`EstadoPrenda`, patrón **State** en `BE/Estados/`) | Disponible 0 · EnUso 1 · EnLimpieza 2 · Baja 3 | Disponible→EnLimpieza\|Baja; EnLimpieza→Disponible\|Baja; EnUso→Baja (solo por *Reportar prenda perdida*); Baja = final. **→EnUso** solo al separar las prendas de un pedido (`DAL/Pedido.cs › SepararPrendas`); **EnUso→EnLimpieza** solo al registrar la devolución. `BLL/Prenda.cs › CambiarEstado` rechaza siempre EnUso→Baja y EnLimpieza→Baja: las dos van con cargo y solo las hace `BLL/InspeccionDevolucion.cs` |
-| **Pedido** (`EstadoPedido`) | Pendiente 0 (formalizado) · Despachado 1 · Entregado 2 · Cancelado 3 · EnControlStock 4 · ConFaltantes 5 · Separado 6 · Desistido 7 | Armado (PN01): EnControlStock→ConFaltantes\|Separado; ConFaltantes→EnControlStock (ajuste)\|Desistido; Separado→Pendiente (formalizar). Ciclo: Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); Cancelado→EnControlStock (`DesCancelar` = "Reactivar": revalida y vuelve a control de stock, sin reservar); `RegistrarDevolucion` solo sobre Entregado (prendas EnUso→EnLimpieza). Entregado y Desistido son finales. Cancelar/devolver con **Command** (`BLL/Comandos/`) |
+| **Pedido** (`EstadoPedido`) | Pendiente 0 (formalizado) · Despachado 1 · Entregado 2 · Cancelado 3 · EnControlStock 4 · ConFaltantes 5 · Separado 6 · Desistido 7 | Armado (PN01): EnControlStock→ConFaltantes\|Separado; ConFaltantes→EnControlStock (ajuste)\|Desistido; Separado→Pendiente (formalizar). Ciclo: Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); Cancelado→EnControlStock (`DesCancelar` = "Reactivar": revalida y vuelve a control de stock, sin reservar); `RegistrarDevolucion` solo sobre Entregado sin devolver (prendas EnUso→EnLimpieza y `Pedido.FechaDevolucion`, sin cambiar el estado). Entregado y Desistido son finales. Cancelar/devolver con **Command** (`BLL/Comandos/`) |
 | **Contratacion** (`EstadoContratacion`) | PendientePago 0 · Pagada 1 · Cancelada 2 | Pendiente→Pagada (cobro, claim atómico) · Pendiente→Cancelada (3.er intento fallido, automático) · Pagada→Pendiente solo como **compensación** si falla la activación (`ReabrirPago`). Regla en `BE.Contratacion.TransicionValida` |
 | **Promocion** (`EstadoPromocion`) | EnRevisionContable 0 · Vigente 1 · RechazadaContabilidad 2 · BajaSolicitada 3 · Desactivada 4 | EnRevisión→Vigente\|Rechazada (Contabilidad); Rechazada→EnRevisión (**Reformular**, Administración); Vigente→BajaSolicitada (Vendedor) → Desactivada (aprueba baja) \| Vigente (rechaza baja); Vigente→Desactivada (Administración, directo). Cada cambio es un `UPDATE ... WHERE Estado=@esperado` (`DAL/Promocion.cs`) |
 | **SugerenciaPromocion** (`EstadoSugerencia`) | Pendiente 0 · Evaluada 1 | Pendiente→Evaluada al crear una promoción desde ella (una sugerencia evaluada no se reutiliza) |
@@ -377,7 +378,7 @@ Se mantiene que las promociones por categoría son informativas: no descuentan e
 **Pantallas.**
 - `GUI/SugerirPromocionForm.cs` (Gerencia): "Analizar métricas…", registrar la sugerencia y reimprimir las registradas.
 - `GUI/PromocionesAdministracionForm.cs` + `GUI/AltaPromocionForm.cs` (Administración): aceptar o descartar sugerencias, crear, reformular, descartar, desactivar y resolver bajas; historial e impresiones.
-- `GUI/PromocionesContabilidadForm.cs` (Contabilidad): análisis de margen e impacto y dictamen.
+- `GUI/PromocionesContabilidadForm.cs` (Contabilidad): análisis de margen e impacto (con el margen proyectado paso a paso) y dictamen.
 - `GUI/PromocionesVigentesForm.cs` (Vendedor): vigentes y con baja pedida; solicitar la baja.
 
 **Documentos (PDF, Factory Method en `GUI/Exportacion/DocumentosPromocion.cs` + `GeneradorDocumentoPromocion.cs`):**
@@ -398,7 +399,7 @@ Se mantiene que las promociones por categoría son informativas: no descuentan e
 | Administración | ¿Acepta la sugerencia? No → Descartar sugerencia | `SugerenciaPromocion.DescartarSugerencia` (motivo obligatorio, claim `Pendiente → Descartada`) |
 | Administración | ¿Acepta? Sí → Crear promoción (o crearla manual) | `BLL.Promocion.CrearDesdeSugerencia` (claim `Pendiente → Evaluada`, compensación `ReabrirEvaluacion`) / `CrearManual` |
 | Sistema | Validar → En revisión contable («Ficha de promoción») | `Promocion.ValidarPromocion` (destino único, valor, fechas); guarda `IdUsuarioAlta` y el historial `— → EnRevisionContable` |
-| Contabilidad | Analizar margen e impacto | `Promocion.AnalizarMargenEImpacto`: beneficio estimado de la sugerencia y promociones Vigentes del mismo plan superpuestas en fechas (advertencia) |
+| Contabilidad | Analizar margen e impacto | `Promocion.AnalizarMargenEImpacto`: **margen proyectado** (beneficio estimado − costo del descuento, ver abajo) y promociones Vigentes del mismo plan superpuestas en fechas (advertencia) |
 | Contabilidad | ¿Aprueba? (guarda: quien la creó no la dictamina) | `Promocion.PuedeDictaminar` (`BE.Promocion.PuedeDictaminarla`); `AprobarContable` → Vigente / `RechazarContable` → RechazadaContabilidad, ambas con «Dictamen contable» |
 | Administración | ¿Reformular? Sí → Reformular (vuelve a Validar) | `Promocion.Reformular` (claim `RechazadaContabilidad → EnRevisionContable`) |
 | Administración | ¿Reformular? No → Descartar promoción | `Promocion.DescartarPromocion` (motivo obligatorio → Descartada; «Constancia de descarte») |
@@ -406,6 +407,19 @@ Se mantiene que las promociones por categoría son informativas: no descuentan e
 | Administración | ¿Aprueba la baja? Sí / No («Resolución de baja») | `Promocion.AprobarBaja` → Desactivada / `RechazarBaja` (motivo obligatorio) → Vigente |
 | Administración | (b) Desactivar directamente | `Promocion.Desactivar` (motivo obligatorio) |
 | Sistema | (c) Llega la FechaFin → Vencida | `Promocion.CerrarVencidas`, que se ejecuta al consultar las promociones (`ObtenerTodas`, `ObtenerVigentes`, `ObtenerParaVentas`) |
+
+**Cálculo del margen proyectado ("Analizar margen e impacto").** Todo en importes **mensuales**, la misma base que el
+beneficio de Gerencia (en una oportunidad de abandono es el ingreso mensual en riesgo del plan):
+- *Descuento por cliente* = lo que la promoción descuenta sobre el **precio mensual del plan destino**, con la misma regla
+  que el cobro (`PoliticaDescuento.DescuentoDe`: Porcentaje = precio × valor / 100; MontoFijo = valor, con tope en el precio;
+  PrecioPromocional = precio − valor).
+- *Costo del descuento* = descuento por cliente × **clientes activos del plan** (`DAL.Cliente.ContarClientesActivosPorPlan`).
+- *Beneficio estimado* = el de la sugerencia de Gerencia; en un alta manual, el **margen estimado que cargó Administración**.
+- *Margen proyectado* = beneficio estimado − costo del descuento; **conviene** si es mayor a cero (con margen 0 no conviene).
+- Una promoción **por categoría** es informativa (no descuenta en el cobro): no tiene costo proyectado ni resultado.
+- Es una **recomendación** que se muestra en `PromocionesContabilidadForm`: la decisión (¿Aprueba?) sigue siendo de Contabilidad.
+  No se guarda con el dictamen: el «Dictamen contable» impreso no la incluye porque los clientes activos cambian con el
+  tiempo y el documento se reimprime desde otras pantallas (Administración, Vendedor) que no tienen la patente contable.
 
 Aplicación al cobro: mientras está **Vigente** y dentro de sus fechas, la promoción entra en `BE.PoliticaDescuento.Resolver`,
 que usan el cobro de contratación (`BLL.Contratacion.CalcularImporte/ConfirmarCobro`, PN02) y el cobro recurrente (`ProcesarPagoHandler`, N01).
@@ -424,7 +438,7 @@ inserta su fila de `PromocionHistorial` y el objeto que genera (`DictamenContabl
 | 5 | Toda promoción **nace En Revisión Contable** (tras Validar) y no aplica descuento hasta ser aprobada | `CrearDesdeSugerencia/CrearManual` | `PromocionTests › CrearManual_GuardaElCreadorYEscribeHistorialDeAlta` |
 | 6 | **Quien creó la promoción no puede dictaminarla**, salvo el **Administrador** (decisión del 05/10: el Administrador puede hacer todo) | `Promocion.PuedeDictaminar`; `IdUsuarioAlta` | `PromocionTests › AprobarContable_QuienCreo*`, `RechazarContable_QuienCreo*` |
 | 7 | El dictamen exige observación y queda guardado (resultado, observación, usuario, fecha) | `AprobarContable/RechazarContable`; tabla `DictamenContable` | `PromocionTests › AprobarContable_GuardaElDictamen*`, `RechazarContable_*` |
-| 8 | Contabilidad ve el beneficio estimado de la sugerencia y las promociones vigentes del mismo plan superpuestas (no impide aprobar) | `AnalizarMargenEImpacto`, `BE.Promocion.SeSuperponeCon` | `PromocionTests › AnalizarMargenEImpacto_*` |
+| 8 | Contabilidad ve el beneficio estimado, el **margen proyectado** (beneficio − descuento por cliente × clientes activos del plan; conviene si es > 0; informativo si es por categoría) y las promociones vigentes del mismo plan superpuestas. Nada de esto impide aprobar | `AnalizarMargenEImpacto`, `BE.AnalisisImpactoPromocion`, `BE.Promocion.SeSuperponeCon` | `PromocionTests › AnalizarMargenEImpacto_*` |
 | 9 | Solo una promoción **Rechazada** se reformula o se descarta; descartar exige motivo | `Reformular`, `DescartarPromocion` | `PromocionTests › DescartarPromocion_*`, `EndurecimientoPn02Pn03Tests › Reformular_*` |
 | 10 | Solo se pide la baja de una **Vigente**, con motivo; la solicitud queda guardada | `SolicitarBaja`; tabla `SolicitudBajaPromocion` (una pendiente por promoción) | `PromocionTests › SolicitarBaja_*` |
 | 11 | Solo se resuelve una **BajaSolicitada**; rechazarla exige motivo; la resolución queda guardada y **no se pierde** el dictamen contable | `AprobarBaja/RechazarBaja` | `PromocionTests › AprobarBaja_*`, `RechazarBaja_*` |
@@ -465,7 +479,8 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 **Pantallas.** `GUI/InspeccionDevolucionForm.cs` (CU-DEP-01), `GUI/PedidosRealizados.cs` (registrar devolución y CU-DEP-02), `CargoPrendaDialog`, `Prendas.cs`.
 
 **Flujo**
-1. Un pedido `Entregado` se devuelve: `BLL.Pedido.RegistrarDevolucion` pasa sus prendas `EnUso` → `EnLimpieza` (y abre `MantenimientoPrenda`). **Ese es el "desbloqueo" de la cuenta** (PN01 regla 3).
+1. Un pedido `Entregado` se devuelve: `BLL.Pedido.RegistrarDevolucion` pasa sus prendas `EnUso` → `EnLimpieza` (y abre `MantenimientoPrenda`) y completa `Pedido.FechaDevolucion`, todo en la misma transacción (`DAL/Pedido.cs › RegistrarDevolucion`). **Ese es el "desbloqueo" de la cuenta** (PN01 regla 3). El pedido **sigue `Entregado`** (no hay estado nuevo: la máquina de estados y los diagramas aprobados no cambian); la fecha distingue un pedido devuelto de uno con las prendas en poder del cliente. Pedidos Realizados lo muestra como "Entregado (devuelto el dd/mm)" o "Entregado — en poder del cliente (N días)".
+   - **Pedidos atrasados:** `Entregado`, sin `FechaDevolucion` y con 30 días o más desde la entrega (el mismo plazo de la compra tácita, `PoliticaCompraTacita.EstaAtrasado`). Se listan con el filtro "Atrasados" de Pedidos Realizados (resaltados en rojo) y generan la alerta `alert.pedidos.atrasados` (Pedidos Realizados e Inspección de Devolución). Son la cola de "reclamar la devolución o reportar la prenda perdida".
 2. Depósito ve la cola de prendas En Limpieza (`BLL.Prenda.ObtenerEnLimpieza`) y, por prenda:
    - **Desgaste normal → aprueba el reingreso:** `CambiarEstado(Disponible)`, sin cargo (cubierto por la cuota). Dispara la Lista de Espera.
    - **Daño irreparable → baja con cargo:** `BLL.InspeccionDevolucion.DarDeBajaConCargo` (precio de reposición; pre-cargado desde `Prenda.PrecioReposicion`, editable). Cargo, baja, cierre del mantenimiento y cancelación de la lista de espera van en **una transacción** (`DAL/InspeccionDevolucion.cs`); la transición la valida el patrón State (`Prenda.TransicionPermitida` / `ControlarEstado`).
@@ -486,6 +501,8 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 | 9 | **No hay cargos por demora** en la devolución | (ausencia de lógica) | — |
 | 10 | La cola de inspección son **solo las prendas que volvieron de un cliente** (mantenimiento abierto por la devolución); una prenda que entró a limpieza en el depósito se da de baja a mano y **sin cargo**. Ya no se ofrece un cargo suelto al dar de baja desde Prendas | `BLL/Prenda.cs › ObtenerEnLimpieza/RequiereInspeccion`, `BLL/InspeccionDevolucion.cs` (`no_devuelta`) | `PrendaTests › ObtenerEnLimpieza_*`, `AuditoriaGuiTests › DarDeBajaConCargo_PrendaQueNoVieneDeUnaDevolucion_Rechaza` |
 | 11 | No se da de baja a un cliente con **cargos pendientes** (se cobran con la próxima renovación o contratación) | `BLL/Cliente.cs › Baja` (`baja_cargos`) | `ClienteTests › Baja_ConCargosPendientes_*` |
+| 12 | La devolución completa **`Pedido.FechaDevolucion`** en la misma transacción que las prendas (entra en el DV de Pedido); un pedido ya devuelto no se vuelve a devolver y deja de ser el "pedido en curso" de sus prendas (`ObtenerPedidoEnCurso`) | `BE/Pedido.cs › PuedeDevolverse/EnPoderDelCliente`, `BLL/Pedido.cs › RegistrarDevolucion`, `DAL/Pedido.cs › RegistrarDevolucion`, `DAL/InspeccionDevolucion.cs › ObtenerPedidoEnCurso` | `PedidoTests › RegistrarDevolucion_PedidoYaDevuelto_*`, `Pedido_Devuelto_*`, `IntegracionBDTests › Pedido_RegistrarDevolucion_CompletaLaFechaYDejaDeEstarEnCurso` |
+| 13 | **Pedido atrasado** = Entregado sin devolución con 30 días o más desde la entrega (mismo plazo que la compra tácita): filtro en Pedidos Realizados y alerta para Pedidos Realizados / Inspección de Devolución | `BLL/Politicas/PoliticaCompraTacita.cs › EstaAtrasado/Atrasados`, `BLL/PanelAlertas.cs` (`alert.pedidos.atrasados`), `GUI/PedidosRealizados.cs` | `PedidoTests › Atrasado_*`, `PanelAlertasTests › Evaluar_PedidosAtrasados_*`, `AuditoriaGuiTests › Alertas_PedidosAtrasados_*` |
 
 **Casos de uso:** CU-DEP-01 Inspeccionar Devolución, CU-DEP-02 Reportar Prenda Perdida.
 **Alcance.** Abarca: reingreso, baja con cargo, prenda perdida, desbloqueo. **No abarca:** reparación/limpieza detallada, cobro inmediato del cargo (se difiere al próximo cobro), reposición automática de stock, cargo por demora.
@@ -560,7 +577,8 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 - **Secciones** (numeración histórica): 01 base y núcleo · 05 renovación · 06 menú · 08 cobro · 09–14 analítica (PdN8–13) ·
   15 fidelización (pausa, referidos, cargo) · 16 lista de espera · 17 PN02 · 18 PN03 · 19 PN04 · 20 hardening de integridad ·
   **20b** importe/promoción en `Contratacion`, CHECKs, índices únicos y de consulta · **20c** PN02 (medios de pago, intentos, desistimientos) ·
-  **20d** PN03 (historial, dictamen, solicitud de baja, vencimiento) · **21** datos de prueba.
+  **20c5** medio de pago preferido del cliente (FK) · **20d** PN03 (historial, dictamen, solicitud de baja, vencimiento) ·
+  **20e** catálogo `Categoria` · **20f** origen del mantenimiento · **21** datos de prueba · **21z5** restricciones de normalización y baja de `RolPermiso` (ver §6.5).
 - **Datos de prueba (sección 21):** 11 clientes en distintos estados de suscripción, 20 prendas (3 En Limpieza, 1 Baja con cargo),
   9 pedidos, 3 contrataciones (2 pendientes, 1 cobrada), 3 promociones y 2 sugerencias en distintos estados, 1 lista de espera, empleados
   vinculados a `caja`/`admin`. Se aplica una sola vez (marca: cliente Julieta Navarro).
@@ -585,6 +603,28 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 - Abrir `WardrobeFlow.slnx` en Visual Studio, compilar y correr los tests desde el Explorador de pruebas; o por línea de comandos con MSBuild (`WardrobeFlow.slnx /p:Configuration=Release /restore`) y `vstest.console.exe Tests\bin\Release\Tests.dll`.
 - Los tests son unitarios con fakes (`Tests/Fakes/`): **no** ejecutan SQL. Las garantías de concurrencia a nivel de BD (claims atómicos, índices únicos) se probaron a mano contra SQL Server, no con tests automáticos.
 - Para generar el instalador: compilar en Release (incluido `Instalador/DbInstaller`) y correr `Instalador/compilar-y-firmar.ps1`.
+
+### 6.5 Decisiones de normalización (3FN)
+**Qué se normalizó** (script `BD/00_Instalacion_Completa.sql`; cada sección migra una base existente sin perder datos y es idempotente):
+
+| # | Antes | Ahora | Sección | Por qué |
+|---|---|---|---|---|
+| 1 | `Prenda.Categoria`, `Promocion.CategoriaPrenda`, `SugerenciaPromocion.CategoriaPrenda`: texto libre | Catálogo **`Categoria`** (`IdCategoria`, `Nombre` UNIQUE, `Activo`) y FK **por clave natural** a `Categoria(Nombre)` con `ON UPDATE CASCADE` | 20e | La misma categoría se escribía distinto: el formulario de prendas ofrecía "Vestidos" y los datos decían "Vestido", así que editar una prenda le cambiaba la categoría a la primera de la lista, y una promoción por categoría podía no aplicar a ninguna prenda. La clave natural evita cambiar el tipo de tres columnas y el `CASCADE` hace que renombrar una categoría actualice prendas y promociones. Migración: se recortan espacios, el plural del formulario viejo pasa al singular y todo texto restante se agrega al catálogo. Los combos (`PrendaForm`, `AltaPromocionForm`, `SugerirPromocionForm`) son listas cerradas que llena `BLL.Prenda.ObtenerCategorias` (`DAL.Prenda.ObtenerCategorias`) y `BLL.Prenda` valida la categoría |
+| 2 | `Cliente.MetodoPago`: texto libre ("Efectivo", "Crédito"…) con los mismos valores del catálogo de Caja escritos de otra forma | **`Cliente.IdMedioPagoPreferido`** (FK a `MedioPago`) | 20c5 | El nombre del medio dependía del cliente y no de su clave. Migración por la clave de traducción del catálogo (el Id de «Tarjeta de débito» es 2 o 5 según la base), después por nombre; un texto fuera del catálogo se conserva como **medio histórico inactivo** (Ids desde 100) y un vacío queda `NULL`. La columna entra en el DVH de `Cliente` (se pide el recálculo). `BLL.Cliente.ObtenerMetodosPago` ofrece los activos del catálogo (más el actual si es histórico) y `Alta`/`Modificar` exigen un medio válido |
+| 3 | La devolución de PN04 se reconocía por la **marca** `MantenimientoPrenda.Actor = 'Devolución'` | **`MantenimientoPrenda.Origen`** `TINYINT` (0 manual, 1 devolución; CHECK) y `Actor` solo dice quién lo abrió | 20f | Un dato no puede ser a la vez "quién" y "por qué": un usuario llamado "Devolución" que mandara una prenda a limpieza a mano la hacía entrar a la Inspección y se le cobraba el daño al último cliente. Migración una sola vez, al crear la columna (`Actor = 'Devolución'` → `Origen = 1`, `Actor = NULL`) |
+| 4a | `Permiso.Nombre` de los roles sin unicidad | Índice único filtrado **`UX_Permiso_NombreRol`** (`WHERE EsRol = 1`) | 21z5 | Hace del nombre del rol una clave candidata, que es lo que referencia `Usuario.Rol` |
+| 4b | `Usuario.Perfil` repetía `Usuario.Rol` sin garantía | CHECK **`CK_Usuario_PerfilEsRol`** (`Rol IS NULL OR Perfil IS NULL OR Rol = Perfil`) | 21z5 | `DAL.Usuario` ya los escribe juntos; el CHECK impide que diverjan por SQL directo |
+| 4c | `Usuario.IdIdioma` (código) sin FK | FK **`FK_Usuario_Idioma`** a `Idioma(Codigo)` (UNIQUE); los códigos inexistentes pasan al idioma por defecto | 21z5 | Integridad referencial de la preferencia de idioma (el script siembra también `PT`) |
+| 4d | `RolPermiso` (asignación plana rol→patente) quedaba en la base junto a `PermisoRelacion` | Es una **tabla de paso del instalador**: el script la usa para sembrar los nodos-rol y las aristas de `PermisoRelacion` y la borra al final | 21z5 | La asignación de patentes a roles se guarda una sola vez (`PermisoRelacion`, con DVH); el C# nunca la usó |
+
+**Desnormalización consciente** (se mantiene a propósito, con su justificación):
+- **Columnas `Actor` / `NombreUsuario` como foto histórica** (`MantenimientoPrenda.Actor`, `CargoPrenda.Actor`, `HistorialUsuario.Actor`, `PedidoHistorial.NombreUsuario`…): registran *quién era* el usuario al momento del hecho y sobreviven a la purga de usuarios archivados (RF-10) y a un cambio de username. Donde además hace falta navegar al usuario hay FK + foto (`PedidoHistorial.IdUsuario`, `Bitacora.usuario`, `BitacoraNegocio.IdUsuario`); las firmas de PN03 (`PromocionHistorial`, `DictamenContable`, `SolicitudBajaPromocion`) son solo FK a `Usuario`.
+- **`Usuario.Rol` por clave natural** (el nombre del rol, no `IdRol`): ahora es clave candidata gracias a `UX_Permiso_NombreRol`. Pasarlo a `IdRol` cambiaría el DVH de `Usuario` y su espejo de integridad (`Usuario_Seguridad`), que protegen justamente el rol contra la escalada de privilegios.
+- **`Usuario.Perfil` = `Usuario.Rol`**: redundancia heredada que el CHECK `CK_Usuario_PerfilEsRol` mantiene consistente.
+- **Snapshots de precio**: `Contratacion.PrecioMensual`, `Contratacion.RecargoCuotas`, `Contratacion.Importe`, `CargoPrenda.Monto` (y `HistorialCobro.Importe`/`DescuentoAplicado`). Son el precio *pactado o cobrado* en ese momento: el plan, el porcentaje de recargo o el precio de reposición pueden cambiar después y el comprobante se reimprime igual.
+- **`Usuario_Seguridad`**: espejo de integridad de T07; duplica a propósito los campos del DVH de `Usuario` para diagnosticar y reparar una manipulación directa en la base.
+- **`PedidoHistorial.ValorAnterior` / `ValorNuevo`**: es un log de cambios en texto (no se consulta por esos valores); guardar el valor tal como se veía es el objetivo.
+- **`Talle` y `Color` de `Prenda`**: siguen como texto; son atributos atómicos de la prenda (dependen solo de su clave), así que repetir un valor no rompe la 3FN.
 
 ---
 
@@ -646,7 +686,7 @@ Fuente: `Plan de Entregas TD 2026.xlsx` y notas de la clase 4. Fechas: **Entrega
 | **3** | N03 (proceso complejo que cruce información para decidir) · D01 manual de instalación · D02 ayuda en línea · D03 material de usuario · A01 casos especiales · A02 informe PDF y **serialización** | Instalador con casos especiales: hecho (`.iss`). PDF: hecho con iTextSharp, sin impresora virtual. **Serialización (A02): hecha** — cada error inesperado se serializa a XML con `XmlSerializer` (`Servicios/Serializacion/SerializadorXml.cs`, `RegistroErrores.cs`; `BE.RegistroError`/`LibroErrores` `[Serializable]`, un archivo por mes en `%LOCALAPPDATA%/WardrobeFlow/Errores`); Bitácora › **Errores (XML)** (`GUI/ErroresXmlForm.cs`, `BLL.ErroresSerializados`, patente de Auditoría) los muestra, importa un XML de otra PC (deserializa, sin DTD) y exporta (serializa); `SerializacionTests`. **Ayuda en línea (D02):** F1 en cualquier pantalla (`GUI/Ayuda/AyudaEnLinea.cs`). N03: PN03 conectado a la analítica es la base natural |
 
 Criterios de evaluación del Plan (balanceo de clases, DER, casos de uso, secuencia; UI; POO; BD 3FN; presentación): el código y el SQL son la fuente para el balanceo;
-puntos discutibles de 3FN ya detectados: `Categoria`/`Talle`/`Color` son texto libre repetido (sin tablas de catálogo); `Contratacion` mezcla datos del pago; `Prenda.IdClienteActual`/`IdUltimoCliente` desnormalizados; campos `Actor` como texto.
+3FN: ver §6.5 (catálogos `Categoria` y `MedioPago` para el cliente, `MantenimientoPrenda.Origen`, restricciones sobre roles e idioma, y la desnormalización consciente justificada: fotos `Actor`, snapshots de precio, espejo de integridad).
 
 ---
 

@@ -97,6 +97,7 @@ namespace GUI
 
             // ── AnalisisAbandonoForm ───────────────────────────────────────────
             this.ClientSize = new Size(880, 560);
+            this.MinimumSize = new Size(660, 400);
             this.Controls.Add(this.lblTitulo);
             this.Controls.Add(this.lblEstrategia);
             this.Controls.Add(this.cmbEstrategia);

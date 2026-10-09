@@ -214,6 +214,7 @@ namespace GUI
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1000, 560);
+            this.MinimumSize = new System.Drawing.Size(800, 480);
             this.Controls.Add(this.dgvCola);
             this.Controls.Add(this.panelPlanilla);
             this.Controls.Add(this.panelStatus);

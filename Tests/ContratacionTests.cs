@@ -884,7 +884,7 @@ namespace Tests
             var cliente = ClienteExistente();
             cliente.IdPlan = 1;
             EsperarError(() => new BLL.Cobro(dal, new FakeCobroDAL(), new FakeCargoPrendaDAL())
-                    .Procesar("Test", cliente, BLL.Manejadores.DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual, "caja"),
+                    .Procesar("Test", cliente, BLL.Manejadores.DecisionCobro.Cobrado, BE.Builders.ModalidadCobro.Mensual),
                 "err.bll.cobro.contratacion_pendiente");
         }
 
@@ -919,7 +919,7 @@ namespace Tests
             var cliente = ClienteExistente();
             cliente.IdPlan = 1;
             EsperarError(() => new BLL.Renovacion(dal, new FakeRenovacionDAL(), new FakePlanSuscripcionDAL(), new FakePrendaDAL())
-                    .Procesar("Test", cliente, BLL.Manejadores.DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual, "vendedor"),
+                    .Procesar("Test", cliente, BLL.Manejadores.DecisionRenovacion.Renovar, null, BE.Builders.ModalidadCobro.Mensual),
                 "err.bll.renovacion.contratacion_pendiente");
         }
 

@@ -17,11 +17,12 @@ namespace DAL
             /// (el estado cambió entre la lectura y la escritura) se hace rollback de AMBAS
             /// escrituras y se lanza AppException. Devuelve el Id del cargo creado.
             /// </summary>
-            int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado);
+            int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado, int? idPedidoACerrar = null);
 
             /// <summary>
             /// Último pedido que tiene la prenda asignada (Separado, Pendiente, Despachado o
-            /// Entregado: un pedido devuelto queda Entregado, por eso se toma el más reciente), con su estado y su fecha de entrega. Null si no hay ninguno.
+            /// Entregado SIN devolución registrada: un pedido devuelto sigue Entregado pero con
+            /// FechaDevolucion, y se ignora), con su estado y su fecha de entrega. Null si no hay ninguno.
             /// PN04 lo usa para la compra tácita: solo se reporta perdida una prenda entregada.
             /// </summary>
             BE.Pedido ObtenerPedidoEnCurso(int idPrenda);
@@ -37,13 +38,19 @@ namespace DAL
     /// </summary>
     public class InspeccionDevolucion : BaseDAL, Interfaces.IInspeccionDevolucionDAL
     {
-        public int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado)
+        // idPedidoACerrar (Reportar Prenda Perdida): si con esta baja al pedido ya no le queda ninguna
+        // prenda en poder del cliente, se completa su FechaDevolucion (queda cerrado: deja de contar
+        // como atrasado). Se recalcula el DV de Pedido en la misma transacción.
+        public int DarDeBajaConCargo(BE.CargoPrenda cargo, BE.EstadoPrenda estadoEsperado, int? idPedidoACerrar = null)
         {
             if (cargo == null) throw new ArgumentNullException(nameof(cargo));
             int idNuevo = 0;
 
             acceso.EjecutarTransaccion((cn, tx) =>
             {
+                if (idPedidoACerrar.HasValue)
+                    DigitoVerificador.Bloquear(cn, tx, Pedido.DV_Tabla);   // antes de escribir nada
+
                 using (var cmd = new SqlCommand(
                     "INSERT INTO CargoPrenda (IdPrenda, IdCliente, Motivo, Monto, FechaRegistro, Actor, Estado) " +
                     "VALUES (@IdPrenda, @IdCliente, @Motivo, @Monto, @FechaRegistro, @Actor, @Estado); " +
@@ -91,6 +98,24 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@Actor",     (object)cargo.Actor ?? DBNull.Value);
                     cmd.ExecuteNonQuery();
                 }
+
+                if (idPedidoACerrar.HasValue)
+                {
+                    int cerrado;
+                    using (var cmd = new SqlCommand(
+                        "UPDATE Pedido SET FechaDevolucion = GETDATE() " +
+                        "WHERE IdPedido = @IdPedido AND FechaDevolucion IS NULL " +
+                        "AND NOT EXISTS (SELECT 1 FROM PedidoPrenda pp INNER JOIN Prenda pr ON pr.IdPrenda = pp.IdPrenda " +
+                        "                WHERE pp.IdPedido = @IdPedido AND pr.Estado = @EnUso AND pr.IdClienteActual = @IdCliente)",
+                        cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@IdPedido",  idPedidoACerrar.Value);
+                        cmd.Parameters.AddWithValue("@EnUso",     (int)BE.EstadoPrenda.EnUso);
+                        cmd.Parameters.AddWithValue("@IdCliente", cargo.IdCliente);
+                        cerrado = cmd.ExecuteNonQuery();
+                    }
+                    if (cerrado > 0) new Pedido().ActualizarDVEnTx(cn, tx, idPedidoACerrar.Value);
+                }
             });
 
             return idNuevo;
@@ -102,24 +127,27 @@ namespace DAL
             {
                 new SqlParameter("@IdPrenda",   idPrenda),
                 new SqlParameter("@Separado",   (int)BE.EstadoPedido.Separado),
-                new SqlParameter("@Pendiente",  (int)BE.EstadoPedido.Pendiente),
+                new SqlParameter("@Pendiente",  (object)(int)BE.EstadoPedido.Pendiente),   // (object): un 0 constante se tomaría como SqlDbType
                 new SqlParameter("@Despachado", (int)BE.EstadoPedido.Despachado),
                 new SqlParameter("@Entregado",  (int)BE.EstadoPedido.Entregado)
             };
             var dt = acceso.Leer(
-                "SELECT TOP 1 p.IdPedido, p.IdCliente, p.Estado, p.FechaEntrega " +
+                "SELECT TOP 1 p.IdPedido, p.IdCliente, p.Estado, p.FechaEntrega, p.FechaDevolucion " +
                 "FROM Pedido p INNER JOIN PedidoPrenda pp ON pp.IdPedido = p.IdPedido " +
                 "WHERE pp.IdPrenda = @IdPrenda AND p.Estado IN (@Separado, @Pendiente, @Despachado, @Entregado) " +
+                // PN04: un pedido ya devuelto no está "en curso" (la prenda volvió con ese pedido).
+                "AND p.FechaDevolucion IS NULL " +
                 "ORDER BY p.FechaPedido DESC, p.IdPedido DESC", p);
             if (dt.Rows.Count == 0) return null;
 
             var r = dt.Rows[0];
             return new BE.Pedido
             {
-                IdPedido     = Convert.ToInt32(r["IdPedido"]),
-                IdCliente    = Convert.ToInt32(r["IdCliente"]),
-                Estado       = (BE.EstadoPedido)Convert.ToInt32(r["Estado"]),
-                FechaEntrega = r["FechaEntrega"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaEntrega"])
+                IdPedido        = Convert.ToInt32(r["IdPedido"]),
+                IdCliente       = Convert.ToInt32(r["IdCliente"]),
+                Estado          = (BE.EstadoPedido)Convert.ToInt32(r["Estado"]),
+                FechaEntrega    = r["FechaEntrega"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaEntrega"]),
+                FechaDevolucion = r["FechaDevolucion"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaDevolucion"])
             };
         }
     }

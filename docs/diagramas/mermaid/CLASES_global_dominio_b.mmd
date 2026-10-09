@@ -8,7 +8,7 @@ classDiagram
     +DateTime FechaPedido
     +DateTime? FechaDespacho
     +DateTime? FechaEntrega
-    +DateTime? FechaEnvioControl
+    +DateTime? FechaDevolucion
   }
   class PedidoHistorial {
     +int IdHistorial
@@ -32,6 +32,7 @@ classDiagram
     +DateTime FechaEntrada
     +DateTime? FechaSalida
     +string Actor
+    +OrigenMantenimiento Origen
     +bool EstaAbierto
     +bool VieneDeDevolucion
     +int? DuracionDias

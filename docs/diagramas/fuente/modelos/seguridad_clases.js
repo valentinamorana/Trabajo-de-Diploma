@@ -75,7 +75,7 @@ module.exports = [
   },
   // DER por módulo de seguridad (las tablas salen de la base real)
   { tipo: 'er', id: 'DER_T02_login', titulo: 'DER — T02 Login y Logout', columnas: 3, tablas: ['Usuario', 'Usuario_Seguridad', 'Empleado', 'Preferencia', 'Bitacora'] },
-  { tipo: 'er', id: 'DER_T04_perfiles', titulo: 'DER — T04 Gestión de perfiles', columnas: 3, tablas: ['Permiso', 'PermisoRelacion', 'RolPermiso', 'Usuario'] },
+  { tipo: 'er', id: 'DER_T04_perfiles', titulo: 'DER — T04 Gestión de perfiles', columnas: 3, tablas: ['Permiso', 'PermisoRelacion', 'Usuario'] },
   { tipo: 'er', id: 'DER_T05_idiomas', titulo: 'DER — T05 Gestión de múltiples idiomas', columnas: 3, tablas: ['Idioma', 'Traduccion', 'Control', 'ControlMapeado', 'Preferencia'] },
   { tipo: 'er', id: 'DER_T06_bitacora', titulo: 'DER — T06 Bitácora y control de cambios', columnas: 3, tablas: ['Bitacora', 'BitacoraNegocio', 'HistorialUsuario', 'Usuario'] },
   { tipo: 'er', id: 'DER_T07_dv', titulo: 'DER — T07 Dígitos verificadores', columnas: 3, tablas: ['Usuario', 'DVVertical', 'HistorialIntegridad'] },

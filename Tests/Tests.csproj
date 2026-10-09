@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
@@ -74,6 +75,7 @@
     <Compile Include="RecomendacionPrendasTests.cs" />
     <Compile Include="ReporteVentasVendedorTests.cs" />
     <Compile Include="CobroTests.cs" />
+    <Compile Include="IntegracionBDTests.cs" />
     <Compile Include="ListaEsperaTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="ReporteJornadaTests.cs" />

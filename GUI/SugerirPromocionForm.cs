@@ -107,6 +107,16 @@ namespace GUI
             RH("Estado", "col.promo.estado", "Estado");
         }
 
+// Selecciona la categoría en el combo (lista cerrada del catálogo Categoria). Si es una
+        // categoría que ya no está activa, se agrega para no cambiarla por otra.
+        private void SeleccionarCategoria(string categoria)
+        {
+            if (string.IsNullOrWhiteSpace(categoria)) { cmbCategoria.SelectedIndex = -1; return; }
+            int idx = cmbCategoria.FindStringExact(categoria.Trim());
+            if (idx < 0) idx = cmbCategoria.Items.Add(categoria.Trim());
+            cmbCategoria.SelectedIndex = idx;
+        }
+
         private void SugerirPromocionForm_Load(object sender, EventArgs e)
         {
             try
@@ -116,7 +126,7 @@ namespace GUI
                 cmbPlan.DisplayMember = nameof(BE.PlanSuscripcion.Nombre);
                 cmbPlan.ValueMember = nameof(BE.PlanSuscripcion.IdPlan);
                 cmbTipoDescuento.DataSource = Enum.GetValues(typeof(BE.TipoDescuento));
-                // Categorías del catálogo como sugerencias (se puede escribir otra).
+                // Categorías del catálogo (tabla Categoria): lista cerrada, la FK de la base no acepta otra.
                 cmbCategoria.Items.Clear();
                 foreach (string categoria in new BLL.Prenda().ObtenerCategorias()) cmbCategoria.Items.Add(categoria);
                 // Se muestra traducido ("Monto fijo"); el ítem sigue siendo el enum.
@@ -163,7 +173,7 @@ namespace GUI
             else
             {
                 rbCategoria.Checked = true;
-                cmbCategoria.Text = elegida.CategoriaPrenda;
+                SeleccionarCategoria(elegida.CategoriaPrenda);
             }
             cmbTipoDescuento.SelectedItem = elegida.TipoSugerido;
             numBeneficioEstimado.Value = Math.Min(numBeneficioEstimado.Maximum, elegida.BeneficioEstimado);

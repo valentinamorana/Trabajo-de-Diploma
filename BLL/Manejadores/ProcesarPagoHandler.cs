@@ -136,42 +136,42 @@ namespace BLL.Manejadores
             if (conPromo && conCargos)
             {
                 clave = "cobro.msg.cobrado.promoycargos";
-                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
-                          $"Incluye la promoción '{resDescuento.Promocion.Nombre}' (-${descuento}) y {cargosPendientes.Count} cargo(s) por daño/pérdida (${totalCargos}).";
+                mensaje = $"Cobro registrado ({importeFinal:C2}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye la promoción '{resDescuento.Promocion.Nombre}' (-{descuento:C2}) y {cargosPendientes.Count} cargo(s) por daño/pérdida ({totalCargos:C2}).";
                 args = new object[] { importeFinal, suscripcion.FechaVencimiento, resDescuento.Promocion.Nombre, descuento, cargosPendientes.Count, totalCargos };
             }
             else if (conPromo)
             {
                 clave = "cobro.msg.cobrado.promo";
-                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
-                          $"Incluye la promoción '{resDescuento.Promocion.Nombre}' (-${descuento}).";
+                mensaje = $"Cobro registrado ({importeFinal:C2}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye la promoción '{resDescuento.Promocion.Nombre}' (-{descuento:C2}).";
                 args = new object[] { importeFinal, suscripcion.FechaVencimiento, resDescuento.Promocion.Nombre, descuento };
             }
             else if (conDescuento && conCargos)
             {
                 clave = "cobro.msg.cobrado.descuentoycargos";
-                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
-                          $"Incluye descuento por referido de ${descuento} y {cargosPendientes.Count} cargo(s) por daño/pérdida (${totalCargos}).";
+                mensaje = $"Cobro registrado ({importeFinal:C2}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye descuento por referido de {descuento:C2} y {cargosPendientes.Count} cargo(s) por daño/pérdida ({totalCargos:C2}).";
                 args = new object[] { importeFinal, suscripcion.FechaVencimiento, descuento, cargosPendientes.Count, totalCargos };
             }
             else if (conDescuento)
             {
                 clave = "cobro.msg.cobrado.descuento";
-                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
-                          $"Incluye descuento por referido de ${descuento}.";
+                mensaje = $"Cobro registrado ({importeFinal:C2}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye descuento por referido de {descuento:C2}.";
                 args = new object[] { importeFinal, suscripcion.FechaVencimiento, descuento };
             }
             else if (conCargos)
             {
                 clave = "cobro.msg.cobrado.cargos";
-                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
-                          $"Incluye {cargosPendientes.Count} cargo(s) por daño/pérdida (${totalCargos}).";
+                mensaje = $"Cobro registrado ({importeFinal:C2}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}. " +
+                          $"Incluye {cargosPendientes.Count} cargo(s) por daño/pérdida ({totalCargos:C2}).";
                 args = new object[] { importeFinal, suscripcion.FechaVencimiento, cargosPendientes.Count, totalCargos };
             }
             else
             {
                 clave = "cobro.msg.cobrado";
-                mensaje = $"Cobro registrado (${importeFinal}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}.";
+                mensaje = $"Cobro registrado ({importeFinal:C2}). Renovación confirmada: nueva vigencia hasta {suscripcion.FechaVencimiento:d}.";
                 args = new object[] { importeFinal, suscripcion.FechaVencimiento };
             }
 

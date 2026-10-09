@@ -506,7 +506,7 @@ namespace GUI
             if (pedidoCompleto == null) return;
 
             string bodyDev = string.Format(
-                Tr("conf.devolucion.body", "¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado EnLimpieza."),
+                Tr("conf.devolucion.body", "¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado En limpieza."),
                 pedidoCompleto.IdPedido, pedidoCompleto.NombreCliente, pedidoCompleto.CantidadPrendas);
 
             var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
@@ -523,7 +523,7 @@ namespace GUI
                 _invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
                 _invocador.ProcesarOrdenes();
 
-                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a EnLimpieza."), pedidoCompleto.CantidadPrendas));
+                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a En limpieza."), pedidoCompleto.CantidadPrendas));
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -549,7 +549,7 @@ namespace GUI
                     inspeccionBLL.ReportarPerdida(this.Text, prenda, dlg.Motivo, dlg.Monto);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);
                     MostrarOk(string.Format(
-                        tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de ${1} registrado.",
+                        tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de {1:C2} registrado.",
                         prenda.Nombre, dlg.Monto));
                     var pedidoSel = ObtenerPedidoSeleccionado();
                     if (pedidoSel != null) CargarDetallePrendas(pedidoSel);

@@ -451,6 +451,7 @@ namespace GUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(240)))), ((int)(((byte)(246)))));
             this.ClientSize = new System.Drawing.Size(960, 592);
+            this.MinimumSize = new System.Drawing.Size(976, 440);
             this.Controls.Add(this.rtbReporte);
             this.Controls.Add(this.panelKpiBanner);
             this.Controls.Add(this.panelControles);

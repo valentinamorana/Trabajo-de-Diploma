@@ -177,6 +177,7 @@ namespace GUI
             chkNotif.Text      = Tr("perfil.notif", "Recibir notificaciones");
             btnGuardar.Text    = Tr("perfil.btn.guardar", "Guardar preferencias");
             btnDefault.Text    = Tr("perfil.btn.default", "Restaurar valores de fábrica");
+            btnCerrar.Text     = Tr("btn.cerrar", "Cerrar");
             PoblarOpciones();
         }
 

@@ -358,7 +358,7 @@ ES	msg.ped.ensistema	{0} pedido(s) en el sistema.
 ES	msg.ped.mostrando	Mostrando {0} de {1}
 ES	msg.ped.despachado	Pedido #{0} despachado correctamente.
 ES	msg.ped.entregado	Pedido #{0} marcado como Entregado.
-ES	msg.ped.devolucion	Devolución registrada — {0} prenda(s) pasan a EnLimpieza.
+ES	msg.ped.devolucion	Devolución registrada — {0} prenda(s) pasan a En limpieza.
 ES	btn.historial	Historial
 ES	btn.aceptar	Aceptar
 ES	dlg.cancelped.titulo	Motivo de Cancelación
@@ -373,7 +373,7 @@ ES	conf.despachar.body	¿Despachar el Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}
 ES	conf.entrega.titulo	Confirmar Entrega
 ES	conf.entrega.body	¿Confirmar entrega del Pedido #{0} a {1}?
 ES	conf.devolucion.titulo	Confirmar Devolución
-ES	conf.devolucion.body	¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado EnLimpieza.
+ES	conf.devolucion.body	¿Registrar devolución del Pedido #{0}?\n\nCliente: {1}\nPrendas: {2}\n\nLas prendas pasarán a estado En limpieza.
 ES	msg.prenda.agregada	Prenda '{0}' agregada al catálogo.
 ES	msg.prenda.actualizada	Prenda '{0}' actualizada.
 ES	msg.prenda.estadoact	Estado de '{0}' actualizado a {1}.
@@ -642,7 +642,7 @@ ES	msg.historial.atencion	Atención
 ES	msg.historial.restaurado	Versión restaurada correctamente.
 ES	msg.cli.registrado	Cliente '{0}' registrado correctamente.
 ES	msg.cli.actualizado	Cliente '{0}' actualizado.
-ES	msg.cli.eliminado	Cliente '{0}' eliminado.
+ES	msg.cli.eliminado	Cliente '{0}' dado de baja.
 ES	conf.baja.cli.msg	¿Dar de baja a {0} (DNI {1})?\n\nEsta acción no se puede deshacer.
 ES	conf.baja.cli.titulo	Confirmar Baja
 ES	err.cli.errorplanes	— Error al cargar planes —
@@ -696,7 +696,7 @@ ES	err.bll.cliente.dni_formato	El DNI debe tener entre 7 y 8 dígitos.
 ES	err.bll.cliente.dni_numeros	El DNI solo puede contener números.
 ES	err.bll.cliente.dni_duplicado	Ya existe un cliente con DNI {0}.
 ES	err.bll.cliente.dni_duplicado_otro	El DNI {0} ya está registrado para otro cliente.
-ES	err.bll.cliente.baja_prendas	No se puede eliminar a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.
+ES	err.bll.cliente.baja_prendas	No se puede dar de baja a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.
 ES	err.bll.pedido.sin_prendas	Debe seleccionar al menos una prenda.
 ES	err.bll.pedido.cliente_inexistente	El cliente seleccionado no existe.
 ES	err.bll.pedido.sin_plan	El cliente {0} no tiene plan asignado. Asignale un plan antes de crear un pedido.
@@ -807,7 +807,7 @@ EN	err.bll.prenda.categoria_requerida	The category is required.
 EN	err.bll.prenda.nombre_requerido	The garment name is required.
 EN	err.bll.prenda.talle_requerido	The size is required.
 EN	err.bll.usuario.no_existe	The user for this version no longer exists.
-EN	err.bll.usuario.perfil_requerido	The profile/role is required.
+EN	err.bll.usuario.perfil_requerido	The role is required.
 EN	err.bll.usuario.sin_permiso	Only an Administrator can manage users.
 EN	err.bll.usuario.username_corto	The username must be at least 3 characters long.
 EN	err.bll.usuario.username_requerido	The username is required.
@@ -815,7 +815,7 @@ EN	err.bll.version.no_existe	The selected version does not exist.
 EN	err.bll.version.sin_permiso	Only an Administrator can restore a user's historical version.
 EN	err.bll.prenda.transicion_baja	A garment that has been deactivated cannot change state.
 EN	err.bll.prenda.transicion_enuso	The state of a garment in use updates automatically when processing orders.\nThe only manual exception is reporting it lost (PN04, Completed Orders module).
-EN	err.bll.prenda.baja_requiere_flujoperdida	A garment in use can only be discontinued through 'Report Lost Garment' (with a replacement charge to the client), not directly.
+EN	err.bll.prenda.baja_requiere_flujoperdida	A garment in use can only be retired through 'Report Lost Garment' (with a replacement charge to the customer), not directly.
 EN	err.bll.prenda.baja_requiere_inspeccion	A garment In Cleaning can only be retired from the Return Inspection (which records the damage charge), not directly.
 EN	err.bll.prenda.transicion_generica	The transition from '{0}' to '{1}' is not allowed.
 EN	lbl.permisos.estructura	System structure (roles, families and patents)
@@ -826,7 +826,7 @@ EN	perm.ok.quitado	'{0}' removed from '{1}'.
 EN	btn.permisos.actualizar	Refresh
 EN	tip.actualizar	Refresh
 EN	tip.config.backup	Configure backup reminder
-EN	help.permisos.rol	Role = profile assigned to a user. Can contain patents, families and other roles (role-in-role).
+EN	help.permisos.rol	Role = set of permissions assigned to a user. Can contain patents, families and other roles (role-in-role).
 EN	lbl.permisos.subtitulo	Manage roles, families and patents
 EN	btn.permisos.eliminar	Delete selection
 EN	perm.conf.titulo	Confirm
@@ -885,30 +885,30 @@ EN	mnu.inventario	Inventory
 EN	mnu.prendas	Garments
 EN	mnu.suscriptores	Subscribers
 EN	mnu.ventas	Sales
-EN	mnu.clientes	Clients
+EN	mnu.clientes	Customers
 EN	mnu.planes	Subscription Plans
 EN	mnu.pedidosventa	Sales Orders
 EN	mnu.pedidosreal	Fulfilled Orders
 EN	mnu.administrar	Administration
-EN	mnu.perfiles	Profiles & Permissions
+EN	mnu.perfiles	Roles & Permissions
 EN	mnu.cerrarsesion	Sign Out
 EN	mnu.ventana	Open Windows
 EN	mnu.ventana.cerrartodas	Close All
 EN	mnu.idiomas	Language Management
-EN	frm.clientes	Client Management
+EN	frm.clientes	Customer Management
 EN	lbl.buscar	Search:
-EN	btn.nuevocliente	+ New Client
+EN	btn.nuevocliente	+ New Customer
 EN	btn.editar	Edit
-EN	btn.darbaja	Delete
+EN	btn.darbaja	Deactivate
 EN	frm.prendas	Garment Catalog
 EN	lbl.estado	Status:
 EN	btn.nuevaprenda	+ New Garment
 EN	btn.cambiarestado	Status
-EN	lbl.clienteenuso	Client in use:
+EN	lbl.clienteenuso	Customer in use:
 EN	frm.gestion	User Management
 EN	lbl.nuevousuario	New User
 EN	lbl.nombreusuario	Username:
-EN	lbl.perfilrol	Profile (role):
+EN	lbl.perfilrol	Role:
 EN	btn.agregar	Add User
 EN	lbl.resettitulo	Reset Password
 EN	lbl.resetinfo	Select a user\nfrom the list and press:
@@ -943,7 +943,7 @@ EN	btn.limpiarfiltro	Clear
 EN	btn.exportar	Export CSV
 EN	lbl.tipoevento	Event type:
 EN	lbl.idpedido	Order ID:
-EN	lbl.idcliente	Client ID:
+EN	lbl.idcliente	Customer ID:
 EN	frm.pedidosventa	Sales Orders
 EN	btn.nuevopedido	+ New Order
 EN	btn.cancelarpedido	Cancel
@@ -957,8 +957,8 @@ EN	btn.devolucion	Register Return
 EN	lbl.detallepedido	Selected order detail
 EN	col.ped.urgencia	Urgency
 EN	col.ped.fecha	Date
-EN	col.ped.cliente	Client
-EN	col.ped.vendedor	Seller
+EN	col.ped.cliente	Customer
+EN	col.ped.vendedor	Salesperson
 EN	col.ped.prendas	Garments
 EN	col.ped.estado	Status
 EN	col.ped.despacho	Dispatch
@@ -982,10 +982,10 @@ EN	col.neg.idevento	Event Id
 EN	col.neg.fecha	Date
 EN	col.neg.tipo	Type
 EN	col.neg.usuario	User
-EN	col.neg.cliente	Client
+EN	col.neg.cliente	Customer
 EN	col.neg.idpedido	Order Id
 EN	col.neg.idprenda	Garment Id
-EN	col.neg.idcliente	Client Id
+EN	col.neg.idcliente	Customer ID
 EN	col.neg.desc	Description
 EN	stat.ninguno	None
 EN	stat.baja	Low
@@ -1035,7 +1035,7 @@ EN	listaespera.pendiente	Pending
 EN	listaespera.reservada	Reserved
 EN	listaespera.convertida	Converted
 EN	listaespera.cancelada	Cancelled
-EN	col.prenda.cliente	Client
+EN	col.prenda.cliente	Customer
 EN	col.prenda.alta	Registered
 EN	msg.prenda.conteo	Showing {0} of {1}
 EN	msg.prenda.cargadas	{0} garment(s) in catalog.
@@ -1046,8 +1046,8 @@ EN	col.plan.estado	Status
 EN	plan.activo	Active
 EN	plan.inactivo	Inactive
 EN	msg.planes.cargados	{0} plan(s) loaded.
-EN	frm.nuevocliente	New Client
-EN	frm.editarcliente	Edit Client
+EN	frm.nuevocliente	New Customer
+EN	frm.editarcliente	Edit Customer
 EN	lbl.cli.nombre	First name *
 EN	lbl.cli.apellido	Last name *
 EN	lbl.cli.dni	DNI * (7-8 digits)
@@ -1055,7 +1055,7 @@ EN	lbl.cli.email	Email
 EN	lbl.cli.metodopago	Payment method *
 EN	lbl.cli.plan	Subscription plan
 EN	combo.cli.sinplan	— No plan —
-EN	btn.registrar.cliente	Register Client
+EN	btn.registrar.cliente	Register Customer
 EN	btn.guardar.cambios	Save Changes
 EN	btn.cancelar	Cancel
 EN	col.cli.nombre	First Name
@@ -1068,7 +1068,7 @@ EN	col.cli.metodopago	Payment Method
 EN	col.cli.alta	Registered
 EN	lbl.sinplan	No plan
 EN	msg.cli.conteo	Showing {0} of {1}
-EN	msg.cli.cargados	{0} client(s) registered.
+EN	msg.cli.cargados	{0} customer(s) registered.
 EN	col.usr.username	Username
 EN	col.usr.perfil	Role
 EN	col.usr.estado	Status
@@ -1093,7 +1093,7 @@ EN	lbl.prenda.categoria	Category *
 EN	btn.agregar.prenda	Add Garment
 EN	frm.nuevopedido	New Sales Order
 EN	paso2.texto	Step 2 of 2 — Select Garments
-EN	lbl.ped.selcliente	Select the client for this order:
+EN	lbl.ped.selcliente	Select the customer for this order:
 EN	lbl.ped.selprendas	Select the garments to include in the order (checkbox):
 EN	btn.siguiente	Next →
 EN	btn.volver	← Back
@@ -1146,7 +1146,7 @@ EN	msg.prenda.estadoact	Status of '{0}' updated to {1}.
 EN	opt.enviarlimpieza	Send to Cleaning
 EN	opt.darbaja	Retire
 EN	opt.marcardisp	Mark Available
-EN	err.prenda.enuso	Cannot change status: garment is currently in use by a client.
+EN	err.prenda.enuso	Cannot change status: garment is currently in use by a customer.
 EN	err.prenda.baja	The garment is retired and cannot be reactivated.
 EN	lbl.cambioest.info	Garment: {0}  —  Current status: {1}
 EN	msg.cambioest.selecciona	Select an option.
@@ -1172,16 +1172,16 @@ EN	tevt.entrega	Delivery
 EN	tevt.altaprenda	New Garment
 EN	tevt.modprenda	Garment Edit
 EN	tevt.cambiostprenda	Garment Status Change
-EN	tevt.altacliente	New Client
-EN	tevt.modcliente	Client Edit
-EN	tevt.bajacliente	Client Removed
+EN	tevt.altacliente	New Customer
+EN	tevt.modcliente	Customer Edit
+EN	tevt.bajacliente	Customer Deactivated
 EN	lbl.editplan	Edit Plan
 EN	msg.bit.registros	  {0} record(s)
 EN	msg.bit.ultimos	last {0} days
 EN	msg.bit.todos	all records
 EN	btn.copiado	Copied
 EN	perfil.administrador	Administrator
-EN	perfil.vendedor	Sales Rep
+EN	perfil.vendedor	Salesperson
 EN	perfil.deposito	Warehouse
 EN	metodo.efectivo	Cash
 EN	metodo.debito	Debit
@@ -1190,8 +1190,8 @@ EN	metodo.transferencia	Wire Transfer
 EN	lbl.proximamente	Coming Soon
 EN	err.pdf.sinDatos	No data to export.
 EN	lbl.exportarpdf	Export PDF
-EN	lbl.ped.infoplan	Client: {0}\nPlan: {1}\nGarments currently in use: {2}\nPayment method: {3}\nSince: {4}
-EN	err.ped.sinplan	{0} has no plan assigned.\nAssign a plan in the Clients module before creating an order.
+EN	lbl.ped.infoplan	Customer: {0}\nPlan: {1}\nGarments currently in use: {2}\nPayment method: {3}\nSince: {4}
+EN	err.ped.sinplan	{0} has no plan assigned.\nAssign a plan in the Customers module before creating an order.
 EN	msg.usr.creado.exportado	User '{0}' [{1}] created.\nCredentials saved to:\n{2}
 EN	msg.usr.clave.exportada	Password for '{0}' auto-generated.\nCredentials saved to:\n{1}
 EN	err.usr.selecciona	Select a user from the list.
@@ -1199,8 +1199,8 @@ EN	err.usr.sel.bloqueado	Select a locked user from the list.
 EN	conf.desbloquear.body	Unlock the account of '{0}'?
 EN	conf.desbloquear.titulo	Confirm Unlock
 EN	msg.usr.desbloqueada	Account '{0}' unlocked successfully.
-EN	frm.gestorpermisos	Profile and Permission Manager
-EN	lbl.permisos.titulo	Profiles and Permissions
+EN	frm.gestorpermisos	Role and Permission Manager
+EN	lbl.permisos.titulo	Roles and Permissions
 EN	btn.permisos.cerrar	Close
 EN	perm.rol.administrador	Administrator
 EN	perm.rol.vendedor	Salesperson
@@ -1214,7 +1214,7 @@ EN	perm.pat.veroutfits	View Outfits
 EN	perm.pat.verprendas	View Garments
 EN	perm.pat.gestionarusuarios	Manage Users
 EN	perm.pat.verauditoria	View Audit Log
-EN	perm.pat.gestionarclientes	Manage Clients
+EN	perm.pat.gestionarclientes	Manage Customers
 EN	perm.pat.gestionarplansuscripciones	Manage Subscription Plans
 EN	perm.pat.realizarventas	Process Sales
 EN	perm.pat.verpedidosrealizados	View Fulfilled Orders
@@ -1273,7 +1273,7 @@ EN	err.bll.emergencia.sin_claves	No emergency keys left. Ask another Administrat
 EN	perfil.menu	My Profile
 EN	perfil.frm.titulo	My Profile
 EN	perfil.usuario	User:
-EN	perfil.perfil	Profile / Role:
+EN	perfil.perfil	Role:
 EN	perfil.idioma	Preferred language:
 EN	perfil.btn.guardar	Save preferences
 EN	perfil.btn.default	Restore factory defaults
@@ -1305,10 +1305,10 @@ EN	frm.restauracion	System Integrity
 EN	mnu.dashboard	Dashboard
 EN	mnu.bitacora.sistema	System Log
 EN	mnu.bitacora.negocio	Business Log
-EN	frm.dashboard	Control Panel
+EN	frm.dashboard	Dashboard
 EN	dash.general.subtitulo	WardrobeFlow
 EN	dash.prendas	Garments\navailable
-EN	dash.clientes	Clients\nregistered
+EN	dash.clientes	Customers\nregistered
 EN	dash.pedidos	Orders\npending
 EN	dash.suscripciones	Subscriptions\nexpiring soon
 EN	dash.backup	days without\nbackup
@@ -1324,7 +1324,7 @@ EN	rpt.exportartxt	Export TXT
 EN	rpt.fecha	Shift:
 EN	rpt.fecha2	Compare with:
 EN	rpt.kpi.prendas	Available garments
-EN	rpt.kpi.clientes	Registered clients
+EN	rpt.kpi.clientes	Registered customers
 EN	rpt.kpi.eventos	Events today
 EN	rpt.kpi.backup	days since backup
 EN	rpt.limpiar	Clear
@@ -1332,13 +1332,13 @@ EN	rpt.subtitulo	Business events per day with TXT export
 EN	rpt.txt.titulo	DAILY REPORT
 EN	rpt.txt.resumen	SYSTEM SUMMARY
 EN	rpt.txt.prendas	Available garments
-EN	rpt.txt.clientes	Registered clients
+EN	rpt.txt.clientes	Registered customers
 EN	rpt.txt.diassinbkp	Days without backup
 EN	rpt.txt.sinbackups	No backups
 EN	rpt.txt.eventos	BUSINESS EVENTS OF THE DAY
 EN	rpt.txt.sinevt	(no events recorded for this shift)
 EN	rpt.txt.usuario	User
-EN	rpt.txt.cliente	Client
+EN	rpt.txt.cliente	Customer
 EN	rpt.txt.totalevt	TOTAL EVENTS
 EN	rpt.txt.generado	Generated
 EN	rpt.txt.comparacion	SHIFT COMPARISON
@@ -1404,17 +1404,17 @@ EN	msg.confirmar.limiteintentos	Too many failed attempts. Close this window and 
 EN	msg.historial.sinseleccion	Select a version from the grid.
 EN	msg.historial.atencion	Attention
 EN	msg.historial.restaurado	Version restored successfully.
-EN	msg.cli.registrado	Client '{0}' registered successfully.
-EN	msg.cli.actualizado	Client '{0}' updated.
-EN	msg.cli.eliminado	Client '{0}' deleted.
+EN	msg.cli.registrado	Customer '{0}' registered successfully.
+EN	msg.cli.actualizado	Customer '{0}' updated.
+EN	msg.cli.eliminado	Customer '{0}' deactivated.
 EN	conf.baja.cli.msg	Deactivate {0} (DNI {1})?\n\nThis action cannot be undone.
-EN	conf.baja.cli.titulo	Confirm Deletion
+EN	conf.baja.cli.titulo	Confirm Deactivation
 EN	err.cli.errorplanes	— Error loading plans —
 EN	msg.planes.creado	Plan '{0}' created.
 EN	msg.planes.actualizado	Plan '{0}' updated.
 EN	msg.planes.desactivado	Plan '{0}' deactivated.
 EN	msg.planes.reactivado	Plan '{0}' reactivated.
-EN	conf.planes.desat.msg	Deactivate plan '{0}'?\n\nExisting clients with this plan will not be affected.
+EN	conf.planes.desat.msg	Deactivate plan '{0}'?\n\nExisting customers with this plan will not be affected.
 EN	conf.planes.desat.tit	Confirm Deactivation
 EN	conf.planes.act.msg	Reactivate plan '{0}'?\n\nThe plan will be available for new subscriptions again.
 EN	conf.planes.act.tit	Confirm Activation
@@ -1433,8 +1433,8 @@ EN	col.cli.vencimiento	Expiry
 EN	msg.cli.sinvenc	No expiry
 EN	msg.cli.vencido	Expired
 EN	msg.cli.proxvencer	Expiring soon
-EN	err.ped.suscvencida	{0}'s subscription expired on {1}.\nUpdate in the Clients module.
-EN	lbl.ped.proxvencer	Subscription expires in {0} day(s). Remind the client to renew.
+EN	err.ped.suscvencida	{0}'s subscription expired on {1}.\nUpdate in the Customers module.
+EN	lbl.ped.proxvencer	Subscription expires in {0} day(s). Remind the customer to renew.
 EN	lbl.ped.res.linea1	Selected: {0}  |  Already in use: {1}  |  Total: {2}
 EN	lbl.ped.res.limite	Plan '{0}' allows {1} garment(s). You are exceeding the limit by {2}.
 EN	lbl.ped.res.vacio	You can add up to {0} garment(s) (plan {1}).
@@ -1460,20 +1460,20 @@ EN	err.bll.cliente.dni_formato	ID number must be 7 or 8 digits.
 EN	err.bll.cliente.dni_numeros	ID number can only contain digits.
 EN	err.bll.cliente.dni_duplicado	A customer with ID {0} already exists.
 EN	err.bll.cliente.dni_duplicado_otro	ID {0} is already registered to another customer.
-EN	err.bll.cliente.baja_prendas	Cannot delete {0}: they have {1} garment(s) in use. Register the return first.
+EN	err.bll.cliente.baja_prendas	Cannot deactivate {0}: they have {1} garment(s) in use. Register the return first.
 EN	err.bll.pedido.sin_prendas	You must select at least one garment.
 EN	err.bll.pedido.cliente_inexistente	The selected customer does not exist.
 EN	err.bll.pedido.sin_plan	Customer {0} has no plan assigned. Assign a plan before creating an order.
 EN	err.bll.pedido.suscripcion_vencida	Subscription for {0} expired on {1}. Renew in the Customers module.
 EN	err.bll.pedido.limite_plan	Plan '{0}' allows {1} garment(s). Customer already has {2} in use and is adding {3} more. Maximum allowed: {4}.
-EN	err.bll.listaespera.cliente_inexistente	The client does not exist.
+EN	err.bll.listaespera.cliente_inexistente	The customer does not exist.
 EN	err.bll.listaespera.inexistente	The entry does not exist.
 EN	err.bll.listaespera.prenda_inexistente	The garment does not exist.
 EN	err.bll.listaespera.prenda_no_enuso	'{0}' is {1} — no need to wait, it can already be ordered directly.
 EN	err.bll.listaespera.suscripcion_vencida	{0} does not have an active subscription.
 EN	err.bll.listaespera.ya_anotado	{0} is already on the waiting list for '{1}'.
 EN	err.bll.listaespera.ya_resuelta	This entry is already {0} — it cannot be cancelled.
-EN	err.bll.pedido.prenda_reservada	The garment '{0}' is reserved on the Waiting List for another client. Update the selection.
+EN	err.bll.pedido.prenda_reservada	The garment '{0}' is reserved on the Waiting List for another customer. Update the selection.
 EN	err.bll.pedido.despachar_estado	Only Pending orders can be dispatched. This order is '{0}'.
 EN	err.bll.pedido.entregar_estado	Only Dispatched orders can be marked as Delivered. This order is '{0}'.
 EN	err.bll.pedido.devolucion_estado	Returns can only be registered for Delivered orders. This order is '{0}'.
@@ -1663,7 +1663,7 @@ RU	frm.clientes	Управление клиентами
 RU	lbl.buscar	Поиск:
 RU	btn.nuevocliente	+ Новый клиент
 RU	btn.editar	Изменить
-RU	btn.darbaja	Удалить
+RU	btn.darbaja	Деактивировать
 RU	frm.prendas	Каталог одежды
 RU	lbl.estado	Состояние:
 RU	btn.nuevaprenda	+ Новая одежда
@@ -1938,7 +1938,7 @@ RU	tevt.modprenda	Изменение вещи
 RU	tevt.cambiostprenda	Изменение статуса вещи
 RU	tevt.altacliente	Новый клиент
 RU	tevt.modcliente	Изменение клиента
-RU	tevt.bajacliente	Удаление клиента
+RU	tevt.bajacliente	Деактивация клиента
 RU	lbl.editplan	Редактировать план
 RU	msg.bit.registros	  {0} запись(ей)
 RU	msg.bit.ultimos	последние {0} дней
@@ -2170,9 +2170,9 @@ RU	msg.historial.atencion	Внимание
 RU	msg.historial.restaurado	Версия успешно восстановлена.
 RU	msg.cli.registrado	Клиент '{0}' успешно зарегистрирован.
 RU	msg.cli.actualizado	Клиент '{0}' обновлён.
-RU	msg.cli.eliminado	Клиент '{0}' удалён.
-RU	conf.baja.cli.msg	Удалить клиента {0} (ИНН {1})?\n\nЭто действие нельзя отменить.
-RU	conf.baja.cli.titulo	Подтверждение удаления
+RU	msg.cli.eliminado	Клиент '{0}' деактивирован.
+RU	conf.baja.cli.msg	Деактивировать клиента {0} (ИНН {1})?\n\nЭто действие нельзя отменить.
+RU	conf.baja.cli.titulo	Подтверждение деактивации
 RU	err.cli.errorplanes	— Ошибка загрузки планов —
 RU	msg.planes.creado	План '{0}' создан.
 RU	msg.planes.actualizado	План '{0}' обновлён.
@@ -2224,7 +2224,7 @@ RU	err.bll.cliente.dni_formato	Номер удостоверения долже�
 RU	err.bll.cliente.dni_numeros	Номер удостоверения может содержать только цифры.
 RU	err.bll.cliente.dni_duplicado	Клиент с удостоверением {0} уже существует.
 RU	err.bll.cliente.dni_duplicado_otro	Удостоверение {0} уже зарегистрировано для другого клиента.
-RU	err.bll.cliente.baja_prendas	Невозможно удалить {0}: у них {1} вещь(ей) в использовании. Сначала зарегистрируйте возврат.
+RU	err.bll.cliente.baja_prendas	Невозможно деактивировать {0}: у них {1} вещь(ей) в использовании. Сначала зарегистрируйте возврат.
 RU	err.bll.pedido.sin_prendas	Необходимо выбрать хотя бы одну вещь.
 RU	err.bll.pedido.cliente_inexistente	Выбранный клиент не существует.
 RU	err.bll.pedido.sin_plan	У клиента {0} нет назначенного плана. Назначьте план перед созданием заказа.
@@ -2468,7 +2468,7 @@ PT	frm.clientes	Gerenciamento de Clientes
 PT	lbl.buscar	Buscar:
 PT	btn.nuevocliente	+ Novo Cliente
 PT	btn.editar	Editar
-PT	btn.darbaja	Excluir
+PT	btn.darbaja	Desativar
 PT	frm.prendas	Catálogo de Roupas
 PT	lbl.estado	Estado:
 PT	btn.nuevaprenda	+ Nova Roupa
@@ -2743,7 +2743,7 @@ PT	tevt.modprenda	Edição Roupa
 PT	tevt.cambiostprenda	Alteração Estado Roupa
 PT	tevt.altacliente	Novo Cliente
 PT	tevt.modcliente	Edição Cliente
-PT	tevt.bajacliente	Exclusão Cliente
+PT	tevt.bajacliente	Desativação Cliente
 PT	lbl.editplan	Editar Plano
 PT	msg.bit.registros	  {0} registro(s)
 PT	msg.bit.ultimos	últimos {0} dias
@@ -2969,9 +2969,9 @@ PT	msg.historial.atencion	Atenção
 PT	msg.historial.restaurado	Versão restaurada com sucesso.
 PT	msg.cli.registrado	Cliente '{0}' cadastrado com sucesso.
 PT	msg.cli.actualizado	Cliente '{0}' atualizado.
-PT	msg.cli.eliminado	Cliente '{0}' excluído.
-PT	conf.baja.cli.msg	Excluir {0} (CPF {1})?\n\nEsta ação não pode ser desfeita.
-PT	conf.baja.cli.titulo	Confirmar Exclusão
+PT	msg.cli.eliminado	Cliente '{0}' desativado.
+PT	conf.baja.cli.msg	Desativar {0} (CPF {1})?\n\nEsta ação não pode ser desfeita.
+PT	conf.baja.cli.titulo	Confirmar Desativação
 PT	err.cli.errorplanes	— Erro ao carregar planos —
 PT	msg.planes.creado	Plano '{0}' criado.
 PT	msg.planes.actualizado	Plano '{0}' atualizado.
@@ -3023,7 +3023,7 @@ PT	err.bll.cliente.dni_formato	O CPF deve ter entre 7 e 8 dígitos.
 PT	err.bll.cliente.dni_numeros	O CPF só pode conter números.
 PT	err.bll.cliente.dni_duplicado	Já existe um cliente com CPF {0}.
 PT	err.bll.cliente.dni_duplicado_otro	O CPF {0} já está cadastrado para outro cliente.
-PT	err.bll.cliente.baja_prendas	Não é possível excluir {0}: possui {1} roupa(s) em uso. Registre a devolução primeiro.
+PT	err.bll.cliente.baja_prendas	Não é possível desativar {0}: possui {1} roupa(s) em uso. Registre a devolução primeiro.
 PT	err.bll.pedido.sin_prendas	Selecione pelo menos uma roupa.
 PT	err.bll.pedido.cliente_inexistente	O cliente selecionado não existe.
 PT	err.bll.pedido.sin_plan	O cliente {0} não tem plano atribuído. Atribua um plano antes de criar um pedido.
@@ -3716,15 +3716,15 @@ EN	err.bll.usuario.clave_corta	The password must be at least 8 characters long.
 EN	err.bll.usuario.clave_sinnumero	The password must contain at least one number.
 EN	err.bll.usuario.clave_sinespecial	The password must contain at least one special character (!@#$%...).
 EN	err.bll.cliente.plan_inexistente	The specified subscription plan was not found.
-EN	err.bll.cliente.plan_solo_admin	Only an Administrator can change a client's plan or expiration date directly. To activate a new subscription, use the Contracting module.
+EN	err.bll.cliente.plan_solo_admin	Only an Administrator can change a customer's plan or expiration date directly. To activate a new subscription, use the Contracting module.
 EN	err.bll.renovacion.solo_admin	Renewing or changing the plan extends the subscription and must go through the Cashier: register a New Contracting. From Renewal, only an Administrator can do it.
 EN	err.bll.cliente.fechanac_requerida	The date of birth is required.
-EN	err.bll.cliente.menor_edad	The client must be over 18 years old.
+EN	err.bll.cliente.menor_edad	The customer must be over 18 years old.
 EN	err.bll.plan.nombre_letras	The plan name can only contain letters and spaces.
 EN	err.bll.plan.precio_cero	The price must be greater than zero.
 EN	err.bll.renovacion.plan_requerido	You must specify the new plan to change the subscription.
 EN	err.bll.renovacion.plan_inexistente	The specified plan does not exist.
-EN	err.bll.renovacion.plan_insuficiente	Cannot switch to plan '{0}': the client has {1} garment(s) in use and that plan only allows {2}.
+EN	err.bll.renovacion.plan_insuficiente	Cannot switch to plan '{0}': the customer has {1} garment(s) in use and that plan only allows {2}.
 EN	err.bll.renovacion.sin_plan	{0} has no subscription plan assigned. A renewal cannot be processed.
 EN	err.bll.cobro.sin_plan	{0} has no subscription plan assigned. A payment cannot be processed.
 EN	err.bll.pedido.pago_suspendido	{0}'s subscription has been suspended for non-payment since {1}. Regularize the payment in the Subscribers module before creating a new order.
@@ -3836,7 +3836,7 @@ ES	cobro.estado.aldia	al día
 ES	cobro.sinelegibles	No hay clientes con un cobro pendiente de procesar.
 ES	cobro.estado.resumen	Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}
 ES	cobro.msg.pendiente	La suscripción de {0} no está vencida ni próxima a vencer. Todavía no corresponde procesar el cobro.
-ES	cobro.msg.cobrado	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}.
+ES	cobro.msg.cobrado	Cobro registrado ({0:C2}). Renovación confirmada: nueva vigencia hasta {1:d}.
 ES	cobro.msg.gracia	Cobro fallido. Período de gracia hasta {0:d} para regularizar antes de suspender nuevos pedidos.
 ES	cobro.msg.suspendido	Venció el período de gracia sin regularizar el cobro. El cliente no podrá generar nuevos pedidos hasta registrar un cobro exitoso.
 ES	mnu.abandono	Análisis de Abandono
@@ -3862,8 +3862,8 @@ EN	renov.titulo	Subscription Renewal
 EN	conf.renov.baja.msg	Cancel {0}'s subscription?\n\nThis action is irreversible.
 EN	conf.renov.procesar.msg	Process this decision for {0}?
 EN	conf.renov.procesar.tit	Confirm Renewal
-EN	renov.cliente	Client:
-EN	renov.decision	Decision (after contacting the client)
+EN	renov.cliente	Customer:
+EN	renov.decision	Decision (after contacting the customer)
 EN	renov.renovar	Renew same plan
 EN	renov.cambiarplan	Change plan
 EN	renov.baja	Cancel subscription
@@ -3875,7 +3875,7 @@ EN	mnu.cobro	Renewal Charges
 EN	cobro.titulo	Subscription Payment
 EN	conf.cobro.procesar.msg	Process this payment for {0}?
 EN	conf.cobro.procesar.tit	Confirm Payment
-EN	cobro.cliente	Client:
+EN	cobro.cliente	Customer:
 EN	cobro.decision	Payment outcome
 EN	cobro.cobrado	Paid
 EN	cobro.pagofallido	Payment failed
@@ -3889,17 +3889,17 @@ EN	renov.estado.resumen	Current plan: {0} — Expiration: {1} ({2})
 EN	renov.msg.pendiente	{0}'s subscription is not expired or about to expire. Decision '{1}' was not processed: it's not due for renewal yet.
 EN	renov.msg.renovada	Subscription renewed. New validity until {0:d}.
 EN	renov.msg.cambioplan	Plan changed to '{0}'. New validity until {1:d}.
-EN	renov.msg.baja	Subscription cancelled. The client won't be able to place new orders.
-EN	renov.msg.baja_conprendas	Subscription cancelled. The client won't be able to place new orders. They have {0} garment(s) in use — request the return.
+EN	renov.msg.baja	Subscription cancelled. The customer won't be able to place new orders.
+EN	renov.msg.baja_conprendas	Subscription cancelled. The customer won't be able to place new orders. They have {0} garment(s) in use — request the return.
 EN	cobro.estado.suspendido	SUSPENDED for non-payment
 EN	cobro.estado.engracia	in grace period until {0:d}
 EN	cobro.estado.aldia	up to date
-EN	cobro.sinelegibles	No clients have a charge pending to process.
+EN	cobro.sinelegibles	No customers have a charge pending to process.
 EN	cobro.estado.resumen	Plan: {0} — Expiration: {1}\nPayment status: {2}
 EN	cobro.msg.pendiente	{0}'s subscription is not expired or about to expire. Payment doesn't need to be processed yet.
-EN	cobro.msg.cobrado	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}.
+EN	cobro.msg.cobrado	Payment recorded ({0:C2}). Renewal confirmed: new validity until {1:d}.
 EN	cobro.msg.gracia	Payment failed. Grace period until {0:d} to regularize before suspending new orders.
-EN	cobro.msg.suspendido	The grace period expired without regularizing the payment. The client won't be able to place new orders until a successful payment is recorded.
+EN	cobro.msg.suspendido	The grace period expired without regularizing the payment. The customer won't be able to place new orders until a successful payment is recorded.
 EN	mnu.abandono	Churn Analysis
 EN	abandono.titulo	Churn Analysis
 EN	abandono.estrategia	Risk criterion:
@@ -3907,13 +3907,13 @@ EN	abandono.generar	Generate
 EN	abandono.estr.vencinactividad	Expiring soon with no recent activity
 EN	abandono.estr.inactividad	No activity for a while (even if still active)
 EN	abandono.estr.nuncaactivo	Signed up and never placed an order
-EN	abandono.col.cliente	Client
+EN	abandono.col.cliente	Customer
 EN	abandono.col.plan	Plan
 EN	abandono.col.vencimiento	Expiration
 EN	abandono.col.ultimopedido	Last order
 EN	abandono.col.motivo	Reason
 EN	abandono.nuncapidio	never
-EN	abandono.resultado	{0} client(s) at risk under '{1}'.
+EN	abandono.resultado	{0} customer(s) at risk under '{1}'.
 EN	abandono.motivo.vencinactividad_nunca	{0}'s subscription is expiring soon and they never placed an order.
 EN	abandono.motivo.vencinactividad	{0}'s subscription is expiring soon and has had no activity for {1} day(s).
 EN	abandono.motivo.inactividad	{0} has had no activity for {1} day(s), regardless of expiration.
@@ -3958,7 +3958,7 @@ RU	cobro.estado.aldia	оплачено
 RU	cobro.sinelegibles	Нет клиентов с ожидающим оплаты платежом.
 RU	cobro.estado.resumen	План: {0} — Срок действия: {1}\nСтатус оплаты: {2}
 RU	cobro.msg.pendiente	Подписка {0} не просрочена и не истекает в ближайшее время. Обрабатывать платёж пока не требуется.
-RU	cobro.msg.cobrado	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}.
+RU	cobro.msg.cobrado	Платёж зафиксирован ({0:C2}). Продление подтверждено: новый срок действия до {1:d}.
 RU	cobro.msg.gracia	Платёж не прошёл. Льготный период до {0:d}, чтобы урегулировать оплату до приостановки новых заказов.
 RU	cobro.msg.suspendido	Льготный период истёк без урегулирования платежа. Клиент не сможет оформлять новые заказы, пока не будет зафиксирован успешный платёж.
 RU	mnu.abandono	Анализ оттока
@@ -4019,7 +4019,7 @@ PT	cobro.estado.aldia	em dia
 PT	cobro.sinelegibles	Não há clientes com uma cobrança pendente de processar.
 PT	cobro.estado.resumen	Plano: {0} — Vencimento: {1}\nStatus de pagamento: {2}
 PT	cobro.msg.pendiente	A assinatura de {0} não está vencida nem prestes a vencer. Ainda não é necessário processar a cobrança.
-PT	cobro.msg.cobrado	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}.
+PT	cobro.msg.cobrado	Cobrança registrada ({0:C2}). Renovação confirmada: nova vigência até {1:d}.
 PT	cobro.msg.gracia	Cobrança falhou. Período de carência até {0:d} para regularizar antes de suspender novos pedidos.
 PT	cobro.msg.suspendido	O período de carência venceu sem regularizar a cobrança. O cliente não poderá fazer novos pedidos até que uma cobrança seja registrada com sucesso.
 PT	mnu.abandono	Análise de Abandono
@@ -4288,10 +4288,10 @@ EN	recom.col.categoria	Category
 EN	recom.col.color	Color
 EN	recom.col.motivo	Reason
 EN	recom.resultado	{0} garment(s) recommended.
-EN	recom.sinhistorial	The client doesn't have enough order history to generate a recommendation.
-EN	recom.motivo.ambos	{0} matches the client's preferred category ({1}) and color ({2}).
-EN	recom.motivo.categoria	{0} matches the client's preferred category ({1}).
-EN	recom.motivo.color	{0} matches the client's preferred color ({1}).
+EN	recom.sinhistorial	The customer doesn't have enough order history to generate a recommendation.
+EN	recom.motivo.ambos	{0} matches the customer's preferred category ({1}) and color ({2}).
+EN	recom.motivo.categoria	{0} matches the customer's preferred category ({1}).
+EN	recom.motivo.color	{0} matches the customer's preferred color ({1}).
 RU	recom.titulo	Рекомендации одежды
 RU	recom.col.prenda	Одежда
 RU	recom.col.categoria	Категория
@@ -4335,22 +4335,22 @@ ES	lbl.cargoprenda.monto	Monto a cobrar *
 ES	lbl.cargoprenda.info	Prenda: {0}\nÚltimo cliente: {1}
 ES	btn.registrar.cargo	Registrar Cargo
 ES	msg.cargoprenda.preguntar	¿Corresponde cobrarle a {0} por daño o pérdida de esta prenda?
-ES	msg.cargoprenda.registrado	Cargo de ${0} registrado — se sumará al próximo cobro de {1}.
+ES	msg.cargoprenda.registrado	Cargo de {0:C2} registrado — se sumará al próximo cobro de {1}.
 ES	err.bll.cargoprenda.sin_cliente	La prenda '{0}' no tiene un último cliente registrado; no se le puede cargar el costo a nadie.
 ES	err.bll.cargoprenda.motivo_requerido	Debe indicar el motivo del cargo (daño o pérdida).
 ES	err.bll.cargoprenda.monto_invalido	El monto del cargo debe ser mayor a cero.
-ES	cobro.msg.cobrado.descuento	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2}.
-ES	cobro.msg.cobrado.cargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye {2} cargo(s) por daño/pérdida (${3}).
-ES	cobro.msg.cobrado.descuentoycargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de ${2} y {3} cargo(s) por daño/pérdida (${4}).
-ES	cobro.msg.cobrado.promo	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye la promoción '{2}' (-${3}).
-ES	cobro.msg.cobrado.promoycargos	Cobro registrado (${0}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye la promoción '{2}' (-${3}) y {4} cargo(s) por daño/pérdida (${5}).
+ES	cobro.msg.cobrado.descuento	Cobro registrado ({0:C2}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de {2:C2}.
+ES	cobro.msg.cobrado.cargos	Cobro registrado ({0:C2}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye {2} cargo(s) por daño/pérdida ({3:C2}).
+ES	cobro.msg.cobrado.descuentoycargos	Cobro registrado ({0:C2}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye descuento por referido de {2:C2} y {3} cargo(s) por daño/pérdida ({4:C2}).
+ES	cobro.msg.cobrado.promo	Cobro registrado ({0:C2}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye la promoción '{2}' (-{3:C2}).
+ES	cobro.msg.cobrado.promoycargos	Cobro registrado ({0:C2}). Renovación confirmada: nueva vigencia hasta {1:d}. Incluye la promoción '{2}' (-{3:C2}) y {4} cargo(s) por daño/pérdida ({5:C2}).
 EN	renov.pausar	Pause until:
 EN	renov.reanudar	Resume now
 EN	renov.estado.pausada	PAUSED
 EN	renov.estado.pausadahasta	paused until {0}
-EN	renov.msg.pausada	Subscription paused until {0:d}. The client won't be able to place new orders until it's resumed.
+EN	renov.msg.pausada	Subscription paused until {0:d}. The customer won't be able to place new orders until it's resumed.
 EN	renov.msg.reanudada	Subscription resumed.
-EN	renov.sinelegibles	No clients are eligible to process this decision.
+EN	renov.sinelegibles	No customers are eligible to process this decision.
 EN	err.bll.renovacion.pausa_sin_fecha	You must indicate until when the subscription is paused.
 EN	err.bll.renovacion.pausa_fecha_pasada	The resume date can't be earlier than today.
 EN	err.bll.renovacion.pausa_excede_tope	A pause can't exceed {0} months (until {1:d}).
@@ -4364,18 +4364,18 @@ EN	combo.cli.sinreferente	— None —
 EN	frm.cargoprenda	Damage/Loss Charge
 EN	lbl.cargoprenda.motivo	Reason (damage or loss) *
 EN	lbl.cargoprenda.monto	Amount to charge *
-EN	lbl.cargoprenda.info	Garment: {0}\nLast client: {1}
+EN	lbl.cargoprenda.info	Garment: {0}\nLast customer: {1}
 EN	btn.registrar.cargo	Register Charge
 EN	msg.cargoprenda.preguntar	Should {0} be charged for damage or loss of this garment?
-EN	msg.cargoprenda.registrado	Charge of ${0} registered — it will be added to {1}'s next payment.
-EN	err.bll.cargoprenda.sin_cliente	Garment '{0}' has no last known client; there's no one to charge for it.
+EN	msg.cargoprenda.registrado	Charge of {0:C2} registered — it will be added to {1}'s next payment.
+EN	err.bll.cargoprenda.sin_cliente	Garment '{0}' has no last known customer; there's no one to charge for it.
 EN	err.bll.cargoprenda.motivo_requerido	You must indicate the reason for the charge (damage or loss).
 EN	err.bll.cargoprenda.monto_invalido	The charge amount must be greater than zero.
-EN	cobro.msg.cobrado.descuento	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2}.
-EN	cobro.msg.cobrado.cargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes {2} damage/loss charge(s) (${3}).
-EN	cobro.msg.cobrado.descuentoycargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of ${2} and {3} damage/loss charge(s) (${4}).
-EN	cobro.msg.cobrado.promo	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes the promotion '{2}' (-${3}).
-EN	cobro.msg.cobrado.promoycargos	Payment recorded (${0}). Renewal confirmed: new validity until {1:d}. Includes the promotion '{2}' (-${3}) and {4} damage/loss charge(s) (${5}).
+EN	cobro.msg.cobrado.descuento	Payment recorded ({0:C2}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of {2:C2}.
+EN	cobro.msg.cobrado.cargos	Payment recorded ({0:C2}). Renewal confirmed: new validity until {1:d}. Includes {2} damage/loss charge(s) ({3:C2}).
+EN	cobro.msg.cobrado.descuentoycargos	Payment recorded ({0:C2}). Renewal confirmed: new validity until {1:d}. Includes a referral discount of {2:C2} and {3} damage/loss charge(s) ({4:C2}).
+EN	cobro.msg.cobrado.promo	Payment recorded ({0:C2}). Renewal confirmed: new validity until {1:d}. Includes the promotion '{2}' (-{3:C2}).
+EN	cobro.msg.cobrado.promoycargos	Payment recorded ({0:C2}). Renewal confirmed: new validity until {1:d}. Includes the promotion '{2}' (-{3:C2}) and {4} damage/loss charge(s) ({5:C2}).
 RU	renov.pausar	Приостановить до:
 RU	renov.reanudar	Возобновить сейчас
 RU	renov.estado.pausada	ПРИОСТАНОВЛЕНА
@@ -4399,15 +4399,15 @@ RU	lbl.cargoprenda.monto	Сумма к оплате *
 RU	lbl.cargoprenda.info	Одежда: {0}\nПоследний клиент: {1}
 RU	btn.registrar.cargo	Зарегистрировать штраф
 RU	msg.cargoprenda.preguntar	Нужно ли взыскать с {0} штраф за повреждение или утрату этой вещи?
-RU	msg.cargoprenda.registrado	Штраф на сумму ${0} зарегистрирован — будет добавлен к следующему платежу {1}.
+RU	msg.cargoprenda.registrado	Штраф на сумму {0:C2} зарегистрирован — будет добавлен к следующему платежу {1}.
 RU	err.bll.cargoprenda.sin_cliente	У вещи «{0}» нет последнего известного клиента; взыскать не с кого.
 RU	err.bll.cargoprenda.motivo_requerido	Укажите причину штрафа (повреждение или утрата).
 RU	err.bll.cargoprenda.monto_invalido	Сумма штрафа должна быть больше нуля.
-RU	cobro.msg.cobrado.descuento	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2}.
-RU	cobro.msg.cobrado.cargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает {2} штраф(ов) за повреждение/утрату (${3}).
-RU	cobro.msg.cobrado.descuentoycargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку ${2} и {3} штраф(ов) за повреждение/утрату (${4}).
-RU	cobro.msg.cobrado.promo	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает акцию '{2}' (-${3}).
-RU	cobro.msg.cobrado.promoycargos	Платёж зафиксирован (${0}). Продление подтверждено: новый срок действия до {1:d}. Включает акцию '{2}' (-${3}) и {4} штраф(ов) за повреждение/утрату (${5}).
+RU	cobro.msg.cobrado.descuento	Платёж зафиксирован ({0:C2}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку {2:C2}.
+RU	cobro.msg.cobrado.cargos	Платёж зафиксирован ({0:C2}). Продление подтверждено: новый срок действия до {1:d}. Включает {2} штраф(ов) за повреждение/утрату ({3:C2}).
+RU	cobro.msg.cobrado.descuentoycargos	Платёж зафиксирован ({0:C2}). Продление подтверждено: новый срок действия до {1:d}. Включает реферальную скидку {2:C2} и {3} штраф(ов) за повреждение/утрату ({4:C2}).
+RU	cobro.msg.cobrado.promo	Платёж зафиксирован ({0:C2}). Продление подтверждено: новый срок действия до {1:d}. Включает акцию '{2}' (-{3:C2}).
+RU	cobro.msg.cobrado.promoycargos	Платёж зафиксирован ({0:C2}). Продление подтверждено: новый срок действия до {1:d}. Включает акцию '{2}' (-{3:C2}) и {4} штраф(ов) за повреждение/утрату ({5:C2}).
 PT	renov.pausar	Pausar até:
 PT	renov.reanudar	Retomar agora
 PT	renov.estado.pausada	PAUSADA
@@ -4431,15 +4431,15 @@ PT	lbl.cargoprenda.monto	Valor a cobrar *
 PT	lbl.cargoprenda.info	Peça: {0}\nÚltimo cliente: {1}
 PT	btn.registrar.cargo	Registrar Cobrança
 PT	msg.cargoprenda.preguntar	Cabe cobrar de {0} por dano ou perda desta peça?
-PT	msg.cargoprenda.registrado	Cobrança de ${0} registrada — será somada à próxima cobrança de {1}.
+PT	msg.cargoprenda.registrado	Cobrança de {0:C2} registrada — será somada à próxima cobrança de {1}.
 PT	err.bll.cargoprenda.sin_cliente	A peça '{0}' não tem um último cliente registrado; não há quem cobrar.
 PT	err.bll.cargoprenda.motivo_requerido	Você deve indicar o motivo da cobrança (dano ou perda).
 PT	err.bll.cargoprenda.monto_invalido	O valor da cobrança deve ser maior que zero.
-PT	cobro.msg.cobrado.descuento	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2}.
-PT	cobro.msg.cobrado.cargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui {2} cobrança(s) por dano/perda (${3}).
-PT	cobro.msg.cobrado.descuentoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de ${2} e {3} cobrança(s) por dano/perda (${4}).
-PT	cobro.msg.cobrado.promo	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui a promoção '{2}' (-${3}).
-PT	cobro.msg.cobrado.promoycargos	Cobrança registrada (${0}). Renovação confirmada: nova vigência até {1:d}. Inclui a promoção '{2}' (-${3}) e {4} cobrança(s) por dano/perda (${5}).
+PT	cobro.msg.cobrado.descuento	Cobrança registrada ({0:C2}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de {2:C2}.
+PT	cobro.msg.cobrado.cargos	Cobrança registrada ({0:C2}). Renovação confirmada: nova vigência até {1:d}. Inclui {2} cobrança(s) por dano/perda ({3:C2}).
+PT	cobro.msg.cobrado.descuentoycargos	Cobrança registrada ({0:C2}). Renovação confirmada: nova vigência até {1:d}. Inclui desconto por indicação de {2:C2} e {3} cobrança(s) por dano/perda ({4:C2}).
+PT	cobro.msg.cobrado.promo	Cobrança registrada ({0:C2}). Renovação confirmada: nova vigência até {1:d}. Inclui a promoção '{2}' (-{3:C2}).
+PT	cobro.msg.cobrado.promoycargos	Cobrança registrada ({0:C2}). Renovação confirmada: nova vigência até {1:d}. Inclui a promoção '{2}' (-{3:C2}) e {4} cobrança(s) por dano/perda ({5:C2}).
 ES	mnu.auditoria	Auditoría
 ES	mnu.analiticanegocio	Analítica de Negocio
 EN	mnu.auditoria	Audit
@@ -4453,7 +4453,7 @@ EN	frm.nuevacontratacion	New Contract
 RU	frm.nuevacontratacion	Новый договор
 PT	frm.nuevacontratacion	Nova Contratação
 ES	contratacion.cliente	Cliente:
-EN	contratacion.cliente	Client:
+EN	contratacion.cliente	Customer:
 RU	contratacion.cliente	Клиент:
 PT	contratacion.cliente	Cliente:
 ES	contratacion.plan	Plan:
@@ -4497,8 +4497,8 @@ ES	err.bll.contratacion.cobro_sin_activar	El cobro de la contratación #{0} qued
 ES	err.bll.contratacion.inexistente	La contratación ya no existe.
 ES	err.bll.contratacion.medio_pago_requerido	Debe indicar el medio de pago (efectivo, tarjeta de débito, tarjeta de crédito o transferencia).
 ES	err.bll.contratacion.plan_inexistente	El plan seleccionado no existe o no está activo.
-EN	err.bll.contratacion.pendiente_existente	This client already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
-EN	err.bll.contratacion.cliente_inexistente	The selected client does not exist.
+EN	err.bll.contratacion.pendiente_existente	This customer already has a contract pending payment. It must be resolved (charged or cancelled) before registering a new one.
+EN	err.bll.contratacion.cliente_inexistente	The selected customer does not exist.
 EN	err.bll.contratacion.cobrar_estado	Only contracts Pending payment can be charged. This contract is '{0}'.
 EN	err.bll.contratacion.plan_baja	Plan '{0}' has been discontinued: the subscription cannot be formalized. The contracting remains pending payment.
 EN	err.bll.contratacion.cobrar_concurrente	Another Cashier session has already resolved this contracting. Refresh the Cashier queue.
@@ -4525,7 +4525,7 @@ PT	err.bll.contratacion.inexistente	A contratação não existe mais.
 PT	err.bll.contratacion.medio_pago_requerido	Deve indicar o meio de pagamento (dinheiro, cartão de débito, cartão de crédito ou transferência).
 PT	err.bll.contratacion.plan_inexistente	O plano selecionado não existe ou não está ativo.
 ES	err.contratacion.faltandatos	Seleccioná un cliente y un plan para continuar.
-EN	err.contratacion.faltandatos	Select a client and a plan to continue.
+EN	err.contratacion.faltandatos	Select a customer and a plan to continue.
 RU	err.contratacion.faltandatos	Выберите клиента и план, чтобы продолжить.
 PT	err.contratacion.faltandatos	Selecione um cliente e um plano para continuar.
 ES	conf.contratacion.crear.titulo	Confirmar Contratación
@@ -4584,14 +4584,14 @@ ES	msg.insp.reingreso_ok	'{0}' reingresó a Disponible.
 EN	msg.insp.reingreso_ok	'{0}' returned to Available.
 RU	msg.insp.reingreso_ok	'{0}' возвращена в статус «Доступно».
 PT	msg.insp.reingreso_ok	'{0}' reingressou em Disponível.
-ES	msg.insp.baja_ok	'{0}' dada de baja — cargo de ${1} registrado.
-EN	msg.insp.baja_ok	'{0}' discarded — charge of ${1} recorded.
-RU	msg.insp.baja_ok	'{0}' списана — зарегистрирован платёж на ${1}.
-PT	msg.insp.baja_ok	'{0}' baixada — cobrança de ${1} registrada.
-ES	msg.ped.perdida_ok	'{0}' reportada como perdida — cargo de ${1} registrado.
-EN	msg.ped.perdida_ok	'{0}' reported as lost — charge of ${1} recorded.
-RU	msg.ped.perdida_ok	'{0}' отмечена как утерянная — зарегистрирован платёж на ${1}.
-PT	msg.ped.perdida_ok	'{0}' reportada como perdida — cobrança de ${1} registrada.
+ES	msg.insp.baja_ok	'{0}' dada de baja — cargo de {1:C2} registrado.
+EN	msg.insp.baja_ok	'{0}' retired — charge of {1:C2} recorded.
+RU	msg.insp.baja_ok	'{0}' списана — зарегистрирован платёж на {1:C2}.
+PT	msg.insp.baja_ok	'{0}' baixada — cobrança de {1:C2} registrada.
+ES	msg.ped.perdida_ok	'{0}' reportada como perdida — cargo de {1:C2} registrado.
+EN	msg.ped.perdida_ok	'{0}' reported as lost — charge of {1:C2} recorded.
+RU	msg.ped.perdida_ok	'{0}' отмечена как утерянная — зарегистрирован платёж на {1:C2}.
+PT	msg.ped.perdida_ok	'{0}' reportada como perdida — cobrança de {1:C2} registrada.
 ES	promo.sugerenciaorigen	A partir de la sugerencia #{0}: {1}
 EN	promo.sugerenciaorigen	From suggestion #{0}: {1}
 RU	promo.sugerenciaorigen	На основе предложения №{0}: {1}
@@ -4696,7 +4696,7 @@ ES	msg.listaespera.cancelada	Anotación de {0} cancelada.
 ES	msg.listaespera.cargadas	{0} anotación(es) activa(s).
 EN	frm.listaespera	Waiting List
 EN	frm.listaespera.anotar	Add to Waiting List
-EN	lbl.listaespera.elegircliente	Client waiting for '{0}':
+EN	lbl.listaespera.elegircliente	Customer waiting for '{0}':
 EN	msg.listaespera.anotado	{0} added to the waiting list for '{1}'.
 EN	msg.listaespera.cancelada	{0}'s entry cancelled.
 EN	msg.listaespera.cargadas	{0} active entry(ies).
@@ -4725,7 +4725,7 @@ EN	col.contr.id	ID
 RU	col.contr.id	ID
 PT	col.contr.id	ID
 ES	col.contr.cliente	Cliente
-EN	col.contr.cliente	Client
+EN	col.contr.cliente	Customer
 RU	col.contr.cliente	Клиент
 PT	col.contr.cliente	Cliente
 ES	col.contr.plan	Plan
@@ -5093,7 +5093,7 @@ EN	col.insp.categoria	Category
 RU	col.insp.categoria	Категория
 PT	col.insp.categoria	Categoria
 ES	col.insp.ultimocliente	Último Cliente
-EN	col.insp.ultimocliente	Last Client
+EN	col.insp.ultimocliente	Last Customer
 RU	col.insp.ultimocliente	Последний клиент
 PT	col.insp.ultimocliente	Último Cliente
 ES	insp.btn.aprobarreingreso	Aprobar Reingreso
@@ -5358,20 +5358,20 @@ ES	err.bll.renovacion.pedido_activo	No se puede pausar ni dar de baja la suscrip
 ES	err.bll.usuario.preferencia_ajena	Solo podés cambiar tu propia preferencia de idioma.
 ES	err.dal.pedido.restaurar_prendas	No se puede restaurar el Pedido #{0}: una o más de sus prendas ya no están disponibles para el cliente (las tiene otro pedido, están en limpieza o de baja).
 EN	err.dal.prenda.estado_cambio	The garment's state changed since it was last read. Refresh the screen and try again.
-EN	paso1.identificar	Step 1 of 2 — Identify the client
+EN	paso1.identificar	Step 1 of 2 — Identify the customer
 EN	paso.ajuste.texto	Adjust selection of Order #{0}
 EN	frm.ajustarpedido	Adjust order selection
 EN	frm.controlstock	Stock Control
 EN	mnu.controlstock	Stock Control
-EN	lbl.ped.identificacion	Client identification (ID number, first or last name):
+EN	lbl.ped.identificacion	Customer identification (ID number, first or last name):
 EN	btn.ped.buscar	Search
-EN	err.ped.noencontrado	No client was found with that identification. Check the ID number, first name or last name.
-EN	lbl.ped.variascoinc	Several clients match: choose the right one from the list.
+EN	err.ped.noencontrado	No customer was found with that identification. Check the ID number, first name or last name.
+EN	lbl.ped.variascoinc	Several customers match: choose the right one from the list.
 EN	lbl.ped.imposible	Cannot continue:
 EN	lbl.ped.pedidoactivo	Active order:
-EN	lbl.ped.ficha	Client: {0}  —  ID {1}\nPlan: {2} (up to {3} garments)  —  Expires: {4}\nGarments in use: {5}  —  Last order: {6}\nPayment method: {7}  —  Joined: {8}
+EN	lbl.ped.ficha	Customer: {0}  —  ID {1}\nPlan: {2} (up to {3} garments)  —  Expires: {4}\nGarments in use: {5}  —  Last order: {6}\nPayment method: {7}  —  Joined: {8}
 EN	lbl.ped.ajuste	Adjust the selection: missing garments are no longer listed and the suggested alternatives are highlighted.
-EN	lbl.ped.res.ajustar	The client adjusts the selection or withdraws.
+EN	lbl.ped.res.ajustar	The customer adjusts the selection or withdraws.
 EN	lbl.ped.detalle	Selection detail:
 EN	btn.ped.enviarcontrol	Send to stock control
 EN	btn.ped.reenviarcontrol	Resend to stock control
@@ -5384,7 +5384,7 @@ EN	conf.ped.enviar.titulo	Send to stock control
 EN	conf.ped.formalizar	Finalize Order #{0} for {1}?\n\nWarehouse already set aside the {2} garment(s). From here on the selection is closed and cannot be modified.
 EN	conf.ped.formalizar.titulo	Finalize order
 EN	dlg.desistir.titulo	Record withdrawal
-EN	dlg.desistir.prompt	Withdrawal reason given by the client:
+EN	dlg.desistir.prompt	Withdrawal reason given by the customer:
 EN	dlg.desistir.pedido	Withdrawal reason — Order #{0} ({1}):
 EN	msg.desistir.req	A withdrawal requires a reason.
 EN	msg.ped.encontrol	Order #{0} sent to stock control. Warehouse will check availability.
@@ -5410,13 +5410,13 @@ EN	lbl.si	Yes
 EN	lbl.no	No
 EN	msg.cs.conteo	{0} order(s) to check
 EN	msg.cs.yanoencontrol	This order is no longer in stock control. The queue is refreshed.
-EN	msg.cs.faltantes	Missing-items report for Order #{0} issued: {1} garment(s). The seller will tell the client.
+EN	msg.cs.faltantes	Missing-items report for Order #{0} issued: {1} garment(s). The salesperson will tell the customer.
 EN	msg.cs.confirmadas	Order #{0}: {1} garment(s) confirmed as available. Set them aside to reserve them.
-EN	msg.cs.separadas	Order #{0}: garments set aside. The seller can now finalize the order.
-EN	conf.cs.separar	Set aside the {0} garment(s) of Order #{1} for {2}?\n\nThey become reserved (in use) in the client's name.
+EN	msg.cs.separadas	Order #{0}: garments set aside. The salesperson can now finalize the order.
+EN	conf.cs.separar	Set aside the {0} garment(s) of Order #{1} for {2}?\n\nThey become reserved (in use) in the customer's name.
 EN	doc.ped.pedido	Order
-EN	doc.ped.cliente	Client
-EN	doc.ped.vendedor	Seller
+EN	doc.ped.cliente	Customer
+EN	doc.ped.vendedor	Salesperson
 EN	doc.ped.fecha	Order date
 EN	doc.ped.envio	Sent to stock control
 EN	doc.ped.detalle	Selection detail (garment, size, color, quantity):
@@ -5428,12 +5428,12 @@ EN	doc.ped.controlo	Checked by
 EN	doc.planilla.titulo	Stock control sheet
 EN	doc.faltantes.titulo	Availability report (missing items and alternatives)
 EN	doc.faltantes.lista	Unavailable garments and suggested alternatives:
-EN	doc.faltantes.reservada	reserved by the Waiting List for another client
+EN	doc.faltantes.reservada	reserved by the Waiting List for another customer
 EN	doc.faltantes.estado	status: {0}
 EN	doc.faltantes.sinalt	No available alternatives of the same category and size.
 EN	doc.separacion.titulo	Set-aside garments receipt
 EN	doc.separacion.fecha	Garments set aside on
-EN	doc.separacion.lista	Garments set aside for the order (now in use in the client's name):
+EN	doc.separacion.lista	Garments set aside for the order (now in use in the customer's name):
 EN	doc.confirmacion.titulo	Order confirmation and receipt
 EN	doc.confirmacion.formalizado	Order finalized on
 EN	doc.confirmacion.cerrada	The selection is closed and cannot be modified.
@@ -5441,25 +5441,25 @@ EN	doc.desist.titulo	Withdrawal notice
 EN	doc.desist.etapa	Withdrew because of
 EN	doc.desist.etapa.cupo	the selection exceeds the plan limit
 EN	doc.desist.etapa.disp	garments not available
-EN	doc.desist.motivo	Reason given by the client
+EN	doc.desist.motivo	Reason given by the customer
 EN	tevt.enviocontrol	Sent to stock control
 EN	tevt.faltantes	Missing-items report
 EN	tevt.separacion	Garments set aside
 EN	tevt.desistimiento	Withdrawal
 EN	alert.pedidos.control	{0} order(s) waiting for warehouse stock control.
-EN	alert.pedidos.faltantes	{0} order(s) with missing items to tell the client about.
+EN	alert.pedidos.faltantes	{0} order(s) with missing items to tell the customer about.
 EN	alert.pedidos.formalizar	{0} order(s) with garments set aside, ready to finalize.
-EN	alert.listaespera.reservadas	{0} garment(s) reserved by the Waiting List waiting for the client to pick them up.
+EN	alert.listaespera.reservadas	{0} garment(s) reserved by the Waiting List waiting for the customer to pick them up.
 EN	err.bll.pedido.pedido_activo	{0} already has order #{1} in progress (status: {2}). Another order cannot be created until that one finishes its cycle.
 EN	err.bll.pedido.desistimiento_sin_exceso	The selection is within the plan limit: a limit-based withdrawal is only recorded when the selection exceeds it.
 EN	err.bll.pedido.desistir_estado	A withdrawal can only be recorded for an order with reported missing items. This order is '{0}'.
-EN	err.bll.pedido.desistir_sin_motivo	You must enter the withdrawal reason given by the client.
+EN	err.bll.pedido.desistir_sin_motivo	You must enter the withdrawal reason given by the customer.
 EN	err.bll.pedido.ajustar_estado	Only an order with reported missing items can have its selection adjusted. This order is '{0}'.
 EN	err.bll.pedido.control_estado	Stock can only be checked for an order sent to control. This order is '{0}'.
 EN	err.bll.pedido.sin_faltantes	All garments of Order #{0} are available: confirm them instead of reporting missing items.
 EN	err.bll.pedido.hay_faltantes	Garment '{0}' is not available: report the missing items instead of confirming.
 EN	err.bll.pedido.sin_confirmar	Confirm the available garments of Order #{0} before setting them aside.
-EN	err.bll.pedido.separar_faltantes	While setting aside, one or more garments of Order #{0} were no longer available. Nothing was reserved and a missing-items report was issued for the seller.
+EN	err.bll.pedido.separar_faltantes	While setting aside, one or more garments of Order #{0} were no longer available. Nothing was reserved and a missing-items report was issued for the salesperson.
 EN	err.bll.pedido.formalizar_estado	Only an order whose garments were set aside by the warehouse can be finalized. This order is '{0}'.
 EN	err.bll.pedido.inexistente	Order #{0} does not exist.
 EN	err.bll.pedido.confirmacion_estado	A confirmation can only be prepared for a finalized order. This order is '{0}'.
@@ -5476,13 +5476,13 @@ EN	doc.aviso.nocontinua	A new order cannot be created at this time.
 EN	doc.aviso.activo.titulo	Active order notice
 EN	doc.aviso.novigente.titulo	Inactive subscription notice
 EN	doc.cupo.exceso	The selection exceeds the plan limit by {0} garment(s).
-EN	doc.cupo.opciones	The client can adjust the selection or withdraw.
+EN	doc.cupo.opciones	The customer can adjust the selection or withdraw.
 EN	doc.cupo.titulo	Plan limit restrictions
 EN	doc.confirmadas.lista	Garments confirmed as available (pending set-aside):
 EN	doc.confirmadas.titulo	Confirmed garments detail
-EN	err.bll.cliente.baja_contratacion	{0} cannot be removed: they have a contract pending payment. Cashier must charge or cancel it first.
-EN	err.bll.cliente.baja_pedido	{0} cannot be removed: they have an order in progress. Wait for it to finish or cancel it first.
-EN	err.bll.contratacion.desistir_sin_motivo	You must enter the withdrawal reason given by the client.
+EN	err.bll.cliente.baja_contratacion	{0} cannot be deactivated: they have a contract pending payment. Cashier must charge or cancel it first.
+EN	err.bll.cliente.baja_pedido	{0} cannot be deactivated: they have an order in progress. Wait for it to finish or cancel it first.
+EN	err.bll.contratacion.desistir_sin_motivo	You must enter the withdrawal reason given by the customer.
 EN	err.bll.contratacion.intento_sin_motivo	Enter the reason why the payment did not go through.
 EN	err.bll.contratacion.medio_invalido	The selected payment method does not exist.
 EN	tend.titulo	ACTIVITY TREND
@@ -5536,26 +5536,26 @@ EN	doc.contr.referido	The referral benefit was credited to {0}.
 EN	doc.contr.constancia.titulo	Subscription certificate
 EN	doc.contr.cancelada	The contract was cancelled on {0} because the payment did not go through in {1} attempts.
 EN	doc.contr.cancelacion.titulo	Cancellation certificate
-EN	msg.contr.desistimiento	Withdrawal recorded: the client did not sign up for any plan.
-EN	msg.contr.noregistrado	The client is not registered. Register them to continue with the contract.
-EN	lbl.contr.ficha	Client: {0}  —  ID {1}\nCurrent plan: {2}  —  Expires: {3}  —  Garments in use: {4}
+EN	msg.contr.desistimiento	Withdrawal recorded: the customer did not sign up for any plan.
+EN	msg.contr.noregistrado	The customer is not registered. Register them to continue with the contract.
+EN	lbl.contr.ficha	Customer: {0}  —  ID {1}\nCurrent plan: {2}  —  Expires: {3}  —  Garments in use: {4}
 EN	col.contr.preciomensual	Monthly price
 EN	col.contr.limite	Garment limit
 EN	col.contr.estado	Status
 EN	col.contr.comprobante	Receipt
 EN	lbl.contr.importedesc	Amount to pay at the cashier: {0:C2}\n(includes a {1:C2} discount: {2})
 EN	lbl.contr.importe	Amount to pay at the cashier: {0:C2}
-EN	btn.contr.registrarcliente	Register client
+EN	btn.contr.registrarcliente	Register customer
 EN	lbl.contr.planes	Available plans:
 EN	btn.contr.imprimirplanes	Print plans
 EN	lbl.contratacion.modalidad	Billing frequency:
 EN	btn.contr.registrar	Register contract
-EN	btn.contr.desistir	Client withdraws
+EN	btn.contr.desistir	Customer withdraws
 EN	conf.contr.cobro.confirmar	Confirm the charge for Contract #{0}?\n\nClient: {1}\nPlan: {2}\nAmount: {3:C2}\nPayment method: {4}\n\nA receipt will be issued and the subscription will be activated.
 EN	err.bll.cobro.contratacion_pendiente	{0} has a contract pending payment: the subscription is set when the cashier charges or cancels it.
 EN	err.bll.renovacion.contratacion_pendiente	{0} has a contract pending payment: the subscription is set when the cashier charges or cancels it.
 EN	alert.contr.pendientes	{0} contract(s) waiting for the cashier to charge them.
-EN	conf.cli.contratar	Continue with a plan contract for this client?
+EN	conf.cli.contratar	Continue with a plan contract for this customer?
 EN	est.formalizado	Finalized (pending dispatch)
 EN	conf.ped.reactivar	Reactivate Order #{0} for {1}?\n\nIt goes back to stock control: the warehouse checks availability again and sets the garments aside.
 EN	conf.ped.reactivar.titulo	Reactivate order
@@ -5569,7 +5569,7 @@ EN	dash.dep.acontrolar	Orders\nto check
 EN	dash.vend.paraatender	Orders\nto handle
 EN	dash.vend.encaja	Contracts\nwaiting for cashier
 EN	dash.kan.encontrol	In stock control
-EN	dash.kan.faltantes	Missing items: tell the client
+EN	dash.kan.faltantes	Missing items: tell the customer
 EN	dash.kan.separados	Set aside: finalize
 EN	btn.actualizar	Refresh
 EN	lbl.permisos.elegiritem	Choose an item:
@@ -5725,8 +5725,8 @@ RU	doc.cupo.opciones	Клиент может изменить выбор или 
 RU	doc.cupo.titulo	Ограничения лимита плана
 RU	doc.confirmadas.lista	Вещи, подтверждённые как доступные (ожидают откладывания):
 RU	doc.confirmadas.titulo	Подтверждённые вещи
-RU	err.bll.cliente.baja_contratacion	Нельзя удалить клиента {0}: у него есть договор, ожидающий оплаты. Касса должна сначала принять оплату или отменить его.
-RU	err.bll.cliente.baja_pedido	Нельзя удалить клиента {0}: у него есть заказ в работе. Дождитесь его завершения или сначала отмените его.
+RU	err.bll.cliente.baja_contratacion	Нельзя деактивировать клиента {0}: у него есть договор, ожидающий оплаты. Касса должна сначала принять оплату или отменить его.
+RU	err.bll.cliente.baja_pedido	Нельзя деактивировать клиента {0}: у него есть заказ в работе. Дождитесь его завершения или сначала отмените его.
 RU	err.bll.contratacion.desistir_sin_motivo	Необходимо указать причину отказа, названную клиентом.
 RU	err.bll.contratacion.intento_sin_motivo	Укажите причину, по которой оплата не прошла.
 RU	err.bll.contratacion.medio_invalido	Указанный способ оплаты не существует.
@@ -5970,8 +5970,8 @@ PT	doc.cupo.opciones	O cliente pode ajustar a seleção ou desistir.
 PT	doc.cupo.titulo	Detalhe das restrições de limite
 PT	doc.confirmadas.lista	Peças confirmadas como disponíveis (pendentes de separação):
 PT	doc.confirmadas.titulo	Detalhe das peças confirmadas
-PT	err.bll.cliente.baja_contratacion	Não é possível dar baixa em {0}: há uma contratação pendente de pagamento. O caixa precisa cobrá-la ou cancelá-la primeiro.
-PT	err.bll.cliente.baja_pedido	Não é possível dar baixa em {0}: há um pedido em andamento. Aguarde a conclusão ou cancele-o primeiro.
+PT	err.bll.cliente.baja_contratacion	Não é possível desativar {0}: há uma contratação pendente de pagamento. O caixa precisa cobrá-la ou cancelá-la primeiro.
+PT	err.bll.cliente.baja_pedido	Não é possível desativar {0}: há um pedido em andamento. Aguarde a conclusão ou cancele-o primeiro.
 PT	err.bll.contratacion.desistir_sin_motivo	É obrigatório indicar o motivo da desistência informado pelo cliente.
 PT	err.bll.contratacion.intento_sin_motivo	Indique o motivo pelo qual o pagamento não foi concluído.
 PT	err.bll.contratacion.medio_invalido	A forma de pagamento indicada não existe.

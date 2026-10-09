@@ -99,6 +99,7 @@ namespace GUI
 
             // ── AnalisisEscasezForm ────────────────────────────────────────────
             this.ClientSize = new Size(880, 560);
+            this.MinimumSize = new Size(660, 400);
             this.Controls.Add(this.lblTitulo);
             this.Controls.Add(this.lblUmbral);
             this.Controls.Add(this.numUmbral);

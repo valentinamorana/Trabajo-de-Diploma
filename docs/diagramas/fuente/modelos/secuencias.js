@@ -36,8 +36,8 @@ module.exports = [
       c('B', 'D', 'ObtenerTodos() · TieneContratacionPendiente(idCliente)'),
       r('B', 'F', 'clientes con plan, sin contratación pendiente y en condiciones para esa decisión (más los pausados)'),
       c('V', 'F', 'Elige el cliente'),
-      c('F', 'B', 'Procesar(modulo, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta)'),
-      nota('Exigir(ClientesEditar) · el cliente debe tener plan', 'B'),
+      c('F', 'B', 'Procesar(modulo, cliente, decision, idPlanNuevo, modalidad, fechaPausaHasta)'),
+      nota('Exigir(ClientesEditar) · el cliente debe tener plan · el actor sale de la sesión (BLL.Sesion), no de la GUI', 'B'),
       c('B', 'H1', 'Procesar(contexto)'),
       { alt: 'Ni vencida ni próxima a vencer (y la decisión no es Pausar)', pasos: [r('H1', 'B', 'Resultado: Pendiente (todavía no corresponde renovar)')],
         sino: [{ etiqueta: 'Vencida, próxima a vencer o decisión Pausar', pasos: [
@@ -68,7 +68,7 @@ module.exports = [
       c('B', 'D', 'ObtenerPendientesPorCliente(idCliente)'),
       r('B', 'F', 'cantidad y total de cargos pendientes que sumará el cobro'),
       c('V', 'F', 'Elige modalidad y resultado del cobro (Cobrado o Pago fallido)'),
-      c('F', 'B', 'Procesar(modulo, cliente, decision, modalidad, actor)'),
+      c('F', 'B', 'Procesar(modulo, cliente, decision, modalidad, idMedioPago)'),
       c('B', 'H1', 'Procesar(contexto)'),
       { alt: 'Todavía no corresponde cobrar', pasos: [r('H1', 'B', 'Resultado: Pendiente')],
         sino: [{ etiqueta: 'Vencida o próxima a vencer', pasos: [
@@ -210,7 +210,7 @@ module.exports = [
               r('F', 'DP', 'Informa que el pedido pasó a faltantes (informe imprimible)')
             ], sino: [{ etiqueta: 'Separadas', pasos: [
               c('B', 'H', 'RegistrarCambios(cambios)  [Accion = SEPARAR]'),
-              { loop: 'Por cada prenda del pedido', pasos: [c('B', 'LE', 'CerrarSiReservada(modulo, idPrenda, idCliente, actor)')] },
+              { loop: 'Por cada prenda del pedido', pasos: [c('B', 'LE', 'CerrarSiReservada(modulo, idPrenda, idCliente)')] },
               r('B', 'F', 'ok'),
               r('F', 'DP', 'Constancia de prendas separadas (PDF)')
             ] }] }
@@ -1025,14 +1025,14 @@ module.exports = [
       { alt: 'Desgaste normal: Aprobar reingreso', pasos: [
         c('D', 'F', 'Pulsa "Aprobar reingreso" y confirma'),
         c('F', 'IN', 'AprobarReingreso(modulo, prenda)'),
-        c('IN', 'PB', 'CambiarEstado(modulo, prenda, Disponible, actor)'),
+        c('IN', 'PB', 'CambiarEstado(modulo, prenda, Disponible)'),
         nota('Exigir(StockEditar) · una prenda En limpieza solo se da de baja desde la Inspección', 'PB'),
         c('PB', 'PR', 'ControlarEstado(Disponible)'),
         nota('Patrón State: EstadoEnLimpieza permite EnLimpieza → Disponible', 'PR'),
         r('PR', 'PB', 'true'),
         c('PB', 'DP', 'CambiarEstado(idPrenda, EnLimpieza, Disponible, null)'),
         c('PB', 'DM', 'CerrarMantenimiento(idPrenda)'),
-        c('PB', 'LE', 'NotificarSiCorresponde(idPrenda, actor)'),
+        c('PB', 'LE', 'NotificarSiCorresponde(idPrenda)'),
         c('LE', 'DL', 'ObtenerPendienteMasAntigua(idPrenda)'),
         r('DL', 'LE', 'primer cliente en espera (si hay)'),
         { alt: 'Hay un cliente en espera', pasos: [c('LE', 'DL', 'CambiarEstado(idListaEspera, Reservada, limite, actor, Pendiente)  [reserva por 48 h]')] },
@@ -1049,7 +1049,7 @@ module.exports = [
         c('F', 'IN', 'DarDeBajaConCargo(modulo, prenda, motivo, monto)'),
         c('IN', 'PB', 'ObtenerEnLimpieza()  [¿la prenda volvió de un cliente?]'),
         { alt: 'No viene de una devolución', pasos: [r('IN', 'F', 'AppException(no_devuelta): se da de baja sin cargo desde Prendas'), r('F', 'D', 'Informa el motivo')] },
-        c('IN', 'IN', 'BajaConCargo(modulo, prenda, motivo, monto, actor, EnLimpieza)'),
+        c('IN', 'IN', 'BajaConCargo(modulo, prenda, motivo, monto, EnLimpieza)'),
         nota('Exigir(StockEditar) · la prenda sigue En limpieza y tiene último cliente', 'IN'),
         c('IN', 'PR', 'TransicionPermitida(Baja)'),
         r('PR', 'IN', 'true  [patrón State: EstadoEnLimpieza permite pasar a Baja]'),
@@ -1091,7 +1091,7 @@ module.exports = [
       r('DI', 'IN', 'pedido (estado y fecha de entrega)'),
       c('IN', 'PC', 'Exigir(pedido, hoy)'),
       { alt: 'Pedido no entregado o plazo de 30 días sin vencer', pasos: [r('PC', 'IN', 'AppException(perdida_no_entregado | perdida_plazo)'), r('IN', 'F', 'AppException'), r('F', 'D', 'Rechaza la operación con el motivo (fin del caso de uso)')] },
-      c('IN', 'IN', 'BajaConCargo(modulo, prenda, motivo, monto, actor, EnUso)'),
+      c('IN', 'IN', 'BajaConCargo(modulo, prenda, motivo, monto, EnUso)'),
       { alt: 'Sin último cliente registrado', pasos: [r('IN', 'F', 'AppException(sin_cliente)'), r('F', 'D', 'Rechaza la operación (fin del caso de uso)')],
         sino: [{ etiqueta: 'Con último cliente', pasos: [
           c('IN', 'PR', 'TransicionPermitida(Baja)'),

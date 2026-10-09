@@ -43,10 +43,10 @@ namespace BLL
         }
 
         /// <summary>Camino A — reingresa a Disponible sin cargo (mismo CambiarEstado de siempre).</summary>
-        public void AprobarReingreso(string modulo, BE.Prenda prenda, string actor = null)
+        public void AprobarReingreso(string modulo, BE.Prenda prenda)
         {
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
-            _prenda.CambiarEstado(modulo, prenda, BE.EstadoPrenda.Disponible, actor ?? ActorEnSesion());
+            _prenda.CambiarEstado(modulo, prenda, BE.EstadoPrenda.Disponible);
         }
 
         /// <summary>
@@ -54,14 +54,14 @@ namespace BLL
         /// de inspección (volvió de un cliente): a una que entró a limpieza en el depósito no se le
         /// puede cobrar al último cliente.
         /// </summary>
-        public int DarDeBajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto, string actor = null)
+        public int DarDeBajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto)
         {
             if (prenda != null && prenda.Estado == BE.EstadoPrenda.EnLimpieza &&
                 !_prenda.ObtenerEnLimpieza().Exists(p => p.IdPrenda == prenda.IdPrenda))
                 throw new BE.AppException("err.bll.insp.no_devuelta",
                     "La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dala de baja desde Prendas.",
                     prenda.Nombre);
-            return BajaConCargo(modulo, prenda, motivo, monto, actor, BE.EstadoPrenda.EnLimpieza,
+            return BajaConCargo(modulo, prenda, motivo, monto, BE.EstadoPrenda.EnLimpieza,
                             "err.bll.insp.no_en_limpieza",
                             "Solo se puede dar de baja con cargo una prenda En Limpieza pendiente de inspección.");
         }
@@ -71,7 +71,7 @@ namespace BLL
         /// pedido Entregado hace 30 días o más (compra tácita): si el cliente todavía no la recibió,
         /// o el plazo no venció, se rechaza.
         /// </summary>
-        public int ReportarPerdida(string modulo, BE.Prenda prenda, string motivo, decimal monto, string actor = null)
+        public int ReportarPerdida(string modulo, BE.Prenda prenda, string motivo, decimal monto)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
@@ -81,7 +81,7 @@ namespace BLL
             // Se relee el pedido desde la base (no se confía en lo que muestra la pantalla).
             Politicas.PoliticaCompraTacita.Exigir(_dal.ObtenerPedidoEnCurso(prenda.IdPrenda), _hoy());
 
-            return BajaConCargo(modulo, prenda, motivo, monto, actor, BE.EstadoPrenda.EnUso,
+            return BajaConCargo(modulo, prenda, motivo, monto, BE.EstadoPrenda.EnUso,
                                 "err.bll.insp.no_en_uso",
                                 "Solo se puede reportar como perdida una prenda En Uso.");
         }
@@ -94,7 +94,7 @@ namespace BLL
             prenda != null && prenda.PuedeReportarsePerdida() &&
             Politicas.PoliticaCompraTacita.PlazoVencido(pedido, _hoy());
 
-        private int BajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto, string actor,
+        private int BajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto,
                                  BE.EstadoPrenda estadoEsperado, string claveEstado, string fallbackEstado)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
@@ -111,7 +111,7 @@ namespace BLL
 
             _cargo.ValidarDatos(motivo, monto);
 
-            string quien = actor ?? ActorEnSesion();
+            string quien = Sesion.Actor;   // lo resuelve la BLL desde la sesión, no la GUI
             var cargo = new BE.CargoPrenda
             {
                 IdPrenda      = prenda.IdPrenda,
@@ -156,8 +156,5 @@ namespace BLL
 
             return idCargo;
         }
-
-        private static string ActorEnSesion() =>
-            Seguridad.SessionManager.IsLoggedIn ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
     }
 }

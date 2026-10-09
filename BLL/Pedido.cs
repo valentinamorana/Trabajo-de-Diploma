@@ -500,11 +500,9 @@ namespace BLL
 
             // Lista de Espera (mejora opcional): si alguna prenda separada estaba reservada para
             // este cliente, cierra el ciclo (Convertida).
-            string actorEspera = Seguridad.SessionManager.IsLoggedIn
-                ? Seguridad.SessionManager.GetInstance().Usuario.Username : null;
             foreach (var p in pedido.Prendas)
             {
-                try { listaEsperaBLL.CerrarSiReservada(modulo, p.IdPrenda, pedido.IdCliente, actorEspera); }
+                try { listaEsperaBLL.CerrarSiReservada(modulo, p.IdPrenda, pedido.IdCliente); }
                 catch (Exception ex) { System.Diagnostics.Trace.TraceError($"[BLL.Pedido] Lista de Espera: {ex.Message}"); }
             }
 

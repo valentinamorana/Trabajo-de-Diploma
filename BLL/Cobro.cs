@@ -46,7 +46,7 @@ namespace BLL
 
         public Manejadores.ResultadoCobro Procesar(
             string modulo, BE.Cliente cliente, Manejadores.DecisionCobro decision,
-            BE.Builders.ModalidadCobro modalidad, string actor, int? idMedioPago = null)
+            BE.Builders.ModalidadCobro modalidad, int? idMedioPago = null)
         {
             // N01 — El cobro recurrente de la suscripción lo registra CAJA (decisión del proceso:
             // quien vende no cobra). Se gobierna por la patente de edición de Caja; la de
@@ -84,7 +84,7 @@ namespace BLL
                 Cliente = cliente,
                 Decision = decision,
                 Modalidad = modalidad,
-                Actor = actor,
+                Actor = Sesion.Actor,   // lo resuelve la BLL desde la sesión, no la GUI
                 Modulo = modulo,
                 IdMedioPago = decision == Manejadores.DecisionCobro.Cobrado ? idMedioPago : null
             };

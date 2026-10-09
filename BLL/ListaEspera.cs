@@ -30,7 +30,7 @@ namespace BLL
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
         }
 
-        public void Anotar(string modulo, int idPrenda, int idCliente, string actor)
+        public void Anotar(string modulo, int idPrenda, int idCliente)
         {
             // Patente propia de escritura de Lista de Espera (fallback: la de VER el módulo). Antes
             // exigía StockEditar, que el Vendedor no tiene, y "Anotar en espera" le fallaba.
@@ -78,9 +78,10 @@ namespace BLL
                 idPrenda: idPrenda, idCliente: idCliente);
         }
 
-        public void Cancelar(string modulo, int idListaEspera, string actor)
+        public void Cancelar(string modulo, int idListaEspera)
         {
             PermisosAccion.Exigir(BE.Patentes.ListaEsperaEditar, BE.Patentes.ListaEspera);
+            string actor = Sesion.Actor;   // lo resuelve la BLL desde la sesión, no la GUI
 
             var fila = dalListaEspera.ObtenerPorId(idListaEspera);
             if (fila == null)
@@ -116,8 +117,10 @@ namespace BLL
         // HORAS_RESERVA. Se cancelan (claim sobre "Reservada") y la prenda pasa al siguiente de la
         // lista. Antes quedaban "Reservadas" para siempre y nadie más era avisado. Se ejecuta al
         // consultar la lista (best-effort). Devuelve cuántas reservas se liberaron.
-        public int LiberarReservasVencidas(string actor = "sistema")
+        // Es un proceso del sistema (no lo dispara una acción del usuario): actor explícito "sistema".
+        public int LiberarReservasVencidas()
         {
+            const string actor = Sesion.ActorSistema;
             int liberadas = 0;
             foreach (var fila in dalListaEspera.ObtenerActivas().Where(f => f.ReservaExpirada).ToList())
             {
@@ -136,10 +139,10 @@ namespace BLL
         // Al liberarse una prenda (BLL.Prenda.CambiarEstado, EnLimpieza → Disponible), reserva
         // la fila Pendiente más antigua (FIFO) durante HORAS_RESERVA. No hace nada si nadie espera.
         // Escritura: exige el mismo permiso que liberar la prenda (BLL.Prenda.CambiarEstado).
-        public void NotificarSiCorresponde(int idPrenda, string actor)
+        public void NotificarSiCorresponde(int idPrenda)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
-            ReservarSiguiente(idPrenda, actor);
+            ReservarSiguiente(idPrenda, Sesion.Actor);
         }
 
         private void ReservarSiguiente(int idPrenda, string actor)
@@ -168,9 +171,10 @@ namespace BLL
         // Tras crear el pedido (BLL.Pedido.SepararPrendas), cierra la reserva si esta prenda
         // estaba retenida para este mismo cliente. No hace nada si no había reserva.
         // Escritura: la dispara "Separar prendas" (Depósito), con el permiso de Control de Stock.
-        public void CerrarSiReservada(string modulo, int idPrenda, int idCliente, string actor)
+        public void CerrarSiReservada(string modulo, int idPrenda, int idCliente)
         {
             PermisosAccion.Exigir(BE.Patentes.ControlStockEditar, BE.Patentes.ControlStock);
+            string actor = Sesion.Actor;   // lo resuelve la BLL desde la sesión
             var fila = dalListaEspera.ObtenerReservaVigenteDeCliente(idPrenda, idCliente);
             if (fila == null) return;
 

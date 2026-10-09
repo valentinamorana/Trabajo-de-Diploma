@@ -34,7 +34,7 @@ namespace BLL
                     "El monto del cargo debe ser mayor a cero.");
         }
 
-        public void RegistrarCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto, string actor = null)
+        public void RegistrarCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
@@ -53,7 +53,7 @@ namespace BLL
                 Motivo = motivo,
                 Monto = monto,
                 FechaRegistro = DateTime.Now,
-                Actor = actor
+                Actor = Sesion.Actor   // lo resuelve la BLL desde la sesión, no la GUI
             };
             int idNuevo = dalCargoPrenda.Alta(cargo);
             cargo.IdCargo = idNuevo;

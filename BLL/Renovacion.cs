@@ -50,7 +50,7 @@ namespace BLL
 
         public Manejadores.ResultadoRenovacion Procesar(
             string modulo, BE.Cliente cliente, Manejadores.DecisionRenovacion decision,
-            int? idPlanNuevo, BE.Builders.ModalidadCobro modalidad, string actor,
+            int? idPlanNuevo, BE.Builders.ModalidadCobro modalidad,
             DateTime? fechaPausaHasta = null)
         {
             PermisosAccion.Exigir(BE.Patentes.ClientesEditar, BE.Patentes.Clientes);
@@ -89,7 +89,7 @@ namespace BLL
                 IdPlanNuevo = idPlanNuevo,
                 FechaPausaHasta = fechaPausaHasta,
                 Modalidad = modalidad,
-                Actor = actor,
+                Actor = Sesion.Actor,   // lo resuelve la BLL desde la sesión, no la GUI
                 Modulo = modulo
             };
 

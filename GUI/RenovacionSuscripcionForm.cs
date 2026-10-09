@@ -232,9 +232,8 @@ namespace GUI
             try
             {
                 var cliente = _bllCliente.ObtenerPorId(item.Cliente.IdCliente);
-                var actor = BLL.Sesion.Actor;
-
-                var resultado = _bllRenovacion.Procesar(this.Text, cliente, decision, idPlanNuevo, modalidad, actor, fechaPausaHasta);
+                // El actor lo resuelve la BLL desde la sesión.
+                var resultado = _bllRenovacion.Procesar(this.Text, cliente, decision, idPlanNuevo, modalidad, fechaPausaHasta);
 
                 lblResultado.ForeColor = resultado.Estado == BE.EstadoRenovacion.Pendiente ? Color.DarkOrange : Color.DarkGreen;
                 lblResultado.Text = Tr(resultado.Clave, resultado.Mensaje, resultado.Args);

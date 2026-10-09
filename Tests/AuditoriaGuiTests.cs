@@ -208,7 +208,7 @@ namespace Tests
         private sealed class PrendaServiceEspia : FakePrendaService, BLL.Interfaces.IPrendaService
         {
             public readonly List<BE.EstadoPrenda> Cambios = new List<BE.EstadoPrenda>();
-            public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, string actor = null)
+            public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado)
                 => Cambios.Add(nuevoEstado);
             // Cola de inspección: por defecto la prenda 5 (la de los tests) volvió de una devolución.
             public List<BE.Prenda> ColaInspeccion = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 5 } };
@@ -477,7 +477,7 @@ namespace Tests
             var dalPrenda = new FakePrendaDAL { Todas = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 1, Nombre = "Vestido", Estado = BE.EstadoPrenda.EnUso } } };
             var dalCliente = new FakeClienteDAL { ClientePorId = new BE.Cliente { IdCliente = 10, Nombre = "Ana", Apellido = "G", IdPlan = 1, FechaVencimiento = DateTime.Today.AddDays(30) } };
 
-            new BLL.ListaEspera(dalLe, dalPrenda, dalCliente).Anotar("Test", 1, 10, "vendedor");
+            new BLL.ListaEspera(dalLe, dalPrenda, dalCliente).Anotar("Test", 1, 10);
 
             Assert.AreEqual(1, dalLe.AltaVeces, "Antes exigía mnuStockEditar y al Vendedor le fallaba.");
         }
@@ -489,7 +489,7 @@ namespace Tests
             var dalLe = new FakeListaEsperaDAL();
             try
             {
-                new BLL.ListaEspera(dalLe, new FakePrendaDAL(), new FakeClienteDAL()).Anotar("Test", 1, 10, "x");
+                new BLL.ListaEspera(dalLe, new FakePrendaDAL(), new FakeClienteDAL()).Anotar("Test", 1, 10);
                 Assert.Fail("Debía exigir la patente de Lista de Espera.");
             }
             catch (BE.AppException ex) { Assert.AreEqual("err.bll.sin_permiso", ex.Clave); }

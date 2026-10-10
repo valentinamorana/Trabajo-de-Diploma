@@ -24,16 +24,28 @@ namespace BLL
 
         // ── Sistema ───────────────────────────────────────────────────────────
 
+        // Lectura de la bitácora del SISTEMA: exige permiso en la BLL (no alcanza con que la GUI
+        // oculte la pestaña o el widget). Ver ExigirVerSistema. La de NEGOCIO no lleva este guard:
+        // la consumen ReporteJornada y los indicadores del panel de roles operativos.
         public DataTable ObtenerTodosSistema()
-            => srvSistema.ObtenerTodos();
+        {
+            ExigirVerSistema();
+            return srvSistema.ObtenerTodos();
+        }
 
         public DataTable ObtenerUltimosNDiasSistema(int dias)
-            => srvSistema.ObtenerUltimosNDias(dias);
+        {
+            ExigirVerSistema();
+            return srvSistema.ObtenerUltimosNDias(dias);
+        }
 
         public DataTable BuscarPorFiltrosSistema(
             DateTime? desde, DateTime? hasta,
             int idUsuario, string actividad, int criticidad)
-            => srvSistema.BuscarPorFiltros(desde, hasta, idUsuario, actividad, criticidad);
+        {
+            ExigirVerSistema();
+            return srvSistema.BuscarPorFiltros(desde, hasta, idUsuario, actividad, criticidad);
+        }
 
         // ── Negocio ───────────────────────────────────────────────────────────
 
@@ -48,16 +60,30 @@ namespace BLL
         // ── Acceso por rol ────────────────────────────────────────────────────
 
         /// <summary>
-        /// Determina si el usuario activo puede ver la tab de Bitácora del Sistema.
-        /// El Gerente Comercial (rol que absorbió las responsabilidades del antiguo rol "Supervisor",
-        /// ver Usuario.Abm.NormalizarPerfil) solo accede a la bitácora de negocio; el resto
-        /// (Administrador) ve ambas.
+        /// Determina si el usuario activo puede ver la Bitácora del Sistema. LISTA BLANCA: solo el
+        /// Administrador (bypass por rol) o quien tenga la patente de Auditoría (mnuAuditoria, p.
+        /// ej. el rol Auditor). Antes era una lista negra que solo excluía al Gerente Comercial,
+        /// así que cualquier otro rol (o uno nuevo) quedaba habilitado por omisión.
         /// </summary>
         public bool UsuarioPuedeVerSistema()
         {
             if (!Seguridad.SessionManager.IsLoggedIn) return false;
-            string perfil = Seguridad.SessionManager.GetInstance().Usuario.Perfil ?? "";
-            return !perfil.Equals("GerenteComercial", StringComparison.OrdinalIgnoreCase);
+            var sm = Seguridad.SessionManager.GetInstance();
+            if (sm.Usuario == null) return false;
+            return sm.Usuario.EsAdministrador || sm.TienePermiso(BE.Patentes.Auditoria);
+        }
+
+        // Guard fail-closed de la lectura de la bitácora del sistema: sesión activa, permiso
+        // (lista blanca de UsuarioPuedeVerSistema) y usuario todavía vigente en la base.
+        private void ExigirVerSistema()
+        {
+            if (!Seguridad.SessionManager.IsLoggedIn)
+                throw new BE.AppException("err.bll.sesion_expirada",
+                    "La sesión expiró. Volvé a iniciar sesión.");
+            if (!UsuarioPuedeVerSistema())
+                throw new BE.AppException("err.bll.bitacora.sin_permiso_sistema",
+                    "No tenés permiso para consultar la bitácora del sistema.");
+            BLLHelper.ExigirVigente();
         }
     }
 }

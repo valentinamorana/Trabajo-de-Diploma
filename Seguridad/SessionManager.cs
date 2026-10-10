@@ -15,10 +15,10 @@ namespace Seguridad
         private static volatile SessionManager _session;
 
         // Usuario actualmente en sesión y fecha/hora de inicio. 
-        public Usuario Usuario    { get; set; }
+        public Usuario Usuario    { get; private set; }
 
         // Marca de tiempo del momento en que se inició la sesión.
-        public DateTime FechaInicio { get; set; }
+        public DateTime FechaInicio { get; private set; }
 
         // Retorna la sesión activa. Lanza SesionException (traducible) si no hay sesión iniciada.
         public static SessionManager GetInstance()

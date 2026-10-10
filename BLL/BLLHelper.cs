@@ -26,7 +26,7 @@ namespace BLL
         // Excepción: con la integridad comprometida la tabla Usuario no es confiable (el ingreso se
         // validó contra el espejo) y revalidar podría dejar afuera al Administrador justo cuando
         // tiene que reparar o restaurar la base.
-        private static void ExigirVigente()
+        internal static void ExigirVigente()
         {
             if (Configuracion.IntegridadComprometida) return;
             var sm = Seguridad.SessionManager.GetInstance();

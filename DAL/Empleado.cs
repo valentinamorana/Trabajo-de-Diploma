@@ -101,6 +101,44 @@ namespace DAL
             return id;
         }
 
+        // Sincroniza Nombre, Apellido y Email del Empleado vinculado al usuario con los datos
+        // administrativos del Usuario (BLL.Usuario.Modificar). Campo por campo: un dato vacío o
+        // null del usuario NO pisa el del empleado (COALESCE con el valor actual). El DNI, el
+        // puesto y el legajo no se tocan. Recalcula el DV como CrearParaUsuario.
+        // Devuelve el IdEmpleado actualizado, o 0 si el usuario no tiene Empleado vinculado
+        // (o no hay ningún dato para sincronizar).
+        public int SincronizarDatosPersonales(int idUsuario, string nombre, string apellido, string email)
+        {
+            if (string.IsNullOrWhiteSpace(nombre) && string.IsNullOrWhiteSpace(apellido)
+                && string.IsNullOrWhiteSpace(email))
+                return 0;
+
+            SqlParameter[] p =
+            {
+                new SqlParameter("@IdUsuario", idUsuario),
+                new SqlParameter("@Nombre",   SqlDbType.NVarChar, 100) { Value = string.IsNullOrWhiteSpace(nombre)   ? (object)DBNull.Value : nombre.Trim() },
+                new SqlParameter("@Apellido", SqlDbType.NVarChar, 100) { Value = string.IsNullOrWhiteSpace(apellido) ? (object)DBNull.Value : apellido.Trim() },
+                new SqlParameter("@Email",    SqlDbType.NVarChar, 200) { Value = string.IsNullOrWhiteSpace(email)    ? (object)DBNull.Value : email.Trim() }
+            };
+            DataTable tabla = acceso.Leer(
+                "UPDATE Empleado SET Nombre   = COALESCE(@Nombre, Nombre), " +
+                "                    Apellido = COALESCE(@Apellido, Apellido), " +
+                "                    Email    = COALESCE(@Email, Email) " +
+                "WHERE IdUsuario = @IdUsuario; " +
+                "SELECT IdEmpleado FROM Empleado WHERE IdUsuario = @IdUsuario ORDER BY IdEmpleado;",
+                p);
+            if (tabla == null || tabla.Rows.Count == 0) return 0;
+
+            int primero = 0;
+            foreach (DataRow row in tabla.Rows)
+            {
+                int id = Convert.ToInt32(row["IdEmpleado"]);
+                ActualizarDV(id);
+                if (primero == 0) primero = id;
+            }
+            return primero;
+        }
+
         // Obtiene el empleado vinculado a un usuario del sistema.
         public BE.Empleado ObtenerPorUsuario(int idUsuario)
         {

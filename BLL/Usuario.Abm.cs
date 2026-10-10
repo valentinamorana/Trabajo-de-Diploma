@@ -126,6 +126,18 @@ namespace BLL
             // Snapshot del NUEVO estado (después del UPDATE) → alimenta el Historial de Cambios.
             versionBLL.GrabarVersion(idUsuario, actor, detalle);
 
+            // Empleado ↔ Usuario: los datos personales del Empleado vinculado siguen a los del
+            // usuario (sin esto, vendedor/cajero seguían figurando con el nombre viejo). El UPDATE
+            // del usuario ya quedó grabado: si la sincronización falla se deja traza y no se revierte.
+            try
+            {
+                SincronizarEmpleado(empleadoDAL, idUsuario, nuevoNombre, nuevoApellido, nuevoEmail);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("[BLL.Usuario.Modificar] sincronizar empleado: " + ex.Message);
+            }
+
             bitacora.RegistrarSinSesion(
                 modulo:     modulo,
                 actividad:  BE.ActividadesBitacora.ModificacionDeUsuario,
@@ -184,6 +196,18 @@ namespace BLL
             if (empleados.ObtenerPorUsuario(idUsuario) != null) return false;
             empleados.CrearParaUsuario(idUsuario, nombre, apellido, email, puesto);
             return true;
+        }
+
+        // Copia Nombre/Apellido/Email del usuario a su Empleado vinculado. Los datos que el usuario
+        // no tiene cargados (null/vacío) no pisan los del empleado. Devuelve true si había empleado
+        // vinculado y algún dato para copiar.
+        internal static bool SincronizarEmpleado(DAL.Interfaces.IEmpleadoDAL empleados, int idUsuario,
+                                                 string nombre, string apellido, string email)
+        {
+            if (string.IsNullOrWhiteSpace(nombre) && string.IsNullOrWhiteSpace(apellido)
+                && string.IsNullOrWhiteSpace(email))
+                return false;
+            return empleados.SincronizarDatosPersonales(idUsuario, nombre, apellido, email) > 0;
         }
 
         // Búsqueda por datos NO sensibles (nombre, apellido, email, username). Filtra en

@@ -31,6 +31,7 @@ flowchart TD
     direction TB
     a4["Prenda Disponible sin cargo (cierra mantenimiento y avisa a la lista de espera)"]
     d2{"¿Tiene último cliente y datos válidos?"}
+    a11["Informar el rechazo con su motivo"]
     a6["Registra el cargo contra el último cliente, da la prenda de baja, cierra su mantenimiento y cancela su lista de espera (una transacción)"]
     a7["El cargo se suma al próximo cobro de la suscripción"]
     f(((" ")))
@@ -55,7 +56,8 @@ flowchart TD
   dt -- "Sí" --> a9
   a9 --> a5
   a5 --> d2
-  d2 -- "No" --> a10
+  d2 -- "No" --> a11
+  a11 --> a10
   a10 --> f3
   d2 -- "Sí" --> a6
   a6 --> a7
@@ -70,7 +72,7 @@ flowchart TD
   o3 -.-> a5
   a5 -.-> o4
   o4 -.-> a6
-  d2 -.-> o7
+  a11 -.-> o7
   o7 -.-> a10
   a6 -.-> o5
   o5 -.-> a7

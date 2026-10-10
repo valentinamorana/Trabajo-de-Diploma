@@ -274,6 +274,7 @@ module.exports = [
       N('a9', 'accion', 'D', 'Consultar el detalle de prendas del pedido Entregado (En uso)'),
       N('a5', 'accion', 'D', 'Indica motivo del daño o de la pérdida y monto'),
       N('d2', 'decision', 'S', '¿Tiene último cliente y datos válidos?'),
+      N('a11', 'accion', 'S', 'Informar el rechazo con su motivo'),
       N('a10', 'accion', 'D', 'Recibir el rechazo'),
       N('a6', 'accion', 'S', 'Registra el cargo contra el último cliente, da la prenda de baja, cierra su mantenimiento y cancela su lista de espera (una transacción)'),
       N('a7', 'accion', 'S', 'El cargo se suma al próximo cobro de la suscripción'),
@@ -295,7 +296,7 @@ module.exports = [
     ],
     flujos: [
       F('i', 'd0'), F('d0', 'a0', 'Sí'), F('a0', 'a1'), F('a1', 'a8'), F('a8', 'a2'), F('a2', 'd1'), F('d1', 'a3', 'Sí'), F('a3', 'a4'), F('a4', 'f'),
-      F('d1', 'a5', 'No, dañada'), F('d0', 'dt', 'No'), F('dt', 'd0', 'No, sigue en alquiler'), F('dt', 'a9', 'Sí'), F('a9', 'a5'), F('a5', 'd2'), F('d2', 'a10', 'No'), F('a10', 'f3'),
+      F('d1', 'a5', 'No, dañada'), F('d0', 'dt', 'No'), F('dt', 'd0', 'No, sigue en alquiler'), F('dt', 'a9', 'Sí'), F('a9', 'a5'), F('a5', 'd2'), F('d2', 'a11', 'No'), F('a11', 'a10'), F('a10', 'f3'),
       F('d2', 'a6', 'Sí'), F('a6', 'a7'), F('a7', 'r1'), F('r1', 'f2')
     ],
     objetos: [
@@ -303,7 +304,7 @@ module.exports = [
       O('a1', 'o2'), O('o2', 'a8'), O('o2', 'a2'),
       O('a9', 'o3'), O('o3', 'a5'),
       O('a5', 'o4'), O('o4', 'a6'),
-      O('d2', 'o7'), O('o7', 'a10'),
+      O('a11', 'o7'), O('o7', 'a10'),
       O('a6', 'o5'), O('o5', 'a7'),
       O('a7', 'o6'), O('o6', 'r1'),
       O('a4', 'o8'),

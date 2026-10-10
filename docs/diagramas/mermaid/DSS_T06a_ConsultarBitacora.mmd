@@ -8,6 +8,7 @@ sequenceDiagram
   A->>F: Abre la bitácora y filtra por días (BtnUltimosDias_Click)
   F->>B: UsuarioPuedeVerSistema()
   F->>B: ObtenerUltimosNDiasSistema(dias)
+  Note over B: ExigirVerSistema(): Administrador o patente de Auditoría (lista blanca), si no AppException
   B->>S: ObtenerUltimosNDias(dias)
   S->>D: ObtenerUltimosNDias(dias)
   D-->>F: registros de bitácora

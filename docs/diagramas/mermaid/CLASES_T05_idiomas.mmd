@@ -1,5 +1,7 @@
 classDiagram
   direction TB
+  class GUI_FormBase["GUI.FormBase"] {
+  }
   class GUI_FormIdiomas["GUI.FormIdiomas"] {
     +UpdateLanguage(Idioma) void
   }
@@ -50,8 +52,10 @@ classDiagram
     +string Formulario
     +string Texto
   }
+  GUI_FormBase <|-- GUI_FormIdiomas
   Servicios_Multiidioma_IIdiomaObserver <|.. GUI_FormIdiomas
   FilaTraduccion --> "1" Control : IdControl
+  GUI_FormBase ..> Servicios_Multiidioma_GestorIdioma : usa
   GUI_FormIdiomas ..> BLL_IdiomaService : usa
   GUI_FormIdiomas ..> Servicios_Multiidioma_GestorIdioma : usa
   Servicios_Multiidioma_GestorIdioma ..> Servicios_Multiidioma_IIdiomaObserver : usa

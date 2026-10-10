@@ -42,6 +42,7 @@ namespace Tests.Fakes
         public int DespacharVeces { get; private set; }
         public int MarcarEntregadoVeces { get; private set; }
         public int RegistrarDevolucionVeces { get; private set; }
+        public string UltimoActorDevolucion { get; private set; }
         public int CancelarVeces { get; private set; }
         public string UltimoMotivoCancelar { get; private set; }
         public int DesCancelarVeces { get; private set; }
@@ -115,9 +116,10 @@ namespace Tests.Fakes
         public void Despachar(int idPedido) => DespacharVeces++;
         public void MarcarEntregado(int idPedido) => MarcarEntregadoVeces++;
 
-        public int RegistrarDevolucion(int idPedido, int idCliente)
+        public int RegistrarDevolucion(int idPedido, int idCliente, string actor)
         {
             RegistrarDevolucionVeces++;
+            UltimoActorDevolucion = actor;
             return RegistrarDevolucionRespuesta;
         }
 

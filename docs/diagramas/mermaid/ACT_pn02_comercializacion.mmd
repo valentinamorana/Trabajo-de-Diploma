@@ -10,6 +10,7 @@ flowchart TD
     a21["Elegir cantidad de cuotas"]
     r2["Recibir comprobante y constancia de suscripción"]
     r3["Recibir constancia de cancelación"]
+    r4["Recibir constancia de cancelación (contratación anulada)"]
     f(((" ")))
     f2(((" ")))
     o1[/"Identificación (DNI, nombre o apellido)"/]:::doc
@@ -63,7 +64,7 @@ flowchart TD
     o14[/"Constancia de cancelación"/]:::doc
     o15[/"Planes de cuotas (1 sin interés; 3: 5 %; 6: 10 %; 12: 20 %)"/]:::doc
     o17[/"Detalle de financiación (cuotas, recargo, valor de cuota)"/]:::doc
-    o18[/"Motivo de anulación"/]:::doc
+    o18[/"Constancia de cancelación (motivo de anulación)"/]:::doc
   end
   i --> a1
   a1 --> a2
@@ -85,7 +86,8 @@ flowchart TD
   a16 --> d10
   d10 -- "No" --> a8
   d10 -- "Sí" --> a23
-  a23 --> r3
+  a23 --> r4
+  r4 --> f2
   a8 --> a9
   a9 --> d9
   d9 -- "Sí" --> a20
@@ -119,10 +121,9 @@ flowchart TD
   o2 -.-> a4
   o2 -.-> a6
   a4 -.-> o3
-  o3 -.-> d2
+  o3 -.-> a19
   a19 -.-> o4
   o4 -.-> a15
-  o4 -.-> a6
   a5 -.-> o5
   o5 -.-> r1
   a15 -.-> o6
@@ -130,14 +131,10 @@ flowchart TD
   a6 -.-> o7
   o7 -.-> a16
   a7 -.-> o8
-  o8 -.-> d2
   a8 -.-> o9
   o9 -.-> a9
-  o9 -.-> a10
   a9 -.-> o10
-  o10 -.-> d9
   o10 -.-> a10
-  o10 -.-> a13
   a20 -.-> o15
   o15 -.-> a21
   a21 -.-> o16
@@ -149,11 +146,10 @@ flowchart TD
   a11 -.-> o12
   o12 -.-> r2
   a13 -.-> o13
-  o13 -.-> d6
   a14 -.-> o14
   o14 -.-> r3
   a23 -.-> o18
-  a23 -.-> o14
+  o18 -.-> r4
   classDef doc fill:#d4efe8,stroke:#307060
   classDef ini fill:#222,stroke:#222,color:#222
   class i,f,f2 ini

@@ -873,7 +873,7 @@ UPDATE u SET u.Nombre = v.Nombre, u.Apellido = v.Apellido, u.Email = v.Email, u.
 FROM Usuario u
 JOIN (VALUES
     ('admin',       N'Admin',     N'Sistema',      'admin@wardrobeflow.com',       '1985-01-15'),
-    ('vendedor',    N'Valentina', N'Bolívar',      'vendedor@wardrobeflow.com',    '1995-06-20'),
+    ('vendedor',    N'Valentina', N'Morana',       'vendedor@wardrobeflow.com',    '1995-06-20'),
     ('deposito',    N'Oscar',     N'Pérez',        'deposito@wardrobeflow.com',    '1990-03-10'),
     ('auditor',     N'Ana',       N'Díaz',         'auditor@wardrobeflow.com',     '1988-09-05'),
     ('gcomercial',  N'Gabriel',   N'Morán',        'gcomercial@wardrobeflow.com',  '1983-11-25'),

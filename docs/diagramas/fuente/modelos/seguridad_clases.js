@@ -7,9 +7,9 @@ const idDe = (ref) => { const c = cs.buscar(ref); if (!c) throw new Error('Clase
 const USOS = {
   CLASES_T02_login_logout: [['GUI.Login', 'BLL.Usuario'], ['BLL.Usuario', 'IUsuarioDAL'], ['BLL.Usuario', 'SessionManager'], ['BLL.Usuario', 'ContadorSesion'], ['BLL.Usuario', 'Encriptador'], ['BLL.Usuario', 'Servicios.Bitacora'], ['BLL.Usuario', 'BE.LoginException'], ['SessionManager', 'BE.SesionException'], ['SessionManager', 'BE.Usuario']],
   CLASES_T04_perfiles: [['GUI.GestorPermisos', 'BLL.Familia'], ['BLL.Familia', 'IPermisoDAL'], ['BLL.Familia', 'BE.Componente']],
-  CLASES_T05_idiomas: [['GUI.FormIdiomas', 'BLL.IdiomaService'], ['GUI.FormIdiomas', 'GestorIdioma'], ['GestorIdioma', 'IIdiomaObserver'], ['GestorIdioma', 'Servicios.Multiidioma.Idioma'], ['Traductor', 'GestorIdioma'], ['BLL.IdiomaService', 'BE.Control'], ['BLL.IdiomaService', 'BE.FilaTraduccion']],
+  CLASES_T05_idiomas: [['GUI.FormBase', 'GestorIdioma'], ['GUI.FormIdiomas', 'BLL.IdiomaService'], ['GUI.FormIdiomas', 'GestorIdioma'], ['GestorIdioma', 'IIdiomaObserver'], ['GestorIdioma', 'Servicios.Multiidioma.Idioma'], ['Traductor', 'GestorIdioma'], ['BLL.IdiomaService', 'BE.Control'], ['BLL.IdiomaService', 'BE.FilaTraduccion']],
   CLASES_T06a_bitacora: [['GUI.Bitacora', 'BLL.Bitacora'], ['BLL.Bitacora', 'Servicios.Bitacora'], ['BLL.Bitacora', 'Servicios.BitacoraNegocio'], ['Servicios.Bitacora', 'BE.Bitacora'], ['Servicios.BitacoraNegocio', 'BE.BitacoraNegocio']],
-  CLASES_T06b_control_cambios: [['GUI.VersionHistorialForm', 'BLL.VersionUsuario'], ['BLL.VersionUsuario', 'BLL.CuidadorHistorial'], ['BLL.VersionUsuario', 'BE.Usuario'], ['BLL.VersionUsuario', 'DAL.VersionUsuario'], ['BLL.CuidadorHistorial', 'IMemento'], ['BE.Usuario', 'IMemento']],
+  CLASES_T06b_control_cambios: [['GUI.VersionHistorialForm', 'BLL.VersionUsuario'], ['BLL.VersionUsuario', 'BLL.CuidadorHistorial'], ['BLL.VersionUsuario', 'BE.Usuario'], ['BLL.VersionUsuario', 'DAL.VersionUsuario'], ['BLL.CuidadorHistorial', 'IMemento'], ['BE.Usuario', 'IMemento'], ['BE.Usuario', 'IOriginator']],
   CLASES_T07_digitos_verificadores: [['GUI.DiagnosticoIntegridadForm', 'BLL.Configuracion'], ['GUI.DiagnosticoIntegridadForm', 'GUI.RecuperacionEspejoForm'], ['GUI.RecuperacionEspejoForm', 'BLL.RecuperacionIntegridad'], ['BLL.RecuperacionIntegridad', 'DAL.EspejoUsuario'], ['BLL.Configuracion', 'DAL.EspejoUsuario'], ['BLL.Configuracion', 'CalculadorDV'], ['BLL.Configuracion', 'DAL.DigitoVerificador'], ['BLL.RecuperacionIntegridad', 'DAL.DigitoVerificador'], ['BLL.Configuracion', 'DAL.HistorialIntegridad'], ['CalculadorDV', 'ICalculadorDV'], ['CalculadorDV', 'Seguridad.DigitoVerificador'], ['DAL.DigitoVerificador', 'BE.FilaUsuarioDV']],
   CLASES_T08_backup: [['GUI.BackupForm', 'BLL.Backup'], ['BLL.Backup', 'IBackupDAL'], ['BLL.Backup', 'CifradorArchivos'], ['BLL.Backup', 'Servicios.Bitacora'], ['DAL.Backup', 'IBackupDAL']]
 };
@@ -30,14 +30,14 @@ module.exports = [
     tipo: 'clases', id: 'CLASES_T04_perfiles', titulo: 'Diagrama de clases — T04 Gestión de perfiles (patrón Composite)', columnas: 3,
     clases: [
       E('GUI.GestorPermisos', { metodos: 'none' }), E('BLL.Familia', { metodos: ['ObtenerArbol', 'ObtenerPermisosEfectivos', 'CrearRol', 'AgregarComponente', 'QuitarComponente', 'GuardarAsignacionRol', 'NoEscalaPrivilegios'] }),
-      E('BLL.PermisosAccion', { metodos: 'all' }), E('BE.Componente', { metodos: 'all' }), E('BE.Familia', { metodos: 'all' }), E('BE.Patente', { metodos: 'all' }), E('BE.Rol', { metodos: 'all' }),
+      E('BLL.PermisosAccion', { metodos: 'all' }), E('BE.Componente', { metodos: 'all' }), E('BE.Familia', { metodos: 'all' }), E('BE.Patente', { attrs: ['NombreMenu', 'Asignado'], metodos: 'all' }), E('BE.Rol', { metodos: 'all' }),
       E('IPermisoDAL', { metodos: ['AgregarRelacion', 'ObtenerIdRol'] })
     ]
   },
   {
     tipo: 'clases', id: 'CLASES_T05_idiomas', titulo: 'Diagrama de clases — T05 Gestión de múltiples idiomas (patrón Observer)', columnas: 3,
     clases: [
-      E('GUI.FormIdiomas', { metodos: 'all' }), E('BLL.IdiomaService', { metodos: ['CargarTraducciones', 'GuardarTraduccion', 'CrearIdioma', 'ActivarIdioma', 'DesactivarIdioma', 'ContarTraduccionesFaltantes'] }),
+      E('GUI.FormBase', { metodos: 'none' }), E('GUI.FormIdiomas', { metodos: 'all' }), E('BLL.IdiomaService', { metodos: ['CargarTraducciones', 'GuardarTraduccion', 'CrearIdioma', 'ActivarIdioma', 'DesactivarIdioma', 'ContarTraduccionesFaltantes'] }),
       E('GestorIdioma', { metodos: 'all' }), E('IIdiomaObserver', { metodos: 'all' }), E('Traductor', { metodos: ['Resolver', 'ObtenerTraducciones', 'ObtenerIdiomaDefault'] }),
       E('Servicios.Multiidioma.Idioma', { attrs: 'all' }), E('BE.Control', { attrs: 'all' }), E('BE.FilaTraduccion', { attrs: 'all' })
     ]
@@ -54,7 +54,7 @@ module.exports = [
     clases: [
       E('GUI.VersionHistorialForm', { metodos: 'none' }), E('BLL.VersionUsuario', { metodos: 'all' }), E('BLL.CuidadorHistorial', { metodos: 'all' }),
       E('BE.Usuario', { attrs: ['Id', 'Username', 'Nombre', 'Apellido', 'Email', 'FechaNacimiento'], metodos: ['CrearMemento', 'RestaurarDesde'] }),
-      E('BE.VersionUsuario', { attrs: 'all' }), E('IMemento', { metodos: 'all' }), E('DAL.VersionUsuario', { metodos: 'all' })
+      E('BE.VersionUsuario', { attrs: 'all' }), E('IOriginator', { metodos: 'all' }), E('IMemento', { metodos: 'all' }), E('DAL.VersionUsuario', { metodos: 'all' })
     ]
   },
   {
@@ -76,7 +76,7 @@ module.exports = [
   // DER por módulo de seguridad (las tablas salen de la base real)
   { tipo: 'er', id: 'DER_T02_login', titulo: 'DER — T02 Login y Logout', columnas: 3, tablas: ['Usuario', 'Usuario_Seguridad', 'Empleado', 'Preferencia', 'Bitacora'] },
   { tipo: 'er', id: 'DER_T04_perfiles', titulo: 'DER — T04 Gestión de perfiles', columnas: 3, tablas: ['Permiso', 'PermisoRelacion', 'Usuario'] },
-  { tipo: 'er', id: 'DER_T05_idiomas', titulo: 'DER — T05 Gestión de múltiples idiomas', columnas: 3, tablas: ['Idioma', 'Traduccion', 'Control', 'ControlMapeado', 'Preferencia'] },
+  { tipo: 'er', id: 'DER_T05_idiomas', titulo: 'DER — T05 Gestión de múltiples idiomas', columnas: 3, tablas: ['Idioma', 'Traduccion', 'Control', 'ControlMapeado', 'Preferencia', 'Usuario', 'Permiso'] },
   { tipo: 'er', id: 'DER_T06_bitacora', titulo: 'DER — T06 Bitácora y control de cambios', columnas: 3, tablas: ['Bitacora', 'BitacoraNegocio', 'HistorialUsuario', 'Usuario'] },
   { tipo: 'er', id: 'DER_T07_dv', titulo: 'DER — T07 Dígitos verificadores', columnas: 3, tablas: ['Usuario', 'DVVertical', 'HistorialIntegridad'] },
   { tipo: 'er', id: 'DER_T08_backup', titulo: 'DER — T08 Backup y restauración (bitácora de las operaciones)', columnas: 2, tablas: ['Bitacora', 'Usuario'] }

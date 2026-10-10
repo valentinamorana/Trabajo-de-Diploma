@@ -89,6 +89,7 @@ module.exports = [
       c('A', 'F', 'Abre la bitácora y filtra por días (BtnUltimosDias_Click)'),
       c('F', 'B', 'UsuarioPuedeVerSistema()'),
       c('F', 'B', 'ObtenerUltimosNDiasSistema(dias)'),
+      nota('ExigirVerSistema(): Administrador o patente de Auditoría (lista blanca), si no AppException', 'B'),
       c('B', 'S', 'ObtenerUltimosNDias(dias)'),
       c('S', 'D', 'ObtenerUltimosNDias(dias)'),
       r('D', 'F', 'registros de bitácora'),
@@ -196,10 +197,16 @@ module.exports = [
       c('B', 'B', 'EsCifrado(rutaArchivo)'),
       { alt: 'Backup cifrado (.wfbak)', pasos: [
         c('B', 'K', 'Descifrar(rutaArchivo, tempPlano, claveCifrado)'),
-        { alt: 'Contraseña incorrecta o archivo dañado', pasos: [ r('B', 'F', 'AppException(clave_invalida)') ],
-          sino: [{ etiqueta: 'Descifrado correcto', pasos: [ c('B', 'D', 'RestaurarBackup(tempPlano)') ] }] } ],
+        nota('v2: verifica el HMAC-SHA256 antes de descifrar; v1 (sin HMAC) se sigue leyendo', 'K'),
+        r('K', 'B', 'FormatoArchivoCifrado'),
+        { alt: 'HMAC inválido (archivo alterado o truncado)', pasos: [ r('B', 'F', 'AppException(alterado)') ],
+          sino: [
+            { etiqueta: 'Contraseña incorrecta', pasos: [ r('B', 'F', 'AppException(clave_invalida)') ] },
+            { etiqueta: 'Descifrado correcto', pasos: [ c('B', 'D', 'RestaurarBackup(tempPlano)') ] }
+          ] } ],
         sino: [{ etiqueta: '.bak plano', pasos: [ c('B', 'D', 'RestaurarBackup(rutaArchivo)') ] }] },
       c('B', 'L', 'Registrar(Base de datos restaurada, Criticidad.Alta)'),
+      { opt: 'Formato v1 sin HMAC', pasos: [ c('B', 'L', 'Registrar(Backup restaurado sin verificación de integridad, Criticidad.Alta)') ] },
       r('B', 'F', 'restaurado'),
       r('F', 'A', 'Confirma')
     ]

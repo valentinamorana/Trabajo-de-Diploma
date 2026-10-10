@@ -28,5 +28,29 @@ namespace BLL
         public const string ActorSistema = "sistema";
 
         public static int? IdUsuario => Usuario?.Id;
+
+        /// <summary>
+        /// Vuelve a resolver desde la base los permisos efectivos del usuario en sesión y los
+        /// reemplaza en la sesión (re-aplicación de seguridad EN VIVO tras editar roles/permisos).
+        /// Es el ÚNICO punto, fuera del login, que escribe el estado de autorización de la sesión:
+        /// la GUI pide el refresco y recibe la lista nueva para re-aplicar menús y controles, pero
+        /// no la arma ni la asigna. Devuelve null si no hay sesión activa.
+        /// </summary>
+        public static System.Collections.Generic.List<BE.Permiso> RefrescarPermisos()
+            => RefrescarPermisos(new Familia());
+
+        // Sobrecarga con la resolución inyectada (tests sin base de datos).
+        internal static System.Collections.Generic.List<BE.Permiso> RefrescarPermisos(Familia resolutor)
+        {
+            if (!Activa) return null;
+            var usuario  = Seguridad.SessionManager.GetInstance().Usuario;
+            var permisos = resolutor.ObtenerPermisosEfectivos(usuario.Rol ?? usuario.Perfil)
+                           ?? new System.Collections.Generic.List<BE.Permiso>();
+            // Se reemplaza la lista entera (no se muta la vieja): un lector concurrente ve la
+            // lista anterior completa o la nueva completa, nunca una a medio armar.
+            usuario.Permisos = permisos;
+            PermisosAccion.LimpiarCacheVigencia();
+            return permisos;
+        }
     }
 }

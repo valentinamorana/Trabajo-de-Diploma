@@ -32,6 +32,8 @@ namespace BE
         public const string BackupCifradoGeneradoPrefijo   = "Backup cifrado generado: ";
         public const string BackupEliminadoPrefijo         = "Backup eliminado: ";
         public const string BaseDeDatosRestauradaPrefijo   = "Base de datos restaurada desde ";
+        // Restauración de un .wfbak del formato v1 (sin HMAC): no se pudo verificar que no fuera alterado.
+        public const string BackupSinVerificacionPrefijo   = "Backup restaurado sin verificación de integridad (formato v1, sin HMAC): ";
         public const string DesbloqueoDeCuentaPrefijo      = "Desbloqueo de Cuenta: ";
         public const string AltaUsuarioPrefijo             = "Alta Usuario: ";
         public const string RestauracionAVersionPrefijo    = "Restauración a versión ";

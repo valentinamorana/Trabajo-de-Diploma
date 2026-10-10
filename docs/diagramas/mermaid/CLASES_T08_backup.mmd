@@ -28,7 +28,7 @@ classDiagram
   class Seguridad_CifradorArchivos["Seguridad.CifradorArchivos"] {
     <<static>>
     +Cifrar(string,  string,  string) void
-    +Descifrar(string,  string,  string) void
+    +Descifrar(string,  string,  string) FormatoArchivoCifrado
   }
   class Servicios_Bitacora["Servicios.Bitacora"] {
     +Registrar(string,  string,  Criticidad) void

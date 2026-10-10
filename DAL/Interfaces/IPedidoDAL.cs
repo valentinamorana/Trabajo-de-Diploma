@@ -39,7 +39,8 @@ namespace DAL.Interfaces
         // Claims atómicos: lanzan "estado_cambiado" si el pedido ya no está en el estado esperado.
         void Despachar(int idPedido);
         void MarcarEntregado(int idPedido);
-        int RegistrarDevolucion(int idPedido, int idCliente);
+        // actor: quién registra la devolución (queda en MantenimientoPrenda.Actor).
+        int RegistrarDevolucion(int idPedido, int idCliente, string actor);
         // Revierte campos desde el historial solo si el pedido sigue en 'estadoEsperado'.
         void RestaurarOperacionAtomica(int idPedido, BE.EstadoPedido estadoEsperado,
                                        IList<(string Campo, string ValorAnterior)> campos);

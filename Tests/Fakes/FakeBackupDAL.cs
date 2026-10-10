@@ -20,7 +20,16 @@ namespace Tests.Fakes
         public int VecesContado { get; private set; }
 
         public void RealizarBackup(string rutaDestino) { }
-        public void RestaurarBackup(string rutaOrigen) { }
+        // Contenido del archivo que recibió RestaurarBackup (el .bak plano ya descifrado), o null
+        // si no se llegó a restaurar.
+        public byte[] ContenidoRestaurado { get; private set; }
+        public int VecesRestaurado { get; private set; }
+
+        public void RestaurarBackup(string rutaOrigen)
+        {
+            VecesRestaurado++;
+            ContenidoRestaurado = System.IO.File.ReadAllBytes(rutaOrigen);
+        }
 
         public DateTime? ObtenerFechaBackup(string rutaArchivo) => FechaBackupConfig;
 

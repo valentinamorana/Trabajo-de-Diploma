@@ -710,6 +710,7 @@ namespace GUI
                 new { Es = BE.ActividadesBitacora.BackupCifradoGeneradoPrefijo,   Key = "dash.act.backupcreate"  },
                 new { Es = BE.ActividadesBitacora.BackupEliminadoPrefijo,         Key = "dash.act.backupdelete"  },
                 new { Es = BE.ActividadesBitacora.BaseDeDatosRestauradaPrefijo,   Key = "dash.act.dbrestore"     },
+                new { Es = BE.ActividadesBitacora.BackupSinVerificacionPrefijo,   Key = "dash.act.backupnomac"   },
                 new { Es = BE.ActividadesBitacora.DesbloqueoDeCuentaPrefijo,      Key = "dash.act.accountunlock" },
                 new { Es = BE.ActividadesBitacora.AltaUsuarioPrefijo,             Key = "dash.act.useradd"       },
                 new { Es = BE.ActividadesBitacora.RestauracionAVersionPrefijo,    Key = "dash.act.userrestore"   },
@@ -751,7 +752,10 @@ namespace GUI
             Task.Run(() =>
             {
                 System.Data.DataTable dtN = null, dtNeg = null;
-                try { dtN   = _bllBitacora.ObtenerUltimosNDiasSistema(30); } catch (Exception ex) { LogWidget("bitácora del sistema (30d)", ex); }
+                // La bitácora del SISTEMA solo se pide si el usuario puede verla (la BLL igual lo
+                // exige); los roles operativos ven solo los conteos de la bitácora de negocio.
+                if (_verActividad)
+                    try { dtN = _bllBitacora.ObtenerUltimosNDiasSistema(30); } catch (Exception ex) { LogWidget("bitácora del sistema (30d)", ex); }
                 try { dtNeg = _bllBitacora.ObtenerTodosNegocio(); } catch (Exception ex) { LogWidget("bitácora de negocio", ex); }
 
                 InvocarSeguro(() =>
@@ -761,7 +765,8 @@ namespace GUI
 
                     var tStats = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
                     string lblSistema30d = tStats.ContainsKey("dash.stats.sistema30d") ? tStats["dash.stats.sistema30d"].Texto : "Sistema (30d)";
-                    flStats.Controls.Add(CrearMiniStatRow(lblSistema30d, (dtN?.Rows.Count ?? 0).ToString(), Tema.RosaOscuro));
+                    if (_verActividad)
+                        flStats.Controls.Add(CrearMiniStatRow(lblSistema30d, (dtN?.Rows.Count ?? 0).ToString(), Tema.RosaOscuro));
 
                     if (dtNeg != null)
                     {

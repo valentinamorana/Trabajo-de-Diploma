@@ -27,6 +27,12 @@ namespace DAL
             "       ped.FechaEnvioControl, ped.FechaControl, ped.IdEmpleadoControl, " +
             "       ped.FechaSeparacion, ped.FechaFormalizacion, " +
             "       ped.MotivoDesistimiento, ped.EtapaDesistimiento, " +
+            // PN04: cerrado sin devolución = ninguna prenda del pedido entró a mantenimiento por la
+            // devolución (Origen = 1) después de la entrega: se cerró por pérdida (compra tácita).
+            "       CASE WHEN ped.FechaDevolucion IS NOT NULL AND NOT EXISTS (" +
+            "            SELECT 1 FROM PedidoPrenda ppd INNER JOIN MantenimientoPrenda mpd ON mpd.IdPrenda = ppd.IdPrenda " +
+            "             WHERE ppd.IdPedido = ped.IdPedido AND mpd.Origen = 1 AND mpd.FechaEntrada >= ped.FechaEntrega) " +
+            "            THEN 1 ELSE 0 END AS CerradoPorPerdida, " +
             "       cli.Nombre + ' ' + cli.Apellido AS NombreCliente, " +
             "       emp.Nombre + ' ' + emp.Apellido AS NombreEmpleado, " +
             "       ctl.Nombre + ' ' + ctl.Apellido AS NombreEmpleadoControl " +
@@ -700,7 +706,7 @@ namespace DAL
         // Es idempotente: una segunda devolución del mismo pedido no afecta filas (las prendas
         // ya no están EnUso) y no pisa prendas que ya hayan vuelto a circular en otro pedido.
         // Devuelve la cantidad de prendas efectivamente devueltas.
-        public int RegistrarDevolucion(int idPedido, int idCliente)
+        public int RegistrarDevolucion(int idPedido, int idCliente, string actor)
         {
             int afectadas = 0;
             acceso.EjecutarTransaccion((conexion, tx) =>
@@ -714,7 +720,7 @@ namespace DAL
                 // estado se hace en SQL directo y no pasa por BLL.Prenda.CambiarEstado.
                 using (var cmd = new SqlCommand(
                     "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor, Origen) " +
-                    "SELECT IdPrenda, GETDATE(), NULL, @OrigenDevolucion FROM Prenda " +
+                    "SELECT IdPrenda, GETDATE(), @Actor, @OrigenDevolucion FROM Prenda " +
                     "WHERE Estado=@EstadoEnUso AND IdClienteActual=@IdCliente AND IdPrenda IN " +
                     "  (SELECT IdPrenda FROM PedidoPrenda WHERE IdPedido=@IdPedido) " +
                     "AND NOT EXISTS (SELECT 1 FROM MantenimientoPrenda m " +
@@ -724,6 +730,9 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@EstadoEnUso", (int)BE.EstadoPrenda.EnUso);
                     cmd.Parameters.AddWithValue("@IdCliente",   idCliente);
                     cmd.Parameters.AddWithValue("@IdPedido",    idPedido);
+                    // Quién registra la devolución (lo resuelve la BLL desde la sesión).
+                    cmd.Parameters.Add(new SqlParameter("@Actor", SqlDbType.NVarChar, 100)
+                        { Value = string.IsNullOrWhiteSpace(actor) ? (object)DBNull.Value : actor.Trim() });
                     // Origen = Devolución: es lo que lleva la prenda a la Inspección de Devolución (PN04).
                     cmd.Parameters.Add(new SqlParameter("@OrigenDevolucion", SqlDbType.TinyInt) { Value = (byte)BE.OrigenMantenimiento.Devolucion });
                     cmd.ExecuteNonQuery();
@@ -1062,6 +1071,8 @@ namespace DAL
                 FechaDespacho = row["FechaDespacho"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaDespacho"]) : null,
                 FechaEntrega = row["FechaEntrega"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaEntrega"]) : null,
                 FechaDevolucion = FechaNula(row, "FechaDevolucion"),
+                CerradoPorPerdida = row.Table.Columns.Contains("CerradoPorPerdida") && row["CerradoPorPerdida"] != DBNull.Value
+                                    && Convert.ToInt32(row["CerradoPorPerdida"]) == 1,
                 MotivoCancelacion = row.Table.Columns.Contains("MotivoCancelacion") && row["MotivoCancelacion"] != DBNull.Value
                                         ? row["MotivoCancelacion"].ToString() : null,
                 FechaEnvioControl     = FechaNula(row, "FechaEnvioControl"),

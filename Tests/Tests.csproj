@@ -45,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackupTests.cs" />
+    <Compile Include="BackupCifradoTests.cs" />
+    <Compile Include="SeguridadSesionBitacoraTests.cs" />
     <Compile Include="CasosPruebaEspecialesTests.cs" />
     <Compile Include="ClaveEmergenciaTests.cs" />
     <Compile Include="DigitoVerificadorTests.cs" />

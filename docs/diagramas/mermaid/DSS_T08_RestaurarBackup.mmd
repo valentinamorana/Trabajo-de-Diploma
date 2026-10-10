@@ -11,7 +11,11 @@ sequenceDiagram
   B->>B: EsCifrado(rutaArchivo)
   alt Backup cifrado (.wfbak)
     B->>K: Descifrar(rutaArchivo, tempPlano, claveCifrado)
-    alt Contraseña incorrecta o archivo dañado
+    Note over K: v2: verifica el HMAC-SHA256 antes de descifrar, v1 (sin HMAC) se sigue leyendo
+    K-->>B: FormatoArchivoCifrado
+    alt HMAC inválido (archivo alterado o truncado)
+      B-->>F: AppException(alterado)
+    else Contraseña incorrecta
       B-->>F: AppException(clave_invalida)
     else Descifrado correcto
       B->>D: RestaurarBackup(tempPlano)
@@ -20,5 +24,8 @@ sequenceDiagram
     B->>D: RestaurarBackup(rutaArchivo)
   end
   B->>L: Registrar(Base de datos restaurada, Criticidad.Alta)
+  opt Formato v1 sin HMAC
+    B->>L: Registrar(Backup restaurado sin verificación de integridad, Criticidad.Alta)
+  end
   B-->>F: restaurado
   F-->>A: Confirma

@@ -394,7 +394,7 @@ module.exports = [
       nota('Exigir(PedidosRealizadosEditar)', 'B'),
       { alt: 'No está Entregado', pasos: [r('B', 'F', 'AppException(devolucion_estado)'), r('F', 'L', 'Informa el estado actual')],
         sino: [{ etiqueta: 'Entregado', pasos: [
-          c('B', 'D', 'RegistrarDevolucion(idPedido, idCliente)'),
+          c('B', 'D', 'RegistrarDevolucion(idPedido, idCliente, Sesion.Actor)'),
           nota('Una transacción: abre MantenimientoPrenda y pasa a En limpieza solo las prendas que siguen En uso por ese cliente', 'D'),
           r('D', 'B', 'cantidad de prendas devueltas'),
           { alt: 'Ninguna prenda devuelta (ya registrada)', pasos: [r('B', 'F', 'AppException(devolucion_ya_hecha)'), r('F', 'L', 'Informa que la devolución ya estaba registrada')],

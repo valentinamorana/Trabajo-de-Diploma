@@ -106,7 +106,7 @@ function resolverClases(m) {
   for (const it of items) {
     for (const b of it.bases) {
       const base = tipoBase(b);
-      const d = elegir(base, false);
+      const d = elegir(base, esBE(it)); // la base, de la misma capa (BE.Rol hereda de BE.Familia, no de BLL.Familia)
       if (d && d.id !== it.id) add({ tipo: d.tipo === 'interface' ? 'implementa' : 'hereda', de: it.id, a: d.id });
     }
     if (m.autoAsociaciones !== false && esBE(it)) {

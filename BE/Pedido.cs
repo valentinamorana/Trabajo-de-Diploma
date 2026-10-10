@@ -28,6 +28,10 @@ namespace BE
         // pedido devuelto de uno con las prendas todavía en poder del cliente.
         public DateTime? FechaDevolucion { get; set; }
 
+        /// <summary>PN04: se cerró sin devolución (sus prendas se reportaron perdidas: compra tácita).
+        /// Lo calcula la consulta; no se guarda.</summary>
+        public bool CerradoPorPerdida { get; set; }
+
         public string MotivoCancelacion { get; set; }
 
         // ── PN01 — circuito de control de stock (diagrama de actividad) ─────────

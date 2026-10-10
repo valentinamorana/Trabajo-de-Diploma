@@ -6,7 +6,7 @@ flowchart TD
     a1["Analizar métricas del período (por defecto 90 días): abandono por plan, rotación por categoría e impacto de las promociones"]
     d1{"¿Hay oportunidad?"}
     f0(((" ")))
-    a2["Registrar sugerencia: queda Pendiente"]
+    a2["Registrar sugerencia (origen Abandono o Rotación, o Manual si es idea propia): queda Pendiente"]
     g1["Recibir constancia de descarte de la sugerencia"]
     g2["Recibir informe de la baja (promoción desactivada)"]
     o1[/"Reporte de métricas (período, abandono por plan, rotación por categoría, impacto de las promociones)"/]:::doc
@@ -17,7 +17,7 @@ flowchart TD
     d2{"¿Acepta la sugerencia?"}
     a3["Descartar sugerencia con motivo: Descartada"]
     f1(((" ")))
-    a4["Crear promoción desde la sugerencia"]
+    a4["Crear promoción desde la sugerencia (la sugerencia queda Evaluada)"]
     a4m["Crear promoción manual, sin sugerencia"]
     a5["Validar (destino único, valor, fecha de fin desde hoy) → En revisión contable"]
     d4{"¿Reformular?"}
@@ -25,6 +25,7 @@ flowchart TD
     a9["Descartar promoción con motivo: Descartada"]
     f2(((" ")))
     d5{"¿Qué la interrumpe?"}
+    a16["Evaluar la solicitud de baja"]
     d6{"¿Aprueba la baja?"}
     a12["Desactivada (informe a Gerencia)"]
     a13["Sigue Vigente con motivo (informe a Ventas)"]
@@ -42,9 +43,9 @@ flowchart TD
   end
   subgraph K["Contabilidad"]
     direction TB
-    a6["Analizar margen e impacto (beneficio estimado vs. costo del descuento, promociones superpuestas)"]
-    d3{"¿Aprueba? (quien la creó no la dictamina; si ya pasó su fecha de fin, se rechaza)"}
-    a7["Rechazada por Contabilidad"]
+    a6["Analizar margen e impacto (beneficio estimado vs. costo del descuento, promociones superpuestas); quien la creó no la dictamina"]
+    d3{"¿Aprueba?"}
+    a7["Rechazada por Contabilidad (también si ya pasó su fecha de fin)"]
     a10["Vigente: un solo descuento por cobro"]
     o5[/"Dictamen contable (rechazo con observación)"/]:::doc
     o6[/"Dictamen contable (aprobada: Vigente)"/]:::doc
@@ -63,12 +64,12 @@ flowchart TD
   a4m --> a5
   a1 --> d1
   d1 -- "No: sin promoción" --> f0
-  d1 -- "Sí: elige una (origen Abandono o Rotación)" --> a2
+  d1 -- "Sí" --> a2
   a2 --> d2
   d2 -- "No" --> a3
   a3 --> g1
   g1 --> f1
-  d2 -- "Sí: la sugerencia queda Evaluada" --> a4
+  d2 -- "Sí" --> a4
   a4 --> a5
   a5 --> a6
   a6 --> d3
@@ -81,7 +82,8 @@ flowchart TD
   d3 -- "Sí" --> a10
   a10 --> d5
   d5 -- "El Vendedor pide la baja" --> a11
-  a11 --> d6
+  a11 --> a16
+  a16 --> d6
   d6 -- "Sí" --> a12
   a12 --> g2
   g2 --> f3
@@ -95,26 +97,23 @@ flowchart TD
   a1 -.-> o1
   o1 -.-> a2
   a2 -.-> o2
-  o2 -.-> d2
   o2 -.-> a4
   a3 -.-> o3
   o3 -.-> g1
   a5 -.-> o4
   o4 -.-> a6
   a7 -.-> o5
-  o5 -.-> d4
   o5 -.-> a8
   a10 -.-> o6
   o6 -.-> a11
   a9 -.-> o7
   a11 -.-> o8
-  o8 -.-> d6
+  o8 -.-> a16
   a12 -.-> o9
   a13 -.-> o9
   o9 -.-> g2
   o9 -.-> v1
   a6 -.-> o10
-  o10 -.-> d3
   a8 -.-> o11
   o11 -.-> a5
   a14 -.-> o12

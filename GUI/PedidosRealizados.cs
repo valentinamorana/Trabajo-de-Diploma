@@ -651,6 +651,9 @@ namespace GUI
         {
             if (p.Estado == BE.EstadoPedido.Entregado)
             {
+                if (p.FechaDevolucion.HasValue && p.CerradoPorPerdida)
+                    return Tr("est.entregado.cerrado", "Entregado (cerrado por pérdida el {0:dd/MM})",
+                              new object[] { p.FechaDevolucion.Value });
                 if (p.FechaDevolucion.HasValue)
                     return Tr("est.entregado.devuelto", "Entregado (devuelto el {0:dd/MM})",
                               new object[] { p.FechaDevolucion.Value });

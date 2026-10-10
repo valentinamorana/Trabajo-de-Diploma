@@ -417,10 +417,6 @@ ES	btn.copiado	Copiado
 ES	perfil.administrador	Administrador
 ES	perfil.vendedor	Vendedor
 ES	perfil.deposito	Depósito
-ES	metodo.efectivo	Efectivo
-ES	metodo.debito	Débito
-ES	metodo.credito	Crédito
-ES	metodo.transferencia	Transferencia
 ES	lbl.proximamente	Próximamente
 ES	err.pdf.sinDatos	No hay datos para exportar.
 ES	lbl.exportarpdf	Exportar PDF
@@ -1183,10 +1179,6 @@ EN	btn.copiado	Copied
 EN	perfil.administrador	Administrator
 EN	perfil.vendedor	Salesperson
 EN	perfil.deposito	Warehouse
-EN	metodo.efectivo	Cash
-EN	metodo.debito	Debit
-EN	metodo.credito	Credit
-EN	metodo.transferencia	Wire Transfer
 EN	lbl.proximamente	Coming Soon
 EN	err.pdf.sinDatos	No data to export.
 EN	lbl.exportarpdf	Export PDF
@@ -1947,10 +1939,6 @@ RU	btn.copiado	Скопировано
 RU	perfil.administrador	Администратор
 RU	perfil.vendedor	Продавец
 RU	perfil.deposito	Склад
-RU	metodo.efectivo	Наличные
-RU	metodo.debito	Дебетовая карта
-RU	metodo.credito	Кредитная карта
-RU	metodo.transferencia	Банковский перевод
 RU	lbl.proximamente	Скоро
 RU	err.pdf.sinDatos	Нет данных для экспорта.
 RU	lbl.exportarpdf	Экспорт PDF
@@ -2752,10 +2740,6 @@ PT	btn.copiado	Copiado
 PT	perfil.administrador	Administrador
 PT	perfil.vendedor	Vendedor
 PT	perfil.deposito	Depósito
-PT	metodo.efectivo	Dinheiro
-PT	metodo.debito	Débito
-PT	metodo.credito	Crédito
-PT	metodo.transferencia	Transferência
 PT	lbl.proximamente	Em breve
 PT	err.pdf.sinDatos	Sem dados para exportar.
 PT	lbl.exportarpdf	Exportar PDF
@@ -7300,3 +7284,7 @@ PT	err.bll.prenda.categoria_invalida	A categoria '{0}' não está no catálogo d
 PT	col.mant.origen	Origem
 PT	mant.origen.devolucion	Devolução de pedido
 PT	mant.origen.manual	Manual
+ES	est.entregado.cerrado	Entregado (cerrado por pérdida el {0:dd/MM})
+EN	est.entregado.cerrado	Delivered (closed as lost on {0:dd/MM})
+RU	est.entregado.cerrado	Доставлен (закрыт как утерянный {0:dd/MM})
+PT	est.entregado.cerrado	Entregue (encerrado por perda em {0:dd/MM})

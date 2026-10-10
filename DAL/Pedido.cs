@@ -27,6 +27,12 @@ namespace DAL
             "       ped.FechaEnvioControl, ped.FechaControl, ped.IdEmpleadoControl, " +
             "       ped.FechaSeparacion, ped.FechaFormalizacion, " +
             "       ped.MotivoDesistimiento, ped.EtapaDesistimiento, " +
+            // PN04: cerrado sin devolución = ninguna prenda del pedido entró a mantenimiento por la
+            // devolución (Origen = 1) después de la entrega: se cerró por pérdida (compra tácita).
+            "       CASE WHEN ped.FechaDevolucion IS NOT NULL AND NOT EXISTS (" +
+            "            SELECT 1 FROM PedidoPrenda ppd INNER JOIN MantenimientoPrenda mpd ON mpd.IdPrenda = ppd.IdPrenda " +
+            "             WHERE ppd.IdPedido = ped.IdPedido AND mpd.Origen = 1 AND mpd.FechaEntrada >= ped.FechaEntrega) " +
+            "            THEN 1 ELSE 0 END AS CerradoPorPerdida, " +
             "       cli.Nombre + ' ' + cli.Apellido AS NombreCliente, " +
             "       emp.Nombre + ' ' + emp.Apellido AS NombreEmpleado, " +
             "       ctl.Nombre + ' ' + ctl.Apellido AS NombreEmpleadoControl " +
@@ -1062,6 +1068,8 @@ namespace DAL
                 FechaDespacho = row["FechaDespacho"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaDespacho"]) : null,
                 FechaEntrega = row["FechaEntrega"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["FechaEntrega"]) : null,
                 FechaDevolucion = FechaNula(row, "FechaDevolucion"),
+                CerradoPorPerdida = row.Table.Columns.Contains("CerradoPorPerdida") && row["CerradoPorPerdida"] != DBNull.Value
+                                    && Convert.ToInt32(row["CerradoPorPerdida"]) == 1,
                 MotivoCancelacion = row.Table.Columns.Contains("MotivoCancelacion") && row["MotivoCancelacion"] != DBNull.Value
                                         ? row["MotivoCancelacion"].ToString() : null,
                 FechaEnvioControl     = FechaNula(row, "FechaEnvioControl"),

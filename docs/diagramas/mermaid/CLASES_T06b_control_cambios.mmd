@@ -35,6 +35,11 @@ classDiagram
     +bool EstadoSnapshot
     +int IntentosSnapshot
   }
+  class IOriginator {
+    <<interface>>
+    +CrearMemento(string,  string) IMemento
+    +RestaurarDesde(IMemento) void
+  }
   class IMemento {
     <<interface>>
   }
@@ -44,6 +49,7 @@ classDiagram
     +ObtenerPorUsuario(int) List~VersionUsuario~
     +Insertar(VersionUsuario) void
   }
+  IOriginator <|.. Usuario
   IMemento <|.. VersionUsuario
   VersionUsuario --> "1" Usuario : IdUsuario
   GUI_VersionHistorialForm ..> BLL_VersionUsuario : usa
@@ -52,3 +58,4 @@ classDiagram
   BLL_VersionUsuario ..> DAL_VersionUsuario : usa
   BLL_CuidadorHistorial ..> IMemento : usa
   Usuario ..> IMemento : usa
+  Usuario ..> IOriginator : usa

@@ -162,11 +162,11 @@ namespace Tests
                 Assert.IsTrue(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(antes, DateTime.Today));
                 Assert.AreEqual(idPedido, new DAL.InspeccionDevolucion().ObtenerPedidoEnCurso(idPrenda)?.IdPedido);
 
-                Assert.AreEqual(1, dal.RegistrarDevolucion(idPedido, idCliente));
+                Assert.AreEqual(1, dal.RegistrarDevolucion(idPedido, idCliente, "deposito.test"));
                 var abierto = new DAL.MantenimientoPrenda().ObtenerPorPrenda(idPrenda).Single(m => m.EstaAbierto);
                 Assert.AreEqual(BE.OrigenMantenimiento.Devolucion, abierto.Origen,
                     "La devolución abre el mantenimiento con Origen = Devolución (lo que la lleva a la Inspección).");
-                Assert.IsNull(abierto.Actor, "Actor ya no lleva una marca de texto.");
+                Assert.AreEqual("deposito.test", abierto.Actor, "El mantenimiento queda a nombre de quien registró la devolución.");
 
                 var despues = dal.ObtenerPorId(idPedido);
                 Assert.AreEqual(BE.EstadoPedido.Entregado, despues.Estado, "El estado no cambia.");
@@ -190,6 +190,50 @@ namespace Tests
                         new[] { new SqlParameter("@Prenda", idPrenda), new SqlParameter("@Id", idPedido) });
                     dal.ActualizarDV(idPedido);
                 }
+            }
+        }
+
+        // Empleado ↔ Usuario: al modificar el usuario, su Empleado toma Nombre/Apellido/Email; un dato
+        // vacío no pisa el del empleado y el DVH queda al día.
+        [TestMethod]
+        public void Empleado_SincronizarDatosPersonales_CopiaLosDatosSinPisarVaciosYActualizaElDV()
+        {
+            ExigirBase();
+            var acceso = DAL.Acceso.GetInstance();
+            var dt = acceso.Leer(
+                "SELECT TOP 1 IdEmpleado, IdUsuario, Nombre, Apellido, Email FROM Empleado " +
+                "WHERE IdUsuario IS NOT NULL ORDER BY IdEmpleado", null);
+            if (dt.Rows.Count == 0) Assert.Inconclusive("La base de pruebas no tiene empleados vinculados a un usuario.");
+            int idEmpleado = Convert.ToInt32(dt.Rows[0]["IdEmpleado"]);
+            int idUsuario  = Convert.ToInt32(dt.Rows[0]["IdUsuario"]);
+            object nombre   = dt.Rows[0]["Nombre"];
+            object apellido = dt.Rows[0]["Apellido"];
+            object email    = dt.Rows[0]["Email"];
+
+            var dal = new DAL.Empleado();
+            try
+            {
+                Assert.AreEqual(0, dal.SincronizarDatosPersonales(-1, "X", "Y", "z@z.com"), "Sin empleado vinculado no hace nada.");
+                Assert.AreEqual(0, dal.SincronizarDatosPersonales(idUsuario, null, " ", null), "Sin datos no hace nada.");
+
+                Assert.AreEqual(idEmpleado, dal.SincronizarDatosPersonales(idUsuario, " NombreSync ", null, "sync@test.com"));
+                var e = dal.ObtenerPorId(idEmpleado);
+                Assert.AreEqual("NombreSync", e.Nombre);
+                Assert.AreEqual(apellido.ToString(), e.Apellido, "El apellido vacío del usuario no pisa el del empleado.");
+                Assert.AreEqual("sync@test.com", e.Email);
+                Assert.IsTrue(DvhCoincide(DAL.Empleado.DV_Tabla, DAL.Empleado.DV_Pk, DAL.Empleado.DV_Columnas, idEmpleado),
+                    "El DVH del empleado se recalculó tras la sincronización.");
+            }
+            finally
+            {
+                acceso.Escribir(
+                    "UPDATE Empleado SET Nombre = @N, Apellido = @A, Email = @E WHERE IdEmpleado = @Id",
+                    new[]
+                    {
+                        new SqlParameter("@N", nombre), new SqlParameter("@A", apellido),
+                        new SqlParameter("@E", email),  new SqlParameter("@Id", idEmpleado)
+                    });
+                dal.ActualizarDV(idEmpleado);
             }
         }
     }

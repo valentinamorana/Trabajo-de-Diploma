@@ -934,6 +934,8 @@ namespace Tests
 
             Assert.AreEqual(1, ctx.DalPedido.RegistrarDevolucionVeces, "La devolución (En uso a En limpieza, con mantenimiento) se hace una sola vez.");
             Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces, "Queda la operación DEVOLUCION en el historial.");
+            Assert.AreEqual("admin", ctx.DalPedido.UltimoActorDevolucion,
+                "El actor de la devolución lo resuelve la BLL desde la sesión y llega al DAL (MantenimientoPrenda.Actor).");
         }
 
         [TestMethod]

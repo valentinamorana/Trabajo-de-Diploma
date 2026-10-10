@@ -11,5 +11,9 @@ namespace DAL.Interfaces
 
         // Crea el Empleado vinculado a un usuario del sistema (si no tiene uno) y devuelve su Id.
         int CrearParaUsuario(int idUsuario, string nombre, string apellido, string email, string puesto);
+
+        // Copia Nombre/Apellido/Email del usuario a su Empleado vinculado (los vacíos no pisan)
+        // y recalcula el DV. Devuelve el IdEmpleado, o 0 si no hay empleado vinculado.
+        int SincronizarDatosPersonales(int idUsuario, string nombre, string apellido, string email);
     }
 }

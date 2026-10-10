@@ -721,7 +721,9 @@ namespace BLL
                     pedido.IdPedido);
 
             // El DAL pasa las prendas a EnLimpieza y completa Pedido.FechaDevolucion en la misma transacción.
-            int devueltas = dalPedido.RegistrarDevolucion(pedido.IdPedido, pedido.IdCliente);
+            // El actor (quién recibe la devolución) lo resuelve la BLL desde la sesión, no la GUI;
+            // queda en MantenimientoPrenda.Actor de cada prenda que entra a limpieza.
+            int devueltas = dalPedido.RegistrarDevolucion(pedido.IdPedido, pedido.IdCliente, Sesion.Actor);
             if (devueltas == 0)
                 throw new BE.AppException("err.bll.pedido.devolucion_ya_hecha",
                     "El Pedido #{0} no tiene prendas en uso para devolver " +

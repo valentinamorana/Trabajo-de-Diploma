@@ -20,7 +20,7 @@ sequenceDiagram
     B-->>F: AppException(devolucion_estado)
     F-->>L: Informa el estado actual
   else Entregado
-    B->>D: RegistrarDevolucion(idPedido, idCliente)
+    B->>D: RegistrarDevolucion(idPedido, idCliente, Sesion.Actor)
     Note over D: Una transacción: abre MantenimientoPrenda y pasa a En limpieza solo las prendas que siguen En uso por ese cliente
     D-->>B: cantidad de prendas devueltas
     alt Ninguna prenda devuelta (ya registrada)

@@ -40,7 +40,6 @@ classDiagram
   class Patente {
     +string NombreMenu
     +bool Asignado
-    +IList~Componente~ Hijos
     +AgregarHijo(Componente) void
     +QuitarHijo(Componente) void
     +VaciarHijos() void
@@ -58,7 +57,6 @@ classDiagram
   Componente <|-- Familia
   Familia --> "*" Componente : Hijos
   Componente <|-- Patente
-  Patente --> "*" Componente : Hijos
   Familia <|-- Rol
   GUI_GestorPermisos ..> BLL_Familia : usa
   BLL_Familia ..> Componente : usa

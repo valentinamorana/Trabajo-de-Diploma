@@ -330,9 +330,11 @@ namespace GUI
             if (!BLL.Sesion.Activa) return;
             try
             {
+                // La BLL recarga los permisos desde la base y actualiza la sesión; la GUI solo
+                // re-aplica la visibilidad con la lista que le devuelve (no escribe la sesión).
+                var permisos = BLL.Sesion.RefrescarPermisos();
+                if (permisos == null) return;
                 var usuario  = BLL.Sesion.Usuario;
-                var permisos = new BLL.Familia().ObtenerPermisosEfectivos(usuario.Rol ?? usuario.Perfil);
-                usuario.Permisos = permisos;   // _usuarioActivo es la MISMA referencia que la sesión
                 AplicarPermisos(permisos);
                 // Etapa 4 — re-aplicar también la seguridad a nivel de control en los forms abiertos.
                 ManejadorSeguridad.ActualizarSeguridadFormulariosAbiertos(usuario);

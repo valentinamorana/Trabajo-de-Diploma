@@ -189,6 +189,7 @@ namespace BLL
         {
             ValidarAdministrador();
 
+            bool sinVerificacion = false;
             if (EsCifrado(rutaArchivo))
             {
                 // Descifrar a una carpeta que la cuenta de SQL Server pueda LEER (no al %TEMP% del
@@ -196,15 +197,23 @@ namespace BLL
                 string tempPlano = Path.Combine(DAL.Backup.DirectorioTempSeguro(), $"WF_restore_{Guid.NewGuid():N}.bak");
                 try
                 {
+                    Seguridad.FormatoArchivoCifrado formato;
                     try
                     {
-                        Seguridad.CifradorArchivos.Descifrar(rutaArchivo, tempPlano, claveCifrado);
+                        // v2: el HMAC se verifica ANTES de descifrar; v1 (sin HMAC) se sigue leyendo.
+                        formato = Seguridad.CifradorArchivos.Descifrar(rutaArchivo, tempPlano, claveCifrado);
+                    }
+                    catch (Seguridad.ArchivoCifradoAlteradoException)
+                    {
+                        throw new BE.AppException("err.bll.backup.alterado",
+                            "El backup fue alterado o está incompleto: no pasó la verificación de integridad y no se restauró.");
                     }
                     catch (CryptographicException)
                     {
                         throw new BE.AppException("err.bll.backup.clave_invalida",
                             "La contraseña del backup es incorrecta o el archivo está dañado.");
                     }
+                    sinVerificacion = formato == Seguridad.FormatoArchivoCifrado.V1SinAutenticacion;
                     _dal.RestaurarBackup(tempPlano);
                 }
                 finally
@@ -220,6 +229,12 @@ namespace BLL
             _bitacora.Registrar(modulo,
                 $"{BE.ActividadesBitacora.BaseDeDatosRestauradaPrefijo}'{Path.GetFileName(rutaArchivo)}'",
                 BE.Criticidad.Alta);
+            // Un .wfbak del formato anterior no trae HMAC: se restaura para no perder copias
+            // viejas, pero queda asentado que su integridad no pudo verificarse.
+            if (sinVerificacion)
+                _bitacora.Registrar(modulo,
+                    $"{BE.ActividadesBitacora.BackupSinVerificacionPrefijo}'{Path.GetFileName(rutaArchivo)}'",
+                    BE.Criticidad.Alta);
         }
 
         public void EliminarBackup(string modulo, string rutaArchivo)

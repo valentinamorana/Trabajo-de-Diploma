@@ -44,6 +44,54 @@ namespace Tests
             Assert.AreEqual(0, fake.Creados.Count);
         }
 
+        // ── Sincronización Usuario → Empleado (Modificar) ──────────────────────────
+        [TestMethod]
+        public void SincronizarEmpleado_CopiaNombreApellidoYEmailAlEmpleadoVinculado()
+        {
+            var fake = new Tests.Fakes.FakeEmpleadoDAL
+            {
+                EmpleadoPorUsuario = new BE.Empleado { IdEmpleado = 3, IdUsuario = 7, Nombre = "Viejo", Apellido = "Apellido", Email = "viejo@x.com" }
+            };
+            Assert.IsTrue(BLL.Usuario.SincronizarEmpleado(fake, 7, "Ana", "Paz", "ana@x.com"));
+            Assert.AreEqual(1, fake.Sincronizados.Count);
+            Assert.AreEqual(7, fake.Sincronizados[0].IdUsuario);
+            Assert.AreEqual("Ana", fake.EmpleadoPorUsuario.Nombre);
+            Assert.AreEqual("Paz", fake.EmpleadoPorUsuario.Apellido);
+            Assert.AreEqual("ana@x.com", fake.EmpleadoPorUsuario.Email);
+        }
+
+        [TestMethod]
+        public void SincronizarEmpleado_DatoVacio_NoPisaElDelEmpleado()
+        {
+            var fake = new Tests.Fakes.FakeEmpleadoDAL
+            {
+                EmpleadoPorUsuario = new BE.Empleado { IdEmpleado = 3, IdUsuario = 7, Nombre = "Viejo", Apellido = "Apellido", Email = "viejo@x.com" }
+            };
+            Assert.IsTrue(BLL.Usuario.SincronizarEmpleado(fake, 7, "Ana", null, " "));
+            Assert.AreEqual("Ana", fake.EmpleadoPorUsuario.Nombre);
+            Assert.AreEqual("Apellido", fake.EmpleadoPorUsuario.Apellido);
+            Assert.AreEqual("viejo@x.com", fake.EmpleadoPorUsuario.Email);
+        }
+
+        [TestMethod]
+        public void SincronizarEmpleado_SinDatos_NoLlamaAlDal()
+        {
+            var fake = new Tests.Fakes.FakeEmpleadoDAL
+            {
+                EmpleadoPorUsuario = new BE.Empleado { IdEmpleado = 3, IdUsuario = 7, Nombre = "Viejo" }
+            };
+            Assert.IsFalse(BLL.Usuario.SincronizarEmpleado(fake, 7, null, "", "  "));
+            Assert.AreEqual(0, fake.Sincronizados.Count);
+            Assert.AreEqual("Viejo", fake.EmpleadoPorUsuario.Nombre);
+        }
+
+        [TestMethod]
+        public void SincronizarEmpleado_UsuarioSinEmpleado_DevuelveFalse()
+        {
+            var fake = new Tests.Fakes.FakeEmpleadoDAL();
+            Assert.IsFalse(BLL.Usuario.SincronizarEmpleado(fake, 7, "Ana", "Paz", null));
+        }
+
         // ── ValidarDatosAdministrativos ──────────────────────────────────────────
         [TestMethod]
         public void Validar_DatosCorrectos_NoLanza()

@@ -2190,6 +2190,9 @@ GO
 --   La sección 20d agrega el flujo aprobado: 5=Descartada, 6=Vencida, sugerencia
 --   Descartada (2), y las tablas PromocionHistorial, DictamenContable y
 --   SolicitudBajaPromocion (reemplazan Promocion.Observacion y MotivoBaja).
+--   La sección 20g simplifica el flujo: solo promociones por plan (IdPlan NOT NULL,
+--   sin CategoriaPrenda), estados 0, 1, 2, 4=DadaDeBaja y 6, y la solicitud de baja
+--   pasa a ser Pendiente/Atendida con su respuesta (no cambia el estado).
 --
 -- Idempotente: se puede volver a ejecutar sin duplicar nada.
 -- ============================================================
@@ -2270,10 +2273,12 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Fechas')
     ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Fechas CHECK (FechaFin >= FechaInicio);
 GO
+-- Solo mientras exista la columna: la sección 20g quita las promociones por categoría.
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Destino')
-    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Destino CHECK (
+   AND COL_LENGTH('Promocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Destino CHECK (
         (IdPlan IS NOT NULL AND CategoriaPrenda IS NULL) OR
-        (IdPlan IS NULL AND CategoriaPrenda IS NOT NULL));
+        (IdPlan IS NULL AND CategoriaPrenda IS NOT NULL))');
 GO
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Porcentaje')
     ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Porcentaje CHECK (TipoDescuento <> 0 OR Valor <= 100);
@@ -3187,45 +3192,265 @@ BEGIN
     WHERE Categoria IS NOT NULL AND (DATALENGTH(Categoria) <> DATALENGTH(LTRIM(RTRIM(Categoria))) OR LTRIM(RTRIM(Categoria)) = N'');
     UPDATE p SET p.Categoria = m.Singular FROM Prenda p JOIN @plural m ON m.Plural = p.Categoria;
 END
+-- Promocion/SugerenciaPromocion.CategoriaPrenda solo existen hasta la sección 20g (que las quita):
+-- en una base ya migrada estas sentencias no corren (van con EXEC porque la columna puede no existir).
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Promocion_Categoria')
-BEGIN
-    UPDATE Promocion SET CategoriaPrenda = ISNULL(NULLIF(LTRIM(RTRIM(CategoriaPrenda)), N''), N'Otro')
-    WHERE CategoriaPrenda IS NOT NULL AND (DATALENGTH(CategoriaPrenda) <> DATALENGTH(LTRIM(RTRIM(CategoriaPrenda))) OR LTRIM(RTRIM(CategoriaPrenda)) = N'');
-    UPDATE p SET p.CategoriaPrenda = m.Singular FROM Promocion p JOIN @plural m ON m.Plural = p.CategoriaPrenda;
-END
+   AND COL_LENGTH('Promocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'UPDATE Promocion SET CategoriaPrenda = ISNULL(NULLIF(LTRIM(RTRIM(CategoriaPrenda)), N''''), N''Otro'')
+           WHERE CategoriaPrenda IS NOT NULL AND (DATALENGTH(CategoriaPrenda) <> DATALENGTH(LTRIM(RTRIM(CategoriaPrenda))) OR LTRIM(RTRIM(CategoriaPrenda)) = N'''');
+           UPDATE p SET p.CategoriaPrenda = m.Singular
+           FROM Promocion p JOIN (VALUES (N''Vestidos'', N''Vestido''), (N''Faldas'', N''Falda''), (N''Pantalones'', N''Pantalón''),
+                                         (N''Tops'', N''Top''), (N''Blazers'', N''Saco''), (N''Abrigos'', N''Abrigo''),
+                                         (N''Conjuntos'', N''Conjunto''), (N''Accesorios'', N''Accesorio'')) AS m(Plural, Singular)
+                ON m.Plural = p.CategoriaPrenda;
+           INSERT INTO Categoria (Nombre) SELECT DISTINCT CategoriaPrenda FROM Promocion p
+           WHERE CategoriaPrenda IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Categoria c WHERE c.Nombre = p.CategoriaPrenda);');
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_SugerenciaPromocion_Categoria')
-BEGIN
-    UPDATE SugerenciaPromocion SET CategoriaPrenda = ISNULL(NULLIF(LTRIM(RTRIM(CategoriaPrenda)), N''), N'Otro')
-    WHERE CategoriaPrenda IS NOT NULL AND (DATALENGTH(CategoriaPrenda) <> DATALENGTH(LTRIM(RTRIM(CategoriaPrenda))) OR LTRIM(RTRIM(CategoriaPrenda)) = N'');
-    UPDATE s SET s.CategoriaPrenda = m.Singular FROM SugerenciaPromocion s JOIN @plural m ON m.Plural = s.CategoriaPrenda;
-END
+   AND COL_LENGTH('SugerenciaPromocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'UPDATE SugerenciaPromocion SET CategoriaPrenda = ISNULL(NULLIF(LTRIM(RTRIM(CategoriaPrenda)), N''''), N''Otro'')
+           WHERE CategoriaPrenda IS NOT NULL AND (DATALENGTH(CategoriaPrenda) <> DATALENGTH(LTRIM(RTRIM(CategoriaPrenda))) OR LTRIM(RTRIM(CategoriaPrenda)) = N'''');
+           UPDATE s SET s.CategoriaPrenda = m.Singular
+           FROM SugerenciaPromocion s JOIN (VALUES (N''Vestidos'', N''Vestido''), (N''Faldas'', N''Falda''), (N''Pantalones'', N''Pantalón''),
+                                                   (N''Tops'', N''Top''), (N''Blazers'', N''Saco''), (N''Abrigos'', N''Abrigo''),
+                                                   (N''Conjuntos'', N''Conjunto''), (N''Accesorios'', N''Accesorio'')) AS m(Plural, Singular)
+                ON m.Plural = s.CategoriaPrenda;
+           INSERT INTO Categoria (Nombre) SELECT DISTINCT CategoriaPrenda FROM SugerenciaPromocion s
+           WHERE CategoriaPrenda IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Categoria c WHERE c.Nombre = s.CategoriaPrenda);');
 
--- Textos fuera del catálogo: se agregan como categorías (no se pierde el dato).
+-- Textos de prenda fuera del catálogo: se agregan como categorías (no se pierde el dato).
 INSERT INTO Categoria (Nombre)
-SELECT DISTINCT x.Nombre
-FROM (SELECT Categoria AS Nombre FROM Prenda WHERE Categoria IS NOT NULL
-      UNION SELECT CategoriaPrenda FROM Promocion WHERE CategoriaPrenda IS NOT NULL
-      UNION SELECT CategoriaPrenda FROM SugerenciaPromocion WHERE CategoriaPrenda IS NOT NULL) x
-WHERE NOT EXISTS (SELECT 1 FROM Categoria c WHERE c.Nombre = x.Nombre);
-IF @@ROWCOUNT > 0 PRINT 'Categoria: se agregaron al catálogo categorías que ya usaban las prendas o promociones.';
+SELECT DISTINCT p.Categoria FROM Prenda p
+WHERE p.Categoria IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Categoria c WHERE c.Nombre = p.Categoria);
+IF @@ROWCOUNT > 0 PRINT 'Categoria: se agregaron al catálogo categorías que ya usaban las prendas.';
 GO
 
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Prenda_Categoria')
     ALTER TABLE Prenda ADD CONSTRAINT FK_Prenda_Categoria
         FOREIGN KEY (Categoria) REFERENCES Categoria(Nombre) ON UPDATE CASCADE;
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Promocion_Categoria')
-    ALTER TABLE Promocion ADD CONSTRAINT FK_Promocion_Categoria
-        FOREIGN KEY (CategoriaPrenda) REFERENCES Categoria(Nombre) ON UPDATE CASCADE;
+   AND COL_LENGTH('Promocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'ALTER TABLE Promocion ADD CONSTRAINT FK_Promocion_Categoria
+           FOREIGN KEY (CategoriaPrenda) REFERENCES Categoria(Nombre) ON UPDATE CASCADE');
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_SugerenciaPromocion_Categoria')
-    ALTER TABLE SugerenciaPromocion ADD CONSTRAINT FK_SugerenciaPromocion_Categoria
-        FOREIGN KEY (CategoriaPrenda) REFERENCES Categoria(Nombre) ON UPDATE CASCADE;
+   AND COL_LENGTH('SugerenciaPromocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'ALTER TABLE SugerenciaPromocion ADD CONSTRAINT FK_SugerenciaPromocion_Categoria
+           FOREIGN KEY (CategoriaPrenda) REFERENCES Categoria(Nombre) ON UPDATE CASCADE');
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Promocion_CategoriaPrenda' AND object_id = OBJECT_ID('Promocion'))
-    CREATE NONCLUSTERED INDEX IX_Promocion_CategoriaPrenda ON Promocion(CategoriaPrenda);
+   AND COL_LENGTH('Promocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'CREATE NONCLUSTERED INDEX IX_Promocion_CategoriaPrenda ON Promocion(CategoriaPrenda)');
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_SugerenciaPromocion_CategoriaPrenda' AND object_id = OBJECT_ID('SugerenciaPromocion'))
-    CREATE NONCLUSTERED INDEX IX_SugerenciaPromocion_CategoriaPrenda ON SugerenciaPromocion(CategoriaPrenda);
+   AND COL_LENGTH('SugerenciaPromocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'CREATE NONCLUSTERED INDEX IX_SugerenciaPromocion_CategoriaPrenda ON SugerenciaPromocion(CategoriaPrenda)');
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Prenda_Categoria' AND object_id = OBJECT_ID('Prenda'))
     CREATE NONCLUSTERED INDEX IX_Prenda_Categoria ON Prenda(Categoria);
 PRINT 'Sección 20e: catálogo de categorías de prenda verificado.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 20g. PN03: PROMOCIONES SOLO POR PLAN Y BAJA SIMPLIFICADA
+-- ------------------------------------------------------------
+-- Simplificación del flujo de PN03 (BE.EstadoPromocion, BE.EstadoSolicitudBaja):
+--   · Estados de Promocion: 0=EnRevisionContable, 1=Vigente, 2=RechazadaContabilidad,
+--     4=DadaDeBaja, 6=Vencida. Se quitan 3=BajaSolicitada y 5=Descartada:
+--       - una promoción con la baja solicitada (3) vuelve a Vigente (1) y su solicitud queda
+--         Pendiente: pedir la baja ya no cambia el estado;
+--       - una descartada (5) pasa a Dada de baja (4); el motivo queda en el historial
+--         ("Descartada: ...").
+--   · SolicitudBajaPromocion: Estado 0=Pendiente, 1=Atendida, con la «Respuesta a la
+--     solicitud» (Respuesta, antes MotivoResolucion) y DioDeBaja (1 si Administración estuvo
+--     de acuerdo y dio de baja la promoción). Una aprobada (1) queda Atendida con DioDeBaja = 1;
+--     una rechazada (2), Atendida con DioDeBaja = 0.
+--   · Las promociones por categoría de prenda se discontinúan: se BORRAN con su historial,
+--     dictamen y solicitudes (decisión de la alumna, 11/10: nunca descontaron en un cobro) y las
+--     sugerencias por categoría todavía pendientes se cierran como Descartadas. Se quitan la FK,
+--     el CHECK de destino, los índices y la columna CategoriaPrenda de Promocion y de
+--     SugerenciaPromocion, y Promocion.IdPlan pasa a NOT NULL. SugerenciaPromocion.IdPlan queda
+--     NULL solo para las sugerencias por categoría ya evaluadas (la BLL exige plan).
+--   · Patentes: "Dar de baja" y "Atender solicitudes" usan la patente de escritura de
+--     Administración (mnuPromocionesAdminEditar), la misma que ya usaban "Desactivar",
+--     "Descartar promoción" y "Resolver baja": los roles no cambian.
+--   · Textos de idiomas: se actualizan los de fábrica que cambiaron y se borran las claves que
+--     ya no usa la aplicación (las nuevas las carga la aplicación desde traducciones.tsv).
+-- Idempotente: en una base ya migrada no cambia nada. Va antes de la 21e (datos de demo).
+-- ============================================================
+SET QUOTED_IDENTIFIER ON;
+GO
+
+-- (1) SolicitudBajaPromocion: respuesta y resultado.
+IF COL_LENGTH('SolicitudBajaPromocion', 'Respuesta') IS NULL
+    ALTER TABLE SolicitudBajaPromocion ADD Respuesta NVARCHAR(500) NULL;
+IF COL_LENGTH('SolicitudBajaPromocion', 'DioDeBaja') IS NULL
+    ALTER TABLE SolicitudBajaPromocion ADD DioDeBaja BIT NOT NULL CONSTRAINT DF_SolicitudBaja_DioDeBaja DEFAULT 0;
+GO
+IF COL_LENGTH('SolicitudBajaPromocion', 'MotivoResolucion') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SolicitudBaja_MotivoRechazo')
+        ALTER TABLE SolicitudBajaPromocion DROP CONSTRAINT CHK_SolicitudBaja_MotivoRechazo;
+    IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SolicitudBaja_Estado')
+        ALTER TABLE SolicitudBajaPromocion DROP CONSTRAINT CHK_SolicitudBaja_Estado;
+    -- El SET usa los valores anteriores de todas las columnas (Estado se recalcula al final).
+    EXEC(N'UPDATE SolicitudBajaPromocion SET
+               DioDeBaja = CASE WHEN Estado = 1 THEN 1 ELSE 0 END,
+               Respuesta = CASE WHEN Estado = 0 THEN NULL
+                                ELSE COALESCE(NULLIF(LTRIM(RTRIM(MotivoResolucion)), N''''),
+                                              CASE WHEN Estado = 1 THEN N''Baja aprobada''
+                                                   ELSE N''Baja rechazada: la promoción sigue vigente'' END) END,
+               Estado    = CASE WHEN Estado = 0 THEN 0 ELSE 1 END;');
+    ALTER TABLE SolicitudBajaPromocion DROP COLUMN MotivoResolucion;
+    PRINT 'SolicitudBajaPromocion: resolución migrada a Respuesta/DioDeBaja (Pendiente/Atendida).';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SolicitudBaja_Estado')
+    ALTER TABLE SolicitudBajaPromocion ADD CONSTRAINT CHK_SolicitudBaja_Estado CHECK (Estado IN (0,1));
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SolicitudBaja_Respuesta')
+    ALTER TABLE SolicitudBajaPromocion ADD CONSTRAINT CHK_SolicitudBaja_Respuesta
+        CHECK ((Estado = 0 AND Respuesta IS NULL AND DioDeBaja = 0) OR (Estado = 1 AND Respuesta IS NOT NULL));
+GO
+
+-- (2) Estados 3 y 5 de Promocion y de su historial.
+UPDATE Promocion SET Estado = 1 WHERE Estado = 3;   -- la solicitud sigue Pendiente
+UPDATE Promocion SET Estado = 4 WHERE Estado = 5;
+-- Pedir la baja (Vigente → 3) y rechazarla (3 → Vigente) ya no son transiciones: la solicitud
+-- y su respuesta quedan en SolicitudBajaPromocion.
+DELETE FROM PromocionHistorial WHERE (EstadoAnterior = 1 AND EstadoNuevo = 3) OR (EstadoAnterior = 3 AND EstadoNuevo = 1);
+UPDATE PromocionHistorial SET EstadoAnterior = 1 WHERE EstadoAnterior = 3;
+UPDATE PromocionHistorial SET EstadoNuevo = 1 WHERE EstadoNuevo = 3;
+UPDATE PromocionHistorial SET EstadoNuevo = 4, Observacion = LEFT(N'Descartada: ' + ISNULL(Observacion, N'(sin motivo)'), 500)
+WHERE EstadoNuevo = 5;
+UPDATE PromocionHistorial SET EstadoAnterior = 4 WHERE EstadoAnterior = 5;
+GO
+
+-- (3) Promociones y sugerencias por categoría de prenda.
+IF COL_LENGTH('Promocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'DECLARE @cat TABLE (IdPromocion INT PRIMARY KEY);
+           INSERT INTO @cat SELECT IdPromocion FROM Promocion WHERE IdPlan IS NULL;
+           IF EXISTS (SELECT 1 FROM Contratacion c JOIN @cat x ON x.IdPromocion = c.IdPromocion)
+              OR EXISTS (SELECT 1 FROM HistorialCobro h JOIN @cat x ON x.IdPromocion = h.IdPromocion)
+               THROW 50020, ''Hay cobros registrados con una promoción por categoría: revisarlos antes de discontinuarlas.'', 1;
+           DELETE h FROM PromocionHistorial h     JOIN @cat x ON x.IdPromocion = h.IdPromocion;
+           DELETE d FROM DictamenContable d       JOIN @cat x ON x.IdPromocion = d.IdPromocion;
+           DELETE s FROM SolicitudBajaPromocion s JOIN @cat x ON x.IdPromocion = s.IdPromocion;
+           DELETE p FROM Promocion p              JOIN @cat x ON x.IdPromocion = p.IdPromocion;
+           DECLARE @n INT = @@ROWCOUNT;
+           IF @n > 0 PRINT CONCAT(''Promociones por categoría borradas: '', @n, ''.'');');
+IF COL_LENGTH('SugerenciaPromocion', 'CategoriaPrenda') IS NOT NULL
+    EXEC(N'UPDATE SugerenciaPromocion
+           SET Estado = 2, MotivoDescarte = N''Discontinuada: promociones por categoría'', FechaEvaluacion = GETDATE()
+           WHERE Estado = 0 AND IdPlan IS NULL;');
+GO
+
+-- (4) Sin CategoriaPrenda: FK, CHECK de destino, índices y columna.
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Promocion_Categoria')
+    ALTER TABLE Promocion DROP CONSTRAINT FK_Promocion_Categoria;
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_SugerenciaPromocion_Categoria')
+    ALTER TABLE SugerenciaPromocion DROP CONSTRAINT FK_SugerenciaPromocion_Categoria;
+IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Destino')
+    ALTER TABLE Promocion DROP CONSTRAINT CHK_Promocion_Destino;
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Promocion_CategoriaPrenda' AND object_id = OBJECT_ID('Promocion'))
+    DROP INDEX IX_Promocion_CategoriaPrenda ON Promocion;
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_SugerenciaPromocion_CategoriaPrenda' AND object_id = OBJECT_ID('SugerenciaPromocion'))
+    DROP INDEX IX_SugerenciaPromocion_CategoriaPrenda ON SugerenciaPromocion;
+IF COL_LENGTH('Promocion', 'CategoriaPrenda') IS NOT NULL
+    ALTER TABLE Promocion DROP COLUMN CategoriaPrenda;
+IF COL_LENGTH('SugerenciaPromocion', 'CategoriaPrenda') IS NOT NULL
+    ALTER TABLE SugerenciaPromocion DROP COLUMN CategoriaPrenda;
+GO
+
+-- (5) Promocion.IdPlan obligatorio (con su FK con nombre: la de la sección 18 no lo tenía).
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Promocion') AND name = 'IdPlan' AND is_nullable = 1)
+BEGIN
+    DECLARE @fkPlan SYSNAME = (SELECT TOP 1 fk.name FROM sys.foreign_keys fk
+                               JOIN sys.foreign_key_columns fc ON fc.constraint_object_id = fk.object_id
+                               JOIN sys.columns c ON c.object_id = fc.parent_object_id AND c.column_id = fc.parent_column_id
+                               WHERE fk.parent_object_id = OBJECT_ID('Promocion') AND c.name = 'IdPlan');
+    IF @fkPlan IS NOT NULL EXEC(N'ALTER TABLE Promocion DROP CONSTRAINT [' + @fkPlan + N']');
+    ALTER TABLE Promocion ALTER COLUMN IdPlan INT NOT NULL;
+    PRINT 'Promocion.IdPlan pasa a ser obligatorio.';
+END
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys fk
+               JOIN sys.foreign_key_columns fc ON fc.constraint_object_id = fk.object_id
+               JOIN sys.columns c ON c.object_id = fc.parent_object_id AND c.column_id = fc.parent_column_id
+               WHERE fk.parent_object_id = OBJECT_ID('Promocion') AND c.name = 'IdPlan')
+    ALTER TABLE Promocion ADD CONSTRAINT FK_Promocion_Plan FOREIGN KEY (IdPlan) REFERENCES PlanSuscripcion(IdPlan);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Promocion_IdPlan' AND object_id = OBJECT_ID('Promocion'))
+    CREATE NONCLUSTERED INDEX IX_Promocion_IdPlan ON Promocion(IdPlan);
+GO
+
+-- (6) CHECK de los estados nuevos (Promocion y su historial).
+IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Estado'
+           AND (definition LIKE '%(3)%' OR definition LIKE '%(5)%'))
+    ALTER TABLE Promocion DROP CONSTRAINT CHK_Promocion_Estado;
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Promocion_Estado')
+    ALTER TABLE Promocion ADD CONSTRAINT CHK_Promocion_Estado CHECK (Estado IN (0,1,2,4,6));
+IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_PromocionHistorial_Anterior'
+           AND (definition LIKE '%(3)%' OR definition LIKE '%(5)%'))
+    ALTER TABLE PromocionHistorial DROP CONSTRAINT CHK_PromocionHistorial_Anterior;
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_PromocionHistorial_Anterior')
+    ALTER TABLE PromocionHistorial ADD CONSTRAINT CHK_PromocionHistorial_Anterior CHECK (EstadoAnterior IN (0,1,2,4,6));
+IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_PromocionHistorial_Nuevo'
+           AND (definition LIKE '%(3)%' OR definition LIKE '%(5)%'))
+    ALTER TABLE PromocionHistorial DROP CONSTRAINT CHK_PromocionHistorial_Nuevo;
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_PromocionHistorial_Nuevo')
+    ALTER TABLE PromocionHistorial ADD CONSTRAINT CHK_PromocionHistorial_Nuevo CHECK (EstadoNuevo IN (0,1,2,4,6));
+GO
+
+-- (7) Textos de idiomas: los de fábrica que cambiaron (sin pisar los editados en Idiomas) y las
+--     claves que la aplicación ya no usa.
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @TextosPN03 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                               TextoAnterior NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @TextosPN03 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'msg.sugerencia.sinanalisis', N'Los reportes de rotación y abandono no detectan casos para sugerir por ahora.', N'El reporte de abandono no detecta planes para sugerir por ahora.'),
+    (N'EN', N'msg.sugerencia.sinanalisis', N'The rotation and churn reports do not detect any cases to suggest for now.', N'The churn report does not detect any plans to suggest for now.'),
+    (N'RU', N'msg.sugerencia.sinanalisis', N'Отчёты по обороту и оттоку пока не выявляют случаев для предложения.', N'Отчёт по оттоку пока не выявляет тарифов для предложения.'),
+    (N'PT', N'msg.sugerencia.sinanalisis', N'Os relatórios de rotação e abandono não detectam casos para sugerir por enquanto.', N'O relatório de abandono não detecta planos para sugerir por enquanto.'),
+    (N'ES', N'doc.promo.rechazada', N'RECHAZADA — vuelve a Administración para reformularla o descartarla.', N'RECHAZADA — vuelve a Administración para reformularla o darla de baja.'),
+    (N'EN', N'doc.promo.rechazada', N'REJECTED — it goes back to Administration to be reformulated or discarded.', N'REJECTED — it goes back to Administration to be reformulated or withdrawn.'),
+    (N'RU', N'doc.promo.rechazada', N'ОТКЛОНЕНО — возвращается в администрацию для переформулирования или отклонения.', N'ОТКЛОНЕНО — возвращается в администрацию для переформулирования или снятия.'),
+    (N'PT', N'doc.promo.rechazada', N'REJEITADA — volta à Administração para ser reformulada ou descartada.', N'REJEITADA — volta à Administração para ser reformulada ou baixada.'),
+    (N'ES', N'ayuda.SugerirPromocionForm', N'1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.' + NCHAR(10) + N'2. Si hay oportunidad, usá la idea propuesta (se completa el formulario) o cargala a mano.' + NCHAR(10) + N'3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.', N'1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.' + NCHAR(10) + N'2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.' + NCHAR(10) + N'3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.'),
+    (N'ES', N'ayuda.PromocionesAdministracionForm', N'• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).' + NCHAR(10) + N'• Promociones: crear, reformular las rechazadas por Contabilidad o descartarlas.' + NCHAR(10) + N'• Bajas: resolver las solicitudes de baja de Ventas, o desactivar directamente.' + NCHAR(10) + N'• Imprimir ▾: ficha, dictamen, solicitud y resolución de baja, constancia de descarte.' + NCHAR(10) + N'La fecha de fin no puede haber pasado. Las promociones por categoría son informativas: el descuento se aplica a las promociones por plan.', N'• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).' + NCHAR(10) + N'• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si estás de acuerdo, la promoción se da de baja, si no, sigue vigente.' + NCHAR(10) + N'• Promociones: crear (siempre para un plan), reformular las rechazadas por Contabilidad, o Dar de baja una vigente o una rechazada (con motivo).' + NCHAR(10) + N'• Imprimir ▾: ficha, dictamen, solicitud de baja, respuesta a la solicitud y constancia de baja.' + NCHAR(10) + N'La fecha de fin no puede haber pasado.'),
+    (N'ES', N'ayuda.PromocionesVigentesForm', N'Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la resuelve Administración. Mientras la baja está solicitada, la promoción no se aplica en los cobros.', N'Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la columna Baja solicitada muestra si ya hay una pendiente. Administración atiende la solicitud: mientras tanto la promoción sigue vigente y se aplica en los cobros.'),
+    (N'EN', N'ayuda.SugerirPromocionForm', N'1. Choose the period and Analyse metrics: churn by plan, rotation by category and impact of promotions on the period''s payments.' + NCHAR(10) + N'2. If there is an opportunity, use the proposed idea (the form is filled in) or enter it manually.' + NCHAR(10) + N'3. Send to Administration. Print the suggestion with Print suggestion.', N'1. Choose the period and Analyse metrics: churn by plan, rotation by category and impact of promotions on the period''s payments.' + NCHAR(10) + N'2. If there is a plan opportunity, use the proposed idea (the form is filled in) or enter it manually. Category opportunities are informative only: promotions are always by plan.' + NCHAR(10) + N'3. Send to Administration. Print the suggestion with Print suggestion.'),
+    (N'EN', N'ayuda.PromocionesAdministracionForm', N'• Suggestions: create the promotion from a suggestion or discard it (with a reason).' + NCHAR(10) + N'• Promotions: create, rework those rejected by Accounting or discard them.' + NCHAR(10) + N'• Withdrawals: resolve withdrawal requests from Sales, or deactivate directly.' + NCHAR(10) + N'• Print ▾: sheet, opinion, withdrawal request and resolution, discard certificate.' + NCHAR(10) + N'The end date cannot be in the past. Category promotions are informative: the discount applies to plan promotions.', N'• Suggestions: create the promotion from a suggestion or discard it (with a reason).' + NCHAR(10) + N'• Pending withdrawal requests: Handle each Sales request with a response; if you agree, the promotion is withdrawn, otherwise it remains active.' + NCHAR(10) + N'• Promotions: create (always for a plan), rework those rejected by Accounting, or Withdraw an active or rejected one (with a reason).' + NCHAR(10) + N'• Print ▾: sheet, opinion, withdrawal request, response to the request and withdrawal certificate.' + NCHAR(10) + N'The end date cannot be in the past.'),
+    (N'EN', N'ayuda.PromocionesVigentesForm', N'View of active promotions. Sales can request withdrawal of one (with a reason); Administration resolves it. While withdrawal is requested, the promotion is not applied to payments.', N'View of active promotions. Sales can request withdrawal of one (with a reason); the Withdrawal requested column shows whether one is already pending. Administration handles the request: meanwhile the promotion remains active and is applied to payments.'),
+    (N'RU', N'ayuda.SugerirPromocionForm', N'1. Выберите период и «Анализировать метрики»: отток по тарифам, оборачиваемость по категориям и влияние акций на оплаты за период.' + NCHAR(10) + N'2. Если есть возможность, используйте предложенную идею (форма заполнится) или введите вручную.' + NCHAR(10) + N'3. «Отправить в администрацию». Предложение печатается кнопкой «Печать предложения».', N'1. Выберите период и «Анализировать метрики»: отток по тарифам, оборачиваемость по категориям и влияние акций на оплаты за период.' + NCHAR(10) + N'2. Если есть возможность по тарифу, используйте предложенную идею (форма заполнится) или введите вручную. Возможности по категориям только информационные: акции всегда действуют по тарифам.' + NCHAR(10) + N'3. «Отправить в администрацию». Предложение печатается кнопкой «Печать предложения».'),
+    (N'RU', N'ayuda.PromocionesAdministracionForm', N'• Предложения: создать акцию по предложению или отклонить его (с причиной).' + NCHAR(10) + N'• Акции: создать, переработать отклонённые бухгалтерией или отклонить.' + NCHAR(10) + N'• Отмены: рассмотреть запросы отдела продаж на отмену или деактивировать напрямую.' + NCHAR(10) + N'• Печать ▾: карточка, заключение, запрос и решение об отмене, справка об отклонении.' + NCHAR(10) + N'Дата окончания не может быть в прошлом. Акции по категориям информационные: скидка применяется к акциям по тарифам.', N'• Предложения: создать акцию по предложению или отклонить его (с причиной).' + NCHAR(10) + N'• Ожидающие запросы на отмену: рассмотрите каждый запрос отдела продаж и дайте ответ; если вы согласны, акция снимается, если нет — остаётся действующей.' + NCHAR(10) + N'• Акции: создать (всегда для тарифа), переработать отклонённые бухгалтерией или снять действующую либо отклонённую (с причиной).' + NCHAR(10) + N'• Печать ▾: карточка, заключение, запрос на отмену, ответ на запрос и справка о снятии.' + NCHAR(10) + N'Дата окончания не может быть в прошлом.'),
+    (N'RU', N'ayuda.PromocionesVigentesForm', N'Просмотр действующих акций. Отдел продаж может запросить отмену (с причиной); решение принимает администрация. Пока отмена запрошена, акция не применяется к оплатам.', N'Просмотр действующих акций. Отдел продаж может запросить отмену (с причиной); столбец «Запрошена отмена» показывает, есть ли уже ожидающий запрос. Администрация рассматривает запрос: до этого акция остаётся действующей и применяется к оплатам.'),
+    (N'PT', N'ayuda.SugerirPromocionForm', N'1. Escolha o período e Analisar métricas: abandono por plano, rotação por categoria e impacto das promoções nas cobranças do período.' + NCHAR(10) + N'2. Se houver oportunidade, use a ideia proposta (o formulário é preenchido) ou digite-a.' + NCHAR(10) + N'3. Enviar à Administração. A sugestão é impressa com Imprimir sugestão.', N'1. Escolha o período e Analisar métricas: abandono por plano, rotação por categoria e impacto das promoções nas cobranças do período.' + NCHAR(10) + N'2. Se houver oportunidade por plano, use a ideia proposta (o formulário é preenchido) ou digite-a. As oportunidades por categoria são apenas informativas: as promoções são sempre por plano.' + NCHAR(10) + N'3. Enviar à Administração. A sugestão é impressa com Imprimir sugestão.'),
+    (N'PT', N'ayuda.PromocionesAdministracionForm', N'• Sugestões: criar a promoção a partir de uma sugestão ou descartá-la (com motivo).' + NCHAR(10) + N'• Promoções: criar, reformular as rejeitadas pela Contabilidade ou descartá-las.' + NCHAR(10) + N'• Baixas: resolver os pedidos de baixa de Vendas, ou desativar diretamente.' + NCHAR(10) + N'• Imprimir ▾: ficha, parecer, pedido e resolução de baixa, comprovante de descarte.' + NCHAR(10) + N'A data de fim não pode ter passado. As promoções por categoria são informativas: o desconto se aplica às promoções por plano.', N'• Sugestões: criar a promoção a partir de uma sugestão ou descartá-la (com motivo).' + NCHAR(10) + N'• Pedidos de baixa pendentes: Atender cada pedido de Vendas com uma resposta; se você concordar, a promoção é baixada, se não, continua vigente.' + NCHAR(10) + N'• Promoções: criar (sempre para um plano), reformular as rejeitadas pela Contabilidade, ou Dar baixa em uma vigente ou rejeitada (com motivo).' + NCHAR(10) + N'• Imprimir ▾: ficha, parecer, pedido de baixa, resposta ao pedido e comprovante de baixa.' + NCHAR(10) + N'A data de fim não pode ter passado.'),
+    (N'PT', N'ayuda.PromocionesVigentesForm', N'Consulta das promoções vigentes. Vendas pode pedir a baixa de uma (com motivo); a Administração resolve. Enquanto a baixa estiver pedida, a promoção não se aplica nas cobranças.', N'Consulta das promoções vigentes. Vendas pode pedir a baixa de uma (com motivo); a coluna Baixa solicitada mostra se já há um pedido pendente. A Administração atende o pedido: enquanto isso a promoção continua vigente e se aplica nas cobranças.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @TextosPN03 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('PN03: textos de fábrica actualizados: ', @@ROWCOUNT, ' fila(s).');
+
+    DECLARE @ClavesObsoletasPN03 TABLE (Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT PRIMARY KEY);
+    INSERT INTO @ClavesObsoletasPN03 (Clave) VALUES
+        (N'msg.promo.desactivada'), (N'inputdlg.rechazarbaja.titulo'), (N'inputdlg.rechazarbaja.prompt'), (N'msg.promo.bajarechazada'),
+        (N'err.bll.promocion.destino_invalido'), (N'err.bll.promocion.desactivar_estado'), (N'err.bll.promocion.resolverbaja_estado'), (N'err.bll.promocion.motivorechazobaja_requerido'),
+        (N'err.bll.sugerenciapromocion.destino_invalido'), (N'promocion.categoria'), (N'promocion.btn.desactivar'), (N'promocion.btn.aprobarbaja'),
+        (N'promocion.btn.rechazarbaja'), (N'col.promo.motivobaja'), (N'dlg.promo.descartar.titulo'), (N'dlg.promo.descartar.prompt'),
+        (N'msg.promo.descartada'), (N'dlg.promo.desactivar.titulo'), (N'dlg.promo.desactivar.prompt'), (N'dlg.promo.aprobarbaja.titulo'),
+        (N'dlg.promo.aprobarbaja.prompt'), (N'promo.analisis.calc.informativa'), (N'menu.promo.resolucion'), (N'est.promo.bajasolicitada'),
+        (N'est.promo.desactivada'), (N'est.promo.descartada'), (N'doc.promo.categoria'), (N'doc.promo.notacategoria'),
+        (N'doc.promo.solicitud.nota'), (N'doc.promo.agerencia'), (N'doc.promo.bajaaprobada'), (N'doc.promo.bajarechazada'),
+        (N'doc.promo.motivoresolucion'), (N'doc.promo.resolvio'), (N'doc.promo.resolucion.gerencia'), (N'doc.promo.resolucion.ventas'),
+        (N'doc.promo.descarteprom'), (N'doc.promo.descartadapor'), (N'err.bll.promocion.descartar_estado'), (N'err.bll.promocion.solicitud_inexistente'),
+        (N'err.bll.promocion.motivodescarte_requerido'), (N'err.bll.promocion.motivodesactivar_requerido'), (N'promocion.btn.descartar');
+    DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl JOIN @ClavesObsoletasPN03 o ON o.Clave = c.Clave;
+    DELETE c FROM Control c JOIN @ClavesObsoletasPN03 o ON o.Clave = c.Clave
+    WHERE NOT EXISTS (SELECT 1 FROM Traduccion t WHERE t.IdControl = c.IdControl);
+    DECLARE @obsoletas INT = @@ROWCOUNT;
+    IF @obsoletas > 0 PRINT CONCAT('PN03: claves de idioma obsoletas borradas: ', @obsoletas, '.');
+END
+GO
+PRINT 'Sección 20g: promociones solo por plan y baja simplificada (PN03) verificadas.';
 GO
 
 -- ============================================================
@@ -3450,8 +3675,8 @@ GO
 --     Elena TercerIntentoFallido .. contratación con 2 intentos fallidos → el 3.º la cancela
 --     (DNI 40000099: no existe → rama "¿Registrado? No")
 --   PN03 Promociones (gcomercial, admcomercial, contable, vendedor)
---     2 sugerencias pendientes, y promociones En revisión contable, Vigente, Rechazada por
---     Contabilidad y con Baja solicitada.
+--     2 sugerencias pendientes (por plan), y promociones En revisión contable, Vigente, Rechazada
+--     por Contabilidad y Vigente con una solicitud de baja pendiente.
 -- Se carga UNA sola vez: en una instalación NUEVA, o cuando se pidió restablecer la demo con
 -- BD/Reset_Datos_Demo.sql (marca ParametroSistema 'ResetDatosDemo' = '1'). En ese caso primero se
 -- BORRAN los datos de negocio (clientes, prendas, pedidos, contrataciones, promociones y la
@@ -3682,39 +3907,40 @@ BEGIN
 
     -- ── PN03: sugerencias y promociones en cada estado, con sus objetos e historial ──
     -- Gerencia (gcomercial) sugiere, Administración (admcomercial) crea, Contabilidad (contable)
-    -- dictamina y Ventas (vendedor) pide la baja: quien crea no dictamina.
+    -- dictamina y Ventas (vendedor) pide la baja (la solicitud queda pendiente, la promoción sigue
+    -- Vigente hasta que Administración la atiende): quien crea no dictamina.
     DECLARE @uGer  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'gcomercial');
     DECLARE @uAdm  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'admcomercial');
     DECLARE @uCont INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'contable');
     DECLARE @uVend INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'vendedor');
 
-    INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
-    SELECT v.IdPlan, v.Categoria, v.Motivo, v.Tipo, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
+    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
+    SELECT v.IdPlan, v.Motivo, v.Tipo, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
     FROM (VALUES
-        (@pBasico, NULL,      N'SUGERENCIA PendienteDeEvaluar: el plan Básico tiene la mayor tasa de abandono; un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE()), 0),
-        (NULL,     N'Abrigo', N'SUGERENCIA PendienteDeEvaluar: los abrigos rotan poco fuera de temporada; conviene incentivar su alquiler.',               1,  5000.00, DATEADD(DAY, -2, GETDATE()), 1)
-    ) AS v(IdPlan, Categoria, Motivo, Tipo, Beneficio, FechaAlta, Origen)
-    WHERE (v.IdPlan IS NOT NULL OR v.Categoria IS NOT NULL) AND @uGer IS NOT NULL;
+        (@pBasico,  N'SUGERENCIA PendienteDeEvaluar: el plan Básico tiene la mayor tasa de abandono; un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE()), 0),
+        (@pPremium, N'SUGERENCIA PendienteDeEvaluar: el plan Premium suma pocos clientes nuevos; un monto fijo de captación puede atraerlos.',     1,  5000.00, DATEADD(DAY, -2, GETDATE()), 2)
+    ) AS v(IdPlan, Motivo, Tipo, Beneficio, FechaAlta, Origen)
+    WHERE v.IdPlan IS NOT NULL AND @uGer IS NOT NULL;
 
-    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, CategoriaPrenda, MargenEstimado, ImpactoEconomico, IdUsuarioAlta, FechaAlta)
-    SELECT v.Nombre, v.Descripcion, v.TipoDescuento, v.Valor, v.FechaInicio, v.FechaFin, v.Estado, v.IdPlan, v.Categoria,
+    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, MargenEstimado, ImpactoEconomico, IdUsuarioAlta, FechaAlta)
+    SELECT v.Nombre, v.Descripcion, v.TipoDescuento, v.Valor, v.FechaInicio, v.FechaFin, v.Estado, v.IdPlan,
            v.Margen, v.Impacto, @uAdm, v.FechaAlta
     FROM (VALUES
         (N'PROMO Vigente Estandar -10%',        N'10% en el plan Estándar. Vigente: Ventas puede pedir la baja y se aplica en el cobro.', 0, 10.00,
-         DATEADD(DAY, -10, @hoy), DATEADD(DAY, 50, @hoy), 1, @pEstand, NULL, 8000.00, N'Reducción compensada por mayor retención.', DATEADD(DAY, -12, GETDATE())),
+         DATEADD(DAY, -10, @hoy), DATEADD(DAY, 50, @hoy), 1, @pEstand, 8000.00, N'Reducción compensada por mayor retención.', DATEADD(DAY, -12, GETDATE())),
         (N'PROMO ParaDictaminar Premium -15%',  N'15% en el plan Premium. Espera el dictamen de Contabilidad.',                         0, 15.00,
-         @hoy, DATEADD(DAY, 30, @hoy), 0, @pPremium, NULL, 6000.00, N'Descuento de captación para nuevos clientes.', DATEADD(DAY, -1, GETDATE())),
-        (N'PROMO Rechazada Basico -20%',        N'20% en el plan Básico. Contabilidad la rechazó: Administración la reformula o descarta.', 0, 20.00,
-         @hoy, DATEADD(DAY, 30, @hoy), 2, @pBasico, NULL, 3000.00, N'El margen no cubre la reducción.', DATEADD(DAY, -5, GETDATE())),
-        (N'PROMO BajaSolicitada Abrigos $3000', N'$3000 menos por prenda Abrigo. Ventas pidió la baja: Administración la resuelve.',  1, 3000.00,
-         DATEADD(DAY, -20, @hoy), DATEADD(DAY, 40, @hoy), 3, NULL, N'Abrigo', 4500.00, N'Impacto bajo: categoría de baja rotación.', DATEADD(DAY, -22, GETDATE()))
-    ) AS v(Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, Categoria, Margen, Impacto, FechaAlta)
-    WHERE (v.IdPlan IS NOT NULL OR v.Categoria IS NOT NULL) AND @uAdm IS NOT NULL;
+         @hoy, DATEADD(DAY, 30, @hoy), 0, @pPremium, 6000.00, N'Descuento de captación para nuevos clientes.', DATEADD(DAY, -1, GETDATE())),
+        (N'PROMO Rechazada Basico -20%',        N'20% en el plan Básico. Contabilidad la rechazó: Administración la reformula o la da de baja.', 0, 20.00,
+         @hoy, DATEADD(DAY, 30, @hoy), 2, @pBasico, 3000.00, N'El margen no cubre la reducción.', DATEADD(DAY, -5, GETDATE())),
+        (N'PROMO ConSolicitudBaja Premium $3000', N'$3000 menos en el plan Premium. Vigente con una solicitud de baja de Ventas: Administración la atiende.', 1, 3000.00,
+         DATEADD(DAY, -20, @hoy), DATEADD(DAY, 40, @hoy), 1, @pPremium, 4500.00, N'Impacto bajo: pocos clientes en el plan.', DATEADD(DAY, -22, GETDATE()))
+    ) AS v(Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, Margen, Impacto, FechaAlta)
+    WHERE v.IdPlan IS NOT NULL AND @uAdm IS NOT NULL;
 
     DECLARE @prVig  INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Vigente Estandar -10%');
     DECLARE @prDict INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO ParaDictaminar Premium -15%');
     DECLARE @prRech INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Rechazada Basico -20%');
-    DECLARE @prBaja INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO BajaSolicitada Abrigos $3000');
+    DECLARE @prBaja INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO ConSolicitudBaja Premium $3000');
 
     IF @uCont IS NOT NULL
         INSERT INTO DictamenContable (IdPromocion, IdUsuario, Aprobada, Observacion, Fecha)
@@ -3722,7 +3948,7 @@ BEGIN
         FROM (VALUES
             (@prVig,  1, N'Aprobada: el margen estimado cubre la reducción de ingresos.',      DATEADD(DAY, -11, GETDATE())),
             (@prRech, 0, N'Rechazada: un 20% en el plan más barato no cubre el costo.',         DATEADD(DAY,  -4, GETDATE())),
-            (@prBaja, 1, N'Aprobada: impacto bajo en una categoría de baja rotación.',          DATEADD(DAY, -21, GETDATE()))
+            (@prBaja, 1, N'Aprobada: impacto bajo, el plan tiene pocos clientes.',            DATEADD(DAY, -21, GETDATE()))
         ) AS v(IdPromocion, Aprobada, Observacion, Fecha)
         WHERE v.IdPromocion IS NOT NULL;
 
@@ -3739,8 +3965,7 @@ BEGIN
         (@prRech, NULL, 0, @uAdm,  DATEADD(DAY,  -5, GETDATE()), N'Alta manual'),
         (@prRech, 0,    2, @uCont, DATEADD(DAY,  -4, GETDATE()), N'Rechazada por Contabilidad'),
         (@prBaja, NULL, 0, @uAdm,  DATEADD(DAY, -22, GETDATE()), N'Alta manual'),
-        (@prBaja, 0,    1, @uCont, DATEADD(DAY, -21, GETDATE()), N'Aprobada por Contabilidad'),
-        (@prBaja, 1,    3, @uVend, DATEADD(DAY,  -1, GETDATE()), N'Ventas solicitó la baja')
+        (@prBaja, 0,    1, @uCont, DATEADD(DAY, -21, GETDATE()), N'Aprobada por Contabilidad')
     ) AS v(IdPromocion, Anterior, Nuevo, IdUsuario, Fecha, Observacion)
     WHERE v.IdPromocion IS NOT NULL;
 

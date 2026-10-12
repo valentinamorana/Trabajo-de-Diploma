@@ -51,21 +51,22 @@ module.exports = [
     // promoción y Recomendación de prendas, que está en el menú Analítica de Negocio). El Administrador puede
     // todo y, como en los demás diagramas, no se dibuja.
     // CU03-GER es «extend» de CU01-GER: SugerirPromocionForm deja enviar la sugerencia sin analizar las
-    // métricas (OrigenMetrica.Manual). El orden de casos y enlaces fija la grilla de hacerCasos (motor-ea.js).
+    // métricas (OrigenMetrica.Manual). CU04-ADM Dar de Baja extiende a CU01-ADM (¿Reformular? No) y a CU02-ADM
+    // (Administración está de acuerdo con la solicitud), y Administración también lo usa directamente sobre
+    // una Vigente. El orden de casos y enlaces fija la grilla de hacerCasos (motor-ea.js).
     actores: [{ id: 'G', nombre: 'Gerencia' }, { id: 'K', nombre: 'Contabilidad' }, { id: 'A', nombre: 'Administración' },
               { id: 'V', nombre: 'Vendedor' }, { id: 'GI', nombre: 'Gerencia de Inventario' }],
     casos: [
       { id: 'c1', nombre: 'CU01-GER Sugerir Promoción' }, { id: 'c3', nombre: 'CU01-CONT Analizar Promoción' },
-      { id: 'c2', nombre: 'CU01-ADM Gestionar Promociones' }, { id: 'c10', nombre: 'CU05-ADM Desactivar Promoción' },
-      { id: 'c5', nombre: 'CU02-ADM Resolver Baja de Promoción' }, { id: 'c4', nombre: 'CU07-VEN Solicitar Baja de Promoción' },
+      { id: 'c2', nombre: 'CU01-ADM Gestionar Promociones' }, { id: 'c9', nombre: 'CU04-ADM Dar de Baja Promoción' },
+      { id: 'c5', nombre: 'CU02-ADM Atender Solicitud de Baja' }, { id: 'c4', nombre: 'CU07-VEN Solicitar Baja de Promoción' },
       { id: 'c6', nombre: 'CU02-GER Consultar Analítica de Negocio' },
-      { id: 'c7', nombre: 'CU03-GER Analizar Métricas' }, { id: 'c8', nombre: 'CU03-ADM Descartar Sugerencia' },
-      { id: 'c9', nombre: 'CU04-ADM Descartar Promoción Rechazada' }
+      { id: 'c7', nombre: 'CU03-GER Analizar Métricas' }, { id: 'c8', nombre: 'CU03-ADM Descartar Sugerencia' }
     ],
-    enlaces: [{ actor: 'G', caso: 'c1' }, { actor: 'K', caso: 'c3' }, { actor: 'A', caso: 'c2' }, { actor: 'A', caso: 'c10' },
+    enlaces: [{ actor: 'G', caso: 'c1' }, { actor: 'K', caso: 'c3' }, { actor: 'A', caso: 'c2' }, { actor: 'A', caso: 'c9' },
               { actor: 'A', caso: 'c5' }, { actor: 'V', caso: 'c4' }, { actor: 'G', caso: 'c4' },
               { actor: 'GI', caso: 'c6' }, { actor: 'G', caso: 'c6' }, { actor: 'V', caso: 'c6' }],
-    extiende: [{ de: 'c7', a: 'c1' }, { de: 'c8', a: 'c2' }, { de: 'c9', a: 'c2' }]
+    extiende: [{ de: 'c7', a: 'c1' }, { de: 'c8', a: 'c2' }, { de: 'c9', a: 'c2' }, { de: 'c9', a: 'c5' }]
   },
   {
     tipo: 'casos', id: 'CU_pn04_devolucion', titulo: 'Casos de uso — PN04 Inspección de devolución', sistema: 'WardrobeFlow — PN04 Inspección de devolución',

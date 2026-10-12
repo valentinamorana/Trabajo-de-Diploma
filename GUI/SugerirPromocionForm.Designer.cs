@@ -15,10 +15,8 @@ namespace GUI
 
         private void InitializeComponent()
         {
-            this.rbPlan = new System.Windows.Forms.RadioButton();
-            this.rbCategoria = new System.Windows.Forms.RadioButton();
+            this.lblPlan = new System.Windows.Forms.Label();
             this.cmbPlan = new System.Windows.Forms.ComboBox();
-            this.cmbCategoria = new System.Windows.Forms.ComboBox();
             this.lblTipoDescuento = new System.Windows.Forms.Label();
             this.cmbTipoDescuento = new System.Windows.Forms.ComboBox();
             this.lblBeneficioEstimado = new System.Windows.Forms.Label();
@@ -39,17 +37,14 @@ namespace GUI
             ((System.ComponentModel.ISupportInitialize)(this.dgvSugerencias)).BeginInit();
             this.SuspendLayout();
             //
-            // rbPlan
+            // lblPlan
             //
-            this.rbPlan.Checked = true;
-            this.rbPlan.TabStop = true;
-            this.rbPlan.Location = new System.Drawing.Point(16, 16);
-            this.rbPlan.Name = "rbPlan";
-            this.rbPlan.Size = new System.Drawing.Size(90, 24);
-            this.rbPlan.TabIndex = 0;
-            this.rbPlan.Tag = "promocion.plan";
-            this.rbPlan.Text = "Plan:";
-            this.rbPlan.CheckedChanged += new System.EventHandler(this.RbPlan_CheckedChanged);
+            this.lblPlan.Location = new System.Drawing.Point(16, 18);
+            this.lblPlan.Name = "lblPlan";
+            this.lblPlan.Size = new System.Drawing.Size(90, 24);
+            this.lblPlan.TabIndex = 0;
+            this.lblPlan.Tag = "promocion.plan";
+            this.lblPlan.Text = "Plan:";
             //
             // cmbPlan
             //
@@ -59,27 +54,9 @@ namespace GUI
             this.cmbPlan.Size = new System.Drawing.Size(220, 21);
             this.cmbPlan.TabIndex = 1;
             //
-            // rbCategoria
-            //
-            this.rbCategoria.Location = new System.Drawing.Point(16, 46);
-            this.rbCategoria.Name = "rbCategoria";
-            this.rbCategoria.Size = new System.Drawing.Size(90, 24);
-            this.rbCategoria.TabIndex = 2;
-            this.rbCategoria.Tag = "promocion.categoria";
-            this.rbCategoria.Text = "Categoría:";
-            //
-            // cmbCategoria
-            //
-            this.cmbCategoria.Enabled = false;
-            this.cmbCategoria.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbCategoria.Location = new System.Drawing.Point(112, 48);
-            this.cmbCategoria.Name = "cmbCategoria";
-            this.cmbCategoria.Size = new System.Drawing.Size(220, 20);
-            this.cmbCategoria.TabIndex = 3;
-            //
             // lblTipoDescuento
             //
-            this.lblTipoDescuento.Location = new System.Drawing.Point(16, 80);
+            this.lblTipoDescuento.Location = new System.Drawing.Point(16, 50);
             this.lblTipoDescuento.Name = "lblTipoDescuento";
             this.lblTipoDescuento.Size = new System.Drawing.Size(90, 23);
             this.lblTipoDescuento.TabIndex = 4;
@@ -90,14 +67,14 @@ namespace GUI
             // cmbTipoDescuento
             //
             this.cmbTipoDescuento.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbTipoDescuento.Location = new System.Drawing.Point(112, 78);
+            this.cmbTipoDescuento.Location = new System.Drawing.Point(112, 48);
             this.cmbTipoDescuento.Name = "cmbTipoDescuento";
             this.cmbTipoDescuento.Size = new System.Drawing.Size(160, 21);
             this.cmbTipoDescuento.TabIndex = 5;
             //
             // lblBeneficioEstimado
             //
-            this.lblBeneficioEstimado.Location = new System.Drawing.Point(16, 110);
+            this.lblBeneficioEstimado.Location = new System.Drawing.Point(16, 80);
             this.lblBeneficioEstimado.Name = "lblBeneficioEstimado";
             this.lblBeneficioEstimado.Size = new System.Drawing.Size(90, 23);
             this.lblBeneficioEstimado.TabIndex = 6;
@@ -108,7 +85,7 @@ namespace GUI
             // numBeneficioEstimado
             //
             this.numBeneficioEstimado.DecimalPlaces = 2;
-            this.numBeneficioEstimado.Location = new System.Drawing.Point(112, 108);
+            this.numBeneficioEstimado.Location = new System.Drawing.Point(112, 78);
             this.numBeneficioEstimado.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             this.numBeneficioEstimado.Name = "numBeneficioEstimado";
             this.numBeneficioEstimado.Size = new System.Drawing.Size(120, 20);
@@ -116,7 +93,7 @@ namespace GUI
             //
             // lblMotivo
             //
-            this.lblMotivo.Location = new System.Drawing.Point(16, 140);
+            this.lblMotivo.Location = new System.Drawing.Point(16, 110);
             this.lblMotivo.Name = "lblMotivo";
             this.lblMotivo.Size = new System.Drawing.Size(90, 23);
             this.lblMotivo.TabIndex = 8;
@@ -125,7 +102,7 @@ namespace GUI
             //
             // txtMotivo
             //
-            this.txtMotivo.Location = new System.Drawing.Point(112, 140);
+            this.txtMotivo.Location = new System.Drawing.Point(112, 110);
             this.txtMotivo.Multiline = true;
             this.txtMotivo.Name = "txtMotivo";
             this.txtMotivo.Size = new System.Drawing.Size(320, 60);
@@ -137,7 +114,7 @@ namespace GUI
             this.btnEnviar.FlatAppearance.BorderSize = 0;
             this.btnEnviar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEnviar.ForeColor = System.Drawing.Color.White;
-            this.btnEnviar.Location = new System.Drawing.Point(112, 210);
+            this.btnEnviar.Location = new System.Drawing.Point(112, 180);
             this.btnEnviar.Name = "btnEnviar";
             this.btnEnviar.Size = new System.Drawing.Size(160, 30);
             this.btnEnviar.TabIndex = 10;
@@ -260,10 +237,8 @@ namespace GUI
             this.Controls.Add(this.lblBeneficioEstimado);
             this.Controls.Add(this.cmbTipoDescuento);
             this.Controls.Add(this.lblTipoDescuento);
-            this.Controls.Add(this.cmbCategoria);
-            this.Controls.Add(this.rbCategoria);
             this.Controls.Add(this.cmbPlan);
-            this.Controls.Add(this.rbPlan);
+            this.Controls.Add(this.lblPlan);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -281,10 +256,8 @@ namespace GUI
 
         #endregion
 
-        private System.Windows.Forms.RadioButton rbPlan;
-        private System.Windows.Forms.RadioButton rbCategoria;
+        private System.Windows.Forms.Label lblPlan;
         private System.Windows.Forms.ComboBox cmbPlan;
-        private System.Windows.Forms.ComboBox cmbCategoria;
         private System.Windows.Forms.Label lblTipoDescuento;
         private System.Windows.Forms.ComboBox cmbTipoDescuento;
         private System.Windows.Forms.Label lblBeneficioEstimado;

@@ -9,9 +9,10 @@ namespace GUI
 {
     /// <summary>
     /// Capa de Presentación — PN03, carril Vendedor de la región de vigencia: consulta las
-    /// promociones Vigentes (y las que tienen la baja pedida) y puede solicitar la baja de una
-    /// Vigente con motivo («Solicitud de baja»). Imprime la solicitud y la «Resolución de baja»
-    /// (informe a Ventas cuando Administración la rechaza).
+    /// promociones Vigentes (con la marca de si ya tienen una solicitud de baja pendiente) y puede
+    /// solicitar la baja de una Vigente con motivo («Solicitud de baja»). La promoción sigue
+    /// Vigente hasta que Administración atiende la solicitud. Imprime la solicitud y la
+    /// «Respuesta a la solicitud».
     /// </summary>
     public partial class PromocionesVigentesForm : FormBase, IIdiomaObserver
     {
@@ -78,6 +79,7 @@ namespace GUI
             RH("Valor", "col.promo.valor", "Valor");
             RH("Vigencia", "col.promo.vigencia", "Vigencia");
             RH("Estado", "col.promo.estado", "Estado");
+            RH("Baja solicitada", "col.promo.bajasolicitada", "Baja solicitada");
         }
 
         private void PromocionesVigentesForm_Load(object sender, EventArgs e) => CargarPromociones();
@@ -98,11 +100,15 @@ namespace GUI
                 tabla.Columns.Add("Valor", typeof(decimal));
                 tabla.Columns.Add("Vigencia", typeof(string));
                 tabla.Columns.Add("Estado", typeof(string));
+                tabla.Columns.Add("Baja solicitada", typeof(string));
 
                 foreach (var p in _promociones)
-                    tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan, p.CategoriaPrenda),
+                    tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan),
                         Docs.Tipo(p.TipoDescuento), p.Valor, $"{p.FechaInicio:d} - {p.FechaFin:d}",
-                        Docs.Estado(p.Estado));
+                        Docs.Estado(p.Estado),
+                        p.TieneSolicitudBajaPendiente()
+                            ? Tr("promo.bajapendiente", "Sí, pendiente de Administración")
+                            : Tr("promo.sinbajapendiente", "No"));
 
                 dgvPromociones.DataSource = tabla;
                 if (dgvPromociones.Columns.Contains("ID")) dgvPromociones.Columns["ID"].Width = 44;
@@ -130,11 +136,18 @@ namespace GUI
             btnImprimir.Enabled = p != null;
         }
 
-        // (a) Vendedor solicita la baja (motivo obligatorio) → «Solicitud de baja».
+        // (a) Vendedor solicita la baja (motivo obligatorio) → «Solicitud de baja» pendiente.
         private void BtnSugerirBaja_Click(object sender, EventArgs e)
         {
             var promocion = ObtenerSeleccionada();
             if (promocion == null) return;
+            if (promocion.TieneSolicitudBajaPendiente())
+            {
+                MostrarError(Tr("msg.promo.bajaya_pendiente",
+                    "La promoción '{0}' ya tiene una solicitud de baja pendiente (motivo: {1}).",
+                    new object[] { promocion.Nombre, promocion.MotivoBaja }));
+                return;
+            }
 
             string motivo;
             using (var dlg = new InputDialog(

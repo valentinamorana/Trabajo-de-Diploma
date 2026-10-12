@@ -218,7 +218,7 @@ namespace GUI
                 if (_verPromoAdmin)
                 {
                     try { nSug = new BLL.SugerenciaPromocion().ObtenerPendientes().Count; } catch (Exception ex) { LogWidget("sugerencias pendientes", ex); }
-                    try { nBajas = new BLL.Promocion().ObtenerTodas().Count(p => p.Estado == BE.EstadoPromocion.BajaSolicitada); } catch (Exception ex) { LogWidget("bajas de promociones", ex); }
+                    try { nBajas = new BLL.Promocion().ObtenerSolicitudesBajaPendientes().Count; } catch (Exception ex) { LogWidget("solicitudes de baja pendientes", ex); }
                 }
                 if (_verPromoContable)
                     try { nRev = new BLL.Promocion().ObtenerPendientesRevisionContable().Count; } catch (Exception ex) { LogWidget("promociones en revisión", ex); }

@@ -20,40 +20,50 @@ namespace GUI
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.panelTop = new System.Windows.Forms.Panel();
             this.btnRefrescar = new System.Windows.Forms.Button();
             this.flowSugerencias = new System.Windows.Forms.FlowLayoutPanel();
             this.btnUsarSugerencia = new System.Windows.Forms.Button();
             this.btnDescartarSugerencia = new System.Windows.Forms.Button();
             this.btnImprimirSugerencia = new System.Windows.Forms.Button();
+            this.flowSolicitudes = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnAtenderSolicitud = new System.Windows.Forms.Button();
             this.flowPromociones = new System.Windows.Forms.FlowLayoutPanel();
             this.btnNuevaManual = new System.Windows.Forms.Button();
             this.btnReformular = new System.Windows.Forms.Button();
-            this.btnDescartarPromocion = new System.Windows.Forms.Button();
-            this.btnDesactivar = new System.Windows.Forms.Button();
-            this.btnAprobarBaja = new System.Windows.Forms.Button();
-            this.btnRechazarBaja = new System.Windows.Forms.Button();
+            this.btnDarDeBaja = new System.Windows.Forms.Button();
             this.btnHistorial = new System.Windows.Forms.Button();
             this.btnImprimir = new System.Windows.Forms.Button();
             this.lblSugerenciasTitulo = new System.Windows.Forms.Label();
             this.dgvSugerencias = new System.Windows.Forms.DataGridView();
+            this.lblSolicitudesTitulo = new System.Windows.Forms.Label();
+            this.dgvSolicitudes = new System.Windows.Forms.DataGridView();
             this.lblPromocionesTitulo = new System.Windows.Forms.Label();
             this.lblConteo = new System.Windows.Forms.Label();
             this.dgvPromociones = new System.Windows.Forms.DataGridView();
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
             this.splitPrincipal = new System.Windows.Forms.SplitContainer();
+            this.splitInferior = new System.Windows.Forms.SplitContainer();
             this.tip = new System.Windows.Forms.ToolTip(this.components);
             this.panelTop.SuspendLayout();
             this.flowSugerencias.SuspendLayout();
+            this.flowSolicitudes.SuspendLayout();
             this.flowPromociones.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSugerencias)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSolicitudes)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPromociones)).BeginInit();
             this.panelStatus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitPrincipal)).BeginInit();
             this.splitPrincipal.Panel1.SuspendLayout();
             this.splitPrincipal.Panel2.SuspendLayout();
             this.splitPrincipal.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitInferior)).BeginInit();
+            this.splitInferior.Panel1.SuspendLayout();
+            this.splitInferior.Panel2.SuspendLayout();
+            this.splitInferior.SuspendLayout();
             this.SuspendLayout();
             //
             // panelTop
@@ -132,14 +142,35 @@ namespace GUI
             this.btnImprimirSugerencia.UseVisualStyleBackColor = false;
             this.btnImprimirSugerencia.Click += new System.EventHandler(this.BtnImprimirSugerencia_Click);
             //
+            // flowSolicitudes
+            //
+            this.flowSolicitudes.Controls.Add(this.btnAtenderSolicitud);
+            this.flowSolicitudes.Dock = System.Windows.Forms.DockStyle.Top;
+            this.flowSolicitudes.Location = new System.Drawing.Point(0, 22);
+            this.flowSolicitudes.Name = "flowSolicitudes";
+            this.flowSolicitudes.Padding = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.flowSolicitudes.Size = new System.Drawing.Size(1040, 36);
+            this.flowSolicitudes.TabIndex = 1;
+            //
+            // btnAtenderSolicitud
+            //
+            this.btnAtenderSolicitud.Enabled = false;
+            this.btnAtenderSolicitud.FlatAppearance.BorderSize = 0;
+            this.btnAtenderSolicitud.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAtenderSolicitud.ForeColor = System.Drawing.Color.White;
+            this.btnAtenderSolicitud.Name = "btnAtenderSolicitud";
+            this.btnAtenderSolicitud.Size = new System.Drawing.Size(130, 28);
+            this.btnAtenderSolicitud.TabIndex = 0;
+            this.btnAtenderSolicitud.Tag = "promocion.btn.atender";
+            this.btnAtenderSolicitud.Text = "Atender";
+            this.btnAtenderSolicitud.UseVisualStyleBackColor = false;
+            this.btnAtenderSolicitud.Click += new System.EventHandler(this.BtnAtenderSolicitud_Click);
+            //
             // flowPromociones
             //
             this.flowPromociones.Controls.Add(this.btnNuevaManual);
             this.flowPromociones.Controls.Add(this.btnReformular);
-            this.flowPromociones.Controls.Add(this.btnDescartarPromocion);
-            this.flowPromociones.Controls.Add(this.btnDesactivar);
-            this.flowPromociones.Controls.Add(this.btnAprobarBaja);
-            this.flowPromociones.Controls.Add(this.btnRechazarBaja);
+            this.flowPromociones.Controls.Add(this.btnDarDeBaja);
             this.flowPromociones.Controls.Add(this.btnHistorial);
             this.flowPromociones.Controls.Add(this.btnImprimir);
             this.flowPromociones.Dock = System.Windows.Forms.DockStyle.Top;
@@ -176,61 +207,19 @@ namespace GUI
             this.btnReformular.UseVisualStyleBackColor = false;
             this.btnReformular.Click += new System.EventHandler(this.BtnReformular_Click);
             //
-            // btnDescartarPromocion
+            // btnDarDeBaja
             //
-            this.btnDescartarPromocion.Enabled = false;
-            this.btnDescartarPromocion.FlatAppearance.BorderSize = 0;
-            this.btnDescartarPromocion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDescartarPromocion.ForeColor = System.Drawing.Color.White;
-            this.btnDescartarPromocion.Name = "btnDescartarPromocion";
-            this.btnDescartarPromocion.Size = new System.Drawing.Size(105, 28);
-            this.btnDescartarPromocion.TabIndex = 2;
-            this.btnDescartarPromocion.Tag = "promocion.btn.descartar";
-            this.btnDescartarPromocion.Text = "Descartar";
-            this.btnDescartarPromocion.UseVisualStyleBackColor = false;
-            this.btnDescartarPromocion.Click += new System.EventHandler(this.BtnDescartarPromocion_Click);
-            //
-            // btnDesactivar
-            //
-            this.btnDesactivar.Enabled = false;
-            this.btnDesactivar.FlatAppearance.BorderSize = 0;
-            this.btnDesactivar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDesactivar.ForeColor = System.Drawing.Color.White;
-            this.btnDesactivar.Name = "btnDesactivar";
-            this.btnDesactivar.Size = new System.Drawing.Size(105, 28);
-            this.btnDesactivar.TabIndex = 3;
-            this.btnDesactivar.Tag = "promocion.btn.desactivar";
-            this.btnDesactivar.Text = "Desactivar";
-            this.btnDesactivar.UseVisualStyleBackColor = false;
-            this.btnDesactivar.Click += new System.EventHandler(this.BtnDesactivar_Click);
-            //
-            // btnAprobarBaja
-            //
-            this.btnAprobarBaja.Enabled = false;
-            this.btnAprobarBaja.FlatAppearance.BorderSize = 0;
-            this.btnAprobarBaja.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAprobarBaja.ForeColor = System.Drawing.Color.White;
-            this.btnAprobarBaja.Name = "btnAprobarBaja";
-            this.btnAprobarBaja.Size = new System.Drawing.Size(115, 28);
-            this.btnAprobarBaja.TabIndex = 4;
-            this.btnAprobarBaja.Tag = "promocion.btn.aprobarbaja";
-            this.btnAprobarBaja.Text = "Aprobar Baja";
-            this.btnAprobarBaja.UseVisualStyleBackColor = false;
-            this.btnAprobarBaja.Click += new System.EventHandler(this.BtnAprobarBaja_Click);
-            //
-            // btnRechazarBaja
-            //
-            this.btnRechazarBaja.Enabled = false;
-            this.btnRechazarBaja.FlatAppearance.BorderSize = 0;
-            this.btnRechazarBaja.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRechazarBaja.ForeColor = System.Drawing.Color.White;
-            this.btnRechazarBaja.Name = "btnRechazarBaja";
-            this.btnRechazarBaja.Size = new System.Drawing.Size(115, 28);
-            this.btnRechazarBaja.TabIndex = 5;
-            this.btnRechazarBaja.Tag = "promocion.btn.rechazarbaja";
-            this.btnRechazarBaja.Text = "Rechazar Baja";
-            this.btnRechazarBaja.UseVisualStyleBackColor = false;
-            this.btnRechazarBaja.Click += new System.EventHandler(this.BtnRechazarBaja_Click);
+            this.btnDarDeBaja.Enabled = false;
+            this.btnDarDeBaja.FlatAppearance.BorderSize = 0;
+            this.btnDarDeBaja.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDarDeBaja.ForeColor = System.Drawing.Color.White;
+            this.btnDarDeBaja.Name = "btnDarDeBaja";
+            this.btnDarDeBaja.Size = new System.Drawing.Size(110, 28);
+            this.btnDarDeBaja.TabIndex = 2;
+            this.btnDarDeBaja.Tag = "promocion.btn.dardebaja";
+            this.btnDarDeBaja.Text = "Dar de baja";
+            this.btnDarDeBaja.UseVisualStyleBackColor = false;
+            this.btnDarDeBaja.Click += new System.EventHandler(this.BtnDarDeBaja_Click);
             //
             // btnHistorial
             //
@@ -240,7 +229,7 @@ namespace GUI
             this.btnHistorial.ForeColor = System.Drawing.Color.White;
             this.btnHistorial.Name = "btnHistorial";
             this.btnHistorial.Size = new System.Drawing.Size(95, 28);
-            this.btnHistorial.TabIndex = 6;
+            this.btnHistorial.TabIndex = 3;
             this.btnHistorial.Tag = "promocion.btn.historial";
             this.btnHistorial.Text = "Historial";
             this.btnHistorial.UseVisualStyleBackColor = false;
@@ -254,20 +243,20 @@ namespace GUI
             this.btnImprimir.ForeColor = System.Drawing.Color.White;
             this.btnImprimir.Name = "btnImprimir";
             this.btnImprimir.Size = new System.Drawing.Size(105, 28);
-            this.btnImprimir.TabIndex = 7;
+            this.btnImprimir.TabIndex = 4;
             this.btnImprimir.Tag = "promocion.btn.imprimir";
             this.btnImprimir.Text = "Imprimir ▾";
             this.btnImprimir.UseVisualStyleBackColor = false;
             this.btnImprimir.Click += new System.EventHandler(this.BtnImprimir_Click);
             //
-            // splitPrincipal
+            // splitPrincipal (arriba: sugerencias; abajo: splitInferior)
             //
             this.splitPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitPrincipal.Location = new System.Drawing.Point(0, 40);
             this.splitPrincipal.Name = "splitPrincipal";
             this.splitPrincipal.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            this.splitPrincipal.Size = new System.Drawing.Size(1040, 514);
-            this.splitPrincipal.SplitterDistance = 220;
+            this.splitPrincipal.Size = new System.Drawing.Size(1040, 634);
+            this.splitPrincipal.SplitterDistance = 180;
             this.splitPrincipal.TabIndex = 1;
             //
             // splitPrincipal.Panel1 (Fill primero; los Top se apilan en orden inverso)
@@ -278,10 +267,30 @@ namespace GUI
             //
             // splitPrincipal.Panel2
             //
-            this.splitPrincipal.Panel2.Controls.Add(this.dgvPromociones);
-            this.splitPrincipal.Panel2.Controls.Add(this.lblConteo);
-            this.splitPrincipal.Panel2.Controls.Add(this.flowPromociones);
-            this.splitPrincipal.Panel2.Controls.Add(this.lblPromocionesTitulo);
+            this.splitPrincipal.Panel2.Controls.Add(this.splitInferior);
+            //
+            // splitInferior (arriba: solicitudes de baja pendientes; abajo: promociones)
+            //
+            this.splitInferior.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitInferior.Location = new System.Drawing.Point(0, 0);
+            this.splitInferior.Name = "splitInferior";
+            this.splitInferior.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.splitInferior.Size = new System.Drawing.Size(1040, 450);
+            this.splitInferior.SplitterDistance = 160;
+            this.splitInferior.TabIndex = 0;
+            //
+            // splitInferior.Panel1
+            //
+            this.splitInferior.Panel1.Controls.Add(this.dgvSolicitudes);
+            this.splitInferior.Panel1.Controls.Add(this.flowSolicitudes);
+            this.splitInferior.Panel1.Controls.Add(this.lblSolicitudesTitulo);
+            //
+            // splitInferior.Panel2
+            //
+            this.splitInferior.Panel2.Controls.Add(this.dgvPromociones);
+            this.splitInferior.Panel2.Controls.Add(this.lblConteo);
+            this.splitInferior.Panel2.Controls.Add(this.flowPromociones);
+            this.splitInferior.Panel2.Controls.Add(this.lblPromocionesTitulo);
             //
             // lblSugerenciasTitulo
             //
@@ -314,9 +323,44 @@ namespace GUI
             this.dgvSugerencias.ReadOnly = true;
             this.dgvSugerencias.RowHeadersVisible = false;
             this.dgvSugerencias.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvSugerencias.Size = new System.Drawing.Size(1040, 162);
+            this.dgvSugerencias.Size = new System.Drawing.Size(1040, 122);
             this.dgvSugerencias.TabIndex = 2;
             this.dgvSugerencias.SelectionChanged += new System.EventHandler(this.DgvSugerencias_SelectionChanged);
+            //
+            // lblSolicitudesTitulo
+            //
+            this.lblSolicitudesTitulo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.lblSolicitudesTitulo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblSolicitudesTitulo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblSolicitudesTitulo.Location = new System.Drawing.Point(0, 0);
+            this.lblSolicitudesTitulo.Name = "lblSolicitudesTitulo";
+            this.lblSolicitudesTitulo.Padding = new System.Windows.Forms.Padding(6, 3, 0, 0);
+            this.lblSolicitudesTitulo.Size = new System.Drawing.Size(1040, 22);
+            this.lblSolicitudesTitulo.TabIndex = 0;
+            this.lblSolicitudesTitulo.Tag = "promocion.titulosolicitudesbaja";
+            this.lblSolicitudesTitulo.Text = "Solicitudes de baja pendientes (Ventas)";
+            //
+            // dgvSolicitudes
+            //
+            this.dgvSolicitudes.AllowUserToAddRows = false;
+            this.dgvSolicitudes.AllowUserToDeleteRows = false;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(248)))), ((int)(((byte)(252)))));
+            this.dgvSolicitudes.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle5;
+            this.dgvSolicitudes.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvSolicitudes.BackgroundColor = System.Drawing.Color.White;
+            this.dgvSolicitudes.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(182)))), ((int)(((byte)(193)))));
+            this.dgvSolicitudes.DefaultCellStyle = dataGridViewCellStyle6;
+            this.dgvSolicitudes.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvSolicitudes.Location = new System.Drawing.Point(0, 58);
+            this.dgvSolicitudes.MultiSelect = false;
+            this.dgvSolicitudes.Name = "dgvSolicitudes";
+            this.dgvSolicitudes.ReadOnly = true;
+            this.dgvSolicitudes.RowHeadersVisible = false;
+            this.dgvSolicitudes.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvSolicitudes.Size = new System.Drawing.Size(1040, 102);
+            this.dgvSolicitudes.TabIndex = 2;
+            this.dgvSolicitudes.SelectionChanged += new System.EventHandler(this.DgvSolicitudes_SelectionChanged);
             //
             // lblPromocionesTitulo
             //
@@ -336,7 +380,7 @@ namespace GUI
             this.lblConteo.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lblConteo.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblConteo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblConteo.Location = new System.Drawing.Point(0, 270);
+            this.lblConteo.Location = new System.Drawing.Point(0, 266);
             this.lblConteo.Name = "lblConteo";
             this.lblConteo.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
             this.lblConteo.Size = new System.Drawing.Size(1040, 20);
@@ -360,7 +404,7 @@ namespace GUI
             this.dgvPromociones.ReadOnly = true;
             this.dgvPromociones.RowHeadersVisible = false;
             this.dgvPromociones.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvPromociones.Size = new System.Drawing.Size(1040, 212);
+            this.dgvPromociones.Size = new System.Drawing.Size(1040, 208);
             this.dgvPromociones.TabIndex = 2;
             this.dgvPromociones.SelectionChanged += new System.EventHandler(this.DgvPromociones_SelectionChanged);
             //
@@ -369,7 +413,7 @@ namespace GUI
             this.panelStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(235)))), ((int)(((byte)(245)))));
             this.panelStatus.Controls.Add(this.lblMensaje);
             this.panelStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelStatus.Location = new System.Drawing.Point(0, 554);
+            this.panelStatus.Location = new System.Drawing.Point(0, 674);
             this.panelStatus.Name = "panelStatus";
             this.panelStatus.Padding = new System.Windows.Forms.Padding(8, 4, 8, 4);
             this.panelStatus.Size = new System.Drawing.Size(1040, 26);
@@ -388,21 +432,27 @@ namespace GUI
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1040, 580);
+            this.ClientSize = new System.Drawing.Size(1040, 700);
             this.Controls.Add(this.splitPrincipal);
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.panelTop);
-            this.MinimumSize = new System.Drawing.Size(960, 500);
+            this.MinimumSize = new System.Drawing.Size(960, 600);
             this.Name = "PromocionesAdministracionForm";
             this.Tag = "frm.promoadmin";
             this.Text = "Gestión de Promociones (Administración)";
             this.Load += new System.EventHandler(this.PromocionesAdministracionForm_Load);
             this.panelTop.ResumeLayout(false);
             this.flowSugerencias.ResumeLayout(false);
+            this.flowSolicitudes.ResumeLayout(false);
             this.flowPromociones.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSugerencias)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSolicitudes)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPromociones)).EndInit();
             this.panelStatus.ResumeLayout(false);
+            this.splitInferior.Panel1.ResumeLayout(false);
+            this.splitInferior.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitInferior)).EndInit();
+            this.splitInferior.ResumeLayout(false);
             this.splitPrincipal.Panel1.ResumeLayout(false);
             this.splitPrincipal.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitPrincipal)).EndInit();
@@ -419,19 +469,21 @@ namespace GUI
         private System.Windows.Forms.Button btnUsarSugerencia;
         private System.Windows.Forms.Button btnDescartarSugerencia;
         private System.Windows.Forms.Button btnImprimirSugerencia;
+        private System.Windows.Forms.FlowLayoutPanel flowSolicitudes;
+        private System.Windows.Forms.Button btnAtenderSolicitud;
         private System.Windows.Forms.FlowLayoutPanel flowPromociones;
         private System.Windows.Forms.Button btnNuevaManual;
         private System.Windows.Forms.Button btnReformular;
-        private System.Windows.Forms.Button btnDescartarPromocion;
-        private System.Windows.Forms.Button btnDesactivar;
-        private System.Windows.Forms.Button btnAprobarBaja;
-        private System.Windows.Forms.Button btnRechazarBaja;
+        private System.Windows.Forms.Button btnDarDeBaja;
         private System.Windows.Forms.Button btnHistorial;
         private System.Windows.Forms.Button btnImprimir;
         private System.Windows.Forms.ToolTip tip;
         private System.Windows.Forms.SplitContainer splitPrincipal;
+        private System.Windows.Forms.SplitContainer splitInferior;
         private System.Windows.Forms.Label lblSugerenciasTitulo;
         private System.Windows.Forms.DataGridView dgvSugerencias;
+        private System.Windows.Forms.Label lblSolicitudesTitulo;
+        private System.Windows.Forms.DataGridView dgvSolicitudes;
         private System.Windows.Forms.Label lblPromocionesTitulo;
         private System.Windows.Forms.Label lblConteo;
         private System.Windows.Forms.DataGridView dgvPromociones;

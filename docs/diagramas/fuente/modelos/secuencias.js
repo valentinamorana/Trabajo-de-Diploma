@@ -689,29 +689,30 @@ module.exports = [
         c('AN', 'DP', 'ObtenerTodos()'),
         r('DP', 'AN', 'planes'),
         c('AN', 'AN', 'AbandonoPorPlan(enRiesgo, planes)'),
-        c('AN', 'AN', 'Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría; abandono: clientes en riesgo por plan]'),
+        c('AN', 'AN', 'RotacionPorCategoria(rot)  [categorías con ≥ 2 prendas sin pedidos: oportunidad solo informativa]'),
+        c('AN', 'AN', 'Oportunidades(ab, planes)  [solo por plan: clientes en riesgo de abandono]'),
       c('AN', 'DPR', 'ObtenerImpacto(desde, hasta)'),
       r('DPR', 'AN', 'impacto de cada promoción: cobros, total descontado y total cobrado'),
         nota('bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"', 'AN'),
-        r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades)'),
+        r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto de las promociones, oportunidades por plan)'),
         c('F', 'AN', 'HayOportunidad(reporte)'),
         r('AN', 'F', 'hayOportunidad'),
         c('F', 'F', 'MostrarReporte(reporte, hayOportunidad)'),
         r('F', 'G', '«Reporte de métricas» en pantalla (imprimible) con las oportunidades para elegir'),
         c('G', 'F', 'Pulsa "Usar esta idea" sobre una oportunidad, o Cerrar'),
         c('F', 'AN', 'HayOportunidad(reporte)  [¿Hay oportunidad?]'),
-        { alt: '¿Hay oportunidad? No', pasos: [r('F', 'G', '"Los reportes de rotación y abandono no detectan casos": fin sin promoción')],
+        { alt: '¿Hay oportunidad? No', pasos: [r('F', 'G', '"El reporte de abandono no detecta planes para sugerir": fin sin promoción')],
           sino: [{ etiqueta: 'Sí', pasos: [
-            { opt: 'Eligió una oportunidad', pasos: [r('F', 'G', 'Precarga destino (plan o categoría), tipo, beneficio estimado y motivo; origen = Abandono o Rotación')] }
+            { opt: 'Eligió una oportunidad', pasos: [r('F', 'G', 'Precarga el plan, tipo, beneficio estimado y motivo; origen = Abandono (las de categoría no se pueden usar)')] }
           ] }] }
       ] },
       nota('Sin usar el reporte (o sin elegir una oportunidad) Gerencia carga los datos a mano: el origen queda Manual', 'G', 'F'),
-      c('G', 'F', 'Ajusta destino (plan o categoría), motivo, tipo de descuento y beneficio estimado; pulsa "Enviar Sugerencia"'),
-      c('F', 'B', 'RegistrarSugerencia(modulo, origen, idPlan, categoriaPrenda, motivo, tipoSugerido, beneficioEstimado)  [origen = Abandono, Rotación o Manual]'),
+      c('G', 'F', 'Ajusta el plan, motivo, tipo de descuento y beneficio estimado; pulsa "Enviar Sugerencia"'),
+      c('F', 'B', 'RegistrarSugerencia(modulo, origen, idPlan, motivo, tipoSugerido, beneficioEstimado)  [origen = Abandono o Manual]'),
       nota('PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)', 'B'),
-      { alt: 'Plan y categoría a la vez, o ninguno', pasos: [r('B', 'F', 'AppException(destino_invalido)'), r('F', 'G', 'Informa el motivo y retoma la carga')],
-        sino: [{ etiqueta: 'Destino único', pasos: [
-          { opt: 'Aplica a un plan', pasos: [c('B', 'DP', 'ObtenerPorId(idPlan)'), r('DP', 'B', 'plan (null si no existe)')] },
+      { alt: 'Sin plan', pasos: [r('B', 'F', 'AppException(plan_requerido)'), r('F', 'G', 'Informa el motivo y retoma la carga')],
+        sino: [{ etiqueta: 'Con plan', pasos: [
+          c('B', 'DP', 'ObtenerPorId(idPlan)'), r('DP', 'B', 'plan (null si no existe)'),
           { alt: 'Plan inexistente, sin motivo o beneficio ≤ 0', pasos: [r('B', 'F', 'AppException(plan_inexistente / motivo_requerido / beneficio_invalido)'), r('F', 'G', 'Informa el motivo y retoma la carga')],
             sino: [{ etiqueta: 'Válidos', pasos: [
               c('B', 'D', 'Alta(sugerencia)  [Estado = Pendiente, OrigenMetrica = origen, IdUsuarioAlta = usuario de la sesión]'),
@@ -729,26 +730,26 @@ module.exports = [
     participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('AF', 'AltaPromocionForm'), P('BS', 'BLL.SugerenciaPromocion'), P('B', 'BLL.Promocion'),
                     P('DS', 'DAL.SugerenciaPromocion'), P('D', 'DAL.Promocion')],
     pasos: [
-      nota('Crear desde sugerencia o manual, y reformular · «extend» CU03-ADM (¿Acepta la sugerencia? No) y CU04-ADM (¿Reformular? No)', 'A', 'F'),
+      nota('Crear desde sugerencia o manual, y reformular · «extend» CU03-ADM (¿Acepta la sugerencia? No) y CU04-ADM Dar de Baja (¿Reformular? No)', 'A', 'F'),
       c('A', 'F', 'Abre Gestión de Promociones (o pulsa Actualizar)'),
       c('F', 'BS', 'ObtenerPendientes()'),
       c('BS', 'DS', 'ObtenerPendientes()'),
       r('BS', 'F', 'sugerencias Pendientes de Gerencia'),
-      c('F', 'B', 'ObtenerTodas()  [antes cierra las vencidas, ver CU05-ADM]'),
+      c('F', 'B', 'ObtenerTodas()  [antes cierra las vencidas, ver DSS_PN03_CerrarVencidas]'),
       r('B', 'F', 'promociones'),
       r('F', 'A', 'Sugerencias pendientes y promociones (acciones habilitadas según el estado)'),
       { alt: '¿Acepta la sugerencia? Sí: "Alta desde Sugerencia"', pasos: [
         c('F', 'AF', 'new AltaPromocionForm(sugerenciaOrigen, promocionAReformular)  [sugerencia elegida, null]'),
-        r('AF', 'A', 'Destino de la sugerencia (bloqueado), tipo sugerido y valor inicial precargados'),
+        r('AF', 'A', 'Plan de la sugerencia (bloqueado), tipo sugerido y valor inicial precargados'),
         c('A', 'AF', 'Completa nombre, descripción, tipo, valor, vigencia, margen e impacto; pulsa Registrar'),
         c('AF', 'B', 'CrearDesdeSugerencia(modulo, idSugerencia, nombre, descripcion, tipo, valor, fechaInicio, fechaFin, margenEstimado, impactoEconomico)'),
         nota('PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)', 'B'),
         c('B', 'DS', 'ObtenerPorId(idSugerencia)'),
         r('DS', 'B', 'sugerencia'),
-        { alt: 'No existe, o ya no está Pendiente (PuedeEvaluarse / TransicionValida(Evaluada))', pasos: [r('B', 'AF', 'AppException(sugerencia_inexistente / sugerencia_evaluada)')],
+        { alt: 'No existe, ya no está Pendiente (PuedeEvaluarse / TransicionValida(Evaluada)) o no tiene plan (por categoría, versión anterior)', pasos: [r('B', 'AF', 'AppException(sugerencia_inexistente / sugerencia_evaluada / sugerencia_sin_plan)')],
           sino: [{ etiqueta: 'Pendiente', pasos: [
-            c('B', 'B', 'ValidarPromocion(promocion)  [armada con el destino de la sugerencia, EnRevisionContable]'),
-            { alt: 'Datos inválidos', pasos: [r('B', 'AF', 'AppException(nombre_requerido / destino_invalido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)')],
+            c('B', 'B', 'ValidarPromocion(promocion)  [armada con el plan de la sugerencia, EnRevisionContable]'),
+            { alt: 'Datos inválidos', pasos: [r('B', 'AF', 'AppException(nombre_requerido / plan_requerido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)')],
               sino: [{ etiqueta: 'Válidos', pasos: [
                 c('B', 'DS', 'MarcarEvaluada(idSugerencia, fecha)  [claim: WHERE Estado = Pendiente]'),
                 { alt: 'false: otra sesión ya la evaluó', pasos: [r('DS', 'B', 'false'), r('B', 'AF', 'AppException(sugerencia_evaluada)')],
@@ -764,11 +765,11 @@ module.exports = [
       ], sino: [
         { etiqueta: 'Alta manual: "Alta Manual"', pasos: [
           c('F', 'AF', 'new AltaPromocionForm(sugerenciaOrigen, promocionAReformular)  [null, null]'),
-          c('A', 'AF', 'Elige el destino (plan o categoría), completa las condiciones y pulsa Registrar'),
-          c('AF', 'B', 'CrearManual(modulo, nombre, descripcion, tipo, valor, fechaInicio, fechaFin, idPlan, categoriaPrenda, margenEstimado, impactoEconomico)'),
+          c('A', 'AF', 'Elige el plan, completa las condiciones y pulsa Registrar'),
+          c('AF', 'B', 'CrearManual(modulo, nombre, descripcion, tipo, valor, fechaInicio, fechaFin, idPlan, margenEstimado, impactoEconomico)'),
           nota('PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)', 'B'),
           c('B', 'B', 'ValidarPromocion(promocion)'),
-          { alt: 'Datos inválidos', pasos: [r('B', 'AF', 'AppException(nombre_requerido / destino_invalido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)')],
+          { alt: 'Datos inválidos', pasos: [r('B', 'AF', 'AppException(nombre_requerido / plan_requerido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)')],
             sino: [{ etiqueta: 'Válidos', pasos: [
               c('B', 'B', 'Registrar(modulo, promocion, observacion)  [observacion = "Alta manual"]'),
               c('B', 'D', 'Alta(promocion, historial)  [historial: — → EnRevisionContable]'),
@@ -778,14 +779,14 @@ module.exports = [
         ] },
         { etiqueta: '¿Reformular? Sí: elige una Rechazada por Contabilidad y pulsa "Reformular"', pasos: [
           c('F', 'AF', 'new AltaPromocionForm(sugerenciaOrigen, promocionAReformular)  [null, promoción elegida]'),
-          r('AF', 'A', 'Condiciones actuales y observación de Contabilidad (destino bloqueado)'),
+          r('AF', 'A', 'Condiciones actuales y observación de Contabilidad (plan bloqueado)'),
           c('A', 'AF', 'Corrige las condiciones y pulsa Registrar'),
           c('AF', 'B', 'Reformular(modulo, promocion)'),
           nota('PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)', 'B'),
           { alt: 'No está Rechazada por Contabilidad (PuedeReformularse / TransicionValida(EnRevisionContable))', pasos: [r('B', 'AF', 'AppException(reformular_estado)')],
             sino: [{ etiqueta: 'Rechazada', pasos: [
               c('B', 'B', 'ValidarPromocion(promocion)'),
-              { alt: 'Datos inválidos', pasos: [r('B', 'AF', 'AppException(nombre_requerido / destino_invalido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)')],
+              { alt: 'Datos inválidos', pasos: [r('B', 'AF', 'AppException(nombre_requerido / plan_requerido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)')],
                 sino: [{ etiqueta: 'Válidos', pasos: [
                   c('B', 'D', 'Reformular(promocion, historial)  [claim: WHERE Estado = RechazadaContabilidad; historial: RechazadaContabilidad → EnRevisionContable]'),
                   { alt: 'false: otra sesión ya la cambió', pasos: [r('D', 'B', 'false'), r('B', 'AF', 'AppException(estado_concurrente)')],
@@ -798,6 +799,7 @@ module.exports = [
       r('AF', 'F', 'DialogResult.OK + IdPromocionCreada'),
       r('F', 'A', '"Promoción #id registrada (o reformulada): pendiente de revisión contable"'),
       c('F', 'BS', 'ObtenerPendientes()  [recarga]'),
+      c('F', 'B', 'ObtenerSolicitudesBajaPendientes()  [recarga la bandeja de CU02-ADM]'),
       c('F', 'B', 'ObtenerTodas()  [recarga]')
     ]
   },
@@ -852,15 +854,14 @@ module.exports = [
             c('B', 'DS', 'ObtenerPorId(idSugerencia)  [idSugerencia = promocion.IdSugerenciaOrigen.Value]'),
             r('DS', 'B', 'sugerencia (beneficio estimado y origen)')] },
           c('B', 'B', 'ProyectarCostoDelDescuento(analisis)'),
-          { alt: 'Aplica a un plan (promocion.AplicaAPlan())', pasos: [
-            c('B', 'DP', 'ObtenerPorId(idPlan)  [idPlan = promocion.IdPlan.Value]'),
-            r('DP', 'B', 'plan (precio mensual)'),
-            c('B', 'B', 'PoliticaDescuento.DescuentoDe(promocion, plan.Precio)  [descuento por cliente]'),
-            c('B', 'DC', 'ContarClientesActivosPorPlan(idPlan)'),
-            r('DC', 'B', 'clientes activos del plan'),
-            nota('margen proyectado = beneficio estimado − descuento por cliente × clientes activos; conviene si es > 0', 'B')],
-            sino: [{ etiqueta: 'Por categoría', pasos: [
-              nota('EsInformativa: no descuenta en el cobro, sin costo proyectado ni resultado', 'B')] }] },
+          c('B', 'DP', 'ObtenerPorId(idPlan)  [idPlan = promocion.IdPlan]'),
+          { alt: 'El plan ya no existe', pasos: [r('DP', 'B', 'null'), nota('MargenCalculable = false: sin costo proyectado ni resultado', 'B')],
+            sino: [{ etiqueta: 'Plan existente', pasos: [
+              r('DP', 'B', 'plan (precio mensual)'),
+              c('B', 'B', 'PoliticaDescuento.DescuentoDe(promocion, plan.Precio)  [descuento por cliente]'),
+              c('B', 'DC', 'ContarClientesActivosPorPlan(idPlan)'),
+              r('DC', 'B', 'clientes activos del plan'),
+              nota('margen proyectado = beneficio estimado − descuento por cliente × clientes activos; conviene si es > 0', 'B')] }] },
           r('B', 'F', 'AnalisisImpactoPromocion (beneficio estimado, margen proyectado, superpuestas, UsuarioPuedeDictaminar)'),
           r('F', 'K', 'Análisis de margen e impacto; Aprobar y Rechazar habilitados solo si puede dictaminar')
         ] }] },
@@ -888,26 +889,29 @@ module.exports = [
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU04_ADM_DescartarPromocion', titulo: 'PN03 · CU04-ADM Descartar Promoción Rechazada',
+    tipo: 'secuencia', id: 'DSS_PN03_CU04_ADM_DarDeBaja', titulo: 'PN03 · CU04-ADM Dar de Baja Promoción',
     participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
     pasos: [
-      nota('«extend» de CU01-ADM Gestionar Promociones: ¿Reformular? No', 'A', 'F'),
-      c('A', 'F', 'Elige una promoción Rechazada por Contabilidad y pulsa "Descartar"'),
-      c('A', 'F', 'Ingresa el motivo (InputDialog); si cancela, no se descarta'),
-      c('F', 'B', 'DescartarPromocion(modulo, promocion, motivo)'),
-      nota('PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)', 'B'),
-      { alt: 'No está Rechazada (PuedeDescartarse / TransicionValida(Descartada)) o sin motivo', pasos: [
-        r('B', 'F', 'AppException(descartar_estado / motivodescarte_requerido)'), r('F', 'A', 'Informa el motivo')],
-        sino: [{ etiqueta: 'Rechazada y con motivo', pasos: [
-          c('B', 'B', 'Transicionar(promocion, destino, observacion)  [destino = Descartada, observacion = motivo]'),
-          c('B', 'D', 'CambiarEstado(idPromocion, estadoEsperado, historial)  [claim: estadoEsperado = RechazadaContabilidad; historial: RechazadaContabilidad → Descartada, con el motivo]'),
-          { alt: 'false: otra sesión ya la cambió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)'), r('F', 'A', 'Informa el motivo')],
-            sino: [{ etiqueta: 'true', pasos: [
-              r('D', 'B', 'true'),
-              nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion, …)', 'B'),
-              r('B', 'F', 'ok'),
-              r('F', 'A', '"Promoción descartada"'),
-              c('F', 'B', 'ObtenerTodas()  [recarga]')
+      nota('Una Vigente (directamente o al atender una solicitud, CU02-ADM) o una Rechazada (¿Reformular? No, «extend» de CU01-ADM)', 'A', 'F'),
+      c('A', 'F', 'Elige una promoción Vigente o Rechazada por Contabilidad y pulsa "Dar de baja"'),
+      c('A', 'F', 'Ingresa el motivo (InputDialog); si cancela, no se da de baja'),
+      c('F', 'B', 'DarDeBaja(modulo, promocion, motivo)'),
+      { alt: 'Sin motivo', pasos: [r('B', 'F', 'AppException(motivobaja_admin_requerido)'), r('F', 'A', 'Informa el motivo')],
+        sino: [{ etiqueta: 'Con motivo', pasos: [
+          c('B', 'B', 'DarDeBaja(modulo, promocion, motivo, respuestaSolicitudes)  [respuestaSolicitudes = motivo]'),
+          nota('PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)', 'B'),
+          { alt: 'No está Vigente ni Rechazada (PuedeDarseDeBaja / TransicionValida(DadaDeBaja))', pasos: [
+            r('B', 'F', 'AppException(darbaja_estado)'), r('F', 'A', 'Informa el motivo')],
+            sino: [{ etiqueta: 'Vigente o Rechazada', pasos: [
+              c('B', 'D', 'DarDeBaja(idPromocion, estadoEsperado, historial, respuestaSolicitudes)  [claim: WHERE Estado = estadoEsperado; historial: Vigente o RechazadaContabilidad → DadaDeBaja, con el motivo; las solicitudes Pendientes pasan a Atendida con DioDeBaja = 1]'),
+              { alt: 'false: otra sesión ya la cambió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)'), r('F', 'A', 'Informa el motivo')],
+                sino: [{ etiqueta: 'true', pasos: [
+                  r('D', 'B', 'true'),
+                  nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion, …)', 'B'),
+                  r('B', 'F', 'ok'),
+                  r('F', 'A', '"Promoción dada de baja": fin (la «Constancia de baja» está en Imprimir)'),
+                  c('F', 'B', 'ObtenerSolicitudesBajaPendientes() · ObtenerTodas()  [recarga]')
+                ] }] }
             ] }] }
         ] }] }
     ]
@@ -918,74 +922,67 @@ module.exports = [
     pasos: [
       c('V', 'F', 'Abre Promociones Vigentes (o pulsa Actualizar)'),
       c('F', 'B', 'ObtenerParaVentas()'),
-      c('B', 'B', 'CerrarVencidasSinFallar()  [CerrarVencidas(): las Vigentes con fecha de fin pasada pasan a Vencida, ver CU05-ADM]'),
-      c('B', 'D', 'ObtenerTodas()  [quedan las Vigentes y las de baja solicitada, por fecha de fin]'),
+      c('B', 'B', 'CerrarVencidasSinFallar()  [CerrarVencidas(): las Vigentes con fecha de fin pasada pasan a Vencida]'),
+      c('B', 'D', 'ObtenerTodas()  [quedan las Vigentes, por fecha de fin; MotivoBaja = motivo de la solicitud pendiente, si la hay]'),
       r('B', 'F', 'promociones para Ventas'),
-      c('V', 'F', 'Elige una promoción Vigente y pulsa "Solicitar baja"'),
+      r('F', 'V', 'Vigentes, con la columna "Baja solicitada" (si ya hay una pendiente)'),
+      c('V', 'F', 'Elige una promoción sin solicitud pendiente y pulsa "Solicitar baja"'),
       c('V', 'F', 'Ingresa el motivo (InputDialog); si cancela, no se solicita'),
       c('F', 'B', 'SolicitarBaja(modulo, promocion, motivo)'),
       nota('PermisosAccion.Exigir(PromocionesVigentesEditar, PromocionesVigentes)', 'B'),
-      { alt: 'No está Vigente (PuedeSolicitarseBaja / TransicionValida(BajaSolicitada)) o sin motivo', pasos: [
-        r('B', 'F', 'AppException(sugerirbaja_estado / motivobaja_requerido)'), r('F', 'V', 'Informa el motivo')],
-        sino: [{ etiqueta: 'Vigente y con motivo', pasos: [
-          c('B', 'D', 'SolicitarBaja(solicitud, historial)  [claim: WHERE Estado = Vigente; + SolicitudBajaPromocion Pendiente; historial: Vigente → BajaSolicitada]'),
-          { alt: 'Ya no está Vigente', pasos: [r('D', 'B', '0'), r('B', 'F', 'AppException(estado_concurrente)'), r('F', 'V', 'Informa el motivo')],
+      { alt: 'No está Vigente, ya tiene una solicitud pendiente (TieneSolicitudBajaPendiente) o sin motivo', pasos: [
+        r('B', 'F', 'AppException(sugerirbaja_estado / solicitud_ya_pendiente / motivobaja_requerido)'), r('F', 'V', 'Informa el motivo')],
+        sino: [{ etiqueta: 'Vigente, sin pendiente y con motivo', pasos: [
+          c('B', 'D', 'SolicitarBaja(solicitud)  [INSERT de la SolicitudBajaPromocion Pendiente solo si la promoción sigue Vigente y sin otra pendiente; no cambia el estado ni escribe historial]'),
+          { alt: 'Otra sesión la cambió o ya pidió la baja', pasos: [r('D', 'B', '0'), r('B', 'F', 'AppException(solicitud_concurrente)'), r('F', 'V', 'Informa el motivo')],
             sino: [{ etiqueta: 'Solicitada', pasos: [
               r('D', 'B', 'idSolicitud'),
               nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta, …)', 'B'),
               r('B', 'F', 'idSolicitud'),
-              r('F', 'V', '"Se envió a Administración la sugerencia de baja"'),
+              r('F', 'V', '"Se envió a Administración la sugerencia de baja": la promoción sigue Vigente'),
               c('F', 'B', 'ObtenerParaVentas()  [recarga]')
             ] }] }
         ] }] }
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU02_ADM_ResolverBaja', titulo: 'PN03 · CU02-ADM Resolver Baja de Promoción',
+    tipo: 'secuencia', id: 'DSS_PN03_CU02_ADM_AtenderSolicitudBaja', titulo: 'PN03 · CU02-ADM Atender Solicitud de Baja',
     participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
     pasos: [
-      nota('¿Aprueba la baja? (solicitada por Ventas en CU07-VEN)', 'A', 'F'),
-      c('F', 'B', 'ObtenerTodas()'),
-      r('B', 'F', 'promociones (las de baja solicitada muestran el motivo de Ventas)'),
-      c('A', 'F', 'Elige una promoción con baja solicitada y revisa el motivo de Ventas'),
-      { alt: 'Aprueba la baja: "Aprobar Baja"', pasos: [
-        c('A', 'F', 'Ingresa una observación (opcional)'),
-        c('F', 'B', 'AprobarBaja(modulo, promocion, observacion)'),
-        c('B', 'B', 'ResolverBaja(promocion, resultado, destino, motivoResolucion)  [Aprobada → Desactivada; observación vacía = null]')
-      ], sino: [{ etiqueta: 'Rechaza la baja: "Rechazar Baja"', pasos: [
-        c('A', 'F', 'Ingresa el motivo (obligatorio)'),
-        c('F', 'B', 'RechazarBaja(modulo, promocion, motivo)'),
-        { alt: 'Sin motivo', pasos: [r('B', 'F', 'AppException(motivorechazobaja_requerido)'), r('F', 'A', 'Informa el motivo')],
-          sino: [{ etiqueta: 'Con motivo', pasos: [c('B', 'B', 'ResolverBaja(promocion, resultado, destino, motivoResolucion)  [Rechazada → Vigente; el dictamen contable no se toca]')] }] }
-      ] }] },
-      nota('ResolverBaja: PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)', 'B'),
-      { alt: 'No está con baja solicitada (PuedeResolverseBaja / TransicionValida(destino))', pasos: [r('B', 'F', 'AppException(resolverbaja_estado)'), r('F', 'A', 'Informa el motivo')],
-        sino: [{ etiqueta: 'Baja solicitada', pasos: [
-          c('B', 'D', 'ObtenerSolicitudesBaja(idPromocion)  [la última pendiente]'),
-          { alt: 'Sin solicitud pendiente', pasos: [r('B', 'F', 'AppException(solicitud_inexistente)'), r('F', 'A', 'Informa el motivo')],
-            sino: [{ etiqueta: 'Solicitud pendiente', pasos: [
-              c('B', 'D', 'ResolverBaja(resolucion, historial)  [claim: WHERE Estado = BajaSolicitada; actualiza la solicitud; historial: BajaSolicitada → Desactivada o Vigente]'),
-              { alt: 'false: otra sesión ya la resolvió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)'), r('F', 'A', 'Informa el motivo')],
-                sino: [{ etiqueta: 'true', pasos: [
-                  r('D', 'B', 'true'),
-                  nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion o Venta, …)', 'B'),
-                  r('B', 'F', 'idSolicitud'),
-                  r('F', 'A', '"Promoción dada de baja" o "Se rechazó la baja: sigue vigente"'),
-                  c('F', 'B', 'ObtenerTodas()  [recarga]')
-                ] }] }
-            ] }] }
+      nota('Solicitudes de baja pendientes de Ventas (CU07-VEN) · «extend» CU04-ADM Dar de Baja si Administración está de acuerdo', 'A', 'F'),
+      c('F', 'B', 'ObtenerSolicitudesBajaPendientes()'),
+      c('B', 'D', 'ObtenerSolicitudesBajaPendientes()'),
+      r('B', 'F', 'solicitudes Pendientes (promoción, motivo, quién y cuándo)'),
+      c('A', 'F', 'Elige una solicitud y pulsa "Atender"'),
+      c('A', 'F', '¿Está de acuerdo con dar de baja la promoción? (Sí / No / Cancelar) e ingresa la respuesta para Ventas'),
+      c('F', 'B', 'AtenderSolicitud(modulo, solicitud, respuesta, darDeBaja)'),
+      nota('PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)', 'B'),
+      { alt: 'Ya no está Pendiente o sin respuesta', pasos: [r('B', 'F', 'AppException(solicitud_atendida / respuesta_requerida)'), r('F', 'A', 'Informa el motivo')],
+        sino: [{ etiqueta: 'Pendiente y con respuesta', pasos: [
+          { alt: 'De acuerdo (darDeBaja = true)', pasos: [
+            c('B', 'D', 'ObtenerPorId(idPromocion)'),
+            r('D', 'B', 'promocion'),
+            c('B', 'B', 'DarDeBaja(modulo, promocion, motivo, respuestaSolicitudes)  [ver CU04-ADM: la solicitud queda Atendida con DioDeBaja = 1 y la respuesta]')
+          ], sino: [{ etiqueta: 'No está de acuerdo (darDeBaja = false)', pasos: [
+            c('B', 'D', 'AtenderSolicitud(atendida)  [claim: WHERE Estado = Pendiente; Atendida con la respuesta, DioDeBaja = 0; la promoción sigue Vigente y su dictamen no se toca]'),
+            { alt: 'false: otra sesión ya la atendió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(solicitud_atendida)'), r('F', 'A', 'Informa el motivo')],
+              sino: [{ etiqueta: 'true', pasos: [r('D', 'B', 'true'), nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta, …)', 'B')] }] }
+          ] }] },
+          r('B', 'F', 'ok'),
+          r('F', 'A', '"Solicitud atendida: la promoción quedó dada de baja" o "… sigue vigente" (la «Respuesta a la solicitud» está en Imprimir)'),
+          c('F', 'B', 'ObtenerSolicitudesBajaPendientes() · ObtenerTodas()  [recarga]')
         ] }] }
     ]
   },
   {
-    tipo: 'secuencia', id: 'DSS_PN03_CU05_ADM_DesactivarYVencer', titulo: 'PN03 · CU05-ADM Desactivar Promoción',
+    tipo: 'secuencia', id: 'DSS_PN03_CerrarVencidas', titulo: 'PN03 · Cierre de promociones por fecha de fin',
     participantes: [A('A', 'Administración'), P('F', 'PromocionesAdministracionForm'), P('B', 'BLL.Promocion'), P('D', 'DAL.Promocion')],
     pasos: [
-      nota('Desactivación directa (b) y cierre por fecha de fin (c): al consultar, las Vigentes vencidas pasan a Vencida', 'A', 'F'),
+      nota('(c) llega la fecha de fin: al consultar las promociones, las Vigentes vencidas pasan a Vencida (lo firma el sistema, sin usuario)', 'A', 'F'),
       c('A', 'F', 'Abre Gestión de Promociones (o pulsa Actualizar)'),
       c('F', 'B', 'ObtenerTodas()'),
       c('B', 'B', 'CerrarVencidasSinFallar()  [si falla, lo deja en el Trace y la consulta sigue]'),
-      c('B', 'B', 'CerrarVencidas()  [(c) llega la fecha de fin]'),
+      c('B', 'B', 'CerrarVencidas()'),
       c('B', 'D', 'ObtenerTodas()  [se quedan las que cumplen DebeVencer(hoy): Vigente con FechaFin pasada]'),
       { loop: 'Por cada promoción que debe vencer', pasos: [
         c('B', 'D', 'CambiarEstado(idPromocion, estadoEsperado, historial)  [claim: estadoEsperado = Vigente; historial: Vigente → Vencida]'),
@@ -993,24 +990,7 @@ module.exports = [
       ] },
       nota('bitacoraNeg.Registrar(Cancelacion, …) por cada vencida · bitacora.Registrar("Promociones", …) si cerró alguna', 'B'),
       c('B', 'D', 'ObtenerTodas()'),
-      r('B', 'F', 'promociones (las vencidas ya no aplican en el cobro)'),
-      c('A', 'F', '(b) Elige una Vigente, pulsa "Desactivar" e ingresa el motivo'),
-      c('F', 'B', 'Desactivar(modulo, promocion, motivo)'),
-      nota('PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)', 'B'),
-      { alt: 'No está Vigente (PuedeDesactivarseDirecto / TransicionValida(Desactivada)) o sin motivo', pasos: [
-        r('B', 'F', 'AppException(desactivar_estado / motivodesactivar_requerido)'), r('F', 'A', 'Informa el motivo')],
-        sino: [{ etiqueta: 'Vigente y con motivo', pasos: [
-          c('B', 'B', 'Transicionar(promocion, destino, observacion)  [destino = Desactivada, observacion = motivo]'),
-          c('B', 'D', 'CambiarEstado(idPromocion, estadoEsperado, historial)  [claim: estadoEsperado = Vigente; historial: Vigente → Desactivada, con el motivo]'),
-          { alt: 'false: otra sesión ya la cambió', pasos: [r('D', 'B', 'false'), r('B', 'F', 'AppException(estado_concurrente)'), r('F', 'A', 'Informa el motivo')],
-            sino: [{ etiqueta: 'true', pasos: [
-              r('D', 'B', 'true'),
-              nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Cancelacion, …)', 'B'),
-              r('B', 'F', 'ok'),
-              r('F', 'A', '"Promoción desactivada": fin'),
-              c('F', 'B', 'ObtenerTodas()  [recarga]')
-            ] }] }
-        ] }] }
+      r('B', 'F', 'promociones (las vencidas ya no aplican en el cobro)')
     ]
   },
 
@@ -1169,19 +1149,20 @@ module.exports = [
       c('AN', 'DP', 'ObtenerTodos()'),
       r('DP', 'AN', 'planes'),
       c('AN', 'AN', 'AbandonoPorPlan(enRiesgo, planes)'),
-      c('AN', 'AN', 'Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría; abandono: clientes en riesgo por plan]'),
+      c('AN', 'AN', 'RotacionPorCategoria(rot)  [categorías con ≥ 2 prendas sin pedidos: oportunidad solo informativa]'),
+      c('AN', 'AN', 'Oportunidades(ab, planes)  [solo por plan: clientes en riesgo de abandono]'),
       c('AN', 'DPR', 'ObtenerImpacto(desde, hasta)'),
       r('DPR', 'AN', 'impacto de cada promoción: cobros, total descontado y total cobrado'),
       nota('bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"', 'AN'),
-      r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades)'),
+      r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto de las promociones, oportunidades por plan)'),
       c('F', 'AN', 'HayOportunidad(reporte)'),
       r('AN', 'F', 'hayOportunidad'),
       c('F', 'F', 'MostrarReporte(reporte, hayOportunidad)'),
-      { alt: '¿Hay oportunidad? No', pasos: [r('F', 'G', '«Reporte de métricas»: "Los reportes de rotación y abandono no detectan casos" (fin sin promoción)')],
+      { alt: '¿Hay oportunidad? No', pasos: [r('F', 'G', '«Reporte de métricas»: "El reporte de abandono no detecta planes para sugerir" (fin sin promoción)')],
         sino: [{ etiqueta: 'Sí', pasos: [
           r('F', 'G', '«Reporte de métricas» (imprimible) con las oportunidades para elegir'),
           c('G', 'F', 'Pulsa "Usar esta idea" sobre una oportunidad'),
-          r('F', 'G', 'Precarga destino (plan o categoría), tipo, beneficio estimado y motivo; origen = Abandono o Rotación'),
+          r('F', 'G', 'Precarga el plan, tipo, beneficio estimado y motivo; origen = Abandono (las de categoría no se pueden usar)'),
           nota('Sigue CU01-GER Sugerir Promoción: RegistrarSugerencia con el origen de la métrica', 'G', 'F')
         ] }] }
     ]

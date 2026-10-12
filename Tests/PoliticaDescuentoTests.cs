@@ -11,7 +11,7 @@ namespace Tests
     [TestClass]
     public class PoliticaDescuentoTests
     {
-        private static BE.Promocion Promo(BE.TipoDescuento tipo, decimal valor, int? idPlan = 1,
+        private static BE.Promocion Promo(BE.TipoDescuento tipo, decimal valor, int idPlan = 1,
                                           BE.EstadoPromocion estado = BE.EstadoPromocion.Vigente,
                                           int diasInicio = -5, int diasFin = 30) => new BE.Promocion
         {
@@ -123,10 +123,8 @@ namespace Tests
                 Promo(BE.TipoDescuento.Porcentaje, 50, diasInicio: 5, diasFin: 20),                          // aún no empieza
                 Promo(BE.TipoDescuento.Porcentaje, 50, diasInicio: -30, diasFin: -1),                        // ya terminó
                 Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.EnRevisionContable),       // sin aprobar
-                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.BajaSolicitada),
-                Promo(BE.TipoDescuento.Porcentaje, 50, idPlan: null)                                         // de categoría (informativa)
+                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.RechazadaContabilidad)     // rechazada
             };
-            promos[5].CategoriaPrenda = "Abrigo";
 
             var r = BLL.Politicas.PoliticaDescuento.Resolver(10000m, 1, promos, 0m);
 
@@ -169,13 +167,24 @@ namespace Tests
         }
 
         [TestMethod]
-        public void Resolver_DescartadaODesactivada_NoSeAplican()
+        public void Resolver_VigenteConSolicitudDeBajaPendiente_SigueAplicandose()
+        {
+            var promo = Promo(BE.TipoDescuento.Porcentaje, 10);
+            promo.MotivoBaja = "Ventas pidió la baja";   // la solicitud no cambia el estado
+
+            var r = BLL.Politicas.PoliticaDescuento.Resolver(10000m, 1, new[] { promo }, 0m);
+
+            Assert.AreSame(promo, r.Promocion);
+            Assert.AreEqual(1000m, r.Descuento);
+        }
+
+        [TestMethod]
+        public void Resolver_DadaDeBajaOVencida_NoSeAplican()
         {
             var promos = new[]
             {
-                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.Descartada),
-                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.Desactivada),
-                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.BajaSolicitada)
+                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.DadaDeBaja),
+                Promo(BE.TipoDescuento.Porcentaje, 50, estado: BE.EstadoPromocion.Vencida)
             };
             Assert.AreEqual(0m, BLL.Politicas.PoliticaDescuento.Resolver(10000m, 1, promos, 0m).Descuento);
         }

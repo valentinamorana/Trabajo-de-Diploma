@@ -123,22 +123,22 @@ namespace GUI.Ayuda
 
             ["SugerirPromocionForm"] = new TemaAyuda("Sugerir promoción (Gerencia, PN03)",
                 "1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.\n" +
-                "2. Si hay oportunidad, usá la idea propuesta (se completa el formulario) o cargala a mano.\n" +
+                "2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.\n" +
                 "3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia."),
 
             ["PromocionesAdministracionForm"] = new TemaAyuda("Promociones (Administración Comercial, PN03)",
                 "• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).\n" +
-                "• Promociones: crear, reformular las rechazadas por Contabilidad o descartarlas.\n" +
-                "• Bajas: resolver las solicitudes de baja de Ventas, o desactivar directamente.\n" +
-                "• Imprimir ▾: ficha, dictamen, solicitud y resolución de baja, constancia de descarte.\n" +
-                "La fecha de fin no puede haber pasado. Las promociones por categoría son informativas: el descuento se aplica a las promociones por plan."),
+                "• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si estás de acuerdo, la promoción se da de baja, si no, sigue vigente.\n" +
+                "• Promociones: crear (siempre para un plan), reformular las rechazadas por Contabilidad, o Dar de baja una vigente o una rechazada (con motivo).\n" +
+                "• Imprimir ▾: ficha, dictamen, solicitud de baja, respuesta a la solicitud y constancia de baja.\n" +
+                "La fecha de fin no puede haber pasado."),
 
             ["PromocionesContabilidadForm"] = new TemaAyuda("Revisión contable (Contabilidad, PN03)",
                 "Promociones en revisión contable: Aprobar (queda vigente) o Rechazar (vuelve a Administración), con observación.\n" +
                 "No se puede aprobar una promoción cuya fecha de fin ya pasó. Quien creó la promoción no puede dictaminarla (salvo el Administrador)."),
 
             ["PromocionesVigentesForm"] = new TemaAyuda("Promociones vigentes",
-                "Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la resuelve Administración. Mientras la baja está solicitada, la promoción no se aplica en los cobros."),
+                "Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la columna Baja solicitada muestra si ya hay una pendiente. Administración atiende la solicitud: mientras tanto la promoción sigue vigente y se aplica en los cobros."),
 
             ["Usuarios"] = new TemaAyuda("Usuarios",
                 "Alta, edición, desbloqueo y archivo de usuarios (solo Administrador).\n" +

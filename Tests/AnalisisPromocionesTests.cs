@@ -38,22 +38,31 @@ namespace Tests
             => Assert.AreEqual(0, Crear(new RotacionFake(), new AbandonoFake()).Detectar().Count);
 
         [TestMethod]
-        public void Detectar_VariasPrendasSinPedidosEnUnaCategoria_ProponePromocionPorCategoria()
+        public void Detectar_VariasPrendasSinPedidosEnUnaCategoria_NoEsBaseDeUnaSugerencia()
+        {
+            var rot = new RotacionFake();
+            rot.Resultado.Add(BajaDemanda("Abrigo Camel", "Abrigo"));
+            rot.Resultado.Add(BajaDemanda("Tapado Rojo", "abrigo"));
+
+            // Las promociones son siempre por plan: una categoría no genera una oportunidad para sugerir.
+            Assert.AreEqual(0, Crear(rot, new AbandonoFake()).Detectar().Count);
+        }
+
+        [TestMethod]
+        public void RotacionPorCategoria_VariasPrendasSinPedidos_QuedaEnElReporteComoOportunidadInformativa()
         {
             var rot = new RotacionFake();
             rot.Resultado.Add(BajaDemanda("Abrigo Camel", "Abrigo"));
             rot.Resultado.Add(BajaDemanda("Tapado Rojo", "abrigo"));
             rot.Resultado.Add(BajaDemanda("Camisa Blanca", "Camisa"));   // una sola: no alcanza el mínimo
 
-            var r = Crear(rot, new AbandonoFake()).Detectar();
+            var r = Crear(rot, new AbandonoFake()).RotacionPorCategoria();
 
-            Assert.AreEqual(1, r.Count);
-            Assert.AreEqual(BE.OrigenMetrica.Rotacion, r[0].Origen);
-            Assert.AreEqual("Abrigo", r[0].CategoriaPrenda);
-            Assert.IsNull(r[0].IdPlan);
-            Assert.AreEqual(BE.TipoDescuento.MontoFijo, r[0].TipoSugerido);
-            Assert.AreEqual(2 * BLL.AnalisisPromociones.ValorReferenciaPorPrenda, r[0].BeneficioEstimado);
-            StringAssert.Contains(r[0].Motivo, "2 prenda(s)");
+            var abrigo = r.Find(m => m.Categoria == "Abrigo");
+            Assert.IsTrue(abrigo.EsOportunidad);
+            Assert.AreEqual(2, abrigo.PrendasBajaDemanda);
+            StringAssert.Contains(abrigo.EjemplosBajaDemanda, "Abrigo Camel");
+            Assert.IsFalse(r.Find(m => m.Categoria == "Camisa").EsOportunidad);
         }
 
         [TestMethod]
@@ -64,6 +73,7 @@ namespace Tests
             rot.Resultado.Add(new BE.RotacionPrenda { NombrePrenda = "B", Categoria = "Vestido", Clave = "rotacion.motivo.altademanda" });
 
             Assert.AreEqual(0, Crear(rot, new AbandonoFake()).Detectar().Count);
+            Assert.IsFalse(Crear(rot, new AbandonoFake()).RotacionPorCategoria()[0].EsOportunidad);
         }
 
         [TestMethod]
@@ -96,17 +106,16 @@ namespace Tests
         [TestMethod]
         public void Detectar_OrdenaPorBeneficioEstimadoDescendente()
         {
-            var rot = new RotacionFake();
-            rot.Resultado.Add(BajaDemanda("A", "Abrigo"));
-            rot.Resultado.Add(BajaDemanda("B", "Abrigo"));
             var ab = new AbandonoFake();
             ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 1, NombrePlan = "Básico" });
-            var plan = new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Precio = 8000m, Estado = true };
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 2, NombrePlan = "Premium" });
+            var basico = new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Precio = 8000m, Estado = true };
+            var premium = new BE.PlanSuscripcion { IdPlan = 3, Nombre = "Premium", Precio = 25000m, Estado = true };
 
-            var r = Crear(rot, ab, plan).Detectar();
+            var r = Crear(new RotacionFake(), ab, basico, premium).Detectar();
 
-            Assert.AreEqual(BE.OrigenMetrica.Abandono, r[0].Origen);   // 8000 > 2000
-            Assert.AreEqual(BE.OrigenMetrica.Rotacion, r[1].Origen);
+            Assert.AreEqual(3, r[0].IdPlan);   // 25000 > 8000
+            Assert.AreEqual(1, r[1].IdPlan);
         }
 
         // ── Analizar métricas («Reporte de métricas») → ¿Hay oportunidad? ────
@@ -151,8 +160,10 @@ namespace Tests
             Assert.AreEqual(8000m, reporte.AbandonoPorPlan[0].IngresoMensualEnRiesgo);
             var abrigo = reporte.RotacionPorCategoria.Find(m => m.Categoria == "Abrigo");
             Assert.AreEqual(2, abrigo.PrendasBajaDemanda);
+            Assert.IsTrue(abrigo.EsOportunidad, "La categoría queda en el reporte como oportunidad informativa.");
             Assert.AreEqual(1, reporte.RotacionPorCategoria.Find(m => m.Categoria == "Vestido").PrendasAltaDemanda);
-            Assert.AreEqual(2, reporte.Oportunidades.Count);
+            Assert.AreEqual(1, reporte.Oportunidades.Count, "Solo la oportunidad por plan sirve de base para una sugerencia.");
+            Assert.AreEqual(1, reporte.Oportunidades[0].IdPlan);
         }
 
         [TestMethod]
@@ -203,12 +214,14 @@ namespace Tests
         }
 
         [TestMethod]
-        public void Detectar_PrendaSinPedidosEnElPeriodo_CuentaComoBajaDemanda()
+        public void RotacionPorCategoria_PrendaSinPedidosEnElPeriodo_CuentaComoBajaDemanda()
         {
             var rot = new RotacionFake();
             rot.Resultado.Add(new BE.RotacionPrenda { NombrePrenda = "A", Categoria = "Saco", Clave = "rotacion.motivo.bajademanda.periodo" });
             rot.Resultado.Add(new BE.RotacionPrenda { NombrePrenda = "B", Categoria = "Saco", Clave = "rotacion.motivo.bajademanda.periodo" });
-            Assert.AreEqual(1, Crear(rot, new AbandonoFake()).Detectar().Count);
+            var saco = Crear(rot, new AbandonoFake()).RotacionPorCategoria()[0];
+            Assert.AreEqual(2, saco.PrendasBajaDemanda);
+            Assert.IsTrue(saco.EsOportunidad);
         }
     }
 }

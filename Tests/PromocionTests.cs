@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Seguridad;
 using Tests.Fakes;
@@ -7,9 +8,10 @@ namespace Tests
 {
     /// <summary>
     /// BLL.Promocion — PN03 (Métricas, promociones y toma de decisiones). Una prueba por rama del
-    /// diagrama de actividad aprobado: crear (desde sugerencia o manual) → Validar → ¿Aprueba?
-    /// (quien crea no dictamina) → ¿Reformular? / Descartar; región de vigencia: solicitud de baja
-    /// → ¿Aprueba la baja?, desactivación directa y vencimiento. Cada transición escribe historial.
+    /// diagrama de actividad aprobado: crear (siempre para un plan, desde sugerencia o manual) →
+    /// Validar → ¿Aprueba? (quien crea no dictamina) → ¿Reformular? / Dar de baja; región de
+    /// vigencia: solicitud de baja (no cambia el estado) → Atender (de acuerdo: Dar de baja), baja
+    /// directa y vencimiento. Cada transición escribe historial.
     /// </summary>
     [TestClass]
     public class PromocionTests
@@ -62,7 +64,7 @@ namespace Tests
             var bll = ctx.Crear();
 
             int id = bll.CrearManual("Test", "Promo Verano", "desc", BE.TipoDescuento.Porcentaje, 10m,
-                DateTime.Today, DateTime.Today.AddDays(30), 1, null, 500m, "impacto");
+                DateTime.Today, DateTime.Today.AddDays(30), 1, 500m, "impacto");
 
             Assert.AreEqual(77, id);
             Assert.AreEqual(1, ctx.DalPromocion.AltaVeces);
@@ -72,24 +74,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void CrearManual_DatosValidosConCategoria_Persiste()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalPromocion.AltaIdGenerado = 78;
-            var bll = ctx.Crear();
-
-            int id = bll.CrearManual("Test", "Promo Camisas", "desc", BE.TipoDescuento.MontoFijo, 20m,
-                DateTime.Today, DateTime.Today.AddDays(10), null, "Camisas", 100m, "impacto");
-
-            Assert.AreEqual(78, id);
-            Assert.AreEqual(1, ctx.DalPromocion.AltaVeces);
-            Assert.IsNull(ctx.DalPromocion.UltimoAlta.IdPlan);
-            Assert.AreEqual("Camisas", ctx.DalPromocion.UltimoAlta.CategoriaPrenda);
-        }
-
-        [TestMethod]
-        public void CrearManual_AmbosDestinos_LanzaDestinoInvalido()
+        public void CrearManual_SinPlan_LanzaPlanRequerido()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
@@ -98,32 +83,12 @@ namespace Tests
             try
             {
                 bll.CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 10m,
-                    DateTime.Today, DateTime.Today.AddDays(30), 1, "Camisas", 500m, "impacto");
-                Assert.Fail("Debía rechazar una promoción con plan y categoría a la vez.");
+                    DateTime.Today, DateTime.Today.AddDays(30), 0, 500m, "impacto");
+                Assert.Fail("Debía rechazar una promoción sin plan: el plan es obligatorio.");
             }
             catch (BE.AppException ex)
             {
-                Assert.AreEqual("err.bll.promocion.destino_invalido", ex.Clave);
-            }
-            Assert.AreEqual(0, ctx.DalPromocion.AltaVeces);
-        }
-
-        [TestMethod]
-        public void CrearManual_NingunDestino_LanzaDestinoInvalido()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
-
-            try
-            {
-                bll.CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 10m,
-                    DateTime.Today, DateTime.Today.AddDays(30), null, null, 500m, "impacto");
-                Assert.Fail("Debía rechazar una promoción sin plan ni categoría.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.promocion.destino_invalido", ex.Clave);
+                Assert.AreEqual("err.bll.promocion.plan_requerido", ex.Clave);
             }
             Assert.AreEqual(0, ctx.DalPromocion.AltaVeces);
         }
@@ -138,7 +103,7 @@ namespace Tests
             try
             {
                 bll.CrearManual("Test", "   ", "desc", BE.TipoDescuento.Porcentaje, 10m,
-                    DateTime.Today, DateTime.Today.AddDays(30), 1, null, 500m, "impacto");
+                    DateTime.Today, DateTime.Today.AddDays(30), 1, 500m, "impacto");
                 Assert.Fail("Debía exigir el nombre de la promoción.");
             }
             catch (BE.AppException ex)
@@ -159,7 +124,7 @@ namespace Tests
             try
             {
                 bll.CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 10m,
-                    DateTime.Today, DateTime.Today.AddDays(30), 1, null, 500m, "impacto");
+                    DateTime.Today, DateTime.Today.AddDays(30), 1, 500m, "impacto");
                 Assert.Fail("Debía rechazar un plan inexistente.");
             }
             catch (BE.AppException ex)
@@ -179,7 +144,7 @@ namespace Tests
             try
             {
                 bll.CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 0m,
-                    DateTime.Today, DateTime.Today.AddDays(30), 1, null, 500m, "impacto");
+                    DateTime.Today, DateTime.Today.AddDays(30), 1, 500m, "impacto");
                 Assert.Fail("Debía exigir un valor mayor a cero.");
             }
             catch (BE.AppException ex)
@@ -199,7 +164,7 @@ namespace Tests
             try
             {
                 bll.CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 150m,
-                    DateTime.Today, DateTime.Today.AddDays(30), 1, null, 500m, "impacto");
+                    DateTime.Today, DateTime.Today.AddDays(30), 1, 500m, "impacto");
                 Assert.Fail("Debía rechazar un porcentaje mayor a 100.");
             }
             catch (BE.AppException ex)
@@ -219,7 +184,7 @@ namespace Tests
             try
             {
                 bll.CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 10m,
-                    DateTime.Today, DateTime.Today.AddDays(-1), 1, null, 500m, "impacto");
+                    DateTime.Today, DateTime.Today.AddDays(-1), 1, 500m, "impacto");
                 Assert.Fail("Debía rechazar una fecha de fin anterior a la de inicio.");
             }
             catch (BE.AppException ex)
@@ -240,7 +205,6 @@ namespace Tests
             {
                 IdSugerencia = 5,
                 IdPlan = 1,
-                CategoriaPrenda = null,
                 Motivo = "Motivo de la sugerencia",
                 TipoDescuentoSugerido = BE.TipoDescuento.Porcentaje,
                 BeneficioEstimado = 100m,
@@ -255,7 +219,6 @@ namespace Tests
             Assert.AreEqual(88, id);
             Assert.AreEqual(1, ctx.DalPromocion.AltaVeces);
             Assert.AreEqual(1, ctx.DalPromocion.UltimoAlta.IdPlan);
-            Assert.IsNull(ctx.DalPromocion.UltimoAlta.CategoriaPrenda);
             Assert.AreEqual(5, ctx.DalPromocion.UltimoAlta.IdSugerenciaOrigen);
             Assert.AreEqual(1, ctx.DalSugerencia.MarcarEvaluadaVeces);
             Assert.AreEqual(5, ctx.DalSugerencia.UltimoIdEvaluado);
@@ -320,7 +283,7 @@ namespace Tests
             LoginComoAdministrador();
             var ctx = new Contexto();
             EsperarError(() => ctx.Crear().CrearManual("Test", "Promo Test", "desc", BE.TipoDescuento.Porcentaje, 10m,
-                    DateTime.Today.AddDays(-10), DateTime.Today.AddDays(-1), 1, null, 500m, "impacto"),
+                    DateTime.Today.AddDays(-10), DateTime.Today.AddDays(-1), 1, 500m, "impacto"),
                 "err.bll.promocion.fecha_fin_pasada");
             Assert.AreEqual(0, ctx.DalPromocion.AltaVeces);
         }
@@ -386,7 +349,7 @@ namespace Tests
             ctx.DalPromocion.AltaIdGenerado = 7;
 
             ctx.Crear().CrearManual("Test", "Promo", "d", BE.TipoDescuento.MontoFijo, 100m,
-                DateTime.Today, DateTime.Today.AddDays(10), 1, null, 0m, "i");
+                DateTime.Today, DateTime.Today.AddDays(10), 1, 0m, "i");
 
             Assert.AreEqual(1, ctx.DalPromocion.UltimoAlta.IdUsuarioAlta);
             Assert.AreEqual(1, ctx.DalPromocion.Historial.Count);
@@ -410,6 +373,23 @@ namespace Tests
 
             AssertHistorial(ctx.DalPromocion.Historial[0], null, BE.EstadoPromocion.EnRevisionContable, 1);
             StringAssert.Contains(ctx.DalPromocion.Historial[0].Observacion, "#9");
+        }
+
+        [TestMethod]
+        public void CrearDesdeSugerencia_SugerenciaPorCategoriaDeLaVersionAnterior_LanzaSugerenciaSinPlan()
+        {
+            LoginComo(1);
+            var ctx = new Contexto();
+            ctx.DalSugerencia.SugerenciaPorId = new BE.SugerenciaPromocion
+            {
+                IdSugerencia = 9, IdPlan = null, Motivo = "m", BeneficioEstimado = 10m, Estado = BE.EstadoSugerencia.Pendiente
+            };
+
+            EsperarError(() => ctx.Crear().CrearDesdeSugerencia("Test", 9, "Promo", "d",
+                    BE.TipoDescuento.MontoFijo, 10m, DateTime.Today, DateTime.Today.AddDays(10), 0m, "i"),
+                "err.bll.promocion.sugerencia_sin_plan");
+            Assert.AreEqual(0, ctx.DalSugerencia.MarcarEvaluadaVeces);
+            Assert.AreEqual(0, ctx.DalPromocion.AltaVeces);
         }
 
         [TestMethod]
@@ -505,7 +485,6 @@ namespace Tests
 
             var a = ctx.Crear().AnalizarMargenEImpacto(42);
 
-            Assert.IsFalse(a.EsInformativa);
             Assert.IsTrue(a.MargenCalculable);
             Assert.AreEqual(1000m, a.PrecioPlan);
             Assert.AreEqual(100m, a.DescuentoPorCliente, "10 % de 1000.");
@@ -588,27 +567,6 @@ namespace Tests
         }
 
         [TestMethod]
-        public void AnalizarMargenEImpacto_PorCategoria_EsInformativaSinCostoNiResultado()
-        {
-            LoginComo(2);
-            var ctx = new Contexto { ClientesActivos = 50 };
-            var promo = Promo(BE.EstadoPromocion.EnRevisionContable);
-            promo.IdPlan = null;
-            promo.CategoriaPrenda = "Abrigos";
-            promo.MargenEstimado = 4000m;
-            ctx.DalPromocion.Todas.Add(promo);
-
-            var a = ctx.Crear().AnalizarMargenEImpacto(42);
-
-            Assert.IsTrue(a.EsInformativa);
-            Assert.IsFalse(a.MargenCalculable);
-            Assert.IsNull(a.PrecioPlan);
-            Assert.AreEqual(0m, a.CostoDescuentoProyectado);
-            Assert.IsNull(a.Conviene, "Una promoción por categoría no descuenta en el cobro: no hay resultado.");
-            Assert.AreEqual(0, ctx.ConteosDeClientes, "No consulta clientes de un plan que no existe en la promoción.");
-        }
-
-        [TestMethod]
         public void AnalizarMargenEImpacto_PlanInexistente_NoCalculaElMargen()
         {
             LoginComo(2);
@@ -618,9 +576,9 @@ namespace Tests
 
             var a = ctx.Crear().AnalizarMargenEImpacto(42);
 
-            Assert.IsFalse(a.EsInformativa);
             Assert.IsFalse(a.MargenCalculable);
             Assert.IsNull(a.Conviene);
+            Assert.AreEqual(0, ctx.ConteosDeClientes, "Sin plan no consulta los clientes.");
             Assert.AreEqual(0m, a.CostoDescuentoProyectado);
         }
 
@@ -709,49 +667,99 @@ namespace Tests
                 "err.bll.promocion.observacion_requerida");
         }
 
-        // ¿Reformular? No → Descartar promoción
+        // ¿Reformular? No → Dar de baja (también una Vigente, directamente o al atender una solicitud)
 
         [TestMethod]
-        public void DescartarPromocion_TrasElRechazo_PasaADescartadaConElMotivoEnElHistorial()
+        public void DarDeBaja_Rechazada_PasaADadaDeBajaConElMotivoEnElHistorial()
         {
             LoginComo(1);
             var ctx = new Contexto();
             var promo = Promo(BE.EstadoPromocion.RechazadaContabilidad);
             ctx.DalPromocion.Todas.Add(promo);
 
-            ctx.Crear().DescartarPromocion("Test", promo, "No conviene al negocio");
+            ctx.Crear().DarDeBaja("Test", promo, " No conviene al negocio ");
 
-            Assert.AreEqual(BE.EstadoPromocion.Descartada, promo.Estado);
-            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.RechazadaContabilidad, BE.EstadoPromocion.Descartada, 1);
-            Assert.AreEqual("No conviene al negocio", ctx.Crear().ObtenerDescarte(42).Observacion);
+            Assert.AreEqual(BE.EstadoPromocion.DadaDeBaja, promo.Estado);
+            Assert.AreEqual(BE.EstadoPromocion.RechazadaContabilidad, ctx.DalPromocion.UltimoEstadoEsperado);
+            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.RechazadaContabilidad, BE.EstadoPromocion.DadaDeBaja, 1);
+            Assert.AreEqual("No conviene al negocio", ctx.Crear().ObtenerBaja(42).Observacion, "Base de la «Constancia de baja».");
+            Assert.IsTrue(promo.EsFinal());
         }
 
         [TestMethod]
-        public void DescartarPromocion_SinMotivo_LanzaMotivoDescarteRequerido()
+        public void DarDeBaja_Vigente_PasaADadaDeBajaConElMotivoEnElHistorial()
         {
             LoginComo(1);
             var ctx = new Contexto();
-            EsperarError(() => ctx.Crear().DescartarPromocion("Test", Promo(BE.EstadoPromocion.RechazadaContabilidad), " "),
-                "err.bll.promocion.motivodescarte_requerido");
+            var promo = Promo(BE.EstadoPromocion.Vigente);
+
+            ctx.Crear().DarDeBaja("Test", promo, "Cambio de estrategia comercial");
+
+            Assert.AreEqual(BE.EstadoPromocion.DadaDeBaja, promo.Estado);
+            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.Vigente, BE.EstadoPromocion.DadaDeBaja, 1);
+            Assert.AreEqual("Cambio de estrategia comercial", ctx.DalPromocion.Historial[0].Observacion);
+        }
+
+        [TestMethod]
+        public void DarDeBaja_VigenteConSolicitudPendiente_LaCierraComoAtendidaConLaBaja()
+        {
+            LoginComo(1);
+            var ctx = ConSolicitudPendiente(out var promo);
+
+            ctx.Crear().DarDeBaja("Test", promo, "Fin de campaña");
+
+            var s = ctx.DalPromocion.Solicitudes[0];
+            Assert.AreEqual(BE.EstadoSolicitudBaja.Atendida, s.Estado);
+            Assert.IsTrue(s.DioDeBaja);
+            Assert.AreEqual("Fin de campaña", s.Respuesta);
+            Assert.AreEqual(1, s.IdUsuarioResuelve);
+            Assert.IsFalse(promo.TieneSolicitudBajaPendiente());
+            Assert.AreEqual(0, ctx.Crear().ObtenerSolicitudesBajaPendientes().Count);
+        }
+
+        [TestMethod]
+        public void DarDeBaja_SinMotivo_LanzaMotivoBajaRequerido()
+        {
+            LoginComo(1);
+            var ctx = new Contexto();
+            EsperarError(() => ctx.Crear().DarDeBaja("Test", Promo(BE.EstadoPromocion.Vigente), " "),
+                "err.bll.promocion.motivobaja_admin_requerido");
             Assert.AreEqual(0, ctx.DalPromocion.Transiciones);
         }
 
         [TestMethod]
-        public void DescartarPromocion_NoRechazada_LanzaDescartarEstado()
+        public void DarDeBaja_EnRevisionOFinal_LanzaDarBajaEstado()
         {
             LoginComo(1);
-            EsperarError(() => new Contexto().Crear().DescartarPromocion("Test", Promo(BE.EstadoPromocion.EnRevisionContable), "m"),
-                "err.bll.promocion.descartar_estado");
+            foreach (var estado in new[] { BE.EstadoPromocion.EnRevisionContable, BE.EstadoPromocion.DadaDeBaja, BE.EstadoPromocion.Vencida })
+            {
+                var ctx = new Contexto();
+                EsperarError(() => ctx.Crear().DarDeBaja("Test", Promo(estado), "m"), "err.bll.promocion.darbaja_estado");
+                Assert.AreEqual(0, ctx.DalPromocion.Transiciones, estado.ToString());
+            }
         }
 
-        // (a) Vendedor solicita la baja → ¿Aprueba la baja?
+        [TestMethod]
+        public void DarDeBaja_OtraSesionCambioElEstado_LanzaEstadoConcurrente()
+        {
+            LoginComo(1);
+            var ctx = new Contexto();
+            ctx.DalPromocion.ClaimResultado = false;
+            var promo = Promo(BE.EstadoPromocion.Vigente);
+
+            EsperarError(() => ctx.Crear().DarDeBaja("Test", promo, "m"), "err.bll.promocion.estado_concurrente");
+            Assert.AreEqual(BE.EstadoPromocion.Vigente, promo.Estado);
+        }
+
+        // (a) Vendedor solicita la baja: solo registra la solicitud, la promoción sigue Vigente
 
         [TestMethod]
-        public void SolicitarBaja_Vigente_GuardaLaSolicitudYPasaABajaSolicitada()
+        public void SolicitarBaja_Vigente_GuardaLaSolicitudPendienteSinCambiarElEstado()
         {
             LoginComo(3);
             var ctx = new Contexto();
             var promo = Promo(BE.EstadoPromocion.Vigente);
+            ctx.DalPromocion.Todas.Add(promo);
 
             int idSolicitud = ctx.Crear().SolicitarBaja("Test", promo, " Se superpone con otra ");
 
@@ -760,8 +768,11 @@ namespace Tests
             Assert.AreEqual("Se superpone con otra", s.Motivo);
             Assert.AreEqual(3, s.IdUsuarioSolicita);
             Assert.AreEqual(BE.EstadoSolicitudBaja.Pendiente, s.Estado);
-            Assert.AreEqual(BE.EstadoPromocion.BajaSolicitada, promo.Estado);
-            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.Vigente, BE.EstadoPromocion.BajaSolicitada, 3);
+            Assert.AreEqual(BE.EstadoPromocion.Vigente, promo.Estado, "Pedir la baja no cambia el estado.");
+            Assert.AreEqual(0, ctx.DalPromocion.Transiciones, "No es una transición: no escribe historial.");
+            Assert.IsTrue(promo.TieneSolicitudBajaPendiente());
+            Assert.IsFalse(promo.PuedeSolicitarseBaja(), "Una sola solicitud pendiente por promoción.");
+            Assert.IsTrue(promo.EstaVigente(), "Sigue aplicándose en el cobro.");
         }
 
         [TestMethod]
@@ -782,12 +793,32 @@ namespace Tests
             Assert.AreEqual(0, ctx.DalPromocion.Solicitudes.Count);
         }
 
+        [TestMethod]
+        public void SolicitarBaja_YaTieneUnaPendiente_LanzaSolicitudYaPendiente()
+        {
+            LoginComo(3);
+            var ctx = ConSolicitudPendiente(out var promo);
+            EsperarError(() => ctx.Crear().SolicitarBaja("Test", promo, "otra vez"), "err.bll.promocion.solicitud_ya_pendiente");
+            Assert.AreEqual(1, ctx.DalPromocion.Solicitudes.Count);
+        }
+
+        [TestMethod]
+        public void SolicitarBaja_OtraSesionYaLaPidio_LanzaSolicitudConcurrente()
+        {
+            LoginComo(3);
+            var ctx = ConSolicitudPendiente(out var promo);
+            promo.MotivoBaja = null;   // la lista de esta sesión se cargó antes de la otra solicitud
+            EsperarError(() => ctx.Crear().SolicitarBaja("Test", promo, "m"), "err.bll.promocion.solicitud_concurrente");
+            Assert.AreEqual(1, ctx.DalPromocion.Solicitudes.Count);
+        }
+
         // Contexto con una promoción Vigente aprobada por Contabilidad y una solicitud de baja pendiente.
-        private static Contexto ConBajaSolicitada(out BE.Promocion promo)
+        private static Contexto ConSolicitudPendiente(out BE.Promocion promo)
         {
             var ctx = new Contexto();
-            promo = Promo(BE.EstadoPromocion.BajaSolicitada);
+            promo = Promo(BE.EstadoPromocion.Vigente);
             promo.Observacion = "Aprobada: margen suficiente";
+            promo.MotivoBaja = "Erosiona el margen";
             ctx.DalPromocion.Todas.Add(promo);
             ctx.DalPromocion.Dictamenes.Add(new BE.DictamenContable
             {
@@ -801,99 +832,88 @@ namespace Tests
             return ctx;
         }
 
+        // Administración atiende la solicitud («Respuesta a la solicitud»)
+
         [TestMethod]
-        public void AprobarBaja_GuardaLaResolucionAprobadaYDesactiva()
+        public void AtenderSolicitud_DeAcuerdo_DaDeBajaLaPromocionYQuedaAtendidaConLaRespuesta()
         {
             LoginComo(1);
-            var ctx = ConBajaSolicitada(out var promo);
+            var ctx = ConSolicitudPendiente(out var promo);
+            var solicitud = ctx.Crear().ObtenerSolicitudesBajaPendientes()[0];
 
-            int idSolicitud = ctx.Crear().AprobarBaja("Test", promo, "");
+            ctx.Crear().AtenderSolicitud("Test", solicitud, " Tiene razón, la damos de baja ", darDeBaja: true);
 
-            Assert.AreEqual(1, idSolicitud);
-            var r = ctx.DalPromocion.UltimaResolucion;
-            Assert.AreEqual(BE.EstadoSolicitudBaja.Aprobada, r.Estado);
-            Assert.AreEqual(1, r.IdUsuarioResuelve);
-            Assert.IsNotNull(r.FechaResolucion);
-            Assert.AreEqual("Erosiona el margen", r.Motivo, "La solicitud conserva el motivo del Vendedor.");
-            Assert.AreEqual(BE.EstadoPromocion.Desactivada, promo.Estado);
-            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.BajaSolicitada, BE.EstadoPromocion.Desactivada, 1);
+            Assert.AreEqual(BE.EstadoPromocion.DadaDeBaja, promo.Estado);
+            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.Vigente, BE.EstadoPromocion.DadaDeBaja, 1);
+            StringAssert.Contains(ctx.DalPromocion.Historial[0].Observacion, "#1");
+            var s = ctx.DalPromocion.Solicitudes[0];
+            Assert.AreEqual(BE.EstadoSolicitudBaja.Atendida, s.Estado);
+            Assert.IsTrue(s.DioDeBaja);
+            Assert.AreEqual("Tiene razón, la damos de baja", s.Respuesta);
+            Assert.AreEqual("Erosiona el margen", s.Motivo, "La solicitud conserva el motivo del Vendedor.");
+            Assert.AreEqual(1, s.IdUsuarioResuelve);
+            Assert.IsNotNull(s.FechaResolucion);
         }
 
         [TestMethod]
-        public void RechazarBaja_GuardaLaResolucionConMotivoYVuelveAVigente_SinPerderLaObservacionContable()
+        public void AtenderSolicitud_NoDeAcuerdo_QuedaAtendidaYLaPromocionSigueVigente_SinTocarElDictamen()
         {
             LoginComo(1);
-            var ctx = ConBajaSolicitada(out var promo);
+            var ctx = ConSolicitudPendiente(out var promo);
+            var solicitud = ctx.DalPromocion.Solicitudes[0];
 
-            ctx.Crear().RechazarBaja("Test", promo, "La promoción sigue rindiendo");
+            ctx.Crear().AtenderSolicitud("Test", solicitud, "La promoción sigue rindiendo", darDeBaja: false);
 
-            var r = ctx.DalPromocion.UltimaResolucion;
-            Assert.AreEqual(BE.EstadoSolicitudBaja.Rechazada, r.Estado);
-            Assert.AreEqual("La promoción sigue rindiendo", r.MotivoResolucion);
             Assert.AreEqual(BE.EstadoPromocion.Vigente, promo.Estado);
+            Assert.AreEqual(0, ctx.DalPromocion.Transiciones, "La promoción no cambió de estado.");
+            var r = ctx.DalPromocion.UltimaResolucion;
+            Assert.AreEqual(BE.EstadoSolicitudBaja.Atendida, r.Estado);
+            Assert.IsFalse(r.DioDeBaja);
+            Assert.AreEqual("La promoción sigue rindiendo", r.Respuesta);
+            Assert.AreEqual(1, r.IdUsuarioResuelve);
+            Assert.IsTrue(solicitud.FueAtendida());
+            Assert.AreEqual(0, ctx.Crear().ObtenerSolicitudesBajaPendientes().Count);
             Assert.AreEqual(1, ctx.DalPromocion.Dictamenes.Count, "El dictamen contable no se toca.");
             Assert.AreEqual("Aprobada: margen suficiente", ctx.DalPromocion.Dictamenes[0].Observacion);
-            Assert.AreEqual("Aprobada: margen suficiente", promo.Observacion);
-            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.BajaSolicitada, BE.EstadoPromocion.Vigente, 1);
         }
 
         [TestMethod]
-        public void RechazarBaja_SinMotivo_LanzaMotivoRechazoBajaRequerido()
+        public void AtenderSolicitud_SinRespuesta_LanzaRespuestaRequerida()
         {
             LoginComo(1);
-            var ctx = ConBajaSolicitada(out var promo);
-            EsperarError(() => ctx.Crear().RechazarBaja("Test", promo, "  "), "err.bll.promocion.motivorechazobaja_requerido");
-            Assert.AreEqual(BE.EstadoPromocion.BajaSolicitada, promo.Estado);
+            var ctx = ConSolicitudPendiente(out var promo);
+            EsperarError(() => ctx.Crear().AtenderSolicitud("Test", ctx.DalPromocion.Solicitudes[0], "  ", darDeBaja: true),
+                "err.bll.promocion.respuesta_requerida");
+            Assert.AreEqual(BE.EstadoPromocion.Vigente, promo.Estado);
+            Assert.IsTrue(ctx.DalPromocion.Solicitudes[0].EstaPendiente());
         }
 
         [TestMethod]
-        public void AprobarBaja_SinSolicitudPendiente_LanzaSolicitudInexistente()
+        public void AtenderSolicitud_YaAtendida_LanzaSolicitudAtendida()
         {
             LoginComo(1);
-            EsperarError(() => new Contexto().Crear().AprobarBaja("Test", Promo(BE.EstadoPromocion.BajaSolicitada), null),
-                "err.bll.promocion.solicitud_inexistente");
+            var ctx = ConSolicitudPendiente(out _);
+            var solicitud = ctx.DalPromocion.Solicitudes[0];
+            ctx.Crear().AtenderSolicitud("Test", solicitud, "Sigue", darDeBaja: false);
+
+            EsperarError(() => ctx.Crear().AtenderSolicitud("Test", solicitud, "Otra respuesta", darDeBaja: true),
+                "err.bll.promocion.solicitud_atendida");
+            Assert.AreEqual("Sigue", ctx.DalPromocion.Solicitudes[0].Respuesta);
         }
 
         [TestMethod]
-        public void AprobarBaja_NoBajaSolicitada_LanzaResolverBajaEstado()
+        public void AtenderSolicitud_OtraSesionLaAtendio_LanzaSolicitudAtendida()
         {
             LoginComo(1);
-            EsperarError(() => new Contexto().Crear().AprobarBaja("Test", Promo(BE.EstadoPromocion.Vigente), null),
-                "err.bll.promocion.resolverbaja_estado");
-        }
+            var ctx = ConSolicitudPendiente(out var promo);
+            // Copia en pantalla, cargada antes de que otra sesión la atendiera.
+            var enPantalla = new BE.SolicitudBajaPromocion { IdSolicitud = 1, IdPromocion = 42, Motivo = "Erosiona el margen" };
+            ctx.DalPromocion.Solicitudes[0].Estado = BE.EstadoSolicitudBaja.Atendida;
+            ctx.DalPromocion.Solicitudes[0].Respuesta = "Ya respondida";
 
-        // (b) Administración desactiva directamente
-
-        [TestMethod]
-        public void Desactivar_VigenteConMotivo_DesactivaYGuardaElMotivoEnElHistorial()
-        {
-            LoginComo(1);
-            var ctx = new Contexto();
-            var promo = Promo(BE.EstadoPromocion.Vigente);
-
-            ctx.Crear().Desactivar("Test", promo, "Cambio de estrategia comercial");
-
-            Assert.AreEqual(BE.EstadoPromocion.Desactivada, promo.Estado);
-            AssertHistorial(ctx.DalPromocion.Historial[0], BE.EstadoPromocion.Vigente, BE.EstadoPromocion.Desactivada, 1);
-            Assert.AreEqual("Cambio de estrategia comercial", ctx.DalPromocion.Historial[0].Observacion);
-        }
-
-        [TestMethod]
-        public void Desactivar_SinMotivo_LanzaMotivoDesactivarRequerido()
-        {
-            LoginComo(1);
-            var ctx = new Contexto();
-            EsperarError(() => ctx.Crear().Desactivar("Test", Promo(BE.EstadoPromocion.Vigente), null),
-                "err.bll.promocion.motivodesactivar_requerido");
-            Assert.AreEqual(0, ctx.DalPromocion.Transiciones);
-        }
-
-        [TestMethod]
-        public void Desactivar_NoVigente_LanzaDesactivarEstado()
-        {
-            LoginComo(1);
-            EsperarError(() => new Contexto().Crear().Desactivar("Test", Promo(BE.EstadoPromocion.BajaSolicitada), "m"),
-                "err.bll.promocion.desactivar_estado");
+            EsperarError(() => ctx.Crear().AtenderSolicitud("Test", enPantalla, "Sigue", darDeBaja: false),
+                "err.bll.promocion.solicitud_atendida");
+            Assert.IsTrue(enPantalla.EstaPendiente(), "La copia en pantalla no se marca como atendida si la base no la cambió.");
         }
 
         // (c) Llega la FechaFin → Vencida
@@ -961,8 +981,9 @@ namespace Tests
             var bll = ctx.Crear();
 
             LoginComo(1);
-            bll.CrearManual("Test", "Promo", "d", BE.TipoDescuento.Porcentaje, 10m, DateTime.Today, DateTime.Today.AddDays(30), 1, null, 0m, "i");
+            bll.CrearManual("Test", "Promo", "d", BE.TipoDescuento.Porcentaje, 10m, DateTime.Today, DateTime.Today.AddDays(30), 1, 0m, "i");
             var promo = ctx.DalPromocion.UltimoAlta;
+            promo.IdPromocion = 42;
             ctx.DalPromocion.Todas.Add(promo);
 
             LoginComo(2);
@@ -975,39 +996,123 @@ namespace Tests
             LoginComo(3);
             bll.SolicitarBaja("Test", promo, "No rinde");
             LoginComo(1);
-            bll.RechazarBaja("Test", promo, "Sigue rindiendo");
-            bll.Desactivar("Test", promo, "Fin de campaña");
+            bll.AtenderSolicitud("Test", ctx.DalPromocion.Solicitudes[0], "Sigue rindiendo", darDeBaja: false);
+            promo.MotivoBaja = null;   // la pantalla vuelve a cargar la lista: ya no hay solicitud pendiente
+            LoginComo(3);
+            bll.SolicitarBaja("Test", promo, "Sigue sin rendir");
+            LoginComo(1);
+            bll.AtenderSolicitud("Test", ctx.DalPromocion.Solicitudes[1], "De acuerdo", darDeBaja: true);
 
             var esperado = new[]
             {
                 "-→EnRevisionContable", "EnRevisionContable→RechazadaContabilidad", "RechazadaContabilidad→EnRevisionContable",
-                "EnRevisionContable→Vigente", "Vigente→BajaSolicitada", "BajaSolicitada→Vigente", "Vigente→Desactivada"
+                "EnRevisionContable→Vigente", "Vigente→DadaDeBaja"
             };
             CollectionAssert.AreEqual(esperado, ctx.DalPromocion.ObtenerHistorial(42)
                 .ConvertAll(h => $"{(h.EstadoAnterior.HasValue ? h.EstadoAnterior.ToString() : "-")}→{h.EstadoNuevo}"));
             Assert.AreEqual(2, ctx.DalPromocion.Dictamenes.Count);
+            Assert.AreEqual(2, ctx.DalPromocion.Solicitudes.Count);
+            Assert.IsFalse(ctx.DalPromocion.Solicitudes[0].DioDeBaja);
+            Assert.IsTrue(ctx.DalPromocion.Solicitudes[1].DioDeBaja);
             Assert.IsTrue(promo.EsFinal());
+        }
+
+        [TestMethod]
+        public void RecorridoRechazada_NoSeReformulaYSeDaDeBaja()
+        {
+            var ctx = new Contexto();
+            ctx.DalPromocion.AltaIdGenerado = 42;
+            var bll = ctx.Crear();
+
+            LoginComo(1);
+            bll.CrearManual("Test", "Promo", "d", BE.TipoDescuento.Porcentaje, 10m, DateTime.Today, DateTime.Today.AddDays(30), 1, 0m, "i");
+            var promo = ctx.DalPromocion.UltimoAlta;
+            promo.IdPromocion = 42;
+            ctx.DalPromocion.Todas.Add(promo);
+            LoginComo(2);
+            bll.RechazarContable("Test", promo, "No cubre el costo");
+            LoginComo(1);
+            bll.DarDeBaja("Test", promo, "No se reformula");
+
+            CollectionAssert.AreEqual(
+                new[] { "-→EnRevisionContable", "EnRevisionContable→RechazadaContabilidad", "RechazadaContabilidad→DadaDeBaja" },
+                ctx.DalPromocion.ObtenerHistorial(42)
+                    .ConvertAll(h => $"{(h.EstadoAnterior.HasValue ? h.EstadoAnterior.ToString() : "-")}→{h.EstadoNuevo}"));
         }
 
         // Máquina de estados (BE)
 
         [TestMethod]
+        public void EstadoPromocion_SoloTieneLosEstadosDelFlujoSimplificado()
+            => CollectionAssert.AreEqual(new[] { 0, 1, 2, 4, 6 },
+                   ((BE.EstadoPromocion[])Enum.GetValues(typeof(BE.EstadoPromocion))).Select(e => (int)e).ToArray());
+
+        [TestMethod]
         public void TransicionValida_LosEstadosFinalesNoTienenSalida()
         {
-            foreach (var final in new[] { BE.EstadoPromocion.Desactivada, BE.EstadoPromocion.Descartada, BE.EstadoPromocion.Vencida })
+            foreach (var final in new[] { BE.EstadoPromocion.DadaDeBaja, BE.EstadoPromocion.Vencida })
                 foreach (BE.EstadoPromocion destino in Enum.GetValues(typeof(BE.EstadoPromocion)))
                     Assert.IsFalse(Promo(final).TransicionValida(destino), $"{final} → {destino}");
         }
 
         [TestMethod]
-        public void TransicionValida_SigueElDiagrama()
+        public void TransicionValida_EnRevisionContable_SoloVaAVigenteORechazada()
         {
-            Assert.IsTrue(Promo(BE.EstadoPromocion.EnRevisionContable).TransicionValida(BE.EstadoPromocion.Vigente));
-            Assert.IsTrue(Promo(BE.EstadoPromocion.RechazadaContabilidad).TransicionValida(BE.EstadoPromocion.Descartada));
-            Assert.IsTrue(Promo(BE.EstadoPromocion.Vigente).TransicionValida(BE.EstadoPromocion.Vencida));
-            Assert.IsTrue(Promo(BE.EstadoPromocion.BajaSolicitada).TransicionValida(BE.EstadoPromocion.Vigente));
-            Assert.IsFalse(Promo(BE.EstadoPromocion.EnRevisionContable).TransicionValida(BE.EstadoPromocion.Desactivada));
-            Assert.IsFalse(Promo(BE.EstadoPromocion.BajaSolicitada).TransicionValida(BE.EstadoPromocion.Vencida));
+            var p = Promo(BE.EstadoPromocion.EnRevisionContable);
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPromocion.Vigente));
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPromocion.RechazadaContabilidad));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPromocion.DadaDeBaja));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPromocion.Vencida));
+        }
+
+        [TestMethod]
+        public void TransicionValida_Rechazada_SeReformulaOSeDaDeBaja()
+        {
+            var p = Promo(BE.EstadoPromocion.RechazadaContabilidad);
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPromocion.EnRevisionContable));
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPromocion.DadaDeBaja));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPromocion.Vigente));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPromocion.Vencida));
+        }
+
+        [TestMethod]
+        public void TransicionValida_Vigente_SeDaDeBajaOVence()
+        {
+            var p = Promo(BE.EstadoPromocion.Vigente);
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPromocion.DadaDeBaja));
+            Assert.IsTrue(p.TransicionValida(BE.EstadoPromocion.Vencida));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPromocion.EnRevisionContable));
+            Assert.IsFalse(p.TransicionValida(BE.EstadoPromocion.RechazadaContabilidad));
+        }
+
+        [TestMethod]
+        public void PuedeDarseDeBaja_SoloVigenteORechazada()
+        {
+            foreach (BE.EstadoPromocion e in Enum.GetValues(typeof(BE.EstadoPromocion)))
+                Assert.AreEqual(e == BE.EstadoPromocion.Vigente || e == BE.EstadoPromocion.RechazadaContabilidad,
+                    Promo(e).PuedeDarseDeBaja(), e.ToString());
+        }
+
+        [TestMethod]
+        public void PuedeSolicitarseBaja_VigenteSinSolicitudPendiente()
+        {
+            Assert.IsTrue(Promo(BE.EstadoPromocion.Vigente).PuedeSolicitarseBaja());
+            var conPendiente = Promo(BE.EstadoPromocion.Vigente);
+            conPendiente.MotivoBaja = "Ya pedida";
+            Assert.IsFalse(conPendiente.PuedeSolicitarseBaja());
+            Assert.IsFalse(Promo(BE.EstadoPromocion.RechazadaContabilidad).PuedeSolicitarseBaja());
+        }
+
+        [TestMethod]
+        public void SeSuperponeCon_SoloOtraVigenteDelMismoPlanConFechasCruzadas()
+        {
+            var p = Promo(BE.EstadoPromocion.EnRevisionContable);
+            var vigente = Promo(BE.EstadoPromocion.Vigente); vigente.IdPromocion = 50;
+            var dadaDeBaja = Promo(BE.EstadoPromocion.DadaDeBaja); dadaDeBaja.IdPromocion = 51;
+            var otroPlan = Promo(BE.EstadoPromocion.Vigente); otroPlan.IdPromocion = 52; otroPlan.IdPlan = 2;
+            Assert.IsTrue(p.SeSuperponeCon(vigente));
+            Assert.IsFalse(p.SeSuperponeCon(dadaDeBaja));
+            Assert.IsFalse(p.SeSuperponeCon(otroPlan));
         }
     }
 }

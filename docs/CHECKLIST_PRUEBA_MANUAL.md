@@ -95,7 +95,9 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 
 ## 5. Promociones (`admcomercial`, `contable`)
 
-- [ ] Administración: alta desde sugerencia y manual, reformular una rechazada, desactivar, resolver bajas. Un precio promocional se interpreta como mensual.
+- [ ] Administración: alta desde sugerencia y manual (siempre con plan), reformular una rechazada, dar de baja una vigente y una rechazada, atender una solicitud de baja (de acuerdo y en desacuerdo). Un precio promocional se interpreta como mensual.
+- [ ] Vendedor: solicitar la baja de una vigente; la promoción sigue vigente y la columna "Baja solicitada" lo muestra; no deja pedir otra mientras haya una pendiente.
+- [ ] Dashboard de Administración Comercial: la tarjeta cuenta las solicitudes de baja pendientes.
 - [ ] Contabilidad: aprobar o rechazar exige observación.
 - [ ] Una promoción vigente reduce el importe en Caja (un solo descuento por cobro).
 

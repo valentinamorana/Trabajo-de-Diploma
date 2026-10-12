@@ -20,10 +20,8 @@ namespace GUI
             this.txtNombre = new System.Windows.Forms.TextBox();
             this.lblDescripcion = new System.Windows.Forms.Label();
             this.txtDescripcion = new System.Windows.Forms.TextBox();
-            this.rbPlan = new System.Windows.Forms.RadioButton();
+            this.lblPlan = new System.Windows.Forms.Label();
             this.cmbPlan = new System.Windows.Forms.ComboBox();
-            this.rbCategoria = new System.Windows.Forms.RadioButton();
-            this.cmbCategoria = new System.Windows.Forms.ComboBox();
             this.lblTipoDescuento = new System.Windows.Forms.Label();
             this.cmbTipoDescuento = new System.Windows.Forms.ComboBox();
             this.lblValor = new System.Windows.Forms.Label();
@@ -86,17 +84,14 @@ namespace GUI
             this.txtDescripcion.Size = new System.Drawing.Size(320, 20);
             this.txtDescripcion.TabIndex = 4;
             //
-            // rbPlan
+            // lblPlan
             //
-            this.rbPlan.Checked = true;
-            this.rbPlan.TabStop = true;
-            this.rbPlan.Location = new System.Drawing.Point(12, 100);
-            this.rbPlan.Name = "rbPlan";
-            this.rbPlan.Size = new System.Drawing.Size(90, 24);
-            this.rbPlan.TabIndex = 5;
-            this.rbPlan.Tag = "promocion.plan";
-            this.rbPlan.Text = "Plan:";
-            this.rbPlan.CheckedChanged += new System.EventHandler(this.RbPlan_CheckedChanged);
+            this.lblPlan.Location = new System.Drawing.Point(12, 102);
+            this.lblPlan.Name = "lblPlan";
+            this.lblPlan.Size = new System.Drawing.Size(90, 24);
+            this.lblPlan.TabIndex = 5;
+            this.lblPlan.Tag = "promocion.plan";
+            this.lblPlan.Text = "Plan:";
             //
             // cmbPlan
             //
@@ -106,27 +101,9 @@ namespace GUI
             this.cmbPlan.Size = new System.Drawing.Size(220, 21);
             this.cmbPlan.TabIndex = 6;
             //
-            // rbCategoria
-            //
-            this.rbCategoria.Location = new System.Drawing.Point(12, 128);
-            this.rbCategoria.Name = "rbCategoria";
-            this.rbCategoria.Size = new System.Drawing.Size(90, 24);
-            this.rbCategoria.TabIndex = 7;
-            this.rbCategoria.Tag = "promocion.categoria";
-            this.rbCategoria.Text = "Categoría:";
-            //
-            // cmbCategoria
-            //
-            this.cmbCategoria.Enabled = false;
-            this.cmbCategoria.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbCategoria.Location = new System.Drawing.Point(108, 130);
-            this.cmbCategoria.Name = "cmbCategoria";
-            this.cmbCategoria.Size = new System.Drawing.Size(220, 20);
-            this.cmbCategoria.TabIndex = 8;
-            //
             // lblTipoDescuento
             //
-            this.lblTipoDescuento.Location = new System.Drawing.Point(12, 160);
+            this.lblTipoDescuento.Location = new System.Drawing.Point(12, 132);
             this.lblTipoDescuento.Name = "lblTipoDescuento";
             this.lblTipoDescuento.Size = new System.Drawing.Size(90, 23);
             this.lblTipoDescuento.TabIndex = 9;
@@ -136,14 +113,14 @@ namespace GUI
             // cmbTipoDescuento
             //
             this.cmbTipoDescuento.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbTipoDescuento.Location = new System.Drawing.Point(108, 158);
+            this.cmbTipoDescuento.Location = new System.Drawing.Point(108, 130);
             this.cmbTipoDescuento.Name = "cmbTipoDescuento";
             this.cmbTipoDescuento.Size = new System.Drawing.Size(150, 21);
             this.cmbTipoDescuento.TabIndex = 10;
             //
             // lblValor
             //
-            this.lblValor.Location = new System.Drawing.Point(268, 160);
+            this.lblValor.Location = new System.Drawing.Point(268, 132);
             this.lblValor.Name = "lblValor";
             this.lblValor.Size = new System.Drawing.Size(50, 23);
             this.lblValor.TabIndex = 11;
@@ -153,7 +130,7 @@ namespace GUI
             // numValor
             //
             this.numValor.DecimalPlaces = 2;
-            this.numValor.Location = new System.Drawing.Point(322, 159);
+            this.numValor.Location = new System.Drawing.Point(322, 131);
             this.numValor.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             this.numValor.Name = "numValor";
             this.numValor.Size = new System.Drawing.Size(106, 20);
@@ -161,7 +138,7 @@ namespace GUI
             //
             // lblInicio
             //
-            this.lblInicio.Location = new System.Drawing.Point(12, 188);
+            this.lblInicio.Location = new System.Drawing.Point(12, 160);
             this.lblInicio.Name = "lblInicio";
             this.lblInicio.Size = new System.Drawing.Size(90, 23);
             this.lblInicio.TabIndex = 13;
@@ -176,14 +153,14 @@ namespace GUI
             // dd/MM/yyyy, riesgo real de leer mal una fecha límite de vigencia.
             this.dtpInicio.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpInicio.CustomFormat = "dd/MM/yyyy";
-            this.dtpInicio.Location = new System.Drawing.Point(108, 186);
+            this.dtpInicio.Location = new System.Drawing.Point(108, 158);
             this.dtpInicio.Name = "dtpInicio";
             this.dtpInicio.Size = new System.Drawing.Size(120, 20);
             this.dtpInicio.TabIndex = 14;
             //
             // lblFin
             //
-            this.lblFin.Location = new System.Drawing.Point(240, 188);
+            this.lblFin.Location = new System.Drawing.Point(240, 160);
             this.lblFin.Name = "lblFin";
             this.lblFin.Size = new System.Drawing.Size(40, 23);
             this.lblFin.TabIndex = 15;
@@ -194,14 +171,14 @@ namespace GUI
             //
             this.dtpFin.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpFin.CustomFormat = "dd/MM/yyyy";
-            this.dtpFin.Location = new System.Drawing.Point(284, 186);
+            this.dtpFin.Location = new System.Drawing.Point(284, 158);
             this.dtpFin.Name = "dtpFin";
             this.dtpFin.Size = new System.Drawing.Size(120, 20);
             this.dtpFin.TabIndex = 16;
             //
             // lblMargenEstimado
             //
-            this.lblMargenEstimado.Location = new System.Drawing.Point(12, 216);
+            this.lblMargenEstimado.Location = new System.Drawing.Point(12, 188);
             this.lblMargenEstimado.Name = "lblMargenEstimado";
             this.lblMargenEstimado.Size = new System.Drawing.Size(90, 23);
             this.lblMargenEstimado.TabIndex = 17;
@@ -211,7 +188,7 @@ namespace GUI
             // numMargenEstimado
             //
             this.numMargenEstimado.DecimalPlaces = 2;
-            this.numMargenEstimado.Location = new System.Drawing.Point(108, 214);
+            this.numMargenEstimado.Location = new System.Drawing.Point(108, 186);
             this.numMargenEstimado.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
             this.numMargenEstimado.Name = "numMargenEstimado";
             this.numMargenEstimado.Size = new System.Drawing.Size(120, 20);
@@ -219,7 +196,7 @@ namespace GUI
             //
             // lblImpactoEconomico
             //
-            this.lblImpactoEconomico.Location = new System.Drawing.Point(12, 244);
+            this.lblImpactoEconomico.Location = new System.Drawing.Point(12, 216);
             this.lblImpactoEconomico.Name = "lblImpactoEconomico";
             this.lblImpactoEconomico.Size = new System.Drawing.Size(90, 23);
             this.lblImpactoEconomico.TabIndex = 19;
@@ -228,7 +205,7 @@ namespace GUI
             //
             // txtImpactoEconomico
             //
-            this.txtImpactoEconomico.Location = new System.Drawing.Point(108, 242);
+            this.txtImpactoEconomico.Location = new System.Drawing.Point(108, 214);
             this.txtImpactoEconomico.Multiline = true;
             this.txtImpactoEconomico.Name = "txtImpactoEconomico";
             this.txtImpactoEconomico.Size = new System.Drawing.Size(320, 44);
@@ -240,7 +217,7 @@ namespace GUI
             this.btnConfirmar.FlatAppearance.BorderSize = 0;
             this.btnConfirmar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnConfirmar.ForeColor = System.Drawing.Color.White;
-            this.btnConfirmar.Location = new System.Drawing.Point(108, 296);
+            this.btnConfirmar.Location = new System.Drawing.Point(108, 268);
             this.btnConfirmar.Name = "btnConfirmar";
             this.btnConfirmar.Size = new System.Drawing.Size(120, 30);
             this.btnConfirmar.TabIndex = 21;
@@ -252,7 +229,7 @@ namespace GUI
             // btnCancelar
             //
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelar.Location = new System.Drawing.Point(236, 296);
+            this.btnCancelar.Location = new System.Drawing.Point(236, 268);
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(100, 30);
             this.btnCancelar.TabIndex = 22;
@@ -265,7 +242,7 @@ namespace GUI
             this.panelStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(235)))), ((int)(((byte)(245)))));
             this.panelStatus.Controls.Add(this.lblMensaje);
             this.panelStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelStatus.Location = new System.Drawing.Point(0, 344);
+            this.panelStatus.Location = new System.Drawing.Point(0, 316);
             this.panelStatus.Name = "panelStatus";
             this.panelStatus.Padding = new System.Windows.Forms.Padding(8, 4, 8, 4);
             this.panelStatus.Size = new System.Drawing.Size(452, 26);
@@ -284,7 +261,7 @@ namespace GUI
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(452, 370);
+            this.ClientSize = new System.Drawing.Size(452, 342);
             this.Controls.Add(this.panelStatus);
             this.Controls.Add(this.btnCancelar);
             this.Controls.Add(this.btnConfirmar);
@@ -302,10 +279,8 @@ namespace GUI
             this.Controls.Add(this.lblValor);
             this.Controls.Add(this.cmbTipoDescuento);
             this.Controls.Add(this.lblTipoDescuento);
-            this.Controls.Add(this.cmbCategoria);
-            this.Controls.Add(this.rbCategoria);
             this.Controls.Add(this.cmbPlan);
-            this.Controls.Add(this.rbPlan);
+            this.Controls.Add(this.lblPlan);
             this.Controls.Add(this.txtDescripcion);
             this.Controls.Add(this.lblDescripcion);
             this.Controls.Add(this.txtNombre);
@@ -333,10 +308,8 @@ namespace GUI
         private System.Windows.Forms.TextBox txtNombre;
         private System.Windows.Forms.Label lblDescripcion;
         private System.Windows.Forms.TextBox txtDescripcion;
-        private System.Windows.Forms.RadioButton rbPlan;
+        private System.Windows.Forms.Label lblPlan;
         private System.Windows.Forms.ComboBox cmbPlan;
-        private System.Windows.Forms.RadioButton rbCategoria;
-        private System.Windows.Forms.ComboBox cmbCategoria;
         private System.Windows.Forms.Label lblTipoDescuento;
         private System.Windows.Forms.ComboBox cmbTipoDescuento;
         private System.Windows.Forms.Label lblValor;

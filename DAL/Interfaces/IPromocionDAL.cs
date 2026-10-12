@@ -7,7 +7,7 @@ namespace DAL.Interfaces
     ///
     /// Cada transición de estado es un claim atómico (UPDATE ... WHERE Estado = @esperado) y, en
     /// la MISMA transacción, inserta la fila de PromocionHistorial que arma la BLL (y el objeto
-    /// del flujo que corresponda: «Dictamen contable», «Solicitud/Resolución de baja»). Si otra
+    /// del flujo que corresponda: «Dictamen contable», cierre de las «Solicitudes de baja»). Si otra
     /// sesión ya cambió el estado, no escribe nada y devuelve false / 0.
     /// </summary>
     public interface IPromocionDAL
@@ -26,17 +26,25 @@ namespace DAL.Interfaces
         // RechazadaContabilidad → EnRevisionContable con las condiciones nuevas + historial.
         bool Reformular(BE.Promocion promocion, BE.PromocionHistorial historial);
 
-        // estadoEsperado → historial.EstadoNuevo + historial (desactivar, descartar, vencer).
+        // estadoEsperado → historial.EstadoNuevo + historial (vencer).
         bool CambiarEstado(int idPromocion, BE.EstadoPromocion estadoEsperado, BE.PromocionHistorial historial);
 
         // EnRevisionContable → historial.EstadoNuevo + «Dictamen contable» + historial. Devuelve el ID del dictamen (0 si perdió el claim).
         int Dictaminar(BE.DictamenContable dictamen, BE.PromocionHistorial historial);
 
-        // Vigente → BajaSolicitada + «Solicitud de baja» + historial. Devuelve el ID de la solicitud (0 si perdió el claim).
-        int SolicitarBaja(BE.SolicitudBajaPromocion solicitud, BE.PromocionHistorial historial);
+        // estadoEsperado (Vigente o RechazadaContabilidad) → DadaDeBaja + historial, y en la misma
+        // transacción atiende las solicitudes de baja pendientes (DioDeBaja = 1, con esa respuesta).
+        bool DarDeBaja(int idPromocion, BE.EstadoPromocion estadoEsperado, BE.PromocionHistorial historial, string respuestaSolicitudes);
 
-        // BajaSolicitada → historial.EstadoNuevo + «Resolución de baja» (la solicitud pendiente se cierra) + historial.
-        bool ResolverBaja(BE.SolicitudBajaPromocion resolucion, BE.PromocionHistorial historial);
+        // «Solicitud de baja» Pendiente, solo si la promoción sigue Vigente y no tiene otra pendiente.
+        // No cambia el estado de la promoción. Devuelve el ID de la solicitud (0 si no se pudo registrar).
+        int SolicitarBaja(BE.SolicitudBajaPromocion solicitud);
+
+        // Pendiente → Atendida con su respuesta (sin dar de baja). false si otra sesión ya la atendió.
+        bool AtenderSolicitud(BE.SolicitudBajaPromocion atendida);
+
+        // Solicitudes de baja Pendientes de todas las promociones (bandeja de Administración).
+        List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBajaPendientes();
 
         List<BE.PromocionHistorial> ObtenerHistorial(int idPromocion);
         List<BE.DictamenContable> ObtenerDictamenes(int idPromocion);

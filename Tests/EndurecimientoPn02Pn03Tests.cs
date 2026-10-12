@@ -319,14 +319,15 @@ namespace Tests
         }
 
         [TestMethod]
-        public void SolicitarBaja_OtraSesionYaCambioElEstado_LanzaEstadoConcurrente()
+        public void SolicitarBaja_OtraSesionYaCambioElEstado_LanzaSolicitudConcurrente()
         {
             LoginComoAdministrador();
             var ctx = new CtxPromo();
-            ctx.DalPromocion.ClaimResultado = false;
+            ctx.DalPromocion.ClaimResultado = false;   // ya no está Vigente o ya tiene otra solicitud pendiente
 
             EsperarError(() => ctx.Crear().SolicitarBaja("Test", Promo(BE.EstadoPromocion.Vigente), "motivo"),
-                "err.bll.promocion.estado_concurrente");
+                "err.bll.promocion.solicitud_concurrente");
+            Assert.AreEqual(0, ctx.DalPromocion.Solicitudes.Count);
         }
 
         [TestMethod]

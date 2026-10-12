@@ -17,8 +17,7 @@ namespace BE
     ///                            estimado que cargó Administración
     ///   margen proyectado      = beneficio estimado − costo del descuento
     ///   ¿conviene?             = margen proyectado &gt; 0
-    /// Las promociones por categoría son informativas (no descuentan en el cobro): no tienen costo
-    /// proyectado y el resultado no se calcula. Es una recomendación: la decisión es de Contabilidad.
+    /// Es una recomendación: la decisión es de Contabilidad.
     /// </summary>
     public class AnalisisImpactoPromocion
     {
@@ -34,10 +33,7 @@ namespace BE
 
         // ── Margen proyectado ─────────────────────────────────────────────────
 
-        /// <summary>Promoción por categoría de prenda: no descuenta en el cobro, el análisis es informativo.</summary>
-        public bool EsInformativa { get; set; }
-
-        /// <summary>Precio mensual del plan destino. Null si es por categoría o el plan ya no existe.</summary>
+        /// <summary>Precio mensual del plan destino. Null si el plan ya no existe.</summary>
         public decimal? PrecioPlan { get; set; }
 
         /// <summary>Clientes activos asignados al plan destino (a quienes se les aplicaría el descuento).</summary>
@@ -56,8 +52,8 @@ namespace BE
         public decimal BeneficioEstimado =>
             BeneficioEstimadoSugerencia ?? (Promocion != null ? Promocion.MargenEstimado : 0m);
 
-        /// <summary>Hay datos para calcular el margen: promoción por plan con su precio.</summary>
-        public bool MargenCalculable => !EsInformativa && PrecioPlan.HasValue && !SugerenciaOrigenPerdida;
+        /// <summary>Hay datos para calcular el margen: el plan existe y tiene precio.</summary>
+        public bool MargenCalculable => PrecioPlan.HasValue && !SugerenciaOrigenPerdida;
 
         /// <summary>La promoción nació de una sugerencia que ya no se encuentra: no hay beneficio de
         /// referencia confiable (el margen que carga Administración no aplica a ese caso).</summary>

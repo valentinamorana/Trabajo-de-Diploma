@@ -6,27 +6,28 @@ sequenceDiagram
   participant D as DAL.Promocion
   V->>F: Abre Promociones Vigentes (o pulsa Actualizar)
   F->>B: ObtenerParaVentas()
-  B->>B: CerrarVencidasSinFallar()  [CerrarVencidas(): las Vigentes con fecha de fin pasada pasan a Vencida, ver CU05-ADM]
-  B->>D: ObtenerTodas()  [quedan las Vigentes y las de baja solicitada, por fecha de fin]
+  B->>B: CerrarVencidasSinFallar()  [CerrarVencidas(): las Vigentes con fecha de fin pasada pasan a Vencida]
+  B->>D: ObtenerTodas()  [quedan las Vigentes, por fecha de fin, MotivoBaja = motivo de la solicitud pendiente, si la hay]
   B-->>F: promociones para Ventas
-  V->>F: Elige una promoción Vigente y pulsa "Solicitar baja"
+  F-->>V: Vigentes, con la columna "Baja solicitada" (si ya hay una pendiente)
+  V->>F: Elige una promoción sin solicitud pendiente y pulsa "Solicitar baja"
   V->>F: Ingresa el motivo (InputDialog), si cancela, no se solicita
   F->>B: SolicitarBaja(modulo, promocion, motivo)
   Note over B: PermisosAccion.Exigir(PromocionesVigentesEditar, PromocionesVigentes)
-  alt No está Vigente (PuedeSolicitarseBaja / TransicionValida(BajaSolicitada)) o sin motivo
-    B-->>F: AppException(sugerirbaja_estado / motivobaja_requerido)
+  alt No está Vigente, ya tiene una solicitud pendiente (TieneSolicitudBajaPendiente) o sin motivo
+    B-->>F: AppException(sugerirbaja_estado / solicitud_ya_pendiente / motivobaja_requerido)
     F-->>V: Informa el motivo
-  else Vigente y con motivo
-    B->>D: SolicitarBaja(solicitud, historial)  [claim: WHERE Estado = Vigente, + SolicitudBajaPromocion Pendiente, historial: Vigente → BajaSolicitada]
-    alt Ya no está Vigente
+  else Vigente, sin pendiente y con motivo
+    B->>D: SolicitarBaja(solicitud)  [INSERT de la SolicitudBajaPromocion Pendiente solo si la promoción sigue Vigente y sin otra pendiente, no cambia el estado ni escribe historial]
+    alt Otra sesión la cambió o ya pidió la baja
       D-->>B: 0
-      B-->>F: AppException(estado_concurrente)
+      B-->>F: AppException(solicitud_concurrente)
       F-->>V: Informa el motivo
     else Solicitada
       D-->>B: idSolicitud
       Note over B: bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta, …)
       B-->>F: idSolicitud
-      F-->>V: "Se envió a Administración la sugerencia de baja"
+      F-->>V: "Se envió a Administración la sugerencia de baja": la promoción sigue Vigente
       F->>B: ObtenerParaVentas()  [recarga]
     end
   end

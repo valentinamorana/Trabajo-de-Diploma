@@ -83,20 +83,55 @@ namespace Tests.Fakes
             return dictamen.IdDictamen;
         }
 
-        public int SolicitarBaja(BE.SolicitudBajaPromocion solicitud, BE.PromocionHistorial historial)
+        public int DarDeBajaVeces { get; private set; }
+
+        public bool DarDeBaja(int idPromocion, BE.EstadoPromocion estadoEsperado, BE.PromocionHistorial historial, string respuestaSolicitudes)
         {
-            if (!Reclamar(solicitud.IdPromocion, BE.EstadoPromocion.Vigente, historial)) return 0;
+            UltimoEstadoEsperado = estadoEsperado;
+            if (!Reclamar(idPromocion, estadoEsperado, historial)) return false;
+            DarDeBajaVeces++;
+            // Como el DAL real: las solicitudes pendientes quedan atendidas con la baja.
+            foreach (var s in Solicitudes.FindAll(x => x.IdPromocion == idPromocion && x.EstaPendiente()))
+            {
+                s.Estado = BE.EstadoSolicitudBaja.Atendida;
+                s.DioDeBaja = true;
+                s.Respuesta = respuestaSolicitudes;
+                s.IdUsuarioResuelve = historial.IdUsuario;
+                s.FechaResolucion = historial.Fecha;
+            }
+            return true;
+        }
+
+        // INSERT ... WHERE la promoción sigue Vigente y no tiene otra solicitud pendiente. No cambia el estado.
+        public int SolicitarBaja(BE.SolicitudBajaPromocion solicitud)
+        {
+            if (!ClaimResultado) return 0;
+            var guardada = Todas.Find(p => p.IdPromocion == solicitud.IdPromocion);
+            if (guardada != null && guardada.Estado != BE.EstadoPromocion.Vigente) return 0;
+            if (Solicitudes.Exists(s => s.IdPromocion == solicitud.IdPromocion && s.EstaPendiente())) return 0;
             solicitud.IdSolicitud = Solicitudes.Count + 1;
             Solicitudes.Add(solicitud);
             return solicitud.IdSolicitud;
         }
 
-        public bool ResolverBaja(BE.SolicitudBajaPromocion resolucion, BE.PromocionHistorial historial)
+        public bool AtenderSolicitud(BE.SolicitudBajaPromocion atendida)
         {
-            if (!Reclamar(resolucion.IdPromocion, BE.EstadoPromocion.BajaSolicitada, historial)) return false;
-            UltimaResolucion = resolucion;
+            if (!ClaimResultado) return false;
+            var guardada = Solicitudes.Find(s => s.IdSolicitud == atendida.IdSolicitud);
+            if (guardada != null && !guardada.EstaPendiente()) return false;
+            if (guardada != null)
+            {
+                guardada.Estado = BE.EstadoSolicitudBaja.Atendida;
+                guardada.Respuesta = atendida.Respuesta;
+                guardada.DioDeBaja = atendida.DioDeBaja;
+                guardada.IdUsuarioResuelve = atendida.IdUsuarioResuelve;
+                guardada.FechaResolucion = atendida.FechaResolucion;
+            }
+            UltimaResolucion = atendida;
             return true;
         }
+
+        public List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBajaPendientes() => Solicitudes.FindAll(s => s.EstaPendiente());
 
         public List<BE.PromocionHistorial> ObtenerHistorial(int idPromocion) => Historial.FindAll(h => h.IdPromocion == idPromocion);
         public List<BE.DictamenContable> ObtenerDictamenes(int idPromocion) => Dictamenes.FindAll(d => d.IdPromocion == idPromocion);

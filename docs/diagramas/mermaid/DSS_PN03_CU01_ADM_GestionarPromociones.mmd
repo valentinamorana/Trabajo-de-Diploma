@@ -7,28 +7,28 @@ sequenceDiagram
   participant B as BLL.Promocion
   participant DS as DAL.Sugerencia<br/>Promocion
   participant D as DAL.Promocion
-  Note over A,F: Crear desde sugerencia o manual, y reformular · «extend» CU03-ADM (¿Acepta la sugerencia? No) y CU04-ADM (¿Reformular? No)
+  Note over A,F: Crear desde sugerencia o manual, y reformular · «extend» CU03-ADM (¿Acepta la sugerencia? No) y CU04-ADM Dar de Baja (¿Reformular? No)
   A->>F: Abre Gestión de Promociones (o pulsa Actualizar)
   F->>BS: ObtenerPendientes()
   BS->>DS: ObtenerPendientes()
   BS-->>F: sugerencias Pendientes de Gerencia
-  F->>B: ObtenerTodas()  [antes cierra las vencidas, ver CU05-ADM]
+  F->>B: ObtenerTodas()  [antes cierra las vencidas, ver DSS_PN03_CerrarVencidas]
   B-->>F: promociones
   F-->>A: Sugerencias pendientes y promociones (acciones habilitadas según el estado)
   alt ¿Acepta la sugerencia? Sí: "Alta desde Sugerencia"
     F->>AF: new AltaPromocionForm(sugerenciaOrigen, promocionAReformular)  [sugerencia elegida, null]
-    AF-->>A: Destino de la sugerencia (bloqueado), tipo sugerido y valor inicial precargados
+    AF-->>A: Plan de la sugerencia (bloqueado), tipo sugerido y valor inicial precargados
     A->>AF: Completa nombre, descripción, tipo, valor, vigencia, margen e impacto, pulsa Registrar
     AF->>B: CrearDesdeSugerencia(modulo, idSugerencia, nombre, descripcion, tipo, valor, fechaInicio, fechaFin, margenEstimado, impactoEconomico)
     Note over B: PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)
     B->>DS: ObtenerPorId(idSugerencia)
     DS-->>B: sugerencia
-    alt No existe, o ya no está Pendiente (PuedeEvaluarse / TransicionValida(Evaluada))
-      B-->>AF: AppException(sugerencia_inexistente / sugerencia_evaluada)
+    alt No existe, ya no está Pendiente (PuedeEvaluarse / TransicionValida(Evaluada)) o no tiene plan (por categoría, versión anterior)
+      B-->>AF: AppException(sugerencia_inexistente / sugerencia_evaluada / sugerencia_sin_plan)
     else Pendiente
-      B->>B: ValidarPromocion(promocion)  [armada con el destino de la sugerencia, EnRevisionContable]
+      B->>B: ValidarPromocion(promocion)  [armada con el plan de la sugerencia, EnRevisionContable]
       alt Datos inválidos
-        B-->>AF: AppException(nombre_requerido / destino_invalido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)
+        B-->>AF: AppException(nombre_requerido / plan_requerido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)
       else Válidos
         B->>DS: MarcarEvaluada(idSugerencia, fecha)  [claim: WHERE Estado = Pendiente]
         alt false: otra sesión ya la evaluó
@@ -51,12 +51,12 @@ sequenceDiagram
     end
   else Alta manual: "Alta Manual"
     F->>AF: new AltaPromocionForm(sugerenciaOrigen, promocionAReformular)  [null, null]
-    A->>AF: Elige el destino (plan o categoría), completa las condiciones y pulsa Registrar
-    AF->>B: CrearManual(modulo, nombre, descripcion, tipo, valor, fechaInicio, fechaFin, idPlan, categoriaPrenda, margenEstimado, impactoEconomico)
+    A->>AF: Elige el plan, completa las condiciones y pulsa Registrar
+    AF->>B: CrearManual(modulo, nombre, descripcion, tipo, valor, fechaInicio, fechaFin, idPlan, margenEstimado, impactoEconomico)
     Note over B: PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)
     B->>B: ValidarPromocion(promocion)
     alt Datos inválidos
-      B-->>AF: AppException(nombre_requerido / destino_invalido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)
+      B-->>AF: AppException(nombre_requerido / plan_requerido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)
     else Válidos
       B->>B: Registrar(modulo, promocion, observacion)  [observacion = "Alta manual"]
       B->>D: Alta(promocion, historial)  [historial: — → EnRevisionContable]
@@ -65,7 +65,7 @@ sequenceDiagram
     end
   else ¿Reformular? Sí: elige una Rechazada por Contabilidad y pulsa "Reformular"
     F->>AF: new AltaPromocionForm(sugerenciaOrigen, promocionAReformular)  [null, promoción elegida]
-    AF-->>A: Condiciones actuales y observación de Contabilidad (destino bloqueado)
+    AF-->>A: Condiciones actuales y observación de Contabilidad (plan bloqueado)
     A->>AF: Corrige las condiciones y pulsa Registrar
     AF->>B: Reformular(modulo, promocion)
     Note over B: PermisosAccion.Exigir(PromocionesAdminEditar, PromocionesAdmin)
@@ -74,7 +74,7 @@ sequenceDiagram
     else Rechazada
       B->>B: ValidarPromocion(promocion)
       alt Datos inválidos
-        B-->>AF: AppException(nombre_requerido / destino_invalido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)
+        B-->>AF: AppException(nombre_requerido / plan_requerido / plan_inexistente / valor_invalido / porcentaje_invalido / rango_fechas_invalido)
       else Válidos
         B->>D: Reformular(promocion, historial)  [claim: WHERE Estado = RechazadaContabilidad, historial: RechazadaContabilidad → EnRevisionContable]
         alt false: otra sesión ya la cambió
@@ -92,4 +92,5 @@ sequenceDiagram
   AF-->>F: DialogResult.OK + IdPromocionCreada
   F-->>A: "Promoción nro.id registrada (o reformulada): pendiente de revisión contable"
   F->>BS: ObtenerPendientes()  [recarga]
+  F->>B: ObtenerSolicitudesBajaPendientes()  [recarga la bandeja de CU02-ADM]
   F->>B: ObtenerTodas()  [recarga]

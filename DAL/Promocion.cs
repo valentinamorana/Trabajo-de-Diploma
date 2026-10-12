@@ -11,7 +11,8 @@ namespace DAL
     ///
     /// Cada transición es un claim atómico (UPDATE ... WHERE Estado = @Esperado) que, en la misma
     /// transacción, inserta su fila de PromocionHistorial y el objeto del flujo que genera
-    /// («Dictamen contable», «Solicitud de baja», «Resolución de baja»).
+    /// («Dictamen contable» o el cierre de las «Solicitudes de baja» al dar de baja). Pedir la baja
+    /// no es una transición: solo registra la «Solicitud de baja» pendiente.
     /// </summary>
     public class Promocion : BaseDAL, Interfaces.IPromocionDAL
     {
@@ -21,7 +22,7 @@ namespace DAL
 
         private static readonly string SELECT_BASE =
             "SELECT p.IdPromocion, p.Nombre, p.Descripcion, p.TipoDescuento, p.Valor, " +
-            "p.FechaInicio, p.FechaFin, p.Estado, p.IdPlan, p.CategoriaPrenda, p.MargenEstimado, " +
+            "p.FechaInicio, p.FechaFin, p.Estado, p.IdPlan, p.MargenEstimado, " +
             "p.ImpactoEconomico, p.IdSugerenciaOrigen, p.IdUsuarioAlta, p.FechaAlta, " +
             "pl.Nombre AS NombrePlan, " + NombreUsuario("ua") + " AS NombreUsuarioAlta, " +
             "dc.Observacion, sb.Motivo AS MotivoBaja " +
@@ -117,9 +118,9 @@ namespace DAL
                 {
                     using (var cmd = new SqlCommand(
                         "INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, " +
-                        "Estado, IdPlan, CategoriaPrenda, MargenEstimado, ImpactoEconomico, IdSugerenciaOrigen, IdUsuarioAlta, FechaAlta) " +
+                        "Estado, IdPlan, MargenEstimado, ImpactoEconomico, IdSugerenciaOrigen, IdUsuarioAlta, FechaAlta) " +
                         "VALUES (@Nombre, @Descripcion, @TipoDescuento, @Valor, @FechaInicio, @FechaFin, " +
-                        "@Estado, @IdPlan, @CategoriaPrenda, @MargenEstimado, @ImpactoEconomico, @IdSugerenciaOrigen, @IdUsuarioAlta, @FechaAlta); " +
+                        "@Estado, @IdPlan, @MargenEstimado, @ImpactoEconomico, @IdSugerenciaOrigen, @IdUsuarioAlta, @FechaAlta); " +
                         "SELECT CAST(SCOPE_IDENTITY() AS INT)", cn, tx))
                     {
                         AgregarCondiciones(cmd, promocion);
@@ -147,7 +148,7 @@ namespace DAL
                     using (var cmd = new SqlCommand(
                         "UPDATE Promocion SET Nombre=@Nombre, Descripcion=@Descripcion, TipoDescuento=@TipoDescuento, " +
                         "Valor=@Valor, FechaInicio=@FechaInicio, FechaFin=@FechaFin, IdPlan=@IdPlan, " +
-                        "CategoriaPrenda=@CategoriaPrenda, MargenEstimado=@MargenEstimado, ImpactoEconomico=@ImpactoEconomico, " +
+                        "MargenEstimado=@MargenEstimado, ImpactoEconomico=@ImpactoEconomico, " +
                         "Estado=@Nuevo WHERE IdPromocion=@IdPromocion AND Estado=@Esperado", cn, tx))
                     {
                         AgregarCondiciones(cmd, promocion);
@@ -206,64 +207,90 @@ namespace DAL
             return idDictamen;
         }
 
-        public int SolicitarBaja(BE.SolicitudBajaPromocion solicitud, BE.PromocionHistorial historial)
-        {
-            int idSolicitud = 0;
-            try
-            {
-                acceso.EjecutarTransaccion((cn, tx) =>
-                {
-                    if (!Reclamar(cn, tx, solicitud.IdPromocion, BE.EstadoPromocion.Vigente, BE.EstadoPromocion.BajaSolicitada))
-                        return;
-                    using (var cmd = new SqlCommand(
-                        "INSERT INTO SolicitudBajaPromocion (IdPromocion, IdUsuarioSolicita, Motivo, FechaSolicitud, Estado) " +
-                        "VALUES (@IdPromocion, @IdUsuario, @Motivo, @Fecha, @Estado); " +
-                        "SELECT CAST(SCOPE_IDENTITY() AS INT)", cn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@IdPromocion", solicitud.IdPromocion);
-                        cmd.Parameters.AddWithValue("@IdUsuario", solicitud.IdUsuarioSolicita);
-                        cmd.Parameters.AddWithValue("@Motivo", solicitud.Motivo);
-                        cmd.Parameters.AddWithValue("@Fecha", solicitud.FechaSolicitud);
-                        cmd.Parameters.AddWithValue("@Estado", (int)BE.EstadoSolicitudBaja.Pendiente);
-                        idSolicitud = Convert.ToInt32(cmd.ExecuteScalar());
-                    }
-                    InsertarHistorial(cn, tx, historial);
-                });
-            }
-            catch (Exception ex) { throw new Exception("Error al registrar la solicitud de baja.", ex); }
-            return idSolicitud;
-        }
-
-        public bool ResolverBaja(BE.SolicitudBajaPromocion resolucion, BE.PromocionHistorial historial)
+        public bool DarDeBaja(int idPromocion, BE.EstadoPromocion estadoEsperado, BE.PromocionHistorial historial,
+                              string respuestaSolicitudes)
         {
             bool ok = false;
             try
             {
                 acceso.EjecutarTransaccion((cn, tx) =>
                 {
-                    if (!Reclamar(cn, tx, resolucion.IdPromocion, BE.EstadoPromocion.BajaSolicitada, historial.EstadoNuevo))
+                    if (!Reclamar(cn, tx, idPromocion, estadoEsperado, BE.EstadoPromocion.DadaDeBaja))
                         return;
-                    using (var cmd = new SqlCommand(
-                        "UPDATE SolicitudBajaPromocion SET Estado = @Estado, IdUsuarioResuelve = @IdUsuario, " +
-                        "MotivoResolucion = @Motivo, FechaResolucion = @Fecha " +
-                        "WHERE IdSolicitud = @IdSolicitud AND IdPromocion = @IdPromocion AND Estado = @Pendiente", cn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@Estado", (int)resolucion.Estado);
-                        cmd.Parameters.AddWithValue("@IdUsuario", (object)resolucion.IdUsuarioResuelve ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Motivo", (object)resolucion.MotivoResolucion ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Fecha", (object)resolucion.FechaResolucion ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@IdSolicitud", resolucion.IdSolicitud);
-                        cmd.Parameters.AddWithValue("@IdPromocion", resolucion.IdPromocion);
-                        cmd.Parameters.AddWithValue("@Pendiente", (int)BE.EstadoSolicitudBaja.Pendiente);
-                        if (cmd.ExecuteNonQuery() != 1)
-                            throw new InvalidOperationException("La solicitud de baja ya no está pendiente.");
-                    }
                     InsertarHistorial(cn, tx, historial);
+                    // Las solicitudes pendientes quedan atendidas con la baja (DioDeBaja = 1).
+                    using (var cmd = new SqlCommand(
+                        "UPDATE SolicitudBajaPromocion SET Estado = @Atendida, IdUsuarioResuelve = @IdUsuario, " +
+                        "Respuesta = @Respuesta, DioDeBaja = 1, FechaResolucion = @Fecha " +
+                        "WHERE IdPromocion = @IdPromocion AND Estado = @Pendiente", cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@Atendida", (int)BE.EstadoSolicitudBaja.Atendida);
+                        cmd.Parameters.AddWithValue("@IdUsuario", (object)historial.IdUsuario ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Respuesta", respuestaSolicitudes);
+                        cmd.Parameters.AddWithValue("@Fecha", historial.Fecha);
+                        cmd.Parameters.AddWithValue("@IdPromocion", idPromocion);
+                        cmd.Parameters.AddWithValue("@Pendiente", (int)BE.EstadoSolicitudBaja.Pendiente);
+                        cmd.ExecuteNonQuery();
+                    }
                     ok = true;
                 });
             }
-            catch (Exception ex) { throw new Exception("Error al resolver la solicitud de baja.", ex); }
+            catch (Exception ex) { throw new Exception("Error al dar de baja la promoción.", ex); }
             return ok;
+        }
+
+        public int SolicitarBaja(BE.SolicitudBajaPromocion solicitud)
+        {
+            int idSolicitud = 0;
+            try
+            {
+                acceso.EjecutarTransaccion((cn, tx) =>
+                {
+                    // Solo si sigue Vigente y sin otra pendiente (UX_SolicitudBaja_UnaPendiente lo garantiza
+                    // también en la base; el UPDLOCK evita que dos sesiones pasen el NOT EXISTS a la vez).
+                    using (var cmd = new SqlCommand(
+                        "INSERT INTO SolicitudBajaPromocion (IdPromocion, IdUsuarioSolicita, Motivo, FechaSolicitud, Estado, DioDeBaja) " +
+                        "SELECT @IdPromocion, @IdUsuario, @Motivo, @Fecha, @Pendiente, 0 " +
+                        "WHERE EXISTS (SELECT 1 FROM Promocion WITH (UPDLOCK) WHERE IdPromocion = @IdPromocion AND Estado = @Vigente) " +
+                        "  AND NOT EXISTS (SELECT 1 FROM SolicitudBajaPromocion WITH (UPDLOCK, HOLDLOCK) " +
+                        "                  WHERE IdPromocion = @IdPromocion AND Estado = @Pendiente); " +
+                        "SELECT CAST(SCOPE_IDENTITY() AS INT)", cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@IdPromocion", solicitud.IdPromocion);
+                        cmd.Parameters.AddWithValue("@IdUsuario", solicitud.IdUsuarioSolicita);
+                        cmd.Parameters.AddWithValue("@Motivo", solicitud.Motivo);
+                        cmd.Parameters.AddWithValue("@Fecha", solicitud.FechaSolicitud);
+                        cmd.Parameters.AddWithValue("@Pendiente", (int)BE.EstadoSolicitudBaja.Pendiente);
+                        cmd.Parameters.AddWithValue("@Vigente", (int)BE.EstadoPromocion.Vigente);
+                        object id = cmd.ExecuteScalar();
+                        idSolicitud = id == null || id == DBNull.Value ? 0 : Convert.ToInt32(id);
+                    }
+                });
+            }
+            catch (Exception ex) { throw new Exception("Error al registrar la solicitud de baja.", ex); }
+            return idSolicitud;
+        }
+
+        public bool AtenderSolicitud(BE.SolicitudBajaPromocion atendida)
+        {
+            SqlParameter[] p =
+            {
+                new SqlParameter("@Atendida",    SqlDbType.Int) { Value = (int)BE.EstadoSolicitudBaja.Atendida },
+                new SqlParameter("@Pendiente",   SqlDbType.Int) { Value = (int)BE.EstadoSolicitudBaja.Pendiente },
+                new SqlParameter("@IdUsuario",   SqlDbType.Int) { Value = (object)atendida.IdUsuarioResuelve ?? DBNull.Value },
+                new SqlParameter("@Respuesta",   SqlDbType.NVarChar, 500) { Value = (object)atendida.Respuesta ?? DBNull.Value },
+                new SqlParameter("@DioDeBaja",   SqlDbType.Bit) { Value = atendida.DioDeBaja },
+                new SqlParameter("@Fecha",       SqlDbType.DateTime) { Value = (object)atendida.FechaResolucion ?? DBNull.Value },
+                new SqlParameter("@IdSolicitud", SqlDbType.Int) { Value = atendida.IdSolicitud }
+            };
+            try
+            {
+                return acceso.Escribir(
+                    "UPDATE SolicitudBajaPromocion SET Estado = @Atendida, IdUsuarioResuelve = @IdUsuario, " +
+                    "Respuesta = @Respuesta, DioDeBaja = @DioDeBaja, FechaResolucion = @Fecha " +
+                    "WHERE IdSolicitud = @IdSolicitud AND Estado = @Pendiente", p) == 1;
+            }
+            catch (Exception ex) { throw new Exception("Error al atender la solicitud de baja.", ex); }
         }
 
         // Claim atómico: solo una sesión puede sacar a la promoción del estado esperado.
@@ -306,8 +333,7 @@ namespace DAL
             cmd.Parameters.AddWithValue("@Valor", p.Valor);
             cmd.Parameters.AddWithValue("@FechaInicio", p.FechaInicio.Date);
             cmd.Parameters.AddWithValue("@FechaFin", p.FechaFin.Date);
-            cmd.Parameters.AddWithValue("@IdPlan", (object)p.IdPlan ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@CategoriaPrenda", (object)p.CategoriaPrenda ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@IdPlan", p.IdPlan);
             cmd.Parameters.AddWithValue("@MargenEstimado", p.MargenEstimado);
             cmd.Parameters.AddWithValue("@ImpactoEconomico", (object)p.ImpactoEconomico ?? DBNull.Value);
         }
@@ -369,21 +395,35 @@ namespace DAL
             return lista;
         }
 
+        private static readonly string SELECT_SOLICITUD =
+            "SELECT s.IdSolicitud, s.IdPromocion, s.IdUsuarioSolicita, s.Motivo, s.FechaSolicitud, s.Estado, " +
+            "s.IdUsuarioResuelve, s.Respuesta, s.DioDeBaja, s.FechaResolucion, pr.Nombre AS NombrePromocion, " +
+            NombreUsuario("us") + " AS NombreUsuarioSolicita, " + NombreUsuario("ur") + " AS NombreUsuarioResuelve " +
+            "FROM SolicitudBajaPromocion s " +
+            "JOIN Promocion pr ON pr.IdPromocion = s.IdPromocion " +
+            "JOIN Usuario us ON us.IdUsuario = s.IdUsuarioSolicita " +
+            "LEFT JOIN Usuario ur ON ur.IdUsuario = s.IdUsuarioResuelve ";
+
         public List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBaja(int idPromocion)
         {
-            var lista = new List<BE.SolicitudBajaPromocion>();
             SqlParameter[] p = { new SqlParameter("@Id", SqlDbType.Int) { Value = idPromocion } };
+            return ListarSolicitudes(SELECT_SOLICITUD + "WHERE s.IdPromocion = @Id ORDER BY s.FechaSolicitud, s.IdSolicitud", p,
+                "Error al obtener las solicitudes de baja.");
+        }
+
+        public List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBajaPendientes()
+        {
+            SqlParameter[] p = { new SqlParameter("@Pendiente", SqlDbType.Int) { Value = (int)BE.EstadoSolicitudBaja.Pendiente } };
+            return ListarSolicitudes(SELECT_SOLICITUD + "WHERE s.Estado = @Pendiente ORDER BY s.FechaSolicitud, s.IdSolicitud", p,
+                "Error al obtener las solicitudes de baja pendientes.");
+        }
+
+        private List<BE.SolicitudBajaPromocion> ListarSolicitudes(string sql, SqlParameter[] p, string error)
+        {
+            var lista = new List<BE.SolicitudBajaPromocion>();
             try
             {
-                DataTable tabla = acceso.Leer(
-                    "SELECT s.IdSolicitud, s.IdPromocion, s.IdUsuarioSolicita, s.Motivo, s.FechaSolicitud, s.Estado, " +
-                    "s.IdUsuarioResuelve, s.MotivoResolucion, s.FechaResolucion, " +
-                    NombreUsuario("us") + " AS NombreUsuarioSolicita, " + NombreUsuario("ur") + " AS NombreUsuarioResuelve " +
-                    "FROM SolicitudBajaPromocion s " +
-                    "JOIN Usuario us ON us.IdUsuario = s.IdUsuarioSolicita " +
-                    "LEFT JOIN Usuario ur ON ur.IdUsuario = s.IdUsuarioResuelve " +
-                    "WHERE s.IdPromocion = @Id ORDER BY s.FechaSolicitud, s.IdSolicitud", p);
-                foreach (DataRow r in tabla.Rows)
+                foreach (DataRow r in acceso.Leer(sql, p).Rows)
                     lista.Add(new BE.SolicitudBajaPromocion
                     {
                         IdSolicitud           = Convert.ToInt32(r["IdSolicitud"]),
@@ -393,13 +433,15 @@ namespace DAL
                         FechaSolicitud        = Convert.ToDateTime(r["FechaSolicitud"]),
                         Estado                = (BE.EstadoSolicitudBaja)Convert.ToInt32(r["Estado"]),
                         IdUsuarioResuelve     = r["IdUsuarioResuelve"] != DBNull.Value ? (int?)Convert.ToInt32(r["IdUsuarioResuelve"]) : null,
-                        MotivoResolucion      = Texto(r, "MotivoResolucion"),
+                        Respuesta             = Texto(r, "Respuesta"),
+                        DioDeBaja             = Convert.ToBoolean(r["DioDeBaja"]),
                         FechaResolucion       = r["FechaResolucion"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(r["FechaResolucion"]) : null,
+                        NombrePromocion       = Texto(r, "NombrePromocion"),
                         NombreUsuarioSolicita = Texto(r, "NombreUsuarioSolicita"),
                         NombreUsuarioResuelve = Texto(r, "NombreUsuarioResuelve")
                     });
             }
-            catch (Exception ex) { throw new Exception("Error al obtener las solicitudes de baja.", ex); }
+            catch (Exception ex) { throw new Exception(error, ex); }
             return lista;
         }
 
@@ -417,8 +459,7 @@ namespace DAL
                 FechaInicio         = Convert.ToDateTime(row["FechaInicio"]),
                 FechaFin            = Convert.ToDateTime(row["FechaFin"]),
                 Estado              = (BE.EstadoPromocion)Convert.ToInt32(row["Estado"]),
-                IdPlan              = row["IdPlan"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPlan"]) : null,
-                CategoriaPrenda     = Texto(row, "CategoriaPrenda"),
+                IdPlan              = Convert.ToInt32(row["IdPlan"]),
                 MargenEstimado      = Convert.ToDecimal(row["MargenEstimado"]),
                 ImpactoEconomico    = Texto(row, "ImpactoEconomico"),
                 IdSugerenciaOrigen  = row["IdSugerenciaOrigen"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdSugerenciaOrigen"]) : null,

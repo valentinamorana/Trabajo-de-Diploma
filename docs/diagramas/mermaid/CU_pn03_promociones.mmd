@@ -8,18 +8,17 @@ flowchart LR
     c1(["CU01-GER Sugerir Promoción"])
     c3(["CU01-CONT Analizar Promoción"])
     c2(["CU01-ADM Gestionar Promociones"])
-    c10(["CU05-ADM Desactivar Promoción"])
-    c5(["CU02-ADM Resolver Baja de Promoción"])
+    c9(["CU04-ADM Dar de Baja Promoción"])
+    c5(["CU02-ADM Atender Solicitud de Baja"])
     c4(["CU07-VEN Solicitar Baja de Promoción"])
     c6(["CU02-GER Consultar Analítica de Negocio"])
     c7(["CU03-GER Analizar Métricas"])
     c8(["CU03-ADM Descartar Sugerencia"])
-    c9(["CU04-ADM Descartar Promoción Rechazada"])
   end
   G --- c1
   K --- c3
   A --- c2
-  A --- c10
+  A --- c9
   A --- c5
   V --- c4
   G --- c4
@@ -29,4 +28,5 @@ flowchart LR
   c7 -. "«extend»" .-> c1
   c8 -. "«extend»" .-> c2
   c9 -. "«extend»" .-> c2
+  c9 -. "«extend»" .-> c5
   classDef actor fill:#fff7e6,stroke:#b8860b

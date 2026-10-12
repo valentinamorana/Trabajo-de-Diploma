@@ -49,7 +49,7 @@ classDiagram
     +DateTime FechaInicio
     +DateTime FechaFin
     +EstadoPromocion Estado
-    +int? IdPlan
+    +int IdPlan
     +int? IdSugerenciaOrigen
     +int? IdUsuarioAlta
   }
@@ -77,6 +77,6 @@ classDiagram
   Renovacion --> "0..1" PlanSuscripcion : IdPlanNuevo
   Cobro --> "1" Cliente : IdCliente
   Cobro --> "0..1" Promocion : IdPromocion
-  Promocion --> "0..1" PlanSuscripcion : IdPlan
+  Promocion --> "1" PlanSuscripcion : IdPlan
   Promocion --> "0..1" SugerenciaPromocion : IdSugerenciaOrigen
   SugerenciaPromocion --> "0..1" PlanSuscripcion : IdPlan

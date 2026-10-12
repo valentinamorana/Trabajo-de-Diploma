@@ -12,11 +12,12 @@ namespace GUI.Exportacion
     /// (ExportadorPdf, sin impresora virtual):
     ///   • Reporte de métricas                               (Gerencia)
     ///   • Sugerencia de promoción                           (Gerencia → Administración)
-    ///   • Constancia de descarte (de sugerencia o promoción) (Administración)
+    ///   • Constancia de descarte de una sugerencia          (Administración)
     ///   • Ficha de promoción (con su historial de estados)  (Administración → Contabilidad)
     ///   • Dictamen contable                                 (Contabilidad → Administración)
     ///   • Solicitud de baja                                 (Vendedor → Administración)
-    ///   • Resolución de baja (informe a Gerencia o a Ventas) (Administración)
+    ///   • Respuesta a la solicitud de baja                  (Administración → Ventas)
+    ///   • Constancia de baja                                (Administración)
     /// Solo da formato a datos que ya resolvió la BLL; la exportación la hace el Exportador que
     /// fabrica <see cref="GeneradorDocumentoPromocion"/>.
     /// </summary>
@@ -44,9 +45,7 @@ namespace GUI.Exportacion
                 case BE.EstadoPromocion.EnRevisionContable:    return Tr("est.promo.enrevision", "En revisión contable");
                 case BE.EstadoPromocion.Vigente:               return Tr("est.promo.vigente", "Vigente");
                 case BE.EstadoPromocion.RechazadaContabilidad: return Tr("est.promo.rechazada", "Rechazada por Contabilidad");
-                case BE.EstadoPromocion.BajaSolicitada:        return Tr("est.promo.bajasolicitada", "Baja solicitada");
-                case BE.EstadoPromocion.Desactivada:           return Tr("est.promo.desactivada", "Desactivada");
-                case BE.EstadoPromocion.Descartada:            return Tr("est.promo.descartada", "Descartada");
+                case BE.EstadoPromocion.DadaDeBaja:            return Tr("est.promo.dadadebaja", "Dada de baja");
                 default:                                       return Tr("est.promo.vencida", "Vencida");
             }
         }
@@ -81,10 +80,9 @@ namespace GUI.Exportacion
             }
         }
 
-        public static string AplicaA(int? idPlan, string nombrePlan, string categoria) =>
-            idPlan.HasValue
-                ? $"{Tr("doc.promo.plan", "Plan")}: {nombrePlan ?? "#" + idPlan}"
-                : $"{Tr("doc.promo.categoria", "Categoría")}: {categoria}";
+        // Las sugerencias por categoría de la versión anterior no tienen plan: se muestran con "—".
+        public static string AplicaA(int? idPlan, string nombrePlan) =>
+            $"{Tr("doc.promo.plan", "Plan")}: {nombrePlan ?? (idPlan.HasValue ? "#" + idPlan : "—")}";
 
         internal static string Valor(BE.Promocion p) =>
             p.TipoDescuento == BE.TipoDescuento.Porcentaje ? $"{p.Valor:0.##} %" : p.Valor.ToString("C2");
@@ -95,7 +93,7 @@ namespace GUI.Exportacion
         private static void Cabecera(StringBuilder sb, BE.Promocion p)
         {
             sb.AppendLine($"{Tr("doc.promo.promocion", "Promoción")}: #{p.IdPromocion} — {p.Nombre}");
-            sb.AppendLine(AplicaA(p.IdPlan, p.NombrePlan, p.CategoriaPrenda));
+            sb.AppendLine(AplicaA(p.IdPlan, p.NombrePlan));
             sb.AppendLine($"{Tr("doc.promo.beneficio", "Beneficio")}: {Tipo(p.TipoDescuento)} — {Valor(p)}");
             sb.AppendLine($"{Tr("doc.promo.vigencia", "Vigencia")}: {Fecha(p.FechaInicio, false)} — {Fecha(p.FechaFin, false)}");
             sb.AppendLine($"{Tr("doc.promo.estado", "Estado")}: {Estado(p.Estado)}");
@@ -128,6 +126,18 @@ namespace GUI.Exportacion
                 sb.AppendLine(string.Format(Tr("doc.promo.rotacionlinea", "   • {0}: {1} de baja demanda, {2} de alta demanda"),
                                             m.Categoria, m.PrendasBajaDemanda, m.PrendasAltaDemanda));
             sb.AppendLine();
+            // Oportunidades por categoría: quedan como dato, pero no son base de una sugerencia.
+            var porCategoria = r.RotacionPorCategoria.FindAll(m => m.EsOportunidad);
+            if (porCategoria.Count > 0)
+            {
+                sb.AppendLine(Tr("doc.promo.oportunidadescategoria",
+                    "Oportunidades por categoría (solo informativas: las promociones son por plan):"));
+                foreach (var m in porCategoria)
+                    sb.AppendLine("   • " + string.Format(Tr("promo.cand.rotacion",
+                        "Análisis de rotación: {0} prenda(s) de la categoría {1} sin pedidos ({2})."),
+                        m.PrendasBajaDemanda, m.Categoria, m.EjemplosBajaDemanda));
+                sb.AppendLine();
+            }
             if (r.HayOportunidad())
             {
                 sb.AppendLine(Tr("doc.promo.oportunidades", "Oportunidades de promoción detectadas:"));
@@ -152,7 +162,7 @@ namespace GUI.Exportacion
             sb.AppendLine($"{Tr("doc.promo.sugerencia", "Sugerencia")}: #{s.IdSugerencia}  —  {Fecha(s.FechaAlta)}");
             sb.AppendLine($"{Tr("doc.promo.gerencia", "Registrada por (Gerencia)")}: {s.NombreUsuarioAlta ?? "—"}");
             sb.AppendLine($"{Tr("doc.promo.origen", "Origen de la métrica")}: {Origen(s.OrigenMetrica)}");
-            sb.AppendLine(AplicaA(s.IdPlan, s.NombrePlan, s.CategoriaPrenda));
+            sb.AppendLine(AplicaA(s.IdPlan, s.NombrePlan));
             sb.AppendLine($"{Tr("doc.promo.tiposugerido", "Tipo de descuento sugerido")}: {Tipo(s.TipoDescuentoSugerido)}");
             sb.AppendLine($"{Tr("doc.promo.beneficioest", "Beneficio estimado")}: {s.BeneficioEstimado:C2}");
             sb.AppendLine($"{Tr("doc.promo.motivo", "Motivo")}: {s.Motivo}");
@@ -184,8 +194,6 @@ namespace GUI.Exportacion
             sb.AppendLine($"{Tr("doc.promo.origensug", "Origen")}: " + (p.IdSugerenciaOrigen.HasValue
                 ? string.Format(Tr("doc.promo.desdesugerencia", "sugerencia de Gerencia #{0}"), p.IdSugerenciaOrigen.Value)
                 : Tr("doc.promo.manual", "alta manual")));
-            if (p.AplicaACategoria())
-                sb.AppendLine(Tr("doc.promo.notacategoria", "Promoción por categoría: es informativa, no descuenta en el cobro de la suscripción."));
             sb.AppendLine();
             if (historial != null && historial.Count > 0)
             {
@@ -204,7 +212,7 @@ namespace GUI.Exportacion
             Cabecera(sb, p);
             sb.AppendLine($"{Tr("doc.promo.resultado", "Resultado")}: " + (d.Aprobada
                 ? Tr("doc.promo.aprobada", "APROBADA — la promoción queda Vigente.")
-                : Tr("doc.promo.rechazada", "RECHAZADA — vuelve a Administración para reformularla o descartarla.")));
+                : Tr("doc.promo.rechazada", "RECHAZADA — vuelve a Administración para reformularla o darla de baja.")));
             sb.AppendLine($"{Tr("doc.promo.observacion", "Observación")}: {d.Observacion}");
             sb.AppendLine($"{Tr("doc.promo.contable", "Dictaminó (Contabilidad)")}: {d.NombreUsuario ?? "—"}  —  {Fecha(d.Fecha)}");
             return Doc($"{Tr("doc.promo.dictamen.titulo", "Dictamen contable")} — {Tr("doc.promo.promocion", "Promoción")} #{p.IdPromocion}",
@@ -219,43 +227,41 @@ namespace GUI.Exportacion
             sb.AppendLine($"{Tr("doc.promo.solicito", "Solicitó (Ventas)")}: {s.NombreUsuarioSolicita ?? "—"}  —  {Fecha(s.FechaSolicitud)}");
             sb.AppendLine($"{Tr("doc.promo.motivo", "Motivo")}: {s.Motivo}");
             sb.AppendLine();
-            sb.AppendLine(Tr("doc.promo.solicitud.nota", "Mientras Administración resuelve la solicitud, la promoción no se aplica en los cobros."));
+            sb.AppendLine(Tr("doc.promo.solicitud.nota2", "La promoción sigue Vigente y se aplica en los cobros hasta que Administración atienda la solicitud."));
             return Doc($"{Tr("doc.promo.solicitud.titulo", "Solicitud de baja")} #{s.IdSolicitud} — {p.Nombre}", $"SolicitudBaja_{s.IdSolicitud}", sb);
         }
 
-        // «Resolución de baja»: informe a Gerencia si se aprueba, a Ventas si se rechaza.
-        public static ReporteExportable ResolucionBaja(BE.Promocion p, BE.SolicitudBajaPromocion s)
+        // «Respuesta a la solicitud» de baja (Administración → Ventas): si estuvo de acuerdo, la
+        // promoción quedó dada de baja; si no, sigue Vigente.
+        public static ReporteExportable RespuestaSolicitud(BE.Promocion p, BE.SolicitudBajaPromocion s)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"{Tr("doc.promo.destinatario", "Destinatario")}: " + (s.FueAprobada()
-                ? Tr("doc.promo.agerencia", "Gerencia")
-                : Tr("doc.promo.aventas", "Ventas")));
+            sb.AppendLine($"{Tr("doc.promo.destinatario", "Destinatario")}: {Tr("doc.promo.aventas", "Ventas")}");
             sb.AppendLine();
             Cabecera(sb, p);
             sb.AppendLine($"{Tr("doc.promo.solicito", "Solicitó (Ventas)")}: {s.NombreUsuarioSolicita ?? "—"}  —  {Fecha(s.FechaSolicitud)}");
             sb.AppendLine($"{Tr("doc.promo.motivosolicitud", "Motivo de la solicitud")}: {s.Motivo}");
-            sb.AppendLine($"{Tr("doc.promo.resultado", "Resultado")}: " + (s.FueAprobada()
-                ? Tr("doc.promo.bajaaprobada", "Baja APROBADA — la promoción quedó Desactivada.")
-                : Tr("doc.promo.bajarechazada", "Baja RECHAZADA — la promoción sigue Vigente.")));
-            sb.AppendLine($"{Tr("doc.promo.motivoresolucion", "Motivo de la resolución")}: {s.MotivoResolucion ?? "—"}");
-            sb.AppendLine($"{Tr("doc.promo.resolvio", "Resolvió (Administración)")}: {s.NombreUsuarioResuelve ?? "—"}  —  {Fecha(s.FechaResolucion)}");
-            string titulo = s.FueAprobada()
-                ? Tr("doc.promo.resolucion.gerencia", "Resolución de baja — Informe a Gerencia")
-                : Tr("doc.promo.resolucion.ventas", "Resolución de baja — Informe a Ventas");
-            return Doc($"{titulo} #{s.IdSolicitud}", $"ResolucionBaja_{s.IdSolicitud}", sb);
+            sb.AppendLine($"{Tr("doc.promo.resultado", "Resultado")}: " + (s.DioDeBaja
+                ? Tr("doc.promo.respuesta.dadabaja", "Administración estuvo de acuerdo: la promoción quedó dada de baja.")
+                : Tr("doc.promo.respuesta.sigue", "Administración no estuvo de acuerdo: la promoción sigue Vigente.")));
+            sb.AppendLine($"{Tr("doc.promo.respuesta", "Respuesta")}: {s.Respuesta ?? "—"}");
+            sb.AppendLine($"{Tr("doc.promo.atendio", "Atendió (Administración)")}: {s.NombreUsuarioResuelve ?? "—"}  —  {Fecha(s.FechaResolucion)}");
+            return Doc($"{Tr("doc.promo.respuesta.titulo", "Respuesta a la solicitud de baja")} #{s.IdSolicitud}",
+                       $"RespuestaSolicitudBaja_{s.IdSolicitud}", sb);
         }
 
-        // «Constancia de descarte» de una promoción (¿Reformular? No).
-        public static ReporteExportable ConstanciaDescartePromocion(BE.Promocion p, BE.PromocionHistorial descarte)
+        // «Constancia de baja» de una promoción (Vigente o Rechazada → Dada de baja).
+        public static ReporteExportable ConstanciaBaja(BE.Promocion p, BE.PromocionHistorial baja)
         {
             var sb = new StringBuilder();
             Cabecera(sb, p);
-            sb.AppendLine(string.Format(Tr("doc.promo.descarteprom", "Administración descartó la promoción el {0} tras el rechazo contable."),
-                                        Fecha(descarte?.Fecha)));
-            sb.AppendLine($"{Tr("doc.promo.motivodescarte", "Motivo del descarte")}: {descarte?.Observacion ?? "—"}");
-            sb.AppendLine($"{Tr("doc.promo.descartadapor", "Descartó")}: {descarte?.NombreUsuario ?? "—"}");
-            return Doc($"{Tr("doc.promo.constanciadescarte.titulo", "Constancia de descarte")} — {Tr("doc.promo.promocion", "Promoción")} #{p.IdPromocion}",
-                       $"ConstanciaDescartePromocion_{p.IdPromocion}", sb);
+            sb.AppendLine(string.Format(Tr("doc.promo.bajaprom", "Administración dio de baja la promoción el {0} (estaba {1})."),
+                                        Fecha(baja?.Fecha),
+                                        baja?.EstadoAnterior != null ? Estado(baja.EstadoAnterior.Value) : "—"));
+            sb.AppendLine($"{Tr("doc.promo.motivobajaadmin", "Motivo de la baja")}: {baja?.Observacion ?? "—"}");
+            sb.AppendLine($"{Tr("doc.promo.dadabajapor", "Dio de baja")}: {baja?.NombreUsuario ?? "—"}");
+            return Doc($"{Tr("doc.promo.constanciabaja.titulo", "Constancia de baja")} — {Tr("doc.promo.promocion", "Promoción")} #{p.IdPromocion}",
+                       $"ConstanciaBajaPromocion_{p.IdPromocion}", sb);
         }
 
         public static void Imprimir(ReporteExportable reporte, IWin32Window propietario)

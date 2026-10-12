@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor A as Administración
+  participant F as Promociones<br/>AdministracionForm
+  participant B as BLL.Promocion
+  participant D as DAL.Promocion
+  Note over A,F: (c) llega la fecha de fin: al consultar las promociones, las Vigentes vencidas pasan a Vencida (lo firma el sistema, sin usuario)
+  A->>F: Abre Gestión de Promociones (o pulsa Actualizar)
+  F->>B: ObtenerTodas()
+  B->>B: CerrarVencidasSinFallar()  [si falla, lo deja en el Trace y la consulta sigue]
+  B->>B: CerrarVencidas()
+  B->>D: ObtenerTodas()  [se quedan las que cumplen DebeVencer(hoy): Vigente con FechaFin pasada]
+  loop Por cada promoción que debe vencer
+    B->>D: CambiarEstado(idPromocion, estadoEsperado, historial)  [claim: estadoEsperado = Vigente, historial: Vigente → Vencida]
+    D-->>B: true, o false si otra sesión ya la cerró (no duplica el historial)
+  end
+  Note over B: bitacoraNeg.Registrar(Cancelacion, …) por cada vencida · bitacora.Registrar("Promociones", …) si cerró alguna
+  B->>D: ObtenerTodas()
+  B-->>F: promociones (las vencidas ya no aplican en el cobro)

@@ -5,11 +5,11 @@ erDiagram
   PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
+  PlanCuotas |o--o{ Contratacion : "IdPlanCuotas"
+  MedioPago |o--o{ Contratacion : "IdMedioPago"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
-  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
-  MedioPago |o--o{ Contratacion : "IdMedioPago"
-  PlanCuotas |o--o{ Contratacion : "IdPlanCuotas"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Empleado |o--o{ ContratacionIntentoPago : "IdCaja"
@@ -18,7 +18,7 @@ erDiagram
   PlanSuscripcion |o--o{ DesistimientoContratacion : "IdPlan"
   Cliente ||--o{ DesistimientoContratacion : "IdCliente"
   Empleado ||--o{ DesistimientoContratacion : "IdVendedor"
-  PlanSuscripcion |o--o{ Promocion : "IdPlan"
+  PlanSuscripcion ||--o{ Promocion : "IdPlan"
   Cliente {
     int IdCliente PK
     nvarchar(100) Nombre
@@ -125,8 +125,7 @@ erDiagram
     date FechaInicio
     date FechaFin
     int Estado
-    int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda FK "NULL"
+    int IdPlan FK
     decimal(10_2) MargenEstimado
     nvarchar(500) ImpactoEconomico "NULL"
     int IdSugerenciaOrigen FK "NULL"

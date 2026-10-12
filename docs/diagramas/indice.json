@@ -315,9 +315,9 @@
     "titulo": "PN03 · CU01-CONT Analizar Promoción"
   },
   {
-    "id": "DSS_PN03_CU04_ADM_DescartarPromocion",
+    "id": "DSS_PN03_CU04_ADM_DarDeBaja",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU04-ADM Descartar Promoción Rechazada"
+    "titulo": "PN03 · CU04-ADM Dar de Baja Promoción"
   },
   {
     "id": "DSS_PN03_CU01_VEN_SugerirBaja",
@@ -325,14 +325,14 @@
     "titulo": "PN03 · CU07-VEN Solicitar Baja de Promoción"
   },
   {
-    "id": "DSS_PN03_CU02_ADM_ResolverBaja",
+    "id": "DSS_PN03_CU02_ADM_AtenderSolicitudBaja",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU02-ADM Resolver Baja de Promoción"
+    "titulo": "PN03 · CU02-ADM Atender Solicitud de Baja"
   },
   {
-    "id": "DSS_PN03_CU05_ADM_DesactivarYVencer",
+    "id": "DSS_PN03_CerrarVencidas",
     "tipo": "secuencia",
-    "titulo": "PN03 · CU05-ADM Desactivar Promoción"
+    "titulo": "PN03 · Cierre de promociones por fecha de fin"
   },
   {
     "id": "DSS_PN04_CU01_DEP_InspeccionarDevolucion",

@@ -10,18 +10,16 @@ erDiagram
   Usuario ||--o{ DictamenContable : "IdUsuario"
   Promocion |o--o{ HistorialCobro : "IdPromocion"
   Cliente ||--o{ HistorialCobro : "IdCliente"
-  Categoria |o--o{ Promocion : "CategoriaPrenda"
   Usuario |o--o{ Promocion : "IdUsuarioAlta"
+  PlanSuscripcion ||--o{ Promocion : "IdPlan"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
-  PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Promocion ||--o{ PromocionHistorial : "IdPromocion"
   Usuario |o--o{ PromocionHistorial : "IdUsuario"
   Usuario ||--o{ SolicitudBajaPromocion : "IdUsuarioSolicita"
   Usuario |o--o{ SolicitudBajaPromocion : "IdUsuarioResuelve"
   Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
-  Categoria |o--o{ SugerenciaPromocion : "CategoriaPrenda"
-  Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
+  Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   Usuario {
     int IdUsuario PK
     nvarchar(100) Username
@@ -57,7 +55,6 @@ erDiagram
   SugerenciaPromocion {
     int IdSugerencia PK
     int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda FK "NULL"
     nvarchar(500) Motivo
     int TipoDescuentoSugerido
     decimal(10_2) BeneficioEstimado
@@ -77,8 +74,7 @@ erDiagram
     date FechaInicio
     date FechaFin
     int Estado
-    int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda FK "NULL"
+    int IdPlan FK
     decimal(10_2) MargenEstimado
     nvarchar(500) ImpactoEconomico "NULL"
     int IdSugerenciaOrigen FK "NULL"
@@ -110,8 +106,9 @@ erDiagram
     datetime FechaSolicitud
     int Estado
     int IdUsuarioResuelve FK "NULL"
-    nvarchar(500) MotivoResolucion "NULL"
     datetime FechaResolucion "NULL"
+    nvarchar(500) Respuesta "NULL"
+    bit DioDeBaja
   }
   Contratacion {
     int IdContratacion PK

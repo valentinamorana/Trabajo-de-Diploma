@@ -24,8 +24,8 @@ namespace GUI
 
         public int IdPromocionCreada { get; private set; }
 
-        /// <param name="sugerenciaOrigen">Si viene de una sugerencia de Gerencia, precarga plan/categoría
-        /// y los bloquea (no se puede cambiar el destino de la sugerencia). Null para alta manual.</param>
+        /// <param name="sugerenciaOrigen">Si viene de una sugerencia de Gerencia, precarga el plan
+        /// y lo bloquea (no se puede cambiar el plan de la sugerencia). Null para alta manual.</param>
         public AltaPromocionForm(BE.SugerenciaPromocion sugerenciaOrigen = null, BE.Promocion promocionAReformular = null)
         {
             InitializeComponent();
@@ -53,8 +53,7 @@ namespace GUI
                 this.Text = t[this.Tag.ToString()].Texto;
             Aplicar(lblNombre,           t);
             Aplicar(lblDescripcion,      t);
-            Aplicar(rbPlan,              t);
-            Aplicar(rbCategoria,         t);
+            Aplicar(lblPlan,             t);
             Aplicar(lblTipoDescuento,    t);
             Aplicar(lblValor,            t);
             Aplicar(lblInicio,           t);
@@ -71,14 +70,19 @@ namespace GUI
                 c.Text = t[c.Tag.ToString()].Texto;
         }
 
-// Selecciona la categoría en el combo (lista cerrada del catálogo Categoria). Si es una
-        // categoría que ya no está activa, se agrega para no cambiarla por otra.
-        private void SeleccionarCategoria(string categoria)
+        // Selecciona el plan en el combo. Si el plan ya no está activo (reformular una promoción
+        // vieja), se agrega para no cambiarlo por otro.
+        private void SeleccionarPlan(int idPlan, string nombrePlan)
         {
-            if (string.IsNullOrWhiteSpace(categoria)) { cmbCategoria.SelectedIndex = -1; return; }
-            int idx = cmbCategoria.FindStringExact(categoria.Trim());
-            if (idx < 0) idx = cmbCategoria.Items.Add(categoria.Trim());
-            cmbCategoria.SelectedIndex = idx;
+            if (!_planes.Exists(p => p.IdPlan == idPlan))
+            {
+                _planes.Add(new BE.PlanSuscripcion { IdPlan = idPlan, Nombre = nombrePlan ?? "#" + idPlan });
+                cmbPlan.DataSource = null;
+                cmbPlan.DataSource = _planes;
+                cmbPlan.DisplayMember = nameof(BE.PlanSuscripcion.Nombre);
+                cmbPlan.ValueMember = nameof(BE.PlanSuscripcion.IdPlan);
+            }
+            cmbPlan.SelectedValue = idPlan;
         }
 
         private void AltaPromocionForm_Load(object sender, EventArgs e)
@@ -90,9 +94,6 @@ namespace GUI
                 cmbPlan.DisplayMember = nameof(BE.PlanSuscripcion.Nombre);
                 cmbPlan.ValueMember = nameof(BE.PlanSuscripcion.IdPlan);
                 cmbTipoDescuento.DataSource = Enum.GetValues(typeof(BE.TipoDescuento));
-                // Categorías del catálogo (tabla Categoria): lista cerrada, la FK de la base no acepta otra.
-                cmbCategoria.Items.Clear();
-                foreach (string categoria in new BLL.Prenda().ObtenerCategorias()) cmbCategoria.Items.Add(categoria);
                 // Se muestra traducido ("Monto fijo"); el ítem sigue siendo el enum.
                 cmbTipoDescuento.FormattingEnabled = true;
                 cmbTipoDescuento.Format -= FormatearTipo;
@@ -104,14 +105,8 @@ namespace GUI
                 {
                     lblSugerencia.Text = Tr("promo.reformular", "Reformulando la promoción #{0}. Observación de Contabilidad: {1}",
                         new object[] { _reformular.IdPromocion, _reformular.Observacion ?? "—" });
-                    rbPlan.Checked = _reformular.AplicaAPlan();
-                    rbCategoria.Checked = _reformular.AplicaACategoria();
-                    if (_reformular.AplicaAPlan()) cmbPlan.SelectedValue = _reformular.IdPlan.Value;
-                    else SeleccionarCategoria(_reformular.CategoriaPrenda);
-                    rbPlan.Enabled = false;
-                    rbCategoria.Enabled = false;
-                    cmbPlan.Enabled = _reformular.AplicaAPlan();
-                    cmbCategoria.Enabled = _reformular.AplicaACategoria();
+                    SeleccionarPlan(_reformular.IdPlan, _reformular.NombrePlan);
+                    cmbPlan.Enabled = false;   // reformular no cambia el plan
                     txtNombre.Text = _reformular.Nombre;
                     txtDescripcion.Text = _reformular.Descripcion;
                     cmbTipoDescuento.SelectedItem = _reformular.TipoDescuento;
@@ -125,30 +120,19 @@ namespace GUI
                 {
                     lblSugerencia.Text = Tr("promo.sugerenciaorigen", "A partir de la sugerencia #{0}: {1}",
                         new object[] { _sugerenciaOrigen.IdSugerencia, _sugerenciaOrigen.Motivo });
-                    rbPlan.Checked = _sugerenciaOrigen.AplicaAPlan();
-                    rbCategoria.Checked = _sugerenciaOrigen.AplicaACategoria();
-                    if (_sugerenciaOrigen.AplicaAPlan()) cmbPlan.SelectedValue = _sugerenciaOrigen.IdPlan.Value;
-                    else SeleccionarCategoria(_sugerenciaOrigen.CategoriaPrenda);
-                    rbPlan.Enabled = false;
-                    rbCategoria.Enabled = false;
-                    cmbPlan.Enabled = _sugerenciaOrigen.AplicaAPlan();
-                    cmbCategoria.Enabled = _sugerenciaOrigen.AplicaACategoria();
+                    // El plan de la sugerencia no se cambia (la BLL lo toma de la sugerencia).
+                    if (_sugerenciaOrigen.AplicaAPlan())
+                        SeleccionarPlan(_sugerenciaOrigen.IdPlan.Value, _sugerenciaOrigen.NombrePlan);
+                    cmbPlan.Enabled = false;
                     cmbTipoDescuento.SelectedItem = _sugerenciaOrigen.TipoDescuentoSugerido;
                     numValor.Value = Math.Min(numValor.Maximum, _sugerenciaOrigen.ValorInicialPromocion());
                 }
                 else
                 {
                     lblSugerencia.Text = Tr("promo.altamanual", "Alta manual (sin sugerencia de Gerencia).");
-                    RbPlan_CheckedChanged(this, EventArgs.Empty);
                 }
             }
             catch (Exception ex) { MostrarError(ex); }
-        }
-
-        private void RbPlan_CheckedChanged(object sender, EventArgs e)
-        {
-            cmbPlan.Enabled = rbPlan.Checked;
-            cmbCategoria.Enabled = !rbPlan.Checked;
         }
 
         private void BtnConfirmar_Click(object sender, EventArgs e)
@@ -156,7 +140,7 @@ namespace GUI
             var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
 
             // Sin validaciones acá: la actividad "Validar" es BLL.Promocion.ValidarPromocion
-            // (destino único, valor y fechas); si falla, se muestra su mensaje traducido.
+            // (plan, valor y fechas); si falla, se muestra su mensaje traducido.
             try
             {
                 if (_reformular != null)
@@ -180,10 +164,8 @@ namespace GUI
                 }
                 else
                 {
-                    int? idPlan = rbPlan.Checked ? (int?)cmbPlan.SelectedValue : null;
-                    string categoria = rbPlan.Checked ? null : cmbCategoria.Text;
                     IdPromocionCreada = promocionBLL.CrearManual(this.Text, txtNombre.Text, txtDescripcion.Text,
-                        tipo, numValor.Value, dtpInicio.Value, dtpFin.Value, idPlan, categoria,
+                        tipo, numValor.Value, dtpInicio.Value, dtpFin.Value, PlanElegido(),
                         numMargenEstimado.Value, txtImpactoEconomico.Text);
                 }
 
@@ -196,6 +178,9 @@ namespace GUI
             }
             catch (Exception ex) { MostrarError(ex); }
         }
+
+        // 0 si no hay plan elegido: la BLL ("Validar") informa que el plan es obligatorio.
+        private int PlanElegido() => cmbPlan.SelectedValue is int id ? id : 0;
 
         private void BtnCancelar_Click(object sender, EventArgs e)
         {

@@ -11,7 +11,7 @@ namespace GUI
     /// Capa de Presentación — PN03, carril Gerencia del diagrama de actividad (rol GerenteComercial):
     ///   Analizar métricas («Reporte de métricas», imprimible) → ¿Hay oportunidad?
     ///   No: fin "Sin promoción". Sí: Registrar sugerencia («Sugerencia de promoción»), con el
-    ///   origen de la métrica (abandono, rotación) o Manual si Gerencia la carga sin el reporte.
+    ///   origen de la métrica (abandono por plan) o Manual si Gerencia la carga sin el reporte.
     /// Lista las sugerencias registradas para volver a imprimirlas (o su constancia de descarte).
     /// </summary>
     public partial class SugerirPromocionForm : FormBase, IIdiomaObserver
@@ -107,16 +107,6 @@ namespace GUI
             RH("Estado", "col.promo.estado", "Estado");
         }
 
-// Selecciona la categoría en el combo (lista cerrada del catálogo Categoria). Si es una
-        // categoría que ya no está activa, se agrega para no cambiarla por otra.
-        private void SeleccionarCategoria(string categoria)
-        {
-            if (string.IsNullOrWhiteSpace(categoria)) { cmbCategoria.SelectedIndex = -1; return; }
-            int idx = cmbCategoria.FindStringExact(categoria.Trim());
-            if (idx < 0) idx = cmbCategoria.Items.Add(categoria.Trim());
-            cmbCategoria.SelectedIndex = idx;
-        }
-
         private void SugerirPromocionForm_Load(object sender, EventArgs e)
         {
             try
@@ -126,9 +116,6 @@ namespace GUI
                 cmbPlan.DisplayMember = nameof(BE.PlanSuscripcion.Nombre);
                 cmbPlan.ValueMember = nameof(BE.PlanSuscripcion.IdPlan);
                 cmbTipoDescuento.DataSource = Enum.GetValues(typeof(BE.TipoDescuento));
-                // Categorías del catálogo (tabla Categoria): lista cerrada, la FK de la base no acepta otra.
-                cmbCategoria.Items.Clear();
-                foreach (string categoria in new BLL.Prenda().ObtenerCategorias()) cmbCategoria.Items.Add(categoria);
                 // Se muestra traducido ("Monto fijo"); el ítem sigue siendo el enum.
                 cmbTipoDescuento.FormattingEnabled = true;
                 cmbTipoDescuento.Format -= FormatearTipo;
@@ -136,12 +123,6 @@ namespace GUI
             }
             catch (Exception ex) { MostrarError(ex); }
             CargarSugerencias();
-        }
-
-        private void RbPlan_CheckedChanged(object sender, EventArgs e)
-        {
-            cmbPlan.Enabled = rbPlan.Checked;
-            cmbCategoria.Enabled = !rbPlan.Checked;
         }
 
         // ── Analizar métricas → ¿Hay oportunidad? ────────────────────────────
@@ -159,22 +140,14 @@ namespace GUI
             {
                 // ¿Hay oportunidad? No → fin "Sin promoción".
                 MostrarOk(Tr("msg.sugerencia.sinanalisis",
-                    "Los reportes de rotación y abandono no detectan casos para sugerir por ahora."));
+                    "El reporte de abandono no detecta planes para sugerir por ahora."));
                 return;
             }
             if (elegida == null) return;
 
             // ¿Hay oportunidad? Sí → se precarga la sugerencia con el dato del reporte (editable).
-            if (elegida.IdPlan.HasValue)
-            {
-                rbPlan.Checked = true;
-                cmbPlan.SelectedValue = elegida.IdPlan.Value;
-            }
-            else
-            {
-                rbCategoria.Checked = true;
-                SeleccionarCategoria(elegida.CategoriaPrenda);
-            }
+            // Solo las oportunidades por plan: las por categoría quedan en el reporte como dato.
+            cmbPlan.SelectedValue = elegida.IdPlan;
             cmbTipoDescuento.SelectedItem = elegida.TipoSugerido;
             numBeneficioEstimado.Value = Math.Min(numBeneficioEstimado.Maximum, elegida.BeneficioEstimado);
             txtMotivo.Text = elegida.ClaveMotivo != null
@@ -207,7 +180,7 @@ namespace GUI
                 lista.Format += (s, ev) =>
                 {
                     if (ev.ListItem is BE.CandidataSugerencia c)
-                        ev.Value = $"[{Docs.Origen(c.Origen)}] {Docs.AplicaA(c.IdPlan, c.NombrePlan, c.CategoriaPrenda)} — {c.BeneficioEstimado:C2}";
+                        ev.Value = $"[{Docs.Origen(c.Origen)}] {Docs.AplicaA(c.IdPlan, c.NombrePlan)} — {c.BeneficioEstimado:C2}";
                 };
                 foreach (var c in reporte.Oportunidades) lista.Items.Add(c);
                 if (lista.Items.Count > 0) lista.SelectedIndex = 0;
@@ -251,11 +224,11 @@ namespace GUI
             int id;
             try
             {
-                int? idPlan = rbPlan.Checked ? (int?)cmbPlan.SelectedValue : null;
-                string categoria = rbPlan.Checked ? null : cmbCategoria.Text;
+                // 0 si no hay plan elegido: la BLL informa que el plan es obligatorio.
+                int idPlan = cmbPlan.SelectedValue is int elegido ? elegido : 0;
                 var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
 
-                id = sugerenciaBLL.RegistrarSugerencia(this.Text, _origen, idPlan, categoria, txtMotivo.Text,
+                id = sugerenciaBLL.RegistrarSugerencia(this.Text, _origen, idPlan, txtMotivo.Text,
                                                       tipo, numBeneficioEstimado.Value);
                 MostrarOk(Tr("msg.sugerencia.enviada", "Sugerencia #{0} enviada a Administración.", new object[] { id }));
                 txtMotivo.Clear();
@@ -283,7 +256,7 @@ namespace GUI
                 tabla.Columns.Add("Estado", typeof(string));
                 foreach (var s in _sugerencias)
                     tabla.Rows.Add(s.IdSugerencia, s.FechaAlta.ToString("d"),
-                        Docs.AplicaA(s.IdPlan, s.NombrePlan, s.CategoriaPrenda), Docs.Origen(s.OrigenMetrica),
+                        Docs.AplicaA(s.IdPlan, s.NombrePlan), Docs.Origen(s.OrigenMetrica),
                         s.BeneficioEstimado, Docs.EstadoSugerencia(s.Estado));
                 dgvSugerencias.DataSource = tabla;
                 if (dgvSugerencias.Columns.Contains("ID")) dgvSugerencias.Columns["ID"].Width = 44;

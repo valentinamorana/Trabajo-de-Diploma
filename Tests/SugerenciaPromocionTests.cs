@@ -54,12 +54,11 @@ namespace Tests
             ctx.DalSugerencia.AltaIdGenerado = 55;
             var bll = ctx.Crear();
 
-            int id = bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Abandono, 1, null, "Motivo válido", BE.TipoDescuento.Porcentaje, 100m);
+            int id = bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Abandono, 1, "Motivo válido", BE.TipoDescuento.Porcentaje, 100m);
 
             Assert.AreEqual(55, id);
             Assert.AreEqual(1, ctx.DalSugerencia.AltaVeces);
             Assert.AreEqual(1, ctx.DalSugerencia.UltimoAlta.IdPlan);
-            Assert.IsNull(ctx.DalSugerencia.UltimoAlta.CategoriaPrenda);
             Assert.AreEqual("Motivo válido", ctx.DalSugerencia.UltimoAlta.Motivo);
             Assert.AreEqual(BE.TipoDescuento.Porcentaje, ctx.DalSugerencia.UltimoAlta.TipoDescuentoSugerido);
             Assert.AreEqual(100m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado);
@@ -69,23 +68,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void RegistrarSugerencia_DatosValidosConCategoria_Persiste()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            ctx.DalSugerencia.AltaIdGenerado = 56;
-            var bll = ctx.Crear();
-
-            int id = bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, null, "Camisas", "Motivo válido", BE.TipoDescuento.MontoFijo, 50m);
-
-            Assert.AreEqual(56, id);
-            Assert.AreEqual(1, ctx.DalSugerencia.AltaVeces);
-            Assert.IsNull(ctx.DalSugerencia.UltimoAlta.IdPlan);
-            Assert.AreEqual("Camisas", ctx.DalSugerencia.UltimoAlta.CategoriaPrenda);
-        }
-
-        [TestMethod]
-        public void RegistrarSugerencia_AmbosIdPlanYCategoria_LanzaDestinoInvalido()
+        public void RegistrarSugerencia_SinPlan_LanzaPlanRequerido()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
@@ -93,31 +76,12 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Camisas", "Motivo", BE.TipoDescuento.Porcentaje, 100m);
-                Assert.Fail("Debía rechazar una sugerencia con plan y categoría a la vez.");
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 0, "Motivo", BE.TipoDescuento.Porcentaje, 100m);
+                Assert.Fail("Debía rechazar una sugerencia sin plan: las promociones son siempre por plan.");
             }
             catch (BE.AppException ex)
             {
-                Assert.AreEqual("err.bll.sugerenciapromocion.destino_invalido", ex.Clave);
-            }
-            Assert.AreEqual(0, ctx.DalSugerencia.AltaVeces);
-        }
-
-        [TestMethod]
-        public void RegistrarSugerencia_NingunoIdPlanNiCategoria_LanzaDestinoInvalido()
-        {
-            LoginComoAdministrador();
-            var ctx = new Contexto();
-            var bll = ctx.Crear();
-
-            try
-            {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, null, null, "Motivo", BE.TipoDescuento.Porcentaje, 100m);
-                Assert.Fail("Debía rechazar una sugerencia sin plan ni categoría.");
-            }
-            catch (BE.AppException ex)
-            {
-                Assert.AreEqual("err.bll.sugerenciapromocion.destino_invalido", ex.Clave);
+                Assert.AreEqual("err.bll.sugerenciapromocion.plan_requerido", ex.Clave);
             }
             Assert.AreEqual(0, ctx.DalSugerencia.AltaVeces);
         }
@@ -132,7 +96,7 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, null, "Motivo", BE.TipoDescuento.Porcentaje, 100m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 100m);
                 Assert.Fail("Debía rechazar un plan inexistente.");
             }
             catch (BE.AppException ex)
@@ -151,7 +115,7 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, null, "   ", BE.TipoDescuento.Porcentaje, 100m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "   ", BE.TipoDescuento.Porcentaje, 100m);
                 Assert.Fail("Debía exigir el motivo de la sugerencia.");
             }
             catch (BE.AppException ex)
@@ -170,7 +134,7 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, null, null, BE.TipoDescuento.Porcentaje, 100m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, null, BE.TipoDescuento.Porcentaje, 100m);
                 Assert.Fail("Debía exigir el motivo de la sugerencia.");
             }
             catch (BE.AppException ex)
@@ -189,7 +153,7 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, null, "Motivo", BE.TipoDescuento.Porcentaje, 0m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 0m);
                 Assert.Fail("Debía exigir un beneficio estimado mayor a cero.");
             }
             catch (BE.AppException ex)

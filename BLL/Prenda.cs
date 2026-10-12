@@ -38,10 +38,9 @@ namespace BLL
 
         public List<BE.Prenda> ObtenerTodos()                   => dalPrenda.ObtenerTodos();
 
-        // Catálogo de categorías activas (tabla Categoria, 3FN): las que se ofrecen al cargar una prenda,
-        // una promoción o una sugerencia (PN03). Antes el formulario de prendas tenía su propia lista
-        // fija ("Vestidos", en plural) distinta de los datos ("Vestido") y las promociones derivaban
-        // las suyas de las prendas cargadas.
+        // Catálogo de categorías activas (tabla Categoria, 3FN): las que se ofrecen al cargar una prenda.
+        // Antes el formulario de prendas tenía su propia lista fija ("Vestidos", en plural) distinta
+        // de los datos ("Vestido").
         public List<string> ObtenerCategorias() =>
             (dalPrenda.ObtenerCategorias() ?? new List<string>())
                 .OrderBy(c => c, StringComparer.CurrentCultureIgnoreCase)

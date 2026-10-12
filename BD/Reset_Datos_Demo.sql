@@ -3,7 +3,9 @@
 -- ------------------------------------------------------------
 -- Pide que la próxima corrida de 00_Instalacion_Completa.sql BORRE los datos de negocio
 -- (clientes, prendas, pedidos, contrataciones, promociones y bitácora de negocio) y cargue los
--- escenarios de demo de la sección 21e (Juan PedidoFeliz, Ana PrendasNoDisponibles, etc.).
+-- escenarios de demo de la sección 21e (Juan PedidoFeliz, Ana PrendasNoDisponibles, etc.; en PN03,
+-- dos sugerencias por plan y promociones por plan En revisión, Vigente, Rechazada y una Vigente
+-- con su solicitud de baja pendiente para que Administración la atienda).
 -- Usuarios, planes, permisos, traducciones y bitácora del sistema se conservan.
 --
 -- Uso (HACER UN BACKUP ANTES: se pierden los datos de negocio actuales):

@@ -6,7 +6,7 @@ namespace GUI
     /// <summary>
     /// PN03 — Menú "Imprimir" común a las pantallas de promociones: ofrece los documentos que
     /// la promoción seleccionada ya tiene guardados («Ficha de promoción», «Dictamen contable»,
-    /// «Solicitud de baja», «Resolución de baja», «Constancia de descarte»). Solo consulta a la
+    /// «Solicitud de baja», «Respuesta a la solicitud», «Constancia de baja»). Solo consulta a la
     /// BLL qué objetos existen y los manda a imprimir; no decide nada del negocio.
     /// </summary>
     internal sealed class MenuDocumentosPromocion
@@ -15,8 +15,8 @@ namespace GUI
         private readonly ToolStripMenuItem itFicha = new ToolStripMenuItem();
         private readonly ToolStripMenuItem itDictamen = new ToolStripMenuItem();
         private readonly ToolStripMenuItem itSolicitud = new ToolStripMenuItem();
-        private readonly ToolStripMenuItem itResolucion = new ToolStripMenuItem();
-        private readonly ToolStripMenuItem itDescarte = new ToolStripMenuItem();
+        private readonly ToolStripMenuItem itRespuesta = new ToolStripMenuItem();
+        private readonly ToolStripMenuItem itBaja = new ToolStripMenuItem();
 
         private readonly BLL.Interfaces.IPromocionService promocionBLL;
         private readonly Func<BE.Promocion> seleccionada;
@@ -27,7 +27,7 @@ namespace GUI
         private BE.Promocion _promocion;
         private BE.DictamenContable _dictamen;
         private BE.SolicitudBajaPromocion _solicitud;
-        private BE.PromocionHistorial _descarte;
+        private BE.PromocionHistorial _baja;
 
         public MenuDocumentosPromocion(BLL.Interfaces.IPromocionService promocionBLL, Func<BE.Promocion> seleccionada,
                                        IWin32Window propietario, Action<Exception> alFallar, Func<string, string, string> tr)
@@ -38,13 +38,13 @@ namespace GUI
             this.alFallar = alFallar;
             this.tr = tr;
 
-            menu.Items.AddRange(new ToolStripItem[] { itFicha, itDictamen, itSolicitud, itResolucion, itDescarte });
+            menu.Items.AddRange(new ToolStripItem[] { itFicha, itDictamen, itSolicitud, itRespuesta, itBaja });
             itFicha.Click += (s, e) => Imprimir(() =>
                 Exportacion.DocumentosPromocion.FichaPromocion(_promocion, promocionBLL.ObtenerHistorial(_promocion.IdPromocion)));
             itDictamen.Click += (s, e) => Imprimir(() => Exportacion.DocumentosPromocion.DictamenContable(_promocion, _dictamen));
             itSolicitud.Click += (s, e) => Imprimir(() => Exportacion.DocumentosPromocion.SolicitudBaja(_promocion, _solicitud));
-            itResolucion.Click += (s, e) => Imprimir(() => Exportacion.DocumentosPromocion.ResolucionBaja(_promocion, _solicitud));
-            itDescarte.Click += (s, e) => Imprimir(() => Exportacion.DocumentosPromocion.ConstanciaDescartePromocion(_promocion, _descarte));
+            itRespuesta.Click += (s, e) => Imprimir(() => Exportacion.DocumentosPromocion.RespuestaSolicitud(_promocion, _solicitud));
+            itBaja.Click += (s, e) => Imprimir(() => Exportacion.DocumentosPromocion.ConstanciaBaja(_promocion, _baja));
             Traducir();
         }
 
@@ -53,8 +53,8 @@ namespace GUI
             itFicha.Text = tr("doc.promo.ficha.titulo", "Ficha de promoción");
             itDictamen.Text = tr("doc.promo.dictamen.titulo", "Dictamen contable");
             itSolicitud.Text = tr("doc.promo.solicitud.titulo", "Solicitud de baja");
-            itResolucion.Text = tr("menu.promo.resolucion", "Resolución de baja");
-            itDescarte.Text = tr("doc.promo.constanciadescarte.titulo", "Constancia de descarte");
+            itRespuesta.Text = tr("doc.promo.respuesta.titulo", "Respuesta a la solicitud de baja");
+            itBaja.Text = tr("doc.promo.constanciabaja.titulo", "Constancia de baja");
         }
 
         // Muestra el menú debajo del botón, habilitando solo los documentos que ya existen.
@@ -66,15 +66,15 @@ namespace GUI
             {
                 _dictamen = promocionBLL.ObtenerUltimoDictamen(_promocion.IdPromocion);
                 _solicitud = promocionBLL.ObtenerUltimaSolicitudBaja(_promocion.IdPromocion);
-                _descarte = _promocion.Estado == BE.EstadoPromocion.Descartada
-                    ? promocionBLL.ObtenerDescarte(_promocion.IdPromocion) : null;
+                _baja = _promocion.Estado == BE.EstadoPromocion.DadaDeBaja
+                    ? promocionBLL.ObtenerBaja(_promocion.IdPromocion) : null;
             }
             catch (Exception ex) { alFallar(ex); return; }
 
             itDictamen.Enabled = _dictamen != null;
             itSolicitud.Enabled = _solicitud != null;
-            itResolucion.Enabled = _solicitud != null && _solicitud.FueResuelta();
-            itDescarte.Enabled = _descarte != null;
+            itRespuesta.Enabled = _solicitud != null && _solicitud.FueAtendida();
+            itBaja.Enabled = _baja != null;
             menu.Show(boton, 0, boton.Height);
         }
 

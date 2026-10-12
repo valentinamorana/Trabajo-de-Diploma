@@ -169,60 +169,62 @@ module.exports = [
     tipo: 'actividad', id: 'ACT_pn03_promociones', titulo: 'Actividad — PN03 Métricas, promociones y toma de decisiones',
     // El sistema actúa dentro de cada carril. Cada acción es un método de BLL.AnalisisPromociones /
     // BLL.SugerenciaPromocion / BLL.Promocion y cada decisión, una guarda de BE (PuedeEvaluarse, PuedeDictaminar,
-    // PuedeReformularse, PuedeResolverseBaja, PuedeDesactivarseDirecto, DebeVencer). Estados: SugerenciaPromocion
-    // Pendiente → Evaluada | Descartada; Promocion según Promocion.TransicionValida (BE/Promocion.cs:91-107).
-    // La promoción nace de una sugerencia de Gerencia (con el reporte de métricas: origen Abandono o Rotación;
-    // sin él: Manual) o del alta manual de Administración (CrearManual, sin sugerencia). La vigencia termina por
-    // la baja pedida por el Vendedor, la desactivación directa o la fecha de fin (CerrarVencidas, que corre al
-    // consultar las promociones); si se rechaza la baja vuelve a Vigente con el mismo dictamen contable.
+    // PuedeReformularse, PuedeDarseDeBaja, PuedeSolicitarseBaja, DebeVencer). Estados: SugerenciaPromocion
+    // Pendiente → Evaluada | Descartada; Promocion según Promocion.TransicionValida (BE/Promocion.cs): En revisión
+    // contable → Vigente | Rechazada; Rechazada → En revisión contable | Dada de baja; Vigente → Dada de baja | Vencida.
+    // La promoción es siempre por plan y nace de una sugerencia de Gerencia (con el reporte de métricas: origen
+    // Abandono; sin él: Manual) o del alta manual de Administración (CrearManual, sin sugerencia). Pedir la baja no
+    // cambia el estado: la solicitud queda Pendiente y la promoción sigue Vigente hasta que Administración la
+    // atiende (AtenderSolicitud); si está de acuerdo, la da de baja (DarDeBaja). La vigencia también termina por la
+    // baja directa de Administración o por la fecha de fin (CerrarVencidas, que corre al consultar las promociones).
     carriles: [{ id: 'G', nombre: 'Gerencia' }, { id: 'A', nombre: 'Administración' }, { id: 'K', nombre: 'Contabilidad' }, { id: 'V', nombre: 'Vendedor' }],
     nodos: [
       N('i', 'inicio', 'G'),
       N('d0', 'decision', 'G', '¿Cómo surge la promoción?'),
-      N('a1', 'accion', 'G', 'Analizar métricas del período (por defecto 90 días): abandono por plan, rotación por categoría e impacto de las promociones'),
+      N('a1', 'accion', 'G', 'Analizar métricas del período (por defecto 90 días): abandono por plan, rotación por categoría (solo informativa) e impacto de las promociones'),
       N('d1', 'decision', 'G', '¿Hay oportunidad?'),
       N('f0', 'fin', 'G'),
-      N('a2', 'accion', 'G', 'Registrar sugerencia (origen Abandono o Rotación, o Manual si es idea propia): queda Pendiente'),
+      N('a2', 'accion', 'G', 'Registrar sugerencia para un plan (origen Abandono, o Manual si es idea propia): queda Pendiente'),
       N('d2', 'decision', 'A', '¿Acepta la sugerencia?'),
       N('a3', 'accion', 'A', 'Descartar sugerencia con motivo: Descartada'),
       N('f1', 'fin', 'A'),
       N('a4', 'accion', 'A', 'Crear promoción desde la sugerencia (la sugerencia queda Evaluada)'),
       N('a4m', 'accion', 'A', 'Crear promoción manual, sin sugerencia'),
-      N('a5', 'accion', 'A', 'Validar (destino único, valor, fecha de fin desde hoy) → En revisión contable'),
+      N('a5', 'accion', 'A', 'Validar (plan obligatorio, valor, fecha de fin desde hoy) → En revisión contable'),
       N('a6', 'accion', 'K', 'Analizar margen e impacto (beneficio estimado vs. costo del descuento, promociones superpuestas); quien la creó no la dictamina'),
       N('d3', 'decision', 'K', '¿Aprueba?'),
       N('a7', 'accion', 'K', 'Rechazada por Contabilidad (también si ya pasó su fecha de fin)'),
       N('d4', 'decision', 'A', '¿Reformular?'),
       N('a8', 'accion', 'A', 'Reformular las condiciones'),
-      N('a9', 'accion', 'A', 'Descartar promoción con motivo: Descartada'),
+      N('a9', 'accion', 'A', 'Dar de baja con motivo: Dada de baja'),
       N('f2', 'fin', 'A'),
       N('a10', 'accion', 'K', 'Vigente: un solo descuento por cobro'),
       N('d5', 'decision', 'A', '¿Qué la interrumpe?'),
-      N('a11', 'accion', 'V', 'Solicitar la baja con motivo: Baja solicitada'),
-      N('a16', 'accion', 'A', 'Evaluar la solicitud de baja'),
-      N('d6', 'decision', 'A', '¿Aprueba la baja?'),
-      N('a12', 'accion', 'A', 'Desactivada (informe a Gerencia)'),
-      N('a13', 'accion', 'A', 'Sigue Vigente con motivo (informe a Ventas)'),
-      N('a14', 'accion', 'A', 'Desactivar directamente con motivo: Desactivada'),
+      N('a11', 'accion', 'V', 'Solicitar la baja con motivo: la solicitud queda Pendiente y la promoción sigue Vigente'),
+      N('a16', 'accion', 'A', 'Atender la solicitud de baja'),
+      N('d6', 'decision', 'A', '¿Está de acuerdo?'),
+      N('a12', 'accion', 'A', 'Dar de baja: Dada de baja (la solicitud queda atendida)'),
+      N('a13', 'accion', 'A', 'Responder con motivo: sigue Vigente'),
+      N('a14', 'accion', 'A', 'Dar de baja directamente con motivo: Dada de baja'),
       N('a15', 'accion', 'A', 'Vencida (el sistema la cierra al consultar): ya no aplica en el cobro'),
       N('f3', 'fin', 'A'), N('f4', 'fin', 'A'),
-      // la información vuelve a quien la pidió (como en el PN01): Gerencia y Ventas reciben las resoluciones
+      // la información vuelve a quien la pidió (como en el PN01): Gerencia recibe el descarte y Ventas, la respuesta
       N('g1', 'accion', 'G', 'Recibir constancia de descarte de la sugerencia'),
-      N('g2', 'accion', 'G', 'Recibir informe de la baja (promoción desactivada)'),
-      N('v1', 'accion', 'V', 'Recibir resolución de baja rechazada (sigue vigente)'),
+      N('v2', 'accion', 'V', 'Recibir la respuesta (promoción dada de baja)'),
+      N('v1', 'accion', 'V', 'Recibir la respuesta (sigue vigente)'),
       // documentos (Artifact «Document», como en el PN01)
-      N('o1', 'documento', 'G', 'Reporte de métricas (período, abandono por plan, rotación por categoría, impacto de las promociones)'),
+      N('o1', 'documento', 'G', 'Reporte de métricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades por plan)'),
       N('o2', 'documento', 'G', 'Sugerencia de promoción (Pendiente)'),
       N('o3', 'documento', 'A', 'Constancia de descarte de la sugerencia'),
       N('o4', 'documento', 'A', 'Ficha de promoción (En revisión contable)'),
       N('o5', 'documento', 'K', 'Dictamen contable (rechazo con observación)'),
       N('o6', 'documento', 'K', 'Dictamen contable (aprobada: Vigente)'),
-      N('o7', 'documento', 'A', 'Constancia de descarte de la promoción'),
+      N('o7', 'documento', 'A', 'Constancia de baja (rechazada no reformulada)'),
       N('o8', 'documento', 'V', 'Solicitud de baja (motivo)'),
-      N('o9', 'documento', 'A', 'Resolución de baja'),
+      N('o9', 'documento', 'A', 'Respuesta a la solicitud de baja'),
       N('o10', 'documento', 'K', 'Análisis de impacto (beneficio estimado, costo del descuento, promociones superpuestas)'),
       N('o11', 'documento', 'A', 'Condiciones reformuladas'),
-      N('o12', 'documento', 'A', 'Constancia de desactivación (motivo)'),
+      N('o12', 'documento', 'A', 'Constancia de baja (motivo)'),
       N('o13', 'documento', 'A', 'Ficha de promoción (Vencida)')
     ],
     // El orden de nodos y flujos fija la grilla de conv-actividad.js (EA-generador): no reordenar sin volver a revisar el layout.
@@ -233,8 +235,8 @@ module.exports = [
       F('d2', 'a3', 'No'), F('a3', 'g1'), F('g1', 'f1'), F('d2', 'a4', 'Sí'), F('a4', 'a5'), F('a5', 'a6'), F('a6', 'd3'),
       F('d3', 'a7', 'No'), F('a7', 'd4'), F('d4', 'a8', 'Sí'), F('a8', 'a5'), F('d4', 'a9', 'No'), F('a9', 'f2'),
       F('d3', 'a10', 'Sí'), F('a10', 'd5'),
-      F('d5', 'a11', 'El Vendedor pide la baja'), F('a11', 'a16'), F('a16', 'd6'), F('d6', 'a12', 'Sí'), F('a12', 'g2'), F('g2', 'f3'), F('d6', 'a13', 'No'), F('a13', 'v1'), F('v1', 'a10'),
-      F('d5', 'a14', 'Administración la desactiva'), F('a14', 'f3'),
+      F('d5', 'a11', 'El Vendedor pide la baja'), F('a11', 'a16'), F('a16', 'd6'), F('d6', 'a12', 'Sí'), F('a12', 'v2'), F('v2', 'f3'), F('d6', 'a13', 'No'), F('a13', 'v1'), F('v1', 'a10'),
+      F('d5', 'a14', 'Administración la da de baja'), F('a14', 'f3'),
       F('d5', 'a15', 'Llega la fecha de fin'), F('a15', 'f4')
     ],
     // ida y vuelta de información: { de: acción, a: documento } = la produce; { de: documento, a: acción } = la usa
@@ -247,7 +249,7 @@ module.exports = [
       O('a10', 'o6'), O('o6', 'a11'),
       O('a9', 'o7'),
       O('a11', 'o8'), O('o8', 'a16'),
-      O('a12', 'o9'), O('a13', 'o9'), O('o9', 'g2'), O('o9', 'v1'),
+      O('a12', 'o9'), O('a13', 'o9'), O('o9', 'v2'), O('o9', 'v1'),
       O('a6', 'o10'),
       O('a8', 'o11'), O('o11', 'a5'),
       O('a14', 'o12'),

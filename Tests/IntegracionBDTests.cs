@@ -193,6 +193,90 @@ namespace Tests
             }
         }
 
+        // PN03 — la solicitud de baja no cambia el estado; atenderla sin baja la cierra; dar de baja la
+        // promoción cierra en la misma transacción las solicitudes pendientes (DioDeBaja = 1).
+        [TestMethod]
+        public void Promocion_SolicitarAtenderYDarDeBaja_RespetaElEsquemaNuevo()
+        {
+            ExigirBase();
+            var acceso = DAL.Acceso.GetInstance();
+            var dt = acceso.Leer(
+                "SELECT (SELECT TOP 1 IdPlan FROM PlanSuscripcion ORDER BY IdPlan) AS IdPlan, " +
+                "       (SELECT TOP 1 IdUsuario FROM Usuario ORDER BY IdUsuario) AS IdUsuario", null);
+            if (dt.Rows[0]["IdPlan"] == DBNull.Value || dt.Rows[0]["IdUsuario"] == DBNull.Value)
+                Assert.Inconclusive("La base de pruebas no tiene planes o usuarios.");
+            int idPlan = Convert.ToInt32(dt.Rows[0]["IdPlan"]);
+            int idUsuario = Convert.ToInt32(dt.Rows[0]["IdUsuario"]);
+
+            var dal = new DAL.Promocion();
+            int idPromo = 0;
+            try
+            {
+                idPromo = dal.Alta(new BE.Promocion
+                {
+                    Nombre = "PROMO Integracion Baja", TipoDescuento = BE.TipoDescuento.Porcentaje, Valor = 5,
+                    FechaInicio = DateTime.Today, FechaFin = DateTime.Today.AddDays(10), IdPlan = idPlan,
+                    IdUsuarioAlta = idUsuario, FechaAlta = DateTime.Now
+                }, new BE.PromocionHistorial { EstadoNuevo = BE.EstadoPromocion.EnRevisionContable, IdUsuario = idUsuario, Fecha = DateTime.Now });
+                acceso.Escribir("UPDATE Promocion SET Estado = 1 WHERE IdPromocion = @Id", new[] { new SqlParameter("@Id", idPromo) });
+
+                // Solicitar: queda Pendiente y la promoción sigue Vigente; no se admite una segunda pendiente.
+                var solicitud = new BE.SolicitudBajaPromocion
+                {
+                    IdPromocion = idPromo, IdUsuarioSolicita = idUsuario, Motivo = "No rinde", FechaSolicitud = DateTime.Now
+                };
+                int idSol = dal.SolicitarBaja(solicitud);
+                Assert.IsTrue(idSol > 0);
+                Assert.AreEqual(0, dal.SolicitarBaja(solicitud), "Una sola solicitud pendiente por promoción.");
+                var promo = dal.ObtenerPorId(idPromo);
+                Assert.AreEqual(BE.EstadoPromocion.Vigente, promo.Estado);
+                Assert.AreEqual("No rinde", promo.MotivoBaja);
+                Assert.IsTrue(dal.ObtenerSolicitudesBajaPendientes().Exists(s => s.IdSolicitud == idSol && s.NombrePromocion == "PROMO Integracion Baja"));
+
+                // Atender sin baja: Atendida con respuesta; la promoción sigue Vigente; no se atiende dos veces.
+                var atendida = new BE.SolicitudBajaPromocion
+                {
+                    IdSolicitud = idSol, IdPromocion = idPromo, Estado = BE.EstadoSolicitudBaja.Atendida, Respuesta = "Sigue",
+                    IdUsuarioResuelve = idUsuario, FechaResolucion = DateTime.Now
+                };
+                Assert.IsTrue(dal.AtenderSolicitud(atendida));
+                Assert.IsFalse(dal.AtenderSolicitud(atendida), "Ya no está pendiente.");
+                var s1 = dal.ObtenerSolicitudesBaja(idPromo).Single();
+                Assert.AreEqual(BE.EstadoSolicitudBaja.Atendida, s1.Estado);
+                Assert.IsFalse(s1.DioDeBaja);
+                Assert.AreEqual("Sigue", s1.Respuesta);
+                Assert.IsNull(dal.ObtenerPorId(idPromo).MotivoBaja);
+
+                // Nueva solicitud y Dar de baja: la cierra con DioDeBaja = 1 y escribe el historial.
+                int idSol2 = dal.SolicitarBaja(solicitud);
+                Assert.IsTrue(idSol2 > 0);
+                Assert.IsTrue(dal.DarDeBaja(idPromo, BE.EstadoPromocion.Vigente, new BE.PromocionHistorial
+                {
+                    IdPromocion = idPromo, EstadoAnterior = BE.EstadoPromocion.Vigente, EstadoNuevo = BE.EstadoPromocion.DadaDeBaja,
+                    IdUsuario = idUsuario, Fecha = DateTime.Now, Observacion = "Fin de campaña"
+                }, "De acuerdo"));
+                Assert.IsFalse(dal.DarDeBaja(idPromo, BE.EstadoPromocion.Vigente, new BE.PromocionHistorial
+                {
+                    IdPromocion = idPromo, EstadoAnterior = BE.EstadoPromocion.Vigente, EstadoNuevo = BE.EstadoPromocion.DadaDeBaja,
+                    IdUsuario = idUsuario, Fecha = DateTime.Now
+                }, "x"), "Claim atómico: ya no está Vigente.");
+                Assert.AreEqual(BE.EstadoPromocion.DadaDeBaja, dal.ObtenerPorId(idPromo).Estado);
+                var s2 = dal.ObtenerSolicitudesBaja(idPromo).Single(s => s.IdSolicitud == idSol2);
+                Assert.IsTrue(s2.DioDeBaja);
+                Assert.AreEqual("De acuerdo", s2.Respuesta);
+                Assert.AreEqual(BE.EstadoSolicitudBaja.Atendida, s2.Estado);
+                Assert.AreEqual(BE.EstadoPromocion.DadaDeBaja, dal.ObtenerHistorial(idPromo).Last().EstadoNuevo);
+                Assert.AreEqual(0, dal.SolicitarBaja(solicitud), "Una promoción dada de baja no admite solicitudes.");
+            }
+            finally
+            {
+                if (idPromo != 0)
+                    acceso.Escribir(
+                        "DELETE FROM SolicitudBajaPromocion WHERE IdPromocion = @Id; DELETE FROM PromocionHistorial WHERE IdPromocion = @Id; " +
+                        "DELETE FROM Promocion WHERE IdPromocion = @Id;", new[] { new SqlParameter("@Id", idPromo) });
+            }
+        }
+
         // Empleado ↔ Usuario: al modificar el usuario, su Empleado toma Nombre/Apellido/Email; un dato
         // vacío no pisa el del empleado y el DVH queda al día.
         [TestMethod]

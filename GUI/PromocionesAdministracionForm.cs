@@ -11,11 +11,12 @@ namespace GUI
     /// Capa de Presentación — PN03, carril Administración del diagrama de actividad (rol
     /// AdministracionComercial):
     ///   ¿Acepta la sugerencia? Sí: Crear promoción desde la sugerencia; No: Descartar sugerencia.
-    ///   Crear promoción manual. ¿Reformular? Sí: Reformular; No: Descartar promoción.
-    ///   ¿Aprueba la baja? Sí/No («Resolución de baja»). Desactivar directamente.
-    /// Imprime la sugerencia, la ficha, el dictamen, la solicitud y la resolución de baja y las
-    /// constancias de descarte. Solo muestra datos y llama a la BLL: las guardas viven en
-    /// BLL.Promocion / BLL.SugerenciaPromocion y los predicados en BE.
+    ///   Crear promoción manual. ¿Reformular? Sí: Reformular; No: Dar de baja.
+    ///   Solicitudes de baja pendientes (Ventas): Atender («Respuesta a la solicitud»); si
+    ///   Administración está de acuerdo, la promoción se da de baja. Dar de baja directamente.
+    /// Imprime la sugerencia, la ficha, el dictamen, la solicitud, la respuesta y la constancia de
+    /// baja. Solo muestra datos y llama a la BLL: las guardas viven en BLL.Promocion /
+    /// BLL.SugerenciaPromocion y los predicados en BE.
     /// </summary>
     public partial class PromocionesAdministracionForm : FormBase, IIdiomaObserver
     {
@@ -26,6 +27,7 @@ namespace GUI
         private readonly MenuDocumentosPromocion menuDocumentos;
 
         private List<BE.SugerenciaPromocion> _sugerencias = new List<BE.SugerenciaPromocion>();
+        private List<BE.SolicitudBajaPromocion> _solicitudes = new List<BE.SolicitudBajaPromocion>();
         private List<BE.Promocion> _promociones = new List<BE.Promocion>();
 
         private Idioma _idioma = GestorIdioma.IdiomaActual;
@@ -35,12 +37,12 @@ namespace GUI
             InitializeComponent();
             // Mismo estilo de grilla que el resto de las pantallas.
             GUI.Estilos.EstiloFormulario.Grilla(dgvSugerencias);
+            GUI.Estilos.EstiloFormulario.Grilla(dgvSolicitudes);
             GUI.Estilos.EstiloFormulario.Grilla(dgvPromociones);
             // Paleta centralizada (GUI/Tema.cs).
             btnUsarSugerencia.BackColor = btnNuevaManual.BackColor = btnReformular.BackColor = Tema.RosaPrimario;
-            btnAprobarBaja.BackColor = Tema.Exito;
-            btnDescartarSugerencia.BackColor = btnDescartarPromocion.BackColor = btnDesactivar.BackColor = Tema.Error;
-            btnRechazarBaja.BackColor = Tema.Alerta;
+            btnAtenderSolicitud.BackColor = Tema.Alerta;
+            btnDescartarSugerencia.BackColor = btnDarDeBaja.BackColor = Tema.Error;
             btnImprimirSugerencia.BackColor = btnImprimir.BackColor = Tema.RosaOscuro;
             btnHistorial.BackColor = Tema.TextoMuted;
             menuDocumentos = new MenuDocumentosPromocion(promocionBLL, ObtenerPromocionSeleccionada, this,
@@ -67,14 +69,16 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(idioma);
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
-            foreach (Control c in new Control[] { lblSugerenciasTitulo, lblPromocionesTitulo })
+            foreach (Control c in new Control[] { lblSugerenciasTitulo, lblSolicitudesTitulo, lblPromocionesTitulo })
                 Aplicar(c, t);
             foreach (Control c in flowSugerencias.Controls) Aplicar(c, t);
+            foreach (Control c in flowSolicitudes.Controls) Aplicar(c, t);
             foreach (Control c in flowPromociones.Controls) Aplicar(c, t);
             tip.SetToolTip(btnRefrescar, Tr("tip.actualizar", "Actualizar"));
             btnRefrescar.Text = Tr("tip.actualizar", "Actualizar");
             menuDocumentos.Traducir();
             TraducirHeadersSugerencias();
+            TraducirHeadersSolicitudes();
             TraducirHeadersPromociones();
         }
 
@@ -99,6 +103,19 @@ namespace GUI
             RH("Sugerida por", "col.promo.sugeridapor", "Sugerida por");
         }
 
+        private void TraducirHeadersSolicitudes()
+        {
+            void RH(string col, string clave, string fb)
+            {
+                if (dgvSolicitudes.Columns.Contains(col)) dgvSolicitudes.Columns[col].HeaderText = Tr(clave, fb);
+            }
+            RH("ID", "col.promo.id", "ID");
+            RH("Promoción", "col.promo.promocion", "Promoción");
+            RH("Motivo", "col.promo.motivo", "Motivo");
+            RH("Solicitada por", "col.promo.solicitadapor", "Solicitada por");
+            RH("Fecha", "col.promo.fecha", "Fecha");
+        }
+
         private void TraducirHeadersPromociones()
         {
             void RH(string col, string clave, string fb)
@@ -111,7 +128,7 @@ namespace GUI
             RH("Estado", "col.promo.estado", "Estado");
             RH("Vigencia", "col.promo.vigencia", "Vigencia");
             RH("Creada por", "col.promo.creadapor", "Creada por");
-            RH("Motivo Baja", "col.promo.motivobaja", "Motivo Baja");
+            RH("Baja solicitada", "col.promo.bajasolicitada", "Baja solicitada");
         }
 
         private void PromocionesAdministracionForm_Load(object sender, EventArgs e) => CargarTodo();
@@ -121,6 +138,7 @@ namespace GUI
         private void CargarTodo()
         {
             CargarSugerencias();
+            CargarSolicitudes();
             CargarPromociones();
         }
 
@@ -142,7 +160,7 @@ namespace GUI
                 tabla.Columns.Add("Sugerida por", typeof(string));
 
                 foreach (var s in _sugerencias)
-                    tabla.Rows.Add(s.IdSugerencia, Docs.AplicaA(s.IdPlan, s.NombrePlan, s.CategoriaPrenda),
+                    tabla.Rows.Add(s.IdSugerencia, Docs.AplicaA(s.IdPlan, s.NombrePlan),
                         Docs.Origen(s.OrigenMetrica), s.Motivo, Docs.Tipo(s.TipoDescuentoSugerido),
                         s.BeneficioEstimado, s.NombreUsuarioAlta ?? "—");
 
@@ -208,6 +226,81 @@ namespace GUI
             });
         }
 
+        // ── Solicitudes de baja pendientes (Ventas): Atender ─────────────────
+
+        private void CargarSolicitudes()
+        {
+            try
+            {
+                _solicitudes = promocionBLL.ObtenerSolicitudesBajaPendientes();
+
+                var tabla = new DataTable();
+                tabla.Columns.Add("ID", typeof(int));
+                tabla.Columns.Add("Promoción", typeof(string));
+                tabla.Columns.Add("Motivo", typeof(string));
+                tabla.Columns.Add("Solicitada por", typeof(string));
+                tabla.Columns.Add("Fecha", typeof(string));
+
+                foreach (var s in _solicitudes)
+                    tabla.Rows.Add(s.IdSolicitud, $"#{s.IdPromocion} — {s.NombrePromocion}", s.Motivo,
+                        s.NombreUsuarioSolicita ?? "—", s.FechaSolicitud.ToString("g"));
+
+                dgvSolicitudes.DataSource = tabla;
+                if (dgvSolicitudes.Columns.Contains("ID")) dgvSolicitudes.Columns["ID"].Width = 44;
+                TraducirHeadersSolicitudes();
+                dgvSolicitudes.ClearSelection();
+                btnAtenderSolicitud.Enabled = false;
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        private BE.SolicitudBajaPromocion ObtenerSolicitudSeleccionada()
+        {
+            if (dgvSolicitudes.SelectedRows.Count == 0) return null;
+            int id = Convert.ToInt32(dgvSolicitudes.SelectedRows[0].Cells["ID"].Value);
+            return _solicitudes.Find(s => s.IdSolicitud == id);
+        }
+
+        private void DgvSolicitudes_SelectionChanged(object sender, EventArgs e)
+        {
+            var s = ObtenerSolicitudSeleccionada();
+            btnAtenderSolicitud.Enabled = s != null && s.EstaPendiente();
+        }
+
+        // Atender la solicitud: ¿de acuerdo con dar de baja? → respuesta obligatoria («Respuesta a la solicitud»).
+        private void BtnAtenderSolicitud_Click(object sender, EventArgs e)
+        {
+            var solicitud = ObtenerSolicitudSeleccionada();
+            if (solicitud == null) return;
+
+            var decision = MessageBox.Show(this,
+                Tr("dlg.promo.atender.pregunta",
+                   "Ventas pide dar de baja '{0}'.\nMotivo: {1}\n\n¿Estás de acuerdo con darla de baja?\n\nSí: se da de baja.  No: sigue vigente.",
+                   new object[] { solicitud.NombrePromocion, solicitud.Motivo }),
+                Tr("dlg.promo.atender.titulo", "Atender solicitud de baja"),
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (decision == DialogResult.Cancel) return;
+            bool darDeBaja = decision == DialogResult.Yes;
+
+            string respuesta = PedirTexto(Tr("dlg.promo.atender.titulo", "Atender solicitud de baja"),
+                darDeBaja
+                    ? Tr("dlg.promo.atender.prompt.baja", "Respuesta para Ventas (la promoción '{0}' se da de baja):", new object[] { solicitud.NombrePromocion })
+                    : Tr("dlg.promo.atender.prompt.sigue", "Respuesta para Ventas (por qué '{0}' sigue vigente):", new object[] { solicitud.NombrePromocion }));
+            if (respuesta == null) return;
+
+            try
+            {
+                promocionBLL.AtenderSolicitud(this.Text, solicitud, respuesta, darDeBaja);
+                MostrarOk(darDeBaja
+                    ? Tr("msg.promo.solicitud.dadabaja", "Solicitud #{0} atendida: la promoción '{1}' quedó dada de baja.", new object[] { solicitud.IdSolicitud, solicitud.NombrePromocion })
+                    : Tr("msg.promo.solicitud.sigue", "Solicitud #{0} atendida: la promoción '{1}' sigue vigente.", new object[] { solicitud.IdSolicitud, solicitud.NombrePromocion }));
+                CargarSolicitudes();
+                CargarPromociones();
+            }
+            catch (Exception ex) { MostrarError(ex); }
+            // La respuesta a la solicitud está en el menú "Imprimir" de la promoción.
+        }
+
         // ── Promociones ──────────────────────────────────────────────────────
 
         private void CargarPromociones()
@@ -223,10 +316,10 @@ namespace GUI
                 tabla.Columns.Add("Estado", typeof(string));
                 tabla.Columns.Add("Vigencia", typeof(string));
                 tabla.Columns.Add("Creada por", typeof(string));
-                tabla.Columns.Add("Motivo Baja", typeof(string));
+                tabla.Columns.Add("Baja solicitada", typeof(string));
 
                 foreach (var p in _promociones)
-                    tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan, p.CategoriaPrenda),
+                    tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan),
                         Docs.Estado(p.Estado), $"{p.FechaInicio:d} - {p.FechaFin:d}",
                         p.NombreUsuarioAlta ?? "—", p.MotivoBaja ?? "—");
 
@@ -254,9 +347,7 @@ namespace GUI
         private void HabilitarPromocion(BE.Promocion p)
         {
             btnReformular.Enabled = p != null && p.PuedeReformularse();
-            btnDescartarPromocion.Enabled = p != null && p.PuedeDescartarse();
-            btnDesactivar.Enabled = p != null && p.PuedeDesactivarseDirecto();
-            btnAprobarBaja.Enabled = btnRechazarBaja.Enabled = p != null && p.PuedeResolverseBaja();
+            btnDarDeBaja.Enabled = p != null && p.PuedeDarseDeBaja();
             btnHistorial.Enabled = btnImprimir.Enabled = p != null;
         }
 
@@ -284,80 +375,25 @@ namespace GUI
             CargarTodo();   // la ficha para Contabilidad está en el menú "Imprimir"
         }
 
-        // ¿Reformular? No → Descartar promoción (motivo obligatorio) → «Constancia de descarte».
-        private void BtnDescartarPromocion_Click(object sender, EventArgs e)
+        // Dar de baja (motivo obligatorio) una Vigente o una Rechazada (¿Reformular? No) → «Constancia de baja».
+        // Si tenía una solicitud de baja pendiente, queda atendida con este motivo.
+        private void BtnDarDeBaja_Click(object sender, EventArgs e)
         {
             var promocion = ObtenerPromocionSeleccionada();
             if (promocion == null) return;
-            string motivo = PedirTexto(Tr("dlg.promo.descartar.titulo", "Descartar promoción"),
-                Tr("dlg.promo.descartar.prompt", "Motivo por el que no se reformula la promoción '{0}':", new object[] { promocion.Nombre }));
+            string motivo = PedirTexto(Tr("dlg.promo.dardebaja.titulo", "Dar de baja la promoción"),
+                Tr("dlg.promo.dardebaja.prompt", "Motivo para dar de baja la promoción '{0}':", new object[] { promocion.Nombre }));
             if (motivo == null) return;
 
             try
             {
-                promocionBLL.DescartarPromocion(this.Text, promocion, motivo);
-                MostrarOk(Tr("msg.promo.descartada", "Promoción '{0}' descartada.", new object[] { promocion.Nombre }));
+                promocionBLL.DarDeBaja(this.Text, promocion, motivo);
+                MostrarOk(Tr("msg.promo.dadabaja", "Promoción '{0}' dada de baja.", new object[] { promocion.Nombre }));
+                CargarSolicitudes();
                 CargarPromociones();
             }
             catch (Exception ex) { MostrarError(ex); }
-            // La constancia de descarte está en el menú "Imprimir".
-        }
-
-        // (b) Administración desactiva directamente (motivo obligatorio).
-        private void BtnDesactivar_Click(object sender, EventArgs e)
-        {
-            var promocion = ObtenerPromocionSeleccionada();
-            if (promocion == null) return;
-            string motivo = PedirTexto(Tr("dlg.promo.desactivar.titulo", "Desactivar promoción"),
-                Tr("dlg.promo.desactivar.prompt", "Motivo para desactivar la promoción '{0}':", new object[] { promocion.Nombre }));
-            if (motivo == null) return;
-
-            try
-            {
-                promocionBLL.Desactivar(this.Text, promocion, motivo);
-                MostrarOk(Tr("msg.promo.desactivada", "Promoción '{0}' desactivada.", new object[] { promocion.Nombre }));
-                CargarPromociones();
-            }
-            catch (Exception ex) { MostrarError(ex); }
-        }
-
-        // ¿Aprueba la baja? Sí → Desactivada + «Resolución de baja» (informe a Gerencia).
-        private void BtnAprobarBaja_Click(object sender, EventArgs e)
-        {
-            var promocion = ObtenerPromocionSeleccionada();
-            if (promocion == null) return;
-            string observacion = PedirTexto(Tr("dlg.promo.aprobarbaja.titulo", "Aprobar baja de promoción"),
-                Tr("dlg.promo.aprobarbaja.prompt", "Ventas pidió la baja de '{0}'.\nMotivo: {1}\n\nObservación de la resolución (opcional):",
-                   new object[] { promocion.Nombre, promocion.MotivoBaja }), obligatorio: false);
-            if (observacion == null) return;
-
-            ResolverBaja(promocion, () => promocionBLL.AprobarBaja(this.Text, promocion, observacion),
-                Tr("msg.promo.dadabaja", "Promoción '{0}' dada de baja.", new object[] { promocion.Nombre }));
-        }
-
-        // ¿Aprueba la baja? No (motivo obligatorio) → vuelve a Vigente + «Resolución de baja» (informe a Ventas).
-        private void BtnRechazarBaja_Click(object sender, EventArgs e)
-        {
-            var promocion = ObtenerPromocionSeleccionada();
-            if (promocion == null) return;
-            string motivo = PedirTexto(Tr("inputdlg.rechazarbaja.titulo", "Rechazar Baja de Promoción"),
-                Tr("inputdlg.rechazarbaja.prompt", "Motivo por el cual '{0}' sigue vigente:", new object[] { promocion.Nombre }));
-            if (motivo == null) return;
-
-            ResolverBaja(promocion, () => promocionBLL.RechazarBaja(this.Text, promocion, motivo),
-                Tr("msg.promo.bajarechazada", "Se rechazó la baja de '{0}': sigue vigente.", new object[] { promocion.Nombre }));
-        }
-
-        // La resolución de baja (informe a Gerencia o a Ventas) está en el menú "Imprimir".
-        private void ResolverBaja(BE.Promocion promocion, Func<int> resolver, string mensajeOk)
-        {
-            try
-            {
-                resolver();
-                MostrarOk(mensajeOk);
-                CargarPromociones();
-            }
-            catch (Exception ex) { MostrarError(ex); }
+            // La constancia de baja está en el menú "Imprimir".
         }
 
         private void BtnHistorial_Click(object sender, EventArgs e)

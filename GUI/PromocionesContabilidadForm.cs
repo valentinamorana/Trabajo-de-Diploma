@@ -109,7 +109,7 @@ namespace GUI
                 tabla.Columns.Add("Creada por", typeof(string));
 
                 foreach (var p in _promociones)
-                    tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan, p.CategoriaPrenda),
+                    tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan),
                         Docs.Tipo(p.TipoDescuento), p.Valor, $"{p.FechaInicio:d} - {p.FechaFin:d}",
                         p.MargenEstimado, p.ImpactoEconomico ?? "—", p.NombreUsuarioAlta ?? "—");
 
@@ -183,13 +183,6 @@ namespace GUI
             var p = a.Promocion;
             sb.AppendLine();
             sb.AppendLine(Tr("promo.analisis.calc.titulo", "Margen proyectado (por mes):"));
-            if (a.EsInformativa)
-            {
-                sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.informativa",
-                    "Promoción por categoría: es informativa (no descuenta en el cobro); no tiene costo proyectado ni resultado."));
-                sb.AppendLine();
-                return;
-            }
             if (!a.MargenCalculable)
             {
                 sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.sinplan", "No se puede calcular el margen: el plan de la promoción ya no existe."));

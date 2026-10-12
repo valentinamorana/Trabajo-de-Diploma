@@ -12,8 +12,8 @@ namespace BLL.Interfaces
         List<BE.SugerenciaPromocion> ObtenerTodas();
         BE.SugerenciaPromocion ObtenerPorId(int idSugerencia);
 
-        // "Registrar sugerencia": para un plan o una categoría de prenda (nunca ambos), con su origen.
-        int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int? idPlan, string categoriaPrenda,
+        // "Registrar sugerencia": siempre para un plan, con su origen.
+        int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int idPlan,
                                 string motivo, BE.TipoDescuento tipoSugerido, decimal beneficioEstimado);
 
         // "¿Acepta la sugerencia? No → Descartar sugerencia" (motivo obligatorio).

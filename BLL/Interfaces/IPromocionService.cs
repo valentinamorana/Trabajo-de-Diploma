@@ -16,7 +16,8 @@ namespace BLL.Interfaces
         List<BE.PromocionHistorial> ObtenerHistorial(int idPromocion);
         BE.DictamenContable ObtenerUltimoDictamen(int idPromocion);
         BE.SolicitudBajaPromocion ObtenerUltimaSolicitudBaja(int idPromocion);
-        BE.PromocionHistorial ObtenerDescarte(int idPromocion);
+        BE.PromocionHistorial ObtenerBaja(int idPromocion);
+        List<BE.SolicitudBajaPromocion> ObtenerSolicitudesBajaPendientes();
 
         // ── Administración: crear (desde sugerencia / manual) → Validar ────────
         int CrearDesdeSugerencia(string modulo, int idSugerencia, string nombre, string descripcion,
@@ -24,7 +25,7 @@ namespace BLL.Interfaces
                                   decimal margenEstimado, string impactoEconomico);
 
         int CrearManual(string modulo, string nombre, string descripcion, BE.TipoDescuento tipo, decimal valor,
-                         DateTime fechaInicio, DateTime fechaFin, int? idPlan, string categoriaPrenda,
+                         DateTime fechaInicio, DateTime fechaFin, int idPlan,
                          decimal margenEstimado, string impactoEconomico);
 
         void ValidarPromocion(BE.Promocion promocion);
@@ -35,15 +36,15 @@ namespace BLL.Interfaces
         int AprobarContable(string modulo, BE.Promocion promocion, string observacion);
         int RechazarContable(string modulo, BE.Promocion promocion, string observacion);
 
-        // ── Administración: ¿Reformular? ───────────────────────────────────────
+        // ── Administración: ¿Reformular? / Dar de baja ──────────────────────
         void Reformular(string modulo, BE.Promocion promocion);
-        void DescartarPromocion(string modulo, BE.Promocion promocion, string motivo);
+        // Una Vigente o una Rechazada → DadaDeBaja; cierra las solicitudes de baja pendientes.
+        void DarDeBaja(string modulo, BE.Promocion promocion, string motivo);
 
         // ── Vigencia (región interrumpible) ────────────────────────────────────
         int SolicitarBaja(string modulo, BE.Promocion promocion, string motivo);
-        int AprobarBaja(string modulo, BE.Promocion promocion, string observacion);
-        int RechazarBaja(string modulo, BE.Promocion promocion, string motivo);
-        void Desactivar(string modulo, BE.Promocion promocion, string motivo);
+        // Si darDeBaja, Administración está de acuerdo y la promoción pasa a DadaDeBaja.
+        void AtenderSolicitud(string modulo, BE.SolicitudBajaPromocion solicitud, string respuesta, bool darDeBaja);
         int CerrarVencidas();
     }
 }

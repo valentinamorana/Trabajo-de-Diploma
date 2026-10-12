@@ -12,16 +12,14 @@ namespace BLL
     ///
     /// Cruza los reportes del negocio con la sugerencia de promociones:
     ///   · Abandono por plan: clientes en riesgo de irse → promoción de retención por plan.
-    ///   · Rotación por categoría: varias prendas sin pedidos → promoción por categoría (informativa).
+    ///   · Rotación por categoría: varias prendas sin pedidos → queda en el reporte como oportunidad
+    ///     informativa; no sirve de base para una sugerencia (las promociones son por plan).
     /// Es de solo lectura: el reporte se calcula sobre los datos guardados y se puede imprimir;
     /// Gerencia decide qué oportunidad convertir en sugerencia (SugerenciaPromocion.RegistrarSugerencia).
     /// </summary>
     public class AnalisisPromociones
     {
         public const int MinimoPrendasPorCategoria = 2;
-
-        /// <summary>Valor de referencia (editable por Gerencia) por prenda parada, para la estimación inicial.</summary>
-        public const decimal ValorReferenciaPorPrenda = 1000m;
 
         /// <summary>Período por defecto de "Analizar métricas" (días hacia atrás desde hoy).</summary>
         public const int DiasPeriodoPorDefecto = 90;
@@ -73,17 +71,8 @@ namespace BLL
                 Hasta = fin,
                 ImpactoPromociones = ImpactoPromociones(inicio, fin),
                 AbandonoPorPlan = AbandonoPorPlan(ab, planes),
-                RotacionPorCategoria = rot
-                    .Where(r => !string.IsNullOrWhiteSpace(r.Categoria))
-                    .GroupBy(r => r.Categoria.Trim(), StringComparer.OrdinalIgnoreCase)
-                    .Select(g => new BE.MetricaRotacionCategoria
-                    {
-                        Categoria = g.Key,
-                        PrendasBajaDemanda = g.Count(EsBajaDemanda),
-                        PrendasAltaDemanda = g.Count(r => !EsBajaDemanda(r))
-                    })
-                    .OrderByDescending(m => m.PrendasBajaDemanda).ToList(),
-                Oportunidades = Oportunidades(rot, ab, planes)
+                RotacionPorCategoria = RotacionPorCategoria(rot),
+                Oportunidades = Oportunidades(ab, planes)
             };
 
             try
@@ -114,7 +103,25 @@ namespace BLL
 
         // Oportunidades detectadas (sin exigir permisos: lo usa AnalizarMetricas y las pruebas).
         public List<BE.CandidataSugerencia> Detectar()
-            => Oportunidades(rotacion.Detectar(), abandono.Detectar(), dalPlan.ObtenerTodos());
+            => Oportunidades(abandono.Detectar(), dalPlan.ObtenerTodos());
+
+        // Rotación por categoría del reporte. Una categoría con varias prendas de baja demanda se
+        // marca como oportunidad informativa (con ejemplos), pero no genera una CandidataSugerencia.
+        public List<BE.MetricaRotacionCategoria> RotacionPorCategoria()
+            => RotacionPorCategoria(rotacion.Detectar());
+
+        private static List<BE.MetricaRotacionCategoria> RotacionPorCategoria(List<BE.RotacionPrenda> rot) =>
+            rot.Where(r => !string.IsNullOrWhiteSpace(r.Categoria))
+               .GroupBy(r => r.Categoria.Trim(), StringComparer.OrdinalIgnoreCase)
+               .Select(g => new BE.MetricaRotacionCategoria
+               {
+                   Categoria = g.Key,
+                   PrendasBajaDemanda = g.Count(EsBajaDemanda),
+                   PrendasAltaDemanda = g.Count(r => !EsBajaDemanda(r)),
+                   EjemplosBajaDemanda = string.Join(", ", g.Where(EsBajaDemanda).Select(r => r.NombrePrenda).Take(3)),
+                   EsOportunidad = g.Count(EsBajaDemanda) >= MinimoPrendasPorCategoria
+               })
+               .OrderByDescending(m => m.PrendasBajaDemanda).ToList();
 
         private static List<BE.MetricaAbandonoPlan> AbandonoPorPlan(List<BE.ClienteEnRiesgo> enRiesgo, List<BE.PlanSuscripcion> planes)
         {
@@ -134,30 +141,10 @@ namespace BLL
             return lista.OrderByDescending(m => m.IngresoMensualEnRiesgo).ToList();
         }
 
-        private static List<BE.CandidataSugerencia> Oportunidades(List<BE.RotacionPrenda> rot, List<BE.ClienteEnRiesgo> ab,
-                                                                  List<BE.PlanSuscripcion> planes)
+        // Oportunidades que Gerencia puede usar de base para una sugerencia: solo las por plan.
+        private static List<BE.CandidataSugerencia> Oportunidades(List<BE.ClienteEnRiesgo> ab, List<BE.PlanSuscripcion> planes)
         {
             var candidatas = new List<BE.CandidataSugerencia>();
-
-            // Rotación: prendas de baja demanda agrupadas por categoría.
-            var bajaDemanda = rot
-                .Where(r => EsBajaDemanda(r) && !string.IsNullOrWhiteSpace(r.Categoria))
-                .GroupBy(r => r.Categoria.Trim(), StringComparer.OrdinalIgnoreCase)
-                .Where(g => g.Count() >= MinimoPrendasPorCategoria);
-            foreach (var g in bajaDemanda)
-            {
-                string ejemplos = string.Join(", ", g.Select(r => r.NombrePrenda).Take(3));
-                candidatas.Add(new BE.CandidataSugerencia
-                {
-                    Origen = BE.OrigenMetrica.Rotacion,
-                    CategoriaPrenda = g.Key,
-                    TipoSugerido = BE.TipoDescuento.MontoFijo,
-                    BeneficioEstimado = g.Count() * ValorReferenciaPorPrenda,
-                    Motivo = $"Análisis de rotación: {g.Count()} prenda(s) de la categoría {g.Key} sin pedidos ({ejemplos}).",
-                    ClaveMotivo = "promo.cand.rotacion",
-                    ArgsMotivo = new object[] { g.Count(), g.Key, ejemplos }
-                });
-            }
 
             // Abandono: clientes en riesgo agrupados por plan (el ingreso mensual en riesgo es el beneficio a proteger).
             foreach (var m in AbandonoPorPlan(ab, planes))

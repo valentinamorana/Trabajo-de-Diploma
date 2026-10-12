@@ -5,14 +5,14 @@ namespace BE
     /// <summary>
     /// PN03 — «Sugerencia de promoción» que Gerencia (rol GerenteComercial) envía a Administración
     /// tras "Analizar métricas". Administración la acepta (crea la promoción a partir de ella:
-    /// Evaluada) o la descarta con motivo (Descartada). Aplica a UNO de estos dos, nunca ambos:
-    /// IdPlan o CategoriaPrenda.
+    /// Evaluada) o la descarta con motivo (Descartada). Aplica siempre a un plan (la BLL lo exige);
+    /// IdPlan es nullable solo por las sugerencias por categoría de la versión anterior, que la
+    /// base cerró al discontinuarlas.
     /// </summary>
     public class SugerenciaPromocion
     {
         public int IdSugerencia { get; set; }
         public int? IdPlan { get; set; }
-        public string CategoriaPrenda { get; set; }
         public string Motivo { get; set; }
         public TipoDescuento TipoDescuentoSugerido { get; set; }
         public decimal BeneficioEstimado { get; set; }
@@ -36,7 +36,6 @@ namespace BE
         public string NombreUsuarioAlta { get; set; }
 
         public bool AplicaAPlan() => IdPlan.HasValue;
-        public bool AplicaACategoria() => !string.IsNullOrWhiteSpace(CategoriaPrenda);
 
         /// <summary>Guarda de "¿Acepta la sugerencia?": solo se decide sobre una sugerencia Pendiente.</summary>
         public bool PuedeEvaluarse() => Estado == EstadoSugerencia.Pendiente;

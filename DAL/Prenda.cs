@@ -170,9 +170,8 @@ namespace DAL
             return lista;
         }
 
-        // Catálogo de categorías ACTIVAS (tabla Categoria, 3FN): lo que se ofrece al cargar una prenda,
-        // una promoción o una sugerencia. Prenda.Categoria y Promocion/SugerenciaPromocion.CategoriaPrenda
-        // referencian Categoria.Nombre (FK por clave natural).
+        // Catálogo de categorías ACTIVAS (tabla Categoria, 3FN): lo que se ofrece al cargar una prenda.
+        // Prenda.Categoria referencia Categoria.Nombre (FK por clave natural).
         public List<string> ObtenerCategorias()
         {
             var lista = new List<string>();

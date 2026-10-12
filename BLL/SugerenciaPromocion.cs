@@ -35,19 +35,17 @@ namespace BLL
         public BE.SugerenciaPromocion ObtenerPorId(int idSugerencia) => dalSugerencia.ObtenerPorId(idSugerencia);
 
         // "¿Hay oportunidad? Sí → Registrar sugerencia" («Sugerencia de promoción»).
-        public int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int? idPlan, string categoriaPrenda,
+        public int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int idPlan,
                                        string motivo, BE.TipoDescuento tipoSugerido, decimal beneficioEstimado)
         {
             PermisosAccion.Exigir(BE.Patentes.SugerenciaPromocion, BE.Patentes.SugerenciaPromocion);
 
-            bool aplicaPlan = idPlan.HasValue;
-            bool aplicaCategoria = !string.IsNullOrWhiteSpace(categoriaPrenda);
+            // Las promociones son siempre por plan: la sugerencia también.
+            if (idPlan <= 0)
+                throw new BE.AppException("err.bll.sugerenciapromocion.plan_requerido",
+                    "Elegí el plan al que apunta la sugerencia.");
 
-            if (aplicaPlan == aplicaCategoria)
-                throw new BE.AppException("err.bll.sugerenciapromocion.destino_invalido",
-                    "La sugerencia debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.");
-
-            if (aplicaPlan && dalPlan.ObtenerPorId(idPlan.Value) == null)
+            if (dalPlan.ObtenerPorId(idPlan) == null)
                 throw new BE.AppException("err.bll.sugerenciapromocion.plan_inexistente",
                     "El plan seleccionado no existe.");
 
@@ -62,7 +60,6 @@ namespace BLL
             var sugerencia = new BE.SugerenciaPromocion
             {
                 IdPlan = idPlan,
-                CategoriaPrenda = aplicaCategoria ? categoriaPrenda.Trim() : null,
                 Motivo = motivo.Trim(),
                 TipoDescuentoSugerido = tipoSugerido,
                 BeneficioEstimado = beneficioEstimado,
@@ -74,7 +71,7 @@ namespace BLL
 
             int idNuevo = dalSugerencia.Alta(sugerencia);
 
-            string destino = aplicaPlan ? $"plan ID {idPlan}" : $"categoría '{sugerencia.CategoriaPrenda}'";
+            string destino = $"plan ID {idPlan}";
             bitacora.Registrar(modulo,
                 $"Sugerencia de promoción #{idNuevo} ({origen}) — {destino} — Motivo: {sugerencia.Motivo}",
                 BE.Criticidad.Baja);

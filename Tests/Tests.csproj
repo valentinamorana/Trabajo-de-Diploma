@@ -77,6 +77,7 @@
     <Compile Include="RecomendacionPrendasTests.cs" />
     <Compile Include="ReporteVentasVendedorTests.cs" />
     <Compile Include="CobroTests.cs" />
+    <Compile Include="CircuitoPN03IntegracionTests.cs" />
     <Compile Include="IntegracionBDTests.cs" />
     <Compile Include="ListaEsperaTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />

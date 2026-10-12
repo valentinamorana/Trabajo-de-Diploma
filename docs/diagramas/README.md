@@ -119,10 +119,10 @@ Si cambia el esquema de la base, volver a extraer `fuente/schema.json` (tablas, 
 | `DSS_PN03_CU01_ADM_GestionarPromociones` | PN03 · CU01-ADM Gestionar promociones (crear desde sugerencia o manual, reformular) |
 | `DSS_PN03_CU03_ADM_DescartarSugerencia` | PN03 · CU03-ADM Descartar sugerencia (¿Acepta la sugerencia? No) |
 | `DSS_PN03_CU01_CONT_AnalizarPromocion` | PN03 · CU01-CONT Analizar promoción (margen e impacto → ¿Aprueba?) |
-| `DSS_PN03_CU04_ADM_DescartarPromocion` | PN03 · CU04-ADM Descartar promoción rechazada (¿Reformular? No) |
-| `DSS_PN03_CU01_VEN_SugerirBaja` | PN03 · CU01-VEN Solicitar baja de promoción |
-| `DSS_PN03_CU02_ADM_ResolverBaja` | PN03 · CU02-ADM Resolver baja de promoción (¿Aprueba la baja?) |
-| `DSS_PN03_CU05_ADM_DesactivarYVencer` | PN03 · CU05-ADM Desactivar promoción y cierre por fecha de fin |
+| `DSS_PN03_CU04_ADM_DarDeBaja` | PN03 · CU04-ADM Dar de baja promoción (Vigente, o Rechazada que no se reformula) |
+| `DSS_PN03_CU01_VEN_SugerirBaja` | PN03 · CU01-VEN Solicitar baja de promoción (queda pendiente; la promoción sigue Vigente) |
+| `DSS_PN03_CU02_ADM_AtenderSolicitudBaja` | PN03 · CU02-ADM Atender solicitud de baja (de acuerdo: dar de baja; si no, sigue Vigente) |
+| `DSS_PN03_CerrarVencidas` | PN03 · Cierre de promociones por fecha de fin |
 | `DSS_PN04_CU01_DEP_InspeccionarDevolucion` | PN04 · CU-DEP-01 Inspeccionar devolución |
 | `DSS_PN04_CU02_DEP_ReportarPrendaPerdida` | PN04 · CU-DEP-02 Reportar prenda perdida |
 | `DSS_N01_CU04_GestionarPlanes` | N01 · CU04-VEN Gestionar planes de suscripción |

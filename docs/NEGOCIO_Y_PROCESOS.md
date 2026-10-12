@@ -133,8 +133,9 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 | **Prenda** (`EstadoPrenda`, patrón **State** en `BE/Estados/`) | Disponible 0 · EnUso 1 · EnLimpieza 2 · Baja 3 | Disponible→EnLimpieza\|Baja; EnLimpieza→Disponible\|Baja; EnUso→Baja (solo por *Reportar prenda perdida*); Baja = final. **→EnUso** solo al separar las prendas de un pedido (`DAL/Pedido.cs › SepararPrendas`); **EnUso→EnLimpieza** solo al registrar la devolución. `BLL/Prenda.cs › CambiarEstado` rechaza siempre EnUso→Baja y EnLimpieza→Baja: las dos van con cargo y solo las hace `BLL/InspeccionDevolucion.cs` |
 | **Pedido** (`EstadoPedido`) | Pendiente 0 (formalizado) · Despachado 1 · Entregado 2 · Cancelado 3 · EnControlStock 4 · ConFaltantes 5 · Separado 6 · Desistido 7 | Armado (PN01): EnControlStock→ConFaltantes\|Separado; ConFaltantes→EnControlStock (ajuste)\|Desistido; Separado→Pendiente (formalizar). Ciclo: Pendiente→Despachado (`Despachar`)→Entregado (`MarcarEntregado`); Pendiente→Cancelado (`Cancelar`, libera prendas); Cancelado→EnControlStock (`DesCancelar` = "Reactivar": revalida y vuelve a control de stock, sin reservar); `RegistrarDevolucion` solo sobre Entregado sin devolver (prendas EnUso→EnLimpieza y `Pedido.FechaDevolucion`, sin cambiar el estado). Entregado y Desistido son finales. Cancelar/devolver con **Command** (`BLL/Comandos/`) |
 | **Contratacion** (`EstadoContratacion`) | PendientePago 0 · Pagada 1 · Cancelada 2 | Pendiente→Pagada (cobro, claim atómico) · Pendiente→Cancelada (3.er intento fallido, automático) · Pagada→Pendiente solo como **compensación** si falla la activación (`ReabrirPago`). Regla en `BE.Contratacion.TransicionValida` |
-| **Promocion** (`EstadoPromocion`) | EnRevisionContable 0 · Vigente 1 · RechazadaContabilidad 2 · BajaSolicitada 3 · Desactivada 4 | EnRevisión→Vigente\|Rechazada (Contabilidad); Rechazada→EnRevisión (**Reformular**, Administración); Vigente→BajaSolicitada (Vendedor) → Desactivada (aprueba baja) \| Vigente (rechaza baja); Vigente→Desactivada (Administración, directo). Cada cambio es un `UPDATE ... WHERE Estado=@esperado` (`DAL/Promocion.cs`) |
-| **SugerenciaPromocion** (`EstadoSugerencia`) | Pendiente 0 · Evaluada 1 | Pendiente→Evaluada al crear una promoción desde ella (una sugerencia evaluada no se reutiliza) |
+| **Promocion** (`EstadoPromocion`) | EnRevisionContable 0 · Vigente 1 · RechazadaContabilidad 2 · DadaDeBaja 4 · Vencida 6 (3 y 5 ya no existen: la sección 20g los migra) | EnRevisión→Vigente\|Rechazada (Contabilidad); Rechazada→EnRevisión (**Reformular**) \| DadaDeBaja (Administración); Vigente→DadaDeBaja (Administración, directo o al atender una solicitud) \| Vencida (fecha de fin). Pedir la baja **no** es una transición: la solicitud queda Pendiente. Cada cambio es un `UPDATE ... WHERE Estado=@esperado` (`DAL/Promocion.cs`) |
+| **SolicitudBajaPromocion** (`EstadoSolicitudBaja`) | Pendiente 0 · Atendida 1 | Pendiente→Atendida con la respuesta (`AtenderSolicitud`, `DioDeBaja` = 0) o al dar de baja la promoción (`DarDeBaja`, `DioDeBaja` = 1). Una sola pendiente por promoción (`UX_SolicitudBaja_UnaPendiente`) |
+| **SugerenciaPromocion** (`EstadoSugerencia`) | Pendiente 0 · Evaluada 1 · Descartada 2 | Pendiente→Evaluada al crear una promoción desde ella (una sugerencia evaluada no se reutiliza) \| Descartada (con motivo) |
 | **ListaEspera** (`EstadoListaEspera`) | Pendiente 0 · Reservada 1 · Convertida 2 · Cancelada 3 | Pendiente→Reservada (al pasar la prenda a Disponible, FIFO, ventana `HORAS_RESERVA = 48` en `BLL/ListaEspera.cs`) → Convertida (el cliente arma su pedido) \| Cancelada |
 | **CargoPrenda** (`EstadoCargo`) | Pendiente 0 · Cobrado 1 | Pendiente→Cobrado dentro de la transacción del próximo cobro (`ProcesarPagoHandler`) |
 | **Cobro** (`EstadoCobro`) | Pendiente · Cobrado · Gracia · Suspendido | ver N01 |
@@ -370,16 +371,18 @@ Pasos de `ConfirmarCobro`:
 ### PN03 — Métricas, promociones y toma de decisiones
 
 **Objetivo.** Convertir los datos del negocio en decisiones comerciales: detectar una oportunidad con un dato, formalizarla,
-aprobar su impacto económico, **aplicarla al cobro** mientras está vigente y cerrarla (baja, desactivación o vencimiento).
-**Referencia.** Flujo corregido y aprobado por la alumna (salidas faltantes, vigencia con vencimiento, historial y objetos).
-Se mantiene que las promociones por categoría son informativas: no descuentan en el cobro.
+aprobar su impacto económico, **aplicarla al cobro** mientras está vigente y cerrarla (dada de baja o vencida).
+**Referencia.** Flujo corregido y aprobado por la alumna (salidas faltantes, vigencia con vencimiento, historial y objetos),
+simplificado el 11/10: las promociones son **siempre por plan** (las por categoría se discontinuaron: no descontaban en
+ningún cobro), "Desactivar" y "Descartar promoción" se unen en **Dar de baja**, y la solicitud de baja del Vendedor ya no
+cambia el estado: Administración la **atiende** con una respuesta.
 
 **Actores.** Gerencia (rol GerenteComercial), Administración (AdministracionComercial), Contabilidad y Vendedor. El sistema actúa dentro de cada carril.
 **Pantallas.**
 - `GUI/SugerirPromocionForm.cs` (Gerencia): "Analizar métricas…", registrar la sugerencia y reimprimir las registradas.
-- `GUI/PromocionesAdministracionForm.cs` + `GUI/AltaPromocionForm.cs` (Administración): aceptar o descartar sugerencias, crear, reformular, descartar, desactivar y resolver bajas; historial e impresiones.
+- `GUI/PromocionesAdministracionForm.cs` + `GUI/AltaPromocionForm.cs` (Administración): aceptar o descartar sugerencias, crear (siempre para un plan), reformular, dar de baja (Vigente o Rechazada) y atender las solicitudes de baja pendientes; historial e impresiones.
 - `GUI/PromocionesContabilidadForm.cs` (Contabilidad): análisis de margen e impacto (con el margen proyectado paso a paso) y dictamen.
-- `GUI/PromocionesVigentesForm.cs` (Vendedor): vigentes y con baja pedida; solicitar la baja.
+- `GUI/PromocionesVigentesForm.cs` (Vendedor): vigentes, con la marca de si ya tienen una solicitud de baja pendiente; solicitar la baja.
 
 **Documentos (PDF, Factory Method en `GUI/Exportacion/DocumentosPromocion.cs` + `GeneradorDocumentoPromocion.cs`):**
 - Reporte de métricas;
@@ -387,25 +390,26 @@ Se mantiene que las promociones por categoría son informativas: no descuentan e
 - Ficha de promoción (con su historial de estados);
 - Dictamen contable;
 - Solicitud de baja;
-- Resolución de baja (informe a Gerencia si se aprueba, a Ventas si se rechaza);
-- Constancia de descarte (de sugerencia o de promoción).
+- Respuesta a la solicitud de baja (a Ventas: dada de baja o sigue vigente);
+- Constancia de baja (de una promoción Vigente o Rechazada);
+- Constancia de descarte (de una sugerencia).
 
 **Flujo (actividad → método)**
 | Carril | Actividad | Código |
 |---|---|---|
-| Gerencia | Analizar métricas («Reporte de métricas») | `BLL.AnalisisPromociones.AnalizarMetricas`: abandono por plan (Strategy) y rotación por categoría; arma las oportunidades |
+| Gerencia | Analizar métricas («Reporte de métricas») | `BLL.AnalisisPromociones.AnalizarMetricas`: abandono por plan (Strategy) y rotación por categoría; las oportunidades por plan se pueden usar de base, las por categoría quedan en el reporte solo como dato (`MetricaRotacionCategoria.EsOportunidad`) |
 | Gerencia | ¿Hay oportunidad? No → fin "Sin promoción" | `AnalisisPromociones.HayOportunidad` (`BE.ReporteMetricas.HayOportunidad`) |
-| Gerencia | Registrar sugerencia («Sugerencia de promoción») | `BLL.SugerenciaPromocion.RegistrarSugerencia`: guarda `OrigenMetrica` (Abandono/Rotación/Manual) e `IdUsuarioAlta` |
+| Gerencia | Registrar sugerencia («Sugerencia de promoción») | `BLL.SugerenciaPromocion.RegistrarSugerencia`: exige el plan; guarda `OrigenMetrica` (Abandono/Manual) e `IdUsuarioAlta` |
 | Administración | ¿Acepta la sugerencia? No → Descartar sugerencia | `SugerenciaPromocion.DescartarSugerencia` (motivo obligatorio, claim `Pendiente → Descartada`) |
 | Administración | ¿Acepta? Sí → Crear promoción (o crearla manual) | `BLL.Promocion.CrearDesdeSugerencia` (claim `Pendiente → Evaluada`, compensación `ReabrirEvaluacion`) / `CrearManual` |
-| Sistema | Validar → En revisión contable («Ficha de promoción») | `Promocion.ValidarPromocion` (destino único, valor, fechas); guarda `IdUsuarioAlta` y el historial `— → EnRevisionContable` |
+| Sistema | Validar → En revisión contable («Ficha de promoción») | `Promocion.ValidarPromocion` (plan obligatorio y existente, valor, fechas); guarda `IdUsuarioAlta` y el historial `— → EnRevisionContable` |
 | Contabilidad | Analizar margen e impacto | `Promocion.AnalizarMargenEImpacto`: **margen proyectado** (beneficio estimado − costo del descuento, ver abajo) y promociones Vigentes del mismo plan superpuestas en fechas (advertencia) |
 | Contabilidad | ¿Aprueba? (guarda: quien la creó no la dictamina) | `Promocion.PuedeDictaminar` (`BE.Promocion.PuedeDictaminarla`); `AprobarContable` → Vigente / `RechazarContable` → RechazadaContabilidad, ambas con «Dictamen contable» |
 | Administración | ¿Reformular? Sí → Reformular (vuelve a Validar) | `Promocion.Reformular` (claim `RechazadaContabilidad → EnRevisionContable`) |
-| Administración | ¿Reformular? No → Descartar promoción | `Promocion.DescartarPromocion` (motivo obligatorio → Descartada; «Constancia de descarte») |
-| Vendedor | (a) Solicitar la baja («Solicitud de baja») | `Promocion.SolicitarBaja` (motivo obligatorio → BajaSolicitada) |
-| Administración | ¿Aprueba la baja? Sí / No («Resolución de baja») | `Promocion.AprobarBaja` → Desactivada / `RechazarBaja` (motivo obligatorio) → Vigente |
-| Administración | (b) Desactivar directamente | `Promocion.Desactivar` (motivo obligatorio) |
+| Administración | ¿Reformular? No → Dar de baja | `Promocion.DarDeBaja` (motivo obligatorio → DadaDeBaja; «Constancia de baja») |
+| Vendedor | (a) Solicitar la baja («Solicitud de baja») | `Promocion.SolicitarBaja` (motivo obligatorio; la solicitud queda Pendiente y la promoción sigue Vigente) |
+| Administración | Atender la solicitud («Respuesta a la solicitud») | `Promocion.AtenderSolicitud` (respuesta obligatoria): de acuerdo → `DarDeBaja`; si no → Atendida y sigue Vigente |
+| Administración | (b) Dar de baja directamente | `Promocion.DarDeBaja` (motivo obligatorio; cierra las solicitudes pendientes) |
 | Sistema | (c) Llega la FechaFin → Vencida | `Promocion.CerrarVencidas`, que se ejecuta al consultar las promociones (`ObtenerTodas`, `ObtenerVigentes`, `ObtenerParaVentas`) |
 
 **Cálculo del margen proyectado ("Analizar margen e impacto").** Todo en importes **mensuales**, la misma base que el
@@ -416,39 +420,39 @@ beneficio de Gerencia (en una oportunidad de abandono es el ingreso mensual en r
 - *Costo del descuento* = descuento por cliente × **clientes activos del plan** (`DAL.Cliente.ContarClientesActivosPorPlan`).
 - *Beneficio estimado* = el de la sugerencia de Gerencia; en un alta manual, el **margen estimado que cargó Administración**.
 - *Margen proyectado* = beneficio estimado − costo del descuento; **conviene** si es mayor a cero (con margen 0 no conviene).
-- Una promoción **por categoría** es informativa (no descuenta en el cobro): no tiene costo proyectado ni resultado.
+- Si el plan de la promoción ya no existe, el margen no se calcula (sin costo proyectado ni resultado).
 - Es una **recomendación** que se muestra en `PromocionesContabilidadForm`: la decisión (¿Aprueba?) sigue siendo de Contabilidad.
   No se guarda con el dictamen: el «Dictamen contable» impreso no la incluye porque los clientes activos cambian con el
   tiempo y el documento se reimprime desde otras pantallas (Administración, Vendedor) que no tienen la patente contable.
 
 Aplicación al cobro: mientras está **Vigente** y dentro de sus fechas, la promoción entra en `BE.PoliticaDescuento.Resolver`,
 que usan el cobro de contratación (`BLL.Contratacion.CalcularImporte/ConfirmarCobro`, PN02) y el cobro recurrente (`ProcesarPagoHandler`, N01).
-Una promoción con baja solicitada, desactivada, descartada o **vencida** no se aplica.
+Una promoción **con una solicitud de baja pendiente sigue aplicándose** (sigue Vigente); una dada de baja o **vencida** no se aplica.
 
 Cada transición pasa por el DAL como un **claim atómico** (`UPDATE ... WHERE Estado = @esperado`) que, en la misma transacción,
-inserta su fila de `PromocionHistorial` y el objeto que genera (`DictamenContable`, `SolicitudBajaPromocion`).
+inserta su fila de `PromocionHistorial` y el objeto que genera (`DictamenContable`, o el cierre de las `SolicitudBajaPromocion` pendientes al dar de baja).
 
 **Reglas de negocio PN03**
 | # | Regla | Ubicación | T: |
 |---|---|---|---|
-| 1 | Una promoción aplica a **un plan o una categoría, nunca a ambos ni a ninguno** | `Promocion.ValidarPromocion`; CHECK `CHK_Promocion_Destino` | `PromocionTests › CrearManual_AmbosDestinos_*`, `SugerenciaPromocionTests` |
+| 1 | Una promoción aplica **siempre a un plan** (obligatorio); la sugerencia también | `Promocion.ValidarPromocion`, `SugerenciaPromocion.RegistrarSugerencia`; `Promocion.IdPlan NOT NULL` | `PromocionTests › CrearManual_SinPlan_*`, `SugerenciaPromocionTests › RegistrarSugerencia_SinPlan_*` |
 | 2 | `Valor > 0`; si es Porcentaje, ≤ 100; fecha fin ≥ fecha inicio | ídem; CHECK `CHK_Promocion_Valor/Porcentaje/Fechas` | `PromocionTests › CrearManual_*` |
-| 3 | Sin oportunidad en el reporte, el flujo termina sin promoción; la sugerencia guarda el origen de la métrica y quién la creó | `AnalizarMetricas`, `HayOportunidad`, `RegistrarSugerencia` | `AnalisisPromocionesTests › AnalizarMetricas_*`, `SugerenciaPromocionTests › RegistrarSugerencia_DatosValidosConPlan_*` |
+| 3 | Sin oportunidad **por plan** en el reporte, el flujo termina sin promoción (las por categoría son solo informativas); la sugerencia guarda el origen de la métrica y quién la creó | `AnalizarMetricas`, `HayOportunidad`, `RegistrarSugerencia` | `AnalisisPromocionesTests › AnalizarMetricas_*`, `SugerenciaPromocionTests › RegistrarSugerencia_DatosValidosConPlan_*` |
 | 4 | Solo una sugerencia **Pendiente** se acepta o se descarta; descartarla exige motivo | `BE.SugerenciaPromocion.PuedeEvaluarse`; `DAL.Descartar/MarcarEvaluada ... AND Estado = 0` | `SugerenciaPromocionTests › DescartarSugerencia_*`, `EndurecimientoPn02Pn03Tests › CrearDesdeSugerencia_*` |
 | 5 | Toda promoción **nace En Revisión Contable** (tras Validar) y no aplica descuento hasta ser aprobada | `CrearDesdeSugerencia/CrearManual` | `PromocionTests › CrearManual_GuardaElCreadorYEscribeHistorialDeAlta` |
 | 6 | **Quien creó la promoción no puede dictaminarla**, salvo el **Administrador** (decisión del 05/10: el Administrador puede hacer todo) | `Promocion.PuedeDictaminar`; `IdUsuarioAlta` | `PromocionTests › AprobarContable_QuienCreo*`, `RechazarContable_QuienCreo*` |
 | 7 | El dictamen exige observación y queda guardado (resultado, observación, usuario, fecha) | `AprobarContable/RechazarContable`; tabla `DictamenContable` | `PromocionTests › AprobarContable_GuardaElDictamen*`, `RechazarContable_*` |
-| 8 | Contabilidad ve el beneficio estimado, el **margen proyectado** (beneficio − descuento por cliente × clientes activos del plan; conviene si es > 0; informativo si es por categoría) y las promociones vigentes del mismo plan superpuestas. Nada de esto impide aprobar | `AnalizarMargenEImpacto`, `BE.AnalisisImpactoPromocion`, `BE.Promocion.SeSuperponeCon` | `PromocionTests › AnalizarMargenEImpacto_*` |
-| 9 | Solo una promoción **Rechazada** se reformula o se descarta; descartar exige motivo | `Reformular`, `DescartarPromocion` | `PromocionTests › DescartarPromocion_*`, `EndurecimientoPn02Pn03Tests › Reformular_*` |
-| 10 | Solo se pide la baja de una **Vigente**, con motivo; la solicitud queda guardada | `SolicitarBaja`; tabla `SolicitudBajaPromocion` (una pendiente por promoción) | `PromocionTests › SolicitarBaja_*` |
-| 11 | Solo se resuelve una **BajaSolicitada**; rechazarla exige motivo; la resolución queda guardada y **no se pierde** el dictamen contable | `AprobarBaja/RechazarBaja` | `PromocionTests › AprobarBaja_*`, `RechazarBaja_*` |
-| 12 | La desactivación directa exige motivo (queda en el historial) | `Desactivar` | `PromocionTests › Desactivar_*` |
+| 8 | Contabilidad ve el beneficio estimado, el **margen proyectado** (beneficio − descuento por cliente × clientes activos del plan; conviene si es > 0) y las promociones vigentes del mismo plan superpuestas. Nada de esto impide aprobar | `AnalizarMargenEImpacto`, `BE.AnalisisImpactoPromocion`, `BE.Promocion.SeSuperponeCon` | `PromocionTests › AnalizarMargenEImpacto_*` |
+| 9 | Solo una promoción **Rechazada** se reformula; **dar de baja** (una Vigente o una Rechazada) exige motivo, queda en el historial y cierra las solicitudes pendientes | `Reformular`, `DarDeBaja`, `BE.Promocion.PuedeDarseDeBaja` | `PromocionTests › DarDeBaja_*`, `EndurecimientoPn02Pn03Tests › Reformular_*` |
+| 10 | Solo se pide la baja de una **Vigente**, con motivo y **una sola pendiente** a la vez; no cambia el estado | `SolicitarBaja`; tabla `SolicitudBajaPromocion` (`UX_SolicitudBaja_UnaPendiente`) | `PromocionTests › SolicitarBaja_*` |
+| 11 | Atender una solicitud exige respuesta; si Administración está de acuerdo da de baja la promoción, si no la solicitud queda Atendida y **no se pierde** el dictamen contable | `AtenderSolicitud`; `SolicitudBajaPromocion.Respuesta/DioDeBaja` | `PromocionTests › AtenderSolicitud_*` |
+| 12 | Una promoción con una solicitud de baja pendiente **sigue aplicándose** en el cobro | `PoliticaDescuento.Resolver` | `PoliticaDescuentoTests › Resolver_VigenteConSolicitudDeBajaPendiente_SigueAplicandose` |
 | 13 | Al llegar la FechaFin la promoción pasa a **Vencida** y no se aplica en el cobro | `CerrarVencidas`; `PoliticaDescuento.Resolver` (`!EstaVencida() && EstaVigente()`) | `PromocionTests › CerrarVencidas_*`, `PoliticaDescuentoTests › Resolver_PromocionVencida_NoSeAplica` |
 | 14 | **Cada transición escribe historial** y es atómica frente a otra sesión | `DAL/Promocion.cs` (claim + `PromocionHistorial` en una transacción) | `PromocionTests › RecorridoCompleto_CadaTransicionEscribeSuFilaDeHistorial`, `EndurecimientoPn02Pn03Tests › *_OtraSesion*` |
-| 15 | Máquina de estados: EnRevisión → Vigente \| Rechazada; Rechazada → EnRevisión \| Descartada; Vigente → BajaSolicitada \| Desactivada \| Vencida; BajaSolicitada → Desactivada \| Vigente. Desactivada, Descartada y Vencida son finales | `BE.Promocion.TransicionValida`, `BE.SugerenciaPromocion.TransicionValida` | `PromocionTests › TransicionValida_*` |
+| 15 | Máquina de estados: EnRevisión → Vigente \| Rechazada; Rechazada → EnRevisión \| DadaDeBaja; Vigente → DadaDeBaja \| Vencida. DadaDeBaja y Vencida son finales | `BE.Promocion.TransicionValida`, `BE.SugerenciaPromocion.TransicionValida` | `PromocionTests › TransicionValida_*` |
 | 16 | **Un solo descuento por ciclo:** compiten la mejor promoción vigente **del plan del cliente** y el crédito por referido; se aplica el **mayor**; si gana la promoción el crédito queda acumulado; en empate gana la promoción | `BE/PoliticaDescuento.cs › Resolver` | `PoliticaDescuentoTests`, `CobroTests`, `ContratacionTests` |
 | 17 | Tipos de descuento: `Porcentaje`, `MontoFijo` (tope = bruto), `PrecioPromocional` (`Valor` = precio **mensual**) | `PoliticaDescuento.DescuentoDe` | `PoliticaDescuentoTests` |
-| 18 | Las promociones por **categoría son informativas** (no descuentan en el cobro de la suscripción) | `PoliticaDescuento.Resolver` (solo `AplicaAPlan`) | `PoliticaDescuentoTests` |
+| 18 | Las oportunidades por **categoría** quedan en el reporte solo como dato: no son base de una sugerencia (no hay promociones por categoría) | `AnalisisPromociones.Oportunidades/RotacionPorCategoria` | `AnalisisPromocionesTests › *Categoria*` |
 
 **Base de datos (3FN).**
 - `SugerenciaPromocion` suma `OrigenMetrica`, `IdUsuarioAlta`, `MotivoDescarte`, `FechaEvaluacion` y el estado Descartada (2).
@@ -456,17 +460,22 @@ inserta su fila de `PromocionHistorial` y el objeto que genera (`DictamenContabl
 - Tablas nuevas `PromocionHistorial`, `DictamenContable` y `SolicitudBajaPromocion`.
 - `Promocion.Observacion` y `Promocion.MotivoBaja` se migran a esas tablas y se quitan.
 - La sección 20d del script migra las bases ya instaladas.
+- La sección 20g simplifica el flujo: quita los estados 3 y 5 (3 → Vigente con su solicitud Pendiente; 5 → DadaDeBaja con
+  "Descartada: …" en el historial), **borra las promociones por categoría** con su historial, dictamen y solicitudes
+  (decisión de la alumna, 11/10), cierra las sugerencias por categoría pendientes, quita `CategoriaPrenda` (FK, CHECK,
+  índices y columna) de `Promocion` y `SugerenciaPromocion`, pone `Promocion.IdPlan NOT NULL`, deja `CHECK Estado IN
+  (0,1,2,4,6)` y agrega a `SolicitudBajaPromocion` la `Respuesta` (antes `MotivoResolucion`) y `DioDeBaja`.
 
 **Casos de uso:**
 - CU01-GER Sugerir Promoción (incluye CU03-GER Analizar Métricas);
 - CU02-GER Consultar Analítica de Negocio;
-- CU01-ADM Gestionar Promociones (crear desde sugerencia o manual, reformular), extendido por CU03-ADM Descartar Sugerencia y CU04-ADM Descartar Promoción Rechazada;
-- CU05-ADM Desactivar Promoción;
+- CU01-ADM Gestionar Promociones (crear desde sugerencia o manual, reformular), extendido por CU03-ADM Descartar Sugerencia y CU04-ADM Dar de Baja Promoción;
+- CU04-ADM Dar de Baja Promoción (también directo sobre una Vigente, y «extend» de CU02-ADM);
 - CU01-CONT Analizar Promoción;
 - CU01-VEN Solicitar Baja de Promoción;
-- CU02-ADM Resolver Baja de Promoción.
+- CU02-ADM Atender Solicitud de Baja.
 
-**Alcance.** Abarca todo el diagrama de actividad y su aplicación al importe del cobro. **No abarca:** aplicar promociones por categoría a un precio (no hay compra de prenda);
+**Alcance.** Abarca todo el diagrama de actividad y su aplicación al importe del cobro. **No abarca:** promociones por categoría de prenda (se discontinuaron: no hay compra de prenda donde aplicarlas);
 descuentos acumulables; el "margen estimado" es solo informativo para Contabilidad.
 Nota de origen: la estructura del circuito (sugerir → crear → aprobar → baja) se adaptó de otro proyecto de la cursada (SIRVI); la regla del descuento único viene de NUULY.
 
@@ -609,7 +618,7 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 
 | # | Antes | Ahora | Sección | Por qué |
 |---|---|---|---|---|
-| 1 | `Prenda.Categoria`, `Promocion.CategoriaPrenda`, `SugerenciaPromocion.CategoriaPrenda`: texto libre | Catálogo **`Categoria`** (`IdCategoria`, `Nombre` UNIQUE, `Activo`) y FK **por clave natural** a `Categoria(Nombre)` con `ON UPDATE CASCADE` | 20e | La misma categoría se escribía distinto: el formulario de prendas ofrecía "Vestidos" y los datos decían "Vestido", así que editar una prenda le cambiaba la categoría a la primera de la lista, y una promoción por categoría podía no aplicar a ninguna prenda. La clave natural evita cambiar el tipo de tres columnas y el `CASCADE` hace que renombrar una categoría actualice prendas y promociones. Migración: se recortan espacios, el plural del formulario viejo pasa al singular y todo texto restante se agrega al catálogo. Los combos (`PrendaForm`, `AltaPromocionForm`, `SugerirPromocionForm`) son listas cerradas que llena `BLL.Prenda.ObtenerCategorias` (`DAL.Prenda.ObtenerCategorias`) y `BLL.Prenda` valida la categoría |
+| 1 | `Prenda.Categoria`, `Promocion.CategoriaPrenda`, `SugerenciaPromocion.CategoriaPrenda`: texto libre | Catálogo **`Categoria`** (`IdCategoria`, `Nombre` UNIQUE, `Activo`) y FK **por clave natural** a `Categoria(Nombre)` con `ON UPDATE CASCADE` | 20e | La misma categoría se escribía distinto: el formulario de prendas ofrecía "Vestidos" y los datos decían "Vestido", así que editar una prenda le cambiaba la categoría a la primera de la lista, y una promoción por categoría podía no aplicar a ninguna prenda (las promociones por categoría se discontinuaron después: sección 20g). La clave natural evita cambiar el tipo de tres columnas y el `CASCADE` hace que renombrar una categoría actualice prendas y promociones. Migración: se recortan espacios, el plural del formulario viejo pasa al singular y todo texto restante se agrega al catálogo. El combo de `PrendaForm` es una lista cerrada que llena `BLL.Prenda.ObtenerCategorias` (`DAL.Prenda.ObtenerCategorias`) y `BLL.Prenda` valida la categoría |
 | 2 | `Cliente.MetodoPago`: texto libre ("Efectivo", "Crédito"…) con los mismos valores del catálogo de Caja escritos de otra forma | **`Cliente.IdMedioPagoPreferido`** (FK a `MedioPago`) | 20c5 | El nombre del medio dependía del cliente y no de su clave. Migración por la clave de traducción del catálogo (el Id de «Tarjeta de débito» es 2 o 5 según la base), después por nombre; un texto fuera del catálogo se conserva como **medio histórico inactivo** (Ids desde 100) y un vacío queda `NULL`. La columna entra en el DVH de `Cliente` (se pide el recálculo). `BLL.Cliente.ObtenerMetodosPago` ofrece los activos del catálogo (más el actual si es histórico) y `Alta`/`Modificar` exigen un medio válido |
 | 3 | La devolución de PN04 se reconocía por la **marca** `MantenimientoPrenda.Actor = 'Devolución'` | **`MantenimientoPrenda.Origen`** `TINYINT` (0 manual, 1 devolución; CHECK) y `Actor` solo dice quién lo abrió | 20f | Un dato no puede ser a la vez "quién" y "por qué": un usuario llamado "Devolución" que mandara una prenda a limpieza a mano la hacía entrar a la Inspección y se le cobraba el daño al último cliente. Migración una sola vez, al crear la columna (`Actor = 'Devolución'` → `Origen = 1`, `Actor = NULL`) |
 | 4a | `Permiso.Nombre` de los roles sin unicidad | Índice único filtrado **`UX_Permiso_NombreRol`** (`WHERE EsRol = 1`) | 21z5 | Hace del nombre del rol una clave candidata, que es lo que referencia `Usuario.Rol` |
@@ -638,7 +647,7 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 | D3 | **Crédito de referido inmediato** ($1000 fijo al activar) | Simplificación de NUULY (7 días de espera, tope 12/año, descuento de bienvenida). No se adopta la espera de 7 días porque requeriría un proceso en segundo plano que la aplicación de escritorio no tiene; el referente se fija una sola vez al alta (no hay auto-referencia ni referido con cuenta previa) |
 | D4 | **Cuenta desbloqueada = sin prendas `EnUso`** (cubre pedidos Pendiente, Despachado y Entregado sin devolver) | Adopta NUULY 4.2/4.6 y reemplaza la validación por cupo con prendas en uso, que era más laxa que G02 |
 | D5 | **Un solo descuento por ciclo**, el mayor entre promoción y crédito por referido | NUULY 5.1; el crédito no usado se acumula |
-| D6 | Promociones **por categoría informativas** | No hay compra/precio de prenda donde aplicarlas |
+| D6 | ~~Promociones por categoría informativas~~ | **Discontinuadas (11/10):** las promociones son siempre por plan; la rotación por categoría queda en el reporte solo como dato |
 | D7 | Verificación y reserva de PN01 **atómicas en un paso** (sin cola de Depósito) | NUULY confirma contra stock y bloquea; el centro de distribución prepara después |
 | D8 | ~~Cargo y baja de PN04 sin transacción común~~ | **Resuelto:** una sola transacción en `DAL/InspeccionDevolucion.cs` |
 | D9 | Claim + activación de PN02 **sin transacción común**; se compensa con `ReabrirPago` | Tablas distintas; la ventana residual (caída entre ambos pasos) queda documentada en `BLL/Contratacion.cs` |

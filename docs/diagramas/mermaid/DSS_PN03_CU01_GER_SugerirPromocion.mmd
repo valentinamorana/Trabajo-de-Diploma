@@ -21,11 +21,12 @@ sequenceDiagram
     AN->>DP: ObtenerTodos()
     DP-->>AN: planes
     AN->>AN: AbandonoPorPlan(enRiesgo, planes)
-    AN->>AN: Oportunidades(rot, ab, planes)  [rotación: ≥ 2 prendas sin pedidos por categoría, abandono: clientes en riesgo por plan]
+    AN->>AN: RotacionPorCategoria(rot)  [categorías con ≥ 2 prendas sin pedidos: oportunidad solo informativa]
+    AN->>AN: Oportunidades(ab, planes)  [solo por plan: clientes en riesgo de abandono]
     AN->>DPR: ObtenerImpacto(desde, hasta)
     DPR-->>AN: impacto de cada promoción: cobros, total descontado y total cobrado
     Note over AN: bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"
-    AN-->>F: ReporteMetricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades)
+    AN-->>F: ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto de las promociones, oportunidades por plan)
     F->>AN: HayOportunidad(reporte)
     AN-->>F: hayOportunidad
     F->>F: MostrarReporte(reporte, hayOportunidad)
@@ -33,25 +34,23 @@ sequenceDiagram
     G->>F: Pulsa "Usar esta idea" sobre una oportunidad, o Cerrar
     F->>AN: HayOportunidad(reporte)  [¿Hay oportunidad?]
     alt ¿Hay oportunidad? No
-      F-->>G: "Los reportes de rotación y abandono no detectan casos": fin sin promoción
+      F-->>G: "El reporte de abandono no detecta planes para sugerir": fin sin promoción
     else Sí
       opt Eligió una oportunidad
-        F-->>G: Precarga destino (plan o categoría), tipo, beneficio estimado y motivo, origen = Abandono o Rotación
+        F-->>G: Precarga el plan, tipo, beneficio estimado y motivo, origen = Abandono (las de categoría no se pueden usar)
       end
     end
   end
   Note over G,F: Sin usar el reporte (o sin elegir una oportunidad) Gerencia carga los datos a mano: el origen queda Manual
-  G->>F: Ajusta destino (plan o categoría), motivo, tipo de descuento y beneficio estimado, pulsa "Enviar Sugerencia"
-  F->>B: RegistrarSugerencia(modulo, origen, idPlan, categoriaPrenda, motivo, tipoSugerido, beneficioEstimado)  [origen = Abandono, Rotación o Manual]
+  G->>F: Ajusta el plan, motivo, tipo de descuento y beneficio estimado, pulsa "Enviar Sugerencia"
+  F->>B: RegistrarSugerencia(modulo, origen, idPlan, motivo, tipoSugerido, beneficioEstimado)  [origen = Abandono o Manual]
   Note over B: PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)
-  alt Plan y categoría a la vez, o ninguno
-    B-->>F: AppException(destino_invalido)
+  alt Sin plan
+    B-->>F: AppException(plan_requerido)
     F-->>G: Informa el motivo y retoma la carga
-  else Destino único
-    opt Aplica a un plan
-      B->>DP: ObtenerPorId(idPlan)
-      DP-->>B: plan (null si no existe)
-    end
+  else Con plan
+    B->>DP: ObtenerPorId(idPlan)
+    DP-->>B: plan (null si no existe)
     alt Plan inexistente, sin motivo o beneficio ≤ 0
       B-->>F: AppException(plan_inexistente / motivo_requerido / beneficio_invalido)
       F-->>G: Informa el motivo y retoma la carga

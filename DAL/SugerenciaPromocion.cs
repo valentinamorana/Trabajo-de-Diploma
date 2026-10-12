@@ -7,13 +7,13 @@ namespace DAL
 {
     /// <summary>
     /// Capa de Acceso a Datos — SugerenciaPromocion (PN03, «Sugerencia de promoción»).
-    /// Las decisiones de Administración (aceptar → Evaluada, descartar → Descartada) son claims
-    /// atómicos sobre el estado Pendiente.
+    /// Siempre apunta a un plan. Las decisiones de Administración (aceptar → Evaluada, descartar
+    /// → Descartada) son claims atómicos sobre el estado Pendiente.
     /// </summary>
     public class SugerenciaPromocion : BaseDAL, Interfaces.ISugerenciaPromocionDAL
     {
         private const string SELECT_BASE =
-            "SELECT s.IdSugerencia, s.IdPlan, s.CategoriaPrenda, s.Motivo, s.TipoDescuentoSugerido, " +
+            "SELECT s.IdSugerencia, s.IdPlan, s.Motivo, s.TipoDescuentoSugerido, " +
             "s.BeneficioEstimado, s.Estado, s.FechaAlta, s.OrigenMetrica, s.IdUsuarioAlta, s.MotivoDescarte, " +
             "s.FechaEvaluacion, pl.Nombre AS NombrePlan, " +
             "COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(u.Nombre, '') + ' ' + ISNULL(u.Apellido, ''))), ''), u.Username) AS NombreUsuarioAlta " +
@@ -56,7 +56,6 @@ namespace DAL
             SqlParameter[] p =
             {
                 new SqlParameter("@IdPlan",               SqlDbType.Int) { Value = (object)sugerencia.IdPlan ?? DBNull.Value },
-                new SqlParameter("@CategoriaPrenda",       SqlDbType.NVarChar, 100) { Value = (object)sugerencia.CategoriaPrenda ?? DBNull.Value },
                 new SqlParameter("@Motivo",                SqlDbType.NVarChar, 500) { Value = sugerencia.Motivo },
                 new SqlParameter("@TipoDescuentoSugerido", SqlDbType.Int) { Value = (int)sugerencia.TipoDescuentoSugerido },
                 new SqlParameter("@BeneficioEstimado",     SqlDbType.Decimal) { Value = sugerencia.BeneficioEstimado, Precision = 10, Scale = 2 },
@@ -68,9 +67,9 @@ namespace DAL
             try
             {
                 DataTable tabla = acceso.Leer(
-                    "INSERT INTO SugerenciaPromocion (IdPlan, CategoriaPrenda, Motivo, TipoDescuentoSugerido, BeneficioEstimado, " +
+                    "INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, " +
                     "Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta) " +
-                    "VALUES (@IdPlan, @CategoriaPrenda, @Motivo, @TipoDescuentoSugerido, @BeneficioEstimado, " +
+                    "VALUES (@IdPlan, @Motivo, @TipoDescuentoSugerido, @BeneficioEstimado, " +
                     "@Estado, @FechaAlta, @OrigenMetrica, @IdUsuarioAlta); " +
                     "SELECT SCOPE_IDENTITY() AS IdNuevo", p);
                 return tabla != null && tabla.Rows.Count > 0 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"]) : 0;
@@ -139,7 +138,6 @@ namespace DAL
             {
                 IdSugerencia          = Convert.ToInt32(row["IdSugerencia"]),
                 IdPlan                = row["IdPlan"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdPlan"]) : null,
-                CategoriaPrenda       = Texto("CategoriaPrenda"),
                 Motivo                = row["Motivo"].ToString(),
                 TipoDescuentoSugerido = (BE.TipoDescuento)Convert.ToInt32(row["TipoDescuentoSugerido"]),
                 BeneficioEstimado     = Convert.ToDecimal(row["BeneficioEstimado"]),

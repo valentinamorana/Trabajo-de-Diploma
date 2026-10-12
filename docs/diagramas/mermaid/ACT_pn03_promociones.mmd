@@ -3,13 +3,12 @@ flowchart TD
     direction TB
     i((" "))
     d0{"¿Cómo surge la promoción?"}
-    a1["Analizar métricas del período (por defecto 90 días): abandono por plan, rotación por categoría e impacto de las promociones"]
+    a1["Analizar métricas del período (por defecto 90 días): abandono por plan, rotación por categoría (solo informativa) e impacto de las promociones"]
     d1{"¿Hay oportunidad?"}
     f0(((" ")))
-    a2["Registrar sugerencia (origen Abandono o Rotación, o Manual si es idea propia): queda Pendiente"]
+    a2["Registrar sugerencia para un plan (origen Abandono, o Manual si es idea propia): queda Pendiente"]
     g1["Recibir constancia de descarte de la sugerencia"]
-    g2["Recibir informe de la baja (promoción desactivada)"]
-    o1[/"Reporte de métricas (período, abandono por plan, rotación por categoría, impacto de las promociones)"/]:::doc
+    o1[/"Reporte de métricas (período, abandono por plan, rotación por categoría, impacto de las promociones, oportunidades por plan)"/]:::doc
     o2[/"Sugerencia de promoción (Pendiente)"/]:::doc
   end
   subgraph A["Administración"]
@@ -19,26 +18,26 @@ flowchart TD
     f1(((" ")))
     a4["Crear promoción desde la sugerencia (la sugerencia queda Evaluada)"]
     a4m["Crear promoción manual, sin sugerencia"]
-    a5["Validar (destino único, valor, fecha de fin desde hoy) → En revisión contable"]
+    a5["Validar (plan obligatorio, valor, fecha de fin desde hoy) → En revisión contable"]
     d4{"¿Reformular?"}
     a8["Reformular las condiciones"]
-    a9["Descartar promoción con motivo: Descartada"]
+    a9["Dar de baja con motivo: Dada de baja"]
     f2(((" ")))
     d5{"¿Qué la interrumpe?"}
-    a16["Evaluar la solicitud de baja"]
-    d6{"¿Aprueba la baja?"}
-    a12["Desactivada (informe a Gerencia)"]
-    a13["Sigue Vigente con motivo (informe a Ventas)"]
-    a14["Desactivar directamente con motivo: Desactivada"]
+    a16["Atender la solicitud de baja"]
+    d6{"¿Está de acuerdo?"}
+    a12["Dar de baja: Dada de baja (la solicitud queda atendida)"]
+    a13["Responder con motivo: sigue Vigente"]
+    a14["Dar de baja directamente con motivo: Dada de baja"]
     a15["Vencida (el sistema la cierra al consultar): ya no aplica en el cobro"]
     f3(((" ")))
     f4(((" ")))
     o3[/"Constancia de descarte de la sugerencia"/]:::doc
     o4[/"Ficha de promoción (En revisión contable)"/]:::doc
-    o7[/"Constancia de descarte de la promoción"/]:::doc
-    o9[/"Resolución de baja"/]:::doc
+    o7[/"Constancia de baja (rechazada no reformulada)"/]:::doc
+    o9[/"Respuesta a la solicitud de baja"/]:::doc
     o11[/"Condiciones reformuladas"/]:::doc
-    o12[/"Constancia de desactivación (motivo)"/]:::doc
+    o12[/"Constancia de baja (motivo)"/]:::doc
     o13[/"Ficha de promoción (Vencida)"/]:::doc
   end
   subgraph K["Contabilidad"]
@@ -53,8 +52,9 @@ flowchart TD
   end
   subgraph V["Vendedor"]
     direction TB
-    a11["Solicitar la baja con motivo: Baja solicitada"]
-    v1["Recibir resolución de baja rechazada (sigue vigente)"]
+    a11["Solicitar la baja con motivo: la solicitud queda Pendiente y la promoción sigue Vigente"]
+    v2["Recibir la respuesta (promoción dada de baja)"]
+    v1["Recibir la respuesta (sigue vigente)"]
     o8[/"Solicitud de baja (motivo)"/]:::doc
   end
   i --> d0
@@ -85,12 +85,12 @@ flowchart TD
   a11 --> a16
   a16 --> d6
   d6 -- "Sí" --> a12
-  a12 --> g2
-  g2 --> f3
+  a12 --> v2
+  v2 --> f3
   d6 -- "No" --> a13
   a13 --> v1
   v1 --> a10
-  d5 -- "Administración la desactiva" --> a14
+  d5 -- "Administración la da de baja" --> a14
   a14 --> f3
   d5 -- "Llega la fecha de fin" --> a15
   a15 --> f4
@@ -111,7 +111,7 @@ flowchart TD
   o8 -.-> a16
   a12 -.-> o9
   a13 -.-> o9
-  o9 -.-> g2
+  o9 -.-> v2
   o9 -.-> v1
   a6 -.-> o10
   a8 -.-> o11

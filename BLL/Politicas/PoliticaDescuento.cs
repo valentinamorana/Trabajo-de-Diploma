@@ -14,8 +14,7 @@ namespace BLL.Politicas
     ///   · el crédito por referidos acumulado en el cliente (Cliente.DescuentoProximoCobro).
     /// Se aplica UNA sola: la de mayor descuento. Si gana la promoción, el crédito por referido NO se
     /// consume y sigue acumulado; si gana el crédito, se consume. En un empate se prefiere la promoción
-    /// (así el crédito acumulado no se pierde). Las promociones por categoría de prenda son
-    /// informativas: no tienen un importe sobre el cual aplicarse en el cobro de la suscripción.
+    /// (así el crédito acumulado no se pierde).
     /// </summary>
     public static class PoliticaDescuento
     {
@@ -61,8 +60,7 @@ namespace BLL.Politicas
             decimal descuentoMejor = 0;
             if (idPlan.HasValue && promocionesDelPlan != null)
             {
-                foreach (var p in promocionesDelPlan.Where(x => x != null && x.AplicaAPlan()
-                                                                && x.IdPlan == idPlan && !x.EstaVencida()
+                foreach (var p in promocionesDelPlan.Where(x => x != null && x.IdPlan == idPlan && !x.EstaVencida()
                                                                 && x.EstaVigente()))
                 {
                     decimal d = DescuentoDe(p, bruto, meses);

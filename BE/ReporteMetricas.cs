@@ -20,7 +20,7 @@ namespace BE
         public List<MetricaRotacionCategoria> RotacionPorCategoria { get; set; } = new List<MetricaRotacionCategoria>();
         public List<CandidataSugerencia> Oportunidades { get; set; } = new List<CandidataSugerencia>();
 
-        /// <summary>Guarda de "¿Hay oportunidad?".</summary>
+        /// <summary>Guarda de "¿Hay oportunidad?": solo cuentan las oportunidades por plan.</summary>
         public bool HayOportunidad() => Oportunidades != null && Oportunidades.Count > 0;
     }
 
@@ -45,11 +45,19 @@ namespace BE
         public decimal IngresoMensualEnRiesgo { get; set; }
     }
 
-    /// <summary>Rotación de una categoría: prendas de baja y de alta demanda.</summary>
+    /// <summary>Rotación de una categoría: prendas de baja y de alta demanda. Si hay varias de
+    /// baja demanda, el reporte la señala como oportunidad, solo como dato: las promociones son
+    /// por plan y una categoría no sirve de base para una sugerencia.</summary>
     public class MetricaRotacionCategoria
     {
         public string Categoria { get; set; }
         public int PrendasBajaDemanda { get; set; }
         public int PrendasAltaDemanda { get; set; }
+
+        /// <summary>Hasta tres prendas de baja demanda de la categoría, como ejemplo.</summary>
+        public string EjemplosBajaDemanda { get; set; }
+
+        /// <summary>Oportunidad informativa: alcanzó el mínimo de prendas de baja demanda.</summary>
+        public bool EsOportunidad { get; set; }
     }
 }

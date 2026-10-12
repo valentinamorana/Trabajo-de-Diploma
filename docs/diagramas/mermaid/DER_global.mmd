@@ -10,9 +10,9 @@ erDiagram
   PlanSuscripcion |o--o{ Cliente : "IdPlanSiguiente"
   PlanSuscripcion |o--o{ Cliente : "IdPlan"
   Promocion |o--o{ Contratacion : "IdPromocion"
+  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Empleado ||--o{ Contratacion : "IdVendedor"
   Empleado |o--o{ Contratacion : "IdCaja"
-  PlanSuscripcion ||--o{ Contratacion : "IdPlan"
   Cliente ||--o{ Contratacion : "IdCliente"
   Cliente |o--o{ Contratacion : "IdReferenteAcreditado"
   Permiso ||--o{ ControlMapeado : "IdPermiso"
@@ -29,30 +29,28 @@ erDiagram
   Prenda ||--o{ ListaEspera : "IdPrenda"
   Prenda ||--o{ MantenimientoPrenda : "IdPrenda"
   Cliente ||--o{ Pedido : "IdCliente"
-  Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Empleado ||--o{ Pedido : "IdEmpleado"
+  Empleado |o--o{ Pedido : "IdEmpleadoControl"
   Usuario |o--o{ PedidoHistorial : "IdUsuario"
   Pedido ||--o{ PedidoHistorial : "IdPedido"
-  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Pedido ||--o{ PedidoPrenda : "IdPedido"
+  Prenda ||--o{ PedidoPrenda : "IdPrenda"
   Permiso ||--o{ PermisoRelacion : "IdPadre"
   Permiso ||--o{ PermisoRelacion : "IdHijo"
   Usuario ||--o{ Preferencia : "IdUsuario"
   Categoria |o--o{ Prenda : "Categoria"
-  Cliente |o--o{ Prenda : "IdClienteActual"
   Cliente |o--o{ Prenda : "IdUltimoCliente"
-  Categoria |o--o{ Promocion : "CategoriaPrenda"
+  Cliente |o--o{ Prenda : "IdClienteActual"
   Usuario |o--o{ Promocion : "IdUsuarioAlta"
+  PlanSuscripcion ||--o{ Promocion : "IdPlan"
   SugerenciaPromocion |o--o{ Promocion : "IdSugerenciaOrigen"
-  PlanSuscripcion |o--o{ Promocion : "IdPlan"
   Promocion ||--o{ PromocionHistorial : "IdPromocion"
   Usuario |o--o{ PromocionHistorial : "IdUsuario"
   Usuario ||--o{ SolicitudBajaPromocion : "IdUsuarioSolicita"
   Usuario |o--o{ SolicitudBajaPromocion : "IdUsuarioResuelve"
   Promocion ||--o{ SolicitudBajaPromocion : "IdPromocion"
-  Categoria |o--o{ SugerenciaPromocion : "CategoriaPrenda"
-  Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   PlanSuscripcion |o--o{ SugerenciaPromocion : "IdPlan"
+  Usuario |o--o{ SugerenciaPromocion : "IdUsuarioAlta"
   Control ||--o{ Traduccion : "IdControl"
   Idioma ||--o{ Traduccion : "IdIdioma"
   Idioma |o--o{ Usuario : "IdIdioma"
@@ -371,7 +369,6 @@ erDiagram
   SugerenciaPromocion {
     int IdSugerencia PK
     int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda FK "NULL"
     nvarchar(500) Motivo
     int TipoDescuentoSugerido
     decimal(10_2) BeneficioEstimado
@@ -391,8 +388,7 @@ erDiagram
     date FechaInicio
     date FechaFin
     int Estado
-    int IdPlan FK "NULL"
-    nvarchar(100) CategoriaPrenda FK "NULL"
+    int IdPlan FK
     decimal(10_2) MargenEstimado
     nvarchar(500) ImpactoEconomico "NULL"
     int IdSugerenciaOrigen FK "NULL"
@@ -424,6 +420,7 @@ erDiagram
     datetime FechaSolicitud
     int Estado
     int IdUsuarioResuelve FK "NULL"
-    nvarchar(500) MotivoResolucion "NULL"
     datetime FechaResolucion "NULL"
+    nvarchar(500) Respuesta "NULL"
+    bit DioDeBaja
   }

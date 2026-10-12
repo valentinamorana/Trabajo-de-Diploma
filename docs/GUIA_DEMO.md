@@ -95,20 +95,21 @@ Administrador puede corregirlo a mano, como excepción).
 
 | Objeto | Estado | Quién actúa |
 |---|---|---|
-| 2 sugerencias "SUGERENCIA PendienteDeEvaluar" | Pendientes | `admcomercial`: **Alta desde Sugerencia** o **Descartar sugerencia** (con motivo) |
+| 2 sugerencias "SUGERENCIA PendienteDeEvaluar" (planes Básico y Premium) | Pendientes | `admcomercial`: **Alta desde Sugerencia** o **Descartar sugerencia** (con motivo) |
 | PROMO ParaDictaminar Premium -15% | En revisión contable | `contable`: **Aprobar y Activar** o **Rechazar** (con observación) |
-| PROMO Rechazada Basico -20% | Rechazada por Contabilidad | `admcomercial`: **Reformular** (vuelve a revisión) o **Descartar** |
+| PROMO Rechazada Basico -20% | Rechazada por Contabilidad | `admcomercial`: **Reformular** (vuelve a revisión) o **Dar de baja** |
 | PROMO Vigente Estandar -10% | Vigente | `vendedor`: **Solicitar baja**; mientras esté vigente se aplica en el cobro de Caja |
-| PROMO BajaSolicitada Abrigos $3000 | Baja solicitada | `admcomercial`: **Aprobar Baja** (queda Desactivada) o **Rechazar Baja** |
+| PROMO ConSolicitudBaja Premium $3000 | Vigente, con una solicitud de baja pendiente | `admcomercial`: en **Solicitudes de baja pendientes**, **Atender**: Sí = se da de baja, No = sigue vigente (con respuesta) |
 
 1. `gcomercial` → **Promociones → Sugerir Promoción**: **Analizar métricas…** muestra el reporte (abandono y
-   rotación) → **Usar esta idea** precarga los datos → **Enviar Sugerencia**.
+   rotación; solo las oportunidades por plan se pueden usar) → **Usar esta idea** precarga los datos → **Enviar Sugerencia**.
 2. `admcomercial` → **Promociones → Gestión de Promociones**: alta desde una sugerencia o **Alta Manual**,
-   reformular la rechazada, resolver la baja solicitada.
+   reformular la rechazada (o **Dar de baja**), **Atender** la solicitud de baja pendiente.
 3. `contable` → **Promociones → Revisión Contable**: dictaminar la "ParaDictaminar". Quien creó una
    promoción no puede dictaminarla.
 4. `vendedor` → **Promociones → Promociones Vigentes**: **Solicitar baja** de la vigente (con motivo),
-   después de haberle cobrado a Diego en PN02.
+   después de haberle cobrado a Diego en PN02. La promoción sigue vigente (columna "Baja solicitada") hasta que
+   `admcomercial` la atiende.
 
 ---
 

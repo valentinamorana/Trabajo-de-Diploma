@@ -4604,26 +4604,10 @@ ES	promo.conteo	{0} promoción(es) en total.
 EN	promo.conteo	{0} promotion(s) in total.
 RU	promo.conteo	Всего акций: {0}.
 PT	promo.conteo	{0} promoção(ões) no total.
-ES	msg.promo.desactivada	Promoción '{0}' desactivada.
-EN	msg.promo.desactivada	Promotion '{0}' deactivated.
-RU	msg.promo.desactivada	Акция '{0}' отключена.
-PT	msg.promo.desactivada	Promoção '{0}' desativada.
 ES	msg.promo.dadabaja	Promoción '{0}' dada de baja.
 EN	msg.promo.dadabaja	Promotion '{0}' discontinued.
 RU	msg.promo.dadabaja	Акция '{0}' отменена.
 PT	msg.promo.dadabaja	Promoção '{0}' baixada.
-ES	inputdlg.rechazarbaja.titulo	Rechazar Baja de Promoción
-EN	inputdlg.rechazarbaja.titulo	Reject Promotion Discontinuation
-RU	inputdlg.rechazarbaja.titulo	Отклонить отмену акции
-PT	inputdlg.rechazarbaja.titulo	Rejeitar Baixa de Promoção
-ES	inputdlg.rechazarbaja.prompt	Motivo por el cual '{0}' sigue vigente:
-EN	inputdlg.rechazarbaja.prompt	Reason why '{0}' remains active:
-RU	inputdlg.rechazarbaja.prompt	Причина, по которой '{0}' остаётся действующей:
-PT	inputdlg.rechazarbaja.prompt	Motivo pelo qual '{0}' continua vigente:
-ES	msg.promo.bajarechazada	Se rechazó la baja de '{0}': sigue vigente.
-EN	msg.promo.bajarechazada	Discontinuation of '{0}' rejected: it remains active.
-RU	msg.promo.bajarechazada	Отмена '{0}' отклонена: акция остаётся действующей.
-PT	msg.promo.bajarechazada	A baixa de '{0}' foi rejeitada: continua vigente.
 ES	promo.conteo.revisioncontable	{0} promoción(es) pendiente(s) de revisión contable.
 EN	promo.conteo.revisioncontable	{0} promotion(s) pending accounting review.
 RU	promo.conteo.revisioncontable	{0} акци(й/я) ожидают проверки бухгалтерии.
@@ -4731,7 +4715,6 @@ ES	medio.tarjeta	Tarjeta
 ES	medio.transferencia	Transferencia
 ES	err.bll.promocion.sugerencia_inexistente	La sugerencia seleccionada no existe.
 ES	err.bll.promocion.nombre_requerido	El nombre de la promoción es obligatorio.
-ES	err.bll.promocion.destino_invalido	La promoción debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.
 ES	err.bll.promocion.plan_inexistente	El plan seleccionado no existe.
 ES	err.bll.promocion.valor_invalido	El beneficio de la promoción debe ser mayor a cero.
 ES	err.bll.promocion.porcentaje_invalido	Un descuento por porcentaje no puede superar el 100%.
@@ -4739,14 +4722,10 @@ ES	err.bll.promocion.rango_fechas_invalido	La fecha de fin no puede ser anterior
 ES	err.bll.promocion.reformular_estado	Solo se puede reformular una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.
 ES	err.bll.promocion.estado_concurrente	La promoción cambió de estado desde otra sesión. Actualizá la lista e intentá de nuevo.
 ES	err.bll.promocion.sugerencia_evaluada	La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.
-ES	err.bll.promocion.desactivar_estado	Solo se pueden desactivar promociones Vigentes. Esta promoción está '{0}'.
 ES	err.bll.promocion.sugerirbaja_estado	Solo se puede sugerir la baja de promociones Vigentes. Esta promoción está '{0}'.
 ES	err.bll.promocion.motivobaja_requerido	Debe indicar el motivo de la baja sugerida.
-ES	err.bll.promocion.resolverbaja_estado	Solo se puede resolver la baja de promociones con baja Solicitada. Esta promoción está '{0}'.
-ES	err.bll.promocion.motivorechazobaja_requerido	Debe indicar el motivo por el cual la promoción sigue vigente.
 ES	err.bll.promocion.revisioncontable_estado	Solo se pueden aprobar o rechazar promociones En Revisión Contable. Esta promoción está '{0}'.
 ES	err.bll.promocion.observacion_requerida	Debe ingresar una observación para esta decisión.
-ES	err.bll.sugerenciapromocion.destino_invalido	La sugerencia debe aplicar a un plan o a una categoría de prenda, nunca a ambos ni a ninguno.
 ES	err.bll.sugerenciapromocion.plan_inexistente	El plan seleccionado no existe.
 ES	err.bll.sugerenciapromocion.motivo_requerido	Debe indicar el motivo de la sugerencia.
 ES	err.bll.sugerenciapromocion.beneficio_invalido	El beneficio estimado debe ser mayor a cero.
@@ -4757,7 +4736,6 @@ EN	medio.tarjeta	Card
 EN	medio.transferencia	Transfer
 EN	err.bll.promocion.sugerencia_inexistente	The selected suggestion does not exist.
 EN	err.bll.promocion.nombre_requerido	The promotion name is required.
-EN	err.bll.promocion.destino_invalido	The promotion must apply to either a plan or a garment category, never both or neither.
 EN	err.bll.promocion.plan_inexistente	The selected plan does not exist.
 EN	err.bll.promocion.valor_invalido	The promotion's benefit must be greater than zero.
 EN	err.bll.promocion.porcentaje_invalido	A percentage discount cannot exceed 100%.
@@ -4765,14 +4743,10 @@ EN	err.bll.promocion.rango_fechas_invalido	The end date cannot be earlier than t
 EN	err.bll.promocion.reformular_estado	Only a promotion Rejected by Accounting can be reformulated. This promotion is '{0}'.
 EN	err.bll.promocion.estado_concurrente	The promotion changed state from another session. Refresh the list and try again.
 EN	err.bll.promocion.sugerencia_evaluada	The selected suggestion has already been evaluated. Refresh the suggestions list.
-EN	err.bll.promocion.desactivar_estado	Only Active promotions can be deactivated. This promotion is '{0}'.
 EN	err.bll.promocion.sugerirbaja_estado	Only Active promotions can have their removal suggested. This promotion is '{0}'.
 EN	err.bll.promocion.motivobaja_requerido	You must indicate the reason for the suggested removal.
-EN	err.bll.promocion.resolverbaja_estado	Only promotions with a Requested removal can be resolved. This promotion is '{0}'.
-EN	err.bll.promocion.motivorechazobaja_requerido	You must indicate why the promotion remains active.
 EN	err.bll.promocion.revisioncontable_estado	Only promotions Under accounting review can be approved or rejected. This promotion is '{0}'.
 EN	err.bll.promocion.observacion_requerida	You must enter a remark for this decision.
-EN	err.bll.sugerenciapromocion.destino_invalido	The suggestion must apply to either a plan or a garment category, never both or neither.
 EN	err.bll.sugerenciapromocion.plan_inexistente	The selected plan does not exist.
 EN	err.bll.sugerenciapromocion.motivo_requerido	You must indicate the reason for the suggestion.
 EN	err.bll.sugerenciapromocion.beneficio_invalido	The estimated benefit must be greater than zero.
@@ -4783,7 +4757,6 @@ RU	medio.tarjeta	Карта
 RU	medio.transferencia	Перевод
 RU	err.bll.promocion.sugerencia_inexistente	Выбранное предложение не существует.
 RU	err.bll.promocion.nombre_requerido	Название акции обязательно.
-RU	err.bll.promocion.destino_invalido	Акция должна применяться либо к плану, либо к категории вещей, но не к обоим и не ни к одному.
 RU	err.bll.promocion.plan_inexistente	Выбранный план не существует.
 RU	err.bll.promocion.valor_invalido	Выгода по акции должна быть больше нуля.
 RU	err.bll.promocion.porcentaje_invalido	Процентная скидка не может превышать 100%.
@@ -4791,14 +4764,10 @@ RU	err.bll.promocion.rango_fechas_invalido	Дата окончания не мо
 RU	err.bll.promocion.reformular_estado	Переработать можно только акцию, отклонённую бухгалтерией. Эта акция в статусе '{0}'.
 RU	err.bll.promocion.estado_concurrente	Статус акции изменён в другом сеансе. Обновите список и повторите.
 RU	err.bll.promocion.sugerencia_evaluada	Выбранное предложение уже рассмотрено. Обновите список предложений.
-RU	err.bll.promocion.desactivar_estado	Отключить можно только действующие акции. Текущий статус: '{0}'.
 RU	err.bll.promocion.sugerirbaja_estado	Предложить отмену можно только для действующих акций. Текущий статус: '{0}'.
 RU	err.bll.promocion.motivobaja_requerido	Необходимо указать причину предложенной отмены.
-RU	err.bll.promocion.resolverbaja_estado	Решение можно принять только по акциям с запрошенной отменой. Текущий статус: '{0}'.
-RU	err.bll.promocion.motivorechazobaja_requerido	Необходимо указать, почему акция остаётся действующей.
 RU	err.bll.promocion.revisioncontable_estado	Утвердить или отклонить можно только акции на бухгалтерской проверке. Текущий статус: '{0}'.
 RU	err.bll.promocion.observacion_requerida	Необходимо ввести комментарий к этому решению.
-RU	err.bll.sugerenciapromocion.destino_invalido	Предложение должно применяться либо к плану, либо к категории вещей, но не к обоим и не ни к одному.
 RU	err.bll.sugerenciapromocion.plan_inexistente	Выбранный план не существует.
 RU	err.bll.sugerenciapromocion.motivo_requerido	Необходимо указать причину предложения.
 RU	err.bll.sugerenciapromocion.beneficio_invalido	Ожидаемая выгода должна быть больше нуля.
@@ -4809,7 +4778,6 @@ PT	medio.tarjeta	Cartão
 PT	medio.transferencia	Transferência
 PT	err.bll.promocion.sugerencia_inexistente	A sugestão selecionada não existe.
 PT	err.bll.promocion.nombre_requerido	O nome da promoção é obrigatório.
-PT	err.bll.promocion.destino_invalido	A promoção deve aplicar-se a um plano ou a uma categoria de peça, nunca a ambos nem a nenhum.
 PT	err.bll.promocion.plan_inexistente	O plano selecionado não existe.
 PT	err.bll.promocion.valor_invalido	O benefício da promoção deve ser maior que zero.
 PT	err.bll.promocion.porcentaje_invalido	Um desconto percentual não pode superar 100%.
@@ -4817,14 +4785,10 @@ PT	err.bll.promocion.rango_fechas_invalido	A data de término não pode ser ante
 PT	err.bll.promocion.reformular_estado	Somente uma promoção Rejeitada pela Contabilidade pode ser reformulada. Esta promoção está '{0}'.
 PT	err.bll.promocion.estado_concurrente	A promoção mudou de estado em outra sessão. Atualize a lista e tente novamente.
 PT	err.bll.promocion.sugerencia_evaluada	A sugestão selecionada já foi avaliada. Atualize a lista de sugestões.
-PT	err.bll.promocion.desactivar_estado	Só é possível desativar promoções Vigentes. Esta promoção está '{0}'.
 PT	err.bll.promocion.sugerirbaja_estado	Só é possível sugerir a baixa de promoções Vigentes. Esta promoção está '{0}'.
 PT	err.bll.promocion.motivobaja_requerido	Deve indicar o motivo da baixa sugerida.
-PT	err.bll.promocion.resolverbaja_estado	Só é possível resolver a baixa de promoções com baixa Solicitada. Esta promoção está '{0}'.
-PT	err.bll.promocion.motivorechazobaja_requerido	Deve indicar o motivo pelo qual a promoção permanece vigente.
 PT	err.bll.promocion.revisioncontable_estado	Só é possível aprovar ou rejeitar promoções Em Revisão Contábil. Esta promoção está '{0}'.
 PT	err.bll.promocion.observacion_requerida	Deve inserir uma observação para esta decisão.
-PT	err.bll.sugerenciapromocion.destino_invalido	A sugestão deve aplicar-se a um plano ou a uma categoria de peça, nunca a ambos nem a nenhum.
 PT	err.bll.sugerenciapromocion.plan_inexistente	O plano selecionado não existe.
 PT	err.bll.sugerenciapromocion.motivo_requerido	Deve indicar o motivo da sugestão.
 PT	err.bll.sugerenciapromocion.beneficio_invalido	O benefício estimado deve ser maior que zero.
@@ -4848,10 +4812,6 @@ ES	promocion.plan	Plan:
 EN	promocion.plan	Plan:
 RU	promocion.plan	План:
 PT	promocion.plan	Plano:
-ES	promocion.categoria	Categoría:
-EN	promocion.categoria	Category:
-RU	promocion.categoria	Категория:
-PT	promocion.categoria	Categoria:
 ES	promocion.tiposugerido	Tipo sugerido:
 EN	promocion.tiposugerido	Suggested type:
 RU	promocion.tiposugerido	Предлагаемый тип:
@@ -4863,25 +4823,25 @@ PT	promocion.beneficioestimado	Benefício est.:
 ES	promocion.btn.enviarsugerencia	Enviar Sugerencia
 ES	promocion.btn.reformular	Reformular
 ES	promocion.desdeanalisis.usar	Usar esta idea
-ES	msg.sugerencia.sinanalisis	Los reportes de rotación y abandono no detectan casos para sugerir por ahora.
+ES	msg.sugerencia.sinanalisis	El reporte de abandono no detecta planes para sugerir por ahora.
 ES	msg.promo.reformulada	Promoción #{0} reformulada: vuelve a revisión contable.
 ES	promo.reformular	Reformulando la promoción #{0}. Observación de Contabilidad: {1}
 EN	promocion.btn.enviarsugerencia	Send Suggestion
 EN	promocion.btn.reformular	Reformulate
 EN	promocion.desdeanalisis.usar	Use this idea
-EN	msg.sugerencia.sinanalisis	The rotation and churn reports do not detect any cases to suggest for now.
+EN	msg.sugerencia.sinanalisis	The churn report does not detect any plans to suggest for now.
 EN	msg.promo.reformulada	Promotion #{0} reformulated: back to accounting review.
 EN	promo.reformular	Reformulating promotion #{0}. Accounting note: {1}
 RU	promocion.btn.enviarsugerencia	Отправить предложение
 RU	promocion.btn.reformular	Переработать
 RU	promocion.desdeanalisis.usar	Использовать эту идею
-RU	msg.sugerencia.sinanalisis	Отчёты по обороту и оттоку пока не выявляют случаев для предложения.
+RU	msg.sugerencia.sinanalisis	Отчёт по оттоку пока не выявляет тарифов для предложения.
 RU	msg.promo.reformulada	Акция #{0} переработана: возвращена на бухгалтерскую проверку.
 RU	promo.reformular	Переработка акции #{0}. Замечание бухгалтерии: {1}
 PT	promocion.btn.enviarsugerencia	Enviar Sugestão
 PT	promocion.btn.reformular	Reformular
 PT	promocion.desdeanalisis.usar	Usar esta ideia
-PT	msg.sugerencia.sinanalisis	Os relatórios de rotação e abandono não detectam casos para sugerir por enquanto.
+PT	msg.sugerencia.sinanalisis	O relatório de abandono não detecta planos para sugerir por enquanto.
 PT	msg.promo.reformulada	Promoção #{0} reformulada: volta para a revisão contábil.
 PT	promo.reformular	Reformulando a promoção #{0}. Observação da Contabilidade: {1}
 ES	frm.altapromocion	Alta de Promoción
@@ -4936,18 +4896,6 @@ ES	promocion.btn.altamanual	Alta Manual
 EN	promocion.btn.altamanual	Manual Entry
 RU	promocion.btn.altamanual	Ручное создание
 PT	promocion.btn.altamanual	Cadastro Manual
-ES	promocion.btn.desactivar	Desactivar
-EN	promocion.btn.desactivar	Deactivate
-RU	promocion.btn.desactivar	Деактивировать
-PT	promocion.btn.desactivar	Desativar
-ES	promocion.btn.aprobarbaja	Aprobar Baja
-EN	promocion.btn.aprobarbaja	Approve Deactivation
-RU	promocion.btn.aprobarbaja	Утвердить отмену
-PT	promocion.btn.aprobarbaja	Aprovar Baixa
-ES	promocion.btn.rechazarbaja	Rechazar Baja
-EN	promocion.btn.rechazarbaja	Reject Deactivation
-RU	promocion.btn.rechazarbaja	Отклонить отмену
-PT	promocion.btn.rechazarbaja	Rejeitar Baixa
 ES	promocion.titulosugerencias	Sugerencias de Promoción pendientes (Gerencia)
 EN	promocion.titulosugerencias	Pending Promotion Suggestions (Management)
 RU	promocion.titulosugerencias	Ожидающие предложения по акциям (Руководство)
@@ -4984,10 +4932,6 @@ ES	col.promo.estado	Estado
 EN	col.promo.estado	Status
 RU	col.promo.estado	Статус
 PT	col.promo.estado	Estado
-ES	col.promo.motivobaja	Motivo Baja
-EN	col.promo.motivobaja	Deactivation Reason
-RU	col.promo.motivobaja	Причина отмены
-PT	col.promo.motivobaja	Motivo da Baixa
 ES	frm.promocontab	Revisión Contable de Promociones
 EN	frm.promocontab	Accounting Review of Promotions
 RU	frm.promocontab	Бухгалтерская проверка акций
@@ -6091,13 +6035,6 @@ PT	err.dal.pedido.restaurar_prendas	Não é possível restaurar o Pedido #{0}: u
 ES	dlg.promo.descartarsug.titulo	Descartar sugerencia
 ES	dlg.promo.descartarsug.prompt	Motivo por el que se descarta la sugerencia #{0}:
 ES	msg.promo.sugdescartada	Sugerencia #{0} descartada.
-ES	dlg.promo.descartar.titulo	Descartar promoción
-ES	dlg.promo.descartar.prompt	Motivo por el que no se reformula la promoción '{0}':
-ES	msg.promo.descartada	Promoción '{0}' descartada.
-ES	dlg.promo.desactivar.titulo	Desactivar promoción
-ES	dlg.promo.desactivar.prompt	Motivo para desactivar la promoción '{0}':
-ES	dlg.promo.aprobarbaja.titulo	Aprobar baja de promoción
-ES	dlg.promo.aprobarbaja.prompt	Ventas pidió la baja de '{0}'.\nMotivo: {1}\n\nObservación de la resolución (opcional):
 ES	lbl.promo.historial.titulo	Historial de estados — Promoción #{0}
 ES	promo.analisis.vacio	Seleccioná una promoción para analizar su margen e impacto.
 ES	promo.analisis.titulo	Análisis de margen e impacto — Promoción #{0} '{1}'
@@ -6108,7 +6045,6 @@ ES	promo.analisis.superpuestas	ADVERTENCIA: se superpone en fechas con otras pro
 ES	promo.analisis.sinsuperposicion	No se superpone con otras promociones vigentes del mismo plan.
 ES	promo.analisis.creador	Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad.
 ES	promo.analisis.calc.titulo	Margen proyectado (por mes):
-ES	promo.analisis.calc.informativa	Promoción por categoría: es informativa (no descuenta en el cobro); no tiene costo proyectado ni resultado.
 ES	promo.analisis.calc.sinplan	No se puede calcular el margen: el plan de la promoción ya no existe.
 ES	promo.analisis.calc.descuento	Descuento por cliente: {0:C2} ({1} {2} sobre el precio del plan, {3:C2})
 ES	promo.analisis.calc.costo	Costo del descuento: {0:C2} × {1} cliente(s) activo(s) del plan = {2:C2}
@@ -6125,14 +6061,10 @@ ES	promocion.btn.imprimirreporte	Imprimir reporte
 ES	doc.promo.ficha.titulo	Ficha de promoción
 ES	doc.promo.dictamen.titulo	Dictamen contable
 ES	doc.promo.solicitud.titulo	Solicitud de baja
-ES	menu.promo.resolucion	Resolución de baja
 ES	doc.promo.constanciadescarte.titulo	Constancia de descarte
 ES	est.promo.enrevision	En revisión contable
 ES	est.promo.vigente	Vigente
 ES	est.promo.rechazada	Rechazada por Contabilidad
-ES	est.promo.bajasolicitada	Baja solicitada
-ES	est.promo.desactivada	Desactivada
-ES	est.promo.descartada	Descartada
 ES	est.promo.vencida	Vencida
 ES	est.sugpromo.evaluada	Aceptada (promoción creada)
 ES	est.sugpromo.descartada	Descartada
@@ -6144,7 +6076,6 @@ ES	tipodesc.porcentaje	Porcentaje
 ES	tipodesc.montofijo	Monto fijo
 ES	tipodesc.preciopromocional	Precio promocional
 ES	doc.promo.plan	Plan
-ES	doc.promo.categoria	Categoría
 ES	doc.promo.promocion	Promoción
 ES	doc.promo.beneficio	Beneficio
 ES	doc.promo.vigencia	Vigencia
@@ -6173,37 +6104,21 @@ ES	doc.promo.creadapor	Creada por (Administración)
 ES	doc.promo.origensug	Origen
 ES	doc.promo.desdesugerencia	sugerencia de Gerencia #{0}
 ES	doc.promo.manual	alta manual
-ES	doc.promo.notacategoria	Promoción por categoría: es informativa, no descuenta en el cobro de la suscripción.
 ES	doc.promo.historial	Historial de estados:
 ES	doc.promo.resultado	Resultado
 ES	doc.promo.aprobada	APROBADA — la promoción queda Vigente.
-ES	doc.promo.rechazada	RECHAZADA — vuelve a Administración para reformularla o descartarla.
+ES	doc.promo.rechazada	RECHAZADA — vuelve a Administración para reformularla o darla de baja.
 ES	doc.promo.observacion	Observación
 ES	doc.promo.contable	Dictaminó (Contabilidad)
 ES	doc.promo.solicito	Solicitó (Ventas)
-ES	doc.promo.solicitud.nota	Mientras Administración resuelve la solicitud, la promoción no se aplica en los cobros.
 ES	doc.promo.destinatario	Destinatario
-ES	doc.promo.agerencia	Gerencia
 ES	doc.promo.aventas	Ventas
 ES	doc.promo.motivosolicitud	Motivo de la solicitud
-ES	doc.promo.bajaaprobada	Baja APROBADA — la promoción quedó Desactivada.
-ES	doc.promo.bajarechazada	Baja RECHAZADA — la promoción sigue Vigente.
-ES	doc.promo.motivoresolucion	Motivo de la resolución
-ES	doc.promo.resolvio	Resolvió (Administración)
-ES	doc.promo.resolucion.gerencia	Resolución de baja — Informe a Gerencia
-ES	doc.promo.resolucion.ventas	Resolución de baja — Informe a Ventas
-ES	doc.promo.descarteprom	Administración descartó la promoción el {0} tras el rechazo contable.
-ES	doc.promo.descartadapor	Descartó
 ES	err.bll.promocion.inexistente	La promoción ya no existe.
 ES	err.bll.promocion.creador_no_dictamina	Quien creó la promoción no puede dictaminarla: la tiene que analizar otro usuario de Contabilidad.
-ES	err.bll.promocion.descartar_estado	Solo se puede descartar una promoción Rechazada por Contabilidad. Esta promoción está '{0}'.
-ES	err.bll.promocion.solicitud_inexistente	La promoción no tiene una solicitud de baja pendiente.
-ES	err.bll.promocion.motivodescarte_requerido	Debe indicar el motivo por el que se descarta la promoción.
-ES	err.bll.promocion.motivodesactivar_requerido	Debe indicar el motivo de la desactivación.
 ES	err.bll.sugerenciapromocion.motivodescarte_requerido	Debe indicar el motivo por el que se descarta la sugerencia.
 ES	promocion.btn.descartarsugerencia	Descartar sugerencia
 ES	promocion.btn.imprimirsugerencia	Imprimir sugerencia
-ES	promocion.btn.descartar	Descartar
 ES	promocion.btn.historial	Historial
 ES	promocion.btn.imprimir	Imprimir ▾
 ES	promocion.btn.solicitarbaja	Solicitar baja
@@ -6216,13 +6131,6 @@ ES	col.promo.fecha	Fecha
 EN	dlg.promo.descartarsug.titulo	Discard suggestion
 EN	dlg.promo.descartarsug.prompt	Reason for discarding suggestion #{0}:
 EN	msg.promo.sugdescartada	Suggestion #{0} discarded.
-EN	dlg.promo.descartar.titulo	Discard promotion
-EN	dlg.promo.descartar.prompt	Reason for not reformulating promotion '{0}':
-EN	msg.promo.descartada	Promotion '{0}' discarded.
-EN	dlg.promo.desactivar.titulo	Deactivate promotion
-EN	dlg.promo.desactivar.prompt	Reason for deactivating promotion '{0}':
-EN	dlg.promo.aprobarbaja.titulo	Approve promotion withdrawal
-EN	dlg.promo.aprobarbaja.prompt	Sales requested the withdrawal of '{0}'.\nReason: {1}\n\nResolution note (optional):
 EN	lbl.promo.historial.titulo	Status history — Promotion #{0}
 EN	promo.analisis.vacio	Select a promotion to analyze its margin and impact.
 EN	promo.analisis.titulo	Margin and impact analysis — Promotion #{0} '{1}'
@@ -6233,7 +6141,6 @@ EN	promo.analisis.superpuestas	WARNING: its dates overlap with other active prom
 EN	promo.analisis.sinsuperposicion	It does not overlap with other active promotions of the same plan.
 EN	promo.analisis.creador	You created this promotion: another Accounting user must rule on it.
 EN	promo.analisis.calc.titulo	Projected margin (per month):
-EN	promo.analisis.calc.informativa	Category promotion: it is informative (no discount at billing); it has no projected cost or result.
 EN	promo.analisis.calc.sinplan	The margin cannot be calculated: the promotion plan no longer exists.
 EN	promo.analisis.calc.descuento	Discount per customer: {0:C2} ({1} {2} on the plan price, {3:C2})
 EN	promo.analisis.calc.costo	Discount cost: {0:C2} × {1} active customer(s) of the plan = {2:C2}
@@ -6250,14 +6157,10 @@ EN	promocion.btn.imprimirreporte	Print report
 EN	doc.promo.ficha.titulo	Promotion sheet
 EN	doc.promo.dictamen.titulo	Accounting ruling
 EN	doc.promo.solicitud.titulo	Withdrawal request
-EN	menu.promo.resolucion	Withdrawal resolution
 EN	doc.promo.constanciadescarte.titulo	Discard certificate
 EN	est.promo.enrevision	Under accounting review
 EN	est.promo.vigente	Active
 EN	est.promo.rechazada	Rejected by Accounting
-EN	est.promo.bajasolicitada	Withdrawal requested
-EN	est.promo.desactivada	Deactivated
-EN	est.promo.descartada	Discarded
 EN	est.promo.vencida	Expired
 EN	est.sugpromo.evaluada	Accepted (promotion created)
 EN	est.sugpromo.descartada	Discarded
@@ -6269,7 +6172,6 @@ EN	tipodesc.porcentaje	Percentage
 EN	tipodesc.montofijo	Fixed amount
 EN	tipodesc.preciopromocional	Promotional price
 EN	doc.promo.plan	Plan
-EN	doc.promo.categoria	Category
 EN	doc.promo.promocion	Promotion
 EN	doc.promo.beneficio	Benefit
 EN	doc.promo.vigencia	Validity
@@ -6298,37 +6200,21 @@ EN	doc.promo.creadapor	Created by (Administration)
 EN	doc.promo.origensug	Source
 EN	doc.promo.desdesugerencia	Management suggestion #{0}
 EN	doc.promo.manual	manual entry
-EN	doc.promo.notacategoria	Category promotion: informational only, it does not discount the subscription charge.
 EN	doc.promo.historial	Status history:
 EN	doc.promo.resultado	Result
 EN	doc.promo.aprobada	APPROVED — the promotion becomes Active.
-EN	doc.promo.rechazada	REJECTED — it goes back to Administration to be reformulated or discarded.
+EN	doc.promo.rechazada	REJECTED — it goes back to Administration to be reformulated or withdrawn.
 EN	doc.promo.observacion	Note
 EN	doc.promo.contable	Ruled by (Accounting)
 EN	doc.promo.solicito	Requested by (Sales)
-EN	doc.promo.solicitud.nota	While Administration resolves the request, the promotion is not applied to charges.
 EN	doc.promo.destinatario	Recipient
-EN	doc.promo.agerencia	Management
 EN	doc.promo.aventas	Sales
 EN	doc.promo.motivosolicitud	Request reason
-EN	doc.promo.bajaaprobada	Withdrawal APPROVED — the promotion was Deactivated.
-EN	doc.promo.bajarechazada	Withdrawal REJECTED — the promotion remains Active.
-EN	doc.promo.motivoresolucion	Resolution reason
-EN	doc.promo.resolvio	Resolved by (Administration)
-EN	doc.promo.resolucion.gerencia	Withdrawal resolution — Report to Management
-EN	doc.promo.resolucion.ventas	Withdrawal resolution — Report to Sales
-EN	doc.promo.descarteprom	Administration discarded the promotion on {0} after the accounting rejection.
-EN	doc.promo.descartadapor	Discarded by
 EN	err.bll.promocion.inexistente	The promotion no longer exists.
 EN	err.bll.promocion.creador_no_dictamina	Whoever created the promotion cannot rule on it: another Accounting user must analyze it.
-EN	err.bll.promocion.descartar_estado	Only a promotion Rejected by Accounting can be discarded. This promotion is '{0}'.
-EN	err.bll.promocion.solicitud_inexistente	The promotion has no pending withdrawal request.
-EN	err.bll.promocion.motivodescarte_requerido	You must state the reason for discarding the promotion.
-EN	err.bll.promocion.motivodesactivar_requerido	You must state the reason for the deactivation.
 EN	err.bll.sugerenciapromocion.motivodescarte_requerido	You must state the reason for discarding the suggestion.
 EN	promocion.btn.descartarsugerencia	Discard suggestion
 EN	promocion.btn.imprimirsugerencia	Print suggestion
-EN	promocion.btn.descartar	Discard
 EN	promocion.btn.historial	History
 EN	promocion.btn.imprimir	Print ▾
 EN	promocion.btn.solicitarbaja	Request withdrawal
@@ -6341,13 +6227,6 @@ EN	col.promo.fecha	Date
 RU	dlg.promo.descartarsug.titulo	Отклонить предложение
 RU	dlg.promo.descartarsug.prompt	Причина отклонения предложения №{0}:
 RU	msg.promo.sugdescartada	Предложение №{0} отклонено.
-RU	dlg.promo.descartar.titulo	Отклонить акцию
-RU	dlg.promo.descartar.prompt	Причина, по которой акция '{0}' не переформулируется:
-RU	msg.promo.descartada	Акция '{0}' отклонена.
-RU	dlg.promo.desactivar.titulo	Деактивировать акцию
-RU	dlg.promo.desactivar.prompt	Причина деактивации акции '{0}':
-RU	dlg.promo.aprobarbaja.titulo	Одобрить отмену акции
-RU	dlg.promo.aprobarbaja.prompt	Отдел продаж запросил отмену '{0}'.\nПричина: {1}\n\nКомментарий к решению (необязательно):
 RU	lbl.promo.historial.titulo	История статусов — акция №{0}
 RU	promo.analisis.vacio	Выберите акцию, чтобы проанализировать её маржу и влияние.
 RU	promo.analisis.titulo	Анализ маржи и влияния — акция №{0} '{1}'
@@ -6358,7 +6237,6 @@ RU	promo.analisis.superpuestas	ВНИМАНИЕ: даты пересекаютс
 RU	promo.analisis.sinsuperposicion	Не пересекается с другими действующими акциями того же плана.
 RU	promo.analisis.creador	Вы создали эту акцию: решение по ней должен принять другой сотрудник бухгалтерии.
 RU	promo.analisis.calc.titulo	Прогнозируемая маржа (в месяц):
-RU	promo.analisis.calc.informativa	Акция по категории: носит информационный характер (не даёт скидки при оплате); прогнозируемых затрат и результата нет.
 RU	promo.analisis.calc.sinplan	Невозможно рассчитать маржу: план акции больше не существует.
 RU	promo.analisis.calc.descuento	Скидка на клиента: {0:C2} ({1} {2} от цены плана, {3:C2})
 RU	promo.analisis.calc.costo	Стоимость скидки: {0:C2} × {1} активн. клиент(ов) плана = {2:C2}
@@ -6375,14 +6253,10 @@ RU	promocion.btn.imprimirreporte	Печать отчёта
 RU	doc.promo.ficha.titulo	Карточка акции
 RU	doc.promo.dictamen.titulo	Заключение бухгалтерии
 RU	doc.promo.solicitud.titulo	Запрос на отмену
-RU	menu.promo.resolucion	Решение об отмене
 RU	doc.promo.constanciadescarte.titulo	Справка об отклонении
 RU	est.promo.enrevision	На проверке бухгалтерии
 RU	est.promo.vigente	Действует
 RU	est.promo.rechazada	Отклонена бухгалтерией
-RU	est.promo.bajasolicitada	Запрошена отмена
-RU	est.promo.desactivada	Деактивирована
-RU	est.promo.descartada	Отклонена
 RU	est.promo.vencida	Истекла
 RU	est.sugpromo.evaluada	Принято (акция создана)
 RU	est.sugpromo.descartada	Отклонено
@@ -6394,7 +6268,6 @@ RU	tipodesc.porcentaje	Процент
 RU	tipodesc.montofijo	Фиксированная сумма
 RU	tipodesc.preciopromocional	Акционная цена
 RU	doc.promo.plan	План
-RU	doc.promo.categoria	Категория
 RU	doc.promo.promocion	Акция
 RU	doc.promo.beneficio	Выгода
 RU	doc.promo.vigencia	Срок действия
@@ -6423,37 +6296,21 @@ RU	doc.promo.creadapor	Создано (администрация)
 RU	doc.promo.origensug	Источник
 RU	doc.promo.desdesugerencia	предложение руководства №{0}
 RU	doc.promo.manual	создана вручную
-RU	doc.promo.notacategoria	Акция по категории: носит информационный характер и не снижает оплату подписки.
 RU	doc.promo.historial	История статусов:
 RU	doc.promo.resultado	Результат
 RU	doc.promo.aprobada	ОДОБРЕНО — акция начинает действовать.
-RU	doc.promo.rechazada	ОТКЛОНЕНО — возвращается в администрацию для переформулирования или отклонения.
+RU	doc.promo.rechazada	ОТКЛОНЕНО — возвращается в администрацию для переформулирования или снятия.
 RU	doc.promo.observacion	Комментарий
 RU	doc.promo.contable	Заключение дал (бухгалтерия)
 RU	doc.promo.solicito	Запросил (продажи)
-RU	doc.promo.solicitud.nota	Пока администрация рассматривает запрос, акция не применяется к оплатам.
 RU	doc.promo.destinatario	Получатель
-RU	doc.promo.agerencia	Руководство
 RU	doc.promo.aventas	Отдел продаж
 RU	doc.promo.motivosolicitud	Причина запроса
-RU	doc.promo.bajaaprobada	Отмена ОДОБРЕНА — акция деактивирована.
-RU	doc.promo.bajarechazada	Отмена ОТКЛОНЕНА — акция продолжает действовать.
-RU	doc.promo.motivoresolucion	Причина решения
-RU	doc.promo.resolvio	Решение принял (администрация)
-RU	doc.promo.resolucion.gerencia	Решение об отмене — отчёт для руководства
-RU	doc.promo.resolucion.ventas	Решение об отмене — отчёт для отдела продаж
-RU	doc.promo.descarteprom	Администрация отклонила акцию {0} после отказа бухгалтерии.
-RU	doc.promo.descartadapor	Отклонил
 RU	err.bll.promocion.inexistente	Акция больше не существует.
 RU	err.bll.promocion.creador_no_dictamina	Создатель акции не может выносить по ней заключение: её должен проанализировать другой сотрудник бухгалтерии.
-RU	err.bll.promocion.descartar_estado	Отклонить можно только акцию, отклонённую бухгалтерией. Статус этой акции: '{0}'.
-RU	err.bll.promocion.solicitud_inexistente	У акции нет ожидающего запроса на отмену.
-RU	err.bll.promocion.motivodescarte_requerido	Необходимо указать причину отклонения акции.
-RU	err.bll.promocion.motivodesactivar_requerido	Необходимо указать причину деактивации.
 RU	err.bll.sugerenciapromocion.motivodescarte_requerido	Необходимо указать причину отклонения предложения.
 RU	promocion.btn.descartarsugerencia	Отклонить предложение
 RU	promocion.btn.imprimirsugerencia	Печать предложения
-RU	promocion.btn.descartar	Отклонить
 RU	promocion.btn.historial	История
 RU	promocion.btn.imprimir	Печать ▾
 RU	promocion.btn.solicitarbaja	Запросить отмену
@@ -6466,13 +6323,6 @@ RU	col.promo.fecha	Дата
 PT	dlg.promo.descartarsug.titulo	Descartar sugestão
 PT	dlg.promo.descartarsug.prompt	Motivo pelo qual a sugestão #{0} é descartada:
 PT	msg.promo.sugdescartada	Sugestão #{0} descartada.
-PT	dlg.promo.descartar.titulo	Descartar promoção
-PT	dlg.promo.descartar.prompt	Motivo pelo qual a promoção '{0}' não é reformulada:
-PT	msg.promo.descartada	Promoção '{0}' descartada.
-PT	dlg.promo.desactivar.titulo	Desativar promoção
-PT	dlg.promo.desactivar.prompt	Motivo para desativar a promoção '{0}':
-PT	dlg.promo.aprobarbaja.titulo	Aprovar baixa da promoção
-PT	dlg.promo.aprobarbaja.prompt	Vendas pediu a baixa de '{0}'.\nMotivo: {1}\n\nObservação da resolução (opcional):
 PT	lbl.promo.historial.titulo	Histórico de estados — Promoção #{0}
 PT	promo.analisis.vacio	Selecione uma promoção para analisar sua margem e impacto.
 PT	promo.analisis.titulo	Análise de margem e impacto — Promoção #{0} '{1}'
@@ -6483,7 +6333,6 @@ PT	promo.analisis.superpuestas	ATENÇÃO: as datas se sobrepõem a outras promo�
 PT	promo.analisis.sinsuperposicion	Não se sobrepõe a outras promoções vigentes do mesmo plano.
 PT	promo.analisis.creador	Você criou esta promoção: outro usuário da Contabilidade deve emitir o parecer.
 PT	promo.analisis.calc.titulo	Margem projetada (por mês):
-PT	promo.analisis.calc.informativa	Promoção por categoria: é informativa (não dá desconto na cobrança); não tem custo projetado nem resultado.
 PT	promo.analisis.calc.sinplan	Não é possível calcular a margem: o plano da promoção não existe mais.
 PT	promo.analisis.calc.descuento	Desconto por cliente: {0:C2} ({1} {2} sobre o preço do plano, {3:C2})
 PT	promo.analisis.calc.costo	Custo do desconto: {0:C2} × {1} cliente(s) ativo(s) do plano = {2:C2}
@@ -6500,14 +6349,10 @@ PT	promocion.btn.imprimirreporte	Imprimir relatório
 PT	doc.promo.ficha.titulo	Ficha da promoção
 PT	doc.promo.dictamen.titulo	Parecer contábil
 PT	doc.promo.solicitud.titulo	Solicitação de baixa
-PT	menu.promo.resolucion	Resolução de baixa
 PT	doc.promo.constanciadescarte.titulo	Comprovante de descarte
 PT	est.promo.enrevision	Em revisão contábil
 PT	est.promo.vigente	Vigente
 PT	est.promo.rechazada	Rejeitada pela Contabilidade
-PT	est.promo.bajasolicitada	Baixa solicitada
-PT	est.promo.desactivada	Desativada
-PT	est.promo.descartada	Descartada
 PT	est.promo.vencida	Vencida
 PT	est.sugpromo.evaluada	Aceita (promoção criada)
 PT	est.sugpromo.descartada	Descartada
@@ -6519,7 +6364,6 @@ PT	tipodesc.porcentaje	Porcentagem
 PT	tipodesc.montofijo	Valor fixo
 PT	tipodesc.preciopromocional	Preço promocional
 PT	doc.promo.plan	Plano
-PT	doc.promo.categoria	Categoria
 PT	doc.promo.promocion	Promoção
 PT	doc.promo.beneficio	Benefício
 PT	doc.promo.vigencia	Vigência
@@ -6548,37 +6392,21 @@ PT	doc.promo.creadapor	Criada por (Administração)
 PT	doc.promo.origensug	Origem
 PT	doc.promo.desdesugerencia	sugestão da Gerência #{0}
 PT	doc.promo.manual	cadastro manual
-PT	doc.promo.notacategoria	Promoção por categoria: é informativa, não desconta na cobrança da assinatura.
 PT	doc.promo.historial	Histórico de estados:
 PT	doc.promo.resultado	Resultado
 PT	doc.promo.aprobada	APROVADA — a promoção fica Vigente.
-PT	doc.promo.rechazada	REJEITADA — volta à Administração para ser reformulada ou descartada.
+PT	doc.promo.rechazada	REJEITADA — volta à Administração para ser reformulada ou baixada.
 PT	doc.promo.observacion	Observação
 PT	doc.promo.contable	Parecer de (Contabilidade)
 PT	doc.promo.solicito	Solicitou (Vendas)
-PT	doc.promo.solicitud.nota	Enquanto a Administração resolve a solicitação, a promoção não é aplicada nas cobranças.
 PT	doc.promo.destinatario	Destinatário
-PT	doc.promo.agerencia	Gerência
 PT	doc.promo.aventas	Vendas
 PT	doc.promo.motivosolicitud	Motivo da solicitação
-PT	doc.promo.bajaaprobada	Baixa APROVADA — a promoção ficou Desativada.
-PT	doc.promo.bajarechazada	Baixa REJEITADA — a promoção continua Vigente.
-PT	doc.promo.motivoresolucion	Motivo da resolução
-PT	doc.promo.resolvio	Resolveu (Administração)
-PT	doc.promo.resolucion.gerencia	Resolução de baixa — Relatório para a Gerência
-PT	doc.promo.resolucion.ventas	Resolução de baixa — Relatório para Vendas
-PT	doc.promo.descarteprom	A Administração descartou a promoção em {0} após a rejeição contábil.
-PT	doc.promo.descartadapor	Descartou
 PT	err.bll.promocion.inexistente	A promoção não existe mais.
 PT	err.bll.promocion.creador_no_dictamina	Quem criou a promoção não pode emitir o parecer: outro usuário da Contabilidade deve analisá-la.
-PT	err.bll.promocion.descartar_estado	Só é possível descartar uma promoção Rejeitada pela Contabilidade. Esta promoção está '{0}'.
-PT	err.bll.promocion.solicitud_inexistente	A promoção não tem uma solicitação de baixa pendente.
-PT	err.bll.promocion.motivodescarte_requerido	É preciso indicar o motivo pelo qual a promoção é descartada.
-PT	err.bll.promocion.motivodesactivar_requerido	É preciso indicar o motivo da desativação.
 PT	err.bll.sugerenciapromocion.motivodescarte_requerido	É preciso indicar o motivo pelo qual a sugestão é descartada.
 PT	promocion.btn.descartarsugerencia	Descartar sugestão
 PT	promocion.btn.imprimirsugerencia	Imprimir sugestão
-PT	promocion.btn.descartar	Descartar
 PT	promocion.btn.historial	Histórico
 PT	promocion.btn.imprimir	Imprimir ▾
 PT	promocion.btn.solicitarbaja	Solicitar baixa
@@ -7020,13 +6848,13 @@ ES	ayuda.Planes	Alta y edición de planes (nombre, límite de prendas y precio m
 ES	ayuda.Prendas.titulo	Catálogo de prendas
 ES	ayuda.Prendas	Alta, edición y cambio de estado de las prendas.\n\n• Una prenda que entró a limpieza en el depósito se puede volver a dejar disponible o dar de baja, sin cargo.\n• Las que volvieron de un cliente se resuelven en Inspección de devolución, y las que el cliente no devuelve, con Reportar pérdida en Pedidos realizados.
 ES	ayuda.SugerirPromocionForm.titulo	Sugerir promoción (Gerencia, PN03)
-ES	ayuda.SugerirPromocionForm	1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.\n2. Si hay oportunidad, usá la idea propuesta (se completa el formulario) o cargala a mano.\n3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.
+ES	ayuda.SugerirPromocionForm	1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.\n2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.\n3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.
 ES	ayuda.PromocionesAdministracionForm.titulo	Promociones (Administración Comercial, PN03)
-ES	ayuda.PromocionesAdministracionForm	• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).\n• Promociones: crear, reformular las rechazadas por Contabilidad o descartarlas.\n• Bajas: resolver las solicitudes de baja de Ventas, o desactivar directamente.\n• Imprimir ▾: ficha, dictamen, solicitud y resolución de baja, constancia de descarte.\nLa fecha de fin no puede haber pasado. Las promociones por categoría son informativas: el descuento se aplica a las promociones por plan.
+ES	ayuda.PromocionesAdministracionForm	• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).\n• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si estás de acuerdo, la promoción se da de baja, si no, sigue vigente.\n• Promociones: crear (siempre para un plan), reformular las rechazadas por Contabilidad, o Dar de baja una vigente o una rechazada (con motivo).\n• Imprimir ▾: ficha, dictamen, solicitud de baja, respuesta a la solicitud y constancia de baja.\nLa fecha de fin no puede haber pasado.
 ES	ayuda.PromocionesContabilidadForm.titulo	Revisión contable (Contabilidad, PN03)
 ES	ayuda.PromocionesContabilidadForm	Promociones en revisión contable: Aprobar (queda vigente) o Rechazar (vuelve a Administración), con observación.\nNo se puede aprobar una promoción cuya fecha de fin ya pasó. Quien creó la promoción no puede dictaminarla (salvo el Administrador).
 ES	ayuda.PromocionesVigentesForm.titulo	Promociones vigentes
-ES	ayuda.PromocionesVigentesForm	Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la resuelve Administración. Mientras la baja está solicitada, la promoción no se aplica en los cobros.
+ES	ayuda.PromocionesVigentesForm	Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la columna Baja solicitada muestra si ya hay una pendiente. Administración atiende la solicitud: mientras tanto la promoción sigue vigente y se aplica en los cobros.
 ES	ayuda.Usuarios.titulo	Usuarios
 ES	ayuda.Usuarios	Alta, edición, desbloqueo y archivo de usuarios (solo Administrador).\n\n• Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock.\n• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).\n• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.\n• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.
 ES	ayuda.GestorPermisos.titulo	Perfiles y permisos
@@ -7075,13 +6903,13 @@ EN	ayuda.Planes	Create and edit plans (name, garment limit and monthly price).\n
 EN	ayuda.Prendas.titulo	Garment catalogue
 EN	ayuda.Prendas	Add, edit and change the status of garments.\n\n• A garment put into cleaning at the warehouse can be made available again or retired, with no charge.\n• Garments returned by a customer are resolved in Return inspection, and those the customer does not return, with Report loss in Completed orders.
 EN	ayuda.SugerirPromocionForm.titulo	Suggest a promotion (Management, PN03)
-EN	ayuda.SugerirPromocionForm	1. Choose the period and Analyse metrics: churn by plan, rotation by category and impact of promotions on the period's payments.\n2. If there is an opportunity, use the proposed idea (the form is filled in) or enter it manually.\n3. Send to Administration. Print the suggestion with Print suggestion.
+EN	ayuda.SugerirPromocionForm	1. Choose the period and Analyse metrics: churn by plan, rotation by category and impact of promotions on the period's payments.\n2. If there is a plan opportunity, use the proposed idea (the form is filled in) or enter it manually. Category opportunities are informative only: promotions are always by plan.\n3. Send to Administration. Print the suggestion with Print suggestion.
 EN	ayuda.PromocionesAdministracionForm.titulo	Promotions (Commercial Administration, PN03)
-EN	ayuda.PromocionesAdministracionForm	• Suggestions: create the promotion from a suggestion or discard it (with a reason).\n• Promotions: create, rework those rejected by Accounting or discard them.\n• Withdrawals: resolve withdrawal requests from Sales, or deactivate directly.\n• Print ▾: sheet, opinion, withdrawal request and resolution, discard certificate.\nThe end date cannot be in the past. Category promotions are informative: the discount applies to plan promotions.
+EN	ayuda.PromocionesAdministracionForm	• Suggestions: create the promotion from a suggestion or discard it (with a reason).\n• Pending withdrawal requests: Handle each Sales request with a response; if you agree, the promotion is withdrawn, otherwise it remains active.\n• Promotions: create (always for a plan), rework those rejected by Accounting, or Withdraw an active or rejected one (with a reason).\n• Print ▾: sheet, opinion, withdrawal request, response to the request and withdrawal certificate.\nThe end date cannot be in the past.
 EN	ayuda.PromocionesContabilidadForm.titulo	Accounting review (Accounting, PN03)
 EN	ayuda.PromocionesContabilidadForm	Promotions under accounting review: Approve (it becomes active) or Reject (it goes back to Administration), with a remark.\nA promotion whose end date has passed cannot be approved. Whoever created the promotion cannot rule on it (except the Administrator).
 EN	ayuda.PromocionesVigentesForm.titulo	Active promotions
-EN	ayuda.PromocionesVigentesForm	View of active promotions. Sales can request withdrawal of one (with a reason); Administration resolves it. While withdrawal is requested, the promotion is not applied to payments.
+EN	ayuda.PromocionesVigentesForm	View of active promotions. Sales can request withdrawal of one (with a reason); the Withdrawal requested column shows whether one is already pending. Administration handles the request: meanwhile the promotion remains active and is applied to payments.
 EN	ayuda.Usuarios.titulo	Users
 EN	ayuda.Usuarios	Create, edit, unlock and archive users (Administrator only).\n\n• Each new user is linked to their employee record, so they can sell, collect payments or control stock.\n• Reset password: generates a new one and exports it to a file (asks for confirmation).\n• Archive: the user cannot sign in and leaves the list, but their history is kept.\n• Purge: permanently deletes users archived more than a year ago, except those who signed promotion records.
 EN	ayuda.GestorPermisos.titulo	Roles and permissions
@@ -7130,13 +6958,13 @@ RU	ayuda.Planes	Создание и редактирование тарифов 
 RU	ayuda.Prendas.titulo	Каталог вещей
 RU	ayuda.Prendas	Создание, редактирование и смена статуса вещей.\n\n• Вещь, отправленную в чистку на складе, можно вернуть в доступные или списать без сбора.\n• Вещи, возвращённые клиентом, обрабатываются в «Проверке возврата», а невозвращённые — через «Сообщить о потере» в «Выполненных заказах».
 RU	ayuda.SugerirPromocionForm.titulo	Предложить акцию (руководство, PN03)
-RU	ayuda.SugerirPromocionForm	1. Выберите период и «Анализировать метрики»: отток по тарифам, оборачиваемость по категориям и влияние акций на оплаты за период.\n2. Если есть возможность, используйте предложенную идею (форма заполнится) или введите вручную.\n3. «Отправить в администрацию». Предложение печатается кнопкой «Печать предложения».
+RU	ayuda.SugerirPromocionForm	1. Выберите период и «Анализировать метрики»: отток по тарифам, оборачиваемость по категориям и влияние акций на оплаты за период.\n2. Если есть возможность по тарифу, используйте предложенную идею (форма заполнится) или введите вручную. Возможности по категориям только информационные: акции всегда действуют по тарифам.\n3. «Отправить в администрацию». Предложение печатается кнопкой «Печать предложения».
 RU	ayuda.PromocionesAdministracionForm.titulo	Акции (коммерческий отдел, PN03)
-RU	ayuda.PromocionesAdministracionForm	• Предложения: создать акцию по предложению или отклонить его (с причиной).\n• Акции: создать, переработать отклонённые бухгалтерией или отклонить.\n• Отмены: рассмотреть запросы отдела продаж на отмену или деактивировать напрямую.\n• Печать ▾: карточка, заключение, запрос и решение об отмене, справка об отклонении.\nДата окончания не может быть в прошлом. Акции по категориям информационные: скидка применяется к акциям по тарифам.
+RU	ayuda.PromocionesAdministracionForm	• Предложения: создать акцию по предложению или отклонить его (с причиной).\n• Ожидающие запросы на отмену: рассмотрите каждый запрос отдела продаж и дайте ответ; если вы согласны, акция снимается, если нет — остаётся действующей.\n• Акции: создать (всегда для тарифа), переработать отклонённые бухгалтерией или снять действующую либо отклонённую (с причиной).\n• Печать ▾: карточка, заключение, запрос на отмену, ответ на запрос и справка о снятии.\nДата окончания не может быть в прошлом.
 RU	ayuda.PromocionesContabilidadForm.titulo	Бухгалтерская проверка (бухгалтерия, PN03)
 RU	ayuda.PromocionesContabilidadForm	Акции на проверке: «Утвердить» (акция становится действующей) или «Отклонить» (возвращается в администрацию), с комментарием.\nНельзя утвердить акцию с прошедшей датой окончания. Автор акции не может её оценивать (кроме администратора).
 RU	ayuda.PromocionesVigentesForm.titulo	Действующие акции
-RU	ayuda.PromocionesVigentesForm	Просмотр действующих акций. Отдел продаж может запросить отмену (с причиной); решение принимает администрация. Пока отмена запрошена, акция не применяется к оплатам.
+RU	ayuda.PromocionesVigentesForm	Просмотр действующих акций. Отдел продаж может запросить отмену (с причиной); столбец «Запрошена отмена» показывает, есть ли уже ожидающий запрос. Администрация рассматривает запрос: до этого акция остаётся действующей и применяется к оплатам.
 RU	ayuda.Usuarios.titulo	Пользователи
 RU	ayuda.Usuarios	Создание, редактирование, разблокировка и архивирование пользователей (только администратор).\n\n• Каждый новый пользователь связывается со своей карточкой сотрудника, чтобы продавать, принимать оплату или контролировать наличие.\n• «Сбросить пароль»: создаёт новый и сохраняет его в файл (с подтверждением).\n• «Архивировать»: пользователь не может войти и исчезает из списка, но история сохраняется.\n• «Очистить»: окончательно удаляет архивированных более года назад, кроме подписавших записи об акциях.
 RU	ayuda.GestorPermisos.titulo	Роли и права
@@ -7185,13 +7013,13 @@ PT	ayuda.Planes	Cadastro e edição de planos (nome, limite de peças e preço m
 PT	ayuda.Prendas.titulo	Catálogo de peças
 PT	ayuda.Prendas	Cadastro, edição e mudança de estado das peças.\n\n• Uma peça que entrou em limpeza no depósito pode voltar a ficar disponível ou ser baixada, sem cobrança.\n• As que voltaram de um cliente são resolvidas na Inspeção de devolução, e as que o cliente não devolve, com Informar perda em Pedidos realizados.
 PT	ayuda.SugerirPromocionForm.titulo	Sugerir promoção (Gerência, PN03)
-PT	ayuda.SugerirPromocionForm	1. Escolha o período e Analisar métricas: abandono por plano, rotação por categoria e impacto das promoções nas cobranças do período.\n2. Se houver oportunidade, use a ideia proposta (o formulário é preenchido) ou digite-a.\n3. Enviar à Administração. A sugestão é impressa com Imprimir sugestão.
+PT	ayuda.SugerirPromocionForm	1. Escolha o período e Analisar métricas: abandono por plano, rotação por categoria e impacto das promoções nas cobranças do período.\n2. Se houver oportunidade por plano, use a ideia proposta (o formulário é preenchido) ou digite-a. As oportunidades por categoria são apenas informativas: as promoções são sempre por plano.\n3. Enviar à Administração. A sugestão é impressa com Imprimir sugestão.
 PT	ayuda.PromocionesAdministracionForm.titulo	Promoções (Administração Comercial, PN03)
-PT	ayuda.PromocionesAdministracionForm	• Sugestões: criar a promoção a partir de uma sugestão ou descartá-la (com motivo).\n• Promoções: criar, reformular as rejeitadas pela Contabilidade ou descartá-las.\n• Baixas: resolver os pedidos de baixa de Vendas, ou desativar diretamente.\n• Imprimir ▾: ficha, parecer, pedido e resolução de baixa, comprovante de descarte.\nA data de fim não pode ter passado. As promoções por categoria são informativas: o desconto se aplica às promoções por plano.
+PT	ayuda.PromocionesAdministracionForm	• Sugestões: criar a promoção a partir de uma sugestão ou descartá-la (com motivo).\n• Pedidos de baixa pendentes: Atender cada pedido de Vendas com uma resposta; se você concordar, a promoção é baixada, se não, continua vigente.\n• Promoções: criar (sempre para um plano), reformular as rejeitadas pela Contabilidade, ou Dar baixa em uma vigente ou rejeitada (com motivo).\n• Imprimir ▾: ficha, parecer, pedido de baixa, resposta ao pedido e comprovante de baixa.\nA data de fim não pode ter passado.
 PT	ayuda.PromocionesContabilidadForm.titulo	Revisão contábil (Contabilidade, PN03)
 PT	ayuda.PromocionesContabilidadForm	Promoções em revisão contábil: Aprovar (fica vigente) ou Rejeitar (volta à Administração), com observação.\nNão é possível aprovar uma promoção cuja data de fim já passou. Quem criou a promoção não pode dar o parecer (exceto o Administrador).
 PT	ayuda.PromocionesVigentesForm.titulo	Promoções vigentes
-PT	ayuda.PromocionesVigentesForm	Consulta das promoções vigentes. Vendas pode pedir a baixa de uma (com motivo); a Administração resolve. Enquanto a baixa estiver pedida, a promoção não se aplica nas cobranças.
+PT	ayuda.PromocionesVigentesForm	Consulta das promoções vigentes. Vendas pode pedir a baixa de uma (com motivo); a coluna Baixa solicitada mostra se já há um pedido pendente. A Administração atende o pedido: enquanto isso a promoção continua vigente e se aplica nas cobranças.
 PT	ayuda.Usuarios.titulo	Usuários
 PT	ayuda.Usuarios	Cadastro, edição, desbloqueio e arquivamento de usuários (só Administrador).\n\n• Cada usuário novo fica vinculado à sua ficha de funcionário, para poder vender, cobrar ou controlar estoque.\n• Redefinir senha: gera uma nova e a exporta para um arquivo (pede confirmação).\n• Arquivar: o usuário não pode entrar e sai da lista, mas seu histórico é mantido.\n• Expurgar: exclui definitivamente os arquivados há mais de um ano, exceto os que assinaram registros de promoções.
 PT	ayuda.GestorPermisos.titulo	Perfis e permissões
@@ -7300,3 +7128,155 @@ ES	est.entregado.cerrado	Entregado (cerrado por pérdida el {0:dd/MM})
 EN	est.entregado.cerrado	Delivered (closed as lost on {0:dd/MM})
 RU	est.entregado.cerrado	Доставлен (закрыт как утерянный {0:dd/MM})
 PT	est.entregado.cerrado	Entregue (encerrado por perda em {0:dd/MM})
+ES	err.bll.promocion.sugerencia_sin_plan	La sugerencia no indica un plan: las promociones se crean siempre para un plan.
+ES	err.bll.promocion.plan_requerido	Elegí el plan al que aplica la promoción.
+ES	err.bll.promocion.darbaja_estado	Solo se pueden dar de baja promociones Vigentes o Rechazadas por Contabilidad. Esta promoción está '{0}'.
+ES	err.bll.promocion.solicitud_ya_pendiente	La promoción ya tiene una solicitud de baja pendiente: Administración todavía no la atendió.
+ES	err.bll.promocion.solicitud_concurrente	La promoción cambió desde otra sesión (ya no está Vigente o ya tiene una solicitud de baja pendiente). Actualizá la lista.
+ES	err.bll.promocion.solicitud_atendida	La solicitud de baja ya fue atendida. Actualizá la lista de solicitudes.
+ES	err.bll.promocion.respuesta_requerida	Debe escribir la respuesta a la solicitud de baja.
+ES	err.bll.promocion.motivobaja_admin_requerido	Debe indicar el motivo por el que se da de baja la promoción.
+ES	err.bll.sugerenciapromocion.plan_requerido	Elegí el plan al que apunta la sugerencia.
+ES	est.promo.dadadebaja	Dada de baja
+ES	doc.promo.oportunidadescategoria	Oportunidades por categoría (solo informativas: las promociones son por plan):
+ES	doc.promo.solicitud.nota2	La promoción sigue Vigente y se aplica en los cobros hasta que Administración atienda la solicitud.
+ES	doc.promo.respuesta.dadabaja	Administración estuvo de acuerdo: la promoción quedó dada de baja.
+ES	doc.promo.respuesta.sigue	Administración no estuvo de acuerdo: la promoción sigue Vigente.
+ES	doc.promo.respuesta	Respuesta
+ES	doc.promo.atendio	Atendió (Administración)
+ES	doc.promo.respuesta.titulo	Respuesta a la solicitud de baja
+ES	doc.promo.bajaprom	Administración dio de baja la promoción el {0} (estaba {1}).
+ES	doc.promo.motivobajaadmin	Motivo de la baja
+ES	doc.promo.dadabajapor	Dio de baja
+ES	doc.promo.constanciabaja.titulo	Constancia de baja
+ES	dlg.promo.atender.pregunta	Ventas pide dar de baja '{0}'.\nMotivo: {1}\n\n¿Estás de acuerdo con darla de baja?\n\nSí: se da de baja.  No: sigue vigente.
+ES	dlg.promo.atender.titulo	Atender solicitud de baja
+ES	dlg.promo.atender.prompt.baja	Respuesta para Ventas (la promoción '{0}' se da de baja):
+ES	dlg.promo.atender.prompt.sigue	Respuesta para Ventas (por qué '{0}' sigue vigente):
+ES	msg.promo.solicitud.dadabaja	Solicitud #{0} atendida: la promoción '{1}' quedó dada de baja.
+ES	msg.promo.solicitud.sigue	Solicitud #{0} atendida: la promoción '{1}' sigue vigente.
+ES	dlg.promo.dardebaja.titulo	Dar de baja la promoción
+ES	dlg.promo.dardebaja.prompt	Motivo para dar de baja la promoción '{0}':
+ES	promocion.btn.atender	Atender
+ES	promocion.btn.dardebaja	Dar de baja
+ES	promocion.titulosolicitudesbaja	Solicitudes de baja pendientes (Ventas)
+ES	promo.bajapendiente	Sí, pendiente de Administración
+ES	promo.sinbajapendiente	No
+ES	msg.promo.bajaya_pendiente	La promoción '{0}' ya tiene una solicitud de baja pendiente (motivo: {1}).
+ES	col.promo.promocion	Promoción
+ES	col.promo.solicitadapor	Solicitada por
+ES	col.promo.bajasolicitada	Baja solicitada
+EN	err.bll.promocion.sugerencia_sin_plan	The suggestion has no plan: promotions are always created for a plan.
+EN	err.bll.promocion.plan_requerido	Choose the plan the promotion applies to.
+EN	err.bll.promocion.darbaja_estado	Only Active promotions or promotions Rejected by Accounting can be withdrawn. This promotion is '{0}'.
+EN	err.bll.promocion.solicitud_ya_pendiente	The promotion already has a pending withdrawal request: Administration has not handled it yet.
+EN	err.bll.promocion.solicitud_concurrente	The promotion changed in another session (it is no longer Active or already has a pending withdrawal request). Refresh the list.
+EN	err.bll.promocion.solicitud_atendida	The withdrawal request has already been handled. Refresh the list of requests.
+EN	err.bll.promocion.respuesta_requerida	You must write the response to the withdrawal request.
+EN	err.bll.promocion.motivobaja_admin_requerido	You must state the reason for withdrawing the promotion.
+EN	err.bll.sugerenciapromocion.plan_requerido	Choose the plan the suggestion is for.
+EN	est.promo.dadadebaja	Withdrawn
+EN	doc.promo.oportunidadescategoria	Opportunities by category (informative only: promotions are by plan):
+EN	doc.promo.solicitud.nota2	The promotion stays Active and is applied to payments until Administration handles the request.
+EN	doc.promo.respuesta.dadabaja	Administration agreed: the promotion was withdrawn.
+EN	doc.promo.respuesta.sigue	Administration did not agree: the promotion remains Active.
+EN	doc.promo.respuesta	Response
+EN	doc.promo.atendio	Handled by (Administration)
+EN	doc.promo.respuesta.titulo	Response to the withdrawal request
+EN	doc.promo.bajaprom	Administration withdrew the promotion on {0} (it was {1}).
+EN	doc.promo.motivobajaadmin	Reason for withdrawal
+EN	doc.promo.dadabajapor	Withdrawn by
+EN	doc.promo.constanciabaja.titulo	Withdrawal certificate
+EN	dlg.promo.atender.pregunta	Sales asks to withdraw '{0}'.\nReason: {1}\n\nDo you agree to withdraw it?\n\nYes: it is withdrawn.  No: it remains active.
+EN	dlg.promo.atender.titulo	Handle withdrawal request
+EN	dlg.promo.atender.prompt.baja	Response for Sales (promotion '{0}' is withdrawn):
+EN	dlg.promo.atender.prompt.sigue	Response for Sales (why '{0}' remains active):
+EN	msg.promo.solicitud.dadabaja	Request #{0} handled: promotion '{1}' was withdrawn.
+EN	msg.promo.solicitud.sigue	Request #{0} handled: promotion '{1}' remains active.
+EN	dlg.promo.dardebaja.titulo	Withdraw promotion
+EN	dlg.promo.dardebaja.prompt	Reason for withdrawing promotion '{0}':
+EN	promocion.btn.atender	Handle
+EN	promocion.btn.dardebaja	Withdraw
+EN	promocion.titulosolicitudesbaja	Pending withdrawal requests (Sales)
+EN	promo.bajapendiente	Yes, pending with Administration
+EN	promo.sinbajapendiente	No
+EN	msg.promo.bajaya_pendiente	Promotion '{0}' already has a pending withdrawal request (reason: {1}).
+EN	col.promo.promocion	Promotion
+EN	col.promo.solicitadapor	Requested by
+EN	col.promo.bajasolicitada	Withdrawal requested
+RU	err.bll.promocion.sugerencia_sin_plan	В предложении не указан тариф: акции всегда создаются для тарифа.
+RU	err.bll.promocion.plan_requerido	Выберите тариф, к которому применяется акция.
+RU	err.bll.promocion.darbaja_estado	Снять можно только действующие акции или отклонённые бухгалтерией. Эта акция в состоянии «{0}».
+RU	err.bll.promocion.solicitud_ya_pendiente	У акции уже есть ожидающий запрос на отмену: администрация его ещё не рассмотрела.
+RU	err.bll.promocion.solicitud_concurrente	Акция изменена в другом сеансе (она больше не действует или уже есть ожидающий запрос на отмену). Обновите список.
+RU	err.bll.promocion.solicitud_atendida	Запрос на отмену уже рассмотрен. Обновите список запросов.
+RU	err.bll.promocion.respuesta_requerida	Необходимо написать ответ на запрос на отмену.
+RU	err.bll.promocion.motivobaja_admin_requerido	Необходимо указать причину снятия акции.
+RU	err.bll.sugerenciapromocion.plan_requerido	Выберите тариф, к которому относится предложение.
+RU	est.promo.dadadebaja	Снята
+RU	doc.promo.oportunidadescategoria	Возможности по категориям (только для информации: акции действуют по тарифам):
+RU	doc.promo.solicitud.nota2	Акция остаётся действующей и применяется к оплатам, пока администрация не рассмотрит запрос.
+RU	doc.promo.respuesta.dadabaja	Администрация согласилась: акция снята.
+RU	doc.promo.respuesta.sigue	Администрация не согласилась: акция остаётся действующей.
+RU	doc.promo.respuesta	Ответ
+RU	doc.promo.atendio	Рассмотрел (администрация)
+RU	doc.promo.respuesta.titulo	Ответ на запрос на отмену
+RU	doc.promo.bajaprom	Администрация сняла акцию {0} (состояние было: {1}).
+RU	doc.promo.motivobajaadmin	Причина снятия
+RU	doc.promo.dadabajapor	Снял
+RU	doc.promo.constanciabaja.titulo	Справка о снятии
+RU	dlg.promo.atender.pregunta	Отдел продаж просит снять «{0}».\nПричина: {1}\n\nВы согласны снять её?\n\nДа: акция снимается.  Нет: остаётся действующей.
+RU	dlg.promo.atender.titulo	Рассмотреть запрос на отмену
+RU	dlg.promo.atender.prompt.baja	Ответ для отдела продаж (акция «{0}» снимается):
+RU	dlg.promo.atender.prompt.sigue	Ответ для отдела продаж (почему «{0}» остаётся действующей):
+RU	msg.promo.solicitud.dadabaja	Запрос №{0} рассмотрен: акция «{1}» снята.
+RU	msg.promo.solicitud.sigue	Запрос №{0} рассмотрен: акция «{1}» остаётся действующей.
+RU	dlg.promo.dardebaja.titulo	Снять акцию
+RU	dlg.promo.dardebaja.prompt	Причина снятия акции «{0}»:
+RU	promocion.btn.atender	Рассмотреть
+RU	promocion.btn.dardebaja	Снять
+RU	promocion.titulosolicitudesbaja	Ожидающие запросы на отмену (отдел продаж)
+RU	promo.bajapendiente	Да, ожидает решения администрации
+RU	promo.sinbajapendiente	Нет
+RU	msg.promo.bajaya_pendiente	У акции «{0}» уже есть ожидающий запрос на отмену (причина: {1}).
+RU	col.promo.promocion	Акция
+RU	col.promo.solicitadapor	Кем запрошено
+RU	col.promo.bajasolicitada	Запрошена отмена
+PT	err.bll.promocion.sugerencia_sin_plan	A sugestão não indica um plano: as promoções são sempre criadas para um plano.
+PT	err.bll.promocion.plan_requerido	Escolha o plano ao qual a promoção se aplica.
+PT	err.bll.promocion.darbaja_estado	Só é possível dar baixa em promoções Vigentes ou Rejeitadas pela Contabilidade. Esta promoção está '{0}'.
+PT	err.bll.promocion.solicitud_ya_pendiente	A promoção já tem um pedido de baixa pendente: a Administração ainda não o atendeu.
+PT	err.bll.promocion.solicitud_concurrente	A promoção mudou em outra sessão (não está mais Vigente ou já tem um pedido de baixa pendente). Atualize a lista.
+PT	err.bll.promocion.solicitud_atendida	O pedido de baixa já foi atendido. Atualize a lista de pedidos.
+PT	err.bll.promocion.respuesta_requerida	É preciso escrever a resposta ao pedido de baixa.
+PT	err.bll.promocion.motivobaja_admin_requerido	É preciso indicar o motivo da baixa da promoção.
+PT	err.bll.sugerenciapromocion.plan_requerido	Escolha o plano ao qual a sugestão se refere.
+PT	est.promo.dadadebaja	Baixada
+PT	doc.promo.oportunidadescategoria	Oportunidades por categoria (apenas informativas: as promoções são por plano):
+PT	doc.promo.solicitud.nota2	A promoção continua Vigente e se aplica nas cobranças até a Administração atender o pedido.
+PT	doc.promo.respuesta.dadabaja	A Administração concordou: a promoção foi baixada.
+PT	doc.promo.respuesta.sigue	A Administração não concordou: a promoção continua Vigente.
+PT	doc.promo.respuesta	Resposta
+PT	doc.promo.atendio	Atendeu (Administração)
+PT	doc.promo.respuesta.titulo	Resposta ao pedido de baixa
+PT	doc.promo.bajaprom	A Administração deu baixa na promoção em {0} (estava {1}).
+PT	doc.promo.motivobajaadmin	Motivo da baixa
+PT	doc.promo.dadabajapor	Deu baixa
+PT	doc.promo.constanciabaja.titulo	Comprovante de baixa
+PT	dlg.promo.atender.pregunta	Vendas pede a baixa de '{0}'.\nMotivo: {1}\n\nVocê concorda em dar baixa?\n\nSim: é baixada.  Não: continua vigente.
+PT	dlg.promo.atender.titulo	Atender pedido de baixa
+PT	dlg.promo.atender.prompt.baja	Resposta para Vendas (a promoção '{0}' é baixada):
+PT	dlg.promo.atender.prompt.sigue	Resposta para Vendas (por que '{0}' continua vigente):
+PT	msg.promo.solicitud.dadabaja	Pedido #{0} atendido: a promoção '{1}' foi baixada.
+PT	msg.promo.solicitud.sigue	Pedido #{0} atendido: a promoção '{1}' continua vigente.
+PT	dlg.promo.dardebaja.titulo	Dar baixa na promoção
+PT	dlg.promo.dardebaja.prompt	Motivo para dar baixa na promoção '{0}':
+PT	promocion.btn.atender	Atender
+PT	promocion.btn.dardebaja	Dar baixa
+PT	promocion.titulosolicitudesbaja	Pedidos de baixa pendentes (Vendas)
+PT	promo.bajapendiente	Sim, pendente na Administração
+PT	promo.sinbajapendiente	Não
+PT	msg.promo.bajaya_pendiente	A promoção '{0}' já tem um pedido de baixa pendente (motivo: {1}).
+PT	col.promo.promocion	Promoção
+PT	col.promo.solicitadapor	Solicitada por
+PT	col.promo.bajasolicitada	Baixa solicitada

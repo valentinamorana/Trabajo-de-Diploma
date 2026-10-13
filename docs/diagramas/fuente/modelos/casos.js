@@ -42,7 +42,7 @@ module.exports = [
     extiende: [{ de: 'c5', a: 'c1' }, { de: 'c6', a: 'c2' }]
   },
   {
-    tipo: 'casos', id: 'CU_pn03_promociones', titulo: 'Casos de uso — PN03 Métricas, promociones y toma de decisiones', sistema: 'WardrobeFlow — PN03 Promociones',
+    tipo: 'casos', id: 'CU_pn03_promociones', titulo: 'Casos de uso — PN03 Evaluar y aplicar promociones comerciales', sistema: 'WardrobeFlow — PN03 Promociones',
     // Actor = rol que tiene la patente que exige el CU (PermisosAccion.Exigir en BLL/SugerenciaPromocion.cs,
     // BLL/AnalisisPromociones.cs y BLL/Promocion.cs; asignaciones en BD/00_Instalacion_Completa.sql:2265-2276,
     // 785-791 y 804): Gerencia = GerenteComercial (Sugerir promoción; abandono y ventas por vendedor; contiene al
@@ -69,7 +69,7 @@ module.exports = [
     extiende: [{ de: 'c7', a: 'c1' }, { de: 'c8', a: 'c2' }, { de: 'c9', a: 'c2' }, { de: 'c9', a: 'c5' }]
   },
   {
-    tipo: 'casos', id: 'CU_pn04_devolucion', titulo: 'Casos de uso — PN04 Inspección de devolución', sistema: 'WardrobeFlow — PN04 Inspección de devolución',
+    tipo: 'casos', id: 'CU_pn04_devolucion', titulo: 'Casos de uso — PN04 Inspeccionar prendas devueltas', sistema: 'WardrobeFlow — PN04 Inspeccionar prendas devueltas',
     actores: [{ id: 'D', nombre: 'Depósito' }],
     casos: [{ id: 'c1', nombre: 'CU05-DEP Inspeccionar Devolución' }, { id: 'c2', nombre: 'CU06-DEP Reportar Prenda Perdida' }],
     enlaces: [{ actor: 'D', caso: 'c1' }, { actor: 'D', caso: 'c2' }]

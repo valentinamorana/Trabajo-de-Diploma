@@ -55,6 +55,7 @@ classDiagram
   }
   class BLL_Prenda["BLL.Prenda"] {
     +CambiarEstado(string,  Prenda,  EstadoPrenda) void
+    +ReingresarInspeccionada(string,  Prenda) void
     +ObtenerTransicionesManuales(Prenda) List~EstadoPrenda~
     +ObtenerEnLimpieza() List~Prenda~
     +ObtenerHistorialMantenimiento(int) List~MantenimientoPrenda~

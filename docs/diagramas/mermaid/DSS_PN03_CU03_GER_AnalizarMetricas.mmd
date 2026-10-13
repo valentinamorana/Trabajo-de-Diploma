@@ -11,6 +11,8 @@ sequenceDiagram
   participant DC as DAL.Cliente
   participant DP as DAL.Plan<br/>Suscripcion
   participant DPR as DAL.Promocion
+  participant RP as BE.Resultado<br/>Promocion
+  participant DS as DAL.Sugerencia<br/>Promocion
   Note over G,F: Punto de extensión de CU01-GER: Gerencia pulsa "Analizar métricas…" antes de cargar la sugerencia
   G->>F: Elige el período (30, 90, 180 o 365 días, por defecto 90) y pulsa "Analizar métricas…"
   F->>AN: AnalizarMetricas(modulo, desde, hasta)
@@ -38,8 +40,24 @@ sequenceDiagram
   AN->>AN: Oportunidades(ab, planes)  [solo por plan: clientes en riesgo de abandono]
   AN->>DPR: ObtenerImpacto(desde, hasta)
   DPR-->>AN: impacto de cada promoción: cobros, total descontado y total cobrado
+  AN->>AN: ResultadoPromociones(desde, hasta)  [Evaluar resultado de la promoción]
+  AN->>DPR: ObtenerTodas()
+  DPR-->>AN: promociones (se evalúan las Vigentes, Dadas de baja y Vencidas que tocan el período)
+  loop Por cada promoción evaluable
+    AN->>DPR: ObtenerHistorial(idPromocion)
+    DPR-->>AN: historial: fecha de aprobación y de baja → vigencia real [desde, hasta)
+    opt Nació de una sugerencia
+      AN->>DS: ObtenerPorId(idSugerenciaOrigen)
+      DS-->>AN: sugerencia (tasa de retención esperada)
+    end
+    AN->>DPR: ObtenerDecisionesDelPlan(idPlan, desde, hasta)  [durante la vigencia]
+    AN->>DPR: ObtenerDecisionesDelPlan(idPlan, anteriorDesde, desde)  [período anterior de igual duración]
+    DPR-->>AN: decisiones: renovación de N01 (Renovada/Baja/Pausada) y recontratación del mismo plan (PN02)
+    AN->>RP: Contar(decisiones)  [bajas, pausas y renovaciones de cada tramo]
+    AN->>RP: CalcularRetencion(decisionesDurante)  [clientes en juego y retenidos: última decisión ≠ Baja]
+  end
   Note over AN: bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"
-  AN-->>F: ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto de las promociones, oportunidades por plan)
+  AN-->>F: ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto y resultado de las promociones, oportunidades por plan)
   F->>AN: HayOportunidad(reporte)
   AN-->>F: hayOportunidad
   F->>F: MostrarReporte(reporte, hayOportunidad)
@@ -48,6 +66,6 @@ sequenceDiagram
   else Sí
     F-->>G: «Reporte de métricas» (imprimible) con las oportunidades para elegir
     G->>F: Pulsa "Usar esta idea" sobre una oportunidad
-    F-->>G: Precarga el plan, tipo, beneficio estimado y motivo, origen = Abandono (las de categoría no se pueden usar)
+    F-->>G: Precarga el plan, tipo, ingreso mensual en riesgo, tasa de retención (30 % por defecto) y motivo, origen = Abandono (las de categoría no se pueden usar)
     Note over G,F: Sigue CU01-GER Sugerir Promoción: RegistrarSugerencia con el origen de la métrica
   end

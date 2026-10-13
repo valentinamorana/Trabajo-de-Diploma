@@ -91,7 +91,7 @@ Administrador puede corregirlo a mano, como excepción).
 
 ---
 
-## PN03 — Métricas, promociones y decisiones
+## PN03 — Evaluar y aplicar promociones comerciales
 
 | Objeto | Estado | Quién actúa |
 |---|---|---|
@@ -102,10 +102,12 @@ Administrador puede corregirlo a mano, como excepción).
 | PROMO ConSolicitudBaja Premium $3000 | Vigente, con una solicitud de baja pendiente | `admcomercial`: en **Solicitudes de baja pendientes**, **Atender**: Sí = se da de baja, No = sigue vigente (con respuesta) |
 
 1. `gcomercial` → **Promociones → Sugerir Promoción**: **Analizar métricas…** muestra el reporte (abandono y
-   rotación; solo las oportunidades por plan se pueden usar) → **Usar esta idea** precarga los datos → **Enviar Sugerencia**.
+   rotación; solo las oportunidades por plan se pueden usar) → **Usar esta idea** precarga el ingreso en riesgo y la
+   **retención esperada** (30 %); al cambiar la tasa se recalcula el beneficio estimado → **Enviar Sugerencia**.
 2. `admcomercial` → **Promociones → Gestión de Promociones**: alta desde una sugerencia o **Alta Manual**,
    reformular la rechazada (o **Dar de baja**), **Atender** la solicitud de baja pendiente.
-3. `contable` → **Promociones → Revisión Contable**: dictaminar la "ParaDictaminar". Quien creó una
+3. `contable` → **Promociones → Revisión Contable**: dictaminar la "ParaDictaminar" (el análisis muestra el beneficio
+   de Gerencia como ingreso en riesgo × retención esperada, y el margen proyectado). Quien creó una
    promoción no puede dictaminarla.
 4. `vendedor` → **Promociones → Promociones Vigentes**: **Solicitar baja** de la vigente (con motivo),
    después de haberle cobrado a Diego en PN02. La promoción sigue vigente (columna "Baja solicitada") hasta que

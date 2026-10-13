@@ -12,9 +12,11 @@ namespace BLL.Interfaces
         List<BE.SugerenciaPromocion> ObtenerTodas();
         BE.SugerenciaPromocion ObtenerPorId(int idSugerencia);
 
-        // "Registrar sugerencia": siempre para un plan, con su origen.
+        // "Registrar sugerencia": siempre para un plan, con su origen. El beneficio estimado lo calcula
+        // la BLL: ingreso mensual en riesgo × tasa de retención (0-100] / 100.
         int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int idPlan,
-                                string motivo, BE.TipoDescuento tipoSugerido, decimal beneficioEstimado);
+                                string motivo, BE.TipoDescuento tipoSugerido, decimal ingresoMensualEnRiesgo,
+                                decimal tasaRetencion = BE.SugerenciaPromocion.TasaRetencionPorDefecto);
 
         // "¿Acepta la sugerencia? No → Descartar sugerencia" (motivo obligatorio).
         void DescartarSugerencia(string modulo, int idSugerencia, string motivo);

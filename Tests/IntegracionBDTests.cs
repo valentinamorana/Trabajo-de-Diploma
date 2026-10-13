@@ -56,6 +56,7 @@ namespace Tests
             new DAL.Pedido().ObtenerTodos();
             new DAL.Contratacion().ObtenerPendientesDePago();
             new DAL.Promocion().ObtenerTodas();
+            new DAL.Promocion().ObtenerDecisionesDelPlan(1, DateTime.Today.AddYears(-1), DateTime.Today.AddDays(1));   // PN03: Evaluar resultado
             new DAL.Usuario().ObtenerTodos();
             new DAL.CargoPrenda().ObtenerPendientesPorCliente(1);
             new DAL.InspeccionDevolucion().ObtenerPedidoEnCurso(1);
@@ -80,6 +81,25 @@ namespace Tests
             // La prenda de demo en limpieza la mandó el depósito a mano: no viene de una devolución.
             var mantenimientos = new DAL.MantenimientoPrenda().ObtenerTodos();
             Assert.IsTrue(mantenimientos.Exists(m => m.Actor == "deposito" && m.Origen == BE.OrigenMantenimiento.Manual));
+        }
+
+        // PN04: con los datos reales, una prenda que entró a limpieza en el depósito se libera desde
+        // Prendas; una que volvió de un cliente no ofrece ningún destino manual (sale por la Inspección).
+        [TestMethod]
+        public void PN04_TransicionesManuales_DistinguenLimpiezaDelDepositoDeDevolucion()
+        {
+            ExigirBase();
+            var bll = new BLL.Prenda();
+            var abiertos = new DAL.MantenimientoPrenda().ObtenerTodos().Where(m => m.EstaAbierto).ToList();
+            var enLimpieza = new DAL.Prenda().ObtenerTodos().Where(p => p.Estado == BE.EstadoPrenda.EnLimpieza).ToList();
+
+            var delDeposito = enLimpieza.FirstOrDefault(p => abiertos.Any(m => m.IdPrenda == p.IdPrenda && !m.VieneDeDevolucion));
+            if (delDeposito == null) Assert.Inconclusive("La base de pruebas no tiene una prenda en limpieza del depósito.");
+            CollectionAssert.Contains(bll.ObtenerTransicionesManuales(delDeposito), BE.EstadoPrenda.Disponible);
+
+            foreach (var devuelta in enLimpieza.Where(p => abiertos.Any(m => m.IdPrenda == p.IdPrenda && m.VieneDeDevolucion)))
+                Assert.AreEqual(0, bll.ObtenerTransicionesManuales(devuelta).Count,
+                    $"La prenda devuelta {devuelta.IdPrenda} solo sale de limpieza por la Inspección de Devolución.");
         }
 
         [TestMethod]

@@ -10,7 +10,10 @@ sequenceDiagram
   Note over B: «include» CU02-CAJ Emitir Comprobante: se ejecuta dentro de ConfirmarCobro · «extend» CU04-CAJ Financiar en Cuotas: con tarjeta de crédito
   F->>B: ObtenerPendientesDePago()  [Consultar cola]
   B->>D: ObtenerPendientesDePago()
-  B-->>F: contrataciones Pendientes de pago (de la más antigua a la más nueva)
+  loop Por cada contratación de la cola
+    B->>B: PuedeCobrar(contratacion, idEmpleado)  [UsuarioPuedeCobrar: false si la registró el usuario en sesión, salvo el Administrador]
+  end
+  B-->>F: contrataciones Pendientes de pago (de la más antigua a la más nueva), cada una con UsuarioPuedeCobrar
   F->>B: CalcularImportes(contrataciones)
   loop Por cada contratación de la cola
     B->>PD: Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)  [bruto = PrecioMensual pactado × meses]

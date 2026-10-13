@@ -27,12 +27,12 @@
   {
     "id": "DER_pn03_promociones",
     "tipo": "er",
-    "titulo": "DER — PN03 Métricas, promociones y toma de decisiones"
+    "titulo": "DER — PN03 Evaluar y aplicar promociones comerciales"
   },
   {
     "id": "DER_pn04_devolucion",
     "tipo": "er",
-    "titulo": "DER — PN04 Inspección de devolución"
+    "titulo": "DER — PN04 Inspeccionar prendas devueltas"
   },
   {
     "id": "MC_n01_clientes_suscripciones",
@@ -52,12 +52,12 @@
   {
     "id": "MC_pn03_promociones",
     "tipo": "er",
-    "titulo": "Modelo conceptual — PN03 Métricas, promociones y toma de decisiones"
+    "titulo": "Modelo conceptual — PN03 Evaluar y aplicar promociones comerciales"
   },
   {
     "id": "MC_pn04_devolucion",
     "tipo": "er",
-    "titulo": "Modelo conceptual — PN04 Inspección de devolución"
+    "titulo": "Modelo conceptual — PN04 Inspeccionar prendas devueltas"
   },
   {
     "id": "DER_seg_usuarios",
@@ -132,7 +132,7 @@
   {
     "id": "CLASES_pn03_promociones",
     "tipo": "clases",
-    "titulo": "Diagrama de clases — PN03 Métricas, promociones y toma de decisiones"
+    "titulo": "Diagrama de clases — PN03 Evaluar y aplicar promociones comerciales"
   },
   {
     "id": "CLASES_patron_strategy_abandono",
@@ -142,7 +142,7 @@
   {
     "id": "CLASES_pn04_devolucion",
     "tipo": "clases",
-    "titulo": "Diagrama de clases — PN04 Inspección de devolución"
+    "titulo": "Diagrama de clases — PN04 Inspeccionar prendas devueltas"
   },
   {
     "id": "CLASES_patron_state_prenda",
@@ -167,12 +167,12 @@
   {
     "id": "CU_pn03_promociones",
     "tipo": "casos",
-    "titulo": "Casos de uso — PN03 Métricas, promociones y toma de decisiones"
+    "titulo": "Casos de uso — PN03 Evaluar y aplicar promociones comerciales"
   },
   {
     "id": "CU_pn04_devolucion",
     "tipo": "casos",
-    "titulo": "Casos de uso — PN04 Inspección de devolución"
+    "titulo": "Casos de uso — PN04 Inspeccionar prendas devueltas"
   },
   {
     "id": "ACT_n01_renovacion_cobro",
@@ -192,12 +192,12 @@
   {
     "id": "ACT_pn03_promociones",
     "tipo": "actividad",
-    "titulo": "Actividad — PN03 Métricas, promociones y toma de decisiones"
+    "titulo": "Actividad — PN03 Evaluar y aplicar promociones comerciales"
   },
   {
     "id": "ACT_pn04_devolucion",
     "tipo": "actividad",
-    "titulo": "Actividad — PN04 Inspección de devolución"
+    "titulo": "Actividad — PN04 Inspeccionar prendas devueltas"
   },
   {
     "id": "DSS_N01_CU01_GestionarCliente",

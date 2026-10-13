@@ -281,12 +281,50 @@ namespace Tests
         }
 
         [TestMethod]
-        public void TransicionesManuales_EnLimpiezaDevuelta_SoloDisponible_LaBajaEsPorInspeccion()
+        public void TransicionesManuales_EnLimpiezaDevuelta_Ninguna_SaleSoloPorInspeccion()
         {
             var ctx = new Contexto();
             ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 9, Origen = BE.OrigenMantenimiento.Devolucion });
             var r = ctx.Crear().ObtenerTransicionesManuales(new BE.Prenda { IdPrenda = 9, Estado = BE.EstadoPrenda.EnLimpieza });
-            CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.Disponible }, r);
+            Assert.AreEqual(0, r.Count);
+        }
+
+        // PN04 — la prenda devuelta no reingresa a Disponible salteando la Inspección de Devolución.
+        [TestMethod]
+        public void CambiarEstado_EnLimpiezaDevueltaADisponible_LanzaReingresoRequiereInspeccion()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Origen = BE.OrigenMantenimiento.Devolucion });
+
+            try
+            {
+                bll.CambiarEstado("Test", prenda, BE.EstadoPrenda.Disponible);
+                Assert.Fail("Debía exigir la Inspección de Devolución para reingresar una prenda devuelta.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.prenda.reingreso_requiere_inspeccion", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalPrenda.CambiarEstadoVeces);
+            Assert.AreEqual(BE.EstadoPrenda.EnLimpieza, prenda.Estado);
+        }
+
+        [TestMethod]
+        public void ReingresarInspeccionada_EnLimpiezaDevuelta_PasaADisponible()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var bll = ctx.Crear();
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Origen = BE.OrigenMantenimiento.Devolucion });
+
+            bll.ReingresarInspeccionada("Test", prenda);
+
+            Assert.AreEqual(1, ctx.DalPrenda.CambiarEstadoVeces);
+            Assert.AreEqual(BE.EstadoPrenda.Disponible, prenda.Estado);
         }
 
         [TestMethod]

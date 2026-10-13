@@ -30,7 +30,7 @@ namespace BLL
             // gestiona Clientes (Venta); Contrataciones Pendientes es exclusivo del rol Caja.
             ("nuevaContratacionToolStripMenuItem",      "mnuClientes"),
             ("contratacionesPendientesToolStripMenuItem", "mnuCaja"),
-            // PN03 — Métricas, promociones y toma de decisiones.
+            // PN03 — Evaluar y aplicar promociones comerciales.
             ("sugerirPromocionToolStripMenuItem",              "mnuSugerenciaPromocion"),
             ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
             ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),

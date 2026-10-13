@@ -28,6 +28,10 @@ namespace BLL.Interfaces
         // EnUso → Baja y EnLimpieza → Baja no pasan por acá: son de BLL.InspeccionDevolucion (con cargo).
         void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado);
 
+        // PN04, CU-DEP-01: reingreso sin cargo aprobado por la Inspección (EnLimpieza → Disponible
+        // de una prenda devuelta, que CambiarEstado rechaza).
+        void ReingresarInspeccionada(string modulo, BE.Prenda prenda);
+
         // CU01-CS-Verificar Disponibilidad (PN01): releyendo el estado real desde la base,
         // confirma si cada prenda de la selección sigue Disponible. Solo lectura.
         (bool Disponible, List<BE.Prenda> NoDisponibles) VerificarDisponibilidad(List<BE.Prenda> seleccion);

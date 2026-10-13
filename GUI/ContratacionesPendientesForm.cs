@@ -272,12 +272,18 @@ namespace GUI
         private void HabilitarAcciones(BE.Contratacion c)
         {
             bool pendiente = c != null && c.PuedeCobrarse();
-            btnCobrar.Enabled = btnIntentoFallido.Enabled = btnImprimirLiquidacion.Enabled = btnAnular.Enabled = pendiente;
+            // Separación de funciones: quien registró la contratación no la resuelve (la BLL calcula
+            // UsuarioPuedeCobrar para el usuario en sesión; el Administrador siempre puede).
+            btnCobrar.Enabled = btnIntentoFallido.Enabled = btnAnular.Enabled = pendiente && c.UsuarioPuedeCobrar;
+            btnImprimirLiquidacion.Enabled = pendiente;
             cmbMedioPago.Enabled = !VistaResueltas;
             btnVerIntentos.Enabled = c != null && c.TieneIntentos();
             btnImprimirComprobante.Enabled = c != null && c.EstaPagada();
             btnImprimirConstancia.Enabled = c != null && !c.PuedeCobrarse();
             CargarCuotas();
+            if (pendiente && !c.UsuarioPuedeCobrar)
+                lblDetalleCuotas.Text = Tr("lbl.contr.registraste",
+                    "Registraste esta contratación: la tiene que resolver otra persona de Caja.");
         }
 
         // ── ¿Se concreta el pago? Sí → Confirmar cobro → Comprobante → Constancia ─

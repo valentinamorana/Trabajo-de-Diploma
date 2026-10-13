@@ -8,12 +8,16 @@ classDiagram
     +List~MetricaAbandonoPlan~ AbandonoPorPlan
     +List~MetricaRotacionCategoria~ RotacionPorCategoria
     +List~CandidataSugerencia~ Oportunidades
+    +List~ResultadoPromocion~ ResultadoPromociones
     +HayOportunidad() bool
   }
   class CandidataSugerencia {
     +OrigenMetrica Origen
     +int IdPlan
     +string Motivo
+    +int ClientesEnRiesgo
+    +decimal IngresoMensualEnRiesgo
+    +decimal TasaRetencion
     +decimal BeneficioEstimado
   }
   class SugerenciaPromocion {
@@ -22,6 +26,7 @@ classDiagram
     +string Motivo
     +TipoDescuento TipoDescuentoSugerido
     +decimal BeneficioEstimado
+    +decimal TasaRetencion
     +EstadoSugerencia Estado
     +DateTime FechaAlta
     +OrigenMetrica OrigenMetrica
@@ -29,6 +34,8 @@ classDiagram
     +string MotivoDescarte
     +DateTime? FechaEvaluacion
     +string NombreUsuarioAlta
+    +CalcularBeneficio(decimal,  decimal) decimal
+    +IngresoEnRiesgo() decimal
     +PuedeEvaluarse() bool
     +TransicionValida(EstadoSugerencia) bool
   }
@@ -53,6 +60,7 @@ classDiagram
     +PuedeDictaminarla(int) bool
     +PuedeSolicitarseBaja() bool
     +PuedeReformularse() bool
+    +PuedeDarseDeBaja() bool
     +SeSuperponeCon(Promocion) bool
     +TransicionValida(EstadoPromocion) bool
   }
@@ -91,6 +99,8 @@ classDiagram
     +Promocion Promocion
     +decimal? BeneficioEstimadoSugerencia
     +OrigenMetrica? OrigenSugerencia
+    +decimal? TasaRetencionSugerencia
+    +decimal IngresoEnRiesgoSugerencia
     +List~Promocion~ Superpuestas
     +bool UsuarioPuedeDictaminar
     +decimal? PrecioPlan
@@ -104,15 +114,50 @@ classDiagram
     +decimal MargenProyectado
     +bool? Conviene
   }
+  class ResultadoPromocion {
+    +int IdPromocion
+    +string Nombre
+    +EstadoPromocion Estado
+    +int IdPlan
+    +string NombrePlan
+    +DateTime Desde
+    +DateTime Hasta
+    +DateTime AnteriorDesde
+    +int Dias
+    +ConteoMovimientos Durante
+    +ConteoMovimientos Antes
+    +int VariacionBajas
+    +int VariacionPausas
+    +int VariacionRenovaciones
+    +int ClientesEnJuego
+    +int ClientesRetenidos
+    +decimal? TasaRetencionReal
+    +decimal? TasaRetencionEsperada
+    +RetuvoClientes() bool
+    +CumplioRetencionEsperada() bool?
+    +Contar(IEnumerable~DecisionRenovacion~) ConteoMovimientos
+    +CalcularRetencion(IEnumerable~DecisionRenovacion~) void
+  }
+  class ConteoMovimientos {
+    +int Bajas
+    +int Pausas
+    +int Renovaciones
+  }
+  class DecisionRenovacion {
+    +int IdCliente
+    +DateTime Fecha
+    +EstadoRenovacion Resultado
+  }
   class BLL_AnalisisPromociones["BLL.AnalisisPromociones"] {
     +AnalizarMetricas(string,  DateTime?,  DateTime?) ReporteMetricas
+    +ResultadoPromociones(DateTime,  DateTime) List~ResultadoPromocion~
     +HayOportunidad(ReporteMetricas) bool
     +RotacionPorCategoria() List~MetricaRotacionCategoria~
   }
   class BLL_SugerenciaPromocion["BLL.SugerenciaPromocion"] {
     +ObtenerPendientes() List~SugerenciaPromocion~
     +ObtenerTodas() List~SugerenciaPromocion~
-    +RegistrarSugerencia(string,  OrigenMetrica,  int,  string,  TipoDescuento,  decimal) int
+    +RegistrarSugerencia(string,  OrigenMetrica,  int,  string,  TipoDescuento,  decimal,  decimal) int
     +DescartarSugerencia(string,  int,  string) void
   }
   class BLL_Promocion["BLL.Promocion"] {
@@ -137,6 +182,7 @@ classDiagram
     <<interface>>
     +ObtenerTodas() List~Promocion~
     +ObtenerImpacto(DateTime,  DateTime) List~MetricaImpactoPromocion~
+    +ObtenerDecisionesDelPlan(int,  DateTime,  DateTime) List~DecisionRenovacion~
     +ObtenerPendientesRevisionContable() List~Promocion~
     +ObtenerPorId(int) Promocion
     +Alta(Promocion,  PromocionHistorial) int
@@ -200,14 +246,19 @@ classDiagram
     +ObtenerTodos() List~MantenimientoPrenda~
   }
   ReporteMetricas --> "*" CandidataSugerencia : Oportunidades
+  ReporteMetricas --> "*" ResultadoPromocion : ResultadoPromociones
   Promocion --> "0..1" SugerenciaPromocion : IdSugerenciaOrigen
   PromocionHistorial --> "1" Promocion : IdPromocion
   DictamenContable --> "1" Promocion : IdPromocion
   SolicitudBajaPromocion --> "1" Promocion : IdPromocion
   AnalisisImpactoPromocion --> "1" Promocion : Promocion
   AnalisisImpactoPromocion --> "*" Promocion : Superpuestas
+  ResultadoPromocion --> "1" Promocion : IdPromocion
+  ResultadoPromocion --> "1" ConteoMovimientos : Durante
+  ResultadoPromocion --> "1" ConteoMovimientos : Antes
   BLL_AnalisisPromociones ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
   BLL_AnalisisPromociones ..> DAL_Interfaces_IPromocionDAL : usa
+  BLL_AnalisisPromociones ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa
   BLL_SugerenciaPromocion ..> DAL_Interfaces_ISugerenciaPromocionDAL : usa
   BLL_SugerenciaPromocion ..> DAL_Interfaces_IPlanSuscripcionDAL : usa
   BLL_Promocion ..> DAL_Interfaces_IPromocionDAL : usa

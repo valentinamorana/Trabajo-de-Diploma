@@ -166,7 +166,7 @@ module.exports = [
     ]
   },
   {
-    tipo: 'actividad', id: 'ACT_pn03_promociones', titulo: 'Actividad — PN03 Métricas, promociones y toma de decisiones',
+    tipo: 'actividad', id: 'ACT_pn03_promociones', titulo: 'Actividad — PN03 Evaluar y aplicar promociones comerciales',
     // El sistema actúa dentro de cada carril. Cada acción es un método de BLL.AnalisisPromociones /
     // BLL.SugerenciaPromocion / BLL.Promocion y cada decisión, una guarda de BE (PuedeEvaluarse, PuedeDictaminar,
     // PuedeReformularse, PuedeDarseDeBaja, PuedeSolicitarseBaja, DebeVencer). Estados: SugerenciaPromocion
@@ -257,7 +257,7 @@ module.exports = [
     ]
   },
   {
-    tipo: 'actividad', id: 'ACT_pn04_devolucion', titulo: 'Actividad — PN04 Inspección de devolución',
+    tipo: 'actividad', id: 'ACT_pn04_devolucion', titulo: 'Actividad — PN04 Inspeccionar prendas devueltas',
     // GUI/InspeccionDevolucionForm.cs (CU05-DEP), GUI/PedidosRealizados.cs › BtnReportarPerdida_Click (CU06-DEP),
     // GUI/CargoPrendaDialog.cs y BLL/InspeccionDevolucion.cs: cargo y baja en UNA transacción (DAL/InspeccionDevolucion.cs).
     // Compra tácita (BLL/Politicas/PoliticaCompraTacita.cs): la pérdida solo con el pedido Entregado hace 30 días o más.

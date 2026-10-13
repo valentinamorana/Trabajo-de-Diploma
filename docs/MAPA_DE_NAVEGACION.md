@@ -2,7 +2,7 @@
 
 Documento para verificar que no falte nada. Cada fila sale del código: el menú de `GUI/Menu.Designer.cs`, las reglas de visibilidad de `BLL/MenuVisibilidad.cs`, los permisos sembrados en `BD/00_Instalacion_Completa.sql` y los botones de cada `*.Designer.cs`.
 
-**Siglas de procesos:** N01 Clientes/Suscripciones · PN01 Armar pedido · PN02 Comercialización de la suscripción · PN03 Métricas, promociones y decisiones · PN04 Inspección de devolución · SEG Seguridad y administración · AUD Auditoría · EXT mejora extra (no exigida por la cátedra).
+**Siglas de procesos:** N01 Clientes/Suscripciones · PN01 Armar pedido · PN02 Comercialización de la suscripción · PN03 Evaluar y aplicar promociones comerciales · PN04 Inspeccionar prendas devueltas · SEG Seguridad y administración · AUD Auditoría · EXT mejora extra (no exigida por la cátedra).
 
 **Roles (10):** ADM Administrador · AUD Auditor · VEN Vendedor · GCO GerenteComercial (incluye Vendedor) · LOG OperadorLogistico · DEP Deposito · GIN GerenteInventario (incluye OperadorLogistico + Deposito) · CAJ Caja · ACO AdministracionComercial · CON Contabilidad.
 
@@ -48,7 +48,7 @@ El Administrador ve todo (bypass en las 3 capas). Un grupo del menú se muestra 
 | | Usuarios ▸ Cuentas de usuario | `Usuarios` | mnuUsuarios | ADM | SEG |
 | | Perfiles | `GestorPermisos` | mnuUsuarios | ADM | SEG |
 | | Sistema ▸ Idiomas | `FormIdiomas` | mnuUsuarios | ADM | SEG |
-| | Sistema ▸ Historial de versiones | `VersionHistorialForm` | mnuUsuarios | ADM | SEG |
+| | Sistema ▸ Historial de cambios de usuarios | `VersionHistorialForm` | mnuUsuarios | ADM | SEG |
 | | Sistema ▸ Backup | `BackupForm` (modal) | mnuUsuarios | ADM | SEG |
 | | Sistema ▸ Integridad | `DiagnosticoIntegridadForm` | mnuUsuarios | ADM | SEG |
 
@@ -85,9 +85,9 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | Formulario | Qué hace | Acciones |
 |---|---|---|
 | `NuevaContratacionForm` | Carril Vendedor de PN02. Identifica al cliente por DNI, nombre o apellido (si no está registrado, lo registra) y presenta los planes con precio y límite. Valida la contratación e informa el motivo si no es válida. Muestra el importe a abonar y registra la contratación («Orden de cobro»), o asienta el desistimiento. | Buscar · Registrar cliente · Imprimir planes · Registrar contratación · El cliente desiste · Cerrar |
-| `ContratacionesPendientesForm` | Carril Caja de PN02. Muestra la cola con la liquidación (un solo descuento) y cobra con un medio de pago del catálogo: emite el comprobante, activa la suscripción y acredita al referente. También registra intentos con motivo; al tercero cancela automáticamente. La vista Resueltas permite reimprimir. | Pendientes/Resueltas · Cobrar · Intento Fallido · Ver intentos · Imprimir liquidación · Imprimir comprobante · Imprimir constancia · Actualizar |
+| `ContratacionesPendientesForm` | Carril Caja de PN02. Muestra la cola con la liquidación (un solo descuento) y cobra con un medio de pago del catálogo: emite el comprobante, activa la suscripción y acredita al referente. También registra intentos con motivo (al tercero cancela automáticamente) y anula con motivo. Cobrar, Intento Fallido y Anular quedan deshabilitados para quien registró la contratación (salvo ADM). La vista Resueltas permite reimprimir. | Pendientes/Resueltas · Cobrar · Intento Fallido · Anular · Ver intentos · Imprimir liquidación · Imprimir comprobante · Imprimir constancia · Actualizar |
 
-### PN03 — Métricas, promociones y decisiones
+### PN03 — Evaluar y aplicar promociones comerciales
 | Formulario | Qué hace | Acciones |
 |---|---|---|
 | `SugerirPromocionForm` | Carril Gerencia de PN03. Analiza las métricas (abandono por plan, rotación por categoría solo informativa) y muestra el «Reporte de métricas»; si no hay oportunidad por plan, termina sin promoción. Registra la sugerencia para un plan con el origen de la métrica y lista las registradas con su estado. | Analizar métricas… (Imprimir reporte · Usar esta idea) · Enviar Sugerencia · Imprimir sugerencia (o constancia de descarte) |
@@ -102,7 +102,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | `AnalisisEscasezForm` | Talle+Categoría bajo un umbral de stock. | Generar · Exportar a PDF · Guardar como .CSV |
 | `RecomendacionPrendasForm` | Prendas afines al historial de un cliente. | Generar · Exportar a PDF · Guardar como .CSV |
 
-### PN04 — Inspección de devolución
+### PN04 — Inspeccionar prendas devueltas
 | Formulario | Qué hace | Acciones |
 |---|---|---|
 | `InspeccionDevolucionForm` | Depósito decide por prenda devuelta: reingreso a stock, o baja y cobro de cargo al último cliente. | Aprobar Reingreso · Dar de Baja y Cobrar · Actualizar |
@@ -125,7 +125,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | `DiagnosticoIntegridadForm` | Verifica DVH/DVV de las tablas. | Recalcular Todo · Recuperación (Espejo)… · Actualizar |
 | `RecuperacionEspejoForm` | Repara integridad desde el espejo `Usuario_Seguridad`. | Reparar desde Espejo · Asumir Pérdida · Restaurar Backup… · Cerrar |
 | `ConfirmarAdminForm` · `InputDialog` | Diálogos de confirmación y entrada de texto. | — |
-| `VersionHistorialForm` | Historial de versiones del sistema. | — |
+| `VersionHistorialForm` | Historial de versiones de los usuarios (patrón Memento): restaura una versión anterior de sus datos. | Cargar · Restaurar Versión Seleccionada · Cerrar |
 
 ### AUD — Auditoría y transversales
 | Formulario | Qué hace | Acciones |
@@ -147,7 +147,8 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Clientes / Nueva contratación | ● | | ● | ● | | | | | | |
 | Planes | ● | | ● | ● | | | | | | |
-| Renovación / Cobro de suscripción | ● | | ● | ● | | | | | | |
+| Renovación de suscripción | ● | | ● | ● | | | | | | |
+| Cobro de suscripción (N01) y Contrataciones pendientes (PN02) | ● | | | | | | | ● | | |
 | Prendas (consulta) | ● | | ● | ● | | ● | ● | | | |
 | Prendas (alta/edición/estado, mnuStock) | ● | | | | | ● | ● | | | |
 | Inspección de Devolución | ● | | | | | ● | ● | | | |

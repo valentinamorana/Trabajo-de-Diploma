@@ -3478,6 +3478,35 @@ GO
 PRINT 'Sección 20f: origen del mantenimiento de prendas verificado.';
 GO
 -- ============================================================
+-- WardrobeFlow — 20h. PN03: TASA DE RETENCIÓN ESPERADA EN LA SUGERENCIA
+-- ------------------------------------------------------------
+--   El beneficio estimado de una sugerencia suponía que la promoción retenía al 100 % de los
+--   clientes en riesgo. Ahora Gerencia declara la tasa de retención esperada (0-100], por
+--   defecto 30 %), y el beneficio es ingreso mensual en riesgo × tasa / 100. Las sugerencias ya
+--   registradas quedan con 100: es lo que suponían (su beneficio no cambia).
+--   SugerenciaPromocion no lleva dígito verificador. Idempotente.
+-- ============================================================
+IF COL_LENGTH('SugerenciaPromocion', 'TasaRetencion') IS NULL
+BEGIN
+    ALTER TABLE SugerenciaPromocion ADD TasaRetencion DECIMAL(5,2) NOT NULL
+        CONSTRAINT DF_SugerenciaPromocion_TasaRetencion DEFAULT 30
+        CONSTRAINT CHK_SugerenciaPromocion_TasaRetencion CHECK (TasaRetencion > 0 AND TasaRetencion <= 100);
+    EXEC(N'UPDATE SugerenciaPromocion SET TasaRetencion = 100;
+           DECLARE @n INT = @@ROWCOUNT;
+           PRINT ''SugerenciaPromocion: columna TasaRetencion agregada; '' + CAST(@n AS NVARCHAR(10)) + '' sugerencia(s) previas con 100 %.'';');
+END
+GO
+-- Clave de idioma reemplazada (el texto ahora muestra la tasa): promo.analisis.calc.beneficiotasa.
+IF OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Traduccion') IS NOT NULL
+BEGIN
+    DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl
+    WHERE c.Clave = N'promo.analisis.calc.beneficiosug';
+    DELETE FROM Control WHERE Clave = N'promo.analisis.calc.beneficiosug';
+END
+GO
+PRINT 'Sección 20h: tasa de retención de las sugerencias (PN03) verificada.';
+GO
+-- ============================================================
 -- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
 -- ------------------------------------------------------------
 -- Despachar, registrar la entrega y registrar la devolución (que abre PN04) se hacen desde Pedidos

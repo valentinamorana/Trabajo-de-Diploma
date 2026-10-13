@@ -43,6 +43,11 @@ namespace Tests.Fakes
             UltimoDesdeImpacto = desde;
             return Impacto;
         }
+        // Decisiones de suscripción por plan (filtradas por fecha como la consulta real).
+        public List<(int IdPlan, BE.DecisionRenovacion Decision)> Decisiones { get; set; } = new List<(int, BE.DecisionRenovacion)>();
+        public List<BE.DecisionRenovacion> ObtenerDecisionesDelPlan(int idPlan, System.DateTime desde, System.DateTime hastaExcl) =>
+            Decisiones.FindAll(d => d.IdPlan == idPlan && d.Decision.Fecha >= desde && d.Decision.Fecha < hastaExcl)
+                      .ConvertAll(d => d.Decision);
         public List<BE.Promocion> ObtenerPendientesRevisionContable() => Todas.FindAll(p => p.Estado == BE.EstadoPromocion.EnRevisionContable);
         public BE.Promocion ObtenerPorId(int idPromocion) => Todas.Find(p => p.IdPromocion == idPromocion);
 

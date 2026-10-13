@@ -35,8 +35,11 @@ namespace BLL
         public BE.SugerenciaPromocion ObtenerPorId(int idSugerencia) => dalSugerencia.ObtenerPorId(idSugerencia);
 
         // "¿Hay oportunidad? Sí → Registrar sugerencia" («Sugerencia de promoción»).
+        // Beneficio estimado = ingreso mensual en riesgo × tasa de retención / 100: la tasa es el
+        // supuesto explícito de cuántos clientes en riesgo retiene la promoción (antes, el 100 %).
         public int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int idPlan,
-                                       string motivo, BE.TipoDescuento tipoSugerido, decimal beneficioEstimado)
+                                       string motivo, BE.TipoDescuento tipoSugerido, decimal ingresoMensualEnRiesgo,
+                                       decimal tasaRetencion = BE.SugerenciaPromocion.TasaRetencionPorDefecto)
         {
             PermisosAccion.Exigir(BE.Patentes.SugerenciaPromocion, BE.Patentes.SugerenciaPromocion);
 
@@ -53,6 +56,11 @@ namespace BLL
                 throw new BE.AppException("err.bll.sugerenciapromocion.motivo_requerido",
                     "Debe indicar el motivo de la sugerencia.");
 
+            if (tasaRetencion <= 0 || tasaRetencion > 100)
+                throw new BE.AppException("err.bll.sugerenciapromocion.tasa_invalida",
+                    "La tasa de retención esperada debe ser mayor a 0 y hasta 100 %.");
+
+            decimal beneficioEstimado = BE.SugerenciaPromocion.CalcularBeneficio(ingresoMensualEnRiesgo, tasaRetencion);
             if (beneficioEstimado <= 0)
                 throw new BE.AppException("err.bll.sugerenciapromocion.beneficio_invalido",
                     "El beneficio estimado debe ser mayor a cero.");
@@ -63,6 +71,7 @@ namespace BLL
                 Motivo = motivo.Trim(),
                 TipoDescuentoSugerido = tipoSugerido,
                 BeneficioEstimado = beneficioEstimado,
+                TasaRetencion = tasaRetencion,
                 Estado = BE.EstadoSugerencia.Pendiente,
                 OrigenMetrica = origen,
                 IdUsuarioAlta = BLLHelper.ResolverUsuarioActivo(),
@@ -76,7 +85,8 @@ namespace BLL
                 $"Sugerencia de promoción #{idNuevo} ({origen}) — {destino} — Motivo: {sugerencia.Motivo}",
                 BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
-                $"Sugerencia de promoción #{idNuevo} para {destino} — beneficio estimado ${beneficioEstimado}");
+                $"Sugerencia de promoción #{idNuevo} para {destino} — beneficio estimado ${beneficioEstimado} " +
+                $"(ingreso en riesgo ${ingresoMensualEnRiesgo} × retención {tasaRetencion} %)");
 
             return idNuevo;
         }

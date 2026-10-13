@@ -506,7 +506,10 @@ module.exports = [
       nota('«include» CU02-CAJ Emitir Comprobante: se ejecuta dentro de ConfirmarCobro · «extend» CU04-CAJ Financiar en Cuotas: con tarjeta de crédito', 'B'),
       c('F', 'B', 'ObtenerPendientesDePago()  [Consultar cola]'),
       c('B', 'D', 'ObtenerPendientesDePago()'),
-      r('B', 'F', 'contrataciones Pendientes de pago (de la más antigua a la más nueva)'),
+      { loop: 'Por cada contratación de la cola', pasos: [
+        c('B', 'B', 'PuedeCobrar(contratacion, idEmpleado)  [UsuarioPuedeCobrar: false si la registró el usuario en sesión, salvo el Administrador]')
+      ] },
+      r('B', 'F', 'contrataciones Pendientes de pago (de la más antigua a la más nueva), cada una con UsuarioPuedeCobrar'),
       c('F', 'B', 'CalcularImportes(contrataciones)'),
       { loop: 'Por cada contratación de la cola', pasos: [
         c('B', 'PD', 'Resolver(bruto, idPlan, promocionesDelPlan, creditoReferido, meses)  [bruto = PrecioMensual pactado × meses]')
@@ -669,13 +672,13 @@ module.exports = [
     ]
   },
 
-  // ───────────────────────────── PN03 — Métricas, promociones y toma de decisiones ─────────────────────────────
+  // ───────────────────────────── PN03 — Evaluar y aplicar promociones comerciales ─────────────────────────────
   // Sigue el flujo aprobado: cada mensaje a la BLL es un método por actividad; cada transición es un
   // claim (UPDATE ... WHERE Estado = esperado) que inserta su fila de PromocionHistorial en la misma transacción.
   {
     tipo: 'secuencia', id: 'DSS_PN03_CU01_GER_SugerirPromocion', titulo: 'PN03 · CU01-GER Sugerir Promoción',
     participantes: [A('G', 'Gerencia'), P('F', 'SugerirPromocionForm'), P('AN', 'BLL.AnalisisPromociones'), P('AR', 'BLL.AnalisisRotacion'), P('AA', 'BLL.AnalisisAbandono'),
-                    P('DP', 'DAL.PlanSuscripcion'), P('DPR', 'DAL.Promocion'), P('B', 'BLL.SugerenciaPromocion'), P('D', 'DAL.SugerenciaPromocion')],
+                    P('DP', 'DAL.PlanSuscripcion'), P('DPR', 'DAL.Promocion'), P('B', 'BLL.SugerenciaPromocion'), P('SP', 'BE.SugerenciaPromocion'), P('D', 'DAL.SugerenciaPromocion')],
     pasos: [
       nota('«extend» CU03-GER Analizar Métricas (opcional): AnalizarMetricas y ¿Hay oportunidad? (HayOportunidad). Sin análisis, la sugerencia queda con origen Manual', 'G', 'F'),
       { opt: 'Gerencia analiza las métricas (opcional)', pasos: [
@@ -703,19 +706,21 @@ module.exports = [
         c('F', 'AN', 'HayOportunidad(reporte)  [¿Hay oportunidad?]'),
         { alt: '¿Hay oportunidad? No', pasos: [r('F', 'G', '"El reporte de abandono no detecta planes para sugerir": fin sin promoción')],
           sino: [{ etiqueta: 'Sí', pasos: [
-            { opt: 'Eligió una oportunidad', pasos: [r('F', 'G', 'Precarga el plan, tipo, beneficio estimado y motivo; origen = Abandono (las de categoría no se pueden usar)')] }
+            { opt: 'Eligió una oportunidad', pasos: [r('F', 'G', 'Precarga el plan, tipo, ingreso mensual en riesgo, tasa de retención (30 % por defecto) y motivo; origen = Abandono (las de categoría no se pueden usar)')] }
           ] }] }
       ] },
       nota('Sin usar el reporte (o sin elegir una oportunidad) Gerencia carga los datos a mano: el origen queda Manual', 'G', 'F'),
-      c('G', 'F', 'Ajusta el plan, motivo, tipo de descuento y beneficio estimado; pulsa "Enviar Sugerencia"'),
-      c('F', 'B', 'RegistrarSugerencia(modulo, origen, idPlan, motivo, tipoSugerido, beneficioEstimado)  [origen = Abandono o Manual]'),
+      c('G', 'F', 'Ajusta el plan, motivo, tipo de descuento, ingreso en riesgo y tasa de retención esperada; pulsa "Enviar Sugerencia"'),
+      c('F', 'SP', 'CalcularBeneficio(ingresoMensualEnRiesgo, tasaRetencion)  [muestra el beneficio estimado]'),
+      c('F', 'B', 'RegistrarSugerencia(modulo, origen, idPlan, motivo, tipoSugerido, ingresoMensualEnRiesgo, tasaRetencion)  [origen = Abandono o Manual]'),
       nota('PermisosAccion.Exigir(SugerenciaPromocion, SugerenciaPromocion)', 'B'),
       { alt: 'Sin plan', pasos: [r('B', 'F', 'AppException(plan_requerido)'), r('F', 'G', 'Informa el motivo y retoma la carga')],
         sino: [{ etiqueta: 'Con plan', pasos: [
           c('B', 'DP', 'ObtenerPorId(idPlan)'), r('DP', 'B', 'plan (null si no existe)'),
-          { alt: 'Plan inexistente, sin motivo o beneficio ≤ 0', pasos: [r('B', 'F', 'AppException(plan_inexistente / motivo_requerido / beneficio_invalido)'), r('F', 'G', 'Informa el motivo y retoma la carga')],
+          { alt: 'Plan inexistente, sin motivo, tasa fuera de (0, 100] o beneficio ≤ 0', pasos: [r('B', 'F', 'AppException(plan_inexistente / motivo_requerido / tasa_invalida / beneficio_invalido)'), r('F', 'G', 'Informa el motivo y retoma la carga')],
             sino: [{ etiqueta: 'Válidos', pasos: [
-              c('B', 'D', 'Alta(sugerencia)  [Estado = Pendiente, OrigenMetrica = origen, IdUsuarioAlta = usuario de la sesión]'),
+              c('B', 'SP', 'CalcularBeneficio(ingresoMensualEnRiesgo, tasaRetencion)  [beneficio = ingreso × tasa / 100]'),
+              c('B', 'D', 'Alta(sugerencia)  [Estado = Pendiente, OrigenMetrica = origen, TasaRetencion, IdUsuarioAlta = usuario de la sesión]'),
               r('D', 'B', 'idNuevo'),
               nota('bitacora.Registrar(modulo, …) · bitacoraNeg.Registrar(Venta, …)', 'B'),
               r('B', 'F', 'id de la sugerencia'),
@@ -994,11 +999,11 @@ module.exports = [
     ]
   },
 
-  // ───────────────────────────── PN04 — Inspección de devolución ─────────────────────────────
+  // ───────────────────────────── PN04 — Inspeccionar prendas devueltas ─────────────────────────────
   {
     tipo: 'secuencia', id: 'DSS_PN04_CU01_DEP_InspeccionarDevolucion', titulo: 'PN04 · CU05-DEP Inspeccionar devolución',
     // GUI/InspeccionDevolucionForm.cs › CargarPrendas, BtnAprobarReingreso_Click, BtnDarDeBajaConCargo_Click;
-    // BLL/InspeccionDevolucion.cs (AprobarReingreso, DarDeBajaConCargo → BajaConCargo); BLL/Prenda.cs › CambiarEstado (patrón State);
+    // BLL/InspeccionDevolucion.cs (AprobarReingreso, DarDeBajaConCargo → BajaConCargo); BLL/Prenda.cs › ReingresarInspeccionada (patrón State);
     // DAL/InspeccionDevolucion.cs: INSERT del cargo + UPDATE condicionado de la prenda en una sola transacción.
     participantes: [A('D', 'Depósito'), P('F', 'InspeccionDevolucionForm'), P('CD', 'CargoPrendaDialog'), P('IN', 'BLL.InspeccionDevolucion'),
                     P('PB', 'BLL.Prenda'), P('PR', 'BE.Prenda'), P('CG', 'BLL.CargoPrenda'), P('LE', 'BLL.ListaEspera'),
@@ -1016,8 +1021,10 @@ module.exports = [
       { alt: 'Desgaste normal: Aprobar reingreso', pasos: [
         c('D', 'F', 'Pulsa "Aprobar reingreso" y confirma'),
         c('F', 'IN', 'AprobarReingreso(modulo, prenda)'),
-        c('IN', 'PB', 'CambiarEstado(modulo, prenda, Disponible)'),
-        nota('Exigir(StockEditar) · una prenda En limpieza solo se da de baja desde la Inspección', 'PB'),
+        c('IN', 'PB', 'ObtenerEnLimpieza()  [¿la prenda está en la cola de inspección?]'),
+        { alt: 'No está pendiente de inspección', pasos: [r('IN', 'F', 'AppException(reingreso_fuera_de_cola)'), r('F', 'D', 'Informa el motivo')] },
+        c('IN', 'PB', 'ReingresarInspeccionada(modulo, prenda)'),
+        nota('Exigir(StockEditar) · una prenda devuelta solo sale de limpieza por la Inspección (Prendas → Estado la rechaza)', 'PB'),
         c('PB', 'PR', 'ControlarEstado(Disponible)'),
         nota('Patrón State: EstadoEnLimpieza permite EnLimpieza → Disponible', 'PR'),
         r('PR', 'PB', 'true'),
@@ -1124,7 +1131,7 @@ module.exports = [
     // (BLL.AnalisisAbandono.Detectar, Strategy con el criterio por defecto) + planes → «Reporte de métricas».
     participantes: [A('G', 'Gerencia'), P('F', 'SugerirPromocionForm'), P('AN', 'BLL.AnalisisPromociones'), P('AR', 'BLL.AnalisisRotacion'),
                     P('AA', 'BLL.AnalisisAbandono'), P('ER', 'EstrategiaRiesgo'), P('DPE', 'DAL.Pedido'), P('DR', 'DAL.Prenda'), P('DC', 'DAL.Cliente'),
-                    P('DP', 'DAL.PlanSuscripcion'), P('DPR', 'DAL.Promocion')],
+                    P('DP', 'DAL.PlanSuscripcion'), P('DPR', 'DAL.Promocion'), P('RP', 'BE.ResultadoPromocion'), P('DS', 'DAL.SugerenciaPromocion')],
     pasos: [
       nota('Punto de extensión de CU01-GER: Gerencia pulsa "Analizar métricas…" antes de cargar la sugerencia', 'G', 'F'),
       c('G', 'F', 'Elige el período (30, 90, 180 o 365 días; por defecto 90) y pulsa "Analizar métricas…"'),
@@ -1153,8 +1160,21 @@ module.exports = [
       c('AN', 'AN', 'Oportunidades(ab, planes)  [solo por plan: clientes en riesgo de abandono]'),
       c('AN', 'DPR', 'ObtenerImpacto(desde, hasta)'),
       r('DPR', 'AN', 'impacto de cada promoción: cobros, total descontado y total cobrado'),
+      c('AN', 'AN', 'ResultadoPromociones(desde, hasta)  [Evaluar resultado de la promoción]'),
+      c('AN', 'DPR', 'ObtenerTodas()'),
+      r('DPR', 'AN', 'promociones (se evalúan las Vigentes, Dadas de baja y Vencidas que tocan el período)'),
+      { loop: 'Por cada promoción evaluable', pasos: [
+        c('AN', 'DPR', 'ObtenerHistorial(idPromocion)'),
+        r('DPR', 'AN', 'historial: fecha de aprobación y de baja → vigencia real [desde, hasta)'),
+        { opt: 'Nació de una sugerencia', pasos: [c('AN', 'DS', 'ObtenerPorId(idSugerenciaOrigen)'), r('DS', 'AN', 'sugerencia (tasa de retención esperada)')] },
+        c('AN', 'DPR', 'ObtenerDecisionesDelPlan(idPlan, desde, hasta)  [durante la vigencia]'),
+        c('AN', 'DPR', 'ObtenerDecisionesDelPlan(idPlan, anteriorDesde, desde)  [período anterior de igual duración]'),
+        r('DPR', 'AN', 'decisiones: renovación de N01 (Renovada/Baja/Pausada) y recontratación del mismo plan (PN02)'),
+        c('AN', 'RP', 'Contar(decisiones)  [bajas, pausas y renovaciones de cada tramo]'),
+        c('AN', 'RP', 'CalcularRetencion(decisionesDurante)  [clientes en juego y retenidos: última decisión ≠ Baja]')
+      ] },
       nota('bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"', 'AN'),
-      r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto de las promociones, oportunidades por plan)'),
+      r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto y resultado de las promociones, oportunidades por plan)'),
       c('F', 'AN', 'HayOportunidad(reporte)'),
       r('AN', 'F', 'hayOportunidad'),
       c('F', 'F', 'MostrarReporte(reporte, hayOportunidad)'),
@@ -1162,7 +1182,7 @@ module.exports = [
         sino: [{ etiqueta: 'Sí', pasos: [
           r('F', 'G', '«Reporte de métricas» (imprimible) con las oportunidades para elegir'),
           c('G', 'F', 'Pulsa "Usar esta idea" sobre una oportunidad'),
-          r('F', 'G', 'Precarga el plan, tipo, beneficio estimado y motivo; origen = Abandono (las de categoría no se pueden usar)'),
+          r('F', 'G', 'Precarga el plan, tipo, ingreso mensual en riesgo, tasa de retención (30 % por defecto) y motivo; origen = Abandono (las de categoría no se pueden usar)'),
           nota('Sigue CU01-GER Sugerir Promoción: RegistrarSugerencia con el origen de la métrica', 'G', 'F')
         ] }] }
     ]

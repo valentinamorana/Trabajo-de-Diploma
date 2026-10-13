@@ -828,6 +828,56 @@ namespace Tests
             Assert.AreEqual(1, ctx.DalContratacion.ConfirmarCobroVeces);
         }
 
+        // La guarda también cubre el intento fallido y la anulación: quien registró no resuelve en Caja.
+        [TestMethod]
+        public void RegistrarIntentoFallido_ElMismoEmpleadoQueVendio_LanzaResuelveElVendedor()
+        {
+            LoginComoCaja();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            c.IdVendedor = 5;
+            EsperarError(() => ctx.Crear().RegistrarIntentoFallido("Test", c, 1, "Rechazada"), "err.bll.contratacion.resuelve_el_vendedor");
+        }
+
+        [TestMethod]
+        public void Anular_ElMismoEmpleadoQueVendio_LanzaResuelveElVendedor()
+        {
+            LoginComoCaja();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            c.IdVendedor = 5;
+            EsperarError(() => ctx.Crear().Anular("Test", c, "Error de carga"), "err.bll.contratacion.resuelve_el_vendedor");
+        }
+
+        // Predicado para la pantalla de Caja (mismo patrón que UsuarioPuedeDictaminar en Contabilidad).
+        [TestMethod]
+        public void ObtenerPendientesDePago_MarcaUsuarioPuedeCobrar_SegunQuienRegistro()
+        {
+            LoginComoCaja();
+            var ctx = new Contexto();
+            var propia = ctx.Pendiente();
+            propia.IdVendedor = 5;   // la registró el empleado en sesión
+            var ajena = ctx.Pendiente();
+            ajena.IdContratacion = propia.IdContratacion + 1;
+            ajena.IdVendedor = 7;
+            ctx.DalContratacion.PendientesDePago = new List<BE.Contratacion> { propia, ajena };
+
+            var cola = ctx.Crear().ObtenerPendientesDePago();
+
+            Assert.IsFalse(cola.Single(c => c.IdContratacion == propia.IdContratacion).UsuarioPuedeCobrar);
+            Assert.IsTrue(cola.Single(c => c.IdContratacion == ajena.IdContratacion).UsuarioPuedeCobrar);
+        }
+
+        [TestMethod]
+        public void PuedeCobrar_AdministradorQueVendio_True()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var c = ctx.Pendiente();
+            c.IdVendedor = 5;
+            Assert.IsTrue(ctx.Crear().PuedeCobrar(c));
+        }
+
         [TestMethod]
         public void AsentarDesistimiento_MotivoMasLargoQueLaColumna_SeRechaza()
         {

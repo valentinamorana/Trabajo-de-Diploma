@@ -96,6 +96,14 @@ namespace BE
         public bool EstaCancelada() => Estado == EstadoContratacion.Cancelada;
         public bool TieneIntentos() => IntentosPago > 0;
 
+        /// <summary>Separación de funciones por persona: el empleado que registró la contratación
+        /// (el Vendedor) no la resuelve en Caja (cobrar, intento fallido, anular).</summary>
+        public bool PuedeResolverla(int idEmpleado) => IdVendedor != idEmpleado;
+
+        /// <summary>Lo calcula la BLL al listar la cola de Caja para el usuario en sesión (no persiste):
+        /// false si quien está en sesión registró la contratación. El Administrador siempre puede.</summary>
+        public bool UsuarioPuedeCobrar { get; set; }
+
         /// <summary>
         /// Máquina de estados del diagrama de actividad de PN02:
         ///   PendientePago → Pagada    (¿Se concreta el pago? Sí → Confirmar cobro)

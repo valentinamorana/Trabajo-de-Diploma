@@ -6048,7 +6048,6 @@ ES	promo.analisis.calc.titulo	Margen proyectado (por mes):
 ES	promo.analisis.calc.sinplan	No se puede calcular el margen: el plan de la promoción ya no existe.
 ES	promo.analisis.calc.descuento	Descuento por cliente: {0:C2} ({1} {2} sobre el precio del plan, {3:C2})
 ES	promo.analisis.calc.costo	Costo del descuento: {0:C2} × {1} cliente(s) activo(s) del plan = {2:C2}
-ES	promo.analisis.calc.beneficiosug	Beneficio estimado (sugerencia de Gerencia): {0:C2}
 ES	promo.analisis.calc.beneficioadm	Beneficio estimado (margen cargado por Administración): {0:C2}
 ES	promo.analisis.calc.margen	Margen proyectado: {0:C2} − {1:C2} = {2:C2}
 ES	promo.analisis.calc.conviene	Resultado: CONVIENE (el beneficio estimado cubre el costo del descuento).
@@ -6144,7 +6143,6 @@ EN	promo.analisis.calc.titulo	Projected margin (per month):
 EN	promo.analisis.calc.sinplan	The margin cannot be calculated: the promotion plan no longer exists.
 EN	promo.analisis.calc.descuento	Discount per customer: {0:C2} ({1} {2} on the plan price, {3:C2})
 EN	promo.analisis.calc.costo	Discount cost: {0:C2} × {1} active customer(s) of the plan = {2:C2}
-EN	promo.analisis.calc.beneficiosug	Estimated benefit (Management suggestion): {0:C2}
 EN	promo.analisis.calc.beneficioadm	Estimated benefit (margin entered by Administration): {0:C2}
 EN	promo.analisis.calc.margen	Projected margin: {0:C2} − {1:C2} = {2:C2}
 EN	promo.analisis.calc.conviene	Result: WORTHWHILE (the estimated benefit covers the discount cost).
@@ -6240,7 +6238,6 @@ RU	promo.analisis.calc.titulo	Прогнозируемая маржа (в мес
 RU	promo.analisis.calc.sinplan	Невозможно рассчитать маржу: план акции больше не существует.
 RU	promo.analisis.calc.descuento	Скидка на клиента: {0:C2} ({1} {2} от цены плана, {3:C2})
 RU	promo.analisis.calc.costo	Стоимость скидки: {0:C2} × {1} активн. клиент(ов) плана = {2:C2}
-RU	promo.analisis.calc.beneficiosug	Ожидаемая выгода (предложение руководства): {0:C2}
 RU	promo.analisis.calc.beneficioadm	Ожидаемая выгода (маржа, указанная администрацией): {0:C2}
 RU	promo.analisis.calc.margen	Прогнозируемая маржа: {0:C2} − {1:C2} = {2:C2}
 RU	promo.analisis.calc.conviene	Результат: ВЫГОДНО (ожидаемая выгода покрывает стоимость скидки).
@@ -6336,7 +6333,6 @@ PT	promo.analisis.calc.titulo	Margem projetada (por mês):
 PT	promo.analisis.calc.sinplan	Não é possível calcular a margem: o plano da promoção não existe mais.
 PT	promo.analisis.calc.descuento	Desconto por cliente: {0:C2} ({1} {2} sobre o preço do plano, {3:C2})
 PT	promo.analisis.calc.costo	Custo do desconto: {0:C2} × {1} cliente(s) ativo(s) do plano = {2:C2}
-PT	promo.analisis.calc.beneficiosug	Benefício estimado (sugestão da Gerência): {0:C2}
 PT	promo.analisis.calc.beneficioadm	Benefício estimado (margem informada pela Administração): {0:C2}
 PT	promo.analisis.calc.margen	Margem projetada: {0:C2} − {1:C2} = {2:C2}
 PT	promo.analisis.calc.conviene	Resultado: VALE A PENA (o benefício estimado cobre o custo do desconto).
@@ -6848,7 +6844,7 @@ ES	ayuda.Planes	Alta y edición de planes (nombre, límite de prendas y precio m
 ES	ayuda.Prendas.titulo	Catálogo de prendas
 ES	ayuda.Prendas	Alta, edición y cambio de estado de las prendas.\n\n• Una prenda que entró a limpieza en el depósito se puede volver a dejar disponible o dar de baja, sin cargo.\n• Las que volvieron de un cliente se resuelven en Inspección de devolución, y las que el cliente no devuelve, con Reportar pérdida en Pedidos realizados.
 ES	ayuda.SugerirPromocionForm.titulo	Sugerir promoción (Gerencia, PN03)
-ES	ayuda.SugerirPromocionForm	1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.\n2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.\n3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.
+ES	ayuda.SugerirPromocionForm	1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.\n2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.\n3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.\n4. La retención esperada (30 % por defecto) define el beneficio estimado: ingreso en riesgo × retención. El reporte incluye el Resultado de las promociones: bajas, pausas y renovaciones del plan durante la vigencia contra el período anterior, y la retención real contra la esperada.
 ES	ayuda.PromocionesAdministracionForm.titulo	Promociones (Administración Comercial, PN03)
 ES	ayuda.PromocionesAdministracionForm	• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).\n• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si estás de acuerdo, la promoción se da de baja, si no, sigue vigente.\n• Promociones: crear (siempre para un plan), reformular las rechazadas por Contabilidad, o Dar de baja una vigente o una rechazada (con motivo).\n• Imprimir ▾: ficha, dictamen, solicitud de baja, respuesta a la solicitud y constancia de baja.\nLa fecha de fin no puede haber pasado.
 ES	ayuda.PromocionesContabilidadForm.titulo	Revisión contable (Contabilidad, PN03)
@@ -6903,7 +6899,7 @@ EN	ayuda.Planes	Create and edit plans (name, garment limit and monthly price).\n
 EN	ayuda.Prendas.titulo	Garment catalogue
 EN	ayuda.Prendas	Add, edit and change the status of garments.\n\n• A garment put into cleaning at the warehouse can be made available again or retired, with no charge.\n• Garments returned by a customer are resolved in Return inspection, and those the customer does not return, with Report loss in Completed orders.
 EN	ayuda.SugerirPromocionForm.titulo	Suggest a promotion (Management, PN03)
-EN	ayuda.SugerirPromocionForm	1. Choose the period and Analyse metrics: churn by plan, rotation by category and impact of promotions on the period's payments.\n2. If there is a plan opportunity, use the proposed idea (the form is filled in) or enter it manually. Category opportunities are informative only: promotions are always by plan.\n3. Send to Administration. Print the suggestion with Print suggestion.
+EN	ayuda.SugerirPromocionForm	1. Choose the period and Analyse metrics: churn by plan, rotation by category and impact of promotions on the period's payments.\n2. If there is a plan opportunity, use the proposed idea (the form is filled in) or enter it manually. Category opportunities are informative only: promotions are always by plan.\n3. Send to Administration. Print the suggestion with Print suggestion.\n4. The expected retention (30 % by default) sets the estimated benefit: revenue at risk × retention. The report includes the Promotion results: cancellations, pauses and renewals of the plan during the active period against the previous period, and the actual retention against the expected one.
 EN	ayuda.PromocionesAdministracionForm.titulo	Promotions (Commercial Administration, PN03)
 EN	ayuda.PromocionesAdministracionForm	• Suggestions: create the promotion from a suggestion or discard it (with a reason).\n• Pending withdrawal requests: Handle each Sales request with a response; if you agree, the promotion is withdrawn, otherwise it remains active.\n• Promotions: create (always for a plan), rework those rejected by Accounting, or Withdraw an active or rejected one (with a reason).\n• Print ▾: sheet, opinion, withdrawal request, response to the request and withdrawal certificate.\nThe end date cannot be in the past.
 EN	ayuda.PromocionesContabilidadForm.titulo	Accounting review (Accounting, PN03)
@@ -6958,7 +6954,7 @@ RU	ayuda.Planes	Создание и редактирование тарифов 
 RU	ayuda.Prendas.titulo	Каталог вещей
 RU	ayuda.Prendas	Создание, редактирование и смена статуса вещей.\n\n• Вещь, отправленную в чистку на складе, можно вернуть в доступные или списать без сбора.\n• Вещи, возвращённые клиентом, обрабатываются в «Проверке возврата», а невозвращённые — через «Сообщить о потере» в «Выполненных заказах».
 RU	ayuda.SugerirPromocionForm.titulo	Предложить акцию (руководство, PN03)
-RU	ayuda.SugerirPromocionForm	1. Выберите период и «Анализировать метрики»: отток по тарифам, оборачиваемость по категориям и влияние акций на оплаты за период.\n2. Если есть возможность по тарифу, используйте предложенную идею (форма заполнится) или введите вручную. Возможности по категориям только информационные: акции всегда действуют по тарифам.\n3. «Отправить в администрацию». Предложение печатается кнопкой «Печать предложения».
+RU	ayuda.SugerirPromocionForm	1. Выберите период и «Анализировать метрики»: отток по тарифам, оборачиваемость по категориям и влияние акций на оплаты за период.\n2. Если есть возможность по тарифу, используйте предложенную идею (форма заполнится) или введите вручную. Возможности по категориям только информационные: акции всегда действуют по тарифам.\n3. «Отправить в администрацию». Предложение печатается кнопкой «Печать предложения».\n4. Ожидаемое удержание (по умолчанию 30 %) задаёт ожидаемую выгоду: доход под риском × удержание. Отчёт включает «Результаты акций»: отказы, паузы и продления тарифа в период действия против предыдущего периода и фактическое удержание против ожидаемого.
 RU	ayuda.PromocionesAdministracionForm.titulo	Акции (коммерческий отдел, PN03)
 RU	ayuda.PromocionesAdministracionForm	• Предложения: создать акцию по предложению или отклонить его (с причиной).\n• Ожидающие запросы на отмену: рассмотрите каждый запрос отдела продаж и дайте ответ; если вы согласны, акция снимается, если нет — остаётся действующей.\n• Акции: создать (всегда для тарифа), переработать отклонённые бухгалтерией или снять действующую либо отклонённую (с причиной).\n• Печать ▾: карточка, заключение, запрос на отмену, ответ на запрос и справка о снятии.\nДата окончания не может быть в прошлом.
 RU	ayuda.PromocionesContabilidadForm.titulo	Бухгалтерская проверка (бухгалтерия, PN03)
@@ -7013,7 +7009,7 @@ PT	ayuda.Planes	Cadastro e edição de planos (nome, limite de peças e preço m
 PT	ayuda.Prendas.titulo	Catálogo de peças
 PT	ayuda.Prendas	Cadastro, edição e mudança de estado das peças.\n\n• Uma peça que entrou em limpeza no depósito pode voltar a ficar disponível ou ser baixada, sem cobrança.\n• As que voltaram de um cliente são resolvidas na Inspeção de devolução, e as que o cliente não devolve, com Informar perda em Pedidos realizados.
 PT	ayuda.SugerirPromocionForm.titulo	Sugerir promoção (Gerência, PN03)
-PT	ayuda.SugerirPromocionForm	1. Escolha o período e Analisar métricas: abandono por plano, rotação por categoria e impacto das promoções nas cobranças do período.\n2. Se houver oportunidade por plano, use a ideia proposta (o formulário é preenchido) ou digite-a. As oportunidades por categoria são apenas informativas: as promoções são sempre por plano.\n3. Enviar à Administração. A sugestão é impressa com Imprimir sugestão.
+PT	ayuda.SugerirPromocionForm	1. Escolha o período e Analisar métricas: abandono por plano, rotação por categoria e impacto das promoções nas cobranças do período.\n2. Se houver oportunidade por plano, use a ideia proposta (o formulário é preenchido) ou digite-a. As oportunidades por categoria são apenas informativas: as promoções são sempre por plano.\n3. Enviar à Administração. A sugestão é impressa com Imprimir sugestão.\n4. A retenção esperada (30 % por padrão) define o benefício estimado: receita em risco × retenção. O relatório inclui o Resultado das promoções: baixas, pausas e renovações do plano durante a vigência contra o período anterior, e a retenção real contra a esperada.
 PT	ayuda.PromocionesAdministracionForm.titulo	Promoções (Administração Comercial, PN03)
 PT	ayuda.PromocionesAdministracionForm	• Sugestões: criar a promoção a partir de uma sugestão ou descartá-la (com motivo).\n• Pedidos de baixa pendentes: Atender cada pedido de Vendas com uma resposta; se você concordar, a promoção é baixada, se não, continua vigente.\n• Promoções: criar (sempre para um plano), reformular as rejeitadas pela Contabilidade, ou Dar baixa em uma vigente ou rejeitada (com motivo).\n• Imprimir ▾: ficha, parecer, pedido de baixa, resposta ao pedido e comprovante de baixa.\nA data de fim não pode ter passado.
 PT	ayuda.PromocionesContabilidadForm.titulo	Revisão contábil (Contabilidade, PN03)
@@ -7280,3 +7276,79 @@ PT	msg.promo.bajaya_pendiente	A promoção '{0}' já tem um pedido de baixa pend
 PT	col.promo.promocion	Promoção
 PT	col.promo.solicitadapor	Solicitada por
 PT	col.promo.bajasolicitada	Baixa solicitada
+ES	err.bll.prenda.reingreso_requiere_inspeccion	Una prenda devuelta por un cliente solo vuelve a Disponible desde la Inspección de Devolución, no directamente.
+EN	err.bll.prenda.reingreso_requiere_inspeccion	A garment returned by a customer can only go back to Available from the Return Inspection, not directly.
+RU	err.bll.prenda.reingreso_requiere_inspeccion	Вещь, возвращённую клиентом, можно вернуть в статус «Доступна» только через инспекцию возврата, а не напрямую.
+PT	err.bll.prenda.reingreso_requiere_inspeccion	Uma peça devolvida por um cliente só volta a Disponível pela Inspeção de Devolução, não diretamente.
+ES	err.bll.insp.reingreso_fuera_de_cola	La prenda '{0}' no está pendiente de inspección: no viene de una devolución o ya se resolvió.
+EN	err.bll.insp.reingreso_fuera_de_cola	Garment '{0}' is not pending inspection: it did not come from a return or it was already resolved.
+RU	err.bll.insp.reingreso_fuera_de_cola	Вещь «{0}» не ожидает инспекции: она поступила не по возврату или уже обработана.
+PT	err.bll.insp.reingreso_fuera_de_cola	A peça '{0}' não está pendente de inspeção: não veio de uma devolução ou já foi resolvida.
+ES	err.prenda.eninspeccion	La prenda volvió de un cliente: se resuelve desde la Inspección de Devolución (reingreso o baja con cargo).
+EN	err.prenda.eninspeccion	The garment came back from a customer: it is resolved from the Return Inspection (re-entry or retirement with a charge).
+RU	err.prenda.eninspeccion	Вещь вернулась от клиента: решение принимается в инспекции возврата (возврат в оборот или списание с начислением).
+PT	err.prenda.eninspeccion	A peça voltou de um cliente: é resolvida na Inspeção de Devolução (reingresso ou baixa com cobrança).
+ES	err.bll.contratacion.resuelve_el_vendedor	Quien registró la contratación no puede resolverla en Caja: lo hace otra persona de Caja.
+EN	err.bll.contratacion.resuelve_el_vendedor	Whoever registered the contract cannot resolve it at the Cashier: another Cashier user does it.
+RU	err.bll.contratacion.resuelve_el_vendedor	Тот, кто оформил договор, не может провести его через кассу: это делает другой сотрудник кассы.
+PT	err.bll.contratacion.resuelve_el_vendedor	Quem registrou a contratação não pode resolvê-la no Caixa: isso é feito por outra pessoa do Caixa.
+ES	lbl.contr.registraste	Registraste esta contratación: la tiene que resolver otra persona de Caja.
+EN	lbl.contr.registraste	You registered this contract: another Cashier user has to resolve it.
+RU	lbl.contr.registraste	Вы оформили этот договор: его должен провести другой сотрудник кассы.
+PT	lbl.contr.registraste	Você registrou esta contratação: outra pessoa do Caixa precisa resolvê-la.
+ES	promocion.ingresoriesgo	Ingreso en riesgo:
+EN	promocion.ingresoriesgo	Revenue at risk:
+RU	promocion.ingresoriesgo	Доход под риском:
+PT	promocion.ingresoriesgo	Receita em risco:
+ES	promocion.tasaretencion	Retención esperada %:
+EN	promocion.tasaretencion	Expected retention %:
+RU	promocion.tasaretencion	Ожидаемое удержание %:
+PT	promocion.tasaretencion	Retenção esperada %:
+ES	col.promo.tasaretencion	Retención %
+EN	col.promo.tasaretencion	Retention %
+RU	col.promo.tasaretencion	Удержание %
+PT	col.promo.tasaretencion	Retenção %
+ES	doc.promo.retencionesperada	de retención esperada
+EN	doc.promo.retencionesperada	expected retention
+RU	doc.promo.retencionesperada	ожидаемого удержания
+PT	doc.promo.retencionesperada	de retenção esperada
+ES	promo.analisis.calc.beneficiotasa	Beneficio estimado (sugerencia de Gerencia): {0:C2} = ingreso mensual en riesgo {1:C2} × retención esperada {2:0.##} %
+EN	promo.analisis.calc.beneficiotasa	Estimated benefit (Management suggestion): {0:C2} = monthly revenue at risk {1:C2} × expected retention {2:0.##} %
+RU	promo.analisis.calc.beneficiotasa	Ожидаемая выгода (предложение руководства): {0:C2} = ежемесячный доход под риском {1:C2} × ожидаемое удержание {2:0.##} %
+PT	promo.analisis.calc.beneficiotasa	Benefício estimado (sugestão da Gerência): {0:C2} = receita mensal em risco {1:C2} × retenção esperada {2:0.##} %
+ES	err.bll.sugerenciapromocion.tasa_invalida	La tasa de retención esperada debe ser mayor a 0 y hasta 100 %.
+EN	err.bll.sugerenciapromocion.tasa_invalida	The expected retention rate must be greater than 0 and up to 100 %.
+RU	err.bll.sugerenciapromocion.tasa_invalida	Ожидаемая доля удержания должна быть больше 0 и не выше 100 %.
+PT	err.bll.sugerenciapromocion.tasa_invalida	A taxa de retenção esperada deve ser maior que 0 e até 100 %.
+ES	doc.promo.resultado.titulo	Resultado de las promociones (vigencia contra el período anterior de igual duración):
+EN	doc.promo.resultado.titulo	Promotion results (active period against the previous period of the same length):
+RU	doc.promo.resultado.titulo	Результаты акций (период действия против предыдущего периода той же длительности):
+PT	doc.promo.resultado.titulo	Resultado das promoções (vigência contra o período anterior de mesma duração):
+ES	doc.promo.resultado.sindatos	No hay promociones vigentes, dadas de baja o vencidas en el período.
+EN	doc.promo.resultado.sindatos	There are no active, withdrawn or expired promotions in the period.
+RU	doc.promo.resultado.sindatos	В периоде нет действующих, снятых или истёкших акций.
+PT	doc.promo.resultado.sindatos	Não há promoções vigentes, baixadas ou vencidas no período.
+ES	doc.promo.resultado.promo	   • {0} ({1}) — plan {2} — vigencia {3:d} al {4:d} ({5} día(s)); antes: {6:d} al {7:d}
+EN	doc.promo.resultado.promo	   • {0} ({1}) — plan {2} — active {3:d} to {4:d} ({5} day(s)); before: {6:d} to {7:d}
+RU	doc.promo.resultado.promo	   • {0} ({1}) — тариф {2} — действует с {3:d} по {4:d} ({5} дн.); до этого: с {6:d} по {7:d}
+PT	doc.promo.resultado.promo	   • {0} ({1}) — plano {2} — vigência {3:d} a {4:d} ({5} dia(s)); antes: {6:d} a {7:d}
+ES	doc.promo.resultado.movimientos	      Bajas {0} (antes {1}, {2:+0;-0;0}) · Pausas {3} (antes {4}, {5:+0;-0;0}) · Renovaciones {6} (antes {7}, {8:+0;-0;0})
+EN	doc.promo.resultado.movimientos	      Cancellations {0} (before {1}, {2:+0;-0;0}) · Pauses {3} (before {4}, {5:+0;-0;0}) · Renewals {6} (before {7}, {8:+0;-0;0})
+RU	doc.promo.resultado.movimientos	      Отказы {0} (до {1}, {2:+0;-0;0}) · Паузы {3} (до {4}, {5:+0;-0;0}) · Продления {6} (до {7}, {8:+0;-0;0})
+PT	doc.promo.resultado.movimientos	      Baixas {0} (antes {1}, {2:+0;-0;0}) · Pausas {3} (antes {4}, {5:+0;-0;0}) · Renovações {6} (antes {7}, {8:+0;-0;0})
+ES	doc.promo.resultado.esperada	esperada {0:0.##} %
+EN	doc.promo.resultado.esperada	expected {0:0.##} %
+RU	doc.promo.resultado.esperada	ожидалось {0:0.##} %
+PT	doc.promo.resultado.esperada	esperada {0:0.##} %
+ES	doc.promo.resultado.sinesperada	sin tasa esperada (alta manual)
+EN	doc.promo.resultado.sinesperada	no expected rate (manual entry)
+RU	doc.promo.resultado.sinesperada	без ожидаемой доли (создана вручную)
+PT	doc.promo.resultado.sinesperada	sem taxa esperada (cadastro manual)
+ES	doc.promo.resultado.retencion	      Clientes con la renovación en juego: {0}; retenidos: {1} ({2:0.##} %, {3})
+EN	doc.promo.resultado.retencion	      Customers with their renewal at stake: {0}; retained: {1} ({2:0.##} %, {3})
+RU	doc.promo.resultado.retencion	      Клиентов с решением о продлении: {0}; удержано: {1} ({2:0.##} %, {3})
+PT	doc.promo.resultado.retencion	      Clientes com a renovação em jogo: {0}; retidos: {1} ({2:0.##} %, {3})
+ES	doc.promo.resultado.sinjuego	      Ningún cliente del plan tuvo la renovación en juego durante la vigencia ({0}).
+EN	doc.promo.resultado.sinjuego	      No customer of the plan had their renewal at stake during the active period ({0}).
+RU	doc.promo.resultado.sinjuego	      Ни у одного клиента тарифа не было решения о продлении в период действия ({0}).
+PT	doc.promo.resultado.sinjuego	      Nenhum cliente do plano teve a renovação em jogo durante a vigência ({0}).

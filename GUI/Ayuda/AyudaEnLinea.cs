@@ -124,7 +124,8 @@ namespace GUI.Ayuda
             ["SugerirPromocionForm"] = new TemaAyuda("Sugerir promoción (Gerencia, PN03)",
                 "1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.\n" +
                 "2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.\n" +
-                "3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia."),
+                "3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.\n" +
+                "4. La retención esperada (30 % por defecto) define el beneficio estimado: ingreso en riesgo × retención. El reporte incluye el Resultado de las promociones: bajas, pausas y renovaciones del plan durante la vigencia contra el período anterior, y la retención real contra la esperada."),
 
             ["PromocionesAdministracionForm"] = new TemaAyuda("Promociones (Administración Comercial, PN03)",
                 "• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).\n" +

@@ -19,8 +19,11 @@ namespace GUI
             this.cmbPlan = new System.Windows.Forms.ComboBox();
             this.lblTipoDescuento = new System.Windows.Forms.Label();
             this.cmbTipoDescuento = new System.Windows.Forms.ComboBox();
-            this.lblBeneficioEstimado = new System.Windows.Forms.Label();
-            this.numBeneficioEstimado = new System.Windows.Forms.NumericUpDown();
+            this.lblIngresoEnRiesgo = new System.Windows.Forms.Label();
+            this.numIngresoEnRiesgo = new System.Windows.Forms.NumericUpDown();
+            this.lblTasaRetencion = new System.Windows.Forms.Label();
+            this.numTasaRetencion = new System.Windows.Forms.NumericUpDown();
+            this.lblBeneficioCalculado = new System.Windows.Forms.Label();
             this.lblMotivo = new System.Windows.Forms.Label();
             this.txtMotivo = new System.Windows.Forms.TextBox();
             this.btnEnviar = new System.Windows.Forms.Button();
@@ -32,7 +35,8 @@ namespace GUI
             this.dgvSugerencias = new System.Windows.Forms.DataGridView();
             this.panelStatus = new System.Windows.Forms.Panel();
             this.lblMensaje = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.numBeneficioEstimado)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numIngresoEnRiesgo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numTasaRetencion)).BeginInit();
             this.panelStatus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSugerencias)).BeginInit();
             this.SuspendLayout();
@@ -72,24 +76,51 @@ namespace GUI
             this.cmbTipoDescuento.Size = new System.Drawing.Size(160, 21);
             this.cmbTipoDescuento.TabIndex = 5;
             //
-            // lblBeneficioEstimado
+            // lblIngresoEnRiesgo
             //
-            this.lblBeneficioEstimado.Location = new System.Drawing.Point(16, 80);
-            this.lblBeneficioEstimado.Name = "lblBeneficioEstimado";
-            this.lblBeneficioEstimado.Size = new System.Drawing.Size(90, 23);
-            this.lblBeneficioEstimado.TabIndex = 6;
-            this.lblBeneficioEstimado.Tag = "promocion.beneficioestimado";
-            this.lblBeneficioEstimado.Text = "Beneficio est.:";
-            this.lblBeneficioEstimado.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblIngresoEnRiesgo.Location = new System.Drawing.Point(16, 80);
+            this.lblIngresoEnRiesgo.Name = "lblIngresoEnRiesgo";
+            this.lblIngresoEnRiesgo.Size = new System.Drawing.Size(90, 23);
+            this.lblIngresoEnRiesgo.TabIndex = 6;
+            this.lblIngresoEnRiesgo.Tag = "promocion.ingresoriesgo";
+            this.lblIngresoEnRiesgo.Text = "Ingreso en riesgo:";
+            this.lblIngresoEnRiesgo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
-            // numBeneficioEstimado
+            // numIngresoEnRiesgo
             //
-            this.numBeneficioEstimado.DecimalPlaces = 2;
-            this.numBeneficioEstimado.Location = new System.Drawing.Point(112, 78);
-            this.numBeneficioEstimado.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
-            this.numBeneficioEstimado.Name = "numBeneficioEstimado";
-            this.numBeneficioEstimado.Size = new System.Drawing.Size(120, 20);
-            this.numBeneficioEstimado.TabIndex = 7;
+            this.numIngresoEnRiesgo.DecimalPlaces = 2;
+            this.numIngresoEnRiesgo.Location = new System.Drawing.Point(112, 78);
+            this.numIngresoEnRiesgo.Maximum = new decimal(new int[] { 10000000, 0, 0, 0 });
+            this.numIngresoEnRiesgo.Name = "numIngresoEnRiesgo";
+            this.numIngresoEnRiesgo.Size = new System.Drawing.Size(120, 20);
+            this.numIngresoEnRiesgo.TabIndex = 7;
+            this.numIngresoEnRiesgo.ValueChanged += new System.EventHandler(this.ActualizarBeneficio);
+            //
+            // lblTasaRetencion
+            //
+            this.lblTasaRetencion.Location = new System.Drawing.Point(240, 80);
+            this.lblTasaRetencion.Name = "lblTasaRetencion";
+            this.lblTasaRetencion.Size = new System.Drawing.Size(120, 23);
+            this.lblTasaRetencion.Tag = "promocion.tasaretencion";
+            this.lblTasaRetencion.Text = "Retención esperada %:";
+            this.lblTasaRetencion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // numTasaRetencion
+            //
+            this.numTasaRetencion.Location = new System.Drawing.Point(362, 78);
+            this.numTasaRetencion.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.numTasaRetencion.Maximum = new decimal(new int[] { 100, 0, 0, 0 });
+            this.numTasaRetencion.Value = new decimal(new int[] { 30, 0, 0, 0 });
+            this.numTasaRetencion.Name = "numTasaRetencion";
+            this.numTasaRetencion.Size = new System.Drawing.Size(70, 20);
+            this.numTasaRetencion.TabIndex = 8;
+            this.numTasaRetencion.ValueChanged += new System.EventHandler(this.ActualizarBeneficio);
+            //
+            // lblBeneficioCalculado
+            //
+            this.lblBeneficioCalculado.Location = new System.Drawing.Point(452, 140);
+            this.lblBeneficioCalculado.Name = "lblBeneficioCalculado";
+            this.lblBeneficioCalculado.Size = new System.Drawing.Size(232, 34);
             //
             // lblMotivo
             //
@@ -233,8 +264,11 @@ namespace GUI
             this.AcceptButton = this.btnEnviar;
             this.Controls.Add(this.txtMotivo);
             this.Controls.Add(this.lblMotivo);
-            this.Controls.Add(this.numBeneficioEstimado);
-            this.Controls.Add(this.lblBeneficioEstimado);
+            this.Controls.Add(this.numIngresoEnRiesgo);
+            this.Controls.Add(this.lblIngresoEnRiesgo);
+            this.Controls.Add(this.lblTasaRetencion);
+            this.Controls.Add(this.numTasaRetencion);
+            this.Controls.Add(this.lblBeneficioCalculado);
             this.Controls.Add(this.cmbTipoDescuento);
             this.Controls.Add(this.lblTipoDescuento);
             this.Controls.Add(this.cmbPlan);
@@ -247,7 +281,8 @@ namespace GUI
             this.Tag = "frm.sugerirpromocion";
             this.Text = "Sugerir Promoción a Administración";
             this.Load += new System.EventHandler(this.SugerirPromocionForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.numBeneficioEstimado)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numIngresoEnRiesgo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numTasaRetencion)).EndInit();
             this.panelStatus.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSugerencias)).EndInit();
             this.ResumeLayout(false);
@@ -260,8 +295,11 @@ namespace GUI
         private System.Windows.Forms.ComboBox cmbPlan;
         private System.Windows.Forms.Label lblTipoDescuento;
         private System.Windows.Forms.ComboBox cmbTipoDescuento;
-        private System.Windows.Forms.Label lblBeneficioEstimado;
-        private System.Windows.Forms.NumericUpDown numBeneficioEstimado;
+        private System.Windows.Forms.Label lblIngresoEnRiesgo;
+        private System.Windows.Forms.NumericUpDown numIngresoEnRiesgo;
+        private System.Windows.Forms.Label lblTasaRetencion;
+        private System.Windows.Forms.NumericUpDown numTasaRetencion;
+        private System.Windows.Forms.Label lblBeneficioCalculado;
         private System.Windows.Forms.Label lblMotivo;
         private System.Windows.Forms.TextBox txtMotivo;
         private System.Windows.Forms.Button btnEnviar;

@@ -16,6 +16,24 @@ namespace BE
         public string Motivo { get; set; }
         public TipoDescuento TipoDescuentoSugerido { get; set; }
         public decimal BeneficioEstimado { get; set; }
+
+        /// <summary>
+        /// Porcentaje (0-100] de los clientes en riesgo que Gerencia espera que la promoción retenga.
+        /// El beneficio estimado es el ingreso mensual en riesgo × TasaRetencion / 100: la promoción
+        /// ya no supone que retiene a todos, y el supuesto queda explícito para Contabilidad.
+        /// Las sugerencias anteriores a la tasa quedaron con 100 (era lo que suponían).
+        /// </summary>
+        public decimal TasaRetencion { get; set; } = TasaRetencionPorDefecto;
+
+        public const decimal TasaRetencionPorDefecto = 30m;
+
+        /// <summary>Beneficio mensual estimado: ingreso en riesgo × tasa de retención / 100.</summary>
+        public static decimal CalcularBeneficio(decimal ingresoMensualEnRiesgo, decimal tasaRetencion) =>
+            Math.Round(ingresoMensualEnRiesgo * tasaRetencion / 100m, 2);
+
+        /// <summary>Ingreso mensual en riesgo del que partió el beneficio (lo inverso de CalcularBeneficio).</summary>
+        public decimal IngresoEnRiesgo() => TasaRetencion > 0 ? Math.Round(BeneficioEstimado * 100m / TasaRetencion, 2) : 0m;
+
         public EstadoSugerencia Estado { get; set; } = EstadoSugerencia.Pendiente;
         public DateTime FechaAlta { get; set; }
 

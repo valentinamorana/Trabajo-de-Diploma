@@ -20,7 +20,7 @@ namespace BE
         public const string Caja              = "mnuCaja";
         public const string RenovacionSuscripcion = "mnuRenovacionSuscripcion";
 
-        // PN03 — Métricas, promociones y toma de decisiones.
+        // PN03 — Evaluar y aplicar promociones comerciales.
         public const string SugerenciaPromocion   = "mnuSugerenciaPromocion";
         public const string PromocionesAdmin      = "mnuPromocionesAdmin";
         public const string PromocionesContable   = "mnuPromocionesContable";

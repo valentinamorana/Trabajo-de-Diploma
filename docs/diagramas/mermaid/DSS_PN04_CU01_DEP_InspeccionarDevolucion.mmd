@@ -24,8 +24,13 @@ sequenceDiagram
   alt Desgaste normal: Aprobar reingreso
     D->>F: Pulsa "Aprobar reingreso" y confirma
     F->>IN: AprobarReingreso(modulo, prenda)
-    IN->>PB: CambiarEstado(modulo, prenda, Disponible)
-    Note over PB: Exigir(StockEditar) · una prenda En limpieza solo se da de baja desde la Inspección
+    IN->>PB: ObtenerEnLimpieza()  [¿la prenda está en la cola de inspección?]
+    alt No está pendiente de inspección
+      IN-->>F: AppException(reingreso_fuera_de_cola)
+      F-->>D: Informa el motivo
+    end
+    IN->>PB: ReingresarInspeccionada(modulo, prenda)
+    Note over PB: Exigir(StockEditar) · una prenda devuelta solo sale de limpieza por la Inspección (Prendas → Estado la rechaza)
     PB->>PR: ControlarEstado(Disponible)
     Note over PR: Patrón State: EstadoEnLimpieza permite EnLimpieza → Disponible
     PR-->>PB: true

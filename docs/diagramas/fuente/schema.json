@@ -1,5 +1,5 @@
 {
- "bdHash": "832cf7024a9ca5865dd5aee623d1e23a8d06178b",
+ "bdHash": "dbb87d2bac4f4c472b2abb7d0500cc53a0a4407f",
  "cols": [
   {
    "tabla": "Bitacora",
@@ -3313,6 +3313,17 @@
    "ident": false
   },
   {
+   "tabla": "SugerenciaPromocion",
+   "ord": 13,
+   "col": "TasaRetencion",
+   "tipo": "decimal",
+   "len": 5,
+   "prec": 5,
+   "sc": 2,
+   "nulo": false,
+   "ident": false
+  },
+  {
    "tabla": "Traduccion",
    "ord": 1,
    "col": "IdControl",
@@ -3741,16 +3752,16 @@
    "col": "IdListaEspera"
   },
   {
+   "tabla": "Usuario_Seguridad",
+   "col": "IdUsuario"
+  },
+  {
    "tabla": "PedidoFaltante",
    "col": "IdPedido"
   },
   {
    "tabla": "PedidoFaltante",
    "col": "IdPrenda"
-  },
-  {
-   "tabla": "Usuario_Seguridad",
-   "col": "IdUsuario"
   },
   {
    "tabla": "Contratacion",
@@ -4187,7 +4198,7 @@
    "colpadre": "IdPrenda"
   },
   {
-   "fk": "FK__PedidoFal__IdPre__2EA5EC27",
+   "fk": "FK__PedidoFal__IdPre__308E3499",
    "hija": "PedidoFaltanteAlternativa",
    "colhija": "IdPrendaAlternativa",
    "padre": "Prenda",

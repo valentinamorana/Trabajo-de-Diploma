@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio para PN03 — Métricas, promociones y toma de decisiones.
+    /// Lógica de negocio para PN03 — Evaluar y aplicar promociones comerciales.
     ///
     /// Cada método público corresponde a una actividad del diagrama de actividad aprobado de PN03
     /// (carriles Gerencia, Administración, Contabilidad y Vendedor) y cada decisión tiene su guarda:
@@ -252,6 +252,7 @@ namespace BLL
                 var sugerencia = dalSugerencia.ObtenerPorId(promocion.IdSugerenciaOrigen.Value);
                 analisis.BeneficioEstimadoSugerencia = sugerencia?.BeneficioEstimado;
                 analisis.OrigenSugerencia = sugerencia?.OrigenMetrica;
+                analisis.TasaRetencionSugerencia = sugerencia?.TasaRetencion;
             }
             ProyectarCostoDelDescuento(analisis);
             return analisis;

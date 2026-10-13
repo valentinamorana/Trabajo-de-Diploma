@@ -126,21 +126,23 @@ module.exports = [
 
   // ───────────── PN03 ─────────────
   {
-    tipo: 'clases', id: 'CLASES_pn03_promociones', procesos: ['PN03'], titulo: 'Diagrama de clases — PN03 Métricas, promociones y toma de decisiones', columnas: 3,
+    tipo: 'clases', id: 'CLASES_pn03_promociones', procesos: ['PN03'], titulo: 'Diagrama de clases — PN03 Evaluar y aplicar promociones comerciales', columnas: 3,
     // Diagrama de actividad aprobado: una clase de BLL por carril, un método por actividad y los
     // objetos del flujo (reporte, sugerencia, dictamen, solicitud/resolución de baja, historial).
     clases: [
-      E('BE.ReporteMetricas', { attrs: 'all', metodos: ['HayOportunidad'] }), E('BE.CandidataSugerencia', { attrs: ['Origen', 'IdPlan', 'CategoriaPrenda', 'Motivo', 'BeneficioEstimado'] }),
-      E('BE.SugerenciaPromocion', { attrs: 'all', metodos: ['PuedeEvaluarse', 'TransicionValida'] }),
-      E('BE.Promocion', { attrs: 'all', metodos: ['EstaVigente', 'DebeVencer', 'PuedeDictaminarla', 'PuedeReformularse', 'PuedeDescartarse', 'PuedeSolicitarseBaja', 'PuedeResolverseBaja', 'PuedeDesactivarseDirecto', 'SeSuperponeCon', 'TransicionValida'] }),
+      E('BE.ReporteMetricas', { attrs: 'all', metodos: ['HayOportunidad'] }), E('BE.CandidataSugerencia', { attrs: ['Origen', 'IdPlan', 'Motivo', 'ClientesEnRiesgo', 'IngresoMensualEnRiesgo', 'TasaRetencion', 'BeneficioEstimado'] }),
+      E('BE.SugerenciaPromocion', { attrs: 'all', metodos: ['CalcularBeneficio', 'IngresoEnRiesgo', 'PuedeEvaluarse', 'TransicionValida'] }),
+      E('BE.Promocion', { attrs: 'all', metodos: ['EstaVigente', 'DebeVencer', 'PuedeDictaminarla', 'PuedeReformularse', 'PuedeSolicitarseBaja', 'PuedeDarseDeBaja', 'SeSuperponeCon', 'TransicionValida'] }),
       E('BE.PromocionHistorial', { attrs: 'all' }), E('BE.DictamenContable', { attrs: 'all' }), E('BE.SolicitudBajaPromocion', { attrs: 'all' }),
       E('BE.AnalisisImpactoPromocion', { attrs: 'all' }),
-      E('BLL.AnalisisPromociones', { metodos: ['AnalizarMetricas', 'HayOportunidad'] }),
+      E('BE.ResultadoPromocion', { attrs: 'all', metodos: ['Contar', 'CalcularRetencion', 'RetuvoClientes', 'CumplioRetencionEsperada'] }),
+      E('BE.ConteoMovimientos', { attrs: 'all' }), E('BE.DecisionRenovacion', { attrs: 'all' }),
+      E('BLL.AnalisisPromociones', { metodos: ['AnalizarMetricas', 'HayOportunidad', 'ResultadoPromociones'] }),
       E('BLL.SugerenciaPromocion', { metodos: ['RegistrarSugerencia', 'DescartarSugerencia', 'ObtenerPendientes'] }),
       E('BLL.Promocion', { metodos: ['CrearDesdeSugerencia', 'CrearManual', 'ValidarPromocion', 'AnalizarMargenEImpacto', 'PuedeDictaminar', 'AprobarContable', 'RechazarContable',
-                                     'Reformular', 'DescartarPromocion', 'SolicitarBaja', 'AprobarBaja', 'RechazarBaja', 'Desactivar', 'CerrarVencidas'] }),
-      E('IPromocionDAL', { metodos: ['Alta', 'Reformular', 'CambiarEstado', 'Dictaminar', 'SolicitarBaja', 'ResolverBaja', 'ObtenerHistorial'] }),
-      E('ISugerenciaPromocionDAL', { metodos: ['Alta', 'MarcarEvaluada', 'ReabrirEvaluacion', 'Descartar'] }),
+                                     'Reformular', 'DarDeBaja', 'SolicitarBaja', 'AtenderSolicitud', 'CerrarVencidas'] }),
+      E('IPromocionDAL', { metodos: ['Alta', 'Reformular', 'CambiarEstado', 'Dictaminar', 'DarDeBaja', 'SolicitarBaja', 'AtenderSolicitud', 'ObtenerHistorial', 'ObtenerDecisionesDelPlan'] }),
+      E('ISugerenciaPromocionDAL', { metodos: ['Alta', 'ObtenerPorId', 'MarcarEvaluada', 'ReabrirEvaluacion', 'Descartar'] }),
       E('BLL.AnalisisRotacion', { metodos: [] }), E('IPlanSuscripcionDAL', { metodos: [] }),
       E('BLL.ReporteVentasVendedor', { metodos: [] }), E('BLL.AnalisisMantenimiento', { metodos: [] }), E('BLL.AnalisisEscasez', { metodos: [] }), E('BLL.RecomendacionPrendas', { metodos: [] }),
       E('IPedidoDAL', { metodos: [] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }), E('IMantenimientoPrendaDAL', { metodos: [] })
@@ -158,7 +160,7 @@ module.exports = [
 
   // ───────────── PN04 ─────────────
   {
-    tipo: 'clases', id: 'CLASES_pn04_devolucion', procesos: ['PN04'], titulo: 'Diagrama de clases — PN04 Inspección de devolución', columnas: 3,
+    tipo: 'clases', id: 'CLASES_pn04_devolucion', procesos: ['PN04'], titulo: 'Diagrama de clases — PN04 Inspeccionar prendas devueltas', columnas: 3,
     clases: [
       E('BE.Prenda', { attrs: 'all', metodos: ['ControlarEstado', 'PuedeReportarsePerdida'] }), E('BE.MantenimientoPrenda', { attrs: 'all' }), E('BE.CargoPrenda', { attrs: 'all' }),
       E('BE.Cliente', { attrs: ['IdCliente', 'Nombre', 'Apellido'] }),

@@ -61,7 +61,8 @@ namespace Tests
             Assert.AreEqual(1, ctx.DalSugerencia.UltimoAlta.IdPlan);
             Assert.AreEqual("Motivo válido", ctx.DalSugerencia.UltimoAlta.Motivo);
             Assert.AreEqual(BE.TipoDescuento.Porcentaje, ctx.DalSugerencia.UltimoAlta.TipoDescuentoSugerido);
-            Assert.AreEqual(100m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado);
+            Assert.AreEqual(30m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado, "Ingreso en riesgo $100 × retención por defecto 30 %.");
+            Assert.AreEqual(30m, ctx.DalSugerencia.UltimoAlta.TasaRetencion, "Guarda la tasa de retención.");
             Assert.AreEqual(BE.EstadoSugerencia.Pendiente, ctx.DalSugerencia.UltimoAlta.Estado);
             Assert.AreEqual(BE.OrigenMetrica.Abandono, ctx.DalSugerencia.UltimoAlta.OrigenMetrica, "Guarda el origen de la métrica.");
             Assert.AreEqual(1, ctx.DalSugerencia.UltimoAlta.IdUsuarioAlta, "Guarda quién la registró.");
@@ -140,6 +141,39 @@ namespace Tests
             catch (BE.AppException ex)
             {
                 Assert.AreEqual("err.bll.sugerenciapromocion.motivo_requerido", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalSugerencia.AltaVeces);
+        }
+
+        // PN03 — beneficio estimado = ingreso mensual en riesgo × tasa de retención esperada / 100.
+        [TestMethod]
+        public void RegistrarSugerencia_ConTasaDeRetencion_CalculaElBeneficioYGuardaLaTasa()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.Crear().RegistrarSugerencia("Test", BE.OrigenMetrica.Abandono, 1, "Motivo", BE.TipoDescuento.Porcentaje, 16000m, 25m);
+
+            Assert.AreEqual(4000m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado);
+            Assert.AreEqual(25m, ctx.DalSugerencia.UltimoAlta.TasaRetencion);
+            Assert.AreEqual(16000m, ctx.DalSugerencia.UltimoAlta.IngresoEnRiesgo());
+        }
+
+        [TestMethod]
+        public void RegistrarSugerencia_TasaFueraDeRango_LanzaTasaInvalida()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            foreach (var tasa in new[] { 0m, -5m, 100.01m })
+            {
+                try
+                {
+                    ctx.Crear().RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 1000m, tasa);
+                    Assert.Fail($"Debía exigir una tasa de retención en (0, 100] (probó {tasa}).");
+                }
+                catch (BE.AppException ex)
+                {
+                    Assert.AreEqual("err.bll.sugerenciapromocion.tasa_invalida", ex.Clave);
+                }
             }
             Assert.AreEqual(0, ctx.DalSugerencia.AltaVeces);
         }

@@ -81,6 +81,41 @@ namespace DAL
             return lista;
         }
 
+        public List<BE.DecisionRenovacion> ObtenerDecisionesDelPlan(int idPlan, DateTime desde, DateTime hastaExcl)
+        {
+            SqlParameter[] p =
+            {
+                new SqlParameter("@IdPlan", SqlDbType.Int) { Value = idPlan },
+                new SqlParameter("@Desde", desde),
+                new SqlParameter("@HastaExcl", hastaExcl)
+            };
+            var lista = new List<BE.DecisionRenovacion>();
+            try
+            {
+                // Renovación de N01 resuelta sobre el plan (1 Renovada, 3 Baja, 4 Pausada) + recontratación
+                // del mismo plan cobrada en Caja (PN02) por un cliente que ya lo había pagado antes.
+                DataTable t = acceso.Leer(
+                    "SELECT IdCliente, FechaResolucion AS Fecha, Resultado FROM HistorialRenovacion " +
+                    "WHERE IdPlanAnterior = @IdPlan AND Resultado IN (1, 3, 4) " +
+                    "  AND FechaResolucion >= @Desde AND FechaResolucion < @HastaExcl " +
+                    "UNION ALL " +
+                    "SELECT c.IdCliente, c.FechaComprobante, 1 FROM Contratacion c " +
+                    "WHERE c.Estado = 1 AND c.IdPlan = @IdPlan " +
+                    "  AND c.FechaComprobante >= @Desde AND c.FechaComprobante < @HastaExcl " +
+                    "  AND EXISTS (SELECT 1 FROM Contratacion a WHERE a.IdCliente = c.IdCliente AND a.IdPlan = c.IdPlan " +
+                    "              AND a.Estado = 1 AND a.FechaComprobante < c.FechaComprobante)", p);
+                foreach (DataRow r in t.Rows)
+                    lista.Add(new BE.DecisionRenovacion
+                    {
+                        IdCliente = Convert.ToInt32(r["IdCliente"]),
+                        Fecha     = Convert.ToDateTime(r["Fecha"]),
+                        Resultado = (BE.EstadoRenovacion)Convert.ToInt32(r["Resultado"])
+                    });
+            }
+            catch (Exception ex) { throw new Exception("Error al obtener las decisiones de suscripción del plan.", ex); }
+            return lista;
+        }
+
         public List<BE.Promocion> ObtenerPendientesRevisionContable() =>
             Listar(SELECT_BASE + "WHERE p.Estado = 0 ORDER BY p.FechaAlta",
                    "Error al obtener las promociones pendientes de revisión contable.");

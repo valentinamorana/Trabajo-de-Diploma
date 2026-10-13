@@ -9,6 +9,7 @@ namespace BLL
     ///
     ///   Analizar métricas («Reporte de métricas») ........ AnalizarMetricas
     ///   ¿Hay oportunidad? (No → fin "Sin promoción") ..... HayOportunidad
+    ///   Evaluar resultado de la promoción (sección del reporte) .. ResultadoPromociones
     ///
     /// Cruza los reportes del negocio con la sugerencia de promociones:
     ///   · Abandono por plan: clientes en riesgo de irse → promoción de retención por plan.
@@ -31,18 +32,25 @@ namespace BLL
         private readonly Interfaces.IAnalisisRotacionService rotacion;
         private readonly Interfaces.IAnalisisAbandonoService abandono;
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
-        private readonly DAL.Interfaces.IPromocionDAL dalPromocion;   // null: sin impacto de promociones
+        private readonly DAL.Interfaces.IPromocionDAL dalPromocion;   // null: sin impacto ni resultado de promociones
+        private readonly DAL.Interfaces.ISugerenciaPromocionDAL dalSugerencia;   // null: sin tasa esperada
+        private readonly Func<DateTime> hoy;
         private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
 
         public AnalisisPromociones()
-            : this(new AnalisisRotacion(), new AnalisisAbandono(), new DAL.PlanSuscripcion(), new DAL.Promocion()) { }
+            : this(new AnalisisRotacion(), new AnalisisAbandono(), new DAL.PlanSuscripcion(), new DAL.Promocion(),
+                   new DAL.SugerenciaPromocion()) { }
 
         public AnalisisPromociones(Interfaces.IAnalisisRotacionService rotacion,
                                    Interfaces.IAnalisisAbandonoService abandono,
                                    DAL.Interfaces.IPlanSuscripcionDAL dalPlan,
-                                   DAL.Interfaces.IPromocionDAL dalPromocion = null)
+                                   DAL.Interfaces.IPromocionDAL dalPromocion = null,
+                                   DAL.Interfaces.ISugerenciaPromocionDAL dalSugerencia = null,
+                                   Func<DateTime> hoy = null)
         {
             this.dalPromocion = dalPromocion;
+            this.dalSugerencia = dalSugerencia;
+            this.hoy = hoy ?? (() => DateTime.Today);
             this.rotacion = rotacion ?? throw new ArgumentNullException(nameof(rotacion));
             this.abandono = abandono ?? throw new ArgumentNullException(nameof(abandono));
             this.dalPlan  = dalPlan  ?? throw new ArgumentNullException(nameof(dalPlan));
@@ -70,6 +78,7 @@ namespace BLL
                 Desde = inicio,
                 Hasta = fin,
                 ImpactoPromociones = ImpactoPromociones(inicio, fin),
+                ResultadoPromociones = ResultadoPromociones(inicio, fin),
                 AbandonoPorPlan = AbandonoPorPlan(ab, planes),
                 RotacionPorCategoria = RotacionPorCategoria(rot),
                 Oportunidades = Oportunidades(ab, planes)
@@ -96,6 +105,75 @@ namespace BLL
                 System.Diagnostics.Trace.TraceError($"[BLL.AnalisisPromociones] Impacto de promociones: {ex.Message}");
                 return new List<BE.MetricaImpactoPromocion>();
             }
+        }
+
+        // "Evaluar resultado de la promoción": por cada promoción Vigente, Dada de baja o Vencida cuya
+        // vigencia toca el período, compara las bajas, pausas y renovaciones de su plan DURANTE la
+        // vigencia contra un período ANTERIOR de la misma duración, y mide cuántos clientes con la
+        // renovación en juego durante la vigencia se retuvieron (contra la tasa que supuso Gerencia).
+        // Best-effort, como el impacto: si la consulta falla, el reporte sale sin esta sección.
+        public List<BE.ResultadoPromocion> ResultadoPromociones(DateTime desde, DateTime hasta)
+        {
+            var lista = new List<BE.ResultadoPromocion>();
+            if (dalPromocion == null) return lista;
+            try
+            {
+                DateTime hastaExcl = hasta.Date.AddDays(1);
+                foreach (var p in dalPromocion.ObtenerTodas().Where(EsEvaluable))
+                {
+                    var (inicio, fin) = VigenciaReal(p);
+                    if (fin <= inicio || inicio >= hastaExcl || fin <= desde.Date) continue;
+
+                    var r = new BE.ResultadoPromocion
+                    {
+                        IdPromocion = p.IdPromocion, Nombre = p.Nombre, Estado = p.Estado,
+                        IdPlan = p.IdPlan, NombrePlan = p.NombrePlan, Desde = inicio, Hasta = fin,
+                        TasaRetencionEsperada = TasaEsperada(p)
+                    };
+                    var durante = dalPromocion.ObtenerDecisionesDelPlan(p.IdPlan, r.Desde, r.Hasta);
+                    var antes   = dalPromocion.ObtenerDecisionesDelPlan(p.IdPlan, r.AnteriorDesde, r.Desde);
+                    r.Durante = BE.ResultadoPromocion.Contar(durante);
+                    r.Antes   = BE.ResultadoPromocion.Contar(antes);
+                    r.CalcularRetencion(durante);
+                    lista.Add(r);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[BLL.AnalisisPromociones] Resultado de promociones: {ex.Message}");
+            }
+            return lista;
+        }
+
+        private static bool EsEvaluable(BE.Promocion p) =>
+            p.Estado == BE.EstadoPromocion.Vigente || p.Estado == BE.EstadoPromocion.DadaDeBaja
+            || p.Estado == BE.EstadoPromocion.Vencida;
+
+        // Vigencia real [inicio, fin): empieza al aprobarla Contabilidad (no antes de su FechaInicio) y
+        // termina al darla de baja o al vencer (no después de su FechaFin); si sigue Vigente, hoy.
+        private (DateTime inicio, DateTime fin) VigenciaReal(BE.Promocion p)
+        {
+            var historial = dalPromocion.ObtenerHistorial(p.IdPromocion) ?? new List<BE.PromocionHistorial>();
+            var aprobada = historial.Where(h => h.EstadoNuevo == BE.EstadoPromocion.Vigente).Select(h => (DateTime?)h.Fecha.Date).Min();
+            DateTime inicio = aprobada.HasValue && aprobada.Value > p.FechaInicio.Date ? aprobada.Value : p.FechaInicio.Date;
+
+            DateTime finPlanificado = p.FechaFin.Date.AddDays(1);
+            DateTime fin = finPlanificado;
+            if (p.Estado == BE.EstadoPromocion.DadaDeBaja)
+            {
+                var baja = historial.Where(h => h.EstadoNuevo == BE.EstadoPromocion.DadaDeBaja).Select(h => (DateTime?)h.Fecha.Date).Max();
+                if (baja.HasValue) fin = baja.Value.AddDays(1);
+            }
+            DateTime manana = hoy().Date.AddDays(1);
+            if (fin > manana) fin = manana;
+            if (fin > finPlanificado) fin = finPlanificado;
+            return (inicio, fin);
+        }
+
+        private decimal? TasaEsperada(BE.Promocion p)
+        {
+            if (dalSugerencia == null || !p.IdSugerenciaOrigen.HasValue) return null;
+            return dalSugerencia.ObtenerPorId(p.IdSugerenciaOrigen.Value)?.TasaRetencion;
         }
 
         // "¿Hay oportunidad?": el reporte detectó al menos un caso para sugerir.
@@ -146,7 +224,9 @@ namespace BLL
         {
             var candidatas = new List<BE.CandidataSugerencia>();
 
-            // Abandono: clientes en riesgo agrupados por plan (el ingreso mensual en riesgo es el beneficio a proteger).
+            // Abandono: clientes en riesgo agrupados por plan. El beneficio a proteger es la parte del
+            // ingreso mensual en riesgo que la promoción retendría: ingreso × tasa de retención (por
+            // defecto 30 %, Gerencia la ajusta). Antes se tomaba el 100 %.
             foreach (var m in AbandonoPorPlan(ab, planes))
             {
                 candidatas.Add(new BE.CandidataSugerencia
@@ -155,7 +235,8 @@ namespace BLL
                     IdPlan = m.IdPlan,
                     NombrePlan = m.NombrePlan,
                     TipoSugerido = BE.TipoDescuento.Porcentaje,
-                    BeneficioEstimado = m.IngresoMensualEnRiesgo,
+                    ClientesEnRiesgo = m.ClientesEnRiesgo,
+                    IngresoMensualEnRiesgo = m.IngresoMensualEnRiesgo,
                     Motivo = $"Análisis de abandono: {m.ClientesEnRiesgo} cliente(s) del plan {m.NombrePlan} en riesgo de abandono " +
                              $"({m.IngresoMensualEnRiesgo:C2} de ingreso mensual en riesgo).",
                     ClaveMotivo = "promo.cand.abandono",

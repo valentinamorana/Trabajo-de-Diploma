@@ -64,7 +64,10 @@ namespace Tests
                 EsperarError(() => sug.RegistrarSugerencia(Modulo, BE.OrigenMetrica.Manual, 0, "Sin plan", BE.TipoDescuento.Porcentaje, 100m),
                     "err.bll.sugerenciapromocion.plan_requerido");
                 idSugerencia = sug.RegistrarSugerencia(Modulo, BE.OrigenMetrica.Manual, idPlan, "Circuito de 4 roles",
-                    BE.TipoDescuento.Porcentaje, 5000m);
+                    BE.TipoDescuento.Porcentaje, 5000m, 40m);
+                    var guardada = sug.ObtenerPorId(idSugerencia);
+                    Assert.AreEqual(40m, guardada.TasaRetencion, "La tasa de retención se guarda con la sugerencia.");
+                    Assert.AreEqual(2000m, guardada.BeneficioEstimado, "$5000 en riesgo × 40 %.");
 
                 // 2) Administración la acepta y crea la promoción.
                 Entrar("admcomercial", "usuario1!");
@@ -79,6 +82,7 @@ namespace Tests
                 var analisis = new BLL.Promocion().AnalizarMargenEImpacto(idPromo);
                 Assert.IsTrue(analisis.UsuarioPuedeDictaminar);
                 Assert.IsTrue(analisis.MargenCalculable);
+                Assert.AreEqual(40m, analisis.TasaRetencionSugerencia);
                 new BLL.Promocion().AprobarContable(Modulo, Buscar(idPromo), "Margen suficiente");
                 Assert.AreEqual(BE.EstadoPromocion.Vigente, Buscar(idPromo).Estado);
                 EsperarError(() => new BLL.Promocion().DarDeBaja(Modulo, Buscar(idPromo), "no me corresponde"), "err.bll.sin_permiso");

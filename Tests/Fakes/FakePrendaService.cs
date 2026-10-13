@@ -22,6 +22,7 @@ namespace Tests.Fakes
         public void Alta(string modulo, BE.Prenda prenda) { }
         public void Modificar(string modulo, BE.Prenda prenda) { }
         public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado) { }
+        public void ReingresarInspeccionada(string modulo, BE.Prenda prenda) { }
         public (bool Disponible, List<BE.Prenda> NoDisponibles) VerificarDisponibilidad(List<BE.Prenda> seleccion) => (true, new List<BE.Prenda>());
         public List<BE.MantenimientoPrenda> ObtenerHistorialMantenimiento(int idPrenda) => new List<BE.MantenimientoPrenda>();
         public List<BE.MantenimientoPrenda> ObtenerEnMantenimiento() => new List<BE.MantenimientoPrenda>();

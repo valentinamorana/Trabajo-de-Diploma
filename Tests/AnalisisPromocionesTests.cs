@@ -90,7 +90,10 @@ namespace Tests
             Assert.AreEqual(BE.OrigenMetrica.Abandono, r[0].Origen);
             Assert.AreEqual(7, r[0].IdPlan);
             Assert.AreEqual(BE.TipoDescuento.Porcentaje, r[0].TipoSugerido);
-            Assert.AreEqual(16000m, r[0].BeneficioEstimado, "2 clientes × $8000 de ingreso mensual en riesgo.");
+            Assert.AreEqual(2, r[0].ClientesEnRiesgo);
+            Assert.AreEqual(16000m, r[0].IngresoMensualEnRiesgo, "2 clientes × $8000 de ingreso mensual en riesgo.");
+            Assert.AreEqual(30m, r[0].TasaRetencion, "Tasa de retención esperada por defecto.");
+            Assert.AreEqual(4800m, r[0].BeneficioEstimado, "El beneficio ya no supone retener al 100 %: $16000 × 30 %.");
         }
 
         [TestMethod]
@@ -223,5 +226,109 @@ namespace Tests
             Assert.AreEqual(2, saco.PrendasBajaDemanda);
             Assert.IsTrue(saco.EsOportunidad);
         }
+
+        // ── PN03: Evaluar resultado de la promoción ──────────────────────────
+
+        private static readonly System.DateTime Hoy = new System.DateTime(2026, 10, 13);
+
+        private static BE.DecisionRenovacion Dec(int cliente, int diasDesdeHoy, BE.EstadoRenovacion r) =>
+            new BE.DecisionRenovacion { IdCliente = cliente, Fecha = Hoy.AddDays(diasDesdeHoy), Resultado = r };
+
+        private static BLL.AnalisisPromociones CrearConPromos(FakePromocionDAL dal, FakeSugerenciaPromocionDAL sug = null) =>
+            new BLL.AnalisisPromociones(new RotacionFake(), new AbandonoFake(), new FakePlanSuscripcionDAL(),
+                                        dal, sug ?? new FakeSugerenciaPromocionDAL(), () => Hoy);
+
+        [TestMethod]
+        public void ResultadoPromociones_ComparaLaVigenciaContraElPeriodoAnteriorYMideLaRetencion()
+        {
+            var dal = new FakePromocionDAL();
+            // Vigente desde hace 10 días (aprobada ese día), plan 3, nacida de una sugerencia con 30 % esperado.
+            dal.Todas.Add(new BE.Promocion
+            {
+                IdPromocion = 1, Nombre = "Retención Básico", Estado = BE.EstadoPromocion.Vigente, IdPlan = 3, NombrePlan = "Básico",
+                FechaInicio = Hoy.AddDays(-10), FechaFin = Hoy.AddDays(20), IdSugerenciaOrigen = 9
+            });
+            dal.Historial.Add(new BE.PromocionHistorial { IdPromocion = 1, EstadoNuevo = BE.EstadoPromocion.Vigente, Fecha = Hoy.AddDays(-10) });
+            dal.Decisiones.AddRange(new[]
+            {
+                // Durante [hoy-10, hoy]: el cliente 1 renovó, el 2 pausó, el 3 se dio de baja.
+                (3, Dec(1, -5, BE.EstadoRenovacion.Renovada)), (3, Dec(2, -3, BE.EstadoRenovacion.Pausada)), (3, Dec(3, -1, BE.EstadoRenovacion.Baja)),
+                // Antes [hoy-21, hoy-10): tres bajas y una renovación.
+                (3, Dec(4, -15, BE.EstadoRenovacion.Baja)), (3, Dec(5, -14, BE.EstadoRenovacion.Baja)), (3, Dec(6, -12, BE.EstadoRenovacion.Baja)),
+                (3, Dec(7, -11, BE.EstadoRenovacion.Renovada)),
+                // Otro plan: no cuenta.
+                (8, Dec(8, -2, BE.EstadoRenovacion.Baja))
+            });
+            var sug = new FakeSugerenciaPromocionDAL { SugerenciaPorId = new BE.SugerenciaPromocion { IdSugerencia = 9, TasaRetencion = 30m } };
+
+            var r = CrearConPromos(dal, sug).ResultadoPromociones(Hoy.AddDays(-90), Hoy);
+
+            Assert.AreEqual(1, r.Count);
+            var res = r[0];
+            Assert.AreEqual(Hoy.AddDays(-10), res.Desde);
+            Assert.AreEqual(Hoy.AddDays(1), res.Hasta, "Sigue vigente: se evalúa hasta hoy inclusive.");
+            Assert.AreEqual(11, res.Dias);
+            Assert.AreEqual(1, res.Durante.Bajas);
+            Assert.AreEqual(3, res.Antes.Bajas);
+            Assert.AreEqual(-2, res.VariacionBajas, "Bajaron las bajas del plan durante la promoción.");
+            Assert.AreEqual(1, res.Durante.Pausas);
+            Assert.AreEqual(1, res.Durante.Renovaciones);
+            Assert.AreEqual(3, res.ClientesEnJuego);
+            Assert.AreEqual(2, res.ClientesRetenidos, "Renovar o pausar retiene; la baja no.");
+            Assert.AreEqual(66.67m, res.TasaRetencionReal);
+            Assert.AreEqual(30m, res.TasaRetencionEsperada);
+            Assert.IsTrue(res.RetuvoClientes());
+            Assert.AreEqual(true, res.CumplioRetencionEsperada());
+        }
+
+        [TestMethod]
+        public void ResultadoPromociones_DadaDeBaja_TerminaEnLaFechaDeBaja_YSoloEvaluaVigenteBajaOVencida()
+        {
+            var dal = new FakePromocionDAL();
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 1, Estado = BE.EstadoPromocion.DadaDeBaja, IdPlan = 3,
+                                             FechaInicio = Hoy.AddDays(-30), FechaFin = Hoy.AddDays(30) });
+            dal.Historial.Add(new BE.PromocionHistorial { IdPromocion = 1, EstadoNuevo = BE.EstadoPromocion.DadaDeBaja, Fecha = Hoy.AddDays(-20) });
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 2, Estado = BE.EstadoPromocion.EnRevisionContable, IdPlan = 3,
+                                             FechaInicio = Hoy.AddDays(-30), FechaFin = Hoy.AddDays(30) });
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 3, Estado = BE.EstadoPromocion.RechazadaContabilidad, IdPlan = 3,
+                                             FechaInicio = Hoy.AddDays(-30), FechaFin = Hoy.AddDays(30) });
+            dal.Decisiones.Add((3, Dec(1, -25, BE.EstadoRenovacion.Baja)));
+            dal.Decisiones.Add((3, Dec(2, -5, BE.EstadoRenovacion.Baja)));   // después de la baja: no cuenta
+
+            var r = CrearConPromos(dal).ResultadoPromociones(Hoy.AddDays(-90), Hoy);
+
+            Assert.AreEqual(1, r.Count, "En revisión y rechazadas no se evalúan: nunca se aplicaron.");
+            Assert.AreEqual(Hoy.AddDays(-19), r[0].Hasta, "La vigencia termina el día de la baja.");
+            Assert.AreEqual(1, r[0].Durante.Bajas);
+            Assert.IsNull(r[0].TasaRetencionEsperada, "Alta manual: sin tasa esperada.");
+            Assert.IsNull(r[0].CumplioRetencionEsperada());
+            Assert.AreEqual(0, r[0].ClientesRetenidos);
+        }
+
+        [TestMethod]
+        public void ResultadoPromociones_FueraDelPeriodo_NoSeEvalua_YLaUltimaDecisionDelClienteEsLaQueCuenta()
+        {
+            var dal = new FakePromocionDAL();
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 1, Estado = BE.EstadoPromocion.Vencida, IdPlan = 3,
+                                             FechaInicio = Hoy.AddDays(-200), FechaFin = Hoy.AddDays(-150) });
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 2, Estado = BE.EstadoPromocion.Vencida, IdPlan = 4,
+                                             FechaInicio = Hoy.AddDays(-40), FechaFin = Hoy.AddDays(-20) });
+            // El cliente 1 pausó y después se dio de baja: no se retuvo.
+            dal.Decisiones.Add((4, Dec(1, -35, BE.EstadoRenovacion.Pausada)));
+            dal.Decisiones.Add((4, Dec(1, -25, BE.EstadoRenovacion.Baja)));
+
+            var r = CrearConPromos(dal).ResultadoPromociones(Hoy.AddDays(-90), Hoy);
+
+            Assert.AreEqual(1, r.Count, "La vencida hace 150 días no toca el período analizado.");
+            Assert.AreEqual(2, r[0].IdPromocion);
+            Assert.AreEqual(Hoy.AddDays(-19), r[0].Hasta, "Vencida: hasta su fecha de fin inclusive.");
+            Assert.AreEqual(1, r[0].ClientesEnJuego);
+            Assert.AreEqual(0, r[0].ClientesRetenidos);
+            Assert.AreEqual(0m, r[0].TasaRetencionReal);
+        }
+
+        [TestMethod]
+        public void ResultadoPromociones_SinDalDePromociones_DevuelveVacio()
+            => Assert.AreEqual(0, Crear(new RotacionFake(), new AbandonoFake()).ResultadoPromociones(Hoy.AddDays(-90), Hoy).Count);
     }
 }

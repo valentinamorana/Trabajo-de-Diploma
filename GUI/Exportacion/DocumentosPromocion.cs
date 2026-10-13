@@ -7,8 +7,8 @@ using Servicios.Multiidioma;
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// PN03 — arma los objetos de información del diagrama de actividad de Métricas, promociones
-    /// y toma de decisiones como documentos PDF generados directamente
+    /// PN03 — arma los objetos de información del diagrama de actividad de Evaluar y aplicar
+    /// promociones comerciales como documentos PDF generados directamente
     /// (ExportadorPdf, sin impresora virtual):
     ///   • Reporte de métricas                               (Gerencia)
     ///   • Sugerencia de promoción                           (Gerencia → Administración)
@@ -100,6 +100,35 @@ namespace GUI.Exportacion
             sb.AppendLine();
         }
 
+        // "Evaluar resultado de la promoción": movimientos del plan durante la vigencia contra el
+        // período anterior de igual duración, y retención real contra la esperada.
+        private static void ResultadoPromociones(StringBuilder sb, List<BE.ResultadoPromocion> resultados)
+        {
+            sb.AppendLine(Tr("doc.promo.resultado.titulo",
+                "Resultado de las promociones (vigencia contra el período anterior de igual duración):"));
+            if (resultados == null || resultados.Count == 0)
+                sb.AppendLine("   " + Tr("doc.promo.resultado.sindatos", "No hay promociones vigentes, dadas de baja o vencidas en el período."));
+            foreach (var r in resultados ?? new List<BE.ResultadoPromocion>())
+            {
+                sb.AppendLine(string.Format(Tr("doc.promo.resultado.promo", "   • {0} ({1}) — plan {2} — vigencia {3:d} al {4:d} ({5} día(s)); antes: {6:d} al {7:d}"),
+                    r.Nombre, Estado(r.Estado), r.NombrePlan ?? "—", r.Desde, r.Hasta.AddDays(-1), r.Dias, r.AnteriorDesde, r.Desde.AddDays(-1)));
+                sb.AppendLine(string.Format(Tr("doc.promo.resultado.movimientos",
+                    "      Bajas {0} (antes {1}, {2:+0;-0;0}) · Pausas {3} (antes {4}, {5:+0;-0;0}) · Renovaciones {6} (antes {7}, {8:+0;-0;0})"),
+                    r.Durante.Bajas, r.Antes.Bajas, r.VariacionBajas, r.Durante.Pausas, r.Antes.Pausas, r.VariacionPausas,
+                    r.Durante.Renovaciones, r.Antes.Renovaciones, r.VariacionRenovaciones));
+                string esperada = r.TasaRetencionEsperada.HasValue
+                    ? string.Format(Tr("doc.promo.resultado.esperada", "esperada {0:0.##} %"), r.TasaRetencionEsperada.Value)
+                    : Tr("doc.promo.resultado.sinesperada", "sin tasa esperada (alta manual)");
+                sb.AppendLine(r.TasaRetencionReal.HasValue
+                    ? string.Format(Tr("doc.promo.resultado.retencion",
+                        "      Clientes con la renovación en juego: {0}; retenidos: {1} ({2:0.##} %, {3})"),
+                        r.ClientesEnJuego, r.ClientesRetenidos, r.TasaRetencionReal.Value, esperada)
+                    : string.Format(Tr("doc.promo.resultado.sinjuego",
+                        "      Ningún cliente del plan tuvo la renovación en juego durante la vigencia ({0})."), esperada));
+            }
+            sb.AppendLine();
+        }
+
         // «Reporte de métricas»: abandono por plan, rotación por categoría y oportunidades.
         public static ReporteExportable ReporteMetricas(BE.ReporteMetricas r)
         {
@@ -114,6 +143,7 @@ namespace GUI.Exportacion
                 sb.AppendLine(string.Format(Tr("doc.promo.impactolinea", "   • {0} ({1}): {2} cobro(s) — {3:C2} descontados — {4:C2} cobrados"),
                                             m.Nombre, Estado(m.Estado), m.Cobros, m.TotalDescontado, m.TotalCobrado));
             sb.AppendLine();
+            ResultadoPromociones(sb, r.ResultadoPromociones);
             sb.AppendLine(Tr("doc.promo.abandonoplan", "Abandono por plan (clientes en riesgo):"));
             if (r.AbandonoPorPlan.Count == 0) sb.AppendLine("   " + Tr("doc.promo.sindatos", "Sin casos detectados."));
             foreach (var m in r.AbandonoPorPlan)
@@ -142,7 +172,7 @@ namespace GUI.Exportacion
             {
                 sb.AppendLine(Tr("doc.promo.oportunidades", "Oportunidades de promoción detectadas:"));
                 foreach (var c in r.Oportunidades)
-                    sb.AppendLine($"   • [{Origen(c.Origen)}] {MotivoCandidata(c)} ({Tr("doc.promo.beneficioest", "Beneficio estimado")}: {c.BeneficioEstimado:C2})");
+                    sb.AppendLine($"   • [{Origen(c.Origen)}] {MotivoCandidata(c)} ({Tr("doc.promo.beneficioest", "Beneficio estimado")}: {c.BeneficioEstimado:C2} = {c.IngresoMensualEnRiesgo:C2} × {c.TasaRetencion:0.##} % {Tr("doc.promo.retencionesperada", "de retención esperada")})");
             }
             else
                 sb.AppendLine(Tr("doc.promo.sinoportunidad", "¿Hay oportunidad? No: no se detectaron casos para promocionar. Fin sin promoción."));
@@ -164,7 +194,7 @@ namespace GUI.Exportacion
             sb.AppendLine($"{Tr("doc.promo.origen", "Origen de la métrica")}: {Origen(s.OrigenMetrica)}");
             sb.AppendLine(AplicaA(s.IdPlan, s.NombrePlan));
             sb.AppendLine($"{Tr("doc.promo.tiposugerido", "Tipo de descuento sugerido")}: {Tipo(s.TipoDescuentoSugerido)}");
-            sb.AppendLine($"{Tr("doc.promo.beneficioest", "Beneficio estimado")}: {s.BeneficioEstimado:C2}");
+            sb.AppendLine($"{Tr("doc.promo.beneficioest", "Beneficio estimado")}: {s.BeneficioEstimado:C2} = {s.IngresoEnRiesgo():C2} × {s.TasaRetencion:0.##} % {Tr("doc.promo.retencionesperada", "de retención esperada")}");
             sb.AppendLine($"{Tr("doc.promo.motivo", "Motivo")}: {s.Motivo}");
             sb.AppendLine($"{Tr("doc.promo.estado", "Estado")}: {EstadoSugerencia(s.Estado)}");
         }

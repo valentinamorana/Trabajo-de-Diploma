@@ -87,6 +87,7 @@
     <Compile Include="DictamenContable.cs" />
     <Compile Include="SolicitudBajaPromocion.cs" />
     <Compile Include="ReporteMetricas.cs" />
+    <Compile Include="ResultadoPromocion.cs" />
     <Compile Include="AnalisisImpactoPromocion.cs" />
     <Compile Include="MantenimientoPrenda.cs" />
     <Compile Include="NivelUrgencia.cs" />

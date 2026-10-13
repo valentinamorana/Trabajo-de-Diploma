@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace BE
@@ -13,7 +14,8 @@ namespace BE
     ///   descuento por cliente  = lo que la promoción descuenta sobre el precio mensual del plan
     ///                            (misma regla que el cobro: BLL.Politicas.PoliticaDescuento.DescuentoDe)
     ///   costo del descuento    = descuento por cliente × clientes activos del plan
-    ///   beneficio estimado     = el de la sugerencia de Gerencia; en un alta manual, el margen
+    ///   beneficio estimado     = el de la sugerencia de Gerencia (ingreso mensual en riesgo × tasa
+    ///                            de retención esperada / 100); en un alta manual, el margen
     ///                            estimado que cargó Administración
     ///   margen proyectado      = beneficio estimado − costo del descuento
     ///   ¿conviene?             = margen proyectado &gt; 0
@@ -24,6 +26,15 @@ namespace BE
         public Promocion Promocion { get; set; }
         public decimal? BeneficioEstimadoSugerencia { get; set; }
         public OrigenMetrica? OrigenSugerencia { get; set; }
+
+        /// <summary>Tasa de retención esperada (%) con la que Gerencia estimó el beneficio de la sugerencia.</summary>
+        public decimal? TasaRetencionSugerencia { get; set; }
+
+        /// <summary>Ingreso mensual en riesgo del que partió Gerencia (beneficio × 100 / tasa).</summary>
+        public decimal IngresoEnRiesgoSugerencia =>
+            BeneficioEstimadoSugerencia.HasValue && TasaRetencionSugerencia > 0
+                ? Math.Round(BeneficioEstimadoSugerencia.Value * 100m / TasaRetencionSugerencia.Value, 2)
+                : 0m;
         public List<Promocion> Superpuestas { get; set; } = new List<Promocion>();
 
         /// <summary>false si el usuario en sesión es quien creó la promoción (no puede dictaminarla).</summary>

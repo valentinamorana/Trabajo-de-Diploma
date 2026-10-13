@@ -77,6 +77,7 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 
 - [ ] Solo ve el menú Caja. En Contrataciones pendientes se ve el importe a cobrar (con el descuento).
 - [ ] Cobrar una contratación trimestral muestra el importe de 3 meses del precio mensual y el comprobante `CMP-…`.
+- [ ] Con un usuario de Caja que también registró una contratación (vinculado al mismo Empleado), esa contratación aparece con Cobrar, Intento fallido y Anular deshabilitados y el aviso "Registraste esta contratación". El Administrador sí puede resolverla.
 - [ ] Tres intentos fallidos cancelan la contratación.
 
 ## 3. Depósito (`deposito`) y Operador Logístico (`logistico`)
@@ -85,11 +86,14 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 - [ ] Depósito: Prendas (alta, editar, estado), Lista de espera, Control de Stock, Inspección de devolución.
 - [ ] Después de **Registrar devolución**, las prendas aparecen en Inspección (En limpieza) y en el historial de mantenimiento de la prenda.
 - [ ] Inspección: aprobar reingreso deja la prenda Disponible; dar de baja y cobrar registra el cargo antes de la baja.
+- [ ] Prendas → Estado sobre una prenda devuelta (En limpieza, en la cola de Inspección): no ofrece ningún destino y deriva a la Inspección. Una prenda que entró a limpieza en el depósito sí se puede dejar Disponible desde Prendas.
 - [ ] Logístico solo ve Pedidos realizados.
 
 ## 4. Gerentes (`gcomercial`, `ginventario`)
 
 - [ ] Gerente comercial: además de lo del Vendedor, ve Sugerir promoción, Análisis de abandono y Ventas por vendedor. Sugerir promoción desde el análisis precarga el formulario.
+- [ ] Reporte de métricas: la sección "Resultado de las promociones" lista la PROMO Vigente Estandar (y las dadas de baja o vencidas del período) con bajas, pausas y renovaciones durante la vigencia contra el período anterior, y la retención real contra la esperada.
+- [ ] Sugerir promoción: la idea del reporte precarga el ingreso en riesgo y la retención esperada en 30 %; al cambiar la tasa cambia el "Beneficio est."; una tasa de 0 o mayor a 100 no se acepta. La grilla muestra la columna Retención %.
 - [ ] Gerente de inventario: ve Rotación, Mantenimiento y Escasez, y lo de Depósito y Logístico.
 - [ ] Cada reporte genera, muestra resultados y exporta a PDF y CSV.
 
@@ -99,6 +103,7 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 - [ ] Vendedor: solicitar la baja de una vigente; la promoción sigue vigente y la columna "Baja solicitada" lo muestra; no deja pedir otra mientras haya una pendiente.
 - [ ] Dashboard de Administración Comercial: la tarjeta cuenta las solicitudes de baja pendientes.
 - [ ] Contabilidad: aprobar o rechazar exige observación.
+- [ ] Contabilidad: el análisis de una promoción creada desde una sugerencia muestra "ingreso mensual en riesgo × retención esperada".
 - [ ] Una promoción vigente reduce el importe en Caja (un solo descuento por cobro).
 
 ## 6. Auditor (`auditor`) y Administrador (`admin`)

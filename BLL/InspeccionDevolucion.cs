@@ -42,11 +42,18 @@ namespace BLL
             _cargo  = new CargoPrenda(new DAL.CargoPrenda());   // solo para ValidarDatos (sin acceso a datos)
         }
 
-        /// <summary>Camino A — reingresa a Disponible sin cargo (mismo CambiarEstado de siempre).</summary>
+        /// <summary>
+        /// Camino A — reingresa a Disponible sin cargo. Solo para una prenda de la cola de inspección:
+        /// las que entraron a limpieza en el depósito se liberan desde Prendas.
+        /// </summary>
         public void AprobarReingreso(string modulo, BE.Prenda prenda)
         {
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
-            _prenda.CambiarEstado(modulo, prenda, BE.EstadoPrenda.Disponible);
+            if (!_prenda.ObtenerEnLimpieza().Exists(p => p.IdPrenda == prenda.IdPrenda))
+                throw new BE.AppException("err.bll.insp.reingreso_fuera_de_cola",
+                    "La prenda '{0}' no está pendiente de inspección: no viene de una devolución o ya se resolvió.",
+                    prenda.Nombre);
+            _prenda.ReingresarInspeccionada(modulo, prenda);
         }
 
         /// <summary>

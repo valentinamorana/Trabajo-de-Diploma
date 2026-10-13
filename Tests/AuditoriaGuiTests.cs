@@ -224,6 +224,9 @@ namespace Tests
             public readonly List<BE.EstadoPrenda> Cambios = new List<BE.EstadoPrenda>();
             public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado)
                 => Cambios.Add(nuevoEstado);
+            public readonly List<int> Reingresos = new List<int>();
+            public new void ReingresarInspeccionada(string modulo, BE.Prenda prenda)
+                => Reingresos.Add(prenda.IdPrenda);
             // Cola de inspección: por defecto la prenda 5 (la de los tests) volvió de una devolución.
             public List<BE.Prenda> ColaInspeccion = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 5 } };
             public new List<BE.Prenda> ObtenerEnLimpieza() => ColaInspeccion;
@@ -428,12 +431,29 @@ namespace Tests
         }
 
         [TestMethod]
-        public void AprobarReingreso_UsaCambiarEstadoADisponible()
+        public void AprobarReingreso_PrendaDeLaCola_ReingresaPorLaInspeccion()
         {
             LoginComoAdministrador();
             var espia = new PrendaServiceEspia();
             new BLL.InspeccionDevolucion(new FakeInspeccionDAL(), espia).AprobarReingreso("Test", Prenda(BE.EstadoPrenda.EnLimpieza));
-            CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.Disponible }, espia.Cambios);
+            CollectionAssert.AreEqual(new[] { 5 }, espia.Reingresos);
+            Assert.AreEqual(0, espia.Cambios.Count, "El reingreso no pasa por el cambio de estado manual.");
+        }
+
+        // PN04 — el reingreso es la decisión de la Inspección: solo para prendas de su cola.
+        [TestMethod]
+        public void AprobarReingreso_PrendaFueraDeLaCola_Rechaza()
+        {
+            LoginComoAdministrador();
+            var espia = new PrendaServiceEspia();
+            espia.ColaInspeccion.Clear();
+            try
+            {
+                new BLL.InspeccionDevolucion(new FakeInspeccionDAL(), espia).AprobarReingreso("Test", Prenda(BE.EstadoPrenda.EnLimpieza));
+                Assert.Fail("Debía rechazar el reingreso de una prenda que no está pendiente de inspección.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.insp.reingreso_fuera_de_cola", ex.Clave); }
+            Assert.AreEqual(0, espia.Reingresos.Count);
         }
 
         // ── PanelTareas: tablero logístico y suscripciones ────────────────────

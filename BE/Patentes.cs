@@ -33,6 +33,15 @@ namespace BE
         // Vendedor, informa faltantes o confirma y separa las prendas.
         public const string ControlStock          = "mnuControlStock";
 
+        // Analítica de Negocio (Bloque 3 + PdN10) — un solo formulario con selector; cada
+        // reporte conserva su patente propia (BLL.MenuVisibilidad.PatentesReportes).
+        public const string AnalisisAbandono      = "mnuAnalisisAbandono";
+        public const string VentasVendedor        = "mnuVentasVendedor";
+        public const string AnalisisRotacion      = "mnuAnalisisRotacion";
+        public const string AnalisisMantenimiento = "mnuAnalisisMantenimiento";
+        public const string AnalisisEscasez       = "mnuAnalisisEscasez";
+        public const string RecomendacionPrendas  = "mnuRecomendacionPrendas";
+
         // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────
         // Cada una gobierna las operaciones de escritura (alta/modificación/baja) del módulo.
         // Convención: <patente de ver> + "Editar". Si la patente no existe en el catálogo,

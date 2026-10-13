@@ -38,15 +38,15 @@ El Administrador ve todo (bypass en las 3 capas). Un grupo del menú se muestra 
 | **Auditoría** | Bitácora del Sistema | `Bitacora("sistema")` | mnuAuditoria | AUD, ADM | AUD |
 | | Bitácora de Negocio | `Bitacora("negocio")` | mnuAuditoria | AUD, ADM | AUD |
 | | Reporte de Jornada | `ReporteJornadaForm` | mnuAuditoria | AUD, ADM | AUD |
-| **Analítica de Negocio** | Análisis de Abandono | `AnalisisAbandonoForm` | mnuAnalisisAbandono | GCO, ADM | PN03 (PdN10) |
-| | Ventas por Vendedor | `ReporteVentasVendedorForm` | mnuVentasVendedor | GCO, ADM | PN03 (PdN8) |
-| | Rotación de Prendas | `AnalisisRotacionForm` | mnuAnalisisRotacion | GIN, ADM | PN03 (PdN9) |
-| | Tiempos de Mantenimiento | `AnalisisMantenimientoForm` | mnuAnalisisMantenimiento | GIN, ADM | PN03 (PdN11) |
-| | Escasez de Stock | `AnalisisEscasezForm` | mnuAnalisisEscasez | GIN, ADM | PN03 (PdN12) |
-| | Recomendación de Prendas | `RecomendacionPrendasForm` | mnuRecomendacionPrendas | VEN, GCO, ADM | PN03 (PdN13) |
-| **Administrar** (todo con mnuUsuarios: solo ADM) | Usuarios ▸ Administración de usuarios | `AdministracionUsuariosForm` | mnuUsuarios | ADM | SEG |
-| | Usuarios ▸ Cuentas de usuario | `Usuarios` | mnuUsuarios | ADM | SEG |
-| | Perfiles | `GestorPermisos` | mnuUsuarios | ADM | SEG |
+| **Analítica de Negocio** | (ítem directo) | `AnaliticaNegocioForm` | cualquiera de las 6 de abajo | VEN, GCO, GIN, ADM | PN03 |
+| | ↳ reporte Análisis de Abandono | selector de `AnaliticaNegocioForm` | mnuAnalisisAbandono | GCO, ADM | PN03 (PdN10) |
+| | ↳ reporte Ventas por Vendedor | selector de `AnaliticaNegocioForm` | mnuVentasVendedor | GCO, ADM | PN03 (PdN8) |
+| | ↳ reporte Rotación de Prendas | selector de `AnaliticaNegocioForm` | mnuAnalisisRotacion | GIN, ADM | PN03 (PdN9) |
+| | ↳ reporte Tiempos de Mantenimiento | selector de `AnaliticaNegocioForm` | mnuAnalisisMantenimiento | GIN, ADM | PN03 (PdN11) |
+| | ↳ reporte Escasez de Stock | selector de `AnaliticaNegocioForm` | mnuAnalisisEscasez | GIN, ADM | PN03 (PdN12) |
+| | ↳ reporte Recomendación de Prendas | selector de `AnaliticaNegocioForm` | mnuRecomendacionPrendas | VEN, GCO, ADM | PN03 (PdN13) |
+| **Administrar** (todo con mnuUsuarios: solo ADM) | Usuarios ▸ Administración de usuarios (pestañas Cuentas y Datos administrativos) | `Usuarios` | mnuUsuarios | ADM | SEG |
+| | Perfiles (pestañas Gestión de roles y Vista completa) | `GestorPermisos` | mnuUsuarios | ADM | SEG |
 | | Sistema ▸ Idiomas | `FormIdiomas` | mnuUsuarios | ADM | SEG |
 | | Sistema ▸ Historial de cambios de usuarios | `VersionHistorialForm` | mnuUsuarios | ADM | SEG |
 | | Sistema ▸ Backup | `BackupForm` (modal) | mnuUsuarios | ADM | SEG |
@@ -95,12 +95,7 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | `AltaPromocionForm` (modal) | Alta (desde sugerencia o manual) o reformulación de una promoción; la validación es de la BLL. | Registrar · Cancelar |
 | `PromocionesContabilidadForm` | Carril Contabilidad de PN03. Muestra el análisis de margen e impacto (beneficio estimado, margen proyectado contra el costo del descuento sobre los clientes activos del plan y promociones vigentes superpuestas) y dictamina con observación; quien creó la promoción no puede dictaminarla. | Aprobar y Activar · Rechazar · Imprimir ▾ · Actualizar |
 | `PromocionesVigentesForm` | Carril Vendedor de PN03. Consulta las promociones vigentes, con la marca de si ya tienen una solicitud de baja pendiente; solicita la baja con motivo («Solicitud de baja»): la promoción sigue vigente hasta que Administración la atiende. | Solicitar baja · Imprimir ▾ (ficha, solicitud, respuesta a la solicitud) · Actualizar |
-| `AnalisisAbandonoForm` | Lista de clientes en riesgo según criterio elegido (Strategy). | Generar · Exportar a PDF · Guardar como .CSV |
-| `ReporteVentasVendedorForm` | Desempeño por vendedor: totales, entregados, cancelados. | Generar · Exportar a PDF · Guardar como .CSV |
-| `AnalisisRotacionForm` | Prendas de baja o alta demanda. | Generar · Exportar a PDF · Guardar como .CSV |
-| `AnalisisMantenimientoForm` | Prendas cuyo mantenimiento supera el umbral. | Generar · Exportar a PDF · Guardar como .CSV |
-| `AnalisisEscasezForm` | Talle+Categoría bajo un umbral de stock. | Generar · Exportar a PDF · Guardar como .CSV |
-| `RecomendacionPrendasForm` | Prendas afines al historial de un cliente. | Generar · Exportar a PDF · Guardar como .CSV |
+| `AnaliticaNegocioForm` | Los 6 reportes de decisión en una sola pantalla; el selector ofrece solo los que el usuario tiene permitidos (una patente por reporte). Análisis de Abandono: clientes en riesgo según el criterio elegido (Strategy). Ventas por Vendedor: totales, entregados, cancelados. Rotación de Prendas: baja o alta demanda. Tiempos de Mantenimiento: prendas cuyo mantenimiento supera el umbral. Escasez de Stock: Talle+Categoría bajo un umbral de stock. Recomendación de Prendas: prendas afines al historial de un cliente. | Reporte (selector) · filtro del reporte (criterio / umbral mínimo / cliente) · Generar · Exportar a PDF · Guardar como .CSV |
 
 ### PN04 — Inspeccionar prendas devueltas
 | Formulario | Qué hace | Acciones |
@@ -116,10 +111,8 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | `DesbloqueoEmergenciaForm` | Desbloqueo del Administrador con clave de emergencia de un solo uso. | Desbloquear · Cancelar |
 | `CambioClaveObligatorioForm` | Fuerza el cambio de clave temporal tras el login. | — |
 | `MiPerfilForm` | Idioma, tipografía, tamaño y tema del usuario en sesión. | Guardar preferencias · Restaurar valores de fábrica · Recibir notificaciones |
-| `Usuarios` | Cuentas: alta, desbloqueo, reset de clave, archivar y purgar. | Agregar Usuario · Desbloquear Cuenta · Resetear Contraseña · Archivar usuario · Ver archivados · Purgar (>1 año) · Refrescar Lista |
-| `AdministracionUsuariosForm` | Datos administrativos no sensibles y cambio de rol. | Nuevo usuario · Guardar cambios · Cambiar rol · Buscar · Ver historial de cambios |
-| `GestorPermisos` | Roles y familias con el Composite: crear, renombrar, asignar y quitar. | Crear rol raíz · Crear sub-rol · Renombrar · Eliminar · Asignar · Quitar · Ver vista completa |
-| `ExploradorCompositeForm` | Vista de solo lectura del árbol Composite. | — |
+| `Usuarios` | Administración de usuarios en dos pestañas (una sola pantalla y un solo alta). **Cuentas:** desbloqueo, reset de clave, archivar y purgar. **Datos administrativos:** alta (vincula el legajo de empleado), datos no sensibles, cambio de rol e Historial de Cambios (Memento). | Cuentas: Refrescar Lista · Resetear Contraseña · Desbloquear Cuenta · Archivar usuario · Ver archivados · Purgar (>1 año) — Datos administrativos: Buscar · Ver todos · Nuevo usuario · Guardar cambios · Cambiar rol · Ver historial de cambios |
+| `GestorPermisos` | Roles y familias con el Composite en dos pestañas. **Gestión de roles:** crear, renombrar, asignar y quitar. **Vista completa:** el árbol Composite completo en solo lectura (antes un formulario aparte). | Gestión de roles: Crear rol raíz · Crear sub-rol · Renombrar · Eliminar · Asignar · Quitar — Vista completa: Expandir todo · Colapsar todo — Actualizar · Cerrar |
 | `FormIdiomas` | ABM de idiomas y traducciones. | Nuevo idioma · Renombrar · Activar · Desactivar · Guardar cambios |
 | `BackupForm` | Copias de seguridad y restauración. | Generar Copia de Seguridad · Restaurar seleccionado · Desde archivo… · Eliminar · Backup de instalación limpia |
 | `DiagnosticoIntegridadForm` | Verifica DVH/DVV de las tablas. | Recalcular Todo · Recuperación (Espejo)… · Actualizar |
@@ -160,9 +153,10 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 | Gestión de promociones | ● | | | | | | | | ● | |
 | Revisión contable | ● | | | | | | | | | ● |
 | Promociones vigentes | ● | | ● | ● | | | | | | |
-| Análisis de Abandono / Ventas por Vendedor | ● | | | ● | | | | | | |
-| Rotación / Mantenimiento / Escasez | ● | | | | | | ● | | | |
-| Recomendación de Prendas | ● | | ● | ● | | | | | | |
+| Analítica de Negocio (la pantalla) | ● | | ● | ● | | | ● | | | |
+| ↳ Análisis de Abandono / Ventas por Vendedor | ● | | | ● | | | | | | |
+| ↳ Rotación / Mantenimiento / Escasez | ● | | | | | | ● | | | |
+| ↳ Recomendación de Prendas | ● | | ● | ● | | | | | | |
 | Bitácoras / Reporte de Jornada | ● | ● | | | | | | | | |
 | Administrar (usuarios, perfiles, idiomas, backup, integridad) | ● | | | | | | | | | |
 | Mi Perfil, Alertas, Panel, Cerrar sesión | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
@@ -175,11 +169,11 @@ Selector de idioma (ES/EN/RU/PT) en la barra superior: visible para todos.
 |---|---|---|
 | ADM | genérico | todos |
 | AUD | genérico | Auditoría |
-| VEN | `DashboardVendedor` | Suscriptores, Inventario (Prendas, Lista de Espera), Ventas (Pedidos de Venta), Promociones (vigentes), Analítica (Recomendación) |
-| GCO | genérico | lo de VEN + Pedidos Realizados, Sugerir promoción, Análisis de Abandono, Ventas por Vendedor |
+| VEN | `DashboardVendedor` | Suscriptores, Inventario (Prendas, Lista de Espera), Ventas (Pedidos de Venta), Promociones (vigentes), Analítica de Negocio (solo Recomendación) |
+| GCO | genérico | lo de VEN + Pedidos Realizados, Sugerir promoción; en Analítica de Negocio, además, Análisis de Abandono y Ventas por Vendedor |
 | LOG | `DashboardLogistica` | Ventas (Pedidos Realizados) |
 | DEP | `DashboardDeposito` | Inventario (Prendas, Control de Stock, Inspección, Lista de Espera), Ventas (Pedidos Realizados) |
-| GIN | genérico | lo de DEP + Rotación, Mantenimiento, Escasez |
+| GIN | genérico | lo de DEP + Analítica de Negocio (Rotación, Mantenimiento, Escasez) |
 | CAJ | genérico | Caja |
 | ACO | genérico | Promociones (Gestión) |
 | CON | genérico | Promociones (Revisión contable) |

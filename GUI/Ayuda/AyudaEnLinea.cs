@@ -142,15 +142,24 @@ namespace GUI.Ayuda
                 "Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la columna Baja solicitada muestra si ya hay una pendiente. Administración atiende la solicitud: mientras tanto la promoción sigue vigente y se aplica en los cobros."),
 
             ["Usuarios"] = new TemaAyuda("Usuarios",
-                "Alta, edición, desbloqueo y archivo de usuarios (solo Administrador).\n" +
+                "Administración de usuarios en dos pestañas (solo Administrador).\n" +
                 "\n" +
-                "• Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock.\n" +
+                "Cuentas:\n" +
                 "• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).\n" +
+                "• Desbloquear: habilita una cuenta bloqueada por intentos fallidos de ingreso.\n" +
                 "• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.\n" +
-                "• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones."),
+                "• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.\n" +
+                "\n" +
+                "Datos administrativos:\n" +
+                "• Nuevo usuario: el único alta de usuarios. Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock; la contraseña se genera y se exporta a un archivo.\n" +
+                "• Guardar cambios / Cambiar rol: nombre, apellido, usuario, email, fecha de nacimiento y rol (el sistema no puede quedar sin administrador).\n" +
+                "• Ver historial de cambios: las versiones anteriores del usuario."),
 
             ["GestorPermisos"] = new TemaAyuda("Perfiles y permisos",
-                "Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar."),
+                "Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.\n" +
+                "\n" +
+                "• Gestión de roles: crear, renombrar y eliminar roles, y asignar o quitar permisos y sub-roles.\n" +
+                "• Vista completa: el árbol completo de roles, familias y permisos, en solo lectura."),
 
             ["BackupForm"] = new TemaAyuda("Copias de seguridad",
                 "Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos."),
@@ -182,6 +191,17 @@ namespace GUI.Ayuda
 
             ["ListaEsperaForm"] = new TemaAyuda("Lista de espera",
                 "Clientes anotados para una prenda que hoy está en uso. Cuando la prenda vuelve a estar disponible, se reserva para el primero de la lista durante 48 horas. Si la prenda se da de baja por daño o pérdida, las anotaciones se cancelan."),
+
+            ["AnaliticaNegocioForm"] = new TemaAyuda("Analítica de Negocio",
+                "Reportes para la toma de decisiones. El selector muestra solo los reportes que tu rol tiene permitidos.\n" +
+                "\n" +
+                "1. Elegí el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).\n" +
+                "2. Generar: el resultado se muestra en la grilla, con un resumen arriba.\n" +
+                "3. Exportar a PDF (vista previa) o Guardar como .CSV.\n" +
+                "\n" +
+                "• Gerencia Comercial: Análisis de Abandono y Ventas por Vendedor.\n" +
+                "• Gerencia de Inventario: Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.\n" +
+                "• Ventas: Recomendación de Prendas."),
 
             ["ReporteJornadaForm"] = new TemaAyuda("Reporte de jornada",
                 "Resumen de una jornada: eventos de negocio del día, prendas disponibles, clientes y días sin copia de seguridad.\n" +

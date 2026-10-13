@@ -115,6 +115,17 @@ Administrador puede corregirlo a mano, como excepción).
 
 ---
 
+## Seguridad (Administrador)
+
+- `admin` → **Administrar → Usuarios → Administración de Usuarios**: una sola pantalla con dos pestañas.
+  **Datos administrativos**: **Nuevo usuario** (el único alta; la clave se genera y se exporta a un archivo),
+  editar datos, **Cambiar rol** y **Ver historial de cambios** (Memento). **Cuentas**: resetear la clave,
+  desbloquear, archivar y purgar.
+- `admin` → **Administrar → Perfiles y Permisos** (Composite): **Gestión de roles** para crear roles y asignar
+  permisos o sub-roles; la pestaña **Vista completa** muestra el árbol entero en solo lectura.
+
+---
+
 ## Volver a empezar
 
 1. Backup de la base (`admin` → **Administrar → Sistema → Backup y Restauración**, o desde SQL Server).

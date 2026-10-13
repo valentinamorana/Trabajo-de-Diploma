@@ -123,7 +123,7 @@ module.exports = [
               nota('«include» CU02-VEN Consultar Catálogo', 'F', 'PB'),
               { loop: 'Por cada prenda que el Vendedor anota (o quita) de la selección', pasos: [
                 c('F', 'CB', 'ObtenerEstadoComercial(cliente, prendasSolicitadas)'),
-                r('CB', 'F', 'cupo disponible del plan (¿supera el límite?)'),
+                r('CB', 'F', 'cupo disponible del plan (ExcedeCupo: ¿excede el cupo?)'),
                 r('F', 'V', 'Detalle de selección (prenda, talle, color, cantidad) y estado del cupo')
               ] },
               { alt: 'Excede el cupo y el cliente no ajusta', pasos: [
@@ -1189,20 +1189,29 @@ module.exports = [
   },
   {
     tipo: 'secuencia', id: 'DSS_PN03_CU02_GER_ConsultarAnalitica', titulo: 'PN03 · CU02-GER Consultar Analítica de Negocio',
-    participantes: [A('G', 'Gerencia'), P('M', 'Menu'), P('FA', 'AnalisisAbandonoForm'), P('BA', 'BLL.AnalisisAbandono'), P('ER', 'EstrategiaRiesgo'), P('DC', 'DAL.Cliente'),
-                    P('GR', 'GeneradorReporte'), P('EX', 'Exportador'), P('FV', 'ReporteVentasVendedorForm'), P('BV', 'BLL.ReporteVentasVendedor'),
-                    P('FR', 'AnalisisRotacionForm'), P('BR', 'BLL.AnalisisRotacion'), P('FM', 'AnalisisMantenimientoForm'), P('BM', 'BLL.AnalisisMantenimiento'),
-                    P('DM', 'DAL.MantenimientoPrenda'), P('FE', 'AnalisisEscasezForm'), P('BE', 'BLL.AnalisisEscasez'), P('FC', 'RecomendacionPrendasForm'),
+    // GUI/AnaliticaNegocioForm.cs: un solo formulario con selector; lo propio de cada reporte vive en
+    // GUI/Analitica/Vista*.cs (filtros, columnas, generador de exportación). El selector lo arma
+    // BLL.MenuVisibilidad.ReportesVisibles con las patentes del usuario (una por reporte).
+    participantes: [A('G', 'Gerencia'), P('M', 'Menu'), P('F', 'AnaliticaNegocioForm'), P('MV', 'BLL.MenuVisibilidad'),
+                    P('VA', 'VistaAbandono'), P('BA', 'BLL.AnalisisAbandono'), P('ER', 'EstrategiaRiesgo'), P('DC', 'DAL.Cliente'),
+                    P('GR', 'GeneradorReporte'), P('EX', 'Exportador'), P('VV', 'VistaVentasVendedor'), P('BV', 'BLL.ReporteVentasVendedor'),
+                    P('VR', 'VistaRotacion'), P('BR', 'BLL.AnalisisRotacion'), P('VM', 'VistaMantenimiento'), P('BM', 'BLL.AnalisisMantenimiento'),
+                    P('DM', 'DAL.MantenimientoPrenda'), P('VE', 'VistaEscasez'), P('BE', 'BLL.AnalisisEscasez'), P('VC', 'VistaRecomendacion'),
                     P('BC', 'BLL.RecomendacionPrendas'), P('DP', 'DAL.Pedido'), P('DR', 'DAL.Prenda')],
     pasos: [
-      nota('Menú "Analítica de Negocio": seis reportes de solo lectura; cada ítem se muestra según los permisos del usuario', 'G', 'M'),
+      nota('Menú "Analítica de Negocio": una sola entrada, visible si el usuario tiene al menos una de las seis patentes de reporte', 'G', 'M'),
+      c('G', 'M', 'Analítica de Negocio'),
+      c('M', 'F', 'new AnaliticaNegocioForm(permisos, esAdministrador)  [AbrirUnico: hijo MDI]'),
+      c('F', 'MV', 'ReportesVisibles(patentes, esAdmin)'),
+      r('MV', 'F', 'List<ReporteAnalitica>  [los reportes cuya patente tiene el usuario; todos si es Administrador]'),
+      r('F', 'G', 'Selector con los reportes permitidos (el primero elegido)'),
       { alt: 'Análisis de Abandono', pasos: [
-        c('G', 'M', 'Analítica de Negocio → Análisis de Abandono'),
-        c('M', 'FA', 'new AnalisisAbandonoForm()  [AbrirUnico: hijo MDI]'),
-        nota('Al cargar, CargarEstrategias() ofrece EstrategiaVencimientoInactividad (por defecto), EstrategiaInactividadPura y EstrategiaClienteNuevoInactivo', 'FA'),
-        c('G', 'FA', 'Elige el criterio de riesgo y pulsa Generar'),
-        c('FA', 'BA', 'CambiarEstrategia(estrategia)  [patrón Strategy: la elegida en el combo]'),
-        c('FA', 'BA', 'Detectar()'),
+        c('G', 'F', 'Elige "Análisis de Abandono" en el selector'),
+        nota('Su filtro ofrece EstrategiaVencimientoInactividad (por defecto), EstrategiaInactividadPura y EstrategiaClienteNuevoInactivo', 'VA'),
+        c('G', 'F', 'Elige el criterio de riesgo y pulsa Generar'),
+        c('F', 'VA', 'Generar()'),
+        c('VA', 'BA', 'CambiarEstrategia(estrategia)  [patrón Strategy: la elegida en el combo]'),
+        c('VA', 'BA', 'Detectar()'),
         c('BA', 'DP', 'ObtenerFechaUltimoPedidoPorCliente()'),
         r('DP', 'BA', 'fecha del último pedido de cada cliente'),
         c('BA', 'DC', 'ObtenerTodos()'),
@@ -1211,72 +1220,77 @@ module.exports = [
           c('BA', 'ER', 'Evaluar(datos)  [cliente + fecha de su último pedido]'),
           r('ER', 'BA', 'ResultadoRiesgo (EnRiesgo, Motivo)')
         ] },
-        r('BA', 'FA', 'List<ClienteEnRiesgo>'),
-        r('FA', 'G', 'Grilla de clientes en riesgo y cantidad según el criterio (exportar habilitado si hay resultados)'),
+        r('BA', 'VA', 'List<ClienteEnRiesgo>'),
+        r('VA', 'F', 'ResultadoVistaReporte (tabla y resumen)'),
+        r('F', 'G', 'Grilla de clientes en riesgo y cantidad según el criterio (exportar habilitado si hay resultados)'),
         { opt: 'Exportar a PDF o Guardar como .CSV', pasos: [
-          c('G', 'FA', 'Pulsa "Exportar a PDF" o "Guardar como .CSV"'),
-          c('FA', 'FA', 'Exportar(formato)  [formato = "pdf" o "csv"; arma el ReporteExportable con la grilla]'),
-          c('FA', 'GR', 'CrearExportador(formato)  [generador: GeneradorAnalisisAbandono, Factory Method]'),
-          r('GR', 'FA', 'Exportador (PDF o CSV)'),
-          c('FA', 'EX', 'Exportar(reporte, propietario)'),
+          c('G', 'F', 'Pulsa "Exportar a PDF" o "Guardar como .CSV"'),
+          c('F', 'F', 'Exportar(formato)  [formato = "pdf" o "csv"; arma el ReporteExportable con el título del reporte y la grilla]'),
+          c('F', 'VA', 'CrearGenerador()'),
+          r('VA', 'F', 'GeneradorAnalisisAbandono'),
+          c('F', 'GR', 'CrearExportador(formato)  [Factory Method]'),
+          r('GR', 'F', 'Exportador (PDF o CSV)'),
+          c('F', 'EX', 'Exportar(reporte, propietario)'),
           r('EX', 'G', 'PDF (vista previa) o archivo .CSV')
         ] }
       ], sino: [
         { etiqueta: 'Ventas por Vendedor', pasos: [
-          c('G', 'M', 'Analítica de Negocio → Ventas por Vendedor'),
-          c('M', 'FV', 'new ReporteVentasVendedorForm()'),
-          c('G', 'FV', 'Pulsa Generar'),
-          c('FV', 'BV', 'Obtener()'),
+          c('G', 'F', 'Elige "Ventas por Vendedor" y pulsa Generar'),
+          c('F', 'VV', 'Generar()'),
+          c('VV', 'BV', 'Obtener()'),
           c('BV', 'DP', 'ObtenerEstadisticasPorEmpleado()'),
-          r('BV', 'FV', 'List<DesempenoVendedor>'),
-          r('FV', 'G', 'Grilla por vendedor: pedidos, entregados, cancelados y tasa de cancelación')
+          r('BV', 'VV', 'List<DesempenoVendedor>'),
+          r('VV', 'F', 'ResultadoVistaReporte'),
+          r('F', 'G', 'Grilla por vendedor: pedidos, entregados, cancelados y tasa de cancelación')
         ] },
         { etiqueta: 'Rotación de Prendas', pasos: [
-          c('G', 'M', 'Analítica de Negocio → Rotación de Prendas'),
-          c('M', 'FR', 'new AnalisisRotacionForm()'),
-          c('G', 'FR', 'Pulsa Generar'),
-          c('FR', 'BR', 'Detectar()'),
+          c('G', 'F', 'Elige "Rotación de Prendas" y pulsa Generar'),
+          c('F', 'VR', 'Generar()'),
+          c('VR', 'BR', 'Detectar()'),
           c('BR', 'DP', 'ObtenerCantidadPedidosPorPrenda()'),
           c('BR', 'DR', 'ObtenerTodos()  [la BLL descarta las de Baja]'),
-          r('BR', 'FR', 'List<RotacionPrenda>  [baja demanda: sin pedidos y 30 días o más en catálogo; alta: 5 pedidos o más]'),
-          r('FR', 'G', 'Grilla de prendas marcadas por rotación')
+          r('BR', 'VR', 'List<RotacionPrenda>  [baja demanda: sin pedidos y 30 días o más en catálogo; alta: 5 pedidos o más]'),
+          r('VR', 'F', 'ResultadoVistaReporte'),
+          r('F', 'G', 'Grilla de prendas marcadas por rotación')
         ] },
         { etiqueta: 'Tiempos de Mantenimiento', pasos: [
-          c('G', 'M', 'Analítica de Negocio → Tiempos de Mantenimiento'),
-          c('M', 'FM', 'new AnalisisMantenimientoForm()'),
-          c('G', 'FM', 'Pulsa Generar'),
-          c('FM', 'BM', 'Detectar()'),
+          c('G', 'F', 'Elige "Tiempos de Mantenimiento" y pulsa Generar'),
+          c('F', 'VM', 'Generar()'),
+          c('VM', 'BM', 'Detectar()'),
           c('BM', 'DM', 'ObtenerTodos()'),
-          r('BM', 'FM', 'List<TiempoMantenimientoPrenda>  [3 mantenimientos o más, o promedio de 5 días o más]'),
-          r('FM', 'G', 'Grilla de prendas con mantenimientos excesivos')
+          r('BM', 'VM', 'List<TiempoMantenimientoPrenda>  [3 mantenimientos o más, o promedio de 5 días o más]'),
+          r('VM', 'F', 'ResultadoVistaReporte'),
+          r('F', 'G', 'Grilla de prendas con mantenimientos excesivos')
         ] },
         { etiqueta: 'Escasez de Stock', pasos: [
-          c('G', 'M', 'Analítica de Negocio → Escasez de Stock'),
-          c('M', 'FE', 'new AnalisisEscasezForm()'),
-          c('G', 'FE', 'Indica el umbral mínimo (por defecto 3) y pulsa Generar'),
-          c('FE', 'BE', 'Detectar(umbralMinimo)  [(int)numUmbral.Value]'),
+          c('G', 'F', 'Elige "Escasez de Stock", indica el umbral mínimo (por defecto 3) y pulsa Generar'),
+          c('F', 'VE', 'Generar()'),
+          c('VE', 'BE', 'Detectar(umbralMinimo)  [(int)numUmbral.Value]'),
           c('BE', 'DR', 'ObtenerConteoDisponiblesPorTalleCategoria()'),
-          r('BE', 'FE', 'List<EscasezStock>  [talle + categoría con menos disponibles que el umbral]'),
-          r('FE', 'G', 'Grilla de combinaciones en escasez')
+          r('BE', 'VE', 'List<EscasezStock>  [talle + categoría con menos disponibles que el umbral]'),
+          r('VE', 'F', 'ResultadoVistaReporte'),
+          r('F', 'G', 'Grilla de combinaciones en escasez')
         ] },
         { etiqueta: 'Recomendación de Prendas', pasos: [
-          c('G', 'M', 'Analítica de Negocio → Recomendación de Prendas'),
-          c('M', 'FC', 'new RecomendacionPrendasForm()'),
-          nota('Al cargar, CargarClientes() llena el combo con BLL.Cliente.ObtenerTodos()', 'FC'),
-          c('G', 'FC', 'Elige el cliente y pulsa Generar'),
-          c('FC', 'BC', 'Recomendar(idCliente)  [item.Cliente.IdCliente]'),
+          c('G', 'F', 'Elige "Recomendación de Prendas"'),
+          c('F', 'VC', 'Cargar()  [la primera vez: llena el combo con BLL.Cliente.ObtenerTodos]'),
+          c('G', 'F', 'Elige el cliente y pulsa Generar'),
+          c('F', 'VC', 'Generar()'),
+          c('VC', 'BC', 'Recomendar(idCliente)  [item.Cliente.IdCliente]'),
           c('BC', 'DP', 'ObtenerPrendasHistoricasPorCliente(idCliente)'),
           { alt: 'Sin historial de pedidos', pasos: [
-            r('BC', 'FC', 'lista vacía'),
-            r('FC', 'G', '"El cliente no tiene historial de pedidos suficiente para recomendar"')],
+            r('BC', 'VC', 'lista vacía'),
+            r('VC', 'F', 'ResultadoVistaReporte sin filas'),
+            r('F', 'G', '"El cliente no tiene historial de pedidos suficiente para recomendar"')],
             sino: [{ etiqueta: 'Con historial', pasos: [
               c('BC', 'DR', 'ObtenerDisponibles()'),
-              r('BC', 'FC', 'List<PrendaRecomendada>  [categoría y/o color favoritos, sin las ya pedidas]'),
-              r('FC', 'G', 'Grilla de prendas recomendadas')
+              r('BC', 'VC', 'List<PrendaRecomendada>  [categoría y/o color favoritos, sin las ya pedidas]'),
+              r('VC', 'F', 'ResultadoVistaReporte'),
+              r('F', 'G', 'Grilla de prendas recomendadas')
             ] }] }
         ] }
       ] },
-      nota('Los otros cinco formularios exportan igual: Exportar(formato) → CrearExportador(formato) → Exportar(reporte, propietario), con GeneradorVentasVendedor, GeneradorRotacion, GeneradorMantenimiento, GeneradorEscasez y GeneradorRecomendacion', 'G')
+      nota('Los otros cinco reportes exportan igual: CrearGenerador → CrearExportador(formato) → Exportar(reporte, propietario), con GeneradorVentasVendedor, GeneradorRotacion, GeneradorMantenimiento, GeneradorEscasez y GeneradorRecomendacion', 'G')
     ]
   },
 ];

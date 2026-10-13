@@ -840,6 +840,38 @@ namespace Tests
         }
 
         [TestMethod]
+        public void TieneFaltantesInformados_SoloConFaltantes()
+        {
+            foreach (BE.EstadoPedido estado in Enum.GetValues(typeof(BE.EstadoPedido)))
+            {
+                var p = new BE.Pedido { Estado = estado };
+                Assert.AreEqual(estado == BE.EstadoPedido.ConFaltantes, p.TieneFaltantesInformados(), estado.ToString());
+            }
+        }
+
+        [TestMethod]
+        public void TodaviaSinPrendasSeparadas_SoloAntesDeSeparar()
+        {
+            foreach (BE.EstadoPedido estado in Enum.GetValues(typeof(BE.EstadoPedido)))
+            {
+                var p = new BE.Pedido { Estado = estado };
+                bool esperado = estado == BE.EstadoPedido.EnControlStock || estado == BE.EstadoPedido.ConFaltantes;
+                Assert.AreEqual(esperado, p.TodaviaSinPrendasSeparadas(), estado.ToString());
+            }
+        }
+
+        [TestMethod]
+        public void CancelarEnControlStock_NoTienePrendasQueLiberar()
+        {
+            // El mensaje de cancelación distingue si hay prendas separadas que liberar.
+            var enControl = new BE.Pedido { Estado = BE.EstadoPedido.EnControlStock };
+            Assert.IsTrue(enControl.PuedeCancelarse() && enControl.TodaviaSinPrendasSeparadas());
+
+            var separado = new BE.Pedido { Estado = BE.EstadoPedido.Separado };
+            Assert.IsTrue(separado.PuedeCancelarse() && !separado.TodaviaSinPrendasSeparadas());
+        }
+
+        [TestMethod]
         public void RestaurarOperacion_PasoDelControlDeStock_NoSePuedeRevertir()
         {
             LoginComoAdministrador();

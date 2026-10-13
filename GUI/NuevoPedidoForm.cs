@@ -430,14 +430,14 @@ namespace GUI
                 Tr("lbl.ped.res.linea1", "Seleccionadas: {0}  |  Ya en uso: {1}  |  Total: {2}"),
                 seleccionadas, enUso, total);
             string linea2 = "";
-            bool excede = false;
+            // La BLL decide si la selección excede el cupo (incluido el plan sin cupo).
+            bool excede = estado.ExcedeCupo;
 
             if (limite > 0)
             {
-                if (estado.SuperaLimite)
+                if (excede)
                 {
                     // "Informar exceso de cupo" (Detalle de restricciones de cupo).
-                    excede = true;
                     linea2 = string.Format(
                         Tr("lbl.ped.res.limite",
                            "El plan '{0}' permite {1} prenda(s). Estás superando el límite por {2}."),
@@ -471,7 +471,6 @@ namespace GUI
             }
             else
             {
-                excede = seleccionadas > 0;   // plan sin cupo: cualquier selección lo excede
                 lblResumen.ForeColor = excede ? Color.DarkRed : Tema.RosaOscuro;
             }
 

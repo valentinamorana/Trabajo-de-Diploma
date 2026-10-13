@@ -603,6 +603,45 @@ namespace Tests
             Assert.IsFalse(estado.SuperaLimite);
             Assert.AreEqual(0, estado.Exceso);
             Assert.AreEqual(2, estado.PrendasDisponibles); // 3 - 1
+            Assert.IsFalse(estado.ExcedeCupo);
+        }
+
+        [TestMethod]
+        public void EstadoComercial_SuperaLimite_ExcedeCupo()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var cliente = ClienteValido();
+            cliente.LimitePrendas = 3;
+            cliente.StockUtilizado = 2;
+
+            var estado = bll.ObtenerEstadoComercial(cliente, 2); // 2 + 2 = 4 > 3
+
+            Assert.IsTrue(estado.ExcedeCupo);
+        }
+
+        [TestMethod]
+        public void EstadoComercial_PlanSinCupo_CualquierSeleccionLoExcede()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var cliente = ClienteValido();
+            cliente.LimitePrendas = 0;
+            cliente.StockUtilizado = 0;
+
+            Assert.IsTrue(bll.ObtenerEstadoComercial(cliente, 1).ExcedeCupo,
+                "Con un plan sin cupo, una sola prenda ya lo excede.");
+            Assert.IsFalse(bll.ObtenerEstadoComercial(cliente, 0).ExcedeCupo,
+                "Sin selección no hay exceso.");
+        }
+
+        [TestMethod]
+        public void EstadoComercial_ClienteSinPlan_CualquierSeleccionExcede()
+        {
+            var bll = new BLL.Cliente(new FakeClienteDAL());
+            var cliente = ClienteValido();
+            cliente.IdPlan = null;
+
+            Assert.IsTrue(bll.ObtenerEstadoComercial(cliente, 1).ExcedeCupo);
+            Assert.IsFalse(bll.ObtenerEstadoComercial(cliente, 0).ExcedeCupo);
         }
 
         // ── Alta fija la fecha de alta (antes la ponía ClienteForm) ─────────────

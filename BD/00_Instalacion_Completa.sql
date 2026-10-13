@@ -3496,16 +3496,124 @@ BEGIN
            PRINT ''SugerenciaPromocion: columna TasaRetencion agregada; '' + CAST(@n AS NVARCHAR(10)) + '' sugerencia(s) previas con 100 %.'';');
 END
 GO
--- Clave de idioma reemplazada (el texto ahora muestra la tasa): promo.analisis.calc.beneficiotasa.
+-- Claves de idioma sin uso: promo.analisis.calc.beneficiosug (reemplazada por .beneficiotasa, que
+-- muestra la tasa) y est.pendiente (Pedidos Realizados usa las etiquetas de GUI/EstadosPedido).
 IF OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Traduccion') IS NOT NULL
 BEGIN
     DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl
-    WHERE c.Clave = N'promo.analisis.calc.beneficiosug';
-    DELETE FROM Control WHERE Clave = N'promo.analisis.calc.beneficiosug';
+    WHERE c.Clave IN (N'promo.analisis.calc.beneficiosug', N'est.pendiente');
+    DELETE FROM Control WHERE Clave IN (N'promo.analisis.calc.beneficiosug', N'est.pendiente');
 END
 GO
 PRINT 'Sección 20h: tasa de retención de las sugerencias (PN03) verificada.';
 GO
+-- ============================================================
+-- WardrobeFlow — 20i. ANALÍTICA DE NEGOCIO EN UN SOLO FORMULARIO
+-- ------------------------------------------------------------
+-- Los 6 reportes de decisión (Análisis de Abandono, Ventas por Vendedor, Rotación de Prendas,
+-- Tiempos de Mantenimiento, Escasez de Stock y Recomendación de Prendas) dejan de ser 6
+-- formularios con un ítem de menú cada uno: ahora son UNA entrada de menú, "Analítica de
+-- Negocio" (analiticaNegocioToolStripMenuItem), que abre GUI.AnaliticaNegocioForm con un
+-- selector de reporte.
+--   · Patentes: NO cambian. Cada reporte conserva la suya (mnuAnalisisAbandono,
+--     mnuVentasVendedor, mnuAnalisisRotacion, mnuAnalisisMantenimiento, mnuAnalisisEscasez,
+--     mnuRecomendacionPrendas) con los mismos roles: el selector ofrece solo los reportes cuya
+--     patente tiene el usuario, y la entrada del menú se ve si tiene AL MENOS UNA (la decisión
+--     vive en BLL.MenuVisibilidad: Resolver + ReportesVisibles).
+--   · ControlMapeado: se borran los mapeos del Menú a los 6 ítems que ya no existen. La entrada
+--     única no se mapea a una patente: su visibilidad es el OR de las 6 y el Menú no se gobierna
+--     por ControlMapeado (GUI.ManejadorSeguridad lo excluye; usa BLL.MenuVisibilidad).
+--   · Textos de idiomas: se borran los rótulos de los 6 ítems de menú (mnu.abandono,
+--     mnu.ventasvendedor, mnu.rotacion, mnu.mantanalisis, mnu.escasez, mnu.recomendacion); el
+--     selector usa los títulos de cada reporte, que ya existían. Las claves nuevas (selector,
+--     ayuda) las carga la aplicación desde traducciones.tsv.
+-- Idempotente: en una base ya migrada no cambia nada.
+-- ============================================================
+IF OBJECT_ID('ControlMapeado') IS NOT NULL
+BEGIN
+    DELETE FROM ControlMapeado
+    WHERE Formulario = 'Menu'
+      AND NombreControl IN ('analisisAbandonoToolStripMenuItem', 'ventasVendedorToolStripMenuItem',
+                            'analisisRotacionToolStripMenuItem', 'analisisMantenimientoToolStripMenuItem',
+                            'analisisEscasezToolStripMenuItem', 'recomendacionPrendasToolStripMenuItem');
+    DECLARE @mapeos INT = @@ROWCOUNT;
+    IF @mapeos > 0 PRINT CONCAT('Analítica de Negocio: mapeos de menú obsoletos borrados: ', @mapeos, '.');
+END
+GO
+
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL
+BEGIN
+    DECLARE @ClavesObsoletasAnalitica TABLE (Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT PRIMARY KEY);
+    INSERT INTO @ClavesObsoletasAnalitica (Clave) VALUES
+        (N'mnu.abandono'), (N'mnu.ventasvendedor'), (N'mnu.rotacion'),
+        (N'mnu.mantanalisis'), (N'mnu.escasez'), (N'mnu.recomendacion');
+    DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl JOIN @ClavesObsoletasAnalitica o ON o.Clave = c.Clave;
+    DELETE c FROM Control c JOIN @ClavesObsoletasAnalitica o ON o.Clave = c.Clave
+    WHERE NOT EXISTS (SELECT 1 FROM Traduccion t WHERE t.IdControl = c.IdControl);
+    DECLARE @obsoletas INT = @@ROWCOUNT;
+    IF @obsoletas > 0 PRINT CONCAT('Analítica de Negocio: claves de idioma obsoletas borradas: ', @obsoletas, '.');
+END
+GO
+PRINT 'Sección 20i: Analítica de Negocio en un solo formulario verificada.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20j. P2: CONSOLIDACIÓN DE PANTALLAS DE SEGURIDAD
+-- ------------------------------------------------------------
+-- Consolidación de pantallas de seguridad (GUI, sin cambios de esquema ni de patentes):
+--   · "Cuentas de Usuario" (GUI.Usuarios) y "Administración de Usuarios"
+--     (AdministracionUsuariosForm, eliminado) quedan en UN formulario, GUI.Usuarios, con las
+--     pestañas Cuentas y Datos administrativos. Las dos pantallas ya estaban gobernadas por la
+--     misma patente (mnuUsuarios), así que ningún rol gana ni pierde acceso. El alta de usuarios
+--     queda en un único lugar (Datos administrativos › Nuevo usuario). El ítem de menú que
+--     sobrevive es usuariosToolStripMenuItem, el que ya está en ControlMapeado: no hay mapeos que
+--     agregar ni quitar.
+--   · La "Vista completa del sistema" (ExploradorCompositeForm, eliminado) pasa a ser la pestaña
+--     Vista completa de Perfiles y Permisos (GestorPermisos). Solo se abría desde esa pantalla,
+--     así que sigue gobernada por mnuUsuarios; no tenía ítem de menú ni mapeo propio.
+--   · Textos de idiomas: se actualiza la ayuda en línea de las dos pantallas (sin pisar textos
+--     editados en Idiomas) y se borran las claves que la aplicación ya no usa (las nuevas las
+--     carga la aplicación desde traducciones.tsv).
+-- Idempotente: en una base ya migrada no cambia nada.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @TextosP2 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                             TextoAnterior NVARCHAR(2000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(2000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @TextosP2 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.Usuarios', N'Alta, edición, desbloqueo y archivo de usuarios (solo Administrador).' + NCHAR(10) + NCHAR(10) + N'• Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock.' + NCHAR(10) + N'• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).' + NCHAR(10) + N'• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.' + NCHAR(10) + N'• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.', N'Administración de usuarios en dos pestañas (solo Administrador).' + NCHAR(10) + NCHAR(10) + N'Cuentas:' + NCHAR(10) + N'• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).' + NCHAR(10) + N'• Desbloquear: habilita una cuenta bloqueada por intentos fallidos de ingreso.' + NCHAR(10) + N'• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.' + NCHAR(10) + N'• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.' + NCHAR(10) + NCHAR(10) + N'Datos administrativos:' + NCHAR(10) + N'• Nuevo usuario: el único alta de usuarios. Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock; la contraseña se genera y se exporta a un archivo.' + NCHAR(10) + N'• Guardar cambios / Cambiar rol: nombre, apellido, usuario, email, fecha de nacimiento y rol (el sistema no puede quedar sin administrador).' + NCHAR(10) + N'• Ver historial de cambios: las versiones anteriores del usuario.'),
+    (N'EN', N'ayuda.Usuarios', N'Create, edit, unlock and archive users (Administrator only).' + NCHAR(10) + NCHAR(10) + N'• Each new user is linked to their employee record, so they can sell, collect payments or control stock.' + NCHAR(10) + N'• Reset password: generates a new one and exports it to a file (asks for confirmation).' + NCHAR(10) + N'• Archive: the user cannot sign in and leaves the list, but their history is kept.' + NCHAR(10) + N'• Purge: permanently deletes users archived more than a year ago, except those who signed promotion records.', N'User administration in two tabs (Administrator only).' + NCHAR(10) + NCHAR(10) + N'Accounts:' + NCHAR(10) + N'• Reset password: generates a new one and exports it to a file (asks for confirmation).' + NCHAR(10) + N'• Unlock: re-enables an account locked after failed sign-in attempts.' + NCHAR(10) + N'• Archive: the user cannot sign in and leaves the list, but their history is kept.' + NCHAR(10) + N'• Purge: permanently deletes users archived more than a year ago, except those who signed promotion records.' + NCHAR(10) + NCHAR(10) + N'Administrative data:' + NCHAR(10) + N'• New user: the only way to create users. Each new user is linked to their employee record, so they can sell, collect payments or control stock; the password is generated and exported to a file.' + NCHAR(10) + N'• Save changes / Change role: first name, last name, username, email, date of birth and role (the system cannot be left without an administrator).' + NCHAR(10) + N'• View change history: the user''s previous versions.'),
+    (N'RU', N'ayuda.Usuarios', N'Создание, редактирование, разблокировка и архивирование пользователей (только администратор).' + NCHAR(10) + NCHAR(10) + N'• Каждый новый пользователь связывается со своей карточкой сотрудника, чтобы продавать, принимать оплату или контролировать наличие.' + NCHAR(10) + N'• «Сбросить пароль»: создаёт новый и сохраняет его в файл (с подтверждением).' + NCHAR(10) + N'• «Архивировать»: пользователь не может войти и исчезает из списка, но история сохраняется.' + NCHAR(10) + N'• «Очистить»: окончательно удаляет архивированных более года назад, кроме подписавших записи об акциях.', N'Администрирование пользователей на двух вкладках (только администратор).' + NCHAR(10) + NCHAR(10) + N'Учётные записи:' + NCHAR(10) + N'• «Сбросить пароль»: создаёт новый и сохраняет его в файл (с подтверждением).' + NCHAR(10) + N'• «Разблокировать»: снова включает учётную запись, заблокированную после неудачных попыток входа.' + NCHAR(10) + N'• «Архивировать»: пользователь не может войти и исчезает из списка, но история сохраняется.' + NCHAR(10) + N'• «Очистить»: окончательно удаляет архивированных более года назад, кроме подписавших записи об акциях.' + NCHAR(10) + NCHAR(10) + N'Административные данные:' + NCHAR(10) + N'• «Новый пользователь»: единственный способ создать пользователя. Каждый новый пользователь связывается со своей карточкой сотрудника, чтобы продавать, принимать оплату или контролировать наличие; пароль создаётся и сохраняется в файл.' + NCHAR(10) + N'• «Сохранить изменения» / «Сменить роль»: имя, фамилия, имя пользователя, email, дата рождения и роль (систему нельзя оставить без администратора).' + NCHAR(10) + N'• «История изменений»: предыдущие версии пользователя.'),
+    (N'PT', N'ayuda.Usuarios', N'Cadastro, edição, desbloqueio e arquivamento de usuários (só Administrador).' + NCHAR(10) + NCHAR(10) + N'• Cada usuário novo fica vinculado à sua ficha de funcionário, para poder vender, cobrar ou controlar estoque.' + NCHAR(10) + N'• Redefinir senha: gera uma nova e a exporta para um arquivo (pede confirmação).' + NCHAR(10) + N'• Arquivar: o usuário não pode entrar e sai da lista, mas seu histórico é mantido.' + NCHAR(10) + N'• Expurgar: exclui definitivamente os arquivados há mais de um ano, exceto os que assinaram registros de promoções.', N'Administração de usuários em duas abas (só Administrador).' + NCHAR(10) + NCHAR(10) + N'Contas:' + NCHAR(10) + N'• Redefinir senha: gera uma nova e a exporta para um arquivo (pede confirmação).' + NCHAR(10) + N'• Desbloquear: reativa uma conta bloqueada por tentativas de acesso falhas.' + NCHAR(10) + N'• Arquivar: o usuário não pode entrar e sai da lista, mas seu histórico é mantido.' + NCHAR(10) + N'• Expurgar: exclui definitivamente os arquivados há mais de um ano, exceto os que assinaram registros de promoções.' + NCHAR(10) + NCHAR(10) + N'Dados administrativos:' + NCHAR(10) + N'• Novo usuário: o único cadastro de usuários. Cada usuário novo fica vinculado à sua ficha de funcionário, para poder vender, cobrar ou controlar estoque; a senha é gerada e exportada para um arquivo.' + NCHAR(10) + N'• Salvar alterações / Alterar perfil: nome, sobrenome, usuário, email, data de nascimento e perfil (o sistema não pode ficar sem administrador).' + NCHAR(10) + N'• Ver histórico de alterações: as versões anteriores do usuário.'),
+    (N'ES', N'ayuda.GestorPermisos', N'Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.', N'Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.' + NCHAR(10) + NCHAR(10) + N'• Gestión de roles: crear, renombrar y eliminar roles, y asignar o quitar permisos y sub-roles.' + NCHAR(10) + N'• Vista completa: el árbol completo de roles, familias y permisos, en solo lectura.'),
+    (N'EN', N'ayuda.GestorPermisos', N'System roles and permissions. A role with assigned users cannot be deleted or renamed.', N'System roles and permissions. A role with assigned users cannot be deleted or renamed.' + NCHAR(10) + NCHAR(10) + N'• Role management: create, rename and delete roles, and assign or remove permissions and sub-roles.' + NCHAR(10) + N'• Full view: the complete tree of roles, families and permissions, read-only.'),
+    (N'RU', N'ayuda.GestorPermisos', N'Роли и права системы. Роль с назначенными пользователями нельзя удалить или переименовать.', N'Роли и права системы. Роль с назначенными пользователями нельзя удалить или переименовать.' + NCHAR(10) + NCHAR(10) + N'• Управление ролями: создание, переименование и удаление ролей, назначение и снятие прав и подролей.' + NCHAR(10) + N'• Полный обзор: всё дерево ролей, семейств и прав, только для чтения.'),
+    (N'PT', N'ayuda.GestorPermisos', N'Perfis e permissões do sistema. Um perfil com usuários atribuídos não pode ser excluído nem renomeado.', N'Perfis e permissões do sistema. Um perfil com usuários atribuídos não pode ser excluído nem renomeado.' + NCHAR(10) + NCHAR(10) + N'• Gestão de perfis: criar, renomear e excluir perfis, e atribuir ou remover permissões e subperfis.' + NCHAR(10) + N'• Visão completa: a árvore completa de perfis, famílias e permissões, somente leitura.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @TextosP2 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('P2: textos de fábrica actualizados: ', @@ROWCOUNT, ' fila(s).');
+
+    DECLARE @ClavesObsoletasP2 TABLE (Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT PRIMARY KEY);
+    INSERT INTO @ClavesObsoletasP2 (Clave) VALUES
+        -- Usuarios: el ítem "Cuentas de Usuario", el título viejo y el alta oculta de la pestaña Cuentas.
+        (N'mnu.cuentas'), (N'frm.gestion'), (N'lbl.nuevousuario'), (N'lbl.nombreusuario'), (N'lbl.perfilrol'),
+        (N'btn.agregar'), (N'msg.usr.creado.exportado'),
+        -- Perfiles: el botón y el formulario aparte de la Vista completa (hoy es una pestaña).
+        (N'btn.explorador'), (N'frm.explorador'), (N'lbl.explorador.titulo'), (N'btn.explorador.cerrar');
+    DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl JOIN @ClavesObsoletasP2 o ON o.Clave = c.Clave;
+    DELETE c FROM Control c JOIN @ClavesObsoletasP2 o ON o.Clave = c.Clave
+    WHERE NOT EXISTS (SELECT 1 FROM Traduccion t WHERE t.IdControl = c.IdControl);
+    DECLARE @obsoletasP2 INT = @@ROWCOUNT;
+    IF @obsoletasP2 > 0 PRINT CONCAT('P2: claves de idioma obsoletas borradas: ', @obsoletasP2, '.');
+END
+GO
+PRINT 'Sección 20j: pantallas de seguridad consolidadas (P2) verificadas.';
+GO
+
 -- ============================================================
 -- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
 -- ------------------------------------------------------------

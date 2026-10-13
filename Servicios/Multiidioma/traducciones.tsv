@@ -141,11 +141,6 @@ ES	lbl.estado	Estado:
 ES	btn.nuevaprenda	+ Nueva Prenda
 ES	btn.cambiarestado	Estado
 ES	lbl.clienteenuso	Cliente en uso:
-ES	frm.gestion	Gestión de Usuarios
-ES	lbl.nuevousuario	Nuevo Usuario
-ES	lbl.nombreusuario	Nombre de usuario:
-ES	lbl.perfilrol	Perfil (rol):
-ES	btn.agregar	Agregar Usuario
 ES	lbl.resettitulo	Resetear Contraseña
 ES	lbl.resetinfo	Seleccioná un usuario\nen la lista y presioná:
 ES	btn.resetclave	Resetear Contraseña
@@ -202,7 +197,6 @@ ES	col.ped.entrega	Entrega
 ES	urg.urgente	Urgente
 ES	urg.normal	Normal
 ES	urg.reciente	Reciente
-ES	est.pendiente	Pendiente
 ES	est.despachado	Despachado
 ES	est.entregado	Entregado
 ES	est.cancelado	Cancelado
@@ -424,7 +418,6 @@ ES	lbl.ped.infoplan	Cliente: {0}\nPlan: {1}\nPrendas en uso actualmente: {2}\nM�
 ES	err.ped.sinplan	{0} no tiene plan asignado.\nAsigná un plan en el módulo de Clientes antes de crear un pedido.
 ES	err.recup.nousername	Ingresá tu nombre de usuario.
 ES	msg.recup.exito	Si el usuario existe, contactá al administrador para que resetee\ntu contraseña desde Administrar -> Usuarios.
-ES	msg.usr.creado.exportado	Usuario '{0}' [{1}] creado.\nCredenciales guardadas en:\n{2}
 ES	msg.usr.clave.exportada	Contraseña de '{0}' regenerada automáticamente.\nCredenciales guardadas en:\n{1}
 ES	err.usr.selecciona	Seleccioná un usuario de la lista.
 ES	err.usr.sel.bloqueado	Seleccioná un usuario bloqueado de la lista.
@@ -450,12 +443,8 @@ ES	perm.pat.gestionarclientes	Gestionar Clientes
 ES	perm.pat.gestionarplansuscripciones	Gestionar Plan Suscripciones
 ES	perm.pat.realizarventas	Realizar Ventas
 ES	perm.pat.verpedidosrealizados	Ver Pedidos Realizados
-ES	btn.explorador	Ver vista completa del sistema
-ES	frm.explorador	Vista completa del sistema
-ES	lbl.explorador.titulo	Vista completa del sistema
 ES	lbl.explorador.descripcion	Estructura organizacional de WardrobeFlow — Solo lectura
 ES	lbl.explorador.leyenda	Familia (nodo compuesto — Área o Rol)    Patente (hoja — permiso atómico)
-ES	btn.explorador.cerrar	Cerrar
 ES	btn.explorador.colapsar	⊟ Colapsar todo
 ES	btn.explorador.expandir	⊞ Expandir todo
 ES	perfil.auditor	Auditor
@@ -901,11 +890,6 @@ EN	lbl.estado	Status:
 EN	btn.nuevaprenda	+ New Garment
 EN	btn.cambiarestado	Status
 EN	lbl.clienteenuso	Customer in use:
-EN	frm.gestion	User Management
-EN	lbl.nuevousuario	New User
-EN	lbl.nombreusuario	Username:
-EN	lbl.perfilrol	Role:
-EN	btn.agregar	Add User
 EN	lbl.resettitulo	Reset Password
 EN	lbl.resetinfo	Select a user\nfrom the list and press:
 EN	btn.resetclave	Reset Password
@@ -962,7 +946,6 @@ EN	col.ped.entrega	Delivery
 EN	urg.urgente	Urgent
 EN	urg.normal	Normal
 EN	urg.reciente	Recent
-EN	est.pendiente	Pending
 EN	est.despachado	Dispatched
 EN	est.entregado	Delivered
 EN	est.cancelado	Cancelled
@@ -1184,7 +1167,6 @@ EN	err.pdf.sinDatos	No data to export.
 EN	lbl.exportarpdf	Export PDF
 EN	lbl.ped.infoplan	Customer: {0}\nPlan: {1}\nGarments currently in use: {2}\nPayment method: {3}\nSince: {4}
 EN	err.ped.sinplan	{0} has no plan assigned.\nAssign a plan in the Customers module before creating an order.
-EN	msg.usr.creado.exportado	User '{0}' [{1}] created.\nCredentials saved to:\n{2}
 EN	msg.usr.clave.exportada	Password for '{0}' auto-generated.\nCredentials saved to:\n{1}
 EN	err.usr.selecciona	Select a user from the list.
 EN	err.usr.sel.bloqueado	Select a locked user from the list.
@@ -1210,12 +1192,8 @@ EN	perm.pat.gestionarclientes	Manage Customers
 EN	perm.pat.gestionarplansuscripciones	Manage Subscription Plans
 EN	perm.pat.realizarventas	Process Sales
 EN	perm.pat.verpedidosrealizados	View Fulfilled Orders
-EN	btn.explorador	View full system map
-EN	frm.explorador	Full system view
-EN	lbl.explorador.titulo	Full system view
 EN	lbl.explorador.descripcion	WardrobeFlow organizational structure — Read only
 EN	lbl.explorador.leyenda	Family (composite node — Area or Role)    Patent (leaf — atomic permission)
-EN	btn.explorador.cerrar	Close
 EN	btn.explorador.colapsar	⊟ Collapse all
 EN	btn.explorador.expandir	⊞ Expand all
 EN	perfil.auditor	Auditor
@@ -1661,11 +1639,6 @@ RU	lbl.estado	Состояние:
 RU	btn.nuevaprenda	+ Новая одежда
 RU	btn.cambiarestado	Состояние
 RU	lbl.clienteenuso	Клиент (в использовании):
-RU	frm.gestion	Управление пользователями
-RU	lbl.nuevousuario	Новый пользователь
-RU	lbl.nombreusuario	Имя пользователя:
-RU	lbl.perfilrol	Профиль (роль):
-RU	btn.agregar	Добавить пользователя
 RU	lbl.resettitulo	Сброс пароля
 RU	lbl.resetinfo	Выберите пользователя\nиз списка и нажмите:
 RU	btn.resetclave	Сбросить пароль
@@ -1724,7 +1697,6 @@ RU	lbl.ped.seleccionado	Заказ #{0} — {1} — {2}
 RU	urg.urgente	Срочно
 RU	urg.normal	Норма
 RU	urg.reciente	Недавно
-RU	est.pendiente	Ожидание
 RU	est.despachado	Отправлен
 RU	est.entregado	Доставлен
 RU	est.cancelado	Отменён
@@ -1944,7 +1916,6 @@ RU	err.pdf.sinDatos	Нет данных для экспорта.
 RU	lbl.exportarpdf	Экспорт PDF
 RU	lbl.ped.infoplan	Клиент: {0}\nПлан: {1}\nВещей в использовании: {2}\nМетод оплаты: {3}\nС: {4}
 RU	err.ped.sinplan	У {0} не назначен план.\nНазначьте план в модуле Клиентов перед созданием заказа.
-RU	msg.usr.creado.exportado	Пользователь '{0}' [{1}] создан.\nУчётные данные сохранены в:\n{2}
 RU	msg.usr.clave.exportada	Пароль '{0}' сгенерирован автоматически.\nУчётные данные сохранены в:\n{1}
 RU	err.usr.selecciona	Выберите пользователя из списка.
 RU	err.usr.sel.bloqueado	Выберите заблокированного пользователя из списка.
@@ -1970,12 +1941,8 @@ RU	perm.pat.gestionarclientes	Управление клиентами
 RU	perm.pat.gestionarplansuscripciones	Управление тарифными планами
 RU	perm.pat.realizarventas	Оформление продаж
 RU	perm.pat.verpedidosrealizados	Просмотр выполненных заказов
-RU	btn.explorador	Полная схема системы
-RU	frm.explorador	Полная схема системы
-RU	lbl.explorador.titulo	Полная схема системы
 RU	lbl.explorador.descripcion	Организационная структура WardrobeFlow — Только чтение
 RU	lbl.explorador.leyenda	Семья (составной узел — Область или Роль)    Патент (лист — атомарное разрешение)
-RU	btn.explorador.cerrar	Закрыть
 RU	btn.explorador.colapsar	⊟ Свернуть всё
 RU	btn.explorador.expandir	⊞ Развернуть всё
 RU	perfil.auditor	Аудитор
@@ -2462,11 +2429,6 @@ PT	lbl.estado	Estado:
 PT	btn.nuevaprenda	+ Nova Roupa
 PT	btn.cambiarestado	Estado
 PT	lbl.clienteenuso	Cliente em uso:
-PT	frm.gestion	Gerenciamento de Usuários
-PT	lbl.nuevousuario	Novo Usuário
-PT	lbl.nombreusuario	Nome de usuário:
-PT	lbl.perfilrol	Perfil (função):
-PT	btn.agregar	Adicionar Usuário
 PT	lbl.resettitulo	Redefinir Senha
 PT	lbl.resetinfo	Selecione um usuário\nna lista e pressione:
 PT	btn.resetclave	Redefinir Senha
@@ -2523,7 +2485,6 @@ PT	col.ped.entrega	Entrega
 PT	urg.urgente	Urgente
 PT	urg.normal	Normal
 PT	urg.reciente	Recente
-PT	est.pendiente	Pendente
 PT	est.despachado	Despachado
 PT	est.entregado	Entregue
 PT	est.cancelado	Cancelado
@@ -2745,7 +2706,6 @@ PT	err.pdf.sinDatos	Sem dados para exportar.
 PT	lbl.exportarpdf	Exportar PDF
 PT	lbl.ped.infoplan	Cliente: {0}\nPlano: {1}\nRoupas em uso: {2}\nForma de pagamento: {3}\nCadastro: {4}
 PT	err.ped.sinplan	{0} não tem plano atribuído.\nAtribua um plano no módulo de Clientes antes de criar um pedido.
-PT	msg.usr.creado.exportado	Usuário '{0}' [{1}] criado.\nCredenciais salvas em:\n{2}
 PT	msg.usr.clave.exportada	Senha de '{0}' regenerada automaticamente.\nCredenciais salvas em:\n{1}
 PT	err.usr.selecciona	Selecione um usuário da lista.
 PT	err.usr.sel.bloqueado	Selecione um usuário bloqueado da lista.
@@ -2771,12 +2731,8 @@ PT	perm.pat.gestionarclientes	Gerenciar Clientes
 PT	perm.pat.gestionarplansuscripciones	Gerenciar Planos de Assinatura
 PT	perm.pat.realizarventas	Realizar Vendas
 PT	perm.pat.verpedidosrealizados	Ver Pedidos Realizados
-PT	btn.explorador	Ver visão completa do sistema
-PT	frm.explorador	Visão completa do sistema
-PT	lbl.explorador.titulo	Visão completa do sistema
 PT	lbl.explorador.descripcion	Estrutura organizacional do WardrobeFlow — Somente leitura
 PT	lbl.explorador.leyenda	Família (nó composto — Área ou Papel)    Patente (folha — permissão atômica)
-PT	btn.explorador.cerrar	Fechar
 PT	btn.explorador.colapsar	⊟ Recolher tudo
 PT	btn.explorador.expandir	⊞ Expandir tudo
 PT	perfil.auditor	Auditor
@@ -3233,16 +3189,12 @@ RU	perm.msg.nombrevacio	Имя роли не может быть пустым.
 
 ES	mnu.grp.usuarios	Usuarios
 ES	mnu.grp.sistema	Sistema
-ES	mnu.cuentas	Cuentas de Usuario
 EN	mnu.grp.usuarios	Users
 EN	mnu.grp.sistema	System
-EN	mnu.cuentas	User Accounts
 PT	mnu.grp.usuarios	Usuários
 PT	mnu.grp.sistema	Sistema
-PT	mnu.cuentas	Contas de Usuário
 RU	mnu.grp.usuarios	Пользователи
 RU	mnu.grp.sistema	Система
-RU	mnu.cuentas	Учётные записи
 
 ES	mnu.sesion	Sesión
 EN	mnu.sesion	Session
@@ -3835,7 +3787,6 @@ ES	cobro.msg.pendiente	La suscripción de {0} no está vencida ni próxima a ven
 ES	cobro.msg.cobrado	Cobro registrado ({0:C2}). Renovación confirmada: nueva vigencia hasta {1:d}.
 ES	cobro.msg.gracia	Cobro fallido. Período de gracia hasta {0:d} para regularizar antes de suspender nuevos pedidos.
 ES	cobro.msg.suspendido	Venció el período de gracia sin regularizar el cobro. El cliente no podrá generar nuevos pedidos hasta registrar un cobro exitoso.
-ES	mnu.abandono	Análisis de Abandono
 ES	abandono.titulo	Análisis de Abandono
 ES	abandono.estrategia	Criterio de riesgo:
 ES	abandono.generar	Generar
@@ -3896,7 +3847,6 @@ EN	cobro.msg.pendiente	{0}'s subscription is not expired or about to expire. Pay
 EN	cobro.msg.cobrado	Payment recorded ({0:C2}). Renewal confirmed: new validity until {1:d}.
 EN	cobro.msg.gracia	Payment failed. Grace period until {0:d} to regularize before suspending new orders.
 EN	cobro.msg.suspendido	The grace period expired without regularizing the payment. The customer won't be able to place new orders until a successful payment is recorded.
-EN	mnu.abandono	Churn Analysis
 EN	abandono.titulo	Churn Analysis
 EN	abandono.estrategia	Risk criterion:
 EN	abandono.generar	Generate
@@ -3957,7 +3907,6 @@ RU	cobro.msg.pendiente	Подписка {0} не просрочена и не и
 RU	cobro.msg.cobrado	Платёж зафиксирован ({0:C2}). Продление подтверждено: новый срок действия до {1:d}.
 RU	cobro.msg.gracia	Платёж не прошёл. Льготный период до {0:d}, чтобы урегулировать оплату до приостановки новых заказов.
 RU	cobro.msg.suspendido	Льготный период истёк без урегулирования платежа. Клиент не сможет оформлять новые заказы, пока не будет зафиксирован успешный платёж.
-RU	mnu.abandono	Анализ оттока
 RU	abandono.titulo	Анализ оттока
 RU	abandono.estrategia	Критерий риска:
 RU	abandono.generar	Сформировать
@@ -4018,7 +3967,6 @@ PT	cobro.msg.pendiente	A assinatura de {0} não está vencida nem prestes a venc
 PT	cobro.msg.cobrado	Cobrança registrada ({0:C2}). Renovação confirmada: nova vigência até {1:d}.
 PT	cobro.msg.gracia	Cobrança falhou. Período de carência até {0:d} para regularizar antes de suspender novos pedidos.
 PT	cobro.msg.suspendido	O período de carência venceu sem regularizar a cobrança. O cliente não poderá fazer novos pedidos até que uma cobrança seja registrada com sucesso.
-PT	mnu.abandono	Análise de Abandono
 PT	abandono.titulo	Análise de Abandono
 PT	abandono.estrategia	Critério de risco:
 PT	abandono.generar	Gerar
@@ -4116,26 +4064,6 @@ ES	diag.btn.espejo	Recuperación (Espejo)...
 EN	diag.btn.espejo	Recovery (Mirror)...
 RU	diag.btn.espejo	Восстановление (Зеркало)...
 PT	diag.btn.espejo	Recuperação (Espelho)...
-ES	mnu.ventasvendedor	Ventas por Vendedor
-ES	mnu.rotacion	Rotación de Prendas
-ES	mnu.mantanalisis	Tiempos de Mantenimiento
-ES	mnu.escasez	Escasez de Stock
-ES	mnu.recomendacion	Recomendación de Prendas
-EN	mnu.ventasvendedor	Sales by Salesperson
-EN	mnu.rotacion	Garment Turnover
-EN	mnu.mantanalisis	Maintenance Times
-EN	mnu.escasez	Stock Shortage
-EN	mnu.recomendacion	Garment Recommendations
-RU	mnu.ventasvendedor	Продажи по продавцам
-RU	mnu.rotacion	Оборот одежды
-RU	mnu.mantanalisis	Сроки обслуживания
-RU	mnu.escasez	Дефицит запасов
-RU	mnu.recomendacion	Рекомендации одежды
-PT	mnu.ventasvendedor	Vendas por Vendedor
-PT	mnu.rotacion	Rotatividade de Peças
-PT	mnu.mantanalisis	Tempos de Manutenção
-PT	mnu.escasez	Escassez de Estoque
-PT	mnu.recomendacion	Recomendação de Peças
 ES	ventasvend.titulo	Ventas por Vendedor
 ES	ventasvend.col.vendedor	Vendedor
 ES	ventasvend.col.total	Total pedidos
@@ -6852,9 +6780,9 @@ ES	ayuda.PromocionesContabilidadForm	Promociones en revisión contable: Aprobar 
 ES	ayuda.PromocionesVigentesForm.titulo	Promociones vigentes
 ES	ayuda.PromocionesVigentesForm	Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la columna Baja solicitada muestra si ya hay una pendiente. Administración atiende la solicitud: mientras tanto la promoción sigue vigente y se aplica en los cobros.
 ES	ayuda.Usuarios.titulo	Usuarios
-ES	ayuda.Usuarios	Alta, edición, desbloqueo y archivo de usuarios (solo Administrador).\n\n• Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock.\n• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).\n• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.\n• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.
+ES	ayuda.Usuarios	Administración de usuarios en dos pestañas (solo Administrador).\n\nCuentas:\n• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).\n• Desbloquear: habilita una cuenta bloqueada por intentos fallidos de ingreso.\n• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.\n• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.\n\nDatos administrativos:\n• Nuevo usuario: el único alta de usuarios. Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock; la contraseña se genera y se exporta a un archivo.\n• Guardar cambios / Cambiar rol: nombre, apellido, usuario, email, fecha de nacimiento y rol (el sistema no puede quedar sin administrador).\n• Ver historial de cambios: las versiones anteriores del usuario.
 ES	ayuda.GestorPermisos.titulo	Perfiles y permisos
-ES	ayuda.GestorPermisos	Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.
+ES	ayuda.GestorPermisos	Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.\n\n• Gestión de roles: crear, renombrar y eliminar roles, y asignar o quitar permisos y sub-roles.\n• Vista completa: el árbol completo de roles, familias y permisos, en solo lectura.
 ES	ayuda.BackupForm.titulo	Copias de seguridad
 ES	ayuda.BackupForm	Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos.
 ES	ayuda.Bitacora.titulo	Bitácora
@@ -6907,9 +6835,9 @@ EN	ayuda.PromocionesContabilidadForm	Promotions under accounting review: Approve
 EN	ayuda.PromocionesVigentesForm.titulo	Active promotions
 EN	ayuda.PromocionesVigentesForm	View of active promotions. Sales can request withdrawal of one (with a reason); the Withdrawal requested column shows whether one is already pending. Administration handles the request: meanwhile the promotion remains active and is applied to payments.
 EN	ayuda.Usuarios.titulo	Users
-EN	ayuda.Usuarios	Create, edit, unlock and archive users (Administrator only).\n\n• Each new user is linked to their employee record, so they can sell, collect payments or control stock.\n• Reset password: generates a new one and exports it to a file (asks for confirmation).\n• Archive: the user cannot sign in and leaves the list, but their history is kept.\n• Purge: permanently deletes users archived more than a year ago, except those who signed promotion records.
+EN	ayuda.Usuarios	User administration in two tabs (Administrator only).\n\nAccounts:\n• Reset password: generates a new one and exports it to a file (asks for confirmation).\n• Unlock: re-enables an account locked after failed sign-in attempts.\n• Archive: the user cannot sign in and leaves the list, but their history is kept.\n• Purge: permanently deletes users archived more than a year ago, except those who signed promotion records.\n\nAdministrative data:\n• New user: the only way to create users. Each new user is linked to their employee record, so they can sell, collect payments or control stock; the password is generated and exported to a file.\n• Save changes / Change role: first name, last name, username, email, date of birth and role (the system cannot be left without an administrator).\n• View change history: the user's previous versions.
 EN	ayuda.GestorPermisos.titulo	Roles and permissions
-EN	ayuda.GestorPermisos	System roles and permissions. A role with assigned users cannot be deleted or renamed.
+EN	ayuda.GestorPermisos	System roles and permissions. A role with assigned users cannot be deleted or renamed.\n\n• Role management: create, rename and delete roles, and assign or remove permissions and sub-roles.\n• Full view: the complete tree of roles, families and permissions, read-only.
 EN	ayuda.BackupForm.titulo	Backups
 EN	ayuda.BackupForm	Create, restore and delete database backups (Administrator only). Data integrity is checked before creating a backup.
 EN	ayuda.Bitacora.titulo	Audit log
@@ -6962,9 +6890,9 @@ RU	ayuda.PromocionesContabilidadForm	Акции на проверке: «Утв�
 RU	ayuda.PromocionesVigentesForm.titulo	Действующие акции
 RU	ayuda.PromocionesVigentesForm	Просмотр действующих акций. Отдел продаж может запросить отмену (с причиной); столбец «Запрошена отмена» показывает, есть ли уже ожидающий запрос. Администрация рассматривает запрос: до этого акция остаётся действующей и применяется к оплатам.
 RU	ayuda.Usuarios.titulo	Пользователи
-RU	ayuda.Usuarios	Создание, редактирование, разблокировка и архивирование пользователей (только администратор).\n\n• Каждый новый пользователь связывается со своей карточкой сотрудника, чтобы продавать, принимать оплату или контролировать наличие.\n• «Сбросить пароль»: создаёт новый и сохраняет его в файл (с подтверждением).\n• «Архивировать»: пользователь не может войти и исчезает из списка, но история сохраняется.\n• «Очистить»: окончательно удаляет архивированных более года назад, кроме подписавших записи об акциях.
+RU	ayuda.Usuarios	Администрирование пользователей на двух вкладках (только администратор).\n\nУчётные записи:\n• «Сбросить пароль»: создаёт новый и сохраняет его в файл (с подтверждением).\n• «Разблокировать»: снова включает учётную запись, заблокированную после неудачных попыток входа.\n• «Архивировать»: пользователь не может войти и исчезает из списка, но история сохраняется.\n• «Очистить»: окончательно удаляет архивированных более года назад, кроме подписавших записи об акциях.\n\nАдминистративные данные:\n• «Новый пользователь»: единственный способ создать пользователя. Каждый новый пользователь связывается со своей карточкой сотрудника, чтобы продавать, принимать оплату или контролировать наличие; пароль создаётся и сохраняется в файл.\n• «Сохранить изменения» / «Сменить роль»: имя, фамилия, имя пользователя, email, дата рождения и роль (систему нельзя оставить без администратора).\n• «История изменений»: предыдущие версии пользователя.
 RU	ayuda.GestorPermisos.titulo	Роли и права
-RU	ayuda.GestorPermisos	Роли и права системы. Роль с назначенными пользователями нельзя удалить или переименовать.
+RU	ayuda.GestorPermisos	Роли и права системы. Роль с назначенными пользователями нельзя удалить или переименовать.\n\n• Управление ролями: создание, переименование и удаление ролей, назначение и снятие прав и подролей.\n• Полный обзор: всё дерево ролей, семейств и прав, только для чтения.
 RU	ayuda.BackupForm.titulo	Резервные копии
 RU	ayuda.BackupForm	Создание, восстановление и удаление резервных копий базы (только администратор). Перед созданием копии проверяется целостность данных.
 RU	ayuda.Bitacora.titulo	Журнал
@@ -7017,9 +6945,9 @@ PT	ayuda.PromocionesContabilidadForm	Promoções em revisão contábil: Aprovar 
 PT	ayuda.PromocionesVigentesForm.titulo	Promoções vigentes
 PT	ayuda.PromocionesVigentesForm	Consulta das promoções vigentes. Vendas pode pedir a baixa de uma (com motivo); a coluna Baixa solicitada mostra se já há um pedido pendente. A Administração atende o pedido: enquanto isso a promoção continua vigente e se aplica nas cobranças.
 PT	ayuda.Usuarios.titulo	Usuários
-PT	ayuda.Usuarios	Cadastro, edição, desbloqueio e arquivamento de usuários (só Administrador).\n\n• Cada usuário novo fica vinculado à sua ficha de funcionário, para poder vender, cobrar ou controlar estoque.\n• Redefinir senha: gera uma nova e a exporta para um arquivo (pede confirmação).\n• Arquivar: o usuário não pode entrar e sai da lista, mas seu histórico é mantido.\n• Expurgar: exclui definitivamente os arquivados há mais de um ano, exceto os que assinaram registros de promoções.
+PT	ayuda.Usuarios	Administração de usuários em duas abas (só Administrador).\n\nContas:\n• Redefinir senha: gera uma nova e a exporta para um arquivo (pede confirmação).\n• Desbloquear: reativa uma conta bloqueada por tentativas de acesso falhas.\n• Arquivar: o usuário não pode entrar e sai da lista, mas seu histórico é mantido.\n• Expurgar: exclui definitivamente os arquivados há mais de um ano, exceto os que assinaram registros de promoções.\n\nDados administrativos:\n• Novo usuário: o único cadastro de usuários. Cada usuário novo fica vinculado à sua ficha de funcionário, para poder vender, cobrar ou controlar estoque; a senha é gerada e exportada para um arquivo.\n• Salvar alterações / Alterar perfil: nome, sobrenome, usuário, email, data de nascimento e perfil (o sistema não pode ficar sem administrador).\n• Ver histórico de alterações: as versões anteriores do usuário.
 PT	ayuda.GestorPermisos.titulo	Perfis e permissões
-PT	ayuda.GestorPermisos	Perfis e permissões do sistema. Um perfil com usuários atribuídos não pode ser excluído nem renomeado.
+PT	ayuda.GestorPermisos	Perfis e permissões do sistema. Um perfil com usuários atribuídos não pode ser excluído nem renomeado.\n\n• Gestão de perfis: criar, renomear e excluir perfis, e atribuir ou remover permissões e subperfis.\n• Visão completa: a árvore completa de perfis, famílias e permissões, somente leitura.
 PT	ayuda.BackupForm.titulo	Cópias de segurança
 PT	ayuda.BackupForm	Criar, restaurar e excluir cópias de segurança do banco (só Administrador). Antes de criar uma cópia, a integridade dos dados é verificada.
 PT	ayuda.Bitacora.titulo	Bitácula
@@ -7352,3 +7280,35 @@ ES	doc.promo.resultado.sinjuego	      Ningún cliente del plan tuvo la renovaci�
 EN	doc.promo.resultado.sinjuego	      No customer of the plan had their renewal at stake during the active period ({0}).
 RU	doc.promo.resultado.sinjuego	      Ни у одного клиента тарифа не было решения о продлении в период действия ({0}).
 PT	doc.promo.resultado.sinjuego	      Nenhum cliente do plano teve a renovação em jogo durante a vigência ({0}).
+ES	analitica.reporte	Reporte:
+ES	analitica.sinreportes	No tenés permiso para ningún reporte de analítica.
+ES	ayuda.AnaliticaNegocioForm.titulo	Analítica de Negocio
+ES	ayuda.AnaliticaNegocioForm	Reportes para la toma de decisiones. El selector muestra solo los reportes que tu rol tiene permitidos.\n\n1. Elegí el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).\n2. Generar: el resultado se muestra en la grilla, con un resumen arriba.\n3. Exportar a PDF (vista previa) o Guardar como .CSV.\n\n• Gerencia Comercial: Análisis de Abandono y Ventas por Vendedor.\n• Gerencia de Inventario: Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.\n• Ventas: Recomendación de Prendas.
+EN	analitica.reporte	Report:
+EN	analitica.sinreportes	You do not have permission for any analytics report.
+EN	ayuda.AnaliticaNegocioForm.titulo	Business Analytics
+EN	ayuda.AnaliticaNegocioForm	Reports for decision making. The selector only shows the reports your role is allowed to see.\n\n1. Choose the report and, if it has one, its filter: risk criterion (Churn Analysis), minimum threshold (Stock Shortage) or customer (Garment Recommendations).\n2. Generate: the result is shown in the grid, with a summary above it.\n3. Export to PDF (preview) or Save as .CSV.\n\n• Sales Management: Churn Analysis and Sales by Salesperson.\n• Inventory Management: Garment Turnover, Maintenance Times and Stock Shortage.\n• Sales: Garment Recommendations.
+RU	analitica.reporte	Отчёт:
+RU	analitica.sinreportes	У вас нет доступа ни к одному аналитическому отчёту.
+RU	ayuda.AnaliticaNegocioForm.titulo	Бизнес-аналитика
+RU	ayuda.AnaliticaNegocioForm	Отчёты для принятия решений. В списке показываются только отчёты, разрешённые для вашей роли.\n\n1. Выберите отчёт и, если есть, его фильтр: критерий риска («Анализ оттока»), минимальный порог («Дефицит запасов») или клиента («Рекомендации одежды»).\n2. «Сформировать»: результат показывается в таблице, сводка — над ней.\n3. «Экспорт в PDF» (предпросмотр) или «Сохранить как .CSV».\n\n• Коммерческое руководство: «Анализ оттока» и «Продажи по продавцам».\n• Руководство склада: «Оборот одежды», «Сроки обслуживания» и «Дефицит запасов».\n• Продажи: «Рекомендации одежды».
+PT	analitica.reporte	Relatório:
+PT	analitica.sinreportes	Você não tem permissão para nenhum relatório de análise.
+PT	ayuda.AnaliticaNegocioForm.titulo	Análise de Negócio
+PT	ayuda.AnaliticaNegocioForm	Relatórios para a tomada de decisões. O seletor mostra apenas os relatórios permitidos para o seu perfil.\n\n1. Escolha o relatório e, se tiver, o seu filtro: critério de risco (Análise de Abandono), limite mínimo (Escassez de Estoque) ou cliente (Recomendação de Peças).\n2. Gerar: o resultado aparece na grade, com um resumo acima.\n3. Exportar para PDF (pré-visualização) ou Salvar como .CSV.\n\n• Gerência Comercial: Análise de Abandono e Vendas por Vendedor.\n• Gerência de Estoque: Rotatividade de Peças, Tempos de Manutenção e Escassez de Estoque.\n• Vendas: Recomendação de Peças.
+ES	usr.tab.cuentas	Cuentas
+EN	usr.tab.cuentas	Accounts
+RU	usr.tab.cuentas	Учётные записи
+PT	usr.tab.cuentas	Contas
+ES	usr.tab.datos	Datos administrativos
+EN	usr.tab.datos	Administrative data
+RU	usr.tab.datos	Административные данные
+PT	usr.tab.datos	Dados administrativos
+ES	perm.tab.gestion	Gestión de roles
+EN	perm.tab.gestion	Role management
+RU	perm.tab.gestion	Управление ролями
+PT	perm.tab.gestion	Gestão de perfis
+ES	perm.tab.vistacompleta	Vista completa
+EN	perm.tab.vistacompleta	Full view
+RU	perm.tab.vistacompleta	Полный обзор
+PT	perm.tab.vistacompleta	Visão completa

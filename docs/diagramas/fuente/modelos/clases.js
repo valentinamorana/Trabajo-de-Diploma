@@ -145,6 +145,7 @@ module.exports = [
       E('ISugerenciaPromocionDAL', { metodos: ['Alta', 'ObtenerPorId', 'MarcarEvaluada', 'ReabrirEvaluacion', 'Descartar'] }),
       E('BLL.AnalisisRotacion', { metodos: [] }), E('IPlanSuscripcionDAL', { metodos: [] }),
       E('BLL.ReporteVentasVendedor', { metodos: [] }), E('BLL.AnalisisMantenimiento', { metodos: [] }), E('BLL.AnalisisEscasez', { metodos: [] }), E('BLL.RecomendacionPrendas', { metodos: [] }),
+      E('BLL.MenuVisibilidad', { metodos: ['ReportesVisibles'] }),
       E('IPedidoDAL', { metodos: [] }), E('IClienteDAL', { metodos: [] }), E('IPrendaDAL', { metodos: [] }), E('IMantenimientoPrendaDAL', { metodos: [] })
     ]
   },

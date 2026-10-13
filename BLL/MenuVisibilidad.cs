@@ -48,21 +48,42 @@ namespace BLL
             ("historialUsuariosToolStripMenuItem",     "mnuUsuarios"),
             ("backupToolStripMenuItem",                "mnuUsuarios"),
             ("integridadToolStripMenuItem",            "mnuUsuarios"),
-            ("adminUsuariosItem",                      "mnuUsuarios"),
             // Bitácora.
             ("bitSistemaToolStripMenuItem",            "mnuAuditoria"),
             ("bitNegocioToolStripMenuItem",             "mnuAuditoria"),
             ("reporteJornadaToolStripMenuItem",        "mnuAuditoria"),
-            // PdN10 — patente propia: no todo el que audita necesita decidir sobre retención.
-            ("analisisAbandonoToolStripMenuItem",      "mnuAnalisisAbandono"),
-            // Bloque 3 (Idea de Negocio) — PdN8, 9, 11, 12, 13: cada uno con patente propia,
-            // mismo criterio que PdN10 (decisión de negocio, no auditoría genérica).
-            ("ventasVendedorToolStripMenuItem",        "mnuVentasVendedor"),
-            ("analisisRotacionToolStripMenuItem",      "mnuAnalisisRotacion"),
-            ("analisisMantenimientoToolStripMenuItem", "mnuAnalisisMantenimiento"),
-            ("analisisEscasezToolStripMenuItem",       "mnuAnalisisEscasez"),
-            ("recomendacionPrendasToolStripMenuItem",  "mnuRecomendacionPrendas"),
         };
+
+        /// <summary>
+        /// Reporte de "Analítica de Negocio" → patente que lo habilita. Los 6 reportes viven en
+        /// un solo formulario (GUI.AnaliticaNegocioForm) con un selector, pero cada uno conserva
+        /// su patente propia (decisión de negocio, no auditoría genérica): PdN10 Abandono y PdN8
+        /// Ventas por Vendedor para Gerencia Comercial, PdN9/11/12 para Gerencia de Inventario y
+        /// PdN13 Recomendación para Ventas. El orden es el del selector.
+        /// </summary>
+        public static readonly (BE.ReporteAnalitica Reporte, string Permiso)[] PatentesReportes =
+        {
+            (BE.ReporteAnalitica.AnalisisAbandono,     BE.Patentes.AnalisisAbandono),
+            (BE.ReporteAnalitica.VentasVendedor,       BE.Patentes.VentasVendedor),
+            (BE.ReporteAnalitica.RotacionPrendas,      BE.Patentes.AnalisisRotacion),
+            (BE.ReporteAnalitica.TiemposMantenimiento, BE.Patentes.AnalisisMantenimiento),
+            (BE.ReporteAnalitica.EscasezStock,         BE.Patentes.AnalisisEscasez),
+            (BE.ReporteAnalitica.RecomendacionPrendas, BE.Patentes.RecomendacionPrendas),
+        };
+
+        /// <summary>
+        /// Reportes de "Analítica de Negocio" que el usuario puede ver, en el orden del selector:
+        /// los que tienen su patente entre las efectivas (case-insensitive), o todos si es
+        /// Administrador (mismo bypass que Resolver). Lista vacía si no tiene ninguno.
+        /// </summary>
+        public static List<BE.ReporteAnalitica> ReportesVisibles(IEnumerable<string> patentes, bool esAdmin)
+        {
+            var nombresMenu = new HashSet<string>(patentes ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+            return PatentesReportes
+                .Where(r => esAdmin || nombresMenu.Contains(r.Permiso))
+                .Select(r => r.Reporte)
+                .ToList();
+        }
 
         /// <summary>Grupo (Name del menú contenedor) → hojas hijas que determinan su visibilidad (OR).</summary>
         public static readonly (string Grupo, string[] Hijos)[] Grupos =
@@ -87,17 +108,11 @@ namespace BLL
             }),
             // "Analítica" se partió en dos menúes de primer nivel (antes eran 9 ítems en un
             // solo dropdown plano): Auditoría (bitácoras + reporte de jornada, gobernados por
-            // mnuAuditoria) y Analítica de Negocio (los 6 reportes de decisión comercial del
-            // Bloque 3 + PdN10, cada uno con patente propia).
+            // mnuAuditoria) y Analítica de Negocio (una sola entrada que abre el formulario con
+            // selector; su visibilidad se resuelve aparte, ver Resolver/ReportesVisibles).
             ("auditoriaToolStripMenuItem", new[]
             {
                 "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem"
-            }),
-            ("analiticaNegocioToolStripMenuItem", new[]
-            {
-                "analisisAbandonoToolStripMenuItem", "ventasVendedorToolStripMenuItem",
-                "analisisRotacionToolStripMenuItem", "analisisMantenimientoToolStripMenuItem",
-                "analisisEscasezToolStripMenuItem", "recomendacionPrendasToolStripMenuItem"
             }),
         };
 
@@ -110,7 +125,9 @@ namespace BLL
         ///   • Hoja: visible si tiene la patente exacta (o es Admin).
         ///   • Inventario: visible si Prendas, Lista de Espera o Inspección de Devolución son
         ///     visibles, o tiene mnuStock (Stock no tiene ToolStripMenuItem propio en el Designer).
-        ///   • Grupo genérico (Suscriptores/Ventas/Auditoría/Analítica de Negocio): visible si algún hijo lo es.
+        ///   • Grupo genérico (Suscriptores/Ventas/Caja/Promociones/Auditoría): visible si algún hijo lo es.
+        ///   • Analítica de Negocio: una sola entrada (abre el formulario con selector), visible
+        ///     si el usuario tiene AL MENOS UNA de las 6 patentes de reporte (ReportesVisibles).
         ///   • Administrar/Usuarios▸/Sistema▸: gobernados por mnuUsuarios.
         /// </summary>
         public static Dictionary<string, bool> Resolver(IEnumerable<string> patentes, bool esAdmin)
@@ -130,6 +147,8 @@ namespace BLL
                 visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] ||
                 visible["inspeccionDevolucionToolStripMenuItem"] || visible["controlStockToolStripMenuItem"] ||
                 Permite("mnuStock");
+
+            visible["analiticaNegocioToolStripMenuItem"] = ReportesVisibles(nombresMenu, esAdmin).Count > 0;
 
             foreach (var g in Grupos)
                 visible[g.Grupo] = g.Hijos.Any(h => visible.TryGetValue(h, out var v) && v);

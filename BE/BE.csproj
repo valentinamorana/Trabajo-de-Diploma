@@ -126,6 +126,7 @@
     <Compile Include="ListaEspera.cs" />
     <Compile Include="DatosClienteRiesgo.cs" />
     <Compile Include="ResultadoRiesgo.cs" />
+    <Compile Include="ReporteAnalitica.cs" />
     <Compile Include="ClienteEnRiesgo.cs" />
     <Compile Include="HistorialIntegridad.cs" />
     <Compile Include="EstadoComercialCliente.cs" />

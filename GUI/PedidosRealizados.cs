@@ -104,10 +104,11 @@ namespace GUI
             cmbFiltroEstado.SelectedIndexChanged -= CmbFiltroEstado_SelectedIndexChanged;
             cmbFiltroEstado.Items.Clear();
             cmbFiltroEstado.Items.Add(Tr("combo.prenda.todos", "Todos"));
-            cmbFiltroEstado.Items.Add(Tr("est.pendiente",  "Pendiente"));
-            cmbFiltroEstado.Items.Add(Tr("est.despachado", "Despachado"));
-            cmbFiltroEstado.Items.Add(Tr("est.entregado",  "Entregado"));
-            cmbFiltroEstado.Items.Add(Tr("est.cancelado",  "Cancelado"));
+            // Mismas etiquetas que la grilla (EstadosPedido es la única fuente).
+            cmbFiltroEstado.Items.Add(EstadosPedido.Etiqueta(BE.EstadoPedido.Pendiente));
+            cmbFiltroEstado.Items.Add(EstadosPedido.Etiqueta(BE.EstadoPedido.Despachado));
+            cmbFiltroEstado.Items.Add(EstadosPedido.Etiqueta(BE.EstadoPedido.Entregado));
+            cmbFiltroEstado.Items.Add(EstadosPedido.Etiqueta(BE.EstadoPedido.Cancelado));
             cmbFiltroEstado.Items.Add(Tr("combo.ped.atrasados", "Atrasados (30+ días sin devolver)"));
             cmbFiltroEstado.SelectedIndex = idx >= 0 && idx < cmbFiltroEstado.Items.Count ? idx : 0;
             cmbFiltroEstado.SelectedIndexChanged += CmbFiltroEstado_SelectedIndexChanged;
@@ -308,14 +309,7 @@ namespace GUI
                 // para ser independiente del idioma de la etiqueta visible.
                 if (!dgvPedidos.Columns.Contains("_EstadoKey")) continue;
                 if (!int.TryParse(row.Cells["_EstadoKey"].Value?.ToString(), out int estadoKey)) continue;
-                row.DefaultCellStyle.ForeColor = estadoKey switch
-                {
-                    (int)BE.EstadoPedido.Pendiente  => Tema.Alerta,
-                    (int)BE.EstadoPedido.Despachado => Tema.Info,
-                    (int)BE.EstadoPedido.Entregado  => Tema.Exito,
-                    (int)BE.EstadoPedido.Cancelado  => Tema.Error,
-                    _                               => Color.Black
-                };
+                row.DefaultCellStyle.ForeColor = EstadosPedido.Color((BE.EstadoPedido)estadoKey);
             }
         }
 
@@ -629,18 +623,7 @@ namespace GUI
             return _pedidos.Find(p => p.IdPedido == id);
         }
 
-        private string EstadoLabel(BE.EstadoPedido estado)
-        {
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            switch (estado)
-            {
-                case BE.EstadoPedido.Pendiente:  return t.ContainsKey("est.formalizado") ? t["est.formalizado"].Texto : "Formalizado (pendiente de despacho)";
-                case BE.EstadoPedido.Despachado: return t.ContainsKey("est.despachado") ? t["est.despachado"].Texto : "Despachado";
-                case BE.EstadoPedido.Entregado:  return t.ContainsKey("est.entregado")  ? t["est.entregado"].Texto  : "Entregado";
-                case BE.EstadoPedido.Cancelado:  return t.ContainsKey("est.cancelado")  ? t["est.cancelado"].Texto  : "Cancelado";
-                default: return estado.ToString();
-            }
-        }
+        private string EstadoLabel(BE.EstadoPedido estado) => EstadosPedido.Etiqueta(estado);
 
         /// <summary>
         /// PN04 — texto del estado con el detalle de la devolución: un Entregado se muestra como

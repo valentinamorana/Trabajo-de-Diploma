@@ -34,7 +34,7 @@ sequenceDiagram
       Note over F,PB: «include» CU02-VEN Consultar Catálogo
       loop Por cada prenda que el Vendedor anota (o quita) de la selección
         F->>CB: ObtenerEstadoComercial(cliente, prendasSolicitadas)
-        CB-->>F: cupo disponible del plan (¿supera el límite?)
+        CB-->>F: cupo disponible del plan (ExcedeCupo: ¿excede el cupo?)
         F-->>V: Detalle de selección (prenda, talle, color, cantidad) y estado del cupo
       end
       alt Excede el cupo y el cliente no ajusta

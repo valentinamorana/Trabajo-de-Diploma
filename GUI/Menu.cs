@@ -297,12 +297,7 @@ namespace GUI
                 revisionContablePromocionesToolStripMenuItem, promocionesVigentesToolStripMenuItem,
                 usuariosToolStripMenuItem, perfilesToolStripMenuItem, idiomasToolStripMenuItem,
                 historialUsuariosToolStripMenuItem, backupToolStripMenuItem, integridadToolStripMenuItem,
-                adminUsuariosItem,
                 bitSistemaToolStripMenuItem, bitNegocioToolStripMenuItem, reporteJornadaToolStripMenuItem,
-                analisisAbandonoToolStripMenuItem,
-                ventasVendedorToolStripMenuItem, analisisRotacionToolStripMenuItem,
-                analisisMantenimientoToolStripMenuItem, analisisEscasezToolStripMenuItem,
-                recomendacionPrendasToolStripMenuItem,
                 suscriptoresToolStripMenuItem, ventasToolStripMenuItem, cajaToolStripMenuItem,
                 promocionesToolStripMenuItem,
                 auditoriaToolStripMenuItem, analiticaNegocioToolStripMenuItem,
@@ -426,55 +421,23 @@ namespace GUI
         }
 
         /// <summary>
-        /// Abre el módulo de Análisis de Abandono (PdN10) como hijo MDI.
+        /// Abre "Analítica de Negocio" como hijo MDI: los 6 reportes (Bloque 3 + PdN10) en un
+        /// solo formulario, con un selector que ofrece solo los que el usuario tiene permitidos
+        /// (BLL.MenuVisibilidad.ReportesVisibles).
         /// </summary>
-        private void analisisAbandonoToolStripMenuItem_Click(object sender, EventArgs e)
+        private void analiticaNegocioToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AbrirUnico(() => new AnalisisAbandonoForm());
-        }
-
-        /// <summary>Abre el Reporte de Ventas por Vendedor (PdN8) como hijo MDI.</summary>
-        private void ventasVendedorToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AbrirUnico(() => new ReporteVentasVendedorForm());
-        }
-
-        /// <summary>Abre el Análisis de Rotación de Prendas (PdN9) como hijo MDI.</summary>
-        private void analisisRotacionToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AbrirUnico(() => new AnalisisRotacionForm());
-        }
-
-        /// <summary>Abre el Análisis de Tiempos de Mantenimiento (PdN11) como hijo MDI.</summary>
-        private void analisisMantenimientoToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AbrirUnico(() => new AnalisisMantenimientoForm());
-        }
-
-        /// <summary>Abre la Detección de Escasez por Talle/Categoría (PdN12) como hijo MDI.</summary>
-        private void analisisEscasezToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AbrirUnico(() => new AnalisisEscasezForm());
-        }
-
-        /// <summary>Abre la Recomendación de Prendas para un Cliente (PdN13) como hijo MDI.</summary>
-        private void recomendacionPrendasToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AbrirUnico(() => new RecomendacionPrendasForm());
+            AbrirUnico(() => new AnaliticaNegocioForm(
+                _usuarioActivo?.Permisos, _usuarioActivo?.EsAdministrador == true));
         }
 
         /// <summary>
-        /// Abre Gestión de Usuarios como hijo MDI. Accesible solo para Administrador.
+        /// Abre Administración de Usuarios como hijo MDI: una sola pantalla con las pestañas
+        /// Cuentas y Datos administrativos. Gobernada por la patente mnuUsuarios.
         /// </summary>
         private void usuariosToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AbrirUnico(() => new Usuarios());
-        }
-
-        // Abre el panel de Administración de Usuarios (ABM de datos no sensibles + cambiar rol + historial).
-        private void AdminUsuarios_Click(object sender, EventArgs e)
-        {
-            AbrirUnico(() => new AdministracionUsuariosForm());
         }
 
         /// <summary>
@@ -856,7 +819,6 @@ namespace GUI
             Aplicar(grpUsuarios,                        t);
             Aplicar(grpSistema,                         t);
             Aplicar(usuariosToolStripMenuItem,          t);
-            Aplicar(adminUsuariosItem,                  t);
             Aplicar(perfilesToolStripMenuItem,          t);
             Aplicar(idiomasToolStripMenuItem,           t);
             Aplicar(historialUsuariosToolStripMenuItem, t);
@@ -867,12 +829,6 @@ namespace GUI
             Aplicar(bitSistemaToolStripMenuItem,        t);
             Aplicar(bitNegocioToolStripMenuItem,        t);
             Aplicar(reporteJornadaToolStripMenuItem,    t);
-            Aplicar(analisisAbandonoToolStripMenuItem,  t);
-            Aplicar(ventasVendedorToolStripMenuItem,        t);
-            Aplicar(analisisRotacionToolStripMenuItem,      t);
-            Aplicar(analisisMantenimientoToolStripMenuItem, t);
-            Aplicar(analisisEscasezToolStripMenuItem,       t);
-            Aplicar(recomendacionPrendasToolStripMenuItem,  t);
             Aplicar(cerrarSesionToolStripMenuItem,      t);
             Aplicar(ventanaToolStripMenuItem,           t);
             Aplicar(cerrarTodasLasVentanasToolStripMenuItem, t);

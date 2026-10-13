@@ -242,7 +242,7 @@ namespace GUI
             btnDesCancelar.Enabled    = pedido != null && pedido.PuedeDesCancelarse();
             btnHistorial.Enabled      = pedido != null;
             // "Comunicar faltantes" → el cliente ajusta la selección o desiste.
-            btnVerFaltantes.Enabled   = pedido != null && pedido.Estado == BE.EstadoPedido.ConFaltantes;
+            btnVerFaltantes.Enabled   = pedido != null && pedido.TieneFaltantesInformados();
             btnAjustar.Enabled        = pedido != null && pedido.PuedeAjustarse();
             btnDesistirPedido.Enabled = pedido != null && pedido.PuedeDesistirse();
             // "Formalizar el pedido" (prendas ya separadas por Depósito).
@@ -338,7 +338,7 @@ namespace GUI
             }
 
             // En control de stock o con faltantes todavía no hay prendas separadas: no hay nada que liberar.
-            bool sinReserva = pedido.Estado == BE.EstadoPedido.EnControlStock || pedido.Estado == BE.EstadoPedido.ConFaltantes;
+            bool sinReserva = pedido.TodaviaSinPrendasSeparadas();
             string bodyCanc = string.Format(sinReserva
                     ? Tr("conf.cancelped.body.sinreserva", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nTodavía no tiene prendas separadas.")
                     : Tr("conf.cancelped.body", "¿Cancelar el Pedido #{0} de {1}?\n\nMotivo: {2}\n\nLas prendas volverán a estado Disponible."),

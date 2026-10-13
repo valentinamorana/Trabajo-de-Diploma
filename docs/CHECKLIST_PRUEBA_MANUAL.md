@@ -14,7 +14,7 @@ Marcar cada punto: OK / falla (anotar qué se vio).
 
 ## 1. Vendedor (`vendedor`)
 
-- [ ] Menús visibles: Suscriptores, Inventario (Prendas, Lista de espera), Ventas (Pedidos de venta), Promociones (vigentes), Analítica (Recomendación). No ve Caja, Auditoría ni Administrar.
+- [ ] Menús visibles: Suscriptores, Inventario (Prendas, Lista de espera), Ventas (Pedidos de venta), Promociones (vigentes), Analítica de Negocio (en el selector, solo Recomendación de prendas). No ve Caja, Auditoría ni Administrar.
 - [ ] **Clientes**: alta con "Referido por"; DNI repetido se rechaza; baja de un cliente con prendas en uso se rechaza.
 - [ ] **Nueva contratación**: el combo de **modalidad** aparece con Mensual, Trimestral y Anual, sin error. Con un cliente que ya tiene una contratación pendiente, la rechaza.
 - [ ] **Renovación**: el combo de modalidad funciona. Pausar: la fecha no deja pasar de 3 meses. Reanudar ahora devuelve los días no usados.
@@ -91,10 +91,11 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 
 ## 4. Gerentes (`gcomercial`, `ginventario`)
 
-- [ ] Gerente comercial: además de lo del Vendedor, ve Sugerir promoción, Análisis de abandono y Ventas por vendedor. Sugerir promoción desde el análisis precarga el formulario.
+- [ ] Gerente comercial: además de lo del Vendedor, ve Sugerir promoción, y en Analítica de Negocio el selector ofrece Análisis de abandono, Ventas por vendedor y Recomendación de prendas. Sugerir promoción desde el análisis precarga el formulario.
 - [ ] Reporte de métricas: la sección "Resultado de las promociones" lista la PROMO Vigente Estandar (y las dadas de baja o vencidas del período) con bajas, pausas y renovaciones durante la vigencia contra el período anterior, y la retención real contra la esperada.
 - [ ] Sugerir promoción: la idea del reporte precarga el ingreso en riesgo y la retención esperada en 30 %; al cambiar la tasa cambia el "Beneficio est."; una tasa de 0 o mayor a 100 no se acepta. La grilla muestra la columna Retención %.
-- [ ] Gerente de inventario: ve Rotación, Mantenimiento y Escasez, y lo de Depósito y Logístico.
+- [ ] Gerente de inventario: en Analítica de Negocio el selector ofrece solo Rotación, Mantenimiento y Escasez; además ve lo de Depósito y Logístico.
+- [ ] Analítica de Negocio: al cambiar de reporte se limpia la grilla y aparece su filtro (criterio de riesgo, umbral mínimo o cliente); Generar llena la grilla y habilita Exportar a PDF y .CSV; el PDF lleva el título del reporte elegido.
 - [ ] Cada reporte genera, muestra resultados y exporta a PDF y CSV.
 
 ## 5. Promociones (`admcomercial`, `contable`)
@@ -110,6 +111,8 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 
 - [ ] Auditor: solo Bitácoras y Reporte de jornada, sin botones de edición.
 - [ ] Administrador: ve todo. Usuarios, Perfiles, Idiomas, Backup e Integridad abren y funcionan.
+- [ ] **Administrar → Usuarios** tiene un solo ítem, **Administración de Usuarios**, con dos pestañas. En **Datos administrativos**: **Nuevo usuario** es el único alta (genera la clave en un archivo); editar datos, **Cambiar rol** y **Ver historial de cambios** funcionan. En **Cuentas**: el usuario recién creado aparece al cambiar de pestaña; **Resetear Contraseña**, **Desbloquear Cuenta**, **Archivar usuario**, **Ver archivados** y **Purgar** funcionan. Los mensajes salen en la barra inferior.
+- [ ] **Administrar → Perfiles y Permisos** tiene dos pestañas: **Gestión de roles** (igual que antes) y **Vista completa** (el árbol de solo lectura, con **Expandir todo** / **Colapsar todo**). Un cambio hecho en Gestión de roles se ve en la Vista completa sin reabrir; ya no hay botón "Ver vista completa del sistema" ni ventana aparte.
 - [ ] Integridad: diagnóstico sin advertencias en una base recién instalada.
 - [ ] Historial de un pedido: **Restaurar** funciona para quien puede editar pedidos y se rechaza para quien no.
 

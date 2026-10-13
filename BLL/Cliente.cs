@@ -463,6 +463,7 @@ namespace BLL
                 {
                     PuedeProceder  = false,
                     MotivoBloqueo  = "SIN_PLAN",
+                    ExcedeCupo     = ExcedeCupo(0, prendasSolicitadas, false),
                     MetodoPago     = cliente.MetodoPago,
                     FechaAlta      = cliente.FechaAlta
                 };
@@ -472,6 +473,7 @@ namespace BLL
                 {
                     PuedeProceder    = false,
                     MotivoBloqueo    = "SUSCRIPCION_VENCIDA",
+                    ExcedeCupo       = ExcedeCupo(0, prendasSolicitadas, false),
                     NombrePlan       = cliente.NombrePlan,
                     FechaVencimiento = cliente.FechaVencimiento,
                     MetodoPago       = cliente.MetodoPago,
@@ -496,10 +498,18 @@ namespace BLL
                 SuperaLimite     = superaLimite,
                 PrendasDisponibles = disponibles,
                 Exceso           = exceso,
+                ExcedeCupo       = ExcedeCupo(cliente.LimitePrendas, prendasSolicitadas, superaLimite),
                 SuscripcionProximaAVencer = cliente.SuscripcionProximaAVencer(),
                 DiasHastaVencimiento      = cliente.DiasHastaVencimiento()
             };
         }
+
+        // "¿Excede el cupo disponible?" (PN01). Con un plan que tiene cupo (límite > 0) excede
+        // cuando lo que ya está en uso más lo seleccionado supera el límite. Sin cupo (límite 0,
+        // o el cliente bloqueado sin plan / con la suscripción vencida) no admite ninguna
+        // prenda: cualquier selección lo excede.
+        private static bool ExcedeCupo(int limitePrendas, int prendasSolicitadas, bool superaLimite)
+            => limitePrendas > 0 ? superaLimite : prendasSolicitadas > 0;
 
         // Validaciones
         private void Validar(BE.Cliente cliente)

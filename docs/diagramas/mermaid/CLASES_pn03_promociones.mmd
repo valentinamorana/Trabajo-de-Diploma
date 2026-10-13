@@ -224,6 +224,10 @@ classDiagram
   class BLL_RecomendacionPrendas["BLL.RecomendacionPrendas"] {
     +Recomendar(int) List~PrendaRecomendada~
   }
+  class BLL_MenuVisibilidad["BLL.MenuVisibilidad"] {
+    <<static>>
+    +ReportesVisibles(IEnumerable~string~,  bool) List~ReporteAnalitica~
+  }
   class DAL_Interfaces_IPedidoDAL["DAL.Interfaces.IPedidoDAL"] {
     <<interface>>
     +ObtenerFechaUltimoPedidoPorCliente() Dictionary~int, DateTime~

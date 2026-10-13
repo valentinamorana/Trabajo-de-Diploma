@@ -27,12 +27,20 @@ namespace BE
 
         public const decimal TasaRetencionPorDefecto = 30m;
 
+        /// <summary>Ingreso mensual en riesgo que cargó Gerencia (se guarda: así la ecuación impresa
+        /// "beneficio = ingreso × tasa" muestra lo que se ingresó y no un valor reconstruido).
+        /// Null solo en datos anteriores a la 20h.</summary>
+        public decimal? IngresoMensualEnRiesgo { get; set; }
+
         /// <summary>Beneficio mensual estimado: ingreso en riesgo × tasa de retención / 100.</summary>
         public static decimal CalcularBeneficio(decimal ingresoMensualEnRiesgo, decimal tasaRetencion) =>
-            Math.Round(ingresoMensualEnRiesgo * tasaRetencion / 100m, 2);
+            // Mismo redondeo que SQL ROUND (desde el cero): el CHECK CHK_SugerenciaPromocion_Beneficio lo compara.
+            Math.Round(ingresoMensualEnRiesgo * tasaRetencion / 100m, 2, MidpointRounding.AwayFromZero);
 
-        /// <summary>Ingreso mensual en riesgo del que partió el beneficio (lo inverso de CalcularBeneficio).</summary>
-        public decimal IngresoEnRiesgo() => TasaRetencion > 0 ? Math.Round(BeneficioEstimado * 100m / TasaRetencion, 2) : 0m;
+        /// <summary>Ingreso mensual en riesgo del que partió el beneficio: el guardado, o (datos
+        /// anteriores a la 20h) el que resulta de invertir CalcularBeneficio.</summary>
+        public decimal IngresoEnRiesgo() =>
+            IngresoMensualEnRiesgo ?? (TasaRetencion > 0 ? Math.Round(BeneficioEstimado * 100m / TasaRetencion, 2) : 0m);
 
         public EstadoSugerencia Estado { get; set; } = EstadoSugerencia.Pendiente;
         public DateTime FechaAlta { get; set; }

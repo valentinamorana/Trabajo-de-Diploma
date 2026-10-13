@@ -869,13 +869,14 @@ namespace Tests
         }
 
         [TestMethod]
-        public void PuedeCobrar_AdministradorQueVendio_True()
+        public void ObtenerPendientesDePago_AdministradorQueVendio_PuedeCobrar()
         {
             LoginComoAdministrador();
             var ctx = new Contexto();
             var c = ctx.Pendiente();
             c.IdVendedor = 5;
-            Assert.IsTrue(ctx.Crear().PuedeCobrar(c));
+            ctx.DalContratacion.PendientesDePago = new List<BE.Contratacion> { c };
+            Assert.IsTrue(ctx.Crear().ObtenerPendientesDePago().Single().UsuarioPuedeCobrar);
         }
 
         [TestMethod]

@@ -9,6 +9,7 @@ classDiagram
     +List~MetricaRotacionCategoria~ RotacionPorCategoria
     +List~CandidataSugerencia~ Oportunidades
     +List~ResultadoPromocion~ ResultadoPromociones
+    +bool ResultadoNoDisponible
     +HayOportunidad() bool
   }
   class CandidataSugerencia {
@@ -27,6 +28,7 @@ classDiagram
     +TipoDescuento TipoDescuentoSugerido
     +decimal BeneficioEstimado
     +decimal TasaRetencion
+    +decimal? IngresoMensualEnRiesgo
     +EstadoSugerencia Estado
     +DateTime FechaAlta
     +OrigenMetrica OrigenMetrica
@@ -120,6 +122,7 @@ classDiagram
     +EstadoPromocion Estado
     +int IdPlan
     +string NombrePlan
+    +bool NoSePudoCalcular
     +DateTime Desde
     +DateTime Hasta
     +DateTime AnteriorDesde

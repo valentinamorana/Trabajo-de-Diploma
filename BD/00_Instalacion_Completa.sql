@@ -3496,6 +3496,21 @@ BEGIN
            PRINT ''SugerenciaPromocion: columna TasaRetencion agregada; '' + CAST(@n AS NVARCHAR(10)) + '' sugerencia(s) previas con 100 %.'';');
 END
 GO
+-- Ingreso mensual en riesgo que cargó Gerencia: se guarda para que la sugerencia impresa y el análisis
+-- de Contabilidad muestren lo ingresado (antes se reconstruía desde el beneficio redondeado). El
+-- beneficio sigue guardado (lo leen Contabilidad y los reportes) y un CHECK garantiza que es
+-- exactamente ROUND(ingreso × tasa / 100, 2): no puede quedar desfasado. Las previas: ingreso = beneficio × 100 / tasa.
+IF COL_LENGTH('SugerenciaPromocion', 'IngresoEnRiesgo') IS NULL
+BEGIN
+    ALTER TABLE SugerenciaPromocion ADD IngresoEnRiesgo DECIMAL(12,2) NULL;
+    EXEC(N'UPDATE SugerenciaPromocion SET IngresoEnRiesgo = ROUND(BeneficioEstimado * 100 / TasaRetencion, 2) WHERE IngresoEnRiesgo IS NULL;
+           PRINT ''SugerenciaPromocion: columna IngresoEnRiesgo agregada.'';');
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SugerenciaPromocion_Beneficio')
+    EXEC(N'ALTER TABLE SugerenciaPromocion ADD CONSTRAINT CHK_SugerenciaPromocion_Beneficio
+           CHECK (IngresoEnRiesgo IS NULL OR BeneficioEstimado = ROUND(IngresoEnRiesgo * TasaRetencion / 100, 2))');
+GO
 -- Claves de idioma sin uso: promo.analisis.calc.beneficiosug (reemplazada por .beneficiotasa, que
 -- muestra la tasa) y est.pendiente (Pedidos Realizados usa las etiquetas de GUI/EstadosPedido).
 IF OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Traduccion') IS NOT NULL
@@ -4053,8 +4068,8 @@ BEGIN
 
     -- TasaRetencion = 100: el beneficio de estas dos sugerencias de demo es el ingreso en riesgo completo
     -- (como las sugerencias anteriores a la 20h); las que registre Gerencia arrancan con 30 %.
-    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, TasaRetencion, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
-    SELECT v.IdPlan, v.Motivo, v.Tipo, v.Beneficio, 100, 0, v.FechaAlta, v.Origen, @uGer
+    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, TasaRetencion, IngresoEnRiesgo, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
+    SELECT v.IdPlan, v.Motivo, v.Tipo, v.Beneficio, 100, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
     FROM (VALUES
         (@pBasico,  N'SUGERENCIA PendienteDeEvaluar: el plan Básico tiene la mayor tasa de abandono; un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE()), 0),
         (@pPremium, N'SUGERENCIA PendienteDeEvaluar: el plan Premium suma pocos clientes nuevos; un monto fijo de captación puede atraerlos.',     1,  5000.00, DATEADD(DAY, -2, GETDATE()), 2)

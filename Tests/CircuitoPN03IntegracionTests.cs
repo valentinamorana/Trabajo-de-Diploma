@@ -61,7 +61,7 @@ namespace Tests
                 // 1) Gerencia sugiere (siempre para un plan).
                 Entrar("gcomercial", "gcomercial1!");
                 var sug = new BLL.SugerenciaPromocion();
-                EsperarError(() => sug.RegistrarSugerencia(Modulo, BE.OrigenMetrica.Manual, 0, "Sin plan", BE.TipoDescuento.Porcentaje, 100m),
+                EsperarError(() => sug.RegistrarSugerencia(Modulo, BE.OrigenMetrica.Manual, 0, "Sin plan", BE.TipoDescuento.Porcentaje, 100m, 30m),
                     "err.bll.sugerenciapromocion.plan_requerido");
                 idSugerencia = sug.RegistrarSugerencia(Modulo, BE.OrigenMetrica.Manual, idPlan, "Circuito de 4 roles",
                     BE.TipoDescuento.Porcentaje, 5000m, 40m);

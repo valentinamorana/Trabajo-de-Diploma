@@ -34,7 +34,9 @@ namespace Tests.Fakes
         /// <summary>Cantidad de escrituras que cambiaron el estado (cualquier transición).</summary>
         public int Transiciones => Historial.Count;
 
-        public List<BE.Promocion> ObtenerTodas() => Todas;
+        // Si es true, leer las promociones falla (simula un error de BD).
+        public bool FallarObtenerTodas { get; set; }
+        public List<BE.Promocion> ObtenerTodas() => FallarObtenerTodas ? throw new System.Exception("falla simulada") : Todas;
         public List<BE.Promocion> ObtenerVigentes() => Todas.FindAll(p => p.EstaVigente());
         public List<BE.MetricaImpactoPromocion> Impacto { get; set; } = new List<BE.MetricaImpactoPromocion>();
         public System.DateTime? UltimoDesdeImpacto { get; private set; }
@@ -45,7 +47,10 @@ namespace Tests.Fakes
         }
         // Decisiones de suscripción por plan (filtradas por fecha como la consulta real).
         public List<(int IdPlan, BE.DecisionRenovacion Decision)> Decisiones { get; set; } = new List<(int, BE.DecisionRenovacion)>();
+        // Si no es null, leer las decisiones de ese plan falla (simula un error de BD).
+        public int? FallarDecisionesDelPlan { get; set; }
         public List<BE.DecisionRenovacion> ObtenerDecisionesDelPlan(int idPlan, System.DateTime desde, System.DateTime hastaExcl) =>
+            idPlan == FallarDecisionesDelPlan ? throw new System.Exception("falla simulada") :
             Decisiones.FindAll(d => d.IdPlan == idPlan && d.Decision.Fecha >= desde && d.Decision.Fecha < hastaExcl)
                       .ConvertAll(d => d.Decision);
         public List<BE.Promocion> ObtenerPendientesRevisionContable() => Todas.FindAll(p => p.Estado == BE.EstadoPromocion.EnRevisionContable);

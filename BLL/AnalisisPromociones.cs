@@ -72,13 +72,15 @@ namespace BLL
             var ab = abandono.Detectar();
             var planes = dalPlan.ObtenerTodos();
 
+            var resultados = ResultadoPromociones(inicio, fin);
             var reporte = new BE.ReporteMetricas
             {
+                ResultadoNoDisponible = resultados == null,
                 Fecha = DateTime.Now,
                 Desde = inicio,
                 Hasta = fin,
                 ImpactoPromociones = ImpactoPromociones(inicio, fin),
-                ResultadoPromociones = ResultadoPromociones(inicio, fin),
+                ResultadoPromociones = resultados ?? new List<BE.ResultadoPromocion>(),
                 AbandonoPorPlan = AbandonoPorPlan(ab, planes),
                 RotacionPorCategoria = RotacionPorCategoria(rot),
                 Oportunidades = Oportunidades(ab, planes)
@@ -111,15 +113,28 @@ namespace BLL
         // vigencia toca el período, compara las bajas, pausas y renovaciones de su plan DURANTE la
         // vigencia contra un período ANTERIOR de la misma duración, y mide cuántos clientes con la
         // renovación en juego durante la vigencia se retuvieron (contra la tasa que supuso Gerencia).
-        // Best-effort, como el impacto: si la consulta falla, el reporte sale sin esta sección.
+        // Devuelve: lista vacía si no hay DAL de promociones; NULL si no se pudieron leer las
+        // promociones (AnalizarMetricas lo informa como ReporteMetricas.ResultadoNoDisponible); y, si
+        // falla una sola promoción, su fila con NoSePudoCalcular = true.
         public List<BE.ResultadoPromocion> ResultadoPromociones(DateTime desde, DateTime hasta)
         {
             var lista = new List<BE.ResultadoPromocion>();
             if (dalPromocion == null) return lista;
-            try
+            List<BE.Promocion> promociones;
+            try { promociones = dalPromocion.ObtenerTodas(); }
+            catch (Exception ex)
             {
-                DateTime hastaExcl = hasta.Date.AddDays(1);
-                foreach (var p in dalPromocion.ObtenerTodas().Where(EsEvaluable))
+                // Falla total: null, para que el reporte diga que no se pudo leer (no "no hay promociones").
+                System.Diagnostics.Trace.TraceError($"[BLL.AnalisisPromociones] Resultado de promociones: {ex.Message}");
+                return null;
+            }
+            DateTime hastaExcl = hasta.Date.AddDays(1);
+            // Las fechas planificadas ya descartan, sin consultar la BD, las que no tocan el período (la
+            // vigencia real siempre cae dentro de [FechaInicio, FechaFin]).
+            foreach (var p in promociones.Where(p => EsEvaluable(p) && p.FechaInicio.Date < hastaExcl && p.FechaFin.Date >= desde.Date))
+            {
+                // Una promoción que falla no se lleva puestas a las demás: queda marcada en el reporte.
+                try
                 {
                     var (inicio, fin) = VigenciaReal(p);
                     if (fin <= inicio || inicio >= hastaExcl || fin <= desde.Date) continue;
@@ -137,10 +152,15 @@ namespace BLL
                     r.CalcularRetencion(durante, antes);
                     lista.Add(r);
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError($"[BLL.AnalisisPromociones] Resultado de promociones: {ex.Message}");
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceError($"[BLL.AnalisisPromociones] Resultado de la promoción #{p.IdPromocion}: {ex.Message}");
+                    lista.Add(new BE.ResultadoPromocion
+                    {
+                        IdPromocion = p.IdPromocion, Nombre = p.Nombre, Estado = p.Estado,
+                        IdPlan = p.IdPlan, NombrePlan = p.NombrePlan, NoSePudoCalcular = true
+                    });
+                }
             }
             return lista;
         }

@@ -72,7 +72,9 @@ namespace GUI
         {
             Traducir(idioma);
             // Refrescar grillas para que headers y valores de estado reflejen el nuevo idioma
-            CargarDatos(txtBuscar.Text);
+            // Con cambios sin guardar, Traducir ya re-tradujo los encabezados; los valores se refrescan
+            // al guardar o al volver a la pestaña.
+            if (!HayEdicionEnCurso()) CargarDatos(txtBuscar.Text);
             CargarUsuarios();
         }
 
@@ -130,9 +132,24 @@ namespace GUI
         // archivado, un cambio de rol) se ve sin tener que refrescar a mano.
         private void Tabs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (tabs.SelectedTab == tabDatos) CargarDatos(txtBuscar.Text);
+            if (tabs.SelectedTab == tabDatos) { if (!HayEdicionEnCurso()) CargarDatos(txtBuscar.Text); }
             else CargarUsuarios();
         }
+
+        // Un alta o cambios sin guardar sobre el usuario seleccionado no se descartan al cambiar de
+        // pestaña o de idioma (recargar la grilla limpia los campos). Tener una fila seleccionada sin
+        // tocar NO cuenta: la grilla se recarga para no operar sobre datos viejos (un usuario archivado
+        // desde Cuentas, por ejemplo).
+        private bool HayEdicionEnCurso() =>
+            _modoAlta || (_idSeleccionado != 0 && FotoEdicion() != _fotoAlSeleccionar);
+
+        // Lo que muestran los campos de edición, tal como quedaron al seleccionar el usuario: así un
+        // rol que no está en el combo (o un combo que no cargó) no cuenta como "cambio sin guardar".
+        private string _fotoAlSeleccionar;
+        private string FotoEdicion() => string.Join("\u001f",   // separador: un cambio que cruce campos no se confunde
+            txtNombre.Text, txtApellido.Text, txtUsername.Text, txtEmail.Text,
+            dtpNacimiento.Checked ? dtpNacimiento.Value.Date.ToString("yyyyMMdd") : "",
+            (cmbRol.SelectedItem as RolItem)?.Value ?? "");
 
         // ══ Pestaña "Cuentas" ══════════════════════════════════════════════════
 
@@ -484,13 +501,16 @@ namespace GUI
             }
             else dtpNacimiento.Checked = false;
 
-            // Preseleccionar el rol actual en el combo.
+            // Preseleccionar el rol actual en el combo. Si no está en la lista, queda SIN selección
+            // (antes quedaba el rol del usuario anterior y Guardar se lo asignaba sin querer).
+            cmbRol.SelectedIndex = -1;
             for (int i = 0; i < cmbRol.Items.Count; i++)
                 if (cmbRol.Items[i] is RolItem ri &&
                     string.Equals(ri.Value, u.Perfil, StringComparison.OrdinalIgnoreCase))
                 { cmbRol.SelectedIndex = i; break; }
 
             HabilitarEdicion(true);
+            _fotoAlSeleccionar = FotoEdicion();
         }
 
         private void LimpiarEdicion()
@@ -537,7 +557,9 @@ namespace GUI
             _idSeleccionado = 0;
             txtNombre.Text = txtApellido.Text = txtUsername.Text = txtEmail.Text = "";
             dtpNacimiento.Checked = false;
-            cmbRol.SelectedIndex = cmbRol.Items.Count > 0 ? 0 : -1;
+            // Sin rol preseleccionado: la lista está en orden alfabético y el primero puede ser
+            // Administrador. Se elige a mano (la BLL rechaza el alta sin rol).
+            cmbRol.SelectedIndex = -1;
             HabilitarEdicion(true);
             btnCambiarRol.Enabled = false;   // el rol se elige en el alta; "cambiar rol" es para existentes
             btnHistorial.Enabled  = false;
@@ -557,9 +579,9 @@ namespace GUI
 
             var actual = _usuarios.Find(x => x.Id == _idSeleccionado);
             string rolSel = (cmbRol.SelectedItem as RolItem)?.Value;
+            bool huboCambio = false;
             try
             {
-                bool huboCambio = false;
                 DateTime? fnac = dtpNacimiento.Checked ? (DateTime?)dtpNacimiento.Value.Date : null;
 
                 // Datos administrativos (si no cambió nada, la BLL lanza 'sin_cambios' y lo ignoramos).
@@ -586,7 +608,19 @@ namespace GUI
                 MostrarOk(Tr("msg.adminusr.guardado", "Datos del usuario actualizados correctamente."));
                 CargarDatos(txtBuscar.Text);
             }
-            catch (Exception ex) { MostrarError(ex); }
+            catch (Exception ex)
+            {
+                // Si una parte ya se guardó (los datos) y falló otra (el rol), la grilla se recarga para
+                // no seguir mostrando datos viejos; si no se guardó nada, se conservan los campos.
+                if (huboCambio)
+                {
+                    CargarDatos(txtBuscar.Text);
+                    MostrarError(string.Format(Tr("err.adminusr.guardadoparcial",
+                        "Se guardaron los datos del usuario, pero no se pudo cambiar el rol: {0}"),
+                        MensajeDeError(ex)));
+                }
+                else MostrarError(ex);
+            }
         }
 
         // Alta de un usuario nuevo con sus datos administrativos — el ÚNICO alta del sistema.

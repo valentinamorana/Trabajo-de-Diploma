@@ -35,7 +35,6 @@ namespace GUI
             };
 
         private readonly List<VistaReporteAnalitica> _vistas;
-        private readonly HashSet<VistaReporteAnalitica> _cargadas = new HashSet<VistaReporteAnalitica>();
         private VistaReporteAnalitica _actual;
 
         protected override Label MensajeLabel => lblResultado;
@@ -94,7 +93,8 @@ namespace GUI
             for (int i = 0; i < cmbReporte.Items.Count; i++)
                 cmbReporte.Items[i] = cmbReporte.Items[i];
 
-            foreach (var v in _vistas.Where(v => _cargadas.Contains(v)))
+            // Todas las vistas cuyos filtros ya existen (aunque su carga haya fallado).
+            foreach (var v in _vistas.Where(v => v.FiltrosCreados))
                 v.Traducir();
 
             if (_actual != null)
@@ -124,17 +124,10 @@ namespace GUI
             btnExportarPdf.Enabled = btnExportarCsv.Enabled = false;
             lblResultado.Text = string.Empty;
 
-            if (_cargadas.Add(vista))
-            {
-                try
-                {
-                    vista.Cargar();
-                }
-                catch (Exception ex)
-                {
-                    MostrarError(ex);
-                }
-            }
+            // Si Cargar falla (p. ej. la BD), la vista queda sin cargar y se reintenta al pulsar
+            // Generar o al volver a elegir el reporte.
+            try { vista.AsegurarCargada(); }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         private void BtnGenerar_Click(object sender, EventArgs e)
@@ -143,8 +136,24 @@ namespace GUI
 
             try
             {
+                if (_actual.AsegurarCargada())
+                {
+                    // Se reintentó la carga de los filtros que había fallado, pero NO se genera: el
+                    // usuario tiene que ver y elegir los filtros (p. ej. el cliente) antes del reporte.
+                    lblResultado.ForeColor = System.Drawing.Color.DimGray;
+                    lblResultado.Text = Tr("analitica.filtroscargados", "Se cargaron los filtros del reporte: revisalos y pulsá Generar.");
+                    return;
+                }
                 var resultado = _actual.Generar();
-                if (resultado == null) return;
+                if (resultado == null)
+                {
+                    // Falta un filtro obligatorio: no se eligió o no hay opciones (p. ej. no hay clientes).
+                    dgv.DataSource = null;
+                    btnExportarPdf.Enabled = btnExportarCsv.Enabled = false;
+                    lblResultado.ForeColor = System.Drawing.Color.DimGray;
+                    lblResultado.Text = Tr("analitica.faltafiltro", "Falta elegir un filtro del reporte, o no hay opciones para elegir (por ejemplo, no hay clientes).");
+                    return;
+                }
 
                 var encabezados = _actual.Encabezados;
                 dgv.DataSource = resultado.Tabla;
@@ -201,7 +210,7 @@ namespace GUI
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             pnlFiltros.Controls.Clear();
-            foreach (var v in _vistas.Where(v => _cargadas.Contains(v)))
+            foreach (var v in _vistas.Where(v => v.FiltrosCreados))
                 v.Filtros?.Dispose();
             base.OnFormClosed(e);
         }

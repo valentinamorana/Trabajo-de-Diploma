@@ -122,14 +122,15 @@ namespace BLL
             => CambiarEstado(modulo, prenda, nuevoEstado, porInspeccion: false);
 
         // PN04, CU-DEP-01 camino A: la Inspección de Devolución aprueba el reingreso sin cargo
-        // (EnLimpieza → Disponible). Solo la llama BLL.InspeccionDevolucion, que ya verificó que la
-        // prenda está en la cola de inspección.
+        // (EnLimpieza → Disponible). La llama BLL.InspeccionDevolucion.AprobarReingreso; la guarda de
+        // la cola (prenda devuelta y todavía En Limpieza, releída de la BD) está ACÁ y es la única.
         public void ReingresarInspeccionada(string modulo, BE.Prenda prenda)
         {
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
+            PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);   // antes de leer la BD
             // Defensa propia (no depende de que la llame solo la Inspección): únicamente una prenda
             // devuelta que sigue En Limpieza reingresa por este camino.
-            if (prenda.Estado != BE.EstadoPrenda.EnLimpieza || !VieneDeDevolucion(prenda.IdPrenda))
+            if (!EstaPendienteDeInspeccion(prenda))
                 throw new BE.AppException("err.bll.insp.reingreso_fuera_de_cola",
                     "La prenda '{0}' no está pendiente de inspección: no viene de una devolución o ya se resolvió.",
                     prenda.Nombre);
@@ -242,9 +243,20 @@ namespace BLL
         // el cargo por daño. Si entró a limpieza en el depósito, los dos cambios son manuales y sin
         // cargo: el cliente no tuvo nada que ver.
         private bool RequiereInspeccion(BE.Prenda prenda, BE.EstadoPrenda hacia) =>
-            prenda.Estado == BE.EstadoPrenda.EnLimpieza
-            && (hacia == BE.EstadoPrenda.Baja || hacia == BE.EstadoPrenda.Disponible)
-            && VieneDeDevolucion(prenda.IdPrenda);
+            SaleDeLimpieza(hacia) && EstaEnColaSegun(prenda);
+
+        // Los dos destinos que, para una prenda devuelta, solo decide la Inspección.
+        private static bool SaleDeLimpieza(BE.EstadoPrenda hacia) =>
+            hacia == BE.EstadoPrenda.Baja || hacia == BE.EstadoPrenda.Disponible;
+
+        // Con el estado del objeto recibido (para armar la pantalla y dentro de CambiarEstado, cuyo
+        // UPDATE ya está condicionado al estado anterior).
+        private bool EstaEnColaSegun(BE.Prenda prenda) =>
+            prenda != null && prenda.Estado == BE.EstadoPrenda.EnLimpieza && VieneDeDevolucion(prenda.IdPrenda);
+
+        // Guarda de la Inspección: relee el estado de la BD (el objeto de la pantalla puede estar viejo).
+        public bool EstaPendienteDeInspeccion(BE.Prenda prenda) =>
+            prenda != null && EstaEnColaSegun(dalPrenda.ObtenerPorId(prenda.IdPrenda));
 
         private bool VieneDeDevolucion(int idPrenda) =>
             dalMantenimiento.ObtenerPorPrenda(idPrenda).Any(m => m.EstaAbierto && m.VieneDeDevolucion);
@@ -259,11 +271,14 @@ namespace BLL
         {
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
 
+            // Una sola consulta de mantenimiento por prenda: si está pendiente de inspección no se le
+            // ofrece salir de limpieza (ni a Disponible ni a Baja); eso es RequiereInspeccion.
+            bool pendienteDeInspeccion = EstaEnColaSegun(prenda);
             var candidatos = new[] { BE.EstadoPrenda.Disponible, BE.EstadoPrenda.EnLimpieza, BE.EstadoPrenda.Baja };
             return candidatos
                 .Where(destino => destino != prenda.Estado
                                && !RequiereFlujoPerdida(prenda.Estado, destino)
-                               && !RequiereInspeccion(prenda, destino)
+                               && !(pendienteDeInspeccion && SaleDeLimpieza(destino))
                                && prenda.TransicionPermitida(destino))
                 .ToList();
         }

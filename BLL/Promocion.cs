@@ -253,6 +253,7 @@ namespace BLL
                 analisis.BeneficioEstimadoSugerencia = sugerencia?.BeneficioEstimado;
                 analisis.OrigenSugerencia = sugerencia?.OrigenMetrica;
                 analisis.TasaRetencionSugerencia = sugerencia?.TasaRetencion;
+                analisis.IngresoEnRiesgoSugerencia = sugerencia?.IngresoEnRiesgo() ?? 0m;
             }
             ProyectarCostoDelDescuento(analisis);
             return analisis;

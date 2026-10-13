@@ -122,7 +122,7 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 | `CargoPrenda` | `CargoPrenda` | `IdPrenda`, `IdCliente`, `Motivo`, `Monto` (>0, CHECK), `Estado` (0 Pendiente / 1 Cobrado) |
 | `ListaEspera` | `ListaEspera` | `Estado` (0–3), `FechaLimiteReserva`; índice único de anotación activa por (prenda, cliente) |
 | `Contratacion` | `Contratacion` | `IdVendedor`, `IdCaja`, `Modalidad` (0 mensual/1 trimestral/2 anual), `Estado`, `IntentosPago` (0..3, CHECK), `MedioPago`, `NumeroComprobante`, `Importe`, `DescuentoAplicado`, `IdPromocion`; índice único: **una pendiente por cliente** |
-| `SugerenciaPromocion` | `SugerenciaPromocion` | `IdPlan` (obligatorio), `Motivo`, `TipoDescuentoSugerido`, `BeneficioEstimado`, `TasaRetencion` (0-100], por defecto 30; 20h), `Estado`, `OrigenMetrica` |
+| `SugerenciaPromocion` | `SugerenciaPromocion` | `IdPlan` (obligatorio), `Motivo`, `TipoDescuentoSugerido`, `BeneficioEstimado`, `TasaRetencion` (0-100], por defecto 30; 20h), `IngresoEnRiesgo` (el que cargó Gerencia; CHECK: `BeneficioEstimado = ROUND(IngresoEnRiesgo × TasaRetencion / 100, 2)`), `Estado`, `OrigenMetrica` |
 | `Promocion` | `Promocion` | `IdPlan` **o** `CategoriaPrenda` (CHECK), `TipoDescuento`, `Valor` (CHECK >0; ≤100 si %), vigencia (CHECK fin ≥ inicio), `Estado`, `Observacion`, `MotivoBaja` |
 | `HistorialRenovacion` / `HistorialCobro` | `Renovacion`, `Cobro` | auditoría de los procesos N01 |
 | `BitacoraNegocio` / `Bitacora` | `BitacoraNegocio`, `Bitacora` | auditoría de negocio y de sistema |

@@ -16,7 +16,7 @@ namespace BLL.Interfaces
         // la BLL: ingreso mensual en riesgo × tasa de retención (0-100] / 100.
         int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int idPlan,
                                 string motivo, BE.TipoDescuento tipoSugerido, decimal ingresoMensualEnRiesgo,
-                                decimal tasaRetencion = BE.SugerenciaPromocion.TasaRetencionPorDefecto);
+                                decimal tasaRetencion);
 
         // "¿Acepta la sugerencia? No → Descartar sugerencia" (motivo obligatorio).
         void DescartarSugerencia(string modulo, int idSugerencia, string motivo);

@@ -55,6 +55,7 @@ namespace GUI
         public GestorPermisos()
         {
             InitializeComponent();
+            tabs.SelectedIndexChanged += Tabs_SelectedIndexChanged;
             ActualizarControles();
         }
 
@@ -66,7 +67,27 @@ namespace GUI
             CargarArbol();
         }
 
-        public void UpdateLanguage(Idioma idioma) { Traducir(); CargarVistaCompleta(); }
+        public void UpdateLanguage(Idioma idioma) { Traducir(); _vistaDesactualizada = true; CargarVistaSiSeVe(); }
+
+        // Fuentes compartidas por todos los nodos (antes una Font nueva por nodo, que no se liberaba).
+        private static readonly Font FuenteNodo        = new Font("Segoe UI", 9f);
+        private static readonly Font FuenteNodoNegrita = new Font("Segoe UI", 9f, FontStyle.Bold);
+
+        // La pestaña "Vista completa" se arma recién cuando se muestra (y solo si cambió algo).
+        private bool _vistaDesactualizada = true;
+
+        private void CargarVistaSiSeVe()
+        {
+            if (_vistaDesactualizada && tabs.SelectedTab == tabVistaCompleta)
+            {
+                // Se arma desde las raíces ya leídas: si falla, reintentar con los mismos datos daría el
+                // mismo error. Se vuelve a intentar cuando cambian los datos (CargarArbol / Actualizar).
+                CargarVistaCompleta();
+                _vistaDesactualizada = false;
+            }
+        }
+
+        private void Tabs_SelectedIndexChanged(object sender, EventArgs e) => CargarVistaSiSeVe();
 
         private void Traducir()
         {
@@ -132,7 +153,8 @@ namespace GUI
                 tvEstructura.ExpandAll();
                 tvEstructura.EndUpdate();
 
-                CargarVistaCompleta();
+                _vistaDesactualizada = true;
+                CargarVistaSiSeVe();
 
                 // Reseleccionar el nodo previo (si sigue existiendo) o limpiar.
                 _seleccionado = idPrev != 0 && _todos.ContainsKey(idPrev) ? _todos[idPrev] : null;
@@ -158,7 +180,7 @@ namespace GUI
             var nodo = new TreeNode(Etiqueta(comp)) { Tag = comp };
             if (comp is BE.Rol)
             {
-                nodo.NodeFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
+                nodo.NodeFont  = FuenteNodoNegrita;
                 nodo.ForeColor = Tema.RosaOscuro;
             }
             if (comp.Id != 0 && vis.Add(comp.Id))
@@ -281,14 +303,14 @@ namespace GUI
         // trajo CargarArbol (BLL.Familia.ObtenerArbol): no hace otra consulta. NO modifica permisos.
         private void CargarVistaCompleta()
         {
-            var traducciones = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             tvVistaCompleta.BeginUpdate();
             try
             {
+                var traducciones = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
                 tvVistaCompleta.Nodes.Clear();
                 var empresa = new TreeNode("WardrobeFlow")
                 {
-                    NodeFont  = new Font("Segoe UI", 9f, FontStyle.Bold),
+                    NodeFont  = FuenteNodoNegrita,
                     ForeColor = Tema.RosaOscuro
                 };
                 foreach (BE.Componente raiz in _raices)
@@ -328,9 +350,11 @@ namespace GUI
             var nodo = new TreeNode((esFamilia ? "(Familia) " : "") + nombre)
             {
                 Tag       = componente,
-                NodeFont  = esFamilia ? new Font("Segoe UI", 9f, FontStyle.Bold) : new Font("Segoe UI", 9f),
+                NodeFont  = esFamilia ? FuenteNodoNegrita : FuenteNodo,
                 ForeColor = esFamilia ? Tema.RosaOscuro : Tema.Exito
             };
+            // Sin guarda de ciclos: el árbol en memoria no puede tenerlos (BE.Familia.AgregarHijo los
+            // rechaza al armarlo en DAL.ObtenerArbol).
             foreach (BE.Componente hijo in componente.Hijos)
                 nodo.Nodes.Add(CrearNodoVista(hijo, t));
             return nodo;

@@ -14,7 +14,7 @@ namespace DAL
     {
         private const string SELECT_BASE =
             "SELECT s.IdSugerencia, s.IdPlan, s.Motivo, s.TipoDescuentoSugerido, " +
-            "s.BeneficioEstimado, s.TasaRetencion, s.Estado, s.FechaAlta, s.OrigenMetrica, s.IdUsuarioAlta, s.MotivoDescarte, " +
+            "s.BeneficioEstimado, s.TasaRetencion, s.IngresoEnRiesgo, s.Estado, s.FechaAlta, s.OrigenMetrica, s.IdUsuarioAlta, s.MotivoDescarte, " +
             "s.FechaEvaluacion, pl.Nombre AS NombrePlan, " +
             "COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(u.Nombre, '') + ' ' + ISNULL(u.Apellido, ''))), ''), u.Username) AS NombreUsuarioAlta " +
             "FROM SugerenciaPromocion s " +
@@ -60,6 +60,7 @@ namespace DAL
                 new SqlParameter("@TipoDescuentoSugerido", SqlDbType.Int) { Value = (int)sugerencia.TipoDescuentoSugerido },
                 new SqlParameter("@BeneficioEstimado",     SqlDbType.Decimal) { Value = sugerencia.BeneficioEstimado, Precision = 10, Scale = 2 },
                 new SqlParameter("@TasaRetencion",         SqlDbType.Decimal) { Value = sugerencia.TasaRetencion, Precision = 5, Scale = 2 },
+                new SqlParameter("@IngresoEnRiesgo",       SqlDbType.Decimal) { Value = (object)sugerencia.IngresoMensualEnRiesgo ?? DBNull.Value, Precision = 12, Scale = 2 },
                 new SqlParameter("@Estado",                SqlDbType.Int) { Value = (int)BE.EstadoSugerencia.Pendiente },
                 new SqlParameter("@FechaAlta",             SqlDbType.DateTime) { Value = sugerencia.FechaAlta },
                 new SqlParameter("@OrigenMetrica",         SqlDbType.Int) { Value = (int)sugerencia.OrigenMetrica },
@@ -68,9 +69,9 @@ namespace DAL
             try
             {
                 DataTable tabla = acceso.Leer(
-                    "INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, TasaRetencion, " +
+                    "INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, TasaRetencion, IngresoEnRiesgo, " +
                     "Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta) " +
-                    "VALUES (@IdPlan, @Motivo, @TipoDescuentoSugerido, @BeneficioEstimado, @TasaRetencion, " +
+                    "VALUES (@IdPlan, @Motivo, @TipoDescuentoSugerido, @BeneficioEstimado, @TasaRetencion, @IngresoEnRiesgo, " +
                     "@Estado, @FechaAlta, @OrigenMetrica, @IdUsuarioAlta); " +
                     "SELECT SCOPE_IDENTITY() AS IdNuevo", p);
                 return tabla != null && tabla.Rows.Count > 0 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"]) : 0;
@@ -143,6 +144,7 @@ namespace DAL
                 TipoDescuentoSugerido = (BE.TipoDescuento)Convert.ToInt32(row["TipoDescuentoSugerido"]),
                 BeneficioEstimado     = Convert.ToDecimal(row["BeneficioEstimado"]),
                 TasaRetencion         = Convert.ToDecimal(row["TasaRetencion"]),
+                IngresoMensualEnRiesgo = row["IngresoEnRiesgo"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["IngresoEnRiesgo"]) : null,
                 Estado                = (BE.EstadoSugerencia)Convert.ToInt32(row["Estado"]),
                 FechaAlta             = Convert.ToDateTime(row["FechaAlta"]),
                 OrigenMetrica         = (BE.OrigenMetrica)Convert.ToInt32(row["OrigenMetrica"]),

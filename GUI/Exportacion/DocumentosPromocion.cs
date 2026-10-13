@@ -102,14 +102,22 @@ namespace GUI.Exportacion
 
         // "Evaluar resultado de la promoción": movimientos del plan durante la vigencia contra el
         // período anterior de igual duración, y retención real contra la esperada.
-        private static void ResultadoPromociones(StringBuilder sb, List<BE.ResultadoPromocion> resultados)
+        private static void ResultadoPromociones(StringBuilder sb, List<BE.ResultadoPromocion> resultados, bool noDisponible)
         {
             sb.AppendLine(Tr("doc.promo.resultado.titulo",
                 "Resultado de las promociones (vigencia contra el período anterior de igual duración):"));
-            if (resultados == null || resultados.Count == 0)
+            if (noDisponible)
+                sb.AppendLine("   " + Tr("doc.promo.resultado.nodisponible", "No se pudieron leer las promociones: volvé a analizar las métricas."));
+            else if (resultados == null || resultados.Count == 0)
                 sb.AppendLine("   " + Tr("doc.promo.resultado.sindatos", "No hay promociones vigentes, dadas de baja o vencidas en el período."));
             foreach (var r in resultados ?? new List<BE.ResultadoPromocion>())
             {
+                if (r.NoSePudoCalcular)
+                {
+                    sb.AppendLine(string.Format(Tr("doc.promo.resultado.error",
+                        "   • {0}: no se pudo calcular su resultado. Volvé a analizar las métricas."), r.Nombre));
+                    continue;
+                }
                 sb.AppendLine(string.Format(Tr("doc.promo.resultado.promo", "   • {0} ({1}) — plan {2} — vigencia {3:d} al {4:d} ({5} día(s)); antes: {6:d} al {7:d}"),
                     r.Nombre, Estado(r.Estado), r.NombrePlan ?? "—", r.Desde, r.Hasta.AddDays(-1), r.Dias, r.AnteriorDesde, r.Desde.AddDays(-1)));
                 sb.AppendLine(string.Format(Tr("doc.promo.resultado.movimientos",
@@ -120,7 +128,8 @@ namespace GUI.Exportacion
                 string esperada = r.TasaRetencionEsperada.HasValue
                     ? string.Format(Tr("doc.promo.resultado.esperada", "esperada {0:0.##} %"), r.TasaRetencionEsperada.Value)
                     : Tr("doc.promo.resultado.sinesperada", "sin tasa esperada (alta manual)");
-                string antes = r.TasaRetencionAntes.HasValue
+                // La mejora existe solo si hay retención en los DOS tramos (MejoraRetencion es null si no).
+                string antes = r.MejoraRetencion.HasValue
                     ? string.Format(Tr("doc.promo.resultado.antes", "antes {0:0.##} %, mejora {1:+0.##;-0.##;0} pts"),
                         r.TasaRetencionAntes.Value, r.MejoraRetencion.Value)
                     : Tr("doc.promo.resultado.sinantes", "sin base del período anterior");
@@ -148,7 +157,7 @@ namespace GUI.Exportacion
                 sb.AppendLine(string.Format(Tr("doc.promo.impactolinea", "   • {0} ({1}): {2} cobro(s) — {3:C2} descontados — {4:C2} cobrados"),
                                             m.Nombre, Estado(m.Estado), m.Cobros, m.TotalDescontado, m.TotalCobrado));
             sb.AppendLine();
-            ResultadoPromociones(sb, r.ResultadoPromociones);
+            ResultadoPromociones(sb, r.ResultadoPromociones, r.ResultadoNoDisponible);
             sb.AppendLine(Tr("doc.promo.abandonoplan", "Abandono por plan (clientes en riesgo):"));
             if (r.AbandonoPorPlan.Count == 0) sb.AppendLine("   " + Tr("doc.promo.sindatos", "Sin casos detectados."));
             foreach (var m in r.AbandonoPorPlan)

@@ -236,8 +236,6 @@ namespace BLL
         // Guarda de la separación de funciones para la pantalla: ¿el usuario en sesión puede resolver
         // (cobrar, registrar un intento fallido o anular) esta contratación? No, si la registró él.
         // Excepción: el Administrador puede hacer las dos cosas (decisión de la alumna).
-        public bool PuedeCobrar(BE.Contratacion contratacion) => PuedeCobrar(contratacion, EmpleadoEnSesion());
-
         private static bool PuedeCobrar(BE.Contratacion contratacion, int? idEmpleado)
         {
             if (contratacion == null || !Seguridad.SessionManager.IsLoggedIn) return false;
@@ -253,9 +251,8 @@ namespace BLL
 
         // Misma guarda en la BLL (la pantalla puede estar desactualizada): quien registró la
         // contratación no la resuelve en Caja, salvo el Administrador.
-        private void ExigirQueNoLaRegistro(BE.Contratacion actual, string clave, string mensaje)
+        private static void ExigirQueNoLaRegistro(BE.Contratacion actual, int idCaja, string clave, string mensaje)
         {
-            int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
             if (!actual.PuedeResolverla(idCaja) && !(Sesion.Usuario?.EsAdministrador ?? false))
                 throw new BE.AppException(clave, mensaje);
         }
@@ -382,7 +379,7 @@ namespace BLL
             int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
             // Separación de funciones POR PERSONA: quien vendió la contratación no puede cobrarla.
             // Excepción: el Administrador puede hacer las dos cosas (decisión de la alumna).
-            ExigirQueNoLaRegistro(actual, "err.bll.contratacion.cobra_el_vendedor",
+            ExigirQueNoLaRegistro(actual, idCaja, "err.bll.contratacion.cobra_el_vendedor",
                 "Quien registró la contratación no puede cobrarla: el cobro lo confirma otra persona de Caja.");
             var descuento = ResolverDescuento(actual, plan, cliente, ObtenerPromocionesVigentes());
             // PN04: los cargos por daño o pérdida pendientes se cobran junto con el período (igual que
@@ -513,7 +510,8 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.cobrar_estado",
                     "Solo se pueden registrar intentos sobre contrataciones Pendientes de pago. Esta contratación está '{0}'.",
                     actual.Estado);
-            ExigirQueNoLaRegistro(actual, "err.bll.contratacion.resuelve_el_vendedor",
+            int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
+            ExigirQueNoLaRegistro(actual, idCaja, "err.bll.contratacion.resuelve_el_vendedor",
                 "Quien registró la contratación no puede resolverla en Caja: lo hace otra persona de Caja.");
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.contratacion.intento_sin_motivo",
@@ -522,7 +520,7 @@ namespace BLL
             ValidarMedioPago(idMedioPago, requerido: false);
 
             var resultado = dalContratacion.RegistrarIntentoFallido(actual.IdContratacion, idMedioPago, motivo.Trim(),
-                BLLHelper.ResolverEmpleadoActivo(dalEmpleado), BE.Contratacion.MaxIntentosPago);
+                idCaja, BE.Contratacion.MaxIntentosPago);
             if (resultado == null)
                 throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
                     "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
@@ -560,14 +558,15 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.anular_estado",
                     "Solo se pueden anular contrataciones Pendientes de pago. Esta contratación está '{0}'.",
                     actual.Estado);
-            ExigirQueNoLaRegistro(actual, "err.bll.contratacion.resuelve_el_vendedor",
+            int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
+            ExigirQueNoLaRegistro(actual, idCaja, "err.bll.contratacion.resuelve_el_vendedor",
                 "Quien registró la contratación no puede resolverla en Caja: lo hace otra persona de Caja.");
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.contratacion.anular_sin_motivo",
                     "Indicá el motivo por el que se anula la contratación.");
             ValidarLargoMotivo(motivo);
 
-            if (!dalContratacion.Anular(actual.IdContratacion, motivo.Trim(), BLLHelper.ResolverEmpleadoActivo(dalEmpleado)))
+            if (!dalContratacion.Anular(actual.IdContratacion, motivo.Trim(), idCaja))
                 throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
                     "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
 

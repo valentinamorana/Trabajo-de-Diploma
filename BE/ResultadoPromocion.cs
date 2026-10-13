@@ -19,6 +19,9 @@ namespace BE
         public int IdPlan { get; set; }
         public string NombrePlan { get; set; }
 
+        /// <summary>La lectura de sus datos falló: el reporte lo avisa en vez de omitir la promoción.</summary>
+        public bool NoSePudoCalcular { get; set; }
+
         /// <summary>Vigencia real evaluada [Desde, Hasta): desde la aprobación (o la fecha de inicio)
         /// hasta la baja, el vencimiento o hoy.</summary>
         public DateTime Desde { get; set; }

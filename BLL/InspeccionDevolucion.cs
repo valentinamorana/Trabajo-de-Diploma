@@ -49,10 +49,8 @@ namespace BLL
         public void AprobarReingreso(string modulo, BE.Prenda prenda)
         {
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
-            if (!_prenda.ObtenerEnLimpieza().Exists(p => p.IdPrenda == prenda.IdPrenda))
-                throw new BE.AppException("err.bll.insp.reingreso_fuera_de_cola",
-                    "La prenda '{0}' no está pendiente de inspección: no viene de una devolución o ya se resolvió.",
-                    prenda.Nombre);
+            // La guarda (prenda devuelta y todavía En Limpieza, releída de la BD) la aplica
+            // BLL.Prenda.ReingresarInspeccionada: err.bll.insp.reingreso_fuera_de_cola.
             _prenda.ReingresarInspeccionada(modulo, prenda);
         }
 
@@ -63,8 +61,9 @@ namespace BLL
         /// </summary>
         public int DarDeBajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto)
         {
+            PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);   // antes de leer la BD
             if (prenda != null && prenda.Estado == BE.EstadoPrenda.EnLimpieza &&
-                !_prenda.ObtenerEnLimpieza().Exists(p => p.IdPrenda == prenda.IdPrenda))
+                !_prenda.EstaPendienteDeInspeccion(prenda))
                 throw new BE.AppException("err.bll.insp.no_devuelta",
                     "La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dala de baja desde Prendas.",
                     prenda.Nombre);

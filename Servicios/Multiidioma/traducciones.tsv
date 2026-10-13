@@ -7320,3 +7320,23 @@ ES	doc.promo.resultado.sinantes	sin base del período anterior
 EN	doc.promo.resultado.sinantes	no baseline from the previous period
 RU	doc.promo.resultado.sinantes	нет базы за предыдущий период
 PT	doc.promo.resultado.sinantes	sem base do período anterior
+ES	doc.promo.resultado.error	   • {0}: no se pudo calcular su resultado. Volvé a analizar las métricas.
+EN	doc.promo.resultado.error	   • {0}: its result could not be calculated. Analyse the metrics again.
+RU	doc.promo.resultado.error	   • {0}: не удалось рассчитать результат. Повторите анализ метрик.
+PT	doc.promo.resultado.error	   • {0}: não foi possível calcular o resultado. Analise as métricas novamente.
+ES	doc.promo.resultado.nodisponible	No se pudieron leer las promociones: volvé a analizar las métricas.
+EN	doc.promo.resultado.nodisponible	The promotions could not be read: analyse the metrics again.
+RU	doc.promo.resultado.nodisponible	Не удалось прочитать акции: повторите анализ метрик.
+PT	doc.promo.resultado.nodisponible	Não foi possível ler as promoções: analise as métricas novamente.
+ES	analitica.filtroscargados	Se cargaron los filtros del reporte: revisalos y pulsá Generar.
+EN	analitica.filtroscargados	The report filters were loaded: check them and press Generate.
+RU	analitica.filtroscargados	Фильтры отчёта загружены: проверьте их и нажмите «Сформировать».
+PT	analitica.filtroscargados	Os filtros do relatório foram carregados: confira-os e clique em Gerar.
+ES	analitica.faltafiltro	Falta elegir un filtro del reporte, o no hay opciones para elegir (por ejemplo, no hay clientes).
+EN	analitica.faltafiltro	A report filter is missing, or there are no options to choose from (for example, there are no customers).
+RU	analitica.faltafiltro	Не выбран фильтр отчёта, или выбирать не из чего (например, нет клиентов).
+PT	analitica.faltafiltro	Falta escolher um filtro do relatório, ou não há opções para escolher (por exemplo, não há clientes).
+ES	err.adminusr.guardadoparcial	Se guardaron los datos del usuario, pero no se pudo cambiar el rol: {0}
+EN	err.adminusr.guardadoparcial	The user data was saved, but the role could not be changed: {0}
+RU	err.adminusr.guardadoparcial	Данные пользователя сохранены, но роль изменить не удалось: {0}
+PT	err.adminusr.guardadoparcial	Os dados do usuário foram salvos, mas não foi possível alterar o perfil: {0}

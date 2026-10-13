@@ -83,6 +83,53 @@ namespace Tests
             Assert.IsTrue(mantenimientos.Exists(m => m.Actor == "deposito" && m.Origen == BE.OrigenMantenimiento.Manual));
         }
 
+        // PN03: el beneficio que calcula BE (redondeo desde el cero) pasa el CHECK de la base, que lo
+        // compara con ROUND(ingreso × tasa / 100, 2) — incluso en un punto medio (1,15 × 50 % = 0,575).
+        [TestMethod]
+        public void PN03_SugerenciaConIngresoYTasa_PasaElCheckDelBeneficio()
+        {
+            ExigirBase();
+            var plan = new DAL.PlanSuscripcion().ObtenerTodos().First();
+            var dal = new DAL.SugerenciaPromocion();
+            var s = new BE.SugerenciaPromocion
+            {
+                IdPlan = plan.IdPlan, Motivo = "Prueba de integración: punto medio del redondeo",
+                TipoDescuentoSugerido = BE.TipoDescuento.Porcentaje, OrigenMetrica = BE.OrigenMetrica.Manual,
+                IngresoMensualEnRiesgo = 1.15m, TasaRetencion = 50m,
+                BeneficioEstimado = BE.SugerenciaPromocion.CalcularBeneficio(1.15m, 50m), FechaAlta = DateTime.Now
+            };
+            Assert.AreEqual(0.58m, s.BeneficioEstimado);
+            int id = dal.Alta(s);
+            var acceso = DAL.Acceso.GetInstance();
+            try
+            {
+                var leida = dal.ObtenerPorId(id);
+                Assert.AreEqual(1.15m, leida.IngresoMensualEnRiesgo);
+                Assert.AreEqual(1.15m, leida.IngresoEnRiesgo());
+                Assert.AreEqual(50m, leida.TasaRetencion);
+
+                // Un beneficio que no coincide con ingreso × tasa no entra.
+                s.BeneficioEstimado = 0.57m;
+                int idDesfasado = 0;
+                try { idDesfasado = dal.Alta(s); }
+                catch (Exception ex)
+                {
+                    StringAssert.Contains(ex.InnerException?.Message ?? ex.Message, "CHK_SugerenciaPromocion_Beneficio");
+                }
+                if (idDesfasado != 0)
+                {
+                    acceso.Escribir("DELETE FROM SugerenciaPromocion WHERE IdSugerencia = @Id",
+                        new[] { new SqlParameter("@Id", idDesfasado) });
+                    Assert.Fail("El CHECK CHK_SugerenciaPromocion_Beneficio debía rechazar el desfasaje.");
+                }
+            }
+            finally
+            {
+                acceso.Escribir("DELETE FROM SugerenciaPromocion WHERE IdSugerencia = @Id",
+                    new[] { new SqlParameter("@Id", id) });
+            }
+        }
+
         // PN04: con los datos reales, una prenda que entró a limpieza en el depósito se libera desde
         // Prendas; una que volvió de un cliente no ofrece ningún destino manual (sale por la Inspección).
         [TestMethod]

@@ -318,6 +318,9 @@ namespace Tests
             LoginComoAdministrador();
             var ctx = new Contexto();
             var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+            // Existe y está En Limpieza, pero la mandó el depósito (mantenimiento manual), no un cliente.
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza });
+            ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Origen = BE.OrigenMantenimiento.Manual });
             try
             {
                 ctx.Crear().ReingresarInspeccionada("Test", prenda);
@@ -334,6 +337,7 @@ namespace Tests
             var ctx = new Contexto();
             var bll = ctx.Crear();
             var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+            ctx.DalPrenda.Todas.Add(new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza });
             ctx.DalMantenimiento.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 1, Origen = BE.OrigenMantenimiento.Devolucion });
 
             bll.ReingresarInspeccionada("Test", prenda);

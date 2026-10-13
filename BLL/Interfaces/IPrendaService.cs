@@ -32,6 +32,10 @@ namespace BLL.Interfaces
         // de una prenda devuelta, que CambiarEstado rechaza).
         void ReingresarInspeccionada(string modulo, BE.Prenda prenda);
 
+        // PN04: ¿la prenda está en la cola de inspección (devuelta por un cliente y todavía En Limpieza)?
+        // Consulta puntual (la cola completa es ObtenerEnLimpieza).
+        bool EstaPendienteDeInspeccion(BE.Prenda prenda);
+
         // CU01-CS-Verificar Disponibilidad (PN01): releyendo el estado real desde la base,
         // confirma si cada prenda de la selección sigue Disponible. Solo lectura.
         (bool Disponible, List<BE.Prenda> NoDisponibles) VerificarDisponibilidad(List<BE.Prenda> seleccion);

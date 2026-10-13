@@ -24,6 +24,9 @@ namespace BE
         /// Vencida cuya vigencia toca el período.</summary>
         public List<ResultadoPromocion> ResultadoPromociones { get; set; } = new List<ResultadoPromocion>();
 
+        /// <summary>No se pudieron leer las promociones: el reporte lo dice en vez de "no hay promociones".</summary>
+        public bool ResultadoNoDisponible { get; set; }
+
         /// <summary>Guarda de "¿Hay oportunidad?": solo cuentan las oportunidades por plan.</summary>
         public bool HayOportunidad() => Oportunidades != null && Oportunidades.Count > 0;
     }

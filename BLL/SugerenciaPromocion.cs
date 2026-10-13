@@ -39,7 +39,7 @@ namespace BLL
         // supuesto explícito de cuántos clientes en riesgo retiene la promoción (antes, el 100 %).
         public int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int idPlan,
                                        string motivo, BE.TipoDescuento tipoSugerido, decimal ingresoMensualEnRiesgo,
-                                       decimal tasaRetencion = BE.SugerenciaPromocion.TasaRetencionPorDefecto)
+                                       decimal tasaRetencion)
         {
             PermisosAccion.Exigir(BE.Patentes.SugerenciaPromocion, BE.Patentes.SugerenciaPromocion);
 
@@ -58,11 +58,12 @@ namespace BLL
 
             // La columna guarda 2 decimales: se redondea antes de validar y de calcular el beneficio,
             // así lo guardado y lo calculado coinciden.
-            tasaRetencion = Math.Round(tasaRetencion, 2);
+            tasaRetencion = Math.Round(tasaRetencion, 2, MidpointRounding.AwayFromZero);
             if (tasaRetencion <= 0 || tasaRetencion > 100)
                 throw new BE.AppException("err.bll.sugerenciapromocion.tasa_invalida",
                     "La tasa de retención esperada debe ser mayor a 0 y hasta 100 %.");
 
+            ingresoMensualEnRiesgo = Math.Round(ingresoMensualEnRiesgo, 2, MidpointRounding.AwayFromZero);   // la columna guarda 2 decimales
             decimal beneficioEstimado = BE.SugerenciaPromocion.CalcularBeneficio(ingresoMensualEnRiesgo, tasaRetencion);
             if (beneficioEstimado <= 0)
                 throw new BE.AppException("err.bll.sugerenciapromocion.beneficio_invalido",
@@ -75,6 +76,7 @@ namespace BLL
                 TipoDescuentoSugerido = tipoSugerido,
                 BeneficioEstimado = beneficioEstimado,
                 TasaRetencion = tasaRetencion,
+                IngresoMensualEnRiesgo = ingresoMensualEnRiesgo,
                 Estado = BE.EstadoSugerencia.Pendiente,
                 OrigenMetrica = origen,
                 IdUsuarioAlta = BLLHelper.ResolverUsuarioActivo(),

@@ -30,11 +30,8 @@ namespace BE
         /// <summary>Tasa de retención esperada (%) con la que Gerencia estimó el beneficio de la sugerencia.</summary>
         public decimal? TasaRetencionSugerencia { get; set; }
 
-        /// <summary>Ingreso mensual en riesgo del que partió Gerencia (beneficio × 100 / tasa).</summary>
-        public decimal IngresoEnRiesgoSugerencia =>
-            BeneficioEstimadoSugerencia.HasValue && TasaRetencionSugerencia > 0
-                ? Math.Round(BeneficioEstimadoSugerencia.Value * 100m / TasaRetencionSugerencia.Value, 2)
-                : 0m;
+        /// <summary>Ingreso mensual en riesgo del que partió Gerencia (BE.SugerenciaPromocion.IngresoEnRiesgo).</summary>
+        public decimal IngresoEnRiesgoSugerencia { get; set; }
         public List<Promocion> Superpuestas { get; set; } = new List<Promocion>();
 
         /// <summary>false si el usuario en sesión es quien creó la promoción (no puede dictaminarla).</summary>

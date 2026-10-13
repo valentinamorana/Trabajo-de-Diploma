@@ -230,6 +230,8 @@ namespace Tests
             // Cola de inspección: por defecto la prenda 5 (la de los tests) volvió de una devolución.
             public List<BE.Prenda> ColaInspeccion = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 5 } };
             public new List<BE.Prenda> ObtenerEnLimpieza() => ColaInspeccion;
+            public new bool EstaPendienteDeInspeccion(BE.Prenda prenda) =>
+                prenda.Estado == BE.EstadoPrenda.EnLimpieza && ColaInspeccion.Exists(p => p.IdPrenda == prenda.IdPrenda);
         }
 
         private static BE.Prenda Prenda(BE.EstadoPrenda estado, int? ultimoCliente = 3) => new BE.Prenda
@@ -444,16 +446,21 @@ namespace Tests
         [TestMethod]
         public void AprobarReingreso_PrendaFueraDeLaCola_Rechaza()
         {
+            // Con la BLL de Prenda REAL (la guarda vive en ReingresarInspeccionada): la prenda está En
+            // Limpieza pero la mandó el depósito, así que no está en la cola de inspección.
             LoginComoAdministrador();
-            var espia = new PrendaServiceEspia();
-            espia.ColaInspeccion.Clear();
+            var dalPrenda = new FakePrendaDAL();
+            dalPrenda.Todas.Add(Prenda(BE.EstadoPrenda.EnLimpieza));
+            var dalMant = new FakeMantenimientoPrendaDAL();
+            dalMant.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 5, Origen = BE.OrigenMantenimiento.Manual });
+            var prendaBLL = new BLL.Prenda(dalPrenda, dalMant, new FakeListaEsperaService());
             try
             {
-                new BLL.InspeccionDevolucion(new FakeInspeccionDAL(), espia).AprobarReingreso("Test", Prenda(BE.EstadoPrenda.EnLimpieza));
+                new BLL.InspeccionDevolucion(new FakeInspeccionDAL(), prendaBLL).AprobarReingreso("Test", Prenda(BE.EstadoPrenda.EnLimpieza));
                 Assert.Fail("Debía rechazar el reingreso de una prenda que no está pendiente de inspección.");
             }
             catch (BE.AppException ex) { Assert.AreEqual("err.bll.insp.reingreso_fuera_de_cola", ex.Clave); }
-            Assert.AreEqual(0, espia.Reingresos.Count);
+            Assert.AreEqual(0, dalPrenda.CambiarEstadoVeces);
         }
 
         // ── PanelTareas: tablero logístico y suscripciones ────────────────────

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tests.Fakes;
 
@@ -369,6 +370,55 @@ namespace Tests
             Assert.AreEqual(1, res.Durante.CambiosDePlan);
             Assert.AreEqual(2, res.ClientesEnJuego);
             Assert.AreEqual(1, res.ClientesRetenidos);
+        }
+
+        // Revisión 13/10: sin decisiones durante la vigencia pero sí antes, no hay mejora (antes se
+        // pedía MejoraRetencion.Value y el reporte de métricas se caía).
+        [TestMethod]
+        public void ResultadoPromociones_SinDecisionesDuranteLaVigencia_NoHayMejora()
+        {
+            var dal = new FakePromocionDAL();
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 1, Estado = BE.EstadoPromocion.Vigente, IdPlan = 3,
+                                             FechaInicio = Hoy.AddDays(-1), FechaFin = Hoy.AddDays(30) });
+            dal.Decisiones.Add((3, Dec(1, -2, BE.EstadoRenovacion.Renovada)));   // solo en el período anterior
+
+            var res = CrearConPromos(dal).ResultadoPromociones(Hoy.AddDays(-90), Hoy)[0];
+
+            Assert.IsNull(res.TasaRetencionReal);
+            Assert.AreEqual(100m, res.TasaRetencionAntes);
+            Assert.IsNull(res.MejoraRetencion);
+            Assert.IsNull(res.CumplioRetencionEsperada());
+        }
+
+        // Revisión 13/10: si falla una promoción, las demás se evalúan y la fallida queda marcada.
+        [TestMethod]
+        public void ResultadoPromociones_FallaUnaPromocion_LasDemasSeEvaluanYQuedaMarcada()
+        {
+            var dal = new FakePromocionDAL { FallarDecisionesDelPlan = 3 };
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 1, Nombre = "Falla", Estado = BE.EstadoPromocion.Vigente, IdPlan = 3,
+                                             FechaInicio = Hoy.AddDays(-10), FechaFin = Hoy.AddDays(10) });
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 2, Nombre = "Anda", Estado = BE.EstadoPromocion.Vigente, IdPlan = 4,
+                                             FechaInicio = Hoy.AddDays(-10), FechaFin = Hoy.AddDays(10) });
+
+            var r = CrearConPromos(dal).ResultadoPromociones(Hoy.AddDays(-90), Hoy);
+
+            Assert.AreEqual(2, r.Count);
+            Assert.IsTrue(r.Single(x => x.IdPromocion == 1).NoSePudoCalcular);
+            Assert.IsFalse(r.Single(x => x.IdPromocion == 2).NoSePudoCalcular);
+        }
+
+        // Revisión 13/10: si no se pueden leer las promociones, el reporte lo dice (no "no hay promociones").
+        [TestMethod]
+        public void AnalizarMetricas_NoSePuedenLeerLasPromociones_ResultadoNoDisponible()
+        {
+            Login();
+            var dal = new FakePromocionDAL { FallarObtenerTodas = true };
+            var bll = new BLL.AnalisisPromociones(new RotacionFake(), new AbandonoFake(), new FakePlanSuscripcionDAL(), dal,
+                                                  new FakeSugerenciaPromocionDAL(), () => Hoy);
+            Assert.IsNull(bll.ResultadoPromociones(Hoy.AddDays(-90), Hoy));
+            var reporte = bll.AnalizarMetricas("Test", Hoy.AddDays(-90), Hoy);
+            Assert.IsTrue(reporte.ResultadoNoDisponible);
+            Assert.AreEqual(0, reporte.ResultadoPromociones.Count);
         }
 
         [TestMethod]

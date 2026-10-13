@@ -56,6 +56,23 @@ namespace GUI.Analitica
 
         protected virtual Control CrearFiltros() => null;
 
+        /// <summary>Ya se crearon sus filtros (Traducir los puede tocar).</summary>
+        public bool FiltrosCreados => _filtrosCreados;
+
+        /// <summary>Los datos de sus filtros se cargaron bien (si Cargar falló, queda en false).</summary>
+        public bool Cargada { get; private set; }
+
+        /// <summary>Carga los filtros si todavía no se cargaron. Devuelve true si los cargó AHORA.
+        /// Si Cargar lanza, la vista sigue sin cargar y se reintenta la próxima vez.</summary>
+        public bool AsegurarCargada()
+        {
+            if (Cargada) return false;
+            _ = Filtros;   // Cargar llena los controles de filtro: tienen que existir antes
+            Cargar();
+            Cargada = true;
+            return true;
+        }
+
         /// <summary>Re-traduce los textos de los filtros (cambio de idioma en vivo).</summary>
         public virtual void Traducir() { }
 

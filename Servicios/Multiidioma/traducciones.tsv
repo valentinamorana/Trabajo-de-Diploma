@@ -7220,10 +7220,10 @@ ES	err.bll.contratacion.resuelve_el_vendedor	Quien registró la contratación no
 EN	err.bll.contratacion.resuelve_el_vendedor	Whoever registered the contract cannot resolve it at the Cashier: another Cashier user does it.
 RU	err.bll.contratacion.resuelve_el_vendedor	Тот, кто оформил договор, не может провести его через кассу: это делает другой сотрудник кассы.
 PT	err.bll.contratacion.resuelve_el_vendedor	Quem registrou a contratação não pode resolvê-la no Caixa: isso é feito por outra pessoa do Caixa.
-ES	lbl.contr.registraste	Registraste esta contratación: la tiene que resolver otra persona de Caja.
-EN	lbl.contr.registraste	You registered this contract: another Cashier user has to resolve it.
-RU	lbl.contr.registraste	Вы оформили этот договор: его должен провести другой сотрудник кассы.
-PT	lbl.contr.registraste	Você registrou esta contratação: outra pessoa do Caixa precisa resolvê-la.
+ES	lbl.contr.registraste	No podés resolver esta contratación: la registraste vos (la resuelve otra persona de Caja) o tu usuario no tiene un Empleado vinculado.
+EN	lbl.contr.registraste	You cannot resolve this contract: you registered it (another Cashier user resolves it) or your user has no linked Employee.
+RU	lbl.contr.registraste	Вы не можете провести этот договор: вы его оформили (его проводит другой сотрудник кассы) или к вашему пользователю не привязан сотрудник.
+PT	lbl.contr.registraste	Você não pode resolver esta contratação: você a registrou (outra pessoa do Caixa a resolve) ou seu usuário não tem um Funcionário vinculado.
 ES	promocion.ingresoriesgo	Ingreso en riesgo:
 EN	promocion.ingresoriesgo	Revenue at risk:
 RU	promocion.ingresoriesgo	Доход под риском:
@@ -7260,10 +7260,10 @@ ES	doc.promo.resultado.promo	   • {0} ({1}) — plan {2} — vigencia {3:d} al
 EN	doc.promo.resultado.promo	   • {0} ({1}) — plan {2} — active {3:d} to {4:d} ({5} day(s)); before: {6:d} to {7:d}
 RU	doc.promo.resultado.promo	   • {0} ({1}) — тариф {2} — действует с {3:d} по {4:d} ({5} дн.); до этого: с {6:d} по {7:d}
 PT	doc.promo.resultado.promo	   • {0} ({1}) — plano {2} — vigência {3:d} a {4:d} ({5} dia(s)); antes: {6:d} a {7:d}
-ES	doc.promo.resultado.movimientos	      Bajas {0} (antes {1}, {2:+0;-0;0}) · Pausas {3} (antes {4}, {5:+0;-0;0}) · Renovaciones {6} (antes {7}, {8:+0;-0;0})
-EN	doc.promo.resultado.movimientos	      Cancellations {0} (before {1}, {2:+0;-0;0}) · Pauses {3} (before {4}, {5:+0;-0;0}) · Renewals {6} (before {7}, {8:+0;-0;0})
-RU	doc.promo.resultado.movimientos	      Отказы {0} (до {1}, {2:+0;-0;0}) · Паузы {3} (до {4}, {5:+0;-0;0}) · Продления {6} (до {7}, {8:+0;-0;0})
-PT	doc.promo.resultado.movimientos	      Baixas {0} (antes {1}, {2:+0;-0;0}) · Pausas {3} (antes {4}, {5:+0;-0;0}) · Renovações {6} (antes {7}, {8:+0;-0;0})
+ES	doc.promo.resultado.movimientos	      Bajas {0} (antes {1}, {2:+0;-0;0}) · Cambios a otro plan {3} (antes {4}, {5:+0;-0;0}) · Pausas {6} (antes {7}, {8:+0;-0;0}) · Renovaciones {9} (antes {10}, {11:+0;-0;0})
+EN	doc.promo.resultado.movimientos	      Cancellations {0} (before {1}, {2:+0;-0;0}) · Switches to another plan {3} (before {4}, {5:+0;-0;0}) · Pauses {6} (before {7}, {8:+0;-0;0}) · Renewals {9} (before {10}, {11:+0;-0;0})
+RU	doc.promo.resultado.movimientos	      Отказы {0} (до {1}, {2:+0;-0;0}) · Переходы на другой тариф {3} (до {4}, {5:+0;-0;0}) · Паузы {6} (до {7}, {8:+0;-0;0}) · Продления {9} (до {10}, {11:+0;-0;0})
+PT	doc.promo.resultado.movimientos	      Baixas {0} (antes {1}, {2:+0;-0;0}) · Trocas para outro plano {3} (antes {4}, {5:+0;-0;0}) · Pausas {6} (antes {7}, {8:+0;-0;0}) · Renovações {9} (antes {10}, {11:+0;-0;0})
 ES	doc.promo.resultado.esperada	esperada {0:0.##} %
 EN	doc.promo.resultado.esperada	expected {0:0.##} %
 RU	doc.promo.resultado.esperada	ожидалось {0:0.##} %
@@ -7272,10 +7272,10 @@ ES	doc.promo.resultado.sinesperada	sin tasa esperada (alta manual)
 EN	doc.promo.resultado.sinesperada	no expected rate (manual entry)
 RU	doc.promo.resultado.sinesperada	без ожидаемой доли (создана вручную)
 PT	doc.promo.resultado.sinesperada	sem taxa esperada (cadastro manual)
-ES	doc.promo.resultado.retencion	      Clientes con la renovación en juego: {0}; retenidos: {1} ({2:0.##} %, {3})
-EN	doc.promo.resultado.retencion	      Customers with their renewal at stake: {0}; retained: {1} ({2:0.##} %, {3})
-RU	doc.promo.resultado.retencion	      Клиентов с решением о продлении: {0}; удержано: {1} ({2:0.##} %, {3})
-PT	doc.promo.resultado.retencion	      Clientes com a renovação em jogo: {0}; retidos: {1} ({2:0.##} %, {3})
+ES	doc.promo.resultado.retencion	      Clientes con la renovación en juego: {0}; retenidos: {1} ({2:0.##} %; {3}; {4})
+EN	doc.promo.resultado.retencion	      Customers with their renewal at stake: {0}; retained: {1} ({2:0.##} %; {3}; {4})
+RU	doc.promo.resultado.retencion	      Клиентов с решением о продлении: {0}; удержано: {1} ({2:0.##} %; {3}; {4})
+PT	doc.promo.resultado.retencion	      Clientes com a renovação em jogo: {0}; retidos: {1} ({2:0.##} %; {3}; {4})
 ES	doc.promo.resultado.sinjuego	      Ningún cliente del plan tuvo la renovación en juego durante la vigencia ({0}).
 EN	doc.promo.resultado.sinjuego	      No customer of the plan had their renewal at stake during the active period ({0}).
 RU	doc.promo.resultado.sinjuego	      Ни у одного клиента тарифа не было решения о продлении в период действия ({0}).
@@ -7312,3 +7312,11 @@ ES	perm.tab.vistacompleta	Vista completa
 EN	perm.tab.vistacompleta	Full view
 RU	perm.tab.vistacompleta	Полный обзор
 PT	perm.tab.vistacompleta	Visão completa
+ES	doc.promo.resultado.antes	antes {0:0.##} %, mejora {1:+0.##;-0.##;0} pts
+EN	doc.promo.resultado.antes	before {0:0.##} %, improvement {1:+0.##;-0.##;0} pts
+RU	doc.promo.resultado.antes	до этого {0:0.##} %, прирост {1:+0.##;-0.##;0} п.п.
+PT	doc.promo.resultado.antes	antes {0:0.##} %, melhora {1:+0.##;-0.##;0} pts
+ES	doc.promo.resultado.sinantes	sin base del período anterior
+EN	doc.promo.resultado.sinantes	no baseline from the previous period
+RU	doc.promo.resultado.sinantes	нет базы за предыдущий период
+PT	doc.promo.resultado.sinantes	sem base do período anterior

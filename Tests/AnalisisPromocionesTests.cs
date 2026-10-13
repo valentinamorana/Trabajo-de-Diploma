@@ -276,9 +276,12 @@ namespace Tests
             Assert.AreEqual(3, res.ClientesEnJuego);
             Assert.AreEqual(2, res.ClientesRetenidos, "Renovar o pausar retiene; la baja no.");
             Assert.AreEqual(66.67m, res.TasaRetencionReal);
+            Assert.AreEqual(4, res.ClientesEnJuegoAntes);
+            Assert.AreEqual(25m, res.TasaRetencionAntes, "Antes: 1 de 4 se quedó.");
+            Assert.AreEqual(41.67m, res.MejoraRetencion);
             Assert.AreEqual(30m, res.TasaRetencionEsperada);
             Assert.IsTrue(res.RetuvoClientes());
-            Assert.AreEqual(true, res.CumplioRetencionEsperada());
+            Assert.AreEqual(true, res.CumplioRetencionEsperada(), "La mejora (41,67 pts) supera el 30 % esperado.");
         }
 
         [TestMethod]
@@ -325,6 +328,47 @@ namespace Tests
             Assert.AreEqual(1, r[0].ClientesEnJuego);
             Assert.AreEqual(0, r[0].ClientesRetenidos);
             Assert.AreEqual(0m, r[0].TasaRetencionReal);
+        }
+
+        // Revisión 13/10: un plan que siempre renueva mucho no debe parecer un éxito de la promoción.
+        [TestMethod]
+        public void ResultadoPromociones_RetencionAltaDeSiempre_NoCumpleLaEsperada()
+        {
+            var dal = new FakePromocionDAL();
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 1, Estado = BE.EstadoPromocion.Vencida, IdPlan = 3, IdSugerenciaOrigen = 9,
+                                             FechaInicio = Hoy.AddDays(-20), FechaFin = Hoy.AddDays(-11) });
+            // Antes y durante: 9 de 10 renuevan (90 %).
+            for (int i = 0; i < 10; i++)
+            {
+                var r = i == 0 ? BE.EstadoRenovacion.Baja : BE.EstadoRenovacion.Renovada;
+                dal.Decisiones.Add((3, Dec(100 + i, -25, r)));   // antes [hoy-30, hoy-20)
+                dal.Decisiones.Add((3, Dec(200 + i, -15, r)));   // durante [hoy-20, hoy-10)
+            }
+            var sug = new FakeSugerenciaPromocionDAL { SugerenciaPorId = new BE.SugerenciaPromocion { IdSugerencia = 9, TasaRetencion = 30m } };
+
+            var res = CrearConPromos(dal, sug).ResultadoPromociones(Hoy.AddDays(-90), Hoy)[0];
+
+            Assert.AreEqual(90m, res.TasaRetencionReal);
+            Assert.AreEqual(90m, res.TasaRetencionAntes);
+            Assert.AreEqual(0m, res.MejoraRetencion);
+            Assert.AreEqual(false, res.CumplioRetencionEsperada(), "Sin mejora sobre la base, la promoción no retuvo a nadie más.");
+        }
+
+        // Pasarse a otro plan es una pérdida para el plan de la promoción.
+        [TestMethod]
+        public void ResultadoPromociones_CambioAOtroPlan_CuentaComoPerdida()
+        {
+            var dal = new FakePromocionDAL();
+            dal.Todas.Add(new BE.Promocion { IdPromocion = 1, Estado = BE.EstadoPromocion.Vigente, IdPlan = 3,
+                                             FechaInicio = Hoy.AddDays(-10), FechaFin = Hoy.AddDays(10) });
+            dal.Decisiones.Add((3, Dec(1, -5, BE.EstadoRenovacion.CambioPlan)));
+            dal.Decisiones.Add((3, Dec(2, -4, BE.EstadoRenovacion.Renovada)));
+
+            var res = CrearConPromos(dal).ResultadoPromociones(Hoy.AddDays(-90), Hoy)[0];
+
+            Assert.AreEqual(1, res.Durante.CambiosDePlan);
+            Assert.AreEqual(2, res.ClientesEnJuego);
+            Assert.AreEqual(1, res.ClientesRetenidos);
         }
 
         [TestMethod]

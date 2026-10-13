@@ -56,6 +56,9 @@ namespace BLL
                 throw new BE.AppException("err.bll.sugerenciapromocion.motivo_requerido",
                     "Debe indicar el motivo de la sugerencia.");
 
+            // La columna guarda 2 decimales: se redondea antes de validar y de calcular el beneficio,
+            // así lo guardado y lo calculado coinciden.
+            tasaRetencion = Math.Round(tasaRetencion, 2);
             if (tasaRetencion <= 0 || tasaRetencion > 100)
                 throw new BE.AppException("err.bll.sugerenciapromocion.tasa_invalida",
                     "La tasa de retención esperada debe ser mayor a 0 y hasta 100 %.");

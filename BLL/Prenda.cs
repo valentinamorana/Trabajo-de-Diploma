@@ -125,7 +125,16 @@ namespace BLL
         // (EnLimpieza → Disponible). Solo la llama BLL.InspeccionDevolucion, que ya verificó que la
         // prenda está en la cola de inspección.
         public void ReingresarInspeccionada(string modulo, BE.Prenda prenda)
-            => CambiarEstado(modulo, prenda, BE.EstadoPrenda.Disponible, porInspeccion: true);
+        {
+            if (prenda == null) throw new ArgumentNullException(nameof(prenda));
+            // Defensa propia (no depende de que la llame solo la Inspección): únicamente una prenda
+            // devuelta que sigue En Limpieza reingresa por este camino.
+            if (prenda.Estado != BE.EstadoPrenda.EnLimpieza || !VieneDeDevolucion(prenda.IdPrenda))
+                throw new BE.AppException("err.bll.insp.reingreso_fuera_de_cola",
+                    "La prenda '{0}' no está pendiente de inspección: no viene de una devolución o ya se resolvió.",
+                    prenda.Nombre);
+            CambiarEstado(modulo, prenda, BE.EstadoPrenda.Disponible, porInspeccion: true);
+        }
 
         private void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, bool porInspeccion)
         {

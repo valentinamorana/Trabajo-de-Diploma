@@ -158,6 +158,23 @@ namespace Tests
             Assert.AreEqual(16000m, ctx.DalSugerencia.UltimoAlta.IngresoEnRiesgo());
         }
 
+        // La columna guarda 2 decimales: la tasa se redondea antes de validar y calcular.
+        [TestMethod]
+        public void RegistrarSugerencia_TasaConMasDeDosDecimales_SeRedondea()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.Crear().RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 1000m, 33.333m);
+            Assert.AreEqual(33.33m, ctx.DalSugerencia.UltimoAlta.TasaRetencion);
+            Assert.AreEqual(333.30m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado);
+            try
+            {
+                ctx.Crear().RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 1000m, 0.001m);
+                Assert.Fail("0,001 % redondea a 0: tasa inválida.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sugerenciapromocion.tasa_invalida", ex.Clave); }
+        }
+
         [TestMethod]
         public void RegistrarSugerencia_TasaFueraDeRango_LanzaTasaInvalida()
         {

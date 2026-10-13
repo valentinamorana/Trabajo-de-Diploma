@@ -52,9 +52,9 @@ sequenceDiagram
     end
     AN->>DPR: ObtenerDecisionesDelPlan(idPlan, desde, hasta)  [durante la vigencia]
     AN->>DPR: ObtenerDecisionesDelPlan(idPlan, anteriorDesde, desde)  [período anterior de igual duración]
-    DPR-->>AN: decisiones: renovación de N01 (Renovada/Baja/Pausada) y recontratación del mismo plan (PN02)
+    DPR-->>AN: decisiones: renovación de N01 (Renovada/Baja/Pausada/Cambio a otro plan) y recontratación del mismo plan (PN02)
     AN->>RP: Contar(decisiones)  [bajas, pausas y renovaciones de cada tramo]
-    AN->>RP: CalcularRetencion(decisionesDurante)  [clientes en juego y retenidos: última decisión ≠ Baja]
+    AN->>RP: CalcularRetencion(decisionesDurante, decisionesAntes)  [en juego y retenidos de cada tramo: la última decisión fue renovar o pausar, mejora = durante − antes]
   end
   Note over AN: bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"
   AN-->>F: ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto y resultado de las promociones, oportunidades por plan)

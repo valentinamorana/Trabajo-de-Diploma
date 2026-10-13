@@ -127,19 +127,25 @@ classDiagram
     +ConteoMovimientos Durante
     +ConteoMovimientos Antes
     +int VariacionBajas
+    +int VariacionCambiosDePlan
     +int VariacionPausas
     +int VariacionRenovaciones
     +int ClientesEnJuego
     +int ClientesRetenidos
+    +int ClientesEnJuegoAntes
+    +int ClientesRetenidosAntes
     +decimal? TasaRetencionReal
+    +decimal? TasaRetencionAntes
+    +decimal? MejoraRetencion
     +decimal? TasaRetencionEsperada
     +RetuvoClientes() bool
     +CumplioRetencionEsperada() bool?
     +Contar(IEnumerable~DecisionRenovacion~) ConteoMovimientos
-    +CalcularRetencion(IEnumerable~DecisionRenovacion~) void
+    +CalcularRetencion(IEnumerable~DecisionRenovacion~,  IEnumerable~DecisionRenovacion~) void
   }
   class ConteoMovimientos {
     +int Bajas
+    +int CambiosDePlan
     +int Pausas
     +int Renovaciones
   }

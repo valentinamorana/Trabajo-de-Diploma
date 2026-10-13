@@ -4051,8 +4051,10 @@ BEGIN
     DECLARE @uCont INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'contable');
     DECLARE @uVend INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'vendedor');
 
-    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
-    SELECT v.IdPlan, v.Motivo, v.Tipo, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
+    -- TasaRetencion = 100: el beneficio de estas dos sugerencias de demo es el ingreso en riesgo completo
+    -- (como las sugerencias anteriores a la 20h); las que registre Gerencia arrancan con 30 %.
+    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, TasaRetencion, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
+    SELECT v.IdPlan, v.Motivo, v.Tipo, v.Beneficio, 100, 0, v.FechaAlta, v.Origen, @uGer
     FROM (VALUES
         (@pBasico,  N'SUGERENCIA PendienteDeEvaluar: el plan Básico tiene la mayor tasa de abandono; un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE()), 0),
         (@pPremium, N'SUGERENCIA PendienteDeEvaluar: el plan Premium suma pocos clientes nuevos; un monto fijo de captación puede atraerlos.',     1,  5000.00, DATEADD(DAY, -2, GETDATE()), 2)

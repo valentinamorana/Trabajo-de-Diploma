@@ -313,6 +313,21 @@ namespace Tests
         }
 
         [TestMethod]
+        public void ReingresarInspeccionada_PrendaQueNoVieneDeUnaDevolucion_Rechaza()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            var prenda = new BE.Prenda { IdPrenda = 1, Nombre = "Remera", Estado = BE.EstadoPrenda.EnLimpieza };
+            try
+            {
+                ctx.Crear().ReingresarInspeccionada("Test", prenda);
+                Assert.Fail("Solo una prenda devuelta reingresa por la Inspección.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.insp.reingreso_fuera_de_cola", ex.Clave); }
+            Assert.AreEqual(0, ctx.DalPrenda.CambiarEstadoVeces);
+        }
+
+        [TestMethod]
         public void ReingresarInspeccionada_EnLimpiezaDevuelta_PasaADisponible()
         {
             LoginComoAdministrador();

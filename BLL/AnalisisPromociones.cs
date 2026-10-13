@@ -134,7 +134,7 @@ namespace BLL
                     var antes   = dalPromocion.ObtenerDecisionesDelPlan(p.IdPlan, r.AnteriorDesde, r.Desde);
                     r.Durante = BE.ResultadoPromocion.Contar(durante);
                     r.Antes   = BE.ResultadoPromocion.Contar(antes);
-                    r.CalcularRetencion(durante);
+                    r.CalcularRetencion(durante, antes);
                     lista.Add(r);
                 }
             }

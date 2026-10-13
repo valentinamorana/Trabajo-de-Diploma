@@ -1169,9 +1169,9 @@ module.exports = [
         { opt: 'Nació de una sugerencia', pasos: [c('AN', 'DS', 'ObtenerPorId(idSugerenciaOrigen)'), r('DS', 'AN', 'sugerencia (tasa de retención esperada)')] },
         c('AN', 'DPR', 'ObtenerDecisionesDelPlan(idPlan, desde, hasta)  [durante la vigencia]'),
         c('AN', 'DPR', 'ObtenerDecisionesDelPlan(idPlan, anteriorDesde, desde)  [período anterior de igual duración]'),
-        r('DPR', 'AN', 'decisiones: renovación de N01 (Renovada/Baja/Pausada) y recontratación del mismo plan (PN02)'),
+        r('DPR', 'AN', 'decisiones: renovación de N01 (Renovada/Baja/Pausada/Cambio a otro plan) y recontratación del mismo plan (PN02)'),
         c('AN', 'RP', 'Contar(decisiones)  [bajas, pausas y renovaciones de cada tramo]'),
-        c('AN', 'RP', 'CalcularRetencion(decisionesDurante)  [clientes en juego y retenidos: última decisión ≠ Baja]')
+        c('AN', 'RP', 'CalcularRetencion(decisionesDurante, decisionesAntes)  [en juego y retenidos de cada tramo: la última decisión fue renovar o pausar; mejora = durante − antes]')
       ] },
       nota('bitacora.Registrar(modulo, …): cantidad de oportunidades o "sin oportunidad de promoción"', 'AN'),
       r('AN', 'F', 'ReporteMetricas (período, abandono por plan, rotación por categoría con sus oportunidades informativas, impacto y resultado de las promociones, oportunidades por plan)'),

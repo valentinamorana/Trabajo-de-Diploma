@@ -139,6 +139,14 @@ namespace GUI
         {
             lblDetalleCuotas.Text = "";
             var c = ObtenerSeleccionada();
+            // Separación de funciones: se avisa por qué Cobrar/Intento fallido/Anular están deshabilitados
+            // (acá, para que no lo borre el cambio de medio de pago o de cuotas).
+            if (c != null && c.PuedeCobrarse() && !c.UsuarioPuedeCobrar && !VistaResueltas)
+            {
+                lblDetalleCuotas.Text = Tr("lbl.contr.registraste",
+                    "No podés resolver esta contratación: la registraste vos (la resuelve otra persona de Caja) o tu usuario no tiene un Empleado vinculado.");
+                return;
+            }
             var idPlan = PlanCuotasSeleccionado();
             if (c == null || !idPlan.HasValue || !_importes.TryGetValue(c.IdContratacion, out var liq)) return;
             var plan = _planesCuotas.Find(p => p.IdPlanCuotas == idPlan.Value);
@@ -281,9 +289,6 @@ namespace GUI
             btnImprimirComprobante.Enabled = c != null && c.EstaPagada();
             btnImprimirConstancia.Enabled = c != null && !c.PuedeCobrarse();
             CargarCuotas();
-            if (pendiente && !c.UsuarioPuedeCobrar)
-                lblDetalleCuotas.Text = Tr("lbl.contr.registraste",
-                    "Registraste esta contratación: la tiene que resolver otra persona de Caja.");
         }
 
         // ── ¿Se concreta el pago? Sí → Confirmar cobro → Comprobante → Constancia ─

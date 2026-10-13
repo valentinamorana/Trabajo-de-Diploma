@@ -92,11 +92,12 @@ namespace DAL
             var lista = new List<BE.DecisionRenovacion>();
             try
             {
-                // Renovación de N01 resuelta sobre el plan (1 Renovada, 3 Baja, 4 Pausada) + recontratación
-                // del mismo plan cobrada en Caja (PN02) por un cliente que ya lo había pagado antes.
+                // Renovación de N01 resuelta sobre el plan (1 Renovada, 3 Baja, 4 Pausada, 2 CambioPlan a
+                // OTRO plan: una pérdida para este) + recontratación del mismo plan cobrada en Caja (PN02)
+                // por un cliente que ya lo había pagado antes.
                 DataTable t = acceso.Leer(
                     "SELECT IdCliente, FechaResolucion AS Fecha, Resultado FROM HistorialRenovacion " +
-                    "WHERE IdPlanAnterior = @IdPlan AND Resultado IN (1, 3, 4) " +
+                    "WHERE IdPlanAnterior = @IdPlan AND (Resultado IN (1, 3, 4) OR (Resultado = 2 AND ISNULL(IdPlanNuevo, 0) <> @IdPlan)) " +
                     "  AND FechaResolucion >= @Desde AND FechaResolucion < @HastaExcl " +
                     "UNION ALL " +
                     "SELECT c.IdCliente, c.FechaComprobante, 1 FROM Contratacion c " +

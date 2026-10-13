@@ -113,16 +113,21 @@ namespace GUI.Exportacion
                 sb.AppendLine(string.Format(Tr("doc.promo.resultado.promo", "   • {0} ({1}) — plan {2} — vigencia {3:d} al {4:d} ({5} día(s)); antes: {6:d} al {7:d}"),
                     r.Nombre, Estado(r.Estado), r.NombrePlan ?? "—", r.Desde, r.Hasta.AddDays(-1), r.Dias, r.AnteriorDesde, r.Desde.AddDays(-1)));
                 sb.AppendLine(string.Format(Tr("doc.promo.resultado.movimientos",
-                    "      Bajas {0} (antes {1}, {2:+0;-0;0}) · Pausas {3} (antes {4}, {5:+0;-0;0}) · Renovaciones {6} (antes {7}, {8:+0;-0;0})"),
-                    r.Durante.Bajas, r.Antes.Bajas, r.VariacionBajas, r.Durante.Pausas, r.Antes.Pausas, r.VariacionPausas,
+                    "      Bajas {0} (antes {1}, {2:+0;-0;0}) · Cambios a otro plan {3} (antes {4}, {5:+0;-0;0}) · Pausas {6} (antes {7}, {8:+0;-0;0}) · Renovaciones {9} (antes {10}, {11:+0;-0;0})"),
+                    r.Durante.Bajas, r.Antes.Bajas, r.VariacionBajas, r.Durante.CambiosDePlan, r.Antes.CambiosDePlan, r.VariacionCambiosDePlan,
+                    r.Durante.Pausas, r.Antes.Pausas, r.VariacionPausas,
                     r.Durante.Renovaciones, r.Antes.Renovaciones, r.VariacionRenovaciones));
                 string esperada = r.TasaRetencionEsperada.HasValue
                     ? string.Format(Tr("doc.promo.resultado.esperada", "esperada {0:0.##} %"), r.TasaRetencionEsperada.Value)
                     : Tr("doc.promo.resultado.sinesperada", "sin tasa esperada (alta manual)");
+                string antes = r.TasaRetencionAntes.HasValue
+                    ? string.Format(Tr("doc.promo.resultado.antes", "antes {0:0.##} %, mejora {1:+0.##;-0.##;0} pts"),
+                        r.TasaRetencionAntes.Value, r.MejoraRetencion.Value)
+                    : Tr("doc.promo.resultado.sinantes", "sin base del período anterior");
                 sb.AppendLine(r.TasaRetencionReal.HasValue
                     ? string.Format(Tr("doc.promo.resultado.retencion",
-                        "      Clientes con la renovación en juego: {0}; retenidos: {1} ({2:0.##} %, {3})"),
-                        r.ClientesEnJuego, r.ClientesRetenidos, r.TasaRetencionReal.Value, esperada)
+                        "      Clientes con la renovación en juego: {0}; retenidos: {1} ({2:0.##} %; {3}; {4})"),
+                        r.ClientesEnJuego, r.ClientesRetenidos, r.TasaRetencionReal.Value, antes, esperada)
                     : string.Format(Tr("doc.promo.resultado.sinjuego",
                         "      Ningún cliente del plan tuvo la renovación en juego durante la vigencia ({0})."), esperada));
             }

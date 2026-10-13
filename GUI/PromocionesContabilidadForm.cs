@@ -147,7 +147,7 @@ namespace GUI
             btnAprobar.Enabled = btnRechazar.Enabled = a != null && a.UsuarioPuedeDictaminar;
             if (a == null)
             {
-                txtAnalisis.Text = Tr("promo.analisis.vacio", "Seleccioná una promoción para analizar su margen e impacto.");
+                txtAnalisis.Text = Tr("promo.analisis.vacio", "Seleccione una promoción para analizar su margen e impacto.");
                 return;
             }
 
@@ -170,7 +170,7 @@ namespace GUI
             else
                 sb.AppendLine(Tr("promo.analisis.sinsuperposicion", "No se superpone con otras promociones vigentes del mismo plan."));
             if (!a.UsuarioPuedeDictaminar)
-                sb.AppendLine(Tr("promo.analisis.creador", "Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad."));
+                sb.AppendLine(Tr("promo.analisis.creador", "Usted creó esta promoción: la tiene que dictaminar otro usuario de Contabilidad."));
             txtAnalisis.Text = sb.ToString();
         }
 
@@ -194,7 +194,9 @@ namespace GUI
             sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.costo", "Costo del descuento: {0:C2} × {1} cliente(s) activo(s) del plan = {2:C2}",
                 new object[] { a.DescuentoPorCliente, a.ClientesActivosPlan, a.CostoDescuentoProyectado }));
             sb.Append(Sangria).AppendLine(a.BeneficioDeSugerencia
-                ? Tr("promo.analisis.calc.beneficiosug", "Beneficio estimado (sugerencia de Gerencia): {0:C2}", new object[] { a.BeneficioEstimado })
+                ? Tr("promo.analisis.calc.beneficiotasa",
+                     "Beneficio estimado (sugerencia de Gerencia): {0:C2} = ingreso mensual en riesgo {1:C2} × retención esperada {2:0.##} %",
+                     new object[] { a.BeneficioEstimado, a.IngresoEnRiesgoSugerencia, a.TasaRetencionSugerencia ?? 100m })
                 : Tr("promo.analisis.calc.beneficioadm", "Beneficio estimado (margen cargado por Administración): {0:C2}", new object[] { a.BeneficioEstimado }));
             sb.Append(Sangria).AppendLine(Tr("promo.analisis.calc.margen", "Margen proyectado: {0:C2} − {1:C2} = {2:C2}",
                 new object[] { a.BeneficioEstimado, a.CostoDescuentoProyectado, a.MargenProyectado }));

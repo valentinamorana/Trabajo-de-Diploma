@@ -56,6 +56,7 @@ namespace BLL
                 {
                     IdCliente = cliente.IdCliente,
                     NombreCliente = cliente.NombreCompleto,
+                    IdPlan = cliente.IdPlan,
                     NombrePlan = cliente.NombrePlan,
                     FechaVencimiento = cliente.FechaVencimiento,
                     FechaUltimoPedido = datos.FechaUltimoPedido,

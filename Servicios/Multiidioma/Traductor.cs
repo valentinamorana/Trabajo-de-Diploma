@@ -27,7 +27,7 @@ namespace Servicios.Multiidioma
     ///   lbl.contrasena      → label "Contraseña"
     ///   btn.ingresar        → botón "Ingresar"
     ///   btn.salir           → botón "Salir"
-    ///   lnk.olvide          → link "¿Olvidaste tu contraseña?"
+    ///   lnk.olvide          → link "¿Olvidaste su contraseña?"
     ///   mnu.inventario      → menú "Inventario"
     ///   mnu.prendas         → ítem "Prendas"
     ///   mnu.suscriptores    → menú "Suscriptores" (Clientes/Planes/Renovación — separado de Ventas)

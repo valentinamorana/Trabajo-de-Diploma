@@ -28,10 +28,6 @@ namespace GUI
         private static readonly HashSet<string> _ocultadosPorNosotros =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        // El Menú principal NO se gobierna por control: tiene su propia lógica por NombreMenu
-        // (Menu.AplicarPermisos). Se excluye acá para no aplicar dos mecanismos sobre los mismos ítems.
-        private const string FormularioMenu = "Menu";
-
         private static List<BE.ControlMapeado> Mapeos()
         {
             if (_cacheMapeos == null) _cacheMapeos = _bll.ObtenerTodos();
@@ -43,19 +39,16 @@ namespace GUI
         {
             if (form == null || usuario == null) return;
             // El Menú tiene su propio gateo por NombreMenu; no se le aplican mapeos de control.
-            if (string.Equals(form.Name, FormularioMenu, StringComparison.OrdinalIgnoreCase)) return;
+            if (string.Equals(form.Name, BLL.ControlMapeado.FormularioMenu, StringComparison.OrdinalIgnoreCase)) return;
             try
             {
-                List<BE.ControlMapeado> mapeos = Mapeos()
-                    .Where(c => string.Equals(c.Formulario, form.Name, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                // Reglas puras (filtro por formulario, bypass de Admin, patente exacta) en BLL.ControlMapeado.
+                List<BE.ControlMapeado> mapeos = BLL.ControlMapeado.AplicablesA(Mapeos(), form.Name);
 
                 // B1 — el Administrador ve todo.
                 bool esAdmin = usuario.EsAdministrador;
 
-                var patentesUsuario = new HashSet<int>();
-                if (usuario.Permisos != null)
-                    foreach (var p in usuario.Permisos) patentesUsuario.Add(p.Id);
+                var patentesUsuario = BLL.ControlMapeado.PatentesDe(usuario);
 
                 var mapeadosAhora = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -73,7 +66,7 @@ namespace GUI
                         string key = form.Name + "." + m.NombreControl;
                         mapeadosAhora.Add(key);
 
-                        bool tieneAcceso = esAdmin || patentesUsuario.Contains(m.IdPermiso);
+                        bool tieneAcceso = BLL.ControlMapeado.TieneAcceso(m, esAdmin, patentesUsuario);
                         // Ocultar NO es equivalente a deshabilitar: un control oculto pero todavía
                         // Enabled podía seguir siendo disparable por un atajo de teclado, un
                         // AcceptButton/CancelButton, u otro control que lo revelara sin pasar por

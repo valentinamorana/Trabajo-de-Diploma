@@ -79,6 +79,8 @@
     <Compile Include="CobroTests.cs" />
     <Compile Include="CircuitoPN03IntegracionTests.cs" />
     <Compile Include="IntegracionBDTests.cs" />
+    <Compile Include="UsuarioDVIntegracionTests.cs" />
+    <Compile Include="VersionUsuarioTests.cs" />
     <Compile Include="ListaEsperaTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="ReporteJornadaTests.cs" />
@@ -99,6 +101,9 @@
     <Compile Include="MenuVisibilidadTests.cs" />
     <Compile Include="ReporteTendenciaTests.cs" />
     <Compile Include="RecuperacionAdminTests.cs" />
+    <Compile Include="RecuperacionIntegridadTests.cs" />
+    <Compile Include="ControlMapeadoTests.cs" />
+    <Compile Include="Fakes\FakeControlMapeadoDAL.cs" />
     <Compile Include="Fakes\FakeBackupDAL.cs" />
     <Compile Include="Fakes\FakeRegistroBitacora.cs" />
     <Compile Include="ConfiguracionTests.cs" />

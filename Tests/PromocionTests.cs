@@ -433,13 +433,15 @@ namespace Tests
             ctx.DalPromocion.Todas.AddRange(new[] { enRevision, superpuesta, otroPlan, sinCruce });
             ctx.DalSugerencia.SugerenciaPorId = new BE.SugerenciaPromocion
             {
-                IdSugerencia = 9, BeneficioEstimado = 12000m, OrigenMetrica = BE.OrigenMetrica.Abandono
+                IdSugerencia = 9, BeneficioEstimado = 12000m, TasaRetencion = 25m, OrigenMetrica = BE.OrigenMetrica.Abandono
             };
 
             var a = ctx.Crear().AnalizarMargenEImpacto(42);
 
             Assert.AreEqual(12000m, a.BeneficioEstimadoSugerencia);
             Assert.AreEqual(BE.OrigenMetrica.Abandono, a.OrigenSugerencia);
+            Assert.AreEqual(25m, a.TasaRetencionSugerencia, "Contabilidad ve la tasa de retención que supuso Gerencia.");
+            Assert.AreEqual(48000m, a.IngresoEnRiesgoSugerencia, "$12000 de beneficio con 25 % de retención = $48000 en riesgo.");
             Assert.IsTrue(a.TieneSuperposicion());
             CollectionAssert.AreEqual(new[] { 50 }, a.Superpuestas.ConvertAll(p => p.IdPromocion));
             Assert.IsTrue(a.UsuarioPuedeDictaminar);
@@ -480,7 +482,7 @@ namespace Tests
             ctx.DalPromocion.Todas.Add(promo);
             ctx.DalSugerencia.SugerenciaPorId = new BE.SugerenciaPromocion
             {
-                IdSugerencia = 9, BeneficioEstimado = 12000m, OrigenMetrica = BE.OrigenMetrica.Abandono
+                IdSugerencia = 9, BeneficioEstimado = 12000m, TasaRetencion = 25m, OrigenMetrica = BE.OrigenMetrica.Abandono
             };
 
             var a = ctx.Crear().AnalizarMargenEImpacto(42);

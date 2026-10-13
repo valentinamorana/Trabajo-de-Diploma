@@ -23,11 +23,13 @@ namespace DAL.Interfaces
 
         /// <summary>Ejecuta una acción dentro de una única transacción de BD (commit si no lanza, rollback si lanza).
         /// Permite que los manejadores de Renovación/Cobro actualicen Cliente y su historial de forma atómica —
-        /// antes eran dos round-trips independientes sin garantía de consistencia entre sí.</summary>
+        /// antes eran dos round-trips independientes sin garantía de consistencia entre sí.
+        /// T07: el DV de las filas de Cliente escritas con los métodos ...EnTx se recalcula dentro de esta
+        /// misma transacción, antes del commit (si falla, se revierte todo).</summary>
         void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion);
 
         /// <summary>Igual que <see cref="Modificar"/>, pero sobre una transacción YA abierta (ver <see cref="EjecutarTransaccion"/>).
-        /// No recalcula el DV — el caller debe llamar a <see cref="RecalcularDV"/> después de confirmar la transacción.</summary>
+        /// El DV de la fila lo recalcula <see cref="EjecutarTransaccion"/> antes del commit.</summary>
         void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente);
 
         /// <summary>Cobro recurrente (N01): fija el nuevo vencimiento y limpia la gracia SOLO si el
@@ -40,12 +42,8 @@ namespace DAL.Interfaces
         /// El UPDATE general de Cliente no escribe el crédito: solo estas dos operaciones lo modifican.</summary>
         void SumarCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto);
 
-        /// <summary>Resta <paramref name="monto"/> del crédito de referido de forma atómica, sin dejarlo negativo.</summary>
+        /// <summary>Resta <paramref name="monto"/> del crédito de referido de forma atómica, SOLO si el saldo
+        /// real de la base lo cubre; si no (otro cobro ya lo aplicó), lanza y la transacción se revierte.</summary>
         void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto);
-
-        /// <summary>Recalcula el Dígito Verificador (T07) de UNA fila de Cliente y el DVV de la tabla
-        /// (desde los DVH almacenados). Se invoca tras confirmar una transacción externa armada con
-        /// <see cref="EjecutarTransaccion"/>, una vez por cada cliente modificado.</summary>
-        void RecalcularDV(int idCliente);
     }
 }

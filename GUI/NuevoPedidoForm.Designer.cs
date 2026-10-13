@@ -211,7 +211,7 @@ namespace GUI
             this.lblInstruccion.Size = new System.Drawing.Size(660, 23);
             this.lblInstruccion.TabIndex = 0;
             this.lblInstruccion.Tag = "lbl.ped.selprendas";
-            this.lblInstruccion.Text = "Seleccioná las prendas para incluir en el pedido (checkbox):";
+            this.lblInstruccion.Text = "Seleccione las prendas para incluir en el pedido (checkbox):";
             // 
             // dgvPrendas
             // 

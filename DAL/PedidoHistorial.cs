@@ -8,65 +8,81 @@ namespace DAL
     /// <summary>
     /// Acceso a datos para la tabla [PedidoHistorial].
     /// Responsabilidades:
-    ///   - Insertar lotes de cambios (todos los campos de un evento van en una transacción).
+    ///   - Asentar los campos de un evento DENTRO de la transacción que hace el cambio
+    ///     (DAL.Pedido llama a RegistrarCambiosEnTx antes de confirmar).
     ///   - Consultar el historial de un pedido con filtros opcionales.
-    ///   - Obtener el próximo IdOperacion para agrupar los campos de un mismo evento.
+    ///   - Informar la última operación de un pedido (restauración desde el historial).
     /// </summary>
     public class PedidoHistorial : BaseDAL, Interfaces.IPedidoHistorialDAL
     {
         // ── Escritura ─────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Inserta una lista de registros de historial en una sola transacción.
-        /// Todos los registros de un evento comparten el mismo IdOperacion.
+        /// Asienta los campos de UN evento sobre una transacción ya abierta (la del cambio del
+        /// pedido): si el cambio se revierte, el historial también, y viceversa. El IdOperacion se
+        /// calcula acá, con UPDLOCK + HOLDLOCK sobre las filas del pedido, así dos eventos
+        /// simultáneos no reciben el mismo número (lo respalda UQ_PedidoHistorial_Operacion).
+        /// Completa IdPedido e IdOperacion de cada registro; devuelve el IdOperacion (0 sin cambios).
         /// </summary>
-        public void RegistrarCambios(List<BE.PedidoHistorial> cambios)
+        internal static int RegistrarCambiosEnTx(SqlConnection conn, SqlTransaction tx, int idPedido,
+                                                 IList<BE.PedidoHistorial> cambios)
         {
-            if (cambios == null || cambios.Count == 0) return;
+            if (cambios == null || cambios.Count == 0) return 0;
 
-            acceso.EjecutarTransaccion((conn, tx) =>
+            int idOperacion;
+            using (var cmd = new SqlCommand(
+                "SELECT ISNULL(MAX(IdOperacion), 0) + 1 FROM PedidoHistorial WITH (UPDLOCK, HOLDLOCK) " +
+                "WHERE IdPedido = @IdPedido",
+                conn, tx))
             {
-                foreach (var c in cambios)
+                cmd.Parameters.AddWithValue("@IdPedido", idPedido);
+                idOperacion = Convert.ToInt32(cmd.ExecuteScalar());
+            }
+
+            foreach (var c in cambios)
+            {
+                c.IdPedido    = idPedido;
+                c.IdOperacion = idOperacion;
+                using (var cmd = new SqlCommand(
+                    "INSERT INTO PedidoHistorial " +
+                    "(IdPedido, IdOperacion, Fecha, IdUsuario, NombreUsuario, Accion, Campo, ValorAnterior, ValorNuevo) " +
+                    "VALUES (@IdPedido, @IdOperacion, @Fecha, @IdUsuario, @NombreUsuario, @Accion, @Campo, @ValorAnterior, @ValorNuevo)",
+                    conn, tx))
                 {
-                    using (var cmd = new SqlCommand(
-                        "INSERT INTO PedidoHistorial " +
-                        "(IdPedido, IdOperacion, Fecha, IdUsuario, NombreUsuario, Accion, Campo, ValorAnterior, ValorNuevo) " +
-                        "VALUES (@IdPedido, @IdOperacion, @Fecha, @IdUsuario, @NombreUsuario, @Accion, @Campo, @ValorAnterior, @ValorNuevo)",
-                        conn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@IdPedido",      c.IdPedido);
-                        cmd.Parameters.AddWithValue("@IdOperacion",   c.IdOperacion);
-                        cmd.Parameters.AddWithValue("@Fecha",         c.Fecha);
-                        cmd.Parameters.AddWithValue("@IdUsuario",     (object)c.IdUsuario     ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@NombreUsuario", (object)c.NombreUsuario ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Accion",        c.Accion);
-                        cmd.Parameters.AddWithValue("@Campo",         c.Campo);
-                        cmd.Parameters.AddWithValue("@ValorAnterior", (object)c.ValorAnterior ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@ValorNuevo",    (object)c.ValorNuevo    ?? DBNull.Value);
-                        cmd.ExecuteNonQuery();
-                    }
+                    cmd.Parameters.AddWithValue("@IdPedido",      c.IdPedido);
+                    cmd.Parameters.AddWithValue("@IdOperacion",   c.IdOperacion);
+                    cmd.Parameters.AddWithValue("@Fecha",         c.Fecha);
+                    cmd.Parameters.AddWithValue("@IdUsuario",     (object)c.IdUsuario     ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@NombreUsuario", (object)c.NombreUsuario ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Accion",        c.Accion);
+                    cmd.Parameters.AddWithValue("@Campo",         c.Campo);
+                    cmd.Parameters.AddWithValue("@ValorAnterior", (object)c.ValorAnterior ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ValorNuevo",    (object)c.ValorNuevo    ?? DBNull.Value);
+                    cmd.ExecuteNonQuery();
                 }
-            });
+            }
+            return idOperacion;
         }
 
         /// <summary>
-        /// Devuelve el próximo IdOperacion para el pedido indicado.
-        /// Permite agrupar todos los campos de un mismo evento de negocio.
+        /// IdOperacion de la última operación registrada del pedido (0 si no tiene historial).
+        /// Lectura informativa (mensajes de la restauración): la verificación que cuenta la repite
+        /// DAL.Pedido.RestaurarOperacionAtomica dentro de su transacción.
         /// </summary>
-        public int ObtenerSiguienteIdOperacion(int idPedido)
+        public int ObtenerUltimaIdOperacion(int idPedido)
         {
             try
             {
                 var dt = acceso.Leer(
-                    "SELECT ISNULL(MAX(IdOperacion), 0) + 1 AS Siguiente " +
+                    "SELECT ISNULL(MAX(IdOperacion), 0) AS Ultima " +
                     "FROM PedidoHistorial WHERE IdPedido = @IdPedido",
                     new[] { new SqlParameter("@IdPedido", idPedido) });
 
-                return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["Siguiente"]) : 1;
+                return dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0]["Ultima"]) : 0;
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al obtener el siguiente IdOperacion del historial de pedidos.", ex);
+                throw new Exception("Error al obtener la última operación del historial de pedidos.", ex);
             }
         }
 

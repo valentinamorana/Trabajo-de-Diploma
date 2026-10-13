@@ -15,10 +15,32 @@ namespace BLL
     /// </summary>
     public class VersionUsuario
     {
-        private readonly CuidadorHistorial   _caretaker  = new CuidadorHistorial();
         private readonly DAL.VersionUsuario  _dalVersion = new DAL.VersionUsuario();
-        private readonly DAL.Usuario         _dalUsuario = new DAL.Usuario();
+        private readonly DAL.Interfaces.IUsuarioDAL _dalUsuario;
         private readonly Servicios.IRegistroBitacora  _bitacora   = Servicios.FabricaBitacora.CrearSistema();
+
+        // Operaciones del Caretaker (recuperar / guardar un Memento). Por defecto, el
+        // CuidadorHistorial real; reemplazables en las pruebas unitarias.
+        private readonly System.Func<int, BE.Memento.IMemento>   _obtenerVersion;
+        private readonly System.Action<int, BE.Memento.IMemento> _guardarVersion;
+
+        public VersionUsuario()
+        {
+            var caretaker   = new CuidadorHistorial();
+            _dalUsuario     = new DAL.Usuario();
+            _obtenerVersion = caretaker.Obtener;
+            _guardarVersion = caretaker.Guardar;
+        }
+
+        // Para tests: Usuario inyectable y Caretaker en memoria.
+        internal VersionUsuario(DAL.Interfaces.IUsuarioDAL dalUsuario,
+                                System.Func<int, BE.Memento.IMemento> obtenerVersion,
+                                System.Action<int, BE.Memento.IMemento> guardarVersion)
+        {
+            _dalUsuario     = dalUsuario;
+            _obtenerVersion = obtenerVersion;
+            _guardarVersion = guardarVersion;
+        }
 
         /// <summary>
         /// Captura el estado actual del usuario (Originator) en un Memento y lo guarda
@@ -33,7 +55,7 @@ namespace BLL
             if (originator == null) return;
 
             BE.Memento.IMemento memento = originator.CrearMemento(actor, detalle);
-            _caretaker.Guardar(idUsuario, memento);
+            _guardarVersion(idUsuario, memento);
         }
 
         public List<BE.VersionUsuario> ObtenerPorUsuario(int idUsuario)
@@ -52,7 +74,7 @@ namespace BLL
                 "Solo un Administrador puede restaurar una versión histórica de un usuario.");
 
             // Memento elegido (el Caretaker lo recupera como abstracción IMemento).
-            var memento = _caretaker.Obtener(idVersion) as BE.VersionUsuario;
+            var memento = _obtenerVersion(idVersion) as BE.VersionUsuario;
             if (memento == null)
                 throw new BE.AppException("err.bll.version.no_existe",
                     "La versión seleccionada no existe.");
@@ -64,6 +86,14 @@ namespace BLL
             if (originator == null)
                 throw new BE.AppException("err.bll.usuario.no_existe",
                     "El usuario de la versión ya no existe.");
+
+            // El nombre de usuario de la versión puede haber pasado a otro usuario (activo o
+            // archivado: el UNIQUE(Username) es global). Se avisa con un mensaje claro en vez de
+            // dejar que el UPDATE choque con UQ_Usuario_Username.
+            if (UsernameUsadoPorOtro(memento.UsernameSnapshot, memento.IdUsuario))
+                throw new BE.AppException("err.bll.version.username_en_uso",
+                    "No se puede restaurar esta versión: el nombre de usuario '{0}' ya lo usa otro usuario.",
+                    memento.UsernameSnapshot);
 
             // Detalle del cambio que produce el rollback ("campo: 'actual' → 'restaurado'").
             string diff    = DescribirRestauracion(originator, memento);
@@ -81,11 +111,22 @@ namespace BLL
             //    SIEMPRE refleja el estado vigente del usuario y el Historial muestra el rollback
             //    como un cambio más. El estado previo al rollback ya quedó como snapshot anterior,
             //    de modo que el propio rollback también se puede deshacer.
-            _caretaker.Guardar(memento.IdUsuario, originator.CrearMemento(actor, detalle));
+            _guardarVersion(memento.IdUsuario, originator.CrearMemento(actor, detalle));
 
             _bitacora.Registrar(modulo,
                 $"{BE.ActividadesBitacora.RestauracionAVersionPrefijo}ID {idVersion} — usuario ID {memento.IdUsuario} ({memento.UsernameSnapshot})",
                 BE.Criticidad.Alta);
+        }
+
+        // ¿Algún OTRO usuario (activo o archivado) tiene ya ese nombre? Misma comparación sin
+        // distinguir mayúsculas que la validación del ABM (la intercalación de la base tampoco).
+        private bool UsernameUsadoPorOtro(string username, int idUsuario)
+        {
+            if (string.IsNullOrWhiteSpace(username)) return false;
+            var otros = new List<BE.Usuario>(_dalUsuario.ObtenerTodos());
+            otros.AddRange(_dalUsuario.ObtenerArchivados());
+            return otros.Exists(u => u.Id != idUsuario &&
+                string.Equals((u.Username ?? "").Trim(), username.Trim(), System.StringComparison.OrdinalIgnoreCase));
         }
 
         // Describe el cambio que produce un rollback comparando el estado ACTUAL (antes) con el

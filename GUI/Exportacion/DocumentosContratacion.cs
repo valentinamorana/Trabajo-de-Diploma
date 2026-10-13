@@ -234,8 +234,7 @@ namespace GUI.Exportacion
         {
             // Creator → Factory Method → Product (Exportador concreto a PDF)
             GeneradorReporte generador = new GeneradorDocumentoContratacion(reporte.Titulo);
-            Exportador exportador = generador.CrearExportador("pdf");
-            exportador.Exportar(reporte, propietario);
+            generador.Exportar("pdf", reporte, propietario);
         }
     }
 }

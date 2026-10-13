@@ -105,7 +105,7 @@ namespace GUI
             {
                 // ¿Registrado? No → Registrar cliente.
                 MostrarError(Tr("msg.contr.noregistrado",
-                    "El cliente no está registrado. Registralo para continuar con la contratación."));
+                    "El cliente no está registrado. Regístrelo para continuar con la contratación."));
                 btnRegistrarCliente.Visible = true;
                 return;
             }
@@ -114,7 +114,7 @@ namespace GUI
             foreach (var c in _coincidencias)
                 lstCoincidencias.Items.Add($"{c.NombreCompleto}  (DNI {c.DNI})");
             lstCoincidencias.Visible = true;
-            MostrarOk(Tr("lbl.ped.variascoinc", "Hay varios clientes que coinciden: elegí el correcto en la lista."));
+            MostrarOk(Tr("lbl.ped.variascoinc", "Hay varios clientes que coinciden: elija el correcto en la lista."));
         }
 
         private void LstCoincidencias_SelectedIndexChanged(object sender, EventArgs e)
@@ -269,7 +269,7 @@ namespace GUI
             var modalidad = ModalidadSeleccionada();
             if (_cliente == null || plan == null || !modalidad.HasValue)
             {
-                MostrarError(Tr("err.contratacion.faltandatos", "Seleccioná un cliente y un plan para continuar."));
+                MostrarError(Tr("err.contratacion.faltandatos", "Seleccione un cliente y un plan para continuar."));
                 return;
             }
 

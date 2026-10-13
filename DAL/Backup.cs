@@ -64,6 +64,52 @@ namespace DAL
 
         private string ObtenerDirectorioTemp() => DirectorioTempSeguro();
 
+        /// <summary>
+        /// Borra las copias SIN CIFRAR que hayan quedado de un backup o una restauración que se
+        /// cortó (corte de luz, proceso terminado): cada operación borra la suya al terminar, pero un
+        /// corte deja el .bak plano en la carpeta temporal, legible por otros usuarios de la PC. Solo
+        /// borra las de más de una hora (una operación en curso de otra sesión sigue intacta).
+        /// Devuelve cuántas borró; nunca lanza.
+        /// </summary>
+        public static int LimpiarTemporalesHuerfanos()
+        {
+            int borrados = 0;
+            var carpetas = new List<string> { Path.GetTempPath() };
+            string publico = Environment.GetEnvironmentVariable("PUBLIC");
+            carpetas.Add(Path.Combine(string.IsNullOrEmpty(publico) ? @"C:\Users\Public" : publico, "WardrobeFlow_Temp"));
+            carpetas.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TempBackups"));
+            DateTime limite = DateTime.Now.AddHours(-1);
+            foreach (string dir in carpetas)
+            {
+                try
+                {
+                    if (!Directory.Exists(dir)) continue;
+                    foreach (string patron in new[] { "WF_bak_*.bak", "WF_restore_*.bak", "WardrobeFlow_Temp_*.bak", "WardrobeFlow_Restore_*.bak" })
+                        foreach (string archivo in Directory.GetFiles(dir, patron))
+                            try
+                            {
+                                // File.Copy conserva la fecha de modificación del original: se toma la
+                                // más reciente entre creación y modificación (una copia recién hecha de un
+                                // .bak viejo no cuenta como huérfana).
+                                DateTime ultima = File.GetCreationTime(archivo) > File.GetLastWriteTime(archivo)
+                                    ? File.GetCreationTime(archivo) : File.GetLastWriteTime(archivo);
+                                if (ultima >= limite) continue;
+                                File.Delete(archivo);
+                                borrados++;
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Trace.TraceWarning($"[DAL.Backup] No se pudo borrar el temporal huérfano '{archivo}': {ex.Message}");
+                            }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[DAL.Backup] No se pudo revisar '{dir}': {ex.Message}");
+                }
+            }
+            return borrados;
+        }
+
         public void RealizarBackup(string rutaDestino)
         {
             if (string.IsNullOrEmpty(_cadenaConexionMaster))

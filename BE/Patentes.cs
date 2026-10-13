@@ -20,7 +20,7 @@ namespace BE
         public const string Caja              = "mnuCaja";
         public const string RenovacionSuscripcion = "mnuRenovacionSuscripcion";
 
-        // PN03 — Métricas, promociones y toma de decisiones.
+        // PN03 — Evaluar y aplicar promociones comerciales.
         public const string SugerenciaPromocion   = "mnuSugerenciaPromocion";
         public const string PromocionesAdmin      = "mnuPromocionesAdmin";
         public const string PromocionesContable   = "mnuPromocionesContable";
@@ -32,6 +32,15 @@ namespace BE
         // PN01 — Control de Stock: Depósito revisa el stock de la selección enviada por el
         // Vendedor, informa faltantes o confirma y separa las prendas.
         public const string ControlStock          = "mnuControlStock";
+
+        // Analítica de Negocio (Bloque 3 + PdN10) — un solo formulario con selector; cada
+        // reporte conserva su patente propia (BLL.MenuVisibilidad.PatentesReportes).
+        public const string AnalisisAbandono      = "mnuAnalisisAbandono";
+        public const string VentasVendedor        = "mnuVentasVendedor";
+        public const string AnalisisRotacion      = "mnuAnalisisRotacion";
+        public const string AnalisisMantenimiento = "mnuAnalisisMantenimiento";
+        public const string AnalisisEscasez       = "mnuAnalisisEscasez";
+        public const string RecomendacionPrendas  = "mnuRecomendacionPrendas";
 
         // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────
         // Cada una gobierna las operaciones de escritura (alta/modificación/baja) del módulo.

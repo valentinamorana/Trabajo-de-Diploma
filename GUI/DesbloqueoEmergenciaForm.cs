@@ -62,7 +62,7 @@ namespace GUI
                 if (ok)
                 {
                     MessageBox.Show(
-                        Tr("emg.exito", "Cuenta desbloqueada con éxito.\nYa podés iniciar sesión normalmente."),
+                        Tr("emg.exito", "Cuenta desbloqueada con éxito.\nYa puede iniciar sesión normalmente."),
                         Tr("emg.exito.titulo", "Cuenta desbloqueada"),
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.DialogResult = DialogResult.OK;

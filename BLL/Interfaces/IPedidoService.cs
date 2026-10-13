@@ -89,7 +89,8 @@ namespace BLL.Interfaces
 
         // Registra la devolución de prendas por parte del cliente.
         // Libera las prendas a estado Disponible o EnLimpieza según configuración.
-        void RegistrarDevolucion(string modulo, BE.Pedido pedido);
+        // Devuelve cuántas prendas volvieron efectivamente (sin las reportadas como perdidas).
+        int RegistrarDevolucion(string modulo, BE.Pedido pedido);
 
         // Cancela un pedido Pendiente con un motivo obligatorio.
         void Cancelar(string modulo, BE.Pedido pedido, string motivo);

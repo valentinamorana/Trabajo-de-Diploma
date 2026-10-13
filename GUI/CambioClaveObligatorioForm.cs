@@ -40,7 +40,7 @@ namespace GUI
             // pero ninguna pantalla la llamaba todavía. Misma regla que ya se muestra en lblReglas.
             if (string.IsNullOrEmpty(txtNueva.Text))
             {
-                lblError.Text = Tr("err.cambioclave.vacia", "Ingresá una contraseña nueva.");
+                lblError.Text = Tr("err.cambioclave.vacia", "Ingrese una contraseña nueva.");
                 txtNueva.Focus();
                 return;
             }
@@ -66,7 +66,7 @@ namespace GUI
                 // La BLL valida requisitos, que difiera de la actual, persiste y baja el flag.
                 _usuarioBLL.CambiarClavePropia(this.Text, txtNueva.Text);
                 MessageBox.Show(
-                    Tr("msg.cambioclave.exito", "Contraseña actualizada. Ya podés usar el sistema."),
+                    Tr("msg.cambioclave.exito", "Contraseña actualizada. Ya puede usar el sistema."),
                     Tr("rpt.dlg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
                 this.Close();

@@ -171,7 +171,7 @@ namespace GUI
             if (dgv.SelectedRows.Count == 0)
             {
                 var tHR = Traductor.ObtenerTraducciones(_idioma);
-                MostrarError(tHR.ContainsKey("err.hist.restaurar") ? tHR["err.hist.restaurar"].Texto : "Seleccioná una fila del historial para restaurar.");
+                MostrarError(tHR.ContainsKey("err.hist.restaurar") ? tHR["err.hist.restaurar"].Texto : "Seleccione una fila del historial para restaurar.");
                 return;
             }
 

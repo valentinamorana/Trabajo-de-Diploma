@@ -191,7 +191,7 @@ namespace GUI
             this.pnlLeft.TabIndex  = 21;
             this.pnlLeft.Paint    += new System.Windows.Forms.PaintEventHandler(this.PnlLeft_Paint);
 
-            // ── lblTagline — "ORGANIZÁ • GESTIONÁ • POTENCIÁ" (traducible vía Tag) ──
+            // ── lblTagline — "ORGANICE • GESTIONE • POTENCIE" (traducible vía Tag) ──
             this.lblTagline.BackColor = GUI.Tema.RosaPalido;
             this.lblTagline.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.lblTagline.ForeColor = GUI.Tema.RosaOscuro;
@@ -200,7 +200,7 @@ namespace GUI
             this.lblTagline.Size      = new System.Drawing.Size(340, 20);
             this.lblTagline.TabIndex  = 30;
             this.lblTagline.Tag       = "lbl.tagline";
-            this.lblTagline.Text      = "ORGANIZÁ • GESTIONÁ • POTENCIÁ";
+            this.lblTagline.Text      = "ORGANICE • GESTIONE • POTENCIE";
 
             // ── lblWordmarkDark / lblWordmarkVino — "Wardrobe" / "Flow" en dos colores ──
             this.lblWordmarkDark.AutoSize  = false;
@@ -233,7 +233,7 @@ namespace GUI
             this.lblBrandDesc.Size      = new System.Drawing.Size(340, 66);
             this.lblBrandDesc.TabIndex  = 33;
             this.lblBrandDesc.Tag       = "lbl.brand.desc";
-            this.lblBrandDesc.Text      = "Gestioná tu flujo de\r\nprendas e información\r\nde manera simple y eficiente.";
+            this.lblBrandDesc.Text      = "Gestione su flujo de\r\nprendas e información\r\nde manera simple y eficiente.";
 
             // ── picClothingRack — asset 03, percha con prendas ──────────────
             this.picClothingRack.BackColor = GUI.Tema.RosaPalido;
@@ -324,7 +324,7 @@ namespace GUI
             this.lblLoginSub.Size      = new System.Drawing.Size(404, 22);
             this.lblLoginSub.TabIndex  = 15;
             this.lblLoginSub.Tag       = "lbl.credenciales";
-            this.lblLoginSub.Text      = "Ingresá para continuar en tu cuenta.";
+            this.lblLoginSub.Text      = "Ingrese para continuar en su cuenta.";
 
             // ── lblUsuario — etiqueta "USUARIO" (uppercase small) ──────────
             this.lblUsuario.AutoSize  = false;
@@ -447,12 +447,12 @@ namespace GUI
             this.lnkOlvidaste.TabIndex        = 6;
             this.lnkOlvidaste.TabStop         = true;
             this.lnkOlvidaste.Tag             = "lnk.olvide";
-            this.lnkOlvidaste.Text            = "¿Olvidaste tu contraseña?";
+            this.lnkOlvidaste.Text            = "¿Olvidó su contraseña?";
             this.lnkOlvidaste.TextAlign       = System.Drawing.ContentAlignment.MiddleRight;
             this.lnkOlvidaste.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkOlvidaste_LinkClicked);
 
             // ── lnkEmergencia — RF-10, autodesbloqueo con clave de emergencia ─
-            // Fila propia entre "¿Olvidaste tu contraseña?" y el cartel de error, para que
+            // Fila propia entre "¿Olvidó su contraseña?" y el cartel de error, para que
             // NO se superponga con el mensaje "cuenta bloqueada".
             this.lnkEmergencia.ActiveLinkColor = GUI.Tema.RosaOscuro;
             this.lnkEmergencia.AutoSize        = false;

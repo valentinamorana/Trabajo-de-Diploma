@@ -62,7 +62,6 @@
             this.promocionesVigentesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grpUsuarios = new System.Windows.Forms.ToolStripMenuItem();
-            this.adminUsuariosItem = new System.Windows.Forms.ToolStripMenuItem();
             this.usuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.perfilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sepAdministrarToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
@@ -77,13 +76,6 @@
             this.sepBitacoraToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.reporteJornadaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.analiticaNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.analisisAbandonoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sepAnaliticaToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
-            this.ventasVendedorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.analisisRotacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.analisisMantenimientoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.analisisEscasezToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.recomendacionPrendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventanaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cerrarTodasLasVentanasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alertasItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -210,7 +202,7 @@
             this.controlStockToolStripMenuItem.Text = "Control de Stock";
             this.controlStockToolStripMenuItem.Click += new System.EventHandler(this.controlStockToolStripMenuItem_Click);
             //
-            // inspeccionDevolucionToolStripMenuItem — PN04, CU-DEP-01 Inspeccionar Devolución
+            // inspeccionDevolucionToolStripMenuItem — PN04, CU05-DEP Inspeccionar Devolución
             //
             this.inspeccionDevolucionToolStripMenuItem.Name = "inspeccionDevolucionToolStripMenuItem";
             this.inspeccionDevolucionToolStripMenuItem.Tag = "mnu.inspecciondevolucion";
@@ -382,30 +374,22 @@
             this.gestionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.gestionToolStripMenuItem.Text = "Administrar";
             //
-            // grpUsuarios — submenú "Usuarios": ABM de datos + cuentas + historial de cambios.
+            // grpUsuarios — submenú "Usuarios": administración (cuentas + datos) + historial de cambios.
             //
             this.grpUsuarios.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.adminUsuariosItem,
             this.usuariosToolStripMenuItem,
             this.historialUsuariosToolStripMenuItem});
             this.grpUsuarios.Name = "grpUsuarios";
             this.grpUsuarios.Tag  = "mnu.grp.usuarios";
             this.grpUsuarios.Text = "Usuarios";
             //
-            // adminUsuariosItem — ABM de datos no sensibles + cambiar rol + historial.
-            //
-            this.adminUsuariosItem.Name = "adminUsuariosItem";
-            this.adminUsuariosItem.Tag  = "mnu.adminusuarios";
-            this.adminUsuariosItem.Text = "Administración de Usuarios";
-            this.adminUsuariosItem.Click += new System.EventHandler(this.AdminUsuarios_Click);
-            //
-            // usuariosToolStripMenuItem — pasa a llamarse "Cuentas de Usuario" (no confundir con
-            // "Administración de Usuarios").
+            // usuariosToolStripMenuItem — "Administración de Usuarios": una sola pantalla con las
+            // pestañas Cuentas y Datos administrativos (antes eran dos ítems y dos formularios).
             //
             this.usuariosToolStripMenuItem.Name = "usuariosToolStripMenuItem";
-            this.usuariosToolStripMenuItem.Tag = "mnu.cuentas";
+            this.usuariosToolStripMenuItem.Tag = "mnu.adminusuarios";
             this.usuariosToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.usuariosToolStripMenuItem.Text = "Cuentas de Usuario";
+            this.usuariosToolStripMenuItem.Text = "Administración de Usuarios";
             this.usuariosToolStripMenuItem.Click += new System.EventHandler(this.usuariosToolStripMenuItem_Click);
             //
             // sepAdministrarToolStripSeparator
@@ -484,21 +468,15 @@
             this.auditoriaToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
             this.auditoriaToolStripMenuItem.Text = "Auditoría";
             //
-            // analiticaNegocioToolStripMenuItem — los 6 reportes de valor agregado (Bloque 3 +
-            // PdN10), cada uno con patente propia (decisión comercial, no auditoría genérica).
+            // analiticaNegocioToolStripMenuItem — una sola entrada que abre AnaliticaNegocioForm:
+            // los 6 reportes de valor agregado (Bloque 3 + PdN10) en un selector. Cada reporte
+            // conserva su patente propia; el ítem se ve si el usuario tiene al menos una.
             //
-            this.analiticaNegocioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.analisisAbandonoToolStripMenuItem,
-            this.sepAnaliticaToolStripSeparator,
-            this.ventasVendedorToolStripMenuItem,
-            this.analisisRotacionToolStripMenuItem,
-            this.analisisMantenimientoToolStripMenuItem,
-            this.analisisEscasezToolStripMenuItem,
-            this.recomendacionPrendasToolStripMenuItem});
             this.analiticaNegocioToolStripMenuItem.Name = "analiticaNegocioToolStripMenuItem";
             this.analiticaNegocioToolStripMenuItem.Tag = "mnu.analiticanegocio";
             this.analiticaNegocioToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
             this.analiticaNegocioToolStripMenuItem.Text = "Analítica de Negocio";
+            this.analiticaNegocioToolStripMenuItem.Click += new System.EventHandler(this.analiticaNegocioToolStripMenuItem_Click);
             //
             // bitSistemaToolStripMenuItem
             //
@@ -528,59 +506,6 @@
             this.reporteJornadaToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.reporteJornadaToolStripMenuItem.Text = "Reporte de Jornada";
             this.reporteJornadaToolStripMenuItem.Click += new System.EventHandler(this.reporteJornadaToolStripMenuItem_Click);
-            //
-            // sepAnaliticaToolStripSeparator — separa Análisis de Abandono (retención, PdN10)
-            // de los 5 reportes del Bloque 3 (arriba tiene su propia patente, mnuAnalisisAbandono).
-            //
-            this.sepAnaliticaToolStripSeparator.Name = "sepAnaliticaToolStripSeparator";
-            //
-            // analisisAbandonoToolStripMenuItem
-            //
-            this.analisisAbandonoToolStripMenuItem.Name = "analisisAbandonoToolStripMenuItem";
-            this.analisisAbandonoToolStripMenuItem.Tag = "mnu.abandono";
-            this.analisisAbandonoToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.analisisAbandonoToolStripMenuItem.Text = "Análisis de Abandono";
-            this.analisisAbandonoToolStripMenuItem.Click += new System.EventHandler(this.analisisAbandonoToolStripMenuItem_Click);
-            //
-            // ventasVendedorToolStripMenuItem
-            //
-            this.ventasVendedorToolStripMenuItem.Name = "ventasVendedorToolStripMenuItem";
-            this.ventasVendedorToolStripMenuItem.Tag = "mnu.ventasvendedor";
-            this.ventasVendedorToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.ventasVendedorToolStripMenuItem.Text = "Ventas por Vendedor";
-            this.ventasVendedorToolStripMenuItem.Click += new System.EventHandler(this.ventasVendedorToolStripMenuItem_Click);
-            //
-            // analisisRotacionToolStripMenuItem
-            //
-            this.analisisRotacionToolStripMenuItem.Name = "analisisRotacionToolStripMenuItem";
-            this.analisisRotacionToolStripMenuItem.Tag = "mnu.rotacion";
-            this.analisisRotacionToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.analisisRotacionToolStripMenuItem.Text = "Rotación de Prendas";
-            this.analisisRotacionToolStripMenuItem.Click += new System.EventHandler(this.analisisRotacionToolStripMenuItem_Click);
-            //
-            // analisisMantenimientoToolStripMenuItem
-            //
-            this.analisisMantenimientoToolStripMenuItem.Name = "analisisMantenimientoToolStripMenuItem";
-            this.analisisMantenimientoToolStripMenuItem.Tag = "mnu.mantanalisis";
-            this.analisisMantenimientoToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.analisisMantenimientoToolStripMenuItem.Text = "Tiempos de Mantenimiento";
-            this.analisisMantenimientoToolStripMenuItem.Click += new System.EventHandler(this.analisisMantenimientoToolStripMenuItem_Click);
-            //
-            // analisisEscasezToolStripMenuItem
-            //
-            this.analisisEscasezToolStripMenuItem.Name = "analisisEscasezToolStripMenuItem";
-            this.analisisEscasezToolStripMenuItem.Tag = "mnu.escasez";
-            this.analisisEscasezToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.analisisEscasezToolStripMenuItem.Text = "Escasez de Stock";
-            this.analisisEscasezToolStripMenuItem.Click += new System.EventHandler(this.analisisEscasezToolStripMenuItem_Click);
-            //
-            // recomendacionPrendasToolStripMenuItem
-            //
-            this.recomendacionPrendasToolStripMenuItem.Name = "recomendacionPrendasToolStripMenuItem";
-            this.recomendacionPrendasToolStripMenuItem.Tag = "mnu.recomendacion";
-            this.recomendacionPrendasToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.recomendacionPrendasToolStripMenuItem.Text = "Recomendación de Prendas";
-            this.recomendacionPrendasToolStripMenuItem.Click += new System.EventHandler(this.recomendacionPrendasToolStripMenuItem_Click);
             //
             // ventanaToolStripMenuItem
             //
@@ -667,13 +592,6 @@
         private System.Windows.Forms.ToolStripMenuItem bitNegocioToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator sepBitacoraToolStripSeparator;
         private System.Windows.Forms.ToolStripMenuItem reporteJornadaToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator sepAnaliticaToolStripSeparator;
-        private System.Windows.Forms.ToolStripMenuItem analisisAbandonoToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ventasVendedorToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem analisisRotacionToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem analisisMantenimientoToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem analisisEscasezToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem recomendacionPrendasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gestionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem perfilesToolStripMenuItem;
@@ -694,7 +612,6 @@
         private System.Windows.Forms.ToolStripSeparator tsIdiomaSep;
         private System.Windows.Forms.ToolStripComboBox cmbIdiomaMenu;
         private System.Windows.Forms.ToolStripMenuItem miPerfilItem;
-        private System.Windows.Forms.ToolStripMenuItem adminUsuariosItem;
         private System.Windows.Forms.ToolStripMenuItem grpUsuarios;
         private System.Windows.Forms.ToolStripMenuItem grpSistema;
         private System.Windows.Forms.ToolStripSeparator sepAdministrarToolStripSeparator;

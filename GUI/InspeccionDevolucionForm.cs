@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN04, CU-DEP-01 Inspeccionar Devolución. Actor: Depósito
+    /// Capa de Presentación — PN04, CU05-DEP Inspeccionar Devolución. Actor: Depósito
     /// (Deposito). Lógica alineada a Nuuly: binaria, sin aprobador — la prenda
     /// devuelta (EnLimpieza) reingresa sin cargo o se da de baja y se cobra el precio de
     /// reposición completo (BLL.CargoPrenda.RegistrarCargo, ya existente desde Bloque 1).

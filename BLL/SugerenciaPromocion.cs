@@ -35,15 +35,18 @@ namespace BLL
         public BE.SugerenciaPromocion ObtenerPorId(int idSugerencia) => dalSugerencia.ObtenerPorId(idSugerencia);
 
         // "¿Hay oportunidad? Sí → Registrar sugerencia" («Sugerencia de promoción»).
+        // Beneficio estimado = ingreso mensual en riesgo × tasa de retención / 100: la tasa es el
+        // supuesto explícito de cuántos clientes en riesgo retiene la promoción (antes, el 100 %).
         public int RegistrarSugerencia(string modulo, BE.OrigenMetrica origen, int idPlan,
-                                       string motivo, BE.TipoDescuento tipoSugerido, decimal beneficioEstimado)
+                                       string motivo, BE.TipoDescuento tipoSugerido, decimal ingresoMensualEnRiesgo,
+                                       decimal tasaRetencion)
         {
             PermisosAccion.Exigir(BE.Patentes.SugerenciaPromocion, BE.Patentes.SugerenciaPromocion);
 
             // Las promociones son siempre por plan: la sugerencia también.
             if (idPlan <= 0)
                 throw new BE.AppException("err.bll.sugerenciapromocion.plan_requerido",
-                    "Elegí el plan al que apunta la sugerencia.");
+                    "Elija el plan al que apunta la sugerencia.");
 
             if (dalPlan.ObtenerPorId(idPlan) == null)
                 throw new BE.AppException("err.bll.sugerenciapromocion.plan_inexistente",
@@ -53,6 +56,15 @@ namespace BLL
                 throw new BE.AppException("err.bll.sugerenciapromocion.motivo_requerido",
                     "Debe indicar el motivo de la sugerencia.");
 
+            // La columna guarda 2 decimales: se redondea antes de validar y de calcular el beneficio,
+            // así lo guardado y lo calculado coinciden.
+            tasaRetencion = Math.Round(tasaRetencion, 2, MidpointRounding.AwayFromZero);
+            if (tasaRetencion <= 0 || tasaRetencion > 100)
+                throw new BE.AppException("err.bll.sugerenciapromocion.tasa_invalida",
+                    "La tasa de retención esperada debe ser mayor a 0 y hasta 100 %.");
+
+            ingresoMensualEnRiesgo = Math.Round(ingresoMensualEnRiesgo, 2, MidpointRounding.AwayFromZero);   // la columna guarda 2 decimales
+            decimal beneficioEstimado = BE.SugerenciaPromocion.CalcularBeneficio(ingresoMensualEnRiesgo, tasaRetencion);
             if (beneficioEstimado <= 0)
                 throw new BE.AppException("err.bll.sugerenciapromocion.beneficio_invalido",
                     "El beneficio estimado debe ser mayor a cero.");
@@ -63,6 +75,8 @@ namespace BLL
                 Motivo = motivo.Trim(),
                 TipoDescuentoSugerido = tipoSugerido,
                 BeneficioEstimado = beneficioEstimado,
+                TasaRetencion = tasaRetencion,
+                IngresoMensualEnRiesgo = ingresoMensualEnRiesgo,
                 Estado = BE.EstadoSugerencia.Pendiente,
                 OrigenMetrica = origen,
                 IdUsuarioAlta = BLLHelper.ResolverUsuarioActivo(),
@@ -76,7 +90,8 @@ namespace BLL
                 $"Sugerencia de promoción #{idNuevo} ({origen}) — {destino} — Motivo: {sugerencia.Motivo}",
                 BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
-                $"Sugerencia de promoción #{idNuevo} para {destino} — beneficio estimado ${beneficioEstimado}");
+                $"Sugerencia de promoción #{idNuevo} para {destino} — beneficio estimado ${beneficioEstimado} " +
+                $"(ingreso en riesgo ${ingresoMensualEnRiesgo} × retención {tasaRetencion} %)");
 
             return idNuevo;
         }
@@ -93,7 +108,7 @@ namespace BLL
             // Guarda de "¿Acepta la sugerencia?": solo se decide sobre una sugerencia Pendiente.
             if (!sugerencia.PuedeEvaluarse() || !sugerencia.TransicionValida(BE.EstadoSugerencia.Descartada))
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
-                    "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
+                    "La sugerencia seleccionada ya fue evaluada. Actualice la lista de sugerencias.");
 
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.sugerenciapromocion.motivodescarte_requerido",
@@ -102,7 +117,7 @@ namespace BLL
             // Claim atómico (UPDATE ... WHERE Estado = Pendiente).
             if (!dalSugerencia.Descartar(idSugerencia, motivo.Trim(), DateTime.Now))
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
-                    "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
+                    "La sugerencia seleccionada ya fue evaluada. Actualice la lista de sugerencias.");
 
             bitacora.Registrar(modulo, $"Descartar sugerencia de promoción #{idSugerencia} — Motivo: {motivo.Trim()}",
                 BE.Criticidad.Baja);

@@ -3,8 +3,8 @@ namespace GUI.Exportacion
     /// <summary>
     /// Patrón FACTORY METHOD — rol "ConcreteCreator".
     ///
-    /// Creador de exportadores para los documentos de PN03 (Métricas, promociones y toma de
-    /// decisiones): reporte de métricas, sugerencia de promoción, constancia de descarte, ficha
+    /// Creador de exportadores para los documentos de PN03 (Evaluar y aplicar promociones
+    /// comerciales): reporte de métricas, sugerencia de promoción, constancia de descarte, ficha
     /// de promoción, dictamen contable, solicitud de baja y resolución de baja.
     /// </summary>
     public class GeneradorDocumentoPromocion : GeneradorReporte

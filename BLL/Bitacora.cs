@@ -79,10 +79,10 @@ namespace BLL
         {
             if (!Seguridad.SessionManager.IsLoggedIn)
                 throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+                    "La sesión expiró. Vuelva a iniciar sesión.");
             if (!UsuarioPuedeVerSistema())
                 throw new BE.AppException("err.bll.bitacora.sin_permiso_sistema",
-                    "No tenés permiso para consultar la bitácora del sistema.");
+                    "No tiene permiso para consultar la bitácora del sistema.");
             BLLHelper.ExigirVigente();
         }
     }

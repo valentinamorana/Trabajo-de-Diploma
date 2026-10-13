@@ -37,7 +37,7 @@ namespace BLL.Manejadores
             if (dalPedido != null && dalPedido.TienePedidoActivo(contexto.Cliente.IdCliente))
                 throw new BE.AppException("err.bll.renovacion.pedido_activo",
                     "No se puede pausar ni dar de baja la suscripción: el cliente tiene un pedido en curso. " +
-                    "Esperá a que termine su ciclo o cancelalo.");
+                    "Espere a que termine su ciclo o cancélelo.");
 
             var cliente = contexto.Cliente;
             int? idPlanAnterior = cliente.IdPlan;
@@ -64,7 +64,6 @@ namespace BLL.Manejadores
                     Actor = contexto.Actor
                 });
             });
-            dalCliente.RecalcularDV(cliente.IdCliente);
 
             var prendasEnUso = dalPrenda.ObtenerPorCliente(cliente.IdCliente);
             bool conPrendas = prendasEnUso.Count > 0;

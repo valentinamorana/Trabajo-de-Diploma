@@ -52,7 +52,7 @@ namespace GUI.Estilos
 
         // Busca el color de categoría subiendo por la cadena de OwnerItem hasta encontrar
         // un ítem de primer nivel conocido — así un ítem dentro de un submenú anidado
-        // (ej. "Cuentas de Usuario" dentro de Usuarios ▸ dentro de Administrar) hereda el
+        // (ej. "Administración de Usuarios" dentro de Usuarios ▸ dentro de Administrar) hereda el
         // color de "Administrar", no un default genérico.
         private static Color ColorCategoria(ToolStripItem item)
         {

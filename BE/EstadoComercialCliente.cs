@@ -25,6 +25,10 @@ namespace BE
         public int  PrendasDisponibles { get; set; }
         public int  Exceso             { get; set; }
 
+        // Decisión de la BLL: la selección excede el cupo del plan (incluye el plan sin cupo,
+        // donde cualquier selección lo excede). La GUI solo la lee para habilitar Confirmar/Desistir.
+        public bool ExcedeCupo         { get; set; }
+
         // Alerta proactiva: suscripción vigente pero vence pronto
         public bool SuscripcionProximaAVencer { get; set; }
         public int? DiasHastaVencimiento      { get; set; }

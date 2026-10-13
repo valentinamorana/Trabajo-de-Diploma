@@ -349,11 +349,14 @@ namespace GUI
 
             if (opciones.Count == 0)
             {
-                string errKey = prenda.Estado == BE.EstadoPrenda.EnUso ? "err.prenda.enuso" : "err.prenda.baja";
-                string errFb  = prenda.Estado == BE.EstadoPrenda.EnUso
-                    ? "No se puede cambiar el estado: la prenda está en uso por un cliente."
-                    : "La prenda está dada de baja y no puede ser reactivada.";
-                MostrarError(Tr(errKey, errFb));
+                // PN04: una prenda devuelta En Limpieza sale solo por la Inspección de Devolución.
+                if (prenda.Estado == BE.EstadoPrenda.EnUso)
+                    MostrarError(Tr("err.prenda.enuso", "No se puede cambiar el estado: la prenda está en uso por un cliente."));
+                else if (prenda.Estado == BE.EstadoPrenda.EnLimpieza)
+                    MostrarError(Tr("err.prenda.eninspeccion",
+                        "La prenda volvió de un cliente: se resuelve desde la Inspección de Devolución (reingreso o baja con cargo)."));
+                else
+                    MostrarError(Tr("err.prenda.baja", "La prenda está dada de baja y no puede ser reactivada."));
                 return;
             }
 

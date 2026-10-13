@@ -522,8 +522,7 @@ namespace GUI
 
             // Creator → Factory Method → Product (Exportador concreto según el formato)
             Exportacion.GeneradorReporte generador  = new Exportacion.GeneradorBitacora();
-            Exportacion.Exportador       exportador = generador.CrearExportador(formato);
-            exportador?.Exportar(reporte, this);
+            generador.Exportar(formato, reporte, this);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

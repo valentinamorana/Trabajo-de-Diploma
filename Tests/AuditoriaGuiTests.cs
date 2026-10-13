@@ -224,9 +224,14 @@ namespace Tests
             public readonly List<BE.EstadoPrenda> Cambios = new List<BE.EstadoPrenda>();
             public new void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado)
                 => Cambios.Add(nuevoEstado);
+            public readonly List<int> Reingresos = new List<int>();
+            public new void ReingresarInspeccionada(string modulo, BE.Prenda prenda)
+                => Reingresos.Add(prenda.IdPrenda);
             // Cola de inspección: por defecto la prenda 5 (la de los tests) volvió de una devolución.
             public List<BE.Prenda> ColaInspeccion = new List<BE.Prenda> { new BE.Prenda { IdPrenda = 5 } };
             public new List<BE.Prenda> ObtenerEnLimpieza() => ColaInspeccion;
+            public new bool EstaPendienteDeInspeccion(BE.Prenda prenda) =>
+                prenda.Estado == BE.EstadoPrenda.EnLimpieza && ColaInspeccion.Exists(p => p.IdPrenda == prenda.IdPrenda);
         }
 
         private static BE.Prenda Prenda(BE.EstadoPrenda estado, int? ultimoCliente = 3) => new BE.Prenda
@@ -341,6 +346,7 @@ namespace Tests
         [TestMethod]
         public void PuedeReportarPerdida_SoloConPedidoEntregadoHace30Dias()
         {
+            LoginComoAdministrador();
             var bll = Inspeccion(new FakeInspeccionDAL());
             var prenda = Prenda(BE.EstadoPrenda.EnUso);
             var entregado = new BE.Pedido { Estado = BE.EstadoPedido.Entregado, FechaEntrega = Hoy.AddDays(-30) };
@@ -350,6 +356,15 @@ namespace Tests
             Assert.IsFalse(bll.PuedeReportarPerdida(prenda, new BE.Pedido { Estado = BE.EstadoPedido.Despachado }));
             Assert.IsFalse(bll.PuedeReportarPerdida(Prenda(BE.EstadoPrenda.EnLimpieza), entregado));
             Assert.IsFalse(bll.PuedeReportarPerdida(prenda, null));
+        }
+
+        [TestMethod]
+        public void PuedeReportarPerdida_SinLaPatenteDeEditarStock_NoHabilitaElBoton()
+        {
+            // Un rol sin mnuStockEditar (p. ej. el Operador Logístico) no ve el botón habilitado.
+            SessionManager.Login(new BE.Usuario { Id = 9, Username = "logistica", Perfil = "OperadorLogistico", Contraseña = Encriptador.Hash("Clave1!") });
+            var entregado = new BE.Pedido { Estado = BE.EstadoPedido.Entregado, FechaEntrega = Hoy.AddDays(-30) };
+            Assert.IsFalse(Inspeccion(new FakeInspeccionDAL()).PuedeReportarPerdida(Prenda(BE.EstadoPrenda.EnUso), entregado));
         }
 
         [TestMethod]
@@ -428,12 +443,34 @@ namespace Tests
         }
 
         [TestMethod]
-        public void AprobarReingreso_UsaCambiarEstadoADisponible()
+        public void AprobarReingreso_PrendaDeLaCola_ReingresaPorLaInspeccion()
         {
             LoginComoAdministrador();
             var espia = new PrendaServiceEspia();
             new BLL.InspeccionDevolucion(new FakeInspeccionDAL(), espia).AprobarReingreso("Test", Prenda(BE.EstadoPrenda.EnLimpieza));
-            CollectionAssert.AreEqual(new[] { BE.EstadoPrenda.Disponible }, espia.Cambios);
+            CollectionAssert.AreEqual(new[] { 5 }, espia.Reingresos);
+            Assert.AreEqual(0, espia.Cambios.Count, "El reingreso no pasa por el cambio de estado manual.");
+        }
+
+        // PN04 — el reingreso es la decisión de la Inspección: solo para prendas de su cola.
+        [TestMethod]
+        public void AprobarReingreso_PrendaFueraDeLaCola_Rechaza()
+        {
+            // Con la BLL de Prenda REAL (la guarda vive en ReingresarInspeccionada): la prenda está En
+            // Limpieza pero la mandó el depósito, así que no está en la cola de inspección.
+            LoginComoAdministrador();
+            var dalPrenda = new FakePrendaDAL();
+            dalPrenda.Todas.Add(Prenda(BE.EstadoPrenda.EnLimpieza));
+            var dalMant = new FakeMantenimientoPrendaDAL();
+            dalMant.Todos.Add(new BE.MantenimientoPrenda { IdPrenda = 5, Origen = BE.OrigenMantenimiento.Manual });
+            var prendaBLL = new BLL.Prenda(dalPrenda, dalMant, new FakeListaEsperaService());
+            try
+            {
+                new BLL.InspeccionDevolucion(new FakeInspeccionDAL(), prendaBLL).AprobarReingreso("Test", Prenda(BE.EstadoPrenda.EnLimpieza));
+                Assert.Fail("Debía rechazar el reingreso de una prenda que no está pendiente de inspección.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.insp.reingreso_fuera_de_cola", ex.Clave); }
+            Assert.AreEqual(0, dalPrenda.CambiarEstadoVeces);
         }
 
         // ── PanelTareas: tablero logístico y suscripciones ────────────────────

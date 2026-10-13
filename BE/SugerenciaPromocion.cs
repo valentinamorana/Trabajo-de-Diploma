@@ -16,6 +16,32 @@ namespace BE
         public string Motivo { get; set; }
         public TipoDescuento TipoDescuentoSugerido { get; set; }
         public decimal BeneficioEstimado { get; set; }
+
+        /// <summary>
+        /// Porcentaje (0-100] de los clientes en riesgo que Gerencia espera que la promoción retenga.
+        /// El beneficio estimado es el ingreso mensual en riesgo × TasaRetencion / 100: la promoción
+        /// ya no supone que retiene a todos, y el supuesto queda explícito para Contabilidad.
+        /// Las sugerencias anteriores a la tasa quedaron con 100 (era lo que suponían).
+        /// </summary>
+        public decimal TasaRetencion { get; set; } = TasaRetencionPorDefecto;
+
+        public const decimal TasaRetencionPorDefecto = 30m;
+
+        /// <summary>Ingreso mensual en riesgo que cargó Gerencia (se guarda: así la ecuación impresa
+        /// "beneficio = ingreso × tasa" muestra lo que se ingresó y no un valor reconstruido).
+        /// Null solo en datos anteriores a la 20h.</summary>
+        public decimal? IngresoMensualEnRiesgo { get; set; }
+
+        /// <summary>Beneficio mensual estimado: ingreso en riesgo × tasa de retención / 100.</summary>
+        public static decimal CalcularBeneficio(decimal ingresoMensualEnRiesgo, decimal tasaRetencion) =>
+            // Mismo redondeo que SQL ROUND (desde el cero): el CHECK CHK_SugerenciaPromocion_Beneficio lo compara.
+            Math.Round(ingresoMensualEnRiesgo * tasaRetencion / 100m, 2, MidpointRounding.AwayFromZero);
+
+        /// <summary>Ingreso mensual en riesgo del que partió el beneficio: el guardado, o (datos
+        /// anteriores a la 20h) el que resulta de invertir CalcularBeneficio.</summary>
+        public decimal IngresoEnRiesgo() =>
+            IngresoMensualEnRiesgo ?? (TasaRetencion > 0 ? Math.Round(BeneficioEstimado * 100m / TasaRetencion, 2) : 0m);
+
         public EstadoSugerencia Estado { get; set; } = EstadoSugerencia.Pendiente;
         public DateTime FechaAlta { get; set; }
 
@@ -41,13 +67,21 @@ namespace BE
         public bool PuedeEvaluarse() => Estado == EstadoSugerencia.Pendiente;
         public bool EstaDescartada() => Estado == EstadoSugerencia.Descartada;
 
+        /// <summary>Descuento con el que arranca la propuesta (Administración lo ajusta).</summary>
+        public const decimal DescuentoInicialPorcentaje = 10m;
+
         /// <summary>
-        /// Valor con el que Administración arranca la promoción creada desde esta sugerencia. El
-        /// beneficio estimado es un importe en $: si el tipo sugerido es un PORCENTAJE y ese importe
-        /// supera 100, no sirve como valor (16000 % es inválido) y se propone 10 %.
+        /// Valor con el que Administración arranca la promoción creada desde esta sugerencia: un
+        /// descuento por cliente del 10 % (o el 10 % del precio del plan, si es un monto fijo). Antes
+        /// se precargaba el beneficio estimado, que es el ingreso MENSUAL TOTAL a retener de todos los
+        /// clientes en riesgo: como descuento por cliente no tenía sentido. Sin precio del plan, 0.
         /// </summary>
-        public decimal ValorInicialPromocion() =>
-            TipoDescuentoSugerido == TipoDescuento.Porcentaje && BeneficioEstimado > 100 ? 10m : BeneficioEstimado;
+        public decimal ValorInicialPromocion(decimal? precioPlan) =>
+            TipoDescuentoSugerido == TipoDescuento.Porcentaje
+                ? DescuentoInicialPorcentaje
+                : precioPlan.HasValue && precioPlan.Value > 0
+                    ? Math.Round(precioPlan.Value * DescuentoInicialPorcentaje / 100m, 2, MidpointRounding.AwayFromZero)
+                    : 0m;
 
         /// <summary>
         /// Pendiente → Evaluada (se creó la promoción) | Descartada (fin).

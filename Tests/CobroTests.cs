@@ -189,6 +189,38 @@ namespace Tests
         }
 
         [TestMethod]
+        public void ProcesarPago_SiOtroCobroYaAplicoElCredito_PropagaYNoRegistraElCobro()
+        {
+            // El DAL lanza si el saldo real ya no cubre el crédito: la transacción del cobro se revierte
+            // entera (en la BD real); acá se verifica que el handler no lo trague ni siga con el historial.
+            var dalCliente = new FakeClienteDAL
+            {
+                ConsumirCreditoLanza = new BE.AppException("err.bll.cobro.credito_concurrente", "ya aplicado")
+            };
+            var dalCobro = new FakeCobroDAL();
+            var handler = new ProcesarPagoHandler(dalCliente, dalCobro, new FakeCargoPrendaDAL());
+            var cliente = ClienteVigente();
+            cliente.DescuentoProximoCobro = 1000m;
+
+            try
+            {
+                handler.Procesar(new ContextoCobro
+                {
+                    Cliente = cliente,
+                    Decision = DecisionCobro.Cobrado,
+                    Modalidad = BE.Builders.ModalidadCobro.Mensual,
+                    Actor = "vendedor1"
+                });
+                Assert.Fail("Debía propagar el crédito ya aplicado.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cobro.credito_concurrente", ex.Clave);
+            }
+            Assert.AreEqual(0, dalCobro.AltaVeces);
+        }
+
+        [TestMethod]
         public void ProcesarPago_SiOtraSesionYaCobroLosCargos_LanzaCargoConcurrente()
         {
             var cliente = ClienteVigente();

@@ -24,7 +24,7 @@ Este repositorio parte de la base construida durante la materia Ingeniería de S
 | UI | Windows Forms (MDI) |
 | Base de datos | SQL Server |
 | Acceso a datos | ADO.NET puro (sin ORM) |
-| Encriptado | PBKDF2-SHA256 (contraseñas) · AES-128 + PBKDF2 (backups .wfbak) |
+| Encriptado | PBKDF2-SHA256 (contraseñas) · AES-128 + HMAC-SHA256 con clave PBKDF2 (backups .wfbak, encrypt-then-MAC) |
 
 ---
 
@@ -49,12 +49,16 @@ La GUI nunca accede a DAL ni a Seguridad directamente. Toda la lógica de negoci
 BE/ BLL/ DAL/ GUI/ Seguridad/ Servicios/   Capas de la aplicación (ver arriba)
 Tests/                                    Tests unitarios (MSTest) con fakes de DAL
 BD/00_Instalacion_Completa.sql            Único script: esquema, datos semilla y datos de prueba
+BD/01_Esquema_Final_DDL.sql               DDL limpio del esquema final (documentación; no lo corre el instalador)
 Instalador/                               Script de Inno Setup, DbInstaller (cliente SQL embebido)
                                           y credenciales iniciales. El .exe se genera en
                                           Instalador/Salida/ y no se versiona: el instalador
                                           firmado se distribuye como GitHub Release
-docs/NEGOCIO_Y_PROCESOS.md               Documento de referencia: reglas y procesos de negocio, roles y arquitectura
-docs/MAPA_DE_NAVEGACION.md               Mapa de menús, formularios, procesos y roles
+Documentación y diagramas/                Documentación y modelo de Enterprise Architect:
+  NEGOCIO_Y_PROCESOS.md                   Documento de referencia: reglas y procesos de negocio, roles y arquitectura
+  MAPA_DE_NAVEGACION.md                   Mapa de menús, formularios, procesos y roles
+  CHECKLIST_PRUEBA_MANUAL.md, GUIA_DEMO.md  Prueba manual y guion de la demo
+  WardrobeFlow - Modelo EA.eapx           Diagramas (Enterprise Architect; solo local, no se versiona)
 WardrobeFlow.slnx                         Solución de Visual Studio
 ```
 
@@ -138,7 +142,7 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 | **Historial de Cambios** | Cambios de datos administrativos por usuario a nivel de campo, con rollback (Memento) |
 | **Idiomas** | ABM de traducciones directamente en la BD |
 | **Dashboard** | Panel de control personalizado por rol, con auto-refresh y carga asíncrona |
-| **Backup / Restauración** | Copias cifradas con contraseña (`.wfbak`, AES+PBKDF2) con verificación de integridad previa |
+| **Backup / Restauración** | Copias cifradas con contraseña (`.wfbak`, AES + HMAC-SHA256, clave PBKDF2) con verificación de integridad previa |
 | **Reporte de Jornada** | Exportación PDF de actividad del día filtrable por rol |
 | **Diagnóstico de Integridad** | Visualización y reparación asistida de filas con DVH/DVV corruptos |
 | **Lista de Espera** *(mejora opcional)* | Un cliente se anota por una prenda `EnUso`; al liberarse, queda reservada exclusivamente para él por 48hs (visible solo para ese cliente en Nuevo Pedido) antes de volver a estar disponible para cualquiera |
@@ -203,7 +207,7 @@ State ya entregado (PdN2/PdN4) sin tocarlo.
 - Bloqueo de login progresivo (1 → 5 → 15 → 60 min) con claves de emergencia de un solo uso
 - Handler global de excepciones no controladas: registra el detalle técnico en bitácora y muestra un mensaje genérico al usuario
 - Dígitos verificadores (DVH por fila + DVV por tabla) sobre `Usuario`, `Cliente`, `Empleado`, `Pedido`, `Contratacion` y `PermisoRelacion`; cada escritura recalcula solo la fila afectada
-- Backups cifrados con contraseña (AES-128 + PBKDF2) y Clave Maestra de Recuperación opcional
+- Backups cifrados con contraseña (AES-128 + HMAC-SHA256, clave derivada con PBKDF2) y Clave Maestra de Recuperación opcional
 - **Usuarios demo con claves fijas (decisión deliberada para la defensa):** las cuentas de `Instalador/Credenciales_Iniciales.txt` no exigen cambio de clave en el primer ingreso. En una implementación real hay que cambiar todas esas contraseñas (desde Mi Perfil, o forzando el cambio desde Administrar → Usuarios) y borrar o restringir ese archivo. Las cuentas demo solo se crean en una instalación nueva; una actualización nunca las recrea.
 - **Acceso a la base:** el instalador da al grupo local "Usuarios" de Windows el rol `db_owner` sobre `WardrobeFlowDB` (hace falta para restaurar backups desde la app). Quién puede operar lo decide el login y las patentes de la aplicación; un cambio de datos hecho por fuera de la app lo detectan los dígitos verificadores al iniciar.
 
@@ -233,14 +237,14 @@ BD/00_Instalacion_Completa.sql   -- Crea WardrobeFlowDB completa: estructura, da
                                   -- se puede volver a ejecutar sin duplicar ni romper nada.
 ```
 
-Es el único archivo de esquema que se edita. Los scripts individuales que introdujeron cada módulo históricamente (`01`, `03`, `05`, `06`, `08` a `20`) ya no están en el repo — todo su contenido está absorbido en `00`, que es la única fuente de verdad; si hace falta ver cómo se introdujo una funcionalidad puntual, buscarlo en el historial de git en vez de en un archivo aparte. El instalador (`Instalador/WardrobeFlow_Setup.iss`) usa este único script.
+Es el único archivo de esquema que se edita. Los scripts individuales que introdujeron cada módulo históricamente (los viejos `01`, `03`, `05`, `06`, `08` a `20`) ya no están en el repo — todo su contenido está absorbido en `00`, que es la única fuente de verdad; si hace falta ver cómo se introdujo una funcionalidad puntual, buscarlo en el historial de git en vez de en un archivo aparte. El instalador (`Instalador/WardrobeFlow_Setup.iss`) usa este único script.
 
-**Es el único script de la carpeta `BD/`.** Incluye también los **datos de prueba** de todos los procesos (sección 21: clientes en distintos estados de suscripción, prendas en cada estado, pedidos, contrataciones pendientes, promociones, etc.), así que la base queda lista para probar apenas se instala — el instalador (`Instalador/`) ejecuta este mismo archivo. Sobre una base ya instalada con una versión anterior también es seguro volver a ejecutarlo: migra el rol `OperadorDeInventario` a `Deposito` y retira los roles viejos.
+**Es el único script que corre el instalador.** (En `BD/` están además `01_Esquema_Final_DDL.sql`, el DDL limpio del esquema final como documentación, y `Reset_Datos_Demo.sql`, que pide recargar los datos de demo en la próxima corrida.) Incluye también los **datos de prueba** de todos los procesos (sección 21: clientes en distintos estados de suscripción, prendas en cada estado, pedidos, contrataciones pendientes, promociones, etc.), así que la base queda lista para probar apenas se instala — el instalador (`Instalador/`) ejecuta este mismo archivo. Sobre una base ya instalada con una versión anterior también es seguro volver a ejecutarlo: migra el rol `OperadorDeInventario` a `Deposito` y retira los roles viejos.
 
 **Notas de los módulos** (para ubicarlos dentro de `00_Instalacion_Completa.sql` — los números de sección adentro del archivo coinciden con estos, y son el orden histórico en el que se agregaron):
 - **Lista de Espera (mejora opcional)** — sección 16 en `00`; el resto del sistema funciona sin ella (`BLL.Prenda`/`BLL.Pedido` degradan a su comportamiento anterior si la tabla `ListaEspera` no existe).
 - **Comercialización de la suscripción (PN02)** — sección 17 en `00`. Crea el rol `Caja` (separado de Vendedor) y sus patentes; hay que asignarle el rol `Caja` a algún usuario desde Administrar → Usuarios para poder probar el módulo (o usar el usuario demo `caja`).
-- **Métricas, promociones y toma de decisiones (PN03)** — sección 18 en `00`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay usuarios demo (`admcomercial`, `contable`) para probar el módulo sin dar de alta nada a mano.
+- **Evaluar y aplicar promociones comerciales (PN03)** — sección 18 en `00`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay usuarios demo (`admcomercial`, `contable`) para probar el módulo sin dar de alta nada a mano.
 - **Inspección de Devolución (PN04)** — sección 19 en `00`. Sin rol nuevo: reusa el rol `Deposito` (el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
 - **Aplicación de promociones al cobro e integridad (PN02/PN03/PN04)** — sección 20b en `00`. Agrega `Importe`, `DescuentoAplicado` e `IdPromocion` a `Contratacion` (lo que realmente se cobró), los `CHECK` de `CargoPrenda.Monto` e `IntentosPago`, las restricciones únicas (una contratación pendiente por cliente, una anotación activa por prenda y cliente) y los índices de las tablas nuevas.
 - **Hardening de integridad (auditoría de BD)** — sección 20 en `00`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
@@ -277,4 +281,4 @@ Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: 
 
 1. Compilar la solución en modo **Release** (y `Instalador/DbInstaller` en Release).
 2. Ejecutar `Instalador/compilar-y-firmar.ps1`: descarga `Instalador/Redist/SqlLocalDB.msi` si falta (instalador oficial de SQL Server 2022 Express LocalDB, no se versiona), compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool, o con `Set-AuthenticodeSignature` si no está el Windows SDK. El certificado (`wardrobeflow.pfx`) se busca en `%USERPROFILE%` y no se versiona; si no está, el instalador queda compilado sin firmar.
-3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_V1.exe` (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal.
+3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_1.4.0.exe` (el número sale de `MyAppVersion` del `.iss`) (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal.

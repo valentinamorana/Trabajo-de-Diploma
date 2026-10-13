@@ -262,7 +262,7 @@ namespace GUI
         {
             using (var d1 = new InputDialog(
                 Tr("dlg.backup.clave.titulo", "Contraseña del backup"),
-                Tr("dlg.backup.clave.nueva", "Ingresá una contraseña para CIFRAR el backup.\nLa vas a necesitar para restaurarlo (no se puede recuperar)."),
+                Tr("dlg.backup.clave.nueva", "Ingrese una contraseña para CIFRAR el backup.\nLa va a necesitar para restaurarlo (no se puede recuperar)."),
                 esPassword: true))
             {
                 if (d1.ShowDialog(this) != DialogResult.OK) return null;
@@ -275,7 +275,7 @@ namespace GUI
                 }
                 using (var d2 = new InputDialog(
                     Tr("dlg.backup.clave.titulo", "Contraseña del backup"),
-                    Tr("dlg.backup.clave.repetir", "Repetí la contraseña para confirmar:"),
+                    Tr("dlg.backup.clave.repetir", "Repita la contraseña para confirmar:"),
                     esPassword: true))
                 {
                     if (d2.ShowDialog(this) != DialogResult.OK) return null;
@@ -295,7 +295,7 @@ namespace GUI
         {
             using (var d = new InputDialog(
                 Tr("dlg.backup.clave.titulo", "Contraseña del backup"),
-                Tr("dlg.backup.clave.ingresar", "Ingresá la contraseña con la que se cifró este backup:"),
+                Tr("dlg.backup.clave.ingresar", "Ingrese la contraseña con la que se cifró este backup:"),
                 esPassword: true))
             {
                 return d.ShowDialog(this) == DialogResult.OK ? d.InputText : null;

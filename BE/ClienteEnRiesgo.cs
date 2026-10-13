@@ -8,6 +8,8 @@ namespace BE
     {
         public int IdCliente { get; set; }
         public string NombreCliente { get; set; }
+        /// <summary>Plan del cliente (para agrupar por plan: el nombre no es único).</summary>
+        public int? IdPlan { get; set; }
         public string NombrePlan { get; set; }
         public DateTime? FechaVencimiento { get; set; }
         public DateTime? FechaUltimoPedido { get; set; }

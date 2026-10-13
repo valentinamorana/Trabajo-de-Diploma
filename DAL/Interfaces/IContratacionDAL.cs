@@ -31,8 +31,10 @@ namespace DAL.Interfaces
         void RegistrarVigencia(int idContratacion, DateTime desde, DateTime hasta, int? idReferenteAcreditado = null);
 
         // Compensación técnica: revierte un cobro recién confirmado a PendientePago (solo si está
-        // Pagada) cuando la activación de la suscripción falló después del claim.
-        void ReabrirPago(int idContratacion, IList<int> idsCargo = null);
+        // Pagada) cuando la activación de la suscripción falló después del claim. En una transacción:
+        // la contratación y los cargos de PN04 liquidados con ese cobro (que vuelven a Pendiente).
+        // Devuelve false (sin tocar nada) si la contratación ya no estaba Pagada.
+        bool ReabrirPago(int idContratacion, IList<int> idsCargo = null);
 
         // "Anular contratación" (Caja, con motivo): claim atómico sobre Pendiente de pago.
         bool Anular(int idContratacion, string motivo, int idCaja);

@@ -53,7 +53,7 @@ namespace Tests
         [TestMethod]
         public void EnUso_PuedePasarABaja_ReportarPrendaPerdida()
         {
-            // PN04, CU-DEP-02 Reportar Prenda Perdida: única transición manual desde EnUso.
+            // PN04, CU06-DEP Reportar Prenda Perdida: única transición manual desde EnUso.
             var p = new BE.Prenda { Estado = BE.EstadoPrenda.EnUso };
             Assert.IsTrue(p.TransicionPermitida(BE.EstadoPrenda.Baja));
         }

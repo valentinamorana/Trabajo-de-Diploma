@@ -565,7 +565,7 @@ Servicios/   Bitácora, multiidioma, generador de credenciales
 Tests/       MSTest con Fakes/ (dobles de DAL/servicios)
 BD/00_Instalacion_Completa.sql   Único script de base de datos
 Instalador/  Inno Setup + DbInstaller + credenciales + script de firma
-docs/        Este documento
+Documentación y diagramas/   Este documento y el modelo de Enterprise Architect
 ```
 Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL/Seguridad. Inyección de dependencias por constructor
 (constructor por defecto con DAL reales + overloads con dobles para tests).
@@ -667,8 +667,8 @@ Estado tras la edición de la tesis (N01 y PN01–PN04 documentados desde el có
 | Despacho, cargos, incidencias por demora, compra definitiva | **Resuelto** | La tesis describe solo lo implementado (sin email/tracking, sin aprobador de cargos, sin compra definitiva) |
 | PN01 con Depósito, PN04 con cargo por daño | **Resuelto** | Reescritos según D7 y D2 |
 | N01 (clientes y suscripciones: renovación, pausa, baja, cobro del período con gracia y suspensión, planes) | **Pendiente** | La V19 (10/10) no tiene sección propia: N00 documenta PN01–PN04 y en G03 "N01" es PN01 (Entrega 1), mientras G02 usa N01 = clientes y suscripciones. Lo ya implementado de N01 falta en la tesis (auditoría 13/10) |
-| Diagramas PN01–PN04 y N01 (proceso, casos de uso, secuencia, clases, conceptual, DER) | **Resuelto** | 63 diagramas generados desde el código (`docs/diagramas/`, Mermaid + draw.io), verificados en cada commit |
-| Balanceo clases–secuencia (corrección de la Entrega 1) | **Resuelto** | `verificar.js` exige que toda clase y método citado en las secuencias de un proceso figure en sus diagramas de clases |
+| Diagramas PN01–PN04 y N01 (proceso, casos de uso, secuencia, clases, conceptual, DER) | **Resuelto** | En el modelo de Enterprise Architect (`Documentación y diagramas/WardrobeFlow - Modelo EA.eapx`) |
+| Balanceo clases–secuencia (corrección de la Entrega 1) | **Resuelto** | Toda clase y método citado en las secuencias de un proceso figura en sus diagramas de clases (modelo de EA) |
 | Diagramas T02–T08 (login, perfiles, idiomas, bitácora, control de cambios, dígitos verificadores, backup) | **Resuelto** | Secuencias, clases y DER regenerados desde el código y la base; T01 (componentes, mapa MDI) y los casos de uso de T02–T08 se mantienen |
 | Calidad de impresión | Limitación | Los diagramas de clases y DER son grandes: se leen ampliando en el Word |
 | draw.io | Limitación | Archivos generados con disposición automática; no se abrieron uno por uno en draw.io |

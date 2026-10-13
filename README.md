@@ -53,8 +53,11 @@ Instalador/                               Script de Inno Setup, DbInstaller (cli
                                           y credenciales iniciales. El .exe se genera en
                                           Instalador/Salida/ y no se versiona: el instalador
                                           firmado se distribuye como GitHub Release
-docs/NEGOCIO_Y_PROCESOS.md               Documento de referencia: reglas y procesos de negocio, roles y arquitectura
-docs/MAPA_DE_NAVEGACION.md               Mapa de menús, formularios, procesos y roles
+Documentación y diagramas/                Documentación y modelo de Enterprise Architect:
+  NEGOCIO_Y_PROCESOS.md                   Documento de referencia: reglas y procesos de negocio, roles y arquitectura
+  MAPA_DE_NAVEGACION.md                   Mapa de menús, formularios, procesos y roles
+  CHECKLIST_PRUEBA_MANUAL.md, GUIA_DEMO.md  Prueba manual y guion de la demo
+  WardrobeFlow - Modelo EA.eapx           Diagramas (Enterprise Architect)
 WardrobeFlow.slnx                         Solución de Visual Studio
 ```
 

@@ -99,13 +99,13 @@ namespace BLL
         {
             if (!cliente.IdMedioPagoPreferido.HasValue)
                 throw new BE.AppException("err.bll.cliente.medio_requerido",
-                    "Elegí el medio de pago preferido del cliente.");
+                    "Elija el medio de pago preferido del cliente.");
 
             var medio = (dalCliente.ObtenerMediosPago() ?? new List<BE.MedioPago>())
                 .Find(m => m.IdMedioPago == cliente.IdMedioPagoPreferido.Value);
             if (medio == null || (!medio.Activo && medio.IdMedioPago != idMedioActual))
                 throw new BE.AppException("err.bll.cliente.medio_invalido",
-                    "El medio de pago elegido no está disponible. Elegí otro del catálogo.");
+                    "El medio de pago elegido no está disponible. Elija otro del catálogo.");
         }
 
         // Obtiene un cliente por ID.
@@ -176,7 +176,7 @@ namespace BLL
             if (actual != null && (cliente.IdPlan != actual.IdPlan || cliente.FechaVencimiento != actual.FechaVencimiento))
                 BLLHelper.ExigirAdministrador("err.bll.cliente.plan_solo_admin",
                     "Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. " +
-                    "Para activar una suscripción nueva, usá el módulo de Contratación.");
+                    "Para activar una suscripción nueva, use el módulo de Contratación.");
 
             // Bloquear si el nuevo plan tiene menos capacidad que prendas en uso
             if (actual != null && cliente.IdPlan.HasValue && cliente.IdPlan != actual.IdPlan)
@@ -185,7 +185,7 @@ namespace BLL
                 if (nuevoPlan != null && actual.StockUtilizado > nuevoPlan.LimitePrendas)
                     throw new BE.AppException("err.bll.cliente.plan_insuficiente",
                         "No se puede asignar el plan '{0}': el cliente tiene {1} prenda(s) en uso " +
-                        "y ese plan solo permite {2}. Registrá las devoluciones primero.",
+                        "y ese plan solo permite {2}. Registre las devoluciones primero.",
                         nuevoPlan.Nombre, actual.StockUtilizado, nuevoPlan.LimitePrendas);
             }
 
@@ -212,7 +212,7 @@ namespace BLL
             // Bloquear baja si el cliente tiene prendas en uso actualmente
             if (cliente.StockUtilizado > 0)
                 throw new BE.AppException("err.bll.cliente.baja_prendas",
-                    "No se puede dar de baja a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.",
+                    "No se puede dar de baja a {0}: tiene {1} prenda(s) en uso. Registre la devolución primero.",
                     cliente.NombreCompleto, cliente.StockUtilizado);
 
             // PN02: una contratación pendiente de pago quedaría sin poder cobrarse.
@@ -224,7 +224,7 @@ namespace BLL
             // PN01: un pedido en el circuito quedaría huérfano en la cola de Depósito.
             if (dalPedido != null && dalPedido.TienePedidoActivo(cliente.IdCliente))
                 throw new BE.AppException("err.bll.cliente.baja_pedido",
-                    "No se puede dar de baja a {0}: tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo primero.",
+                    "No se puede dar de baja a {0}: tiene un pedido en curso. Espere a que termine su ciclo o cancélelo primero.",
                     cliente.NombreCompleto);
 
             // PN04: un cargo por daño o pérdida pendiente no se cobraría nunca (se suma al próximo cobro).
@@ -260,7 +260,7 @@ namespace BLL
             // Activar sin pasar por Contratación + Caja es una corrección administrativa (PN02).
             BLLHelper.ExigirAdministrador("err.bll.cliente.plan_solo_admin",
                 "Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. " +
-                "Para activar una suscripción nueva, usá el módulo de Contratación.");
+                "Para activar una suscripción nueva, use el módulo de Contratación.");
             return ActivarSuscripcionInterna(modulo, cliente, idPlan, modalidad);
         }
 

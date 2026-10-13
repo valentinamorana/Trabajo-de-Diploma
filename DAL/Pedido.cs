@@ -368,7 +368,7 @@ namespace DAL
                                           && ex.Message.Contains("UX_Pedido_ClienteActivo"))
             {
                 throw new BE.AppException("err.dal.pedido.pedido_activo_concurrente",
-                    "El cliente ya tiene otro pedido en curso: otro operador lo registró recién. Actualizá la lista.");
+                    "El cliente ya tiene otro pedido en curso: otro operador lo registró recién. Actualice la lista.");
             }
         }
 
@@ -527,7 +527,7 @@ namespace DAL
                         // desde la revisión de stock, no se afecta ninguna fila → rollback de todo.
                         if (cmdPr.ExecuteNonQuery() == 0)
                             throw new BE.AppException("err.dal.pedido.prenda_tomada",
-                                "La prenda '{0}' ya no está disponible. Actualizá la selección e intentá de nuevo.",
+                                "La prenda '{0}' ya no está disponible. Actualice la selección e intente de nuevo.",
                                 linea.Nombre);
                     }
                 }
@@ -690,7 +690,7 @@ namespace DAL
 
         private static BE.AppException EstadoCambiado(int idPedido) =>
             new BE.AppException("err.dal.pedido.estado_cambiado",
-                "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
+                "El Pedido #{0} cambió de estado en otra sesión. Actualice la lista y vuelva a intentarlo.",
                 idPedido);
 
         // Marca un pedido como Despachado y registra la fecha. Claim atómico: solo pasa si sigue

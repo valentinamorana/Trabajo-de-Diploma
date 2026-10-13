@@ -187,7 +187,7 @@ namespace GUI
             this.lblPlanillaTitulo.Size = new System.Drawing.Size(984, 26);
             this.lblPlanillaTitulo.TabIndex = 0;
             this.lblPlanillaTitulo.Tag = "lbl.cs.planilla";
-            this.lblPlanillaTitulo.Text = "Planilla de control de existencias — seleccioná un pedido de la cola";
+            this.lblPlanillaTitulo.Text = "Planilla de control de existencias — seleccione un pedido de la cola";
             //
             // panelStatus
             //

@@ -107,7 +107,7 @@ namespace GUI.Exportacion
             sb.AppendLine(Tr("doc.promo.resultado.titulo",
                 "Resultado de las promociones (vigencia contra el período anterior de igual duración):"));
             if (noDisponible)
-                sb.AppendLine("   " + Tr("doc.promo.resultado.nodisponible", "No se pudieron leer las promociones: volvé a analizar las métricas."));
+                sb.AppendLine("   " + Tr("doc.promo.resultado.nodisponible", "No se pudieron leer las promociones: vuelva a analizar las métricas."));
             else if (resultados == null || resultados.Count == 0)
                 sb.AppendLine("   " + Tr("doc.promo.resultado.sindatos", "No hay promociones vigentes, dadas de baja o vencidas en el período."));
             foreach (var r in resultados ?? new List<BE.ResultadoPromocion>())
@@ -115,7 +115,7 @@ namespace GUI.Exportacion
                 if (r.NoSePudoCalcular)
                 {
                     sb.AppendLine(string.Format(Tr("doc.promo.resultado.error",
-                        "   • {0}: no se pudo calcular su resultado. Volvé a analizar las métricas."), r.Nombre));
+                        "   • {0}: no se pudo calcular su resultado. Vuelva a analizar las métricas."), r.Nombre));
                     continue;
                 }
                 sb.AppendLine(string.Format(Tr("doc.promo.resultado.promo", "   • {0} ({1}) — plan {2} — vigencia {3:d} al {4:d} ({5} día(s)); antes: {6:d} al {7:d}"),

@@ -74,13 +74,13 @@ namespace BLL
         {
             if (idEnSesion == idObjetivo)
                 throw new BE.AppException("err.bll.usuario.autobaja",
-                    "No podés archivar tu propio usuario mientras tenés la sesión abierta.");
+                    "No puede archivar su propio usuario mientras tiene la sesión abierta.");
 
             if (BE.Roles.EsAdministrador(perfilObjetivo)
                 && adminsActivos <= 1)
                 throw new BE.AppException("err.bll.usuario.ultimo_admin",
                     "No se puede archivar al último Administrador activo del sistema. " +
-                    "Creá o activá otro Administrador antes de archivar este.");
+                    "Cree o active otro Administrador antes de archivar este.");
         }
 
         // RF-10 — Lista de usuarios archivados (Activo=0) para la vista de gestión.

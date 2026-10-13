@@ -144,7 +144,7 @@ namespace GUI
             if (c != null && c.PuedeCobrarse() && !c.UsuarioPuedeCobrar && !VistaResueltas)
             {
                 lblDetalleCuotas.Text = Tr("lbl.contr.registraste",
-                    "No podés resolver esta contratación: la registraste vos (la resuelve otra persona de Caja) o tu usuario no tiene un Empleado vinculado.");
+                    "No puede resolver esta contratación: la registró usted (la resuelve otra persona de Caja) o su usuario no tiene un Empleado vinculado.");
                 return;
             }
             var idPlan = PlanCuotasSeleccionado();
@@ -300,7 +300,7 @@ namespace GUI
             var idMedio = MedioSeleccionado();
             if (!idMedio.HasValue)
             {
-                MostrarError(Tr("err.contratacion.mediopago_requerido", "Seleccioná el medio de pago antes de cobrar."));
+                MostrarError(Tr("err.contratacion.mediopago_requerido", "Seleccione el medio de pago antes de cobrar."));
                 return;
             }
 

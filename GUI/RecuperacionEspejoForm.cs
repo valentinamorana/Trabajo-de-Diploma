@@ -167,7 +167,7 @@ namespace GUI
                 {
                     using (var dlg = new InputDialog(
                         Tr("dlg.backup.clave.titulo", "Contraseña del backup"),
-                        Tr("dlg.backup.clave.ingresar", "Ingresá la contraseña con la que se cifró este backup:"),
+                        Tr("dlg.backup.clave.ingresar", "Ingrese la contraseña con la que se cifró este backup:"),
                         esPassword: true))
                     {
                         if (dlg.ShowDialog(this) != DialogResult.OK) return;

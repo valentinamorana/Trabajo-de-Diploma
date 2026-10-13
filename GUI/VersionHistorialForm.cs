@@ -145,7 +145,7 @@ namespace GUI
             if (dgv.CurrentRow == null)
             {
                 MessageBox.Show(
-                    Tr("msg.historial.sinseleccion", "Seleccioná una versión de la grilla."),
+                    Tr("msg.historial.sinseleccion", "Seleccione una versión de la grilla."),
                     Tr("msg.historial.atencion",     "Atención"),
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;

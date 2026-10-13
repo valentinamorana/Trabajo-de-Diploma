@@ -591,7 +591,7 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
   15 fidelización (pausa, referidos, cargo) · 16 lista de espera · 17 PN02 · 18 PN03 · 19 PN04 · 20 hardening de integridad ·
   **20b** importe/promoción en `Contratacion`, CHECKs, índices únicos y de consulta · **20c** PN02 (medios de pago, intentos, desistimientos) ·
   **20c5** medio de pago preferido del cliente (FK) · **20d** PN03 (historial, dictamen, solicitud de baja, vencimiento) ·
-  **20e** catálogo `Categoria` · **20f** origen del mantenimiento · **20g** PN03 solo por plan y baja simplificada · **20h** tasa de retención · **20i** analítica en un formulario · **20j** pantallas de seguridad · **20k** historial de pedidos con número de operación único · **20n** unicidad de DNI, legajo y usuario del empleado · **21** datos de prueba · **21z5** restricciones de normalización y baja de `RolPermiso` (ver §6.5).
+  **20e** catálogo `Categoria` · **20f** origen del mantenimiento · **20g** PN03 solo por plan y baja simplificada · **20h** tasa de retención · **20i** analítica en un formulario · **20j** pantallas de seguridad · **20k** historial de pedidos con número de operación único · **20n** unicidad de DNI, legajo y usuario del empleado · **21** datos de prueba · **21z5** restricciones de normalización y baja de `RolPermiso` (ver §6.5). · **21z6** textos de la interfaz en usted (sin voseo).
 - **Datos de prueba (sección 21):** 11 clientes en distintos estados de suscripción, 20 prendas (3 En Limpieza, 1 Baja con cargo),
   9 pedidos, 3 contrataciones (2 pendientes, 1 cobrada), 3 promociones y 2 sugerencias en distintos estados, 1 lista de espera, empleados
   vinculados a `caja`/`admin`. Se aplica una sola vez (marca: cliente Julieta Navarro).

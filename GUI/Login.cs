@@ -328,7 +328,7 @@ namespace GUI
                                 usuarioBLL.Logout(this.Text);
                                 MostrarErrorLogin(
                                     Tx("err.login.debecambiarclave",
-                                       "Debés cambiar tu contraseña temporal para ingresar."),
+                                       "Debe cambiar su contraseña temporal para ingresar."),
                                     bloqueado: false);
                                 return;
                             }

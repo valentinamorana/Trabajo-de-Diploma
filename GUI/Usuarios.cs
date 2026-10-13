@@ -281,7 +281,7 @@ namespace GUI
         {
             if (dgvUsuarios.SelectedRows.Count == 0)
             {
-                MostrarError(Tr("err.usr.selecciona", "Seleccioná un usuario de la lista."));
+                MostrarError(Tr("err.usr.selecciona", "Seleccione un usuario de la lista."));
                 return;
             }
 
@@ -314,7 +314,7 @@ namespace GUI
         {
             if (dgvUsuarios.SelectedRows.Count == 0)
             {
-                MostrarError(Tr("err.usr.sel.bloqueado", "Seleccioná un usuario bloqueado de la lista."));
+                MostrarError(Tr("err.usr.sel.bloqueado", "Seleccione un usuario bloqueado de la lista."));
                 return;
             }
 
@@ -565,7 +565,7 @@ namespace GUI
             btnHistorial.Enabled  = false;
             btnGuardar.Text = Tr("btn.adminusr.crear", "Crear usuario");
             lblMensaje.ForeColor = Color.DimGray;
-            lblMensaje.Text = Tr("msg.adminusr.modoalta", "Cargá los datos del nuevo usuario y presioná Crear.");
+            lblMensaje.Text = Tr("msg.adminusr.modoalta", "Cargue los datos del nuevo usuario y presione Crear.");
             txtNombre.Focus();
         }
 
@@ -630,7 +630,7 @@ namespace GUI
         {
             string rol = (cmbRol.SelectedItem as RolItem)?.Value;
             if (string.IsNullOrWhiteSpace(rol))
-            { MostrarError(Tr("err.adminusr.rol_vacio", "Seleccioná un rol.")); return; }
+            { MostrarError(Tr("err.adminusr.rol_vacio", "Seleccione un rol.")); return; }
             try
             {
                 DateTime? fnac = dtpNacimiento.Checked ? (DateTime?)dtpNacimiento.Value.Date : null;
@@ -651,7 +651,7 @@ namespace GUI
             if (_idSeleccionado == 0) return;
             string rol = (cmbRol.SelectedItem as RolItem)?.Value;
             if (string.IsNullOrWhiteSpace(rol))
-            { MostrarError(Tr("err.adminusr.rol_vacio", "Seleccioná un rol.")); return; }
+            { MostrarError(Tr("err.adminusr.rol_vacio", "Seleccione un rol.")); return; }
             if (!ConfirmarSiNo(Tr("conf.adminusr.cambiarrol",
                     "¿Cambiar el rol de '{0}' a '{1}'?\n\nSus permisos cambian en el próximo ingreso.",
                     new object[] { txtUsername.Text.Trim(), cmbRol.SelectedItem?.ToString() }),

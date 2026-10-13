@@ -177,7 +177,7 @@ namespace GUI
             this.lblResetInfo.Size      = new Size(210, 36);
             this.lblResetInfo.TabIndex  = 3;
             this.lblResetInfo.Tag       = "lbl.resetinfo";
-            this.lblResetInfo.Text      = "Seleccioná un usuario\nen la lista y presioná:";
+            this.lblResetInfo.Text      = "Seleccione un usuario\nen la lista y presione:";
 
             this.btnResetearClave.BackColor = Color.FromArgb(60, 110, 180);
             this.btnResetearClave.Enabled   = false;
@@ -214,7 +214,7 @@ namespace GUI
             this.lblDesbloquearInfo.Size      = new Size(210, 36);
             this.lblDesbloquearInfo.TabIndex  = 7;
             this.lblDesbloquearInfo.Tag       = "lbl.desbloqinfo";
-            this.lblDesbloquearInfo.Text      = "Seleccioná un usuario\nbloqueado y presioná:";
+            this.lblDesbloquearInfo.Text      = "Seleccione un usuario\nbloqueado y presione:";
 
             this.btnDesbloquear.BackColor = Color.FromArgb(178, 58, 58);
             this.btnDesbloquear.Enabled   = false;

@@ -80,7 +80,7 @@ namespace GUI
                     MessageBox.Show(
                         "Se creó el usuario administrador de respaldo 'admin2'.\n" +
                         "Sus credenciales fueron guardadas en:\n\n" + rutaAdmin2 +
-                        "\n\nGuardá ese archivo en un lugar seguro.",
+                        "\n\nGuarde ese archivo en un lugar seguro.",
                         "Administrador de respaldo creado",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
@@ -91,7 +91,7 @@ namespace GUI
                         "Se generaron 10 claves de emergencia de un solo uso.\n" +
                         "Sirven para desbloquear una cuenta de Administrador bloqueada.\n\n" +
                         "Se guardaron en:\n" + rutaClaves +
-                        "\n\nGuardá ese archivo en un lugar seguro.",
+                        "\n\nGuarde ese archivo en un lugar seguro.",
                         "Claves de emergencia generadas",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
@@ -119,7 +119,7 @@ namespace GUI
                         string Tx(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
                         MessageBox.Show(
                             Tx("msg.mantenimiento.cuerpo",
-                               "El sistema no está disponible en este momento por tareas de mantenimiento. Reintentá más tarde o contactá al Administrador."),
+                               "El sistema no está disponible en este momento por tareas de mantenimiento. Reintente más tarde o contacte al Administrador."),
                             Tx("msg.mantenimiento.titulo", "Sistema en mantenimiento"),
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                         new BLL.Usuario().Logout("Arranque");

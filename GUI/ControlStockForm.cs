@@ -204,7 +204,7 @@ namespace GUI
             _pedido = null;
             _lineas = new List<BE.LineaControlStock>();
             dgvPlanilla.DataSource = null;
-            lblPlanillaTitulo.Text = Tr("lbl.cs.planilla", "Planilla de control de existencias — seleccioná un pedido de la cola");
+            lblPlanillaTitulo.Text = Tr("lbl.cs.planilla", "Planilla de control de existencias — seleccione un pedido de la cola");
             lblPlanillaTitulo.ForeColor = Tema.RosaOscuro;
             btnInformarFaltantes.Enabled = btnConfirmarPrendas.Enabled =
                 btnSepararPrendas.Enabled = btnImprimirPlanilla.Enabled = false;
@@ -241,7 +241,7 @@ namespace GUI
             {
                 pedidoBLL.ConfirmarPrendasDisponibles(this.Text, _pedido);
                 MostrarOk(Tr("msg.cs.confirmadas",
-                    "Pedido #{0}: {1} prenda(s) confirmadas como disponibles. Separalas para reservarlas.",
+                    "Pedido #{0}: {1} prenda(s) confirmadas como disponibles. Sepárelas para reservarlas.",
                     new object[] { _pedido.IdPedido, _pedido.CantidadPrendas }));
                 int id = _pedido.IdPedido;
                 CargarCola();

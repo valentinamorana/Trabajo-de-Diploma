@@ -65,7 +65,7 @@ namespace BLL
             if (prenda != null && prenda.Estado == BE.EstadoPrenda.EnLimpieza &&
                 !_prenda.EstaPendienteDeInspeccion(prenda))
                 throw new BE.AppException("err.bll.insp.no_devuelta",
-                    "La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dala de baja desde Prendas.",
+                    "La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dela de baja desde Prendas.",
                     prenda.Nombre);
             return BajaConCargo(modulo, prenda, motivo, monto, BE.EstadoPrenda.EnLimpieza,
                             "err.bll.insp.no_en_limpieza",

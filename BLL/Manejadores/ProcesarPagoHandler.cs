@@ -86,7 +86,7 @@ namespace BLL.Manejadores
                 if (!dalCliente.RenovarVencimientoEnTx(conexion, tx, cliente.IdCliente, vencimientoLeido,
                                                        suscripcion.FechaVencimiento))
                     throw new BE.AppException("err.bll.cobro.concurrente",
-                        "Otra sesión ya procesó el cobro de este cliente. Actualizá la lista y verificá su vencimiento.");
+                        "Otra sesión ya procesó el cobro de este cliente. Actualice la lista y verifique su vencimiento.");
                 // Crédito de referido: delta atómico sobre el valor real de la BD.
                 if (resDescuento.UsaCreditoReferido)
                     dalCliente.ConsumirCreditoEnTx(conexion, tx, cliente.IdCliente, resDescuento.Descuento);
@@ -116,7 +116,7 @@ namespace BLL.Manejadores
 
                     throw new BE.AppException("err.bll.cobro.cargo_concurrente",
 
-                        "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.");
+                        "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualice y reintente.");
             });
 
             // Clave (y Mensaje de respaldo) distinta por combinación, igual que

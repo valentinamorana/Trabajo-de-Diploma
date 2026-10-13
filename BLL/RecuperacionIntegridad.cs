@@ -91,7 +91,7 @@ namespace BLL
                 if (d.OtrasTablasCorruptas.Count > 0)
                     d.Resumen.Add("Los dígitos verificadores de otras tablas protegidas no coinciden " +
                                   "(" + string.Join(", ", d.OtrasTablasCorruptas) + "). Si los datos son legítimos (por ejemplo, cargados por script), " +
-                                  "usá \"Asumir pérdida\" para recalcularlos.");
+                                  "use \"Asumir pérdida\" para recalcularlos.");
             }
             catch (Exception ex)
             {
@@ -243,11 +243,11 @@ namespace BLL
             var d = Diagnosticar();
             if (!d.EspejoDisponible)
                 throw new BE.AppException("err.bll.espejo.no",
-                    "No hay un espejo de integridad disponible para reparar. Usá «Recalcular» o restaurá un backup.");
+                    "No hay un espejo de integridad disponible para reparar. Use «Recalcular» o restaure un backup.");
             if (!d.PuedeReparar)
                 throw new BE.AppException("err.bll.espejo.norep",
                     "El daño detectado no se puede reparar desde el espejo (hay registros eliminados físicamente). " +
-                    "Restaurá un backup para recuperarlos.");
+                    "Restaure un backup para recuperarlos.");
 
             var espejo = new DAL.EspejoUsuario().ObtenerFilas();
             var espById = espejo.ToDictionary(x => x.Id);

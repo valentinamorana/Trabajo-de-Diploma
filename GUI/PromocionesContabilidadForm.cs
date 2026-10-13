@@ -147,7 +147,7 @@ namespace GUI
             btnAprobar.Enabled = btnRechazar.Enabled = a != null && a.UsuarioPuedeDictaminar;
             if (a == null)
             {
-                txtAnalisis.Text = Tr("promo.analisis.vacio", "Seleccioná una promoción para analizar su margen e impacto.");
+                txtAnalisis.Text = Tr("promo.analisis.vacio", "Seleccione una promoción para analizar su margen e impacto.");
                 return;
             }
 
@@ -170,7 +170,7 @@ namespace GUI
             else
                 sb.AppendLine(Tr("promo.analisis.sinsuperposicion", "No se superpone con otras promociones vigentes del mismo plan."));
             if (!a.UsuarioPuedeDictaminar)
-                sb.AppendLine(Tr("promo.analisis.creador", "Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad."));
+                sb.AppendLine(Tr("promo.analisis.creador", "Usted creó esta promoción: la tiene que dictaminar otro usuario de Contabilidad."));
             txtAnalisis.Text = sb.ToString();
         }
 

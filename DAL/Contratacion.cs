@@ -161,7 +161,7 @@ namespace DAL
                     if (idsCargo != null && idsCargo.Count > 0 &&
                         !new CargoPrenda().MarcarCobradosEnTx(cn, tx, new List<int>(idsCargo), DateTime.Now))
                         throw new BE.AppException("err.bll.cobro.cargo_concurrente",
-                            "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.");
+                            "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualice y reintente.");
                     DigitoVerificador.ActualizarFilaEnTx(cn, tx, DV_Tabla, DV_Pk, DV_Columnas, idContratacion);
                     DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, DV_Tabla, DigitoVerificador.OrdenPor(DV_Pk));
                 });

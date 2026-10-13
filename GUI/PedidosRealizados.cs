@@ -441,7 +441,7 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); return; }
             if (pedido == null)
             {
-                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualice la grilla."));
                 CargarPedidos();
                 return;
             }
@@ -477,7 +477,7 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); return; }
             if (pedido == null)
             {
-                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualice la grilla."));
                 CargarPedidos();
                 return;
             }

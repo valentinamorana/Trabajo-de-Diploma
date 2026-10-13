@@ -46,7 +46,7 @@ namespace BLL
             // Las promociones son siempre por plan: la sugerencia también.
             if (idPlan <= 0)
                 throw new BE.AppException("err.bll.sugerenciapromocion.plan_requerido",
-                    "Elegí el plan al que apunta la sugerencia.");
+                    "Elija el plan al que apunta la sugerencia.");
 
             if (dalPlan.ObtenerPorId(idPlan) == null)
                 throw new BE.AppException("err.bll.sugerenciapromocion.plan_inexistente",
@@ -108,7 +108,7 @@ namespace BLL
             // Guarda de "¿Acepta la sugerencia?": solo se decide sobre una sugerencia Pendiente.
             if (!sugerencia.PuedeEvaluarse() || !sugerencia.TransicionValida(BE.EstadoSugerencia.Descartada))
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
-                    "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
+                    "La sugerencia seleccionada ya fue evaluada. Actualice la lista de sugerencias.");
 
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.sugerenciapromocion.motivodescarte_requerido",
@@ -117,7 +117,7 @@ namespace BLL
             // Claim atómico (UPDATE ... WHERE Estado = Pendiente).
             if (!dalSugerencia.Descartar(idSugerencia, motivo.Trim(), DateTime.Now))
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
-                    "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
+                    "La sugerencia seleccionada ya fue evaluada. Actualice la lista de sugerencias.");
 
             bitacora.Registrar(modulo, $"Descartar sugerencia de promoción #{idSugerencia} — Motivo: {motivo.Trim()}",
                 BE.Criticidad.Baja);

@@ -63,7 +63,7 @@ namespace BLL
             if (decision == Manejadores.DecisionRenovacion.Renovar || decision == Manejadores.DecisionRenovacion.CambiarPlan)
                 BLLHelper.ExigirAdministrador("err.bll.renovacion.solo_admin",
                     "Renovar o cambiar el plan extiende la suscripción y tiene que pasar por Caja: " +
-                    "registrá una Nueva Contratación. Desde Renovación solo puede hacerlo un Administrador.");
+                    "registre una Nueva Contratación. Desde Renovación solo puede hacerlo un Administrador.");
 
             // Guarda de entrada única para toda la cadena: sin plan asignado no hay
             // suscripción que renovar, cambiar o dar de baja. Sin este chequeo, un cliente

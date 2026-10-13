@@ -65,7 +65,7 @@ namespace BLL
             if (ContadorSesion.GetInstance().LimiteAlcanzado)
                 throw new BE.LoginException(BE.LoginException.TipoError.LimiteAlcanzado,
                     "Demasiados intentos fallidos en esta sesión.\n" +
-                    "Reiniciá la aplicación para volver a intentarlo.");
+                    "Reinicie la aplicación para volver a intentarlo.");
 
             // T07 — Si la verificación de arranque detectó que la tabla Usuario (u otra protegida)
             // fue manipulada, NO se confía en ella para autenticar: un atacante podría haberse
@@ -111,10 +111,10 @@ namespace BLL
                     if (permanente)
                         throw new BE.LoginException(BE.LoginException.TipoError.CuentaBloqueada,
                             $"La cuenta '{username}' está bloqueada.\n" +
-                            "Contactá al Administrador (o usá una clave de emergencia) para reactivarla.");
+                            "Contacte al Administrador (o use una clave de emergencia) para reactivarla.");
                     throw new BE.LoginException(BE.LoginException.TipoError.CuentaBloqueada,
                         $"La cuenta '{username}' está bloqueada temporalmente.\n" +
-                        $"Reintentá en {minutos} minuto(s) o usá una clave de emergencia.");
+                        $"Reintente en {minutos} minuto(s) o use una clave de emergencia.");
                 }
 
                 // El bloqueo temporal EXPIRÓ → se reactiva sola y el login continúa normalmente.
@@ -250,11 +250,11 @@ namespace BLL
         public void GuardarPreferenciaIdioma(int idUsuario, string idIdioma)
         {
             if (!SessionManager.IsLoggedIn)
-                throw new BE.AppException("err.bll.sesion_expirada", "La sesión expiró. Volvé a iniciar sesión.");
+                throw new BE.AppException("err.bll.sesion_expirada", "La sesión expiró. Vuelva a iniciar sesión.");
             var u = SessionManager.GetInstance().Usuario;
             if (u.Id != idUsuario)
                 throw new BE.AppException("err.bll.usuario.preferencia_ajena",
-                    "Solo podés cambiar tu propia preferencia de idioma.");
+                    "Solo puede cambiar su propia preferencia de idioma.");
 
             usuarioDAL.GuardarIdioma(idUsuario, idIdioma);
             u.IdIdioma = idIdioma;

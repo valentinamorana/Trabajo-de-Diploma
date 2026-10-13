@@ -225,7 +225,7 @@ namespace BLL
                         {
                             $"Formato de dígitos verificadores de la base: '{formato ?? "(sin marca)"}'; " +
                             $"esta versión requiere el formato {DAL.DigitoVerificador.FormatoActual}. " +
-                            "Ejecutá el instalador (script de la base) antes de usar el sistema."
+                            "Ejecute el instalador (script de la base) antes de usar el sistema."
                         }
                     };
                     LogearVerificacion("Formato DV", null, 0, false, 1, "Arranque");
@@ -359,7 +359,7 @@ namespace BLL
             if (!VerificarIntegridadDV(out ResultadoIntegridad _))
                 throw new BE.AppException("err.bll.integridad",
                     "Operación cancelada: se detectó una posible manipulación de los datos de usuarios " +
-                    "(dígito verificador inválido). Reiniciá el sistema para reparar la integridad antes de continuar.");
+                    "(dígito verificador inválido). Reinicie el sistema para reparar la integridad antes de continuar.");
         }
 
         // ── Siembra inicial (primer arranque) ───────────────────────────────────────
@@ -494,7 +494,7 @@ namespace BLL
         {
             if (!Seguridad.SessionManager.IsLoggedIn)
                 throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+                    "La sesión expiró. Vuelva a iniciar sesión.");
 
             var u = Seguridad.SessionManager.GetInstance().Usuario;
             if (u != null && u.EsAdministrador) return;
@@ -513,7 +513,7 @@ namespace BLL
             catch { /* el fallo del log no debe ocultar el bloqueo */ }
 
             throw new BE.AppException("err.bll.dv.sin_permiso",
-                "No tenés permiso para ejecutar operaciones sobre los Dígitos Verificadores. " +
+                "No tiene permiso para ejecutar operaciones sobre los Dígitos Verificadores. " +
                 "Esta acción es exclusiva del Administrador y quedó registrada.");
         }
 
@@ -610,7 +610,7 @@ namespace BLL
         {
             // Solo con una sesión iniciada (lo dispara el Timer del menú).
             if (!Seguridad.SessionManager.IsLoggedIn)
-                throw new BE.AppException("err.bll.sesion_expirada", "La sesión expiró. Volvé a iniciar sesión.");
+                throw new BE.AppException("err.bll.sesion_expirada", "La sesión expiró. Vuelva a iniciar sesión.");
             try
             {
                 new DAL.HistorialIntegridad().Insertar(new BE.HistorialIntegridad

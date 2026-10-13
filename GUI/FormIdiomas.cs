@@ -53,14 +53,14 @@ namespace GUI
             {
                 _bllIdioma.CrearIdioma(codigo, nombre);
                 CargarIdiomas();
-                MostrarOk(string.Format(Tr("idiomas.ok.creado", "Idioma '{0}' creado (inactivo — activalo cuando cargues sus traducciones)."), nombre.Trim()));
+                MostrarOk(string.Format(Tr("idiomas.ok.creado", "Idioma '{0}' creado (inactivo — actívelo cuando cargue sus traducciones)."), nombre.Trim()));
             }
             catch (Exception ex) { MostrarError(ex); }
         }
 
         private void BtnRenombrarIdioma_Click(object sender, EventArgs e)
         {
-            if (_idIdiomaSeleccionado == 0) { MostrarError(Tr("idiomas.msg.selecc", "Seleccioná un idioma de la grilla.")); return; }
+            if (_idIdiomaSeleccionado == 0) { MostrarError(Tr("idiomas.msg.selecc", "Seleccione un idioma de la grilla.")); return; }
             string nombre = Pedir(Tr("idiomas.dlg.renombrar.t", "Renombrar idioma"), Tr("idiomas.dlg.renombrar.p", "Nuevo nombre:"));
             if (string.IsNullOrWhiteSpace(nombre)) return;
             try
@@ -332,7 +332,7 @@ namespace GUI
                 {
                     var confirm = (FormBase.MostrarConfirmacionSiNo(this,
                         string.Format(Tr("idiomas.conf.incompleto",
-                            "Este idioma tiene {0} control(es) sin traducir.\nSi lo activás, esos textos se mostrarán en el idioma por defecto.\n\n¿Activar de todos modos?"), faltantes),
+                            "Este idioma tiene {0} control(es) sin traducir.\nSi lo activa, esos textos se mostrarán en el idioma por defecto.\n\n¿Activar de todos modos?"), faltantes),
                         Tr("idiomas.conf.incompleto.t", "Traducciones incompletas"), porDefectoNo: true) ? DialogResult.Yes : DialogResult.No);
                     if (confirm != DialogResult.Yes) return;
                 }
@@ -411,7 +411,7 @@ namespace GUI
             if (_idIdiomaSeleccionado == 0)
             {
                 var tSel = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
-                MostrarError(tSel.ContainsKey("msg.idiomas.seleccionar") ? tSel["msg.idiomas.seleccionar"].Texto : "Seleccioná un idioma primero.");
+                MostrarError(tSel.ContainsKey("msg.idiomas.seleccionar") ? tSel["msg.idiomas.seleccionar"].Texto : "Seleccione un idioma primero.");
                 return;
             }
 

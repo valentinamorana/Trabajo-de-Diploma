@@ -150,7 +150,7 @@ namespace BLL
             if (despachado != null)
                 throw new BE.AppException("err.bll.pedido.ya_despachado",
                     "El cliente tiene el pedido #{0} despachado pendiente de entrega. " +
-                    "Confirmá la entrega antes de crear uno nuevo.",
+                    "Confirme la entrega antes de crear uno nuevo.",
                     despachado.IdPedido);
 
             if (activos.Count > 0)
@@ -390,7 +390,7 @@ namespace BLL
 
             if (faltantes.Count == 0)
                 throw new BE.AppException("err.bll.pedido.sin_faltantes",
-                    "Todas las prendas del Pedido #{0} están disponibles: confirmalas en lugar de informar faltantes.",
+                    "Todas las prendas del Pedido #{0} están disponibles: confírmelas en lugar de informar faltantes.",
                     pedido.IdPedido);
             ExigirTransicion(pedido, BE.EstadoPedido.ConFaltantes);
 
@@ -424,7 +424,7 @@ namespace BLL
             var faltante = lineas.Find(l => !l.Disponible);
             if (faltante != null)
                 throw new BE.AppException("err.bll.pedido.hay_faltantes",
-                    "La prenda '{0}' no está disponible: informá los faltantes en lugar de confirmar.",
+                    "La prenda '{0}' no está disponible: informe los faltantes en lugar de confirmar.",
                     faltante.Prenda.Nombre);
 
             int idEmpleado = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
@@ -452,7 +452,7 @@ namespace BLL
                     pedido.Estado);
             if (!pedido.PuedeSepararse())
                 throw new BE.AppException("err.bll.pedido.sin_confirmar",
-                    "Confirmá las prendas disponibles del Pedido #{0} antes de separarlas.",
+                    "Confirme las prendas disponibles del Pedido #{0} antes de separarlas.",
                     pedido.IdPedido);
             ExigirTransicion(pedido, BE.EstadoPedido.Separado);
             // El cliente pudo pausar, vencer o quedar suspendido mientras el pedido esperaba en la
@@ -800,7 +800,7 @@ namespace BLL
             });
             if (!dalPedido.DesCancelar(pedido.IdPedido, pedido.IdCliente, historial))
                 throw new BE.AppException("err.bll.pedido.estado_cambiado",
-                    "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
+                    "El Pedido #{0} cambió de estado en otra sesión. Actualice la lista y vuelva a intentarlo.",
                     pedido.IdPedido);
 
             bitacora.Registrar(modulo,
@@ -833,7 +833,7 @@ namespace BLL
 
             if (!cliente.TienePlan())
                 throw new BE.AppException("err.bll.pedido.sin_plan",
-                    "El cliente {0} no tiene plan asignado. Asignale un plan antes de crear un pedido.",
+                    "El cliente {0} no tiene plan asignado. Asígnele un plan antes de crear un pedido.",
                     cliente.NombreCompleto);
 
             // PdN6 — venció el período de gracia sin regularizar el cobro (BLL.Manejadores.
@@ -873,7 +873,7 @@ namespace BLL
 
             if (!cliente.IdPlan.HasValue)
                 throw new BE.AppException("err.bll.pedido.sin_plan",
-                    "El cliente {0} no tiene plan asignado. Asignale un plan antes de crear un pedido.",
+                    "El cliente {0} no tiene plan asignado. Asígnele un plan antes de crear un pedido.",
                     cliente.NombreCompleto);
 
             var plan = dalPlan.ObtenerPorId(cliente.IdPlan.Value);
@@ -1015,7 +1015,7 @@ namespace BLL
                     "revertir desde el historial.", accionOriginal);
             if (!OperacionesRestaurables.Contains(accionOriginal))
                 throw new BE.AppException("err.bll.pedido.restaurar_no_restaurable",
-                    "La operación '{0}' no se puede revertir desde el historial: usá la acción correspondiente " +
+                    "La operación '{0}' no se puede revertir desde el historial: use la acción correspondiente " +
                     "del pedido (reactivar, cancelar o registrar la devolución).", accionOriginal);
 
             // Solo la última operación: revertir una intermedia dejaría al pedido en un estado que
@@ -1031,13 +1031,13 @@ namespace BLL
                 || !Enum.TryParse(cambioEstado.ValorNuevo, out BE.EstadoPedido estadoQueDejo)
                 || !Enum.TryParse(cambioEstado.ValorAnterior, out BE.EstadoPedido _))
                 throw new BE.AppException("err.bll.pedido.restaurar_no_restaurable",
-                    "La operación '{0}' no se puede revertir desde el historial: usá la acción correspondiente " +
+                    "La operación '{0}' no se puede revertir desde el historial: use la acción correspondiente " +
                     "del pedido (reactivar, cancelar o registrar la devolución).", accionOriginal);
 
             var actual = dalPedido.ObtenerPorId(idPedido);
             if (actual == null || actual.Estado != estadoQueDejo)
                 throw new BE.AppException("err.dal.pedido.estado_cambiado",
-                    "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
+                    "El Pedido #{0} cambió de estado en otra sesión. Actualice la lista y vuelva a intentarlo.",
                     idPedido);
 
             // Restauración ATÓMICA: el DAL vuelve a exigir el estado esperado (WHERE Estado=...) y

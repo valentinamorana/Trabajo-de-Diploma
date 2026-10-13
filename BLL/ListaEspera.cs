@@ -94,7 +94,7 @@ namespace BLL
             var estadoPrevio = fila.Estado;
             if (!dalListaEspera.CambiarEstado(idListaEspera, BE.EstadoListaEspera.Cancelada, fila.FechaLimiteReserva, actor, estadoPrevio))
                 throw new BE.AppException("err.bll.listaespera.estado_cambiado",
-                    "La anotación cambió en otra sesión. Actualizá la lista y volvé a intentarlo.");
+                    "La anotación cambió en otra sesión. Actualice la lista y vuelva a intentarlo.");
 
             bitacora.Registrar(modulo,
                 $"Cancelar Lista de Espera #{idListaEspera} — Prenda '{fila.NombrePrenda}' — Cliente: {fila.NombreCliente}",

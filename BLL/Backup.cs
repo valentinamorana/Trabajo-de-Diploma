@@ -89,7 +89,7 @@ namespace BLL
                 string detalle = r?.MensajeES ?? "Se detectaron inconsistencias en los dígitos verificadores.";
                 throw new BE.AppException("err.bll.backup.integridad",
                     "No se puede generar el backup: la base tiene problemas de integridad.\n" +
-                    "Reparalos desde Administrar → Diagnóstico de Integridad antes de respaldar.\n\n" + detalle);
+                    "Repárelos desde Administrar → Diagnóstico de Integridad antes de respaldar.\n\n" + detalle);
             }
         }
 
@@ -122,7 +122,7 @@ namespace BLL
         {
             if (string.IsNullOrEmpty(claveCifrado))
                 throw new BE.AppException("err.bll.backup.clave_requerida",
-                    "Debés ingresar una contraseña para cifrar el backup.");
+                    "Debe ingresar una contraseña para cifrar el backup.");
 
             string tempPlano = Path.Combine(Path.GetTempPath(), $"WF_bak_{Guid.NewGuid():N}.bak");
             try

@@ -298,7 +298,7 @@ namespace DAL
                 }
                 if (afectadas == 0)
                     throw new BE.AppException("err.dal.prenda.estado_cambio",
-                        "El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.");
+                        "El estado de la prenda cambió desde que se consultó. Actualice la pantalla e intente de nuevo.");
 
                 if (mantenimiento == Interfaces.MovimientoMantenimiento.Ninguno) return;
                 // Abrir: mantenimiento MANUAL (Origen = 0, DEFAULT de la columna); los de una devolución

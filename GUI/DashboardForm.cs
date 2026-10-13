@@ -261,7 +261,7 @@ namespace GUI
                     _numBackup.ForeColor         = Tema.Error;
                     _txtBackup.ForeColor         = Tema.Error;
                     _cardBackupPanel.Invalidate();
-                    MostrarAviso(Tr("dash.aviso.sinbackup", "Sin backups. Generá uno desde Administrar → Backup."), Tema.Error);
+                    MostrarAviso(Tr("dash.aviso.sinbackup", "Sin backups. Genere uno desde Administrar → Backup."), Tema.Error);
                     return;
                 }
 

@@ -78,7 +78,7 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@IdPrenda",       cargo.IdPrenda);
                     if (cmd.ExecuteNonQuery() == 0)
                         throw new BE.AppException("err.dal.prenda.estado_cambio",
-                            "El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.");
+                            "El estado de la prenda cambió desde que se consultó. Actualice la pantalla e intente de nuevo.");
                 }
 
                 // Una prenda dada de baja sale del circuito: se cierra el mantenimiento abierto (si

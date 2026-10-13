@@ -115,7 +115,7 @@ namespace BLL
             // Guarda de "¿Acepta la sugerencia?": solo una sugerencia Pendiente se acepta o descarta.
             if (!sugerencia.PuedeEvaluarse() || !sugerencia.TransicionValida(BE.EstadoSugerencia.Evaluada))
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
-                    "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
+                    "La sugerencia seleccionada ya fue evaluada. Actualice la lista de sugerencias.");
 
             // Las sugerencias por categoría (versión anterior) se cerraron al discontinuarlas.
             if (!sugerencia.AplicaAPlan())
@@ -131,7 +131,7 @@ namespace BLL
             // Si el alta falla, se compensa devolviéndola a Pendiente para que pueda reintentarse.
             if (!dalSugerencia.MarcarEvaluada(idSugerencia, DateTime.Now))
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
-                    "La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.");
+                    "La sugerencia seleccionada ya fue evaluada. Actualice la lista de sugerencias.");
             try
             {
                 return Registrar(modulo, promocion, $"Alta desde la sugerencia #{idSugerencia}");
@@ -167,7 +167,7 @@ namespace BLL
 
             if (promocion.IdPlan <= 0)
                 throw new BE.AppException("err.bll.promocion.plan_requerido",
-                    "Elegí el plan al que aplica la promoción.");
+                    "Elija el plan al que aplica la promoción.");
 
             if (dalPlan.ObtenerPorId(promocion.IdPlan) == null)
                 throw new BE.AppException("err.bll.promocion.plan_inexistente",
@@ -188,7 +188,7 @@ namespace BLL
             // Una promoción que ya terminó nunca llegaría a aplicarse: se vencería al aprobarla.
             if (promocion.FechaFin.Date < DateTime.Today)
                 throw new BE.AppException("err.bll.promocion.fecha_fin_pasada",
-                    "La fecha de fin ({0:dd/MM/yyyy}) ya pasó. Elegí una fecha de hoy en adelante.",
+                    "La fecha de fin ({0:dd/MM/yyyy}) ya pasó. Elija una fecha de hoy en adelante.",
                     promocion.FechaFin);
         }
 
@@ -316,7 +316,7 @@ namespace BLL
             // Vigente un instante y se vencería sola. Se rechaza para que Administración la reformule.
             if (aprobada && promocion.FechaFin.Date < DateTime.Today)
                 throw new BE.AppException("err.bll.promocion.aprobar_vencida",
-                    "La promoción terminó el {0:dd/MM/yyyy}: no se puede aprobar. Rechazala para que Administración la reformule con fechas nuevas.",
+                    "La promoción terminó el {0:dd/MM/yyyy}: no se puede aprobar. Recházela para que Administración la reformule con fechas nuevas.",
                     promocion.FechaFin);
             if (!PuedeDictaminar(promocion))
                 throw new BE.AppException("err.bll.promocion.creador_no_dictamina",
@@ -437,7 +437,7 @@ namespace BLL
             int idSolicitud = dalPromocion.SolicitarBaja(solicitud);
             if (idSolicitud <= 0)
                 throw new BE.AppException("err.bll.promocion.solicitud_concurrente",
-                    "La promoción cambió desde otra sesión (ya no está Vigente o ya tiene una solicitud de baja pendiente). Actualizá la lista.");
+                    "La promoción cambió desde otra sesión (ya no está Vigente o ya tiene una solicitud de baja pendiente). Actualice la lista.");
             promocion.MotivoBaja = solicitud.Motivo;
 
             bitacora.Registrar(modulo, $"Solicitar baja Promoción #{promocion.IdPromocion}: {promocion.Nombre}", BE.Criticidad.Baja);
@@ -456,7 +456,7 @@ namespace BLL
 
             if (!solicitud.EstaPendiente())
                 throw new BE.AppException("err.bll.promocion.solicitud_atendida",
-                    "La solicitud de baja ya fue atendida. Actualizá la lista de solicitudes.");
+                    "La solicitud de baja ya fue atendida. Actualice la lista de solicitudes.");
             ExigirTexto(respuesta, "err.bll.promocion.respuesta_requerida",
                 "Debe escribir la respuesta a la solicitud de baja.");
             string texto = respuesta.Trim();
@@ -485,7 +485,7 @@ namespace BLL
             // Claim atómico (UPDATE ... WHERE Estado = Pendiente): otra sesión pudo atenderla antes.
             if (!dalPromocion.AtenderSolicitud(atendida))
                 throw new BE.AppException("err.bll.promocion.solicitud_atendida",
-                    "La solicitud de baja ya fue atendida. Actualizá la lista de solicitudes.");
+                    "La solicitud de baja ya fue atendida. Actualice la lista de solicitudes.");
             solicitud.Estado = atendida.Estado;
             solicitud.DioDeBaja = false;
             solicitud.Respuesta = texto;
@@ -545,7 +545,7 @@ namespace BLL
 
         private static BE.AppException EstadoConcurrente()
             => new BE.AppException("err.bll.promocion.estado_concurrente",
-                "La promoción cambió de estado desde otra sesión. Actualizá la lista e intentá de nuevo.");
+                "La promoción cambió de estado desde otra sesión. Actualice la lista e intente de nuevo.");
 
         private static void ExigirTexto(string texto, string clave, string mensaje)
         {

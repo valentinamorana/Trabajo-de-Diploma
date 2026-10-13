@@ -25,7 +25,7 @@ namespace Seguridad
         {
             if (_session == null)
                 throw new BE.SesionException("err.seg.sesion_no_iniciada",
-                    "La sesión no está iniciada. Iniciá sesión primero.");
+                    "La sesión no está iniciada. Inicie sesión primero.");
 
             return _session;
         }
@@ -62,7 +62,7 @@ namespace Seguridad
                 else
                 {
                     throw new BE.SesionException("err.seg.sesion_ya_iniciada",
-                        "Ya hay una sesión iniciada. Cerrá la sesión actual antes de iniciar otra.");
+                        "Ya hay una sesión iniciada. Cierre la sesión actual antes de iniciar otra.");
                 }
             }
         }

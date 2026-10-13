@@ -51,7 +51,7 @@ namespace BLL
         {
             if (!SessionManager.IsLoggedIn)
                 throw new BE.SesionException("err.seg.sesion_no_iniciada",
-                    "La sesión no está iniciada. Iniciá sesión primero.");
+                    "La sesión no está iniciada. Inicie sesión primero.");
 
             var u = SessionManager.GetInstance().Usuario;
 

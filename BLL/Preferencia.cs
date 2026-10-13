@@ -22,10 +22,10 @@ namespace BLL
                 throw new BE.AppException("err.bll.pref.nula", "No hay preferencias para guardar.");
             // Solo el propio usuario de la sesión guarda sus preferencias.
             if (!Seguridad.SessionManager.IsLoggedIn)
-                throw new BE.AppException("err.bll.sesion_expirada", "La sesión expiró. Volvé a iniciar sesión.");
+                throw new BE.AppException("err.bll.sesion_expirada", "La sesión expiró. Vuelva a iniciar sesión.");
             if (Seguridad.SessionManager.GetInstance().Usuario.Id != pref.IdUsuario)
                 throw new BE.AppException("err.bll.usuario.preferencia_ajena",
-                    "Solo podés cambiar tu propia preferencia de idioma.");
+                    "Solo puede cambiar su propia preferencia de idioma.");
             _dal.Guardar(pref);
         }
     }

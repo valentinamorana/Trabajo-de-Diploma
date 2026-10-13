@@ -32,7 +32,7 @@ namespace GUI
             this.lblInfo.Size     = new System.Drawing.Size(398, 36);
             this.lblInfo.TabIndex = 0;
             this.lblInfo.Tag      = "lbl.cambioclave.info";
-            this.lblInfo.Text     = "Tu contraseña es temporal. Definí una nueva para continuar.";
+            this.lblInfo.Text     = "Su contraseña es temporal. Defina una nueva para continuar.";
 
             // ── lblNueva ───────────────────────────────────────────────────────
             this.lblNueva.Location = new System.Drawing.Point(16, 58);

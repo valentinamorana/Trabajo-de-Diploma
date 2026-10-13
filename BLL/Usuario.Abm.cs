@@ -270,7 +270,7 @@ namespace BLL
                 && adminsActivos <= 1)
                 throw new BE.AppException("err.bll.usuario.ultimo_admin_rol",
                     "No se puede quitar el rol de Administrador al último administrador activo. " +
-                    "Asigná el rol Administrador a otro usuario antes de cambiar este.");
+                    "Asigne el rol Administrador a otro usuario antes de cambiar este.");
         }
 
         // Validación de email simple y robusta (sin regex frágil): un '@' con texto a ambos

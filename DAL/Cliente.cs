@@ -360,7 +360,7 @@ namespace DAL
                 cmd.Parameters.AddWithValue("@IdCliente", idCliente);
                 if (cmd.ExecuteNonQuery() == 0)
                     throw new BE.AppException("err.bll.cobro.credito_concurrente",
-                        "El crédito por referido del cliente ya se aplicó en otro cobro. Actualizá y volvé a calcular el importe.");
+                        "El crédito por referido del cliente ya se aplicó en otro cobro. Actualice y vuelva a calcular el importe.");
                 AnotarFila(idCliente);
             }
         }

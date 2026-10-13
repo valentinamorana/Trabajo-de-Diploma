@@ -73,7 +73,7 @@ namespace BLL
             {
                 if (!idMedioPago.HasValue)
                     throw new BE.AppException("err.bll.cobro.medio_requerido",
-                        "Indicá el medio de pago con el que abonó el cliente.");
+                        "Indique el medio de pago con el que abonó el cliente.");
                 if (!ObtenerMediosPago().Exists(m => m.IdMedioPago == idMedioPago.Value))
                     throw new BE.AppException("err.bll.contratacion.medio_invalido",
                         "El medio de pago indicado no existe.");

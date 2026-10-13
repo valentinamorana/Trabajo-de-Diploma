@@ -115,7 +115,7 @@ namespace GUI
                     int tIdx = gridRotas.Rows.Add("—",
                         string.Format(Tr("diag.tabla.corrupta", "Tabla '{0}'"), tablaCorrupta),
                         "—", "—",
-                        Tr("diag.tabla.dvinvalido", "DV inválido — usá «Recalcular Todo»"));
+                        Tr("diag.tabla.dvinvalido", "DV inválido — use «Recalcular Todo»"));
                     gridRotas.Rows[tIdx].DefaultCellStyle.ForeColor = Tema.Error;
                     gridRotas.Rows[tIdx].ReadOnly = true;
                 }

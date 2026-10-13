@@ -74,7 +74,7 @@ namespace GUI
                 // No debería pasar (el menú no se ve sin al menos una patente), pero si se abre
                 // igual, la pantalla queda inerte en vez de mostrar reportes no permitidos.
                 cmbReporte.Enabled = btnGenerar.Enabled = false;
-                lblResultado.Text = Tr("analitica.sinreportes", "No tenés permiso para ningún reporte de analítica.");
+                lblResultado.Text = Tr("analitica.sinreportes", "No tiene permiso para ningún reporte de analítica.");
             }
         }
 
@@ -141,7 +141,7 @@ namespace GUI
                     // Se reintentó la carga de los filtros que había fallado, pero NO se genera: el
                     // usuario tiene que ver y elegir los filtros (p. ej. el cliente) antes del reporte.
                     lblResultado.ForeColor = System.Drawing.Color.DimGray;
-                    lblResultado.Text = Tr("analitica.filtroscargados", "Se cargaron los filtros del reporte: revisalos y pulsá Generar.");
+                    lblResultado.Text = Tr("analitica.filtroscargados", "Se cargaron los filtros del reporte: revíselos y pulse Generar.");
                     return;
                 }
                 var resultado = _actual.Generar();

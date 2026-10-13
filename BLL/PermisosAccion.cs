@@ -101,7 +101,7 @@ namespace BLL
                 {
                     System.Diagnostics.Trace.TraceError("[PermisosAccion] No se pudo revalidar el usuario: " + ex.Message);
                     throw new BE.AppException("err.bll.permisos.no_verificable",
-                        "No se pudo verificar tu usuario contra la base de datos. La operación no se ejecutó.");
+                        "No se pudo verificar su usuario contra la base de datos. La operación no se ejecutó.");
                 }
                 if (vigente != null)
                     lock (_lockCache) _cache[usuario.Id] = (sesion, ahora, vigente);
@@ -112,7 +112,7 @@ namespace BLL
                             && (vigente.Rol == null || MismoTexto(vigente.Rol, usuario.Rol));
             if (vigente == null || !vigente.Activo || !mismoRol)
                 throw new BE.AppException("err.bll.permisos.usuario_no_vigente",
-                    "Tu usuario fue desactivado o cambió de rol. Cerrá la sesión y volvé a ingresar.");
+                    "Su usuario fue desactivado o cambió de rol. Cierre la sesión y vuelva a ingresar.");
         }
 
         /// <summary>Para armar la pantalla (sin lanzar ni leer la base): ¿la sesión puede ejecutar la
@@ -132,7 +132,7 @@ namespace BLL
         {
             if (!Seguridad.SessionManager.IsLoggedIn)
                 throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+                    "La sesión expiró. Vuelva a iniciar sesión.");
 
             var sm = Seguridad.SessionManager.GetInstance();
             if (!PermiteAccion(sm.Usuario.EsAdministrador, sm.TienePermiso(patenteEditar)))

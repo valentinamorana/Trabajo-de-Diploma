@@ -39,7 +39,8 @@ namespace BLL.Manejadores
 
             // UPDATE de Cliente + INSERT del historial en una única transacción: antes eran
             // dos round-trips independientes, y un crash entre medio podía dejar el historial
-            // de auditoría desincronizado del estado real de la suscripción.
+            // de auditoría desincronizado del estado real de la suscripción. El DV de la fila del
+            // cliente se recalcula dentro de la misma transacción (DAL.Cliente.EjecutarTransaccion).
             var ahora = DateTime.Now;
             int idRenovacion = 0;
             dalCliente.EjecutarTransaccion((conexion, tx) =>
@@ -56,7 +57,6 @@ namespace BLL.Manejadores
                     Actor = contexto.Actor
                 });
             });
-            dalCliente.RecalcularDV(cliente.IdCliente);
 
             return new ResultadoRenovacion
             {

@@ -67,13 +67,21 @@ namespace BE
         public bool PuedeEvaluarse() => Estado == EstadoSugerencia.Pendiente;
         public bool EstaDescartada() => Estado == EstadoSugerencia.Descartada;
 
+        /// <summary>Descuento con el que arranca la propuesta (Administración lo ajusta).</summary>
+        public const decimal DescuentoInicialPorcentaje = 10m;
+
         /// <summary>
-        /// Valor con el que Administración arranca la promoción creada desde esta sugerencia. El
-        /// beneficio estimado es un importe en $: si el tipo sugerido es un PORCENTAJE y ese importe
-        /// supera 100, no sirve como valor (16000 % es inválido) y se propone 10 %.
+        /// Valor con el que Administración arranca la promoción creada desde esta sugerencia: un
+        /// descuento por cliente del 10 % (o el 10 % del precio del plan, si es un monto fijo). Antes
+        /// se precargaba el beneficio estimado, que es el ingreso MENSUAL TOTAL a retener de todos los
+        /// clientes en riesgo: como descuento por cliente no tenía sentido. Sin precio del plan, 0.
         /// </summary>
-        public decimal ValorInicialPromocion() =>
-            TipoDescuentoSugerido == TipoDescuento.Porcentaje && BeneficioEstimado > 100 ? 10m : BeneficioEstimado;
+        public decimal ValorInicialPromocion(decimal? precioPlan) =>
+            TipoDescuentoSugerido == TipoDescuento.Porcentaje
+                ? DescuentoInicialPorcentaje
+                : precioPlan.HasValue && precioPlan.Value > 0
+                    ? Math.Round(precioPlan.Value * DescuentoInicialPorcentaje / 100m, 2, MidpointRounding.AwayFromZero)
+                    : 0m;
 
         /// <summary>
         /// Pendiente → Evaluada (se creó la promoción) | Descartada (fin).

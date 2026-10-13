@@ -81,8 +81,8 @@ namespace Tests
         public void Detectar_ClientesEnRiesgoDeUnPlan_ProponePromocionDeRetencionConElIngresoEnRiesgo()
         {
             var ab = new AbandonoFake();
-            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 1, NombrePlan = "Básico" });
-            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 2, NombrePlan = "Básico" });
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdPlan = 7, IdCliente = 1, NombrePlan = "Básico" });
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdPlan = 7, IdCliente = 2, NombrePlan = "Básico" });
             var plan = new BE.PlanSuscripcion { IdPlan = 7, Nombre = "Básico", Precio = 8000m, Estado = true };
 
             var r = Crear(new RotacionFake(), ab, plan).Detectar();
@@ -101,7 +101,7 @@ namespace Tests
         public void Detectar_PlanInactivoODesconocido_NoProponePromocion()
         {
             var ab = new AbandonoFake();
-            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 1, NombrePlan = "Premium" });
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdPlan = 9, IdCliente = 1, NombrePlan = "Premium" });
             var inactivo = new BE.PlanSuscripcion { IdPlan = 9, Nombre = "Premium", Precio = 1000m, Estado = false };
 
             Assert.AreEqual(0, Crear(new RotacionFake(), ab, inactivo).Detectar().Count);
@@ -111,8 +111,8 @@ namespace Tests
         public void Detectar_OrdenaPorBeneficioEstimadoDescendente()
         {
             var ab = new AbandonoFake();
-            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 1, NombrePlan = "Básico" });
-            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 2, NombrePlan = "Premium" });
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdPlan = 1, IdCliente = 1, NombrePlan = "Básico" });
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdPlan = 3, IdCliente = 2, NombrePlan = "Premium" });
             var basico = new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Precio = 8000m, Estado = true };
             var premium = new BE.PlanSuscripcion { IdPlan = 3, Nombre = "Premium", Precio = 25000m, Estado = true };
 
@@ -120,6 +120,23 @@ namespace Tests
 
             Assert.AreEqual(3, r[0].IdPlan);   // 25000 > 8000
             Assert.AreEqual(1, r[1].IdPlan);
+        }
+
+        [TestMethod]
+        public void Detectar_DosPlanesConElMismoNombre_SeAgrupanPorIdPlan()
+        {
+            var ab = new AbandonoFake();
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdPlan = 1, IdCliente = 1, NombrePlan = "Básico" });
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdPlan = 2, IdCliente = 2, NombrePlan = "Básico" });
+            var viejo = new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Precio = 8000m, Estado = true };
+            var nuevo = new BE.PlanSuscripcion { IdPlan = 2, Nombre = "Básico", Precio = 9000m, Estado = true };
+
+            var r = Crear(new RotacionFake(), ab, viejo, nuevo).Detectar();
+
+            Assert.AreEqual(2, r.Count, "Cada plan es una oportunidad aparte, aunque se llamen igual.");
+            Assert.AreEqual(2, r[0].IdPlan);   // 9000 > 8000
+            Assert.AreEqual(9000m, r[0].IngresoMensualEnRiesgo);
+            Assert.AreEqual(8000m, r[1].IngresoMensualEnRiesgo);
         }
 
         // ── Analizar métricas («Reporte de métricas») → ¿Hay oportunidad? ────
@@ -152,7 +169,7 @@ namespace Tests
             rot.Resultado.Add(BajaDemanda("B", "Abrigo"));
             rot.Resultado.Add(new BE.RotacionPrenda { NombrePrenda = "C", Categoria = "Vestido", Clave = "rotacion.motivo.altademanda" });
             var ab = new AbandonoFake();
-            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdCliente = 1, NombrePlan = "Básico" });
+            ab.Resultado.Add(new BE.ClienteEnRiesgo { IdPlan = 1, IdCliente = 1, NombrePlan = "Básico" });
             var plan = new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Precio = 8000m, Estado = true };
             var bll = Crear(rot, ab, plan);
 

@@ -224,9 +224,10 @@ namespace BLL
         private static List<BE.MetricaAbandonoPlan> AbandonoPorPlan(List<BE.ClienteEnRiesgo> enRiesgo, List<BE.PlanSuscripcion> planes)
         {
             var lista = new List<BE.MetricaAbandonoPlan>();
-            foreach (var g in enRiesgo.Where(c => !string.IsNullOrWhiteSpace(c.NombrePlan)).GroupBy(c => c.NombrePlan))
+            // Por IdPlan: dos planes pueden llamarse igual (el nombre no es único en la base).
+            foreach (var g in enRiesgo.Where(c => c.IdPlan.HasValue).GroupBy(c => c.IdPlan.Value))
             {
-                var plan = planes.Find(p => p.Estado && p.Nombre == g.Key);
+                var plan = planes.Find(p => p.Estado && p.IdPlan == g.Key);
                 if (plan == null) continue;
                 lista.Add(new BE.MetricaAbandonoPlan
                 {

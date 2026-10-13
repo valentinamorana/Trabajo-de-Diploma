@@ -57,13 +57,12 @@ namespace BLL.Manejadores
             if (abreGracia)
             {
                 // Reabre gracia: UPDATE de Cliente + INSERT del historial en una única
-                // transacción (ver IntentarRenovarHandler para el porqué).
+                // transacción (ver IntentarRenovarHandler para el porqué); el DV se recalcula adentro.
                 dalCliente.EjecutarTransaccion((conexion, tx) =>
                 {
                     dalCliente.ModificarEnTx(conexion, tx, cliente);
                     idCobro = dalCobro.AltaEnTx(conexion, tx, cobro);
                 });
-                dalCliente.RecalcularDV(cliente.IdCliente);
             }
             else
             {

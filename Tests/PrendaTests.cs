@@ -98,7 +98,7 @@ namespace Tests
             Assert.AreEqual(2, noDisponibles[0].IdPrenda);
         }
 
-        // ── ObtenerEnLimpieza (PN04, CU-DEP-01 Inspeccionar Devolución) ──────────
+        // ── ObtenerEnLimpieza (PN04, CU05-DEP Inspeccionar Devolución) ──────────
 
         [TestMethod]
         public void ObtenerEnLimpieza_FiltraSoloLasEnLimpieza()
@@ -206,7 +206,7 @@ namespace Tests
             }
         }
 
-        // ── CambiarEstado — guard EnUso→Baja (CU-DEP-02, Reportar Prenda Perdida) ───────────
+        // ── CambiarEstado — guard EnUso→Baja (CU06-DEP, Reportar Prenda Perdida) ───────────
         // Antes esta restricción vivía únicamente en GUI/Prendas.cs (un `continue` en una lista
         // de opciones del diálogo genérico de cambio de estado) — cualquier código que llamara
         // CambiarEstado directo podía saltearla. Ahora la guarda vive en el propio BLL.
@@ -404,7 +404,8 @@ namespace Tests
             ctx.Crear().CambiarEstado("Test", prenda, BE.EstadoPrenda.Baja);
 
             Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
-            Assert.AreEqual(1, ctx.DalMantenimiento.CerrarMantenimientoVeces);
+            Assert.AreEqual(DAL.Interfaces.MovimientoMantenimiento.Cerrar, ctx.DalPrenda.UltimoMovimientoMantenimiento,
+                "El mantenimiento se cierra en la misma escritura que el cambio de estado.");
         }
     }
 }

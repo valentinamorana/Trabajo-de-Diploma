@@ -17,7 +17,8 @@ dicen qué rama del diagrama de actividad muestran.
 | `admin` | `administrador1!` | Administrador | ve todo |
 
 Se puede abrir la aplicación dos veces (una por usuario) o alternar con **Sesión → Cerrar Sesion** (menú a
-la derecha). Cada documento del proceso se imprime o se guarda como PDF con "Microsoft Print to PDF".
+la derecha). Cada documento del proceso lo genera la aplicación directamente en PDF (iTextSharp, sin
+impresora virtual): se elige dónde guardarlo y después se puede imprimir desde el visor.
 
 ---
 

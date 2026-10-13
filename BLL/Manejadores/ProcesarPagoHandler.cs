@@ -118,7 +118,6 @@ namespace BLL.Manejadores
 
                         "Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.");
             });
-            dalCliente.RecalcularDV(cliente.IdCliente);
 
             // Clave (y Mensaje de respaldo) distinta por combinación, igual que
             // BajaSuscripcionHandler con renov.msg.baja/renov.msg.baja_conprendas: el Mensaje

@@ -115,6 +115,15 @@ namespace BLL
                     "Tu usuario fue desactivado o cambió de rol. Cerrá la sesión y volvé a ingresar.");
         }
 
+        /// <summary>Para armar la pantalla (sin lanzar ni leer la base): ¿la sesión puede ejecutar la
+        /// acción? La operación igual pasa por Exigir.</summary>
+        public static bool Puede(string patenteEditar)
+        {
+            if (!Seguridad.SessionManager.IsLoggedIn) return false;
+            var sm = Seguridad.SessionManager.GetInstance();
+            return PermiteAccion(sm.Usuario.EsAdministrador, sm.TienePermiso(patenteEditar));
+        }
+
         // ── Guard de negocio (fail-closed) ──────────────────────────────────────────────
         // Exige permiso para CONFIGURAR el módulo. 'patenteVer' se conserva en la firma por
         // compatibilidad con los llamadores (documenta qué pantalla gobierna la acción); ya no

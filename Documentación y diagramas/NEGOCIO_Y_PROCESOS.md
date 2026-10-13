@@ -8,7 +8,7 @@
 > gana el código: corregir el documento.
 >
 > Convención: `Archivo.cs › Método` = ubicación. **T:** = archivo de tests que lo cubre.
-> Estado al escribirlo: 457 tests (455 pasan, 2 omitidos preexistentes).
+> Estado al 13/10/2026: 924 tests (922 pasan, 2 omitidos preexistentes).
 
 ---
 
@@ -116,7 +116,7 @@ Todas las tablas están en `BD/00_Instalacion_Completa.sql` (31 `CREATE TABLE`).
 | `Cliente` | `Cliente` | `DNI`, `IdMedioPagoPreferido` (FK `MedioPago`), `IdPlan`, `FechaVencimiento`, `FechaLimiteGracia`, `FechaPausaHasta`, `IdClienteReferente`, `DescuentoProximoCobro`, `BeneficioReferidoOtorgado`, `DVH` |
 | `Empleado` | `Empleado` | `IdUsuario` (vínculo con `Usuario`), `Legajo` |
 | `Prenda` | `Prenda` | `Estado` (0–3), `IdClienteActual` (quién la tiene), `IdUltimoCliente` (nunca se limpia), `PrecioReposicion`, `Talle/Color`, `Categoria` (FK al catálogo `Categoria` por nombre) |
-| `Pedido` / `PedidoPrenda` / `PedidoHistorial` | `Pedido`, `PedidoHistorial` | `Estado` (0–3), fechas de despacho/entrega, `MotivoCancelacion`; el historial permite restaurar operaciones |
+| `Pedido` / `PedidoPrenda` / `PedidoHistorial` | `Pedido`, `PedidoHistorial` | `Estado` (0–7, `BE.EstadoPedido`), fechas de despacho/entrega, `MotivoCancelacion`; el historial permite restaurar operaciones |
 | `MantenimientoPrenda` | `MantenimientoPrenda` | ciclo En Limpieza: `FechaEntrada`, `FechaSalida` (abierto si es NULL), `Origen` (0 manual / 1 devolución de PN04), `Actor` |
 | `Categoria` | — (`BLL.Prenda.ObtenerCategorias`) | `Nombre` (UNIQUE, clave natural que referencian `Prenda`, `Promocion` y `SugerenciaPromocion`), `Activo` |
 | `CargoPrenda` | `CargoPrenda` | `IdPrenda`, `IdCliente`, `Motivo`, `Monto` (>0, CHECK), `Estado` (0 Pendiente / 1 Cobrado) |
@@ -238,7 +238,7 @@ El carril "Controlador de Stock" lo cumple el rol **Depósito**.
 | Vendedor | Preparar la confirmación | `PrepararConfirmacion` → Confirmación y constancia del pedido |
 
 Cada transición registra:
-- `PedidoHistorial`: ENVIAR_CONTROL, DESISTIR, AJUSTAR_SELECCION, INFORMAR_FALTANTES, CONFIRMAR_PRENDAS, SEPARAR y FORMALIZAR;
+- `PedidoHistorial`: ENVIAR_CONTROL, DESISTIR, AJUSTAR_SELECCION, INFORMAR_FALTANTES, CONFIRMAR_PRENDAS, SEPARAR y FORMALIZAR (se graba en la misma transacción que el cambio; el número de operación es único por pedido, `UQ_PedidoHistorial_Operacion`);
 - la bitácora;
 - la bitácora de negocio: `EnvioControlStock`, `InformeFaltantes`, `SeparacionPrendas`, `Desistimiento` y `Venta` (al formalizar).
 
@@ -489,7 +489,7 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 
 **Objetivo.** Resolver qué pasa con una prenda cuando el cliente la devuelve o se reporta perdida, sin aprobación de nadie.
 **Actores.** Depósito (rol `Deposito`), Cliente (externo).
-**Pantallas.** `GUI/InspeccionDevolucionForm.cs` (CU-DEP-01), `GUI/PedidosRealizados.cs` (registrar devolución y CU-DEP-02), `CargoPrendaDialog`, `Prendas.cs`.
+**Pantallas.** `GUI/InspeccionDevolucionForm.cs` (CU05-DEP), `GUI/PedidosRealizados.cs` (registrar devolución y CU06-DEP), `CargoPrendaDialog`, `Prendas.cs`.
 
 **Flujo**
 1. Un pedido `Entregado` se devuelve: `BLL.Pedido.RegistrarDevolucion` pasa sus prendas `EnUso` → `EnLimpieza` (y abre `MantenimientoPrenda`) y completa `Pedido.FechaDevolucion`, todo en la misma transacción (`DAL/Pedido.cs › RegistrarDevolucion`). **Ese es el "desbloqueo" de la cuenta** (PN01 regla 3). El pedido **sigue `Entregado`** (no hay estado nuevo: la máquina de estados y los diagramas aprobados no cambian); la fecha distingue un pedido devuelto de uno con las prendas en poder del cliente. Pedidos Realizados lo muestra como "Entregado (devuelto el dd/mm)" o "Entregado — en poder del cliente (N días)".
@@ -497,7 +497,7 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 2. Depósito ve la cola de prendas En Limpieza (`BLL.Prenda.ObtenerEnLimpieza`) y, por prenda:
    - **Desgaste normal → aprueba el reingreso:** `BLL.InspeccionDevolucion.AprobarReingreso` (exige que la prenda esté en la cola) → `BLL.Prenda.ReingresarInspeccionada` (En Limpieza → Disponible), sin cargo (cubierto por la cuota). Dispara la Lista de Espera.
    - **Daño irreparable → baja con cargo:** `BLL.InspeccionDevolucion.DarDeBajaConCargo` (precio de reposición; pre-cargado desde `Prenda.PrecioReposicion`, editable). Cargo, baja, cierre del mantenimiento y cancelación de la lista de espera van en **una transacción** (`DAL/InspeccionDevolucion.cs`); la transición la valida el patrón State (`Prenda.TransicionPermitida` / `ControlarEstado`).
-3. **Prenda perdida = compra tácita** (CU-DEP-02, desde el detalle del pedido): `BLL.InspeccionDevolucion.ReportarPerdida`, solo si el pedido está **Entregado hace 30 días o más** (`BLL/Politicas/PoliticaCompraTacita.cs`). Antes, la prenda sigue siendo un alquiler en curso; si el pedido no se entregó, el cliente nunca la recibió.
+3. **Prenda perdida = compra tácita** (CU06-DEP, desde el detalle del pedido): `BLL.InspeccionDevolucion.ReportarPerdida`, solo si el pedido está **Entregado hace 30 días o más** (`BLL/Politicas/PoliticaCompraTacita.cs`). Antes, la prenda sigue siendo un alquiler en curso; si el pedido no se entregó, el cliente nunca la recibió.
 4. El cargo queda `Pendiente` contra `IdUltimoCliente` y **se suma al próximo cobro** de ese cliente (`ProcesarPagoHandler`, misma transacción).
 
 **Reglas de negocio PN04**
@@ -517,7 +517,7 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 | 12 | La devolución completa **`Pedido.FechaDevolucion`** en la misma transacción que las prendas (entra en el DV de Pedido); un pedido ya devuelto no se vuelve a devolver y deja de ser el "pedido en curso" de sus prendas (`ObtenerPedidoEnCurso`) | `BE/Pedido.cs › PuedeDevolverse/EnPoderDelCliente`, `BLL/Pedido.cs › RegistrarDevolucion`, `DAL/Pedido.cs › RegistrarDevolucion`, `DAL/InspeccionDevolucion.cs › ObtenerPedidoEnCurso` | `PedidoTests › RegistrarDevolucion_PedidoYaDevuelto_*`, `Pedido_Devuelto_*`, `IntegracionBDTests › Pedido_RegistrarDevolucion_CompletaLaFechaYDejaDeEstarEnCurso` |
 | 13 | **Pedido atrasado** = Entregado sin devolución con 30 días o más desde la entrega (mismo plazo que la compra tácita): filtro en Pedidos Realizados y alerta para Pedidos Realizados / Inspección de Devolución | `BLL/Politicas/PoliticaCompraTacita.cs › EstaAtrasado/Atrasados`, `BLL/PanelAlertas.cs` (`alert.pedidos.atrasados`), `GUI/PedidosRealizados.cs` | `PedidoTests › Atrasado_*`, `PanelAlertasTests › Evaluar_PedidosAtrasados_*`, `AuditoriaGuiTests › Alertas_PedidosAtrasados_*` |
 
-**Casos de uso:** CU-DEP-01 Inspeccionar Devolución, CU-DEP-02 Reportar Prenda Perdida.
+**Casos de uso:** CU05-DEP Inspeccionar Devolución, CU06-DEP Reportar Prenda Perdida.
 **Alcance.** Abarca: reingreso, baja con cargo, prenda perdida, desbloqueo. **No abarca:** reparación/limpieza detallada, cobro inmediato del cargo (se difiere al próximo cobro), reposición automática de stock, cargo por demora.
 
 ---
@@ -543,8 +543,8 @@ Nota de origen: la estructura del circuito (sugerir → crear → aprobar → ba
 |---|---|---|
 | **Contraseñas** | PBKDF2-SHA256, sal aleatoria de 16 B, **100 000 iteraciones**, verificación en tiempo constante | `Seguridad/Encriptador.cs` |
 | **Datos sensibles** | El DNI se guarda en texto plano (se quitó el cifrado AES); igualmente no se escribe en la bitácora | `Seguridad/Encriptador.cs`, `BLL/Cliente.cs` |
-| **Login** | 3 intentos fallidos bloquean; bloqueo **progresivo** (1/5/15/60 min); claves de emergencia de autodesbloqueo del admin | `BLL/Usuario.Autenticacion.cs`, `BLL/RecuperacionAdmin.cs`, `Seguridad/ContadorSesion.cs` |
-| **Integridad** | DVH (por fila) y DVV (por tabla) sobre Usuario, Cliente, Empleado, Pedido; al iniciar, filas con `DVH=0` se **recalculan** (no es falsa alarma); una discrepancia real bloquea el login hasta que el Administrador repara | `Seguridad/DigitoVerificador.cs`, `BLL/Configuracion.cs › VerificarIntegridadDV` |
+| **Login** | 3 intentos fallidos bloquean; bloqueo **progresivo** (1/5/15/60 min; un ingreso exitoso reinicia la escala); claves de emergencia de autodesbloqueo del admin | `BLL/Usuario.Autenticacion.cs`, `BLL/RecuperacionAdmin.cs`, `Seguridad/ContadorSesion.cs` |
+| **Integridad** | DVH (por fila) y DVV (por tabla) sobre Usuario, Cliente, Empleado, Pedido, Contratacion y PermisoRelacion, recalculados en la MISMA transacción que cada escritura (si el recálculo falla, se revierte la escritura); al iniciar, filas con `DVH=0` se **recalculan** (no es falsa alarma); una discrepancia real bloquea el login hasta que el Administrador repara | `Seguridad/DigitoVerificador.cs`, `BLL/Configuracion.cs › VerificarIntegridadDV` |
 | **Bitácora** | `Bitacora` (sistema, con criticidad) y `BitacoraNegocio` (eventos de negocio); toda escritura relevante deja rastro | `Servicios/Bitacora.cs`, `Servicios/BitacoraNegocio.cs` |
 | **Permisos** | Toda operación de BLL exige patente (`PermisosAccion.Exigir(editar, ver)`); la GUI nunca accede a DAL ni Seguridad | `BLL/PermisosAccion.cs`, `BLL/MenuVisibilidad.cs` |
 | **Multiidioma** | 4 idiomas (ES/EN/RU/PT) en vivo (**Observer**: `GestorIdioma` + `IIdiomaObserver`); corpus en `Servicios/Multiidioma/traducciones.tsv` (formato `IDIOMA⇥clave⇥texto`, más de 1.300 claves por idioma, **las mismas claves en los 4**). Los errores de negocio son `BE.AppException(clave, fallback, args)` y se resuelven con `Traductor.Resolver`. Los roles se traducen con `perfil.*` y `perm.rol.*` | `Servicios/Multiidioma/` |
@@ -591,7 +591,7 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
   15 fidelización (pausa, referidos, cargo) · 16 lista de espera · 17 PN02 · 18 PN03 · 19 PN04 · 20 hardening de integridad ·
   **20b** importe/promoción en `Contratacion`, CHECKs, índices únicos y de consulta · **20c** PN02 (medios de pago, intentos, desistimientos) ·
   **20c5** medio de pago preferido del cliente (FK) · **20d** PN03 (historial, dictamen, solicitud de baja, vencimiento) ·
-  **20e** catálogo `Categoria` · **20f** origen del mantenimiento · **21** datos de prueba · **21z5** restricciones de normalización y baja de `RolPermiso` (ver §6.5).
+  **20e** catálogo `Categoria` · **20f** origen del mantenimiento · **20g** PN03 solo por plan y baja simplificada · **20h** tasa de retención · **20i** analítica en un formulario · **20j** pantallas de seguridad · **20k** historial de pedidos con número de operación único · **20n** unicidad de DNI, legajo y usuario del empleado · **21** datos de prueba · **21z5** restricciones de normalización y baja de `RolPermiso` (ver §6.5).
 - **Datos de prueba (sección 21):** 11 clientes en distintos estados de suscripción, 20 prendas (3 En Limpieza, 1 Baja con cargo),
   9 pedidos, 3 contrataciones (2 pendientes, 1 cobrada), 3 promociones y 2 sugerencias en distintos estados, 1 lista de espera, empleados
   vinculados a `caja`/`admin`. Se aplica una sola vez (marca: cliente Julieta Navarro).
@@ -604,8 +604,8 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
   guarda `install.log`. Copia la app (14 archivos de `GUI/bin/Release`), el `.sql`, `DbInstaller.exe` y `Credenciales_Iniciales.txt`.
   Si el equipo no tiene ningún SQL Server, la opción por defecto instala **SQL Server 2022 Express LocalDB** (MSI oficial embebido, `msiexec /passive`)
   y continúa sobre `(localdb)\MSSQLLocalDB`. LocalDB es privado de cada usuario de Windows: la base queda para el usuario que instala.
-- `Instalador/DbInstaller/` (C#): cliente SQL embebido (subcomandos `run-script`, chequeo/arranque de servicio, prueba de conexión, borrado de BD).
-- **Un solo `.exe`** de salida: `Instalador/Salida/Instalador_WardrobeFlow_V1.exe` (no se versiona).
+- `Instalador/DbInstaller/` (C#): cliente SQL embebido (subcomandos `run-script`, `check-service`, `test-connection`, `check-perms`, `backup`, `drop-database`, `grant-users` y `verify [actualizacion]`; en una actualización `verify` exige un Administrador activo, no un usuario llamado `admin`).
+- **Un solo `.exe`** de salida: `Instalador/Salida/Instalador_WardrobeFlow_1.4.0.exe` (no se versiona).
 - `Instalador/compilar-y-firmar.ps1`: descarga `Redist/SqlLocalDB.msi` si falta, compila con Inno Setup y firma con SignTool, o con `Set-AuthenticodeSignature` sin Windows SDK (certificado en `%USERPROFILE%\wardrobeflow.pfx`, **autofirmado**, fuera del repo;
   contraseña por `WF_PFX_PASS` o prompt). Un certificado autofirmado **no** evita el aviso de SmartScreen en otras PCs.
 - Requisitos de la cátedra (clase 4): un `.exe`, crea BD/tablas por script (sin `.bak`), usuarios/roles, multiidioma, datos de ejemplo, una sola corrida.
@@ -654,9 +654,9 @@ Regla de capas: `GUI → BLL → DAL/BE/Servicios/Seguridad`; la GUI no toca DAL
 | D6 | ~~Promociones por categoría informativas~~ | **Discontinuadas (11/10):** las promociones son siempre por plan; la rotación por categoría queda en el reporte solo como dato |
 | D7 | ~~Verificación y reserva de PN01 atómicas en un paso (sin cola de Depósito)~~ | **Reemplazada:** el Vendedor envía el pedido a Control de Stock (`EnControlStock`) y Depósito lo resuelve desde su cola (`ControlStockForm`): informa faltantes o confirma y separa las prendas (la reserva física recién ocurre al separar, con `UPDATE` condicionado) |
 | D8 | ~~Cargo y baja de PN04 sin transacción común~~ | **Resuelto:** una sola transacción en `DAL/InspeccionDevolucion.cs` |
-| D9 | Claim + activación de PN02 **sin transacción común**; se compensa con `ReabrirPago` | Tablas distintas; la ventana residual (caída entre ambos pasos) queda documentada en `BLL/Contratacion.cs` |
+| D9 | Claim + activación de PN02 **sin transacción común**; se compensa con `ReabrirPago` (una sola transacción: la contratación, que tiene que seguir Pagada, y después sus cargos de PN04, con el DV) | Tablas distintas; la ventana residual (caída entre ambos pasos) queda documentada en `BLL/Contratacion.cs` |
 | D10 | **Pausar corre el vencimiento** por los días de pausa (solo si quedaba tiempo pagado); reanudar antes de tiempo devuelve los días no usados | NUULY 4.8: mientras dura la pausa no se cobra, así que la pausa no consume lo ya pagado. Implementado en `PausarSuscripcionHandler` y `BLL.Cliente.ReanudarPausa` |
-| D11 | **Concurrencia entre sesiones**: el crédito de referido se modifica solo con `SumarCreditoEnTx` / `ConsumirCreditoEnTx` (UPDATE atómico sobre el valor real; el UPDATE general de Cliente ya no lo escribe); el cobro de cargos exige `Estado=Pendiente` y aborta todo el cobro si otra sesión ya los cobró; `Promocion.Modificar` exige `Estado=EnRevisionContable`; contratar y cobrar validan el cupo del plan contra las prendas en uso | Evita perder actualizaciones, cobrar dos veces un cargo y editar una promoción ya aprobada por otra sesión |
+| D11 | **Concurrencia entre sesiones**: el crédito de referido se modifica solo con `SumarCreditoEnTx` / `ConsumirCreditoEnTx` (UPDATE atómico sobre el valor real; el UPDATE general de Cliente ya no lo escribe; consumir exige saldo suficiente y, si otro cobro ya lo aplicó, revierte todo el cobro); el cobro de cargos exige `Estado=Pendiente` y aborta todo el cobro si otra sesión ya los cobró; `Promocion.Modificar` exige `Estado=EnRevisionContable`; contratar y cobrar validan el cupo del plan contra las prendas en uso | Evita perder actualizaciones, cobrar dos veces un cargo y editar una promoción ya aprobada por otra sesión |
 
 ### 7.2 Desvíos entre el documento del trabajo (`WardrobeFlow - Trabajo de Diploma.docx`) y el código
 Estado tras la edición de la tesis (N01 y PN01–PN04 documentados desde el código; G01, G02, G04, G05, G06, G07 y G08 corregidos).
@@ -669,21 +669,9 @@ Estado tras la edición de la tesis (N01 y PN01–PN04 documentados desde el có
 | N01 (clientes y suscripciones: renovación, pausa, baja, cobro del período con gracia y suspensión, planes) | **Pendiente** | La V19 (10/10) no tiene sección propia: N00 documenta PN01–PN04 y en G03 "N01" es PN01 (Entrega 1), mientras G02 usa N01 = clientes y suscripciones. Lo ya implementado de N01 falta en la tesis (auditoría 13/10) |
 | Diagramas PN01–PN04 y N01 (proceso, casos de uso, secuencia, clases, conceptual, DER) | **Resuelto** | En el modelo de Enterprise Architect (`Documentación y diagramas/WardrobeFlow - Modelo EA.eapx`) |
 | Balanceo clases–secuencia (corrección de la Entrega 1) | **Resuelto** | Toda clase y método citado en las secuencias de un proceso figura en sus diagramas de clases (modelo de EA) |
-| Diagramas T02–T08 (login, perfiles, idiomas, bitácora, control de cambios, dígitos verificadores, backup) | **Resuelto** | Secuencias, clases y DER regenerados desde el código y la base; T01 (componentes, mapa MDI) y los casos de uso de T02–T08 se mantienen |
+| Diagramas T02–T08 (login, perfiles, idiomas, bitácora, control de cambios, dígitos verificadores, backup) | **Resuelto** | Secuencias, clases y DER en el modelo de EA; T01 (componentes, mapa MDI) y los casos de uso de T02–T08 se mantienen |
 | Calidad de impresión | Limitación | Los diagramas de clases y DER son grandes: se leen ampliando en el Word |
-| draw.io | Limitación | Archivos generados con disposición automática; no se abrieron uno por uno en draw.io |
 
----|---|---|---|
-| Roles (G05) | Supervisor, Operador de Inventario, Depósito | 10 roles reales (§2.2); Supervisor no existe; "Depósito" = rol `Deposito` | actualizar G05 (y G02/G04) |
-| Estados de prenda (G04) | "Disponible / En uso" | 4 estados | actualizar G04 |
-| Despacho (M05) | email con tracking; estados Despachado/En curso/On Hold | sin email/tracking; estados Pendiente/Despachado/Entregado/Cancelado | ajustar el documento |
-| Cargos (M06) | autorización por Supervisor | sin aprobador (PN04 del propio documento lo dice) | ajustar M06 |
-| Incidencias por demora | listadas | no hay cargo ni registro por demora | quitar del alcance |
-| Compra definitiva (G01) | descrita | **no implementada** | quitar del alcance o marcar futuro |
-| PN01 con Depósito | CU01/02-DEP como pasos separados | lógica en BLL, sin actor/pantalla de Depósito | reescribir PN01 (D7) |
-| PN04 "alineado a NUULY" | binaria "sin cargos por daño" implícito | cobra daño irreparable | reescribir el texto (D2) |
-| N01 | debe estar documentado (Plan de Entregas) | **no aparece en este `.docx`** (verificar si vive en otro archivo/Entrega 1) | confirmar |
-| Diagramas | PN02–PN04 y secuencias de PN01 "a incorporar desde Enterprise Architect"; Diagrama de Clases/Modelo de Datos de PN02–PN04 vacíos | — | pendiente (se dejan para el final) |
 
 ---
 

@@ -49,6 +49,18 @@ namespace Tests.Fakes
         public int RestaurarOperacionAtomicaVeces { get; private set; }
         public IList<(string Campo, string ValorAnterior)> UltimoRestaurarOperacionCampos { get; private set; }
         public int RecalcularDVVeces { get; private set; }
+        public int? UltimoIdOperacionRestaurar { get; private set; }
+
+        // Historial que cada escritura recibió para asentar en su transacción (solo si la escritura
+        // "se confirmó": no se cuenta si la escritura lanza o no toca nada).
+        public int HistorialRegistradoVeces { get; private set; }
+        public List<BE.PedidoHistorial> UltimoHistorial { get; private set; }
+        private void Asentar(List<BE.PedidoHistorial> historial)
+        {
+            if (historial == null || historial.Count == 0) return;
+            HistorialRegistradoVeces++;
+            UltimoHistorial = historial;
+        }
 
         public List<BE.Pedido> ObtenerTodos() => PedidosDevueltos;
         public List<BE.Pedido> ObtenerPendientes() => PedidosDevueltos.FindAll(p => p.Estado == BE.EstadoPedido.Pendiente);
@@ -65,90 +77,118 @@ namespace Tests.Fakes
         public BE.Pedido ObtenerPorId(int idPedido) => PedidosDevueltos.Find(p => p.IdPedido == idPedido);
         public bool TienePedidoActivo(int idCliente) => PedidosDevueltos.Exists(p => p.IdCliente == idCliente && p.EsActivo());
 
-        public int AltaSinReserva(BE.Pedido pedido)
+        public int AltaSinReserva(BE.Pedido pedido, List<BE.PedidoHistorial> historial = null)
         {
             AltaSinReservaVeces++;
             UltimoAltaSinReserva = pedido;
+            Asentar(historial);
             return AltaIdGenerado;
         }
 
-        public void ReemplazarSeleccion(int idPedido, List<BE.Prenda> prendas)
+        public void ReemplazarSeleccion(int idPedido, List<BE.Prenda> prendas, List<BE.PedidoHistorial> historial = null)
         {
             ReemplazarSeleccionVeces++;
             UltimaSeleccionReemplazada = prendas;
+            Asentar(historial);
         }
 
-        public void RegistrarFaltantes(int idPedido, int idEmpleadoControl, List<BE.PedidoFaltante> faltantes)
+        public void RegistrarFaltantes(int idPedido, int idEmpleadoControl, List<BE.PedidoFaltante> faltantes,
+                                       List<BE.PedidoHistorial> historial = null)
         {
             RegistrarFaltantesVeces++;
             UltimosFaltantes = faltantes;
             UltimoIdEmpleadoControl = idEmpleadoControl;
+            Asentar(historial);
         }
 
-        public void ConfirmarPrendas(int idPedido, int idEmpleadoControl)
+        public void ConfirmarPrendas(int idPedido, int idEmpleadoControl, List<BE.PedidoHistorial> historial = null)
         {
             ConfirmarPrendasVeces++;
             UltimoIdEmpleadoControl = idEmpleadoControl;
+            Asentar(historial);
         }
 
-        public void SepararPrendas(int idPedido, int idCliente)
+        public void SepararPrendas(int idPedido, int idCliente, List<BE.PedidoHistorial> historial = null)
         {
             AntesDeSeparar?.Invoke();
             if (SepararPrendasLanza != null) throw SepararPrendasLanza;
             SepararPrendasVeces++;
+            Asentar(historial);
         }
 
-        public void Formalizar(int idPedido) => FormalizarVeces++;
+        public void Formalizar(int idPedido, List<BE.PedidoHistorial> historial = null)
+        {
+            FormalizarVeces++;
+            Asentar(historial);
+        }
 
         public List<BE.Prenda> UltimaSeleccionDesistida { get; private set; }
 
         public void RegistrarDesistimiento(int idPedido, string motivo, BE.EtapaDesistimiento etapa,
-                                           List<BE.Prenda> seleccionAjustada = null)
+                                           List<BE.Prenda> seleccionAjustada = null,
+                                           List<BE.PedidoHistorial> historial = null)
         {
             RegistrarDesistimientoVeces++;
             UltimoMotivoDesistimiento = motivo;
             UltimaEtapaDesistimiento = etapa;
             UltimaSeleccionDesistida = seleccionAjustada;
+            Asentar(historial);
         }
 
         public List<BE.PedidoFaltante> ObtenerFaltantes(int idPedido) => FaltantesDevueltos;
 
-        public void Despachar(int idPedido) => DespacharVeces++;
-        public void MarcarEntregado(int idPedido) => MarcarEntregadoVeces++;
+        public void Despachar(int idPedido, List<BE.PedidoHistorial> historial = null)
+        {
+            DespacharVeces++;
+            Asentar(historial);
+        }
 
-        public int RegistrarDevolucion(int idPedido, int idCliente, string actor)
+        public void MarcarEntregado(int idPedido, List<BE.PedidoHistorial> historial = null)
+        {
+            MarcarEntregadoVeces++;
+            Asentar(historial);
+        }
+
+        public int RegistrarDevolucion(int idPedido, int idCliente, string actor,
+                                       Func<int, List<BE.PedidoHistorial>> historial = null)
         {
             RegistrarDevolucionVeces++;
             UltimoActorDevolucion = actor;
+            // Como el DAL real: el historial se arma con la cantidad devuelta, solo si volvió alguna.
+            if (RegistrarDevolucionRespuesta > 0 && historial != null) Asentar(historial(RegistrarDevolucionRespuesta));
             return RegistrarDevolucionRespuesta;
         }
 
         public BE.EstadoPedido? UltimoEstadoEsperadoRestaurar { get; private set; }
-        public void RestaurarOperacionAtomica(int idPedido, BE.EstadoPedido estadoEsperado,
-                                              IList<(string Campo, string ValorAnterior)> campos)
+        public void RestaurarOperacionAtomica(int idPedido, int idOperacion, BE.EstadoPedido estadoEsperado,
+                                              IList<(string Campo, string ValorAnterior)> campos,
+                                              List<BE.PedidoHistorial> historial = null)
         {
             RestaurarOperacionAtomicaVeces++;
+            UltimoIdOperacionRestaurar = idOperacion;
             UltimoEstadoEsperadoRestaurar = estadoEsperado;
             UltimoRestaurarOperacionCampos = campos;
+            Asentar(historial);
         }
 
         public BE.EstadoPedido? UltimoEstadoEsperadoCancelar { get; private set; }
-        public void Cancelar(int idPedido, int idCliente, BE.EstadoPedido estadoEsperado, string motivo)
+        public void Cancelar(int idPedido, int idCliente, BE.EstadoPedido estadoEsperado, string motivo,
+                             List<BE.PedidoHistorial> historial = null)
         {
             CancelarVeces++;
             UltimoMotivoCancelar = motivo;
             UltimoEstadoEsperadoCancelar = estadoEsperado;
+            Asentar(historial);
         }
 
-        public bool DesCancelar(int idPedido, int idCliente)
+        public bool DesCancelar(int idPedido, int idCliente, List<BE.PedidoHistorial> historial = null)
         {
             DesCancelarVeces++;
+            if (DesCancelarRespuesta) Asentar(historial);
             return DesCancelarRespuesta;
         }
 
         public List<BE.FilaDV> ObtenerFilasDV() => new List<BE.FilaDV>();
         public void RecalcularDV() => RecalcularDVVeces++;
-        public int ActualizarDVVeces { get; private set; }
-        public void ActualizarDV(int idPedido) => ActualizarDVVeces++;
     }
 }

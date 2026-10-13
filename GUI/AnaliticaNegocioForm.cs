@@ -201,8 +201,7 @@ namespace GUI
             };
 
             Exportacion.GeneradorReporte generador = _actual.CrearGenerador();
-            Exportacion.Exportador exportador = generador.CrearExportador(formato);
-            exportador?.Exportar(reporte, this);
+            generador.Exportar(formato, reporte, this);
         }
 
         // Los filtros de los reportes que no están a la vista no pertenecen a ningún contenedor:

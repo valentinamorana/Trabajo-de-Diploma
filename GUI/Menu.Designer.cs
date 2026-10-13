@@ -202,7 +202,7 @@
             this.controlStockToolStripMenuItem.Text = "Control de Stock";
             this.controlStockToolStripMenuItem.Click += new System.EventHandler(this.controlStockToolStripMenuItem_Click);
             //
-            // inspeccionDevolucionToolStripMenuItem — PN04, CU-DEP-01 Inspeccionar Devolución
+            // inspeccionDevolucionToolStripMenuItem — PN04, CU05-DEP Inspeccionar Devolución
             //
             this.inspeccionDevolucionToolStripMenuItem.Name = "inspeccionDevolucionToolStripMenuItem";
             this.inspeccionDevolucionToolStripMenuItem.Tag = "mnu.inspecciondevolucion";

@@ -36,7 +36,7 @@ namespace GUI
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
 
-        // PN04, CU-DEP-02 Reportar Prenda Perdida: prendas del pedido actualmente mostrado
+        // PN04, CU06-DEP Reportar Prenda Perdida: prendas del pedido actualmente mostrado
         // en dgvDetalle, para resolver la selección sin agregar una columna ID visible.
         private List<BE.Prenda> _prendasDetalleActual = new List<BE.Prenda>();
         private BE.Pedido _pedidoDetalleActual;
@@ -124,6 +124,8 @@ namespace GUI
 
         private void PedidosRealizados_Load(object sender, EventArgs e)
         {
+            // CU06-DEP: sin la patente de edición de stock (p. ej. el Operador Logístico) el botón ni se ve.
+            btnReportarPerdida.Visible = BLL.PermisosAccion.Puede(BE.Patentes.StockEditar);
             CargarPedidos();
         }
 
@@ -404,7 +406,7 @@ namespace GUI
             RH("Estado",    "col.prenda.estado",    "Estado");
         }
 
-        // PN04, CU-DEP-02 Reportar Prenda Perdida: solo tiene sentido sobre una prenda
+        // PN04, CU06-DEP Reportar Prenda Perdida: solo tiene sentido sobre una prenda
         // EnUso (la única transición manual habilitada desde ese estado, ver
         // BE.Estados.EstadoEnUso).
         private void DgvDetalle_SelectionChanged(object sender, EventArgs e)
@@ -525,18 +527,20 @@ namespace GUI
                 // Patrón Command (PdN3): la GUI arma el pedido de devolución y se lo entrega
                 // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
                 // ejecución real siguen 100% en BLL.Pedido.RegistrarDevolucion, adentro del Command.
-                _invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
+                var devolucion = new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text);
+                _invocador.TomarOrden(devolucion);
                 _invocador.ProcesarOrdenes();
 
-                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a En limpieza."), pedidoCompleto.CantidadPrendas));
+                // Las que volvieron de verdad: las reportadas como perdidas ya están de baja y no cuentan.
+                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a En limpieza."), devolucion.PrendasDevueltas));
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        // PN04, CU-DEP-02 Reportar Prenda Perdida: una prenda EnUso que nunca vuelve
+        // PN04, CU06-DEP Reportar Prenda Perdida: una prenda EnUso que nunca vuelve
         // físicamente no puede pasar por Inspección de Devolución (esa cola es EnLimpieza).
-        // Mismo mecanismo que CU-DEP-01: CambiarEstado + RegistrarCargo, sin aprobación de
+        // Mismo mecanismo que CU05-DEP: CambiarEstado + RegistrarCargo, sin aprobación de
         // nadie (Nuuly: cobro directo por reposición).
         private void BtnReportarPerdida_Click(object sender, EventArgs e)
         {
@@ -549,7 +553,7 @@ namespace GUI
 
                 try
                 {
-                    // CU-DEP-02: cargo de reposición + baja en UNA transacción (BLL.InspeccionDevolucion).
+                    // CU06-DEP: cargo de reposición + baja en UNA transacción (BLL.InspeccionDevolucion).
                     // Antes eran dos llamadas sueltas desde acá (RegistrarCargo + CambiarEstado), sin transacción.
                     inspeccionBLL.ReportarPerdida(this.Text, prenda, dlg.Motivo, dlg.Monto);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);

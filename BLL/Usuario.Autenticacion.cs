@@ -12,6 +12,7 @@ namespace BLL
 
         // Bloqueo PROGRESIVO: duración (en minutos) según cuántas veces ya se bloqueó la cuenta.
         // 1er bloqueo → 1 min, 2do → 5, 3ro → 15, 4to → 60; superada la escala, queda permanente.
+        // La escala cuenta bloqueos CONSECUTIVOS: un login exitoso la reinicia (ResetearIntentosFallidos).
         private static readonly int[] _minutosBloqueo = { 1, 5, 15, 60 };
 
         // T07 — Lectores para el login con la integridad comprometida (reemplazables en tests).

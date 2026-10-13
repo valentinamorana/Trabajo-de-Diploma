@@ -456,6 +456,9 @@ namespace GUI
             if (pedido == null) return;
             try
             {
+                // Con la suscripción vencida no se puede ajustar (el cupo sería 0 y todo "excedería"):
+                // se informa el motivo; el pedido se puede desistir con "Asentar desistimiento".
+                pedidoBLL.VerificarVigencia(pedido.IdCliente);
                 var faltantes = pedidoBLL.ObtenerInformeFaltantes(pedido.IdPedido);
                 using (var form = new NuevoPedidoForm(pedido, faltantes))
                 {

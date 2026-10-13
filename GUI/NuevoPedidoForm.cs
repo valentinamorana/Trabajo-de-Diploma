@@ -134,13 +134,16 @@ namespace GUI
             // Modo ajuste: el cliente ya está identificado; se abre directamente el catálogo.
             try
             {
-                _clienteSel = clienteBLL.ObtenerPorId(_pedidoAjuste.IdCliente);
+                // Misma verificación que al armar: con la suscripción vencida el cupo sería 0 y la
+                // pantalla mostraría un exceso que no es tal (y el desistimiento por cupo fallaría).
+                _clienteSel = pedidoBLL.VerificarVigencia(_pedidoAjuste.IdCliente);
                 btnVolver.Visible = false;
                 MostrarPaso(2);
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
+                BeginInvoke((Action)Close);
             }
         }
 

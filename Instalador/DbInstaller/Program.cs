@@ -23,7 +23,7 @@ namespace DbInstaller
     //   DbInstaller.exe backup          <servidor> <nombreBD> <version> <log.txt>
     //   DbInstaller.exe drop-database   <servidor> <nombreBD> <log.txt>
     //   DbInstaller.exe grant-users     <servidor> <nombreBD> <log.txt>
-    //   DbInstaller.exe verify          <servidor> <nombreBD> <log.txt>
+    //   DbInstaller.exe verify          <servidor> <nombreBD> [actualizacion] <log.txt>
     //
     // Además del log (que se acumula), cada ejecución deja en "<log.txt>.out" (se
     // sobrescribe) un resultado corto para que el instalador lo muestre en pantalla:
@@ -77,7 +77,10 @@ namespace DbInstaller
                         resultado = OtorgarAccesoUsuariosLocales(args[1], args[2], registrar);
                         break;
                     case "verify" when args.Length == 4:
-                        resultado = VerificarInstalacion(args[1], args[2], registrar);
+                        resultado = VerificarInstalacion(args[1], args[2], false, registrar);
+                        break;
+                    case "verify" when args.Length == 5 && args[3] == "actualizacion":
+                        resultado = VerificarInstalacion(args[1], args[2], true, registrar);
                         break;
                     default:
                         Console.Error.WriteLine(Uso);
@@ -124,7 +127,7 @@ namespace DbInstaller
             "  DbInstaller.exe backup          <servidor> <nombreBD> <version> <log.txt>\n" +
             "  DbInstaller.exe drop-database   <servidor> <nombreBD> <log.txt>\n" +
             "  DbInstaller.exe grant-users     <servidor> <nombreBD> <log.txt>\n" +
-            "  DbInstaller.exe verify          <servidor> <nombreBD> <log.txt>";
+            "  DbInstaller.exe verify          <servidor> <nombreBD> [actualizacion] <log.txt>";
 
         private static int EjecutarScript(string servidor, string scriptPath, Action<string> registrar, Action<string> informar)
         {
@@ -574,17 +577,24 @@ EXEC (@q);";
         // base) y confirma que quedó lista para el primer login: existe el admin semilla y hay
         // planes y prendas para operar los procesos de negocio. Si falla, el instalador hace
         // rollback en vez de dejar instalada una app en la que no se puede entrar.
-        private static int VerificarInstalacion(string servidor, string nombreBD, Action<string> registrar)
+        // En una ACTUALIZACIÓN (la base ya existía) el admin semilla puede haberse renombrado o
+        // archivado legítimamente: ahí alcanza con que haya al menos un usuario Administrador
+        // activo (por Perfil o Rol, igual que BE.Usuario.EsAdministrador).
+        private static int VerificarInstalacion(string servidor, string nombreBD, bool actualizacion, Action<string> registrar)
         {
-            registrar($"Verificando la instalación de '{nombreBD}' en '{servidor}'...");
+            registrar($"Verificando la instalación de '{nombreBD}' en '{servidor}'" +
+                      (actualizacion ? " (actualización)..." : "..."));
             try
             {
                 var cadena = new SqlConnectionStringBuilder(CadenaConexion(servidor)) { InitialCatalog = nombreBD };
                 using (var conexion = new SqlConnection(cadena.ConnectionString))
                 {
                     conexion.Open();
-                    const string sql =
-                        "SELECT (SELECT COUNT(*) FROM Usuario WHERE Username = 'admin'), " +
+                    string filtroAdmin = actualizacion
+                        ? "(Perfil = 'Administrador' OR Rol = 'Administrador') AND Activo = 1"
+                        : "Username = 'admin'";
+                    string sql =
+                        "SELECT (SELECT COUNT(*) FROM Usuario WHERE " + filtroAdmin + "), " +
                         "       (SELECT COUNT(*) FROM PlanSuscripcion), " +
                         "       (SELECT COUNT(*) FROM Prenda)";
                     using (var cmd = new SqlCommand(sql, conexion))
@@ -592,7 +602,8 @@ EXEC (@q);";
                     {
                         rd.Read();
                         int admins = rd.GetInt32(0), planes = rd.GetInt32(1), prendas = rd.GetInt32(2);
-                        registrar($"Usuario admin: {admins} | Planes: {planes} | Prendas: {prendas}");
+                        registrar($"{(actualizacion ? "Administradores activos" : "Usuario admin")}: {admins} | " +
+                                  $"Planes: {planes} | Prendas: {prendas}");
                         if (admins == 0 || planes == 0 || prendas == 0)
                         {
                             registrar("ERROR: la base quedó creada pero sin los datos iniciales necesarios.");

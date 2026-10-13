@@ -23,9 +23,14 @@ namespace Tests.Fakes
         public BE.EstadoPrenda? UltimoEstadoAnterior { get; private set; }
         public BE.EstadoPrenda? UltimoNuevoEstado { get; private set; }
 
-        public void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null)
+        public DAL.Interfaces.MovimientoMantenimiento? UltimoMovimientoMantenimiento { get; private set; }
+
+        public void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null,
+                                  DAL.Interfaces.MovimientoMantenimiento mantenimiento = DAL.Interfaces.MovimientoMantenimiento.Ninguno,
+                                  string actor = null)
         {
             CambiarEstadoVeces++;
+            UltimoMovimientoMantenimiento = mantenimiento;
             UltimoEstadoAnterior = estadoAnterior;
             UltimoNuevoEstado = nuevoEstado;
         }

@@ -4,10 +4,10 @@ namespace BLL
 {
     /// <summary>
     /// PN04 — Casos de uso de Depósito que terminan una prenda con cargo al cliente:
-    ///   • CU-DEP-01 Inspeccionar Devolución: la prenda devuelta (En Limpieza) reingresa sin
+    ///   • CU05-DEP Inspeccionar Devolución: la prenda devuelta (En Limpieza) reingresa sin
     ///     cargo (<see cref="AprobarReingreso"/>) o se da de baja cobrando la reposición
     ///     (<see cref="DarDeBajaConCargo"/>).
-    ///   • CU-DEP-02 Reportar Prenda Perdida: la prenda En Uso se da de baja con cargo
+    ///   • CU06-DEP Reportar Prenda Perdida: la prenda En Uso se da de baja con cargo
     ///     (<see cref="ReportarPerdida"/>), solo si el pedido se entregó hace 30 días o más
     ///     (compra tácita, <see cref="Politicas.PoliticaCompraTacita"/>).
     ///
@@ -73,7 +73,7 @@ namespace BLL
         }
 
         /// <summary>
-        /// CU-DEP-02 — En Uso → Baja + cargo de reposición, atómico. Solo para una prenda de un
+        /// CU06-DEP — En Uso → Baja + cargo de reposición, atómico. Solo para una prenda de un
         /// pedido Entregado hace 30 días o más (compra tácita): si el cliente todavía no la recibió,
         /// o el plazo no venció, se rechaza.
         /// </summary>
@@ -98,8 +98,10 @@ namespace BLL
         /// Para habilitar "Reportar pérdida" en la pantalla: prenda En Uso de un pedido Entregado
         /// hace 30 días o más. La regla la vuelve a validar <see cref="ReportarPerdida"/> contra la base.
         /// </summary>
+        // Incluye la patente: sin ella (p. ej. el Operador Logístico) el botón queda deshabilitado
+        // en vez de habilitado y rechazado al pulsarlo.
         public bool PuedeReportarPerdida(BE.Prenda prenda, BE.Pedido pedido) =>
-            prenda != null && prenda.PuedeReportarsePerdida() &&
+            prenda != null && PermisosAccion.Puede(BE.Patentes.StockEditar) && prenda.PuedeReportarsePerdida() &&
             Politicas.PoliticaCompraTacita.PlazoVencido(pedido, _hoy());
 
         private int BajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto,

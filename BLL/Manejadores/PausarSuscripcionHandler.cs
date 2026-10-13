@@ -96,7 +96,6 @@ namespace BLL.Manejadores
                     Actor = contexto.Actor
                 });
             });
-            dalCliente.RecalcularDV(cliente.IdCliente);
 
             return new ResultadoRenovacion
             {

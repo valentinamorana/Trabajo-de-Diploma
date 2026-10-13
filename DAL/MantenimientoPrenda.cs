@@ -7,30 +7,9 @@ namespace DAL
 {
     public class MantenimientoPrenda : BaseDAL<BE.MantenimientoPrenda>, Interfaces.IMantenimientoPrendaDAL
     {
-        // Mantenimiento MANUAL (Prendas/Stock): Origen queda en 0 (DEFAULT de la columna). Los que abre
-        // la devolución de un pedido los inserta DAL.Pedido.RegistrarDevolucion con Origen = 1.
-        public void IniciarMantenimiento(int idPrenda, string actor)
-        {
-            SqlParameter[] p =
-            {
-                new SqlParameter("@IdPrenda", idPrenda),
-                new SqlParameter("@Actor",    (object)actor ?? DBNull.Value)
-            };
-            acceso.Escribir(
-                "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor) " +
-                "VALUES (@IdPrenda, GETDATE(), @Actor)",
-                p);
-        }
-
-        public void CerrarMantenimiento(int idPrenda)
-        {
-            SqlParameter[] p = { new SqlParameter("@IdPrenda", idPrenda) };
-            acceso.Escribir(
-                "UPDATE MantenimientoPrenda SET FechaSalida = GETDATE() " +
-                "WHERE IdPrenda = @IdPrenda AND FechaSalida IS NULL",
-                p);
-        }
-
+        // Los mantenimientos se abren y se cierran junto con el cambio de estado de la prenda, en la
+        // misma transacción: DAL.Prenda.CambiarEstado (manuales) y DAL.Pedido.RegistrarDevolucion
+        // (los de una devolución, Origen = 1).
         public List<BE.MantenimientoPrenda> ObtenerPorPrenda(int idPrenda)
         {
             var lista = new List<BE.MantenimientoPrenda>();

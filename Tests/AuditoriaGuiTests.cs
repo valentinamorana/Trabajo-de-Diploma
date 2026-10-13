@@ -346,6 +346,7 @@ namespace Tests
         [TestMethod]
         public void PuedeReportarPerdida_SoloConPedidoEntregadoHace30Dias()
         {
+            LoginComoAdministrador();
             var bll = Inspeccion(new FakeInspeccionDAL());
             var prenda = Prenda(BE.EstadoPrenda.EnUso);
             var entregado = new BE.Pedido { Estado = BE.EstadoPedido.Entregado, FechaEntrega = Hoy.AddDays(-30) };
@@ -355,6 +356,15 @@ namespace Tests
             Assert.IsFalse(bll.PuedeReportarPerdida(prenda, new BE.Pedido { Estado = BE.EstadoPedido.Despachado }));
             Assert.IsFalse(bll.PuedeReportarPerdida(Prenda(BE.EstadoPrenda.EnLimpieza), entregado));
             Assert.IsFalse(bll.PuedeReportarPerdida(prenda, null));
+        }
+
+        [TestMethod]
+        public void PuedeReportarPerdida_SinLaPatenteDeEditarStock_NoHabilitaElBoton()
+        {
+            // Un rol sin mnuStockEditar (p. ej. el Operador Logístico) no ve el botón habilitado.
+            SessionManager.Login(new BE.Usuario { Id = 9, Username = "logistica", Perfil = "OperadorLogistico", Contraseña = Encriptador.Hash("Clave1!") });
+            var entregado = new BE.Pedido { Estado = BE.EstadoPedido.Entregado, FechaEntrega = Hoy.AddDays(-30) };
+            Assert.IsFalse(Inspeccion(new FakeInspeccionDAL()).PuedeReportarPerdida(Prenda(BE.EstadoPrenda.EnUso), entregado));
         }
 
         [TestMethod]

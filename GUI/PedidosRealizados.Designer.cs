@@ -226,7 +226,7 @@ namespace GUI
             this.btnHistorial.UseVisualStyleBackColor = false;
             this.btnHistorial.Click += new System.EventHandler(this.BtnHistorial_Click);
             //
-            // btnReportarPerdida — PN04, CU-DEP-02 Reportar Prenda Perdida
+            // btnReportarPerdida — PN04, CU06-DEP Reportar Prenda Perdida
             //
             this.btnReportarPerdida.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
             this.btnReportarPerdida.Enabled = false;

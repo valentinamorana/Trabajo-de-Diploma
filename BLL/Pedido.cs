@@ -198,14 +198,12 @@ namespace BLL
                 FechaEnvioControl = ahora,
                 Prendas           = prendas
             };
-            int idNuevo = dalPedido.AltaSinReserva(pedido);
-
-            RegistrarHistorial(idNuevo, "ENVIAR_CONTROL", new List<(string, string, string)>
+            int idNuevo = dalPedido.AltaSinReserva(pedido, ArmarHistorial("ENVIAR_CONTROL", new List<(string, string, string)>
             {
                 ("Estado",            null, BE.EstadoPedido.EnControlStock.ToString()),
                 ("FechaPedido",       null, ahora.ToString("yyyy-MM-dd HH:mm:ss")),
                 ("Prendas",           null, IdsDe(prendas))
-            });
+            }));
 
             bitacora.Registrar(modulo,
                 $"Enviar a control de stock Pedido #{idNuevo} — Cliente: {cliente.NombreCompleto} — " +
@@ -248,15 +246,13 @@ namespace BLL
                 EtapaDesistimiento  = BE.EtapaDesistimiento.Cupo,
                 Prendas             = prendas
             };
-            int idNuevo = dalPedido.AltaSinReserva(pedido);
-
-            RegistrarHistorial(idNuevo, "DESISTIR", new List<(string, string, string)>
+            int idNuevo = dalPedido.AltaSinReserva(pedido, ArmarHistorial("DESISTIR", new List<(string, string, string)>
             {
                 ("Estado",              null, BE.EstadoPedido.Desistido.ToString()),
                 ("EtapaDesistimiento",  null, BE.EtapaDesistimiento.Cupo.ToString()),
                 ("MotivoDesistimiento", null, motivo.Trim()),
                 ("Prendas",             null, IdsDe(prendas))
-            });
+            }));
             LogDesistimiento(modulo, idNuevo, cliente.IdCliente, cliente.NombreCompleto,
                              BE.EtapaDesistimiento.Cupo, motivo.Trim());
             return idNuevo;
@@ -293,8 +289,6 @@ namespace BLL
                 seleccionAjustada = null;   // por disponibilidad se conserva la selección informada
             }
 
-            dalPedido.RegistrarDesistimiento(pedido.IdPedido, motivo.Trim(), etapa, seleccionAjustada);
-
             var cambios = new List<(string, string, string)>
             {
                 ("Estado",              pedido.Estado.ToString(), BE.EstadoPedido.Desistido.ToString()),
@@ -303,7 +297,8 @@ namespace BLL
             };
             if (seleccionAjustada != null)
                 cambios.Add(("Prendas", IdsDe(pedido.Prendas), IdsDe(seleccionAjustada)));
-            RegistrarHistorial(pedido.IdPedido, "DESISTIR", cambios);
+            dalPedido.RegistrarDesistimiento(pedido.IdPedido, motivo.Trim(), etapa, seleccionAjustada,
+                                             ArmarHistorial("DESISTIR", cambios));
             LogDesistimiento(modulo, pedido.IdPedido, pedido.IdCliente, pedido.NombreCliente, etapa, motivo.Trim());
         }
 
@@ -328,13 +323,11 @@ namespace BLL
                 ?? throw new BE.AppException("err.bll.pedido.cliente_inexistente", "El cliente seleccionado no existe.");
             ComprobarCupo(cliente, prendas.Count);
 
-            dalPedido.ReemplazarSeleccion(pedido.IdPedido, prendas);
-
-            RegistrarHistorial(pedido.IdPedido, "AJUSTAR_SELECCION", new List<(string, string, string)>
+            dalPedido.ReemplazarSeleccion(pedido.IdPedido, prendas, ArmarHistorial("AJUSTAR_SELECCION", new List<(string, string, string)>
             {
                 ("Estado",  pedido.Estado.ToString(), BE.EstadoPedido.EnControlStock.ToString()),
                 ("Prendas", IdsDe(pedido.Prendas),    IdsDe(prendas))
-            });
+            }));
 
             bitacora.Registrar(modulo,
                 $"Ajustar selección Pedido #{pedido.IdPedido} — Cliente: {cliente.NombreCompleto} — " +
@@ -402,13 +395,11 @@ namespace BLL
             ExigirTransicion(pedido, BE.EstadoPedido.ConFaltantes);
 
             int idEmpleado = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
-            dalPedido.RegistrarFaltantes(pedido.IdPedido, idEmpleado, faltantes);
-
-            RegistrarHistorial(pedido.IdPedido, "INFORMAR_FALTANTES", new List<(string, string, string)>
+            dalPedido.RegistrarFaltantes(pedido.IdPedido, idEmpleado, faltantes, ArmarHistorial("INFORMAR_FALTANTES", new List<(string, string, string)>
             {
                 ("Estado",     pedido.Estado.ToString(), BE.EstadoPedido.ConFaltantes.ToString()),
                 ("Faltantes",  null,                     IdsDe(faltantes.Select(f => f.Prenda).ToList()))
-            });
+            }));
 
             bitacora.Registrar(modulo,
                 $"Informe de faltantes Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
@@ -437,12 +428,10 @@ namespace BLL
                     faltante.Prenda.Nombre);
 
             int idEmpleado = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
-            dalPedido.ConfirmarPrendas(pedido.IdPedido, idEmpleado);
-
-            RegistrarHistorial(pedido.IdPedido, "CONFIRMAR_PRENDAS", new List<(string, string, string)>
+            dalPedido.ConfirmarPrendas(pedido.IdPedido, idEmpleado, ArmarHistorial("CONFIRMAR_PRENDAS", new List<(string, string, string)>
             {
                 ("PrendasConfirmadas", null, IdsDe(pedido.Prendas))
-            });
+            }));
 
             bitacora.Registrar(modulo,
                 $"Confirmar prendas disponibles Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
@@ -475,7 +464,11 @@ namespace BLL
             {
                 try
                 {
-                    dalPedido.SepararPrendas(pedido.IdPedido, pedido.IdCliente);
+                    dalPedido.SepararPrendas(pedido.IdPedido, pedido.IdCliente, ArmarHistorial("SEPARAR", new List<(string, string, string)>
+                    {
+                        ("Estado",          pedido.Estado.ToString(), BE.EstadoPedido.Separado.ToString()),
+                        ("FechaSeparacion", null,                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+                    }));
                 }
                 catch (BE.AppException ex) when (ex.Clave == "err.dal.pedido.prenda_tomada")
                 {
@@ -491,12 +484,6 @@ namespace BLL
                     "reservó nada y se emitió el informe de faltantes para el Vendedor.",
                     pedido.IdPedido);
             }
-
-            RegistrarHistorial(pedido.IdPedido, "SEPARAR", new List<(string, string, string)>
-            {
-                ("Estado",          pedido.Estado.ToString(), BE.EstadoPedido.Separado.ToString()),
-                ("FechaSeparacion", null,                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-            });
 
             // Lista de Espera (mejora opcional): si alguna prenda separada estaba reservada para
             // este cliente, cierra el ciclo (Convertida).
@@ -530,14 +517,12 @@ namespace BLL
             // Se revalida la vigencia del cliente al cerrar el pedido (pudo cambiar desde el armado).
             ObtenerClienteValidado(pedido.IdCliente);
 
-            dalPedido.Formalizar(pedido.IdPedido);
-
             var ahora = DateTime.Now;
-            RegistrarHistorial(pedido.IdPedido, "FORMALIZAR", new List<(string, string, string)>
+            dalPedido.Formalizar(pedido.IdPedido, ArmarHistorial("FORMALIZAR", new List<(string, string, string)>
             {
                 ("Estado",             pedido.Estado.ToString(), BE.EstadoPedido.Pendiente.ToString()),
                 ("FechaFormalizacion", null,                     ahora.ToString("yyyy-MM-dd HH:mm:ss"))
-            });
+            }));
 
             var cliente = dalCliente.ObtenerPorId(pedido.IdCliente);
             var plan    = cliente?.IdPlan != null ? dalPlan.ObtenerPorId(cliente.IdPlan.Value) : null;
@@ -654,13 +639,11 @@ namespace BLL
                     "Solo se pueden despachar pedidos Pendientes. Este pedido está '{0}'.",
                     pedido.Estado);
 
-            dalPedido.Despachar(pedido.IdPedido);
-
-            RegistrarHistorial(pedido.IdPedido, "DESPACHAR", new List<(string, string, string)>
+            dalPedido.Despachar(pedido.IdPedido, ArmarHistorial("DESPACHAR", new List<(string, string, string)>
             {
                 ("Estado",       pedido.Estado.ToString(),                          BE.EstadoPedido.Despachado.ToString()),
                 ("FechaDespacho", pedido.FechaDespacho?.ToString("yyyy-MM-dd HH:mm:ss"), DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-            });
+            }));
 
             bitacora.Registrar(modulo,
                 $"Despachar Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
@@ -685,13 +668,11 @@ namespace BLL
                     "Solo se pueden marcar como entregados los pedidos Despachados. Este pedido está '{0}'.",
                     pedido.Estado);
 
-            dalPedido.MarcarEntregado(pedido.IdPedido);
-
-            RegistrarHistorial(pedido.IdPedido, "ENTREGAR", new List<(string, string, string)>
+            dalPedido.MarcarEntregado(pedido.IdPedido, ArmarHistorial("ENTREGAR", new List<(string, string, string)>
             {
                 ("Estado",      pedido.Estado.ToString(),                         BE.EstadoPedido.Entregado.ToString()),
                 ("FechaEntrega", pedido.FechaEntrega?.ToString("yyyy-MM-dd HH:mm:ss"), DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-            });
+            }));
 
             bitacora.Registrar(modulo,
                 $"Entrega Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente}",
@@ -705,8 +686,9 @@ namespace BLL
         }
 
         // Registrar Devolución
-        // Registra la devolución de prendas de un pedido Entregado.
-        public void RegistrarDevolucion(string modulo, BE.Pedido pedido)
+        // Registra la devolución de prendas de un pedido Entregado. Devuelve cuántas prendas volvieron
+        // efectivamente (las que el cliente seguía teniendo: no cuenta las reportadas como perdidas).
+        public int RegistrarDevolucion(string modulo, BE.Pedido pedido)
         {
             PermisosAccion.Exigir(BE.Patentes.PedidosRealizadosEditar, BE.Patentes.PedidosRealizados);
             if (pedido.Estado != BE.EstadoPedido.Entregado)
@@ -722,19 +704,19 @@ namespace BLL
 
             // El DAL pasa las prendas a EnLimpieza y completa Pedido.FechaDevolucion en la misma transacción.
             // El actor (quién recibe la devolución) lo resuelve la BLL desde la sesión, no la GUI;
-            // queda en MantenimientoPrenda.Actor de cada prenda que entra a limpieza.
-            int devueltas = dalPedido.RegistrarDevolucion(pedido.IdPedido, pedido.IdCliente, Sesion.Actor);
+            // queda en MantenimientoPrenda.Actor de cada prenda que entra a limpieza. El historial
+            // (que lleva la cantidad devuelta) se asienta en esa misma transacción.
+            int devueltas = dalPedido.RegistrarDevolucion(pedido.IdPedido, pedido.IdCliente, Sesion.Actor,
+                n => ArmarHistorial("DEVOLUCION", new List<(string, string, string)>
+                {
+                    ("Prendas",         "EnUso", $"EnLimpieza ({n} prenda(s))"),
+                    ("FechaDevolucion", null,    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+                }));
             if (devueltas == 0)
                 throw new BE.AppException("err.bll.pedido.devolucion_ya_hecha",
                     "El Pedido #{0} no tiene prendas en uso para devolver " +
                     "(es posible que la devolución ya se haya registrado).",
                     pedido.IdPedido);
-
-            RegistrarHistorial(pedido.IdPedido, "DEVOLUCION", new List<(string, string, string)>
-            {
-                ("Prendas",         "EnUso", $"EnLimpieza ({devueltas} prenda(s))"),
-                ("FechaDevolucion", null,    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-            });
 
             bitacora.Registrar(modulo,
                 $"Devolución Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
@@ -747,6 +729,7 @@ namespace BLL
                 $"{devueltas} prenda(s) pasan a EnLimpieza",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
+            return devueltas;
         }
 
         // Cancelar
@@ -770,13 +753,12 @@ namespace BLL
             ValidarLargoMotivo(motivo);
 
             bool separado = pedido.Estado == BE.EstadoPedido.Separado;
-            dalPedido.Cancelar(pedido.IdPedido, pedido.IdCliente, pedido.Estado, motivo.Trim());
-
-            RegistrarHistorial(pedido.IdPedido, "CANCELAR", new List<(string, string, string)>
-            {
-                ("Estado",             pedido.Estado.ToString(),            BE.EstadoPedido.Cancelado.ToString()),
-                ("MotivoCancelacion",  pedido.MotivoCancelacion,           motivo.Trim())
-            });
+            dalPedido.Cancelar(pedido.IdPedido, pedido.IdCliente, pedido.Estado, motivo.Trim(),
+                ArmarHistorial("CANCELAR", new List<(string, string, string)>
+                {
+                    ("Estado",             pedido.Estado.ToString(),            BE.EstadoPedido.Cancelado.ToString()),
+                    ("MotivoCancelacion",  pedido.MotivoCancelacion,           motivo.Trim())
+                }));
 
             string accion = separado ? "Cancelar pedido separado" : "Cancelar";
             bitacora.Registrar(modulo,
@@ -811,16 +793,15 @@ namespace BLL
             var completo = dalPedido.ObtenerPorId(pedido.IdPedido) ?? pedido;
             ComprobarCupo(cliente, completo.CantidadPrendas);
 
-            if (!dalPedido.DesCancelar(pedido.IdPedido, pedido.IdCliente))
-                throw new BE.AppException("err.bll.pedido.estado_cambiado",
-                    "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
-                    pedido.IdPedido);
-
-            RegistrarHistorial(pedido.IdPedido, "DESCANCELAR", new List<(string, string, string)>
+            var historial = ArmarHistorial("DESCANCELAR", new List<(string, string, string)>
             {
                 ("Estado",            pedido.Estado.ToString(),  BE.EstadoPedido.EnControlStock.ToString()),
                 ("MotivoCancelacion", pedido.MotivoCancelacion, null)
             });
+            if (!dalPedido.DesCancelar(pedido.IdPedido, pedido.IdCliente, historial))
+                throw new BE.AppException("err.bll.pedido.estado_cambiado",
+                    "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
+                    pedido.IdPedido);
 
             bitacora.Registrar(modulo,
                 $"Reactivar Pedido #{pedido.IdPedido} — vuelve a control de stock — Cliente: {pedido.NombreCliente}",
@@ -912,11 +893,15 @@ namespace BLL
         // ── Historial ─────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Crea y persiste registros de historial para todos los campos cambiados en un evento.
+        /// Arma los registros de historial de un evento (un registro por campo cambiado). No los
+        /// persiste: se le pasan a la escritura del DAL, que los asienta en la MISMA transacción del
+        /// cambio y les asigna el IdPedido y el IdOperacion. Así no queda un cambio sin historial
+        /// (antes se escribía en otra transacción, después del cambio) ni dos eventos con el mismo
+        /// IdOperacion (se calculaba fuera de toda transacción).
         /// Obtiene el usuario de la sesión activa; si no hay sesión registra como anónimo.
         /// </summary>
-        private void RegistrarHistorial(int idPedido, string accion,
-                                        List<(string Campo, string Anterior, string Nuevo)> campos)
+        private static List<BE.PedidoHistorial> ArmarHistorial(string accion,
+                                                               List<(string Campo, string Anterior, string Nuevo)> campos)
         {
             int?   idUsuario     = null;
             string nombreUsuario = null;
@@ -928,13 +913,10 @@ namespace BLL
                 nombreUsuario = u.Username;
             }
 
-            int idOp = dalHistorial.ObtenerSiguienteIdOperacion(idPedido);
-
-            var registros = campos.Select(c => new BE.PedidoHistorial
+            var ahora = DateTime.Now;
+            return campos.Select(c => new BE.PedidoHistorial
             {
-                IdPedido      = idPedido,
-                IdOperacion   = idOp,
-                Fecha         = DateTime.Now,
+                Fecha         = ahora,
                 IdUsuario     = idUsuario,
                 NombreUsuario = nombreUsuario,
                 Accion        = accion,
@@ -942,8 +924,6 @@ namespace BLL
                 ValorAnterior = c.Anterior,
                 ValorNuevo    = c.Nuevo
             }).ToList();
-
-            dalHistorial.RegistrarCambios(registros);
         }
 
         /// <summary>
@@ -1040,7 +1020,8 @@ namespace BLL
 
             // Solo la última operación: revertir una intermedia dejaría al pedido en un estado que
             // ignora lo que pasó después (por ejemplo, una devolución ya registrada).
-            int ultima = dalHistorial.ObtenerSiguienteIdOperacion(idPedido) - 1;
+            // (El DAL lo vuelve a verificar dentro de la transacción de la restauración.)
+            int ultima = dalHistorial.ObtenerUltimaIdOperacion(idPedido);
             if (idOperacion != ultima)
                 throw new BE.AppException("err.bll.pedido.restaurar_no_ultima",
                     "Solo se puede revertir la última operación del Pedido #{0} (la #{1}).", idPedido, ultima);
@@ -1059,14 +1040,12 @@ namespace BLL
                     "El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.",
                     idPedido);
 
-            // Restauración ATÓMICA: el DAL vuelve a exigir el estado esperado (WHERE Estado=...),
-            // revierte los campos y verifica las prendas en UNA sola transacción; también
-            // recalcula el DV del pedido después de confirmar.
-            dalPedido.RestaurarOperacionAtomica(idPedido, estadoQueDejo,
-                cambios.Select(c => (c.Campo, c.ValorAnterior)).ToList());
-
-            RegistrarHistorial(idPedido, "RESTAURAR",
-                cambios.Select(c => (c.Campo, c.ValorNuevo, c.ValorAnterior)).ToList());
+            // Restauración ATÓMICA: el DAL vuelve a exigir el estado esperado (WHERE Estado=...) y
+            // que siga siendo la última operación, revierte los campos, verifica las prendas, asienta
+            // el evento RESTAURAR y recalcula el DV del pedido, todo en UNA sola transacción.
+            dalPedido.RestaurarOperacionAtomica(idPedido, idOperacion, estadoQueDejo,
+                cambios.Select(c => (c.Campo, c.ValorAnterior)).ToList(),
+                ArmarHistorial("RESTAURAR", cambios.Select(c => (c.Campo, c.ValorNuevo, c.ValorAnterior)).ToList()));
 
             bitacora.Registrar(modulo,
                 $"Restaurar Pedido #{idPedido} — Revertida operación '{accionOriginal}' (op. #{idOperacion})",

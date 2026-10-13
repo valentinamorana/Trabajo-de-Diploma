@@ -302,6 +302,40 @@ namespace DAL
             });
         }
 
+        /// <summary>
+        /// Escritura de negocio + DV en UNA transacción: toma el bloqueo del DV de la tabla ANTES de
+        /// escribir, corre 'escritura' (que devuelve los Id de las filas que tocó), recalcula sus DVH y
+        /// el DVV, y recién ahí confirma. Si cualquier paso falla se revierte todo: nunca queda una
+        /// fila cambiada con el DV viejo (que el arranque marcaría como base manipulada).
+        /// </summary>
+        public T EscribirConDV<T>(string tabla, string pkCol, string[] columnas,
+                                  Func<SqlConnection, SqlTransaction, T> escritura,
+                                  Func<T, IEnumerable<int>> filasTocadas)
+        {
+            T resultado = default(T);
+            EjecutarConBloqueo(tabla, (cn, tx) =>
+            {
+                resultado = escritura(cn, tx);
+                ActualizarFilasYDVVEnTx(cn, tx, tabla, pkCol, columnas, filasTocadas(resultado));
+            });
+            return resultado;
+        }
+
+        /// <summary>Recalcula los DVH de las filas indicadas y el DVV, dentro de una transacción que
+        /// ya tiene tomado el bloqueo del DV de la tabla. Sin filas, no hace nada.</summary>
+        internal static void ActualizarFilasYDVVEnTx(SqlConnection cn, SqlTransaction tx, string tabla,
+                                                     string pkCol, string[] columnas, IEnumerable<int> ids)
+        {
+            bool alguna = false;
+            if (ids != null)
+                foreach (int id in new HashSet<int>(ids))
+                {
+                    ActualizarFilaEnTx(cn, tx, tabla, pkCol, columnas, id);
+                    alguna = true;
+                }
+            if (alguna) GuardarDVVDesdeAlmacenadosEnTx(cn, tx, tabla, OrdenPor(pkCol));
+        }
+
         internal static void ActualizarFilaEnTx(SqlConnection cn, SqlTransaction tx,
                                                 string tabla, string pkCol, string[] columnas, int id)
         {

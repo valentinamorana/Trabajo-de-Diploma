@@ -23,6 +23,10 @@ namespace BLL
             _dal = dal;
         }
 
+        /// <summary>Al arrancar: borra las copias sin cifrar que haya dejado un backup o una
+        /// restauración interrumpidos (ver DAL.Backup.LimpiarTemporalesHuerfanos). Nunca lanza.</summary>
+        public static int LimpiarTemporalesHuerfanos() => DAL.Backup.LimpiarTemporalesHuerfanos();
+
         // Extensión de los backups CIFRADOS (con contraseña). Los .bak planos legacy se siguen
         // pudiendo restaurar para no romper copias anteriores.
         public const string ExtensionCifrada = ".wfbak";

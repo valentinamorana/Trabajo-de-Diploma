@@ -473,7 +473,7 @@ namespace GUI
             AbrirUnico(() => new Prendas());
         }
 
-        // PN04, CU-DEP-01 Inspeccionar Devolución.
+        // PN04, CU05-DEP Inspeccionar Devolución.
         // PN01 — Control de Stock (Depósito): revisar stock, informar faltantes, confirmar y separar.
         private void controlStockToolStripMenuItem_Click(object sender, EventArgs e)
         {

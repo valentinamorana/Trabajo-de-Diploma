@@ -4249,6 +4249,7 @@ ES	err.bll.renovacion.pausa_excede_tope	La pausa no puede superar los {0} meses 
 ES	err.bll.renovacion.pausa_con_prendas	No se puede pausar: el cliente tiene prendas en uso pendientes de devolución.
 ES	err.bll.renovacion.ya_pausada	La suscripción ya está pausada. Reanudala antes de pedir una nueva pausa.
 ES	err.bll.cobro.cargo_concurrente	Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.
+ES	err.bll.cobro.credito_concurrente	El crédito por referido del cliente ya se aplicó en otro cobro. Actualizá y volvé a calcular el importe.
 ES	err.bll.pedido.suscripcion_pausada	La suscripción de {0} está pausada hasta el {1}. Reanudarla en el módulo de Clientes antes de generar un nuevo pedido.
 ES	err.bll.cliente.no_pausada	{0} no tiene la suscripción pausada.
 ES	lbl.cli.referente	Referido por
@@ -4281,6 +4282,7 @@ EN	err.bll.renovacion.pausa_excede_tope	A pause can't exceed {0} months (until {
 EN	err.bll.renovacion.pausa_con_prendas	Can't pause: the customer has garments in use pending return.
 EN	err.bll.renovacion.ya_pausada	The subscription is already paused. Resume it before requesting a new pause.
 EN	err.bll.cobro.cargo_concurrente	The customer's pending charges were already collected by another session. Refresh and try again.
+EN	err.bll.cobro.credito_concurrente	The customer's referral credit was already applied in another charge. Refresh and recalculate the amount.
 EN	err.bll.pedido.suscripcion_pausada	{0}'s subscription is paused until {1}. Resume it in the Customers module before creating a new order.
 EN	err.bll.cliente.no_pausada	{0}'s subscription is not paused.
 EN	lbl.cli.referente	Referred by
@@ -4313,6 +4315,7 @@ RU	err.bll.renovacion.pausa_excede_tope	Пауза не может превыш�
 RU	err.bll.renovacion.pausa_con_prendas	Невозможно приостановить: у клиента есть вещи, которые нужно вернуть.
 RU	err.bll.renovacion.ya_pausada	Подписка уже приостановлена. Возобновите её, прежде чем запрашивать новую паузу.
 RU	err.bll.cobro.cargo_concurrente	Ожидающие списания клиента уже обработаны в другом сеансе. Обновите и повторите.
+RU	err.bll.cobro.credito_concurrente	Реферальный кредит клиента уже применён в другой оплате. Обновите и пересчитайте сумму.
 RU	err.bll.pedido.suscripcion_pausada	Подписка {0} приостановлена до {1}. Возобновите её в модуле Клиентов перед созданием нового заказа.
 RU	err.bll.cliente.no_pausada	Подписка {0} не приостановлена.
 RU	lbl.cli.referente	Приглашён кем
@@ -4345,6 +4348,7 @@ PT	err.bll.renovacion.pausa_excede_tope	A pausa não pode exceder {0} meses (at�
 PT	err.bll.renovacion.pausa_con_prendas	Não é possível pausar: o cliente tem peças em uso pendentes de devolução.
 PT	err.bll.renovacion.ya_pausada	A assinatura já está pausada. Retome-a antes de pedir uma nova pausa.
 PT	err.bll.cobro.cargo_concurrente	As cobranças pendentes do cliente já foram cobradas por outra sessão. Atualize e tente novamente.
+PT	err.bll.cobro.credito_concurrente	O crédito por indicação do cliente já foi aplicado em outra cobrança. Atualize e recalcule o valor.
 PT	err.bll.pedido.suscripcion_pausada	A assinatura de {0} está pausada até {1}. Retome-a no módulo de Clientes antes de gerar um novo pedido.
 PT	err.bll.cliente.no_pausada	A assinatura de {0} não está pausada.
 PT	lbl.cli.referente	Indicado por
@@ -7340,3 +7344,7 @@ ES	err.adminusr.guardadoparcial	Se guardaron los datos del usuario, pero no se p
 EN	err.adminusr.guardadoparcial	The user data was saved, but the role could not be changed: {0}
 RU	err.adminusr.guardadoparcial	Данные пользователя сохранены, но роль изменить не удалось: {0}
 PT	err.adminusr.guardadoparcial	Os dados do usuário foram salvos, mas não foi possível alterar o perfil: {0}
+ES	err.bll.version.username_en_uso	No se puede restaurar esta versión: el nombre de usuario '{0}' ya lo usa otro usuario.
+EN	err.bll.version.username_en_uso	This version cannot be restored: the username '{0}' is already used by another user.
+RU	err.bll.version.username_en_uso	Невозможно восстановить эту версию: имя пользователя «{0}» уже использует другой пользователь.
+PT	err.bll.version.username_en_uso	Não é possível restaurar esta versão: o nome de usuário '{0}' já é usado por outro usuário.

@@ -58,36 +58,37 @@ namespace DAL
             return dt == null || dt.Rows.Count == 0 ? null : DigitoVerificador.MapearFilaUsuario(dt.Rows[0]);
         }
 
-        // Inserta o actualiza (upsert) la fila del espejo para un usuario. La llama la app tras cada
-        // escritura legítima sobre el usuario (cuando recalcula su DVH).
-        public void Upsert(BE.FilaUsuarioDV fila)
+        // Inserta o actualiza (upsert) la fila del espejo para un usuario. La llama DAL.Usuario tras
+        // cada escritura legítima, dentro de la MISMA transacción que la escritura y el recálculo de
+        // su DVH: o quedan los tres (fila, DV y espejo) o no queda ninguno.
+        internal static void UpsertEnTx(SqlConnection cn, SqlTransaction tx, BE.FilaUsuarioDV fila)
         {
             if (fila == null) return;
-            try
+            using (var cmd = new SqlCommand(
+                "IF EXISTS (SELECT 1 FROM Usuario_Seguridad WHERE IdUsuario = @id) " +
+                "    UPDATE Usuario_Seguridad SET Username=@u, Clave=@c, Rol=@r, Perfil=@p, " +
+                "        Estado=@e, IntentosFallidos=@i, Activo=@a, RequiereCambioClave=@rc, " +
+                "        CantidadBloqueos=@cb, FechaBloqueo=@fb, DVH=@dvh, FechaActualizacion=GETDATE() " +
+                "    WHERE IdUsuario=@id " +
+                "ELSE " +
+                "    INSERT INTO Usuario_Seguridad (" + Columnas + ", FechaActualizacion) " +
+                "    VALUES (@id, @u, @c, @r, @p, @e, @i, @a, @rc, @cb, @fb, @dvh, GETDATE())",
+                cn, tx))
             {
-                acceso.Escribir(
-                    "IF EXISTS (SELECT 1 FROM Usuario_Seguridad WHERE IdUsuario = @id) " +
-                    "    UPDATE Usuario_Seguridad SET Username=@u, Clave=@c, Rol=@r, Perfil=@p, " +
-                    "        Estado=@e, IntentosFallidos=@i, Activo=@a, RequiereCambioClave=@rc, " +
-                    "        CantidadBloqueos=@cb, FechaBloqueo=@fb, DVH=@dvh, FechaActualizacion=GETDATE() " +
-                    "    WHERE IdUsuario=@id " +
-                    "ELSE " +
-                    "    INSERT INTO Usuario_Seguridad (" + Columnas + ", FechaActualizacion) " +
-                    "    VALUES (@id, @u, @c, @r, @p, @e, @i, @a, @rc, @cb, @fb, @dvh, GETDATE())",
-                    ParametrosFila(fila));
-            }
-            catch (Exception ex)
-            {
-                // El espejo es un respaldo: no aborta la escritura de negocio ya confirmada, pero se registra.
-                System.Diagnostics.Trace.TraceError($"[DAL.EspejoUsuario.Upsert] {ex.Message}");
+                cmd.Parameters.AddRange(ParametrosFila(fila));
+                cmd.ExecuteNonQuery();
             }
         }
 
-        // Elimina una fila del espejo (cuando se da de baja FÍSICA un usuario legítimamente).
-        public void Eliminar(int idUsuario)
+        // Elimina una fila del espejo (cuando se da de baja FÍSICA un usuario legítimamente),
+        // dentro de la transacción de la baja.
+        internal static void EliminarEnTx(SqlConnection cn, SqlTransaction tx, int idUsuario)
         {
-            acceso.Escribir("DELETE FROM Usuario_Seguridad WHERE IdUsuario = @id",
-                new SqlParameter[] { new SqlParameter("@id", idUsuario) });
+            using (var cmd = new SqlCommand("DELETE FROM Usuario_Seguridad WHERE IdUsuario = @id", cn, tx))
+            {
+                cmd.Parameters.AddWithValue("@id", idUsuario);
+                cmd.ExecuteNonQuery();
+            }
         }
 
         // Reconstruye TODO el espejo desde una lista de filas legítimas (wipe + reinsert), en una

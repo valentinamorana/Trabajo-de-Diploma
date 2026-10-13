@@ -329,7 +329,7 @@ namespace Tests
             Assert.IsNotNull(ctx.DalPedido.UltimoAltaSinReserva.FechaEnvioControl);
             Assert.AreEqual(5, ctx.DalPedido.UltimoAltaSinReserva.IdEmpleado);
             Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces, "Enviar a control no reserva prendas.");
-            Assert.AreEqual("ENVIAR_CONTROL", ctx.DalHistorial.UltimoCambiosRegistrados[0].Accion);
+            Assert.AreEqual("ENVIAR_CONTROL", ctx.DalPedido.UltimoHistorial[0].Accion);
         }
 
         [TestMethod]
@@ -435,7 +435,7 @@ namespace Tests
 
             Assert.AreEqual(1, ctx.DalPedido.RegistrarDesistimientoVeces);
             Assert.AreEqual(BE.EtapaDesistimiento.Disponibilidad, ctx.DalPedido.UltimaEtapaDesistimiento);
-            Assert.AreEqual("DESISTIR", ctx.DalHistorial.UltimoCambiosRegistrados[0].Accion);
+            Assert.AreEqual("DESISTIR", ctx.DalPedido.UltimoHistorial[0].Accion);
         }
 
         [TestMethod]
@@ -462,7 +462,7 @@ namespace Tests
 
             Assert.AreEqual(1, ctx.DalPedido.ReemplazarSeleccionVeces);
             Assert.AreEqual(2, ctx.DalPedido.UltimaSeleccionReemplazada.Count);
-            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            var estado = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Estado");
             Assert.AreEqual("EnControlStock", estado.ValorNuevo);
         }
 
@@ -656,7 +656,7 @@ namespace Tests
             CollectionAssert.AreEqual(new[] { 3 }, faltantes[0].Alternativas.ConvertAll(a => a.IdPrenda));
             Assert.AreEqual(1, ctx.DalPedido.RegistrarFaltantesVeces);
             Assert.AreEqual(5, ctx.DalPedido.UltimoIdEmpleadoControl);
-            Assert.AreEqual("INFORMAR_FALTANTES", ctx.DalHistorial.UltimoCambiosRegistrados[0].Accion);
+            Assert.AreEqual("INFORMAR_FALTANTES", ctx.DalPedido.UltimoHistorial[0].Accion);
         }
 
         [TestMethod]
@@ -682,7 +682,7 @@ namespace Tests
             ctx.Crear().ConfirmarPrendasDisponibles("Test", PedidoEn(BE.EstadoPedido.EnControlStock, Prenda(1)));
 
             Assert.AreEqual(1, ctx.DalPedido.ConfirmarPrendasVeces);
-            Assert.AreEqual("CONFIRMAR_PRENDAS", ctx.DalHistorial.UltimoCambiosRegistrados[0].Accion);
+            Assert.AreEqual("CONFIRMAR_PRENDAS", ctx.DalPedido.UltimoHistorial[0].Accion);
         }
 
         [TestMethod]
@@ -720,7 +720,7 @@ namespace Tests
 
             Assert.AreEqual(1, ctx.DalPedido.SepararPrendasVeces);
             Assert.AreEqual(1, ctx.DalListaEspera.CerrarSiReservadaVeces);
-            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            var estado = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Estado");
             Assert.AreEqual("Separado", estado.ValorNuevo);
         }
 
@@ -762,7 +762,7 @@ namespace Tests
             ctx.Crear().FormalizarPedido("Test", PedidoEn(BE.EstadoPedido.Separado, Prenda(1)));
 
             Assert.AreEqual(1, ctx.DalPedido.FormalizarVeces);
-            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            var estado = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Estado");
             Assert.AreEqual("Separado", estado.ValorAnterior);
             Assert.AreEqual("Pendiente", estado.ValorNuevo);
         }
@@ -962,10 +962,15 @@ namespace Tests
             var bll = ctx.Crear();
             var pedido = new BE.Pedido { IdPedido = 1, IdCliente = 10, Estado = BE.EstadoPedido.Entregado };
 
-            bll.RegistrarDevolucion("Test", pedido);
+            int devueltas = bll.RegistrarDevolucion("Test", pedido);
 
+            Assert.AreEqual(2, devueltas, "Informa las prendas que volvieron de verdad, no todas las del pedido.");
             Assert.AreEqual(1, ctx.DalPedido.RegistrarDevolucionVeces, "La devolución (En uso a En limpieza, con mantenimiento) se hace una sola vez.");
-            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces, "Queda la operación DEVOLUCION en el historial.");
+            Assert.AreEqual(1, ctx.DalPedido.HistorialRegistradoVeces,
+                "La operación DEVOLUCION se le pasa al DAL para asentarla en la misma transacción.");
+            var prendas = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Prendas");
+            Assert.AreEqual("DEVOLUCION", prendas.Accion);
+            StringAssert.Contains(prendas.ValorNuevo, "(2 prenda(s))", "El historial lleva la cantidad que devolvió el DAL.");
             Assert.AreEqual("admin", ctx.DalPedido.UltimoActorDevolucion,
                 "El actor de la devolución lo resuelve la BLL desde la sesión y llega al DAL (MantenimientoPrenda.Actor).");
         }
@@ -992,7 +997,7 @@ namespace Tests
                 Assert.AreEqual("err.bll.pedido.devolucion_ya_hecha", ex.Clave);
             }
             Assert.AreEqual(0, ctx.DalPedido.RegistrarDevolucionVeces);
-            Assert.AreEqual(0, ctx.DalHistorial.RegistrarCambiosVeces);
+            Assert.AreEqual(0, ctx.DalPedido.HistorialRegistradoVeces);
         }
 
         // ── PN04 — fecha de devolución: devuelto vs en poder del cliente ──────
@@ -1177,14 +1182,14 @@ namespace Tests
             bll.DesCancelar("Test", pedido);
 
             Assert.AreEqual(1, ctx.DalPedido.DesCancelarVeces);
-            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces);
+            Assert.AreEqual(1, ctx.DalPedido.HistorialRegistradoVeces);
 
-            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            var estado = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Estado");
             Assert.AreEqual("Cancelado", estado.ValorAnterior);
             Assert.AreEqual("EnControlStock", estado.ValorNuevo);
             Assert.AreEqual(0, ctx.DalPedido.SepararPrendasVeces, "Reactivar no reserva: separa Depósito.");
 
-            var motivo = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "MotivoCancelacion");
+            var motivo = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "MotivoCancelacion");
             Assert.AreEqual("Cliente se arrepintió", motivo.ValorAnterior);
             Assert.IsNull(motivo.ValorNuevo);
         }
@@ -1292,7 +1297,7 @@ namespace Tests
             {
                 new BE.PedidoHistorial { Campo = "Estado", Accion = "DESPACHAR", ValorAnterior = "Pendiente", ValorNuevo = "Despachado" }
             };
-            ctx.DalHistorial.SiguienteIdOperacion = 6;   // la #5 es la última operación del pedido
+            ctx.DalHistorial.UltimaIdOperacion = 5;   // la #5 es la última operación del pedido
             ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 1, Estado = BE.EstadoPedido.Despachado });
             var bll = ctx.Crear();
 
@@ -1302,6 +1307,8 @@ namespace Tests
             // que tiene que seguir teniendo el pedido (claim atómico).
             Assert.AreEqual(1, ctx.DalPedido.RestaurarOperacionAtomicaVeces);
             Assert.AreEqual(BE.EstadoPedido.Despachado, ctx.DalPedido.UltimoEstadoEsperadoRestaurar);
+            Assert.AreEqual(5, ctx.DalPedido.UltimoIdOperacionRestaurar,
+                "El DAL vuelve a exigir, en su transacción, que sea la última operación.");
             Assert.AreEqual("Estado", ctx.DalPedido.UltimoRestaurarOperacionCampos[0].Campo);
             Assert.AreEqual("Pendiente", ctx.DalPedido.UltimoRestaurarOperacionCampos[0].ValorAnterior);
 
@@ -1309,8 +1316,8 @@ namespace Tests
             // original: lo que estaba "Nuevo" pasa a ser el "Anterior" de este evento (el estado
             // del que se viene al restaurar) y el "Anterior" original pasa a ser el "Nuevo" (a
             // donde se vuelve) — swap fácil de invertir por error, de ahí el test explícito.
-            Assert.AreEqual(1, ctx.DalHistorial.RegistrarCambiosVeces);
-            var restaurado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            Assert.AreEqual(1, ctx.DalPedido.HistorialRegistradoVeces);
+            var restaurado = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Estado");
             Assert.AreEqual("RESTAURAR", restaurado.Accion);
             Assert.AreEqual("Despachado", restaurado.ValorAnterior);
             Assert.AreEqual("Pendiente", restaurado.ValorNuevo);
@@ -1327,7 +1334,7 @@ namespace Tests
             {
                 new BE.PedidoHistorial { Campo = "Estado", Accion = accion, ValorAnterior = anterior, ValorNuevo = nuevo }
             };
-            ctx.DalHistorial.SiguienteIdOperacion = siguiente;
+            ctx.DalHistorial.UltimaIdOperacion = siguiente - 1;
             ctx.DalPedido.PedidosDevueltos.Add(new BE.Pedido { IdPedido = 1, Estado = estadoActual });
             try { ctx.Crear().RestaurarOperacion("Test", 1, op); Assert.Fail("Debía rechazar: " + accion); }
             catch (BE.AppException ex) { Assert.AreEqual(claveEsperada, ex.Clave, accion); }
@@ -1373,7 +1380,7 @@ namespace Tests
 
             Assert.AreEqual(1, ctx.DalPedido.CancelarVeces);
             Assert.AreEqual(BE.EstadoPedido.Separado, ctx.DalPedido.UltimoEstadoEsperadoCancelar, "Claim: solo si sigue Separado.");
-            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            var estado = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Estado");
             Assert.AreEqual("Separado", estado.ValorAnterior);
             Assert.AreEqual("Cancelado", estado.ValorNuevo);
         }
@@ -1392,7 +1399,7 @@ namespace Tests
 
             Assert.AreEqual(1, ctx.DalPedido.CancelarVeces);
             Assert.AreEqual(BE.EstadoPedido.EnControlStock, ctx.DalPedido.UltimoEstadoEsperadoCancelar, "Claim: solo si sigue en control.");
-            var estado = ctx.DalHistorial.UltimoCambiosRegistrados.Find(c => c.Campo == "Estado");
+            var estado = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Estado");
             Assert.AreEqual("EnControlStock", estado.ValorAnterior);
             Assert.AreEqual("Cancelado", estado.ValorNuevo);
         }

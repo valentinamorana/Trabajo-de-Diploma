@@ -130,8 +130,8 @@ namespace BLL
             int idNuevo = dalCliente.Alta(cliente);
             cliente.IdCliente = idNuevo;
 
-            // El DNI del cliente se guarda en TEXTO PLANO en la tabla Cliente (a diferencia del
-            // Empleado, que sí se cifra): se busca por DNI exacto (PN01) y se valida su unicidad.
+            // El DNI del cliente se guarda en TEXTO PLANO en la tabla Cliente (igual que el del
+            // Empleado): se busca por DNI exacto (PN01) y se valida su unicidad.
             // Por eso no se copia a la Bitácora (dato personal; suele tener otros controles de
             // acceso): el IdCliente ya identifica el registro sin exponerlo.
             bitacora.Registrar(modulo, $"Alta Cliente ID {cliente.IdCliente}: {cliente.NombreCompleto}", BE.Criticidad.Baja);
@@ -357,14 +357,12 @@ namespace BLL
                 if (referente != null)
                     dalCliente.SumarCreditoEnTx(conexion, tx, referente.IdCliente, MontoBeneficioReferido);
             });
+            // El DV de las dos filas (cliente y referente) ya se recalculó dentro de la transacción.
             // La activación ya quedó confirmada: un fallo del registro posterior no debe propagarse,
             // porque BLL.Contratacion.ConfirmarCobro lo interpretaría como activación fallida y
             // reabriría el cobro de una suscripción que sí quedó activa (doble cobro).
             try
             {
-                dalCliente.RecalcularDV(cliente.IdCliente);
-                if (referente != null) dalCliente.RecalcularDV(referente.IdCliente);
-
                 bitacora.Registrar(modulo,
                     $"Activar Suscripción Cliente ID {cliente.IdCliente}: plan '{plan.Nombre}', " +
                     $"modalidad {modalidad}, vence {suscripcion.FechaVencimiento:d}" +

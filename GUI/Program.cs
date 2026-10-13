@@ -34,6 +34,9 @@ namespace GUI
                 return;
             }
 
+            // T08 — Copias de la base SIN CIFRAR que dejó un backup o una restauración cortados.
+            BLL.Backup.LimpiarTemporalesHuerfanos();
+
             // Etapa 5 — i18n 100% desde BD: sembrar (si falta) y cargar el idioma por defecto desde
             // la BD ANTES de mostrar cualquier pantalla, para que toda la app (Login y diálogos de
             // arranque incluidos) se renderice desde la base. Si la BD/i18n fallara, el Traductor

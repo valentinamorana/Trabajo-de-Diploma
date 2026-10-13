@@ -632,7 +632,13 @@ namespace BLL
 
         private void Compensar(string modulo, BE.Contratacion actual, IList<int> idsCargo = null)
         {
-            try { dalContratacion.ReabrirPago(actual.IdContratacion, idsCargo); }
+            try
+            {
+                // false: la contratación ya no estaba Pagada y no se reabrió nada; queda un cobro sin
+                // suscripción que no se pudo deshacer, igual que si la compensación hubiera fallado.
+                if (!dalContratacion.ReabrirPago(actual.IdContratacion, idsCargo))
+                    throw new InvalidOperationException("La contratación ya no estaba Pagada.");
+            }
             catch (Exception ex)
             {
                 // Peor caso: el cobro quedó registrado y no se pudo reabrir. Se deja constancia de

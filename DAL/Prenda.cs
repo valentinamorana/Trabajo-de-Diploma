@@ -274,25 +274,45 @@ namespace DAL
         // misma prenda) y se aborta en vez de pisarlo.
         // IdUltimoCliente solo se pisa cuando se pasa un idClienteActual concreto (asignación);
         // en las demás transiciones (limpieza, baja) se conserva el último dueño conocido.
-        public void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null)
+        // El mantenimiento se abre o se cierra en la MISMA transacción que el cambio de estado: antes
+        // eran dos escrituras sueltas y, si fallaba la segunda, una prenda reingresada quedaba con el
+        // mantenimiento de la devolución abierto (y se la podía volver a inspeccionar y cobrar).
+        public void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null,
+                                  Interfaces.MovimientoMantenimiento mantenimiento = Interfaces.MovimientoMantenimiento.Ninguno,
+                                  string actor = null)
         {
-            SqlParameter[] p =
+            acceso.EjecutarTransaccion((cn, tx) =>
             {
-                new SqlParameter("@Estado", (int)nuevoEstado),
-                new SqlParameter("@EstadoAnterior", (int)estadoAnterior),
-                new SqlParameter("@IdClienteActual", (object)idClienteActual ?? DBNull.Value),
-                new SqlParameter("@IdUltimoCliente", (object)idClienteActual ?? DBNull.Value),
-                new SqlParameter("@IdPrenda", idPrenda)
-            };
-            int afectadas = acceso.Escribir(
-                "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdClienteActual, " +
-                "IdUltimoCliente=COALESCE(@IdUltimoCliente, IdUltimoCliente) " +
-                "WHERE IdPrenda=@IdPrenda AND Estado=@EstadoAnterior",
-                p);
+                int afectadas;
+                using (var cmd = new SqlCommand(
+                    "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdClienteActual, " +
+                    "IdUltimoCliente=COALESCE(@IdUltimoCliente, IdUltimoCliente) " +
+                    "WHERE IdPrenda=@IdPrenda AND Estado=@EstadoAnterior", cn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@Estado", (int)nuevoEstado);
+                    cmd.Parameters.AddWithValue("@EstadoAnterior", (int)estadoAnterior);
+                    cmd.Parameters.AddWithValue("@IdClienteActual", (object)idClienteActual ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@IdUltimoCliente", (object)idClienteActual ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@IdPrenda", idPrenda);
+                    afectadas = cmd.ExecuteNonQuery();
+                }
+                if (afectadas == 0)
+                    throw new BE.AppException("err.dal.prenda.estado_cambio",
+                        "El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.");
 
-            if (afectadas == 0)
-                throw new BE.AppException("err.dal.prenda.estado_cambio",
-                    "El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.");
+                if (mantenimiento == Interfaces.MovimientoMantenimiento.Ninguno) return;
+                // Abrir: mantenimiento MANUAL (Origen = 0, DEFAULT de la columna); los de una devolución
+                // los abre DAL.Pedido.RegistrarDevolucion con Origen = 1.
+                string sql = mantenimiento == Interfaces.MovimientoMantenimiento.Abrir
+                    ? "INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, Actor) VALUES (@IdPrenda, GETDATE(), @Actor)"
+                    : "UPDATE MantenimientoPrenda SET FechaSalida = GETDATE() WHERE IdPrenda = @IdPrenda AND FechaSalida IS NULL";
+                using (var cmd = new SqlCommand(sql, cn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@IdPrenda", idPrenda);
+                    cmd.Parameters.AddWithValue("@Actor", (object)actor ?? DBNull.Value);
+                    cmd.ExecuteNonQuery();
+                }
+            });
         }
 
         private BE.Prenda Mapear(DataRow row)

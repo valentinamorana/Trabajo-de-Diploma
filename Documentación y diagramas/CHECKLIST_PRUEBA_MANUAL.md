@@ -26,6 +26,7 @@ Marcar cada punto: OK / falla (anotar qué se vio).
 Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, sin pedidos en curso ni prendas sin devolver.
 
 **Identificación y avisos (Vendedor → Nuevo pedido)**
+- [ ] **Ajustar selección** de un pedido Con faltantes cuyo cliente tiene la suscripción vencida: avisa que la suscripción no está vigente y no abre el catálogo (el pedido se puede desistir).
 - [ ] Buscar por DNI exacto encuentra al cliente; buscar por parte del nombre o del apellido muestra la lista de coincidencias.
 - [ ] Al elegirlo se ve la ficha: plan, vencimiento, prendas en uso, último pedido, método de pago y fecha de alta.
 - [ ] Con un cliente vencido, pausado o sin plan aparece el aviso de suscripción no vigente y no deja avanzar.
@@ -87,7 +88,7 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 - [ ] Después de **Registrar devolución**, las prendas aparecen en Inspección (En limpieza) y en el historial de mantenimiento de la prenda.
 - [ ] Inspección: aprobar reingreso deja la prenda Disponible; dar de baja y cobrar registra el cargo antes de la baja.
 - [ ] Prendas → Estado sobre una prenda devuelta (En limpieza, en la cola de Inspección): no ofrece ningún destino y deriva a la Inspección. Una prenda que entró a limpieza en el depósito sí se puede dejar Disponible desde Prendas.
-- [ ] Logístico solo ve Pedidos realizados.
+- [ ] Logístico solo ve Pedidos realizados, y ahí no aparece **Reportar pérdida** (es de Depósito).
 
 ## 4. Gerentes (`gcomercial`, `ginventario`)
 
@@ -115,9 +116,12 @@ Sigue el diagrama de actividad de EA. Usar un cliente con suscripción vigente, 
 - [ ] **Administrar → Perfiles y Permisos** tiene dos pestañas: **Gestión de roles** (igual que antes) y **Vista completa** (el árbol de solo lectura, con **Expandir todo** / **Colapsar todo**). Un cambio hecho en Gestión de roles se ve en la Vista completa sin reabrir; ya no hay botón "Ver vista completa del sistema" ni ventana aparte.
 - [ ] Integridad: diagnóstico sin advertencias en una base recién instalada.
 - [ ] Historial de un pedido: **Restaurar** funciona para quien puede editar pedidos y se rechaza para quien no.
+- [ ] **Ver historial de cambios** de un usuario: restaurar una versión cuyo nombre de usuario ya usa otro usuario muestra el aviso "el nombre de usuario … ya lo usa otro usuario" y no cambia nada.
+- [ ] Bloqueos: un usuario que se bloqueó por intentos fallidos y después ingresa bien, al volver a equivocarse 3 veces queda bloqueado 1 minuto (la escala vuelve a empezar).
 
 ## 7. Instalador (en otra computadora)
 
 - [ ] Instala con SQL Server o LocalDB; crea la base con datos de demo; el acceso directo abre la aplicación.
 - [ ] Ingresa con cada usuario del archivo de credenciales.
-- [ ] Desinstalar no deja errores.
+- [ ] Desinstalar no deja errores. El diálogo dice "¿Desea borrar también la base de datos…?" (los mensajes del instalador van en usted).
+- [ ] Actualización sobre una base existente donde el usuario `admin` se renombró: la actualización termina bien (exige solo un Administrador activo).

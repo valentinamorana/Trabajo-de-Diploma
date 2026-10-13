@@ -302,13 +302,15 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ValorInicialPromocion_PorcentajeConBeneficioEnPesos_ProponeDiezPorCiento()
+        public void ValorInicialPromocion_EsUnDescuentoPorClienteYNoElBeneficioTotal()
         {
             var s = Sugerencia(BE.EstadoSugerencia.Pendiente);
-            s.BeneficioEstimado = 16000m;
-            Assert.AreEqual(10m, s.ValorInicialPromocion());
+            s.BeneficioEstimado = 96000m;
+            s.TipoDescuentoSugerido = BE.TipoDescuento.Porcentaje;
+            Assert.AreEqual(10m, s.ValorInicialPromocion(8000m));
             s.TipoDescuentoSugerido = BE.TipoDescuento.MontoFijo;
-            Assert.AreEqual(16000m, s.ValorInicialPromocion());
+            Assert.AreEqual(800m, s.ValorInicialPromocion(8000m), "10 % del precio del plan, no los $ 96.000 a retener.");
+            Assert.AreEqual(0m, s.ValorInicialPromocion(null));
         }
     }
 }

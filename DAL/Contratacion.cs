@@ -24,13 +24,24 @@ namespace DAL
             "IdReferenteAcreditado", "IdPlanCuotas", "RecargoCuotas", "CreditoCambioPlan", "MotivoAnulacion"
         };
 
-        // Recalcula el DVH de la fila y el DVV de la tabla. Best-effort: la escritura de negocio
-        // ya quedó confirmada; si esto falla, la verificación de integridad lo detecta.
-        private static void ActualizarDV(int idContratacion)
+        // T07 — Cada escritura recalcula el DVH de la fila y el DVV en la MISMA transacción, con el
+        // bloqueo del DV tomado antes de escribir (DigitoVerificador.EscribirConDV). Si el recálculo
+        // falla se revierte también la escritura: antes el DV se recalculaba después del commit y su
+        // error se tragaba, y el arranque marcaba la base como manipulada.
+        // Orden de bloqueos si una transacción toca las dos tablas: primero Cliente, después Contratacion.
+        private static T EscribirConDV<T>(Func<SqlConnection, SqlTransaction, T> escritura, Func<T, IEnumerable<int>> filasTocadas)
+            => new DigitoVerificador().EscribirConDV(DV_Tabla, DV_Pk, DV_Columnas, escritura, filasTocadas);
+
+        private static int EscribirEnTx(SqlConnection cn, SqlTransaction tx, string sql, SqlParameter[] p)
         {
-            try { new DigitoVerificador().ActualizarFila(DV_Tabla, DV_Pk, DV_Columnas, idContratacion); }
-            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Contratacion.ActualizarDV] " + ex.Message); }
+            using (var cmd = new SqlCommand(sql, cn, tx))
+            {
+                cmd.Parameters.AddRange(p);
+                return cmd.ExecuteNonQuery();
+            }
         }
+
+        private static readonly int[] Ninguna = new int[0];
 
         private const string SELECT_BASE =
             "SELECT c.IdContratacion, c.IdCliente, c.IdPlan, c.IdVendedor, c.IdCaja, c.Modalidad, " +
@@ -94,13 +105,14 @@ namespace DAL
             };
             try
             {
-                DataTable tabla = acceso.Leer(
-                    "INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, Modalidad, Estado, FechaAlta, PrecioMensual) " +
-                    "VALUES (@IdCliente, @IdPlan, @IdVendedor, @Modalidad, 0, @FechaAlta, @PrecioMensual); " +
-                    "SELECT SCOPE_IDENTITY() AS IdNuevo", p);
-                int id = tabla != null && tabla.Rows.Count > 0 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"]) : 0;
-                if (id > 0) ActualizarDV(id);
-                return id;
+                return EscribirConDV((cn, tx) =>
+                {
+                    DataTable tabla = DigitoVerificador.LeerEnTx(cn, tx,
+                        "INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, Modalidad, Estado, FechaAlta, PrecioMensual) " +
+                        "VALUES (@IdCliente, @IdPlan, @IdVendedor, @Modalidad, 0, @FechaAlta, @PrecioMensual); " +
+                        "SELECT SCOPE_IDENTITY() AS IdNuevo", p);
+                    return tabla.Rows.Count > 0 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"]) : 0;
+                }, id => id > 0 ? new[] { id } : Ninguna);
             }
             catch (Exception ex) { throw new Exception("Error al registrar la contratación.", ex); }
         }
@@ -170,34 +182,48 @@ namespace DAL
             };
             try
             {
-                acceso.Escribir(
+                EscribirConDV((cn, tx) => EscribirEnTx(cn, tx,
                     "UPDATE Contratacion SET VigenciaDesde = @Desde, VigenciaHasta = @Hasta, IdReferenteAcreditado = @IdReferente " +
-                    "WHERE IdContratacion = @IdContratacion AND Estado = 1", p);
-                ActualizarDV(idContratacion);
+                    "WHERE IdContratacion = @IdContratacion AND Estado = 1", p),
+                    filas => filas > 0 ? new[] { idContratacion } : Ninguna);
             }
             catch (Exception ex) { throw new Exception("Error al registrar la vigencia de la contratación.", ex); }
         }
 
-        public void ReabrirPago(int idContratacion, IList<int> idsCargo = null)
+        // Todo en UNA transacción (con el DV): primero la contratación, que tiene que seguir Pagada
+        // (si no, no se toca nada y devuelve false); después los cargos de PN04 liquidados con ese
+        // cobro. Antes eran UPDATE sueltos: una falla a mitad de camino dejaba los cargos Pendientes
+        // con la contratación Pagada, y se volvían a cobrar en el próximo cobro (doble cobro).
+        public bool ReabrirPago(int idContratacion, IList<int> idsCargo = null)
         {
-            SqlParameter[] p = { new SqlParameter("@IdContratacion", idContratacion) };
+            SqlParameter[] p =
+            {
+                new SqlParameter("@IdContratacion", idContratacion),
+                new SqlParameter("@Pagada", (int)BE.EstadoContratacion.Pagada),
+                new SqlParameter("@PendientePago", (object)(int)BE.EstadoContratacion.PendientePago)
+            };
             try
             {
-                // Los cargos de PN04 que se habían liquidado con este cobro vuelven a quedar pendientes.
-                if (idsCargo != null)
-                    foreach (int idCargo in idsCargo)
-                        acceso.Escribir(
-                            "UPDATE CargoPrenda SET Estado = @Pendiente, FechaCobro = NULL WHERE IdCargo = @IdCargo AND Estado = @Cobrado",
-                            new[] { new SqlParameter("@IdCargo", idCargo),
-                                    new SqlParameter("@Pendiente", (object)(int)BE.EstadoCargo.Pendiente),
-                                    new SqlParameter("@Cobrado", (int)BE.EstadoCargo.Cobrado) });
-                acceso.Escribir(
-                    "UPDATE Contratacion SET Estado = 0, IdCaja = NULL, IdMedioPago = NULL, NumeroComprobante = NULL, " +
-                    "FechaComprobante = NULL, Importe = NULL, DescuentoAplicado = NULL, IdPromocion = NULL, " +
-                    "FechaResolucion = NULL, VigenciaDesde = NULL, VigenciaHasta = NULL, IdReferenteAcreditado = NULL, " +
-                    "IdPlanCuotas = NULL, RecargoCuotas = NULL, CreditoCambioPlan = NULL " +
-                    "WHERE IdContratacion = @IdContratacion AND Estado = 1", p);
-                ActualizarDV(idContratacion);
+                return EscribirConDV((cn, tx) =>
+                {
+                    int filas = EscribirEnTx(cn, tx,
+                        "UPDATE Contratacion SET Estado = @PendientePago, IdCaja = NULL, IdMedioPago = NULL, NumeroComprobante = NULL, " +
+                        "FechaComprobante = NULL, Importe = NULL, DescuentoAplicado = NULL, IdPromocion = NULL, " +
+                        "FechaResolucion = NULL, VigenciaDesde = NULL, VigenciaHasta = NULL, IdReferenteAcreditado = NULL, " +
+                        "IdPlanCuotas = NULL, RecargoCuotas = NULL, CreditoCambioPlan = NULL " +
+                        "WHERE IdContratacion = @IdContratacion AND Estado = @Pagada", p);
+                    if (filas != 1) return false;   // ya no estaba Pagada: no se reabre nada
+
+                    // Los cargos de PN04 que se habían liquidado con este cobro vuelven a quedar pendientes.
+                    if (idsCargo != null)
+                        foreach (int idCargo in idsCargo)
+                            EscribirEnTx(cn, tx,
+                                "UPDATE CargoPrenda SET Estado = @Pendiente, FechaCobro = NULL WHERE IdCargo = @IdCargo AND Estado = @Cobrado",
+                                new[] { new SqlParameter("@IdCargo", idCargo),
+                                        new SqlParameter("@Pendiente", (object)(int)BE.EstadoCargo.Pendiente),
+                                        new SqlParameter("@Cobrado", (int)BE.EstadoCargo.Cobrado) });
+                    return true;
+                }, ok => ok ? new[] { idContratacion } : Ninguna);
             }
             catch (Exception ex) { throw new Exception("Error al reabrir la contratación tras un cobro fallido.", ex); }
         }
@@ -216,21 +242,20 @@ namespace DAL
             };
             try
             {
-                bool ok = acceso.Escribir(
+                return EscribirConDV((cn, tx) => EscribirEnTx(cn, tx,
                     "UPDATE Contratacion SET Estado = @Cancelada, MotivoAnulacion = @Motivo, IdCaja = @IdCaja, " +
-                    "FechaResolucion = @Ahora WHERE IdContratacion = @IdContratacion AND Estado = 0", p) > 0;
-                if (ok) ActualizarDV(idContratacion);
-                return ok;
+                    "FechaResolucion = @Ahora WHERE IdContratacion = @IdContratacion AND Estado = 0", p) > 0,
+                    ok => ok ? new[] { idContratacion } : Ninguna);
             }
             catch (Exception ex) { throw new Exception("Error al anular la contratación.", ex); }
         }
 
         public BE.ResultadoIntentoPago RegistrarIntentoFallido(int idContratacion, int? idMedioPago, string motivo, int idCaja, int maximo)
         {
-            BE.ResultadoIntentoPago resultado = null;
             try
             {
-                acceso.EjecutarTransaccion((cn, tx) =>
+                // T07: si el intento cancela la contratación, su DV se recalcula en esta transacción.
+                return EscribirConDV<BE.ResultadoIntentoPago>((cn, tx) =>
                 {
                     // Bloquea la fila: dos sesiones de Caja no pueden numerar el mismo intento.
                     object estado;
@@ -241,7 +266,7 @@ namespace DAL
                         estado = cmd.ExecuteScalar();
                     }
                     if (estado == null || Convert.ToInt32(estado) != (int)BE.EstadoContratacion.PendientePago)
-                        return;   // otra sesión ya la resolvió
+                        return null;   // otra sesión ya la resolvió
 
                     int nro;
                     using (var cmd = new SqlCommand(
@@ -277,12 +302,10 @@ namespace DAL
                             cmd.ExecuteNonQuery();
                         }
 
-                    resultado = new BE.ResultadoIntentoPago { NroIntento = nro, Maximo = maximo, Cancelada = cancelar };
-                });
+                    return new BE.ResultadoIntentoPago { NroIntento = nro, Maximo = maximo, Cancelada = cancelar };
+                }, r => r != null && r.Cancelada ? new[] { idContratacion } : Ninguna);
             }
             catch (Exception ex) { throw new Exception("Error al registrar el intento de pago.", ex); }
-            if (resultado != null && resultado.Cancelada) ActualizarDV(idContratacion);
-            return resultado;
         }
 
         public List<BE.IntentoPago> ObtenerIntentos(int idContratacion)

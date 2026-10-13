@@ -63,7 +63,7 @@ namespace GUI.Exportacion
                 ruta = dlg.FileName;
             }
 
-            Generar(reporte, ruta, T);
+            Generar(reporte, ruta, T, _origen);
 
             // Se abre con el visor de PDF del equipo (si no hay ninguno, el archivo igual quedó guardado).
             try { Process.Start(new ProcessStartInfo(ruta) { UseShellExecute = true }); }
@@ -72,7 +72,7 @@ namespace GUI.Exportacion
         }
 
         // Escribe el PDF en 'ruta'. Público para poder generarlo sin diálogo (por ejemplo, en pruebas).
-        public static void Generar(ReporteExportable reporte, string ruta, Func<string, string, string> T)
+        public static void Generar(ReporteExportable reporte, string ruta, Func<string, string, string> T, string origen = null)
         {
             var tamanio = reporte.EsTabular ? PageSize.A4.Rotate() : PageSize.A4;   // tabular en horizontal
             using (var fs = new FileStream(ruta, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -82,6 +82,7 @@ namespace GUI.Exportacion
                 writer.PageEvent = new PiePagina(string.Format(T("bit.pdf.pagina", "WardrobeFlow — Página {0}"), "{0}"));
                 doc.AddTitle(reporte.Titulo ?? "");
                 doc.AddCreator("WardrobeFlow");
+                doc.AddSubject(origen ?? "");   // qué reporte lo fabricó (lo fija el creador concreto)
                 doc.Open();
 
                 Encabezado(doc, reporte, T);

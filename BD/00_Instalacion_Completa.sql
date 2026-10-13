@@ -316,7 +316,7 @@ BEGIN
         IdEmpleado   INT           IDENTITY(1,1) PRIMARY KEY,
         Nombre       NVARCHAR(100) NOT NULL,
         Apellido     NVARCHAR(100) NOT NULL,
-        DNI          NVARCHAR(200) NOT NULL,  -- T03: almacena el DNI CIFRADO (AES Base64)
+        DNI          NVARCHAR(200) NOT NULL,  -- en texto plano (no se cifra)
         Email        NVARCHAR(200) NULL,
         FechaIngreso DATETIME      NOT NULL DEFAULT GETDATE(),
         Puesto       NVARCHAR(100) NULL,
@@ -337,7 +337,7 @@ BEGIN
         IdCliente        INT           IDENTITY(1,1) PRIMARY KEY,
         Nombre           NVARCHAR(100) NOT NULL,
         Apellido         NVARCHAR(100) NOT NULL,
-        DNI              NVARCHAR(200) NOT NULL,  -- T03: almacena el DNI CIFRADO (AES Base64)
+        DNI              NVARCHAR(200) NOT NULL,  -- en texto plano: se busca por DNI exacto (PN01)
         Email            NVARCHAR(200) NULL,
         -- El medio de pago preferido (IdMedioPagoPreferido, FK a MedioPago) lo agrega la sección
         -- 20c5: el catálogo MedioPago se crea recién en la 20c.
@@ -2372,7 +2372,7 @@ GO
 -- cobra el precio de reposición completo (BLL.CargoPrenda.RegistrarCargo, ya
 -- existente desde Bloque 1, sin aprobación de nadie). Una prenda que nunca
 -- vuelve físicamente (perdida) se reporta directo desde EnUso → Baja
--- (CU-DEP-02), habilitado en BE.Estados.EstadoEnUso.
+-- (CU06-DEP), habilitado en BE.Estados.EstadoEnUso.
 --
 -- Rol: reusa Deposito (ya tiene StockEditar/Stock, ya es el
 -- "Depósito" conceptual de PN01) — sin rol nuevo, coherente con que en el
@@ -3627,6 +3627,102 @@ BEGIN
 END
 GO
 PRINT 'Sección 20j: pantallas de seguridad consolidadas (P2) verificadas.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20k. HISTORIAL DE PEDIDOS: UNA OPERACIÓN, UN NÚMERO
+-- ------------------------------------------------------------
+-- El historial de un pedido (PedidoHistorial) agrupa los campos de cada evento con IdOperacion.
+-- Antes el número se calculaba como MAX + 1 fuera de toda transacción y el historial se escribía
+-- en otra transacción, después del cambio: dos eventos simultáneos podían recibir el mismo número.
+-- Ahora DAL.Pedido asienta el historial en la misma transacción del cambio y numera con
+-- UPDLOCK + HOLDLOCK; esta sección agrega la restricción que lo garantiza en la base:
+--   · UQ_PedidoHistorial_Operacion UNIQUE (IdPedido, IdOperacion, Campo).
+--   · Antes de crearla se renumeran las operaciones repetidas que pudiera haber. Un evento se
+--     reconoce por (IdOperacion, Accion) y por la "vuelta" de cada campo: la 1.ª fila de un campo
+--     es del primer evento que usó ese número, la 2.ª del segundo, etc. Solo en los pedidos con
+--     números repetidos, las operaciones se vuelven a numerar 1, 2, 3... respetando el orden en
+--     que se registraron (IdOperacion y después IdHistorial). Los demás pedidos no se tocan.
+-- PedidoHistorial no lleva dígito verificador. Idempotente: con la restricción creada no hace nada.
+-- ============================================================
+IF OBJECT_ID('PedidoHistorial') IS NOT NULL
+   AND NOT EXISTS (SELECT 1 FROM sys.key_constraints
+                   WHERE name = 'UQ_PedidoHistorial_Operacion' AND parent_object_id = OBJECT_ID('PedidoHistorial'))
+BEGIN
+    SELECT IdHistorial, IdPedido, IdOperacion,
+           MIN(IdHistorial) OVER (PARTITION BY IdPedido, IdOperacion, Accion, Vuelta) AS PrimeraFila
+    INTO #EventosHistorial
+    FROM (SELECT IdHistorial, IdPedido, IdOperacion, Accion,
+                 ROW_NUMBER() OVER (PARTITION BY IdPedido, IdOperacion, Accion, Campo ORDER BY IdHistorial) AS Vuelta
+          FROM PedidoHistorial) f;
+
+    ;WITH Repetidos AS (
+        SELECT DISTINCT IdPedido FROM #EventosHistorial
+        GROUP BY IdPedido, IdOperacion HAVING COUNT(DISTINCT PrimeraFila) > 1
+    ), Renumerado AS (
+        SELECT e.IdHistorial,
+               DENSE_RANK() OVER (PARTITION BY e.IdPedido ORDER BY e.IdOperacion, e.PrimeraFila) AS Nuevo
+        FROM #EventosHistorial e JOIN Repetidos r ON r.IdPedido = e.IdPedido
+    )
+    UPDATE h SET h.IdOperacion = n.Nuevo
+    FROM PedidoHistorial h JOIN Renumerado n ON n.IdHistorial = h.IdHistorial
+    WHERE h.IdOperacion <> n.Nuevo;
+    DECLARE @renumeradas INT = @@ROWCOUNT;
+    IF @renumeradas > 0 PRINT CONCAT('PedidoHistorial: filas con IdOperacion repetido renumeradas: ', @renumeradas, '.');
+    DROP TABLE #EventosHistorial;
+
+    ALTER TABLE PedidoHistorial ADD CONSTRAINT UQ_PedidoHistorial_Operacion UNIQUE (IdPedido, IdOperacion, Campo);
+    PRINT 'PedidoHistorial: restricción UQ_PedidoHistorial_Operacion creada.';
+END
+GO
+PRINT 'Sección 20k: numeración de operaciones del historial de pedidos verificada.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 20n. UNICIDAD DE DNI, LEGAJO Y USUARIO DEL EMPLEADO
+-- ------------------------------------------------------------
+-- La unicidad la validaba solo la aplicación (BLL.Cliente: "ya existe un cliente con DNI ..."),
+-- sin respaldo en la base. Índices únicos filtrados:
+--   · Cliente(DNI) entre los clientes ACTIVOS (un cliente dado de baja conserva su DNI y se puede
+--     volver a dar de alta otro con el mismo, igual que valida BLL.Cliente).
+--   · Empleado(DNI) cuando está cargado (el empleado creado junto con un usuario arranca con DNI vacío).
+--   · Empleado(Legajo) cuando está cargado.
+--   · Empleado(IdUsuario): un usuario tiene a lo sumo un empleado (DAL.Empleado.CrearParaUsuario).
+-- Si una base ya tiene duplicados, el índice no se crea y se avisa (la instalación sigue): hay que
+-- corregir los datos y volver a correr el script. Idempotente.
+-- ============================================================
+IF OBJECT_ID('Cliente') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Cliente_DNI_Activo' AND object_id = OBJECT_ID('Cliente'))
+BEGIN
+    IF EXISTS (SELECT DNI FROM Cliente WHERE Activo = 1 GROUP BY DNI HAVING COUNT(*) > 1)
+        PRINT 'AVISO 20n: hay clientes activos con el mismo DNI; no se crea UX_Cliente_DNI_Activo.';
+    ELSE
+        EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_Cliente_DNI_Activo ON Cliente(DNI) WHERE Activo = 1;');
+END
+GO
+IF OBJECT_ID('Empleado') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Empleado_DNI' AND object_id = OBJECT_ID('Empleado'))
+BEGIN
+    IF EXISTS (SELECT DNI FROM Empleado WHERE DNI <> N'' GROUP BY DNI HAVING COUNT(*) > 1)
+        PRINT 'AVISO 20n: hay empleados con el mismo DNI; no se crea UX_Empleado_DNI.';
+    ELSE
+        EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_Empleado_DNI ON Empleado(DNI) WHERE DNI <> N'''';');
+END
+GO
+IF OBJECT_ID('Empleado') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Empleado_Legajo' AND object_id = OBJECT_ID('Empleado'))
+BEGIN
+    IF EXISTS (SELECT Legajo FROM Empleado WHERE Legajo IS NOT NULL GROUP BY Legajo HAVING COUNT(*) > 1)
+        PRINT 'AVISO 20n: hay empleados con el mismo legajo; no se crea UX_Empleado_Legajo.';
+    ELSE
+        EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_Empleado_Legajo ON Empleado(Legajo) WHERE Legajo IS NOT NULL;');
+END
+GO
+IF OBJECT_ID('Empleado') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Empleado_IdUsuario' AND object_id = OBJECT_ID('Empleado'))
+BEGIN
+    IF EXISTS (SELECT IdUsuario FROM Empleado WHERE IdUsuario IS NOT NULL GROUP BY IdUsuario HAVING COUNT(*) > 1)
+        PRINT 'AVISO 20n: hay usuarios con más de un empleado; no se crea UX_Empleado_IdUsuario.';
+    ELSE
+        EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_Empleado_IdUsuario ON Empleado(IdUsuario) WHERE IdUsuario IS NOT NULL;');
+END
+GO
+PRINT 'Sección 20n: unicidad de DNI, legajo y usuario del empleado verificada.';
 GO
 
 -- ============================================================

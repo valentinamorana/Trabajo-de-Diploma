@@ -26,7 +26,14 @@ namespace Tests.Fakes
 
         public void DesCancelar(string modulo, BE.Pedido pedido) => DesCancelarVeces++;
 
-        public void RegistrarDevolucion(string modulo, BE.Pedido pedido) => RegistrarDevolucionVeces++;
+        // Prendas que "vuelven" en RegistrarDevolucion (las efectivamente devueltas).
+        public int PrendasDevueltas { get; set; }
+
+        public int RegistrarDevolucion(string modulo, BE.Pedido pedido)
+        {
+            RegistrarDevolucionVeces++;
+            return PrendasDevueltas;
+        }
 
         // Resto del contrato: no ejercitado por estos tests, cuerpos mínimos.
         public List<BE.Pedido> Pedidos { get; } = new List<BE.Pedido>();

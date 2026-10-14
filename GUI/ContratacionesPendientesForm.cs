@@ -139,6 +139,14 @@ namespace GUI
         {
             lblDetalleCuotas.Text = "";
             var c = ObtenerSeleccionada();
+            // Separación de funciones: se avisa por qué Cobrar/Intento fallido/Anular están deshabilitados
+            // (acá, para que no lo borre el cambio de medio de pago o de cuotas).
+            if (c != null && c.PuedeCobrarse() && !c.UsuarioPuedeCobrar && !VistaResueltas)
+            {
+                lblDetalleCuotas.Text = Tr("lbl.contr.registraste",
+                    "No puede resolver esta contratación: la registró usted (la resuelve otra persona de Caja) o su usuario no tiene un Empleado vinculado.");
+                return;
+            }
             var idPlan = PlanCuotasSeleccionado();
             if (c == null || !idPlan.HasValue || !_importes.TryGetValue(c.IdContratacion, out var liq)) return;
             var plan = _planesCuotas.Find(p => p.IdPlanCuotas == idPlan.Value);
@@ -272,7 +280,10 @@ namespace GUI
         private void HabilitarAcciones(BE.Contratacion c)
         {
             bool pendiente = c != null && c.PuedeCobrarse();
-            btnCobrar.Enabled = btnIntentoFallido.Enabled = btnImprimirLiquidacion.Enabled = btnAnular.Enabled = pendiente;
+            // Separación de funciones: quien registró la contratación no la resuelve (la BLL calcula
+            // UsuarioPuedeCobrar para el usuario en sesión; el Administrador siempre puede).
+            btnCobrar.Enabled = btnIntentoFallido.Enabled = btnAnular.Enabled = pendiente && c.UsuarioPuedeCobrar;
+            btnImprimirLiquidacion.Enabled = pendiente;
             cmbMedioPago.Enabled = !VistaResueltas;
             btnVerIntentos.Enabled = c != null && c.TieneIntentos();
             btnImprimirComprobante.Enabled = c != null && c.EstaPagada();
@@ -289,7 +300,7 @@ namespace GUI
             var idMedio = MedioSeleccionado();
             if (!idMedio.HasValue)
             {
-                MostrarError(Tr("err.contratacion.mediopago_requerido", "Seleccioná el medio de pago antes de cobrar."));
+                MostrarError(Tr("err.contratacion.mediopago_requerido", "Seleccione el medio de pago antes de cobrar."));
                 return;
             }
 

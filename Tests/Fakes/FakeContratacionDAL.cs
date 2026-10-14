@@ -137,11 +137,14 @@ namespace Tests.Fakes
         public Exception ReabrirPagoLanza { get; set; }
         public IList<int> UltimosCargos { get; private set; }
         public IList<int> CargosReabiertos { get; private set; }
-        public void ReabrirPago(int idContratacion, IList<int> idsCargo = null)
+        // false simula que la contratación ya no estaba Pagada (el DAL no reabre nada).
+        public bool ReabrirPagoResultado { get; set; } = true;
+        public bool ReabrirPago(int idContratacion, IList<int> idsCargo = null)
         {
             CargosReabiertos = idsCargo;
             ReabrirPagoVeces++;
             if (ReabrirPagoLanza != null) throw ReabrirPagoLanza;
+            return ReabrirPagoResultado;
         }
 
         public BE.ResultadoIntentoPago RegistrarIntentoFallido(int idContratacion, int? idMedioPago, string motivo,

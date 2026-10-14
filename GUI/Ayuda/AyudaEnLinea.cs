@@ -28,7 +28,7 @@ namespace GUI.Ayuda
             ["General"] = new TemaAyuda("Ayuda de WardrobeFlow",
                 "WardrobeFlow gestiona el alquiler de prendas por suscripción.\n" +
                 "\n" +
-                "• El menú muestra solo las opciones que tu rol tiene permitidas.\n" +
+                "• El menú muestra solo las opciones que su rol tiene permitidas.\n" +
                 "• En cualquier pantalla, F1 (o Sesión › Ayuda) abre la ayuda de esa pantalla.\n" +
                 "• Los mensajes de resultado aparecen en la barra inferior de cada pantalla (verde: correcto, rojo: error).\n" +
                 "• Las confirmaciones de acciones que no se pueden deshacer traen \"No\" como opción por defecto.\n" +
@@ -50,13 +50,13 @@ namespace GUI.Ayuda
                 "• Editar no cambia la gracia, la pausa ni el beneficio por referido."),
 
             ["ClienteForm"] = new TemaAyuda("Datos del cliente",
-                "Completá nombre, apellido, DNI y, opcionalmente, email y cliente que lo refirió.\n" +
+                "Complete nombre, apellido, DNI y, opcionalmente, email y cliente que lo refirió.\n" +
                 "Al guardar se valida todo; si hay un error se muestra abajo y el formulario sigue abierto."),
 
             ["PedidosVenta"] = new TemaAyuda("Pedidos de venta (PN01)",
                 "Circuito del pedido desde el lado del Vendedor.\n" +
                 "\n" +
-                "1. Nuevo pedido: elegís el cliente (debe tener la suscripción vigente y ningún pedido en curso) y las prendas dentro de su cupo. Se envía a control de stock.\n" +
+                "1. Nuevo pedido: elija el cliente (debe tener la suscripción vigente y ningún pedido en curso) y las prendas dentro de su cupo. Se envía a control de stock.\n" +
                 "2. Depósito controla: si faltan prendas, el pedido vuelve \"Con faltantes\": Ver faltantes, y el cliente ajusta la selección o desiste.\n" +
                 "3. Cuando Depósito separa las prendas: Formalizar.\n" +
                 "\n" +
@@ -65,8 +65,8 @@ namespace GUI.Ayuda
                 "• El buscador filtra por número, cliente, vendedor o estado."),
 
             ["NuevoPedidoForm"] = new TemaAyuda("Nuevo pedido",
-                "1. Buscá al cliente: se verifica que la suscripción esté vigente y que no tenga otro pedido en curso.\n" +
-                "2. Elegí las prendas disponibles; el cupo del plan (prendas en uso + seleccionadas) se controla en el momento.\n" +
+                "1. Busque al cliente: se verifica que la suscripción esté vigente y que no tenga otro pedido en curso.\n" +
+                "2. Elija las prendas disponibles; el cupo del plan (prendas en uso + seleccionadas) se controla en el momento.\n" +
                 "3. Enviar a control de stock. Si la selección excede el cupo, el cliente puede corregirla o desistir."),
 
             ["ControlStockForm"] = new TemaAyuda("Control de stock (Depósito, PN01)",
@@ -82,8 +82,8 @@ namespace GUI.Ayuda
                 "• Reportar pérdida: solo para una prenda En uso de un pedido Entregado hace 30 días o más (compra tácita). Se le cobra la reposición al cliente con su próximo cobro."),
 
             ["NuevaContratacionForm"] = new TemaAyuda("Nueva contratación (PN02)",
-                "1. Identificá al cliente por DNI o nombre. Si no está registrado, Registrar cliente.\n" +
-                "2. Elegí el plan y la modalidad (mensual, trimestral o anual): se muestra el importe a abonar con el descuento y los cargos pendientes que correspondan.\n" +
+                "1. Identifique al cliente por DNI o nombre. Si no está registrado, Registrar cliente.\n" +
+                "2. Elija el plan y la modalidad (mensual, trimestral o anual): se muestra el importe a abonar con el descuento y los cargos pendientes que correspondan.\n" +
                 "3. Registrar: la contratación queda pendiente de pago hasta que Caja la cobre.\n" +
                 "\n" +
                 "• Si el cliente pasa a un plan más caro con su plan vigente, el plan nuevo rige desde hoy y se descuentan los días no usados.\n" +
@@ -93,7 +93,7 @@ namespace GUI.Ayuda
             ["ContratacionesPendientesForm"] = new TemaAyuda("Cobro de contrataciones (Caja, PN02)",
                 "Cola de contrataciones pendientes de pago.\n" +
                 "\n" +
-                "• Elegí el medio de pago (con tarjeta de crédito, las cuotas) y Cobrar: se emite el comprobante y la suscripción queda activa. El total incluye los cargos por daño o pérdida pendientes del cliente.\n" +
+                "• Elija el medio de pago (con tarjeta de crédito, las cuotas) y Cobrar: se emite el comprobante y la suscripción queda activa. El total incluye los cargos por daño o pérdida pendientes del cliente.\n" +
                 "• Intento fallido: registra el intento con motivo; al tercero la contratación se cancela.\n" +
                 "• Anular: cancela una contratación sin cobrarla (el cliente se arrepintió o hubo un error de carga), con motivo.\n" +
                 "• Quien registró la contratación no puede cobrarla (salvo el Administrador).\n" +
@@ -102,17 +102,17 @@ namespace GUI.Ayuda
             ["CobroSuscripcionForm"] = new TemaAyuda("Cobro de renovaciones (Caja, N01)",
                 "Cobro recurrente de las suscripciones vencidas o próximas a vencer.\n" +
                 "\n" +
-                "• Elegí el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).\n" +
-                "• Cobrado: indicá el medio de pago; se emite el comprobante y se extiende la vigencia.\n" +
+                "• Elija el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).\n" +
+                "• Cobrado: indique el medio de pago; se emite el comprobante y se extiende la vigencia.\n" +
                 "• Pago fallido: el cliente entra en período de gracia y, si ya estaba en gracia, se suspende."),
 
             ["RenovacionSuscripcionForm"] = new TemaAyuda("Renovación de la suscripción",
-                "Renovar o cambiar de plan sin pasar por Caja es solo para el Administrador (correcciones). El Vendedor puede pausar o dar de baja; para cambiar de plan, registrá una Nueva contratación."),
+                "Renovar o cambiar de plan sin pasar por Caja es solo para el Administrador (correcciones). El Vendedor puede pausar o dar de baja; para cambiar de plan, registre una Nueva contratación."),
 
             ["Planes"] = new TemaAyuda("Planes de suscripción",
                 "Alta y edición de planes (nombre, límite de prendas y precio mensual).\n" +
                 "\n" +
-                "• Elegí un plan y Editar plan (o doble clic) para cambiarlo.\n" +
+                "• Elija un plan y Editar plan (o doble clic) para cambiarlo.\n" +
                 "• Desactivar: no se permite si hay clientes activos con el plan o contrataciones pendientes de pago."),
 
             ["Prendas"] = new TemaAyuda("Catálogo de prendas",
@@ -122,13 +122,14 @@ namespace GUI.Ayuda
                 "• Las que volvieron de un cliente se resuelven en Inspección de devolución, y las que el cliente no devuelve, con Reportar pérdida en Pedidos realizados."),
 
             ["SugerirPromocionForm"] = new TemaAyuda("Sugerir promoción (Gerencia, PN03)",
-                "1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.\n" +
-                "2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.\n" +
-                "3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia."),
+                "1. Elija el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.\n" +
+                "2. Si hay oportunidad por plan, use la idea propuesta (se completa el formulario) o cárguela a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.\n" +
+                "3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.\n" +
+                "4. La retención esperada (30 % por defecto) define el beneficio estimado: ingreso en riesgo × retención. El reporte incluye el Resultado de las promociones: bajas, pausas y renovaciones del plan durante la vigencia contra el período anterior, y la retención real contra la esperada."),
 
             ["PromocionesAdministracionForm"] = new TemaAyuda("Promociones (Administración Comercial, PN03)",
                 "• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).\n" +
-                "• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si estás de acuerdo, la promoción se da de baja, si no, sigue vigente.\n" +
+                "• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si está de acuerdo, la promoción se da de baja, si no, sigue vigente.\n" +
                 "• Promociones: crear (siempre para un plan), reformular las rechazadas por Contabilidad, o Dar de baja una vigente o una rechazada (con motivo).\n" +
                 "• Imprimir ▾: ficha, dictamen, solicitud de baja, respuesta a la solicitud y constancia de baja.\n" +
                 "La fecha de fin no puede haber pasado."),
@@ -141,15 +142,24 @@ namespace GUI.Ayuda
                 "Consulta de las promociones vigentes. Ventas puede solicitar la baja de una (con motivo); la columna Baja solicitada muestra si ya hay una pendiente. Administración atiende la solicitud: mientras tanto la promoción sigue vigente y se aplica en los cobros."),
 
             ["Usuarios"] = new TemaAyuda("Usuarios",
-                "Alta, edición, desbloqueo y archivo de usuarios (solo Administrador).\n" +
+                "Administración de usuarios en dos pestañas (solo Administrador).\n" +
                 "\n" +
-                "• Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock.\n" +
+                "Cuentas:\n" +
                 "• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).\n" +
+                "• Desbloquear: habilita una cuenta bloqueada por intentos fallidos de ingreso.\n" +
                 "• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.\n" +
-                "• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones."),
+                "• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.\n" +
+                "\n" +
+                "Datos administrativos:\n" +
+                "• Nuevo usuario: el único alta de usuarios. Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock; la contraseña se genera y se exporta a un archivo.\n" +
+                "• Guardar cambios / Cambiar rol: nombre, apellido, usuario, email, fecha de nacimiento y rol (el sistema no puede quedar sin administrador).\n" +
+                "• Ver historial de cambios: las versiones anteriores del usuario."),
 
             ["GestorPermisos"] = new TemaAyuda("Perfiles y permisos",
-                "Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar."),
+                "Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.\n" +
+                "\n" +
+                "• Gestión de roles: crear, renombrar y eliminar roles, y asignar o quitar permisos y sub-roles.\n" +
+                "• Vista completa: el árbol completo de roles, familias y permisos, en solo lectura."),
 
             ["BackupForm"] = new TemaAyuda("Copias de seguridad",
                 "Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos."),
@@ -177,10 +187,21 @@ namespace GUI.Ayuda
                 "• Exportar XML: guarda la lista que se está viendo en un archivo."),
 
             ["AlertasForm"] = new TemaAyuda("Alertas",
-                "Avisos que necesitan atención según tu rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular."),
+                "Avisos que necesitan atención según su rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular."),
 
             ["ListaEsperaForm"] = new TemaAyuda("Lista de espera",
                 "Clientes anotados para una prenda que hoy está en uso. Cuando la prenda vuelve a estar disponible, se reserva para el primero de la lista durante 48 horas. Si la prenda se da de baja por daño o pérdida, las anotaciones se cancelan."),
+
+            ["AnaliticaNegocioForm"] = new TemaAyuda("Analítica de Negocio",
+                "Reportes para la toma de decisiones. El selector muestra solo los reportes que su rol tiene permitidos.\n" +
+                "\n" +
+                "1. Elija el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).\n" +
+                "2. Generar: el resultado se muestra en la grilla, con un resumen arriba.\n" +
+                "3. Exportar a PDF (vista previa) o Guardar como .CSV.\n" +
+                "\n" +
+                "• Gerencia Comercial: Análisis de Abandono y Ventas por Vendedor.\n" +
+                "• Gerencia de Inventario: Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.\n" +
+                "• Ventas: Recomendación de Prendas."),
 
             ["ReporteJornadaForm"] = new TemaAyuda("Reporte de jornada",
                 "Resumen de una jornada: eventos de negocio del día, prendas disponibles, clientes y días sin copia de seguridad.\n" +
@@ -203,7 +224,7 @@ namespace GUI.Ayuda
             string titulo = Tr("ayuda." + clave + ".titulo", tema.Titulo);
             string texto  = Tr("ayuda." + clave, tema.Texto);
             if (clave != "General")
-                texto += "\n\n" + Tr("ayuda.pie", "Para la ayuda general, presioná F1 en el menú principal.");
+                texto += "\n\n" + Tr("ayuda.pie", "Para la ayuda general, presione F1 en el menú principal.");
 
             using (var dlg = new Form
             {

@@ -44,7 +44,7 @@ namespace GUI
             this.lblInfo.Size      = new System.Drawing.Size(386, 40);
             this.lblInfo.TabIndex  = 1;
             this.lblInfo.Tag       = "emg.info";
-            this.lblInfo.Text      = "Ingresá tu usuario y una de tus claves de emergencia de un solo uso para desbloquear la cuenta.";
+            this.lblInfo.Text      = "Ingrese su usuario y una de sus claves de emergencia de un solo uso para desbloquear la cuenta.";
 
             // ── lblUsuario ─────────────────────────────────────────────────────
             this.lblUsuario.AutoSize = true;

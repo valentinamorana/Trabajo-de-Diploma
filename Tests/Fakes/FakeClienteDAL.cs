@@ -20,7 +20,6 @@ namespace Tests.Fakes
         // ── Espías (el test los lee después) ────────────────────────────────────
         public int ModificarVeces { get; private set; }
         public BE.Cliente UltimoModificado { get; private set; }
-        public int RecalcularDVVeces { get; private set; }
         public int AltaVeces { get; private set; }
         public BE.Cliente UltimoAlta { get; private set; }
         public int BajaVeces { get; private set; }
@@ -105,10 +104,12 @@ namespace Tests.Fakes
         public void SumarCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
             => CreditosSumados.Add(new KeyValuePair<int, decimal>(idCliente, monto));
 
+        // Si se asigna, ConsumirCreditoEnTx lanza (simula que otro cobro ya aplicó el crédito).
+        public Exception ConsumirCreditoLanza { get; set; }
         public void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
-            => CreditosConsumidos.Add(new KeyValuePair<int, decimal>(idCliente, monto));
-
-        public List<int> IdsDVRecalculados { get; } = new List<int>();
-        public void RecalcularDV(int idCliente) { RecalcularDVVeces++; IdsDVRecalculados.Add(idCliente); }
+        {
+            if (ConsumirCreditoLanza != null) throw ConsumirCreditoLanza;
+            CreditosConsumidos.Add(new KeyValuePair<int, decimal>(idCliente, monto));
+        }
     }
 }

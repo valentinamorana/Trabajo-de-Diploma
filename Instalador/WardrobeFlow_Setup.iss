@@ -94,7 +94,7 @@
 ; =====================================================================
 
 #define MyAppName "WardrobeFlow"
-#define MyAppVersion "1.3.0"
+#define MyAppVersion "1.4.0"
 #define MyAppPublisher "Valentina Morana"
 #define MyAppExeName "GUI.exe"
 #define MyDatabaseName "WardrobeFlowDB"
@@ -289,8 +289,8 @@ begin
   begin
     SuppressibleMsgBox(
       'WardrobeFlow requiere .NET Framework 4.7.2 o superior, que no se encontró instalado en este equipo.' + #13#13 +
-      'Instalá .NET Framework 4.7.2 (o una versión posterior) desde ' +
-      'https://dotnet.microsoft.com/download/dotnet-framework y volvé a ejecutar este instalador.',
+      'Instale .NET Framework 4.7.2 (o una versión posterior) desde ' +
+      'https://dotnet.microsoft.com/download/dotnet-framework y vuelva a ejecutar este instalador.',
       mbError, MB_OK, IDOK);
     Result := False;
   end;
@@ -447,10 +447,10 @@ begin
   AvisoLocalDbMostrado := True;
   SuppressibleMsgBox(
     'Importante: SQL LocalDB es privado de cada usuario de Windows.' + #13#13 +
-    'La base de datos de WardrobeFlow se va a crear en el perfil del usuario con el que iniciaste ' +
+    'La base de datos de WardrobeFlow se va a crear en el perfil del usuario con el que inició ' +
     'este instalador, y solo ese usuario de Windows la va a ver. Si otra persona inicia sesión en ' +
     'Windows con otra cuenta y abre WardrobeFlow, no va a encontrar los datos.' + #13#13 +
-    'Para que varios usuarios de Windows compartan la base, instalá SQL Server Express y elegí esa instancia.',
+    'Para que varios usuarios de Windows compartan la base, instale SQL Server Express y elija esa instancia.',
     mbInformation, MB_OK, IDOK);
 end;
 
@@ -510,7 +510,7 @@ begin
     ErrMsg :=
       'No se pudo instalar SQL Server LocalDB (código ' + IntToStr(ResultCode) + ').' + #13#13 +
       'Detalle en: ' + Log + #13#13 +
-      'Podés instalar SQL Server Express a mano desde https://www.microsoft.com/sql-server/sql-server-downloads ' +
+      'Puede instalar SQL Server Express a mano desde https://www.microsoft.com/sql-server/sql-server-downloads ' +
       'y volver a ejecutar este instalador. No se instaló nada de WardrobeFlow.';
     exit;
   end;
@@ -581,8 +581,8 @@ begin
   // Caso: hay 1+ instancias locales detectadas -> elegir cual usar.
   PaginaSeleccionInstancia := CreateInputOptionPage(wpSelectTasks,
     'Base de datos', 'Se encontró SQL Server en este equipo',
-    'Se detectaron las siguientes instancias de SQL Server instaladas localmente. Elegí cuál va a usar WardrobeFlow ' +
-    '(una base en SQL LocalDB queda solo para tu usuario de Windows):',
+    'Se detectaron las siguientes instancias de SQL Server instaladas localmente. Elija cuál va a usar WardrobeFlow ' +
+    '(una base en SQL LocalDB queda solo para su usuario de Windows):',
     True, False);
   IndicePrevio := -1;
   for I := 0 to GetArrayLength(InstanciasDetectadas) - 1 do
@@ -592,10 +592,10 @@ begin
       IndicePrevio := I;
   end;
   if LocalDbDisponible then
-    PaginaSeleccionInstancia.Add('(localdb)\MSSQLLocalDB   (SQL LocalDB, solo para tu usuario de Windows)')
+    PaginaSeleccionInstancia.Add('(localdb)\MSSQLLocalDB   (SQL LocalDB, solo para su usuario de Windows)')
   else
-    PaginaSeleccionInstancia.Add('Instalar SQL Server Express LocalDB (incluido; solo para tu usuario de Windows; ' +
-                                 'sirve si no tenés permisos en la instancia de arriba)');
+    PaginaSeleccionInstancia.Add('Instalar SQL Server Express LocalDB (incluido; solo para su usuario de Windows; ' +
+                                 'sirve si no tiene permisos en la instancia de arriba)');
   if EsLocalDb(ServidorPrevio) then
     IndicePrevio := IndiceLocalDbEnSeleccion();
   PaginaSeleccionInstancia.Add('Otra instancia o servidor (ingresar manualmente)');
@@ -617,7 +617,7 @@ begin
   PaginaSinInstancias := CreateInputOptionPage(PaginaSeleccionInstancia.ID,
     'Base de datos', 'No se encontró SQL Server en este equipo',
     'WardrobeFlow necesita una instancia de SQL Server (Express, LocalDB, o una instalación completa) para funcionar. ' +
-    'Una base en SQL LocalDB queda solo para tu usuario de Windows. ¿Cómo querés continuar?',
+    'Una base en SQL LocalDB queda solo para su usuario de Windows. ¿Cómo desea continuar?',
     True, False);
   if LocalDbDisponible then
     PaginaSinInstancias.Add('Usar SQL LocalDB, ya detectado en este equipo ((localdb)\MSSQLLocalDB)')
@@ -630,7 +630,7 @@ begin
   // Ingreso manual del servidor\instancia (comun a los dos casos de arriba).
   PaginaIngresoManual := CreateInputQueryPage(PaginaSinInstancias.ID,
     'Base de datos', 'Servidor de SQL Server',
-    'Ingresá el servidor y, si corresponde, la instancia (ejemplos: .\SQLEXPRESS, (localdb)\MSSQLLocalDB, MIPC\INSTANCIA):');
+    'Ingrese el servidor y, si corresponde, la instancia (ejemplos: .\SQLEXPRESS, (localdb)\MSSQLLocalDB, MIPC\INSTANCIA):');
   PaginaIngresoManual.Add('Servidor\Instancia:', False);
   PaginaIngresoManual.Values[0] := '{#MySqlInstanceSugerido}';
   if ServidorPrevio <> '' then
@@ -715,7 +715,7 @@ begin
   if SuppressibleMsgBox(
        'El servicio de Windows para esa instancia (' + NombreServicio + ') no está disponible ' +
        '(no existe, o está detenido y no se pudo iniciar automáticamente — ¿faltan permisos de administrador?).' + #13#13 +
-       '¿Querés continuar de todos modos? (se va a reintentar más adelante)',
+       '¿Desea continuar de todos modos? (se va a reintentar más adelante)',
        mbConfirmation, MB_YESNO, IDYES) = IDNO then
     Result := False;
 end;
@@ -745,9 +745,9 @@ begin
   begin
     SuppressibleMsgBox(
       'Permisos insuficientes en SQL Server (' + Servidor + ').' + #13#13 + Detalle + #13#13 +
-      'Ejecutá el instalador con una cuenta de Windows que sea administradora de esa instancia (sysadmin), ' +
-      'pedile a quien administra SQL Server que te dé el rol dbcreator, o elegí otra instancia.' + #13#13 +
-      'Si no tenés esos permisos, elegí la opción de SQL LocalDB de la lista: se instala para tu usuario ' +
+      'Ejecute el instalador con una cuenta de Windows que sea administradora de esa instancia (sysadmin), ' +
+      'pídale a quien administra SQL Server que le dé el rol dbcreator, o elija otra instancia.' + #13#13 +
+      'Si no tiene esos permisos, elija la opción de SQL LocalDB de la lista: se instala para su usuario ' +
       'de Windows y no necesita permisos sobre el SQL Server existente.',
       mbError, MB_OK, IDOK);
     Result := False;
@@ -756,7 +756,7 @@ begin
   begin
     if SuppressibleMsgBox(
          'No se pudieron verificar los permisos en ''' + Servidor + '''.' + #13#13 + Detalle + #13#13 +
-         '¿Querés continuar de todos modos?',
+         '¿Desea continuar de todos modos?',
          mbConfirmation, MB_YESNO, IDNO) = IDNO then
       Result := False;
   end;
@@ -834,9 +834,9 @@ begin
       // de descarga). El usuario instala el motor y vuelve a correr esto.
       SuppressibleMsgBox(
         'WardrobeFlow necesita SQL Server para funcionar y no se detectó ninguna instancia en este equipo.' + #13#13 +
-        'Descargá e instalá SQL Server Express (o LocalDB) desde:' + #13 +
+        'Descargue e instale SQL Server Express (o LocalDB) desde:' + #13 +
         'https://www.microsoft.com/sql-server/sql-server-downloads' + #13#13 +
-        'Después, volvé a ejecutar este instalador. No se instaló nada.',
+        'Después, vuelva a ejecutar este instalador. No se instaló nada.',
         mbInformation, MB_OK, IDOK);
       // Cierre normal del wizard (Setup limpia su carpeta temporal), sin la
       // pregunta de confirmacion (ver CancelButtonClick).
@@ -854,7 +854,7 @@ begin
     ServidorElegido := Trim(PaginaIngresoManual.Values[0]);
     if ServidorElegido = '' then
     begin
-      SuppressibleMsgBox('Ingresá un servidor/instancia válido.', mbError, MB_OK, IDOK);
+      SuppressibleMsgBox('Ingrese un servidor/instancia válido.', mbError, MB_OK, IDOK);
       Result := False;
       exit;
     end;
@@ -892,8 +892,8 @@ begin
       begin
         if SuppressibleMsgBox(
              'No se pudo conectar a ''' + ServidorElegido + '''.' + #13#13 +
-             'Verificá el nombre del servidor/instancia y que el servicio esté en ejecución.' + #13#13 +
-             '¿Querés continuar de todos modos?',
+             'Verifique el nombre del servidor/instancia y que el servicio esté en ejecución.' + #13#13 +
+             '¿Desea continuar de todos modos?',
              mbConfirmation, MB_YESNO, IDNO) = IDNO then
         begin
           Result := False;
@@ -987,7 +987,7 @@ begin
   if not LoadStringFromFile(RutaConfig, Contenido) then
   begin
     SuppressibleMsgBox('No se encontró (o no se pudo leer) ' + RutaConfig + '.' + #13#13 +
-                       'WardrobeFlow no va a poder conectarse a la base. Reinstalá la aplicación.',
+                       'WardrobeFlow no va a poder conectarse a la base. Reinstale la aplicación.',
                        mbError, MB_OK, IDOK);
     exit;
   end;
@@ -1057,7 +1057,7 @@ begin
   begin
     Result := False;
     ErrMsg := 'El script ' + NombreArchivo + ' devolvió un error (código ' + IntToStr(ResultCode) + ') contra ''' + ServidorElegido + '''.' + #13#13 +
-              'Puede ser un problema de conexión o un error en el script SQL. Revisá el log para más detalle: ' + LogPath;
+              'Puede ser un problema de conexión o un error en el script SQL. Revise el log para más detalle: ' + LogPath;
   end;
 end;
 
@@ -1146,7 +1146,7 @@ begin
     'QUÉ SE HIZO:' + #13#10 +
     'Se deshace la instalación (rollback automático) para no dejar la aplicación instalada pero no funcional.' + #13#13 +
     'QUÉ HACER AHORA:' + #13#10 +
-    'Solucioná el problema descripto arriba y volvé a ejecutar el instalador. ' +
+    'Solucione el problema descripto arriba y vuelva a ejecutar el instalador. ' +
     'Log completo: ' + LogPreservado;
 
   if ExtractoLog <> '' then
@@ -1181,8 +1181,8 @@ begin
     'QUÉ SE HIZO:' + #13#10 +
     'No se desinstaló nada (la instalación y la configuración del servidor se conservan).' + #13#13 +
     'QUÉ HACER AHORA:' + #13#10 +
-    'Solucioná el problema descripto arriba y volvé a ejecutar este instalador (el script es idempotente y ' +
-    'continúa la actualización). Si preferís volver atrás, restaurá el backup indicado. ' +
+    'Solucione el problema descripto arriba y vuelva a ejecutar este instalador (el script es idempotente y ' +
+    'continúa la actualización). Si prefiere volver atrás, restaure el backup indicado. ' +
     'Log completo: ' + LogPreservado;
 
   if ExtractoLog <> '' then
@@ -1209,6 +1209,7 @@ var
   ErrMsg, Avisos: String;
   ResultCode: Integer;
   LogPath: String;
+  BaseExistia: Boolean;
 begin
   if CurStep = ssPostInstall then
   begin
@@ -1251,11 +1252,12 @@ begin
     WizardForm.StatusLabel.Caption := 'Respaldando la base de datos existente...';
     RutaBackupPrevio := '';
     EjecutarDbInstaller('backup "' + ServidorElegido + '" "{#MyDatabaseName}" "{#MyAppVersion}" "' + LogPath + '"', ResultCode);
+    BaseExistia := ResultCode = 0;
     if ResultCode = 0 then
       RutaBackupPrevio := LeerSalidaDbInstaller(LogPath)
     else if ResultCode <> 4 then
       FallarInstalacion('No se pudo hacer el backup de la base existente antes de actualizarla, así que NO se ' +
-                        'modificó la base. Revisá el espacio en disco y los permisos de la carpeta de backups ' +
+                        'modificó la base. Revise el espacio en disco y los permisos de la carpeta de backups ' +
                         'de SQL Server. Log: ' + LogPath, False);
 
     WizardForm.StatusLabel.Caption := 'Creando o actualizando la base de datos WardrobeFlowDB...';
@@ -1295,11 +1297,23 @@ begin
     // Smoke test final: la base responde con la misma forma de conexion que
     // usa la app y tiene el admin semilla y datos para operar. Si no, rollback
     // (instalación nueva) o aviso con el backup (actualización).
+    // Si la base ya existía (el backup previo la encontró) el admin semilla puede
+    // haberse renombrado o archivado: se exige solo algún Administrador activo.
     WizardForm.StatusLabel.Caption := 'Verificando la instalación...';
-    EjecutarDbInstaller('verify "' + ServidorElegido + '" "{#MyDatabaseName}" "' + LogPath + '"', ResultCode);
-    if ResultCode <> 0 then
-      FallarInstalacion('La base de datos se creó pero la verificación final falló ' +
-                        '(no se encontró el usuario admin inicial o faltan datos).', True);
+    if BaseExistia then
+    begin
+      EjecutarDbInstaller('verify "' + ServidorElegido + '" "{#MyDatabaseName}" actualizacion "' + LogPath + '"', ResultCode);
+      if ResultCode <> 0 then
+        FallarInstalacion('La base de datos se actualizó pero la verificación final falló ' +
+                          '(no quedó ningún usuario Administrador activo o faltan datos).', True);
+    end
+    else
+    begin
+      EjecutarDbInstaller('verify "' + ServidorElegido + '" "{#MyDatabaseName}" "' + LogPath + '"', ResultCode);
+      if ResultCode <> 0 then
+        FallarInstalacion('La base de datos se creó pero la verificación final falló ' +
+                          '(no se encontró el usuario admin inicial o faltan datos).', True);
+    end;
   end;
 end;
 
@@ -1326,8 +1340,8 @@ begin
     // irreversible). MB_DEFBUTTON2 deja el foco en "No"; el IDNO final es
     // solo la respuesta por defecto en desinstalación silenciosa.
     if SuppressibleMsgBox(
-         '¿Querés borrar también la base de datos WardrobeFlowDB?' + #13#13 +
-         'Esta acción NO se puede deshacer. Si no estás seguro, elegí "No": la base va a quedar en el servidor aunque desinstales la aplicación.',
+         '¿Desea borrar también la base de datos WardrobeFlowDB?' + #13#13 +
+         'Esta acción NO se puede deshacer. Si no está seguro, elija "No": la base va a quedar en el servidor aunque desinstale la aplicación.',
          mbConfirmation, MB_YESNO or MB_DEFBUTTON2, IDNO) = IDYES then
     begin
       ServidorGuardado := GetPreviousData('ServidorSql', '{#MySqlInstanceSugerido}');

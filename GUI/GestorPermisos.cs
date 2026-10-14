@@ -22,6 +22,11 @@ namespace GUI
     ///
     /// La composición se persiste en [PermisoRelacion] de forma inmediata (cada acción guarda y
     /// re-aplica la seguridad en vivo). La validación anti-ciclos vive en la BLL.
+    ///
+    /// Pestaña "Vista completa" (antes un formulario aparte, ExploradorCompositeForm): el mismo
+    /// árbol Composite en solo lectura, con los nombres traducidos y una leyenda Familia/Patente.
+    /// Se arma con las mismas raíces que la pestaña de gestión, así que cada cambio se ve al
+    /// instante. Está dentro de esta pantalla, gobernada por la misma patente (mnuUsuarios).
     /// </summary>
     public partial class GestorPermisos : FormBase, IIdiomaObserver
     {
@@ -33,7 +38,6 @@ namespace GUI
         private List<BE.Componente> _raices = new List<BE.Componente>();
         private readonly Dictionary<int, BE.Componente> _todos = new Dictionary<int, BE.Componente>();
         private BE.Componente _seleccionado;
-        private ExploradorCompositeForm _exploradorAbierto;
 
         // Envoltura para mostrar un componente en el ComboBox con su ícono.
         private class Item
@@ -51,6 +55,7 @@ namespace GUI
         public GestorPermisos()
         {
             InitializeComponent();
+            tabs.SelectedIndexChanged += Tabs_SelectedIndexChanged;
             ActualizarControles();
         }
 
@@ -62,7 +67,27 @@ namespace GUI
             CargarArbol();
         }
 
-        public void UpdateLanguage(Idioma idioma) { Traducir(); }
+        public void UpdateLanguage(Idioma idioma) { Traducir(); _vistaDesactualizada = true; CargarVistaSiSeVe(); }
+
+        // Fuentes compartidas por todos los nodos (antes una Font nueva por nodo, que no se liberaba).
+        private static readonly Font FuenteNodo        = new Font("Segoe UI", 9f);
+        private static readonly Font FuenteNodoNegrita = new Font("Segoe UI", 9f, FontStyle.Bold);
+
+        // La pestaña "Vista completa" se arma recién cuando se muestra (y solo si cambió algo).
+        private bool _vistaDesactualizada = true;
+
+        private void CargarVistaSiSeVe()
+        {
+            if (_vistaDesactualizada && tabs.SelectedTab == tabVistaCompleta)
+            {
+                // Se arma desde las raíces ya leídas: si falla, reintentar con los mismos datos daría el
+                // mismo error. Se vuelve a intentar cuando cambian los datos (CargarArbol / Actualizar).
+                CargarVistaCompleta();
+                _vistaDesactualizada = false;
+            }
+        }
+
+        private void Tabs_SelectedIndexChanged(object sender, EventArgs e) => CargarVistaSiSeVe();
 
         private void Traducir()
         {
@@ -78,7 +103,7 @@ namespace GUI
             grpCrear.Text        = Tr("grp.permisos.crear",      "Crear rol");
             grpEditar.Text       = Tr("grp.permisos.editar",     "Editar rol");
             grpAsignar.Text      = Tr("grp.permisos.asignar",    "Asignar permiso o rol");
-            lblAsignar.Text      = Tr("lbl.permisos.elegiritem", "Elegí un ítem:");
+            lblAsignar.Text      = Tr("lbl.permisos.elegiritem", "Elija un ítem:");
 
             btnCrearRaiz.Text    = Tr("btn.permisos.crearraiz",  "Crear rol raíz");
             btnCrearSub.Text     = Tr("btn.permisos.crearsub",   "Crear sub-rol");
@@ -87,8 +112,14 @@ namespace GUI
             btnAsignar.Text      = Tr("btn.permisos.asignar",    "Asignar ↓");
             btnQuitar.Text       = Tr("btn.permisos.quitar",     "Quitar ítem seleccionado");
             btnActualizar.Text   = Tr("btn.permisos.actualizar", "Actualizar");
-            btnExplorador.Text   = Tr("btn.explorador",          "Ver vista completa del sistema");
             btnCerrar.Text       = Tr("btn.permisos.cerrar",     "Cerrar");
+
+            tabGestion.Text       = Tr("perm.tab.gestion",        "Gestión de roles");
+            tabVistaCompleta.Text = Tr("perm.tab.vistacompleta",  "Vista completa");
+            lblDescripcion.Text   = Tr("lbl.explorador.descripcion", "Estructura organizacional de WardrobeFlow — Solo lectura");
+            lblLeyenda.Text       = Tr("lbl.explorador.leyenda",  "Familia (nodo compuesto — Área o Rol)    Patente (hoja — permiso atómico)");
+            btnColapsar.Text      = Tr("btn.explorador.colapsar", "⊟ Colapsar todo");
+            btnExpandir.Text      = Tr("btn.explorador.expandir", "⊞ Expandir todo");
 
             if (tip != null)
                 tip.SetToolTip(rbCrear, Tr("help.permisos.rol",
@@ -122,6 +153,9 @@ namespace GUI
                 tvEstructura.ExpandAll();
                 tvEstructura.EndUpdate();
 
+                _vistaDesactualizada = true;
+                CargarVistaSiSeVe();
+
                 // Reseleccionar el nodo previo (si sigue existiendo) o limpiar.
                 _seleccionado = idPrev != 0 && _todos.ContainsKey(idPrev) ? _todos[idPrev] : null;
                 if (_seleccionado != null) SeleccionarNodoPorId(tvEstructura.Nodes, idPrev);
@@ -146,7 +180,7 @@ namespace GUI
             var nodo = new TreeNode(Etiqueta(comp)) { Tag = comp };
             if (comp is BE.Rol)
             {
-                nodo.NodeFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
+                nodo.NodeFont  = FuenteNodoNegrita;
                 nodo.ForeColor = Tema.RosaOscuro;
             }
             if (comp.Id != 0 && vis.Add(comp.Id))
@@ -258,26 +292,80 @@ namespace GUI
         private void BtnEliminarRol_Click(object sender, EventArgs e) => EliminarRolSel();
         private void BtnAsignar_Click(object sender, EventArgs e) => Asignar();
         private void BtnQuitar_Click(object sender, EventArgs e) => QuitarItem();
-        private void BtnActualizar_Click(object sender, EventArgs e) => CargarArbol();
-        private void BtnExplorador_Click(object sender, EventArgs e)
-        {
-            if (_exploradorAbierto != null && !_exploradorAbierto.IsDisposed)
-            {
-                _exploradorAbierto.BringToFront();
-                return;
-            }
-            _exploradorAbierto = new ExploradorCompositeForm();
-            _exploradorAbierto.FormClosed += (s, ev) => _exploradorAbierto = null;
-            _exploradorAbierto.Show(this);
-        }
+        private void BtnActualizar_Click(object sender, EventArgs e) => CargarArbol();   // recarga las dos pestañas
         private void BtnCerrar_Click(object sender, EventArgs e) => this.Close();
+        private void BtnColapsar_Click(object sender, EventArgs e) => tvVistaCompleta.CollapseAll();
+        private void BtnExpandir_Click(object sender, EventArgs e) => tvVistaCompleta.ExpandAll();
+
+        // ── Pestaña "Vista completa" (solo lectura) ─────────────────────────────────
+        // Árbol Composite completo bajo un nodo "WardrobeFlow": roles/familias (compuestos) y
+        // patentes (hojas), con los nombres traducidos al idioma activo. Usa las raíces que ya
+        // trajo CargarArbol (BLL.Familia.ObtenerArbol): no hace otra consulta. NO modifica permisos.
+        private void CargarVistaCompleta()
+        {
+            tvVistaCompleta.BeginUpdate();
+            try
+            {
+                var traducciones = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+                tvVistaCompleta.Nodes.Clear();
+                var empresa = new TreeNode("WardrobeFlow")
+                {
+                    NodeFont  = FuenteNodoNegrita,
+                    ForeColor = Tema.RosaOscuro
+                };
+                foreach (BE.Componente raiz in _raices)
+                    empresa.Nodes.Add(CrearNodoVista(raiz, traducciones));
+                tvVistaCompleta.Nodes.Add(empresa);
+                tvVistaCompleta.ExpandAll();
+            }
+            catch (Exception ex)
+            {
+                MostrarError(ex);
+            }
+            finally
+            {
+                tvVistaCompleta.EndUpdate();
+            }
+        }
+
+        // Familias → negrita rosa con prefijo "(Familia) "; patentes → verde. Las traducciones se
+        // pasan como parámetro para no armar el diccionario en cada nodo. La recursión se apoya en
+        // el polimorfismo del Composite (BE.Patente.Hijos es una lista vacía).
+        private static TreeNode CrearNodoVista(BE.Componente componente, IDictionary<string, Traduccion> t)
+        {
+            bool esFamilia = componente is BE.Familia;
+            string nombre  = componente.Nombre;
+            string Clave(string prefijo) => prefijo + componente.Nombre.ToLowerInvariant()
+                                                .Replace(" ", "").Replace("(", "").Replace(")", "");
+
+            if (esFamilia)
+            {
+                // Primero como grupo de permisos; si no, como rol.
+                if (t.ContainsKey(Clave("perm.grp.")))      nombre = t[Clave("perm.grp.")].Texto;
+                else if (t.ContainsKey(Clave("perm.rol."))) nombre = t[Clave("perm.rol.")].Texto;
+            }
+            else if (t.ContainsKey(Clave("perm.pat.")))
+                nombre = t[Clave("perm.pat.")].Texto;
+
+            var nodo = new TreeNode((esFamilia ? "(Familia) " : "") + nombre)
+            {
+                Tag       = componente,
+                NodeFont  = esFamilia ? FuenteNodoNegrita : FuenteNodo,
+                ForeColor = esFamilia ? Tema.RosaOscuro : Tema.Exito
+            };
+            // Sin guarda de ciclos: el árbol en memoria no puede tenerlos (BE.Familia.AgregarHijo los
+            // rechaza al armarlo en DAL.ObtenerArbol).
+            foreach (BE.Componente hijo in componente.Hijos)
+                nodo.Nodes.Add(CrearNodoVista(hijo, t));
+            return nodo;
+        }
 
         // ── Acciones: modo CREAR ───────────────────────────────────────────────────
         private void CrearRolRaiz()
         {
             string nombre = txtNombreRol.Text.Trim();
             if (string.IsNullOrWhiteSpace(nombre))
-            { MostrarError(Tr("perm.msg.nombrevacio", "Escribí un nombre para el rol.")); return; }
+            { MostrarError(Tr("perm.msg.nombrevacio", "Escriba un nombre para el rol.")); return; }
             try
             {
                 _familiaBLL.CrearRol(nombre);
@@ -292,11 +380,11 @@ namespace GUI
         private void CrearSubRol()
         {
             if (!(_seleccionado is BE.Rol padre))
-            { MostrarError(Tr("perm.msg.selpadrerol", "Seleccioná un Rol del árbol para crearle un sub-rol.")); return; }
+            { MostrarError(Tr("perm.msg.selpadrerol", "Seleccione un Rol del árbol para crearle un sub-rol.")); return; }
 
             string nombre = txtNombreRol.Text.Trim();
             if (string.IsNullOrWhiteSpace(nombre))
-            { MostrarError(Tr("perm.msg.nombrevacio", "Escribí un nombre para el sub-rol.")); return; }
+            { MostrarError(Tr("perm.msg.nombrevacio", "Escriba un nombre para el sub-rol.")); return; }
             try
             {
                 int nuevoId = _familiaBLL.CrearRol(nombre);
@@ -321,7 +409,7 @@ namespace GUI
                         // genérico, para que quede claro que hay que revisarlo a mano.
                         MostrarError(string.Format(
                             Tr("perm.err.subrol_huerfano",
-                              "El sub-rol '{0}' se creó pero no se pudo vincular a '{1}' ({2}), y tampoco se pudo deshacer automáticamente. Revisalo manualmente en la lista de Roles."),
+                              "El sub-rol '{0}' se creó pero no se pudo vincular a '{1}' ({2}), y tampoco se pudo deshacer automáticamente. Revíselo manualmente en la lista de Roles."),
                             nombre, padre.Nombre, exVincular.Message));
                         CargarArbol();
                         return;
@@ -340,7 +428,7 @@ namespace GUI
         private void EditarNombre()
         {
             if (!(_seleccionado is BE.Rol rol))
-            { MostrarError(Tr("perm.msg.selmodrol", "Seleccioná un ROL del árbol para renombrar (los permisos no se editan).")); return; }
+            { MostrarError(Tr("perm.msg.selmodrol", "Seleccione un ROL del árbol para renombrar (los permisos no se editan).")); return; }
 
             string nombre = txtNombreRol.Text.Trim();
             if (string.IsNullOrWhiteSpace(nombre))
@@ -358,7 +446,7 @@ namespace GUI
         private void EliminarRolSel()
         {
             if (!(_seleccionado is BE.Rol rol))
-            { MostrarError(Tr("perm.msg.selelirol", "Seleccioná un ROL del árbol para eliminar (los permisos no se eliminan).")); return; }
+            { MostrarError(Tr("perm.msg.selelirol", "Seleccione un ROL del árbol para eliminar (los permisos no se eliminan).")); return; }
 
             if (!FormBase.MostrarConfirmacionSiNo(this,
                     string.Format(Tr("perm.conf.elirol", "¿Eliminar el rol '{0}'? No se permite si tiene usuarios asignados."), rol.Nombre),
@@ -378,9 +466,9 @@ namespace GUI
         private void Asignar()
         {
             if (!(_seleccionado is BE.Rol rol))
-            { MostrarError(Tr("perm.msg.selpadre", "Seleccioná un Rol para asignarle un permiso o rol.")); return; }
+            { MostrarError(Tr("perm.msg.selpadre", "Seleccione un Rol para asignarle un permiso o rol.")); return; }
             if (!(cmbAsignables.SelectedItem is Item it))
-            { MostrarError(Tr("perm.msg.selasignable", "Elegí un permiso o rol de la lista para asignar.")); return; }
+            { MostrarError(Tr("perm.msg.selasignable", "Elija un permiso o rol de la lista para asignar.")); return; }
             try
             {
                 _familiaBLL.AgregarComponente(rol.Id, it.Comp.Id);
@@ -395,7 +483,7 @@ namespace GUI
         {
             var node = tvEstructura.SelectedNode;
             if (node?.Parent == null)
-            { MostrarError(Tr("perm.msg.selquitar", "Seleccioná un ítem que cuelgue de un rol para quitarlo.")); return; }
+            { MostrarError(Tr("perm.msg.selquitar", "Seleccione un ítem que cuelgue de un rol para quitarlo.")); return; }
 
             var padre = node.Parent.Tag as BE.Componente;
             var hijo  = node.Tag as BE.Componente;

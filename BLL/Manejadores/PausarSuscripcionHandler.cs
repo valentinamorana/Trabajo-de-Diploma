@@ -48,7 +48,7 @@ namespace BLL.Manejadores
             // encadenar pausas día a día y superar el tope de 3 meses.
             if (contexto.Cliente.EstaPausada)
                 throw new BE.AppException("err.bll.renovacion.ya_pausada",
-                    "La suscripción ya está pausada. Reanudala antes de pedir una nueva pausa.");
+                    "La suscripción ya está pausada. Reanúdela antes de pedir una nueva pausa.");
 
             if (contexto.FechaPausaHasta.Value.Date > DateTime.Today.AddMonths(MaxMesesPausa))
                 throw new BE.AppException("err.bll.renovacion.pausa_excede_tope",
@@ -65,7 +65,7 @@ namespace BLL.Manejadores
             if (dalPedido != null && dalPedido.TienePedidoActivo(contexto.Cliente.IdCliente))
                 throw new BE.AppException("err.bll.renovacion.pedido_activo",
                     "No se puede pausar ni dar de baja la suscripción: el cliente tiene un pedido en curso. " +
-                    "Esperá a que termine su ciclo o cancelalo.");
+                    "Espere a que termine su ciclo o cancélelo.");
 
             var cliente = contexto.Cliente;
             cliente.FechaPausaHasta = contexto.FechaPausaHasta;
@@ -96,7 +96,6 @@ namespace BLL.Manejadores
                     Actor = contexto.Actor
                 });
             });
-            dalCliente.RecalcularDV(cliente.IdCliente);
 
             return new ResultadoRenovacion
             {

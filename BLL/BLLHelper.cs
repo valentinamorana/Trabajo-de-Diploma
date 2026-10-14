@@ -13,7 +13,7 @@ namespace BLL
         {
             if (!Seguridad.SessionManager.IsLoggedIn)
                 throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+                    "La sesión expiró. Vuelva a iniciar sesión.");
             if (!Seguridad.SessionManager.GetInstance().TienePermiso(nombrePatente))
                 throw new BE.AppException("err.bll.sin_permiso",
                     "No tiene permiso para ejecutar esta operación ('{0}').", nombrePatente);
@@ -40,7 +40,7 @@ namespace BLL
         {
             if (!Seguridad.SessionManager.IsLoggedIn)
                 throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+                    "La sesión expiró. Vuelva a iniciar sesión.");
             if (!Seguridad.SessionManager.GetInstance().Usuario.EsAdministrador)
                 throw new BE.AppException(claveSinPermiso, mensajeSinPermiso);
             ExigirVigente();   // p. ej. un Administrador archivado no restaura backups ni crea usuarios
@@ -52,14 +52,14 @@ namespace BLL
         {
             if (!Seguridad.SessionManager.IsLoggedIn)
                 throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+                    "La sesión expiró. Vuelva a iniciar sesión.");
 
             var usuario  = Seguridad.SessionManager.GetInstance().Usuario;
             var empleado = dalEmpleado.ObtenerPorUsuario(usuario.Id);
             if (empleado == null)
                 throw new BE.AppException("err.bll.empleado_sin_vinculo",
                     "El usuario '{0}' no tiene un Empleado vinculado. " +
-                    "Pedíle al Administrador que configure el vínculo.",
+                    "Pídale al Administrador que configure el vínculo.",
                     usuario.Username);
             return empleado.IdEmpleado;
         }
@@ -69,7 +69,7 @@ namespace BLL
         {
             if (!Seguridad.SessionManager.IsLoggedIn)
                 throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+                    "La sesión expiró. Vuelva a iniciar sesión.");
             return Seguridad.SessionManager.GetInstance().Usuario.Id;
         }
 
@@ -80,13 +80,13 @@ namespace BLL
         {
             if (!Seguridad.SessionManager.IsLoggedIn)
                 throw new BE.AppException("err.bll.sesion_expirada",
-                    "La sesión expiró. Volvé a iniciar sesión.");
+                    "La sesión expiró. Vuelva a iniciar sesión.");
             var u = Seguridad.SessionManager.GetInstance().Usuario;
             bool tieneGestion = u.EsAdministrador
                                 || (u.Permisos != null && u.Permisos.Exists(p => p.NombreMenu == "mnuUsuarios"));
             if (!tieneGestion)
                 throw new BE.AppException("err.bll.familia.sin_permiso",
-                    "No tenés permiso para gestionar usuarios y permisos.");
+                    "No tiene permiso para gestionar usuarios y permisos.");
             ExigirVigente();
         }
     }

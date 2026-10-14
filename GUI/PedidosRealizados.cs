@@ -36,7 +36,7 @@ namespace GUI
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
 
-        // PN04, CU-DEP-02 Reportar Prenda Perdida: prendas del pedido actualmente mostrado
+        // PN04, CU06-DEP Reportar Prenda Perdida: prendas del pedido actualmente mostrado
         // en dgvDetalle, para resolver la selección sin agregar una columna ID visible.
         private List<BE.Prenda> _prendasDetalleActual = new List<BE.Prenda>();
         private BE.Pedido _pedidoDetalleActual;
@@ -104,10 +104,11 @@ namespace GUI
             cmbFiltroEstado.SelectedIndexChanged -= CmbFiltroEstado_SelectedIndexChanged;
             cmbFiltroEstado.Items.Clear();
             cmbFiltroEstado.Items.Add(Tr("combo.prenda.todos", "Todos"));
-            cmbFiltroEstado.Items.Add(Tr("est.pendiente",  "Pendiente"));
-            cmbFiltroEstado.Items.Add(Tr("est.despachado", "Despachado"));
-            cmbFiltroEstado.Items.Add(Tr("est.entregado",  "Entregado"));
-            cmbFiltroEstado.Items.Add(Tr("est.cancelado",  "Cancelado"));
+            // Mismas etiquetas que la grilla (EstadosPedido es la única fuente).
+            cmbFiltroEstado.Items.Add(EstadosPedido.Etiqueta(BE.EstadoPedido.Pendiente));
+            cmbFiltroEstado.Items.Add(EstadosPedido.Etiqueta(BE.EstadoPedido.Despachado));
+            cmbFiltroEstado.Items.Add(EstadosPedido.Etiqueta(BE.EstadoPedido.Entregado));
+            cmbFiltroEstado.Items.Add(EstadosPedido.Etiqueta(BE.EstadoPedido.Cancelado));
             cmbFiltroEstado.Items.Add(Tr("combo.ped.atrasados", "Atrasados (30+ días sin devolver)"));
             cmbFiltroEstado.SelectedIndex = idx >= 0 && idx < cmbFiltroEstado.Items.Count ? idx : 0;
             cmbFiltroEstado.SelectedIndexChanged += CmbFiltroEstado_SelectedIndexChanged;
@@ -123,6 +124,8 @@ namespace GUI
 
         private void PedidosRealizados_Load(object sender, EventArgs e)
         {
+            // CU06-DEP: sin la patente de edición de stock (p. ej. el Operador Logístico) el botón ni se ve.
+            btnReportarPerdida.Visible = BLL.PermisosAccion.Puede(BE.Patentes.StockEditar);
             CargarPedidos();
         }
 
@@ -308,14 +311,7 @@ namespace GUI
                 // para ser independiente del idioma de la etiqueta visible.
                 if (!dgvPedidos.Columns.Contains("_EstadoKey")) continue;
                 if (!int.TryParse(row.Cells["_EstadoKey"].Value?.ToString(), out int estadoKey)) continue;
-                row.DefaultCellStyle.ForeColor = estadoKey switch
-                {
-                    (int)BE.EstadoPedido.Pendiente  => Tema.Alerta,
-                    (int)BE.EstadoPedido.Despachado => Tema.Info,
-                    (int)BE.EstadoPedido.Entregado  => Tema.Exito,
-                    (int)BE.EstadoPedido.Cancelado  => Tema.Error,
-                    _                               => Color.Black
-                };
+                row.DefaultCellStyle.ForeColor = EstadosPedido.Color((BE.EstadoPedido)estadoKey);
             }
         }
 
@@ -410,7 +406,7 @@ namespace GUI
             RH("Estado",    "col.prenda.estado",    "Estado");
         }
 
-        // PN04, CU-DEP-02 Reportar Prenda Perdida: solo tiene sentido sobre una prenda
+        // PN04, CU06-DEP Reportar Prenda Perdida: solo tiene sentido sobre una prenda
         // EnUso (la única transición manual habilitada desde ese estado, ver
         // BE.Estados.EstadoEnUso).
         private void DgvDetalle_SelectionChanged(object sender, EventArgs e)
@@ -445,7 +441,7 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); return; }
             if (pedido == null)
             {
-                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualice la grilla."));
                 CargarPedidos();
                 return;
             }
@@ -481,7 +477,7 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); return; }
             if (pedido == null)
             {
-                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualizá la grilla."));
+                MostrarError(Tr("msg.ped.yanoexiste", "Este pedido ya no existe. Actualice la grilla."));
                 CargarPedidos();
                 return;
             }
@@ -531,18 +527,20 @@ namespace GUI
                 // Patrón Command (PdN3): la GUI arma el pedido de devolución y se lo entrega
                 // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
                 // ejecución real siguen 100% en BLL.Pedido.RegistrarDevolucion, adentro del Command.
-                _invocador.TomarOrden(new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text));
+                var devolucion = new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text);
+                _invocador.TomarOrden(devolucion);
                 _invocador.ProcesarOrdenes();
 
-                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a En limpieza."), pedidoCompleto.CantidadPrendas));
+                // Las que volvieron de verdad: las reportadas como perdidas ya están de baja y no cuentan.
+                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a En limpieza."), devolucion.PrendasDevueltas));
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        // PN04, CU-DEP-02 Reportar Prenda Perdida: una prenda EnUso que nunca vuelve
+        // PN04, CU06-DEP Reportar Prenda Perdida: una prenda EnUso que nunca vuelve
         // físicamente no puede pasar por Inspección de Devolución (esa cola es EnLimpieza).
-        // Mismo mecanismo que CU-DEP-01: CambiarEstado + RegistrarCargo, sin aprobación de
+        // Mismo mecanismo que CU05-DEP: CambiarEstado + RegistrarCargo, sin aprobación de
         // nadie (Nuuly: cobro directo por reposición).
         private void BtnReportarPerdida_Click(object sender, EventArgs e)
         {
@@ -555,7 +553,7 @@ namespace GUI
 
                 try
                 {
-                    // CU-DEP-02: cargo de reposición + baja en UNA transacción (BLL.InspeccionDevolucion).
+                    // CU06-DEP: cargo de reposición + baja en UNA transacción (BLL.InspeccionDevolucion).
                     // Antes eran dos llamadas sueltas desde acá (RegistrarCargo + CambiarEstado), sin transacción.
                     inspeccionBLL.ReportarPerdida(this.Text, prenda, dlg.Motivo, dlg.Monto);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);
@@ -629,18 +627,7 @@ namespace GUI
             return _pedidos.Find(p => p.IdPedido == id);
         }
 
-        private string EstadoLabel(BE.EstadoPedido estado)
-        {
-            var t = Traductor.ObtenerTraducciones(_idioma);
-            switch (estado)
-            {
-                case BE.EstadoPedido.Pendiente:  return t.ContainsKey("est.formalizado") ? t["est.formalizado"].Texto : "Formalizado (pendiente de despacho)";
-                case BE.EstadoPedido.Despachado: return t.ContainsKey("est.despachado") ? t["est.despachado"].Texto : "Despachado";
-                case BE.EstadoPedido.Entregado:  return t.ContainsKey("est.entregado")  ? t["est.entregado"].Texto  : "Entregado";
-                case BE.EstadoPedido.Cancelado:  return t.ContainsKey("est.cancelado")  ? t["est.cancelado"].Texto  : "Cancelado";
-                default: return estado.ToString();
-            }
-        }
+        private string EstadoLabel(BE.EstadoPedido estado) => EstadosPedido.Etiqueta(estado);
 
         /// <summary>
         /// PN04 — texto del estado con el detalle de la devolución: un Entregado se muestra como

@@ -94,8 +94,8 @@ namespace GUI
             lblPaso.Text              = Tr("paso1.identificar",     "Paso 1 de 2 — Identificar al cliente");
             lblSeleccionaCliente.Text = Tr("lbl.ped.identificacion","Identificación del cliente (DNI, nombre o apellido):");
             lblInstruccion.Text       = EsAjuste
-                ? Tr("lbl.ped.ajuste", "Ajustá la selección: las prendas faltantes ya no figuran y las alternativas sugeridas están resaltadas.")
-                : Tr("lbl.ped.selprendas", "Seleccioná las prendas para incluir en el pedido (checkbox):");
+                ? Tr("lbl.ped.ajuste", "Ajuste la selección: las prendas faltantes ya no figuran y las alternativas sugeridas están resaltadas.")
+                : Tr("lbl.ped.selprendas", "Seleccione las prendas para incluir en el pedido (checkbox):");
             btnBuscar.Text            = Tr("btn.ped.buscar",        "Buscar");
             btnSiguiente.Text         = Tr("btn.siguiente",         "Siguiente →");
             btnVolver.Text            = Tr("btn.volver",            "← Volver");
@@ -134,13 +134,16 @@ namespace GUI
             // Modo ajuste: el cliente ya está identificado; se abre directamente el catálogo.
             try
             {
-                _clienteSel = clienteBLL.ObtenerPorId(_pedidoAjuste.IdCliente);
+                // Misma verificación que al armar: con la suscripción vencida el cupo sería 0 y la
+                // pantalla mostraría un exceso que no es tal (y el desistimiento por cupo fallaría).
+                _clienteSel = pedidoBLL.VerificarVigencia(_pedidoAjuste.IdCliente);
                 btnVolver.Visible = false;
                 MostrarPaso(2);
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
+                BeginInvoke((Action)Close);
             }
         }
 
@@ -187,7 +190,7 @@ namespace GUI
             if (_coincidencias.Count == 0)
             {
                 MostrarAviso(Tr("err.ped.noencontrado",
-                    "No se encontró ningún cliente con esa identificación. Verificá el DNI, el nombre o el apellido."));
+                    "No se encontró ningún cliente con esa identificación. Verifique el DNI, el nombre o el apellido."));
                 return;
             }
 
@@ -201,7 +204,7 @@ namespace GUI
             foreach (var c in _coincidencias)
                 lstCoincidencias.Items.Add($"{c.NombreCompleto}  (DNI {c.DNI})");
             lstCoincidencias.Visible = true;
-            MostrarAviso(Tr("lbl.ped.variascoinc", "Hay varios clientes que coinciden: elegí el correcto en la lista."),
+            MostrarAviso(Tr("lbl.ped.variascoinc", "Hay varios clientes que coinciden: elija el correcto en la lista."),
                          Tema.Info);
         }
 
@@ -259,7 +262,7 @@ namespace GUI
                 lblInfoPlan.ForeColor = Tema.Alerta;
                 lblInfoPlan.Text = ficha + "\n" + string.Format(
                     Tr("lbl.ped.proxvencer",
-                        "La suscripción vence en {0} día(s). Avisale al cliente para renovarla."),
+                        "La suscripción vence en {0} día(s). Avísele al cliente para renovarla."),
                     estado.DiasHastaVencimiento);
             }
             else
@@ -430,17 +433,17 @@ namespace GUI
                 Tr("lbl.ped.res.linea1", "Seleccionadas: {0}  |  Ya en uso: {1}  |  Total: {2}"),
                 seleccionadas, enUso, total);
             string linea2 = "";
-            bool excede = false;
+            // La BLL decide si la selección excede el cupo (incluido el plan sin cupo).
+            bool excede = estado.ExcedeCupo;
 
             if (limite > 0)
             {
-                if (estado.SuperaLimite)
+                if (excede)
                 {
                     // "Informar exceso de cupo" (Detalle de restricciones de cupo).
-                    excede = true;
                     linea2 = string.Format(
                         Tr("lbl.ped.res.limite",
-                           "El plan '{0}' permite {1} prenda(s). Estás superando el límite por {2}."),
+                           "El plan '{0}' permite {1} prenda(s). Está superando el límite por {2}."),
                         estado.NombrePlan, limite, estado.Exceso) + " " +
                         Tr("lbl.ped.res.ajustar", "El cliente ajusta la selección o desiste.");
                     lblResumen.ForeColor = Color.DarkRed;
@@ -448,7 +451,7 @@ namespace GUI
                 else if (seleccionadas == 0)
                 {
                     linea2 = string.Format(
-                        Tr("lbl.ped.res.vacio", "Podés agregar hasta {0} prenda(s) (plan {1})."),
+                        Tr("lbl.ped.res.vacio", "Puede agregar hasta {0} prenda(s) (plan {1})."),
                         estado.PrendasDisponibles, estado.NombrePlan);
                     lblResumen.ForeColor = Color.DimGray;
                 }
@@ -456,7 +459,7 @@ namespace GUI
                 {
                     linea2 = string.Format(
                         Tr("lbl.ped.res.parcial",
-                           "El plan '{0}' permite {1}. Estás eligiendo {2} de {3} posibles — podés agregar más."),
+                           "El plan '{0}' permite {1}. Está eligiendo {2} de {3} posibles — puede agregar más."),
                         estado.NombrePlan, limite, seleccionadas, estado.PrendasDisponibles);
                     lblResumen.ForeColor = Tema.Alerta;
                 }
@@ -464,14 +467,13 @@ namespace GUI
                 {
                     linea2 = string.Format(
                         Tr("lbl.ped.res.lleno",
-                           "Alcanzás el máximo del plan '{0}' ({1} prendas)."),
+                           "Alcanza el máximo del plan '{0}' ({1} prendas)."),
                         estado.NombrePlan, limite);
                     lblResumen.ForeColor = Color.DarkGreen;
                 }
             }
             else
             {
-                excede = seleccionadas > 0;   // plan sin cupo: cualquier selección lo excede
                 lblResumen.ForeColor = excede ? Color.DarkRed : Tema.RosaOscuro;
             }
 
@@ -519,7 +521,7 @@ namespace GUI
             var prendas = ObtenerPrendasSeleccionadas();
             if (prendas.Count == 0)
             {
-                MostrarError(Tr("err.ped.sinprendas", "Seleccioná al menos una prenda."));
+                MostrarError(Tr("err.ped.sinprendas", "Seleccione al menos una prenda."));
                 return;
             }
 

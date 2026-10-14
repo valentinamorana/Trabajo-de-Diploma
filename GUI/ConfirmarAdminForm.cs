@@ -80,7 +80,7 @@ namespace GUI
                     if (_intentosFallidos >= MaxIntentos)
                     {
                         MessageBox.Show(
-                            Tr("msg.confirmar.limiteintentos", "Demasiados intentos fallidos. Cerrá esta ventana e intentá de nuevo más tarde."),
+                            Tr("msg.confirmar.limiteintentos", "Demasiados intentos fallidos. Cierre esta ventana e intente de nuevo más tarde."),
                             Tr("msg.error.titulo", "Error"),
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         this.DialogResult = DialogResult.Cancel;

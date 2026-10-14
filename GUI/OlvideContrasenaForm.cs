@@ -77,7 +77,7 @@ namespace GUI
 
             if (string.IsNullOrWhiteSpace(username))
             {
-                MostrarError(Tr("err.recup.nousername", "Ingresá tu nombre de usuario."));
+                MostrarError(Tr("err.recup.nousername", "Ingrese su nombre de usuario."));
                 return;
             }
 
@@ -93,7 +93,7 @@ namespace GUI
 
                 lblMensaje.ForeColor = Tema.Exito;
                 lblMensaje.Text = Tr("msg.recup.exito",
-                    "Si el usuario existe, contactá al administrador para que resetee\ntu contraseña desde Administrar -> Usuarios.");
+                    "Si el usuario existe, contacte al administrador para que resetee\nsu contraseña desde Administrar -> Usuarios.");
 
                 btnEnviar.Enabled = false;
             }

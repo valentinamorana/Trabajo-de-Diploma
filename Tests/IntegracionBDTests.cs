@@ -56,11 +56,13 @@ namespace Tests
             new DAL.Pedido().ObtenerTodos();
             new DAL.Contratacion().ObtenerPendientesDePago();
             new DAL.Promocion().ObtenerTodas();
+            new DAL.Promocion().ObtenerDecisionesDelPlan(1, DateTime.Today.AddYears(-1), DateTime.Today.AddDays(1));   // PN03: Evaluar resultado
             new DAL.Usuario().ObtenerTodos();
             new DAL.CargoPrenda().ObtenerPendientesPorCliente(1);
             new DAL.InspeccionDevolucion().ObtenerPedidoEnCurso(1);
             // Compensación de un cobro con cargos (los parámetros con estado 0 tienen que llegar como valor).
-            new DAL.Contratacion().ReabrirPago(-1, new System.Collections.Generic.List<int> { -1 });
+            Assert.IsFalse(new DAL.Contratacion().ReabrirPago(-1, new System.Collections.Generic.List<int> { -1 }),
+                "Una contratación que no está Pagada no se reabre.");
         }
 
         // Normalización 3FN: catálogo de categorías, medio de pago preferido por FK y origen del
@@ -80,6 +82,72 @@ namespace Tests
             // La prenda de demo en limpieza la mandó el depósito a mano: no viene de una devolución.
             var mantenimientos = new DAL.MantenimientoPrenda().ObtenerTodos();
             Assert.IsTrue(mantenimientos.Exists(m => m.Actor == "deposito" && m.Origen == BE.OrigenMantenimiento.Manual));
+        }
+
+        // PN03: el beneficio que calcula BE (redondeo desde el cero) pasa el CHECK de la base, que lo
+        // compara con ROUND(ingreso × tasa / 100, 2) — incluso en un punto medio (1,15 × 50 % = 0,575).
+        [TestMethod]
+        public void PN03_SugerenciaConIngresoYTasa_PasaElCheckDelBeneficio()
+        {
+            ExigirBase();
+            var plan = new DAL.PlanSuscripcion().ObtenerTodos().First();
+            var dal = new DAL.SugerenciaPromocion();
+            var s = new BE.SugerenciaPromocion
+            {
+                IdPlan = plan.IdPlan, Motivo = "Prueba de integración: punto medio del redondeo",
+                TipoDescuentoSugerido = BE.TipoDescuento.Porcentaje, OrigenMetrica = BE.OrigenMetrica.Manual,
+                IngresoMensualEnRiesgo = 1.15m, TasaRetencion = 50m,
+                BeneficioEstimado = BE.SugerenciaPromocion.CalcularBeneficio(1.15m, 50m), FechaAlta = DateTime.Now
+            };
+            Assert.AreEqual(0.58m, s.BeneficioEstimado);
+            int id = dal.Alta(s);
+            var acceso = DAL.Acceso.GetInstance();
+            try
+            {
+                var leida = dal.ObtenerPorId(id);
+                Assert.AreEqual(1.15m, leida.IngresoMensualEnRiesgo);
+                Assert.AreEqual(1.15m, leida.IngresoEnRiesgo());
+                Assert.AreEqual(50m, leida.TasaRetencion);
+
+                // Un beneficio que no coincide con ingreso × tasa no entra.
+                s.BeneficioEstimado = 0.57m;
+                int idDesfasado = 0;
+                try { idDesfasado = dal.Alta(s); }
+                catch (Exception ex)
+                {
+                    StringAssert.Contains(ex.InnerException?.Message ?? ex.Message, "CHK_SugerenciaPromocion_Beneficio");
+                }
+                if (idDesfasado != 0)
+                {
+                    acceso.Escribir("DELETE FROM SugerenciaPromocion WHERE IdSugerencia = @Id",
+                        new[] { new SqlParameter("@Id", idDesfasado) });
+                    Assert.Fail("El CHECK CHK_SugerenciaPromocion_Beneficio debía rechazar el desfasaje.");
+                }
+            }
+            finally
+            {
+                acceso.Escribir("DELETE FROM SugerenciaPromocion WHERE IdSugerencia = @Id",
+                    new[] { new SqlParameter("@Id", id) });
+            }
+        }
+
+        // PN04: con los datos reales, una prenda que entró a limpieza en el depósito se libera desde
+        // Prendas; una que volvió de un cliente no ofrece ningún destino manual (sale por la Inspección).
+        [TestMethod]
+        public void PN04_TransicionesManuales_DistinguenLimpiezaDelDepositoDeDevolucion()
+        {
+            ExigirBase();
+            var bll = new BLL.Prenda();
+            var abiertos = new DAL.MantenimientoPrenda().ObtenerTodos().Where(m => m.EstaAbierto).ToList();
+            var enLimpieza = new DAL.Prenda().ObtenerTodos().Where(p => p.Estado == BE.EstadoPrenda.EnLimpieza).ToList();
+
+            var delDeposito = enLimpieza.FirstOrDefault(p => abiertos.Any(m => m.IdPrenda == p.IdPrenda && !m.VieneDeDevolucion));
+            if (delDeposito == null) Assert.Inconclusive("La base de pruebas no tiene una prenda en limpieza del depósito.");
+            CollectionAssert.Contains(bll.ObtenerTransicionesManuales(delDeposito), BE.EstadoPrenda.Disponible);
+
+            foreach (var devuelta in enLimpieza.Where(p => abiertos.Any(m => m.IdPrenda == p.IdPrenda && m.VieneDeDevolucion)))
+                Assert.AreEqual(0, bll.ObtenerTransicionesManuales(devuelta).Count,
+                    $"La prenda devuelta {devuelta.IdPrenda} solo sale de limpieza por la Inspección de Devolución.");
         }
 
         [TestMethod]
@@ -121,6 +189,85 @@ namespace Tests
             Assert.AreEqual(antes.DescuentoProximoCobro, despues.DescuentoProximoCobro, "Rollback del crédito.");
         }
 
+        // C5: dos cobros que leyeron el mismo crédito no lo aplican los dos. Si el saldo real ya no lo
+        // cubre, ConsumirCreditoEnTx lanza y se revierte toda la transacción (también lo que se escribió antes).
+        [TestMethod]
+        public void Cliente_ConsumirCreditoSinSaldoSuficiente_LanzaYRevierteTodo()
+        {
+            ExigirBase();
+            var dal = new DAL.Cliente();
+            var antes = dal.ObtenerTodos().First();
+
+            try
+            {
+                dal.EjecutarTransaccion((cn, tx) =>
+                {
+                    dal.SumarCreditoEnTx(cn, tx, antes.IdCliente, 1m);
+                    dal.ConsumirCreditoEnTx(cn, tx, antes.IdCliente, antes.DescuentoProximoCobro + 2m);
+                });
+                Assert.Fail("Debía rechazar el consumo de un crédito que ya no está.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.cobro.credito_concurrente", ex.Clave);
+            }
+
+            Assert.AreEqual(antes.DescuentoProximoCobro, dal.ObtenerPorId(antes.IdCliente).DescuentoProximoCobro,
+                "Rollback: ni la suma ni el consumo quedaron aplicados.");
+            Assert.IsTrue(DvhCoincide(DAL.Cliente.DV_Tabla, DAL.Cliente.DV_Pk, DAL.Cliente.DV_Columnas, antes.IdCliente));
+        }
+
+        // C1 + C2: alta, cobro y reapertura de una contratación dejan el DVH al día (recalculado en la
+        // misma transacción); la reapertura exige que siga Pagada y la segunda vez no toca nada.
+        [TestMethod]
+        public void Contratacion_ReabrirPago_SoloSiEstaPagadaYConElDvAlDia()
+        {
+            ExigirBase();
+            var acceso = DAL.Acceso.GetInstance();
+            var dt = acceso.Leer(
+                "SELECT (SELECT TOP 1 IdCliente FROM Cliente c WHERE Activo = 1 AND NOT EXISTS " +
+                "          (SELECT 1 FROM Contratacion x WHERE x.IdCliente = c.IdCliente AND x.Estado = 0) ORDER BY IdCliente DESC) AS IdCliente, " +
+                "       (SELECT TOP 1 IdPlan FROM PlanSuscripcion ORDER BY IdPlan) AS IdPlan, " +
+                "       (SELECT TOP 1 IdEmpleado FROM Empleado ORDER BY IdEmpleado) AS IdEmpleado, " +
+                "       (SELECT TOP 1 IdMedioPago FROM MedioPago ORDER BY IdMedioPago) AS IdMedioPago", null);
+            var r = dt.Rows[0];
+            if (r["IdCliente"] == DBNull.Value || r["IdPlan"] == DBNull.Value || r["IdEmpleado"] == DBNull.Value || r["IdMedioPago"] == DBNull.Value)
+                Assert.Inconclusive("La base de pruebas no tiene los datos de demo necesarios.");
+            int idEmpleado = Convert.ToInt32(r["IdEmpleado"]);
+
+            var dal = new DAL.Contratacion();
+            int id = 0;
+            try
+            {
+                id = dal.Alta(new BE.Contratacion
+                {
+                    IdCliente = Convert.ToInt32(r["IdCliente"]), IdPlan = Convert.ToInt32(r["IdPlan"]), IdVendedor = idEmpleado,
+                    Modalidad = BE.Builders.ModalidadCobro.Mensual, FechaAlta = DateTime.Now
+                });
+                Assert.IsTrue(DvhCoincide(DAL.Contratacion.DV_Tabla, DAL.Contratacion.DV_Pk, DAL.Contratacion.DV_Columnas, id));
+                Assert.IsFalse(dal.ReabrirPago(id), "Pendiente de pago: no hay cobro que reabrir.");
+
+                Assert.IsTrue(dal.ConfirmarCobro(id, idEmpleado, Convert.ToInt32(r["IdMedioPago"]),
+                    "TEST-REABRIR-" + Guid.NewGuid().ToString("N").Substring(0, 12), 100m, 0m, null));
+                Assert.IsTrue(dal.ReabrirPago(id));
+                var reabierta = dal.ObtenerPorId(id);
+                Assert.AreEqual(BE.EstadoContratacion.PendientePago, reabierta.Estado);
+                Assert.IsNull(reabierta.NumeroComprobante);
+                Assert.IsTrue(DvhCoincide(DAL.Contratacion.DV_Tabla, DAL.Contratacion.DV_Pk, DAL.Contratacion.DV_Columnas, id),
+                    "El DVH de la reapertura se recalcula en la misma transacción.");
+                Assert.IsFalse(dal.ReabrirPago(id), "Ya no está Pagada: la segunda vez no reabre nada.");
+            }
+            finally
+            {
+                if (id != 0)
+                {
+                    acceso.Escribir("DELETE FROM Contratacion WHERE IdContratacion = @Id", new[] { new SqlParameter("@Id", id) });
+                    new DAL.DigitoVerificador().ActualizarFila(DAL.Contratacion.DV_Tabla, DAL.Contratacion.DV_Pk,
+                                                               DAL.Contratacion.DV_Columnas, id);   // solo cambia el DVV
+                }
+            }
+        }
+
         // PN04: la devolución completa Pedido.FechaDevolucion en la misma transacción que las prendas,
         // el DV del pedido queda al día y el pedido devuelto deja de ser el "pedido en curso" de la prenda.
         [TestMethod]
@@ -155,14 +302,22 @@ namespace Tests
                         new SqlParameter("@Prenda", idPrenda)
                     });
                 idPedido = Convert.ToInt32(r.Rows[0]["IdPedido"]);
-                dal.ActualizarDV(idPedido);
+                dal.RecalcularDV();   // la fila se insertó a mano: se acepta como legítima
 
                 var antes = dal.ObtenerPorId(idPedido);
                 Assert.IsNull(antes.FechaDevolucion);
                 Assert.IsTrue(BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(antes, DateTime.Today));
                 Assert.AreEqual(idPedido, new DAL.InspeccionDevolucion().ObtenerPedidoEnCurso(idPrenda)?.IdPedido);
 
-                Assert.AreEqual(1, dal.RegistrarDevolucion(idPedido, idCliente, "deposito.test"));
+                Assert.AreEqual(1, dal.RegistrarDevolucion(idPedido, idCliente, "deposito.test",
+                    n => new System.Collections.Generic.List<BE.PedidoHistorial>
+                    {
+                        new BE.PedidoHistorial { Fecha = DateTime.Now, Accion = "DEVOLUCION", Campo = "Prendas",
+                                                 ValorAnterior = "EnUso", ValorNuevo = "EnLimpieza (" + n + " prenda(s))" }
+                    }));
+                var historial = new DAL.PedidoHistorial().ObtenerPorOperacion(idPedido, 1);
+                Assert.AreEqual(1, historial.Count, "El historial se asienta en la misma transacción de la devolución.");
+                Assert.AreEqual("EnLimpieza (1 prenda(s))", historial[0].ValorNuevo);
                 var abierto = new DAL.MantenimientoPrenda().ObtenerPorPrenda(idPrenda).Single(m => m.EstaAbierto);
                 Assert.AreEqual(BE.OrigenMantenimiento.Devolucion, abierto.Origen,
                     "La devolución abre el mantenimiento con Origen = Devolución (lo que la lleva a la Inspección).");
@@ -186,11 +341,97 @@ namespace Tests
                     acceso.Escribir(
                         "DELETE FROM MantenimientoPrenda WHERE IdPrenda = @Prenda AND FechaSalida IS NULL; " +
                         "UPDATE Prenda SET Estado = 0, IdClienteActual = NULL WHERE IdPrenda = @Prenda; " +
+                        "DELETE FROM PedidoHistorial WHERE IdPedido = @Id; " +
                         "DELETE FROM PedidoPrenda WHERE IdPedido = @Id; DELETE FROM Pedido WHERE IdPedido = @Id;",
                         new[] { new SqlParameter("@Prenda", idPrenda), new SqlParameter("@Id", idPedido) });
-                    dal.ActualizarDV(idPedido);
+                    dal.RecalcularDV();
                 }
             }
+        }
+
+        // C1 + C3: el cambio de estado, su historial y el DV del pedido van en UNA transacción. Si el
+        // historial no se puede asentar, el cambio se revierte (antes quedaba hecho, sin historial, y el
+        // DV se recalculaba aparte tragándose el error). El IdOperacion se numera dentro de la
+        // transacción y UQ_PedidoHistorial_Operacion impide repetirlo.
+        [TestMethod]
+        public void Pedido_CambioDeEstado_HistorialYDVEnLaMismaTransaccion()
+        {
+            ExigirBase();
+            var acceso = DAL.Acceso.GetInstance();
+            // Un cliente sin pedido en curso (UX_Pedido_ClienteActivo) y un empleado cualquiera.
+            var dt = acceso.Leer(
+                "SELECT TOP 1 c.IdCliente, (SELECT TOP 1 IdEmpleado FROM Empleado ORDER BY IdEmpleado) AS IdEmpleado " +
+                "FROM Cliente c WHERE NOT EXISTS (SELECT 1 FROM Pedido p WHERE p.IdCliente = c.IdCliente " +
+                "AND p.Estado IN (0, 1, 4, 5, 6)) ORDER BY c.IdCliente DESC", null);
+            if (dt.Rows.Count == 0) Assert.Inconclusive("La base de pruebas no tiene un cliente sin pedido en curso.");
+
+            var dal = new DAL.Pedido();
+            int idPedido = 0;
+            System.Collections.Generic.List<BE.PedidoHistorial> Evento(string accion, string campo, string anterior, string nuevo) =>
+                new System.Collections.Generic.List<BE.PedidoHistorial>
+                {
+                    new BE.PedidoHistorial { Fecha = DateTime.Now, Accion = accion, Campo = campo, ValorAnterior = anterior, ValorNuevo = nuevo }
+                };
+            try
+            {
+                idPedido = dal.AltaSinReserva(new BE.Pedido
+                {
+                    IdCliente   = Convert.ToInt32(dt.Rows[0]["IdCliente"]),
+                    IdEmpleado  = Convert.ToInt32(dt.Rows[0]["IdEmpleado"]),
+                    Estado      = BE.EstadoPedido.Despachado,
+                    FechaPedido = DateTime.Now
+                }, Evento("ENVIAR_CONTROL", "Estado", null, "Despachado"));
+                Assert.AreEqual(1, new DAL.PedidoHistorial().ObtenerUltimaIdOperacion(idPedido), "El alta asienta la operación #1.");
+                AssertDvhPedidoAlDia(dal, idPedido);
+
+                // Historial inválido (Campo NOT NULL): falla el INSERT del historial → se revierte el cambio de estado.
+                try
+                {
+                    dal.MarcarEntregado(idPedido, Evento("ENTREGAR", null, "Despachado", "Entregado"));
+                    Assert.Fail("El historial inválido debía hacer fallar la operación.");
+                }
+                catch (SqlException) { }
+                Assert.AreEqual(BE.EstadoPedido.Despachado, dal.ObtenerPorId(idPedido).Estado,
+                    "Sin historial no queda el cambio de estado: rollback de toda la transacción.");
+                Assert.AreEqual(1, new DAL.PedidoHistorial().ObtenerUltimaIdOperacion(idPedido));
+                AssertDvhPedidoAlDia(dal, idPedido);
+
+                dal.MarcarEntregado(idPedido, Evento("ENTREGAR", "Estado", "Despachado", "Entregado"));
+                Assert.AreEqual(BE.EstadoPedido.Entregado, dal.ObtenerPorId(idPedido).Estado);
+                var op2 = new DAL.PedidoHistorial().ObtenerPorOperacion(idPedido, 2);
+                Assert.AreEqual(1, op2.Count, "La entrega es la operación #2 (numerada dentro de la transacción).");
+                Assert.AreEqual("ENTREGAR", op2[0].Accion);
+                AssertDvhPedidoAlDia(dal, idPedido);
+
+                // UQ_PedidoHistorial_Operacion (sección 20k): no puede haber dos filas del mismo campo en una operación.
+                try
+                {
+                    acceso.Escribir(
+                        "INSERT INTO PedidoHistorial (IdPedido, IdOperacion, Fecha, Accion, Campo) " +
+                        "VALUES (@Id, 2, GETDATE(), 'ENTREGAR', 'Estado')",
+                        new[] { new SqlParameter("@Id", idPedido) });
+                    Assert.Fail("La restricción única debía rechazar el IdOperacion repetido.");
+                }
+                catch (Exception ex) when (ex is SqlException || ex.InnerException is SqlException) { }
+            }
+            finally
+            {
+                if (idPedido != 0)
+                {
+                    acceso.Escribir(
+                        "DELETE FROM PedidoHistorial WHERE IdPedido = @Id; " +
+                        "DELETE FROM PedidoPrenda WHERE IdPedido = @Id; DELETE FROM Pedido WHERE IdPedido = @Id;",
+                        new[] { new SqlParameter("@Id", idPedido) });
+                    dal.RecalcularDV();
+                }
+            }
+        }
+
+        private static void AssertDvhPedidoAlDia(DAL.Pedido dal, int idPedido)
+        {
+            var fila = dal.ObtenerFilasDV().Single(f => f.Id == idPedido);
+            Assert.AreEqual(Seguridad.CalculadorDV.Crear().CalcularDVH(fila.Campos), fila.DVHAlmacenado,
+                "El DVH del pedido quedó al día dentro de la misma transacción.");
         }
 
         // PN03 — la solicitud de baja no cambia el estado; atenderla sin baja la cierra; dar de baja la

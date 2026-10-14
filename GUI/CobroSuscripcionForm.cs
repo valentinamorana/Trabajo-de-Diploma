@@ -157,7 +157,7 @@ namespace GUI
             int? idMedioPago = (cmbMedioPago.SelectedItem as BE.MedioPago)?.IdMedioPago;
             if (decision == BLL.Manejadores.DecisionCobro.Cobrado && !idMedioPago.HasValue)
             {
-                MostrarError(Tr("err.bll.cobro.medio_requerido", "Indicá el medio de pago con el que abonó el cliente."));
+                MostrarError(Tr("err.bll.cobro.medio_requerido", "Indique el medio de pago con el que abonó el cliente."));
                 return;
             }
 

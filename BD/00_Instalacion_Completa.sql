@@ -316,7 +316,7 @@ BEGIN
         IdEmpleado   INT           IDENTITY(1,1) PRIMARY KEY,
         Nombre       NVARCHAR(100) NOT NULL,
         Apellido     NVARCHAR(100) NOT NULL,
-        DNI          NVARCHAR(200) NOT NULL,  -- T03: almacena el DNI CIFRADO (AES Base64)
+        DNI          NVARCHAR(200) NOT NULL,  -- en texto plano (no se cifra)
         Email        NVARCHAR(200) NULL,
         FechaIngreso DATETIME      NOT NULL DEFAULT GETDATE(),
         Puesto       NVARCHAR(100) NULL,
@@ -337,7 +337,7 @@ BEGIN
         IdCliente        INT           IDENTITY(1,1) PRIMARY KEY,
         Nombre           NVARCHAR(100) NOT NULL,
         Apellido         NVARCHAR(100) NOT NULL,
-        DNI              NVARCHAR(200) NOT NULL,  -- T03: almacena el DNI CIFRADO (AES Base64)
+        DNI              NVARCHAR(200) NOT NULL,  -- en texto plano: se busca por DNI exacto (PN01)
         Email            NVARCHAR(200) NULL,
         -- El medio de pago preferido (IdMedioPagoPreferido, FK a MedioPago) lo agrega la sección
         -- 20c5: el catálogo MedioPago se crea recién en la 20c.
@@ -2372,7 +2372,7 @@ GO
 -- cobra el precio de reposición completo (BLL.CargoPrenda.RegistrarCargo, ya
 -- existente desde Bloque 1, sin aprobación de nadie). Una prenda que nunca
 -- vuelve físicamente (perdida) se reporta directo desde EnUso → Baja
--- (CU-DEP-02), habilitado en BE.Estados.EstadoEnUso.
+-- (CU06-DEP), habilitado en BE.Estados.EstadoEnUso.
 --
 -- Rol: reusa Deposito (ya tiene StockEditar/Stock, ya es el
 -- "Depósito" conceptual de PN01) — sin rol nuevo, coherente con que en el
@@ -3478,6 +3478,254 @@ GO
 PRINT 'Sección 20f: origen del mantenimiento de prendas verificado.';
 GO
 -- ============================================================
+-- WardrobeFlow — 20h. PN03: TASA DE RETENCIÓN ESPERADA EN LA SUGERENCIA
+-- ------------------------------------------------------------
+--   El beneficio estimado de una sugerencia suponía que la promoción retenía al 100 % de los
+--   clientes en riesgo. Ahora Gerencia declara la tasa de retención esperada (0-100], por
+--   defecto 30 %), y el beneficio es ingreso mensual en riesgo × tasa / 100. Las sugerencias ya
+--   registradas quedan con 100: es lo que suponían (su beneficio no cambia).
+--   SugerenciaPromocion no lleva dígito verificador. Idempotente.
+-- ============================================================
+IF COL_LENGTH('SugerenciaPromocion', 'TasaRetencion') IS NULL
+BEGIN
+    ALTER TABLE SugerenciaPromocion ADD TasaRetencion DECIMAL(5,2) NOT NULL
+        CONSTRAINT DF_SugerenciaPromocion_TasaRetencion DEFAULT 30
+        CONSTRAINT CHK_SugerenciaPromocion_TasaRetencion CHECK (TasaRetencion > 0 AND TasaRetencion <= 100);
+    EXEC(N'UPDATE SugerenciaPromocion SET TasaRetencion = 100;
+           DECLARE @n INT = @@ROWCOUNT;
+           PRINT ''SugerenciaPromocion: columna TasaRetencion agregada; '' + CAST(@n AS NVARCHAR(10)) + '' sugerencia(s) previas con 100 %.'';');
+END
+GO
+-- Ingreso mensual en riesgo que cargó Gerencia: se guarda para que la sugerencia impresa y el análisis
+-- de Contabilidad muestren lo ingresado (antes se reconstruía desde el beneficio redondeado). El
+-- beneficio sigue guardado (lo leen Contabilidad y los reportes) y un CHECK garantiza que es
+-- exactamente ROUND(ingreso × tasa / 100, 2): no puede quedar desfasado. Las previas: ingreso = beneficio × 100 / tasa.
+IF COL_LENGTH('SugerenciaPromocion', 'IngresoEnRiesgo') IS NULL
+BEGIN
+    ALTER TABLE SugerenciaPromocion ADD IngresoEnRiesgo DECIMAL(12,2) NULL;
+    EXEC(N'UPDATE SugerenciaPromocion SET IngresoEnRiesgo = ROUND(BeneficioEstimado * 100 / TasaRetencion, 2) WHERE IngresoEnRiesgo IS NULL;
+           PRINT ''SugerenciaPromocion: columna IngresoEnRiesgo agregada.'';');
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_SugerenciaPromocion_Beneficio')
+    EXEC(N'ALTER TABLE SugerenciaPromocion ADD CONSTRAINT CHK_SugerenciaPromocion_Beneficio
+           CHECK (IngresoEnRiesgo IS NULL OR BeneficioEstimado = ROUND(IngresoEnRiesgo * TasaRetencion / 100, 2))');
+GO
+-- Claves de idioma sin uso: promo.analisis.calc.beneficiosug (reemplazada por .beneficiotasa, que
+-- muestra la tasa) y est.pendiente (Pedidos Realizados usa las etiquetas de GUI/EstadosPedido).
+IF OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Traduccion') IS NOT NULL
+BEGIN
+    DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl
+    WHERE c.Clave IN (N'promo.analisis.calc.beneficiosug', N'est.pendiente');
+    DELETE FROM Control WHERE Clave IN (N'promo.analisis.calc.beneficiosug', N'est.pendiente');
+END
+GO
+PRINT 'Sección 20h: tasa de retención de las sugerencias (PN03) verificada.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20i. ANALÍTICA DE NEGOCIO EN UN SOLO FORMULARIO
+-- ------------------------------------------------------------
+-- Los 6 reportes de decisión (Análisis de Abandono, Ventas por Vendedor, Rotación de Prendas,
+-- Tiempos de Mantenimiento, Escasez de Stock y Recomendación de Prendas) dejan de ser 6
+-- formularios con un ítem de menú cada uno: ahora son UNA entrada de menú, "Analítica de
+-- Negocio" (analiticaNegocioToolStripMenuItem), que abre GUI.AnaliticaNegocioForm con un
+-- selector de reporte.
+--   · Patentes: NO cambian. Cada reporte conserva la suya (mnuAnalisisAbandono,
+--     mnuVentasVendedor, mnuAnalisisRotacion, mnuAnalisisMantenimiento, mnuAnalisisEscasez,
+--     mnuRecomendacionPrendas) con los mismos roles: el selector ofrece solo los reportes cuya
+--     patente tiene el usuario, y la entrada del menú se ve si tiene AL MENOS UNA (la decisión
+--     vive en BLL.MenuVisibilidad: Resolver + ReportesVisibles).
+--   · ControlMapeado: se borran los mapeos del Menú a los 6 ítems que ya no existen. La entrada
+--     única no se mapea a una patente: su visibilidad es el OR de las 6 y el Menú no se gobierna
+--     por ControlMapeado (GUI.ManejadorSeguridad lo excluye; usa BLL.MenuVisibilidad).
+--   · Textos de idiomas: se borran los rótulos de los 6 ítems de menú (mnu.abandono,
+--     mnu.ventasvendedor, mnu.rotacion, mnu.mantanalisis, mnu.escasez, mnu.recomendacion); el
+--     selector usa los títulos de cada reporte, que ya existían. Las claves nuevas (selector,
+--     ayuda) las carga la aplicación desde traducciones.tsv.
+-- Idempotente: en una base ya migrada no cambia nada.
+-- ============================================================
+IF OBJECT_ID('ControlMapeado') IS NOT NULL
+BEGIN
+    DELETE FROM ControlMapeado
+    WHERE Formulario = 'Menu'
+      AND NombreControl IN ('analisisAbandonoToolStripMenuItem', 'ventasVendedorToolStripMenuItem',
+                            'analisisRotacionToolStripMenuItem', 'analisisMantenimientoToolStripMenuItem',
+                            'analisisEscasezToolStripMenuItem', 'recomendacionPrendasToolStripMenuItem');
+    DECLARE @mapeos INT = @@ROWCOUNT;
+    IF @mapeos > 0 PRINT CONCAT('Analítica de Negocio: mapeos de menú obsoletos borrados: ', @mapeos, '.');
+END
+GO
+
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL
+BEGIN
+    DECLARE @ClavesObsoletasAnalitica TABLE (Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT PRIMARY KEY);
+    INSERT INTO @ClavesObsoletasAnalitica (Clave) VALUES
+        (N'mnu.abandono'), (N'mnu.ventasvendedor'), (N'mnu.rotacion'),
+        (N'mnu.mantanalisis'), (N'mnu.escasez'), (N'mnu.recomendacion');
+    DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl JOIN @ClavesObsoletasAnalitica o ON o.Clave = c.Clave;
+    DELETE c FROM Control c JOIN @ClavesObsoletasAnalitica o ON o.Clave = c.Clave
+    WHERE NOT EXISTS (SELECT 1 FROM Traduccion t WHERE t.IdControl = c.IdControl);
+    DECLARE @obsoletas INT = @@ROWCOUNT;
+    IF @obsoletas > 0 PRINT CONCAT('Analítica de Negocio: claves de idioma obsoletas borradas: ', @obsoletas, '.');
+END
+GO
+PRINT 'Sección 20i: Analítica de Negocio en un solo formulario verificada.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20j. P2: CONSOLIDACIÓN DE PANTALLAS DE SEGURIDAD
+-- ------------------------------------------------------------
+-- Consolidación de pantallas de seguridad (GUI, sin cambios de esquema ni de patentes):
+--   · "Cuentas de Usuario" (GUI.Usuarios) y "Administración de Usuarios"
+--     (AdministracionUsuariosForm, eliminado) quedan en UN formulario, GUI.Usuarios, con las
+--     pestañas Cuentas y Datos administrativos. Las dos pantallas ya estaban gobernadas por la
+--     misma patente (mnuUsuarios), así que ningún rol gana ni pierde acceso. El alta de usuarios
+--     queda en un único lugar (Datos administrativos › Nuevo usuario). El ítem de menú que
+--     sobrevive es usuariosToolStripMenuItem, el que ya está en ControlMapeado: no hay mapeos que
+--     agregar ni quitar.
+--   · La "Vista completa del sistema" (ExploradorCompositeForm, eliminado) pasa a ser la pestaña
+--     Vista completa de Perfiles y Permisos (GestorPermisos). Solo se abría desde esa pantalla,
+--     así que sigue gobernada por mnuUsuarios; no tenía ítem de menú ni mapeo propio.
+--   · Textos de idiomas: se actualiza la ayuda en línea de las dos pantallas (sin pisar textos
+--     editados en Idiomas) y se borran las claves que la aplicación ya no usa (las nuevas las
+--     carga la aplicación desde traducciones.tsv).
+-- Idempotente: en una base ya migrada no cambia nada.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @TextosP2 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                             TextoAnterior NVARCHAR(2000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(2000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @TextosP2 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.Usuarios', N'Alta, edición, desbloqueo y archivo de usuarios (solo Administrador).' + NCHAR(10) + NCHAR(10) + N'• Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock.' + NCHAR(10) + N'• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).' + NCHAR(10) + N'• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.' + NCHAR(10) + N'• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.', N'Administración de usuarios en dos pestañas (solo Administrador).' + NCHAR(10) + NCHAR(10) + N'Cuentas:' + NCHAR(10) + N'• Resetear contraseña: genera una nueva y la exporta a un archivo (pide confirmación).' + NCHAR(10) + N'• Desbloquear: habilita una cuenta bloqueada por intentos fallidos de ingreso.' + NCHAR(10) + N'• Archivar: el usuario no puede ingresar y sale de la lista, pero se conserva su historial.' + NCHAR(10) + N'• Purgar: elimina definitivamente a los archivados hace más de un año, salvo los que firmaron registros de promociones.' + NCHAR(10) + NCHAR(10) + N'Datos administrativos:' + NCHAR(10) + N'• Nuevo usuario: el único alta de usuarios. Cada usuario nuevo queda vinculado a su legajo de empleado, para poder vender, cobrar o controlar stock; la contraseña se genera y se exporta a un archivo.' + NCHAR(10) + N'• Guardar cambios / Cambiar rol: nombre, apellido, usuario, email, fecha de nacimiento y rol (el sistema no puede quedar sin administrador).' + NCHAR(10) + N'• Ver historial de cambios: las versiones anteriores del usuario.'),
+    (N'EN', N'ayuda.Usuarios', N'Create, edit, unlock and archive users (Administrator only).' + NCHAR(10) + NCHAR(10) + N'• Each new user is linked to their employee record, so they can sell, collect payments or control stock.' + NCHAR(10) + N'• Reset password: generates a new one and exports it to a file (asks for confirmation).' + NCHAR(10) + N'• Archive: the user cannot sign in and leaves the list, but their history is kept.' + NCHAR(10) + N'• Purge: permanently deletes users archived more than a year ago, except those who signed promotion records.', N'User administration in two tabs (Administrator only).' + NCHAR(10) + NCHAR(10) + N'Accounts:' + NCHAR(10) + N'• Reset password: generates a new one and exports it to a file (asks for confirmation).' + NCHAR(10) + N'• Unlock: re-enables an account locked after failed sign-in attempts.' + NCHAR(10) + N'• Archive: the user cannot sign in and leaves the list, but their history is kept.' + NCHAR(10) + N'• Purge: permanently deletes users archived more than a year ago, except those who signed promotion records.' + NCHAR(10) + NCHAR(10) + N'Administrative data:' + NCHAR(10) + N'• New user: the only way to create users. Each new user is linked to their employee record, so they can sell, collect payments or control stock; the password is generated and exported to a file.' + NCHAR(10) + N'• Save changes / Change role: first name, last name, username, email, date of birth and role (the system cannot be left without an administrator).' + NCHAR(10) + N'• View change history: the user''s previous versions.'),
+    (N'RU', N'ayuda.Usuarios', N'Создание, редактирование, разблокировка и архивирование пользователей (только администратор).' + NCHAR(10) + NCHAR(10) + N'• Каждый новый пользователь связывается со своей карточкой сотрудника, чтобы продавать, принимать оплату или контролировать наличие.' + NCHAR(10) + N'• «Сбросить пароль»: создаёт новый и сохраняет его в файл (с подтверждением).' + NCHAR(10) + N'• «Архивировать»: пользователь не может войти и исчезает из списка, но история сохраняется.' + NCHAR(10) + N'• «Очистить»: окончательно удаляет архивированных более года назад, кроме подписавших записи об акциях.', N'Администрирование пользователей на двух вкладках (только администратор).' + NCHAR(10) + NCHAR(10) + N'Учётные записи:' + NCHAR(10) + N'• «Сбросить пароль»: создаёт новый и сохраняет его в файл (с подтверждением).' + NCHAR(10) + N'• «Разблокировать»: снова включает учётную запись, заблокированную после неудачных попыток входа.' + NCHAR(10) + N'• «Архивировать»: пользователь не может войти и исчезает из списка, но история сохраняется.' + NCHAR(10) + N'• «Очистить»: окончательно удаляет архивированных более года назад, кроме подписавших записи об акциях.' + NCHAR(10) + NCHAR(10) + N'Административные данные:' + NCHAR(10) + N'• «Новый пользователь»: единственный способ создать пользователя. Каждый новый пользователь связывается со своей карточкой сотрудника, чтобы продавать, принимать оплату или контролировать наличие; пароль создаётся и сохраняется в файл.' + NCHAR(10) + N'• «Сохранить изменения» / «Сменить роль»: имя, фамилия, имя пользователя, email, дата рождения и роль (систему нельзя оставить без администратора).' + NCHAR(10) + N'• «История изменений»: предыдущие версии пользователя.'),
+    (N'PT', N'ayuda.Usuarios', N'Cadastro, edição, desbloqueio e arquivamento de usuários (só Administrador).' + NCHAR(10) + NCHAR(10) + N'• Cada usuário novo fica vinculado à sua ficha de funcionário, para poder vender, cobrar ou controlar estoque.' + NCHAR(10) + N'• Redefinir senha: gera uma nova e a exporta para um arquivo (pede confirmação).' + NCHAR(10) + N'• Arquivar: o usuário não pode entrar e sai da lista, mas seu histórico é mantido.' + NCHAR(10) + N'• Expurgar: exclui definitivamente os arquivados há mais de um ano, exceto os que assinaram registros de promoções.', N'Administração de usuários em duas abas (só Administrador).' + NCHAR(10) + NCHAR(10) + N'Contas:' + NCHAR(10) + N'• Redefinir senha: gera uma nova e a exporta para um arquivo (pede confirmação).' + NCHAR(10) + N'• Desbloquear: reativa uma conta bloqueada por tentativas de acesso falhas.' + NCHAR(10) + N'• Arquivar: o usuário não pode entrar e sai da lista, mas seu histórico é mantido.' + NCHAR(10) + N'• Expurgar: exclui definitivamente os arquivados há mais de um ano, exceto os que assinaram registros de promoções.' + NCHAR(10) + NCHAR(10) + N'Dados administrativos:' + NCHAR(10) + N'• Novo usuário: o único cadastro de usuários. Cada usuário novo fica vinculado à sua ficha de funcionário, para poder vender, cobrar ou controlar estoque; a senha é gerada e exportada para um arquivo.' + NCHAR(10) + N'• Salvar alterações / Alterar perfil: nome, sobrenome, usuário, email, data de nascimento e perfil (o sistema não pode ficar sem administrador).' + NCHAR(10) + N'• Ver histórico de alterações: as versões anteriores do usuário.'),
+    (N'ES', N'ayuda.GestorPermisos', N'Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.', N'Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.' + NCHAR(10) + NCHAR(10) + N'• Gestión de roles: crear, renombrar y eliminar roles, y asignar o quitar permisos y sub-roles.' + NCHAR(10) + N'• Vista completa: el árbol completo de roles, familias y permisos, en solo lectura.'),
+    (N'EN', N'ayuda.GestorPermisos', N'System roles and permissions. A role with assigned users cannot be deleted or renamed.', N'System roles and permissions. A role with assigned users cannot be deleted or renamed.' + NCHAR(10) + NCHAR(10) + N'• Role management: create, rename and delete roles, and assign or remove permissions and sub-roles.' + NCHAR(10) + N'• Full view: the complete tree of roles, families and permissions, read-only.'),
+    (N'RU', N'ayuda.GestorPermisos', N'Роли и права системы. Роль с назначенными пользователями нельзя удалить или переименовать.', N'Роли и права системы. Роль с назначенными пользователями нельзя удалить или переименовать.' + NCHAR(10) + NCHAR(10) + N'• Управление ролями: создание, переименование и удаление ролей, назначение и снятие прав и подролей.' + NCHAR(10) + N'• Полный обзор: всё дерево ролей, семейств и прав, только для чтения.'),
+    (N'PT', N'ayuda.GestorPermisos', N'Perfis e permissões do sistema. Um perfil com usuários atribuídos não pode ser excluído nem renomeado.', N'Perfis e permissões do sistema. Um perfil com usuários atribuídos não pode ser excluído nem renomeado.' + NCHAR(10) + NCHAR(10) + N'• Gestão de perfis: criar, renomear e excluir perfis, e atribuir ou remover permissões e subperfis.' + NCHAR(10) + N'• Visão completa: a árvore completa de perfis, famílias e permissões, somente leitura.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @TextosP2 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('P2: textos de fábrica actualizados: ', @@ROWCOUNT, ' fila(s).');
+
+    DECLARE @ClavesObsoletasP2 TABLE (Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT PRIMARY KEY);
+    INSERT INTO @ClavesObsoletasP2 (Clave) VALUES
+        -- Usuarios: el ítem "Cuentas de Usuario", el título viejo y el alta oculta de la pestaña Cuentas.
+        (N'mnu.cuentas'), (N'frm.gestion'), (N'lbl.nuevousuario'), (N'lbl.nombreusuario'), (N'lbl.perfilrol'),
+        (N'btn.agregar'), (N'msg.usr.creado.exportado'),
+        -- Perfiles: el botón y el formulario aparte de la Vista completa (hoy es una pestaña).
+        (N'btn.explorador'), (N'frm.explorador'), (N'lbl.explorador.titulo'), (N'btn.explorador.cerrar');
+    DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl JOIN @ClavesObsoletasP2 o ON o.Clave = c.Clave;
+    DELETE c FROM Control c JOIN @ClavesObsoletasP2 o ON o.Clave = c.Clave
+    WHERE NOT EXISTS (SELECT 1 FROM Traduccion t WHERE t.IdControl = c.IdControl);
+    DECLARE @obsoletasP2 INT = @@ROWCOUNT;
+    IF @obsoletasP2 > 0 PRINT CONCAT('P2: claves de idioma obsoletas borradas: ', @obsoletasP2, '.');
+END
+GO
+PRINT 'Sección 20j: pantallas de seguridad consolidadas (P2) verificadas.';
+GO
+-- ============================================================
+-- WardrobeFlow — 20k. HISTORIAL DE PEDIDOS: UNA OPERACIÓN, UN NÚMERO
+-- ------------------------------------------------------------
+-- El historial de un pedido (PedidoHistorial) agrupa los campos de cada evento con IdOperacion.
+-- Antes el número se calculaba como MAX + 1 fuera de toda transacción y el historial se escribía
+-- en otra transacción, después del cambio: dos eventos simultáneos podían recibir el mismo número.
+-- Ahora DAL.Pedido asienta el historial en la misma transacción del cambio y numera con
+-- UPDLOCK + HOLDLOCK; esta sección agrega la restricción que lo garantiza en la base:
+--   · UQ_PedidoHistorial_Operacion UNIQUE (IdPedido, IdOperacion, Campo).
+--   · Antes de crearla se renumeran las operaciones repetidas que pudiera haber. Un evento se
+--     reconoce por (IdOperacion, Accion) y por la "vuelta" de cada campo: la 1.ª fila de un campo
+--     es del primer evento que usó ese número, la 2.ª del segundo, etc. Solo en los pedidos con
+--     números repetidos, las operaciones se vuelven a numerar 1, 2, 3... respetando el orden en
+--     que se registraron (IdOperacion y después IdHistorial). Los demás pedidos no se tocan.
+-- PedidoHistorial no lleva dígito verificador. Idempotente: con la restricción creada no hace nada.
+-- ============================================================
+IF OBJECT_ID('PedidoHistorial') IS NOT NULL
+   AND NOT EXISTS (SELECT 1 FROM sys.key_constraints
+                   WHERE name = 'UQ_PedidoHistorial_Operacion' AND parent_object_id = OBJECT_ID('PedidoHistorial'))
+BEGIN
+    SELECT IdHistorial, IdPedido, IdOperacion,
+           MIN(IdHistorial) OVER (PARTITION BY IdPedido, IdOperacion, Accion, Vuelta) AS PrimeraFila
+    INTO #EventosHistorial
+    FROM (SELECT IdHistorial, IdPedido, IdOperacion, Accion,
+                 ROW_NUMBER() OVER (PARTITION BY IdPedido, IdOperacion, Accion, Campo ORDER BY IdHistorial) AS Vuelta
+          FROM PedidoHistorial) f;
+
+    ;WITH Repetidos AS (
+        SELECT DISTINCT IdPedido FROM #EventosHistorial
+        GROUP BY IdPedido, IdOperacion HAVING COUNT(DISTINCT PrimeraFila) > 1
+    ), Renumerado AS (
+        SELECT e.IdHistorial,
+               DENSE_RANK() OVER (PARTITION BY e.IdPedido ORDER BY e.IdOperacion, e.PrimeraFila) AS Nuevo
+        FROM #EventosHistorial e JOIN Repetidos r ON r.IdPedido = e.IdPedido
+    )
+    UPDATE h SET h.IdOperacion = n.Nuevo
+    FROM PedidoHistorial h JOIN Renumerado n ON n.IdHistorial = h.IdHistorial
+    WHERE h.IdOperacion <> n.Nuevo;
+    DECLARE @renumeradas INT = @@ROWCOUNT;
+    IF @renumeradas > 0 PRINT CONCAT('PedidoHistorial: filas con IdOperacion repetido renumeradas: ', @renumeradas, '.');
+    DROP TABLE #EventosHistorial;
+
+    ALTER TABLE PedidoHistorial ADD CONSTRAINT UQ_PedidoHistorial_Operacion UNIQUE (IdPedido, IdOperacion, Campo);
+    PRINT 'PedidoHistorial: restricción UQ_PedidoHistorial_Operacion creada.';
+END
+GO
+PRINT 'Sección 20k: numeración de operaciones del historial de pedidos verificada.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 20n. UNICIDAD DE DNI, LEGAJO Y USUARIO DEL EMPLEADO
+-- ------------------------------------------------------------
+-- La unicidad la validaba solo la aplicación (BLL.Cliente: "ya existe un cliente con DNI ..."),
+-- sin respaldo en la base. Índices únicos filtrados:
+--   · Cliente(DNI) entre los clientes ACTIVOS (un cliente dado de baja conserva su DNI y se puede
+--     volver a dar de alta otro con el mismo, igual que valida BLL.Cliente).
+--   · Empleado(DNI) cuando está cargado (el empleado creado junto con un usuario arranca con DNI vacío).
+--   · Empleado(Legajo) cuando está cargado.
+--   · Empleado(IdUsuario): un usuario tiene a lo sumo un empleado (DAL.Empleado.CrearParaUsuario).
+-- Si una base ya tiene duplicados, el índice no se crea y se avisa (la instalación sigue): hay que
+-- corregir los datos y volver a correr el script. Idempotente.
+-- ============================================================
+IF OBJECT_ID('Cliente') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Cliente_DNI_Activo' AND object_id = OBJECT_ID('Cliente'))
+BEGIN
+    IF EXISTS (SELECT DNI FROM Cliente WHERE Activo = 1 GROUP BY DNI HAVING COUNT(*) > 1)
+        PRINT 'AVISO 20n: hay clientes activos con el mismo DNI; no se crea UX_Cliente_DNI_Activo.';
+    ELSE
+        EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_Cliente_DNI_Activo ON Cliente(DNI) WHERE Activo = 1;');
+END
+GO
+IF OBJECT_ID('Empleado') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Empleado_DNI' AND object_id = OBJECT_ID('Empleado'))
+BEGIN
+    IF EXISTS (SELECT DNI FROM Empleado WHERE DNI <> N'' GROUP BY DNI HAVING COUNT(*) > 1)
+        PRINT 'AVISO 20n: hay empleados con el mismo DNI; no se crea UX_Empleado_DNI.';
+    ELSE
+        EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_Empleado_DNI ON Empleado(DNI) WHERE DNI <> N'''';');
+END
+GO
+IF OBJECT_ID('Empleado') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Empleado_Legajo' AND object_id = OBJECT_ID('Empleado'))
+BEGIN
+    IF EXISTS (SELECT Legajo FROM Empleado WHERE Legajo IS NOT NULL GROUP BY Legajo HAVING COUNT(*) > 1)
+        PRINT 'AVISO 20n: hay empleados con el mismo legajo; no se crea UX_Empleado_Legajo.';
+    ELSE
+        EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_Empleado_Legajo ON Empleado(Legajo) WHERE Legajo IS NOT NULL;');
+END
+GO
+IF OBJECT_ID('Empleado') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Empleado_IdUsuario' AND object_id = OBJECT_ID('Empleado'))
+BEGIN
+    IF EXISTS (SELECT IdUsuario FROM Empleado WHERE IdUsuario IS NOT NULL GROUP BY IdUsuario HAVING COUNT(*) > 1)
+        PRINT 'AVISO 20n: hay usuarios con más de un empleado; no se crea UX_Empleado_IdUsuario.';
+    ELSE
+        EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_Empleado_IdUsuario ON Empleado(IdUsuario) WHERE IdUsuario IS NOT NULL;');
+END
+GO
+PRINT 'Sección 20n: unicidad de DNI, legajo y usuario del empleado verificada.';
+GO
+
+-- ============================================================
 -- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
 -- ------------------------------------------------------------
 -- Despachar, registrar la entrega y registrar la devolución (que abre PN04) se hacen desde Pedidos
@@ -3914,8 +4162,10 @@ BEGIN
     DECLARE @uCont INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'contable');
     DECLARE @uVend INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'vendedor');
 
-    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
-    SELECT v.IdPlan, v.Motivo, v.Tipo, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
+    -- TasaRetencion = 100: el beneficio de estas dos sugerencias de demo es el ingreso en riesgo completo
+    -- (como las sugerencias anteriores a la 20h); las que registre Gerencia arrancan con 30 %.
+    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, TasaRetencion, IngresoEnRiesgo, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
+    SELECT v.IdPlan, v.Motivo, v.Tipo, v.Beneficio, 100, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
     FROM (VALUES
         (@pBasico,  N'SUGERENCIA PendienteDeEvaluar: el plan Básico tiene la mayor tasa de abandono; un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE()), 0),
         (@pPremium, N'SUGERENCIA PendienteDeEvaluar: el plan Premium suma pocos clientes nuevos; un monto fijo de captación puede atraerlos.',     1,  5000.00, DATEADD(DAY, -2, GETDATE()), 2)
@@ -4446,6 +4696,278 @@ BEGIN
     PRINT 'RolPermiso (tabla de paso del instalador) eliminada: la composición vive en PermisoRelacion.';
 END
 PRINT 'Sección 21z5: restricciones de normalización verificadas.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21z6. TEXTOS EN ESPAÑOL EN USTED (sin voseo)
+-- ------------------------------------------------------------
+-- La interfaz en español pasa del voseo ("Seleccioná", "Volvé a intentar", "tu usuario") al usted
+-- ("Seleccione", "Vuelva a intentar", "su usuario"), el mismo registro que el instalador. Los textos
+-- nuevos están en traducciones.tsv y en los textos de respaldo del código; acá se actualizan los que
+-- la base ya tiene. Solo se cambia un texto que sigue EXACTAMENTE igual al de fábrica: una traducción
+-- editada en Idiomas se respeta. Idempotente: en una base ya migrada no cambia nada.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @Usted TABLE (TextoAnterior NVARCHAR(4000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(4000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @Usted (TextoAnterior, TextoNuevo) VALUES
+    (N'La prenda ''{0}'' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dala de baja desde Prendas.', N'La prenda ''{0}'' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dela de baja desde Prendas.'),
+    (N'No podés archivar tu propio usuario mientras tenés la sesión abierta.', N'No puede archivar su propio usuario mientras tiene la sesión abierta.'),
+    (N'No se puede archivar al último Administrador activo del sistema. Creá o activá otro Administrador antes de archivar este.', N'No se puede archivar al último Administrador activo del sistema. Cree o active otro Administrador antes de archivar este.'),
+    (N'La sesión expiró. Volvé a iniciar sesión.', N'La sesión expiró. Vuelva a iniciar sesión.'),
+    (N'La sesión no está iniciada. Iniciá sesión primero.', N'La sesión no está iniciada. Inicie sesión primero.'),
+    (N'Ya hay una sesión iniciada. Cerrá la sesión actual antes de iniciar otra.', N'Ya hay una sesión iniciada. Cierre la sesión actual antes de iniciar otra.'),
+    (N'Operación cancelada: se detectó una posible manipulación de los datos de usuarios (dígito verificador inválido). Reiniciá el sistema para reparar la integridad antes de continuar.', N'Operación cancelada: se detectó una posible manipulación de los datos de usuarios (dígito verificador inválido). Reinicie el sistema para reparar la integridad antes de continuar.'),
+    (N'No se puede eliminar el rol ''{0}'': está asignado a {1} usuario(s) ({2}). Reasigná esos usuarios a otro rol antes de eliminarlo.', N'No se puede eliminar el rol ''{0}'': está asignado a {1} usuario(s) ({2}). Reasigne esos usuarios a otro rol antes de eliminarlo.'),
+    (N'El rol ''{0}'' no existe como nodo del árbol de permisos. Volvé a abrir la pantalla.', N'El rol ''{0}'' no existe como nodo del árbol de permisos. Vuelva a abrir la pantalla.'),
+    (N'No se puede asignar el plan ''{0}'': el cliente tiene {1} prenda(s) en uso y ese plan solo permite {2}. Registrá las devoluciones primero.', N'No se puede asignar el plan ''{0}'': el cliente tiene {1} prenda(s) en uso y ese plan solo permite {2}. Registre las devoluciones primero.'),
+    (N'El usuario ''{0}'' no tiene un Empleado vinculado. Pedíle al Administrador que configure el vínculo.', N'El usuario ''{0}'' no tiene un Empleado vinculado. Pídale al Administrador que configure el vínculo.'),
+    (N'El cliente tiene el pedido #{0} despachado pendiente de entrega. Confirmá la entrega antes de crear uno nuevo.', N'El cliente tiene el pedido #{0} despachado pendiente de entrega. Confirme la entrega antes de crear uno nuevo.'),
+    (N'No se puede desactivar el plan: tiene {0} cliente(s) activo(s) asignado(s). Reasignalos a otro plan antes de desactivarlo.', N'No se puede desactivar el plan: tiene {0} cliente(s) activo(s) asignado(s). Reasígnelos a otro plan antes de desactivarlo.'),
+    (N'Seleccioná una Familia o Rol para agregarle hijos.', N'Seleccione una Familia o Rol para agregarle hijos.'),
+    (N'Seleccioná un idioma de la grilla.', N'Seleccione un idioma de la grilla.'),
+    (N'Idioma ''{0}'' creado (inactivo — activalo cuando cargues sus traducciones).', N'Idioma ''{0}'' creado (inactivo — actívelo cuando cargue sus traducciones).'),
+    (N'Este idioma tiene {0} control(es) sin traducir.' + NCHAR(10) + N'Si lo activás, esos textos se mostrarán en el idioma por defecto.' + NCHAR(10) + N'' + NCHAR(10) + N'¿Activar de todos modos?', N'Este idioma tiene {0} control(es) sin traducir.' + NCHAR(10) + N'Si lo activa, esos textos se mostrarán en el idioma por defecto.' + NCHAR(10) + N'' + NCHAR(10) + N'¿Activar de todos modos?'),
+    (N'ORGANIZÁ • GESTIONÁ • POTENCIÁ', N'ORGANICE • GESTIONE • POTENCIE'),
+    (N'Ingresá tus credenciales para continuar', N'Ingrese sus credenciales para continuar'),
+    (N'La cuenta está bloqueada.' + NCHAR(10) + N'Contactá al Administrador para reactivarla.', N'La cuenta está bloqueada.' + NCHAR(10) + N'Contacte al Administrador para reactivarla.'),
+    (N'Seleccioná un usuario' + NCHAR(10) + N'en la lista y presioná:', N'Seleccione un usuario' + NCHAR(10) + N'en la lista y presione:'),
+    (N'Seleccioná un usuario' + NCHAR(10) + N'bloqueado y presioná:', N'Seleccione un usuario' + NCHAR(10) + N'bloqueado y presione:'),
+    (N'Ingresá tu nombre de usuario. Un administrador' + NCHAR(10) + N'podrá resetear tu contraseña desde el sistema.', N'Ingrese su nombre de usuario. Un administrador' + NCHAR(10) + N'podrá resetear su contraseña desde el sistema.'),
+    (N'Seleccioná el cliente para este pedido:', N'Seleccione el cliente para este pedido:'),
+    (N'Seleccioná las prendas para incluir en el pedido (checkbox):', N'Seleccione las prendas para incluir en el pedido (checkbox):'),
+    (N'Este pedido ya no existe. Actualizá la grilla.', N'Este pedido ya no existe. Actualice la grilla.'),
+    (N'Seleccioná una opción.', N'Seleccione una opción.'),
+    (N'Seleccioná al menos una prenda.', N'Seleccione al menos una prenda.'),
+    (N'Seleccioná una fila del historial para restaurar.', N'Seleccione una fila del historial para restaurar.'),
+    (N'{0} no tiene plan asignado.' + NCHAR(10) + N'Asigná un plan en el módulo de Clientes antes de crear un pedido.', N'{0} no tiene plan asignado.' + NCHAR(10) + N'Asigne un plan en el módulo de Clientes antes de crear un pedido.'),
+    (N'Ingresá tu nombre de usuario.', N'Ingrese su nombre de usuario.'),
+    (N'Si el usuario existe, contactá al administrador para que resetee' + NCHAR(10) + N'tu contraseña desde Administrar -> Usuarios.', N'Si el usuario existe, contacte al administrador para que resetee' + NCHAR(10) + N'su contraseña desde Administrar -> Usuarios.'),
+    (N'Seleccioná un usuario de la lista.', N'Seleccione un usuario de la lista.'),
+    (N'Seleccioná un usuario bloqueado de la lista.', N'Seleccione un usuario bloqueado de la lista.'),
+    (N'No se puede generar el backup: la base tiene problemas de integridad.' + NCHAR(10) + N'Reparalos desde Administrar → Diagnóstico de Integridad antes de respaldar.', N'No se puede generar el backup: la base tiene problemas de integridad.' + NCHAR(10) + N'Repárelos desde Administrar → Diagnóstico de Integridad antes de respaldar.'),
+    (N'Ingresá tu usuario y una de tus claves de emergencia de un solo uso para desbloquear la cuenta.', N'Ingrese su usuario y una de sus claves de emergencia de un solo uso para desbloquear la cuenta.'),
+    (N'Cuenta desbloqueada con éxito.' + NCHAR(10) + N'Ya podés iniciar sesión normalmente.', N'Cuenta desbloqueada con éxito.' + NCHAR(10) + N'Ya puede iniciar sesión normalmente.'),
+    (N'Ingresá tu usuario y una clave de emergencia.', N'Ingrese su usuario y una clave de emergencia.'),
+    (N'La cuenta no está bloqueada: podés iniciar sesión normalmente.', N'La cuenta no está bloqueada: puede iniciar sesión normalmente.'),
+    (N'No quedan claves de emergencia. Pedile a otro Administrador que genere un nuevo set.', N'No quedan claves de emergencia. Pídale a otro Administrador que genere un nuevo set.'),
+    (N'Sin backups. Generá uno desde Administrar → Backup.', N'Sin backups. Genere uno desde Administrar → Backup.'),
+    (N'Demasiados intentos fallidos. Cerrá esta ventana e intentá de nuevo más tarde.', N'Demasiados intentos fallidos. Cierre esta ventana e intente de nuevo más tarde.'),
+    (N'Seleccioná una versión de la grilla.', N'Seleccione una versión de la grilla.'),
+    (N'La suscripción vence en {0} día(s). Avisale al cliente para renovarla.', N'La suscripción vence en {0} día(s). Avísele al cliente para renovarla.'),
+    (N'El plan ''{0}'' permite {1} prenda(s). Estás superando el límite por {2}.', N'El plan ''{0}'' permite {1} prenda(s). Está superando el límite por {2}.'),
+    (N'Podés agregar hasta {0} prenda(s) (plan {1}).', N'Puede agregar hasta {0} prenda(s) (plan {1}).'),
+    (N'El plan ''{0}'' permite {1}. Estás eligiendo {2} de {3} posibles — podés agregar más.', N'El plan ''{0}'' permite {1}. Está eligiendo {2} de {3} posibles — puede agregar más.'),
+    (N'Alcanzás el máximo del plan ''{0}'' ({1} prendas).', N'Alcanza el máximo del plan ''{0}'' ({1} prendas).'),
+    (N'No se puede dar de baja a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.', N'No se puede dar de baja a {0}: tiene {1} prenda(s) en uso. Registre la devolución primero.'),
+    (N'El cliente {0} no tiene plan asignado. Asignale un plan antes de crear un pedido.', N'El cliente {0} no tiene plan asignado. Asígnele un plan antes de crear un pedido.'),
+    (N'La prenda ''{0}'' está reservada por Lista de Espera para otro cliente. Actualizá la selección.', N'La prenda ''{0}'' está reservada por Lista de Espera para otro cliente. Actualice la selección.'),
+    (N'Seleccioná un idioma primero.', N'Seleccione un idioma primero.'),
+    (N'DV inválido — usá «Recalcular Todo»', N'DV inválido — use «Recalcular Todo»'),
+    (N'Seleccioná un rol.', N'Seleccione un rol.'),
+    (N'Cargá los datos del nuevo usuario y presioná Crear.', N'Cargue los datos del nuevo usuario y presione Crear.'),
+    (N'Ingresá la contraseña con la que se cifró este backup:', N'Ingrese la contraseña con la que se cifró este backup:'),
+    (N'Ingresá una contraseña para CIFRAR el backup.' + NCHAR(10) + N'La vas a necesitar para restaurarlo (no se puede recuperar).', N'Ingrese una contraseña para CIFRAR el backup.' + NCHAR(10) + N'La va a necesitar para restaurarlo (no se puede recuperar).'),
+    (N'Repetí la contraseña para confirmar:', N'Repita la contraseña para confirmar:'),
+    (N'Ingresá una contraseña nueva.', N'Ingrese una contraseña nueva.'),
+    (N'Debés cambiar tu contraseña temporal para ingresar.', N'Debe cambiar su contraseña temporal para ingresar.'),
+    (N'Tu contraseña es temporal. Definí una nueva para continuar.', N'Su contraseña es temporal. Defina una nueva para continuar.'),
+    (N'Contraseña actualizada. Ya podés usar el sistema.', N'Contraseña actualizada. Ya puede usar el sistema.'),
+    (N'Seleccioná un ROL del árbol para eliminar (los permisos no se eliminan).', N'Seleccione un ROL del árbol para eliminar (los permisos no se eliminan).'),
+    (N'Seleccioná un ROL del árbol para renombrar (los permisos no se editan).', N'Seleccione un ROL del árbol para renombrar (los permisos no se editan).'),
+    (N'Esta acción dejaría al sistema SIN NINGÚN usuario con acceso de Gestión de Usuarios. Asigná la gestión a otro rol o usuario antes de continuar.', N'Esta acción dejaría al sistema SIN NINGÚN usuario con acceso de Gestión de Usuarios. Asigne la gestión a otro rol o usuario antes de continuar.'),
+    (N'No podés quitarte a vos mismo el acceso de Gestión de Usuarios de tu propio rol.', N'No puede quitarse a sí mismo el acceso de Gestión de Usuarios de su propio rol.'),
+    (N'No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando tu propio rol. Pedile a otro administrador que lo haga.', N'No puede agregarse a sí mismo permisos que su rol no tiene hoy, editando su propio rol. Pídale a otro administrador que lo haga.'),
+    (N'El sistema no está disponible en este momento por tareas de mantenimiento. Reintentá más tarde o contactá al Administrador.', N'El sistema no está disponible en este momento por tareas de mantenimiento. Reintente más tarde o contacte al Administrador.'),
+    (N'No se puede quitar el rol de Administrador al último administrador activo. Asigná el rol Administrador a otro usuario antes de cambiar este.', N'No se puede quitar el rol de Administrador al último administrador activo. Asigne el rol Administrador a otro usuario antes de cambiar este.'),
+    (N'Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. Para activar una suscripción nueva, usá el módulo de Contratación.', N'Solo un Administrador puede modificar el plan o el vencimiento de un cliente directamente. Para activar una suscripción nueva, use el módulo de Contratación.'),
+    (N'Renovar o cambiar el plan extiende la suscripción y tiene que pasar por Caja: registrá una Nueva Contratación. Desde Renovación solo puede hacerlo un Administrador.', N'Renovar o cambiar el plan extiende la suscripción y tiene que pasar por Caja: registre una Nueva Contratación. Desde Renovación solo puede hacerlo un Administrador.'),
+    (N'No hay un espejo de integridad disponible para reparar. Usá «Recalcular» o restaurá un backup.', N'No hay un espejo de integridad disponible para reparar. Use «Recalcular» o restaure un backup.'),
+    (N'El daño detectado no se puede reparar desde el espejo (hay registros eliminados físicamente). Restaurá un backup para recuperarlos.', N'El daño detectado no se puede reparar desde el espejo (hay registros eliminados físicamente). Restaure un backup para recuperarlos.'),
+    (N'Debés ingresar una contraseña para cifrar el backup.', N'Debe ingresar una contraseña para cifrar el backup.'),
+    (N'No tenés permiso para consultar la bitácora del sistema.', N'No tiene permiso para consultar la bitácora del sistema.'),
+    (N'No tenés permiso para ejecutar operaciones sobre los Dígitos Verificadores. Esta acción es exclusiva del Administrador y quedó registrada.', N'No tiene permiso para ejecutar operaciones sobre los Dígitos Verificadores. Esta acción es exclusiva del Administrador y quedó registrada.'),
+    (N'La prenda ''{0}'' ya no está disponible. Actualizá la selección e intentá de nuevo.', N'La prenda ''{0}'' ya no está disponible. Actualice la selección e intente de nuevo.'),
+    (N'El cliente ya tiene otro pedido en curso: otro operador lo registró recién. Actualizá la lista.', N'El cliente ya tiene otro pedido en curso: otro operador lo registró recién. Actualice la lista.'),
+    (N'Seleccioná un Rol del árbol para crearle un sub-rol.', N'Seleccione un Rol del árbol para crearle un sub-rol.'),
+    (N'El sub-rol ''{0}'' se creó pero no se pudo vincular a ''{1}'' ({2}), y tampoco se pudo deshacer automáticamente. Revisalo manualmente en la lista de Roles.', N'El sub-rol ''{0}'' se creó pero no se pudo vincular a ''{1}'' ({2}), y tampoco se pudo deshacer automáticamente. Revíselo manualmente en la lista de Roles.'),
+    (N'Elegí un permiso o rol de la lista para asignar.', N'Elija un permiso o rol de la lista para asignar.'),
+    (N'Seleccioná un ítem que cuelgue de un rol para quitarlo.', N'Seleccione un ítem que cuelgue de un rol para quitarlo.'),
+    (N'La suscripción ya está pausada. Reanudala antes de pedir una nueva pausa.', N'La suscripción ya está pausada. Reanúdela antes de pedir una nueva pausa.'),
+    (N'Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualizá y reintentá.', N'Los cargos pendientes del cliente ya fueron cobrados por otra sesión. Actualice y reintente.'),
+    (N'El crédito por referido del cliente ya se aplicó en otro cobro. Actualizá y volvé a calcular el importe.', N'El crédito por referido del cliente ya se aplicó en otro cobro. Actualice y vuelva a calcular el importe.'),
+    (N'Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.', N'Otra sesión de Caja ya resolvió esta contratación. Actualice la cola de Caja.'),
+    (N'El cobro de la contratación #{0} quedó registrado pero la suscripción NO se activó. Avisá al Administrador para completar el alta del plan.', N'El cobro de la contratación #{0} quedó registrado pero la suscripción NO se activó. Avise al Administrador para completar el alta del plan.'),
+    (N'Seleccioná un cliente y un plan para continuar.', N'Seleccione un cliente y un plan para continuar.'),
+    (N'Seleccioná el medio de pago antes de cobrar.', N'Seleccione el medio de pago antes de cobrar.'),
+    (N'No se pudo guardar el archivo: puede estar abierto en otro programa (por ejemplo, Excel). Cerralo e intentá de nuevo.', N'No se pudo guardar el archivo: puede estar abierto en otro programa (por ejemplo, Excel). Ciérrelo e intente de nuevo.'),
+    (N'No se pudo guardar el archivo: no tenés permisos para escribir en esa ubicación.', N'No se pudo guardar el archivo: no tiene permisos para escribir en esa ubicación.'),
+    (N'La promoción cambió de estado desde otra sesión. Actualizá la lista e intentá de nuevo.', N'La promoción cambió de estado desde otra sesión. Actualice la lista e intente de nuevo.'),
+    (N'La sugerencia seleccionada ya fue evaluada. Actualizá la lista de sugerencias.', N'La sugerencia seleccionada ya fue evaluada. Actualice la lista de sugerencias.'),
+    (N'El estado de la prenda cambió desde que se consultó. Actualizá la pantalla e intentá de nuevo.', N'El estado de la prenda cambió desde que se consultó. Actualice la pantalla e intente de nuevo.'),
+    (N'No se encontró ningún cliente con esa identificación. Verificá el DNI, el nombre o el apellido.', N'No se encontró ningún cliente con esa identificación. Verifique el DNI, el nombre o el apellido.'),
+    (N'Hay varios clientes que coinciden: elegí el correcto en la lista.', N'Hay varios clientes que coinciden: elija el correcto en la lista.'),
+    (N'Ajustá la selección: las prendas faltantes ya no figuran y las alternativas sugeridas están resaltadas.', N'Ajuste la selección: las prendas faltantes ya no figuran y las alternativas sugeridas están resaltadas.'),
+    (N'Planilla de control de existencias — seleccioná un pedido de la cola', N'Planilla de control de existencias — seleccione un pedido de la cola'),
+    (N'Pedido #{0}: {1} prenda(s) confirmadas como disponibles. Separalas para reservarlas.', N'Pedido #{0}: {1} prenda(s) confirmadas como disponibles. Sepárelas para reservarlas.'),
+    (N'Todas las prendas del Pedido #{0} están disponibles: confirmalas en lugar de informar faltantes.', N'Todas las prendas del Pedido #{0} están disponibles: confírmelas en lugar de informar faltantes.'),
+    (N'La prenda ''{0}'' no está disponible: informá los faltantes en lugar de confirmar.', N'La prenda ''{0}'' no está disponible: informe los faltantes en lugar de confirmar.'),
+    (N'Confirmá las prendas disponibles del Pedido #{0} antes de separarlas.', N'Confirme las prendas disponibles del Pedido #{0} antes de separarlas.'),
+    (N'El Pedido #{0} cambió de estado en otra sesión. Actualizá la lista y volvé a intentarlo.', N'El Pedido #{0} cambió de estado en otra sesión. Actualice la lista y vuelva a intentarlo.'),
+    (N'No se puede dar de baja a {0}: tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo primero.', N'No se puede dar de baja a {0}: tiene un pedido en curso. Espere a que termine su ciclo o cancélelo primero.'),
+    (N'Indicá el motivo por el que no se concretó el pago.', N'Indique el motivo por el que no se concretó el pago.'),
+    (N'El cliente no está registrado. Registralo para continuar con la contratación.', N'El cliente no está registrado. Regístrelo para continuar con la contratación.'),
+    (N'El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Volvé a calcular el importe y confirmá de nuevo.', N'El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Vuelva a calcular el importe y confirme de nuevo.'),
+    (N'Elegí un ítem:', N'Elija un ítem:'),
+    (N'Otra sesión ya procesó el cobro de este cliente. Actualizá la lista y verificá su vencimiento.', N'Otra sesión ya procesó el cobro de este cliente. Actualice la lista y verifique su vencimiento.'),
+    (N'Demasiados intentos fallidos en esta sesión. Reiniciá la aplicación para volver a intentarlo.', N'Demasiados intentos fallidos en esta sesión. Reinicie la aplicación para volver a intentarlo.'),
+    (N'La anotación cambió en otra sesión. Actualizá la lista y volvé a intentarlo.', N'La anotación cambió en otra sesión. Actualice la lista y vuelva a intentarlo.'),
+    (N'La operación ''{0}'' no se puede revertir desde el historial: usá la acción correspondiente del pedido (reactivar, cancelar o registrar la devolución).', N'La operación ''{0}'' no se puede revertir desde el historial: use la acción correspondiente del pedido (reactivar, cancelar o registrar la devolución).'),
+    (N'No se pudo verificar tu usuario contra la base de datos. La operación no se ejecutó.', N'No se pudo verificar su usuario contra la base de datos. La operación no se ejecutó.'),
+    (N'Tu usuario fue desactivado o cambió de rol. Cerrá la sesión y volvé a ingresar.', N'Su usuario fue desactivado o cambió de rol. Cierre la sesión y vuelva a ingresar.'),
+    (N'No se puede pausar ni dar de baja la suscripción: el cliente tiene un pedido en curso. Esperá a que termine su ciclo o cancelalo.', N'No se puede pausar ni dar de baja la suscripción: el cliente tiene un pedido en curso. Espere a que termine su ciclo o cancélelo.'),
+    (N'Solo podés cambiar tu propia preferencia de idioma.', N'Solo puede cambiar su propia preferencia de idioma.'),
+    (N'Seleccioná una promoción para analizar su margen e impacto.', N'Seleccione una promoción para analizar su margen e impacto.'),
+    (N'Creaste esta promoción: la tiene que dictaminar otro usuario de Contabilidad.', N'Usted creó esta promoción: la tiene que dictaminar otro usuario de Contabilidad.'),
+    (N'Indicá el motivo por el que se anula la contratación.', N'Indique el motivo por el que se anula la contratación.'),
+    (N'La fecha de fin ({0:d}) ya pasó. Elegí una fecha de hoy en adelante.', N'La fecha de fin ({0:d}) ya pasó. Elija una fecha de hoy en adelante.'),
+    (N'La promoción terminó el {0:d}: no se puede aprobar. Rechazala para que Administración la reformule con fechas nuevas.', N'La promoción terminó el {0:d}: no se puede aprobar. Recházela para que Administración la reformule con fechas nuevas.'),
+    (N'Indicá el medio de pago con el que abonó el cliente.', N'Indique el medio de pago con el que abonó el cliente.'),
+    (N'No se puede renombrar el rol ''{0}'': está asignado a {1} usuario(s) ({2}). Reasigná esos usuarios a otro rol antes de renombrarlo.', N'No se puede renombrar el rol ''{0}'': está asignado a {1} usuario(s) ({2}). Reasigne esos usuarios a otro rol antes de renombrarlo.'),
+    (N'Para la ayuda general, presioná F1 en el menú principal.', N'Para la ayuda general, presione F1 en el menú principal.'),
+    (N'WardrobeFlow gestiona el alquiler de prendas por suscripción.' + NCHAR(10) + N'' + NCHAR(10) + N'• El menú muestra solo las opciones que tu rol tiene permitidas.' + NCHAR(10) + N'• En cualquier pantalla, F1 (o Sesión › Ayuda) abre la ayuda de esa pantalla.' + NCHAR(10) + N'• Los mensajes de resultado aparecen en la barra inferior de cada pantalla (verde: correcto, rojo: error).' + NCHAR(10) + N'• Las confirmaciones de acciones que no se pueden deshacer traen "No" como opción por defecto.' + NCHAR(10) + N'• Mi Perfil permite cambiar el idioma, la fuente, el tema y el formato de fecha.' + NCHAR(10) + N'' + NCHAR(10) + N'Procesos principales:' + NCHAR(10) + N'• PN01 Armar pedido: Vendedor (Pedidos de venta) y Depósito (Control de stock).' + NCHAR(10) + N'• PN02 Comercialización: Vendedor (Nueva contratación) y Caja (Cobro de contrataciones).' + NCHAR(10) + N'• PN03 Promociones: Gerencia sugiere, Administración Comercial crea, Contabilidad aprueba.' + NCHAR(10) + N'• PN04 Devoluciones: Depósito inspecciona las prendas devueltas y reporta las perdidas.' + NCHAR(10) + N'• N01 Suscripciones: Caja registra el cobro de las renovaciones (Cobro de renovaciones).', N'WardrobeFlow gestiona el alquiler de prendas por suscripción.' + NCHAR(10) + N'' + NCHAR(10) + N'• El menú muestra solo las opciones que su rol tiene permitidas.' + NCHAR(10) + N'• En cualquier pantalla, F1 (o Sesión › Ayuda) abre la ayuda de esa pantalla.' + NCHAR(10) + N'• Los mensajes de resultado aparecen en la barra inferior de cada pantalla (verde: correcto, rojo: error).' + NCHAR(10) + N'• Las confirmaciones de acciones que no se pueden deshacer traen "No" como opción por defecto.' + NCHAR(10) + N'• Mi Perfil permite cambiar el idioma, la fuente, el tema y el formato de fecha.' + NCHAR(10) + N'' + NCHAR(10) + N'Procesos principales:' + NCHAR(10) + N'• PN01 Armar pedido: Vendedor (Pedidos de venta) y Depósito (Control de stock).' + NCHAR(10) + N'• PN02 Comercialización: Vendedor (Nueva contratación) y Caja (Cobro de contrataciones).' + NCHAR(10) + N'• PN03 Promociones: Gerencia sugiere, Administración Comercial crea, Contabilidad aprueba.' + NCHAR(10) + N'• PN04 Devoluciones: Depósito inspecciona las prendas devueltas y reporta las perdidas.' + NCHAR(10) + N'• N01 Suscripciones: Caja registra el cobro de las renovaciones (Cobro de renovaciones).'),
+    (N'Completá nombre, apellido, DNI y, opcionalmente, email y cliente que lo refirió.' + NCHAR(10) + N'Al guardar se valida todo; si hay un error se muestra abajo y el formulario sigue abierto.', N'Complete nombre, apellido, DNI y, opcionalmente, email y cliente que lo refirió.' + NCHAR(10) + N'Al guardar se valida todo; si hay un error se muestra abajo y el formulario sigue abierto.'),
+    (N'Circuito del pedido desde el lado del Vendedor.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Nuevo pedido: elegís el cliente (debe tener la suscripción vigente y ningún pedido en curso) y las prendas dentro de su cupo. Se envía a control de stock.' + NCHAR(10) + N'2. Depósito controla: si faltan prendas, el pedido vuelve "Con faltantes": Ver faltantes, y el cliente ajusta la selección o desiste.' + NCHAR(10) + N'3. Cuando Depósito separa las prendas: Formalizar.' + NCHAR(10) + N'' + NCHAR(10) + N'• Documentos ▾: planilla, informe de faltantes, constancias, confirmación del pedido y aviso de desistimiento.' + NCHAR(10) + N'• Cancelar: pedidos en control de stock, separados o pendientes de despacho (con motivo).' + NCHAR(10) + N'• El buscador filtra por número, cliente, vendedor o estado.', N'Circuito del pedido desde el lado del Vendedor.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Nuevo pedido: elija el cliente (debe tener la suscripción vigente y ningún pedido en curso) y las prendas dentro de su cupo. Se envía a control de stock.' + NCHAR(10) + N'2. Depósito controla: si faltan prendas, el pedido vuelve "Con faltantes": Ver faltantes, y el cliente ajusta la selección o desiste.' + NCHAR(10) + N'3. Cuando Depósito separa las prendas: Formalizar.' + NCHAR(10) + N'' + NCHAR(10) + N'• Documentos ▾: planilla, informe de faltantes, constancias, confirmación del pedido y aviso de desistimiento.' + NCHAR(10) + N'• Cancelar: pedidos en control de stock, separados o pendientes de despacho (con motivo).' + NCHAR(10) + N'• El buscador filtra por número, cliente, vendedor o estado.'),
+    (N'1. Buscá al cliente: se verifica que la suscripción esté vigente y que no tenga otro pedido en curso.' + NCHAR(10) + N'2. Elegí las prendas disponibles; el cupo del plan (prendas en uso + seleccionadas) se controla en el momento.' + NCHAR(10) + N'3. Enviar a control de stock. Si la selección excede el cupo, el cliente puede corregirla o desistir.', N'1. Busque al cliente: se verifica que la suscripción esté vigente y que no tenga otro pedido en curso.' + NCHAR(10) + N'2. Elija las prendas disponibles; el cupo del plan (prendas en uso + seleccionadas) se controla en el momento.' + NCHAR(10) + N'3. Enviar a control de stock. Si la selección excede el cupo, el cliente puede corregirla o desistir.'),
+    (N'1. Identificá al cliente por DNI o nombre. Si no está registrado, Registrar cliente.' + NCHAR(10) + N'2. Elegí el plan y la modalidad (mensual, trimestral o anual): se muestra el importe a abonar con el descuento y los cargos pendientes que correspondan.' + NCHAR(10) + N'3. Registrar: la contratación queda pendiente de pago hasta que Caja la cobre.' + NCHAR(10) + N'' + NCHAR(10) + N'• Si el cliente pasa a un plan más caro con su plan vigente, el plan nuevo rige desde hoy y se descuentan los días no usados.' + NCHAR(10) + N'• A un plan igual o más barato se cambia al vencer el período pagado.' + NCHAR(10) + N'• Si el cliente no contrata: Asentar desistimiento (con motivo).', N'1. Identifique al cliente por DNI o nombre. Si no está registrado, Registrar cliente.' + NCHAR(10) + N'2. Elija el plan y la modalidad (mensual, trimestral o anual): se muestra el importe a abonar con el descuento y los cargos pendientes que correspondan.' + NCHAR(10) + N'3. Registrar: la contratación queda pendiente de pago hasta que Caja la cobre.' + NCHAR(10) + N'' + NCHAR(10) + N'• Si el cliente pasa a un plan más caro con su plan vigente, el plan nuevo rige desde hoy y se descuentan los días no usados.' + NCHAR(10) + N'• A un plan igual o más barato se cambia al vencer el período pagado.' + NCHAR(10) + N'• Si el cliente no contrata: Asentar desistimiento (con motivo).'),
+    (N'Cola de contrataciones pendientes de pago.' + NCHAR(10) + N'' + NCHAR(10) + N'• Elegí el medio de pago (con tarjeta de crédito, las cuotas) y Cobrar: se emite el comprobante y la suscripción queda activa. El total incluye los cargos por daño o pérdida pendientes del cliente.' + NCHAR(10) + N'• Intento fallido: registra el intento con motivo; al tercero la contratación se cancela.' + NCHAR(10) + N'• Anular: cancela una contratación sin cobrarla (el cliente se arrepintió o hubo un error de carga), con motivo.' + NCHAR(10) + N'• Quien registró la contratación no puede cobrarla (salvo el Administrador).' + NCHAR(10) + N'• En la vista de resueltas se reimprimen el comprobante y las constancias.', N'Cola de contrataciones pendientes de pago.' + NCHAR(10) + N'' + NCHAR(10) + N'• Elija el medio de pago (con tarjeta de crédito, las cuotas) y Cobrar: se emite el comprobante y la suscripción queda activa. El total incluye los cargos por daño o pérdida pendientes del cliente.' + NCHAR(10) + N'• Intento fallido: registra el intento con motivo; al tercero la contratación se cancela.' + NCHAR(10) + N'• Anular: cancela una contratación sin cobrarla (el cliente se arrepintió o hubo un error de carga), con motivo.' + NCHAR(10) + N'• Quien registró la contratación no puede cobrarla (salvo el Administrador).' + NCHAR(10) + N'• En la vista de resueltas se reimprimen el comprobante y las constancias.'),
+    (N'Cobro recurrente de las suscripciones vencidas o próximas a vencer.' + NCHAR(10) + N'' + NCHAR(10) + N'• Elegí el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).' + NCHAR(10) + N'• Cobrado: indicá el medio de pago; se emite el comprobante y se extiende la vigencia.' + NCHAR(10) + N'• Pago fallido: el cliente entra en período de gracia y, si ya estaba en gracia, se suspende.', N'Cobro recurrente de las suscripciones vencidas o próximas a vencer.' + NCHAR(10) + N'' + NCHAR(10) + N'• Elija el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).' + NCHAR(10) + N'• Cobrado: indique el medio de pago; se emite el comprobante y se extiende la vigencia.' + NCHAR(10) + N'• Pago fallido: el cliente entra en período de gracia y, si ya estaba en gracia, se suspende.'),
+    (N'Renovar o cambiar de plan sin pasar por Caja es solo para el Administrador (correcciones). El Vendedor puede pausar o dar de baja; para cambiar de plan, registrá una Nueva contratación.', N'Renovar o cambiar de plan sin pasar por Caja es solo para el Administrador (correcciones). El Vendedor puede pausar o dar de baja; para cambiar de plan, registre una Nueva contratación.'),
+    (N'Alta y edición de planes (nombre, límite de prendas y precio mensual).' + NCHAR(10) + N'' + NCHAR(10) + N'• Elegí un plan y Editar plan (o doble clic) para cambiarlo.' + NCHAR(10) + N'• Desactivar: no se permite si hay clientes activos con el plan o contrataciones pendientes de pago.', N'Alta y edición de planes (nombre, límite de prendas y precio mensual).' + NCHAR(10) + N'' + NCHAR(10) + N'• Elija un plan y Editar plan (o doble clic) para cambiarlo.' + NCHAR(10) + N'• Desactivar: no se permite si hay clientes activos con el plan o contrataciones pendientes de pago.'),
+    (N'1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.' + NCHAR(10) + N'2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.' + NCHAR(10) + N'3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.' + NCHAR(10) + N'4. La retención esperada (30 % por defecto) define el beneficio estimado: ingreso en riesgo × retención. El reporte incluye el Resultado de las promociones: bajas, pausas y renovaciones del plan durante la vigencia contra el período anterior, y la retención real contra la esperada.', N'1. Elija el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.' + NCHAR(10) + N'2. Si hay oportunidad por plan, use la idea propuesta (se completa el formulario) o cárguela a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.' + NCHAR(10) + N'3. Enviar a Administración. La sugerencia se imprime con Imprimir sugerencia.' + NCHAR(10) + N'4. La retención esperada (30 % por defecto) define el beneficio estimado: ingreso en riesgo × retención. El reporte incluye el Resultado de las promociones: bajas, pausas y renovaciones del plan durante la vigencia contra el período anterior, y la retención real contra la esperada.'),
+    (N'• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).' + NCHAR(10) + N'• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si estás de acuerdo, la promoción se da de baja, si no, sigue vigente.' + NCHAR(10) + N'• Promociones: crear (siempre para un plan), reformular las rechazadas por Contabilidad, o Dar de baja una vigente o una rechazada (con motivo).' + NCHAR(10) + N'• Imprimir ▾: ficha, dictamen, solicitud de baja, respuesta a la solicitud y constancia de baja.' + NCHAR(10) + N'La fecha de fin no puede haber pasado.', N'• Sugerencias: crear la promoción a partir de una sugerencia o descartarla (con motivo).' + NCHAR(10) + N'• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si está de acuerdo, la promoción se da de baja, si no, sigue vigente.' + NCHAR(10) + N'• Promociones: crear (siempre para un plan), reformular las rechazadas por Contabilidad, o Dar de baja una vigente o una rechazada (con motivo).' + NCHAR(10) + N'• Imprimir ▾: ficha, dictamen, solicitud de baja, respuesta a la solicitud y constancia de baja.' + NCHAR(10) + N'La fecha de fin no puede haber pasado.'),
+    (N'Avisos que necesitan atención según tu rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular.', N'Avisos que necesitan atención según su rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular.'),
+    (N'Elegí el medio de pago preferido del cliente.', N'Elija el medio de pago preferido del cliente.'),
+    (N'El medio de pago elegido no está disponible. Elegí otro del catálogo.', N'El medio de pago elegido no está disponible. Elija otro del catálogo.'),
+    (N'Elegí el plan al que aplica la promoción.', N'Elija el plan al que aplica la promoción.'),
+    (N'La promoción cambió desde otra sesión (ya no está Vigente o ya tiene una solicitud de baja pendiente). Actualizá la lista.', N'La promoción cambió desde otra sesión (ya no está Vigente o ya tiene una solicitud de baja pendiente). Actualice la lista.'),
+    (N'La solicitud de baja ya fue atendida. Actualizá la lista de solicitudes.', N'La solicitud de baja ya fue atendida. Actualice la lista de solicitudes.'),
+    (N'Elegí el plan al que apunta la sugerencia.', N'Elija el plan al que apunta la sugerencia.'),
+    (N'Ventas pide dar de baja ''{0}''.' + NCHAR(10) + N'Motivo: {1}' + NCHAR(10) + N'' + NCHAR(10) + N'¿Estás de acuerdo con darla de baja?' + NCHAR(10) + N'' + NCHAR(10) + N'Sí: se da de baja.  No: sigue vigente.', N'Ventas pide dar de baja ''{0}''.' + NCHAR(10) + N'Motivo: {1}' + NCHAR(10) + N'' + NCHAR(10) + N'¿Está de acuerdo con darla de baja?' + NCHAR(10) + N'' + NCHAR(10) + N'Sí: se da de baja.  No: sigue vigente.'),
+    (N'No podés resolver esta contratación: la registraste vos (la resuelve otra persona de Caja) o tu usuario no tiene un Empleado vinculado.', N'No puede resolver esta contratación: la registró usted (la resuelve otra persona de Caja) o su usuario no tiene un Empleado vinculado.'),
+    (N'No tenés permiso para ningún reporte de analítica.', N'No tiene permiso para ningún reporte de analítica.'),
+    (N'Reportes para la toma de decisiones. El selector muestra solo los reportes que tu rol tiene permitidos.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Elegí el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).' + NCHAR(10) + N'2. Generar: el resultado se muestra en la grilla, con un resumen arriba.' + NCHAR(10) + N'3. Exportar a PDF (vista previa) o Guardar como .CSV.' + NCHAR(10) + N'' + NCHAR(10) + N'• Gerencia Comercial: Análisis de Abandono y Ventas por Vendedor.' + NCHAR(10) + N'• Gerencia de Inventario: Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.' + NCHAR(10) + N'• Ventas: Recomendación de Prendas.', N'Reportes para la toma de decisiones. El selector muestra solo los reportes que su rol tiene permitidos.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Elija el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).' + NCHAR(10) + N'2. Generar: el resultado se muestra en la grilla, con un resumen arriba.' + NCHAR(10) + N'3. Exportar a PDF (vista previa) o Guardar como .CSV.' + NCHAR(10) + N'' + NCHAR(10) + N'• Gerencia Comercial: Análisis de Abandono y Ventas por Vendedor.' + NCHAR(10) + N'• Gerencia de Inventario: Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.' + NCHAR(10) + N'• Ventas: Recomendación de Prendas.'),
+    (N'   • {0}: no se pudo calcular su resultado. Volvé a analizar las métricas.', N'   • {0}: no se pudo calcular su resultado. Vuelva a analizar las métricas.'),
+    (N'No se pudieron leer las promociones: volvé a analizar las métricas.', N'No se pudieron leer las promociones: vuelva a analizar las métricas.'),
+    (N'Se cargaron los filtros del reporte: revisalos y pulsá Generar.', N'Se cargaron los filtros del reporte: revíselos y pulse Generar.'),
+    (N'Reparalos desde Administrar → Diagnóstico de Integridad antes de respaldar.' + NCHAR(10) + N'' + NCHAR(10) + N'', N'Repárelos desde Administrar → Diagnóstico de Integridad antes de respaldar.' + NCHAR(10) + N'' + NCHAR(10) + N''),
+    (N'Pedíle al Administrador que configure el vínculo.', N'Pídale al Administrador que configure el vínculo.'),
+    (N'No tenés permiso para gestionar usuarios y permisos.', N'No tiene permiso para gestionar usuarios y permisos.'),
+    (N'Para activar una suscripción nueva, usá el módulo de Contratación.', N'Para activar una suscripción nueva, use el módulo de Contratación.'),
+    (N'y ese plan solo permite {2}. Registrá las devoluciones primero.', N'y ese plan solo permite {2}. Registre las devoluciones primero.'),
+    (N'Ejecutá el instalador (script de la base) antes de usar el sistema.', N'Ejecute el instalador (script de la base) antes de usar el sistema.'),
+    (N'(dígito verificador inválido). Reiniciá el sistema para reparar la integridad antes de continuar.', N'(dígito verificador inválido). Reinicie el sistema para reparar la integridad antes de continuar.'),
+    (N'No tenés permiso para ejecutar operaciones sobre los Dígitos Verificadores. ', N'No tiene permiso para ejecutar operaciones sobre los Dígitos Verificadores. '),
+    (N'Avisá al Administrador para completar el alta del plan.', N'Avise al Administrador para completar el alta del plan.'),
+    (N'Asigná la gestión a otro rol o usuario antes de continuar.', N'Asigne la gestión a otro rol o usuario antes de continuar.'),
+    (N'No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando ', N'No puede agregarse a sí mismo permisos que su rol no tiene hoy, editando '),
+    (N'tu propio rol. Pedile a otro administrador que lo haga.', N'su propio rol. Pídale a otro administrador que lo haga.'),
+    (N'Reasigná esos usuarios a otro rol antes de renombrarlo.', N'Reasigne esos usuarios a otro rol antes de renombrarlo.'),
+    (N'Reasigná esos usuarios a otro rol antes de eliminarlo.', N'Reasigne esos usuarios a otro rol antes de eliminarlo.'),
+    (N'Esperá a que termine su ciclo o cancelalo.', N'Espere a que termine su ciclo o cancélelo.'),
+    (N'Confirmá la entrega antes de crear uno nuevo.', N'Confirme la entrega antes de crear uno nuevo.'),
+    (N'La operación ''{0}'' no se puede revertir desde el historial: usá la acción correspondiente ', N'La operación ''{0}'' no se puede revertir desde el historial: use la acción correspondiente '),
+    (N'Reasignalos a otro plan antes de desactivarlo.', N'Reasígnelos a otro plan antes de desactivarlo.'),
+    (N'La fecha de fin ({0:dd/MM/yyyy}) ya pasó. Elegí una fecha de hoy en adelante.', N'La fecha de fin ({0:dd/MM/yyyy}) ya pasó. Elija una fecha de hoy en adelante.'),
+    (N'La promoción terminó el {0:dd/MM/yyyy}: no se puede aprobar. Rechazala para que Administración la reformule con fechas nuevas.', N'La promoción terminó el {0:dd/MM/yyyy}: no se puede aprobar. Recházela para que Administración la reformule con fechas nuevas.'),
+    (N'usá "Asumir pérdida" para recalcularlos.', N'use "Asumir pérdida" para recalcularlos.'),
+    (N'Restaurá un backup para recuperarlos.', N'Restaure un backup para recuperarlos.'),
+    (N'registrá una Nueva Contratación. Desde Renovación solo puede hacerlo un Administrador.', N'registre una Nueva Contratación. Desde Renovación solo puede hacerlo un Administrador.'),
+    (N'Asigná el rol Administrador a otro usuario antes de cambiar este.', N'Asigne el rol Administrador a otro usuario antes de cambiar este.'),
+    (N'Creá o activá otro Administrador antes de archivar este.', N'Cree o active otro Administrador antes de archivar este.'),
+    (N'Reiniciá la aplicación para volver a intentarlo.', N'Reinicie la aplicación para volver a intentarlo.'),
+    (N'Contactá al Administrador (o usá una clave de emergencia) para reactivarla.', N'Contacte al Administrador (o use una clave de emergencia) para reactivarla.'),
+    (N'Reintentá en {minutos} minuto(s) o usá una clave de emergencia.', N'Reintente en {minutos} minuto(s) o use una clave de emergencia.'),
+    (N'Verificá que la sección <connectionStrings> esté correctamente configurada.', N'Verifique que la sección <connectionStrings> esté correctamente configurada.'),
+    (N'• El menú muestra solo las opciones que tu rol tiene permitidas.' + NCHAR(10) + N'', N'• El menú muestra solo las opciones que su rol tiene permitidas.' + NCHAR(10) + N''),
+    (N'Completá nombre, apellido, DNI y, opcionalmente, email y cliente que lo refirió.' + NCHAR(10) + N'', N'Complete nombre, apellido, DNI y, opcionalmente, email y cliente que lo refirió.' + NCHAR(10) + N''),
+    (N'1. Nuevo pedido: elegís el cliente (debe tener la suscripción vigente y ningún pedido en curso) y las prendas dentro de su cupo. Se envía a control de stock.' + NCHAR(10) + N'', N'1. Nuevo pedido: elija el cliente (debe tener la suscripción vigente y ningún pedido en curso) y las prendas dentro de su cupo. Se envía a control de stock.' + NCHAR(10) + N''),
+    (N'1. Buscá al cliente: se verifica que la suscripción esté vigente y que no tenga otro pedido en curso.' + NCHAR(10) + N'', N'1. Busque al cliente: se verifica que la suscripción esté vigente y que no tenga otro pedido en curso.' + NCHAR(10) + N''),
+    (N'2. Elegí las prendas disponibles; el cupo del plan (prendas en uso + seleccionadas) se controla en el momento.' + NCHAR(10) + N'', N'2. Elija las prendas disponibles; el cupo del plan (prendas en uso + seleccionadas) se controla en el momento.' + NCHAR(10) + N''),
+    (N'1. Identificá al cliente por DNI o nombre. Si no está registrado, Registrar cliente.' + NCHAR(10) + N'', N'1. Identifique al cliente por DNI o nombre. Si no está registrado, Registrar cliente.' + NCHAR(10) + N''),
+    (N'2. Elegí el plan y la modalidad (mensual, trimestral o anual): se muestra el importe a abonar con el descuento y los cargos pendientes que correspondan.' + NCHAR(10) + N'', N'2. Elija el plan y la modalidad (mensual, trimestral o anual): se muestra el importe a abonar con el descuento y los cargos pendientes que correspondan.' + NCHAR(10) + N''),
+    (N'• Elegí el medio de pago (con tarjeta de crédito, las cuotas) y Cobrar: se emite el comprobante y la suscripción queda activa. El total incluye los cargos por daño o pérdida pendientes del cliente.' + NCHAR(10) + N'', N'• Elija el medio de pago (con tarjeta de crédito, las cuotas) y Cobrar: se emite el comprobante y la suscripción queda activa. El total incluye los cargos por daño o pérdida pendientes del cliente.' + NCHAR(10) + N''),
+    (N'• Elegí el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).' + NCHAR(10) + N'', N'• Elija el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).' + NCHAR(10) + N''),
+    (N'• Cobrado: indicá el medio de pago; se emite el comprobante y se extiende la vigencia.' + NCHAR(10) + N'', N'• Cobrado: indique el medio de pago; se emite el comprobante y se extiende la vigencia.' + NCHAR(10) + N''),
+    (N'• Elegí un plan y Editar plan (o doble clic) para cambiarlo.' + NCHAR(10) + N'', N'• Elija un plan y Editar plan (o doble clic) para cambiarlo.' + NCHAR(10) + N''),
+    (N'1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.' + NCHAR(10) + N'', N'1. Elija el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.' + NCHAR(10) + N''),
+    (N'2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.' + NCHAR(10) + N'', N'2. Si hay oportunidad por plan, use la idea propuesta (se completa el formulario) o cárguela a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.' + NCHAR(10) + N''),
+    (N'• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si estás de acuerdo, la promoción se da de baja, si no, sigue vigente.' + NCHAR(10) + N'', N'• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si está de acuerdo, la promoción se da de baja, si no, sigue vigente.' + NCHAR(10) + N''),
+    (N'Reportes para la toma de decisiones. El selector muestra solo los reportes que tu rol tiene permitidos.' + NCHAR(10) + N'', N'Reportes para la toma de decisiones. El selector muestra solo los reportes que su rol tiene permitidos.' + NCHAR(10) + N''),
+    (N'1. Elegí el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).' + NCHAR(10) + N'', N'1. Elija el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).' + NCHAR(10) + N''),
+    (N'Escribí un nombre para el rol.', N'Escriba un nombre para el rol.'),
+    (N'Escribí un nombre para el sub-rol.', N'Escriba un nombre para el sub-rol.'),
+    (N'Seleccioná un Rol para asignarle un permiso o rol.', N'Seleccione un Rol para asignarle un permiso o rol.'),
+    (N'Gestioná tu flujo de' + NCHAR(13) + N'' + NCHAR(10) + N'prendas e información' + NCHAR(13) + N'' + NCHAR(10) + N'de manera simple y eficiente.', N'Gestione su flujo de' + NCHAR(13) + N'' + NCHAR(10) + N'prendas e información' + NCHAR(13) + N'' + NCHAR(10) + N'de manera simple y eficiente.'),
+    (N'Ingresá para continuar en tu cuenta.', N'Ingrese para continuar en su cuenta.'),
+    (N'¿Olvidaste tu contraseña?', N'¿Olvidó su contraseña?'),
+    (N'Ingresá tu nombre de usuario. Un administrador' + NCHAR(10) + N'podrá resetear tu contraseña desde', N'Ingrese su nombre de usuario. Un administrador' + NCHAR(10) + N'podrá resetear su contraseña desde'),
+    (N'' + NCHAR(10) + N'' + NCHAR(10) + N'Guardá ese archivo en un lugar seguro.', N'' + NCHAR(10) + N'' + NCHAR(10) + N'Guarde ese archivo en un lugar seguro.'),
+    (N'Cada clave es de UN SOLO USO. Guardá este archivo en un lugar seguro.', N'Cada clave es de UN SOLO USO. Guarde este archivo en un lugar seguro.'),
+    (N'1. Elegí el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.', N'1. Elija el período y Analizar métricas: abandono por plan, rotación por categoría e impacto de las promociones en los cobros del período.'),
+    (N'2. Si hay oportunidad, usá la idea propuesta (se completa el formulario) o cargala a mano.', N'2. Si hay oportunidad, use la idea propuesta (se completa el formulario) o cárguela a mano.'),
+    (N'2. Si hay oportunidad por plan, usá la idea propuesta (se completa el formulario) o cargala a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.', N'2. Si hay oportunidad por plan, use la idea propuesta (se completa el formulario) o cárguela a mano. Las oportunidades por categoría son solo informativas: las promociones son siempre por plan.'),
+    (N'• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si estás de acuerdo, la promoción se da de baja, si no, sigue vigente.', N'• Solicitudes de baja pendientes: Atender cada pedido de Ventas con una respuesta; si está de acuerdo, la promoción se da de baja, si no, sigue vigente.'),
+    (N'No se puede eliminar a {0}: tiene {1} prenda(s) en uso. Registrá la devolución primero.', N'No se puede eliminar a {0}: tiene {1} prenda(s) en uso. Registre la devolución primero.'),
+    (N'Si lo activás, esos textos se mostrarán en el idioma por defecto.', N'Si lo activa, esos textos se mostrarán en el idioma por defecto.'),
+    (N'Contactá al Administrador para reactivarla.', N'Contacte al Administrador para reactivarla.'),
+    (N'Seleccioná un usuario', N'Seleccione un usuario'),
+    (N'en la lista y presioná:', N'en la lista y presione:'),
+    (N'bloqueado y presioná:', N'bloqueado y presione:'),
+    (N'Ingresá tu nombre de usuario. Un administrador', N'Ingrese su nombre de usuario. Un administrador'),
+    (N'podrá resetear tu contraseña desde el sistema.', N'podrá resetear su contraseña desde el sistema.'),
+    (N'Asigná un plan en el módulo de Clientes antes de crear un pedido.', N'Asigne un plan en el módulo de Clientes antes de crear un pedido.'),
+    (N'Si el usuario existe, contactá al administrador para que resetee', N'Si el usuario existe, contacte al administrador para que resetee'),
+    (N'tu contraseña desde Administrar -> Usuarios.', N'su contraseña desde Administrar -> Usuarios.'),
+    (N'Reparalos desde Administrar → Diagnóstico de Integridad antes de respaldar.', N'Repárelos desde Administrar → Diagnóstico de Integridad antes de respaldar.'),
+    (N'Ya podés iniciar sesión normalmente.', N'Ya puede iniciar sesión normalmente.'),
+    (N'Ingresá una contraseña para CIFRAR el backup.', N'Ingrese una contraseña para CIFRAR el backup.'),
+    (N'La vas a necesitar para restaurarlo (no se puede recuperar).', N'La va a necesitar para restaurarlo (no se puede recuperar).'),
+    (N'• El menú muestra solo las opciones que tu rol tiene permitidas.', N'• El menú muestra solo las opciones que su rol tiene permitidas.'),
+    (N'Completá nombre, apellido, DNI y, opcionalmente, email y cliente que lo refirió.', N'Complete nombre, apellido, DNI y, opcionalmente, email y cliente que lo refirió.'),
+    (N'1. Nuevo pedido: elegís el cliente (debe tener la suscripción vigente y ningún pedido en curso) y las prendas dentro de su cupo. Se envía a control de stock.', N'1. Nuevo pedido: elija el cliente (debe tener la suscripción vigente y ningún pedido en curso) y las prendas dentro de su cupo. Se envía a control de stock.'),
+    (N'1. Buscá al cliente: se verifica que la suscripción esté vigente y que no tenga otro pedido en curso.', N'1. Busque al cliente: se verifica que la suscripción esté vigente y que no tenga otro pedido en curso.'),
+    (N'2. Elegí las prendas disponibles; el cupo del plan (prendas en uso + seleccionadas) se controla en el momento.', N'2. Elija las prendas disponibles; el cupo del plan (prendas en uso + seleccionadas) se controla en el momento.'),
+    (N'1. Identificá al cliente por DNI o nombre. Si no está registrado, Registrar cliente.', N'1. Identifique al cliente por DNI o nombre. Si no está registrado, Registrar cliente.'),
+    (N'2. Elegí el plan y la modalidad (mensual, trimestral o anual): se muestra el importe a abonar con el descuento y los cargos pendientes que correspondan.', N'2. Elija el plan y la modalidad (mensual, trimestral o anual): se muestra el importe a abonar con el descuento y los cargos pendientes que correspondan.'),
+    (N'• Elegí el medio de pago (con tarjeta de crédito, las cuotas) y Cobrar: se emite el comprobante y la suscripción queda activa. El total incluye los cargos por daño o pérdida pendientes del cliente.', N'• Elija el medio de pago (con tarjeta de crédito, las cuotas) y Cobrar: se emite el comprobante y la suscripción queda activa. El total incluye los cargos por daño o pérdida pendientes del cliente.'),
+    (N'• Elegí el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).', N'• Elija el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).'),
+    (N'• Cobrado: indicá el medio de pago; se emite el comprobante y se extiende la vigencia.', N'• Cobrado: indique el medio de pago; se emite el comprobante y se extiende la vigencia.'),
+    (N'• Elegí un plan y Editar plan (o doble clic) para cambiarlo.', N'• Elija un plan y Editar plan (o doble clic) para cambiarlo.'),
+    (N'¿Estás de acuerdo con darla de baja?', N'¿Está de acuerdo con darla de baja?'),
+    (N'Reportes para la toma de decisiones. El selector muestra solo los reportes que tu rol tiene permitidos.', N'Reportes para la toma de decisiones. El selector muestra solo los reportes que su rol tiene permitidos.'),
+    (N'1. Elegí el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).', N'1. Elija el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).'),
+    (N'Gestioná tu flujo de', N'Gestione su flujo de'),
+    (N'podrá resetear tu contraseña desde', N'podrá resetear su contraseña desde'),
+    (N'Guardá ese archivo en un lugar seguro.', N'Guarde ese archivo en un lugar seguro.'),
+    (N'— Seleccioná un cliente —', N'— Seleccione un cliente —'),
+    (N'Abrí los formularios que quieras mapear y volvé a entrar acá.', N'Abra los formularios que quiera mapear y vuelva a entrar acá.'),
+    (N'Indicá el motivo del cargo.', N'Indique el motivo del cargo.'),
+    (N'Ingresá una observación antes de aprobar.', N'Ingrese una observación antes de aprobar.'),
+    (N'Ingresá una observación antes de rechazar.', N'Ingrese una observación antes de rechazar.'),
+    (N'La prenda ''{0}'' ya no está disponible (estado: {1}). Actualizá la selección.', N'La prenda ''{0}'' ya no está disponible (estado: {1}). Actualice la selección.'),
+    (N'No se encontró el usuario ''{0}''.' + NCHAR(10) + N'Verificá que escribiste tu nombre correctamente.', N'No se encontró el usuario ''{0}''.' + NCHAR(10) + N'Verifique que escribió su nombre correctamente.'),
+    (N'WardrobeFlow — Tu guardarropa, sin límites.', N'WardrobeFlow — Su guardarropa, sin límites.');
+
+    UPDATE t SET t.Texto = u.TextoNuevo
+    FROM Traduccion t
+    JOIN Idioma i ON i.IdIdioma = t.IdIdioma
+    JOIN @Usted u ON t.Texto COLLATE Latin1_General_BIN2 = u.TextoAnterior COLLATE Latin1_General_BIN2
+    WHERE i.Codigo = 'ES';
+    PRINT CONCAT('Textos en usted: ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z6: textos en español en usted verificados.';
 GO
 
 -- ============================================================

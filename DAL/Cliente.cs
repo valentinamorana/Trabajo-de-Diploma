@@ -26,17 +26,17 @@ namespace DAL
             "IdPlanSiguiente", "FechaCambioPlan"
         };
 
-        // Recalcula el DVH de la fila del cliente + el DVV de la tabla desde los DVH almacenados
-        // (DigitoVerificador.ActualizarFila). Se llama tras Alta/Modificar/Baja.
-        // No propaga errores: la falla del DV no debe abortar la operación de negocio
-        // (la verificación de integridad al arranque la detectaría igual).
-        // Público (antes privado): ModificarEnTx no lo llama internamente porque corre DENTRO
-        // de una transacción todavía sin confirmar — el caller (ver EjecutarTransaccion) debe
-        // invocarlo DESPUÉS del commit, mismo criterio que DAL.Pedido.Alta con su propio DV.
-        public void RecalcularDV(int idCliente)
+        // T07 — Alta/Modificar/Baja escriben y recalculan el DVH de la fila + el DVV en UNA transacción
+        // (DigitoVerificador.EscribirConDV, con el bloqueo del DV tomado antes de escribir). Si el
+        // recálculo falla se revierte también la escritura: nunca queda una fila con el DV viejo, que
+        // el arranque marcaría como base manipulada. Las escrituras compuestas usan EjecutarTransaccion.
+        private static int EscribirEnTx(SqlConnection cn, SqlTransaction tx, string sql, SqlParameter[] p)
         {
-            try { new DigitoVerificador().ActualizarFila(DV_Tabla, DV_Pk, DV_Columnas, idCliente); }
-            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[DAL.Cliente.RecalcularDV] " + ex.Message); }
+            using (var cmd = new SqlCommand(sql, cn, tx))
+            {
+                cmd.Parameters.AddRange(p);
+                return cmd.ExecuteNonQuery();
+            }
         }
 
         // Devuelve todos los clientes activos con el nombre de su plan (JOIN).
@@ -198,17 +198,15 @@ namespace DAL
                 new SqlParameter("@IdClienteReferente", (object)cliente.IdClienteReferente ?? DBNull.Value)
             };
 
-            DataTable tabla = acceso.Leer(
-                "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, IdMedioPagoPreferido, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento, IdClienteReferente) " +
-                "VALUES (@Nombre, @Apellido, @DNI, @Email, @IdMedioPagoPreferido, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento, @IdClienteReferente); " +
-                "SELECT SCOPE_IDENTITY() AS IdNuevo",
-                p);
-
-            int idNuevo = tabla != null && tabla.Rows.Count > 0
-                ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"])
-                : 0;
-            RecalcularDV(idNuevo);   // T07
-            return idNuevo;
+            return new DigitoVerificador().EscribirConDV(DV_Tabla, DV_Pk, DV_Columnas, (cn, tx) =>
+            {
+                DataTable tabla = DigitoVerificador.LeerEnTx(cn, tx,
+                    "INSERT INTO Cliente (Nombre, Apellido, DNI, Email, IdMedioPagoPreferido, IdPlan, FechaAlta, FechaVencimiento, FechaNacimiento, IdClienteReferente) " +
+                    "VALUES (@Nombre, @Apellido, @DNI, @Email, @IdMedioPagoPreferido, @IdPlan, @FechaAlta, @FechaVencimiento, @FechaNacimiento, @IdClienteReferente); " +
+                    "SELECT SCOPE_IDENTITY() AS IdNuevo",
+                    p);
+                return tabla.Rows.Count > 0 ? Convert.ToInt32(tabla.Rows[0]["IdNuevo"]) : 0;
+            }, id => new[] { id });   // T07
         }
 
         // Actualiza los datos de un cliente existente.
@@ -231,7 +229,7 @@ namespace DAL
                 new SqlParameter("@FechaCambioPlan",  (object)cliente.FechaCambioPlan ?? DBNull.Value),
                 new SqlParameter("@IdCliente",        cliente.IdCliente)
             };
-            acceso.Escribir(
+            new DigitoVerificador().EscribirConDV(DV_Tabla, DV_Pk, DV_Columnas, (cn, tx) => EscribirEnTx(cn, tx,
                 "UPDATE Cliente SET Nombre=@Nombre, Apellido=@Apellido, DNI=@DNI, " +
                 "Email=@Email, IdMedioPagoPreferido=@IdMedioPagoPreferido, IdPlan=@IdPlan, " +
                 "FechaVencimiento=@FechaVencimiento, FechaNacimiento=@FechaNacimiento, " +
@@ -239,8 +237,7 @@ namespace DAL
                 "BeneficioReferidoOtorgado=@BeneficioReferidoOtorgado, " +
                 "IdPlanSiguiente=@IdPlanSiguiente, FechaCambioPlan=@FechaCambioPlan " +
                 "WHERE IdCliente=@IdCliente",
-                p);
-            RecalcularDV(cliente.IdCliente);   // T07
+                p), _ => new[] { cliente.IdCliente });   // T07
         }
 
         // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
@@ -280,8 +277,8 @@ namespace DAL
         // UPDATE de Cliente y el INSERT del historial (HistorialRenovacion/HistorialCobro)
         // sean atómicos: antes eran dos round-trips independientes sin transacción compartida,
         // así que un crash entre medio podía dejar el historial de auditoría desincronizado
-        // del estado real de la suscripción. Sin RecalcularDV acá adentro a propósito: corre
-        // sobre datos todavía sin confirmar — el caller lo llama después del commit.
+        // del estado real de la suscripción. Anota la fila: EjecutarTransaccion recalcula su DV
+        // antes del commit (todo método ...EnTx que escribe Cliente tiene que anotar la fila).
         public void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente)
         {
             using (var cmd = new SqlCommand(
@@ -350,17 +347,20 @@ namespace DAL
             }
         }
 
-        // Resta lo aplicado sin dejar el saldo negativo.
+        // Resta lo aplicado SOLO si el saldo real de la base todavía lo cubre. Antes se recortaba a 0
+        // sin fallar: dos cobros simultáneos que habían leído el mismo crédito lo aplicaban los dos.
+        // Ahora el segundo no encuentra saldo y lanza: su transacción se revierte entera.
         public void ConsumirCreditoEnTx(SqlConnection conexion, SqlTransaction tx, int idCliente, decimal monto)
         {
             using (var cmd = new SqlCommand(
-                "UPDATE Cliente SET DescuentoProximoCobro = " +
-                "CASE WHEN ISNULL(DescuentoProximoCobro, 0) > @Monto THEN DescuentoProximoCobro - @Monto ELSE 0 END " +
-                "WHERE IdCliente = @IdCliente", conexion, tx))
+                "UPDATE Cliente SET DescuentoProximoCobro = DescuentoProximoCobro - @Monto " +
+                "WHERE IdCliente = @IdCliente AND ISNULL(DescuentoProximoCobro, 0) >= @Monto", conexion, tx))
             {
                 cmd.Parameters.AddWithValue("@Monto", monto);
                 cmd.Parameters.AddWithValue("@IdCliente", idCliente);
-                cmd.ExecuteNonQuery();
+                if (cmd.ExecuteNonQuery() == 0)
+                    throw new BE.AppException("err.bll.cobro.credito_concurrente",
+                        "El crédito por referido del cliente ya se aplicó en otro cobro. Actualice y vuelva a calcular el importe.");
                 AnotarFila(idCliente);
             }
         }
@@ -373,9 +373,8 @@ namespace DAL
         public void Baja(int idCliente)
         {
             SqlParameter[] p = { new SqlParameter("@IdCliente", idCliente) };
-            acceso.Escribir(
-                "UPDATE Cliente SET Activo = 0 WHERE IdCliente = @IdCliente", p);
-            RecalcularDV(idCliente);   // T07
+            new DigitoVerificador().EscribirConDV(DV_Tabla, DV_Pk, DV_Columnas, (cn, tx) => EscribirEnTx(cn, tx,
+                "UPDATE Cliente SET Activo = 0 WHERE IdCliente = @IdCliente", p), _ => new[] { idCliente });   // T07
         }
 
         private BE.Cliente Mapear(DataRow row)

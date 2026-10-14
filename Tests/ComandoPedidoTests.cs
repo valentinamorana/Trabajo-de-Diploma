@@ -29,12 +29,14 @@ namespace Tests
         [TestMethod]
         public void DevolucionCommand_Ejecutar_LlamaARegistrarDevolucion()
         {
-            var receptor = new FakePedidoService();
+            var receptor = new FakePedidoService { PrendasDevueltas = 2 };
             var comando = new DevolucionCommand(receptor, PedidoDePrueba(), "Test");
 
             comando.Ejecutar();
 
             Assert.AreEqual(1, receptor.RegistrarDevolucionVeces);
+            // C13: la pantalla informa las que volvieron de verdad (no las reportadas como perdidas).
+            Assert.AreEqual(2, comando.PrendasDevueltas);
         }
 
         [TestMethod]

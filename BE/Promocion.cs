@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PN03 — Métricas, promociones y toma de decisiones. Una Promocion aplica siempre a un plan
+    /// PN03 — Evaluar y aplicar promociones comerciales. Una Promocion aplica siempre a un plan
     /// de suscripción (IdPlan, obligatorio) y descuenta en el cobro de ese plan. Las promociones
     /// por categoría de prenda se discontinuaron: no descontaban en ningún cobro.
     ///

@@ -54,14 +54,15 @@ namespace Tests
             ctx.DalSugerencia.AltaIdGenerado = 55;
             var bll = ctx.Crear();
 
-            int id = bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Abandono, 1, "Motivo válido", BE.TipoDescuento.Porcentaje, 100m);
+            int id = bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Abandono, 1, "Motivo válido", BE.TipoDescuento.Porcentaje, 100m, 30m);
 
             Assert.AreEqual(55, id);
             Assert.AreEqual(1, ctx.DalSugerencia.AltaVeces);
             Assert.AreEqual(1, ctx.DalSugerencia.UltimoAlta.IdPlan);
             Assert.AreEqual("Motivo válido", ctx.DalSugerencia.UltimoAlta.Motivo);
             Assert.AreEqual(BE.TipoDescuento.Porcentaje, ctx.DalSugerencia.UltimoAlta.TipoDescuentoSugerido);
-            Assert.AreEqual(100m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado);
+            Assert.AreEqual(30m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado, "Ingreso en riesgo $100 × retención por defecto 30 %.");
+            Assert.AreEqual(30m, ctx.DalSugerencia.UltimoAlta.TasaRetencion, "Guarda la tasa de retención.");
             Assert.AreEqual(BE.EstadoSugerencia.Pendiente, ctx.DalSugerencia.UltimoAlta.Estado);
             Assert.AreEqual(BE.OrigenMetrica.Abandono, ctx.DalSugerencia.UltimoAlta.OrigenMetrica, "Guarda el origen de la métrica.");
             Assert.AreEqual(1, ctx.DalSugerencia.UltimoAlta.IdUsuarioAlta, "Guarda quién la registró.");
@@ -76,7 +77,7 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 0, "Motivo", BE.TipoDescuento.Porcentaje, 100m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 0, "Motivo", BE.TipoDescuento.Porcentaje, 100m, 30m);
                 Assert.Fail("Debía rechazar una sugerencia sin plan: las promociones son siempre por plan.");
             }
             catch (BE.AppException ex)
@@ -96,7 +97,7 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 100m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 100m, 30m);
                 Assert.Fail("Debía rechazar un plan inexistente.");
             }
             catch (BE.AppException ex)
@@ -115,7 +116,7 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "   ", BE.TipoDescuento.Porcentaje, 100m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "   ", BE.TipoDescuento.Porcentaje, 100m, 30m);
                 Assert.Fail("Debía exigir el motivo de la sugerencia.");
             }
             catch (BE.AppException ex)
@@ -134,12 +135,62 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, null, BE.TipoDescuento.Porcentaje, 100m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, null, BE.TipoDescuento.Porcentaje, 100m, 30m);
                 Assert.Fail("Debía exigir el motivo de la sugerencia.");
             }
             catch (BE.AppException ex)
             {
                 Assert.AreEqual("err.bll.sugerenciapromocion.motivo_requerido", ex.Clave);
+            }
+            Assert.AreEqual(0, ctx.DalSugerencia.AltaVeces);
+        }
+
+        // PN03 — beneficio estimado = ingreso mensual en riesgo × tasa de retención esperada / 100.
+        [TestMethod]
+        public void RegistrarSugerencia_ConTasaDeRetencion_CalculaElBeneficioYGuardaLaTasa()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.Crear().RegistrarSugerencia("Test", BE.OrigenMetrica.Abandono, 1, "Motivo", BE.TipoDescuento.Porcentaje, 16000m, 25m);
+
+            Assert.AreEqual(4000m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado);
+            Assert.AreEqual(25m, ctx.DalSugerencia.UltimoAlta.TasaRetencion);
+            Assert.AreEqual(16000m, ctx.DalSugerencia.UltimoAlta.IngresoEnRiesgo());
+        }
+
+        // La columna guarda 2 decimales: la tasa se redondea antes de validar y calcular.
+        [TestMethod]
+        public void RegistrarSugerencia_TasaConMasDeDosDecimales_SeRedondea()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            ctx.Crear().RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 1000m, 33.333m);
+            Assert.AreEqual(33.33m, ctx.DalSugerencia.UltimoAlta.TasaRetencion);
+            Assert.AreEqual(333.30m, ctx.DalSugerencia.UltimoAlta.BeneficioEstimado);
+            try
+            {
+                ctx.Crear().RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 1000m, 0.001m);
+                Assert.Fail("0,001 % redondea a 0: tasa inválida.");
+            }
+            catch (BE.AppException ex) { Assert.AreEqual("err.bll.sugerenciapromocion.tasa_invalida", ex.Clave); }
+        }
+
+        [TestMethod]
+        public void RegistrarSugerencia_TasaFueraDeRango_LanzaTasaInvalida()
+        {
+            LoginComoAdministrador();
+            var ctx = new Contexto();
+            foreach (var tasa in new[] { 0m, -5m, 100.01m })
+            {
+                try
+                {
+                    ctx.Crear().RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 1000m, tasa);
+                    Assert.Fail($"Debía exigir una tasa de retención en (0, 100] (probó {tasa}).");
+                }
+                catch (BE.AppException ex)
+                {
+                    Assert.AreEqual("err.bll.sugerenciapromocion.tasa_invalida", ex.Clave);
+                }
             }
             Assert.AreEqual(0, ctx.DalSugerencia.AltaVeces);
         }
@@ -153,7 +204,7 @@ namespace Tests
 
             try
             {
-                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 0m);
+                bll.RegistrarSugerencia("Test", BE.OrigenMetrica.Manual, 1, "Motivo", BE.TipoDescuento.Porcentaje, 0m, 30m);
                 Assert.Fail("Debía exigir un beneficio estimado mayor a cero.");
             }
             catch (BE.AppException ex)
@@ -251,13 +302,15 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ValorInicialPromocion_PorcentajeConBeneficioEnPesos_ProponeDiezPorCiento()
+        public void ValorInicialPromocion_EsUnDescuentoPorClienteYNoElBeneficioTotal()
         {
             var s = Sugerencia(BE.EstadoSugerencia.Pendiente);
-            s.BeneficioEstimado = 16000m;
-            Assert.AreEqual(10m, s.ValorInicialPromocion());
+            s.BeneficioEstimado = 96000m;
+            s.TipoDescuentoSugerido = BE.TipoDescuento.Porcentaje;
+            Assert.AreEqual(10m, s.ValorInicialPromocion(8000m));
             s.TipoDescuentoSugerido = BE.TipoDescuento.MontoFijo;
-            Assert.AreEqual(16000m, s.ValorInicialPromocion());
+            Assert.AreEqual(800m, s.ValorInicialPromocion(8000m), "10 % del precio del plan, no los $ 96.000 a retener.");
+            Assert.AreEqual(0m, s.ValorInicialPromocion(null));
         }
     }
 }

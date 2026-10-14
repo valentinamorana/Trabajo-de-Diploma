@@ -100,7 +100,7 @@ namespace Servicios
             var sb = new StringBuilder();
             sb.AppendLine("=== CLAVES DE EMERGENCIA — WardrobeFlow ===");
             sb.AppendLine("Sirven para DESBLOQUEAR una cuenta de Administrador bloqueada.");
-            sb.AppendLine("Cada clave es de UN SOLO USO. Guardá este archivo en un lugar seguro.");
+            sb.AppendLine("Cada clave es de UN SOLO USO. Guarde este archivo en un lugar seguro.");
             sb.AppendLine("Generadas: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
             sb.AppendLine(new string('-', 44));
             int n = 1;

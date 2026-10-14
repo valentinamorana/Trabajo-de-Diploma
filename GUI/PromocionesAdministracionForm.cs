@@ -275,7 +275,7 @@ namespace GUI
 
             var decision = MessageBox.Show(this,
                 Tr("dlg.promo.atender.pregunta",
-                   "Ventas pide dar de baja '{0}'.\nMotivo: {1}\n\n¿Estás de acuerdo con darla de baja?\n\nSí: se da de baja.  No: sigue vigente.",
+                   "Ventas pide dar de baja '{0}'.\nMotivo: {1}\n\n¿Está de acuerdo con darla de baja?\n\nSí: se da de baja.  No: sigue vigente.",
                    new object[] { solicitud.NombrePromocion, solicitud.Motivo }),
                 Tr("dlg.promo.atender.titulo", "Atender solicitud de baja"),
                 MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);

@@ -42,7 +42,7 @@ namespace DAL
             var entry = ConfigurationManager.ConnectionStrings["WardrobeFlowDB"]
                 ?? throw new InvalidOperationException(
                     "No se encontró 'WardrobeFlowDB' en App.config. " +
-                    "Verificá que la sección <connectionStrings> esté correctamente configurada.");
+                    "Verifique que la sección <connectionStrings> esté correctamente configurada.");
             _cadenaConexion = entry.ConnectionString;
         }
 

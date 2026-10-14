@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BLL.Interfaces
 {
     /// <summary>
-    /// PN03 — Métricas, promociones y toma de decisiones (ciclo de vida de la Promocion).
+    /// PN03 — Evaluar y aplicar promociones comerciales (ciclo de vida de la Promocion).
     /// El mapeo de cada actividad del diagrama a su método está en el encabezado de BLL.Promocion.
     /// </summary>
     public interface IPromocionService

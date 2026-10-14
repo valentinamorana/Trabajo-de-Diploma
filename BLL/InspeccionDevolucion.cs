@@ -4,10 +4,10 @@ namespace BLL
 {
     /// <summary>
     /// PN04 — Casos de uso de Depósito que terminan una prenda con cargo al cliente:
-    ///   • CU-DEP-01 Inspeccionar Devolución: la prenda devuelta (En Limpieza) reingresa sin
+    ///   • CU05-DEP Inspeccionar Devolución: la prenda devuelta (En Limpieza) reingresa sin
     ///     cargo (<see cref="AprobarReingreso"/>) o se da de baja cobrando la reposición
     ///     (<see cref="DarDeBajaConCargo"/>).
-    ///   • CU-DEP-02 Reportar Prenda Perdida: la prenda En Uso se da de baja con cargo
+    ///   • CU06-DEP Reportar Prenda Perdida: la prenda En Uso se da de baja con cargo
     ///     (<see cref="ReportarPerdida"/>), solo si el pedido se entregó hace 30 días o más
     ///     (compra tácita, <see cref="Politicas.PoliticaCompraTacita"/>).
     ///
@@ -42,11 +42,16 @@ namespace BLL
             _cargo  = new CargoPrenda(new DAL.CargoPrenda());   // solo para ValidarDatos (sin acceso a datos)
         }
 
-        /// <summary>Camino A — reingresa a Disponible sin cargo (mismo CambiarEstado de siempre).</summary>
+        /// <summary>
+        /// Camino A — reingresa a Disponible sin cargo. Solo para una prenda de la cola de inspección:
+        /// las que entraron a limpieza en el depósito se liberan desde Prendas.
+        /// </summary>
         public void AprobarReingreso(string modulo, BE.Prenda prenda)
         {
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
-            _prenda.CambiarEstado(modulo, prenda, BE.EstadoPrenda.Disponible);
+            // La guarda (prenda devuelta y todavía En Limpieza, releída de la BD) la aplica
+            // BLL.Prenda.ReingresarInspeccionada: err.bll.insp.reingreso_fuera_de_cola.
+            _prenda.ReingresarInspeccionada(modulo, prenda);
         }
 
         /// <summary>
@@ -56,10 +61,11 @@ namespace BLL
         /// </summary>
         public int DarDeBajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto)
         {
+            PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);   // antes de leer la BD
             if (prenda != null && prenda.Estado == BE.EstadoPrenda.EnLimpieza &&
-                !_prenda.ObtenerEnLimpieza().Exists(p => p.IdPrenda == prenda.IdPrenda))
+                !_prenda.EstaPendienteDeInspeccion(prenda))
                 throw new BE.AppException("err.bll.insp.no_devuelta",
-                    "La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dala de baja desde Prendas.",
+                    "La prenda '{0}' no viene de una devolución: no se le puede cobrar al último cliente. Si no sirve más, dela de baja desde Prendas.",
                     prenda.Nombre);
             return BajaConCargo(modulo, prenda, motivo, monto, BE.EstadoPrenda.EnLimpieza,
                             "err.bll.insp.no_en_limpieza",
@@ -67,7 +73,7 @@ namespace BLL
         }
 
         /// <summary>
-        /// CU-DEP-02 — En Uso → Baja + cargo de reposición, atómico. Solo para una prenda de un
+        /// CU06-DEP — En Uso → Baja + cargo de reposición, atómico. Solo para una prenda de un
         /// pedido Entregado hace 30 días o más (compra tácita): si el cliente todavía no la recibió,
         /// o el plazo no venció, se rechaza.
         /// </summary>
@@ -92,8 +98,10 @@ namespace BLL
         /// Para habilitar "Reportar pérdida" en la pantalla: prenda En Uso de un pedido Entregado
         /// hace 30 días o más. La regla la vuelve a validar <see cref="ReportarPerdida"/> contra la base.
         /// </summary>
+        // Incluye la patente: sin ella (p. ej. el Operador Logístico) el botón queda deshabilitado
+        // en vez de habilitado y rechazado al pulsarlo.
         public bool PuedeReportarPerdida(BE.Prenda prenda, BE.Pedido pedido) =>
-            prenda != null && prenda.PuedeReportarsePerdida() &&
+            prenda != null && PermisosAccion.Puede(BE.Patentes.StockEditar) && prenda.PuedeReportarsePerdida() &&
             Politicas.PoliticaCompraTacita.PlazoVencido(pedido, _hoy());
 
         private int BajaConCargo(string modulo, BE.Prenda prenda, string motivo, decimal monto,

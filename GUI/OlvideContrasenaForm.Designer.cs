@@ -54,7 +54,7 @@ namespace GUI
             this.lblDesc.Size = new System.Drawing.Size(332, 40);
             this.lblDesc.TabIndex = 2;
             this.lblDesc.Tag = "lbl.recup.desc";
-            this.lblDesc.Text = "Ingresá tu nombre de usuario. Un administrador\npodrá resetear tu contraseña desde" +
+            this.lblDesc.Text = "Ingrese su nombre de usuario. Un administrador\npodrá resetear su contraseña desde" +
     " el sistema.";
             // 
             // lblUser

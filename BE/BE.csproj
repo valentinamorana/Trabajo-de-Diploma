@@ -87,6 +87,7 @@
     <Compile Include="DictamenContable.cs" />
     <Compile Include="SolicitudBajaPromocion.cs" />
     <Compile Include="ReporteMetricas.cs" />
+    <Compile Include="ResultadoPromocion.cs" />
     <Compile Include="AnalisisImpactoPromocion.cs" />
     <Compile Include="MantenimientoPrenda.cs" />
     <Compile Include="NivelUrgencia.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="ListaEspera.cs" />
     <Compile Include="DatosClienteRiesgo.cs" />
     <Compile Include="ResultadoRiesgo.cs" />
+    <Compile Include="ReporteAnalitica.cs" />
     <Compile Include="ClienteEnRiesgo.cs" />
     <Compile Include="HistorialIntegridad.cs" />
     <Compile Include="EstadoComercialCliente.cs" />

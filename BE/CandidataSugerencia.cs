@@ -26,8 +26,16 @@ namespace BE
 
         public TipoDescuento TipoSugerido { get; set; }
 
-        /// <summary>Estimación inicial editable: ingreso mensual en riesgo del plan. Gerencia la
-        /// ajusta antes de enviar.</summary>
-        public decimal BeneficioEstimado { get; set; }
+        /// <summary>Clientes del plan en riesgo de abandono y el ingreso mensual que representan
+        /// (clientes × precio del plan).</summary>
+        public int ClientesEnRiesgo { get; set; }
+        public decimal IngresoMensualEnRiesgo { get; set; }
+
+        /// <summary>Tasa de retención esperada (%) con la que se estima el beneficio; Gerencia la
+        /// ajusta antes de enviar la sugerencia.</summary>
+        public decimal TasaRetencion { get; set; } = SugerenciaPromocion.TasaRetencionPorDefecto;
+
+        /// <summary>Beneficio estimado: ingreso mensual en riesgo × tasa de retención / 100.</summary>
+        public decimal BeneficioEstimado => SugerenciaPromocion.CalcularBeneficio(IngresoMensualEnRiesgo, TasaRetencion);
     }
 }

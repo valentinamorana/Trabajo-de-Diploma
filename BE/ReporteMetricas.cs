@@ -20,6 +20,13 @@ namespace BE
         public List<MetricaRotacionCategoria> RotacionPorCategoria { get; set; } = new List<MetricaRotacionCategoria>();
         public List<CandidataSugerencia> Oportunidades { get; set; } = new List<CandidataSugerencia>();
 
+        /// <summary>"Evaluar resultado de la promoción": una fila por promoción Vigente, Dada de baja o
+        /// Vencida cuya vigencia toca el período.</summary>
+        public List<ResultadoPromocion> ResultadoPromociones { get; set; } = new List<ResultadoPromocion>();
+
+        /// <summary>No se pudieron leer las promociones: el reporte lo dice en vez de "no hay promociones".</summary>
+        public bool ResultadoNoDisponible { get; set; }
+
         /// <summary>Guarda de "¿Hay oportunidad?": solo cuentan las oportunidades por plan.</summary>
         public bool HayOportunidad() => Oportunidades != null && Oportunidades.Count > 0;
     }

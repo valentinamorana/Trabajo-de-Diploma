@@ -40,7 +40,7 @@ namespace BE
         /// <summary>Indica si la prenda puede ser asignada a un pedido.</summary>
         public bool EstaDisponible() => Estado == EstadoPrenda.Disponible;
 
-        /// <summary>PN04, CU-DEP-02 Reportar Prenda Perdida: solo una prenda EnUso (en poder de
+        /// <summary>PN04, CU06-DEP Reportar Prenda Perdida: solo una prenda EnUso (en poder de
         /// un cliente) puede reportarse como perdida — es la única transición manual que admite
         /// ese estado (ver <see cref="Estados.EstadoEnUso"/>).</summary>
         public bool PuedeReportarsePerdida() => Estado == EstadoPrenda.EnUso;
@@ -59,7 +59,7 @@ namespace BE
         /// módulo de Prendas):
         ///   Disponible  → EnLimpieza | Baja
         ///   EnLimpieza  → Disponible | Baja
-        ///   EnUso       → Baja (PN04, CU-DEP-02 Reportar Prenda Perdida — la única manual)
+        ///   EnUso       → Baja (PN04, CU06-DEP Reportar Prenda Perdida — la única manual)
         ///   Baja        → (ninguna: estado final)
         /// La transición Disponible/EnLimpieza → EnUso solo ocurre
         /// internamente al crear o des-cancelar un pedido (ver DAL.Pedido).

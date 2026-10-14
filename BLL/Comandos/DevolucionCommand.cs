@@ -11,6 +11,9 @@ namespace BLL.Comandos
         {
         }
 
-        public override void Ejecutar() => _receptor.RegistrarDevolucion(_modulo, _pedido);
+        /// <summary>Prendas que volvieron efectivamente (sin las reportadas como perdidas), tras Ejecutar.</summary>
+        public int PrendasDevueltas { get; private set; }
+
+        public override void Ejecutar() => PrendasDevueltas = _receptor.RegistrarDevolucion(_modulo, _pedido);
     }
 }

@@ -54,7 +54,9 @@ namespace Tests.Fakes
 
         // Resto del contrato: lee de la lista sembrada (vacía por defecto).
         public List<BE.Usuario> ObtenerTodos()                       => new List<BE.Usuario>(Usuarios);
-        public List<BE.Usuario> ObtenerArchivados()                  => new List<BE.Usuario>();
+        // Archivados sembrados (vacío por defecto).
+        public readonly List<BE.Usuario> Archivados = new List<BE.Usuario>();
+        public List<BE.Usuario> ObtenerArchivados()                  => new List<BE.Usuario>(Archivados);
         public BE.Usuario       ObtenerPorUsername(string username)  => Usuarios.Find(x => string.Equals(x.Username, username, StringComparison.OrdinalIgnoreCase));
         public BE.Usuario       ObtenerPorId(int idUsuario)          => Usuarios.Find(x => x.Id == idUsuario);
         public void             Alta(string u, string c, string p)   { }

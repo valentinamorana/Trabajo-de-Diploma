@@ -73,7 +73,7 @@ namespace BLL
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(clavePlana))
                 throw new BE.AppException("err.bll.emergencia.campos",
-                    "Ingresá tu usuario y una clave de emergencia.");
+                    "Ingrese su usuario y una clave de emergencia.");
 
             string user  = username.Trim();
             string clave = clavePlana.Trim().ToUpperInvariant();   // las claves son en mayúsculas
@@ -82,12 +82,12 @@ namespace BLL
             // probar claves sin fin.
             if (ContadorSesion.GetInstance().LimiteAlcanzado)
                 throw new BE.AppException("err.bll.emergencia.limite",
-                    "Demasiados intentos fallidos en esta sesión. Reiniciá la aplicación para volver a intentarlo.");
+                    "Demasiados intentos fallidos en esta sesión. Reinicie la aplicación para volver a intentarlo.");
 
             var disponibles = claveDAL.ObtenerDisponibles();
             if (disponibles.Count == 0)
                 throw new BE.AppException("err.bll.emergencia.sin_claves",
-                    "No quedan claves de emergencia. Pedile a otro Administrador que genere un nuevo set.");
+                    "No quedan claves de emergencia. Pídale a otro Administrador que genere un nuevo set.");
 
             // PRIMERO se valida la clave (PBKDF2 contra cada hash disponible, mismo costo para todo
             // intento); recién con una clave válida se informa el estado de la cuenta. Antes se
@@ -122,7 +122,7 @@ namespace BLL
 
             if (!usuario.Bloqueado)
                 throw new BE.AppException("err.bll.emergencia.no_bloqueada",
-                    "La cuenta no está bloqueada: podés iniciar sesión normalmente.");
+                    "La cuenta no está bloqueada: puede iniciar sesión normalmente.");
 
             // Consumir la clave (uso único). Si otro la consumió en paralelo, abortar.
             if (!claveDAL.MarcarUsada(idClave, user))

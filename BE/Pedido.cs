@@ -129,6 +129,14 @@ namespace BE
         // Separar prendas: en control y con todas las líneas confirmadas.
         public bool PuedeSepararse() => Estado == EstadoPedido.EnControlStock && TodasConfirmadas;
 
+        // Depósito ya informó faltantes (hay un informe para consultar con el cliente).
+        public bool TieneFaltantesInformados() => Estado == EstadoPedido.ConFaltantes;
+
+        // Todavía no se separaron prendas para el pedido (sigue en control de stock o con
+        // faltantes): no hay reserva que liberar si se cancela.
+        public bool TodaviaSinPrendasSeparadas() =>
+            Estado == EstadoPedido.EnControlStock || Estado == EstadoPedido.ConFaltantes;
+
         // El cliente ajusta la selección por disponibilidad: solo con faltantes informados.
         public bool PuedeAjustarse() => Estado == EstadoPedido.ConFaltantes;
 

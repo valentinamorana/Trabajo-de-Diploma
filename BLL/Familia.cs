@@ -99,7 +99,7 @@ namespace BLL
             if (!SistemaConservaGestion(arbol, usuarios))
                 throw new BE.AppException("err.bll.familia.sistema_sin_gestion",
                     "Esta acción dejaría al sistema SIN NINGÚN usuario con acceso de Gestión de Usuarios. " +
-                    "Asigná la gestión a otro rol o usuario antes de continuar.");
+                    "Asigne la gestión a otro rol o usuario antes de continuar.");
         }
 
         // Deja constancia en bitácora (criticidad Alta) cada vez que el guard anti-lockout de
@@ -237,7 +237,7 @@ namespace BLL
             int idRol = permisoDAL.ObtenerIdRol(rol);
             if (idRol == 0)
                 throw new BE.AppException("err.bll.rol_inexistente",
-                    "El rol '{0}' no existe como nodo del árbol de permisos. Volvé a abrir la pantalla.", rol);
+                    "El rol '{0}' no existe como nodo del árbol de permisos. Vuelva a abrir la pantalla.", rol);
 
             var seleccion = new HashSet<int>(idsSeleccionados ?? new List<int>());
             var actuales  = ObtenerIdsDirectosDelRol(rol);
@@ -252,7 +252,7 @@ namespace BLL
                 {
                     if (!ConservaGestion(seleccion))
                         throw new BE.AppException("err.bll.familia.autobloqueo",
-                            "No podés quitarte a vos mismo el acceso de Gestión de Usuarios de tu propio rol.");
+                            "No puede quitarse a sí mismo el acceso de Gestión de Usuarios de su propio rol.");
 
                     // Anti-autoescalación: tampoco puede AGREGARSE a su propio rol ningún permiso
                     // que ese rol no resuelva YA hoy — el guard de arriba solo protege contra
@@ -264,8 +264,8 @@ namespace BLL
                     if (!NoEscalaPrivilegios(PatentesDeConjunto(arbolActual, actuales),
                                              PatentesDeConjunto(arbolActual, seleccion)))
                         throw new BE.AppException("err.bll.familia.autoescalacion",
-                            "No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando " +
-                            "tu propio rol. Pedile a otro administrador que lo haga.");
+                            "No puede agregarse a sí mismo permisos que su rol no tiene hoy, editando " +
+                            "su propio rol. Pídale a otro administrador que lo haga.");
                 }
             }
 
@@ -361,7 +361,7 @@ namespace BLL
                 if (usuarios > 0)
                     throw new BE.AppException("err.bll.rol_renombrar_en_uso",
                         "No se puede renombrar el rol '{0}': está asignado a {1} usuario(s) ({2}). " +
-                        "Reasigná esos usuarios a otro rol antes de renombrarlo.",
+                        "Reasigne esos usuarios a otro rol antes de renombrarlo.",
                         nodo.Nombre, usuarios, string.Join(", ", permisoDAL.ObtenerUsuariosPorRol(nodo.Nombre)));
             }
 
@@ -410,7 +410,7 @@ namespace BLL
                 var nombres = permisoDAL.ObtenerUsuariosPorRol(rol);
                 throw new BE.AppException("err.bll.rol_en_uso",
                     "No se puede eliminar el rol '{0}': está asignado a {1} usuario(s) ({2}). " +
-                    "Reasigná esos usuarios a otro rol antes de eliminarlo.",
+                    "Reasigne esos usuarios a otro rol antes de eliminarlo.",
                     rol, usuarios, string.Join(", ", nombres));
             }
 
@@ -482,8 +482,8 @@ namespace BLL
 
             if (!NoEscalaPrivilegios(antes, despues))
                 throw new BE.AppException("err.bll.familia.autoescalacion",
-                    "No podés agregarte a vos mismo permisos que tu rol no tiene hoy, editando " +
-                    "tu propio rol. Pedile a otro administrador que lo haga.");
+                    "No puede agregarse a sí mismo permisos que su rol no tiene hoy, editando " +
+                    "su propio rol. Pídale a otro administrador que lo haga.");
         }
 
         private static void RecolectarIds(BE.Componente nodo, HashSet<int> ids)

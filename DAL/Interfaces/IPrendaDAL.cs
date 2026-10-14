@@ -22,10 +22,21 @@ namespace DAL.Interfaces
         List<BE.Prenda> ObtenerPorCliente(int idCliente);
         int Alta(BE.Prenda prenda);
         void Modificar(BE.Prenda prenda);
-        void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null);
+        /// <summary>Cambia el estado y, en la MISMA transacción, abre o cierra el mantenimiento de la
+        /// prenda (así nunca queda una prenda Disponible con un mantenimiento abierto, ni al revés).</summary>
+        void CambiarEstado(int idPrenda, BE.EstadoPrenda estadoAnterior, BE.EstadoPrenda nuevoEstado, int? idClienteActual = null,
+                           MovimientoMantenimiento mantenimiento = MovimientoMantenimiento.Ninguno, string actor = null);
         List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria();
 
         /// <summary>Nombres del catálogo de categorías activas (tabla Categoria), ordenados.</summary>
         List<string> ObtenerCategorias();
+    }
+
+    /// <summary>Qué le pasa al mantenimiento de la prenda junto con el cambio de estado.</summary>
+    public enum MovimientoMantenimiento
+    {
+        Ninguno,
+        Abrir,    // entra a limpieza en el depósito (mantenimiento manual)
+        Cerrar    // sale de limpieza (reingreso o baja)
     }
 }

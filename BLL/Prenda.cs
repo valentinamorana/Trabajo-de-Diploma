@@ -116,7 +116,28 @@ namespace BLL
         // NUNCA pasan por acá: el patrón State (BE.Estados) las permite a nivel de datos, pero las
         // dos llevan un cargo al cliente en la misma transacción, así que solo las hace
         // BLL.InspeccionDevolucion. Acá se rechazan siempre, venga de la pantalla que venga.
+        // Lo mismo EnLimpieza → Disponible de una prenda devuelta: el reingreso es la decisión de la
+        // Inspección (ReingresarInspeccionada), no un cambio de estado manual.
         public void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado)
+            => CambiarEstado(modulo, prenda, nuevoEstado, porInspeccion: false);
+
+        // PN04, CU05-DEP camino A: la Inspección de Devolución aprueba el reingreso sin cargo
+        // (EnLimpieza → Disponible). La llama BLL.InspeccionDevolucion.AprobarReingreso; la guarda de
+        // la cola (prenda devuelta y todavía En Limpieza, releída de la BD) está ACÁ y es la única.
+        public void ReingresarInspeccionada(string modulo, BE.Prenda prenda)
+        {
+            if (prenda == null) throw new ArgumentNullException(nameof(prenda));
+            PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);   // antes de leer la BD
+            // Defensa propia (no depende de que la llame solo la Inspección): únicamente una prenda
+            // devuelta que sigue En Limpieza reingresa por este camino.
+            if (!EstaPendienteDeInspeccion(prenda))
+                throw new BE.AppException("err.bll.insp.reingreso_fuera_de_cola",
+                    "La prenda '{0}' no está pendiente de inspección: no viene de una devolución o ya se resolvió.",
+                    prenda.Nombre);
+            CambiarEstado(modulo, prenda, BE.EstadoPrenda.Disponible, porInspeccion: true);
+        }
+
+        private void CambiarEstado(string modulo, BE.Prenda prenda, BE.EstadoPrenda nuevoEstado, bool porInspeccion)
         {
             PermisosAccion.Exigir(BE.Patentes.StockEditar, BE.Patentes.Stock);
             string actor = Sesion.Actor;   // quién abre el mantenimiento: lo resuelve la BLL, no la GUI
@@ -136,7 +157,12 @@ namespace BLL
             // PN04: una prenda que volvió del cliente (En Limpieza) solo se da de baja desde la
             // Inspección de Devolución, que registra ANTES el cargo por el daño irreparable. Sin
             // esta barrera en la BLL, cualquier otra pantalla podía retirarla del catálogo sin cargo.
-            if (RequiereInspeccion(prenda, nuevoEstado))
+            // Tampoco vuelve a Disponible sin la Inspección: si no, se la salteaba.
+            if (!porInspeccion && nuevoEstado == BE.EstadoPrenda.Disponible && RequiereInspeccion(prenda, nuevoEstado))
+                throw new BE.AppException("err.bll.prenda.reingreso_requiere_inspeccion",
+                    "Una prenda devuelta por un cliente solo vuelve a Disponible desde la Inspección de Devolución, " +
+                    "no directamente.");
+            if (nuevoEstado == BE.EstadoPrenda.Baja && RequiereInspeccion(prenda, nuevoEstado))
                 throw new BE.AppException("err.bll.prenda.baja_requiere_inspeccion",
                     "Una prenda En Limpieza solo puede darse de baja desde la Inspección de Devolución " +
                     "(que registra el cargo por el daño), no directamente.");
@@ -161,9 +187,17 @@ namespace BLL
                 ? prenda.IdClienteActual
                 : null;
 
+            // Entra a limpieza en el depósito → abre un mantenimiento manual. Sale de limpieza (reingreso
+            // o baja) → cierra el que esté abierto. Todo en la misma transacción que el cambio de estado.
+            var mantenimiento = nuevoEstado == BE.EstadoPrenda.EnLimpieza
+                ? DAL.Interfaces.MovimientoMantenimiento.Abrir
+                : estadoAnterior == BE.EstadoPrenda.EnLimpieza && SaleDeLimpieza(nuevoEstado)
+                    ? DAL.Interfaces.MovimientoMantenimiento.Cerrar
+                    : DAL.Interfaces.MovimientoMantenimiento.Ninguno;
+
             try
             {
-                dalPrenda.CambiarEstado(prenda.IdPrenda, estadoAnterior, nuevoEstado, idCliente);
+                dalPrenda.CambiarEstado(prenda.IdPrenda, estadoAnterior, nuevoEstado, idCliente, mantenimiento, actor);
             }
             catch
             {
@@ -176,21 +210,8 @@ namespace BLL
                 throw;
             }
 
-            if (nuevoEstado == BE.EstadoPrenda.EnLimpieza)
+            if (estadoAnterior == BE.EstadoPrenda.EnLimpieza && nuevoEstado == BE.EstadoPrenda.Disponible)
             {
-                dalMantenimiento.IniciarMantenimiento(prenda.IdPrenda, actor);
-            }
-            else if (estadoAnterior == BE.EstadoPrenda.EnLimpieza && nuevoEstado == BE.EstadoPrenda.Baja)
-            {
-                // Baja de una prenda que entró a limpieza en el depósito (no por devolución): se
-                // cierra el mantenimiento para que no quede abierto en el tablero.
-                dalMantenimiento.CerrarMantenimiento(prenda.IdPrenda);
-            }
-            else if (estadoAnterior == BE.EstadoPrenda.EnLimpieza &&
-                     nuevoEstado == BE.EstadoPrenda.Disponible)
-            {
-                dalMantenimiento.CerrarMantenimiento(prenda.IdPrenda);
-
                 // Lista de Espera (mejora opcional): si alguien esperaba esta prenda,
                 // se la reserva (ventana de HORAS_RESERVA). No hace nada si nadie espera,
                 // ni si la tabla ListaEspera todavía no existe (BD sin migrar).
@@ -208,16 +229,29 @@ namespace BLL
                 idPrenda: prenda.IdPrenda);
         }
 
-        // PN04 — EnUso → Baja solo por CU-DEP-02 Reportar Prenda Perdida (con cargo de reposición).
+        // PN04 — EnUso → Baja solo por CU06-DEP Reportar Prenda Perdida (con cargo de reposición).
         private static bool RequiereFlujoPerdida(BE.EstadoPrenda desde, BE.EstadoPrenda hacia) =>
             desde == BE.EstadoPrenda.EnUso && hacia == BE.EstadoPrenda.Baja;
 
-        // PN04 — Una prenda que volvió de un cliente (mantenimiento abierto por la devolución) solo se
-        // da de baja desde la Inspección de Devolución, que registra el cargo por daño. Si entró a
-        // limpieza en el depósito, la baja es manual y sin cargo: el cliente no tuvo nada que ver.
+        // PN04 — Una prenda que volvió de un cliente (mantenimiento abierto por la devolución) sale de
+        // limpieza solo por la Inspección de Devolución: reingresa a Disponible o se da de baja con
+        // el cargo por daño. Si entró a limpieza en el depósito, los dos cambios son manuales y sin
+        // cargo: el cliente no tuvo nada que ver.
         private bool RequiereInspeccion(BE.Prenda prenda, BE.EstadoPrenda hacia) =>
-            prenda.Estado == BE.EstadoPrenda.EnLimpieza && hacia == BE.EstadoPrenda.Baja
-            && VieneDeDevolucion(prenda.IdPrenda);
+            SaleDeLimpieza(hacia) && EstaEnColaSegun(prenda);
+
+        // Los dos destinos que, para una prenda devuelta, solo decide la Inspección.
+        private static bool SaleDeLimpieza(BE.EstadoPrenda hacia) =>
+            hacia == BE.EstadoPrenda.Baja || hacia == BE.EstadoPrenda.Disponible;
+
+        // Con el estado del objeto recibido (para armar la pantalla y dentro de CambiarEstado, cuyo
+        // UPDATE ya está condicionado al estado anterior).
+        private bool EstaEnColaSegun(BE.Prenda prenda) =>
+            prenda != null && prenda.Estado == BE.EstadoPrenda.EnLimpieza && VieneDeDevolucion(prenda.IdPrenda);
+
+        // Guarda de la Inspección: relee el estado de la BD (el objeto de la pantalla puede estar viejo).
+        public bool EstaPendienteDeInspeccion(BE.Prenda prenda) =>
+            prenda != null && EstaEnColaSegun(dalPrenda.ObtenerPorId(prenda.IdPrenda));
 
         private bool VieneDeDevolucion(int idPrenda) =>
             dalMantenimiento.ObtenerPorPrenda(idPrenda).Any(m => m.EstaAbierto && m.VieneDeDevolucion);
@@ -232,11 +266,14 @@ namespace BLL
         {
             if (prenda == null) throw new ArgumentNullException(nameof(prenda));
 
+            // Una sola consulta de mantenimiento por prenda: si está pendiente de inspección no se le
+            // ofrece salir de limpieza (ni a Disponible ni a Baja); eso es RequiereInspeccion.
+            bool pendienteDeInspeccion = EstaEnColaSegun(prenda);
             var candidatos = new[] { BE.EstadoPrenda.Disponible, BE.EstadoPrenda.EnLimpieza, BE.EstadoPrenda.Baja };
             return candidatos
                 .Where(destino => destino != prenda.Estado
                                && !RequiereFlujoPerdida(prenda.Estado, destino)
-                               && !RequiereInspeccion(prenda, destino)
+                               && !(pendienteDeInspeccion && SaleDeLimpieza(destino))
                                && prenda.TransicionPermitida(destino))
                 .ToList();
         }
@@ -260,7 +297,7 @@ namespace BLL
             return (noDisponibles.Count == 0, noDisponibles);
         }
 
-        // PN04, CU-DEP-01 Inspeccionar Devolución: prendas EnLimpieza que volvieron de un cliente
+        // PN04, CU05-DEP Inspeccionar Devolución: prendas EnLimpieza que volvieron de un cliente
         // (mantenimiento abierto por la devolución), pendientes de resolución: reingresan sin cargo o
         // se dan de baja con cargo al último cliente. Las que entraron a limpieza en el depósito no
         // están acá: no hay a quién cobrarle.

@@ -5,7 +5,7 @@ namespace GUI
     /// <summary>
     /// Paleta y tokens visuales centralizados de WardrobeFlow (rediseño UX/UI — hallazgo #4:
     /// antes cada formulario repetía <c>Color.FromArgb(...)</c> suelto; algunos incluso
-    /// definían sus propias constantes locales, como <c>AdministracionUsuariosForm.RosaPrimario</c>).
+    /// definían sus propias constantes locales, como la vieja <c>AdministracionUsuariosForm.RosaPrimario</c>, hoy pestaña de <c>Usuarios</c>).
     /// Los valores son los mismos que ya estaban en uso — no se inventó paleta nueva, solo se
     /// les dio un único lugar de origen. Los formularios existentes se migran de a poco;
     /// todo control nuevo debería usar esta clase en vez de un literal.

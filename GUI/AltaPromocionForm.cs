@@ -125,7 +125,11 @@ namespace GUI
                         SeleccionarPlan(_sugerenciaOrigen.IdPlan.Value, _sugerenciaOrigen.NombrePlan);
                     cmbPlan.Enabled = false;
                     cmbTipoDescuento.SelectedItem = _sugerenciaOrigen.TipoDescuentoSugerido;
-                    numValor.Value = Math.Min(numValor.Maximum, _sugerenciaOrigen.ValorInicialPromocion());
+                    decimal? precioPlan = _sugerenciaOrigen.AplicaAPlan()
+                        ? _planes.Find(p => p.IdPlan == _sugerenciaOrigen.IdPlan.Value)?.Precio
+                        : null;
+                    numValor.Value = Math.Max(numValor.Minimum,
+                        Math.Min(numValor.Maximum, _sugerenciaOrigen.ValorInicialPromocion(precioPlan)));
                 }
                 else
                 {

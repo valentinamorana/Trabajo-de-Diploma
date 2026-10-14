@@ -91,7 +91,7 @@ namespace BLL
             if (clientesActivos > 0)
                 throw new BE.AppException("err.bll.plan.tiene_clientes",
                     "No se puede desactivar el plan: tiene {0} cliente(s) activo(s) asignado(s). " +
-                    "Reasignalos a otro plan antes de desactivarlo.",
+                    "Reasígnelos a otro plan antes de desactivarlo.",
                     clientesActivos);
 
             dalPlan.Desactivar(idPlan);

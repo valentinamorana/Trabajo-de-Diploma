@@ -46,30 +46,24 @@ namespace DAL
 
         // Inserta un nuevo usuario con contraseña hasheada y rol asignado.
         // Estado=1 (activo) e IntentosFallidos=0 por defecto al crear.
-        // Después del INSERT calcula y persiste el DVH de la nueva fila.
+        // El INSERT y el DVH/DVV de la nueva fila van en la misma transacción.
         public void Alta(string username, string clave, string perfil)
         {
             try
             {
-                SqlParameter[] parametros = new SqlParameter[]
-                {
-                    new SqlParameter("@username", username),
-                    new SqlParameter("@clave",    clave),
-                    new SqlParameter("@perfil",   perfil),
-                    new SqlParameter("@rol",      perfil)
-                };
-                acceso.Escribir(
-                    "INSERT INTO Usuario (Username, Clave, Rol, Estado, Perfil, IntentosFallidos) " +
-                    "VALUES (@username, @clave, @rol, 1, @perfil, 0)",
-                    parametros);
-
-                BE.Usuario nuevo = ObtenerPorUsername(username);
-                if (nuevo != null)
+                EscribirConDV((cn, tx) =>
                 {
                     // Clave generada por el sistema → el usuario debe cambiarla en su primer login.
-                    SetRequiereCambioClave(nuevo.Id, true);
-                    RecalcularDVH(nuevo.Id);
-                }
+                    var dt = DigitoVerificador.LeerEnTx(cn, tx,
+                        "INSERT INTO Usuario (Username, Clave, Rol, Estado, Perfil, IntentosFallidos, RequiereCambioClave) " +
+                        "OUTPUT inserted.IdUsuario " +
+                        "VALUES (@username, @clave, @rol, 1, @perfil, 0, 1)",
+                        new SqlParameter("@username", username),
+                        new SqlParameter("@clave",    clave),
+                        new SqlParameter("@perfil",   perfil),
+                        new SqlParameter("@rol",      perfil));
+                    return IdsDe(dt);
+                });
             }
             catch (Exception ex)
             {
@@ -148,12 +142,10 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
+                EscribirConDV(idUsuario,
                     "UPDATE Usuario SET Estado = 0, FechaBloqueo = GETDATE(), " +
                     "       CantidadBloqueos = ISNULL(CantidadBloqueos, 0) + 1 " +
-                    "WHERE IdUsuario = @idUsuario",
-                    new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                RecalcularDVH(idUsuario);
+                    "WHERE IdUsuario = @id");
             }
             catch (Exception ex)
             {
@@ -167,11 +159,9 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
+                EscribirConDV(idUsuario,
                     "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0, FechaBloqueo = NULL " +
-                    "WHERE IdUsuario = @idUsuario",
-                    new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                RecalcularDVH(idUsuario);
+                    "WHERE IdUsuario = @id");
             }
             catch (Exception ex)
             {
@@ -186,11 +176,9 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
+                EscribirConDV(idUsuario,
                     "UPDATE Usuario SET Estado = 1, IntentosFallidos = 0, " +
-                    "       CantidadBloqueos = 0, FechaBloqueo = NULL WHERE IdUsuario = @idUsuario",
-                    new SqlParameter[] { new SqlParameter("@idUsuario", idUsuario) });
-                RecalcularDVH(idUsuario);
+                    "       CantidadBloqueos = 0, FechaBloqueo = NULL WHERE IdUsuario = @id");
             }
             catch (Exception ex)
             {
@@ -240,34 +228,40 @@ namespace DAL
         // El contador persiste en BD: sobrevive reinicios de la aplicación.
         public int? IncrementarIntentosFallidos(string username)
         {
-            DataTable t = acceso.Leer(
-                "UPDATE Usuario SET IntentosFallidos = ISNULL(IntentosFallidos, 0) + 1 " +
-                "OUTPUT inserted.IdUsuario, inserted.IntentosFallidos " +
-                "WHERE Username = @username AND Activo = 1",
-                new SqlParameter[] { new SqlParameter("@username", username ?? string.Empty) });
-            if (t == null || t.Rows.Count == 0) return null;
-            // T07 — IntentosFallidos forma parte del DVH: recalcular para no dejar la
-            // fila "corrupta" y bloquear la app en el próximo arranque.
-            RecalcularDVH(Convert.ToInt32(t.Rows[0]["IdUsuario"]));
-            return Convert.ToInt32(t.Rows[0]["IntentosFallidos"]);
+            int? intentos = null;
+            // T07 — IntentosFallidos forma parte del DVH: el incremento y el DVH/DVV van juntos,
+            // para no dejar la fila "corrupta" y bloquear la app en el próximo arranque.
+            EscribirConDV((cn, tx) =>
+            {
+                var t = DigitoVerificador.LeerEnTx(cn, tx,
+                    "UPDATE Usuario SET IntentosFallidos = ISNULL(IntentosFallidos, 0) + 1 " +
+                    "OUTPUT inserted.IdUsuario, inserted.IntentosFallidos " +
+                    "WHERE Username = @username AND Activo = 1",
+                    new SqlParameter("@username", username ?? string.Empty));
+                if (t.Rows.Count > 0) intentos = Convert.ToInt32(t.Rows[0]["IntentosFallidos"]);
+                return IdsDe(t);
+            });
+            return intentos;
         }
 
-        // Resetea a 0 el contador de intentos fallidos para el username dado.
-        // Se llama tras un login exitoso.
+        // Tras un login exitoso: resetea a 0 el contador de intentos fallidos Y la escala del
+        // bloqueo progresivo (CantidadBloqueos). La escala cuenta bloqueos CONSECUTIVOS: si el
+        // dueño de la cuenta vuelve a entrar con su clave, el próximo bloqueo arranca de nuevo en
+        // 1 min. Sin este reset, al 5.º bloqueo de toda la vida de la cuenta quedaba permanente.
         public void ResetearIntentosFallidos(string username)
         {
             try
             {
-                DataTable t = acceso.Leer(
-                    "UPDATE Usuario SET IntentosFallidos = 0 OUTPUT inserted.IdUsuario " +
-                    "WHERE Username = @username AND IntentosFallidos <> 0",
-                    new SqlParameter[] { new SqlParameter("@username", username ?? string.Empty) });
-                // T07 — IntentosFallidos forma parte del DVH: recalcular tras el reset.
-                if (t != null)
-                    foreach (DataRow r in t.Rows) RecalcularDVH(Convert.ToInt32(r["IdUsuario"]));
+                EscribirConDV((cn, tx) => IdsDe(DigitoVerificador.LeerEnTx(cn, tx,
+                    "UPDATE Usuario SET IntentosFallidos = 0, CantidadBloqueos = 0 OUTPUT inserted.IdUsuario " +
+                    "WHERE Username = @username AND Activo = 1 " +
+                    "  AND (ISNULL(IntentosFallidos, 0) <> 0 OR ISNULL(CantidadBloqueos, 0) <> 0)",
+                    new SqlParameter("@username", username ?? string.Empty))));
             }
             catch (Exception ex)
             {
+                // La transacción ya se revirtió (fila y DV intactos): solo queda el contador sin
+                // resetear, lo que no justifica rechazar un login válido.
                 System.Diagnostics.Trace.TraceError($"[DAL.Usuario.ResetearIntentosFallidos] {ex.Message}");
             }
         }
@@ -275,24 +269,19 @@ namespace DAL
         // Aplica el snapshot de una versión histórica a la fila activa del usuario.
         // SOLO restaura datos administrativos NO sensibles (username/nombre/apellido/fecha nac./email);
         // la contraseña y el estado de bloqueo NUNCA se revierten (no hay rollback de credenciales).
-        // El Username forma parte del DVH → recalcular tras el UPDATE.
+        // El Username forma parte del DVH → se recalcula en la misma transacción del UPDATE.
         public void RestaurarVersion(BE.VersionUsuario v)
         {
             try
             {
-                acceso.Escribir(
+                EscribirConDV(v.IdUsuario,
                     "UPDATE Usuario SET Username = @Username, Nombre = @Nombre, Apellido = @Apellido, " +
-                    "       FechaNacimiento = @FechaNac, Email = @Email WHERE IdUsuario = @Id",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@Username", (object)v.UsernameSnapshot ?? DBNull.Value),
-                        new SqlParameter("@Nombre",   (object)v.NombreSnapshot   ?? DBNull.Value),
-                        new SqlParameter("@Apellido", (object)v.ApellidoSnapshot ?? DBNull.Value),
-                        new SqlParameter("@FechaNac", (object)v.FechaNacSnapshot ?? DBNull.Value),
-                        new SqlParameter("@Email",    (object)v.EmailSnapshot    ?? DBNull.Value),
-                        new SqlParameter("@Id",       v.IdUsuario)
-                    });
-                RecalcularDVH(v.IdUsuario);
+                    "       FechaNacimiento = @FechaNac, Email = @Email WHERE IdUsuario = @id",
+                    new SqlParameter("@Username", (object)v.UsernameSnapshot ?? DBNull.Value),
+                    new SqlParameter("@Nombre",   (object)v.NombreSnapshot   ?? DBNull.Value),
+                    new SqlParameter("@Apellido", (object)v.ApellidoSnapshot ?? DBNull.Value),
+                    new SqlParameter("@FechaNac", (object)v.FechaNacSnapshot ?? DBNull.Value),
+                    new SqlParameter("@Email",    (object)v.EmailSnapshot    ?? DBNull.Value));
             }
             catch (Exception ex)
             {
@@ -305,16 +294,10 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
-                    "UPDATE Usuario SET Clave = @clave WHERE IdUsuario = @idUsuario",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@clave",     claveHasheada),
-                        new SqlParameter("@idUsuario", idUsuario)
-                    });
                 // Clave reseteada por un admin → el usuario debe cambiarla en su próximo login.
-                SetRequiereCambioClave(idUsuario, true);
-                RecalcularDVH(idUsuario);
+                EscribirConDV(idUsuario,
+                    "UPDATE Usuario SET Clave = @clave, RequiereCambioClave = 1 WHERE IdUsuario = @id",
+                    new SqlParameter("@clave", claveHasheada));
             }
             catch (Exception ex)
             {
@@ -330,16 +313,10 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
-                    "UPDATE Usuario SET Clave = @clave WHERE IdUsuario = @idUsuario",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@clave",     claveHasheada),
-                        new SqlParameter("@idUsuario", idUsuario)
-                    });
                 // El usuario ya eligió su propia clave → deja de ser temporal.
-                SetRequiereCambioClave(idUsuario, false);
-                RecalcularDVH(idUsuario);
+                EscribirConDV(idUsuario,
+                    "UPDATE Usuario SET Clave = @clave, RequiereCambioClave = 0 WHERE IdUsuario = @id",
+                    new SqlParameter("@clave", claveHasheada));
             }
             catch (Exception ex)
             {
@@ -349,25 +326,20 @@ namespace DAL
 
         // ABM — Modifica los datos administrativos NO sensibles de un usuario (nombre, apellido,
         // username, fecha de nacimiento, email). El Username forma parte del DVH, por lo que se
-        // recalcula tras el UPDATE para no dejar la fila marcada como corrupta.
+        // recalcula en la misma transacción para no dejar la fila marcada como corrupta.
         public void Modificar(int idUsuario, string nombre, string apellido, string username,
                               DateTime? fechaNacimiento, string email)
         {
             try
             {
-                acceso.Escribir(
+                EscribirConDV(idUsuario,
                     "UPDATE Usuario SET Username = @username, Nombre = @nombre, Apellido = @apellido, " +
                     "       FechaNacimiento = @fechaNac, Email = @email WHERE IdUsuario = @id",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@username", (object)username ?? DBNull.Value),
-                        new SqlParameter("@nombre",   (object)nombre   ?? DBNull.Value),
-                        new SqlParameter("@apellido", (object)apellido ?? DBNull.Value),
-                        new SqlParameter("@fechaNac", (object)fechaNacimiento ?? DBNull.Value),
-                        new SqlParameter("@email",    (object)email    ?? DBNull.Value),
-                        new SqlParameter("@id",       idUsuario)
-                    });
-                RecalcularDVH(idUsuario);
+                    new SqlParameter("@username", (object)username ?? DBNull.Value),
+                    new SqlParameter("@nombre",   (object)nombre   ?? DBNull.Value),
+                    new SqlParameter("@apellido", (object)apellido ?? DBNull.Value),
+                    new SqlParameter("@fechaNac", (object)fechaNacimiento ?? DBNull.Value),
+                    new SqlParameter("@email",    (object)email    ?? DBNull.Value));
             }
             catch (Exception ex)
             {
@@ -380,32 +352,14 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
+                EscribirConDV(idUsuario,
                     "UPDATE Usuario SET Rol = @rol, Perfil = @rol WHERE IdUsuario = @id",
-                    new SqlParameter[]
-                    {
-                        new SqlParameter("@rol", (object)rol ?? DBNull.Value),
-                        new SqlParameter("@id",  idUsuario)
-                    });
-                RecalcularDVH(idUsuario);
+                    new SqlParameter("@rol", (object)rol ?? DBNull.Value));
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error al cambiar el rol del usuario ID {idUsuario}.", ex);
             }
-        }
-
-        // Marca/desmarca el flag de cambio obligatorio para un usuario. Desde el formato 2 de DV
-        // el flag SÍ entra al DVH: todos los llamadores recalculan el DVH después.
-        private void SetRequiereCambioClave(int idUsuario, bool requiere)
-        {
-            acceso.Escribir(
-                "UPDATE Usuario SET RequiereCambioClave = @r WHERE IdUsuario = @id",
-                new SqlParameter[]
-                {
-                    new SqlParameter("@r",  SqlDbType.Bit) { Value = requiere },
-                    new SqlParameter("@id", idUsuario)
-                });
         }
 
         public override BE.Usuario ObtenerPorId(int idUsuario)
@@ -451,46 +405,78 @@ namespace DAL
             }
         }
 
-        // T07 — Recalcula SOLO el DVH de la fila del usuario y el DVV de la tabla a partir de los
-        // DVH ALMACENADOS, con el bloqueo del DV tomado (DigitoVerificador.EjecutarConBloqueo).
-        // Antes se recalculaba el DVV con todos los DVH, lo que no lavaba filas ajenas, pero el
-        // recálculo no estaba serializado: dos escrituras simultáneas podían pisarse el DVV.
-        // Se llama después de cualquier operación de escritura sobre un usuario.
-        private void RecalcularDVH(int idUsuario)
-        {
-            try
-            {
-                BE.FilaUsuarioDV fila = null;
-                new DigitoVerificador().EjecutarConBloqueo("Usuario", (cn, tx) =>
-                {
-                    var dt = DigitoVerificador.LeerEnTx(cn, tx,
-                        DigitoVerificador.SelectFilasUsuario + " WHERE IdUsuario = @id",
-                        new SqlParameter("@id", idUsuario));
-                    if (dt.Rows.Count > 0)
-                    {
-                        fila = DigitoVerificador.MapearFilaUsuario(dt.Rows[0]);
-                        int dvh = Seguridad.CalculadorDV.Crear().CalcularDVH(fila.CamposParaDVH());
-                        using (var cmd = new SqlCommand("UPDATE Usuario SET DVH = @dvh WHERE IdUsuario = @id", cn, tx))
-                        {
-                            cmd.Parameters.AddWithValue("@dvh", dvh);
-                            cmd.Parameters.AddWithValue("@id", idUsuario);
-                            cmd.ExecuteNonQuery();
-                        }
-                        fila.DVHAlmacenado = dvh;
-                    }
-                    DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, "Usuario", "IdUsuario");
-                });
+        // ── T07 — Escritura + DV + espejo en UNA transacción ─────────────────────────
+        // Antes la escritura se confirmaba sola y el DVH/DVV se recalculaba DESPUÉS, en otra
+        // transacción y tragándose los errores: si el recálculo fallaba, la fila quedaba con el DV
+        // viejo y el próximo arranque marcaba la base como manipulada (bloqueando a los no admin).
+        // Ahora: se toma el bloqueo del DV de Usuario ANTES de escribir, se escribe, se recalculan
+        // el DVH de las filas tocadas, el DVV (desde los DVH almacenados) y el espejo de
+        // integridad, y recién ahí se confirma. Si algo falla se revierte todo y el error se propaga.
 
-                // T07 — Espejo de integridad: registrar el nuevo estado legítimo de esta fila
-                // (o quitarla si el usuario se eliminó físicamente).
-                var espejo = new EspejoUsuario();
-                if (fila != null) espejo.Upsert(fila);
-                else espejo.Eliminar(idUsuario);
-            }
-            catch (Exception ex)
+        // Variante general: 'escritura' devuelve los IdUsuario de las filas que tocó.
+        private void EscribirConDV(Func<SqlConnection, SqlTransaction, IEnumerable<int>> escritura)
+        {
+            acceso.EjecutarTransaccion((cn, tx) =>
             {
-                System.Diagnostics.Trace.TraceError($"[DAL.Usuario.RecalcularDVH] {ex.Message}");
+                DigitoVerificador.Bloquear(cn, tx, "Usuario");
+                ActualizarDVEnTx(cn, tx, escritura(cn, tx));
+            });
+        }
+
+        // Variante para un UPDATE sobre una sola fila: el SQL usa @id para el IdUsuario.
+        private void EscribirConDV(int idUsuario, string sql, params SqlParameter[] parametros)
+        {
+            EscribirConDV((cn, tx) =>
+            {
+                using (var cmd = new SqlCommand(sql, cn, tx))
+                {
+                    cmd.Parameters.AddRange(parametros);
+                    cmd.Parameters.AddWithValue("@id", idUsuario);
+                    cmd.ExecuteNonQuery();
+                }
+                return new[] { idUsuario };
+            });
+        }
+
+        // Ids devueltos por un OUTPUT inserted.IdUsuario.
+        private static List<int> IdsDe(DataTable dt)
+        {
+            var ids = new List<int>();
+            foreach (DataRow r in dt.Rows) ids.Add(Convert.ToInt32(r["IdUsuario"]));
+            return ids;
+        }
+
+        // Recalcula el DVH de cada fila indicada (si todavía existe), sincroniza el espejo (upsert,
+        // o lo quita si la fila se eliminó) y el DVV desde los DVH ALMACENADOS. Debe correr con el
+        // bloqueo del DV de Usuario tomado. Sin filas, no hace nada.
+        private static void ActualizarDVEnTx(SqlConnection cn, SqlTransaction tx, IEnumerable<int> ids)
+        {
+            bool alguna = false;
+            var svc = Seguridad.CalculadorDV.Crear();
+            foreach (int id in new HashSet<int>(ids ?? new int[0]))
+            {
+                alguna = true;
+                var dt = DigitoVerificador.LeerEnTx(cn, tx,
+                    DigitoVerificador.SelectFilasUsuario + " WHERE IdUsuario = @id",
+                    new SqlParameter("@id", id));
+                if (dt.Rows.Count == 0)
+                {
+                    EspejoUsuario.EliminarEnTx(cn, tx, id);
+                    continue;
+                }
+                var fila = DigitoVerificador.MapearFilaUsuario(dt.Rows[0]);
+                int dvh = svc.CalcularDVH(fila.CamposParaDVH());
+                using (var cmd = new SqlCommand("UPDATE Usuario SET DVH = @dvh WHERE IdUsuario = @id", cn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@dvh", dvh);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+                fila.DVHAlmacenado = dvh;
+                EspejoUsuario.UpsertEnTx(cn, tx, fila);
             }
+            if (alguna)
+                DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(cn, tx, "Usuario", "IdUsuario");
         }
 
         // Lista los usuarios ACTIVOS del sistema (sin contraseña). RF-10: los archivados
@@ -561,11 +547,9 @@ namespace DAL
         {
             try
             {
-                acceso.Escribir(
+                EscribirConDV(idUsuario,
                     "UPDATE Usuario SET Activo = 0, FechaBaja = GETDATE(), Estado = 0 " +
-                    "WHERE IdUsuario = @id",
-                    new SqlParameter[] { new SqlParameter("@id", idUsuario) });
-                RecalcularDVH(idUsuario);
+                    "WHERE IdUsuario = @id");
             }
             catch (Exception ex)
             {
@@ -575,7 +559,9 @@ namespace DAL
 
         // RF-10 — Eliminación FÍSICA con limpieza de FKs, en una transacción atómica.
         // Desvincula la bitácora (conserva los registros con usuario NULL), borra el historial
-        // propio del usuario y elimina la fila. Luego recalcula DVH/DVV de toda la tabla.
+        // propio del usuario y elimina la fila. En la MISMA transacción recalcula el DVV de Usuario
+        // (y quita la fila del espejo) y el DVH/DVV de los Empleados desvinculados.
+        // Orden de bloqueos del DV: primero Usuario, después Empleado (siempre en ese orden).
         public void EliminarFisico(int idUsuario)
         {
             try
@@ -583,6 +569,8 @@ namespace DAL
                 var empleadosDesvinculados = new List<int>();
                 acceso.EjecutarTransaccion((conn, tx) =>
                 {
+                    DigitoVerificador.Bloquear(conn, tx, "Usuario");
+                    DigitoVerificador.Bloquear(conn, tx, Empleado.DV_Tabla);
                     using (var cmd = new SqlCommand("SELECT IdEmpleado FROM Empleado WHERE IdUsuario = @id", conn, tx))
                     {
                         cmd.Parameters.AddWithValue("@id", idUsuario);
@@ -605,13 +593,13 @@ namespace DAL
                     // El historial de versiones del usuario se va con el usuario (FK NOT NULL).
                     Exec("DELETE FROM HistorialUsuario WHERE IdUsuario = @id");
                     Exec("DELETE FROM Usuario WHERE IdUsuario = @id");
-                });
 
-                // La fila ya no existe: solo cambia el DVV (desde los DVH almacenados) y se quita
-                // del espejo. Los Empleados desvinculados cambian su DVH (IdUsuario entra al cálculo).
-                RecalcularDVH(idUsuario);
-                foreach (int idEmp in empleadosDesvinculados)
-                    new Empleado().ActualizarDV(idEmp);
+                    // La fila ya no existe: solo cambia el DVV (desde los DVH almacenados) y se quita
+                    // del espejo. Los Empleados desvinculados cambian su DVH (IdUsuario entra al cálculo).
+                    ActualizarDVEnTx(conn, tx, new[] { idUsuario });
+                    DigitoVerificador.ActualizarFilasYDVVEnTx(conn, tx, Empleado.DV_Tabla, Empleado.DV_Pk,
+                                                              Empleado.DV_Columnas, empleadosDesvinculados);
+                });
             }
             catch (Exception ex)
             {

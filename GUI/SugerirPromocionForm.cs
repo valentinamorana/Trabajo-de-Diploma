@@ -91,6 +91,15 @@ namespace GUI
         private void MostrarOrigen()
         {
             lblOrigen.Text = Tr("promocion.origenactual", "Origen de la sugerencia: {0}", new object[] { Docs.Origen(_origen) });
+            ActualizarBeneficio(this, EventArgs.Empty);
+        }
+
+        // Beneficio estimado = ingreso mensual en riesgo × tasa de retención / 100 (lo calcula BE, igual
+        // que la BLL al registrar la sugerencia).
+        private void ActualizarBeneficio(object sender, EventArgs e)
+        {
+            decimal beneficio = BE.SugerenciaPromocion.CalcularBeneficio(numIngresoEnRiesgo.Value, numTasaRetencion.Value);
+            lblBeneficioCalculado.Text = $"{Tr("promocion.beneficioestimado", "Beneficio est.:")} {beneficio:C2}";
         }
 
         private void TraducirHeaders()
@@ -104,6 +113,7 @@ namespace GUI
             RH("Aplica a", "col.promo.aplicaa", "Aplica a");
             RH("Origen", "col.promo.origen", "Origen");
             RH("Beneficio Est.", "col.promo.beneficioest", "Beneficio Est.");
+            RH("Retención %", "col.promo.tasaretencion", "Retención %");
             RH("Estado", "col.promo.estado", "Estado");
         }
 
@@ -149,7 +159,8 @@ namespace GUI
             // Solo las oportunidades por plan: las por categoría quedan en el reporte como dato.
             cmbPlan.SelectedValue = elegida.IdPlan;
             cmbTipoDescuento.SelectedItem = elegida.TipoSugerido;
-            numBeneficioEstimado.Value = Math.Min(numBeneficioEstimado.Maximum, elegida.BeneficioEstimado);
+            numIngresoEnRiesgo.Value = Math.Min(numIngresoEnRiesgo.Maximum, elegida.IngresoMensualEnRiesgo);
+            numTasaRetencion.Value = Math.Min(numTasaRetencion.Maximum, Math.Max(numTasaRetencion.Minimum, elegida.TasaRetencion));
             txtMotivo.Text = elegida.ClaveMotivo != null
                 ? Tr(elegida.ClaveMotivo, elegida.Motivo, elegida.ArgsMotivo)
                 : elegida.Motivo;
@@ -229,7 +240,7 @@ namespace GUI
                 var tipo = (BE.TipoDescuento)cmbTipoDescuento.SelectedItem;
 
                 id = sugerenciaBLL.RegistrarSugerencia(this.Text, _origen, idPlan, txtMotivo.Text,
-                                                      tipo, numBeneficioEstimado.Value);
+                                                      tipo, numIngresoEnRiesgo.Value, numTasaRetencion.Value);
                 MostrarOk(Tr("msg.sugerencia.enviada", "Sugerencia #{0} enviada a Administración.", new object[] { id }));
                 txtMotivo.Clear();
                 _origen = BE.OrigenMetrica.Manual;
@@ -253,11 +264,12 @@ namespace GUI
                 tabla.Columns.Add("Aplica a", typeof(string));
                 tabla.Columns.Add("Origen", typeof(string));
                 tabla.Columns.Add("Beneficio Est.", typeof(decimal));
+                tabla.Columns.Add("Retención %", typeof(decimal));
                 tabla.Columns.Add("Estado", typeof(string));
                 foreach (var s in _sugerencias)
                     tabla.Rows.Add(s.IdSugerencia, s.FechaAlta.ToString("d"),
                         Docs.AplicaA(s.IdPlan, s.NombrePlan), Docs.Origen(s.OrigenMetrica),
-                        s.BeneficioEstimado, Docs.EstadoSugerencia(s.Estado));
+                        s.BeneficioEstimado, s.TasaRetencion, Docs.EstadoSugerencia(s.Estado));
                 dgvSugerencias.DataSource = tabla;
                 if (dgvSugerencias.Columns.Contains("ID")) dgvSugerencias.Columns["ID"].Width = 44;
                 TraducirHeaders();

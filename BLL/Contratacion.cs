@@ -226,7 +226,35 @@ namespace BLL
         public List<BE.Contratacion> ObtenerPendientesDePago()
         {
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
-            return dalContratacion.ObtenerPendientesDePago();
+            var pendientes = dalContratacion.ObtenerPendientesDePago();
+            int? idEmpleado = EmpleadoEnSesion();
+            foreach (var c in pendientes)
+                c.UsuarioPuedeCobrar = PuedeCobrar(c, idEmpleado);
+            return pendientes;
+        }
+
+        // Guarda de la separación de funciones para la pantalla: ¿el usuario en sesión puede resolver
+        // (cobrar, registrar un intento fallido o anular) esta contratación? No, si la registró él.
+        // Excepción: el Administrador puede hacer las dos cosas (decisión de la alumna).
+        private static bool PuedeCobrar(BE.Contratacion contratacion, int? idEmpleado)
+        {
+            if (contratacion == null || !Seguridad.SessionManager.IsLoggedIn) return false;
+            if (Sesion.Usuario?.EsAdministrador ?? false) return true;
+            return idEmpleado.HasValue && contratacion.PuedeResolverla(idEmpleado.Value);
+        }
+
+        private int? EmpleadoEnSesion()
+        {
+            if (!Seguridad.SessionManager.IsLoggedIn) return null;
+            return dalEmpleado.ObtenerPorUsuario(Seguridad.SessionManager.GetInstance().Usuario.Id)?.IdEmpleado;
+        }
+
+        // Misma guarda en la BLL (la pantalla puede estar desactualizada): quien registró la
+        // contratación no la resuelve en Caja, salvo el Administrador.
+        private static void ExigirQueNoLaRegistro(BE.Contratacion actual, int idCaja, string clave, string mensaje)
+        {
+            if (!actual.PuedeResolverla(idCaja) && !(Sesion.Usuario?.EsAdministrador ?? false))
+                throw new BE.AppException(clave, mensaje);
         }
 
         // Cantidad de contrataciones en la cola de Caja (panel de alertas, común a todos los roles).
@@ -351,9 +379,8 @@ namespace BLL
             int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
             // Separación de funciones POR PERSONA: quien vendió la contratación no puede cobrarla.
             // Excepción: el Administrador puede hacer las dos cosas (decisión de la alumna).
-            if (idCaja == actual.IdVendedor && !(Sesion.Usuario?.EsAdministrador ?? false))
-                throw new BE.AppException("err.bll.contratacion.cobra_el_vendedor",
-                    "Quien registró la contratación no puede cobrarla: el cobro lo confirma otra persona de Caja.");
+            ExigirQueNoLaRegistro(actual, idCaja, "err.bll.contratacion.cobra_el_vendedor",
+                "Quien registró la contratación no puede cobrarla: el cobro lo confirma otra persona de Caja.");
             var descuento = ResolverDescuento(actual, plan, cliente, ObtenerPromocionesVigentes());
             // PN04: los cargos por daño o pérdida pendientes se cobran junto con el período (igual que
             // el cobro de N01); se liquidan en la misma transacción del cobro.
@@ -364,7 +391,7 @@ namespace BLL
             // se consumió el crédito, apareció un cargo), no se cobra un monto distinto del confirmado.
             if (importeConfirmado.HasValue && totalACobrar != importeConfirmado.Value)
                 throw new BE.AppException("err.bll.contratacion.importe_cambiado",
-                    "El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Volvé a calcular el importe y confirmá de nuevo.",
+                    "El importe a cobrar cambió desde la liquidación ({0:C2} → {1:C2}). Vuelva a calcular el importe y confirme de nuevo.",
                     importeConfirmado.Value, totalACobrar);
 
             // "Calcular recargo y valor de cuota" («Detalle de financiación»): el recargo se suma al total
@@ -381,7 +408,7 @@ namespace BLL
                     planCuotas?.IdPlanCuotas, planCuotas != null ? financiacion.Recargo : (decimal?)null,
                     descuento.CreditoCambioPlan > 0 ? descuento.CreditoCambioPlan : (decimal?)null, idsCargo))
                 throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
-                    "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
+                    "Otra sesión de Caja ya resolvió esta contratación. Actualice la cola de Caja.");
 
             // "¿Referido?": el beneficio se acredita una sola vez, al activar la suscripción del referido.
             BE.Cliente referente = null;
@@ -483,17 +510,20 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.cobrar_estado",
                     "Solo se pueden registrar intentos sobre contrataciones Pendientes de pago. Esta contratación está '{0}'.",
                     actual.Estado);
+            int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
+            ExigirQueNoLaRegistro(actual, idCaja, "err.bll.contratacion.resuelve_el_vendedor",
+                "Quien registró la contratación no puede resolverla en Caja: lo hace otra persona de Caja.");
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.contratacion.intento_sin_motivo",
-                    "Indicá el motivo por el que no se concretó el pago.");
+                    "Indique el motivo por el que no se concretó el pago.");
             ValidarLargoMotivo(motivo);
             ValidarMedioPago(idMedioPago, requerido: false);
 
             var resultado = dalContratacion.RegistrarIntentoFallido(actual.IdContratacion, idMedioPago, motivo.Trim(),
-                BLLHelper.ResolverEmpleadoActivo(dalEmpleado), BE.Contratacion.MaxIntentosPago);
+                idCaja, BE.Contratacion.MaxIntentosPago);
             if (resultado == null)
                 throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
-                    "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
+                    "Otra sesión de Caja ya resolvió esta contratación. Actualice la cola de Caja.");
 
             bitacora.Registrar(modulo,
                 $"Intento de pago fallido en Contratación #{actual.IdContratacion} — Cliente: {actual.NombreCliente} — " +
@@ -528,14 +558,17 @@ namespace BLL
                 throw new BE.AppException("err.bll.contratacion.anular_estado",
                     "Solo se pueden anular contrataciones Pendientes de pago. Esta contratación está '{0}'.",
                     actual.Estado);
+            int idCaja = BLLHelper.ResolverEmpleadoActivo(dalEmpleado);
+            ExigirQueNoLaRegistro(actual, idCaja, "err.bll.contratacion.resuelve_el_vendedor",
+                "Quien registró la contratación no puede resolverla en Caja: lo hace otra persona de Caja.");
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new BE.AppException("err.bll.contratacion.anular_sin_motivo",
-                    "Indicá el motivo por el que se anula la contratación.");
+                    "Indique el motivo por el que se anula la contratación.");
             ValidarLargoMotivo(motivo);
 
-            if (!dalContratacion.Anular(actual.IdContratacion, motivo.Trim(), BLLHelper.ResolverEmpleadoActivo(dalEmpleado)))
+            if (!dalContratacion.Anular(actual.IdContratacion, motivo.Trim(), idCaja))
                 throw new BE.AppException("err.bll.contratacion.cobrar_concurrente",
-                    "Otra sesión de Caja ya resolvió esta contratación. Actualizá la cola de Caja.");
+                    "Otra sesión de Caja ya resolvió esta contratación. Actualice la cola de Caja.");
 
             bitacora.Registrar(modulo,
                 $"Anular Contratación #{actual.IdContratacion} — Cliente: {actual.NombreCliente} — Motivo: {motivo.Trim()}",
@@ -599,7 +632,13 @@ namespace BLL
 
         private void Compensar(string modulo, BE.Contratacion actual, IList<int> idsCargo = null)
         {
-            try { dalContratacion.ReabrirPago(actual.IdContratacion, idsCargo); }
+            try
+            {
+                // false: la contratación ya no estaba Pagada y no se reabrió nada; queda un cobro sin
+                // suscripción que no se pudo deshacer, igual que si la compensación hubiera fallado.
+                if (!dalContratacion.ReabrirPago(actual.IdContratacion, idsCargo))
+                    throw new InvalidOperationException("La contratación ya no estaba Pagada.");
+            }
             catch (Exception ex)
             {
                 // Peor caso: el cobro quedó registrado y no se pudo reabrir. Se deja constancia de
@@ -616,7 +655,7 @@ namespace BLL
                 catch { /* la bitácora no puede impedir el aviso a Caja */ }
                 throw new BE.AppException("err.bll.contratacion.cobro_sin_activar",
                     "El cobro de la contratación #{0} quedó registrado pero la suscripción NO se activó. " +
-                    "Avisá al Administrador para completar el alta del plan.",
+                    "Avise al Administrador para completar el alta del plan.",
                     actual.IdContratacion);
             }
         }
@@ -626,7 +665,7 @@ namespace BLL
         {
             if (cliente != null && plan != null && cliente.StockUtilizado > plan.LimitePrendas)
                 throw new BE.AppException("err.bll.cliente.plan_insuficiente",
-                    "No se puede asignar el plan '{0}': el cliente tiene {1} prenda(s) en uso y ese plan solo permite {2}. Registrá las devoluciones primero.",
+                    "No se puede asignar el plan '{0}': el cliente tiene {1} prenda(s) en uso y ese plan solo permite {2}. Registre las devoluciones primero.",
                     plan.Nombre, cliente.StockUtilizado, plan.LimitePrendas);
         }
 

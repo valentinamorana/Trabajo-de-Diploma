@@ -34,7 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
+    <Reference Include="System">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.dll</HintPath>
+    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -80,45 +82,22 @@
     <Compile Include="ListaEsperaForm.Designer.cs">
       <DependentUpon>ListaEsperaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="AnalisisAbandonoForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="CobroSuscripcionForm.Designer.cs">
       <DependentUpon>CobroSuscripcionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="AnalisisAbandonoForm.Designer.cs">
-      <DependentUpon>AnalisisAbandonoForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ReporteVentasVendedorForm.cs">
+    <Compile Include="AnaliticaNegocioForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ReporteVentasVendedorForm.Designer.cs">
-      <DependentUpon>ReporteVentasVendedorForm.cs</DependentUpon>
+    <Compile Include="AnaliticaNegocioForm.Designer.cs">
+      <DependentUpon>AnaliticaNegocioForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="AnalisisRotacionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AnalisisRotacionForm.Designer.cs">
-      <DependentUpon>AnalisisRotacionForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AnalisisMantenimientoForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AnalisisMantenimientoForm.Designer.cs">
-      <DependentUpon>AnalisisMantenimientoForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AnalisisEscasezForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AnalisisEscasezForm.Designer.cs">
-      <DependentUpon>AnalisisEscasezForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="RecomendacionPrendasForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="RecomendacionPrendasForm.Designer.cs">
-      <DependentUpon>RecomendacionPrendasForm.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Analitica\VistaReporteAnalitica.cs" />
+    <Compile Include="Analitica\VistaAbandono.cs" />
+    <Compile Include="Analitica\VistaVentasVendedor.cs" />
+    <Compile Include="Analitica\VistaRotacion.cs" />
+    <Compile Include="Analitica\VistaMantenimiento.cs" />
+    <Compile Include="Analitica\VistaEscasez.cs" />
+    <Compile Include="Analitica\VistaRecomendacion.cs" />
     <Compile Include="DashboardDeposito.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -140,12 +119,6 @@
     <Compile Include="GestorPermisos.Designer.cs">
       <DependentUpon>GestorPermisos.cs</DependentUpon>
     </Compile>
-    <Compile Include="AdministracionUsuariosForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AdministracionUsuariosForm.Designer.cs">
-      <DependentUpon>AdministracionUsuariosForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="InputDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -159,12 +132,6 @@
       <DependentUpon>CambioClaveObligatorioForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ManejadorSeguridad.cs" />
-    <Compile Include="ExploradorCompositeForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ExploradorCompositeForm.Designer.cs">
-      <DependentUpon>ExploradorCompositeForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Bitacora.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -91,7 +91,7 @@ namespace BLL
                 if (d.OtrasTablasCorruptas.Count > 0)
                     d.Resumen.Add("Los dígitos verificadores de otras tablas protegidas no coinciden " +
                                   "(" + string.Join(", ", d.OtrasTablasCorruptas) + "). Si los datos son legítimos (por ejemplo, cargados por script), " +
-                                  "usá \"Asumir pérdida\" para recalcularlos.");
+                                  "use \"Asumir pérdida\" para recalcularlos.");
             }
             catch (Exception ex)
             {
@@ -101,13 +101,23 @@ namespace BLL
             var actuales = dvDAL.ObtenerFilasUsuario();
             var espejo   = esp.Existe() ? esp.ObtenerFilas() : new List<BE.FilaUsuarioDV>();
 
+            return Evaluar(d, actuales, espejo, dvDAL.ObtenerDVV("Usuario"), svc);
+        }
+
+        // Núcleo puro del diagnóstico (sin BD): compara las filas actuales contra el espejo, clasifica
+        // el daño y habilita las opciones de recuperación. Separado de Diagnosticar para poder
+        // testearlo con filas armadas a mano (RecuperacionIntegridadTests).
+        internal static DiagnosticoEspejo Evaluar(DiagnosticoEspejo d, List<BE.FilaUsuarioDV> actuales,
+                                                  List<BE.FilaUsuarioDV> espejo, int? dvvAlmacenado,
+                                                  Seguridad.ICalculadorDV svc)
+        {
             d.EspejoDisponible = espejo.Count > 0;
 
             // DVV: comparar el almacenado contra el recalculado sobre los datos actuales.
             var dvhsActuales = new List<int>();
             foreach (var f in actuales) dvhsActuales.Add(svc.CalcularDVH(f.CamposParaDVH()));
             d.DvvCalculado  = svc.CalcularDVV(dvhsActuales);
-            d.DvvAlmacenado = dvDAL.ObtenerDVV("Usuario");
+            d.DvvAlmacenado = dvvAlmacenado;
             d.DvvOk         = d.DvvAlmacenado != null && d.DvvAlmacenado == d.DvvCalculado;
 
             // Sin espejo no se puede diagnosticar por campo ni reparar: solo recalcular o backup.
@@ -233,11 +243,11 @@ namespace BLL
             var d = Diagnosticar();
             if (!d.EspejoDisponible)
                 throw new BE.AppException("err.bll.espejo.no",
-                    "No hay un espejo de integridad disponible para reparar. Usá «Recalcular» o restaurá un backup.");
+                    "No hay un espejo de integridad disponible para reparar. Use «Recalcular» o restaure un backup.");
             if (!d.PuedeReparar)
                 throw new BE.AppException("err.bll.espejo.norep",
                     "El daño detectado no se puede reparar desde el espejo (hay registros eliminados físicamente). " +
-                    "Restaurá un backup para recuperarlos.");
+                    "Restaure un backup para recuperarlos.");
 
             var espejo = new DAL.EspejoUsuario().ObtenerFilas();
             var espById = espejo.ToDictionary(x => x.Id);

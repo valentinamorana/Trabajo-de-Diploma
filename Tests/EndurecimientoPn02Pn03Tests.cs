@@ -232,6 +232,28 @@ namespace Tests
             Assert.AreEqual(1, ctx.DalContratacion.ReabrirPagoVeces);
         }
 
+        [TestMethod]
+        public void ConfirmarCobro_FallaLaActivacionYLaContratacionYaNoEstabaPagada_AvisaQueElCobroQuedoSinActivar()
+        {
+            // ReabrirPago devuelve false (no reabrió nada): es el mismo peor caso que si la compensación fallara.
+            LoginComoAdministrador();
+            var ctx = new CtxCobro();
+            ctx.ClienteBLL.ActivarSuscripcionLanza = new BE.AppException("err.bll.cobro.credito_concurrente", "ya aplicado");
+            ctx.DalContratacion.ReabrirPagoResultado = false;
+            var contratacion = ctx.Pendiente();
+
+            try
+            {
+                ctx.Crear().ConfirmarCobro("Test", contratacion, 1);
+                Assert.Fail("Debía avisar que el cobro quedó sin activar.");
+            }
+            catch (BE.AppException ex)
+            {
+                Assert.AreEqual("err.bll.contratacion.cobro_sin_activar", ex.Clave);
+            }
+            Assert.AreEqual(1, ctx.DalContratacion.ReabrirPagoVeces);
+        }
+
         // ── PN03: sugerencias y promociones ──────────────────────────────────────────────
 
         private class CtxPromo

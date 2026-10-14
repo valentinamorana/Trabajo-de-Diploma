@@ -82,9 +82,9 @@ WardrobeFlow.slnx                         Solución de Visual Studio
 | PN | Proceso | Rol(es) protagonista(s) | Detalle |
 |----|---------|--------------------------|---------|
 | PN01 | Armar pedido de prendas | Vendedor / Deposito | `BLL.Pedido.ValidarPuedeArmarPedido` valida suscripción vigente, sin pausa ni suspensión, sin pedido despachado sin entregar y **cuenta desbloqueada** (sin prendas pendientes de devolución, como NUULY 4.2/4.6). El asistente lo avisa al elegir el cliente. La disponibilidad se relee por lote (`BLL.Prenda.VerificarDisponibilidad`) y la reserva es atómica (`UPDATE ... AND Estado = Disponible`) |
-| PN02 | Comercialización de la Suscripción | Vendedor (crea la contratación) / **Caja** (cobra y formaliza) | Rol `Caja` separado de Vendedor (quien vende no cobra). El cobro es un *claim* atómico (`UPDATE ... AND Estado = Pendiente`): dos sesiones de Caja no pueden cobrar la misma contratación, y si la activación falla se compensa reabriéndola. Rechaza planes dados de baja y muestra el importe con el descuento y el comprobante emitido |
-| PN03 | Métricas, Promociones y Toma de Decisiones | GerenteComercial (sugiere) / **AdministracionComercial** (crea y reformula) / **Contabilidad** (aprueba) | Circuito **reporte → sugerencia → Administración → Contabilidad → Vigente → se aplica al cobro**. Gerencia puede cargar ideas detectadas por el reporte de abandono por plan (`BLL.AnalisisPromociones`; la rotación por categoría queda como dato). Regla de NUULY (5.1): **un solo descuento por ciclo**, el mayor entre la promoción vigente del plan y el crédito por referido (`BE.PoliticaDescuento`); el crédito no usado se acumula. Las promociones son siempre por plan; Ventas pide la baja y Administración la atiende o la da de baja |
-| PN04 | Inspección de Devolución | Deposito ("Depósito") | Sin rol nuevo, sin aprobador: reingresa sin cargo o se da de baja registrando **antes** el cargo por el daño irreparable (decisión propia, a diferencia de NUULY que no cobra daños). En Limpieza → Baja solo desde la Inspección (la BLL lo exige). Al registrarse la devolución las prendas dejan de estar En Uso y la cuenta del cliente se desbloquea (PN01) |
+| PN02 | Comercialización de la Suscripción | Vendedor (crea la contratación) / **Caja** (cobra y formaliza) | Rol `Caja` separado de Vendedor (quien vende no cobra): quien registró la contratación no puede cobrarla, registrar un intento fallido ni anularla, salvo el Administrador. El cobro es un *claim* atómico (`UPDATE ... AND Estado = Pendiente`): dos sesiones de Caja no pueden cobrar la misma contratación, y si la activación falla se compensa reabriéndola en una sola transacción (`ReabrirPago`). Rechaza planes dados de baja y muestra el importe con el descuento y el comprobante emitido |
+| PN03 | Evaluar y aplicar promociones comerciales | GerenteComercial (sugiere) / **AdministracionComercial** (crea y reformula) / **Contabilidad** (aprueba) | Circuito **reporte → sugerencia → Administración → Contabilidad → Vigente → se aplica al cobro**. Gerencia puede cargar ideas detectadas por el reporte de abandono por plan (`BLL.AnalisisPromociones`; la rotación por categoría queda como dato). Regla de NUULY (5.1): **un solo descuento por ciclo**, el mayor entre la promoción vigente del plan y el crédito por referido (`BE.PoliticaDescuento`); el crédito no usado se acumula. Las promociones son siempre por plan; Ventas pide la baja y Administración la atiende o la da de baja. La sugerencia lleva el ingreso en riesgo y una **tasa de retención esperada** (30 % por defecto): el beneficio estimado es ingreso × tasa. El Reporte de métricas suma **"Resultado de las promociones"**: bajas, cambios de plan, pausas y renovaciones durante la vigencia contra el período anterior, y la retención lograda contra la esperada |
+| PN04 | Inspeccionar prendas devueltas | Deposito ("Depósito") | Sin rol nuevo, sin aprobador: reingresa sin cargo o se da de baja registrando **antes** el cargo por el daño irreparable (decisión propia, a diferencia de NUULY que no cobra daños). Una prenda devuelta solo sale de En Limpieza por la Inspección: reingreso (`ReingresarInspeccionada`) o baja con cargo; la BLL lo exige. El cambio de estado y el cierre del mantenimiento van en la misma transacción. Al registrarse la devolución las prendas dejan de estar En Uso y la cuenta del cliente se desbloquea (PN01) |
 
 ---
 
@@ -99,7 +99,7 @@ WardrobeFlow.slnx                         Solución de Visual Studio
 | PdN12 | Detección de Escasez por Talle/Categoría | GerenteInventario | — |
 | PdN13 | Recomendación de Prendas para un Cliente | Vendedor | — |
 
-Los 6 reportes son de solo lectura, con exportación a PDF/CSV (Factory Method, `GUI.Exportacion`); cada uno tiene su propia patente (`mnuAnalisisXxx`), agrupados bajo el menú "Analítica de Negocio".
+Los 6 reportes son de solo lectura, con exportación a PDF/CSV (Factory Method, `GUI.Exportacion`). Están en **un solo formulario, "Analítica de Negocio"**, con un selector que muestra solo los reportes que permiten las patentes del usuario (`mnuAnalisisXxx`, una por reporte).
 
 ---
 
@@ -126,10 +126,9 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 
 | Módulo | Descripción |
 |--------|-------------|
-| **Login / Logout** | Autenticación con bloqueo de login progresivo (1/5/15/60 min tras 3 intentos), claves de emergencia de autodesbloqueo y bloqueo de sesión en memoria |
-| **Usuarios** (operaciones de cuenta) | Alta de empleados, reset de contraseña, desbloqueo, archivado (baja lógica) y purga diferida; contraseñas generadas automáticamente (RNG criptográfico) |
-| **Administración de Usuarios** (ABM de datos) | Edición de datos administrativos no sensibles, búsqueda/filtros, cambio de rol y Historial de Cambios |
-| **Perfiles y Permisos** | Árbol Composite por rol; ABM de roles y asignación de permisos en tiempo real; mapeo de controles por patente |
+| **Login / Logout** | Autenticación con bloqueo de login progresivo (1/5/15/60 min tras 3 intentos; un ingreso exitoso reinicia la escala), claves de emergencia de autodesbloqueo y bloqueo de sesión en memoria |
+| **Administración de Usuarios** | Un solo formulario con dos pestañas. **Cuentas:** reset de contraseña, desbloqueo, archivado (baja lógica) y purga diferida. **Datos administrativos:** alta de usuarios (único lugar; contraseña generada con RNG criptográfico), edición de datos no sensibles, cambio de rol e Historial de Cambios |
+| **Perfiles y Permisos** | Pestaña **Gestión de roles** (árbol Composite por rol, ABM de roles y asignación de permisos en tiempo real) y pestaña **Vista completa** (árbol de solo lectura de todo el sistema); mapeo de controles por patente |
 | **Mi Perfil** | Preferencias de UI por usuario (idioma, tipografía, tamaño, tema, formato de fecha) |
 | **Clientes** | ABM de suscriptores con plan, vencimiento, modalidad de cobro y columna `en uso / límite`; alta activa la suscripción vía **Builder** |
 | **Prendas** | Inventario con estados (Disponible · EnUso · EnLimpieza · Baja) gestionados vía **State** |
@@ -139,17 +138,17 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 | **Renovación de Suscripción** | Verificación de vencimiento, renovación, cambio de plan o baja resueltos por una cadena de manejadores (**Chain of Responsibility**) |
 | **Cobro de Suscripción** | Detección de cobro pendiente, confirmación de pago (extiende la vigencia), período de gracia ante un pago fallido y suspensión de nuevos pedidos si el plazo vence sin regularizar — cadena de manejadores (**Chain of Responsibility**) |
 | **Bitácora** | Registro de eventos del sistema y de negocio con filtros, criticidad y exportación a PDF |
-| **Historial de Cambios** | Cambios de datos administrativos por usuario a nivel de campo, con rollback (Memento) |
+| **Historial de Cambios** | Cambios de datos administrativos por usuario a nivel de campo, con rollback (Memento); no restaura una versión cuyo nombre de usuario ya usa otro |
 | **Idiomas** | ABM de traducciones directamente en la BD |
 | **Dashboard** | Panel de control personalizado por rol, con auto-refresh y carga asíncrona |
-| **Backup / Restauración** | Copias cifradas con contraseña (`.wfbak`, AES + HMAC-SHA256, clave PBKDF2) con verificación de integridad previa |
+| **Backup / Restauración** | Copias cifradas con contraseña (`.wfbak`, AES + HMAC-SHA256, clave PBKDF2) con verificación de integridad previa; al arrancar se borran las copias sin cifrar que haya dejado un backup o una restauración interrumpidos |
 | **Reporte de Jornada** | Exportación PDF de actividad del día filtrable por rol |
 | **Diagnóstico de Integridad** | Visualización y reparación asistida de filas con DVH/DVV corruptos |
 | **Lista de Espera** *(mejora opcional)* | Un cliente se anota por una prenda `EnUso`; al liberarse, queda reservada exclusivamente para él por 48hs (visible solo para ese cliente en Nuevo Pedido) antes de volver a estar disponible para cualquiera |
 | **Nueva Contratación / Contrataciones Pendientes** *(PN02)* | Vendedor da de alta la contratación (plan + modalidad); Caja la cobra y formaliza la suscripción, o registra intentos fallidos hasta cancelarla |
 | **Promociones** *(PN03)* | Sugerir (GerenteComercial) → Gestionar/crear (AdministracionComercial) → Revisión Contable, aprobar o rechazar (Contabilidad) → consultar vigentes y sugerir baja (Vendedor) |
-| **Inspección de Devolución** *(PN04)* | Cola de prendas `EnLimpieza`: reingresa sin cargo o se da de baja cobrando el precio de reposición; también permite reportar una prenda `EnUso` como perdida sin esperar la devolución |
-| **Analítica de Negocio** *(Bloque 3, PdN8-13)* | 6 reportes de decisión comercial de solo lectura (Ventas por Vendedor, Rotación, Abandono, Mantenimiento, Escasez, Recomendación de Prendas), exportables a PDF/CSV |
+| **Inspección de Devolución** *(PN04)* | Cola de prendas `EnLimpieza` devueltas: reingresa sin cargo o se da de baja cobrando el precio de reposición. Desde Pedidos Realizados, Depósito reporta como perdida una prenda `EnUso` de un pedido entregado hace 30 días o más (compra tácita); sin la patente de stock el botón no se muestra |
+| **Analítica de Negocio** *(Bloque 3, PdN8-13)* | Un formulario con 6 reportes de decisión comercial de solo lectura (Ventas por Vendedor, Rotación, Abandono, Mantenimiento, Escasez, Recomendación de Prendas), elegidos con un selector según las patentes, exportables a PDF/CSV |
 
 ---
 
@@ -185,6 +184,7 @@ State ya entregado (PdN2/PdN4) sin tocarlo.
 | **Singleton** | `SessionManager` (sesión activa) · `ContadorSesion` (intentos de login) · `DAL.Acceso` (conexión BD) |
 | **Observer** | `GestorIdioma` (Subject) → formularios como observers — cambio de idioma dinámico en tiempo de ejecución |
 | **Composite** | `Componente` → `Patente` (hoja) / `Rol` (nodo compuesto, anidable *rol-en-rol*) — árbol de permisos con resolución recursiva, dedup y anti-ciclos |
+| **Factory Method** | `GUI.Exportacion.GeneradorReporte` (Creator, con la operación `Exportar` que usa el método fábrica `CrearExportador`) → un creador por reporte; productos `ExportadorPdf` / `ExportadorTxt` / `ExportadorCsv` |
 | **Memento** | `BE.Usuario` (Originator) + `BE.VersionUsuario` (Memento) + `BLL.CuidadorHistorial` (Caretaker) — versiona datos administrativos no sensibles y permite rollback |
 
 ---
@@ -206,8 +206,9 @@ State ya entregado (PdN2/PdN4) sin tocarlo.
 - Contraseñas nunca en texto plano: PBKDF2-SHA256 con salt aleatorio y 100.000 iteraciones; verificación en tiempo constante
 - Bloqueo de login progresivo (1 → 5 → 15 → 60 min) con claves de emergencia de un solo uso
 - Handler global de excepciones no controladas: registra el detalle técnico en bitácora y muestra un mensaje genérico al usuario
-- Dígitos verificadores (DVH por fila + DVV por tabla) sobre `Usuario`, `Cliente`, `Empleado`, `Pedido`, `Contratacion` y `PermisoRelacion`; cada escritura recalcula solo la fila afectada
+- Dígitos verificadores (DVH por fila + DVV por tabla) sobre `Usuario`, `Cliente`, `Empleado`, `Pedido`, `Contratacion` y `PermisoRelacion`; cada escritura recalcula el DVH de las filas que tocó y el DVV **en la misma transacción** (`DAL.DigitoVerificador.EscribirConDV`, con el bloqueo del DV tomado antes de escribir): si el recálculo falla se revierte la escritura, así una falla nunca deja la base marcada como manipulada
 - Backups cifrados con contraseña (AES-128 + HMAC-SHA256, clave derivada con PBKDF2) y Clave Maestra de Recuperación opcional
+- Unicidad respaldada en la base: DNI de los clientes activos, DNI, legajo y usuario de cada empleado (índices únicos filtrados), y número de operación del historial de pedidos
 - **Usuarios demo con claves fijas (decisión deliberada para la defensa):** las cuentas de `Instalador/Credenciales_Iniciales.txt` no exigen cambio de clave en el primer ingreso. En una implementación real hay que cambiar todas esas contraseñas (desde Mi Perfil, o forzando el cambio desde Administrar → Usuarios) y borrar o restringir ese archivo. Las cuentas demo solo se crean en una instalación nueva; una actualización nunca las recrea.
 - **Acceso a la base:** el instalador da al grupo local "Usuarios" de Windows el rol `db_owner` sobre `WardrobeFlowDB` (hace falta para restaurar backups desde la app). Quién puede operar lo decide el login y las patentes de la aplicación; un cambio de datos hecho por fuera de la app lo detectan los dígitos verificadores al iniciar.
 
@@ -215,7 +216,7 @@ State ya entregado (PdN2/PdN4) sin tocarlo.
 
 ## Multiidioma
 
-Soporta **Español · English · Русский · Português** con cambio dinámico en tiempo de ejecución. Las traducciones se almacenan en la tabla `Traduccion`; un corpus embebido (`traducciones.tsv`) actúa como fallback por clave.
+Soporta **Español · English · Русский · Português** con cambio dinámico en tiempo de ejecución. Las traducciones se almacenan en la tabla `Traduccion`; un corpus embebido (`traducciones.tsv`) actúa como fallback por clave y siembra las claves que falten al iniciar. La interfaz en español está **en usted** (sin voseo), igual que el instalador.
 
 ---
 
@@ -247,6 +248,7 @@ Es el único archivo de esquema que se edita. Los scripts individuales que intro
 - **Evaluar y aplicar promociones comerciales (PN03)** — sección 18 en `00`. Crea los roles `AdministracionComercial` y `Contabilidad` (Gerencia y Vendedor reusan `GerenteComercial`/`Vendedor` ya existentes); hay usuarios demo (`admcomercial`, `contable`) para probar el módulo sin dar de alta nada a mano.
 - **Inspección de Devolución (PN04)** — sección 19 en `00`. Sin rol nuevo: reusa el rol `Deposito` (el "Depósito" de PN01). Lógica alineada a Nuuly (binaria, sin aprobador): reingresa sin cargo o se da de baja cobrando el precio de reposición (`BLL.CargoPrenda.RegistrarCargo`, existente desde Bloque 1).
 - **Aplicación de promociones al cobro e integridad (PN02/PN03/PN04)** — sección 20b en `00`. Agrega `Importe`, `DescuentoAplicado` e `IdPromocion` a `Contratacion` (lo que realmente se cobró), los `CHECK` de `CargoPrenda.Monto` e `IntentosPago`, las restricciones únicas (una contratación pendiente por cliente, una anotación activa por prenda y cliente) y los índices de las tablas nuevas.
+- **Auditoría del 13/10** — secciones 20g a 20n y 21z6 en `00`: **20g** PN03 solo por plan, **20h** tasa de retención de la sugerencia, **20i** analítica en un formulario, **20j** pantallas de seguridad consolidadas, **20k** número de operación único en `PedidoHistorial`, **20n** unicidad de DNI, legajo y usuario del empleado, **21z6** textos en español en usted (solo cambia los que siguen iguales a los de fábrica).
 - **Hardening de integridad (auditoría de BD)** — sección 20 en `00`. Agrega los CHECK constraints que faltaban en columnas `Estado`/`Resultado` respaldadas por enum (`Prenda`, `Pedido`, `HistorialRenovacion`, `HistorialCobro`, `ListaEspera`, `CargoPrenda`, `Bitacora`) y los índices sobre `Prenda.Estado`/`Pedido.Estado`.
 
 ### Cadena de conexión
@@ -275,10 +277,10 @@ En el primer arranque el sistema seedea automáticamente las tablas de traduccio
 
 ### Build y tests
 
-Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`).
+Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`, 924 pruebas al 13/10/2026). Las pruebas de integración usan una base aparte, `WardrobeFlowDB_Tests` (el mismo script con ese nombre); nunca tocan `WardrobeFlowDB`.
 
 ### Generar el instalador
 
 1. Compilar la solución en modo **Release** (y `Instalador/DbInstaller` en Release).
-2. Ejecutar `Instalador/compilar-y-firmar.ps1`: descarga `Instalador/Redist/SqlLocalDB.msi` si falta (instalador oficial de SQL Server 2022 Express LocalDB, no se versiona), compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool, o con `Set-AuthenticodeSignature` si no está el Windows SDK. El certificado (`wardrobeflow.pfx`) se busca en `%USERPROFILE%` y no se versiona; si no está, el instalador queda compilado sin firmar.
-3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_1.4.0.exe` (el número sale de `MyAppVersion` del `.iss`) (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal.
+2. Ejecutar `Instalador/compilar-y-firmar.ps1`: descarga `Instalador/Redist/SqlLocalDB.msi` si falta (instalador oficial de SQL Server 2022 Express LocalDB, no se versiona), compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool, o con `Set-AuthenticodeSignature` si no está el Windows SDK. Antes de compilar corre todas las pruebas. Usa el certificado de WardrobeFlow instalado en el almacén de Windows (o `wardrobeflow.pfx` en `%USERPROFILE%`, que no se versiona); si no hay ninguno, el instalador queda sin firmar. El certificado es autofirmado: Windows puede mostrarlo como editor desconocido.
+3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_1.4.0.exe` (el número sale de `MyAppVersion` del `.iss`) (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal. Sobre una base existente, el instalador hace un backup, corre el script (que migra sin perder datos) y verifica que haya al menos un Administrador activo. La última versión publicada es la **1.4.0** (GitHub Releases, tag `v1.4.0`).

@@ -4971,6 +4971,41 @@ PRINT 'Sección 21z6: textos en español en usted verificados.';
 GO
 
 -- ============================================================
+-- WardrobeFlow — 21z7. AYUDA DE BACKUP: BACKUPS AUTOMÁTICOS
+-- ------------------------------------------------------------
+-- La ayuda en línea de la pantalla de Backup ahora explica los backups automáticos (al iniciar
+-- sesión según el intervalo configurable y cada 24 h, sin cifrar, rotando auto_domingo.bak …
+-- auto_sabado.bak). Las claves nuevas las inserta la aplicación desde traducciones.tsv; acá se
+-- actualiza ayuda.BackupForm en una base ya instalada, SOLO si sigue con el texto de fábrica
+-- anterior (una edición hecha en Idiomas se respeta). Idempotente.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @AyudaBackup TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                                TextoAnterior NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @AyudaBackup (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.BackupForm', N'Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos.',
+        N'Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos.' + NCHAR(10) + N'' + NCHAR(10) + N'Backups automáticos (sin cifrar):' + NCHAR(10) + N'• Al iniciar sesión (cualquier rol), si el último backup es más antiguo que el intervalo configurado (60 minutos por defecto; el Administrador lo cambia con "Backup automático al iniciar sesión...").' + NCHAR(10) + N'• Cada 24 horas mientras la aplicación esté abierta.' + NCHAR(10) + N'• Rotan entre auto_domingo.bak … auto_sabado.bak (uno por día de la semana) y se restauran sin contraseña.'),
+    (N'EN', N'ayuda.BackupForm', N'Create, restore and delete database backups (Administrator only). Data integrity is checked before creating a backup.',
+        N'Create, restore and delete database backups (Administrator only). Data integrity is checked before creating a backup.' + NCHAR(10) + N'' + NCHAR(10) + N'Automatic backups (unencrypted):' + NCHAR(10) + N'• At login (any role), if the last backup is older than the configured interval (60 minutes by default; the Administrator changes it with "Automatic backup at login...").' + NCHAR(10) + N'• Every 24 hours while the application is open.' + NCHAR(10) + N'• They rotate over auto_domingo.bak … auto_sabado.bak (one per day of the week) and are restored without a password.'),
+    (N'RU', N'ayuda.BackupForm', N'Создание, восстановление и удаление резервных копий базы (только администратор). Перед созданием копии проверяется целостность данных.',
+        N'Создание, восстановление и удаление резервных копий базы (только администратор). Перед созданием копии проверяется целостность данных.' + NCHAR(10) + N'' + NCHAR(10) + N'Автоматические бэкапы (без шифрования):' + NCHAR(10) + N'• При входе в систему (любая роль), если последний бэкап старше настроенного интервала (по умолчанию 60 минут; администратор меняет его кнопкой «Автоматический бэкап при входе...»).' + NCHAR(10) + N'• Каждые 24 часа, пока приложение открыто.' + NCHAR(10) + N'• Чередуются в файлах auto_domingo.bak … auto_sabado.bak (по одному на день недели) и восстанавливаются без пароля.'),
+    (N'PT', N'ayuda.BackupForm', N'Criar, restaurar e excluir cópias de segurança do banco (só Administrador). Antes de criar uma cópia, a integridade dos dados é verificada.',
+        N'Criar, restaurar e excluir cópias de segurança do banco (só Administrador). Antes de criar uma cópia, a integridade dos dados é verificada.' + NCHAR(10) + N'' + NCHAR(10) + N'Backups automáticos (sem criptografia):' + NCHAR(10) + N'• Ao iniciar sessão (qualquer função), se o último backup for mais antigo que o intervalo configurado (60 minutos por padrão; o Administrador o altera com "Backup automático ao iniciar sessão...").' + NCHAR(10) + N'• A cada 24 horas enquanto a aplicação estiver aberta.' + NCHAR(10) + N'• Alternam entre auto_domingo.bak … auto_sabado.bak (um por dia da semana) e são restaurados sem senha.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @AyudaBackup f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Ayuda de backup: ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z7: ayuda de backups automáticos verificada.';
+GO
+
+-- ============================================================
 -- WardrobeFlow — 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA
 -- ------------------------------------------------------------
 -- Formato 2 de los dígitos verificadores (DAL.DigitoVerificador.FormatoActual = 2):

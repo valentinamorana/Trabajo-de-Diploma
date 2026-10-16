@@ -709,6 +709,8 @@ namespace GUI
                 new { Es = BE.ActividadesBitacora.BackupInstalacionLimpiaPrefijo, Key = "dash.act.backupinitial" },
                 new { Es = BE.ActividadesBitacora.BackupCifradoGeneradoPrefijo,   Key = "dash.act.backupcreate"  },
                 new { Es = BE.ActividadesBitacora.BackupEliminadoPrefijo,         Key = "dash.act.backupdelete"  },
+                new { Es = BE.ActividadesBitacora.BackupAutomaticoGeneradoPrefijo, Key = "dash.act.backupauto"     },
+                new { Es = BE.ActividadesBitacora.BackupAutomaticoFallidoPrefijo,  Key = "dash.act.backupautofail" },
                 new { Es = BE.ActividadesBitacora.BaseDeDatosRestauradaPrefijo,   Key = "dash.act.dbrestore"     },
                 new { Es = BE.ActividadesBitacora.BackupSinVerificacionPrefijo,   Key = "dash.act.backupnomac"   },
                 new { Es = BE.ActividadesBitacora.DesbloqueoDeCuentaPrefijo,      Key = "dash.act.accountunlock" },
@@ -717,9 +719,20 @@ namespace GUI
             };
             foreach (var p in prefijos)
                 if (actividad.StartsWith(p.Es, StringComparison.Ordinal))
-                    return string.Format(Tr(p.Key, "{0}"), actividad.Substring(p.Es.Length));
+                    return string.Format(Tr(p.Key, "{0}"), TraducirOrigenBackup(actividad.Substring(p.Es.Length)));
 
             return actividad;   // actividad desconocida → sin traducir
+        }
+
+        // El origen de un backup automático ("(origen: Login)") viaja en español dentro de la parte
+        // variable de la actividad: se reemplaza por su traducción.
+        private string TraducirOrigenBackup(string resto)
+        {
+            return resto
+                .Replace(BE.ActividadesBitacora.SufijoOrigenBackup(BLL.OrigenBackup.Login.ToString()),
+                         Tr("dash.act.origen.login", "(origen: inicio de sesión)"))
+                .Replace(BE.ActividadesBitacora.SufijoOrigenBackup(BLL.OrigenBackup.Programado.ToString()),
+                         Tr("dash.act.origen.programado", "(origen: reloj de 24 h)"));
         }
 
         private void CargarActividadReciente()

@@ -28,6 +28,7 @@ namespace GUI
             this.btnEliminar  = new System.Windows.Forms.Button();
             this.btnExterno   = new System.Windows.Forms.Button();
             this.btnInicial   = new System.Windows.Forms.Button();
+            this.btnIntervalo = new System.Windows.Forms.Button();
             this.lblInfo      = new System.Windows.Forms.Label();
             this.pnlMain.SuspendLayout();
             this.SuspendLayout();
@@ -44,6 +45,7 @@ namespace GUI
             this.pnlMain.Controls.Add(this.btnEliminar);
             this.pnlMain.Controls.Add(this.btnExterno);
             this.pnlMain.Controls.Add(this.btnInicial);
+            this.pnlMain.Controls.Add(this.btnIntervalo);
             this.pnlMain.Controls.Add(this.lblInfo);
             this.pnlMain.Dock     = System.Windows.Forms.DockStyle.Fill;
             this.pnlMain.Name     = "pnlMain";
@@ -86,7 +88,7 @@ namespace GUI
             this.lstBackups.Location      = new System.Drawing.Point(20, 92);
             this.lstBackups.MultiSelect   = false;
             this.lstBackups.Name          = "lstBackups";
-            this.lstBackups.Size          = new System.Drawing.Size(460, 200);
+            this.lstBackups.Size          = new System.Drawing.Size(460, 186);
             this.lstBackups.TabIndex      = 3;
             this.lstBackups.View          = System.Windows.Forms.View.Details;
             this.lstBackups.Font          = new System.Drawing.Font("Segoe UI", 9F);
@@ -112,9 +114,9 @@ namespace GUI
             // ── lblConteo ────────────────────────────────────────────────────
             this.lblConteo.Font      = new System.Drawing.Font("Segoe UI", 8F);
             this.lblConteo.ForeColor = System.Drawing.Color.FromArgb(120, 100, 120);
-            this.lblConteo.Location  = new System.Drawing.Point(20, 298);
+            this.lblConteo.Location  = new System.Drawing.Point(20, 284);
             this.lblConteo.Name      = "lblConteo";
-            this.lblConteo.Size      = new System.Drawing.Size(460, 16);
+            this.lblConteo.Size      = new System.Drawing.Size(460, 32);
             this.lblConteo.TabIndex  = 4;
             this.lblConteo.Text      = "";
 
@@ -197,20 +199,35 @@ namespace GUI
             this.btnInicial.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnInicial.Click    += new System.EventHandler(this.btnInicial_Click);
 
+            // ── btnIntervalo — backup automático al iniciar sesión ───────────────
+            this.btnIntervalo.BackColor                         = System.Drawing.Color.FromArgb(230, 225, 230);
+            this.btnIntervalo.FlatStyle                         = System.Windows.Forms.FlatStyle.Flat;
+            this.btnIntervalo.FlatAppearance.BorderSize         = 0;
+            this.btnIntervalo.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(210, 205, 215);
+            this.btnIntervalo.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.btnIntervalo.ForeColor = System.Drawing.Color.FromArgb(80, 60, 80);
+            this.btnIntervalo.Location  = new System.Drawing.Point(20, 450);
+            this.btnIntervalo.Name      = "btnIntervalo";
+            this.btnIntervalo.Size      = new System.Drawing.Size(460, 30);
+            this.btnIntervalo.TabIndex  = 10;
+            this.btnIntervalo.Text      = "Backup automático al iniciar sesión...";
+            this.btnIntervalo.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnIntervalo.Click    += new System.EventHandler(this.btnIntervalo_Click);
+
             // ── lblInfo ──────────────────────────────────────────────────────
             this.lblInfo.Font      = new System.Drawing.Font("Segoe UI", 8F);
             this.lblInfo.ForeColor = System.Drawing.Color.FromArgb(140, 110, 130);
-            this.lblInfo.Location  = new System.Drawing.Point(20, 456);
+            this.lblInfo.Location  = new System.Drawing.Point(20, 490);
             this.lblInfo.Name      = "lblInfo";
             this.lblInfo.Size      = new System.Drawing.Size(460, 32);
-            this.lblInfo.TabIndex  = 10;
+            this.lblInfo.TabIndex  = 11;
             this.lblInfo.Text      = "Nota: la restauración cierra las conexiones activas y reinicia la aplicación.";
 
             // ── BackupForm ───────────────────────────────────────────────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor           = System.Drawing.Color.FromArgb(252, 250, 252);
-            this.ClientSize          = new System.Drawing.Size(500, 502);
+            this.ClientSize          = new System.Drawing.Size(500, 536);
             this.Controls.Add(this.pnlMain);
             this.FormBorderStyle     = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox         = false;
@@ -237,6 +254,7 @@ namespace GUI
         private System.Windows.Forms.Button       btnEliminar;
         private System.Windows.Forms.Button       btnExterno;
         private System.Windows.Forms.Button       btnInicial;
+        private System.Windows.Forms.Button       btnIntervalo;
         private System.Windows.Forms.Label        lblInfo;
     }
 }

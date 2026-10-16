@@ -48,6 +48,7 @@ namespace GUI
             colAutor.Text     = Tr("col.backup.autor",     "Autor");
             colTamanio.Text   = Tr("col.backup.tamanio",   "Tamaño");
             btnInicial.Text   = Tr("btn.backup.inicial",   "Backup de instalación limpia");
+            btnIntervalo.Text = Tr("btn.backup.intervalo", "Backup automático al iniciar sesión...");
         }
 
         // Carga los .bak de la carpeta Backups/ ordenados por fecha descendente (más reciente primero).
@@ -68,7 +69,9 @@ namespace GUI
 
                 var item = new ListViewItem(fi.Name) { Tag = fi.FullName };
                 item.SubItems.Add(fi.LastWriteTime.ToString("g"));
-                item.SubItems.Add(_bll.ExtraerAutorDeNombre(fi.Name));
+                item.SubItems.Add(BLL.Backup.EsAutomatico(fi.Name)
+                    ? Tr("col.backup.autor.automatico", "sistema (automático)")
+                    : _bll.ExtraerAutorDeNombre(fi.Name));
                 item.SubItems.Add(tamanio);
                 lstBackups.Items.Add(item);
             }
@@ -77,6 +80,46 @@ namespace GUI
                 ? Tr("lbl.backup.sincopias", "Sin copias de seguridad generadas aún.")
                 : string.Format(Tr("lbl.backup.conteo", "{0} copia(s) disponible(s). La más reciente: {1}"),
                     archivos.Count, archivos[0].LastWriteTime.ToString("g"));
+
+            // Reloj de 24 h: el próximo automático es el último backup + 24 h.
+            DateTime ahora   = DateTime.Now;
+            DateTime proximo = BLL.Backup.ProximoBackupProgramado(ahora);
+            lblConteo.Text += "\n" + (proximo <= ahora
+                ? Tr("lbl.backup.proximo.ya", "Próximo backup automático: en la próxima revisión (cada hora).")
+                : string.Format(Tr("lbl.backup.proximo", "Próximo backup automático: {0}"), proximo.ToString("g")));
+        }
+
+        // Intervalo del backup al iniciar sesión: minutos desde el último backup (0 = en todos los
+        // logins, máximo 1440). Los automáticos rotan en auto_<día>.bak, sin cifrar.
+        private void btnIntervalo_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new InputDialog(
+                Tr("dlg.backup.intervalo.titulo", "Backup automático al iniciar sesión"),
+                string.Format(Tr("dlg.backup.intervalo.texto",
+                    "Minutos que tienen que pasar desde el último backup para que el inicio de sesión haga otro.\n" +
+                    "0 = en todos los inicios de sesión; máximo {0}.\n\nIntervalo actual: {1} minutos."),
+                    BLL.Configuracion.IntervaloBackupLoginMaximo,
+                    BLL.Configuracion.ObtenerIntervaloBackupLoginMinutos()),
+                esPassword: false))
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                if (!int.TryParse(dlg.InputText?.Trim(), out int minutos))
+                {
+                    MessageBox.Show(Tr("dlg.backup.intervalo.invalido", "Ingrese un número entero de minutos."),
+                        Tr("msg.error.titulo", "Error"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                try
+                {
+                    BLL.Configuracion.GuardarIntervaloBackupLoginMinutos(minutos);
+                    MessageBox.Show(string.Format(Tr("dlg.backup.intervalo.ok", "Intervalo guardado: {0} minutos."), minutos),
+                        Tr("rpt.dlg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MostrarError(ex);
+                }
+            }
         }
 
         private void lstBackups_SelectedIndexChanged(object sender, EventArgs e)
@@ -328,6 +371,7 @@ namespace GUI
         {
             btnCrear.Enabled     = habilitado;
             btnInicial.Enabled   = habilitado;
+            btnIntervalo.Enabled = habilitado;
             btnExterno.Enabled   = habilitado;
             lstBackups.Enabled   = habilitado;
             bool haySeleccion    = habilitado && lstBackups.SelectedItems.Count > 0;

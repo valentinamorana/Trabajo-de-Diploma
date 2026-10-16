@@ -175,6 +175,29 @@ namespace BLL
             };
         }
 
+        // Las filas y el DVV se leen en dos consultas. Una escritura legítima (fila + DVV en la misma
+        // transacción) que confirma JUSTO entre las dos deja una lectura que no cierra aunque la base
+        // esté sana; con el reloj de backup y el timer de integridad corriendo en otro hilo eso puede
+        // pasar. Si no cierra, se vuelve a leer y comparar (hasta 3 veces, con una pausa corta): la
+        // carrera desaparece al releer, una manipulación real persiste y se informa igual que antes.
+        // Se relee sin bloquear las escrituras a propósito: tomar el bloqueo del DV mientras se lee
+        // desde otras conexiones podría trabar una escritura que toca dos tablas protegidas.
+        internal const int LecturasVerificacion = 3;
+        internal static int PausaEntreLecturasMs = 250;
+
+        internal static (List<int> Rotas, int DvvCalculado, bool DvvOk) CompararReleyendo(
+            Action releer, Func<(List<int> Rotas, int DvvCalculado, bool DvvOk)> comparar)
+        {
+            var cmp = comparar();
+            for (int i = 1; i < LecturasVerificacion && (cmp.Rotas.Count > 0 || !cmp.DvvOk); i++)
+            {
+                System.Threading.Thread.Sleep(PausaEntreLecturasMs);
+                releer();
+                cmp = comparar();
+            }
+            return cmp;
+        }
+
         // Pura (testeable): resultado de comparar los DVH almacenados con los recalculados y el DVV.
         internal static (List<int> Rotas, int DvvCalculado, bool DvvOk) Comparar(
             IList<string[]> campos, IList<int?> dvhAlmacenados, int? dvvAlmacenado, Seguridad.ICalculadorDV svc)
@@ -250,7 +273,9 @@ namespace BLL
                 }
                 else
                 {
-                    var cmp = Comparar(filas.ConvertAll(f => f.CamposParaDVH()), filas.ConvertAll(f => f.DVHAlmacenado), dvvUsuario, svc);
+                    var cmp = CompararReleyendo(
+                        () => { filas = dvDAL.ObtenerFilasUsuario(); dvvUsuario = dvDAL.ObtenerDVV("Usuario"); },
+                        () => Comparar(filas.ConvertAll(f => f.CamposParaDVH()), filas.ConvertAll(f => f.DVHAlmacenado), dvvUsuario, svc));
                     foreach (int i in cmp.Rotas) corruptas.Add($"Usuario '{filas[i].Username}' (ID {filas[i].Id})");
                     dvvUsuarioCalc = cmp.DvvCalculado;
                     dvhUsuarioOk   = cmp.Rotas.Count == 0;
@@ -322,7 +347,9 @@ namespace BLL
                 return;
             }
 
-            var cmp = Comparar(filas.ConvertAll(f => f.Campos), filas.ConvertAll(f => f.DVHAlmacenado), dvvAlm, svc);
+            var cmp = CompararReleyendo(
+                () => { filas = t.ObtenerFilas(); dvvAlm = dvDAL.ObtenerDVV(t.Nombre); },
+                () => Comparar(filas.ConvertAll(f => f.Campos), filas.ConvertAll(f => f.DVHAlmacenado), dvvAlm, svc));
             foreach (int i in cmp.Rotas) corruptas.Add(filas[i].Descripcion + " (DVH)");
             if (!cmp.DvvOk) corruptas.Add(t.Nombre + (dvvAlm.HasValue ? " (DVV)" : " (DVV ausente)"));
             int rotas = cmp.Rotas.Count + (cmp.DvvOk ? 0 : 1);
@@ -457,7 +484,9 @@ namespace BLL
                              == DAL.DigitoVerificador.FormatoActual.ToString();
 
             int? dvvAlmacenado = dvDAL.ObtenerDVV("Usuario");
-            var cmp = Comparar(filas.ConvertAll(f => f.CamposParaDVH()), filas.ConvertAll(f => f.DVHAlmacenado), dvvAlmacenado, svc);
+            var cmp = CompararReleyendo(
+                () => { filas = dvDAL.ObtenerFilasUsuario(); dvvAlmacenado = dvDAL.ObtenerDVV("Usuario"); },
+                () => Comparar(filas.ConvertAll(f => f.CamposParaDVH()), filas.ConvertAll(f => f.DVHAlmacenado), dvvAlmacenado, svc));
             var rotas = cmp.Rotas.ConvertAll(i => filas[i]);
 
             var adicionales = new List<string>();
@@ -468,7 +497,14 @@ namespace BLL
                 catch { adicionales.Add(t.Nombre); continue; }   // no se pudo leer → no íntegra
                 int? dvv = dvDAL.ObtenerDVV(t.Nombre);
                 if (CorrespondeInicializar(pendiente, dvv, ft.ConvertAll(f => f.DVHAlmacenado))) continue;
-                var c = Comparar(ft.ConvertAll(f => f.Campos), ft.ConvertAll(f => f.DVHAlmacenado), dvv, svc);
+                (List<int> Rotas, int DvvCalculado, bool DvvOk) c;
+                try
+                {
+                    c = CompararReleyendo(
+                        () => { ft = t.ObtenerFilas(); dvv = dvDAL.ObtenerDVV(t.Nombre); },
+                        () => Comparar(ft.ConvertAll(f => f.Campos), ft.ConvertAll(f => f.DVHAlmacenado), dvv, svc));
+                }
+                catch { adicionales.Add(t.Nombre); continue; }   // no se pudo releer → no íntegra
                 if (c.Rotas.Count > 0 || !c.DvvOk) adicionales.Add(t.Nombre);
             }
 
@@ -656,6 +692,45 @@ namespace BLL
                 File.WriteAllText(RutaConfigRecordatorio, dias.ToString());
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[Configuracion.GuardarDiasRecordatorio] " + ex.Message); }
+        }
+
+        // ── Intervalo del backup al iniciar sesión ────────────────────────────
+        // Minutos que tienen que pasar desde el último backup para que el login haga otro.
+        // 0 = backup en todos los logins; máximo 1440 (un día). Mismo esquema de archivo que el
+        // recordatorio, en la carpeta de backups.
+
+        private static readonly string RutaConfigIntervaloBackup =
+            Path.Combine(Backup.CarpetaBackups, "intervalo_backup_login.cfg");
+
+        public const int IntervaloBackupLoginDefault = 60;
+        public const int IntervaloBackupLoginMaximo  = 1440;
+
+        public static int ObtenerIntervaloBackupLoginMinutos()
+        {
+            try
+            {
+                if (File.Exists(RutaConfigIntervaloBackup) &&
+                    int.TryParse(File.ReadAllText(RutaConfigIntervaloBackup).Trim(), out int m) &&
+                    m >= 0 && m <= IntervaloBackupLoginMaximo)
+                    return m;
+            }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceError("[Configuracion.ObtenerIntervaloBackupLoginMinutos] " + ex.Message); }
+            return IntervaloBackupLoginDefault;
+        }
+
+        public static void GuardarIntervaloBackupLoginMinutos(int minutos)
+        {
+            BLLHelper.ExigirAdministrador("err.bll.backup.sin_permiso",
+                "Solo un Administrador puede configurar el backup automático.");
+            if (minutos < 0 || minutos > IntervaloBackupLoginMaximo)
+                throw new BE.AppException("err.bll.backup.intervalo",
+                    $"El intervalo debe estar entre 0 y {IntervaloBackupLoginMaximo} minutos.");
+            int anterior = ObtenerIntervaloBackupLoginMinutos();
+            Directory.CreateDirectory(Path.GetDirectoryName(RutaConfigIntervaloBackup));
+            File.WriteAllText(RutaConfigIntervaloBackup, minutos.ToString());
+            // Cambiar la política de backup es una acción de administración: queda en la bitácora.
+            Servicios.FabricaBitacora.CrearSistema().Registrar("Backup",
+                $"Intervalo del backup al iniciar sesión: {anterior} → {minutos} minutos", BE.Criticidad.Media);
         }
 
         // Registra silenciosamente cada verificación en HistorialIntegridad.

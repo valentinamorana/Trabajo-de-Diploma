@@ -24,7 +24,7 @@ Este repositorio parte de la base construida durante la materia Ingeniería de S
 | UI | Windows Forms (MDI) |
 | Base de datos | SQL Server |
 | Acceso a datos | ADO.NET puro (sin ORM) |
-| Encriptado | PBKDF2-SHA256 (contraseñas) · AES-128 + HMAC-SHA256 con clave PBKDF2 (backups .wfbak, encrypt-then-MAC) |
+| Encriptado | PBKDF2-SHA256 (contraseñas) · AES-128 + HMAC-SHA256 con clave PBKDF2 (backups manuales .wfbak, encrypt-then-MAC; los automáticos `auto_*.bak` van sin cifrar) |
 
 ---
 
@@ -54,13 +54,10 @@ Instalador/                               Script de Inno Setup, DbInstaller (cli
                                           y credenciales iniciales. El .exe se genera en
                                           Instalador/Salida/ y no se versiona: el instalador
                                           firmado se distribuye como GitHub Release
-Documentación y diagramas/                Documentación y modelo de Enterprise Architect:
-  NEGOCIO_Y_PROCESOS.md                   Documento de referencia: reglas y procesos de negocio, roles y arquitectura
-  MAPA_DE_NAVEGACION.md                   Mapa de menús, formularios, procesos y roles
-  CHECKLIST_PRUEBA_MANUAL.md, GUIA_DEMO.md  Prueba manual y guion de la demo
-  WardrobeFlow - Modelo EA.eapx           Diagramas (Enterprise Architect; solo local, no se versiona)
 WardrobeFlow.slnx                         Solución de Visual Studio
 ```
+
+Los diagramas (casos de uso, clases, secuencia, actividad y DER) están en el modelo de Enterprise Architect (`.eapx`), que se mantiene fuera del repositorio (`*.eapx` está en `.gitignore`).
 
 ---
 
@@ -141,7 +138,7 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 | **Historial de Cambios** | Cambios de datos administrativos por usuario a nivel de campo, con rollback (Memento); no restaura una versión cuyo nombre de usuario ya usa otro |
 | **Idiomas** | ABM de traducciones directamente en la BD |
 | **Dashboard** | Panel de control personalizado por rol, con auto-refresh y carga asíncrona |
-| **Backup / Restauración** | Copias cifradas con contraseña (`.wfbak`, AES + HMAC-SHA256, clave PBKDF2) con verificación de integridad previa; al arrancar se borran las copias sin cifrar que haya dejado un backup o una restauración interrumpidos |
+| **Backup / Restauración** | Copias manuales cifradas con contraseña (`.wfbak`, AES + HMAC-SHA256, clave PBKDF2) con verificación de integridad previa, más backups automáticos sin cifrar al iniciar sesión y cada 24 h (ver [Backups automáticos](#backups-automáticos)); al arrancar se borran las copias sin cifrar que haya dejado un backup o una restauración interrumpidos |
 | **Reporte de Jornada** | Exportación PDF de actividad del día filtrable por rol |
 | **Diagnóstico de Integridad** | Visualización y reparación asistida de filas con DVH/DVV corruptos |
 | **Lista de Espera** *(mejora opcional)* | Un cliente se anota por una prenda `EnUso`; al liberarse, queda reservada exclusivamente para él por 48hs (visible solo para ese cliente en Nuevo Pedido) antes de volver a estar disponible para cualquiera |
@@ -149,6 +146,22 @@ Los permisos se resuelven recursivamente desde el árbol Composite (tabla `Permi
 | **Promociones** *(PN03)* | Sugerir (GerenteComercial) → Gestionar/crear (AdministracionComercial) → Revisión Contable, aprobar o rechazar (Contabilidad) → consultar vigentes y sugerir baja (Vendedor) |
 | **Inspección de Devolución** *(PN04)* | Cola de prendas `EnLimpieza` devueltas: reingresa sin cargo o se da de baja cobrando el precio de reposición. Desde Pedidos Realizados, Depósito reporta como perdida una prenda `EnUso` de un pedido entregado hace 30 días o más (compra tácita); sin la patente de stock el botón no se muestra |
 | **Analítica de Negocio** *(Bloque 3, PdN8-13)* | Un formulario con 6 reportes de decisión comercial de solo lectura (Ventas por Vendedor, Rotación, Abandono, Mantenimiento, Escasez, Recomendación de Prendas), elegidos con un selector según las patentes, exportables a PDF/CSV |
+
+### Backups automáticos
+
+Además del botón "Generar Copia de Seguridad", el sistema hace backups por su cuenta, por dos vías. Todos los backups (manual, de instalación limpia, de inicio de sesión y del reloj) pasan por el mismo método, `BLL.Backup.HacerBackup`, que verifica la integridad (RF-04) antes de copiar; con la integridad comprometida el backup automático se saltea, para no guardar una base adulterada como punto de restauración bueno.
+
+| Disparador | Cuándo | Comportamiento |
+|------------|--------|----------------|
+| **Al iniciar sesión** | En cada ingreso, con cualquier rol | Se saltea si el último backup de la carpeta `Backups` es más nuevo que el intervalo configurado (por defecto 60 min; 0 = en todos los inicios de sesión; máximo 1440). El Administrador lo configura en Backup y Restauración → "Backup automático al iniciar sesión..." (se guarda en `Backups/intervalo_backup_login.cfg`). Es sincrónico: el ingreso espera a que termine. Si falla, el ingreso continúa, la falla queda en la bitácora y el Menú avisa una sola vez (el Administrador ve la ruta y el error; los demás roles, un mensaje genérico) |
+| **Reloj de 24 h** (`BLL.BackupProgramado`) | Mientras la aplicación está abierta: primera revisión al minuto de abrir el Menú, después una por hora | Hace el backup si ya pasaron 24 h desde el último. Compara contra los archivos de la carpeta `Backups`, así cualquier backup reinicia la cuenta y uno atrasado se recupera al volver a abrir la aplicación. Si falla, reintenta cada hora pero registra en la bitácora como máximo un error cada 24 h; un bloqueo con `Interlocked` evita revisiones superpuestas. Se detiene al cerrar el Menú |
+
+- **Rotación semanal:** los backups automáticos se guardan como `.bak` **sin cifrar** en 7 archivos fijos, `auto_domingo.bak` … `auto_sabado.bak`, y cada uno pisa el del mismo día de la semana anterior. El espacio en disco queda acotado y queda, como máximo, un punto de restauración por cada uno de los últimos 7 días (el último backup de ese día, si la aplicación se usó ese día). Los backups manuales y el de instalación limpia siguen siendo `.wfbak` cifrados con contraseña.
+- **Pantalla Backup y Restauración:** muestra "Próximo backup automático: <último backup + 24 h>"; en la lista, los archivos `auto_*.bak` figuran con autor "sistema (automático)" y se restauran desde la misma pantalla, sin contraseña.
+- **Limitaciones conocidas:**
+  - El reloj de 24 h no es un programador de tareas del sistema operativo: solo corre mientras la aplicación está abierta. Con la aplicación cerrada no se hacen backups; el atrasado se hace al volver a abrirla.
+  - Cuando corresponde un backup al iniciar sesión, el ingreso se demora lo que tarda el backup.
+  - Los backups automáticos no están cifrados y quedan en la carpeta `Backups`, al lado del ejecutable: cualquiera con acceso a esa carpeta puede leerlos. Para una copia que vaya a salir del equipo conviene el backup manual cifrado.
 
 ---
 
@@ -207,7 +220,7 @@ State ya entregado (PdN2/PdN4) sin tocarlo.
 - Bloqueo de login progresivo (1 → 5 → 15 → 60 min) con claves de emergencia de un solo uso
 - Handler global de excepciones no controladas: registra el detalle técnico en bitácora y muestra un mensaje genérico al usuario
 - Dígitos verificadores (DVH por fila + DVV por tabla) sobre `Usuario`, `Cliente`, `Empleado`, `Pedido`, `Contratacion` y `PermisoRelacion`; cada escritura recalcula el DVH de las filas que tocó y el DVV **en la misma transacción** (`DAL.DigitoVerificador.EscribirConDV`, con el bloqueo del DV tomado antes de escribir): si el recálculo falla se revierte la escritura, así una falla nunca deja la base marcada como manipulada
-- Backups cifrados con contraseña (AES-128 + HMAC-SHA256, clave derivada con PBKDF2) y Clave Maestra de Recuperación opcional
+- Backups cifrados con contraseña (AES-128 + HMAC-SHA256, clave derivada con PBKDF2) y Clave Maestra de Recuperación opcional. Los backups automáticos (`auto_*.bak`) no se cifran: quedan en la carpeta `Backups`, rotando sobre los últimos 7 días
 - Unicidad respaldada en la base: DNI de los clientes activos, DNI, legajo y usuario de cada empleado (índices únicos filtrados), y número de operación del historial de pedidos
 - **Usuarios demo con claves fijas (decisión deliberada para la defensa):** las cuentas de `Instalador/Credenciales_Iniciales.txt` no exigen cambio de clave en el primer ingreso. En una implementación real hay que cambiar todas esas contraseñas (desde Mi Perfil, o forzando el cambio desde Administrar → Usuarios) y borrar o restringir ese archivo. Las cuentas demo solo se crean en una instalación nueva; una actualización nunca las recrea.
 - **Acceso a la base:** el instalador da al grupo local "Usuarios" de Windows el rol `db_owner` sobre `WardrobeFlowDB` (hace falta para restaurar backups desde la app). Quién puede operar lo decide el login y las patentes de la aplicación; un cambio de datos hecho por fuera de la app lo detectan los dígitos verificadores al iniciar.
@@ -277,10 +290,10 @@ En el primer arranque el sistema seedea automáticamente las tablas de traduccio
 
 ### Build y tests
 
-Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`, 924 pruebas al 13/10/2026). Las pruebas de integración usan una base aparte, `WardrobeFlowDB_Tests` (el mismo script con ese nombre); nunca tocan `WardrobeFlowDB`.
+Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`, 929 pruebas al 16/10/2026). Las pruebas de integración usan una base aparte, `WardrobeFlowDB_Tests` (el mismo script con ese nombre); nunca tocan `WardrobeFlowDB`.
 
 ### Generar el instalador
 
 1. Compilar la solución en modo **Release** (y `Instalador/DbInstaller` en Release).
 2. Ejecutar `Instalador/compilar-y-firmar.ps1`: descarga `Instalador/Redist/SqlLocalDB.msi` si falta (instalador oficial de SQL Server 2022 Express LocalDB, no se versiona), compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool, o con `Set-AuthenticodeSignature` si no está el Windows SDK. Antes de compilar corre todas las pruebas. Usa el certificado de WardrobeFlow instalado en el almacén de Windows (o `wardrobeflow.pfx` en `%USERPROFILE%`, que no se versiona); si no hay ninguno, el instalador queda sin firmar. El certificado es autofirmado: Windows puede mostrarlo como editor desconocido.
-3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_1.4.0.exe` (el número sale de `MyAppVersion` del `.iss`) (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal. Sobre una base existente, el instalador hace un backup, corre el script (que migra sin perder datos) y verifica que haya al menos un Administrador activo. La última versión publicada es la **1.4.0** (GitHub Releases, tag `v1.4.0`).
+3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_1.5.0.exe` (el número sale de `MyAppVersion` del `.iss`) (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal. Sobre una base existente, el instalador hace un backup, corre el script (que migra sin perder datos) y verifica que haya al menos un Administrador activo. La última versión publicada es la **1.5.0** (GitHub Releases, tag `v1.5.0`).

@@ -636,6 +636,10 @@ namespace GUI
             // Calcular el badge del Centro de Alertas (en background, vía BLL).
             ActualizarBadgeAlertas();
 
+            // Backup automático: reloj de 24 h (todos los roles) y aviso si falló el del login.
+            BLL.BackupProgramado.Iniciar();
+            BeginInvoke(new Action(MostrarAvisoBackupLogin));
+
             // 4. Cargar traducciones de BD en background (no bloquea la UI)
             // RF-22/23 — Al ingresar se aplica el idioma PREFERIDO del usuario (persistido en BD).
             // El login queda en el idioma elegido en esa pantalla; el Menú ya abre en el del usuario.
@@ -714,8 +718,30 @@ namespace GUI
         {
             _timerIntegridad?.Stop();
             _timerIntegridad?.Dispose();
+            BLL.BackupProgramado.Detener();
             GestorIdioma.DesuscribirObservador(this);
             base.OnFormClosing(e);
+        }
+
+        // Si el backup del login falló, se avisa UNA vez al abrir el menú (el ingreso no se cortó).
+        // El Administrador ve la ruta y el error real; el resto de los roles, un mensaje genérico
+        // sin datos del equipo.
+        private void MostrarAvisoBackupLogin()
+        {
+            var r = BLL.Backup.TomarAvisoLogin();
+            if (r == null) return;
+
+            var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
+            string T(string k, string fb) => t.ContainsKey(k) ? t[k].Texto : fb;
+
+            string msg = _usuarioActivo != null && _usuarioActivo.EsAdministrador
+                ? string.Format(T("msg.backup.auto.fallo.admin",
+                      "No se pudo hacer el backup automático al iniciar sesión.\n\nRuta: {0}\nError: {1}"),
+                      r.Ruta, r.Error)
+                : T("msg.backup.auto.fallo",
+                      "No se pudo hacer el backup automático al iniciar sesión. Avise al Administrador.");
+            MessageBox.Show(this, msg, T("msg.backup.auto.titulo", "Backup automático"),
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void TimerIntegridad_Tick(object sender, EventArgs e)

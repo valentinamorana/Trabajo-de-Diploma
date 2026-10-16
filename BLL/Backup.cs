@@ -82,10 +82,21 @@ namespace BLL
         // RF-04 — Antes de generar un backup se verifica la integridad (DVH/DVV) de la
         // información a respaldar. Si la base está comprometida, se cancela el backup para
         // no perpetuar datos corruptos en la copia. Lanza AppException con el detalle.
-        private static void VerificarIntegridadAntesDeRespaldar()
+        private static void VerificarIntegridadAntesDeRespaldar(bool automatico = false)
         {
+            bool comprometidaAntes = Configuracion.IntegridadComprometida;
             if (!Configuracion.VerificarIntegridadDV(out ResultadoIntegridad r))
             {
+                // En un backup automático, un error TÉCNICO al verificar (timeout, base en
+                // SINGLE_USER) no es corrupción: no se deja la sesión marcada como comprometida
+                // (apagaría los automáticos y los controles de BLLHelper) y el backup cuenta como
+                // fallido, así queda en la bitácora y se reintenta.
+                if (automatico && r?.ErrorTecnico != null)
+                {
+                    Configuracion.IntegridadComprometida = comprometidaAntes;
+                    throw new InvalidOperationException("No se pudo verificar la integridad de la base: " + r.ErrorTecnico);
+                }
+
                 string detalle = r?.MensajeES ?? "Se detectaron inconsistencias en los dígitos verificadores.";
                 throw new BE.AppException("err.bll.backup.integridad",
                     "No se puede generar el backup: la base tiene problemas de integridad.\n" +
@@ -93,28 +104,68 @@ namespace BLL
             }
         }
 
-        // Construye el nombre del archivo embebiendo el usuario activo.
-        // Formato: WardrobeFlow_Backup_yyyyMMddHHmmss_USUARIO.bak
-        // El usuario en el nombre permite saber quién hizo cada backup desde la lista.
-        public string RealizarBackup(string modulo, string dirDestino, string claveCifrado)
+        // ── Punto único de generación de backups ──────────────────────────────────────────
+        // El botón "Generar Copia de Seguridad", el de instalación limpia, el login y el reloj de
+        // 24 h terminan todos acá: mismas validaciones (integridad RF-04), mismo DAL y registro en
+        // la bitácora. Solo cambian el nombre del archivo y el cifrado según el origen:
+        //   Manual / Inicial      → WardrobeFlow_Backup|Inicial_yyyyMMddHHmmss_USUARIO.wfbak, cifrado.
+        //   Login / Programado    → auto_<día>.bak, sin cifrar, rota por día de la semana.
+        private string HacerBackup(OrigenBackup origen, string modulo, string dirDestino, string claveCifrado, DateTime fecha)
         {
-            ValidarAdministrador();
-            VerificarIntegridadAntesDeRespaldar();   // RF-04
+            VerificarIntegridadAntesDeRespaldar(EsOrigenAutomatico(origen));   // RF-04
 
+            string filename = NombreArchivo(origen, fecha);
+            string ruta     = Path.Combine(dirDestino, filename);
+
+            if (EsOrigenAutomatico(origen))
+                _dal.RealizarBackup(ruta);   // pisa el archivo del día (rotación semanal)
+            else
+                GenerarBackupCifrado(ruta, claveCifrado);
+
+            _bitacora.Registrar(modulo, ActividadBitacora(origen, filename),
+                EsOrigenAutomatico(origen) ? BE.Criticidad.Media : BE.Criticidad.Alta);
+            return filename;
+        }
+
+        private static bool EsOrigenAutomatico(OrigenBackup origen)
+            => origen == OrigenBackup.Login || origen == OrigenBackup.Programado;
+
+        private static string NombreArchivo(OrigenBackup origen, DateTime fecha)
+        {
+            if (EsOrigenAutomatico(origen)) return NombreArchivoAutomatico(fecha);
+
+            // El usuario en el nombre permite saber quién hizo cada backup desde la lista.
             string usuario = Seguridad.SessionManager.IsLoggedIn
                 ? Seguridad.SessionManager.GetInstance().Usuario.Username
                 : "sistema";
-
             string usuarioSanitizado = Regex.Replace(usuario, @"[^\w]", "_");
-            string filename = $"WardrobeFlow_Backup_{DateTime.Now:yyyyMMddHHmmss}_{usuarioSanitizado}{ExtensionCifrada}";
-
-            GenerarBackupCifrado(Path.Combine(dirDestino, filename), claveCifrado);
-            _bitacora.Registrar(modulo,
-                $"{BE.ActividadesBitacora.BackupCifradoGeneradoPrefijo}'{filename}'",
-                BE.Criticidad.Alta);
-
-            return filename;
+            string tipo = origen == OrigenBackup.Inicial ? "Inicial" : "Backup";
+            return $"WardrobeFlow_{tipo}_{fecha:yyyyMMddHHmmss}_{usuarioSanitizado}{ExtensionCifrada}";
         }
+
+        private static string ActividadBitacora(OrigenBackup origen, string filename)
+        {
+            switch (origen)
+            {
+                case OrigenBackup.Inicial: return $"{BE.ActividadesBitacora.BackupInstalacionLimpiaPrefijo}'{filename}'";
+                case OrigenBackup.Manual:  return $"{BE.ActividadesBitacora.BackupCifradoGeneradoPrefijo}'{filename}'";
+                default:                   return $"{BE.ActividadesBitacora.BackupAutomaticoGeneradoPrefijo}'{filename}' {BE.ActividadesBitacora.SufijoOrigenBackup(origen.ToString())}";
+            }
+        }
+
+        // Botón "Generar Copia de Seguridad": solo Administrador, cifrado con la contraseña.
+        // Formato: WardrobeFlow_Backup_yyyyMMddHHmmss_USUARIO.wfbak
+        public string RealizarBackup(string modulo, string dirDestino, string claveCifrado)
+        {
+            ValidarAdministrador();
+            lock (_operacionEnCurso)
+                return HacerBackup(OrigenBackup.Manual, modulo, dirDestino, claveCifrado, DateTime.Now);
+        }
+
+        // Un backup o una restauración a la vez en todo el proceso: el reloj de 24 h corre en otro
+        // hilo y no debe chocar con una restauración (SINGLE_USER, archivo que se está copiando)
+        // ni con el botón. Los manuales y la restauración esperan; el automático se saltea.
+        private static readonly object _operacionEnCurso = new object();
 
         // Genera el .bak con SQL en un temporal plano y lo CIFRA hacia la ruta final (.wfbak).
         // El temporal plano se borra siempre (finally) para no dejar datos sin cifrar en disco.
@@ -143,21 +194,132 @@ namespace BLL
         public string RealizarBackupInicial(string modulo, string dirDestino, string claveCifrado)
         {
             ValidarAdministrador();
-            VerificarIntegridadAntesDeRespaldar();   // RF-04
+            lock (_operacionEnCurso)
+                return HacerBackup(OrigenBackup.Inicial, modulo, dirDestino, claveCifrado, DateTime.Now);
+        }
 
-            string usuario = Seguridad.SessionManager.IsLoggedIn
-                ? Seguridad.SessionManager.GetInstance().Usuario.Username
-                : "sistema";
+        // ── Backups automáticos (al iniciar sesión y reloj de 24 h) ───────────────────────
+        // Los dispara el sistema, no una pantalla: por eso no exigen Administrador (corren con
+        // cualquier rol) ni piden contraseña (son .bak sin cifrar). No crean un archivo nuevo
+        // cada vez: rotan sobre 7 archivos fijos, uno por día de la semana (auto_lunes.bak, ...),
+        // y cada backup pisa el de ese día. Así el disco queda acotado y siempre hay un punto de
+        // restauración por cada uno de los últimos 7 días.
 
-            string usuarioSanitizado = Regex.Replace(usuario, @"[^\w]", "_");
-            string filename = $"WardrobeFlow_Inicial_{DateTime.Now:yyyyMMddHHmmss}_{usuarioSanitizado}{ExtensionCifrada}";
+        public const string PrefijoAutomatico = "auto_";
 
-            GenerarBackupCifrado(Path.Combine(dirDestino, filename), claveCifrado);
-            _bitacora.Registrar(modulo,
-                $"{BE.ActividadesBitacora.BackupInstalacionLimpiaPrefijo}'{filename}'",
-                BE.Criticidad.Alta);
+        private static readonly string[] DiasSemana =
+            { "domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado" };
 
-            return filename;
+        /// <summary>Nombre del archivo rotativo del día: auto_lunes.bak, auto_martes.bak, ...</summary>
+        public static string NombreArchivoAutomatico(DateTime fecha)
+            => $"{PrefijoAutomatico}{DiasSemana[(int)fecha.DayOfWeek]}.bak";
+
+        public static bool EsAutomatico(string nombreArchivo)
+            => !string.IsNullOrEmpty(nombreArchivo) &&
+               Path.GetFileName(nombreArchivo).StartsWith(PrefijoAutomatico, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Fecha del último backup de cualquier tipo (manual, inicial o automático), o
+        /// null si no hay. Cualquier backup reinicia la cuenta del login y del reloj de 24 h.</summary>
+        public static DateTime? FechaUltimoBackup() => ObtenerUltimoBackup()?.LastWriteTime;
+
+        /// <summary>Cuándo le toca al reloj de 24 h: último backup + 24 h (ahora si no hay ninguno).</summary>
+        public static DateTime ProximoBackupProgramado(DateTime ahora)
+        {
+            DateTime? ultimo = FechaUltimoBackup();
+            return ultimo.HasValue ? ultimo.Value.AddHours(24) : ahora;
+        }
+
+        /// <summary>
+        /// Backup al iniciar sesión (cualquier rol). Se saltea si la integridad está comprometida
+        /// (no se guarda una base adulterada como punto de restauración bueno) o si el último backup
+        /// es más nuevo que el intervalo configurado (0 = en todos los logins). Nunca lanza: si
+        /// falla, el login sigue y el resultado se avisa en el menú.
+        /// </summary>
+        public ResultadoBackupAutomatico HacerBackupAlIniciarSesion()
+        {
+            try
+            {
+                int intervalo = Configuracion.ObtenerIntervaloBackupLoginMinutos();
+                DateTime? ultimo = FechaUltimoBackup();   // lee la carpeta: puede fallar (permisos)
+                if (intervalo > 0 && ultimo.HasValue && DateTime.Now - ultimo.Value < TimeSpan.FromMinutes(intervalo))
+                    return ResultadoBackupAutomatico.Salteado("Hay un backup más nuevo que el intervalo configurado.");
+
+                return HacerBackupAutomatico(OrigenBackup.Login);
+            }
+            catch (Exception ex)
+            {
+                return ResultadoBackupAutomatico.Fallido(CarpetaBackups, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Backup automático (login o reloj de 24 h). Usa el mismo método que el botón
+        /// (<see cref="HacerBackup"/>), sin exigir Administrador porque lo dispara el sistema.
+        /// Se saltea si la integridad está comprometida. Con un origen automático nunca lanza.
+        /// </summary>
+        public ResultadoBackupAutomatico HacerBackupAutomatico(OrigenBackup origen)
+        {
+            if (!EsOrigenAutomatico(origen))
+                throw new ArgumentException("Solo Login o Programado son backups automáticos.", nameof(origen));
+
+            DateTime fecha = DateTime.Now;
+            string ruta = Path.Combine(CarpetaBackups, NombreArchivoAutomatico(fecha));
+            bool tomado = false;
+            try
+            {
+                // Chequeo barato primero: con la base ya marcada como comprometida no se toca nada.
+                if (Configuracion.IntegridadComprometida)
+                    return ResultadoBackupAutomatico.Salteado("La integridad de la base está comprometida.");
+
+                System.Threading.Monitor.TryEnter(_operacionEnCurso, ref tomado);
+                if (!tomado)
+                    return ResultadoBackupAutomatico.Salteado("Hay un backup o una restauración en curso.");
+
+                HacerBackup(origen, "Backup automático", AsegurarCarpetaBackups(), null, fecha);
+                return ResultadoBackupAutomatico.Realizado(ruta);
+            }
+            catch (BE.AppException ex) when (ex.Clave == "err.bll.backup.integridad")
+            {
+                // RF-04: no se guarda una base adulterada como punto de restauración bueno.
+                return ResultadoBackupAutomatico.Salteado("La integridad de la base está comprometida.");
+            }
+            catch (Exception ex)
+            {
+                return ResultadoBackupAutomatico.Fallido(ruta, ex.Message);
+            }
+            finally
+            {
+                if (tomado) System.Threading.Monitor.Exit(_operacionEnCurso);
+            }
+        }
+
+        /// <summary>Registra en la bitácora un backup automático fallido. Nunca lanza.</summary>
+        public void RegistrarFalloAutomatico(OrigenBackup origen, ResultadoBackupAutomatico r)
+        {
+            try
+            {
+                _bitacora.Registrar("Backup automático",
+                    $"{BE.ActividadesBitacora.BackupAutomaticoFallidoPrefijo}{BE.ActividadesBitacora.SufijoOrigenBackup(origen.ToString())} {r.Ruta}: {r.Error}",
+                    BE.Criticidad.Alta);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("[Backup.RegistrarFalloAutomatico] " + ex.Message);
+            }
+        }
+
+        // Aviso del backup de login para mostrar UNA vez al abrir el menú (lo deja el Login y lo
+        // consume el Menu). null = nada que avisar.
+        private static ResultadoBackupAutomatico _avisoLogin;
+
+        public static void GuardarAvisoLogin(ResultadoBackupAutomatico r)
+            => _avisoLogin = r != null && r.Estado == EstadoBackupAutomatico.Fallido ? r : null;
+
+        public static ResultadoBackupAutomatico TomarAvisoLogin()
+        {
+            var r = _avisoLogin;
+            _avisoLogin = null;
+            return r;
         }
 
         // RF-08 — Fecha en que se completó un backup (para informar el alcance de la pérdida
@@ -192,6 +354,12 @@ namespace BLL
         public void RestaurarBackup(string modulo, string rutaArchivo, string claveCifrado = null)
         {
             ValidarAdministrador();
+            lock (_operacionEnCurso)
+                RestaurarBackupSinBloqueo(modulo, rutaArchivo, claveCifrado);
+        }
+
+        private void RestaurarBackupSinBloqueo(string modulo, string rutaArchivo, string claveCifrado)
+        {
 
             bool sinVerificacion = false;
             if (EsCifrado(rutaArchivo))
@@ -273,6 +441,8 @@ namespace BLL
 
         public string ExtraerAutorDeNombre(string nombreArchivo)
         {
+            if (EsAutomatico(nombreArchivo)) return "sistema (automático)";
+
             string prefix = PrefijosConocidos.FirstOrDefault(p => nombreArchivo.StartsWith(p));
             if (prefix == null || nombreArchivo.Length <= prefix.Length + 15)
                 return "—";
@@ -286,5 +456,26 @@ namespace BLL
 
             return Path.GetFileNameWithoutExtension(rest.Substring(15));
         }
+    }
+
+    /// <summary>Quién disparó un backup automático (queda en la bitácora).</summary>
+    public enum OrigenBackup { Manual, Inicial, Login, Programado }
+
+    public enum EstadoBackupAutomatico { Realizado, Salteado, Fallido }
+
+    /// <summary>Resultado de un backup automático: se hizo, se salteó (y por qué) o falló.</summary>
+    public class ResultadoBackupAutomatico
+    {
+        public EstadoBackupAutomatico Estado { get; private set; }
+        public string Ruta   { get; private set; }
+        public string Motivo { get; private set; }   // por qué se salteó
+        public string Error  { get; private set; }   // detalle técnico de la falla
+
+        public static ResultadoBackupAutomatico Realizado(string ruta)
+            => new ResultadoBackupAutomatico { Estado = EstadoBackupAutomatico.Realizado, Ruta = ruta };
+        public static ResultadoBackupAutomatico Salteado(string motivo)
+            => new ResultadoBackupAutomatico { Estado = EstadoBackupAutomatico.Salteado, Motivo = motivo };
+        public static ResultadoBackupAutomatico Fallido(string ruta, string error)
+            => new ResultadoBackupAutomatico { Estado = EstadoBackupAutomatico.Fallido, Ruta = ruta, Error = error };
     }
 }

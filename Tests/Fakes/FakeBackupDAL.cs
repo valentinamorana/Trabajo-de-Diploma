@@ -19,7 +19,8 @@ namespace Tests.Fakes
         public DateTime? FechaRecibidaEnConteo { get; private set; }
         public int VecesContado { get; private set; }
 
-        public void RealizarBackup(string rutaDestino) { }
+        public int VecesBackup { get; private set; }
+        public void RealizarBackup(string rutaDestino) { VecesBackup++; }
         // Contenido del archivo que recibió RestaurarBackup (el .bak plano ya descifrado), o null
         // si no se llegó a restaurar.
         public byte[] ContenidoRestaurado { get; private set; }

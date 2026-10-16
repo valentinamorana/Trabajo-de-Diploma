@@ -78,13 +78,16 @@ namespace DAL
             string publico = Environment.GetEnvironmentVariable("PUBLIC");
             carpetas.Add(Path.Combine(string.IsNullOrEmpty(publico) ? @"C:\Users\Public" : publico, "WardrobeFlow_Temp"));
             carpetas.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TempBackups"));
+            // Parciales de la copia final (~WF_*.partial): en la carpeta Backups (automáticos) o en
+            // el temporal del usuario (manuales, antes de cifrar).
+            carpetas.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups"));
             DateTime limite = DateTime.Now.AddHours(-1);
             foreach (string dir in carpetas)
             {
                 try
                 {
                     if (!Directory.Exists(dir)) continue;
-                    foreach (string patron in new[] { "WF_bak_*.bak", "WF_restore_*.bak", "WardrobeFlow_Temp_*.bak", "WardrobeFlow_Restore_*.bak" })
+                    foreach (string patron in new[] { "WF_bak_*.bak", "WF_restore_*.bak", "WardrobeFlow_Temp_*.bak", "WardrobeFlow_Restore_*.bak", "~WF_*.partial" })
                         foreach (string archivo in Directory.GetFiles(dir, patron))
                             try
                             {
@@ -117,6 +120,7 @@ namespace DAL
 
             string dirTemp  = ObtenerDirectorioTemp();
             string rutaTemp = Path.Combine(dirTemp, $"WardrobeFlow_Temp_{Guid.NewGuid():N}.bak");
+            string rutaParcial = null;
 
             try
             {
@@ -131,11 +135,20 @@ namespace DAL
                     cmd.ExecuteNonQuery();
                 }
 
-                if (File.Exists(rutaDestino)) File.Delete(rutaDestino);
-                File.Copy(rutaTemp, rutaDestino);
+                // Se copia a un parcial en la carpeta de destino y recién al final se reemplaza:
+                // si la copia falla (disco lleno, corte), el archivo anterior queda intacto. Importa
+                // en los automáticos, que pisan siempre el mismo auto_<día>.bak.
+                rutaParcial = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(rutaDestino)),
+                                           $"~WF_{Guid.NewGuid():N}.partial");
+                File.Copy(rutaTemp, rutaParcial);
+                // Replace cambia el archivo en un solo paso: si falla, el anterior sigue ahí.
+                if (File.Exists(rutaDestino)) File.Replace(rutaParcial, rutaDestino, null);
+                else                          File.Move(rutaParcial, rutaDestino);
             }
             finally
             {
+                if (rutaParcial != null && File.Exists(rutaParcial))
+                    try { File.Delete(rutaParcial); } catch (Exception exParcial) { System.Diagnostics.Trace.TraceWarning($"[DAL.Backup] No se pudo borrar el parcial '{rutaParcial}': {exParcial.Message}"); }
                 if (File.Exists(rutaTemp))
                     try { File.Delete(rutaTemp); } catch (Exception exTemp) { System.Diagnostics.Trace.TraceWarning($"[DAL.Backup] No se pudo borrar el temporal '{rutaTemp}': {exTemp.Message}"); }
             }

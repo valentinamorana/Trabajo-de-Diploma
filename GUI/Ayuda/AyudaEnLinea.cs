@@ -162,7 +162,12 @@ namespace GUI.Ayuda
                 "• Vista completa: el árbol completo de roles, familias y permisos, en solo lectura."),
 
             ["BackupForm"] = new TemaAyuda("Copias de seguridad",
-                "Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos."),
+                "Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos.\n" +
+                "\n" +
+                "Backups automáticos (sin cifrar):\n" +
+                "• Al iniciar sesión (cualquier rol), si el último backup es más antiguo que el intervalo configurado (60 minutos por defecto; el Administrador lo cambia con \"Backup automático al iniciar sesión...\").\n" +
+                "• Cada 24 horas mientras la aplicación esté abierta.\n" +
+                "• Rotan entre auto_domingo.bak … auto_sabado.bak (uno por día de la semana) y se restauran sin contraseña."),
 
             ["Bitacora"] = new TemaAyuda("Bitácora",
                 "Consulta de los eventos del sistema con filtros por usuario, fecha, módulo y criticidad. Se puede exportar a PDF.\n" +

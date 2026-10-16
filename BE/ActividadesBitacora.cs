@@ -31,6 +31,12 @@ namespace BE
         public const string BackupInstalacionLimpiaPrefijo = "Backup de instalación limpia (cifrado) generado: ";
         public const string BackupCifradoGeneradoPrefijo   = "Backup cifrado generado: ";
         public const string BackupEliminadoPrefijo         = "Backup eliminado: ";
+        // Backups que dispara el sistema (al iniciar sesión o por el reloj de 24 h), sin cifrar.
+        public const string BackupAutomaticoGeneradoPrefijo = "Backup automático generado: ";
+        public const string BackupAutomaticoFallidoPrefijo  = "Backup automático fallido: ";
+        // Origen del backup automático dentro del texto ("Login" / "Programado"). La bitácora lo
+        // guarda en español; el Dashboard lo traduce al mostrarlo buscando este mismo texto.
+        public static string SufijoOrigenBackup(string origen) => $"(origen: {origen})";
         public const string BaseDeDatosRestauradaPrefijo   = "Base de datos restaurada desde ";
         // Restauración de un .wfbak del formato v1 (sin HMAC): no se pudo verificar que no fuera alterado.
         public const string BackupSinVerificacionPrefijo   = "Backup restaurado sin verificación de integridad (formato v1, sin HMAC): ";

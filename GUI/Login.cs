@@ -335,6 +335,8 @@ namespace GUI
                         }
                     }
 
+                    BackupAlIniciarSesion();
+
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                 }
@@ -365,6 +367,31 @@ namespace GUI
             catch (BE.LoginException ex)
             {
                 MostrarErrorLogin(ex.Message, bloqueado: false);
+            }
+        }
+
+        // Backup automático al iniciar sesión (cualquier rol). La BLL decide si toca según el
+        // intervalo configurado y la integridad. Es sincrónico: cuando toca, el ingreso tarda lo
+        // que tarda el backup. Si falla, el login sigue y el Menu lo avisa una vez.
+        private void BackupAlIniciarSesion()
+        {
+            this.Cursor = Cursors.WaitCursor;
+            try
+            {
+                var bll = new BLL.Backup();
+                var r = bll.HacerBackupAlIniciarSesion();
+                if (r.Estado == BLL.EstadoBackupAutomatico.Fallido)
+                    bll.RegistrarFalloAutomatico(BLL.OrigenBackup.Login, r);
+                BLL.Backup.GuardarAvisoLogin(r);
+            }
+            catch (Exception ex)
+            {
+                // La sesión ya se abrió: un error acá no puede cortar el ingreso.
+                BLL.Backup.GuardarAvisoLogin(BLL.ResultadoBackupAutomatico.Fallido(BLL.Backup.CarpetaBackups, ex.Message));
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
             }
         }
 

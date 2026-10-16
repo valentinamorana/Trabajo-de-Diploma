@@ -125,6 +125,7 @@
     <Compile Include="RecuperacionIntegridad.cs" />
     <Compile Include="Prenda.cs" />
     <Compile Include="Backup.cs" />
+    <Compile Include="BackupProgramado.cs" />
     <Compile Include="BLLHelper.cs" />
     <Compile Include="Sesion.cs" />
     <Compile Include="PermisosAccion.cs" />

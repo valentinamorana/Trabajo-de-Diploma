@@ -94,7 +94,7 @@
 ; =====================================================================
 
 #define MyAppName "WardrobeFlow"
-#define MyAppVersion "1.4.0"
+#define MyAppVersion "1.5.0"
 #define MyAppPublisher "Valentina Morana"
 #define MyAppExeName "GUI.exe"
 #define MyDatabaseName "WardrobeFlowDB"
@@ -188,7 +188,9 @@ Source: "Credenciales_Iniciales.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; Solo se extrae (a {tmp}) si hay que instalar LocalDB: ver InstalarLocalDb.
 Source: "{#LocalDbMsi}"; DestDir: "{tmp}"; Flags: dontcopy nocompression
 
-; La app guarda backups y su configuracion de recordatorio en {app}\Backups.
+; La app guarda backups (manuales .wfbak y automaticos auto_*.bak, que se
+; escriben con el usuario que inicia sesion, sea cual sea su rol) y su
+; configuracion (recordatorio.cfg, intervalo_backup_login.cfg) en {app}\Backups.
 ; {app} esta en Archivos de Programa, donde un usuario sin permisos de
 ; administrador no puede escribir: sin esto, hacer un backup fallaba para
 ; cualquier usuario comun.

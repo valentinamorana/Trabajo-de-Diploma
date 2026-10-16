@@ -522,6 +522,17 @@ ES	msg.backup.restauradaexito	Base de datos restaurada con éxito.\nLa aplicaci�
 ES	msg.backup.restauradatitulo	Restauración Exitosa
 ES	lbl.backup.sincopias	Sin copias de seguridad generadas aún.
 ES	lbl.backup.conteo	{0} copia(s) disponible(s). La más reciente: {1}
+ES	btn.backup.intervalo	Backup automático al iniciar sesión...
+ES	lbl.backup.proximo	Próximo backup automático: {0}
+ES	lbl.backup.proximo.ya	Próximo backup automático: en la próxima revisión (cada hora).
+ES	dlg.backup.intervalo.titulo	Backup automático al iniciar sesión
+ES	dlg.backup.intervalo.texto	Minutos que tienen que pasar desde el último backup para que el inicio de sesión haga otro.\n0 = en todos los inicios de sesión; máximo {0}.\n\nIntervalo actual: {1} minutos.
+ES	dlg.backup.intervalo.invalido	Ingrese un número entero de minutos.
+ES	dlg.backup.intervalo.ok	Intervalo guardado: {0} minutos.
+ES	msg.backup.auto.fallo.admin	No se pudo hacer el backup automático al iniciar sesión.\n\nRuta: {0}\nError: {1}
+ES	msg.backup.auto.fallo	No se pudo hacer el backup automático al iniciar sesión. Avise al Administrador.
+ES	msg.backup.auto.titulo	Backup automático
+ES	err.bll.backup.intervalo	El intervalo debe estar entre 0 y 1440 minutos.
 ES	frm.restauracion	Integridad del Sistema
 ES	mnu.dashboard	Panel de Control
 ES	mnu.bitacora.sistema	Bitácora del Sistema
@@ -1271,6 +1282,17 @@ EN	msg.backup.restauradaexito	Database restored successfully.\nThe application w
 EN	msg.backup.restauradatitulo	Restore Successful
 EN	lbl.backup.sincopias	No backups created yet.
 EN	lbl.backup.conteo	{0} backup(s) available. Most recent: {1}
+EN	btn.backup.intervalo	Automatic backup at login...
+EN	lbl.backup.proximo	Next automatic backup: {0}
+EN	lbl.backup.proximo.ya	Next automatic backup: at the next check (hourly).
+EN	dlg.backup.intervalo.titulo	Automatic backup at login
+EN	dlg.backup.intervalo.texto	Minutes that must pass since the last backup for a login to create another one.\n0 = on every login; maximum {0}.\n\nCurrent interval: {1} minutes.
+EN	dlg.backup.intervalo.invalido	Enter a whole number of minutes.
+EN	dlg.backup.intervalo.ok	Interval saved: {0} minutes.
+EN	msg.backup.auto.fallo.admin	The automatic backup at login could not be created.\n\nPath: {0}\nError: {1}
+EN	msg.backup.auto.fallo	The automatic backup at login could not be created. Please notify the Administrator.
+EN	msg.backup.auto.titulo	Automatic backup
+EN	err.bll.backup.intervalo	The interval must be between 0 and 1440 minutes.
 EN	frm.restauracion	System Integrity
 EN	mnu.dashboard	Dashboard
 EN	mnu.bitacora.sistema	System Log
@@ -2020,6 +2042,17 @@ RU	msg.backup.restauradaexito	База данных успешно восста�
 RU	msg.backup.restauradatitulo	Восстановление выполнено
 RU	lbl.backup.sincopias	Резервных копий нет.
 RU	lbl.backup.conteo	{0} резервная(ых) копия(й). Последняя: {1}
+RU	btn.backup.intervalo	Автоматический бэкап при входе...
+RU	lbl.backup.proximo	Следующий автоматический бэкап: {0}
+RU	lbl.backup.proximo.ya	Следующий автоматический бэкап: при следующей проверке (каждый час).
+RU	dlg.backup.intervalo.titulo	Автоматический бэкап при входе
+RU	dlg.backup.intervalo.texto	Сколько минут должно пройти с последнего бэкапа, чтобы при входе в систему был создан новый.\n0 = при каждом входе; максимум {0}.\n\nТекущий интервал: {1} мин.
+RU	dlg.backup.intervalo.invalido	Введите целое число минут.
+RU	dlg.backup.intervalo.ok	Интервал сохранён: {0} мин.
+RU	msg.backup.auto.fallo.admin	Не удалось создать автоматический бэкап при входе в систему.\n\nПуть: {0}\nОшибка: {1}
+RU	msg.backup.auto.fallo	Не удалось создать автоматический бэкап при входе в систему. Сообщите администратору.
+RU	msg.backup.auto.titulo	Автоматический бэкап
+RU	err.bll.backup.intervalo	Интервал должен быть от 0 до 1440 минут.
 RU	frm.restauracion	Целостность системы
 RU	mnu.dashboard	Панель управления
 RU	mnu.bitacora.sistema	Системный журнал
@@ -2809,6 +2842,17 @@ PT	msg.backup.restauradaexito	Banco de dados restaurado com sucesso.\nO aplicati
 PT	msg.backup.restauradatitulo	Restauração Bem-sucedida
 PT	lbl.backup.sincopias	Nenhum backup gerado ainda.
 PT	lbl.backup.conteo	{0} backup(s) disponível(eis). Mais recente: {1}
+PT	btn.backup.intervalo	Backup automático ao iniciar sessão...
+PT	lbl.backup.proximo	Próximo backup automático: {0}
+PT	lbl.backup.proximo.ya	Próximo backup automático: na próxima verificação (a cada hora).
+PT	dlg.backup.intervalo.titulo	Backup automático ao iniciar sessão
+PT	dlg.backup.intervalo.texto	Minutos que devem passar desde o último backup para que o início de sessão faça outro.\n0 = em todos os inícios de sessão; máximo {0}.\n\nIntervalo atual: {1} minutos.
+PT	dlg.backup.intervalo.invalido	Informe um número inteiro de minutos.
+PT	dlg.backup.intervalo.ok	Intervalo salvo: {0} minutos.
+PT	msg.backup.auto.fallo.admin	Não foi possível fazer o backup automático ao iniciar sessão.\n\nCaminho: {0}\nErro: {1}
+PT	msg.backup.auto.fallo	Não foi possível fazer o backup automático ao iniciar sessão. Avise o Administrador.
+PT	msg.backup.auto.titulo	Backup automático
+PT	err.bll.backup.intervalo	O intervalo deve estar entre 0 e 1440 minutos.
 PT	frm.restauracion	Integridade do Sistema
 PT	frm.dashboard	Painel de Controle
 PT	dash.general.subtitulo	WardrobeFlow
@@ -3437,6 +3481,11 @@ ES	dash.act.backupcreate	Backup cifrado generado: {0}
 ES	dash.act.backupdelete	Backup eliminado: {0}
 ES	dash.act.dbrestore	Base de datos restaurada desde {0}
 ES	dash.act.backupnomac	Backup restaurado sin verificación de integridad (formato anterior): {0}
+ES	dash.act.backupauto	Backup automático generado: {0}
+ES	dash.act.backupautofail	Backup automático fallido: {0}
+ES	dash.act.origen.login	(origen: inicio de sesión)
+ES	dash.act.origen.programado	(origen: reloj de 24 h)
+ES	col.backup.autor.automatico	sistema (automático)
 ES	dash.act.accountunlock	Desbloqueo de cuenta: {0}
 ES	dash.act.useradd	Alta de usuario: {0}
 ES	dash.act.userrestore	Restauración a versión {0}
@@ -3457,6 +3506,11 @@ EN	dash.act.backupcreate	Encrypted backup created: {0}
 EN	dash.act.backupdelete	Backup deleted: {0}
 EN	dash.act.dbrestore	Database restored from {0}
 EN	dash.act.backupnomac	Backup restored without integrity verification (old format): {0}
+EN	dash.act.backupauto	Automatic backup created: {0}
+EN	dash.act.backupautofail	Automatic backup failed: {0}
+EN	dash.act.origen.login	(source: sign-in)
+EN	dash.act.origen.programado	(source: 24-hour clock)
+EN	col.backup.autor.automatico	system (automatic)
 EN	dash.act.accountunlock	Account unlock: {0}
 EN	dash.act.useradd	User added: {0}
 EN	dash.act.userrestore	Restored to version {0}
@@ -3477,6 +3531,11 @@ PT	dash.act.backupcreate	Backup criptografado gerado: {0}
 PT	dash.act.backupdelete	Backup excluído: {0}
 PT	dash.act.dbrestore	Banco de dados restaurado de {0}
 PT	dash.act.backupnomac	Backup restaurado sem verificação de integridade (formato antigo): {0}
+PT	dash.act.backupauto	Backup automático gerado: {0}
+PT	dash.act.backupautofail	Falha no backup automático: {0}
+PT	dash.act.origen.login	(origem: início de sessão)
+PT	dash.act.origen.programado	(origem: relógio de 24 h)
+PT	col.backup.autor.automatico	sistema (automático)
 PT	dash.act.accountunlock	Desbloqueio de conta: {0}
 PT	dash.act.useradd	Cadastro de usuário: {0}
 PT	dash.act.userrestore	Restauração para versão {0}
@@ -3497,6 +3556,11 @@ RU	dash.act.backupcreate	Создан зашифрованный бэкап: {0}
 RU	dash.act.backupdelete	Бэкап удалён: {0}
 RU	dash.act.dbrestore	База данных восстановлена из {0}
 RU	dash.act.backupnomac	Бэкап восстановлен без проверки целостности (старый формат): {0}
+RU	dash.act.backupauto	Создан автоматический бэкап: {0}
+RU	dash.act.backupautofail	Сбой автоматического бэкапа: {0}
+RU	dash.act.origen.login	(источник: вход в систему)
+RU	dash.act.origen.programado	(источник: 24-часовой таймер)
+RU	col.backup.autor.automatico	система (автоматически)
 RU	dash.act.accountunlock	Разблокировка учётной записи: {0}
 RU	dash.act.useradd	Создан пользователь: {0}
 RU	dash.act.userrestore	Восстановление до версии {0}
@@ -6788,7 +6852,7 @@ ES	ayuda.Usuarios	Administración de usuarios en dos pestañas (solo Administrad
 ES	ayuda.GestorPermisos.titulo	Perfiles y permisos
 ES	ayuda.GestorPermisos	Roles y permisos (patentes) del sistema. Un rol con usuarios asignados no se puede eliminar ni renombrar.\n\n• Gestión de roles: crear, renombrar y eliminar roles, y asignar o quitar permisos y sub-roles.\n• Vista completa: el árbol completo de roles, familias y permisos, en solo lectura.
 ES	ayuda.BackupForm.titulo	Copias de seguridad
-ES	ayuda.BackupForm	Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos.
+ES	ayuda.BackupForm	Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos.\n\nBackups automáticos (sin cifrar):\n• Al iniciar sesión (cualquier rol), si el último backup es más antiguo que el intervalo configurado (60 minutos por defecto; el Administrador lo cambia con "Backup automático al iniciar sesión...").\n• Cada 24 horas mientras la aplicación esté abierta.\n• Rotan entre auto_domingo.bak … auto_sabado.bak (uno por día de la semana) y se restauran sin contraseña.
 ES	ayuda.Bitacora.titulo	Bitácora
 ES	ayuda.Bitacora	Consulta de los eventos del sistema con filtros por usuario, fecha, módulo y criticidad. Se puede exportar a PDF.\n\n• Errores (XML): los errores inesperados quedan serializados en XML; se pueden ver, importar desde otra PC y exportar.
 ES	ayuda.MiPerfilForm.titulo	Mi perfil
@@ -6843,7 +6907,7 @@ EN	ayuda.Usuarios	User administration in two tabs (Administrator only).\n\nAccou
 EN	ayuda.GestorPermisos.titulo	Roles and permissions
 EN	ayuda.GestorPermisos	System roles and permissions. A role with assigned users cannot be deleted or renamed.\n\n• Role management: create, rename and delete roles, and assign or remove permissions and sub-roles.\n• Full view: the complete tree of roles, families and permissions, read-only.
 EN	ayuda.BackupForm.titulo	Backups
-EN	ayuda.BackupForm	Create, restore and delete database backups (Administrator only). Data integrity is checked before creating a backup.
+EN	ayuda.BackupForm	Create, restore and delete database backups (Administrator only). Data integrity is checked before creating a backup.\n\nAutomatic backups (unencrypted):\n• At login (any role), if the last backup is older than the configured interval (60 minutes by default; the Administrator changes it with "Automatic backup at login...").\n• Every 24 hours while the application is open.\n• They rotate over auto_domingo.bak … auto_sabado.bak (one per day of the week) and are restored without a password.
 EN	ayuda.Bitacora.titulo	Audit log
 EN	ayuda.Bitacora	View of system events with filters by user, date, module and severity. It can be exported to PDF.\n\n• Errors (XML): unexpected errors are serialized to XML; you can view them, import them from another PC and export them.
 EN	ayuda.MiPerfilForm.titulo	My profile
@@ -6898,7 +6962,7 @@ RU	ayuda.Usuarios	Администрирование пользователей 
 RU	ayuda.GestorPermisos.titulo	Роли и права
 RU	ayuda.GestorPermisos	Роли и права системы. Роль с назначенными пользователями нельзя удалить или переименовать.\n\n• Управление ролями: создание, переименование и удаление ролей, назначение и снятие прав и подролей.\n• Полный обзор: всё дерево ролей, семейств и прав, только для чтения.
 RU	ayuda.BackupForm.titulo	Резервные копии
-RU	ayuda.BackupForm	Создание, восстановление и удаление резервных копий базы (только администратор). Перед созданием копии проверяется целостность данных.
+RU	ayuda.BackupForm	Создание, восстановление и удаление резервных копий базы (только администратор). Перед созданием копии проверяется целостность данных.\n\nАвтоматические бэкапы (без шифрования):\n• При входе в систему (любая роль), если последний бэкап старше настроенного интервала (по умолчанию 60 минут; администратор меняет его кнопкой «Автоматический бэкап при входе...»).\n• Каждые 24 часа, пока приложение открыто.\n• Чередуются в файлах auto_domingo.bak … auto_sabado.bak (по одному на день недели) и восстанавливаются без пароля.
 RU	ayuda.Bitacora.titulo	Журнал
 RU	ayuda.Bitacora	Просмотр событий системы с фильтрами по пользователю, дате, модулю и критичности. Можно экспортировать в PDF.\n\n• «Ошибки (XML)»: непредвиденные ошибки сериализуются в XML; их можно просматривать, импортировать с другого ПК и экспортировать.
 RU	ayuda.MiPerfilForm.titulo	Мой профиль
@@ -6953,7 +7017,7 @@ PT	ayuda.Usuarios	Administração de usuários em duas abas (só Administrador).
 PT	ayuda.GestorPermisos.titulo	Perfis e permissões
 PT	ayuda.GestorPermisos	Perfis e permissões do sistema. Um perfil com usuários atribuídos não pode ser excluído nem renomeado.\n\n• Gestão de perfis: criar, renomear e excluir perfis, e atribuir ou remover permissões e subperfis.\n• Visão completa: a árvore completa de perfis, famílias e permissões, somente leitura.
 PT	ayuda.BackupForm.titulo	Cópias de segurança
-PT	ayuda.BackupForm	Criar, restaurar e excluir cópias de segurança do banco (só Administrador). Antes de criar uma cópia, a integridade dos dados é verificada.
+PT	ayuda.BackupForm	Criar, restaurar e excluir cópias de segurança do banco (só Administrador). Antes de criar uma cópia, a integridade dos dados é verificada.\n\nBackups automáticos (sem criptografia):\n• Ao iniciar sessão (qualquer função), se o último backup for mais antigo que o intervalo configurado (60 minutos por padrão; o Administrador o altera com "Backup automático ao iniciar sessão...").\n• A cada 24 horas enquanto a aplicação estiver aberta.\n• Alternam entre auto_domingo.bak … auto_sabado.bak (um por dia da semana) e são restaurados sem senha.
 PT	ayuda.Bitacora.titulo	Bitácula
 PT	ayuda.Bitacora	Consulta dos eventos do sistema com filtros por usuário, data, módulo e criticidade. Pode ser exportada para PDF.\n\n• Erros (XML): os erros inesperados ficam serializados em XML; é possível vê-los, importá-los de outro PC e exportá-los.
 PT	ayuda.MiPerfilForm.titulo	Meu perfil

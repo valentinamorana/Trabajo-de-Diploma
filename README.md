@@ -54,13 +54,10 @@ Instalador/                               Script de Inno Setup, DbInstaller (cli
                                           y credenciales iniciales. El .exe se genera en
                                           Instalador/Salida/ y no se versiona: el instalador
                                           firmado se distribuye como GitHub Release
-Documentación y diagramas/                Documentación y modelo de Enterprise Architect:
-  NEGOCIO_Y_PROCESOS.md                   Documento de referencia: reglas y procesos de negocio, roles y arquitectura
-  MAPA_DE_NAVEGACION.md                   Mapa de menús, formularios, procesos y roles
-  CHECKLIST_PRUEBA_MANUAL.md, GUIA_DEMO.md  Prueba manual y guion de la demo
-  WardrobeFlow - Modelo EA.eapx           Diagramas (Enterprise Architect; solo local, no se versiona)
 WardrobeFlow.slnx                         Solución de Visual Studio
 ```
+
+Los diagramas (casos de uso, clases, secuencia, actividad y DER) están en el modelo de Enterprise Architect (`.eapx`), que se mantiene fuera del repositorio (`*.eapx` está en `.gitignore`).
 
 ---
 
@@ -299,4 +296,4 @@ Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: 
 
 1. Compilar la solución en modo **Release** (y `Instalador/DbInstaller` en Release).
 2. Ejecutar `Instalador/compilar-y-firmar.ps1`: descarga `Instalador/Redist/SqlLocalDB.msi` si falta (instalador oficial de SQL Server 2022 Express LocalDB, no se versiona), compila `WardrobeFlow_Setup.iss` con Inno Setup y firma el `.exe` con SignTool, o con `Set-AuthenticodeSignature` si no está el Windows SDK. Antes de compilar corre todas las pruebas. Usa el certificado de WardrobeFlow instalado en el almacén de Windows (o `wardrobeflow.pfx` en `%USERPROFILE%`, que no se versiona); si no hay ninguno, el instalador queda sin firmar. El certificado es autofirmado: Windows puede mostrarlo como editor desconocido.
-3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_1.5.0.exe` (el número sale de `MyAppVersion` del `.iss`) (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal. Sobre una base existente, el instalador hace un backup, corre el script (que migra sin perder datos) y verifica que haya al menos un Administrador activo. La última versión publicada es la **1.4.0** (GitHub Releases, tag `v1.4.0`).
+3. Sale un único archivo: `Instalador/Salida/Instalador_WardrobeFlow_1.5.0.exe` (el número sale de `MyAppVersion` del `.iss`) (~64 MB), con la aplicación, la base de datos, los datos de prueba y SQL Server LocalDB adentro. En un equipo sin ningún SQL Server, la opción por defecto instala LocalDB y sigue la instalación normal. Sobre una base existente, el instalador hace un backup, corre el script (que migra sin perder datos) y verifica que haya al menos un Administrador activo. La última versión publicada es la **1.5.0** (GitHub Releases, tag `v1.5.0`).

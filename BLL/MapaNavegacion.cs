@@ -120,7 +120,7 @@ namespace BLL
             new Pantalla("Usuarios", "usuariosToolStripMenuItem",
                 "En Cuentas desbloquee cuentas o resetee contraseñas; en Datos administrativos cree usuarios con Nuevo usuario o cambie su rol."),
             new Pantalla("VersionHistorialForm", "historialUsuariosToolStripMenuItem",
-                "Elija un usuario y presione Cargar para ver sus versiones anteriores; puede restaurar una o exportarlas a XML."),
+                "Elija un usuario y presione Cargar para ver sus versiones anteriores; puede restaurar una o exportarlas a XML o JSON."),
             new Pantalla("GestorPermisos", "perfilesToolStripMenuItem",
                 "Elija un rol en el árbol para ver sus permisos; asigne o quite permisos y sub-roles con Asignar y Quitar."),
             new Pantalla("FormIdiomas", "idiomasToolStripMenuItem",

@@ -21,7 +21,7 @@ namespace GUI.Inteligencia
             public BE.PanelComercial Panel;
             public List<BE.Recomendacion> Recomendaciones = new List<BE.Recomendacion>();
             public List<BE.DecisionComercial> Decisiones = new List<BE.DecisionComercial>();
-            public Dictionary<int, decimal?> Medidos = new Dictionary<int, decimal?>();
+            public Dictionary<int, BE.MedicionDecision> Medidos = new Dictionary<int, BE.MedicionDecision>();
             public List<BE.ResultadoSimulacion> Escenarios = new List<BE.ResultadoSimulacion>();
             public List<BE.MedicionPromocion> Mediciones = new List<BE.MedicionPromocion>();
             public List<(string Titulo, byte[] Png)> Graficos = new List<(string, byte[])>();
@@ -46,7 +46,7 @@ namespace GUI.Inteligencia
                         Tr("cdc.informe.anterior", "Comparado con: {0:d} al {1:d}", p.AnteriorDesde, p.AnteriorHasta),
                         Tr("cdc.informe.plan", "Plan: {0}", p.NombrePlan ?? Tr("cdc.todoslosplanes", "Todos los planes")),
                         Tr("cdc.informe.usuario", "Emitido por: {0}", d.Usuario ?? "—"),
-                        Tr("cdc.informe.ciclo", "Analizar → recomendar/decidir → simular → aplicar promoción → medir resultado")
+                        Tr("cdc.informe.ciclo", "Analizar → recomendar/decidir → simular → aplicar → medir")
                     }
                 }
             };
@@ -84,12 +84,21 @@ namespace GUI.Inteligencia
             secciones.Add(seccionRecs);
 
             // ── Decisiones ──
+            // Totales sin las campañas en medición (BLL MedicionDecisiones.Resumir); si hay alguna, se aclara.
             if (d.Decisiones.Count > 0)
-                secciones.Add(new SeccionReporte
+            {
+                var resumen = BLL.Inteligencia.MedicionDecisiones.Resumir(d.Decisiones, d.Medidos);
+                var seccionDec = new SeccionReporte
                 {
                     Titulo = Tr("cdc.informe.decisiones", "Decisiones tomadas"),
-                    Tabla = TablaDecisiones(d.Decisiones, d.Medidos, out var encDec), Encabezados = encDec
-                });
+                    Tabla = TablaDecisiones(d.Decisiones, d.Medidos, out var encDec), Encabezados = encDec,
+                    Parrafos = { ResumenHistorial(resumen) }
+                };
+                if (resumen.EnMedicion > 0)
+                    seccionDec.Parrafos.Add(Tr("cdc.informe.enmedicion",
+                        "Campañas en medición: su ventana de 30 días todavía no cerró. Se muestra cuántos contactados respondieron y cuándo cierra; el importe se calcula al cierre y recién ahí entra en los totales."));
+                secciones.Add(seccionDec);
+            }
 
             // ── Escenarios ──
             if (d.Escenarios.Count > 0)
@@ -123,7 +132,7 @@ namespace GUI.Inteligencia
                 });
 
             // ── Metas del mes (InformeEjecutivo.Metas.cs) ──
-            AgregarSeccionMetas(secciones, d.Metas);
+            AgregarSeccionMetas(secciones, d.Metas, d.GraficoMetas);
 
             // ── Glosario ──
             var glos = Tabla("Métrica", "Fórmula y fuente", "Umbral y decisión");
@@ -163,15 +172,15 @@ namespace GUI.Inteligencia
             return t;
         }
 
-        public static DataTable TablaDecisiones(List<BE.DecisionComercial> lista, Dictionary<int, decimal?> medidos, out string[] encabezados)
+        public static DataTable TablaDecisiones(List<BE.DecisionComercial> lista, Dictionary<int, BE.MedicionDecision> medidos, out string[] encabezados)
         {
             var t = Tabla("ID", "Fecha", "Usuario", "Regla", "Titulo", "Opcion", "Estado", "Estimado", "Real", "Medido", "Desvio", "Referencia", "Motivo");
             foreach (var d in lista)
             {
-                decimal? medido = medidos != null && medidos.TryGetValue(d.IdDecision, out var m) ? m : null;
+                var medido = medidos != null && medidos.TryGetValue(d.IdDecision, out var m) ? m : null;
                 t.Rows.Add(d.IdDecision.ToString(), d.Fecha.ToString("g"), d.NombreUsuario ?? "", Regla(d.TipoRegla), d.Titulo,
                     (d.EsAlternativa ? "↳ " : "") + d.AccionElegida, Estado(d.Estado) + (d.PospuestaHasta.HasValue ? $" ({d.PospuestaHasta:d})" : ""),
-                    d.ImpactoEstimado.ToString("C0"), d.ResultadoReal?.ToString("C0") ?? "—", medido.HasValue ? medido.Value.ToString("C0") + (d.ResultadoParcial ? " " + Tr("cdc.medido.parcial", "(parcial)") : "") : "—",
+                    d.ImpactoEstimado.ToString("C0"), d.ResultadoReal?.ToString("C0") ?? "—", Medicion(medido),
                     d.Desvio?.ToString("+$#,0;-$#,0;0") ?? "—", d.Referencia.HasValue ? $"{d.TipoReferencia} #{d.Referencia}" : "", d.Motivo ?? "");
             }
             encabezados = new[] { "ID", Tr("cdc.col.fecha", "Fecha"), Tr("cdc.col.usuario", "Usuario"), Tr("cdc.col.regla", "Regla"),

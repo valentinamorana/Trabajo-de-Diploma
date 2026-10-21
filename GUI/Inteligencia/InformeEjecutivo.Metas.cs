@@ -9,17 +9,19 @@ namespace GUI.Inteligencia
 {
     /// <summary>
     /// Sección "Metas del mes" del Informe ejecutivo: cada meta con su objetivo, el valor real, el avance, la
-    /// proyección al cierre y el semáforo, más la explicación. Pura presentación de lo que calculó la BLL
-    /// (MetasComerciales).
+    /// proyección al cierre y el semáforo, más la explicación, y justo después el gráfico real contra
+    /// objetivo. Pura presentación de lo que calculó la BLL (MetasComerciales).
     /// </summary>
     internal static partial class InformeEjecutivo
     {
         public sealed partial class Datos
         {
             public List<BE.SeguimientoMeta> Metas = new List<BE.SeguimientoMeta>();
+            /// <summary>Imagen del gráfico "Metas: real contra objetivo"; va a continuación de la tabla de metas.</summary>
+            public byte[] GraficoMetas;
         }
 
-        private static void AgregarSeccionMetas(List<SeccionReporte> secciones, List<BE.SeguimientoMeta> metas)
+        private static void AgregarSeccionMetas(List<SeccionReporte> secciones, List<BE.SeguimientoMeta> metas, byte[] grafico)
         {
             if (metas == null || metas.Count == 0) return;
             secciones.Add(new SeccionReporte
@@ -28,6 +30,8 @@ namespace GUI.Inteligencia
                 Tabla = TablaMetas(metas, out var encabezados), Encabezados = encabezados,
                 Parrafos = metas.Select(m => $"• {R(m.NombreIndicador)}: {R(m.Explicacion)}").ToList()
             });
+            if (grafico != null)
+                secciones.Add(new SeccionReporte { Titulo = Tr("cdc.meta.grafico", "Metas: real contra objetivo"), Imagen = grafico });
         }
 
         public static DataTable TablaMetas(List<BE.SeguimientoMeta> metas, out string[] encabezados)

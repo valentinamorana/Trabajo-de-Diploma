@@ -82,9 +82,16 @@ relativas al día en que se cargó (o restableció) la demo.
                                                      comerciales: 6 meses de cobros, altas y bajas
                                                      por plan, pedidos y stock (tendencia creciente
                                                      con el pico de bajas del Básico en los últimos
-                                                     2 meses). Pestañas Analizar, Recomendaciones
-                                                     (aceptar / descartar / posponer), Simulador,
-                                                     Medir resultado e Informe ejecutivo (PDF)
+                                                     2 meses). Pestañas: 1. Analizar, 1b. Cohortes
+                                                     (retención por mes de alta), 2. Recomendaciones
+                                                     (aceptar / descartar / posponer y ejecutar la
+                                                     acción), 3. Historial de decisiones (las 3
+                                                     sembradas, estimado vs real), 4. Simulador,
+                                                     5. Medir resultado, Metas (MRR, % de bajas y
+                                                     ocupación, con semáforo) y el botón Informe
+                                                     ejecutivo (PDF). Al iniciar sesión, gcomercial
+                                                     ve los avisos comerciales (recomendaciones de
+                                                     prioridad Alta y metas en riesgo)
   PN03 Gestión de Promociones          admcomercial  En revisión, Vigente, Rechazada (reformular),
                                                      Vigente con solicitud de baja (atenderla),
                                                      Dada de baja y Vencida
@@ -120,7 +127,7 @@ relativas al día en que se cargó (o restableció) la demo.
   Permisos / Usuarios
   Diagnóstico de Integridad            admin         DVH/DVV de todas las tablas protegidas
   Historial de Cambios (usuarios) y    admin         usuario "vendedor": 2 versiones precargadas
-  serialización a XML                                (email anterior y actual). Exportar
+  serialización a XML/JSON                           (email anterior y actual). Exportar
                                                      versiones…, Importar versiones… y
                                                      restaurar la versión importada
 
@@ -140,9 +147,32 @@ sección 21z3b del script; el apellido de cada cliente dice qué caso muestra):
   - contrataciones pagadas, pendientes, canceladas y anuladas; cobros y
     renovaciones mensuales; desistimientos; cargos por prenda dañada;
   - sugerencias y promociones en todos los estados de PN03;
-  - 3 decisiones del Centro de decisiones comerciales (gcomercial): una
-    Ejecutada (la sugerencia que originó la promoción Vencida, con impacto
-    estimado y resultado real), una Pospuesta y una Descartada con motivo.
+  - 3 decisiones sembradas del Centro de decisiones comerciales (gcomercial):
+    una Ejecutada (la sugerencia que originó la promoción Vencida, con impacto
+    estimado y resultado real), una Pospuesta (la campaña de renovación, oculta
+    5 días) y una Descartada con motivo (la baja de las prendas sin rotación);
+  - metas comerciales relativas a hoy (pestaña Metas, semáforo y avisos al
+    iniciar sesión): MRR del mes cumplida, ocupación del mes en riesgo, % de
+    bajas del mes (máximo 30 %), MRR del mes anterior no cumplida y MRR de hace
+    dos meses cumplida.
+
+Guía de primer uso
+------------------
+En el primer ingreso de cada usuario se abre "Bienvenido a WardrobeFlow" (5
+pasos para su rol) y vuelve a aparecer en cada ingreso hasta marcar "No volver
+a mostrar al iniciar sesión"; se reabre desde Sesión → Ver guía de inicio.
+Para que no aparezca durante la defensa, ejecute la aplicación con el
+parámetro /singuia (por ejemplo: GUI.exe /singuia).
+
+Después de actualizar desde 1.5.0 (paso obligatorio)
+-----------------------------------------------------
+Después de actualizar desde 1.5.0, ejecute Backup → Restablecer datos de demo
+(admin → Administrar → Sistema → Backup y Restauración → "Restablecer datos de
+demo..."). La actualización migra la base sin tocar los datos: una base 1.5.0
+conserva su demo anterior, sin las metas, las decisiones sembradas ni la
+historia que usan el Centro de decisiones, las cohortes y el Informe ejecutivo
+(se ven pestañas vacías o incompletas). El instalador no la recarga solo
+porque borraría los datos cargados.
 
 Restablecer los datos de demo (antes de la defensa)
 ---------------------------------------------------

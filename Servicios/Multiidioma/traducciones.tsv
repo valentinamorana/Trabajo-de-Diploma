@@ -8556,10 +8556,10 @@ ES	cdc.informe.usuario	Emitido por: {0}
 EN	cdc.informe.usuario	Issued by: {0}
 RU	cdc.informe.usuario	Составил: {0}
 PT	cdc.informe.usuario	Emitido por: {0}
-ES	cdc.informe.ciclo	Analizar → recomendar/decidir → simular → aplicar promoción → medir resultado
-EN	cdc.informe.ciclo	Analyse → recommend/decide → simulate → apply promotion → measure results
-RU	cdc.informe.ciclo	Анализ → рекомендация/решение → моделирование → запуск акции → оценка результата
-PT	cdc.informe.ciclo	Analisar → recomendar/decidir → simular → aplicar promoção → medir resultado
+ES	cdc.informe.ciclo	Analizar → recomendar/decidir → simular → aplicar → medir
+EN	cdc.informe.ciclo	Analyse → recommend/decide → simulate → apply → measure
+RU	cdc.informe.ciclo	Анализ → рекомендация/решение → моделирование → применение → оценка
+PT	cdc.informe.ciclo	Analisar → recomendar/decidir → simular → aplicar → medir
 ES	cdc.informe.kpi	Resumen de indicadores
 EN	cdc.informe.kpi	Indicator summary
 RU	cdc.informe.kpi	Сводка показателей
@@ -9488,10 +9488,10 @@ ES	ayuda.UmbralesComercialesDialog.titulo	Umbrales del motor de recomendaciones
 EN	ayuda.UmbralesComercialesDialog.titulo	Recommendation engine thresholds
 RU	ayuda.UmbralesComercialesDialog.titulo	Пороги системы рекомендаций
 PT	ayuda.UmbralesComercialesDialog.titulo	Limites do motor de recomendações
-ES	ayuda.UmbralesComercialesDialog	Cada umbral decide cuándo el motor del Centro de decisiones propone una acción. Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.\n\n• Restablecer valores de fábrica: vuelve a los valores por defecto (sin guardar todavía).\n• El descuento máximo no puede ser menor que el base, y la ocupación mínima tiene que ser menor que la máxima.
-EN	ayuda.UmbralesComercialesDialog	Each threshold decides when the decision center engine proposes an action. Edit the Value column (within the stated range) and press Save; changes apply from the next analysis and are logged.\n\n• Restore default values: goes back to the default values (not saved yet).\n• The maximum discount cannot be lower than the base one, and the minimum occupancy must be lower than the maximum.
-RU	ayuda.UmbralesComercialesDialog	Каждый порог определяет, когда система центра решений предлагает действие. Измените столбец «Значение» (в указанном диапазоне) и нажмите «Сохранить»; изменения действуют со следующего анализа и попадают в журнал.\n\n• «Вернуть значения по умолчанию»: восстанавливает исходные значения (пока без сохранения).\n• Максимальная скидка не может быть меньше базовой, а минимальная загрузка должна быть меньше максимальной.
-PT	ayuda.UmbralesComercialesDialog	Cada limite decide quando o motor da Central de decisões propõe uma ação. Edite a coluna Valor (dentro da faixa indicada) e clique em Salvar; as alterações valem a partir da próxima análise e ficam no registro.\n\n• Restaurar valores padrão: volta aos valores padrão (ainda sem salvar).\n• O desconto máximo não pode ser menor que o base, e a ocupação mínima deve ser menor que a máxima.
+ES	ayuda.UmbralesComercialesDialog	Cada umbral decide cuándo el motor del Centro de decisiones propone una acción. Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.\n\n• Restablecer valores de fábrica: vuelve a los valores por defecto (sin guardar todavía).\n• El descuento máximo no puede ser menor que el base.
+EN	ayuda.UmbralesComercialesDialog	Each threshold decides when the decision center engine proposes an action. Edit the Value column (within the stated range) and press Save; changes apply from the next analysis and are logged.\n\n• Restore default values: goes back to the default values (not saved yet).\n• The maximum discount cannot be lower than the base one.
+RU	ayuda.UmbralesComercialesDialog	Каждый порог определяет, когда система центра решений предлагает действие. Измените столбец «Значение» (в указанном диапазоне) и нажмите «Сохранить»; изменения действуют со следующего анализа и попадают в журнал.\n\n• «Вернуть значения по умолчанию»: восстанавливает исходные значения (пока без сохранения).\n• Максимальная скидка не может быть меньше базовой.
+PT	ayuda.UmbralesComercialesDialog	Cada limite decide quando o motor da Central de decisões propõe uma ação. Edite a coluna Valor (dentro da faixa indicada) e clique em Salvar; as alterações valem a partir da próxima análise e ficam no registro.\n\n• Restaurar valores padrão: volta aos valores padrão (ainda sem salvar).\n• O desconto máximo não pode ser menor que o base.
 ES	cdc.btn.csv	Exportar a .CSV
 EN	cdc.btn.csv	Export to .CSV
 RU	cdc.btn.csv	Выгрузить в .CSV
@@ -9552,10 +9552,10 @@ ES	cdc.meta.tip.mes	Las metas se editan para el mes en curso y los siguientes; l
 EN	cdc.meta.tip.mes	Goals can be edited for the current month and the following ones; closed months are read-only.
 RU	cdc.meta.tip.mes	Цели редактируются для текущего и следующих месяцев; закрытые месяцы доступны только для просмотра.
 PT	cdc.meta.tip.mes	As metas são editadas para o mês em curso e os seguintes; os meses fechados são apenas consultados.
-ES	cdc.meta.ninguna	No hay metas para {0:MMMM yyyy}. Elija un indicador, escriba el objetivo y pulse Guardar meta.
-EN	cdc.meta.ninguna	There are no goals for {0:MMMM yyyy}. Choose an indicator, enter the target and press Save goal.
-RU	cdc.meta.ninguna	На {0:MMMM yyyy} целей нет. Выберите показатель, введите цель и нажмите «Сохранить цель».
-PT	cdc.meta.ninguna	Não há metas para {0:MMMM yyyy}. Escolha um indicador, digite o objetivo e clique em Salvar meta.
+ES	cdc.meta.ninguna	No hay metas para {0:yyyy-MM}. Elija un indicador, escriba el objetivo y pulse Guardar meta.
+EN	cdc.meta.ninguna	There are no goals for {0:yyyy-MM}. Choose an indicator, enter the target and press Save goal.
+RU	cdc.meta.ninguna	На {0:yyyy-MM} целей нет. Выберите показатель, введите цель и нажмите «Сохранить цель».
+PT	cdc.meta.ninguna	Não há metas para {0:yyyy-MM}. Escolha um indicador, digite o objetivo e clique em Salvar meta.
 ES	cdc.meta.maximo	(máx.)
 EN	cdc.meta.maximo	(max.)
 RU	cdc.meta.maximo	(макс.)
@@ -9588,14 +9588,14 @@ ES	cdc.meta.soloconsulta	Mes cerrado (o demasiado lejano): sus metas solo se con
 EN	cdc.meta.soloconsulta	Closed (or too distant) month: its goals are read-only.
 RU	cdc.meta.soloconsulta	Закрытый (или слишком далёкий) месяц: цели доступны только для просмотра.
 PT	cdc.meta.soloconsulta	Mês fechado (ou distante demais): suas metas são apenas consultadas.
-ES	cdc.meta.guardada	Meta guardada: {0} para {1:MMMM yyyy}.
-EN	cdc.meta.guardada	Goal saved: {0} for {1:MMMM yyyy}.
-RU	cdc.meta.guardada	Цель сохранена: {0} на {1:MMMM yyyy}.
-PT	cdc.meta.guardada	Meta salva: {0} para {1:MMMM yyyy}.
-ES	cdc.meta.confirmareliminar	¿Eliminar la meta de {0} para {1:MMMM yyyy}?
-EN	cdc.meta.confirmareliminar	Delete the {0} goal for {1:MMMM yyyy}?
-RU	cdc.meta.confirmareliminar	Удалить цель «{0}» на {1:MMMM yyyy}?
-PT	cdc.meta.confirmareliminar	Excluir a meta de {0} para {1:MMMM yyyy}?
+ES	cdc.meta.guardada	Meta guardada: {0} para {1:yyyy-MM}.
+EN	cdc.meta.guardada	Goal saved: {0} for {1:yyyy-MM}.
+RU	cdc.meta.guardada	Цель сохранена: {0} на {1:yyyy-MM}.
+PT	cdc.meta.guardada	Meta salva: {0} para {1:yyyy-MM}.
+ES	cdc.meta.confirmareliminar	¿Eliminar la meta de {0} para {1:yyyy-MM}?
+EN	cdc.meta.confirmareliminar	Delete the {0} goal for {1:yyyy-MM}?
+RU	cdc.meta.confirmareliminar	Удалить цель «{0}» на {1:yyyy-MM}?
+PT	cdc.meta.confirmareliminar	Excluir a meta de {0} para {1:yyyy-MM}?
 ES	cdc.meta.eliminada	Meta eliminada.
 EN	cdc.meta.eliminada	Goal deleted.
 RU	cdc.meta.eliminada	Цель удалена.
@@ -10152,10 +10152,10 @@ ES	ux.hint.Usuarios	En Cuentas desbloquee cuentas o resetee contraseñas; en Dat
 EN	ux.hint.Usuarios	In Accounts, unlock accounts or reset passwords; in Administrative data, create users with New user or change their role.
 RU	ux.hint.Usuarios	На вкладке «Учётные записи» разблокируйте учётные записи или сбросьте пароли; на вкладке административных данных создайте пользователя («Новый пользователь») или смените роль.
 PT	ux.hint.Usuarios	Em Contas, desbloqueie contas ou redefina senhas; em Dados administrativos, crie usuários com Novo usuário ou mude o perfil.
-ES	ux.hint.VersionHistorialForm	Elija un usuario y presione Cargar para ver sus versiones anteriores; puede restaurar una o exportarlas a XML.
-EN	ux.hint.VersionHistorialForm	Select a user and press Load to see their previous versions; you can restore one or export them to XML.
-RU	ux.hint.VersionHistorialForm	Выберите пользователя и нажмите «Загрузить», чтобы увидеть его предыдущие версии; одну из них можно восстановить или выгрузить все в XML.
-PT	ux.hint.VersionHistorialForm	Escolha um usuário e pressione Carregar para ver suas versões anteriores; você pode restaurar uma ou exportá-las para XML.
+ES	ux.hint.VersionHistorialForm	Elija un usuario y presione Cargar para ver sus versiones anteriores; puede restaurar una o exportarlas a XML o JSON.
+EN	ux.hint.VersionHistorialForm	Select a user and press Load to see their previous versions; you can restore one or export them to XML or JSON.
+RU	ux.hint.VersionHistorialForm	Выберите пользователя и нажмите «Загрузить», чтобы увидеть его предыдущие версии; одну из них можно восстановить или выгрузить все в XML или JSON.
+PT	ux.hint.VersionHistorialForm	Escolha um usuário e pressione Carregar para ver suas versões anteriores; você pode restaurar uma ou exportá-las para XML ou JSON.
 ES	ux.hint.GestorPermisos	Elija un rol en el árbol para ver sus permisos; asigne o quite permisos y sub-roles con Asignar y Quitar.
 EN	ux.hint.GestorPermisos	Select a role in the tree to see its permissions; add or remove permissions and sub-roles with Assign and Remove.
 RU	ux.hint.GestorPermisos	Выберите роль в дереве, чтобы увидеть её права; назначайте и убирайте права и подроли кнопками «Назначить» и «Убрать».
@@ -10624,10 +10624,26 @@ ES	cdc.msg.prendassinregistrar	Se cambiaron {0} prenda(s) ({1}), pero la decisi�
 EN	cdc.msg.prendassinregistrar	{0} garment(s) were changed ({1}), but decision #{2} could not be marked as executed ({3}). The garment changes are in the log.
 RU	cdc.msg.prendassinregistrar	Изменено вещей: {0} ({1}), но решение №{2} не удалось отметить как выполненное ({3}). Изменения вещей записаны в журнал.
 PT	cdc.msg.prendassinregistrar	{0} peça(s) foram alteradas ({1}), mas a decisão #{2} não pôde ser marcada como executada ({3}). As mudanças das peças ficaram no log.
-ES	cdc.medido.parcial	(parcial)
-EN	cdc.medido.parcial	(partial)
-RU	cdc.medido.parcial	(частично)
-PT	cdc.medido.parcial	(parcial)
+ES	cdc.medido.enmedicion	En medición: {0} de {1} respondieron (cierra el {2:d})
+EN	cdc.medido.enmedicion	Being measured: {0} of {1} responded (closes on {2:d})
+RU	cdc.medido.enmedicion	Идёт измерение: ответили {0} из {1} (закрывается {2:d})
+PT	cdc.medido.enmedicion	Em medição: {0} de {1} responderam (fecha em {2:d})
+ES	cdc.hist.resumenmedido	medido por el sistema: {0} (estimado {1:C0} → medido {2:C0})
+EN	cdc.hist.resumenmedido	measured by the system: {0} (estimated {1:C0} → measured {2:C0})
+RU	cdc.hist.resumenmedido	измерено системой: {0} (оценка {1:C0} → измерено {2:C0})
+PT	cdc.hist.resumenmedido	medido pelo sistema: {0} (estimado {1:C0} → medido {2:C0})
+ES	cdc.hist.resumenenmedicion	{0} campaña(s) en medición: no se suman hasta que cierra su ventana de 30 días
+EN	cdc.hist.resumenenmedicion	{0} campaign(s) being measured: not added until their 30-day window closes
+RU	cdc.hist.resumenenmedicion	Кампаний в процессе измерения: {0}; они не суммируются, пока не закроется их 30-дневное окно
+PT	cdc.hist.resumenenmedicion	{0} campanha(s) em medição: não são somadas até fechar sua janela de 30 dias
+ES	cdc.informe.enmedicion	Campañas en medición: su ventana de 30 días todavía no cerró. Se muestra cuántos contactados respondieron y cuándo cierra; el importe se calcula al cierre y recién ahí entra en los totales.
+EN	cdc.informe.enmedicion	Campaigns being measured: their 30-day window has not closed yet. The report shows how many contacted customers responded and when it closes; the amount is calculated at closing and only then enters the totals.
+RU	cdc.informe.enmedicion	Кампании в процессе измерения: их 30-дневное окно ещё не закрыто. Показано, сколько охваченных клиентов ответили и когда окно закрывается; сумма рассчитывается при закрытии и только тогда входит в итоги.
+PT	cdc.informe.enmedicion	Campanhas em medição: sua janela de 30 dias ainda não fechou. Mostra-se quantos contatados responderam e quando fecha; o valor é calculado no fechamento e só então entra nos totais.
+ES	cdc.resultado.enmedicion	{0}; el sistema calcula el importe al cierre.
+EN	cdc.resultado.enmedicion	{0}; the system calculates the amount at closing.
+RU	cdc.resultado.enmedicion	{0}; система рассчитает сумму при закрытии.
+PT	cdc.resultado.enmedicion	{0}; o sistema calcula o valor no fechamento.
 ES	err.bll.decision.abierta	La recomendación ya tiene una decisión abierta (aceptada o pospuesta). Actualice el análisis o resuélvala en el historial.
 EN	err.bll.decision.abierta	The recommendation already has an open decision (accepted or postponed). Refresh the analysis or resolve it in the history.
 RU	err.bll.decision.abierta	У рекомендации уже есть открытое решение (принятое или отложенное). Обновите анализ или завершите его в истории.
@@ -10644,11 +10660,19 @@ ES	glos.campania.nombre	Resultado de una campaña de contacto
 EN	glos.campania.nombre	Result of a contact campaign
 RU	glos.campania.nombre	Результат кампании обзвона
 PT	glos.campania.nombre	Resultado de uma campanha de contato
-ES	glos.campania.formula	(respondieron − tasa base × contactados) × valor por respuesta, en los 30 días desde la ejecución (parcial hasta que cierran). Responde: renovó o cambió de plan (upgrade: pasó a un plan más caro). Tasa base: la de los planes contactados en los 30 días anteriores. Valor: precio actual del plan (bajas: × horizonte; upgrade: diferencia × horizonte). Cada cliente cuenta para la primera campaña que lo contactó.
-EN	glos.campania.formula	(responded − base rate × contacted) × value per response, over the 30 days from execution (partial until they close). Responds: renewed or changed plan (upgrade: moved to a more expensive plan). Base rate: that of the contacted plans in the previous 30 days. Value: current plan price (churn: × horizon; upgrade: difference × horizon). Each customer counts for the first campaign that contacted them.
-RU	glos.campania.formula	(ответили − базовая доля × охвачено) × ценность ответа, за 30 дней с выполнения (частично, пока окно не закрыто). Ответ: продлил или сменил тариф (апгрейд: перешёл на более дорогой). Базовая доля — у тех же тарифов за 30 дней до этого. Ценность: текущая цена тарифа (отказы: × горизонт; апгрейд: разница × горизонт). Каждый клиент учитывается в первой кампании, которая с ним связалась.
-PT	glos.campania.formula	(responderam − taxa base × contatados) × valor por resposta, nos 30 dias desde a execução (parcial até fecharem). Responde: renovou ou mudou de plano (upgrade: passou a um plano mais caro). Taxa base: a dos planos contatados nos 30 dias anteriores. Valor: preço atual do plano (cancelamentos: × horizonte; upgrade: diferença × horizonte). Cada cliente conta para a primeira campanha que o contatou.
+ES	glos.campania.formula	(respondieron − tasa base × comparables) × valor por respuesta, en los 30 días desde la ejecución. Comparables: los contactados que resolvieron una renovación en la ventana (renovaron, cambiaron de plan o se dieron de baja); un contactado sin movimiento no cuenta ni a favor ni en contra. Responde: renovó o cambió de plan (upgrade: pasó a un plan más caro). Tasa base: con la misma regla, en los 30 días anteriores, de los clientes de los planes contactados que resolvieron una renovación, la parte que respondió. Mientras la ventana está abierta no hay importe: se muestra el avance (respondieron de contactados y el día en que cierra) y no se suma en los totales; al cerrar se muestra el resultado, aunque sea negativo. Valor: precio actual del plan (bajas: × horizonte; upgrade: diferencia × horizonte). Cada cliente cuenta para la primera campaña que lo contactó.
+EN	glos.campania.formula	(responded − base rate × comparable) × value per response, over the 30 days from execution. Comparable: the contacted customers who resolved a renewal in the window (renewed, changed plan or cancelled); a contacted customer with no movement counts neither for nor against. Responds: renewed or changed plan (upgrade: moved to a more expensive plan). Base rate: with the same rule, in the previous 30 days, of the customers on the contacted plans who resolved a renewal, the share that responded. While the window is open there is no amount: the progress is shown (responded out of contacted and the day it closes) and it is not added to the totals; at closing the result is shown, even if negative. Value: current plan price (churn: × horizon; upgrade: difference × horizon). Each customer counts for the first campaign that contacted them.
+RU	glos.campania.formula	(ответили − базовая доля × сопоставимые) × ценность ответа, за 30 дней с выполнения. Сопоставимые: охваченные клиенты, у которых в окне было решение по продлению (продлили, сменили тариф или отказались); охваченный клиент без движения не учитывается ни в плюс, ни в минус. Ответ: продлил или сменил тариф (апгрейд: перешёл на более дорогой). Базовая доля: по тому же правилу, за 30 дней до этого, из клиентов охваченных тарифов, у которых было решение по продлению, доля ответивших. Пока окно открыто, суммы нет: показан ход измерения (сколько из охваченных ответили и день закрытия), и в итоги она не входит; при закрытии показывается результат, даже отрицательный. Ценность: текущая цена тарифа (отказы: × горизонт; апгрейд: разница × горизонт). Каждый клиент учитывается в первой кампании, которая с ним связалась.
+PT	glos.campania.formula	(responderam − taxa base × comparáveis) × valor por resposta, nos 30 dias desde a execução. Comparáveis: os contatados que resolveram uma renovação na janela (renovaram, mudaram de plano ou cancelaram); um contatado sem movimento não conta nem a favor nem contra. Responde: renovou ou mudou de plano (upgrade: passou a um plano mais caro). Taxa base: com a mesma regra, nos 30 dias anteriores, dos clientes dos planos contatados que resolveram uma renovação, a parte que respondeu. Enquanto a janela está aberta não há valor: mostra-se o andamento (responderam de contatados e o dia em que fecha) e não é somado nos totais; ao fechar mostra-se o resultado, mesmo que negativo. Valor: preço atual do plano (cancelamentos: × horizonte; upgrade: diferença × horizonte). Cada cliente conta para a primeira campanha que o contatou.
 ES	glos.campania.decision	Es lo que la campaña logró por encima de las renovaciones de rutina; se compara con el impacto estimado.
 EN	glos.campania.decision	It is what the campaign achieved above routine renewals; it is compared with the estimated impact.
 RU	glos.campania.decision	Это то, чего кампания добилась сверх обычных продлений; сравнивается с оценкой эффекта.
 PT	glos.campania.decision	É o que a campanha conseguiu acima das renovações de rotina; compara-se com o impacto estimado.
+ES	num.invalido.coma	Use la coma como separador decimal (por ejemplo, 21600,50): el punto solo separa los miles.
+EN	num.invalido.coma	Use a comma as the decimal separator (for example, 21600,50): the dot only separates thousands.
+RU	num.invalido.coma	Используйте запятую как десятичный разделитель (например, 21600,50): точка только разделяет тысячи.
+PT	num.invalido.coma	Use a vírgula como separador decimal (por exemplo, 21600,50): o ponto só separa os milhares.
+ES	num.invalido.formato	Número no válido: use la coma para los decimales y el punto solo para separar los miles en grupos de tres (por ejemplo, 21.600,50).
+EN	num.invalido.formato	Invalid number: use a comma for decimals and the dot only to separate thousands in groups of three (for example, 21.600,50).
+RU	num.invalido.formato	Некорректное число: используйте запятую для дробной части, а точку — только для разделения тысяч группами по три цифры (например, 21.600,50).
+PT	num.invalido.formato	Número inválido: use a vírgula para os decimais e o ponto só para separar os milhares em grupos de três (por exemplo, 21.600,50).

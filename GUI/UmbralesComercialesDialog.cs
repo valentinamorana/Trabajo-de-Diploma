@@ -83,9 +83,10 @@ namespace GUI
         private void DgvUmbrales_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
             if (e.ColumnIndex != colValor.Index) return;
-            if (!decimal.TryParse(Convert.ToString(e.FormattedValue), out _))
+            // Coma decimal y punto solo para miles: "2.5" se rechaza con su explicación (no se lee como 25).
+            if (!EntradaNumerica.TryLeer(Convert.ToString(e.FormattedValue), Tr("cdc.umbrales.numero", "Ingrese un número."), out _, out var error))
             {
-                MostrarError(Tr("cdc.umbrales.numero", "Ingrese un número."));
+                MostrarError(error);
                 e.Cancel = true;
             }
         }
@@ -98,9 +99,9 @@ namespace GUI
             foreach (DataGridViewRow r in dgvUmbrales.Rows)
             {
                 var u = (BE.UmbralComercial)r.Tag;
-                if (!decimal.TryParse(Convert.ToString(r.Cells[colValor.Index].Value), out var v))
+                if (!EntradaNumerica.TryLeer(Convert.ToString(r.Cells[colValor.Index].Value), Tr("cdc.umbrales.numero", "Ingrese un número."), out var v, out var error))
                 {
-                    MostrarError(Tr("cdc.umbrales.numero", "Ingrese un número."));
+                    MostrarError(error);
                     return;
                 }
                 valores[u.Clave] = v;

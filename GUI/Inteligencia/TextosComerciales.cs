@@ -111,6 +111,42 @@ namespace GUI.Inteligencia
         }
 
         /// <summary>
+        /// Resultado medido por el sistema (BLL InteligenciaComercial.MedirDecisiones): el importe si es final,
+        /// el avance si la campaña sigue en medición ("En medición: 2 de 6 respondieron (cierra el 20/11/2026)")
+        /// y "—" sin dato. Una campaña en medición nunca muestra un importe.
+        /// </summary>
+        public static string Medicion(BE.MedicionDecision m)
+        {
+            if (m == null) return "—";
+            switch (m.Estado)
+            {
+                case BE.EstadoMedicion.Medido:
+                    return m.Valor.HasValue ? m.Valor.Value.ToString("C0") : "—";
+                case BE.EstadoMedicion.EnMedicion:
+                    return Tr("cdc.medido.enmedicion", "En medición: {0} de {1} respondieron (cierra el {2:d})",
+                              m.Respondieron, m.Contactados, m.FechaCierre ?? DateTime.Today);
+                default:
+                    return "—";
+            }
+        }
+
+        /// <summary>Totales del historial de decisiones (pantalla e Informe ejecutivo); los calcula la BLL
+        /// (MedicionDecisiones.Resumir) y las campañas en medición no entran en las sumas.</summary>
+        public static string ResumenHistorial(BE.ResumenMediciones r)
+        {
+            var sb = new StringBuilder(Tr("cdc.hist.resumen",
+                "{0} decisión(es) · {1} aceptada(s) o ejecutada(s): estimado {2:C0} · con resultado real: {3} (estimado {4:C0} → real {5:C0})",
+                r.Decisiones, r.Aceptadas, r.EstimadoAceptadas, r.ConReal, r.EstimadoConReal, r.Real));
+            if (r.Medidas > 0)
+                sb.Append(" · ").Append(Tr("cdc.hist.resumenmedido", "medido por el sistema: {0} (estimado {1:C0} → medido {2:C0})",
+                    r.Medidas, r.EstimadoMedidas, r.Medido));
+            if (r.EnMedicion > 0)
+                sb.Append(" · ").Append(Tr("cdc.hist.resumenenmedicion",
+                    "{0} campaña(s) en medición: no se suman hasta que cierra su ventana de 30 días", r.EnMedicion));
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Mes en formato neutro ("2026-05"): la cultura de la app es fija (es-AR) y los idiomas no traen la
         /// suya, así que un nombre de mes saldría en español también en EN, PT o RU. Lo usan la tendencia y
         /// las cohortes (grilla, gráfico, mensajes e informe).
@@ -186,7 +222,7 @@ namespace GUI.Inteligencia
             new[] { "Beneficio neto / costo del descuento × 100.", "Debajo del ROI mínimo (20 %), la promoción es riesgosa." },
             new[] { "Retención durante la vigencia − retención del período anterior (pp). Fuente: AnalisisPromociones.", "Debajo del 50 % de lo esperado → dar de baja; cumple y vence pronto → extender." },
             new[] { "Clientes en juego × mejora × precio × horizonte − total descontado.", "Se compara con el impacto estimado de la decisión (cierre del ciclo)." },
-            new[] { "(respondieron − tasa base × contactados) × valor por respuesta, en los 30 días desde la ejecución (parcial hasta que cierran). Responde: renovó o cambió de plan (upgrade: pasó a un plan más caro). Tasa base: la de los planes contactados en los 30 días anteriores. Valor: precio actual del plan (bajas: × horizonte; upgrade: diferencia × horizonte). Cada cliente cuenta para la primera campaña que lo contactó.", "Es lo que la campaña logró por encima de las renovaciones de rutina; se compara con el impacto estimado." },
+            new[] { "(respondieron − tasa base × comparables) × valor por respuesta, en los 30 días desde la ejecución. Comparables: los contactados que resolvieron una renovación en la ventana (renovaron, cambiaron de plan o se dieron de baja); un contactado sin movimiento no cuenta ni a favor ni en contra. Responde: renovó o cambió de plan (upgrade: pasó a un plan más caro). Tasa base: con la misma regla, en los 30 días anteriores, de los clientes de los planes contactados que resolvieron una renovación, la parte que respondió. Mientras la ventana está abierta no hay importe: se muestra el avance (respondieron de contactados y el día en que cierra) y no se suma en los totales; al cerrar se muestra el resultado, aunque sea negativo. Valor: precio actual del plan (bajas: × horizonte; upgrade: diferencia × horizonte). Cada cliente cuenta para la primera campaña que lo contactó.", "Es lo que la campaña logró por encima de las renovaciones de rutina; se compara con el impacto estimado." },
             new[] { "Mayor es mejor (MRR, ocupación): real / objetivo × 100. Menor es mejor (% de bajas): real / máximo permitido × 100. El real se mide con las fórmulas de los KPI, al cierre del mes (o a hoy en el mes en curso).", "Mayor es mejor: 100 % o más se cumple. Menor es mejor: hasta 100 % se cumple." },
             new[] { "Valor de hoy + pendiente × días que faltan del mes, con la pendiente de la regresión lineal por mínimos cuadrados (la misma de la tendencia) sobre el valor del indicador al cierre de cada día transcurrido. El último día del mes es el valor real. Desde el día 7 del mes; la ocupación es una foto del día y no se proyecta.", "Si la proyección no llega al objetivo, la meta está en riesgo." },
             new[] { "Mes futuro: pendiente. Mes cerrado: cumplida o no cumplida. Mes en curso: con la proyección (o el valor de hoy si no hay proyección): cumple el real y la proyección → cumplida; cumple la proyección → en camino; si no → en riesgo; un máximo acumulativo (% de bajas) ya superado → no cumplida.", "Una meta en riesgo sube un nivel la prioridad de las recomendaciones que la mueven y se avisa al iniciar sesión." }

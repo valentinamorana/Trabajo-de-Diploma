@@ -57,7 +57,8 @@ namespace GUI.Inteligencia
             };
             foreach (var p in s.Serie.OrderBy(x => x.Mes))
             {
-                string etiqueta = p.Mes.ToString("MMM yy") + (p.EsMesEnCurso ? " *" : "");
+                // "yyyy-MM" neutro (como las cohortes): la cultura es-AR daría el nombre del mes en español en EN/PT/RU.
+                string etiqueta = Mes(p.Mes) + (p.EsMesEnCurso ? " *" : "");
                 int i = real.Points.AddXY(etiqueta, (double)(p.Real ?? 0m));
                 if (!p.Real.HasValue) real.Points[i].IsEmpty = true;
                 else

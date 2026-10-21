@@ -3729,7 +3729,7 @@ GO
 -- WardrobeFlow — 20o. PN03: INTELIGENCIA COMERCIAL — CENTRO DE DECISIONES COMERCIALES
 -- ------------------------------------------------------------
 -- PN03 pasa a ser «Inteligencia comercial y promociones»: analizar → recomendar/decidir →
--- simular → aplicar promoción → medir resultado (GUI.CentroDecisionesForm, BLL.Inteligencia).
+-- simular → aplicar → medir (GUI.CentroDecisionesForm, BLL.Inteligencia).
 --   · Tabla DecisionComercial: lo que Gerencia decidió sobre cada recomendación del motor de
 --     reglas (BLL.Inteligencia.MotorRecomendaciones). Estado (BE.EstadoDecision): 0=Pendiente,
 --     1=Aceptada, 2=Descartada (motivo obligatorio), 3=Pospuesta (con PospuestaHasta),
@@ -4390,7 +4390,7 @@ GO
 --     originó la promoción Vencida, con impacto estimado y resultado real), una Pospuesta y una
 --     Descartada con motivo; y metas del mes y de los meses anteriores (paso 9b2): MRR cumplida,
 --     ocupación del stock en riesgo y la del mes anterior no cumplida.
---   Usuarios: 2 versiones (Memento) del usuario vendedor para la serialización a XML (paso 9c).
+--   Usuarios: 2 versiones (Memento) del usuario vendedor para la serialización a XML/JSON (paso 9c).
 --   PN04 Devoluciones (deposito) y logística (logistico)
 --     Julia EnInspeccion .......... devolvió el "Blazer Azul M" ayer → cola de Inspección de devolución
 --     Hernan DevolucionPendiente .. pedido Entregado hace 10 días → Registrar devolución
@@ -5275,7 +5275,7 @@ BEGIN
     END
 
     -- ── 9c. Versiones (Memento) del usuario 'vendedor' ─────────────────────────────
-    -- Para mostrar la exportación/importación a XML y la restauración sin editar antes un usuario:
+    -- Para mostrar la exportación/importación a XML/JSON y la restauración sin editar antes un usuario:
     -- una versión inicial con el email anterior y otra con el cambio al email actual (fechas
     -- relativas a hoy). Se recrean solo si el vendedor no tiene otras versiones que estas dos (no se
     -- pisa un historial real). HistorialUsuario no lleva dígito verificador.
@@ -6388,6 +6388,127 @@ BEGIN
 END
 GO
 PRINT 'Sección 21z13: ayuda final del Centro de decisiones verificada.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21z14. CICLO DEL INFORME EJECUTIVO, MESES DE LAS METAS E HISTORIAL EN XML O JSON
+-- ------------------------------------------------------------
+-- · cdc.informe.ciclo (portada del Informe ejecutivo): el mismo ciclo que la ayuda F1 del Centro
+--   (analizar → recomendar/decidir → simular → aplicar → medir), sin «aplicar promoción → medir resultado».
+-- · cdc.meta.ninguna / cdc.meta.guardada / cdc.meta.confirmareliminar: el mes se muestra como «yyyy-MM»
+--   (igual que las cohortes); con {0:MMMM yyyy} el nombre del mes salía en español en EN, PT y RU
+--   porque la cultura de la aplicación es fija (es-AR).
+-- · ux.hint.VersionHistorialForm: las versiones se exportan a XML o JSON, no solo a XML.
+-- · glos.campania.formula (glosario del Centro de decisiones): una campaña de contacto con la ventana de
+--   30 días abierta ya no muestra un importe «parcial» (restaba la tasa base antes de que nadie respondiera
+--   y daba negativo): muestra el avance (respondieron de contactados y el día en que cierra), no se suma
+--   en los totales y al cerrar se muestra el resultado, aunque sea negativo. Además, la tasa base se
+--   resta sobre los COMPARABLES (los contactados que resolvieron una renovación en la ventana), la
+--   misma población con la que se calcula la base en la ventana anterior: antes se restaba sobre todos
+--   los contactados y una campaña igual a la rutina daba negativo. Cadena (cada texto anterior → final):
+--     · texto «parcial hasta que cierran»       → texto final
+--     · texto «sin importe mientras está abierta» → texto final
+-- · ayuda.UmbralesComercialesDialog (F1 de los umbrales): sin la frase de la ocupación mínima y máxima
+--   (esos umbrales ya no existen).
+-- Las claves ya existen en una base instalada: se actualizan SOLO si siguen con el texto de fábrica
+-- anterior (una edición hecha en Idiomas se respeta). Idempotente.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @Textos21z14 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                                TextoAnterior NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @Textos21z14 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'cdc.informe.ciclo',
+        N'Analizar → recomendar/decidir → simular → aplicar promoción → medir resultado',
+        N'Analizar → recomendar/decidir → simular → aplicar → medir'),
+    (N'EN', N'cdc.informe.ciclo',
+        N'Analyse → recommend/decide → simulate → apply promotion → measure results',
+        N'Analyse → recommend/decide → simulate → apply → measure'),
+    (N'RU', N'cdc.informe.ciclo',
+        N'Анализ → рекомендация/решение → моделирование → запуск акции → оценка результата',
+        N'Анализ → рекомендация/решение → моделирование → применение → оценка'),
+    (N'PT', N'cdc.informe.ciclo',
+        N'Analisar → recomendar/decidir → simular → aplicar promoção → medir resultado',
+        N'Analisar → recomendar/decidir → simular → aplicar → medir'),
+    (N'ES', N'cdc.meta.ninguna',
+        N'No hay metas para {0:MMMM yyyy}. Elija un indicador, escriba el objetivo y pulse Guardar meta.',
+        N'No hay metas para {0:yyyy-MM}. Elija un indicador, escriba el objetivo y pulse Guardar meta.'),
+    (N'EN', N'cdc.meta.ninguna',
+        N'There are no goals for {0:MMMM yyyy}. Choose an indicator, enter the target and press Save goal.',
+        N'There are no goals for {0:yyyy-MM}. Choose an indicator, enter the target and press Save goal.'),
+    (N'RU', N'cdc.meta.ninguna',
+        N'На {0:MMMM yyyy} целей нет. Выберите показатель, введите цель и нажмите «Сохранить цель».',
+        N'На {0:yyyy-MM} целей нет. Выберите показатель, введите цель и нажмите «Сохранить цель».'),
+    (N'PT', N'cdc.meta.ninguna',
+        N'Não há metas para {0:MMMM yyyy}. Escolha um indicador, digite o objetivo e clique em Salvar meta.',
+        N'Não há metas para {0:yyyy-MM}. Escolha um indicador, digite o objetivo e clique em Salvar meta.'),
+    (N'ES', N'cdc.meta.guardada', N'Meta guardada: {0} para {1:MMMM yyyy}.', N'Meta guardada: {0} para {1:yyyy-MM}.'),
+    (N'EN', N'cdc.meta.guardada', N'Goal saved: {0} for {1:MMMM yyyy}.', N'Goal saved: {0} for {1:yyyy-MM}.'),
+    (N'RU', N'cdc.meta.guardada', N'Цель сохранена: {0} на {1:MMMM yyyy}.', N'Цель сохранена: {0} на {1:yyyy-MM}.'),
+    (N'PT', N'cdc.meta.guardada', N'Meta salva: {0} para {1:MMMM yyyy}.', N'Meta salva: {0} para {1:yyyy-MM}.'),
+    (N'ES', N'cdc.meta.confirmareliminar', N'¿Eliminar la meta de {0} para {1:MMMM yyyy}?', N'¿Eliminar la meta de {0} para {1:yyyy-MM}?'),
+    (N'EN', N'cdc.meta.confirmareliminar', N'Delete the {0} goal for {1:MMMM yyyy}?', N'Delete the {0} goal for {1:yyyy-MM}?'),
+    (N'RU', N'cdc.meta.confirmareliminar', N'Удалить цель «{0}» на {1:MMMM yyyy}?', N'Удалить цель «{0}» на {1:yyyy-MM}?'),
+    (N'PT', N'cdc.meta.confirmareliminar', N'Excluir a meta de {0} para {1:MMMM yyyy}?', N'Excluir a meta de {0} para {1:yyyy-MM}?'),
+    (N'ES', N'ux.hint.VersionHistorialForm',
+        N'Elija un usuario y presione Cargar para ver sus versiones anteriores; puede restaurar una o exportarlas a XML.',
+        N'Elija un usuario y presione Cargar para ver sus versiones anteriores; puede restaurar una o exportarlas a XML o JSON.'),
+    (N'EN', N'ux.hint.VersionHistorialForm',
+        N'Select a user and press Load to see their previous versions; you can restore one or export them to XML.',
+        N'Select a user and press Load to see their previous versions; you can restore one or export them to XML or JSON.'),
+    (N'RU', N'ux.hint.VersionHistorialForm',
+        N'Выберите пользователя и нажмите «Загрузить», чтобы увидеть его предыдущие версии; одну из них можно восстановить или выгрузить все в XML.',
+        N'Выберите пользователя и нажмите «Загрузить», чтобы увидеть его предыдущие версии; одну из них можно восстановить или выгрузить все в XML или JSON.'),
+    (N'PT', N'ux.hint.VersionHistorialForm',
+        N'Escolha um usuário e pressione Carregar para ver suas versões anteriores; você pode restaurar uma ou exportá-las para XML.',
+        N'Escolha um usuário e pressione Carregar para ver suas versões anteriores; você pode restaurar uma ou exportá-las para XML ou JSON.'),
+    (N'ES', N'glos.campania.formula',
+        N'(respondieron − tasa base × contactados) × valor por respuesta, en los 30 días desde la ejecución (parcial hasta que cierran). Responde: renovó o cambió de plan (upgrade: pasó a un plan más caro). Tasa base: la de los planes contactados en los 30 días anteriores. Valor: precio actual del plan (bajas: × horizonte; upgrade: diferencia × horizonte). Cada cliente cuenta para la primera campaña que lo contactó.',
+        N'(respondieron − tasa base × comparables) × valor por respuesta, en los 30 días desde la ejecución. Comparables: los contactados que resolvieron una renovación en la ventana (renovaron, cambiaron de plan o se dieron de baja); un contactado sin movimiento no cuenta ni a favor ni en contra. Responde: renovó o cambió de plan (upgrade: pasó a un plan más caro). Tasa base: con la misma regla, en los 30 días anteriores, de los clientes de los planes contactados que resolvieron una renovación, la parte que respondió. Mientras la ventana está abierta no hay importe: se muestra el avance (respondieron de contactados y el día en que cierra) y no se suma en los totales; al cerrar se muestra el resultado, aunque sea negativo. Valor: precio actual del plan (bajas: × horizonte; upgrade: diferencia × horizonte). Cada cliente cuenta para la primera campaña que lo contactó.'),
+    (N'ES', N'glos.campania.formula',
+        N'(respondieron − tasa base × contactados) × valor por respuesta, en los 30 días desde la ejecución. Mientras la ventana está abierta no hay importe: se muestra el avance (respondieron de contactados y el día en que cierra) y no se suma en los totales; al cerrar se muestra el resultado, aunque sea negativo. Responde: renovó o cambió de plan (upgrade: pasó a un plan más caro). Tasa base: la de los planes contactados en los 30 días anteriores. Valor: precio actual del plan (bajas: × horizonte; upgrade: diferencia × horizonte). Cada cliente cuenta para la primera campaña que lo contactó.',
+        N'(respondieron − tasa base × comparables) × valor por respuesta, en los 30 días desde la ejecución. Comparables: los contactados que resolvieron una renovación en la ventana (renovaron, cambiaron de plan o se dieron de baja); un contactado sin movimiento no cuenta ni a favor ni en contra. Responde: renovó o cambió de plan (upgrade: pasó a un plan más caro). Tasa base: con la misma regla, en los 30 días anteriores, de los clientes de los planes contactados que resolvieron una renovación, la parte que respondió. Mientras la ventana está abierta no hay importe: se muestra el avance (respondieron de contactados y el día en que cierra) y no se suma en los totales; al cerrar se muestra el resultado, aunque sea negativo. Valor: precio actual del plan (bajas: × horizonte; upgrade: diferencia × horizonte). Cada cliente cuenta para la primera campaña que lo contactó.'),
+    (N'EN', N'glos.campania.formula',
+        N'(responded − base rate × contacted) × value per response, over the 30 days from execution (partial until they close). Responds: renewed or changed plan (upgrade: moved to a more expensive plan). Base rate: that of the contacted plans in the previous 30 days. Value: current plan price (churn: × horizon; upgrade: difference × horizon). Each customer counts for the first campaign that contacted them.',
+        N'(responded − base rate × comparable) × value per response, over the 30 days from execution. Comparable: the contacted customers who resolved a renewal in the window (renewed, changed plan or cancelled); a contacted customer with no movement counts neither for nor against. Responds: renewed or changed plan (upgrade: moved to a more expensive plan). Base rate: with the same rule, in the previous 30 days, of the customers on the contacted plans who resolved a renewal, the share that responded. While the window is open there is no amount: the progress is shown (responded out of contacted and the day it closes) and it is not added to the totals; at closing the result is shown, even if negative. Value: current plan price (churn: × horizon; upgrade: difference × horizon). Each customer counts for the first campaign that contacted them.'),
+    (N'EN', N'glos.campania.formula',
+        N'(responded − base rate × contacted) × value per response, over the 30 days from execution. While the window is open there is no amount: the progress is shown (responded out of contacted and the day it closes) and it is not added to the totals; at closing the result is shown, even if negative. Responds: renewed or changed plan (upgrade: moved to a more expensive plan). Base rate: that of the contacted plans in the previous 30 days. Value: current plan price (churn: × horizon; upgrade: difference × horizon). Each customer counts for the first campaign that contacted them.',
+        N'(responded − base rate × comparable) × value per response, over the 30 days from execution. Comparable: the contacted customers who resolved a renewal in the window (renewed, changed plan or cancelled); a contacted customer with no movement counts neither for nor against. Responds: renewed or changed plan (upgrade: moved to a more expensive plan). Base rate: with the same rule, in the previous 30 days, of the customers on the contacted plans who resolved a renewal, the share that responded. While the window is open there is no amount: the progress is shown (responded out of contacted and the day it closes) and it is not added to the totals; at closing the result is shown, even if negative. Value: current plan price (churn: × horizon; upgrade: difference × horizon). Each customer counts for the first campaign that contacted them.'),
+    (N'RU', N'glos.campania.formula',
+        N'(ответили − базовая доля × охвачено) × ценность ответа, за 30 дней с выполнения (частично, пока окно не закрыто). Ответ: продлил или сменил тариф (апгрейд: перешёл на более дорогой). Базовая доля — у тех же тарифов за 30 дней до этого. Ценность: текущая цена тарифа (отказы: × горизонт; апгрейд: разница × горизонт). Каждый клиент учитывается в первой кампании, которая с ним связалась.',
+        N'(ответили − базовая доля × сопоставимые) × ценность ответа, за 30 дней с выполнения. Сопоставимые: охваченные клиенты, у которых в окне было решение по продлению (продлили, сменили тариф или отказались); охваченный клиент без движения не учитывается ни в плюс, ни в минус. Ответ: продлил или сменил тариф (апгрейд: перешёл на более дорогой). Базовая доля: по тому же правилу, за 30 дней до этого, из клиентов охваченных тарифов, у которых было решение по продлению, доля ответивших. Пока окно открыто, суммы нет: показан ход измерения (сколько из охваченных ответили и день закрытия), и в итоги она не входит; при закрытии показывается результат, даже отрицательный. Ценность: текущая цена тарифа (отказы: × горизонт; апгрейд: разница × горизонт). Каждый клиент учитывается в первой кампании, которая с ним связалась.'),
+    (N'RU', N'glos.campania.formula',
+        N'(ответили − базовая доля × охвачено) × ценность ответа, за 30 дней с выполнения. Пока окно открыто, суммы нет: показан ход измерения (сколько из охваченных ответили и день закрытия), и в итоги она не входит; при закрытии показывается результат, даже отрицательный. Ответ: продлил или сменил тариф (апгрейд: перешёл на более дорогой). Базовая доля — у тех же тарифов за 30 дней до этого. Ценность: текущая цена тарифа (отказы: × горизонт; апгрейд: разница × горизонт). Каждый клиент учитывается в первой кампании, которая с ним связалась.',
+        N'(ответили − базовая доля × сопоставимые) × ценность ответа, за 30 дней с выполнения. Сопоставимые: охваченные клиенты, у которых в окне было решение по продлению (продлили, сменили тариф или отказались); охваченный клиент без движения не учитывается ни в плюс, ни в минус. Ответ: продлил или сменил тариф (апгрейд: перешёл на более дорогой). Базовая доля: по тому же правилу, за 30 дней до этого, из клиентов охваченных тарифов, у которых было решение по продлению, доля ответивших. Пока окно открыто, суммы нет: показан ход измерения (сколько из охваченных ответили и день закрытия), и в итоги она не входит; при закрытии показывается результат, даже отрицательный. Ценность: текущая цена тарифа (отказы: × горизонт; апгрейд: разница × горизонт). Каждый клиент учитывается в первой кампании, которая с ним связалась.'),
+    (N'PT', N'glos.campania.formula',
+        N'(responderam − taxa base × contatados) × valor por resposta, nos 30 dias desde a execução (parcial até fecharem). Responde: renovou ou mudou de plano (upgrade: passou a um plano mais caro). Taxa base: a dos planos contatados nos 30 dias anteriores. Valor: preço atual do plano (cancelamentos: × horizonte; upgrade: diferença × horizonte). Cada cliente conta para a primeira campanha que o contatou.',
+        N'(responderam − taxa base × comparáveis) × valor por resposta, nos 30 dias desde a execução. Comparáveis: os contatados que resolveram uma renovação na janela (renovaram, mudaram de plano ou cancelaram); um contatado sem movimento não conta nem a favor nem contra. Responde: renovou ou mudou de plano (upgrade: passou a um plano mais caro). Taxa base: com a mesma regra, nos 30 dias anteriores, dos clientes dos planos contatados que resolveram uma renovação, a parte que respondeu. Enquanto a janela está aberta não há valor: mostra-se o andamento (responderam de contatados e o dia em que fecha) e não é somado nos totais; ao fechar mostra-se o resultado, mesmo que negativo. Valor: preço atual do plano (cancelamentos: × horizonte; upgrade: diferença × horizonte). Cada cliente conta para a primeira campanha que o contatou.'),
+    (N'PT', N'glos.campania.formula',
+        N'(responderam − taxa base × contatados) × valor por resposta, nos 30 dias desde a execução. Enquanto a janela está aberta não há valor: mostra-se o andamento (responderam de contatados e o dia em que fecha) e não é somado nos totais; ao fechar mostra-se o resultado, mesmo que negativo. Responde: renovou ou mudou de plano (upgrade: passou a um plano mais caro). Taxa base: a dos planos contatados nos 30 dias anteriores. Valor: preço atual do plano (cancelamentos: × horizonte; upgrade: diferença × horizonte). Cada cliente conta para a primeira campanha que o contatou.',
+        N'(responderam − taxa base × comparáveis) × valor por resposta, nos 30 dias desde a execução. Comparáveis: os contatados que resolveram uma renovação na janela (renovaram, mudaram de plano ou cancelaram); um contatado sem movimento não conta nem a favor nem contra. Responde: renovou ou mudou de plano (upgrade: passou a um plano mais caro). Taxa base: com a mesma regra, nos 30 dias anteriores, dos clientes dos planos contatados que resolveram uma renovação, a parte que respondeu. Enquanto a janela está aberta não há valor: mostra-se o andamento (responderam de contatados e o dia em que fecha) e não é somado nos totais; ao fechar mostra-se o resultado, mesmo que negativo. Valor: preço atual do plano (cancelamentos: × horizonte; upgrade: diferença × horizonte). Cada cliente conta para a primeira campanha que o contatou.'),
+    (N'ES', N'ayuda.UmbralesComercialesDialog',
+        N'Cada umbral decide cuándo el motor del Centro de decisiones propone una acción. Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restablecer valores de fábrica: vuelve a los valores por defecto (sin guardar todavía).' + NCHAR(10) + N'• El descuento máximo no puede ser menor que el base, y la ocupación mínima tiene que ser menor que la máxima.',
+        N'Cada umbral decide cuándo el motor del Centro de decisiones propone una acción. Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restablecer valores de fábrica: vuelve a los valores por defecto (sin guardar todavía).' + NCHAR(10) + N'• El descuento máximo no puede ser menor que el base.'),
+    (N'EN', N'ayuda.UmbralesComercialesDialog',
+        N'Each threshold decides when the decision center engine proposes an action. Edit the Value column (within the stated range) and press Save; changes apply from the next analysis and are logged.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restore default values: goes back to the default values (not saved yet).' + NCHAR(10) + N'• The maximum discount cannot be lower than the base one, and the minimum occupancy must be lower than the maximum.',
+        N'Each threshold decides when the decision center engine proposes an action. Edit the Value column (within the stated range) and press Save; changes apply from the next analysis and are logged.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restore default values: goes back to the default values (not saved yet).' + NCHAR(10) + N'• The maximum discount cannot be lower than the base one.'),
+    (N'RU', N'ayuda.UmbralesComercialesDialog',
+        N'Каждый порог определяет, когда система центра решений предлагает действие. Измените столбец «Значение» (в указанном диапазоне) и нажмите «Сохранить»; изменения действуют со следующего анализа и попадают в журнал.' + NCHAR(10) + N'' + NCHAR(10) + N'• «Вернуть значения по умолчанию»: восстанавливает исходные значения (пока без сохранения).' + NCHAR(10) + N'• Максимальная скидка не может быть меньше базовой, а минимальная загрузка должна быть меньше максимальной.',
+        N'Каждый порог определяет, когда система центра решений предлагает действие. Измените столбец «Значение» (в указанном диапазоне) и нажмите «Сохранить»; изменения действуют со следующего анализа и попадают в журнал.' + NCHAR(10) + N'' + NCHAR(10) + N'• «Вернуть значения по умолчанию»: восстанавливает исходные значения (пока без сохранения).' + NCHAR(10) + N'• Максимальная скидка не может быть меньше базовой.'),
+    (N'PT', N'ayuda.UmbralesComercialesDialog',
+        N'Cada limite decide quando o motor da Central de decisões propõe uma ação. Edite a coluna Valor (dentro da faixa indicada) e clique em Salvar; as alterações valem a partir da próxima análise e ficam no registro.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restaurar valores padrão: volta aos valores padrão (ainda sem salvar).' + NCHAR(10) + N'• O desconto máximo não pode ser menor que o base, e a ocupação mínima deve ser menor que a máxima.',
+        N'Cada limite decide quando o motor da Central de decisões propõe uma ação. Edite a coluna Valor (dentro da faixa indicada) e clique em Salvar; as alterações valem a partir da próxima análise e ficam no registro.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restaurar valores padrão: volta aos valores padrão (ainda sem salvar).' + NCHAR(10) + N'• O desconto máximo não pode ser menor que o base.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @Textos21z14 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Ciclo del informe, meses de las metas e historial XML/JSON: ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z14: textos del ciclo del informe, de las metas y del historial verificados.';
 GO
 -- ============================================================
 -- WardrobeFlow — 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA

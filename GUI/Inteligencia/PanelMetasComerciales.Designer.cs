@@ -32,7 +32,7 @@ namespace GUI.Inteligencia
             this.lblIndicador = new Label();
             this.cmbIndicador = new ComboBox();
             this.lblObjetivo = new Label();
-            this.numObjetivo = new NumericUpDown();
+            this.numObjetivo = new NumericUpDownLocal();
             this.btnGuardar = new Button();
             this.btnEliminar = new Button();
             this.lblMensaje = new Label();
@@ -61,7 +61,7 @@ namespace GUI.Inteligencia
             this.lblMes.Name = "lblMes";
             this.lblMes.Text = "Mes:";
 
-            this.dtpMes.CustomFormat = "MMMM yyyy";
+            this.dtpMes.CustomFormat = "yyyy-MM";
             this.dtpMes.Format = DateTimePickerFormat.Custom;
             this.dtpMes.Location = new Point(60, 8);
             this.dtpMes.Name = "dtpMes";
@@ -197,7 +197,7 @@ namespace GUI.Inteligencia
         private Label lblIndicador;
         private ComboBox cmbIndicador;
         private Label lblObjetivo;
-        private NumericUpDown numObjetivo;
+        private NumericUpDownLocal numObjetivo;
         private Button btnGuardar;
         private Button btnEliminar;
         private Label lblMensaje;

@@ -569,9 +569,11 @@ namespace BLL.Inteligencia
 
         /// <summary>
         /// Cierra el ciclo: para cada decisión ejecutada o aceptada que generó una sugerencia o tocó una
-        /// promoción, el beneficio real medido de esa promoción (null si todavía no se puede medir).
+        /// promoción, el beneficio real medido de esa promoción (SinDato si todavía no se puede medir); para
+        /// cada campaña de contacto ejecutada, su resultado (EnMedicion con el avance mientras la ventana
+        /// está abierta, Medido con el importe al cerrar). Las decisiones sin nada que medir no aparecen.
         /// </summary>
-        public Dictionary<int, decimal?> MedirDecisiones(IEnumerable<BE.DecisionComercial> lista)
+        public Dictionary<int, BE.MedicionDecision> MedirDecisiones(IEnumerable<BE.DecisionComercial> lista)
         {
             Exigir();
             var todas = (lista ?? Enumerable.Empty<BE.DecisionComercial>()).ToList();
@@ -584,18 +586,24 @@ namespace BLL.Inteligencia
         /// Campañas de contacto ejecutadas (Renovaciones, ChurnPlan, UpgradePlan): qué hicieron los clientes
         /// contactados después de la decisión (MedicionCampanias). Best-effort: si algo falla, sin dato.
         /// </summary>
-        private Dictionary<int, decimal?> MedirCampanias(List<BE.DecisionComercial> lista)
+        private Dictionary<int, BE.MedicionDecision> MedirCampanias(List<BE.DecisionComercial> lista)
         {
-            var resultado = new Dictionary<int, decimal?>();
-            var candidatas = lista.Where(d => d.Estado == BE.EstadoDecision.Ejecutada && !d.Referencia.HasValue).ToList();
+            var resultado = new Dictionary<int, BE.MedicionDecision>();
+            bool EsCampania(BE.DecisionComercial d) => d != null && d.Estado == BE.EstadoDecision.Ejecutada && !d.Referencia.HasValue;
+            var candidatas = lista.Where(EsCampania).ToList();
             if (candidatas.Count == 0 || decisiones == null) return resultado;
             try
             {
-                var contactos = decisiones.ObtenerDetalle(candidatas.Select(d => d.IdDecision), BE.DecisionComercial.DetalleCliente);
+                // La atribución se hace sobre TODAS las campañas ejecutadas, no solo las que pasan el filtro
+                // del Historial (fechas, estado): el resultado de una decisión no cambia con el filtro.
+                var todas = (decisiones.Obtener() ?? new List<BE.DecisionComercial>()).Where(EsCampania).ToList();
+                var idsTodas = new HashSet<int>(todas.Select(d => d.IdDecision));
+                todas.AddRange(candidatas.Where(d => idsTodas.Add(d.IdDecision)));
+                var contactos = decisiones.ObtenerDetalle(todas.Select(d => d.IdDecision), BE.DecisionComercial.DetalleCliente);
                 var conContactos = candidatas.Where(d => contactos.ContainsKey(d.IdDecision)).ToList();
                 if (conContactos.Count == 0) return resultado;
-                // Cada cliente cuenta para una sola campaña: la primera que lo contactó.
-                var atribuidos = MedicionCampanias.Atribuir(conContactos, contactos);
+                // Cada cliente cuenta para una sola campaña: la primera que lo contactó (entre todas).
+                var atribuidos = MedicionCampanias.Atribuir(todas, contactos);
                 DateTime hoyDia = hoy().Date;
                 DateTime desde = conContactos.Min(d => d.FechaVigencia).Date.AddDays(-MedicionCampanias.DiasVentana);
                 var movimientos = dal.ObtenerMovimientos(desde, hoyDia.AddDays(1)) ?? new List<BE.MovimientoSuscripcion>();
@@ -606,17 +614,16 @@ namespace BLL.Inteligencia
                 foreach (var d in conContactos)
                 {
                     var r = MedicionCampanias.Medir(d, atribuidos[d.IdDecision], movimientos, precios, planDeCliente, horizonte, hoyDia);
-                    resultado[d.IdDecision] = r?.Valor;
-                    d.ResultadoParcial = r?.Parcial ?? false;
+                    resultado[d.IdDecision] = r?.ComoMedicion() ?? BE.MedicionDecision.SinDatos();
                 }
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.InteligenciaComercial] Medir campañas: " + ex.Message); }
             return resultado;
         }
 
-        private Dictionary<int, decimal?> MedirPorPromocion(List<BE.DecisionComercial> lista)
+        private Dictionary<int, BE.MedicionDecision> MedirPorPromocion(List<BE.DecisionComercial> lista)
         {
-            var resultado = new Dictionary<int, decimal?>();
+            var resultado = new Dictionary<int, BE.MedicionDecision>();
             var medibles = lista
                 .Where(d => d.AdmiteResultado() && d.Referencia.HasValue
                             && (d.TipoReferencia == BE.DecisionComercial.RefPromocion || d.TipoReferencia == BE.DecisionComercial.RefSugerencia))
@@ -643,7 +650,8 @@ namespace BLL.Inteligencia
                     ? promociones.FirstOrDefault(p => p.IdPromocion == d.Referencia.Value)
                     : promociones.FirstOrDefault(p => p.IdSugerenciaOrigen == d.Referencia.Value);
                 var medicion = promo != null ? mediciones.FirstOrDefault(m => m.IdPromocion == promo.IdPromocion) : null;
-                resultado[d.IdDecision] = medicion?.BeneficioReal;
+                resultado[d.IdDecision] = medicion?.BeneficioReal is decimal beneficio
+                    ? BE.MedicionDecision.Medida(beneficio) : BE.MedicionDecision.SinDatos();
             }
             return resultado;
         }

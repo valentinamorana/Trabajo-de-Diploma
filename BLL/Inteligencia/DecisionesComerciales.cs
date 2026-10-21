@@ -34,9 +34,15 @@ namespace BLL.Inteligencia
 
         // ── Consultas ─────────────────────────────────────────────────────────────
 
+        // Las consultas también exigen la patente de Gerencia: el historial de decisiones y a quiénes se
+        // contactó son datos del Centro de decisiones, no solo de quien escribe en él.
+
         /// <summary>Decisiones del rango [desde, hasta] (fechas inclusivas; null = sin límite).</summary>
-        public List<BE.DecisionComercial> Obtener(DateTime? desde = null, DateTime? hasta = null) =>
-            dal.Obtener(desde?.Date, hasta?.Date.AddDays(1));
+        public List<BE.DecisionComercial> Obtener(DateTime? desde = null, DateTime? hasta = null)
+        {
+            Exigir();
+            return dal.Obtener(desde?.Date, hasta?.Date.AddDays(1));
+        }
 
         /// <summary>
         /// Asocia a cada recomendación su última decisión (por Clave). Best-effort: si la tabla todavía no
@@ -44,6 +50,7 @@ namespace BLL.Inteligencia
         /// </summary>
         public bool AsociarDecisiones(IEnumerable<BE.Recomendacion> recomendaciones)
         {
+            Exigir();   // fuera del best-effort: sin la patente se rechaza, no se muestra «sin historial»
             List<BE.DecisionComercial> todas;
             try { todas = dal.Obtener(null, null) ?? new List<BE.DecisionComercial>(); }
             catch (Exception ex)
@@ -257,6 +264,7 @@ namespace BLL.Inteligencia
         /// <summary>IDs de los clientes o prendas que tocó cada decisión (best-effort: sin tabla, vacío).</summary>
         public Dictionary<int, List<int>> ObtenerDetalle(IEnumerable<int> idsDecision, string tipoDetalle)
         {
+            Exigir();
             try { return dal.ObtenerDetalle(idsDecision, tipoDetalle) ?? new Dictionary<int, List<int>>(); }
             catch (Exception ex)
             {

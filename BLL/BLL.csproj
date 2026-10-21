@@ -149,6 +149,7 @@
     <Compile Include="Inteligencia\InteligenciaComercial.cs" />
     <Compile Include="Inteligencia\AccionesRecomendacion.cs" />
     <Compile Include="Inteligencia\MedicionCampanias.cs" />
+    <Compile Include="Inteligencia\MedicionDecisiones.cs" />
     <Compile Include="Inteligencia\CatalogoIndicadores.cs" />
     <Compile Include="Inteligencia\MetasComerciales.cs" />
     <Compile Include="Inteligencia\AvisosComerciales.cs" />

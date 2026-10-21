@@ -53,10 +53,6 @@ namespace BE
         public DateTime? FechaEvaluacion { get; set; }
         public decimal? ResultadoReal { get; set; }
 
-        /// <summary>No se persiste: true si el resultado medido es parcial (la ventana de medición todavía
-        /// no cerró). Lo completa BLL.Inteligencia.InteligenciaComercial.MedirDecisiones.</summary>
-        public bool ResultadoParcial { get; set; }
-
         /// <summary>Fecha desde la que rige la decisión ejecutada: la de ejecución (o la de creación si es anterior a ese dato).</summary>
         public DateTime FechaVigencia => FechaEjecucion ?? Fecha;
 

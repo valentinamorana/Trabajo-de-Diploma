@@ -86,6 +86,7 @@
     <Compile Include="UsuarioDVIntegracionTests.cs" />
     <Compile Include="VersionUsuarioTests.cs" />
     <Compile Include="ListaEsperaTests.cs" />
+    <Compile Include="LectorNumerosTests.cs" />
     <Compile Include="AnalisisAbandonoTests.cs" />
     <Compile Include="ReporteJornadaTests.cs" />
     <Compile Include="UsuarioAbmTests.cs" />

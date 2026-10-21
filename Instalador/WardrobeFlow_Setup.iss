@@ -100,7 +100,7 @@
 ; =====================================================================
 
 #define MyAppName "WardrobeFlow"
-#define MyAppVersion "1.5.0"
+#define MyAppVersion "1.6.0"
 #define MyAppPublisher "Valentina Morana"
 #define MyAppExeName "GUI.exe"
 #define MyDatabaseName "WardrobeFlowDB"
@@ -240,6 +240,8 @@ Type: files; Name: "{app}\install.log.out"
 Type: files; Name: "{app}\uninstall.log"
 Type: files; Name: "{app}\uninstall.log.out"
 Type: filesandordirs; Name: "{app}\Logs"
+; Copia persistente del tutorial que deja el instalador (ver RutaTutorialPersistente).
+Type: files; Name: "{commondocs}\WardrobeFlow_Tutorial_SQL_Server.html"
 
 [Code]
 const
@@ -591,7 +593,7 @@ end;
 function InstalarLocalDb(var ErrMsg: String): Boolean;
 var
   ResultCode: Integer;
-  Msi, Log, SqlLocalDbExe: String;
+  Msi, Log, SqlLocalDbExe, Tutorial: String;
 begin
   Result := False;
   ExtractTemporaryFile('SqlLocalDB.msi');
@@ -604,11 +606,18 @@ begin
   // 3010 = instalado OK, pide reiniciar (LocalDB funciona igual sin reinicio).
   if (ResultCode <> 0) and (ResultCode <> 3010) then
   begin
+    // Solo se cita la copia del tutorial si quedó en Documentos públicos: la de
+    // {tmp} se borra al cerrar el instalador (si la copia falla, sin ruta).
+    Tutorial := PrepararTutorial();
+    if Tutorial = RutaTutorialPersistente() then
+      Tutorial := ' (copia en ' + Tutorial + ')'
+    else
+      Tutorial := '';
     ErrMsg :=
       'No se pudo instalar SQL Server LocalDB (código ' + IntToStr(ResultCode) + ').' + #13#13 +
       'Detalle en: ' + Log + #13#13 +
       'No se instaló nada de WardrobeFlow. Para instalar SQL Server Express a mano, siga el tutorial ' +
-      '"Cómo instalar SQL Server" (copia en ' + RutaTutorialPersistente() + ') y vuelva a ejecutar este instalador.';
+      '"Cómo instalar SQL Server"' + Tutorial + ' y vuelva a ejecutar este instalador.';
     exit;
   end;
 

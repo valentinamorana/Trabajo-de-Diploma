@@ -236,7 +236,7 @@ namespace GUI.Ayuda
                 "Cada umbral decide cuándo el motor del Centro de decisiones propone una acción. Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.\n" +
                 "\n" +
                 "• Restablecer valores de fábrica: vuelve a los valores por defecto (sin guardar todavía).\n" +
-                "• El descuento máximo no puede ser menor que el base, y la ocupación mínima tiene que ser menor que la máxima."),
+                "• El descuento máximo no puede ser menor que el base."),
 
             ["ReporteJornadaForm"] = new TemaAyuda("Reporte de jornada",
                 "Resumen de una jornada: eventos de negocio del día, prendas disponibles, clientes y días sin copia de seguridad.\n" +

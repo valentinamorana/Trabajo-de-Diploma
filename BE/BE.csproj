@@ -151,6 +151,7 @@
     <Compile Include="MatrizCohortes.cs" />
     <Compile Include="Recomendacion.cs" />
     <Compile Include="DecisionComercial.cs" />
+    <Compile Include="MedicionDecision.cs" />
     <Compile Include="MetaComercial.cs" />
     <Compile Include="SimulacionPromocion.cs" />
     <Compile Include="MedicionPromocion.cs" />

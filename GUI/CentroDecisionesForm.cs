@@ -47,7 +47,7 @@ namespace GUI
         private List<BE.Recomendacion> _recsVisibles = new List<BE.Recomendacion>();
         private List<string> _reglasConError = new List<string>();
         private List<BE.DecisionComercial> _historial = new List<BE.DecisionComercial>();
-        private Dictionary<int, decimal?> _medidos = new Dictionary<int, decimal?>();
+        private Dictionary<int, BE.MedicionDecision> _medidos = new Dictionary<int, BE.MedicionDecision>();
         private List<BE.MedicionPromocion> _mediciones = new List<BE.MedicionPromocion>();
         private BE.ResultadoSimulacion _simActual;
         private readonly List<BE.ResultadoSimulacion> _escenarios = new List<BE.ResultadoSimulacion>();
@@ -68,6 +68,9 @@ namespace GUI
         {
             InitializeComponent();
             InicializarCohortes();   // pestaña «1b. Cohortes» (CentroDecisionesForm.Cohortes.cs)
+            // Simulador y días de posponer: un número ambiguo ("2.5") no se lee como 25, se explica.
+            foreach (var n in new[] { numDiasPosponer, numSimClientesPlan, numSimObjetivo, numSimDescuento, numSimDuracion, numSimRetencion, numSimHorizonte })
+                n.EntradaInvalida += (s, mensaje) => MostrarError(mensaje);
             Estilos.EstiloFormulario.BotonPrimario(btnAnalizar);
             Estilos.EstiloFormulario.BotonSecundario(btnUmbrales);
             Estilos.EstiloFormulario.BotonSecundario(btnGlosario);
@@ -515,6 +518,8 @@ namespace GUI
                     (d.PospuestaHasta.HasValue ? $" ({d.PospuestaHasta:d})" : "") +
                     (string.IsNullOrEmpty(d.AccionElegida) ? "" : " · " + d.AccionElegida) +
                     (string.IsNullOrEmpty(d.Motivo) ? "" : " · " + d.Motivo) +
+                    (_medidos.TryGetValue(d.IdDecision, out var medicion) && medicion.Estado != BE.EstadoMedicion.SinDato
+                        ? " · " + Tr("cdc.col.medido", "Medido por el sistema") + ": " + TextosComerciales.Medicion(medicion) : "") +
                     (d.EsFinal() && !BLLI.DecisionesComerciales.DecisionVigente(d, DateTime.Today, DiasSilencio(), InicioAnalisis())
                         ? Environment.NewLine + Tr("cdc.det.decisionnorige", "Esa decisión ya no rige para la situación actual: puede volver a decidir.")
                         : ""));
@@ -834,7 +839,7 @@ namespace GUI
             DateTime desde = dtpHistDesde.Value.Date, hasta = dtpHistHasta.Value.Date;
             try
             {
-                Func<(List<BE.DecisionComercial>, Dictionary<int, decimal?>)> leer = () =>
+                Func<(List<BE.DecisionComercial>, Dictionary<int, BE.MedicionDecision>)> leer = () =>
                 {
                     var lista = Decisiones.Obtener(desde, hasta);
                     return (lista, bll.MedirDecisiones(lista));
@@ -862,12 +867,8 @@ namespace GUI
             for (int i = 0; i < enc.Length && i < dgvHistorial.Columns.Count; i++) dgvHistorial.Columns[i].HeaderText = enc[i];
             if (dgvHistorial.Columns.Count > 0) dgvHistorial.Columns[0].FillWeight = 20;
 
-            var aceptadas = lista.Where(d => d.AdmiteResultado()).ToList();
-            var conReal = aceptadas.Where(d => d.ResultadoReal.HasValue).ToList();
-            lblHistResumen.Text = Tr("cdc.hist.resumen",
-                "{0} decisión(es) · {1} aceptada(s) o ejecutada(s): estimado {2:C0} · con resultado real: {3} (estimado {4:C0} → real {5:C0})",
-                new object[] { lista.Count, aceptadas.Count, aceptadas.Sum(d => d.ImpactoEstimado), conReal.Count,
-                               conReal.Sum(d => d.ImpactoEstimado), conReal.Sum(d => d.ResultadoReal.Value) });
+            // Los totales los arma la BLL: las campañas en medición no se suman (el texto lo aclara).
+            lblHistResumen.Text = TextosComerciales.ResumenHistorial(BLLI.MedicionDecisiones.Resumir(lista, _medidos));
             DgvHistorial_SelectionChanged(this, EventArgs.Empty);
         }
 
@@ -889,16 +890,22 @@ namespace GUI
         {
             var d = DecisionSeleccionada();
             if (d == null) return;
-            decimal? medido = _medidos.TryGetValue(d.IdDecision, out var m) ? m : null;
+            var medicion = _medidos.TryGetValue(d.IdDecision, out var m) ? m : null;
+            // Solo un resultado final se propone como valor; una campaña en medición muestra su avance, sin importe.
+            decimal? medido = medicion?.Estado == BE.EstadoMedicion.Medido ? medicion.Valor : null;
+            string nota = medido.HasValue ? " " + Tr("cdc.resultado.medido", "El sistema midió {0:C0}.", new object[] { medido.Value })
+                        : medicion?.Estado == BE.EstadoMedicion.EnMedicion
+                            ? " " + Tr("cdc.resultado.enmedicion", "{0}; el sistema calcula el importe al cierre.", new object[] { TextosComerciales.Medicion(medicion) })
+                            : "";
             string valor = PedirTexto(Tr("cdc.btn.resultado", "Registrar resultado real"),
                 Tr("cdc.resultado.pedir", "Resultado real en $ de la decisión #{0} (estimado {1:C0}).{2}",
-                   new object[] { d.IdDecision, d.ImpactoEstimado,
-                                  medido.HasValue ? " " + Tr("cdc.resultado.medido", "El sistema midió {0:C0}.", new object[] { medido.Value }) : "" }),
+                   new object[] { d.IdDecision, d.ImpactoEstimado, nota }),
                 (medido ?? d.ResultadoReal ?? 0m).ToString("0.##"));
             if (valor == null) return;
-            if (!decimal.TryParse(valor, out var resultado))
+            // Coma decimal y punto solo para miles: "21600.50" se rechaza (no se lee como 2.160.050).
+            if (!EntradaNumerica.TryLeer(valor, Tr("cdc.resultado.invalido", "Ingrese un importe válido."), out var resultado, out var error))
             {
-                MostrarError(Tr("cdc.resultado.invalido", "Ingrese un importe válido."));
+                MostrarError(error);
                 return;
             }
             try

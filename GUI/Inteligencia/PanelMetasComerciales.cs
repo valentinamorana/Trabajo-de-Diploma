@@ -38,6 +38,8 @@ namespace GUI.Inteligencia
         public PanelMetasComerciales()
         {
             InitializeComponent();
+            // Un objetivo ambiguo ("2.5") no se lee como 25: vuelve al valor anterior y se explica.
+            numObjetivo.EntradaInvalida += (s, mensaje) => Mensaje(mensaje, true);
             Estilos.EstiloFormulario.Grilla(dgvMetas);
             Estilos.EstiloFormulario.BotonSecundario(btnActualizar);
             Estilos.EstiloFormulario.BotonPrimario(btnGuardar);
@@ -136,7 +138,7 @@ namespace GUI.Inteligencia
                 Cargado = true;
                 Mostrar();
                 if (_seguimiento.Count == 0)
-                    Mensaje(Tr("cdc.meta.ninguna", "No hay metas para {0:MMMM yyyy}. Elija un indicador, escriba el objetivo y pulse Guardar meta.", mes), false);
+                    Mensaje(Tr("cdc.meta.ninguna", "No hay metas para {0:yyyy-MM}. Elija un indicador, escriba el objetivo y pulse Guardar meta.", mes), false);
                 else
                     Mensaje(string.Empty, false);
             }
@@ -247,7 +249,7 @@ namespace GUI.Inteligencia
             try
             {
                 var meta = _bll.Metas.Guardar(_modulo, item.Valor, MesElegido, numObjetivo.Value);
-                Mensaje(Tr("cdc.meta.guardada", "Meta guardada: {0} para {1:MMMM yyyy}.", Indicador(meta.Indicador), meta.Periodo), false);
+                Mensaje(Tr("cdc.meta.guardada", "Meta guardada: {0} para {1:yyyy-MM}.", Indicador(meta.Indicador), meta.Periodo), false);
                 Recargar();
             }
             catch (Exception ex) { Mensaje(Error(ex), true); }
@@ -258,7 +260,7 @@ namespace GUI.Inteligencia
             var s = Seleccionada() ?? _seguimiento.FirstOrDefault();
             if (_bll?.Metas == null || s == null) return;
             if (!FormBase.MostrarConfirmacionSiNo(FindForm(),
-                    Tr("cdc.meta.confirmareliminar", "¿Eliminar la meta de {0} para {1:MMMM yyyy}?", R(s.NombreIndicador), s.Meta.Periodo),
+                    Tr("cdc.meta.confirmareliminar", "¿Eliminar la meta de {0} para {1:yyyy-MM}?", R(s.NombreIndicador), s.Meta.Periodo),
                     Tr("cdc.meta.eliminar", "Eliminar meta")))
                 return;
             try

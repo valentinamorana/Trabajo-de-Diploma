@@ -197,21 +197,22 @@ namespace Tests
                 Mov(53, Hoy.AddDays(-48), BE.EstadoRenovacion.Baja)
             };
             var r = MedicionCampanias.Medir(d, new[] { 1, 2, 3, 4 }, movimientos, Precios, Plan1, 6m, Hoy);
-            Assert.IsFalse(r.Parcial, "La ventana de 30 días ya cerró.");
+            Assert.IsFalse(r.EnMedicion, "La ventana de 30 días ya cerró.");
             Assert.AreEqual(2, r.Respondieron);
+            Assert.AreEqual(3, r.Comparables, "1, 2 y 3 resolvieron en la ventana; el 4 no tuvo movimiento en ella.");
             Assert.AreEqual(0.25m, r.TasaBase);
             Assert.AreEqual(1250m, r.ValorPorRespuesta, "(1000 + 1500) / 2, con el precio actual del plan.");
-            // (2 − 25 % × 4) × 1250 = 1250: solo lo que superó a las renovaciones de rutina.
-            Assert.AreEqual(1250m, r.Valor);
+            // (2 − 25 % × 3 comparables) × 1250 = 1562,50: solo lo que superó a las renovaciones de rutina.
+            Assert.AreEqual(1562.5m, r.Valor);
         }
 
         [TestMethod]
-        public void MedirCampania_VentanaAbierta_EsParcial_YSinContactadosNoHayMedicion()
+        public void MedirCampania_VentanaAbierta_EstaEnMedicion_YSinContactadosNoHayMedicion()
         {
             var reciente = Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-5));
             var r = MedicionCampanias.Medir(reciente, new[] { 1 }, new BE.MovimientoSuscripcion[0], Precios, Plan1, 6m, Hoy);
-            Assert.IsTrue(r.Parcial);
-            Assert.AreEqual(0m, r.Valor);
+            Assert.IsTrue(r.EnMedicion);
+            Assert.IsNull(r.Valor, "Con la ventana abierta no hay importe.");
             Assert.IsNull(MedicionCampanias.Medir(reciente, new int[0], new BE.MovimientoSuscripcion[0], Precios, Plan1, 6m, Hoy), "Sin contactados no hay campaña.");
             var descartada = Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-40)); descartada.Estado = BE.EstadoDecision.Descartada;
             Assert.IsNull(MedicionCampanias.Medir(descartada, new[] { 1 }, new BE.MovimientoSuscripcion[0], Precios, Plan1, 6m, Hoy));
@@ -227,10 +228,12 @@ namespace Tests
                 Mov(3, Hoy.AddDays(-8), BE.EstadoRenovacion.Renovada),
                 Mov(3, Hoy.AddDays(-2), BE.EstadoRenovacion.CambioPlan, 1, 2)    // renovó y después subió de plan
             };
+            // Se miden el día en que cierra la ventana (ejecutadas hace 10 días: dentro de 20).
+            var cierre = Hoy.AddDays(20);
             // Bajas: (3 que se quedaron − 0) × precio promedio × horizonte = 3 × (1000 + 1500 + 1000) / 3 × 6.
-            Assert.AreEqual(21000m, MedicionCampanias.Medir(Ejecutada(ReglaChurnPlan.Codigo, Hoy.AddDays(-10)), new[] { 1, 2, 3 }, movimientos, Precios, Plan1, 6m, Hoy).Valor);
+            Assert.AreEqual(21000m, MedicionCampanias.Medir(Ejecutada(ReglaChurnPlan.Codigo, Hoy.AddDays(-10)), new[] { 1, 2, 3 }, movimientos, Precios, Plan1, 6m, cierre).Valor);
             // Upgrade: los clientes 2 y 3 pasaron a un plan más caro (el 3 aunque antes renovó): 2 × 500 × 6.
-            var up = MedicionCampanias.Medir(Ejecutada(ReglaUpgradePlan.Codigo, Hoy.AddDays(-10)), new[] { 1, 2, 3 }, movimientos, Precios, Plan1, 6m, Hoy);
+            var up = MedicionCampanias.Medir(Ejecutada(ReglaUpgradePlan.Codigo, Hoy.AddDays(-10)), new[] { 1, 2, 3 }, movimientos, Precios, Plan1, 6m, cierre);
             Assert.AreEqual(2, up.Respondieron);
             Assert.AreEqual(6000m, up.Valor);
         }
@@ -246,8 +249,293 @@ namespace Tests
             CollectionAssert.AreEqual(new[] { 3 }, a[2], "El cliente 2 ya lo cuenta la primera campaña.");
         }
 
+        // ══ Ventana de medición: sin importe hasta que cierra ════════════════════
+
+        private static readonly int[] Seis = { 1, 2, 3, 4, 5, 6 };
+
+        // Seis contactados del plan 1; en los 30 días anteriores a la ejecución, 1 de las 2 renovaciones
+        // resueltas del plan fue renovación: tasa base 50 %.
+        private static List<BE.MovimientoSuscripcion> ConBase(DateTime ejecucion, params BE.MovimientoSuscripcion[] respuestas)
+        {
+            var l = new List<BE.MovimientoSuscripcion>
+            {
+                Mov(50, ejecucion.AddDays(-10), BE.EstadoRenovacion.Renovada),
+                Mov(51, ejecucion.AddDays(-12), BE.EstadoRenovacion.Baja)
+            };
+            l.AddRange(respuestas);
+            return l;
+        }
+
         [TestMethod]
-        public void MedirDecisiones_IncluyeLasCampaniasConContactosGuardados_YMarcaElParcial()
+        public void MedirCampania_VentanaAbierta_SinImporte_ConElAvanceYLaFechaDeCierre()
+        {
+            // Ejecutada hoy: la fórmula daría (0 − 50 % × 6) × 1000 = −3000 antes de que nadie pudiera responder.
+            var r = MedicionCampanias.Medir(Ejecutada(ReglaRenovaciones.Codigo, Hoy), Seis, ConBase(Hoy), Precios, Plan1, 6m, Hoy);
+            Assert.IsTrue(r.EnMedicion);
+            Assert.IsNull(r.Valor, "Con la ventana abierta no hay importe (ni negativo ni cero).");
+            Assert.AreEqual(0, r.Respondieron);
+            Assert.AreEqual(6, r.Contactados);
+            Assert.AreEqual(Hoy.AddDays(30), r.Hasta);
+            var m = r.ComoMedicion();
+            Assert.AreEqual(BE.EstadoMedicion.EnMedicion, m.Estado);
+            Assert.IsNull(m.Valor);
+            Assert.AreEqual(Hoy.AddDays(30), m.FechaCierre);
+
+            // A los 10 días respondieron 2 de 6: sigue sin importe, con el avance y el día en que cierra.
+            var movs = ConBase(Hoy.AddDays(-10), Mov(1, Hoy.AddDays(-8), BE.EstadoRenovacion.Renovada),
+                                                 Mov(2, Hoy.AddDays(-1), BE.EstadoRenovacion.CambioPlan, 1, 2));
+            var avance = MedicionCampanias.Medir(Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-10)), Seis, movs, Precios, Plan1, 6m, Hoy).ComoMedicion();
+            Assert.AreEqual(BE.EstadoMedicion.EnMedicion, avance.Estado);
+            Assert.IsNull(avance.Valor);
+            Assert.AreEqual(2, avance.Respondieron);
+            Assert.AreEqual(6, avance.Contactados);
+            Assert.AreEqual(Hoy.AddDays(20), avance.FechaCierre);
+            Assert.IsFalse(avance.EsFinal);
+        }
+
+        [TestMethod]
+        public void MedirCampania_VentanaCerrada_MuestraElImporte_PositivoONegativo()
+        {
+            var ejecutada = Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-40));
+            // 5 renovaron y el 6 no tuvo movimiento: (5 − 50 % × 5 comparables) × 1000 = 2500.
+            var bien = ConBase(Hoy.AddDays(-40), Enumerable.Range(1, 5).Select(c => Mov(c, Hoy.AddDays(-35), BE.EstadoRenovacion.Renovada)).ToArray());
+            var r = MedicionCampanias.Medir(ejecutada, Seis, bien, Precios, Plan1, 6m, Hoy);
+            Assert.IsFalse(r.EnMedicion);
+            Assert.AreEqual(5, r.Comparables);
+            Assert.AreEqual(2500m, r.Valor);
+            Assert.AreEqual(BE.EstadoMedicion.Medido, r.ComoMedicion().Estado);
+            Assert.AreEqual(2500m, r.ComoMedicion().Valor);
+            Assert.IsTrue(r.ComoMedicion().EsFinal);
+
+            // 1 renovó y 5 se dieron de baja: (1 − 50 % × 6) × 1000 = −2000. Quedó debajo de la rutina y se muestra igual.
+            var mal = ConBase(Hoy.AddDays(-40), new[] { Mov(1, Hoy.AddDays(-35), BE.EstadoRenovacion.Renovada) }
+                .Concat(Enumerable.Range(2, 5).Select(c => Mov(c, Hoy.AddDays(-34), BE.EstadoRenovacion.Baja))).ToArray());
+            var n = MedicionCampanias.Medir(ejecutada, Seis, mal, Precios, Plan1, 6m, Hoy).ComoMedicion();
+            Assert.AreEqual(BE.EstadoMedicion.Medido, n.Estado);
+            Assert.AreEqual(-2000m, n.Valor);
+        }
+
+        [TestMethod]
+        public void MedirCampania_ElDia30CierraLaVentana_YLoQuePasaEseDiaNoCuenta()
+        {
+            var movs = ConBase(Hoy.AddDays(-30), Mov(1, Hoy.AddDays(-1).AddHours(23), BE.EstadoRenovacion.Renovada),   // último día de la ventana
+                                                 Mov(2, Hoy.AddHours(9), BE.EstadoRenovacion.Renovada));                 // el día del cierre: afuera
+            // Ejecutada hace exactamente 30 días: hoy cierra y ya hay importe: (1 − 50 % × 1 comparable) × 1000
+            // (la renovación del cliente 2 es del día del cierre: no cuenta, ni como respuesta ni como comparable).
+            var r = MedicionCampanias.Medir(Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-30)), Seis, movs, Precios, Plan1, 6m, Hoy);
+            Assert.IsFalse(r.EnMedicion);
+            Assert.AreEqual(Hoy, r.Hasta);
+            Assert.AreEqual(1, r.Respondieron);
+            Assert.AreEqual(1, r.Comparables);
+            Assert.AreEqual(500m, r.Valor);
+
+            // Con la hora de la ejecución (15:00) también cierra al empezar el día 30, a cualquier hora de hoy.
+            var conHora = MedicionCampanias.Medir(Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-30).AddHours(15)), Seis, movs, Precios, Plan1, 6m, Hoy.AddHours(8));
+            Assert.IsFalse(conHora.EnMedicion);
+            Assert.AreEqual(Hoy, conHora.Hasta);
+            Assert.AreEqual(1, conHora.Respondieron);
+
+            // Ejecutada hace 29 días: todavía en medición, cierra mañana (y la renovación de hoy sí cuenta).
+            var dia29 = MedicionCampanias.Medir(Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-29)), Seis, movs, Precios, Plan1, 6m, Hoy);
+            Assert.IsTrue(dia29.EnMedicion);
+            Assert.IsNull(dia29.Valor);
+            Assert.AreEqual(2, dia29.Respondieron);
+            Assert.AreEqual(Hoy.AddDays(1), dia29.ComoMedicion().FechaCierre);
+        }
+
+        [TestMethod]
+        public void MedirCampania_SinFechaEjecucion_MideDesdeLaCreacion()
+        {
+            BE.DecisionComercial Anterior(DateTime fecha) => new BE.DecisionComercial
+            {
+                IdDecision = 1, TipoRegla = ReglaRenovaciones.Codigo, Fecha = fecha, FechaEjecucion = null, Estado = BE.EstadoDecision.Ejecutada
+            };
+            var vieja = MedicionCampanias.Medir(Anterior(Hoy.AddDays(-40)), Seis,
+                ConBase(Hoy.AddDays(-40), Mov(1, Hoy.AddDays(-35), BE.EstadoRenovacion.Renovada)), Precios, Plan1, 6m, Hoy);
+            Assert.AreEqual(Hoy.AddDays(-40), vieja.Desde, "Sin FechaEjecucion, la ventana empieza en la fecha de creación.");
+            Assert.IsFalse(vieja.EnMedicion);
+            Assert.AreEqual(500m, vieja.Valor, "(1 − 50 % × 1 comparable) × 1000.");
+
+            var reciente = MedicionCampanias.Medir(Anterior(Hoy.AddDays(-10)), Seis, ConBase(Hoy.AddDays(-10)), Precios, Plan1, 6m, Hoy).ComoMedicion();
+            Assert.AreEqual(BE.EstadoMedicion.EnMedicion, reciente.Estado);
+            Assert.IsNull(reciente.Valor);
+            Assert.AreEqual(Hoy.AddDays(20), reciente.FechaCierre);
+        }
+
+        // ══ Población comparable: el mismo denominador en la base y en la campaña ══
+
+        [TestMethod]
+        public void MedirCampania_EjemploAuditoria_LosContactadosSinMovimientoNoLaVuelvenNegativa()
+        {
+            var ejecutada = Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-40));
+            var movs = new List<BE.MovimientoSuscripcion>();
+            // Ventana anterior: 9 de 10 renovaciones resueltas del plan fueron renovación → tasa base 90 %.
+            movs.AddRange(Enumerable.Range(50, 9).Select(c => Mov(c, Hoy.AddDays(-50), BE.EstadoRenovacion.Renovada)));
+            movs.Add(Mov(59, Hoy.AddDays(-55), BE.EstadoRenovacion.Baja));
+            // Campaña: 10 contactados; 6 renovaron y 4 no tuvieron ningún movimiento en la ventana.
+            movs.AddRange(Enumerable.Range(1, 6).Select(c => Mov(c, Hoy.AddDays(-35), BE.EstadoRenovacion.Renovada)));
+
+            var r = MedicionCampanias.Medir(ejecutada, Enumerable.Range(1, 10), movs, Precios, Plan1, 6m, Hoy);
+            Assert.IsFalse(r.EnMedicion);
+            Assert.AreEqual(10, r.Contactados);
+            Assert.AreEqual(6, r.Comparables, "Los 4 sin movimiento no tienen resultado que comparar.");
+            Assert.AreEqual(6, r.Respondieron);
+            Assert.AreEqual(0.9m, r.TasaBase);
+            // (6 − 90 % × 6) × 1000 = 600: renovó el 100 % de los comparables contra el 90 % de rutina.
+            // Con el denominador anterior (todos los contactados) daba (6 − 90 % × 10) × 1000 = −3000.
+            Assert.AreEqual(600m, r.Valor);
+        }
+
+        [TestMethod]
+        public void MedirCampania_IgualALaRutinaDaCero_YConBajasRealesDaNegativo()
+        {
+            var ejecutada = Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-40));
+            // Tasa base 50 % (ConBase). 2 renovaron, 2 se dieron de baja y 2 sin movimiento: 50 % de los
+            // comparables, igual que la rutina → (2 − 50 % × 4) × 1000 = 0.
+            var igual = ConBase(Hoy.AddDays(-40),
+                Mov(1, Hoy.AddDays(-35), BE.EstadoRenovacion.Renovada), Mov(2, Hoy.AddDays(-35), BE.EstadoRenovacion.Renovada),
+                Mov(3, Hoy.AddDays(-34), BE.EstadoRenovacion.Baja), Mov(4, Hoy.AddDays(-34), BE.EstadoRenovacion.Baja));
+            var r = MedicionCampanias.Medir(ejecutada, Seis, igual, Precios, Plan1, 6m, Hoy);
+            Assert.AreEqual(4, r.Comparables);
+            Assert.AreEqual(0m, r.Valor);
+
+            // Si los otros 2 también se dan de baja, la campaña quedó debajo de la rutina: (2 − 50 % × 6) × 1000.
+            var peor = ConBase(Hoy.AddDays(-40), igual.Skip(2).Concat(new[]
+                { Mov(5, Hoy.AddDays(-33), BE.EstadoRenovacion.Baja), Mov(6, Hoy.AddDays(-33), BE.EstadoRenovacion.Baja) }).ToArray());
+            var n = MedicionCampanias.Medir(ejecutada, Seis, peor, Precios, Plan1, 6m, Hoy);
+            Assert.AreEqual(6, n.Comparables);
+            Assert.AreEqual(-1000m, n.Valor);
+        }
+
+        [TestMethod]
+        public void MedirCampania_LaTasaBaseEsPorCliente_ConElPrimerMovimientoResuelto()
+        {
+            // En la ventana anterior, el cliente 50 renovó dos veces y el 51 se dio de baja: 1 de 2 clientes
+            // (no 2 de 3 movimientos). La pausa del 52 no es una renovación resuelta: no es comparable.
+            var movs = new List<BE.MovimientoSuscripcion>
+            {
+                Mov(50, Hoy.AddDays(-60), BE.EstadoRenovacion.Renovada),
+                Mov(50, Hoy.AddDays(-45), BE.EstadoRenovacion.Renovada),
+                Mov(51, Hoy.AddDays(-50), BE.EstadoRenovacion.Baja),
+                Mov(52, Hoy.AddDays(-50), BE.EstadoRenovacion.Pausada),
+                Mov(60, Hoy.AddDays(-50), BE.EstadoRenovacion.Renovada, plan: 2),   // otro plan: no cuenta
+                Mov(1, Hoy.AddDays(-35), BE.EstadoRenovacion.Renovada)
+            };
+            var r = MedicionCampanias.Medir(Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-40)), new[] { 1 }, movs, Precios, Plan1, 6m, Hoy);
+            Assert.AreEqual(0.5m, r.TasaBase);
+            Assert.AreEqual(500m, r.Valor, "(1 − 50 % × 1) × 1000.");
+        }
+
+        [TestMethod]
+        public void MedirDecisiones_LaAtribucionNoDependeDelFiltroDelHistorial()
+        {
+            LoginAdmin();
+            var dalDec = new FakeDecisionComercialDAL();
+            dalDec.Filas.Add(Ejecutada(ReglaRenovaciones.Codigo, Hoy.AddDays(-20), id: 1));
+            dalDec.Filas.Add(Ejecutada(ReglaUpgradePlan.Codigo, Hoy.AddDays(-10), id: 2));
+            dalDec.Detalle[(1, BE.DecisionComercial.DetalleCliente)] = new List<int> { 7, 8 };
+            dalDec.Detalle[(2, BE.DecisionComercial.DetalleCliente)] = new List<int> { 8, 9 };
+            var planes = new FakePlanSuscripcionDAL { Planes = new List<BE.PlanSuscripcion> { new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Precio = 1000m, Estado = true } } };
+            var svc = new InteligenciaComercial(new FakeInteligenciaComercialDAL(), planes, null, null, null, null, dalDec, () => Hoy);
+
+            var todas = svc.MedirDecisiones(dalDec.Obtener(null, null));
+            Assert.AreEqual(2, todas[1].Contactados);
+            Assert.AreEqual(1, todas[2].Contactados, "El cliente 8 cuenta para la primera campaña que lo contactó.");
+
+            // El filtro del Historial (fechas o estado) dejó solo la segunda: la atribución no cambia.
+            var filtrada = svc.MedirDecisiones(new[] { dalDec.ObtenerPorId(2) });
+            Assert.AreEqual(1, filtrada.Count);
+            Assert.AreEqual(1, filtrada[2].Contactados, "Sin la primera en la lista, el cliente 8 sigue siendo de la primera.");
+        }
+
+        [TestMethod]
+        public void ConsultasDeDecisiones_SinSesionOSinLaPatenteDeGerencia_Rechazan()
+        {
+            var dal = new FakeDecisionComercialDAL();
+            dal.Filas.Add(Ejecutada(ReglaRenovaciones.Codigo, Hoy, id: 1));
+            dal.Detalle[(1, BE.DecisionComercial.DetalleCliente)] = new List<int> { 7 };
+            var svc = new DecisionesComerciales(dal, () => Hoy);
+            void Rechaza(Action a, string clave)
+            {
+                try { a(); Assert.Fail("Se esperaba " + clave); }
+                catch (BE.AppException ex) { Assert.AreEqual(clave, ex.Clave); }
+            }
+            foreach (var clave in new[] { "err.bll.sesion_expirada", "err.bll.sin_permiso" })
+            {
+                if (clave == "err.bll.sin_permiso")
+                    SessionManager.Login(new BE.Usuario { Id = 2, Username = "vend", Perfil = "Vendedor",
+                        Permisos = new List<BE.Permiso> { new BE.Permiso { NombreMenu = BE.Patentes.Clientes } } });
+                Rechaza(() => svc.Obtener(), clave);
+                Rechaza(() => svc.AsociarDecisiones(new[] { RecRenovaciones() }), clave);
+                Rechaza(() => svc.ObtenerDetalle(new[] { 1 }, BE.DecisionComercial.DetalleCliente), clave);
+            }
+            SessionManager.Logout();
+            LoginAdmin();
+            Assert.AreEqual(1, svc.Obtener().Count);
+            Assert.IsTrue(svc.AsociarDecisiones(new[] { RecRenovaciones() }));
+            Assert.AreEqual(1, svc.ObtenerDetalle(new[] { 1 }, BE.DecisionComercial.DetalleCliente).Count);
+        }
+
+        [TestMethod]
+        public void MedirDecisiones_CampaniaAceptadaSinEjecutar_NoSeMide()
+        {
+            LoginAdmin();
+            var dalDec = new FakeDecisionComercialDAL();
+            var planes = new FakePlanSuscripcionDAL { Planes = new List<BE.PlanSuscripcion> { new BE.PlanSuscripcion { IdPlan = 1, Nombre = "Básico", Precio = 1000m, Estado = true } } };
+            var svc = new InteligenciaComercial(new FakeInteligenciaComercialDAL(), planes, null, null, null, null, dalDec, () => Hoy);
+            var d = new DecisionesComerciales(dalDec, () => Hoy).Aceptar("Test", RecRenovaciones(), 0);
+            dalDec.Detalle[(d.IdDecision, BE.DecisionComercial.DetalleCliente)] = new List<int> { 7 };   // aunque tuviera contactos guardados
+            var lista = dalDec.Obtener(null, null);
+            Assert.IsNull(lista.Single().FechaEjecucion);
+            Assert.IsFalse(svc.MedirDecisiones(lista).ContainsKey(d.IdDecision), "Sin ejecutar no hay campaña que medir.");
+        }
+
+        [TestMethod]
+        public void Resumir_LasCampaniasEnMedicionNoSeSuman_HastaQueCierran()
+        {
+            BE.DecisionComercial D(int id, BE.EstadoDecision e, decimal estimado, decimal? real = null) =>
+                new BE.DecisionComercial { IdDecision = id, Estado = e, ImpactoEstimado = estimado, ResultadoReal = real };
+            var lista = new List<BE.DecisionComercial>
+            {
+                D(1, BE.EstadoDecision.Ejecutada, 500m), D(2, BE.EstadoDecision.Ejecutada, 800m), D(3, BE.EstadoDecision.Ejecutada, 1800m),
+                D(4, BE.EstadoDecision.Aceptada, 300m, 250m), D(5, BE.EstadoDecision.Descartada, 999m), D(6, BE.EstadoDecision.Ejecutada, 100m)
+            };
+            var medidos = new Dictionary<int, BE.MedicionDecision>
+            {
+                [1] = BE.MedicionDecision.Medida(1000m),
+                [2] = BE.MedicionDecision.Medida(-2000m),
+                [3] = BE.MedicionDecision.EnCurso(2, 6, Hoy.AddDays(20)),
+                [5] = BE.MedicionDecision.Medida(7777m),     // descartada: no admite resultado
+                [6] = BE.MedicionDecision.SinDatos()
+            };
+            var r = MedicionDecisiones.Resumir(lista, medidos);
+            Assert.AreEqual(6, r.Decisiones);
+            Assert.AreEqual(5, r.Aceptadas);
+            Assert.AreEqual(3500m, r.EstimadoAceptadas);
+            Assert.AreEqual(1, r.ConReal);
+            Assert.AreEqual(300m, r.EstimadoConReal);
+            Assert.AreEqual(250m, r.Real);
+            Assert.AreEqual(2, r.Medidas, "Solo las de resultado final.");
+            Assert.AreEqual(1300m, r.EstimadoMedidas, "El estimado de la campaña en medición tampoco se suma.");
+            Assert.AreEqual(-1000m, r.Medido, "1000 − 2000: la negativa cerrada suma; la abierta no.");
+            Assert.AreEqual(1, r.EnMedicion);
+
+            // Al cerrar la campaña 3 entra en las sumas.
+            medidos[3] = BE.MedicionDecision.Medida(600m);
+            var cerrada = MedicionDecisiones.Resumir(lista, medidos);
+            Assert.AreEqual(3, cerrada.Medidas);
+            Assert.AreEqual(3100m, cerrada.EstimadoMedidas);
+            Assert.AreEqual(-400m, cerrada.Medido);
+            Assert.AreEqual(0, cerrada.EnMedicion);
+
+            var sinMediciones = MedicionDecisiones.Resumir(lista, null);
+            Assert.AreEqual(0, sinMediciones.Medidas);
+            Assert.AreEqual(0, sinMediciones.EnMedicion);
+            Assert.AreEqual(0, MedicionDecisiones.Resumir(null, medidos).Decisiones);
+        }
+
+        [TestMethod]
+        public void MedirDecisiones_IncluyeLasCampaniasConContactosGuardados_EnMedicionHastaQueCierra()
         {
             LoginAdmin();
             var dalDec = new FakeDecisionComercialDAL();
@@ -260,9 +548,22 @@ namespace Tests
             decisiones.MarcarEjecutadaConDetalle("Test", d.IdDecision, BE.DecisionComercial.DetalleCliente, new[] { 7, 8 });
 
             var lista = dalDec.Obtener(null, null);
-            var medidos = svc.MedirDecisiones(lista);
-            Assert.AreEqual(1000m, medidos[d.IdDecision], "El cliente 7 renovó después de la campaña (sin historia: tasa base 0).");
-            Assert.IsTrue(lista.Single().ResultadoParcial, "La ventana de 30 días todavía no cerró.");
+            var medida = svc.MedirDecisiones(lista)[d.IdDecision];
+            Assert.AreEqual(BE.EstadoMedicion.EnMedicion, medida.Estado, "La ventana de 30 días todavía no cerró.");
+            Assert.IsNull(medida.Valor, "En medición no hay importe.");
+            Assert.AreEqual(1, medida.Respondieron, "El cliente 7 ya renovó.");
+            Assert.AreEqual(2, medida.Contactados);
+            Assert.AreEqual(Hoy.AddDays(25), medida.FechaCierre, "Ejecutada hace 5 días: cierra dentro de 25.");
+            var resumen = MedicionDecisiones.Resumir(lista, svc.MedirDecisiones(lista));
+            Assert.AreEqual(1, resumen.EnMedicion);
+            Assert.AreEqual(0, resumen.Medidas);
+            Assert.AreEqual(0m, resumen.Medido, "La campaña en medición no suma.");
+
+            // El día del cierre, el importe: el cliente 7 renovó (sin historia: tasa base 0).
+            var alCierre = new InteligenciaComercial(dal, planes, null, null, null, null, dalDec, () => Hoy.AddDays(25));
+            var final = alCierre.MedirDecisiones(dalDec.Obtener(null, null))[d.IdDecision];
+            Assert.AreEqual(BE.EstadoMedicion.Medido, final.Estado);
+            Assert.AreEqual(1000m, final.Valor);
         }
 
         // ══ Fecha de ejecución ═══════════════════════════════════════════════════

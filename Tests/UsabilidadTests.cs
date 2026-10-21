@@ -701,5 +701,60 @@ namespace Tests
             CollectionAssert.AreEqual(new[] { "siguiente" }, log);
             Assert.IsTrue(s.Resuelta);
         }
+
+        // ── Cola: lo encolado espera a que no haya un diálogo modal abierto ──────
+
+        [TestMethod]
+        public void ColaVentanaLibre_ConUnModalAbierto_EsperaYDespuesEjecutaEnOrden()
+        {
+            // Caso del login: la guía no se muestra (la secuencia se resuelve en el acto) mientras el
+            // aviso modal del backup sigue abierto; el aviso comercial tiene que esperar a que se cierre.
+            bool modalAbierto = true;
+            var log = new List<string>();
+            var cola = new BLL.ColaHastaVentanaLibre(() => !modalAbierto);
+            var s = new BLL.SecuenciaDespuesDeLaGuia(a => { cola.Agregar(a); cola.Procesar(); });
+            s.Agregar(() => log.Add("aviso"));
+            s.Agregar(() => log.Add("otro"));
+            s.Resolver();
+
+            Assert.AreEqual(0, log.Count, "Con un modal abierto no se ejecuta nada.");
+            Assert.AreEqual(2, cola.Pendientes);
+            Assert.IsFalse(cola.Procesar(), "Sigue esperando (el Menú vuelve a mirar cada 400 ms).");
+
+            modalAbierto = false;
+            Assert.IsTrue(cola.Procesar());
+            CollectionAssert.AreEqual(new[] { "aviso", "otro" }, log);
+            Assert.AreEqual(0, cola.Pendientes);
+        }
+
+        [TestMethod]
+        public void ColaVentanaLibre_SiUnaAccionAbreUnModal_LasSiguientesEsperan()
+        {
+            bool modalAbierto = false;
+            var log = new List<string>();
+            var cola = new BLL.ColaHastaVentanaLibre(() => !modalAbierto);
+            cola.Agregar(() => { log.Add("abre modal"); modalAbierto = true; });
+            cola.Agregar(() => log.Add("siguiente"));
+
+            Assert.IsFalse(cola.Procesar());
+            CollectionAssert.AreEqual(new[] { "abre modal" }, log);
+
+            modalAbierto = false;
+            Assert.IsTrue(cola.Procesar());
+            CollectionAssert.AreEqual(new[] { "abre modal", "siguiente" }, log);
+        }
+
+        [TestMethod]
+        public void ColaVentanaLibre_NoLanza_SiFallaUnaAccionOLaCondicion()
+        {
+            var log = new List<string>();
+            var cola = new BLL.ColaHastaVentanaLibre(() => throw new InvalidOperationException("handle destruido"));
+            cola.Agregar(() => throw new InvalidOperationException("aviso roto"));
+            cola.Agregar(() => log.Add("siguiente"));
+            cola.Agregar(null);
+
+            Assert.IsTrue(cola.Procesar(), "Si no se puede mirar la ventana, se toma como libre.");
+            CollectionAssert.AreEqual(new[] { "siguiente" }, log);
+        }
     }
 }

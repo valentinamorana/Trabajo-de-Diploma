@@ -6,11 +6,13 @@
 -- claves primarias, restricciones UNIQUE y CHECK, índices únicos/filtrados
 -- y de búsqueda, y claves foráneas). No incluye datos ni migraciones.
 --
--- Generado el 13/10/2026 a partir de la base construida con
+-- Generado el 21/10/2026 a partir de la base construida con
 -- BD/00_Instalacion_Completa.sql, leyendo el catálogo de SQL Server
 -- (sys.tables, sys.columns, sys.indexes, sys.check_constraints,
--- sys.foreign_keys...). El esquema no tiene vistas, procedimientos
--- almacenados, funciones ni triggers.
+-- sys.foreign_keys...). Este DDL incluye solo tablas, índices y
+-- restricciones: el esquema no tiene vistas, funciones ni triggers, y su
+-- único procedimiento almacenado (dbo.RestablecerDatosDemo, la carga de los
+-- datos de demo) está en 00_Instalacion_Completa.sql.
 --
 -- IMPORTANTE: 00_Instalacion_Completa.sql sigue siendo el ÚNICO script que
 -- ejecuta el instalador (crea la base, migra versiones anteriores y carga
@@ -222,18 +224,13 @@ CREATE TABLE [dbo].[DecisionComercial] (
 );
 GO
 
--- PN03: una sola decisión abierta (Aceptada / Pospuesta) por recomendación (sección 20p).
-CREATE UNIQUE NONCLUSTERED INDEX [UX_DecisionComercial_Abierta] ON [dbo].[DecisionComercial]([ClaveRecomendacion]) WHERE ([Estado] IN ((1), (3)));
-GO
-
 -- PN03: qué tocó una decisión ejecutada (clientes contactados o prendas cambiadas). Sección 20p.
 CREATE TABLE [dbo].[DecisionComercialDetalle] (
     [IdDecision] int NOT NULL,
     [Tipo]       nvarchar(20) NOT NULL,
     [IdObjeto]   int NOT NULL,
     CONSTRAINT [PK_DecisionComercialDetalle] PRIMARY KEY CLUSTERED ([IdDecision], [Tipo], [IdObjeto]),
-    CONSTRAINT [CHK_DecisionComercialDetalle_Tipo] CHECK ([Tipo]=N'Prenda' OR [Tipo]=N'Cliente'),
-    CONSTRAINT [FK_DecisionComercialDetalle_Decision] FOREIGN KEY ([IdDecision]) REFERENCES [dbo].[DecisionComercial] ([IdDecision]) ON DELETE CASCADE
+    CONSTRAINT [CHK_DecisionComercialDetalle_Tipo] CHECK ([Tipo]=N'Prenda' OR [Tipo]=N'Cliente')
 );
 GO
 
@@ -251,10 +248,10 @@ CREATE TABLE [dbo].[MetaComercial] (
     CONSTRAINT [CHK_MetaComercial_Periodo] CHECK (datepart(day,[Periodo])=(1)),
     CONSTRAINT [CHK_MetaComercial_Indicador] CHECK ([Indicador]>=(0)),
     CONSTRAINT [CHK_MetaComercial_Sentido] CHECK ([Sentido]=(1) OR [Sentido]=(0)),
-    CONSTRAINT [CHK_MetaComercial_Valor] CHECK ([ValorObjetivo]>=(0)),
-    CONSTRAINT [FK_MetaComercial_Usuario] FOREIGN KEY ([IdUsuario]) REFERENCES [dbo].[Usuario] ([IdUsuario])
+    CONSTRAINT [CHK_MetaComercial_Valor] CHECK ([ValorObjetivo]>=(0))
 );
 GO
+
 CREATE TABLE [dbo].[DesistimientoContratacion] (
     [IdDesistimiento] int IDENTITY(1, 1) NOT NULL,
     [IdCliente]       int NOT NULL,
@@ -715,6 +712,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [UX_Contratacion_UnaPendientePorCliente] ON [db
 CREATE NONCLUSTERED INDEX [IX_IntentoPago_Contratacion] ON [dbo].[ContratacionIntentoPago] ([IdContratacion]);
 CREATE NONCLUSTERED INDEX [IX_DecisionComercial_Clave] ON [dbo].[DecisionComercial] ([ClaveRecomendacion], [Fecha] DESC);
 CREATE NONCLUSTERED INDEX [IX_DecisionComercial_Fecha] ON [dbo].[DecisionComercial] ([Fecha]);
+CREATE UNIQUE NONCLUSTERED INDEX [UX_DecisionComercial_Abierta] ON [dbo].[DecisionComercial] ([ClaveRecomendacion]) WHERE ([Estado] IN ((1), (3)));
 CREATE NONCLUSTERED INDEX [IX_DictamenContable_Promocion] ON [dbo].[DictamenContable] ([IdPromocion]);
 CREATE UNIQUE NONCLUSTERED INDEX [UX_Empleado_DNI] ON [dbo].[Empleado] ([DNI]) WHERE ([DNI]<>N'');
 CREATE UNIQUE NONCLUSTERED INDEX [UX_Empleado_IdUsuario] ON [dbo].[Empleado] ([IdUsuario]) WHERE ([IdUsuario] IS NOT NULL);
@@ -784,6 +782,8 @@ ALTER TABLE [dbo].[DesistimientoContratacion] ADD CONSTRAINT [FK_DesistContr_Pla
 ALTER TABLE [dbo].[DesistimientoContratacion] ADD CONSTRAINT [FK_DesistContr_Vendedor] FOREIGN KEY ([IdVendedor]) REFERENCES [dbo].[Empleado] ([IdEmpleado]);
 
 ALTER TABLE [dbo].[DecisionComercial] ADD CONSTRAINT [FK_DecisionComercial_Usuario] FOREIGN KEY ([IdUsuario]) REFERENCES [dbo].[Usuario] ([IdUsuario]);
+ALTER TABLE [dbo].[DecisionComercialDetalle] ADD CONSTRAINT [FK_DecisionComercialDetalle_Decision] FOREIGN KEY ([IdDecision]) REFERENCES [dbo].[DecisionComercial] ([IdDecision]) ON DELETE CASCADE;
+
 ALTER TABLE [dbo].[DictamenContable] ADD CONSTRAINT [FK_DictamenContable_Promocion] FOREIGN KEY ([IdPromocion]) REFERENCES [dbo].[Promocion] ([IdPromocion]);
 ALTER TABLE [dbo].[DictamenContable] ADD CONSTRAINT [FK_DictamenContable_Usuario] FOREIGN KEY ([IdUsuario]) REFERENCES [dbo].[Usuario] ([IdUsuario]);
 
@@ -803,6 +803,8 @@ ALTER TABLE [dbo].[ListaEspera] ADD FOREIGN KEY ([IdCliente]) REFERENCES [dbo].[
 ALTER TABLE [dbo].[ListaEspera] ADD FOREIGN KEY ([IdPrenda]) REFERENCES [dbo].[Prenda] ([IdPrenda]);
 
 ALTER TABLE [dbo].[MantenimientoPrenda] ADD FOREIGN KEY ([IdPrenda]) REFERENCES [dbo].[Prenda] ([IdPrenda]);
+
+ALTER TABLE [dbo].[MetaComercial] ADD CONSTRAINT [FK_MetaComercial_Usuario] FOREIGN KEY ([IdUsuario]) REFERENCES [dbo].[Usuario] ([IdUsuario]);
 
 ALTER TABLE [dbo].[Pedido] ADD FOREIGN KEY ([IdCliente]) REFERENCES [dbo].[Cliente] ([IdCliente]);
 ALTER TABLE [dbo].[Pedido] ADD FOREIGN KEY ([IdEmpleado]) REFERENCES [dbo].[Empleado] ([IdEmpleado]);

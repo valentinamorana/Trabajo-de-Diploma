@@ -36,6 +36,9 @@ Instalador/Redist/
 # Instalador compilado (se distribuye firmado como GitHub Release, no se versiona)
 Instalador/Salida/
 
+# Copia comprimida local del instalador (no se versiona)
+/Instalador.zip
+
 # Configuración local de Claude Code (permisos de esta PC)
 .claude/settings.local.json
 

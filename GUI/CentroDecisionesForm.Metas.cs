@@ -42,10 +42,10 @@ namespace GUI
             }
         }
 
+        // El gráfico va en la sección de metas del informe, a continuación de su tabla (no con los de Analizar).
         private void AgregarGraficoMetas(InformeEjecutivo.Datos datos)
         {
-            byte[] png = panelMetas != null && panelMetas.Cargado ? panelMetas.GraficoPng() : null;
-            if (png != null) datos.Graficos.Add((Tr("cdc.meta.grafico", "Metas: real contra objetivo"), png));
+            datos.GraficoMetas = panelMetas != null && panelMetas.Cargado ? panelMetas.GraficoPng() : null;
         }
     }
 }

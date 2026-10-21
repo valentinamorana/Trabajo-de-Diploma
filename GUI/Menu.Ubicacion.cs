@@ -43,6 +43,10 @@ namespace GUI
         // Lo que tiene que mostrarse DESPUÉS de la guía de primer uso (ver DespuesDeLaGuia).
         private BLL.SecuenciaDespuesDeLaGuia _secuenciaGuia;
 
+        // Lo que espera a que no haya un diálogo modal abierto (ver CuandoLaVentanaEsteLibre).
+        private BLL.ColaHastaVentanaLibre _colaVentanaLibre;
+        private Timer _timerVentanaLibre;
+
         [DllImport("user32.dll")]
         private static extern bool IsWindowEnabled(IntPtr hWnd);
 
@@ -85,12 +89,10 @@ namespace GUI
             int idxAyuda = usuarioToolStripMenuItem.DropDownItems.IndexOf(ayudaItem);
             usuarioToolStripMenuItem.DropDownItems.Insert(idxAyuda >= 0 ? idxAyuda + 1 : 0, guiaItem);
 
-            _secuenciaGuia = new BLL.SecuenciaDespuesDeLaGuia(accion =>
-            {
-                if (IsDisposed) return;
-                if (IsHandleCreated) BeginInvoke(accion);
-                else accion();
-            });
+            // Lo encolado tras la guía tampoco se superpone a un aviso modal (p. ej. el del backup del
+            // login, abierto cuando la guía no se muestra y la secuencia se resuelve en el acto).
+            _colaVentanaLibre = new BLL.ColaHastaVentanaLibre(VentanaLibre);
+            _secuenciaGuia = new BLL.SecuenciaDespuesDeLaGuia(CuandoLaVentanaEsteLibre);
 
             MdiChildActivate += (s, e) =>
             {
@@ -128,6 +130,46 @@ namespace GUI
         /// el constructor u OnLoad: lo encolado espera a OnShown.
         /// </summary>
         internal void DespuesDeLaGuia(Action accion) => _secuenciaGuia?.Agregar(accion);
+
+        /// <summary>
+        /// Ejecuta <paramref name="accion"/> en el hilo de UI cuando la ventana principal quede libre:
+        /// habilitada y sin un diálogo modal propio abierto (MessageBox del backup del login, la guía,
+        /// Backup, Mi Perfil…); la misma condición con la que espera la guía. Si ya está libre, corre
+        /// enseguida (por BeginInvoke); si no, se revisa cada 400 ms. Lo encolado respeta el orden.
+        /// Con la ventana ya creada se puede llamar desde cualquier hilo; nunca lanza.
+        /// </summary>
+        internal void CuandoLaVentanaEsteLibre(Action accion)
+        {
+            if (accion == null || IsDisposed) return;
+            try
+            {
+                if (IsHandleCreated) BeginInvoke(new Action(() => EncolarHastaVentanaLibre(accion)));
+                else EncolarHastaVentanaLibre(accion);
+            }
+            catch (InvalidOperationException) { /* el menú se cerró mientras tanto */ }
+            catch (Exception ex) { System.Diagnostics.Trace.TraceWarning("[Menu] Acción tras los avisos: " + ex.Message); }
+        }
+
+        private void EncolarHastaVentanaLibre(Action accion)
+        {
+            if (IsDisposed) return;
+            _colaVentanaLibre.Agregar(accion);
+            if (_colaVentanaLibre.Procesar() || _timerVentanaLibre != null) return;
+            _timerVentanaLibre = new Timer { Interval = 400 };
+            _timerVentanaLibre.Tick += (s, e) =>
+            {
+                if (!IsDisposed && !_colaVentanaLibre.Procesar()) return;
+                _timerVentanaLibre?.Stop();
+                _timerVentanaLibre?.Dispose();
+                _timerVentanaLibre = null;
+            };
+            _timerVentanaLibre.Start();
+        }
+
+        // Libre = la ventana está habilitada (un MessageBox o un ShowDialog la deshabilitan) y no hay
+        // un formulario modal propio visible. La usan la guía y CuandoLaVentanaEsteLibre.
+        private bool VentanaLibre() =>
+            IsHandleCreated && IsWindowEnabled(Handle) && !OwnedForms.Any(f => f.Visible && f.Modal);
 
         /// <summary>
         /// Lo llama FormBase cuando un diálogo modal con este Menú como dueño se abre o se cierra.
@@ -287,7 +329,7 @@ namespace GUI
                 _timerGuia.Tick += (s, e) =>
                 {
                     if (IsDisposed) { _timerGuia.Stop(); return; }
-                    if (!IsHandleCreated || !IsWindowEnabled(Handle) || OwnedForms.Any(f => f.Visible && f.Modal)) return;
+                    if (!VentanaLibre()) return;
                     _timerGuia.Stop();
                     _timerGuia.Dispose();
                     _timerGuia = null;

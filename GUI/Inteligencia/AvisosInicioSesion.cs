@@ -9,7 +9,9 @@ namespace GUI.Inteligencia
     /// hay algo, muestra un aviso NO modal en la esquina del menú (AvisoComercialForm) con un botón que abre
     /// el Centro con el mecanismo del menú (Menu.AbrirUnico). El cálculo arranca enseguida (fuera del hilo de
     /// la interfaz); mostrarlo lo encola el Menú con DespuesDeLaGuia, así en el primer ingreso aparece después
-    /// de la guía de primer uso. Si el cálculo falla o no hay nada, no se muestra nada.
+    /// de la guía de primer uso, y nunca encima de un diálogo modal abierto (Menu.CuandoLaVentanaEsteLibre:
+    /// si el cálculo termina con un modal abierto, el aviso espera a que se cierre). Si el cálculo falla o no
+    /// hay nada, no se muestra nada.
     /// </summary>
     internal static class AvisosInicioSesion
     {
@@ -44,18 +46,15 @@ namespace GUI.Inteligencia
             {
                 var resumen = t.Status == TaskStatus.RanToCompletion ? t.Result : null;
                 if (resumen == null || !resumen.HayAlgo) return;
-                try
+                if (menu.IsDisposed || !menu.IsHandleCreated) return;
+                // Nunca lanza; si el menú se cerró mientras se calculaba, no hace nada.
+                menu.CuandoLaVentanaEsteLibre(() =>
                 {
-                    if (menu.IsDisposed || !menu.IsHandleCreated) return;
-                    menu.BeginInvoke(new Action(() =>
-                    {
-                        if (menu.IsDisposed || !BLL.Sesion.Activa) return;
-                        var aviso = new AvisoComercialForm(resumen, idUsuario.Value, Modulo,
-                            () => menu.AbrirUnico(() => new CentroDecisionesForm()));
-                        aviso.MostrarEnEsquina(menu);
-                    }));
-                }
-                catch (InvalidOperationException) { /* el menú se cerró mientras se calculaba */ }
+                    if (menu.IsDisposed || !BLL.Sesion.Activa) return;
+                    var aviso = new AvisoComercialForm(resumen, idUsuario.Value, Modulo,
+                        () => menu.AbrirUnico(() => new CentroDecisionesForm()));
+                    aviso.MostrarEnEsquina(menu);
+                });
             });
         }
     }

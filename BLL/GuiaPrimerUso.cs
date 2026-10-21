@@ -36,9 +36,11 @@ namespace BLL
 
         public const string NombreArchivo = "guia_primer_uso.txt";
 
-        /// <summary>Carpeta de datos locales de WardrobeFlow (la misma de Versiones y Errores).</summary>
-        public static string CarpetaPorDefecto => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WardrobeFlow");
+        /// <summary>
+        /// Carpeta de datos locales de WardrobeFlow (la misma de Versiones y Errores): la raíz que define
+        /// en un solo lugar Servicios.Serializacion.GestorArchivos (%LOCALAPPDATA%\WardrobeFlow).
+        /// </summary>
+        public static string CarpetaPorDefecto => Servicios.Serializacion.GestorArchivos.CarpetaRaizPorDefecto;
 
         private readonly string _ruta;
         private static readonly object Candado = new object();
@@ -325,7 +327,8 @@ namespace BLL
     ///   • Mientras no se decidió si la guía se muestra, las acciones se encolan.
     ///   • Resolver() (la guía se cerró, o no se iba a mostrar) despacha las encoladas en orden.
     ///   • Una acción que llega después de Resolver() se despacha en el momento.
-    /// El "despachador" lo pone quien la usa (el Menú hace BeginInvoke); acá no hay UI, así que la
+    /// El "despachador" lo pone quien la usa (el Menú la pasa a Menu.CuandoLaVentanaEsteLibre, que espera
+    /// a que no haya un diálogo modal abierto: ver ColaHastaVentanaLibre); acá no hay UI, así que la
     /// secuencia se prueba sin formularios. Una acción que falla no corta a las siguientes.
     /// </summary>
     public sealed class SecuenciaDespuesDeLaGuia
@@ -376,6 +379,62 @@ namespace BLL
         {
             try { accion(); }
             catch (Exception ex) { System.Diagnostics.Trace.TraceWarning("[SecuenciaDespuesDeLaGuia] Acción posterior a la guía: " + ex.Message); }
+        }
+    }
+
+    /// <summary>
+    /// Acciones que esperan a que la ventana principal quede libre (sin un diálogo modal abierto), en el
+    /// orden en que llegaron. El Menú la usa para que lo encolado tras la guía (p. ej. el aviso comercial
+    /// de PN03) no aparezca encima del aviso modal del backup del login: Procesar() se llama al encolar y
+    /// después cada 400 ms hasta que no queda nada. La condición "libre" la pone quien la usa (el Menú
+    /// mira IsWindowEnabled y sus formularios modales, igual que antes de mostrar la guía); acá no hay
+    /// UI, así que se prueba sin formularios. Se usa desde un solo hilo (el de la interfaz) y nunca lanza:
+    /// una acción que falla no corta a las siguientes, y si la condición falla se toma como libre (para
+    /// no dejar un aviso esperando para siempre).
+    /// </summary>
+    public sealed class ColaHastaVentanaLibre
+    {
+        private readonly Queue<Action> _pendientes = new Queue<Action>();
+        private readonly Func<bool> _ventanaLibre;
+
+        public ColaHastaVentanaLibre(Func<bool> ventanaLibre)
+        {
+            _ventanaLibre = ventanaLibre ?? (() => true);
+        }
+
+        /// <summary>Cuántas acciones siguen esperando.</summary>
+        public int Pendientes => _pendientes.Count;
+
+        public void Agregar(Action accion)
+        {
+            if (accion != null) _pendientes.Enqueue(accion);
+        }
+
+        /// <summary>
+        /// Ejecuta en orden las pendientes mientras la ventana siga libre; la condición se vuelve a mirar
+        /// antes de cada una (si una abre un diálogo modal, las siguientes esperan a que se cierre).
+        /// Devuelve true si no quedó ninguna pendiente.
+        /// </summary>
+        public bool Procesar()
+        {
+            while (_pendientes.Count > 0)
+            {
+                if (!EstaLibre()) return false;
+                var accion = _pendientes.Dequeue();
+                try { accion(); }
+                catch (Exception ex) { System.Diagnostics.Trace.TraceWarning("[ColaHastaVentanaLibre] " + ex.Message); }
+            }
+            return true;
+        }
+
+        private bool EstaLibre()
+        {
+            try { return _ventanaLibre(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning("[ColaHastaVentanaLibre] No se pudo ver si hay un diálogo abierto: " + ex.Message);
+                return true;
+            }
         }
     }
 }

@@ -553,7 +553,7 @@ namespace GUI
 
         /// <summary>
         /// PN03 «Inteligencia comercial y promociones» — Abre el Centro de decisiones comerciales (Gerencia)
-        /// como hijo MDI: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.
+        /// como hijo MDI: analizar → recomendar/decidir → simular → aplicar → medir.
         /// </summary>
         private void centroDecisionesToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -650,7 +650,8 @@ namespace GUI
             // Backup automático: reloj de 24 h (todos los roles) y aviso si falló el del login.
             BLL.BackupProgramado.Iniciar();
             BeginInvoke(new Action(MostrarAvisoBackupLogin));
-            // PN03: avisos del Centro de decisiones (no modal, calculado en segundo plano; se muestra después de la guía).
+            // PN03: avisos del Centro de decisiones (no modal, calculado en segundo plano). Orden: dashboard →
+            // avisos modales (backup) → guía → esto; espera a que se cierre cualquier modal (CuandoLaVentanaEsteLibre).
             DespuesDeLaGuia(Inteligencia.AvisosInicioSesion.Preparar(this));
 
             // 4. Cargar traducciones de BD en background (no bloquea la UI)

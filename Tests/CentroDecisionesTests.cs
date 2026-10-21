@@ -356,6 +356,7 @@ namespace Tests
         [TestMethod]
         public void AsociarDecisiones_TablaInaccesible_NoRompeLasRecomendaciones()
         {
+            LoginAdmin();   // la consulta exige la patente de Gerencia
             var rec = Rec();
             Assert.IsFalse(Servicio(new FakeDecisionComercialDAL { FallarLectura = true }).AsociarDecisiones(new[] { rec }));
             Assert.IsNull(rec.UltimaDecision);
@@ -399,7 +400,8 @@ namespace Tests
             };
             var medido = ctx.Crear().MedirDecisiones(new[] { decision });
             // Mejora 80 % − 50 % = 30 pp → 3 retenidos × 1000 × 6 meses − 2000 descontados.
-            Assert.AreEqual(16000m, medido[1]);
+            Assert.AreEqual(BE.EstadoMedicion.Medido, medido[1].Estado);
+            Assert.AreEqual(16000m, medido[1].Valor);
         }
 
         [TestMethod]

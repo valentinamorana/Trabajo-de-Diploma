@@ -52,6 +52,7 @@
     <Compile Include="Serializacion\SerializadorJson.cs" />
     <Compile Include="Serializacion\SerializadorXml.cs" />
     <Compile Include="GeneradorCredenciales.cs" />
+    <Compile Include="LectorNumeros.cs" />
     <Compile Include="RegistroBitacora.cs" />
     <Compile Include="Multiidioma\GestorIdioma.cs" />
     <Compile Include="Multiidioma\IIdiomaObserver.cs" />

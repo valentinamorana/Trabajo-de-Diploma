@@ -167,12 +167,14 @@ namespace GUI.Ayuda
                 "Backups automáticos (sin cifrar):\n" +
                 "• Al iniciar sesión (cualquier rol), si el último backup es más antiguo que el intervalo configurado (60 minutos por defecto; el Administrador lo cambia con \"Backup automático al iniciar sesión...\").\n" +
                 "• Cada 24 horas mientras la aplicación esté abierta.\n" +
-                "• Rotan entre auto_domingo.bak … auto_sabado.bak (uno por día de la semana) y se restauran sin contraseña."),
+                "• Rotan entre auto_domingo.bak … auto_sabado.bak (uno por día de la semana) y se restauran sin contraseña.\n" +
+                "\n" +
+                "Restablecer datos de demo... (solo Administrador): borra los datos de negocio y vuelve a cargar los de prueba con las fechas corridas a hoy. Antes genera una copia sin cifrar WardrobeFlow_PrevioDemo_<fecha>_<usuario>.bak en la carpeta de backups (se restaura como cualquier otra) y, al terminar, verifica la integridad y reinicia la aplicación."),
 
             ["Bitacora"] = new TemaAyuda("Bitácora",
                 "Consulta de los eventos del sistema con filtros por usuario, fecha, módulo y criticidad. Se puede exportar a PDF.\n" +
                 "\n" +
-                "• Errores (XML): los errores inesperados quedan serializados en XML; se pueden ver, importar desde otra PC y exportar."),
+                "• Errores (XML/JSON): los errores inesperados quedan serializados en XML; se pueden ver, importar desde otra PC y exportar, en XML o JSON."),
 
             ["MiPerfilForm"] = new TemaAyuda("Mi perfil",
                 "Preferencias del usuario: idioma, fuente, tamaño, tema y formato de fecha (se aplican a todas las pantallas). La contraseña la cambia el Administrador desde Usuarios."),
@@ -184,12 +186,21 @@ namespace GUI.Ayuda
                 "• Daño irreparable → Dar de baja con cargo: se cobra la reposición al último cliente con su próximo cobro.\n" +
                 "Las prendas que entraron a limpieza en el depósito no aparecen acá."),
 
-            ["ErroresXmlForm"] = new TemaAyuda("Errores (XML)",
+            ["ErroresXmlForm"] = new TemaAyuda("Errores (XML/JSON)",
                 "Errores inesperados de la aplicación, serializados en XML (un archivo por mes en esta PC).\n" +
                 "\n" +
                 "• Ver los de esta PC: lee los archivos locales.\n" +
-                "• Importar XML: abre un archivo de errores, por ejemplo traído de otra PC.\n" +
-                "• Exportar XML: guarda la lista que se está viendo en un archivo."),
+                "• Importar XML/JSON: abre un archivo de errores en XML o JSON, por ejemplo traído de otra PC.\n" +
+                "• Exportar XML/JSON: guarda la lista que se está viendo en un archivo; el formato lo da el tipo elegido (.xml o .json).\n" +
+                "Los dos diálogos abren en %LOCALAPPDATA%\\WardrobeFlow\\Errores\\Exportados, aparte del registro mensual (la carpeta se crea si no existe); la importación puede abrir un archivo de cualquier carpeta."),
+
+            ["VersionHistorialForm"] = new TemaAyuda("Historial de Cambios de Usuarios",
+                "Versiones (patrón Memento) de los datos administrativos de cada usuario: usuario, nombre, apellido, email y fecha de nacimiento. La contraseña nunca se versiona.\n" +
+                "\n" +
+                "• Cargar: muestra las versiones del usuario elegido guardadas en la base.\n" +
+                "• Restaurar Versión Seleccionada (solo Administrador): deja al usuario exactamente en ese estado. Queda registrado como un cambio más, así que también se puede deshacer.\n" +
+                "• Exportar versiones…: serializa las versiones del usuario elegido a XML o JSON (según el tipo elegido), sin la clave ni el estado de bloqueo. Por defecto se guardan en %LOCALAPPDATA%\\WardrobeFlow\\Versiones (la carpeta se crea si no existe).\n" +
+                "• Importar versiones…: lee un archivo exportado (XML o JSON), verifica su formato y que pertenezca a un usuario existente, y muestra sus versiones marcadas como \"importada\". Elija una y presione Restaurar: se aplican los mismos controles que en una restauración normal."),
 
             ["AlertasForm"] = new TemaAyuda("Alertas",
                 "Avisos que necesitan atención según su rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular."),
@@ -202,11 +213,30 @@ namespace GUI.Ayuda
                 "\n" +
                 "1. Elija el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).\n" +
                 "2. Generar: el resultado se muestra en la grilla, con un resumen arriba.\n" +
-                "3. Exportar a PDF (vista previa) o Guardar como .CSV.\n" +
+                "3. Exportar a PDF (se guarda y se abre) o Guardar como .CSV.\n" +
                 "\n" +
                 "• Gerencia Comercial: Análisis de Abandono y Ventas por Vendedor.\n" +
                 "• Gerencia de Inventario: Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.\n" +
                 "• Ventas: Recomendación de Prendas."),
+
+            ["CentroDecisionesForm"] = new TemaAyuda("Centro de decisiones comerciales (Gerencia, PN03)",
+                "Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.\n" +
+                "\n" +
+                "1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados.\n" +
+                "1b. Cohortes: retención por mes de alta y peor cohorte.\n" +
+                "2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo: sugiere, extiende o pide la baja de una promoción, exporta los contactos de una campaña (se mide después), genera la orden de compra o da de baja / manda a revisión prendas. Descartar pide motivo; Posponer la oculta N días.\n" +
+                "3. Historial: impacto estimado contra el real.\n" +
+                "4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.\n" +
+                "5. Medir resultado: veredicto por promoción.\n" +
+                "Metas: objetivo mensual por indicador con real, proyección y semáforo; en riesgo, sube la prioridad de lo que la mueve y se avisa al iniciar sesión.\n" +
+                "\n" +
+                "Umbrales: lo que dispara cada regla. Informe ejecutivo: PDF con todo."),
+
+            ["UmbralesComercialesDialog"] = new TemaAyuda("Umbrales del motor de recomendaciones",
+                "Cada umbral decide cuándo el motor del Centro de decisiones propone una acción. Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.\n" +
+                "\n" +
+                "• Restablecer valores de fábrica: vuelve a los valores por defecto (sin guardar todavía).\n" +
+                "• El descuento máximo no puede ser menor que el base, y la ocupación mínima tiene que ser menor que la máxima."),
 
             ["ReporteJornadaForm"] = new TemaAyuda("Reporte de jornada",
                 "Resumen de una jornada: eventos de negocio del día, prendas disponibles, clientes y días sin copia de seguridad.\n" +
@@ -216,8 +246,17 @@ namespace GUI.Ayuda
                 "• Exportar TXT: guarda el reporte en un archivo.")
         };
 
+        // Texto en español de ux.ayuda.ventana (igual al del .tsv): se agrega a la ayuda general.
+        private const string AyudaVentanaPrincipal =
+            "La ventana principal:\n" +
+            "• La barra de estado, al pie, indica dónde está (la ruta del menú, por ejemplo Ventas → Pedidos de Venta), qué puede hacer en esa pantalla y con qué usuario y rol ingresó; «F1: Ayuda» en esa barra también abre la ayuda.\n" +
+            "• Al apoyar el mouse sobre un botón, un globo explica para qué sirve.\n" +
+            "• El Panel de Control muestra los indicadores y las tareas del día según su rol.\n" +
+            "• Al ingresar por primera vez se abre una guía de primeros pasos para su rol; Sesión › Ver guía de inicio la vuelve a abrir.";
+
         /// <summary>Abre la ayuda de la pantalla <paramref name="nombrePantalla"/> (nombre de la clase del formulario).</summary>
-        public static void Mostrar(IWin32Window propietario, string nombrePantalla)
+        /// <param name="anexo">Texto que la pantalla agrega a su ayuda (p. ej. el glosario de métricas del Centro de decisiones).</param>
+        public static void Mostrar(IWin32Window propietario, string nombrePantalla, string anexo = null)
         {
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string Tr(string clave, string fb) => t.ContainsKey(clave) ? t[clave].Texto : fb;
@@ -228,6 +267,13 @@ namespace GUI.Ayuda
 
             string titulo = Tr("ayuda." + clave + ".titulo", tema.Titulo);
             string texto  = Tr("ayuda." + clave, tema.Texto);
+            // Usabilidad: la ayuda general describe también la ventana principal (barra de estado,
+            // tooltips, Panel de Control y guía de primer uso). Clave aparte (ux.ayuda.ventana) para
+            // no superar el largo de Traduccion.Texto ni pisar ayuda.General en bases ya instaladas.
+            if (clave == "General")
+                texto += "\n\n" + Tr("ux.ayuda.ventana", AyudaVentanaPrincipal);
+            if (!string.IsNullOrWhiteSpace(anexo))
+                texto += "\n\n" + anexo.Replace("\r\n", "\n");
             if (clave != "General")
                 texto += "\n\n" + Tr("ayuda.pie", "Para la ayuda general, presione F1 en el menú principal.");
 

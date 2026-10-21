@@ -30,6 +30,14 @@ namespace BLL
         public static int? IdUsuario => Usuario?.Id;
 
         /// <summary>
+        /// ¿La sesión puede ver la pantalla gobernada por la patente? (Administrador: siempre). Lo usa la
+        /// GUI para decidir si un botón abre una pantalla o propone una alternativa; la operación igual
+        /// vuelve a validar el permiso en la BLL.
+        /// </summary>
+        public static bool TienePermiso(string patente) =>
+            Activa && (Usuario.EsAdministrador || Seguridad.SessionManager.GetInstance().TienePermiso(patente));
+
+        /// <summary>
         /// Vuelve a resolver desde la base los permisos efectivos del usuario en sesión y los
         /// reemplaza en la sesión (re-aplicación de seguridad EN VIVO tras editar roles/permisos).
         /// Es el ÚNICO punto, fuera del login, que escribe el estado de autorización de la sesión:

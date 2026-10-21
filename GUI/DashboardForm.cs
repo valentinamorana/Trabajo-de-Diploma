@@ -713,6 +713,8 @@ namespace GUI
                 new { Es = BE.ActividadesBitacora.BackupAutomaticoFallidoPrefijo,  Key = "dash.act.backupautofail" },
                 new { Es = BE.ActividadesBitacora.BaseDeDatosRestauradaPrefijo,   Key = "dash.act.dbrestore"     },
                 new { Es = BE.ActividadesBitacora.BackupSinVerificacionPrefijo,   Key = "dash.act.backupnomac"   },
+                new { Es = BE.ActividadesBitacora.BackupPrevioDemoPrefijo,        Key = "dash.act.backupdemo"    },
+                new { Es = BE.ActividadesBitacora.DatosDemoRestablecidosPrefijo,  Key = "dash.act.demoreset"     },
                 new { Es = BE.ActividadesBitacora.DesbloqueoDeCuentaPrefijo,      Key = "dash.act.accountunlock" },
                 new { Es = BE.ActividadesBitacora.AltaUsuarioPrefijo,             Key = "dash.act.useradd"       },
                 new { Es = BE.ActividadesBitacora.RestauracionAVersionPrefijo,    Key = "dash.act.userrestore"   },

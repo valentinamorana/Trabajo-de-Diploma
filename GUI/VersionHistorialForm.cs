@@ -13,6 +13,11 @@ namespace GUI
         private List<BE.VersionUsuario> _versiones = new List<BE.VersionUsuario>();
         private int _preseleccionarId = 0;   // si >0, se preselecciona ese usuario al abrir
 
+        // A02 Serialización: si no es null, la grilla muestra las versiones de un archivo XML o JSON
+        // importado (no las de la base) y "Restaurar" usa el flujo de versión importada.
+        private BE.HistorialUsuarioXml _importado;
+        private string _archivoImportado;
+
         public VersionHistorialForm()
         {
             InitializeComponent();
@@ -48,6 +53,9 @@ namespace GUI
             btnCargar.Text      = Tr("btn.ver.cargar",      "Cargar");
             btnRestaurar.Text   = Tr("btn.ver.restaurar",   "Restaurar Versión Seleccionada");
             btnCerrar.Text      = Tr("btn.ver.cerrar",      "Cerrar");
+            btnExportar.Text    = Tr("btn.ver.exportar",    "Exportar versiones…");
+            btnImportar.Text    = Tr("btn.ver.importar",    "Importar versiones…");
+            MostrarOrigen();
 
             if (dgv.Columns.Count > 0)
             {
@@ -91,6 +99,9 @@ namespace GUI
             {
                 int idUsuario = (int)cboUsuario.SelectedValue;
                 _versiones = _bll.ObtenerPorUsuario(idUsuario);
+                _importado = null;            // vuelve a mostrar el historial de la base
+                _archivoImportado = null;
+                MostrarOrigen();
                 CargarGrilla();
             }
             catch (Exception ex)
@@ -124,6 +135,9 @@ namespace GUI
                 string actorTxt = EsRestauracion(v)
                     ? $"{v.Actor} · {Tr("hist.rollback", "rollback")}"
                     : v.Actor;
+                // Versión leída de un archivo XML o JSON (no está en la base): se marca como "importada".
+                if (_importado != null)
+                    actorTxt = $"{actorTxt} · {Tr("hist.importada", "importada")}";
 
                 // colId = Id de ESTA versión: "Restaurar" deja al usuario en el estado de este snapshot.
                 dgv.Rows.Add(new object[] { v.Id, registroTxt, fechaTxt, actorTxt, v.Detalle ?? "" });
@@ -170,24 +184,137 @@ namespace GUI
             string msg = Tr("msg.historial.confirmar.restaurar",
                 "¿Restaurar al usuario al estado del {0}?\n\n{1}\n\nEl usuario quedará exactamente en este estado. Es reversible (queda registrado como un nuevo cambio en el historial).",
                 new object[] { fechaTxt, estado });
+            if (_importado != null)
+                msg += "\n\n" + Tr("msg.ver.xml.confirmar.importada",
+                    "Esta versión proviene del archivo importado; no está guardada en el historial de la base.");
 
             if (!ConfirmarSiNo(msg, Tr("msg.backup.titulorestaura", "Confirmar Restauración"), porDefectoNo: true))
                 return;
 
             try
             {
-                _bll.RestaurarVersion(this.Text, idVersion);
+                // Mismo flujo de restauración (permiso, nombre en uso, DV, snapshot y bitácora):
+                // la BLL solo cambia de dónde toma el Memento (la base o el archivo importado).
+                if (_importado != null)
+                    _bll.RestaurarVersionImportada(this.Text, _importado, idVersion);
+                else
+                    _bll.RestaurarVersion(this.Text, idVersion);
                 MessageBox.Show(
                     Tr("msg.historial.restaurado",  "Versión restaurada correctamente."),
                     Tr("rpt.dlg.exito.titulo",       "Éxito"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                btnCargar_Click(null, EventArgs.Empty);
+                // Se vuelve al historial de la base del usuario restaurado (allí aparece el rollback).
+                cboUsuario.SelectedValue = version.IdUsuario;
+                if (cboUsuario.SelectedValue != null)
+                    btnCargar_Click(null, EventArgs.Empty);
+                else
+                {
+                    // Usuario fuera de la lista (p. ej. archivado): se sale del modo "importado".
+                    _importado = null;
+                    _archivoImportado = null;
+                    _versiones.Clear();
+                    CargarGrilla();
+                    MostrarOrigen();
+                }
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
             }
+        }
+
+        // ══ A02 Serialización — exportar / importar las versiones (Mementos) a XML o JSON ═════════
+
+        // Carpeta inicial de los diálogos: %LOCALAPPDATA%\WardrobeFlow\Versiones (la crea si falta).
+        // Si no se pudiera crear, el diálogo abre en su carpeta por defecto.
+        private string CarpetaInicial()
+        {
+            try { return BLL.VersionUsuario.PrepararCarpetaVersiones(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[VersionHistorialForm.CarpetaInicial] {ex.Message}");
+                return null;
+            }
+        }
+
+        private void btnExportar_Click(object sender, EventArgs e)
+        {
+            var usuario = cboUsuario.SelectedItem as BE.Usuario;
+            if (usuario == null)
+            {
+                MessageBox.Show(
+                    Tr("msg.ver.xml.sinusuario", "Seleccione un usuario para exportar sus versiones."),
+                    Tr("msg.historial.atencion", "Atención"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (var dlg = new SaveFileDialog
+            {
+                // XML o JSON: el formato lo decide la extensión elegida (BLL → FabricaSerializadores).
+                // DefaultExt: si se escribe un nombre sin extensión, toma la del tipo elegido.
+                Filter           = Tr("dlg.filtro.serial.guardar", "Archivos XML (*.xml)|*.xml|Archivos JSON (*.json)|*.json"),
+                DefaultExt       = "xml",
+                AddExtension     = true,
+                InitialDirectory = CarpetaInicial(),
+                FileName         = BLL.VersionUsuario.NombreArchivoSugerido(usuario.Username, DateTime.Now)
+            })
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                try
+                {
+                    var archivo = _bll.Exportar(this.Text, usuario.Id, dlg.FileName);
+                    MessageBox.Show(
+                        Tr("msg.ver.xml.exportado", "Se exportaron {0} versión(es) del usuario '{1}' a:\n{2}",
+                           new object[] { archivo.Versiones.Count, archivo.Username, dlg.FileName }),
+                        Tr("rpt.dlg.exito.titulo", "Éxito"),
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex) { MostrarError(ex); }
+            }
+        }
+
+        private void btnImportar_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new OpenFileDialog
+            {
+                Filter           = Tr("dlg.filtro.serial.abrir", "Archivos XML o JSON (*.xml;*.json)|*.xml;*.json"),
+                InitialDirectory = CarpetaInicial()
+            })
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                try
+                {
+                    // La BLL deserializa y valida (formato, coherencia y que el usuario exista).
+                    _importado        = _bll.Importar(this.Text, dlg.FileName);
+                    _archivoImportado = dlg.FileName;
+                    _versiones        = new List<BE.VersionUsuario>(_importado.Versiones);
+                    cboUsuario.SelectedValue = _importado.IdUsuario;
+                    MostrarOrigen();
+                    CargarGrilla();
+                }
+                catch (Exception ex) { MostrarError(ex); }
+            }
+        }
+
+        // Indica de dónde salen las versiones de la grilla: la base o un archivo importado.
+        private void MostrarOrigen()
+        {
+            if (_importado == null)
+            {
+                lblOrigen.Text = dgv.Rows.Count > 0 || cboUsuario.SelectedValue != null
+                    ? Tr("lbl.ver.origen.base", "Versiones guardadas en la base de datos.")
+                    : "";
+                return;
+            }
+            lblOrigen.Text = Tr("lbl.ver.origen.archivo",
+                "Versiones importadas de '{0}' — usuario '{1}' (ID {2}), exportadas el {3} en el equipo {4}. Elija una y presione Restaurar.",
+                new object[]
+                {
+                    System.IO.Path.GetFileName(_archivoImportado), _importado.Username, _importado.IdUsuario,
+                    _importado.FechaExportacion.ToString("dd/MM/yyyy HH:mm"), _importado.Equipo
+                });
         }
     }
 }

@@ -30,7 +30,9 @@ namespace BLL
             // gestiona Clientes (Venta); Contrataciones Pendientes es exclusivo del rol Caja.
             ("nuevaContratacionToolStripMenuItem",      "mnuClientes"),
             ("contratacionesPendientesToolStripMenuItem", "mnuCaja"),
-            // PN03 — Evaluar y aplicar promociones comerciales.
+            // PN03 — Inteligencia comercial y promociones. El Centro de decisiones comerciales es de
+            // Gerencia: lo gobierna la misma patente que Sugerir Promoción (no hace falta una nueva).
+            ("centroDecisionesToolStripMenuItem",              "mnuSugerenciaPromocion"),
             ("sugerirPromocionToolStripMenuItem",              "mnuSugerenciaPromocion"),
             ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
             ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),
@@ -103,7 +105,7 @@ namespace BLL
             // propia patente, el grupo solo se muestra si al menos una de las 4 es visible.
             ("promocionesToolStripMenuItem", new[]
             {
-                "sugerirPromocionToolStripMenuItem", "gestionPromocionesToolStripMenuItem",
+                "centroDecisionesToolStripMenuItem", "sugerirPromocionToolStripMenuItem", "gestionPromocionesToolStripMenuItem",
                 "revisionContablePromocionesToolStripMenuItem", "promocionesVigentesToolStripMenuItem"
             }),
             // "Analítica" se partió en dos menúes de primer nivel (antes eran 9 ítems en un

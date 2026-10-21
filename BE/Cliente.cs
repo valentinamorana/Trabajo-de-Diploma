@@ -68,8 +68,7 @@ namespace BE
         public DateTime? FechaVencimiento { get; set; }
 
         // True si FechaVencimiento está establecida y ya pasó (independientemente del plan).
-        public bool VencimientoExpirado =>
-            FechaVencimiento.HasValue && FechaVencimiento.Value.Date < DateTime.Today;
+        public bool VencimientoExpirado => VencimientoExpiradoAl(FechaVencimiento, DateTime.Today);
 
         // True si el cliente tiene plan Y (sin fecha de vencimiento O la fecha no pasó).
         public bool SuscripcionVigente()
@@ -128,8 +127,7 @@ namespace BE
 
         // True si venció el período de gracia sin que se haya registrado un cobro
         // exitoso: a partir de acá se bloquean nuevos pedidos (BLL.Pedido.VerificarVigencia).
-        public bool EstaSuspendidoPorPago =>
-            FechaLimiteGracia.HasValue && FechaLimiteGracia.Value.Date < DateTime.Today;
+        public bool EstaSuspendidoPorPago => SuspendidoPorPagoAl(FechaLimiteGracia, DateTime.Today);
 
         // Pausa de suscripción — el cliente pidió no usar el servicio temporalmente (viaje,
         // etc.) sin darse de baja del todo. Null = nunca pausado / pausa ya terminada.
@@ -138,8 +136,18 @@ namespace BE
         // True mientras la pausa está vigente: bloquea pedidos nuevos (BLL.Pedido.VerificarVigencia)
         // y el vencimiento se corre por los días pausados (NUULY: no se cobra mientras está pausada;
         // ver BLL.Manejadores.PausarSuscripcionHandler y BLL.Cliente.ReanudarPausa).
-        public bool EstaPausada =>
-            FechaPausaHasta.HasValue && FechaPausaHasta.Value.Date >= DateTime.Today;
+        public bool EstaPausada => PausaVigente(FechaPausaHasta, DateTime.Today);
+
+        // Criterios de estado con el día como parámetro: los usan estas propiedades (con HOY) y el
+        // análisis comercial (BE.ClienteComercial, MRR de PN03) con una fecha inyectable en las pruebas.
+        public static bool PausaVigente(DateTime? fechaPausaHasta, DateTime dia) =>
+            fechaPausaHasta.HasValue && fechaPausaHasta.Value.Date >= dia.Date;
+
+        public static bool VencimientoExpiradoAl(DateTime? fechaVencimiento, DateTime dia) =>
+            fechaVencimiento.HasValue && fechaVencimiento.Value.Date < dia.Date;
+
+        public static bool SuspendidoPorPagoAl(DateTime? fechaLimiteGracia, DateTime dia) =>
+            fechaLimiteGracia.HasValue && fechaLimiteGracia.Value.Date < dia.Date;
 
         // Programa de referidos — quién trajo a este cliente (null si nadie lo refirió).
         public int? IdClienteReferente { get; set; }

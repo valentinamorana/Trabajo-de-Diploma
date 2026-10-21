@@ -56,6 +56,7 @@
             this.cajaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contratacionesPendientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.promocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.centroDecisionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sugerirPromocionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionPromocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.revisionContablePromocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -321,6 +322,7 @@
             // Vendedor conviven acá, cada hoja gobernada por su propia patente.
             //
             this.promocionesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.centroDecisionesToolStripMenuItem,
             this.sugerirPromocionToolStripMenuItem,
             this.gestionPromocionesToolStripMenuItem,
             this.revisionContablePromocionesToolStripMenuItem,
@@ -329,6 +331,14 @@
             this.promocionesToolStripMenuItem.Tag = "mnu.promociones";
             this.promocionesToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
             this.promocionesToolStripMenuItem.Text = "Promociones";
+            //
+            // centroDecisionesToolStripMenuItem — PN03 «Inteligencia comercial y promociones» (Gerencia)
+            //
+            this.centroDecisionesToolStripMenuItem.Name = "centroDecisionesToolStripMenuItem";
+            this.centroDecisionesToolStripMenuItem.Tag = "mnu.centrodecisiones";
+            this.centroDecisionesToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
+            this.centroDecisionesToolStripMenuItem.Text = "Centro de decisiones comerciales";
+            this.centroDecisionesToolStripMenuItem.Click += new System.EventHandler(this.centroDecisionesToolStripMenuItem_Click);
             //
             // sugerirPromocionToolStripMenuItem
             //
@@ -580,6 +590,7 @@
         private System.Windows.Forms.ToolStripMenuItem cajaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem contratacionesPendientesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem promocionesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem centroDecisionesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sugerirPromocionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gestionPromocionesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem revisionContablePromocionesToolStripMenuItem;

@@ -28,5 +28,30 @@ namespace GUI.Exportacion
 
         /// <summary>True si el reporte trae estructura tabular (columnas + filas).</summary>
         public bool EsTabular => Encabezados != null && Datos != null;
+
+        /// <summary>
+        /// Reporte COMPUESTO (p. ej. el Informe ejecutivo del Centro de decisiones comerciales): una
+        /// secuencia de secciones con párrafos, tablas e imágenes de gráficos. Null en los reportes de
+        /// siempre (tabulares o de texto), que se exportan igual que antes.
+        /// </summary>
+        public System.Collections.Generic.List<SeccionReporte> Secciones { get; set; }
+
+        /// <summary>True si el reporte se arma por secciones.</summary>
+        public bool EsCompuesto => Secciones != null && Secciones.Count > 0;
+    }
+
+    /// <summary>Una sección de un reporte compuesto: título, párrafos, una tabla y/o una imagen (PNG).</summary>
+    public class SeccionReporte
+    {
+        public string Titulo { get; set; }
+        public System.Collections.Generic.List<string> Parrafos { get; set; } = new System.Collections.Generic.List<string>();
+        public string[] Encabezados { get; set; }
+        public DataTable Tabla { get; set; }
+        /// <summary>Imagen PNG (un gráfico guardado con Chart.SaveImage).</summary>
+        public byte[] Imagen { get; set; }
+        /// <summary>Portada: título grande centrado y sus párrafos como datos del informe.</summary>
+        public bool EsPortada { get; set; }
+        /// <summary>Empieza en una página nueva.</summary>
+        public bool PaginaNueva { get; set; }
     }
 }

@@ -10,9 +10,11 @@ namespace GUI
 {
     /// <summary>
     /// A02 Serialización — muestra los errores inesperados serializados en XML
-    /// (Servicios.Serializacion.RegistroErrores), permite importar un archivo XML de errores
+    /// (Servicios.Serializacion.RegistroErrores), permite importar un archivo XML o JSON de errores
     /// (deserializar, por ejemplo traído de otra PC) y exportar la lista que se está viendo
-    /// (serializar). Se abre desde la Bitácora; exige la patente de Auditoría (BLL.ErroresSerializados).
+    /// (serializar, en XML o JSON según la extensión elegida). Se abre desde la Bitácora; exige la
+    /// patente de Auditoría (BLL.ErroresSerializados). El nombre de la clase conserva "Xml" (formato
+    /// original) para no renombrar el formulario.
     /// </summary>
     public class ErroresXmlForm : FormBase, IIdiomaObserver
     {
@@ -34,7 +36,7 @@ namespace GUI
 
         public ErroresXmlForm()
         {
-            Text = "Errores (XML)";
+            Text = "Errores (XML/JSON)";
             ClientSize = new Size(900, 560);
             MinimumSize = new Size(760, 460);
             StartPosition = FormStartPosition.CenterParent;
@@ -106,11 +108,11 @@ namespace GUI
 
         private void Traducir()
         {
-            Text             = Tr("frm.errxml", "Errores (XML)");
-            lblTitulo.Text   = Tr("frm.errxml.titulo", "Errores inesperados serializados en XML");
+            Text             = Tr("frm.errxml", "Errores (XML/JSON)");
+            lblTitulo.Text   = Tr("frm.errxml.titulo", "Errores inesperados serializados (XML/JSON)");
             btnRecargar.Text = Tr("btn.errxml.estapc", "Ver los de esta PC");
-            btnImportar.Text = Tr("btn.errxml.importar", "Importar XML…");
-            btnExportar.Text = Tr("btn.errxml.exportar", "Exportar XML…");
+            btnImportar.Text = Tr("btn.errxml.importar", "Importar XML/JSON…");
+            btnExportar.Text = Tr("btn.errxml.exportar", "Exportar XML/JSON…");
             btnCerrar.Text   = Tr("btn.cerrar", "Cerrar");
         }
 
@@ -125,12 +127,26 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); }
         }
 
+        // Carpeta inicial de los diálogos: %LOCALAPPDATA%\WardrobeFlow\Errores\Exportados (la crea si
+        // falta), aparte del registro mensual errores_AAAAMM.xml, así una exportación nunca se mezcla
+        // con los errores de esta PC. La importación igual puede abrir un archivo de cualquier carpeta.
+        // Si no se pudiera crear, el diálogo abre en su carpeta por defecto.
+        private string CarpetaInicial()
+        {
+            try { return Servicios.Serializacion.RegistroErrores.PrepararCarpetaExportados(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[ErroresXmlForm.CarpetaInicial] {ex.Message}");
+                return null;
+            }
+        }
+
         private void Importar()
         {
             using (var dlg = new OpenFileDialog
             {
-                Filter = Tr("dlg.filtro.xml", "Archivos XML (*.xml)|*.xml"),
-                InitialDirectory = Servicios.Serializacion.RegistroErrores.Carpeta
+                Filter = Tr("dlg.filtro.serial.abrir", "Archivos XML o JSON (*.xml;*.json)|*.xml;*.json"),
+                InitialDirectory = CarpetaInicial()
             })
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
@@ -149,15 +165,21 @@ namespace GUI
         {
             using (var dlg = new SaveFileDialog
             {
-                Filter = Tr("dlg.filtro.xml", "Archivos XML (*.xml)|*.xml"),
-                FileName = $"errores_wardrobeflow_{DateTime.Now:yyyyMMdd_HHmm}.xml"
+                // XML o JSON: el formato lo decide la extensión elegida (BLL → FabricaSerializadores).
+                // DefaultExt: si se escribe un nombre sin extensión, toma la del tipo elegido.
+                Filter = Tr("dlg.filtro.serial.guardar", "Archivos XML (*.xml)|*.xml|Archivos JSON (*.json)|*.json"),
+                DefaultExt = "xml",
+                AddExtension = true,
+                InitialDirectory = CarpetaInicial(),
+                FileName = Servicios.Serializacion.GestorArchivos.Instancia.NombreArchivoSugerido(
+                    "errores_wardrobeflow", null, DateTime.Now, Servicios.Serializacion.FabricaSerializadores.ExtensionXml)
             })
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 try
                 {
-                    _bll.Exportar(Text, _errores, dlg.FileName);
-                    MostrarOk(Tr("msg.errxml.exportado", "Se exportaron {0} error(es) a XML.", new object[] { _errores.Count }));
+                    string formato = _bll.Exportar(Text, _errores, dlg.FileName);
+                    MostrarOk(Tr("msg.errxml.exportado", "Se exportaron {0} error(es) a {1}.", new object[] { _errores.Count, formato }));
                 }
                 catch (Exception ex) { MostrarError(ex); }
             }

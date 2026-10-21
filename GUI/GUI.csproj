@@ -47,6 +47,8 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
+    <!-- PN03 — gráficos del Centro de decisiones comerciales (MSChart, parte de .NET Framework). -->
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +93,52 @@
     <Compile Include="AnaliticaNegocioForm.Designer.cs">
       <DependentUpon>AnaliticaNegocioForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CentroDecisionesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CentroDecisionesForm.Designer.cs">
+      <DependentUpon>CentroDecisionesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CentroDecisionesForm.Metas.cs">
+      <DependentUpon>CentroDecisionesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CentroDecisionesForm.Cohortes.cs">
+      <DependentUpon>CentroDecisionesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UmbralesComercialesDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UmbralesComercialesDialog.Designer.cs">
+      <DependentUpon>UmbralesComercialesDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inteligencia\TextosComerciales.cs" />
+    <Compile Include="Inteligencia\TarjetaKpi.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Inteligencia\GraficosComerciales.cs" />
+    <Compile Include="Inteligencia\InformeEjecutivo.cs" />
+    <Compile Include="Inteligencia\InformeEjecutivo.Metas.cs" />
+    <Compile Include="Inteligencia\TextosMetas.cs" />
+    <Compile Include="Inteligencia\GraficoMetas.cs" />
+    <Compile Include="Inteligencia\AvisosInicioSesion.cs" />
+    <Compile Include="Inteligencia\PanelMetasComerciales.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Inteligencia\PanelMetasComerciales.Designer.cs">
+      <DependentUpon>PanelMetasComerciales.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inteligencia\AvisoComercialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Inteligencia\AvisoComercialForm.Designer.cs">
+      <DependentUpon>AvisoComercialForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inteligencia\InformeEjecutivo.Cohortes.cs" />
+    <Compile Include="Inteligencia\GraficosComerciales.Cohortes.cs" />
+    <Compile Include="Inteligencia\PanelCohortes.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Exportacion\GeneradorInformeComercial.cs" />
     <Compile Include="Analitica\VistaReporteAnalitica.cs" />
     <Compile Include="Analitica\VistaAbandono.cs" />
     <Compile Include="Analitica\VistaVentasVendedor.cs" />
@@ -366,6 +414,15 @@
     <Compile Include="MenuDocumentosPromocion.cs" />
     <Compile Include="MenuDocumentosPedido.cs" />
     <Compile Include="Ayuda\AyudaEnLinea.cs" />
+    <Compile Include="FormBase.Usabilidad.cs">
+      <DependentUpon>FormBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Menu.Ubicacion.cs">
+      <DependentUpon>Menu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GuiaPrimerUsoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
     <Compile Include="Exportacion\GeneradorVentasVendedor.cs" />
     <Compile Include="Exportacion\GeneradorRotacion.cs" />

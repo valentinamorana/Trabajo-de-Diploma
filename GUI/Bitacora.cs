@@ -59,7 +59,7 @@ namespace GUI
             InicializarDisenoMockup();
         }
 
-        // A02 Serialización: abre los errores inesperados serializados en XML (ErroresXmlForm).
+        // A02 Serialización: abre los errores inesperados serializados (XML/JSON, ErroresXmlForm).
         private Button _btnErroresXml;
 
         private void AgregarBotonErroresXml()
@@ -68,7 +68,7 @@ namespace GUI
             _btnErroresXml = new Button
             {
                 Name = "btnErroresXml",
-                Text = Tr("btn.errxml", "Errores (XML)"),
+                Text = Tr("btn.errxml", "Errores (XML/JSON)"),
                 Location = new Point(btnExportSistema.Left, btnExportSistema.Bottom + 2),
                 Size = new Size(btnExportSistema.Width, 32),
                 Anchor = btnExportSistema.Anchor,
@@ -269,7 +269,7 @@ namespace GUI
             string exportPdf = Tr("btn.exportar.pdf", "Exportar PDF");
             btnExportSistema.Text  = exportPdf;
             btnExportNegocio.Text  = exportPdf;
-            if (_btnErroresXml != null) _btnErroresXml.Text = Tr("btn.errxml", "Errores (XML)");
+            if (_btnErroresXml != null) _btnErroresXml.Text = Tr("btn.errxml", "Errores (XML/JSON)");
 
             RellenarComboCriticidad();
             RellenarComboTipoEvento();
@@ -331,6 +331,8 @@ namespace GUI
             Add("InformeFaltantes",   "tevt.faltantes",      "Informe de faltantes");
             Add("SeparacionPrendas",  "tevt.separacion",     "Separación de prendas");
             Add("Desistimiento",      "tevt.desistimiento",  "Desistimiento");
+            // PN03 — Centro de decisiones comerciales.
+            Add("DecisionComercial",  "tevt.decisioncomercial", "Decisión comercial");
 
             cmbTipoEvento.SelectedIndex =
                 (idx >= 0 && idx < cmbTipoEvento.Items.Count) ? idx : 0;
@@ -652,6 +654,7 @@ namespace GUI
                 { "InformeFaltantes",    "tevt.faltantes"      },
                 { "SeparacionPrendas",   "tevt.separacion"     },
                 { "Desistimiento",       "tevt.desistimiento"  },
+                { "DecisionComercial",   "tevt.decisioncomercial" },
             };
 
             var partes = new List<string>();

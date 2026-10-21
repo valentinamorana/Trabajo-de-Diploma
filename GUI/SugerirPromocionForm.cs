@@ -28,6 +28,33 @@ namespace GUI
         // Origen de la sugerencia que se está armando: Manual hasta que se use una oportunidad del reporte.
         private BE.OrigenMetrica _origen = BE.OrigenMetrica.Manual;
 
+        // Centro de decisiones comerciales: datos con los que se abre la pantalla (se aplican al cargar).
+        private Action _precarga;
+
+        /// <summary>ID de la última sugerencia registrada en esta pantalla (null si no se registró ninguna).
+        /// El Centro de decisiones lo usa para marcar su decisión como Ejecutada.</summary>
+        public int? UltimaSugerenciaRegistrada { get; private set; }
+
+        /// <summary>
+        /// Abre la sugerencia precargada desde una recomendación o un escenario del Centro de decisiones
+        /// comerciales (PN03). Todo queda editable: Gerencia revisa y recién ahí la envía a Administración.
+        /// </summary>
+        public void Precargar(int? idPlan, BE.TipoDescuento tipo, decimal ingresoEnRiesgo, decimal tasaRetencion,
+                              string motivo, BE.OrigenMetrica origen)
+        {
+            _precarga = () =>
+            {
+                if (idPlan.HasValue && _planes.Exists(p => p.IdPlan == idPlan.Value)) cmbPlan.SelectedValue = idPlan.Value;
+                cmbTipoDescuento.SelectedItem = tipo;
+                numIngresoEnRiesgo.Value = Math.Min(numIngresoEnRiesgo.Maximum, Math.Max(numIngresoEnRiesgo.Minimum, Math.Round(ingresoEnRiesgo, 2)));
+                numTasaRetencion.Value = Math.Min(numTasaRetencion.Maximum, Math.Max(numTasaRetencion.Minimum, Math.Round(tasaRetencion, 2)));
+                string texto = motivo ?? string.Empty;
+                txtMotivo.Text = texto.Length > 500 ? texto.Substring(0, 499) + "…" : texto;
+                _origen = origen;
+                MostrarOrigen();
+            };
+        }
+
         public SugerirPromocionForm()
         {
             InitializeComponent();
@@ -133,6 +160,8 @@ namespace GUI
             }
             catch (Exception ex) { MostrarError(ex); }
             CargarSugerencias();
+            try { _precarga?.Invoke(); }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         // ── Analizar métricas → ¿Hay oportunidad? ────────────────────────────
@@ -241,6 +270,7 @@ namespace GUI
 
                 id = sugerenciaBLL.RegistrarSugerencia(this.Text, _origen, idPlan, txtMotivo.Text,
                                                       tipo, numIngresoEnRiesgo.Value, numTasaRetencion.Value);
+                UltimaSugerenciaRegistrada = id;
                 MostrarOk(Tr("msg.sugerencia.enviada", "Sugerencia #{0} enviada a Administración.", new object[] { id }));
                 txtMotivo.Clear();
                 _origen = BE.OrigenMetrica.Manual;

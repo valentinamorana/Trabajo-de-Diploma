@@ -85,6 +85,13 @@ namespace GUI.Exportacion
                 doc.AddSubject(origen ?? "");   // qué reporte lo fabricó (lo fija el creador concreto)
                 doc.Open();
 
+                if (reporte.EsCompuesto)
+                {
+                    // Informe por secciones (Centro de decisiones comerciales): la portada hace de encabezado.
+                    Compuesto(doc, reporte, T);
+                    doc.Close();
+                    return;
+                }
                 Encabezado(doc, reporte, T);
                 if (reporte.EsTabular) Tabla(doc, reporte);
                 else                   Texto(doc, reporte);
@@ -147,6 +154,68 @@ namespace GUI.Exportacion
             var fuente = Fuente(Fuentes.Mono, 8.5f, Tinta);
             foreach (string linea in (reporte.TextoPlano ?? string.Empty).Replace("\r\n", "\n").Split('\n'))
                 doc.Add(new Paragraph(linea.Length == 0 ? " " : linea, fuente) { Leading = 11.5f });
+        }
+
+        // Modo COMPUESTO: portada + secciones con párrafos, tabla e imagen (gráficos guardados como PNG).
+        private static void Compuesto(Document doc, ReporteExportable reporte, Func<string, string, string> T)
+        {
+            foreach (var s in reporte.Secciones)
+            {
+                if (s.PaginaNueva) doc.NewPage();
+                if (s.EsPortada)
+                {
+                    doc.Add(new Paragraph(" ") { SpacingBefore = 120 });
+                    doc.Add(new Paragraph(s.Titulo ?? reporte.Titulo ?? "", Fuente(Fuentes.TituloNegrita, 24, VinoOscuro))
+                        { Alignment = Element.ALIGN_CENTER, SpacingAfter = 18 });
+                    foreach (string p in s.Parrafos)
+                        doc.Add(new Paragraph(p, Fuente(Fuentes.Normal, 11, Tinta)) { Alignment = Element.ALIGN_CENTER, SpacingAfter = 4 });
+                    doc.Add(new Paragraph($"{T("rpt.txt.generado", "Generado")}: {DateTime.Now:g}", Fuente(Fuentes.Normal, 9, VinoMedio))
+                        { Alignment = Element.ALIGN_CENTER, SpacingBefore = 24 });
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(s.Titulo))
+                {
+                    var barra = new PdfPTable(1) { WidthPercentage = 100, SpacingBefore = 8, SpacingAfter = 4, KeepTogether = true };
+                    barra.AddCell(new PdfPCell(new Phrase(s.Titulo, Fuente(Fuentes.TituloNegrita, 11, BaseColor.WHITE)))
+                    {
+                        BackgroundColor = VinoOscuro, Border = Rectangle.NO_BORDER, PaddingTop = 3, PaddingBottom = 5, PaddingLeft = 6
+                    });
+                    doc.Add(barra);
+                }
+                foreach (string p in s.Parrafos)
+                    doc.Add(new Paragraph(p, Fuente(Fuentes.Normal, 9, Tinta)) { SpacingAfter = 3 });
+
+                if (s.Tabla != null && s.Tabla.Rows.Count > 0)
+                {
+                    int nCols = s.Tabla.Columns.Count;
+                    var tabla = new PdfPTable(nCols) { WidthPercentage = 100, HeaderRows = 1, SpacingBefore = 4, SpacingAfter = 6 };
+                    for (int c = 0; c < nCols; c++)
+                        tabla.AddCell(new PdfPCell(new Phrase(s.Encabezados != null && c < s.Encabezados.Length ? s.Encabezados[c] : s.Tabla.Columns[c].ColumnName,
+                            Fuente(Fuentes.TituloNegrita, 7.5f, BaseColor.WHITE))) { BackgroundColor = VinoMedio, BorderColor = VinoMedio, Padding = 3 });
+                    bool alternar = false;
+                    foreach (DataRow fila in s.Tabla.Rows)
+                    {
+                        for (int c = 0; c < nCols; c++)
+                            tabla.AddCell(new PdfPCell(new Phrase(fila[c]?.ToString() ?? "", Fuente(Fuentes.Normal, 7, Tinta)))
+                            {
+                                BackgroundColor = alternar ? VinoClaro : BaseColor.WHITE, BorderColor = Borde, BorderWidth = 0.5f, Padding = 2.5f
+                            });
+                        alternar = !alternar;
+                    }
+                    doc.Add(tabla);
+                }
+
+                if (s.Imagen != null && s.Imagen.Length > 0)
+                {
+                    var imagen = Image.GetInstance(s.Imagen);
+                    float ancho = doc.PageSize.Width - doc.LeftMargin - doc.RightMargin;
+                    imagen.ScaleToFit(ancho, 300f);
+                    imagen.Alignment = Element.ALIGN_CENTER;
+                    imagen.SpacingAfter = 6;
+                    doc.Add(imagen);
+                }
+            }
         }
 
         // Pie "WardrobeFlow — Página N" con una línea, en todas las páginas.

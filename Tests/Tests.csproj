@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -35,6 +35,8 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
       <HintPath>C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
       <Private>False</Private>
@@ -97,10 +99,13 @@
     <Compile Include="UltimoAdminGuardTests.cs" />
     <Compile Include="PermisosAccionTests.cs" />
     <Compile Include="TraductorI18nTests.cs" />
+    <Compile Include="SerializacionJsonTests.cs" />
     <Compile Include="SerializacionTests.cs" />
+    <Compile Include="SerializacionVersionesTests.cs" />
     <Compile Include="SerializadorCsvTests.cs" />
     <Compile Include="PanelAlertasTests.cs" />
     <Compile Include="MenuVisibilidadTests.cs" />
+    <Compile Include="UsabilidadTests.cs" />
     <Compile Include="ReporteTendenciaTests.cs" />
     <Compile Include="RecuperacionAdminTests.cs" />
     <Compile Include="RecuperacionIntegridadTests.cs" />
@@ -133,6 +138,13 @@
     <Compile Include="Fakes\FakeMantenimientoPrendaDAL.cs" />
     <Compile Include="Fakes\FakeBitacoraService.cs" />
     <Compile Include="Fakes\FakePrendaService.cs" />
+    <Compile Include="Fakes\FakeInteligenciaComercialDAL.cs" />
+    <Compile Include="InteligenciaCalculosTests.cs" />
+    <Compile Include="MotorRecomendacionesTests.cs" />
+    <Compile Include="CentroDecisionesTests.cs" />
+    <Compile Include="MetasComercialesTests.cs" />
+    <Compile Include="AccionesRecomendacionTests.cs" />
+    <Compile Include="AnalisisCohortesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

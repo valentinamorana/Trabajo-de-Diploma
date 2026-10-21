@@ -31,18 +31,27 @@ namespace GUI
     ///   MensajeLabel → cada hijo sobreescribe para devolver su lblMensaje.
     ///   Si no sobreescribe (como Bitacora), MostrarError usa MessageBox.
     /// </summary>
-    public class FormBase : Form
+    public partial class FormBase : Form
     {
         // D02 — Ayuda en línea: F1 abre la ayuda de esta pantalla (Ayuda.AyudaEnLinea).
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.F1)
             {
-                Ayuda.AyudaEnLinea.Mostrar(this, GetType().Name);
+                Ayuda.AyudaEnLinea.Mostrar(this, GetType().Name, AyudaAdicional());
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }
+
+        /// <summary>
+        /// Texto que la pantalla agrega a su ayuda F1 (p. ej. el glosario de métricas del Centro de
+        /// decisiones comerciales). Por defecto, nada.
+        /// </summary>
+        protected virtual string AyudaAdicional() => null;
+
+        /// <summary>Acceso para el Menú, que abre la ayuda del formulario activo con F1.</summary>
+        internal string TextoAyudaAdicional => AyudaAdicional();
 
         protected override void OnLoad(EventArgs e)
         {
@@ -81,6 +90,9 @@ namespace GUI
                 System.Diagnostics.Trace.TraceWarning(
                     $"[FormBase.OnLoad] No se pudo aplicar seguridad de controles en {this.GetType().Name}: {ex.Message}");
             }
+
+            // Usabilidad: tooltips tip.<Formulario>.<control> y barra "Usted está en" (FormBase.Usabilidad.cs).
+            IniciarUsabilidad();
         }
 
         /// <summary>
@@ -112,9 +124,13 @@ namespace GUI
         /// </summary>
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            if (this is IIdiomaObserver observador)
-                GestorIdioma.DesuscribirObservador(observador);
-            base.OnFormClosed(e);
+            try
+            {
+                if (this is IIdiomaObserver observador)
+                    GestorIdioma.DesuscribirObservador(observador);
+                FinalizarUsabilidad();
+            }
+            finally { base.OnFormClosed(e); }
         }
 
         /// <summary>
@@ -332,7 +348,7 @@ namespace GUI
             }
             catch { /* el fallo al registrar no debe romper el manejo del error */ }
 
-            // A02 Serialización: el error también queda serializado en XML (Bitácora › Errores (XML)).
+            // A02 Serialización: el error también queda serializado en XML (Bitácora › Errores (XML/JSON)).
             Servicios.Serializacion.RegistroErrores.Registrar(ex, this.GetType().Name, BLL.Sesion.Actor);
         }
     }

@@ -276,11 +276,27 @@ namespace Tests
                 "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem",
                 "suscriptoresToolStripMenuItem", "ventasToolStripMenuItem",
                 "auditoriaToolStripMenuItem", "analiticaNegocioToolStripMenuItem",
+                "centroDecisionesToolStripMenuItem",
                 "grpUsuarios", "grpSistema", "gestionToolStripMenuItem"
             };
 
             foreach (var nombre in esperados)
                 Assert.IsTrue(v.ContainsKey(nombre), $"Falta '{nombre}' en el resultado de Resolver — revisar Menu.cs vs BLL.MenuVisibilidad.");
+        }
+
+        [TestMethod]
+        public void CentroDecisiones_SoloConLaPatenteDeGerencia_YMuestraElGrupoPromociones()
+        {
+            // PN03 «Inteligencia comercial»: lo gobierna mnuSugerenciaPromocion (Gerencia), sin patente nueva.
+            var gerencia = BLL.MenuVisibilidad.Resolver(new[] { "mnuSugerenciaPromocion" }, esAdmin: false);
+            Assert.IsTrue(V(gerencia, "centroDecisionesToolStripMenuItem"));
+            Assert.IsTrue(V(gerencia, "promocionesToolStripMenuItem"));
+
+            var vendedor = BLL.MenuVisibilidad.Resolver(new[] { "mnuPromocionesVigentes", "mnuPromocionesVigentesEditar" }, esAdmin: false);
+            Assert.IsFalse(V(vendedor, "centroDecisionesToolStripMenuItem"));
+            Assert.IsTrue(V(vendedor, "promocionesToolStripMenuItem"));
+
+            Assert.IsTrue(V(BLL.MenuVisibilidad.Resolver(new string[0], esAdmin: true), "centroDecisionesToolStripMenuItem"));
         }
 
         [TestMethod]

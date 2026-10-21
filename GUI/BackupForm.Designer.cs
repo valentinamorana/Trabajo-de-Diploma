@@ -29,6 +29,7 @@ namespace GUI
             this.btnExterno   = new System.Windows.Forms.Button();
             this.btnInicial   = new System.Windows.Forms.Button();
             this.btnIntervalo = new System.Windows.Forms.Button();
+            this.btnRestablecerDemo = new System.Windows.Forms.Button();
             this.lblInfo      = new System.Windows.Forms.Label();
             this.pnlMain.SuspendLayout();
             this.SuspendLayout();
@@ -46,6 +47,7 @@ namespace GUI
             this.pnlMain.Controls.Add(this.btnExterno);
             this.pnlMain.Controls.Add(this.btnInicial);
             this.pnlMain.Controls.Add(this.btnIntervalo);
+            this.pnlMain.Controls.Add(this.btnRestablecerDemo);
             this.pnlMain.Controls.Add(this.lblInfo);
             this.pnlMain.Dock     = System.Windows.Forms.DockStyle.Fill;
             this.pnlMain.Name     = "pnlMain";
@@ -214,20 +216,36 @@ namespace GUI
             this.btnIntervalo.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnIntervalo.Click    += new System.EventHandler(this.btnIntervalo_Click);
 
+            // ── btnRestablecerDemo — borra los datos de negocio y recarga la demo ──
+            this.btnRestablecerDemo.BackColor                         = System.Drawing.Color.FromArgb(250, 235, 235);
+            this.btnRestablecerDemo.FlatStyle                         = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRestablecerDemo.FlatAppearance.BorderSize         = 1;
+            this.btnRestablecerDemo.FlatAppearance.BorderColor        = System.Drawing.Color.FromArgb(200, 150, 150);
+            this.btnRestablecerDemo.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(240, 210, 210);
+            this.btnRestablecerDemo.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.btnRestablecerDemo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(178)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
+            this.btnRestablecerDemo.Location  = new System.Drawing.Point(20, 490);
+            this.btnRestablecerDemo.Name      = "btnRestablecerDemo";
+            this.btnRestablecerDemo.Size      = new System.Drawing.Size(460, 30);
+            this.btnRestablecerDemo.TabIndex  = 11;
+            this.btnRestablecerDemo.Text      = "Restablecer datos de demo...";
+            this.btnRestablecerDemo.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnRestablecerDemo.Click    += new System.EventHandler(this.btnRestablecerDemo_Click);
+
             // ── lblInfo ──────────────────────────────────────────────────────
             this.lblInfo.Font      = new System.Drawing.Font("Segoe UI", 8F);
             this.lblInfo.ForeColor = System.Drawing.Color.FromArgb(140, 110, 130);
-            this.lblInfo.Location  = new System.Drawing.Point(20, 490);
+            this.lblInfo.Location  = new System.Drawing.Point(20, 530);
             this.lblInfo.Name      = "lblInfo";
             this.lblInfo.Size      = new System.Drawing.Size(460, 32);
-            this.lblInfo.TabIndex  = 11;
+            this.lblInfo.TabIndex  = 12;
             this.lblInfo.Text      = "Nota: la restauración cierra las conexiones activas y reinicia la aplicación.";
 
             // ── BackupForm ───────────────────────────────────────────────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor           = System.Drawing.Color.FromArgb(252, 250, 252);
-            this.ClientSize          = new System.Drawing.Size(500, 536);
+            this.ClientSize          = new System.Drawing.Size(500, 576);
             this.Controls.Add(this.pnlMain);
             this.FormBorderStyle     = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox         = false;
@@ -255,6 +273,7 @@ namespace GUI
         private System.Windows.Forms.Button       btnExterno;
         private System.Windows.Forms.Button       btnInicial;
         private System.Windows.Forms.Button       btnIntervalo;
+        private System.Windows.Forms.Button       btnRestablecerDemo;
         private System.Windows.Forms.Label        lblInfo;
     }
 }

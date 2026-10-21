@@ -38,6 +38,9 @@ namespace BE
         // guarda en español; el Dashboard lo traduce al mostrarlo buscando este mismo texto.
         public static string SufijoOrigenBackup(string origen) => $"(origen: {origen})";
         public const string BaseDeDatosRestauradaPrefijo   = "Base de datos restaurada desde ";
+        // Restablecer datos de demo (Administración → Backup): resguardo previo y recarga de la demo.
+        public const string BackupPrevioDemoPrefijo        = "Backup previo a restablecer los datos de demo generado: ";
+        public const string DatosDemoRestablecidosPrefijo  = "Datos de demo restablecidos; backup previo: ";
         // Restauración de un .wfbak del formato v1 (sin HMAC): no se pudo verificar que no fuera alterado.
         public const string BackupSinVerificacionPrefijo   = "Backup restaurado sin verificación de integridad (formato v1, sin HMAC): ";
         public const string DesbloqueoDeCuentaPrefijo      = "Desbloqueo de Cuenta: ";

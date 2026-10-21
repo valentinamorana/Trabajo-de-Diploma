@@ -110,6 +110,7 @@ namespace BLL
         // la bitácora. Solo cambian el nombre del archivo y el cifrado según el origen:
         //   Manual / Inicial      → WardrobeFlow_Backup|Inicial_yyyyMMddHHmmss_USUARIO.wfbak, cifrado.
         //   Login / Programado    → auto_<día>.bak, sin cifrar, rota por día de la semana.
+        //   PrevioDemo            → WardrobeFlow_PrevioDemo_yyyyMMddHHmmss_USUARIO.bak, sin cifrar.
         private string HacerBackup(OrigenBackup origen, string modulo, string dirDestino, string claveCifrado, DateTime fecha)
         {
             VerificarIntegridadAntesDeRespaldar(EsOrigenAutomatico(origen));   // RF-04
@@ -117,8 +118,8 @@ namespace BLL
             string filename = NombreArchivo(origen, fecha);
             string ruta     = Path.Combine(dirDestino, filename);
 
-            if (EsOrigenAutomatico(origen))
-                _dal.RealizarBackup(ruta);   // pisa el archivo del día (rotación semanal)
+            if (EsOrigenAutomatico(origen) || origen == OrigenBackup.PrevioDemo)
+                _dal.RealizarBackup(ruta);   // automáticos: pisa el archivo del día (rotación semanal)
             else
                 GenerarBackupCifrado(ruta, claveCifrado);
 
@@ -139,6 +140,8 @@ namespace BLL
                 ? Seguridad.SessionManager.GetInstance().Usuario.Username
                 : "sistema";
             string usuarioSanitizado = Regex.Replace(usuario, @"[^\w]", "_");
+            if (origen == OrigenBackup.PrevioDemo)
+                return $"{PrefijoPrevioDemo}{fecha:yyyyMMddHHmmss}_{usuarioSanitizado}.bak";
             string tipo = origen == OrigenBackup.Inicial ? "Inicial" : "Backup";
             return $"WardrobeFlow_{tipo}_{fecha:yyyyMMddHHmmss}_{usuarioSanitizado}{ExtensionCifrada}";
         }
@@ -149,7 +152,8 @@ namespace BLL
             {
                 case OrigenBackup.Inicial: return $"{BE.ActividadesBitacora.BackupInstalacionLimpiaPrefijo}'{filename}'";
                 case OrigenBackup.Manual:  return $"{BE.ActividadesBitacora.BackupCifradoGeneradoPrefijo}'{filename}'";
-                default:                   return $"{BE.ActividadesBitacora.BackupAutomaticoGeneradoPrefijo}'{filename}' {BE.ActividadesBitacora.SufijoOrigenBackup(origen.ToString())}";
+                case OrigenBackup.PrevioDemo: return $"{BE.ActividadesBitacora.BackupPrevioDemoPrefijo}'{filename}'";
+                default:                  return $"{BE.ActividadesBitacora.BackupAutomaticoGeneradoPrefijo}'{filename}' {BE.ActividadesBitacora.SufijoOrigenBackup(origen.ToString())}";
             }
         }
 
@@ -160,6 +164,39 @@ namespace BLL
             ValidarAdministrador();
             lock (_operacionEnCurso)
                 return HacerBackup(OrigenBackup.Manual, modulo, dirDestino, claveCifrado, DateTime.Now);
+        }
+
+        // Resguardo previo a "Restablecer datos de demo" (BLL.DatosDemo): solo Administrador. Es un
+        // .bak SIN cifrar (como los automáticos: no pide otra contraseña) en la carpeta de backups,
+        // y se restaura desde esta misma pantalla. Verifica antes la integridad (RF-04): si la base
+        // está comprometida o el backup falla, lanza y la demo no se restablece.
+        public const string PrefijoPrevioDemo = "WardrobeFlow_PrevioDemo_";
+
+        /// <summary>
+        /// "Restablecer datos de demo" de punta a punta DENTRO del mismo bloqueo de backup/restauración
+        /// (_operacionEnCurso): backup de resguardo → <paramref name="restablecer"/> (procedimiento
+        /// dbo.RestablecerDatosDemo) → inicialización y verificación de los dígitos verificadores. Así
+        /// ningún backup automático ni restauración se mete entre el resguardo y la carga, ni copia la
+        /// base a mitad de la inicialización. Devuelve el nombre del backup previo.
+        /// </summary>
+        public string RestablecerDemoConResguardo(string modulo, Action restablecer)
+        {
+            ValidarAdministrador();
+            if (restablecer == null) throw new ArgumentNullException(nameof(restablecer));
+            lock (_operacionEnCurso)
+            {
+                // Resguardo: si falla (o la integridad está comprometida), se corta acá.
+                string backup = HacerBackup(OrigenBackup.PrevioDemo, modulo, AsegurarCarpetaBackups(), null, DateTime.Now);
+
+                restablecer();
+
+                // Las tablas que cambió el procedimiento quedaron "sin calcular": se inicializan ahora.
+                if (!Configuracion.VerificarIntegridadDV(out ResultadoIntegridad r))
+                    throw new BE.AppException("err.bll.demo.integridad",
+                        "Los datos de demo se cargaron, pero la verificación de integridad no cerró. " +
+                        "Revise Administrar → Sistema → Diagnóstico de Integridad.\n\n" + (r?.MensajeES ?? ""));
+                return backup;
+            }
         }
 
         // Un backup o una restauración a la vez en todo el proceso: el reloj de 24 h corre en otro
@@ -437,7 +474,7 @@ namespace BLL
         // "WardrobeFlow_Inicial_" (RealizarBackupInicial) — antes solo reconocía el primero, así
         // que la UI (GUI.BackupForm, columna "Autor") siempre mostraba autor desconocido para
         // cualquier backup de instalación limpia, aunque el username estuviera en el nombre.
-        private static readonly string[] PrefijosConocidos = { "WardrobeFlow_Backup_", "WardrobeFlow_Inicial_" };
+        private static readonly string[] PrefijosConocidos = { "WardrobeFlow_Backup_", "WardrobeFlow_Inicial_", PrefijoPrevioDemo };
 
         public string ExtraerAutorDeNombre(string nombreArchivo)
         {
@@ -459,7 +496,7 @@ namespace BLL
     }
 
     /// <summary>Quién disparó un backup automático (queda en la bitácora).</summary>
-    public enum OrigenBackup { Manual, Inicial, Login, Programado }
+    public enum OrigenBackup { Manual, Inicial, Login, Programado, PrevioDemo }
 
     public enum EstadoBackupAutomatico { Realizado, Salteado, Fallido }
 

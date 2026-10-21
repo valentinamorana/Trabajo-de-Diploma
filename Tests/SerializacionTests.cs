@@ -14,24 +14,25 @@ namespace Tests
     [TestClass]
     public class SerializacionTests
     {
-        private string _carpetaOriginal;
+        private static readonly SerializadorXml<BE.LibroErrores> Xml = new SerializadorXml<BE.LibroErrores>();
+        private string _raiz;
         private string _carpeta;
 
         [TestInitialize]
         public void Setup()
         {
             SessionManager.Logout();
-            _carpetaOriginal = RegistroErrores.Carpeta;
-            _carpeta = Path.Combine(Path.GetTempPath(), "wf_errores_" + Guid.NewGuid().ToString("N"));
-            RegistroErrores.Carpeta = _carpeta;
+            _raiz = Path.Combine(Path.GetTempPath(), "wf_errores_" + Guid.NewGuid().ToString("N"));
+            GestorArchivos.Instancia.CarpetaRaiz = _raiz;   // en lugar de %LOCALAPPDATA%\WardrobeFlow
+            _carpeta = RegistroErrores.Carpeta;              // <raíz>\Errores
         }
 
         [TestCleanup]
         public void Cleanup()
         {
             SessionManager.Logout();
-            RegistroErrores.Carpeta = _carpetaOriginal;
-            try { Directory.Delete(_carpeta, true); } catch { }
+            GestorArchivos.Instancia.CarpetaRaiz = null;
+            try { Directory.Delete(_raiz, true); } catch { }
         }
 
         private static void LoginComoAdministrador() =>
@@ -47,8 +48,8 @@ namespace Tests
                 Tipo = "System.InvalidOperationException", Mensaje = "Algo <falló> & \"sigue\"", Causa = "SqlException: timeout", Equipo = "PC1"
             });
 
-            string xml = SerializadorXml.Serializar(libro);
-            var leido = SerializadorXml.Deserializar<BE.LibroErrores>(xml);
+            string xml = Xml.Serializar(libro);
+            var leido = Xml.Deserializar(xml);
 
             StringAssert.Contains(xml, "<ErroresWardrobeFlow");
             Assert.AreEqual(1, leido.Errores.Count);
@@ -93,7 +94,7 @@ namespace Tests
                          "<ErroresWardrobeFlow><Error fecha=\"2026-10-09T00:00:00\"><Mensaje>&e;</Mensaje></Error></ErroresWardrobeFlow>";
             try
             {
-                SerializadorXml.Deserializar<BE.LibroErrores>(xml);
+                Xml.Deserializar(xml);
                 Assert.Fail("Un XML con DTD no se debe procesar.");
             }
             catch (BE.AppException ex) { Assert.AreEqual("err.serial.formato", ex.Clave); }

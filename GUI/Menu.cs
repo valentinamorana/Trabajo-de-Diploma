@@ -46,7 +46,7 @@ namespace GUI
         {
             if (keyData == Keys.F1)
             {
-                Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General");
+                Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General", (ActiveMdiChild as FormBase)?.TextoAyudaAdicional);
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
@@ -73,8 +73,9 @@ namespace GUI
         public Menu()
         {
             InitializeComponent();
-            ayudaItem.Click += (s, e) => Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General");
+            ayudaItem.Click += (s, e) => Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General", (ActiveMdiChild as FormBase)?.TextoAyudaAdicional);
             usuarioToolStripMenuItem.DropDownItems.Insert(1, ayudaItem);
+            InicializarUsabilidad();   // barra "Usted está en" + Sesión › Ver guía de inicio (Menu.Ubicacion.cs)
             AplicarEstiloMenu();
 
             ReconstruirComboIdioma(Traductor.ObtenerIdiomas());
@@ -115,7 +116,7 @@ namespace GUI
         /// el bloque "foreach MdiChildren / if (hijo is X) BringToFront" que estaba copiado
         /// en cada ítem del menú.
         /// </summary>
-        private T AbrirUnico<T>(Func<T> crear, Action<T> alReactivar = null) where T : Form
+        internal T AbrirUnico<T>(Func<T> crear, Action<T> alReactivar = null) where T : Form
         {
             foreach (Form hijo in this.MdiChildren)
             {
@@ -293,6 +294,7 @@ namespace GUI
                 renovacionSuscripcionToolStripMenuItem, cobroSuscripcionToolStripMenuItem,
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
                 nuevaContratacionToolStripMenuItem, contratacionesPendientesToolStripMenuItem,
+                centroDecisionesToolStripMenuItem,
                 sugerirPromocionToolStripMenuItem, gestionPromocionesToolStripMenuItem,
                 revisionContablePromocionesToolStripMenuItem, promocionesVigentesToolStripMenuItem,
                 usuariosToolStripMenuItem, perfilesToolStripMenuItem, idiomasToolStripMenuItem,
@@ -549,6 +551,15 @@ namespace GUI
             AbrirUnico(() => new ContratacionesPendientesForm());
         }
 
+        /// <summary>
+        /// PN03 «Inteligencia comercial y promociones» — Abre el Centro de decisiones comerciales (Gerencia)
+        /// como hijo MDI: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.
+        /// </summary>
+        private void centroDecisionesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AbrirUnico(() => new CentroDecisionesForm());
+        }
+
         /// <summary>PN03 — Abre el diálogo para que Gerencia (GerenteComercial) sugiera una promoción.</summary>
         private void sugerirPromocionToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -639,6 +650,8 @@ namespace GUI
             // Backup automático: reloj de 24 h (todos los roles) y aviso si falló el del login.
             BLL.BackupProgramado.Iniciar();
             BeginInvoke(new Action(MostrarAvisoBackupLogin));
+            // PN03: avisos del Centro de decisiones (no modal, calculado en segundo plano; se muestra después de la guía).
+            DespuesDeLaGuia(Inteligencia.AvisosInicioSesion.Preparar(this));
 
             // 4. Cargar traducciones de BD en background (no bloquea la UI)
             // RF-22/23 — Al ingresar se aplica el idioma PREFERIDO del usuario (persistido en BD).
@@ -837,6 +850,7 @@ namespace GUI
             Aplicar(cajaToolStripMenuItem,                       t);
             Aplicar(contratacionesPendientesToolStripMenuItem,   t);
             Aplicar(promocionesToolStripMenuItem,                t);
+            Aplicar(centroDecisionesToolStripMenuItem,           t);
             Aplicar(sugerirPromocionToolStripMenuItem,           t);
             Aplicar(gestionPromocionesToolStripMenuItem,         t);
             Aplicar(revisionContablePromocionesToolStripMenuItem, t);
@@ -864,6 +878,10 @@ namespace GUI
 
             // Ítem de Alertas: tiene icono + badge, se compone aparte (no por Tag directo).
             RefrescarTextoAlertas();
+
+            // Usabilidad: ítem de la guía y barra "Usted está en" (Menu.Ubicacion.cs).
+            Aplicar(guiaItem, t);
+            ActualizarBarraUbicacionDiferida();
         }
 
         /// <summary>

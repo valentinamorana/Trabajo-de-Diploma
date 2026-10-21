@@ -13,6 +13,13 @@ namespace GUI
     {
         public string InputText => txtInput.Text;
 
+        /// <summary>Valor inicial del campo (p. ej. un importe sugerido), seleccionado para reemplazarlo.</summary>
+        public void EstablecerTexto(string texto)
+        {
+            txtInput.Text = texto ?? string.Empty;
+            txtInput.SelectAll();
+        }
+
         public InputDialog(string titulo, string prompt, bool esPassword)
         {
             InitializeComponent();

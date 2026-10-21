@@ -192,6 +192,69 @@ CREATE TABLE [dbo].[ControlMapeado] (
 );
 GO
 
+CREATE TABLE [dbo].[DecisionComercial] (
+    [IdDecision]         int IDENTITY(1, 1) NOT NULL,
+    [Fecha]              datetime NOT NULL CONSTRAINT [DF_DecisionComercial_Fecha] DEFAULT (getdate()),
+    [IdUsuario]          int NOT NULL,
+    [TipoRegla]          nvarchar(50) NOT NULL,
+    [ClaveRecomendacion] nvarchar(100) NOT NULL,
+    [Prioridad]          int NOT NULL,
+    [Titulo]             nvarchar(300) NOT NULL,
+    [Diagnostico]        nvarchar(1000) NULL,
+    [AccionElegida]      nvarchar(500) NULL,
+    [EsAlternativa]      bit NOT NULL CONSTRAINT [DF_DecisionComercial_EsAlternativa] DEFAULT ((0)),
+    [ImpactoEstimado]    decimal(14, 2) NOT NULL CONSTRAINT [DF_DecisionComercial_Impacto] DEFAULT ((0)),
+    [Estado]             int NOT NULL,
+    [Motivo]             nvarchar(500) NULL,
+    [TipoReferencia]     nvarchar(30) NULL,
+    [Referencia]         int NULL,
+    [PospuestaHasta]     date NULL,
+    [FechaEjecucion]     datetime NULL,
+    [FechaEvaluacion]    datetime NULL,
+    [ResultadoReal]      decimal(14, 2) NULL,
+    CONSTRAINT [PK_DecisionComercial] PRIMARY KEY CLUSTERED ([IdDecision]),
+    CONSTRAINT [CHK_DecisionComercial_Descarte] CHECK ([Estado]<>(2) OR [Motivo] IS NOT NULL),
+    CONSTRAINT [CHK_DecisionComercial_Estado] CHECK ([Estado]=(4) OR [Estado]=(3) OR [Estado]=(2) OR [Estado]=(1) OR [Estado]=(0)),
+    CONSTRAINT [CHK_DecisionComercial_Pospuesta] CHECK ([Estado]=(3) AND [PospuestaHasta] IS NOT NULL OR [Estado]<>(3) AND [PospuestaHasta] IS NULL),
+    CONSTRAINT [CHK_DecisionComercial_Prioridad] CHECK ([Prioridad]=(2) OR [Prioridad]=(1) OR [Prioridad]=(0)),
+    CONSTRAINT [CHK_DecisionComercial_Referencia] CHECK ([TipoReferencia] IS NULL AND [Referencia] IS NULL OR [TipoReferencia] IS NOT NULL AND [Referencia] IS NOT NULL),
+    CONSTRAINT [CHK_DecisionComercial_TipoReferencia] CHECK ([TipoReferencia] IS NULL OR ([TipoReferencia]=N'SolicitudBaja' OR [TipoReferencia]=N'Promocion' OR [TipoReferencia]=N'Sugerencia'))
+);
+GO
+
+-- PN03: una sola decisión abierta (Aceptada / Pospuesta) por recomendación (sección 20p).
+CREATE UNIQUE NONCLUSTERED INDEX [UX_DecisionComercial_Abierta] ON [dbo].[DecisionComercial]([ClaveRecomendacion]) WHERE ([Estado] IN ((1), (3)));
+GO
+
+-- PN03: qué tocó una decisión ejecutada (clientes contactados o prendas cambiadas). Sección 20p.
+CREATE TABLE [dbo].[DecisionComercialDetalle] (
+    [IdDecision] int NOT NULL,
+    [Tipo]       nvarchar(20) NOT NULL,
+    [IdObjeto]   int NOT NULL,
+    CONSTRAINT [PK_DecisionComercialDetalle] PRIMARY KEY CLUSTERED ([IdDecision], [Tipo], [IdObjeto]),
+    CONSTRAINT [CHK_DecisionComercialDetalle_Tipo] CHECK ([Tipo]=N'Prenda' OR [Tipo]=N'Cliente'),
+    CONSTRAINT [FK_DecisionComercialDetalle_Decision] FOREIGN KEY ([IdDecision]) REFERENCES [dbo].[DecisionComercial] ([IdDecision]) ON DELETE CASCADE
+);
+GO
+
+-- PN03: metas comerciales mensuales de Gerencia (una por indicador y mes). Sección 20p.
+CREATE TABLE [dbo].[MetaComercial] (
+    [IdMeta]        int IDENTITY(1, 1) NOT NULL,
+    [Periodo]       date NOT NULL,
+    [Indicador]     int NOT NULL,
+    [ValorObjetivo] decimal(14, 2) NOT NULL,
+    [Sentido]       int NOT NULL,
+    [IdUsuario]     int NOT NULL,
+    [Fecha]         datetime NOT NULL CONSTRAINT [DF_MetaComercial_Fecha] DEFAULT (getdate()),
+    CONSTRAINT [PK_MetaComercial] PRIMARY KEY CLUSTERED ([IdMeta]),
+    CONSTRAINT [UQ_MetaComercial_PeriodoIndicador] UNIQUE ([Periodo], [Indicador]),
+    CONSTRAINT [CHK_MetaComercial_Periodo] CHECK (datepart(day,[Periodo])=(1)),
+    CONSTRAINT [CHK_MetaComercial_Indicador] CHECK ([Indicador]>=(0)),
+    CONSTRAINT [CHK_MetaComercial_Sentido] CHECK ([Sentido]=(1) OR [Sentido]=(0)),
+    CONSTRAINT [CHK_MetaComercial_Valor] CHECK ([ValorObjetivo]>=(0)),
+    CONSTRAINT [FK_MetaComercial_Usuario] FOREIGN KEY ([IdUsuario]) REFERENCES [dbo].[Usuario] ([IdUsuario])
+);
+GO
 CREATE TABLE [dbo].[DesistimientoContratacion] (
     [IdDesistimiento] int IDENTITY(1, 1) NOT NULL,
     [IdCliente]       int NOT NULL,
@@ -650,6 +713,8 @@ CREATE NONCLUSTERED INDEX [IX_Contratacion_Estado] ON [dbo].[Contratacion] ([Est
 CREATE UNIQUE NONCLUSTERED INDEX [UX_Contratacion_Comprobante] ON [dbo].[Contratacion] ([NumeroComprobante]) WHERE ([NumeroComprobante] IS NOT NULL);
 CREATE UNIQUE NONCLUSTERED INDEX [UX_Contratacion_UnaPendientePorCliente] ON [dbo].[Contratacion] ([IdCliente]) WHERE ([Estado]=(0));
 CREATE NONCLUSTERED INDEX [IX_IntentoPago_Contratacion] ON [dbo].[ContratacionIntentoPago] ([IdContratacion]);
+CREATE NONCLUSTERED INDEX [IX_DecisionComercial_Clave] ON [dbo].[DecisionComercial] ([ClaveRecomendacion], [Fecha] DESC);
+CREATE NONCLUSTERED INDEX [IX_DecisionComercial_Fecha] ON [dbo].[DecisionComercial] ([Fecha]);
 CREATE NONCLUSTERED INDEX [IX_DictamenContable_Promocion] ON [dbo].[DictamenContable] ([IdPromocion]);
 CREATE UNIQUE NONCLUSTERED INDEX [UX_Empleado_DNI] ON [dbo].[Empleado] ([DNI]) WHERE ([DNI]<>N'');
 CREATE UNIQUE NONCLUSTERED INDEX [UX_Empleado_IdUsuario] ON [dbo].[Empleado] ([IdUsuario]) WHERE ([IdUsuario] IS NOT NULL);
@@ -718,6 +783,7 @@ ALTER TABLE [dbo].[DesistimientoContratacion] ADD CONSTRAINT [FK_DesistContr_Cli
 ALTER TABLE [dbo].[DesistimientoContratacion] ADD CONSTRAINT [FK_DesistContr_Plan] FOREIGN KEY ([IdPlan]) REFERENCES [dbo].[PlanSuscripcion] ([IdPlan]);
 ALTER TABLE [dbo].[DesistimientoContratacion] ADD CONSTRAINT [FK_DesistContr_Vendedor] FOREIGN KEY ([IdVendedor]) REFERENCES [dbo].[Empleado] ([IdEmpleado]);
 
+ALTER TABLE [dbo].[DecisionComercial] ADD CONSTRAINT [FK_DecisionComercial_Usuario] FOREIGN KEY ([IdUsuario]) REFERENCES [dbo].[Usuario] ([IdUsuario]);
 ALTER TABLE [dbo].[DictamenContable] ADD CONSTRAINT [FK_DictamenContable_Promocion] FOREIGN KEY ([IdPromocion]) REFERENCES [dbo].[Promocion] ([IdPromocion]);
 ALTER TABLE [dbo].[DictamenContable] ADD CONSTRAINT [FK_DictamenContable_Usuario] FOREIGN KEY ([IdUsuario]) REFERENCES [dbo].[Usuario] ([IdUsuario]);
 

@@ -17,7 +17,7 @@ namespace GUI
     ///
     /// El selector ofrece SOLO los reportes cuya patente tiene el usuario: la decisión es de la
     /// BLL (BLL.MenuVisibilidad.ReportesVisibles, la misma que decide si el ítem del menú se ve).
-    /// Cada reporte exporta a PDF (vista previa) o CSV (archivo) con su propio Factory Method de
+    /// Cada reporte exporta a PDF (se guarda y se abre con el visor) o CSV con su propio Factory Method de
     /// GUI.Exportacion, igual que antes.
     /// </summary>
     public partial class AnaliticaNegocioForm : FormBase, IIdiomaObserver

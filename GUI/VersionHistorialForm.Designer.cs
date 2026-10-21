@@ -18,6 +18,9 @@ namespace GUI
             this.lblUsuario  = new System.Windows.Forms.Label();
             this.cboUsuario  = new System.Windows.Forms.ComboBox();
             this.btnCargar   = new System.Windows.Forms.Button();
+            this.btnExportar = new System.Windows.Forms.Button();
+            this.btnImportar = new System.Windows.Forms.Button();
+            this.lblOrigen   = new System.Windows.Forms.Label();
             this.dgv         = new System.Windows.Forms.DataGridView();
             this.colId       = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colRegistro = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -38,8 +41,11 @@ namespace GUI
             this.pnlTop.Controls.Add(this.lblUsuario);
             this.pnlTop.Controls.Add(this.cboUsuario);
             this.pnlTop.Controls.Add(this.btnCargar);
+            this.pnlTop.Controls.Add(this.btnExportar);
+            this.pnlTop.Controls.Add(this.btnImportar);
+            this.pnlTop.Controls.Add(this.lblOrigen);
             this.pnlTop.Dock     = System.Windows.Forms.DockStyle.Top;
-            this.pnlTop.Height   = 80;
+            this.pnlTop.Height   = 104;
             this.pnlTop.Name     = "pnlTop";
             this.pnlTop.Padding  = new System.Windows.Forms.Padding(12, 10, 12, 8);
             this.pnlTop.TabIndex = 0;
@@ -83,6 +89,46 @@ namespace GUI
             this.btnCargar.Text      = "Cargar";
             this.btnCargar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnCargar.Click    += new System.EventHandler(this.btnCargar_Click);
+
+            // ── btnExportar (A02: serializa a XML o JSON las versiones del usuario elegido) ──
+            this.btnExportar.BackColor                  = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.btnExportar.FlatStyle                  = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExportar.FlatAppearance.BorderSize  = 0;
+            this.btnExportar.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnExportar.ForeColor = System.Drawing.Color.White;
+            this.btnExportar.Location  = new System.Drawing.Point(404, 44);
+            this.btnExportar.Name      = "btnExportar";
+            this.btnExportar.Size      = new System.Drawing.Size(176, 26);
+            this.btnExportar.TabIndex  = 8;
+            this.btnExportar.Text      = "Exportar versiones…";
+            this.btnExportar.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnExportar.Click    += new System.EventHandler(this.btnExportar_Click);
+
+            // ── btnImportar (A02: deserializa un archivo XML o JSON de versiones) ──
+            this.btnImportar.BackColor                  = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.btnImportar.FlatStyle                  = System.Windows.Forms.FlatStyle.Flat;
+            this.btnImportar.FlatAppearance.BorderSize  = 0;
+            this.btnImportar.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnImportar.ForeColor = System.Drawing.Color.White;
+            this.btnImportar.Location  = new System.Drawing.Point(588, 44);
+            this.btnImportar.Name      = "btnImportar";
+            this.btnImportar.Size      = new System.Drawing.Size(176, 26);
+            this.btnImportar.TabIndex  = 9;
+            this.btnImportar.Text      = "Importar versiones…";
+            this.btnImportar.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnImportar.Click    += new System.EventHandler(this.btnImportar_Click);
+
+            // ── lblOrigen (de dónde salen las versiones de la grilla: base o archivo importado) ──
+            this.lblOrigen.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Italic);
+            this.lblOrigen.ForeColor = System.Drawing.Color.FromArgb(90, 90, 90);
+            this.lblOrigen.Anchor    = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            this.lblOrigen.AutoEllipsis = true;
+            this.lblOrigen.Location  = new System.Drawing.Point(12, 76);
+            this.lblOrigen.Name      = "lblOrigen";
+            this.lblOrigen.Size      = new System.Drawing.Size(776, 20);
+            this.lblOrigen.TabIndex  = 10;
+            this.lblOrigen.Text      = "";
+            this.lblOrigen.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
             // ── dgv ──────────────────────────────────────────────────────────
             this.dgv.AllowUserToAddRows    = false;
@@ -201,6 +247,9 @@ namespace GUI
         private System.Windows.Forms.Label                    lblUsuario;
         private System.Windows.Forms.ComboBox                 cboUsuario;
         private System.Windows.Forms.Button                   btnCargar;
+        private System.Windows.Forms.Button                   btnExportar;
+        private System.Windows.Forms.Button                   btnImportar;
+        private System.Windows.Forms.Label                    lblOrigen;
         private System.Windows.Forms.DataGridView             dgv;
         private System.Windows.Forms.DataGridViewTextBoxColumn colId;
         private System.Windows.Forms.DataGridViewTextBoxColumn colRegistro;

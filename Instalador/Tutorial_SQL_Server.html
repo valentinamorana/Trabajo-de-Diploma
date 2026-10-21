@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo instalar SQL Server para WardrobeFlow</title>
+<style>
+  :root {
+    --texto: #1f2328;
+    --suave: #57606a;
+    --fondo: #ffffff;
+    --panel: #f6f8fa;
+    --borde: #d0d7de;
+    --acento: #0b5cad;
+    --acento-fondo: #e8f1fb;
+    --ok: #1a7f37;
+    --ok-fondo: #e9f6ec;
+    --aviso: #9a6700;
+    --aviso-fondo: #fff8e1;
+    --error: #b42318;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+  header.portada { border-bottom: 3px solid var(--acento); padding-bottom: 16px; margin-bottom: 24px; }
+  header.portada .marca { color: var(--acento); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: .85rem; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 6px 0 8px; }
+  h2 { font-size: 1.4rem; margin: 40px 0 12px; padding-top: 8px; border-top: 1px solid var(--borde); }
+  h3 { font-size: 1.12rem; margin: 26px 0 8px; }
+  p, li { max-width: 72ch; }
+  a { color: var(--acento); }
+  code, .ruta {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .92em;
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 4px;
+    padding: 1px 5px;
+    word-break: break-all;
+  }
+  /* Nombre de un boton o elemento de una ventana */
+  .boton {
+    display: inline-block;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: .9em;
+    font-weight: 600;
+    line-height: 1.3;
+    padding: 1px 10px;
+    border: 1px solid #8c959f;
+    border-radius: 4px;
+    background: linear-gradient(#ffffff, #eaeef2);
+    box-shadow: 0 1px 0 rgba(27,31,36,.1);
+    white-space: nowrap;
+  }
+  .tecla {
+    display: inline-block;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .85em;
+    padding: 0 6px;
+    border: 1px solid #8c959f;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: var(--panel);
+  }
+  .opcion { font-weight: 600; color: var(--acento); }
+  .indice { background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 12px 20px; }
+  .indice ol { margin: 6px 0; padding-left: 22px; }
+  .caja { border-radius: 8px; padding: 12px 16px; margin: 16px 0; border-left: 5px solid; }
+  .caja p { margin: 4px 0; }
+  .caja.info { background: var(--acento-fondo); border-color: var(--acento); }
+  .caja.ok { background: var(--ok-fondo); border-color: var(--ok); }
+  .caja.aviso { background: var(--aviso-fondo); border-color: var(--aviso); }
+  .caja strong.titulo { display: block; margin-bottom: 2px; }
+  /* Pasos numerados */
+  ol.pasos { list-style: none; counter-reset: paso; padding-left: 0; }
+  ol.pasos > li { counter-increment: paso; position: relative; padding: 2px 0 14px 48px; }
+  ol.pasos > li::before {
+    content: counter(paso);
+    position: absolute; left: 0; top: 0;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--acento); color: #fff;
+    font-weight: 700; text-align: center; line-height: 32px;
+  }
+  ol.pasos > li > ul { margin: 6px 0 0; }
+  .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .tarjeta { border: 1px solid var(--borde); border-radius: 8px; padding: 14px 16px; background: var(--fondo); }
+  .tarjeta h3 { margin-top: 0; }
+  .tarjeta .etiqueta { display: inline-block; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 10px; margin-bottom: 6px; }
+  .etiqueta.facil { background: var(--ok-fondo); color: var(--ok); }
+  .etiqueta.completa { background: var(--acento-fondo); color: var(--acento); }
+  .tarjeta ul { padding-left: 20px; margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .95rem; }
+  th, td { border: 1px solid var(--borde); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+  .esquema-nota { font-size: .85rem; color: var(--suave); margin-top: -4px; }
+  figure { margin: 16px 0; }
+  figure svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: .85rem; color: var(--suave); margin-top: 4px; }
+  details { border: 1px solid var(--borde); border-radius: 8px; margin: 10px 0; padding: 0 14px; }
+  details[open] { padding-bottom: 10px; }
+  summary { cursor: pointer; font-weight: 600; padding: 10px 0; }
+  footer { margin-top: 48px; padding-top: 12px; border-top: 1px solid var(--borde); color: var(--suave); font-size: .85rem; }
+  @media (max-width: 640px) {
+    .opciones { grid-template-columns: 1fr; }
+    h1 { font-size: 1.5rem; }
+  }
+  @media print {
+    html { font-size: 11pt; }
+    main { max-width: none; padding: 0; }
+    a { color: var(--texto); }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; word-break: break-all; }
+    h2 { break-after: avoid; page-break-after: avoid; }
+    .caja, .tarjeta, ol.pasos > li, table, figure { break-inside: avoid; page-break-inside: avoid; }
+    details { border: none; padding: 0; }
+    details > summary { list-style: none; }
+    .indice { display: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header class="portada">
+  <div class="marca">WardrobeFlow · Guía de instalación</div>
+  <h1>Cómo instalar SQL Server para WardrobeFlow</h1>
+  <p>Esta guía le explica, paso a paso, cómo dejar listo el motor de base de datos que WardrobeFlow necesita. Puede leerla sin conexión a Internet e imprimirla.</p>
+</header>
+
+<nav class="indice" aria-label="Contenido">
+  <strong>Contenido</strong>
+  <ol>
+    <li><a href="#que-es">Qué es SQL Server y por qué lo necesita WardrobeFlow</a></li>
+    <li><a href="#cual-elegir">Qué opción le conviene</a></li>
+    <li><a href="#opcion-facil">Opción fácil: SQL Server LocalDB desde el instalador de WardrobeFlow</a></li>
+    <li><a href="#opcion-completa">Opción completa: SQL Server 2022 Express</a></li>
+    <li><a href="#verificar">Cómo verificar que el servicio está en ejecución</a></li>
+    <li><a href="#problemas">Solución de problemas frecuentes</a></li>
+    <li><a href="#logs">Dónde están los registros (logs) del instalador</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="que-es">1. Qué es SQL Server y por qué lo necesita WardrobeFlow</h2>
+<p><strong>SQL Server</strong> es el motor de base de datos de Microsoft. Es el programa que guarda, de forma ordenada y segura, toda la información de WardrobeFlow: clientes, prendas, pedidos, suscripciones, usuarios, permisos y la bitácora de operaciones.</p>
+<p>WardrobeFlow no funciona sin una instancia de SQL Server, porque cada pantalla de la aplicación lee y escribe en la base de datos <code>WardrobeFlowDB</code>. El instalador de WardrobeFlow crea esa base automáticamente; usted solo necesita que exista un SQL Server en el equipo (o en un servidor de la red).</p>
+<div class="caja info">
+  <strong class="titulo">Versión mínima</strong>
+  <p>WardrobeFlow requiere <strong>SQL Server 2012 o posterior</strong>. Se recomienda SQL Server 2022 Express, que es gratuito.</p>
+</div>
+<div class="caja ok">
+  <strong class="titulo">¿Ya tiene SQL Server instalado?</strong>
+  <p>No necesita esta guía: el instalador de WardrobeFlow detecta las instancias del equipo y le permite elegir la que desea usar.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="cual-elegir">2. Qué opción le conviene</h2>
+<div class="opciones">
+  <div class="tarjeta">
+    <span class="etiqueta facil">Recomendada · la más fácil</span>
+    <h3>SQL Server LocalDB</h3>
+    <ul>
+      <li>Viene <strong>incluido</strong> en el instalador de WardrobeFlow: no hace falta descargar nada.</li>
+      <li>Se instala con un solo clic, sin preguntas.</li>
+      <li>La base queda disponible <strong>solo para el usuario de Windows</strong> que instaló.</li>
+      <li>Ideal para un único puesto de trabajo o para una demostración.</li>
+    </ul>
+    <p><a href="#opcion-facil">Ver los pasos</a></p>
+  </div>
+  <div class="tarjeta">
+    <span class="etiqueta completa">Completa</span>
+    <h3>SQL Server 2022 Express</h3>
+    <ul>
+      <li>Se descarga gratis desde el sitio de Microsoft.</li>
+      <li>Funciona como un <strong>servicio de Windows</strong>, siempre disponible.</li>
+      <li>La base la pueden usar <strong>todos los usuarios de Windows</strong> del equipo.</li>
+      <li>Ideal si varias personas usan la misma computadora.</li>
+    </ul>
+    <p><a href="#opcion-completa">Ver los pasos</a></p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="opcion-facil">3. Opción fácil: SQL Server LocalDB desde el instalador de WardrobeFlow</h2>
+<p>El instalador de WardrobeFlow trae incluido <strong>SQL Server 2022 Express LocalDB</strong>, una versión liviana de SQL Server pensada para un solo usuario.</p>
+<ol class="pasos">
+  <li>Ejecute nuevamente el instalador de WardrobeFlow (<code>Instalador_WardrobeFlow_….exe</code>) y acepte el aviso de Control de cuentas de usuario de Windows con <span class="boton">Sí</span>.</li>
+  <li>Avance con <span class="boton">Siguiente</span> hasta la página <strong>«No se encontró SQL Server en este equipo»</strong>.</li>
+  <li>Deje marcada la primera opción: <span class="opcion">Instalar SQL Server Express LocalDB (recomendado, incluido en este instalador; se instala al confirmar)</span>. Ya viene seleccionada.</li>
+  <li>Haga clic en <span class="boton">Siguiente</span>. Se mostrará un aviso que recuerda que la base de LocalDB es solo de su usuario de Windows; ciérrelo con <span class="boton">Aceptar</span>.</li>
+  <li>Continúe con <span class="boton">Siguiente</span> y, en la página «Listo para instalar», haga clic en <span class="boton">Instalar</span>.</li>
+  <li>Espere: primero se instala SQL Server LocalDB (aparece una barra de progreso de Windows Installer, sin preguntas) y después WardrobeFlow y su base de datos.</li>
+  <li>Al terminar, haga clic en <span class="boton">Finalizar</span>. WardrobeFlow queda listo para usarse.</li>
+</ol>
+<div class="caja aviso">
+  <strong class="titulo">Importante: LocalDB es de cada usuario de Windows</strong>
+  <p>La base de datos se crea dentro del perfil del usuario de Windows que ejecutó el instalador. Si otra persona inicia sesión en Windows con otra cuenta y abre WardrobeFlow, no verá los datos. Si varias personas van a usar la aplicación en la misma computadora con cuentas distintas, elija la <a href="#opcion-completa">opción completa</a>.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="opcion-completa">4. Opción completa: SQL Server 2022 Express</h2>
+<p>Necesitará una conexión a Internet (se descargan unos 250&nbsp;MB) y una cuenta de Windows con permisos de administrador. El proceso demora entre 10 y 20 minutos.</p>
+
+<figure aria-label="Esquema del proceso">
+  <svg viewBox="0 0 760 92" role="img" aria-labelledby="flujo-titulo">
+    <title id="flujo-titulo">Esquema: descargar, instalar, verificar el servicio y volver a ejecutar el instalador de WardrobeFlow</title>
+    <defs>
+      <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#57606a"/>
+      </marker>
+    </defs>
+    <g font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="14" text-anchor="middle">
+      <rect x="4" y="18" width="160" height="56" rx="8" fill="#e8f1fb" stroke="#0b5cad"/>
+      <text x="84" y="42" font-weight="700" fill="#0b5cad">1. Descargar</text>
+      <text x="84" y="62" fill="#1f2328">sitio de Microsoft</text>
+      <rect x="200" y="18" width="160" height="56" rx="8" fill="#e8f1fb" stroke="#0b5cad"/>
+      <text x="280" y="42" font-weight="700" fill="#0b5cad">2. Instalar</text>
+      <text x="280" y="62" fill="#1f2328">tipo «Básica»</text>
+      <rect x="396" y="18" width="160" height="56" rx="8" fill="#e8f1fb" stroke="#0b5cad"/>
+      <text x="476" y="42" font-weight="700" fill="#0b5cad">3. Verificar</text>
+      <text x="476" y="62" fill="#1f2328">servicio activo</text>
+      <rect x="592" y="18" width="164" height="56" rx="8" fill="#e9f6ec" stroke="#1a7f37"/>
+      <text x="674" y="42" font-weight="700" fill="#1a7f37">4. WardrobeFlow</text>
+      <text x="674" y="62" fill="#1f2328">elegir .\SQLEXPRESS</text>
+      <line x1="166" y1="46" x2="196" y2="46" stroke="#57606a" stroke-width="2" marker-end="url(#flecha)"/>
+      <line x1="362" y1="46" x2="392" y2="46" stroke="#57606a" stroke-width="2" marker-end="url(#flecha)"/>
+      <line x1="558" y1="46" x2="588" y2="46" stroke="#57606a" stroke-width="2" marker-end="url(#flecha)"/>
+    </g>
+  </svg>
+  <figcaption>Resumen del proceso completo.</figcaption>
+</figure>
+
+<h3>4.1. Descargar SQL Server 2022 Express</h3>
+<ol class="pasos">
+  <li>Abra el navegador e ingrese en la página oficial de descargas de Microsoft:<br>
+    <a href="https://www.microsoft.com/es-es/sql-server/sql-server-downloads">https://www.microsoft.com/es-es/sql-server/sql-server-downloads</a></li>
+  <li>Busque la sección <strong>Express</strong> (edición gratuita) y haga clic en <span class="boton">Descargar ahora</span>.</li>
+  <li>Se descargará un archivo pequeño, con un nombre similar a <code>SQL2022-SSEI-Expr.exe</code>. Es el asistente que descarga e instala el resto.</li>
+</ol>
+<div class="caja aviso">
+  <strong class="titulo">Descargue solo desde el sitio de Microsoft</strong>
+  <p>No use instaladores de SQL Server obtenidos de otros sitios. El sitio de Microsoft puede cambiar de diseño con el tiempo; si no encuentra el botón, busque «SQL Server 2022 Express» dentro de la misma página.</p>
+</div>
+
+<h3>4.2. Ejecutar la instalación</h3>
+<ol class="pasos">
+  <li>Abra el archivo descargado (haga doble clic en él desde la carpeta <strong>Descargas</strong>). Cuando Windows lo pregunte, permita que realice cambios con <span class="boton">Sí</span>.</li>
+  <li>En la primera pantalla, elija el tipo de instalación <span class="boton">Básica</span>. Es la más simple y deja todo configurado como WardrobeFlow lo espera.</li>
+  <li>Lea los términos de licencia de Microsoft y haga clic en <span class="boton">Aceptar</span>.</li>
+  <li>Deje la carpeta de instalación propuesta y haga clic en <span class="boton">Instalar</span>.</li>
+  <li>Espere a que termine la descarga y la instalación. Puede tardar varios minutos; no cierre la ventana ni apague el equipo.</li>
+  <li>Al finalizar, se mostrará la pantalla <strong>«La instalación se completó correctamente»</strong> con un resumen. Anote estos datos:
+    <ul>
+      <li><strong>Nombre de instancia:</strong> <code>SQLEXPRESS</code></li>
+      <li><strong>Conexión:</strong> <code>localhost\SQLEXPRESS</code> (equivale a <code>.\SQLEXPRESS</code>)</li>
+    </ul>
+  </li>
+  <li>Haga clic en <span class="boton">Cerrar</span>. No hace falta instalar SSMS (SQL Server Management Studio) para usar WardrobeFlow.</li>
+</ol>
+<div class="caja info">
+  <strong class="titulo">Sobre los permisos</strong>
+  <p>La instalación «Básica» agrega como administrador de SQL Server (rol <code>sysadmin</code>) a la cuenta de Windows con la que usted instaló. Por eso conviene instalar WardrobeFlow <strong>con esa misma cuenta</strong>.</p>
+</div>
+
+<h3>4.3. Verificar el servicio</h3>
+<p>Antes de volver al instalador de WardrobeFlow, confirme que el servicio de SQL Server está en ejecución, tal como se explica en la <a href="#verificar">sección 5</a>. Normalmente ya lo está: la instalación lo deja iniciado y con inicio automático.</p>
+
+<h3>4.4. Volver a ejecutar el instalador de WardrobeFlow</h3>
+<ol class="pasos">
+  <li>Ejecute nuevamente el instalador de WardrobeFlow.</li>
+  <li>Ahora el instalador detecta SQL Server y muestra la página <strong>«Se encontró SQL Server en este equipo»</strong>.</li>
+  <li>Elija la instancia <span class="opcion">.\SQLEXPRESS (SQL Server 2022)</span> y haga clic en <span class="boton">Siguiente</span>.</li>
+  <li>El instalador verifica el servicio y los permisos antes de copiar archivos. Continúe con <span class="boton">Siguiente</span> y <span class="boton">Instalar</span>, y al terminar haga clic en <span class="boton">Finalizar</span>.</li>
+</ol>
+<div class="caja ok">
+  <strong class="titulo">Si el instalador no muestra la instancia</strong>
+  <p>Elija <span class="opcion">Otra instancia o servidor (ingresar manualmente)</span> (o, en la página «No se encontró SQL Server», <span class="opcion">Ya tengo SQL Server instalado … — ingresar manualmente</span>) y escriba <code>.\SQLEXPRESS</code>.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="verificar">5. Cómo verificar que el servicio está en ejecución</h2>
+<ol class="pasos">
+  <li>Presione las teclas <span class="tecla">Windows</span> + <span class="tecla">R</span>. Se abre la ventana «Ejecutar».</li>
+  <li>Escriba <code>services.msc</code> y haga clic en <span class="boton">Aceptar</span>. Se abre la consola «Servicios».</li>
+  <li>Busque en la lista el servicio <strong>SQL Server (SQLEXPRESS)</strong> (la lista está en orden alfabético).</li>
+  <li>Compruebe las columnas <strong>Estado</strong> y <strong>Tipo de inicio</strong>. Deben mostrar lo siguiente:</li>
+</ol>
+<table>
+  <thead><tr><th>Nombre</th><th>Estado</th><th>Tipo de inicio</th></tr></thead>
+  <tbody><tr><td>SQL Server (SQLEXPRESS)</td><td style="color:var(--ok);font-weight:600">En ejecución</td><td style="color:var(--ok);font-weight:600">Automático</td></tr></tbody>
+</table>
+<p class="esquema-nota">Esquema de los valores esperados (no es una captura de pantalla).</p>
+<p>Si el estado no es «En ejecución» o el tipo de inicio no es «Automático», siga los pasos de <a href="#p-servicio">«El servicio está detenido o deshabilitado»</a>.</p>
+<div class="caja info">
+  <strong class="titulo">LocalDB no aparece en «Servicios»</strong>
+  <p>SQL Server LocalDB no funciona como servicio de Windows: se inicia solo cuando WardrobeFlow lo necesita. Es normal que no figure en la lista.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="problemas">6. Solución de problemas frecuentes</h2>
+
+<details open id="p-servicio">
+  <summary>El servicio está detenido o deshabilitado</summary>
+  <ol class="pasos">
+    <li>Abra la consola «Servicios» (<span class="tecla">Windows</span> + <span class="tecla">R</span>, <code>services.msc</code>, <span class="boton">Aceptar</span>).</li>
+    <li>Haga clic derecho sobre <strong>SQL Server (SQLEXPRESS)</strong> y elija <span class="boton">Propiedades</span>.</li>
+    <li>En <strong>Tipo de inicio</strong>, seleccione <span class="opcion">Automático</span> y haga clic en <span class="boton">Aplicar</span>.</li>
+    <li>Haga clic en <span class="boton">Iniciar</span> y espere a que el estado cambie a «En ejecución». Luego, haga clic en <span class="boton">Aceptar</span>.</li>
+    <li>Vuelva a ejecutar el instalador de WardrobeFlow.</li>
+  </ol>
+  <p>El instalador de WardrobeFlow intenta iniciar el servicio por su cuenta; si no lo logra, normalmente se debe a la falta de permisos (vea el punto siguiente). Si el servicio se detiene apenas se inicia, revise el Visor de eventos de Windows (<code>eventvwr.msc</code> → Registros de Windows → Aplicación) y busque errores de origen «MSSQL$SQLEXPRESS».</p>
+</details>
+
+<details open>
+  <summary>No tiene permisos suficientes (se necesita un administrador)</summary>
+  <ul>
+    <li><strong>Permisos de Windows:</strong> tanto el instalador de SQL Server como el de WardrobeFlow necesitan permisos de administrador. Si Windows le pide una contraseña de administrador y usted no la tiene, solicite ayuda al responsable de sistemas.</li>
+    <li><strong>Permisos dentro de SQL Server:</strong> la cuenta de Windows que instala WardrobeFlow debe ser administradora de la instancia (<code>sysadmin</code>) o, al menos, poder crear bases de datos (rol <code>dbcreator</code>). El instalador lo verifica antes de copiar archivos y le avisa si no se cumple.</li>
+    <li>Si SQL Server lo instaló otra persona, pídale que le asigne el rol <code>dbcreator</code>, o ejecute el instalador de WardrobeFlow con la misma cuenta que instaló SQL Server.</li>
+    <li>Como alternativa, elija la opción <span class="opcion">Instalar SQL Server Express LocalDB</span> en el instalador de WardrobeFlow: LocalDB se instala para su usuario y no necesita permisos sobre el SQL Server existente.</li>
+  </ul>
+</details>
+
+<details open>
+  <summary>Tiene una versión antigua de SQL Server</summary>
+  <p>WardrobeFlow requiere <strong>SQL Server 2012 o posterior</strong>. El instalador de WardrobeFlow muestra la versión de cada instancia detectada, por ejemplo <code>.\SQLEXPRESS (SQL Server 2008)</code>.</p>
+  <ul>
+    <li>Si su instancia es anterior a 2012 (SQL Server 2005, 2008 o 2008 R2), instale SQL Server 2022 Express siguiendo la <a href="#opcion-completa">opción completa</a>. Puede convivir con la versión anterior: si ya existe una instancia llamada SQLEXPRESS, el asistente de Microsoft creará otra con un nombre distinto (por ejemplo, <code>SQLEXPRESS01</code>). Elija esa nueva instancia en el instalador de WardrobeFlow.</li>
+    <li>También puede usar la <a href="#opcion-facil">opción fácil (LocalDB)</a>, que instala SQL Server 2022.</li>
+  </ul>
+</details>
+
+<details open>
+  <summary>Desea conectarse a un SQL Server de otro equipo (servidor remoto)</summary>
+  <p>Al instalar WardrobeFlow, elija <span class="opcion">ingresar manualmente</span> y escriba el nombre del servidor, por ejemplo <code>SERVIDOR\SQLEXPRESS</code> o <code>SERVIDOR</code> (instancia predeterminada). En el <strong>servidor</strong>, el administrador debe comprobar lo siguiente:</p>
+  <ol class="pasos">
+    <li><strong>TCP/IP habilitado:</strong> en el Administrador de configuración de SQL Server (<em>SQL Server Configuration Manager</em>), abra «Configuración de red de SQL Server» → «Protocolos de SQLEXPRESS», haga clic derecho en <strong>TCP/IP</strong> y elija <span class="boton">Habilitar</span>. Después, reinicie el servicio de SQL Server. SQL Server Express trae TCP/IP deshabilitado de forma predeterminada.</li>
+    <li><strong>Puerto y firewall:</strong> la instancia predeterminada usa el puerto TCP <code>1433</code>. Permita ese puerto en el Firewall de Windows del servidor (Firewall de Windows Defender → Configuración avanzada → Reglas de entrada → Nueva regla → Puerto → TCP 1433). Si usa una instancia con nombre, asígnele un puerto fijo en las propiedades de TCP/IP (pestaña «Direcciones IP», sección «IPAll») y permita ese puerto.</li>
+    <li><strong>SQL Server Browser:</strong> para conectarse a una instancia con nombre (por ejemplo, <code>SERVIDOR\SQLEXPRESS</code>) sin indicar el puerto, el servicio <strong>SQL Server Browser</strong> debe estar en ejecución en el servidor y el puerto UDP <code>1434</code> debe estar permitido en el firewall.</li>
+    <li><strong>Acceso de su usuario:</strong> WardrobeFlow se conecta con la autenticación de Windows (su usuario de Windows, sin contraseña adicional). Su cuenta debe tener un inicio de sesión en ese SQL Server con permisos para crear la base (<code>dbcreator</code> o <code>sysadmin</code>). Normalmente esto requiere que ambos equipos pertenezcan al mismo dominio.</li>
+  </ol>
+  <p>El instalador de WardrobeFlow prueba la conexión y los permisos antes de copiar archivos, y le avisa si algo de lo anterior falla.</p>
+</details>
+
+<details open>
+  <summary>Otra cuenta de Windows no ve los datos (LocalDB)</summary>
+  <p>SQL Server LocalDB pertenece al usuario de Windows que lo instaló: su base de datos se guarda en el perfil de ese usuario. Si otra persona inicia sesión en Windows con otra cuenta, verá un LocalDB propio y vacío. Para compartir la base entre varias cuentas de Windows, instale <a href="#opcion-completa">SQL Server 2022 Express</a> y vuelva a ejecutar el instalador de WardrobeFlow eligiendo <code>.\SQLEXPRESS</code>.</p>
+</details>
+
+<details open>
+  <summary>Falló la instalación de SQL Server LocalDB</summary>
+  <ul>
+    <li>Revise el registro <code class="ruta">Documentos\WardrobeFlow_LocalDB_install.log</code> (vea la <a href="#logs">sección 7</a>).</li>
+    <li>Compruebe que tiene permisos de administrador, que hay espacio libre en el disco y que no hay otra instalación de Windows en curso (por ejemplo, Windows Update). Reinicie el equipo y vuelva a intentarlo.</li>
+    <li>Si el problema continúa, instale <a href="#opcion-completa">SQL Server 2022 Express</a> manualmente.</li>
+  </ul>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="logs">7. Dónde están los registros (logs) del instalador</h2>
+<p>Si algo falla, el instalador de WardrobeFlow deja un registro con el detalle técnico. «Documentos» es la carpeta Documentos del usuario de Windows que ejecutó el instalador como administrador.</p>
+<table>
+  <thead><tr><th>Archivo</th><th>Cuándo se genera</th></tr></thead>
+  <tbody>
+    <tr><td><code class="ruta">Documentos\WardrobeFlow_LocalDB_install.log</code></td><td>Al instalar SQL Server LocalDB desde el instalador de WardrobeFlow (registro de Windows Installer).</td></tr>
+    <tr><td><code class="ruta">Documentos\WardrobeFlow_instalacion_fallida.log</code></td><td>Cuando falla la creación de la base en una instalación nueva y el instalador deshace todo (rollback automático).</td></tr>
+    <tr><td><code class="ruta">Documentos\WardrobeFlow_actualizacion_fallida.log</code></td><td>Cuando falla la actualización de una versión anterior (la instalación existente se conserva).</td></tr>
+    <tr><td><code class="ruta">Documentos\WardrobeFlow_desinstalacion.log</code></td><td>Cuando, al desinstalar, no se puede borrar la base de datos.</td></tr>
+    <tr><td><code class="ruta">C:\Program Files\WardrobeFlow\install.log</code><br>(con LocalDB: <code class="ruta">C:\Program Files\WardrobeFlow\Logs\install.log</code>)</td><td>Registro de la creación de la base cuando la instalación terminó bien.</td></tr>
+    <tr><td><code class="ruta">%TEMP%\is-XXXXX.tmp\preflight.log</code></td><td>Verificaciones previas (conexión, servicio y permisos) durante el asistente. Es temporal: se borra al cerrar el instalador, pero su contenido se muestra en los mensajes de error.</td></tr>
+  </tbody>
+</table>
+<div class="caja info">
+  <strong class="titulo">Registro completo del asistente</strong>
+  <p>Para obtener un registro detallado de todo el proceso, ejecute el instalador desde una ventana de símbolo del sistema con el parámetro <code>/LOG</code>, por ejemplo: <code>Instalador_WardrobeFlow_….exe /LOG="%USERPROFILE%\Documents\WardrobeFlow_setup.log"</code></p>
+</div>
+
+<footer>
+  <p>WardrobeFlow · Guía «Cómo instalar SQL Server para WardrobeFlow». Antes de instalar, puede abrirla desde la página «No se encontró SQL Server en este equipo» del instalador, con el botón <span class="boton">Ver tutorial para instalar SQL Server</span>; al abrirla se guarda una copia en <code class="ruta">C:\Users\Public\Documents\WardrobeFlow_Tutorial_SQL_Server.html</code> (Documentos públicos). Después de instalar, queda en la carpeta de WardrobeFlow (<code>Docs\Tutorial_SQL_Server.html</code>) y en el menú Inicio, como «Cómo instalar SQL Server».</p>
+</footer>
+
+</main>
+</body>
+</html>

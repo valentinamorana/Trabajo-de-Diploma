@@ -80,5 +80,27 @@ namespace Tests
 
             Assert.AreEqual(esperada, bll.ObtenerFechaBackup("cualquiera.wfbak"));
         }
+
+        // "Restablecer datos de demo" corre backup previo + carga + verificación en un solo bloqueo
+        // (BLL.Backup.RestablecerDemoConResguardo). Sin Administrador no se hace NADA: ni el backup ni
+        // la carga. El camino completo se prueba de punta a punta contra la base real.
+        [TestMethod]
+        public void RestablecerDemoConResguardo_SinAdministrador_NoBackupeaNiRestablece()
+        {
+            bool restablecio = false;
+            var bll = new BLL.Backup(new FakeBackupDAL());
+            try
+            {
+                Seguridad.SessionManager.Logout();
+                try { bll.RestablecerDemoConResguardo("Test", () => restablecio = true); Assert.Fail(); }
+                catch (BE.AppException ex) { Assert.AreEqual("err.bll.sesion_expirada", ex.Clave); }
+
+                Seguridad.SessionManager.Login(new BE.Usuario { Id = 2, Username = "vend", Perfil = "Vendedor" });
+                try { bll.RestablecerDemoConResguardo("Test", () => restablecio = true); Assert.Fail(); }
+                catch (BE.AppException ex) { Assert.AreEqual("err.bll.backup.sin_permiso", ex.Clave); }
+                Assert.IsFalse(restablecio);
+            }
+            finally { Seguridad.SessionManager.Logout(); }
+        }
     }
 }

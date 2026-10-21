@@ -3726,6 +3726,216 @@ PRINT 'Sección 20n: unicidad de DNI, legajo y usuario del empleado verificada.'
 GO
 
 -- ============================================================
+-- WardrobeFlow — 20o. PN03: INTELIGENCIA COMERCIAL — CENTRO DE DECISIONES COMERCIALES
+-- ------------------------------------------------------------
+-- PN03 pasa a ser «Inteligencia comercial y promociones»: analizar → recomendar/decidir →
+-- simular → aplicar promoción → medir resultado (GUI.CentroDecisionesForm, BLL.Inteligencia).
+--   · Tabla DecisionComercial: lo que Gerencia decidió sobre cada recomendación del motor de
+--     reglas (BLL.Inteligencia.MotorRecomendaciones). Estado (BE.EstadoDecision): 0=Pendiente,
+--     1=Aceptada, 2=Descartada (motivo obligatorio), 3=Pospuesta (con PospuestaHasta),
+--     4=Ejecutada. Prioridad (BE.PrioridadRecomendacion): 0=Alta, 1=Media, 2=Baja.
+--     AccionElegida: la opción elegida (EsAlternativa = 1 si no fue la principal).
+--     TipoReferencia/Referencia: lo que generó la decisión (Sugerencia, Promocion o
+--     SolicitudBaja + su ID). FechaEvaluacion/ResultadoReal: el resultado real medido o cargado,
+--     que se compara con ImpactoEstimado (cierre del ciclo). No lleva dígito verificador (como
+--     SugerenciaPromocion); cada cambio de estado es un claim atómico en DAL.DecisionComercial.
+--   · ParametroSistema "Comercial.*": umbrales del motor (BLL.Inteligencia.CatalogoUmbrales), con
+--     sus valores de fábrica. Solo se agregan los que faltan: un valor editado por Gerencia
+--     desde el diálogo "Umbrales" no se pisa.
+--   · Permisos: sin patente nueva. El Centro de decisiones lo gobierna mnuSugerenciaPromocion
+--     (Gerencia: GerenteComercial y Administrador), la misma patente que "Sugerir promoción".
+--     Se mapea el ítem de menú nuevo en ControlMapeado (pantalla Perfiles y Permisos).
+--   · Textos: la ayuda de Analítica de Negocio decía "PDF (vista previa)", pero el PDF se guarda
+--     y se abre (no hay vista previa). Se corrige solo esa frase (REPLACE: no pisa otras
+--     ediciones). Las claves nuevas las carga la aplicación desde traducciones.tsv.
+-- Idempotente: en una base ya migrada no cambia nada.
+-- ============================================================
+IF OBJECT_ID('DecisionComercial', 'U') IS NULL
+BEGIN
+    CREATE TABLE DecisionComercial (
+        IdDecision         INT            IDENTITY(1,1) NOT NULL CONSTRAINT PK_DecisionComercial PRIMARY KEY,
+        Fecha              DATETIME       NOT NULL CONSTRAINT DF_DecisionComercial_Fecha DEFAULT GETDATE(),
+        IdUsuario          INT            NOT NULL CONSTRAINT FK_DecisionComercial_Usuario REFERENCES Usuario(IdUsuario),
+        TipoRegla          NVARCHAR(50)   NOT NULL,
+        ClaveRecomendacion NVARCHAR(100)  NOT NULL,
+        Prioridad          INT            NOT NULL CONSTRAINT CHK_DecisionComercial_Prioridad CHECK (Prioridad IN (0,1,2)),
+        Titulo             NVARCHAR(300)  NOT NULL,
+        Diagnostico        NVARCHAR(1000) NULL,
+        AccionElegida      NVARCHAR(500)  NULL,
+        EsAlternativa      BIT            NOT NULL CONSTRAINT DF_DecisionComercial_EsAlternativa DEFAULT 0,
+        ImpactoEstimado    DECIMAL(14,2)  NOT NULL CONSTRAINT DF_DecisionComercial_Impacto DEFAULT 0,
+        Estado             INT            NOT NULL CONSTRAINT CHK_DecisionComercial_Estado CHECK (Estado IN (0,1,2,3,4)),
+        Motivo             NVARCHAR(500)  NULL,
+        TipoReferencia     NVARCHAR(30)   NULL,
+        Referencia         INT            NULL,
+        PospuestaHasta     DATE           NULL,
+        FechaEvaluacion    DATETIME       NULL,
+        ResultadoReal      DECIMAL(14,2)  NULL,
+        -- Descartar exige motivo; posponer exige la fecha hasta la que se pospone (y solo entonces).
+        CONSTRAINT CHK_DecisionComercial_Descarte  CHECK (Estado <> 2 OR Motivo IS NOT NULL),
+        CONSTRAINT CHK_DecisionComercial_Pospuesta CHECK ((Estado = 3 AND PospuestaHasta IS NOT NULL) OR (Estado <> 3 AND PospuestaHasta IS NULL)),
+        CONSTRAINT CHK_DecisionComercial_Referencia CHECK ((TipoReferencia IS NULL AND Referencia IS NULL) OR (TipoReferencia IS NOT NULL AND Referencia IS NOT NULL)),
+        CONSTRAINT CHK_DecisionComercial_TipoReferencia CHECK (TipoReferencia IS NULL OR TipoReferencia IN (N'Sugerencia', N'Promocion', N'SolicitudBaja'))
+    );
+    PRINT 'Tabla DecisionComercial creada.';
+END
+GO
+IF OBJECT_ID('DecisionComercial', 'U') IS NOT NULL
+   AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_DecisionComercial_Clave' AND object_id = OBJECT_ID('DecisionComercial'))
+    CREATE NONCLUSTERED INDEX IX_DecisionComercial_Clave ON DecisionComercial(ClaveRecomendacion, Fecha DESC);
+GO
+IF OBJECT_ID('DecisionComercial', 'U') IS NOT NULL
+   AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_DecisionComercial_Fecha' AND object_id = OBJECT_ID('DecisionComercial'))
+    CREATE NONCLUSTERED INDEX IX_DecisionComercial_Fecha ON DecisionComercial(Fecha);
+GO
+
+-- Umbrales del motor de recomendaciones (valores de fábrica; ver BLL.Inteligencia.CatalogoUmbrales).
+IF OBJECT_ID('ParametroSistema', 'U') IS NOT NULL
+BEGIN
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha)
+    SELECT v.Clave, v.Valor, GETDATE()
+    FROM (VALUES
+        (N'Comercial.ChurnAltoPct', N'5'),             (N'Comercial.SubidaChurnPp', N'2'),
+        (N'Comercial.DescuentoBasePct', N'10'),        (N'Comercial.DescuentoMaximoPct', N'30'),
+        (N'Comercial.TasaRetencionDefecto', N'30'),    (N'Comercial.HorizonteMeses', N'6'),
+        (N'Comercial.RoiMinimoPct', N'20'),            (N'Comercial.MargenSeguridadPp', N'10'),
+        (N'Comercial.DiasPorVencer', N'7'),            (N'Comercial.TasaRecuperoCobroPct', N'60'),
+        (N'Comercial.EscasezMinimo', N'3'),            (N'Comercial.DemandaEscasez', N'2'),
+        (N'Comercial.DiasSinRotacion', N'60'),         (N'Comercial.MinPrendasLiquidar', N'3'),
+        (N'Comercial.RecuperoLiquidacionPct', N'40'),  (N'Comercial.RendimientoMinimoPct', N'50'),
+        (N'Comercial.DiasMinimosEvaluacion', N'14'),   (N'Comercial.DiasAvisoVencimientoPromo', N'15'),
+        (N'Comercial.ConversionUpgradePct', N'20'),    (N'Comercial.DiasSilencioDescarte', N'30')
+    ) AS v(Clave, Valor)
+    WHERE NOT EXISTS (SELECT 1 FROM ParametroSistema p WHERE p.Clave = v.Clave);
+    DECLARE @umbrales INT = @@ROWCOUNT;
+    IF @umbrales > 0 PRINT CONCAT('Centro de decisiones: umbrales comerciales sembrados: ', @umbrales, '.');
+END
+GO
+
+-- Ítem de menú del Centro de decisiones → patente de Gerencia (Perfiles y Permisos lo muestra mapeado).
+IF OBJECT_ID('ControlMapeado', 'U') IS NOT NULL
+BEGIN
+    INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
+    SELECT ISNULL(MIN(CASE WHEN p.Estado = 1 THEN p.IdPermiso END), MIN(p.IdPermiso)), N'Menu', N'centroDecisionesToolStripMenuItem'
+    FROM Permiso p
+    WHERE p.NombreMenu = 'mnuSugerenciaPromocion' AND ISNULL(p.EsFamilia, 0) = 0 AND ISNULL(p.EsRol, 0) = 0
+      AND NOT EXISTS (SELECT 1 FROM ControlMapeado c WHERE c.Formulario = N'Menu' AND c.NombreControl = N'centroDecisionesToolStripMenuItem')
+    HAVING COUNT(*) > 0;
+END
+GO
+
+-- Ayuda de Analítica de Negocio: el PDF no tiene vista previa (se guarda y se abre).
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @FrasesPdf TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Anterior NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                              Nueva NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @FrasesPdf (Codigo, Anterior, Nueva) VALUES
+        (N'ES', N'Exportar a PDF (vista previa)', N'Exportar a PDF (se guarda y se abre)'),
+        (N'EN', N'Export to PDF (preview)', N'Export to PDF (saved and opened)'),
+        (N'RU', N'«Экспорт в PDF» (предпросмотр)', N'«Экспорт в PDF» (файл сохраняется и открывается)'),
+        (N'PT', N'Exportar para PDF (pré-visualização)', N'Exportar para PDF (salvo e aberto)');
+    UPDATE t SET t.Texto = REPLACE(t.Texto, f.Anterior, f.Nueva)
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @FrasesPdf f ON f.Codigo = i.Codigo
+    WHERE c.Clave = N'ayuda.AnaliticaNegocioForm'
+      AND CHARINDEX(f.Anterior COLLATE Latin1_General_BIN2, t.Texto COLLATE Latin1_General_BIN2) > 0;
+    DECLARE @ayudas INT = @@ROWCOUNT;
+    IF @ayudas > 0 PRINT CONCAT('Ayuda de Analítica de Negocio corregida (PDF sin vista previa): ', @ayudas, ' idioma(s).');
+END
+GO
+PRINT 'Sección 20o: Centro de decisiones comerciales (PN03) verificado.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 20p. PN03: METAS COMERCIALES, DETALLE DE LAS DECISIONES Y REGLAS RETIRADAS
+-- ------------------------------------------------------------
+--   · Tabla MetaComercial: el objetivo mensual de Gerencia por indicador (BLL.Inteligencia.MetasComerciales).
+--     Periodo = primer día del mes. Indicador (BE.IndicadorMeta): 0=MRR ($), 1=% de bajas, 2=ocupación
+--     del stock (%); el catálogo admite más (BLL.Inteligencia.CatalogoIndicadores). Sentido
+--     (BE.SentidoMeta): 0=mayor es mejor, 1=menor es mejor. Una meta por indicador y mes
+--     (UQ_MetaComercial_PeriodoIndicador). Sin dígito verificador, como DecisionComercial.
+--   · Tabla DecisionComercialDetalle: qué tocó una decisión ejecutada (Tipo 'Cliente' = clientes
+--     contactados en una campaña, para medir cuántos renovaron; 'Prenda' = prendas dadas de baja o
+--     mandadas a revisión). Se borra con su decisión (ON DELETE CASCADE).
+--   · Umbrales de las reglas retiradas del motor (Desempeño de vendedores y Ocupación del stock: solo
+--     registraban la decisión, sin operación que ejecutar): se borran de ParametroSistema.
+--   · Permisos: sin patente nueva; las metas las edita Gerencia con mnuSugerenciaPromocion (como los
+--     umbrales del motor).
+-- Idempotente: en una base ya migrada no cambia nada.
+-- ============================================================
+IF OBJECT_ID('MetaComercial', 'U') IS NULL
+BEGIN
+    CREATE TABLE MetaComercial (
+        IdMeta        INT           IDENTITY(1,1) NOT NULL CONSTRAINT PK_MetaComercial PRIMARY KEY,
+        Periodo       DATE          NOT NULL,
+        Indicador     INT           NOT NULL,
+        ValorObjetivo DECIMAL(14,2) NOT NULL,
+        Sentido       INT           NOT NULL,
+        IdUsuario     INT           NOT NULL CONSTRAINT FK_MetaComercial_Usuario REFERENCES Usuario(IdUsuario),
+        Fecha         DATETIME      NOT NULL CONSTRAINT DF_MetaComercial_Fecha DEFAULT GETDATE(),
+        CONSTRAINT UQ_MetaComercial_PeriodoIndicador UNIQUE (Periodo, Indicador),
+        CONSTRAINT CHK_MetaComercial_Periodo   CHECK (DAY(Periodo) = 1),
+        CONSTRAINT CHK_MetaComercial_Indicador CHECK (Indicador >= 0),
+        CONSTRAINT CHK_MetaComercial_Sentido   CHECK (Sentido IN (0, 1)),
+        CONSTRAINT CHK_MetaComercial_Valor     CHECK (ValorObjetivo >= 0)
+    );
+    PRINT 'Tabla MetaComercial creada.';
+END
+GO
+
+IF OBJECT_ID('DecisionComercialDetalle', 'U') IS NULL AND OBJECT_ID('DecisionComercial', 'U') IS NOT NULL
+BEGIN
+    CREATE TABLE DecisionComercialDetalle (
+        IdDecision INT          NOT NULL CONSTRAINT FK_DecisionComercialDetalle_Decision
+                                REFERENCES DecisionComercial(IdDecision) ON DELETE CASCADE,
+        Tipo       NVARCHAR(20) NOT NULL CONSTRAINT CHK_DecisionComercialDetalle_Tipo CHECK (Tipo IN (N'Cliente', N'Prenda')),
+        IdObjeto   INT          NOT NULL,
+        CONSTRAINT PK_DecisionComercialDetalle PRIMARY KEY (IdDecision, Tipo, IdObjeto)
+    );
+    PRINT 'Tabla DecisionComercialDetalle creada.';
+END
+GO
+
+-- Fecha de ejecución de la decisión: desde cuándo rige y desde cuándo se mide su resultado (una
+-- decisión pospuesta 90 días y ejecutada hoy rige desde hoy, no desde que se creó).
+IF OBJECT_ID('DecisionComercial', 'U') IS NOT NULL AND COL_LENGTH('DecisionComercial', 'FechaEjecucion') IS NULL
+BEGIN
+    ALTER TABLE DecisionComercial ADD FechaEjecucion DATETIME NULL;
+    PRINT 'Columna DecisionComercial.FechaEjecucion agregada.';
+END
+GO
+
+-- Una sola decisión abierta (Aceptada = 1 o Pospuesta = 3) por recomendación. Lo valida la BLL; el índice
+-- filtrado lo respalda. Si una base vieja ya tuviera dos abiertas para la misma clave, no se crea (y se avisa).
+IF OBJECT_ID('DecisionComercial', 'U') IS NOT NULL
+   AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_DecisionComercial_Abierta' AND object_id = OBJECT_ID('DecisionComercial'))
+BEGIN
+    IF EXISTS (SELECT ClaveRecomendacion FROM DecisionComercial WHERE Estado IN (1, 3) GROUP BY ClaveRecomendacion HAVING COUNT(*) > 1)
+        PRINT 'AVISO: hay recomendaciones con más de una decisión abierta; no se crea UX_DecisionComercial_Abierta.';
+    ELSE
+    BEGIN
+        CREATE UNIQUE NONCLUSTERED INDEX UX_DecisionComercial_Abierta ON DecisionComercial(ClaveRecomendacion) WHERE Estado IN (1, 3);
+        PRINT 'Índice UX_DecisionComercial_Abierta creado.';
+    END
+END
+GO
+
+-- Umbrales de las reglas retiradas (ReglaVendedores y ReglaOcupacionStock).
+IF OBJECT_ID('ParametroSistema', 'U') IS NOT NULL
+BEGIN
+    DELETE FROM ParametroSistema
+    WHERE Clave IN (N'Comercial.ConcentracionVendedorPct', N'Comercial.BajoPromedioVendedorPct',
+                    N'Comercial.OcupacionMinimaPct', N'Comercial.OcupacionMaximaPct');
+    IF @@ROWCOUNT > 0 PRINT 'Umbrales de las reglas retiradas (vendedores, ocupación) borrados.';
+END
+GO
+
+PRINT 'Sección 20p: metas comerciales y detalle de las decisiones (PN03) verificados.';
+GO
+
+-- ============================================================
 -- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
 -- ------------------------------------------------------------
 -- Despachar, registrar la entrega y registrar la devolución (que abre PN04) se hacen desde Pedidos
@@ -3902,35 +4112,17 @@ PRINT 'Permiso mnuListaEsperaEditar asignado a Administrador, Vendedor y Deposit
 GO
 
 -- ============================================================
--- WardrobeFlow — 21e. DATOS DE DEMO: ESCENARIOS DE PN01, PN02 Y PN03
+-- WardrobeFlow — 21e. DATOS DE DEMO: ¿CORRESPONDE CARGARLOS?
 -- ------------------------------------------------------------
--- Escenarios listos para mostrar cada proceso de negocio. El APELLIDO de cada cliente y el
--- NOMBRE de cada promoción dicen qué rama del diagrama de actividad muestran:
---   PN01 Armar pedido (vendedor + deposito)
---     Juan PedidoFeliz ............ suscripción vigente, sin pedidos: camino feliz completo
---     Ana PrendasNoDisponibles .... pedido En control de stock con una prenda que ya tiene otro
---                                   cliente → Depósito informa faltantes con alternativas
---     Nicolas ExcedeCupo .......... plan Básico (5 prendas): elegir 6 → exceso de cupo / desistir
---     Sofia ListaParaFormalizar ... pedido Separado → el Vendedor lo formaliza
---     Pedro PedidoActivo .......... ya tiene un pedido formalizado → aviso de pedido activo
---     Lucia SuscripcionVencida .... vencida → aviso de suscripción no vigente
---     Tomas SuscripcionPausada .... pausada → aviso de suscripción no vigente
---   PN02 Comercialización de la suscripción (vendedor + caja)
---     Laura SinPlan ............... registrada sin plan → contratar
---     Rocio ReferidaPorJuan ....... sin plan, referida por Juan → al cobrar se acredita el beneficio
---     Diego PagoPendiente ......... contratación Estándar trimestral esperando a Caja
---                                   (tiene la promoción vigente del plan Estándar)
---     Elena TercerIntentoFallido .. contratación con 2 intentos fallidos → el 3.º la cancela
---     (DNI 40000099: no existe → rama "¿Registrado? No")
---   PN03 Promociones (gcomercial, admcomercial, contable, vendedor)
---     2 sugerencias pendientes (por plan), y promociones En revisión contable, Vigente, Rechazada
---     por Contabilidad y Vigente con una solicitud de baja pendiente.
--- Se carga UNA sola vez: en una instalación NUEVA, o cuando se pidió restablecer la demo con
--- BD/Reset_Datos_Demo.sql (marca ParametroSistema 'ResetDatosDemo' = '1'). En ese caso primero se
--- BORRAN los datos de negocio (clientes, prendas, pedidos, contrataciones, promociones y la
--- bitácora de negocio); usuarios, planes, permisos, traducciones y bitácora del sistema se conservan.
+-- Los datos de demo (escenarios de PN01–PN04 y 6 meses de historia para la analítica) los carga
+-- el procedimiento dbo.RestablecerDatosDemo, que se crea más abajo (sección 21z3b: necesita las
+-- columnas que agregan las secciones 21z y 21z3). Acá solo se DECIDE si corresponde cargarlos y se
+-- deja la marca ParametroSistema 'DemoCargaPendiente' = '1'; la sección 21z3b la atiende.
+-- Corresponde UNA sola vez: en una instalación NUEVA, o cuando se pidió restablecer la demo con
+-- BD/Reset_Datos_Demo.sql (marca 'ResetDatosDemo' = '1'). La app también puede restablecerla en
+-- cualquier momento (Administración → Backup → "Restablecer datos de demo"), con backup previo.
 -- Nunca se mezclan con datos reales: con datos propios y sin pedido de restablecer, no hace nada.
--- DVH = 0: se pide el recálculo de los dígitos verificadores (la app los calcula al arrancar).
+-- El detalle de cada escenario está en la sección 21z3b y en Instalador/Credenciales_Iniciales.txt.
 -- ============================================================
 DECLARE @sembrar21 BIT = 0;
 DECLARE @reset21   BIT = CASE WHEN EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'ResetDatosDemo' AND Valor = N'1') THEN 1 ELSE 0 END;
@@ -3956,282 +4148,12 @@ ELSE
 
 IF @sembrar21 = 1
 BEGIN
-    SET XACT_ABORT ON;   -- ante cualquier error se revierte todo el bloque
-    BEGIN TRANSACTION;
-
-    -- ── Se borran los datos de negocio (en una instalación nueva: los ejemplos de la sección 01) ──
-    DELETE FROM PedidoFaltanteAlternativa;
-    DELETE FROM PedidoFaltante;
-    DELETE FROM PedidoHistorial;
-    DELETE FROM PedidoPrenda;
-    DELETE FROM BitacoraNegocio;
-    DELETE FROM CargoPrenda;
-    DELETE FROM ListaEspera;
-    DELETE FROM MantenimientoPrenda;
-    DELETE FROM ContratacionIntentoPago;
-    DELETE FROM Contratacion;
-    DELETE FROM DesistimientoContratacion;
-    DELETE FROM HistorialCobro;
-    DELETE FROM HistorialRenovacion;
-    DELETE FROM PromocionHistorial;
-    DELETE FROM DictamenContable;
-    DELETE FROM SolicitudBajaPromocion;
-    DELETE FROM Promocion;
-    DELETE FROM SugerenciaPromocion;
-    DELETE FROM Pedido;
-    DELETE FROM Prenda;
-    UPDATE Cliente SET IdClienteReferente = NULL;
-    DELETE FROM Cliente;
-
-    -- ── Empleados de Caja y Administrador (Vendedor y Depósito vienen de la sección 01) ──
-    INSERT INTO Empleado (Nombre, Apellido, DNI, Email, FechaIngreso, Puesto, Legajo, IdUsuario, DVH)
-    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, GETDATE(), v.Puesto, v.Legajo,
-           (SELECT TOP 1 IdUsuario FROM Usuario u WHERE u.Username = v.Username), 0
-    FROM (VALUES
-        (N'Carolina', N'Ibáñez',  '34555666', 'caja@wardrobeflow.com',  N'Caja',          'L-003', 'caja'),
-        (N'Admin',    N'Sistema', '30000001', 'admin@wardrobeflow.com', N'Administrador', 'L-004', 'admin')
-    ) AS v(Nombre, Apellido, DNI, Email, Puesto, Legajo, Username)
-    WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo);
-
-    DECLARE @vend INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-001');
-    DECLARE @depo INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-002');
-    DECLARE @caja INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-003');
-    IF @vend IS NULL OR @depo IS NULL
-        PRINT 'AVISO: faltan los empleados L-001 (vendedor) o L-002 (deposito); no se cargan los pedidos ni las contrataciones de demo.';
-    DECLARE @hoy  DATE = CAST(GETDATE() AS DATE);
-    DECLARE @pBasico  INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Básico'   AND Estado = 1);
-    DECLARE @pEstand  INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Estándar' AND Estado = 1);
-    DECLARE @pPremium INT = (SELECT TOP 1 IdPlan FROM PlanSuscripcion WHERE Nombre = N'Premium'  AND Estado = 1);
-    -- «Tarjeta de débito» es el Id 2 o el 5 según la base (sección 20c2): se busca por su clave.
-    DECLARE @mDebito  INT = (SELECT TOP 1 IdMedioPago FROM MedioPago WHERE ClaveTraduccion = 'medio.tarjeta_debito' AND Activo = 1);
-
-    -- ── Clientes: el apellido dice qué escenario muestran ────────────────────
-    INSERT INTO Cliente (Nombre, Apellido, DNI, Email, IdMedioPagoPreferido, IdPlan, FechaAlta, FechaNacimiento,
-                         FechaVencimiento, FechaPausaHasta, Activo, DVH)
-    SELECT v.Nombre, v.Apellido, v.DNI, v.Email,
-           (SELECT TOP 1 mp.IdMedioPago FROM MedioPago mp WHERE mp.ClaveTraduccion = v.ClaveMedio AND mp.Activo = 1), v.IdPlan,
-           DATEADD(DAY, -v.DiasAlta, GETDATE()), v.FechaNac,
-           CASE WHEN v.DiasVence IS NULL THEN NULL ELSE DATEADD(DAY, v.DiasVence, @hoy) END,
-           CASE WHEN v.DiasPausa IS NULL THEN NULL ELSE DATEADD(DAY, v.DiasPausa, GETDATE()) END,
-           1, 0
-    FROM (VALUES
-        -- PN01
-        (N'Juan',    N'PedidoFeliz',          '40000001', 'juan.pedidofeliz@demo.com',          'medio.tarjeta_credito', @pPremium, 120, CONVERT(date,'1990-03-12'),   30, NULL),
-        (N'Ana',     N'PrendasNoDisponibles', '40000002', 'ana.prendasnodisponibles@demo.com',  'medio.tarjeta_debito',  @pEstand,   90, CONVERT(date,'1992-07-21'),   25, NULL),
-        (N'Nicolas', N'ExcedeCupo',           '40000003', 'nicolas.excedecupo@demo.com',        'medio.tarjeta_debito',  @pBasico,   60, CONVERT(date,'1997-04-14'),   20, NULL),
-        (N'Sofia',   N'ListaParaFormalizar',  '40000004', 'sofia.listaparaformalizar@demo.com', 'medio.tarjeta_credito', @pPremium,  75, CONVERT(date,'1994-11-02'),   28, NULL),
-        (N'Pedro',   N'PedidoActivo',         '40000005', 'pedro.pedidoactivo@demo.com',        'medio.transferencia',   @pEstand,  150, CONVERT(date,'1988-02-09'),   15, NULL),
-        (N'Lucia',   N'SuscripcionVencida',   '40000006', 'lucia.suscripcionvencida@demo.com',  'medio.tarjeta_credito', @pEstand,  200, CONVERT(date,'1991-09-30'),  -10, NULL),
-        (N'Tomas',   N'SuscripcionPausada',   '40000007', 'tomas.suscripcionpausada@demo.com',  'medio.tarjeta_debito',  @pBasico,  100, CONVERT(date,'1995-09-03'),   40,   20),
-        -- PN02
-        (N'Laura',   N'SinPlan',              '40000008', 'laura.sinplan@demo.com',             'medio.efectivo',        NULL,        3, CONVERT(date,'1999-12-21'), NULL, NULL),
-        (N'Rocio',   N'ReferidaPorJuan',      '40000009', 'rocio.referidaporjuan@demo.com',     'medio.efectivo',        NULL,        1, CONVERT(date,'2000-06-15'), NULL, NULL),
-        (N'Diego',   N'PagoPendiente',        '40000010', 'diego.pagopendiente@demo.com',       'medio.transferencia',   NULL,        2, CONVERT(date,'1993-08-27'), NULL, NULL),
-        (N'Elena',   N'TercerIntentoFallido', '40000011', 'elena.tercerintentofallido@demo.com', 'medio.tarjeta_credito',NULL,        4, CONVERT(date,'1996-01-19'), NULL, NULL)
-    ) AS v(Nombre, Apellido, DNI, Email, ClaveMedio, IdPlan, DiasAlta, FechaNac, DiasVence, DiasPausa);
-
-    DECLARE @cJuan   INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000001');
-    DECLARE @cAna    INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000002');
-    DECLARE @cSofia  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000004');
-    DECLARE @cPedro  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000005');
-    DECLARE @cLucia  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000006');
-    DECLARE @cRocio  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000009');
-    DECLARE @cDiego  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000010');
-    DECLARE @cElena  INT = (SELECT IdCliente FROM Cliente WHERE DNI = '40000011');
-    UPDATE Cliente SET IdClienteReferente = @cJuan WHERE IdCliente = @cRocio;   -- Rocío llegó por Juan
-
-    -- ── Prendas: por cada categoría y talle hay varias, para que existan alternativas ──
-    INSERT INTO Prenda (Nombre, Descripcion, Talle, Color, Categoria, Estado, IdClienteActual, IdUltimoCliente, PrecioReposicion, FechaAlta)
-    SELECT v.Nombre, v.Descripcion, v.Talle, v.Color, v.Categoria, v.Estado, v.Cli, v.Cli, v.Precio, DATEADD(DAY, -100, GETDATE())
-    FROM (VALUES
-        (N'Vestido Azul M',       N'Vestido midi de gasa',        'M',  N'Azul',    N'Vestido',  0, NULL,    42000.00),
-        (N'Vestido Verde M',      N'Vestido midi de gasa',        'M',  N'Verde',   N'Vestido',  0, NULL,    42000.00),
-        (N'Vestido Negro M',      N'Vestido largo de noche',      'M',  N'Negro',   N'Vestido',  0, NULL,    48000.00),
-        (N'Vestido Rojo S',       N'Vestido corto de fiesta',     'S',  N'Rojo',    N'Vestido',  1, @cSofia, 45000.00),
-        (N'Falda Plisada S',      N'Falda midi plisada',          'S',  N'Beige',   N'Falda',    1, @cSofia, 20000.00),
-        (N'Saco Negro M',         N'Blazer de vestir',            'M',  N'Negro',   N'Saco',     1, @cPedro, 38000.00),
-        (N'Saco Gris M',          N'Blazer de vestir',            'M',  N'Gris',    N'Saco',     0, NULL,    38000.00),
-        (N'Saco Beige M',         N'Blazer de lino',              'M',  N'Beige',   N'Saco',     0, NULL,    36000.00),
-        (N'Camisa Blanca S',      N'Camisa de algodón',           'S',  N'Blanco',  N'Camisa',   0, NULL,    18000.00),
-        (N'Camisa Celeste S',     N'Camisa de algodón',           'S',  N'Celeste', N'Camisa',   0, NULL,    18000.00),
-        (N'Camisa Rayada S',      N'Camisa de viscosa',           'S',  N'Rayado',  N'Camisa',   0, NULL,    19000.00),
-        (N'Pantalon Negro 40',    N'Pantalón sastrero',           '40', N'Negro',   N'Pantalón', 0, NULL,    24000.00),
-        (N'Pantalon Beige 40',    N'Pantalón de lino',            '40', N'Beige',   N'Pantalón', 0, NULL,    26000.00),
-        (N'Tapado Camel L',       N'Tapado de paño',              'L',  N'Camel',   N'Abrigo',   0, NULL,    55000.00),
-        (N'Campera Cuero L',      N'Campera biker de cuero',      'L',  N'Negro',   N'Abrigo',   0, NULL,    60000.00),
-        (N'Sweater Gris M',       N'Sweater de lana',             'M',  N'Gris',    N'Sweater',  0, NULL,    22000.00),
-        (N'Sweater Bordo M',      N'Sweater de lana',             'M',  N'Bordó',   N'Sweater',  0, NULL,    22000.00),
-        (N'Blazer Azul M',        N'Blazer cruzado (en limpieza)', 'M', N'Azul',    N'Saco',     2, NULL,    38000.00)
-    ) AS v(Nombre, Descripcion, Talle, Color, Categoria, Estado, Cli, Precio);
-
-    -- La prenda en limpieza tiene su mantenimiento abierto (pantalla de Inspección).
-    INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, FechaSalida, Actor)
-    SELECT IdPrenda, DATEADD(DAY, -1, GETDATE()), NULL, 'deposito' FROM Prenda WHERE Nombre = N'Blazer Azul M';
-
-    DECLARE @pzVestAzul  INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Vestido Azul M');
-    DECLARE @pzVestRojo  INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Vestido Rojo S');
-    DECLARE @pzFalda     INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Falda Plisada S');
-    DECLARE @pzSacoNegro INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Saco Negro M');
-    DECLARE @pzCamisa    INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Camisa Blanca S');
-    DECLARE @pzTapado    INT = (SELECT IdPrenda FROM Prenda WHERE Nombre = N'Tapado Camel L');
-    DECLARE @idp INT;
-
-    IF @vend IS NOT NULL AND @depo IS NOT NULL
-    BEGIN
-        -- ── PN01: Pedro ya tiene un pedido FORMALIZADO (Pendiente de despacho) → "pedido activo" ──
-        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, FechaControl, IdEmpleadoControl,
-                            FechaSeparacion, FechaFormalizacion, DVH)
-        VALUES (@cPedro, @vend, 0, DATEADD(DAY, -3, GETDATE()), DATEADD(DAY, -3, GETDATE()), DATEADD(DAY, -2, GETDATE()), @depo,
-                DATEADD(DAY, -2, GETDATE()), DATEADD(DAY, -1, GETDATE()), 0);
-        SET @idp = SCOPE_IDENTITY();
-        INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@idp, @pzSacoNegro, 1);
-
-        -- ── PN01: Sofía tiene un pedido SEPARADO (prendas ya En uso) → el Vendedor lo formaliza ──
-        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, FechaControl, IdEmpleadoControl,
-                            FechaSeparacion, DVH)
-        VALUES (@cSofia, @vend, 6, DATEADD(HOUR, -6, GETDATE()), DATEADD(HOUR, -6, GETDATE()), DATEADD(HOUR, -2, GETDATE()), @depo,
-                DATEADD(HOUR, -2, GETDATE()), 0);
-        SET @idp = SCOPE_IDENTITY();
-        INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@idp, @pzVestRojo, 1), (@idp, @pzFalda, 1);
-
-        -- ── PN01: Ana tiene un pedido EN CONTROL DE STOCK con el "Saco Negro M", que ya tiene Pedro ──
-        --    Depósito lo ve como no disponible → Informar faltantes (alternativas: Saco Gris M y Saco Beige M).
-        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, DVH)
-        VALUES (@cAna, @vend, 4, DATEADD(HOUR, -1, GETDATE()), DATEADD(HOUR, -1, GETDATE()), 0);
-        SET @idp = SCOPE_IDENTITY();
-        INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@idp, @pzVestAzul, 0), (@idp, @pzSacoNegro, 0);
-
-        -- ── Historial entregado (para que las métricas de PN03 tengan datos) ──
-        DECLARE @hist TABLE (Cli INT, Dias INT, Prenda INT);
-        INSERT INTO @hist VALUES (@cJuan, 60, @pzCamisa), (@cJuan, 30, @pzTapado), (@cLucia, 50, @pzVestAzul),
-                                 (@cPedro, 90, @pzCamisa), (@cLucia, 80, @pzTapado);
-        DECLARE @cli INT, @dias INT, @pz INT;
-        DECLARE curHist CURSOR LOCAL FAST_FORWARD FOR SELECT Cli, Dias, Prenda FROM @hist WHERE Cli IS NOT NULL AND Prenda IS NOT NULL;
-        OPEN curHist;
-        FETCH NEXT FROM curHist INTO @cli, @dias, @pz;
-        WHILE @@FETCH_STATUS = 0
-        BEGIN
-            INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, FechaControl, IdEmpleadoControl,
-                                FechaSeparacion, FechaFormalizacion, FechaDespacho, FechaEntrega, DVH)
-            VALUES (@cli, @vend, 2, DATEADD(DAY, -@dias, GETDATE()), DATEADD(DAY, -@dias, GETDATE()),
-                    DATEADD(DAY, -@dias, GETDATE()), @depo, DATEADD(DAY, -@dias, GETDATE()), DATEADD(DAY, -@dias, GETDATE()),
-                    DATEADD(DAY, -@dias + 1, GETDATE()), DATEADD(DAY, -@dias + 2, GETDATE()), 0);
-            SET @idp = SCOPE_IDENTITY();
-            INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada) VALUES (@idp, @pz, 1);
-            FETCH NEXT FROM curHist INTO @cli, @dias, @pz;
-        END
-        CLOSE curHist;
-        DEALLOCATE curHist;
-    END
-
-    -- ── PN02: contrataciones ─────────────────────────────────────────────────
-    IF @vend IS NOT NULL
-    BEGIN
-        -- Juan: su suscripción vino de una contratación ya cobrada (vista "Resueltas" de Caja).
-        INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion,
-                                  IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado,
-                                  VigenciaDesde, VigenciaHasta, PrecioMensual)
-        SELECT @cJuan, pl.IdPlan, @vend, @caja, 0, 1, DATEADD(DAY, -120, GETDATE()), DATEADD(DAY, -120, GETDATE()),
-               @mDebito, 'CMP-0001-' + FORMAT(DATEADD(DAY, -120, GETDATE()), 'yyyyMMdd'), DATEADD(DAY, -120, GETDATE()),
-               pl.Precio, 0, DATEADD(DAY, -120, @hoy), DATEADD(DAY, 30, @hoy),   -- misma vigencia que la suscripción de Juan
-               pl.Precio
-        FROM PlanSuscripcion pl WHERE pl.IdPlan = @pPremium AND @caja IS NOT NULL AND @cJuan IS NOT NULL;
-
-        -- Diego: Estándar trimestral esperando a Caja (con la promoción vigente del plan Estándar).
-        -- Elena: Básico mensual esperando a Caja, ya con 2 intentos fallidos.
-        INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, PrecioMensual)
-        SELECT v.Cli, pl.IdPlan, @vend, NULL, v.Modalidad, 0, v.FechaAlta, pl.Precio
-        FROM (VALUES (@cDiego, @pEstand, 1, DATEADD(HOUR, -3, GETDATE())),
-                     (@cElena, @pBasico, 0, DATEADD(DAY,  -1, GETDATE()))) AS v(Cli, IdPlan, Modalidad, FechaAlta)
-        JOIN PlanSuscripcion pl ON pl.IdPlan = v.IdPlan
-        WHERE v.Cli IS NOT NULL;
-
-        INSERT INTO ContratacionIntentoPago (IdContratacion, NroIntento, Fecha, IdMedioPago, Motivo, IdCaja)
-        SELECT c.IdContratacion, v.Nro, DATEADD(HOUR, -v.Horas, GETDATE()), @mDebito, v.Motivo, @caja
-        FROM Contratacion c
-        CROSS JOIN (VALUES (1, 20, N'Tarjeta rechazada'), (2, 4, N'Fondos insuficientes')) AS v(Nro, Horas, Motivo)
-        WHERE c.IdCliente = @cElena AND c.Estado = 0 AND @caja IS NOT NULL;
-    END
-
-    -- ── PN03: sugerencias y promociones en cada estado, con sus objetos e historial ──
-    -- Gerencia (gcomercial) sugiere, Administración (admcomercial) crea, Contabilidad (contable)
-    -- dictamina y Ventas (vendedor) pide la baja (la solicitud queda pendiente, la promoción sigue
-    -- Vigente hasta que Administración la atiende): quien crea no dictamina.
-    DECLARE @uGer  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'gcomercial');
-    DECLARE @uAdm  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'admcomercial');
-    DECLARE @uCont INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'contable');
-    DECLARE @uVend INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'vendedor');
-
-    -- TasaRetencion = 100: el beneficio de estas dos sugerencias de demo es el ingreso en riesgo completo
-    -- (como las sugerencias anteriores a la 20h); las que registre Gerencia arrancan con 30 %.
-    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, TasaRetencion, IngresoEnRiesgo, Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta)
-    SELECT v.IdPlan, v.Motivo, v.Tipo, v.Beneficio, 100, v.Beneficio, 0, v.FechaAlta, v.Origen, @uGer
-    FROM (VALUES
-        (@pBasico,  N'SUGERENCIA PendienteDeEvaluar: el plan Básico tiene la mayor tasa de abandono; un descuento de retención puede sostenerlo.', 0, 12000.00, DATEADD(DAY, -3, GETDATE()), 0),
-        (@pPremium, N'SUGERENCIA PendienteDeEvaluar: el plan Premium suma pocos clientes nuevos; un monto fijo de captación puede atraerlos.',     1,  5000.00, DATEADD(DAY, -2, GETDATE()), 2)
-    ) AS v(IdPlan, Motivo, Tipo, Beneficio, FechaAlta, Origen)
-    WHERE v.IdPlan IS NOT NULL AND @uGer IS NOT NULL;
-
-    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, MargenEstimado, ImpactoEconomico, IdUsuarioAlta, FechaAlta)
-    SELECT v.Nombre, v.Descripcion, v.TipoDescuento, v.Valor, v.FechaInicio, v.FechaFin, v.Estado, v.IdPlan,
-           v.Margen, v.Impacto, @uAdm, v.FechaAlta
-    FROM (VALUES
-        (N'PROMO Vigente Estandar -10%',        N'10% en el plan Estándar. Vigente: Ventas puede pedir la baja y se aplica en el cobro.', 0, 10.00,
-         DATEADD(DAY, -10, @hoy), DATEADD(DAY, 50, @hoy), 1, @pEstand, 8000.00, N'Reducción compensada por mayor retención.', DATEADD(DAY, -12, GETDATE())),
-        (N'PROMO ParaDictaminar Premium -15%',  N'15% en el plan Premium. Espera el dictamen de Contabilidad.',                         0, 15.00,
-         @hoy, DATEADD(DAY, 30, @hoy), 0, @pPremium, 6000.00, N'Descuento de captación para nuevos clientes.', DATEADD(DAY, -1, GETDATE())),
-        (N'PROMO Rechazada Basico -20%',        N'20% en el plan Básico. Contabilidad la rechazó: Administración la reformula o la da de baja.', 0, 20.00,
-         @hoy, DATEADD(DAY, 30, @hoy), 2, @pBasico, 3000.00, N'El margen no cubre la reducción.', DATEADD(DAY, -5, GETDATE())),
-        (N'PROMO ConSolicitudBaja Premium $3000', N'$3000 menos en el plan Premium. Vigente con una solicitud de baja de Ventas: Administración la atiende.', 1, 3000.00,
-         DATEADD(DAY, -20, @hoy), DATEADD(DAY, 40, @hoy), 1, @pPremium, 4500.00, N'Impacto bajo: pocos clientes en el plan.', DATEADD(DAY, -22, GETDATE()))
-    ) AS v(Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, Margen, Impacto, FechaAlta)
-    WHERE v.IdPlan IS NOT NULL AND @uAdm IS NOT NULL;
-
-    DECLARE @prVig  INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Vigente Estandar -10%');
-    DECLARE @prDict INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO ParaDictaminar Premium -15%');
-    DECLARE @prRech INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Rechazada Basico -20%');
-    DECLARE @prBaja INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO ConSolicitudBaja Premium $3000');
-
-    IF @uCont IS NOT NULL
-        INSERT INTO DictamenContable (IdPromocion, IdUsuario, Aprobada, Observacion, Fecha)
-        SELECT v.IdPromocion, @uCont, v.Aprobada, v.Observacion, v.Fecha
-        FROM (VALUES
-            (@prVig,  1, N'Aprobada: el margen estimado cubre la reducción de ingresos.',      DATEADD(DAY, -11, GETDATE())),
-            (@prRech, 0, N'Rechazada: un 20% en el plan más barato no cubre el costo.',         DATEADD(DAY,  -4, GETDATE())),
-            (@prBaja, 1, N'Aprobada: impacto bajo, el plan tiene pocos clientes.',            DATEADD(DAY, -21, GETDATE()))
-        ) AS v(IdPromocion, Aprobada, Observacion, Fecha)
-        WHERE v.IdPromocion IS NOT NULL;
-
-    INSERT INTO SolicitudBajaPromocion (IdPromocion, IdUsuarioSolicita, Motivo, FechaSolicitud, Estado)
-    SELECT @prBaja, @uVend, N'Los clientes no la usan y confunde en el mostrador.', DATEADD(DAY, -1, GETDATE()), 0
-    WHERE @prBaja IS NOT NULL AND @uVend IS NOT NULL;
-
-    INSERT INTO PromocionHistorial (IdPromocion, EstadoAnterior, EstadoNuevo, IdUsuario, Fecha, Observacion)
-    SELECT v.IdPromocion, v.Anterior, v.Nuevo, v.IdUsuario, v.Fecha, v.Observacion
-    FROM (VALUES
-        (@prVig,  NULL, 0, @uAdm,  DATEADD(DAY, -12, GETDATE()), N'Alta manual'),
-        (@prVig,  0,    1, @uCont, DATEADD(DAY, -11, GETDATE()), N'Aprobada por Contabilidad'),
-        (@prDict, NULL, 0, @uAdm,  DATEADD(DAY,  -1, GETDATE()), N'Alta manual'),
-        (@prRech, NULL, 0, @uAdm,  DATEADD(DAY,  -5, GETDATE()), N'Alta manual'),
-        (@prRech, 0,    2, @uCont, DATEADD(DAY,  -4, GETDATE()), N'Rechazada por Contabilidad'),
-        (@prBaja, NULL, 0, @uAdm,  DATEADD(DAY, -22, GETDATE()), N'Alta manual'),
-        (@prBaja, 0,    1, @uCont, DATEADD(DAY, -21, GETDATE()), N'Aprobada por Contabilidad')
-    ) AS v(IdPromocion, Anterior, Nuevo, IdUsuario, Fecha, Observacion)
-    WHERE v.IdPromocion IS NOT NULL;
-
-    -- ── Marcas: datos de demo aplicados y recálculo de los dígitos verificadores ──
-    DELETE FROM ParametroSistema WHERE Clave IN (N'SeedDemo21', N'ResetDatosDemo');
-    -- PN04: la sección 21z3 vuelve a completar la FechaDevolucion del historial entregado de la demo.
-    DELETE FROM ParametroSistema WHERE Clave = N'PedidoFechaDevolucion';
-    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada', GETDATE());
-    IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'FormatoDV' AND TRY_CONVERT(INT, Valor) >= 2)
-        MERGE ParametroSistema AS t
-        USING (VALUES (N'DVReinicializar', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
-        WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
-        WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
-
-    COMMIT TRANSACTION;
-    PRINT 'Datos de demo (sección 21e) aplicados: escenarios de PN01, PN02 y PN03.';
+    MERGE ParametroSistema AS t
+    USING (VALUES (N'DemoCargaPendiente', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+    WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+    WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    DELETE FROM ParametroSistema WHERE Clave = N'ResetDatosDemo';
+    PRINT 'Datos de demo: se cargan en la sección 21z3b (procedimiento dbo.RestablecerDatosDemo).';
 END
 GO
 
@@ -4427,6 +4349,982 @@ BEGIN
     PRINT 'Pedido: FechaDevolucion completada en ' + CAST(@devueltos AS VARCHAR(10)) + ' pedido(s) ya devuelto(s); DV a recalcular.';
 END
 GO
+
+-- ============================================================
+-- WardrobeFlow — 21z3b. DATOS DE DEMO: PROCEDIMIENTO dbo.RestablecerDatosDemo
+-- ------------------------------------------------------------
+-- Un solo código para cargar la demo: lo usa la instalación nueva (marca 'DemoCargaPendiente' de la
+-- sección 21e), BD/Reset_Datos_Demo.sql y la app (Administración → Backup → "Restablecer datos de
+-- demo", que antes hace un backup). Va después de 21z y 21z3 porque usa sus columnas.
+-- Borra los datos de negocio (clientes, prendas, pedidos, contrataciones, cobros, renovaciones,
+-- promociones, decisiones comerciales, lista de espera, cargos y bitácora de negocio) y carga los
+-- escenarios con TODAS las
+-- fechas relativas a GETDATE(): la demo tiene sentido el día que se restablece (hacerlo como máximo
+-- 2 días antes de la defensa: la reserva de la lista de espera dura 48 h). Usuarios, planes,
+-- permisos, traducciones y bitácora del sistema no se tocan. Todo o nada (una transacción).
+-- El APELLIDO de cada cliente de escenario dice qué caso muestra:
+--   PN01 Armar pedido (vendedor + deposito)
+--     Juan PedidoFeliz ............ vigente, sin pedido en curso (con historial): camino feliz
+--     Ana PrendasNoDisponibles .... pedido En control de stock con una prenda que ya tiene Pedro
+--     Nicolas ExcedeCupo .......... plan Básico (5 prendas): elegir 6 → exceso de cupo / desistir
+--     Sofia ListaParaFormalizar ... pedido Separado → el Vendedor lo formaliza
+--     Pedro PedidoActivo .......... pedido formalizado (Pendiente de despacho) → aviso de pedido activo
+--     Lucia SuscripcionVencida .... vencida hace 10 días → aviso de suscripción no vigente (y Caja la cobra)
+--     Tomas SuscripcionPausada .... pausada → aviso de suscripción no vigente
+--     Valeria ConFaltantes ........ pedido Con faltantes (alternativas) → el Vendedor ajusta o desiste
+--   PN02 Comercialización y cobro (vendedor + caja)
+--     Laura SinPlan ............... registrada sin plan (desistió ayer) → contratar
+--     Rocio ReferidaPorJuan ....... sin plan, referida por Juan → al cobrar se acredita el beneficio
+--     Diego PagoPendiente ......... contratación Estándar trimestral esperando a Caja
+--     Elena TercerIntentoFallido .. contratación con 2 intentos fallidos → el 3.º la cancela
+--     Sergio PagoRechazado ........ contratación ya cancelada por el 3.er intento fallido
+--     Martina PorVencer ........... vence en 5 días → alerta "por vencer", renovación y cobro
+--     Carla EnGracia .............. cobro fallido: en período de gracia (3 días)
+--     Raul Suspendido ............. gracia vencida: suspendido por falta de pago
+--     Federico CambioProgramado ... Premium con cambio a Estándar programado al vencer
+--     Gustavo DadoDeBaja .......... cliente dado de baja (no aparece en las listas; sí en historiales)
+--     (DNI 40000099: no existe → rama "¿Registrado? No")
+--   PN03 Promociones: sugerencias pendientes, evaluada y descartada; promociones En revisión,
+--     Vigente, Rechazada, Vigente con solicitud de baja, Dada de baja y Vencida.
+--     Centro de decisiones: 3 decisiones comerciales (paso 9b) — una Ejecutada (la sugerencia que
+--     originó la promoción Vencida, con impacto estimado y resultado real), una Pospuesta y una
+--     Descartada con motivo; y metas del mes y de los meses anteriores (paso 9b2): MRR cumplida,
+--     ocupación del stock en riesgo y la del mes anterior no cumplida.
+--   Usuarios: 2 versiones (Memento) del usuario vendedor para la serialización a XML (paso 9c).
+--   PN04 Devoluciones (deposito) y logística (logistico)
+--     Julia EnInspeccion .......... devolvió el "Blazer Azul M" ayer → cola de Inspección de devolución
+--     Hernan DevolucionPendiente .. pedido Entregado hace 10 días → Registrar devolución
+--     Paula CompraTacita .......... Entregado hace 35 días sin devolver → atrasado / compra tácita
+--     Ines PedidoDespachado ....... pedido Despachado → "para entregar"
+--     Marcos CargoPendiente ....... cargo por prenda dañada pendiente → se suma a su próximo cobro
+-- Historia de 6 meses (analítica y centro de decisiones): 24 clientes más con altas mes a mes y
+-- bajas (el plan Básico concentra las bajas del último mes), cobros y renovaciones mensuales,
+-- ~40 pedidos de 3 vendedores, mantenimientos cerrados, lista de espera, cargos, historial de
+-- pedidos y bitácora de negocio coherentes con los pedidos.
+-- Dígitos verificadores: las filas nuevas quedan con DVH = 0. Si la base ya tenía los dígitos
+-- calculados (formato 2), las tablas que cambia quedan "sin calcular" con la marca
+-- 'DVInicializacionPendiente' = 1: la app las inicializa (y lo asienta en la bitácora) al arrancar
+-- o, desde "Restablecer datos de demo", enseguida. En una instalación nueva lo resuelve la sección 22.
+-- Idempotente: el procedimiento se recrea en cada corrida; la carga solo corre con la marca.
+-- ============================================================
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+IF OBJECT_ID('dbo.RestablecerDatosDemo', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.RestablecerDatosDemo;
+GO
+CREATE PROCEDURE dbo.RestablecerDatosDemo
+    @Confirmacion NVARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;   -- ante cualquier error se revierte todo
+
+    IF @Confirmacion IS NULL OR @Confirmacion <> N'RESTABLECER'
+        THROW 50001, N'Para restablecer los datos de demo hay que pasar @Confirmacion = N''RESTABLECER''.', 1;
+
+    DECLARE @ahora DATETIME = GETDATE();
+    DECLARE @hoy   DATE     = CAST(@ahora AS DATE);
+    DECLARE @base  DATETIME = CAST(@hoy AS DATETIME);   -- hoy a las 00:00
+
+    BEGIN TRANSACTION;
+
+    -- ── 1. Se borran los datos de negocio ──────────────────────────────────────
+    -- PN03: las decisiones comerciales sobre las recomendaciones (las de la demo se vuelven a
+    -- sembrar en el paso 9b; sin esto, una decisión vieja seguiría asociada a las claves nuevas).
+    -- Las metas comerciales de la demo también se vuelven a sembrar (paso 9b2, relativas a hoy); el
+    -- detalle de las decisiones (clientes contactados, prendas) se va con ellas.
+    IF OBJECT_ID('MetaComercial', 'U') IS NOT NULL
+        DELETE FROM MetaComercial;
+    IF OBJECT_ID('DecisionComercialDetalle', 'U') IS NOT NULL
+        DELETE FROM DecisionComercialDetalle;
+    IF OBJECT_ID('DecisionComercial', 'U') IS NOT NULL
+        DELETE FROM DecisionComercial;
+    DELETE FROM PedidoFaltanteAlternativa;
+    DELETE FROM PedidoFaltante;
+    DELETE FROM PedidoHistorial;
+    DELETE FROM PedidoPrenda;
+    DELETE FROM BitacoraNegocio;
+    DELETE FROM CargoPrenda;
+    DELETE FROM ListaEspera;
+    DELETE FROM MantenimientoPrenda;
+    DELETE FROM ContratacionIntentoPago;
+    DELETE FROM Contratacion;
+    DELETE FROM DesistimientoContratacion;
+    DELETE FROM HistorialCobro;
+    DELETE FROM HistorialRenovacion;
+    DELETE FROM PromocionHistorial;
+    DELETE FROM DictamenContable;
+    DELETE FROM SolicitudBajaPromocion;
+    DELETE FROM Promocion;
+    DELETE FROM SugerenciaPromocion;
+    DELETE FROM Pedido;
+    DELETE FROM Prenda;
+    UPDATE Cliente SET IdClienteReferente = NULL;
+    DELETE FROM Cliente;
+
+    -- ── 2. Empleados: Caja, Administrador y dos vendedores más (sin usuario del sistema) ──
+    --    Vendedor (L-001) y Depósito (L-002) vienen de la sección 01.
+    INSERT INTO Empleado (Nombre, Apellido, DNI, Email, FechaIngreso, Puesto, Legajo, IdUsuario, DVH)
+    SELECT v.Nombre, v.Apellido, v.DNI, v.Email, DATEADD(DAY, -v.DiasIngreso, @base), v.Puesto, v.Legajo,
+           (SELECT TOP 1 IdUsuario FROM Usuario u WHERE u.Username = v.Username), 0
+    FROM (VALUES
+        (N'Carolina', N'Ibáñez',  '34555666', 'caja@wardrobeflow.com',      N'Caja',          'L-003', 'caja',  0),
+        (N'Admin',    N'Sistema', '30000001', 'admin@wardrobeflow.com',     N'Administrador', 'L-004', 'admin', 0),
+        (N'Martín',   N'Herrera', '32555777', 'mherrera@wardrobeflow.com',  N'Vendedor',      'L-005', NULL,  400),
+        (N'Lorena',   N'Sosa',    '36777888', 'lsosa@wardrobeflow.com',     N'Vendedora',     'L-006', NULL,  300)
+    ) AS v(Nombre, Apellido, DNI, Email, Puesto, Legajo, Username, DiasIngreso)
+    WHERE NOT EXISTS (SELECT 1 FROM Empleado e WHERE e.Legajo = v.Legajo OR e.DNI = v.DNI);
+
+    DECLARE @depo INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-002');
+    DECLARE @caja INT = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-003');
+    -- Vendedores: V1 = vendedor (usuario 'vendedor'), V2 = Martín Herrera, V3 = Lorena Sosa.
+    CREATE TABLE #Vend (K CHAR(2) PRIMARY KEY, IdEmpleado INT, Usr NVARCHAR(50));
+    INSERT INTO #Vend VALUES
+        ('V1', (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-001'), N'vendedor'),
+        ('V2', (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-005'), N'mherrera'),
+        ('V3', (SELECT TOP 1 IdEmpleado FROM Empleado WHERE Legajo = 'L-006'), N'lsosa');
+    -- Si falta el vendedor o el depósito de la sección 01, los otros cubren (la demo no se corta).
+    UPDATE #Vend SET IdEmpleado = (SELECT TOP 1 IdEmpleado FROM #Vend WHERE IdEmpleado IS NOT NULL ORDER BY K) WHERE IdEmpleado IS NULL;
+    IF @depo IS NULL SET @depo = (SELECT TOP 1 IdEmpleado FROM #Vend);
+    IF @caja IS NULL SET @caja = (SELECT TOP 1 IdEmpleado FROM Empleado WHERE IdEmpleado NOT IN (SELECT IdEmpleado FROM #Vend) ORDER BY IdEmpleado);
+
+    CREATE TABLE #Plan (K CHAR(1) PRIMARY KEY, IdPlan INT, Precio DECIMAL(18,2));
+    INSERT INTO #Plan (K, IdPlan, Precio)
+    SELECT v.K, p.IdPlan, p.Precio
+    FROM (VALUES ('B', N'Básico'), ('E', N'Estándar'), ('P', N'Premium')) AS v(K, Nombre)
+    CROSS APPLY (SELECT TOP 1 IdPlan, Precio FROM PlanSuscripcion pl WHERE pl.Nombre = v.Nombre ORDER BY pl.Estado DESC, pl.IdPlan) p;
+
+    -- ── 3. Clientes ────────────────────────────────────────────────────────────
+    -- Vence: días hasta el vencimiento (NULL = ciclo mensual desde el alta). Ancla: vencimiento
+    -- "viejo" del que salen los cobros (si difiere). Baja: días desde la baja de la suscripción
+    -- (queda sin plan). BajaLogica: días desde la baja lógica (Activo = 0).
+    CREATE TABLE #Cli (
+        DNI NVARCHAR(20) PRIMARY KEY, Nombre NVARCHAR(60), Apellido NVARCHAR(60), Email NVARCHAR(120),
+        Medio NVARCHAR(60), PlanK CHAR(1), PlanIniK CHAR(1), DiasCambio INT, DiasAlta INT, FechaNac DATE,
+        Vence INT, Ancla INT, Pausa INT, Gracia INT, Baja INT, BajaLogica INT, PlanSigK CHAR(1),
+        IdCliente INT, IdPlan INT, Venc DATE, Fin DATE, Orden INT IDENTITY(1,1));
+    INSERT INTO #Cli (DNI, Nombre, Apellido, Email, Medio, PlanK, PlanIniK, DiasCambio, DiasAlta, FechaNac,
+                      Vence, Ancla, Pausa, Gracia, Baja, BajaLogica, PlanSigK)
+    VALUES
+    -- PN01
+    ('40000001', N'Juan',     N'PedidoFeliz',          'juan.pedidofeliz@demo.com',           'medio.tarjeta_credito', 'P', NULL, NULL, 120, '1990-03-12',   30, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000002', N'Ana',      N'PrendasNoDisponibles', 'ana.prendasnodisponibles@demo.com',   'medio.tarjeta_debito',  'E', NULL, NULL,  90, '1992-07-21',   25, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000003', N'Nicolas',  N'ExcedeCupo',           'nicolas.excedecupo@demo.com',         'medio.tarjeta_debito',  'B', NULL, NULL,  60, '1997-04-14',   20, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000004', N'Sofia',    N'ListaParaFormalizar',  'sofia.listaparaformalizar@demo.com',  'medio.tarjeta_credito', 'P', NULL, NULL,  75, '1994-11-02',   28, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000005', N'Pedro',    N'PedidoActivo',         'pedro.pedidoactivo@demo.com',         'medio.transferencia',   'E', NULL, NULL, 150, '1988-02-09',   15, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000006', N'Lucia',    N'SuscripcionVencida',   'lucia.suscripcionvencida@demo.com',   'medio.tarjeta_credito', 'E', NULL, NULL, 200, '1991-09-30',  -10, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000007', N'Tomas',    N'SuscripcionPausada',   'tomas.suscripcionpausada@demo.com',   'medio.tarjeta_debito',  'B', NULL, NULL, 100, '1995-09-03',   40,   10,   20, NULL, NULL, NULL, NULL),
+    ('40000022', N'Valeria',  N'ConFaltantes',         'valeria.confaltantes@demo.com',       'medio.tarjeta_debito',  'E', NULL, NULL, 115, '1993-05-17', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    -- PN02
+    ('40000008', N'Laura',    N'SinPlan',              'laura.sinplan@demo.com',              'medio.efectivo',        NULL, NULL, NULL,   3, '1999-12-21', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000009', N'Rocio',    N'ReferidaPorJuan',      'rocio.referidaporjuan@demo.com',      'medio.efectivo',        NULL, NULL, NULL,   1, '2000-06-15', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000010', N'Diego',    N'PagoPendiente',        'diego.pagopendiente@demo.com',        'medio.transferencia',   NULL, NULL, NULL,   2, '1993-08-27', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000011', N'Elena',    N'TercerIntentoFallido', 'elena.tercerintentofallido@demo.com', 'medio.tarjeta_credito', NULL, NULL, NULL,   4, '1996-01-19', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000023', N'Sergio',   N'PagoRechazado',        'sergio.pagorechazado@demo.com',       'medio.tarjeta_credito', NULL, NULL, NULL,   8, '1989-10-05', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000012', N'Martina',  N'PorVencer',            'martina.porvencer@demo.com',          'medio.tarjeta_debito',  'E', NULL, NULL,  85, '1996-02-28',    5, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000013', N'Carla',    N'EnGracia',             'carla.engracia@demo.com',             'medio.efectivo',        'B', NULL, NULL,  60, '1998-08-08',   -2, NULL, NULL,    3, NULL, NULL, NULL),
+    ('40000014', N'Raul',     N'Suspendido',           'raul.suspendido@demo.com',            'medio.tarjeta_debito',  'B', NULL, NULL, 100, '1985-12-01',  -12, NULL, NULL,   -7, NULL, NULL, NULL),
+    ('40000015', N'Federico', N'CambioProgramado',     'federico.cambioprogramado@demo.com',  'medio.tarjeta_credito', 'P', NULL, NULL,  80, '1987-06-23',   40,   10, NULL, NULL, NULL, NULL, 'E'),
+    ('40000016', N'Gustavo',  N'DadoDeBaja',           'gustavo.dadodebaja@demo.com',         'medio.transferencia',   'B', NULL, NULL, 150, '1983-04-11', NULL, NULL, NULL, NULL,   40,   30, NULL),
+    -- PN04 / logística
+    ('40000017', N'Hernan',   N'DevolucionPendiente',  'hernan.devolucionpendiente@demo.com', 'medio.tarjeta_debito',  'E', NULL, NULL, 110, '1990-10-30', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000018', N'Paula',    N'CompraTacita',         'paula.compratacita@demo.com',         'medio.tarjeta_credito', 'P', NULL, NULL, 130, '1992-01-14', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000019', N'Julia',    N'EnInspeccion',         'julia.eninspeccion@demo.com',         'medio.tarjeta_debito',  'E', NULL, NULL,  95, '1997-07-07', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000020', N'Marcos',   N'CargoPendiente',       'marcos.cargopendiente@demo.com',      'medio.efectivo',        'B', NULL, NULL,  70, '1994-03-03', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('40000021', N'Ines',     N'PedidoDespachado',     'ines.pedidodespachado@demo.com',      'medio.tarjeta_credito', 'P', NULL, NULL,  45, '1991-11-19', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    -- Historia de 6 meses (clientes "reales"): altas mes a mes y bajas de suscripción
+    ('30111001', N'Camila',    N'Rodríguez', 'camila.rodriguez@mail.com',   'medio.tarjeta_credito', 'P', NULL, NULL, 185, '1990-05-02', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111002', N'Agustina',  N'López',     'agustina.lopez@mail.com',     'medio.tarjeta_debito',  'E', NULL, NULL, 182, '1988-09-13', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111003', N'Florencia', N'Díaz',      'florencia.diaz@mail.com',     'medio.transferencia',   'E', NULL, NULL, 170, '1993-02-25', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111004', N'Joaquín',   N'Pérez',     'joaquin.perez@mail.com',      'medio.efectivo',        'B', NULL, NULL, 165, '1999-07-19', NULL, NULL, NULL, NULL,  100, NULL, NULL),
+    ('30111005', N'Micaela',   N'Fernández', 'micaela.fernandez@mail.com',  'medio.tarjeta_credito', 'P', NULL, NULL, 150, '1986-12-08', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111006', N'Lautaro',   N'Romero',    'lautaro.romero@mail.com',     'medio.tarjeta_debito',  'E', NULL, NULL, 140, '1995-04-30', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111007', N'Victoria',  N'Álvarez',   'victoria.alvarez@mail.com',   'medio.efectivo',        'B', NULL, NULL, 132, '2000-01-22', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111008', N'Santiago',  N'Torres',    'santiago.torres@mail.com',    'medio.transferencia',   'E', NULL, NULL, 125, '1984-06-15', NULL, NULL, NULL, NULL,   70, NULL, NULL),
+    ('30111009', N'Julieta',   N'Ruiz',      'julieta.ruiz@mail.com',       'medio.tarjeta_credito', 'P', NULL, NULL, 118, '1992-10-03', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111010', N'Ramiro',    N'Acosta',    'ramiro.acosta@mail.com',      'medio.tarjeta_debito',  'B', NULL, NULL, 105, '1997-03-27', NULL, NULL, NULL, NULL,   25, NULL, NULL),
+    ('30111011', N'Luciana',   N'Medina',    'luciana.medina@mail.com',     'medio.tarjeta_credito', 'E', NULL, NULL,  95, '1989-08-11', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111012', N'Facundo',   N'Molina',    'facundo.molina@mail.com',     'medio.efectivo',        'B', NULL, NULL,  90, '1998-11-29', NULL, NULL, NULL, NULL,   12, NULL, NULL),
+    ('30111013', N'Abril',     N'Castro',    'abril.castro@mail.com',       'medio.tarjeta_credito', 'P', NULL, NULL,  75, '1996-05-05', NULL, NULL, NULL, NULL,   15, NULL, NULL),
+    ('30111014', N'Emilia',    N'Ortiz',     'emilia.ortiz@mail.com',       'medio.tarjeta_debito',  'E',  'B',   35,  65, '1994-09-21', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111015', N'Ignacio',   N'Silva',     'ignacio.silva@mail.com',      'medio.efectivo',        'B', NULL, NULL,  55, '2001-02-14', NULL, NULL, NULL, NULL,    8, NULL, NULL),
+    ('30111016', N'Delfina',   N'Rojas',     'delfina.rojas@mail.com',      'medio.transferencia',   'E', NULL, NULL,  50, '1991-07-09', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111017', N'Milagros',  N'Núñez',     'milagros.nunez@mail.com',     'medio.tarjeta_credito', 'P', NULL, NULL,  40, '1993-12-12', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111018', N'Valentín',  N'Ríos',      'valentin.rios@mail.com',      'medio.efectivo',        'B', NULL, NULL,  30, '2002-04-18', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111019', N'Renata',    N'Vega',      'renata.vega@mail.com',        'medio.tarjeta_debito',  'B', NULL, NULL, 170, '1987-01-31', NULL, NULL, NULL, NULL,  120, NULL, NULL),
+    ('30111020', N'Gonzalo',   N'Moreno',    'gonzalo.moreno@mail.com',     'medio.transferencia',   'E', NULL, NULL, 100, '1985-10-26', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111021', N'Sol',       N'Gutiérrez', 'sol.gutierrez@mail.com',      'medio.efectivo',        'B', NULL, NULL,  60, '1999-06-06', NULL, NULL, NULL, NULL,   20, NULL, NULL),
+    ('30111022', N'Pilar',     N'Ibarra',    'pilar.ibarra@mail.com',       'medio.tarjeta_debito',  'B', NULL, NULL,  20, '1995-08-24', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111023', N'Mateo',     N'Cabrera',   'mateo.cabrera@mail.com',      'medio.tarjeta_credito', 'P', NULL, NULL,  12, '1990-02-02', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('30111024', N'Bianca',    N'Ponce',     'bianca.ponce@mail.com',       'medio.transferencia',   'E', NULL, NULL,   8, '1997-09-15', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+    -- Vencimiento: el indicado o el del ciclo mensual desde el alta; sin plan o con baja, ninguno.
+    -- Fin = hasta cuándo se cobró: el vencimiento "viejo" (ancla) o, si se dio de baja, la fecha de baja.
+    UPDATE #Cli SET
+        Venc = CASE WHEN PlanK IS NULL OR Baja IS NOT NULL THEN NULL
+                    WHEN Vence IS NOT NULL THEN DATEADD(DAY, Vence, @hoy)
+                    ELSE DATEADD(DAY, 30 - DiasAlta % 30, @hoy) END;
+    UPDATE #Cli SET
+        Fin = CASE WHEN PlanK IS NULL THEN NULL
+                   WHEN Baja IS NOT NULL THEN DATEADD(DAY, -Baja, @hoy)
+                   WHEN Ancla IS NOT NULL THEN DATEADD(DAY, Ancla, @hoy)
+                   ELSE Venc END;
+
+    INSERT INTO Cliente (Nombre, Apellido, DNI, Email, IdMedioPagoPreferido, IdPlan, FechaAlta, FechaNacimiento,
+                         FechaVencimiento, FechaLimiteGracia, FechaPausaHasta, Activo, IdPlanSiguiente, FechaCambioPlan, DVH)
+    SELECT c.Nombre, c.Apellido, c.DNI, c.Email,
+           (SELECT TOP 1 mp.IdMedioPago FROM MedioPago mp WHERE mp.ClaveTraduccion = c.Medio AND mp.Activo = 1),
+           CASE WHEN c.Baja IS NULL THEN p.IdPlan END,
+           DATEADD(MINUTE, 10 * 60 + c.Orden * 7, DATEADD(DAY, -c.DiasAlta, @base)),
+           c.FechaNac, c.Venc,
+           CASE WHEN c.Gracia IS NULL THEN NULL ELSE DATEADD(DAY, c.Gracia, @hoy) END,
+           CASE WHEN c.Pausa  IS NULL THEN NULL ELSE DATEADD(DAY, c.Pausa, @ahora) END,
+           CASE WHEN c.BajaLogica IS NULL THEN 1 ELSE 0 END,
+           ps.IdPlan,
+           CASE WHEN c.PlanSigK IS NULL THEN NULL ELSE CAST(c.Fin AS DATETIME) END,
+           0
+    FROM #Cli c
+    LEFT JOIN #Plan p  ON p.K  = c.PlanK
+    LEFT JOIN #Plan ps ON ps.K = c.PlanSigK
+    ORDER BY c.Orden;
+
+    UPDATE c SET IdCliente = cl.IdCliente, IdPlan = p.IdPlan
+    FROM #Cli c JOIN Cliente cl ON cl.DNI = c.DNI LEFT JOIN #Plan p ON p.K = c.PlanK;
+    UPDATE Cliente SET IdClienteReferente = (SELECT IdCliente FROM #Cli WHERE DNI = '40000001')
+    WHERE DNI = '40000009';   -- Rocío llegó por Juan
+
+    -- ── 4. Prendas ─────────────────────────────────────────────────────────────
+    INSERT INTO Prenda (Nombre, Descripcion, Talle, Color, Categoria, Estado, IdClienteActual, IdUltimoCliente, PrecioReposicion, FechaAlta)
+    SELECT v.Nombre, v.Descripcion, v.Talle, v.Color, v.Categoria, 0, NULL, NULL, v.Precio, DATEADD(DAY, -v.DiasAlta, @base)
+    FROM (VALUES
+        (N'Vestido Azul M',    N'Vestido midi de gasa',         'M',  N'Azul',    N'Vestido',  42000.00, 200),
+        (N'Vestido Verde M',   N'Vestido midi de gasa',         'M',  N'Verde',   N'Vestido',  42000.00, 200),
+        (N'Vestido Negro M',   N'Vestido largo de noche',       'M',  N'Negro',   N'Vestido',  48000.00, 200),
+        (N'Vestido Rojo S',    N'Vestido corto de fiesta',      'S',  N'Rojo',    N'Vestido',  45000.00, 200),
+        (N'Vestido Coral S',   N'Vestido corto de lino',        'S',  N'Coral',   N'Vestido',  30000.00, 200),
+        (N'Vestido Lila S',    N'Vestido cóctel (ingreso nuevo)', 'S', N'Lila',   N'Vestido',  44000.00,  12),
+        (N'Falda Plisada S',   N'Falda midi plisada',           'S',  N'Beige',   N'Falda',    20000.00, 200),
+        (N'Falda Negra M',     N'Falda lápiz',                  'M',  N'Negro',   N'Falda',    21000.00, 200),
+        (N'Saco Negro M',      N'Blazer de vestir',             'M',  N'Negro',   N'Saco',     38000.00, 200),
+        (N'Saco Gris M',       N'Blazer de vestir',             'M',  N'Gris',    N'Saco',     38000.00, 200),
+        (N'Saco Beige M',      N'Blazer de lino',               'M',  N'Beige',   N'Saco',     36000.00, 200),
+        (N'Blazer Azul M',     N'Blazer cruzado (en limpieza)', 'M',  N'Azul',    N'Saco',     38000.00, 200),
+        (N'Camisa Blanca S',   N'Camisa de algodón',            'S',  N'Blanco',  N'Camisa',   18000.00, 200),
+        (N'Camisa Celeste S',  N'Camisa de algodón',            'S',  N'Celeste', N'Camisa',   18000.00, 200),
+        (N'Camisa Rayada S',   N'Camisa de viscosa',            'S',  N'Rayado',  N'Camisa',   19000.00, 200),
+        (N'Camisa Negra M',    N'Camisa de seda',               'M',  N'Negro',   N'Camisa',   19000.00,  95),
+        (N'Camisa Lino M',     N'Camisa de lino (dada de baja)', 'M', N'Blanco',  N'Camisa',   17000.00, 200),
+        (N'Pantalon Negro 40', N'Pantalón sastrero',            '40', N'Negro',   N'Pantalón', 24000.00, 200),
+        (N'Pantalon Beige 40', N'Pantalón de lino',             '40', N'Beige',   N'Pantalón', 26000.00, 200),
+        (N'Jean Celeste 40',   N'Jean recto',                   '40', N'Celeste', N'Pantalón', 25000.00, 120),
+        (N'Tapado Camel L',    N'Tapado de paño',               'L',  N'Camel',   N'Abrigo',   55000.00, 200),
+        (N'Campera Cuero L',   N'Campera biker de cuero',       'L',  N'Negro',   N'Abrigo',   60000.00, 200),
+        (N'Sweater Gris M',    N'Sweater de lana',              'M',  N'Gris',    N'Sweater',  22000.00, 200),
+        (N'Sweater Bordo M',   N'Sweater de lana',              'M',  N'Bordó',   N'Sweater',  22000.00, 200),
+        (N'Sweater Crema L',   N'Sweater de lana trenzado',     'L',  N'Crema',   N'Sweater',  23000.00, 200)
+    ) AS v(Nombre, Descripcion, Talle, Color, Categoria, Precio, DiasAlta);
+
+    -- ── 5. PN03: sugerencias y promociones en cada estado ─────────────────────────
+    -- Gerencia (gcomercial) sugiere, Administración (admcomercial) crea, Contabilidad (contable)
+    -- dictamina y Ventas (vendedor) pide la baja: quien crea no dictamina.
+    DECLARE @uGer  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'gcomercial');
+    DECLARE @uAdm  INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'admcomercial');
+    DECLARE @uCont INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'contable');
+    DECLARE @uVend INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = 'vendedor');
+    DECLARE @pB INT = (SELECT IdPlan FROM #Plan WHERE K = 'B');
+    DECLARE @pE INT = (SELECT IdPlan FROM #Plan WHERE K = 'E');
+    DECLARE @pP INT = (SELECT IdPlan FROM #Plan WHERE K = 'P');
+
+    -- TasaRetencion = 100 en las dos pendientes (beneficio = ingreso en riesgo completo, como las
+    -- anteriores a la 20h); la evaluada y la descartada usan el 30 % que propone Gerencia.
+    INSERT INTO SugerenciaPromocion (IdPlan, Motivo, TipoDescuentoSugerido, BeneficioEstimado, TasaRetencion, IngresoEnRiesgo,
+                                     Estado, FechaAlta, OrigenMetrica, IdUsuarioAlta, MotivoDescarte, FechaEvaluacion)
+    SELECT v.IdPlan, v.Motivo, v.Tipo, ROUND(v.Ingreso * v.Tasa / 100, 2), v.Tasa, v.Ingreso, v.Estado,
+           DATEADD(DAY, -v.Dias, @ahora), v.Origen, @uGer, v.Descarte,
+           CASE WHEN v.DiasEval IS NULL THEN NULL ELSE DATEADD(DAY, -v.DiasEval, @ahora) END
+    FROM (VALUES
+        (@pB, N'SUGERENCIA PendienteDeEvaluar: el plan Básico tiene la mayor tasa de abandono del último mes; un descuento de retención puede sostenerlo.', 0, 12000.00, 100.00, 0,   3, 0, NULL, NULL),
+        (@pP, N'SUGERENCIA PendienteDeEvaluar: el plan Premium suma pocos clientes nuevos; un monto fijo de captación puede atraerlos.',                 1,  5000.00, 100.00, 0,   2, 2, NULL, NULL),
+        (@pB, N'SUGERENCIA Evaluada: 5 clientes del plan Básico en riesgo de abandono; se propone un 15 % de retención.',                                0, 40000.00,  30.00, 1, 106, 0, NULL, 103),
+        (@pE, N'SUGERENCIA Descartada: baja rotación de sweaters; se propuso un descuento en el plan Estándar.',                                         0, 30000.00,  30.00, 2,  25, 1,
+              N'Ya hay una promoción vigente en el plan Estándar; se reevalúa cuando venza.', 20)
+    ) AS v(IdPlan, Motivo, Tipo, Ingreso, Tasa, Estado, Dias, Origen, Descarte, DiasEval)
+    WHERE v.IdPlan IS NOT NULL AND @uGer IS NOT NULL;
+    DECLARE @sugEval INT = (SELECT TOP 1 IdSugerencia FROM SugerenciaPromocion WHERE Estado = 1);
+
+    INSERT INTO Promocion (Nombre, Descripcion, TipoDescuento, Valor, FechaInicio, FechaFin, Estado, IdPlan, MargenEstimado,
+                           ImpactoEconomico, IdSugerenciaOrigen, IdUsuarioAlta, FechaAlta)
+    SELECT v.Nombre, v.Descripcion, v.TipoDescuento, v.Valor, DATEADD(DAY, v.Inicio, @hoy), DATEADD(DAY, v.Fin, @hoy), v.Estado, v.IdPlan,
+           v.Margen, v.Impacto, CASE WHEN v.DeSugerencia = 1 THEN @sugEval END, @uAdm, DATEADD(DAY, -v.DiasAlta, @ahora)
+    FROM (VALUES
+        (N'PROMO Vigente Estandar -10%',          N'10% en el plan Estándar. Vigente: Ventas puede pedir la baja y se aplica en el cobro.', 0, 10.00,
+         -10,  50, 1, @pE, 8000.00, N'Reducción compensada por mayor retención.', 0, 12),
+        (N'PROMO ParaDictaminar Premium -15%',    N'15% en el plan Premium. Espera el dictamen de Contabilidad.',                         0, 15.00,
+           0,  30, 0, @pP, 6000.00, N'Descuento de captación para nuevos clientes.', 0, 1),
+        (N'PROMO Rechazada Basico -20%',          N'20% en el plan Básico. Contabilidad la rechazó: Administración la reformula o la da de baja.', 0, 20.00,
+           0,  30, 2, @pB, 3000.00, N'El margen no cubre la reducción.', 0, 5),
+        (N'PROMO ConSolicitudBaja Premium $3000', N'$3000 menos en el plan Premium. Vigente con una solicitud de baja de Ventas: Administración la atiende.', 1, 3000.00,
+         -20,  40, 1, @pP, 4500.00, N'Impacto bajo: pocos clientes en el plan.', 0, 22),
+        (N'PROMO DadaDeBaja Premium -10%',        N'10% en el plan Premium. Administración la dio de baja a pedido de Ventas.', 0, 10.00,
+         -75,  15, 4, @pP, 5000.00, N'Se esperaba captar clientes Premium; no tuvo uso.', 0, 78),
+        (N'PROMO Vencida Basico -15%',            N'15% de retención en el plan Básico. Llegó a su fecha de fin.', 0, 15.00,
+        -100, -41, 6, @pB, 9000.00, N'Retención de clientes Básico en riesgo de abandono.', 1, 103)
+    ) AS v(Nombre, Descripcion, TipoDescuento, Valor, Inicio, Fin, Estado, IdPlan, Margen, Impacto, DeSugerencia, DiasAlta)
+    WHERE v.IdPlan IS NOT NULL AND @uAdm IS NOT NULL;
+
+    DECLARE @prVig  INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Vigente Estandar -10%');
+    DECLARE @prDict INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO ParaDictaminar Premium -15%');
+    DECLARE @prRech INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Rechazada Basico -20%');
+    DECLARE @prBaja INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO ConSolicitudBaja Premium $3000');
+    DECLARE @prDDB  INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO DadaDeBaja Premium -10%');
+    DECLARE @prVenc INT = (SELECT IdPromocion FROM Promocion WHERE Nombre = N'PROMO Vencida Basico -15%');
+
+    IF @uCont IS NOT NULL
+        INSERT INTO DictamenContable (IdPromocion, IdUsuario, Aprobada, Observacion, Fecha)
+        SELECT v.IdPromocion, @uCont, v.Aprobada, v.Observacion, DATEADD(DAY, -v.Dias, @ahora)
+        FROM (VALUES
+            (@prVig,  1, N'Aprobada: el margen estimado cubre la reducción de ingresos.', 11),
+            (@prRech, 0, N'Rechazada: un 20% en el plan más barato no cubre el costo.',    4),
+            (@prBaja, 1, N'Aprobada: impacto bajo, el plan tiene pocos clientes.',       21),
+            (@prDDB,  1, N'Aprobada: el margen de Premium lo permite.',                  76),
+            (@prVenc, 1, N'Aprobada: retener clientes Básico cuesta menos que captar nuevos.', 101)
+        ) AS v(IdPromocion, Aprobada, Observacion, Dias)
+        WHERE v.IdPromocion IS NOT NULL;
+
+    INSERT INTO SolicitudBajaPromocion (IdPromocion, IdUsuarioSolicita, Motivo, FechaSolicitud, Estado,
+                                        IdUsuarioResuelve, FechaResolucion, Respuesta, DioDeBaja)
+    SELECT v.IdPromocion, @uVend, v.Motivo, DATEADD(DAY, -v.Dias, @ahora), v.Estado,
+           CASE WHEN v.Estado = 1 THEN @uAdm END,
+           CASE WHEN v.Estado = 1 THEN DATEADD(DAY, -v.DiasRes, @ahora) END, v.Respuesta, v.Estado
+    FROM (VALUES
+        (@prBaja, N'Los clientes no la usan y confunde en el mostrador.',        1, 0, NULL, NULL),
+        (@prDDB,  N'Ningún cliente Premium la pidió en un mes; complica la caja.', 47, 1, 45, N'Se da de baja: no tuvo uso.')
+    ) AS v(IdPromocion, Motivo, Dias, Estado, DiasRes, Respuesta)
+    WHERE v.IdPromocion IS NOT NULL AND @uVend IS NOT NULL;
+
+    INSERT INTO PromocionHistorial (IdPromocion, EstadoAnterior, EstadoNuevo, IdUsuario, Fecha, Observacion)
+    SELECT v.IdPromocion, v.Anterior, v.Nuevo, v.IdUsuario, DATEADD(DAY, -v.Dias, @ahora), v.Observacion
+    FROM (VALUES
+        (@prVig,  NULL, 0, @uAdm,   12, N'Alta manual'),
+        (@prVig,  0,    1, @uCont,  11, N'Aprobada por Contabilidad'),
+        (@prDict, NULL, 0, @uAdm,    1, N'Alta manual'),
+        (@prRech, NULL, 0, @uAdm,    5, N'Alta manual'),
+        (@prRech, 0,    2, @uCont,   4, N'Rechazada por Contabilidad'),
+        (@prBaja, NULL, 0, @uAdm,   22, N'Alta manual'),
+        (@prBaja, 0,    1, @uCont,  21, N'Aprobada por Contabilidad'),
+        (@prDDB,  NULL, 0, @uAdm,   78, N'Alta manual'),
+        (@prDDB,  0,    1, @uCont,  76, N'Aprobada por Contabilidad'),
+        (@prDDB,  1,    4, @uAdm,   45, N'Baja a pedido de Ventas: no tuvo uso.'),
+        (@prVenc, NULL, 0, @uAdm,  103, N'Alta desde una sugerencia de Gerencia'),
+        (@prVenc, 0,    1, @uCont, 101, N'Aprobada por Contabilidad'),
+        (@prVenc, 1,    6, NULL,    40, N'Llegó la fecha de fin de la promoción.')
+    ) AS v(IdPromocion, Anterior, Nuevo, IdUsuario, Dias, Observacion)
+    WHERE v.IdPromocion IS NOT NULL;
+
+    -- Ventanas en que cada promoción se aplicó en los cobros (vigente, de su aprobación a su fin o baja).
+    CREATE TABLE #PromoVentana (IdPromocion INT, IdPlan INT, Desde DATE, Hasta DATE, Tipo INT, Valor DECIMAL(18,2));
+    INSERT INTO #PromoVentana
+    SELECT IdPromocion, IdPlan, FechaInicio,
+           CASE WHEN IdPromocion = @prDDB THEN DATEADD(DAY, -46, @hoy)
+                WHEN FechaFin < @hoy THEN FechaFin ELSE @hoy END,
+           TipoDescuento, Valor
+    FROM Promocion WHERE Estado IN (1, 4, 6);
+
+    -- ── 6. PN02: contrataciones, cobros y renovaciones de 6 meses ──────────────────
+    -- Alta: contratación Pagada (vendedores rotando, cobra Caja). Después, cada mes: renovación
+    -- (Renovada) y cobro (Cobrado) hasta el vencimiento vigente o hasta la baja.
+    CREATE TABLE #Mov (IdCliente INT, Fecha DATETIME, IdPlan INT, Precio DECIMAL(18,2), IdPromocion INT, Descuento DECIMAL(18,2),
+                       IdMedio INT, EsAlta BIT, Vendedor CHAR(2));
+    -- Altas
+    INSERT INTO #Mov (IdCliente, Fecha, IdPlan, Precio, IdMedio, EsAlta, Vendedor)
+    SELECT c.IdCliente, cl.FechaAlta, pi.IdPlan, pi.Precio, cl.IdMedioPagoPreferido, 1,
+           CASE c.Orden % 3 WHEN 0 THEN 'V1' WHEN 1 THEN 'V2' ELSE 'V3' END
+    FROM #Cli c
+    JOIN Cliente cl ON cl.IdCliente = c.IdCliente
+    JOIN #Plan pi ON pi.K = ISNULL(c.PlanIniK, c.PlanK);
+    -- Renovaciones mensuales: Fin - 30, Fin - 60... mientras sean posteriores al alta y no futuras.
+    INSERT INTO #Mov (IdCliente, Fecha, IdPlan, Precio, IdMedio, EsAlta)
+    SELECT c.IdCliente,
+           CASE WHEN DATEADD(MINUTE, 9 * 60 + 30 + c.Orden, CAST(DATEADD(DAY, -30 * n.j, c.Fin) AS DATETIME)) > @ahora
+                THEN DATEADD(MINUTE, -c.Orden, @ahora)
+                ELSE DATEADD(MINUTE, 9 * 60 + 30 + c.Orden, CAST(DATEADD(DAY, -30 * n.j, c.Fin) AS DATETIME)) END,
+           p.IdPlan, p.Precio, cl.IdMedioPagoPreferido, 0
+    FROM #Cli c
+    JOIN Cliente cl ON cl.IdCliente = c.IdCliente
+    CROSS JOIN (VALUES (1), (2), (3), (4), (5), (6), (7), (8)) AS n(j)
+    CROSS APPLY (SELECT CASE WHEN c.PlanIniK IS NOT NULL AND DATEADD(DAY, -30 * n.j, c.Fin) < DATEADD(DAY, -c.DiasCambio, @hoy)
+                             THEN c.PlanIniK ELSE c.PlanK END AS K) k
+    JOIN #Plan p ON p.K = k.K
+    WHERE c.Fin IS NOT NULL
+      AND DATEADD(DAY, -30 * n.j, c.Fin) > DATEADD(DAY, -c.DiasAlta, @hoy)
+      AND DATEADD(DAY, -30 * n.j, c.Fin) <= @hoy;
+    -- Promoción vigente del plan en esa fecha (descuento sobre el precio mensual).
+    UPDATE m SET IdPromocion = pv.IdPromocion,
+                 Descuento = CASE WHEN pv.Tipo = 0 THEN ROUND(m.Precio * pv.Valor / 100, 2) ELSE pv.Valor END
+    FROM #Mov m
+    CROSS APPLY (SELECT TOP 1 * FROM #PromoVentana v
+                 WHERE v.IdPlan = m.IdPlan AND CAST(m.Fecha AS DATE) BETWEEN v.Desde AND v.Hasta) pv;
+
+    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion,
+                              IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado, IdPromocion,
+                              VigenciaDesde, VigenciaHasta, PrecioMensual)
+    SELECT m.IdCliente, m.IdPlan, v.IdEmpleado, @caja, 0, 1, DATEADD(MINUTE, -20, m.Fecha), m.Fecha,
+           m.IdMedio, CONVERT(NVARCHAR(36), NEWID()), m.Fecha, m.Precio - ISNULL(m.Descuento, 0), ISNULL(m.Descuento, 0), m.IdPromocion,
+           CAST(m.Fecha AS DATE), DATEADD(DAY, 30, CAST(m.Fecha AS DATE)), m.Precio
+    FROM #Mov m JOIN #Vend v ON v.K = m.Vendedor
+    WHERE m.EsAlta = 1;
+
+    INSERT INTO HistorialCobro (IdCliente, Importe, FechaDeteccion, FechaResolucion, Resultado, Actor, IdMedioPago,
+                                NumeroComprobante, Modalidad, DescuentoAplicado, IdPromocion)
+    SELECT m.IdCliente, m.Precio - ISNULL(m.Descuento, 0), m.Fecha, m.Fecha, 1, N'caja', m.IdMedio,
+           NULL, 0, NULLIF(m.Descuento, 0), m.IdPromocion
+    FROM #Mov m WHERE m.EsAlta = 0;
+
+    INSERT INTO HistorialRenovacion (IdCliente, IdPlanAnterior, IdPlanNuevo, FechaDeteccion, FechaResolucion, Resultado, Actor)
+    SELECT m.IdCliente, m.IdPlan, m.IdPlan, DATEADD(MINUTE, -30, m.Fecha), DATEADD(MINUTE, -25, m.Fecha), 1, N'vendedor'
+    FROM #Mov m WHERE m.EsAlta = 0;
+
+    -- Cambio de plan (Emilia: Básico → Estándar), pausa (Tomás) y bajas de suscripción.
+    INSERT INTO HistorialRenovacion (IdCliente, IdPlanAnterior, IdPlanNuevo, FechaDeteccion, FechaResolucion, Resultado, Actor)
+    SELECT c.IdCliente, pi.IdPlan, p.IdPlan, DATEADD(HOUR, 11, CAST(DATEADD(DAY, -c.DiasCambio, @hoy) AS DATETIME)),
+           DATEADD(HOUR, 11, CAST(DATEADD(DAY, -c.DiasCambio, @hoy) AS DATETIME)), 2, N'admin'
+    FROM #Cli c JOIN #Plan pi ON pi.K = c.PlanIniK JOIN #Plan p ON p.K = c.PlanK
+    WHERE c.PlanIniK IS NOT NULL;
+
+    INSERT INTO HistorialRenovacion (IdCliente, IdPlanAnterior, IdPlanNuevo, FechaDeteccion, FechaResolucion, Resultado, Actor)
+    SELECT c.IdCliente, c.IdPlan, c.IdPlan, DATEADD(DAY, c.Pausa - 30, @ahora), DATEADD(DAY, c.Pausa - 30, @ahora), 4, N'vendedor'
+    FROM #Cli c WHERE c.Pausa IS NOT NULL;
+
+    INSERT INTO HistorialRenovacion (IdCliente, IdPlanAnterior, IdPlanNuevo, FechaDeteccion, FechaResolucion, Resultado, Actor)
+    SELECT c.IdCliente, p.IdPlan, NULL, DATEADD(HOUR, 12, CAST(c.Fin AS DATETIME)), DATEADD(HOUR, 12, CAST(c.Fin AS DATETIME)), 3, N'vendedor'
+    FROM #Cli c JOIN #Plan p ON p.K = c.PlanK
+    WHERE c.Baja IS NOT NULL;
+
+    -- Cobros fallidos: Carla en gracia; Raúl, gracia vencida y suspendido.
+    INSERT INTO HistorialCobro (IdCliente, Importe, FechaDeteccion, FechaResolucion, Resultado, Actor)
+    SELECT c.IdCliente, 0, DATEADD(HOUR, 10, CAST(c.Venc AS DATETIME)), DATEADD(HOUR, 10, CAST(c.Venc AS DATETIME)), 2, N'caja'
+    FROM #Cli c WHERE c.Gracia IS NOT NULL
+    UNION ALL
+    SELECT c.IdCliente, 0, DATEADD(HOUR, 10, CAST(DATEADD(DAY, c.Gracia + 1, @hoy) AS DATETIME)),
+           DATEADD(HOUR, 10, CAST(DATEADD(DAY, c.Gracia + 1, @hoy) AS DATETIME)), 3, N'caja'
+    FROM #Cli c WHERE c.Gracia < 0;
+
+    UPDATE HistorialCobro
+       SET NumeroComprobante = N'CBR-' + RIGHT(N'000000' + CAST(IdCobro AS NVARCHAR(10)), 6) + N'-' + CONVERT(NVARCHAR(8), FechaResolucion, 112)
+     WHERE Resultado = 1;
+
+    -- Federico: contrató Estándar hace 3 días con la Premium vigente → cambio programado al vencer.
+    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion,
+                              IdMedioPago, NumeroComprobante, FechaComprobante, Importe, DescuentoAplicado, IdPromocion,
+                              VigenciaDesde, VigenciaHasta, PrecioMensual)
+    SELECT c.IdCliente, p.IdPlan, (SELECT IdEmpleado FROM #Vend WHERE K = 'V1'), @caja, 0, 1,
+           DATEADD(HOUR, 11, DATEADD(DAY, -3, @base)), DATEADD(HOUR, 12, DATEADD(DAY, -3, @base)),
+           cl.IdMedioPagoPreferido, CONVERT(NVARCHAR(36), NEWID()), DATEADD(HOUR, 12, DATEADD(DAY, -3, @base)),
+           p.Precio - ROUND(p.Precio * 0.10, 2), ROUND(p.Precio * 0.10, 2), @prVig,
+           c.Fin, c.Venc, p.Precio
+    FROM #Cli c JOIN Cliente cl ON cl.IdCliente = c.IdCliente JOIN #Plan p ON p.K = c.PlanSigK
+    WHERE c.PlanSigK IS NOT NULL;
+
+    -- Pendientes de pago (Diego trimestral con la promo vigente del Estándar; Elena con 2 intentos),
+    -- Sergio cancelada por el 3.er intento fallido y Gonzalo con una anulada antes de su alta.
+    INSERT INTO Contratacion (IdCliente, IdPlan, IdVendedor, IdCaja, Modalidad, Estado, FechaAlta, FechaResolucion, PrecioMensual, MotivoAnulacion)
+    SELECT c.IdCliente, p.IdPlan, (SELECT IdEmpleado FROM #Vend WHERE K = v.Vend), v.Caja, v.Modalidad, v.Estado,
+           DATEADD(MINUTE, -v.Minutos, @ahora),
+           CASE WHEN v.Estado = 2 THEN DATEADD(MINUTE, -v.Minutos + 120, @ahora) END, p.Precio, v.Motivo
+    FROM (VALUES
+        ('40000010', 'E', 'V1', 1, 0,     180, NULL, NULL),
+        ('40000011', 'B', 'V2', 0, 0,    1440, NULL, NULL),
+        ('40000023', 'B', 'V1', 0, 2,    8640, NULL, NULL),
+        ('30111020', 'E', 'V3', 0, 2,  145440, @caja, N'El cliente pidió anularla: volvió al día siguiente con otro medio de pago.')
+    ) AS v(DNI, PlanK, Vend, Modalidad, Estado, Minutos, Caja, Motivo)
+    JOIN #Cli c ON c.DNI = v.DNI JOIN #Plan p ON p.K = v.PlanK;
+
+    UPDATE Contratacion
+       SET NumeroComprobante = N'CMP-' + RIGHT(N'000000' + CAST(IdContratacion AS NVARCHAR(10)), 6) + N'-' + CONVERT(NVARCHAR(8), FechaComprobante, 112)
+     WHERE Estado = 1;
+
+    DECLARE @mCredito INT = (SELECT TOP 1 IdMedioPago FROM MedioPago WHERE ClaveTraduccion = 'medio.tarjeta_credito' AND Activo = 1);
+    DECLARE @mDebito  INT = (SELECT TOP 1 IdMedioPago FROM MedioPago WHERE ClaveTraduccion = 'medio.tarjeta_debito'  AND Activo = 1);
+    INSERT INTO ContratacionIntentoPago (IdContratacion, NroIntento, Fecha, IdMedioPago, Motivo, IdCaja)
+    SELECT ct.IdContratacion, v.Nro, DATEADD(MINUTE, v.Minutos, ct.FechaAlta), v.Medio, v.Motivo, @caja
+    FROM Contratacion ct
+    JOIN #Cli c ON c.IdCliente = ct.IdCliente
+    JOIN (VALUES ('40000011', 1,  240, @mDebito,  N'Tarjeta rechazada'),
+                 ('40000011', 2, 1200, @mDebito,  N'Fondos insuficientes'),
+                 ('40000023', 1,   30, @mCredito, N'Tarjeta rechazada'),
+                 ('40000023', 2,   60, @mCredito, N'Fondos insuficientes'),
+                 ('40000023', 3,  120, @mCredito, N'Tarjeta vencida')) AS v(DNI, Nro, Minutos, Medio, Motivo)
+      ON v.DNI = c.DNI
+    WHERE ct.Estado IN (0, 2) AND ct.MotivoAnulacion IS NULL;
+
+    INSERT INTO DesistimientoContratacion (IdCliente, IdPlan, Modalidad, Motivo, Fecha, IdVendedor)
+    SELECT c.IdCliente, p.IdPlan, CASE WHEN p.IdPlan IS NULL THEN NULL ELSE 0 END, v.Motivo,
+           DATEADD(DAY, -v.Dias, @ahora), (SELECT IdEmpleado FROM #Vend WHERE K = v.Vend)
+    FROM (VALUES ('40000008', 'E',  1, 'V1', N'Quiere consultarlo en casa antes de contratar.'),
+                 ('30111004', NULL, 90, 'V2', N'Por ahora no le interesa volver a suscribirse.'),
+                 ('30111019', 'P', 110, 'V3', N'Le pareció caro el plan Premium; lo va a pensar.')) AS v(DNI, PlanK, Dias, Vend, Motivo)
+    JOIN #Cli c ON c.DNI = v.DNI LEFT JOIN #Plan p ON p.K = v.PlanK;
+
+    -- ── 7. PN01/PN04: pedidos de 3 vendedores en todos los estados ──────────────────
+    -- Horas: antigüedad del pedido. Uso: días que el cliente tuvo las prendas (NULL = todavía las tiene).
+    -- Ciclo: control +2 h, separación +3 h, formalización +5 h, despacho +22 h, entrega +53 h,
+    -- devolución = entrega + uso. Las prendas de cada pedido no se superponen en el tiempo.
+    CREATE TABLE #Ped (Clave VARCHAR(5) PRIMARY KEY, DNI NVARCHAR(20), Vend CHAR(2), Horas INT, Estado INT, Uso INT,
+                       Etapa NVARCHAR(20), Motivo NVARCHAR(200), IdPedido INT);
+    INSERT INTO #Ped (Clave, DNI, Vend, Horas, Estado, Uso, Etapa, Motivo) VALUES
+    ('O01', '30111001', 'V1', 178*24, 2, 12, NULL, NULL), ('O02', '30111002', 'V2', 172*24, 2, 12, NULL, NULL),
+    ('O03', '30111003', 'V1', 165*24, 2, 12, NULL, NULL), ('O04', '30111004', 'V3', 158*24, 2, 10, NULL, NULL),
+    ('O05', '30111001', 'V1', 148*24, 2, 12, NULL, NULL), ('O06', '30111005', 'V2', 142*24, 2, 12, NULL, NULL),
+    ('O07', '30111006', 'V1', 135*24, 2, 14, NULL, NULL), ('O08', '30111007', 'V3', 128*24, 2, 12, NULL, NULL),
+    ('O09', '30111002', 'V2', 121*24, 2, 12, NULL, NULL), ('O10', '30111008', 'V1', 117*24, 2, 12, NULL, NULL),
+    ('O11', '30111009', 'V2', 112*24, 2, 12, NULL, NULL), ('O12', '30111003', 'V1', 104*24, 2, 12, NULL, NULL),
+    ('O13', '30111010', 'V3',  97*24, 2, 12, NULL, NULL), ('O14', '40000005', 'V1',  90*24, 2, 12, NULL, NULL),
+    ('O15', '30111011', 'V2',  86*24, 2, 12, NULL, NULL), ('O16', '40000006', 'V1',  80*24, 2, 12, NULL, NULL),
+    ('O17', '30111012', 'V2',  76*24, 2, 12, NULL, NULL), ('O18', '30111006', 'V1',  70*24, 2, 12, NULL, NULL),
+    ('O19', '30111013', 'V3',  64*24, 2, 12, NULL, NULL), ('O20', '40000001', 'V1',  60*24, 2, 12, NULL, NULL),
+    ('O21', '30111014', 'V2',  57*24, 2, 12, NULL, NULL), ('O22', '40000006', 'V1',  50*24, 2, 12, NULL, NULL),
+    ('O23', '30111015', 'V3',  45*24, 2, 12, NULL, NULL), ('O24', '30111016', 'V2',  41*24, 2, 12, NULL, NULL),
+    ('O25', '40000020', 'V1',  40*24, 2, 23, NULL, NULL), ('O26', '40000018', 'V2',  37*24, 2, NULL, NULL, NULL),
+    ('O27', '40000001', 'V1',  30*24, 2, 12, NULL, NULL), ('O28', '30111017', 'V1',  26*24, 2, 12, NULL, NULL),
+    ('O29', '40000019', 'V3',  22*24, 2, 19, NULL, NULL), ('O30', '30111018', 'V2',  20*24, 2,  8, NULL, NULL),
+    ('O31', '40000017', 'V1',  12*24, 2, NULL, NULL, NULL), ('O32', '40000021', 'V2', 2*24, 1, NULL, NULL, NULL),
+    ('O38', '30111007', 'V3',  90*24, 2, 12, NULL, NULL),
+    ('O33', '30111019', 'V2', 130*24, 3, NULL, NULL, N'El cliente se mudó al interior antes del despacho.'),
+    ('O34', '30111020', 'V3',  95*24, 3, NULL, NULL, N'Cambió de opinión antes del despacho.'),
+    ('O35', '30111012', 'V1',  33*24, 3, NULL, NULL, N'Talle equivocado: se rehízo el pedido con otra selección.'),
+    ('O36', '30111021', 'V1',  55*24, 7, NULL, N'Cupo', N'No quiso pasar al plan Estándar para llevar 6 prendas.'),
+    ('O37', '30111009', 'V2',  18*24, 7, NULL, N'Disponibilidad', N'No le interesaron las alternativas ofrecidas.'),
+    -- En curso (uno por cliente)
+    ('P01', '40000005', 'V1', 72, 0, NULL, NULL, NULL),   -- Pedro: formalizado, para despachar
+    ('P02', '40000004', 'V1',  6, 6, NULL, NULL, NULL),   -- Sofía: separado, para formalizar
+    ('P03', '40000002', 'V1',  1, 4, NULL, NULL, NULL),   -- Ana: en control de stock
+    ('P04', '40000022', 'V3', 26, 5, NULL, NULL, NULL);   -- Valeria: con faltantes
+
+    -- Limp: días de limpieza tras la devolución (-1 = sigue en limpieza; 0 = dada de baja en la inspección).
+    CREATE TABLE #PP (Clave VARCHAR(5), Prenda NVARCHAR(60), Limp INT);
+    INSERT INTO #PP (Clave, Prenda, Limp) VALUES
+    ('O01', N'Vestido Negro M', 7), ('O01', N'Camisa Blanca S', 2),
+    ('O02', N'Saco Gris M', 3),
+    ('O03', N'Tapado Camel L', 8), ('O03', N'Pantalon Negro 40', 3),
+    ('O04', N'Campera Cuero L', 4), ('O04', N'Vestido Azul M', 3),
+    ('O05', N'Vestido Negro M', 6),
+    ('O06', N'Saco Gris M', 3), ('O06', N'Saco Negro M', 4),
+    ('O07', N'Falda Negra M', 2), ('O07', N'Camisa Celeste S', 2),
+    ('O08', N'Saco Beige M', 3),
+    ('O09', N'Camisa Blanca S', 2), ('O09', N'Vestido Rojo S', 5), ('O09', N'Falda Plisada S', 3),
+    ('O10', N'Vestido Negro M', 8),
+    ('O11', N'Saco Gris M', 3), ('O11', N'Blazer Azul M', 4),
+    ('O12', N'Pantalon Negro 40', 3), ('O12', N'Vestido Verde M', 4),
+    ('O13', N'Jean Celeste 40', 2),
+    ('O14', N'Camisa Blanca S', 2),
+    ('O15', N'Vestido Negro M', 6), ('O15', N'Camisa Negra M', 2),
+    ('O16', N'Tapado Camel L', 8),
+    ('O17', N'Saco Gris M', 3), ('O17', N'Pantalon Beige 40', 3),
+    ('O18', N'Camisa Celeste S', 2), ('O18', N'Falda Negra M', 2),
+    ('O19', N'Saco Negro M', 3),
+    ('O20', N'Camisa Blanca S', 2),
+    ('O21', N'Camisa Rayada S', 2), ('O21', N'Vestido Negro M', 7),
+    ('O22', N'Vestido Azul M', 3),
+    ('O23', N'Jean Celeste 40', 2),
+    ('O24', N'Saco Gris M', 3),
+    ('O25', N'Vestido Coral S', 0),
+    ('O26', N'Vestido Verde M', NULL),
+    ('O27', N'Tapado Camel L', 8),
+    ('O28', N'Vestido Negro M', 6),
+    ('O29', N'Blazer Azul M', -1),
+    ('O30', N'Camisa Negra M', 2),
+    ('O31', N'Pantalon Negro 40', NULL), ('O31', N'Camisa Celeste S', NULL),
+    ('O32', N'Saco Beige M', NULL),
+    ('O38', N'Camisa Lino M', 0),
+    ('O33', N'Campera Cuero L', NULL),
+    ('O34', N'Pantalon Beige 40', NULL),
+    ('O35', N'Camisa Rayada S', NULL),
+    ('O36', N'Vestido Azul M', NULL), ('O36', N'Saco Gris M', NULL), ('O36', N'Camisa Blanca S', NULL),
+    ('O36', N'Falda Negra M', NULL), ('O36', N'Pantalon Beige 40', NULL), ('O36', N'Jean Celeste 40', NULL),
+    ('O37', N'Vestido Verde M', NULL),
+    ('P01', N'Saco Negro M', NULL),
+    ('P02', N'Vestido Rojo S', NULL), ('P02', N'Falda Plisada S', NULL),
+    ('P03', N'Vestido Azul M', NULL), ('P03', N'Saco Negro M', NULL),
+    ('P04', N'Vestido Verde M', NULL), ('P04', N'Camisa Blanca S', NULL);
+
+    DECLARE @k VARCHAR(5), @cli INT, @emp INT, @h INT, @est INT, @uso INT, @etapa NVARCHAR(20), @motivo NVARCHAR(200), @t0 DATETIME;
+    DECLARE curPed CURSOR LOCAL FAST_FORWARD FOR
+        SELECT p.Clave, c.IdCliente, v.IdEmpleado, p.Horas, p.Estado, p.Uso, p.Etapa, p.Motivo
+        FROM #Ped p JOIN #Cli c ON c.DNI = p.DNI JOIN #Vend v ON v.K = p.Vend
+        ORDER BY p.Horas DESC;
+    OPEN curPed;
+    FETCH NEXT FROM curPed INTO @k, @cli, @emp, @h, @est, @uso, @etapa, @motivo;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @t0 = CASE WHEN @h < 48 THEN DATEADD(HOUR, -@h, @ahora)
+                       ELSE DATEADD(HOUR, 11, DATEADD(DAY, -(@h / 24), @base)) END;
+        INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaEnvioControl, FechaControl, IdEmpleadoControl,
+                            FechaSeparacion, FechaFormalizacion, FechaDespacho, FechaEntrega, FechaDevolucion,
+                            MotivoCancelacion, MotivoDesistimiento, EtapaDesistimiento, DVH)
+        VALUES (@cli, @emp, @est, @t0,
+                CASE WHEN @est = 7 AND @etapa = N'Cupo' THEN NULL ELSE @t0 END,
+                CASE WHEN @est IN (0, 1, 2, 3, 5, 6) OR (@est = 7 AND @etapa = N'Disponibilidad') THEN DATEADD(HOUR, 2, @t0) END,
+                CASE WHEN @est IN (0, 1, 2, 3, 5, 6) OR (@est = 7 AND @etapa = N'Disponibilidad') THEN @depo END,
+                CASE WHEN @est IN (0, 1, 2, 3, 6) THEN DATEADD(HOUR, 3, @t0) END,
+                CASE WHEN @est IN (0, 1, 2, 3) THEN DATEADD(HOUR, 5, @t0) END,
+                CASE WHEN @est IN (1, 2) THEN DATEADD(HOUR, 22, @t0) END,
+                CASE WHEN @est = 2 THEN DATEADD(HOUR, 53, @t0) END,
+                CASE WHEN @est = 2 AND @uso IS NOT NULL THEN DATEADD(HOUR, 1, DATEADD(DAY, 2 + @uso, @t0)) END,
+                CASE WHEN @est = 3 THEN @motivo END,
+                CASE WHEN @est = 7 THEN @motivo END,
+                CASE WHEN @est = 7 THEN @etapa END,
+                0);
+        UPDATE #Ped SET IdPedido = SCOPE_IDENTITY() WHERE Clave = @k;
+        FETCH NEXT FROM curPed INTO @k, @cli, @emp, @h, @est, @uso, @etapa, @motivo;
+    END
+    CLOSE curPed;
+    DEALLOCATE curPed;
+
+    INSERT INTO PedidoPrenda (IdPedido, IdPrenda, Confirmada)
+    SELECT p.IdPedido, pr.IdPrenda, CASE WHEN p.Estado IN (0, 1, 2, 3, 6) THEN 1 ELSE 0 END
+    FROM #PP x JOIN #Ped p ON p.Clave = x.Clave JOIN Prenda pr ON pr.Nombre = x.Prenda;
+
+    -- Faltantes: el "Vestido Verde M" lo tiene Paula (Valeria y el desistimiento de Julieta).
+    INSERT INTO PedidoFaltante (IdPedido, IdPrenda, EstadoAlRevisar, ReservadaParaOtro)
+    SELECT p.IdPedido, pr.IdPrenda, 1, 0
+    FROM #Ped p JOIN Prenda pr ON pr.Nombre = N'Vestido Verde M'
+    WHERE p.Clave IN ('P04', 'O37');
+    INSERT INTO PedidoFaltanteAlternativa (IdPedido, IdPrenda, IdPrendaAlternativa)
+    SELECT p.IdPedido, pr.IdPrenda, alt.IdPrenda
+    FROM #Ped p JOIN Prenda pr ON pr.Nombre = N'Vestido Verde M'
+    JOIN Prenda alt ON alt.Nombre IN (N'Vestido Azul M', N'Vestido Negro M')
+    WHERE p.Clave IN ('P04', 'O37');
+
+    -- Estado actual de cada prenda: en uso por el cliente del pedido en curso (o entregado sin
+    -- devolver), en limpieza (Blazer de Julia) o de baja (dañadas, con cargo); el resto disponible.
+    UPDATE pr SET Estado = 1, IdClienteActual = ped.IdCliente
+    FROM Prenda pr JOIN PedidoPrenda pp ON pp.IdPrenda = pr.IdPrenda JOIN Pedido ped ON ped.IdPedido = pp.IdPedido
+    WHERE ped.Estado IN (0, 1, 6) OR (ped.Estado = 2 AND ped.FechaDevolucion IS NULL);
+    UPDATE pr SET Estado = CASE WHEN x.Limp = -1 THEN 2 ELSE 3 END, IdClienteActual = NULL
+    FROM Prenda pr JOIN #PP x ON x.Prenda = pr.Nombre
+    WHERE x.Limp IN (-1, 0);
+    UPDATE pr SET IdUltimoCliente = (SELECT TOP 1 ped.IdCliente FROM PedidoPrenda pp JOIN Pedido ped ON ped.IdPedido = pp.IdPedido
+                                     WHERE pp.IdPrenda = pr.IdPrenda AND ped.Estado IN (0, 1, 2, 6)
+                                     ORDER BY ped.FechaPedido DESC)
+    FROM Prenda pr;
+
+    -- Mantenimientos: uno por prenda devuelta (Origen 1) y dos manuales del depósito (Origen 0).
+    -- Quedan abiertos el del Blazer (devolución: lo muestra la cola de Inspección de devolución) y
+    -- el de la Campera (limpieza manual: sale de limpieza desde Prendas, no por la Inspección).
+    INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, FechaSalida, Actor, Origen)
+    SELECT pr.IdPrenda, ped.FechaDevolucion,
+           CASE WHEN x.Limp = -1 THEN NULL
+                WHEN x.Limp = 0 THEN DATEADD(HOUR, 2, ped.FechaDevolucion)
+                ELSE DATEADD(HOUR, 3, DATEADD(DAY, x.Limp, ped.FechaDevolucion)) END,
+           N'deposito', 1
+    FROM #PP x JOIN #Ped p ON p.Clave = x.Clave JOIN Pedido ped ON ped.IdPedido = p.IdPedido
+    JOIN Prenda pr ON pr.Nombre = x.Prenda
+    WHERE ped.FechaDevolucion IS NOT NULL;
+    INSERT INTO MantenimientoPrenda (IdPrenda, FechaEntrada, FechaSalida, Actor, Origen)
+    SELECT pr.IdPrenda, DATEADD(HOUR, 10, DATEADD(DAY, -v.Entrada, @base)),
+           CASE WHEN v.Salida IS NULL THEN NULL ELSE DATEADD(HOUR, 16, DATEADD(DAY, -v.Salida, @base)) END, N'deposito', 0
+    FROM (VALUES (N'Sweater Gris M', 60, 57), (N'Campera Cuero L', 2, NULL)) AS v(Prenda, Entrada, Salida)
+    JOIN Prenda pr ON pr.Nombre = v.Prenda;
+    UPDATE Prenda SET Estado = 2 WHERE Nombre = N'Campera Cuero L';
+
+    -- Cargos por prenda dañada: Marcos (pendiente: se suma a su próximo cobro) y Victoria (ya cobrado).
+    INSERT INTO CargoPrenda (IdPrenda, IdCliente, Motivo, Monto, FechaRegistro, FechaCobro, Actor, Estado)
+    SELECT pr.IdPrenda, ped.IdCliente, v.Motivo, pr.PrecioReposicion, DATEADD(HOUR, 2, ped.FechaDevolucion),
+           CASE WHEN v.Cobrado = 1 THEN (SELECT MIN(hc.FechaResolucion) FROM HistorialCobro hc
+                                         WHERE hc.IdCliente = ped.IdCliente AND hc.Resultado = 1 AND hc.FechaResolucion > ped.FechaDevolucion) END,
+           N'deposito', v.Cobrado
+    FROM (VALUES ('O25', N'Vestido Coral S', N'Daño irreparable detectado en la inspección de devolución (rotura en la costura lateral).', 0),
+                 ('O38', N'Camisa Lino M',   N'Mancha permanente detectada en la inspección de devolución.', 1)) AS v(Clave, Prenda, Motivo, Cobrado)
+    JOIN #Ped p ON p.Clave = v.Clave JOIN Pedido ped ON ped.IdPedido = p.IdPedido
+    JOIN Prenda pr ON pr.Nombre = v.Prenda;
+    -- El cargo cobrado se sumó al importe de ese cobro.
+    UPDATE hc SET Importe = hc.Importe + cg.Monto
+    FROM HistorialCobro hc JOIN CargoPrenda cg ON cg.IdCliente = hc.IdCliente AND cg.FechaCobro = hc.FechaResolucion
+    WHERE cg.Estado = 1;
+
+    -- Lista de espera: pendiente (Martina espera el vestido que tiene Paula), reservada (48 h para
+    -- retirarla), convertida en pedido y cancelada por vencer la reserva.
+    INSERT INTO ListaEspera (IdPrenda, IdCliente, FechaAlta, Estado, FechaLimiteReserva, FechaResolucion, Actor)
+    SELECT pr.IdPrenda, c.IdCliente, DATEADD(DAY, -v.DiasAlta, @ahora), v.Estado,
+           CASE WHEN v.Estado = 1 THEN DATEADD(HOUR, 47, @ahora)
+                WHEN v.Estado IN (2, 3) THEN DATEADD(DAY, -v.DiasRes, @ahora) END,
+           CASE WHEN v.Estado IN (2, 3) THEN DATEADD(DAY, -v.DiasRes, @ahora) END,
+           v.Actor
+    FROM (VALUES ('40000012', N'Vestido Verde M', 6,  0, NULL, N'vendedor'),
+                 ('30111001', N'Camisa Rayada S', 3,  1, NULL, N'vendedor'),
+                 ('30111016', N'Saco Gris M',     48, 2, 41,   N'vendedor'),
+                 ('30111013', N'Vestido Negro M', 40, 3, 36,   N'sistema')) AS v(DNI, Prenda, DiasAlta, Estado, DiasRes, Actor)
+    JOIN #Cli c ON c.DNI = v.DNI JOIN Prenda pr ON pr.Nombre = v.Prenda;
+
+    -- ── 8. Historial de cada pedido (mismo formato que BLL.Pedido) ──────────────────
+    CREATE TABLE #Ops (IdPedido INT, Orden INT, Fecha DATETIME, Accion NVARCHAR(50), Campo NVARCHAR(100),
+                       Anterior NVARCHAR(1000), Nuevo NVARCHAR(1000), Usr NVARCHAR(50));
+    CREATE TABLE #PedInfo (IdPedido INT PRIMARY KEY, Ids NVARCHAR(400), Cant INT, IdsFaltantes NVARCHAR(400), Vendedor NVARCHAR(50),
+                           Cliente NVARCHAR(150), IdCliente INT, Etapa NVARCHAR(20), Motivo NVARCHAR(200), Estado INT,
+                           FechaPedido DATETIME, FechaEnvioControl DATETIME, FechaControl DATETIME, FechaSeparacion DATETIME,
+                           FechaFormalizacion DATETIME, FechaDespacho DATETIME, FechaEntrega DATETIME, FechaDevolucion DATETIME, PlanNombre NVARCHAR(50));
+    INSERT INTO #PedInfo
+    SELECT ped.IdPedido,
+           STUFF((SELECT ',' + CAST(pp.IdPrenda AS NVARCHAR(10)) FROM PedidoPrenda pp WHERE pp.IdPedido = ped.IdPedido
+                  ORDER BY pp.IdPrenda FOR XML PATH('')), 1, 1, ''),
+           (SELECT COUNT(*) FROM PedidoPrenda pp WHERE pp.IdPedido = ped.IdPedido),
+           STUFF((SELECT ',' + CAST(pf.IdPrenda AS NVARCHAR(10)) FROM PedidoFaltante pf WHERE pf.IdPedido = ped.IdPedido
+                  ORDER BY pf.IdPrenda FOR XML PATH('')), 1, 1, ''),
+           v.Usr, cl.Nombre + N' ' + cl.Apellido, ped.IdCliente, ped.EtapaDesistimiento, ISNULL(ped.MotivoCancelacion, ped.MotivoDesistimiento), ped.Estado,
+           ped.FechaPedido, ped.FechaEnvioControl, ped.FechaControl, ped.FechaSeparacion, ped.FechaFormalizacion,
+           ped.FechaDespacho, ped.FechaEntrega, ped.FechaDevolucion,
+           (SELECT pl.Nombre FROM PlanSuscripcion pl JOIN #Cli c ON c.IdPlan = pl.IdPlan WHERE c.IdCliente = ped.IdCliente)
+    FROM Pedido ped
+    JOIN Cliente cl ON cl.IdCliente = ped.IdCliente
+    JOIN #Vend v ON v.IdEmpleado = ped.IdEmpleado;
+
+    INSERT INTO #Ops (IdPedido, Orden, Fecha, Accion, Campo, Anterior, Nuevo, Usr)
+    -- Envío a control de stock (vendedor)
+    SELECT IdPedido, 1, FechaEnvioControl, N'ENVIAR_CONTROL', x.Campo, NULL, x.Nuevo, Vendedor
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'EnControlStock'), (N'FechaPedido', CONVERT(NVARCHAR(19), i.FechaPedido, 120)), (N'Prendas', i.Ids)) x(Campo, Nuevo)
+    WHERE i.FechaEnvioControl IS NOT NULL
+    UNION ALL
+    -- Desistimiento por cupo (sin pasar por control)
+    SELECT IdPedido, 1, FechaPedido, N'DESISTIR', x.Campo, NULL, x.Nuevo, Vendedor
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'Desistido'), (N'EtapaDesistimiento', i.Etapa), (N'MotivoDesistimiento', i.Motivo), (N'Prendas', i.Ids)) x(Campo, Nuevo)
+    WHERE i.Estado = 7 AND i.Etapa = N'Cupo'
+    UNION ALL
+    -- Informe de faltantes (depósito)
+    SELECT IdPedido, 2, FechaControl, N'INFORMAR_FALTANTES', x.Campo, x.Anterior, x.Nuevo, N'deposito'
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'EnControlStock', N'ConFaltantes'), (N'Faltantes', NULL, i.IdsFaltantes)) x(Campo, Anterior, Nuevo)
+    WHERE i.IdsFaltantes IS NOT NULL
+    UNION ALL
+    -- Desistimiento después de los faltantes (vendedor)
+    SELECT IdPedido, 3, DATEADD(HOUR, 1, FechaControl), N'DESISTIR', x.Campo, x.Anterior, x.Nuevo, Vendedor
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'ConFaltantes', N'Desistido'), (N'EtapaDesistimiento', NULL, i.Etapa), (N'MotivoDesistimiento', NULL, i.Motivo)) x(Campo, Anterior, Nuevo)
+    WHERE i.Estado = 7 AND i.Etapa = N'Disponibilidad'
+    UNION ALL
+    -- Confirmación y separación (depósito)
+    SELECT IdPedido, 2, FechaControl, N'CONFIRMAR_PRENDAS', N'PrendasConfirmadas', NULL, Ids, N'deposito'
+    FROM #PedInfo WHERE FechaSeparacion IS NOT NULL
+    UNION ALL
+    SELECT IdPedido, 3, FechaSeparacion, N'SEPARAR', x.Campo, x.Anterior, x.Nuevo, N'deposito'
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'EnControlStock', N'Separado'), (N'FechaSeparacion', NULL, CONVERT(NVARCHAR(19), i.FechaSeparacion, 120))) x(Campo, Anterior, Nuevo)
+    WHERE i.FechaSeparacion IS NOT NULL
+    UNION ALL
+    -- Formalización (vendedor)
+    SELECT IdPedido, 4, FechaFormalizacion, N'FORMALIZAR', x.Campo, x.Anterior, x.Nuevo, Vendedor
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'Separado', N'Pendiente'), (N'FechaFormalizacion', NULL, CONVERT(NVARCHAR(19), i.FechaFormalizacion, 120))) x(Campo, Anterior, Nuevo)
+    WHERE i.FechaFormalizacion IS NOT NULL
+    UNION ALL
+    -- Cancelación (vendedor), al día siguiente de formalizar
+    SELECT IdPedido, 5, DATEADD(HOUR, 20, FechaFormalizacion), N'CANCELAR', x.Campo, x.Anterior, x.Nuevo, Vendedor
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'Pendiente', N'Cancelado'), (N'MotivoCancelacion', NULL, i.Motivo)) x(Campo, Anterior, Nuevo)
+    WHERE i.Estado = 3
+    UNION ALL
+    -- Despacho y entrega (operador logístico)
+    SELECT IdPedido, 5, FechaDespacho, N'DESPACHAR', x.Campo, x.Anterior, x.Nuevo, N'logistico'
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'Pendiente', N'Despachado'), (N'FechaDespacho', NULL, CONVERT(NVARCHAR(19), i.FechaDespacho, 120))) x(Campo, Anterior, Nuevo)
+    WHERE i.FechaDespacho IS NOT NULL
+    UNION ALL
+    SELECT IdPedido, 6, FechaEntrega, N'ENTREGAR', x.Campo, x.Anterior, x.Nuevo, N'logistico'
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Estado', N'Despachado', N'Entregado'), (N'FechaEntrega', NULL, CONVERT(NVARCHAR(19), i.FechaEntrega, 120))) x(Campo, Anterior, Nuevo)
+    WHERE i.FechaEntrega IS NOT NULL
+    UNION ALL
+    -- Devolución (depósito): las prendas pasan a limpieza
+    SELECT IdPedido, 7, FechaDevolucion, N'DEVOLUCION', x.Campo, x.Anterior, x.Nuevo, N'deposito'
+    FROM #PedInfo i
+    CROSS APPLY (VALUES (N'Prendas', N'EnUso', N'EnLimpieza (' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s))'),
+                        (N'FechaDevolucion', NULL, CONVERT(NVARCHAR(19), i.FechaDevolucion, 120))) x(Campo, Anterior, Nuevo)
+    WHERE i.FechaDevolucion IS NOT NULL;
+
+    INSERT INTO PedidoHistorial (IdPedido, IdOperacion, Fecha, IdUsuario, NombreUsuario, Accion, Campo, ValorAnterior, ValorNuevo)
+    SELECT o.IdPedido, DENSE_RANK() OVER (PARTITION BY o.IdPedido ORDER BY o.Orden), o.Fecha,
+           (SELECT TOP 1 IdUsuario FROM Usuario u WHERE u.Username = o.Usr), o.Usr, o.Accion, o.Campo, o.Anterior, o.Nuevo
+    FROM #Ops o;
+
+    -- ── 9. Bitácora de negocio coherente con lo anterior ─────────────────────────
+    INSERT INTO BitacoraNegocio (Fecha, Tipo, IdUsuario, IdPedido, IdPrenda, IdCliente, Descripcion)
+    SELECT e.Fecha, e.Tipo, (SELECT TOP 1 IdUsuario FROM Usuario u WHERE u.Username = e.Usr), e.IdPedido, e.IdPrenda, e.IdCliente, e.Descripcion
+    FROM (
+        -- Pedidos: un evento por operación
+        SELECT o.Fecha, o.Usr, o.IdPedido, CAST(NULL AS INT) AS IdPrenda, i.IdCliente,
+               CASE o.Accion WHEN N'ENVIAR_CONTROL' THEN N'EnvioControlStock' WHEN N'INFORMAR_FALTANTES' THEN N'InformeFaltantes'
+                             WHEN N'SEPARAR' THEN N'SeparacionPrendas' WHEN N'FORMALIZAR' THEN N'Venta' WHEN N'DESPACHAR' THEN N'Despacho'
+                             WHEN N'ENTREGAR' THEN N'Entrega' WHEN N'DEVOLUCION' THEN N'Devolucion' WHEN N'CANCELAR' THEN N'Cancelacion'
+                             ELSE N'Desistimiento' END AS Tipo,
+               CASE o.Accion
+                    WHEN N'ENVIAR_CONTROL'     THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' enviado a control de stock — ' + i.Cliente + N' — ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s)'
+                    WHEN N'INFORMAR_FALTANTES' THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': 1 prenda(s) faltante(s) — Vestido Verde M'
+                    WHEN N'SEPARAR'            THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s) separadas para ' + i.Cliente
+                    WHEN N'FORMALIZAR'         THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' — ' + i.Cliente + N' — ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s) — Plan ' + ISNULL(i.PlanNombre, N'—') + N' — ' + FORMAT(o.Fecha, 'dd/MM/yyyy HH:mm')
+                    WHEN N'DESPACHAR'          THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' despachado — Cliente: ' + i.Cliente + N' — ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s)'
+                    WHEN N'ENTREGAR'           THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' entregado — Cliente: ' + i.Cliente
+                    WHEN N'DEVOLUCION'         THEN N'Devolución pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' — Cliente: ' + i.Cliente + N' — ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s) pasan a EnLimpieza'
+                    WHEN N'CANCELAR'           THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' cancelado — Cliente: ' + i.Cliente + N' — Motivo: ' + i.Motivo
+                    ELSE N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': el cliente ' + i.Cliente + N' desistió (' + i.Etapa + N') — ' + i.Motivo END AS Descripcion
+        FROM (SELECT DISTINCT IdPedido, Orden, Fecha, Accion, Usr FROM #Ops WHERE Accion <> N'CONFIRMAR_PRENDAS') o
+        JOIN #PedInfo i ON i.IdPedido = o.IdPedido
+        UNION ALL
+        -- Altas de clientes
+        SELECT cl.FechaAlta, N'vendedor', NULL, NULL, cl.IdCliente, N'AltaCliente',
+               N'Alta de cliente ' + cl.Nombre + N' ' + cl.Apellido + N' — DNI ' + cl.DNI
+        FROM Cliente cl
+        UNION ALL
+        -- Baja lógica de Gustavo
+        SELECT DATEADD(HOUR, 15, DATEADD(DAY, -c.BajaLogica, @base)), N'admin', NULL, NULL, c.IdCliente, N'BajaCliente',
+               N'Baja de cliente ' + c.Nombre + N' ' + c.Apellido + N' — DNI ' + c.DNI
+        FROM #Cli c WHERE c.BajaLogica IS NOT NULL
+        UNION ALL
+        -- Cobros de suscripción
+        SELECT hc.FechaResolucion, hc.Actor, NULL, NULL, hc.IdCliente, N'CobroSuscripcion',
+               N'Cobro de suscripción ' + hc.NumeroComprobante + N' — ' + cl.Nombre + N' ' + cl.Apellido + N' — $' + FORMAT(hc.Importe, 'N2', 'es-AR')
+        FROM HistorialCobro hc JOIN Cliente cl ON cl.IdCliente = hc.IdCliente
+        WHERE hc.Resultado = 1
+        UNION ALL
+        -- Lista de espera
+        SELECT le.FechaAlta, N'vendedor', NULL, le.IdPrenda, le.IdCliente, N'ListaEspera',
+               cl.Nombre + N' ' + cl.Apellido + N' se anotó en la lista de espera de ''' + pr.Nombre + N''''
+        FROM ListaEspera le JOIN Cliente cl ON cl.IdCliente = le.IdCliente JOIN Prenda pr ON pr.IdPrenda = le.IdPrenda
+        UNION ALL
+        -- Prendas: alta y bajas con cargo
+        SELECT pr.FechaAlta, N'deposito', NULL, pr.IdPrenda, NULL, N'AltaPrenda', N'Alta de prenda ''' + pr.Nombre + N''' (' + pr.Categoria + N', talle ' + pr.Talle + N')'
+        FROM Prenda pr
+        UNION ALL
+        SELECT cg.FechaRegistro, N'deposito', NULL, cg.IdPrenda, cg.IdCliente, N'CambioEstadoPrenda',
+               N'''' + pr.Nombre + N''' dada de baja en la inspección — cargo de $' + FORMAT(cg.Monto, 'N2', 'es-AR') + N' a ' + cl.Nombre + N' ' + cl.Apellido
+        FROM CargoPrenda cg JOIN Prenda pr ON pr.IdPrenda = cg.IdPrenda JOIN Cliente cl ON cl.IdCliente = cg.IdCliente
+    ) e;
+
+    -- ── 9b. PN03: decisiones comerciales del Centro de decisiones ─────────────────────
+    -- ClaveRecomendacion con el formato de las reglas (BLL.Inteligencia.Reglas: Codigo[:Id[:Caso]]),
+    -- así se asocian a las recomendaciones del análisis por defecto (últimos 90 días):
+    --   · Ejecutada hace 107 días: la recomendación de bajas del plan Básico que originó la sugerencia
+    --     evaluada → promoción Vencida. Estimado (40000 × 30 %) contra el resultado real cargado: se
+    --     ve "estimado vs real" en el Historial. Es anterior al período analizado, así que la
+    --     recomendación de hoy vuelve a poder decidirse (BLL DecisionesComerciales.DecisionVigente).
+    --   · Pospuesta hasta dentro de 5 días: la recomendación queda oculta hasta esa fecha
+    --     ("Mostrar ocultas" la muestra).
+    --   · Descartada hace 45 días (pasado el silencio de 30): la liquidación de las prendas sin
+    --     rotación se muestra de nuevo para decidir, con el descarte anterior como dato.
+    IF OBJECT_ID('DecisionComercial', 'U') IS NOT NULL AND @uGer IS NOT NULL
+    BEGIN
+        INSERT INTO DecisionComercial (Fecha, IdUsuario, TipoRegla, ClaveRecomendacion, Prioridad, Titulo, Diagnostico,
+                                       AccionElegida, EsAlternativa, ImpactoEstimado, Estado, Motivo, TipoReferencia, Referencia,
+                                       PospuestaHasta, FechaEjecucion, FechaEvaluacion, ResultadoReal)
+        SELECT DATEADD(DAY, -v.Dias, @ahora), @uGer, v.TipoRegla, v.Clave, v.Prioridad, v.Titulo, v.Diagnostico,
+               v.Accion, 0, v.Impacto, v.Estado, v.Motivo, v.TipoRef, v.Ref,
+               CASE WHEN v.PospHasta IS NULL THEN NULL ELSE DATEADD(DAY, v.PospHasta, @hoy) END,
+               CASE WHEN v.Estado = 4 THEN DATEADD(DAY, -v.Dias, @ahora) END,   -- la Ejecutada: se ejecutó al aceptarla
+               CASE WHEN v.DiasEval IS NULL THEN NULL ELSE DATEADD(DAY, -v.DiasEval, @ahora) END, v.Real
+        FROM (VALUES
+            (N'ChurnPlan', N'ChurnPlan:' + CAST(@pB AS NVARCHAR(10)), 0,
+             N'Bajas altas en el plan Básico: actuar para retener a los clientes en riesgo',
+             N'El plan Básico tenía el % de bajas más alto de los planes y 5 cliente(s) en riesgo de abandono.',
+             N'Lanzar una promoción de retención en el plan Básico con 15 % de descuento durante 60 días',
+             12000.00, 4, CAST(NULL AS NVARCHAR(500)), N'Sugerencia', @sugEval, CAST(NULL AS INT), 107, 38, CAST(21600.00 AS DECIMAL(14,2))),
+            (N'Renovaciones', N'Renovaciones', 1,
+             N'Gestionar la renovación de los clientes con la suscripción por vencer o vencida',
+             N'Clientes con la suscripción por vencer o vencida hace poco: conviene gestionar el cobro antes de perderlos.',
+             N'Campaña de renovación: exportar los contactos de los clientes para llamarlos o escribirles antes de perderlos',
+             0.00, 3, N'Se retoma después del cierre de mes.', NULL, NULL, 5, 2, NULL, NULL),
+            (N'BajaRotacion', N'BajaRotacion', 1,
+             N'Liquidar o dar de baja las prendas sin rotación',
+             N'Prendas disponibles sin pedidos en el período y con más de 60 días en el catálogo inmovilizaban capital.',
+             N'Dar de baja las prendas para liquidarlas (pasan de Disponible a Baja)',
+             0.00, 2, N'Se esperaba el cambio de temporada antes de liquidar.', NULL, NULL, NULL, 45, NULL, NULL)
+        ) AS v(TipoRegla, Clave, Prioridad, Titulo, Diagnostico, Accion, Impacto, Estado, Motivo, TipoRef, Ref, PospHasta, Dias, DiasEval, Real)
+        WHERE v.Clave IS NOT NULL AND (v.TipoRef IS NULL OR v.Ref IS NOT NULL);
+    END
+
+    -- ── 9b2. PN03: metas comerciales (relativas a hoy) ─────────────────────────────
+    -- Para que la pestaña Metas, el semáforo y los avisos al iniciar sesión tengan qué mostrar el día
+    -- que se instala o restablece la demo, sin depender del día del mes:
+    --   · MRR del mes en curso: la mitad del ingreso de los clientes activos con plan → Cumplida.
+    --   · Ocupación del stock del mes en curso: la de hoy + 15 pp (tope 100) → En riesgo (es una foto del
+    --     día). Para quien puede ejecutarlas (patente de edición de stock), sube la prioridad de dar de baja
+    --     las prendas sin rotación o con mantenimiento excesivo (menos prendas activas) y la del upgrade de
+    --     plan (más prendas en uso). Mandar prendas a revisión no cambia la ocupación (siguen activas).
+    --   · % de bajas del mes en curso: máximo 30 % (se ve el ritmo del mes y su proyección).
+    --   · MRR del mes anterior: 1,5 veces el ingreso actual → No cumplida (mes cerrado).
+    --   · MRR de hace dos meses: 40 % del ingreso actual → Cumplida (historia del gráfico).
+    IF OBJECT_ID('MetaComercial', 'U') IS NOT NULL AND @uGer IS NOT NULL
+    BEGIN
+        DECLARE @mesActual DATE = DATEFROMPARTS(YEAR(@hoy), MONTH(@hoy), 1);
+        DECLARE @mrrBase DECIMAL(14,2) = (SELECT ISNULL(SUM(p.Precio), 0) FROM Cliente c
+                                          JOIN PlanSuscripcion p ON p.IdPlan = c.IdPlan WHERE c.Activo = 1);
+        DECLARE @ocupHoy DECIMAL(14,2) = (SELECT CASE WHEN COUNT(*) = 0 THEN 0
+                                                      ELSE 100.0 * SUM(CASE WHEN Estado = 1 THEN 1 ELSE 0 END) / COUNT(*) END
+                                          FROM Prenda WHERE Estado <> 3);
+        IF @mrrBase > 0
+            INSERT INTO MetaComercial (Periodo, Indicador, ValorObjetivo, Sentido, IdUsuario, Fecha)
+            SELECT v.Periodo, v.Indicador, v.Valor, v.Sentido, @uGer, DATEADD(DAY, -v.Dias, @ahora)
+            FROM (VALUES
+                (@mesActual,                     0, ROUND(@mrrBase * 0.5, -3), 0, 2),
+                (@mesActual,                     2, CASE WHEN @ocupHoy + 15 > 100 THEN 100 ELSE ROUND(@ocupHoy + 15, 0) END, 0, 2),
+                (@mesActual,                     1, CAST(30 AS DECIMAL(14,2)), 1, 2),
+                (DATEADD(MONTH, -1, @mesActual), 0, ROUND(@mrrBase * 1.5, -3), 0, 35),
+                (DATEADD(MONTH, -2, @mesActual), 0, ROUND(@mrrBase * 0.4, -3), 0, 65)
+            ) AS v(Periodo, Indicador, Valor, Sentido, Dias)
+            WHERE v.Valor > 0;
+    END
+
+    -- ── 9c. Versiones (Memento) del usuario 'vendedor' ─────────────────────────────
+    -- Para mostrar la exportación/importación a XML y la restauración sin editar antes un usuario:
+    -- una versión inicial con el email anterior y otra con el cambio al email actual (fechas
+    -- relativas a hoy). Se recrean solo si el vendedor no tiene otras versiones que estas dos (no se
+    -- pisa un historial real). HistorialUsuario no lleva dígito verificador.
+    IF OBJECT_ID('HistorialUsuario', 'U') IS NOT NULL AND @uVend IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM HistorialUsuario WHERE IdUsuario = @uVend
+                       AND Detalle NOT IN (N'Estado administrativo inicial.', N'Modificación de usuario: email actualizado.'))
+    BEGIN
+        DELETE FROM HistorialUsuario WHERE IdUsuario = @uVend;
+        INSERT INTO HistorialUsuario (IdUsuario, Fecha, Actor, Detalle, UsernameSnap, NombreSnap, ApellidoSnap,
+                                      FechaNacSnap, EmailSnap, ClaveSnap, EstadoSnap, IntentosSnap)
+        SELECT u.IdUsuario, DATEADD(DAY, -60, @ahora), N'admin', N'Estado administrativo inicial.',
+               u.Username, u.Nombre, u.Apellido, u.FechaNacimiento, N'vmorana.ventas@wardrobeflow.com', N'', 1, 0
+        FROM Usuario u WHERE u.IdUsuario = @uVend
+        UNION ALL
+        SELECT u.IdUsuario, DATEADD(DAY, -20, @ahora), N'admin', N'Modificación de usuario: email actualizado.',
+               u.Username, u.Nombre, u.Apellido, u.FechaNacimiento, u.Email, N'', 1, 0
+        FROM Usuario u WHERE u.IdUsuario = @uVend;
+    END
+
+    -- ── 10. Marcas: demo aplicada y dígitos verificadores pendientes ─────────────────
+    DELETE FROM ParametroSistema WHERE Clave IN (N'SeedDemo21', N'ResetDatosDemo', N'DemoCargaPendiente');
+    INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada', GETDATE());
+    -- Con los dígitos ya calculados alguna vez (formato 2), las tablas que cambió este procedimiento
+    -- quedan "sin calcular" (DVH = 0 y sin DVV) y se pide la inicialización a la app: Usuario y
+    -- PermisoRelacion no se tocan y se siguen verificando normalmente.
+    IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'FormatoDV' AND TRY_CONVERT(INT, Valor) >= 2)
+    BEGIN
+        UPDATE Empleado SET DVH = 0;
+        DELETE FROM DVVertical WHERE NombreTabla IN ('Cliente', 'Empleado', 'Pedido', 'Contratacion');
+        MERGE ParametroSistema AS t
+        USING (VALUES (N'DVInicializacionPendiente', N'1')) AS s(Clave, Valor) ON t.Clave = s.Clave
+        WHEN MATCHED THEN UPDATE SET Valor = s.Valor, Fecha = GETDATE()
+        WHEN NOT MATCHED THEN INSERT (Clave, Valor, Fecha) VALUES (s.Clave, s.Valor, GETDATE());
+    END
+
+    COMMIT TRANSACTION;
+END
+GO
+
+IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'DemoCargaPendiente' AND Valor = N'1')
+BEGIN
+    EXEC dbo.RestablecerDatosDemo @Confirmacion = N'RESTABLECER';
+    PRINT 'Datos de demo (sección 21z3b) cargados: escenarios de PN01–PN04 y 6 meses de historia.';
+END
+GO
+
+-- Las 2 versiones (Memento) del usuario 'vendedor' de la demo se cargan dentro de
+-- dbo.RestablecerDatosDemo (paso 9c): solo en una instalación nueva o al restablecer la demo, no
+-- en cualquier base donde se corra el script.
 
 -- ============================================================
 -- WardrobeFlow — 21z4. TEXTOS DE FÁBRICA CORREGIDOS (terminología EN, montos {n:C2}, "En limpieza")
@@ -5005,6 +5903,492 @@ GO
 PRINT 'Sección 21z7: ayuda de backups automáticos verificada.';
 GO
 
+-- ============================================================
+-- WardrobeFlow — 21z8. TEXTOS DE LA AUDITORÍA DE LA 1.6.0
+-- ------------------------------------------------------------
+-- · ayuda.BackupForm: explica "Restablecer datos de demo..." y su backup previo
+--   (WardrobeFlow_PrevioDemo_<fecha>_<usuario>.bak).
+-- · msg.demo.confirmar: incluye las decisiones comerciales entre lo que se borra y ya no trae
+--   el consejo de la defensa (queda solo en Instalador/Credenciales_Iniciales.txt).
+-- · err.bll.demo.integridad: la ruta real del menú (Administrar → Sistema → Diagnóstico de Integridad).
+-- · ayuda.CentroDecisionesForm y el glosario (glos.mrr/churn/proyeccion.formula): MRR solo de los
+--   clientes que pagan hoy (sin pausa, vencimiento ni suspensión), clientes y MRR reconstruidos al
+--   fin del período, mes parcial fuera de la proyección y el botón "Simular esta opción".
+-- Las claves nuevas las inserta la aplicación desde traducciones.tsv; acá se actualizan las que ya
+-- existen en una base instalada, SOLO si siguen con el texto de fábrica anterior (una edición hecha
+-- en Idiomas se respeta). Idempotente.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @Textos160 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                              TextoAnterior NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @Textos160 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.BackupForm',
+        N'Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos.' + NCHAR(10) + N'' + NCHAR(10) + N'Backups automáticos (sin cifrar):' + NCHAR(10) + N'• Al iniciar sesión (cualquier rol), si el último backup es más antiguo que el intervalo configurado (60 minutos por defecto; el Administrador lo cambia con "Backup automático al iniciar sesión...").' + NCHAR(10) + N'• Cada 24 horas mientras la aplicación esté abierta.' + NCHAR(10) + N'• Rotan entre auto_domingo.bak … auto_sabado.bak (uno por día de la semana) y se restauran sin contraseña.',
+        N'Crear, restaurar y eliminar copias de seguridad de la base (solo Administrador). Antes de crear una copia se verifica la integridad de los datos.' + NCHAR(10) + N'' + NCHAR(10) + N'Backups automáticos (sin cifrar):' + NCHAR(10) + N'• Al iniciar sesión (cualquier rol), si el último backup es más antiguo que el intervalo configurado (60 minutos por defecto; el Administrador lo cambia con "Backup automático al iniciar sesión...").' + NCHAR(10) + N'• Cada 24 horas mientras la aplicación esté abierta.' + NCHAR(10) + N'• Rotan entre auto_domingo.bak … auto_sabado.bak (uno por día de la semana) y se restauran sin contraseña.' + NCHAR(10) + N'' + NCHAR(10) + N'Restablecer datos de demo... (solo Administrador): borra los datos de negocio y vuelve a cargar los de prueba con las fechas corridas a hoy. Antes genera una copia sin cifrar WardrobeFlow_PrevioDemo_<fecha>_<usuario>.bak en la carpeta de backups (se restaura como cualquier otra) y, al terminar, verifica la integridad y reinicia la aplicación.'),
+    (N'EN', N'ayuda.BackupForm',
+        N'Create, restore and delete database backups (Administrator only). Data integrity is checked before creating a backup.' + NCHAR(10) + N'' + NCHAR(10) + N'Automatic backups (unencrypted):' + NCHAR(10) + N'• At login (any role), if the last backup is older than the configured interval (60 minutes by default; the Administrator changes it with "Automatic backup at login...").' + NCHAR(10) + N'• Every 24 hours while the application is open.' + NCHAR(10) + N'• They rotate over auto_domingo.bak … auto_sabado.bak (one per day of the week) and are restored without a password.',
+        N'Create, restore and delete database backups (Administrator only). Data integrity is checked before creating a backup.' + NCHAR(10) + N'' + NCHAR(10) + N'Automatic backups (unencrypted):' + NCHAR(10) + N'• At login (any role), if the last backup is older than the configured interval (60 minutes by default; the Administrator changes it with "Automatic backup at login...").' + NCHAR(10) + N'• Every 24 hours while the application is open.' + NCHAR(10) + N'• They rotate over auto_domingo.bak … auto_sabado.bak (one per day of the week) and are restored without a password.' + NCHAR(10) + N'' + NCHAR(10) + N'Reset demo data... (Administrator only): deletes the business data and reloads the sample data with the dates moved to today. It first creates an unencrypted backup WardrobeFlow_PrevioDemo_<date>_<user>.bak in the backups folder (restored like any other) and, when it finishes, checks integrity and restarts the application.'),
+    (N'RU', N'ayuda.BackupForm',
+        N'Создание, восстановление и удаление резервных копий базы (только администратор). Перед созданием копии проверяется целостность данных.' + NCHAR(10) + N'' + NCHAR(10) + N'Автоматические бэкапы (без шифрования):' + NCHAR(10) + N'• При входе в систему (любая роль), если последний бэкап старше настроенного интервала (по умолчанию 60 минут; администратор меняет его кнопкой «Автоматический бэкап при входе...»).' + NCHAR(10) + N'• Каждые 24 часа, пока приложение открыто.' + NCHAR(10) + N'• Чередуются в файлах auto_domingo.bak … auto_sabado.bak (по одному на день недели) и восстанавливаются без пароля.',
+        N'Создание, восстановление и удаление резервных копий базы (только администратор). Перед созданием копии проверяется целостность данных.' + NCHAR(10) + N'' + NCHAR(10) + N'Автоматические бэкапы (без шифрования):' + NCHAR(10) + N'• При входе в систему (любая роль), если последний бэкап старше настроенного интервала (по умолчанию 60 минут; администратор меняет его кнопкой «Автоматический бэкап при входе...»).' + NCHAR(10) + N'• Каждые 24 часа, пока приложение открыто.' + NCHAR(10) + N'• Чередуются в файлах auto_domingo.bak … auto_sabado.bak (по одному на день недели) и восстанавливаются без пароля.' + NCHAR(10) + N'' + NCHAR(10) + N'Сбросить демо-данные... (только администратор): удаляет бизнес-данные и заново загружает тестовые данные с датами, сдвинутыми на сегодня. Сначала создаётся резервная копия без шифрования WardrobeFlow_PrevioDemo_<дата>_<пользователь>.bak в папке бэкапов (восстанавливается как любая другая), а по завершении проверяется целостность и приложение перезапускается.'),
+    (N'PT', N'ayuda.BackupForm',
+        N'Criar, restaurar e excluir cópias de segurança do banco (só Administrador). Antes de criar uma cópia, a integridade dos dados é verificada.' + NCHAR(10) + N'' + NCHAR(10) + N'Backups automáticos (sem criptografia):' + NCHAR(10) + N'• Ao iniciar sessão (qualquer função), se o último backup for mais antigo que o intervalo configurado (60 minutos por padrão; o Administrador o altera com "Backup automático ao iniciar sessão...").' + NCHAR(10) + N'• A cada 24 horas enquanto a aplicação estiver aberta.' + NCHAR(10) + N'• Alternam entre auto_domingo.bak … auto_sabado.bak (um por dia da semana) e são restaurados sem senha.',
+        N'Criar, restaurar e excluir cópias de segurança do banco (só Administrador). Antes de criar uma cópia, a integridade dos dados é verificada.' + NCHAR(10) + N'' + NCHAR(10) + N'Backups automáticos (sem criptografia):' + NCHAR(10) + N'• Ao iniciar sessão (qualquer função), se o último backup for mais antigo que o intervalo configurado (60 minutos por padrão; o Administrador o altera com "Backup automático ao iniciar sessão...").' + NCHAR(10) + N'• A cada 24 horas enquanto a aplicação estiver aberta.' + NCHAR(10) + N'• Alternam entre auto_domingo.bak … auto_sabado.bak (um por dia da semana) e são restaurados sem senha.' + NCHAR(10) + N'' + NCHAR(10) + N'Restabelecer dados de demonstração... (só Administrador): exclui os dados de negócio e carrega novamente os dados de exemplo com as datas ajustadas para hoje. Antes gera uma cópia sem criptografia WardrobeFlow_PrevioDemo_<data>_<usuário>.bak na pasta de backups (restaurada como qualquer outra) e, ao terminar, verifica a integridade e reinicia a aplicação.'),
+    (N'ES', N'ayuda.CentroDecisionesForm',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: elija el período (o un atajo) y el plan. Cada indicador se compara con el período anterior de igual duración (▲/▼). Los gráficos muestran la tendencia con 3 meses proyectados (punteado), el ingreso en riesgo, el stock y la rotación.' + NCHAR(10) + N'2. Recomendaciones: qué está pasando, por qué, qué hacer y cuánto vale (con la fórmula). Elija una opción y pulse Aceptar y ejecutar (abre el flujo existente), Descartar (con motivo) o Posponer.' + NCHAR(10) + N'3. Historial: las decisiones tomadas, con el impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? con la retención de equilibrio; compare hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción (mantener, extender o dar de baja).' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: los valores que disparan cada regla. Informe ejecutivo: PDF con todo lo anterior.',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: elija el período (o un atajo) y el plan. Cada indicador se compara con el período anterior de igual duración (▲/▼). Los gráficos muestran la tendencia con 3 meses proyectados (punteado), el ingreso en riesgo, el stock y la rotación.' + NCHAR(10) + N'2. Recomendaciones: qué está pasando, por qué, qué hacer y cuánto vale (con la fórmula). Elija una opción y pulse Aceptar y ejecutar (abre el flujo existente), Descartar (con motivo) o Posponer; Simular esta opción la carga en el simulador.' + NCHAR(10) + N'3. Historial: las decisiones tomadas, con el impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? con la retención de equilibrio; compare hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción (mantener, extender o dar de baja).' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: los valores que disparan cada regla. Informe ejecutivo: PDF con todo lo anterior.'),
+    (N'EN', N'ayuda.CentroDecisionesForm',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply promotion → measure results.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: choose the period (or a shortcut) and the plan. Each indicator is compared with the previous period of the same length (▲/▼). The charts show the trend with 3 projected months (dashed), revenue at risk, stock and turnover.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and how much it is worth (with the formula). Choose an option and press Accept and execute (opens the existing flow), Discard (with a reason) or Postpone.' + NCHAR(10) + N'3. History: the decisions taken, with estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? with the break-even retention; compare up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion (keep, extend or withdraw).' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: the values that trigger each rule. Executive report: PDF with all of the above.',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply promotion → measure results.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: choose the period (or a shortcut) and the plan. Each indicator is compared with the previous period of the same length (▲/▼). The charts show the trend with 3 projected months (dashed), revenue at risk, stock and turnover.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and how much it is worth (with the formula). Choose an option and press Accept and execute (opens the existing flow), Discard (with a reason) or Postpone; Simulate this option loads it into the simulator.' + NCHAR(10) + N'3. History: the decisions taken, with estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? with the break-even retention; compare up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion (keep, extend or withdraw).' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: the values that trigger each rule. Executive report: PDF with all of the above.'),
+    (N'RU', N'ayuda.CentroDecisionesForm',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → запуск акции → оценка результата.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: выберите период (или быстрый выбор) и тариф. Каждый показатель сравнивается с предыдущим периодом той же длины (▲/▼). Графики: тенденция с прогнозом на 3 месяца (пунктир), доход под риском, запасы и оборот.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и сколько это стоит (с формулой). Выберите вариант и нажмите «Принять и выполнить» (открывает существующий процесс), «Отклонить» (с причиной) или «Отложить».' + NCHAR(10) + N'3. История: принятые решения, оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? с безубыточным удержанием; сравнение до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по каждой акции (сохранить, продлить или отменить).' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: значения, запускающие правила. Отчёт для руководства: PDF со всем перечисленным.',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → запуск акции → оценка результата.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: выберите период (или быстрый выбор) и тариф. Каждый показатель сравнивается с предыдущим периодом той же длины (▲/▼). Графики: тенденция с прогнозом на 3 месяца (пунктир), доход под риском, запасы и оборот.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и сколько это стоит (с формулой). Выберите вариант и нажмите «Принять и выполнить» (открывает существующий процесс), «Отклонить» (с причиной) или «Отложить»; «Смоделировать этот вариант» загружает его в симулятор.' + NCHAR(10) + N'3. История: принятые решения, оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? с безубыточным удержанием; сравнение до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по каждой акции (сохранить, продлить или отменить).' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: значения, запускающие правила. Отчёт для руководства: PDF со всем перечисленным.'),
+    (N'PT', N'ayuda.CentroDecisionesForm',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar promoção → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: escolha o período (ou um atalho) e o plano. Cada indicador é comparado com o período anterior de mesma duração (▲/▼). Os gráficos mostram a tendência com 3 meses projetados (tracejado), a receita em risco, o estoque e a rotatividade.' + NCHAR(10) + N'2. Recomendações: o que está acontecendo, por quê, o que fazer e quanto vale (com a fórmula). Escolha uma opção e clique em Aceitar e executar (abre o fluxo existente), Descartar (com motivo) ou Adiar.' + NCHAR(10) + N'3. Histórico: as decisões tomadas, com o impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? com a retenção de equilíbrio; compare até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção (manter, estender ou dar baixa).' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: os valores que disparam cada regra. Relatório executivo: PDF com tudo isso.',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar promoção → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: escolha o período (ou um atalho) e o plano. Cada indicador é comparado com o período anterior de mesma duração (▲/▼). Os gráficos mostram a tendência com 3 meses projetados (tracejado), a receita em risco, o estoque e a rotatividade.' + NCHAR(10) + N'2. Recomendações: o que está acontecendo, por quê, o que fazer e quanto vale (com a fórmula). Escolha uma opção e clique em Aceitar e executar (abre o fluxo existente), Descartar (com motivo) ou Adiar; Simular esta opção a carrega no simulador.' + NCHAR(10) + N'3. Histórico: as decisões tomadas, com o impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? com a retenção de equilíbrio; compare até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção (manter, estender ou dar baixa).' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: os valores que disparam cada regra. Relatório executivo: PDF com tudo isso.'),
+    (N'ES', N'msg.demo.confirmar',
+        N'¿Restablecer los datos de demo?' + NCHAR(10) + N'' + NCHAR(10) + N'Se BORRARÁN todos los datos de negocio (clientes, prendas, pedidos, contrataciones, cobros, promociones y bitácora de negocio) y se volverán a cargar los datos de prueba de la instalación, con las fechas corridas a hoy. Usuarios, permisos, planes, idiomas y la bitácora del sistema se conservan.' + NCHAR(10) + N'' + NCHAR(10) + N'Antes se generará una copia de seguridad (sin cifrar) en la carpeta de backups. Al terminar, la aplicación se reiniciará.' + NCHAR(10) + N'' + NCHAR(10) + N'Úsela como máximo 2 días antes de la defensa.',
+        N'¿Restablecer los datos de demo?' + NCHAR(10) + N'' + NCHAR(10) + N'Se BORRARÁN todos los datos de negocio (clientes, prendas, pedidos, contrataciones, cobros, promociones, decisiones comerciales y bitácora de negocio) y se volverán a cargar los datos de prueba de la instalación, con las fechas corridas a hoy. Usuarios, permisos, planes, idiomas y la bitácora del sistema se conservan.' + NCHAR(10) + N'' + NCHAR(10) + N'Antes se generará una copia de seguridad (sin cifrar) en la carpeta de backups. Al terminar, la aplicación se reiniciará.'),
+    (N'EN', N'msg.demo.confirmar',
+        N'Reset the demo data?' + NCHAR(10) + N'' + NCHAR(10) + N'ALL business data (customers, garments, orders, contracts, payments, promotions and business log) will be DELETED and the installation''s sample data will be loaded again, with the dates moved to today. Users, permissions, plans, languages and the system log are kept.' + NCHAR(10) + N'' + NCHAR(10) + N'A backup (unencrypted) is generated first in the backups folder. When it finishes, the application will restart.' + NCHAR(10) + N'' + NCHAR(10) + N'Use it at most 2 days before the defense.',
+        N'Reset the demo data?' + NCHAR(10) + N'' + NCHAR(10) + N'ALL business data (customers, garments, orders, contracts, payments, promotions, business decisions and business log) will be DELETED and the installation''s sample data will be loaded again, with the dates moved to today. Users, permissions, plans, languages and the system log are kept.' + NCHAR(10) + N'' + NCHAR(10) + N'A backup (unencrypted) is generated first in the backups folder. When it finishes, the application will restart.'),
+    (N'RU', N'msg.demo.confirmar',
+        N'Сбросить демо-данные?' + NCHAR(10) + N'' + NCHAR(10) + N'ВСЕ бизнес-данные (клиенты, вещи, заказы, договоры, платежи, акции и бизнес-журнал) будут УДАЛЕНЫ, и тестовые данные установки будут загружены заново с датами, сдвинутыми на сегодня. Пользователи, права, планы, языки и системный журнал сохраняются.' + NCHAR(10) + N'' + NCHAR(10) + N'Сначала в папке бэкапов создаётся резервная копия (без шифрования). По завершении приложение перезапустится.' + NCHAR(10) + N'' + NCHAR(10) + N'Используйте не ранее чем за 2 дня до защиты.',
+        N'Сбросить демо-данные?' + NCHAR(10) + N'' + NCHAR(10) + N'ВСЕ бизнес-данные (клиенты, вещи, заказы, договоры, платежи, акции, коммерческие решения и бизнес-журнал) будут УДАЛЕНЫ, и тестовые данные установки будут загружены заново с датами, сдвинутыми на сегодня. Пользователи, права, планы, языки и системный журнал сохраняются.' + NCHAR(10) + N'' + NCHAR(10) + N'Сначала в папке бэкапов создаётся резервная копия (без шифрования). По завершении приложение перезапустится.'),
+    (N'PT', N'msg.demo.confirmar',
+        N'Restabelecer os dados de demonstração?' + NCHAR(10) + N'' + NCHAR(10) + N'TODOS os dados de negócio (clientes, roupas, pedidos, contratações, cobranças, promoções e log de negócio) serão EXCLUÍDOS e os dados de exemplo da instalação serão carregados novamente, com as datas ajustadas para hoje. Usuários, permissões, planos, idiomas e o log do sistema são mantidos.' + NCHAR(10) + N'' + NCHAR(10) + N'Antes será gerada uma cópia de segurança (sem criptografia) na pasta de backups. Ao terminar, a aplicação será reiniciada.' + NCHAR(10) + N'' + NCHAR(10) + N'Use no máximo 2 dias antes da defesa.',
+        N'Restabelecer os dados de demonstração?' + NCHAR(10) + N'' + NCHAR(10) + N'TODOS os dados de negócio (clientes, roupas, pedidos, contratações, cobranças, promoções, decisões comerciais e log de negócio) serão EXCLUÍDOS e os dados de exemplo da instalação serão carregados novamente, com as datas ajustadas para hoje. Usuários, permissões, planos, idiomas e o log do sistema são mantidos.' + NCHAR(10) + N'' + NCHAR(10) + N'Antes será gerada uma cópia de segurança (sem criptografia) na pasta de backups. Ao terminar, a aplicação será reiniciada.'),
+    (N'ES', N'err.bll.demo.integridad',
+        N'Los datos de demo se cargaron, pero la verificación de integridad no cerró. Revise Administrar → Diagnóstico de Integridad.',
+        N'Los datos de demo se cargaron, pero la verificación de integridad no cerró. Revise Administrar → Sistema → Diagnóstico de Integridad.'),
+    (N'EN', N'err.bll.demo.integridad',
+        N'The demo data was loaded, but the integrity check did not pass. Check Manage → Integrity Diagnostics.',
+        N'The demo data was loaded, but the integrity check did not pass. Check Administration → System → Integrity Diagnostics.'),
+    (N'RU', N'err.bll.demo.integridad',
+        N'Демо-данные загружены, но проверка целостности не пройдена. Проверьте Управление → Диагностика целостности.',
+        N'Демо-данные загружены, но проверка целостности не пройдена. Проверьте Администрирование → Система → Диагностика целостности.'),
+    (N'PT', N'err.bll.demo.integridad',
+        N'Os dados de demonstração foram carregados, mas a verificação de integridade não fechou. Verifique Administrar → Diagnóstico de Integridade.',
+        N'Os dados de demonstração foram carregados, mas a verificação de integridade não fechou. Verifique Administrar → Sistema → Diagnóstico de Integridade.'),
+    (N'ES', N'glos.mrr.formula',
+        N'Σ precio mensual del plan de cada cliente activo; el del período anterior se reconstruye: MRR − altas + bajas. Fuente: Cliente, PlanSuscripcion, HistorialRenovacion.',
+        N'Σ precio mensual del plan de los clientes que pagan hoy (con plan, sin pausa vigente, sin la suscripción vencida y sin suspensión por falta de pago). Al fin del período: MRR de hoy − altas + bajas posteriores al período; al inicio: MRR al fin − altas + bajas del período. Fuente: Cliente, PlanSuscripcion, HistorialRenovacion.'),
+    (N'EN', N'glos.mrr.formula',
+        N'Σ monthly plan price of each active customer; the previous period''s is rebuilt: MRR − sign-ups + cancellations. Source: Cliente, PlanSuscripcion, HistorialRenovacion.',
+        N'Σ monthly plan price of the customers who pay today (with a plan, not paused, subscription not expired and not suspended for non-payment). At the end of the period: today''s MRR − sign-ups + cancellations after the period; at the start: end MRR − sign-ups + cancellations in the period. Source: Cliente, PlanSuscripcion, HistorialRenovacion.'),
+    (N'RU', N'glos.mrr.formula',
+        N'Σ месячной цены тарифа каждого активного клиента; прошлый период восстанавливается: MRR − подписки + отказы. Источник: Cliente, PlanSuscripcion, HistorialRenovacion.',
+        N'Σ месячной цены тарифа клиентов, которые платят сегодня (с тарифом, без действующей паузы, с непросроченной подпиской и без приостановки за неуплату). На конец периода: MRR сегодня − подписки + отказы после периода; на начало: MRR на конец − подписки + отказы за период. Источник: Cliente, PlanSuscripcion, HistorialRenovacion.'),
+    (N'PT', N'glos.mrr.formula',
+        N'Σ preço mensal do plano de cada cliente ativo; o do período anterior é reconstruído: MRR − adesões + cancelamentos. Fonte: Cliente, PlanSuscripcion, HistorialRenovacion.',
+        N'Σ preço mensal do plano dos clientes que pagam hoje (com plano, sem pausa vigente, sem assinatura vencida e sem suspensão por falta de pagamento). No fim do período: MRR de hoje − adesões + cancelamentos posteriores ao período; no início: MRR no fim − adesões + cancelamentos do período. Fonte: Cliente, PlanSuscripcion, HistorialRenovacion.'),
+    (N'ES', N'glos.churn.formula',
+        N'Bajas del período / clientes al inicio × 100 (clientes al inicio = activos − altas + bajas). Fuente: HistorialRenovacion.',
+        N'Bajas del período / clientes al inicio × 100. Clientes al fin del período = activos hoy − altas + bajas posteriores al período; al inicio = clientes al fin − altas + bajas del período. Fuente: HistorialRenovacion.'),
+    (N'EN', N'glos.churn.formula',
+        N'Cancellations in the period / customers at start × 100 (customers at start = active − sign-ups + cancellations). Source: HistorialRenovacion.',
+        N'Cancellations in the period / customers at start × 100. Customers at the end of the period = active today − sign-ups + cancellations after the period; at start = customers at the end − sign-ups + cancellations in the period. Source: HistorialRenovacion.'),
+    (N'RU', N'glos.churn.formula',
+        N'Отказы за период / клиенты на начало × 100 (клиенты на начало = активные − подписки + отказы). Источник: HistorialRenovacion.',
+        N'Отказы за период / клиенты на начало × 100. Клиенты на конец периода = активные сегодня − подписки + отказы после периода; на начало = клиенты на конец − подписки + отказы за период. Источник: HistorialRenovacion.'),
+    (N'PT', N'glos.churn.formula',
+        N'Cancelamentos do período / clientes no início × 100 (clientes no início = ativos − adesões + cancelamentos). Fonte: HistorialRenovacion.',
+        N'Cancelamentos do período / clientes no início × 100. Clientes no fim do período = ativos hoje − adesões + cancelamentos posteriores ao período; no início = clientes no fim − adesões + cancelamentos do período. Fonte: HistorialRenovacion.'),
+    (N'ES', N'glos.proyeccion.formula',
+        N'Regresión lineal por mínimos cuadrados sobre los últimos 6 meses (y = a + b·x); R² indica qué tan confiable es.',
+        N'Regresión lineal por mínimos cuadrados sobre los últimos 6 meses (y = a + b·x); R² indica qué tan confiable es. Un mes parcial (el período termina antes de fin de mes, p. ej. el mes en curso) se muestra con marcador hueco y asterisco, pero no entra en la regresión.'),
+    (N'EN', N'glos.proyeccion.formula',
+        N'Least-squares linear regression over the last 6 months (y = a + b·x); R² shows how reliable it is.',
+        N'Least-squares linear regression over the last 6 months (y = a + b·x); R² shows how reliable it is. A partial month (the period ends before the month does, e.g. the current month) is shown with a hollow marker and an asterisk, but is left out of the regression.'),
+    (N'RU', N'glos.proyeccion.formula',
+        N'Линейная регрессия методом наименьших квадратов за 6 месяцев (y = a + b·x); R² показывает надёжность.',
+        N'Линейная регрессия методом наименьших квадратов за 6 месяцев (y = a + b·x); R² показывает надёжность. Неполный месяц (период заканчивается до конца месяца, например текущий) показывается полым маркером со звёздочкой, но не входит в регрессию.'),
+    (N'PT', N'glos.proyeccion.formula',
+        N'Regressão linear por mínimos quadrados sobre os últimos 6 meses (y = a + b·x); R² indica quão confiável é.',
+        N'Regressão linear por mínimos quadrados sobre os últimos 6 meses (y = a + b·x); R² indica quão confiável é. Um mês parcial (o período termina antes do fim do mês, p. ex. o mês em curso) é exibido com marcador vazado e asterisco, mas não entra na regressão.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @Textos160 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Textos de la 1.6.0: ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z8: textos de la auditoría de la 1.6.0 verificados.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21z9. SERIALIZACIÓN EN XML Y JSON
+-- ------------------------------------------------------------
+-- La exportación/importación de versiones de usuario y de errores serializados ahora admite XML o
+-- JSON (el formato lo da la extensión del archivo). Se actualizan los textos que decían solo "XML":
+-- botón y pantalla de errores (btn.errxml, frm.errxml*, btn.errxml.importar/exportar), el aviso de
+-- exportación (msg.errxml.exportado, ahora con el formato en {1}), los errores err.serial.vacio y
+-- err.serial.formato (formato en {1}) y la ayuda en línea de Bitácora, Errores e Historial de
+-- Cambios. Las claves nuevas (err.serial.extension, dlg.filtro.serial.*) las inserta la aplicación
+-- desde traducciones.tsv; acá se actualizan las que ya existen en una base instalada, SOLO si siguen
+-- con el texto de fábrica anterior (una edición hecha en Idiomas se respeta). Idempotente.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @TextosSerial TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                                 TextoAnterior NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @TextosSerial (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.Bitacora',
+        N'Consulta de los eventos del sistema con filtros por usuario, fecha, módulo y criticidad. Se puede exportar a PDF.' + NCHAR(10) + N'' + NCHAR(10) + N'• Errores (XML): los errores inesperados quedan serializados en XML; se pueden ver, importar desde otra PC y exportar.',
+        N'Consulta de los eventos del sistema con filtros por usuario, fecha, módulo y criticidad. Se puede exportar a PDF.' + NCHAR(10) + N'' + NCHAR(10) + N'• Errores (XML/JSON): los errores inesperados quedan serializados en XML; se pueden ver, importar desde otra PC y exportar, en XML o JSON.'),
+    (N'EN', N'ayuda.Bitacora',
+        N'View of system events with filters by user, date, module and severity. It can be exported to PDF.' + NCHAR(10) + N'' + NCHAR(10) + N'• Errors (XML): unexpected errors are serialized to XML; you can view them, import them from another PC and export them.',
+        N'View of system events with filters by user, date, module and severity. It can be exported to PDF.' + NCHAR(10) + N'' + NCHAR(10) + N'• Errors (XML/JSON): unexpected errors are serialized to XML; you can view them, import them from another PC and export them, in XML or JSON.'),
+    (N'RU', N'ayuda.Bitacora',
+        N'Просмотр событий системы с фильтрами по пользователю, дате, модулю и критичности. Можно экспортировать в PDF.' + NCHAR(10) + N'' + NCHAR(10) + N'• «Ошибки (XML)»: непредвиденные ошибки сериализуются в XML; их можно просматривать, импортировать с другого ПК и экспортировать.',
+        N'Просмотр событий системы с фильтрами по пользователю, дате, модулю и критичности. Можно экспортировать в PDF.' + NCHAR(10) + N'' + NCHAR(10) + N'• «Ошибки (XML/JSON)»: непредвиденные ошибки сериализуются в XML; их можно просматривать, импортировать с другого ПК и экспортировать в XML или JSON.'),
+    (N'PT', N'ayuda.Bitacora',
+        N'Consulta dos eventos do sistema com filtros por usuário, data, módulo e criticidade. Pode ser exportada para PDF.' + NCHAR(10) + N'' + NCHAR(10) + N'• Erros (XML): os erros inesperados ficam serializados em XML; é possível vê-los, importá-los de outro PC e exportá-los.',
+        N'Consulta dos eventos do sistema com filtros por usuário, data, módulo e criticidade. Pode ser exportada para PDF.' + NCHAR(10) + N'' + NCHAR(10) + N'• Erros (XML/JSON): os erros inesperados ficam serializados em XML; é possível vê-los, importá-los de outro PC e exportá-los, em XML ou JSON.'),
+    (N'ES', N'ayuda.ErroresXmlForm',
+        N'Errores inesperados de la aplicación, serializados en XML (un archivo por mes en esta PC).' + NCHAR(10) + N'' + NCHAR(10) + N'• Ver los de esta PC: lee los archivos locales.' + NCHAR(10) + N'• Importar XML: abre un archivo de errores, por ejemplo traído de otra PC.' + NCHAR(10) + N'• Exportar XML: guarda la lista que se está viendo en un archivo.',
+        N'Errores inesperados de la aplicación, serializados en XML (un archivo por mes en esta PC).' + NCHAR(10) + N'' + NCHAR(10) + N'• Ver los de esta PC: lee los archivos locales.' + NCHAR(10) + N'• Importar XML/JSON: abre un archivo de errores en XML o JSON, por ejemplo traído de otra PC.' + NCHAR(10) + N'• Exportar XML/JSON: guarda la lista que se está viendo en un archivo; el formato lo da el tipo elegido (.xml o .json).' + NCHAR(10) + N'Los dos diálogos abren en %LOCALAPPDATA%\WardrobeFlow\Errores\Exportados, aparte del registro mensual (la carpeta se crea si no existe); la importación puede abrir un archivo de cualquier carpeta.'),
+    (N'EN', N'ayuda.ErroresXmlForm',
+        N'Unexpected application errors, serialized to XML (one file per month on this PC).' + NCHAR(10) + N'' + NCHAR(10) + N'• Show this PC''s: reads the local files.' + NCHAR(10) + N'• Import XML: opens an error file, for example brought from another PC.' + NCHAR(10) + N'• Export XML: saves the list being shown to a file.',
+        N'Unexpected application errors, serialized to XML (one file per month on this PC).' + NCHAR(10) + N'' + NCHAR(10) + N'• Show this PC''s: reads the local files.' + NCHAR(10) + N'• Import XML/JSON: opens an XML or JSON error file, for example brought from another PC.' + NCHAR(10) + N'• Export XML/JSON: saves the list being shown to a file; the format is given by the chosen type (.xml or .json).' + NCHAR(10) + N'Both dialogs open in %LOCALAPPDATA%\WardrobeFlow\Errores\Exportados, separate from the monthly log (the folder is created if it does not exist); import can open a file from any folder.'),
+    (N'RU', N'ayuda.ErroresXmlForm',
+        N'Непредвиденные ошибки приложения, сериализованные в XML (один файл в месяц на этом ПК).' + NCHAR(10) + N'' + NCHAR(10) + N'• «Ошибки этого ПК»: читает локальные файлы.' + NCHAR(10) + N'• «Импорт XML»: открывает файл ошибок, например с другого ПК.' + NCHAR(10) + N'• «Экспорт XML»: сохраняет показанный список в файл.',
+        N'Непредвиденные ошибки приложения, сериализованные в XML (один файл в месяц на этом ПК).' + NCHAR(10) + N'' + NCHAR(10) + N'• «Ошибки этого ПК»: читает локальные файлы.' + NCHAR(10) + N'• «Импорт XML/JSON»: открывает файл ошибок в формате XML или JSON, например с другого ПК.' + NCHAR(10) + N'• «Экспорт XML/JSON»: сохраняет показанный список в файл; формат определяется выбранным типом (.xml или .json).' + NCHAR(10) + N'Оба диалога открываются в %LOCALAPPDATA%\WardrobeFlow\Errores\Exportados, отдельно от ежемесячного журнала (папка создаётся, если её нет); при импорте можно открыть файл из любой папки.'),
+    (N'PT', N'ayuda.ErroresXmlForm',
+        N'Erros inesperados da aplicação, serializados em XML (um arquivo por mês neste PC).' + NCHAR(10) + N'' + NCHAR(10) + N'• Ver os deste PC: lê os arquivos locais.' + NCHAR(10) + N'• Importar XML: abre um arquivo de erros, por exemplo trazido de outro PC.' + NCHAR(10) + N'• Exportar XML: salva a lista exibida em um arquivo.',
+        N'Erros inesperados da aplicação, serializados em XML (um arquivo por mês neste PC).' + NCHAR(10) + N'' + NCHAR(10) + N'• Ver os deste PC: lê os arquivos locais.' + NCHAR(10) + N'• Importar XML/JSON: abre um arquivo de erros em XML ou JSON, por exemplo trazido de outro PC.' + NCHAR(10) + N'• Exportar XML/JSON: salva a lista exibida em um arquivo; o formato é dado pelo tipo escolhido (.xml ou .json).' + NCHAR(10) + N'Os dois diálogos abrem em %LOCALAPPDATA%\WardrobeFlow\Errores\Exportados, separada do registro mensal (a pasta é criada se não existir); a importação pode abrir um arquivo de qualquer pasta.'),
+    (N'ES', N'ayuda.ErroresXmlForm.titulo',
+        N'Errores (XML)',
+        N'Errores (XML/JSON)'),
+    (N'EN', N'ayuda.ErroresXmlForm.titulo',
+        N'Errors (XML)',
+        N'Errors (XML/JSON)'),
+    (N'RU', N'ayuda.ErroresXmlForm.titulo',
+        N'Ошибки (XML)',
+        N'Ошибки (XML/JSON)'),
+    (N'PT', N'ayuda.ErroresXmlForm.titulo',
+        N'Erros (XML)',
+        N'Erros (XML/JSON)'),
+    (N'ES', N'ayuda.VersionHistorialForm',
+        N'Versiones (patrón Memento) de los datos administrativos de cada usuario: usuario, nombre, apellido, email y fecha de nacimiento. La contraseña nunca se versiona.' + NCHAR(10) + N'' + NCHAR(10) + N'• Cargar: muestra las versiones del usuario elegido guardadas en la base.' + NCHAR(10) + N'• Restaurar Versión Seleccionada (solo Administrador): deja al usuario exactamente en ese estado. Queda registrado como un cambio más, así que también se puede deshacer.' + NCHAR(10) + N'• Exportar versiones…: serializa a XML las versiones del usuario elegido, sin la clave ni el estado de bloqueo. Por defecto se guardan en %LOCALAPPDATA%\WardrobeFlow\Versiones (la carpeta se crea si no existe).' + NCHAR(10) + N'• Importar versiones…: lee un archivo exportado, verifica su formato y que pertenezca a un usuario existente, y muestra sus versiones marcadas como "importada". Elija una y presione Restaurar: se aplican los mismos controles que en una restauración normal.',
+        N'Versiones (patrón Memento) de los datos administrativos de cada usuario: usuario, nombre, apellido, email y fecha de nacimiento. La contraseña nunca se versiona.' + NCHAR(10) + N'' + NCHAR(10) + N'• Cargar: muestra las versiones del usuario elegido guardadas en la base.' + NCHAR(10) + N'• Restaurar Versión Seleccionada (solo Administrador): deja al usuario exactamente en ese estado. Queda registrado como un cambio más, así que también se puede deshacer.' + NCHAR(10) + N'• Exportar versiones…: serializa las versiones del usuario elegido a XML o JSON (según el tipo elegido), sin la clave ni el estado de bloqueo. Por defecto se guardan en %LOCALAPPDATA%\WardrobeFlow\Versiones (la carpeta se crea si no existe).' + NCHAR(10) + N'• Importar versiones…: lee un archivo exportado (XML o JSON), verifica su formato y que pertenezca a un usuario existente, y muestra sus versiones marcadas como "importada". Elija una y presione Restaurar: se aplican los mismos controles que en una restauración normal.'),
+    (N'EN', N'ayuda.VersionHistorialForm',
+        N'Versions (Memento pattern) of each user''s administrative data: username, first name, last name, email and date of birth. The password is never versioned.' + NCHAR(10) + N'' + NCHAR(10) + N'• Load: shows the selected user''s versions stored in the database.' + NCHAR(10) + N'• Restore Selected Version (Administrator only): leaves the user exactly in that state. It is recorded as one more change, so it can also be undone.' + NCHAR(10) + N'• Export versions…: serializes the selected user''s versions to XML, without the password or the lock status. By default they are saved in %LOCALAPPDATA%\WardrobeFlow\Versiones (the folder is created if it does not exist).' + NCHAR(10) + N'• Import versions…: reads an exported file, checks its format and that it belongs to an existing user, and shows its versions marked as "imported". Choose one and press Restore: the same checks as in a normal restore apply.',
+        N'Versions (Memento pattern) of each user''s administrative data: username, first name, last name, email and date of birth. The password is never versioned.' + NCHAR(10) + N'' + NCHAR(10) + N'• Load: shows the selected user''s versions stored in the database.' + NCHAR(10) + N'• Restore Selected Version (Administrator only): leaves the user exactly in that state. It is recorded as one more change, so it can also be undone.' + NCHAR(10) + N'• Export versions…: serializes the selected user''s versions to XML or JSON (depending on the chosen type), without the password or the lock status. By default they are saved in %LOCALAPPDATA%\WardrobeFlow\Versiones (the folder is created if it does not exist).' + NCHAR(10) + N'• Import versions…: reads an exported file (XML or JSON), checks its format and that it belongs to an existing user, and shows its versions marked as "imported". Choose one and press Restore: the same checks as in a normal restore apply.'),
+    (N'RU', N'ayuda.VersionHistorialForm',
+        N'Версии (паттерн Memento) административных данных каждого пользователя: имя пользователя, имя, фамилия, email и дата рождения. Пароль никогда не версионируется.' + NCHAR(10) + N'' + NCHAR(10) + N'• Загрузить: показывает версии выбранного пользователя, сохранённые в базе данных.' + NCHAR(10) + N'• Восстановить выбранную версию (только администратор): возвращает пользователя точно в это состояние. Это записывается как ещё одно изменение, поэтому его тоже можно отменить.' + NCHAR(10) + N'• Экспорт версий…: сериализует версии выбранного пользователя в XML без пароля и состояния блокировки. По умолчанию файлы сохраняются в %LOCALAPPDATA%\WardrobeFlow\Versiones (папка создаётся, если её нет).' + NCHAR(10) + N'• Импорт версий…: читает экспортированный файл, проверяет его формат и принадлежность существующему пользователю и показывает его версии с пометкой «импортирована». Выберите версию и нажмите «Восстановить»: применяются те же проверки, что и при обычном восстановлении.',
+        N'Версии (паттерн Memento) административных данных каждого пользователя: имя пользователя, имя, фамилия, email и дата рождения. Пароль никогда не версионируется.' + NCHAR(10) + N'' + NCHAR(10) + N'• Загрузить: показывает версии выбранного пользователя, сохранённые в базе данных.' + NCHAR(10) + N'• Восстановить выбранную версию (только администратор): возвращает пользователя точно в это состояние. Это записывается как ещё одно изменение, поэтому его тоже можно отменить.' + NCHAR(10) + N'• Экспорт версий…: сериализует версии выбранного пользователя в XML или JSON (по выбранному типу) без пароля и состояния блокировки. По умолчанию файлы сохраняются в %LOCALAPPDATA%\WardrobeFlow\Versiones (папка создаётся, если её нет).' + NCHAR(10) + N'• Импорт версий…: читает экспортированный файл (XML или JSON), проверяет его формат и принадлежность существующему пользователю и показывает его версии с пометкой «импортирована». Выберите версию и нажмите «Восстановить»: применяются те же проверки, что и при обычном восстановлении.'),
+    (N'PT', N'ayuda.VersionHistorialForm',
+        N'Versões (padrão Memento) dos dados administrativos de cada usuário: usuário, nome, sobrenome, email e data de nascimento. A senha nunca é versionada.' + NCHAR(10) + N'' + NCHAR(10) + N'• Carregar: mostra as versões do usuário escolhido salvas no banco de dados.' + NCHAR(10) + N'• Restaurar Versão Selecionada (somente Administrador): deixa o usuário exatamente nesse estado. Fica registrado como mais uma alteração, então também pode ser desfeito.' + NCHAR(10) + N'• Exportar versões…: serializa em XML as versões do usuário escolhido, sem a senha nem o estado de bloqueio. Por padrão são salvas em %LOCALAPPDATA%\WardrobeFlow\Versiones (a pasta é criada se não existir).' + NCHAR(10) + N'• Importar versões…: lê um arquivo exportado, verifica o formato e se pertence a um usuário existente, e mostra suas versões marcadas como "importada". Escolha uma e pressione Restaurar: aplicam-se os mesmos controles de uma restauração normal.',
+        N'Versões (padrão Memento) dos dados administrativos de cada usuário: usuário, nome, sobrenome, email e data de nascimento. A senha nunca é versionada.' + NCHAR(10) + N'' + NCHAR(10) + N'• Carregar: mostra as versões do usuário escolhido salvas no banco de dados.' + NCHAR(10) + N'• Restaurar Versão Selecionada (somente Administrador): deixa o usuário exatamente nesse estado. Fica registrado como mais uma alteração, então também pode ser desfeito.' + NCHAR(10) + N'• Exportar versões…: serializa as versões do usuário escolhido em XML ou JSON (conforme o tipo escolhido), sem a senha nem o estado de bloqueio. Por padrão são salvas em %LOCALAPPDATA%\WardrobeFlow\Versiones (a pasta é criada se não existir).' + NCHAR(10) + N'• Importar versões…: lê um arquivo exportado (XML ou JSON), verifica o formato e se pertence a um usuário existente, e mostra suas versões marcadas como "importada". Escolha uma e pressione Restaurar: aplicam-se os mesmos controles de uma restauração normal.'),
+    (N'ES', N'btn.errxml',
+        N'Errores (XML)',
+        N'Errores (XML/JSON)'),
+    (N'EN', N'btn.errxml',
+        N'Errors (XML)',
+        N'Errors (XML/JSON)'),
+    (N'RU', N'btn.errxml',
+        N'Ошибки (XML)',
+        N'Ошибки (XML/JSON)'),
+    (N'PT', N'btn.errxml',
+        N'Erros (XML)',
+        N'Erros (XML/JSON)'),
+    (N'ES', N'btn.errxml.exportar',
+        N'Exportar XML…',
+        N'Exportar XML/JSON…'),
+    (N'EN', N'btn.errxml.exportar',
+        N'Export XML…',
+        N'Export XML/JSON…'),
+    (N'RU', N'btn.errxml.exportar',
+        N'Экспорт XML…',
+        N'Экспорт XML/JSON…'),
+    (N'PT', N'btn.errxml.exportar',
+        N'Exportar XML…',
+        N'Exportar XML/JSON…'),
+    (N'ES', N'btn.errxml.importar',
+        N'Importar XML…',
+        N'Importar XML/JSON…'),
+    (N'EN', N'btn.errxml.importar',
+        N'Import XML…',
+        N'Import XML/JSON…'),
+    (N'RU', N'btn.errxml.importar',
+        N'Импорт XML…',
+        N'Импорт XML/JSON…'),
+    (N'PT', N'btn.errxml.importar',
+        N'Importar XML…',
+        N'Importar XML/JSON…'),
+    (N'ES', N'err.serial.formato',
+        N'El archivo no tiene el formato XML esperado: {0}',
+        N'El archivo no tiene el formato {1} esperado: {0}'),
+    (N'EN', N'err.serial.formato',
+        N'The file does not have the expected XML format: {0}',
+        N'The file does not have the expected {1} format: {0}'),
+    (N'RU', N'err.serial.formato',
+        N'Файл не соответствует ожидаемому формату XML: {0}',
+        N'Файл не соответствует ожидаемому формату {1}: {0}'),
+    (N'PT', N'err.serial.formato',
+        N'O arquivo não tem o formato XML esperado: {0}',
+        N'O arquivo não tem o formato {1} esperado: {0}'),
+    (N'ES', N'err.serial.vacio',
+        N'El archivo XML está vacío.',
+        N'El archivo está vacío.'),
+    (N'EN', N'err.serial.vacio',
+        N'The XML file is empty.',
+        N'The file is empty.'),
+    (N'RU', N'err.serial.vacio',
+        N'Файл XML пуст.',
+        N'Файл пуст.'),
+    (N'PT', N'err.serial.vacio',
+        N'O arquivo XML está vazio.',
+        N'O arquivo está vazio.'),
+    (N'ES', N'frm.errxml',
+        N'Errores (XML)',
+        N'Errores (XML/JSON)'),
+    (N'EN', N'frm.errxml',
+        N'Errors (XML)',
+        N'Errors (XML/JSON)'),
+    (N'RU', N'frm.errxml',
+        N'Ошибки (XML)',
+        N'Ошибки (XML/JSON)'),
+    (N'PT', N'frm.errxml',
+        N'Erros (XML)',
+        N'Erros (XML/JSON)'),
+    (N'ES', N'frm.errxml.titulo',
+        N'Errores inesperados serializados en XML',
+        N'Errores inesperados serializados (XML/JSON)'),
+    (N'EN', N'frm.errxml.titulo',
+        N'Unexpected errors serialized to XML',
+        N'Unexpected errors serialized (XML/JSON)'),
+    (N'RU', N'frm.errxml.titulo',
+        N'Непредвиденные ошибки, сериализованные в XML',
+        N'Непредвиденные ошибки, сериализованные (XML/JSON)'),
+    (N'PT', N'frm.errxml.titulo',
+        N'Erros inesperados serializados em XML',
+        N'Erros inesperados serializados (XML/JSON)'),
+    (N'ES', N'msg.errxml.exportado',
+        N'Se exportaron {0} error(es) a XML.',
+        N'Se exportaron {0} error(es) a {1}.'),
+    (N'EN', N'msg.errxml.exportado',
+        N'{0} error(s) exported to XML.',
+        N'{0} error(s) exported to {1}.'),
+    (N'RU', N'msg.errxml.exportado',
+        N'Экспортировано ошибок в XML: {0}.',
+        N'Экспортировано ошибок в {1}: {0}.'),
+    (N'PT', N'msg.errxml.exportado',
+        N'{0} erro(s) exportado(s) para XML.',
+        N'{0} erro(s) exportado(s) para {1}.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @TextosSerial f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Textos de serialización XML/JSON: ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z9: textos de serialización XML/JSON verificados.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21z10. TEXTOS DEL CENTRO DE DECISIONES: ACCIONES EJECUTABLES Y METAS
+-- ------------------------------------------------------------
+-- · ayuda.CentroDecisionesForm: cada recomendación ejecuta algo al aceptarla (sin opciones que solo
+--   registran), la pestaña Metas y los avisos al iniciar sesión.
+-- · glos.ocupacion.decision: la ocupación ya no tiene una regla de rango (30–85 %); se le fija una meta.
+-- · rec.renov.opcion / rec.rotacion.opcion / rec.mant.opcion.revisar: lo que hace ahora cada opción
+--   (campaña de renovación con los contactos, baja de las prendas, revisión en limpieza).
+-- Las claves nuevas las inserta la aplicación desde traducciones.tsv; acá se actualizan las que ya
+-- existen en una base instalada, SOLO si siguen con el texto de fábrica anterior (una edición hecha en
+-- Idiomas se respeta). Idempotente.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @TextosPN03 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                               TextoAnterior NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @TextosPN03 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.CentroDecisionesForm',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: elija el período (o un atajo) y el plan. Cada indicador se compara con el período anterior de igual duración (▲/▼). Los gráficos muestran la tendencia con 3 meses proyectados (punteado), el ingreso en riesgo, el stock y la rotación.' + NCHAR(10) + N'2. Recomendaciones: qué está pasando, por qué, qué hacer y cuánto vale (con la fórmula). Elija una opción y pulse Aceptar y ejecutar (abre el flujo existente), Descartar (con motivo) o Posponer; Simular esta opción la carga en el simulador.' + NCHAR(10) + N'3. Historial: las decisiones tomadas, con el impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? con la retención de equilibrio; compare hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción (mantener, extender o dar de baja).' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: los valores que disparan cada regla. Informe ejecutivo: PDF con todo lo anterior.',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados.' + NCHAR(10) + N'2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo: sugiere, extiende o pide la baja de una promoción, exporta los contactos de una campaña (se mide después), genera la orden de compra o da de baja / manda a revisión prendas. Descartar pide motivo; Posponer la oculta N días.' + NCHAR(10) + N'3. Historial: impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción.' + NCHAR(10) + N'Metas: objetivo mensual por indicador con real, proyección y semáforo; en riesgo, sube la prioridad de lo que la mueve y se avisa al iniciar sesión.' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: lo que dispara cada regla. Informe ejecutivo: PDF con todo.'),
+    (N'EN', N'ayuda.CentroDecisionesForm',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply promotion → measure results.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: choose the period (or a shortcut) and the plan. Each indicator is compared with the previous period of the same length (▲/▼). The charts show the trend with 3 projected months (dashed), revenue at risk, stock and turnover.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and how much it is worth (with the formula). Choose an option and press Accept and execute (opens the existing flow), Discard (with a reason) or Postpone; Simulate this option loads it into the simulator.' + NCHAR(10) + N'3. History: the decisions taken, with estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? with the break-even retention; compare up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion (keep, extend or withdraw).' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: the values that trigger each rule. Executive report: PDF with all of the above.',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply → measure.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: period and plan; indicators against the previous period (▲/▼) and charts with 3 projected months.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and its impact. Accept and execute always does something: it suggests, extends or asks to withdraw a promotion, exports a campaign''s contacts (measured later), generates the purchase order or writes off / sends garments for review. Discard asks for a reason; Postpone hides it N days.' + NCHAR(10) + N'3. History: estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? and up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion.' + NCHAR(10) + N'Goals: monthly target per indicator with actual, projection and traffic light; at risk, it raises the priority of what moves it and is announced at login.' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: what triggers each rule. Executive report: PDF with everything.'),
+    (N'RU', N'ayuda.CentroDecisionesForm',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → запуск акции → оценка результата.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: выберите период (или быстрый выбор) и тариф. Каждый показатель сравнивается с предыдущим периодом той же длины (▲/▼). Графики: тенденция с прогнозом на 3 месяца (пунктир), доход под риском, запасы и оборот.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и сколько это стоит (с формулой). Выберите вариант и нажмите «Принять и выполнить» (открывает существующий процесс), «Отклонить» (с причиной) или «Отложить»; «Смоделировать этот вариант» загружает его в симулятор.' + NCHAR(10) + N'3. История: принятые решения, оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? с безубыточным удержанием; сравнение до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по каждой акции (сохранить, продлить или отменить).' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: значения, запускающие правила. Отчёт для руководства: PDF со всем перечисленным.',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → применение → оценка.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: период и тариф; показатели против прошлого периода (▲/▼) и графики с прогнозом на 3 месяца.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и эффект. «Принять и выполнить» всегда что-то делает: предлагает, продлевает или отменяет акцию, выгружает контакты кампании (результат измеряется позже), формирует заказ на закупку или списывает / отправляет вещи на проверку. «Отклонить» требует причины; «Отложить» скрывает на N дней.' + NCHAR(10) + N'3. История: оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? и до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по акции.' + NCHAR(10) + N'Цели: месячная цель по показателю с фактом, прогнозом и светофором; под угрозой — растёт приоритет того, что на неё влияет, и о ней сообщается при входе.' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: что запускает правила. Отчёт для руководства: PDF со всем.'),
+    (N'PT', N'ayuda.CentroDecisionesForm',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar promoção → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: escolha o período (ou um atalho) e o plano. Cada indicador é comparado com o período anterior de mesma duração (▲/▼). Os gráficos mostram a tendência com 3 meses projetados (tracejado), a receita em risco, o estoque e a rotatividade.' + NCHAR(10) + N'2. Recomendações: o que está acontecendo, por quê, o que fazer e quanto vale (com a fórmula). Escolha uma opção e clique em Aceitar e executar (abre o fluxo existente), Descartar (com motivo) ou Adiar; Simular esta opção a carrega no simulador.' + NCHAR(10) + N'3. Histórico: as decisões tomadas, com o impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? com a retenção de equilíbrio; compare até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção (manter, estender ou dar baixa).' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: os valores que disparam cada regra. Relatório executivo: PDF com tudo isso.',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: período e plano; indicadores contra o período anterior (▲/▼) e gráficos com 3 meses projetados.' + NCHAR(10) + N'2. Recomendações: o que acontece, por quê, o que fazer e seu impacto. Aceitar e executar sempre faz algo: sugere, estende ou pede a baixa de uma promoção, exporta os contatos de uma campanha (medida depois), gera a ordem de compra ou dá baixa / envia peças para revisão. Descartar pede motivo; Adiar a oculta N dias.' + NCHAR(10) + N'3. Histórico: impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? e até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção.' + NCHAR(10) + N'Metas: objetivo mensal por indicador com real, projeção e semáforo; em risco, aumenta a prioridade do que a move e é avisada ao iniciar a sessão.' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: o que dispara cada regra. Relatório executivo: PDF com tudo.'),
+    (N'ES', N'glos.ocupacion.decision',
+        N'Rango 30–85 %: debajo, frenar compras; arriba, priorizar la reposición.',
+        N'Se le puede fijar una meta mensual: si está en riesgo, suben de prioridad dar de baja las prendas sin rotación o con mantenimiento excesivo (menos prendas activas) y el upgrade de plan (más prendas en uso). Mandarlas a revisión no la cambia.'),
+    (N'EN', N'glos.ocupacion.decision',
+        N'Range 30–85 %: below, hold purchases; above, prioritise restocking.',
+        N'A monthly goal can be set: if it is at risk, writing off garments with no turnover or excessive maintenance (fewer active garments) and the plan upgrade (more garments in use) go up in priority. Sending them for review does not change it.'),
+    (N'RU', N'glos.ocupacion.decision',
+        N'Диапазон 30–85 %: ниже — приостановить закупки, выше — пополнять в первую очередь.',
+        N'Можно задать месячную цель: если она под угрозой, растёт приоритет списания вещей без оборота или с избыточным обслуживанием (меньше активных вещей) и перехода на старший тариф (больше вещей в использовании). Отправка на проверку её не меняет.'),
+    (N'PT', N'glos.ocupacion.decision',
+        N'Faixa 30–85 %: abaixo, frear compras; acima, priorizar a reposição.',
+        N'Pode-se definir uma meta mensal: se estiver em risco, sobem de prioridade dar baixa nas peças sem rotatividade ou com manutenção excessiva (menos peças ativas) e o upgrade de plano (mais peças em uso). Enviá-las para revisão não a altera.'),
+    (N'ES', N'rec.renov.opcion',
+        N'Gestionar el cobro de las {0} renovaciones desde Cobro de renovaciones',
+        N'Campaña de renovación: exportar los contactos de los {0} cliente(s) para llamarlos o escribirles antes de perderlos'),
+    (N'EN', N'rec.renov.opcion',
+        N'Manage the payment of the {0} renewals from Renewal payments',
+        N'Renewal campaign: export the contacts of the {0} customer(s) to call or write to them before losing them'),
+    (N'RU', N'rec.renov.opcion',
+        N'Провести оплату {0} продлений в разделе «Оплата продлений»',
+        N'Кампания продления: выгрузить контакты клиентов ({0}), чтобы позвонить или написать им, пока они не ушли'),
+    (N'PT', N'rec.renov.opcion',
+        N'Gerenciar a cobrança das {0} renovações em Cobrança de renovações',
+        N'Campanha de renovação: exportar os contatos dos {0} cliente(s) para ligar ou escrever antes de perdê-los'),
+    (N'ES', N'rec.rotacion.opcion',
+        N'Liquidar o dar de baja las {0} prenda(s) (abre Prendas filtrada)',
+        N'Dar de baja las {0} prenda(s) para liquidarlas (pasan de Disponible a Baja)'),
+    (N'EN', N'rec.rotacion.opcion',
+        N'Clear or write off the {0} garment(s) (opens Garments filtered)',
+        N'Write off the {0} garment(s) to clear them (from Available to Written off)'),
+    (N'RU', N'rec.rotacion.opcion',
+        N'Распродать или списать {0} вещ. (открывает отфильтрованный каталог)',
+        N'Списать вещи ({0}) для распродажи (из «Доступна» в «Списана»)'),
+    (N'PT', N'rec.rotacion.opcion',
+        N'Liquidar ou dar baixa nas {0} peça(s) (abre Peças filtrada)',
+        N'Dar baixa nas {0} peça(s) para liquidá-las (passam de Disponível a Baixa)'),
+    (N'ES', N'rec.mant.opcion.revisar',
+        N'Revisar su historial de mantenimiento con el proveedor de limpieza',
+        N'Mandar las prendas disponibles a revisión (En limpieza) y revisar el proceso con el proveedor de limpieza'),
+    (N'EN', N'rec.mant.opcion.revisar',
+        N'Review their maintenance history with the cleaning supplier',
+        N'Send the available garments for review (In cleaning) and review the process with the cleaning supplier'),
+    (N'RU', N'rec.mant.opcion.revisar',
+        N'Разобрать историю обслуживания с поставщиком чистки',
+        N'Отправить доступные вещи на проверку («В чистке») и разобрать процесс с поставщиком чистки'),
+    (N'PT', N'rec.mant.opcion.revisar',
+        N'Revisar o histórico de manutenção com o fornecedor de limpeza',
+        N'Enviar as peças disponíveis para revisão (Em limpeza) e revisar o processo com o fornecedor de limpeza');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @TextosPN03 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Textos del Centro de decisiones (acciones y metas): ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z10: textos del Centro de decisiones (acciones ejecutables y metas) verificados.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21z12. CENTRO DE DECISIONES: PESTAÑA COHORTES (PN03)
+-- ------------------------------------------------------------
+-- La pestaña «1b. Cohortes» (retención por mes de alta, peor cohorte y su acción) se calcula con las
+-- tablas existentes (Contratacion: primer pago; HistorialRenovacion: bajas): no hay tablas ni columnas
+-- nuevas. Sus textos (cdc.cohorte.*) y la entrada de glosario «Retención por cohorte» (glos.cohorte.*)
+-- son claves nuevas: las inserta la aplicación desde traducciones.tsv. Acá solo se actualiza la ayuda
+-- F1 del Centro (ayuda.CentroDecisionesForm, una línea para la pestaña) en una base ya instalada, SOLO
+-- si sigue con el texto de fábrica de la 1.6.0 (sección 21z8; una edición hecha en Idiomas se
+-- respeta). El texto nuevo deja margen bajo los 1000 caracteres de Traduccion.Texto. Idempotente.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @AyudaCohortes TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                                  TextoAnterior NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @AyudaCohortes (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.CentroDecisionesForm',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: elija el período (o un atajo) y el plan. Cada indicador se compara con el período anterior de igual duración (▲/▼). Los gráficos muestran la tendencia con 3 meses proyectados (punteado), el ingreso en riesgo, el stock y la rotación.' + NCHAR(10) + N'2. Recomendaciones: qué está pasando, por qué, qué hacer y cuánto vale (con la fórmula). Elija una opción y pulse Aceptar y ejecutar (abre el flujo existente), Descartar (con motivo) o Posponer; Simular esta opción la carga en el simulador.' + NCHAR(10) + N'3. Historial: las decisiones tomadas, con el impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? con la retención de equilibrio; compare hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción (mantener, extender o dar de baja).' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: los valores que disparan cada regla. Informe ejecutivo: PDF con todo lo anterior.',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: elija el período (o un atajo) y el plan. Cada indicador se compara con el período anterior de igual duración (▲/▼). Los gráficos muestran la tendencia con 3 meses proyectados (punteado), el ingreso en riesgo, el stock y la rotación.' + NCHAR(10) + N'1b. Cohortes: retención por mes de alta y peor cohorte.' + NCHAR(10) + N'2. Recomendaciones: qué está pasando, por qué, qué hacer y cuánto vale (con la fórmula). Elija una opción y pulse Aceptar y ejecutar, Descartar (con motivo) o Posponer; Simular esta opción la carga en el simulador.' + NCHAR(10) + N'3. Historial: las decisiones tomadas, con el impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? con la retención de equilibrio; compare hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción (mantener, extender o dar de baja).' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: los valores que disparan cada regla. Informe ejecutivo: PDF con todo lo anterior.'),
+    (N'EN', N'ayuda.CentroDecisionesForm',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply promotion → measure results.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: choose the period (or a shortcut) and the plan. Each indicator is compared with the previous period of the same length (▲/▼). The charts show the trend with 3 projected months (dashed), revenue at risk, stock and turnover.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and how much it is worth (with the formula). Choose an option and press Accept and execute (opens the existing flow), Discard (with a reason) or Postpone; Simulate this option loads it into the simulator.' + NCHAR(10) + N'3. History: the decisions taken, with estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? with the break-even retention; compare up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion (keep, extend or withdraw).' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: the values that trigger each rule. Executive report: PDF with all of the above.',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply promotion → measure results.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: choose the period (or a shortcut) and the plan. Each indicator is compared with the previous period of the same length (▲/▼). The charts show the trend with 3 projected months (dashed), revenue at risk, stock and turnover.' + NCHAR(10) + N'1b. Cohorts: retention by sign-up month and worst cohort.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and how much it is worth (with the formula). Choose an option and press Accept and execute, Discard (with a reason) or Postpone; Simulate this option loads it into the simulator.' + NCHAR(10) + N'3. History: the decisions taken, with estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? with the break-even retention; compare up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion (keep, extend or withdraw).' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: the values that trigger each rule. Executive report: PDF with all of the above.'),
+    (N'RU', N'ayuda.CentroDecisionesForm',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → запуск акции → оценка результата.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: выберите период (или быстрый выбор) и тариф. Каждый показатель сравнивается с предыдущим периодом той же длины (▲/▼). Графики: тенденция с прогнозом на 3 месяца (пунктир), доход под риском, запасы и оборот.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и сколько это стоит (с формулой). Выберите вариант и нажмите «Принять и выполнить» (открывает существующий процесс), «Отклонить» (с причиной) или «Отложить»; «Смоделировать этот вариант» загружает его в симулятор.' + NCHAR(10) + N'3. История: принятые решения, оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? с безубыточным удержанием; сравнение до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по каждой акции (сохранить, продлить или отменить).' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: значения, запускающие правила. Отчёт для руководства: PDF со всем перечисленным.',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → запуск акции → оценка результата.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: выберите период (или быстрый выбор) и тариф. Каждый показатель сравнивается с предыдущим периодом той же длины (▲/▼). Графики: тенденция с прогнозом на 3 месяца (пунктир), доход под риском, запасы и оборот.' + NCHAR(10) + N'1b. Когорты: удержание по месяцу подписки и худшая когорта.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и сколько это стоит (с формулой). Выберите вариант и нажмите «Принять и выполнить», «Отклонить» (с причиной) или «Отложить»; «Смоделировать этот вариант» загружает его в симулятор.' + NCHAR(10) + N'3. История: принятые решения, оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? с безубыточным удержанием; сравнение до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по каждой акции (сохранить, продлить или отменить).' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: значения, запускающие правила. Отчёт для руководства: PDF со всем перечисленным.'),
+    (N'PT', N'ayuda.CentroDecisionesForm',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar promoção → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: escolha o período (ou um atalho) e o plano. Cada indicador é comparado com o período anterior de mesma duração (▲/▼). Os gráficos mostram a tendência com 3 meses projetados (tracejado), a receita em risco, o estoque e a rotatividade.' + NCHAR(10) + N'2. Recomendações: o que está acontecendo, por quê, o que fazer e quanto vale (com a fórmula). Escolha uma opção e clique em Aceitar e executar (abre o fluxo existente), Descartar (com motivo) ou Adiar; Simular esta opção a carrega no simulador.' + NCHAR(10) + N'3. Histórico: as decisões tomadas, com o impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? com a retenção de equilíbrio; compare até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção (manter, estender ou dar baixa).' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: os valores que disparam cada regra. Relatório executivo: PDF com tudo isso.',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar promoção → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: escolha o período (ou um atalho) e o plano. Cada indicador é comparado com o período anterior de mesma duração (▲/▼). Os gráficos mostram a tendência com 3 meses projetados (tracejado), a receita em risco, o estoque e a rotatividade.' + NCHAR(10) + N'1b. Coortes: retenção por mês de adesão e pior coorte.' + NCHAR(10) + N'2. Recomendações: o que está acontecendo, por quê, o que fazer e quanto vale (com a fórmula). Escolha uma opção e clique em Aceitar e executar, Descartar (com motivo) ou Adiar; Simular esta opção a carrega no simulador.' + NCHAR(10) + N'3. Histórico: as decisões tomadas, com o impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? com a retenção de equilíbrio; compare até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção (manter, estender ou dar baixa).' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: os valores que disparam cada regra. Relatório executivo: PDF com tudo isso.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @AyudaCohortes f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Ayuda del Centro (cohortes): ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z12: ayuda del Centro de decisiones con la pestaña Cohortes verificada.';
+GO
+
+-- ============================================================
+-- WardrobeFlow — 21z13. AYUDA DEL CENTRO DE DECISIONES: COHORTES + ACCIONES Y METAS (TEXTO FINAL)
+-- ------------------------------------------------------------
+-- ayuda.CentroDecisionesForm termina siempre en el mismo texto (acciones ejecutables, Metas, avisos y
+-- la línea «1b. Cohortes»), sin importar qué secciones anteriores ya corrieron sobre la base:
+--   · texto de fábrica de la 1.6.0 (21z8)           → texto final
+--   · texto de la sección 21z10 (acciones y metas)  → texto final
+--   · texto de la sección 21z12 (solo cohortes)      → texto final
+-- Solo se actualiza si el texto es exactamente uno de esos (una edición hecha en Idiomas se respeta).
+-- El texto final mide menos de 1000 caracteres (Traduccion.Texto) en los 4 idiomas. Idempotente.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @AyudaFinal TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                               TextoAnterior NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @AyudaFinal (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.CentroDecisionesForm',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: elija el período (o un atajo) y el plan. Cada indicador se compara con el período anterior de igual duración (▲/▼). Los gráficos muestran la tendencia con 3 meses proyectados (punteado), el ingreso en riesgo, el stock y la rotación.' + NCHAR(10) + N'2. Recomendaciones: qué está pasando, por qué, qué hacer y cuánto vale (con la fórmula). Elija una opción y pulse Aceptar y ejecutar (abre el flujo existente), Descartar (con motivo) o Posponer; Simular esta opción la carga en el simulador.' + NCHAR(10) + N'3. Historial: las decisiones tomadas, con el impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? con la retención de equilibrio; compare hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción (mantener, extender o dar de baja).' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: los valores que disparan cada regla. Informe ejecutivo: PDF con todo lo anterior.',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados.' + NCHAR(10) + N'1b. Cohortes: retención por mes de alta y peor cohorte.' + NCHAR(10) + N'2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo: sugiere, extiende o pide la baja de una promoción, exporta los contactos de una campaña (se mide después), genera la orden de compra o da de baja / manda a revisión prendas. Descartar pide motivo; Posponer la oculta N días.' + NCHAR(10) + N'3. Historial: impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción.' + NCHAR(10) + N'Metas: objetivo mensual por indicador con real, proyección y semáforo; en riesgo, sube la prioridad de lo que la mueve y se avisa al iniciar sesión.' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: lo que dispara cada regla. Informe ejecutivo: PDF con todo.'),
+    (N'ES', N'ayuda.CentroDecisionesForm',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados.' + NCHAR(10) + N'2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo: sugiere, extiende o pide la baja de una promoción, exporta los contactos de una campaña (se mide después), genera la orden de compra o da de baja / manda a revisión prendas. Descartar pide motivo; Posponer la oculta N días.' + NCHAR(10) + N'3. Historial: impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción.' + NCHAR(10) + N'Metas: objetivo mensual por indicador con real, proyección y semáforo; en riesgo, sube la prioridad de lo que la mueve y se avisa al iniciar sesión.' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: lo que dispara cada regla. Informe ejecutivo: PDF con todo.',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados.' + NCHAR(10) + N'1b. Cohortes: retención por mes de alta y peor cohorte.' + NCHAR(10) + N'2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo: sugiere, extiende o pide la baja de una promoción, exporta los contactos de una campaña (se mide después), genera la orden de compra o da de baja / manda a revisión prendas. Descartar pide motivo; Posponer la oculta N días.' + NCHAR(10) + N'3. Historial: impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción.' + NCHAR(10) + N'Metas: objetivo mensual por indicador con real, proyección y semáforo; en riesgo, sube la prioridad de lo que la mueve y se avisa al iniciar sesión.' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: lo que dispara cada regla. Informe ejecutivo: PDF con todo.'),
+    (N'ES', N'ayuda.CentroDecisionesForm',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar promoción → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: elija el período (o un atajo) y el plan. Cada indicador se compara con el período anterior de igual duración (▲/▼). Los gráficos muestran la tendencia con 3 meses proyectados (punteado), el ingreso en riesgo, el stock y la rotación.' + NCHAR(10) + N'1b. Cohortes: retención por mes de alta y peor cohorte.' + NCHAR(10) + N'2. Recomendaciones: qué está pasando, por qué, qué hacer y cuánto vale (con la fórmula). Elija una opción y pulse Aceptar y ejecutar, Descartar (con motivo) o Posponer; Simular esta opción la carga en el simulador.' + NCHAR(10) + N'3. Historial: las decisiones tomadas, con el impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? con la retención de equilibrio; compare hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción (mantener, extender o dar de baja).' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: los valores que disparan cada regla. Informe ejecutivo: PDF con todo lo anterior.',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados.' + NCHAR(10) + N'1b. Cohortes: retención por mes de alta y peor cohorte.' + NCHAR(10) + N'2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo: sugiere, extiende o pide la baja de una promoción, exporta los contactos de una campaña (se mide después), genera la orden de compra o da de baja / manda a revisión prendas. Descartar pide motivo; Posponer la oculta N días.' + NCHAR(10) + N'3. Historial: impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción.' + NCHAR(10) + N'Metas: objetivo mensual por indicador con real, proyección y semáforo; en riesgo, sube la prioridad de lo que la mueve y se avisa al iniciar sesión.' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: lo que dispara cada regla. Informe ejecutivo: PDF con todo.'),
+    (N'EN', N'ayuda.CentroDecisionesForm',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply promotion → measure results.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: choose the period (or a shortcut) and the plan. Each indicator is compared with the previous period of the same length (▲/▼). The charts show the trend with 3 projected months (dashed), revenue at risk, stock and turnover.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and how much it is worth (with the formula). Choose an option and press Accept and execute (opens the existing flow), Discard (with a reason) or Postpone; Simulate this option loads it into the simulator.' + NCHAR(10) + N'3. History: the decisions taken, with estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? with the break-even retention; compare up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion (keep, extend or withdraw).' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: the values that trigger each rule. Executive report: PDF with all of the above.',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply → measure.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: period and plan; indicators against the previous period (▲/▼) and charts with 3 projected months.' + NCHAR(10) + N'1b. Cohorts: retention by sign-up month and worst cohort.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and its impact. Accept and execute always does something: it suggests, extends or asks to withdraw a promotion, exports a campaign''s contacts (measured later), generates the purchase order or writes off / sends garments for review. Discard asks for a reason; Postpone hides it N days.' + NCHAR(10) + N'3. History: estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? and up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion.' + NCHAR(10) + N'Goals: monthly target per indicator with actual, projection and traffic light; at risk, it raises the priority of what moves it and is announced at login.' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: what triggers each rule. Executive report: PDF with everything.'),
+    (N'EN', N'ayuda.CentroDecisionesForm',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply → measure.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: period and plan; indicators against the previous period (▲/▼) and charts with 3 projected months.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and its impact. Accept and execute always does something: it suggests, extends or asks to withdraw a promotion, exports a campaign''s contacts (measured later), generates the purchase order or writes off / sends garments for review. Discard asks for a reason; Postpone hides it N days.' + NCHAR(10) + N'3. History: estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? and up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion.' + NCHAR(10) + N'Goals: monthly target per indicator with actual, projection and traffic light; at risk, it raises the priority of what moves it and is announced at login.' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: what triggers each rule. Executive report: PDF with everything.',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply → measure.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: period and plan; indicators against the previous period (▲/▼) and charts with 3 projected months.' + NCHAR(10) + N'1b. Cohorts: retention by sign-up month and worst cohort.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and its impact. Accept and execute always does something: it suggests, extends or asks to withdraw a promotion, exports a campaign''s contacts (measured later), generates the purchase order or writes off / sends garments for review. Discard asks for a reason; Postpone hides it N days.' + NCHAR(10) + N'3. History: estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? and up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion.' + NCHAR(10) + N'Goals: monthly target per indicator with actual, projection and traffic light; at risk, it raises the priority of what moves it and is announced at login.' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: what triggers each rule. Executive report: PDF with everything.'),
+    (N'EN', N'ayuda.CentroDecisionesForm',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply promotion → measure results.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: choose the period (or a shortcut) and the plan. Each indicator is compared with the previous period of the same length (▲/▼). The charts show the trend with 3 projected months (dashed), revenue at risk, stock and turnover.' + NCHAR(10) + N'1b. Cohorts: retention by sign-up month and worst cohort.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and how much it is worth (with the formula). Choose an option and press Accept and execute, Discard (with a reason) or Postpone; Simulate this option loads it into the simulator.' + NCHAR(10) + N'3. History: the decisions taken, with estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? with the break-even retention; compare up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion (keep, extend or withdraw).' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: the values that trigger each rule. Executive report: PDF with all of the above.',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply → measure.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: period and plan; indicators against the previous period (▲/▼) and charts with 3 projected months.' + NCHAR(10) + N'1b. Cohorts: retention by sign-up month and worst cohort.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and its impact. Accept and execute always does something: it suggests, extends or asks to withdraw a promotion, exports a campaign''s contacts (measured later), generates the purchase order or writes off / sends garments for review. Discard asks for a reason; Postpone hides it N days.' + NCHAR(10) + N'3. History: estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? and up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion.' + NCHAR(10) + N'Goals: monthly target per indicator with actual, projection and traffic light; at risk, it raises the priority of what moves it and is announced at login.' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: what triggers each rule. Executive report: PDF with everything.'),
+    (N'RU', N'ayuda.CentroDecisionesForm',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → запуск акции → оценка результата.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: выберите период (или быстрый выбор) и тариф. Каждый показатель сравнивается с предыдущим периодом той же длины (▲/▼). Графики: тенденция с прогнозом на 3 месяца (пунктир), доход под риском, запасы и оборот.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и сколько это стоит (с формулой). Выберите вариант и нажмите «Принять и выполнить» (открывает существующий процесс), «Отклонить» (с причиной) или «Отложить»; «Смоделировать этот вариант» загружает его в симулятор.' + NCHAR(10) + N'3. История: принятые решения, оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? с безубыточным удержанием; сравнение до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по каждой акции (сохранить, продлить или отменить).' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: значения, запускающие правила. Отчёт для руководства: PDF со всем перечисленным.',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → применение → оценка.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: период и тариф; показатели против прошлого периода (▲/▼) и графики с прогнозом на 3 месяца.' + NCHAR(10) + N'1b. Когорты: удержание по месяцу подписки и худшая когорта.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и эффект. «Принять и выполнить» всегда что-то делает: предлагает, продлевает или отменяет акцию, выгружает контакты кампании (результат измеряется позже), формирует заказ на закупку или списывает / отправляет вещи на проверку. «Отклонить» требует причины; «Отложить» скрывает на N дней.' + NCHAR(10) + N'3. История: оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? и до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по акции.' + NCHAR(10) + N'Цели: месячная цель по показателю с фактом, прогнозом и светофором; под угрозой — растёт приоритет того, что на неё влияет, и о ней сообщается при входе.' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: что запускает правила. Отчёт для руководства: PDF со всем.'),
+    (N'RU', N'ayuda.CentroDecisionesForm',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → применение → оценка.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: период и тариф; показатели против прошлого периода (▲/▼) и графики с прогнозом на 3 месяца.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и эффект. «Принять и выполнить» всегда что-то делает: предлагает, продлевает или отменяет акцию, выгружает контакты кампании (результат измеряется позже), формирует заказ на закупку или списывает / отправляет вещи на проверку. «Отклонить» требует причины; «Отложить» скрывает на N дней.' + NCHAR(10) + N'3. История: оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? и до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по акции.' + NCHAR(10) + N'Цели: месячная цель по показателю с фактом, прогнозом и светофором; под угрозой — растёт приоритет того, что на неё влияет, и о ней сообщается при входе.' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: что запускает правила. Отчёт для руководства: PDF со всем.',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → применение → оценка.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: период и тариф; показатели против прошлого периода (▲/▼) и графики с прогнозом на 3 месяца.' + NCHAR(10) + N'1b. Когорты: удержание по месяцу подписки и худшая когорта.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и эффект. «Принять и выполнить» всегда что-то делает: предлагает, продлевает или отменяет акцию, выгружает контакты кампании (результат измеряется позже), формирует заказ на закупку или списывает / отправляет вещи на проверку. «Отклонить» требует причины; «Отложить» скрывает на N дней.' + NCHAR(10) + N'3. История: оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? и до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по акции.' + NCHAR(10) + N'Цели: месячная цель по показателю с фактом, прогнозом и светофором; под угрозой — растёт приоритет того, что на неё влияет, и о ней сообщается при входе.' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: что запускает правила. Отчёт для руководства: PDF со всем.'),
+    (N'RU', N'ayuda.CentroDecisionesForm',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → запуск акции → оценка результата.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: выберите период (или быстрый выбор) и тариф. Каждый показатель сравнивается с предыдущим периодом той же длины (▲/▼). Графики: тенденция с прогнозом на 3 месяца (пунктир), доход под риском, запасы и оборот.' + NCHAR(10) + N'1b. Когорты: удержание по месяцу подписки и худшая когорта.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и сколько это стоит (с формулой). Выберите вариант и нажмите «Принять и выполнить», «Отклонить» (с причиной) или «Отложить»; «Смоделировать этот вариант» загружает его в симулятор.' + NCHAR(10) + N'3. История: принятые решения, оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? с безубыточным удержанием; сравнение до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по каждой акции (сохранить, продлить или отменить).' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: значения, запускающие правила. Отчёт для руководства: PDF со всем перечисленным.',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → применение → оценка.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: период и тариф; показатели против прошлого периода (▲/▼) и графики с прогнозом на 3 месяца.' + NCHAR(10) + N'1b. Когорты: удержание по месяцу подписки и худшая когорта.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и эффект. «Принять и выполнить» всегда что-то делает: предлагает, продлевает или отменяет акцию, выгружает контакты кампании (результат измеряется позже), формирует заказ на закупку или списывает / отправляет вещи на проверку. «Отклонить» требует причины; «Отложить» скрывает на N дней.' + NCHAR(10) + N'3. История: оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? и до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по акции.' + NCHAR(10) + N'Цели: месячная цель по показателю с фактом, прогнозом и светофором; под угрозой — растёт приоритет того, что на неё влияет, и о ней сообщается при входе.' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: что запускает правила. Отчёт для руководства: PDF со всем.'),
+    (N'PT', N'ayuda.CentroDecisionesForm',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar promoção → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: escolha o período (ou um atalho) e o plano. Cada indicador é comparado com o período anterior de mesma duração (▲/▼). Os gráficos mostram a tendência com 3 meses projetados (tracejado), a receita em risco, o estoque e a rotatividade.' + NCHAR(10) + N'2. Recomendações: o que está acontecendo, por quê, o que fazer e quanto vale (com a fórmula). Escolha uma opção e clique em Aceitar e executar (abre o fluxo existente), Descartar (com motivo) ou Adiar; Simular esta opção a carrega no simulador.' + NCHAR(10) + N'3. Histórico: as decisões tomadas, com o impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? com a retenção de equilíbrio; compare até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção (manter, estender ou dar baixa).' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: os valores que disparam cada regra. Relatório executivo: PDF com tudo isso.',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: período e plano; indicadores contra o período anterior (▲/▼) e gráficos com 3 meses projetados.' + NCHAR(10) + N'1b. Coortes: retenção por mês de adesão e pior coorte.' + NCHAR(10) + N'2. Recomendações: o que acontece, por quê, o que fazer e seu impacto. Aceitar e executar sempre faz algo: sugere, estende ou pede a baixa de uma promoção, exporta os contatos de uma campanha (medida depois), gera a ordem de compra ou dá baixa / envia peças para revisão. Descartar pede motivo; Adiar a oculta N dias.' + NCHAR(10) + N'3. Histórico: impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? e até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção.' + NCHAR(10) + N'Metas: objetivo mensal por indicador com real, projeção e semáforo; em risco, aumenta a prioridade do que a move e é avisada ao iniciar a sessão.' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: o que dispara cada regra. Relatório executivo: PDF com tudo.'),
+    (N'PT', N'ayuda.CentroDecisionesForm',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: período e plano; indicadores contra o período anterior (▲/▼) e gráficos com 3 meses projetados.' + NCHAR(10) + N'2. Recomendações: o que acontece, por quê, o que fazer e seu impacto. Aceitar e executar sempre faz algo: sugere, estende ou pede a baixa de uma promoção, exporta os contatos de uma campanha (medida depois), gera a ordem de compra ou dá baixa / envia peças para revisão. Descartar pede motivo; Adiar a oculta N dias.' + NCHAR(10) + N'3. Histórico: impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? e até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção.' + NCHAR(10) + N'Metas: objetivo mensal por indicador com real, projeção e semáforo; em risco, aumenta a prioridade do que a move e é avisada ao iniciar a sessão.' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: o que dispara cada regra. Relatório executivo: PDF com tudo.',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: período e plano; indicadores contra o período anterior (▲/▼) e gráficos com 3 meses projetados.' + NCHAR(10) + N'1b. Coortes: retenção por mês de adesão e pior coorte.' + NCHAR(10) + N'2. Recomendações: o que acontece, por quê, o que fazer e seu impacto. Aceitar e executar sempre faz algo: sugere, estende ou pede a baixa de uma promoção, exporta os contatos de uma campanha (medida depois), gera a ordem de compra ou dá baixa / envia peças para revisão. Descartar pede motivo; Adiar a oculta N dias.' + NCHAR(10) + N'3. Histórico: impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? e até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção.' + NCHAR(10) + N'Metas: objetivo mensal por indicador com real, projeção e semáforo; em risco, aumenta a prioridade do que a move e é avisada ao iniciar a sessão.' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: o que dispara cada regra. Relatório executivo: PDF com tudo.'),
+    (N'PT', N'ayuda.CentroDecisionesForm',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar promoção → medir resultado.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: escolha o período (ou um atalho) e o plano. Cada indicador é comparado com o período anterior de mesma duração (▲/▼). Os gráficos mostram a tendência com 3 meses projetados (tracejado), a receita em risco, o estoque e a rotatividade.' + NCHAR(10) + N'1b. Coortes: retenção por mês de adesão e pior coorte.' + NCHAR(10) + N'2. Recomendações: o que está acontecendo, por quê, o que fazer e quanto vale (com a fórmula). Escolha uma opção e clique em Aceitar e executar, Descartar (com motivo) ou Adiar; Simular esta opção a carrega no simulador.' + NCHAR(10) + N'3. Histórico: as decisões tomadas, com o impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? com a retenção de equilíbrio; compare até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção (manter, estender ou dar baixa).' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: os valores que disparam cada regra. Relatório executivo: PDF com tudo isso.',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: período e plano; indicadores contra o período anterior (▲/▼) e gráficos com 3 meses projetados.' + NCHAR(10) + N'1b. Coortes: retenção por mês de adesão e pior coorte.' + NCHAR(10) + N'2. Recomendações: o que acontece, por quê, o que fazer e seu impacto. Aceitar e executar sempre faz algo: sugere, estende ou pede a baixa de uma promoção, exporta os contatos de uma campanha (medida depois), gera a ordem de compra ou dá baixa / envia peças para revisão. Descartar pede motivo; Adiar a oculta N dias.' + NCHAR(10) + N'3. Histórico: impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? e até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção.' + NCHAR(10) + N'Metas: objetivo mensal por indicador com real, projeção e semáforo; em risco, aumenta a prioridade do que a move e é avisada ao iniciar a sessão.' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: o que dispara cada regra. Relatório executivo: PDF com tudo.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @AyudaFinal f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Ayuda del Centro de decisiones (texto final): ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z13: ayuda final del Centro de decisiones verificada.';
+GO
 -- ============================================================
 -- WardrobeFlow — 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA
 -- ------------------------------------------------------------

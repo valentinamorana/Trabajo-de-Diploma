@@ -39,20 +39,125 @@ Usuarios sugeridos para probar los procesos de negocio
                                  contable (aprueba), vendedor (sugiere la baja)
   PN04 Inspección de devolución  deposito
 
+Qué mirar en cada pantalla (datos precargados)
+----------------------------------------------
+El apellido de cada cliente de demo dice qué caso muestra. Todas las fechas son
+relativas al día en que se cargó (o restableció) la demo.
+
+  Pantalla / proceso                   Usuario       Qué caso mirar
+  ------------------------------------ ------------- ------------------------------------------
+  Panel de Control / alertas           admin         por vencer (Martina, Valeria, Julieta Ruiz),
+                                                     vencidas, en limpieza, faltantes, separados,
+                                                     contrataciones por cobrar, 1 pedido atrasado
+                                                     (Paula), 1 reserva de lista de espera
+  PN01 Ventas → Pedidos de Venta       vendedor      Juan PedidoFeliz (camino feliz); Nicolas
+                                                     ExcedeCupo (elegir 6 prendas); Pedro
+                                                     PedidoActivo; Lucia SuscripcionVencida;
+                                                     Tomas SuscripcionPausada; Sofia
+                                                     ListaParaFormalizar (formalizar); Valeria
+                                                     ConFaltantes (ajustar o desistir)
+  PN01 Inventario → Control de Stock   deposito      pedido de Ana PrendasNoDisponibles (el Saco
+                                                     Negro M lo tiene Pedro → informar faltantes)
+  PN02 Ventas → Nueva Contratación     vendedor      Laura SinPlan, Rocio ReferidaPorJuan,
+                                                     DNI 40000099 (no registrado)
+  PN02 Caja → Cobro de Contrataciones  caja          Diego PagoPendiente (cobrar), Elena
+                                                     TercerIntentoFallido (3.er intento cancela);
+                                                     "Resueltas": pagadas, Sergio PagoRechazado
+                                                     (cancelada) y una anulada (Gonzalo Moreno)
+  Caja → Cobro de Renovaciones         caja          Martina PorVencer (vence en 5 días), Lucia
+                                                     (vencida), Carla EnGracia (en gracia), Raul
+                                                     Suspendido; Marcos CargoPendiente al vencer
+                                                     suma su cargo por prenda dañada
+  Renovación de Suscripción            vendedor      Martina, Julieta Ruiz; Federico
+                                                     CambioProgramado (Premium → Estándar al
+                                                     vencer); Tomas (pausada)
+  Clientes                             admin         Gustavo DadoDeBaja NO aparece (baja lógica);
+                                                     clientes sin plan por baja de suscripción
+  PN03 Sugerir Promoción / Analítica   gcomercial    2 sugerencias pendientes, 1 evaluada y 1
+                                                     descartada; abandono por plan (el Básico
+                                                     concentra las bajas del último mes); impacto
+                                                     y resultado de las promociones Vencida y
+                                                     Dada de baja
+  PN03 Centro de decisiones            gcomercial    Promociones → Centro de decisiones
+                                                     comerciales: 6 meses de cobros, altas y bajas
+                                                     por plan, pedidos y stock (tendencia creciente
+                                                     con el pico de bajas del Básico en los últimos
+                                                     2 meses). Pestañas Analizar, Recomendaciones
+                                                     (aceptar / descartar / posponer), Simulador,
+                                                     Medir resultado e Informe ejecutivo (PDF)
+  PN03 Gestión de Promociones          admcomercial  En revisión, Vigente, Rechazada (reformular),
+                                                     Vigente con solicitud de baja (atenderla),
+                                                     Dada de baja y Vencida
+  PN03 Revisión Contable               contable      "PROMO ParaDictaminar Premium -15%"
+  PN03 Promociones Vigentes            vendedor      pedir la baja de una vigente
+  Ventas por vendedor (Analítica)      gcomercial    3 vendedores (Morana, Herrera, Sosa) con
+                                                     entregados y cancelados
+  Rotación / Mantenimiento / Escasez   ginventario   alta demanda: Vestido Negro M (6 pedidos) y
+  (Analítica)                                        Saco Gris M (5); sin rotación: los 3
+                                                     sweaters; mantenimiento: Vestido Negro M
+                                                     (6 limpiezas, ~6,7 días), Tapado Camel L
+  Recomendación de Prendas             vendedor      Juan PedidoFeliz o Camila Rodríguez
+  Lista de Espera                      vendedor      Martina espera el Vestido Verde M (lo tiene
+                                                     Paula); Camisa Rayada S reservada 48 h para
+                                                     Camila Rodríguez
+  PN04 Pedidos Realizados              deposito      Hernan DevolucionPendiente (Registrar
+                                                     devolución, entregado hace 10 días); Paula
+                                                     CompraTacita (atrasado, 35 días: compra
+                                                     tácita / reportar pérdida)
+  PN04 Inspección de Devolución        deposito      Blazer Azul M devuelto ayer por Julia
+                                                     EnInspeccion: reingresar o dar de baja con
+                                                     cargo a Julia
+  Despacho / entrega (Panel logístico) logistico     Pedro (para despachar), Ines
+                                                     PedidoDespachado (para entregar), entregados
+  Historial de Cambios (pedidos)       auditor       ~40 pedidos con su historial completo
+  Bitácora de Negocio / del Sistema    auditor       ~400 eventos de negocio de 6 meses; en la
+                                                     del sistema, inicios de sesión, backups y la
+                                                     inicialización de los dígitos verificadores
+  Reporte de Jornada                   auditor       eventos por día (bitácora de negocio)
+  Backup y Restauración                admin         backups, backup automático, "Restablecer
+                                                     datos de demo"
+  Gestión de Idiomas / Perfiles y      admin         idiomas ES/EN/PT/RU; roles y patentes
+  Permisos / Usuarios
+  Diagnóstico de Integridad            admin         DVH/DVV de todas las tablas protegidas
+  Historial de Cambios (usuarios) y    admin         usuario "vendedor": 2 versiones precargadas
+  serialización a XML                                (email anterior y actual). Exportar
+                                                     versiones…, Importar versiones… y
+                                                     restaurar la versión importada
+
 Datos de prueba incluidos
 -------------------------
 En una instalación NUEVA la base se carga con datos de ejemplo para probar
-cada proceso sin cargar nada a mano (sección 21e del script; el apellido de
-cada cliente dice qué caso muestra):
-  - 11 clientes: uno por escenario de PN01 y PN02 (camino feliz, prendas no
-    disponibles, exceso de cupo, pedido para formalizar, pedido activo,
-    suscripción vencida, pausada, sin plan, referida, pago pendiente y
-    contratación con 2 intentos fallidos);
-  - 18 prendas en distintos estados (1 En Limpieza para inspeccionar en PN04);
-  - pedidos en distintos estados del circuito de PN01;
-  - contrataciones pendientes de pago para Caja;
-  - 2 sugerencias y promociones en distintos estados de PN03.
-Para volver a esos datos: BD/Reset_Datos_Demo.sql.
+cada proceso sin cargar nada a mano (procedimiento dbo.RestablecerDatosDemo,
+sección 21z3b del script; el apellido de cada cliente dice qué caso muestra):
+  - 23 clientes de escenario (PN01, PN02, cobro, PN04) y 24 clientes con 6
+    meses de historia (altas mes a mes y bajas de suscripción); 1 dado de baja;
+  - 25 prendas: en uso, 1 En Limpieza devuelta por Julia EnInspeccion (cola
+    de Inspección de devolución, con su último cliente para el cargo), 1 en
+    limpieza manual del depósito, 2 de baja con cargo, disponibles y nuevas;
+  - 42 pedidos de 3 vendedores en todos los estados (Pendiente, Despachado,
+    Entregado devuelto y sin devolver, Cancelado, En control de stock, Con
+    faltantes, Separado y Desistido), con su historial y la bitácora de negocio;
+  - contrataciones pagadas, pendientes, canceladas y anuladas; cobros y
+    renovaciones mensuales; desistimientos; cargos por prenda dañada;
+  - sugerencias y promociones en todos los estados de PN03;
+  - 3 decisiones del Centro de decisiones comerciales (gcomercial): una
+    Ejecutada (la sugerencia que originó la promoción Vencida, con impacto
+    estimado y resultado real), una Pospuesta y una Descartada con motivo.
+
+Restablecer los datos de demo (antes de la defensa)
+---------------------------------------------------
+Restablecer como máximo 2 días antes de la defensa: las fechas de la demo son
+relativas al día en que se cargan (la reserva de la lista de espera dura 48 h,
+"por vencer" es a 5 días, el pedido atrasado tiene 35 días...).
+  - Desde la app: admin → Administrar → Sistema → Backup y Restauración →
+    "Restablecer datos de demo...". Pide confirmación dos veces (escribir RESTABLECER),
+    hace un backup sin cifrar en la carpeta de backups
+    (WardrobeFlow_PrevioDemo_...bak), borra los datos de negocio (también las
+    decisiones comerciales del Centro de decisiones), recarga la
+    demo, inicializa los dígitos verificadores, lo registra en la bitácora y
+    reinicia la aplicación. Usuarios, permisos, planes, idiomas y la bitácora
+    del sistema se conservan.
+  - Por SQL: ejecutar BD/Reset_Datos_Demo.sql en SSMS y abrir la aplicación.
 
 Requisitos previos a la instalación
 ------------------------------------
@@ -68,6 +173,8 @@ Requisitos previos a la instalación
   instancia elegida (sysadmin) o, al menos, poder crear bases (dbcreator);
   el instalador lo verifica antes de copiar archivos.
 - .NET Framework 4.7.2 o superior.
+- Paso a paso para instalar SQL Server: menú Inicio > WardrobeFlow > "Cómo
+  instalar SQL Server" (Docs\Tutorial_SQL_Server.html en la carpeta de la app).
 
 El instalador crea la base de datos WardrobeFlowDB, todas sus tablas y los
 datos de prueba de forma automática durante la instalación. Si el equipo ya

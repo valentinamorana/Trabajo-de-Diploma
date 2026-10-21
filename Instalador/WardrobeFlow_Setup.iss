@@ -29,9 +29,15 @@
 ;   cuando el usuario confirma la instalacion (PrepareToInstall), no al
 ;   elegir la opcion: si cancela antes, no queda nada instalado.
 ;   "Siguiente, Siguiente" alcanza aunque el equipo no tenga ningun motor.
-;   Si el usuario elige no instalarlo, se le muestra el link de descarga de
-;   SQL Server y se corta sin copiar nada (PPT slide "Sin Motor de Base de
-;   Datos": "Asistente Guiado").
+;   Si el usuario elige no instalarlo, se corta sin copiar nada y se le
+;   ofrece abrir el tutorial "Como instalar SQL Server" (PPT slide "Sin Motor
+;   de Base de Datos": "Asistente Guiado").
+; - Tutorial para instalar el motor (Tutorial_SQL_Server.html, HTML autonomo,
+;   funciona sin Internet): se instala en {app}\Docs con acceso directo en el
+;   menu Inicio, y tambien se puede abrir ANTES de instalar desde la pagina
+;   "No se encontro SQL Server" (botones "Ver tutorial..." y "Abrir pagina de
+;   descarga"). Si el usuario cancela por no tener motor o falla la
+;   instalacion de LocalDB, se le ofrece abrirlo: nunca queda sin salida.
 ; - LocalDB es PRIVADO de cada usuario de Windows (la instancia y la base
 ;   viven en su perfil). Como el instalador corre elevado (puede ser con la
 ;   cuenta de OTRO administrador, via UAC), con LocalDB todo lo que toca la
@@ -187,6 +193,11 @@ Source: "{#DbInstallerSourceDir}\{#DbInstallerExeName}"; DestDir: "{tmp}"; Flags
 Source: "Credenciales_Iniciales.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; Solo se extrae (a {tmp}) si hay que instalar LocalDB: ver InstalarLocalDb.
 Source: "{#LocalDbMsi}"; DestDir: "{tmp}"; Flags: dontcopy nocompression
+; Tutorial para instalar SQL Server: queda instalado en {app}\Docs (acceso
+; directo en el menu Inicio) y viaja ademas como dontcopy para poder abrirlo
+; ANTES de instalar, desde la pagina "No se encontro SQL Server" (ver AbrirTutorial).
+Source: "Tutorial_SQL_Server.html"; DestDir: "{app}\Docs"; Flags: ignoreversion
+Source: "Tutorial_SQL_Server.html"; DestDir: "{tmp}"; Flags: dontcopy
 
 ; La app guarda backups (manuales .wfbak y automaticos auto_*.bak, que se
 ; escriben con el usuario que inicia sesion, sea cual sea su rol) y su
@@ -209,6 +220,7 @@ Name: "{app}\Logs"; Permissions: users-modify
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\Credenciales iniciales (solo demo)"; Filename: "{app}\Credenciales_Iniciales.txt"
+Name: "{group}\Cómo instalar SQL Server"; Filename: "{app}\Docs\Tutorial_SQL_Server.html"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
@@ -230,6 +242,10 @@ Type: files; Name: "{app}\uninstall.log.out"
 Type: filesandordirs; Name: "{app}\Logs"
 
 [Code]
+const
+  // Pagina oficial de descargas de SQL Server (la misma que cita el tutorial).
+  UrlDescargaSql = 'https://www.microsoft.com/es-es/sql-server/sql-server-downloads';
+
 var
   PaginaSeleccionInstancia: TInputOptionWizardPage;
   PaginaSinInstancias: TInputOptionWizardPage;
@@ -258,6 +274,9 @@ var
   // Habia una version instalada antes de empezar (se calcula al inicio, antes de
   // que RegisterPreviousData guarde los datos de ESTA instalacion).
   HabiaVersionPrevia: Boolean;
+  // Botones de ayuda de la pagina "No se encontro SQL Server".
+  BotonTutorialSql: TNewButton;
+  BotonDescargaSql: TNewButton;
 
 // ExitProcess no es una funcion built-in de Pascal Script: hay que
 // importarla de la WinAPI para poder cortar el setup despues de un fallo
@@ -487,6 +506,82 @@ begin
   Result := 2;
 end;
 
+// ---------------------------------------------------------------------
+// Tutorial "Como instalar SQL Server" (requisito: si no esta el motor, un
+// tutorial para instalarlo, sin dejar al usuario sin salida)
+// ---------------------------------------------------------------------
+
+// Copia persistente del tutorial en Documentos publicos (C:\Users\Public\
+// Documents): {tmp} se borra al cerrar el instalador (el navegador podria
+// abrirlo tarde) y el navegador se abre como el usuario ORIGINAL (no el admin
+// que eleva), que tiene que poder leer el archivo. Ahi lo lee cualquier
+// usuario y queda para consultarlo despues de cerrar el instalador.
+function RutaTutorialPersistente(): String;
+begin
+  Result := ExpandConstant('{commondocs}\WardrobeFlow_Tutorial_SQL_Server.html');
+end;
+
+// Extrae el tutorial (entrada dontcopy de [Files]) y lo copia a
+// RutaTutorialPersistente. Devuelve la ruta a abrir ('' si no se pudo).
+function PrepararTutorial(): String;
+var
+  RutaTmp: String;
+begin
+  Result := '';
+  RutaTmp := ExpandConstant('{tmp}\Tutorial_SQL_Server.html');
+  if not FileExists(RutaTmp) then
+    try
+      ExtractTemporaryFile('Tutorial_SQL_Server.html');
+    except
+      exit;
+    end;
+  if CopyFile(RutaTmp, RutaTutorialPersistente(), False) then
+    Result := RutaTutorialPersistente()
+  else
+    Result := RutaTmp;
+end;
+
+// Abre un archivo o URL con el programa predeterminado del usuario que inicio
+// el instalador (no elevado); si no se puede, con la cuenta elevada.
+function AbrirDocumento(const Destino: String): Boolean;
+var
+  ErrorCode: Integer;
+begin
+  Result := ShellExecAsOriginalUser('open', Destino, '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+  if not Result then
+    Result := ShellExec('open', Destino, '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+end;
+
+procedure AbrirTutorial();
+var
+  Ruta: String;
+begin
+  Ruta := PrepararTutorial();
+  if (Ruta = '') or not AbrirDocumento(Ruta) then
+    SuppressibleMsgBox(
+      'No se pudo abrir el tutorial para instalar SQL Server.' + #13#13 +
+      'Puede descargar SQL Server Express desde ' + UrlDescargaSql + '. ' +
+      'Una vez instalado WardrobeFlow, el tutorial también queda en el menú Inicio ("Cómo instalar SQL Server").',
+      mbError, MB_OK, IDOK);
+end;
+
+procedure AbrirPaginaDescarga();
+begin
+  if not AbrirDocumento(UrlDescargaSql) then
+    SuppressibleMsgBox('No se pudo abrir el navegador. Ingrese a esta dirección: ' + UrlDescargaSql,
+                       mbError, MB_OK, IDOK);
+end;
+
+procedure BotonTutorialSqlClick(Sender: TObject);
+begin
+  AbrirTutorial();
+end;
+
+procedure BotonDescargaSqlClick(Sender: TObject);
+begin
+  AbrirPaginaDescarga();
+end;
+
 // Instala SQL Server 2022 Express LocalDB desde el MSI embebido (equipo sin
 // ningun motor) y deja creada y arrancada la instancia MSSQLLocalDB. /passive
 // muestra solo la barra de progreso de Windows Installer, sin preguntas.
@@ -512,8 +607,8 @@ begin
     ErrMsg :=
       'No se pudo instalar SQL Server LocalDB (código ' + IntToStr(ResultCode) + ').' + #13#13 +
       'Detalle en: ' + Log + #13#13 +
-      'Puede instalar SQL Server Express a mano desde https://www.microsoft.com/sql-server/sql-server-downloads ' +
-      'y volver a ejecutar este instalador. No se instaló nada de WardrobeFlow.';
+      'No se instaló nada de WardrobeFlow. Para instalar SQL Server Express a mano, siga el tutorial ' +
+      '"Cómo instalar SQL Server" (copia en ' + RutaTutorialPersistente() + ') y vuelva a ejecutar este instalador.';
     exit;
   end;
 
@@ -628,6 +723,29 @@ begin
   PaginaSinInstancias.Add('Ya tengo SQL Server instalado (con otro nombre, o en otro servidor) — ingresar manualmente');
   PaginaSinInstancias.Add('No tengo ningún motor de SQL Server instalado — cancelar la instalación');
   PaginaSinInstancias.SelectedValueIndex := 0;
+  // Ayuda sin salir del asistente: tutorial (incluido, sin Internet) y pagina
+  // de descarga de Microsoft. Abajo de la lista; no agregan pasos al camino feliz.
+  BotonTutorialSql := TNewButton.Create(PaginaSinInstancias);
+  BotonTutorialSql.Parent := PaginaSinInstancias.Surface;
+  BotonTutorialSql.Caption := 'Ver tutorial para instalar SQL Server';
+  BotonTutorialSql.Width := ScaleX(230);
+  BotonTutorialSql.Height := WizardForm.NextButton.Height;
+  BotonTutorialSql.Left := 0;
+  BotonTutorialSql.Top := PaginaSinInstancias.SurfaceHeight - BotonTutorialSql.Height;
+  BotonTutorialSql.Anchors := [akLeft, akBottom];
+  BotonTutorialSql.OnClick := @BotonTutorialSqlClick;
+
+  BotonDescargaSql := TNewButton.Create(PaginaSinInstancias);
+  BotonDescargaSql.Parent := PaginaSinInstancias.Surface;
+  BotonDescargaSql.Caption := 'Abrir página de descarga';
+  BotonDescargaSql.Width := ScaleX(160);
+  BotonDescargaSql.Height := BotonTutorialSql.Height;
+  BotonDescargaSql.Left := BotonTutorialSql.Left + BotonTutorialSql.Width + ScaleX(8);
+  BotonDescargaSql.Top := BotonTutorialSql.Top;
+  BotonDescargaSql.Anchors := [akLeft, akBottom];
+  BotonDescargaSql.OnClick := @BotonDescargaSqlClick;
+
+  PaginaSinInstancias.CheckListBox.Height := BotonTutorialSql.Top - ScaleY(8) - PaginaSinInstancias.CheckListBox.Top;
 
   // Ingreso manual del servidor\instancia (comun a los dos casos de arriba).
   PaginaIngresoManual := CreateInputQueryPage(PaginaSinInstancias.ID,
@@ -834,12 +952,13 @@ begin
       // "No tengo ningún motor instalado" -> cortar ACÁ, sin copiar nada
       // (PPT slide "Sin Motor de Base de Datos": Asistente Guiado con link
       // de descarga). El usuario instala el motor y vuelve a correr esto.
-      SuppressibleMsgBox(
-        'WardrobeFlow necesita SQL Server para funcionar y no se detectó ninguna instancia en este equipo.' + #13#13 +
-        'Descargue e instale SQL Server Express (o LocalDB) desde:' + #13 +
-        'https://www.microsoft.com/sql-server/sql-server-downloads' + #13#13 +
-        'Después, vuelva a ejecutar este instalador. No se instaló nada.',
-        mbInformation, MB_OK, IDOK);
+      // En vez de un link no clickeable, se ofrece abrir el tutorial.
+      if SuppressibleMsgBox(
+           'WardrobeFlow necesita SQL Server para funcionar y no se detectó ninguna instancia en este equipo. ' +
+           'No se instaló nada.' + #13#13 +
+           '¿Desea abrir el tutorial paso a paso para instalar SQL Server? Cuando termine, vuelva a ejecutar este instalador.',
+           mbConfirmation, MB_YESNO, IDNO) = IDYES then
+        AbrirTutorial();
       // Cierre normal del wizard (Setup limpia su carpeta temporal), sin la
       // pregunta de confirmacion (ver CancelButtonClick).
       CerrarSinConfirmar := True;
@@ -925,7 +1044,17 @@ begin
     if InstalarLocalDb(ErrMsg) then
       InstalarLocalDbPendiente := False
     else
+    begin
+      // Sin salida muerta: se deja la copia del tutorial (ErrMsg cita su ruta)
+      // y se ofrece abrirlo antes de mostrar el error en la pagina.
+      PrepararTutorial();
+      if SuppressibleMsgBox(
+           'No se pudo instalar SQL Server LocalDB, así que no se instaló nada de WardrobeFlow.' + #13#13 +
+           '¿Desea abrir el tutorial para instalar SQL Server de otra forma?',
+           mbError, MB_YESNO, IDNO) = IDYES then
+        AbrirTutorial();
       Result := ErrMsg;
+    end;
   end;
 end;
 

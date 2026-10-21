@@ -43,6 +43,10 @@ namespace BE
 
         SeparacionPrendas = 16,
 
-        Desistimiento = 17
+        Desistimiento = 17,
+
+        // PN03 — Centro de decisiones comerciales: aceptar, descartar, posponer o ejecutar una
+        // recomendación del motor, y registrar su resultado real.
+        DecisionComercial = 18
     }
 }

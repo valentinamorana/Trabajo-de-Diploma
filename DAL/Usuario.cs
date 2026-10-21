@@ -608,7 +608,7 @@ namespace DAL
         }
 
         // RF-10 — Registros de negocio de PN03 firmados por el usuario: son la traza de quién creó,
-        // sugirió, dictaminó o resolvió cada promoción. Un usuario con alguno no se purga.
+        // sugirió, dictaminó o resolvió cada promoción (y quién tomó cada decisión comercial). Un usuario con alguno no se purga.
         public bool TieneRegistrosDeNegocio(int idUsuario)
         {
             DataTable t = acceso.Leer(
@@ -617,7 +617,11 @@ namespace DAL
                 "  EXISTS (SELECT 1 FROM SolicitudBajaPromocion WHERE IdUsuarioSolicita = @id OR IdUsuarioResuelve = @id) OR " +
                 "  EXISTS (SELECT 1 FROM Promocion WHERE IdUsuarioAlta = @id) OR " +
                 "  EXISTS (SELECT 1 FROM PromocionHistorial WHERE IdUsuario = @id) OR " +
-                "  EXISTS (SELECT 1 FROM SugerenciaPromocion WHERE IdUsuarioAlta = @id) " +
+                "  EXISTS (SELECT 1 FROM SugerenciaPromocion WHERE IdUsuarioAlta = @id) OR " +
+                // Centro de decisiones comerciales (sección 20o): quién aceptó, descartó o pospuso cada recomendación.
+                "  EXISTS (SELECT 1 FROM DecisionComercial WHERE IdUsuario = @id) OR " +
+                // Metas comerciales (sección 20p): quién fijó cada objetivo mensual.
+                "  EXISTS (SELECT 1 FROM MetaComercial WHERE IdUsuario = @id) " +
                 "THEN 1 ELSE 0 END AS Tiene",
                 new[] { new SqlParameter("@id", idUsuario) });
             return t != null && t.Rows.Count > 0 && Convert.ToInt32(t.Rows[0]["Tiene"]) == 1;

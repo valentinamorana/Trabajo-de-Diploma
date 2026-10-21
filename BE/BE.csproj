@@ -38,6 +38,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +102,7 @@
     <Compile Include="TipoEventoNegocio.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="VersionUsuario.cs" />
+    <Compile Include="HistorialUsuarioXml.cs" />
     <Compile Include="Memento\IMemento.cs" />
     <Compile Include="Memento\IOriginator.cs" />
     <Compile Include="Estados\Estado.cs" />
@@ -143,6 +145,16 @@
     <Compile Include="PrendaRecomendada.cs" />
     <Compile Include="EstadoCargo.cs" />
     <Compile Include="CargoPrenda.cs" />
+    <Compile Include="TextoTraducible.cs" />
+    <Compile Include="KpiComercial.cs" />
+    <Compile Include="ContextoComercial.cs" />
+    <Compile Include="MatrizCohortes.cs" />
+    <Compile Include="Recomendacion.cs" />
+    <Compile Include="DecisionComercial.cs" />
+    <Compile Include="MetaComercial.cs" />
+    <Compile Include="SimulacionPromocion.cs" />
+    <Compile Include="MedicionPromocion.cs" />
+    <Compile Include="UmbralComercial.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -49,6 +49,7 @@ namespace GUI
             colTamanio.Text   = Tr("col.backup.tamanio",   "Tamaño");
             btnInicial.Text   = Tr("btn.backup.inicial",   "Backup de instalación limpia");
             btnIntervalo.Text = Tr("btn.backup.intervalo", "Backup automático al iniciar sesión...");
+            btnRestablecerDemo.Text = Tr("btn.backup.restablecerdemo", "Restablecer datos de demo...");
         }
 
         // Carga los .bak de la carpeta Backups/ ordenados por fecha descendente (más reciente primero).
@@ -119,6 +120,48 @@ namespace GUI
                 {
                     MostrarError(ex);
                 }
+            }
+        }
+
+        // Restablecer datos de demo: borra los datos de negocio y vuelve a cargar los de la
+        // instalación con las fechas corridas a hoy (BLL.DatosDemo). Doble confirmación: aviso con
+        // botón "No" por defecto y escribir la palabra de confirmación. Antes hace un backup.
+        private async void btnRestablecerDemo_Click(object sender, EventArgs e)
+        {
+            if (!FormBase.MostrarConfirmacionSiNo(this,
+                    Tr("msg.demo.confirmar",
+                        "¿Restablecer los datos de demo?\n\n" +
+                        "Se BORRARÁN todos los datos de negocio (clientes, prendas, pedidos, contrataciones, cobros, " +
+                        "promociones, decisiones comerciales y bitácora de negocio) y se volverán a cargar los datos de prueba de la instalación, " +
+                        "con las fechas corridas a hoy. Usuarios, permisos, planes, idiomas y la bitácora del sistema se conservan.\n\n" +
+                        "Antes se generará una copia de seguridad (sin cifrar) en la carpeta de backups. " +
+                        "Al terminar, la aplicación se reiniciará."),
+                    Tr("dlg.demo.titulo", "Restablecer datos de demo"), porDefectoNo: true))
+                return;
+
+            string texto;
+            using (var dlg = new InputDialog(
+                Tr("dlg.demo.titulo", "Restablecer datos de demo"),
+                string.Format(Tr("dlg.demo.escribir", "Para confirmar, escriba {0}:"), BLL.DatosDemo.TextoConfirmacion),
+                esPassword: false))
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                texto = dlg.InputText;
+            }
+
+            try
+            {
+                string backup = await EjecutarConEsperaAsync(() => new BLL.DatosDemo().Restablecer(this.Text, texto));
+                MessageBox.Show(
+                    string.Format(Tr("msg.demo.ok",
+                        "Datos de demo restablecidos.\nCopia de seguridad previa: {0}\n\nLa aplicación se reiniciará."), backup),
+                    Tr("rpt.dlg.exito.titulo", "Éxito"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Application.Restart();
+            }
+            catch (Exception ex)
+            {
+                MostrarError(ex);
+                CargarLista();
             }
         }
 
@@ -372,6 +415,7 @@ namespace GUI
             btnCrear.Enabled     = habilitado;
             btnInicial.Enabled   = habilitado;
             btnIntervalo.Enabled = habilitado;
+            btnRestablecerDemo.Enabled = habilitado;
             btnExterno.Enabled   = habilitado;
             lstBackups.Enabled   = habilitado;
             bool haySeleccion    = habilitado && lstBackups.SelectedItems.Count > 0;

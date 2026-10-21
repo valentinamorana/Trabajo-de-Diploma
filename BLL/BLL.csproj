@@ -50,6 +50,8 @@
     <Compile Include="PanelAlertas.cs" />
     <Compile Include="PanelTareas.cs" />
     <Compile Include="MenuVisibilidad.cs" />
+    <Compile Include="MapaNavegacion.cs" />
+    <Compile Include="GuiaPrimerUso.cs" />
     <Compile Include="ReporteJornada.cs" />
     <Compile Include="Cliente.cs" />
     <Compile Include="Idioma.cs" />
@@ -125,6 +127,7 @@
     <Compile Include="RecuperacionIntegridad.cs" />
     <Compile Include="Prenda.cs" />
     <Compile Include="Backup.cs" />
+    <Compile Include="DatosDemo.cs" />
     <Compile Include="BackupProgramado.cs" />
     <Compile Include="BLLHelper.cs" />
     <Compile Include="Sesion.cs" />
@@ -136,6 +139,28 @@
     <Compile Include="Usuario.Archivado.cs" />
     <Compile Include="Usuario.Claves.cs" />
     <Compile Include="VersionUsuario.cs" />
+    <Compile Include="Inteligencia\CatalogoUmbrales.cs" />
+    <Compile Include="Inteligencia\ProyeccionSerie.cs" />
+    <Compile Include="Inteligencia\CalculoKpi.cs" />
+    <Compile Include="Inteligencia\SimuladorPromocion.cs" />
+    <Compile Include="Inteligencia\MedicionPromociones.cs" />
+    <Compile Include="Inteligencia\MotorRecomendaciones.cs" />
+    <Compile Include="Inteligencia\DecisionesComerciales.cs" />
+    <Compile Include="Inteligencia\InteligenciaComercial.cs" />
+    <Compile Include="Inteligencia\AccionesRecomendacion.cs" />
+    <Compile Include="Inteligencia\MedicionCampanias.cs" />
+    <Compile Include="Inteligencia\CatalogoIndicadores.cs" />
+    <Compile Include="Inteligencia\MetasComerciales.cs" />
+    <Compile Include="Inteligencia\AvisosComerciales.cs" />
+    <Compile Include="Inteligencia\AnalisisCohortes.cs" />
+    <Compile Include="Inteligencia\Reglas\IReglaRecomendacion.cs" />
+    <Compile Include="Inteligencia\Reglas\ReglaChurnPlan.cs" />
+    <Compile Include="Inteligencia\Reglas\ReglaRenovaciones.cs" />
+    <Compile Include="Inteligencia\Reglas\ReglaEscasez.cs" />
+    <Compile Include="Inteligencia\Reglas\ReglaBajaRotacion.cs" />
+    <Compile Include="Inteligencia\Reglas\ReglaMantenimiento.cs" />
+    <Compile Include="Inteligencia\Reglas\ReglaRendimientoPromocion.cs" />
+    <Compile Include="Inteligencia\Reglas\ReglaUpgradePlan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

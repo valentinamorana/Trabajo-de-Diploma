@@ -63,6 +63,7 @@ namespace GUI
             this.lblSinRegistros.ForeColor = System.Drawing.Color.DimGray;
             this.lblSinRegistros.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblSinRegistros.Name      = "lblSinRegistros";
+            this.lblSinRegistros.Text = "Esta prenda no tiene historial de mantenimiento.";
             this.lblSinRegistros.TabIndex  = 2;
             this.lblSinRegistros.Visible   = false;
 

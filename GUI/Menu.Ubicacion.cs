@@ -21,17 +21,11 @@ namespace GUI
     ///     cada nivel. Si el Designer mueve un ítem de submenú, la ruta lo sigue sola.
     ///   • Guía de primer uso (GuiaPrimerUsoForm): se abre sola en el primer ingreso del usuario,
     ///     después del Panel de Control y de los avisos de arranque, y desde Sesión → Ver guía de inicio.
+    ///   • Sesión → Acerca de WardrobeFlow (AcercaDeForm): versión, servidor y base de datos en uso.
+    ///     Lo ve cualquier usuario con sesión, sin patente (BLL.MapaNavegacion.ItemsSiempreVisibles).
     /// </summary>
     public partial class Menu
     {
-        private StatusStrip barraUbicacion;
-        private ToolStripStatusLabel lblUbicacion;
-        private ToolStripStatusLabel lblPista;
-        private ToolStripStatusLabel lblUsuarioBarra;
-        private ToolStripStatusLabel lblAyudaBarra;
-
-        // Sesión → "Ver guía de inicio" (lo ven todos los roles, como Ayuda (F1)).
-        private readonly ToolStripMenuItem guiaItem = new ToolStripMenuItem { Name = "guiaItem", Tag = "ux.mnu.guia", Text = "Ver guía de inicio" };
 
         // Diálogos modales del menú abiertos (Nueva contratación, Backup, Mi Perfil…), en orden de
         // apertura: la barra muestra el último y, al cerrarse, vuelve al anterior o a la ventana activa.
@@ -53,41 +47,8 @@ namespace GUI
         /// <summary>Arma la barra de estado y el ítem de la guía. Se llama una vez desde el constructor.</summary>
         private void InicializarUsabilidad()
         {
-            lblUbicacion = new ToolStripStatusLabel
-            {
-                Name = "lblUbicacion", Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Tema.RosaTinta,
-                Margin = new Padding(6, 3, 6, 2)
-            };
-            lblPista = new ToolStripStatusLabel
-            {
-                Name = "lblPista", Spring = true, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Tema.Tinta,
-                BorderSides = ToolStripStatusLabelBorderSides.Left, BorderStyle = Border3DStyle.Etched
-            };
-            lblUsuarioBarra = new ToolStripStatusLabel
-            {
-                Name = "lblUsuarioBarra", ForeColor = Tema.TextoSecundario,
-                BorderSides = ToolStripStatusLabelBorderSides.Left, BorderStyle = Border3DStyle.Etched
-            };
-            lblAyudaBarra = new ToolStripStatusLabel
-            {
-                Name = "lblAyudaBarra", IsLink = true, LinkColor = Tema.RosaOscuro, ActiveLinkColor = Tema.RosaPrimario,
-                LinkBehavior = LinkBehavior.HoverUnderline, BorderSides = ToolStripStatusLabelBorderSides.Left,
-                BorderStyle = Border3DStyle.Etched, Margin = new Padding(0, 3, 6, 2)
-            };
-            lblAyudaBarra.Click += (s, e) => Ayuda.AyudaEnLinea.Mostrar(this,
-                ActiveMdiChild?.GetType().Name ?? "General", (ActiveMdiChild as FormBase)?.TextoAyudaAdicional);
-
-            barraUbicacion = new StatusStrip
-            {
-                Name = "barraUbicacion", Dock = DockStyle.Bottom, SizingGrip = false, ShowItemToolTips = true,
-                BackColor = Tema.RosaMuyClara
-            };
-            barraUbicacion.Items.AddRange(new ToolStripItem[] { lblUbicacion, lblPista, lblUsuarioBarra, lblAyudaBarra });
-            Controls.Add(barraUbicacion);
-
-            guiaItem.Click += (s, e) => MostrarGuia(new BLL.GuiaPrimerUso());
-            int idxAyuda = usuarioToolStripMenuItem.DropDownItems.IndexOf(ayudaItem);
-            usuarioToolStripMenuItem.DropDownItems.Insert(idxAyuda >= 0 ? idxAyuda + 1 : 0, guiaItem);
+            // La barra «Usted está en» (barraUbicacion y sus cuatro etiquetas) y los ítems de Sesión
+            // Ayuda (F1) · Ver guía de inicio · Acerca de WardrobeFlow están en el Diseñador (Menu.Designer.cs).
 
             // Lo encolado tras la guía tampoco se superpone a un aviso modal (p. ej. el del backup del
             // login, abierto cuando la guía no se muestra y la secuencia se resuelve en el acto).
@@ -111,6 +72,13 @@ namespace GUI
                 ActualizarBarraUbicacion();
             };
         }
+
+        private void LblAyudaBarra_Click(object sender, EventArgs e)
+            => Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General", (ActiveMdiChild as FormBase)?.TextoAyudaAdicional);
+
+        private void GuiaItem_Click(object sender, EventArgs e) => MostrarGuia(new BLL.GuiaPrimerUso());
+
+        private void AcercaDeItem_Click(object sender, EventArgs e) => MostrarAcercaDe();
 
         protected override void OnShown(EventArgs e)
         {
@@ -279,7 +247,7 @@ namespace GUI
 
         /// <summary>
         /// Ítem del menú con ese .Name. Cada ítem es un campo del Menú con el mismo nombre (Designer o
-        /// creado por código, como ayudaItem/guiaItem): se toma de ahí. Items.Find no sirve como única
+        /// incluidos ayudaItem, guiaItem y acercaDeItem): se toma de ahí. Items.Find no sirve como única
         /// vía porque no entra en los submenús cuyos ítems están ocultos por permisos.
         /// </summary>
         private ToolStripItem BuscarItem(ToolStripItemCollection items, string nombre)
@@ -360,6 +328,25 @@ namespace GUI
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceWarning("[Menu] Guía de primer uso: " + ex.Message);
+            }
+        }
+
+        // ── Acerca de WardrobeFlow ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Sesión → Acerca de WardrobeFlow: diálogo modal con el Menú como dueño (así la barra "Usted
+        /// está en" lo muestra mientras está abierto). Solo lectura: no necesita patente.
+        /// </summary>
+        private void MostrarAcercaDe()
+        {
+            try
+            {
+                using (var acercaDe = new AcercaDeForm())
+                    acercaDe.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning("[Menu] Acerca de WardrobeFlow: " + ex.Message);
             }
         }
     }

@@ -532,57 +532,9 @@ namespace GUI
         /// </summary>
         private string PedirTexto(string prompt, string titulo)
         {
-            string resultado = null;
-            using (var dlg = new Form())
-            {
-                dlg.Text            = titulo;
-                dlg.ClientSize      = new Size(420, 130);
-                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
-                dlg.MaximizeBox     = false;
-                dlg.MinimizeBox     = false;
-                dlg.StartPosition   = FormStartPosition.CenterParent;
-
-                dlg.Controls.Add(new Label
-                {
-                    Text = prompt, Left = 12, Top = 12,
-                    Width = 396, Height = 36,
-                    Font = new Font("Segoe UI", 9f)
-                });
-
-                var txt = new TextBox { Left = 12, Top = 52, Width = 396 };
-                dlg.Controls.Add(txt);
-
-                var tPedir = Traductor.ObtenerTraducciones(_idioma);
-                string aceptarTxt  = tPedir.ContainsKey("btn.aceptar")  ? tPedir["btn.aceptar"].Texto  : "Aceptar";
-                string cancelarTxt = tPedir.ContainsKey("btn.cancelar") ? tPedir["btn.cancelar"].Texto : "Cancelar";
-
-                var btnOk = new Button
-                {
-                    Text         = aceptarTxt, Left = 220, Top = 84,
-                    Width = 90, Height = 30,
-                    DialogResult = DialogResult.OK,
-                    BackColor    = Color.SteelBlue, ForeColor = Color.White,
-                    FlatStyle    = FlatStyle.Flat
-                };
-                btnOk.FlatAppearance.BorderSize = 0;
-
-                var btnCancel = new Button
-                {
-                    Text         = cancelarTxt, Left = 318, Top = 84,
-                    Width = 90, Height = 30,
-                    DialogResult = DialogResult.Cancel,
-                    FlatStyle    = FlatStyle.Flat
-                };
-
-                dlg.Controls.Add(btnOk);
-                dlg.Controls.Add(btnCancel);
-                dlg.AcceptButton = btnOk;
-                dlg.CancelButton = btnCancel;
-
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                    resultado = txt.Text.Trim();
-            }
-            return resultado;
+            // InputDialog: el cuadro de texto genérico hecho con el Diseñador.
+            using (var dlg = new InputDialog(titulo, prompt, false))
+                return dlg.ShowDialog(this) == DialogResult.OK ? dlg.InputText.Trim() : null;
         }
 
         // ── Historial de cambios ──────────────────────────────────────────────

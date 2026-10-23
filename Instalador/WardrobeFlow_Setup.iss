@@ -121,6 +121,15 @@
   #error "No se encontro GUI.exe en GUI\bin\Release. Compilar el proyecto en modo Release antes de generar el instalador."
 #endif
 
+; La version esta escrita dos veces: MyAppVersion arriba (compilar-y-firmar.ps1 la lee de
+; ese #define para nombrar el .exe) y en cada Properties\AssemblyInfo.cs (AssemblyVersion y
+; AssemblyFileVersion = MyAppVersion + ".0"; "Acerca de WardrobeFlow" la lee de GUI.exe). Si
+; no coinciden, no se genera un instalador que anuncie una version y copie otra.
+#define ExeVersion GetVersionNumbersString(AppSourceDir + "\" + MyAppExeName)
+#if ExeVersion != MyAppVersion + ".0"
+  #error "La version de GUI.exe no coincide con MyAppVersion. Actualizar AssemblyVersion y AssemblyFileVersion en los AssemblyInfo.cs (o MyAppVersion) y volver a compilar en Release."
+#endif
+
 #if !FileExists(DbSourceDir + "\00_Instalacion_Completa.sql")
   #error "No se encontro BD\00_Instalacion_Completa.sql (script unico de instalacion)."
 #endif

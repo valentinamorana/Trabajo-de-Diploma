@@ -49,6 +49,7 @@ namespace GUI
             this.lblSugerencia.ForeColor = System.Drawing.Color.DimGray;
             this.lblSugerencia.Location = new System.Drawing.Point(12, 10);
             this.lblSugerencia.Name = "lblSugerencia";
+            this.lblSugerencia.Text = "Alta manual (sin sugerencia de Gerencia).";
             this.lblSugerencia.Size = new System.Drawing.Size(420, 32);
             this.lblSugerencia.TabIndex = 0;
             //

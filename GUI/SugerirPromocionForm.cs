@@ -200,60 +200,19 @@ namespace GUI
         // «Reporte de métricas» en pantalla, con la lista de oportunidades para elegir y la opción de imprimirlo.
         private BE.CandidataSugerencia MostrarReporte(BE.ReporteMetricas reporte, bool hayOportunidad)
         {
-            using (var dlg = new Form
+            using (var dlg = new ReporteMetricasDialog())
             {
-                Text = Tr("doc.promo.reporte.titulo", "Reporte de métricas"),
-                StartPosition = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                MaximizeBox = false,
-                MinimizeBox = false,
-                BackColor = Tema.Papel,
-                ClientSize = new System.Drawing.Size(640, 460)
-            })
-            {
-                var texto = new TextBox
-                {
-                    Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical,
-                    BackColor = Tema.Papel, ForeColor = Tema.Tinta, Text = Docs.ReporteMetricas(reporte).TextoPlano
-                };
-                var lista = new ListBox { Dock = DockStyle.Bottom, Height = 120, FormattingEnabled = true, Visible = hayOportunidad };
-                lista.Format += (s, ev) =>
-                {
-                    if (ev.ListItem is BE.CandidataSugerencia c)
-                        ev.Value = $"[{Docs.Origen(c.Origen)}] {Docs.AplicaA(c.IdPlan, c.NombrePlan)} — {c.BeneficioEstimado:C2}";
-                };
-                foreach (var c in reporte.Oportunidades) lista.Items.Add(c);
-                if (lista.Items.Count > 0) lista.SelectedIndex = 0;
-
-                var usar = new Button
-                {
-                    Text = Tr("promocion.desdeanalisis.usar", "Usar esta idea"), DialogResult = DialogResult.OK,
-                    Dock = DockStyle.Right, Width = 150, Visible = hayOportunidad,
-                    FlatStyle = FlatStyle.Flat, BackColor = Tema.Exito, ForeColor = System.Drawing.Color.White
-                };
-                var imprimir = new Button
-                {
-                    Text = Tr("promocion.btn.imprimirreporte", "Imprimir reporte"), Dock = DockStyle.Left, Width = 150,
-                    FlatStyle = FlatStyle.Flat, BackColor = Tema.RosaOscuro, ForeColor = System.Drawing.Color.White
-                };
-                imprimir.Click += (s, ev) =>
+                dlg.Configurar(Tr("doc.promo.reporte.titulo", "Reporte de métricas"), Docs.ReporteMetricas(reporte).TextoPlano,
+                               reporte.Oportunidades, hayOportunidad,
+                               c => $"[{Docs.Origen(c.Origen)}] {Docs.AplicaA(c.IdPlan, c.NombrePlan)} — {c.BeneficioEstimado:C2}",
+                               Tr("promocion.desdeanalisis.usar", "Usar esta idea"),
+                               Tr("promocion.btn.imprimirreporte", "Imprimir reporte"), Tr("btn.cerrar", "Cerrar"));
+                dlg.Imprimir += (s, ev) =>
                 {
                     try { Docs.Imprimir(Docs.ReporteMetricas(reporte), dlg); }
                     catch (Exception ex) { MostrarError(ex); }
                 };
-                var cerrar = new Button { Text = Tr("btn.cerrar", "Cerrar"), DialogResult = DialogResult.Cancel, Dock = DockStyle.Right, Width = 100 };
-                var panel = new Panel { Dock = DockStyle.Bottom, Height = 36, Padding = new Padding(4) };
-                panel.Controls.Add(usar);
-                panel.Controls.Add(cerrar);
-                panel.Controls.Add(imprimir);
-
-                dlg.Controls.Add(texto);
-                dlg.Controls.Add(lista);
-                dlg.Controls.Add(panel);
-                dlg.AcceptButton = hayOportunidad ? usar : null;
-                dlg.CancelButton = cerrar;
-
-                return dlg.ShowDialog(this) == DialogResult.OK ? lista.SelectedItem as BE.CandidataSugerencia : null;
+                return dlg.ShowDialog(this) == DialogResult.OK ? dlg.OportunidadElegida : null;
             }
         }
 

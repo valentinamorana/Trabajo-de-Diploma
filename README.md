@@ -5,14 +5,29 @@ Desarrollado en C# / .NET Framework 4.7.2 / Windows Forms / SQL Server.
 
 **Materia:** Trabajo de Diploma — UAI 2026
 **Autora:** Valentina Morana
+**Versión actual:** 1.6.0 — instalador firmado en [GitHub Releases](https://github.com/valentinamorana/Trabajo-de-Diploma/releases/tag/v1.6.0) (tag `v1.6.0`)
 
 ---
 
 ## Descripción
 
-WardrobeFlow permite a una empresa de alquiler de ropa administrar clientes, prendas, planes de suscripción, pedidos de venta y la renovación periódica de suscripciones. El acceso está restringido a empleados internos con roles diferenciados, cada uno con visibilidad y operaciones acotadas a su función.
+WardrobeFlow permite a una empresa de alquiler de ropa por suscripción administrar clientes, prendas, planes, pedidos, la contratación y el cobro de las suscripciones, las promociones comerciales y la inspección de las prendas devueltas. El acceso está restringido a empleados internos con roles diferenciados, cada uno con visibilidad y operaciones acotadas a su función.
 
-Este repositorio parte de la base construida durante la materia Ingeniería de Software y la evoluciona para el Trabajo de Diploma, incorporando los procesos de negocio y patrones de diseño del **Bloque 1 — Operativos Core: Clientes (Fidelización de clientes)**.
+Este repositorio parte de la base construida durante la materia Ingeniería de Software (módulos técnicos T01–T08 y los procesos PdN1–PdN13) y la evoluciona para el Trabajo de Diploma con los **cuatro procesos de negocio PN01–PN04**, el instalador, el informe PDF, la serialización y la documentación de usuario.
+
+### Correspondencia con el plan de entregas
+
+| Ítem del plan | Dónde está en el sistema |
+|---------------|--------------------------|
+| **N01** Proceso de negocio | **PN01 Armar pedido de prendas** (Vendedor y Depósito) |
+| **N02** Proceso de negocio | **PN02 Comercialización de la suscripción** (Vendedor y Caja) |
+| **N03** Proceso de negocio complejo (toma de decisiones) | **PN03 Inteligencia comercial y promociones**: Centro de decisiones comerciales, circuito de promociones y medición de resultados |
+| Proceso adicional | **PN04 Inspeccionar prendas devueltas** (Depósito) |
+| **A01** Instalador | Inno Setup + `DbInstaller` (`Instalador/`): caso simple y casos especiales (sin instancia, sin motor, servicio detenido) |
+| **A02** Informe y exportación a PDF | iTextSharp con Factory Method (`GUI/Exportacion`) |
+| **A02** Serialización | XML y JSON (`Servicios/Serializacion`); en la tesis figura como A03 |
+| **D01 / D03** Manual de instalación y material de apoyo | Documento de la tesis; el tutorial de SQL Server viaja con el instalador |
+| **D02** Ayuda en línea | F1 en todas las pantallas (`GUI/Ayuda/AyudaEnLinea.cs`), ver [Usabilidad](#usabilidad) |
 
 ---
 
@@ -35,7 +50,7 @@ GUI (WinForms MDI)
  └── BLL (lógica de negocio)
       ├── DAL (ADO.NET → SQL Server)
       ├── BE  (entidades de dominio + DTOs + patrones estructurales/creacionales/de comportamiento)
-      ├── Servicios (bitácora · multiidioma · generador de credenciales)
+      ├── Servicios (bitácora · multiidioma · serialización XML/JSON · exportación CSV · generador de credenciales)
       └── Seguridad (sesión · encriptado · dígitos verificadores)
 ```
 
@@ -61,7 +76,9 @@ Los diagramas (casos de uso, clases, secuencia, actividad y DER) están en el mo
 
 ---
 
-## Procesos de negocio — Bloque 1: Operativos Core (Clientes)
+## Procesos base heredados — Bloque 1: Operativos Core (Clientes)
+
+Vienen de Ingeniería de Software y siguen en el sistema; los procesos del Trabajo de Diploma son PN01–PN04 (sección siguiente). La renovación y el cobro de renovaciones (PdN5 y PdN6) son los que el sistema muestra como "Cobro de renovaciones (N01)".
 
 | PdN | Proceso | Patrón aplicado |
 |-----|---------|------------------|
@@ -74,7 +91,7 @@ Los diagramas (casos de uso, clases, secuencia, actividad y DER) están en el mo
 
 ---
 
-## Procesos de negocio nuevos (PN01-PN04)
+## Procesos de negocio del Trabajo de Diploma (PN01-PN04)
 
 | PN | Proceso | Rol(es) protagonista(s) | Detalle |
 |----|---------|--------------------------|---------|
@@ -343,7 +360,7 @@ Objetivo: que en todo momento se entienda **dónde está parado el usuario, qué
 |---------|-------------------|------------|
 | **Panel de Control por rol** | Al ingresar se abre el tablero de su rol: Ventas (pedidos para atender, con faltantes y separados), Depósito (pedidos a controlar, prendas en mantenimiento, ocupación), Logística (pendientes/despachados/entregados) y uno general para el resto (indicadores y "Mis tareas pendientes" según las patentes). Un clic en una tarjeta o tarea abre la pantalla que la resuelve | `GUI.Menu.CrearDashboardDelRol`, `Dashboard*` |
 | **Barra de estado "Usted está en"** | Al pie de la ventana principal: la ruta del menú de la pantalla activa (p. ej. *Promociones → Centro de decisiones comerciales*), una pista de una línea con lo que se puede hacer ahí, el usuario con su rol y el enlace **F1: Ayuda**. Se actualiza al cambiar de ventana, al cerrar la última ventana ("Inicio") y mientras está abierto un diálogo que se abre **desde el menú** (Nueva Contratación, Sugerir Promoción, Backup, Mi Perfil, la guía); los diálogos que abren las ventanas hijas no cambian la ubicación. Si se abre un diálogo del menú dentro de otro, al cerrarse vuelve a mostrar el anterior. Nunca interrumpe: un texto mal editado en Gestión de Idiomas (p. ej. un `{0` sin cerrar) cae al texto de fábrica | `GUI/Menu.Ubicacion.cs` + `BLL.MapaNavegacion` |
-| **Ayuda en línea (F1)** | F1 en cualquier pantalla (o Sesión › Ayuda, o el enlace de la barra) abre la ayuda de esa pantalla; la ayuda general describe además la ventana principal | `GUI.Ayuda.AyudaEnLinea` (claves `ayuda.*`, `ux.ayuda.ventana`) |
+| **Ayuda en línea (F1)** | F1 en cualquier pantalla (o Sesión › Ayuda, o el enlace de la barra) abre la ayuda de esa pantalla, también en el Login y en el aviso comercial al iniciar sesión. Hay 51 temas: uno por pantalla, incluidos los diálogos (alta de promoción, cargo por daño o pérdida, datos y estado de la prenda, historiales), los paneles de cada rol y las pantallas de seguridad (contraseña olvidada, cambio obligatorio, clave de emergencia, integridad). Solo el Menú y el cuadro de texto genérico muestran la ayuda general, que describe además la ventana principal | `GUI.Ayuda.AyudaEnLinea` (claves `ayuda.*`, `ux.ayuda.ventana`); `UsabilidadTests` exige un tema por pantalla, en los 4 idiomas |
 | **Tooltips** | 106 botones de 26 pantallas explican su función al apoyar el mouse (los que no se entienden solo por el texto: Formalizar, Separar prendas, Intento Fallido, Purgar, Recalcular Todo…) | `GUI/FormBase.Usabilidad.cs` (claves `tip.<Formulario>.<control>`) |
 | **Guía de primer uso** | En el primer ingreso de cada usuario, después del Panel de Control y de los avisos de arranque, se abre "Bienvenido a WardrobeFlow" con 5 pasos para su rol: qué hace el sistema para él, por qué menú empezar, qué muestra su panel, la barra de estado y F1. La guía vuelve a aparecer en cada ingreso hasta que el usuario marque "No volver a mostrar al iniciar sesión" (desmarcada por defecto); se puede reabrir en cualquier momento desde **Sesión › Ver guía de inicio**. Los pasos se eligen por el **nombre del rol** del usuario: un rol renombrado o creado en Perfiles y Permisos recibe la guía genérica (el Administrador siempre ve la suya) | `GUI/GuiaPrimerUsoForm.cs` + `BLL.GuiaPrimerUso` |
 | **Idiomas** | Todo lo anterior está en los 4 idiomas y cambia en vivo con el selector de idioma | `traducciones.tsv` (claves `ux.*` y `tip.*`) |
@@ -431,7 +448,9 @@ En el primer arranque el sistema seedea automáticamente las tablas de traduccio
 
 ### Build y tests
 
-Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`, 1214 pruebas al 21/10/2026: 1196 pasan y 18 de integración se omiten cuando no está disponible la base de pruebas). Las pruebas de integración usan una base aparte, `WardrobeFlowDB_Tests` (el mismo script con ese nombre); nunca tocan `WardrobeFlowDB`.
+Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`, 1217 pruebas al 23/10/2026: con la base de pruebas disponible pasan 1215 y 2 se omiten a propósito porque necesitan un `.bak` real; sin la base, se omiten además las de integración). Las pruebas de integración usan una base aparte, `WardrobeFlowDB_Tests` (el mismo script con ese nombre); nunca tocan `WardrobeFlowDB`.
+
+Desde la línea de comandos hay que usar el MSBuild de Visual Studio (`MSBuild.exe WardrobeFlow.slnx -restore`) y `vstest.console.exe Tests\bin\Debug\Tests.dll`. `dotnet build` falla en el proyecto GUI (errores MSB3822/MSB3823 con los recursos `.resx` de un proyecto .NET Framework): es una limitación del SDK de `dotnet`, no del código.
 
 ### Generar el instalador
 

@@ -67,7 +67,34 @@ namespace GUI
             ((System.ComponentModel.ISupportInitialize)(this.dgvNegocio)).BeginInit();
             this.panelFiltrosNegocio.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudNegDias)).BeginInit();
+            this.components = new System.ComponentModel.Container();
+            this.menuExportar = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuExportarPdf = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuExportarCsv = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuExportar.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // menuExportar — formatos de exportación (PDF / CSV) que se despliegan junto a cada botón Exportar.
+            // 
+            this.menuExportar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuExportarPdf,
+            this.mnuExportarCsv});
+            this.menuExportar.Name = "menuExportar";
+            this.menuExportar.Size = new System.Drawing.Size(160, 48);
+            // 
+            // mnuExportarPdf
+            // 
+            this.mnuExportarPdf.Name = "mnuExportarPdf";
+            this.mnuExportarPdf.Size = new System.Drawing.Size(159, 22);
+            this.mnuExportarPdf.Text = "Exportar a PDF";
+            this.mnuExportarPdf.Click += new System.EventHandler(this.MnuExportarPdf_Click);
+            // 
+            // mnuExportarCsv
+            // 
+            this.mnuExportarCsv.Name = "mnuExportarCsv";
+            this.mnuExportarCsv.Size = new System.Drawing.Size(159, 22);
+            this.mnuExportarCsv.Text = "Exportar a CSV";
+            this.mnuExportarCsv.Click += new System.EventHandler(this.MnuExportarCsv_Click);
             //
             // panelTop
             //
@@ -592,6 +619,7 @@ namespace GUI
             this.panelFiltrosNegocio.ResumeLayout(false);
             this.panelFiltrosNegocio.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudNegDias)).EndInit();
+            this.menuExportar.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -636,5 +664,8 @@ namespace GUI
         private System.Windows.Forms.Button        btnExportNegocio;
         private System.Windows.Forms.DataGridView  dgvNegocio;
         private System.Windows.Forms.Label         lblResultadosNegocio;
+        private System.Windows.Forms.ContextMenuStrip  menuExportar;
+        private System.Windows.Forms.ToolStripMenuItem mnuExportarPdf;
+        private System.Windows.Forms.ToolStripMenuItem mnuExportarCsv;
     }
 }

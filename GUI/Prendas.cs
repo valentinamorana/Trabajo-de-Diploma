@@ -406,45 +406,11 @@ namespace GUI
             try { clientes = clienteBLL.ObtenerTodos(); }
             catch (Exception ex) { MostrarError(ex); return null; }
 
-            using (var dlg = new Form())
+            using (var dlg = new SeleccionClienteDialog())
             {
-                dlg.Text = titulo;
-                dlg.ClientSize = new Size(360, 130);
-                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.MaximizeBox = false;
-                dlg.MinimizeBox = false;
-
-                var lbl = new Label { Text = prompt, Left = 16, Top = 16, Width = 328, Height = 20 };
-                var cmb = new ComboBox
-                {
-                    Left = 16, Top = 40, Width = 328, Height = 22,
-                    DropDownStyle = ComboBoxStyle.DropDownList,
-                    DisplayMember = "NombreCompleto"
-                };
-                foreach (var c in clientes) cmb.Items.Add(c);
-                if (cmb.Items.Count > 0) cmb.SelectedIndex = 0;
-
-                var btnOk = new Button
-                {
-                    Text = Tr("btn.aceptar", "Aceptar"), Left = 184, Top = 80, Width = 76, Height = 30,
-                    DialogResult = DialogResult.OK,
-                    BackColor = Tema.RosaPrimario, ForeColor = Color.White,
-                    FlatStyle = FlatStyle.Flat
-                };
-                btnOk.FlatAppearance.BorderSize = 0;
-                var btnCancel = new Button
-                {
-                    Text = Tr("btn.cancelar", "Cancelar"), Left = 268, Top = 80, Width = 76, Height = 30,
-                    DialogResult = DialogResult.Cancel, FlatStyle = FlatStyle.Flat
-                };
-
-                dlg.Controls.AddRange(new Control[] { lbl, cmb, btnOk, btnCancel });
-                dlg.AcceptButton = btnOk;
-                dlg.CancelButton = btnCancel;
-
+                dlg.Configurar(titulo, prompt, Tr("btn.aceptar", "Aceptar"), Tr("btn.cancelar", "Cancelar"), clientes);
                 if (dlg.ShowDialog(this) != DialogResult.OK) return null;
-                return cmb.SelectedItem as BE.Cliente;
+                return dlg.ClienteSeleccionado;
             }
         }
 

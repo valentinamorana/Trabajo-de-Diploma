@@ -52,6 +52,10 @@ namespace GUI
             this.tabs = new TabControl();
             // Pestaña Analizar
             this.tabAnalizar = new TabPage();
+            this.tabCohortes = new TabPage();
+            this.panelCohortes = new GUI.Inteligencia.PanelCohortes();
+            this.tabMetas = new TabPage();
+            this.panelMetas = new GUI.Inteligencia.PanelMetasComerciales();
             this.flpKpis = new FlowLayoutPanel();
             this.lblAvisos = new Label();
             this.tlpGraficos = new TableLayoutPanel();
@@ -177,6 +181,8 @@ namespace GUI
             ((System.ComponentModel.ISupportInitialize)(this.chartSensibilidad)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvEscenarios)).BeginInit();
             this.tabMedir.SuspendLayout();
+            this.tabCohortes.SuspendLayout();
+            this.tabMetas.SuspendLayout();
             this.pnlMedirFiltros.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMedir)).BeginInit();
             this.splitMedir.Panel1.SuspendLayout();
@@ -301,10 +307,12 @@ namespace GUI
 
             // ══ Pestañas ═══════════════════════════════════════════════════════
             this.tabs.Controls.Add(this.tabAnalizar);
+            this.tabs.Controls.Add(this.tabCohortes);
             this.tabs.Controls.Add(this.tabRecomendaciones);
             this.tabs.Controls.Add(this.tabHistorial);
             this.tabs.Controls.Add(this.tabSimulador);
             this.tabs.Controls.Add(this.tabMedir);
+            this.tabs.Controls.Add(this.tabMetas);
             this.tabs.Dock = DockStyle.Fill;
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
@@ -787,6 +795,26 @@ namespace GUI
             this.dgvEscenarios.Name = "dgvEscenarios";
             this.dgvEscenarios.ReadOnly = true;
 
+            // ── 1b. Cohortes (control propio Inteligencia.PanelCohortes) ─────────
+            this.tabCohortes.BackColor = Tema.Papel;
+            this.tabCohortes.Controls.Add(this.panelCohortes);
+            this.tabCohortes.Name = "tabCohortes";
+            this.tabCohortes.Padding = new Padding(4);
+            this.tabCohortes.Text = "1b. Cohortes";
+
+            this.panelCohortes.Dock = DockStyle.Fill;
+            this.panelCohortes.Name = "panelCohortes";
+
+            // ── 6. Metas (control propio Inteligencia.PanelMetasComerciales) ─────
+            this.tabMetas.BackColor = Tema.Papel;
+            this.tabMetas.Controls.Add(this.panelMetas);
+            this.tabMetas.Name = "tabMetas";
+            this.tabMetas.Padding = new Padding(6);
+            this.tabMetas.Text = "Metas";
+
+            this.panelMetas.Dock = DockStyle.Fill;
+            this.panelMetas.Name = "panelMetas";
+
             // ── 5. Medir resultado ─────────────────────────────────────────────
             this.tabMedir.Controls.Add(this.splitMedir);
             this.tabMedir.Controls.Add(this.pnlMedirFiltros);
@@ -952,6 +980,8 @@ namespace GUI
             ((System.ComponentModel.ISupportInitialize)(this.splitMedir)).EndInit();
             this.splitMedir.ResumeLayout(false);
             this.tabMedir.ResumeLayout(false);
+            this.tabCohortes.ResumeLayout(false);
+            this.tabMetas.ResumeLayout(false);
             this.tabs.ResumeLayout(false);
             this.ResumeLayout(false);
         }
@@ -1043,6 +1073,10 @@ namespace GUI
         private Chart chartSensibilidad;
         private DataGridView dgvEscenarios;
         private TabPage tabMedir;
+        private TabPage tabCohortes;
+        private GUI.Inteligencia.PanelCohortes panelCohortes;
+        private TabPage tabMetas;
+        private GUI.Inteligencia.PanelMetasComerciales panelMetas;
         private Panel pnlMedirFiltros;
         private Label lblMedirDesde;
         private DateTimePicker dtpMedirDesde;

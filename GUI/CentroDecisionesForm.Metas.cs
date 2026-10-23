@@ -7,21 +7,15 @@ namespace GUI
 {
     /// <summary>
     /// PN03 — Pestaña "Metas" del Centro de decisiones comerciales. El contenido es un control propio
-    /// (Inteligencia.PanelMetasComerciales, hecho con el Diseñador); acá solo se lo aloja en una pestaña,
+    /// (Inteligencia.PanelMetasComerciales, hecho con el Diseñador) ubicado en su pestaña con el Diseñador;
     /// se conecta con el análisis (al cambiar una meta se vuelve a analizar: las prioridades dependen de
     /// ella) y se suma al Informe ejecutivo.
     /// </summary>
     public partial class CentroDecisionesForm
     {
-        private TabPage tabMetas;
-        private PanelMetasComerciales panelMetas;
-
         private void AgregarPestanaMetas()
         {
-            panelMetas = new PanelMetasComerciales { Dock = DockStyle.Fill, Name = "panelMetas" };
-            tabMetas = new TabPage { Name = "tabMetas", Text = "Metas", BackColor = Tema.Papel, Padding = new Padding(6) };
-            tabMetas.Controls.Add(panelMetas);
-            tabs.TabPages.Add(tabMetas);
+            // La pestaña y el panel están en el Diseñador (última pestaña).
             panelMetas.Inicializar(bll, Modulo);
             panelMetas.MetasCambiaron += (s, e) => BtnAnalizar_Click(this, EventArgs.Empty);
             tabs.SelectedIndexChanged += (s, e) =>

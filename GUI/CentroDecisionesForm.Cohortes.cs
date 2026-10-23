@@ -8,7 +8,7 @@ namespace GUI
 {
     /// <summary>
     /// Centro de decisiones comerciales — pestaña «1b. Cohortes» (retención por mes de alta). La pestaña
-    /// es un control propio (<see cref="PanelCohortes"/>) que se agrega por código; el cálculo es de
+    /// es un control propio (<see cref="PanelCohortes"/>) ubicado con el Diseñador; el cálculo es de
     /// BLL.Inteligencia.AnalisisCohortes y corre junto con el análisis, en segundo plano.
     ///
     /// Movimiento: «Actuar sobre la peor cohorte» lleva a la pestaña Recomendaciones y selecciona la
@@ -18,18 +18,12 @@ namespace GUI
     public partial class CentroDecisionesForm
     {
         private readonly BLLI.AnalisisCohortes cohortesBLL = new BLLI.AnalisisCohortes();
-        private TabPage tabCohortes;
-        private PanelCohortes panelCohortes;
         private BE.MatrizCohortes _cohortes;
 
         private void InicializarCohortes()
         {
-            panelCohortes = new PanelCohortes { Name = "panelCohortes" };
+            // La pestaña y el panel están en el Diseñador, justo después de «1. Analizar» (es parte del análisis).
             panelCohortes.ActuarSobrePeorCohorte += PanelCohortes_ActuarSobrePeorCohorte;
-            tabCohortes = new TabPage { Name = "tabCohortes", Padding = new Padding(4), BackColor = Tema.Papel };
-            tabCohortes.Controls.Add(panelCohortes);
-            // Justo después de «1. Analizar»: es parte del análisis.
-            tabs.TabPages.Insert(Math.Min(1, tabs.TabPages.Count), tabCohortes);
         }
 
         private void TraducirCohortes()

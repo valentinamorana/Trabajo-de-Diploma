@@ -216,7 +216,7 @@ namespace GUI.Inteligencia
             new[] { "Σ descuentos aplicados en los cobros del período (Contratacion + HistorialCobro).", "Costo real de las promociones: se compara con lo que retienen." },
             new[] { "Prendas en uso / prendas activas × 100. Fuente: Prenda.", "Se le puede fijar una meta mensual: si está en riesgo, suben de prioridad dar de baja las prendas sin rotación o con mantenimiento excesivo (menos prendas activas) y el upgrade de plan (más prendas en uso). Mandarlas a revisión no la cambia." },
             new[] { "Ingresos cobrados / cantidad de cobros del período.", "Valor de un cliente: se usa en las estimaciones de las reglas." },
-            new[] { "Σ importes cobrados en el período (PN02 + N01).", "Tendencia del negocio; se proyecta 3 meses." },
+            new[] { "Σ importes cobrados en el período (contrataciones y renovaciones, PN02).", "Tendencia del negocio; se proyecta 3 meses." },
             new[] { "Regresión lineal por mínimos cuadrados sobre los últimos 6 meses (y = a + b·x); R² indica qué tan confiable es. Un mes parcial (el período termina antes de fin de mes, p. ej. el mes en curso) se muestra con marcador hueco y asterisco, pero no entra en la regresión.", "Con R² bajo, la proyección es orientativa." },
             new[] { "Costo del descuento / (clientes objetivo × precio × horizonte) × 100.", "La promoción conviene si retiene al menos ese %." },
             new[] { "Beneficio neto / costo del descuento × 100.", "Debajo del ROI mínimo (20 %), la promoción es riesgosa." },

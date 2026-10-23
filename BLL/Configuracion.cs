@@ -101,13 +101,32 @@ namespace BLL
             }
         }
 
-        // Servidor (Data Source) de la cadena de conexión configurada, para mostrarlo en el error.
-        private static string ServidorConfigurado()
+        /// <summary>
+        /// Servidor (Data Source) de la cadena de conexión configurada ('WardrobeFlowDB', la misma que
+        /// usa DAL.Acceso), para mostrarlo en el error de conexión y en «Acerca de WardrobeFlow».
+        /// Devuelve "?" si no se puede leer. Nunca lanza.
+        /// </summary>
+        public static string ServidorConfigurado()
         {
             try
             {
                 var entry = System.Configuration.ConfigurationManager.ConnectionStrings["WardrobeFlowDB"];
                 return entry == null ? "?" : new System.Data.SqlClient.SqlConnectionStringBuilder(entry.ConnectionString).DataSource;
+            }
+            catch { return "?"; }
+        }
+
+        /// <summary>
+        /// Base de datos (Initial Catalog) de la cadena de conexión configurada ('WardrobeFlowDB'), para
+        /// «Acerca de WardrobeFlow». Devuelve "?" si no se puede leer y "" si la cadena no la indica.
+        /// Nunca lanza.
+        /// </summary>
+        public static string BaseDeDatosConfigurada()
+        {
+            try
+            {
+                var entry = System.Configuration.ConfigurationManager.ConnectionStrings["WardrobeFlowDB"];
+                return entry == null ? "?" : new System.Data.SqlClient.SqlConnectionStringBuilder(entry.ConnectionString).InitialCatalog;
             }
             catch { return "?"; }
         }

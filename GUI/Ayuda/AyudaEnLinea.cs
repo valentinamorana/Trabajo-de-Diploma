@@ -39,7 +39,7 @@ namespace GUI.Ayuda
                 "• PN02 Comercialización: Vendedor (Nueva contratación) y Caja (Cobro de contrataciones).\n" +
                 "• PN03 Promociones: Gerencia sugiere, Administración Comercial crea, Contabilidad aprueba.\n" +
                 "• PN04 Devoluciones: Depósito inspecciona las prendas devueltas y reporta las perdidas.\n" +
-                "• N01 Suscripciones: Caja registra el cobro de las renovaciones (Cobro de renovaciones)."),
+                "• PN02 Renovaciones: Caja registra el cobro de las renovaciones (Cobro de renovaciones)."),
 
             ["Clientes"] = new TemaAyuda("Clientes",
                 "Alta, edición y baja de clientes.\n" +
@@ -99,7 +99,7 @@ namespace GUI.Ayuda
                 "• Quien registró la contratación no puede cobrarla (salvo el Administrador).\n" +
                 "• En la vista de resueltas se reimprimen el comprobante y las constancias."),
 
-            ["CobroSuscripcionForm"] = new TemaAyuda("Cobro de renovaciones (Caja, N01)",
+            ["CobroSuscripcionForm"] = new TemaAyuda("Cobro de renovaciones (Caja, PN02)",
                 "Cobro recurrente de las suscripciones vencidas o próximas a vencer.\n" +
                 "\n" +
                 "• Elija el cliente y la modalidad: se muestra el total a cobrar (período − descuento + cargos por daño o pérdida).\n" +
@@ -243,7 +243,170 @@ namespace GUI.Ayuda
                 "\n" +
                 "• Comparar jornadas: dos días lado a lado.\n" +
                 "• Tendencia (rango): evolución de los eventos entre dos fechas.\n" +
-                "• Exportar TXT: guarda el reporte en un archivo.")
+                "• Exportar TXT: guarda el reporte en un archivo."),
+
+            ["Login"] = new TemaAyuda("Ingreso al sistema",
+                "Ingrese su usuario y su contraseña y presione Ingresar.\n" +
+                "\n" +
+                "• Idioma: el selector de la franja superior cambia el idioma de esta pantalla y del sistema.\n" +
+                "• Después de 3 intentos fallidos la cuenta se bloquea en forma progresiva (1, 5, 15 y 60 minutos); si sigue fallando, queda bloqueada hasta que un Administrador la desbloquee. Un ingreso correcto reinicia la escala.\n" +
+                "• Olvidé mi contraseña: indica cómo pedirle al Administrador una contraseña nueva.\n" +
+                "• ¿Cuenta bloqueada? Usar clave de emergencia: solo para cuentas de Administrador, con una de sus claves de un solo uso.\n" +
+                "• Si su contraseña es temporal (usuario nuevo o contraseña reseteada), al ingresar se le pide definir una nueva."),
+
+            ["OlvideContrasenaForm"] = new TemaAyuda("Recuperar contraseña",
+                "WardrobeFlow no envía correos: la contraseña la resetea un Administrador.\n" +
+                "\n" +
+                "1. Ingrese su nombre de usuario y presione Enviar solicitud.\n" +
+                "2. Comuníquese con el Administrador: desde Administrar › Usuarios › Resetear contraseña le genera una contraseña temporal.\n" +
+                "3. Al ingresar con esa contraseña, el sistema le pide definir una nueva."),
+
+            ["DesbloqueoEmergenciaForm"] = new TemaAyuda("Desbloqueo con clave de emergencia",
+                "Permite que un Administrador bloqueado por intentos fallidos desbloquee su propia cuenta sin depender de otro Administrador.\n" +
+                "\n" +
+                "• Ingrese su usuario y una de sus claves de emergencia y presione Desbloquear.\n" +
+                "• Cada clave sirve una sola vez: después de usarla queda anulada.\n" +
+                "• Solo funciona con cuentas de Administrador bloqueadas. Los demás usuarios deben pedirle el desbloqueo a un Administrador (Administrar › Usuarios › Desbloquear).\n" +
+                "• El desbloqueo queda registrado en la bitácora."),
+
+            ["CambioClaveObligatorioForm"] = new TemaAyuda("Cambio de contraseña obligatorio",
+                "Su contraseña es temporal (usuario nuevo o contraseña reseteada por el Administrador): defina una nueva para continuar.\n" +
+                "\n" +
+                "• La contraseña debe tener al menos 8 caracteres, un número y un carácter especial (!@#$%...).\n" +
+                "• Escríbala dos veces; si no coinciden, se le avisa y la ventana sigue abierta.\n" +
+                "• Si cancela, se cierra la sesión y vuelve a la pantalla de ingreso."),
+
+            ["ConfirmarAdminForm"] = new TemaAyuda("Confirmar Administrador",
+                "Algunas acciones delicadas, como recalcular los dígitos verificadores o recuperar la integridad de la base, piden que un Administrador confirme con su usuario y su contraseña.\n" +
+                "\n" +
+                "• Si el usuario no es Administrador o la contraseña no es correcta, la acción no se ejecuta.\n" +
+                "• Después de 3 intentos fallidos la ventana deja de aceptar intentos: ciérrela y vuelva a intentarlo más tarde."),
+
+            ["AltaPromocionForm"] = new TemaAyuda("Alta de promoción (Administración Comercial, PN03)",
+                "Crea una promoción para un plan. Queda en revisión contable hasta que Contabilidad la apruebe o la rechace.\n" +
+                "\n" +
+                "• Desde una sugerencia de Gerencia: el plan viene de la sugerencia y no se puede cambiar; el tipo y el valor se completan con la propuesta.\n" +
+                "• Alta manual: elija el plan.\n" +
+                "• Reformular una promoción rechazada: arriba se ve la observación de Contabilidad; el plan no se cambia.\n" +
+                "\n" +
+                "• Tipo: Porcentaje (hasta 100 %), Monto fijo o Precio promocional. El valor debe ser mayor a cero.\n" +
+                "• Vigencia: la fecha de fin no puede ser anterior a la de inicio ni haber pasado.\n" +
+                "• Margen estimado e impacto económico: Contabilidad los tiene en cuenta para dictaminar.\n" +
+                "• Registrar: si falta un dato, el error se muestra abajo y no se pierde lo cargado."),
+
+            ["CargoPrendaDialog"] = new TemaAyuda("Cargo por daño o pérdida (PN04)",
+                "Registra lo que se le cobra al último cliente que tuvo la prenda. Se abre desde la Inspección de devolución (Dar de baja con cargo, por daño) y desde Pedidos realizados (Reportar pérdida).\n" +
+                "\n" +
+                "• Motivo: describa el daño o la pérdida (obligatorio).\n" +
+                "• Monto a cobrar: viene precargado con el precio de reposición de la prenda, si tiene uno; se puede corregir y debe ser mayor a cero.\n" +
+                "• Registrar cargo: la prenda pasa a Baja y el cargo se suma al próximo cobro del cliente.\n" +
+                "• Cancelar: no se registra nada y la prenda no cambia."),
+
+            ["PrendaForm"] = new TemaAyuda("Datos de la prenda",
+                "Alta o edición de una prenda del catálogo.\n" +
+                "\n" +
+                "• Obligatorios: nombre, talle y categoría.\n" +
+                "• Precio de reposición (opcional): es el monto que se propone cobrarle al cliente si la prenda vuelve dañada o se pierde (PN04).\n" +
+                "• Las prendas nuevas quedan Disponibles.\n" +
+                "• Al guardar se valida todo; si hay un error se muestra abajo y el formulario sigue abierto."),
+
+            ["CambioEstadoDialog"] = new TemaAyuda("Cambiar estado de la prenda",
+                "Cambia a mano el estado de una prenda del depósito. Solo se ofrecen los cambios permitidos entre Disponible, En limpieza y Baja.\n" +
+                "\n" +
+                "• Una prenda En uso no se puede cambiar: está a nombre de un cliente.\n" +
+                "• Las prendas que volvieron de un cliente se resuelven en Inspección de devolución, y las que el cliente no devuelve, con Reportar pérdida en Pedidos realizados.\n" +
+                "• Una prenda dada de baja no se puede reactivar."),
+
+            ["DashboardForm"] = new TemaAyuda("Panel de Control",
+                "Se abre al iniciar sesión y muestra solo los indicadores que su rol puede ver: prendas disponibles, clientes, pedidos pendientes, ocupación del stock, contrataciones y renovaciones por cobrar, sugerencias y bajas de promociones pendientes, promociones en revisión y días sin copia de seguridad (Administrador).\n" +
+                "\n" +
+                "• Mis tareas pendientes: un clic en una fila abre la pantalla donde se resuelve.\n" +
+                "• Actividad reciente y Resumen de eventos: lo último que pasó en el sistema.\n" +
+                "• La tarjeta de copias de seguridad cambia de color según la antigüedad del último backup; su botón configura cada cuántos días recordarlo.\n" +
+                "• Actualizar: vuelve a calcular los indicadores."),
+
+            ["DashboardVendedor"] = new TemaAyuda("Panel de Ventas",
+                "Panel del Vendedor al iniciar sesión.\n" +
+                "\n" +
+                "• Indicadores: pedidos para atender, clientes registrados, contrataciones esperando a Caja y suscripciones por vencer.\n" +
+                "• Tablero de pedidos: En control de stock, Con faltantes (hay que comunicarlo al cliente) y Separados (hay que formalizarlos).\n" +
+                "• Un clic en el indicador de pedidos o en una tarjeta abre Pedidos de Venta.\n" +
+                "• Actualizar: vuelve a cargar los datos."),
+
+            ["DashboardDeposito"] = new TemaAyuda("Panel de Depósito",
+                "Panel del Depósito al iniciar sesión.\n" +
+                "\n" +
+                "• Indicadores: pedidos a controlar, prendas disponibles, prendas en mantenimiento y ocupación del stock.\n" +
+                "• Prendas en mantenimiento según el tiempo que llevan: Reciente (menos de 2 días), En curso (de 2 a 7 días) y Urgente (más de 7 días).\n" +
+                "• Un clic en Pedidos a controlar abre Control de Stock; un clic en una prenda abre el catálogo de prendas.\n" +
+                "• Actualizar: vuelve a cargar los datos."),
+
+            ["DashboardLogistica"] = new TemaAyuda("Panel de Logística",
+                "Panel del Operador logístico al iniciar sesión.\n" +
+                "\n" +
+                "• Indicadores: pedidos pendientes de despacho, despachados y entregados.\n" +
+                "• Tablero con los pedidos de cada etapa: Pendiente, Despachado y Entregado.\n" +
+                "• Un clic en un indicador abre Pedidos realizados, donde se despacha y se registran la entrega y la devolución.\n" +
+                "• Actualizar: vuelve a cargar los datos."),
+
+            ["PedidoHistorialForm"] = new TemaAyuda("Historial de cambios del pedido",
+                "Todos los cambios del pedido: quién, cuándo, qué campo, el valor anterior y el nuevo (control de cambios, T06b).\n" +
+                "\n" +
+                "• Filtros: rango de fechas y tipo de acción (crear, despachar, entregar, cancelar, devolución, restaurar...). Buscar aplica el filtro.\n" +
+                "• Restaurar: elija una fila y confirme; el pedido vuelve al estado anterior a esa operación. La restauración queda registrada como una operación más.\n" +
+                "• El estado de las prendas del pedido no se revierte automáticamente."),
+
+            ["MantenimientoHistorialForm"] = new TemaAyuda("Historial de mantenimiento",
+                "Registros de limpieza y mantenimiento de la prenda elegida, en solo lectura: entrada, salida, duración en días, origen (devolución de un pedido o manual), responsable y estado (En limpieza o Finalizado)."),
+
+            ["DiagnosticoIntegridadForm"] = new TemaAyuda("Diagnóstico de integridad (T07)",
+                "Controla los dígitos verificadores (DVH por fila y DVV por tabla) de los datos protegidos.\n" +
+                "\n" +
+                "• Diagnóstico: estado general (Íntegro o Comprometido) y las filas o tablas cuyos dígitos no coinciden.\n" +
+                "• Historial de verificaciones: cada control realizado y su resultado.\n" +
+                "• Actualizar: vuelve a verificar.\n" +
+                "• Recalcular todo: acepta los datos actuales como válidos y recalcula los dígitos. Pide confirmación y la de un Administrador; úselo solo si sabe por qué cambiaron los datos.\n" +
+                "• Recuperación (Espejo)...: abre la consola para reparar los datos de los usuarios desde el espejo de seguridad."),
+
+            ["RecuperacionEspejoForm"] = new TemaAyuda("Recuperación de integridad (T07)",
+                "Muestra qué cambió en los datos de los usuarios respecto del último estado válido guardado en el espejo: filas modificadas, insertadas desde fuera del sistema, eliminadas o con el dígito verificador dañado.\n" +
+                "\n" +
+                "• Reparar desde Espejo: restaura los valores legítimos guardados en el espejo.\n" +
+                "• Asumir Pérdida: acepta los datos actuales y recalcula los dígitos verificadores.\n" +
+                "• Restaurar Backup...: cuando el espejo no alcanza, por ejemplo si se vació la tabla.\n" +
+                "\n" +
+                "Los botones se habilitan según el tipo de daño y cada acción pide la confirmación de un Administrador."),
+
+            ["FormIdiomas"] = new TemaAyuda("Gestión de Idiomas (T05)",
+                "Idiomas del sistema y sus traducciones.\n" +
+                "\n" +
+                "• Nuevo idioma: código (hasta 5 letras) y nombre. Se crea inactivo hasta que cargue sus traducciones.\n" +
+                "• Activar / Desactivar: un idioma activo se puede elegir al ingresar y en Mi perfil. Si faltan traducciones se avisa, y esos textos se muestran en el idioma por defecto. El idioma por defecto no se puede desactivar.\n" +
+                "• Renombrar: cambia el nombre visible.\n" +
+                "• Traducciones: edite la columna Texto / Traducción y presione Guardar cambios; la columna Referencia muestra el texto por defecto.\n" +
+                "• Controles traducibles: las claves y la pantalla a la que pertenecen, en solo lectura."),
+
+            ["GuiaPrimerUsoForm"] = new TemaAyuda("Guía de primeros pasos",
+                "Cinco pasos con lo esencial de su rol: por dónde empezar, qué pantallas va a usar y cómo pedir ayuda.\n" +
+                "\n" +
+                "• Se abre sola la primera vez que ingresa. Marque «No volver a mostrar al iniciar sesión» para que no aparezca más.\n" +
+                "• Se puede volver a abrir en cualquier momento desde Sesión › Ver guía de inicio."),
+
+            ["AvisoComercialForm"] = new TemaAyuda("Avisos comerciales (PN03)",
+                "Al iniciar sesión, Gerencia ve un resumen de lo que necesita su atención en el Centro de decisiones: recomendaciones de prioridad alta, decisiones pospuestas que llegaron a su fecha y metas del mes en riesgo.\n" +
+                "\n" +
+                "• Ir al Centro de decisiones: abre el Centro de decisiones comerciales.\n" +
+                "• No mostrar hoy: el aviso no vuelve a aparecer hasta mañana.\n" +
+                "• Cerrar: lo cierra. El aviso no bloquea el resto del sistema."),
+
+            ["AcercaDeForm"] = new TemaAyuda("Acerca de WardrobeFlow",
+                "Datos de la aplicación instalada (solo lectura; la ve cualquier usuario con sesión iniciada).\n" +
+                "\n" +
+                "• Versión: la del programa instalado, leída del ejecutable; es la misma que muestra el instalador.\n" +
+                "• Compilación: fecha del ejecutable instalado.\n" +
+                "• Servidor y Base de datos: la instancia de SQL Server y la base a las que está conectada la aplicación (cadena de conexión WardrobeFlowDB).\n" +
+                "\n" +
+                "Al pedir soporte, informe la versión y el servidor que se ven en esta pantalla.")
         };
 
         // Texto en español de ux.ayuda.ventana (igual al del .tsv): se agrega a la ayuda general.
@@ -277,37 +440,9 @@ namespace GUI.Ayuda
             if (clave != "General")
                 texto += "\n\n" + Tr("ayuda.pie", "Para la ayuda general, presione F1 en el menú principal.");
 
-            using (var dlg = new Form
+            using (var dlg = new AyudaDialog())
             {
-                Text = Tr("ayuda.ventana", "Ayuda") + " — " + titulo,
-                StartPosition = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.Sizable,
-                MinimizeBox = false,
-                ShowInTaskbar = false,
-                ClientSize = new Size(560, 420),
-                BackColor = GUI.Tema.Papel
-            })
-            {
-                var encabezado = new Label
-                {
-                    Dock = DockStyle.Top, Height = 40, Text = titulo, TextAlign = ContentAlignment.MiddleLeft,
-                    Padding = new Padding(10, 0, 0, 0), BackColor = GUI.Tema.RosaOscuro, ForeColor = Color.White,
-                    Font = new Font("Segoe UI", 12f, FontStyle.Bold)
-                };
-                var cuerpo = new TextBox
-                {
-                    Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical,
-                    BorderStyle = BorderStyle.None, BackColor = GUI.Tema.Papel, ForeColor = GUI.Tema.Tinta,
-                    Font = new Font("Segoe UI", 10f), Text = texto.Replace("\n", Environment.NewLine), TabStop = false
-                };
-                var cerrar = new Button { Text = Tr("btn.cerrar", "Cerrar"), Dock = DockStyle.Bottom, Height = 32, DialogResult = DialogResult.OK };
-                var margen = new Panel { Dock = DockStyle.Fill, Padding = new Padding(12) };
-                margen.Controls.Add(cuerpo);
-                dlg.Controls.Add(margen);
-                dlg.Controls.Add(cerrar);
-                dlg.Controls.Add(encabezado);
-                dlg.AcceptButton = cerrar;
-                dlg.CancelButton = cerrar;
+                dlg.Mostrar(Tr("ayuda.ventana", "Ayuda") + " — " + titulo, titulo, texto, Tr("btn.cerrar", "Cerrar"));
                 dlg.ShowDialog(propietario);
             }
         }

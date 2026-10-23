@@ -11,22 +11,15 @@ namespace GUI
     /// (BLL.GuiaPrimerUso.PasosPara). Se abre sola en el primer ingreso del usuario, después de
     /// que el Menú muestra su Panel de Control, y en cualquier momento desde Sesión → Ver guía de
     /// inicio. "No volver a mostrar" se guarda por usuario con BLL.GuiaPrimerUso (archivo local).
-    /// Solo presenta: los pasos y la persistencia viven en la BLL.
+    /// Solo presenta: los pasos y la persistencia viven en la BLL. Hecho con el Diseñador.
     /// </summary>
-    internal sealed class GuiaPrimerUsoForm : FormBase, IIdiomaObserver
+    internal sealed partial class GuiaPrimerUsoForm : FormBase, IIdiomaObserver
     {
         private readonly BE.Usuario _usuario;
         private readonly BLL.GuiaPrimerUso _preferencia;
         private readonly IList<BLL.GuiaPrimerUso.Paso> _pasos;
 
-        private readonly Label lblTitulo;
-        private readonly Label lblIntro;
-        private readonly TableLayoutPanel tblPasos;
         private readonly List<Label> _lblPasos = new List<Label>();
-        private readonly CheckBox chkNoMostrar;
-        private readonly Button btnComenzar;
-
-        private const int AnchoTexto = 500;
 
         /// <remarks>
         /// "No volver a mostrar" refleja la preferencia guardada: al abrirse sola (el usuario todavía
@@ -39,86 +32,15 @@ namespace GUI
             _preferencia = preferencia ?? new BLL.GuiaPrimerUso();
             _pasos       = BLL.GuiaPrimerUso.PasosPara(usuario?.Perfil, usuario?.EsAdministrador == true);
 
-            Text            = "Bienvenido a WardrobeFlow";
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            StartPosition   = FormStartPosition.CenterParent;
-            MaximizeBox     = false;
-            MinimizeBox     = false;
-            ShowInTaskbar   = false;
-            BackColor       = Tema.Papel;
-            AutoScaleMode   = AutoScaleMode.Font;
-            Font            = Tema.FuenteNormal;
-            AutoSize        = true;
-            AutoSizeMode    = AutoSizeMode.GrowAndShrink;
-            Padding         = new Padding(0, 0, 0, 12);
+            InitializeComponent();
+            chkNoMostrar.Checked = !_preferencia.DebeMostrarse(usuario?.Username);
 
-            lblTitulo = new Label
-            {
-                Dock = DockStyle.Top, Height = 46, TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(16, 0, 0, 0), BackColor = Tema.RosaOscuro, ForeColor = Color.White,
-                Font = new Font("Segoe UI", 13f, FontStyle.Bold), Text = "Bienvenido a WardrobeFlow"
-            };
-
-            lblIntro = new Label
-            {
-                AutoSize = true, MaximumSize = new Size(AnchoTexto + 40, 0), ForeColor = Tema.Tinta,
-                Font = Tema.FuenteSubtitulo, Margin = new Padding(0, 0, 0, 10)
-            };
-
-            tblPasos = new TableLayoutPanel
-            {
-                AutoSize = true, ColumnCount = 2, GrowStyle = TableLayoutPanelGrowStyle.AddRows,
-                Margin = new Padding(0)
-            };
-            tblPasos.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 36));
-            tblPasos.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-            for (int i = 0; i < _pasos.Count; i++)
-            {
-                var numero = new Label
-                {
-                    Text = (i + 1).ToString(), Width = 26, Height = 26, TextAlign = ContentAlignment.MiddleCenter,
-                    BackColor = Tema.RosaPrimario, ForeColor = Color.White, Font = Tema.FuenteSubtitulo,
-                    Margin = new Padding(0, 2, 8, 10)
-                };
-                var texto = new Label
-                {
-                    AutoSize = true, MaximumSize = new Size(AnchoTexto, 0), ForeColor = Tema.Tinta,
-                    Margin = new Padding(0, 4, 0, 10)
-                };
-                _lblPasos.Add(texto);
-                tblPasos.Controls.Add(numero, 0, i);
-                tblPasos.Controls.Add(texto, 1, i);
-            }
-
-            chkNoMostrar = new CheckBox
-            {
-                AutoSize = true, ForeColor = Tema.TextoSecundario, Margin = new Padding(0, 12, 0, 0),
-                Checked = !_preferencia.DebeMostrarse(usuario?.Username)
-            };
-
-            btnComenzar = new Button
-            {
-                AutoSize = true, MinimumSize = new Size(120, 32), DialogResult = DialogResult.OK,
-                BackColor = Tema.RosaPrimario, ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
-                Margin = new Padding(0, 8, 0, 0), Anchor = AnchorStyles.Right
-            };
-            btnComenzar.FlatAppearance.BorderSize = 0;
-
-            var cuerpo = new FlowLayoutPanel
-            {
-                FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true,
-                Padding = new Padding(18, 14, 18, 0), Dock = DockStyle.Top
-            };
-            cuerpo.Controls.Add(lblIntro);
-            cuerpo.Controls.Add(tblPasos);
-            cuerpo.Controls.Add(chkNoMostrar);
-            cuerpo.Controls.Add(btnComenzar);
-
-            Controls.Add(cuerpo);
-            Controls.Add(lblTitulo);
-            AcceptButton = btnComenzar;
-            CancelButton = btnComenzar;
-            MinimumSize  = new Size(AnchoTexto + 110, 0);
+            // Los pasos están en el Diseñador (hasta 5: los 3 del rol y los 2 comunes); los que el rol
+            // no usa se ocultan.
+            _lblPasos.AddRange(new[] { lblPaso1, lblPaso2, lblPaso3, lblPaso4, lblPaso5 });
+            var numeros = new[] { lblNumero1, lblNumero2, lblNumero3, lblNumero4, lblNumero5 };
+            for (int i = 0; i < _lblPasos.Count; i++)
+                numeros[i].Visible = _lblPasos[i].Visible = i < _pasos.Count;
         }
 
         protected override void OnLoad(EventArgs e)

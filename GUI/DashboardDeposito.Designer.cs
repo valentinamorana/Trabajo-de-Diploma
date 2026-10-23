@@ -178,6 +178,7 @@ namespace GUI
             this.txtDisp.ForeColor = Color.FromArgb(65, 135, 85);
             this.txtDisp.Location  = new Point(0, 102);
             this.txtDisp.Name      = "txtDisp";
+            this.txtDisp.Text = "Prendas\ndisponibles";
             this.txtDisp.Size      = new Size(148, 44);
             this.txtDisp.TabIndex  = 1;
             this.txtDisp.TextAlign = ContentAlignment.TopCenter;
@@ -209,6 +210,7 @@ namespace GUI
             this.txtMant.ForeColor = Color.FromArgb(65, 135, 85);
             this.txtMant.Location  = new Point(0, 102);
             this.txtMant.Name      = "txtMant";
+            this.txtMant.Text = "En\nmantenimiento";
             this.txtMant.Size      = new Size(148, 44);
             this.txtMant.TabIndex  = 1;
             this.txtMant.TextAlign = ContentAlignment.TopCenter;
@@ -240,6 +242,7 @@ namespace GUI
             this.txtControl.ForeColor = Color.FromArgb(138, 116, 128);
             this.txtControl.Location  = new Point(0, 102);
             this.txtControl.Name      = "txtControl";
+            this.txtControl.Text = "Pedidos\na controlar";
             this.txtControl.Size      = new Size(148, 44);
             this.txtControl.TabIndex  = 1;
             this.txtControl.TextAlign = ContentAlignment.TopCenter;
@@ -271,6 +274,7 @@ namespace GUI
             this.txtOcup.ForeColor = Color.FromArgb(65, 135, 85);
             this.txtOcup.Location  = new Point(0, 102);
             this.txtOcup.Name      = "txtOcup";
+            this.txtOcup.Text = "ocupación\ndel stock";
             this.txtOcup.Size      = new Size(148, 44);
             this.txtOcup.TabIndex  = 1;
             this.txtOcup.TextAlign = ContentAlignment.TopCenter;

@@ -360,58 +360,14 @@ namespace GUI
         {
             int actual = BLL.Configuracion.ObtenerDiasRecordatorio();
 
-            using (var dlg = new Form())
+            using (var dlg = new RecordatorioBackupDialog())
             {
-                dlg.Text            = Tr("dash.cfg.titulo", "Recordatorio de Backup");
-                dlg.ClientSize      = new Size(300, 150);
-                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
-                dlg.StartPosition   = FormStartPosition.CenterParent;
-                dlg.MaximizeBox     = false;
-                dlg.MinimizeBox     = false;
-                dlg.BackColor       = Color.White;
-
-                var lbl = new Label
-                {
-                    Text     = Tr("dash.cfg.recada", "Recordarme cada:"),
-                    Left     = 16, Top = 22, Width = 268, Height = 20,
-                    Font     = new Font("Segoe UI", 9f)
-                };
-
-                var spn = new NumericUpDown
-                {
-                    Left    = 16, Top = 48, Width = 80, Height = 28,
-                    Minimum = 1, Maximum = 365, Value = actual,
-                    Font    = new Font("Segoe UI", 10f)
-                };
-
-                var lblDias = new Label
-                {
-                    Text = Tr("dash.cfg.dias", "días"), Left = 104, Top = 52, Width = 60, Height = 20,
-                    Font = new Font("Segoe UI", 9f)
-                };
-
-                var btnOk = new Button
-                {
-                    Text = Tr("dash.cfg.guardar", "Guardar"), Left = 80, Top = 104, Width = 90, Height = 30,
-                    DialogResult = DialogResult.OK,
-                    BackColor    = Tema.RosaOscuro,
-                    ForeColor    = Color.White, FlatStyle = FlatStyle.Flat
-                };
-                btnOk.FlatAppearance.BorderSize = 0;
-
-                var btnCancelar = new Button
-                {
-                    Text = Tr("btn.cancelar", "Cancelar"), Left = 184, Top = 104, Width = 100, Height = 30,
-                    DialogResult = DialogResult.Cancel, FlatStyle = FlatStyle.Flat
-                };
-
-                dlg.AcceptButton = btnOk;
-                dlg.CancelButton = btnCancelar;
-                dlg.Controls.AddRange(new Control[] { lbl, spn, lblDias, btnOk, btnCancelar });
-
+                dlg.Traducir(Tr("dash.cfg.titulo", "Recordatorio de Backup"), Tr("dash.cfg.recada", "Recordarme cada:"),
+                             Tr("dash.cfg.dias", "días"), Tr("dash.cfg.guardar", "Guardar"), Tr("btn.cancelar", "Cancelar"));
+                dlg.Dias = actual;
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    BLL.Configuracion.GuardarDiasRecordatorio((int)spn.Value);
+                    BLL.Configuracion.GuardarDiasRecordatorio(dlg.Dias);
                     ActualizarMetricas();
                 }
             }

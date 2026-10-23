@@ -35,12 +35,14 @@ namespace GUI
             this.lblTitulo.Font     = new Font(this.Font, FontStyle.Bold);
             this.lblTitulo.Location = new Point(15, 12);
             this.lblTitulo.Name     = "lblTitulo";
+            this.lblTitulo.Text = "Analítica de Negocio";
             this.lblTitulo.TabIndex = 0;
 
             // ── lblReporte / cmbReporte — selector de reporte (solo los permitidos) ──
             this.lblReporte.AutoSize = true;
             this.lblReporte.Location = new Point(15, 48);
             this.lblReporte.Name     = "lblReporte";
+            this.lblReporte.Text = "Reporte:";
             this.lblReporte.TabIndex = 1;
 
             this.cmbReporte.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -54,6 +56,7 @@ namespace GUI
             this.btnGenerar.Height   = 28;
             this.btnGenerar.Location = new Point(500, 44);
             this.btnGenerar.Name     = "btnGenerar";
+            this.btnGenerar.Text = "Generar";
             this.btnGenerar.TabIndex = 4;
             this.btnGenerar.Width    = 110;
             this.btnGenerar.UseVisualStyleBackColor = true;
@@ -90,6 +93,7 @@ namespace GUI
             this.btnExportarPdf.Height   = 30;
             this.btnExportarPdf.Location = new Point(15, 495);
             this.btnExportarPdf.Name     = "btnExportarPdf";
+            this.btnExportarPdf.Text = "Exportar a PDF";
             this.btnExportarPdf.TabIndex = 7;
             this.btnExportarPdf.Width    = 150;
             this.btnExportarPdf.UseVisualStyleBackColor = true;
@@ -99,6 +103,7 @@ namespace GUI
             this.btnExportarCsv.Height   = 30;
             this.btnExportarCsv.Location = new Point(175, 495);
             this.btnExportarCsv.Name     = "btnExportarCsv";
+            this.btnExportarCsv.Text = "Guardar como .CSV";
             this.btnExportarCsv.TabIndex = 8;
             this.btnExportarCsv.Width    = 150;
             this.btnExportarCsv.UseVisualStyleBackColor = true;

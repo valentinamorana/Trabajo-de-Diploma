@@ -40,12 +40,14 @@ namespace GUI
             this.lblTitulo.Font     = new Font(this.Font, FontStyle.Bold);
             this.lblTitulo.Location = new Point(15, 12);
             this.lblTitulo.Name     = "lblTitulo";
+            this.lblTitulo.Text = "Cobro de Suscripción";
             this.lblTitulo.TabIndex = 0;
 
             // ── lblCliente / cmbCliente ──────────────────────────────────────
             this.lblCliente.AutoSize = true;
             this.lblCliente.Location = new Point(15, 50);
             this.lblCliente.Name     = "lblCliente";
+            this.lblCliente.Text = "Cliente:";
             this.lblCliente.TabIndex = 1;
 
             this.cmbCliente.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -68,6 +70,7 @@ namespace GUI
             this.grpDecision.Controls.Add(this.rbPagoFallido);
             this.grpDecision.Location = new Point(15, 138);
             this.grpDecision.Name     = "grpDecision";
+            this.grpDecision.Text = "Resultado del cobro";
             this.grpDecision.Size     = new Size(430, 80);
             this.grpDecision.TabIndex = 4;
             this.grpDecision.TabStop  = false;
@@ -76,6 +79,7 @@ namespace GUI
             this.rbCobrado.Checked  = true;
             this.rbCobrado.Location = new Point(15, 25);
             this.rbCobrado.Name     = "rbCobrado";
+            this.rbCobrado.Text = "Cobrado";
             this.rbCobrado.TabIndex = 0;
             this.rbCobrado.TabStop  = true;
             this.rbCobrado.UseVisualStyleBackColor = true;
@@ -84,6 +88,7 @@ namespace GUI
             this.rbPagoFallido.AutoSize = true;
             this.rbPagoFallido.Location = new Point(15, 50);
             this.rbPagoFallido.Name     = "rbPagoFallido";
+            this.rbPagoFallido.Text = "Pago fallido";
             this.rbPagoFallido.TabIndex = 1;
             this.rbPagoFallido.UseVisualStyleBackColor = true;
 
@@ -91,6 +96,7 @@ namespace GUI
             this.lblModalidad.AutoSize = true;
             this.lblModalidad.Location = new Point(15, 233);
             this.lblModalidad.Name     = "lblModalidad";
+            this.lblModalidad.Text = "Modalidad de cobro:";
             this.lblModalidad.TabIndex = 5;
 
             this.cmbModalidad.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -107,6 +113,7 @@ namespace GUI
             this.lblMedioPago.AutoSize = true;
             this.lblMedioPago.Location = new Point(15, 263);
             this.lblMedioPago.Name     = "lblMedioPago";
+            this.lblMedioPago.Text = "Medio de pago:";
             this.lblMedioPago.TabIndex = 10;
 
             this.cmbMedioPago.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -127,6 +134,7 @@ namespace GUI
             this.btnProcesar.Height   = 32;
             this.btnProcesar.Location = new Point(15, 334);
             this.btnProcesar.Name     = "btnProcesar";
+            this.btnProcesar.Text = "Procesar";
             this.btnProcesar.TabIndex = 8;
             this.btnProcesar.Width    = 150;
             this.btnProcesar.UseVisualStyleBackColor = true;

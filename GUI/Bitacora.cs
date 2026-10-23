@@ -494,12 +494,25 @@ namespace GUI
         /// </summary>
         private void MostrarMenuExportar(Control ancla, DataGridView dgv, string titulo)
         {
-            var menu = new ContextMenuStrip();
-            menu.Items.Add(Tr("bit.menu.exportarpdf", "Exportar a PDF"), null,
-                (s, e) => ExportarReporte(dgv, titulo, "pdf"));
-            menu.Items.Add(Tr("bit.menu.exportarcsv", "Exportar a CSV"), null,
-                (s, e) => ExportarReporte(dgv, titulo, "csv"));
-            menu.Show(ancla, new Point(0, ancla.Height));
+            // El menú (menuExportar) está en el Diseñador; acá se recuerda qué grilla se exporta.
+            _exportarGrilla = dgv;
+            _exportarTitulo = titulo;
+            mnuExportarPdf.Text = Tr("bit.menu.exportarpdf", "Exportar a PDF");
+            mnuExportarCsv.Text = Tr("bit.menu.exportarcsv", "Exportar a CSV");
+            menuExportar.Show(ancla, new Point(0, ancla.Height));
+        }
+
+        private DataGridView _exportarGrilla;
+        private string _exportarTitulo;
+
+        private void MnuExportarPdf_Click(object sender, EventArgs e)
+        {
+            if (_exportarGrilla != null) ExportarReporte(_exportarGrilla, _exportarTitulo, "pdf");
+        }
+
+        private void MnuExportarCsv_Click(object sender, EventArgs e)
+        {
+            if (_exportarGrilla != null) ExportarReporte(_exportarGrilla, _exportarTitulo, "csv");
         }
 
         /// <summary>

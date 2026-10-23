@@ -102,9 +102,11 @@
     </Compile>
     <Compile Include="CentroDecisionesForm.Metas.cs">
       <DependentUpon>CentroDecisionesForm.cs</DependentUpon>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="CentroDecisionesForm.Cohortes.cs">
       <DependentUpon>CentroDecisionesForm.cs</DependentUpon>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="UmbralesComercialesDialog.cs">
       <SubType>Form</SubType>
@@ -138,6 +140,9 @@
     <Compile Include="Inteligencia\GraficosComerciales.Cohortes.cs" />
     <Compile Include="Inteligencia\PanelCohortes.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Inteligencia\PanelCohortes.Designer.cs">
+      <DependentUpon>PanelCohortes.cs</DependentUpon>
     </Compile>
     <Compile Include="Exportacion\GeneradorInformeComercial.cs" />
     <Compile Include="Analitica\VistaReporteAnalitica.cs" />
@@ -314,6 +319,9 @@
     <Compile Include="ErroresXmlForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ErroresXmlForm.Designer.cs">
+      <DependentUpon>ErroresXmlForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="BackupForm.Designer.cs">
       <DependentUpon>BackupForm.cs</DependentUpon>
     </Compile>
@@ -415,14 +423,61 @@
     <Compile Include="MenuDocumentosPromocion.cs" />
     <Compile Include="MenuDocumentosPedido.cs" />
     <Compile Include="Ayuda\AyudaEnLinea.cs" />
+    <Compile Include="Ayuda\AyudaDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Ayuda\AyudaDialog.Designer.cs">
+      <DependentUpon>AyudaDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConfirmacionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfirmacionDialog.Designer.cs">
+      <DependentUpon>ConfirmacionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RecordatorioBackupDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RecordatorioBackupDialog.Designer.cs">
+      <DependentUpon>RecordatorioBackupDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultadoContratacionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultadoContratacionDialog.Designer.cs">
+      <DependentUpon>ResultadoContratacionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SeleccionClienteDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SeleccionClienteDialog.Designer.cs">
+      <DependentUpon>SeleccionClienteDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ReporteMetricasDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReporteMetricasDialog.Designer.cs">
+      <DependentUpon>ReporteMetricasDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormBase.Usabilidad.cs">
       <DependentUpon>FormBase.cs</DependentUpon>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Menu.Ubicacion.cs">
       <DependentUpon>Menu.cs</DependentUpon>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="GuiaPrimerUsoForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GuiaPrimerUsoForm.Designer.cs">
+      <DependentUpon>GuiaPrimerUsoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AcercaDeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AcercaDeForm.Designer.cs">
+      <DependentUpon>AcercaDeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Exportacion\GeneradorAnalisisAbandono.cs" />
     <Compile Include="Exportacion\GeneradorVentasVendedor.cs" />

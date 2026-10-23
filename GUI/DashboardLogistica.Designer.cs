@@ -173,6 +173,7 @@ namespace GUI
             this.txtPend.ForeColor = Color.FromArgb(170, 130, 50);
             this.txtPend.Location  = new Point(0, 102);
             this.txtPend.Name      = "txtPend";
+            this.txtPend.Text = "Pedidos\npendientes";
             this.txtPend.Size      = new Size(148, 44);
             this.txtPend.TabIndex  = 1;
             this.txtPend.TextAlign = ContentAlignment.TopCenter;
@@ -204,6 +205,7 @@ namespace GUI
             this.txtDesp.ForeColor = Color.FromArgb(70, 110, 180);
             this.txtDesp.Location  = new Point(0, 102);
             this.txtDesp.Name      = "txtDesp";
+            this.txtDesp.Text = "Pedidos\ndespachados";
             this.txtDesp.Size      = new Size(148, 44);
             this.txtDesp.TabIndex  = 1;
             this.txtDesp.TextAlign = ContentAlignment.TopCenter;
@@ -235,6 +237,7 @@ namespace GUI
             this.txtEntr.ForeColor = Color.FromArgb(65, 135, 85);
             this.txtEntr.Location  = new Point(0, 102);
             this.txtEntr.Name      = "txtEntr";
+            this.txtEntr.Text = "Pedidos\nentregados";
             this.txtEntr.Size      = new Size(148, 44);
             this.txtEntr.TabIndex  = 1;
             this.txtEntr.TextAlign = ContentAlignment.TopCenter;

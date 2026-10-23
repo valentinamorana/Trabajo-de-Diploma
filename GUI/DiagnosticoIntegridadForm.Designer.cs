@@ -207,6 +207,7 @@ namespace GUI
             this.lblGridVacio.Font       = new Font("Segoe UI", 11F, FontStyle.Bold);
             this.lblGridVacio.ForeColor  = Color.FromArgb(40, 140, 60);
             this.lblGridVacio.Name       = "lblGridVacio";
+            this.lblGridVacio.Text = "Todo íntegro — no hay filas con problemas de integridad.";
             this.lblGridVacio.TabIndex   = 1;
             this.lblGridVacio.TextAlign  = ContentAlignment.MiddleCenter;
             this.lblGridVacio.Visible    = false;

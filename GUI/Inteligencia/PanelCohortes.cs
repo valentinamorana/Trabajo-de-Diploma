@@ -21,7 +21,7 @@ namespace GUI.Inteligencia
     /// La grilla se puede ordenar por cualquier encabezado: cada fila se resuelve por su dato (el mes de
     /// la cohorte), nunca por su posición en pantalla.
     /// </summary>
-    internal sealed class PanelCohortes : UserControl
+    internal sealed partial class PanelCohortes : UserControl
     {
         // Tramos del mapa de calor: BLL AnalisisCohortes.Nivel, sobre el mismo % entero que muestra la celda.
         private static readonly Color ColorAlto = Color.FromArgb(160, 215, 170);
@@ -31,14 +31,6 @@ namespace GUI.Inteligencia
 
         private const string ColCohorte = "Cohorte", ColClientes = "Clientes", PrefijoMes = "M";
 
-        private readonly Label lblExplicacion = new Label();
-        private readonly Label lblResumen = new Label();
-        private readonly Button btnActuar = new Button();
-        private readonly FlowLayoutPanel flpLeyenda = new FlowLayoutPanel();
-        private readonly SplitContainer split = new SplitContainer();
-        private readonly DataGridView dgv = new DataGridView();
-        private readonly Chart chart = new Chart();
-        private readonly ToolTip tip = new ToolTip();
         private Font fuentePeor;
         private BE.MatrizCohortes _matriz;
 
@@ -49,63 +41,14 @@ namespace GUI.Inteligencia
 
         public PanelCohortes()
         {
-            SuspendLayout();
-            BackColor = Tema.Papel;
-            Dock = DockStyle.Fill;
-            Padding = new Padding(4);
-
-            lblExplicacion.Dock = DockStyle.Top;
-            lblExplicacion.AutoSize = true;   // crece hacia abajo si no entra en una línea (ver OnResize)
-            lblExplicacion.Font = Tema.FuenteNormal;
-            lblExplicacion.ForeColor = Tema.TextoSecundario;
-            lblExplicacion.Padding = new Padding(2, 4, 2, 0);
-
-            var pnlResumen = new Panel { Dock = DockStyle.Top, Height = 54, Padding = new Padding(2, 4, 2, 4) };
-            btnActuar.Dock = DockStyle.Right;
-            btnActuar.Width = 230;
-            btnActuar.Enabled = false;
-            btnActuar.Click += (s, e) => Actuar();
-            Estilos.EstiloFormulario.BotonPrimario(btnActuar);
-            lblResumen.Dock = DockStyle.Fill;
-            lblResumen.Font = Tema.FuenteSubtitulo;
-            lblResumen.ForeColor = Tema.RosaTinta;
-            lblResumen.TextAlign = ContentAlignment.MiddleLeft;
-            pnlResumen.Controls.Add(lblResumen);
-            pnlResumen.Controls.Add(btnActuar);
-
-            flpLeyenda.Dock = DockStyle.Top;
-            flpLeyenda.AutoSize = true;
-            flpLeyenda.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            flpLeyenda.WrapContents = true;
-
+            InitializeComponent();
+            // Estilo de la aplicación; la disposición está en el Diseñador (PanelCohortes.Designer.cs).
             Estilos.EstiloFormulario.Grilla(dgv);
-            dgv.Dock = DockStyle.Fill;
-            dgv.ReadOnly = true;
-            dgv.AllowUserToAddRows = dgv.AllowUserToDeleteRows = dgv.AllowUserToResizeRows = false;
-            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgv.MultiSelect = false;
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgv.CellFormatting += Dgv_CellFormatting;
-            dgv.CellToolTipTextNeeded += Dgv_CellToolTipTextNeeded;
-            dgv.CellDoubleClick += Dgv_CellDoubleClick;
-            dgv.DataBindingComplete += (s, e) => dgv.ClearSelection();
-
-            chart.Dock = DockStyle.Fill;
-            chart.ChartAreas.Add(new ChartArea("principal"));
-            chart.Legends.Add(new Legend("leyenda"));
-
-            split.Dock = DockStyle.Fill;
-            split.Orientation = Orientation.Horizontal;
-            split.Panel1.Controls.Add(dgv);
-            split.Panel2.Controls.Add(chart);
-            split.SizeChanged += Split_SizeChanged;
-
-            Controls.Add(split);
-            Controls.Add(flpLeyenda);
-            Controls.Add(pnlResumen);
-            Controls.Add(lblExplicacion);
-            ResumeLayout(false);
+            Estilos.EstiloFormulario.BotonPrimario(btnActuar);
         }
+
+        private void BtnActuar_Click(object sender, EventArgs e) => Actuar();
+        private void Dgv_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e) => dgv.ClearSelection();
 
         // La primera vez que la pestaña toma su tamaño real, la grilla ocupa un poco más de la mitad.
         private bool _splitAjustado;
@@ -120,12 +63,6 @@ namespace GUI.Inteligencia
         {
             base.OnResize(e);
             lblExplicacion.MaximumSize = new Size(Math.Max(100, ClientSize.Width - Padding.Horizontal), 0);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing) { tip.Dispose(); fuentePeor?.Dispose(); }
-            base.Dispose(disposing);
         }
 
         // ══ Idioma ═══════════════════════════════════════════════════════════════

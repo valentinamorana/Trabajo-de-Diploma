@@ -67,14 +67,9 @@ namespace GUI
         // Usuario cargado en el constructor; reutilizado en OnLoad para no hacer dos SELECT
         private BE.Usuario _usuarioActivo;
 
-        // D02 — "Ayuda (F1)" en el menú Sesión (lo ven todos los roles): ayuda de la pantalla activa.
-        private readonly ToolStripMenuItem ayudaItem = new ToolStripMenuItem { Name = "ayudaItem", Tag = "mnu.ayuda", Text = "Ayuda (F1)" };
-
         public Menu()
         {
             InitializeComponent();
-            ayudaItem.Click += (s, e) => Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General", (ActiveMdiChild as FormBase)?.TextoAyudaAdicional);
-            usuarioToolStripMenuItem.DropDownItems.Insert(1, ayudaItem);
             InicializarUsabilidad();   // barra "Usted está en" + Sesión › Ver guía de inicio (Menu.Ubicacion.cs)
             AplicarEstiloMenu();
 
@@ -102,6 +97,10 @@ namespace GUI
             // Construir menú dinámico según permisos del rol
             AplicarPermisos(_usuarioActivo?.Permisos);
         }
+
+        // D02 — Sesión › "Ayuda (F1)" (ítem del Diseñador, lo ven todos los roles): ayuda de la pantalla activa.
+        private void AyudaItem_Click(object sender, EventArgs e)
+            => Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General", (ActiveMdiChild as FormBase)?.TextoAyudaAdicional);
 
         // Abre el Centro de Alertas como hijo MDI (reusa la instancia abierta si existe).
         private void AlertasItem_Click(object sender, EventArgs e)
@@ -880,8 +879,9 @@ namespace GUI
             // Ítem de Alertas: tiene icono + badge, se compone aparte (no por Tag directo).
             RefrescarTextoAlertas();
 
-            // Usabilidad: ítem de la guía y barra "Usted está en" (Menu.Ubicacion.cs).
+            // Usabilidad: ítems de la guía y de "Acerca de", y barra "Usted está en" (Menu.Ubicacion.cs).
             Aplicar(guiaItem, t);
+            Aplicar(acercaDeItem, t);
             ActualizarBarraUbicacionDiferida();
         }
 

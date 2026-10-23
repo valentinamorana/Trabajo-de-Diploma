@@ -14,84 +14,32 @@ namespace GUI
     /// (deserializar, por ejemplo traído de otra PC) y exportar la lista que se está viendo
     /// (serializar, en XML o JSON según la extensión elegida). Se abre desde la Bitácora; exige la
     /// patente de Auditoría (BLL.ErroresSerializados). El nombre de la clase conserva "Xml" (formato
-    /// original) para no renombrar el formulario.
+    /// original) para no renombrar el formulario. Hecho con el Diseñador (ErroresXmlForm.Designer.cs).
     /// </summary>
-    public class ErroresXmlForm : FormBase, IIdiomaObserver
+    public partial class ErroresXmlForm : FormBase, IIdiomaObserver
     {
         private readonly BLL.ErroresSerializados _bll = new BLL.ErroresSerializados();
         private List<BE.RegistroError> _errores = new List<BE.RegistroError>();
         private string _origen;   // null = errores de esta PC; si no, el archivo importado
 
-        private readonly Label        lblTitulo    = new Label();
-        private readonly Label        lblOrigen    = new Label();
-        private readonly Label        lblMensaje   = new Label();
-        private readonly DataGridView dgvErrores   = new DataGridView();
-        private readonly TextBox      txtDetalle   = new TextBox();
-        private readonly Button       btnRecargar  = new Button();
-        private readonly Button       btnImportar  = new Button();
-        private readonly Button       btnExportar  = new Button();
-        private readonly Button       btnCerrar    = new Button();
-
         protected override Label MensajeLabel => lblMensaje;
 
         public ErroresXmlForm()
         {
-            Text = "Errores (XML/JSON)";
-            ClientSize = new Size(900, 560);
-            MinimumSize = new Size(760, 460);
-            StartPosition = FormStartPosition.CenterParent;
-            BackColor = Color.White;
-            Font = Tema.FuenteNormal;
-
-            lblTitulo.SetBounds(16, 12, 860, 28);
-            lblTitulo.Font = Tema.FuenteTitulo;
-            lblTitulo.ForeColor = Tema.RosaOscuro;
-
-            lblOrigen.SetBounds(16, 42, 860, 20);
-            lblOrigen.ForeColor = Tema.TextoMuted;
-            lblOrigen.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-
-            dgvErrores.SetBounds(16, 68, 868, 300);
-            dgvErrores.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            dgvErrores.ReadOnly = true;
-            dgvErrores.AllowUserToAddRows = false;
-            dgvErrores.AllowUserToDeleteRows = false;
-            dgvErrores.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvErrores.MultiSelect = false;
-            dgvErrores.RowHeadersVisible = false;
-            dgvErrores.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvErrores.SelectionChanged += (s, e) => MostrarDetalle();
+            InitializeComponent();
+            // Estilo de la aplicación (encabezado rosa, filas alternadas); la disposición está en el Diseñador.
             EstiloFormulario.Grilla(dgvErrores);
-
-            txtDetalle.SetBounds(16, 376, 868, 110);
-            txtDetalle.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            txtDetalle.Multiline = true;
-            txtDetalle.ReadOnly = true;
-            txtDetalle.ScrollBars = ScrollBars.Vertical;
-            txtDetalle.BackColor = Tema.Papel;
-
-            lblMensaje.SetBounds(16, 492, 868, 20);
-            lblMensaje.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-
-            int y = 516;
-            ConfigurarBoton(btnRecargar, 16, y, 170, false, (s, e) => CargarDeEstaPc());
-            ConfigurarBoton(btnImportar, 194, y, 170, false, (s, e) => Importar());
-            ConfigurarBoton(btnExportar, 372, y, 170, true, (s, e) => Exportar());
-            ConfigurarBoton(btnCerrar, 764, y, 120, false, (s, e) => Close());
-            btnCerrar.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
-            CancelButton = btnCerrar;
-
-            Controls.AddRange(new Control[] { lblTitulo, lblOrigen, dgvErrores, txtDetalle, lblMensaje,
-                                              btnRecargar, btnImportar, btnExportar, btnCerrar });
+            EstiloFormulario.BotonSecundario(btnRecargar);
+            EstiloFormulario.BotonSecundario(btnImportar);
+            EstiloFormulario.BotonPrimario(btnExportar);
+            EstiloFormulario.BotonSecundario(btnCerrar);
         }
 
-        private void ConfigurarBoton(Button btn, int x, int y, int ancho, bool primario, EventHandler click)
-        {
-            btn.SetBounds(x, y, ancho, 32);
-            btn.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
-            if (primario) EstiloFormulario.BotonPrimario(btn); else EstiloFormulario.BotonSecundario(btn);
-            btn.Click += click;
-        }
+        private void DgvErrores_SelectionChanged(object sender, EventArgs e) => MostrarDetalle();
+        private void BtnRecargar_Click(object sender, EventArgs e) => CargarDeEstaPc();
+        private void BtnImportar_Click(object sender, EventArgs e) => Importar();
+        private void BtnExportar_Click(object sender, EventArgs e) => Exportar();
+        private void BtnCerrar_Click(object sender, EventArgs e) => Close();
 
         protected override void OnLoad(EventArgs e)
         {

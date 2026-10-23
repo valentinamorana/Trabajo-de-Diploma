@@ -28,8 +28,8 @@ using System.Runtime.InteropServices;
 //      Número de compilación
 //      Revisión
 //
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.6.0.0")]
+[assembly: AssemblyFileVersion("1.6.0.0")]
 
 // Los tests reemplazan algunos puntos de acceso a la base (bitácora, revalidación de la
 // sesión, espejo de integridad) por dobles en memoria a través de miembros internal.

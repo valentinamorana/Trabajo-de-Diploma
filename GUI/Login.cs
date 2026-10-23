@@ -233,6 +233,18 @@ namespace GUI
             base.OnFormClosing(e);
         }
 
+        // D02 — Ayuda en línea: el Login no hereda de FormBase (no tiene sesión ni barra de
+        // mensajes), así que atiende F1 igual que FormBase.ProcessCmdKey.
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.F1)
+            {
+                Ayuda.AyudaEnLinea.Mostrar(this, nameof(Login));
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         // ══════════════════════════════════════════════════════════════════════════
         // PATRÓN OBSERVER — T05 Gestión de Múltiples Idiomas
         // ══════════════════════════════════════════════════════════════════════════

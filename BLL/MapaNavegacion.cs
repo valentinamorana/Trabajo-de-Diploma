@@ -140,14 +140,17 @@ namespace BLL
             new Pantalla("GuiaPrimerUsoForm", "guiaItem",
                 "Lea los primeros pasos para su rol y presione Comenzar. Puede volver a abrir esta guía desde Sesión.",
                 esModal: true),
+            new Pantalla("AcercaDeForm", "acercaDeItem",
+                "Consulte la versión instalada y la base de datos a la que está conectado; presione Cerrar para volver.",
+                esModal: true),
         };
 
         /// <summary>
         /// Ítems del menú que abren una pantalla y NO están gobernados por patente en
-        /// <see cref="MenuVisibilidad"/> (siempre visibles para un usuario logueado). guiaItem se
-        /// crea por código (GUI/Menu.Ubicacion.cs), como ayudaItem.
+        /// <see cref="MenuVisibilidad"/> (siempre visibles para un usuario logueado). guiaItem y
+        /// acercaDeItem se crean por código (GUI/Menu.Ubicacion.cs), como ayudaItem.
         /// </summary>
-        public static readonly string[] ItemsSiempreVisibles = { "alertasItem", "miPerfilItem", "guiaItem" };
+        public static readonly string[] ItemsSiempreVisibles = { "alertasItem", "miPerfilItem", "guiaItem", "acercaDeItem" };
 
         /// <summary>
         /// Todos los ítems del menú que abren una pantalla: las hojas de MenuVisibilidad, Panel de

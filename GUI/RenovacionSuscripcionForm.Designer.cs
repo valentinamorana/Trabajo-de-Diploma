@@ -44,12 +44,14 @@ namespace GUI
             this.lblTitulo.Font     = new Font(this.Font, FontStyle.Bold);
             this.lblTitulo.Location = new Point(15, 12);
             this.lblTitulo.Name     = "lblTitulo";
+            this.lblTitulo.Text = "Renovación de Suscripción";
             this.lblTitulo.TabIndex = 0;
 
             // ── lblCliente / cmbCliente ──────────────────────────────────────
             this.lblCliente.AutoSize = true;
             this.lblCliente.Location = new Point(15, 50);
             this.lblCliente.Name     = "lblCliente";
+            this.lblCliente.Text = "Cliente:";
             this.lblCliente.TabIndex = 1;
 
             this.cmbCliente.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -74,6 +76,7 @@ namespace GUI
             this.grpDecision.Controls.Add(this.dtpPausaHasta);
             this.grpDecision.Location = new Point(15, 110);
             this.grpDecision.Name     = "grpDecision";
+            this.grpDecision.Text = "Decisión (tras contactar al cliente)";
             this.grpDecision.Size     = new Size(430, 135);
             this.grpDecision.TabIndex = 4;
             this.grpDecision.TabStop  = false;
@@ -82,6 +85,7 @@ namespace GUI
             this.rbRenovar.Checked  = true;
             this.rbRenovar.Location = new Point(15, 25);
             this.rbRenovar.Name     = "rbRenovar";
+            this.rbRenovar.Text = "Renovar mismo plan";
             this.rbRenovar.TabIndex = 0;
             this.rbRenovar.TabStop  = true;
             this.rbRenovar.UseVisualStyleBackColor = true;
@@ -90,6 +94,7 @@ namespace GUI
             this.rbCambiarPlan.AutoSize = true;
             this.rbCambiarPlan.Location = new Point(15, 50);
             this.rbCambiarPlan.Name     = "rbCambiarPlan";
+            this.rbCambiarPlan.Text = "Cambiar de plan";
             this.rbCambiarPlan.TabIndex = 1;
             this.rbCambiarPlan.UseVisualStyleBackColor = true;
             this.rbCambiarPlan.CheckedChanged += new System.EventHandler(this.RbCambiarPlan_CheckedChanged);
@@ -97,6 +102,7 @@ namespace GUI
             this.rbBaja.AutoSize = true;
             this.rbBaja.Location = new Point(15, 75);
             this.rbBaja.Name     = "rbBaja";
+            this.rbBaja.Text = "Dar de baja";
             this.rbBaja.TabIndex = 2;
             this.rbBaja.UseVisualStyleBackColor = true;
             this.rbBaja.CheckedChanged += new System.EventHandler(this.RbBaja_CheckedChanged);
@@ -104,6 +110,7 @@ namespace GUI
             this.rbPausar.AutoSize = true;
             this.rbPausar.Location = new Point(15, 100);
             this.rbPausar.Name     = "rbPausar";
+            this.rbPausar.Text = "Pausar hasta:";
             this.rbPausar.TabIndex = 3;
             this.rbPausar.UseVisualStyleBackColor = true;
             this.rbPausar.CheckedChanged += new System.EventHandler(this.RbPausar_CheckedChanged);
@@ -124,6 +131,7 @@ namespace GUI
             this.lblPlanNuevo.AutoSize = true;
             this.lblPlanNuevo.Location = new Point(15, 255);
             this.lblPlanNuevo.Name     = "lblPlanNuevo";
+            this.lblPlanNuevo.Text = "Plan nuevo:";
             this.lblPlanNuevo.TabIndex = 5;
 
             this.cmbPlanNuevo.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -137,6 +145,7 @@ namespace GUI
             this.lblModalidad.AutoSize = true;
             this.lblModalidad.Location = new Point(15, 290);
             this.lblModalidad.Name     = "lblModalidad";
+            this.lblModalidad.Text = "Modalidad de cobro:";
             this.lblModalidad.TabIndex = 7;
 
             this.cmbModalidad.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -152,6 +161,7 @@ namespace GUI
             this.btnProcesar.Height   = 32;
             this.btnProcesar.Location = new Point(15, 330);
             this.btnProcesar.Name     = "btnProcesar";
+            this.btnProcesar.Text = "Procesar";
             this.btnProcesar.TabIndex = 9;
             this.btnProcesar.Width    = 150;
             this.btnProcesar.UseVisualStyleBackColor = true;
@@ -160,6 +170,7 @@ namespace GUI
             this.btnReanudar.Height   = 32;
             this.btnReanudar.Location = new Point(180, 330);
             this.btnReanudar.Name     = "btnReanudar";
+            this.btnReanudar.Text = "Reanudar ahora";
             this.btnReanudar.TabIndex = 10;
             this.btnReanudar.Width    = 150;
             this.btnReanudar.UseVisualStyleBackColor = true;

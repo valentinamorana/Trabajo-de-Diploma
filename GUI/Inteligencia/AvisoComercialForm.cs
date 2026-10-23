@@ -73,5 +73,16 @@ namespace GUI.Inteligencia
         }
 
         private void BtnCerrar_Click(object sender, EventArgs e) => Close();
+
+        // D02 — F1 abre la ayuda del aviso (no hereda de FormBase: es una ventana liviana y no modal).
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.F1)
+            {
+                Ayuda.AyudaEnLinea.Mostrar(this, nameof(AvisoComercialForm));
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }

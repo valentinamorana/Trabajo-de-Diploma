@@ -327,22 +327,10 @@ namespace GUI
                 ? Tr("btn.contr.imprimiraviso", "Imprimir aviso de desistimiento")
                 : Tr("btn.contr.imprimirorden", "Imprimir orden de cobro");
 
-            using (var dlg = new Form
+            using (var dlg = new ResultadoContratacionDialog())
             {
-                Text = Tr("msg.ok.titulo", "Listo"), FormBorderStyle = FormBorderStyle.FixedDialog,
-                StartPosition = FormStartPosition.CenterParent, MaximizeBox = false, MinimizeBox = false,
-                ShowInTaskbar = false, ClientSize = new System.Drawing.Size(440, 130), BackColor = System.Drawing.Color.White
-            })
-            {
-                var lbl = new Label { Text = mensaje, Left = 16, Top = 16, Width = 408, Height = 50, Font = Tema.FuenteNormal };
-                var imprimir = new Button { Text = boton, Left = 16, Top = 82, Width = 250, Height = 32 };
-                var cerrar = new Button { Text = Tr("btn.cerrar", "Cerrar"), Left = 324, Top = 82, Width = 100, Height = 32, DialogResult = DialogResult.OK };
-                Estilos.EstiloFormulario.BotonPrimario(imprimir);
-                Estilos.EstiloFormulario.BotonSecundario(cerrar);
-                imprimir.Click += (s, e) => ImprimirDocumentoDelResultado(dlg);
-                dlg.Controls.AddRange(new Control[] { lbl, imprimir, cerrar });
-                dlg.AcceptButton = cerrar;
-                dlg.CancelButton = cerrar;
+                dlg.Configurar(Tr("msg.ok.titulo", "Listo"), mensaje, boton, Tr("btn.cerrar", "Cerrar"));
+                dlg.Imprimir += (s, e) => ImprimirDocumentoDelResultado(dlg);
                 dlg.ShowDialog(propietario);
             }
         }

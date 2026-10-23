@@ -179,6 +179,7 @@ namespace GUI
             this.txtPedidos.ForeColor = Color.FromArgb(130, 78, 102);
             this.txtPedidos.Location  = new Point(0, 102);
             this.txtPedidos.Name      = "txtPedidos";
+            this.txtPedidos.Text = "Pedidos\npara atender";
             this.txtPedidos.Size      = new Size(148, 44);
             this.txtPedidos.TabIndex  = 1;
             this.txtPedidos.TextAlign = ContentAlignment.TopCenter;
@@ -210,6 +211,7 @@ namespace GUI
             this.txtClientes.ForeColor = Color.FromArgb(160, 92, 124);
             this.txtClientes.Location  = new Point(0, 102);
             this.txtClientes.Name      = "txtClientes";
+            this.txtClientes.Text = "Clientes\nregistrados";
             this.txtClientes.Size      = new Size(148, 44);
             this.txtClientes.TabIndex  = 1;
             this.txtClientes.TextAlign = ContentAlignment.TopCenter;
@@ -241,6 +243,7 @@ namespace GUI
             this.txtPlanes.ForeColor = Color.FromArgb(226, 112, 146);
             this.txtPlanes.Location  = new Point(0, 102);
             this.txtPlanes.Name      = "txtPlanes";
+            this.txtPlanes.Text = "Contrataciones\nesperando a Caja";
             this.txtPlanes.Size      = new Size(148, 44);
             this.txtPlanes.TabIndex  = 1;
             this.txtPlanes.TextAlign = ContentAlignment.TopCenter;
@@ -272,6 +275,7 @@ namespace GUI
             this.txtSuscripciones.ForeColor = Color.FromArgb(216, 151, 64);
             this.txtSuscripciones.Location  = new Point(0, 102);
             this.txtSuscripciones.Name      = "txtSuscripciones";
+            this.txtSuscripciones.Text = "Suscripciones\npor vencer";
             this.txtSuscripciones.Size      = new Size(148, 44);
             this.txtSuscripciones.TabIndex  = 1;
             this.txtSuscripciones.TextAlign = ContentAlignment.TopCenter;

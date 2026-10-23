@@ -462,6 +462,139 @@ namespace Tests
             }
         }
 
+        // ── Ayuda F1 (D02): un tema propio por pantalla ─────────────────────────
+
+        // Pantallas que a propósito usan la ayuda General: el Menú (F1 ahí es la ayuda general),
+        // la base de los formularios, el cuadro de texto genérico que abren otras pantallas y los
+        // diálogos auxiliares (heredan de Form, no de FormBase): la propia ventana de ayuda, la
+        // confirmación Sí/No y los cuadros chicos que abren el Panel de Control, Nueva contratación,
+        // Prendas y Sugerir promoción.
+        private static readonly HashSet<string> SinTemaPropio =
+            new HashSet<string>(StringComparer.Ordinal)
+            {
+                "Menu", "FormBase", "InputDialog", "AyudaDialog", "ConfirmacionDialog", "RecordatorioBackupDialog",
+                "ResultadoContratacionDialog", "SeleccionClienteDialog", "ReporteMetricasDialog"
+            };
+
+        private static List<string> ClavesDelCatalogoDeAyuda(string gui)
+        {
+            string fuente = File.ReadAllText(Path.Combine(gui, "Ayuda", "AyudaEnLinea.cs"));
+            return Regex.Matches(fuente, @"\[""(\w+)""\]\s*=\s*new TemaAyuda\(")
+                        .Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+        }
+
+        [TestMethod]
+        public void AyudaF1_CadaPantalla_TieneTemaPropio()
+        {
+            string gui = GuiOInconcluso();
+            var temas = new HashSet<string>(ClavesDelCatalogoDeAyuda(gui), StringComparer.Ordinal);
+            var formulario = new Regex(@"\bclass\s+(\w+)\s*:\s*(FormBase|Form)\b");
+            var faltan = FuentesGui(gui).Values
+                .SelectMany(t => formulario.Matches(t).Cast<Match>().Select(m => m.Groups[1].Value))
+                .Distinct()
+                .Where(c => !SinTemaPropio.Contains(c) && !temas.Contains(c))
+                .OrderBy(c => c)
+                .ToList();
+            Assert.AreEqual(0, faltan.Count, "Pantallas sin tema de ayuda F1: " + string.Join(", ", faltan));
+        }
+
+        [TestMethod]
+        public void AyudaF1_CadaTema_EnLosCuatroIdiomas_YElFallbackEsElTextoES()
+        {
+            string gui = GuiOInconcluso();
+            string fuente = File.ReadAllText(Path.Combine(gui, "Ayuda", "AyudaEnLinea.cs"));
+            var es = Corpus("ES");
+            var errores = new StringBuilder();
+            foreach (var clave in ClavesDelCatalogoDeAyuda(gui))
+            {
+                AssertClaveEnLosCuatroIdiomas("ayuda." + clave, errores);
+                AssertClaveEnLosCuatroIdiomas("ayuda." + clave + ".titulo", errores);
+                if (!es.ContainsKey("ayuda." + clave)) continue;
+                var lineas = es["ayuda." + clave].Texto.Split('\n');
+                for (int i = 0; i < lineas.Length; i++)
+                {
+                    string literal = "\"" + lineas[i].Replace("\\", "\\\\").Replace("\"", "\\\"") +
+                                     (i < lineas.Length - 1 ? "\\n\"" : "\")");
+                    if (fuente.IndexOf(literal, StringComparison.Ordinal) < 0)
+                        errores.AppendLine("ayuda." + clave + ": el fallback difiere del .tsv en «" + lineas[i] + "»");
+                }
+            }
+            Assert.AreEqual(0, errores.Length, errores.ToString());
+        }
+
+        [TestMethod]
+        public void AyudaF1_LoginYAvisoComercial_AtiendenF1()
+        {
+            // No heredan de FormBase: cada uno tiene que atender F1 por su cuenta.
+            string gui = GuiOInconcluso();
+            foreach (var clase in new[] { "Login", "AvisoComercialForm" })
+            {
+                string todo = string.Join("\n", PartesDeLaClase(gui, clase));
+                StringAssert.Contains(todo, "AyudaEnLinea.Mostrar(this, nameof(" + clase + "))", clase + " no abre su ayuda con F1");
+            }
+        }
+
+        // ── Formularios hechos con el Diseñador (vista de diseño en Visual Studio) ──
+
+        [TestMethod]
+        public void Formularios_CadaFormularioYControl_TieneDisenador_YNingunoSeArmaEnCodigo()
+        {
+            string gui = GuiOInconcluso();
+            var fuentes = FuentesGui(gui);
+            var conDisenador = new HashSet<string>(
+                fuentes.Where(kv => kv.Key.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase))
+                       .SelectMany(kv => Regex.Matches(kv.Value, @"partial\s+class\s+(\w+)").Cast<Match>().Select(m => m.Groups[1].Value)),
+                StringComparer.Ordinal);
+            var clase = new Regex(@"\bclass\s+(\w+)\s*:\s*(FormBase|Form|UserControl)\b");
+            var faltan = fuentes.Values
+                .SelectMany(t => clase.Matches(t).Cast<Match>().Select(m => m.Groups[1].Value))
+                .Distinct()
+                .Where(c => c != "FormBase" && !conDisenador.Contains(c))   // FormBase: base sin interfaz propia
+                .OrderBy(c => c)
+                .ToList();
+            Assert.AreEqual(0, faltan.Count, "Formularios o controles sin .Designer.cs: " + string.Join(", ", faltan));
+
+            var armadosEnCodigo = fuentes.Where(kv => Regex.IsMatch(kv.Value, @"\bnew\s+Form\s*[({]"))
+                                         .Select(kv => Path.GetFileName(kv.Key)).OrderBy(n => n).ToList();
+            Assert.AreEqual(0, armadosEnCodigo.Count, "Diálogos armados en código, sin Diseñador: " + string.Join(", ", armadosEnCodigo));
+        }
+
+        // ── Acerca de WardrobeFlow (Sesión) ─────────────────────────────────────
+
+        [TestMethod]
+        public void AcercaDe_ItemDeSesion_SinPatente_YEnElCatalogoComoDialogo()
+        {
+            CollectionAssert.Contains(BLL.MapaNavegacion.ItemsSiempreVisibles, "acercaDeItem");
+            // No lo gobierna ninguna patente: no está en la resolución del menú, ni siquiera sin permisos.
+            Assert.IsFalse(BLL.MenuVisibilidad.Resolver(new string[0], esAdmin: false).ContainsKey("acercaDeItem"));
+            Assert.IsFalse(BLL.MenuVisibilidad.Resolver(new string[0], esAdmin: true).ContainsKey("acercaDeItem"));
+
+            var entradas = BLL.MapaNavegacion.EntradasDe("AcercaDeForm");
+            Assert.AreEqual(1, entradas.Count);
+            Assert.AreEqual("acercaDeItem", entradas[0].ItemMenu);
+            Assert.IsTrue(entradas[0].EsModal);
+        }
+
+        [TestMethod]
+        public void AcercaDe_TextosYAyuda_EnLosCuatroIdiomas_YFallbackDeAyudaIgualAlES()
+        {
+            var errores = new StringBuilder();
+            foreach (var clave in new[] { "ux.mnu.acercade", "ux.acercade.titulo", "ux.acercade.descripcion",
+                                          "ux.acercade.version", "ux.acercade.compilacion", "ux.acercade.servidor",
+                                          "ux.acercade.basedatos", "ux.acercade.autora", "ux.acercade.nodisponible",
+                                          "ux.acercade.trabajo", "ux.hint.AcercaDeForm",
+                                          "ayuda.AcercaDeForm.titulo", "ayuda.AcercaDeForm" })
+                AssertClaveEnLosCuatroIdiomas(clave, errores);
+            Assert.AreEqual(0, errores.Length, errores.ToString());
+
+            // La ayuda F1 de la pantalla: el texto de fábrica de AyudaEnLinea es el mismo del .tsv.
+            string gui = GuiOInconcluso();
+            string fuente = File.ReadAllText(Path.Combine(gui, "Ayuda", "AyudaEnLinea.cs"));
+            StringAssert.Contains(fuente, "[\"AcercaDeForm\"] = new TemaAyuda(\"" + Corpus("ES")["ayuda.AcercaDeForm.titulo"].Texto + "\"");
+            foreach (var linea in Corpus("ES")["ayuda.AcercaDeForm"].Texto.Split('\n'))
+                StringAssert.Contains(fuente, "\"" + linea, "El fallback de AyudaEnLinea difiere del .tsv en: " + linea);
+        }
+
         // ── Guía de primer uso: pasos por rol ──────────────────────────────────
 
         [TestMethod]
@@ -651,7 +784,7 @@ namespace Tests
         [TestMethod]
         public void DialogosDelMenu_SoloLosModalesDelCatalogo()
         {
-            foreach (var f in new[] { "NuevaContratacionForm", "SugerirPromocionForm", "BackupForm", "MiPerfilForm", "GuiaPrimerUsoForm" })
+            foreach (var f in new[] { "NuevaContratacionForm", "SugerirPromocionForm", "BackupForm", "MiPerfilForm", "GuiaPrimerUsoForm", "AcercaDeForm" })
                 Assert.IsTrue(BLL.MapaNavegacion.EsDialogoDelMenu(f), f);
             // Ventanas MDI del menú y diálogos que abren las ventanas hijas: no cuentan.
             foreach (var f in new[] { "Clientes", "PedidosVenta", "ClienteForm", "CambioEstadoDialog", "ConfirmarAdminForm", "InputDialog" })

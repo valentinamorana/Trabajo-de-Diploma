@@ -38,6 +38,14 @@
             this.usuarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miPerfilItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cerrarSesionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ayudaItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.guiaItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.acercaDeItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.barraUbicacion = new System.Windows.Forms.StatusStrip();
+            this.lblUbicacion = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblPista = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblUsuarioBarra = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblAyudaBarra = new System.Windows.Forms.ToolStripStatusLabel();
             this.panelControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inventarioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -82,6 +90,7 @@
             this.alertasItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsIdioma.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            this.barraUbicacion.SuspendLayout();
             this.SuspendLayout();
             //
             // tsIdioma — barra de selección de idioma (debajo del MenuStrip principal).
@@ -143,6 +152,9 @@
             //
             this.usuarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miPerfilItem,
+            this.ayudaItem,
+            this.guiaItem,
+            this.acercaDeItem,
             this.cerrarSesionToolStripMenuItem});
             this.usuarioToolStripMenuItem.Name = "usuarioToolStripMenuItem";
             this.usuarioToolStripMenuItem.Tag = "mnu.sesion";
@@ -158,6 +170,27 @@
             this.miPerfilItem.Tag  = "perfil.menu";
             this.miPerfilItem.Text = "Mi Perfil";
             this.miPerfilItem.Click += new System.EventHandler(this.MiPerfil_Click);
+            //
+            // ayudaItem — D02 "Ayuda (F1)": ayuda de la pantalla activa (lo ven todos los roles).
+            //
+            this.ayudaItem.Name = "ayudaItem";
+            this.ayudaItem.Tag = "mnu.ayuda";
+            this.ayudaItem.Text = "Ayuda (F1)";
+            this.ayudaItem.Click += new System.EventHandler(this.AyudaItem_Click);
+            //
+            // guiaItem — "Ver guía de inicio" (GuiaPrimerUsoForm), para todos los roles.
+            //
+            this.guiaItem.Name = "guiaItem";
+            this.guiaItem.Tag = "ux.mnu.guia";
+            this.guiaItem.Text = "Ver guía de inicio";
+            this.guiaItem.Click += new System.EventHandler(this.GuiaItem_Click);
+            //
+            // acercaDeItem — "Acerca de WardrobeFlow" (AcercaDeForm), para todos los roles.
+            //
+            this.acercaDeItem.Name = "acercaDeItem";
+            this.acercaDeItem.Tag = "ux.mnu.acercade";
+            this.acercaDeItem.Text = "Acerca de WardrobeFlow";
+            this.acercaDeItem.Click += new System.EventHandler(this.AcercaDeItem_Click);
             //
             // panelControlToolStripMenuItem
             //
@@ -552,6 +585,59 @@
             this.alertasItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.alertasItem.Click    += new System.EventHandler(this.AlertasItem_Click);
             //
+            // barraUbicacion — barra «Usted está en» al pie de la ventana (Menu.Ubicacion.cs la actualiza).
+            //
+            this.barraUbicacion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(244)))), ((int)(((byte)(246)))));
+            this.barraUbicacion.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblUbicacion,
+            this.lblPista,
+            this.lblUsuarioBarra,
+            this.lblAyudaBarra});
+            this.barraUbicacion.Name = "barraUbicacion";
+            this.barraUbicacion.ShowItemToolTips = true;
+            this.barraUbicacion.SizingGrip = false;
+            this.barraUbicacion.TabIndex = 3;
+            this.barraUbicacion.Text = "barraUbicacion";
+            //
+            // lblUbicacion
+            //
+            this.lblUbicacion.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblUbicacion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(30)))), ((int)(((byte)(55)))));
+            this.lblUbicacion.Margin = new System.Windows.Forms.Padding(6, 3, 6, 2);
+            this.lblUbicacion.Name = "lblUbicacion";
+            this.lblUbicacion.Text = "Usted está en: Inicio";
+            //
+            // lblPista
+            //
+            this.lblPista.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.lblPista.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.lblPista.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(26)))), ((int)(((byte)(32)))));
+            this.lblPista.Name = "lblPista";
+            this.lblPista.Spring = true;
+            this.lblPista.Text = "Elija una opción del menú para empezar.";
+            this.lblPista.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblUsuarioBarra
+            //
+            this.lblUsuarioBarra.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.lblUsuarioBarra.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.lblUsuarioBarra.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(80)))));
+            this.lblUsuarioBarra.Name = "lblUsuarioBarra";
+            this.lblUsuarioBarra.Text = "usuario · rol";
+            //
+            // lblAyudaBarra
+            //
+            this.lblAyudaBarra.ActiveLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
+            this.lblAyudaBarra.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.lblAyudaBarra.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.lblAyudaBarra.IsLink = true;
+            this.lblAyudaBarra.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            this.lblAyudaBarra.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
+            this.lblAyudaBarra.Margin = new System.Windows.Forms.Padding(0, 3, 6, 2);
+            this.lblAyudaBarra.Name = "lblAyudaBarra";
+            this.lblAyudaBarra.Text = "F1: Ayuda";
+            this.lblAyudaBarra.Click += new System.EventHandler(this.LblAyudaBarra_Click);
+            // 
             // Menu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -560,6 +646,7 @@
             this.ClientSize = new System.Drawing.Size(1100, 650);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.tsIdioma);
+            this.Controls.Add(this.barraUbicacion);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip1;
@@ -570,6 +657,8 @@
             this.tsIdioma.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.barraUbicacion.ResumeLayout(false);
+            this.barraUbicacion.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -623,6 +712,14 @@
         private System.Windows.Forms.ToolStripSeparator tsIdiomaSep;
         private System.Windows.Forms.ToolStripComboBox cmbIdiomaMenu;
         private System.Windows.Forms.ToolStripMenuItem miPerfilItem;
+        private System.Windows.Forms.ToolStripMenuItem ayudaItem;
+        private System.Windows.Forms.ToolStripMenuItem guiaItem;
+        private System.Windows.Forms.ToolStripMenuItem acercaDeItem;
+        private System.Windows.Forms.StatusStrip barraUbicacion;
+        private System.Windows.Forms.ToolStripStatusLabel lblUbicacion;
+        private System.Windows.Forms.ToolStripStatusLabel lblPista;
+        private System.Windows.Forms.ToolStripStatusLabel lblUsuarioBarra;
+        private System.Windows.Forms.ToolStripStatusLabel lblAyudaBarra;
         private System.Windows.Forms.ToolStripMenuItem grpUsuarios;
         private System.Windows.Forms.ToolStripMenuItem grpSistema;
         private System.Windows.Forms.ToolStripSeparator sepAdministrarToolStripSeparator;

@@ -5,8 +5,10 @@ ATENCIÓN: este archivo es SOLO PARA LA DEMOSTRACIÓN ACADÉMICA. Las cuentas y
 contraseñas de abajo son FIJAS a propósito, para la presentación y defensa del
 trabajo, y este archivo es público (lo puede leer cualquier usuario del
 equipo). En una implementación real hay que cambiar todas estas contraseñas
-desde Mi Perfil en el primer uso (o un Administrador debe forzar el cambio de
-clave de cada cuenta) y borrar o restringir este archivo.
+en el primer uso: el Administrador entra en Administrar > Usuarios >
+Administración de Usuarios, pestaña Cuentas, y usa «Resetear Contraseña» en
+cada cuenta (en el siguiente ingreso, el sistema obliga a definir una
+contraseña nueva). Después hay que borrar o restringir este archivo.
 
 Estas cuentas se crean automáticamente SOLO en una instalación NUEVA (ver
 BD/00_Instalacion_Completa.sql). Al actualizar una base existente no se crea

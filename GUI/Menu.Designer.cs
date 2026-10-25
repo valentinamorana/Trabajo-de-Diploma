@@ -84,13 +84,28 @@
             this.bitNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sepBitacoraToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.reporteJornadaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.analiticaNegocioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisAbandonoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ventasVendedorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisRotacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisMantenimientoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.analisisEscasezToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recomendacionPrendasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ventanaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cerrarTodasLasVentanasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alertasItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dividirPantallaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quitarDivisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabsVentanas = new System.Windows.Forms.TabControl();
+            this.menuPestania = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.fijarIzquierdaPestaniaItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quitarDivisionPestaniaItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sepPestania = new System.Windows.Forms.ToolStripSeparator();
+            this.cerrarPestaniaItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cerrarOtrasPestaniaItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsIdioma.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.barraUbicacion.SuspendLayout();
+            this.menuPestania.SuspendLayout();
             this.SuspendLayout();
             //
             // tsIdioma — barra de selección de idioma (debajo del MenuStrip principal).
@@ -139,7 +154,6 @@
             this.cajaToolStripMenuItem,
             this.promocionesToolStripMenuItem,
             this.auditoriaToolStripMenuItem,
-            this.analiticaNegocioToolStripMenuItem,
             this.gestionToolStripMenuItem,
             this.alertasItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -214,7 +228,10 @@
             this.prendasToolStripMenuItem,
             this.controlStockToolStripMenuItem,
             this.inspeccionDevolucionToolStripMenuItem,
-            this.listaEsperaToolStripMenuItem});
+            this.listaEsperaToolStripMenuItem,
+            this.analisisRotacionToolStripMenuItem,
+            this.analisisMantenimientoToolStripMenuItem,
+            this.analisisEscasezToolStripMenuItem});
             this.inventarioToolStripMenuItem.Name = "inventarioToolStripMenuItem";
             this.inventarioToolStripMenuItem.Tag = "mnu.inventario";
             this.inventarioToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
@@ -270,7 +287,10 @@
             //
             this.ventasToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pedidosVentaToolStripMenuItem,
-            this.pedidosRealizadosToolStripMenuItem});
+            this.pedidosRealizadosToolStripMenuItem,
+            this.recomendacionPrendasToolStripMenuItem,
+            this.analisisAbandonoToolStripMenuItem,
+            this.ventasVendedorToolStripMenuItem});
             this.ventasToolStripMenuItem.Name = "ventasToolStripMenuItem";
             this.ventasToolStripMenuItem.Tag = "mnu.ventas";
             this.ventasToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
@@ -511,15 +531,40 @@
             this.auditoriaToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
             this.auditoriaToolStripMenuItem.Text = "Auditoría";
             //
-            // analiticaNegocioToolStripMenuItem — una sola entrada que abre AnaliticaNegocioForm:
-            // los 6 reportes de valor agregado (Bloque 3 + PdN10) en un selector. Cada reporte
-            // conserva su patente propia; el ítem se ve si el usuario tiene al menos una.
             //
-            this.analiticaNegocioToolStripMenuItem.Name = "analiticaNegocioToolStripMenuItem";
-            this.analiticaNegocioToolStripMenuItem.Tag = "mnu.analiticanegocio";
-            this.analiticaNegocioToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
-            this.analiticaNegocioToolStripMenuItem.Text = "Analítica de Negocio";
-            this.analiticaNegocioToolStripMenuItem.Click += new System.EventHandler(this.analiticaNegocioToolStripMenuItem_Click);
+            // Reportes de decisión (Bloque 3 + PdN10): cada uno en el menú de su rol y con su patente
+            // (BLL.MenuVisibilidad.Hojas). Todos abren ReporteNegocioForm con su reporte (Menu.ReporteNegocio_Click).
+            //
+            this.analisisAbandonoToolStripMenuItem.Name = "analisisAbandonoToolStripMenuItem";
+            this.analisisAbandonoToolStripMenuItem.Tag = "abandono.titulo";
+            this.analisisAbandonoToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.analisisAbandonoToolStripMenuItem.Text = "Análisis de Abandono";
+            this.analisisAbandonoToolStripMenuItem.Click += new System.EventHandler(this.ReporteNegocio_Click);
+            this.ventasVendedorToolStripMenuItem.Name = "ventasVendedorToolStripMenuItem";
+            this.ventasVendedorToolStripMenuItem.Tag = "ventasvend.titulo";
+            this.ventasVendedorToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.ventasVendedorToolStripMenuItem.Text = "Ventas por Vendedor";
+            this.ventasVendedorToolStripMenuItem.Click += new System.EventHandler(this.ReporteNegocio_Click);
+            this.analisisRotacionToolStripMenuItem.Name = "analisisRotacionToolStripMenuItem";
+            this.analisisRotacionToolStripMenuItem.Tag = "rotacion.titulo";
+            this.analisisRotacionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.analisisRotacionToolStripMenuItem.Text = "Rotación de Prendas";
+            this.analisisRotacionToolStripMenuItem.Click += new System.EventHandler(this.ReporteNegocio_Click);
+            this.analisisMantenimientoToolStripMenuItem.Name = "analisisMantenimientoToolStripMenuItem";
+            this.analisisMantenimientoToolStripMenuItem.Tag = "mant.analisis.titulo";
+            this.analisisMantenimientoToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.analisisMantenimientoToolStripMenuItem.Text = "Tiempos de Mantenimiento";
+            this.analisisMantenimientoToolStripMenuItem.Click += new System.EventHandler(this.ReporteNegocio_Click);
+            this.analisisEscasezToolStripMenuItem.Name = "analisisEscasezToolStripMenuItem";
+            this.analisisEscasezToolStripMenuItem.Tag = "escasez.titulo";
+            this.analisisEscasezToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.analisisEscasezToolStripMenuItem.Text = "Escasez de Stock";
+            this.analisisEscasezToolStripMenuItem.Click += new System.EventHandler(this.ReporteNegocio_Click);
+            this.recomendacionPrendasToolStripMenuItem.Name = "recomendacionPrendasToolStripMenuItem";
+            this.recomendacionPrendasToolStripMenuItem.Tag = "recom.titulo";
+            this.recomendacionPrendasToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.recomendacionPrendasToolStripMenuItem.Text = "Recomendación de Prendas";
+            this.recomendacionPrendasToolStripMenuItem.Click += new System.EventHandler(this.ReporteNegocio_Click);
             //
             // bitSistemaToolStripMenuItem
             //
@@ -562,7 +607,10 @@
             // les agrega un separador + la lista de ventanas abajo — no hace falta
             // mantenerla sincronizada a mano.
             this.ventanaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.cerrarTodasLasVentanasToolStripMenuItem});
+            this.cerrarTodasLasVentanasToolStripMenuItem,
+            this.dividirPantallaToolStripMenuItem,
+            this.quitarDivisionToolStripMenuItem});
+            this.ventanaToolStripMenuItem.DropDownOpening += new System.EventHandler(this.VentanaMenu_DropDownOpening);
             this.ventanaToolStripMenuItem.Name = "ventanaToolStripMenuItem";
             this.ventanaToolStripMenuItem.Tag = "mnu.ventana";
             this.ventanaToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
@@ -577,6 +625,61 @@
             this.cerrarTodasLasVentanasToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.cerrarTodasLasVentanasToolStripMenuItem.Text = "Cerrar Todas";
             this.cerrarTodasLasVentanasToolStripMenuItem.Click += new System.EventHandler(this.cerrarTodasLasVentanasToolStripMenuItem_Click);
+            //
+            // dividirPantallaToolStripMenuItem / quitarDivisionToolStripMenuItem — pantalla dividida (Menu.Pestanias.cs).
+            //
+            this.dividirPantallaToolStripMenuItem.Name = "dividirPantallaToolStripMenuItem";
+            this.dividirPantallaToolStripMenuItem.Tag = "mnu.ventana.dividir";
+            this.dividirPantallaToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.dividirPantallaToolStripMenuItem.Text = "Dividir pantalla (la activa a la izquierda)";
+            this.dividirPantallaToolStripMenuItem.Click += new System.EventHandler(this.DividirPantalla_Click);
+            this.quitarDivisionToolStripMenuItem.Name = "quitarDivisionToolStripMenuItem";
+            this.quitarDivisionToolStripMenuItem.Tag = "mnu.ventana.quitardivision";
+            this.quitarDivisionToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.quitarDivisionToolStripMenuItem.Text = "Quitar pantalla dividida";
+            this.quitarDivisionToolStripMenuItem.Click += new System.EventHandler(this.QuitarDivision_Click);
+            //
+            // tabsVentanas — una pestaña por pantalla abierta, debajo del menú (Menu.Pestanias.cs).
+            // Solo se usan los encabezados: la pantalla se ve en el área MDI, debajo.
+            //
+            this.tabsVentanas.ContextMenuStrip = this.menuPestania;
+            this.tabsVentanas.Dock = System.Windows.Forms.DockStyle.Top;
+            this.tabsVentanas.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
+            this.tabsVentanas.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.tabsVentanas.ItemSize = new System.Drawing.Size(0, 26);
+            this.tabsVentanas.Name = "tabsVentanas";
+            this.tabsVentanas.Padding = new System.Drawing.Point(18, 5);
+            this.tabsVentanas.SelectedIndex = 0;
+            this.tabsVentanas.Size = new System.Drawing.Size(800, 30);
+            this.tabsVentanas.TabIndex = 4;
+            this.tabsVentanas.Visible = false;
+            this.tabsVentanas.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.TabsVentanas_DrawItem);
+            this.tabsVentanas.SelectedIndexChanged += new System.EventHandler(this.TabsVentanas_SelectedIndexChanged);
+            this.tabsVentanas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TabsVentanas_MouseDown);
+            //
+            // menuPestania — clic derecho sobre una pestaña (los textos se traducen al abrirlo).
+            //
+            this.menuPestania.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fijarIzquierdaPestaniaItem,
+            this.quitarDivisionPestaniaItem,
+            this.sepPestania,
+            this.cerrarPestaniaItem,
+            this.cerrarOtrasPestaniaItem});
+            this.menuPestania.Name = "menuPestania";
+            this.menuPestania.Opening += new System.ComponentModel.CancelEventHandler(this.MenuPestania_Opening);
+            this.fijarIzquierdaPestaniaItem.Name = "fijarIzquierdaPestaniaItem";
+            this.fijarIzquierdaPestaniaItem.Text = "Fijar a la izquierda (pantalla dividida)";
+            this.fijarIzquierdaPestaniaItem.Click += new System.EventHandler(this.FijarIzquierdaPestania_Click);
+            this.quitarDivisionPestaniaItem.Name = "quitarDivisionPestaniaItem";
+            this.quitarDivisionPestaniaItem.Text = "Quitar pantalla dividida";
+            this.quitarDivisionPestaniaItem.Click += new System.EventHandler(this.QuitarDivision_Click);
+            this.sepPestania.Name = "sepPestania";
+            this.cerrarPestaniaItem.Name = "cerrarPestaniaItem";
+            this.cerrarPestaniaItem.Text = "Cerrar";
+            this.cerrarPestaniaItem.Click += new System.EventHandler(this.CerrarPestania_Click);
+            this.cerrarOtrasPestaniaItem.Name = "cerrarOtrasPestaniaItem";
+            this.cerrarOtrasPestaniaItem.Text = "Cerrar las demás";
+            this.cerrarOtrasPestaniaItem.Click += new System.EventHandler(this.CerrarOtrasPestanias_Click);
             //
             // alertasItem — Centro de Alertas, alineado a la derecha (badge se compone en código).
             //
@@ -644,6 +747,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(228)))), ((int)(((byte)(235)))));
             this.ClientSize = new System.Drawing.Size(1100, 650);
+            this.Controls.Add(this.tabsVentanas);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.tsIdioma);
             this.Controls.Add(this.barraUbicacion);
@@ -659,6 +763,7 @@
             this.menuStrip1.PerformLayout();
             this.barraUbicacion.ResumeLayout(false);
             this.barraUbicacion.PerformLayout();
+            this.menuPestania.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -687,7 +792,12 @@
         private System.Windows.Forms.ToolStripMenuItem backupToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem historialUsuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem auditoriaToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem analiticaNegocioToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisAbandonoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ventasVendedorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisRotacionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisMantenimientoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem analisisEscasezToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recomendacionPrendasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bitSistemaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bitNegocioToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator sepBitacoraToolStripSeparator;
@@ -716,6 +826,15 @@
         private System.Windows.Forms.ToolStripMenuItem guiaItem;
         private System.Windows.Forms.ToolStripMenuItem acercaDeItem;
         private System.Windows.Forms.StatusStrip barraUbicacion;
+        private System.Windows.Forms.ToolStripMenuItem dividirPantallaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem quitarDivisionToolStripMenuItem;
+        private System.Windows.Forms.TabControl tabsVentanas;
+        private System.Windows.Forms.ContextMenuStrip menuPestania;
+        private System.Windows.Forms.ToolStripMenuItem fijarIzquierdaPestaniaItem;
+        private System.Windows.Forms.ToolStripMenuItem quitarDivisionPestaniaItem;
+        private System.Windows.Forms.ToolStripSeparator sepPestania;
+        private System.Windows.Forms.ToolStripMenuItem cerrarPestaniaItem;
+        private System.Windows.Forms.ToolStripMenuItem cerrarOtrasPestaniaItem;
         private System.Windows.Forms.ToolStripStatusLabel lblUbicacion;
         private System.Windows.Forms.ToolStripStatusLabel lblPista;
         private System.Windows.Forms.ToolStripStatusLabel lblUsuarioBarra;

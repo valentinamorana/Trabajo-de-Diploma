@@ -87,13 +87,15 @@ relativas al día en que se cargó (o restableció) la demo.
                                                      2 meses). Pestañas: 1. Analizar, 1b. Cohortes
                                                      (retención por mes de alta), 2. Recomendaciones
                                                      (aceptar / descartar / posponer y ejecutar la
-                                                     acción), 3. Historial de decisiones (las 3
+                                                     acción), 3. Historial de decisiones (las 4
                                                      sembradas, estimado vs real), 4. Simulador,
                                                      5. Medir resultado, Metas (MRR, % de bajas y
                                                      ocupación, con semáforo) y el botón Informe
                                                      ejecutivo (PDF). Al iniciar sesión, gcomercial
                                                      ve los avisos comerciales (recomendaciones de
-                                                     prioridad Alta y metas en riesgo)
+                                                     prioridad Alta y metas en riesgo). Qué mirar
+                                                     en cada pestaña: ver "Centro de decisiones
+                                                     comerciales: guía para la demo" más abajo
   PN03 Gestión de Promociones          admcomercial  En revisión, Vigente, Rechazada (reformular),
                                                      Vigente con solicitud de baja (atenderla),
                                                      Dada de baja y Vencida
@@ -138,25 +140,77 @@ Datos de prueba incluidos
 En una instalación NUEVA la base se carga con datos de ejemplo para probar
 cada proceso sin cargar nada a mano (procedimiento dbo.RestablecerDatosDemo,
 sección 21z3b del script; el apellido de cada cliente dice qué caso muestra):
-  - 23 clientes de escenario (PN01, PN02, cobro, PN04) y 24 clientes con 6
-    meses de historia (altas mes a mes y bajas de suscripción); 1 dado de baja;
-  - 25 prendas: en uso, 1 En Limpieza devuelta por Julia EnInspeccion (cola
+  - 23 clientes de escenario (PN01, PN02, cobro, PN04) y 44 clientes con 6
+    meses de historia (altas mes a mes y bajas de suscripción; 20 de ellos,
+    DNI 4100xxxx, para el Centro de decisiones de PN03); 1 dado de baja;
+  - 30 prendas: en uso, 1 En Limpieza devuelta por Julia EnInspeccion (cola
     de Inspección de devolución, con su último cliente para el cargo), 1 en
     limpieza manual del depósito, 2 de baja con cargo, disponibles y nuevas;
-  - 42 pedidos de 3 vendedores en todos los estados (Pendiente, Despachado,
+  - 43 pedidos de 3 vendedores en todos los estados (Pendiente, Despachado,
     Entregado devuelto y sin devolver, Cancelado, En control de stock, Con
     faltantes, Separado y Desistido), con su historial y la bitácora de negocio;
   - contrataciones pagadas, pendientes, canceladas y anuladas; cobros y
     renovaciones mensuales; desistimientos; cargos por prenda dañada;
   - sugerencias y promociones en todos los estados de PN03;
-  - 3 decisiones sembradas del Centro de decisiones comerciales (gcomercial):
+  - 4 decisiones sembradas del Centro de decisiones comerciales (gcomercial):
     una Ejecutada (la sugerencia que originó la promoción Vencida, con impacto
-    estimado y resultado real), una Pospuesta (la campaña de renovación, oculta
-    5 días) y una Descartada con motivo (la baja de las prendas sin rotación);
+    estimado y resultado real), una campaña de renovación Ejecutada hace 20
+    días y todavía en medición (con sus clientes contactados), una Pospuesta
+    (la campaña de renovación de este mes, oculta 5 días) y una Descartada con
+    motivo (la baja de las prendas sin rotación);
   - metas comerciales relativas a hoy (pestaña Metas, semáforo y avisos al
     iniciar sesión): MRR del mes cumplida, ocupación del mes en riesgo, % de
-    bajas del mes (máximo 30 %), MRR del mes anterior no cumplida y MRR de hace
-    dos meses cumplida.
+    bajas del mes (máximo 30 %), MRR del mes anterior no cumplida, % de bajas
+    del mes anterior cumplido y MRR de hace dos meses cumplida.
+
+Centro de decisiones comerciales: guía para la demo (PN03)
+----------------------------------------------------------
+Ingresar con gcomercial (o admin) → Promociones → Centro de decisiones
+comerciales → Analizar (período por defecto: los últimos 90 días). Los datos
+son relativos al día de la instalación; los importes y % de abajo son
+aproximados (pueden variar un poco según el día).
+  1. Analizar ........... MRR ~ $ 730.000 (sube ~32 %), % de bajas ~17 % contra
+                          ~33 % del período anterior (favorable), 18 clientes
+                          en riesgo, ingreso en riesgo por plan (Estándar,
+                          Básico y Premium), stock por categoría, prendas más y
+                          menos pedidas y la tendencia de 6 meses con su
+                          proyección de 3.
+  1b. Cohortes .......... 6 cohortes comparables con distinta retención. La peor
+                          es la de hace unos 5 meses (13 clientes: retiene ~69 %
+                          al mes 3 contra ~85 % del promedio) y la explica el
+                          plan Básico. "Actuar sobre la peor cohorte" lleva a la
+                          recomendación de bajas del Básico.
+  2. Recomendaciones .... "Bajas altas en el plan Básico" (33 % de bajas, 10
+                          clientes en riesgo): la opción ganadora es una
+                          promoción de retención del 30 % durante 60 días →
+                          "Simular esta opción" (el Simulador dice Conviene, ROI
+                          ~85 %); Aceptar registra la sugerencia, que sigue el
+                          circuito Administración → Contabilidad. También:
+                          extender "PROMO Vigente Estandar -10%" (también se
+                          puede simular), dar de baja "PROMO ConSolicitudBaja
+                          Premium $3000", ofrecer el Estándar a Bruno
+                          UsaTodoElCupo (tiene las 5 prendas de su plan Básico),
+                          escasez (lista de espera) y, solo con la patente de
+                          stock (admin, ginventario), prendas sin rotación y
+                          mantenimiento excesivo. La campaña de renovación está
+                          pospuesta: se ve con "Mostrar ocultas".
+  3. Historial .......... 4 decisiones: la Ejecutada de bajas del Básico (estimado
+                          $ 12.000, real y medido $ 225.360), la campaña de
+                          renovación en medición (4 de 5 contactados ya
+                          renovaron; cierra en 10 días), la Pospuesta y la
+                          Descartada con su motivo. "Registrar resultado real"
+                          propone el valor que midió el sistema.
+  5. Medir resultado .... Mantener "PROMO Vencida Basico -15%" (+33 pp de
+                          retención), Extender "PROMO Vigente Estandar -10%"
+                          (cumple y vence en 10 días) y Dar de baja "PROMO
+                          ConSolicitudBaja Premium $3000" y "PROMO DadaDeBaja
+                          Premium -10%". En las vigentes, "Aplicar veredicto"
+                          sugiere la extensión o pide la baja.
+  Metas ................. mes en curso: MRR cumplida, % de bajas en camino y
+                          ocupación en riesgo (sube la prioridad del upgrade);
+                          mes anterior: MRR no cumplida y % de bajas cumplido.
+Si la base ya tenía la demo de una versión anterior, estos datos aparecen
+después de Backup → "Restablecer datos de demo..." (ver más abajo).
 
 Guía de primer uso
 ------------------

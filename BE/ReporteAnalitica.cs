@@ -1,11 +1,9 @@
 namespace BE
 {
     /// <summary>
-    /// Los 6 reportes de la pantalla "Analítica de Negocio" (Bloque 3 + PdN10). Antes cada uno
-    /// era un formulario propio con su ítem de menú; ahora conviven en un solo formulario con
-    /// un selector, y cada reporte sigue gobernado por SU patente (BLL.MenuVisibilidad.
-    /// PatentesReportes): el selector solo ofrece los que el usuario tiene permitidos.
-    /// El orden de la enumeración es el orden en que aparecen en el selector.
+    /// Los 6 reportes de decisión (Bloque 3 + PdN10). Todos se muestran con el mismo formulario
+    /// (GUI.ReporteNegocioForm), pero cada uno tiene su ítem en el menú de su rol y su patente
+    /// (BLL.MenuVisibilidad.PatentesReportes).
     /// </summary>
     public enum ReporteAnalitica
     {

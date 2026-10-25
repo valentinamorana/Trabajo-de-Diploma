@@ -25,10 +25,11 @@ namespace GUI.Estilos
         public static void BotonPrimario(Button btn)
         {
             btn.UseVisualStyleBackColor = false;
-            btn.BackColor = Rosa;
-            btn.ForeColor = Color.White;
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
+            btn.EnabledChanged -= PintarPrimario;
+            btn.EnabledChanged += PintarPrimario;
+            PintarPrimario(btn, System.EventArgs.Empty);
         }
 
         /// <summary>Botón de acción secundaria (Exportar PDF/CSV, Reanudar) — contorno
@@ -37,10 +38,28 @@ namespace GUI.Estilos
         {
             btn.UseVisualStyleBackColor = false;
             btn.BackColor = Color.White;
-            btn.ForeColor = RosaOscuro;
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 1;
-            btn.FlatAppearance.BorderColor = Rosa;
+            btn.EnabledChanged -= PintarSecundario;
+            btn.EnabledChanged += PintarSecundario;
+            PintarSecundario(btn, System.EventArgs.Empty);
+        }
+
+        // Un botón Flat deshabilitado conserva su BackColor y WinForms solo agrisa el texto: el botón
+        // rosa seguía pareciendo activo y "no hacía nada" al pulsarlo (p. ej. «Actuar sobre la peor
+        // cohorte» sin peor cohorte). Deshabilitado se pinta gris para que se note que no está disponible.
+        private static void PintarPrimario(object sender, System.EventArgs e)
+        {
+            var btn = (Button)sender;
+            btn.BackColor = btn.Enabled ? Rosa : Tema.Borde;
+            btn.ForeColor = btn.Enabled ? Color.White : Tema.TextoMuted;
+        }
+
+        private static void PintarSecundario(object sender, System.EventArgs e)
+        {
+            var btn = (Button)sender;
+            btn.ForeColor = btn.Enabled ? RosaOscuro : Tema.TextoMuted;
+            btn.FlatAppearance.BorderColor = btn.Enabled ? Rosa : Tema.Borde;
         }
 
         /// <summary>Estilo de grilla de reportes: encabezado con tinte rosa, filas

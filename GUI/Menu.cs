@@ -71,6 +71,7 @@ namespace GUI
         {
             InitializeComponent();
             InicializarUsabilidad();   // barra "Usted está en" + Sesión › Ver guía de inicio (Menu.Ubicacion.cs)
+            InicializarPestanias();    // una pestaña por pantalla abierta + pantalla dividida (Menu.Pestanias.cs)
             AplicarEstiloMenu();
 
             ReconstruirComboIdioma(Traductor.ObtenerIdiomas());
@@ -253,7 +254,6 @@ namespace GUI
             Estilizar(inventarioToolStripMenuItem, textoOscuro);
             Estilizar(ventasToolStripMenuItem, textoOscuro);
             Estilizar(auditoriaToolStripMenuItem, textoOscuro);
-            Estilizar(analiticaNegocioToolStripMenuItem, textoOscuro);
             Estilizar(gestionToolStripMenuItem, textoOscuro);
             // Sesión: fondo claro, el texto default (negro) ya es legible — no hace falta forzarlo.
             // Alertas: ForeColor dinámico (blanco/dorado) gestionado en RefrescarTextoAlertas,
@@ -301,7 +301,9 @@ namespace GUI
                 bitSistemaToolStripMenuItem, bitNegocioToolStripMenuItem, reporteJornadaToolStripMenuItem,
                 suscriptoresToolStripMenuItem, ventasToolStripMenuItem, cajaToolStripMenuItem,
                 promocionesToolStripMenuItem,
-                auditoriaToolStripMenuItem, analiticaNegocioToolStripMenuItem,
+                auditoriaToolStripMenuItem,
+                analisisAbandonoToolStripMenuItem, ventasVendedorToolStripMenuItem, analisisRotacionToolStripMenuItem,
+                analisisMantenimientoToolStripMenuItem, analisisEscasezToolStripMenuItem, recomendacionPrendasToolStripMenuItem,
                 grpUsuarios, grpSistema, gestionToolStripMenuItem
             };
             // Fail-closed: si un .Name no está en la resolución (typo, ítem renombrado por el
@@ -422,14 +424,17 @@ namespace GUI
         }
 
         /// <summary>
-        /// Abre "Analítica de Negocio" como hijo MDI: los 6 reportes (Bloque 3 + PdN10) en un
-        /// solo formulario, con un selector que ofrece solo los que el usuario tiene permitidos
-        /// (BLL.MenuVisibilidad.ReportesVisibles).
+        /// Abre el reporte de decisión del ítem (Análisis de Abandono, Ventas por Vendedor, Rotación,
+        /// Mantenimiento, Escasez o Recomendación de Prendas) como hijo MDI. Si ese reporte ya está
+        /// abierto, lo trae al frente; cada reporte tiene su propia pestaña.
         /// </summary>
-        private void analiticaNegocioToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ReporteNegocio_Click(object sender, EventArgs e)
         {
-            AbrirUnico(() => new AnaliticaNegocioForm(
-                _usuarioActivo?.Permisos, _usuarioActivo?.EsAdministrador == true));
+            var reporte = BLL.MenuVisibilidad.ReporteDelItem((sender as ToolStripItem)?.Name);
+            if (reporte == null) return;
+            var abierto = MdiChildren.OfType<ReporteNegocioForm>().FirstOrDefault(f => f.Reporte == reporte.Value);
+            if (abierto != null) { abierto.Activate(); return; }
+            new ReporteNegocioForm(reporte.Value) { MdiParent = this }.Show();
         }
 
         /// <summary>
@@ -559,11 +564,14 @@ namespace GUI
             AbrirUnico(() => new CentroDecisionesForm());
         }
 
-        /// <summary>PN03 — Abre el diálogo para que Gerencia (GerenteComercial) sugiera una promoción.</summary>
+        /// <summary>
+        /// PN03 — Abre «Sugerir Promoción» (Gerencia) como hijo MDI, en su pestaña: se puede dejar abierta
+        /// y volver después. Desde el Centro de decisiones sigue siendo un diálogo, porque ahí la decisión
+        /// necesita saber qué sugerencia se registró (CentroDecisionesForm.AbrirSugerencia).
+        /// </summary>
         private void sugerirPromocionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (var form = new SugerirPromocionForm())
-                form.ShowDialog(this);
+            AbrirUnico(() => new SugerirPromocionForm());
         }
 
         /// <summary>PN03 — Abre la gestión de promociones (rol Administración) como hijo MDI.</summary>
@@ -865,13 +873,20 @@ namespace GUI
             Aplicar(backupToolStripMenuItem,            t);
             Aplicar(integridadToolStripMenuItem,        t);
             Aplicar(auditoriaToolStripMenuItem,         t);
-            Aplicar(analiticaNegocioToolStripMenuItem,  t);
+            Aplicar(analisisAbandonoToolStripMenuItem, t);
+            Aplicar(ventasVendedorToolStripMenuItem, t);
+            Aplicar(analisisRotacionToolStripMenuItem, t);
+            Aplicar(analisisMantenimientoToolStripMenuItem, t);
+            Aplicar(analisisEscasezToolStripMenuItem, t);
+            Aplicar(recomendacionPrendasToolStripMenuItem, t);
             Aplicar(bitSistemaToolStripMenuItem,        t);
             Aplicar(bitNegocioToolStripMenuItem,        t);
             Aplicar(reporteJornadaToolStripMenuItem,    t);
             Aplicar(cerrarSesionToolStripMenuItem,      t);
             Aplicar(ventanaToolStripMenuItem,           t);
             Aplicar(cerrarTodasLasVentanasToolStripMenuItem, t);
+            Aplicar(dividirPantallaToolStripMenuItem,   t);
+            Aplicar(quitarDivisionToolStripMenuItem,    t);
 
             // Título de la ventana: el rol se muestra traducido.
             ActualizarTitulo();

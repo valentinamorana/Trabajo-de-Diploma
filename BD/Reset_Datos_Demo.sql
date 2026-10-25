@@ -5,7 +5,9 @@
 -- además hace un backup antes y lo deja en la bitácora): BORRA los datos de negocio (clientes,
 -- prendas, pedidos, contrataciones, cobros, promociones, lista de espera, cargos y bitácora de
 -- negocio) y vuelve a cargar la demo de la instalación con las fechas corridas a HOY (escenarios
--- de PN01–PN04 y 6 meses de historia; ver BD/00_Instalacion_Completa.sql, sección 21z3b).
+-- de PN01–PN04 y 6 meses de historia, incluidos los datos del Centro de decisiones comerciales de
+-- PN03: cohortes, recomendaciones, decisiones, metas y promociones para medir; ver
+-- BD/00_Instalacion_Completa.sql, sección 21z3b).
 -- Usuarios, planes, permisos, traducciones y bitácora del sistema se conservan.
 -- Restablecer como máximo 2 días antes de la defensa.
 --

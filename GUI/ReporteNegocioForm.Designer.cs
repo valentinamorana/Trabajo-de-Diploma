@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    partial class AnaliticaNegocioForm
+    partial class ReporteNegocioForm
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -19,8 +19,6 @@ namespace GUI
         private void InitializeComponent()
         {
             this.lblTitulo      = new Label();
-            this.lblReporte     = new Label();
-            this.cmbReporte     = new ComboBox();
             this.btnGenerar     = new Button();
             this.pnlFiltros     = new Panel();
             this.lblResultado   = new Label();
@@ -35,26 +33,12 @@ namespace GUI
             this.lblTitulo.Font     = new Font(this.Font, FontStyle.Bold);
             this.lblTitulo.Location = new Point(15, 12);
             this.lblTitulo.Name     = "lblTitulo";
-            this.lblTitulo.Text = "Analítica de Negocio";
+            this.lblTitulo.Text = "Reporte";
             this.lblTitulo.TabIndex = 0;
-
-            // ── lblReporte / cmbReporte — selector de reporte (solo los permitidos) ──
-            this.lblReporte.AutoSize = true;
-            this.lblReporte.Location = new Point(15, 48);
-            this.lblReporte.Name     = "lblReporte";
-            this.lblReporte.Text = "Reporte:";
-            this.lblReporte.TabIndex = 1;
-
-            this.cmbReporte.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.cmbReporte.Location      = new Point(150, 45);
-            this.cmbReporte.Name          = "cmbReporte";
-            this.cmbReporte.TabIndex      = 2;
-            this.cmbReporte.Width         = 340;
-            this.cmbReporte.SelectedIndexChanged += new System.EventHandler(this.CmbReporte_SelectedIndexChanged);
 
             // ── btnGenerar ─────────────────────────────────────────────────────
             this.btnGenerar.Height   = 28;
-            this.btnGenerar.Location = new Point(500, 44);
+            this.btnGenerar.Location = new Point(15, 76);
             this.btnGenerar.Name     = "btnGenerar";
             this.btnGenerar.Text = "Generar";
             this.btnGenerar.TabIndex = 4;
@@ -62,17 +46,17 @@ namespace GUI
             this.btnGenerar.UseVisualStyleBackColor = true;
             this.btnGenerar.Click += new System.EventHandler(this.BtnGenerar_Click);
 
-            // ── pnlFiltros — filtros propios del reporte elegido (criterio, umbral, cliente) ──
+            // ── pnlFiltros — filtros propios del reporte (criterio, umbral, cliente); vacío si no tiene ──
             this.pnlFiltros.Anchor   = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            this.pnlFiltros.Location = new Point(15, 80);
+            this.pnlFiltros.Location = new Point(15, 40);
             this.pnlFiltros.Name     = "pnlFiltros";
             this.pnlFiltros.Size     = new Size(840, 30);
-            this.pnlFiltros.TabIndex = 3;
+            this.pnlFiltros.TabIndex = 1;
 
             // ── lblResultado ───────────────────────────────────────────────────
             this.lblResultado.AutoSize  = true;
             this.lblResultado.ForeColor = Color.DimGray;
-            this.lblResultado.Location  = new Point(15, 115);
+            this.lblResultado.Location  = new Point(135, 82);
             this.lblResultado.Name      = "lblResultado";
             this.lblResultado.TabIndex  = 5;
 
@@ -81,11 +65,11 @@ namespace GUI
             this.dgv.AllowUserToAddRows    = false;
             this.dgv.AllowUserToDeleteRows = false;
             this.dgv.AutoSizeColumnsMode   = DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgv.Location   = new Point(15, 140);
+            this.dgv.Location   = new Point(15, 112);
             this.dgv.Name       = "dgv";
             this.dgv.ReadOnly   = true;
             this.dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            this.dgv.Size       = new Size(840, 345);
+            this.dgv.Size       = new Size(840, 373);
             this.dgv.TabIndex   = 6;
 
             // ── btnExportarPdf / btnExportarCsv ───────────────────────────────
@@ -109,21 +93,19 @@ namespace GUI
             this.btnExportarCsv.UseVisualStyleBackColor = true;
             this.btnExportarCsv.Click += new System.EventHandler(this.BtnExportarCsv_Click);
 
-            // ── AnaliticaNegocioForm ───────────────────────────────────────────
+            // ── ReporteNegocioForm ─────────────────────────────────────────────
             this.ClientSize = new Size(880, 560);
             this.MinimumSize = new Size(660, 400);
             this.Controls.Add(this.lblTitulo);
-            this.Controls.Add(this.lblReporte);
-            this.Controls.Add(this.cmbReporte);
             this.Controls.Add(this.btnGenerar);
             this.Controls.Add(this.pnlFiltros);
             this.Controls.Add(this.lblResultado);
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.btnExportarPdf);
             this.Controls.Add(this.btnExportarCsv);
-            this.Name          = "AnaliticaNegocioForm";
+            this.Name          = "ReporteNegocioForm";
             this.StartPosition = FormStartPosition.CenterParent;
-            this.Text          = "Analítica de Negocio";
+            this.Text          = "Reporte";
 
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.ResumeLayout(false);
@@ -133,8 +115,6 @@ namespace GUI
         #endregion
 
         private Label        lblTitulo;
-        private Label        lblReporte;
-        private ComboBox     cmbReporte;
         private Button       btnGenerar;
         private Panel        pnlFiltros;
         private Label        lblResultado;

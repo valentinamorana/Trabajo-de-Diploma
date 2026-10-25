@@ -784,10 +784,10 @@ namespace Tests
         [TestMethod]
         public void DialogosDelMenu_SoloLosModalesDelCatalogo()
         {
-            foreach (var f in new[] { "NuevaContratacionForm", "SugerirPromocionForm", "BackupForm", "MiPerfilForm", "GuiaPrimerUsoForm", "AcercaDeForm" })
+            foreach (var f in new[] { "NuevaContratacionForm", "BackupForm", "MiPerfilForm", "GuiaPrimerUsoForm", "AcercaDeForm" })
                 Assert.IsTrue(BLL.MapaNavegacion.EsDialogoDelMenu(f), f);
             // Ventanas MDI del menú y diálogos que abren las ventanas hijas: no cuentan.
-            foreach (var f in new[] { "Clientes", "PedidosVenta", "ClienteForm", "CambioEstadoDialog", "ConfirmarAdminForm", "InputDialog" })
+            foreach (var f in new[] { "Clientes", "PedidosVenta", "SugerirPromocionForm", "ClienteForm", "CambioEstadoDialog", "ConfirmarAdminForm", "InputDialog" })
                 Assert.IsFalse(BLL.MapaNavegacion.EsDialogoDelMenu(f), f);
         }
 

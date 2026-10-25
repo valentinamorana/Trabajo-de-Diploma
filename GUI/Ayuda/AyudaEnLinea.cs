@@ -208,16 +208,16 @@ namespace GUI.Ayuda
             ["ListaEsperaForm"] = new TemaAyuda("Lista de espera",
                 "Clientes anotados para una prenda que hoy está en uso. Cuando la prenda vuelve a estar disponible, se reserva para el primero de la lista durante 48 horas. Si la prenda se da de baja por daño o pérdida, las anotaciones se cancelan."),
 
-            ["AnaliticaNegocioForm"] = new TemaAyuda("Analítica de Negocio",
-                "Reportes para la toma de decisiones. El selector muestra solo los reportes que su rol tiene permitidos.\n" +
+            ["ReporteNegocioForm"] = new TemaAyuda("Reportes de decisión",
+                "Reportes para la toma de decisiones. Cada uno está en el menú de su rol y solo lo ven quienes tienen su permiso.\n" +
                 "\n" +
-                "1. Elija el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).\n" +
+                "1. Si el reporte tiene filtro, elíjalo: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).\n" +
                 "2. Generar: el resultado se muestra en la grilla, con un resumen arriba.\n" +
                 "3. Exportar a PDF (se guarda y se abre) o Guardar como .CSV.\n" +
                 "\n" +
-                "• Gerencia Comercial: Análisis de Abandono y Ventas por Vendedor.\n" +
-                "• Gerencia de Inventario: Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.\n" +
-                "• Ventas: Recomendación de Prendas."),
+                "• Ventas (Gerencia Comercial): Análisis de Abandono y Ventas por Vendedor.\n" +
+                "• Inventario (Gerencia de Inventario): Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.\n" +
+                "• Ventas (Vendedor): Recomendación de Prendas."),
 
             ["CentroDecisionesForm"] = new TemaAyuda("Centro de decisiones comerciales (Gerencia, PN03)",
                 "Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.\n" +

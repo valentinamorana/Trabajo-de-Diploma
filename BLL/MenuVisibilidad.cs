@@ -54,38 +54,44 @@ namespace BLL
             ("bitSistemaToolStripMenuItem",            "mnuAuditoria"),
             ("bitNegocioToolStripMenuItem",             "mnuAuditoria"),
             ("reporteJornadaToolStripMenuItem",        "mnuAuditoria"),
+            // Reportes de decisión (Bloque 3 + PdN10), cada uno en el menú de su rol: Ventas
+            // (Recomendación de Prendas, Vendedor; Abandono y Ventas por Vendedor, Gerencia Comercial)
+            // e Inventario (Rotación, Mantenimiento y Escasez, Gerencia de Inventario). Promociones
+            // queda solo con PN03.
+            ("analisisAbandonoToolStripMenuItem", "mnuAnalisisAbandono"),
+            ("ventasVendedorToolStripMenuItem", "mnuVentasVendedor"),
+            ("analisisRotacionToolStripMenuItem", "mnuAnalisisRotacion"),
+            ("analisisMantenimientoToolStripMenuItem", "mnuAnalisisMantenimiento"),
+            ("analisisEscasezToolStripMenuItem", "mnuAnalisisEscasez"),
+            ("recomendacionPrendasToolStripMenuItem", "mnuRecomendacionPrendas"),
         };
 
         /// <summary>
-        /// Reporte de "Analítica de Negocio" → patente que lo habilita. Los 6 reportes viven en
-        /// un solo formulario (GUI.AnaliticaNegocioForm) con un selector, pero cada uno conserva
-        /// su patente propia (decisión de negocio, no auditoría genérica): PdN10 Abandono y PdN8
-        /// Ventas por Vendedor para Gerencia Comercial, PdN9/11/12 para Gerencia de Inventario y
-        /// PdN13 Recomendación para Ventas. El orden es el del selector.
+        /// Reporte de decisión → ítem del menú que lo abre y patente que lo habilita. Los 6 abren el
+        /// mismo formulario (GUI.ReporteNegocioForm) con su reporte; cada ítem también figura en
+        /// <see cref="Hojas"/> (lo verifica MenuVisibilidadTests).
         /// </summary>
-        public static readonly (BE.ReporteAnalitica Reporte, string Permiso)[] PatentesReportes =
+        public static readonly (BE.ReporteAnalitica Reporte, string Item, string Permiso)[] PatentesReportes =
         {
-            (BE.ReporteAnalitica.AnalisisAbandono,     BE.Patentes.AnalisisAbandono),
-            (BE.ReporteAnalitica.VentasVendedor,       BE.Patentes.VentasVendedor),
-            (BE.ReporteAnalitica.RotacionPrendas,      BE.Patentes.AnalisisRotacion),
-            (BE.ReporteAnalitica.TiemposMantenimiento, BE.Patentes.AnalisisMantenimiento),
-            (BE.ReporteAnalitica.EscasezStock,         BE.Patentes.AnalisisEscasez),
-            (BE.ReporteAnalitica.RecomendacionPrendas, BE.Patentes.RecomendacionPrendas),
+            (BE.ReporteAnalitica.AnalisisAbandono, "analisisAbandonoToolStripMenuItem", "mnuAnalisisAbandono"),
+            (BE.ReporteAnalitica.VentasVendedor, "ventasVendedorToolStripMenuItem", "mnuVentasVendedor"),
+            (BE.ReporteAnalitica.RotacionPrendas, "analisisRotacionToolStripMenuItem", "mnuAnalisisRotacion"),
+            (BE.ReporteAnalitica.TiemposMantenimiento, "analisisMantenimientoToolStripMenuItem", "mnuAnalisisMantenimiento"),
+            (BE.ReporteAnalitica.EscasezStock, "analisisEscasezToolStripMenuItem", "mnuAnalisisEscasez"),
+            (BE.ReporteAnalitica.RecomendacionPrendas, "recomendacionPrendasToolStripMenuItem", "mnuRecomendacionPrendas"),
         };
 
-        /// <summary>
-        /// Reportes de "Analítica de Negocio" que el usuario puede ver, en el orden del selector:
-        /// los que tienen su patente entre las efectivas (case-insensitive), o todos si es
-        /// Administrador (mismo bypass que Resolver). Lista vacía si no tiene ninguno.
-        /// </summary>
-        public static List<BE.ReporteAnalitica> ReportesVisibles(IEnumerable<string> patentes, bool esAdmin)
+        /// <summary>Reporte que abre el ítem del menú con ese .Name (null si no es un ítem de reporte).</summary>
+        public static BE.ReporteAnalitica? ReporteDelItem(string item)
         {
-            var nombresMenu = new HashSet<string>(patentes ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
-            return PatentesReportes
-                .Where(r => esAdmin || nombresMenu.Contains(r.Permiso))
-                .Select(r => r.Reporte)
-                .ToList();
+            foreach (var r in PatentesReportes)
+                if (string.Equals(r.Item, item, StringComparison.Ordinal)) return r.Reporte;
+            return null;
         }
+
+        /// <summary>.Name del ítem del menú que abre el reporte.</summary>
+        public static string ItemDelReporte(BE.ReporteAnalitica reporte) =>
+            PatentesReportes.First(r => r.Reporte == reporte).Item;
 
         /// <summary>Grupo (Name del menú contenedor) → hojas hijas que determinan su visibilidad (OR).</summary>
         public static readonly (string Grupo, string[] Hijos)[] Grupos =
@@ -96,13 +102,17 @@ namespace BLL
                 "renovacionSuscripcionToolStripMenuItem",
                 "nuevaContratacionToolStripMenuItem"
             }),
-            ("ventasToolStripMenuItem", new[] { "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem" }),
+            ("ventasToolStripMenuItem", new[]
+            {
+                "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem", "recomendacionPrendasToolStripMenuItem",
+                "analisisAbandonoToolStripMenuItem", "ventasVendedorToolStripMenuItem"
+            }),
             // PN02 — rol Caja, separado de Vendedor.
             // El cobro recurrente (N01) también es de Caja: quien vende no cobra.
             ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem", "cobroSuscripcionToolStripMenuItem" }),
             // PN03 — Gerencia (GerenteComercial), Administración y Contabilidad (roles nuevos)
             // y Vendedor conviven en un mismo grupo de menú; cada hoja sigue gobernada por su
-            // propia patente, el grupo solo se muestra si al menos una de las 4 es visible.
+            // propia patente, el grupo solo se muestra si alguna es visible.
             ("promocionesToolStripMenuItem", new[]
             {
                 "centroDecisionesToolStripMenuItem", "sugerirPromocionToolStripMenuItem", "gestionPromocionesToolStripMenuItem",
@@ -110,8 +120,7 @@ namespace BLL
             }),
             // "Analítica" se partió en dos menúes de primer nivel (antes eran 9 ítems en un
             // solo dropdown plano): Auditoría (bitácoras + reporte de jornada, gobernados por
-            // mnuAuditoria) y Analítica de Negocio (una sola entrada que abre el formulario con
-            // selector; su visibilidad se resuelve aparte, ver Resolver/ReportesVisibles).
+            // mnuAuditoria) y los reportes de decisión, que ahora están en el menú de cada rol.
             ("auditoriaToolStripMenuItem", new[]
             {
                 "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem"
@@ -128,8 +137,7 @@ namespace BLL
         ///   • Inventario: visible si Prendas, Lista de Espera o Inspección de Devolución son
         ///     visibles, o tiene mnuStock (Stock no tiene ToolStripMenuItem propio en el Designer).
         ///   • Grupo genérico (Suscriptores/Ventas/Caja/Promociones/Auditoría): visible si algún hijo lo es.
-        ///   • Analítica de Negocio: una sola entrada (abre el formulario con selector), visible
-        ///     si el usuario tiene AL MENOS UNA de las 6 patentes de reporte (ReportesVisibles).
+        ///   • Reportes de decisión: hojas comunes (Hojas), cada una en el menú de su rol.
         ///   • Administrar/Usuarios▸/Sistema▸: gobernados por mnuUsuarios.
         /// </summary>
         public static Dictionary<string, bool> Resolver(IEnumerable<string> patentes, bool esAdmin)
@@ -148,9 +156,9 @@ namespace BLL
             visible["inventarioToolStripMenuItem"] =
                 visible["prendasToolStripMenuItem"] || visible["listaEsperaToolStripMenuItem"] ||
                 visible["inspeccionDevolucionToolStripMenuItem"] || visible["controlStockToolStripMenuItem"] ||
+                visible["analisisRotacionToolStripMenuItem"] || visible["analisisMantenimientoToolStripMenuItem"] ||
+                visible["analisisEscasezToolStripMenuItem"] ||
                 Permite("mnuStock");
-
-            visible["analiticaNegocioToolStripMenuItem"] = ReportesVisibles(nombresMenu, esAdmin).Count > 0;
 
             foreach (var g in Grupos)
                 visible[g.Grupo] = g.Hijos.Any(h => visible.TryGetValue(h, out var v) && v);

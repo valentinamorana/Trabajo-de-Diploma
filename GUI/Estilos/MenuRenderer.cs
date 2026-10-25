@@ -38,7 +38,6 @@ namespace GUI.Estilos
             ["inventarioToolStripMenuItem"]        = Tema.FondoAlerta,
             ["ventasToolStripMenuItem"]            = Tema.FondoExito,
             ["auditoriaToolStripMenuItem"]         = Tema.FondoInfo,
-            ["analiticaNegocioToolStripMenuItem"]  = Color.FromArgb(215, 200, 240),
             ["gestionToolStripMenuItem"]           = Tema.Borde,
             ["usuarioToolStripMenuItem"]           = Tema.PanelClaro,
             ["alertasItem"]                        = Tema.RosaOscuro,

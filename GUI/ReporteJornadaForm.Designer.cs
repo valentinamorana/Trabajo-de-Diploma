@@ -111,6 +111,9 @@ namespace GUI
             // 
             // panelKpiBanner
             // 
+            // Anclados a izquierda y derecha: se estiran con el área de la pantalla (completa o dividida).
+            this.panelKpiBanner.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelKpiBanner.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(236)))), ((int)(((byte)(244)))));
             this.panelKpiBanner.Controls.Add(this.kpiPrendasVal);
             this.panelKpiBanner.Controls.Add(this.kpiClientesVal);
@@ -125,6 +128,7 @@ namespace GUI
             this.panelKpiBanner.Size = new System.Drawing.Size(940, 66);
             this.panelKpiBanner.TabIndex = 9;
             this.panelKpiBanner.Paint += new System.Windows.Forms.PaintEventHandler(this.PanelKpiBanner_Paint);
+            this.panelKpiBanner.Resize += new System.EventHandler(this.PanelKpiBanner_Resize);
             // 
             // kpiPrendasVal
             // 
@@ -273,6 +277,8 @@ namespace GUI
             // 
             // panelControles
             // 
+            this.panelControles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelControles.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(220)))), ((int)(((byte)(230)))));
             this.panelControles.Controls.Add(this.lblJornada);
             this.panelControles.Controls.Add(this.dtpJornada);

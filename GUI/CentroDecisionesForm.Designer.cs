@@ -224,7 +224,8 @@ namespace GUI
             this.lblDesde.Name = "lblDesde";
             this.lblDesde.Text = "Desde:";
 
-            this.dtpDesde.Format = DateTimePickerFormat.Short;
+            this.dtpDesde.CustomFormat = "dd/MM/yyyy";
+            this.dtpDesde.Format = DateTimePickerFormat.Custom;
             this.dtpDesde.Location = new Point(62, 43);
             this.dtpDesde.Name = "dtpDesde";
             this.dtpDesde.Size = new Size(105, 23);
@@ -236,7 +237,8 @@ namespace GUI
             this.lblHasta.Name = "lblHasta";
             this.lblHasta.Text = "Hasta:";
 
-            this.dtpHasta.Format = DateTimePickerFormat.Short;
+            this.dtpHasta.CustomFormat = "dd/MM/yyyy";
+            this.dtpHasta.Format = DateTimePickerFormat.Custom;
             this.dtpHasta.Location = new Point(224, 43);
             this.dtpHasta.Name = "dtpHasta";
             this.dtpHasta.Size = new Size(105, 23);
@@ -545,7 +547,8 @@ namespace GUI
             this.lblHistDesde.Name = "lblHistDesde";
             this.lblHistDesde.Text = "Desde:";
 
-            this.dtpHistDesde.Format = DateTimePickerFormat.Short;
+            this.dtpHistDesde.CustomFormat = "dd/MM/yyyy";
+            this.dtpHistDesde.Format = DateTimePickerFormat.Custom;
             this.dtpHistDesde.Location = new Point(54, 8);
             this.dtpHistDesde.Name = "dtpHistDesde";
             this.dtpHistDesde.Size = new Size(105, 23);
@@ -555,7 +558,8 @@ namespace GUI
             this.lblHistHasta.Name = "lblHistHasta";
             this.lblHistHasta.Text = "Hasta:";
 
-            this.dtpHistHasta.Format = DateTimePickerFormat.Short;
+            this.dtpHistHasta.CustomFormat = "dd/MM/yyyy";
+            this.dtpHistHasta.Format = DateTimePickerFormat.Custom;
             this.dtpHistHasta.Location = new Point(216, 8);
             this.dtpHistHasta.Name = "dtpHistHasta";
             this.dtpHistHasta.Size = new Size(105, 23);
@@ -837,7 +841,8 @@ namespace GUI
             this.lblMedirDesde.Name = "lblMedirDesde";
             this.lblMedirDesde.Text = "Desde:";
 
-            this.dtpMedirDesde.Format = DateTimePickerFormat.Short;
+            this.dtpMedirDesde.CustomFormat = "dd/MM/yyyy";
+            this.dtpMedirDesde.Format = DateTimePickerFormat.Custom;
             this.dtpMedirDesde.Location = new Point(54, 8);
             this.dtpMedirDesde.Name = "dtpMedirDesde";
             this.dtpMedirDesde.Size = new Size(105, 23);
@@ -847,7 +852,8 @@ namespace GUI
             this.lblMedirHasta.Name = "lblMedirHasta";
             this.lblMedirHasta.Text = "Hasta:";
 
-            this.dtpMedirHasta.Format = DateTimePickerFormat.Short;
+            this.dtpMedirHasta.CustomFormat = "dd/MM/yyyy";
+            this.dtpMedirHasta.Format = DateTimePickerFormat.Custom;
             this.dtpMedirHasta.Location = new Point(216, 8);
             this.dtpMedirHasta.Name = "dtpMedirHasta";
             this.dtpMedirHasta.Size = new Size(105, 23);

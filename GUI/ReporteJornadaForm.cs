@@ -80,6 +80,21 @@ namespace GUI
                     e.Graphics.DrawLine(pen, i * cellW, 8, i * cellW, panelH - 10);
         }
 
+        // Reparte las 4 celdas del banner en partes iguales al cambiar el ancho (pantalla completa o
+        // dividida), para que coincidan con los separadores que dibuja PanelKpiBanner_Paint.
+        private void PanelKpiBanner_Resize(object sender, EventArgs e)
+        {
+            Label[] valores   = { kpiPrendasVal, kpiClientesVal, kpiEventosVal, kpiBackupVal };
+            Label[] etiquetas = { kpiPrendasLbl, kpiClientesLbl, kpiEventosLbl, kpiBackupLbl };
+            int cellW = panelKpiBanner.Width / valores.Length;
+            for (int i = 0; i < valores.Length; i++)
+            {
+                valores[i].SetBounds(i * cellW, valores[i].Top, cellW, valores[i].Height);
+                etiquetas[i].SetBounds(i * cellW, etiquetas[i].Top, cellW, etiquetas[i].Height);
+            }
+            panelKpiBanner.Invalidate();
+        }
+
         private void BtnTendencia_Click(object sender, EventArgs e) => MostrarTendencia();
 
         // ── IIdiomaObserver ───────────────────────────────────────────────────

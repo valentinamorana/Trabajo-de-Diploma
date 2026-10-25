@@ -352,6 +352,8 @@ namespace GUI
             // 
             // btnExportSistema
             // 
+            // Anclado arriba a la derecha: acompaña el borde derecho al ensanchar o dividir la pantalla.
+            this.btnExportSistema.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnExportSistema.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
             this.btnExportSistema.FlatAppearance.BorderSize = 0;
             this.btnExportSistema.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -580,6 +582,7 @@ namespace GUI
             // 
             // btnExportNegocio
             // 
+            this.btnExportNegocio.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnExportNegocio.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(100)))), ((int)(((byte)(135)))));
             this.btnExportNegocio.FlatAppearance.BorderSize = 0;
             this.btnExportNegocio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

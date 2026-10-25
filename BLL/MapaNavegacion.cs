@@ -95,8 +95,7 @@ namespace BLL
             new Pantalla("CentroDecisionesForm", "centroDecisionesToolStripMenuItem",
                 "Elija el período y el plan para analizar; luego revise las recomendaciones, simule opciones y mida el resultado de las promociones."),
             new Pantalla("SugerirPromocionForm", "sugerirPromocionToolStripMenuItem",
-                "Elija el período y presione Analizar métricas; complete la sugerencia para un plan y presione Enviar Sugerencia.",
-                esModal: true),
+                "Elija el período y presione Analizar métricas; complete la sugerencia para un plan y presione Enviar Sugerencia."),
             new Pantalla("PromocionesAdministracionForm", "gestionPromocionesToolStripMenuItem",
                 "Cree promociones desde las sugerencias de Gerencia o con Alta Manual, y atienda las solicitudes de baja de Ventas."),
             new Pantalla("PromocionesContabilidadForm", "revisionContablePromocionesToolStripMenuItem",
@@ -112,9 +111,19 @@ namespace BLL
             new Pantalla("ReporteJornadaForm", "reporteJornadaToolStripMenuItem",
                 "Elija una fecha y presione Generar; también puede comparar dos jornadas o ver la tendencia de un rango de fechas."),
 
-            // Analítica de Negocio
-            new Pantalla("AnaliticaNegocioForm", "analiticaNegocioToolStripMenuItem",
-                "Elija un reporte y, si corresponde, su filtro; presione Generar y luego exporte el resultado a PDF o CSV."),
+            // Reportes de decisión: un mismo formulario (y una misma pista), abierto desde el ítem de cada reporte
+            new Pantalla("ReporteNegocioForm", "analisisAbandonoToolStripMenuItem",
+                "Si el reporte tiene filtro, elíjalo; presione Generar y luego exporte el resultado a PDF o CSV."),
+            new Pantalla("ReporteNegocioForm", "ventasVendedorToolStripMenuItem",
+                "Si el reporte tiene filtro, elíjalo; presione Generar y luego exporte el resultado a PDF o CSV."),
+            new Pantalla("ReporteNegocioForm", "analisisRotacionToolStripMenuItem",
+                "Si el reporte tiene filtro, elíjalo; presione Generar y luego exporte el resultado a PDF o CSV."),
+            new Pantalla("ReporteNegocioForm", "analisisMantenimientoToolStripMenuItem",
+                "Si el reporte tiene filtro, elíjalo; presione Generar y luego exporte el resultado a PDF o CSV."),
+            new Pantalla("ReporteNegocioForm", "analisisEscasezToolStripMenuItem",
+                "Si el reporte tiene filtro, elíjalo; presione Generar y luego exporte el resultado a PDF o CSV."),
+            new Pantalla("ReporteNegocioForm", "recomendacionPrendasToolStripMenuItem",
+                "Si el reporte tiene filtro, elíjalo; presione Generar y luego exporte el resultado a PDF o CSV."),
 
             // Administrar
             new Pantalla("Usuarios", "usuariosToolStripMenuItem",
@@ -153,14 +162,14 @@ namespace BLL
         public static readonly string[] ItemsSiempreVisibles = { "alertasItem", "miPerfilItem", "guiaItem", "acercaDeItem" };
 
         /// <summary>
-        /// Todos los ítems del menú que abren una pantalla: las hojas de MenuVisibilidad, Panel de
-        /// Control, Analítica de Negocio y los siempre visibles. Cada uno tiene que figurar en
+        /// Todos los ítems del menú que abren una pantalla: las hojas de MenuVisibilidad (incluidos
+        /// los reportes de decisión), Panel de Control y los siempre visibles. Cada uno tiene que figurar en
         /// <see cref="Pantallas"/> (lo verifica UsabilidadTests).
         /// </summary>
         public static IEnumerable<string> ItemsQueAbrenPantalla()
         {
             return MenuVisibilidad.Hojas.Select(h => h.Item)
-                .Concat(new[] { "panelControlToolStripMenuItem", "analiticaNegocioToolStripMenuItem" })
+                .Concat(new[] { "panelControlToolStripMenuItem" })
                 .Concat(ItemsSiempreVisibles)
                 .Distinct(StringComparer.Ordinal);
         }

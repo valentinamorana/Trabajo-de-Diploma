@@ -198,7 +198,11 @@ namespace GUI
                 ruta = T("ux.barra.inicio", "Inicio");
             else
             {
-                var recorridos = BLL.MapaNavegacion.EntradasDe(formulario)
+                // Los 6 reportes de decisión abren el mismo formulario: la ruta sale del ítem de SU reporte.
+                var entradas = BLL.MapaNavegacion.EntradasDe(formulario);
+                if (activa is ReporteNegocioForm reporte)
+                    entradas = entradas.Where(p => p.ItemMenu == BLL.MenuVisibilidad.ItemDelReporte(reporte.Reporte)).ToList();
+                var recorridos = entradas
                     .Select(p => RecorridoDelItem(p.ItemMenu, t))
                     .Where(r => r != null)
                     .ToList();

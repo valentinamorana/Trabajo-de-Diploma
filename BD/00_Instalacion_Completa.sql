@@ -4386,10 +4386,24 @@ GO
 --     (DNI 40000099: no existe → rama "¿Registrado? No")
 --   PN03 Promociones: sugerencias pendientes, evaluada y descartada; promociones En revisión,
 --     Vigente, Rechazada, Vigente con solicitud de baja, Dada de baja y Vencida.
---     Centro de decisiones: 3 decisiones comerciales (paso 9b) — una Ejecutada (la sugerencia que
---     originó la promoción Vencida, con impacto estimado y resultado real), una Pospuesta y una
---     Descartada con motivo; y metas del mes y de los meses anteriores (paso 9b2): MRR cumplida,
---     ocupación del stock en riesgo y la del mes anterior no cumplida.
+--     Centro de decisiones comerciales (todo relativo a hoy, con el período por defecto de 90 días):
+--       · Analizar: KPI con variación (% de bajas del período ~17 % contra ~33 % del anterior), 6 meses
+--         de tendencia, ingreso en riesgo por plan, stock por categoría y rotación.
+--       · Cohortes: 6 cohortes comparables; la peor (la de hace ~5 meses) la explica el plan Básico →
+--         "Actuar sobre la peor cohorte" lleva a su recomendación de bajas.
+--       · Recomendaciones: bajas del Básico (33 % de bajas, 10 clientes en riesgo: la opción ganadora
+--         es una promoción de retención 30 % / 60 días → "Simular esta opción"), extender la promoción
+--         Vigente del Estándar, dar de baja la de Premium con solicitud, upgrade de plan (Bruno
+--         UsaTodoElCupo), escasez, prendas sin rotación, mantenimiento excesivo y la renovación pospuesta.
+--       · Historial (paso 9b): 4 decisiones — Ejecutada con sugerencia (promoción Vencida del Básico,
+--         estimado vs real), campaña de renovación Ejecutada "en medición" (clientes contactados en
+--         DecisionComercialDetalle), Pospuesta y Descartada con motivo.
+--       · Medir resultado: Mantener (Vencida del Básico), Extender (Vigente del Estándar, vence en 10
+--         días) y Dar de baja (Premium con solicitud y Dada de baja).
+--       · Metas (paso 9b2): MRR del mes cumplida, % de bajas en camino, ocupación en riesgo; MRR del mes
+--         anterior no cumplida y % de bajas del mes anterior cumplido.
+--     Clientes del Centro (DNI 4100xxxx): 12 del plan Básico (en riesgo, antiguos, bajas viejas y Bruno
+--     UsaTodoElCupo, con las 5 prendas de su cupo) y 8 fundadores de Estándar y Premium.
 --   Usuarios: 2 versiones (Memento) del usuario vendedor para la serialización a XML/JSON (paso 9c).
 --   PN04 Devoluciones (deposito) y logística (logistico)
 --     Julia EnInspeccion .......... devolvió el "Blazer Azul M" ayer → cola de Inspección de devolución
@@ -4397,7 +4411,7 @@ GO
 --     Paula CompraTacita .......... Entregado hace 35 días sin devolver → atrasado / compra tácita
 --     Ines PedidoDespachado ....... pedido Despachado → "para entregar"
 --     Marcos CargoPendiente ....... cargo por prenda dañada pendiente → se suma a su próximo cobro
--- Historia de 6 meses (analítica y centro de decisiones): 24 clientes más con altas mes a mes y
+-- Historia de 6 meses (analítica y centro de decisiones): 44 clientes más con altas mes a mes y
 -- bajas (el plan Básico concentra las bajas del último mes), cobros y renovaciones mensuales,
 -- ~40 pedidos de 3 vendedores, mantenimientos cerrados, lista de espera, cargos, historial de
 -- pedidos y bitácora de negocio coherentes con los pedidos.
@@ -4557,7 +4571,34 @@ BEGIN
     ('30111021', N'Sol',       N'Gutiérrez', 'sol.gutierrez@mail.com',      'medio.efectivo',        'B', NULL, NULL,  60, '1999-06-06', NULL, NULL, NULL, NULL,   20, NULL, NULL),
     ('30111022', N'Pilar',     N'Ibarra',    'pilar.ibarra@mail.com',       'medio.tarjeta_debito',  'B', NULL, NULL,  20, '1995-08-24', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
     ('30111023', N'Mateo',     N'Cabrera',   'mateo.cabrera@mail.com',      'medio.tarjeta_credito', 'P', NULL, NULL,  12, '1990-02-02', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    ('30111024', N'Bianca',    N'Ponce',     'bianca.ponce@mail.com',       'medio.transferencia',   'E', NULL, NULL,   8, '1997-09-15', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    ('30111024', N'Bianca',    N'Ponce',     'bianca.ponce@mail.com',       'medio.transferencia',   'E', NULL, NULL,   8, '1997-09-15', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    -- PN03 Centro de decisiones (DNI 4100xxxx): plan Básico con muchos clientes en riesgo (vencen en
+    -- 15 días o menos y nunca pidieron prendas), clientes antiguos que sostienen el % de bajas del
+    -- período en un valor creíble, bajas viejas (antes de la promoción Vencida del Básico: su
+    -- resultado medido es bueno → "Mantener" y alimenta la retención histórica del plan) y un cliente
+    -- que usa todo su cupo (regla de upgrade de plan). Vence NULL = ciclo mensual desde el alta.
+    ('41000001', N'Bruno',     N'UsaTodoElCupo', 'bruno.usatodoelcupo@demo.com', 'medio.tarjeta_debito', 'B', NULL, NULL,  96, '1993-04-08', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000002', N'Carolina',  N'Paz',       'carolina.paz@mail.com',       'medio.efectivo',        'B', NULL, NULL, 108, '1996-03-19', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000003', N'Tobías',    N'Luna',      'tobias.luna@mail.com',        'medio.tarjeta_debito',  'B', NULL, NULL, 117, '1998-10-07', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000004', N'Josefina',  N'Benítez',   'josefina.benitez@mail.com',   'medio.transferencia',   'B', NULL, NULL, 139, '1992-12-30', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000005', N'Thiago',    N'Sánchez',   'thiago.sanchez@mail.com',     'medio.efectivo',        'B', NULL, NULL, 147, '2000-05-11', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000006', N'Catalina',  N'Godoy',     'catalina.godoy@mail.com',     'medio.tarjeta_debito',  'B', NULL, NULL, 166, '1995-01-25', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000007', N'Benjamín',  N'Aguirre',   'benjamin.aguirre@mail.com',   'medio.efectivo',        'B', NULL, NULL, 172, '1989-06-02', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000008', N'Olivia',    N'Peralta',   'olivia.peralta@mail.com',     'medio.tarjeta_credito', 'B', NULL, NULL, 167, '1991-08-16', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000009', N'Felipe',    N'Domínguez', 'felipe.dominguez@mail.com',   'medio.transferencia',   'B', NULL, NULL, 152, '1986-11-04', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000010', N'Emma',      N'Quiroga',   'emma.quiroga@mail.com',       'medio.tarjeta_debito',  'B', NULL, NULL, 124, '1994-02-21', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000011', N'Lucas',     N'Correa',    'lucas.correa@mail.com',       'medio.efectivo',        'B', NULL, NULL, 175, '1997-07-13', NULL, NULL, NULL, NULL,  130, NULL, NULL),
+    ('41000012', N'Alma',      N'Ledesma',   'alma.ledesma@mail.com',       'medio.tarjeta_debito',  'B', NULL, NULL, 160, '1999-09-27', NULL, NULL, NULL, NULL,  108, NULL, NULL),
+    -- Clientes fundadores de los planes Estándar y Premium (más de 6 meses): dan base al % de bajas del
+    -- período anterior (clientes al inicio de ese período).
+    ('41000013', N'Ezequiel',  N'Ramos',     'ezequiel.ramos@mail.com',     'medio.tarjeta_credito', 'E', NULL, NULL, 181, '1988-05-14', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000014', N'Morena',    N'Villalba',  'morena.villalba@mail.com',    'medio.transferencia',   'E', NULL, NULL, 184, '1993-03-08', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000015', N'Nahuel',    N'Suárez',    'nahuel.suarez@mail.com',      'medio.tarjeta_debito',  'E', NULL, NULL, 188, '1990-12-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000016', N'Agustín',   N'Ferreyra',  'agustin.ferreyra@mail.com',   'medio.efectivo',        'E', NULL, NULL, 193, '1987-07-29', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000017', N'Lara',      N'Méndez',    'lara.mendez@mail.com',        'medio.tarjeta_credito', 'E', NULL, NULL, 199, '1995-10-17', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000018', N'Bautista',  N'Giménez',   'bautista.gimenez@mail.com',   'medio.tarjeta_credito', 'P', NULL, NULL, 182, '1984-09-09', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000019', N'Zoe',       N'Carrizo',   'zoe.carrizo@mail.com',        'medio.transferencia',   'P', NULL, NULL, 187, '1992-06-26', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    ('41000020', N'Ian',       N'Toledo',    'ian.toledo@mail.com',         'medio.tarjeta_credito', 'P', NULL, NULL, 191, '1989-01-12', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     -- Vencimiento: el indicado o el del ciclo mensual desde el alta; sin plan o con baja, ninguno.
     -- Fin = hasta cuándo se cobró: el vencimiento "viejo" (ancla) o, si se dio de baja, la fecha de baja.
@@ -4622,7 +4663,13 @@ BEGIN
         (N'Campera Cuero L',   N'Campera biker de cuero',       'L',  N'Negro',   N'Abrigo',   60000.00, 200),
         (N'Sweater Gris M',    N'Sweater de lana',              'M',  N'Gris',    N'Sweater',  22000.00, 200),
         (N'Sweater Bordo M',   N'Sweater de lana',              'M',  N'Bordó',   N'Sweater',  22000.00, 200),
-        (N'Sweater Crema L',   N'Sweater de lana trenzado',     'L',  N'Crema',   N'Sweater',  23000.00, 200)
+        (N'Sweater Crema L',   N'Sweater de lana trenzado',     'L',  N'Crema',   N'Sweater',  23000.00, 200),
+        -- PN03: las 5 prendas que tiene Bruno UsaTodoElCupo (todo el cupo del plan Básico → upgrade).
+        (N'Blusa Seda S',      N'Blusa de seda',                'S',  N'Marfil',  N'Camisa',   16000.00, 150),
+        (N'Jean Negro 38',     N'Jean chupín',                  '38', N'Negro',   N'Pantalón', 24000.00, 150),
+        (N'Falda Jean S',      N'Falda corta de jean',          'S',  N'Celeste', N'Falda',    18000.00, 150),
+        (N'Cardigan Gris S',   N'Cárdigan de hilo',             'S',  N'Gris',    N'Sweater',  21000.00, 150),
+        (N'Vestido Floreado S', N'Vestido camisero estampado',  'S',  N'Floreado', N'Vestido', 35000.00, 150)
     ) AS v(Nombre, Descripcion, Talle, Color, Categoria, Precio, DiasAlta);
 
     -- ── 5. PN03: sugerencias y promociones en cada estado ─────────────────────────
@@ -4659,7 +4706,7 @@ BEGIN
            v.Margen, v.Impacto, CASE WHEN v.DeSugerencia = 1 THEN @sugEval END, @uAdm, DATEADD(DAY, -v.DiasAlta, @ahora)
     FROM (VALUES
         (N'PROMO Vigente Estandar -10%',          N'10% en el plan Estándar. Vigente: Ventas puede pedir la baja y se aplica en el cobro.', 0, 10.00,
-         -10,  50, 1, @pE, 8000.00, N'Reducción compensada por mayor retención.', 0, 12),
+         -45,  10, 1, @pE, 8000.00, N'Reducción compensada por mayor retención.', 0, 47),
         (N'PROMO ParaDictaminar Premium -15%',    N'15% en el plan Premium. Espera el dictamen de Contabilidad.',                         0, 15.00,
            0,  30, 0, @pP, 6000.00, N'Descuento de captación para nuevos clientes.', 0, 1),
         (N'PROMO Rechazada Basico -20%',          N'20% en el plan Básico. Contabilidad la rechazó: Administración la reformula o la da de baja.', 0, 20.00,
@@ -4669,7 +4716,7 @@ BEGIN
         (N'PROMO DadaDeBaja Premium -10%',        N'10% en el plan Premium. Administración la dio de baja a pedido de Ventas.', 0, 10.00,
          -75,  15, 4, @pP, 5000.00, N'Se esperaba captar clientes Premium; no tuvo uso.', 0, 78),
         (N'PROMO Vencida Basico -15%',            N'15% de retención en el plan Básico. Llegó a su fecha de fin.', 0, 15.00,
-        -100, -41, 6, @pB, 9000.00, N'Retención de clientes Básico en riesgo de abandono.', 1, 103)
+         -97, -41, 6, @pB, 9000.00, N'Retención de clientes Básico en riesgo de abandono.', 1, 103)
     ) AS v(Nombre, Descripcion, TipoDescuento, Valor, Inicio, Fin, Estado, IdPlan, Margen, Impacto, DeSugerencia, DiasAlta)
     WHERE v.IdPlan IS NOT NULL AND @uAdm IS NOT NULL;
 
@@ -4684,7 +4731,7 @@ BEGIN
         INSERT INTO DictamenContable (IdPromocion, IdUsuario, Aprobada, Observacion, Fecha)
         SELECT v.IdPromocion, @uCont, v.Aprobada, v.Observacion, DATEADD(DAY, -v.Dias, @ahora)
         FROM (VALUES
-            (@prVig,  1, N'Aprobada: el margen estimado cubre la reducción de ingresos.', 11),
+            (@prVig,  1, N'Aprobada: el margen estimado cubre la reducción de ingresos.', 46),
             (@prRech, 0, N'Rechazada: un 20% en el plan más barato no cubre el costo.',    4),
             (@prBaja, 1, N'Aprobada: impacto bajo, el plan tiene pocos clientes.',       21),
             (@prDDB,  1, N'Aprobada: el margen de Premium lo permite.',                  76),
@@ -4706,8 +4753,8 @@ BEGIN
     INSERT INTO PromocionHistorial (IdPromocion, EstadoAnterior, EstadoNuevo, IdUsuario, Fecha, Observacion)
     SELECT v.IdPromocion, v.Anterior, v.Nuevo, v.IdUsuario, DATEADD(DAY, -v.Dias, @ahora), v.Observacion
     FROM (VALUES
-        (@prVig,  NULL, 0, @uAdm,   12, N'Alta manual'),
-        (@prVig,  0,    1, @uCont,  11, N'Aprobada por Contabilidad'),
+        (@prVig,  NULL, 0, @uAdm,   47, N'Alta manual'),
+        (@prVig,  0,    1, @uCont,  46, N'Aprobada por Contabilidad'),
         (@prDict, NULL, 0, @uAdm,    1, N'Alta manual'),
         (@prRech, NULL, 0, @uAdm,    5, N'Alta manual'),
         (@prRech, 0,    2, @uCont,   4, N'Rechazada por Contabilidad'),
@@ -4890,6 +4937,7 @@ BEGIN
     ('O29', '40000019', 'V3',  22*24, 2, 19, NULL, NULL), ('O30', '30111018', 'V2',  20*24, 2,  8, NULL, NULL),
     ('O31', '40000017', 'V1',  12*24, 2, NULL, NULL, NULL), ('O32', '40000021', 'V2', 2*24, 1, NULL, NULL, NULL),
     ('O38', '30111007', 'V3',  90*24, 2, 12, NULL, NULL),
+    ('O39', '41000001', 'V2',   8*24, 2, NULL, NULL, NULL),   -- PN03: Bruno tiene las 5 prendas de su cupo
     ('O33', '30111019', 'V2', 130*24, 3, NULL, NULL, N'El cliente se mudó al interior antes del despacho.'),
     ('O34', '30111020', 'V3',  95*24, 3, NULL, NULL, N'Cambió de opinión antes del despacho.'),
     ('O35', '30111012', 'V1',  33*24, 3, NULL, NULL, N'Talle equivocado: se rehízo el pedido con otra selección.'),
@@ -4937,6 +4985,8 @@ BEGIN
     ('O31', N'Pantalon Negro 40', NULL), ('O31', N'Camisa Celeste S', NULL),
     ('O32', N'Saco Beige M', NULL),
     ('O38', N'Camisa Lino M', 0),
+    ('O39', N'Blusa Seda S', NULL), ('O39', N'Jean Negro 38', NULL), ('O39', N'Falda Jean S', NULL),
+    ('O39', N'Cardigan Gris S', NULL), ('O39', N'Vestido Floreado S', NULL),
     ('O33', N'Campera Cuero L', NULL),
     ('O34', N'Pantalon Beige 40', NULL),
     ('O35', N'Camisa Rayada S', NULL),
@@ -5205,8 +5255,10 @@ BEGIN
     -- ClaveRecomendacion con el formato de las reglas (BLL.Inteligencia.Reglas: Codigo[:Id[:Caso]]),
     -- así se asocian a las recomendaciones del análisis por defecto (últimos 90 días):
     --   · Ejecutada hace 107 días: la recomendación de bajas del plan Básico que originó la sugerencia
-    --     evaluada → promoción Vencida. Estimado (40000 × 30 %) contra el resultado real cargado: se
-    --     ve "estimado vs real" en el Historial. Es anterior al período analizado, así que la
+    --     evaluada → promoción Vencida. Estimado contra el resultado real cargado al cerrar la promoción
+    --     (225.360 = lo que mide "Medir resultado" para esa promoción: 17 clientes en juego, +33,3 pp de
+    --     retención × $ 8.000 × 6 meses − $ 46.800 descontados): se ve "estimado vs real" en el
+    --     Historial. Es anterior al período analizado, así que la
     --     recomendación de hoy vuelve a poder decidirse (BLL DecisionesComerciales.DecisionVigente).
     --   · Pospuesta hasta dentro de 5 días: la recomendación queda oculta hasta esa fecha
     --     ("Mostrar ocultas" la muestra).
@@ -5227,7 +5279,7 @@ BEGIN
              N'Bajas altas en el plan Básico: actuar para retener a los clientes en riesgo',
              N'El plan Básico tenía el % de bajas más alto de los planes y 5 cliente(s) en riesgo de abandono.',
              N'Lanzar una promoción de retención en el plan Básico con 15 % de descuento durante 60 días',
-             12000.00, 4, CAST(NULL AS NVARCHAR(500)), N'Sugerencia', @sugEval, CAST(NULL AS INT), 107, 38, CAST(21600.00 AS DECIMAL(14,2))),
+             12000.00, 4, CAST(NULL AS NVARCHAR(500)), N'Sugerencia', @sugEval, CAST(NULL AS INT), 107, 38, CAST(225360.00 AS DECIMAL(14,2))),
             (N'Renovaciones', N'Renovaciones', 1,
              N'Gestionar la renovación de los clientes con la suscripción por vencer o vencida',
              N'Clientes con la suscripción por vencer o vencida hace poco: conviene gestionar el cobro antes de perderlos.',
@@ -5240,6 +5292,46 @@ BEGIN
              0.00, 2, N'Se esperaba el cambio de temporada antes de liquidar.', NULL, NULL, NULL, 45, NULL, NULL)
         ) AS v(TipoRegla, Clave, Prioridad, Titulo, Diagnostico, Accion, Impacto, Estado, Motivo, TipoRef, Ref, PospHasta, Dias, DiasEval, Real)
         WHERE v.Clave IS NOT NULL AND (v.TipoRef IS NULL OR v.Ref IS NOT NULL);
+
+        --   · Ejecutada hace 20 días: la campaña de renovación anterior (opción "exportar contactos").
+        --     DecisionComercialDetalle guarda a quiénes se contactó: hasta 4 que ya renovaron después de la
+        --     campaña y hasta 2 que vencen en los próximos días. Su ventana de medición (30 días) sigue abierta:
+        --     el Historial la muestra "en medición" con cuántos respondieron y cuándo cierra.
+        CREATE TABLE #Contactados (IdCliente INT PRIMARY KEY, Precio DECIMAL(18,2));
+        INSERT INTO #Contactados (IdCliente, Precio)
+        SELECT TOP 4 c.IdCliente, p.Precio
+        FROM #Cli c JOIN #Plan p ON p.K = c.PlanK
+        WHERE c.Baja IS NULL AND c.DNI LIKE '30111%'
+          AND EXISTS (SELECT 1 FROM HistorialRenovacion h WHERE h.IdCliente = c.IdCliente AND h.Resultado = 1
+                      AND h.FechaResolucion >= DATEADD(DAY, -19, @base) AND h.FechaResolucion < @base)
+        ORDER BY c.Orden;
+        INSERT INTO #Contactados (IdCliente, Precio)
+        SELECT TOP 2 c.IdCliente, p.Precio
+        FROM #Cli c JOIN #Plan p ON p.K = c.PlanK
+        WHERE c.Baja IS NULL AND c.Pausa IS NULL AND c.Gracia IS NULL AND c.DNI LIKE '30111%'
+          AND c.Venc BETWEEN DATEADD(DAY, 1, @hoy) AND DATEADD(DAY, 9, @hoy)
+          AND c.IdCliente NOT IN (SELECT IdCliente FROM #Contactados)
+          AND NOT EXISTS (SELECT 1 FROM HistorialRenovacion h WHERE h.IdCliente = c.IdCliente
+                          AND h.FechaResolucion >= DATEADD(DAY, -20, @base))
+        ORDER BY c.Venc, c.Orden;
+        IF EXISTS (SELECT 1 FROM #Contactados)
+        BEGIN
+            DECLARE @decCampania INT, @cantContactados INT = (SELECT COUNT(*) FROM #Contactados);
+            INSERT INTO DecisionComercial (Fecha, IdUsuario, TipoRegla, ClaveRecomendacion, Prioridad, Titulo, Diagnostico,
+                                           AccionElegida, EsAlternativa, ImpactoEstimado, Estado, Motivo, TipoReferencia, Referencia,
+                                           PospuestaHasta, FechaEjecucion, FechaEvaluacion, ResultadoReal)
+            SELECT DATEADD(HOUR, 10, DATEADD(DAY, -20, @base)), @uGer, N'Renovaciones', N'Renovaciones', 2,
+                   N'Gestionar la renovación de ' + CAST(@cantContactados AS NVARCHAR(10)) + N' cliente(s)',
+                   N'Suscripciones por vencer en los próximos 7 días: conviene gestionar el cobro antes de perderlos.',
+                   N'Campaña de renovación: exportar los contactos de los ' + CAST(@cantContactados AS NVARCHAR(10)) +
+                   N' cliente(s) para llamarlos o escribirles antes de perderlos',
+                   0, ROUND(SUM(Precio) * 0.60, 2), 4, NULL, NULL, NULL, NULL,
+                   DATEADD(MINUTE, 5, DATEADD(HOUR, 10, DATEADD(DAY, -20, @base))), NULL, NULL
+            FROM #Contactados;
+            SET @decCampania = SCOPE_IDENTITY();
+            INSERT INTO DecisionComercialDetalle (IdDecision, Tipo, IdObjeto)
+            SELECT @decCampania, N'Cliente', IdCliente FROM #Contactados;
+        END
     END
 
     -- ── 9b2. PN03: metas comerciales (relativas a hoy) ─────────────────────────────
@@ -5252,6 +5344,7 @@ BEGIN
     --     plan (más prendas en uso). Mandar prendas a revisión no cambia la ocupación (siguen activas).
     --   · % de bajas del mes en curso: máximo 30 % (se ve el ritmo del mes y su proyección).
     --   · MRR del mes anterior: 1,5 veces el ingreso actual → No cumplida (mes cerrado).
+    --   · % de bajas del mes anterior: máximo 15 % → Cumplida (mes cerrado; la demo nunca pierde más del 10 % en un mes).
     --   · MRR de hace dos meses: 40 % del ingreso actual → Cumplida (historia del gráfico).
     IF OBJECT_ID('MetaComercial', 'U') IS NOT NULL AND @uGer IS NOT NULL
     BEGIN
@@ -5269,6 +5362,7 @@ BEGIN
                 (@mesActual,                     2, CASE WHEN @ocupHoy + 15 > 100 THEN 100 ELSE ROUND(@ocupHoy + 15, 0) END, 0, 2),
                 (@mesActual,                     1, CAST(30 AS DECIMAL(14,2)), 1, 2),
                 (DATEADD(MONTH, -1, @mesActual), 0, ROUND(@mrrBase * 1.5, -3), 0, 35),
+                (DATEADD(MONTH, -1, @mesActual), 1, CAST(15 AS DECIMAL(14,2)), 1, 35),
                 (DATEADD(MONTH, -2, @mesActual), 0, ROUND(@mrrBase * 0.4, -3), 0, 65)
             ) AS v(Periodo, Indicador, Valor, Sentido, Dias)
             WHERE v.Valor > 0;

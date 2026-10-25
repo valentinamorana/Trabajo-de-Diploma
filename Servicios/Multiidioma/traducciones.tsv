@@ -7430,20 +7430,20 @@ RU	doc.promo.resultado.sinjuego	      Ни у одного клиента тар
 PT	doc.promo.resultado.sinjuego	      Nenhum cliente do plano teve a renovação em jogo durante a vigência ({0}).
 ES	analitica.reporte	Reporte:
 ES	analitica.sinreportes	No tiene permiso para ningún reporte de analítica.
-ES	ayuda.AnaliticaNegocioForm.titulo	Analítica de Negocio
-ES	ayuda.AnaliticaNegocioForm	Reportes para la toma de decisiones. El selector muestra solo los reportes que su rol tiene permitidos.\n\n1. Elija el reporte y, si tiene, su filtro: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).\n2. Generar: el resultado se muestra en la grilla, con un resumen arriba.\n3. Exportar a PDF (se guarda y se abre) o Guardar como .CSV.\n\n• Gerencia Comercial: Análisis de Abandono y Ventas por Vendedor.\n• Gerencia de Inventario: Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.\n• Ventas: Recomendación de Prendas.
+ES	ayuda.ReporteNegocioForm.titulo	Reportes de decisión
+ES	ayuda.ReporteNegocioForm	Reportes para la toma de decisiones. Cada uno está en el menú de su rol y solo lo ven quienes tienen su permiso.\n\n1. Si el reporte tiene filtro, elíjalo: criterio de riesgo (Análisis de Abandono), umbral mínimo (Escasez de Stock) o cliente (Recomendación de Prendas).\n2. Generar: el resultado se muestra en la grilla, con un resumen arriba.\n3. Exportar a PDF (se guarda y se abre) o Guardar como .CSV.\n\n• Ventas (Gerencia Comercial): Análisis de Abandono y Ventas por Vendedor.\n• Inventario (Gerencia de Inventario): Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock.\n• Ventas (Vendedor): Recomendación de Prendas.
 EN	analitica.reporte	Report:
 EN	analitica.sinreportes	You do not have permission for any analytics report.
-EN	ayuda.AnaliticaNegocioForm.titulo	Business Analytics
-EN	ayuda.AnaliticaNegocioForm	Reports for decision making. The selector only shows the reports your role is allowed to see.\n\n1. Choose the report and, if it has one, its filter: risk criterion (Churn Analysis), minimum threshold (Stock Shortage) or customer (Garment Recommendations).\n2. Generate: the result is shown in the grid, with a summary above it.\n3. Export to PDF (saved and opened) or Save as .CSV.\n\n• Sales Management: Churn Analysis and Sales by Salesperson.\n• Inventory Management: Garment Turnover, Maintenance Times and Stock Shortage.\n• Sales: Garment Recommendations.
+EN	ayuda.ReporteNegocioForm.titulo	Decision reports
+EN	ayuda.ReporteNegocioForm	Reports for decision making. Each one is in its role's menu and only users with its permission can see it.\n\n1. If the report has a filter, choose it: risk criterion (Churn Analysis), minimum threshold (Stock Shortage) or customer (Garment Recommendations).\n2. Generate: the result is shown in the grid, with a summary above it.\n3. Export to PDF (saved and opened) or Save as .CSV.\n\n• Sales (Sales Management): Churn Analysis and Sales by Salesperson.\n• Inventory (Inventory Management): Garment Turnover, Maintenance Times and Stock Shortage.\n• Sales (Salesperson): Garment Recommendations.
 RU	analitica.reporte	Отчёт:
 RU	analitica.sinreportes	У вас нет доступа ни к одному аналитическому отчёту.
-RU	ayuda.AnaliticaNegocioForm.titulo	Бизнес-аналитика
-RU	ayuda.AnaliticaNegocioForm	Отчёты для принятия решений. В списке показываются только отчёты, разрешённые для вашей роли.\n\n1. Выберите отчёт и, если есть, его фильтр: критерий риска («Анализ оттока»), минимальный порог («Дефицит запасов») или клиента («Рекомендации одежды»).\n2. «Сформировать»: результат показывается в таблице, сводка — над ней.\n3. «Экспорт в PDF» (файл сохраняется и открывается) или «Сохранить как .CSV».\n\n• Коммерческое руководство: «Анализ оттока» и «Продажи по продавцам».\n• Руководство склада: «Оборот одежды», «Сроки обслуживания» и «Дефицит запасов».\n• Продажи: «Рекомендации одежды».
+RU	ayuda.ReporteNegocioForm.titulo	Отчёты для принятия решений
+RU	ayuda.ReporteNegocioForm	Отчёты для принятия решений. Каждый находится в меню своей роли и виден только пользователям с соответствующим разрешением.\n\n1. Если у отчёта есть фильтр, выберите его: критерий риска («Анализ оттока»), минимальный порог («Дефицит запасов») или клиента («Рекомендации одежды»).\n2. «Сформировать»: результат показывается в таблице, сводка — над ней.\n3. «Экспорт в PDF» (файл сохраняется и открывается) или «Сохранить как .CSV».\n\n• Продажи (коммерческое руководство): «Анализ оттока» и «Продажи по продавцам».\n• Склад (руководство склада): «Оборот одежды», «Сроки обслуживания» и «Дефицит запасов».\n• Продажи (продавец): «Рекомендации одежды».
 PT	analitica.reporte	Relatório:
 PT	analitica.sinreportes	Você não tem permissão para nenhum relatório de análise.
-PT	ayuda.AnaliticaNegocioForm.titulo	Análise de Negócio
-PT	ayuda.AnaliticaNegocioForm	Relatórios para a tomada de decisões. O seletor mostra apenas os relatórios permitidos para o seu perfil.\n\n1. Escolha o relatório e, se tiver, o seu filtro: critério de risco (Análise de Abandono), limite mínimo (Escassez de Estoque) ou cliente (Recomendação de Peças).\n2. Gerar: o resultado aparece na grade, com um resumo acima.\n3. Exportar para PDF (salvo e aberto) ou Salvar como .CSV.\n\n• Gerência Comercial: Análise de Abandono e Vendas por Vendedor.\n• Gerência de Estoque: Rotatividade de Peças, Tempos de Manutenção e Escassez de Estoque.\n• Vendas: Recomendação de Peças.
+PT	ayuda.ReporteNegocioForm.titulo	Relatórios de decisão
+PT	ayuda.ReporteNegocioForm	Relatórios para a tomada de decisões. Cada um fica no menu do seu perfil e só o veem os usuários com a permissão correspondente.\n\n1. Se o relatório tiver filtro, escolha-o: critério de risco (Análise de Abandono), limite mínimo (Escassez de Estoque) ou cliente (Recomendação de Peças).\n2. Gerar: o resultado aparece na grade, com um resumo acima.\n3. Exportar para PDF (salvo e aberto) ou Salvar como .CSV.\n\n• Vendas (Gerência Comercial): Análise de Abandono e Vendas por Vendedor.\n• Estoque (Gerência de Estoque): Rotatividade de Peças, Tempos de Manutenção e Escassez de Estoque.\n• Vendas (Vendedor): Recomendação de Peças.
 ES	usr.tab.cuentas	Cuentas
 EN	usr.tab.cuentas	Accounts
 RU	usr.tab.cuentas	Учётные записи
@@ -10144,10 +10144,10 @@ ES	ux.hint.ReporteJornadaForm	Elija una fecha y presione Generar; también puede
 EN	ux.hint.ReporteJornadaForm	Choose a date and press Generate; you can also compare two days or see the trend over a date range.
 RU	ux.hint.ReporteJornadaForm	Выберите дату и нажмите «Создать»; можно также сравнить два дня или посмотреть тенденцию за период.
 PT	ux.hint.ReporteJornadaForm	Escolha uma data e pressione Gerar; você também pode comparar duas jornadas ou ver a tendência de um intervalo de datas.
-ES	ux.hint.AnaliticaNegocioForm	Elija un reporte y, si corresponde, su filtro; presione Generar y luego exporte el resultado a PDF o CSV.
-EN	ux.hint.AnaliticaNegocioForm	Choose a report and, if it has one, its filter; press Generate and then export the result to PDF or CSV.
-RU	ux.hint.AnaliticaNegocioForm	Выберите отчёт и при необходимости его фильтр; нажмите «Сформировать», затем выгрузите результат в PDF или CSV.
-PT	ux.hint.AnaliticaNegocioForm	Escolha um relatório e, se houver, o filtro; pressione Gerar e depois exporte o resultado para PDF ou CSV.
+ES	ux.hint.ReporteNegocioForm	Si el reporte tiene filtro, elíjalo; presione Generar y luego exporte el resultado a PDF o CSV.
+EN	ux.hint.ReporteNegocioForm	If the report has a filter, choose it; press Generate and then export the result to PDF or CSV.
+RU	ux.hint.ReporteNegocioForm	Если у отчёта есть фильтр, выберите его; нажмите «Сформировать», затем выгрузите результат в PDF или CSV.
+PT	ux.hint.ReporteNegocioForm	Se o relatório tiver filtro, escolha-o; pressione Gerar e depois exporte o resultado para PDF ou CSV.
 ES	ux.hint.Usuarios	En Cuentas desbloquee cuentas o resetee contraseñas; en Datos administrativos cree usuarios con Nuevo usuario o cambie su rol.
 EN	ux.hint.Usuarios	In Accounts, unlock accounts or reset passwords; in Administrative data, create users with New user or change their role.
 RU	ux.hint.Usuarios	На вкладке «Учётные записи» разблокируйте учётные записи или сбросьте пароли; на вкладке административных данных создайте пользователя («Новый пользователь») или смените роль.
@@ -10480,18 +10480,18 @@ ES	tip.ReporteJornadaForm.btnExportarComp	Elija el formato para guardar la compa
 EN	tip.ReporteJornadaForm.btnExportarComp	Choose the format to save the day comparison.
 RU	tip.ReporteJornadaForm.btnExportarComp	Выберите формат для сохранения сравнения дней.
 PT	tip.ReporteJornadaForm.btnExportarComp	Escolha o formato para salvar a comparação de jornadas.
-ES	tip.AnaliticaNegocioForm.btnGenerar	Calcula el reporte elegido con el filtro indicado.
-EN	tip.AnaliticaNegocioForm.btnGenerar	Calculates the chosen report with the given filter.
-RU	tip.AnaliticaNegocioForm.btnGenerar	Рассчитывает выбранный отчёт с указанным фильтром.
-PT	tip.AnaliticaNegocioForm.btnGenerar	Calcula o relatório escolhido com o filtro indicado.
-ES	tip.AnaliticaNegocioForm.btnExportarPdf	Guarda el resultado en PDF y lo abre.
-EN	tip.AnaliticaNegocioForm.btnExportarPdf	Saves the result to PDF and opens it.
-RU	tip.AnaliticaNegocioForm.btnExportarPdf	Сохраняет результат в PDF и открывает его.
-PT	tip.AnaliticaNegocioForm.btnExportarPdf	Salva o resultado em PDF e o abre.
-ES	tip.AnaliticaNegocioForm.btnExportarCsv	Guarda la grilla como .CSV para abrirla en una planilla de cálculo.
-EN	tip.AnaliticaNegocioForm.btnExportarCsv	Saves the grid as .CSV to open it in a spreadsheet.
-RU	tip.AnaliticaNegocioForm.btnExportarCsv	Сохраняет таблицу в формате .CSV для открытия в электронной таблице.
-PT	tip.AnaliticaNegocioForm.btnExportarCsv	Salva a grade como .CSV para abri-la em uma planilha.
+ES	tip.ReporteNegocioForm.btnGenerar	Calcula el reporte con el filtro indicado.
+EN	tip.ReporteNegocioForm.btnGenerar	Calculates the report with the given filter.
+RU	tip.ReporteNegocioForm.btnGenerar	Рассчитывает выбранный отчёт с указанным фильтром.
+PT	tip.ReporteNegocioForm.btnGenerar	Calcula o relatório com o filtro indicado.
+ES	tip.ReporteNegocioForm.btnExportarPdf	Guarda el resultado en PDF y lo abre.
+EN	tip.ReporteNegocioForm.btnExportarPdf	Saves the result to PDF and opens it.
+RU	tip.ReporteNegocioForm.btnExportarPdf	Сохраняет результат в PDF и открывает его.
+PT	tip.ReporteNegocioForm.btnExportarPdf	Salva o resultado em PDF e o abre.
+ES	tip.ReporteNegocioForm.btnExportarCsv	Guarda la grilla como .CSV para abrirla en una planilla de cálculo.
+EN	tip.ReporteNegocioForm.btnExportarCsv	Saves the grid as .CSV to open it in a spreadsheet.
+RU	tip.ReporteNegocioForm.btnExportarCsv	Сохраняет таблицу в формате .CSV для открытия в электронной таблице.
+PT	tip.ReporteNegocioForm.btnExportarCsv	Salva a grade como .CSV para abri-la em uma planilha.
 ES	tip.Usuarios.btnResetearClave	Genera una contraseña nueva para el usuario seleccionado y la exporta a un archivo.
 EN	tip.Usuarios.btnResetearClave	Generates a new password for the selected user and exports it to a file.
 RU	tip.Usuarios.btnResetearClave	Создаёт новый пароль для выбранного пользователя и сохраняет его в файл.
@@ -10888,3 +10888,23 @@ ES	ayuda.AcercaDeForm	Datos de la aplicación instalada (solo lectura; la ve cua
 EN	ayuda.AcercaDeForm	Information about the installed application (read-only; any signed-in user can open it).\n\n• Version: the installed program's version, read from the executable; it is the same one the installer shows.\n• Build date: date of the installed executable.\n• Server and Database: the SQL Server instance and the database the application is connected to (WardrobeFlowDB connection string).\n\nWhen asking for support, report the version and the server shown on this screen.
 RU	ayuda.AcercaDeForm	Сведения об установленном приложении (только просмотр; доступно любому пользователю, вошедшему в систему).\n\n• Версия: версия установленной программы, считанная из исполняемого файла; совпадает с версией, которую показывает установщик.\n• Дата сборки: дата установленного исполняемого файла.\n• Сервер и База данных: экземпляр SQL Server и база данных, к которым подключено приложение (строка подключения WardrobeFlowDB).\n\nОбращаясь в поддержку, сообщите версию и сервер, указанные на этом экране.
 PT	ayuda.AcercaDeForm	Dados do aplicativo instalado (somente leitura; qualquer usuário com sessão iniciada pode abri-lo).\n\n• Versão: a do programa instalado, lida do executável; é a mesma que o instalador mostra.\n• Compilação: data do executável instalado.\n• Servidor e Banco de dados: a instância do SQL Server e o banco aos quais o aplicativo está conectado (cadeia de conexão WardrobeFlowDB).\n\nAo pedir suporte, informe a versão e o servidor exibidos nesta tela.
+ES	mnu.ventana.dividir	Dividir pantalla (la activa a la izquierda)
+EN	mnu.ventana.dividir	Split screen (active window on the left)
+RU	mnu.ventana.dividir	Разделить экран (активное окно слева)
+PT	mnu.ventana.dividir	Dividir a tela (a ativa à esquerda)
+ES	mnu.ventana.quitardivision	Quitar pantalla dividida
+EN	mnu.ventana.quitardivision	Remove split screen
+RU	mnu.ventana.quitardivision	Убрать разделение экрана
+PT	mnu.ventana.quitardivision	Remover tela dividida
+ES	mnu.pestania.fijar	Fijar a la izquierda (pantalla dividida)
+EN	mnu.pestania.fijar	Pin to the left (split screen)
+RU	mnu.pestania.fijar	Закрепить слева (разделённый экран)
+PT	mnu.pestania.fijar	Fixar à esquerda (tela dividida)
+ES	mnu.pestania.cerrar	Cerrar
+EN	mnu.pestania.cerrar	Close
+RU	mnu.pestania.cerrar	Закрыть
+PT	mnu.pestania.cerrar	Fechar
+ES	mnu.pestania.cerrarotras	Cerrar las demás
+EN	mnu.pestania.cerrarotras	Close the others
+RU	mnu.pestania.cerrarotras	Закрыть остальные
+PT	mnu.pestania.cerrarotras	Fechar as demais

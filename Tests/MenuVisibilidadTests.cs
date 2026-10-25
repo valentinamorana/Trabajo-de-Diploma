@@ -40,9 +40,8 @@ namespace Tests
             Assert.IsTrue(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitNegocioToolStripMenuItem"));
             Assert.IsTrue(V(v, "reporteJornadaToolStripMenuItem"));
-            // Analítica de Negocio es una sola entrada; el Administrador ve los 6 reportes en el selector.
-            Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"));
-            CollectionAssert.AreEqual(Todos, BLL.MenuVisibilidad.ReportesVisibles(new string[0], esAdmin: true));
+            // El Administrador ve los 6 reportes de decisión, cada uno en el menú de su rol.
+            CollectionAssert.AreEqual(Todos, ReportesVisibles(v));
             Assert.IsTrue(V(v, "gestionToolStripMenuItem"));
             Assert.IsTrue(V(v, "grpUsuarios"));
             Assert.IsTrue(V(v, "grpSistema"));
@@ -105,11 +104,8 @@ namespace Tests
             Assert.IsTrue(V(v, "bitNegocioToolStripMenuItem"));
             Assert.IsTrue(V(v, "reporteJornadaToolStripMenuItem"));
 
-            // El Auditor no tiene ninguna patente de "Analítica de Negocio" (decisión
-            // comercial, no auditoría): el menú entero queda oculto, ya no comparte
-            // dropdown con Auditoría como antes de la separación.
-            Assert.IsFalse(V(v, "analiticaNegocioToolStripMenuItem"));
-            Assert.AreEqual(0, BLL.MenuVisibilidad.ReportesVisibles(new[] { "mnuAuditoria" }, esAdmin: false).Count);
+            // El Auditor no tiene ninguna patente de reporte de decisión (decisión comercial, no auditoría).
+            Assert.AreEqual(0, ReportesVisibles(v).Length);
 
             Assert.IsFalse(V(v, "suscriptoresToolStripMenuItem"));
             Assert.IsFalse(V(v, "inventarioToolStripMenuItem"));
@@ -125,11 +121,9 @@ namespace Tests
                                     "mnuRecomendacionPrendas" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
 
-            // PdN13 — patente propia de Vendedor: la usa en el momento de armar el pedido. Es el
-            // ÚNICO reporte de su selector: Abandono y Ventas por Vendedor son de GerenteComercial,
-            // Rotación/Mantenimiento/Escasez de GerenteInventario.
-            CollectionAssert.AreEqual(new[] { BE.ReporteAnalitica.RecomendacionPrendas },
-                BLL.MenuVisibilidad.ReportesVisibles(patentes, esAdmin: false));
+            // PdN13 — patente propia de Vendedor: la usa al armar el pedido (menú Ventas). Abandono y
+            // Ventas por Vendedor son de GerenteComercial; Rotación/Mantenimiento/Escasez de GerenteInventario.
+            CollectionAssert.AreEqual(new[] { BE.ReporteAnalitica.RecomendacionPrendas }, ReportesVisibles(v));
 
             Assert.IsTrue(V(v, "suscriptoresToolStripMenuItem"));
             Assert.IsTrue(V(v, "clientesToolStripMenuItem"));
@@ -144,9 +138,7 @@ namespace Tests
 
             // Vendedor NO despacha: Pedidos Realizados no aparece.
             Assert.IsFalse(V(v, "pedidosRealizadosToolStripMenuItem"));
-            // PdN13 (Recomendación de Prendas) vive dentro de "Analítica de Negocio": al tener
-            // esa patente propia, la entrada se vuelve visible aunque no tenga las otras 5.
-            Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"));
+            Assert.IsTrue(V(v, "recomendacionPrendasToolStripMenuItem"));
             // Auditoría vive en un menú aparte ahora: sin mnuAuditoria, queda oculto entero.
             Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
@@ -172,15 +164,16 @@ namespace Tests
                     BE.ReporteAnalitica.AnalisisAbandono, BE.ReporteAnalitica.VentasVendedor,
                     BE.ReporteAnalitica.RecomendacionPrendas
                 },
-                BLL.MenuVisibilidad.ReportesVisibles(patentes, esAdmin: false));
+                ReportesVisibles(v));
 
             Assert.IsTrue(V(v, "pedidosVentaToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
 
-            // Con sus patentes de reporte, la entrada "Analítica de Negocio" queda visible.
-            // Auditoría es un menú aparte (gobernado por mnuAuditoria) y sigue oculto para este rol.
-            Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"));
+            // Sus 3 reportes (Abandono, Ventas por Vendedor, Recomendación) quedan en el menú Ventas;
+            // Promociones es solo de PN03. Auditoría es un menú aparte y sigue oculto para este rol.
+            Assert.IsTrue(V(v, "analisisAbandonoToolStripMenuItem"));
+            Assert.IsFalse(V(v, "promocionesToolStripMenuItem"));
             Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitNegocioToolStripMenuItem"));
@@ -234,19 +227,18 @@ namespace Tests
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
 
             // PdN9/PdN11/PdN12 — patentes propias de GerenteInventario.
-            // Ventas por Vendedor y Abandono son decisiones de GerenteComercial: no están en su selector.
+            // Ventas por Vendedor y Abandono son decisiones de GerenteComercial: no los ve.
             CollectionAssert.AreEqual(new[]
                 {
                     BE.ReporteAnalitica.RotacionPrendas, BE.ReporteAnalitica.TiemposMantenimiento,
                     BE.ReporteAnalitica.EscasezStock
                 },
-                BLL.MenuVisibilidad.ReportesVisibles(patentes, esAdmin: false));
+                ReportesVisibles(v));
 
             Assert.IsFalse(V(v, "suscriptoresToolStripMenuItem"));
-            // PdN9/11/12 viven dentro de "Analítica de Negocio": al tener esas patentes propias,
-            // el menú se vuelve visible. Auditoría queda oculto (gobernado por mnuAuditoria, que
-            // este rol no tiene).
-            Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"));
+            // PdN9/11/12 están en el menú Inventario. Auditoría queda oculto (gobernado por
+            // mnuAuditoria, que este rol no tiene).
+            Assert.IsTrue(V(v, "analisisRotacionToolStripMenuItem"));
             Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsFalse(V(v, "reporteJornadaToolStripMenuItem"));
@@ -275,7 +267,9 @@ namespace Tests
                 "historialUsuariosToolStripMenuItem", "backupToolStripMenuItem", "integridadToolStripMenuItem",
                 "bitSistemaToolStripMenuItem", "bitNegocioToolStripMenuItem", "reporteJornadaToolStripMenuItem",
                 "suscriptoresToolStripMenuItem", "ventasToolStripMenuItem",
-                "auditoriaToolStripMenuItem", "analiticaNegocioToolStripMenuItem",
+                "auditoriaToolStripMenuItem",
+                "analisisAbandonoToolStripMenuItem", "ventasVendedorToolStripMenuItem", "analisisRotacionToolStripMenuItem",
+                "analisisMantenimientoToolStripMenuItem", "analisisEscasezToolStripMenuItem", "recomendacionPrendasToolStripMenuItem",
                 "centroDecisionesToolStripMenuItem",
                 "grpUsuarios", "grpSistema", "gestionToolStripMenuItem"
             };
@@ -322,7 +316,7 @@ namespace Tests
             Assert.IsFalse(V(v, "inventarioToolStripMenuItem"));
             Assert.IsFalse(V(v, "ventasToolStripMenuItem"));
             Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
-            Assert.IsFalse(V(v, "analiticaNegocioToolStripMenuItem"));
+            Assert.IsFalse(V(v, "promocionesToolStripMenuItem"));
             Assert.IsFalse(V(v, "gestionToolStripMenuItem"));
         }
 
@@ -333,7 +327,7 @@ namespace Tests
             Assert.IsTrue(V(v, "prendasToolStripMenuItem"));
         }
 
-        // ── Analítica de Negocio: una sola entrada + selector filtrado por patente ──────────
+        // ── Reportes de decisión: un ítem por reporte, en el menú de su rol ──────────────────
 
         private static readonly BE.ReporteAnalitica[] Todos =
         {
@@ -342,65 +336,48 @@ namespace Tests
             BE.ReporteAnalitica.EscasezStock, BE.ReporteAnalitica.RecomendacionPrendas
         };
 
+        // Reportes cuyo ítem quedó visible, en el orden de BE.ReporteAnalitica.
+        private static BE.ReporteAnalitica[] ReportesVisibles(System.Collections.Generic.Dictionary<string, bool> v) =>
+            BLL.MenuVisibilidad.PatentesReportes.Where(r => V(v, r.Item)).Select(r => r.Reporte).ToArray();
+
         [TestMethod]
-        public void AnaliticaNegocio_CadaPatenteDeReporte_HabilitaLaEntradaYSoloSuReporte()
+        public void Reportes_CadaPatenteMuestraSoloSuItemYSuMenu()
         {
-            // La entrada del menú se ve con CUALQUIERA de las 6 patentes, y el selector ofrece
-            // únicamente el reporte de esa patente (las patentes por reporte no cambian).
-            var casos = new (string Patente, BE.ReporteAnalitica Reporte)[]
+            var casos = new (string Patente, string Item, string Menu)[]
             {
-                ("mnuAnalisisAbandono",      BE.ReporteAnalitica.AnalisisAbandono),
-                ("mnuVentasVendedor",        BE.ReporteAnalitica.VentasVendedor),
-                ("mnuAnalisisRotacion",      BE.ReporteAnalitica.RotacionPrendas),
-                ("mnuAnalisisMantenimiento", BE.ReporteAnalitica.TiemposMantenimiento),
-                ("mnuAnalisisEscasez",       BE.ReporteAnalitica.EscasezStock),
-                ("mnuRecomendacionPrendas",  BE.ReporteAnalitica.RecomendacionPrendas),
+                ("mnuAnalisisAbandono",      "analisisAbandonoToolStripMenuItem",      "ventasToolStripMenuItem"),
+                ("mnuVentasVendedor",        "ventasVendedorToolStripMenuItem",        "ventasToolStripMenuItem"),
+                ("mnuAnalisisRotacion",      "analisisRotacionToolStripMenuItem",      "inventarioToolStripMenuItem"),
+                ("mnuAnalisisMantenimiento", "analisisMantenimientoToolStripMenuItem", "inventarioToolStripMenuItem"),
+                ("mnuAnalisisEscasez",       "analisisEscasezToolStripMenuItem",       "inventarioToolStripMenuItem"),
+                ("mnuRecomendacionPrendas",  "recomendacionPrendasToolStripMenuItem",  "ventasToolStripMenuItem"),
             };
 
             foreach (var c in casos)
             {
                 var v = BLL.MenuVisibilidad.Resolver(new[] { c.Patente }, esAdmin: false);
-                Assert.IsTrue(V(v, "analiticaNegocioToolStripMenuItem"), c.Patente);
-                CollectionAssert.AreEqual(new[] { c.Reporte },
-                    BLL.MenuVisibilidad.ReportesVisibles(new[] { c.Patente }, esAdmin: false), c.Patente);
+                Assert.IsTrue(V(v, c.Item), c.Patente);
+                Assert.IsTrue(V(v, c.Menu), c.Patente + " → " + c.Menu);
+                Assert.AreEqual(1, ReportesVisibles(v).Length, c.Patente);
             }
         }
 
         [TestMethod]
-        public void AnaliticaNegocio_SinPatentesDeReporte_EntradaOcultaYSelectorVacio()
+        public void Reportes_CadaUnoTieneUnItemYUnaPatente_YFiguranEnHojas()
         {
-            var patentes = new[] { "mnuPrendas", "mnuAuditoria", "mnuUsuarios" };
-            var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
-
-            Assert.IsFalse(V(v, "analiticaNegocioToolStripMenuItem"));
-            Assert.AreEqual(0, BLL.MenuVisibilidad.ReportesVisibles(patentes, esAdmin: false).Count);
-            Assert.AreEqual(0, BLL.MenuVisibilidad.ReportesVisibles(null, esAdmin: false).Count);
-        }
-
-        [TestMethod]
-        public void AnaliticaNegocio_SelectorRespetaElOrdenFijoYEsCaseInsensitive()
-        {
-            // Las patentes llegan en cualquier orden y mayúsculas: el selector sale en el orden
-            // de BE.ReporteAnalitica, sin duplicados.
-            var patentes = new[] { "MNURECOMENDACIONPRENDAS", "mnuanalisisabandono", "mnuAnalisisEscasez", "mnuAnalisisEscasez" };
-
-            CollectionAssert.AreEqual(new[]
-                {
-                    BE.ReporteAnalitica.AnalisisAbandono, BE.ReporteAnalitica.EscasezStock,
-                    BE.ReporteAnalitica.RecomendacionPrendas
-                },
-                BLL.MenuVisibilidad.ReportesVisibles(patentes, esAdmin: false));
-        }
-
-        [TestMethod]
-        public void AnaliticaNegocio_CadaReporteTieneExactamenteUnaPatente()
-        {
-            // Guarda contra un reporte nuevo en BE.ReporteAnalitica sin patente asignada (no
-            // aparecería nunca en el selector, ni siquiera para el Administrador).
-            CollectionAssert.AreEquivalent(Todos,
-                BLL.MenuVisibilidad.PatentesReportes.Select(p => p.Reporte).ToArray());
-            CollectionAssert.AllItemsAreUnique(BLL.MenuVisibilidad.PatentesReportes.Select(p => p.Permiso).ToArray());
+            // Guarda contra un reporte nuevo en BE.ReporteAnalitica sin ítem o sin patente (no
+            // aparecería nunca en el menú, ni siquiera para el Administrador).
+            CollectionAssert.AreEquivalent(Todos, BLL.MenuVisibilidad.PatentesReportes.Select(p => p.Reporte).ToArray());
             CollectionAssert.AreEquivalent(Todos, (BE.ReporteAnalitica[])System.Enum.GetValues(typeof(BE.ReporteAnalitica)));
+            CollectionAssert.AllItemsAreUnique(BLL.MenuVisibilidad.PatentesReportes.Select(p => p.Item).ToArray());
+            CollectionAssert.AllItemsAreUnique(BLL.MenuVisibilidad.PatentesReportes.Select(p => p.Permiso).ToArray());
+            foreach (var r in BLL.MenuVisibilidad.PatentesReportes)
+            {
+                Assert.IsTrue(BLL.MenuVisibilidad.Hojas.Contains((r.Item, r.Permiso)), r.Item);
+                Assert.AreEqual(r.Reporte, BLL.MenuVisibilidad.ReporteDelItem(r.Item));
+                Assert.AreEqual(r.Item, BLL.MenuVisibilidad.ItemDelReporte(r.Reporte));
+            }
+            Assert.IsNull(BLL.MenuVisibilidad.ReporteDelItem("clientesToolStripMenuItem"));
         }
     }
 }

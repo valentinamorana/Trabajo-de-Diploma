@@ -6,9 +6,9 @@ using Servicios.Multiidioma;
 namespace GUI.Analitica
 {
     /// <summary>
-    /// Un reporte de "Analítica de Negocio" tal como lo muestra AnaliticaNegocioForm. Antes cada
-    /// reporte era un formulario propio (AnalisisAbandonoForm, ReporteVentasVendedorForm, ...) con
-    /// la misma plantilla: BLL + Generar + Exportar. Ahora el formulario es uno solo y lo propio de
+    /// Un reporte de decisión tal como lo muestra ReporteNegocioForm. Antes cada reporte era un
+    /// formulario propio (AnalisisAbandonoForm, ReporteVentasVendedorForm, ...) con la misma
+    /// plantilla: BLL + Generar + Exportar. Ahora el formulario es uno solo y lo propio de
     /// cada reporte vive acá: su título, sus columnas, sus filtros (si tiene), cómo arma la grilla
     /// a partir del resultado de su BLL y qué generador de exportación usa (Factory Method de
     /// GUI.Exportacion). Las reglas siguen en la BLL de cada reporte; esto es solo presentación.

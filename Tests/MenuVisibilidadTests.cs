@@ -33,9 +33,8 @@ namespace Tests
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosVentaToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
-            // "Analítica" (antes un único dropdown de 9 ítems) se partió en dos menúes de
-            // primer nivel: Auditoría (bitácoras + reporte de jornada) y Analítica de Negocio
-            // (los 6 reportes de decisión comercial, Bloque 3 + PdN10).
+            // Auditoría (bitácoras + reporte de jornada) es un menú de primer nivel; los 6 reportes
+            // de decisión comercial (Bloque 3 + PdN10) están en Ventas e Inventario.
             Assert.IsTrue(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsTrue(V(v, "bitNegocioToolStripMenuItem"));
@@ -154,7 +153,11 @@ namespace Tests
             var patentes = new[] { "mnuPrendas", "mnuClientes", "mnuPlanSuscripciones",
                                     "mnuRenovacionSuscripcion",
                                     "mnuPedidosVenta", "mnuPedidosRealizados", "mnuAnalisisAbandono",
-                                    "mnuVentasVendedor", "mnuRecomendacionPrendas" };
+                                    "mnuVentasVendedor", "mnuRecomendacionPrendas",
+                                    // PN03: propia (sugiere promociones) y heredadas de Vendedor
+                                    // (consulta las vigentes y puede sugerir su baja), como en la BD.
+                                    "mnuSugerenciaPromocion",
+                                    "mnuPromocionesVigentes", "mnuPromocionesVigentesEditar" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
 
             // PdN10 y PdN8 — patentes propias de GerenteComercial; PdN13 heredada de Vendedor
@@ -170,10 +173,17 @@ namespace Tests
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
 
-            // Sus 3 reportes (Abandono, Ventas por Vendedor, Recomendación) quedan en el menú Ventas;
-            // Promociones es solo de PN03. Auditoría es un menú aparte y sigue oculto para este rol.
+            // Sus 3 reportes (Abandono, Ventas por Vendedor, Recomendación) quedan en el menú Ventas.
+            // Promociones (solo PN03) lo ve por el Centro de decisiones, Sugerir y las vigentes; no
+            // ve la gestión de Administración Comercial ni la de Contabilidad. Auditoría es un menú
+            // aparte y sigue oculto para este rol.
             Assert.IsTrue(V(v, "analisisAbandonoToolStripMenuItem"));
-            Assert.IsFalse(V(v, "promocionesToolStripMenuItem"));
+            Assert.IsTrue(V(v, "promocionesToolStripMenuItem"));
+            Assert.IsTrue(V(v, "centroDecisionesToolStripMenuItem"));
+            Assert.IsTrue(V(v, "sugerirPromocionToolStripMenuItem"));
+            Assert.IsTrue(V(v, "promocionesVigentesToolStripMenuItem"));
+            Assert.IsFalse(V(v, "gestionPromocionesToolStripMenuItem"));
+            Assert.IsFalse(V(v, "revisionContablePromocionesToolStripMenuItem"));
             Assert.IsFalse(V(v, "auditoriaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitSistemaToolStripMenuItem"));
             Assert.IsFalse(V(v, "bitNegocioToolStripMenuItem"));

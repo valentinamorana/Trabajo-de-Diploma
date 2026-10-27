@@ -57,11 +57,18 @@ namespace GUI
         {
             if (tabsVentanas.TabPages.Cast<TabPage>().Any(p => p.Tag == hijo)) return;
 
-            // Sin borde ni tamaños mínimos: la posición y el tamaño los decide Acomodar.
+            // Sin borde ni tamaños mínimos: la posición y el tamaño los decide Acomodar. El tamaño
+            // mínimo de diseño pasa a ser el mínimo del área desplazable: en una mitad más angosta,
+            // la pantalla muestra barras de desplazamiento en vez de encimar sus controles (los
+            // paneles acoplados se acomodan dentro de ese mínimo, no del espacio visible).
+            Size minimoCliente = hijo.MinimumSize.IsEmpty ? Size.Empty
+                : new Size(Math.Max(0, hijo.MinimumSize.Width - (hijo.Width - hijo.ClientSize.Width)),
+                           Math.Max(0, hijo.MinimumSize.Height - (hijo.Height - hijo.ClientSize.Height)));
             hijo.FormBorderStyle = FormBorderStyle.None;
             hijo.MinimumSize = Size.Empty;
             hijo.MaximumSize = Size.Empty;
-            hijo.AutoScroll = true;   // una pantalla diseñada más grande que el espacio se desplaza
+            hijo.AutoScroll = true;
+            hijo.AutoScrollMinSize = minimoCliente;
 
             var pestania = new TabPage(TituloPestania(hijo)) { Tag = hijo };
             tabsVentanas.TabPages.Add(pestania);
@@ -182,7 +189,11 @@ namespace GUI
         private void Acomodar()
         {
             if (_areaMdi == null || _acomodando) return;
-            if (_fijadaIzquierda != null && _fijadaIzquierda.IsDisposed) _fijadaIzquierda = null;
+            // Sin otra pantalla para la mitad derecha (se cerró, o «Cerrar las demás»), la división
+            // se deshace sola: si no, la fijada quedaría en la mitad izquierda con la derecha vacía.
+            if (_fijadaIzquierda != null && (_fijadaIzquierda.IsDisposed ||
+                !tabsVentanas.TabPages.Cast<TabPage>().Any(p => p.Tag is Form f && f != _fijadaIzquierda && !f.IsDisposed)))
+                _fijadaIzquierda = null;
             _acomodando = true;
             try
             {

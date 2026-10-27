@@ -285,13 +285,13 @@ namespace BLL
             ["gerentecomercial"] = new[]
             {
                 "Como Gerente Comercial, usted analiza el negocio y decide las promociones para retener clientes, además de las tareas de Ventas.",
-                "Empiece por Promociones → Centro de decisiones comerciales. Los reportes de abandono y de ventas por vendedor están en Analítica de Negocio.",
+                "Empiece por Promociones → Centro de decisiones comerciales. Los reportes de abandono y de ventas por vendedor están en Ventas → Análisis de Abandono y Ventas → Ventas por Vendedor.",
                 "El Panel de Control muestra los indicadores generales y sus tareas pendientes; haga clic en una tarea para resolverla.",
             },
             ["gerenteinventario"] = new[]
             {
                 "Como Gerente de Inventario, usted supervisa el stock, el depósito y la logística, y analiza la rotación, el mantenimiento y la escasez de prendas.",
-                "Empiece por Analítica de Negocio para los reportes de inventario. La operación diaria está en Inventario y en Ventas → Pedidos Realizados.",
+                "Empiece por Inventario: ahí están sus reportes Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock. La operación diaria está en Inventario y en Ventas → Pedidos Realizados.",
                 "El Panel de Control muestra las prendas disponibles, la ocupación del stock, los pedidos pendientes y sus tareas.",
             },
             ["administracioncomercial"] = new[]

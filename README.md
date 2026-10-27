@@ -448,7 +448,7 @@ En el primer arranque el sistema seedea automáticamente las tablas de traduccio
 
 ### Build y tests
 
-Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`, 1217 pruebas al 23/10/2026: con la base de pruebas disponible pasan 1215 y 2 se omiten a propósito porque necesitan un `.bak` real; sin la base, se omiten además las de integración). Las pruebas de integración usan una base aparte, `WardrobeFlowDB_Tests` (el mismo script con ese nombre); nunca tocan `WardrobeFlowDB`.
+Abrir `WardrobeFlow.slnx` en Visual Studio, compilar la solución (8 proyectos: BE, Seguridad, DAL, Servicios, BLL, GUI, Tests e Instalador/DbInstaller) y correr los tests desde el Explorador de pruebas (suite MSTest sobre `Tests.dll`, 1220 pruebas al 27/10/2026: con la base de pruebas disponible pasan 1218 y 2 se omiten a propósito porque necesitan un `.bak` real; sin la base, se omiten además las de integración). Las pruebas de integración usan una base aparte, `WardrobeFlowDB_Tests` (el mismo script con ese nombre); nunca tocan `WardrobeFlowDB`.
 
 Desde la línea de comandos hay que usar el MSBuild de Visual Studio (`MSBuild.exe WardrobeFlow.slnx -restore`) y `vstest.console.exe Tests\bin\Debug\Tests.dll`. `dotnet build` falla en el proyecto GUI (errores MSB3822/MSB3823 con los recursos `.resx` de un proyecto .NET Framework): es una limitación del SDK de `dotnet`, no del código.
 

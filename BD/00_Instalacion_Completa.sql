@@ -5389,6 +5389,76 @@ BEGIN
         FROM Usuario u WHERE u.IdUsuario = @uVend;
     END
 
+    -- ── 9d. Bitácora del sistema: un mes de actividad de ejemplo ──────────────────
+    -- Para que la Bitácora del Sistema y el Reporte de Jornada muestren datos desde la instalación:
+    -- ingresos y salidas de cada rol, intentos fallidos con bloqueo y desbloqueo, el cambio de email
+    -- del vendedor (el mismo de su versión en 9c), backups y los errores inesperados que la app deja
+    -- como ejemplo en su registro serializado (Servicios.Serializacion.RegistroErrores.SembrarEjemplos).
+    -- Fechas relativas a hoy, con el mismo formato de detalle que escribe Servicios.Bitacora. SOLO si
+    -- la bitácora está vacía (instalación nueva): restablecer la demo nunca toca la auditoría real.
+    -- Bitacora no lleva dígito verificador.
+    IF OBJECT_ID('Bitacora', 'U') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Bitacora)
+    BEGIN
+        INSERT INTO Bitacora (fecha, usuario, modulo, actividad, detalle, criticidad, ip)
+        SELECT f.Fecha, u.IdUsuario, v.Modulo, v.Actividad,
+               COALESCE(v.Detalle,
+                   CONCAT(N'Usuario ''', u.Username, N''' (ID: ', u.IdUsuario, N') realizó ''', v.Actividad,
+                          N''' en ''', v.Modulo, N''' [Criticidad: ',
+                          CASE v.Criticidad WHEN 0 THEN N'None' WHEN 1 THEN N'Baja' WHEN 2 THEN N'Media'
+                                            WHEN 3 THEN N'Alta' WHEN 4 THEN N'IntentosLogin'
+                                            WHEN 5 THEN N'RecuperacionClave' ELSE N'BloqueosCuenta' END,
+                          N'] desde ', v.Ip, N' a las ', CONVERT(VARCHAR(8), f.Fecha, 108), N'.')),
+               v.Criticidad, v.Ip
+        FROM (VALUES
+            (30,  540, 'admin',       N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.10', NULL),
+            (30,  548, 'admin',       N'Backup y Restauración', N'Backup cifrado generado: ''backup_manual.wfbak''', 2, N'192.168.0.10', NULL),
+            (30,  560, 'admin',       N'WardrobeFlow',          N'Cierre Sesion',                    0, N'192.168.0.10', NULL),
+            (29,  545, 'vendedor',    N'Login',                 N'Intento Fallido Login',            4, N'192.168.0.21',
+                N'Intento fallido #1/3 del usuario ''vendedor'': contraseña incorrecta.'),
+            (29,  547, 'vendedor',    N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.21', NULL),
+            (29, 1080, 'vendedor',    N'WardrobeFlow',          N'Cierre Sesion',                    0, N'192.168.0.21', NULL),
+            (26,  600, 'deposito',    N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.31', NULL),
+            (26,  612, 'deposito',    N'ControlStockForm',      N'Excepción: SqlException',          3, N'192.168.0.31',
+                N'Usuario ''deposito'' - ControlStockForm: Se agotó el tiempo de espera de la conexión con el servidor SQL al consultar el stock. | Causa: Win32Exception: Tiempo de espera de la operación agotado'),
+            (26, 1050, 'deposito',    N'WardrobeFlow',          N'Cierre Sesion',                    0, N'192.168.0.31', NULL),
+            (20,  615, 'admin',       N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.10', NULL),
+            (20,  622, 'admin',       N'Administración de Usuarios', N'Modificación de Usuario',     2, N'192.168.0.10',
+                N'Usuario ''vendedor'': Email: ''vmorana.ventas@wardrobeflow.com'' → email actual.'),
+            (18, 1115, 'admin',       N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.10', NULL),
+            (18, 1120, 'admin',       N'BackupForm',            N'Excepción: IOException',           3, N'192.168.0.10',
+                N'Usuario ''admin'' - BackupForm: No se pudo escribir el archivo de backup: no hay espacio suficiente en el disco.'),
+            (14,  530, 'logistico',   N'Login',                 N'Intento Fallido Login',            4, N'192.168.0.41',
+                N'Intento fallido #1/3 del usuario ''logistico'': contraseña incorrecta.'),
+            (14,  531, 'logistico',   N'Login',                 N'Intento Fallido Login',            4, N'192.168.0.41',
+                N'Intento fallido #2/3 del usuario ''logistico'': contraseña incorrecta.'),
+            (14,  532, 'logistico',   N'Login',                 N'Intento Fallido Login',            4, N'192.168.0.41',
+                N'Intento fallido #3/3 del usuario ''logistico'': contraseña incorrecta.'),
+            (14,  532, 'logistico',   N'Login',                 N'Bloqueo de Cuenta',                6, N'192.168.0.41',
+                N'La cuenta ''logistico'' fue bloqueada automáticamente tras 3 intentos fallidos.'),
+            (14,  560, 'admin',       N'Administración de Usuarios', N'Desbloqueo de Cuenta: ''logistico''', 3, N'192.168.0.10', NULL),
+            (14,  575, 'logistico',   N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.41', NULL),
+            (11,  660, 'vendedor',    N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.21', NULL),
+            (11,  665, 'vendedor',    N'PedidosVenta',          N'Excepción: InvalidOperationException', 3, N'192.168.0.21',
+                N'Usuario ''vendedor'' - PedidosVenta: La prenda seleccionada dejó de estar disponible mientras se armaba el pedido.'),
+            (10,  600, 'auditor',     N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.50', NULL),
+            (10,  640, 'auditor',     N'WardrobeFlow',          N'Cierre Sesion',                    0, N'192.168.0.50', NULL),
+            ( 7,  555, 'ginventario', N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.32', NULL),
+            ( 6,  565, 'gcomercial',  N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.22', NULL),
+            ( 6,  571, 'gcomercial',  N'CentroDecisionesForm',  N'Excepción: SqlException',          3, N'192.168.0.22',
+                N'Usuario ''gcomercial'' - CentroDecisionesForm: Error de red al ejecutar la consulta del análisis comercial. | Causa: Win32Exception: Se forzó la interrupción de una conexión existente por el host remoto'),
+            ( 5,  541, 'admin',       N'Backup automático',     N'Backup automático generado: ''auto_lunes.bak'' (origen: Login)', 2, N'192.168.0.10', NULL),
+            ( 3, 1202, 'admin',       N'Aplicación',            N'Excepción: UnauthorizedAccessException', 3, N'192.168.0.10',
+                N'Usuario ''admin'' - Aplicación: Acceso denegado a la ruta de la carpeta de backups.'),
+            ( 2,  600, 'caja',        N'WardrobeFlow',          N'Inicio Sesion',                    0, N'192.168.0.60', NULL),
+            ( 1,  590, 'vendedor',    N'Mi Perfil',             N'Cambio de Contrasena Propia',      2, N'192.168.0.21', NULL),
+            ( 1, 1008, 'caja',        N'ContratacionesPendientesForm', N'Excepción: FormatException', 3, N'192.168.0.60',
+                N'Usuario ''caja'' - ContratacionesPendientesForm: El importe ingresado no tiene un formato numérico válido.'),
+            ( 1, 1080, 'caja',        N'WardrobeFlow',          N'Cierre Sesion',                    0, N'192.168.0.60', NULL)
+        ) AS v(Dias, Minuto, Username, Modulo, Actividad, Criticidad, Ip, Detalle)
+        JOIN Usuario u ON u.Username = v.Username
+        CROSS APPLY (SELECT DATEADD(MINUTE, v.Minuto, CAST(CAST(DATEADD(DAY, -v.Dias, @ahora) AS DATE) AS DATETIME)) AS Fecha) f;
+    END
+
     -- ── 10. Marcas: demo aplicada y dígitos verificadores pendientes ─────────────────
     DELETE FROM ParametroSistema WHERE Clave IN (N'SeedDemo21', N'ResetDatosDemo', N'DemoCargaPendiente');
     INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada', GETDATE());

@@ -76,6 +76,34 @@ namespace Tests
         }
 
         [TestMethod]
+        public void SembrarEjemplos_PrimerUso_DejaErroresDeEstaPcYUnArchivoDeOtraPcEnXmlYJson()
+        {
+            RegistroErrores.SembrarEjemplos();
+
+            var todos = RegistroErrores.ObtenerTodos();
+            Assert.AreEqual(6, todos.Count, "Los 6 errores de ejemplo de esta PC, en los archivos mensuales.");
+            Assert.IsTrue(todos.All(e => e.Fecha < DateTime.Now && e.Equipo == Environment.MachineName));
+
+            string exportados = Path.Combine(_carpeta, "Exportados");
+            var xml = RegistroErrores.LeerArchivo(Path.Combine(exportados, "errores_PC-DEPOSITO_ejemplo.xml"));
+            var json = RegistroErrores.LeerArchivo(Path.Combine(exportados, "errores_PC-DEPOSITO_ejemplo.json"));
+            Assert.AreEqual(3, xml.Errores.Count);
+            Assert.AreEqual(3, json.Errores.Count);
+            Assert.IsTrue(json.Errores.All(e => e.Equipo == "PC-DEPOSITO"));
+        }
+
+        [TestMethod]
+        public void SembrarEjemplos_ConLaCarpetaYaCreada_NoAgregaNada()
+        {
+            Assert.IsTrue(RegistroErrores.Registrar(new InvalidOperationException("real"), "FormA", "admin"));
+
+            RegistroErrores.SembrarEjemplos();
+
+            Assert.AreEqual(1, RegistroErrores.ObtenerTodos().Count, "Con errores reales no se siembran ejemplos.");
+            Assert.IsFalse(Directory.Exists(Path.Combine(_carpeta, "Exportados")));
+        }
+
+        [TestMethod]
         public void Registrar_ArchivoDanado_LoApartaYSigueRegistrando()
         {
             Directory.CreateDirectory(_carpeta);

@@ -129,6 +129,84 @@ namespace Servicios.Serializacion
             return serializador.Formato;
         }
 
+        /// <summary>
+        /// Datos de demostración del registro de errores, igual que la demo de la base: la primera vez
+        /// que la aplicación se abre con este usuario de Windows (todavía no existe la carpeta Errores),
+        /// deja 6 errores de ejemplo en los archivos mensuales de esta PC y, en Errores\Exportados, un
+        /// archivo de errores "traído de otra PC" en XML y en JSON para probar la importación. Así la
+        /// pantalla Errores (XML/JSON) muestra datos desde la instalación. Las fechas son relativas a
+        /// hoy. Nunca lanza ni pisa nada: si la carpeta ya existe, no hace nada.
+        /// </summary>
+        public static void SembrarEjemplos()
+        {
+            try
+            {
+                if (Directory.Exists(Carpeta)) return;
+                PrepararCarpeta();
+                DateTime hoy = DateTime.Now;
+                string equipo = Environment.MachineName;
+
+                var deEstaPc = new List<BE.RegistroError>
+                {
+                    Ejemplo(hoy.AddDays(-26).Date.AddHours(10).AddMinutes(12), "deposito", "ControlStockForm",
+                        "System.Data.SqlClient.SqlException",
+                        "Se agotó el tiempo de espera de la conexión con el servidor SQL al consultar el stock.",
+                        "Win32Exception: Tiempo de espera de la operación agotado", equipo),
+                    Ejemplo(hoy.AddDays(-18).Date.AddHours(18).AddMinutes(40), "admin", "BackupForm",
+                        "System.IO.IOException",
+                        "No se pudo escribir el archivo de backup: no hay espacio suficiente en el disco.", null, equipo),
+                    Ejemplo(hoy.AddDays(-11).Date.AddHours(11).AddMinutes(5), "vendedor", "PedidosVenta",
+                        "System.InvalidOperationException",
+                        "La prenda seleccionada dejó de estar disponible mientras se armaba el pedido.", null, equipo),
+                    Ejemplo(hoy.AddDays(-6).Date.AddHours(9).AddMinutes(31), "gcomercial", "CentroDecisionesForm",
+                        "System.Data.SqlClient.SqlException",
+                        "Error de red al ejecutar la consulta del análisis comercial.",
+                        "Win32Exception: Se forzó la interrupción de una conexión existente por el host remoto", equipo),
+                    Ejemplo(hoy.AddDays(-3).Date.AddHours(20).AddMinutes(2), "admin", "Aplicación",
+                        "System.UnauthorizedAccessException",
+                        "Acceso denegado a la ruta de la carpeta de backups.", null, equipo),
+                    Ejemplo(hoy.AddDays(-1).Date.AddHours(16).AddMinutes(48), "caja", "ContratacionesPendientesForm",
+                        "System.FormatException",
+                        "El importe ingresado no tiene un formato numérico válido.", null, equipo),
+                };
+                lock (Candado)
+                {
+                    foreach (var mes in deEstaPc.GroupBy(e => new DateTime(e.Fecha.Year, e.Fecha.Month, 1)))
+                        new SerializadorXml<BE.LibroErrores>().GuardarArchivo(
+                            new BE.LibroErrores { Errores = mes.ToList() }, RutaDelMes(mes.Key));
+                }
+
+                var deOtraPc = new List<BE.RegistroError>
+                {
+                    Ejemplo(hoy.AddDays(-9).Date.AddHours(8).AddMinutes(55), "deposito", "InspeccionDevolucionForm",
+                        "System.Data.SqlClient.SqlException",
+                        "No se pudo registrar la inspección: la conexión con la base se cerró.",
+                        "Win32Exception: El nombre de red especificado ya no está disponible", "PC-DEPOSITO"),
+                    Ejemplo(hoy.AddDays(-4).Date.AddHours(15).AddMinutes(20), "logistico", "PedidosRealizados",
+                        "System.TimeoutException",
+                        "La operación de despacho excedió el tiempo de espera.", null, "PC-DEPOSITO"),
+                    Ejemplo(hoy.AddDays(-2).Date.AddHours(12).AddMinutes(7), "deposito", "ControlStockForm",
+                        "System.IO.IOException",
+                        "No se pudo abrir el PDF del informe de faltantes: el archivo está en uso.", null, "PC-DEPOSITO"),
+                };
+                string exportados = PrepararCarpetaExportados();
+                Exportar(deOtraPc, Path.Combine(exportados, "errores_PC-DEPOSITO_ejemplo.xml"));
+                Exportar(deOtraPc, Path.Combine(exportados, "errores_PC-DEPOSITO_ejemplo.json"));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("[Servicios.RegistroErrores] No se pudieron crear los ejemplos: " + ex.Message);
+            }
+        }
+
+        private static BE.RegistroError Ejemplo(DateTime fecha, string usuario, string modulo, string tipo,
+                                                string mensaje, string causa, string equipo) =>
+            new BE.RegistroError
+            {
+                Fecha = fecha, Usuario = usuario, Modulo = modulo, Tipo = tipo,
+                Mensaje = mensaje, Causa = causa, Equipo = equipo
+            };
+
         // Un archivo dañado (o de un formato desconocido) no impide registrar los errores nuevos: se
         // aparta y se empieza otro. Por las dudas, un registro nulo se descarta (XmlSerializer no los
         // produce, pero la lista no debe llegar con nulos a la pantalla).

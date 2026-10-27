@@ -9976,10 +9976,10 @@ ES	ux.guia.gerentecomercial.1	Como Gerente Comercial, usted analiza el negocio y
 EN	ux.guia.gerentecomercial.1	As Sales Manager, you analyse the business and decide on promotions to retain customers, in addition to the Sales tasks.
 RU	ux.guia.gerentecomercial.1	Как коммерческий директор, вы анализируете бизнес и принимаете решения об акциях для удержания клиентов, а также выполняете задачи продаж.
 PT	ux.guia.gerentecomercial.1	Como Gerente Comercial, você analisa o negócio e decide as promoções para reter clientes, além das tarefas de Vendas.
-ES	ux.guia.gerentecomercial.2	Empiece por Promociones → Centro de decisiones comerciales. Los reportes de abandono y de ventas por vendedor están en Analítica de Negocio.
-EN	ux.guia.gerentecomercial.2	Start with Promotions → Commercial decision center. The churn and sales-by-salesperson reports are in Business Analytics.
-RU	ux.guia.gerentecomercial.2	Начните с Акции → Центр коммерческих решений. Отчёты об оттоке и о продажах по продавцам находятся в разделе Бизнес-аналитика.
-PT	ux.guia.gerentecomercial.2	Comece por Promoções → Central de decisões comerciais. Os relatórios de abandono e de vendas por vendedor estão em Análise de Negócio.
+ES	ux.guia.gerentecomercial.2	Empiece por Promociones → Centro de decisiones comerciales. Los reportes de abandono y de ventas por vendedor están en Ventas → Análisis de Abandono y Ventas → Ventas por Vendedor.
+EN	ux.guia.gerentecomercial.2	Start with Promotions → Commercial decision center. The churn and sales-by-salesperson reports are in Sales → Churn Analysis and Sales → Sales by Salesperson.
+RU	ux.guia.gerentecomercial.2	Начните с Акции → Центр коммерческих решений. Отчёты об оттоке и о продажах по продавцам находятся в Продажи → Анализ оттока и Продажи → Продажи по продавцам.
+PT	ux.guia.gerentecomercial.2	Comece por Promoções → Central de decisões comerciais. Os relatórios de abandono e de vendas por vendedor estão em Vendas → Análise de Abandono e Vendas → Vendas por Vendedor.
 ES	ux.guia.gerentecomercial.3	El Panel de Control muestra los indicadores generales y sus tareas pendientes; haga clic en una tarea para resolverla.
 EN	ux.guia.gerentecomercial.3	The Dashboard shows the general indicators and your pending tasks; click a task to resolve it.
 RU	ux.guia.gerentecomercial.3	Панель управления показывает общие показатели и ваши текущие задачи; щёлкните задачу, чтобы перейти к её выполнению.
@@ -9988,10 +9988,10 @@ ES	ux.guia.gerenteinventario.1	Como Gerente de Inventario, usted supervisa el st
 EN	ux.guia.gerenteinventario.1	As Inventory Manager, you oversee stock, the warehouse and logistics, and analyse garment rotation, maintenance and shortages.
 RU	ux.guia.gerenteinventario.1	Как менеджер по запасам, вы контролируете запасы, склад и логистику и анализируете оборачиваемость, обслуживание и дефицит вещей.
 PT	ux.guia.gerenteinventario.1	Como Gerente de Estoque, você supervisiona o estoque, o depósito e a logística, e analisa a rotação, a manutenção e a escassez de roupas.
-ES	ux.guia.gerenteinventario.2	Empiece por Analítica de Negocio para los reportes de inventario. La operación diaria está en Inventario y en Ventas → Pedidos Realizados.
-EN	ux.guia.gerenteinventario.2	Start with Business Analytics for the inventory reports. Day-to-day work is in Inventory and in Sales → Fulfilled Orders.
-RU	ux.guia.gerenteinventario.2	Начните с раздела Бизнес-аналитика — там отчёты по запасам. Повседневная работа — в разделах Склад и Продажи → Выполненные заказы.
-PT	ux.guia.gerenteinventario.2	Comece por Análise de Negócio para os relatórios de estoque. A operação diária está em Estoque e em Vendas → Pedidos Realizados.
+ES	ux.guia.gerenteinventario.2	Empiece por Inventario: ahí están sus reportes Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock. La operación diaria está en Inventario y en Ventas → Pedidos Realizados.
+EN	ux.guia.gerenteinventario.2	Start with Inventory: your Garment Turnover, Maintenance Times and Stock Shortage reports are there. Day-to-day work is in Inventory and in Sales → Fulfilled Orders.
+RU	ux.guia.gerenteinventario.2	Начните с раздела Склад: там ваши отчёты Оборот одежды, Сроки обслуживания и Дефицит запасов. Повседневная работа — в разделах Склад и Продажи → Выполненные заказы.
+PT	ux.guia.gerenteinventario.2	Comece por Estoque: lá estão os seus relatórios Rotatividade de Peças, Tempos de Manutenção e Escassez de Estoque. A operação diária está em Estoque e em Vendas → Pedidos Realizados.
 ES	ux.guia.gerenteinventario.3	El Panel de Control muestra las prendas disponibles, la ocupación del stock, los pedidos pendientes y sus tareas.
 EN	ux.guia.gerenteinventario.3	The Dashboard shows available garments, stock occupancy, pending orders and your tasks.
 RU	ux.guia.gerenteinventario.3	Панель управления показывает доступные вещи, загрузку запасов, заказы в ожидании и ваши задачи.

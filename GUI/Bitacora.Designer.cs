@@ -604,7 +604,9 @@ namespace GUI
             this.ClientSize = new System.Drawing.Size(1020, 696);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.panelTop);
-            this.MinimumSize = new System.Drawing.Size(860, 580);
+            // Ancho mínimo: el botón Exportar (anclado a la derecha) no se encima con el último filtro
+            // (Id cliente termina en x=792 y el botón mide 130). Más angosta, la pantalla se desplaza.
+            this.MinimumSize = new System.Drawing.Size(976, 580);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F);   // escala tipográfica de Tema (antes: Microsoft Sans Serif por defecto)
             this.Name = "Bitacora";
             this.Tag = "frm.bitacora";

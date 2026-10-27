@@ -230,7 +230,7 @@ namespace GUI
         /// <summary>
         /// Rediseño visual del menú: renderer propio (GUI.Estilos.MenuRenderer) que pinta
         /// cada ítem de primer nivel como un "chip" redondeado con color por área funcional
-        /// (Suscriptores/Inventario/Ventas/Auditoría/Analítica de Negocio/Administrar), con
+        /// (Suscriptores/Inventario/Ventas/Promociones/Auditoría/Administrar), con
         /// margen entre ellos para que se lean como botones separados sobre la barra rosa,
         /// y separadores en puntos en vez de líneas. Pura presentación (colores/Margin) —
         /// ninguna decisión de negocio vive acá.

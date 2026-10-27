@@ -33,8 +33,8 @@ namespace BE
         // Vendedor, informa faltantes o confirma y separa las prendas.
         public const string ControlStock          = "mnuControlStock";
 
-        // Analítica de Negocio (Bloque 3 + PdN10) — un solo formulario con selector; cada
-        // reporte conserva su patente propia (BLL.MenuVisibilidad.PatentesReportes).
+        // Reportes de decisión (Bloque 3 + PdN10) — cada uno tiene su ítem en el menú de su rol
+        // (Ventas o Inventario) y su patente propia (BLL.MenuVisibilidad.PatentesReportes).
         public const string AnalisisAbandono      = "mnuAnalisisAbandono";
         public const string VentasVendedor        = "mnuVentasVendedor";
         public const string AnalisisRotacion      = "mnuAnalisisRotacion";

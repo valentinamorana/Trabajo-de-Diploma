@@ -6605,6 +6605,56 @@ GO
 PRINT 'Sección 21z14: textos del ciclo del informe, de las metas y del historial verificados.';
 GO
 -- ============================================================
+-- WardrobeFlow — 21z15. GUÍA DE PRIMER USO: REPORTES EN EL MENÚ DE CADA ROL
+-- ------------------------------------------------------------
+-- · ux.guia.gerentecomercial.2 / ux.guia.gerenteinventario.2: el menú «Analítica de Negocio» ya no
+--   existe (los reportes están en Ventas e Inventario, cada uno en el menú de su rol); la guía de
+--   primer uso nombra los ítems reales.
+-- Las claves ya existen en una base instalada: se actualizan SOLO si siguen con el texto de fábrica
+-- anterior (una edición hecha en Idiomas se respeta). Idempotente.
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @Textos21z15 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                                TextoAnterior NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @Textos21z15 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ux.guia.gerentecomercial.2',
+        N'Empiece por Promociones → Centro de decisiones comerciales. Los reportes de abandono y de ventas por vendedor están en Analítica de Negocio.',
+        N'Empiece por Promociones → Centro de decisiones comerciales. Los reportes de abandono y de ventas por vendedor están en Ventas → Análisis de Abandono y Ventas → Ventas por Vendedor.'),
+    (N'EN', N'ux.guia.gerentecomercial.2',
+        N'Start with Promotions → Commercial decision center. The churn and sales-by-salesperson reports are in Business Analytics.',
+        N'Start with Promotions → Commercial decision center. The churn and sales-by-salesperson reports are in Sales → Churn Analysis and Sales → Sales by Salesperson.'),
+    (N'RU', N'ux.guia.gerentecomercial.2',
+        N'Начните с Акции → Центр коммерческих решений. Отчёты об оттоке и о продажах по продавцам находятся в разделе Бизнес-аналитика.',
+        N'Начните с Акции → Центр коммерческих решений. Отчёты об оттоке и о продажах по продавцам находятся в Продажи → Анализ оттока и Продажи → Продажи по продавцам.'),
+    (N'PT', N'ux.guia.gerentecomercial.2',
+        N'Comece por Promoções → Central de decisões comerciais. Os relatórios de abandono e de vendas por vendedor estão em Análise de Negócio.',
+        N'Comece por Promoções → Central de decisões comerciais. Os relatórios de abandono e de vendas por vendedor estão em Vendas → Análise de Abandono e Vendas → Vendas por Vendedor.'),
+    (N'ES', N'ux.guia.gerenteinventario.2',
+        N'Empiece por Analítica de Negocio para los reportes de inventario. La operación diaria está en Inventario y en Ventas → Pedidos Realizados.',
+        N'Empiece por Inventario: ahí están sus reportes Rotación de Prendas, Tiempos de Mantenimiento y Escasez de Stock. La operación diaria está en Inventario y en Ventas → Pedidos Realizados.'),
+    (N'EN', N'ux.guia.gerenteinventario.2',
+        N'Start with Business Analytics for the inventory reports. Day-to-day work is in Inventory and in Sales → Fulfilled Orders.',
+        N'Start with Inventory: your Garment Turnover, Maintenance Times and Stock Shortage reports are there. Day-to-day work is in Inventory and in Sales → Fulfilled Orders.'),
+    (N'RU', N'ux.guia.gerenteinventario.2',
+        N'Начните с раздела Бизнес-аналитика — там отчёты по запасам. Повседневная работа — в разделах Склад и Продажи → Выполненные заказы.',
+        N'Начните с раздела Склад: там ваши отчёты Оборот одежды, Сроки обслуживания и Дефицит запасов. Повседневная работа — в разделах Склад и Продажи → Выполненные заказы.'),
+    (N'PT', N'ux.guia.gerenteinventario.2',
+        N'Comece por Análise de Negócio para os relatórios de estoque. A operação diária está em Estoque e em Vendas → Pedidos Realizados.',
+        N'Comece por Estoque: lá estão os seus relatórios Rotatividade de Peças, Tempos de Manutenção e Escassez de Estoque. A operação diária está em Estoque e em Vendas → Pedidos Realizados.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @Textos21z15 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Guía de primer uso (reportes en el menú de cada rol): ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z15: textos de la guía de primer uso verificados.';
+GO
+-- ============================================================
 -- WardrobeFlow — 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA
 -- ------------------------------------------------------------
 -- Formato 2 de los dígitos verificadores (DAL.DigitoVerificador.FormatoActual = 2):

@@ -10,7 +10,7 @@ namespace GUI
     /// <summary>
     /// Un reporte de decisión (Bloque 3 + PdN10) en su propia pantalla: Análisis de Abandono, Ventas
     /// por Vendedor, Rotación de Prendas, Tiempos de Mantenimiento, Escasez de Stock o Recomendación de
-    /// Prendas. Cada uno tiene su ítem en el menú de su rol (Promociones, Inventario o Ventas) y su
+    /// Prendas. Cada uno tiene su ítem en el menú de su rol (Inventario o Ventas) y su
     /// patente (BLL.MenuVisibilidad.Hojas); antes convivían en «Analítica de Negocio» con un selector.
     /// Lo propio de cada reporte (filtros, columnas, generador de exportación) vive en GUI.Analitica;
     /// cada uno exporta a PDF (se guarda y se abre con el visor) o CSV con su propio Factory Method de

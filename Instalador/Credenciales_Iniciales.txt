@@ -122,7 +122,9 @@ relativas al día en que se cargó (o restableció) la demo.
                                                      PedidoDespachado (para entregar), entregados
   Historial de Cambios (pedidos)       auditor       ~40 pedidos con su historial completo
   Bitácora de Negocio / del Sistema    auditor       ~400 eventos de negocio de 6 meses; en la
-                                                     del sistema, inicios de sesión, backups y la
+                                                     del sistema, un mes de actividad de ejemplo
+                                                     (ingresos de cada rol, bloqueo y desbloqueo
+                                                     de "logistico", backups, errores) y la
                                                      inicialización de los dígitos verificadores
   Reporte de Jornada                   auditor       eventos por día (bitácora de negocio)
   Backup y Restauración                admin         backups, backup automático, "Restablecer
@@ -134,6 +136,11 @@ relativas al día en que se cargó (o restableció) la demo.
   serialización a XML/JSON                           (email anterior y actual). Exportar
                                                      versiones…, Importar versiones… y
                                                      restaurar la versión importada
+  Errores serializados (XML/JSON)      auditor       Bitácora del Sistema > "Errores (XML/JSON)":
+                                                     6 errores de ejemplo de esta PC. Importar
+                                                     XML/JSON… > errores_PC-DEPOSITO_ejemplo
+                                                     (.xml o .json): 3 errores "de otra PC".
+                                                     Exportar XML/JSON… guarda la lista
 
 Datos de prueba incluidos
 -------------------------

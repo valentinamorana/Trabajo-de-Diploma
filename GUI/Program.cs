@@ -72,6 +72,10 @@ namespace GUI
             }
             else
             {
+                // Primer uso con este usuario de Windows: errores de ejemplo para la pantalla de
+                // errores serializados (A02), como los datos de demo de la base. No pisa nada.
+                Servicios.Serializacion.RegistroErrores.SembrarEjemplos();
+
                 // Primer arranque de una instalación nueva: admin de respaldo y claves de emergencia.
                 // Se siembran UNA sola vez en la vida de la base (marca persistente), quedan en la
                 // bitácora y el archivo con las credenciales solo lo puede leer el usuario actual.

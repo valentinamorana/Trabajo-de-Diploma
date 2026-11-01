@@ -9,10 +9,10 @@ namespace Servicios.Multiidioma
     /// por BLL.Idioma). Cuando hay cache de BD, ObtenerTraducciones usa esa capa.
     ///
     /// CORPUS / FALLBACK: el conjunto completo de traducciones vive en un RECURSO EMBEBIDO de datos
-    /// (Multiidioma/traducciones.tsv — formato idioma\tclave\ttexto), NO en diccionarios hardcodeados
+    /// (Multiidioma/traducciones.tsv: formato idioma\tclave\ttexto), NO en diccionarios hardcodeados
     /// en código. Se usa para (a) el auto-seed inicial de la BD y (b) el fallback offline en los 4
     /// idiomas. No se usan hojas .resx. Para agregar/editar textos: el .tsv (o, ya seedeada, la BD
-    /// vía el módulo Idiomas) — sin recompilar el resto del sistema.
+    /// vía el módulo Idiomas): sin recompilar el resto del sistema.
     ///
     /// Idiomas soportados: Español (ES), English (EN), Русский (RU), Português (PT).
     ///
@@ -30,7 +30,7 @@ namespace Servicios.Multiidioma
     ///   lnk.olvide          → link "¿Olvidaste su contraseña?"
     ///   mnu.inventario      → menú "Inventario"
     ///   mnu.prendas         → ítem "Prendas"
-    ///   mnu.suscriptores    → menú "Suscriptores" (Clientes/Planes/Renovación — separado de Ventas)
+    ///   mnu.suscriptores    → menú "Suscriptores" (Clientes/Planes/Renovación: separado de Ventas)
     ///   mnu.ventas          → menú "Ventas" (Pedidos de Venta/Realizados)
     ///   mnu.clientes        → ítem "Clientes"
     ///   mnu.planes          → ítem "Planes de Suscripción"
@@ -55,7 +55,7 @@ namespace Servicios.Multiidioma
             return ObtenerIdiomasHardcode();
         }
 
-        /// <summary>Lista de idiomas hardcodeada — usada como fallback y durante el seeding inicial.</summary>
+        /// <summary>Lista de idiomas hardcodeada: usada como fallback y durante el seeding inicial.</summary>
         public static IList<Idioma> ObtenerIdiomasHardcode()
         {
             return new List<Idioma>
@@ -98,7 +98,7 @@ namespace Servicios.Multiidioma
             var cache = GestorIdioma.TradActuales;
             if (cache != null && cache.Count > 0)
             {
-                // T05 — FALLBACK por-clave: si el idioma activo no tiene cargada una
+                // T05: FALLBACK por-clave: si el idioma activo no tiene cargada una
                 // traducción, se usa el texto por defecto (idioma default, completo)
                 // en lugar de dejar el control sin traducir. Esto permite activar un
                 // idioma incompleto sin que la UI quede con textos faltantes/stale.
@@ -122,7 +122,7 @@ namespace Servicios.Multiidioma
         /// <summary>
         /// Resuelve una clave de traducción con argumentos para string.Format, con fallback si la
         /// clave no está en el corpus. ÚNICA implementación de este patrón (antes triplicada entre
-        /// FormBase.MostrarError, RenovacionSuscripcionForm.T y CobroSuscripcionForm.T) — el fallback
+        /// FormBase.MostrarError, RenovacionSuscripcionForm.T y CobroSuscripcionForm.T): el fallback
         /// también se formatea con los mismos argumentos, así una clave faltante en el corpus no deja
         /// placeholders "{0}" sin resolver en pantalla cuando el fallback es una plantilla sin sustituir.
         /// </summary>
@@ -136,7 +136,7 @@ namespace Servicios.Multiidioma
 
         /// <summary>Sobrecarga de conveniencia: resuelve las traducciones del idioma en un solo paso.
         /// Para resolver varias claves seguidas (ej. un resumen con 3 sub-textos), preferir obtener el
-        /// diccionario una sola vez con ObtenerTraducciones() y llamar a la sobrecarga que lo recibe —
+        /// diccionario una sola vez con ObtenerTraducciones() y llamar a la sobrecarga que lo recibe:
         /// evita reconstruir el diccionario mergeado (BD + corpus embebido) en cada sub-resolución.</summary>
         public static string Resolver(string clave, string fallback, object[] args, Idioma idioma)
             => Resolver(clave, fallback, args, ObtenerTraducciones(idioma));
@@ -155,7 +155,7 @@ namespace Servicios.Multiidioma
         }
 
         // Asigna el módulo/formulario a cada clave de traducción según su prefijo.
-        // Vive aquí (Servicios) porque es metadata de las claves — no lógica de negocio.
+        // Vive aquí (Servicios) porque es metadata de las claves: no lógica de negocio.
         public static string InferirFormulario(string clave)
         {
             if (clave.StartsWith("mnu.")) return "Menu";

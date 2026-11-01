@@ -9,7 +9,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Módulo de Pedidos Realizados (Deposito).
+    /// Capa de Presentación: Módulo de Pedidos Realizados (Deposito).
     ///
     /// Permite al Deposito gestionar el ciclo de vida post-venta:
     ///   Ver todos los pedidos con su estado actual
@@ -41,14 +41,14 @@ namespace GUI
         private List<BE.Prenda> _prendasDetalleActual = new List<BE.Prenda>();
         private BE.Pedido _pedidoDetalleActual;
 
-        // Idioma activo — se actualiza en UpdateLanguage para poder usarlo
+        // Idioma activo: se actualiza en UpdateLanguage para poder usarlo
         // en los helpers EstadoLabel() y ComputarUrgencia() que no reciben parámetro.
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
         public PedidosRealizados()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvPedidos);
             Estilos.EstiloFormulario.Grilla(dgvDetalle);
         }
@@ -209,8 +209,8 @@ namespace GUI
                     p.NombreEmpleado,
                     p.CantidadPrendas,
                     EstadoTexto(p),
-                    p.FechaDespacho?.ToString("d") ?? "—",
-                    p.FechaEntrega?.ToString("d")  ?? "—",
+                    p.FechaDespacho?.ToString("d") ?? "-",
+                    p.FechaEntrega?.ToString("d")  ?? "-",
                     (int)p.Estado,
                     (int)pedidoBLL.CalcularNivelUrgencia(p),
                     BLL.Politicas.PoliticaCompraTacita.EstaAtrasado(p, DateTime.Today));
@@ -246,7 +246,7 @@ namespace GUI
         private string ComputarUrgencia(BE.Pedido p)
         {
             var nivel = pedidoBLL.CalcularNivelUrgencia(p);
-            if (nivel == BE.NivelUrgencia.NoAplica) return "—";
+            if (nivel == BE.NivelUrgencia.NoAplica) return "-";
 
             var t      = Traductor.ObtenerTraducciones(_idioma);
             string urg = t.ContainsKey("urg.urgente")  ? t["urg.urgente"].Texto  : "Urgente";
@@ -258,7 +258,7 @@ namespace GUI
                 case BE.NivelUrgencia.Urgente:  return urg;
                 case BE.NivelUrgencia.Normal:   return nor;
                 case BE.NivelUrgencia.Reciente: return rec;
-                default:                        return "—";
+                default:                        return "-";
             }
         }
 
@@ -365,13 +365,13 @@ namespace GUI
                     tabla.Rows.Add(
                         p.IdPrenda,
                         p.Nombre,
-                        p.Categoria ?? "—",
-                        p.Talle     ?? "—",
-                        p.Color     ?? "—",
+                        p.Categoria ?? "-",
+                        p.Talle     ?? "-",
+                        p.Color     ?? "-",
                         EstadoPrendaLabel(p.Estado));
 
                 dgvDetalle.DataSource = tabla;
-                // Columna técnica, no se muestra — ObtenerPrendaDetalleSeleccionada() la usa
+                // Columna técnica, no se muestra: ObtenerPrendaDetalleSeleccionada() la usa
                 // para resolver la fila seleccionada aunque el usuario ordene la grilla por
                 // columna (el orden de _prendasDetalleActual no se toca).
                 if (dgvDetalle.Columns.Contains("IdPrenda"))
@@ -435,7 +435,7 @@ namespace GUI
 
             // Releer el estado ACTUAL desde BD antes de actuar: `seleccionado` viene de la grilla
             // cacheada en memoria, que puede estar desactualizada si otro operador ya cambió este
-            // pedido — mismo criterio que ya usa BtnDevolucion_Click acá abajo.
+            // pedido: mismo criterio que ya usa BtnDevolucion_Click acá abajo.
             BE.Pedido pedido;
             try { pedido = pedidoBLL.ObtenerPorId(seleccionado.IdPedido); }
             catch (Exception ex) { MostrarError(ex); return; }
@@ -525,14 +525,14 @@ namespace GUI
             try
             {
                 // Patrón Command (PdN3): la GUI arma el pedido de devolución y se lo entrega
-                // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
+                // al invocador: no decide nada, solo empaqueta la petición. La decisión y la
                 // ejecución real siguen 100% en BLL.Pedido.RegistrarDevolucion, adentro del Command.
                 var devolucion = new BLL.Comandos.DevolucionCommand(pedidoBLL, pedidoCompleto, this.Text);
                 _invocador.TomarOrden(devolucion);
                 _invocador.ProcesarOrdenes();
 
                 // Las que volvieron de verdad: las reportadas como perdidas ya están de baja y no cuentan.
-                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada — {0} prenda(s) pasan a En limpieza."), devolucion.PrendasDevueltas));
+                MostrarOk(string.Format(Tr("msg.ped.devolucion", "Devolución registrada: {0} prenda(s) pasan a En limpieza."), devolucion.PrendasDevueltas));
                 CargarPedidos();
             }
             catch (Exception ex) { MostrarError(ex); }
@@ -558,7 +558,7 @@ namespace GUI
                     inspeccionBLL.ReportarPerdida(this.Text, prenda, dlg.Motivo, dlg.Monto);
                     var tPerd = Traductor.ObtenerTraducciones(_idioma);
                     MostrarOk(string.Format(
-                        tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida — cargo de {1:C2} registrado.",
+                        tPerd.ContainsKey("msg.ped.perdida_ok") ? tPerd["msg.ped.perdida_ok"].Texto : "'{0}' reportada como perdida. Se registró un cargo de {1:C2}.",
                         prenda.Nombre, dlg.Monto));
                     var pedidoSel = ObtenerPedidoSeleccionado();
                     if (pedidoSel != null) CargarDetallePrendas(pedidoSel);
@@ -593,11 +593,11 @@ namespace GUI
                 $"{notifCliente,-12}{completo.NombreCliente}\n" +
                 $"{notifEstado,-12}{EstadoLabel(completo.Estado)}\n" +
                 $"{notifFecha,-12}{completo.FechaPedido:g}\n" +
-                $"{notifDespacho,-12}{(completo.FechaDespacho.HasValue ? completo.FechaDespacho.Value.ToString("d") : "—")}\n" +
-                $"{notifEntrega,-12}{(completo.FechaEntrega.HasValue  ? completo.FechaEntrega.Value.ToString("d")  : "—")}\n" +
+                $"{notifDespacho,-12}{(completo.FechaDespacho.HasValue ? completo.FechaDespacho.Value.ToString("d") : "-")}\n" +
+                $"{notifEntrega,-12}{(completo.FechaEntrega.HasValue  ? completo.FechaEntrega.Value.ToString("d")  : "-")}\n" +
                 $"{notifPrendas,-12}{completo.CantidadPrendas}\n";
 
-            string tituloMsgBox = string.Format(Tr("notif.msgbox.titulo", "Notificación — Pedido #{0}"), completo.IdPedido);
+            string tituloMsgBox = string.Format(Tr("notif.msgbox.titulo", "Notificación: Pedido #{0}"), completo.IdPedido);
             MessageBox.Show(texto, tituloMsgBox,
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -630,8 +630,8 @@ namespace GUI
         private string EstadoLabel(BE.EstadoPedido estado) => EstadosPedido.Etiqueta(estado);
 
         /// <summary>
-        /// PN04 — texto del estado con el detalle de la devolución: un Entregado se muestra como
-        /// "Entregado (devuelto el dd/mm)" o "Entregado — en poder del cliente (N días)". El estado
+        /// PN04: texto del estado con el detalle de la devolución: un Entregado se muestra como
+        /// "Entregado (devuelto el dd/mm)" o "Entregado: en poder del cliente (N días)". El estado
         /// del pedido no cambia (sigue Entregado); lo distingue Pedido.FechaDevolucion.
         /// </summary>
         private string EstadoTexto(BE.Pedido p)
@@ -646,7 +646,7 @@ namespace GUI
                               new object[] { p.FechaDevolucion.Value });
                 int? dias = p.DiasEnPoderDelCliente(DateTime.Today);
                 if (dias.HasValue)
-                    return Tr("est.entregado.enpoder", "Entregado — en poder del cliente ({0} días)",
+                    return Tr("est.entregado.enpoder", "Entregado, en poder del cliente ({0} días)",
                               new object[] { dias.Value });
             }
             return EstadoLabel(p.Estado);

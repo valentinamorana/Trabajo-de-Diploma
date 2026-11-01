@@ -8,7 +8,7 @@ namespace BLL.Manejadores
 
         public BE.EstadoRenovacion Estado { get; set; }
 
-        /// <summary>Mensaje ya formateado en español — fallback si Clave no está en el corpus.</summary>
+        /// <summary>Mensaje ya formateado en español: fallback si Clave no está en el corpus.</summary>
         public string Mensaje { get; set; }
 
         /// <summary>Clave de traducción (Servicios.Multiidioma) para mostrar el mensaje en el idioma activo.</summary>

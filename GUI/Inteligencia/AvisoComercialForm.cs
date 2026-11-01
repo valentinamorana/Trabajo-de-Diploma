@@ -7,7 +7,7 @@ using static GUI.Inteligencia.TextosComerciales;
 namespace GUI.Inteligencia
 {
     /// <summary>
-    /// PN03 — Aviso no modal al iniciar sesión (Gerencia): cuántas recomendaciones de prioridad alta hay,
+    /// PN03: Aviso no modal al iniciar sesión (Gerencia): cuántas recomendaciones de prioridad alta hay,
     /// cuántas decisiones pospuestas llegaron a su fecha y cuántas metas del mes están en riesgo, con un botón
     /// que abre el Centro de decisiones. "No mostrar hoy" lo recuerda por usuario (BLL.AvisosComerciales).
     /// Se muestra con Show (no ShowDialog): no frena el menú ni ningún otro flujo.
@@ -74,7 +74,7 @@ namespace GUI.Inteligencia
 
         private void BtnCerrar_Click(object sender, EventArgs e) => Close();
 
-        // D02 — F1 abre la ayuda del aviso (no hereda de FormBase: es una ventana liviana y no modal).
+        // D02: F1 abre la ayuda del aviso (no hereda de FormBase: es una ventana liviana y no modal).
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.F1)

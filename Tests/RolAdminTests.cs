@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// #3 de la auditoría — la identidad de Administrador se resuelve en UN solo lugar
+    /// #3 de la auditoría: la identidad de Administrador se resuelve en UN solo lugar
     /// (BE.Usuario.EsAdministrador / BE.Roles.EsAdministrador), no con string.Equals disperso.
     /// Reglas: case-insensitive, null-safe, y considera tanto Perfil como Rol.
     /// </summary>

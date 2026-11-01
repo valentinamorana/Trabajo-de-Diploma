@@ -3,7 +3,7 @@ using Tests.Fakes;
 
 namespace Tests
 {
-    /// <summary>BLL.ReporteVentasVendedor (PdN8) — desempeño de pedidos por vendedor.</summary>
+    /// <summary>BLL.ReporteVentasVendedor (PdN8): desempeño de pedidos por vendedor.</summary>
     [TestClass]
     public class ReporteVentasVendedorTests
     {

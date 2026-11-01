@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// PN01 — Resultado de la decisión "¿Selección disponible?" de la planilla de control de
+    /// PN01: Resultado de la decisión "¿Selección disponible?" de la planilla de control de
     /// stock y de qué acciones del diagrama de actividad quedan habilitadas para Depósito.
     /// Lo calcula BLL.EvaluacionControlStock; la GUI solo lo aplica a sus botones.
     /// </summary>

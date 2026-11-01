@@ -1,9 +1,9 @@
 namespace BE
 {
     /// <summary>
-    /// PN03 — Umbral configurable del motor de recomendaciones (se guarda en ParametroSistema con la
+    /// PN03: Umbral configurable del motor de recomendaciones (se guarda en ParametroSistema con la
     /// clave "Comercial.&lt;Clave&gt;"). Lleva su rango válido y la explicación que muestra el diálogo
-    /// "Umbrales" (clave de traducción "umbral.&lt;clave&gt;.ayuda").
+    /// "Parámetros del análisis" (clave de traducción "umbral.&lt;clave&gt;.ayuda").
     /// </summary>
     public class UmbralComercial
     {

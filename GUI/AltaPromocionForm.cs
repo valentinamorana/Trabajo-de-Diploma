@@ -6,7 +6,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN03, carril Administración: "Crear promoción" (desde una
+    /// Capa de Presentación: PN03, carril Administración: "Crear promoción" (desde una
     /// sugerencia de Gerencia o manual) y "Reformular" una promoción rechazada por Contabilidad.
     /// La actividad "Validar" y el paso a EnRevisionContable son de BLL.Promocion.
     /// </summary>
@@ -104,7 +104,7 @@ namespace GUI
                 if (_reformular != null)
                 {
                     lblSugerencia.Text = Tr("promo.reformular", "Reformulando la promoción #{0}. Observación de Contabilidad: {1}",
-                        new object[] { _reformular.IdPromocion, _reformular.Observacion ?? "—" });
+                        new object[] { _reformular.IdPromocion, _reformular.Observacion ?? "-" });
                     SeleccionarPlan(_reformular.IdPlan, _reformular.NombrePlan);
                     cmbPlan.Enabled = false;   // reformular no cambia el plan
                     txtNombre.Text = _reformular.Nombre;

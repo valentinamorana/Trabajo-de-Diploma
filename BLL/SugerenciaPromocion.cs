@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio para PN03 — «Sugerencia de promoción» (ver el mapeo completo del
+    /// Lógica de negocio para PN03: «Sugerencia de promoción» (ver el mapeo completo del
     /// diagrama en el encabezado de BLL.Promocion):
     ///
     ///   Gerencia        Registrar sugerencia (guarda OrigenMetrica y quién la creó) .. RegistrarSugerencia
@@ -87,10 +87,10 @@ namespace BLL
 
             string destino = $"plan ID {idPlan}";
             bitacora.Registrar(modulo,
-                $"Sugerencia de promoción #{idNuevo} ({origen}) — {destino} — Motivo: {sugerencia.Motivo}",
+                $"Sugerencia de promoción #{idNuevo} ({origen}): {destino}; Motivo: {sugerencia.Motivo}",
                 BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
-                $"Sugerencia de promoción #{idNuevo} para {destino} — beneficio estimado ${beneficioEstimado} " +
+                $"Sugerencia de promoción #{idNuevo} para {destino}: beneficio estimado ${beneficioEstimado} " +
                 $"(ingreso en riesgo ${ingresoMensualEnRiesgo} × retención {tasaRetencion} %)");
 
             return idNuevo;
@@ -119,7 +119,7 @@ namespace BLL
                 throw new BE.AppException("err.bll.promocion.sugerencia_evaluada",
                     "La sugerencia seleccionada ya fue evaluada. Actualice la lista de sugerencias.");
 
-            bitacora.Registrar(modulo, $"Descartar sugerencia de promoción #{idSugerencia} — Motivo: {motivo.Trim()}",
+            bitacora.Registrar(modulo, $"Descartar sugerencia de promoción #{idSugerencia}; Motivo: {motivo.Trim()}",
                 BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
                 $"Administración descartó la sugerencia de promoción #{idSugerencia}: {motivo.Trim()}");

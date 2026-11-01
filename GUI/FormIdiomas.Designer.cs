@@ -222,7 +222,7 @@ namespace GUI
             this.panelTrad.Size = new System.Drawing.Size(880, 380);
             this.panelTrad.TabIndex = 1;
             //
-            // tlpTrad — antes los controles estaban posicionados a mano FUERA del panel
+            // tlpTrad: antes los controles estaban posicionados a mano FUERA del panel
             // (btnGuardar en y=627 y dgvControles en x=1256 dentro de un panel de 880x380), así
             // que ni "Guardar cambios" ni la grilla de controles se veían. La TableLayoutPanel
             // reparte el espacio: traducciones (65%) | controles (35%), títulos arriba y el

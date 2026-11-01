@@ -9,7 +9,7 @@ using System.Xml;
 namespace Servicios.Serializacion
 {
     /// <summary>
-    /// A02 Serialización — formato JSON (el JsonSerializator de la cátedra), con
+    /// A02 Serialización: formato JSON (el JsonSerializator de la cátedra), con
     /// System.Runtime.Serialization.Json.DataContractJsonSerializer, que viene con .NET Framework
     /// (sin paquetes NuGet). Serializa los miembros marcados con [DataMember] de las clases de BE
     /// marcadas con [DataContract]; lo que lleva [IgnoreDataMember] (o no lleva [DataMember]) nunca

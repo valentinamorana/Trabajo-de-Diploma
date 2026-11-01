@@ -183,7 +183,7 @@ namespace GUI
             this.colDetalle.MinimumWidth= 220;
 
             // ── btnRestaurar (deshabilitado por diseño: solo se habilita con una fila
-            // seleccionada — mismo patrón que PedidoHistorialForm.btnRestaurar) ───
+            // seleccionada: mismo patrón que PedidoHistorialForm.btnRestaurar) ───
             this.btnRestaurar.BackColor                  = Tema.RosaPrimario;
             this.btnRestaurar.FlatStyle                  = System.Windows.Forms.FlatStyle.Flat;
             this.btnRestaurar.FlatAppearance.BorderSize  = 0;

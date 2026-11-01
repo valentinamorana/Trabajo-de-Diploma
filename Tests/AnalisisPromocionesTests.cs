@@ -6,7 +6,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// PN03 — BLL.AnalisisPromociones: cruza los reportes de rotación y abandono con la sugerencia
+    /// PN03: BLL.AnalisisPromociones: cruza los reportes de rotación y abandono con la sugerencia
     /// de promociones (métricas → decisión).
     /// </summary>
     [TestClass]

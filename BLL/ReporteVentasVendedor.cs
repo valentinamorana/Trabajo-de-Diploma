@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Reporte de Ventas por Vendedor (PdN8). Agrega los pedidos
+    /// Lógica de negocio: Reporte de Ventas por Vendedor (PdN8). Agrega los pedidos
     /// registrados por cada Empleado (Vendedor) para que el GerenteComercial evalúe
     /// desempeño: volumen de pedidos, entregas concretadas y tasa de cancelación.
     /// </summary>

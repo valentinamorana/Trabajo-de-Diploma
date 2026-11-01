@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// PN03 — BLL.Politicas.PoliticaDescuento: regla de NUULY "un solo descuento por ciclo de facturación;
+    /// PN03: BLL.Politicas.PoliticaDescuento: regla de NUULY "un solo descuento por ciclo de facturación;
     /// los no usados quedan acumulados". Compiten la promoción vigente del plan y el crédito por referidos.
     /// </summary>
     [TestClass]

@@ -5,7 +5,7 @@ using System.Linq;
 namespace BE
 {
     /// <summary>
-    /// PN02 — Plan de cuotas con el que el cliente puede pagar con TARJETA DE CRÉDITO (catálogo
+    /// PN02: Plan de cuotas con el que el cliente puede pagar con TARJETA DE CRÉDITO (catálogo
     /// PlanCuotas). La tarjeta financia: Caja cobra el total en un solo cobro y el sistema registra
     /// cuántas cuotas eligió el cliente y el recargo por financiación que se le suma al importe.
     /// Recargos vigentes (seed de la BD, decisión de la alumna): 1 cuota sin interés, 3 cuotas 5 %,

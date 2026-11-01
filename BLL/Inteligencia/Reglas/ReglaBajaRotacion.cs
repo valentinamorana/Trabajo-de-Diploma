@@ -48,7 +48,7 @@ namespace BLL.Inteligencia.Reglas
                     quietas.Count, ctx.DiasPeriodo, diasMinimos, capital),
                 Motivo = T("rec.rotacion.motivo",
                     "Una prenda que nadie pide ocupa lugar y capital; liquidarla libera fondos para reponer lo que sí tiene demanda."),
-                Detalle = quietas.Select(p => $"#{p.IdPrenda} {p.Nombre} — {p.Categoria} {p.Talle} — {(p.PrecioReposicion ?? promedio):C2}").ToList()
+                Detalle = quietas.Select(p => $"#{p.IdPrenda} {p.Nombre}: {p.Categoria} {p.Talle}, {(p.PrecioReposicion ?? promedio):C2}").ToList()
             };
             rec.Principal = Opcion(T("rec.rotacion.opcion", "Dar de baja las {0} prenda(s) para liquidarlas (pasan de Disponible a Baja)", quietas.Count),
                 impacto, T("rec.formula.rotacion", "{0:C2} de capital × {1:0} % de recupero = {2:C2}", capital, recupero, impacto),

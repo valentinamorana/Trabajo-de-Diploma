@@ -10,7 +10,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// PN03 «Metas comerciales» — validación (rango, mes editable, una por indicador y mes), avance,
+    /// PN03 «Metas comerciales»: validación (rango, mes editable, una por indicador y mes), avance,
     /// semáforo, proyección al cierre, medición con las fórmulas de los KPI y el "movimiento": una meta en
     /// riesgo sube la prioridad de las recomendaciones que la mueven. Todo con dobles, sin SQL Server.
     /// </summary>

@@ -17,8 +17,8 @@ namespace GUI
         #region Código generado por el Diseñador de Windows Forms
 
         // Nota: las tarjetas del Kanban (una por prenda en mantenimiento) y el cartel
-        // "— sin tareas —" se arman en runtime en ActualizarKanban() porque su cantidad y
-        // contenido dependen de los datos cargados desde la BLL — no son representables como
+        // "(sin tareas)" se arman en runtime en ActualizarKanban() porque su cantidad y
+        // contenido dependen de los datos cargados desde la BLL: no son representables como
         // controles fijos del Diseñador. El resto del formulario es estático y vive acá.
         private void InitializeComponent()
         {
@@ -95,7 +95,7 @@ namespace GUI
             this.lblSub.Location  = new Point(14, 36);
             this.lblSub.Name      = "lblSub";
             this.lblSub.TabIndex  = 1;
-            this.lblSub.Text      = "WardrobeFlow  —  Stock";
+            this.lblSub.Text      = "WardrobeFlow: Stock";
 
             this.btnRefrescar.Anchor    = AnchorStyles.Top | AnchorStyles.Right;
             this.btnRefrescar.BackColor = Tema.RosaPrimario;

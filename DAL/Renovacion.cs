@@ -42,7 +42,7 @@ namespace DAL
             return lista;
         }
 
-        // Igual que Alta, pero sobre una transacción ya abierta por el caller — usada por
+        // Igual que Alta, pero sobre una transacción ya abierta por el caller: usada por
         // los manejadores de Renovación para que el UPDATE de Cliente y este INSERT sean
         // atómicos (ver DAL.Cliente.EjecutarTransaccion/ModificarEnTx).
         public int AltaEnTx(SqlConnection conexion, SqlTransaction tx, BE.Renovacion renovacion)

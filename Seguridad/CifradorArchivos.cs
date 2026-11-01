@@ -43,7 +43,7 @@ namespace Seguridad
     ///     alterado" en el mensaje al usuario; la garantía de integridad la da el HMAC (si alguien
     ///     altera el verificador, el archivo igual se rechaza).
     ///
-    /// Formato v1 (legacy, solo LECTURA): [ salt(16) ][ IV(16) ][ ciphertext ] — sin autenticación.
+    /// Formato v1 (legacy, solo LECTURA): [ salt(16) ][ IV(16) ][ ciphertext ]; sin autenticación.
     /// Se detecta por la ausencia de la cabecera "WFBK"+2; <see cref="Descifrar"/> informa el
     /// formato leído para que la capa superior deje constancia de que no se pudo verificar.
     ///
@@ -146,7 +146,7 @@ namespace Seguridad
             catch
             {
                 // Si la operación falla a mitad de camino (disco lleno, etc.), no debe quedar un
-                // archivo con el nombre "definitivo" pero corrupto/parcial — podía confundir a un
+                // archivo con el nombre "definitivo" pero corrupto/parcial: podía confundir a un
                 // admin más adelante haciéndole creer que es un backup válido.
                 BorrarSiExiste(rutaDestino);
                 throw;
@@ -167,7 +167,7 @@ namespace Seguridad
         ///   incorrecta.
         /// • v1 (legacy, sin HMAC): lo descifra como antes; una contraseña incorrecta o un archivo
         ///   dañado dan CryptographicException (padding inválido), pero una alteración que no rompa
-        ///   el padding NO se detecta — por eso se devuelve <see cref="FormatoArchivoCifrado.V1SinAutenticacion"/>.
+        ///   el padding NO se detecta: por eso se devuelve <see cref="FormatoArchivoCifrado.V1SinAutenticacion"/>.
         /// </summary>
         public static FormatoArchivoCifrado Descifrar(string rutaOrigen, string rutaDestino, string password)
         {

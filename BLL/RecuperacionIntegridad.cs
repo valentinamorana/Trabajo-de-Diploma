@@ -64,7 +64,7 @@ namespace BLL
     }
 
     /// <summary>
-    /// T07 — Recuperación de integridad asistida por la tabla ESPEJO (Usuario_Seguridad).
+    /// T07: Recuperación de integridad asistida por la tabla ESPEJO (Usuario_Seguridad).
     ///
     /// Tres opciones, al estilo del proyecto de referencia (Agus):
     ///   • Reparar desde Espejo  → restaura los valores legítimos guardados en el espejo
@@ -189,7 +189,7 @@ namespace BLL
                 else if (a.Tipo == TipoAlteracion.DVHCorrupto)
                     d.Resumen.Add($"DVH corrompido a mano: usuario '{a.Username}' (ID {a.Id}).");
                 else
-                    d.Resumen.Add($"Modificación externa: usuario '{a.Username}' (ID {a.Id}) — {a.Campos.Count} campo(s) alterado(s).");
+                    d.Resumen.Add($"Modificación externa: usuario '{a.Username}' (ID {a.Id}), {a.Campos.Count} campo(s) alterado(s).");
             }
             if (!d.DvvOk && d.Alteradas.Count == 0 && d.Faltantes.Count == 0)
                 d.Resumen.Add("El DVV de la tabla no coincide (posible reordenamiento de filas).");

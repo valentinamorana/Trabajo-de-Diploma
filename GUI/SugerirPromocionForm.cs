@@ -8,7 +8,7 @@ using Docs = GUI.Exportacion.DocumentosPromocion;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN03, carril Gerencia del diagrama de actividad (rol GerenteComercial):
+    /// Capa de Presentación: PN03, carril Gerencia del diagrama de actividad (rol GerenteComercial):
     ///   Analizar métricas («Reporte de métricas», imprimible) → ¿Hay oportunidad?
     ///   No: fin "Sin promoción". Sí: Registrar sugerencia («Sugerencia de promoción»), con el
     ///   origen de la métrica (abandono por plan) o Manual si Gerencia la carga sin el reporte.
@@ -95,7 +95,7 @@ namespace GUI
             CargarPeriodos();
         }
 
-        // PN03 — período de "Analizar métricas" (conserva la elección al cambiar de idioma).
+        // PN03: período de "Analizar métricas" (conserva la elección al cambiar de idioma).
         private sealed class PeriodoItem
         {
             public int Dias { get; set; }
@@ -204,7 +204,7 @@ namespace GUI
             {
                 dlg.Configurar(Tr("doc.promo.reporte.titulo", "Reporte de métricas"), Docs.ReporteMetricas(reporte).TextoPlano,
                                reporte.Oportunidades, hayOportunidad,
-                               c => $"[{Docs.Origen(c.Origen)}] {Docs.AplicaA(c.IdPlan, c.NombrePlan)} — {c.BeneficioEstimado:C2}",
+                               c => $"[{Docs.Origen(c.Origen)}] {Docs.AplicaA(c.IdPlan, c.NombrePlan)}: {c.BeneficioEstimado:C2}",
                                Tr("promocion.desdeanalisis.usar", "Usar esta idea"),
                                Tr("promocion.btn.imprimirreporte", "Imprimir reporte"), Tr("btn.cerrar", "Cerrar"));
                 dlg.Imprimir += (s, ev) =>

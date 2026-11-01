@@ -18,7 +18,7 @@ namespace DAL.Interfaces
 
         /// <summary>
         /// Fila Reservada vigente (no expirada) de una prenda para un cliente distinto al
-        /// indicado — si existe, la prenda está retenida para otro y no se puede asignar.
+        /// indicado: si existe, la prenda está retenida para otro y no se puede asignar.
         /// </summary>
         BE.ListaEspera ObtenerReservaVigenteDeOtro(int idPrenda, int idClienteSolicitante);
 

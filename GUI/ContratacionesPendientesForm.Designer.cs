@@ -81,7 +81,7 @@ namespace GUI
             // cmbMedioPago
             //
             // Los ítems se cargan en runtime (ContratacionesPendientesForm.CargarMediosPago), ya
-            // traducidos — antes estaban hardcodeados acá en español fijo.
+            // traducidos: antes estaban hardcodeados acá en español fijo.
             this.cmbMedioPago.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMedioPago.Location = new System.Drawing.Point(102, 16);
             this.cmbMedioPago.Name = "cmbMedioPago";
@@ -89,7 +89,7 @@ namespace GUI
             this.cmbMedioPago.TabIndex = 1;
             this.cmbMedioPago.SelectedIndexChanged += new System.EventHandler(this.CmbMedioPago_SelectedIndexChanged);
             //
-            // lblCuotas — PN02: pago en cuotas con tarjeta de crédito
+            // lblCuotas: PN02: pago en cuotas con tarjeta de crédito
             //
             this.lblCuotas.Location = new System.Drawing.Point(8, 90);
             this.lblCuotas.Name = "lblCuotas";
@@ -99,7 +99,7 @@ namespace GUI
             this.lblCuotas.Text = "Cuotas:";
             this.lblCuotas.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
-            // cmbCuotas — los planes se cargan en runtime (ContratacionesPendientesForm.CargarCuotas)
+            // cmbCuotas: los planes se cargan en runtime (ContratacionesPendientesForm.CargarCuotas)
             //
             this.cmbCuotas.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbCuotas.Enabled = false;
@@ -109,7 +109,7 @@ namespace GUI
             this.cmbCuotas.TabIndex = 2;
             this.cmbCuotas.SelectedIndexChanged += new System.EventHandler(this.CmbCuotas_SelectedIndexChanged);
             //
-            // lblDetalleCuotas — «Detalle de financiación»
+            // lblDetalleCuotas: «Detalle de financiación»
             //
             this.lblDetalleCuotas.Location = new System.Drawing.Point(300, 90);
             this.lblDetalleCuotas.Name = "lblDetalleCuotas";

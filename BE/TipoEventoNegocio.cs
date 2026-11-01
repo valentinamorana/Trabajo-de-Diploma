@@ -32,10 +32,10 @@ namespace BE
 
         CobroSuscripcion = 12,
 
-        // Mejora opcional, no requerida por la cátedra — ver README.
+        // Mejora opcional, no requerida por la cátedra: ver README.
         ListaEspera = 13,
 
-        // PN01 — circuito de control de stock (diagrama de actividad de Armar pedido).
+        // PN01: circuito de control de stock (diagrama de actividad de Armar pedido).
         // La formalización del pedido sigue registrándose como Venta.
         EnvioControlStock = 14,
 
@@ -45,7 +45,7 @@ namespace BE
 
         Desistimiento = 17,
 
-        // PN03 — Centro de decisiones comerciales: aceptar, descartar, posponer o ejecutar una
+        // PN03: Centro de decisiones comerciales: aceptar, descartar, posponer o ejecutar una
         // recomendación del motor, y registrar su resultado real.
         DecisionComercial = 18
     }

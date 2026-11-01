@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// Entidad — Registro de un intento de cobro de suscripción (PdN6).
+    /// Entidad: Registro de un intento de cobro de suscripción (PdN6).
     /// Mapea la tabla [HistorialCobro]. Es el rastro que deja la cadena de
     /// manejadores de BLL.Manejadores al resolver (o dejar pendiente) un cobro.
     /// </summary>
@@ -21,7 +21,7 @@ namespace BE
         public EstadoCobro Resultado { get; set; }
         public string Actor { get; set; }
 
-        // N01 — lo que se registra de un cobro exitoso (igual que Contratacion en PN02).
+        // N01: lo que se registra de un cobro exitoso (igual que Contratacion en PN02).
         public int? IdMedioPago { get; set; }
         /// <summary>Cargado por JOIN con MedioPago, no persiste.</summary>
         public string NombreMedioPago { get; set; }

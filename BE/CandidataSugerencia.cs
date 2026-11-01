@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// PN03 — Oportunidad de promoción detectada en el «Reporte de métricas» (abandono por plan).
+    /// PN03: Oportunidad de promoción detectada en el «Reporte de métricas» (abandono por plan).
     /// Es una PROPUESTA de datos para que Gerencia arme su sugerencia con un dato concreto; no se
     /// persiste: Gerencia la revisa, la ajusta y recién ahí se registra la SugerenciaPromocion
     /// (que guarda el origen en OrigenMetrica). Siempre apunta a un plan: las oportunidades por

@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL.Politicas
 {
     /// <summary>
-    /// PN03 — Política de descuentos del cobro. Regla tomada de NUULY (5.1): "solo se puede aplicar
+    /// PN03: Política de descuentos del cobro. Regla tomada de NUULY (5.1): "solo se puede aplicar
     /// UN descuento por ciclo de facturación; los no usados quedan acumulados para un ciclo futuro".
     ///
     /// Compiten dos fuentes:

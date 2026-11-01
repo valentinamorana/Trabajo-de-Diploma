@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BLL.Interfaces
 {
     /// <summary>
-    /// PdN10 — Detección de clientes en riesgo de abandono. Contexto del patrón Strategy
+    /// PdN10: Detección de clientes en riesgo de abandono. Contexto del patrón Strategy
     /// (BLL.Estrategias): mantiene el criterio de riesgo activo y lo aplica a todos los
     /// clientes con plan asignado.
     /// </summary>

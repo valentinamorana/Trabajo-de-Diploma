@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Seguridad
 {
     /// <summary>
-    /// T07 — Contrato del algoritmo de Dígito Verificador.
+    /// T07: Contrato del algoritmo de Dígito Verificador.
     /// Permite intercambiar la implementación del cálculo (p. ej. la suma ponderada
     /// posicional actual, o una basada en hash) sin tocar el resto del sistema:
     /// los consumidores piden la implementación a <see cref="CalculadorDV.Crear"/>.

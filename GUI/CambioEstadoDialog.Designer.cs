@@ -30,7 +30,7 @@ namespace GUI
             this.lblPrendaInfo.Name = "lblPrendaInfo";
             this.lblPrendaInfo.Size = new System.Drawing.Size(330, 23);
             this.lblPrendaInfo.TabIndex = 0;
-            this.lblPrendaInfo.Text = "Prenda: —";
+            this.lblPrendaInfo.Text = "Prenda: -";
             // 
             // lblNuevoEstado
             // 

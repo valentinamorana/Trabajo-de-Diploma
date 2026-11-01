@@ -85,7 +85,7 @@ namespace Tests
         }
 
         // PN03: el beneficio que calcula BE (redondeo desde el cero) pasa el CHECK de la base, que lo
-        // compara con ROUND(ingreso × tasa / 100, 2) — incluso en un punto medio (1,15 × 50 % = 0,575).
+        // compara con ROUND(ingreso × tasa / 100, 2): incluso en un punto medio (1,15 × 50 % = 0,575).
         [TestMethod]
         public void PN03_SugerenciaConIngresoYTasa_PasaElCheckDelBeneficio()
         {
@@ -434,7 +434,7 @@ namespace Tests
                 "El DVH del pedido quedó al día dentro de la misma transacción.");
         }
 
-        // PN03 — la solicitud de baja no cambia el estado; atenderla sin baja la cierra; dar de baja la
+        // PN03: la solicitud de baja no cambia el estado; atenderla sin baja la cierra; dar de baja la
         // promoción cierra en la misma transacción las solicitudes pendientes (DioDeBaja = 1).
         [TestMethod]
         public void Promocion_SolicitarAtenderYDarDeBaja_RespetaElEsquemaNuevo()

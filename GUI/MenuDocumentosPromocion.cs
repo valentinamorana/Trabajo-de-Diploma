@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace GUI
 {
     /// <summary>
-    /// PN03 — Menú "Imprimir" común a las pantallas de promociones: ofrece los documentos que
+    /// PN03: Menú "Imprimir" común a las pantallas de promociones: ofrece los documentos que
     /// la promoción seleccionada ya tiene guardados («Ficha de promoción», «Dictamen contable»,
     /// «Solicitud de baja», «Respuesta a la solicitud», «Constancia de baja»). Solo consulta a la
     /// BLL qué objetos existen y los manda a imprimir; no decide nada del negocio.

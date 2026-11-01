@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BLL.Interfaces
 {
-    /// <summary>PdN9 — Detección de prendas de alta o baja demanda cruzando el catálogo
+    /// <summary>PdN9: Detección de prendas de alta o baja demanda cruzando el catálogo
     /// activo contra la cantidad de pedidos que incluyó a cada prenda.</summary>
     public interface IAnalisisRotacionService
     {

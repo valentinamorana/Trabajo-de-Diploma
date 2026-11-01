@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Inteligencia comercial y promociones» — servicio del Centro de decisiones comerciales:
+    /// PN03 «Inteligencia comercial y promociones»: servicio del Centro de decisiones comerciales:
     ///
     ///   Analizar ......... KPI con variación contra el período anterior, tendencia de 6 meses con
     ///                      proyección de 3 (ProyeccionSerie), riesgo por plan, stock y rotación   → Analizar
@@ -259,7 +259,7 @@ namespace BLL.Inteligencia
                 })
                 .OrderByDescending(m => m.IngresoMensualEnRiesgo).ToList();
             panel.StockPorCategoria = activas
-                .GroupBy(p => string.IsNullOrWhiteSpace(p.Categoria) ? "—" : p.Categoria.Trim(), StringComparer.OrdinalIgnoreCase)
+                .GroupBy(p => string.IsNullOrWhiteSpace(p.Categoria) ? "-" : p.Categoria.Trim(), StringComparer.OrdinalIgnoreCase)
                 .Select(g => new BE.StockCategoria
                 {
                     Categoria = g.Key,
@@ -309,7 +309,7 @@ namespace BLL.Inteligencia
             try
             {
                 bitacora.Registrar(modulo, $"Centro de decisiones comerciales: análisis del {inicio:dd/MM/yyyy} al {fin:dd/MM/yyyy}" +
-                    (idPlan.HasValue ? $" (plan ID {idPlan})" : "") + $" — MRR {mrrFin:C2}, bajas {churn ?? 0m:0.##} %",
+                    (idPlan.HasValue ? $" (plan ID {idPlan})" : "") + $"; MRR {mrrFin:C2}, bajas {churn ?? 0m:0.##} %",
                     BE.Criticidad.Baja);
             }
             catch (Exception ex) { System.Diagnostics.Trace.TraceError("[BLL.InteligenciaComercial] " + ex.Message); }

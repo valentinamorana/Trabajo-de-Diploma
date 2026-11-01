@@ -19,7 +19,7 @@ namespace BE
 
         // Devuelve las HOJAS (Patentes) alcanzables desde este nodo, sin duplicados.
         // Es la operación uniforme del patrón: en una Patente (hoja) se devuelve a sí misma;
-        // en una Familia/Rol (compuesto) se agregan recursivamente las de todos sus hijos —
+        // en una Familia/Rol (compuesto) se agregan recursivamente las de todos sus hijos:
         // exactamente como CalcularPrecioBase() suma recursivamente en LoteArticulos.
         // La recursión termina al llegar a las hojas; un Rol puede contener otros Roles
         // (rol-dentro-de-rol) igual que un Lote puede contener otros Lotes.

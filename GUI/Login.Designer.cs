@@ -63,7 +63,7 @@ namespace GUI
             this.pnlContraseñaBox.SuspendLayout();
             this.SuspendLayout();
 
-            // ── pnlHeader — franja superior de ancho completo (1000 × 64) ──
+            // ── pnlHeader: franja superior de ancho completo (1000 × 64) ──
             // Marca + selector de idioma + controles de ventana (minimizar/cerrar) dibujados a
             // medida, porque el form usa FormBorderStyle.None (ver comentario más abajo).
             this.pnlHeader.BackColor = GUI.Tema.Papel;
@@ -80,7 +80,7 @@ namespace GUI
             this.pnlHeader.TabIndex  = 20;
             this.pnlHeader.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PnlHeader_MouseDown);
 
-            // ── picLogo — isotipo de percha (icon.png del proyecto, transparente) ──
+            // ── picLogo: isotipo de percha (icon.png del proyecto, transparente) ──
             this.picLogo.BackColor  = GUI.Tema.Papel;
             this.picLogo.Image      = global::GUI.Properties.Resources.login_icono_percha;
             this.picLogo.Location   = new System.Drawing.Point(26, 13);
@@ -91,7 +91,7 @@ namespace GUI
             this.picLogo.TabStop    = false;
             this.picLogo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PnlHeader_MouseDown);
 
-            // ── lblTitle — nombre de marca "WardrobeFlow" junto al ícono ─────
+            // ── lblTitle: nombre de marca "WardrobeFlow" junto al ícono ─────
             this.lblTitle.AutoSize  = false;
             this.lblTitle.BackColor = GUI.Tema.Papel;
             this.lblTitle.Font      = new System.Drawing.Font("Segoe UI", 13F);
@@ -103,7 +103,7 @@ namespace GUI
             this.lblTitle.Text      = "WardrobeFlow";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
-            // ── lblSubtitulo — "PORTAL DE EMPLEADOS" ─────────────────────
+            // ── lblSubtitulo: "PORTAL DE EMPLEADOS" ─────────────────────
             this.lblSubtitulo.AutoSize  = false;
             this.lblSubtitulo.BackColor = GUI.Tema.Papel;
             this.lblSubtitulo.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
@@ -117,7 +117,7 @@ namespace GUI
             this.lblSubtitulo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblSubtitulo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PnlHeader_MouseDown);
 
-            // ── cmbIdioma — selector de idioma (idiomas dinámicos de BD) ──────
+            // ── cmbIdioma: selector de idioma (idiomas dinámicos de BD) ──────
             this.cmbIdioma.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbIdioma.FlatStyle     = System.Windows.Forms.FlatStyle.Flat;
             this.cmbIdioma.Font          = new System.Drawing.Font("Segoe UI", 9F);
@@ -130,14 +130,14 @@ namespace GUI
             this.cmbIdioma.TabStop       = false;
             this.cmbIdioma.SelectedIndexChanged += new System.EventHandler(this.CmbIdioma_SelectedIndexChanged);
 
-            // ── pnlHeaderDivider — línea vertical entre el idioma y minimizar/cerrar ──
+            // ── pnlHeaderDivider: línea vertical entre el idioma y minimizar/cerrar ──
             this.pnlHeaderDivider.BackColor = GUI.Tema.Borde;
             this.pnlHeaderDivider.Location  = new System.Drawing.Point(895, 18);
             this.pnlHeaderDivider.Name      = "pnlHeaderDivider";
             this.pnlHeaderDivider.Size      = new System.Drawing.Size(1, 28);
             this.pnlHeaderDivider.TabIndex  = 26;
 
-            // ── btnMinimizar — minimiza la ventana (form sin borde nativo) ──
+            // ── btnMinimizar: minimiza la ventana (form sin borde nativo) ──
             this.btnMinimizar.BackColor                 = GUI.Tema.Papel;
             this.btnMinimizar.Cursor                    = System.Windows.Forms.Cursors.Hand;
             this.btnMinimizar.FlatAppearance.BorderSize = 0;
@@ -154,7 +154,7 @@ namespace GUI
             this.btnMinimizar.UseVisualStyleBackColor    = false;
             this.btnMinimizar.Click += new System.EventHandler(this.btnMinimizar_Click);
 
-            // ── btnCerrarVentana — cierra el Login (mismo efecto que la X nativa: ──
+            // ── btnCerrarVentana: cierra el Login (mismo efecto que la X nativa: ──
             // DialogResult.Cancel, ver Login.cs). No reemplaza a btnSalir (RF: Salir sigue
             // llamando Application.Exit()); esto solo repone el control de ventana nativo
             // que se pierde al usar FormBorderStyle.None.
@@ -174,7 +174,7 @@ namespace GUI
             this.btnCerrarVentana.UseVisualStyleBackColor    = false;
             this.btnCerrarVentana.Click += new System.EventHandler(this.btnCerrarVentana_Click);
 
-            // ── pnlLeft — panel de branding izquierdo (420 × 696) ──────────
+            // ── pnlLeft: panel de branding izquierdo (420 × 696) ──────────
             // Fondo rosa pálido (Tema.RosaPalido); ilustración vía PictureBox (assets 03/04/05,
             // transparentes), textura sutil de fondo vía Paint en Login.cs.
             this.pnlLeft.BackColor = GUI.Tema.RosaPalido;
@@ -191,7 +191,7 @@ namespace GUI
             this.pnlLeft.TabIndex  = 21;
             this.pnlLeft.Paint    += new System.Windows.Forms.PaintEventHandler(this.PnlLeft_Paint);
 
-            // ── lblTagline — "ORGANICE • GESTIONE • POTENCIE" (traducible vía Tag) ──
+            // ── lblTagline: "ORGANICE • GESTIONE • POTENCIE" (traducible vía Tag) ──
             this.lblTagline.BackColor = GUI.Tema.RosaPalido;
             this.lblTagline.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.lblTagline.ForeColor = GUI.Tema.RosaOscuro;
@@ -202,7 +202,7 @@ namespace GUI
             this.lblTagline.Tag       = "lbl.tagline";
             this.lblTagline.Text      = "ORGANICE • GESTIONE • POTENCIE";
 
-            // ── lblWordmarkDark / lblWordmarkVino — "Wardrobe" / "Flow" en dos colores ──
+            // ── lblWordmarkDark / lblWordmarkVino: "Wardrobe" / "Flow" en dos colores ──
             this.lblWordmarkDark.AutoSize  = false;
             this.lblWordmarkDark.BackColor = GUI.Tema.RosaPalido;
             this.lblWordmarkDark.Font      = new System.Drawing.Font("Segoe UI", 34F);
@@ -223,7 +223,7 @@ namespace GUI
             this.lblWordmarkVino.TabIndex  = 32;
             this.lblWordmarkVino.Text      = "Flow";
 
-            // ── lblBrandDesc — descripción de marca (traducible vía Tag) ──────
+            // ── lblBrandDesc: descripción de marca (traducible vía Tag) ──────
             this.lblBrandDesc.AutoSize  = false;
             this.lblBrandDesc.BackColor = GUI.Tema.RosaPalido;
             this.lblBrandDesc.Font      = new System.Drawing.Font("Segoe UI", 11F);
@@ -235,7 +235,7 @@ namespace GUI
             this.lblBrandDesc.Tag       = "lbl.brand.desc";
             this.lblBrandDesc.Text      = "Gestione su flujo de\r\nprendas e información\r\nde manera simple y eficiente.";
 
-            // ── picClothingRack — asset 03, percha con prendas ──────────────
+            // ── picClothingRack: asset 03, percha con prendas ──────────────
             this.picClothingRack.BackColor = GUI.Tema.RosaPalido;
             this.picClothingRack.Image     = global::GUI.Properties.Resources.login_clothing_rack;
             this.picClothingRack.Location  = new System.Drawing.Point(14, 330);
@@ -245,7 +245,7 @@ namespace GUI
             this.picClothingRack.TabIndex  = 23;
             this.picClothingRack.TabStop   = false;
 
-            // ── picPriceTag — asset 04, cartel de precio ────────────────────
+            // ── picPriceTag: asset 04, cartel de precio ────────────────────
             this.picPriceTag.BackColor = GUI.Tema.RosaPalido;
             this.picPriceTag.Image     = global::GUI.Properties.Resources.login_price_tag;
             this.picPriceTag.Location  = new System.Drawing.Point(266, 330);
@@ -255,7 +255,7 @@ namespace GUI
             this.picPriceTag.TabIndex  = 24;
             this.picPriceTag.TabStop   = false;
 
-            // ── picPlantAndBag — asset 05, planta + bolso ───────────────────
+            // ── picPlantAndBag: asset 05, planta + bolso ───────────────────
             this.picPlantAndBag.BackColor = GUI.Tema.RosaPalido;
             this.picPlantAndBag.Image     = global::GUI.Properties.Resources.login_plant_and_bag;
             this.picPlantAndBag.Location  = new System.Drawing.Point(258, 460);
@@ -265,7 +265,7 @@ namespace GUI
             this.picPlantAndBag.TabIndex  = 25;
             this.picPlantAndBag.TabStop   = false;
 
-            // ── pnlCardShadow — sombra suave detrás de la card (capas dibujadas en Login.cs) ─
+            // ── pnlCardShadow: sombra suave detrás de la card (capas dibujadas en Login.cs) ─
             this.pnlCardShadow.BackColor = GUI.Tema.RosaPalido;
             this.pnlCardShadow.Location  = new System.Drawing.Point(440, 92);
             this.pnlCardShadow.Name      = "pnlCardShadow";
@@ -273,7 +273,7 @@ namespace GUI
             this.pnlCardShadow.TabIndex  = 29;
             this.pnlCardShadow.Paint    += new System.Windows.Forms.PaintEventHandler(this.PnlCardShadow_Paint);
 
-            // ── pnlCard — card blanca flotante con el formulario (500 × 612) ──
+            // ── pnlCard: card blanca flotante con el formulario (500 × 612) ──
             // Esquinas redondeadas vía Region (Login.cs, radio Tema.RadioCard).
             this.pnlCard.BackColor = GUI.Tema.Papel;
             this.pnlCard.Controls.Add(this.lblAccent);
@@ -294,7 +294,7 @@ namespace GUI
             this.pnlCard.Size     = new System.Drawing.Size(500, 612);
             this.pnlCard.TabIndex = 13;
 
-            // ── lblAccent — "Bienvenido / de nuevo" (dos líneas, como el mock) ──
+            // ── lblAccent: "Bienvenido / de nuevo" (dos líneas, como el mock) ──
             this.lblAccent.AutoSize  = false;
             this.lblAccent.BackColor = System.Drawing.Color.Transparent;
             this.lblAccent.Font      = new System.Drawing.Font("Segoe UI", 28F);
@@ -307,14 +307,14 @@ namespace GUI
             this.lblAccent.Text      = "Bienvenido\r\nde nuevo";
             this.lblAccent.TextAlign = System.Drawing.ContentAlignment.TopLeft;
 
-            // ── pnlAccentRule — rayita decorativa bajo "Bienvenido de nuevo" ───
+            // ── pnlAccentRule: rayita decorativa bajo "Bienvenido de nuevo" ───
             this.pnlAccentRule.BackColor = GUI.Tema.RosaOscuro;
             this.pnlAccentRule.Location  = new System.Drawing.Point(50, 140);
             this.pnlAccentRule.Name      = "pnlAccentRule";
             this.pnlAccentRule.Size      = new System.Drawing.Size(44, 3);
             this.pnlAccentRule.TabIndex  = 14;
 
-            // ── lblLoginSub — subtítulo bajo el acento ─────────────────────
+            // ── lblLoginSub: subtítulo bajo el acento ─────────────────────
             this.lblLoginSub.AutoSize  = false;
             this.lblLoginSub.BackColor = System.Drawing.Color.Transparent;
             this.lblLoginSub.Font      = new System.Drawing.Font("Segoe UI", 10.5F);
@@ -326,7 +326,7 @@ namespace GUI
             this.lblLoginSub.Tag       = "lbl.credenciales";
             this.lblLoginSub.Text      = "Ingrese para continuar en su cuenta.";
 
-            // ── lblUsuario — etiqueta "USUARIO" (uppercase small) ──────────
+            // ── lblUsuario: etiqueta "USUARIO" (uppercase small) ──────────
             this.lblUsuario.AutoSize  = false;
             this.lblUsuario.BackColor = System.Drawing.Color.Transparent;
             this.lblUsuario.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -339,7 +339,7 @@ namespace GUI
             this.lblUsuario.Text      = "USUARIO";
             this.lblUsuario.TextAlign = System.Drawing.ContentAlignment.TopLeft;
 
-            // ── pnlUsuarioBox — caja con borde propio (Paint) que aloja ícono + textbox ─
+            // ── pnlUsuarioBox: caja con borde propio (Paint) que aloja ícono + textbox ─
             this.pnlUsuarioBox.BackColor = GUI.Tema.Papel;
             this.pnlUsuarioBox.Controls.Add(this.txtUsuario);
             this.pnlUsuarioBox.Controls.Add(this.lblIconoUsuario);
@@ -360,7 +360,7 @@ namespace GUI
             this.txtUsuario.Size        = new System.Drawing.Size(352, 22);
             this.txtUsuario.TabIndex    = 1;
 
-            // ── lblIconoUsuario — ícono de persona, no interactivo ──────────
+            // ── lblIconoUsuario: ícono de persona, no interactivo ──────────
             this.lblIconoUsuario.BackColor  = GUI.Tema.Papel;
             this.lblIconoUsuario.Font       = new System.Drawing.Font("Segoe UI Emoji", 11F);
             this.lblIconoUsuario.ForeColor  = GUI.Tema.TextoMuted;
@@ -371,7 +371,7 @@ namespace GUI
             this.lblIconoUsuario.Text       = "👤";
             this.lblIconoUsuario.TextAlign  = System.Drawing.ContentAlignment.MiddleCenter;
 
-            // ── lblContraseña — etiqueta "CONTRASEÑA" ─────────────────────
+            // ── lblContraseña: etiqueta "CONTRASEÑA" ─────────────────────
             this.lblContraseña.AutoSize  = false;
             this.lblContraseña.BackColor = System.Drawing.Color.Transparent;
             this.lblContraseña.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -408,7 +408,7 @@ namespace GUI
             this.txtContraseña.Size         = new System.Drawing.Size(328, 22);
             this.txtContraseña.TabIndex     = 3;
 
-            // ── lblIconoContraseña — ícono de candado, no interactivo ───────
+            // ── lblIconoContraseña: ícono de candado, no interactivo ───────
             this.lblIconoContraseña.BackColor  = GUI.Tema.Papel;
             this.lblIconoContraseña.Font       = new System.Drawing.Font("Segoe UI Emoji", 11F);
             this.lblIconoContraseña.ForeColor  = GUI.Tema.TextoMuted;
@@ -419,7 +419,7 @@ namespace GUI
             this.lblIconoContraseña.Text       = "🔒";
             this.lblIconoContraseña.TextAlign  = System.Drawing.ContentAlignment.MiddleCenter;
 
-            // ── btnMostrarClave — ojito mostrar/ocultar contraseña ──────────
+            // ── btnMostrarClave: ojito mostrar/ocultar contraseña ──────────
             this.btnMostrarClave.BackColor                 = GUI.Tema.Papel;
             this.btnMostrarClave.Cursor                    = System.Windows.Forms.Cursors.Hand;
             this.btnMostrarClave.FlatAppearance.BorderSize = 0;
@@ -435,7 +435,7 @@ namespace GUI
             this.btnMostrarClave.UseVisualStyleBackColor    = false;
             this.btnMostrarClave.Click += new System.EventHandler(this.btnMostrarClave_Click);
 
-            // ── lnkOlvidaste — link alineado a la derecha bajo contraseña ─
+            // ── lnkOlvidaste: link alineado a la derecha bajo contraseña ─
             this.lnkOlvidaste.ActiveLinkColor = GUI.Tema.RosaOscuro;
             this.lnkOlvidaste.AutoSize        = false;
             this.lnkOlvidaste.BackColor       = System.Drawing.Color.Transparent;
@@ -451,7 +451,7 @@ namespace GUI
             this.lnkOlvidaste.TextAlign       = System.Drawing.ContentAlignment.MiddleRight;
             this.lnkOlvidaste.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkOlvidaste_LinkClicked);
 
-            // ── lnkEmergencia — RF-10, autodesbloqueo con clave de emergencia ─
+            // ── lnkEmergencia: RF-10, autodesbloqueo con clave de emergencia ─
             // Fila propia entre "¿Olvidó su contraseña?" y el cartel de error, para que
             // NO se superponga con el mensaje "cuenta bloqueada".
             this.lnkEmergencia.ActiveLinkColor = GUI.Tema.RosaOscuro;
@@ -480,7 +480,7 @@ namespace GUI
             this.lblError.TabIndex  = 4;
             this.lblError.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 
-            // ── btnIngresar — botón primario ancho completo (vino), esquinas redondeadas ─
+            // ── btnIngresar: botón primario ancho completo (vino), esquinas redondeadas ─
             this.btnIngresar.BackColor                 = GUI.Tema.RosaOscuro;
             this.btnIngresar.Cursor                    = System.Windows.Forms.Cursors.Hand;
             this.btnIngresar.FlatAppearance.BorderSize = 0;
@@ -498,7 +498,7 @@ namespace GUI
             this.btnIngresar.UseVisualStyleBackColor    = false;
             this.btnIngresar.Click += new System.EventHandler(this.btnIngresar_Click);
 
-            // ── lblDivider — separador "o" con líneas a los lados ─────────
+            // ── lblDivider: separador "o" con líneas a los lados ─────────
             // Las líneas horizontales se dibujan vía Paint event en Login.cs.
             this.lblDivider.AutoSize  = false;
             this.lblDivider.BackColor = System.Drawing.Color.Transparent;
@@ -513,7 +513,7 @@ namespace GUI
             this.lblDivider.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblDivider.Paint    += new System.Windows.Forms.PaintEventHandler(this.LblDivider_Paint);
 
-            // ── btnSalir — botón secundario ancho completo (blanco bordeado), esquinas redondeadas ─
+            // ── btnSalir: botón secundario ancho completo (blanco bordeado), esquinas redondeadas ─
             this.btnSalir.BackColor                         = GUI.Tema.Papel;
             this.btnSalir.Cursor                            = System.Windows.Forms.Cursors.Hand;
             this.btnSalir.FlatAppearance.BorderColor        = GUI.Tema.Borde;

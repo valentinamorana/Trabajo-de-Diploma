@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// USABILIDAD — Guía de primer uso ("Bienvenido a WardrobeFlow"): 5 pasos adaptados al rol
+    /// USABILIDAD: Guía de primer uso ("Bienvenido a WardrobeFlow"): 5 pasos adaptados al rol
     /// (BLL.GuiaPrimerUso.PasosPara). Se abre sola en el primer ingreso del usuario, después de
     /// que el Menú muestra su Panel de Control, y en cualquier momento desde Sesión → Ver guía de
     /// inicio. "No volver a mostrar" se guarda por usuario con BLL.GuiaPrimerUso (archivo local).

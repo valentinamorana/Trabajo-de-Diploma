@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// PN01 — Control de Stock: carril "Controlador de Stock" del diagrama de actividad de
+    /// PN01: Control de Stock: carril "Controlador de Stock" del diagrama de actividad de
     /// Armar pedido, a cargo del rol Depósito (Inventario → Control de Stock, patente
     /// mnuControlStock).
     ///
@@ -41,7 +41,7 @@ namespace GUI
             InitializeComponent();
             menuDocumentos = new MenuDocumentosPedido(pedidoBLL, clienteBLL, () => _pedido, () => this.Text, this,
                 ex => MostrarError(ex), (k, f) => Tr(k, f), () => _lineas);
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvCola);
             Estilos.EstiloFormulario.Grilla(dgvPlanilla);
         }
@@ -92,7 +92,7 @@ namespace GUI
                     tabla.Rows.Add(p.IdPedido,
                         (p.FechaEnvioControl ?? p.FechaPedido).ToString("g"),
                         p.NombreCliente, p.NombreEmpleado,
-                        p.FechaControl.HasValue ? p.FechaControl.Value.ToString("dd/MM HH:mm") : "—");
+                        p.FechaControl.HasValue ? p.FechaControl.Value.ToString("dd/MM HH:mm") : "-");
 
                 dgvCola.DataSource = tabla;
                 if (dgvCola.Columns.Contains("ID")) dgvCola.Columns["ID"].Width = 50;
@@ -156,8 +156,8 @@ namespace GUI
 
                 string si = Tr("lbl.si", "Sí"), no = Tr("lbl.no", "No");
                 foreach (var l in _lineas)
-                    tabla.Rows.Add(l.Prenda.IdPrenda, l.Prenda.Nombre, l.Prenda.Categoria ?? "—",
-                        l.Prenda.Talle ?? "—", l.Prenda.Color ?? "—",
+                    tabla.Rows.Add(l.Prenda.IdPrenda, l.Prenda.Nombre, l.Prenda.Categoria ?? "-",
+                        l.Prenda.Talle ?? "-", l.Prenda.Color ?? "-",
                         l.ReservadaParaOtro ? Tr("lbl.cs.reservada", "Reservada (Lista de Espera)") : EstadoPrendaLabel(l.EstadoActual),
                         l.Disponible ? si : no,
                         l.Confirmada ? si : no);
@@ -183,7 +183,7 @@ namespace GUI
                 bool disponible = evaluacion.SeleccionDisponible;
                 lblPlanillaTitulo.Text = string.Format(
                     Tr("lbl.cs.planilla.pedido",
-                       "Planilla de control — Pedido #{0} — {1} — ¿Selección disponible? {2}"),
+                       "Planilla de control: Pedido #{0}, {1}. ¿Selección disponible? {2}"),
                     _pedido.IdPedido, _pedido.NombreCliente, disponible ? si : no);
                 lblPlanillaTitulo.ForeColor = disponible ? Tema.Exito : Tema.Error;
 
@@ -204,7 +204,7 @@ namespace GUI
             _pedido = null;
             _lineas = new List<BE.LineaControlStock>();
             dgvPlanilla.DataSource = null;
-            lblPlanillaTitulo.Text = Tr("lbl.cs.planilla", "Planilla de control de existencias — seleccione un pedido de la cola");
+            lblPlanillaTitulo.Text = Tr("lbl.cs.planilla", "Planilla de control de existencias: seleccione un pedido de la cola");
             lblPlanillaTitulo.ForeColor = Tema.RosaOscuro;
             btnInformarFaltantes.Enabled = btnConfirmarPrendas.Enabled =
                 btnSepararPrendas.Enabled = btnImprimirPlanilla.Enabled = false;

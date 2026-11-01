@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace BLL
 {
     /// <summary>
-    /// Bloque 1 — Lógica de negocio de Cargo por daño/pérdida de prenda. Se registra desde
+    /// Bloque 1: Lógica de negocio de Cargo por daño/pérdida de prenda. Se registra desde
     /// el mismo flujo que da de baja una prenda (GUI.Prendas → BLL.Prenda.CambiarEstado),
-    /// por eso comparte su permiso (StockEditar/Stock) — no hay una aprobación separada.
+    /// por eso comparte su permiso (StockEditar/Stock): no hay una aprobación separada.
     /// </summary>
     public class CargoPrenda : Interfaces.ICargoPrendaService
     {
@@ -59,11 +59,11 @@ namespace BLL
             cargo.IdCargo = idNuevo;
 
             bitacora.Registrar(modulo,
-                $"Cargo por daño/pérdida — Prenda ID {prenda.IdPrenda} '{prenda.Nombre}': ${monto} ({motivo})",
+                $"Cargo por daño/pérdida: Prenda ID {prenda.IdPrenda} '{prenda.Nombre}'; ${monto} ({motivo})",
                 BE.Criticidad.Media);
 
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.CambioEstadoPrenda,
-                $"Cargo por daño/pérdida: prenda '{prenda.Nombre}' — ${monto} — {motivo} — se sumará al próximo cobro de {prenda.NombreUltimoCliente ?? "cliente ID " + prenda.IdUltimoCliente}",
+                $"Cargo por daño/pérdida: prenda '{prenda.Nombre}', ${monto}, {motivo}, se sumará al próximo cobro de {prenda.NombreUltimoCliente ?? "cliente ID " + prenda.IdUltimoCliente}",
                 idPrenda: prenda.IdPrenda, idCliente: prenda.IdUltimoCliente);
         }
 

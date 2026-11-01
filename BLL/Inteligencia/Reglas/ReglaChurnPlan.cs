@@ -62,7 +62,7 @@ namespace BLL.Inteligencia.Reglas
                         plan.ClientesEnRiesgo, plan.IngresoEnRiesgo),
                     Motivo = T(porNivel ? "rec.churn.motivo.nivel" : "rec.churn.motivo.suba",
                         porNivel
-                            ? "El % de bajas llegó al umbral de {0:0.#} %. La retención supuesta ({1:0.#} %) sale {2}."
+                            ? "El % de bajas llegó al límite de {0:0.#} % de los parámetros del análisis. La retención supuesta ({1:0.#} %) sale {2}."
                             : "El % de bajas subió más de {0:0.#} pp contra el período anterior. La retención supuesta ({1:0.#} %) sale {2}.",
                         porNivel ? umbral : subida, retencion,
                         plan.RetencionHistorica.HasValue
@@ -104,7 +104,7 @@ namespace BLL.Inteligencia.Reglas
                               : BE.PrioridadRecomendacion.Media;
                 if (rec.ImpactoEstimado <= 0)
                     rec.Motivo = T("rec.churn.motivo.norentable",
-                        "Las bajas están por encima del umbral, pero con los supuestos actuales ninguna opción recupera su costo: revise los supuestos en el simulador antes de decidir.");
+                        "Las bajas están por encima del límite de los parámetros del análisis, pero con los supuestos actuales ninguna opción recupera su costo: revise los supuestos en el simulador antes de decidir.");
                 yield return rec;
             }
         }

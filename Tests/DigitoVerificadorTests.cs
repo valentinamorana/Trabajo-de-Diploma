@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Tests
 {
-    /// <summary>T07 — Pruebas del algoritmo de Dígito Verificador (DVH / DVV).</summary>
+    /// <summary>T07: Pruebas del algoritmo de Dígito Verificador (DVH / DVV).</summary>
     [TestClass]
     public class DigitoVerificadorTests
     {
@@ -53,7 +53,7 @@ namespace Tests
         public void DVH_IncluyeRol_DetectaManipulacionDeRol()
         {
             // A4: el Rol participa del DVH (formato v2) para que una manipulación del rol
-            // —del que dependen los permisos efectivos— sea detectada por la verificación
+            // (del que dependen los permisos efectivos) sea detectada por la verificación
             // de integridad. Antes solo se protegía el Perfil.
             var filaBase = new BE.FilaUsuarioDV
             {

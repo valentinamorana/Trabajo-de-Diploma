@@ -20,13 +20,13 @@ namespace GUI.Inteligencia
             if (m == null || m.SinDatos || m.SinMesesCompletos)
             {
                 SinDatos(chart, titulo, m == null ? Tr("cdc.grafico.analice", "Elija el período y pulse Analizar.")
-                    : m.SinDatos ? Tr("cdc.cohorte.sindatos", "No hay altas de suscriptores en los últimos 12 meses para armar cohortes.")
-                    : Tr("cdc.cohorte.sinmesescompletos", "Aún no hay meses completos para comparar: las cohortes están en su primer mes (*), que se ve en la grilla."));
+                    : m.SinDatos ? Tr("cdc.cohorte.sindatos", "No hay altas de suscriptores en los últimos 12 meses para agrupar a los clientes por el mes en que se suscribieron.")
+                    : Tr("cdc.cohorte.sinmesescompletos", "Aún no hay meses completos para comparar: los grupos están en su primer mes (*), que se ve en la grilla."));
                 return;
             }
             var area = Preparar(chart, titulo);
             area.AxisX.Title = Tr("cdc.cohorte.grafico.ejex", "Meses desde el alta");
-            area.AxisY.Title = Tr("cdc.cohorte.grafico.ejey", "% de la cohorte activo");
+            area.AxisY.Title = Tr("cdc.cohorte.grafico.ejey", "% del grupo activo");
             area.AxisX.Minimum = -0.3;
             area.AxisX.Maximum = m.MaximoDesplazamiento + 0.3;
             area.AxisX.Interval = 1;
@@ -37,7 +37,7 @@ namespace GUI.Inteligencia
 
             string Etiqueta(int k) => Tr("cdc.cohorte.col.mes", "Mes {0}", k);
 
-            var promedio = new Series(Tr("cdc.cohorte.grafico.promedio", "Promedio de las cohortes"))
+            var promedio = new Series(Tr("cdc.cohorte.grafico.promedio", "Promedio de los grupos"))
             {
                 ChartType = SeriesChartType.Line, Color = Tema.RosaOscuro, BorderWidth = 3, MarkerStyle = MarkerStyle.Circle, MarkerSize = 7,
                 IsValueShownAsLabel = true, LabelFormat = "0' %'", Font = Tema.FuentePequena
@@ -46,7 +46,7 @@ namespace GUI.Inteligencia
             {
                 int i = promedio.Points.AddXY(p.Desplazamiento, (double)p.Retencion.Value);
                 promedio.Points[i].AxisLabel = Etiqueta(p.Desplazamiento);
-                promedio.Points[i].ToolTip = Tr("cdc.cohorte.grafico.tippromedio", "{0}: {1:0.#} % (promedio de {2} cohorte(s), {3} cliente(s))",
+                promedio.Points[i].ToolTip = Tr("cdc.cohorte.grafico.tippromedio", "{0}: {1:0.#} % (promedio de {2} grupo(s), {3} cliente(s))",
                     Etiqueta(p.Desplazamiento), p.Retencion.Value, p.Cohortes, p.Clientes);
             }
             chart.Series.Add(promedio);
@@ -54,7 +54,7 @@ namespace GUI.Inteligencia
             var fila = m.Peor == null ? null : m.Cohortes.FirstOrDefault(c => c.Mes == m.Peor.Mes);
             if (fila != null)
             {
-                var peor = new Series(Tr("cdc.cohorte.grafico.peor", "Peor cohorte: {0:yyyy-MM}", fila.Mes))
+                var peor = new Series(Tr("cdc.cohorte.grafico.peor", "Menor permanencia: {0:yyyy-MM}", fila.Mes))
                 {
                     ChartType = SeriesChartType.Line, Color = Tema.Error, BorderWidth = 2, BorderDashStyle = ChartDashStyle.Dash,
                     MarkerStyle = MarkerStyle.Diamond, MarkerSize = 8
@@ -63,9 +63,9 @@ namespace GUI.Inteligencia
                 {
                     int i = peor.Points.AddXY(c.Desplazamiento, (double)c.Retencion);
                     peor.Points[i].AxisLabel = Etiqueta(c.Desplazamiento);
-                    peor.Points[i].ToolTip = Tr("cdc.cohorte.tip", "Cohorte {0:yyyy-MM}, mes {1}: {2} de {3} cliente(s) activos ({4:0.#} %)",
+                    peor.Points[i].ToolTip = Tr("cdc.cohorte.tip", "Suscriptos en {0:yyyy-MM}, mes {1}: {2} de {3} cliente(s) activos ({4:0.#} %)",
                         fila.Mes, c.Desplazamiento, c.Activos, fila.Tamanio, c.Retencion)
-                        + (c.EsParcial ? " — " + Tr("cdc.cohorte.parcial", "mes en curso: no entra en el promedio ni en la comparación") : "");
+                        + (c.EsParcial ? "; " + Tr("cdc.cohorte.parcial", "mes en curso: no entra en el promedio ni en la comparación") : "");
                     if (c.EsParcial)
                     {
                         peor.Points[i].MarkerColor = Color.White;

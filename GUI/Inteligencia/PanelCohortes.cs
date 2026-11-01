@@ -71,9 +71,9 @@ namespace GUI.Inteligencia
         {
             lblExplicacion.Text = Tr("cdc.cohorte.explicacion",
                 "Cómo leerlo: cada fila agrupa a los clientes por el mes en que se suscribieron y cada columna muestra qué % de ellos sigue activo (sin baja) k meses después del alta; Mes 0 es el mes del alta y * marca un mes todavía en curso.");
-            btnActuar.Text = Tr("cdc.cohorte.btn.actuar", "Actuar sobre la peor cohorte");
+            btnActuar.Text = Tr("cdc.cohorte.btn.actuar", "Actuar sobre el grupo con menor permanencia");
             tip.SetToolTip(btnActuar, Tr("cdc.cohorte.tip.actuar",
-                "Lleva a la recomendación de bajas del plan que más explica la peor cohorte (o, si no la hay, al Simulador). También con doble clic en su fila."));
+                "Lleva a la recomendación de bajas del plan que más explica las bajas del grupo con menor permanencia (o, si no la hay, al Simulador). También con doble clic en su fila."));
             ArmarLeyenda();
             Mostrar(_matriz);
         }
@@ -91,7 +91,7 @@ namespace GUI.Inteligencia
             Item(ColorBajo, Tr("cdc.cohorte.leyenda.baja", "{0} a {1} %", Bll.TramoBajo, Bll.TramoMedio - 1));
             Item(ColorCritico, Tr("cdc.cohorte.leyenda.critica", "menos de {0} %", Bll.TramoBajo));
             Item(Color.White, Tr("cdc.cohorte.leyenda.parcial", "* mes en curso (no entra en el promedio)"), Tema.TextoMuted);
-            Item(Color.White, Tr("cdc.cohorte.leyenda.peor", "▶ peor cohorte (doble clic para actuar)"), Tema.Error);
+            Item(Color.White, Tr("cdc.cohorte.leyenda.peor", "▶ grupo con menor permanencia (doble clic para actuar)"), Tema.Error);
             flpLeyenda.ResumeLayout();
         }
 
@@ -122,7 +122,7 @@ namespace GUI.Inteligencia
             dgv.DataSource = t;
             if (dgv.Columns.Count >= 2)
             {
-                dgv.Columns[ColCohorte].HeaderText = Tr("cdc.cohorte.col.cohorte", "Cohorte (mes de alta)");
+                dgv.Columns[ColCohorte].HeaderText = Tr("cdc.cohorte.col.cohorte", "Grupo (mes de alta)");
                 dgv.Columns[ColCohorte].FillWeight = 150;
                 dgv.Columns[ColClientes].HeaderText = Tr("cdc.cohorte.col.clientes", "Clientes");
                 dgv.Columns[ColClientes].FillWeight = 70;
@@ -222,15 +222,15 @@ namespace GUI.Inteligencia
             int? k = Desplazamiento(col);
             var celda = k.HasValue ? fila.Celda(k.Value) : null;
             if (celda != null)
-                e.ToolTipText = Tr("cdc.cohorte.tip", "Cohorte {0:yyyy-MM}, mes {1}: {2} de {3} cliente(s) activos ({4:0.#} %)",
+                e.ToolTipText = Tr("cdc.cohorte.tip", "Suscriptos en {0:yyyy-MM}, mes {1}: {2} de {3} cliente(s) activos ({4:0.#} %)",
                                    fila.Mes, celda.Desplazamiento, celda.Activos, fila.Tamanio, celda.Retencion)
-                                + (celda.EsParcial ? " — " + Tr("cdc.cohorte.parcial", "mes en curso: no entra en el promedio ni en la comparación") : "");
+                                + (celda.EsParcial ? "; " + Tr("cdc.cohorte.parcial", "mes en curso: no entra en el promedio ni en la comparación") : "");
             else if (col.Name == ColClientes && !fila.Comparable)
-                e.ToolTipText = Tr("cdc.cohorte.tip.chica", "Cohorte de menos de {0} clientes: se muestra, pero no compite por la peor cohorte (sería ruido).",
+                e.ToolTipText = Tr("cdc.cohorte.tip.chica", "Grupo de menos de {0} clientes: se muestra, pero no compite por la menor permanencia (sería ruido).",
                                    _matriz.MinimoClientes);
             else if (fila.EsPeor)
                 e.ToolTipText = Tr("cdc.cohorte.tip.actuar",
-                    "Lleva a la recomendación de bajas del plan que más explica la peor cohorte (o, si no la hay, al Simulador). También con doble clic en su fila.");
+                    "Lleva a la recomendación de bajas del plan que más explica las bajas del grupo con menor permanencia (o, si no la hay, al Simulador). También con doble clic en su fila.");
         }
 
         private void Dgv_CellDoubleClick(object sender, DataGridViewCellEventArgs e)

@@ -6,11 +6,11 @@ using System.Linq;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Inteligencia comercial» — Catálogo de los umbrales configurables del motor de
+    /// PN03 «Inteligencia comercial»: Catálogo de los umbrales configurables del motor de
     /// recomendaciones y del simulador: clave, valor por defecto, rango válido y explicación.
     /// Los valores se guardan en ParametroSistema ("Comercial.&lt;Clave&gt;", sembrados por la sección
     /// 20o del script); si falta uno o no se puede leer, rige el valor por defecto de este catálogo.
-    /// Gerencia los edita desde el diálogo "Umbrales" del Centro de decisiones.
+    /// Gerencia los edita desde el diálogo "Parámetros del análisis" del Centro de decisiones.
     /// </summary>
     public static class CatalogoUmbrales
     {
@@ -148,12 +148,12 @@ namespace BLL.Inteligencia
         public static void Validar(string clave, decimal valor)
         {
             var d = Buscar(clave) ?? throw new BE.AppException("err.bll.umbral.desconocido",
-                "El umbral '{0}' no existe.", clave);
+                "El parámetro del análisis '{0}' no existe.", clave);
             if (valor < d.Minimo || valor > d.Maximo)
                 throw new BE.AppException("err.bll.umbral.rango",
-                    "El umbral '{0}' debe estar entre {1} y {2}.", d.Nombre, d.Minimo, d.Maximo);
+                    "El parámetro del análisis '{0}' debe estar entre {1} y {2}.", d.Nombre, d.Minimo, d.Maximo);
             if (d.Decimales == 0 && valor != Math.Truncate(valor))
-                throw new BE.AppException("err.bll.umbral.entero", "El umbral '{0}' debe ser un número entero.", d.Nombre);
+                throw new BE.AppException("err.bll.umbral.entero", "El parámetro del análisis '{0}' debe ser un número entero.", d.Nombre);
         }
     }
 
@@ -212,7 +212,7 @@ namespace BLL.Inteligencia
                 cambios.ToDictionary(kv => kv.Key, kv => kv.Value.ToString(CultureInfo.InvariantCulture)));
             try
             {
-                bitacora.Registrar(modulo, "Umbrales comerciales modificados: " +
+                bitacora.Registrar(modulo, "Parámetros del análisis modificados: " +
                     string.Join(", ", cambios.Select(kv => $"{kv.Key} = {kv.Value.ToString(CultureInfo.InvariantCulture)}")),
                     BE.Criticidad.Media);
             }

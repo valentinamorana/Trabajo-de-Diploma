@@ -4,7 +4,7 @@ namespace BLL.Manejadores
 {
     /// <summary>
     /// Último eslabón de la cadena: siempre atiende lo que le llega (venció el período
-    /// de gracia sin regularizar) — igual que BajaSuscripcionHandler / DirectorGeneral
+    /// de gracia sin regularizar): igual que BajaSuscripcionHandler / DirectorGeneral
     /// del ejemplo de cátedra, que resuelve sin condición ni delegación por ser el
     /// último de la cadena. El cliente ya quedó con FechaLimiteGracia vencida (la fijó
     /// AplicarGraciaHandler en un intento anterior), así que Cliente.EstaSuspendidoPorPago

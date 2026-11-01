@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// Capa de Entidades — Permiso del sistema.
+    /// Capa de Entidades: Permiso del sistema.
     /// Mapea la tabla [Permiso] de WardrobeFlowDB.
     ///
     /// Cada permiso representa una funcionalidad habilitada para un rol.

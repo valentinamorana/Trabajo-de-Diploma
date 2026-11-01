@@ -29,7 +29,7 @@ namespace GUI
             if (esPassword) txtInput.UseSystemPasswordChar = true;
 
             // Ícono, tema/fuente del usuario y seguridad de controles ahora los aplica
-            // FormBase.OnLoad — antes se duplicaba a mano solo el ícono acá, y el diálogo
+            // FormBase.OnLoad: antes se duplicaba a mano solo el ícono acá, y el diálogo
             // quedaba con tema claro/fuente por defecto aunque el usuario hubiera elegido
             // tema oscuro en "Mi Perfil". Seguro de usar incluso antes del login:
             // PreferenciasUI.Aplicar usa un default razonable si todavía no se cargó ninguna

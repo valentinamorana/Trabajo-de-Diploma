@@ -1,7 +1,7 @@
 namespace BLL.Comandos
 {
     /// <summary>
-    /// Patrón Command (PN01 y PN04 — operaciones sobre un pedido). Equivalente a OrdenCommand del
+    /// Patrón Command (PN01 y PN04: operaciones sobre un pedido). Equivalente a OrdenCommand del
     /// ejemplo de cátedra: clase abstracta (no interfaz) cuyo constructor recibe y guarda el Receiver
     /// (BLL.Pedido) y los datos de la operación, con el método abstracto Ejecutar().
     /// A diferencia del ejemplo, un comando puede ser reversible (Deshacer): el Invocador guarda el

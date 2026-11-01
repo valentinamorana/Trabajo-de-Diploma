@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// PN01 — arma los objetos de información del diagrama de actividad de Armar pedido como
+    /// PN01: arma los objetos de información del diagrama de actividad de Armar pedido como
     /// documentos PDF generados directamente (ExportadorPdf, sin impresora virtual):
     ///   • Planilla de control de existencias + detalle de selección   (Vendedor → Depósito)
     ///   • Informe de disponibilidad (prendas faltantes y alternativas) (Depósito → Vendedor)
@@ -26,10 +26,10 @@ namespace GUI.Exportacion
             return t.ContainsKey(clave) ? t[clave].Texto : fallback;
         }
 
-        private static string Fecha(DateTime? f) => f.HasValue ? f.Value.ToString("g") : "—";
+        private static string Fecha(DateTime? f) => f.HasValue ? f.Value.ToString("g") : "-";
 
         private static string Prenda(BE.Prenda p) =>
-            $"#{p.IdPrenda}  {p.Nombre}  —  {p.Categoria ?? "—"} / {Tr("col.prenda.talle", "Talle")} {p.Talle ?? "—"} / {p.Color ?? "—"}";
+            $"#{p.IdPrenda}  {p.Nombre}, {p.Categoria ?? "-"} / {Tr("col.prenda.talle", "Talle")} {p.Talle ?? "-"} / {p.Color ?? "-"}";
 
         private static void Cabecera(StringBuilder sb, BE.Pedido pedido)
         {
@@ -45,7 +45,7 @@ namespace GUI.Exportacion
         {
             sb.AppendLine(Tr("doc.ped.detalle", "Detalle de la selección (prenda, talle, color, cantidad):"));
             foreach (var g in prendas.GroupBy(p => new { p.Nombre, p.Talle, p.Color }))
-                sb.AppendLine($"   {g.Key.Nombre}  —  {g.Key.Talle ?? "—"} / {g.Key.Color ?? "—"}  ×{g.Count()}");
+                sb.AppendLine($"   {g.Key.Nombre}, {g.Key.Talle ?? "-"} / {g.Key.Color ?? "-"}  ×{g.Count()}");
             sb.AppendLine();
         }
 
@@ -55,14 +55,14 @@ namespace GUI.Exportacion
             if (cliente == null) return;
             sb.AppendLine(string.Format(
                 Tr("doc.ped.cupo", "Plan {0}: {1} prenda(s) seleccionadas + {2} en uso, de {3} permitidas."),
-                cliente.NombrePlan ?? "—", seleccionadas, cliente.StockUtilizado, cliente.LimitePrendas));
+                cliente.NombrePlan ?? "-", seleccionadas, cliente.StockUtilizado, cliente.LimitePrendas));
             sb.AppendLine();
         }
 
         private static void CabeceraCliente(StringBuilder sb, BE.Cliente c)
         {
-            sb.AppendLine($"{Tr("doc.ped.cliente", "Cliente")}: {c.NombreCompleto}  —  DNI {c.DNI}");
-            sb.AppendLine($"{Tr("doc.aviso.plan", "Plan")}: {c.NombrePlan ?? "—"}  —  {Tr("doc.aviso.vence", "Vence")}: {(c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("d") : "—")}");
+            sb.AppendLine($"{Tr("doc.ped.cliente", "Cliente")}: {c.NombreCompleto}, DNI {c.DNI}");
+            sb.AppendLine($"{Tr("doc.aviso.plan", "Plan")}: {c.NombrePlan ?? "-"}; {Tr("doc.aviso.vence", "Vence")}: {(c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("d") : "-")}");
             sb.AppendLine($"{Tr("doc.aviso.fecha", "Fecha del aviso")}: {Fecha(DateTime.Now)}");
             sb.AppendLine();
         }
@@ -89,7 +89,7 @@ namespace GUI.Exportacion
 
             return new ReporteExportable
             {
-                Titulo        = $"{Tr("doc.planilla.titulo", "Planilla de control de existencias")} — {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
+                Titulo        = $"{Tr("doc.planilla.titulo", "Planilla de control de existencias")}: {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
                 NombreArchivo = $"PlanillaControl_Pedido{pedido.IdPedido}",
                 TextoPlano    = sb.ToString()
             };
@@ -99,7 +99,7 @@ namespace GUI.Exportacion
         {
             var sb = new StringBuilder();
             Cabecera(sb, pedido);
-            sb.AppendLine($"{Tr("doc.ped.controlo", "Controló")}: {pedido.NombreEmpleadoControl ?? "—"}  —  {Fecha(pedido.FechaControl)}");
+            sb.AppendLine($"{Tr("doc.ped.controlo", "Controló")}: {pedido.NombreEmpleadoControl ?? "-"}, {Fecha(pedido.FechaControl)}");
             sb.AppendLine();
             sb.AppendLine(Tr("doc.faltantes.lista", "Prendas no disponibles y alternativas sugeridas:"));
             foreach (var f in faltantes)
@@ -117,7 +117,7 @@ namespace GUI.Exportacion
 
             return new ReporteExportable
             {
-                Titulo        = $"{Tr("doc.faltantes.titulo", "Informe de disponibilidad (faltantes y alternativas)")} — {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
+                Titulo        = $"{Tr("doc.faltantes.titulo", "Informe de disponibilidad (faltantes y alternativas)")}: {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
                 NombreArchivo = $"InformeFaltantes_Pedido{pedido.IdPedido}",
                 TextoPlano    = sb.ToString()
             };
@@ -127,7 +127,7 @@ namespace GUI.Exportacion
         {
             var sb = new StringBuilder();
             Cabecera(sb, pedido);
-            sb.AppendLine($"{Tr("doc.ped.controlo", "Controló")}: {pedido.NombreEmpleadoControl ?? "—"}  —  {Fecha(pedido.FechaControl)}");
+            sb.AppendLine($"{Tr("doc.ped.controlo", "Controló")}: {pedido.NombreEmpleadoControl ?? "-"}, {Fecha(pedido.FechaControl)}");
             sb.AppendLine($"{Tr("doc.separacion.fecha", "Prendas separadas el")}: {Fecha(pedido.FechaSeparacion)}");
             sb.AppendLine();
             sb.AppendLine(Tr("doc.separacion.lista", "Prendas separadas para el pedido (quedan en uso a nombre del cliente):"));
@@ -138,7 +138,7 @@ namespace GUI.Exportacion
 
             return new ReporteExportable
             {
-                Titulo        = $"{Tr("doc.separacion.titulo", "Constancia de prendas separadas")} — {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
+                Titulo        = $"{Tr("doc.separacion.titulo", "Constancia de prendas separadas")}: {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
                 NombreArchivo = $"ConstanciaSeparacion_Pedido{pedido.IdPedido}",
                 TextoPlano    = sb.ToString()
             };
@@ -179,7 +179,7 @@ namespace GUI.Exportacion
 
             return new ReporteExportable
             {
-                Titulo        = $"{Tr("doc.desist.titulo", "Aviso de desistimiento")} — {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
+                Titulo        = $"{Tr("doc.desist.titulo", "Aviso de desistimiento")}: {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
                 NombreArchivo = $"Desistimiento_Pedido{pedido.IdPedido}",
                 TextoPlano    = sb.ToString()
             };
@@ -199,7 +199,7 @@ namespace GUI.Exportacion
                 : Tr("doc.aviso.novigente.titulo", "Aviso de suscripción no vigente");
             return new ReporteExportable
             {
-                Titulo        = $"{titulo} — {cliente.NombreCompleto}",
+                Titulo        = $"{titulo}: {cliente.NombreCompleto}",
                 NombreArchivo = (porPedidoActivo ? "AvisoPedidoActivo_" : "AvisoSuscripcionNoVigente_") + cliente.IdCliente,
                 TextoPlano    = sb.ToString()
             };
@@ -219,7 +219,7 @@ namespace GUI.Exportacion
 
             return new ReporteExportable
             {
-                Titulo        = $"{Tr("doc.cupo.titulo", "Detalle de restricciones de cupo")} — {cliente.NombreCompleto}",
+                Titulo        = $"{Tr("doc.cupo.titulo", "Detalle de restricciones de cupo")}: {cliente.NombreCompleto}",
                 NombreArchivo = $"RestriccionesCupo_{cliente.IdCliente}",
                 TextoPlano    = sb.ToString()
             };
@@ -230,7 +230,7 @@ namespace GUI.Exportacion
         {
             var sb = new StringBuilder();
             Cabecera(sb, pedido);
-            sb.AppendLine($"{Tr("doc.ped.controlo", "Controló")}: {pedido.NombreEmpleadoControl ?? "—"}  —  {Fecha(pedido.FechaControl)}");
+            sb.AppendLine($"{Tr("doc.ped.controlo", "Controló")}: {pedido.NombreEmpleadoControl ?? "-"}, {Fecha(pedido.FechaControl)}");
             sb.AppendLine();
             sb.AppendLine(Tr("doc.confirmadas.lista", "Prendas confirmadas como disponibles (pendientes de separar):"));
             foreach (var p in pedido.Prendas.Where(x => pedido.PrendasConfirmadas.Contains(x.IdPrenda)))
@@ -240,7 +240,7 @@ namespace GUI.Exportacion
 
             return new ReporteExportable
             {
-                Titulo        = $"{Tr("doc.confirmadas.titulo", "Detalle de prendas confirmadas")} — {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
+                Titulo        = $"{Tr("doc.confirmadas.titulo", "Detalle de prendas confirmadas")}: {Tr("doc.ped.pedido", "Pedido")} #{pedido.IdPedido}",
                 NombreArchivo = $"PrendasConfirmadas_Pedido{pedido.IdPedido}",
                 TextoPlano    = sb.ToString()
             };

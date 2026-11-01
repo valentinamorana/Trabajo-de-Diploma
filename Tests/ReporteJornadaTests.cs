@@ -8,7 +8,7 @@ namespace Tests
 {
     /// <summary>
     /// Cubre la fachada real de BLL.ReporteJornada (antes 0% testeable: constructor sin
-    /// ningún parámetro, colaboradores hardcodeados — ver Tests §9, "Reportes"). No repite
+    /// ningún parámetro, colaboradores hardcodeados: ver Tests §9, "Reportes"). No repite
     /// la agregación pura de CalcularTendencia, ya cubierta por ReporteTendenciaTests.
     /// </summary>
     [TestClass]

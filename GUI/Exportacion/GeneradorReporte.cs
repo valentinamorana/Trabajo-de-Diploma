@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// Patrón FACTORY METHOD — rol "Creator" (Creador abstracto).
+    /// Patrón FACTORY METHOD: rol "Creator" (Creador abstracto).
     ///
     /// Declara el método fábrica <see cref="CrearExportador"/>, que recibe el formato
     /// pedido ("pdf" / "txt") y devuelve el <see cref="Exportador"/> concreto. Las

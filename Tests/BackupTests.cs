@@ -6,7 +6,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// RF-08 — Preview de pérdida antes de restaurar un backup.
+    /// RF-08: Preview de pérdida antes de restaurar un backup.
     /// Verifica que BLL.Backup.ObtenerCambiosDesde delegue correctamente en el DAL
     /// (vía IBackupDAL inyectado) y aplique el corto-circuito cuando no hay fecha.
     /// Sin SQL Server: el acceso a datos se reemplaza por FakeBackupDAL.

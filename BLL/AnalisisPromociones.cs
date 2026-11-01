@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// PN03 — carril Gerencia del diagrama (ver el mapeo completo en BLL.Promocion):
+    /// PN03: carril Gerencia del diagrama (ver el mapeo completo en BLL.Promocion):
     ///
     ///   Analizar métricas («Reporte de métricas») ........ AnalizarMetricas
     ///   ¿Hay oportunidad? (No → fin "Sin promoción") ..... HayOportunidad

@@ -23,7 +23,7 @@ namespace BE
     }
 
     /// <summary>
-    /// PN03 «Inteligencia comercial» — Un indicador de la pestaña Analizar: valor del período, valor
+    /// PN03 «Inteligencia comercial»: Un indicador de la pestaña Analizar: valor del período, valor
     /// del período anterior de la misma duración, variación (▲/▼) y una interpretación de una línea
     /// ("Las bajas subieron 4 pp respecto del período anterior"). Lo calcula BLL.Inteligencia.CalculoKpi.
     /// </summary>

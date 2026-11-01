@@ -1,6 +1,6 @@
 namespace GUI.Exportacion
 {
-    /// <summary>Patrón Factory Method — creador de exportadores para el Análisis de Tiempos de Mantenimiento (PdN11).</summary>
+    /// <summary>Patrón Factory Method: creador de exportadores para el Análisis de Tiempos de Mantenimiento (PdN11).</summary>
     public class GeneradorMantenimiento : GeneradorReporte
     {
         private const string Origen = "Tiempos de Mantenimiento";

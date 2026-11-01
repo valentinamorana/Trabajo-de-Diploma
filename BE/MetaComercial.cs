@@ -43,7 +43,7 @@ namespace BE
     }
 
     /// <summary>
-    /// PN03 — «Meta comercial»: el valor que Gerencia se propone para un indicador en un mes
+    /// PN03: «Meta comercial»: el valor que Gerencia se propone para un indicador en un mes
     /// (tabla MetaComercial, una por indicador y mes). Solo se edita para el mes en curso o los futuros.
     /// Sin dígito verificador, como el resto de las tablas de PN03 (DecisionComercial, SugerenciaPromocion).
     /// </summary>
@@ -103,7 +103,7 @@ namespace BE
     }
 
     /// <summary>
-    /// PN03 — Resumen de los avisos al iniciar sesión (Gerencia): qué hay para decidir hoy en el Centro
+    /// PN03: Resumen de los avisos al iniciar sesión (Gerencia): qué hay para decidir hoy en el Centro
     /// de decisiones. Lo calcula BLL.Inteligencia.AvisosComerciales.
     /// </summary>
     public class ResumenAvisosComerciales

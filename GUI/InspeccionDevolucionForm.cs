@@ -7,8 +7,8 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN04, CU05-DEP Inspeccionar Devolución. Actor: Depósito
-    /// (Deposito). Lógica alineada a Nuuly: binaria, sin aprobador — la prenda
+    /// Capa de Presentación: PN04, CU05-DEP Inspeccionar Devolución. Actor: Depósito
+    /// (Deposito). Lógica alineada a Nuuly: binaria, sin aprobador; la prenda
     /// devuelta (EnLimpieza) reingresa sin cargo o se da de baja y se cobra el precio de
     /// reposición completo (BLL.CargoPrenda.RegistrarCargo, ya existente desde Bloque 1).
     /// </summary>
@@ -26,7 +26,7 @@ namespace GUI
         public InspeccionDevolucionForm()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvPrendas);
         }
 
@@ -105,8 +105,8 @@ namespace GUI
 
                 foreach (var p in _prendas)
                     tabla.Rows.Add(
-                        p.IdPrenda, p.Nombre, p.Talle ?? "—", p.Color ?? "—",
-                        p.Categoria ?? "—", p.NombreUltimoCliente ?? "—");
+                        p.IdPrenda, p.Nombre, p.Talle ?? "-", p.Color ?? "-",
+                        p.Categoria ?? "-", p.NombreUltimoCliente ?? "-");
 
                 dgvPrendas.DataSource = tabla;
                 if (dgvPrendas.Columns.Contains("ID"))
@@ -145,7 +145,7 @@ namespace GUI
             return _prendas.Find(p => p.IdPrenda == id);
         }
 
-        // Camino A — reingresa sin cargo (BLL.InspeccionDevolucion.AprobarReingreso), sin
+        // Camino A: reingresa sin cargo (BLL.InspeccionDevolucion.AprobarReingreso), sin
         // aprobación de nadie (Nuuly: desgaste normal cubierto por la cuota).
         private void BtnAprobarReingreso_Click(object sender, EventArgs e)
         {
@@ -166,7 +166,7 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        // Camino B — se da de baja y se cobra el precio de reposición completo, sin aprobación
+        // Camino B: se da de baja y se cobra el precio de reposición completo, sin aprobación
         // de nadie (Nuuly: dañada sin reparación posible = cobro directo). Cargo y baja se
         // persisten en UNA transacción dentro de BLL.InspeccionDevolucion.DarDeBajaConCargo
         // (antes eran dos llamadas sueltas desde acá, sin transacción).
@@ -182,7 +182,7 @@ namespace GUI
                 try
                 {
                     inspeccionBLL.DarDeBajaConCargo(this.Text, prenda, dlg.Motivo, dlg.Monto);
-                    MostrarOk(Tr("msg.insp.baja_ok", "'{0}' dada de baja — cargo de {1:C2} registrado.",
+                    MostrarOk(Tr("msg.insp.baja_ok", "'{0}' dada de baja. Se registró un cargo de {1:C2}.",
                         new object[] { prenda.Nombre, dlg.Monto }));
                     CargarPrendas();
                 }

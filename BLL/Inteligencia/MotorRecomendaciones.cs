@@ -6,7 +6,7 @@ using BLL.Inteligencia.Reglas;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Recomendar / decidir» — Motor de recomendaciones: contexto del patrón STRATEGY. Recorre las
+    /// PN03 «Recomendar / decidir»: Motor de recomendaciones: contexto del patrón STRATEGY. Recorre las
     /// reglas registradas (cada una una IReglaRecomendacion independiente), junta lo que devuelven y lo
     /// ordena por prioridad y, dentro de la misma prioridad, por impacto estimado.
     ///

@@ -4,7 +4,7 @@ using System.IO;
 namespace Servicios.Serializacion
 {
     /// <summary>
-    /// A02 Serialización — punto único (Singleton, el FileStreamManager de la cátedra) que arma las
+    /// A02 Serialización: punto único (Singleton, el FileStreamManager de la cátedra) que arma las
     /// rutas de los archivos serializados: %LOCALAPPDATA%\WardrobeFlow\&lt;subcarpeta&gt;, con
     /// Environment.SpecialFolder (nunca una ruta fija), así funciona en cualquier PC y con un usuario
     /// de Windows sin permisos de administrador. Crea la carpeta cuando hace falta y sugiere nombres

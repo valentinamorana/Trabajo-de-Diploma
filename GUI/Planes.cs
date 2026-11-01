@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Módulo de Gestión de Planes de Suscripción.
+    /// Capa de Presentación: Módulo de Gestión de Planes de Suscripción.
     ///
     /// Permite al Vendedor consultar los planes disponibles y a Gerencia/Admin
     /// crear y modificar planes.
@@ -35,13 +35,13 @@ namespace GUI
         private List<BE.PlanSuscripcion> _planes = new List<BE.PlanSuscripcion>();
         private int _idEnEdicion = 0;  // 0 = modo alta
 
-        // Idioma activo — sincronizado en Traducir() para usar en CargarPlanes
+        // Idioma activo: sincronizado en Traducir() para usar en CargarPlanes
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
         public Planes()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvPlanes);
         }
 

@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — BitacoraNegocio.
+    /// Capa de Acceso a Datos: BitacoraNegocio.
     /// Opera sobre la tabla [BitacoraNegocio] de WardrobeFlowDB.
     /// </summary>
     public class BitacoraNegocio : BaseDAL

@@ -11,7 +11,7 @@ using static GUI.Inteligencia.TextosMetas;
 namespace GUI.Inteligencia
 {
     /// <summary>
-    /// PN03 «Metas comerciales» — Pestaña "Metas" del Centro de decisiones: Gerencia fija el objetivo del mes
+    /// PN03 «Metas comerciales»: Pestaña "Metas" del Centro de decisiones: Gerencia fija el objetivo del mes
     /// para cada indicador (MRR, % de bajas, ocupación del stock) y ve el real contra el objetivo, el avance,
     /// la proyección al cierre, el semáforo y el gráfico de los últimos meses. Toda la lógica (validación,
     /// medición, proyección, semáforo) es de BLL.Inteligencia.MetasComerciales; este control solo pide y dibuja.
@@ -160,7 +160,7 @@ namespace GUI.Inteligencia
                 t.Columns.Add(c, typeof(string));
             foreach (var s in _seguimiento)
                 t.Rows.Add(R(s.NombreIndicador), ValorMeta(s.Unidad, s.Meta.ValorObjetivo) + (s.Meta.Sentido == BE.SentidoMeta.MenorEsMejor ? " " + Tr("cdc.meta.maximo", "(máx.)") : ""),
-                    ValorMeta(s.Unidad, s.ValorActual), s.AvancePorcentaje.HasValue ? s.AvancePorcentaje.Value.ToString("0.#") + " %" : "—",
+                    ValorMeta(s.Unidad, s.ValorActual), s.AvancePorcentaje.HasValue ? s.AvancePorcentaje.Value.ToString("0.#") + " %" : "-",
                     ValorMeta(s.Unidad, s.Proyeccion), EstadoMeta(s.Estado), R(s.Explicacion));
             dgvMetas.DataSource = t;
             if (dgvMetas.Columns.Count == 7)

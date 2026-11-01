@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PN02 — Comercialización de la suscripción. Estado intermedio entre "el cliente eligió
+    /// PN02: Comercialización de la suscripción. Estado intermedio entre "el cliente eligió
     /// un plan" (Vendedor registra la contratación: «Orden de cobro») y "la suscripción quedó
     /// vigente" (Caja confirma el cobro, emite el comprobante y se activa la suscripción). El
     /// Comprobante se guarda como columnas propias (número y fecha de emisión, relación 1:1).

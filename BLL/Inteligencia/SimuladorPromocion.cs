@@ -3,7 +3,7 @@ using System;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Simular» — "¿Qué pasa si…?": costo, beneficio, ROI y retención de equilibrio de una
+    /// PN03 «Simular»: "¿Qué pasa si…?": costo, beneficio, ROI y retención de equilibrio de una
     /// promoción de retención. Matemática pura (probada en Tests/SimuladorPromocionTests), con la misma
     /// base mensual que usa Contabilidad en "Analizar margen e impacto":
     ///
@@ -102,7 +102,7 @@ namespace BLL.Inteligencia
             }
             bool roiBajo = r.Roi.HasValue && r.Roi.Value < roiMinimoPct;
             bool margenChico = r.MargenSeguridad.HasValue && r.MargenSeguridad.Value < margenSeguridadPp;
-            string roiTexto = r.Roi.HasValue ? r.Roi.Value.ToString("0.#") + " %" : "—";
+            string roiTexto = r.Roi.HasValue ? r.Roi.Value.ToString("0.#") + " %" : "-";
             if (roiBajo || margenChico)
             {
                 // La explicación dice la causa real: ROI bajo el mínimo, margen de seguridad chico o ambas.

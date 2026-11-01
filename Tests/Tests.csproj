@@ -35,6 +35,8 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
@@ -147,6 +149,11 @@
     <Compile Include="MetasComercialesTests.cs" />
     <Compile Include="AccionesRecomendacionTests.cs" />
     <Compile Include="AnalisisCohortesTests.cs" />
+    <Compile Include="ExportadorPdfTests.cs" />
+    <Compile Include="AlertasLeidasTests.cs" />
+    <Compile Include="ConstanciaDecisionTests.cs" />
+    <Compile Include="SerializacionArchivosTests.cs" />
+    <Compile Include="ConexionErrorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +176,11 @@
     <ProjectReference Include="..\Servicios\Servicios.csproj">
       <Project>{F41A7A3A-8AC1-4036-9FCA-B81EE8812B8E}</Project>
       <Name>Servicios</Name>
+    </ProjectReference>
+    <!-- GUI (WinExe): las pruebas de ExportadorPdf generan PDF reales con iTextSharp. -->
+    <ProjectReference Include="..\GUI\GUI.csproj">
+      <Project>{EAB99289-C035-40BF-9866-DCC247B7C9DF}</Project>
+      <Name>GUI</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

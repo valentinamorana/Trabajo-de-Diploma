@@ -24,7 +24,7 @@ namespace BLL.Inteligencia
     }
 
     /// <summary>
-    /// PN03 «Medir resultado» — Convierte el «Resultado de la promoción» (BLL.AnalisisPromociones) en
+    /// PN03 «Medir resultado»: Convierte el «Resultado de la promoción» (BLL.AnalisisPromociones) en
     /// plata y en una decisión. Cálculo puro (Tests/MedicionPromocionesTests):
     ///
     ///   retenidos atribuibles = clientes en juego × mejora de retención (pp) / 100

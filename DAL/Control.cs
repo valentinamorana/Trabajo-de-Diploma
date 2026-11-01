@@ -5,7 +5,7 @@ using System.Data;
 namespace DAL
 {
     /// <summary>
-    /// T05 — Acceso a datos de la entidad CONTROL (textos traducibles del sistema).
+    /// T05: Acceso a datos de la entidad CONTROL (textos traducibles del sistema).
     /// </summary>
     public class Control : BaseDAL
     {
@@ -27,6 +27,6 @@ namespace DAL
         }
 
         // Alta/lookup de un Control por clave vive en DAL.Traduccion.ObtenerOCrearControl
-        // (único lugar que lo necesita — evita mantener la misma consulta en dos DAO).
+        // (único lugar que lo necesita: evita mantener la misma consulta en dos DAO).
     }
 }

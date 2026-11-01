@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BE
 {
     /// <summary>
-    /// Patrón Composite — T04 Gestión de Perfiles de Usuario.
+    /// Patrón Composite: T04 Gestión de Perfiles de Usuario.
     /// Nodo compuesto: representa un grupo de permisos (ej: "Inventario", "Ventas").
     /// Puede contener tanto Familia como Patente como hijos.
     /// </summary>
@@ -50,7 +50,7 @@ namespace BE
         }
 
         // Elimina un hijo específico del nodo compuesto.
-        // No lanza si el hijo no existe — comportamiento silencioso como en Stach.
+        // No lanza si el hijo no existe: comportamiento silencioso como en Stach.
         public override void QuitarHijo(Componente c)
         {
             if (c != null)
@@ -63,7 +63,7 @@ namespace BE
         }
 
         // Paso RECURSIVO: un compuesto agrega las hojas de TODOS sus hijos. Si un hijo es a su
-        // vez otra Familia/Rol, éste recorre los suyos — la recursión baja hasta las Patentes.
+        // vez otra Familia/Rol, éste recorre los suyos: la recursión baja hasta las Patentes.
         // Es el mismo mecanismo que CalcularPrecioBase() de LoteArticulos, que suma recursivamente
         // (y soporta lotes-dentro-de-lotes igual que acá rol-dentro-de-rol).
         // 'visitados' evita revisitar nodos compartidos o cortar ante datos cíclicos corruptos.

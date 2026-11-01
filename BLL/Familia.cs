@@ -5,12 +5,12 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Capa de Lógica de Negocio — T04 Gestión de Perfiles de Usuario (Patrón Composite).
+    /// Capa de Lógica de Negocio: T04 Gestión de Perfiles de Usuario (Patrón Composite).
     ///
     /// Responsabilidades:
-    ///   1. ObtenerArbol() — expone el árbol Composite desde BD.
-    ///   2. ObtenerPermisosEfectivos()            — resuelve recursivamente los permisos de un rol.
-    ///   3. CRUD de componentes + AsignarPermiso() / QuitarPermiso() — operan sobre [PermisoRelacion],
+    ///   1. ObtenerArbol(): expone el árbol Composite desde BD.
+    ///   2. ObtenerPermisosEfectivos(): resuelve recursivamente los permisos de un rol.
+    ///   3. CRUD de componentes + AsignarPermiso() / QuitarPermiso(): operan sobre [PermisoRelacion],
     ///      el motor real de autorización.
     /// </summary>
     public class Familia
@@ -32,7 +32,7 @@ namespace BLL
         // Patente que habilita la gestión de usuarios/permisos (acceso a esta misma pantalla).
         private const string MenuGestion = "mnuUsuarios";
 
-        // ¿El usuario en sesión es Administrador? (acceso total por rol — bypass, decisión B1).
+        // ¿El usuario en sesión es Administrador? (acceso total por rol: bypass, decisión B1).
         private static bool EsAdminEnSesion()
         {
             return Seguridad.SessionManager.IsLoggedIn &&
@@ -104,7 +104,7 @@ namespace BLL
 
         // Deja constancia en bitácora (criticidad Alta) cada vez que el guard anti-lockout de
         // administradores se salta por un fallo lateral de BD, para que quede visible que la
-        // protección no se aplicó esa vez — antes el fail-open era completamente silencioso.
+        // protección no se aplicó esa vez: antes el fail-open era completamente silencioso.
         private void RegistrarGuardSaltado(string paso, Exception ex)
         {
             try
@@ -167,7 +167,7 @@ namespace BLL
             return permisoDAL.ObtenerRoles();
         }
 
-        // ── T04 — MOTOR REAL de autorización (Composite + recursión) ────────────
+        // ── T04: MOTOR REAL de autorización (Composite + recursión) ────────────
 
         // Devuelve el árbol Composite COMPLETO desde BD (Familias, Patentes y Roles
         // ya estructurados vía PermisoRelacion). Para visualización en TreeView.
@@ -176,7 +176,7 @@ namespace BLL
             return permisoDAL.ObtenerArbol();
         }
 
-        // Permisos EFECTIVOS de un rol — recorre RECURSIVAMENTE toda la jerarquía
+        // Permisos EFECTIVOS de un rol: recorre RECURSIVAMENTE toda la jerarquía
         // (rol → roles/familias → ... → patentes) y devuelve las hojas (Patentes) sin
         // duplicados. Un permiso que aparece por varios caminos se cuenta una sola vez.
         // Esta es la lista que se carga en la sesión del usuario (BLL.Usuario.Login).
@@ -202,7 +202,7 @@ namespace BLL
             return new List<BE.Permiso>(resultado.Values);
         }
 
-        // Familias disponibles (compuestos que NO son roles) — para la Lista de Familias.
+        // Familias disponibles (compuestos que NO son roles): para la Lista de Familias.
         public List<BE.Familia> ObtenerFamiliasDisponibles()
         {
             var lista = new List<BE.Familia>();
@@ -210,7 +210,7 @@ namespace BLL
             return lista;
         }
 
-        // Patentes disponibles (permisos simples) — para la Lista de Patentes.
+        // Patentes disponibles (permisos simples): para la Lista de Patentes.
         public List<BE.Patente> ObtenerPatentesDisponibles()
         {
             var lista = new List<BE.Patente>();
@@ -255,7 +255,7 @@ namespace BLL
                             "No puede quitarse a sí mismo el acceso de Gestión de Usuarios de su propio rol.");
 
                     // Anti-autoescalación: tampoco puede AGREGARSE a su propio rol ningún permiso
-                    // que ese rol no resuelva YA hoy — el guard de arriba solo protege contra
+                    // que ese rol no resuelva YA hoy: el guard de arriba solo protege contra
                     // PERDER la gestión, no contra ampliar el propio techo de acceso editándose a
                     // sí mismo. Se comparan las patentes efectivas actuales vs. las que resolvería
                     // la selección propuesta, sin mutar el árbol real (solo lectura vía
@@ -320,10 +320,10 @@ namespace BLL
             return (agregados, quitados);
         }
 
-        // ── T04 — CRUD de componentes (Patentes / Familias / Roles) ─────────────
+        // ── T04: CRUD de componentes (Patentes / Familias / Roles) ─────────────
         // CrearPatente/CrearFamilia (revisión 11/06) se eliminaron: las patentes son un
         // catálogo fijo del sistema (no se crean desde la app) y las Familias se retiraron
-        // del modelo (el árbol es Rol→Patente) — ninguno de los dos tenía callers.
+        // del modelo (el árbol es Rol→Patente): ninguno de los dos tenía callers.
 
         public int CrearRol(string nombre)
         {
@@ -494,7 +494,7 @@ namespace BLL
 
         // Núcleo PURO y testeable (mismo estilo que SistemaConservaGestion): ¿el conjunto de
         // patentes DESPUÉS de un cambio se queda dentro del techo de acceso ANTES del cambio? No
-        // toca BD ni sesión — la I/O (resolver el árbol y las patentes efectivas) vive en
+        // toca BD ni sesión: la I/O (resolver el árbol y las patentes efectivas) vive en
         // PatentesDeConjunto, llamado desde GuardarAsignacionRol.
         public static bool NoEscalaPrivilegios(IEnumerable<int> patentesAntes, IEnumerable<int> patentesDespues)
         {
@@ -505,7 +505,7 @@ namespace BLL
         }
 
         // Ids de Patente (hojas, resolución recursiva) que alcanzarían un conjunto de componentes
-        // candidatos si fueran hijos directos de un rol — sin mutar el árbol real, cada id se
+        // candidatos si fueran hijos directos de un rol: sin mutar el árbol real, cada id se
         // resuelve de forma independiente vía ObtenerPatentesEfectivas() del propio nodo. Usado
         // para comparar el "antes"/"después" de una asignación sin tocar la BD ni el árbol vivo.
         private static HashSet<int> PatentesDeConjunto(List<BE.Componente> arbol, IEnumerable<int> ids)

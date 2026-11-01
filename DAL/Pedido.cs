@@ -8,11 +8,11 @@ namespace DAL
 {
     /// <summary>
     /// Acceso a datos de las tablas [Pedido] y [PedidoPrenda].
-    /// NOTA — Estado de Prenda: los UPDATE de Prenda.Estado de esta clase (SepararPrendas,
+    /// NOTA: Estado de Prenda: los UPDATE de Prenda.Estado de esta clase (SepararPrendas,
     /// RegistrarDevolucion, ReconciliarEnTx, Cancelar, DesCancelar) son intencionalmente
     /// SQL directo dentro de la misma transacción del Pedido, y no pasan por
     /// BLL.Prenda.CambiarEstado / el patrón State de BE.Estados. Es la única vía por la
-    /// que una Prenda entra o sale de EnUso — documentado en BE.Prenda.TransicionPermitida
+    /// que una Prenda entra o sale de EnUso: documentado en BE.Prenda.TransicionPermitida
     /// y en BE.Estados.EstadoEnUso. No unificar sin preservar la protección anti-TOCTOU
     /// (UPDATE condicionado + chequeo de filas afectadas dentro de la transacción).
     /// </summary>
@@ -96,7 +96,7 @@ namespace DAL
             return lista;
         }
 
-        // PN01 — pedidos en un estado dado (por ej. la cola de Control de Stock de Depósito),
+        // PN01: pedidos en un estado dado (por ej. la cola de Control de Stock de Depósito),
         // del más antiguo al más nuevo según el envío a control.
         public List<BE.Pedido> ObtenerPorEstado(BE.EstadoPedido estado)
         {
@@ -119,7 +119,7 @@ namespace DAL
             return lista;
         }
 
-        // PdN10 — Fecha del pedido más reciente de cada cliente (solo ventas concretadas: un
+        // PdN10: Fecha del pedido más reciente de cada cliente (solo ventas concretadas: un
         // pedido cancelado, desistido o todavía en control no representa actividad real).
         // Usada por BLL.AnalisisAbandono para cruzar "último pedido" contra vencimiento.
         public Dictionary<int, DateTime> ObtenerFechaUltimoPedidoPorCliente()
@@ -143,7 +143,7 @@ namespace DAL
             return resultado;
         }
 
-        // PdN8 — Desempeño por vendedor: total de pedidos, entregados y cancelados por Empleado.
+        // PdN8: Desempeño por vendedor: total de pedidos, entregados y cancelados por Empleado.
         // Usada por BLL.ReporteVentasVendedor para evaluar desempeño comercial.
         public List<BE.DesempenoVendedor> ObtenerEstadisticasPorEmpleado()
         {
@@ -186,7 +186,7 @@ namespace DAL
             return lista;
         }
 
-        // PdN9 — Cantidad de veces que cada prenda fue pedida (solo ventas concretadas: un
+        // PdN9: Cantidad de veces que cada prenda fue pedida (solo ventas concretadas: un
         // pedido cancelado, desistido o en control no representa demanda real).
         // Usada por BLL.AnalisisRotacion.
         public Dictionary<int, int> ObtenerCantidadPedidosPorPrenda(DateTime? desde = null)
@@ -214,7 +214,7 @@ namespace DAL
             return resultado;
         }
 
-        // PdN13 — Prendas que un cliente pidió alguna vez (solo ventas concretadas), para
+        // PdN13: Prendas que un cliente pidió alguna vez (solo ventas concretadas), para
         // construir su perfil de preferencias. Usada por BLL.RecomendacionPrendas.
         public List<BE.Prenda> ObtenerPrendasHistoricasPorCliente(int idCliente)
         {
@@ -286,7 +286,7 @@ namespace DAL
             }
         }
 
-        // ── PN01 — circuito de control de stock ─────────────────────────────────
+        // ── PN01: circuito de control de stock ─────────────────────────────────
         // Ninguno de estos métodos reserva prendas salvo SepararPrendas: hasta que Depósito
         // separa, la selección es solo un pedido de revisión (las prendas siguen Disponibles).
         // Cada transición de estado se hace con un UPDATE condicionado al estado esperado
@@ -394,7 +394,7 @@ namespace DAL
                 BorrarInformeFaltantesEnTx(conexion, tx, idPedido);
                 Ejecutar(conexion, tx, "DELETE FROM PedidoPrenda WHERE IdPedido=@IdPedido", idPedido);
                 InsertarLineasEnTx(conexion, tx, idPedido, prendas);
-                return idPedido;   // T07 — cambiaron las líneas del pedido
+                return idPedido;   // T07: cambiaron las líneas del pedido
             });
         }
 
@@ -472,7 +472,7 @@ namespace DAL
                 }
 
                 Ejecutar(conexion, tx, "UPDATE PedidoPrenda SET Confirmada=1 WHERE IdPedido=@IdPedido", idPedido);
-                return idPedido;   // T07 — la confirmación de las líneas entra al DVH
+                return idPedido;   // T07: la confirmación de las líneas entra al DVH
             });
         }
 
@@ -513,7 +513,7 @@ namespace DAL
                 {
                     using (var cmdPr = new SqlCommand(
                         // IdUltimoCliente (a diferencia de IdClienteActual) NUNCA se limpia al
-                        // devolverse — así BLL.CargoPrenda puede saber quién tuvo la prenda por
+                        // devolverse: así BLL.CargoPrenda puede saber quién tuvo la prenda por
                         // última vez aunque ya esté en Mantenimiento (EnLimpieza) sin dueño actual.
                         "UPDATE Prenda SET Estado=@Estado, IdClienteActual=@IdCliente, IdUltimoCliente=@IdCliente " +
                         "WHERE IdPrenda=@IdPrenda AND Estado=@EstadoDisponible",
@@ -892,7 +892,7 @@ namespace DAL
             }
         }
 
-        // ── T06b — Restauración ATÓMICA desde el historial ──────────────────────
+        // ── T06b: Restauración ATÓMICA desde el historial ──────────────────────
         // Revierte los campos del pedido a sus valores anteriores Y reconcilia sus prendas dentro de
         // UNA ÚNICA transacción. Claim atómico: el primer paso exige que el pedido siga en
         // 'estadoEsperado' (el ValorNuevo de la operación que se revierte); si otra sesión lo movió,
@@ -984,7 +984,7 @@ namespace DAL
                     };
                     break;
 
-                case "Prendas":      // informativo — el estado de las prendas se reconcilia aparte
+                case "Prendas":      // informativo: el estado de las prendas se reconcilia aparte
                 case "FechaPedido":  // inmutable una vez creado el pedido
                     return;
 
@@ -1089,7 +1089,7 @@ namespace DAL
                     Estado = (BE.EstadoPrenda)Convert.ToInt32(row["Estado"]),
                     // PN04, CU06-DEP Reportar Prenda Perdida (GUI/PedidosRealizados.cs) necesita
                     // IdUltimoCliente para poder cargar el cobro contra el cliente que la tenía
-                    // — sin esto, BLL.CargoPrenda.RegistrarCargo siempre rechazaba con
+                    // sin esto, BLL.CargoPrenda.RegistrarCargo siempre rechazaba con
                     // "sin_cliente" DESPUÉS de que la prenda ya había pasado a Baja.
                     IdUltimoCliente = row["IdUltimoCliente"] != DBNull.Value ? (int?)Convert.ToInt32(row["IdUltimoCliente"]) : null,
                     PrecioReposicion = row["PrecioReposicion"] != DBNull.Value ? (decimal?)Convert.ToDecimal(row["PrecioReposicion"]) : null,
@@ -1151,7 +1151,7 @@ namespace DAL
             return ids;
         }
 
-        // ── T07 — DV MULTI-TABLA del Pedido ─────────────────────────────────────
+        // ── T07: DV MULTI-TABLA del Pedido ─────────────────────────────────────
         // El estado de un Pedido se compone de su fila MÁS sus líneas (PedidoPrenda).
         // El DVH incorpora un digest de las líneas (prenda y si Depósito la confirmó): así,
         // agregar / quitar / intercambiar / confirmar prendas por fuera del sistema se detecta.

@@ -7,7 +7,7 @@ using System.Linq;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Prenda.
+    /// Capa de Acceso a Datos: Prenda.
     /// Opera sobre la tabla [Prenda] de WardrobeFlowDB.
     /// </summary>
     /// <summary>
@@ -47,7 +47,7 @@ namespace DAL
         }
 
         // Devuelve solo las prendas con estado Disponible. El filtrado adicional por
-        // reservas de Lista de Espera (mejora opcional) vive en BLL.Prenda — acá se ignora
+        // reservas de Lista de Espera (mejora opcional) vive en BLL.Prenda: acá se ignora
         // el parámetro para no acoplar esta query, ya probada, a una tabla nueva y opcional.
         public List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null)
         {
@@ -104,7 +104,7 @@ namespace DAL
         }
 
         // PN01, CU01-CS-Verificar Disponibilidad: relee un lote de prendas por ID en una sola
-        // consulta (batch), en vez de una consulta por prenda — ver BLL.Prenda.VerificarDisponibilidad.
+        // consulta (batch), en vez de una consulta por prenda: ver BLL.Prenda.VerificarDisponibilidad.
         public List<BE.Prenda> ObtenerPorIds(List<int> ids)
         {
             if (ids == null || ids.Count == 0) return new List<BE.Prenda>();
@@ -189,7 +189,7 @@ namespace DAL
             return lista;
         }
 
-        // PdN12 — Stock Disponible agrupado por Talle+Categoría. Usada por
+        // PdN12: Stock Disponible agrupado por Talle+Categoría. Usada por
         // BLL.AnalisisEscasez para detectar combinaciones por debajo del umbral mínimo.
         public List<BE.StockPorTalleCategoria> ObtenerConteoDisponiblesPorTalleCategoria()
         {
@@ -197,7 +197,7 @@ namespace DAL
             try
             {
                 DataTable tabla = acceso.Leer(
-                    "SELECT ISNULL(Talle, N'—') AS Talle, ISNULL(Categoria, N'—') AS Categoria, " +
+                    "SELECT ISNULL(Talle, N'-') AS Talle, ISNULL(Categoria, N'-') AS Categoria, " +
                     "       COUNT(*) AS Cantidad " +
                     "FROM Prenda " +
                     "WHERE Estado = @Estado " +
@@ -269,7 +269,7 @@ namespace DAL
 
         // Cambia el estado de una prenda (disponible, en uso, limpieza, baja).
         // UPDATE condicionado por Estado=@EstadoAnterior (anti-TOCTOU, mismo patrón que
-        // DAL.Pedido — ver la nota de clase de esa clase): si 0 filas afectadas, el estado
+        // DAL.Pedido: ver la nota de clase de esa clase): si 0 filas afectadas, el estado
         // cambió entre la lectura y este UPDATE (ej. otra sesión ya devolvió o dio de baja la
         // misma prenda) y se aborta en vez de pisarlo.
         // IdUltimoCliente solo se pisa cuando se pasa un idClienteActual concreto (asignación);

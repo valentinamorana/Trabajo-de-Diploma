@@ -58,6 +58,8 @@ namespace GUI
             this.panelMetas = new GUI.Inteligencia.PanelMetasComerciales();
             this.flpKpis = new FlowLayoutPanel();
             this.lblAvisos = new Label();
+            this.pnlAnalizarBarra = new Panel();
+            this.btnActualizarAnalisis = new Button();
             this.tlpGraficos = new TableLayoutPanel();
             this.chartTendencia = new Chart();
             this.chartRiesgo = new Chart();
@@ -75,13 +77,14 @@ namespace GUI
             this.pnlOpciones = new Panel();
             this.lblOpciones = new Label();
             this.dgvOpciones = new DataGridView();
-            this.pnlAcciones = new Panel();
+            this.pnlAcciones = new FlowLayoutPanel();
             this.btnAceptar = new Button();
             this.btnDescartar = new Button();
             this.btnPosponer = new Button();
             this.numDiasPosponer = new NumericUpDownLocal();
             this.lblDias = new Label();
             this.btnSimularOpcion = new Button();
+            this.lblSimularMotivo = new Label();
             // Pestaña Historial de decisiones
             this.tabHistorial = new TabPage();
             this.pnlHistFiltros = new Panel();
@@ -98,6 +101,8 @@ namespace GUI
             this.btnRegistrarResultado = new Button();
             this.btnHistDescartar = new Button();
             this.lblHistResumen = new Label();
+            this.btnVerConstancia = new Button();
+            this.btnAbrirConstancia = new Button();
             // Pestaña Simulador
             this.tabSimulador = new TabPage();
             this.pnlSimEntradas = new Panel();
@@ -271,25 +276,29 @@ namespace GUI
             this.btnAnalizar.UseVisualStyleBackColor = true;
             this.btnAnalizar.Click += new System.EventHandler(this.BtnAnalizar_Click);
 
-            this.btnUmbrales.Location = new Point(846, 40);
+            // «Parámetros del análisis» y «Glosario» van en la fila del título, pegados al borde derecho
+            // (anclados a la derecha: siguen ahí al agrandar la ventana o con la pantalla dividida).
+            this.btnUmbrales.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            this.btnUmbrales.Location = new Point(910, 6);
             this.btnUmbrales.Name = "btnUmbrales";
-            this.btnUmbrales.Size = new Size(100, 30);
+            this.btnUmbrales.Size = new Size(200, 30);
             this.btnUmbrales.TabIndex = 6;
-            this.btnUmbrales.Text = "Umbrales";
+            this.btnUmbrales.Text = "Parámetros del análisis";
             this.btnUmbrales.UseVisualStyleBackColor = true;
             this.btnUmbrales.Click += new System.EventHandler(this.BtnUmbrales_Click);
 
-            this.btnGlosario.Location = new Point(954, 40);
+            this.btnGlosario.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            this.btnGlosario.Location = new Point(1118, 6);
             this.btnGlosario.Name = "btnGlosario";
-            this.btnGlosario.Size = new Size(95, 30);
+            this.btnGlosario.Size = new Size(110, 30);
             this.btnGlosario.TabIndex = 7;
             this.btnGlosario.Text = "Glosario";
             this.btnGlosario.UseVisualStyleBackColor = true;
             this.btnGlosario.Click += new System.EventHandler(this.BtnGlosario_Click);
 
-            this.btnInforme.Location = new Point(1057, 40);
+            this.btnInforme.Location = new Point(846, 40);
             this.btnInforme.Name = "btnInforme";
-            this.btnInforme.Size = new Size(170, 30);
+            this.btnInforme.Size = new Size(200, 30);
             this.btnInforme.TabIndex = 8;
             this.btnInforme.Text = "Informe ejecutivo (PDF)";
             this.btnInforme.UseVisualStyleBackColor = true;
@@ -322,7 +331,7 @@ namespace GUI
 
             // ── 1. Analizar ────────────────────────────────────────────────────
             this.tabAnalizar.Controls.Add(this.tlpGraficos);
-            this.tabAnalizar.Controls.Add(this.lblAvisos);
+            this.tabAnalizar.Controls.Add(this.pnlAnalizarBarra);
             this.tabAnalizar.Controls.Add(this.flpKpis);
             this.tabAnalizar.Name = "tabAnalizar";
             this.tabAnalizar.Padding = new Padding(4);
@@ -335,10 +344,29 @@ namespace GUI
             this.flpKpis.Name = "flpKpis";
             this.flpKpis.Padding = new Padding(2);
 
-            this.lblAvisos.Dock = DockStyle.Top;
+            // Barra bajo los indicadores: avisos del análisis a la izquierda y «↻ Actualizar» a la derecha
+            // (vuelve a analizar con los filtros del encabezado; anclado a la derecha, no tapa nada al dividir
+            // o achicar la pantalla).
+            this.pnlAnalizarBarra.Dock = DockStyle.Top;
+            this.pnlAnalizarBarra.Height = 36;
+            this.pnlAnalizarBarra.Name = "pnlAnalizarBarra";
+            this.pnlAnalizarBarra.Padding = new Padding(2, 3, 2, 3);
+            this.pnlAnalizarBarra.Controls.Add(this.lblAvisos);
+            this.pnlAnalizarBarra.Controls.Add(this.btnActualizarAnalisis);
+
+            this.lblAvisos.AutoEllipsis = true;
+            this.lblAvisos.Dock = DockStyle.Fill;
             this.lblAvisos.ForeColor = Tema.Alerta;
-            this.lblAvisos.Height = 20;
             this.lblAvisos.Name = "lblAvisos";
+            this.lblAvisos.TextAlign = ContentAlignment.MiddleLeft;
+
+            this.btnActualizarAnalisis.Dock = DockStyle.Right;
+            this.btnActualizarAnalisis.Name = "btnActualizarAnalisis";
+            this.btnActualizarAnalisis.Size = new Size(130, 30);
+            this.btnActualizarAnalisis.TabIndex = 0;
+            this.btnActualizarAnalisis.Text = "↻ Actualizar";
+            this.btnActualizarAnalisis.UseVisualStyleBackColor = true;
+            this.btnActualizarAnalisis.Click += new System.EventHandler(this.BtnAnalizar_Click);
 
             this.tlpGraficos.ColumnCount = 2;
             this.tlpGraficos.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
@@ -454,6 +482,18 @@ namespace GUI
             this.pnlOpciones.Controls.Add(this.dgvOpciones);
             this.pnlOpciones.Controls.Add(this.lblOpciones);
             this.pnlOpciones.Controls.Add(this.pnlAcciones);
+            this.pnlOpciones.Controls.Add(this.lblSimularMotivo);
+
+            // Debajo de los botones: por qué «Simular esta opción» está deshabilitado (un botón deshabilitado no
+            // muestra su tooltip). Solo visible cuando la opción elegida no se puede simular.
+            this.lblSimularMotivo.AutoEllipsis = true;
+            this.lblSimularMotivo.Dock = DockStyle.Bottom;
+            this.lblSimularMotivo.Font = Tema.FuentePequena;
+            this.lblSimularMotivo.ForeColor = Tema.TextoMuted;
+            this.lblSimularMotivo.Height = 20;
+            this.lblSimularMotivo.Name = "lblSimularMotivo";
+            this.lblSimularMotivo.Padding = new Padding(6, 0, 4, 2);
+            this.lblSimularMotivo.Visible = false;
 
             this.lblOpciones.Dock = DockStyle.Top;
             this.lblOpciones.Font = Tema.FuenteSubtitulo;
@@ -472,8 +512,13 @@ namespace GUI
             this.dgvOpciones.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             this.dgvOpciones.SelectionChanged += new System.EventHandler(this.DgvOpciones_SelectionChanged);
 
+            // Fluye y baja de fila si no entra: con la ventana chica o la pantalla dividida ningún botón
+            // queda cortado (antes «Simular esta opción» quedaba fuera del panel).
             this.pnlAcciones.Dock = DockStyle.Bottom;
-            this.pnlAcciones.Height = 44;
+            this.pnlAcciones.AutoSize = true;
+            this.pnlAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            this.pnlAcciones.WrapContents = true;
+            this.pnlAcciones.Padding = new Padding(1, 4, 1, 2);
             this.pnlAcciones.Name = "pnlAcciones";
             this.pnlAcciones.Controls.Add(this.btnAceptar);
             this.pnlAcciones.Controls.Add(this.btnDescartar);
@@ -504,6 +549,7 @@ namespace GUI
             this.btnPosponer.Click += new System.EventHandler(this.BtnPosponer_Click);
 
             this.numDiasPosponer.Location = new Point(432, 11);
+            this.numDiasPosponer.Margin = new Padding(3, 7, 0, 3);
             this.numDiasPosponer.Maximum = new decimal(new int[] { 90, 0, 0, 0 });
             this.numDiasPosponer.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             this.numDiasPosponer.Name = "numDiasPosponer";
@@ -512,6 +558,7 @@ namespace GUI
 
             this.lblDias.AutoSize = true;
             this.lblDias.Location = new Point(492, 14);
+            this.lblDias.Margin = new Padding(3, 10, 12, 3);
             this.lblDias.Name = "lblDias";
             this.lblDias.Text = "días";
 
@@ -599,10 +646,12 @@ namespace GUI
             this.dgvHistorial.SelectionChanged += new System.EventHandler(this.DgvHistorial_SelectionChanged);
 
             this.pnlHistAcciones.Dock = DockStyle.Bottom;
-            this.pnlHistAcciones.Height = 44;
+            this.pnlHistAcciones.Height = 70;
             this.pnlHistAcciones.Name = "pnlHistAcciones";
             this.pnlHistAcciones.Controls.Add(this.btnRegistrarResultado);
             this.pnlHistAcciones.Controls.Add(this.btnHistDescartar);
+            this.pnlHistAcciones.Controls.Add(this.btnVerConstancia);
+            this.pnlHistAcciones.Controls.Add(this.btnAbrirConstancia);
             this.pnlHistAcciones.Controls.Add(this.lblHistResumen);
 
             this.btnRegistrarResultado.Location = new Point(4, 7);
@@ -619,8 +668,23 @@ namespace GUI
             this.btnHistDescartar.UseVisualStyleBackColor = true;
             this.btnHistDescartar.Click += new System.EventHandler(this.BtnHistDescartar_Click);
 
+            // Constancia de la decisión (1.6.1): ver la foto guardada al decidir y abrir una exportada (XML o JSON).
+            this.btnVerConstancia.Location = new Point(386, 7);
+            this.btnVerConstancia.Name = "btnVerConstancia";
+            this.btnVerConstancia.Size = new Size(160, 30);
+            this.btnVerConstancia.Text = "Ver constancia";
+            this.btnVerConstancia.UseVisualStyleBackColor = true;
+            this.btnVerConstancia.Click += new System.EventHandler(this.BtnVerConstancia_Click);
+
+            this.btnAbrirConstancia.Location = new Point(552, 7);
+            this.btnAbrirConstancia.Name = "btnAbrirConstancia";
+            this.btnAbrirConstancia.Size = new Size(260, 30);
+            this.btnAbrirConstancia.Text = "Abrir constancia desde archivo…";
+            this.btnAbrirConstancia.UseVisualStyleBackColor = true;
+            this.btnAbrirConstancia.Click += new System.EventHandler(this.BtnAbrirConstancia_Click);
+
             this.lblHistResumen.AutoSize = true;
-            this.lblHistResumen.Location = new Point(392, 14);
+            this.lblHistResumen.Location = new Point(6, 46);
             this.lblHistResumen.Name = "lblHistResumen";
 
             // ── 4. Simulador ───────────────────────────────────────────────────
@@ -804,7 +868,7 @@ namespace GUI
             this.tabCohortes.Controls.Add(this.panelCohortes);
             this.tabCohortes.Name = "tabCohortes";
             this.tabCohortes.Padding = new Padding(4);
-            this.tabCohortes.Text = "1b. Cohortes";
+            this.tabCohortes.Text = "1b. Permanencia de clientes";
 
             this.panelCohortes.Dock = DockStyle.Fill;
             this.panelCohortes.Name = "panelCohortes";
@@ -1014,6 +1078,8 @@ namespace GUI
         private TabPage tabAnalizar;
         private FlowLayoutPanel flpKpis;
         private Label lblAvisos;
+        private Panel pnlAnalizarBarra;
+        private Button btnActualizarAnalisis;
         private TableLayoutPanel tlpGraficos;
         private Chart chartTendencia;
         private Chart chartRiesgo;
@@ -1030,13 +1096,14 @@ namespace GUI
         private Panel pnlOpciones;
         private Label lblOpciones;
         private DataGridView dgvOpciones;
-        private Panel pnlAcciones;
+        private FlowLayoutPanel pnlAcciones;
         private Button btnAceptar;
         private Button btnDescartar;
         private Button btnPosponer;
         private NumericUpDownLocal numDiasPosponer;
         private Label lblDias;
         private Button btnSimularOpcion;
+        private Label lblSimularMotivo;
         private TabPage tabHistorial;
         private Panel pnlHistFiltros;
         private Label lblHistDesde;
@@ -1052,6 +1119,8 @@ namespace GUI
         private Button btnRegistrarResultado;
         private Button btnHistDescartar;
         private Label lblHistResumen;
+        private Button btnVerConstancia;
+        private Button btnAbrirConstancia;
         private TabPage tabSimulador;
         private Panel pnlSimEntradas;
         private Label lblSimPlan;

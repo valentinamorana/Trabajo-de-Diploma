@@ -7,7 +7,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// PdN10 — Pruebas del patrón Strategy para detección de riesgo de abandono. Cada
+    /// PdN10: Pruebas del patrón Strategy para detección de riesgo de abandono. Cada
     /// estrategia es pura (sin BD): recibe BE.DatosClienteRiesgo y devuelve
     /// BE.ResultadoRiesgo, igual que Arma.Disparar() en el ejemplo de cátedra.
     /// </summary>
@@ -106,7 +106,7 @@ namespace Tests
         [TestMethod]
         public void InactividadPura_NuncaPidio_NoEnRiesgo()
         {
-            // Esta estrategia NO cubre "nunca pidió" — ese es el criterio de
+            // Esta estrategia NO cubre "nunca pidió": ese es el criterio de
             // EstrategiaClienteNuevoInactivo (evita que las tres estrategias se solapen).
             var estrategia = new EstrategiaInactividadPura();
             var datos = new BE.DatosClienteRiesgo
@@ -194,7 +194,7 @@ namespace Tests
 
         // ── BLL.AnalisisAbandono (fachada real, Detectar/CambiarEstrategia) ──────────────
         // Antes dalPedido era DAL.Pedido concreto (no inyectable) y esta clase nunca se
-        // instanciaba en los tests — solo las Estrategias puras de arriba. Mismo problema
+        // instanciaba en los tests: solo las Estrategias puras de arriba. Mismo problema
         // estructural que BLL.Cliente/BLL.Renovacion ya tenían resuelto.
 
         [TestMethod]

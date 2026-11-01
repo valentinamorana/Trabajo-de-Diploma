@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// Patrón FACTORY METHOD — rol "ConcreteProduct" (nuevo, extiende el patrón sin tocar
+    /// Patrón FACTORY METHOD: rol "ConcreteProduct" (nuevo, extiende el patrón sin tocar
     /// los productos existentes).
     ///
     /// Exporta un reporte a un archivo CSV. La LÓGICA de serialización vive en

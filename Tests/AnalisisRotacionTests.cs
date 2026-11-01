@@ -4,7 +4,7 @@ using Tests.Fakes;
 
 namespace Tests
 {
-    /// <summary>BLL.AnalisisRotacion (PdN9) — prendas de baja o alta demanda.</summary>
+    /// <summary>BLL.AnalisisRotacion (PdN9): prendas de baja o alta demanda.</summary>
     [TestClass]
     public class AnalisisRotacionTests
     {

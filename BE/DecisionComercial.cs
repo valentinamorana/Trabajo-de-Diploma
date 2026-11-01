@@ -20,7 +20,7 @@ namespace BE
     }
 
     /// <summary>
-    /// PN03 — «Decisión comercial»: lo que Gerencia decidió sobre una recomendación del motor. Cierra el
+    /// PN03: «Decisión comercial»: lo que Gerencia decidió sobre una recomendación del motor. Cierra el
     /// ciclo analizar → recomendar/decidir → aplicar → medir: guarda el impacto estimado y, cuando se
     /// puede medir (o lo carga el usuario), el resultado real.
     /// </summary>
@@ -52,6 +52,16 @@ namespace BE
         public DateTime? FechaEjecucion { get; set; }
         public DateTime? FechaEvaluacion { get; set; }
         public decimal? ResultadoReal { get; set; }
+
+        /// <summary>
+        /// 1.6.1: ¿Tiene «Constancia de la decisión» (columna DecisionComercial.Constancia, XML)? Las decisiones
+        /// anteriores a la 1.6.1 no la tienen. El listado trae solo esta marca; el XML se lee aparte
+        /// (BLL.Inteligencia.ConstanciasDecision.Obtener).
+        /// </summary>
+        public bool TieneConstancia { get; set; }
+
+        /// <summary>Si no se pudo guardar la constancia al decidir: el motivo (la decisión quedó registrada igual). No se guarda.</summary>
+        public string AvisoConstancia { get; set; }
 
         /// <summary>Fecha desde la que rige la decisión ejecutada: la de ejecución (o la de creación si es anterior a ese dato).</summary>
         public DateTime FechaVigencia => FechaEjecucion ?? Fecha;

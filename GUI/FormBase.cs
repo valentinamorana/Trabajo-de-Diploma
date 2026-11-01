@@ -33,7 +33,7 @@ namespace GUI
     /// </summary>
     public partial class FormBase : Form
     {
-        // D02 — Ayuda en línea: F1 abre la ayuda de esta pantalla (Ayuda.AyudaEnLinea).
+        // D02: Ayuda en línea: F1 abre la ayuda de esta pantalla (Ayuda.AyudaEnLinea).
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.F1)
@@ -76,7 +76,7 @@ namespace GUI
             // Aplica las preferencias de UI del usuario (fuente/tamaño/tema) a este formulario.
             try { PreferenciasUI.Aplicar(this); } catch { }
 
-            // Etapa 4 — Seguridad a nivel de control: muestra/oculta los controles mapeados a
+            // Etapa 4: Seguridad a nivel de control: muestra/oculta los controles mapeados a
             // patentes que el usuario no tiene. Sin mapeos, no hace nada.
             try
             {
@@ -110,17 +110,17 @@ namespace GUI
 
         /// <summary>
         /// Traduce una clave al idioma activo, con fallback si no existe. Único punto de acceso
-        /// al diccionario de traducciones — reemplaza los ~84 helpers locales casi idénticos
+        /// al diccionario de traducciones: reemplaza los ~84 helpers locales casi idénticos
         /// (`T`, `Tx`, `T_ce`, `Tv`...) que antes reinventaba cada formulario/método por su cuenta
         ///. Heredado por todos los formularios
-        /// hijos — no necesitan redefinirlo.
+        /// hijos: no necesitan redefinirlo.
         /// </summary>
         protected string Tr(string clave, string fallback, object[] args = null)
             => Traductor.Resolver(clave, fallback, args, GestorIdioma.IdiomaActual);
 
         /// <summary>
         /// Muestra un mensaje de operación exitosa (en verde).
-        /// Heredado por todos los formularios hijos — no necesitan redefinirlo.
+        /// Heredado por todos los formularios hijos: no necesitan redefinirlo.
         /// </summary>
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
@@ -237,7 +237,7 @@ namespace GUI
         /// <summary>
         /// Muestra un mensaje de error (en rojo).
         /// Si el formulario no tiene lblMensaje, usa MessageBox como fallback.
-        /// Heredado por todos los formularios hijos — no necesitan redefinirlo.
+        /// Heredado por todos los formularios hijos: no necesitan redefinirlo.
         /// </summary>
         protected void MostrarError(string msg)
         {
@@ -295,7 +295,7 @@ namespace GUI
                     "Excepción: " + ex.GetType().Name,
                     BE.Criticidad.Alta,
                     idUsuario,
-                    $"Usuario '{usuario}' — {modulo}: {ex.Message}" +
+                    $"Usuario '{usuario}'; {modulo}: {ex.Message}" +
                     (ex.InnerException != null ? $" | Causa: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}" : ""));
             }
             catch { /* el fallo al registrar no debe romper el manejo del error */ }

@@ -9,14 +9,14 @@ namespace DAL.Interfaces
 
         /// <summary>
         /// Prendas Disponible. Si se indica <paramref name="idClienteSolicitante"/>, excluye las
-        /// que estén Reservadas por Lista de Espera para OTRO cliente (mejora opcional) — ese
+        /// que estén Reservadas por Lista de Espera para OTRO cliente (mejora opcional): ese
         /// cliente sigue viéndolas. Sin cliente en contexto, se excluyen todas las reservas activas.
         /// </summary>
         List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null);
         BE.Prenda ObtenerPorId(int idPrenda);
 
         /// <summary>Relee un lote de prendas por ID en una sola consulta (batch), en vez de
-        /// N consultas individuales. Devuelve solo las que existen — no lanza por IDs faltantes.</summary>
+        /// N consultas individuales. Devuelve solo las que existen: no lanza por IDs faltantes.</summary>
         List<BE.Prenda> ObtenerPorIds(List<int> ids);
 
         List<BE.Prenda> ObtenerPorCliente(int idCliente);

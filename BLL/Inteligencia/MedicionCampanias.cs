@@ -33,7 +33,7 @@ namespace BLL.Inteligencia
     }
 
     /// <summary>
-    /// PN03 «Medir resultado» — Resultado real de una campaña de contacto (opción "Exportar contactos" de
+    /// PN03 «Medir resultado»: Resultado real de una campaña de contacto (opción "Exportar contactos" de
     /// las reglas Renovaciones, ChurnPlan y UpgradePlan). Al ejecutarse, la decisión guarda a quiénes se
     /// contactó (DecisionComercialDetalle). La medición es INCREMENTAL, para no acreditarle a la campaña las
     /// renovaciones de rutina:

@@ -9,12 +9,12 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// PN01 — Armar pedido de prendas: actividades del carril Vendedor del diagrama de
+    /// PN01: Armar pedido de prendas: actividades del carril Vendedor del diagrama de
     /// actividad hasta "Enviar selección para control stock".
     ///
-    ///   PASO 1 — Recibir identificación (DNI, nombre o apellido) → Ficha del cliente →
+    ///   PASO 1: Recibir identificación (DNI, nombre o apellido) → Ficha del cliente →
     ///            Verificar la vigencia de la suscripción → Revisar existencia de un pedido activo
-    ///   PASO 2 — Presentar catálogo → Anotar la selección + Comprobar el cupo del plan →
+    ///   PASO 2: Presentar catálogo → Anotar la selección + Comprobar el cupo del plan →
     ///            ¿Excede el cupo? Sí: Informar exceso → el cliente ajusta la selección o
     ///            desiste (Asentar desistimiento). No: Enviar selección para control stock.
     ///
@@ -91,7 +91,7 @@ namespace GUI
             this.Text                 = EsAjuste
                 ? Tr("frm.ajustarpedido", "Ajustar selección del pedido")
                 : Tr("frm.nuevopedido",   "Nuevo Pedido de Venta");
-            lblPaso.Text              = Tr("paso1.identificar",     "Paso 1 de 2 — Identificar al cliente");
+            lblPaso.Text              = Tr("paso1.identificar",     "Paso 1 de 2: Identificar al cliente");
             lblSeleccionaCliente.Text = Tr("lbl.ped.identificacion","Identificación del cliente (DNI, nombre o apellido):");
             lblInstruccion.Text       = EsAjuste
                 ? Tr("lbl.ped.ajuste", "Ajuste la selección: las prendas faltantes ya no figuran y las alternativas sugeridas están resaltadas.")
@@ -276,7 +276,7 @@ namespace GUI
         // Ficha del Cliente (suscripción, plan, pedidos, datos del cliente).
         private string FichaCliente(BE.Cliente c)
         {
-            string ultimoPedido = "—";
+            string ultimoPedido = "-";
             try
             {
                 var ult = pedidoBLL.ObtenerTodos()
@@ -290,13 +290,13 @@ namespace GUI
 
             return string.Format(
                 Tr("lbl.ped.ficha",
-                    "Cliente: {0}  —  DNI {1}\nPlan: {2} (hasta {3} prendas)  —  Vence: {4}\n" +
-                    "Prendas en uso: {5}  —  Último pedido: {6}\nMétodo de pago: {7}  —  Alta: {8}"),
+                    "Cliente: {0}; DNI {1}\nPlan: {2} (hasta {3} prendas); Vence: {4}\n" +
+                    "Prendas en uso: {5}; Último pedido: {6}\nMétodo de pago: {7}; Alta: {8}"),
                 c.NombreCompleto, c.DNI,
-                c.NombrePlan ?? "—", c.LimitePrendas,
-                c.FechaVencimiento?.ToString("d") ?? "—",
+                c.NombrePlan ?? "-", c.LimitePrendas,
+                c.FechaVencimiento?.ToString("d") ?? "-",
                 c.StockUtilizado, ultimoPedido,
-                c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "—", c.FechaAlta.ToString("d"));
+                c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "-", c.FechaAlta.ToString("d"));
         }
 
         private Func<Exportacion.ReporteExportable> _avisoActual;
@@ -354,10 +354,10 @@ namespace GUI
         {
             panelPaso1.Visible = paso == 1;
             panelPaso2.Visible = paso == 2;
-            string paso1txt = Tr("paso1.identificar", "Paso 1 de 2 — Identificar al cliente");
+            string paso1txt = Tr("paso1.identificar", "Paso 1 de 2: Identificar al cliente");
             string paso2txt = EsAjuste
                 ? string.Format(Tr("paso.ajuste.texto", "Ajustar selección del Pedido #{0}"), _pedidoAjuste.IdPedido)
-                : Tr("paso2.texto", "Paso 2 de 2 — Seleccionar Prendas");
+                : Tr("paso2.texto", "Paso 2 de 2: Seleccionar Prendas");
             lblPaso.Text = paso == 1
                 ? paso1txt
                 : $"{paso2txt}  ({_clienteSel?.NombreCompleto})";
@@ -393,7 +393,7 @@ namespace GUI
                 foreach (var p in _disponibles)
                 {
                     int i = dgvPrendas.Rows.Add(preseleccion.Contains(p.IdPrenda), p.IdPrenda, p.Nombre,
-                        p.Categoria ?? "—", p.Talle ?? "—", p.Color ?? "—");
+                        p.Categoria ?? "-", p.Talle ?? "-", p.Color ?? "-");
                     if (alternativas.Contains(p.IdPrenda))
                         dgvPrendas.Rows[i].DefaultCellStyle.BackColor = Tema.FondoAlerta;
                 }
@@ -459,7 +459,7 @@ namespace GUI
                 {
                     linea2 = string.Format(
                         Tr("lbl.ped.res.parcial",
-                           "El plan '{0}' permite {1}. Está eligiendo {2} de {3} posibles — puede agregar más."),
+                           "El plan '{0}' permite {1}. Está eligiendo {2} de {3} posibles. Puede agregar más."),
                         estado.NombrePlan, limite, seleccionadas, estado.PrendasDisponibles);
                     lblResumen.ForeColor = Tema.Alerta;
                 }
@@ -495,7 +495,7 @@ namespace GUI
             if (seleccion.Count == 0) return string.Empty;
             var grupos = seleccion
                 .GroupBy(p => new { p.Nombre, p.Talle, p.Color })
-                .Select(g => $"{g.Key.Nombre} — {g.Key.Talle ?? "—"} / {g.Key.Color ?? "—"} ×{g.Count()}");
+                .Select(g => $"{g.Key.Nombre}, {g.Key.Talle ?? "-"} / {g.Key.Color ?? "-"} ×{g.Count()}");
             return Tr("lbl.ped.detalle", "Detalle de la selección:") + "  " + string.Join("   •   ", grupos);
         }
 
@@ -526,7 +526,7 @@ namespace GUI
             }
 
             string detallesPrendas = string.Join("\n  • ",
-                prendas.ConvertAll(p => $"{p.Nombre} ({p.Talle} — {p.Color})"));
+                prendas.ConvertAll(p => $"{p.Nombre} ({p.Talle}, {p.Color})"));
 
             var confirmar = (FormBase.MostrarConfirmacionSiNo(this,
                 string.Format(

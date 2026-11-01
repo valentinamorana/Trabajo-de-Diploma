@@ -1,12 +1,12 @@
 ; =====================================================================
-; WardrobeFlow — Instalador (A01, version completa)
+; WardrobeFlow: Instalador (A01, version completa)
 ;
 ; Entrega 2 (caso base, ya resuelto):
 ; - Instala la aplicacion (GUI.exe + dependencias) en Archivos de Programa.
 ; - Crea la base de datos WardrobeFlowDB completa (estructura + los 4
 ;   procesos de negocio PN01-PN04) ejecutando BD/00_Instalacion_Completa.sql
 ;   mediante un cliente SQL embebido (DbInstaller.exe, ADO.NET/SqlClient)
-;   que viaja DENTRO del propio instalador — no depende de que el cliente
+;   que viaja DENTRO del propio instalador: no depende de que el cliente
 ;   tenga sqlcmd/SQL Server Command Line Utilities instalados aparte (PPT,
 ;   slide "A01: Instalacion de Base Datos": "cliente SQL embebido").
 ; - Crea accesos directos (menu inicio + escritorio opcional).
@@ -67,7 +67,7 @@
 ;   Documentos) en vez de dejar la app instalada pero no funcional (PPT
 ;   slide "Resiliencia": "Rollback Automatico").
 ; - El App.config (GUI.exe.config) instalado se reescribe con el servidor
-;   realmente elegido — asi el connection string queda embebido pero
+;   realmente elegido: asi el connection string queda embebido pero
 ;   correcto para CUALQUIER instancia, no solo ".\SQLEXPRESS" fijo.
 ; - Al desinstalar, se pregunta (por defecto "No") si tambien se quiere
 ;   borrar la base de datos (y el login del grupo Usuarios, si ninguna otra
@@ -79,8 +79,8 @@
 ;   desatendidas: Instalador.exe /VERYSILENT /SERVIDOR=.\SQLEXPRESS01
 ; - Despues del script: se da acceso a la base al grupo local "Usuarios"
 ;   como db_owner (igual que el instalador probado en la facultad, fe63121;
-;   hace falta para restaurar backups) — Integrated Security = el usuario de Windows que abre la app,
-;   que puede no ser el administrador que instalo — y se corre una
+;   hace falta para restaurar backups): Integrated Security = el usuario de Windows que abre la app,
+;   que puede no ser el administrador que instalo, y se corre una
 ;   verificacion final (admin semilla + datos); si falla, rollback.
 ;   Quien puede restaurar lo decide la patente de Backup dentro de la app.
 ; - {app}\Backups y {app}\TempBackups quedan escribibles para usuarios
@@ -100,7 +100,7 @@
 ; =====================================================================
 
 #define MyAppName "WardrobeFlow"
-#define MyAppVersion "1.6.0"
+#define MyAppVersion "1.6.1"
 #define MyAppPublisher "Valentina Morana"
 #define MyAppExeName "GUI.exe"
 #define MyDatabaseName "WardrobeFlowDB"
@@ -197,7 +197,7 @@ Source: "{#DbSourceDir}\*.sql"; DestDir: "{app}\BD"; Flags: ignoreversion
 Source: "{#DbInstallerSourceDir}\{#DbInstallerExeName}"; DestDir: "{app}\BD"; Flags: ignoreversion
 ; Segunda copia, solo para {tmp}: permite usar DbInstaller.exe DURANTE el
 ; wizard (pre-flight de conexion) antes de que se copien los archivos a
-; {app}, vía ExtractTemporaryFile — ver PaginaIngresoManual mas abajo.
+; {app}, vía ExtractTemporaryFile: ver PaginaIngresoManual mas abajo.
 Source: "{#DbInstallerSourceDir}\{#DbInstallerExeName}"; DestDir: "{tmp}"; Flags: dontcopy
 Source: "Credenciales_Iniciales.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; Solo se extrae (a {tmp}) si hay que instalar LocalDB: ver InstalarLocalDb.
@@ -207,6 +207,10 @@ Source: "{#LocalDbMsi}"; DestDir: "{tmp}"; Flags: dontcopy nocompression
 ; ANTES de instalar, desde la pagina "No se encontro SQL Server" (ver AbrirTutorial).
 Source: "Tutorial_SQL_Server.html"; DestDir: "{app}\Docs"; Flags: ignoreversion
 Source: "Tutorial_SQL_Server.html"; DestDir: "{tmp}"; Flags: dontcopy
+; Guia de instalacion de WardrobeFlow (requisitos, paso a paso, casos especiales,
+; desatendida, primer ingreso, actualizacion, desinstalacion y errores de conexion
+; del arranque). HTML autonomo, junto al tutorial (lo enlaza por ruta relativa).
+Source: "Guia_Instalacion_WardrobeFlow.html"; DestDir: "{app}\Docs"; Flags: ignoreversion
 
 ; La app guarda backups (manuales .wfbak y automaticos auto_*.bak, que se
 ; escriben con el usuario que inicia sesion, sea cual sea su rol) y su
@@ -229,6 +233,7 @@ Name: "{app}\Logs"; Permissions: users-modify
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\Credenciales iniciales (solo demo)"; Filename: "{app}\Credenciales_Iniciales.txt"
+Name: "{group}\Cómo instalar WardrobeFlow"; Filename: "{app}\Docs\Guia_Instalacion_WardrobeFlow.html"
 Name: "{group}\Cómo instalar SQL Server"; Filename: "{app}\Docs\Tutorial_SQL_Server.html"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
@@ -237,7 +242,7 @@ Filename: "{app}\Credenciales_Iniciales.txt"; Description: "Ver las credenciales
 Filename: "{app}\{#MyAppExeName}"; Description: "Abrir {#MyAppName}"; Flags: nowait postinstall skipifsilent
 
 ; install.log y uninstall.log se escriben en tiempo de ejecucion (CurStepChanged
-; / CurUninstallStepChanged) — Inno no los conoce por venir de [Files], asi que
+; / CurUninstallStepChanged): Inno no los conoce por venir de [Files], asi que
 ; sin esto quedan huerfanos en {app} y el desinstalador NO borra el directorio
 ; (por seguridad, no borra carpetas no vacias). Verificado con un harness
 ; aislado: sin esta seccion, el rollback automatico dejaba {app} a medio
@@ -330,7 +335,7 @@ end;
 
 // ---------------------------------------------------------------------
 // Deteccion de instancias SQL Server (Entrega 3, PPT "A01.1: Instancias
-// SQL Inexistentes" — "Detección y Búsqueda... mediante... Registro de
+// SQL Inexistentes": "Detección y Búsqueda... mediante... Registro de
 // Windows").
 // ---------------------------------------------------------------------
 function ArrayContieneTexto(const Arr: TArrayOfString; const Valor: String): Boolean;
@@ -738,8 +743,8 @@ begin
     PaginaSinInstancias.Add('Usar SQL LocalDB, ya detectado en este equipo ((localdb)\MSSQLLocalDB)')
   else
     PaginaSinInstancias.Add('Instalar SQL Server Express LocalDB (recomendado, incluido en este instalador; se instala al confirmar)');
-  PaginaSinInstancias.Add('Ya tengo SQL Server instalado (con otro nombre, o en otro servidor) — ingresar manualmente');
-  PaginaSinInstancias.Add('No tengo ningún motor de SQL Server instalado — cancelar la instalación');
+  PaginaSinInstancias.Add('Ya tengo SQL Server instalado (con otro nombre, o en otro servidor): ingresar manualmente');
+  PaginaSinInstancias.Add('No tengo ningún motor de SQL Server instalado: cancelar la instalación');
   PaginaSinInstancias.SelectedValueIndex := 0;
   // Ayuda sin salir del asistente: tutorial (incluido, sin Internet) y pagina
   // de descarga de Microsoft. Abajo de la lista; no agregan pasos al camino feliz.
@@ -852,7 +857,7 @@ begin
 
   if SuppressibleMsgBox(
        'El servicio de Windows para esa instancia (' + NombreServicio + ') no está disponible ' +
-       '(no existe, o está detenido y no se pudo iniciar automáticamente — ¿faltan permisos de administrador?).' + #13#13 +
+       '(no existe, o está detenido y no se pudo iniciar automáticamente: ¿faltan permisos de administrador?).' + #13#13 +
        '¿Desea continuar de todos modos? (se va a reintentar más adelante)',
        mbConfirmation, MB_YESNO, IDYES) = IDNO then
     Result := False;
@@ -1118,7 +1123,7 @@ begin
   Result := Copy(Contenido, 1, Inicio - 1) + NuevoServidor + Copy(Contenido, Fin, Length(Contenido) - Fin + 1);
 end;
 
-// Reescribe {app}\GUI.exe.config con el servidor realmente elegido — así el
+// Reescribe {app}\GUI.exe.config con el servidor realmente elegido: así el
 // connection string queda embebido (no ".env") pero correcto para
 // CUALQUIER instancia que se haya detectado/elegido/ingresado, no solo
 // ".\SQLEXPRESS" fijo como en la Entrega 2. El archivo es UTF-8: se trabaja
@@ -1211,7 +1216,7 @@ begin
 end;
 
 // Devuelve las ultimas hasta MaxChars caracteres de Texto (o el texto
-// entero si es mas corto) — para mostrar un extracto del log directo en
+// entero si es mas corto): para mostrar un extracto del log directo en
 // el mensaje, sin obligar al usuario a ir a abrir el archivo para
 // enterarse de qué pasó.
 function UltimosCaracteres(const Texto: AnsiString; MaxChars: Integer): AnsiString;
@@ -1265,12 +1270,12 @@ end;
 //   3) Corre el desinstalador silenciosamente (a esta altura ya existe:
 //      Inno lo genera durante la copia de archivos, antes de ssPostInstall).
 //      Con /SUPPRESSMSGBOXES, la pregunta de "¿borrar también la BD?" del
-//      desinstalador se autorresponde con su default (No) — no tiene
+//      desinstalador se autorresponde con su default (No): no tiene
 //      sentido preguntar por una BD que puede ni haberse llegado a crear.
 //   4) Termina el proceso: nunca vuelve, así que no hace falta "exit"
 //      después de llamarla.
 // PuedeHaberBDParcial: True solo cuando ya se llegó a intentar correr el
-// script (a diferencia de un servicio caído, donde nunca se tocó la BD) —
+// script (a diferencia de un servicio caído, donde nunca se tocó la BD):
 // el script no está envuelto en una única transacción (CREATE DATABASE no
 // puede estarlo), así que un fallo a mitad de camino puede dejar objetos
 // creados a medias en el servidor.
@@ -1374,7 +1379,7 @@ begin
     // Servicio SQL Detenido (PPT slide "A01.1: Servicio SQL Detenido"):
     // solo aplica a instancias detectadas localmente (ServicioWindowsElegido
     // vacío = instancia manual/posiblemente remota, no hay servicio local
-    // que chequear). Esto es una SEGUNDA verificación — la primera ya pasó
+    // que chequear). Esto es una SEGUNDA verificación: la primera ya pasó
     // en el wizard (VerificarServicioPreflight, antes de copiar archivos);
     // esta es la red de seguridad final antes de tocar la base de datos.
     if ServicioWindowsElegido <> '' then
@@ -1483,7 +1488,7 @@ var
 begin
   if CurUninstallStep = usUninstall then
   begin
-    // Se pregunta ANTES de que Inno borre los archivos — DbInstaller.exe
+    // Se pregunta ANTES de que Inno borre los archivos: DbInstaller.exe
     // todavía está en {app}\BD en este punto, lo necesitamos para poder
     // borrar la base. Por defecto NO se borra (acción destructiva e
     // irreversible). MB_DEFBUTTON2 deja el foco en "No"; el IDNO final es

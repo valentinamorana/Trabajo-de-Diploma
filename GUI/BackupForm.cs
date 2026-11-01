@@ -263,7 +263,7 @@ namespace GUI
         {
             if (string.IsNullOrEmpty(ruta)) return;
 
-            // RF-08 — Informar el ALCANCE de la pérdida: todo lo creado/modificado después de la
+            // RF-08: Informar el ALCANCE de la pérdida: todo lo creado/modificado después de la
             // fecha del backup se perderá. Se lee la fecha real del header del .bak.
             string alcance;
             DateTime? fechaBackup = null;
@@ -277,7 +277,7 @@ namespace GUI
                     fechaBackup.Value.ToString("g"),
                     Math.Max(0, (int)antiguedad.TotalDays));
 
-                // RF-08 — Detalle a nivel REGISTRO: qué se perderá concretamente, no solo "todo lo
+                // RF-08: Detalle a nivel REGISTRO: qué se perderá concretamente, no solo "todo lo
                 // posterior a la fecha". Se cuentan las filas de la base actual posteriores al backup.
                 alcance += ConstruirDetallePerdida(fechaBackup);
             }
@@ -317,7 +317,7 @@ namespace GUI
             }
         }
 
-        // RF-08 — Construye el desglose de lo que se perderá al restaurar: cuántos registros de
+        // RF-08: Construye el desglose de lo que se perderá al restaurar: cuántos registros de
         // cada entidad existen en la base actual con fecha posterior a la del backup. Si no hay
         // ninguno, lo informa explícitamente (restaurar es seguro respecto a datos posteriores).
         private string ConstruirDetallePerdida(DateTime? fechaBackup)
@@ -390,7 +390,7 @@ namespace GUI
 
         // Ejecuta una operación de backup/restauración (I/O de archivos potencialmente grande)
         // en un hilo de background, deshabilitando los controles y mostrando el cursor de espera
-        // mientras corre — antes eran síncronas en el hilo de UI y con una base grande la ventana
+        // mientras corre: antes eran síncronas en el hilo de UI y con una base grande la ventana
         // podía marcarse "No responde".
         private async Task<T> EjecutarConEsperaAsync<T>(Func<T> operacion)
         {

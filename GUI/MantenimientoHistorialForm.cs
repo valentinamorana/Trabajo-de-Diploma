@@ -20,7 +20,7 @@ namespace GUI
         public MantenimientoHistorialForm(BE.Prenda prenda, BLL.Interfaces.IPrendaService prendaBLL)
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvHistorial);
             _prenda    = prenda;
             _prendaBLL = prendaBLL;
@@ -28,7 +28,7 @@ namespace GUI
 
         // ── Ciclo de vida ─────────────────────────────────────────────────────
         // A diferencia de PedidoHistorialForm/VersionHistorialForm (sus 2 pantallas "hermanas"
-        // de Historial), esta cargaba en el constructor y no se suscribía a cambios de idioma —
+        // de Historial), esta cargaba en el constructor y no se suscribía a cambios de idioma:
         // quedaba con los textos del idioma anterior si el usuario lo cambiaba con la ventana
         // abierta. Unificado al mismo patrón OnLoad/OnFormClosing + IIdiomaObserver.
 
@@ -51,7 +51,7 @@ namespace GUI
         {
             _idioma = idioma;
             this.Text      = Tr("frm.mantenimiento", "Historial de Mantenimiento");
-            lblTitulo.Text = $"{Tr("frm.mantenimiento", "Historial de Mantenimiento")} — {_prenda.Nombre}";
+            lblTitulo.Text = $"{Tr("frm.mantenimiento", "Historial de Mantenimiento")}: {_prenda.Nombre}";
             btnCerrar.Text = Tr("btn.mant.cerrar", "Cerrar");
 
             TraducirHeadersGrilla();
@@ -92,7 +92,7 @@ namespace GUI
 
                 string abierto  = Tr("mant.abierto",  "En limpieza");
                 string cerrado  = Tr("mant.cerrado",  "Finalizado");
-                string sinFecha = "—";
+                string sinFecha = "-";
                 // Origen del mantenimiento (MantenimientoPrenda.Origen): los de una devolución son los
                 // que pasan por la Inspección de Devolución (PN04).
                 string origenDevolucion = Tr("mant.origen.devolucion", "Devolución de pedido");
@@ -111,9 +111,9 @@ namespace GUI
                     tabla.Rows.Add(
                         r.FechaEntrada.ToString("g"),
                         r.FechaSalida.HasValue ? r.FechaSalida.Value.ToString("g") : sinFecha,
-                        r.DuracionDias.HasValue ? r.DuracionDias.Value.ToString() : "—",
+                        r.DuracionDias.HasValue ? r.DuracionDias.Value.ToString() : "-",
                         r.VieneDeDevolucion ? origenDevolucion : origenManual,
-                        r.Actor ?? "—",
+                        r.Actor ?? "-",
                         r.EstaAbierto ? abierto : cerrado);
                 }
 

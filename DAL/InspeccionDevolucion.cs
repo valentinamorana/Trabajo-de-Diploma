@@ -30,7 +30,7 @@ namespace DAL
     }
 
     /// <summary>
-    /// PN04 — Inspección de Devolución (EnLimpieza → Baja con cargo) y Reportar Prenda Perdida
+    /// PN04: Inspección de Devolución (EnLimpieza → Baja con cargo) y Reportar Prenda Perdida
     /// (EnUso → Baja con cargo). Antes la GUI llamaba por separado a BLL.CargoPrenda.RegistrarCargo
     /// y a BLL.Prenda.CambiarEstado, sin transacción: si el segundo paso fallaba quedaba un cargo
     /// cobrado sobre una prenda que seguía en circulación. Ahora el INSERT del cargo y el UPDATE

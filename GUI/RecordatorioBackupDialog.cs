@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace GUI
 {
     /// <summary>
-    /// Panel de Control — cada cuántos días se recuerda hacer un backup (BLL.Configuracion).
+    /// Panel de Control: cada cuántos días se recuerda hacer un backup (BLL.Configuracion).
     /// Hecho con el Diseñador; los textos los traduce <see cref="DashboardForm"/> antes de mostrarlo.
     /// </summary>
     public partial class RecordatorioBackupDialog : Form

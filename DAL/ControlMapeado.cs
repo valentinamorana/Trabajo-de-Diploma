@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Etapa 4 (permisos a nivel de control).
+    /// Capa de Acceso a Datos: Etapa 4 (permisos a nivel de control).
     /// Lee/escribe la tabla [ControlMapeado] (patente ↔ control de un formulario).
     /// </summary>
     public class ControlMapeado : BaseDAL, DAL.Interfaces.IControlMapeadoDAL

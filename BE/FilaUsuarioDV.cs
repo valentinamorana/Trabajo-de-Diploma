@@ -4,7 +4,7 @@ namespace BE
     /// DTO de transporte para el cálculo de Dígitos Verificadores (T07).
     ///
     /// Representa una fila de la tabla Usuario con solo los campos que participan
-    /// en el cálculo del DVH, más el DVH almacenado. Es un DTO liviano — NO expone
+    /// en el cálculo del DVH, más el DVH almacenado. Es un DTO liviano: NO expone
     /// la entidad BE.Usuario completa (la contraseña hasheada se trata como un campo
     /// más del cálculo, no como dato de negocio).
     ///
@@ -35,10 +35,10 @@ namespace BE
         /// de la fórmula: todos los puntos de recálculo y verificación la usan, de modo
         /// que no puedan divergir.
         ///
-        /// Formato v2 — se incorpora <see cref="Rol"/> al cálculo: de Rol dependen los
+        /// Formato v2: se incorpora <see cref="Rol"/> al cálculo: de Rol dependen los
         /// permisos efectivos del usuario, así una manipulación directa del rol en BD
         /// queda detectada por la verificación de integridad (antes Rol no se protegía).
-        /// Formato 2 — se agregan Activo, RequiereCambioClave, CantidadBloqueos y FechaBloqueo.
+        /// Formato 2: se agregan Activo, RequiereCambioClave, CantidadBloqueos y FechaBloqueo.
         /// </summary>
         public string[] CamposParaDVH()
         {

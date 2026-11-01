@@ -7,7 +7,7 @@ namespace DAL.Interfaces
     public interface IRenovacionDAL
     {
         /// <summary>Inserta el registro de la renovación sobre una transacción ya abierta por el
-        /// caller (ver <see cref="IClienteDAL.EjecutarTransaccion"/>) — para que el INSERT del
+        /// caller (ver <see cref="IClienteDAL.EjecutarTransaccion"/>): para que el INSERT del
         /// historial y el UPDATE de Cliente sean atómicos.</summary>
         int AltaEnTx(SqlConnection conexion, SqlTransaction tx, BE.Renovacion renovacion);
 

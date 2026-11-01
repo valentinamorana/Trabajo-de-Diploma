@@ -5,19 +5,19 @@ using System.Collections.Generic;
 
 namespace BLL
 {
-    // Partial de BLL.Usuario — ABM administrativo: alta, modificación de datos NO sensibles,
+    // Partial de BLL.Usuario: ABM administrativo: alta, modificación de datos NO sensibles,
     // cambio de rol y búsqueda. Ver BLL.Usuario (Usuario.cs) para el resto de grupos.
     public partial class Usuario
     {
         // Crea un nuevo usuario con rol y contraseña generada automáticamente.
-        // Sobrecarga simple (sin datos de perfil) — usada por callers heredados.
+        // Sobrecarga simple (sin datos de perfil): usada por callers heredados.
         public string Alta(string modulo, string username, string perfil)
         {
             return Alta(modulo, username, perfil, null, null, null, null);
         }
 
         // Crea un nuevo usuario con rol, datos administrativos (no sensibles) y contraseña
-        // generada automáticamente. La contraseña NO la ingresa el administrador — se genera
+        // generada automáticamente. La contraseña NO la ingresa el administrador: se genera
         // aquí y se exporta a un .txt en CredencialesGeneradas/. Devuelve la ruta del archivo.
         // Graba una versión base (Memento) para que el primer cambio tenga "valor anterior".
         public string Alta(string modulo, string username, string perfil,
@@ -25,7 +25,7 @@ namespace BLL
         {
             ValidarEsAdministrador();
 
-            // T07 — Verificar integridad de la base ANTES de modificar usuarios.
+            // T07: Verificar integridad de la base ANTES de modificar usuarios.
             Configuracion.AsegurarIntegridadUsuarios();
 
             if (string.IsNullOrWhiteSpace(username))
@@ -84,7 +84,7 @@ namespace BLL
             return rutaArchivo;
         }
 
-        // ── ABM — Modificación de datos administrativos NO sensibles ─────────────
+        // ── ABM: Modificación de datos administrativos NO sensibles ─────────────
         // Edita nombre, apellido, username, fecha de nacimiento y email. NUNCA toca la
         // contraseña. Graba una versión (Memento) con el NUEVO estado, de modo que el
         // Historial de Cambios pueda mostrar campo/valor anterior/valor nuevo (diff entre

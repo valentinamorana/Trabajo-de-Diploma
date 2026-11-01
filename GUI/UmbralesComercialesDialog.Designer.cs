@@ -42,7 +42,7 @@ namespace GUI
             this.lblTitulo.Height = 32;
             this.lblTitulo.Name = "lblTitulo";
             this.lblTitulo.Padding = new Padding(8, 6, 0, 0);
-            this.lblTitulo.Text = "Umbrales del motor de recomendaciones";
+            this.lblTitulo.Text = "Parámetros del análisis";
 
             this.lblInfo.Dock = DockStyle.Top;
             this.lblInfo.ForeColor = Tema.TextoMuted;
@@ -93,7 +93,7 @@ namespace GUI
             this.btnRestablecer.Location = new Point(156, 7);
             this.btnRestablecer.Name = "btnRestablecer";
             this.btnRestablecer.Size = new Size(220, 30);
-            this.btnRestablecer.Text = "Restablecer valores de fábrica";
+            this.btnRestablecer.Text = "Restablecer valores predeterminados";
             this.btnRestablecer.Click += new System.EventHandler(this.BtnRestablecer_Click);
 
             this.btnCancelar.DialogResult = DialogResult.Cancel;
@@ -123,7 +123,7 @@ namespace GUI
             this.Name = "UmbralesComercialesDialog";
             this.ShowInTaskbar = false;
             this.StartPosition = FormStartPosition.CenterParent;
-            this.Text = "Umbrales";
+            this.Text = "Parámetros del análisis";
             ((System.ComponentModel.ISupportInitialize)(this.dgvUmbrales)).EndInit();
             this.pnlBotones.ResumeLayout(false);
             this.ResumeLayout(false);

@@ -13,7 +13,7 @@ namespace BLL.Manejadores
         private readonly DAL.Interfaces.IPlanSuscripcionDAL dalPlan;
         private readonly DAL.Interfaces.IRenovacionDAL dalRenovacion;
 
-        // Antes tomaba DAL.PlanSuscripcion (clase concreta) en vez de IPlanSuscripcionDAL —
+        // Antes tomaba DAL.PlanSuscripcion (clase concreta) en vez de IPlanSuscripcionDAL:
         // por eso no se podía instanciar con un doble de prueba y quedaba sin ningún test,
         // incluida la validación de "plan insuficiente para el stock en uso" al cambiar de plan.
         public CambioPlanHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IPlanSuscripcionDAL dalPlan,

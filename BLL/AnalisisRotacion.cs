@@ -5,10 +5,10 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Análisis de Rotación de Prendas (PdN9). Cruza el catálogo activo
+    /// Lógica de negocio: Análisis de Rotación de Prendas (PdN9). Cruza el catálogo activo
     /// (BE.Prenda, excluye Baja) con la cantidad de pedidos que incluyó a cada prenda
     /// (DAL.Pedido) para identificar candidatas a baja (sin movimiento) o a reposición
-    /// (demanda alta) — mismo criterio de cruce de datos que BLL.AnalisisAbandono (PdN10).
+    /// (demanda alta): mismo criterio de cruce de datos que BLL.AnalisisAbandono (PdN10).
     /// </summary>
     public class AnalisisRotacion : Interfaces.IAnalisisRotacionService
     {
@@ -16,7 +16,7 @@ namespace BLL
         private readonly DAL.Interfaces.IPedidoDAL dalPedido;
 
         // Una prenda sin ningún pedido recién es "candidata a baja" si ya lleva un tiempo
-        // en catálogo — evita marcar como sin movimiento a una prenda recién ingresada.
+        // en catálogo: evita marcar como sin movimiento a una prenda recién ingresada.
         public const int DiasAntiguedadMinimaParaBajaDemanda = 30;
         public const int CantidadPedidosParaAltaDemanda = 5;
 
@@ -53,7 +53,7 @@ namespace BLL
                         NombrePrenda = prenda.Nombre,
                         Categoria = prenda.Categoria,
                         CantidadPedidos = 0,
-                        Motivo = $"{prenda.Nombre} no registra pedidos desde el {sinPedidosDesde.Value:dd/MM/yyyy} — candidata a baja.",
+                        Motivo = $"{prenda.Nombre} no registra pedidos desde el {sinPedidosDesde.Value:dd/MM/yyyy}: candidata a baja.",
                         Clave = "rotacion.motivo.bajademanda.periodo",
                         Args = new object[] { prenda.Nombre, sinPedidosDesde.Value }
                     });
@@ -66,7 +66,7 @@ namespace BLL
                         NombrePrenda = prenda.Nombre,
                         Categoria = prenda.Categoria,
                         CantidadPedidos = 0,
-                        Motivo = $"{prenda.Nombre} no registra pedidos en {diasEnCatalogo} día(s) desde su alta — candidata a baja.",
+                        Motivo = $"{prenda.Nombre} no registra pedidos en {diasEnCatalogo} día(s) desde su alta: candidata a baja.",
                         Clave = "rotacion.motivo.bajademanda",
                         Args = new object[] { prenda.Nombre, diasEnCatalogo }
                     });
@@ -79,7 +79,7 @@ namespace BLL
                         NombrePrenda = prenda.Nombre,
                         Categoria = prenda.Categoria,
                         CantidadPedidos = cantidad,
-                        Motivo = $"{prenda.Nombre} fue pedida {cantidad} veces — candidata a reposición en su categoría.",
+                        Motivo = $"{prenda.Nombre} fue pedida {cantidad} veces: candidata a reposición en su categoría.",
                         Clave = "rotacion.motivo.altademanda",
                         Args = new object[] { prenda.Nombre, cantidad }
                     });

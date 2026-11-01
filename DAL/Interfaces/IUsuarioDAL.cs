@@ -12,7 +12,7 @@ namespace DAL.Interfaces
         BE.Usuario       ObtenerPorUsername(string username);
         BE.Usuario       ObtenerPorId(int idUsuario);
         void             Alta(string username, string clave, string perfil);
-        // ABM — modificación de datos administrativos NO sensibles y cambio de rol.
+        // ABM: modificación de datos administrativos NO sensibles y cambio de rol.
         void             Modificar(int idUsuario, string nombre, string apellido, string username, DateTime? fechaNacimiento, string email);
         void             CambiarRol(int idUsuario, string rol);
         // Bloqueo progresivo: marca el bloqueo con timestamp e incrementa la escala / auto-desbloqueo al expirar.
@@ -26,7 +26,7 @@ namespace DAL.Interfaces
         // Cambio de clave por el propio usuario (baja el flag RequiereCambioClave).
         void             CambiarClave(int idUsuario, string claveHasheada);
         void             GuardarIdioma(int idUsuario, string idIdioma);
-        // RF-10 — baja lógica (archivar) y purga física diferida.
+        // RF-10: baja lógica (archivar) y purga física diferida.
         void             BajaLogica(int idUsuario);
         void             EliminarFisico(int idUsuario);
         // RF-10: ¿el usuario firmó registros de PN03 (promociones, sugerencias, dictámenes, bajas)?

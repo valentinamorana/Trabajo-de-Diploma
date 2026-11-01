@@ -12,13 +12,13 @@ namespace BLL.Interfaces
     ///     ComprobarCupo, EnviarAControlStock, AsentarDesistimiento, AjustarSeleccion,
     ///     FormalizarPedido, PrepararConfirmacion (Vendedor) y RevisarStock, InformarFaltantes,
     ///     ConfirmarPrendasDisponibles, SepararPrendas (Depósito)
-    ///   Despachar()           — Deposito despacha el pedido
-    ///   MarcarEntregado()     — Se confirma la entrega al cliente
-    ///   RegistrarDevolucion() — El cliente devuelve las prendas al finalizar
-    ///   Cancelar()            — Se cancela un pedido Pendiente
-    ///   DesCancelar()         — Se revierte la cancelación
-    ///   ObtenerHistorial()    — Devuelve el historial de cambios de un pedido
-    ///   RestaurarOperacion()  — Restaura el pedido al estado previo a una operación
+    ///   Despachar(): Deposito despacha el pedido
+    ///   MarcarEntregado(): Se confirma la entrega al cliente
+    ///   RegistrarDevolucion(): El cliente devuelve las prendas al finalizar
+    ///   Cancelar(): Se cancela un pedido Pendiente
+    ///   DesCancelar(): Se revierte la cancelación
+    ///   ObtenerHistorial(): Devuelve el historial de cambios de un pedido
+    ///   RestaurarOperacion(): Restaura el pedido al estado previo a una operación
     /// </summary>
     public interface IPedidoService
     {
@@ -31,7 +31,7 @@ namespace BLL.Interfaces
         // Obtiene un pedido por ID con sus prendas asociadas.
         BE.Pedido ObtenerPorId(int id);
 
-        // ── PN01 — Armar pedido de prendas (una operación por actividad del diagrama) ──
+        // ── PN01: Armar pedido de prendas (una operación por actividad del diagrama) ──
         // "Verificar la vigencia de la suscripción": devuelve el cliente o lanza el motivo.
         BE.Cliente VerificarVigencia(int idCliente);
 
@@ -57,16 +57,16 @@ namespace BLL.Interfaces
         // "Recibir selección ajustada por disponibilidad": vuelve a control de stock.
         void AjustarSeleccion(string modulo, BE.Pedido pedido, List<BE.Prenda> prendas);
 
-        // Depósito — "Revisar stock de las prendas" (planilla de control de existencias).
+        // Depósito: "Revisar stock de las prendas" (planilla de control de existencias).
         List<BE.LineaControlStock> RevisarStock(BE.Pedido pedido);
 
-        // Depósito — "Informe de prendas faltantes" (faltantes y alternativas).
+        // Depósito: "Informe de prendas faltantes" (faltantes y alternativas).
         List<BE.PedidoFaltante> InformarFaltantes(string modulo, BE.Pedido pedido);
 
-        // Depósito — "Confirmar prendas disponibles".
+        // Depósito: "Confirmar prendas disponibles".
         void ConfirmarPrendasDisponibles(string modulo, BE.Pedido pedido);
 
-        // Depósito — "Separar prendas del pedido" (reserva las prendas).
+        // Depósito: "Separar prendas del pedido" (reserva las prendas).
         void SepararPrendas(string modulo, BE.Pedido pedido);
 
         // "Formalizar el pedido": desde acá no admite modificaciones.

@@ -5,10 +5,10 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Análisis de Tiempos de Mantenimiento (PdN11). Agrupa el
+    /// Lógica de negocio: Análisis de Tiempos de Mantenimiento (PdN11). Agrupa el
     /// historial de MantenimientoPrenda (T04-independiente, tabla propia desde la
     /// migración de PdN4) por prenda y marca las que exceden el umbral de cantidad o
-    /// duración promedio de mantenimientos — señal de una prenda problemática (mala
+    /// duración promedio de mantenimientos: señal de una prenda problemática (mala
     /// calidad, uso intensivo) a evaluar para baja o revisión de proveedor.
     /// </summary>
     public class AnalisisMantenimiento : Interfaces.IAnalisisMantenimientoService
@@ -45,8 +45,8 @@ namespace BLL
                 string motivo = cantidadExcesiva && duracionExcesiva
                     ? $"{grupo.Key.NombrePrenda} lleva {cantidad} mantenimientos, con un promedio de {promedio:F1} día(s) cada uno."
                     : cantidadExcesiva
-                        ? $"{grupo.Key.NombrePrenda} lleva {cantidad} mantenimientos — cantidad excesiva."
-                        : $"{grupo.Key.NombrePrenda} tiene un promedio de {promedio:F1} día(s) por mantenimiento — duración excesiva.";
+                        ? $"{grupo.Key.NombrePrenda} lleva {cantidad} mantenimientos: cantidad excesiva."
+                        : $"{grupo.Key.NombrePrenda} tiene un promedio de {promedio:F1} día(s) por mantenimiento: duración excesiva.";
                 string clave = cantidadExcesiva && duracionExcesiva ? "mant.analisis.motivo.ambos"
                              : cantidadExcesiva ? "mant.analisis.motivo.cantidad"
                              : "mant.analisis.motivo.duracion";

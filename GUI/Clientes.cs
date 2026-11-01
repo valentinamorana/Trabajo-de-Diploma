@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Módulo de Gestión de Clientes.
+    /// Capa de Presentación: Módulo de Gestión de Clientes.
     ///
     /// Permite al Vendedor administrar los clientes suscriptores del servicio:
     ///   Ver listado completo con plan y stock en uso
@@ -33,13 +33,13 @@ namespace GUI
         // Cache de la lista actual
         private List<BE.Cliente> _clientes = new List<BE.Cliente>();
 
-        // Idioma activo — sincronizado en Traducir() para usar en AplicarFiltro y CargarClientes
+        // Idioma activo: sincronizado en Traducir() para usar en AplicarFiltro y CargarClientes
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
         public Clientes()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvClientes);
         }
 
@@ -160,7 +160,7 @@ namespace GUI
             var t = Traductor.ObtenerTraducciones(_idioma);
             string sinPlan = t.ContainsKey("lbl.sinplan") ? t["lbl.sinplan"].Texto : "Sin plan";
 
-            string sinVenc = t.ContainsKey("msg.cli.sinvenc") ? t["msg.cli.sinvenc"].Texto : "—";
+            string sinVenc = t.ContainsKey("msg.cli.sinvenc") ? t["msg.cli.sinvenc"].Texto : "-";
             string vencido = t.ContainsKey("msg.cli.vencido") ? t["msg.cli.vencido"].Texto : "Vencido";
 
             string proxVencer = t.ContainsKey("msg.cli.proxvencer") ? t["msg.cli.proxvencer"].Texto : "Vence pronto";
@@ -204,10 +204,10 @@ namespace GUI
                     c.Nombre,
                     c.Apellido,
                     c.DNI,
-                    c.Email ?? "—",
+                    c.Email ?? "-",
                     c.NombrePlan ?? sinPlan,
                     capacidad,
-                    c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "—",
+                    c.MetodoPago != null ? Tr(c.ClaveTraduccionMedioPago, c.MetodoPago) : "-",
                     c.FechaAlta.ToString("d"),
                     vencStr,
                     expirado,
@@ -256,7 +256,7 @@ namespace GUI
                     // El alta solo registra los datos personales del cliente, sin plan ni
                     // suscripción activa. Asignarle un plan y activar la suscripción es un paso
                     // comercial aparte (PN02: Vendedor crea la Contratación en el módulo
-                    // correspondiente, Caja confirma el cobro y recién ahí se activa) — así no
+                    // correspondiente, Caja confirma el cobro y recién ahí se activa): así no
                     // hay forma de que un cliente quede con una suscripción vigente sin haber
                     // pasado por Caja.
                     var t = Traductor.ObtenerTraducciones(_idioma);

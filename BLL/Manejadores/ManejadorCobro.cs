@@ -3,7 +3,7 @@ using System;
 namespace BLL.Manejadores
 {
     /// <summary>
-    /// Patrón Chain of Responsibility (PdN6 — Cobro y pago de suscripción). Misma
+    /// Patrón Chain of Responsibility (PdN6: Cobro y pago de suscripción). Misma
     /// estructura que ManejadorRenovacion / Aprobador del ejemplo de cátedra: clase
     /// abstracta con un campo protegido al sucesor, un método para encadenarlo (sin
     /// retorno) y un ÚNICO método abstracto donde cada eslabón concreto decide, dentro
@@ -21,7 +21,7 @@ namespace BLL.Manejadores
         /// <summary>
         /// Delega al siguiente eslabón de la cadena. Si no hay uno configurado, falla con
         /// un mensaje claro de "cadena mal armada" en vez de una NullReferenceException
-        /// genérica — hoy BLL.Cobro arma la cadena completa así que esto nunca dispara,
+        /// genérica: hoy BLL.Cobro arma la cadena completa así que esto nunca dispara,
         /// pero protege contra el día en que se agregue/reordene un eslabón y se olvide
         /// un AgregarSiguiente.
         /// </summary>

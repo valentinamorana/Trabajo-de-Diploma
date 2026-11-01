@@ -4,7 +4,7 @@ using System;
 
 namespace BLL
 {
-    // Partial de BLL.Usuario — Autenticación: login/logout, bloqueo progresivo de cuenta
+    // Partial de BLL.Usuario: Autenticación: login/logout, bloqueo progresivo de cuenta
     // y lectura de la sesión activa. Ver BLL.Usuario (Usuario.cs) para el resto de grupos.
     public partial class Usuario
     {
@@ -15,7 +15,7 @@ namespace BLL
         // La escala cuenta bloqueos CONSECUTIVOS: un login exitoso la reinicia (ResetearIntentosFallidos).
         private static readonly int[] _minutosBloqueo = { 1, 5, 15, 60 };
 
-        // T07 — Lectores para el login con la integridad comprometida (reemplazables en tests).
+        // T07: Lectores para el login con la integridad comprometida (reemplazables en tests).
         // Espejo: último estado legítimo conocido del usuario (Usuario_Seguridad).
         internal static Func<string, BE.FilaUsuarioDV> LectorEspejo =
             u => new DAL.EspejoUsuario().ObtenerPorUsername(u);
@@ -67,7 +67,7 @@ namespace BLL
                     "Demasiados intentos fallidos en esta sesión.\n" +
                     "Reinicie la aplicación para volver a intentarlo.");
 
-            // T07 — Si la verificación de arranque detectó que la tabla Usuario (u otra protegida)
+            // T07: Si la verificación de arranque detectó que la tabla Usuario (u otra protegida)
             // fue manipulada, NO se confía en ella para autenticar: un atacante podría haberse
             // puesto rol Administrador y llegar a la consola de recuperación ("Asumir pérdida").
             if (Configuracion.IntegridadComprometida)
@@ -154,7 +154,7 @@ namespace BLL
 
         private void AbrirSesion(string modulo, BE.Usuario usuario)
         {
-            // T04 — Permisos EFECTIVOS resueltos recursivamente sobre el árbol Composite
+            // T04: Permisos EFECTIVOS resueltos recursivamente sobre el árbol Composite
             // (rol → roles/familias → patentes), con deduplicación de permisos repetidos.
             usuario.Permisos = perfilesBLL.ObtenerPermisosEfectivos(usuario.Rol ?? usuario.Perfil);
             PermisosAccion.LimpiarCacheVigencia();
@@ -162,7 +162,7 @@ namespace BLL
             bitacora.Registrar(modulo, BE.ActividadesBitacora.InicioSesion, BE.Criticidad.None);
         }
 
-        // T07 — Login cuando la integridad está comprometida. Se autentica contra el ESPEJO de
+        // T07: Login cuando la integridad está comprometida. Se autentica contra el ESPEJO de
         // integridad (último estado legítimo conocido de cada usuario), cuyo propio DVH debe
         // verificar: la clave, el rol y el estado salen de ahí y no de la tabla Usuario, que pudo
         // haber sido alterada. Si el usuario no tiene fila íntegra en el espejo, se rechaza.

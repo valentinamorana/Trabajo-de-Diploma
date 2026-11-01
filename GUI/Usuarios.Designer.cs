@@ -94,7 +94,7 @@ namespace GUI
             this.lblTitulo.TabIndex  = 0;
             this.lblTitulo.Text      = "Administración de Usuarios";
 
-            // ── lblMensaje — barra de resultado común a las dos pestañas ───────
+            // ── lblMensaje: barra de resultado común a las dos pestañas ───────
             this.lblMensaje.BackColor = Tema.PanelClaro;
             this.lblMensaje.Dock      = DockStyle.Bottom;
             this.lblMensaje.Font      = new Font("Segoe UI", 8.5F);
@@ -230,7 +230,7 @@ namespace GUI
             this.btnDesbloquear.UseVisualStyleBackColor = false;
             this.btnDesbloquear.Click    += new System.EventHandler(this.BtnDesbloquear_Click);
 
-            // btnArchivar — RF-10, archivar (baja lógica) el usuario seleccionado.
+            // btnArchivar: RF-10, archivar (baja lógica) el usuario seleccionado.
             this.btnArchivar.BackColor = Color.FromArgb(170, 50, 50);
             this.btnArchivar.Cursor    = Cursors.Hand;
             this.btnArchivar.Enabled   = false;
@@ -370,7 +370,7 @@ namespace GUI
             this.btnVerTodos.UseVisualStyleBackColor = false;
             this.btnVerTodos.Click    += new System.EventHandler(this.BtnVerTodos_Click);
 
-            // btnNuevo — ÚNICO punto de alta de usuarios del sistema.
+            // btnNuevo: ÚNICO punto de alta de usuarios del sistema.
             this.btnNuevo.BackColor = Tema.RosaPrimario;
             this.btnNuevo.Cursor    = Cursors.Hand;
             this.btnNuevo.FlatAppearance.BorderSize = 0;
@@ -550,7 +550,7 @@ namespace GUI
             this.btnCambiarRol.UseVisualStyleBackColor = false;
             this.btnCambiarRol.Click    += new System.EventHandler(this.BtnCambiarRol_Click);
 
-            // btnHistorial — Historial de Cambios (Memento) del usuario seleccionado.
+            // btnHistorial: Historial de Cambios (Memento) del usuario seleccionado.
             this.btnHistorial.BackColor = Color.White;
             this.btnHistorial.Cursor    = Cursors.Hand;
             this.btnHistorial.FlatAppearance.BorderColor = Tema.RosaOscuro;

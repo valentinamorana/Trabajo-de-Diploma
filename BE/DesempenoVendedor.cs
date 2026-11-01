@@ -1,6 +1,6 @@
 namespace BE
 {
-    /// <summary>PdN8 — Desempeño de un vendedor: pedidos generados, entregados y cancelados.</summary>
+    /// <summary>PdN8: Desempeño de un vendedor: pedidos generados, entregados y cancelados.</summary>
     public class DesempenoVendedor
     {
         public int IdEmpleado { get; set; }

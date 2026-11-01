@@ -19,7 +19,7 @@ namespace BLL
     }
 
     /// <summary>
-    /// Permisos granulares de ACCIÓN — separan "Ver" de "Configurar" (idea tomada de los
+    /// Permisos granulares de ACCIÓN: separan "Ver" de "Configurar" (idea tomada de los
     /// proyectos Agus / tp-ing-soft, adaptada al modelo de patentes de WardrobeFlow).
     ///
     /// • VER un módulo  → patente de menú (ej. mnuClientes): muestra la pantalla y permite leer.

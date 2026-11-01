@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace DAL.Interfaces
 {
     /// <summary>
-    /// PN03 — Contrato del acceso a datos de MetaComercial (metas mensuales de Gerencia; permite dobles
+    /// PN03: Contrato del acceso a datos de MetaComercial (metas mensuales de Gerencia; permite dobles
     /// de prueba). La unicidad "una meta por indicador y mes" la valida la BLL y la respalda la restricción
     /// UQ_MetaComercial_PeriodoIndicador de la base.
     /// </summary>

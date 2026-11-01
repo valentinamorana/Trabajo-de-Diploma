@@ -5,7 +5,7 @@ using Servicios.Multiidioma;
 namespace Tests
 {
     /// <summary>
-    /// #6 — El corpus de traducciones se externalizó a un recurso embebido (traducciones.tsv)
+    /// #6: El corpus de traducciones se externalizó a un recurso embebido (traducciones.tsv)
     /// y Traductor lo carga en runtime. Estas pruebas blindan la mudanza: que el recurso cargue,
     /// que tenga volumen razonable y que el round-trip del escapado (textos multilínea) sea correcto.
     /// </summary>

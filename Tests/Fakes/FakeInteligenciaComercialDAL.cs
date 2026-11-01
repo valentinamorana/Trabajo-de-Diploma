@@ -117,6 +117,23 @@ namespace Tests.Fakes
             return Detalle.Where(kv => kv.Key.Item2 == tipo && pedidos.Contains(kv.Key.Item1))
                           .ToDictionary(kv => kv.Key.Item1, kv => kv.Value.ToList());
         }
+
+        /// <summary>Constancias guardadas (IdDecision → XML).</summary>
+        public Dictionary<int, string> Constancias { get; } = new Dictionary<int, string>();
+        public bool FallarConstancia { get; set; }
+
+        public bool GuardarConstancia(int idDecision, string constanciaXml)
+        {
+            if (FallarConstancia) throw new Exception("falla simulada al guardar la constancia");
+            var f = Filas.Find(x => x.IdDecision == idDecision);
+            if (f == null) return false;
+            Constancias[idDecision] = constanciaXml;
+            f.TieneConstancia = constanciaXml != null;
+            return true;
+        }
+
+        public string ObtenerConstancia(int idDecision) =>
+            Constancias.TryGetValue(idDecision, out var xml) ? xml : null;
     }
 
     /// <summary>Doble de IMetaComercialDAL: metas en memoria, con alta, modificación y baja.</summary>

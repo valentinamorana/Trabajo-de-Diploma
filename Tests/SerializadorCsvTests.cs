@@ -4,7 +4,7 @@ using Servicios.Exportacion;
 
 namespace Tests
 {
-    /// <summary>Pruebas del serializador CSV (RFC 4180) — núcleo de la exportación CSV.</summary>
+    /// <summary>Pruebas del serializador CSV (RFC 4180): núcleo de la exportación CSV.</summary>
     [TestClass]
     public class SerializadorCsvTests
     {
@@ -91,7 +91,7 @@ namespace Tests
         {
             // Sin comillas internas a propósito: un campo con '"' se entrecomilla por RFC 4180
             // (ver Csv_CampoConComillas_*), lo que movería el apóstrofe agregado adentro de las
-            // comillas — este test aísla solo la neutralización del prefijo de fórmula.
+            // comillas: este test aísla solo la neutralización del prefijo de fórmula.
             var dt  = Tabla(new[] { "c1" }, new object[] { "=HYPERLINK(http://evil,click)" });
             var csv = SerializadorCsv.Generar(new[] { "H" }, dt);
             Assert.IsTrue(Lineas(csv)[1].StartsWith("'="), "Debe anteponer un apóstrofe al '=' inicial.");
@@ -119,7 +119,7 @@ namespace Tests
         public void Csv_MontoNegativoNormal_NoDeberiaConfundirseConFormula_PeroSeNeutralizaIgual()
         {
             // Nota: un número negativo legítimo ("-500") también empieza con '-' y se neutraliza
-            // igual que una fórmula — es el mismo trade-off que aplican las librerías CSV modernas
+            // igual que una fórmula: es el mismo trade-off que aplican las librerías CSV modernas
             // (falso positivo aceptable frente al riesgo de ejecución de fórmula).
             var dt  = Tabla(new[] { "c1" }, new object[] { "-500" });
             var csv = SerializadorCsv.Generar(new[] { "H" }, dt);

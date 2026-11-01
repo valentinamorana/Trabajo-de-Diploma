@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Recomendación de Prendas para un Cliente (PdN13). Construye el
+    /// Lógica de negocio: Recomendación de Prendas para un Cliente (PdN13). Construye el
     /// perfil de preferencia del cliente (categoría y color más pedidos en su historial) y
     /// sugiere prendas Disponibles afines, para que el Vendedor las ofrezca en el próximo
     /// pedido. Sin historial de pedidos, no hay base para recomendar: devuelve lista vacía.

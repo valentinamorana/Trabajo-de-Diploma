@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
-    /// <summary>T03 — Pruebas de hash de contraseñas (PBKDF2).</summary>
+    /// <summary>T03: Pruebas de hash de contraseñas (PBKDF2).</summary>
     [TestClass]
     public class EncriptadorTests
     {

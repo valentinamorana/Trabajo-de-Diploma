@@ -20,20 +20,20 @@ namespace BE
         public const string Caja              = "mnuCaja";
         public const string RenovacionSuscripcion = "mnuRenovacionSuscripcion";
 
-        // PN03 — Evaluar y aplicar promociones comerciales.
+        // PN03: Evaluar y aplicar promociones comerciales.
         public const string SugerenciaPromocion   = "mnuSugerenciaPromocion";
         public const string PromocionesAdmin      = "mnuPromocionesAdmin";
         public const string PromocionesContable   = "mnuPromocionesContable";
         public const string PromocionesVigentes   = "mnuPromocionesVigentes";
 
-        // PN04 — Inspección de Devolución (Depósito = rol Deposito, sin rol nuevo).
+        // PN04: Inspección de Devolución (Depósito = rol Deposito, sin rol nuevo).
         public const string InspeccionDevolucion  = "mnuInspeccionDevolucion";
 
-        // PN01 — Control de Stock: Depósito revisa el stock de la selección enviada por el
+        // PN01: Control de Stock: Depósito revisa el stock de la selección enviada por el
         // Vendedor, informa faltantes o confirma y separa las prendas.
         public const string ControlStock          = "mnuControlStock";
 
-        // Reportes de decisión (Bloque 3 + PdN10) — cada uno tiene su ítem en el menú de su rol
+        // Reportes de decisión (Bloque 3 + PdN10): cada uno tiene su ítem en el menú de su rol
         // (Ventas o Inventario) y su patente propia (BLL.MenuVisibilidad.PatentesReportes).
         public const string AnalisisAbandono      = "mnuAnalisisAbandono";
         public const string VentasVendedor        = "mnuVentasVendedor";
@@ -42,10 +42,10 @@ namespace BE
         public const string AnalisisEscasez       = "mnuAnalisisEscasez";
         public const string RecomendacionPrendas  = "mnuRecomendacionPrendas";
 
-        // ── Patentes de ACCIÓN granular ("Configurar") — separan VER de EDITAR ───────
+        // ── Patentes de ACCIÓN granular ("Configurar"): separan VER de EDITAR ───────
         // Cada una gobierna las operaciones de escritura (alta/modificación/baja) del módulo.
         // Convención: <patente de ver> + "Editar". Si la patente no existe en el catálogo,
-        // BLL.PermisosAccion cae al permiso de VER (retrocompatibilidad — ver PermisosAccion).
+        // BLL.PermisosAccion cae al permiso de VER (retrocompatibilidad: ver PermisosAccion).
         public const string StockEditar             = "mnuStockEditar";
         public const string ClientesEditar          = "mnuClientesEditar";
         public const string PlanSuscripcionesEditar = "mnuPlanSuscripcionesEditar";
@@ -57,10 +57,10 @@ namespace BE
         public const string PromocionesVigentesEditar = "mnuPromocionesVigentesEditar";
         public const string ControlStockEditar        = "mnuControlStockEditar";
         // Lista de Espera: anotar / cancelar / reservar. Antes la escritura exigía StockEditar
-        // (patente de Depósito), así que el Vendedor —que ve la pantalla para anotar al
-        // cliente— recibía "sin permiso". Fallback: mnuListaEspera (ver PermisosAccion).
+        // (patente de Depósito), así que el Vendedor (que ve la pantalla para anotar al
+        // cliente) recibía "sin permiso". Fallback: mnuListaEspera (ver PermisosAccion).
         public const string ListaEsperaEditar         = "mnuListaEsperaEditar";
-        // Nota: Inspección de Devolución (PN04) NO tiene patente de Editar propia — su
+        // Nota: Inspección de Devolución (PN04) NO tiene patente de Editar propia; su
         // escritura (CambiarEstado/RegistrarCargo) ya está gobernada por StockEditar
         // (compartida con el módulo de Stock, ver InspeccionDevolucion arriba). Crear una
         // patente "Editar" que nada verifica sería engañosa en Perfiles y Permisos.

@@ -70,7 +70,7 @@ namespace GUI
 
             // ── txtClave ───────────────────────────────────────────────────────
             // Enmascarado por diseño (PasswordChar), como el resto de los campos de contraseña
-            // del sistema — antes quedaba completamente visible mientras se escribía. btnMostrarClave
+            // del sistema: antes quedaba completamente visible mientras se escribía. btnMostrarClave
             // (mismo mecanismo que Login.btnMostrarClave) permite revelarla temporalmente.
             this.txtClave.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtClave.Font            = new System.Drawing.Font("Consolas", 11F);
@@ -80,7 +80,7 @@ namespace GUI
             this.txtClave.Size            = new System.Drawing.Size(350, 29);
             this.txtClave.TabIndex        = 5;
 
-            // ── btnMostrarClave — ojito mostrar/ocultar clave de emergencia ──────
+            // ── btnMostrarClave: ojito mostrar/ocultar clave de emergencia ──────
             this.btnMostrarClave.Cursor                    = System.Windows.Forms.Cursors.Hand;
             this.btnMostrarClave.FlatAppearance.BorderSize = 0;
             this.btnMostrarClave.FlatStyle                 = System.Windows.Forms.FlatStyle.Flat;

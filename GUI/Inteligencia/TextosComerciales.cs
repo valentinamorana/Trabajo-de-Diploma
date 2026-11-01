@@ -113,20 +113,20 @@ namespace GUI.Inteligencia
         /// <summary>
         /// Resultado medido por el sistema (BLL InteligenciaComercial.MedirDecisiones): el importe si es final,
         /// el avance si la campaña sigue en medición ("En medición: 2 de 6 respondieron (cierra el 20/11/2026)")
-        /// y "—" sin dato. Una campaña en medición nunca muestra un importe.
+        /// y "-" sin dato. Una campaña en medición nunca muestra un importe.
         /// </summary>
         public static string Medicion(BE.MedicionDecision m)
         {
-            if (m == null) return "—";
+            if (m == null) return "-";
             switch (m.Estado)
             {
                 case BE.EstadoMedicion.Medido:
-                    return m.Valor.HasValue ? m.Valor.Value.ToString("C0") : "—";
+                    return m.Valor.HasValue ? m.Valor.Value.ToString("C0") : "-";
                 case BE.EstadoMedicion.EnMedicion:
                     return Tr("cdc.medido.enmedicion", "En medición: {0} de {1} respondieron (cierra el {2:d})",
                               m.Respondieron, m.Contactados, m.FechaCierre ?? DateTime.Today);
                 default:
-                    return "—";
+                    return "-";
             }
         }
 
@@ -187,7 +187,7 @@ namespace GUI.Inteligencia
         {
             ("kpi.mrr", "Ingreso recurrente mensual (MRR)", "glos.mrr"),
             ("kpi.churn", "% de bajas", "glos.churn"),
-            ("glos.cohorte.nombre", "Retención por cohorte", "glos.cohorte"),
+            ("glos.cohorte.nombre", "Permanencia de clientes", "glos.cohorte"),
             ("kpi.riesgo", "Clientes en riesgo", "glos.riesgo"),
             ("kpi.ingresoriesgo", "Ingreso en riesgo", "glos.ingresoriesgo"),
             ("kpi.descontado", "Descontado por promociones", "glos.descontado"),
@@ -209,8 +209,8 @@ namespace GUI.Inteligencia
         private static readonly string[][] GlosarioEs =
         {
             new[] { "Σ precio mensual del plan de los clientes que pagan hoy (con plan, sin pausa vigente, sin la suscripción vencida y sin suspensión por falta de pago). Al fin del período: MRR de hoy − altas + bajas posteriores al período; al inicio: MRR al fin − altas + bajas del período. Fuente: Cliente, PlanSuscripcion, HistorialRenovacion.", "Si cae, revisar las bajas y las renovaciones en juego." },
-            new[] { "Bajas del período / clientes al inicio × 100. Clientes al fin del período = activos hoy − altas + bajas posteriores al período; al inicio = clientes al fin − altas + bajas del período. Fuente: HistorialRenovacion.", "Umbral: % de bajas alto (5 %) o suba de 2 pp → promoción de retención en el plan." },
-            new[] { "Clientes de la cohorte (mismo mes de alta) sin baja registrada al cierre del mes k desde el alta / clientes de la cohorte × 100 (Mes 0 = el mes del alta). Pausas, vencimientos y suspensiones no son bajas, igual que en el % de bajas; el mes en curso se marca con * y no entra en el promedio. Fuente: Contratacion (primer pago), HistorialRenovacion (Resultado = Baja).", "Peor cohorte: la de menor retención al mes 3 (o al último mes que completaron al menos 2 cohortes) entre las de 4 o más clientes; el plan que más explica sus bajas lleva a su recomendación de bajas o al Simulador." },
+            new[] { "Bajas del período / clientes al inicio × 100. Clientes al fin del período = activos hoy − altas + bajas posteriores al período; al inicio = clientes al fin − altas + bajas del período. Fuente: HistorialRenovacion.", "Parámetro del análisis: % de bajas alto (5 %) o suba de 2 pp → promoción de retención en el plan." },
+            new[] { "Clientes agrupados por el mes en que se suscribieron: los del grupo sin baja registrada al cierre del mes k desde el alta / clientes del grupo × 100 (Mes 0 = el mes del alta). Pausas, vencimientos y suspensiones no son bajas, igual que en el % de bajas; el mes en curso se marca con * y no entra en el promedio. Fuente: Contratacion (primer pago), HistorialRenovacion (Resultado = Baja).", "Grupo con menor permanencia: el de menor retención al mes 3 (o al último mes que completaron al menos 2 grupos) entre los de 4 o más clientes; el plan que más explica sus bajas lleva a su recomendación de bajas o al Simulador." },
             new[] { "Clientes que el Análisis de Abandono (PdN10) marca en riesgo hoy.", "Son el objetivo de la promoción de retención." },
             new[] { "Σ precio mensual del plan de los clientes en riesgo.", "Base del beneficio de una sugerencia de promoción." },
             new[] { "Σ descuentos aplicados en los cobros del período (Contratacion + HistorialCobro).", "Costo real de las promociones: se compara con lo que retienen." },

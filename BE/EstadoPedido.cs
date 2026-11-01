@@ -21,16 +21,16 @@ namespace BE
         Entregado = 2,
         Cancelado = 3,
 
-        // PN01 — el Vendedor envió la selección para control de stock (sin reservar prendas).
+        // PN01: el Vendedor envió la selección para control de stock (sin reservar prendas).
         EnControlStock = 4,
 
-        // PN01 — Depósito emitió el informe de prendas faltantes (con alternativas).
+        // PN01: Depósito emitió el informe de prendas faltantes (con alternativas).
         ConFaltantes = 5,
 
-        // PN01 — Depósito confirmó y separó las prendas (quedan En uso); falta formalizar.
+        // PN01: Depósito confirmó y separó las prendas (quedan En uso); falta formalizar.
         Separado = 6,
 
-        // PN01 — el cliente desistió (por exceso de cupo o por falta de disponibilidad).
+        // PN01: el cliente desistió (por exceso de cupo o por falta de disponibilidad).
         Desistido = 7
     }
 }

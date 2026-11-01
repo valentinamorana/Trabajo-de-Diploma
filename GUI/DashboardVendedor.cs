@@ -49,7 +49,7 @@ namespace GUI
         {
             this.Text          = Tr("dash.vendedor.titulo", "Panel de Ventas");
             lblTitulo.Text     = Tr("dash.vendedor.titulo", "Panel de Ventas");
-            lblSub.Text        = Tr("dash.vendedor.subtitulo", "WardrobeFlow  —  Ventas");
+            lblSub.Text        = Tr("dash.vendedor.subtitulo", "WardrobeFlow: Ventas");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",   "Actualizar");
             txtPedidos.Text  = Tr("dash.vend.paraatender", "Pedidos\npara atender");
             txtClientes.Text = Tr("dash.clientes", "Clientes\nregistrados");
@@ -124,7 +124,7 @@ namespace GUI
                 var u = _bllUsuario.ObtenerUsuarioActivo();
                 var h = _bllUsuario.ObtenerFechaInicioSesion();
                 if (u != null)
-                    lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
+                    lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "-"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
             catch (Exception ex)
             {
@@ -133,8 +133,8 @@ namespace GUI
         }
 
         // Pinta la tarjeta como clickeable y, al hacer clic, abre (o enfoca) Pedidos de Venta.
-        // Todavía no deja seleccionado el pedido puntual dentro de la grilla — PedidosVenta no
-        // tiene esa capacidad hoy — pero ya ahorra la navegación por menú (Suscriptores/Ventas
+        // Todavía no deja seleccionado el pedido puntual dentro de la grilla: PedidosVenta no
+        // tiene esa capacidad hoy: pero ya ahorra la navegación por menú (Suscriptores/Ventas
         // → Pedidos de Venta).
         private void HabilitarClicAbrirPedidosVenta(Panel card)
         {

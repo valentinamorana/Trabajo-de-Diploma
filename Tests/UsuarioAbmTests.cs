@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// Mejoras revisión 11/06 — ABM de datos administrativos, cambio de rol y guard de DV.
+    /// Mejoras revisión 11/06: ABM de datos administrativos, cambio de rol y guard de DV.
     /// Se prueban las validaciones PURAS (sin sesión ni BD) y el guard fail-closed de los
     /// Dígitos Verificadores.
     /// </summary>

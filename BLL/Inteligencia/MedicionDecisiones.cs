@@ -4,7 +4,7 @@ using System.Linq;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Medir resultado» — Totales del historial de decisiones (pantalla e Informe ejecutivo). Puro:
+    /// PN03 «Medir resultado»: Totales del historial de decisiones (pantalla e Informe ejecutivo). Puro:
     ///   aceptadas  = las que admiten un resultado (aceptadas o ejecutadas) y su impacto estimado
     ///   con real   = las que tienen un resultado real registrado a mano (estimado → real)
     ///   medidas    = las que tienen un resultado FINAL medido por el sistema (estimado → medido); puede ser

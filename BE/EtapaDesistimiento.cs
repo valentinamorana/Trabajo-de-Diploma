@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// PN01 — momento del proceso en que el cliente desiste del pedido. Coincide con las dos
+    /// PN01: momento del proceso en que el cliente desiste del pedido. Coincide con las dos
     /// ramas "Comunicar desistimiento → Asentar desistimiento" del diagrama de actividad.
     /// Se persiste como texto en Pedido.EtapaDesistimiento (CHECK: 'Cupo' / 'Disponibilidad').
     /// </summary>

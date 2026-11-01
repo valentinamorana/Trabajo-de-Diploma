@@ -9,7 +9,7 @@ using System.Text;
 namespace BLL
 {
     /// <summary>
-    /// USABILIDAD — Guía de primer uso por rol: qué hace el sistema para ese rol, por dónde
+    /// USABILIDAD: Guía de primer uso por rol: qué hace el sistema para ese rol, por dónde
     /// empezar, qué muestra su Panel de Control, la barra inferior y F1.
     ///
     /// Dónde se guarda "No volver a mostrar": en un archivo local por usuario de Windows

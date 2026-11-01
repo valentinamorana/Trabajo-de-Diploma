@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN02, carril Caja del diagrama de actividad:
+    /// Capa de Presentación: PN02, carril Caja del diagrama de actividad:
     ///   Consultar cola → Calcular importe («Liquidación») → el cliente abona (medio de pago) →
     ///   ¿Tarjeta de crédito? Sí: ofrecer planes de cuotas → elegir cuotas → recargo y valor de cuota →
     ///   ¿Se concreta el pago? Sí: Confirmar cobro → «Comprobante» → «Constancia de suscripción»;
@@ -34,7 +34,7 @@ namespace GUI
         public ContratacionesPendientesForm()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvContrataciones);
             // Paleta centralizada (GUI/Tema.cs).
             btnCobrar.BackColor = Tema.Exito;
@@ -152,7 +152,7 @@ namespace GUI
             var plan = _planesCuotas.Find(p => p.IdPlanCuotas == idPlan.Value);
             var f = BLL.Politicas.PoliticaCuotas.Financiar(liq.Total, plan);
             lblDetalleCuotas.Text = string.Format(
-                Tr("lbl.contr.cuotas.detalle", "{0} cuota(s) de {1:C2} — recargo {2:C2} — total a abonar {3:C2}"),
+                Tr("lbl.contr.cuotas.detalle", "{0} cuota(s) de {1:C2}, recargo {2:C2}, total a abonar {3:C2}"),
                 f.CantidadCuotas, f.ValorCuota, f.Recargo, f.TotalFinanciado);
         }
 
@@ -204,8 +204,8 @@ namespace GUI
                         c.IdContratacion, c.NombreCliente, c.NombrePlan, FormatearMonto(c),
                         Exportacion.DocumentosContratacion.Modalidad(c.Modalidad),
                         $"{c.IntentosPago}/{BE.Contratacion.MaxIntentosPago}",
-                        EstadoTexto(c.Estado), c.NumeroComprobante ?? "—",
-                        c.VigenciaHasta.HasValue ? $"{c.VigenciaDesde:d} → {c.VigenciaHasta:d}" : "—",
+                        EstadoTexto(c.Estado), c.NumeroComprobante ?? "-",
+                        c.VigenciaHasta.HasValue ? $"{c.VigenciaDesde:d} → {c.VigenciaHasta:d}" : "-",
                         (c.FechaResolucion ?? c.FechaAlta).ToString("g"));
 
                 dgvContrataciones.DataSource = tabla;
@@ -257,12 +257,12 @@ namespace GUI
         {
             if (VistaResueltas)
             {
-                if (!c.Importe.HasValue) return "—";
+                if (!c.Importe.HasValue) return "-";
                 return (c.CantidadCuotas ?? 1) > 1
                     ? string.Format(Tr("lbl.contr.monto.cuotas", "{0:C2} en {1} cuotas"), c.TotalAbonado, c.CantidadCuotas)
                     : c.Importe.Value.ToString("C2");
             }
-            if (!_importes.TryGetValue(c.IdContratacion, out var liq)) return "—";
+            if (!_importes.TryGetValue(c.IdContratacion, out var liq)) return "-";
             decimal rebaja = liq.Descuento + liq.CreditoCambioPlan;   // promoción/referido + crédito por upgrade
             return rebaja > 0 ? $"{liq.Total:C2} (-{rebaja:C2})" : liq.Total.ToString("C2");
         }
@@ -447,9 +447,9 @@ namespace GUI
             try
             {
                 var lineas = contratacionBLL.ObtenerIntentos(c.IdContratacion).ConvertAll(i =>
-                    $"{i.NroIntento}. {i.Fecha:g} — {i.NombreMedioPago ?? "—"} — {i.Motivo} ({i.NombreCaja ?? "—"})");
+                    $"{i.NroIntento}. {i.Fecha:g}; {i.NombreMedioPago ?? "-"}; {i.Motivo} ({i.NombreCaja ?? "-"})");
                 MessageBox.Show(string.Join("\n", lineas),
-                    string.Format(Tr("lbl.contr.intentos.titulo", "Intentos de cobro — Contratación #{0}"), c.IdContratacion),
+                    string.Format(Tr("lbl.contr.intentos.titulo", "Intentos de cobro: Contratación #{0}"), c.IdContratacion),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex) { MostrarError(ex); }

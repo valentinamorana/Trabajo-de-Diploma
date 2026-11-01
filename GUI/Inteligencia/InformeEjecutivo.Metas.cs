@@ -39,7 +39,7 @@ namespace GUI.Inteligencia
             var t = Tabla("Indicador", "Objetivo", "Real", "Avance", "Proyección", "Estado");
             foreach (var m in metas ?? new List<BE.SeguimientoMeta>())
                 t.Rows.Add(R(m.NombreIndicador), ValorMeta(m.Unidad, m.Meta.ValorObjetivo), ValorMeta(m.Unidad, m.ValorActual),
-                    m.AvancePorcentaje.HasValue ? m.AvancePorcentaje.Value.ToString("0.#") + " %" : "—",
+                    m.AvancePorcentaje.HasValue ? m.AvancePorcentaje.Value.ToString("0.#") + " %" : "-",
                     ValorMeta(m.Unidad, m.Proyeccion), EstadoMeta(m.Estado));
             encabezados = new[] { Tr("cdc.col.indicador", "Indicador"), Tr("cdc.meta.col.objetivo", "Objetivo"), Tr("cdc.meta.col.real", "Real"),
                                   Tr("cdc.meta.col.avance", "Avance"), Tr("cdc.meta.col.proyeccion", "Proyección al cierre"), Tr("cdc.meta.col.estado", "Estado") };

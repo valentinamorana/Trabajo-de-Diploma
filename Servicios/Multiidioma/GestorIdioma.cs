@@ -11,7 +11,7 @@ namespace Servicios.Multiidioma
     ///   - La GUI llama a GestorIdioma.CambiarIdioma(idioma, traducciones)
     ///     que guarda el dict en _tradActuales y notifica a todos los observers.
     ///   - Cada formulario traduce sus controles consultando GestorIdioma.TradActuales
-    ///     via Traductor.ObtenerTraducciones() — sin ir a BD por cada control.
+    ///     via Traductor.ObtenerTraducciones(): sin ir a BD por cada control.
     ///
     /// Si _tradActuales está vacío (primer arranque o error de BD),
     /// Traductor cae al diccionario hardcodeado como fallback.
@@ -63,7 +63,7 @@ namespace Servicios.Multiidioma
             Notificar(idioma);
         }
 
-        // Sobrecarga sin dict — usa traducciones ya cargadas o fallback hardcodeado.
+        // Sobrecarga sin dict: usa traducciones ya cargadas o fallback hardcodeado.
         public static void CambiarIdioma(Idioma idioma)
         {
             _idiomaActual = idioma;

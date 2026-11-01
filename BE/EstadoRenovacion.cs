@@ -1,6 +1,6 @@
 namespace BE
 {
-    /// <summary>PdN5 — Resultado de un intento de renovación de suscripción.</summary>
+    /// <summary>PdN5: Resultado de un intento de renovación de suscripción.</summary>
     public enum EstadoRenovacion
     {
         Pendiente = 0,

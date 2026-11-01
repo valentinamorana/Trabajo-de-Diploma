@@ -3,7 +3,7 @@ using System.Windows.Forms;
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// Patrón FACTORY METHOD — rol "Product" (Producto abstracto).
+    /// Patrón FACTORY METHOD: rol "Product" (Producto abstracto).
     ///
     /// Define la operación común a todos los exportadores de reportes. Cada producto
     /// concreto (<see cref="ExportadorPdf"/>, <see cref="ExportadorTxt"/>) sabe llevar

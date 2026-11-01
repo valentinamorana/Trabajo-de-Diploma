@@ -1,6 +1,6 @@
 namespace GUI.Exportacion
 {
-    /// <summary>Patrón Factory Method — creador de exportadores para el Análisis de Rotación de Prendas (PdN9).</summary>
+    /// <summary>Patrón Factory Method: creador de exportadores para el Análisis de Rotación de Prendas (PdN9).</summary>
     public class GeneradorRotacion : GeneradorReporte
     {
         private const string Origen = "Rotación de Prendas";

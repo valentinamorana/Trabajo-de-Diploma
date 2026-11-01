@@ -149,7 +149,7 @@ namespace GUI
             // dtpInicio
             //
             // Custom + dd/MM/yyyy explícito en vez de Short: Short depende de la configuración
-            // regional de Windows en la máquina donde corre la app — en un equipo no es-AR
+            // regional de Windows en la máquina donde corre la app: en un equipo no es-AR
             // mostraría MM/dd/yyyy mientras el resto de la pantalla (labels de solo-lectura) fuerza
             // dd/MM/yyyy, riesgo real de leer mal una fecha límite de vigencia.
             this.dtpInicio.Format = System.Windows.Forms.DateTimePickerFormat.Custom;

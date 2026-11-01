@@ -8,11 +8,11 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Administración de Usuarios (Menú → Administrar → Usuarios).
+    /// Capa de Presentación: Administración de Usuarios (Menú → Administrar → Usuarios).
     ///
     /// Una sola pantalla con dos pestañas (antes eran dos formularios, "Cuentas de Usuario" y
     /// "Administración de Usuarios", y los dos podían dar de alta):
-    ///   • Cuentas: operaciones sobre la cuenta — resetear contraseña, desbloquear, archivar
+    ///   • Cuentas: operaciones sobre la cuenta; resetear contraseña, desbloquear, archivar
     ///     (baja lógica), ver archivados y purgar los archivados hace más de un año.
     ///   • Datos administrativos: el ÚNICO alta de usuarios ("Nuevo usuario"), la edición de los
     ///     datos no sensibles (nombre, apellido, usuario, nacimiento, email), el cambio de rol
@@ -36,7 +36,7 @@ namespace GUI
         private readonly BLL.Usuario usuarioBLL  = new BLL.Usuario();
         private readonly BLL.Familia _familiaBLL = new BLL.Familia();
 
-        // Idioma activo — sincronizado en Traducir() para usar en CargarUsuarios
+        // Idioma activo: sincronizado en Traducir() para usar en CargarUsuarios
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
         // Pestaña "Cuentas"
@@ -51,7 +51,7 @@ namespace GUI
         public Usuarios()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvUsuarios);
             Estilos.EstiloFormulario.Grilla(dgvDatos);
             HabilitarEdicion(false);
@@ -228,7 +228,7 @@ namespace GUI
                 tabla.Columns.Add("Username",     typeof(string));
                 tabla.Columns.Add("Perfil",       typeof(string));
                 tabla.Columns.Add("Estado",       typeof(string));
-                // Columna interna: 1 = bloqueado/archivado, 0 = activo — independiente del idioma
+                // Columna interna: 1 = bloqueado/archivado, 0 = activo; independiente del idioma
                 tabla.Columns.Add("_BloqueadoKey", typeof(int));
 
                 foreach (var u in usuarios)
@@ -274,7 +274,7 @@ namespace GUI
 
         /// <summary>
         /// Resetea la contraseña del usuario seleccionado generándola automáticamente.
-        /// No solicita contraseña al administrador — la BLL la genera y exporta a archivo.
+        /// No solicita contraseña al administrador: la BLL la genera y exporta a archivo.
         /// Solo funciona si el usuario en sesión es Administrador.
         /// </summary>
         private void BtnResetearClave_Click(object sender, EventArgs e)
@@ -338,7 +338,7 @@ namespace GUI
             }
         }
 
-        // ── RF-10 — Archivar / Ver archivados / Purgar ────────────────────────
+        // ── RF-10: Archivar / Ver archivados / Purgar ────────────────────────
 
         // Archiva (baja lógica) el usuario seleccionado. La BLL protege al último admin y al self.
         private void BtnArchivar_Click(object sender, EventArgs e)
@@ -623,7 +623,7 @@ namespace GUI
             }
         }
 
-        // Alta de un usuario nuevo con sus datos administrativos — el ÚNICO alta del sistema.
+        // Alta de un usuario nuevo con sus datos administrativos: el ÚNICO alta del sistema.
         // La BLL genera la contraseña, la exporta a un .txt, vincula el legajo de Empleado y
         // registra en bitácora + versión base del historial.
         private void Alta()

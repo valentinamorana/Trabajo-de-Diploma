@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Preferencias de UI por usuario (tabla Preferencia).
+    /// Capa de Acceso a Datos: Preferencias de UI por usuario (tabla Preferencia).
     /// Si no hay fila (o la tabla aún no está migrada), devuelve los valores por defecto.
     /// </summary>
     public class Preferencia : BaseDAL, Interfaces.IPreferenciaDAL

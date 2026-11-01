@@ -5,7 +5,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Bloque 1 — Diálogo para registrar un cargo por daño/pérdida sobre el último cliente
+    /// Bloque 1: Diálogo para registrar un cargo por daño/pérdida sobre el último cliente
     /// que tuvo la prenda (BE.Prenda.IdUltimoCliente). Se ofrece desde Prendas.cs justo
     /// después de confirmar el paso a Baja.
     /// </summary>
@@ -18,7 +18,7 @@ namespace GUI
 
         /// <param name="prenda">Prenda sobre la que se registra el cargo.</param>
         /// <param name="montoSugerido">
-        /// PN04 — precio de reposición de la prenda (si está cargado), para no depender de
+        /// PN04: precio de reposición de la prenda (si está cargado), para no depender de
         /// que el inspector tipee un monto a ojo al dar de baja con cargo. Pre-carga
         /// <c>numMonto</c> pero sigue siendo editable; null si no hay valor de referencia
         /// (comportamiento original, sin cambios).
@@ -34,7 +34,7 @@ namespace GUI
             btnCancelar.Text    = Tr("btn.cancelar",           "Cancelar");
 
             string fmtInfo = Tr("lbl.cargoprenda.info", "Prenda: {0}\nÚltimo cliente: {1}");
-            lblPrendaInfo.Text = string.Format(fmtInfo, prenda.Nombre, prenda.NombreUltimoCliente ?? "—");
+            lblPrendaInfo.Text = string.Format(fmtInfo, prenda.Nombre, prenda.NombreUltimoCliente ?? "-");
 
             if (montoSugerido.HasValue && montoSugerido.Value > 0)
                 numMonto.Value = Math.Min(montoSugerido.Value, numMonto.Maximum);

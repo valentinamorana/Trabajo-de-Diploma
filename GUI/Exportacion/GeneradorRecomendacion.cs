@@ -1,6 +1,6 @@
 namespace GUI.Exportacion
 {
-    /// <summary>Patrón Factory Method — creador de exportadores para la Recomendación de Prendas (PdN13).</summary>
+    /// <summary>Patrón Factory Method: creador de exportadores para la Recomendación de Prendas (PdN13).</summary>
     public class GeneradorRecomendacion : GeneradorReporte
     {
         private const string Origen = "Recomendación de Prendas";

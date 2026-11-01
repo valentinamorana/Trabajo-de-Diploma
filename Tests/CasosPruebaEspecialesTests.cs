@@ -17,7 +17,7 @@ namespace Tests
     [TestClass]
     public class CasosPruebaEspecialesTests
     {
-        // ── Caso 1 — Intentar eliminar el último administrador (RF-10) ───────────
+        // ── Caso 1: Intentar eliminar el último administrador (RF-10) ───────────
 
         [TestMethod]
         public void Caso1_NoSePuedeArchivarAlUltimoAdministrador()
@@ -55,7 +55,7 @@ namespace Tests
             }
         }
 
-        // ── Caso 2 — Intentar restaurar un backup corrupto (RNF-02) ──────────────
+        // ── Caso 2: Intentar restaurar un backup corrupto (RNF-02) ──────────────
 
         [TestMethod]
         [Ignore] // Integración: requiere SQL Server + un .bak corrupto.
@@ -77,7 +77,7 @@ namespace Tests
             }
         }
 
-        // ── Caso 3 — Detectar corrupción mediante DVH/DVV (RF-01/02) ─────────────
+        // ── Caso 3: Detectar corrupción mediante DVH/DVV (RF-01/02) ─────────────
 
         [TestMethod]
         public void Caso3_DVH_DetectaManipulacionDeFila()
@@ -109,7 +109,7 @@ namespace Tests
                 "El DVV debe revelar la eliminación (o inserción) de una fila.");
         }
 
-        // ── Caso 4 — Asignar roles generando dependencia circular (RF-11/12/13) ──
+        // ── Caso 4: Asignar roles generando dependencia circular (RF-11/12/13) ──
 
         [TestMethod]
         public void Caso4_JerarquiaDeRoles_RechazaDependenciaCircular()
@@ -147,7 +147,7 @@ namespace Tests
             Assert.AreEqual(1, admin.Hijos.Count);
         }
 
-        // ── Caso 5 — Realizar múltiples niveles de rollback (RF-16/17/18) ────────
+        // ── Caso 5: Realizar múltiples niveles de rollback (RF-16/17/18) ────────
 
         [TestMethod]
         public void Caso5_MultiplesNivelesDeRollback()
@@ -177,7 +177,7 @@ namespace Tests
             Assert.AreEqual("otra", u.Contraseña);
         }
 
-        // ── Caso 6 — Cambiar idioma con múltiples usuarios conectados (RNF-05) ────
+        // ── Caso 6: Cambiar idioma con múltiples usuarios conectados (RNF-05) ────
 
         [TestMethod]
         public void Caso6_PreferenciaDeIdiomaEsIndependientePorUsuario()
@@ -193,7 +193,7 @@ namespace Tests
                 "El cambio de idioma de un usuario no debe afectar la preferencia de otro.");
         }
 
-        // ── Caso 7 — Cambiar idioma mientras la app está en uso (RF-19/20) ───────
+        // ── Caso 7: Cambiar idioma mientras la app está en uso (RF-19/20) ───────
 
         [TestMethod]
         public void Caso7_CambioDeIdiomaEnRuntime_NotificaObservers()
@@ -217,7 +217,7 @@ namespace Tests
             }
         }
 
-        // ── Caso 8 — Restaurar BD con info posterior al último backup (RF-08) ─────
+        // ── Caso 8: Restaurar BD con info posterior al último backup (RF-08) ─────
 
         [TestMethod]
         [Ignore] // Integración: requiere SQL Server + un .bak real.

@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL.Politicas
 {
     /// <summary>
-    /// PN04 — Prenda no devuelta = compra tácita (decisión de la alumna, 05/10, como NUULY): si a los
+    /// PN04: Prenda no devuelta = compra tácita (decisión de la alumna, 05/10, como NUULY): si a los
     /// 30 días de la entrega el cliente no devolvió la prenda, se le cobra la reposición y la prenda se
     /// da de baja (CU06-DEP Reportar Prenda Perdida). Antes de ese plazo la prenda sigue siendo un
     /// alquiler en curso y no se puede reportar perdida; tampoco se puede si el cliente nunca la
@@ -31,7 +31,7 @@ namespace BLL.Politicas
         }
 
         /// <summary>
-        /// PN04 — pedido atrasado: Entregado, SIN devolución registrada y con el plazo de la compra
+        /// PN04: pedido atrasado: Entregado, SIN devolución registrada y con el plazo de la compra
         /// tácita cumplido (30 días o más desde la entrega). Es el mismo umbral que habilita Reportar
         /// Prenda Perdida: la lista de atrasados es la cola de "reclamar o reportar perdida".
         /// </summary>

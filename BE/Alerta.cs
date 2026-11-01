@@ -24,6 +24,9 @@ namespace BE
         public object[]    Parametros      { get; set; }
         public int         Cantidad        { get; set; }
 
+        /// <summary>El usuario ya la leyó con esta misma situación (lo completa BLL.AlertasLeidas; no se guarda acá).</summary>
+        public bool        Leida           { get; set; }
+
         public Alerta() { }
 
         public Alerta(NivelAlerta nivel, string claveI18n, string mensajeFallback, int cantidad, params object[] parametros)

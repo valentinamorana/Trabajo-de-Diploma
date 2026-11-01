@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace GUI.Ayuda
 {
     /// <summary>
-    /// D02 — Ventana de la ayuda en línea (F1): encabezado con el título del tema, el texto con
+    /// D02: Ventana de la ayuda en línea (F1): encabezado con el título del tema, el texto con
     /// desplazamiento y el botón Cerrar. Hecha con el Diseñador; los textos los pone
     /// <see cref="AyudaEnLinea.Mostrar"/> en el idioma del usuario.
     /// </summary>

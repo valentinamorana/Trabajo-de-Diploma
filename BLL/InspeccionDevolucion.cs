@@ -3,7 +3,7 @@ using System;
 namespace BLL
 {
     /// <summary>
-    /// PN04 — Casos de uso de Depósito que terminan una prenda con cargo al cliente:
+    /// PN04: Casos de uso de Depósito que terminan una prenda con cargo al cliente:
     ///   • CU05-DEP Inspeccionar Devolución: la prenda devuelta (En Limpieza) reingresa sin
     ///     cargo (<see cref="AprobarReingreso"/>) o se da de baja cobrando la reposición
     ///     (<see cref="DarDeBajaConCargo"/>).
@@ -43,7 +43,7 @@ namespace BLL
         }
 
         /// <summary>
-        /// Camino A — reingresa a Disponible sin cargo. Solo para una prenda de la cola de inspección:
+        /// Camino A: reingresa a Disponible sin cargo. Solo para una prenda de la cola de inspección:
         /// las que entraron a limpieza en el depósito se liberan desde Prendas.
         /// </summary>
         public void AprobarReingreso(string modulo, BE.Prenda prenda)
@@ -55,7 +55,7 @@ namespace BLL
         }
 
         /// <summary>
-        /// Camino B — En Limpieza → Baja + cargo de reposición, atómico. Solo para una prenda de la cola
+        /// Camino B: En Limpieza → Baja + cargo de reposición, atómico. Solo para una prenda de la cola
         /// de inspección (volvió de un cliente): a una que entró a limpieza en el depósito no se le
         /// puede cobrar al último cliente.
         /// </summary>
@@ -73,7 +73,7 @@ namespace BLL
         }
 
         /// <summary>
-        /// CU06-DEP — En Uso → Baja + cargo de reposición, atómico. Solo para una prenda de un
+        /// CU06-DEP: En Uso → Baja + cargo de reposición, atómico. Solo para una prenda de un
         /// pedido Entregado hace 30 días o más (compra tácita): si el cliente todavía no la recibió,
         /// o el plazo no venció, se rechaza.
         /// </summary>
@@ -147,13 +147,13 @@ namespace BLL
             try
             {
                 Bitacora.Registrar(modulo,
-                    $"Cargo por daño/pérdida — Prenda ID {prenda.IdPrenda} '{prenda.Nombre}': ${monto} ({motivo})",
+                    $"Cargo por daño/pérdida: Prenda ID {prenda.IdPrenda} '{prenda.Nombre}'; ${monto} ({motivo})",
                     BE.Criticidad.Media);
                 Bitacora.Registrar(modulo,
                     $"Estado Prenda ID {prenda.IdPrenda} '{prenda.Nombre}': {estadoEsperado} → {BE.EstadoPrenda.Baja}",
                     BE.Criticidad.Media);
                 BitacoraNeg.Registrar(BE.TipoEventoNegocio.CambioEstadoPrenda,
-                    $"Cargo por daño/pérdida: prenda '{prenda.Nombre}' — ${monto} — {motivo} — se sumará al próximo cobro de " +
+                    $"Cargo por daño/pérdida: prenda '{prenda.Nombre}', ${monto}, {motivo}, se sumará al próximo cobro de " +
                     (prenda.NombreUltimoCliente ?? "cliente ID " + prenda.IdUltimoCliente),
                     idPrenda: prenda.IdPrenda, idCliente: prenda.IdUltimoCliente);
                 BitacoraNeg.Registrar(BE.TipoEventoNegocio.CambioEstadoPrenda,

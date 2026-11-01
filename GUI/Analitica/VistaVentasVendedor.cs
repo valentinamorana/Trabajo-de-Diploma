@@ -3,7 +3,7 @@ using System.Drawing;
 namespace GUI.Analitica
 {
     /// <summary>
-    /// PdN8 — Ventas por Vendedor. El Gerente Comercial genera el desempeño de cada vendedor
+    /// PdN8: Ventas por Vendedor. El Gerente Comercial genera el desempeño de cada vendedor
     /// (pedidos totales, entregados y cancelados) para evaluar rendimiento. Sin filtros.
     /// </summary>
     internal sealed class VistaVentasVendedor : VistaReporteAnalitica

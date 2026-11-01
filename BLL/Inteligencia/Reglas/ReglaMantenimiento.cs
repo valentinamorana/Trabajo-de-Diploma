@@ -52,7 +52,7 @@ namespace BLL.Inteligencia.Reglas
                     excesivas.Count, excesivas.Sum(m => m.CantidadMantenimientos), diasFuera, valorDia),
                 Motivo = T("rec.mant.motivo",
                     "Una prenda que vive en limpieza no se alquila: conviene reponerla si lo que se pierde supera su costo; si no, revisar el proceso de limpieza."),
-                Detalle = excesivas.Select(m => $"#{m.IdPrenda} {m.NombrePrenda} — {m.CantidadMantenimientos} mant. — {(m.DuracionPromedioDias ?? 0d):0.#} d prom.").ToList()
+                Detalle = excesivas.Select(m => $"#{m.IdPrenda} {m.NombrePrenda}: {m.CantidadMantenimientos} mant., {(m.DuracionPromedioDias ?? 0d):0.#} d prom.").ToList()
             };
             ElegirMejorOpcion(rec,
                 Opcion(T("rec.mant.opcion.baja", "Dar de baja y reponer las {0} prenda(s)", excesivas.Count),

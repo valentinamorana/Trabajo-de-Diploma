@@ -7,7 +7,7 @@ using Servicios.Serializacion;
 namespace BLL
 {
     /// <summary>
-    /// A02 Serialización — consulta, importación y exportación de los errores serializados
+    /// A02 Serialización: consulta, importación y exportación de los errores serializados
     /// (Servicios.Serializacion.RegistroErrores). El registro de esta PC es XML; la importación y la
     /// exportación aceptan XML o JSON (el formato sale de la extensión del archivo). Es información de
     /// auditoría: solo con la patente de Auditoría (la misma de la Bitácora). La importación valida el

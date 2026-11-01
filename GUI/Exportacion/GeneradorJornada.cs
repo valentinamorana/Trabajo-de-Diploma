@@ -1,7 +1,7 @@
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// Patrón FACTORY METHOD — rol "ConcreteCreator".
+    /// Patrón FACTORY METHOD: rol "ConcreteCreator".
     ///
     /// Creador de exportadores para el Reporte de Jornada (reporte de texto). Decide
     /// qué producto concreto instanciar según el formato pedido y lo marca con su origen.

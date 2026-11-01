@@ -82,7 +82,7 @@ namespace GUI
             }
         }
 
-        // Deshabilitado por diseño (ver Designer); solo se habilita con una fila seleccionada —
+        // Deshabilitado por diseño (ver Designer); solo se habilita con una fila seleccionada:
         // mismo patrón que PedidoHistorialForm.Dgv_SelectionChanged.
         private void Dgv_SelectionChanged(object sender, EventArgs e)
         {
@@ -172,7 +172,7 @@ namespace GUI
             if (version == null) return;
 
             string fechaTxt = version.Fecha.ToString("dd/MM/yyyy HH:mm:ss");
-            string fnac     = version.FechaNacSnapshot?.ToString("d") ?? "—";
+            string fnac     = version.FechaNacSnapshot?.ToString("d") ?? "-";
             // Estado completo al que volverá el usuario (datos administrativos no sensibles).
             string estado =
                 $"{Tr("lbl.ver.campo.usuario", "Usuario")}: {version.UsernameSnapshot}\n" +
@@ -224,7 +224,7 @@ namespace GUI
             }
         }
 
-        // ══ A02 Serialización — exportar / importar las versiones (Mementos) a XML o JSON ═════════
+        // ══ A02 Serialización: exportar / importar las versiones (Mementos) a XML o JSON ═════════
 
         // Carpeta inicial de los diálogos: %LOCALAPPDATA%\WardrobeFlow\Versiones (la crea si falta).
         // Si no se pudiera crear, el diálogo abre en su carpeta por defecto.
@@ -309,7 +309,7 @@ namespace GUI
                 return;
             }
             lblOrigen.Text = Tr("lbl.ver.origen.archivo",
-                "Versiones importadas de '{0}' — usuario '{1}' (ID {2}), exportadas el {3} en el equipo {4}. Elija una y presione Restaurar.",
+                "Versiones importadas de '{0}': usuario '{1}' (ID {2}), exportadas el {3} en el equipo {4}. Elija una y presione Restaurar.",
                 new object[]
                 {
                     System.IO.Path.GetFileName(_archivoImportado), _importado.Username, _importado.IdUsuario,

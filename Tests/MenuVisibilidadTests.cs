@@ -6,9 +6,9 @@ namespace Tests
 {
     /// <summary>
     /// Regresión para la visibilidad del menú principal por rol (GUI.Menu.AplicarPermisos,
-    /// vía BLL.MenuVisibilidad.Resolver — la lógica pura extraída para poder testearla).
+    /// vía BLL.MenuVisibilidad.Resolver: la lógica pura extraída para poder testearla).
     /// Los 7 roles y sus patentes reproducen EXACTAMENTE lo que siembra
-    /// BD/00_Instalacion_Completa.sql, no una versión inventada — si este archivo y ese
+    /// BD/00_Instalacion_Completa.sql, no una versión inventada: si este archivo y ese
     /// script se desincronizan, alguno de los dos está mal.
     /// </summary>
     [TestClass]
@@ -120,7 +120,7 @@ namespace Tests
                                     "mnuRecomendacionPrendas" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
 
-            // PdN13 — patente propia de Vendedor: la usa al armar el pedido (menú Ventas). Abandono y
+            // PdN13: patente propia de Vendedor: la usa al armar el pedido (menú Ventas). Abandono y
             // Ventas por Vendedor son de GerenteComercial; Rotación/Mantenimiento/Escasez de GerenteInventario.
             CollectionAssert.AreEqual(new[] { BE.ReporteAnalitica.RecomendacionPrendas }, ReportesVisibles(v));
 
@@ -149,7 +149,7 @@ namespace Tests
         public void GerenteComercial_HeredaVendedorMasPedidosRealizadosYAnalisisAbandono()
         {
             // Composite: GerenteComercial → Vendedor. Las patentes efectivas ya vienen
-            // resueltas (recursivamente) antes de llegar acá — se simula el resultado final.
+            // resueltas (recursivamente) antes de llegar acá: se simula el resultado final.
             var patentes = new[] { "mnuPrendas", "mnuClientes", "mnuPlanSuscripciones",
                                     "mnuRenovacionSuscripcion",
                                     "mnuPedidosVenta", "mnuPedidosRealizados", "mnuAnalisisAbandono",
@@ -160,7 +160,7 @@ namespace Tests
                                     "mnuPromocionesVigentes", "mnuPromocionesVigentesEditar" };
             var v = BLL.MenuVisibilidad.Resolver(patentes, esAdmin: false);
 
-            // PdN10 y PdN8 — patentes propias de GerenteComercial; PdN13 heredada de Vendedor
+            // PdN10 y PdN8: patentes propias de GerenteComercial; PdN13 heredada de Vendedor
             // (Composite). Rotación/Mantenimiento/Escasez son decisiones de GerenteInventario.
             CollectionAssert.AreEqual(new[]
                 {
@@ -174,13 +174,12 @@ namespace Tests
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
 
             // Sus 3 reportes (Abandono, Ventas por Vendedor, Recomendación) quedan en el menú Ventas.
-            // Promociones (solo PN03) lo ve por el Centro de decisiones, Sugerir y las vigentes; no
+            // Promociones (solo PN03) lo ve por el Centro de decisiones y las vigentes; no
             // ve la gestión de Administración Comercial ni la de Contabilidad. Auditoría es un menú
             // aparte y sigue oculto para este rol.
             Assert.IsTrue(V(v, "analisisAbandonoToolStripMenuItem"));
             Assert.IsTrue(V(v, "promocionesToolStripMenuItem"));
             Assert.IsTrue(V(v, "centroDecisionesToolStripMenuItem"));
-            Assert.IsTrue(V(v, "sugerirPromocionToolStripMenuItem"));
             Assert.IsTrue(V(v, "promocionesVigentesToolStripMenuItem"));
             Assert.IsFalse(V(v, "gestionPromocionesToolStripMenuItem"));
             Assert.IsFalse(V(v, "revisionContablePromocionesToolStripMenuItem"));
@@ -216,7 +215,7 @@ namespace Tests
         [TestMethod]
         public void Deposito_ConPatenteNueva_VeInspeccionDevolucion()
         {
-            // PN04 — Inspección de Devolución, mismo rol (Depósito = rol Deposito).
+            // PN04: Inspección de Devolución, mismo rol (Depósito = rol Deposito).
             var v = BLL.MenuVisibilidad.Resolver(new[] { "mnuStock", "mnuInspeccionDevolucion" }, esAdmin: false);
 
             Assert.IsTrue(V(v, "inspeccionDevolucionToolStripMenuItem"));
@@ -236,7 +235,7 @@ namespace Tests
             Assert.IsTrue(V(v, "ventasToolStripMenuItem"));
             Assert.IsTrue(V(v, "pedidosRealizadosToolStripMenuItem"));
 
-            // PdN9/PdN11/PdN12 — patentes propias de GerenteInventario.
+            // PdN9/PdN11/PdN12: patentes propias de GerenteInventario.
             // Ventas por Vendedor y Abandono son decisiones de GerenteComercial: no los ve.
             CollectionAssert.AreEqual(new[]
                 {
@@ -285,7 +284,7 @@ namespace Tests
             };
 
             foreach (var nombre in esperados)
-                Assert.IsTrue(v.ContainsKey(nombre), $"Falta '{nombre}' en el resultado de Resolver — revisar Menu.cs vs BLL.MenuVisibilidad.");
+                Assert.IsTrue(v.ContainsKey(nombre), $"Falta '{nombre}' en el resultado de Resolver: revisar Menu.cs vs BLL.MenuVisibilidad.");
         }
 
         [TestMethod]

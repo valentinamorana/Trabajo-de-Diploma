@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Promocion (PN03, Métricas, promociones y toma de decisiones).
+    /// Capa de Acceso a Datos: Promocion (PN03, Métricas, promociones y toma de decisiones).
     /// Tablas: Promocion, PromocionHistorial, DictamenContable y SolicitudBajaPromocion.
     ///
     /// Cada transición es un claim atómico (UPDATE ... WHERE Estado = @Esperado) que, en la misma

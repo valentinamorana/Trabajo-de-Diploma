@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PN02 — "Registrar intento" (objeto «Intento» del diagrama): un cobro que no se concretó.
+    /// PN02: "Registrar intento" (objeto «Intento» del diagrama): un cobro que no se concretó.
     /// Cada intento queda registrado con su número (1..3), el medio con el que se intentó, el
     /// motivo y quién de Caja lo registró. La cantidad de intentos de una contratación se cuenta
     /// sobre esta tabla (no se guarda un contador aparte).

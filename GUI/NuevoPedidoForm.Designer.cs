@@ -72,7 +72,7 @@ namespace GUI
             this.lblPaso.Padding = new System.Windows.Forms.Padding(12, 8, 0, 0);
             this.lblPaso.Size = new System.Drawing.Size(700, 40);
             this.lblPaso.TabIndex = 0;
-            this.lblPaso.Text = "Paso 1 de 2 — Seleccionar Cliente";
+            this.lblPaso.Text = "Paso 1 de 2: Seleccionar Cliente";
             // 
             // panelStatus
             // 

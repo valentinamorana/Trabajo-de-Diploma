@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo instalar WardrobeFlow</title>
+<style>
+  :root {
+    --texto: #1f2328;
+    --suave: #57606a;
+    --fondo: #ffffff;
+    --panel: #f6f8fa;
+    --borde: #d0d7de;
+    --acento: #0b5cad;
+    --acento-fondo: #e8f1fb;
+    --ok: #1a7f37;
+    --ok-fondo: #e9f6ec;
+    --aviso: #9a6700;
+    --aviso-fondo: #fff8e1;
+    --error: #b42318;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+  header.portada { border-bottom: 3px solid var(--acento); padding-bottom: 16px; margin-bottom: 24px; }
+  header.portada .marca { color: var(--acento); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: .85rem; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 6px 0 8px; }
+  h2 { font-size: 1.4rem; margin: 40px 0 12px; padding-top: 8px; border-top: 1px solid var(--borde); }
+  h3 { font-size: 1.12rem; margin: 26px 0 8px; }
+  p, li { max-width: 72ch; }
+  a { color: var(--acento); }
+  code, .ruta {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .92em;
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 4px;
+    padding: 1px 5px;
+    word-break: break-all;
+  }
+  /* Nombre de un boton o elemento de una ventana */
+  .boton {
+    display: inline-block;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: .9em;
+    font-weight: 600;
+    line-height: 1.3;
+    padding: 1px 10px;
+    border: 1px solid #8c959f;
+    border-radius: 4px;
+    background: linear-gradient(#ffffff, #eaeef2);
+    box-shadow: 0 1px 0 rgba(27,31,36,.1);
+    white-space: nowrap;
+  }
+  .tecla {
+    display: inline-block;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .85em;
+    padding: 0 6px;
+    border: 1px solid #8c959f;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: var(--panel);
+  }
+  .opcion { font-weight: 600; color: var(--acento); }
+  .indice { background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 12px 20px; }
+  .indice ol { margin: 6px 0; padding-left: 22px; }
+  .caja { border-radius: 8px; padding: 12px 16px; margin: 16px 0; border-left: 5px solid; }
+  .caja p { margin: 4px 0; }
+  .caja.info { background: var(--acento-fondo); border-color: var(--acento); }
+  .caja.ok { background: var(--ok-fondo); border-color: var(--ok); }
+  .caja.aviso { background: var(--aviso-fondo); border-color: var(--aviso); }
+  .caja strong.titulo { display: block; margin-bottom: 2px; }
+  /* Pasos numerados */
+  ol.pasos { list-style: none; counter-reset: paso; padding-left: 0; }
+  ol.pasos > li { counter-increment: paso; position: relative; padding: 2px 0 14px 48px; }
+  ol.pasos > li::before {
+    content: counter(paso);
+    position: absolute; left: 0; top: 0;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--acento); color: #fff;
+    font-weight: 700; text-align: center; line-height: 32px;
+  }
+  ol.pasos > li > ul { margin: 6px 0 0; }
+  .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .tarjeta { border: 1px solid var(--borde); border-radius: 8px; padding: 14px 16px; background: var(--fondo); }
+  .tarjeta h3 { margin-top: 0; }
+  .tarjeta .etiqueta { display: inline-block; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 10px; margin-bottom: 6px; }
+  .etiqueta.facil { background: var(--ok-fondo); color: var(--ok); }
+  .etiqueta.completa { background: var(--acento-fondo); color: var(--acento); }
+  .tarjeta ul { padding-left: 20px; margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .95rem; }
+  th, td { border: 1px solid var(--borde); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+  .esquema-nota { font-size: .85rem; color: var(--suave); margin-top: -4px; }
+  figure { margin: 16px 0; }
+  figure svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: .85rem; color: var(--suave); margin-top: 4px; }
+  details { border: 1px solid var(--borde); border-radius: 8px; margin: 10px 0; padding: 0 14px; }
+  details[open] { padding-bottom: 10px; }
+  summary { cursor: pointer; font-weight: 600; padding: 10px 0; }
+  footer { margin-top: 48px; padding-top: 12px; border-top: 1px solid var(--borde); color: var(--suave); font-size: .85rem; }
+  @media (max-width: 640px) {
+    .opciones { grid-template-columns: 1fr; }
+    h1 { font-size: 1.5rem; }
+  }
+  @media print {
+    html { font-size: 11pt; }
+    main { max-width: none; padding: 0; }
+    a { color: var(--texto); }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; word-break: break-all; }
+    h2 { break-after: avoid; page-break-after: avoid; }
+    .caja, .tarjeta, ol.pasos > li, table, figure { break-inside: avoid; page-break-inside: avoid; }
+    details { border: none; padding: 0; }
+    details > summary { list-style: none; }
+    .indice { display: none; }
+  }
+  /* Texto de un mensaje tal como lo muestra la aplicacion o el instalador */
+  .mensaje {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-left: 4px solid var(--error);
+    border-radius: 4px;
+    font-size: .95em;
+  }
+  .mensaje.neutro { border-left-color: var(--suave); }
+  pre.comando {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .9em;
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+    padding: 10px 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  @media print {
+    .mensaje, pre.comando { break-inside: avoid; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header class="portada">
+  <div class="marca">WardrobeFlow · Guía de instalación</div>
+  <h1>Cómo instalar WardrobeFlow</h1>
+  <p>Esta guía le explica cómo instalar, actualizar y desinstalar WardrobeFlow en una computadora con Windows, qué hacer si el instalador no encuentra SQL Server y cómo resolver los errores de conexión al iniciar la aplicación. Puede leerla sin conexión a Internet e imprimirla.</p>
+  <p>Si el equipo todavía no tiene un motor de base de datos, consulte también la guía <a href="Tutorial_SQL_Server.html">«Cómo instalar SQL Server para WardrobeFlow»</a>.</p>
+</header>
+
+<nav class="indice" aria-label="Contenido">
+  <strong>Contenido</strong>
+  <ol>
+    <li><a href="#requisitos">Requisitos</a></li>
+    <li><a href="#instalacion">Instalación paso a paso</a></li>
+    <li><a href="#casos">Si el instalador no encuentra SQL Server, no hay motor o el servicio está detenido</a></li>
+    <li><a href="#desatendida">Instalación desatendida</a></li>
+    <li><a href="#primer-ingreso">Primer inicio de sesión</a></li>
+    <li><a href="#actualizacion">Actualización de una versión anterior</a></li>
+    <li><a href="#desinstalacion">Desinstalación</a></li>
+    <li><a href="#problemas">Solución de problemas</a></li>
+    <li><a href="#logs">Dónde están los registros (logs)</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="requisitos">1. Requisitos</h2>
+<table>
+  <thead><tr><th>Requisito</th><th>Detalle</th></tr></thead>
+  <tbody>
+    <tr><td>Sistema operativo</td><td>Windows 10 u 11, de 64 bits (recomendado). El SQL Server LocalDB incluido en el instalador es de 64 bits.</td></tr>
+    <tr><td>Permisos de Windows</td><td>Una cuenta con permisos de administrador del equipo. Al iniciar el instalador, Windows pide confirmación (Control de cuentas de usuario).</td></tr>
+    <tr><td>.NET Framework</td><td>4.7.2 o posterior. Viene incluido en Windows 10 (versión 1803 o posterior) y en Windows 11. Si falta, el instalador lo informa con el enlace de descarga y se cierra <strong>sin instalar nada</strong>.</td></tr>
+    <tr><td>SQL Server</td><td><strong>Opcional.</strong> Si el equipo ya tiene SQL Server (Express, Developer, Standard o LocalDB), el instalador lo detecta y le permite elegir la instancia. Si no tiene ninguno, el instalador ofrece instalar SQL Server 2022 Express LocalDB, que viene incluido. Se requiere SQL Server 2012 o posterior: el instalador muestra la versión de cada instancia para que usted elija.</td></tr>
+    <tr><td>Permisos en SQL Server</td><td>Si usa una instancia existente, la cuenta de Windows que instala debe ser administradora de esa instancia (<code>sysadmin</code>) o, al menos, poder crear bases de datos (<code>dbcreator</code>). Si la base ya existe, debe ser su <code>db_owner</code>. El instalador lo verifica antes de copiar archivos. Con LocalDB no hace falta: su usuario de Windows es el dueño de la instancia.</td></tr>
+    <tr><td>Espacio en disco</td><td>Al menos 1&nbsp;GB libre. El instalador comprueba por sí solo que haya espacio para sus archivos.</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="instalacion">2. Instalación paso a paso</h2>
+<p>Estos pasos corresponden al caso más común: un equipo con SQL Server instalado y su servicio en ejecución. Si el instalador no encuentra SQL Server, vea la <a href="#casos">sección 3</a>.</p>
+<ol class="pasos">
+  <li>Haga doble clic en el instalador (<code>Instalador_WardrobeFlow_….exe</code>). Si Windows SmartScreen muestra un aviso, elija <span class="boton">Más información</span> y luego <span class="boton">Ejecutar de todas formas</span> (el instalador tiene una firma propia, no de una autoridad comercial). Después, acepte el pedido de permisos de administrador con <span class="boton">Sí</span>.</li>
+  <li>Antes de mostrar el asistente, el instalador verifica que esté instalado .NET Framework 4.7.2 o posterior.</li>
+  <li>En la página <strong>«Seleccione la Carpeta de Destino»</strong>, confirme la carpeta propuesta (de forma predeterminada, <span class="ruta">Archivos de programa\WardrobeFlow</span>) y haga clic en <span class="boton">Siguiente</span>. En una actualización esta página no aparece: se usa la carpeta de la instalación anterior.</li>
+  <li>En la página de tareas adicionales, marque <span class="opcion">Crear un acceso directo en el escritorio</span> si lo desea (viene desmarcada) y haga clic en <span class="boton">Siguiente</span>.</li>
+  <li>En la página <strong>«Base de datos: Se encontró SQL Server en este equipo»</strong>, elija la instancia donde se creará la base <code>WardrobeFlowDB</code>. La lista muestra:
+    <ul>
+      <li>cada instancia detectada, con su versión (por ejemplo, <code>.\SQLEXPRESS   (SQL Server 2022)</code>);</li>
+      <li>SQL LocalDB: <span class="opcion">(localdb)\MSSQLLocalDB</span> si ya está instalado, o <span class="opcion">Instalar SQL Server Express LocalDB</span> si no lo está;</li>
+      <li><span class="opcion">Otra instancia o servidor (ingresar manualmente)</span>, para escribir el nombre de un servidor que no aparece.</li>
+    </ul>
+    Si es una reinstalación, ya aparece marcada la instancia que se usó la vez anterior (ahí están los datos). Haga clic en <span class="boton">Siguiente</span>: el instalador comprueba que el servicio de esa instancia esté en ejecución (si está detenido, intenta iniciarlo) y que su cuenta tenga permisos.</li>
+  <li>En la página <strong>«Listo para Instalar»</strong>, revise el resumen y haga clic en <span class="boton">Instalar</span>.</li>
+  <li>Espere a que termine. El instalador copia la aplicación, guarda el servidor elegido en la configuración, hace un backup de la base si ya existía, crea o actualiza la base <code>WardrobeFlowDB</code> con sus tablas y datos iniciales, da acceso a los usuarios del equipo y verifica el resultado. El paso en curso se muestra debajo de la barra de progreso.</li>
+  <li>En la página final, deje marcada la opción <span class="opcion">Abrir WardrobeFlow</span> y haga clic en <span class="boton">Finalizar</span>. Si desea ver las cuentas de prueba, marque también <span class="opcion">Ver las credenciales iniciales (solo demo)</span>.</li>
+</ol>
+
+<h3>Qué deja instalado</h3>
+<table>
+  <thead><tr><th>Elemento</th><th>Detalle</th></tr></thead>
+  <tbody>
+    <tr><td>Aplicación</td><td><code>GUI.exe</code> y sus bibliotecas en la carpeta de instalación. La cadena de conexión queda en <code>GUI.exe.config</code>, junto al ejecutable, con el servidor que usted eligió.</td></tr>
+    <tr><td>Base de datos</td><td><code>WardrobeFlowDB</code> en la instancia elegida, con su estructura, los datos iniciales y los datos de demostración (solo en una instalación nueva).</td></tr>
+    <tr><td>Acceso de los usuarios del equipo</td><td>El grupo local <strong>Usuarios</strong> de Windows recibe acceso (rol <code>db_owner</code>) <strong>solo sobre la base WardrobeFlowDB</strong>, para que cualquier usuario de Windows del equipo pueda abrir la aplicación aunque no sea quien instaló. Quién puede hacer cada cosa lo decide el inicio de sesión propio de WardrobeFlow. Con LocalDB no se aplica (la base es de su usuario).</td></tr>
+    <tr><td>Carpetas con escritura para usuarios</td><td><code>Backups</code>, <code>TempBackups</code> y <code>Logs</code>, dentro de la carpeta de instalación, para que un usuario sin permisos de administrador pueda generar backups desde la aplicación.</td></tr>
+    <tr><td>Menú Inicio (grupo WardrobeFlow)</td><td><strong>WardrobeFlow</strong>, <strong>Credenciales iniciales (solo demo)</strong>, <strong>Cómo instalar WardrobeFlow</strong> (esta guía) y <strong>Cómo instalar SQL Server</strong>.</td></tr>
+    <tr><td>Escritorio</td><td>Acceso directo a WardrobeFlow, solo si marcó esa tarea.</td></tr>
+    <tr><td>Documentación</td><td>Esta guía y el tutorial de SQL Server, en la subcarpeta <code>Docs</code>; los scripts de la base, en la subcarpeta <code>BD</code>; <code>Credenciales_Iniciales.txt</code>, en la carpeta de instalación.</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="casos">3. Si el instalador no encuentra SQL Server, no hay motor o el servicio está detenido</h2>
+
+<h3 id="sin-instancia">3.1. No se encuentra ninguna instancia</h3>
+<p>Si el instalador no detecta ninguna instancia de SQL Server en el equipo, en lugar de la lista de instancias muestra la página <strong>«Base de datos: No se encontró SQL Server en este equipo»</strong>, con tres opciones:</p>
+<table>
+  <thead><tr><th>Opción</th><th>Cuándo elegirla</th></tr></thead>
+  <tbody>
+    <tr><td><span class="opcion">Instalar SQL Server Express LocalDB (recomendado, incluido en este instalador; se instala al confirmar)</span><br>o, si LocalDB ya está en el equipo, <span class="opcion">Usar SQL LocalDB, ya detectado en este equipo</span></td><td>La opción predeterminada. Úsela si no tiene SQL Server o si solo va a usar la aplicación una persona.</td></tr>
+    <tr><td><span class="opcion">Ya tengo SQL Server instalado (con otro nombre, o en otro servidor): ingresar manualmente</span></td><td>Si SQL Server está instalado pero no fue detectado, o está en otro equipo de la red. Escriba el servidor y la instancia (por ejemplo <code>.\SQLEXPRESS</code> o <code>SERVIDOR\INSTANCIA</code>). El instalador prueba la conexión (puede tardar hasta 30 segundos) y los permisos antes de seguir; si la conexión falla, le pregunta si desea continuar de todos modos.</td></tr>
+    <tr><td><span class="opcion">No tengo ningún motor de SQL Server instalado: cancelar la instalación</span></td><td>Si prefiere instalar SQL Server Express completo antes. El instalador se cierra <strong>sin instalar nada</strong> y le ofrece abrir el tutorial para instalar SQL Server.</td></tr>
+  </tbody>
+</table>
+<p>Desde esa misma página también puede abrir, sin salir del asistente, el tutorial (<span class="boton">Ver tutorial para instalar SQL Server</span>, funciona sin Internet) y la página oficial de descarga de Microsoft (<span class="boton">Abrir página de descarga</span>).</p>
+
+<h3 id="sin-motor">3.2. El equipo no tiene ningún motor de base de datos (LocalDB)</h3>
+<ol class="pasos">
+  <li>En la página «No se encontró SQL Server en este equipo», deje marcada la primera opción, <span class="opcion">Instalar SQL Server Express LocalDB</span>, y haga clic en <span class="boton">Siguiente</span>.</li>
+  <li>Lea el aviso de que la base de LocalDB es solo de su usuario de Windows y ciérrelo con <span class="boton">Aceptar</span>.</li>
+  <li>En «Listo para Instalar», haga clic en <span class="boton">Instalar</span>. Recién en ese momento se instala SQL Server 2022 Express LocalDB, desde el propio instalador y sin descargar nada (aparece una barra de progreso de Windows Installer, sin preguntas). Si cancela antes, no queda nada instalado.</li>
+  <li>La instalación continúa sobre <code>(localdb)\MSSQLLocalDB</code>, como en la <a href="#instalacion">sección 2</a>.</li>
+</ol>
+<div class="caja aviso">
+  <strong class="titulo">LocalDB es de cada usuario de Windows</strong>
+  <p>La base se crea en el perfil del usuario de Windows que inició el instalador, y solo ese usuario la ve. Si varias cuentas de Windows van a usar WardrobeFlow en el mismo equipo, instale SQL Server 2022 Express (vea el <a href="Tutorial_SQL_Server.html">tutorial</a>) y elija esa instancia.</p>
+</div>
+<p>Si la instalación de LocalDB falla, el instalador no instala nada de WardrobeFlow, informa el código de error y la ubicación del registro (<code class="ruta">Documentos\WardrobeFlow_LocalDB_install.log</code>) y le ofrece abrir el tutorial para instalar SQL Server de otra forma.</p>
+<p>LocalDB también aparece en la lista cuando el equipo ya tiene otras instancias: es la salida si su cuenta no tiene permisos sobre el SQL Server existente.</p>
+
+<h3 id="servicio-detenido">3.3. El servicio de SQL Server está detenido</h3>
+<p>No necesita hacer nada al principio: al hacer clic en <span class="boton">Siguiente</span> en la página de la base de datos, el instalador comprueba el servicio de Windows de la instancia elegida y, si está detenido, lo inicia y espera hasta 30 segundos a que quede en ejecución.</p>
+<p>Si no lo logra (el servicio no existe o no se pudo iniciar, por ejemplo por falta de permisos), muestra este mensaje:</p>
+<div class="mensaje neutro">El servicio de Windows para esa instancia (MSSQL$SQLEXPRESS) no está disponible (no existe, o está detenido y no se pudo iniciar automáticamente: ¿faltan permisos de administrador?). ¿Desea continuar de todos modos? (se va a reintentar más adelante)</div>
+<ul>
+  <li><span class="boton">No</span>: vuelve a la página para elegir otra instancia. Puede iniciar el servicio a mano (vea <a href="#iniciar-servicio">«Cómo iniciar el servicio de SQL Server»</a>) y volver a hacer clic en <span class="boton">Siguiente</span>.</li>
+  <li><span class="boton">Sí</span>: el instalador continúa y vuelve a intentar iniciar el servicio antes de crear la base. Si vuelve a fallar, en una instalación nueva deshace todo lo copiado (rollback automático) y le indica qué hacer.</li>
+</ul>
+<p>Esta comprobación se hace para las instancias detectadas en el equipo. Para un servidor ingresado manualmente (posiblemente remoto) no hay un servicio local que iniciar: el instalador solo prueba la conexión.</p>
+
+<h3>3.4. Otros avisos del asistente</h3>
+<table>
+  <thead><tr><th>Situación</th><th>Qué muestra el instalador</th><th>Qué hacer</th></tr></thead>
+  <tbody>
+    <tr><td>Permisos insuficientes en SQL Server</td><td>«Permisos insuficientes en SQL Server», con el detalle del permiso que falta. No deja avanzar.</td><td>Ejecutar el instalador con una cuenta administradora de la instancia (<code>sysadmin</code>), pedir a quien administra SQL Server el rol <code>dbcreator</code>, elegir otra instancia o elegir SQL LocalDB.</td></tr>
+    <tr><td>No se pudieron verificar los permisos</td><td>Una pregunta: «¿Desea continuar de todos modos?» (la respuesta predeterminada es No).</td><td>Revisar el nombre del servidor y que esté en ejecución. Si continúa, el error aparecerá, si lo hay, al crear la base.</td></tr>
+    <tr><td>Falta .NET Framework 4.7.2</td><td>Un aviso con el enlace de descarga. No copia ningún archivo.</td><td>Instalar .NET Framework 4.7.2 o posterior y volver a ejecutar el instalador.</td></tr>
+    <tr><td>WardrobeFlow está abierto</td><td>Un pedido para cerrar la aplicación.</td><td>Cerrar WardrobeFlow y continuar.</td></tr>
+    <tr><td>La base se instaló con avisos</td><td>«La base de datos se instaló con estos avisos», con la lista.</td><td>Leerlos: no detienen la instalación. El detalle queda en el registro de la instalación.</td></tr>
+    <tr><td>No se pudo dar acceso a los usuarios del equipo</td><td>Un aviso con el código de error.</td><td>La aplicación funciona para la cuenta que instaló. Para que otras cuentas de Windows puedan conectarse, un administrador de SQL Server debe darles acceso a la base.</td></tr>
+    <tr><td>Falla la creación de la base o la verificación final</td><td>Un mensaje con «QUÉ PASÓ», «QUÉ SE HIZO» y «QUÉ HACER AHORA», y las últimas líneas del registro.</td><td>En una instalación nueva, el instalador deshace todo (rollback automático). Revise <code class="ruta">Documentos\WardrobeFlow_instalacion_fallida.log</code>, corrija la causa y vuelva a ejecutar el instalador.</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="desatendida">4. Instalación desatendida</h2>
+<p>Para instalar sin intervención (por ejemplo, en varios puestos), abra una consola <strong>como administrador</strong> en la carpeta del instalador y ejecute:</p>
+<pre class="comando">Instalador_WardrobeFlow_….exe /VERYSILENT /SUPPRESSMSGBOXES /SERVIDOR=.\SQLEXPRESS</pre>
+<table>
+  <thead><tr><th>Parámetro</th><th>Efecto</th></tr></thead>
+  <tbody>
+    <tr><td><code>/SERVIDOR=servidor\instancia</code></td><td>Parámetro propio de WardrobeFlow. Indica la instancia de SQL Server donde se crea la base (por ejemplo <code>.\SQLEXPRESS01</code>, <code>SERVIDOR\INSTANCIA</code> o <code>(localdb)\MSSQLLocalDB</code>). Cuando se usa, el asistente <strong>no muestra las páginas de base de datos</strong> ni hace sus verificaciones previas (también en una instalación con ventanas). Si el valor coincide con una instancia detectada en el equipo escrita como <code>.\NOMBRE</code> (o <code>.</code> para la instancia predeterminada), igual se comprueba e inicia su servicio antes de crear la base.</td></tr>
+    <tr><td><code>/VERYSILENT</code></td><td>No muestra ninguna ventana del asistente. <code>/SILENT</code> muestra solo la barra de progreso.</td></tr>
+    <tr><td><code>/SUPPRESSMSGBOXES</code></td><td>Responde cada mensaje con su respuesta predeterminada, para que ningún aviso detenga la instalación.</td></tr>
+    <tr><td><code>/DIR="carpeta"</code></td><td>Instala en otra carpeta en lugar de la predeterminada.</td></tr>
+    <tr><td><code>/TASKS="desktopicon"</code></td><td>Crea también el acceso directo en el escritorio (sin este parámetro no se crea).</td></tr>
+    <tr><td><code>/LOG="archivo"</code></td><td>Guarda un registro detallado de todo el proceso del asistente.</td></tr>
+    <tr><td><code>/NORESTART</code></td><td>Evita que el equipo se reinicie al terminar.</td></tr>
+  </tbody>
+</table>
+<div class="caja aviso">
+  <strong class="titulo">Qué tiene en cuenta en modo desatendido</strong>
+  <p><strong>Sin <code>/SERVIDOR</code></strong>, se usa la instancia que estaría preseleccionada: la usada la vez anterior (en una reinstalación), o si no la primera instancia detectada; si el equipo no tiene ninguna, LocalDB si ya está instalado.</p>
+  <p><strong>No se instala LocalDB</strong> en modo desatendido: la instancia indicada (o detectada) debe existir. En un equipo sin ningún motor, instale antes SQL Server o LocalDB.</p>
+  <p>Al terminar no se abre la aplicación ni las credenciales. Si la instalación falla, el instalador termina con un código de salida distinto de 0 y deja el registro en la carpeta Documentos de la cuenta que lo ejecutó.</p>
+</div>
+<p>Para desinstalar sin intervención, ejecute <code>unins000.exe /VERYSILENT /SUPPRESSMSGBOXES</code> desde la carpeta de instalación. En ese modo <strong>no se borra la base de datos</strong> (la respuesta predeterminada a esa pregunta es No).</p>
+
+<!-- ============================================================ -->
+<h2 id="primer-ingreso">5. Primer inicio de sesión</h2>
+<ol class="pasos">
+  <li>Abra WardrobeFlow desde el menú Inicio (<strong>WardrobeFlow</strong>) o desde el acceso directo del escritorio.</li>
+  <li>Al iniciar, la aplicación comprueba la conexión con la base de datos. Si no puede conectarse, muestra el cuadro «Error de conexión» con la causa y qué hacer (vea la <a href="#errores-conexion">sección 8.1</a>).</li>
+  <li>En el primer arranque de una instalación nueva, la aplicación crea el administrador de respaldo <strong>admin2</strong> y diez <strong>claves de emergencia</strong> de un solo uso, y muestra dos avisos con la ubicación de cada archivo (en <span class="ruta">Documentos\WardrobeFlow\CredencialesGeneradas</span> del usuario que abrió la aplicación). Guarde ambos archivos en un lugar seguro: las claves permiten desbloquear una cuenta de Administrador bloqueada.</li>
+  <li>Inicie sesión con una de las cuentas iniciales. Los usuarios y contraseñas de prueba, uno por rol, están en <strong>Credenciales_Iniciales.txt</strong>: menú Inicio → WardrobeFlow → <strong>Credenciales iniciales (solo demo)</strong>, o el archivo del mismo nombre en la carpeta de instalación. Ese archivo también indica qué usuario conviene usar para cada proceso y qué mirar en cada pantalla.</li>
+  <li>En el primer ingreso de cada usuario se abre la guía de inicio de su rol. Para una demostración, puede iniciar la aplicación con el parámetro <code>/singuia</code> (por ejemplo, <code>GUI.exe /singuia</code>) para que no aparezca.</li>
+</ol>
+<div class="caja aviso">
+  <strong class="titulo">Cambie las contraseñas de prueba</strong>
+  <p>Las cuentas de prueba tienen contraseñas fijas, pensadas para la demostración, y se crean solo en una instalación nueva. En un uso real, el Administrador debe entrar en Administrar → Usuarios → Administración de Usuarios, pestaña Cuentas, y usar <span class="boton">Resetear Contraseña</span> en cada cuenta (en el siguiente ingreso, el sistema obliga a definir una contraseña nueva). Después, borre o restrinja <code>Credenciales_Iniciales.txt</code>.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="actualizacion">6. Actualización de una versión anterior</h2>
+<ol class="pasos">
+  <li>Cierre WardrobeFlow en todos los puestos.</li>
+  <li>Ejecute el instalador de la versión nueva. No aparece la página de la carpeta de destino (se usa la anterior) y la instancia usada la vez anterior aparece seleccionada.</li>
+  <li>Antes de modificar la base, el instalador genera un backup completo, <code>WardrobeFlowDB_pre_&lt;versión&gt;_&lt;fecha y hora&gt;.bak</code>, en la carpeta de backups de la instancia de SQL Server (<code>&lt;versión&gt;</code> es la versión que se está instalando). Lo hace siempre que la base ya existe, también al reinstalar la misma versión. Si el backup falla, el instalador se detiene <strong>sin modificar la base</strong>.</li>
+  <li>El script actualiza la estructura sin borrar datos ni volver a crear las cuentas de prueba. Al terminar, el instalador verifica que la base tenga al menos un Administrador activo, planes de suscripción y prendas.</li>
+</ol>
+<p>Si la actualización falla, <strong>no se desinstala nada</strong>: se conservan la instalación y la configuración del servidor, y la base puede haber quedado actualizada a medias. El mensaje indica la ruta del backup para restaurarlo, y el registro queda en <code class="ruta">Documentos\WardrobeFlow_actualizacion_fallida.log</code>. Una vez corregida la causa, vuelva a ejecutar el instalador: continúa la actualización.</p>
+
+<!-- ============================================================ -->
+<h2 id="desinstalacion">7. Desinstalación</h2>
+<ol class="pasos">
+  <li>Cierre WardrobeFlow.</li>
+  <li>Abra Configuración → Aplicaciones (o «Agregar o quitar programas»), busque <strong>WardrobeFlow</strong> y elija <span class="boton">Desinstalar</span>.</li>
+  <li>El desinstalador pregunta: «¿Desea borrar también la base de datos WardrobeFlowDB?». El botón predeterminado es <span class="boton">No</span>, para no perder datos por error. Elija <span class="boton">Sí</span> solo si quiere eliminar toda la información; esta acción no se puede deshacer.</li>
+</ol>
+<table>
+  <thead><tr><th>Se elimina</th><th>No se elimina</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>
+        <ul>
+          <li>La aplicación, sus documentos y los accesos directos.</li>
+          <li>Los registros de la carpeta de instalación.</li>
+          <li>La base <code>WardrobeFlowDB</code>, solo si eligió <span class="boton">Sí</span>. En ese caso también se quita el acceso del grupo Usuarios, si ninguna otra base lo usa.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>La base de datos, si eligió <span class="boton">No</span>.</li>
+          <li>Los backups de la carpeta <code>Backups</code> (si contiene archivos, la carpeta queda).</li>
+          <li>Los backups previos a las actualizaciones (en la carpeta de backups de SQL Server).</li>
+          <li>Los registros guardados en Documentos y los archivos de <span class="ruta">Documentos\WardrobeFlow\CredencialesGeneradas</span>.</li>
+          <li>SQL Server y SQL Server LocalDB.</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Si no se pudo borrar la base, la aplicación se desinstala igual, se avisa con el código de error y el detalle queda en <code class="ruta">Documentos\WardrobeFlow_desinstalacion.log</code>. Con LocalDB solo se borra la base del usuario de Windows que ejecuta el desinstalador: si la base era de otro usuario, debe borrarla esa persona desde su sesión.</p>
+
+<!-- ============================================================ -->
+<h2 id="problemas">8. Solución de problemas</h2>
+
+<h3 id="errores-conexion">8.1. Mensajes de «Error de conexión» al iniciar WardrobeFlow</h3>
+<p>Antes de mostrar la ventana de inicio de sesión, WardrobeFlow comprueba que puede conectarse a la base. Si no puede, muestra el cuadro <strong>«Error de conexión»</strong> en el idioma de Windows (español, inglés, ruso o portugués; si es otro, en español) y se cierra. El mensaje indica la causa, el <strong>servidor configurado</strong> y, al final, <strong>dónde está la cadena de conexión</strong>:</p>
+<div class="mensaje neutro">La cadena de conexión 'WardrobeFlowDB' está en: …\GUI.exe.config (o reinstale WardrobeFlow y elija otra instancia de SQL Server).</div>
+<p>Busque en la tabla el comienzo del mensaje que vio:</p>
+<table>
+  <thead><tr><th>Mensaje</th><th>Causa</th><th>Qué hacer</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><div class="mensaje">La base de datos 'WardrobeFlowDB' no existe en el servidor '…'.</div></td>
+      <td>El servidor responde, pero no tiene la base (error de SQL Server 4060). Por ejemplo, la base se borró al desinstalar o la aplicación apunta a otra instancia.</td>
+      <td>Instale (o reinstale) WardrobeFlow para crear la base. Si la base está en otra instancia, en la instalación elija esa instancia. Si tiene un backup, restáurelo después desde Administrar → Sistema → Backup y Restauración.</td>
+    </tr>
+    <tr>
+      <td><div class="mensaje">El servidor '…' rechazó el inicio de sesión: su usuario de Windows no tiene permiso sobre la base 'WardrobeFlowDB'.</div></td>
+      <td>Su cuenta de Windows no tiene acceso a la base en ese SQL Server (errores 18456 o 18452). Suele pasar si el instalador no pudo dar acceso al grupo Usuarios o si el servidor es de otra persona.</td>
+      <td>Pida acceso al administrador del servidor de SQL Server: debe dar a su usuario de Windows (o al grupo Usuarios del equipo) acceso a la base <code>WardrobeFlowDB</code>. Reinstalar WardrobeFlow con una cuenta <code>sysadmin</code> de la instancia vuelve a dar ese acceso al grupo Usuarios.</td>
+    </tr>
+    <tr>
+      <td><div class="mensaje">El servidor '…' no responde: no se encuentra en la red o el servicio de SQL Server está detenido.</div></td>
+      <td>El servidor no existe, no se encuentra en la red, no responde a tiempo o su servicio está detenido (errores -2, -1, 2, 53, 258 o 26).</td>
+      <td>Inicie el servicio de SQL Server (vea <a href="#iniciar-servicio">«Cómo iniciar el servicio de SQL Server»</a>) y vuelva a abrir WardrobeFlow. Verifique también que el nombre del servidor del mensaje sea correcto; si es un servidor de otro equipo, que el equipo esté encendido y accesible en la red.</td>
+    </tr>
+    <tr>
+      <td><div class="mensaje">La instancia LocalDB '(localdb)\MSSQLLocalDB' no responde.</div></td>
+      <td>El mismo caso anterior, cuando el servidor configurado es SQL Server LocalDB.</td>
+      <td>LocalDB se inicia sola al conectarse; vuelva a abrir WardrobeFlow. Si el error se repite, abra una consola (<span class="tecla">Windows</span> + <span class="tecla">R</span>, <code>cmd</code>) con <strong>su</strong> usuario de Windows y ejecute <code>sqllocaldb start MSSQLLocalDB</code> (con <code>sqllocaldb info MSSQLLocalDB</code> puede ver su estado). Si el comando no existe, LocalDB no está instalado: reinstale WardrobeFlow y elija instalar LocalDB.</td>
+    </tr>
+    <tr>
+      <td><div class="mensaje">No se pudo conectar a la base de datos en el servidor '…'. Verifique que SQL Server esté en ejecución. (Error N: detalle)</div></td>
+      <td>Cualquier otra causa. El mensaje muestra el número de error de SQL Server y el detalle técnico.</td>
+      <td>Anote el número y el detalle. Compruebe que el servicio esté en ejecución y que el servidor sea el correcto. Si el número aparece como «-», la falla no vino de SQL Server: por ejemplo, falta la cadena de conexión <code>WardrobeFlowDB</code> en <code>GUI.exe.config</code> o está mal escrita; reinstale WardrobeFlow.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cadena">8.2. Dónde está la cadena de conexión y cómo cambiar el servidor</h3>
+<p>La cadena de conexión está en el archivo <code>GUI.exe.config</code>, <strong>junto al ejecutable</strong> <code>GUI.exe</code>, en la carpeta de instalación de WardrobeFlow (el mensaje de error muestra la ruta completa). El instalador escribe ahí el servidor que usted eligió, en la entrada <code>WardrobeFlowDB</code>:</p>
+<pre class="comando">&lt;add name="WardrobeFlowDB"
+     connectionString="Data Source=.\SQLEXPRESS;Initial Catalog=WardrobeFlowDB;Integrated Security=True;TrustServerCertificate=True;Connect Timeout=30" … /&gt;</pre>
+<ul>
+  <li>La forma recomendada de cambiar el servidor es <strong>reinstalar WardrobeFlow</strong> y elegir otra instancia: así también se crea o actualiza la base y se da acceso a los usuarios del equipo.</li>
+  <li>Si solo necesita corregir el nombre del servidor (la base ya existe en él), un administrador puede editar el valor de <code>Data Source</code> con el Bloc de notas abierto como administrador (la carpeta de instalación está protegida). No cambie el resto de la cadena.</li>
+</ul>
+
+<h3 id="iniciar-servicio">8.3. Cómo iniciar el servicio de SQL Server</h3>
+<ol class="pasos">
+  <li>Presione <span class="tecla">Windows</span> + <span class="tecla">R</span>, escriba <code>services.msc</code> y haga clic en <span class="boton">Aceptar</span>.</li>
+  <li>Busque el servicio <strong>SQL Server (SQLEXPRESS)</strong> o el de su instancia (<strong>SQL Server (NOMBRE)</strong>; la instancia predeterminada es <strong>SQL Server (MSSQLSERVER)</strong>).</li>
+  <li>Haga clic derecho sobre él y elija <span class="boton">Iniciar</span>. Espere a que el estado cambie a «En ejecución».</li>
+  <li>Para que no vuelva a pasar, en <span class="boton">Propiedades</span> elija el tipo de inicio <span class="opcion">Automático</span> y haga clic en <span class="boton">Aceptar</span>.</li>
+</ol>
+<p>Necesita permisos de administrador. SQL Server LocalDB no aparece en «Servicios»: se inicia sola (vea la tabla de la <a href="#errores-conexion">sección 8.1</a>). Más detalles en el <a href="Tutorial_SQL_Server.html#verificar">tutorial de SQL Server</a>.</p>
+
+<h3>8.4. Otros problemas</h3>
+<table>
+  <thead><tr><th>Problema</th><th>Causa probable</th><th>Solución</th></tr></thead>
+  <tbody>
+    <tr><td>Otro usuario de Windows no ve los datos</td><td>La base se creó en LocalDB, que es privada de cada usuario de Windows.</td><td>Instale SQL Server Express, reinstale WardrobeFlow eligiendo esa instancia y restaure un backup si hace falta.</td></tr>
+    <tr><td>La instancia de SQL Server ya no existe</td><td>Se desinstaló SQL Server o se cambió de equipo.</td><td>Reinstale WardrobeFlow eligiendo otra instancia y restaure el último backup desde Administrar → Sistema → Backup y Restauración.</td></tr>
+    <tr><td>Al iniciar aparece un aviso de integridad</td><td>Se modificaron datos por fuera de la aplicación.</td><td>Ingrese como Administrador y use Administrar → Sistema → Diagnóstico de Integridad.</td></tr>
+    <tr><td>Windows SmartScreen bloquea el instalador</td><td>El instalador tiene una firma propia, no de una autoridad comercial.</td><td>Elija <span class="boton">Más información</span> y luego <span class="boton">Ejecutar de todas formas</span>.</td></tr>
+    <tr><td>El instalador no muestra la instancia de SQL Server</td><td>La instancia tiene otro nombre o está en otro equipo.</td><td>Elija <span class="opcion">Otra instancia o servidor (ingresar manualmente)</span> y escriba el servidor. Para servidores remotos, vea el <a href="Tutorial_SQL_Server.html#problemas">tutorial de SQL Server</a> (TCP/IP, firewall y SQL Server Browser).</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="logs">9. Dónde están los registros (logs)</h2>
+<p>«Documentos» es la carpeta Documentos del usuario de Windows que ejecutó el instalador como administrador.</p>
+<table>
+  <thead><tr><th>Archivo</th><th>Ubicación</th><th>Contenido</th></tr></thead>
+  <tbody>
+    <tr><td><code>install.log</code></td><td>Carpeta de instalación (con LocalDB, en su subcarpeta <code>Logs</code>)</td><td>Cada paso de la creación o actualización de la base.</td></tr>
+    <tr><td><code>WardrobeFlow_LocalDB_install.log</code></td><td>Documentos</td><td>Instalación de SQL Server Express LocalDB.</td></tr>
+    <tr><td><code>WardrobeFlow_instalacion_fallida.log</code></td><td>Documentos</td><td>Registro conservado cuando una instalación nueva se deshace.</td></tr>
+    <tr><td><code>WardrobeFlow_actualizacion_fallida.log</code></td><td>Documentos</td><td>Registro conservado cuando falla una actualización.</td></tr>
+    <tr><td><code>WardrobeFlow_desinstalacion.log</code></td><td>Documentos</td><td>Copia del registro cuando no se pudo borrar la base al desinstalar.</td></tr>
+    <tr><td><code>uninstall.log</code></td><td>Carpeta de instalación</td><td>Borrado de la base al desinstalar (se elimina junto con la carpeta).</td></tr>
+  </tbody>
+</table>
+<div class="caja info">
+  <strong class="titulo">Registro completo del asistente</strong>
+  <p>Para obtener un registro detallado de todo el proceso, ejecute el instalador con el parámetro <code>/LOG</code>, por ejemplo: <code>Instalador_WardrobeFlow_….exe /LOG="%USERPROFILE%\Documents\WardrobeFlow_setup.log"</code></p>
+</div>
+
+<footer>
+  <p>WardrobeFlow · Guía «Cómo instalar WardrobeFlow». Después de instalar, queda en la carpeta de WardrobeFlow (<code>Docs\Guia_Instalacion_WardrobeFlow.html</code>) y en el menú Inicio, como «Cómo instalar WardrobeFlow». El tutorial para instalar SQL Server está en la misma carpeta (<a href="Tutorial_SQL_Server.html">Tutorial_SQL_Server.html</a>) y en el menú Inicio, como «Cómo instalar SQL Server».</p>
+</footer>
+
+</main>
+</body>
+</html>

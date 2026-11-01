@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// T07 — Fila genérica para el cálculo del Dígito Verificador.
+    /// T07: Fila genérica para el cálculo del Dígito Verificador.
     /// Reutilizable por cualquier tabla protegida (Usuario, Cliente, Empleado, …):
     /// agrupa la PK, los valores de campo que entran al DVH y el DVH almacenado.
     /// </summary>

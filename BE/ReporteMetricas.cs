@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BE
 {
     /// <summary>
-    /// PN03 — «Reporte de métricas» (Gerencia → "Analizar métricas"): abandono por plan y
+    /// PN03: «Reporte de métricas» (Gerencia → "Analizar métricas"): abandono por plan y
     /// rotación por categoría, más las oportunidades de promoción que surgen de esos datos.
     /// Se calcula sobre los datos guardados (clientes, pedidos, prendas) cada vez que se analiza,
     /// para un período (Desde–Hasta): la rotación cuenta los pedidos de ese período y el impacto de

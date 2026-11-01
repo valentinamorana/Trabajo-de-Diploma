@@ -6,7 +6,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.Cliente — gestión de clientes (PdN1). Cubre validación de alta/modificación,
+    /// BLL.Cliente: gestión de clientes (PdN1). Cubre validación de alta/modificación,
     /// detección de DNI duplicado, bloqueo de baja con prendas en uso, el DTO de estado
     /// comercial que usa NuevoPedidoForm para decidir si un cliente puede pedir, la rama de
     /// "cambio de plan" de Modificar() y ActivarSuscripcion() (ambas vía FakePlanSuscripcionDAL,
@@ -67,7 +67,7 @@ namespace Tests
             Assert.AreEqual(10, resultado.IdCliente);
         }
 
-        // ── Alta — validaciones ───────────────────────────────────────────────
+        // ── Alta: validaciones ───────────────────────────────────────────────
 
         [TestMethod]
         public void Alta_NombreVacio_LanzaNombreRequerido()
@@ -133,7 +133,7 @@ namespace Tests
         [TestMethod]
         public void Alta_SinPlan_Persiste()
         {
-            // PN02 — el plan ya no se asigna en el alta: un cliente sin plan es un estado
+            // PN02: el plan ya no se asigna en el alta: un cliente sin plan es un estado
             // válido (se adquiere el plan después vía Contratación + Caja).
             LoginComoAdministrador();
             var fake = new FakeClienteDAL { AltaIdGenerado = 42 };
@@ -206,7 +206,7 @@ namespace Tests
         [TestMethod]
         public void Alta_SinSesion_LanzaSesionExpirada()
         {
-            // Setup() ya hizo Logout — no hay sesión activa.
+            // Setup() ya hizo Logout: no hay sesión activa.
             var fake = new FakeClienteDAL();
             var bll = new BLL.Cliente(fake);
 
@@ -320,7 +320,7 @@ namespace Tests
             Assert.AreEqual(1, fake.BajaVeces);
         }
 
-        // ── Modificar (sin cambio de plan — no toca DAL.PlanSuscripcion) ────────
+        // ── Modificar (sin cambio de plan: no toca DAL.PlanSuscripcion) ────────
 
         [TestMethod]
         public void Modificar_DniDuplicadoParaOtroCliente_LanzaDniDuplicadoOtro()
@@ -383,7 +383,7 @@ namespace Tests
         [TestMethod]
         public void Modificar_CambioDePlanSinSerAdministrador_LanzaPlanSoloAdmin()
         {
-            // PN02 — cambiar el plan/vencimiento por Modificar() es una corrección
+            // PN02: cambiar el plan/vencimiento por Modificar() es una corrección
             // administrativa; un Vendedor con ClientesEditar (pero no Administrador) no debe
             // poder usarla como atajo para activar una suscripción sin pasar por Caja.
             SessionManager.Login(new BE.Usuario
@@ -546,7 +546,7 @@ namespace Tests
             Assert.AreEqual(0, fake.ModificarVeces);
         }
 
-        // ── ObtenerEstadoComercial — DTO puro, sin DAL ──────────────────────────
+        // ── ObtenerEstadoComercial: DTO puro, sin DAL ──────────────────────────
 
         [TestMethod]
         public void EstadoComercial_SinPlan_NoPuedeProceder()

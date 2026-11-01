@@ -5,7 +5,7 @@ using System.Text;
 namespace Servicios.Serializacion
 {
     /// <summary>
-    /// A02 Serialización — base de todos los serializadores (el AbstractSerializator del material de
+    /// A02 Serialización: base de todos los serializadores (el AbstractSerializator del material de
     /// la cátedra). Cada formato es una subclase: <see cref="SerializadorXml{T}"/> y
     /// <see cref="SerializadorJson{T}"/>. Esta parte, sin tipo genérico, reúne lo que no depende del
     /// objeto serializado: la extensión y el nombre del formato y la validación de la versión de
@@ -55,7 +55,7 @@ namespace Servicios.Serializacion
     }
 
     /// <summary>
-    /// A02 Serialización — serializador de objetos de tipo <typeparamref name="T"/>. Las subclases
+    /// A02 Serialización: serializador de objetos de tipo <typeparamref name="T"/>. Las subclases
     /// solo implementan cómo se escribe y se lee el objeto en un Stream (Serializar / Deserializar);
     /// el resto es común a todos los formatos (método plantilla):
     ///   • GuardarArchivo: crea la carpeta, escribe a un ".tmp" y después lo reemplaza, para que un

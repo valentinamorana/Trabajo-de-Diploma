@@ -7,7 +7,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// Login y recuperación de acceso — hallazgos de la auditoría de seguridad:
+    /// Login y recuperación de acceso: hallazgos de la auditoría de seguridad:
     ///   • el estado "bloqueada" no se revela sin la contraseña correcta (anti-enumeración);
     ///   • el contador de intentos usa el valor devuelto por el UPDATE (no una lectura vieja);
     ///   • la bitácora no guarda lo tipeado como usuario inexistente;

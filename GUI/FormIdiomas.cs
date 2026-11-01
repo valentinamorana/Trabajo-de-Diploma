@@ -26,7 +26,7 @@ namespace GUI
         public FormIdiomas()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvIdiomas);
             Estilos.EstiloFormulario.Grilla(dgvTraducciones);
             Estilos.EstiloFormulario.Grilla(dgvControles);
@@ -45,7 +45,7 @@ namespace GUI
 
         private void BtnNuevoIdioma_Click(object sender, EventArgs e)
         {
-            string codigo = Pedir(Tr("idiomas.dlg.nuevo.t", "Nuevo idioma"), Tr("idiomas.dlg.nuevo.codigo", "Código (ej: FR, IT, PT) — máx. 5:"));
+            string codigo = Pedir(Tr("idiomas.dlg.nuevo.t", "Nuevo idioma"), Tr("idiomas.dlg.nuevo.codigo", "Código (ej: FR, IT, PT), máx. 5:"));
             if (string.IsNullOrWhiteSpace(codigo)) return;
             string nombre = Pedir(Tr("idiomas.dlg.nuevo.t", "Nuevo idioma"), Tr("idiomas.dlg.nuevo.nombre", "Nombre del idioma (ej: Français):"));
             if (string.IsNullOrWhiteSpace(nombre)) return;
@@ -53,7 +53,7 @@ namespace GUI
             {
                 _bllIdioma.CrearIdioma(codigo, nombre);
                 CargarIdiomas();
-                MostrarOk(string.Format(Tr("idiomas.ok.creado", "Idioma '{0}' creado (inactivo — actívelo cuando cargue sus traducciones)."), nombre.Trim()));
+                MostrarOk(string.Format(Tr("idiomas.ok.creado", "Idioma '{0}' creado como inactivo. Actívelo cuando cargue sus traducciones."), nombre.Trim()));
             }
             catch (Exception ex) { MostrarError(ex); }
         }
@@ -89,7 +89,7 @@ namespace GUI
         }
 
         // Mini cuadro de entrada de texto (sin dependencias externas).
-        // Antes armaba un Form ad-hoc a mano (duplicando lo que InputDialog ya resuelve) — mismo
+        // Antes armaba un Form ad-hoc a mano (duplicando lo que InputDialog ya resuelve): mismo
         // hallazgo que GUI-Operación §5 #6 (tres implementaciones distintas de "diálogo simple").
         private string Pedir(string titulo, string prompt)
         {
@@ -129,7 +129,7 @@ namespace GUI
 
         private void ConfigurarGrillas()
         {
-            // dgvIdiomas — solo lectura, una fila a la vez
+            // dgvIdiomas: solo lectura, una fila a la vez
             dgvIdiomas.SelectionMode           = DataGridViewSelectionMode.FullRowSelect;
             dgvIdiomas.MultiSelect             = false;
             dgvIdiomas.ReadOnly                = true;
@@ -138,7 +138,7 @@ namespace GUI
             dgvIdiomas.AutoSizeColumnsMode     = DataGridViewAutoSizeColumnsMode.Fill;
             dgvIdiomas.RowHeadersVisible       = false;
 
-            // dgvTraducciones — Clave y Formulario son de solo lectura; Texto es editable
+            // dgvTraducciones: Clave y Formulario son de solo lectura; Texto es editable
             dgvTraducciones.SelectionMode          = DataGridViewSelectionMode.FullRowSelect;
             dgvTraducciones.MultiSelect            = false;
             dgvTraducciones.AllowUserToAddRows     = false;
@@ -150,7 +150,7 @@ namespace GUI
             dgvTraducciones.CellEndEdit           -= DgvTraducciones_CellEndEdit;
             dgvTraducciones.CellEndEdit           += DgvTraducciones_CellEndEdit;
 
-            // dgvControles — listado de controles traducibles del sistema (solo lectura)
+            // dgvControles: listado de controles traducibles del sistema (solo lectura)
             dgvControles.SelectionMode          = DataGridViewSelectionMode.FullRowSelect;
             dgvControles.MultiSelect            = false;
             dgvControles.ReadOnly               = true;
@@ -160,7 +160,7 @@ namespace GUI
             dgvControles.RowHeadersVisible      = false;
         }
 
-        // ── Grid de Controles (textos traducibles del sistema) — T05 ─────────────
+        // ── Grid de Controles (textos traducibles del sistema): T05 ─────────────
         private void CargarControles()
         {
             try
@@ -324,7 +324,7 @@ namespace GUI
             if (_idIdiomaSeleccionado == 0) return;
             try
             {
-                // T05 — Advertir si el idioma tiene traducciones incompletas.
+                // T05: Advertir si el idioma tiene traducciones incompletas.
                 // Política elegida: permitir la activación, usando los textos por defecto
                 // para las claves faltantes (fallback por-clave en Traductor).
                 int faltantes = _bllIdioma.ContarTraduccionesFaltantes(_idIdiomaSeleccionado);

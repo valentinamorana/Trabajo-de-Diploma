@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace Tests
 {
     /// <summary>
-    /// T05 — Invariantes de internacionalización (i18n).
+    /// T05: Invariantes de internacionalización (i18n).
     ///
     /// Garantiza que TODOS los idiomas soportados expongan exactamente el mismo
     /// conjunto de claves (sin faltantes ni sobrantes) y que ninguna traducción

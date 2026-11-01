@@ -7,9 +7,9 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// PdN6 — Pruebas del patrón Chain of Responsibility para cobro de suscripción.
+    /// PdN6: Pruebas del patrón Chain of Responsibility para cobro de suscripción.
     /// Misma estructura que RenovacionTests (PdN5): la cadena no valida que el sucesor
-    /// exista — si un eslabón delega y no tiene sucesor asignado, es responsabilidad de
+    /// exista: si un eslabón delega y no tiene sucesor asignado, es responsabilidad de
     /// quien arma la cadena (BLL.Cobro) haberla dejado bien formada. Para probar la
     /// delegación en aislamiento se usa un manejador espía como sucesor.
     /// </summary>
@@ -452,7 +452,7 @@ namespace Tests
 
         // ── BLL.Cobro (fachada real) ──────────────────────────────────────────────
         // Hasta acá todos los tests de este archivo arman su PROPIA copia de la cadena a mano
-        // (mismo orden que el constructor de BLL.Cobro, pero reconstruido en el test) — si
+        // (mismo orden que el constructor de BLL.Cobro, pero reconstruido en el test): si
         // alguien invierte el orden real en el constructor de producción, ningún test de los de
         // arriba lo detecta. Estos instancian la clase fachada REAL y ejercitan Procesar(...) de
         // punta a punta, más el guard de entrada (permisos + sin_plan) que tampoco tenía cobertura.

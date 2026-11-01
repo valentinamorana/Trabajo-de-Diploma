@@ -9,7 +9,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// PN03 «Inteligencia comercial y promociones» — servicios del Centro de decisiones comerciales con
+    /// PN03 «Inteligencia comercial y promociones»: servicios del Centro de decisiones comerciales con
     /// dobles de prueba (sin SQL Server): el análisis (KPI, tendencia, avisos), el registro de decisiones
     /// con su máquina de estados, el cierre del ciclo (resultado real medido) y los umbrales.
     /// </summary>

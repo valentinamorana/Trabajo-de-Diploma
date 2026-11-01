@@ -219,7 +219,7 @@ namespace GUI
             this.lblDescripcion.Location  = new Point(14, 6);
             this.lblDescripcion.Name      = "lblDescripcion";
             this.lblDescripcion.TabIndex  = 0;
-            this.lblDescripcion.Text      = "Estructura organizacional de WardrobeFlow — Solo lectura";
+            this.lblDescripcion.Text      = "Estructura organizacional de WardrobeFlow (solo lectura)";
 
             this.lblLeyenda.AutoSize  = true;
             this.lblLeyenda.Font      = new Font("Segoe UI", 8.5F);
@@ -227,7 +227,7 @@ namespace GUI
             this.lblLeyenda.Location  = new Point(14, 27);
             this.lblLeyenda.Name      = "lblLeyenda";
             this.lblLeyenda.TabIndex  = 1;
-            this.lblLeyenda.Text      = "Familia (nodo compuesto — Área o Rol)    Patente (hoja — permiso atómico)";
+            this.lblLeyenda.Text      = "Familia (nodo compuesto, Área o Rol)    Patente (hoja, permiso atómico)";
 
             this.flVista.BackColor     = Color.FromArgb(252, 240, 246);
             this.flVista.Controls.Add(this.btnExpandir);
@@ -499,7 +499,7 @@ namespace GUI
             this.Name          = "GestorPermisos";
             this.Size          = new Size(840, 700);
             this.StartPosition = FormStartPosition.CenterParent;
-            this.Text          = "Gestor de Perfiles — Roles y Permisos (Composite)";
+            this.Text          = "Gestor de Perfiles: Roles y Permisos (Composite)";
 
             this.panelHeader.ResumeLayout(false);
             this.panelHeader.PerformLayout();

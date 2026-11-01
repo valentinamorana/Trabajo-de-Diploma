@@ -13,13 +13,13 @@ namespace DAL.Interfaces
         // Genera el .bak físico de la base en la ruta indicada.
         void RealizarBackup(string rutaDestino);
 
-        // Restaura la base desde el .bak indicado (valida integridad antes — RNF-02).
+        // Restaura la base desde el .bak indicado (valida integridad antes: RNF-02).
         void RestaurarBackup(string rutaOrigen);
 
-        // RF-08 — Fecha de finalización del backup (header del .bak), o null si no se puede leer.
+        // RF-08: Fecha de finalización del backup (header del .bak), o null si no se puede leer.
         DateTime? ObtenerFechaBackup(string rutaArchivo);
 
-        // RF-08 — Registros de la base ACTUAL posteriores a 'fecha' (los que se perderían
+        // RF-08: Registros de la base ACTUAL posteriores a 'fecha' (los que se perderían
         // al restaurar), desglosados por entidad.
         List<BE.CambioPosterior> ContarCambiosPosterioresA(DateTime fecha);
     }

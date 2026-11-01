@@ -7,12 +7,12 @@ using System.Globalization;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — T07 Dígitos Verificadores.
+    /// Capa de Acceso a Datos: T07 Dígitos Verificadores.
     ///
     /// Opera sobre:
-    ///   [Tabla].DVH        — dígito verificador horizontal por fila de cada tabla protegida
-    ///   [DVVertical]       — dígito verificador vertical por tabla
-    ///   [ParametroSistema] — versión del FORMATO de los DV ('FormatoDV') y la marca de
+    ///   [Tabla].DVH: dígito verificador horizontal por fila de cada tabla protegida
+    ///   [DVVertical]: dígito verificador vertical por tabla
+    ///   [ParametroSistema]: versión del FORMATO de los DV ('FormatoDV') y la marca de
     ///                        inicialización pendiente que deja el script de instalación.
     ///
     /// REGLAS (formato 2):

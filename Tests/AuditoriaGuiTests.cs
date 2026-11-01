@@ -259,7 +259,7 @@ namespace Tests
             Assert.AreEqual(BE.EstadoPrenda.Baja, prenda.Estado);
         }
 
-        // PN04 — una prenda que entró a limpieza en el depósito (no por devolución) no se le cobra al último cliente.
+        // PN04: una prenda que entró a limpieza en el depósito (no por devolución) no se le cobra al último cliente.
         [TestMethod]
         public void DarDeBajaConCargo_PrendaQueNoVieneDeUnaDevolucion_Rechaza()
         {
@@ -290,7 +290,7 @@ namespace Tests
             Assert.IsNull(prenda.IdClienteActual);
         }
 
-        // PN04 — compra tácita: el cliente nunca recibió la prenda (pedido Separado, Pendiente o
+        // PN04: compra tácita: el cliente nunca recibió la prenda (pedido Separado, Pendiente o
         // Despachado). Antes se podía cobrar la reposición completa y despachar el pedido igual.
         [TestMethod]
         public void ReportarPerdida_PedidoNoEntregado_RechazaSinTocarElDAL()
@@ -452,7 +452,7 @@ namespace Tests
             Assert.AreEqual(0, espia.Cambios.Count, "El reingreso no pasa por el cambio de estado manual.");
         }
 
-        // PN04 — el reingreso es la decisión de la Inspección: solo para prendas de su cola.
+        // PN04: el reingreso es la decisión de la Inspección: solo para prendas de su cola.
         [TestMethod]
         public void AprobarReingreso_PrendaFueraDeLaCola_Rechaza()
         {

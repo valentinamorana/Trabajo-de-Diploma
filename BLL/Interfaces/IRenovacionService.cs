@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BLL.Interfaces
 {
     /// <summary>
-    /// PdN5 — Gestión de renovación de suscripciones. Orquesta la cadena de manejadores
+    /// PdN5: Gestión de renovación de suscripciones. Orquesta la cadena de manejadores
     /// (BLL.Manejadores) que resuelve la decisión tomada tras contactar al cliente.
     /// </summary>
     public interface IRenovacionService

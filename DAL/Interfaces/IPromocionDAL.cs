@@ -15,9 +15,9 @@ namespace DAL.Interfaces
         List<BE.Promocion> ObtenerTodas();
         // Vigentes que aplican HOY (Estado Vigente y dentro de sus fechas): las usa el cobro de PN02.
         List<BE.Promocion> ObtenerVigentes();
-        // PN03 — impacto de cada promoción en los cobros del período [desde, hasta] (PN02 + N01).
+        // PN03: impacto de cada promoción en los cobros del período [desde, hasta] (PN02 + N01).
         List<BE.MetricaImpactoPromocion> ObtenerImpacto(System.DateTime desde, System.DateTime hasta);
-        // PN03 — "Evaluar resultado": decisiones de suscripción sobre el plan en [desde, hastaExcl):
+        // PN03: "Evaluar resultado": decisiones de suscripción sobre el plan en [desde, hastaExcl):
         // renovación de N01 (Renovada/Baja/Pausada) y recontratación del mismo plan cobrada (PN02).
         List<BE.DecisionRenovacion> ObtenerDecisionesDelPlan(int idPlan, System.DateTime desde, System.DateTime hastaExcl);
         List<BE.Promocion> ObtenerPendientesRevisionContable();

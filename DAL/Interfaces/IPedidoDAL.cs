@@ -22,7 +22,7 @@ namespace DAL.Interfaces
         // DAL completa IdPedido e IdOperacion). Se asientan en la MISMA transacción que el cambio,
         // junto con el recálculo del DV (T07): o queda todo, o no queda nada.
 
-        // ── PN01 — circuito de control de stock ─────────────────────────────
+        // ── PN01: circuito de control de stock ─────────────────────────────
         // Inserta el pedido y sus líneas SIN reservar prendas (EnControlStock o Desistido).
         int AltaSinReserva(BE.Pedido pedido, List<BE.PedidoHistorial> historial = null);
         // Reemplaza la selección de un pedido ConFaltantes y lo devuelve a EnControlStock.

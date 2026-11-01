@@ -11,11 +11,11 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Formulario Menú Principal (MDI Container).
+    /// Capa de Presentación: Formulario Menú Principal (MDI Container).
     ///
     /// Al iniciarse, construye el menú dinámicamente según los permisos EFECTIVOS
     /// del usuario logueado, resueltos en el Login desde el árbol Composite
-    /// (tabla PermisoRelacion — la única fuente de verdad de autorización).
+    /// (tabla PermisoRelacion: la única fuente de verdad de autorización).
     ///
     /// Roles del sistema (según los procesos de negocio PN01–PN04):
     ///
@@ -33,7 +33,7 @@ namespace GUI
     /// Los permisos se leen de BE.Usuario.Permisos via BLL.ObtenerUsuarioActivo().
     /// La GUI nunca accede directamente a Seguridad ni a DAL.
     ///
-    /// PATRÓN OBSERVER — T05 Gestión de Múltiples Idiomas:
+    /// PATRÓN OBSERVER: T05 Gestión de Múltiples Idiomas:
     ///   Implementa IIdiomaObserver. Se suscribe al GestorIdioma en Load
     ///   y se desuscribe en FormClosing. Al recibir UpdateLanguage() llama
     ///   a Traducir() que reasigna el .Text de todos los ítems del menú.
@@ -41,7 +41,7 @@ namespace GUI
     /// </summary>
     public partial class Menu : Form, IIdiomaObserver
     {
-        // D02 — F1 en el menú principal (sin una pantalla activa que lo atienda): ayuda general.
+        // D02: F1 en el menú principal (sin una pantalla activa que lo atienda): ayuda general.
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.F1)
@@ -52,7 +52,7 @@ namespace GUI
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        // Timer de verificación periódica de integridad (C — background check)
+        // Timer de verificación periódica de integridad (C: background check)
         private System.Windows.Forms.Timer _timerIntegridad;
 
         private bool _suprimirIdiomaMenu = false;
@@ -99,7 +99,7 @@ namespace GUI
             AplicarPermisos(_usuarioActivo?.Permisos);
         }
 
-        // D02 — Sesión › "Ayuda (F1)" (ítem del Diseñador, lo ven todos los roles): ayuda de la pantalla activa.
+        // D02: Sesión › "Ayuda (F1)" (ítem del Diseñador, lo ven todos los roles): ayuda de la pantalla activa.
         private void AyudaItem_Click(object sender, EventArgs e)
             => Ayuda.AyudaEnLinea.Mostrar(this, ActiveMdiChild?.GetType().Name ?? "General", (ActiveMdiChild as FormBase)?.TextoAyudaAdicional);
 
@@ -146,7 +146,7 @@ namespace GUI
                 string clave = "perm.rol." + rol.ToLowerInvariant().Replace(" ", "").Replace("(", "").Replace(")", "");
                 rol = Tx(clave, rol);
             }
-            this.Text = "WardrobeFlow  —  " + _usuarioActivo.Username +
+            this.Text = "WardrobeFlow: " + _usuarioActivo.Username +
                         (!string.IsNullOrEmpty(rol) ? "  [" + rol + "]" : "");
         }
 
@@ -159,14 +159,16 @@ namespace GUI
         }
 
         // Calcula la cantidad de alertas en background (la lógica vive en BLL.PanelAlertas)
+        // (solo las NO leídas: una alerta marcada como leída no vuelve a avisar mientras su situación no cambie;
+        // AlertasForm lo llama al marcar)
         // y actualiza el badge sin bloquear la UI.
-        private void ActualizarBadgeAlertas()
+        internal void ActualizarBadgeAlertas()
         {
             System.Threading.Tasks.Task.Run(() =>
             {
                 int n;
                 // Solo las alertas que el rol puede atender (filtro por patentes en la BLL).
-                try { n = new BLL.PanelAlertas().Contar(_usuarioActivo); } catch { n = 0; }
+                try { n = new BLL.PanelAlertas().ContarNoLeidas(_usuarioActivo); } catch { n = 0; }
                 try
                 {
                     if (!IsHandleCreated || IsDisposed) return;
@@ -210,13 +212,13 @@ namespace GUI
                 using (var fontF = new Font("Georgia", 18, FontStyle.Bold, GraphicsUnit.Point))
                 using (var br    = new SolidBrush(tinta))
                 {
-                    // Fila 0 — sin offset (y = 0)
+                    // Fila 0: sin offset (y = 0)
                     g.DrawString("W", fontW, br, 0,      0);
                     g.DrawString("F", fontF, br, 24,     20);
                     g.DrawString("W", fontW, br, TW,     0);
                     g.DrawString("F", fontF, br, TW + 24, 20);
 
-                    // Fila 1 — offset medio tile (y = TH)
+                    // Fila 1: offset medio tile (y = TH)
                     g.DrawString("W", fontW, br, TW / 2f,       TH);
                     g.DrawString("F", fontF, br, TW / 2f + 24,  TH + 20);
                     g.DrawString("W", fontW, br, TW / 2f + TW,  TH);
@@ -232,7 +234,7 @@ namespace GUI
         /// cada ítem de primer nivel como un "chip" redondeado con color por área funcional
         /// (Suscriptores/Inventario/Ventas/Promociones/Auditoría/Administrar), con
         /// margen entre ellos para que se lean como botones separados sobre la barra rosa,
-        /// y separadores en puntos en vez de líneas. Pura presentación (colores/Margin) —
+        /// y separadores en puntos en vez de líneas. Pura presentación (colores/Margin):
         /// ninguna decisión de negocio vive acá.
         /// </summary>
         private void AplicarEstiloMenu()
@@ -255,22 +257,22 @@ namespace GUI
             Estilizar(ventasToolStripMenuItem, textoOscuro);
             Estilizar(auditoriaToolStripMenuItem, textoOscuro);
             Estilizar(gestionToolStripMenuItem, textoOscuro);
-            // Sesión: fondo claro, el texto default (negro) ya es legible — no hace falta forzarlo.
+            // Sesión: fondo claro, el texto default (negro) ya es legible; no hace falta forzarlo.
             // Alertas: ForeColor dinámico (blanco/dorado) gestionado en RefrescarTextoAlertas,
-            // no se pisa acá — solo se le aplica el margen del chip.
+            // no se pisa acá: solo se le aplica el margen del chip.
             Estilizar(usuarioToolStripMenuItem);
             Estilizar(alertasItem);
         }
 
         /// <summary>
         /// Muestra u oculta los ítems del menú según los permisos del usuario. La DECISIÓN
-        /// (qué .Name queda visible) vive en BLL.MenuVisibilidad.Resolver — pura, testeable
-        /// sin instanciar esta UI (Tests/MenuVisibilidadTests.cs) — este método solo la
+        /// (qué .Name queda visible) vive en BLL.MenuVisibilidad.Resolver: pura, testeable
+        /// sin instanciar esta UI (Tests/MenuVisibilidadTests.cs): este método solo la
         /// APLICA a los ToolStripMenuItem reales, buscándolos por .Name. Mismo criterio de
         /// separación que BLL.PanelAlertas (EvaluarAlertas puro / ObtenerAlertas con BD).
         ///
         /// Administrador ve todo el menú por bypass explícito (esAdmin), no porque la BD
-        /// tenga las 12 patentes bien asignadas — mismo criterio que ManejadorSeguridad y
+        /// tenga las 12 patentes bien asignadas: mismo criterio que ManejadorSeguridad y
         /// BLL.PermisosAccion, para que los 3 puntos donde se chequea permiso sean consistentes.
         /// </summary>
         private void AplicarPermisos(List<BE.Permiso> permisos)
@@ -282,7 +284,7 @@ namespace GUI
 
             var visibilidad = BLL.MenuVisibilidad.Resolver(nombresMenu, esAdmin);
 
-            // Todo ToolStripMenuItem que BLL.MenuVisibilidad conoce por nombre — se busca por
+            // Todo ToolStripMenuItem que BLL.MenuVisibilidad conoce por nombre: se busca por
             // .Name para no duplicar acá el mapeo patente→ítem (única fuente de verdad).
             var items = new ToolStripMenuItem[]
             {
@@ -294,7 +296,7 @@ namespace GUI
                 pedidosVentaToolStripMenuItem, pedidosRealizadosToolStripMenuItem,
                 nuevaContratacionToolStripMenuItem, contratacionesPendientesToolStripMenuItem,
                 centroDecisionesToolStripMenuItem,
-                sugerirPromocionToolStripMenuItem, gestionPromocionesToolStripMenuItem,
+                gestionPromocionesToolStripMenuItem,
                 revisionContablePromocionesToolStripMenuItem, promocionesVigentesToolStripMenuItem,
                 usuariosToolStripMenuItem, perfilesToolStripMenuItem, idiomasToolStripMenuItem,
                 historialUsuariosToolStripMenuItem, backupToolStripMenuItem, integridadToolStripMenuItem,
@@ -308,14 +310,14 @@ namespace GUI
             };
             // Fail-closed: si un .Name no está en la resolución (typo, ítem renombrado por el
             // Designer sin actualizar BLL.MenuVisibilidad), se OCULTA en vez de quedar con el
-            // Visible=true default de WinForms — un ítem gobernado por permiso que desaparece
+            // Visible=true default de WinForms: un ítem gobernado por permiso que desaparece
             // por error se nota enseguida; uno que queda expuesto sin permiso, no.
             foreach (var item in items)
                 if (item != null)
                     item.Visible = visibilidad.TryGetValue(item.Name, out bool v) && v;
         }
 
-        // ── Etapa 2 — Re-aplicación de seguridad EN VIVO (patrón ManejadorSeguridad de Stach) ──
+        // ── Etapa 2: Re-aplicación de seguridad EN VIVO (patrón ManejadorSeguridad de Stach) ──
 
         /// <summary>
         /// Re-resuelve los permisos efectivos del usuario en sesión desde la BD y re-aplica la
@@ -334,7 +336,7 @@ namespace GUI
                 if (permisos == null) return;
                 var usuario  = BLL.Sesion.Usuario;
                 AplicarPermisos(permisos);
-                // Etapa 4 — re-aplicar también la seguridad a nivel de control en los forms abiertos.
+                // Etapa 4: re-aplicar también la seguridad a nivel de control en los forms abiertos.
                 ManejadorSeguridad.ActualizarSeguridadFormulariosAbiertos(usuario);
             }
             catch (Exception ex)
@@ -384,7 +386,7 @@ namespace GUI
             CrearDashboardDelRol().Show();
         }
 
-        // Factory de dashboards — para agregar un rol nuevo insertá una entrada en el diccionario,
+        // Factory de dashboards: para agregar un rol nuevo insertá una entrada en el diccionario,
         // sin tocar CrearDashboardDelRol() (Open/Closed Principle).
         private static readonly Dictionary<string, Func<Form>> _dashboardFactory =
             new Dictionary<string, Func<Form>>(StringComparer.OrdinalIgnoreCase)
@@ -447,7 +449,7 @@ namespace GUI
         }
 
         /// <summary>
-        /// Abre el Gestor de Perfiles y Permisos como hijo MDI — T04 Composite Pattern.
+        /// Abre el Gestor de Perfiles y Permisos como hijo MDI: T04 Composite Pattern.
         /// Accesible solo para Administrador.
         /// </summary>
         private void perfilesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -480,7 +482,7 @@ namespace GUI
         }
 
         // PN04, CU05-DEP Inspeccionar Devolución.
-        // PN01 — Control de Stock (Depósito): revisar stock, informar faltantes, confirmar y separar.
+        // PN01: Control de Stock (Depósito): revisar stock, informar faltantes, confirmar y separar.
         private void controlStockToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AbrirUnico(() => new ControlStockForm());
@@ -525,7 +527,7 @@ namespace GUI
 
         /// <summary>
         /// Abre el módulo de Lista de Espera de prendas como hijo MDI (mejora opcional,
-        /// no requerida por la cátedra — ver README).
+        /// no requerida por la cátedra: ver README).
         /// </summary>
         private void listaEsperaToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -533,7 +535,7 @@ namespace GUI
         }
 
         /// <summary>
-        /// PN02 — Abre el diálogo para que Venta registre una nueva contratación (cliente +
+        /// PN02: Abre el diálogo para que Venta registre una nueva contratación (cliente +
         /// plan + modalidad). Modal, mismo criterio que NuevoPedidoForm: no es un módulo de
         /// consulta permanente, es una operación puntual.
         /// </summary>
@@ -548,7 +550,7 @@ namespace GUI
         }
 
         /// <summary>
-        /// PN02 — Abre la cola de contrataciones pendientes de pago (rol Caja) como hijo MDI.
+        /// PN02: Abre la cola de contrataciones pendientes de pago (rol Caja) como hijo MDI.
         /// </summary>
         private void contratacionesPendientesToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -556,7 +558,7 @@ namespace GUI
         }
 
         /// <summary>
-        /// PN03 «Inteligencia comercial y promociones» — Abre el Centro de decisiones comerciales (Gerencia)
+        /// PN03 «Inteligencia comercial y promociones»: Abre el Centro de decisiones comerciales (Gerencia)
         /// como hijo MDI: analizar → recomendar/decidir → simular → aplicar → medir.
         /// </summary>
         private void centroDecisionesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -564,29 +566,19 @@ namespace GUI
             AbrirUnico(() => new CentroDecisionesForm());
         }
 
-        /// <summary>
-        /// PN03 — Abre «Sugerir Promoción» (Gerencia) como hijo MDI, en su pestaña: se puede dejar abierta
-        /// y volver después. Desde el Centro de decisiones sigue siendo un diálogo, porque ahí la decisión
-        /// necesita saber qué sugerencia se registró (CentroDecisionesForm.AbrirSugerencia).
-        /// </summary>
-        private void sugerirPromocionToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AbrirUnico(() => new SugerirPromocionForm());
-        }
-
-        /// <summary>PN03 — Abre la gestión de promociones (rol Administración) como hijo MDI.</summary>
+        /// <summary>PN03: Abre la gestión de promociones (rol Administración) como hijo MDI.</summary>
         private void gestionPromocionesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AbrirUnico(() => new PromocionesAdministracionForm());
         }
 
-        /// <summary>PN03 — Abre la cola de revisión contable de promociones (rol Contabilidad) como hijo MDI.</summary>
+        /// <summary>PN03: Abre la cola de revisión contable de promociones (rol Contabilidad) como hijo MDI.</summary>
         private void revisionContablePromocionesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AbrirUnico(() => new PromocionesContabilidadForm());
         }
 
-        /// <summary>PN03 — Abre la consulta de promociones vigentes (Vendedor) como hijo MDI.</summary>
+        /// <summary>PN03: Abre la consulta de promociones vigentes (Vendedor) como hijo MDI.</summary>
         private void promocionesVigentesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AbrirUnico(() => new PromocionesVigentesForm());
@@ -610,7 +602,7 @@ namespace GUI
         }
 
         // ══════════════════════════════════════════════════════════════════════
-        // PATRÓN OBSERVER — T05 Gestión de Múltiples Idiomas
+        // PATRÓN OBSERVER: T05 Gestión de Múltiples Idiomas
         // ══════════════════════════════════════════════════════════════════════
 
         /// <summary>
@@ -646,7 +638,7 @@ namespace GUI
                 _timerIntegridad.Start();
             }
 
-            // 3. Abrir dashboard inmediatamente — sus datos cargan en background
+            // 3. Abrir dashboard inmediatamente: sus datos cargan en background
             var dash = CrearDashboardDelRol();
             dash.Show();
             try { PreferenciasUI.Aplicar(dash); } catch { }
@@ -662,7 +654,7 @@ namespace GUI
             DespuesDeLaGuia(Inteligencia.AvisosInicioSesion.Preparar(this));
 
             // 4. Cargar traducciones de BD en background (no bloquea la UI)
-            // RF-22/23 — Al ingresar se aplica el idioma PREFERIDO del usuario (persistido en BD).
+            // RF-22/23: Al ingresar se aplica el idioma PREFERIDO del usuario (persistido en BD).
             // El login queda en el idioma elegido en esa pantalla; el Menú ya abre en el del usuario.
             string codigoPref = _usuarioActivo?.IdIdioma ?? GestorIdioma.IdiomaActual?.Id ?? "ES";
             System.Threading.Tasks.Task.Run(() =>
@@ -791,7 +783,7 @@ namespace GUI
                               "DVV almacenado: {1}  |  DVV calculado: {2}\n\n" +
                               "Vaya a Administrar → Diagnóstico de Integridad para reparar."),
                             diag.FilasRotas.Count,
-                            diag.DVVAlmacenado?.ToString() ?? "—",
+                            diag.DVVAlmacenado?.ToString() ?? "-",
                             diag.DVVCalculado),
                         T("alerta.integridad.titulo", "Alerta de Integridad"),
                         MessageBoxButtons.OK,
@@ -826,7 +818,7 @@ namespace GUI
 
         /// <summary>
         /// Reasigna el .Text de cada ítem del menú leyendo su propiedad Tag como
-        /// clave de traducción — exactamente igual que en el ejemplo de cátedra (frmMain).
+        /// clave de traducción: exactamente igual que en el ejemplo de cátedra (frmMain).
         /// Los Tags se asignan en el Designer; el código no hardcodea ninguna clave.
         /// </summary>
         private void Traducir(Idioma idioma)
@@ -859,7 +851,6 @@ namespace GUI
             Aplicar(contratacionesPendientesToolStripMenuItem,   t);
             Aplicar(promocionesToolStripMenuItem,                t);
             Aplicar(centroDecisionesToolStripMenuItem,           t);
-            Aplicar(sugerirPromocionToolStripMenuItem,           t);
             Aplicar(gestionPromocionesToolStripMenuItem,         t);
             Aplicar(revisionContablePromocionesToolStripMenuItem, t);
             Aplicar(promocionesVigentesToolStripMenuItem,        t);
@@ -903,7 +894,7 @@ namespace GUI
         /// <summary>
         /// Lee el Tag del ítem para obtener la clave y aplica la traducción.
         /// Equivalente al patrón if (item.Tag != null && traducciones.ContainsKey(...))
-        /// del ejemplo de cátedra — el Tag actúa como clave del diccionario.
+        /// del ejemplo de cátedra: el Tag actúa como clave del diccionario.
         /// </summary>
         private static void Aplicar(ToolStripMenuItem item,
             IDictionary<string, Traduccion> t)

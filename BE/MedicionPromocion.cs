@@ -11,7 +11,7 @@ namespace BE
     }
 
     /// <summary>
-    /// PN03 «Medir resultado» — El «Resultado de la promoción» (BE.ResultadoPromocion, de
+    /// PN03 «Medir resultado»: El «Resultado de la promoción» (BE.ResultadoPromocion, de
     /// BLL.AnalisisPromociones) más su costo real, el beneficio real atribuible, el ROI real contra el
     /// estimado y un veredicto (Mantener / Extender / Dar de baja) que se puede ejecutar con un botón.
     /// </summary>

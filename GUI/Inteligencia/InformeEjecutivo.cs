@@ -34,7 +34,7 @@ namespace GUI.Inteligencia
         public static ReporteExportable Armar(Datos d)
         {
             var p = d.Panel;
-            string titulo = Tr("cdc.informe.titulo", "Informe ejecutivo — Inteligencia comercial");
+            string titulo = Tr("cdc.informe.titulo", "Informe ejecutivo: Inteligencia comercial");
             var secciones = new List<SeccionReporte>
             {
                 new SeccionReporte
@@ -45,7 +45,7 @@ namespace GUI.Inteligencia
                         Tr("cdc.informe.periodo", "Período analizado: {0:d} al {1:d}", p.Desde, p.Hasta),
                         Tr("cdc.informe.anterior", "Comparado con: {0:d} al {1:d}", p.AnteriorDesde, p.AnteriorHasta),
                         Tr("cdc.informe.plan", "Plan: {0}", p.NombrePlan ?? Tr("cdc.todoslosplanes", "Todos los planes")),
-                        Tr("cdc.informe.usuario", "Emitido por: {0}", d.Usuario ?? "—"),
+                        Tr("cdc.informe.usuario", "Emitido por: {0}", d.Usuario ?? "-"),
                         Tr("cdc.informe.ciclo", "Analizar → recomendar/decidir → simular → aplicar → medir")
                     }
                 }
@@ -55,7 +55,7 @@ namespace GUI.Inteligencia
             var kpis = Tabla("Indicador", "Valor", "Anterior", "Variación", "Interpretación");
             foreach (var k in p.Kpis)
                 kpis.Rows.Add(R(k.Nombre), ValorKpi(k.Unidad, k.Valor),
-                    k.ValorAnterior.HasValue ? ValorKpi(k.Unidad, k.ValorAnterior.Value) : "—", Variacion(k), R(k.Interpretacion));
+                    k.ValorAnterior.HasValue ? ValorKpi(k.Unidad, k.ValorAnterior.Value) : "-", Variacion(k), R(k.Interpretacion));
             secciones.Add(new SeccionReporte
             {
                 Titulo = Tr("cdc.informe.kpi", "Resumen de indicadores"), PaginaNueva = true, Tabla = kpis,
@@ -78,7 +78,7 @@ namespace GUI.Inteligencia
                 Titulo = Tr("cdc.informe.recomendaciones", "Recomendaciones del motor"), PaginaNueva = true, Tabla = recs, Encabezados = encRecs
             };
             if (d.Recomendaciones.Count == 0)
-                seccionRecs.Parrafos.Add(Tr("cdc.recs.ninguna", "El motor no encontró situaciones que requieran una decisión con los umbrales actuales."));
+                seccionRecs.Parrafos.Add(Tr("cdc.recs.ninguna", "El análisis no encontró situaciones que requieran una decisión con los parámetros del análisis actuales."));
             foreach (var r in d.Recomendaciones)
                 seccionRecs.Parrafos.Add($"• {R(r.Titulo)}: {R(r.Diagnostico)} {Tr("cdc.informe.formula", "Cálculo")}: {R(r.Principal?.Formula)}");
             secciones.Add(seccionRecs);
@@ -109,8 +109,8 @@ namespace GUI.Inteligencia
                     var s = d.Escenarios[i];
                     esc.Rows.Add(((char)('A' + i)).ToString(), s.Escenario.NombrePlan, s.Escenario.DescuentoPorcentaje.ToString("0.#") + " %",
                         s.Escenario.DuracionDias, s.Escenario.TasaRetencion.ToString("0.#") + " %", s.CostoDescuento.ToString("C0"),
-                        s.BeneficioNeto.ToString("C0"), s.Roi.HasValue ? s.Roi.Value.ToString("0.#") + " %" : "—",
-                        s.TasaEquilibrio.HasValue ? s.TasaEquilibrio.Value.ToString("0.#") + " %" : "—", VeredictoSimulacion(s.Veredicto));
+                        s.BeneficioNeto.ToString("C0"), s.Roi.HasValue ? s.Roi.Value.ToString("0.#") + " %" : "-",
+                        s.TasaEquilibrio.HasValue ? s.TasaEquilibrio.Value.ToString("0.#") + " %" : "-", VeredictoSimulacion(s.Veredicto));
                 }
                 secciones.Add(new SeccionReporte
                 {
@@ -128,20 +128,20 @@ namespace GUI.Inteligencia
                 {
                     Titulo = Tr("cdc.informe.medicion", "Resultado de las promociones"),
                     Tabla = TablaMediciones(d.Mediciones, out var encMed), Encabezados = encMed,
-                    Parrafos = d.Mediciones.Select(m => $"• {m.Nombre}: {Veredicto(m.Veredicto)} — {R(m.Explicacion)}").ToList()
+                    Parrafos = d.Mediciones.Select(m => $"• {m.Nombre}: {Veredicto(m.Veredicto)}, {R(m.Explicacion)}").ToList()
                 });
 
             // ── Metas del mes (InformeEjecutivo.Metas.cs) ──
             AgregarSeccionMetas(secciones, d.Metas, d.GraficoMetas);
 
             // ── Glosario ──
-            var glos = Tabla("Métrica", "Fórmula y fuente", "Umbral y decisión");
+            var glos = Tabla("Métrica", "Fórmula y fuente", "Parámetro del análisis y decisión");
             for (int i = 0; i < Metricas.Length; i++)
                 glos.Rows.Add(GlosarioNombre(i), GlosarioFormula(i), GlosarioDecision(i));
             secciones.Add(new SeccionReporte
             {
                 Titulo = Tr("cdc.glosario.titulo", "Glosario de métricas"), PaginaNueva = true, Tabla = glos,
-                Encabezados = new[] { Tr("cdc.col.metrica", "Métrica"), Tr("cdc.col.formula", "Fórmula y fuente"), Tr("cdc.col.decision", "Umbral y decisión") }
+                Encabezados = new[] { Tr("cdc.col.metrica", "Métrica"), Tr("cdc.col.formula", "Fórmula y fuente"), Tr("cdc.col.decision", "Parámetro del análisis y decisión") }
             });
 
             return new ReporteExportable
@@ -174,19 +174,20 @@ namespace GUI.Inteligencia
 
         public static DataTable TablaDecisiones(List<BE.DecisionComercial> lista, Dictionary<int, BE.MedicionDecision> medidos, out string[] encabezados)
         {
-            var t = Tabla("ID", "Fecha", "Usuario", "Regla", "Titulo", "Opcion", "Estado", "Estimado", "Real", "Medido", "Desvio", "Referencia", "Motivo");
+            var t = Tabla("ID", "Fecha", "Usuario", "Regla", "Titulo", "Opcion", "Estado", "Estimado", "Real", "Medido", "Desvio", "Referencia", "Motivo", "Constancia");
             foreach (var d in lista)
             {
                 var medido = medidos != null && medidos.TryGetValue(d.IdDecision, out var m) ? m : null;
                 t.Rows.Add(d.IdDecision.ToString(), d.Fecha.ToString("g"), d.NombreUsuario ?? "", Regla(d.TipoRegla), d.Titulo,
                     (d.EsAlternativa ? "↳ " : "") + d.AccionElegida, Estado(d.Estado) + (d.PospuestaHasta.HasValue ? $" ({d.PospuestaHasta:d})" : ""),
-                    d.ImpactoEstimado.ToString("C0"), d.ResultadoReal?.ToString("C0") ?? "—", Medicion(medido),
-                    d.Desvio?.ToString("+$#,0;-$#,0;0") ?? "—", d.Referencia.HasValue ? $"{d.TipoReferencia} #{d.Referencia}" : "", d.Motivo ?? "");
+                    d.ImpactoEstimado.ToString("C0"), d.ResultadoReal?.ToString("C0") ?? "-", Medicion(medido),
+                    d.Desvio?.ToString("+$#,0;-$#,0;0") ?? "-", d.Referencia.HasValue ? $"{d.TipoReferencia} #{d.Referencia}" : "", d.Motivo ?? "",
+                    d.TieneConstancia ? Tr("cdc.constancia.si", "Sí") : "-");
             }
             encabezados = new[] { "ID", Tr("cdc.col.fecha", "Fecha"), Tr("cdc.col.usuario", "Usuario"), Tr("cdc.col.regla", "Regla"),
                 Tr("cdc.col.recomendacion", "Recomendación"), Tr("cdc.col.opcion", "Opción elegida"), Tr("cdc.col.estado", "Estado"),
                 Tr("cdc.col.impacto", "Impacto estimado"), Tr("cdc.col.real", "Resultado real"), Tr("cdc.col.medido", "Medido por el sistema"),
-                Tr("cdc.col.desvio", "Desvío"), Tr("cdc.col.referencia", "Referencia"), Tr("cdc.col.motivo", "Motivo") };
+                Tr("cdc.col.desvio", "Desvío"), Tr("cdc.col.referencia", "Referencia"), Tr("cdc.col.motivo", "Motivo"), Tr("cdc.col.constancia", "Constancia") };
             return t;
         }
 
@@ -198,12 +199,12 @@ namespace GUI.Inteligencia
             {
                 var r = m.Resultado;
                 string Par(int a, int b) => $"{a} → {b}";
-                string Pct(decimal? v) => v.HasValue ? v.Value.ToString("0.#") + " %" : "—";
+                string Pct(decimal? v) => v.HasValue ? v.Value.ToString("0.#") + " %" : "-";
                 t.Rows.Add(m.IdPromocion.ToString(), m.Nombre, r.NombrePlan, Exportacion.DocumentosPromocion.Estado(r.Estado),
-                    r.NoSePudoCalcular ? "—" : r.Dias.ToString(), Par(r.Antes.Bajas, r.Durante.Bajas), Par(r.Antes.Pausas, r.Durante.Pausas),
+                    r.NoSePudoCalcular ? "-" : r.Dias.ToString(), Par(r.Antes.Bajas, r.Durante.Bajas), Par(r.Antes.Pausas, r.Durante.Pausas),
                     Par(r.Antes.CambiosDePlan, r.Durante.CambiosDePlan), Par(r.Antes.Renovaciones, r.Durante.Renovaciones),
-                    Pct(r.TasaRetencionEsperada), Pct(r.TasaRetencionReal), r.MejoraRetencion.HasValue ? r.MejoraRetencion.Value.ToString("+0.#;-0.#;0") + " pp" : "—",
-                    m.TotalDescontado.ToString("C0"), m.BeneficioReal?.ToString("C0") ?? "—", Pct(m.RoiReal), Pct(m.RoiEstimado), Veredicto(m.Veredicto));
+                    Pct(r.TasaRetencionEsperada), Pct(r.TasaRetencionReal), r.MejoraRetencion.HasValue ? r.MejoraRetencion.Value.ToString("+0.#;-0.#;0") + " pp" : "-",
+                    m.TotalDescontado.ToString("C0"), m.BeneficioReal?.ToString("C0") ?? "-", Pct(m.RoiReal), Pct(m.RoiEstimado), Veredicto(m.Veredicto));
             }
             encabezados = new[] { "ID", Tr("cdc.col.promocion", "Promoción"), Tr("cdc.col.plan", "Plan"), Tr("cdc.col.estado", "Estado"),
                 Tr("cdc.col.dias", "Días"), Tr("cdc.col.bajas", "Bajas (antes → durante)"), Tr("cdc.col.pausas", "Pausas"),

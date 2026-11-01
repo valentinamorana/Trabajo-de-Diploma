@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace GUI.Analitica
 {
     /// <summary>
-    /// PdN12 — Escasez de Stock por Talle/Categoría. El Gerente de Inventario configura un umbral
+    /// PdN12: Escasez de Stock por Talle/Categoría. El Gerente de Inventario configura un umbral
     /// mínimo de stock Disponible y genera las combinaciones Talle+Categoría que caen por debajo,
     /// para planificar compras antes de un faltante.
     /// </summary>

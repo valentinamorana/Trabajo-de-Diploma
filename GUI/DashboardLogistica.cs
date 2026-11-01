@@ -47,7 +47,7 @@ namespace GUI
         {
             this.Text          = Tr("dash.logistica.titulo", "Panel de Logística");
             lblTitulo.Text     = Tr("dash.logistica.titulo", "Panel de Logística");
-            lblSub.Text        = Tr("dash.logistica.subtitulo", "WardrobeFlow  —  Logística");
+            lblSub.Text        = Tr("dash.logistica.subtitulo", "WardrobeFlow: Logística");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",   "Actualizar");
             txtPend.Text = Tr("dash.pedidos",   "Pedidos\npendientes");
             txtDesp.Text = Tr("dash.despachados", "Pedidos\ndespachados");
@@ -105,7 +105,7 @@ namespace GUI
 
                 // Las tres columnas abren la misma pantalla (Pedidos Realizados): es el único
                 // permiso que tiene OperadorLogistico, y ahí se despacha, se marca entregado y
-                // se ve el historial — no hay riesgo de exponer una pantalla sin permiso.
+                // se ve el historial: no hay riesgo de exponer una pantalla sin permiso.
                 switch (p.Estado)
                 {
                     case BE.EstadoPedido.Pendiente:
@@ -139,7 +139,7 @@ namespace GUI
                 var u = _bllUsuario.ObtenerUsuarioActivo();
                 var h = _bllUsuario.ObtenerFechaInicioSesion();
                 if (u != null)
-                    lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
+                    lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "-"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
             catch (Exception ex)
             {
@@ -148,7 +148,7 @@ namespace GUI
         }
 
         // Abre (o enfoca) Pedidos Realizados. Todavía no deja seleccionado el pedido puntual
-        // dentro de la grilla — esa pantalla no tiene esa capacidad hoy.
+        // dentro de la grilla: esa pantalla no tiene esa capacidad hoy.
         private void HabilitarClicAbrirPedidosRealizados(Panel card)
         {
             EventHandler abrir = (s, e) => AbrirPedidosRealizados();

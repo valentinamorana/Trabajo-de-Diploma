@@ -11,7 +11,7 @@ namespace Seguridad
     /// </summary>
     public static class Encriptador
     {
-        // ── PBKDF2-SHA256 — hash unidireccional para contrasenas ──────────────
+        // ── PBKDF2-SHA256: hash unidireccional para contrasenas ──────────────
 
         private const int SaltSize   = 16;
         private const int HashSize   = 32;
@@ -109,7 +109,7 @@ namespace Seguridad
             return (true, null, string.Empty);
         }
 
-        // Wrapper trivial sobre Convert.ToBase64String, sin uso fuera de esta clase — bajado a
+        // Wrapper trivial sobre Convert.ToBase64String, sin uso fuera de esta clase: bajado a
         // private (era public sin ningún consumidor externo).
         private static string ConvertirBase64(byte[] data)
         {

@@ -1,6 +1,6 @@
 namespace BE
 {
-    /// <summary>PdN6 — Resultado de un intento de cobro de suscripción.</summary>
+    /// <summary>PdN6: Resultado de un intento de cobro de suscripción.</summary>
     public enum EstadoCobro
     {
         Pendiente = 0,

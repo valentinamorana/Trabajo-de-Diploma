@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Historial de cambios de un Pedido — T06b.
+    /// Historial de cambios de un Pedido: T06b.
     ///
     /// Muestra todos los eventos registrados sobre el pedido (quién, cuándo, qué campo,
     /// valor anterior y valor nuevo). Permite filtrar por fecha y por tipo de acción,
@@ -55,7 +55,7 @@ namespace GUI
         private void Traducir(Idioma idioma)
         {
             _idioma = idioma;   // sincronizar antes de llamar a TraducirHeadersGrilla()
-            this.Text           = Tr("frm.historial",      "Historial de Cambios — Pedido");
+            this.Text           = Tr("frm.historial",      "Historial de Cambios: Pedido");
             grpFiltros.Text     = Tr("lbl.hist.filtros",   "Filtros");
             lblDesde.Text       = Tr("lbl.hist.desde",     "Desde:");
             lblHasta.Text       = Tr("lbl.hist.hasta",     "Hasta:");
@@ -71,10 +71,10 @@ namespace GUI
 
         private void RellenarComboAcciones()
         {
-            // Opciones fijas de acción — incluye "Todas" como opción vacía
+            // Opciones fijas de acción: incluye "Todas" como opción vacía
             var items = new List<ComboItem>
             {
-                new ComboItem("",           Tr("combo.hist.todas",      "— Todas —")),
+                new ComboItem("",           Tr("combo.hist.todas",      "(Todas)")),
                 new ComboItem("CREAR",      Tr("accion.crear",          "Crear")),
                 new ComboItem("DESPACHAR",  Tr("accion.despachar",      "Despachar")),
                 new ComboItem("ENTREGAR",   Tr("accion.entregar",       "Entregar")),

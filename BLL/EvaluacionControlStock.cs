@@ -4,7 +4,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// PN01 — Decisión PURA del carril "Controlador de Stock": dada la planilla revisada
+    /// PN01: Decisión PURA del carril "Controlador de Stock": dada la planilla revisada
     /// (líneas con el estado real de cada prenda) y el pedido, responde "¿Selección
     /// disponible?" y qué acción corresponde (informar faltantes / confirmar / separar).
     /// Antes la tomaba GUI/ControlStockForm (TrueForAll(Disponible) + reglas de habilitación).

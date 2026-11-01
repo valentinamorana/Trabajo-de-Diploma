@@ -6,7 +6,7 @@ namespace BLL
     /// </summary>
     internal static class BLLHelper
     {
-        // T04 — Re-validación de permisos en el BACKEND (fail-closed).
+        // T04: Re-validación de permisos en el BACKEND (fail-closed).
         // El Administrador siempre pasa. Sin sesión activa se rechaza la operación.
         // Centralizado acá para no repetir el mismo bloque en Pedido, Cliente, Prenda y PlanSuscripcion.
         internal static void ValidarPermiso(string nombrePatente)

@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// Entidad — Empleado.
+    /// Entidad: Empleado.
     /// Datos personales del empleado, vinculado opcionalmente a un Usuario del sistema.
     /// Mapea la tabla [Empleado].
     /// </summary>

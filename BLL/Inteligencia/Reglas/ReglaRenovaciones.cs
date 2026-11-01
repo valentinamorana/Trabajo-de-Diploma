@@ -55,7 +55,7 @@ namespace BLL.Inteligencia.Reglas
                 Motivo = T("rec.renov.motivo",
                     "Una renovación gestionada antes del vencimiento se recupera mucho más que una ya perdida; se estima recuperar el {0:0} % del dinero en juego.",
                     recupero),
-                Detalle = enJuego.Select(v => $"{v.Nombre} — {v.NombrePlan} — {v.FechaVencimiento:dd/MM/yyyy} ({v.DiasRestantes:+0;-0;0} d) — {v.Precio:C2}").ToList()
+                Detalle = enJuego.Select(v => $"{v.Nombre}: {v.NombrePlan}, {v.FechaVencimiento:dd/MM/yyyy} ({v.DiasRestantes:+0;-0;0} d), {v.Precio:C2}").ToList()
             };
             rec.Principal = Opcion(
                 T("rec.renov.opcion", "Campaña de renovación: exportar los contactos de los {0} cliente(s) para llamarlos o escribirles antes de perderlos", enJuego.Count),

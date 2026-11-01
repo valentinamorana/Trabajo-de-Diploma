@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// T07 — Consola de recuperación: el diagnóstico de la tabla Usuario no alcanza. Si falla el dígito
+    /// T07: Consola de recuperación: el diagnóstico de la tabla Usuario no alcanza. Si falla el dígito
     /// verificador de otra tabla protegida (Cliente, Empleado, Pedido) el sistema bloquea el arranque, así
     /// que el diagnóstico NO puede declararse íntegro ni deshabilitar "Asumir pérdida".
     /// </summary>

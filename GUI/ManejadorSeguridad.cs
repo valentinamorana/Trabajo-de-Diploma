@@ -6,11 +6,11 @@ using System.Windows.Forms;
 namespace GUI
 {
     /// <summary>
-    /// Etapa 4 — Aplica la seguridad a nivel de CONTROL (patrón ManejadorSeguridad de Stach).
+    /// Etapa 4: Aplica la seguridad a nivel de CONTROL (patrón ManejadorSeguridad de Stach).
     /// Lee los mapeos [ControlMapeado] del formulario y muestra/oculta cada control según las
     /// patentes efectivas del usuario en sesión.
     ///
-    /// Decisiones adoptadas: A1 (aditivo — convive con la visibilidad de menú por NombreMenu),
+    /// Decisiones adoptadas: A1 (aditivo: convive con la visibilidad de menú por NombreMenu),
     /// B1 (el Administrador ve todo: bypass), C1 (la lista de controles se arma en runtime).
     ///
     /// Vive en la capa GUI porque manipula controles WinForms; evita acoplar Servicios a WinForms.
@@ -45,7 +45,7 @@ namespace GUI
                 // Reglas puras (filtro por formulario, bypass de Admin, patente exacta) en BLL.ControlMapeado.
                 List<BE.ControlMapeado> mapeos = BLL.ControlMapeado.AplicablesA(Mapeos(), form.Name);
 
-                // B1 — el Administrador ve todo.
+                // B1: el Administrador ve todo.
                 bool esAdmin = usuario.EsAdministrador;
 
                 var patentesUsuario = BLL.ControlMapeado.PatentesDe(usuario);
@@ -57,7 +57,7 @@ namespace GUI
                     // Cada mapeo se aplica en su propio try/catch: antes, si UN control fallaba al
                     // resolverse/aplicarse, la excepción abortaba todo el foreach y los mapeos que
                     // todavía no se habían procesado quedaban con su estado de visibilidad PREVIO
-                    // (potencialmente visibles/habilitados) — un fallo parcial pasaba inadvertido.
+                    // (potencialmente visibles/habilitados): un fallo parcial pasaba inadvertido.
                     try
                     {
                         object control = EncontrarControl(form, m.NombreControl);

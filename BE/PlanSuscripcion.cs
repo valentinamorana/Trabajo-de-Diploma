@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// Entidad — Plan de Suscripción.
+    /// Entidad: Plan de Suscripción.
     /// Define los tipos de planes disponibles con su límite de prendas y precio.
     /// Mapea la tabla [PlanSuscripcion].
     /// </summary>

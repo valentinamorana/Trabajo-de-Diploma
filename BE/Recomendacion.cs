@@ -83,7 +83,7 @@ namespace BE
     }
 
     /// <summary>
-    /// PN03 «Recomendar / decidir» — Una recomendación accionable del motor (BLL.Inteligencia.MotorRecomendaciones):
+    /// PN03 «Recomendar / decidir»: Una recomendación accionable del motor (BLL.Inteligencia.MotorRecomendaciones):
     /// qué está pasando (diagnóstico, con números), por qué se recomienda (motivo), qué hacer (opción
     /// principal) y otras opciones con su propio impacto, para que el usuario elija. No se persiste:
     /// se recalcula en cada análisis; lo que se persiste es la decisión (BE.DecisionComercial).

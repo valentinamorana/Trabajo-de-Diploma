@@ -9,7 +9,7 @@ using System.Windows.Forms;
 namespace GUI
 {
     /// <summary>
-    /// A02 Serialización — muestra los errores inesperados serializados en XML
+    /// A02 Serialización: muestra los errores inesperados serializados en XML
     /// (Servicios.Serializacion.RegistroErrores), permite importar un archivo XML o JSON de errores
     /// (deserializar, por ejemplo traído de otra PC) y exportar la lista que se está viendo
     /// (serializar, en XML o JSON según la extensión elegida). Se abre desde la Bitácora; exige la
@@ -137,7 +137,7 @@ namespace GUI
         {
             lblOrigen.Text = _origen == null
                 ? Tr("lbl.errxml.origen.pc", "Errores registrados en esta PC: {0}", new object[] { _errores.Count })
-                : Tr("lbl.errxml.origen.archivo", "Archivo importado: {0} — {1} error(es)",
+                : Tr("lbl.errxml.origen.archivo", "Archivo importado: {0} ({1} error(es))",
                      new object[] { System.IO.Path.GetFileName(_origen), _errores.Count });
 
             var tabla = new DataTable();

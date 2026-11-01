@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
@@ -11,7 +12,7 @@ using Color = System.Drawing.Color;
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// Patrón FACTORY METHOD — rol "ConcreteProduct".
+    /// Patrón FACTORY METHOD: rol "ConcreteProduct".
     ///
     /// Genera el archivo PDF directamente (iTextSharp), sin vista previa de impresión ni impresora
     /// virtual ("Microsoft Print to PDF" no está permitido en la Entrega 3). Pide dónde guardarlo,
@@ -71,33 +72,104 @@ namespace GUI.Exportacion
             return ruta;
         }
 
-        // Escribe el PDF en 'ruta'. Público para poder generarlo sin diálogo (por ejemplo, en pruebas).
+        static ExportadorPdf() => FijarVersionITextSharp();
+
+        /// <summary>
+        /// iTextSharp 5.5.13.3 pregunta su versión (Version.GetInstance) al crear el PdfWriter y al cerrar el
+        /// documento (5 veces por PDF). Cada vez busca por reflexión la licencia comercial (itext.licensekey),
+        /// que no está, y llama a un método sobre ese tipo nulo: lanza una NullReferenceException que la misma
+        /// librería atrapa y, por un defecto de esa versión, no guarda el resultado (nunca llama a su
+        /// AtomicSetVersion), así que la excepción se repite en cada PDF. El archivo sale bien, pero con el
+        /// depurador de Visual Studio parado en las excepciones CLR se ve una NullReferenceException en
+        /// «using (var doc = new Document(...))». Acá se guarda UNA vez la misma versión que la librería
+        /// arma en ese camino (texto de la versión + «(AGPL-version)»): el PDF queda igual (mismo Producer) y
+        /// Version.GetInstance ya no vuelve a buscar la licencia. Si otra versión de iTextSharp no tiene estos
+        /// miembros, no se toca nada.
+        /// </summary>
+        internal static bool FijarVersionITextSharp()
+        {
+            const BindingFlags Estatico = BindingFlags.Static | BindingFlags.NonPublic;
+            var tipo = typeof(iTextSharp.text.Version);
+            var cache = tipo.GetField("version", Estatico);
+            var fijar = tipo.GetMethod("AtomicSetVersion", Estatico, null, new[] { tipo }, null);
+            var texto = tipo.GetField("iTextVersion", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (cache == null || fijar == null || texto == null) return false;
+            if (cache.GetValue(null) != null) return true;
+            var version = (iTextSharp.text.Version)Activator.CreateInstance(tipo, true);
+            texto.SetValue(version, (string)texto.GetValue(version) + iTextSharp.text.Version.AGPL);
+            fijar.Invoke(null, new object[] { version });
+            return true;
+        }
+
+        /// <summary>
+        /// Escribe el PDF en 'ruta'. Público para poder generarlo sin diálogo (por ejemplo, en pruebas).
+        /// Se escribe primero en un temporal de la misma carpeta y recién al terminar reemplaza a 'ruta':
+        /// si algo falla, no queda un PDF a medias ni el archivo abierto, un PDF anterior con ese nombre
+        /// no se pierde y la excepción que llega al formulario es la original (el documento a medio
+        /// escribir NO se cierra: cerrarlo escribiría el pie y la tabla xref sobre un estado roto y
+        /// lanzaría otra excepción que taparía la verdadera). Si 'ruta' está abierta en otro programa,
+        /// lanza AppException err.pdf.enuso (el formulario la muestra con MostrarError).
+        /// </summary>
         public static void Generar(ReporteExportable reporte, string ruta, Func<string, string, string> T, string origen = null)
         {
             var tamanio = reporte.EsTabular ? PageSize.A4.Rotate() : PageSize.A4;   // tabular en horizontal
-            using (var fs = new FileStream(ruta, FileMode.Create, FileAccess.Write, FileShare.None))
-            using (var doc = new Document(tamanio, 30, 30, 30, 40))
+            string temporal = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(ruta)) ?? ".",
+                                           "~" + Path.GetFileNameWithoutExtension(ruta) + "." + Guid.NewGuid().ToString("N").Substring(0, 8) + ".tmp");
+            bool completo = false;
+            FileStream fs;
+            try { fs = new FileStream(temporal, FileMode.CreateNew, FileAccess.Write, FileShare.None); }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException) { throw ErrorAlGuardar(ruta); }
+            try
             {
+                var doc = new Document(tamanio, 30, 30, 30, 40);
                 var writer = PdfWriter.GetInstance(doc, fs);
-                writer.PageEvent = new PiePagina(string.Format(T("bit.pdf.pagina", "WardrobeFlow — Página {0}"), "{0}"));
+                writer.PageEvent = new PiePagina(string.Format(T("bit.pdf.pagina", "WardrobeFlow: Página {0}"), "{0}"));
                 doc.AddTitle(reporte.Titulo ?? "");
                 doc.AddCreator("WardrobeFlow");
                 doc.AddSubject(origen ?? "");   // qué reporte lo fabricó (lo fija el creador concreto)
                 doc.Open();
 
                 if (reporte.EsCompuesto)
+                    Compuesto(doc, reporte, T);   // informe por secciones: la portada hace de encabezado
+                else
                 {
-                    // Informe por secciones (Centro de decisiones comerciales): la portada hace de encabezado.
-                    Compuesto(doc, reporte, T);
-                    doc.Close();
-                    return;
+                    Encabezado(doc, reporte, T);
+                    if (reporte.EsTabular) Tabla(doc, reporte);
+                    else                   Texto(doc, reporte);
                 }
-                Encabezado(doc, reporte, T);
-                if (reporte.EsTabular) Tabla(doc, reporte);
-                else                   Texto(doc, reporte);
 
-                doc.Close();
+                doc.Close();   // escribe el final del PDF y cierra fs
+                completo = true;
             }
+            finally
+            {
+                fs.Dispose();
+                if (!completo) BorrarTemporal(temporal);
+            }
+
+            try
+            {
+                if (File.Exists(ruta)) File.Delete(ruta);
+                File.Move(temporal, ruta);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                BorrarTemporal(temporal);
+                throw ErrorAlGuardar(ruta);
+            }
+        }
+
+        private static BE.AppException ErrorAlGuardar(string ruta) =>
+            new BE.AppException("err.pdf.enuso",
+                "No se pudo guardar el PDF en «{0}»: el archivo está abierto en otro programa o la carpeta no permite escribir. Ciérrelo (o elija otro nombre) y vuelva a intentarlo.",
+                ruta);
+
+        // Un temporal que no se pudo borrar no debe tapar el error original: solo se deja constancia.
+        private static void BorrarTemporal(string temporal)
+        {
+            try { if (File.Exists(temporal)) File.Delete(temporal); }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            { Trace.TraceWarning("[ExportadorPdf] No se pudo borrar el temporal " + temporal + ": " + ex.Message); }
         }
 
         // Barra de título + fecha de generación (+ cantidad de registros si es tabular).
@@ -218,7 +290,7 @@ namespace GUI.Exportacion
             }
         }
 
-        // Pie "WardrobeFlow — Página N" con una línea, en todas las páginas.
+        // Pie "WardrobeFlow: Página N" con una línea, en todas las páginas.
         private sealed class PiePagina : PdfPageEventHelper
         {
             private readonly string _formato;

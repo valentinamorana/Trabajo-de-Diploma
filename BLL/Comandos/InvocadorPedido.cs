@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BLL.Comandos
 {
     /// <summary>
-    /// Invoker del patrón Command — equivalente a EmpresaInvoker del ejemplo de cátedra: acumula
+    /// Invoker del patrón Command: equivalente a EmpresaInvoker del ejemplo de cátedra: acumula
     /// comandos con TomarOrden y los ejecuta en lote con ProcesarOrdenes. Además guarda el historial
     /// de lo ejecutado para poder deshacer la última orden reversible de un pedido (cancelar →
     /// reactivar). Vive en la instancia de la pantalla: el historial dura lo que dura la pantalla.

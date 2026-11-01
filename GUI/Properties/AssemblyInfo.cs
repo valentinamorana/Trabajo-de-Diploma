@@ -31,5 +31,6 @@ using System.Runtime.InteropServices;
 // La versión del producto es la misma en los 8 AssemblyInfo.cs y en MyAppVersion de
 // Instalador/WardrobeFlow_Setup.iss (que no compila el instalador si GUI.exe dice otra).
 // «Acerca de WardrobeFlow» la lee de este ensamblado en tiempo de ejecución.
-[assembly: AssemblyVersion("1.6.0.0")]
-[assembly: AssemblyFileVersion("1.6.0.0")]
+[assembly: AssemblyVersion("1.6.1.0")]
+[assembly: AssemblyFileVersion("1.6.1.0")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Tests")]

@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// PN03 «Recomendar / decidir» — cada regla del motor (Strategy) por separado: cuándo se dispara,
+    /// PN03 «Recomendar / decidir»: cada regla del motor (Strategy) por separado: cuándo se dispara,
     /// cuándo no, la fórmula del impacto y la elección entre la opción principal y las alternativas.
     /// El contexto se arma a mano: las reglas son puras, no tocan la base.
     /// </summary>

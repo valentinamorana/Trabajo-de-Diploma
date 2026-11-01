@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
-    /// <summary>T06 — Pruebas del patrón Memento (Originator / Memento).</summary>
+    /// <summary>T06: Pruebas del patrón Memento (Originator / Memento).</summary>
     [TestClass]
     public class MementoTests
     {

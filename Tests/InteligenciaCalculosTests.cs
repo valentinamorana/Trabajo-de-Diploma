@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// PN03 «Inteligencia comercial» — matemática pura del Centro de decisiones: proyección de series,
+    /// PN03 «Inteligencia comercial»: matemática pura del Centro de decisiones: proyección de series,
     /// KPI con variación, simulador "¿Qué pasa si…?", medición de promociones y catálogo de umbrales.
     /// Sin base de datos ni UI.
     /// </summary>
@@ -388,8 +388,8 @@ namespace Tests
         [TestMethod]
         public void TextoTraducible_ArgumentoAnidado_SeResuelveEnEspanol()
         {
-            var t = new BE.TextoTraducible("x", "{0} — {1}", new BE.TextoTraducible("y", "Hola"), 3);
-            Assert.AreEqual("Hola — 3", t.Espanol);
+            var t = new BE.TextoTraducible("x", "{0}: {1}", new BE.TextoTraducible("y", "Hola"), 3);
+            Assert.AreEqual("Hola: 3", t.Espanol);
             Assert.AreEqual("sin {formato", new BE.TextoTraducible("z", "sin {formato", 1).Espanol, "Un formato roto no rompe.");
         }
     }

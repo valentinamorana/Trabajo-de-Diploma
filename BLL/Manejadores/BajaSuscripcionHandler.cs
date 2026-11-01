@@ -5,10 +5,10 @@ namespace BLL.Manejadores
     /// <summary>
     /// Último eslabón de la cadena: siempre atiende lo que le llega (Decision.Baja, o
     /// cualquier caso que ningún eslabón anterior haya resuelto), sin condición ni
-    /// delegación — igual que DirectorGeneral del ejemplo de cátedra, que aprueba
+    /// delegación: igual que DirectorGeneral del ejemplo de cátedra, que aprueba
     /// cualquier compra sin evaluar nada porque es el último de la cadena. Da de baja el
-    /// plan del cliente — lo que automáticamente bloquea nuevos pedidos, porque
-    /// BLL.Pedido.VerificarVigencia exige Cliente.TienePlan() — y señala si hay prendas en
+    /// plan del cliente: lo que automáticamente bloquea nuevos pedidos, porque
+    /// BLL.Pedido.VerificarVigencia exige Cliente.TienePlan(): y señala si hay prendas en
     /// uso para solicitar la devolución (el pedido de devolución en sí es manual: el
     /// cliente es externo al sistema).
     /// </summary>
@@ -19,7 +19,7 @@ namespace BLL.Manejadores
         private readonly DAL.Interfaces.IPrendaDAL dalPrenda;
         private readonly DAL.Interfaces.IPedidoDAL dalPedido;
 
-        // Antes tomaba DAL.Prenda (clase concreta) en vez de IPrendaDAL — por eso no se podía
+        // Antes tomaba DAL.Prenda (clase concreta) en vez de IPrendaDAL: por eso no se podía
         // instanciar con un doble de prueba y quedaba sin ningún test.
         public BajaSuscripcionHandler(DAL.Interfaces.IClienteDAL dalCliente, DAL.Interfaces.IRenovacionDAL dalRenovacion,
                                        DAL.Interfaces.IPrendaDAL dalPrenda,
@@ -70,7 +70,7 @@ namespace BLL.Manejadores
 
             string mensaje = "Suscripción dada de baja. El cliente no podrá generar nuevos pedidos.";
             if (conPrendas)
-                mensaje += $" Tiene {prendasEnUso.Count} prenda(s) en uso — solicitar la devolución.";
+                mensaje += $" Tiene {prendasEnUso.Count} prenda(s) en uso; solicite su devolución.";
 
             return new ResultadoRenovacion
             {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BE
 {
     /// <summary>
-    /// PN03 — Lo que Contabilidad ve en "Analizar margen e impacto": la promoción, el beneficio
+    /// PN03: Lo que Contabilidad ve en "Analizar margen e impacto": la promoción, el beneficio
     /// estimado de la sugerencia que le dio origen (si existe), las otras promociones Vigentes
     /// del mismo plan que se superponen en fechas (advertencia: no impide aprobar) y el cálculo
     /// del margen proyectado.

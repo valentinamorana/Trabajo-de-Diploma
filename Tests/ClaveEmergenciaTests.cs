@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// RF-10 — Pruebas de las claves de emergencia (generación + hash de un solo uso).
+    /// RF-10: Pruebas de las claves de emergencia (generación + hash de un solo uso).
     /// Cubren la parte sin BD: formato legible, ausencia de caracteres ambiguos, unicidad
     /// y verificación contra el hash PBKDF2. El consumo (uso único) se prueba contra BD real.
     /// </summary>

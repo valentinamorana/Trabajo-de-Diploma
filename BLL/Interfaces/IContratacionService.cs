@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BLL.Interfaces
 {
     /// <summary>
-    /// PN02 — Comercialización de la suscripción. Un método por actividad del diagrama de
+    /// PN02: Comercialización de la suscripción. Un método por actividad del diagrama de
     /// actividad (ver el encabezado de <see cref="BLL.Contratacion"/>).
     /// </summary>
     public interface IContratacionService

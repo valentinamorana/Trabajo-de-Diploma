@@ -101,6 +101,7 @@
     <Compile Include="DecisionComercial.cs" />
     <Compile Include="MetaComercial.cs" />
     <Compile Include="Interfaces\IInteligenciaComercialDAL.cs" />
+    <Compile Include="Interfaces\IParametrosSistemaDAL.cs" />
     <Compile Include="Interfaces\IDecisionComercialDAL.cs" />
     <Compile Include="Interfaces\IMetaComercialDAL.cs" />
   </ItemGroup>

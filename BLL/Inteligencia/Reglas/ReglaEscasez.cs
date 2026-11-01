@@ -41,8 +41,8 @@ namespace BLL.Inteligencia.Reglas
 
             var faltantes = ctx.Prendas
                 .Where(p => p.Estado != BE.EstadoPrenda.Baja)
-                .GroupBy(p => new { Categoria = string.IsNullOrWhiteSpace(p.Categoria) ? "—" : p.Categoria.Trim(),
-                                    Talle = string.IsNullOrWhiteSpace(p.Talle) ? "—" : p.Talle.Trim() })
+                .GroupBy(p => new { Categoria = string.IsNullOrWhiteSpace(p.Categoria) ? "-" : p.Categoria.Trim(),
+                                    Talle = string.IsNullOrWhiteSpace(p.Talle) ? "-" : p.Talle.Trim() })
                 .Select(g =>
                 {
                     var conPrecio = g.Where(p => p.PrecioReposicion.HasValue && p.PrecioReposicion.Value > 0).ToList();

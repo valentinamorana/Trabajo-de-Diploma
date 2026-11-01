@@ -1,12 +1,12 @@
 namespace BE
 {
     /// <summary>
-    /// Capa de Entidades — Enumeración de Niveles de Criticidad para Bitácora.
+    /// Capa de Entidades: Enumeración de Niveles de Criticidad para Bitácora.
     ///   None  (0): Eventos de sesión (login/logout)
     ///   Baja  (1): Consultas, navegación, lectura
     ///   Media (2): Modificaciones de datos
     ///   Alta  (3): Eliminaciones, acceso privilegiado
-    ///   IntentosLogin (4): Intentos fallidos de login — posible bloqueo de cuenta
+    ///   IntentosLogin (4): Intentos fallidos de login; posible bloqueo de cuenta
     ///   RecuperacionClave (5): Recuperación / forgot password
     /// </summary>
     public enum Criticidad

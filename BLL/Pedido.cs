@@ -17,12 +17,12 @@ namespace BLL
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg;
         private readonly DAL.Interfaces.IPedidoHistorialDAL dalHistorial;
 
-        // Lista de Espera (mejora opcional) — composición lazy, mismo criterio que
+        // Lista de Espera (mejora opcional): composición lazy, mismo criterio que
         // BLL.Prenda.listaEsperaBLL / BLL.Usuario.perfilesBLL.
         private Interfaces.IListaEsperaService _listaEsperaLazy;
         private Interfaces.IListaEsperaService listaEsperaBLL => _listaEsperaLazy ?? (_listaEsperaLazy = new ListaEspera());
 
-        // PN01 (split lógico Depósito) — composición lazy, mismo criterio que listaEsperaBLL:
+        // PN01 (split lógico Depósito): composición lazy, mismo criterio que listaEsperaBLL:
         // BLL.Prenda es dueña de VerificarDisponibilidad, BLL.Pedido solo la consume.
         private Interfaces.IPrendaService _prendaBLLLazy;
         private Interfaces.IPrendaService prendaBLL => _prendaBLLLazy ?? (_prendaBLLLazy = new Prenda());
@@ -58,7 +58,7 @@ namespace BLL
         public BE.Pedido ObtenerPorId(int id) => dalPedido.ObtenerPorId(id);
 
         // ══════════════════════════════════════════════════════════════════════
-        // PN01 — Armar pedido de prendas. Cada método público corresponde a una actividad del
+        // PN01: Armar pedido de prendas. Cada método público corresponde a una actividad del
         // diagrama de actividad (carriles Vendedor y Depósito = "Controlador de Stock"):
         //
         //   Vendedor  Verificar la vigencia de la suscripción ......... VerificarVigencia
@@ -114,7 +114,7 @@ namespace BLL
             try
             {
                 bitacora.Registrar(ModuloArmado,
-                    $"{aviso} — Cliente #{idCliente} — {ex.Clave}: {ex.Message}",
+                    $"{aviso}: Cliente #{idCliente}; {ex.Clave}: {ex.Message}",
                     BE.Criticidad.Baja);
             }
             catch (Exception e) { System.Diagnostics.Trace.TraceError($"[BLL.Pedido] Aviso: {e.Message}"); }
@@ -206,12 +206,12 @@ namespace BLL
             }));
 
             bitacora.Registrar(modulo,
-                $"Enviar a control de stock Pedido #{idNuevo} — Cliente: {cliente.NombreCompleto} — " +
-                $"{prendas.Count} prenda(s) — Plan: {plan.Nombre}",
+                $"Enviar a control de stock Pedido #{idNuevo}; Cliente: {cliente.NombreCompleto}; " +
+                $"{prendas.Count} prenda(s); Plan: {plan.Nombre}",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.EnvioControlStock,
-                $"Pedido #{idNuevo} enviado a control de stock — {cliente.NombreCompleto} — {prendas.Count} prenda(s)",
+                $"Pedido #{idNuevo} enviado a control de stock: {cliente.NombreCompleto}, {prendas.Count} prenda(s)",
                 idPedido:  idNuevo,
                 idCliente: idCliente);
 
@@ -330,13 +330,13 @@ namespace BLL
             }));
 
             bitacora.Registrar(modulo,
-                $"Ajustar selección Pedido #{pedido.IdPedido} — Cliente: {cliente.NombreCompleto} — " +
-                $"{prendas.Count} prenda(s) — vuelve a control de stock",
+                $"Ajustar selección Pedido #{pedido.IdPedido}; Cliente: {cliente.NombreCompleto}; " +
+                $"{prendas.Count} prenda(s): vuelve a control de stock",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.EnvioControlStock,
-                $"Pedido #{pedido.IdPedido} reenviado a control de stock con la selección ajustada — " +
-                $"{cliente.NombreCompleto} — {prendas.Count} prenda(s)",
+                $"Pedido #{pedido.IdPedido} reenviado a control de stock con la selección ajustada; " +
+                $"{cliente.NombreCompleto}, {prendas.Count} prenda(s)",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
         }
@@ -402,12 +402,12 @@ namespace BLL
             }));
 
             bitacora.Registrar(modulo,
-                $"Informe de faltantes Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
+                $"Informe de faltantes Pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}; " +
                 $"{faltantes.Count} prenda(s) no disponible(s)",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.InformeFaltantes,
-                $"Pedido #{pedido.IdPedido}: {faltantes.Count} prenda(s) faltante(s) — " +
+                $"Pedido #{pedido.IdPedido}: {faltantes.Count} prenda(s) faltante(s); " +
                 string.Join(", ", faltantes.Select(f => f.Prenda.Nombre)),
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
@@ -434,7 +434,7 @@ namespace BLL
             }));
 
             bitacora.Registrar(modulo,
-                $"Confirmar prendas disponibles Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
+                $"Confirmar prendas disponibles Pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}; " +
                 $"{pedido.CantidadPrendas} prenda(s)",
                 BE.Criticidad.Baja);
         }
@@ -494,7 +494,7 @@ namespace BLL
             }
 
             bitacora.Registrar(modulo,
-                $"Separar prendas Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
+                $"Separar prendas Pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}; " +
                 $"{pedido.CantidadPrendas} prenda(s) reservadas",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(
@@ -527,13 +527,13 @@ namespace BLL
             var cliente = dalCliente.ObtenerPorId(pedido.IdCliente);
             var plan    = cliente?.IdPlan != null ? dalPlan.ObtenerPorId(cliente.IdPlan.Value) : null;
             bitacora.Registrar(modulo,
-                $"Formalizar Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
-                $"{pedido.CantidadPrendas} prenda(s) — Plan: {plan?.Nombre ?? "—"}",
+                $"Formalizar Pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}; " +
+                $"{pedido.CantidadPrendas} prenda(s); Plan: {plan?.Nombre ?? "-"}",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Venta,
-                $"Pedido #{pedido.IdPedido} — {pedido.NombreCliente} — {pedido.CantidadPrendas} prenda(s) — " +
-                $"Plan {plan?.Nombre ?? "—"} — {ahora:dd/MM/yyyy HH:mm}",
+                $"Pedido #{pedido.IdPedido}: {pedido.NombreCliente}, {pedido.CantidadPrendas} prenda(s); " +
+                $"Plan {plan?.Nombre ?? "-"}; {ahora:dd/MM/yyyy HH:mm}",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
         }
@@ -552,7 +552,7 @@ namespace BLL
                     pedido.Estado);
 
             bitacora.Registrar(modulo,
-                $"Confirmación del Pedido #{pedido.IdPedido} emitida — Cliente: {pedido.NombreCliente}",
+                $"Confirmación del Pedido #{pedido.IdPedido} emitida; Cliente: {pedido.NombreCliente}",
                 BE.Criticidad.Baja);
             return pedido;
         }
@@ -620,11 +620,11 @@ namespace BLL
                                       BE.EtapaDesistimiento etapa, string motivo)
         {
             bitacora.Registrar(modulo,
-                $"Asentar desistimiento Pedido #{idPedido} — Cliente: {nombreCliente} — Etapa: {etapa} — Motivo: {motivo}",
+                $"Asentar desistimiento Pedido #{idPedido}; Cliente: {nombreCliente}; Etapa: {etapa}; Motivo: {motivo}",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Desistimiento,
-                $"Pedido #{idPedido}: el cliente {nombreCliente} desistió ({etapa}) — {motivo}",
+                $"Pedido #{idPedido}: el cliente {nombreCliente} desistió ({etapa}), {motivo}",
                 idPedido:  idPedido,
                 idCliente: idCliente);
         }
@@ -646,13 +646,13 @@ namespace BLL
             }));
 
             bitacora.Registrar(modulo,
-                $"Despachar Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
+                $"Despachar Pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}; " +
                 $"{pedido.CantidadPrendas} prenda(s)",
                 BE.Criticidad.Media);
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Despacho,
-                $"Pedido #{pedido.IdPedido} despachado — Cliente: {pedido.NombreCliente} — " +
+                $"Pedido #{pedido.IdPedido} despachado; Cliente: {pedido.NombreCliente}; " +
                 $"{pedido.CantidadPrendas} prenda(s)",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
@@ -675,12 +675,12 @@ namespace BLL
             }));
 
             bitacora.Registrar(modulo,
-                $"Entrega Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente}",
+                $"Entrega Pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}",
                 BE.Criticidad.Baja);
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Entrega,
-                $"Pedido #{pedido.IdPedido} entregado — Cliente: {pedido.NombreCliente}",
+                $"Pedido #{pedido.IdPedido} entregado; Cliente: {pedido.NombreCliente}",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
         }
@@ -719,13 +719,13 @@ namespace BLL
                     pedido.IdPedido);
 
             bitacora.Registrar(modulo,
-                $"Devolución Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
+                $"Devolución Pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}; " +
                 $"{devueltas} prenda(s) devuelta(s)",
                 BE.Criticidad.Baja);
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Devolucion,
-                $"Devolución pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — " +
+                $"Devolución pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}; " +
                 $"{devueltas} prenda(s) pasan a EnLimpieza",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
@@ -762,13 +762,13 @@ namespace BLL
 
             string accion = separado ? "Cancelar pedido separado" : "Cancelar";
             bitacora.Registrar(modulo,
-                $"{accion} Pedido #{pedido.IdPedido} — Cliente: {pedido.NombreCliente} — Motivo: {motivo.Trim()}",
+                $"{accion} Pedido #{pedido.IdPedido}; Cliente: {pedido.NombreCliente}; Motivo: {motivo.Trim()}",
                 BE.Criticidad.Media);
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Cancelacion,
-                $"Pedido #{pedido.IdPedido} cancelado{(separado ? " (con las prendas separadas, liberadas)" : "")} — " +
-                $"Cliente: {pedido.NombreCliente} — Motivo: {motivo.Trim()}",
+                $"Pedido #{pedido.IdPedido} cancelado{(separado ? " (con las prendas separadas, liberadas)" : "")}; " +
+                $"Cliente: {pedido.NombreCliente}; Motivo: {motivo.Trim()}",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
         }
@@ -804,12 +804,12 @@ namespace BLL
                     pedido.IdPedido);
 
             bitacora.Registrar(modulo,
-                $"Reactivar Pedido #{pedido.IdPedido} — vuelve a control de stock — Cliente: {pedido.NombreCliente}",
+                $"Reactivar Pedido #{pedido.IdPedido}: vuelve a control de stock; Cliente: {pedido.NombreCliente}",
                 BE.Criticidad.Media);
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Reactivacion,
-                $"Pedido #{pedido.IdPedido} reactivado — vuelve a control de stock — Cliente: {pedido.NombreCliente}",
+                $"Pedido #{pedido.IdPedido} reactivado: vuelve a control de stock; Cliente: {pedido.NombreCliente}",
                 idPedido:  pedido.IdPedido,
                 idCliente: pedido.IdCliente);
         }
@@ -836,11 +836,11 @@ namespace BLL
                     "El cliente {0} no tiene plan asignado. Asígnele un plan antes de crear un pedido.",
                     cliente.NombreCompleto);
 
-            // PdN6 — venció el período de gracia sin regularizar el cobro (BLL.Manejadores.
+            // PdN6: venció el período de gracia sin regularizar el cobro (BLL.Manejadores.
             // SuspenderHandler): se bloquean nuevos pedidos hasta que se registre un cobro exitoso.
             // Va ANTES que el chequeo de vencimiento genérico de abajo a propósito: un cliente
             // suspendido por pago casi siempre tiene también FechaVencimiento en el pasado (la
-            // gracia solo se abre sobre una suscripción ya vencida/por vencer — DetectarCobroHandler),
+            // gracia solo se abre sobre una suscripción ya vencida/por vencer: DetectarCobroHandler),
             // así que si el chequeo genérico fuera primero, este nunca se alcanzaría en la práctica
             // y el usuario vería "Renovar en el módulo de Clientes" en vez del motivo real (pago).
             if (cliente.EstaSuspendidoPorPago)
@@ -849,7 +849,7 @@ namespace BLL
                     "Regularizar el cobro en el módulo de Suscriptores antes de generar un nuevo pedido.",
                     cliente.NombreCompleto, cliente.FechaLimiteGracia.Value.ToString("dd/MM/yyyy"));
 
-            // Bloque 1 — Pausa de suscripción: mientras está pausada no se pueden generar
+            // Bloque 1: Pausa de suscripción: mientras está pausada no se pueden generar
             // pedidos nuevos, aunque la fecha de vencimiento todavía no haya llegado.
             if (cliente.EstaPausada)
                 throw new BE.AppException("err.bll.pedido.suscripcion_pausada",
@@ -963,7 +963,7 @@ namespace BLL
             DateTime? desde = null, DateTime? hasta = null)
             => dalHistorial.ObtenerPorPedido(idPedido, accion, desde, hasta);
 
-        // T06b — Qué operaciones se pueden revertir desde el historial. Lista BLANCA: una
+        // T06b: Qué operaciones se pueden revertir desde el historial. Lista BLANCA: una
         // operación nueva queda bloqueada por defecto hasta que se analice si revertirla es seguro.
         //   • Los pasos del armado (PN01) tienen su propia operación en el proceso.
         //   • CANCELAR / DESCANCELAR / DEVOLUCION / RESTAURAR mueven prendas o reabren el circuito:
@@ -1048,12 +1048,12 @@ namespace BLL
                 ArmarHistorial("RESTAURAR", cambios.Select(c => (c.Campo, c.ValorNuevo, c.ValorAnterior)).ToList()));
 
             bitacora.Registrar(modulo,
-                $"Restaurar Pedido #{idPedido} — Revertida operación '{accionOriginal}' (op. #{idOperacion})",
+                $"Restaurar Pedido #{idPedido}: Revertida operación '{accionOriginal}' (op. #{idOperacion})",
                 BE.Criticidad.Alta);
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.Reactivacion,
-                $"Pedido #{idPedido} restaurado — operación '{accionOriginal}' #{idOperacion} revertida",
+                $"Pedido #{idPedido} restaurado: operación '{accionOriginal}' #{idOperacion} revertida",
                 idPedido: idPedido);
         }
     }

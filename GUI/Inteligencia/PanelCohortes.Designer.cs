@@ -77,7 +77,7 @@ namespace GUI.Inteligencia
             this.lblResumen.Name = "lblResumen";
             this.lblResumen.Size = new System.Drawing.Size(558, 46);
             this.lblResumen.TabIndex = 0;
-            this.lblResumen.Text = "Peor cohorte: —";
+            this.lblResumen.Text = "Menor permanencia: -";
             this.lblResumen.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btnActuar
@@ -92,7 +92,7 @@ namespace GUI.Inteligencia
             this.btnActuar.Name = "btnActuar";
             this.btnActuar.Size = new System.Drawing.Size(230, 46);
             this.btnActuar.TabIndex = 1;
-            this.btnActuar.Text = "Actuar sobre la peor cohorte";
+            this.btnActuar.Text = "Actuar sobre el grupo con menor permanencia";
             this.btnActuar.UseVisualStyleBackColor = false;
             this.btnActuar.Click += new System.EventHandler(this.BtnActuar_Click);
             // 

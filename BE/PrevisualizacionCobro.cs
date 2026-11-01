@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// PdN6 — El próximo cobro de un cliente, calculado por BLL.Cobro.PrevisualizarCobro para
+    /// PdN6: El próximo cobro de un cliente, calculado por BLL.Cobro.PrevisualizarCobro para
     /// mostrarlo ANTES de procesarlo: importe del período, el descuento que corresponde, los
     /// cargos por daño/pérdida pendientes y el total (la pantalla solo lo muestra, no suma nada).
     /// </summary>

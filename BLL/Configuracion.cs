@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BLL
 {
-    // Resultado estructurado de la verificación de integridad — permite formatear el mensaje en cualquier idioma.
+    // Resultado estructurado de la verificación de integridad: permite formatear el mensaje en cualquier idioma.
     public class ResultadoIntegridad
     {
         public List<string> FilasCorruptas { get; set; } = new List<string>();
@@ -22,7 +22,7 @@ namespace BLL
             {
                 if (ErrorTecnico != null) return $"Advertencia al verificar integridad DV:\n{ErrorTecnico}";
                 var sb = new StringBuilder();
-                sb.AppendLine("ALERTA DE INTEGRIDAD — Tabla Usuario");
+                sb.AppendLine("ALERTA DE INTEGRIDAD: Tabla Usuario");
                 sb.AppendLine(new string('─', 50));
                 sb.AppendLine();
                 if (HayDvhInvalido)
@@ -34,7 +34,7 @@ namespace BLL
                 if (HayDvvInvalido)
                 {
                     sb.AppendLine("El DVV de la tabla no coincide con el valor almacenado.");
-                    sb.AppendLine($"  Almacenado: {(DvvAlmacenado?.ToString() ?? "—")}  |  Calculado: {DvvCalculado}");
+                    sb.AppendLine($"  Almacenado: {(DvvAlmacenado?.ToString() ?? "-")}  |  Calculado: {DvvCalculado}");
                     sb.AppendLine();
                 }
                 sb.AppendLine("Posibles causas: modificación directa en la base de datos,");
@@ -63,11 +63,11 @@ namespace BLL
     }
 
     /// <summary>
-    /// Capa de Lógica de Negocio — Configuración del Sistema.
+    /// Capa de Lógica de Negocio: Configuración del Sistema.
     ///
     /// Responsabilidades de arranque (Program.Main):
-    ///   1. VerificarConexionDAL()  — confirma que SQL Server responde antes del Login.
-    ///   2. VerificarIntegridadDV() — T07: controla DVH/DVV de las tablas protegidas. Se ejecuta
+    ///   1. VerificarConexionDAL(): confirma que SQL Server responde antes del Login.
+    ///   2. VerificarIntegridadDV(): T07: controla DVH/DVV de las tablas protegidas. Se ejecuta
     ///      ANTES de mostrar la ventana de Login (requisito de cátedra). Retorna false si detecta
     ///      manipulación externa; Program deja constancia en bitácora y, tras autenticarse,
     ///      reserva el detalle y la reparación al Administrador.
@@ -76,30 +76,170 @@ namespace BLL
     {
         /// <summary>
         /// Verifica la conexión a SQL Server usando DAL.Acceso.VerificarConexion().
-        /// Retorna false y un mensaje de error si la conexión falla.
+        /// Retorna false y un mensaje de error si la conexión falla. El mensaje explica la causa concreta
+        /// (número de SqlException → <see cref="ClasificarErrorConexion"/>): base inexistente, sin permiso,
+        /// servidor que no responde o servicio detenido, u otra; siempre con el servidor configurado y dónde
+        /// está la cadena de conexión. Se muestra ANTES de que haya base: los textos salen del corpus
+        /// embebido (traducciones.tsv) en el idioma de Windows (<see cref="IdiomaPrevioALaConexion"/>).
         /// Se invoca desde Program.Main() antes de mostrar cualquier formulario.
         /// </summary>
         public static bool VerificarConexionDAL(out string mensajeError)
         {
             mensajeError = null;
+            Exception error;
             try
             {
-                bool ok = DAL.Acceso.GetInstance().VerificarConexion();
+                if (DAL.Acceso.GetInstance().VerificarConexion(out error)) return true;
+            }
+            catch (Exception ex) { error = ex; }   // p. ej. falta la cadena 'WardrobeFlowDB' en el .config
 
-                if (!ok)
-                {
-                    mensajeError = "No se pudo conectar a la base de datos en el servidor '" + ServidorConfigurado() + "'.\n" +
-                                   "Verifique que SQL Server esté en ejecución.\n\n" + AyudaCadenaConexion();
-                    return false;
-                }
-                return true;
+            int? numero = NumeroErrorSql(error);
+            var causa = ClasificarErrorConexion(numero, error);
+            System.Diagnostics.Trace.TraceError(
+                $"[Configuracion.VerificarConexionDAL] Causa: {causa}; SqlException.Number: {(numero.HasValue ? numero.ToString() : "-")}; " +
+                $"servidor '{ServidorConfigurado()}'; {error?.GetType().Name}: {error?.Message}");
+            mensajeError = MensajeErrorConexion(causa, numero, error?.Message, ServidorConfigurado(), BaseDeDatosConfigurada(),
+                RutaConfiguracion(), TextoPrevioALaConexion);
+            return false;
+        }
+
+        /// <summary>Título del cuadro del error de conexión, en el idioma de Windows (corpus embebido).</summary>
+        public static string TituloErrorConexion() => TextoPrevioALaConexion("conexion.error.titulo", "Error de conexión");
+
+        // Texto del corpus embebido (traducciones.tsv) en el idioma de Windows: todavía no hay tabla Traduccion.
+        private static string TextoPrevioALaConexion(string clave, string respaldo)
+        {
+            try
+            {
+                var textos = Servicios.Multiidioma.Traductor.ObtenerTraduccionesHardcode(IdiomaPrevioALaConexion());
+                return textos != null && textos.ContainsKey(clave) && !string.IsNullOrWhiteSpace(textos[clave].Texto) ? textos[clave].Texto : respaldo;
             }
             catch (Exception ex)
             {
-                mensajeError = $"Error al inicializar la conexión:\n{ex.Message}\n\n" + AyudaCadenaConexion();
-                return false;
+                System.Diagnostics.Trace.TraceError("[Configuracion] " + ex.Message);
+                return respaldo;
             }
         }
+
+        /// <summary>Causa de una falla de conexión, según el número de SqlException.</summary>
+        public enum CausaConexion
+        {
+            /// <summary>4060: la base WardrobeFlowDB no existe en el servidor (o no se puede abrir).</summary>
+            BaseInexistente,
+            /// <summary>18456 / 18452: el login fue rechazado o el usuario de Windows no tiene permiso.</summary>
+            SinPermiso,
+            /// <summary>-2, -1, 2, 53, 258, 26: servidor no encontrado, no responde o tiempo agotado (servicio detenido).</summary>
+            ServidorNoResponde,
+            /// <summary>Cualquier otro error (se muestra el número).</summary>
+            Otra
+        }
+
+        /// <summary>Números de SqlException que significan «el servidor no responde» (incluye -2, tiempo de espera agotado).</summary>
+        public static readonly IReadOnlyCollection<int> NumerosServidorNoResponde = new[] { -2, -1, 2, 53, 258, 26 };
+
+        /// <summary>
+        /// Decisión PURA: número de SqlException → causa. Si la falla no es de SQL Server (sin número: falta
+        /// la cadena de conexión, cadena mal formada), es <see cref="CausaConexion.Otra"/>.
+        /// </summary>
+        public static CausaConexion ClasificarErrorConexion(int? numeroSql, Exception error = null)
+        {
+            // Una SqlException puede traer varios errores (4060 y 18456 juntos cuando la base no existe):
+            // manda el más específico.
+            var numeros = new List<int>();
+            if (numeroSql.HasValue) numeros.Add(numeroSql.Value);
+            numeros.AddRange(NumerosErrorSql(error));
+            if (numeros.Contains(4060)) return CausaConexion.BaseInexistente;
+            if (numeros.Contains(18456) || numeros.Contains(18452)) return CausaConexion.SinPermiso;
+            foreach (int n in numeros)
+                if (System.Linq.Enumerable.Contains(NumerosServidorNoResponde, n)) return CausaConexion.ServidorNoResponde;
+            return CausaConexion.Otra;
+        }
+
+        /// <summary>Número del primer error de la SqlException (buscada también en las excepciones internas).</summary>
+        public static int? NumeroErrorSql(Exception error)
+        {
+            foreach (int n in NumerosErrorSql(error)) return n;
+            return null;
+        }
+
+        private static IEnumerable<int> NumerosErrorSql(Exception error)
+        {
+            for (var e = error; e != null; e = e.InnerException)
+                if (e is System.Data.SqlClient.SqlException sql)
+                {
+                    if (sql.Errors != null && sql.Errors.Count > 0)
+                        foreach (System.Data.SqlClient.SqlError err in sql.Errors) yield return err.Number;
+                    else yield return sql.Number;
+                }
+        }
+
+        /// <summary>¿El servidor configurado es una instancia de SQL Server Express LocalDB?</summary>
+        public static bool EsLocalDb(string servidor) =>
+            !string.IsNullOrEmpty(servidor) && servidor.IndexOf("(localdb)", StringComparison.OrdinalIgnoreCase) >= 0;
+
+        /// <summary>
+        /// Arma el mensaje (PURO) para la causa: qué pasó, qué hacer, el servidor configurado y dónde está la
+        /// cadena de conexión. <paramref name="T"/> resuelve clave → texto (con su respaldo en español).
+        /// </summary>
+        public static string MensajeErrorConexion(CausaConexion causa, int? numero, string detalle, string servidor, string baseDatos,
+                                                  string rutaConfiguracion, Func<string, string, string> T)
+        {
+            T = T ?? ((k, fb) => fb);
+            string srv = string.IsNullOrWhiteSpace(servidor) ? "?" : servidor;
+            string bd = string.IsNullOrWhiteSpace(baseDatos) ? "WardrobeFlowDB" : baseDatos;
+            string cuerpo;
+            switch (causa)
+            {
+                case CausaConexion.BaseInexistente:
+                    cuerpo = Formato(T("conexion.error.base",
+                        "La base de datos '{1}' no existe en el servidor '{0}'. Instale WardrobeFlow (o reinstálelo) para crearla, o elija en la instalación el servidor donde está la base."),
+                        srv, bd);
+                    break;
+                case CausaConexion.SinPermiso:
+                    cuerpo = Formato(T("conexion.error.permiso",
+                        "El servidor '{0}' rechazó el inicio de sesión: su usuario de Windows no tiene permiso sobre la base '{1}'. Pida acceso al administrador del servidor de SQL Server."),
+                        srv, bd);
+                    break;
+                case CausaConexion.ServidorNoResponde:
+                    cuerpo = EsLocalDb(srv)
+                        ? Formato(T("conexion.error.localdb",
+                            "La instancia LocalDB '{0}' no responde. LocalDB se inicia sola al conectarse; si no lo hace, abra una consola y ejecute: sqllocaldb start MSSQLLocalDB. Verifique también que SQL Server Express LocalDB esté instalado."),
+                            srv, bd)
+                        : Formato(T("conexion.error.servidor",
+                            "El servidor '{0}' no responde: no se encuentra en la red o el servicio de SQL Server está detenido. Para iniciarlo: Windows + R → services.msc → «SQL Server (SQLEXPRESS)» (o el de su instancia) → Iniciar. Verifique también el nombre del servidor."),
+                            srv, bd);
+                    break;
+                default:
+                    cuerpo = Formato(T("conexion.error.otro",
+                        "No se pudo conectar a la base de datos en el servidor '{0}'. Verifique que SQL Server esté en ejecución. (Error {2}: {3})"),
+                        srv, bd, numero.HasValue ? numero.Value.ToString() : "-", detalle ?? "-");
+                    break;
+            }
+            return cuerpo + "\n\n" + Formato(T("conexion.ayuda.cadena",
+                "La cadena de conexión 'WardrobeFlowDB' está en:\n{0}\n(o reinstale WardrobeFlow y elija otra instancia de SQL Server)."), rutaConfiguracion ?? "?");
+        }
+
+        private static string Formato(string plantilla, params object[] args)
+        {
+            try { return string.Format(plantilla, args); }
+            catch (FormatException) { return plantilla; }
+        }
+
+        /// <summary>
+        /// Idioma de los mensajes previos a la conexión: el de Windows si es uno de los 4 del sistema (ES, EN,
+        /// RU, PT); si no, el idioma por defecto (ES). Todavía no hay base para leer la preferencia guardada.
+        /// </summary>
+        public static Servicios.Multiidioma.Idioma IdiomaPrevioALaConexion(System.Globalization.CultureInfo cultura = null)
+        {
+            string codigo = (cultura ?? System.Globalization.CultureInfo.CurrentUICulture).TwoLetterISOLanguageName;
+            foreach (var i in Servicios.Multiidioma.Traductor.ObtenerIdiomasHardcode())
+                if (string.Equals(i.Id, codigo, StringComparison.OrdinalIgnoreCase)) return i;
+            return Servicios.Multiidioma.Traductor.ObtenerIdiomaDefault();
+        }
+
+        // En una instalación la cadena no está en "App.config" sino en GUI.exe.config, al lado del
+        // ejecutable (el instalador la escribe con el servidor elegido): se indica la ruta real.
+        private static string RutaConfiguracion() => AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
 
         /// <summary>
         /// Servidor (Data Source) de la cadena de conexión configurada ('WardrobeFlowDB', la misma que
@@ -131,14 +271,8 @@ namespace BLL
             catch { return "?"; }
         }
 
-        // En una instalación la cadena no está en "App.config" sino en GUI.exe.config, al lado del
-        // ejecutable (el instalador la escribe con el servidor elegido): se indica la ruta real.
-        private static string AyudaCadenaConexion() =>
-            "La cadena de conexión 'WardrobeFlowDB' está en:\n" +
-            AppDomain.CurrentDomain.SetupInformation.ConfigurationFile +
-            "\n(o reinstale WardrobeFlow y elija otra instancia de SQL Server).";
 
-        // ── T07 — Dígitos verificadores ────────────────────────────────────────────
+        // ── T07: Dígitos verificadores ────────────────────────────────────────────
         //
         // REGLAS DE VERIFICACIÓN (formato 2):
         //   • El script de instalación deja en ParametroSistema la versión del formato ('FormatoDV')
@@ -146,8 +280,8 @@ namespace BLL
         //     las tablas protegidas "sin calcular" (sin fila en DVVertical y DVH = 0).
         //   • Solo en ese caso la app INICIALIZA los dígitos de una tabla (y lo deja asentado en la
         //     bitácora y en el historial de integridad). Al terminar, baja la marca.
-        //   • Cualquier otra anomalía —DVV ausente sin marca, DVH en cero, formato distinto, error al
-        //     leer— es "NO íntegro" y va a la consola de recuperación. Ya no se recalcula solo nada
+        //   • Cualquier otra anomalía (DVV ausente sin marca, DVH en cero, formato distinto, error al
+        //     leer) es "NO íntegro" y va a la consola de recuperación. Ya no se recalcula solo nada
         //     por heurística (antes, poner todos los DVH en 0, o todos < 10, o borrar el marcador de
         //     formato, hacía que la app "sellara" en silencio una base manipulada).
 
@@ -245,7 +379,7 @@ namespace BLL
         }
 
         /// <summary>
-        /// T07 — Verifica la integridad de TODAS las tablas protegidas (Usuario, Cliente, Empleado,
+        /// T07: Verifica la integridad de TODAS las tablas protegidas (Usuario, Cliente, Empleado,
         /// Contratacion, Pedido, PermisoRelacion) mediante DVH y DVV. Inicializa solo las tablas que
         /// el instalador dejó pendientes. Ante cualquier error, la base se considera NO íntegra.
         /// </summary>
@@ -396,7 +530,7 @@ namespace BLL
         private static Servicios.IRegistroBitacora FabricaBitacora() => Servicios.FabricaBitacora.CrearSistema();
 
         /// <summary>
-        /// T07 — Asegura la integridad de las tablas protegidas ANTES de una operación sensible
+        /// T07: Asegura la integridad de las tablas protegidas ANTES de una operación sensible
         /// (alta/reset/desbloqueo de usuarios). Lanza AppException si la base fue manipulada,
         /// de modo que la operación no se ejecute sobre datos corruptos.
         /// </summary>
@@ -457,7 +591,7 @@ namespace BLL
             }
         }
 
-        // RF-10 — Genera el set inicial de claves de emergencia (10) una sola vez en la vida de la
+        // RF-10: Genera el set inicial de claves de emergencia (10) una sola vez en la vida de la
         // base (marca persistente), lo registra en la bitácora y exporta el .txt con acceso solo
         // para el usuario actual. Devuelve la ruta del .txt, o null si no generó nada.
         public static string SeedClavesEmergencia()
@@ -540,7 +674,7 @@ namespace BLL
             };
         }
 
-        // #5 — Guard fail-closed para operaciones sobre Dígitos Verificadores: exige una sesión
+        // #5: Guard fail-closed para operaciones sobre Dígitos Verificadores: exige una sesión
         // de Administrador. Un usuario autenticado sin permiso queda BLOQUEADO y el intento se
         // REGISTRA en bitácora (criticidad Alta). Antes, sin sesión se permitía todo ("break-glass
         // de arranque"); hoy la consola de recuperación solo se abre después de un login de
@@ -610,12 +744,12 @@ namespace BLL
         {
             filas.Clear();
             filas.AddRange(dvDAL.RecalcularTablaUsuario());
-            // T07 — Reconstruir el espejo de integridad para que refleje el estado recién
+            // T07: Reconstruir el espejo de integridad para que refleje el estado recién
             // aceptado como legítimo (inicialización o "Asumir pérdida"/"Recalcular Todo").
             new DAL.EspejoUsuario().Reconstruir(filas);
         }
 
-        // T07 — Recalcula DVH/DVV SOLO de la tabla Usuario y reconstruye su espejo de integridad.
+        // T07: Recalcula DVH/DVV SOLO de la tabla Usuario y reconstruye su espejo de integridad.
         // Lo usa la recuperación asistida tras restaurar valores desde el espejo. Exige Administrador.
         public static void RecalcularUsuario()
         {
@@ -627,7 +761,7 @@ namespace BLL
         // Expone el guard de autorización de DV para la recuperación asistida (mismo fail-closed).
         public static void ExigirAdminDV(string operacion) => ExigirAdminParaDV(operacion);
 
-        // T07 — Siembra el espejo de integridad SOLO si está vacío, a partir de filas ya verificadas
+        // T07: Siembra el espejo de integridad SOLO si está vacío, a partir de filas ya verificadas
         // como íntegras. Nunca siembra desde datos corruptos (se llama solo en el camino OK).
         private static void SeedEspejoSiVacio(List<BE.FilaUsuarioDV> filas)
         {
@@ -768,7 +902,7 @@ namespace BLL
                     DisparadoPor   = origen
                 });
             }
-            catch { /* tabla aún no existe — ignorar */ }
+            catch { /* tabla aún no existe: ignorar */ }
         }
     }
 }

@@ -79,7 +79,7 @@ namespace BLL
                 "Solo un Administrador puede realizar operaciones de backup y restauración.");
         }
 
-        // RF-04 — Antes de generar un backup se verifica la integridad (DVH/DVV) de la
+        // RF-04: Antes de generar un backup se verifica la integridad (DVH/DVV) de la
         // información a respaldar. Si la base está comprometida, se cancela el backup para
         // no perpetuar datos corruptos en la copia. Lanza AppException con el detalle.
         private static void VerificarIntegridadAntesDeRespaldar(bool automatico = false)
@@ -224,7 +224,7 @@ namespace BLL
             }
         }
 
-        // RF-06 — Genera un backup de INSTALACIÓN LIMPIA (estado inicial del sistema).
+        // RF-06: Genera un backup de INSTALACIÓN LIMPIA (estado inicial del sistema).
         // Se nombra con el marcador "Inicial" para distinguirlo en la lista y poder volver
         // siempre al punto de partida conocido. También valida integridad antes de generarlo.
         // Formato: WardrobeFlow_Inicial_yyyyMMddHHmmss_USUARIO.bak
@@ -359,14 +359,14 @@ namespace BLL
             return r;
         }
 
-        // RF-08 — Fecha en que se completó un backup (para informar el alcance de la pérdida
+        // RF-08: Fecha en que se completó un backup (para informar el alcance de la pérdida
         // antes de restaurar). Devuelve null si no puede leerse.
         public DateTime? ObtenerFechaBackup(string rutaArchivo)
         {
             return _dal.ObtenerFechaBackup(rutaArchivo);
         }
 
-        // RF-08 — Preview de pérdida a nivel REGISTRO: dada la fecha del backup, devuelve cuántos
+        // RF-08: Preview de pérdida a nivel REGISTRO: dada la fecha del backup, devuelve cuántos
         // registros de la base actual son posteriores a esa fecha (los que se perderían al
         // restaurar), desglosados por entidad. Solo incluye entidades con al menos 1 registro.
         // Es de SOLO LECTURA (no abre sesión ni modifica nada): se puede usar también en el
@@ -469,9 +469,9 @@ namespace BLL
 
         // Extrae el autor del nombre de un archivo de backup.
         // Formato: WardrobeFlow_Backup_yyyyMMddHHmmss_USUARIO.bak
-        // Devuelve "—" si el nombre no sigue la convención.
+        // Devuelve "-" si el nombre no sigue la convención.
         // Reconoce ambos prefijos: "WardrobeFlow_Backup_" (RealizarBackup) y
-        // "WardrobeFlow_Inicial_" (RealizarBackupInicial) — antes solo reconocía el primero, así
+        // "WardrobeFlow_Inicial_" (RealizarBackupInicial): antes solo reconocía el primero, así
         // que la UI (GUI.BackupForm, columna "Autor") siempre mostraba autor desconocido para
         // cualquier backup de instalación limpia, aunque el username estuviera en el nombre.
         private static readonly string[] PrefijosConocidos = { "WardrobeFlow_Backup_", "WardrobeFlow_Inicial_", PrefijoPrevioDemo };
@@ -482,14 +482,14 @@ namespace BLL
 
             string prefix = PrefijosConocidos.FirstOrDefault(p => nombreArchivo.StartsWith(p));
             if (prefix == null || nombreArchivo.Length <= prefix.Length + 15)
-                return "—";
+                return "-";
 
             string rest = nombreArchivo.Substring(prefix.Length);
             bool isNewFormat = rest.Length >= 15
                 && rest.Substring(0, 14).All(char.IsDigit)
                 && rest[14] == '_';
 
-            if (!isNewFormat) return "—";
+            if (!isNewFormat) return "-";
 
             return Path.GetFileNameWithoutExtension(rest.Substring(15));
         }

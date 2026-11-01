@@ -19,7 +19,11 @@ namespace GUI
             this.lblTitulo      = new System.Windows.Forms.Label();
             this.btnActualizar  = new System.Windows.Forms.Button();
             this.flow           = new System.Windows.Forms.FlowLayoutPanel();
+            this.pnlBarra       = new System.Windows.Forms.Panel();
+            this.chkMostrarLeidas = new System.Windows.Forms.CheckBox();
+            this.btnMarcarTodas = new System.Windows.Forms.Button();
             this.header.SuspendLayout();
+            this.pnlBarra.SuspendLayout();
             this.SuspendLayout();
 
             // ── header ─────────────────────────────────────────────────────────
@@ -58,6 +62,34 @@ namespace GUI
             this.btnActualizar.UseVisualStyleBackColor = false;
             this.btnActualizar.Click += new System.EventHandler(this.BtnActualizar_Click);
 
+            // ── pnlBarra: leídas (1.6.1) ─────────────────────────────────────────
+            this.pnlBarra.Controls.Add(this.chkMostrarLeidas);
+            this.pnlBarra.Controls.Add(this.btnMarcarTodas);
+            this.pnlBarra.Dock     = System.Windows.Forms.DockStyle.Top;
+            this.pnlBarra.Height   = 40;
+            this.pnlBarra.Name     = "pnlBarra";
+            this.pnlBarra.Padding  = new System.Windows.Forms.Padding(12, 0, 12, 0);
+            this.pnlBarra.TabIndex = 2;
+
+            this.chkMostrarLeidas.AutoSize = true;
+            this.chkMostrarLeidas.Font     = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.chkMostrarLeidas.Location = new System.Drawing.Point(14, 11);
+            this.chkMostrarLeidas.Name     = "chkMostrarLeidas";
+            this.chkMostrarLeidas.TabIndex = 0;
+            this.chkMostrarLeidas.Text     = "Mostrar también las leídas";
+            this.chkMostrarLeidas.CheckedChanged += new System.EventHandler(this.ChkMostrarLeidas_CheckedChanged);
+
+            this.btnMarcarTodas.Anchor   = ((System.Windows.Forms.AnchorStyles)(
+                System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right));
+            this.btnMarcarTodas.Font     = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.btnMarcarTodas.Location = new System.Drawing.Point(338, 5);
+            this.btnMarcarTodas.Name     = "btnMarcarTodas";
+            this.btnMarcarTodas.Size     = new System.Drawing.Size(210, 30);
+            this.btnMarcarTodas.TabIndex = 1;
+            this.btnMarcarTodas.Text     = "Marcar todas como leídas";
+            this.btnMarcarTodas.UseVisualStyleBackColor = true;
+            this.btnMarcarTodas.Click += new System.EventHandler(this.BtnMarcarTodas_Click);
+
             // ── flow ───────────────────────────────────────────────────────────
             this.flow.AutoScroll    = true;
             this.flow.Dock          = System.Windows.Forms.DockStyle.Fill;
@@ -71,6 +103,7 @@ namespace GUI
             this.BackColor       = System.Drawing.Color.FromArgb(252, 240, 245);
             this.ClientSize      = new System.Drawing.Size(560, 460);
             this.Controls.Add(this.flow);
+            this.Controls.Add(this.pnlBarra);
             this.Controls.Add(this.header);
             this.MinimumSize     = new System.Drawing.Size(420, 300);
             this.Name            = "AlertasForm";
@@ -79,6 +112,8 @@ namespace GUI
             this.Text            = "Centro de Alertas";
             this.header.ResumeLayout(false);
             this.header.PerformLayout();
+            this.pnlBarra.ResumeLayout(false);
+            this.pnlBarra.PerformLayout();
             this.ResumeLayout(false);
         }
 
@@ -88,5 +123,8 @@ namespace GUI
         private System.Windows.Forms.Label          lblTitulo;
         private System.Windows.Forms.Button         btnActualizar;
         private System.Windows.Forms.FlowLayoutPanel flow;
+        private System.Windows.Forms.Panel          pnlBarra;
+        private System.Windows.Forms.CheckBox       chkMostrarLeidas;
+        private System.Windows.Forms.Button         btnMarcarTodas;
     }
 }

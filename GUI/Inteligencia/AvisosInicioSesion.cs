@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace GUI.Inteligencia
 {
     /// <summary>
-    /// PN03 «Avisos al iniciar sesión» — Después del login, para quien tiene el Centro de decisiones, calcula
+    /// PN03 «Avisos al iniciar sesión»: Después del login, para quien tiene el Centro de decisiones, calcula
     /// en segundo plano qué hay para decidir hoy (BLL.Inteligencia.InteligenciaComercial.ResumirAvisos) y, si
     /// hay algo, muestra un aviso NO modal en la esquina del menú (AvisoComercialForm) con un botón que abre
     /// el Centro con el mecanismo del menú (Menu.AbrirUnico). El cálculo arranca enseguida (fuera del hilo de

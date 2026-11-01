@@ -88,7 +88,7 @@ namespace GUI
         }
 
         /// <summary>
-        /// SECUENCIA DE INGRESO — ejecuta <paramref name="accion"/> justo DESPUÉS de la guía de primer
+        /// SECUENCIA DE INGRESO: ejecuta <paramref name="accion"/> justo DESPUÉS de la guía de primer
         /// uso: cuando el usuario la cierra o, si la guía no se va a mostrar (ya la descartó, no hay
         /// interfaz, /silent…), apenas se decide, siempre por BeginInvoke en el hilo de UI. Si se
         /// llama cuando la guía ya se resolvió, la acción se encola de inmediato.

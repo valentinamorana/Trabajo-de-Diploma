@@ -4,7 +4,7 @@ namespace BE.Estados
     /// Patrón State (PdN2/PdN4). Equivalente al "Estado" del ejemplo de cátedra
     /// (Estado.ControlarEstado(Switch) → Apagado/Encendido/StandBy): cada estado
     /// concreto decide si la transición pedida es válida y, si lo es, la aplica
-    /// directamente sobre el Contexto (Prenda) — igual que el ejemplo hace
+    /// directamente sobre el Contexto (Prenda): igual que el ejemplo hace
     /// "sw.DefinirEstado(new StandBy())" dentro de ControlarEstado.
     /// A diferencia del ejemplo (un ciclo fijo con un único sucesor por estado), el
     /// ciclo de vida de una Prenda admite más de un destino válido por estado

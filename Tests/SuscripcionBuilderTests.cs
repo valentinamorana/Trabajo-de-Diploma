@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
-    /// <summary>PdN1 — Pruebas del patrón Builder para activar una suscripción.</summary>
+    /// <summary>PdN1: Pruebas del patrón Builder para activar una suscripción.</summary>
     [TestClass]
     public class SuscripcionBuilderTests
     {

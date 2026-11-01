@@ -2,7 +2,7 @@ namespace BLL.Estrategias
 {
     /// <summary>
     /// Criterio de "abandono temprano": en riesgo si el cliente se dio de alta hace más
-    /// de un umbral de días y JAMÁS generó un pedido — activó la suscripción pero nunca
+    /// de un umbral de días y JAMÁS generó un pedido: activó la suscripción pero nunca
     /// llegó a usar el servicio. Caso distinto a los otros dos: no depende de vencimiento
     /// ni de haber tenido actividad alguna vez.
     /// </summary>

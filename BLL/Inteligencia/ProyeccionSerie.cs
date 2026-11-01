@@ -18,7 +18,7 @@ namespace BLL.Inteligencia
     }
 
     /// <summary>
-    /// PN03 «Analizar» — Proyección de series mensuales (altas, bajas, ingresos). Matemática pura, sin
+    /// PN03 «Analizar»: Proyección de series mensuales (altas, bajas, ingresos). Matemática pura, sin
     /// base de datos ni UI, probada en Tests/InteligenciaComercialTests:
     ///   · Regresión lineal por mínimos cuadrados:
     ///       pendiente b = Σ(x − x̄)(y − ȳ) / Σ(x − x̄)²,  ordenada a = ȳ − b·x̄,

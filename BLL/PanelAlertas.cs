@@ -13,7 +13,7 @@ namespace BLL
     /// Cada chequeo está aislado en su try: si una fuente falla, no tumba al resto.
     ///
     /// FILTRO POR PATENTES: cada alerta tiene un "dueño" funcional (ver
-    /// <see cref="PatentesPorAlerta"/>). Antes todas se mostraban a cualquier rol — un
+    /// <see cref="PatentesPorAlerta"/>). Antes todas se mostraban a cualquier rol: un
     /// Vendedor veía "Integridad comprometida" o "No hay backups registrados", que solo el
     /// Administrador puede resolver. Ahora <see cref="ObtenerAlertas(BE.Usuario)"/> solo
     /// recolecta y devuelve las que el usuario puede atender. Administrador: bypass total
@@ -45,14 +45,14 @@ namespace BLL
                 // Inventario: Depósito (prendas / stock / inspección de devolución).
                 ["alert.prendas.limpieza"]       = new[] { BE.Patentes.Prendas, BE.Patentes.Stock, BE.Patentes.InspeccionDevolucion },
                 ["alert.listaespera.reservadas"] = new[] { BE.Patentes.ListaEspera },
-                // PN01 — el control de stock lo hace Depósito (el Vendedor sigue su pedido);
+                // PN01: el control de stock lo hace Depósito (el Vendedor sigue su pedido);
                 // comunicar faltantes y formalizar le toca al Vendedor.
                 ["alert.pedidos.control"]    = new[] { BE.Patentes.ControlStock, BE.Patentes.PedidosVenta },
                 ["alert.pedidos.faltantes"]  = new[] { BE.Patentes.PedidosVenta },
                 ["alert.pedidos.formalizar"] = new[] { BE.Patentes.PedidosVenta },
-                // PN02 — cola de cobro: rol Caja.
+                // PN02: cola de cobro: rol Caja.
                 ["alert.contr.pendientes"]   = new[] { BE.Patentes.Caja },
-                // PN04 — pedidos atrasados (entregados hace 30 días o más sin devolución): quien registra
+                // PN04: pedidos atrasados (entregados hace 30 días o más sin devolución): quien registra
                 // la devolución (Pedidos realizados) y Depósito, que reporta la prenda perdida.
                 ["alert.pedidos.atrasados"]  = new[] { BE.Patentes.PedidosRealizados, BE.Patentes.InspeccionDevolucion },
             };
@@ -155,9 +155,9 @@ namespace BLL
             if (Ve("alert.listaespera.reservadas"))
                 try { reservadasEspera = _listaEspera.ContarReservadasVigentes(); } catch { }
 
-            // PN01 — pedidos esperando una acción en el armado: Depósito (control de stock) o
+            // PN01: pedidos esperando una acción en el armado: Depósito (control de stock) o
             // Vendedor (comunicar faltantes / formalizar).
-            // PN04 — pedidos atrasados: entregados sin devolución y con la compra tácita cumplida.
+            // PN04: pedidos atrasados: entregados sin devolución y con la compra tácita cumplida.
             bool veArmado    = Ve("alert.pedidos.control") || Ve("alert.pedidos.faltantes") || Ve("alert.pedidos.formalizar");
             bool veAtrasados = Ve("alert.pedidos.atrasados");
             if (veArmado || veAtrasados)
@@ -177,7 +177,7 @@ namespace BLL
                 catch { }
             }
 
-            // PN02 — contrataciones registradas por el Vendedor que esperan el cobro de Caja.
+            // PN02: contrataciones registradas por el Vendedor que esperan el cobro de Caja.
             if (Ve("alert.contr.pendientes"))
                 try { contratacionesPendientes = new Contratacion().ContarPendientesDePago(); } catch { }
 
@@ -231,13 +231,13 @@ namespace BLL
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Critica, "alert.dv.corruptos",
                     "Integridad comprometida: {0} fila(s) con DV inválido.", dvRotas, dvRotas));
 
-            // 5) Lista de Espera (mejora opcional) — prendas reservadas esperando retiro
+            // 5) Lista de Espera (mejora opcional): prendas reservadas esperando retiro
             if (reservadasEspera > 0)
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.listaespera.reservadas",
                     "{0} prenda(s) reservada(s) por Lista de Espera esperando que el cliente pase a retirarlas.",
                     reservadasEspera, reservadasEspera));
 
-            // 6) PN01 — armado de pedidos pendiente de acción
+            // 6) PN01: armado de pedidos pendiente de acción
             if (enControl > 0)
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Advertencia, "alert.pedidos.control",
                     "{0} pedido(s) esperando el control de stock de Depósito.", enControl, enControl));
@@ -248,12 +248,12 @@ namespace BLL
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.pedidos.formalizar",
                     "{0} pedido(s) con las prendas separadas, listos para formalizar.", separados, separados));
 
-            // 7) PN02 — cola de Caja
+            // 7) PN02: cola de Caja
             if (contratacionesPendientes > 0)
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Info, "alert.contr.pendientes",
                     "{0} contratación(es) esperando el cobro de Caja.", contratacionesPendientes, contratacionesPendientes));
 
-            // 8) PN04 — pedidos atrasados (compra tácita: 30 días desde la entrega sin devolución)
+            // 8) PN04: pedidos atrasados (compra tácita: 30 días desde la entrega sin devolución)
             if (atrasados > 0)
                 alertas.Add(new BE.Alerta(BE.NivelAlerta.Advertencia, "alert.pedidos.atrasados",
                     "{0} pedido(s) atrasado(s): entregados hace 30 días o más, sin devolución registrada.",
@@ -262,10 +262,24 @@ namespace BLL
             return alertas;
         }
 
-        /// <summary>Cantidad de alertas visibles para el usuario (para el badge del menú).</summary>
+        /// <summary>Cantidad de alertas visibles para el usuario (leídas o no).</summary>
         public int Contar(BE.Usuario usuario)
         {
             return ObtenerAlertas(usuario).Count;
         }
+
+        /// <summary>
+        /// Alertas visibles para el usuario con la marca de leída (BLL.AlertasLeidas): una alerta leída
+        /// vuelve a contar como nueva si cambia su situación.
+        /// </summary>
+        public List<BE.Alerta> ObtenerAlertasConLectura(BE.Usuario usuario, AlertasLeidas leidas = null)
+        {
+            var alertas = ObtenerAlertas(usuario);
+            if (usuario == null || alertas.Count == 0) return alertas;
+            return (leidas ?? new AlertasLeidas()).Aplicar(usuario.Id, alertas);
+        }
+
+        /// <summary>Cantidad de alertas NO leídas (el aviso «Alertas (N)» del menú).</summary>
+        public int ContarNoLeidas(BE.Usuario usuario) => ObtenerAlertasConLectura(usuario).Count(a => !a.Leida);
     }
 }

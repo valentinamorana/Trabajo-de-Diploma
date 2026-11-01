@@ -2,7 +2,7 @@ namespace BE
 {
     /// <summary>
     /// DTO que la BLL devuelve con el estado comercial de un cliente para crear pedidos.
-    /// No contiene lógica — es solo transporte de datos hacia la GUI.
+    /// No contiene lógica: es solo transporte de datos hacia la GUI.
     /// </summary>
     public class EstadoComercialCliente
     {

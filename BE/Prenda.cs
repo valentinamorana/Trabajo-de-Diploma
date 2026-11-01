@@ -21,7 +21,7 @@ namespace BE
         public string       NombreCliente   { get; set; }
 
         /// <summary>FK → Cliente. A diferencia de IdClienteActual, NUNCA se limpia al
-        /// devolverse — sigue apuntando a quién la tuvo por última vez durante todo el
+        /// devolverse: sigue apuntando a quién la tuvo por última vez durante todo el
         /// ciclo de Mantenimiento (EnLimpieza), para poder registrar un cargo por
         /// daño/pérdida si corresponde aunque la prenda ya no esté EnUso.</summary>
         public int?         IdUltimoCliente { get; set; }
@@ -29,7 +29,7 @@ namespace BE
         /// <summary>Nombre del último cliente que la tuvo (cargado por JOIN, no persiste).</summary>
         public string       NombreUltimoCliente { get; set; }
 
-        /// <summary>PN04 — valor de reposición de la prenda: monto a cobrar si se pierde o se
+        /// <summary>PN04: valor de reposición de la prenda: monto a cobrar si se pierde o se
         /// daña sin posibilidad de reparación (Inspección de Devolución). Opcional: si no está
         /// cargado, el inspector puede tipear el monto igual al registrar el cargo.</summary>
         public decimal?     PrecioReposicion { get; set; }
@@ -41,7 +41,7 @@ namespace BE
         public bool EstaDisponible() => Estado == EstadoPrenda.Disponible;
 
         /// <summary>PN04, CU06-DEP Reportar Prenda Perdida: solo una prenda EnUso (en poder de
-        /// un cliente) puede reportarse como perdida — es la única transición manual que admite
+        /// un cliente) puede reportarse como perdida: es la única transición manual que admite
         /// ese estado (ver <see cref="Estados.EstadoEnUso"/>).</summary>
         public bool PuedeReportarsePerdida() => Estado == EstadoPrenda.EnUso;
 
@@ -59,7 +59,7 @@ namespace BE
         /// módulo de Prendas):
         ///   Disponible  → EnLimpieza | Baja
         ///   EnLimpieza  → Disponible | Baja
-        ///   EnUso       → Baja (PN04, CU06-DEP Reportar Prenda Perdida — la única manual)
+        ///   EnUso       → Baja (PN04, CU06-DEP Reportar Prenda Perdida: la única manual)
         ///   Baja        → (ninguna: estado final)
         /// La transición Disponible/EnLimpieza → EnUso solo ocurre
         /// internamente al crear o des-cancelar un pedido (ver DAL.Pedido).
@@ -68,12 +68,12 @@ namespace BE
 
         /// <summary>
         /// Patrón State: delega en el objeto Estado que representa el estado actual de
-        /// la prenda — equivalente a Switch.Presionar() → _estado.ControlarEstado(this)
+        /// la prenda: equivalente a Switch.Presionar() → _estado.ControlarEstado(this)
         /// del ejemplo de cátedra. Si la transición es válida, el propio Estado modifica
         /// este.Estado y devuelve true; si no, devuelve false sin modificar nada. A
         /// diferencia del ejemplo, la Prenda no retiene un objeto Estado en vivo (persiste
         /// como enum en la BD), así que acá se resuelve el Estado concreto actual antes de
-        /// delegarle el control — el objeto en sí no tiene estado propio, es descartable.
+        /// delegarle el control: el objeto en sí no tiene estado propio, es descartable.
         /// </summary>
         public bool ControlarEstado(EstadoPrenda destino) => ResolverEstado().ControlarEstado(this, destino);
 

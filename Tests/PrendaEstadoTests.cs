@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
-    /// <summary>PdN2/PdN4 — Pruebas del patrón State para el ciclo de vida de Prenda.</summary>
+    /// <summary>PdN2/PdN4: Pruebas del patrón State para el ciclo de vida de Prenda.</summary>
     [TestClass]
     public class PrendaEstadoTests
     {

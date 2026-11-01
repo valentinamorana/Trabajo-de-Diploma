@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN02, carril Vendedor del diagrama de actividad:
+    /// Capa de Presentación: PN02, carril Vendedor del diagrama de actividad:
     ///   Identificar cliente → ¿Registrado? (No: Registrar cliente) → Presentar planes →
     ///   ¿Elige plan y modalidad? (No: Asentar desistimiento) → Registrar contratación →
     ///   ¿Contratación válida? (No: Informar motivo; Sí: «Orden de cobro» para Caja).
@@ -150,9 +150,9 @@ namespace GUI
         }
 
         private string Ficha(BE.Cliente c) => string.Format(
-            Tr("lbl.contr.ficha", "Cliente: {0}  —  DNI {1}\nPlan actual: {2}  —  Vence: {3}  —  Prendas en uso: {4}"),
-            c.NombreCompleto, c.DNI, c.NombrePlan ?? "—",
-            c.FechaVencimiento?.ToString("d") ?? "—", c.StockUtilizado);
+            Tr("lbl.contr.ficha", "Cliente: {0}; DNI {1}\nPlan actual: {2}; Vence: {3}; Prendas en uso: {4}"),
+            c.NombreCompleto, c.DNI, c.NombrePlan ?? "-",
+            c.FechaVencimiento?.ToString("d") ?? "-", c.StockUtilizado);
 
         // ── "Presentar planes" («Planes disponibles») ────────────────────────
 
@@ -315,7 +315,7 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        // PN02 — Resultado de la venta, con el documento que el cliente se lleva: «Orden de cobro» (la
+        // PN02: Resultado de la venta, con el documento que el cliente se lleva: «Orden de cobro» (la
         // presenta en Caja) o «Aviso de desistimiento». No es una pregunta después de la acción: el
         // botón está ahí por si hace falta imprimirlo.
         public void MostrarResultado(IWin32Window propietario)

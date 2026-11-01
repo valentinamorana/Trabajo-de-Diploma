@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     /// <summary>
-    /// T07 — Recuperación de integridad asistida por el espejo (BLL.RecuperacionIntegridad).
+    /// T07: Recuperación de integridad asistida por el espejo (BLL.RecuperacionIntegridad).
     /// El núcleo del diagnóstico (RecuperacionIntegridad.Evaluar) se ejercita con filas armadas a mano
     /// y el calculador de DV real: clasificación del daño (modificación, DVH corrupto, inserción externa,
     /// eliminación física, vaciado, reordenamiento) y qué opciones de recuperación quedan habilitadas.

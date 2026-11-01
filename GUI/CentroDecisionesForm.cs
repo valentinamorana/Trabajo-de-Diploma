@@ -12,7 +12,7 @@ using BLLI = BLL.Inteligencia;
 namespace GUI
 {
     /// <summary>
-    /// PN03 «Inteligencia comercial y promociones» — Centro de decisiones comerciales (Gerencia,
+    /// PN03 «Inteligencia comercial y promociones»: Centro de decisiones comerciales (Gerencia,
     /// patente mnuSugerenciaPromocion). Recorre el ciclo completo del proceso:
     ///
     ///   1. Analizar ........ KPI con variación contra el período anterior + 4 gráficos (tendencia con
@@ -73,6 +73,7 @@ namespace GUI
                 n.EntradaInvalida += (s, mensaje) => MostrarError(mensaje);
             Estilos.EstiloFormulario.BotonPrimario(btnAnalizar);
             Estilos.EstiloFormulario.BotonSecundario(btnUmbrales);
+            Estilos.EstiloFormulario.BotonSecundario(btnActualizarAnalisis);
             Estilos.EstiloFormulario.BotonSecundario(btnGlosario);
             Estilos.EstiloFormulario.BotonPrimario(btnInforme);
             Estilos.EstiloFormulario.BotonPrimario(btnAceptar);
@@ -84,6 +85,8 @@ namespace GUI
             Estilos.EstiloFormulario.BotonSecundario(btnHistCsv);
             Estilos.EstiloFormulario.BotonPrimario(btnRegistrarResultado);
             Estilos.EstiloFormulario.BotonSecundario(btnHistDescartar);
+            Estilos.EstiloFormulario.BotonSecundario(btnVerConstancia);
+            Estilos.EstiloFormulario.BotonSecundario(btnAbrirConstancia);
             Estilos.EstiloFormulario.BotonSecundario(btnSimAgregar);
             Estilos.EstiloFormulario.BotonSecundario(btnSimLimpiar);
             Estilos.EstiloFormulario.BotonPrimario(btnSimCrearSugerencia);
@@ -99,7 +102,7 @@ namespace GUI
             }
             dgvRecomendaciones.CellFormatting += DgvRecomendaciones_CellFormatting;
             btnAceptar.Enabled = btnDescartar.Enabled = btnPosponer.Enabled = btnSimularOpcion.Enabled = false;
-            btnRegistrarResultado.Enabled = btnHistDescartar.Enabled = false;
+            btnRegistrarResultado.Enabled = btnHistDescartar.Enabled = btnVerConstancia.Enabled = false;
             btnAplicarVeredicto.Enabled = false;
             AgregarPestanaMetas();   // CentroDecisionesForm.Metas.cs
         }
@@ -146,12 +149,13 @@ namespace GUI
         private void Traducir(Idioma idioma)
         {
             Text = Tr("mnu.centrodecisiones", "Centro de decisiones comerciales");
-            lblTitulo.Text = Tr("cdc.titulo", "Centro de decisiones comerciales — Inteligencia comercial y promociones");
+            lblTitulo.Text = Tr("cdc.titulo", "Centro de decisiones comerciales");
             lblDesde.Text = lblHistDesde.Text = lblMedirDesde.Text = Tr("cdc.desde", "Desde:");
             lblHasta.Text = lblHistHasta.Text = lblMedirHasta.Text = Tr("cdc.hasta", "Hasta:");
             lblPlan.Text = Tr("cdc.plan", "Plan:");
             btnAnalizar.Text = Tr("cdc.btn.analizar", "Analizar");
-            btnUmbrales.Text = Tr("cdc.btn.umbrales", "Umbrales");
+            btnActualizarAnalisis.Text = Tr("cdc.btn.actualizar", "↻ Actualizar");
+            btnUmbrales.Text = Tr("cdc.btn.umbrales", "Parámetros del análisis");
             btnGlosario.Text = Tr("cdc.btn.glosario", "Glosario");
             btnInforme.Text = Tr("cdc.btn.informe", "Informe ejecutivo (PDF)");
             tabAnalizar.Text = Tr("cdc.tab.analizar", "1. Analizar");
@@ -170,6 +174,8 @@ namespace GUI
             btnHistFiltrar.Text = Tr("cdc.btn.filtrar", "Filtrar");
             btnRegistrarResultado.Text = Tr("cdc.btn.resultado", "Registrar resultado real");
             btnHistDescartar.Text = Tr("cdc.btn.descartardecision", "Descartar decisión");
+            btnVerConstancia.Text = Tr("cdc.btn.verconstancia", "Ver constancia");
+            btnAbrirConstancia.Text = Tr("cdc.btn.abrirconstancia", "Abrir constancia desde archivo…");
             lblSimPlan.Text = Tr("cdc.plan", "Plan:");
             lblSimClientesPlan.Text = Tr("cdc.sim.clientesplan", "Clientes del plan:");
             lblSimObjetivo.Text = Tr("cdc.sim.objetivo", "Clientes objetivo (en riesgo):");
@@ -187,9 +193,11 @@ namespace GUI
             CargarPresets();
             CargarPlanes();
             CargarEstadosHistorial();
-            foreach (var c in new Control[] { btnAnalizar, btnUmbrales, btnGlosario, btnInforme })
+            foreach (var c in new Control[] { btnAnalizar, btnUmbrales, btnGlosario, btnInforme, btnActualizarAnalisis })
                 tip.SetToolTip(c, null);
-            tip.SetToolTip(btnUmbrales, Tr("cdc.tip.umbrales", "Valores que disparan cada recomendación (editables por Gerencia)."));
+            tip.SetToolTip(btnUmbrales, Tr("cdc.tip.umbrales", "Valores que usa el análisis para decidir qué recomendar, por ejemplo el abandono a partir del cual se sugiere una promoción. Los edita Gerencia."));
+            tip.SetToolTip(btnAbrirConstancia, Tr("cdc.tip.abrirconstancia", "Abre una constancia exportada (.xml o .json), la valida y la compara con la registrada en el sistema: indica si coincide o si el archivo fue modificado."));
+            tip.SetToolTip(btnActualizarAnalisis, Tr("cdc.tip.actualizar", "Vuelve a analizar con el período y el plan elegidos arriba: actualiza los indicadores, los gráficos, las recomendaciones y la permanencia de clientes."));
             tip.SetToolTip(btnInforme, Tr("cdc.tip.informe", "PDF con filtros, indicadores, gráficos, recomendaciones, decisiones, escenarios y glosario."));
         }
 
@@ -428,7 +436,7 @@ namespace GUI
 
             int ocultas = _recs.Count - _recs.Count(r => BLLI.DecisionesComerciales.DebeMostrarse(r, DateTime.Today, DiasSilencio()));
             lblRecsResumen.Text = _recs.Count == 0
-                ? Tr("cdc.recs.ninguna", "El motor no encontró situaciones que requieran una decisión con los umbrales actuales.")
+                ? Tr("cdc.recs.ninguna", "El análisis no encontró situaciones que requieran una decisión con los parámetros del análisis actuales.")
                 : Tr("cdc.recs.resumen", "{0} recomendación(es): {1} de prioridad alta · impacto total estimado {2:C0} · {3} oculta(s) por decisiones anteriores",
                      new object[] { _recs.Count, _recs.Count(r => r.Prioridad == BE.PrioridadRecomendacion.Alta),
                                     _recs.Where(r => r.ImpactoEstimado > 0).Sum(r => r.ImpactoEstimado), ocultas });
@@ -563,8 +571,24 @@ namespace GUI
         private void DgvOpciones_SelectionChanged(object sender, EventArgs e) => ActualizarSimularOpcion();
 
         // "Simular esta opción": solo para opciones de promoción (plan, %, días y retención). La regla es de la BLL.
-        private void ActualizarSimularOpcion() =>
-            btnSimularOpcion.Enabled = BLLI.InteligenciaComercial.EsSimulable(OpcionElegida());
+        // Si no se puede, el botón queda deshabilitado y debajo se explica por qué (un botón deshabilitado no
+        // muestra su tooltip).
+        private void ActualizarSimularOpcion()
+        {
+            var opcion = OpcionElegida();
+            bool simulable = BLLI.InteligenciaComercial.EsSimulable(opcion);
+            btnSimularOpcion.Enabled = simulable;
+            string motivo = opcion == null || simulable ? null
+                : Tr("cdc.sim.motivonosimulable",
+                     "Solo se simulan las opciones que proponen una promoción con plan, descuento y duración; esta opción propone «{0}».",
+                     new object[] { TextosComerciales.Accion(opcion.Accion) });
+            lblSimularMotivo.Text = motivo ?? string.Empty;
+            lblSimularMotivo.Visible = motivo != null;
+            tip.SetToolTip(lblSimularMotivo, motivo);
+            tip.SetToolTip(btnSimularOpcion, simulable
+                ? Tr("cdc.tip.simularopcion", "Lleva esta opción al Simulador (plan, descuento, duración y retención) y cambia a esa pestaña.")
+                : motivo);
+        }
 
         // Lleva la opción al simulador con su plan, %, días, retención y clientes objetivo, y simula.
         private void BtnSimularOpcion_Click(object sender, EventArgs e)
@@ -611,8 +635,9 @@ namespace GUI
             }
             try
             {
-                var decision = Decisiones.Aceptar(Modulo, rec, indice);
+                var decision = Decisiones.Aceptar(Modulo, rec, indice, _panel);
                 Ejecutar(rec, opcion, decision, plan);
+                AvisarConstancia(decision);
             }
             catch (Exception ex) { MostrarError(ex); }
             RefrescarDecisiones();
@@ -627,8 +652,9 @@ namespace GUI
             if (motivo == null) return;
             try
             {
-                var d = Decisiones.Descartar(Modulo, rec, motivo);
+                var d = Decisiones.Descartar(Modulo, rec, motivo, _panel);
                 MostrarOk(Tr("cdc.msg.descartada", "Recomendación descartada (decisión #{0}).", new object[] { d.IdDecision }));
+                AvisarConstancia(d);
             }
             catch (Exception ex) { MostrarError(ex); }
             RefrescarDecisiones();
@@ -640,11 +666,21 @@ namespace GUI
             if (rec == null || Decisiones == null) return;
             try
             {
-                var d = Decisiones.Posponer(Modulo, rec, (int)numDiasPosponer.Value, null);
+                var d = Decisiones.Posponer(Modulo, rec, (int)numDiasPosponer.Value, null, _panel);
                 MostrarOk(Tr("cdc.msg.pospuesta", "Recomendación pospuesta hasta el {0:d}.", new object[] { d.PospuestaHasta }));
+                AvisarConstancia(d);
             }
             catch (Exception ex) { MostrarError(ex); }
             RefrescarDecisiones();
+        }
+
+        // La constancia nunca frena la decisión: si no se pudo guardar, se avisa en la barra (no es un diálogo).
+        private void AvisarConstancia(BE.DecisionComercial d)
+        {
+            if (d?.AvisoConstancia == null) return;
+            MostrarError(Tr("cdc.constancia.nosepudo",
+                "La decisión #{0} quedó registrada, pero no se pudo guardar su constancia: {1}",
+                new object[] { d.IdDecision, d.AvisoConstancia }));
         }
 
         private void RefrescarDecisiones()
@@ -884,6 +920,46 @@ namespace GUI
             var d = DecisionSeleccionada();
             btnRegistrarResultado.Enabled = d != null && d.AdmiteResultado();
             btnHistDescartar.Enabled = d != null && d.TransicionValida(BE.EstadoDecision.Descartada);
+            btnVerConstancia.Enabled = d != null && d.TieneConstancia;
+            tip.SetToolTip(btnVerConstancia, d != null && !d.TieneConstancia
+                ? Tr("cdc.constancia.sin", "Sin constancia: decisión anterior a la versión 1.6.1.")
+                : Tr("cdc.tip.verconstancia", "Muestra lo que se vio al decidir: la recomendación, la opción elegida, los indicadores, los parámetros del análisis, los supuestos y las advertencias. Se puede exportar a XML o JSON."));
+        }
+
+        // ── Constancia de la decisión (1.6.1) ──
+
+        private void BtnVerConstancia_Click(object sender, EventArgs e)
+        {
+            var d = DecisionSeleccionada();
+            if (d == null) return;
+            try
+            {
+                var constancia = new BLLI.ConstanciasDecision().Obtener(d.IdDecision);
+                if (constancia == null) { MostrarError(Tr("cdc.constancia.sin", "Sin constancia: decisión anterior a la versión 1.6.1.")); return; }
+                using (var dlg = new ConstanciaDecisionForm(constancia, null)) dlg.ShowDialog(this);
+            }
+            catch (Exception ex) { MostrarError(ex); }
+        }
+
+        private void BtnAbrirConstancia_Click(object sender, EventArgs e)
+        {
+            string ruta;
+            using (var dlg = new OpenFileDialog
+            {
+                Title = Tr("cdc.btn.abrirconstancia", "Abrir constancia desde archivo…"),
+                Filter = Tr("cdc.constancia.filtro", "Constancia (*.xml;*.json)|*.xml;*.json|XML (*.xml)|*.xml|JSON (*.json)|*.json"),
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            })
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                ruta = dlg.FileName;
+            }
+            try
+            {
+                var verificada = new BLLI.ConstanciasDecision().Abrir(Modulo, ruta);
+                using (var dlg = new ConstanciaDecisionForm(verificada.Constancia, verificada)) dlg.ShowDialog(this);
+            }
+            catch (Exception ex) { MostrarError(ex); }
         }
 
         private void BtnRegistrarResultado_Click(object sender, EventArgs e)
@@ -1030,7 +1106,7 @@ namespace GUI
             lblVeredictoExplicacion.Text = explicacion;
             if (r == null)
             {
-                lblVeredicto.Text = "—";
+                lblVeredicto.Text = "-";
                 pnlVeredicto.BackColor = Tema.PanelClaro;
                 lblVeredicto.ForeColor = Tema.TextoMuted;
                 lblSimResultados.Text = string.Empty;
@@ -1047,8 +1123,8 @@ namespace GUI
             lblSimResultados.Text = Tr("cdc.sim.resultados",
                 "Costo del descuento: {0:C0}\nClientes retenidos: {1:0.#}\nIngreso retenido: {2:C0}\nBeneficio neto: {3:C0}\nROI: {4}\nConviene si retiene al menos: {5}",
                 new object[] { r.CostoDescuento, r.ClientesRetenidos, r.IngresoRetenido, r.BeneficioNeto,
-                               r.Roi.HasValue ? r.Roi.Value.ToString("0.#") + " %" : "—",
-                               r.TasaEquilibrio.HasValue ? r.TasaEquilibrio.Value.ToString("0.#") + " %" : "—" }).Replace("\\n", "\n");
+                               r.Roi.HasValue ? r.Roi.Value.ToString("0.#") + " %" : "-",
+                               r.TasaEquilibrio.HasValue ? r.TasaEquilibrio.Value.ToString("0.#") + " %" : "-" }).Replace("\\n", "\n");
         }
 
         private void BtnSimAgregar_Click(object sender, EventArgs e)
@@ -1092,8 +1168,8 @@ namespace GUI
                 Fila(Tr("cdc.col.costo", "Costo"), r => r.CostoDescuento.ToString("C0"));
                 Fila(Tr("cdc.col.ingresoretenido", "Ingreso retenido"), r => r.IngresoRetenido.ToString("C0"));
                 Fila(Tr("cdc.col.neto", "Beneficio neto"), r => r.BeneficioNeto.ToString("C0"));
-                Fila(Tr("cdc.col.roi", "ROI"), r => r.Roi.HasValue ? r.Roi.Value.ToString("0.#") + " %" : "—");
-                Fila(Tr("cdc.col.equilibrio", "Equilibrio"), r => r.TasaEquilibrio.HasValue ? r.TasaEquilibrio.Value.ToString("0.#") + " %" : "—");
+                Fila(Tr("cdc.col.roi", "ROI"), r => r.Roi.HasValue ? r.Roi.Value.ToString("0.#") + " %" : "-");
+                Fila(Tr("cdc.col.equilibrio", "Equilibrio"), r => r.TasaEquilibrio.HasValue ? r.TasaEquilibrio.Value.ToString("0.#") + " %" : "-");
                 Fila(Tr("cdc.col.veredicto", "Veredicto"), r => TextosComerciales.VeredictoSimulacion(r.Veredicto));
             }
             dgvEscenarios.DataSource = t;
@@ -1167,8 +1243,8 @@ namespace GUI
                                         : m.Veredicto == BE.VeredictoPromocion.Mantener ? Tema.Info : Tema.TextoMuted;
             lblMedirExplicacion.Text = TextosComerciales.R(m.Explicacion) + Environment.NewLine + Environment.NewLine +
                 Tr("cdc.medir.roi", "Beneficio real: {0} · ROI real: {1} · ROI esperado: {2}",
-                   new object[] { m.BeneficioReal?.ToString("C0") ?? "—", m.RoiReal.HasValue ? m.RoiReal.Value.ToString("0.#") + " %" : "—",
-                                  m.RoiEstimado.HasValue ? m.RoiEstimado.Value.ToString("0.#") + " %" : "—" });
+                   new object[] { m.BeneficioReal?.ToString("C0") ?? "-", m.RoiReal.HasValue ? m.RoiReal.Value.ToString("0.#") + " %" : "-",
+                                  m.RoiEstimado.HasValue ? m.RoiEstimado.Value.ToString("0.#") + " %" : "-" });
             // Solo hay algo que ejecutar si el veredicto es dar de baja o extender (Mantener: sigue como está).
             bool vigente = m.Promocion?.Estado == BE.EstadoPromocion.Vigente;
             bool accionable = m.Veredicto == BE.VeredictoPromocion.DarDeBaja || m.Veredicto == BE.VeredictoPromocion.Extender;
@@ -1187,8 +1263,9 @@ namespace GUI
             try
             {
                 Decisiones.AsociarDecisiones(new[] { rec });
-                var decision = Decisiones.Aceptar(Modulo, rec, 0);
+                var decision = Decisiones.Aceptar(Modulo, rec, 0, _panel);
                 Ejecutar(rec, rec.Principal, decision);
+                AvisarConstancia(decision);
             }
             catch (Exception ex) { MostrarError(ex); }
             RefrescarDecisiones();
@@ -1205,7 +1282,7 @@ namespace GUI
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
             }
-            MostrarOk(Tr("cdc.msg.umbrales", "Umbrales guardados. Vuelva a analizar para aplicarlos."));
+            MostrarOk(Tr("cdc.msg.umbrales", "Parámetros del análisis guardados. Vuelva a analizar para aplicarlos."));
             BtnAnalizar_Click(this, EventArgs.Empty);
         }
 
@@ -1221,29 +1298,39 @@ namespace GUI
             }
             try
             {
-                var datos = new InformeEjecutivo.Datos
-                {
-                    Panel = _panel,
-                    Recomendaciones = _recsVisibles,
-                    Decisiones = _historial.Where(d => d.Fecha.Date >= _panel.Desde && d.Fecha.Date <= DateTime.Today).ToList(),
-                    Medidos = _medidos,
-                    Escenarios = _escenarios.ToList(),
-                    Mediciones = _mediciones,
-                    Metas = MetasParaInforme(),
-                    Usuario = BLL.Sesion.Actor
-                };
-                datos.Graficos.Add((Tr("cdc.grafico.tendencia", "Tendencia de 6 meses y proyección de 3"), GraficosComerciales.Png(chartTendencia)));
-                datos.Graficos.Add((Tr("cdc.grafico.riesgo", "Ingreso mensual en riesgo por plan"), GraficosComerciales.Png(chartRiesgo)));
-                datos.Graficos.Add((Tr("cdc.grafico.stock", "Stock por categoría"), GraficosComerciales.Png(chartStock)));
-                datos.Graficos.Add((Tr("cdc.grafico.rotacion", "Rotación: más y menos pedidas"), GraficosComerciales.Png(chartRotacion)));
-                if (_simActual != null || _escenarios.Count > 0)
-                    datos.Graficos.Add((Tr("cdc.grafico.sensibilidad", "Beneficio neto según la retención"), GraficosComerciales.Png(chartSensibilidad)));
-                AgregarGraficoMetas(datos);
-                AgregarCohortesAlInforme(datos);
-                var ruta = new Exportacion.GeneradorInformeComercial().Exportar("pdf", InformeEjecutivo.Armar(datos), this);
+                var ruta = new Exportacion.GeneradorInformeComercial().Exportar("pdf", ArmarInformeEjecutivo(), this);
                 if (ruta != null) MostrarOk(Tr("cdc.msg.informe", "Informe ejecutivo guardado: {0}", new object[] { ruta }));
             }
             catch (Exception ex) { MostrarError(ex); }
+        }
+
+        /// <summary>
+        /// El Informe ejecutivo con lo que muestra la pantalla (análisis, recomendaciones visibles, decisiones,
+        /// escenarios, mediciones, metas, cohortes y los gráficos). Separado del botón para poder generarlo
+        /// sin el diálogo de guardar (pruebas con datos reales).
+        /// </summary>
+        internal Exportacion.ReporteExportable ArmarInformeEjecutivo()
+        {
+            var datos = new InformeEjecutivo.Datos
+            {
+                Panel = _panel,
+                Recomendaciones = _recsVisibles,
+                Decisiones = _historial.Where(d => d.Fecha.Date >= _panel.Desde && d.Fecha.Date <= DateTime.Today).ToList(),
+                Medidos = _medidos,
+                Escenarios = _escenarios.ToList(),
+                Mediciones = _mediciones,
+                Metas = MetasParaInforme(),
+                Usuario = BLL.Sesion.Actor
+            };
+            datos.Graficos.Add((Tr("cdc.grafico.tendencia", "Tendencia de 6 meses y proyección de 3"), GraficosComerciales.Png(chartTendencia)));
+            datos.Graficos.Add((Tr("cdc.grafico.riesgo", "Ingreso mensual en riesgo por plan"), GraficosComerciales.Png(chartRiesgo)));
+            datos.Graficos.Add((Tr("cdc.grafico.stock", "Stock por categoría"), GraficosComerciales.Png(chartStock)));
+            datos.Graficos.Add((Tr("cdc.grafico.rotacion", "Rotación: más y menos pedidas"), GraficosComerciales.Png(chartRotacion)));
+            if (_simActual != null || _escenarios.Count > 0)
+                datos.Graficos.Add((Tr("cdc.grafico.sensibilidad", "Beneficio neto según la retención"), GraficosComerciales.Png(chartSensibilidad)));
+            AgregarGraficoMetas(datos);
+            AgregarCohortesAlInforme(datos);
+            return InformeEjecutivo.Armar(datos);
         }
 
         // ══ Auxiliares de diálogo ════════════════════════════════════════════════

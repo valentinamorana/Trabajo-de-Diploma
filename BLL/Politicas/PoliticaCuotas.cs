@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL.Politicas
 {
     /// <summary>
-    /// PN02 — Reglas del pago en cuotas (sin acceso a datos: se prueban solas):
+    /// PN02: Reglas del pago en cuotas (sin acceso a datos: se prueban solas):
     ///   · solo los medios de pago que permiten cuotas (Tarjeta de crédito) ofrecen planes;
     ///   · no se puede financiar en más cuotas que los meses que cubre la modalidad
     ///     (Mensual: 1; Trimestral: hasta 3; Anual: hasta 12);

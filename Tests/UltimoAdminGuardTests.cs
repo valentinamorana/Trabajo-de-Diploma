@@ -5,7 +5,7 @@ namespace Tests
 {
     /// <summary>
     /// Guard SISTÉMICO de "último administrador" (BLL.Familia.SistemaConservaGestion).
-    /// Pruebas AISLADAS del núcleo PURO: no tocan BD ni sesión — se arma un árbol Composite y
+    /// Pruebas AISLADAS del núcleo PURO: no tocan BD ni sesión; se arma un árbol Composite y
     /// una lista de usuarios en memoria y se verifica la decisión, igual estilo que
     /// ValidarPuedeArchivar / ValidarPuedeCambiarRol.
     /// </summary>

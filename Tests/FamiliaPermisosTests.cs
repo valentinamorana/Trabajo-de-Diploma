@@ -5,7 +5,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// T04 — Pruebas AISLADAS de la resolución de permisos (BLL.Familia) usando un DAL
+    /// T04: Pruebas AISLADAS de la resolución de permisos (BLL.Familia) usando un DAL
     /// falso inyectado por constructor (D2: DI/interfaces). No tocan la base de datos.
     /// </summary>
     [TestClass]

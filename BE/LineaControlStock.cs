@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// PN01 — una línea de la "Planilla de control de existencias" que revisa Depósito
+    /// PN01: una línea de la "Planilla de control de existencias" que revisa Depósito
     /// ("Revisar stock de las prendas"): la prenda del pedido con su estado real, releído
     /// de la base en el momento de la revisión.
     /// </summary>

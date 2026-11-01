@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PN02 — "¿Elige plan y modalidad? No → Asentar desistimiento". El cliente ya fue
+    /// PN02: "¿Elige plan y modalidad? No → Asentar desistimiento". El cliente ya fue
     /// identificado y vio los planes, pero no contrata. No genera una Contratacion (no hubo
     /// nada que cobrar): se registra aparte, con el plan y la modalidad que estaba considerando
     /// si los había elegido, y el motivo que comunicó.

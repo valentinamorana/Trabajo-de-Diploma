@@ -4,13 +4,13 @@ using System.Collections.Generic;
 namespace BE
 {
     /// <summary>
-    /// Capa de Entidades — Usuario del sistema (empleado).
+    /// Capa de Entidades: Usuario del sistema (empleado).
     /// Mapea la tabla [Usuario] de WardrobeFlowDB.
     ///
     /// Columnas:
     ///   Id         int          PK (columna IdUsuario en BD, alias "Id")
     ///   Username   varchar      nombre de acceso único
-    ///   Contraseña varchar      hash PBKDF2-SHA256 — NUNCA texto plano
+    ///   Contraseña varchar      hash PBKDF2-SHA256: NUNCA texto plano
     ///   Perfil     varchar      rol del empleado (ej: "Administrador")
     ///
     /// La lista Permisos se carga en memoria tras el login (no persiste en esta tabla).
@@ -62,7 +62,7 @@ namespace BE
 
         public string IdIdioma { get; set; } = "ES";
 
-        // ── RF-10 — Baja lógica (archivado) ─────────────────────────────────────
+        // ── RF-10: Baja lógica (archivado) ─────────────────────────────────────
         // Activo=false → usuario archivado: no puede iniciar sesión ni aparece en la
         // lista de gestión. FechaBaja registra cuándo se archivó (para la purga >1 año).
         public bool Activo { get; set; } = true;
@@ -74,14 +74,14 @@ namespace BE
         // antes de abrir el menú. No forma parte del DVH (metadata operativa).
         public bool RequiereCambioClave { get; set; }
 
-        // ── Patrón MEMENTO — rol Originator ─────────────────────────────────────
+        // ── Patrón MEMENTO: rol Originator ─────────────────────────────────────
 
         /// <summary>
         /// Captura el estado restaurable del usuario en un Memento concreto
         /// (BE.VersionUsuario). Guarda los datos administrativos NO sensibles
         /// (username + nombre/apellido/fecha nac./email) que el Historial de Cambios
         /// versiona y permite deshacer, y conserva el estado de seguridad
-        /// (clave/bloqueo/intentos) solo como trazabilidad interna — la clave NUNCA
+        /// (clave/bloqueo/intentos) solo como trazabilidad interna: la clave NUNCA
         /// se expone ni se restaura.
         /// </summary>
         public Memento.IMemento CrearMemento(string actor, string detalle)

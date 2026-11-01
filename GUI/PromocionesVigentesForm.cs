@@ -8,7 +8,7 @@ using Docs = GUI.Exportacion.DocumentosPromocion;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN03, carril Vendedor de la región de vigencia: consulta las
+    /// Capa de Presentación: PN03, carril Vendedor de la región de vigencia: consulta las
     /// promociones Vigentes (con la marca de si ya tienen una solicitud de baja pendiente) y puede
     /// solicitar la baja de una Vigente con motivo («Solicitud de baja»). La promoción sigue
     /// Vigente hasta que Administración atiende la solicitud. Imprime la solicitud y la

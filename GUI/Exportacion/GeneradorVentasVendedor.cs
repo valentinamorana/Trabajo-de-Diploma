@@ -1,6 +1,6 @@
 namespace GUI.Exportacion
 {
-    /// <summary>Patrón Factory Method — creador de exportadores para el Reporte de Ventas por Vendedor (PdN8).</summary>
+    /// <summary>Patrón Factory Method: creador de exportadores para el Reporte de Ventas por Vendedor (PdN8).</summary>
     public class GeneradorVentasVendedor : GeneradorReporte
     {
         private const string Origen = "Ventas por Vendedor";

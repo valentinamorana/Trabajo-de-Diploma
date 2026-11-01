@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — SugerenciaPromocion (PN03, «Sugerencia de promoción»).
+    /// Capa de Acceso a Datos: SugerenciaPromocion (PN03, «Sugerencia de promoción»).
     /// Siempre apunta a un plan. Las decisiones de Administración (aceptar → Evaluada, descartar
     /// → Descartada) son claims atómicos sobre el estado Pendiente.
     /// </summary>

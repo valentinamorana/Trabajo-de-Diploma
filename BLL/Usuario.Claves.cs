@@ -4,19 +4,19 @@ using System;
 
 namespace BLL
 {
-    // Partial de BLL.Usuario — reseteo y recuperación de contraseña (individual
+    // Partial de BLL.Usuario: reseteo y recuperación de contraseña (individual
     // y cambio de clave propia). Ver BLL.Usuario (Usuario.cs) para el resto de grupos.
     public partial class Usuario
     {
         // Resetea la contraseña de un usuario generando una nueva automáticamente.
-        // El administrador NO ingresa la contraseña — se genera aquí y se exporta
+        // El administrador NO ingresa la contraseña: se genera aquí y se exporta
         // a un archivo .txt en CredencialesGeneradas/.
         // Devuelve la ruta del archivo de credenciales generado.
         public string ResetearClave(string modulo, int idUsuario, string usernameObjetivo)
         {
             ValidarEsAdministrador();
 
-            // T07 — Verificar integridad de la base ANTES de modificar usuarios.
+            // T07: Verificar integridad de la base ANTES de modificar usuarios.
             Configuracion.AsegurarIntegridadUsuarios();
 
             var admin = SessionManager.GetInstance().Usuario;
@@ -101,7 +101,7 @@ namespace BLL
             return Encriptador.ValidarContrasena(contrasena);
         }
 
-        // Valida credenciales sin abrir sesión — para operaciones que requieren confirmación de admin.
+        // Valida credenciales sin abrir sesión: para operaciones que requieren confirmación de admin.
         // Retorna true solo si el usuario existe, no está bloqueado, la clave es correcta y tiene rol Administrador.
         // Cuenta los intentos fallidos en el contador de la sesión (el mismo del login: tras el
         // límite deja de validar) y registra cada rechazo en la bitácora. Siempre corre PBKDF2,

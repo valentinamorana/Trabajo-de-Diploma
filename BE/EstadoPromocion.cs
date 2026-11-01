@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// PN03 — Estado de una Promocion (diagrama de actividad aprobado):
+    /// PN03: Estado de una Promocion (diagrama de actividad aprobado):
     ///   EnRevisionContable    → estado inicial tras "Validar" (alta o reformulación).
     ///   Vigente               → Contabilidad aprobó; se aplica en el cobro de PN02.
     ///   RechazadaContabilidad → Contabilidad rechazó; Administración la reformula o la da de baja.

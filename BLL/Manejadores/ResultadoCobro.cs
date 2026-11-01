@@ -8,7 +8,7 @@ namespace BLL.Manejadores
 
         public BE.EstadoCobro Estado { get; set; }
 
-        /// <summary>Mensaje ya formateado en español — fallback si Clave no está en el corpus.</summary>
+        /// <summary>Mensaje ya formateado en español: fallback si Clave no está en el corpus.</summary>
         public string Mensaje { get; set; }
 
         /// <summary>Clave de traducción (Servicios.Multiidioma) para mostrar el mensaje en el idioma activo.</summary>
@@ -20,7 +20,7 @@ namespace BLL.Manejadores
         /// <summary>0 si no se llegó a persistir ningún registro de historial (caso Pendiente).</summary>
         public int IdCobro { get; set; }
 
-        // N01 — comprobante emitido al cobrar (null si no se cobró).
+        // N01: comprobante emitido al cobrar (null si no se cobró).
         public string NumeroComprobante { get; set; }
     }
 }

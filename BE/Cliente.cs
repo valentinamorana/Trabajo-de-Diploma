@@ -41,7 +41,7 @@ namespace BE
         // Límite de prendas del plan (cargado por JOIN, no persiste).
         public int LimitePrendas { get; set; }
 
-        // Precio del plan (cargado por JOIN, no persiste). PdN6 — importe a registrar
+        // Precio del plan (cargado por JOIN, no persiste). PdN6: importe a registrar
         // en el historial de cobro cuando se confirma un pago, sin volver a consultar
         // PlanSuscripcion (mismo criterio que NombrePlan/LimitePrendas).
         public decimal PrecioPlan { get; set; }
@@ -114,7 +114,7 @@ namespace BE
                 ? Math.Max(0, (FechaVencimiento.Value.Date - DateTime.Today).Days)
                 : (int?)null;
 
-        // PdN6 — Fecha límite del período de gracia tras un cobro fallido.
+        // PdN6: Fecha límite del período de gracia tras un cobro fallido.
         // Null = no está en gracia (al día). Se persiste directo, sin un enum de estado
         // aparte, con el mismo criterio que FechaVencimiento: el estado se DERIVA de la
         // fecha, no se guarda por duplicado (evita que quede desincronizado).
@@ -129,7 +129,7 @@ namespace BE
         // exitoso: a partir de acá se bloquean nuevos pedidos (BLL.Pedido.VerificarVigencia).
         public bool EstaSuspendidoPorPago => SuspendidoPorPagoAl(FechaLimiteGracia, DateTime.Today);
 
-        // Pausa de suscripción — el cliente pidió no usar el servicio temporalmente (viaje,
+        // Pausa de suscripción: el cliente pidió no usar el servicio temporalmente (viaje,
         // etc.) sin darse de baja del todo. Null = nunca pausado / pausa ya terminada.
         public DateTime? FechaPausaHasta { get; set; }
 
@@ -149,7 +149,7 @@ namespace BE
         public static bool SuspendidoPorPagoAl(DateTime? fechaLimiteGracia, DateTime dia) =>
             fechaLimiteGracia.HasValue && fechaLimiteGracia.Value.Date < dia.Date;
 
-        // Programa de referidos — quién trajo a este cliente (null si nadie lo refirió).
+        // Programa de referidos: quién trajo a este cliente (null si nadie lo refirió).
         public int? IdClienteReferente { get; set; }
 
         // Descuento pendiente de aplicar en el próximo cobro (PdN6), otorgado cuando este

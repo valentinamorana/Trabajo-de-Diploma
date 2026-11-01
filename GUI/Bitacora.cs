@@ -9,11 +9,11 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Módulo de Auditoría (Bitácora).
+    /// Capa de Presentación: Módulo de Auditoría (Bitácora).
     ///
     /// Presenta dos pestañas:
-    ///   Tab 1 — Sistema    : eventos de seguridad (login, logout, resets, intentos fallidos)
-    ///   Tab 2 — Negocio    : eventos de negocio (ventas, despachos, stock, clientes)
+    ///   Tab 1: Sistema    : eventos de seguridad (login, logout, resets, intentos fallidos)
+    ///   Tab 2: Negocio    : eventos de negocio (ventas, despachos, stock, clientes)
     ///
     /// Filtro de fecha unificado: sólo "Últimos N días" (0 = sin filtro de fecha).
     /// Criticidad: "Todas" + valores reales 1-6, sin "None (0)".
@@ -171,7 +171,7 @@ namespace GUI
             try
             {
                 var u = new BLL.Usuario().ObtenerUsuarioActivo();
-                lblSb.Text = u != null ? $"{u.Username}  ·  {u.Perfil ?? "—"}" : "";
+                lblSb.Text = u != null ? $"{u.Username}  ·  {u.Perfil ?? "-"}" : "";
             }
             catch { }
             sbar.Controls.Add(lblSb);
@@ -242,7 +242,7 @@ namespace GUI
 
             if (this.Tag != null && t.ContainsKey(this.Tag.ToString()))
                 this.Text = t[this.Tag.ToString()].Texto;
-            lblBitTitulo.Text    = Tr("frm.bitacora",          "Auditoría — Bitácoras");
+            lblBitTitulo.Text    = Tr("frm.bitacora",          "Auditoría: Bitácoras");
             lblBitSubtitulo.Text = Tr("frm.bitacora.subtitulo","Registro de eventos del sistema y operaciones de negocio");
             // Tabs
             if (t.ContainsKey("tab.sistema")) tabPageSistema.Text = t["tab.sistema"].Texto;
@@ -326,12 +326,12 @@ namespace GUI
             Add("AltaCliente",        "tevt.altacliente",    "Alta Cliente");
             Add("ModificacionCliente","tevt.modcliente",     "Modificación Cliente");
             Add("BajaCliente",        "tevt.bajacliente",    "Baja Cliente");
-            // PN01 — armado del pedido con control de stock.
+            // PN01: armado del pedido con control de stock.
             Add("EnvioControlStock",  "tevt.enviocontrol",   "Envío a control de stock");
             Add("InformeFaltantes",   "tevt.faltantes",      "Informe de faltantes");
             Add("SeparacionPrendas",  "tevt.separacion",     "Separación de prendas");
             Add("Desistimiento",      "tevt.desistimiento",  "Desistimiento");
-            // PN03 — Centro de decisiones comerciales.
+            // PN03: Centro de decisiones comerciales.
             Add("DecisionComercial",  "tevt.decisioncomercial", "Decisión comercial");
 
             cmbTipoEvento.SelectedIndex =
@@ -386,7 +386,7 @@ namespace GUI
         private void BtnExportSistema_Click(object sender, EventArgs e)
         {
             MostrarMenuExportar((Control)sender, dgvSistema,
-                Tr("bit.pdf.titulosistema", "Bitácora del Sistema — WardrobeFlow"));
+                Tr("bit.pdf.titulosistema", "WardrobeFlow: Bitácora del Sistema"));
         }
 
         private void DgvSistema_DataBindingComplete(object sender,
@@ -420,7 +420,7 @@ namespace GUI
         private void BtnExportNegocio_Click(object sender, EventArgs e)
         {
             MostrarMenuExportar((Control)sender, dgvNegocio,
-                Tr("bit.pdf.titulonegocio", "Bitácora de Negocio — WardrobeFlow"));
+                Tr("bit.pdf.titulonegocio", "WardrobeFlow: Bitácora de Negocio"));
         }
 
         // ── Carga ─────────────────────────────────────────────────────────────
@@ -485,7 +485,7 @@ namespace GUI
         }
 
         // ══════════════════════════════════════════════════════════════════════
-        // EXPORTAR PDF — Patrón Factory Method (ver GUI/Exportacion)
+        // EXPORTAR PDF: Patrón Factory Method (ver GUI/Exportacion)
         // ══════════════════════════════════════════════════════════════════════
 
         /// <summary>
@@ -518,7 +518,7 @@ namespace GUI
         /// <summary>
         /// Arma el reporte tabular (con los HeaderText ya traducidos del DataGridView)
         /// y delega la exportación en el producto que fabrica el GeneradorBitacora
-        /// (Factory Method). El render del PDF/CSV vive en GUI.Exportacion — este
+        /// (Factory Method). El render del PDF/CSV vive en GUI.Exportacion: este
         /// formulario es solo el cliente del patrón.
         /// </summary>
         private void ExportarReporte(DataGridView dgv, string titulo, string formato)
@@ -551,7 +551,7 @@ namespace GUI
             TraducirHeadersGrilla(dgv, GestorIdioma.IdiomaActual, esSistema);
 
             string linea1 = Tr("msg.bit.registros", "  {0} registro(s)", new object[] { datos.Rows.Count });
-            if (!string.IsNullOrEmpty(contexto)) linea1 += $"  —  {contexto}";
+            if (!string.IsNullOrEmpty(contexto)) linea1 += $"; {contexto}";
 
             if (dgv == dgvSistema && datos.Columns.Contains("criticidad"))
             {

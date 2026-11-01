@@ -35,7 +35,7 @@ namespace GUI
 
             // Feedback temprano en la propia GUI (antes dependía 100% de que la BLL rechazara la
             // clave débil tras el roundtrip, sin decirle al usuario cuál regla incumplió hasta
-            // recibir la excepción) — BLL.Usuario.ValidarContrasena ya existía justo para esto
+            // recibir la excepción): BLL.Usuario.ValidarContrasena ya existía justo para esto
             // ("para que la GUI pueda dar feedback temprano sin acceder directamente a Seguridad")
             // pero ninguna pantalla la llamaba todavía. Misma regla que ya se muestra en lblReglas.
             if (string.IsNullOrEmpty(txtNueva.Text))

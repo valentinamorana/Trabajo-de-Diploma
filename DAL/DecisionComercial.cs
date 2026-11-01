@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// PN03 — Persistencia de la «Decisión comercial» (tabla DecisionComercial, sección 20o del script).
+    /// PN03: Persistencia de la «Decisión comercial» (tabla DecisionComercial, sección 20o del script).
     /// Cada cambio de estado es un claim atómico (UPDATE ... WHERE Estado = @Esperado): dos sesiones no
     /// pueden decidir dos veces sobre la misma decisión.
     /// </summary>
@@ -18,7 +18,8 @@ namespace DAL
         private const string SELECT_BASE =
             "SELECT d.IdDecision, d.Fecha, d.IdUsuario, u.Username AS NombreUsuario, d.TipoRegla, d.ClaveRecomendacion, " +
             "       d.Prioridad, d.Titulo, d.Diagnostico, d.AccionElegida, d.EsAlternativa, d.ImpactoEstimado, d.Estado, " +
-            "       d.Motivo, d.TipoReferencia, d.Referencia, d.PospuestaHasta, d.FechaEjecucion, d.FechaEvaluacion, d.ResultadoReal " +
+            "       d.Motivo, d.TipoReferencia, d.Referencia, d.PospuestaHasta, d.FechaEjecucion, d.FechaEvaluacion, d.ResultadoReal, " +
+            "       CAST(CASE WHEN d.Constancia IS NULL THEN 0 ELSE 1 END AS BIT) AS TieneConstancia " +
             "FROM DecisionComercial d LEFT JOIN Usuario u ON u.IdUsuario = d.IdUsuario ";
 
         private static string Recortar(string texto, int largo) =>
@@ -156,6 +157,33 @@ namespace DAL
             return Listar(SELECT_BASE + where + "ORDER BY d.Fecha DESC, d.IdDecision DESC", p.ToArray());
         }
 
+        // ── Constancia de la decisión (columna Constancia, XML; sección 21z16 del script) ──
+
+        public bool GuardarConstancia(int idDecision, string constanciaXml)
+        {
+            try
+            {
+                return acceso.Escribir("UPDATE DecisionComercial SET Constancia = @Constancia WHERE IdDecision = @Id",
+                    new[]
+                    {
+                        new SqlParameter("@Id", idDecision),
+                        new SqlParameter("@Constancia", SqlDbType.NVarChar, -1) { Value = Nulo(constanciaXml) }
+                    }) == 1;
+            }
+            catch (Exception ex) { throw new Exception("Error al guardar la constancia de la decisión comercial.", ex); }
+        }
+
+        public string ObtenerConstancia(int idDecision)
+        {
+            try
+            {
+                DataTable t = acceso.Leer("SELECT Constancia FROM DecisionComercial WHERE IdDecision = @Id",
+                    new[] { new SqlParameter("@Id", idDecision) });
+                return t.Rows.Count == 0 || t.Rows[0]["Constancia"] == DBNull.Value ? null : t.Rows[0]["Constancia"].ToString();
+            }
+            catch (Exception ex) { throw new Exception("Error al leer la constancia de la decisión comercial.", ex); }
+        }
+
         // ── Detalle: qué tocó la decisión (tabla DecisionComercialDetalle, sección 20p del script) ──
 
         public Dictionary<int, List<int>> ObtenerDetalle(IEnumerable<int> idsDecision, string tipo)
@@ -218,7 +246,8 @@ namespace DAL
                         PospuestaHasta = r["PospuestaHasta"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["PospuestaHasta"]),
                         FechaEjecucion = r["FechaEjecucion"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaEjecucion"]),
                         FechaEvaluacion = r["FechaEvaluacion"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["FechaEvaluacion"]),
-                        ResultadoReal = r["ResultadoReal"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(r["ResultadoReal"])
+                        ResultadoReal = r["ResultadoReal"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(r["ResultadoReal"]),
+                        TieneConstancia = Convert.ToBoolean(r["TieneConstancia"])
                     });
             }
             catch (Exception ex) { throw new Exception("Error al obtener las decisiones comerciales.", ex); }

@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio para PN02 — Comercialización de la suscripción.
+    /// Lógica de negocio para PN02: Comercialización de la suscripción.
     ///
     /// Cada método público corresponde a una actividad del diagrama de actividad de PN02
     /// (adaptado a WardrobeFlow; carriles Cliente, Vendedor y Caja):
@@ -40,7 +40,7 @@ namespace BLL
         private readonly Servicios.IRegistroBitacora        bitacora    = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
 
-        // BLL.Cliente es quien activa la suscripción (Builder) y acredita el referido — composición
+        // BLL.Cliente es quien activa la suscripción (Builder) y acredita el referido: composición
         // lazy, mismo criterio que BLL.Pedido.prendaBLL / BLL.Prenda.listaEsperaBLL.
         private Interfaces.IClienteService _clienteBLLLazy;
         private Interfaces.IClienteService clienteBLL => _clienteBLLLazy ?? (_clienteBLLLazy = new Cliente());
@@ -135,11 +135,11 @@ namespace BLL
             int id = dalContratacion.AltaDesistimiento(desistimiento);
 
             bitacora.Registrar(modulo,
-                $"Desistimiento de contratación #{id} — Cliente: {cliente.NombreCompleto} — " +
-                $"Plan: {plan?.Nombre ?? "—"} — Motivo: {desistimiento.Motivo}",
+                $"Desistimiento de contratación #{id}; Cliente: {cliente.NombreCompleto}; " +
+                $"Plan: {plan?.Nombre ?? "-"}; Motivo: {desistimiento.Motivo}",
                 BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Desistimiento,
-                $"El cliente {cliente.NombreCompleto} no contrató — Plan considerado: {plan?.Nombre ?? "ninguno"} — {desistimiento.Motivo}",
+                $"El cliente {cliente.NombreCompleto} no contrató; Plan considerado: {plan?.Nombre ?? "ninguno"}; {desistimiento.Motivo}",
                 idCliente: idCliente);
             return id;
         }
@@ -188,7 +188,7 @@ namespace BLL
                 try
                 {
                     bitacora.Registrar(modulo,
-                        $"Contratación no válida — Cliente #{idCliente}, Plan #{idPlan} — {ex.Clave}: {ex.Message}",
+                        $"Contratación no válida: Cliente #{idCliente}, Plan #{idPlan}; {ex.Clave}: {ex.Message}",
                         BE.Criticidad.Baja);
                 }
                 catch (Exception e) { System.Diagnostics.Trace.TraceError($"[BLL.Contratacion] Aviso: {e.Message}"); }
@@ -210,10 +210,10 @@ namespace BLL
             int idNuevo = dalContratacion.Alta(contratacion);
 
             bitacora.Registrar(modulo,
-                $"Nueva contratación #{idNuevo} — Cliente: {cliente?.NombreCompleto} — Plan: {plan.Nombre} — Modalidad: {modalidad}",
+                $"Nueva contratación #{idNuevo}; Cliente: {cliente?.NombreCompleto}; Plan: {plan.Nombre}; Modalidad: {modalidad}",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
-                $"Contratación #{idNuevo} pendiente de pago — {cliente?.NombreCompleto} — Plan {plan.Nombre}",
+                $"Contratación #{idNuevo} pendiente de pago: {cliente?.NombreCompleto}, Plan {plan.Nombre}",
                 idCliente: idCliente);
             return idNuevo;
         }
@@ -456,14 +456,14 @@ namespace BLL
             }
 
             bitacora.Registrar(modulo,
-                $"Cobro Contratación #{actual.IdContratacion} — Cliente: {actual.NombreCliente} — " +
+                $"Cobro Contratación #{actual.IdContratacion}; Cliente: {actual.NombreCliente}; " +
                 $"Medio: {medio.Nombre}" +
                 (planCuotas != null ? $" en {financiacion.CantidadCuotas} cuota(s) de ${financiacion.ValorCuota} (recargo ${financiacion.Recargo})" : "") +
-                $" — Comprobante: {numeroComprobante}",
+                $"; Comprobante: {numeroComprobante}",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.CobroSuscripcion,
-                $"Contratación #{actual.IdContratacion} cobrada y suscripción activada — " +
-                $"{actual.NombreCliente} — Plan {actual.NombrePlan} — Comprobante {numeroComprobante} — " +
+                $"Contratación #{actual.IdContratacion} cobrada y suscripción activada; " +
+                $"{actual.NombreCliente}; Plan {actual.NombrePlan}; Comprobante {numeroComprobante}; " +
                 $"Importe ${totalACobrar}" +
                 (cargos.Count > 0 ? $" (incluye {cargos.Count} cargo(s) por daño o pérdida: ${totalCargos})" : "") +
                 (planCuotas != null && financiacion.CantidadCuotas > 1
@@ -526,18 +526,18 @@ namespace BLL
                     "Otra sesión de Caja ya resolvió esta contratación. Actualice la cola de Caja.");
 
             bitacora.Registrar(modulo,
-                $"Intento de pago fallido en Contratación #{actual.IdContratacion} — Cliente: {actual.NombreCliente} — " +
-                $"Intento {resultado.NroIntento} de {resultado.Maximo} — Motivo: {motivo.Trim()}",
+                $"Intento de pago fallido en Contratación #{actual.IdContratacion}; Cliente: {actual.NombreCliente}; " +
+                $"Intento {resultado.NroIntento} de {resultado.Maximo}; Motivo: {motivo.Trim()}",
                 BE.Criticidad.Baja);
 
             if (resultado.Cancelada)
             {
                 bitacora.Registrar(modulo,
-                    $"Cancelar Contratación #{actual.IdContratacion} — Cliente: {actual.NombreCliente} — " +
+                    $"Cancelar Contratación #{actual.IdContratacion}; Cliente: {actual.NombreCliente}; " +
                     "Máximo de intentos de pago agotado",
                     BE.Criticidad.Media);
                 bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
-                    $"Contratación #{actual.IdContratacion} cancelada — {actual.NombreCliente} — " +
+                    $"Contratación #{actual.IdContratacion} cancelada: {actual.NombreCliente}; " +
                     $"máximo de {resultado.Maximo} intentos de pago agotado sin concretarse",
                     idCliente: actual.IdCliente);
             }
@@ -571,10 +571,10 @@ namespace BLL
                     "Otra sesión de Caja ya resolvió esta contratación. Actualice la cola de Caja.");
 
             bitacora.Registrar(modulo,
-                $"Anular Contratación #{actual.IdContratacion} — Cliente: {actual.NombreCliente} — Motivo: {motivo.Trim()}",
+                $"Anular Contratación #{actual.IdContratacion}; Cliente: {actual.NombreCliente}; Motivo: {motivo.Trim()}",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
-                $"Contratación #{actual.IdContratacion} anulada por Caja — {actual.NombreCliente} — {motivo.Trim()}",
+                $"Contratación #{actual.IdContratacion} anulada por Caja: {actual.NombreCliente}, {motivo.Trim()}",
                 idCliente: actual.IdCliente);
         }
 
@@ -649,7 +649,7 @@ namespace BLL
                 {
                     bitacora.Registrar(modulo,
                         $"CRÍTICO: Contratación #{actual.IdContratacion} cobrada pero la suscripción NO se activó " +
-                        $"y no se pudo reabrir el cobro — Cliente: {actual.NombreCliente}. Requiere alta administrativa del plan.",
+                        $"y no se pudo reabrir el cobro; Cliente: {actual.NombreCliente}. Requiere alta administrativa del plan.",
                         BE.Criticidad.Alta);
                 }
                 catch { /* la bitácora no puede impedir el aviso a Caja */ }

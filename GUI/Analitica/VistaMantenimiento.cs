@@ -3,9 +3,9 @@ using System.Drawing;
 namespace GUI.Analitica
 {
     /// <summary>
-    /// PdN11 — Tiempos de Mantenimiento. El Gerente de Inventario genera el listado de prendas
+    /// PdN11: Tiempos de Mantenimiento. El Gerente de Inventario genera el listado de prendas
     /// cuyo historial de MantenimientoPrenda supera el umbral aceptable de cantidad o duración
-    /// promedio — señal de una prenda problemática a revisar. Sin filtros.
+    /// promedio: señal de una prenda problemática a revisar. Sin filtros.
     /// </summary>
     internal sealed class VistaMantenimiento : VistaReporteAnalitica
     {
@@ -35,8 +35,8 @@ namespace GUI.Analitica
                 tabla.Rows.Add(
                     r.NombrePrenda,
                     r.CantidadMantenimientos,
-                    r.DuracionPromedioDias.HasValue ? r.DuracionPromedioDias.Value.ToString("F1") : "—",
-                    r.DuracionMaximaDias.HasValue ? r.DuracionMaximaDias.Value.ToString() : "—",
+                    r.DuracionPromedioDias.HasValue ? r.DuracionPromedioDias.Value.ToString("F1") : "-",
+                    r.DuracionMaximaDias.HasValue ? r.DuracionMaximaDias.Value.ToString() : "-",
                     Tr(r.Clave, r.Motivo, r.Args));
 
             return new ResultadoVistaReporte

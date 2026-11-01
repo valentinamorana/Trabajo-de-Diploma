@@ -19,7 +19,7 @@ namespace DAL
     /// </summary>
     public class Permiso : BaseDAL, Interfaces.IPermisoDAL
     {
-        // ── T07 — Dígito Verificador de PermisoRelacion (formato 2) ─────────────────
+        // ── T07: Dígito Verificador de PermisoRelacion (formato 2) ─────────────────
         // Las aristas padre→hijo definen qué puede hacer cada rol: agregar por SQL una patente a
         // un rol (escalada de privilegios) queda detectado. La tabla tiene clave compuesta, por
         // eso no usa el DV genérico por Id: el DVH pondera IdPadre e IdHijo y el DVV se calcula
@@ -174,7 +174,7 @@ namespace DAL
             return lista;
         }
 
-        // ── T04 — CRUD del Composite (Patentes / Familias / Roles) ──────────────
+        // ── T04: CRUD del Composite (Patentes / Familias / Roles) ──────────────
 
         // Devuelve el Id del nodo-rol cuyo Nombre coincide, o 0 si no existe.
         public int ObtenerIdRol(string rolNombre)
@@ -257,7 +257,7 @@ namespace DAL
                         cmd.Parameters.AddWithValue("@id", idPermiso);
                         cmd.ExecuteNonQuery();
                     }
-                    // T07 — cambió el conjunto de aristas: DVV desde los DVH almacenados.
+                    // T07: cambió el conjunto de aristas: DVV desde los DVH almacenados.
                     DigitoVerificador.GuardarDVVDesdeAlmacenadosEnTx(conexion, tx, DV_TablaRelacion, OrdenRelacion);
                 });
             }

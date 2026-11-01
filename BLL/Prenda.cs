@@ -12,7 +12,7 @@ namespace BLL
         private readonly Servicios.IRegistroBitacora          bitacora         = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio   bitacoraNeg      = Servicios.FabricaBitacora.CrearNegocio();
 
-        // Lista de Espera (mejora opcional) — composición lazy, mismo criterio que
+        // Lista de Espera (mejora opcional): composición lazy, mismo criterio que
         // BLL.Usuario.perfilesBLL => new BLL.Familia().
         private Interfaces.IListaEsperaService _listaEsperaLazy;
         private Interfaces.IListaEsperaService listaEsperaBLL => _listaEsperaLazy ?? (_listaEsperaLazy = new ListaEspera());
@@ -60,7 +60,7 @@ namespace BLL
 
         // Prendas Disponible, excluyendo las reservadas por Lista de Espera para OTRO
         // cliente (mejora opcional). Filtrado en memoria para no acoplar la query ya
-        // probada de DAL.Prenda a una tabla nueva y opcional — si ListaEspera todavía no
+        // probada de DAL.Prenda a una tabla nueva y opcional: si ListaEspera todavía no
         // existe (BD sin migrar), ObtenerIdsReservadosParaOtro degrada a lista vacía.
         public List<BE.Prenda> ObtenerDisponibles(int? idClienteSolicitante = null)
         {
@@ -88,7 +88,7 @@ namespace BLL
 
             bitacoraNeg.Registrar(
                 BE.TipoEventoNegocio.AltaPrenda,
-                $"Nueva prenda: {prenda.Nombre} — Talle {prenda.Talle} — {prenda.Color} — {prenda.Categoria}",
+                $"Nueva prenda: {prenda.Nombre}, Talle {prenda.Talle}, {prenda.Color}, {prenda.Categoria}",
                 idPrenda: idNuevo);
         }
 
@@ -105,7 +105,7 @@ namespace BLL
                 BE.Criticidad.Baja);
 
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionPrenda,
-                $"Modificación prenda: '{prenda.Nombre}' (ID {prenda.IdPrenda}) — Talle {prenda.Talle}, {prenda.Color}",
+                $"Modificación prenda: '{prenda.Nombre}' (ID {prenda.IdPrenda}), Talle {prenda.Talle}, {prenda.Color}",
                 idPrenda: prenda.IdPrenda);
         }
 
@@ -203,7 +203,7 @@ namespace BLL
             {
                 // Anti-TOCTOU (DAL/Prenda.cs): si el UPDATE condicionado no afectó ninguna fila
                 // porque el estado cambió entre la lectura y este punto, revertir acá la
-                // mutación en memoria que ControlarEstado ya aplicó — si no, el objeto que
+                // mutación en memoria que ControlarEstado ya aplicó: si no, el objeto que
                 // quedó cacheado en la GUI (_prendas/_prendasDetalleActual) sigue mostrando un
                 // estado que en realidad nunca se persistió.
                 prenda.Estado = estadoAnterior;
@@ -229,11 +229,11 @@ namespace BLL
                 idPrenda: prenda.IdPrenda);
         }
 
-        // PN04 — EnUso → Baja solo por CU06-DEP Reportar Prenda Perdida (con cargo de reposición).
+        // PN04: EnUso → Baja solo por CU06-DEP Reportar Prenda Perdida (con cargo de reposición).
         private static bool RequiereFlujoPerdida(BE.EstadoPrenda desde, BE.EstadoPrenda hacia) =>
             desde == BE.EstadoPrenda.EnUso && hacia == BE.EstadoPrenda.Baja;
 
-        // PN04 — Una prenda que volvió de un cliente (mantenimiento abierto por la devolución) sale de
+        // PN04: Una prenda que volvió de un cliente (mantenimiento abierto por la devolución) sale de
         // limpieza solo por la Inspección de Devolución: reingresa a Disponible o se da de baja con
         // el cargo por daño. Si entró a limpieza en el depósito, los dos cambios son manuales y sin
         // cargo: el cliente no tuvo nada que ver.

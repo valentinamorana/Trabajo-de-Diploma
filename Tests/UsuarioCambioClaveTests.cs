@@ -58,7 +58,7 @@ namespace Tests
             }
             catch (BE.AppException ex)
             {
-                // Encriptador.ValidarContrasena chequea longitud antes que número/especial —
+                // Encriptador.ValidarContrasena chequea longitud antes que número/especial:
                 // con menos de 8 caracteres la clave devuelta es siempre clave_corta.
                 Assert.AreEqual("err.bll.usuario.clave_corta", ex.Clave);
             }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace BLL.Interfaces
 {
-    /// <summary>PdN11 — Detección de prendas con tiempos o cantidad de mantenimientos
+    /// <summary>PdN11: Detección de prendas con tiempos o cantidad de mantenimientos
     /// excesivos, a partir del historial de MantenimientoPrenda.</summary>
     public interface IAnalisisMantenimientoService
     {

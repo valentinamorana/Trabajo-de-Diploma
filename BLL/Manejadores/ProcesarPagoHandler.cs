@@ -9,10 +9,10 @@ namespace BLL.Manejadores
     /// CONFIRMA LA RENOVACIÓN (PdN6 dice explícitamente "procesar el pago y confirmar
     /// la renovación"): reutiliza el mismo patrón Builder (PdN1) que usa
     /// IntentarRenovarHandler para extender la vigencia, con el mismo criterio de no
-    /// consultar PlanSuscripcion de nuevo — arma el plan a partir de los datos ya
+    /// consultar PlanSuscripcion de nuevo: arma el plan a partir de los datos ya
     /// cacheados en Cliente (NombrePlan/LimitePrendas/PrecioPlan, cargados por JOIN).
     ///
-    /// Bloque 1 — este es también el único punto de cobro real del sistema, así que acá
+    /// Bloque 1: este es también el único punto de cobro real del sistema, así que acá
     /// se liquidan el descuento por referido (Cliente.DescuentoProximoCobro, se consume
     /// completo en este cobro) y los cargos por daño/pérdida pendientes (CargoPrenda,
     /// Estado=Pendiente) del cliente: se suman al importe y se marcan Cobrados en la
@@ -59,7 +59,7 @@ namespace BLL.Manejadores
             cliente.FechaVencimiento = suscripcion.FechaVencimiento;
             cliente.FechaLimiteGracia = null;
 
-            // PN03 + NUULY 5.1: un solo descuento por ciclo — el mayor entre la promoción vigente del
+            // PN03 + NUULY 5.1: un solo descuento por ciclo; el mayor entre la promoción vigente del
             // plan y el crédito por referidos. Si gana la promoción, el crédito queda acumulado.
             var resDescuento = CalcularDescuento(cliente, contexto.Modalidad, ObtenerPromocionesVigentes());
             decimal descuento = resDescuento.Descuento;
@@ -121,7 +121,7 @@ namespace BLL.Manejadores
 
             // Clave (y Mensaje de respaldo) distinta por combinación, igual que
             // BajaSuscripcionHandler con renov.msg.baja/renov.msg.baja_conprendas: el Mensaje
-            // fijo en español es solo el respaldo si el corpus de traducciones no cargó — la
+            // fijo en español es solo el respaldo si el corpus de traducciones no cargó: la
             // GUI siempre resuelve por Clave+Args primero (ver Traductor.Resolver), así que
             // concatenar texto extra sobre un Mensaje ya traducido lo perdería en los otros 3 idiomas.
             bool conDescuento = resDescuento.UsaCreditoReferido;

@@ -1,7 +1,7 @@
 namespace BLL.Estrategias
 {
     /// <summary>
-    /// Criterio por defecto de PdN10 — literalmente "cruza último pedido y vencimiento"
+    /// Criterio por defecto de PdN10: literalmente "cruza último pedido y vencimiento"
     /// como describe el proceso de negocio: en riesgo si la suscripción está vencida o
     /// vence pronto Y, además, el cliente no tiene actividad reciente (o nunca la tuvo).
     /// Un cliente que paga pero no usa el servicio es el candidato más claro a no renovar.

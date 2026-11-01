@@ -4,11 +4,11 @@ namespace BLL.Manejadores
 {
     /// <summary>
     /// Eslabón que atiende Decision.Pausar: pausa la suscripción hasta la fecha indicada
-    /// y corre FechaVencimiento por los días de pausa (NUULY: no se cobra mientras está pausada) —
+    /// y corre FechaVencimiento por los días de pausa (NUULY: no se cobra mientras está pausada),
     /// al reanudar (ver BLL.Cliente.ReanudarPausa) el cliente retoma el tiempo que ya había pagado. Mientras
     /// está pausada, BLL.Pedido.ObtenerClienteValidado bloquea nuevos pedidos (ver
     /// BE.Cliente.EstaPausada). Debe insertarse ANTES de BajaSuscripcionHandler en la
-    /// cadena (ver BLL.Renovacion) — mismo motivo que el resto de los eslabones no
+    /// cadena (ver BLL.Renovacion): mismo motivo que el resto de los eslabones no
     /// terminales (ver advertencia en DecisionRenovacion).
     /// </summary>
     public sealed class PausarSuscripcionHandler : ManejadorRenovacion

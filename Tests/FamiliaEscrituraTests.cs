@@ -6,14 +6,14 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// T04 — BLL.Familia, métodos de ESCRITURA (CrearRol, EliminarRol, AgregarComponente,
+    /// T04: BLL.Familia, métodos de ESCRITURA (CrearRol, EliminarRol, AgregarComponente,
     /// GuardarAsignacionRol). Antes solo estaba testeada la función pura SistemaConservaGestion,
     /// no la orquestación real que la dispara en producción.
     ///
     /// Deliberadamente NO cubre el camino feliz de GuardarAsignacionRol/EliminarRol/
     /// QuitarComponente: los tres pasan por ExigirSistemaConservaGestion, que internamente
     /// instancia "new Usuario()" (BLL concreto con su DAL real) para poder enumerar TODOS los
-    /// usuarios del sistema — no hay forma de inyectar un doble ahí sin tocar ese código de
+    /// usuarios del sistema: no hay forma de inyectar un doble ahí sin tocar ese código de
     /// producción, así que ejercitarlos de punta a punta pegaría contra la base real y el
     /// resultado dependería de qué usuarios/administradores existan en ella (no determinístico).
     /// Sí se cubren todas las validaciones que ocurren ANTES de llegar a ese guard, que es
@@ -131,7 +131,7 @@ namespace Tests
             Assert.AreEqual(1, dal.AltaComponenteVeces);
         }
 
-        // ── EliminarRol — validaciones previas al guard sistémico ──────────────────────────
+        // ── EliminarRol: validaciones previas al guard sistémico ──────────────────────────
 
         [TestMethod]
         public void EliminarRol_RolInexistente_LanzaRolInexistente_SinTocarElDAL()
@@ -176,7 +176,7 @@ namespace Tests
             Assert.AreEqual(0, dal.BajaComponenteVeces);
         }
 
-        // ── AgregarComponente / ValidarSinCiclo — completamente aislado (no pasa por el guard) ──
+        // ── AgregarComponente / ValidarSinCiclo: completamente aislado (no pasa por el guard) ──
 
         [TestMethod]
         public void AgregarComponente_CicloDirecto_LanzaCiclo_SinTocarElDAL()
@@ -237,7 +237,7 @@ namespace Tests
             Assert.AreEqual((1, 3), dal.UltimaRelacionAgregada);
         }
 
-        // ── GuardarAsignacionRol — validaciones previas al guard sistémico ─────────────────
+        // ── GuardarAsignacionRol: validaciones previas al guard sistémico ─────────────────
 
         [TestMethod]
         public void GuardarAsignacionRol_RolInexistente_LanzaRolInexistente_SinTocarElDAL()
@@ -263,7 +263,7 @@ namespace Tests
         public void GuardarAsignacionRol_UsuarioNoAdminQuitaSuPropioAccesoDeGestion_LanzaAutobloqueo_SinTocarElDAL()
         {
             // Anti-autobloqueo: un no-Administrador no puede editar SU PROPIO rol de forma que
-            // pierda el acceso de gestión (mnuUsuarios) — acá el rol "Vendedor" ni siquiera tiene
+            // pierda el acceso de gestión (mnuUsuarios): acá el rol "Vendedor" ni siquiera tiene
             // el permiso de gestión en el árbol simulado, así que ConservaGestion da false.
             SessionManager.Login(new BE.Usuario
             {
@@ -298,7 +298,7 @@ namespace Tests
             // patente de gestión puede reorganizar su PROPIO rol, pero no puede agregarse a sí
             // mismo un permiso que su rol no resuelve hoy. "Vendedor" hoy solo tiene mnuUsuarios
             // (id 10, conserva gestión); intenta agregarse además mnuStock (id 2, patente real del
-            // árbol pero ajena a su rol) — debe rechazarse antes de tocar el DAL.
+            // árbol pero ajena a su rol): debe rechazarse antes de tocar el DAL.
             SessionManager.Login(new BE.Usuario
             {
                 Id = 4, Username = "vend", Perfil = "Vendedor",
@@ -383,7 +383,7 @@ namespace Tests
             new BLL.Familia(dal).RenombrarComponente(7, "Reportes de ventas", "mnuReportes");
         }
 
-        // ── NoEscalaPrivilegios — núcleo puro del guard anti-autoescalación ────────────────
+        // ── NoEscalaPrivilegios: núcleo puro del guard anti-autoescalación ────────────────
 
         [TestMethod]
         public void NoEscalaPrivilegios_SoloQuitaOReorganizaLoQueYaTenia_True()

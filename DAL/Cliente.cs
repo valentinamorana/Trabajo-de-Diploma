@@ -8,7 +8,7 @@ namespace DAL
     /// <summary>Acceso a datos de la tabla [Cliente].</summary>
     public class Cliente : BaseDAL<BE.Cliente>, Interfaces.IClienteDAL
     {
-        // T07 — Definición del Dígito Verificador de esta tabla (fuente única, usada
+        // T07: Definición del Dígito Verificador de esta tabla (fuente única, usada
         // tanto para recalcular tras escrituras como para verificar al arrancar).
         public const  string   DV_Tabla    = "Cliente";
         public const  string   DV_Pk       = "IdCliente";
@@ -26,7 +26,7 @@ namespace DAL
             "IdPlanSiguiente", "FechaCambioPlan"
         };
 
-        // T07 — Alta/Modificar/Baja escriben y recalculan el DVH de la fila + el DVV en UNA transacción
+        // T07: Alta/Modificar/Baja escriben y recalculan el DVH de la fila + el DVV en UNA transacción
         // (DigitoVerificador.EscribirConDV, con el bloqueo del DV tomado antes de escribir). Si el
         // recálculo falla se revierte también la escritura: nunca queda una fila con el DV viejo, que
         // el arranque marcaría como base manipulada. Las escrituras compuestas usan EjecutarTransaccion.
@@ -244,7 +244,7 @@ namespace DAL
         // Le da a las capas superiores (BLL.Manejadores) una forma de componer, DESDE AFUERA
         // de esta clase, varias escrituras de distintos DAL en una sola operación atómica.
         //
-        // T07 — El dígito verificador se recalcula DENTRO de esta misma transacción: se toma primero el
+        // T07: El dígito verificador se recalcula DENTRO de esta misma transacción: se toma primero el
         // bloqueo del DV de Cliente (antes de escribir nada, así no hay bloqueos mutuos con otro
         // recálculo), los métodos ...EnTx anotan qué filas tocaron y, antes del commit, se recalculan
         // sus DVH y el DVV. Si el recálculo falla, se revierte todo: no queda una fila cambiada con
@@ -273,7 +273,7 @@ namespace DAL
         private void AnotarFila(int idCliente) => _filasEnTx?.Add(idCliente);
 
         // Igual que Modificar, pero sobre una transacción ya abierta por el caller (ver
-        // EjecutarTransaccion) — usado por los manejadores de Renovación/Cobro para que el
+        // EjecutarTransaccion): usado por los manejadores de Renovación/Cobro para que el
         // UPDATE de Cliente y el INSERT del historial (HistorialRenovacion/HistorialCobro)
         // sean atómicos: antes eran dos round-trips independientes sin transacción compartida,
         // así que un crash entre medio podía dejar el historial de auditoría desincronizado

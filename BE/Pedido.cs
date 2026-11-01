@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BE
 {
     /// <summary>
-    /// Entidad — Pedido de prendas generado por el Vendedor para un Cliente.
+    /// Entidad: Pedido de prendas generado por el Vendedor para un Cliente.
     /// Mapea la tabla [Pedido]. Las prendas del pedido se cargan por separado
     /// desde la tabla intermedia [PedidoPrenda].
     /// </summary>
@@ -23,7 +23,7 @@ namespace BE
 
         public DateTime? FechaEntrega { get; set; }
 
-        // PN04 — "Registrar devolución": cuándo volvieron las prendas. El pedido sigue Entregado
+        // PN04: "Registrar devolución": cuándo volvieron las prendas. El pedido sigue Entregado
         // (no hay estado nuevo, la máquina de estados no cambia); esta fecha es la que distingue un
         // pedido devuelto de uno con las prendas todavía en poder del cliente.
         public DateTime? FechaDevolucion { get; set; }
@@ -34,7 +34,7 @@ namespace BE
 
         public string MotivoCancelacion { get; set; }
 
-        // ── PN01 — circuito de control de stock (diagrama de actividad) ─────────
+        // ── PN01: circuito de control de stock (diagrama de actividad) ─────────
         // "Enviar selección para control stock".
         public DateTime? FechaEnvioControl { get; set; }
 
@@ -71,7 +71,7 @@ namespace BE
             CantidadPrendas > 0 && Prendas.TrueForAll(p => PrendasConfirmadas.Contains(p.IdPrenda));
 
         // Comportamiento
-        // Días transcurridos desde que se generó el pedido — usado por los dashboards de
+        // Días transcurridos desde que se generó el pedido: usado por los dashboards de
         // rol (Kanban) para mostrar antigüedad y decidir el color de la tarjeta, en vez de
         // que cada dashboard recalcule "DateTime.Today - FechaPedido" por su cuenta.
         public int DiasDesdeAlta => (int)(DateTime.Today - FechaPedido.Date).TotalDays;
@@ -101,10 +101,10 @@ namespace BE
         // Registrar la devolución (PN04): solo de un pedido entregado que todavía no se devolvió.
         public bool PuedeDevolverse() => Estado == EstadoPedido.Entregado && !FechaDevolucion.HasValue;
 
-        // PN04 — el pedido ya se devolvió (sigue en estado Entregado, con la fecha de devolución).
+        // PN04: el pedido ya se devolvió (sigue en estado Entregado, con la fecha de devolución).
         public bool FueDevuelto => FechaDevolucion.HasValue;
 
-        // PN04 — entregado y sin devolver: las prendas siguen en poder del cliente.
+        // PN04: entregado y sin devolver: las prendas siguen en poder del cliente.
         public bool EnPoderDelCliente => Estado == EstadoPedido.Entregado && !FechaDevolucion.HasValue;
 
         // Días que lleva el cliente con las prendas (desde la entrega). Null si no están en su poder.
@@ -199,7 +199,7 @@ namespace BE
 
                 case EstadoPedido.Entregado:
                 case EstadoPedido.Desistido:
-                    return false; // Estados finales — no admiten más transiciones
+                    return false; // Estados finales: no admiten más transiciones
 
                 default:
                     return false;

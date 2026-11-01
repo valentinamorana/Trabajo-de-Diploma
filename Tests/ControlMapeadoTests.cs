@@ -6,7 +6,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// Etapa 4 — permisos a nivel de control (BLL.ControlMapeado). Cubre el acceso a los mapeos y las
+    /// Etapa 4: permisos a nivel de control (BLL.ControlMapeado). Cubre el acceso a los mapeos y las
     /// reglas que aplica GUI.ManejadorSeguridad: qué mapeos corresponden a cada formulario (el Menú
     /// queda afuera), el bypass del Administrador y el acceso por patente exacta.
     /// </summary>
@@ -132,7 +132,7 @@ namespace Tests
         [TestMethod]
         public void TieneAcceso_AdministradorSinPatentes_VeTodo()
         {
-            // B1 — bypass del Administrador: no depende de tener las patentes bien asignadas en la BD.
+            // B1: bypass del Administrador: no depende de tener las patentes bien asignadas en la BD.
             var admin = Usuario("Administrador");
             Assert.IsTrue(admin.EsAdministrador);
             Assert.IsTrue(BLL.ControlMapeado.TieneAcceso(M(9, "Prendas", "btnEliminar"),

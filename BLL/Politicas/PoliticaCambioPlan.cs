@@ -3,7 +3,7 @@ using System;
 namespace BLL.Politicas
 {
     /// <summary>
-    /// PN02 — Cambio a un plan superior (upgrade) durante un período ya pagado (decisión de la alumna,
+    /// PN02: Cambio a un plan superior (upgrade) durante un período ya pagado (decisión de la alumna,
     /// 07/10): el plan nuevo rige DESDE HOY y se cobra la diferencia. Los días que le quedaban al plan
     /// actual no se pierden: se descuentan del cobro como crédito, valuados al precio mensual del plan
     /// actual (precio × días restantes / 30).

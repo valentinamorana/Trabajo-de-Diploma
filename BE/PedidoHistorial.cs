@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// Entidad — Registro de un cambio de campo sobre un Pedido.
+    /// Entidad: Registro de un cambio de campo sobre un Pedido.
     /// Mapea la tabla [PedidoHistorial].
     ///
     /// Estrategia por campo: cada fila representa un único campo modificado.
@@ -12,13 +12,13 @@ namespace BE
     /// una para Estado y otra para FechaDespacho).
     ///
     /// Acciones posibles (campo Accion):
-    ///   CREAR       — creación del pedido
-    ///   DESPACHAR   — pedido pasó a Despachado
-    ///   ENTREGAR    — pedido pasó a Entregado
-    ///   CANCELAR    — pedido fue cancelado
-    ///   DESCANCELAR — cancelación revertida
-    ///   DEVOLUCION  — prendas devueltas
-    ///   RESTAURAR   — estado restaurado desde historial
+    ///   CREAR: creación del pedido
+    ///   DESPACHAR: pedido pasó a Despachado
+    ///   ENTREGAR: pedido pasó a Entregado
+    ///   CANCELAR: pedido fue cancelado
+    ///   DESCANCELAR: cancelación revertida
+    ///   DEVOLUCION: prendas devueltas
+    ///   RESTAURAR: estado restaurado desde historial
     ///
     /// Campos rastreados (campo Campo):
     ///   Estado | FechaDespacho | FechaEntrega | MotivoCancelacion | Prendas

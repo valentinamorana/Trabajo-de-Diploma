@@ -97,7 +97,7 @@ namespace Tests
             Assert.AreEqual(3, alertas.Count(x => x.Nivel == BE.NivelAlerta.Critica)); // vencidas, backup.nunca, dv
         }
 
-        // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README).
+        // Lista de Espera (mejora opcional, no requerida por la cátedra: ver README).
         [TestMethod]
         public void Evaluar_PrendasReservadasPorListaDeEspera_AlertaInfo()
         {
@@ -113,7 +113,7 @@ namespace Tests
             Assert.AreEqual(0, Evaluar(0, 0, 2, 0, 0, reservadasEspera: 0).Count);
         }
 
-        // PN04 — pedidos atrasados (compra tácita: 30 días desde la entrega sin devolución).
+        // PN04: pedidos atrasados (compra tácita: 30 días desde la entrega sin devolución).
         [TestMethod]
         public void Evaluar_PedidosAtrasados_AlertaAdvertencia()
         {

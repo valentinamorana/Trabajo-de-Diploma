@@ -7,7 +7,7 @@ using System.Globalization;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — T07 Tabla ESPEJO de integridad (Usuario_Seguridad).
+    /// Capa de Acceso a Datos: T07 Tabla ESPEJO de integridad (Usuario_Seguridad).
     ///
     /// Mantiene una copia sombra de los campos que entran al DVH de cada usuario, más su DVH.
     /// La app la sincroniza con cada escritura LEGÍTIMA (junto al recálculo del DVH), de modo que

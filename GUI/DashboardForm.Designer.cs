@@ -18,7 +18,7 @@ namespace GUI
 
         // Nota: las tarjetas KPI (flowCards), el panel de Actividad Reciente y el botón de
         // configuración de la tarjeta de backup se arman en runtime según los PERMISOS del
-        // usuario (ver ConstruirElementosCondicionales() en DashboardForm.cs) — no son
+        // usuario (ver ConstruirElementosCondicionales() en DashboardForm.cs): no son
         // representables como controles fijos del Diseñador porque su EXISTENCIA (no solo su
         // visibilidad) depende de datos de sesión. El resto del formulario (header, footer,
         // panel de tareas, mini-stats, sesión) es estático y vive acá.

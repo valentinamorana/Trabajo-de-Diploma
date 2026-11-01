@@ -82,12 +82,12 @@ namespace GUI.Inteligencia
             {
                 var real = new Series(nombre) { ChartType = SeriesChartType.Line, Color = color, BorderWidth = 3, MarkerStyle = MarkerStyle.Circle,
                                                 YAxisType = eje2 ? AxisType.Secondary : AxisType.Primary,
-                                                ToolTip = "#SERIESNAME — #VALX: " + (eje2 ? "#VAL{C0}" : "#VAL") };
+                                                ToolTip = "#SERIESNAME, #VALX: " + (eje2 ? "#VAL{C0}" : "#VAL") };
                 var proy = new Series(nombre + " · " + Tr("cdc.grafico.proyeccion", "proyección"))
                 {
                     ChartType = SeriesChartType.Line, Color = color, BorderWidth = 2, BorderDashStyle = ChartDashStyle.Dash,
                     MarkerStyle = MarkerStyle.Diamond, YAxisType = eje2 ? AxisType.Secondary : AxisType.Primary,
-                    IsVisibleInLegend = false, ToolTip = "#SERIESNAME — #VALX: " + (eje2 ? "#VAL{C0}" : "#VAL")
+                    IsVisibleInLegend = false, ToolTip = "#SERIESNAME, #VALX: " + (eje2 ? "#VAL{C0}" : "#VAL")
                 };
                 // X numérica (posición del mes) con el mes como etiqueta: así la serie proyectada queda
                 // alineada con la real (con X de texto cada serie se ubicaría por su propio índice).
@@ -112,7 +112,7 @@ namespace GUI.Inteligencia
                             pt.MarkerBorderColor = color;
                             pt.MarkerBorderWidth = 2;
                             pt.MarkerSize = 9;
-                            pt.ToolTip = "#SERIESNAME — " + mes + " (" + Tr("cdc.grafico.mesparcial", "mes parcial: no entra en la proyección") + "): " + (eje2 ? "#VAL{C0}" : "#VAL");
+                            pt.ToolTip = "#SERIESNAME, " + mes + " (" + Tr("cdc.grafico.mesparcial", "mes parcial: no entra en la proyección") + "): " + (eje2 ? "#VAL{C0}" : "#VAL");
                         }
                         ultimoReal = p;
                         xUltimoReal = x;
@@ -192,7 +192,7 @@ namespace GUI.Inteligencia
             area.AxisX.Interval = 1;
             void Serie(string nombre, Color color, System.Func<BE.StockCategoria, int> valor)
             {
-                var s = new Series(nombre) { ChartType = SeriesChartType.StackedColumn, Color = color, ToolTip = "#VALX — #SERIESNAME: #VAL" };
+                var s = new Series(nombre) { ChartType = SeriesChartType.StackedColumn, Color = color, ToolTip = "#VALX, #SERIESNAME: #VAL" };
                 foreach (var d in datos) s.Points.AddXY(d.Categoria, valor(d));
                 chart.Series.Add(s);
             }
@@ -281,7 +281,7 @@ namespace GUI.Inteligencia
         private static Series Curva(string nombre, BE.ResultadoSimulacion r, Color color, int grosor, ChartDashStyle estilo)
         {
             var s = new Series(nombre) { ChartType = SeriesChartType.Line, Color = color, BorderWidth = grosor, BorderDashStyle = estilo,
-                                         ToolTip = "#SERIESNAME — #VALX %: #VAL{C0}" };
+                                         ToolTip = "#SERIESNAME, #VALX %: #VAL{C0}" };
             foreach (var p in r.Curva) s.Points.AddXY((double)p.TasaRetencion, (double)p.BeneficioNeto);
             return s;
         }
@@ -306,8 +306,8 @@ namespace GUI.Inteligencia
             }
             var area = Preparar(chart, titulo);
             area.AxisX.Interval = 1;
-            var antes = new Series(Tr("cdc.grafico.antes", "Período anterior")) { ChartType = SeriesChartType.Column, Color = Tema.TextoMuted, IsValueShownAsLabel = true, ToolTip = "#SERIESNAME — #VALX: #VAL" };
-            var durante = new Series(Tr("cdc.grafico.durante", "Durante la promoción")) { ChartType = SeriesChartType.Column, Color = Tema.RosaPrimario, IsValueShownAsLabel = true, ToolTip = "#SERIESNAME — #VALX: #VAL" };
+            var antes = new Series(Tr("cdc.grafico.antes", "Período anterior")) { ChartType = SeriesChartType.Column, Color = Tema.TextoMuted, IsValueShownAsLabel = true, ToolTip = "#SERIESNAME, #VALX: #VAL" };
+            var durante = new Series(Tr("cdc.grafico.durante", "Durante la promoción")) { ChartType = SeriesChartType.Column, Color = Tema.RosaPrimario, IsValueShownAsLabel = true, ToolTip = "#SERIESNAME, #VALX: #VAL" };
             void Par(string nombre, int a, int d) { antes.Points.AddXY(nombre, a); durante.Points.AddXY(nombre, d); }
             Par(Tr("cdc.grafico.bajas", "Bajas"), r.Antes.Bajas, r.Durante.Bajas);
             Par(Tr("cdc.grafico.pausas", "Pausas"), r.Antes.Pausas, r.Durante.Pausas);

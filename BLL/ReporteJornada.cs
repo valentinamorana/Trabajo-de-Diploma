@@ -17,7 +17,7 @@ namespace BLL
         public ReporteJornada() : this(new Bitacora(), new Prenda(), new Cliente()) { }
 
         // Antes los tres colaboradores eran tipos concretos hardcodeados (new Bitacora(),
-        // new Prenda(), new Cliente()) sin ningún parámetro de constructor — el mismo
+        // new Prenda(), new Cliente()) sin ningún parámetro de constructor: el mismo
         // problema estructural que AnalisisAbandono/Cliente/Renovacion, pero sin siquiera
         // una interfaz para Bitacora (se agregó IBitacoraService acá mismo). Sin esto,
         // Generar/GenerarTendencia/GenerarComparacion/ContarXxx quedaban 0% testeables
@@ -81,7 +81,7 @@ namespace BLL
 
             var sb = new StringBuilder();
             sb.AppendLine("═══════════════════════════════════════════════════════");
-            sb.AppendLine($"   {L("titulo", "REPORTE DE JORNADA")} — {fecha:dd'/'MM'/'yyyy}");
+            sb.AppendLine($"   {L("titulo", "REPORTE DE JORNADA")}: {fecha:dd'/'MM'/'yyyy}");
             sb.AppendLine("   WardrobeFlow");
             sb.AppendLine("═══════════════════════════════════════════════════════");
             sb.AppendLine();
@@ -106,9 +106,9 @@ namespace BLL
                 foreach (DataRow row in eventos.Rows)
                 {
                     n++;
-                    string tipo = row["Tipo"]?.ToString() ?? "—";
-                    string det  = row["Descripcion"]?.ToString() ?? "—";
-                    string hora = row["Fecha"] is DateTime dt ? dt.ToString("HH:mm:ss") : "—";
+                    string tipo = row["Tipo"]?.ToString() ?? "-";
+                    string det  = row["Descripcion"]?.ToString() ?? "-";
+                    string hora = row["Fecha"] is DateTime dt ? dt.ToString("HH:mm:ss") : "-";
                     string usr  = row["UsernameUsuario"]?.ToString();
                     string cli  = row["NombreCliente"]?.ToString();
 
@@ -293,9 +293,9 @@ namespace BLL
                 foreach (DataRow row in eventos.Rows)
                 {
                     n++;
-                    string tipo = row["Tipo"]?.ToString() ?? "—";
-                    string det  = row["Descripcion"]?.ToString() ?? "—";
-                    string hora = row["Fecha"] is DateTime dt ? dt.ToString("HH:mm:ss") : "—";
+                    string tipo = row["Tipo"]?.ToString() ?? "-";
+                    string det  = row["Descripcion"]?.ToString() ?? "-";
+                    string hora = row["Fecha"] is DateTime dt ? dt.ToString("HH:mm:ss") : "-";
                     sb.AppendLine($"  {n,3}. [{hora}] {tipo}: {det}");
                 }
                 sb.AppendLine($"  ► {L("eventostot","Eventos totales")}: {n}");

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BE
 {
     /// <summary>
-    /// PN01 — una línea del "Informe de disponibilidad (prendas faltantes y alternativas)"
+    /// PN01: una línea del "Informe de disponibilidad (prendas faltantes y alternativas)"
     /// que emite Depósito: la prenda del pedido que no está disponible y las prendas
     /// alternativas que propone el sistema (Disponibles, de la misma categoría y talle).
     /// Mapea la tabla [PedidoFaltante] (una fila por alternativa, o una sola sin alternativa).

@@ -9,7 +9,7 @@ namespace Servicios.Multiidioma
     {
         public static string Nombre(string perfil)
         {
-            if (string.IsNullOrEmpty(perfil)) return "—";
+            if (string.IsNullOrEmpty(perfil)) return "-";
 
             var t = Traductor.ObtenerTraducciones(GestorIdioma.IdiomaActual);
             string Key(string k) => t.ContainsKey(k) ? t[k].Texto : null;

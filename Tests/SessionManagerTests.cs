@@ -4,7 +4,7 @@ using Seguridad;
 namespace Tests
 {
     /// <summary>
-    /// RNF-04 — El SessionManager debe lanzar excepciones de DOMINIO tipadas
+    /// RNF-04: El SessionManager debe lanzar excepciones de DOMINIO tipadas
     /// (BE.SesionException, traducibles en la GUI) en vez de Exception genérica.
     /// Logout es idempotente, por lo que el setup/cleanup garantizan un estado limpio
     /// sin afectar a otras pruebas.
@@ -54,7 +54,7 @@ namespace Tests
                 typeof(BE.AppException));
         }
 
-        // TienePermiso(string) — antes solo estaba cubierta la función pura que recibe los
+        // TienePermiso(string): antes solo estaba cubierta la función pura que recibe los
         // booleanos ya resueltos (PermisosAccion), no este método real que hace el bypass de
         // administrador y la comparación case-insensitive contra BE.Permiso.NombreMenu.
 

@@ -9,7 +9,7 @@ using Docs = GUI.Exportacion.DocumentosPromocion;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN03, carril Contabilidad del diagrama de actividad:
+    /// Capa de Presentación: PN03, carril Contabilidad del diagrama de actividad:
     ///   Analizar margen e impacto (beneficio estimado, margen proyectado = beneficio − costo del
     ///   descuento sobre los clientes activos del plan, y promociones Vigentes del mismo plan
     ///   superpuestas en fechas) → ¿Aprueba? Sí: Vigente; No: RechazadaContabilidad.
@@ -111,7 +111,7 @@ namespace GUI
                 foreach (var p in _promociones)
                     tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan),
                         Docs.Tipo(p.TipoDescuento), p.Valor, $"{p.FechaInicio:d} - {p.FechaFin:d}",
-                        p.MargenEstimado, p.ImpactoEconomico ?? "—", p.NombreUsuarioAlta ?? "—");
+                        p.MargenEstimado, p.ImpactoEconomico ?? "-", p.NombreUsuarioAlta ?? "-");
 
                 dgvPromociones.DataSource = tabla;
                 if (dgvPromociones.Columns.Contains("ID")) dgvPromociones.Columns["ID"].Width = 44;
@@ -153,12 +153,12 @@ namespace GUI
 
             var p = a.Promocion;
             var sb = new StringBuilder();
-            sb.AppendLine(Tr("promo.analisis.titulo", "Análisis de margen e impacto — Promoción #{0} '{1}'", new object[] { p.IdPromocion, p.Nombre }));
-            sb.AppendLine(Tr("promo.analisis.margen", "Margen estimado: {0:C2} — Impacto: {1}", new object[] { p.MargenEstimado, p.ImpactoEconomico ?? "—" }));
+            sb.AppendLine(Tr("promo.analisis.titulo", "Análisis de margen e impacto: Promoción #{0} '{1}'", new object[] { p.IdPromocion, p.Nombre }));
+            sb.AppendLine(Tr("promo.analisis.margen", "Margen estimado: {0:C2}; Impacto: {1}", new object[] { p.MargenEstimado, p.ImpactoEconomico ?? "-" }));
             sb.AppendLine(a.BeneficioEstimadoSugerencia.HasValue
                 ? Tr("promo.analisis.beneficio", "Beneficio estimado por Gerencia en la sugerencia #{0}: {1:C2} ({2}).",
                      new object[] { p.IdSugerenciaOrigen, a.BeneficioEstimadoSugerencia.Value,
-                                    a.OrigenSugerencia.HasValue ? Docs.Origen(a.OrigenSugerencia.Value) : "—" })
+                                    a.OrigenSugerencia.HasValue ? Docs.Origen(a.OrigenSugerencia.Value) : "-" })
                 : Tr("promo.analisis.sinsugerencia", "Alta manual: no hay beneficio estimado de Gerencia."));
             AgregarMargenProyectado(sb, a);
             if (a.TieneSuperposicion())

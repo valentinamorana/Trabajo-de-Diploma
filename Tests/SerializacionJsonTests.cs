@@ -13,7 +13,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// A02 Serialización — estructura de serializadores (SerializadorAbstracto → SerializadorXml /
+    /// A02 Serialización: estructura de serializadores (SerializadorAbstracto → SerializadorXml /
     /// SerializadorJson, FabricaSerializadores, GestorArchivos) y exportación/importación en JSON de
     /// las versiones de usuario y de los errores, con las mismas validaciones que en XML. También fija
     /// que el XML siga saliendo igual que antes (los archivos ya exportados se siguen importando).

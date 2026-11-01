@@ -1,5 +1,5 @@
 -- ============================================================
--- WardrobeFlow — Restablecer los DATOS DE DEMO (por SQL)
+-- WardrobeFlow: Restablecer los DATOS DE DEMO (por SQL)
 -- ------------------------------------------------------------
 -- Lo mismo que el botón de la app Administración → Backup → "Restablecer datos de demo" (que
 -- además hace un backup antes y lo deja en la bitácora): BORRA los datos de negocio (clientes,

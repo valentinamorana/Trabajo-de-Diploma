@@ -6,7 +6,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.SugerenciaPromocion — PN03 (Métricas, promociones y toma de decisiones),
+    /// BLL.SugerenciaPromocion: PN03 (Métricas, promociones y toma de decisiones),
     /// CU-GE-01-Sugerir Promoción a la Administración. Actor: GerenteComercial (Gerencia).
     /// </summary>
     [TestClass]
@@ -145,7 +145,7 @@ namespace Tests
             Assert.AreEqual(0, ctx.DalSugerencia.AltaVeces);
         }
 
-        // PN03 — beneficio estimado = ingreso mensual en riesgo × tasa de retención esperada / 100.
+        // PN03: beneficio estimado = ingreso mensual en riesgo × tasa de retención esperada / 100.
         [TestMethod]
         public void RegistrarSugerencia_ConTasaDeRetencion_CalculaElBeneficioYGuardaLaTasa()
         {

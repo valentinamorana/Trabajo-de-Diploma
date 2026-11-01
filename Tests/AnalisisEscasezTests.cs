@@ -4,7 +4,7 @@ using Tests.Fakes;
 
 namespace Tests
 {
-    /// <summary>BLL.AnalisisEscasez (PdN12) — detección de escasez de stock por Talle+Categoría.</summary>
+    /// <summary>BLL.AnalisisEscasez (PdN12): detección de escasez de stock por Talle+Categoría.</summary>
     [TestClass]
     public class AnalisisEscasezTests
     {
@@ -44,7 +44,7 @@ namespace Tests
 
             var resultado = bll.Detectar(3);
 
-            Assert.AreEqual(0, resultado.Count, "El umbral es el mínimo aceptable — igual al umbral no es escasez.");
+            Assert.AreEqual(0, resultado.Count, "El umbral es el mínimo aceptable: igual al umbral no es escasez.");
         }
 
         [TestMethod]

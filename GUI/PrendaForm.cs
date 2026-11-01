@@ -143,7 +143,7 @@ namespace GUI
             {
                 // Antes reimplementaba esto a mano y, para una excepción inesperada (no
                 // BE.AppException), mostraba ex.Message crudo sin traducir ni registrar en
-                // bitácora — MostrarError(Exception), heredado de FormBase, sí lo hace
+                // bitácora: MostrarError(Exception), heredado de FormBase, sí lo hace
                 // (mensaje genérico al usuario + detalle técnico auditado).
                 MostrarError(ex);
             }

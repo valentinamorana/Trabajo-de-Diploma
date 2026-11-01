@@ -74,7 +74,7 @@ namespace GUI
             this.menuExportar.SuspendLayout();
             this.SuspendLayout();
             // 
-            // menuExportar — formatos de exportación (PDF / CSV) que se despliegan junto a cada botón Exportar.
+            // menuExportar: formatos de exportación (PDF / CSV) que se despliegan junto a cada botón Exportar.
             // 
             this.menuExportar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuExportarPdf,
@@ -116,7 +116,7 @@ namespace GUI
             this.lblBitTitulo.Name = "lblBitTitulo";
             this.lblBitTitulo.Size = new System.Drawing.Size(700, 26);
             this.lblBitTitulo.TabIndex = 0;
-            this.lblBitTitulo.Text = "Auditoría — Bitácoras";
+            this.lblBitTitulo.Text = "Auditoría: Bitácoras";
             //
             // lblBitSubtitulo
             //
@@ -610,7 +610,7 @@ namespace GUI
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F);   // escala tipográfica de Tema (antes: Microsoft Sans Serif por defecto)
             this.Name = "Bitacora";
             this.Tag = "frm.bitacora";
-            this.Text = "Auditoría — Bitácoras del Sistema";
+            this.Text = "Auditoría: Bitácoras del Sistema";
             this.Load += new System.EventHandler(this.Bitacora_Load);
             this.panelTop.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);

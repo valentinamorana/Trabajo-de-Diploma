@@ -4,7 +4,7 @@ using Seguridad;
 namespace Tests
 {
     /// <summary>
-    /// Permisos granulares de acción ("Ver" vs "Configurar") — BLL.PermisosAccion.
+    /// Permisos granulares de acción ("Ver" vs "Configurar"): BLL.PermisosAccion.
     /// Fail-closed: toda escritura exige la patente de EDICIÓN (ya no hay fallback a la de ver
     /// cuando el catálogo no se puede leer) y el usuario de la sesión debe seguir activo y con
     /// el mismo rol en la base.

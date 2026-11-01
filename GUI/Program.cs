@@ -30,20 +30,20 @@ namespace GUI
 
             if (!BLL.Configuracion.VerificarConexionDAL(out string errConexion))
             {
-                MessageBox.Show(errConexion, "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(errConexion, BLL.Configuracion.TituloErrorConexion(), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            // T08 — Copias de la base SIN CIFRAR que dejó un backup o una restauración cortados.
+            // T08: Copias de la base SIN CIFRAR que dejó un backup o una restauración cortados.
             BLL.Backup.LimpiarTemporalesHuerfanos();
 
-            // Etapa 5 — i18n 100% desde BD: sembrar (si falta) y cargar el idioma por defecto desde
+            // Etapa 5: i18n 100% desde BD: sembrar (si falta) y cargar el idioma por defecto desde
             // la BD ANTES de mostrar cualquier pantalla, para que toda la app (Login y diálogos de
             // arranque incluidos) se renderice desde la base. Si la BD/i18n fallara, el Traductor
             // sigue cayendo a los diccionarios hardcodeados (fallback de seguridad).
             InicializarIdiomaDesdeBD();
 
-            // T07 — VERIFICACIÓN DE INTEGRIDAD ANTES DEL LOGIN (requisito de cátedra).
+            // T07: VERIFICACIÓN DE INTEGRIDAD ANTES DEL LOGIN (requisito de cátedra).
             // "Al iniciar la aplicación, y antes de dar acceso a la ventana de log-in, se debe
             //  realizar el proceso de verificación de integridad de la base de datos."
             // Va ANTES de cualquier escritura de arranque (siembra de admin2 / claves): en una
@@ -106,7 +106,7 @@ namespace GUI
                 if (frmLogin.ShowDialog() != DialogResult.OK)
                     return;   // login cancelado → fin
 
-                // T07 — La verificación ya se ejecutó ANTES del Login (arriba). Con el usuario
+                // T07: La verificación ya se ejecutó ANTES del Login (arriba). Con el usuario
                 // autenticado solo se ENRUTA la respuesta: el detalle y la reparación son solo-admin.
                 if (!integridadOk)
                 {
@@ -144,7 +144,7 @@ namespace GUI
             }
         }
 
-        // Etapa 5 — Deja la BD como fuente de las traducciones desde el arranque: dispara el seed
+        // Etapa 5: Deja la BD como fuente de las traducciones desde el arranque: dispara el seed
         // (idempotente) la primera vez y carga el diccionario del idioma por defecto en el
         // GestorIdioma, de modo que el Traductor sirva textos de BD ya en la primera pantalla.
         private static void InicializarIdiomaDesdeBD()
@@ -194,7 +194,7 @@ namespace GUI
             try { actor = BLL.Sesion.Actor; } catch { }
             Servicios.Serializacion.RegistroErrores.Registrar(ex, "Aplicación", actor);
 
-            // #6 — Ante un error NO controlado se muestra un mensaje GENÉRICO (no se expone
+            // #6: Ante un error NO controlado se muestra un mensaje GENÉRICO (no se expone
             // información técnica al usuario). El detalle técnico ya quedó en la bitácora.
             string titulo  = "Error inesperado";
             string mensaje = "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.";

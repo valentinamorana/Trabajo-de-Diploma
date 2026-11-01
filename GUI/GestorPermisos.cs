@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// T04 — Gestión de Perfiles de Usuario (Patrón Composite) — UX "árbol + panel de acciones
+    /// T04 (Gestión de Perfiles de Usuario (Patrón Composite)) UX "árbol + panel de acciones
     /// con modo Crear/Editar" (misma experiencia que la pantalla de Gestión de Roles de referencia):
     ///
     ///   • Izquierda: TreeView con TODA la estructura (Roles → sub-roles → Patentes ).
@@ -17,7 +17,7 @@ namespace GUI
     ///       – Crear:  nombre + "Crear rol raíz" / "Crear sub-rol" (bajo el rol seleccionado).
     ///       – Editar: renombrar / eliminar el rol, asignar un permiso o rol por ComboBox,
     ///                 y quitar el ítem seleccionado de su rol padre.
-    ///   • Derecha: árbol de PERMISOS EFECTIVOS (recursivo) del nodo seleccionado — lo que ese
+    ///   • Derecha: árbol de PERMISOS EFECTIVOS (recursivo) del nodo seleccionado; lo que ese
     ///     rol concede tras resolver toda la jerarquía (visualización del Composite).
     ///
     /// La composición se persiste en [PermisoRelacion] de forma inmediata (cada acción guarda y
@@ -91,7 +91,7 @@ namespace GUI
 
         private void Traducir()
         {
-            this.Text            = Tr("frm.gestorpermisos",      "Gestor de Perfiles — Roles y Permisos (Composite)");
+            this.Text            = Tr("frm.gestorpermisos",      "Gestor de Perfiles: Roles y Permisos (Composite)");
             lblTitulo.Text       = Tr("lbl.permisos.titulo",     "Perfiles y Permisos");
             lblSubtitulo.Text    = Tr("lbl.permisos.subtitulo",  "Gestión de roles (los permisos son un catálogo fijo)");
             lblEstructura.Text   = Tr("lbl.permisos.estructura", "Estructura del sistema (roles y permisos)");
@@ -116,8 +116,8 @@ namespace GUI
 
             tabGestion.Text       = Tr("perm.tab.gestion",        "Gestión de roles");
             tabVistaCompleta.Text = Tr("perm.tab.vistacompleta",  "Vista completa");
-            lblDescripcion.Text   = Tr("lbl.explorador.descripcion", "Estructura organizacional de WardrobeFlow — Solo lectura");
-            lblLeyenda.Text       = Tr("lbl.explorador.leyenda",  "Familia (nodo compuesto — Área o Rol)    Patente (hoja — permiso atómico)");
+            lblDescripcion.Text   = Tr("lbl.explorador.descripcion", "Estructura organizacional de WardrobeFlow (solo lectura)");
+            lblLeyenda.Text       = Tr("lbl.explorador.leyenda",  "Familia (nodo compuesto, Área o Rol)    Patente (hoja, permiso atómico)");
             btnColapsar.Text      = Tr("btn.explorador.colapsar", "⊟ Colapsar todo");
             btnExpandir.Text      = Tr("btn.explorador.expandir", "⊞ Expandir todo");
 

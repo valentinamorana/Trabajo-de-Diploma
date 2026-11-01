@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Decidir» — Registro de las decisiones de Gerencia sobre las recomendaciones del motor
+    /// PN03 «Decidir»: Registro de las decisiones de Gerencia sobre las recomendaciones del motor
     /// (tabla DecisionComercial). Cada recomendación se puede:
     ///   · Aceptar (una opción: la principal o una alternativa) → Aceptada; al concretarse la acción
     ///     (p. ej. se registró la sugerencia) → Ejecutada, con la referencia (IdSugerencia, IdPromocion…).
@@ -23,6 +23,7 @@ namespace BLL.Inteligencia
         private readonly Func<DateTime> ahora;
         private readonly Servicios.IRegistroBitacora bitacora = Servicios.FabricaBitacora.CrearSistema();
         private readonly Servicios.IRegistroBitacoraNegocio bitacoraNeg = Servicios.FabricaBitacora.CrearNegocio();
+        private readonly ConstanciasDecision constancias;
 
         public DecisionesComerciales() : this(new DAL.DecisionComercial()) { }
 
@@ -30,6 +31,7 @@ namespace BLL.Inteligencia
         {
             this.dal = dal ?? throw new ArgumentNullException(nameof(dal));
             this.ahora = ahora ?? (() => DateTime.Now);
+            constancias = new ConstanciasDecision(dal);
         }
 
         // ── Consultas ─────────────────────────────────────────────────────────────
@@ -117,7 +119,7 @@ namespace BLL.Inteligencia
 
         /// <summary>Acepta la opción <paramref name="indiceOpcion"/> (0 = principal). Si la recomendación ya
         /// estaba aceptada y sin ejecutar, devuelve esa decisión (se puede reintentar la acción).</summary>
-        public BE.DecisionComercial Aceptar(string modulo, BE.Recomendacion rec, int indiceOpcion)
+        public BE.DecisionComercial Aceptar(string modulo, BE.Recomendacion rec, int indiceOpcion, BE.PanelComercial panel = null)
         {
             Exigir();
             var opcion = OpcionElegida(rec, indiceOpcion);
@@ -129,7 +131,7 @@ namespace BLL.Inteligencia
                 // ejecutar, así que se cierra con el motivo y se sigue con la decisión nueva.
                 abierta.Motivo = "La opción aceptada ya no existe en esta versión; se reemplaza por una nueva decisión.";
                 Persistir(abierta, BE.EstadoDecision.Descartada);
-                Registrar(modulo, abierta, "descartada — " + abierta.Motivo);
+                Registrar(modulo, abierta, "descartada: " + abierta.Motivo);
                 rec.UltimaDecision = abierta;
                 abierta = null;
             }
@@ -153,11 +155,12 @@ namespace BLL.Inteligencia
                 decision.Referencia = opcion.Parametros.IdPromocion;
             }
             Persistir(decision, BE.EstadoDecision.Aceptada);
-            Registrar(modulo, decision, $"aceptada — opción: {decision.AccionElegida} (impacto estimado {decision.ImpactoEstimado:C2})");
+            Registrar(modulo, decision, $"aceptada; opción: {decision.AccionElegida} (impacto estimado {decision.ImpactoEstimado:C2})");
+            GuardarConstancia(modulo, decision, rec, indiceOpcion, panel);
             return decision;
         }
 
-        public BE.DecisionComercial Descartar(string modulo, BE.Recomendacion rec, string motivo)
+        public BE.DecisionComercial Descartar(string modulo, BE.Recomendacion rec, string motivo, BE.PanelComercial panel = null)
         {
             Exigir();
             if (rec == null) throw new ArgumentNullException(nameof(rec));
@@ -173,11 +176,12 @@ namespace BLL.Inteligencia
                 decision.ImpactoEstimado = rec.ImpactoEstimado;
             }
             Persistir(decision, BE.EstadoDecision.Descartada);
-            Registrar(modulo, decision, $"descartada — motivo: {decision.Motivo}");
+            Registrar(modulo, decision, $"descartada; motivo: {decision.Motivo}");
+            GuardarConstancia(modulo, decision, rec, 0, panel);
             return decision;
         }
 
-        public BE.DecisionComercial Posponer(string modulo, BE.Recomendacion rec, int dias, string motivo)
+        public BE.DecisionComercial Posponer(string modulo, BE.Recomendacion rec, int dias, string motivo, BE.PanelComercial panel = null)
         {
             Exigir();
             if (rec == null) throw new ArgumentNullException(nameof(rec));
@@ -198,7 +202,8 @@ namespace BLL.Inteligencia
             }
             Persistir(decision, BE.EstadoDecision.Pospuesta);
             Registrar(modulo, decision, $"pospuesta hasta el {decision.PospuestaHasta:dd/MM/yyyy}" +
-                (decision.Motivo != null ? $" — motivo: {decision.Motivo}" : ""));
+                (decision.Motivo != null ? $"; motivo: {decision.Motivo}" : ""));
+            GuardarConstancia(modulo, decision, rec, 0, panel);
             return decision;
         }
 
@@ -213,7 +218,7 @@ namespace BLL.Inteligencia
             decision.Motivo = motivo.Trim();
             decision.PospuestaHasta = null;
             Persistir(decision, BE.EstadoDecision.Descartada);
-            Registrar(modulo, decision, $"descartada — motivo: {decision.Motivo}");
+            Registrar(modulo, decision, $"descartada; motivo: {decision.Motivo}");
         }
 
         /// <summary>Aceptada → Ejecutada: la acción se concretó (con la referencia de lo que generó).</summary>
@@ -229,7 +234,7 @@ namespace BLL.Inteligencia
             }
             decision.FechaEjecucion = ahora();
             Persistir(decision, BE.EstadoDecision.Ejecutada);
-            Registrar(modulo, decision, "ejecutada" + (referencia.HasValue ? $" — {tipoReferencia} #{referencia}" : ""));
+            Registrar(modulo, decision, "ejecutada" + (referencia.HasValue ? $"; {tipoReferencia} #{referencia}" : ""));
         }
 
         /// <summary>
@@ -258,8 +263,8 @@ namespace BLL.Inteligencia
                 throw new BE.AppException("err.bll.decision.concurrente",
                     "La decisión cambió desde otra sesión. Actualice el historial.");
             }
-            Registrar(modulo, decision, (lista.Count > 0 ? $"ejecutada — {lista.Count} {tipoDetalle}(s): {string.Join(", ", lista.Take(50))}" : "ejecutada")
-                                        + (string.IsNullOrWhiteSpace(nota) ? "" : " — " + nota.Trim()));
+            Registrar(modulo, decision, (lista.Count > 0 ? $"ejecutada: {lista.Count} {tipoDetalle}(s): {string.Join(", ", lista.Take(50))}" : "ejecutada")
+                                        + (string.IsNullOrWhiteSpace(nota) ? "" : "; " + nota.Trim()));
         }
         /// <summary>IDs de los clientes o prendas que tocó cada decisión (best-effort: sin tabla, vacío).</summary>
         public Dictionary<int, List<int>> ObtenerDetalle(IEnumerable<int> idsDecision, string tipoDetalle)
@@ -293,6 +298,31 @@ namespace BLL.Inteligencia
 
         private static void Exigir() =>
             PermisosAccion.Exigir(BE.Patentes.SugerenciaPromocion, BE.Patentes.SugerenciaPromocion);
+
+        /// <summary>
+        /// Constancia de la decisión (1.6.1): la foto de lo que el usuario vio al decidir. NUNCA bloquea la
+        /// decisión: si no se puede armar o guardar, la decisión queda registrada con Constancia = NULL, se deja
+        /// registro en el trace y en la bitácora y se informa en decision.AvisoConstancia (la pantalla lo
+        /// muestra sin frenar nada).
+        /// </summary>
+        private void GuardarConstancia(string modulo, BE.DecisionComercial decision, BE.Recomendacion rec, int indiceOpcion, BE.PanelComercial panel)
+        {
+            decision.AvisoConstancia = null;
+            try
+            {
+                var usuario = Seguridad.SessionManager.GetInstance().Usuario;
+                constancias.Guardar(ConstanciasDecision.Armar(decision, rec, indiceOpcion, panel, usuario));
+                decision.TieneConstancia = true;
+            }
+            catch (Exception ex)
+            {
+                decision.TieneConstancia = false;
+                decision.AvisoConstancia = ex is BE.AppException ? ex.Message : ex.GetBaseException().Message;
+                System.Diagnostics.Trace.TraceError("[BLL.DecisionesComerciales] Constancia de la decisión #" + decision.IdDecision + ": " + ex);
+                try { bitacora.Registrar(modulo, $"No se pudo guardar la constancia de la decisión comercial #{decision.IdDecision}: {decision.AvisoConstancia}", BE.Criticidad.Media); }
+                catch (Exception ex2) { System.Diagnostics.Trace.TraceError("[BLL.DecisionesComerciales] " + ex2.Message); }
+            }
+        }
 
         private static BE.OpcionRecomendacion OpcionElegida(BE.Recomendacion rec, int indice)
         {

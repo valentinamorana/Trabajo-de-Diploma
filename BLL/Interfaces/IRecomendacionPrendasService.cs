@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace BLL.Interfaces
 {
-    /// <summary>PdN13 — Recomendación de prendas para un cliente, a partir de su historial
+    /// <summary>PdN13: Recomendación de prendas para un cliente, a partir de su historial
     /// de pedidos (categoría y color preferidos), sugiriendo prendas Disponibles afines.</summary>
     public interface IRecomendacionPrendasService
     {

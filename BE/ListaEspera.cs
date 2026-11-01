@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// Entidad — Lista de Espera de una prenda específica (mejora opcional, no
+    /// Entidad: Lista de Espera de una prenda específica (mejora opcional, no
     /// requerida por la cátedra). Mapea la tabla [ListaEspera]. Un cliente se
     /// anota por una prenda EnUso; cuando se libera, la fila más antigua Pendiente
     /// pasa a Reservada con una ventana exclusiva para ese cliente.

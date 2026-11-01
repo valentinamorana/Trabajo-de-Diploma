@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
-    /// <summary>T04 — Pruebas del patrón Composite (hojas, nodos, roles y anti-ciclos).</summary>
+    /// <summary>T04: Pruebas del patrón Composite (hojas, nodos, roles y anti-ciclos).</summary>
     [TestClass]
     public class CompositeTests
     {

@@ -4,7 +4,7 @@ using Tests.Fakes;
 
 namespace Tests
 {
-    /// <summary>BLL.AnalisisMantenimiento (PdN11) — prendas con tiempos o cantidad de mantenimientos excesivos.</summary>
+    /// <summary>BLL.AnalisisMantenimiento (PdN11): prendas con tiempos o cantidad de mantenimientos excesivos.</summary>
     [TestClass]
     public class AnalisisMantenimientoTests
     {

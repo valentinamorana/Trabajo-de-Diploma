@@ -5,13 +5,13 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// T07 — Consola de Recuperación de Integridad asistida por el ESPEJO (Usuario_Seguridad).
+    /// T07: Consola de Recuperación de Integridad asistida por el ESPEJO (Usuario_Seguridad).
     ///
     /// Muestra el diagnóstico a nivel de CAMPO (qué cambió respecto del último estado legítimo) y
     /// ofrece tres opciones, habilitadas según el tipo de daño (inspirado en el proyecto Agus):
-    ///   • Reparar desde Espejo  — restaura los valores legítimos guardados en el espejo.
-    ///   • Asumir Pérdida        — acepta los datos actuales y recalcula todos los DV.
-    ///   • Restaurar Backup      — cuando el espejo no alcanza (vaciado/eliminación física).
+    ///   • Reparar desde Espejo: restaura los valores legítimos guardados en el espejo.
+    ///   • Asumir Pérdida: acepta los datos actuales y recalcula todos los DV.
+    ///   • Restaurar Backup: cuando el espejo no alcanza (vaciado/eliminación física).
     ///
     /// Es la ÚNICA vía de recuperación del sistema. Se abre desde el Diagnóstico de Integridad
     /// (admin logueado) y desde el arranque (Program), cuando un Administrador autenticado entra
@@ -62,7 +62,7 @@ namespace GUI
                 if (d.DvvAlmacenado != null || d.DvvCalculado != 0)
                     txtResumen.Text += "\r\n" + string.Format(
                         Tr("rec.dvv.detalle", "DVV almacenado: {0}  |  DVV calculado: {1}"),
-                        d.DvvAlmacenado?.ToString() ?? "—", d.DvvCalculado);
+                        d.DvvAlmacenado?.ToString() ?? "-", d.DvvCalculado);
 
                 string tMod = Tr("rec.tipo.modificada",   "Modificada");
                 string tDvh = Tr("rec.tipo.dvh",          "DVH corrupto");
@@ -77,10 +77,10 @@ namespace GUI
                         foreach (var c in a.Campos)
                             grid.Rows.Add(a.Id, a.Username, tipo, c.Campo, c.ValorActual, c.ValorEsperado);
                     else
-                        grid.Rows.Add(a.Id, a.Username, tipo, "—", a.Descripcion ?? "", "—");
+                        grid.Rows.Add(a.Id, a.Username, tipo, "-", a.Descripcion ?? "", "-");
                 }
                 foreach (var f in d.Faltantes)
-                    grid.Rows.Add(f.Id, f.Username, tDel, "—",
+                    grid.Rows.Add(f.Id, f.Username, tDel, "-",
                         Tr("rec.fila.ausente", "(ausente en la tabla actual)"), Tr("rec.fila.enespejo", "(presente en el espejo)"));
 
                 btnReparar.Enabled = d.PuedeReparar;
@@ -154,7 +154,7 @@ namespace GUI
                 ofd.Title  = Tr("rec.backup.seleccionar", "Seleccionar Backup para Restaurar");
                 if (ofd.ShowDialog(this) != DialogResult.OK) return;
 
-                // RF-08 — Informar el ALCANCE de la pérdida (fecha del backup + registros actuales
+                // RF-08: Informar el ALCANCE de la pérdida (fecha del backup + registros actuales
                 // posteriores que se perderían al sobrescribir) antes de confirmar la restauración.
                 string alcance = ConstruirAlcancePerdida(ofd.FileName);
 
@@ -187,7 +187,7 @@ namespace GUI
             }
         }
 
-        // RF-08 — Arma el aviso de alcance de la pérdida: fecha del backup + desglose de los
+        // RF-08: Arma el aviso de alcance de la pérdida: fecha del backup + desglose de los
         // registros de la base actual posteriores a esa fecha (los que se perderían). Tolerante a
         // fallos: si no puede leerse la fecha o contar, devuelve el aviso genérico o vacío.
         private string ConstruirAlcancePerdida(string ruta)

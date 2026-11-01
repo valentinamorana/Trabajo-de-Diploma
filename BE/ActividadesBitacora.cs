@@ -5,9 +5,9 @@ namespace BE
     /// bitácora del sistema (Servicios.Bitacora.Registrar/RegistrarSinSesion). Existen para
     /// que quien ESCRIBE (BLL) y quien TRADUCE para mostrar (GUI.DashboardForm.
     /// TraducirActividad) usen la misma fuente en vez de retipear el mismo string en dos
-    /// archivos — antes, cambiar el texto en uno sin actualizar el otro rompía la
+    /// archivos: antes, cambiar el texto en uno sin actualizar el otro rompía la
     /// traducción en silencio (revisión de lógica
-    /// en la GUI). La tabla sigue guardando texto plano en español, no una clave — esto
+    /// en la GUI). La tabla sigue guardando texto plano en español, no una clave: esto
     /// no es un cambio de esquema, solo elimina la duplicación del literal en sí.
     ///
     /// Los que terminan en "Prefijo" son la parte FIJA de una actividad con datos

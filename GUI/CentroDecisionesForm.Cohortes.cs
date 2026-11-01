@@ -7,7 +7,7 @@ using BLLI = BLL.Inteligencia;
 namespace GUI
 {
     /// <summary>
-    /// Centro de decisiones comerciales — pestaña «1b. Cohortes» (retención por mes de alta). La pestaña
+    /// Centro de decisiones comerciales: pestaña «1b. Cohortes» (retención por mes de alta). La pestaña
     /// es un control propio (<see cref="PanelCohortes"/>) ubicado con el Diseñador; el cálculo es de
     /// BLL.Inteligencia.AnalisisCohortes y corre junto con el análisis, en segundo plano.
     ///
@@ -28,7 +28,7 @@ namespace GUI
 
         private void TraducirCohortes()
         {
-            tabCohortes.Text = Tr("cdc.cohorte.tab", "1b. Cohortes");
+            tabCohortes.Text = Tr("cdc.cohorte.tab", "1b. Permanencia de clientes");
             panelCohortes.Traducir();
         }
 
@@ -42,7 +42,7 @@ namespace GUI
                 return new BE.MatrizCohortes
                 {
                     Corte = hasta.Date,
-                    Resumen = new BE.TextoTraducible("cdc.cohorte.error", "No se pudo calcular el análisis de cohortes: vuelva a analizar.")
+                    Resumen = new BE.TextoTraducible("cdc.cohorte.error", "No se pudo calcular la permanencia de clientes: vuelva a analizar.")
                 };
             }
         }
@@ -70,7 +70,7 @@ namespace GUI
                 SeleccionarFuente(dgvRecomendaciones, _recsVisibles.IndexOf(rec));
                 MostrarDetalle(RecomendacionSeleccionada());
                 MostrarOk(Tr("cdc.cohorte.msg.recomendacion",
-                    "Recomendación de bajas del plan {0}: es el plan que más explica las bajas de la cohorte de {1:yyyy-MM}.",
+                    "Recomendación de bajas del plan {0}: es el plan que más explica las bajas de los clientes que se suscribieron en {1:yyyy-MM}.",
                     new object[] { peor.NombrePlan, peor.Mes }));
                 return;
             }
@@ -82,14 +82,14 @@ namespace GUI
                 : cmbSimPlan.Items.Cast<Item<int?>>().FirstOrDefault(x => x.Valor == escenario.IdPlan);
             if (item == null)
             {
-                MessageBox.Show(this, motivo, Tr("cdc.cohorte.btn.actuar", "Actuar sobre la peor cohorte"),
+                MessageBox.Show(this, motivo, Tr("cdc.cohorte.btn.actuar", "Actuar sobre el grupo con menor permanencia"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (!ConfirmarSiNo(motivo + Environment.NewLine + Environment.NewLine +
                     Tr("cdc.cohorte.msg.simular", "¿Desea abrir el Simulador con el plan {0} para evaluar una promoción de retención?",
                        new object[] { escenario.NombrePlan }),
-                    Tr("cdc.cohorte.btn.actuar", "Actuar sobre la peor cohorte")))
+                    Tr("cdc.cohorte.btn.actuar", "Actuar sobre el grupo con menor permanencia")))
                 return;
             if (ReferenceEquals(cmbSimPlan.SelectedItem, item))
                 CmbSimPlan_SelectedIndexChanged(cmbSimPlan, EventArgs.Empty);   // vuelve al escenario base del plan
@@ -97,7 +97,7 @@ namespace GUI
                 cmbSimPlan.SelectedItem = item;                                // carga el escenario base del plan
             tabs.SelectedTab = tabSimulador;
             MostrarOk(Tr("cdc.cohorte.msg.simulador",
-                "Simulador cargado con el plan {0} (peor cohorte: {1:yyyy-MM}): ajuste los supuestos para evaluar la retención.",
+                "Simulador cargado con el plan {0} (menor permanencia: los suscriptos en {1:yyyy-MM}): ajuste los supuestos para evaluar la retención.",
                 new object[] { escenario.NombrePlan, peor.Mes }));
         }
     }

@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Renovación de suscripción (PdN5). Arma y expone la cadena de
+    /// Lógica de negocio: Renovación de suscripción (PdN5). Arma y expone la cadena de
     /// manejadores (Chain of Responsibility) que resuelve si un cliente renueva, cambia
     /// de plan o se da de baja tras vencer o estar próximo a vencer.
     /// </summary>
@@ -20,7 +20,7 @@ namespace BLL
 
         // dalPlan/dalPrenda tipados por interfaz (antes eran DAL.PlanSuscripcion/DAL.Prenda
         // concretos): con eso, ni esta fachada ni CambioPlanHandler/BajaSuscripcionHandler se
-        // podían instanciar con un doble de prueba — la cadena real quedaba sin ningún test que
+        // podían instanciar con un doble de prueba: la cadena real quedaba sin ningún test que
         // la ejercitara de punta a punta (los tests reconstruían su propio orden de cadena en vez
         // de usar el que arma este constructor).
         private readonly DAL.Interfaces.IClienteDAL dalCliente;
@@ -32,7 +32,7 @@ namespace BLL
             this.dalCliente = dalCliente ?? throw new ArgumentNullException(nameof(dalCliente));
             this.dalRenovacion = dalRenovacion ?? throw new ArgumentNullException(nameof(dalRenovacion));
 
-            // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
+            // Arma la cadena de cola a cabeza, con sentencias sueltas: igual que el
             // Program.cs del ejemplo de cátedra (director.AgregarSiguiente(directorGeneral);
             // gerente.AgregarSiguiente(director); comprador.AgregarSiguiente(gerente);).
             var verificar = new Manejadores.VerificarVencimientoHandler();
@@ -96,12 +96,12 @@ namespace BLL
             var resultado = cadena.Procesar(contexto);
 
             bitacora.Registrar(modulo,
-                $"Renovación Cliente ID {cliente.IdCliente} ({cliente.NombreCompleto}): {resultado.Estado} — {resultado.Mensaje}",
+                $"Renovación Cliente ID {cliente.IdCliente} ({cliente.NombreCompleto}): {resultado.Estado}, {resultado.Mensaje}",
                 resultado.Estado == BE.EstadoRenovacion.Pendiente ? BE.Criticidad.Baja : BE.Criticidad.Media);
 
             if (resultado.Estado != BE.EstadoRenovacion.Pendiente)
                 bitacoraNeg.Registrar(BE.TipoEventoNegocio.ModificacionCliente,
-                    $"Renovación de suscripción: {cliente.NombreCompleto} — {resultado.Estado} — {resultado.Mensaje}",
+                    $"Renovación de suscripción: {cliente.NombreCompleto}, {resultado.Estado}, {resultado.Mensaje}",
                     idCliente: cliente.IdCliente);
 
             return resultado;

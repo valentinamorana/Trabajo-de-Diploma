@@ -4,9 +4,9 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Análisis de Abandono (PdN10). Contexto del patrón Strategy:
+    /// Lógica de negocio: Análisis de Abandono (PdN10). Contexto del patrón Strategy:
     /// mantiene la BLL.Estrategias.EstrategiaRiesgo activa en un campo y la intercambia
-    /// vía CambiarEstrategia — igual que Jugador._estrategia en el ejemplo de cátedra.
+    /// vía CambiarEstrategia: igual que Jugador._estrategia en el ejemplo de cátedra.
     /// Cruza Cliente (suscripción/vencimiento) con la fecha del último pedido (DAL.Pedido)
     /// para darle a cada estrategia los datos que necesita evaluar.
     /// </summary>
@@ -20,7 +20,7 @@ namespace BLL
 
         public AnalisisAbandono() : this(new DAL.Cliente(), new DAL.Pedido()) { }
 
-        // dalPedido pasa a IPedidoDAL (antes DAL.Pedido concreto) — el mismo problema
+        // dalPedido pasa a IPedidoDAL (antes DAL.Pedido concreto): el mismo problema
         // estructural ya corregido en BLL.Cliente/BLL.Renovacion: sin la interfaz, Detectar()
         // no se podía testear con un doble y quedaba 0% cubierto (ver Tests §9, cobertura de
         // Análisis nunca revisada con el mismo detalle que Pedido/Cliente/Cobro/Renovación).

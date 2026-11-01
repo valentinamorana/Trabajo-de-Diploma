@@ -5,11 +5,11 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.RecuperacionAdmin — ruta de recuperación de cuentas de Administrador bloqueadas
+    /// BLL.RecuperacionAdmin: ruta de recuperación de cuentas de Administrador bloqueadas
     /// mediante claves de emergencia de un solo uso. Estaba diseñada explícitamente para
     /// testearse por interfaces (DIP, ver su propio doc-comment) pero no tenía ningún test ni
     /// el doble de prueba necesario (Tests/Fakes/FakeClaveRecuperacionDAL, agregado en esta
-    /// sesión). No requiere sesión iniciada — es el flujo de emergencia para cuando nadie puede
+    /// sesión). No requiere sesión iniciada: es el flujo de emergencia para cuando nadie puede
     /// loguearse.
     /// </summary>
     [TestClass]
@@ -186,7 +186,7 @@ namespace Tests
         [TestMethod]
         public void DesbloquearConClave_ClaveValidaEnMinusculas_FuncionaIgual()
         {
-            // Las claves de emergencia se generan/comparan en mayúsculas — verificar que el
+            // Las claves de emergencia se generan/comparan en mayúsculas: verificar que el
             // método las normaliza (ToUpperInvariant) antes de compararlas contra el hash.
             var dalUsuario = new FakeUsuarioDAL();
             dalUsuario.Usuarios.Add(AdminBloqueado());
@@ -201,7 +201,7 @@ namespace Tests
         [TestMethod]
         public void DesbloquearConClave_ClaveYaConsumidaPorOtraEjecucion_LanzaInvalida()
         {
-            // MarcarUsada devuelve false si otra ejecución ya la consumió en paralelo (carrera) —
+            // MarcarUsada devuelve false si otra ejecución ya la consumió en paralelo (carrera):
             // el método debe tratarlo como clave inválida en vez de reportar éxito.
             var dalUsuario = new FakeUsuarioDAL();
             dalUsuario.Usuarios.Add(AdminBloqueado());
@@ -222,7 +222,7 @@ namespace Tests
         }
 
         // ── ValidarClaveMaestra ──────────────────────────────────────────────────
-        // Tests/App.config no define MasterRecoveryKeyHash (a diferencia de GUI/App.config) —
+        // Tests/App.config no define MasterRecoveryKeyHash (a diferencia de GUI/App.config):
         // por eso solo se puede ejercitar acá el camino "clave maestra desactivada/sin
         // configurar", no el de coincidencia exitosa contra un hash real.
 

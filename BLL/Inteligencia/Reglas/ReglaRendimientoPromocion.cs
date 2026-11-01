@@ -47,7 +47,7 @@ namespace BLL.Inteligencia.Reglas
                 int dias = Math.Max(1, r.Dias);
                 var confianza = r.ClientesEnJuego >= 10 ? BE.NivelConfianza.Alta
                               : r.ClientesEnJuego >= 3 ? BE.NivelConfianza.Media : BE.NivelConfianza.Baja;
-                string mejora = r.MejoraRetencion.HasValue ? r.MejoraRetencion.Value.ToString("+0.#;-0.#;0") + " pp" : "—";
+                string mejora = r.MejoraRetencion.HasValue ? r.MejoraRetencion.Value.ToString("+0.#;-0.#;0") + " pp" : "-";
 
                 if (m.Veredicto == BE.VeredictoPromocion.DarDeBaja)
                 {

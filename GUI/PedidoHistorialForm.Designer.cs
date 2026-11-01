@@ -34,7 +34,7 @@ namespace GUI
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.SuspendLayout();
 
-            // ── lblPedidoInfo — el texto final ("Pedido #N") se completa en el constructor ─
+            // ── lblPedidoInfo: el texto final ("Pedido #N") se completa en el constructor ─
             this.lblPedidoInfo.AutoSize  = true;
             this.lblPedidoInfo.Font      = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold);
             this.lblPedidoInfo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(62)))), ((int)(((byte)(96)))));
@@ -86,7 +86,7 @@ namespace GUI
             this.lblDesde.Tag      = "lbl.hist.desde";
             this.lblDesde.Text     = "Desde:";
 
-            // ── dtpDesde — Value se fija en el constructor (DateTime.Today.AddMonths(-1)) ─
+            // ── dtpDesde: Value se fija en el constructor (DateTime.Today.AddMonths(-1)) ─
             this.dtpDesde.Enabled  = false;
             this.dtpDesde.Format   = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dtpDesde.Location = new System.Drawing.Point(80, 28);
@@ -110,7 +110,7 @@ namespace GUI
             this.lblHasta.Tag      = "lbl.hist.hasta";
             this.lblHasta.Text     = "Hasta:";
 
-            // ── dtpHasta — Value se fija en el constructor (DateTime.Today) ─────
+            // ── dtpHasta: Value se fija en el constructor (DateTime.Today) ─────
             this.dtpHasta.Enabled  = false;
             this.dtpHasta.Format   = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dtpHasta.Location = new System.Drawing.Point(272, 28);
@@ -234,7 +234,7 @@ namespace GUI
             this.Name            = "PedidoHistorialForm";
             this.StartPosition   = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Tag             = "frm.historial";
-            this.Text            = "Historial de Cambios — Pedido";
+            this.Text            = "Historial de Cambios: Pedido";
             this.grpFiltros.ResumeLayout(false);
             this.grpFiltros.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();

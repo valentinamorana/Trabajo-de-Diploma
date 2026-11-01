@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace GUI
 {
     /// <summary>
-    /// PN02 — Resultado de la venta (NuevaContratacionForm) con el botón para imprimir el documento que
+    /// PN02: Resultado de la venta (NuevaContratacionForm) con el botón para imprimir el documento que
     /// el cliente se lleva: «Orden de cobro» o «Aviso de desistimiento». Hecho con el Diseñador.
     /// </summary>
     public partial class ResultadoContratacionDialog : Form

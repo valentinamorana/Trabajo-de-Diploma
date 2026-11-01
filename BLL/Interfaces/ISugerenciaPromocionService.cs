@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BLL.Interfaces
 {
     /// <summary>
-    /// PN03 — «Sugerencia de promoción»: Gerencia la registra tras analizar las métricas y
+    /// PN03: «Sugerencia de promoción»: Gerencia la registra tras analizar las métricas y
     /// Administración la acepta (BLL.Promocion.CrearDesdeSugerencia) o la descarta.
     /// </summary>
     public interface ISugerenciaPromocionService

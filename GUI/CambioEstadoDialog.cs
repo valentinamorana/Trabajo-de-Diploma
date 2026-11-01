@@ -28,7 +28,7 @@ namespace GUI
             btnConfirmar.Text      = Tr("btn.confirmar.cambio", "Confirmar Cambio");
             btnCancelar.Text       = Tr("btn.cancelar",         "Cancelar");
 
-            string fmtInfo = Tr("lbl.cambioest.info", "Prenda: {0}  —  Estado actual: {1}");
+            string fmtInfo = Tr("lbl.cambioest.info", "Prenda: {0}; Estado actual: {1}");
             string estadoLabel = estadoTraducido ?? prenda.Estado.ToString();
             lblPrendaInfo.Text = string.Format(fmtInfo, prenda.Nombre, estadoLabel);
 

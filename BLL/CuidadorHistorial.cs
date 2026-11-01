@@ -5,7 +5,7 @@ using BE.Memento;
 namespace BLL
 {
     /// <summary>
-    /// Patrón MEMENTO — rol "Caretaker" (Cuidador).
+    /// Patrón MEMENTO: rol "Caretaker" (Cuidador).
     ///
     /// Administra el historial de Mementos de los usuarios: los guarda y los
     /// recupera, pero NO interpreta su estado interno (trabaja contra la abstracción
@@ -32,7 +32,7 @@ namespace BLL
             {
                 // El Caretaker conoce el tipo concreto (lo necesita para setear IdUsuario y
                 // pasarlo a un DAL fuertemente tipado), pero no lee ni interpreta los campos
-                // *Snapshot — esos son responsabilidad exclusiva del Originator (BE.Usuario).
+                // *Snapshot: esos son responsabilidad exclusiva del Originator (BE.Usuario).
                 var snapshot = (BE.VersionUsuario)memento;
                 snapshot.IdUsuario = idUsuario;
                 _dalVersion.Insertar(snapshot);

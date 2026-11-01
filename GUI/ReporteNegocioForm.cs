@@ -125,7 +125,7 @@ namespace GUI
         private void Exportar(string formato)
         {
             // Si todavía no se generó el reporte, dgv.DataSource es null: Datos queda null
-            // pero Encabezados no — ReporteExportable.EsTabular exige AMBOS no-null, así que sin
+            // pero Encabezados no: ReporteExportable.EsTabular exige AMBOS no-null, así que sin
             // este guard cae en la rama "de texto" de los exportadores (TextoPlano vacío) y
             // muestra éxito con un CSV vacío / PDF en blanco en vez del aviso "no hay datos".
             var datos = dgv.DataSource as DataTable;

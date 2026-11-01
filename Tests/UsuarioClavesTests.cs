@@ -5,7 +5,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.Usuario.Claves (partial) — ResetearClave, SolicitarRecuperacionClave y
+    /// BLL.Usuario.Claves (partial): ResetearClave, SolicitarRecuperacionClave y
     /// ValidarCredencialesAdmin. CambiarClavePropia ya está cubierto en detalle por
     /// UsuarioCambioClaveTests.cs.
     ///
@@ -13,7 +13,7 @@ namespace Tests
     /// side-effect). El resto del método no es testeable de forma aislada sin tocar BD/disco:
     /// llama a Configuracion.AsegurarIntegridadUsuarios() (estática, contra la BD real) y a
     /// "new VersionUsuario()"/GeneradorCredenciales.ExportarCredenciales (BLL concreto y
-    /// escritura de archivo real, ninguno inyectable desde acá) — mismo problema estructural
+    /// escritura de archivo real, ninguno inyectable desde acá): mismo problema estructural
     /// que ExigirSistemaConservaGestion en BLL.Familia.
     ///
     /// SolicitarRecuperacionClave: se cubre el camino "no existe" (no toca bitácora). El
@@ -21,7 +21,7 @@ namespace Tests
     /// BD real y queda fuera del mismo modo.
     ///
     /// ValidarCredencialesAdmin: sin ninguna dependencia de BD más allá del IUsuarioDAL
-    /// inyectado — cobertura completa de las 6 ramas.
+    /// inyectado: cobertura completa de las 6 ramas.
     /// </summary>
     [TestClass]
     public class UsuarioClavesTests
@@ -35,7 +35,7 @@ namespace Tests
         private static void LoginComoVendedor()
             => SessionManager.Login(new BE.Usuario { Id = 2, Username = "vend", Perfil = "Vendedor" });
 
-        // ── ResetearClave — guard previo a cualquier side-effect ────────────────────────
+        // ── ResetearClave: guard previo a cualquier side-effect ────────────────────────
 
         [TestMethod]
         public void ResetearClave_SinSesion_LanzaSesionExpirada()
@@ -70,7 +70,7 @@ namespace Tests
             }
         }
 
-        // ── SolicitarRecuperacionClave — camino "no existe" (no toca bitácora) ──────────
+        // ── SolicitarRecuperacionClave: camino "no existe" (no toca bitácora) ──────────
 
         [TestMethod]
         public void SolicitarRecuperacionClave_UsernameVacio_DevuelveFalse()
@@ -95,7 +95,7 @@ namespace Tests
             Assert.IsFalse(bll.SolicitarRecuperacionClave("no_existe"));
         }
 
-        // ── ValidarCredencialesAdmin — sin dependencia de BD, cobertura completa ────────
+        // ── ValidarCredencialesAdmin: sin dependencia de BD, cobertura completa ────────
 
         private static FakeUsuarioDAL ConUsuarioAdmin(string username, string passwordPlano, bool bloqueado = false)
         {

@@ -95,7 +95,7 @@ namespace Tests.Fakes
         public List<BE.Usuario> ObtenerArchivadosParaPurga(int dias) => Purgables;
 
         // Soporte transaccional (BLL.RecuperacionIntegridad): sin BD real en el fake, la
-        // "transacción" solo ejecuta la acción con conn/tx nulos — nadie los usa fuera de
+        // "transacción" solo ejecuta la acción con conn/tx nulos: nadie los usa fuera de
         // pasarlos a SqlCommand, que este doble no llega a construir.
         public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion) => accion(null, null);
         public void EliminarEnTx(SqlConnection conexion, SqlTransaction tx, int idUsuario)
@@ -111,7 +111,7 @@ namespace Tests.Fakes
 
         // Espía de RestaurarVersion (Memento): aplica el snapshot al usuario sembrado equivalente,
         // mismos campos administrativos no sensibles que restaura DAL.Usuario.RestaurarVersion
-        // (username/nombre/apellido/fecha nac./email — nunca clave ni estado de bloqueo).
+        // (username/nombre/apellido/fecha nac./email: nunca clave ni estado de bloqueo).
         public int RestaurarVersionVeces { get; private set; }
         public void RestaurarVersion(BE.VersionUsuario v)
         {

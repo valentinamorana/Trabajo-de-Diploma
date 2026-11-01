@@ -5,9 +5,9 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// PdN3 — Pruebas del patrón Command para Devolución/Cancelación de pedidos.
+    /// PdN3: Pruebas del patrón Command para Devolución/Cancelación de pedidos.
     /// El Invoker es una cola batch (TomarOrden/ProcesarOrdenes), igual que
-    /// EmpresaInvoker del ejemplo de cátedra — no ejecuta inmediato ni deshace.
+    /// EmpresaInvoker del ejemplo de cátedra: no ejecuta inmediato ni deshace.
     /// </summary>
     [TestClass]
     public class ComandoPedidoTests

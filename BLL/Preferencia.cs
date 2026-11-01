@@ -1,7 +1,7 @@
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Preferencias de UI por usuario. Fachada simple sobre el DAL.
+    /// Lógica de negocio: Preferencias de UI por usuario. Fachada simple sobre el DAL.
     /// </summary>
     public class Preferencia
     {

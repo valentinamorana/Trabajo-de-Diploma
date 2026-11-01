@@ -10,7 +10,7 @@ using Servicios.Multiidioma;
 namespace Tests
 {
     /// <summary>
-    /// USABILIDAD — "dónde estoy, qué hace el sistema, cómo avanzar":
+    /// USABILIDAD: "dónde estoy, qué hace el sistema, cómo avanzar":
     ///   • BLL.MapaNavegacion: toda pantalla que se abre desde el menú tiene su ítem y su pista
     ///     (ux.hint.*) en los 4 idiomas, y el catálogo coincide con los manejadores reales de
     ///     GUI/Menu.cs (se leen los fuentes: el proyecto de tests no referencia la GUI).

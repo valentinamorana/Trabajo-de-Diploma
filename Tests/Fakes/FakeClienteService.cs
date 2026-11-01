@@ -33,7 +33,7 @@ namespace Tests.Fakes
                 DateTime.Today, DateTime.Today.AddMonths(1));
         }
 
-        // PN02 — mismo espía: a los tests de ConfirmarCobro les alcanza con saber que
+        // PN02: mismo espía: a los tests de ConfirmarCobro les alcanza con saber que
         // "algo tipo ActivarSuscripcion" fue invocado, sin importar cuál de los dos overloads.
         public BE.Builders.Suscripcion ActivarSuscripcionDesdeContratacion(
             string modulo, BE.Cliente cliente, int idPlan, BE.Builders.ModalidadCobro modalidad, decimal consumoCredito = 0m,

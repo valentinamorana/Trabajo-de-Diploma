@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Capa de Lógica de Negocio — Etapa 4 (permisos a nivel de control).
+    /// Capa de Lógica de Negocio: Etapa 4 (permisos a nivel de control).
     /// Expone los mapeos control↔patente a la GUI (respetando el orden de capas: GUI → BLL → DAL)
     /// y las reglas puras que decide qué controles de un formulario ve cada usuario. Las aplica
     /// GUI.ManejadorSeguridad (que solo se ocupa de encontrar y mostrar/ocultar los controles).

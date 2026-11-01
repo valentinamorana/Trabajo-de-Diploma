@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace BE
 {
     /// <summary>
-    /// A02 Serialización — un error inesperado de la aplicación, tal como queda serializado en XML
+    /// A02 Serialización: un error inesperado de la aplicación, tal como queda serializado en XML
     /// (Servicios.Serializacion.RegistroErrores) o se exporta en XML o JSON. Solo datos técnicos
     /// mínimos: nunca contraseñas ni el ToString() completo de la excepción (puede arrastrar valores
     /// de parámetros). [DataContract] / [DataMember]: el JSON lleva los nombres de las propiedades

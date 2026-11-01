@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// USABILIDAD — "¿Dónde estoy?": catálogo puro de las pantallas que se abren desde el menú
+    /// USABILIDAD: "¿Dónde estoy?": catálogo puro de las pantallas que se abren desde el menú
     /// principal. Por cada pantalla (nombre de la clase del formulario) guarda el .Name del
     /// ToolStripMenuItem que la abre y la pista de una línea ("qué puede hacer acá") que muestra
     /// la barra de estado de la ventana principal.
@@ -94,8 +94,6 @@ namespace BLL
             // Promociones (PN03)
             new Pantalla("CentroDecisionesForm", "centroDecisionesToolStripMenuItem",
                 "Elija el período y el plan para analizar; luego revise las recomendaciones, simule opciones y mida el resultado de las promociones."),
-            new Pantalla("SugerirPromocionForm", "sugerirPromocionToolStripMenuItem",
-                "Elija el período y presione Analizar métricas; complete la sugerencia para un plan y presione Enviar Sugerencia."),
             new Pantalla("PromocionesAdministracionForm", "gestionPromocionesToolStripMenuItem",
                 "Cree promociones desde las sugerencias de Gerencia o con Alta Manual, y atienda las solicitudes de baja de Ventas."),
             new Pantalla("PromocionesContabilidadForm", "revisionContablePromocionesToolStripMenuItem",

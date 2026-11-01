@@ -7,7 +7,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// PdN5 — Pruebas del patrón Chain of Responsibility para renovación de suscripción.
+    /// PdN5: Pruebas del patrón Chain of Responsibility para renovación de suscripción.
     /// Igual que el ejemplo de cátedra, la cadena no valida que el sucesor exista: si un
     /// eslabón delega y no tiene sucesor asignado, es responsabilidad de quien arma la
     /// cadena (BLL.Renovacion) haberla dejado bien formada. Para probar la delegación en
@@ -538,7 +538,7 @@ namespace Tests
 
         // ── BLL.Renovacion (fachada real) ─────────────────────────────────────────
         // Hasta acá todos los tests de este archivo arman su PROPIA copia de la cadena a mano
-        // (mismo orden que el constructor de BLL.Renovacion, pero reconstruido en el test) — si
+        // (mismo orden que el constructor de BLL.Renovacion, pero reconstruido en el test): si
         // alguien invierte el orden real en el constructor de producción, ningún test de los de
         // arriba lo detecta. Estos instancian la clase fachada REAL y ejercitan Procesar(...) de
         // punta a punta, más el guard de entrada (permisos + sin_plan) que tampoco tenía cobertura.
@@ -597,7 +597,7 @@ namespace Tests
         public void Real_ClienteVencidoConCambioDePlan_ProcesaDePuntaAPuntaConLaCadenaReal()
         {
             // VerificarVencimientoHandler (primer eslabón real) solo delega si la suscripción
-            // está vencida o próxima a vencer, sea cual sea la Decision pedida — con un cliente
+            // está vencida o próxima a vencer, sea cual sea la Decision pedida: con un cliente
             // vigente, CambiarPlan/Baja quedan en Pendiente sin llegar a los eslabones que las
             // resuelven (comportamiento documentado, no un bug: PdN5 solo cubre la decisión
             // tomada AL VENCER, no una baja/cambio anticipado). Por eso estos tests de punta a

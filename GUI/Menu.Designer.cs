@@ -65,7 +65,6 @@
             this.contratacionesPendientesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.promocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.centroDecisionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sugerirPromocionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionPromocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.revisionContablePromocionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.promocionesVigentesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -108,7 +107,7 @@
             this.menuPestania.SuspendLayout();
             this.SuspendLayout();
             //
-            // tsIdioma — barra de selección de idioma (debajo del MenuStrip principal).
+            // tsIdioma: barra de selección de idioma (debajo del MenuStrip principal).
             //
             this.tsIdioma.Dock      = System.Windows.Forms.DockStyle.Top;
             this.tsIdioma.BackColor = System.Drawing.Color.FromArgb(40, 40, 55);
@@ -162,7 +161,7 @@
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             //
-            // usuarioToolStripMenuItem — se renombra "Sesión" (evita confundirlo con "Perfiles y Permisos").
+            // usuarioToolStripMenuItem: se renombra "Sesión" (evita confundirlo con "Perfiles y Permisos").
             //
             this.usuarioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miPerfilItem,
@@ -174,32 +173,32 @@
             this.usuarioToolStripMenuItem.Tag = "mnu.sesion";
             this.usuarioToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
             this.usuarioToolStripMenuItem.Text = "Sesión";
-            // Cuenta (Sesión/Mi Perfil) pasa al costado derecho, junto a Alertas — deja de competir
+            // Cuenta (Sesión/Mi Perfil) pasa al costado derecho, junto a Alertas: deja de competir
             // visualmente con los módulos de negocio (hallazgo #10 del rediseño UX/UI).
             this.usuarioToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             //
-            // miPerfilItem — "Mi Perfil" (preferencias del usuario), disponible para todos.
+            // miPerfilItem: "Mi Perfil" (preferencias del usuario), disponible para todos.
             //
             this.miPerfilItem.Name = "miPerfilItem";
             this.miPerfilItem.Tag  = "perfil.menu";
             this.miPerfilItem.Text = "Mi Perfil";
             this.miPerfilItem.Click += new System.EventHandler(this.MiPerfil_Click);
             //
-            // ayudaItem — D02 "Ayuda (F1)": ayuda de la pantalla activa (lo ven todos los roles).
+            // ayudaItem: D02 "Ayuda (F1)": ayuda de la pantalla activa (lo ven todos los roles).
             //
             this.ayudaItem.Name = "ayudaItem";
             this.ayudaItem.Tag = "mnu.ayuda";
             this.ayudaItem.Text = "Ayuda (F1)";
             this.ayudaItem.Click += new System.EventHandler(this.AyudaItem_Click);
             //
-            // guiaItem — "Ver guía de inicio" (GuiaPrimerUsoForm), para todos los roles.
+            // guiaItem: "Ver guía de inicio" (GuiaPrimerUsoForm), para todos los roles.
             //
             this.guiaItem.Name = "guiaItem";
             this.guiaItem.Tag = "ux.mnu.guia";
             this.guiaItem.Text = "Ver guía de inicio";
             this.guiaItem.Click += new System.EventHandler(this.GuiaItem_Click);
             //
-            // acercaDeItem — "Acerca de WardrobeFlow" (AcercaDeForm), para todos los roles.
+            // acercaDeItem: "Acerca de WardrobeFlow" (AcercaDeForm), para todos los roles.
             //
             this.acercaDeItem.Name = "acercaDeItem";
             this.acercaDeItem.Tag = "ux.mnu.acercade";
@@ -245,7 +244,7 @@
             this.prendasToolStripMenuItem.Text = "Prendas";
             this.prendasToolStripMenuItem.Click += new System.EventHandler(this.prendasToolStripMenuItem_Click);
             //
-            // controlStockToolStripMenuItem — PN01, carril Depósito (Controlador de Stock)
+            // controlStockToolStripMenuItem: PN01, carril Depósito (Controlador de Stock)
             //
             this.controlStockToolStripMenuItem.Name = "controlStockToolStripMenuItem";
             this.controlStockToolStripMenuItem.Tag = "mnu.controlstock";
@@ -253,7 +252,7 @@
             this.controlStockToolStripMenuItem.Text = "Control de Stock";
             this.controlStockToolStripMenuItem.Click += new System.EventHandler(this.controlStockToolStripMenuItem_Click);
             //
-            // inspeccionDevolucionToolStripMenuItem — PN04, CU05-DEP Inspeccionar Devolución
+            // inspeccionDevolucionToolStripMenuItem: PN04, CU05-DEP Inspeccionar Devolución
             //
             this.inspeccionDevolucionToolStripMenuItem.Name = "inspeccionDevolucionToolStripMenuItem";
             this.inspeccionDevolucionToolStripMenuItem.Tag = "mnu.inspecciondevolucion";
@@ -261,7 +260,7 @@
             this.inspeccionDevolucionToolStripMenuItem.Text = "Inspección de Devolución";
             this.inspeccionDevolucionToolStripMenuItem.Click += new System.EventHandler(this.inspeccionDevolucionToolStripMenuItem_Click);
             //
-            // listaEsperaToolStripMenuItem — mejora opcional (no requerida por la cátedra, ver README)
+            // listaEsperaToolStripMenuItem: mejora opcional (no requerida por la cátedra, ver README)
             //
             this.listaEsperaToolStripMenuItem.Name = "listaEsperaToolStripMenuItem";
             this.listaEsperaToolStripMenuItem.Tag = "mnu.listaespera";
@@ -272,7 +271,7 @@
             // suscriptoresToolStripMenuItem
             //
             // Se separa de "Ventas": Clientes/Planes/Renovación tienen ritmo semanal, no diario
-            // (hallazgo #6 del rediseño UX/UI) — antes vivían mezclados con Pedidos de Venta.
+            // (hallazgo #6 del rediseño UX/UI): antes vivían mezclados con Pedidos de Venta.
             this.suscriptoresToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.clientesToolStripMenuItem,
             this.planesToolStripMenuItem,
@@ -328,7 +327,7 @@
             this.cobroSuscripcionToolStripMenuItem.Text = "Cobro de Renovaciones";
             this.cobroSuscripcionToolStripMenuItem.Click += new System.EventHandler(this.cobroSuscripcionToolStripMenuItem_Click);
             //
-            // nuevaContratacionToolStripMenuItem — PN02 (Venta capta cliente + plan elegido)
+            // nuevaContratacionToolStripMenuItem: PN02 (Venta capta cliente + plan elegido)
             //
             this.nuevaContratacionToolStripMenuItem.Name = "nuevaContratacionToolStripMenuItem";
             this.nuevaContratacionToolStripMenuItem.Tag = "mnu.nuevacontratacion";
@@ -352,7 +351,7 @@
             this.pedidosRealizadosToolStripMenuItem.Text = "Pedidos Realizados";
             this.pedidosRealizadosToolStripMenuItem.Click += new System.EventHandler(this.pedidosRealizadosToolStripMenuItem_Click);
             //
-            // cajaToolStripMenuItem — PN02, rol Caja (separado de Vendedor: Caja cobra, Vendedor no)
+            // cajaToolStripMenuItem: PN02, rol Caja (separado de Vendedor: Caja cobra, Vendedor no)
             //
             // El cobro recurrente (N01) también es de Caja: quien vende no cobra.
             this.cajaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -371,12 +370,11 @@
             this.contratacionesPendientesToolStripMenuItem.Text = "Cobro de Contrataciones";
             this.contratacionesPendientesToolStripMenuItem.Click += new System.EventHandler(this.contratacionesPendientesToolStripMenuItem_Click);
             //
-            // promocionesToolStripMenuItem — PN03: Gerencia, Administración, Contabilidad y
+            // promocionesToolStripMenuItem: PN03: Gerencia, Administración, Contabilidad y
             // Vendedor conviven acá, cada hoja gobernada por su propia patente.
             //
             this.promocionesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.centroDecisionesToolStripMenuItem,
-            this.sugerirPromocionToolStripMenuItem,
             this.gestionPromocionesToolStripMenuItem,
             this.revisionContablePromocionesToolStripMenuItem,
             this.promocionesVigentesToolStripMenuItem});
@@ -385,21 +383,13 @@
             this.promocionesToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
             this.promocionesToolStripMenuItem.Text = "Promociones";
             //
-            // centroDecisionesToolStripMenuItem — PN03 «Inteligencia comercial y promociones» (Gerencia)
+            // centroDecisionesToolStripMenuItem: PN03 «Inteligencia comercial y promociones» (Gerencia)
             //
             this.centroDecisionesToolStripMenuItem.Name = "centroDecisionesToolStripMenuItem";
             this.centroDecisionesToolStripMenuItem.Tag = "mnu.centrodecisiones";
             this.centroDecisionesToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
             this.centroDecisionesToolStripMenuItem.Text = "Centro de decisiones comerciales";
             this.centroDecisionesToolStripMenuItem.Click += new System.EventHandler(this.centroDecisionesToolStripMenuItem_Click);
-            //
-            // sugerirPromocionToolStripMenuItem
-            //
-            this.sugerirPromocionToolStripMenuItem.Name = "sugerirPromocionToolStripMenuItem";
-            this.sugerirPromocionToolStripMenuItem.Tag = "mnu.sugerirpromocion";
-            this.sugerirPromocionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
-            this.sugerirPromocionToolStripMenuItem.Text = "Sugerir Promoción";
-            this.sugerirPromocionToolStripMenuItem.Click += new System.EventHandler(this.sugerirPromocionToolStripMenuItem_Click);
             //
             // gestionPromocionesToolStripMenuItem
             //
@@ -425,7 +415,7 @@
             this.promocionesVigentesToolStripMenuItem.Text = "Promociones Vigentes";
             this.promocionesVigentesToolStripMenuItem.Click += new System.EventHandler(this.promocionesVigentesToolStripMenuItem_Click);
             //
-            // gestionToolStripMenuItem — reorganizado en submenús: Usuarios ▸, Perfiles, ──, Sistema ▸.
+            // gestionToolStripMenuItem: reorganizado en submenús: Usuarios ▸, Perfiles, ──, Sistema ▸.
             //
             this.gestionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.grpUsuarios,
@@ -437,7 +427,7 @@
             this.gestionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.gestionToolStripMenuItem.Text = "Administrar";
             //
-            // grpUsuarios — submenú "Usuarios": administración (cuentas + datos) + historial de cambios.
+            // grpUsuarios: submenú "Usuarios": administración (cuentas + datos) + historial de cambios.
             //
             this.grpUsuarios.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.usuariosToolStripMenuItem,
@@ -446,7 +436,7 @@
             this.grpUsuarios.Tag  = "mnu.grp.usuarios";
             this.grpUsuarios.Text = "Usuarios";
             //
-            // usuariosToolStripMenuItem — "Administración de Usuarios": una sola pantalla con las
+            // usuariosToolStripMenuItem: "Administración de Usuarios": una sola pantalla con las
             // pestañas Cuentas y Datos administrativos (antes eran dos ítems y dos formularios).
             //
             this.usuariosToolStripMenuItem.Name = "usuariosToolStripMenuItem";
@@ -459,7 +449,7 @@
             //
             this.sepAdministrarToolStripSeparator.Name = "sepAdministrarToolStripSeparator";
             //
-            // grpSistema — submenú "Sistema": herramientas transversales.
+            // grpSistema: submenú "Sistema": herramientas transversales.
             //
             this.grpSistema.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.idiomasToolStripMenuItem,
@@ -470,7 +460,7 @@
             this.grpSistema.Text = "Sistema";
             // Resalte distintivo: los 3 ítems de este submenú (y el submenú en sí) se pintan
             // con un fondo propio para diferenciarlos de un vistazo del resto de "Administrar"
-            // — son herramientas transversales del sistema, no ABM de usuarios.
+            // son herramientas transversales del sistema, no ABM de usuarios.
             this.grpSistema.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             //
             // perfilesToolStripMenuItem
@@ -516,7 +506,7 @@
             this.integridadToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
             this.integridadToolStripMenuItem.Click += new System.EventHandler(this.integridadToolStripMenuItem_Click);
             //
-            // auditoriaToolStripMenuItem — antes vivía junto con los reportes de negocio dentro
+            // auditoriaToolStripMenuItem: antes vivía junto con los reportes de negocio dentro
             // de un único menú "Analítica" de 9 ítems en un dropdown plano; se separó en dos
             // menúes de primer nivel para que cada uno se lea de un vistazo (auditoría del
             // sistema vs. decisiones comerciales).
@@ -604,7 +594,7 @@
             //
             // cerrarTodasLasVentanasToolStripMenuItem se agrega ACÁ (antes de asignar
             // MdiWindowListItem) porque WinForms respeta los DropDownItems ya presentes y
-            // les agrega un separador + la lista de ventanas abajo — no hace falta
+            // les agrega un separador + la lista de ventanas abajo: no hace falta
             // mantenerla sincronizada a mano.
             this.ventanaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cerrarTodasLasVentanasToolStripMenuItem,
@@ -626,7 +616,7 @@
             this.cerrarTodasLasVentanasToolStripMenuItem.Text = "Cerrar Todas";
             this.cerrarTodasLasVentanasToolStripMenuItem.Click += new System.EventHandler(this.cerrarTodasLasVentanasToolStripMenuItem_Click);
             //
-            // dividirPantallaToolStripMenuItem / quitarDivisionToolStripMenuItem — pantalla dividida (Menu.Pestanias.cs).
+            // dividirPantallaToolStripMenuItem / quitarDivisionToolStripMenuItem: pantalla dividida (Menu.Pestanias.cs).
             //
             this.dividirPantallaToolStripMenuItem.Name = "dividirPantallaToolStripMenuItem";
             this.dividirPantallaToolStripMenuItem.Tag = "mnu.ventana.dividir";
@@ -639,7 +629,7 @@
             this.quitarDivisionToolStripMenuItem.Text = "Quitar pantalla dividida";
             this.quitarDivisionToolStripMenuItem.Click += new System.EventHandler(this.QuitarDivision_Click);
             //
-            // tabsVentanas — una pestaña por pantalla abierta, debajo del menú (Menu.Pestanias.cs).
+            // tabsVentanas: una pestaña por pantalla abierta, debajo del menú (Menu.Pestanias.cs).
             // Solo se usan los encabezados: la pantalla se ve en el área MDI, debajo.
             //
             this.tabsVentanas.ContextMenuStrip = this.menuPestania;
@@ -657,7 +647,7 @@
             this.tabsVentanas.SelectedIndexChanged += new System.EventHandler(this.TabsVentanas_SelectedIndexChanged);
             this.tabsVentanas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TabsVentanas_MouseDown);
             //
-            // menuPestania — clic derecho sobre una pestaña (los textos se traducen al abrirlo).
+            // menuPestania: clic derecho sobre una pestaña (los textos se traducen al abrirlo).
             //
             this.menuPestania.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fijarIzquierdaPestaniaItem,
@@ -681,14 +671,14 @@
             this.cerrarOtrasPestaniaItem.Text = "Cerrar las demás";
             this.cerrarOtrasPestaniaItem.Click += new System.EventHandler(this.CerrarOtrasPestanias_Click);
             //
-            // alertasItem — Centro de Alertas, alineado a la derecha (badge se compone en código).
+            // alertasItem: Centro de Alertas, alineado a la derecha (badge se compone en código).
             //
             this.alertasItem.Name      = "alertasItem";
             this.alertasItem.Tag       = "mnu.alertas";
             this.alertasItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.alertasItem.Click    += new System.EventHandler(this.AlertasItem_Click);
             //
-            // barraUbicacion — barra «Usted está en» al pie de la ventana (Menu.Ubicacion.cs la actualiza).
+            // barraUbicacion: barra «Usted está en» al pie de la ventana (Menu.Ubicacion.cs la actualiza).
             //
             this.barraUbicacion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(244)))), ((int)(((byte)(246)))));
             this.barraUbicacion.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -785,7 +775,6 @@
         private System.Windows.Forms.ToolStripMenuItem contratacionesPendientesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem promocionesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem centroDecisionesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sugerirPromocionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gestionPromocionesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem revisionContablePromocionesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem promocionesVigentesToolStripMenuItem;

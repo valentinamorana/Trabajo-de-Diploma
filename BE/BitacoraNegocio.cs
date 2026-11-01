@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// Entidad — BitacoraNegocio.
+    /// Entidad: BitacoraNegocio.
     /// Registra eventos de negocio: ventas, despachos, cambios de stock y gestión de clientes.
     /// Separada de BE.Bitacora (que registra eventos de seguridad del sistema).
     /// Mapea la tabla [BitacoraNegocio].

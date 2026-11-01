@@ -19,7 +19,7 @@ namespace GUI
 
         // Mismo criterio de visibilidad que GUI.DashboardForm para estos 3 KPIs: "Días sin
         // backup" es exclusivo de Administrador (mnuUsuarios); Prendas/Clientes requieren su
-        // propio permiso de módulo. El parámetro `permisos` se recibía pero no se usaba —
+        // propio permiso de módulo. El parámetro `permisos` se recibía pero no se usaba:
         // este reporte mostraba esos datos a cualquier rol con acceso a Auditoría (mnuAuditoria),
         // aunque no tuviera el permiso que el propio Dashboard exige para lo mismo.
         private readonly bool _verPrendas, _verClientes, _verBackup;
@@ -45,7 +45,7 @@ namespace GUI
         private void ReporteJornadaForm_Load(object sender, EventArgs e)
         {
             // El ícono ahora lo aplica FormBase.OnLoad (esta clase no lo sobreescribe, así que
-            // corre alrededor de este handler del Load del Designer) — no hace falta duplicarlo acá.
+            // corre alrededor de este handler del Load del Designer): no hace falta duplicarlo acá.
             Traducir(GestorIdioma.IdiomaActual);
 
             dtpJornada.Value  = DateTime.Today;
@@ -110,8 +110,8 @@ namespace GUI
 
         private void Traducir(Idioma idioma)
         {
-            this.Text          = Tr("frm.reportejornada", "Reporte de Jornada — WardrobeFlow");
-            lblTitulo.Text     = Tr("frm.reportejornada", "Reporte de Jornada — WardrobeFlow");
+            this.Text          = Tr("frm.reportejornada", "WardrobeFlow: Reporte de Jornada");
+            lblTitulo.Text     = Tr("frm.reportejornada", "WardrobeFlow: Reporte de Jornada");
             lblSubtitulo.Text  = Tr("rpt.subtitulo",      "Eventos de negocio por jornada con exportación a TXT");
             lblJornada.Text    = Tr("rpt.fecha",          "Jornada:");
             lblComparar.Text   = Tr("rpt.fecha2",         "Comparar con:");
@@ -174,7 +174,7 @@ namespace GUI
 
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:d}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} ({dtpJornada.Value:d})",
                     NombreArchivo = nombreBase,
                     TextoPlano    = rtbReporte.Text
                 };
@@ -199,7 +199,7 @@ namespace GUI
             {
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {dtpJornada.Value:d}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} ({dtpJornada.Value:d})",
                     NombreArchivo = $"ReporteJornada_{dtpJornada.Value:yyyyMMdd}",
                     TextoPlano    = rtbReporte.Text
                 };
@@ -224,7 +224,7 @@ namespace GUI
                 var lbl = ConstruirLblReporte();
                 rtbReporte.Text = _servicio.GenerarTendencia(
                     dtpJornada2.Value.Date, dtpJornada.Value.Date, lbl);
-                lblStatus.Text  = $"{lbl["rptoegenerado"]} — {DateTime.Now:HH:mm:ss}";
+                lblStatus.Text  = $"{lbl["rptoegenerado"]}: {DateTime.Now:HH:mm:ss}";
                 _esComparacion  = false;
                 btnExportarComp.Visible = false;
             }
@@ -258,7 +258,7 @@ namespace GUI
 
                 var reporte = new Exportacion.ReporteExportable
                 {
-                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} — {fecha:d}",
+                    Titulo        = $"{Tr("frm.reportejornada", "Reporte de Jornada")} ({fecha:d})",
                     NombreArchivo = $"EventosJornada_{fecha:yyyyMMdd}",
                     Encabezados   = headers,
                     Datos         = eventos
@@ -300,7 +300,7 @@ namespace GUI
                 string texto = _servicio.GenerarComparacion(
                     dtpJornada.Value.Date, dtpJornada2.Value.Date, lbl);
                 rtbReporte.Text = texto;
-                lblStatus.Text  = $"{lbl["compgenerada"]} — {DateTime.Now:HH:mm:ss}";
+                lblStatus.Text  = $"{lbl["compgenerada"]}: {DateTime.Now:HH:mm:ss}";
                 _esComparacion = true;
                 btnExportarComp.Visible = true;
             }
@@ -349,7 +349,7 @@ namespace GUI
         }
 
         // Variante de FormBase.MostrarError(Exception) con título de MessageBox personalizado
-        // (ej. "Error al exportar" vs. "Error al imprimir") — este form no tiene lblMensaje
+        // (ej. "Error al exportar" vs. "Error al imprimir"): este form no tiene lblMensaje
         // propio, así que ambas formas terminan en MessageBox igual, pero acá el título importa
         // para distinguir en qué paso falló. Mismo criterio que la base: AppException se traduce
         // y se muestra tal cual; una excepción inesperada se audita en bitácora (heredado de
@@ -379,7 +379,7 @@ namespace GUI
                 DateTime fecha = dtpJornada.Value.Date;
                 var lbl = ConstruirLblReporte();
                 rtbReporte.Text = _servicio.Generar(fecha, lbl);
-                lblStatus.Text  = $"{lbl["rptoegenerado"]} — {DateTime.Now:HH:mm:ss}";
+                lblStatus.Text  = $"{lbl["rptoegenerado"]}: {DateTime.Now:HH:mm:ss}";
                 _esComparacion = false;
                 btnExportarComp.Visible = false;
                 ActualizarKPIs(fecha);

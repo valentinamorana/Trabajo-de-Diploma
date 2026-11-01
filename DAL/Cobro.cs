@@ -46,7 +46,7 @@ namespace DAL
         }
 
         // Inserta el intento de cobro con su resultado ya definido (los tres manejadores
-        // que persisten — Cobrado/Gracia/Suspendido — resuelven en el mismo paso en que
+        // que persisten (Cobrado/Gracia/Suspendido) resuelven en el mismo paso en que
         // detectan el caso, no hay un estado "Pendiente" intermedio que requiera un
         // UPDATE posterior). FechaResolucion se completa acá directamente para evitar
         // un segundo round-trip a la base solo para timestampear.
@@ -74,7 +74,7 @@ namespace DAL
                 : 0;
         }
 
-        // Igual que Alta, pero sobre una transacción ya abierta por el caller — usada por los
+        // Igual que Alta, pero sobre una transacción ya abierta por el caller: usada por los
         // manejadores de Cobro para que el UPDATE de Cliente y este INSERT sean atómicos
         // (ver DAL.Cliente.EjecutarTransaccion/ModificarEnTx).
         public int AltaEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cobro cobro)

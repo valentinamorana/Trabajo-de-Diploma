@@ -6,7 +6,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// "Mi Perfil" — preferencias del usuario en sesión (RF-22/23 + personalización de UI).
+    /// "Mi Perfil": preferencias del usuario en sesión (RF-22/23 + personalización de UI).
     /// El usuario ve sus datos y configura: idioma, tipografía, tamaño de letra, tema
     /// (claro/oscuro), formato de fecha y notificaciones. Todo se guarda en la BD
     /// (Usuario.IdIdioma + tabla Preferencia) y se aplica al instante (idioma por Observer;
@@ -26,7 +26,7 @@ namespace GUI
 
             InitializeComponent();
 
-            lblUsuarioVal.Text = _usuario?.Username ?? "—";
+            lblUsuarioVal.Text = _usuario?.Username ?? "-";
             lblPerfilVal.Text  = TraductorPerfil.Nombre(_usuario?.Perfil);
             PoblarOpciones();
         }

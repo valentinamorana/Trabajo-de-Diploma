@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// RF-08 — Una línea del "preview de pérdida" antes de restaurar un backup.
+    /// RF-08: Una línea del "preview de pérdida" antes de restaurar un backup.
     /// Representa cuántos registros de una entidad existen en la base ACTUAL con
     /// fecha posterior a la del backup; es decir, los que se perderían al restaurar.
     /// </summary>

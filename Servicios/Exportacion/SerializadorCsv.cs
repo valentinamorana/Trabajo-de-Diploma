@@ -4,7 +4,7 @@ using System.Text;
 namespace Servicios.Exportacion
 {
     /// <summary>
-    /// LÓGICA de serialización a CSV (RFC 4180). Vive en la capa de Servicios — NO en la GUI:
+    /// LÓGICA de serialización a CSV (RFC 4180). Vive en la capa de Servicios: NO en la GUI:
     /// los exportadores de la presentación solo piden el texto y lo escriben a disco.
     ///
     /// Reglas de escapado: un campo se encierra entre comillas dobles si contiene el
@@ -13,7 +13,7 @@ namespace Servicios.Exportacion
     /// Nota de ubicación: esta carpeta (Servicios/Exportacion) solo tiene esta utilidad de
     /// bajo nivel. El Factory Method completo de exportación (Product/ConcreteProduct/
     /// Creator: <see cref="GUI.Exportacion.Exportador"/> y compañía) vive en GUI/Exportacion
-    /// porque genera y muestra reportes de UI — son capas distintas con responsabilidades
+    /// porque genera y muestra reportes de UI: son capas distintas con responsabilidades
     /// distintas, no una duplicación.
     /// </summary>
     public static class SerializadorCsv
@@ -56,7 +56,7 @@ namespace Servicios.Exportacion
         // Caracteres que Excel/LibreOffice interpretan como inicio de fórmula al abrir el CSV
         // (CSV/Formula Injection, CWE-1236). Sin esto, un campo con datos cargados por un usuario
         // (nombre, motivo, observación...) que empezara con uno de estos podía ejecutar una
-        // fórmula al abrirse — riesgo real aunque de explotación limitada en este contexto (export
+        // fórmula al abrirse: riesgo real aunque de explotación limitada en este contexto (export
         // manual, uso interno).
         private static readonly char[] PrefijosFormula = { '=', '+', '-', '@', '\t' };
 

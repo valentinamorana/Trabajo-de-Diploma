@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PN03 — «Solicitud de baja» que el Vendedor envía sobre una promoción Vigente. No cambia el
+    /// PN03: «Solicitud de baja» que el Vendedor envía sobre una promoción Vigente. No cambia el
     /// estado de la promoción: queda Pendiente hasta que Administración la atiende con una
     /// «Respuesta a la solicitud». Si Administración está de acuerdo, da de baja la promoción
     /// (DioDeBaja); si no, la promoción sigue Vigente. Dar de baja una promoción también cierra

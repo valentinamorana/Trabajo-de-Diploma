@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// Patrón FACTORY METHOD — rol "ConcreteProduct".
+    /// Patrón FACTORY METHOD: rol "ConcreteProduct".
     ///
     /// Exporta un reporte a un archivo de texto plano (.txt) mediante un diálogo
     /// "Guardar como". Si el reporte es de texto usa su cuerpo tal cual; si es

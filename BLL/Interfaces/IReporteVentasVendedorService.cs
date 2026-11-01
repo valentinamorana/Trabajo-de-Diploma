@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace BLL.Interfaces
 {
-    /// <summary>PdN8 — Reporte de ventas por vendedor: pedidos, entregas y cancelaciones
+    /// <summary>PdN8: Reporte de ventas por vendedor: pedidos, entregas y cancelaciones
     /// agregados por Empleado, para evaluar desempeño comercial.</summary>
     public interface IReporteVentasVendedorService
     {

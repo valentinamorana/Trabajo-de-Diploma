@@ -4,7 +4,7 @@ using System.IO;
 namespace Servicios.Serializacion
 {
     /// <summary>
-    /// A02 Serialización — elige el serializador según la extensión del archivo (.xml o .json), así
+    /// A02 Serialización: elige el serializador según la extensión del archivo (.xml o .json), así
     /// la BLL y la GUI no deciden el formato con un if por cada caso. Cualquier otra extensión se
     /// rechaza con un mensaje claro en vez de intentar leer el archivo.
     /// </summary>

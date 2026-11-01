@@ -10,7 +10,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// PN03 «Aplicar» — cada recomendación aceptada hace algo: qué patente exige cada acción, qué prendas
+    /// PN03 «Aplicar»: cada recomendación aceptada hace algo: qué patente exige cada acción, qué prendas
     /// admiten la baja o la revisión (y se cambian con la operación existente), cómo la decisión guarda a
     /// quiénes contactó y cómo se mide después la campaña. También los avisos al iniciar sesión.
     /// </summary>

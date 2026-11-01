@@ -23,7 +23,7 @@ namespace BLL
         private DAL.Interfaces.IEmpleadoDAL empleadoDAL => _empleadoDALLazy ?? (_empleadoDALLazy = new DAL.Empleado());
         // perfilesBLL y bitacora son PEREZOSOS: solo se instancian cuando una operación los usa
         // (Login resuelve permisos; las escrituras registran bitácora). Así construir BLL.Usuario
-        // —y testear con un IUsuarioDAL falso— no toca la BD a través de sus DAL internos.
+        // (y testear con un IUsuarioDAL falso) no toca la BD a través de sus DAL internos.
         private BLL.Familia _perfilesLazy;
         private BLL.Familia perfilesBLL => _perfilesLazy ?? (_perfilesLazy = new BLL.Familia());
         private Servicios.IRegistroBitacora _bitacoraLazy;

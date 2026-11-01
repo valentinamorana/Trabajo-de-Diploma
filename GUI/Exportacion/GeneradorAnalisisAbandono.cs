@@ -1,7 +1,7 @@
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// Patrón FACTORY METHOD — rol "ConcreteCreator".
+    /// Patrón FACTORY METHOD: rol "ConcreteCreator".
     ///
     /// Creador de exportadores para el Análisis de Abandono (PdN10, reporte tabular).
     /// Mismo criterio que GeneradorBitacora: decide qué producto concreto instanciar

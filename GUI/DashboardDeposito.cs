@@ -17,7 +17,7 @@ namespace GUI
         private System.Windows.Forms.Timer _timer;
 
         // Se reasignaba con `new Font(...)` en cada refresco (timer de 2 min) sin liberar el
-        // anterior — Font implementa IDisposable y envuelve un handle GDI; creada una sola vez
+        // anterior: Font implementa IDisposable y envuelve un handle GDI; creada una sola vez
         // acá y reutilizada evita esa fuga en sesiones largas.
         private readonly Font _fontOcupacionGrande = new Font("Segoe UI", 24f, FontStyle.Bold);
 
@@ -53,7 +53,7 @@ namespace GUI
         {
             this.Text          = Tr("dash.deposito.titulo",   "Panel de Depósito");
             lblTitulo.Text     = Tr("dash.deposito.titulo",   "Panel de Depósito");
-            lblSub.Text        = Tr("dash.deposito.subtitulo", "WardrobeFlow  —  Depósito");
+            lblSub.Text        = Tr("dash.deposito.subtitulo", "WardrobeFlow: Depósito");
             btnRefrescar.Text  = Tr("dash.btn.refrescar",  "Actualizar");
             txtControl.Text = Tr("dash.dep.acontrolar", "Pedidos\na controlar");
             txtDisp.Text = Tr("dash.prendas",    "Prendas\ndisponibles");
@@ -100,7 +100,7 @@ namespace GUI
             // tarjeta por ANTIGÜEDAD vía BE.MantenimientoPrenda.NivelUrgencia): esta tarjeta resumen
             // colorea por CANTIDAD total en mantenimiento. Pueden mostrar colores contradictorios
             // (ej. tarjeta en rojo por más de 5 prendas, con las 3 columnas del Kanban en verde si
-            // todas son recientes) — es intencional, no el mismo drift de umbrales que ya se corrigió
+            // todas son recientes): es intencional, no el mismo drift de umbrales que ya se corrigió
             // entre dashboards distintos.
             Color fondo = enMant.Count == 0
                 ? Tema.FondoExito
@@ -154,7 +154,7 @@ namespace GUI
                 var u = _bllUsuario.ObtenerUsuarioActivo();
                 var h = _bllUsuario.ObtenerFechaInicioSesion();
                 if (u != null)
-                    lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "—"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
+                    lblSesion.Text = $"{u.Username}  ·  {u.Perfil ?? "-"}" + (h.HasValue ? $"  ·  {h.Value:HH:mm}" : "");
             }
             catch (Exception ex)
             {
@@ -163,7 +163,7 @@ namespace GUI
         }
 
         // Abre (o enfoca) Prendas. Todavía no deja seleccionada la prenda puntual dentro de la
-        // grilla — esa pantalla no tiene esa capacidad hoy.
+        // grilla: esa pantalla no tiene esa capacidad hoy.
         private void HabilitarClicAbrirPrendas(Panel card)
         {
             EventHandler abrir = (s, e) => AbrirPrendas();
@@ -220,7 +220,7 @@ namespace GUI
         private void CardOcup_Resize(object sender, EventArgs e) { numOcup.Width = cardOcup.Width; txtOcup.Width = cardOcup.Width; }
         private void CardControl_Resize(object sender, EventArgs e) { numControl.Width = cardControl.Width; txtControl.Width = cardControl.Width; }
 
-        // PN01 — "Revisar stock de las prendas": la tarjeta abre (o enfoca) Control de Stock.
+        // PN01: "Revisar stock de las prendas": la tarjeta abre (o enfoca) Control de Stock.
         private bool _clicControl;
 
         private static void HabilitarClic(Panel card, Action accion)

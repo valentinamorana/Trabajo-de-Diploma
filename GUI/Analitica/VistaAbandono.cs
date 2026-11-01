@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace GUI.Analitica
 {
     /// <summary>
-    /// PdN10 — Análisis de Abandono. El Gerente Comercial elige el criterio de riesgo
+    /// PdN10: Análisis de Abandono. El Gerente Comercial elige el criterio de riesgo
     /// (patrón Strategy, BLL.Estrategias) y genera la lista de clientes que ese criterio
     /// marca en riesgo, cruzando su último pedido contra el vencimiento de la suscripción.
     /// </summary>
@@ -46,7 +46,7 @@ namespace GUI.Analitica
 
         /// <summary>
         /// Rellena el combo de estrategias con los 3 criterios traducidos, respetando el
-        /// índice previamente seleccionado — mismo criterio que
+        /// índice previamente seleccionado: mismo criterio que
         /// Bitacora.RellenarComboCriticidad para que un cambio de idioma no pierda la
         /// selección del usuario. El orden de las 3 estrategias es fijo, así que
         /// preservar por índice (no por instancia) es seguro.

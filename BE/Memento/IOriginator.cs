@@ -1,7 +1,7 @@
 namespace BE.Memento
 {
     /// <summary>
-    /// Patrón MEMENTO — rol "Originator".
+    /// Patrón MEMENTO: rol "Originator".
     ///
     /// Objeto cuyo estado puede guardarse y restaurarse. Es el ÚNICO que conoce
     /// la estructura interna del Memento: lo crea capturando su estado actual y

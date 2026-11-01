@@ -6,7 +6,7 @@ using System.Linq;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Avisos al iniciar sesión» — Para quien tiene el Centro de decisiones (patente de Gerencia
+    /// PN03 «Avisos al iniciar sesión»: Para quien tiene el Centro de decisiones (patente de Gerencia
     /// mnuSugerenciaPromocion): un resumen de lo que hay para decidir hoy, para que el análisis no espere a
     /// que alguien abra la pantalla:
     ///   · recomendaciones de prioridad Alta que se pueden decidir (visibles y sin una decisión final vigente);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BLL.Interfaces
 {
     /// <summary>
-    /// Bloque 1 — Cargo por daño/pérdida de prenda. Se registra sobre el último cliente
+    /// Bloque 1: Cargo por daño/pérdida de prenda. Se registra sobre el último cliente
     /// que tuvo la prenda (BE.Prenda.IdUltimoCliente) y se liquida junto con su próxima
     /// renovación (ver BLL.Manejadores.ProcesarPagoHandler).
     /// </summary>

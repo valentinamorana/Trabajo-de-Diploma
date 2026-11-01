@@ -3,7 +3,7 @@ using System;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Analizar» — Cálculo puro de los KPI y de su variación contra el período anterior de igual
+    /// PN03 «Analizar»: Cálculo puro de los KPI y de su variación contra el período anterior de igual
     /// duración. Reglas de la variación:
     ///   · Porcentajes (% de bajas, ocupación): la variación se expresa en puntos porcentuales (pp) y se
     ///     considera estable si es menor a 0,5 pp.

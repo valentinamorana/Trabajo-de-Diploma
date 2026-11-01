@@ -6,7 +6,7 @@ using BLL.Inteligencia.Reglas;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Metas comerciales» — Catálogo de los indicadores que admiten una meta mensual. Cada uno dice:
+    /// PN03 «Metas comerciales»: Catálogo de los indicadores que admiten una meta mensual. Cada uno dice:
     /// nombre (traducible), unidad, sentido (mayor o menor es mejor), rango válido del objetivo, si es
     /// ACUMULATIVO dentro del mes (solo puede empeorar: el % de bajas), si tiene historia diaria para
     /// proyectar y qué reglas del motor lo mueven (cuando la meta está en riesgo, esas recomendaciones

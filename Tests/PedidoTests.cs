@@ -7,9 +7,9 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.Pedido — la clase más crítica del sistema (cupo de suscripción, alta de pedido,
+    /// BLL.Pedido: la clase más crítica del sistema (cupo de suscripción, alta de pedido,
     /// transiciones de estado). Hasta esta sesión no tenía tests directos porque hardcodeaba
-    /// sus 5 dependencias DAL sin inyección — se refactorizó para recibirlas por constructor
+    /// sus 5 dependencias DAL sin inyección: se refactorizó para recibirlas por constructor
     /// (mismo patrón que BLL.Cliente/Renovacion/Cobro) específicamente para poder escribir
     /// estos tests.
     /// </summary>
@@ -114,7 +114,7 @@ namespace Tests
             public FakePedidoHistorialDAL DalHistorial = new FakePedidoHistorialDAL();
 
             // PN01 (split lógico Depósito): BLL.Pedido ahora consume BLL.Prenda.VerificarDisponibilidad,
-            // que relee el estado desde la base — sembrado por defecto con la misma prenda que
+            // que relee el estado desde la base: sembrado por defecto con la misma prenda que
             // devuelve PrendaDisponible() para que los tests existentes seleccionen "sí, disponible"
             // sin tener que tocar cada uno.
             public FakePrendaDAL DalPrenda = new FakePrendaDAL { Todas = new List<BE.Prenda> { PrendaDisponible() } };
@@ -123,7 +123,7 @@ namespace Tests
             // Lista de Espera (mejora opcional): si no se inyecta un doble acá, BLL.Pedido cae en
             // su lazy `new ListaEspera()` real (BLL.Pedido.cs), que abre DAL.ListaEspera/DAL.Prenda/
             // DAL.Cliente REALES contra la connection string de Tests/App.config. Si esa base
-            // (.\SQLEXPRESS WardrobeFlowDB) existe y tiene datos — por ej. de correr la GUI a mano —
+            // (.\SQLEXPRESS WardrobeFlowDB) existe y tiene datos: por ej. de correr la GUI a mano:
             // estos tests dejan de ser unitarios y su resultado depende del estado de esa base.
             // Se vio en vivo: una fila real de ListaEspera con IdPrenda=1 reservada para otro cliente
             // hizo fallar CrearPedido_DatosValidos_PersisteYRegistraHistorial y
@@ -135,7 +135,7 @@ namespace Tests
             public BLL.Pedido Crear() => new BLL.Pedido(DalPedido, DalCliente, DalEmpleado, DalPlan, DalHistorial, DalListaEspera, PrendaBLL);
         }
 
-        // ══ PN01 — Armar pedido (diagrama de actividad): una prueba por rama ══════
+        // ══ PN01: Armar pedido (diagrama de actividad): una prueba por rama ══════
 
         private static void LoginComo(string perfil, params string[] patentes)
         {
@@ -199,7 +199,7 @@ namespace Tests
             catch (BE.AppException ex)
             {
                 // El chequeo de pago va ANTES que el de vencimiento genérico (a propósito,
-                // ver comentario en BLL.Pedido.ObtenerClienteValidado) — verifica que siga así.
+                // ver comentario en BLL.Pedido.ObtenerClienteValidado): verifica que siga así.
                 Assert.AreEqual("err.bll.pedido.pago_suspendido", ex.Clave);
             }
         }
@@ -1000,7 +1000,7 @@ namespace Tests
             Assert.AreEqual(0, ctx.DalPedido.HistorialRegistradoVeces);
         }
 
-        // ── PN04 — fecha de devolución: devuelto vs en poder del cliente ──────
+        // ── PN04: fecha de devolución: devuelto vs en poder del cliente ──────
 
         [TestMethod]
         public void Pedido_Entregado_SinDevolucion_EstaEnPoderDelClienteYSePuedeDevolver()
@@ -1224,7 +1224,7 @@ namespace Tests
             Assert.AreEqual(0, ctx.DalPedido.DesCancelarVeces);
         }
 
-        // ── CalcularNivelUrgencia — lógica pura, sin DAL ─────────────────────
+        // ── CalcularNivelUrgencia: lógica pura, sin DAL ─────────────────────
 
         [TestMethod]
         public void NivelUrgencia_Entregado_NoAplica()
@@ -1315,7 +1315,7 @@ namespace Tests
             // El nuevo evento RESTAURAR debe quedar con los valores INVERTIDOS respecto al cambio
             // original: lo que estaba "Nuevo" pasa a ser el "Anterior" de este evento (el estado
             // del que se viene al restaurar) y el "Anterior" original pasa a ser el "Nuevo" (a
-            // donde se vuelve) — swap fácil de invertir por error, de ahí el test explícito.
+            // donde se vuelve): swap fácil de invertir por error, de ahí el test explícito.
             Assert.AreEqual(1, ctx.DalPedido.HistorialRegistradoVeces);
             var restaurado = ctx.DalPedido.UltimoHistorial.Find(c => c.Campo == "Estado");
             Assert.AreEqual("RESTAURAR", restaurado.Accion);

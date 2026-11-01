@@ -6,10 +6,10 @@ namespace DAL
     /// Clase base NO genérica: centraliza el acceso a BD para todos los DAL, tengan o no
     /// forma de "entidad con ObtenerTodos/ObtenerPorId" (para esa variante ver
     /// <see cref="BaseDAL{T}"/>). Reemplaza el "private readonly Acceso acceso =
-    /// Acceso.GetInstance();" que se repetía copiado en cada DAL — varios (Bitacora,
+    /// Acceso.GetInstance();" que se repetía copiado en cada DAL: varios (Bitacora,
     /// Traduccion, Permiso, historiales de auditoría, utilidades como DigitoVerificador)
     /// no calzan en el contrato ObtenerTodos/ObtenerPorId de un CRUD por ID, y forzarlos
-    /// a implementarlo solo para "unificar" agregaría métodos sin uso real — heredar de
+    /// a implementarlo solo para "unificar" agregaría métodos sin uso real: heredar de
     /// esta base alcanza para ellos.
     /// </summary>
     public abstract class BaseDAL

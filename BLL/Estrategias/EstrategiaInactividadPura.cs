@@ -2,7 +2,7 @@ namespace BLL.Estrategias
 {
     /// <summary>
     /// Criterio de "abandono silencioso": en riesgo si no tiene actividad hace mucho
-    /// tiempo, SIN mirar el vencimiento — a diferencia de EstrategiaVencimientoInactividad,
+    /// tiempo, SIN mirar el vencimiento: a diferencia de EstrategiaVencimientoInactividad,
     /// detecta al cliente que sigue pagando (su suscripción está vigente) pero dejó de usar
     /// el servicio, antes de que llegue el momento de renovar.
     /// </summary>

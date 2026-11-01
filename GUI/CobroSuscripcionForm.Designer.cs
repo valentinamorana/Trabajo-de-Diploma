@@ -101,7 +101,7 @@ namespace GUI
 
             this.cmbModalidad.DropDownStyle = ComboBoxStyle.DropDownList;
             // Enum.GetValues en vez de una lista hardcodeada (antes la única de las 3 pantallas
-            // que no lo hacía así — NuevaContratacionForm ya usaba este criterio): un valor nuevo
+            // que no lo hacía así: NuevaContratacionForm ya usaba este criterio): un valor nuevo
             // en BE.Builders.ModalidadCobro se refleja acá sin tener que acordarse de tocar esta lista.
             this.cmbModalidad.Location     = new Point(120, 230);
             this.cmbModalidad.Name         = "cmbModalidad";

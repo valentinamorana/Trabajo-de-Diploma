@@ -4,7 +4,7 @@ using DAL.Interfaces;
 namespace Tests.Fakes
 {
     /// <summary>
-    /// Doble de prueba de IClaveRecuperacionDAL (sin base de datos). Antes no existía —
+    /// Doble de prueba de IClaveRecuperacionDAL (sin base de datos). Antes no existía:
     /// BLL.RecuperacionAdmin estaba diseñada explícitamente para testearse por interfaces
     /// (ver su propio doc-comment) pero no tenía ni el doble necesario para hacerlo.
     /// </summary>

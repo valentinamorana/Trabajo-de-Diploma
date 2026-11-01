@@ -6,7 +6,7 @@ using GUI.Inteligencia;
 namespace GUI
 {
     /// <summary>
-    /// PN03 — Pestaña "Metas" del Centro de decisiones comerciales. El contenido es un control propio
+    /// PN03: Pestaña "Metas" del Centro de decisiones comerciales. El contenido es un control propio
     /// (Inteligencia.PanelMetasComerciales, hecho con el Diseñador) ubicado en su pestaña con el Diseñador;
     /// se conecta con el análisis (al cambiar una meta se vuelve a analizar: las prioridades dependen de
     /// ella) y se suma al Informe ejecutivo.

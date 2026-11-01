@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// T05 — Multiidioma. Entidad CONTROL: representa cualquier texto visible del
+    /// T05: Multiidioma. Entidad CONTROL: representa cualquier texto visible del
     /// sistema que puede traducirse (etiqueta, botón, menú, columna, mensaje…).
     ///
     /// Mapea la tabla [Control]:

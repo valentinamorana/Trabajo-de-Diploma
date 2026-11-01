@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Lista de Espera de prendas (mejora opcional, no requerida
+    /// Lógica de negocio: Lista de Espera de prendas (mejora opcional, no requerida
     /// por la cátedra). Ver README, sección "Módulos", y BD/00_Instalacion_Completa.sql
     /// (sección 16, "LISTA DE ESPERA DE PRENDAS").
     /// </summary>
@@ -42,7 +42,7 @@ namespace BLL
                     "La prenda no existe.");
             if (!prenda.PuedeAnotarseEnEspera())
                 throw new BE.AppException("err.bll.listaespera.prenda_no_enuso",
-                    "'{0}' está {1} — no hace falta anotarse, ya se puede pedir directamente.",
+                    "'{0}' está {1}: no hace falta anotarse, ya se puede pedir directamente.",
                     prenda.Nombre, prenda.Estado);
 
             var cliente = dalCliente.ObtenerPorId(idCliente);
@@ -70,7 +70,7 @@ namespace BLL
             });
 
             bitacora.Registrar(modulo,
-                $"Anotar en Lista de Espera — Prenda '{prenda.Nombre}' (ID {idPrenda}) — Cliente: {cliente.NombreCompleto}",
+                $"Anotar en Lista de Espera: Prenda '{prenda.Nombre}' (ID {idPrenda}); Cliente: {cliente.NombreCompleto}",
                 BE.Criticidad.Baja);
 
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.ListaEspera,
@@ -89,7 +89,7 @@ namespace BLL
                     "La anotación no existe.");
             if (!fila.PuedeCancelarse())
                 throw new BE.AppException("err.bll.listaespera.ya_resuelta",
-                    "Esta anotación ya está {0} — no se puede cancelar.", fila.Estado);
+                    "Esta anotación ya está {0} y no se puede cancelar.", fila.Estado);
 
             var estadoPrevio = fila.Estado;
             if (!dalListaEspera.CambiarEstado(idListaEspera, BE.EstadoListaEspera.Cancelada, fila.FechaLimiteReserva, actor, estadoPrevio))
@@ -97,7 +97,7 @@ namespace BLL
                     "La anotación cambió en otra sesión. Actualice la lista y vuelva a intentarlo.");
 
             bitacora.Registrar(modulo,
-                $"Cancelar Lista de Espera #{idListaEspera} — Prenda '{fila.NombrePrenda}' — Cliente: {fila.NombreCliente}",
+                $"Cancelar Lista de Espera #{idListaEspera}: Prenda '{fila.NombrePrenda}'; Cliente: {fila.NombreCliente}",
                 BE.Criticidad.Baja);
 
             // Si se cancela una RESERVA, la prenda queda libre: se avisa al siguiente de la lista.
@@ -188,7 +188,7 @@ namespace BLL
         }
 
         // Best-effort: si la tabla ListaEspera todavía no existe (BD sin migrar,
-        // sección 16 de BD/00_Instalacion_Completa.sql no corrida), no filtra nada — degrada
+        // sección 16 de BD/00_Instalacion_Completa.sql no corrida), no filtra nada: degrada
         // al comportamiento anterior sin romper Nuevo Pedido, mismo criterio que BLL.PanelAlertas.
         public List<int> ObtenerIdsReservadosParaOtro(int? idClienteSolicitante)
         {

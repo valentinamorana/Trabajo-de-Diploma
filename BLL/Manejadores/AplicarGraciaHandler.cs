@@ -6,7 +6,7 @@ namespace BLL.Manejadores
     /// Tercer eslabón: atiende el caso en que el cobro falló Y el cliente todavía tiene
     /// margen (no está en gracia, o está en gracia pero el plazo no venció). Si la
     /// decisión pedida no es PagoFallido, delega al siguiente eslabón. Si YA venció el
-    /// plazo de gracia otorgado, tampoco atiende: delega a SuspenderHandler — el mismo
+    /// plazo de gracia otorgado, tampoco atiende: delega a SuspenderHandler; el mismo
     /// criterio de "cada eslabón evalúa inline si le corresponde" que CambioPlanHandler
     /// usa para su propia decisión.
     /// </summary>

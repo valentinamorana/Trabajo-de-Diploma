@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace Servicios.Serializacion
 {
     /// <summary>
-    /// A02 Serialización — formato XML (el XmlSerializator de la cátedra), con
+    /// A02 Serialización: formato XML (el XmlSerializator de la cátedra), con
     /// System.Xml.Serialization.XmlSerializer: serializa las propiedades públicas y respeta los
     /// atributos [XmlRoot], [XmlElement], [XmlAttribute] y [XmlIgnore] de las clases de BE.
     /// Escribe UTF-8 sin BOM e indentado; al leer no procesa DTD ni entidades externas (XXE), porque

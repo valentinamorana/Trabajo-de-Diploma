@@ -7,7 +7,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.Prenda — cobertura puntual de VerificarDisponibilidad (PN01, split lógico del
+    /// BLL.Prenda: cobertura puntual de VerificarDisponibilidad (PN01, split lógico del
     /// Depósito: antes era una relectura inline dentro de BLL.Pedido.ValidarDisponibilidadPrendas,
     /// ahora es un método público propio de BLL.Prenda). Se agregó DI de constructor (mismo
     /// criterio que BLL.Pedido/BLL.Cliente) específicamente para poder escribir estos tests.
@@ -206,9 +206,9 @@ namespace Tests
             }
         }
 
-        // ── CambiarEstado — guard EnUso→Baja (CU06-DEP, Reportar Prenda Perdida) ───────────
+        // ── CambiarEstado: guard EnUso→Baja (CU06-DEP, Reportar Prenda Perdida) ───────────
         // Antes esta restricción vivía únicamente en GUI/Prendas.cs (un `continue` en una lista
-        // de opciones del diálogo genérico de cambio de estado) — cualquier código que llamara
+        // de opciones del diálogo genérico de cambio de estado): cualquier código que llamara
         // CambiarEstado directo podía saltearla. Ahora la guarda vive en el propio BLL.
 
         [TestMethod]
@@ -289,7 +289,7 @@ namespace Tests
             Assert.AreEqual(0, r.Count);
         }
 
-        // PN04 — la prenda devuelta no reingresa a Disponible salteando la Inspección de Devolución.
+        // PN04: la prenda devuelta no reingresa a Disponible salteando la Inspección de Devolución.
         [TestMethod]
         public void CambiarEstado_EnLimpiezaDevueltaADisponible_LanzaReingresoRequiereInspeccion()
         {
@@ -379,7 +379,7 @@ namespace Tests
             }
         }
 
-        // PN04 — la cola de inspección son solo las prendas devueltas por un cliente; una prenda que
+        // PN04: la cola de inspección son solo las prendas devueltas por un cliente; una prenda que
         // entró a limpieza en el depósito no se le puede cobrar a nadie y se da de baja a mano.
         [TestMethod]
         public void ObtenerEnLimpieza_SoloLasQueVienenDeUnaDevolucion()

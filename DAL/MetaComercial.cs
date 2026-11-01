@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// PN03 — Persistencia de las «Metas comerciales» (tabla MetaComercial, sección 20p del script): el
+    /// PN03: Persistencia de las «Metas comerciales» (tabla MetaComercial, sección 20p del script): el
     /// objetivo mensual de Gerencia para cada indicador (MRR, % de bajas, ocupación del stock…). Consultas
     /// parametrizadas; sin dígito verificador, como DecisionComercial.
     /// </summary>

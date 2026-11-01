@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace BLL
 {
     /// <summary>
-    /// Control de Cambios de Usuarios — orquesta el patrón MEMENTO.
+    /// Control de Cambios de Usuarios: orquesta el patrón MEMENTO.
     ///
     ///   Originator → BE.Usuario        (crea y restaura su propio estado)
     ///   Memento    → BE.VersionUsuario (cápsula del estado, implementa IMemento)
@@ -79,7 +79,7 @@ namespace BLL
         /// <summary>
         /// Restaura un usuario al estado de una versión histórica (deshacer).
         /// Antes de restaurar, guarda un Memento del estado actual (para poder deshacer
-        /// la propia restauración — "rollback de un rollback"). Solo Administrador.
+        /// la propia restauración: "rollback de un rollback"). Solo Administrador.
         /// </summary>
         public void RestaurarVersion(string modulo, int idVersion)
         {
@@ -122,7 +122,7 @@ namespace BLL
             string diff    = DescribirRestauracion(originator, memento);
             string detalle = diff == null
                 ? $"Restauración a versión {etiqueta}: sin cambios de datos."
-                : $"Restauración a versión {etiqueta} — {diff}";
+                : $"Restauración a versión {etiqueta}: {diff}";
 
             // 1) Aplicar la restauración: el Originator toma el estado de la versión elegida y se
             //    persiste (UPDATE a la tabla Usuario).
@@ -137,11 +137,11 @@ namespace BLL
             _guardarVersion(memento.IdUsuario, originator.CrearMemento(actor, detalle));
 
             _bitacora.Registrar(modulo,
-                $"{BE.ActividadesBitacora.RestauracionAVersionPrefijo}{etiqueta} — usuario ID {memento.IdUsuario} ({memento.UsernameSnapshot})",
+                $"{BE.ActividadesBitacora.RestauracionAVersionPrefijo}{etiqueta}, usuario ID {memento.IdUsuario} ({memento.UsernameSnapshot})",
                 BE.Criticidad.Alta);
         }
 
-        // ══ A02 Serialización — exportar / importar las versiones (Mementos) a XML o JSON ═════════
+        // ══ A02 Serialización: exportar / importar las versiones (Mementos) a XML o JSON ═════════
 
         /// <summary>Tamaño máximo de un archivo de versiones que se acepta importar (5 MB).</summary>
         public const long TamanoMaximoArchivo = 5L * 1024 * 1024;

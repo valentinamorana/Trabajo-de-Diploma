@@ -7,7 +7,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.Promocion — PN03 (Métricas, promociones y toma de decisiones). Una prueba por rama del
+    /// BLL.Promocion: PN03 (Métricas, promociones y toma de decisiones). Una prueba por rama del
     /// diagrama de actividad aprobado: crear (siempre para un plan, desde sugerencia o manual) →
     /// Validar → ¿Aprueba? (quien crea no dictamina) → ¿Reformular? / Dar de baja; región de
     /// vigencia: solicitud de baja (no cambia el estado) → Atender (de acuerdo: Dar de baja), baja

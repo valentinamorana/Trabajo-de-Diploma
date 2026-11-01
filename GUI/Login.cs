@@ -11,7 +11,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// WardrobeFlow — Formulario de Login para Empleados.
+    /// WardrobeFlow: Formulario de Login para Empleados.
     ///
     /// Todos los controles visuales están declarados en Login.Designer.cs (InitializeComponent),
     /// igual que en el resto del proyecto (ClienteForm, Usuarios, PrendaForm, etc.): nada de
@@ -19,14 +19,14 @@ namespace GUI
     /// Windows Forms de Visual Studio mostrar la preview del formulario y navegar al código con
     /// doble click sobre cada control.
     ///
-    /// PATRÓN OBSERVER — T05 Gestión de Múltiples Idiomas:
+    /// PATRÓN OBSERVER: T05 Gestión de Múltiples Idiomas:
     ///   Implementa IIdiomaObserver. Se suscribe al GestorIdioma en Load
     ///   y se desuscribe en FormClosing. Al recibir UpdateLanguage() aplica
     ///   las traducciones del nuevo idioma a todos sus controles.
     ///   El selector de idioma (cmbIdioma) vive en la franja superior (pnlHeader).
     ///   Al cambiar el idioma acá, el Menu ya abre traducido cuando el usuario ingresa.
     ///
-    /// Toda la paleta de color usada acá viene de <see cref="Tema"/> — no se agregan
+    /// Toda la paleta de color usada acá viene de <see cref="Tema"/>: no se agregan
     /// literales nuevos; las variantes hover/pressed se derivan en runtime con
     /// ControlPaint.Dark/Light sobre los mismos tokens.
     /// </summary>
@@ -58,7 +58,7 @@ namespace GUI
         // (HTCAPTION). Es el mecanismo estándar para mover un form sin bordes; no cambia
         // ningún comportamiento de negocio. Enganchado desde el Designer al MouseDown de
         // pnlHeader, picLogo y lblSubtitulo (el resto del header son controles interactivos
-        // propios — combo/botones — que no deben disparar el arrastre).
+        // propios (combo/botones) que no deben disparar el arrastre).
         [DllImport("user32.dll")] private static extern bool ReleaseCapture();
         [DllImport("user32.dll")] private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
         private const int WM_NCLBUTTONDOWN = 0xA1;
@@ -91,7 +91,7 @@ namespace GUI
 
         // ── Sombra suave detrás de la card flotante del formulario ───────────────
         // Varias capas de un rectángulo redondeado, cada vez más grande y más transparente,
-        // desplazadas levemente hacia abajo (luz desde arriba) — truco clásico de GDI+ para
+        // desplazadas levemente hacia abajo (luz desde arriba): truco clásico de GDI+ para
         // simular blur sin necesitar procesamiento de imagen.
 
         private void PnlCardShadow_Paint(object sender, PaintEventArgs e)
@@ -233,7 +233,7 @@ namespace GUI
             base.OnFormClosing(e);
         }
 
-        // D02 — Ayuda en línea: el Login no hereda de FormBase (no tiene sesión ni barra de
+        // D02: Ayuda en línea: el Login no hereda de FormBase (no tiene sesión ni barra de
         // mensajes), así que atiende F1 igual que FormBase.ProcessCmdKey.
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -246,7 +246,7 @@ namespace GUI
         }
 
         // ══════════════════════════════════════════════════════════════════════════
-        // PATRÓN OBSERVER — T05 Gestión de Múltiples Idiomas
+        // PATRÓN OBSERVER: T05 Gestión de Múltiples Idiomas
         // ══════════════════════════════════════════════════════════════════════════
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace GUI
 
         /// <summary>
         /// Reasigna el .Text de cada control leyendo su propiedad Tag como clave
-        /// de traducción — exactamente igual que en el ejemplo de cátedra (frmLogin).
+        /// de traducción: exactamente igual que en el ejemplo de cátedra (frmLogin).
         /// </summary>
         private void Traducir(Idioma idioma)
         {
@@ -282,7 +282,7 @@ namespace GUI
             var desc = Tx(lblBrandDesc.Tag?.ToString());
             if (desc != null) lblBrandDesc.Text = desc;
 
-            // Panel derecho — título y subtítulo
+            // Panel derecho: título y subtítulo
             var bienvenido = Tx(lblAccent.Tag?.ToString());
             if (bienvenido != null) lblAccent.Text = bienvenido;
 
@@ -456,7 +456,7 @@ namespace GUI
                 form.ShowDialog(this);
         }
 
-        // RF-10 — Abre el diálogo de autodesbloqueo con clave de emergencia. Si la cuenta queda
+        // RF-10: Abre el diálogo de autodesbloqueo con clave de emergencia. Si la cuenta queda
         // desbloqueada, se reactivan los campos del login para que el admin ingrese normalmente.
         private void LnkEmergencia_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {

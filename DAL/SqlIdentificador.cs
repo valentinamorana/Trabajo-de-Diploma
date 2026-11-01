@@ -4,7 +4,7 @@ namespace DAL
 {
     /// <summary>
     /// Whitelist de identificadores SQL (nombre de tabla/columna) armados por interpolación de
-    /// string en vez de parámetro — único punto de defensa contra inyección por nombre de
+    /// string en vez de parámetro: único punto de defensa contra inyección por nombre de
     /// tabla/columna en los pocos lugares del DAL que necesitan SQL dinámico (DigitoVerificador,
     /// Backup). Antes esta misma validación vivía duplicada byte a byte en las dos clases.
     /// </summary>

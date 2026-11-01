@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BE
 {
     /// <summary>
-    /// Patrón Composite — T04 Gestión de Perfiles de Usuario.
+    /// Patrón Composite: T04 Gestión de Perfiles de Usuario.
     /// Nodo hoja: representa un permiso individual (ej: "Ver Usuarios").
     /// No puede tener hijos. Indica si el permiso está asignado al rol activo.
     /// </summary>
@@ -16,7 +16,7 @@ namespace BE
         // true si el permiso está asignado al rol seleccionado
         public bool Asignado { get; set; }
 
-        // Hoja — nunca tiene hijos
+        // Hoja: nunca tiene hijos
         public override IList<Componente> Hijos => new List<Componente>(0);
 
         public override void AgregarHijo(Componente c)
@@ -25,7 +25,7 @@ namespace BE
                 "Un permiso simple (Patente) no puede contener hijos. Solo las Familias admiten hijos.");
         }
 
-        // Hoja — no tiene hijos que quitar. Equivalente a Quitar() de Stach en la clase Patente.
+        // Hoja: no tiene hijos que quitar. Equivalente a Quitar() de Stach en la clase Patente.
         public override void QuitarHijo(Componente c)
         {
             throw new InvalidOperationException(

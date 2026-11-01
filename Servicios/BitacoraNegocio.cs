@@ -5,7 +5,7 @@ using System.Data;
 namespace Servicios
 {
     /// <summary>
-    /// Capa de Servicios — BitacoraNegocio.
+    /// Capa de Servicios: BitacoraNegocio.
     ///
     /// Responsabilidades únicas:
     ///   - ESCRITURA: Registrar() persiste eventos de negocio en [BitacoraNegocio].

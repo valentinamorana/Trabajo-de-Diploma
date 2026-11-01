@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace GUI.Analitica
 {
     /// <summary>
-    /// PdN13 — Recomendación de Prendas para un Cliente. El Vendedor elige un cliente y genera
+    /// PdN13: Recomendación de Prendas para un Cliente. El Vendedor elige un cliente y genera
     /// prendas Disponibles afines a su historial de pedidos (categoría/color más pedidos), para
     /// ofrecerlas en el próximo pedido.
     /// </summary>

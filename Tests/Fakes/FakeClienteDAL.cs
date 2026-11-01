@@ -78,7 +78,7 @@ namespace Tests.Fakes
         public List<BE.MedioPago> ObtenerMediosPago() => MediosPago;
 
         // Sin BD real: no hay transacción que abrir, se ejecuta la acción directamente
-        // (conexión/transacción null — los EnTx de estos fakes no las usan).
+        // (conexión/transacción null: los EnTx de estos fakes no las usan).
         public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion) => accion(null, null);
 
         public void ModificarEnTx(SqlConnection conexion, SqlTransaction tx, BE.Cliente cliente) => Modificar(cliente);

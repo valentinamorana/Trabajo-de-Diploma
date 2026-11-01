@@ -11,7 +11,7 @@ namespace GUI
         private readonly RecuperacionAdmin _recuperacionBLL = new RecuperacionAdmin();
 
         // Límite de intentos fallidos DENTRO de esta instancia del diálogo (se resetea cada vez
-        // que se vuelve a abrir) — antes no había ninguna fricción para probar credenciales o la
+        // que se vuelve a abrir): antes no había ninguna fricción para probar credenciales o la
         // Clave Maestra a repetición sobre el secreto más crítico del sistema.
         private const int MaxIntentos = 3;
         private int _intentosFallidos = 0;
@@ -57,7 +57,7 @@ namespace GUI
 
             try
             {
-                // Vía 1 — Clave Maestra de Recuperación. Permite autorizar SIN usuario, para
+                // Vía 1: Clave Maestra de Recuperación. Permite autorizar SIN usuario, para
                 // cuando ningún admin puede ingresar. La validación (lectura de config + cripto)
                 // la resuelve la BLL; la GUI solo reacciona al booleano. (Patrón de Stach.)
                 if (_recuperacionBLL.ValidarClaveMaestra(txtClave.Text))
@@ -68,7 +68,7 @@ namespace GUI
                     return;
                 }
 
-                // Vía 2 — Credenciales de un Administrador.
+                // Vía 2: Credenciales de un Administrador.
                 if (string.IsNullOrWhiteSpace(txtUsuario.Text))
                 {
                     lblError.Text = Tr("msg.confirmar.vacio", "Ingrese usuario y contraseña.");

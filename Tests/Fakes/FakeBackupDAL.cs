@@ -7,7 +7,7 @@ namespace Tests.Fakes
     /// <summary>
     /// Doble de prueba de IBackupDAL (sin SQL Server). Permite configurar la fecha del
     /// backup y la lista de cambios posteriores, y registra qué fecha recibió el conteo
-    /// y cuántas veces se invocó — para verificar la delegación de BLL.Backup (RF-08).
+    /// y cuántas veces se invocó: para verificar la delegación de BLL.Backup (RF-08).
     /// </summary>
     public class FakeBackupDAL : IBackupDAL
     {

@@ -139,7 +139,7 @@ namespace GUI
             this.kpiPrendasVal.Name = "kpiPrendasVal";
             this.kpiPrendasVal.Size = new System.Drawing.Size(235, 34);
             this.kpiPrendasVal.TabIndex = 0;
-            this.kpiPrendasVal.Text = "—";
+            this.kpiPrendasVal.Text = "-";
             this.kpiPrendasVal.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // kpiClientesVal
@@ -151,7 +151,7 @@ namespace GUI
             this.kpiClientesVal.Name = "kpiClientesVal";
             this.kpiClientesVal.Size = new System.Drawing.Size(235, 34);
             this.kpiClientesVal.TabIndex = 1;
-            this.kpiClientesVal.Text = "—";
+            this.kpiClientesVal.Text = "-";
             this.kpiClientesVal.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // kpiEventosVal
@@ -163,7 +163,7 @@ namespace GUI
             this.kpiEventosVal.Name = "kpiEventosVal";
             this.kpiEventosVal.Size = new System.Drawing.Size(235, 34);
             this.kpiEventosVal.TabIndex = 2;
-            this.kpiEventosVal.Text = "—";
+            this.kpiEventosVal.Text = "-";
             this.kpiEventosVal.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // kpiBackupVal
@@ -175,7 +175,7 @@ namespace GUI
             this.kpiBackupVal.Name = "kpiBackupVal";
             this.kpiBackupVal.Size = new System.Drawing.Size(235, 34);
             this.kpiBackupVal.TabIndex = 3;
-            this.kpiBackupVal.Text = "—";
+            this.kpiBackupVal.Text = "-";
             this.kpiBackupVal.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // kpiPrendasLbl

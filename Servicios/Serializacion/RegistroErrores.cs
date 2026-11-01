@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace Servicios.Serializacion
 {
     /// <summary>
-    /// A02 Serialización — cada error inesperado de la aplicación queda serializado en XML
+    /// A02 Serialización: cada error inesperado de la aplicación queda serializado en XML
     /// (un archivo por mes: Errores\errores_AAAAMM.xml en la carpeta de datos local de WardrobeFlow,
     /// que arma GestorArchivos), además del renglón que ya va a la bitácora. El archivo mensual es
     /// siempre XML; desde la pantalla de Bitácora (GUI.ErroresXmlForm, vía BLL.ErroresSerializados)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BE
 {
     /// <summary>
-    /// PN03 «Simular» — Escenario del simulador "¿Qué pasa si…?". Todo en la base mensual que usa
+    /// PN03 «Simular»: Escenario del simulador "¿Qué pasa si…?". Todo en la base mensual que usa
     /// Contabilidad (BE.AnalisisImpactoPromocion): el descuento lo reciben TODOS los clientes activos
     /// del plan; el beneficio viene de los clientes en riesgo que la promoción retiene.
     /// </summary>

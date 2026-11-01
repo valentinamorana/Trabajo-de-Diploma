@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Módulo de Gestión de Prendas.
+    /// Capa de Presentación: Módulo de Gestión de Prendas.
     ///
     /// Permite a Depósito administrar el catálogo de prendas:
     ///   Ver todas las prendas con estado, cliente actual y datos descriptivos
@@ -36,14 +36,14 @@ namespace GUI
 
         private readonly BLL.Interfaces.IPrendaService prendaBLL = new BLL.Prenda();
 
-        // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README).
+        // Lista de Espera (mejora opcional, no requerida por la cátedra: ver README).
         private readonly BLL.Interfaces.IListaEsperaService listaEsperaBLL = new BLL.ListaEspera();
         private readonly BLL.Interfaces.IClienteService clienteBLL = new BLL.Cliente();
 
         // Determina si el usuario puede cambiar estados (Depósito)
         private readonly bool _tieneStock;
 
-        // Idioma activo — sincronizado en Traducir() para usar en EstadoLabel y ColorearFilas
+        // Idioma activo: sincronizado en Traducir() para usar en EstadoLabel y ColorearFilas
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
         private List<BE.Prenda> _prendas = new List<BE.Prenda>();
@@ -51,7 +51,7 @@ namespace GUI
         public Prendas()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvPrendas);
 
             // Verificar si el usuario activo tiene permiso de stock
@@ -222,11 +222,11 @@ namespace GUI
                 tabla.Rows.Add(
                     p.IdPrenda,
                     p.Nombre,
-                    p.Categoria ?? "—",
-                    p.Talle ?? "—",
-                    p.Color ?? "—",
+                    p.Categoria ?? "-",
+                    p.Talle ?? "-",
+                    p.Color ?? "-",
                     EstadoLabel(p.Estado),
-                    p.NombreCliente ?? "—",
+                    p.NombreCliente ?? "-",
                     p.FechaAlta.ToString("d"),
                     (int)p.Estado);
             }
@@ -289,10 +289,10 @@ namespace GUI
             {
                 lblDetalleContenido.Text =
                     $"{prenda.NombreCliente}   |   " +
-                    $"Prenda: {prenda.Nombre}  —  {prenda.Talle}  —  {prenda.Color}";
+                    $"Prenda: {prenda.Nombre}, {prenda.Talle}, {prenda.Color}";
                 panelDetalle.Visible = true;
                 // Lista de Espera (mejora opcional): solo tiene sentido anotarse mientras
-                // la prenda está EnUso — ver README.
+                // la prenda está EnUso: ver README.
                 btnAnotarEspera.Visible = _tieneStock && prenda.PuedeAnotarseEnEspera();
             }
         }
@@ -377,7 +377,7 @@ namespace GUI
             }
         }
 
-        // Lista de Espera (mejora opcional, no requerida por la cátedra — ver README):
+        // Lista de Espera (mejora opcional, no requerida por la cátedra: ver README):
         // anota a un cliente para que se lo notifique cuando esta prenda EnUso se libere.
         private void BtnAnotarEspera_Click(object sender, EventArgs e)
         {
@@ -398,7 +398,7 @@ namespace GUI
             catch (Exception ex) { MostrarError(ex); }
         }
 
-        // Diálogo simple de selección de cliente (combo), reutilizable — mismo criterio
+        // Diálogo simple de selección de cliente (combo), reutilizable: mismo criterio
         // que GUI.CobroSuscripcionForm.ClienteItem pero como modal standalone.
         private BE.Cliente SeleccionarClienteDialog(string titulo, string prompt)
         {

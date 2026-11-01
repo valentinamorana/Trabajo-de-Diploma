@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PN03 — Una fila por cada transición de estado de una Promocion (tabla PromocionHistorial).
+    /// PN03: Una fila por cada transición de estado de una Promocion (tabla PromocionHistorial).
     /// EstadoAnterior es null en el alta. IdUsuario es el usuario en sesión que provocó la
     /// transición (en el vencimiento automático, el que consultó la lista).
     /// </summary>

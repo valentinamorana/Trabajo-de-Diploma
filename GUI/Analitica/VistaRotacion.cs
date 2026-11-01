@@ -3,7 +3,7 @@ using System.Drawing;
 namespace GUI.Analitica
 {
     /// <summary>
-    /// PdN9 — Rotación de Prendas. El Gerente de Inventario genera el listado de prendas de baja
+    /// PdN9: Rotación de Prendas. El Gerente de Inventario genera el listado de prendas de baja
     /// demanda (candidatas a baja) o alta demanda (candidatas a reposición), cruzando el catálogo
     /// activo con la cantidad de pedidos por prenda. Sin filtros.
     /// </summary>

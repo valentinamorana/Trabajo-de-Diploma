@@ -4,7 +4,7 @@ using Tests.Fakes;
 
 namespace Tests
 {
-    /// <summary>BLL.RecomendacionPrendas (PdN13) — sugerencias basadas en el historial del cliente.</summary>
+    /// <summary>BLL.RecomendacionPrendas (PdN13): sugerencias basadas en el historial del cliente.</summary>
     [TestClass]
     public class RecomendacionPrendasTests
     {
@@ -43,7 +43,7 @@ namespace Tests
             dalPedido.PrendasHistoricasPorCliente.Add(new BE.Prenda { IdPrenda = 2, Categoria = "Remeras" });
             var dalPrenda = new FakePrendaDAL();
             // La misma prenda (ID 2) sigue figurando como "disponible" en el catálogo (podría
-            // haber vuelto tras una devolución) — no debe re-sugerirse al mismo cliente.
+            // haber vuelto tras una devolución): no debe re-sugerirse al mismo cliente.
             dalPrenda.Disponibles.Add(new BE.Prenda { IdPrenda = 2, Nombre = "Remera ya usada", Categoria = "Remeras" });
             var bll = new BLL.RecomendacionPrendas(dalPedido, dalPrenda);
 

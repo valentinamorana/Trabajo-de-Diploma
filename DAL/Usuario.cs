@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Usuario.
+    /// Capa de Acceso a Datos: Usuario.
     /// Opera sobre la tabla [Usuario] de WardrobeFlowDB.
     ///
     /// Columnas de la tabla:
@@ -121,7 +121,7 @@ namespace DAL
 
             try
             {
-                // RF-10 — los usuarios archivados (Activo=0) NO pueden iniciar sesión.
+                // RF-10: los usuarios archivados (Activo=0) NO pueden iniciar sesión.
                 return LeerUsuarioPorQuery(
                     "SELECT IdUsuario AS Id, Username, Clave AS Contraseña, Rol, Perfil, " +
                     "       Estado, IntentosFallidos, ISNULL(IdIdioma, 'ES') AS IdIdioma, " +
@@ -187,7 +187,7 @@ namespace DAL
         }
 
         // Ejecuta una acción dentro de una única transacción (commit/rollback automático).
-        // Mismo patrón que DAL.Cliente.EjecutarTransaccion — le da a BLL una forma de componer,
+        // Mismo patrón que DAL.Cliente.EjecutarTransaccion: le da a BLL una forma de componer,
         // desde afuera de esta clase, varias escrituras en una sola operación atómica.
         public void EjecutarTransaccion(Action<SqlConnection, SqlTransaction> accion)
             => acceso.EjecutarTransaccion(accion);
@@ -229,7 +229,7 @@ namespace DAL
         public int? IncrementarIntentosFallidos(string username)
         {
             int? intentos = null;
-            // T07 — IntentosFallidos forma parte del DVH: el incremento y el DVH/DVV van juntos,
+            // T07: IntentosFallidos forma parte del DVH: el incremento y el DVH/DVV van juntos,
             // para no dejar la fila "corrupta" y bloquear la app en el próximo arranque.
             EscribirConDV((cn, tx) =>
             {
@@ -324,7 +324,7 @@ namespace DAL
             }
         }
 
-        // ABM — Modifica los datos administrativos NO sensibles de un usuario (nombre, apellido,
+        // ABM: Modifica los datos administrativos NO sensibles de un usuario (nombre, apellido,
         // username, fecha de nacimiento, email). El Username forma parte del DVH, por lo que se
         // recalcula en la misma transacción para no dejar la fila marcada como corrupta.
         public void Modificar(int idUsuario, string nombre, string apellido, string username,
@@ -347,7 +347,7 @@ namespace DAL
             }
         }
 
-        // ABM — Cambia el rol/perfil de un usuario. Rol forma parte del DVH → recalcular.
+        // ABM: Cambia el rol/perfil de un usuario. Rol forma parte del DVH → recalcular.
         public void CambiarRol(int idUsuario, string rol)
         {
             try
@@ -405,7 +405,7 @@ namespace DAL
             }
         }
 
-        // ── T07 — Escritura + DV + espejo en UNA transacción ─────────────────────────
+        // ── T07: Escritura + DV + espejo en UNA transacción ─────────────────────────
         // Antes la escritura se confirmaba sola y el DVH/DVV se recalculaba DESPUÉS, en otra
         // transacción y tragándose los errores: si el recálculo fallaba, la fila quedaba con el DV
         // viejo y el próximo arranque marcaba la base como manipulada (bloqueando a los no admin).
@@ -486,7 +486,7 @@ namespace DAL
             return LeerListaUsuarios(soloActivos: true);
         }
 
-        // RF-10 — Lista los usuarios ARCHIVADOS (Activo=0), con su FechaBaja, para gestión/purga.
+        // RF-10: Lista los usuarios ARCHIVADOS (Activo=0), con su FechaBaja, para gestión/purga.
         public List<BE.Usuario> ObtenerArchivados()
         {
             return LeerListaUsuarios(soloActivos: false);
@@ -541,7 +541,7 @@ namespace DAL
             return lista;
         }
 
-        // RF-10 — Baja lógica (archivar): el usuario deja de poder loguear y sale de la lista,
+        // RF-10: Baja lógica (archivar): el usuario deja de poder loguear y sale de la lista,
         // pero se conserva su historial para trazabilidad. Recalcula DVH/DVV de la fila.
         public void BajaLogica(int idUsuario)
         {
@@ -557,7 +557,7 @@ namespace DAL
             }
         }
 
-        // RF-10 — Eliminación FÍSICA con limpieza de FKs, en una transacción atómica.
+        // RF-10: Eliminación FÍSICA con limpieza de FKs, en una transacción atómica.
         // Desvincula la bitácora (conserva los registros con usuario NULL), borra el historial
         // propio del usuario y elimina la fila. En la MISMA transacción recalcula el DVV de Usuario
         // (y quita la fila del espejo) y el DVH/DVV de los Empleados desvinculados.
@@ -607,7 +607,7 @@ namespace DAL
             }
         }
 
-        // RF-10 — Registros de negocio de PN03 firmados por el usuario: son la traza de quién creó,
+        // RF-10: Registros de negocio de PN03 firmados por el usuario: son la traza de quién creó,
         // sugirió, dictaminó o resolvió cada promoción (y quién tomó cada decisión comercial). Un usuario con alguno no se purga.
         public bool TieneRegistrosDeNegocio(int idUsuario)
         {
@@ -627,7 +627,7 @@ namespace DAL
             return t != null && t.Rows.Count > 0 && Convert.ToInt32(t.Rows[0]["Tiene"]) == 1;
         }
 
-        // RF-10 — Cuenta los Administradores ACTIVOS (para impedir borrar el último).
+        // RF-10: Cuenta los Administradores ACTIVOS (para impedir borrar el último).
         public int ContarAdministradoresActivos()
         {
             try
@@ -644,7 +644,7 @@ namespace DAL
             }
         }
 
-        // RF-10 — Archivados elegibles para purga física: Activo=0 y FechaBaja anterior al
+        // RF-10: Archivados elegibles para purga física: Activo=0 y FechaBaja anterior al
         // umbral de retención (p. ej. 1 año). Mantiene la base limpia sin perder datos antes de tiempo.
         public List<BE.Usuario> ObtenerArchivadosParaPurga(int diasRetencion)
         {

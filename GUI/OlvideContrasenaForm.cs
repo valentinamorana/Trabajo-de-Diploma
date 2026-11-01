@@ -69,7 +69,7 @@ namespace GUI
 
         /// <summary>
         /// Verifica que el username existe y muestra el mensaje de contacto al admin.
-        /// No resetea la contraseña aquí — eso lo hace el Administrador desde Usuarios.
+        /// No resetea la contraseña aquí: eso lo hace el Administrador desde Usuarios.
         /// </summary>
         private void BtnEnviar_Click(object sender, EventArgs e)
         {

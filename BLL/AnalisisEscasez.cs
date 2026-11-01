@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Detección de Escasez por Talle/Categoría (PdN12). Compara el
+    /// Lógica de negocio: Detección de Escasez por Talle/Categoría (PdN12). Compara el
     /// stock Disponible agrupado por combinación Talle+Categoría contra un umbral mínimo
     /// configurable por el GerenteInventario, para planificar compras antes de un faltante.
     /// </summary>

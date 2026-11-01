@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace BLL
 {
     /// <summary>
-    /// Capa de Lógica de Negocio — Gestión de Planes de Suscripción.
+    /// Capa de Lógica de Negocio: Gestión de Planes de Suscripción.
     /// Valida datos antes de persistir y centraliza reglas de negocio.
     /// </summary>
     public class PlanSuscripcion : Interfaces.IPlanSuscripcionService

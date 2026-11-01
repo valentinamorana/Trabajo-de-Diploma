@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PN03 — «Dictamen contable»: resultado de "Analizar margen e impacto" → ¿Aprueba?
+    /// PN03: «Dictamen contable»: resultado de "Analizar margen e impacto" → ¿Aprueba?
     /// Una fila por cada decisión de Contabilidad (una promoción reformulada puede tener varios).
     /// </summary>
     public class DictamenContable

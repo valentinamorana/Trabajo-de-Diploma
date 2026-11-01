@@ -6,7 +6,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// RF-10 — Diálogo de autodesbloqueo de un Administrador mediante una clave de emergencia
+    /// RF-10: Diálogo de autodesbloqueo de un Administrador mediante una clave de emergencia
     /// de un solo uso (tipo códigos de respaldo de Steam / 2FA). Se abre desde el Login cuando
     /// la cuenta quedó bloqueada por intentos fallidos, sin depender de otro Administrador.
     /// </summary>
@@ -76,7 +76,7 @@ namespace GUI
             catch (Exception)
             {
                 // Excepción inesperada (no BE.AppException, sin clave de traducción): mismo criterio
-                // que FormBase.MostrarError(Exception) — mensaje genérico, no el texto técnico crudo.
+                // que FormBase.MostrarError(Exception): mensaje genérico, no el texto técnico crudo.
                 lblError.Text = Tr("msg.error.inesperado",
                     "Ha ocurrido un error inesperado. Por favor, contacte al administrador del sistema.");
             }

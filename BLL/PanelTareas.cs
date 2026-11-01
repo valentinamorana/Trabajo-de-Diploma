@@ -43,7 +43,7 @@ namespace BLL
             };
         }
 
-        // Depósito: "Revisar stock de las prendas" — pedidos en la cola de control de stock.
+        // Depósito: "Revisar stock de las prendas": pedidos en la cola de control de stock.
         public int ContarPedidosAControlar() => _pedido.ObtenerColaControlStock().Count;
 
         // Operador Logístico: pedidos formalizados por etapa del despacho. Antes el panel
@@ -70,7 +70,7 @@ namespace BLL
 
         /// <summary>
         /// Vendedor: suscripciones a gestionar (vencidas o que vencen en los próximos 7 días).
-        /// La regla es el predicado BE.Cliente.RequiereGestionDeVencimiento — el mismo criterio
+        /// La regla es el predicado BE.Cliente.RequiereGestionDeVencimiento: el mismo criterio
         /// de las alertas de suscripción (BLL.PanelAlertas); antes el panel lo repetía a mano.
         /// </summary>
         public static int ContarSuscripcionesAGestionar(IEnumerable<BE.Cliente> clientes) =>

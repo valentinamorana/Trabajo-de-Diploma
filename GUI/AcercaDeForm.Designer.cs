@@ -32,7 +32,7 @@ namespace GUI
             this.tblDatos.SuspendLayout();
             this.SuspendLayout();
 
-            // lblProducto — encabezado (mismo estilo que la guía de inicio)
+            // lblProducto: encabezado (mismo estilo que la guía de inicio)
             this.lblProducto.BackColor = Tema.RosaOscuro;
             this.lblProducto.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblProducto.Font = new System.Drawing.Font("Segoe UI", 13f, System.Drawing.FontStyle.Bold);
@@ -64,7 +64,7 @@ namespace GUI
             this.lblDescripcion.Name = "lblDescripcion";
             this.lblDescripcion.Text = "Gestión de suscripciones de alquiler de indumentaria.";
 
-            // tblDatos — etiqueta | valor
+            // tblDatos: etiqueta | valor
             this.tblDatos.AutoSize = true;
             this.tblDatos.ColumnCount = 2;
             this.tblDatos.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.AutoSize));
@@ -132,7 +132,7 @@ namespace GUI
             this.lblVersionValor.Margin = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.lblVersionValor.MaximumSize = new System.Drawing.Size(300, 0);
             this.lblVersionValor.Name = "lblVersionValor";
-            this.lblVersionValor.Text = "—";
+            this.lblVersionValor.Text = "-";
 
             this.lblCompilacionValor.AutoSize = true;
             this.lblCompilacionValor.Font = Tema.FuenteNormal;
@@ -140,7 +140,7 @@ namespace GUI
             this.lblCompilacionValor.Margin = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.lblCompilacionValor.MaximumSize = new System.Drawing.Size(300, 0);
             this.lblCompilacionValor.Name = "lblCompilacionValor";
-            this.lblCompilacionValor.Text = "—";
+            this.lblCompilacionValor.Text = "-";
 
             this.lblServidorValor.AutoSize = true;
             this.lblServidorValor.Font = Tema.FuenteNormal;
@@ -148,7 +148,7 @@ namespace GUI
             this.lblServidorValor.Margin = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.lblServidorValor.MaximumSize = new System.Drawing.Size(300, 0);
             this.lblServidorValor.Name = "lblServidorValor";
-            this.lblServidorValor.Text = "—";
+            this.lblServidorValor.Text = "-";
 
             this.lblBaseDatosValor.AutoSize = true;
             this.lblBaseDatosValor.Font = Tema.FuenteNormal;
@@ -156,7 +156,7 @@ namespace GUI
             this.lblBaseDatosValor.Margin = new System.Windows.Forms.Padding(0, 0, 0, 8);
             this.lblBaseDatosValor.MaximumSize = new System.Drawing.Size(300, 0);
             this.lblBaseDatosValor.Name = "lblBaseDatosValor";
-            this.lblBaseDatosValor.Text = "—";
+            this.lblBaseDatosValor.Text = "-";
 
             this.lblAutoraValor.AutoSize = true;
             this.lblAutoraValor.Font = Tema.FuenteNormal;

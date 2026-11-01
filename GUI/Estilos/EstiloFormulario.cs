@@ -9,7 +9,7 @@ namespace GUI.Estilos
     /// Rotación, Mantenimiento, Escasez, Recomendación de Prendas) para que sigan la misma
     /// identidad visual que ya usan ClienteForm/CambioEstadoDialog/DashboardDeposito/Menu
     /// (rosa de marca), en vez de quedar con los botones y grillas grises default de
-    /// WinForms. Pura presentación (colores/fuentes) — ninguna decisión de negocio vive acá.
+    /// WinForms. Pura presentación (colores/fuentes): ninguna decisión de negocio vive acá.
     /// </summary>
     public static class EstiloFormulario
     {
@@ -20,7 +20,7 @@ namespace GUI.Estilos
         public static readonly Color RosaClara    = Tema.RosaClara;
         public static readonly Color RosaMuyClara = Tema.RosaMuyClara;
 
-        /// <summary>Botón de acción principal (Generar/Procesar/Confirmar) — mismo patrón
+        /// <summary>Botón de acción principal (Generar/Procesar/Confirmar): mismo patrón
         /// que ClienteForm.btnGuardar y CambioEstadoDialog.btnConfirmar.</summary>
         public static void BotonPrimario(Button btn)
         {
@@ -32,7 +32,7 @@ namespace GUI.Estilos
             PintarPrimario(btn, System.EventArgs.Empty);
         }
 
-        /// <summary>Botón de acción secundaria (Exportar PDF/CSV, Reanudar) — contorno
+        /// <summary>Botón de acción secundaria (Exportar PDF/CSV, Reanudar): contorno
         /// rosa sobre fondo blanco, para no competir con el botón primario del formulario.</summary>
         public static void BotonSecundario(Button btn)
         {
@@ -63,7 +63,7 @@ namespace GUI.Estilos
         }
 
         /// <summary>Estilo de grilla de reportes: encabezado con tinte rosa, filas
-        /// alternadas y selección en el color de marca — reemplaza el DataGridView
+        /// alternadas y selección en el color de marca: reemplaza el DataGridView
         /// 100% default que traían estos 6 formularios.</summary>
         public static void Grilla(DataGridView dgv)
         {

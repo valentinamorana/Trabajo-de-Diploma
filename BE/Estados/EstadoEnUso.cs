@@ -2,7 +2,7 @@ namespace BE.Estados
 {
     /// <summary>
     /// Estado concreto: la prenda está en poder de un cliente. No admite transición manual
-    /// general desde el módulo de Prendas — el pasaje a/desde EnUso lo maneja exclusivamente
+    /// general desde el módulo de Prendas: el pasaje a/desde EnUso lo maneja exclusivamente
     /// el flujo de Pedido (alta, devolución, cancelación, des-cancelación), documentado en
     /// <see cref="Prenda.TransicionPermitida"/>. La única excepción es <c>EnUso → Baja</c>
     /// (PN04, CU06-DEP Reportar Prenda Perdida): una prenda que nunca vuelve físicamente

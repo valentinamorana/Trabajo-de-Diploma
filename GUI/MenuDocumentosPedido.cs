@@ -5,7 +5,7 @@ using System.Windows.Forms;
 namespace GUI
 {
     /// <summary>
-    /// PN01 — Menú "Documentos ▾" de Control de stock y Pedidos de venta (mismo esquema que
+    /// PN01: Menú "Documentos ▾" de Control de stock y Pedidos de venta (mismo esquema que
     /// MenuDocumentosPromocion). Los documentos del pedido ya no se ofrecen con una pregunta después
     /// de cada acción: se imprimen desde acá cuando hacen falta, habilitando solo los que existen
     /// según el estado del pedido. Solo consulta a la BLL y manda a imprimir; no decide nada del negocio.

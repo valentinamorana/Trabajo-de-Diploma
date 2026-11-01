@@ -1,7 +1,7 @@
 namespace GUI.Exportacion
 {
     /// <summary>
-    /// Patrón FACTORY METHOD — rol "ConcreteCreator".
+    /// Patrón FACTORY METHOD: rol "ConcreteCreator".
     ///
     /// Creador de exportadores para los documentos de PN01 (Armar pedido): planilla de
     /// control de existencias, informe de disponibilidad, constancia de prendas separadas,

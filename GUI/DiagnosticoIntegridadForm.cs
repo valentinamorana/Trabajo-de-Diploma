@@ -85,7 +85,7 @@ namespace GUI
 
                 lblDVVDetalle.Text = string.Format(
                     Tr("diag.dvv.detalle", "DVV almacenado: {0}   |   DVV calculado: {1}   |   Filas con DVH inválido: {2}"),
-                    diag.DVVAlmacenado?.ToString() ?? "—",
+                    diag.DVVAlmacenado?.ToString() ?? "-",
                     diag.DVVCalculado,
                     diag.FilasRotas.Count);
 
@@ -102,7 +102,7 @@ namespace GUI
                 {
                     string estadoFila = fila.DVHAlmacenado == null ? sinDVH : noCoincide;
                     gridRotas.Rows.Add(fila.Id, fila.Username,
-                        fila.DVHAlmacenado?.ToString() ?? "—",
+                        fila.DVHAlmacenado?.ToString() ?? "-",
                         dvhRuntime,
                         estadoFila);
                 }
@@ -112,10 +112,10 @@ namespace GUI
                 // recalcular (antes una corrupción en Cliente no aparecía por ningún lado).
                 foreach (var tablaCorrupta in diag.TablasAdicionalesCorruptas)
                 {
-                    int tIdx = gridRotas.Rows.Add("—",
+                    int tIdx = gridRotas.Rows.Add("-",
                         string.Format(Tr("diag.tabla.corrupta", "Tabla '{0}'"), tablaCorrupta),
-                        "—", "—",
-                        Tr("diag.tabla.dvinvalido", "DV inválido — use «Recalcular Todo»"));
+                        "-", "-",
+                        Tr("diag.tabla.dvinvalido", "DV inválido: use «Recalcular Todo»"));
                     gridRotas.Rows[tIdx].DefaultCellStyle.ForeColor = Tema.Error;
                     gridRotas.Rows[tIdx].ReadOnly = true;
                 }
@@ -123,7 +123,7 @@ namespace GUI
                 // Si no hay NINGÚN problema (ni en Usuario ni en las tablas adicionales),
                 // mostrar el cartel "Todo íntegro" SOBRE la grilla (no como fila en Usuario).
                 bool gridVacio = diag.FilasRotas.Count == 0 && diag.TablasAdicionalesCorruptas.Count == 0;
-                lblGridVacio.Text    = Tr("diag.sinfilas", "Todo íntegro — no hay filas con problemas de integridad.");
+                lblGridVacio.Text    = Tr("diag.sinfilas", "Todo íntegro: no hay filas con problemas de integridad.");
                 lblGridVacio.Visible = gridVacio;
                 if (gridVacio) lblGridVacio.BringToFront(); else lblGridVacio.SendToBack();
 
@@ -154,7 +154,7 @@ namespace GUI
                     int idx = gridHistorial.Rows.Add(
                         h.FechaVerificacion.ToString("dd/MM/yyyy HH:mm:ss"),
                         h.NombreTabla,
-                        h.DVVAlmacenado?.ToString() ?? "—",
+                        h.DVVAlmacenado?.ToString() ?? "-",
                         h.DVVCalculado.ToString(),
                         h.FilasCorruptas.ToString(),
                         h.Resultado ? ok : fallo,
@@ -182,14 +182,14 @@ namespace GUI
 
             var sb = new System.Text.StringBuilder();
             sb.AppendLine(string.Format(
-                Tr("diag.tip.fallo.titulo", "Verificación FALLIDA — tabla {0}"), h.NombreTabla));
+                Tr("diag.tip.fallo.titulo", "Verificación FALLIDA: tabla {0}"), h.NombreTabla));
 
             // DVV no coincide → se agregaron/quitaron/reordenaron filas.
             if (h.DVVAlmacenado == null || h.DVVAlmacenado != h.DVVCalculado)
                 sb.AppendLine(string.Format(
                     Tr("diag.tip.dvv.mismatch",
                       "• El DVV no coincide: almacenado {0} ≠ calculado {1} (se insertaron, eliminaron o reordenaron filas)."),
-                    h.DVVAlmacenado?.ToString() ?? "—", h.DVVCalculado));
+                    h.DVVAlmacenado?.ToString() ?? "-", h.DVVCalculado));
 
             // Filas con DVH inválido → se modificó el contenido de esas filas.
             if (h.FilasCorruptas > 0)

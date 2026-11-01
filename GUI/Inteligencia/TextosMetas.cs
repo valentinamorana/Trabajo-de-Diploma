@@ -7,7 +7,7 @@ namespace GUI.Inteligencia
     internal static class TextosMetas
     {
         public static string ValorMeta(BE.UnidadKpi unidad, decimal? valor) =>
-            valor.HasValue ? ValorKpi(unidad, valor.Value) : "—";
+            valor.HasValue ? ValorKpi(unidad, valor.Value) : "-";
 
         public static string EstadoMeta(BE.EstadoMeta e)
         {

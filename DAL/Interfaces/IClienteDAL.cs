@@ -22,7 +22,7 @@ namespace DAL.Interfaces
         List<BE.MedioPago> ObtenerMediosPago();
 
         /// <summary>Ejecuta una acción dentro de una única transacción de BD (commit si no lanza, rollback si lanza).
-        /// Permite que los manejadores de Renovación/Cobro actualicen Cliente y su historial de forma atómica —
+        /// Permite que los manejadores de Renovación/Cobro actualicen Cliente y su historial de forma atómica:
         /// antes eran dos round-trips independientes sin garantía de consistencia entre sí.
         /// T07: el DV de las filas de Cliente escritas con los métodos ...EnTx se recalcula dentro de esta
         /// misma transacción, antes del commit (si falla, se revierte todo).</summary>

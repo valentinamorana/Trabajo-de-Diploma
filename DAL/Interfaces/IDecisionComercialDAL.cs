@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace DAL.Interfaces
 {
     /// <summary>
-    /// PN03 — Contrato del acceso a datos de DecisionComercial (permite dobles de prueba). Cada cambio
+    /// PN03: Contrato del acceso a datos de DecisionComercial (permite dobles de prueba). Cada cambio
     /// de estado es un claim atómico (UPDATE ... WHERE Estado = @esperado): si otra sesión ya lo cambió,
     /// no escribe y devuelve false.
     /// </summary>
@@ -33,5 +33,11 @@ namespace DAL.Interfaces
 
         /// <summary>IDs del detalle de cada decisión pedida (idDecision → IDs del tipo indicado).</summary>
         Dictionary<int, List<int>> ObtenerDetalle(IEnumerable<int> idsDecision, string tipo);
+
+        /// <summary>1.6.1: Guarda la «Constancia de la decisión» (XML) en DecisionComercial.Constancia. false si la decisión no existe.</summary>
+        bool GuardarConstancia(int idDecision, string constanciaXml);
+
+        /// <summary>XML de la constancia (null si la decisión no existe o no tiene).</summary>
+        string ObtenerConstancia(int idDecision);
     }
 }

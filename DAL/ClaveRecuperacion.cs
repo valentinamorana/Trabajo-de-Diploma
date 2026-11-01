@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Claves de emergencia (tabla ClaveRecuperacion).
+    /// Capa de Acceso a Datos: Claves de emergencia (tabla ClaveRecuperacion).
     /// Las claves se guardan HASHEADAS (PBKDF2). Esta capa nunca ve la clave en texto plano:
     /// recibe/almacena hashes y controla el consumo de uso único.
     /// </summary>

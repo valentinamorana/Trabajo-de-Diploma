@@ -5,7 +5,7 @@ using System.Linq;
 namespace BE
 {
     /// <summary>
-    /// PN03 — "Evaluar resultado de la promoción" (sección del «Reporte de métricas», carril Gerencia):
+    /// PN03: "Evaluar resultado de la promoción" (sección del «Reporte de métricas», carril Gerencia):
     /// compara los movimientos de suscripción del plan de una promoción Vigente, Dada de baja o Vencida
     /// DURANTE su vigencia contra un período ANTERIOR de la misma duración, y mide cuántos de los
     /// clientes que tuvieron la renovación en juego durante la vigencia se retuvieron. Cierra el ciclo

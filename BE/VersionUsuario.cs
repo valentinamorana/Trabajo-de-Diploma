@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace BE
 {
     /// <summary>
-    /// Patrón MEMENTO — Memento CONCRETO del Usuario.
+    /// Patrón MEMENTO: Memento CONCRETO del Usuario.
     ///
     /// Guarda una "foto" del estado del Usuario (snapshot) en un instante dado y
     /// persiste en la tabla HistorialUsuario. Expone metadatos (Fecha/Actor/Detalle)

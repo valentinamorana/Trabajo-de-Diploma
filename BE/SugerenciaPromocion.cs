@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PN03 — «Sugerencia de promoción» que Gerencia (rol GerenteComercial) envía a Administración
+    /// PN03: «Sugerencia de promoción» que Gerencia (rol GerenteComercial) envía a Administración
     /// tras "Analizar métricas". Administración la acepta (crea la promoción a partir de ella:
     /// Evaluada) o la descarta con motivo (Descartada). Aplica siempre a un plan (la BLL lo exige);
     /// IdPlan es nullable solo por las sugerencias por categoría de la versión anterior, que la

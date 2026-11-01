@@ -3,10 +3,10 @@ using System;
 namespace BE
 {
     /// <summary>
-    /// PdN10 — Datos cruzados de un cliente para evaluar riesgo de abandono: la
+    /// PdN10: Datos cruzados de un cliente para evaluar riesgo de abandono: la
     /// suscripción (Cliente, ya trae FechaVencimiento) + el último pedido registrado
     /// (fuera de Cliente, viene de la tabla Pedido). Es el INPUT que recibe cada
-    /// BLL.Estrategias.EstrategiaRiesgo — la "Compra" del ejemplo de cátedra Strategy.
+    /// BLL.Estrategias.EstrategiaRiesgo: la "Compra" del ejemplo de cátedra Strategy.
     /// </summary>
     public class DatosClienteRiesgo
     {

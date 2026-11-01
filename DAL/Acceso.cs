@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Punto de Acceso a la Base de Datos (Patrón Singleton).
+    /// Capa de Acceso a Datos: Punto de Acceso a la Base de Datos (Patrón Singleton).
     ///
     /// PATRÓN SINGLETON: Garantiza una única instancia de la clase Acceso en toda la
     /// aplicación, centralizando la gestión del acceso a datos.
@@ -15,7 +15,7 @@ namespace DAL
     ///   - Primera verificación fuera del lock: evita overhead cuando ya existe instancia.
     ///   - Segunda verificación dentro del lock: previene condiciones de carrera.
     ///
-    /// ESTRATEGIA DE CONEXIÓN — nueva conexión por operación:
+    /// ESTRATEGIA DE CONEXIÓN: nueva conexión por operación:
     ///   Cada llamada a Leer() o Escribir() abre una SqlConnection propia dentro de un
     ///   bloque using, garantizando que se libere al terminar. ADO.NET gestiona
     ///   automáticamente un pool de conexiones, por lo que este patrón es eficiente
@@ -96,8 +96,16 @@ namespace DAL
 
         // Verifica que la base de datos esté disponible intentando abrir una conexión.
         // Se llama desde BLL.Configuracion al arranque de la aplicación.
-        public bool VerificarConexion()
+        public bool VerificarConexion() => VerificarConexion(out _);
+
+        /// <summary>
+        /// Igual que <see cref="VerificarConexion()"/>, pero devuelve la excepción de la falla (SqlException con
+        /// su número: base inexistente, login rechazado, servidor que no responde…) para que la BLL explique la
+        /// causa concreta. No se traga el error: queda en el trace y vuelve en <paramref name="error"/>.
+        /// </summary>
+        public bool VerificarConexion(out Exception error)
         {
+            error = null;
             try
             {
                 using (var conexion = new SqlConnection(_cadenaConexion))
@@ -108,7 +116,8 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.TraceError($"[Acceso.VerificarConexion] {ex.Message}");
+                error = ex;
+                System.Diagnostics.Trace.TraceError($"[Acceso.VerificarConexion] {ex.GetType().Name}: {ex.Message}");
                 return false;
             }
         }

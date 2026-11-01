@@ -1,5 +1,5 @@
 -- ============================================================
--- WardrobeFlow — ESQUEMA FINAL (DDL limpio)
+-- WardrobeFlow: ESQUEMA FINAL (DDL limpio)
 -- ------------------------------------------------------------
 -- Documentación del esquema final de la base para la entrega: solo la
 -- estructura (tablas, columnas, tipos, nulabilidad, valores por defecto,
@@ -214,6 +214,7 @@ CREATE TABLE [dbo].[DecisionComercial] (
     [FechaEvaluacion]    datetime NULL,
     [ResultadoReal]      decimal(14, 2) NULL,
     [FechaEjecucion]     datetime NULL,
+    [Constancia]         nvarchar(max) NULL,   -- 1.6.1: «Constancia de la decisión» (XML), sección 21z16
     CONSTRAINT [PK_DecisionComercial] PRIMARY KEY CLUSTERED ([IdDecision]),
     CONSTRAINT [CHK_DecisionComercial_Descarte] CHECK ([Estado]<>(2) OR [Motivo] IS NOT NULL),
     CONSTRAINT [CHK_DecisionComercial_Estado] CHECK ([Estado]=(4) OR [Estado]=(3) OR [Estado]=(2) OR [Estado]=(1) OR [Estado]=(0)),

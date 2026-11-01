@@ -38,7 +38,7 @@ namespace BE
             : null;
 
         // Días transcurridos desde que la prenda entró a mantenimiento, tenga o no
-        // FechaSalida aún — a diferencia de DuracionDias (solo mantenimientos cerrados),
+        // FechaSalida aún: a diferencia de DuracionDias (solo mantenimientos cerrados),
         // esto sirve para las tarjetas Kanban de los dashboards que muestran mantenimientos
         // EN CURSO. Reemplaza el cálculo "DateTime.Today - FechaEntrada" que antes vivía
         // duplicado en GUI.DashboardDeposito y el DashboardForm genérico.
@@ -46,7 +46,7 @@ namespace BE
 
         // Umbrales de antigüedad que los dashboards usan para resaltar mantenimientos
         // demorados. Antes duplicados (con el mismo número "mágico" pero orden de
-        // comparación distinto) en GUI.DashboardDeposito y el DashboardForm genérico —
+        // comparación distinto) en GUI.DashboardDeposito y el DashboardForm genérico:
         // centralizado acá para que ambos dashboards coincidan siempre en el mismo criterio.
         public NivelUrgencia NivelUrgencia =>
             DiasTranscurridos > 7 ? NivelUrgencia.Urgente

@@ -48,6 +48,7 @@
     <Compile Include="Politicas\PoliticaCuotas.cs" />
     <Compile Include="Politicas\PoliticaDescuento.cs" />
     <Compile Include="PanelAlertas.cs" />
+    <Compile Include="AlertasLeidas.cs" />
     <Compile Include="PanelTareas.cs" />
     <Compile Include="MenuVisibilidad.cs" />
     <Compile Include="MapaNavegacion.cs" />
@@ -153,6 +154,7 @@
     <Compile Include="Inteligencia\CatalogoIndicadores.cs" />
     <Compile Include="Inteligencia\MetasComerciales.cs" />
     <Compile Include="Inteligencia\AvisosComerciales.cs" />
+    <Compile Include="Inteligencia\ConstanciasDecision.cs" />
     <Compile Include="Inteligencia\AnalisisCohortes.cs" />
     <Compile Include="Inteligencia\Reglas\IReglaRecomendacion.cs" />
     <Compile Include="Inteligencia\Reglas\ReglaChurnPlan.cs" />

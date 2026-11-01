@@ -49,11 +49,11 @@ namespace GUI
             CargarReferentes();
             AplicarIdioma(GestorIdioma.IdiomaActual);
 
-            // PN02 — el plan (y su activación) ya no se elige en este diálogo: un cliente
+            // PN02: el plan (y su activación) ya no se elige en este diálogo: un cliente
             // nuevo se registra sin plan y lo adquiere después a través de una Contratación
             // (Vendedor) confirmada por Caja. En edición sí se puede corregir el plan
             // directamente (ajuste administrativo puntual, no pasa por Caja) junto con el
-            // vencimiento, o mediante el proceso de Renovación (PdN5 — Chain of Responsibility).
+            // vencimiento, o mediante el proceso de Renovación (PdN5: Chain of Responsibility).
             // Corregir el plan o el vencimiento sin Contratación + Caja es una corrección
             // administrativa: la BLL decide quién puede (solo Administrador, regla 6 de N01).
             bool correccionAdmin = _esEdicion && new BLL.Cliente().PuedeCorregirPlanDirectamente();
@@ -62,8 +62,8 @@ namespace GUI
             chkVencimiento.Visible = correccionAdmin;
             dtpVencimiento.Visible = correccionAdmin;
 
-            // Bloque 1 — Programa de referidos: el referente se fija una única vez, al alta
-            // (ver DAL.Cliente.Alta/Modificar — IdClienteReferente no se puede editar después).
+            // Bloque 1: Programa de referidos: el referente se fija una única vez, al alta
+            // (ver DAL.Cliente.Alta/Modificar: IdClienteReferente no se puede editar después).
             lblReferente.Visible = !_esEdicion;
             cmbReferente.Visible = !_esEdicion;
 
@@ -93,13 +93,13 @@ namespace GUI
             lblReferente.Text       = Tr("lbl.cli.referente",   "Referido por");
             chkVencimiento.Text     = Tr("lbl.cli.vencimiento", "Fecha de Vencimiento");
 
-            // Actualizar ítem "— Sin plan —" del combo de planes (índice 0)
+            // Actualizar ítem "(Sin plan)" del combo de planes (índice 0)
             if (cmbPlan.Items.Count > 0)
-                cmbPlan.Items[0] = Tr("combo.cli.sinplan", "— Sin plan —");
+                cmbPlan.Items[0] = Tr("combo.cli.sinplan", "(Sin plan)");
 
-            // Actualizar ítem "— Ninguno —" del combo de referentes (índice 0)
+            // Actualizar ítem "(Ninguno)" del combo de referentes (índice 0)
             if (cmbReferente.Items.Count > 0)
-                cmbReferente.Items[0] = Tr("combo.cli.sinreferente", "— Ninguno —");
+                cmbReferente.Items[0] = Tr("combo.cli.sinreferente", "(Ninguno)");
 
             // Recargar cmbMetodoPago con etiquetas traducidas (valor interno = IdMedioPago del catálogo)
             RellenarComboMetodoPago();
@@ -165,17 +165,17 @@ namespace GUI
                 var bllPlan = new BLL.PlanSuscripcion();
                 _planes = bllPlan.ObtenerActivos();
 
-                string sinPlan = Tr("combo.cli.sinplan", "— Sin plan —");
+                string sinPlan = Tr("combo.cli.sinplan", "(Sin plan)");
                 cmbPlan.Items.Clear();
                 cmbPlan.Items.Add(sinPlan);
                 foreach (var p in _planes)
-                    cmbPlan.Items.Add($"{p.Nombre}  ({p.LimitePrendas} prendas — ${p.Precio:N2})");
+                    cmbPlan.Items.Add($"{p.Nombre}  ({p.LimitePrendas} prendas, ${p.Precio:N2})");
 
                 cmbPlan.SelectedIndex = 0;
             }
             catch
             {
-                string errPlanes = Tr("err.cli.errorplanes", "— Error al cargar planes —");
+                string errPlanes = Tr("err.cli.errorplanes", "(Error al cargar planes)");
                 cmbPlan.Items.Add(errPlanes);
                 cmbPlan.SelectedIndex = 0;
             }
@@ -188,7 +188,7 @@ namespace GUI
                 var bllCliente = new BLL.Cliente();
                 _clientesParaReferente = bllCliente.ObtenerTodos();
 
-                string ninguno = Tr("combo.cli.sinreferente", "— Ninguno —");
+                string ninguno = Tr("combo.cli.sinreferente", "(Ninguno)");
                 cmbReferente.Items.Clear();
                 cmbReferente.Items.Add(ninguno);
                 foreach (var c in _clientesParaReferente)
@@ -199,7 +199,7 @@ namespace GUI
             catch
             {
                 cmbReferente.Items.Clear();
-                cmbReferente.Items.Add(Tr("combo.cli.sinreferente", "— Ninguno —"));
+                cmbReferente.Items.Add(Tr("combo.cli.sinreferente", "(Ninguno)"));
                 cmbReferente.SelectedIndex = 0;
             }
         }

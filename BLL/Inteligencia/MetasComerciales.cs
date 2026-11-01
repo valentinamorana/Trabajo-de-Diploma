@@ -20,7 +20,7 @@ namespace BLL.Inteligencia
     }
 
     /// <summary>
-    /// PN03 «Metas comerciales» — Gerencia fija un objetivo mensual por indicador (MRR a alcanzar, % de bajas
+    /// PN03 «Metas comerciales»: Gerencia fija un objetivo mensual por indicador (MRR a alcanzar, % de bajas
     /// máximo, ocupación del stock…; ver CatalogoIndicadores) y el sistema lo sigue: valor real, avance,
     /// proyección al cierre del mes y semáforo. Cuando una meta del mes en curso está en riesgo, las
     /// recomendaciones que la mueven suben de prioridad (ElevarPrioridad): el análisis se convierte en acción.

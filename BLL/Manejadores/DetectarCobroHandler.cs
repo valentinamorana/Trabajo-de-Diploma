@@ -2,9 +2,9 @@ namespace BLL.Manejadores
 {
     /// <summary>
     /// Primer eslabón: si la suscripción todavía no venció ni está próxima a vencer, no
-    /// corresponde procesar ningún cobro — la atiende devolviendo Pendiente sin tocar
+    /// corresponde procesar ningún cobro: la atiende devolviendo Pendiente sin tocar
     /// nada, sea cual sea la decisión pedida. Si está vencida o próxima a vencer, delega
-    /// al siguiente eslabón — igual que Comprador.ProcesarCompra delega a _sucesor
+    /// al siguiente eslabón: igual que Comprador.ProcesarCompra delega a _sucesor
     /// cuando el importe supera lo que puede aprobar.
     /// </summary>
     public sealed class DetectarCobroHandler : ManejadorCobro

@@ -8,8 +8,8 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Lista de Espera de prendas (mejora opcional, no requerida
-    /// por la cátedra — ver README, sección "Módulos"). Permite ver y cancelar las
+    /// Capa de Presentación: Lista de Espera de prendas (mejora opcional, no requerida
+    /// por la cátedra: ver README, sección "Módulos"). Permite ver y cancelar las
     /// anotaciones; el alta se hace desde <see cref="Prendas"/> (botón "Anotar en Lista
     /// de Espera" sobre una prenda EnUso) y la reserva se dispara sola al liberarse la
     /// prenda (BLL.Prenda.CambiarEstado).
@@ -28,7 +28,7 @@ namespace GUI
         public ListaEsperaForm()
         {
             InitializeComponent();
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvListaEspera);
         }
 
@@ -128,7 +128,7 @@ namespace GUI
                     f.IdListaEspera, f.NombrePrenda, f.NombreCliente,
                     f.FechaAlta.ToString("g"),
                     EstadoLabel(f.Estado),
-                    f.ReservaVigente ? f.FechaLimiteReserva.Value.ToString("dd/MM HH:mm") : "—",
+                    f.ReservaVigente ? f.FechaLimiteReserva.Value.ToString("dd/MM HH:mm") : "-",
                     (int)f.Estado);
 
             dgvListaEspera.DataSource = tabla;

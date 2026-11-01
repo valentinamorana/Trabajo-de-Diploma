@@ -7,7 +7,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// Lista de Espera de prendas (mejora opcional, no requerida por la cátedra — ver
+    /// Lista de Espera de prendas (mejora opcional, no requerida por la cátedra: ver
     /// README). Mismo criterio de DI/Fakes que CobroTests/PedidoTests.
     /// </summary>
     [TestClass]

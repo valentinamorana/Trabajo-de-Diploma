@@ -6,7 +6,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.CargoPrenda — Bloque 1: cargo por daño/pérdida de prenda, registrado sobre el
+    /// BLL.CargoPrenda: Bloque 1: cargo por daño/pérdida de prenda, registrado sobre el
     /// último cliente que la tuvo (BE.Prenda.IdUltimoCliente) y liquidado junto con su
     /// próxima renovación (ver ProcesarPago_ConCargosPendientes... en CobroTests).
     /// </summary>

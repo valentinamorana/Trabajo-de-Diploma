@@ -1,7 +1,7 @@
 namespace BE
 {
     /// <summary>
-    /// PN02 — Catálogo de medios de pago con los que el cliente abona en Caja (Efectivo,
+    /// PN02: Catálogo de medios de pago con los que el cliente abona en Caja (Efectivo,
     /// Tarjeta de débito, Transferencia, Tarjeta de crédito). Tabla propia en vez de texto libre en la contratación (3FN): el
     /// nombre canónico vive una sola vez y la pantalla lo traduce con <see cref="ClaveTraduccion"/>.
     /// </summary>
@@ -14,7 +14,7 @@ namespace BE
         public string Nombre          { get; set; }
         public string ClaveTraduccion { get; set; }
 
-        /// <summary>PN02 — Pago en cuotas: solo la Tarjeta de crédito permite financiar el cobro en
+        /// <summary>PN02: Pago en cuotas: solo la Tarjeta de crédito permite financiar el cobro en
         /// cuotas (catálogo PlanCuotas). El resto de los medios se cobra en un solo pago.</summary>
         public bool   PermiteCuotas   { get; set; }
 

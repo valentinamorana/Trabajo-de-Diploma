@@ -11,13 +11,13 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Panel de Control — se abre automáticamente al iniciar sesión como hijo MDI.
+    /// Panel de Control: se abre automáticamente al iniciar sesión como hijo MDI.
     ///
     /// Muestra solo las métricas a las que el usuario tiene permiso:
     ///   · Prendas disponibles  (requiere mnuPrendas)
     ///   · Clientes registrados (requiere mnuClientes)
     ///   · Pedidos pendientes   (requiere mnuPedidosVenta o mnuPedidosRealizados)
-    ///   · Días sin backup      (requiere mnuUsuarios — solo Administrador)
+    ///   · Días sin backup      (requiere mnuUsuarios: solo Administrador)
     ///
     /// La tarjeta de Backup cambia de color según la antigüedad y muestra un aviso
     /// cuando se supera el umbral configurado (recordatorio.cfg en carpeta Backups).
@@ -38,7 +38,7 @@ namespace GUI
         // ── Visibilidad por rol ───────────────────────────────────────────────
         private readonly bool _verPrendas, _verClientes, _verPedidos, _verBackup, _verStock;
         // Granulares, para saber a CUÁL de las dos pantallas de pedidos navegar al hacer clic
-        // en una fila de "Pedido" en Tareas Pendientes — _verPedidos por sí solo no alcanza,
+        // en una fila de "Pedido" en Tareas Pendientes: _verPedidos por sí solo no alcanza,
         // porque se activa con cualquiera de las dos patentes, no necesariamente con ambas.
         private readonly bool _tienePedidosVenta, _tienePedidosRealizados;
         // Actividad reciente = bitácora del sistema (dato sensible de auditoría): solo se muestra
@@ -54,7 +54,7 @@ namespace GUI
         // ── Controles condicionados por PERMISOS (null si el rol no tiene acceso) ──────────
         // No son parte del Diseñador: su EXISTENCIA (no solo su visibilidad) depende de los
         // permisos del usuario logueado, así que se construyen en runtime desde
-        // ConstruirElementosCondicionales() — ver ese método más abajo.
+        // ConstruirElementosCondicionales(): ver ese método más abajo.
         private Label _numPrendas,  _txtPrendas;
         private Label _numClientes, _txtClientes;
         private Label _numPedidos,  _txtPedidos;
@@ -63,7 +63,7 @@ namespace GUI
         private Panel _cardBackupPanel;
 
         // Único botón de solo símbolo ("...") de las 16 pantallas de Dashboards/Análisis/Reportes/Historiales
-        // sin tooltip — se crea en código (btnConfig no viene del Designer), así que el ToolTip
+        // sin tooltip: se crea en código (btnConfig no viene del Designer), así que el ToolTip
         // también se instancia acá.
         private readonly ToolTip _tipConfig = new ToolTip();
 
@@ -75,7 +75,7 @@ namespace GUI
         private System.Windows.Forms.Timer _timer;
 
         // Se reasignaban con `new Font(...)` en cada refresco (timer de 2 min) sin liberar el
-        // anterior — Font implementa IDisposable y envuelve un handle GDI; creadas una sola vez
+        // anterior: Font implementa IDisposable y envuelve un handle GDI; creadas una sola vez
         // acá y reutilizadas evita esa fuga en sesiones largas.
         private readonly Font _fontBackupChico  = new Font("Segoe UI", 20f, FontStyle.Bold);
         private readonly Font _fontBackupGrande = new Font("Segoe UI", 36f, FontStyle.Bold);
@@ -116,7 +116,7 @@ namespace GUI
         {
             base.OnLoad(e);   // FormBase: ícono + tema/fuente del usuario + seguridad de controles
             Traducir(GestorIdioma.IdiomaActual);
-            // Cargar datos en background — el form aparece inmediatamente
+            // Cargar datos en background: el form aparece inmediatamente
             ActualizarMetricas();
             CargarActividadReciente();
             CargarMiniStats();
@@ -184,14 +184,14 @@ namespace GUI
 
         // ── Métricas ──────────────────────────────────────────────────────────
 
-        // Un widget que no pudo cargar deja su tarjeta en "—" (no rompe el dashboard), pero
+        // Un widget que no pudo cargar deja su tarjeta en "-" (no rompe el dashboard), pero
         // se deja constancia acá para poder distinguir "dato en cero" de "falló la consulta".
         private static void LogWidget(string widget, Exception ex)
             => System.Diagnostics.Trace.TraceWarning($"[DashboardForm] No se pudo cargar '{widget}': {ex.Message}");
 
         private void ActualizarMetricas()
         {
-            // Backup es I/O de archivo (rápido, sin BD) — se actualiza al instante
+            // Backup es I/O de archivo (rápido, sin BD): se actualiza al instante
             if (_verBackup && _numBackup != null)
                 ActualizarTarjetaBackup();
 
@@ -226,19 +226,19 @@ namespace GUI
                 InvocarSeguro(() =>
                 {
                     if (IsDisposed) return;
-                    string N(int? n) => n.HasValue ? n.Value.ToString() : "—";
+                    string N(int? n) => n.HasValue ? n.Value.ToString() : "-";
                     if (_numContrCobrar != null) _numContrCobrar.Text = N(nContr);
                     if (_numRenovCobrar != null) _numRenovCobrar.Text = N(nRenov);
                     if (_numSugerencias != null) _numSugerencias.Text = N(nSug);
                     if (_numBajasPromo  != null) _numBajasPromo.Text  = N(nBajas);
                     if (_numRevContable != null) _numRevContable.Text = N(nRev);
-                    if (_numPrendas  != null) _numPrendas.Text  = nPrendas.HasValue  ? nPrendas.Value.ToString()  : "—";
-                    if (_numClientes != null) _numClientes.Text = nClientes.HasValue ? nClientes.Value.ToString() : "—";
-                    if (_numPedidos  != null) _numPedidos.Text  = nPedidos.HasValue  ? nPedidos.Value.ToString()  : "—";
+                    if (_numPrendas  != null) _numPrendas.Text  = nPrendas.HasValue  ? nPrendas.Value.ToString()  : "-";
+                    if (_numClientes != null) _numClientes.Text = nClientes.HasValue ? nClientes.Value.ToString() : "-";
+                    if (_numPedidos  != null) _numPedidos.Text  = nPedidos.HasValue  ? nPedidos.Value.ToString()  : "-";
                     if (ocup != null) ActualizarTarjetaOcupacion(ocup);
                     if (usuario != null)
                         lblSesion.Text =
-                            $"{usuario.Username}  ·  {usuario.Perfil ?? "—"}" +
+                            $"{usuario.Username}  ·  {usuario.Perfil ?? "-"}" +
                             (hora.HasValue ? $"  ·  {Tr("dash.sesion.iniciada", "Sesión iniciada:")} {hora.Value:HH:mm}" : "");
                 });
             });
@@ -304,12 +304,12 @@ namespace GUI
 
                 if (dias > umbral)
                     MostrarAviso(
-                        string.Format(Tr("dash.aviso.vencido", "Hace {0} día(s) sin backup — recordatorio cada {1} días."), dias, umbral),
+                        string.Format(Tr("dash.aviso.vencido", "Hace {0} día(s) sin backup (recordatorio cada {1} días)."), dias, umbral),
                         Tema.Alerta);
                 else
                     OcultarAviso();
             }
-            catch { if (_numBackup != null) _numBackup.Text = "—"; }
+            catch { if (_numBackup != null) _numBackup.Text = "-"; }
         }
 
         private void MostrarAviso(string msg, Color color)
@@ -582,7 +582,7 @@ namespace GUI
                         {
                             int dias = p.DiasDesdeAlta;
                             string desde = dias == 0 ? Tr("dash.hoy", "hoy") : string.Format(Tr("dash.hace_dias", "hace {0}d"), dias);
-                            string desc  = $"#{p.IdPedido} — {p.NombreCliente ?? $"Cliente {p.IdCliente}"}";
+                            string desc  = $"#{p.IdPedido}: {p.NombreCliente ?? $"Cliente {p.IdCliente}"}";
                             var fila = dgvTareas.Rows[dgvTareas.Rows.Add(tipoPedido, desc, desde)];
                             fila.DefaultCellStyle.ForeColor = p.EsUrgentePorAntiguedad ? Tema.Error : Tema.Alerta;
                             fila.Tag = "pedido";
@@ -590,20 +590,20 @@ namespace GUI
 
                     if (dgvTareas.Rows.Count == 0)
                     {
-                        dgvTareas.Rows.Add("—", Tr("dash.tareas.sinpendientes", "Sin tareas pendientes"), "—");
+                        dgvTareas.Rows.Add("-", Tr("dash.tareas.sinpendientes", "Sin tareas pendientes"), "-");
                         dgvTareas.Rows[0].DefaultCellStyle.ForeColor = Color.Gray;
                     }
 
                     lblTareasTitulo.Text = string.Format(
                         Tr("dash.tareas.titulo", "Mis Tareas Pendientes ({0})"),
-                        dgvTareas.Rows.Count == 1 && dgvTareas.Rows[0].Cells["colTipo"].Value?.ToString() == "—" ? 0 : dgvTareas.Rows.Count);
+                        dgvTareas.Rows.Count == 1 && dgvTareas.Rows[0].Cells["colTipo"].Value?.ToString() == "-" ? 0 : dgvTareas.Rows.Count);
                 });
             });
         }
 
         // Clic en una fila de "Mis Tareas Pendientes": navega según el TIPO real de la fila
         // (guardado en Tag, no en el texto traducido de la celda) y solo si el usuario tiene
-        // el permiso de la pantalla destino — _verPedidos por sí solo no alcanza, porque se
+        // el permiso de la pantalla destino: _verPedidos por sí solo no alcanza, porque se
         // activa con Pedidos de Venta O Pedidos Realizados, no necesariamente con ambas.
         private void DgvTareas_CellClick(object sender, DataGridViewCellEventArgs e)
         {

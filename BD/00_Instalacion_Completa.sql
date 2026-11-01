@@ -1,10 +1,10 @@
 -- ============================================================
--- WardrobeFlow — INSTALACIÓN COMPLETA (script único, instalación nueva)
+-- WardrobeFlow: INSTALACIÓN COMPLETA (script único, instalación nueva)
 -- ------------------------------------------------------------
 -- Script único para levantar WardrobeFlowDB de cero: estructura, datos
 -- semilla, y TODOS los módulos (Bloque 1, Bloque 3 / Idea de Negocio, y los
 -- 4 procesos de negocio PN01-PN04). Este es el ÚNICO script de esquema
--- que se edita de acá en más — no se regenera concatenando archivos.
+-- que se edita de acá en más: no se regenera concatenando archivos.
 --
 -- Los números de sección (01, 03, 05, 06, 08...21) que aparecen abajo son el
 -- orden histórico en el que cada módulo se agregó al proyecto y se conservan
@@ -26,7 +26,7 @@
 
 
 -- ============================================================
--- WardrobeFlow — 01. CREAR BASE DE DATOS DE CERO
+-- WardrobeFlow: 01. CREAR BASE DE DATOS DE CERO
 -- ------------------------------------------------------------
 -- Crea la base WardrobeFlowDB completa: estructura + datos
 -- semilla (permisos, roles, usuarios, idiomas) + árbol Composite.
@@ -92,7 +92,7 @@ BEGIN
     END CATCH
 END
 ELSE
-    PRINT 'Base de datos WardrobeFlowDB ya existe — se actualiza su contenido.';
+    PRINT 'Base de datos WardrobeFlowDB ya existe: se actualiza su contenido.';
 GO
 
 USE WardrobeFlowDB;
@@ -157,17 +157,17 @@ BEGIN
     PRINT 'Tabla Usuario creada.';
 END
 ELSE
-    PRINT 'Tabla Usuario ya existe — sin cambios.';
+    PRINT 'Tabla Usuario ya existe: sin cambios.';
 GO
 
--- Usuario_Seguridad (T07 — tabla ESPEJO de integridad, ver DAL.EspejoUsuario)
+-- Usuario_Seguridad (T07: tabla ESPEJO de integridad, ver DAL.EspejoUsuario)
 -- Copia sombra de los campos que entran al DVH de cada usuario, más su DVH. La app la
 -- mantiene en sincronía con cada escritura LEGÍTIMA (junto al recálculo del DVH), lo que
 -- permite, ante una manipulación directa en BD: (1) diagnosticar QUÉ campo cambió comparando
 -- contra el espejo y (2) REPARAR restaurando el valor legítimo sin necesitar un backup
 -- completo. Sin esta tabla, DAL.EspejoUsuario degrada en silencio (ver su propio comentario
 -- de TOLERANCIA) y BLL.RecuperacionIntegridad.Diagnosticar() nunca puede ofrecer "Reparar
--- desde Espejo" — antes solo se creaba en un script de migración aparte
+-- desde Espejo": antes solo se creaba en un script de migración aparte
 -- (ya retirado), y faltaba acá, así que una instalación nueva vía este script nunca
 -- la tenía.
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Usuario_Seguridad')
@@ -186,7 +186,7 @@ BEGIN
     PRINT 'Tabla Usuario_Seguridad (espejo de integridad) creada.';
 END
 ELSE
-    PRINT 'Tabla Usuario_Seguridad ya existe — sin cambios.';
+    PRINT 'Tabla Usuario_Seguridad ya existe: sin cambios.';
 GO
 
 -- DVVertical (T07 Dígitos Verificadores)
@@ -202,7 +202,7 @@ BEGIN
     PRINT 'Tabla DVVertical creada.';
 END
 ELSE
-    PRINT 'Tabla DVVertical ya existe — sin cambios.';
+    PRINT 'Tabla DVVertical ya existe: sin cambios.';
 GO
 
 -- PlanSuscripcion
@@ -218,10 +218,10 @@ BEGIN
     PRINT 'Tabla PlanSuscripcion creada.';
 END
 ELSE
-    PRINT 'Tabla PlanSuscripcion ya existe — sin cambios.';
+    PRINT 'Tabla PlanSuscripcion ya existe: sin cambios.';
 GO
 
--- Permiso (T04 Composite — EsFamilia discrimina Familia vs Patente)
+-- Permiso (T04 Composite: EsFamilia discrimina Familia vs Patente)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Permiso')
 BEGIN
     CREATE TABLE Permiso (
@@ -244,7 +244,7 @@ BEGIN
         ALTER TABLE Permiso ADD EsFamilia BIT NOT NULL DEFAULT 0;
         PRINT 'Columna EsFamilia agregada a Permiso (migración).';
     END
-    -- EsRol: marca los nodos-rol del Composite (migración v7.0 — T04)
+    -- EsRol: marca los nodos-rol del Composite (migración v7.0: T04)
     IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
                    WHERE TABLE_NAME = 'Permiso' AND COLUMN_NAME = 'EsRol')
     BEGIN
@@ -268,10 +268,10 @@ BEGIN
     PRINT 'Tabla Idioma creada.';
 END
 ELSE
-    PRINT 'Tabla Idioma ya existe — sin cambios.';
+    PRINT 'Tabla Idioma ya existe: sin cambios.';
 GO
 
--- Control (claves de traducción — T05)
+-- Control (claves de traducción: T05)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Control')
 BEGIN
     CREATE TABLE Control (
@@ -283,14 +283,14 @@ BEGIN
     PRINT 'Tabla Control creada.';
 END
 ELSE
-    PRINT 'Tabla Control ya existe — sin cambios.';
+    PRINT 'Tabla Control ya existe: sin cambios.';
 GO
 
 -- ============================================================
 -- TABLAS CON FK
 -- ============================================================
 
--- Bitacora (sistema — refs Usuario)
+-- Bitacora (sistema: refs Usuario)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Bitacora')
 BEGIN
     CREATE TABLE Bitacora (
@@ -306,10 +306,10 @@ BEGIN
     PRINT 'Tabla Bitacora creada.';
 END
 ELSE
-    PRINT 'Tabla Bitacora ya existe — sin cambios.';
+    PRINT 'Tabla Bitacora ya existe: sin cambios.';
 GO
 
--- Empleado (refs Usuario — FK nullable: empleado puede no tener usuario del sistema)
+-- Empleado (refs Usuario: FK nullable: empleado puede no tener usuario del sistema)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Empleado')
 BEGIN
     CREATE TABLE Empleado (
@@ -327,7 +327,7 @@ BEGIN
     PRINT 'Tabla Empleado creada.';
 END
 ELSE
-    PRINT 'Tabla Empleado ya existe — sin cambios.';
+    PRINT 'Tabla Empleado ya existe: sin cambios.';
 GO
 
 -- Cliente (refs PlanSuscripcion)
@@ -350,10 +350,10 @@ BEGIN
     PRINT 'Tabla Cliente creada.';
 END
 ELSE
-    PRINT 'Tabla Cliente ya existe — sin cambios.';
+    PRINT 'Tabla Cliente ya existe: sin cambios.';
 GO
 
--- Prenda (refs Cliente — FK nullable: prenda disponible no tiene cliente)
+-- Prenda (refs Cliente: FK nullable: prenda disponible no tiene cliente)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Prenda')
 BEGIN
     CREATE TABLE Prenda (
@@ -370,7 +370,7 @@ BEGIN
     PRINT 'Tabla Prenda creada.';
 END
 ELSE
-    PRINT 'Tabla Prenda ya existe — sin cambios.';
+    PRINT 'Tabla Prenda ya existe: sin cambios.';
 GO
 
 -- Pedido (refs Cliente + Empleado)
@@ -390,7 +390,7 @@ BEGIN
     PRINT 'Tabla Pedido creada.';
 END
 ELSE
-    PRINT 'Tabla Pedido ya existe — sin cambios.';
+    PRINT 'Tabla Pedido ya existe: sin cambios.';
 GO
 
 -- PedidoPrenda (junction Pedido-Prenda)
@@ -404,10 +404,10 @@ BEGIN
     PRINT 'Tabla PedidoPrenda creada.';
 END
 ELSE
-    PRINT 'Tabla PedidoPrenda ya existe — sin cambios.';
+    PRINT 'Tabla PedidoPrenda ya existe: sin cambios.';
 GO
 
--- PedidoHistorial (auditoría de cambios de pedidos — refs Pedido + Usuario)
+-- PedidoHistorial (auditoría de cambios de pedidos: refs Pedido + Usuario)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PedidoHistorial')
 BEGIN
     CREATE TABLE PedidoHistorial (
@@ -425,10 +425,10 @@ BEGIN
     PRINT 'Tabla PedidoHistorial creada.';
 END
 ELSE
-    PRINT 'Tabla PedidoHistorial ya existe — sin cambios.';
+    PRINT 'Tabla PedidoHistorial ya existe: sin cambios.';
 GO
 
--- BitacoraNegocio (eventos de negocio — refs Usuario, Pedido, Prenda, Cliente)
+-- BitacoraNegocio (eventos de negocio: refs Usuario, Pedido, Prenda, Cliente)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'BitacoraNegocio')
 BEGIN
     CREATE TABLE BitacoraNegocio (
@@ -444,10 +444,10 @@ BEGIN
     PRINT 'Tabla BitacoraNegocio creada.';
 END
 ELSE
-    PRINT 'Tabla BitacoraNegocio ya existe — sin cambios.';
+    PRINT 'Tabla BitacoraNegocio ya existe: sin cambios.';
 GO
 
--- RolPermiso (asignación PLANA rol→patente) — TABLA DE PASO DEL INSTALADOR.
+-- RolPermiso (asignación PLANA rol→patente): TABLA DE PASO DEL INSTALADOR.
 -- Se usa únicamente para sembrar el árbol: desde estas asignaciones se generan los nodos-rol y
 -- las aristas de [PermisoRelacion], que es la ÚNICA fuente de verdad de autorización en runtime.
 -- El sistema no la lee ni la escribe; la sección 21z5 la borra al final del script (3FN).
@@ -461,10 +461,10 @@ BEGIN
     PRINT 'Tabla RolPermiso creada.';
 END
 ELSE
-    PRINT 'Tabla RolPermiso ya existe — sin cambios.';
+    PRINT 'Tabla RolPermiso ya existe: sin cambios.';
 GO
 
--- PermisoRelacion (árbol Composite padre → hijo — T04)
+-- PermisoRelacion (árbol Composite padre → hijo: T04)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PermisoRelacion')
 BEGIN
     CREATE TABLE PermisoRelacion (
@@ -475,10 +475,10 @@ BEGIN
     PRINT 'Tabla PermisoRelacion creada.';
 END
 ELSE
-    PRINT 'Tabla PermisoRelacion ya existe — sin cambios.';
+    PRINT 'Tabla PermisoRelacion ya existe: sin cambios.';
 GO
 
--- Traduccion (PK compuesta — T05)
+-- Traduccion (PK compuesta: T05)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Traduccion')
 BEGIN
     CREATE TABLE Traduccion (
@@ -490,10 +490,10 @@ BEGIN
     PRINT 'Tabla Traduccion creada.';
 END
 ELSE
-    PRINT 'Tabla Traduccion ya existe — sin cambios.';
+    PRINT 'Tabla Traduccion ya existe: sin cambios.';
 GO
 
--- HistorialUsuario (snapshots de cambios de usuarios — T06)
+-- HistorialUsuario (snapshots de cambios de usuarios: T06)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'HistorialUsuario')
 BEGIN
     CREATE TABLE HistorialUsuario (
@@ -514,10 +514,10 @@ BEGIN
     PRINT 'Tabla HistorialUsuario creada.';
 END
 ELSE
-    PRINT 'Tabla HistorialUsuario ya existe — sin cambios.';
+    PRINT 'Tabla HistorialUsuario ya existe: sin cambios.';
 GO
 
--- HistorialIntegridad (historial de verificaciones de integridad DV — T07)
+-- HistorialIntegridad (historial de verificaciones de integridad DV: T07)
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'HistorialIntegridad')
 BEGIN
     CREATE TABLE HistorialIntegridad (
@@ -534,7 +534,7 @@ BEGIN
     PRINT 'Tabla HistorialIntegridad creada.';
 END
 ELSE
-    PRINT 'Tabla HistorialIntegridad ya existe — sin cambios.';
+    PRINT 'Tabla HistorialIntegridad ya existe: sin cambios.';
 GO
 
 -- ClaveRecuperacion (claves de emergencia de 1 solo uso para desbloquear un Administrador)
@@ -553,7 +553,7 @@ BEGIN
     PRINT 'Tabla ClaveRecuperacion creada.';
 END
 ELSE
-    PRINT 'Tabla ClaveRecuperacion ya existe — sin cambios.';
+    PRINT 'Tabla ClaveRecuperacion ya existe: sin cambios.';
 GO
 
 -- Preferencia (preferencias de UI por usuario: fuente, tamaño, tema, formato de fecha…).
@@ -573,7 +573,7 @@ BEGIN
     PRINT 'Tabla Preferencia creada.';
 END
 ELSE
-    PRINT 'Tabla Preferencia ya existe — sin cambios.';
+    PRINT 'Tabla Preferencia ya existe: sin cambios.';
 GO
 
 -- ============================================================
@@ -710,7 +710,7 @@ WHERE NOT EXISTS (SELECT 1 FROM Idioma WHERE Codigo = v.Codigo);
 PRINT 'Idiomas inicializados (ES, EN, RU, PT).';
 GO
 
--- DVV inicial para la tabla Usuario (en 0 — recalcular desde la app)
+-- DVV inicial para la tabla Usuario (en 0: recalcular desde la app)
 IF NOT EXISTS (SELECT 1 FROM DVVertical WHERE NombreTabla = 'Usuario')
 BEGIN
     INSERT INTO DVVertical (NombreTabla, DVV, FechaCalculo)
@@ -758,11 +758,11 @@ BEGIN
     PRINT 'Árbol Composite generado desde grupos TipoComponente.';
 END
 ELSE
-    PRINT 'Árbol Composite ya inicializado — sin cambios.';
+    PRINT 'Árbol Composite ya inicializado: sin cambios.';
 GO
 
 -- ============================================================
--- MIGRACIÓN COMPOSITE (T04) — Roles como NODOS del árbol
+-- MIGRACIÓN COMPOSITE (T04): Roles como NODOS del árbol
 -- A partir de v7.0 [PermisoRelacion] es la única fuente de verdad de la
 -- composición. Se crea un nodo-rol por cada rol de [RolPermiso] y se migran
 -- las asignaciones planas a aristas rol→permiso.
@@ -792,7 +792,7 @@ END
 GO
 
 -- ============================================================
--- JERARQUÍA DE ROLES (T04) — roles nuevos con vistas + rol-dentro-de-rol
+-- JERARQUÍA DE ROLES (T04): roles nuevos con vistas + rol-dentro-de-rol
 -- Idempotente. Crea los nodos-rol nuevos, les asigna sus patentes (vistas)
 -- propias y arma las aristas rol→rol para que el padre HEREDE recursivamente
 -- las vistas del hijo (demostración real del Composite con jerarquía de roles).
@@ -867,7 +867,7 @@ WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.Username = v.Username)
 PRINT 'Usuarios demo de roles nuevos inicializados.';
 GO
 
--- ── Datos administrativos (NO sensibles) de los usuarios semilla — ABM ───────
+-- ── Datos administrativos (NO sensibles) de los usuarios semilla: ABM ───────
 -- Solo completa los que estén vacíos (idempotente). Habilita búsqueda por nombre/apellido/email.
 UPDATE u SET u.Nombre = v.Nombre, u.Apellido = v.Apellido, u.Email = v.Email, u.FechaNacimiento = v.FechaNac
 FROM Usuario u
@@ -887,14 +887,14 @@ GO
 
 
 -- ============================================================
--- CONSOLIDACIÓN DE ROLES (v8) — decisión de diseño 2da entrega
+-- CONSOLIDACIÓN DE ROLES (v8): decisión de diseño 2da entrega
 -- Lleva la jerarquía al ESTADO OBJETIVO (idempotente, sin importar el estado previo):
---   • Inventario — dos operadores con responsabilidades CLARAS, sin duplicados:
+--   • Inventario: dos operadores con responsabilidades CLARAS, sin duplicados:
 --       - OperadorLogistico    → pedidos / despacho       (Ver Pedidos Realizados)
 --       - Deposito → mantenimiento de prendas (Ver Prendas + Gestionar Stock)
 --       - GerenteInventario ⊃ AMBOS                       (+ Categorías + Outfits)
 --     Se RETIRAN EncargadoDeStock y ControladorDeStock (eran redundantes con lo anterior).
---   • Comercial — se RETIRA Supervisor; el jefe es GerenteComercial ⊃ Vendedor.
+--   • Comercial: se RETIRA Supervisor; el jefe es GerenteComercial ⊃ Vendedor.
 -- Este bloque SUPERSEDE los bloques previos para los nodos afectados.
 -- ============================================================
 
@@ -976,7 +976,7 @@ PRINT 'Consolidación de roles (v8) aplicada.';
 GO
 
 -- ============================================================
--- Simplificación de Permisos — ELIMINAR FAMILIAS del árbol Composite
+-- Simplificación de Permisos: ELIMINAR FAMILIAS del árbol Composite
 -- Decisión de revisión: los permisos (patentes) son un catálogo fijo y las FAMILIAS se
 -- retiran de la experiencia. Para no perder permisos efectivos: (1) se materializan las
 -- relaciones Rol→Patente alcanzables a través de familias, (2) se quitan las aristas que
@@ -1016,11 +1016,11 @@ BEGIN
     PRINT 'Familias eliminadas del Composite: roles aplanados a Rol->Patente.';
 END
 ELSE
-    PRINT 'No hay familias activas — árbol ya aplanado.';
+    PRINT 'No hay familias activas: árbol ya aplanado.';
 GO
 
 -- ============================================================
--- Etapa 4 — Permisos a nivel de CONTROL (mapeo patente ↔ control de un formulario)
+-- Etapa 4: Permisos a nivel de CONTROL (mapeo patente ↔ control de un formulario)
 -- ============================================================
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'ControlMapeado')
 BEGIN
@@ -1035,7 +1035,7 @@ BEGIN
     PRINT 'Tabla ControlMapeado creada (Etapa 4 - permisos por control).';
 END
 ELSE
-    PRINT 'Tabla ControlMapeado ya existe — sin cambios.';
+    PRINT 'Tabla ControlMapeado ya existe: sin cambios.';
 GO
 
 -- Seed inicial: mapea cada patente con NombreMenu al item de menu correspondiente del Menu
@@ -1085,16 +1085,16 @@ BEGIN
     PRINT 'Columna FechaVencimiento agregada a Cliente.';
 END
 ELSE
-    PRINT 'FechaVencimiento ya existe en Cliente — sin cambios.';
+    PRINT 'FechaVencimiento ya existe en Cliente: sin cambios.';
 GO
 
--- FechaLimiteGracia en Cliente y tabla HistorialCobro (PdN6 — período de gracia
+-- FechaLimiteGracia en Cliente y tabla HistorialCobro (PdN6: período de gracia
 -- tras un cobro fallido y auditoría del patrón Chain of Responsibility de cobro).
 -- Fuente única: 08_Cobro_Pago.sql (documenta el detalle y el "por qué"; ambos
 -- bloques son idempotentes, así que da igual si 01 u 08 corre primero).
 -- Ver BE.Cliente.EstaEnGracia / EstaSuspendidoPorPago.
 
--- FechaNacimiento en Cliente — OBLIGATORIA (NOT NULL) para validar mayoría de edad.
+-- FechaNacimiento en Cliente: OBLIGATORIA (NOT NULL) para validar mayoría de edad.
 -- 1) Agregar la columna como NULL si todavía no existe.
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
                WHERE TABLE_NAME = 'Cliente' AND COLUMN_NAME = 'FechaNacimiento')
@@ -1114,7 +1114,7 @@ BEGIN
     PRINT 'Cliente.FechaNacimiento ahora es NOT NULL (obligatoria).';
 END
 ELSE
-    PRINT 'Cliente.FechaNacimiento ya es NOT NULL — sin cambios.';
+    PRINT 'Cliente.FechaNacimiento ya es NOT NULL: sin cambios.';
 GO
 
 -- MantenimientoPrenda (historial de limpieza/mantenimiento por prenda)
@@ -1130,7 +1130,7 @@ BEGIN
     PRINT 'Tabla MantenimientoPrenda creada.';
 END
 ELSE
-    PRINT 'Tabla MantenimientoPrenda ya existe — sin cambios.';
+    PRINT 'Tabla MantenimientoPrenda ya existe: sin cambios.';
 GO
 
 -- ============================================================
@@ -1226,19 +1226,19 @@ BEGIN
     DECLARE @pr3 INT = (SELECT IdPrenda FROM Prenda WHERE Nombre=N'Camisa Blanca Clásica');
     DECLARE @pr4 INT = (SELECT IdPrenda FROM Prenda WHERE Nombre=N'Pantalón Sastre Gris');
 
-    -- Pedido 1: Lucía — Entregado (2 prendas)
+    -- Pedido 1: Lucía; Entregado (2 prendas)
     INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, FechaEntrega, DVH)
     VALUES (@cLucia, @emp, 2, DATEADD(day,-20,GETDATE()), DATEADD(day,-18,GETDATE()), DATEADD(day,-15,GETDATE()), 0);
     DECLARE @ped1 INT = SCOPE_IDENTITY();
     INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@ped1, @pr1), (@ped1, @pr2);
 
-    -- Pedido 2: Martín — Despachado (1 prenda)
+    -- Pedido 2: Martín; Despachado (1 prenda)
     INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, FechaDespacho, DVH)
     VALUES (@cMartin, @emp, 1, DATEADD(day,-5,GETDATE()), DATEADD(day,-3,GETDATE()), 0);
     DECLARE @ped2 INT = SCOPE_IDENTITY();
     INSERT INTO PedidoPrenda (IdPedido, IdPrenda) VALUES (@ped2, @pr3);
 
-    -- Pedido 3: Sofía — Pendiente (1 prenda)
+    -- Pedido 3: Sofía; Pendiente (1 prenda)
     INSERT INTO Pedido (IdCliente, IdEmpleado, Estado, FechaPedido, DVH)
     VALUES (@cSofia, @emp, 0, DATEADD(day,-1,GETDATE()), 0);
     DECLARE @ped3 INT = SCOPE_IDENTITY();
@@ -1252,7 +1252,7 @@ BEGIN
     PRINT 'Demo: 3 pedidos (Entregado/Despachado/Pendiente) + prendas asignadas.';
 END
 ELSE
-    PRINT 'Demo: pedidos ya existen o faltan datos base — sin cambios.';
+    PRINT 'Demo: pedidos ya existen o faltan datos base, sin cambios.';
 GO
 
 -- ============================================================
@@ -1311,7 +1311,7 @@ BEGIN
     PRINT 'CHECK CK_PermisoRelacion_NoAutoref agregado (IdPadre <> IdHijo).';
 END
 ELSE
-    PRINT 'CHECK CK_PermisoRelacion_NoAutoref ya existe — sin cambios.';
+    PRINT 'CHECK CK_PermisoRelacion_NoAutoref ya existe: sin cambios.';
 GO
 
 PRINT '';
@@ -1322,8 +1322,8 @@ PRINT 'Las traducciones se seedean automáticamente en el primer uso de la app.'
 GO
 
 /* ============================================================================
-   WardrobeFlow — 03. PERMISOS GRANULARES (Ver vs. Configurar)
-   Tier 2 — Permisos de ACCIÓN granular: separar "Ver" de "Configurar".
+   WardrobeFlow: 03. PERMISOS GRANULARES (Ver vs. Configurar)
+   Tier 2. Permisos de ACCIÓN granular: separar "Ver" de "Configurar".
 
    Crea una patente de EDICIÓN por cada módulo de negocio (alta/modificación/baja)
    y la propaga ("grandfather") a los roles que hoy pueden editar, de modo que el
@@ -1370,7 +1370,7 @@ WHERE  NOT EXISTS (SELECT 1 FROM PermisoRelacion r2
 PRINT 'OK: patentes de acción creadas y propagadas (idempotente).';
 
 /* ----------------------------------------------------------------------------
-   OPCIONAL — ocultar también los botones de edición en la GUI para los usuarios
+   OPCIONAL: ocultar también los botones de edición en la GUI para los usuarios
    sin la patente de edición. WardrobeFlow ya tiene el mecanismo data-driven
    (ControlMapeado + ManejadorSeguridad): basta mapear los botones Guardar/Eliminar
    de cada formulario a su patente "…Editar" desde la pantalla "Mapeo de Controles".
@@ -1379,7 +1379,7 @@ PRINT 'OK: patentes de acción creadas y propagadas (idempotente).';
    ---------------------------------------------------------------------------- */
 
 -- ============================================================
--- WardrobeFlow — 05. RENOVACIÓN DE SUSCRIPCIÓN (PdN5)
+-- WardrobeFlow: 05. RENOVACIÓN DE SUSCRIPCIÓN (PdN5)
 -- ------------------------------------------------------------
 -- Tabla de auditoría del patrón Chain of Responsibility usado en
 -- BLL.Manejadores (VerificarVencimiento → IntentarRenovar → CambioPlan →
@@ -1409,11 +1409,11 @@ BEGIN
     PRINT 'Tabla HistorialRenovacion creada.';
 END
 ELSE
-    PRINT 'Tabla HistorialRenovacion ya existe — sin cambios.';
+    PRINT 'Tabla HistorialRenovacion ya existe: sin cambios.';
 GO
 
 -- ============================================================
--- PERMISO — patente de menú para bases YA CREADAS (idempotente)
+-- PERMISO: patente de menú para bases YA CREADAS (idempotente)
 -- ------------------------------------------------------------
 -- Solo hace falta para instalaciones existentes: la sección 01 (arriba) ya
 -- siembra esto en instalaciones nuevas. Sigue el mismo patrón de migración que
@@ -1461,14 +1461,14 @@ WHERE p.NombreMenu = 'mnuRenovacionSuscripcion'
 GO
 
 -- ============================================================
--- WardrobeFlow — 06. REDISEÑO DE MENÚ (UX/UI)
+-- WardrobeFlow: 06. REDISEÑO DE MENÚ (UX/UI)
 -- ------------------------------------------------------------
 -- Los ítems nuevos ("mnu.suscriptores", "mnu.ventana") se auto-siembran solos en el primer
 -- arranque (BLL.Idioma.SeedearDesdeHardcode → InsertarSiNoExiste), no necesitan SQL.
 --
 -- Este script solo cubre lo que el auto-seed NO hace: actualizar el TEXTO de una clave que
 -- una base YA TENÍA sembrada de antes ("mnu.bitacora" pasa de "Bitácora" a "Analítica").
--- InsertarSiNoExiste es insert-only — nunca pisa una fila existente — así que sin este UPDATE
+-- InsertarSiNoExiste es insert-only (nunca pisa una fila existente) así que sin este UPDATE
 -- una BD que ya corrió el sistema seguiría mostrando "Bitácora" para siempre.
 --
 -- Idempotente: un UPDATE al mismo valor no rompe nada si se corre más de una vez.
@@ -1495,13 +1495,13 @@ PRINT 'mnu.bitacora actualizado a "Analítica" (y equivalentes EN/RU/PT) en las 
 GO
 
 -- ============================================================
--- WardrobeFlow — 08. COBRO Y PAGO DE SUSCRIPCIÓN (PdN6)
+-- WardrobeFlow: 08. COBRO Y PAGO DE SUSCRIPCIÓN (PdN6)
 -- ------------------------------------------------------------
 -- Tabla de auditoría del patrón Chain of Responsibility usado en
 -- BLL.Manejadores (DetectarCobro → ProcesarPago → AplicarGracia →
 -- Suspender). Cada fila es un intento de cobro para un cliente:
 -- detectado, intentado (fuera del sistema: efectivo/transferencia,
--- sin pasarela — ver alcance) y resuelto como Cobrado / Gracia /
+-- sin pasarela: ver alcance) y resuelto como Cobrado / Gracia /
 -- Suspendido, o Pendiente si aún no correspondía cobrar.
 --
 -- Complementa a HistorialRenovacion (PdN5): un cobro exitoso
@@ -1528,7 +1528,7 @@ BEGIN
     PRINT 'Columna FechaLimiteGracia agregada a Cliente.';
 END
 ELSE
-    PRINT 'FechaLimiteGracia ya existe en Cliente — sin cambios.';
+    PRINT 'FechaLimiteGracia ya existe en Cliente: sin cambios.';
 GO
 
 -- ── 2) Tabla HistorialCobro ───────────────────────────────────────────────
@@ -1547,7 +1547,7 @@ BEGIN
     PRINT 'Tabla HistorialCobro creada.';
 END
 ELSE
-    PRINT 'Tabla HistorialCobro ya existe — sin cambios.';
+    PRINT 'Tabla HistorialCobro ya existe: sin cambios.';
 GO
 
 -- ── 3) Patente de menú mnuCobroSuscripcion ───────────────────────────────
@@ -1580,14 +1580,14 @@ WHERE p.NombreMenu = 'mnuCobroSuscripcion'
 GO
 
 -- ============================================================
--- WardrobeFlow — 09. ANÁLISIS DE ABANDONO (PdN10)
+-- WardrobeFlow: 09. ANÁLISIS DE ABANDONO (PdN10)
 -- ------------------------------------------------------------
 -- No requiere tablas nuevas: PdN10 es 100% lectura, cruza Cliente
 -- (suscripción/vencimiento) con MAX(FechaPedido) de la tabla Pedido
 -- ya existente (BLL.AnalisisAbandono, patrón Strategy en BLL.Estrategias).
 --
 -- Solo agrega la patente de menú mnuAnalisisAbandono, asignada a
--- Administrador y GerenteComercial (jefe del área comercial — quien
+-- Administrador y GerenteComercial (jefe del área comercial: quien
 -- decide acciones de retención). Sigue el patrón DIRECTO a
 -- PermisoRelacion, igual que 08_Cobro_Pago.sql.
 --
@@ -1627,14 +1627,14 @@ WHERE p.NombreMenu = 'mnuAnalisisAbandono'
 GO
 
 -- ============================================================
--- WardrobeFlow — 10. REPORTE DE VENTAS POR VENDEDOR (PdN8)
+-- WardrobeFlow: 10. REPORTE DE VENTAS POR VENDEDOR (PdN8)
 -- ------------------------------------------------------------
 -- No requiere tablas nuevas: PdN8 es 100% lectura, agrega la
 -- tabla Pedido (ya existente) agrupada por Empleado
 -- (BLL.ReporteVentasVendedor).
 --
 -- Solo agrega la patente de menú mnuVentasVendedor, asignada a
--- Administrador y GerenteComercial (jefe del área comercial —
+-- Administrador y GerenteComercial (jefe del área comercial:
 -- quien evalúa desempeño de sus vendedores). Sigue el patrón
 -- DIRECTO a PermisoRelacion, igual que 09_Analisis_Abandono.sql.
 --
@@ -1674,14 +1674,14 @@ WHERE p.NombreMenu = 'mnuVentasVendedor'
 GO
 
 -- ============================================================
--- WardrobeFlow — 11. ANÁLISIS DE ROTACIÓN DE PRENDAS (PdN9)
+-- WardrobeFlow: 11. ANÁLISIS DE ROTACIÓN DE PRENDAS (PdN9)
 -- ------------------------------------------------------------
 -- No requiere tablas nuevas: PdN9 es 100% lectura, cruza Prenda
 -- (catálogo activo) con COUNT(*) de PedidoPrenda por prenda
 -- (BLL.AnalisisRotacion).
 --
 -- Solo agrega la patente de menú mnuAnalisisRotacion, asignada a
--- Administrador y GerenteInventario (jefe del área de inventario —
+-- Administrador y GerenteInventario (jefe del área de inventario:
 -- quien decide bajas y reposición). Sigue el patrón DIRECTO a
 -- PermisoRelacion, igual que 09_Analisis_Abandono.sql.
 --
@@ -1721,7 +1721,7 @@ WHERE p.NombreMenu = 'mnuAnalisisRotacion'
 GO
 
 -- ============================================================
--- WardrobeFlow — 12. ANÁLISIS DE TIEMPOS DE MANTENIMIENTO (PdN11)
+-- WardrobeFlow: 12. ANÁLISIS DE TIEMPOS DE MANTENIMIENTO (PdN11)
 -- ------------------------------------------------------------
 -- No requiere tablas nuevas: PdN11 es 100% lectura sobre
 -- MantenimientoPrenda (ya existente desde PdN4), agrupada por
@@ -1767,7 +1767,7 @@ WHERE p.NombreMenu = 'mnuAnalisisMantenimiento'
 GO
 
 -- ============================================================
--- WardrobeFlow — 13. DETECCIÓN DE ESCASEZ POR TALLE/CATEGORÍA (PdN12)
+-- WardrobeFlow: 13. DETECCIÓN DE ESCASEZ POR TALLE/CATEGORÍA (PdN12)
 -- ------------------------------------------------------------
 -- No requiere tablas nuevas: PdN12 es 100% lectura, agrupa Prenda
 -- Disponible por Talle+Categoría contra un umbral ingresado en
@@ -1813,7 +1813,7 @@ WHERE p.NombreMenu = 'mnuAnalisisEscasez'
 GO
 
 -- ============================================================
--- WardrobeFlow — 14. RECOMENDACIÓN DE PRENDAS PARA UN CLIENTE (PdN13)
+-- WardrobeFlow: 14. RECOMENDACIÓN DE PRENDAS PARA UN CLIENTE (PdN13)
 -- ------------------------------------------------------------
 -- No requiere tablas nuevas: PdN13 es 100% lectura, cruza el
 -- historial de PedidoPrenda de un cliente con el catálogo
@@ -1822,7 +1822,7 @@ GO
 -- Solo agrega la patente de menú mnuRecomendacionPrendas, asignada
 -- a Administrador y Vendedor (quien la usa al armar el próximo
 -- pedido). GerenteComercial la hereda automáticamente por la
--- arista Composite GerenteComercial → Vendedor (T04) — no se
+-- arista Composite GerenteComercial → Vendedor (T04): no se
 -- asigna directo para no duplicar la fuente de verdad.
 --
 -- Idempotente: se puede volver a ejecutar sin duplicar nada.
@@ -1861,27 +1861,27 @@ WHERE p.NombreMenu = 'mnuRecomendacionPrendas'
 GO
 
 -- ============================================================
--- WardrobeFlow — 15. FIDELIZACIÓN: PAUSA, REFERIDOS Y CARGO POR DAÑO/PÉRDIDA
+-- WardrobeFlow: 15. FIDELIZACIÓN: PAUSA, REFERIDOS Y CARGO POR DAÑO/PÉRDIDA
 -- ------------------------------------------------------------
 -- Tres funcionalidades nuevas del Bloque 1 (Fidelización), la última
 -- cruza con Bloque 2 (Cobro):
 --
 --   • Pausa de suscripción (PdN5, Chain of Responsibility): Cliente.FechaPausaHasta.
 --     Mientras esté vigente, bloquea pedidos nuevos SIN tocar FechaVencimiento
---     (al reanudar, la fecha de vencimiento queda como estaba — decisión de diseño).
+--     (al reanudar, la fecha de vencimiento queda como estaba: decisión de diseño).
 --
 --   • Programa de referidos (PdN1 → PdN6): Cliente.IdClienteReferente (quién lo
 --     trajo), DescuentoProximoCobro (beneficio pendiente de aplicar) y
 --     BeneficioReferidoOtorgado (evita otorgar el beneficio dos veces).
 --
 --   • Cargo por daño/pérdida (PdN4 → PdN6): Prenda.IdUltimoCliente (a diferencia
---     de IdClienteActual, NUNCA se limpia al devolver — así en el momento de
+--     de IdClienteActual, NUNCA se limpia al devolver: así en el momento de
 --     inspeccionarla en Mantenimiento todavía se sabe quién la tuvo) + tabla
 --     CargoPrenda (el cargo en sí, pendiente hasta que se cobra junto con la
 --     próxima renovación del cliente).
 --
 -- Ningún rol nuevo ni patente nueva: Pausa reutiliza mnuRenovacionSuscripcion,
--- Referidos reutiliza mnuClientes, Cargo reutiliza mnuPrendas — todas ya
+-- Referidos reutiliza mnuClientes, Cargo reutiliza mnuPrendas: todas ya
 -- asignadas a los roles que hoy manejan esas pantallas.
 --
 -- Idempotente: se puede volver a ejecutar sin duplicar nada.
@@ -1898,7 +1898,7 @@ BEGIN
     PRINT 'Columna FechaPausaHasta agregada a Cliente.';
 END
 ELSE
-    PRINT 'FechaPausaHasta ya existe en Cliente — sin cambios.';
+    PRINT 'FechaPausaHasta ya existe en Cliente: sin cambios.';
 GO
 
 -- ── 2) Programa de referidos ──────────────────────────────────────────────
@@ -1909,7 +1909,7 @@ BEGIN
     PRINT 'Columna IdClienteReferente agregada a Cliente.';
 END
 ELSE
-    PRINT 'IdClienteReferente ya existe en Cliente — sin cambios.';
+    PRINT 'IdClienteReferente ya existe en Cliente: sin cambios.';
 GO
 
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
@@ -1919,7 +1919,7 @@ BEGIN
     PRINT 'Columna DescuentoProximoCobro agregada a Cliente.';
 END
 ELSE
-    PRINT 'DescuentoProximoCobro ya existe en Cliente — sin cambios.';
+    PRINT 'DescuentoProximoCobro ya existe en Cliente: sin cambios.';
 GO
 
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
@@ -1929,7 +1929,7 @@ BEGIN
     PRINT 'Columna BeneficioReferidoOtorgado agregada a Cliente.';
 END
 ELSE
-    PRINT 'BeneficioReferidoOtorgado ya existe en Cliente — sin cambios.';
+    PRINT 'BeneficioReferidoOtorgado ya existe en Cliente: sin cambios.';
 GO
 
 -- ── 3) Cargo por daño/pérdida ─────────────────────────────────────────────
@@ -1940,7 +1940,7 @@ BEGIN
     PRINT 'Columna IdUltimoCliente agregada a Prenda.';
 END
 ELSE
-    PRINT 'IdUltimoCliente ya existe en Prenda — sin cambios.';
+    PRINT 'IdUltimoCliente ya existe en Prenda: sin cambios.';
 GO
 
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'CargoPrenda')
@@ -1959,10 +1959,10 @@ BEGIN
     PRINT 'Tabla CargoPrenda creada.';
 END
 ELSE
-    PRINT 'Tabla CargoPrenda ya existe — sin cambios.';
+    PRINT 'Tabla CargoPrenda ya existe: sin cambios.';
 GO
 
--- Backfill: prendas actualmente EnUso ya tienen IdClienteActual — copiarlo a
+-- Backfill: prendas actualmente EnUso ya tienen IdClienteActual; copiarlo a
 -- IdUltimoCliente para que no arranquen en NULL (a las que ya se devolvieron
 -- antes de esta migración no hay forma de reconstruirles el dato: se acepta).
 UPDATE Prenda SET IdUltimoCliente = IdClienteActual
@@ -1979,8 +1979,8 @@ PRINT 'Índices de Fidelización verificados/creados.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 16. LISTA DE ESPERA DE PRENDAS (mejora opcional,
--- no requerida por la cátedra — ver README, sección "Módulos")
+-- WardrobeFlow: 16. LISTA DE ESPERA DE PRENDAS (mejora opcional,
+-- no requerida por la cátedra: ver README, sección "Módulos")
 -- ------------------------------------------------------------
 -- Inspirado en la Lista de Espera de ExperienceHub (TP de un
 -- compañero de cursada), adaptado al modelo de WardrobeFlow: acá
@@ -1992,7 +1992,7 @@ GO
 -- de EnLimpieza a Disponible), la fila Pendiente más antigua (FIFO)
 -- pasa a Reservada con una ventana de 48hs exclusiva para ese
 -- cliente (BLL.ListaEspera.HORAS_RESERVA). Si nadie la retira a
--- tiempo, la prenda vuelve a estar disponible para cualquiera —
+-- tiempo, la prenda vuelve a estar disponible para cualquiera:
 -- por comparación de fecha, sin job en background, mismo criterio
 -- que Cliente.FechaLimiteGracia (PdN6).
 --
@@ -2020,11 +2020,11 @@ BEGIN
     PRINT 'Tabla ListaEspera creada.';
 END
 ELSE
-    PRINT 'Tabla ListaEspera ya existe — sin cambios.';
+    PRINT 'Tabla ListaEspera ya existe: sin cambios.';
 GO
 
 -- ── 2) Patente de menú mnuListaEspera (solo gobierna visibilidad de la
---     pantalla, igual que mnuCobroSuscripcion — las mutaciones se validan
+--     pantalla, igual que mnuCobroSuscripcion: las mutaciones se validan
 --     con la patente mnuStockEditar, ver BLL.ListaEspera) ──────────────────
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
 SELECT 'Lista de Espera', 'mnuListaEspera', 'Inventario', 1, 0, 0
@@ -2058,13 +2058,13 @@ WHERE p.NombreMenu = 'mnuListaEspera'
 GO
 
 -- ============================================================
--- WardrobeFlow — 17. COMERCIALIZACIÓN DE LA SUSCRIPCIÓN (PN02)
+-- WardrobeFlow: 17. COMERCIALIZACIÓN DE LA SUSCRIPCIÓN (PN02)
 -- ------------------------------------------------------------
 -- Adaptado de un TP de otro compañero de cursada (misma lógica de negocio:
 -- alta de cliente + contratación de un plan), reescrito al vocabulario de
 -- WardrobeFlow. Roles: Venta (ya existe, es el Vendedor) y Caja (NUEVO,
 -- separado de Vendedor a propósito: Vendedor es "operador" de la venta,
--- Caja cobra — separación de funciones).
+-- Caja cobra: separación de funciones).
 --
 -- Tabla Contratacion: estado intermedio entre "el cliente eligió un plan"
 -- (Venta, CrearContratacion) y "la suscripción quedó vigente" (Caja confirma
@@ -2072,7 +2072,7 @@ GO
 -- 0=PendientePago, 1=Pagada, 2=Cancelada (BE.EstadoContratacion).
 --
 -- El Comprobante (CU02-CAJ) se guarda como columnas propias de Contratacion
--- (NumeroComprobante, FechaComprobante) — no hace falta una tabla aparte.
+-- (NumeroComprobante, FechaComprobante): no hace falta una tabla aparte.
 --
 -- Idempotente: se puede volver a ejecutar sin duplicar nada.
 -- ============================================================
@@ -2099,7 +2099,7 @@ BEGIN
     PRINT 'Tabla Contratacion creada.';
 END
 ELSE
-    PRINT 'Tabla Contratacion ya existe — sin cambios.';
+    PRINT 'Tabla Contratacion ya existe: sin cambios.';
 GO
 
 -- ── 1bis) Constraints de integridad (por si la tabla ya existía sin ellas) ──
@@ -2110,10 +2110,10 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacio
     ALTER TABLE Contratacion ADD CONSTRAINT CHK_Contratacion_Estado CHECK (Estado IN (0,1,2));
 GO
 
--- ── 2) Patentes mnuCaja/mnuCajaEditar + rol Caja (nuevo, real — separado de
+-- ── 2) Patentes mnuCaja/mnuCajaEditar + rol Caja (nuevo, real: separado de
 --     Vendedor). Van juntas: ambas son filas de Permiso (dos hojas/patentes
 --     y un nodo-rol), no hace falta un INSERT por fila cuando es la misma
---     tabla — Caja es un rol simple (sin hijos propios en el árbol
+--     tabla: Caja es un rol simple (sin hijos propios en el árbol
 --     Composite), así que no necesita más que esto para existir.
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
 SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, v.EsFamilia, v.EsRol
@@ -2172,7 +2172,7 @@ PRINT 'Usuario demo del rol Caja inicializado.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 18. MÉTRICAS, PROMOCIONES Y TOMA DE DECISIONES (PN03)
+-- WardrobeFlow: 18. MÉTRICAS, PROMOCIONES Y TOMA DE DECISIONES (PN03)
 -- ------------------------------------------------------------
 -- Adaptado del proyecto "SIRVI" de un compañero de cursada (Franco De
 -- Benedetto), reescrito al vocabulario de WardrobeFlow. Roles:
@@ -2216,7 +2216,7 @@ BEGIN
     PRINT 'Tabla SugerenciaPromocion creada.';
 END
 ELSE
-    PRINT 'Tabla SugerenciaPromocion ya existe — sin cambios.';
+    PRINT 'Tabla SugerenciaPromocion ya existe: sin cambios.';
 GO
 
 -- ── 1bis) Constraints de integridad (por si la tabla ya existía sin ellas) ──
@@ -2257,7 +2257,7 @@ BEGIN
     PRINT 'Tabla Promocion creada.';
 END
 ELSE
-    PRINT 'Tabla Promocion ya existe — sin cambios.';
+    PRINT 'Tabla Promocion ya existe: sin cambios.';
 GO
 
 -- ── 2bis) Constraints de integridad (por si la tabla ya existía sin ellas) ──
@@ -2287,7 +2287,7 @@ GO
 -- ── 3) Patentes de menú + roles nuevos AdministracionComercial y
 --     Contabilidad. Van juntas (mismo criterio que el rol Caja en la
 --     sección 17): todo es Permiso, y ninguno de los dos roles tiene hijos
---     propios en el árbol Composite — son roles simples.
+--     propios en el árbol Composite: son roles simples.
 INSERT INTO Permiso (Nombre, NombreMenu, TipoComponente, Estado, EsFamilia, EsRol)
 SELECT v.Nombre, v.NombreMenu, v.Tipo, 1, v.EsFamilia, v.EsRol
 FROM (VALUES
@@ -2335,7 +2335,6 @@ INSERT INTO ControlMapeado (IdPermiso, Formulario, NombreControl)
 SELECT ISNULL(MIN(CASE WHEN p.Estado = 1 THEN p.IdPermiso END), MIN(p.IdPermiso)), v.Formulario, v.NombreControl
 FROM (VALUES
     ('mnuSugerenciaPromocion', 'Menu', 'promocionesToolStripMenuItem'),
-    ('mnuSugerenciaPromocion', 'Menu', 'sugerirPromocionToolStripMenuItem'),
     ('mnuPromocionesAdmin',    'Menu', 'gestionPromocionesToolStripMenuItem'),
     ('mnuPromocionesContable', 'Menu', 'revisionContablePromocionesToolStripMenuItem'),
     ('mnuPromocionesVigentes', 'Menu', 'promocionesVigentesToolStripMenuItem')
@@ -2364,23 +2363,23 @@ PRINT 'Usuarios demo de AdministracionComercial y Contabilidad inicializados.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 19. INSPECCIÓN DE DEVOLUCIÓN (PN04)
+-- WardrobeFlow: 19. INSPECCIÓN DE DEVOLUCIÓN (PN04)
 -- ------------------------------------------------------------
 -- Alineado a la lógica real de Nuuly (binaria, sin aprobador): al inspeccionar
 -- una prenda devuelta (EnLimpieza) el Depósito resuelve directo entre dos
--- caminos únicos — reingresa a Disponible sin cargo, o se da de baja y se
+-- caminos únicos: reingresa a Disponible sin cargo, o se da de baja y se
 -- cobra el precio de reposición completo (BLL.CargoPrenda.RegistrarCargo, ya
 -- existente desde Bloque 1, sin aprobación de nadie). Una prenda que nunca
 -- vuelve físicamente (perdida) se reporta directo desde EnUso → Baja
 -- (CU06-DEP), habilitado en BE.Estados.EstadoEnUso.
 --
 -- Rol: reusa Deposito (ya tiene StockEditar/Stock, ya es el
--- "Depósito" conceptual de PN01) — sin rol nuevo, coherente con que en el
+-- "Depósito" conceptual de PN01): sin rol nuevo, coherente con que en el
 -- modelo real de Nuuly no hay un aprobador. GerenteInventario lo hereda.
 --
 -- La patente mnuInspeccionDevolucion controla SOLO la visibilidad del menú de
 -- esta pantalla nueva: la escritura real (CambiarEstado, RegistrarCargo)
--- sigue exigiendo StockEditar/Stock, sin cambios — mismo mecanismo de
+-- sigue exigiendo StockEditar/Stock, sin cambios: mismo mecanismo de
 -- siempre, ahora con una pantalla propia en vez de reusar la de Stock
 -- genérica. A propósito NO se crea una "mnuInspeccionDevolucionEditar": no
 -- hay una noción de "editar" separada de "ver" en este módulo (a diferencia
@@ -2402,7 +2401,7 @@ BEGIN
     PRINT 'Columna Prenda.PrecioReposicion agregada.';
 END
 ELSE
-    PRINT 'Columna Prenda.PrecioReposicion ya existe — sin cambios.';
+    PRINT 'Columna Prenda.PrecioReposicion ya existe: sin cambios.';
 GO
 
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Prenda_PrecioReposicion')
@@ -2446,13 +2445,13 @@ GROUP BY v.Formulario, v.NombreControl;
 GO
 
 -- ============================================================
--- WardrobeFlow — 20. HARDENING DE INTEGRIDAD (auditoría de BD)
+-- WardrobeFlow: 20. HARDENING DE INTEGRIDAD (auditoría de BD)
 -- ------------------------------------------------------------
 -- Varias columnas INT respaldadas por un enum de C# (Prenda.Estado,
 -- Pedido.Estado, HistorialRenovacion.Resultado, HistorialCobro.Resultado,
 -- ListaEspera.Estado, CargoPrenda.Estado, Bitacora.criticidad) quedaron
 -- sin el CHECK que sí se agregó para los módulos más nuevos (Contratacion,
--- Promocion, SugerenciaPromocion, Prenda.PrecioReposicion — ver 17/18/19).
+-- Promocion, SugerenciaPromocion, Prenda.PrecioReposicion: ver 17/18/19).
 -- Hoy la app nunca escribe un valor fuera de rango (siempre castea el
 -- enum), pero sin el CHECK un UPDATE manual o una migración futura que
 -- agregue un miembro al enum sin agregar el CHECK correspondiente podría
@@ -2471,7 +2470,7 @@ GO
 USE WardrobeFlowDB;
 GO
 
--- ── 1) CHECK constraints — columnas Estado/Resultado respaldadas por enum ──
+-- ── 1) CHECK constraints: columnas Estado/Resultado respaldadas por enum ──
 
 -- Prenda.Estado (BE.EstadoPrenda: Disponible=0, EnUso=1, EnLimpieza=2, Baja=3)
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Prenda_Estado')
@@ -2521,10 +2520,10 @@ GO
 
 
 -- ============================================================
--- WardrobeFlow — 20b. PN03 APLICADO AL COBRO + INTEGRIDAD DE PN02/PN03/PN04
+-- WardrobeFlow: 20b. PN03 APLICADO AL COBRO + INTEGRIDAD DE PN02/PN03/PN04
 -- ------------------------------------------------------------
 -- (1) Contratacion guarda lo que realmente se cobró: importe, descuento aplicado y la promoción
---     vigente que se usó (regla de NUULY: UN solo descuento por ciclo — BE.PoliticaDescuento).
+--     vigente que se usó (regla de NUULY: UN solo descuento por ciclo; BE.PoliticaDescuento).
 -- (2) Restricciones que solo estaban en la BLL: monto de cargo > 0, intentos de pago 0..3, una
 --     única contratación pendiente por cliente y una única anotación activa por prenda y cliente.
 -- (3) Índices sobre las columnas por las que se filtran las tablas nuevas.
@@ -2585,7 +2584,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Cliente_IdPlan' AND ob
 PRINT 'Sección 20b: importe/promoción en Contratacion, restricciones e índices verificados.';
 GO
 -- ============================================================
--- WardrobeFlow — 20c. PN02: MEDIOS DE PAGO, INTENTOS Y DESISTIMIENTOS
+-- WardrobeFlow: 20c. PN02: MEDIOS DE PAGO, INTENTOS Y DESISTIMIENTOS
 -- ------------------------------------------------------------
 -- Diagrama de actividad de PN02 (adaptado a WardrobeFlow):
 --   · «Medio de pago»: catálogo propio (antes texto libre en Contratacion.MedioPago).
@@ -2731,7 +2730,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_IntentoPago_Contrataci
 PRINT 'Sección 20c: medios de pago, intentos y desistimientos de PN02 verificados.';
 GO
 -- ============================================================
--- WardrobeFlow — 20c2. PN02: PAGO EN CUOTAS CON TARJETA DE CRÉDITO
+-- WardrobeFlow: 20c2. PN02: PAGO EN CUOTAS CON TARJETA DE CRÉDITO
 -- ------------------------------------------------------------
 -- La tarjeta financia: Caja cobra el total en un solo cobro y se registra el plan de cuotas
 -- elegido y el recargo por financiación (decisión de la alumna).
@@ -2823,7 +2822,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacio
 PRINT 'Sección 20c2: pago en cuotas con tarjeta de crédito verificado.';
 GO
 -- ============================================================
--- WardrobeFlow — 20c3. PN02: UPGRADE CON CRÉDITO Y ANULACIÓN DE CONTRATACIONES
+-- WardrobeFlow: 20c3. PN02: UPGRADE CON CRÉDITO Y ANULACIÓN DE CONTRATACIONES
 -- ------------------------------------------------------------
 --   · Contratacion.CreditoCambioPlan: al pasar a un plan más caro con el período vigente, el plan
 --     nuevo rige desde hoy y los días no usados del plan anterior se descuentan del cobro
@@ -2865,7 +2864,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CHK_Contratacio
 PRINT 'Sección 20c3: upgrade con crédito y anulación de contrataciones verificado.';
 GO
 -- ============================================================
--- WardrobeFlow — 20c4. N01: COBRO RECURRENTE CON MEDIO DE PAGO, COMPROBANTE Y PROMOCIÓN APLICADA
+-- WardrobeFlow: 20c4. N01: COBRO RECURRENTE CON MEDIO DE PAGO, COMPROBANTE Y PROMOCIÓN APLICADA
 -- ------------------------------------------------------------
 --   HistorialCobro guarda, igual que Contratacion en PN02, con qué medio pagó el cliente, el
 --   comprobante emitido, la modalidad cobrada y el descuento aplicado (promoción vigente o crédito
@@ -2895,7 +2894,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_HistorialCobro_IdPromo
 PRINT 'Sección 20c4: medio de pago, comprobante y promoción del cobro recurrente verificados.';
 GO
 -- ============================================================
--- WardrobeFlow — 20c5. CLIENTE: MEDIO DE PAGO PREFERIDO POR CATÁLOGO (3FN)
+-- WardrobeFlow: 20c5. CLIENTE: MEDIO DE PAGO PREFERIDO POR CATÁLOGO (3FN)
 -- ------------------------------------------------------------
 --   Cliente.MetodoPago era texto libre ("Efectivo", "Crédito"...) con los mismos valores que el
 --   catálogo MedioPago de Caja escrito de otra forma: el nombre del medio dependía del cliente y no
@@ -2982,7 +2981,7 @@ END
 PRINT 'Sección 20c5: medio de pago preferido del cliente por catálogo verificado.';
 GO
 -- ============================================================
--- WardrobeFlow — 20d. PN03: FLUJO APROBADO DE PROMOCIONES
+-- WardrobeFlow: 20d. PN03: FLUJO APROBADO DE PROMOCIONES
 -- ------------------------------------------------------------
 -- Diagrama de actividad de PN03 (corregido y aprobado):
 --   · SugerenciaPromocion: estado Descartada (2) con motivo obligatorio, origen de la
@@ -3146,7 +3145,7 @@ GO
 PRINT 'Sección 20d: flujo aprobado de PN03 (historial, dictamen, solicitud de baja, vencimiento) verificado.';
 GO
 -- ============================================================
--- WardrobeFlow — 20e. CATÁLOGO DE CATEGORÍAS DE PRENDA (3FN)
+-- WardrobeFlow: 20e. CATÁLOGO DE CATEGORÍAS DE PRENDA (3FN)
 -- ------------------------------------------------------------
 --   Prenda.Categoria, Promocion.CategoriaPrenda y SugerenciaPromocion.CategoriaPrenda eran texto
 --   libre: la misma categoría podía escribirse de varias formas ("Vestido" en los datos y
@@ -3247,7 +3246,7 @@ PRINT 'Sección 20e: catálogo de categorías de prenda verificado.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 20g. PN03: PROMOCIONES SOLO POR PLAN Y BAJA SIMPLIFICADA
+-- WardrobeFlow: 20g. PN03: PROMOCIONES SOLO POR PLAN Y BAJA SIMPLIFICADA
 -- ------------------------------------------------------------
 -- Simplificación del flujo de PN03 (BE.EstadoPromocion, BE.EstadoSolicitudBaja):
 --   · Estados de Promocion: 0=EnRevisionContable, 1=Vigente, 2=RechazadaContabilidad,
@@ -3454,7 +3453,7 @@ PRINT 'Sección 20g: promociones solo por plan y baja simplificada (PN03) verifi
 GO
 
 -- ============================================================
--- WardrobeFlow — 20f. ORIGEN DEL MANTENIMIENTO DE UNA PRENDA (PN04)
+-- WardrobeFlow: 20f. ORIGEN DEL MANTENIMIENTO DE UNA PRENDA (PN04)
 -- ------------------------------------------------------------
 --   La devolución de un pedido (DAL.Pedido.RegistrarDevolucion) abría el mantenimiento con
 --   Actor = 'Devolución', y esa MARCA en una columna de texto libre decidía qué prendas van a la
@@ -3478,7 +3477,7 @@ GO
 PRINT 'Sección 20f: origen del mantenimiento de prendas verificado.';
 GO
 -- ============================================================
--- WardrobeFlow — 20h. PN03: TASA DE RETENCIÓN ESPERADA EN LA SUGERENCIA
+-- WardrobeFlow: 20h. PN03: TASA DE RETENCIÓN ESPERADA EN LA SUGERENCIA
 -- ------------------------------------------------------------
 --   El beneficio estimado de una sugerencia suponía que la promoción retenía al 100 % de los
 --   clientes en riesgo. Ahora Gerencia declara la tasa de retención esperada (0-100], por
@@ -3523,7 +3522,7 @@ GO
 PRINT 'Sección 20h: tasa de retención de las sugerencias (PN03) verificada.';
 GO
 -- ============================================================
--- WardrobeFlow — 20i. ANALÍTICA DE NEGOCIO EN UN SOLO FORMULARIO
+-- WardrobeFlow: 20i. ANALÍTICA DE NEGOCIO EN UN SOLO FORMULARIO
 -- ------------------------------------------------------------
 -- Los 6 reportes de decisión (Análisis de Abandono, Ventas por Vendedor, Rotación de Prendas,
 -- Tiempos de Mantenimiento, Escasez de Stock y Recomendación de Prendas) dejan de ser 6
@@ -3572,7 +3571,7 @@ GO
 PRINT 'Sección 20i: Analítica de Negocio en un solo formulario verificada.';
 GO
 -- ============================================================
--- WardrobeFlow — 20j. P2: CONSOLIDACIÓN DE PANTALLAS DE SEGURIDAD
+-- WardrobeFlow: 20j. P2: CONSOLIDACIÓN DE PANTALLAS DE SEGURIDAD
 -- ------------------------------------------------------------
 -- Consolidación de pantallas de seguridad (GUI, sin cambios de esquema ni de patentes):
 --   · "Cuentas de Usuario" (GUI.Usuarios) y "Administración de Usuarios"
@@ -3629,7 +3628,7 @@ GO
 PRINT 'Sección 20j: pantallas de seguridad consolidadas (P2) verificadas.';
 GO
 -- ============================================================
--- WardrobeFlow — 20k. HISTORIAL DE PEDIDOS: UNA OPERACIÓN, UN NÚMERO
+-- WardrobeFlow: 20k. HISTORIAL DE PEDIDOS: UNA OPERACIÓN, UN NÚMERO
 -- ------------------------------------------------------------
 -- El historial de un pedido (PedidoHistorial) agrupa los campos de cada evento con IdOperacion.
 -- Antes el número se calculaba como MAX + 1 fuera de toda transacción y el historial se escribía
@@ -3678,7 +3677,7 @@ PRINT 'Sección 20k: numeración de operaciones del historial de pedidos verific
 GO
 
 -- ============================================================
--- WardrobeFlow — 20n. UNICIDAD DE DNI, LEGAJO Y USUARIO DEL EMPLEADO
+-- WardrobeFlow: 20n. UNICIDAD DE DNI, LEGAJO Y USUARIO DEL EMPLEADO
 -- ------------------------------------------------------------
 -- La unicidad la validaba solo la aplicación (BLL.Cliente: "ya existe un cliente con DNI ..."),
 -- sin respaldo en la base. Índices únicos filtrados:
@@ -3726,7 +3725,7 @@ PRINT 'Sección 20n: unicidad de DNI, legajo y usuario del empleado verificada.'
 GO
 
 -- ============================================================
--- WardrobeFlow — 20o. PN03: INTELIGENCIA COMERCIAL — CENTRO DE DECISIONES COMERCIALES
+-- WardrobeFlow: 20o. PN03: INTELIGENCIA COMERCIAL; CENTRO DE DECISIONES COMERCIALES
 -- ------------------------------------------------------------
 -- PN03 pasa a ser «Inteligencia comercial y promociones»: analizar → recomendar/decidir →
 -- simular → aplicar → medir (GUI.CentroDecisionesForm, BLL.Inteligencia).
@@ -3849,7 +3848,7 @@ PRINT 'Sección 20o: Centro de decisiones comerciales (PN03) verificado.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 20p. PN03: METAS COMERCIALES, DETALLE DE LAS DECISIONES Y REGLAS RETIRADAS
+-- WardrobeFlow: 20p. PN03: METAS COMERCIALES, DETALLE DE LAS DECISIONES Y REGLAS RETIRADAS
 -- ------------------------------------------------------------
 --   · Tabla MetaComercial: el objetivo mensual de Gerencia por indicador (BLL.Inteligencia.MetasComerciales).
 --     Periodo = primer día del mes. Indicador (BE.IndicadorMeta): 0=MRR ($), 1=% de bajas, 2=ocupación
@@ -3936,7 +3935,7 @@ PRINT 'Sección 20p: metas comerciales y detalle de las decisiones (PN03) verifi
 GO
 
 -- ============================================================
--- WardrobeFlow — 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
+-- WardrobeFlow: 21b. DEPÓSITO PUEDE OPERAR PEDIDOS REALIZADOS
 -- ------------------------------------------------------------
 -- Despachar, registrar la entrega y registrar la devolución (que abre PN04) se hacen desde Pedidos
 -- Realizados y exigen mnuPedidosRealizadosEditar. El rol Deposito solo tenía la patente de VER, así
@@ -3952,7 +3951,7 @@ PRINT 'Permiso de edición de Pedidos Realizados asegurado para el rol Deposito.
 GO
 
 -- ============================================================
--- WardrobeFlow — 21c. PN01: CONTROL DE STOCK (diagrama de actividad de Armar pedido)
+-- WardrobeFlow: 21c. PN01: CONTROL DE STOCK (diagrama de actividad de Armar pedido)
 -- ------------------------------------------------------------
 -- El Vendedor envía la selección a control de stock (sin reservar prendas); Depósito revisa
 -- el stock y emite el informe de faltantes con alternativas, o confirma las prendas y las
@@ -4021,7 +4020,7 @@ BEGIN
     PRINT 'Tabla PedidoFaltante creada.';
 END
 ELSE
-    PRINT 'Tabla PedidoFaltante ya existe — sin cambios.';
+    PRINT 'Tabla PedidoFaltante ya existe: sin cambios.';
 GO
 
 -- ...y una fila por alternativa que propone el sistema para cada faltante.
@@ -4039,7 +4038,7 @@ BEGIN
     PRINT 'Tabla PedidoFaltanteAlternativa creada.';
 END
 ELSE
-    PRINT 'Tabla PedidoFaltanteAlternativa ya existe — sin cambios.';
+    PRINT 'Tabla PedidoFaltanteAlternativa ya existe: sin cambios.';
 GO
 
 -- Patentes de Control de Stock: ver (menú) y editar (acciones de Depósito).
@@ -4083,10 +4082,10 @@ GROUP BY v.Formulario, v.NombreControl;
 GO
 
 -- ============================================================
--- WardrobeFlow — 21c2. PATENTE DE ESCRITURA DE LISTA DE ESPERA
+-- WardrobeFlow: 21c2. PATENTE DE ESCRITURA DE LISTA DE ESPERA
 -- ------------------------------------------------------------
 -- BLL.ListaEspera.Anotar/Cancelar exigían mnuStockEditar (patente de Depósito),
--- así que el Vendedor —que ve Lista de Espera para anotar al cliente— recibía
+-- así que el Vendedor (que ve Lista de Espera para anotar al cliente) recibía
 -- "sin permiso". Ahora exigen mnuListaEsperaEditar (fallback: mnuListaEspera,
 -- ver BLL.PermisosAccion). Se asigna a Administrador, Vendedor y Deposito
 -- (GerenteComercial/GerenteInventario la heredan por Composite). Idempotente.
@@ -4112,7 +4111,7 @@ PRINT 'Permiso mnuListaEsperaEditar asignado a Administrador, Vendedor y Deposit
 GO
 
 -- ============================================================
--- WardrobeFlow — 21e. DATOS DE DEMO: ¿CORRESPONDE CARGARLOS?
+-- WardrobeFlow: 21e. DATOS DE DEMO: ¿CORRESPONDE CARGARLOS?
 -- ------------------------------------------------------------
 -- Los datos de demo (escenarios de PN01–PN04 y 6 meses de historia para la analítica) los carga
 -- el procedimiento dbo.RestablecerDatosDemo, que se crea más abajo (sección 21z3b: necesita las
@@ -4129,12 +4128,12 @@ DECLARE @reset21   BIT = CASE WHEN EXISTS (SELECT 1 FROM ParametroSistema WHERE 
 IF @reset21 = 1
     SET @sembrar21 = 1;
 ELSE IF EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SeedDemo21')
-    PRINT 'Datos de demo (sección 21e) ya aplicados — sin cambios.';
+    PRINT 'Datos de demo (sección 21e) ya aplicados: sin cambios.';
 ELSE IF EXISTS (SELECT 1 FROM Cliente WHERE Nombre = N'Julieta' AND Apellido = N'Navarro')
 BEGIN
     -- Base de una versión anterior que ya tenía los datos de prueba viejos (marca vieja).
     INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada por una versión anterior', GETDATE());
-    PRINT 'Datos de prueba (sección 21e) ya aplicados por una versión anterior — sin cambios.';
+    PRINT 'Datos de prueba (sección 21e) ya aplicados por una versión anterior: sin cambios.';
 END
 ELSE IF NOT EXISTS (SELECT 1 FROM ParametroSistema WHERE Clave = N'SemillaUsuarios' AND Valor = N'Pendiente')
      OR EXISTS (SELECT 1 FROM Contratacion)
@@ -4158,7 +4157,7 @@ END
 GO
 
 -- ============================================================
--- WardrobeFlow — 21d. AJUSTES FINALES DE PERMISOS Y MARCAS DE INSTALACIÓN
+-- WardrobeFlow: 21d. AJUSTES FINALES DE PERMISOS Y MARCAS DE INSTALACIÓN
 -- ------------------------------------------------------------
 -- (1) GerenteComercial solo VE Pedidos Realizados: el "grandfather" de la sección 03 le copia
 --     mnuPedidosRealizadosEditar porque tiene la patente de Ver asignada directo. Se quita esa
@@ -4252,7 +4251,7 @@ END
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z. CAMBIO DE PLAN PROGRAMADO (PN02, nodo a11)
+-- WardrobeFlow: 21z. CAMBIO DE PLAN PROGRAMADO (PN02, nodo a11)
 -- ------------------------------------------------------------
 -- Pasar a un plan igual o más barato con el período vigente: el plan nuevo rige al vencer el
 -- período pagado. Cliente guarda el plan siguiente y desde cuándo rige (la app lo aplica ese día).
@@ -4273,7 +4272,7 @@ END
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z2. DV DE CLIENTE: TAMBIÉN EL BENEFICIO POR REFERIDO
+-- WardrobeFlow: 21z2. DV DE CLIENTE: TAMBIÉN EL BENEFICIO POR REFERIDO
 -- ------------------------------------------------------------
 -- BeneficioReferidoOtorgado pasa a formar parte del dígito verificador de Cliente. En una base ya
 -- instalada se pide UNA vez el recálculo (marca 'DVClienteBeneficio'). Idempotente.
@@ -4290,7 +4289,7 @@ END
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z3. FECHA DE DEVOLUCIÓN DEL PEDIDO (PN04)
+-- WardrobeFlow: 21z3. FECHA DE DEVOLUCIÓN DEL PEDIDO (PN04)
 -- ------------------------------------------------------------
 -- Tras "Registrar devolución" el pedido sigue Entregado (no hay estado nuevo: la máquina de
 -- estados y los diagramas aprobados no cambian); Pedido.FechaDevolucion distingue un pedido
@@ -4351,7 +4350,7 @@ END
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z3b. DATOS DE DEMO: PROCEDIMIENTO dbo.RestablecerDatosDemo
+-- WardrobeFlow: 21z3b. DATOS DE DEMO: PROCEDIMIENTO dbo.RestablecerDatosDemo
 -- ------------------------------------------------------------
 -- Un solo código para cargar la demo: lo usa la instalación nueva (marca 'DemoCargaPendiente' de la
 -- sección 21e), BD/Reset_Datos_Demo.sql y la app (Administración → Backup → "Restablecer datos de
@@ -4395,7 +4394,7 @@ GO
 --         es una promoción de retención 30 % / 60 días → "Simular esta opción"), extender la promoción
 --         Vigente del Estándar, dar de baja la de Premium con solicitud, upgrade de plan (Bruno
 --         UsaTodoElCupo), escasez, prendas sin rotación, mantenimiento excesivo y la renovación pospuesta.
---       · Historial (paso 9b): 4 decisiones — Ejecutada con sugerencia (promoción Vencida del Básico,
+--       · Historial (paso 9b): 4 decisiones; Ejecutada con sugerencia (promoción Vencida del Básico,
 --         estimado vs real), campaña de renovación Ejecutada "en medición" (clientes contactados en
 --         DecisionComercialDetalle), Pospuesta y Descartada con motivo.
 --       · Medir resultado: Mantener (Vencida del Básico), Extender (Vigente del Estándar, vence en 10
@@ -5209,31 +5208,31 @@ BEGIN
                              WHEN N'ENTREGAR' THEN N'Entrega' WHEN N'DEVOLUCION' THEN N'Devolucion' WHEN N'CANCELAR' THEN N'Cancelacion'
                              ELSE N'Desistimiento' END AS Tipo,
                CASE o.Accion
-                    WHEN N'ENVIAR_CONTROL'     THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' enviado a control de stock — ' + i.Cliente + N' — ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s)'
-                    WHEN N'INFORMAR_FALTANTES' THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': 1 prenda(s) faltante(s) — Vestido Verde M'
+                    WHEN N'ENVIAR_CONTROL'     THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' enviado a control de stock: ' + i.Cliente + N', ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s)'
+                    WHEN N'INFORMAR_FALTANTES' THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': 1 prenda(s) faltante(s); Vestido Verde M'
                     WHEN N'SEPARAR'            THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s) separadas para ' + i.Cliente
-                    WHEN N'FORMALIZAR'         THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' — ' + i.Cliente + N' — ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s) — Plan ' + ISNULL(i.PlanNombre, N'—') + N' — ' + FORMAT(o.Fecha, 'dd/MM/yyyy HH:mm')
-                    WHEN N'DESPACHAR'          THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' despachado — Cliente: ' + i.Cliente + N' — ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s)'
-                    WHEN N'ENTREGAR'           THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' entregado — Cliente: ' + i.Cliente
-                    WHEN N'DEVOLUCION'         THEN N'Devolución pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' — Cliente: ' + i.Cliente + N' — ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s) pasan a EnLimpieza'
-                    WHEN N'CANCELAR'           THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' cancelado — Cliente: ' + i.Cliente + N' — Motivo: ' + i.Motivo
-                    ELSE N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': el cliente ' + i.Cliente + N' desistió (' + i.Etapa + N') — ' + i.Motivo END AS Descripcion
+                    WHEN N'FORMALIZAR'         THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': ' + i.Cliente + N', ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s); Plan ' + ISNULL(i.PlanNombre, N'-') + N'; ' + FORMAT(o.Fecha, 'dd/MM/yyyy HH:mm')
+                    WHEN N'DESPACHAR'          THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' despachado; Cliente: ' + i.Cliente + N'; ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s)'
+                    WHEN N'ENTREGAR'           THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' entregado; Cliente: ' + i.Cliente
+                    WHEN N'DEVOLUCION'         THEN N'Devolución pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N'; Cliente: ' + i.Cliente + N'; ' + CAST(i.Cant AS NVARCHAR(10)) + N' prenda(s) pasan a EnLimpieza'
+                    WHEN N'CANCELAR'           THEN N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N' cancelado; Cliente: ' + i.Cliente + N'; Motivo: ' + i.Motivo
+                    ELSE N'Pedido #' + CAST(o.IdPedido AS NVARCHAR(10)) + N': el cliente ' + i.Cliente + N' desistió (' + i.Etapa + N'), ' + i.Motivo END AS Descripcion
         FROM (SELECT DISTINCT IdPedido, Orden, Fecha, Accion, Usr FROM #Ops WHERE Accion <> N'CONFIRMAR_PRENDAS') o
         JOIN #PedInfo i ON i.IdPedido = o.IdPedido
         UNION ALL
         -- Altas de clientes
         SELECT cl.FechaAlta, N'vendedor', NULL, NULL, cl.IdCliente, N'AltaCliente',
-               N'Alta de cliente ' + cl.Nombre + N' ' + cl.Apellido + N' — DNI ' + cl.DNI
+               N'Alta de cliente ' + cl.Nombre + N' ' + cl.Apellido + N', DNI ' + cl.DNI
         FROM Cliente cl
         UNION ALL
         -- Baja lógica de Gustavo
         SELECT DATEADD(HOUR, 15, DATEADD(DAY, -c.BajaLogica, @base)), N'admin', NULL, NULL, c.IdCliente, N'BajaCliente',
-               N'Baja de cliente ' + c.Nombre + N' ' + c.Apellido + N' — DNI ' + c.DNI
+               N'Baja de cliente ' + c.Nombre + N' ' + c.Apellido + N', DNI ' + c.DNI
         FROM #Cli c WHERE c.BajaLogica IS NOT NULL
         UNION ALL
         -- Cobros de suscripción
         SELECT hc.FechaResolucion, hc.Actor, NULL, NULL, hc.IdCliente, N'CobroSuscripcion',
-               N'Cobro de suscripción ' + hc.NumeroComprobante + N' — ' + cl.Nombre + N' ' + cl.Apellido + N' — $' + FORMAT(hc.Importe, 'N2', 'es-AR')
+               N'Cobro de suscripción ' + hc.NumeroComprobante + N': ' + cl.Nombre + N' ' + cl.Apellido + N', $' + FORMAT(hc.Importe, 'N2', 'es-AR')
         FROM HistorialCobro hc JOIN Cliente cl ON cl.IdCliente = hc.IdCliente
         WHERE hc.Resultado = 1
         UNION ALL
@@ -5247,7 +5246,7 @@ BEGIN
         FROM Prenda pr
         UNION ALL
         SELECT cg.FechaRegistro, N'deposito', NULL, cg.IdPrenda, cg.IdCliente, N'CambioEstadoPrenda',
-               N'''' + pr.Nombre + N''' dada de baja en la inspección — cargo de $' + FORMAT(cg.Monto, 'N2', 'es-AR') + N' a ' + cl.Nombre + N' ' + cl.Apellido
+               N'''' + pr.Nombre + N''' dada de baja en la inspección, con cargo de $' + FORMAT(cg.Monto, 'N2', 'es-AR') + N' a ' + cl.Nombre + N' ' + cl.Apellido
         FROM CargoPrenda cg JOIN Prenda pr ON pr.IdPrenda = cg.IdPrenda JOIN Cliente cl ON cl.IdCliente = cg.IdCliente
     ) e;
 
@@ -5459,6 +5458,11 @@ BEGIN
         CROSS APPLY (SELECT DATEADD(MINUTE, v.Minuto, CAST(CAST(DATEADD(DAY, -v.Dias, @ahora) AS DATE) AS DATETIME)) AS Fecha) f;
     END
 
+    -- ── 9e. Serialización (1.6.1): versiones de los usuarios de demo y constancias de decisión ──
+    -- Lo carga dbo.SembrarDemoSerializacion (sección 21z17), que existe a partir de la 1.6.1.
+    IF OBJECT_ID('dbo.SembrarDemoSerializacion', 'P') IS NOT NULL
+        EXEC dbo.SembrarDemoSerializacion;
+
     -- ── 10. Marcas: demo aplicada y dígitos verificadores pendientes ─────────────────
     DELETE FROM ParametroSistema WHERE Clave IN (N'SeedDemo21', N'ResetDatosDemo', N'DemoCargaPendiente');
     INSERT INTO ParametroSistema (Clave, Valor, Fecha) VALUES (N'SeedDemo21', N'Aplicada', GETDATE());
@@ -5491,7 +5495,7 @@ GO
 -- en cualquier base donde se corra el script.
 
 -- ============================================================
--- WardrobeFlow — 21z4. TEXTOS DE FÁBRICA CORREGIDOS (terminología EN, montos {n:C2}, "En limpieza")
+-- WardrobeFlow: 21z4. TEXTOS DE FÁBRICA CORREGIDOS (terminología EN, montos {n:C2}, "En limpieza")
 -- ------------------------------------------------------------
 -- La carga de traducciones.tsv a la base es solo-inserción (DAL.Traduccion.InsertarSiNoExiste):
 -- una base ya instalada no ve los textos corregidos. Acá se actualizan SOLO las filas cuyo texto
@@ -5676,7 +5680,7 @@ END
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z5. RESTRICCIONES DE NORMALIZACIÓN SOBRE SEGURIDAD (3FN)
+-- WardrobeFlow: 21z5. RESTRICCIONES DE NORMALIZACIÓN SOBRE SEGURIDAD (3FN)
 -- ------------------------------------------------------------
 -- Sin cambios de código: el motor respalda lo que la aplicación ya cumple.
 --   · UX_Permiso_NombreRol: el nombre de un rol es único (índice filtrado EsRol = 1). Hace de
@@ -5761,7 +5765,7 @@ PRINT 'Sección 21z5: restricciones de normalización verificadas.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z6. TEXTOS EN ESPAÑOL EN USTED (sin voseo)
+-- WardrobeFlow: 21z6. TEXTOS EN ESPAÑOL EN USTED (sin voseo)
 -- ------------------------------------------------------------
 -- La interfaz en español pasa del voseo ("Seleccioná", "Volvé a intentar", "tu usuario") al usted
 -- ("Seleccione", "Vuelva a intentar", "su usuario"), el mismo registro que el instalador. Los textos
@@ -6033,7 +6037,7 @@ PRINT 'Sección 21z6: textos en español en usted verificados.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z7. AYUDA DE BACKUP: BACKUPS AUTOMÁTICOS
+-- WardrobeFlow: 21z7. AYUDA DE BACKUP: BACKUPS AUTOMÁTICOS
 -- ------------------------------------------------------------
 -- La ayuda en línea de la pantalla de Backup ahora explica los backups automáticos (al iniciar
 -- sesión según el intervalo configurable y cada 24 h, sin cifrar, rotando auto_domingo.bak …
@@ -6068,7 +6072,7 @@ PRINT 'Sección 21z7: ayuda de backups automáticos verificada.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z8. TEXTOS DE LA AUDITORÍA DE LA 1.6.0
+-- WardrobeFlow: 21z8. TEXTOS DE LA AUDITORÍA DE LA 1.6.0
 -- ------------------------------------------------------------
 -- · ayuda.BackupForm: explica "Restablecer datos de demo..." y su backup previo
 --   (WardrobeFlow_PrevioDemo_<fecha>_<usuario>.bak).
@@ -6185,7 +6189,7 @@ PRINT 'Sección 21z8: textos de la auditoría de la 1.6.0 verificados.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z9. SERIALIZACIÓN EN XML Y JSON
+-- WardrobeFlow: 21z9. SERIALIZACIÓN EN XML Y JSON
 -- ------------------------------------------------------------
 -- La exportación/importación de versiones de usuario y de errores serializados ahora admite XML o
 -- JSON (el formato lo da la extensión del archivo). Se actualizan los textos que decían solo "XML":
@@ -6359,7 +6363,7 @@ PRINT 'Sección 21z9: textos de serialización XML/JSON verificados.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z10. TEXTOS DEL CENTRO DE DECISIONES: ACCIONES EJECUTABLES Y METAS
+-- WardrobeFlow: 21z10. TEXTOS DEL CENTRO DE DECISIONES: ACCIONES EJECUTABLES Y METAS
 -- ------------------------------------------------------------
 -- · ayuda.CentroDecisionesForm: cada recomendación ejecuta algo al aceptarla (sin opciones que solo
 --   registran), la pestaña Metas y los avisos al iniciar sesión.
@@ -6449,7 +6453,7 @@ PRINT 'Sección 21z10: textos del Centro de decisiones (acciones ejecutables y m
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z12. CENTRO DE DECISIONES: PESTAÑA COHORTES (PN03)
+-- WardrobeFlow: 21z12. CENTRO DE DECISIONES: PESTAÑA COHORTES (PN03)
 -- ------------------------------------------------------------
 -- La pestaña «1b. Cohortes» (retención por mes de alta, peor cohorte y su acción) se calcula con las
 -- tablas existentes (Contratacion: primer pago; HistorialRenovacion: bajas): no hay tablas ni columnas
@@ -6490,7 +6494,7 @@ PRINT 'Sección 21z12: ayuda del Centro de decisiones con la pestaña Cohortes v
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z13. AYUDA DEL CENTRO DE DECISIONES: COHORTES + ACCIONES Y METAS (TEXTO FINAL)
+-- WardrobeFlow: 21z13. AYUDA DEL CENTRO DE DECISIONES: COHORTES + ACCIONES Y METAS (TEXTO FINAL)
 -- ------------------------------------------------------------
 -- ayuda.CentroDecisionesForm termina siempre en el mismo texto (acciones ejecutables, Metas, avisos y
 -- la línea «1b. Cohortes»), sin importar qué secciones anteriores ya corrieron sobre la base:
@@ -6555,7 +6559,7 @@ PRINT 'Sección 21z13: ayuda final del Centro de decisiones verificada.';
 GO
 
 -- ============================================================
--- WardrobeFlow — 21z14. CICLO DEL INFORME EJECUTIVO, MESES DE LAS METAS E HISTORIAL EN XML O JSON
+-- WardrobeFlow: 21z14. CICLO DEL INFORME EJECUTIVO, MESES DE LAS METAS E HISTORIAL EN XML O JSON
 -- ------------------------------------------------------------
 -- · cdc.informe.ciclo (portada del Informe ejecutivo): el mismo ciclo que la ayuda F1 del Centro
 --   (analizar → recomendar/decidir → simular → aplicar → medir), sin «aplicar promoción → medir resultado».
@@ -6675,7 +6679,7 @@ GO
 PRINT 'Sección 21z14: textos del ciclo del informe, de las metas y del historial verificados.';
 GO
 -- ============================================================
--- WardrobeFlow — 21z15. GUÍA DE PRIMER USO: REPORTES EN EL MENÚ DE CADA ROL
+-- WardrobeFlow: 21z15. GUÍA DE PRIMER USO: REPORTES EN EL MENÚ DE CADA ROL
 -- ------------------------------------------------------------
 -- · ux.guia.gerentecomercial.2 / ux.guia.gerenteinventario.2: el menú «Analítica de Negocio» ya no
 --   existe (los reportes están en Ventas e Inventario, cada uno en el menú de su rol); la guía de
@@ -6725,7 +6729,2376 @@ GO
 PRINT 'Sección 21z15: textos de la guía de primer uso verificados.';
 GO
 -- ============================================================
--- WardrobeFlow — 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA
+-- WardrobeFlow: 21z16. CENTRO DE DECISIONES (1.6.1): SUGERIR PROMOCIÓN, TEXTOS, CONSTANCIA DE LA DECISIÓN
+-- ------------------------------------------------------------
+-- El ítem de menú Promociones → Sugerir Promoción se quitó: la sugerencia (CU01-GER) se abre
+-- desde el Centro de decisiones comerciales, al aceptar una recomendación de promoción o al
+-- proponer un escenario del simulador. La patente mnuSugerenciaPromocion NO cambia (gobierna
+-- el Centro y la sugerencia).
+--   · ControlMapeado: se borra el mapeo del Menú al ítem que ya no existe.
+--   · Textos de idiomas: se borran el rótulo del ítem (mnu.sugerirpromocion), la pista de la
+--     barra de estado (ux.hint.SugerirPromocionForm) y las claves sin uso del menú «Analítica
+--     de Negocio», que se quitó en la 20i (mnu.analiticanegocio, ayuda.AnaliticaNegocioForm.titulo).
+--   · Título del Centro: solo «Centro de decisiones comerciales».
+--   · DecisionComercial.Constancia NVARCHAR(MAX) NULL: la «Constancia de la decisión» (XML) que se
+--     guarda al Aceptar, Descartar o Posponer. Sin tabla nueva (siguen 44 tablas).
+--   · Textos visibles (4 idiomas; claves, tablas y parámetros Comercial.* NO cambian):
+--       «Umbrales» → «Parámetros del análisis» (botón, tooltip, diálogo, mensajes, errores, glosario,
+--       motivos de las reglas y ayuda F1); «de fábrica» → «predeterminado(s)» en ese diálogo;
+--       «Cohortes» → «Permanencia de clientes» (pestaña 1b, Informe ejecutivo, mensajes, glosario:
+--       «clientes agrupados por el mes en que se suscribieron»); ayuda F1 del Centro (↻ Actualizar,
+--       Simular esta opción, Ver constancia) y de Alertas (marcar como leída).
+--     Las claves nuevas (↻ Actualizar, alertas leídas, constancia, error de conexión con su causa,
+--     err.pdf.enuso) las inserta la aplicación desde traducciones.tsv.
+-- Los textos se actualizan SOLO si siguen con el texto anterior exacto (COLLATE Latin1_General_BIN2):
+-- una edición hecha en Idiomas se respeta. Idempotente: en una base ya migrada no cambia nada.
+-- ============================================================
+IF OBJECT_ID('ControlMapeado') IS NOT NULL
+BEGIN
+    DELETE FROM ControlMapeado WHERE Formulario = 'Menu' AND NombreControl = 'sugerirPromocionToolStripMenuItem';
+    IF @@ROWCOUNT > 0 PRINT 'Sugerir Promoción: mapeo de menú obsoleto borrado.';
+END
+GO
+
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL
+BEGIN
+    DECLARE @ClavesObsoletas21z16 TABLE (Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT PRIMARY KEY);
+    INSERT INTO @ClavesObsoletas21z16 (Clave) VALUES
+        (N'mnu.sugerirpromocion'), (N'ux.hint.SugerirPromocionForm'),
+        (N'mnu.analiticanegocio'), (N'ayuda.AnaliticaNegocioForm.titulo');
+    DELETE t FROM Traduccion t JOIN Control c ON c.IdControl = t.IdControl JOIN @ClavesObsoletas21z16 o ON o.Clave = c.Clave;
+    DELETE c FROM Control c JOIN @ClavesObsoletas21z16 o ON o.Clave = c.Clave
+    WHERE NOT EXISTS (SELECT 1 FROM Traduccion t WHERE t.IdControl = c.IdControl);
+    DECLARE @obsoletas21z16 INT = @@ROWCOUNT;
+    IF @obsoletas21z16 > 0 PRINT CONCAT('Claves de idioma obsoletas borradas: ', @obsoletas21z16, '.');
+END
+GO
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    -- Título del Centro: solo «Centro de decisiones comerciales» (sin el subtítulo).
+    DECLARE @Textos21z16 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                                TextoAnterior NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @Textos21z16 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'cdc.titulo', N'Centro de decisiones comerciales — Inteligencia comercial y promociones', N'Centro de decisiones comerciales'),
+    (N'EN', N'cdc.titulo', N'Commercial decision center — Business intelligence and promotions', N'Commercial decision center'),
+    (N'RU', N'cdc.titulo', N'Центр коммерческих решений — коммерческая аналитика и акции', N'Центр коммерческих решений'),
+    (N'PT', N'cdc.titulo', N'Central de decisões comerciais — Inteligência comercial e promoções', N'Central de decisões comerciais');
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @Textos21z16 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Título del Centro de decisiones: ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+-- Columna nueva DecisionComercial.Constancia (1.6.1): «Constancia de la decisión» en XML. Las decisiones
+-- anteriores quedan con NULL («sin constancia: decisión anterior a la 1.6.1»). DecisionComercial no lleva
+-- dígitos verificadores (no es una tabla protegida): no hay DVH ni DVV que recalcular.
+IF OBJECT_ID('DecisionComercial') IS NOT NULL AND COL_LENGTH('DecisionComercial', 'Constancia') IS NULL
+BEGIN
+    ALTER TABLE DecisionComercial ADD Constancia NVARCHAR(MAX) NULL;
+    PRINT 'DecisionComercial: columna Constancia agregada.';
+END
+GO
+
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    -- «Umbrales» → «Parámetros del análisis», «de fábrica» → «predeterminado», «Cohortes» → «Permanencia de
+    -- clientes» y la ayuda F1 del Centro y de Alertas (texto anterior exacto → texto nuevo, 4 idiomas).
+    DECLARE @Textos21z16b TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                                 TextoAnterior NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @Textos21z16b (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'ayuda.AlertasForm',
+        N'Avisos que necesitan atención según su rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular.',
+        N'Avisos que necesitan atención según su rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular.' + NCHAR(10) + N'' + NCHAR(10) + N'• Marcar como leída (o Marcar todas como leídas): la alerta deja de contar en «Alertas (N)» del menú mientras su situación no cambie; si cambia la cantidad o el valor, vuelve a aparecer como nueva.' + NCHAR(10) + N'• Mostrar también las leídas: las lista atenuadas, con la opción de marcarlas como no leídas.'),
+    (N'EN', N'ayuda.AlertasForm',
+        N'Notices that need attention according to your role: expired or expiring subscriptions, orders waiting for stock control or with missing items, garments in cleaning, subscriptions pending payment, data integrity and backups. Refresh recalculates them.',
+        N'Notices that need attention according to your role: expired or expiring subscriptions, orders waiting for stock control or with missing items, garments in cleaning, subscriptions pending payment, data integrity and backups. Refresh recalculates them.' + NCHAR(10) + N'' + NCHAR(10) + N'• Mark as read (or Mark all as read): the alert no longer counts in the menu''s "Alerts (N)" while its situation does not change; if the amount or value changes, it shows up again as new.' + NCHAR(10) + N'• Also show read alerts: lists them dimmed, with the option to mark them as unread.'),
+    (N'RU', N'ayuda.AlertasForm',
+        N'Уведомления, требующие внимания для вашей роли: истёкшие или истекающие подписки, заказы на контроле или с нехваткой, вещи в чистке, неоплаченные подписки, целостность данных и резервные копии. «Обновить» пересчитывает их.',
+        N'Уведомления, требующие внимания для вашей роли: истёкшие или истекающие подписки, заказы на контроле или с нехваткой, вещи в чистке, неоплаченные подписки, целостность данных и резервные копии. «Обновить» пересчитывает их.' + NCHAR(10) + N'' + NCHAR(10) + N'• «Отметить как прочитанное» (или «Отметить все как прочитанные»): оповещение не учитывается в «Оповещения (N)» в меню, пока ситуация не изменится; если меняется количество или значение, оно снова появляется как новое.' + NCHAR(10) + N'• «Показывать и прочитанные»: показывает их бледным цветом, с возможностью снова отметить как непрочитанные.'),
+    (N'PT', N'ayuda.AlertasForm',
+        N'Avisos que precisam de atenção conforme o seu perfil: assinaturas vencidas ou a vencer, pedidos aguardando controle de estoque ou com faltantes, peças em limpeza, contratações pendentes de pagamento, integridade dos dados e cópias de segurança. Atualizar recalcula os alertas.',
+        N'Avisos que precisam de atenção conforme o seu perfil: assinaturas vencidas ou a vencer, pedidos aguardando controle de estoque ou com faltantes, peças em limpeza, contratações pendentes de pagamento, integridade dos dados e cópias de segurança. Atualizar recalcula os alertas.' + NCHAR(10) + N'' + NCHAR(10) + N'• Marcar como lida (ou Marcar todas como lidas): o alerta deixa de contar em «Alertas (N)» do menu enquanto a situação não mudar; se mudar a quantidade ou o valor, volta a aparecer como novo.' + NCHAR(10) + N'• Mostrar também as lidas: lista-os esmaecidos, com a opção de marcá-los como não lidos.'),
+    (N'ES', N'ayuda.CentroDecisionesForm',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados.' + NCHAR(10) + N'1b. Cohortes: retención por mes de alta y peor cohorte.' + NCHAR(10) + N'2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo: sugiere, extiende o pide la baja de una promoción, exporta los contactos de una campaña (se mide después), genera la orden de compra o da de baja / manda a revisión prendas. Descartar pide motivo; Posponer la oculta N días.' + NCHAR(10) + N'3. Historial: impacto estimado contra el real.' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción.' + NCHAR(10) + N'Metas: objetivo mensual por indicador con real, proyección y semáforo; en riesgo, sube la prioridad de lo que la mueve y se avisa al iniciar sesión.' + NCHAR(10) + N'' + NCHAR(10) + N'Umbrales: lo que dispara cada regla. Informe ejecutivo: PDF con todo.',
+        N'Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados. ↻ Actualizar vuelve a analizar.' + NCHAR(10) + N'1b. Permanencia de clientes: clientes agrupados por el mes en que se suscribieron, qué % sigue activo y el grupo que menos permanece.' + NCHAR(10) + N'2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo (promoción, contactos, orden de compra o prendas). Descartar pide motivo; Posponer la oculta N días. Simular esta opción: solo opciones de promoción.' + NCHAR(10) + N'3. Historial: impacto estimado contra el real. Ver constancia: lo que se vio al decidir (XML o JSON).' + NCHAR(10) + N'4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.' + NCHAR(10) + N'5. Medir resultado: veredicto por promoción.' + NCHAR(10) + N'Metas: objetivo mensual con real, proyección y semáforo.' + NCHAR(10) + N'' + NCHAR(10) + N'Parámetros del análisis: los valores con que se decide qué recomendar. Informe ejecutivo: PDF con todo.'),
+    (N'EN', N'ayuda.CentroDecisionesForm',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply → measure.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: period and plan; indicators against the previous period (▲/▼) and charts with 3 projected months.' + NCHAR(10) + N'1b. Cohorts: retention by sign-up month and worst cohort.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and its impact. Accept and execute always does something: it suggests, extends or asks to withdraw a promotion, exports a campaign''s contacts (measured later), generates the purchase order or writes off / sends garments for review. Discard asks for a reason; Postpone hides it N days.' + NCHAR(10) + N'3. History: estimated against actual impact.' + NCHAR(10) + N'4. Simulator: what if…? and up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion.' + NCHAR(10) + N'Goals: monthly target per indicator with actual, projection and traffic light; at risk, it raises the priority of what moves it and is announced at login.' + NCHAR(10) + N'' + NCHAR(10) + N'Thresholds: what triggers each rule. Executive report: PDF with everything.',
+        N'Business intelligence and promotions: analyse → recommend/decide → simulate → apply → measure.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analyse: period and plan; indicators against the previous period (▲/▼) and charts with 3 projected months. ↻ Refresh analyses again.' + NCHAR(10) + N'1b. Customer retention: customers grouped by the month they subscribed, what % is still active and the group that stays the least.' + NCHAR(10) + N'2. Recommendations: what is happening, why, what to do and its impact. Accept and execute always does something (promotion, contacts, purchase order or garments). Discard asks for a reason; Postpone hides it N days. Simulate this option: promotion options only.' + NCHAR(10) + N'3. History: estimated against actual impact. View record: what was seen when deciding (XML or JSON).' + NCHAR(10) + N'4. Simulator: what if…? and up to 3 scenarios.' + NCHAR(10) + N'5. Measure results: verdict per promotion.' + NCHAR(10) + N'Goals: monthly target with actual, projection and traffic light.' + NCHAR(10) + N'' + NCHAR(10) + N'Analysis parameters: the values used to decide what to recommend. Executive report: PDF with everything.'),
+    (N'RU', N'ayuda.CentroDecisionesForm',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → применение → оценка.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: период и тариф; показатели против прошлого периода (▲/▼) и графики с прогнозом на 3 месяца.' + NCHAR(10) + N'1b. Когорты: удержание по месяцу подписки и худшая когорта.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и эффект. «Принять и выполнить» всегда что-то делает: предлагает, продлевает или отменяет акцию, выгружает контакты кампании (результат измеряется позже), формирует заказ на закупку или списывает / отправляет вещи на проверку. «Отклонить» требует причины; «Отложить» скрывает на N дней.' + NCHAR(10) + N'3. История: оценка эффекта против факта.' + NCHAR(10) + N'4. Симулятор: что если…? и до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по акции.' + NCHAR(10) + N'Цели: месячная цель по показателю с фактом, прогнозом и светофором; под угрозой — растёт приоритет того, что на неё влияет, и о ней сообщается при входе.' + NCHAR(10) + N'' + NCHAR(10) + N'Пороги: что запускает правила. Отчёт для руководства: PDF со всем.',
+        N'Коммерческая аналитика и акции: анализ → рекомендация/решение → моделирование → применение → оценка.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Анализ: период и тариф; показатели против прошлого периода (▲/▼) и графики с прогнозом на 3 месяца. «↻ Обновить» повторяет анализ.' + NCHAR(10) + N'1b. Удержание клиентов: клиенты, сгруппированные по месяцу подписки, какой % остаётся активным и группа, которая уходит быстрее всех.' + NCHAR(10) + N'2. Рекомендации: что происходит, почему, что делать и эффект. «Принять и выполнить» всегда что-то делает (акция, контакты, заказ на закупку или вещи). «Отклонить» требует причины; «Отложить» скрывает на N дней. «Смоделировать вариант»: только варианты с акцией.' + NCHAR(10) + N'3. История: оценка эффекта против факта. «Показать протокол»: что было видно при решении (XML или JSON).' + NCHAR(10) + N'4. Симулятор: что если…? и до 3 сценариев.' + NCHAR(10) + N'5. Оценка результата: вердикт по акции.' + NCHAR(10) + N'Цели: месячная цель с фактом, прогнозом и светофором.' + NCHAR(10) + N'' + NCHAR(10) + N'Параметры анализа: значения, по которым решается, что рекомендовать. Отчёт для руководства: PDF со всем.'),
+    (N'PT', N'ayuda.CentroDecisionesForm',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: período e plano; indicadores contra o período anterior (▲/▼) e gráficos com 3 meses projetados.' + NCHAR(10) + N'1b. Coortes: retenção por mês de adesão e pior coorte.' + NCHAR(10) + N'2. Recomendações: o que acontece, por quê, o que fazer e seu impacto. Aceitar e executar sempre faz algo: sugere, estende ou pede a baixa de uma promoção, exporta os contatos de uma campanha (medida depois), gera a ordem de compra ou dá baixa / envia peças para revisão. Descartar pede motivo; Adiar a oculta N dias.' + NCHAR(10) + N'3. Histórico: impacto estimado contra o real.' + NCHAR(10) + N'4. Simulador: e se…? e até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção.' + NCHAR(10) + N'Metas: objetivo mensal por indicador com real, projeção e semáforo; em risco, aumenta a prioridade do que a move e é avisada ao iniciar a sessão.' + NCHAR(10) + N'' + NCHAR(10) + N'Limites: o que dispara cada regra. Relatório executivo: PDF com tudo.',
+        N'Inteligência comercial e promoções: analisar → recomendar/decidir → simular → aplicar → medir.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Analisar: período e plano; indicadores contra o período anterior (▲/▼) e gráficos com 3 meses projetados. ↻ Atualizar analisa novamente.' + NCHAR(10) + N'1b. Permanência de clientes: clientes agrupados pelo mês em que assinaram, que % continua ativo e o grupo que menos permanece.' + NCHAR(10) + N'2. Recomendações: o que acontece, por quê, o que fazer e seu impacto. Aceitar e executar sempre faz algo (promoção, contatos, ordem de compra ou peças). Descartar pede motivo; Adiar a oculta N dias. Simular esta opção: só opções de promoção.' + NCHAR(10) + N'3. Histórico: impacto estimado contra o real. Ver comprovante: o que se viu ao decidir (XML ou JSON).' + NCHAR(10) + N'4. Simulador: e se…? e até 3 cenários.' + NCHAR(10) + N'5. Medir resultado: veredito por promoção.' + NCHAR(10) + N'Metas: objetivo mensal com real, projeção e semáforo.' + NCHAR(10) + N'' + NCHAR(10) + N'Parâmetros da análise: os valores com que se decide o que recomendar. Relatório executivo: PDF com tudo.'),
+    (N'ES', N'ayuda.UmbralesComercialesDialog',
+        N'Cada umbral decide cuándo el motor del Centro de decisiones propone una acción. Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restablecer valores de fábrica: vuelve a los valores por defecto (sin guardar todavía).' + NCHAR(10) + N'• El descuento máximo no puede ser menor que el base.',
+        N'Cada parámetro del análisis decide cuándo el Centro de decisiones propone una acción (por ejemplo, el abandono a partir del cual se sugiere una promoción). Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restablecer valores predeterminados: vuelve a los valores predeterminados (sin guardar todavía).' + NCHAR(10) + N'• El descuento máximo no puede ser menor que el base.'),
+    (N'EN', N'ayuda.UmbralesComercialesDialog',
+        N'Each threshold decides when the decision center engine proposes an action. Edit the Value column (within the stated range) and press Save; changes apply from the next analysis and are logged.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restore default values: goes back to the default values (not saved yet).' + NCHAR(10) + N'• The maximum discount cannot be lower than the base one.',
+        N'Each analysis parameter decides when the decision center proposes an action (for example, the churn from which a promotion is suggested). Edit the Value column (within the stated range) and press Save; changes apply from the next analysis and are logged.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restore default values: goes back to the default values (not saved yet).' + NCHAR(10) + N'• The maximum discount cannot be lower than the base one.'),
+    (N'RU', N'ayuda.UmbralesComercialesDialog',
+        N'Каждый порог определяет, когда система центра решений предлагает действие. Измените столбец «Значение» (в указанном диапазоне) и нажмите «Сохранить»; изменения действуют со следующего анализа и попадают в журнал.' + NCHAR(10) + N'' + NCHAR(10) + N'• «Вернуть значения по умолчанию»: восстанавливает исходные значения (пока без сохранения).' + NCHAR(10) + N'• Максимальная скидка не может быть меньше базовой.',
+        N'Каждый параметр анализа определяет, когда центр решений предлагает действие (например, доля отказов, начиная с которой предлагается акция). Измените столбец «Значение» (в указанном диапазоне) и нажмите «Сохранить»; изменения действуют со следующего анализа и попадают в журнал.' + NCHAR(10) + N'' + NCHAR(10) + N'• «Вернуть значения по умолчанию»: восстанавливает значения по умолчанию (пока без сохранения).' + NCHAR(10) + N'• Максимальная скидка не может быть меньше базовой.'),
+    (N'PT', N'ayuda.UmbralesComercialesDialog',
+        N'Cada limite decide quando o motor da Central de decisões propõe uma ação. Edite a coluna Valor (dentro da faixa indicada) e clique em Salvar; as alterações valem a partir da próxima análise e ficam no registro.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restaurar valores padrão: volta aos valores padrão (ainda sem salvar).' + NCHAR(10) + N'• O desconto máximo não pode ser menor que o base.',
+        N'Cada parâmetro da análise decide quando a Central de decisões propõe uma ação (por exemplo, o abandono a partir do qual se sugere uma promoção). Edite a coluna Valor (dentro da faixa indicada) e clique em Salvar; as alterações valem a partir da próxima análise e ficam no registro.' + NCHAR(10) + N'' + NCHAR(10) + N'• Restaurar valores padrão: volta aos valores padrão (ainda sem salvar).' + NCHAR(10) + N'• O desconto máximo não pode ser menor que o base.'),
+    (N'ES', N'ayuda.UmbralesComercialesDialog.titulo',
+        N'Umbrales del motor de recomendaciones',
+        N'Parámetros del análisis'),
+    (N'EN', N'ayuda.UmbralesComercialesDialog.titulo',
+        N'Recommendation engine thresholds',
+        N'Analysis parameters'),
+    (N'RU', N'ayuda.UmbralesComercialesDialog.titulo',
+        N'Пороги системы рекомендаций',
+        N'Параметры анализа'),
+    (N'PT', N'ayuda.UmbralesComercialesDialog.titulo',
+        N'Limites do motor de recomendações',
+        N'Parâmetros da análise'),
+    (N'ES', N'cdc.btn.umbrales',
+        N'Umbrales',
+        N'Parámetros del análisis'),
+    (N'EN', N'cdc.btn.umbrales',
+        N'Thresholds',
+        N'Analysis parameters'),
+    (N'RU', N'cdc.btn.umbrales',
+        N'Пороги',
+        N'Параметры анализа'),
+    (N'PT', N'cdc.btn.umbrales',
+        N'Limites',
+        N'Parâmetros da análise'),
+    (N'ES', N'cdc.tip.umbrales',
+        N'Valores que disparan cada recomendación (editables por Gerencia).',
+        N'Valores que usa el análisis para decidir qué recomendar, por ejemplo el abandono a partir del cual se sugiere una promoción. Los edita Gerencia.'),
+    (N'EN', N'cdc.tip.umbrales',
+        N'Values that trigger each recommendation (editable by Management).',
+        N'Values the analysis uses to decide what to recommend, for example the churn from which a promotion is suggested. Management edits them.'),
+    (N'RU', N'cdc.tip.umbrales',
+        N'Значения, запускающие каждую рекомендацию (их меняет руководство).',
+        N'Значения, по которым анализ решает, что рекомендовать, например доля отказов, начиная с которой предлагается акция. Их меняет руководство.'),
+    (N'PT', N'cdc.tip.umbrales',
+        N'Valores que disparam cada recomendação (editáveis pela Gerência).',
+        N'Valores que a análise usa para decidir o que recomendar, por exemplo o abandono a partir do qual se sugere uma promoção. A Gerência os edita.'),
+    (N'ES', N'cdc.umbrales.titulo',
+        N'Umbrales del motor de recomendaciones',
+        N'Parámetros del análisis'),
+    (N'EN', N'cdc.umbrales.titulo',
+        N'Recommendation engine thresholds',
+        N'Analysis parameters'),
+    (N'RU', N'cdc.umbrales.titulo',
+        N'Пороги системы рекомендаций',
+        N'Параметры анализа'),
+    (N'PT', N'cdc.umbrales.titulo',
+        N'Limites do motor de recomendações',
+        N'Parâmetros da análise'),
+    (N'ES', N'cdc.umbrales.info',
+        N'Edite la columna Valor. Cada umbral decide cuándo el motor propone una acción; los cambios rigen desde el próximo análisis.',
+        N'Edite la columna Valor. Cada parámetro decide cuándo el análisis propone una acción; los cambios rigen desde el próximo análisis.'),
+    (N'EN', N'cdc.umbrales.info',
+        N'Edit the Value column. Each threshold decides when the engine proposes an action; changes apply from the next analysis.',
+        N'Edit the Value column. Each parameter decides when the analysis proposes an action; changes apply from the next analysis.'),
+    (N'RU', N'cdc.umbrales.info',
+        N'Измените столбец «Значение». Каждый порог определяет, когда система предлагает действие; изменения действуют со следующего анализа.',
+        N'Измените столбец «Значение». Каждый параметр определяет, когда анализ предлагает действие; изменения действуют со следующего анализа.'),
+    (N'PT', N'cdc.umbrales.info',
+        N'Edite a coluna Valor. Cada limite decide quando o motor propõe uma ação; as alterações valem a partir da próxima análise.',
+        N'Edite a coluna Valor. Cada parâmetro decide quando a análise propõe uma ação; as alterações valem a partir da próxima análise.'),
+    (N'ES', N'cdc.col.umbral',
+        N'Umbral',
+        N'Parámetro'),
+    (N'EN', N'cdc.col.umbral',
+        N'Threshold',
+        N'Parameter'),
+    (N'RU', N'cdc.col.umbral',
+        N'Порог',
+        N'Параметр'),
+    (N'PT', N'cdc.col.umbral',
+        N'Limite',
+        N'Parâmetro'),
+    (N'ES', N'cdc.col.defecto',
+        N'De fábrica',
+        N'Predeterminado'),
+    (N'ES', N'cdc.umbrales.restablecer',
+        N'Restablecer valores de fábrica',
+        N'Restablecer valores predeterminados'),
+    (N'ES', N'cdc.msg.umbrales',
+        N'Umbrales guardados. Vuelva a analizar para aplicarlos.',
+        N'Parámetros del análisis guardados. Vuelva a analizar para aplicarlos.'),
+    (N'EN', N'cdc.msg.umbrales',
+        N'Thresholds saved. Analyse again to apply them.',
+        N'Analysis parameters saved. Analyse again to apply them.'),
+    (N'RU', N'cdc.msg.umbrales',
+        N'Пороги сохранены. Повторите анализ, чтобы применить их.',
+        N'Параметры анализа сохранены. Повторите анализ, чтобы применить их.'),
+    (N'PT', N'cdc.msg.umbrales',
+        N'Limites salvos. Analise novamente para aplicá-los.',
+        N'Parâmetros da análise salvos. Analise novamente para aplicá-los.'),
+    (N'ES', N'cdc.recs.ninguna',
+        N'El motor no encontró situaciones que requieran una decisión con los umbrales actuales.',
+        N'El análisis no encontró situaciones que requieran una decisión con los parámetros del análisis actuales.'),
+    (N'EN', N'cdc.recs.ninguna',
+        N'The engine found no situations requiring a decision with the current thresholds.',
+        N'The analysis found no situations requiring a decision with the current analysis parameters.'),
+    (N'RU', N'cdc.recs.ninguna',
+        N'При текущих порогах система не нашла ситуаций, требующих решения.',
+        N'При текущих параметрах анализа ситуаций, требующих решения, не найдено.'),
+    (N'PT', N'cdc.recs.ninguna',
+        N'O motor não encontrou situações que exijam uma decisão com os limites atuais.',
+        N'A análise não encontrou situações que exijam uma decisão com os parâmetros da análise atuais.'),
+    (N'ES', N'cdc.col.decision',
+        N'Umbral y decisión',
+        N'Parámetro del análisis y decisión'),
+    (N'EN', N'cdc.col.decision',
+        N'Threshold and decision',
+        N'Analysis parameter and decision'),
+    (N'RU', N'cdc.col.decision',
+        N'Порог и решение',
+        N'Параметр анализа и решение'),
+    (N'PT', N'cdc.col.decision',
+        N'Limite e decisão',
+        N'Parâmetro da análise e decisão'),
+    (N'ES', N'err.bll.umbral.desconocido',
+        N'El umbral ''{0}'' no existe.',
+        N'El parámetro del análisis ''{0}'' no existe.'),
+    (N'EN', N'err.bll.umbral.desconocido',
+        N'The threshold ''{0}'' does not exist.',
+        N'The analysis parameter ''{0}'' does not exist.'),
+    (N'RU', N'err.bll.umbral.desconocido',
+        N'Порог «{0}» не существует.',
+        N'Параметр анализа «{0}» не существует.'),
+    (N'PT', N'err.bll.umbral.desconocido',
+        N'O limite ''{0}'' não existe.',
+        N'O parâmetro da análise ''{0}'' não existe.'),
+    (N'ES', N'err.bll.umbral.entero',
+        N'El umbral ''{0}'' debe ser un número entero.',
+        N'El parámetro del análisis ''{0}'' debe ser un número entero.'),
+    (N'EN', N'err.bll.umbral.entero',
+        N'The threshold ''{0}'' must be a whole number.',
+        N'The analysis parameter ''{0}'' must be a whole number.'),
+    (N'RU', N'err.bll.umbral.entero',
+        N'Порог «{0}» должен быть целым числом.',
+        N'Параметр анализа «{0}» должен быть целым числом.'),
+    (N'PT', N'err.bll.umbral.entero',
+        N'O limite ''{0}'' deve ser um número inteiro.',
+        N'O parâmetro da análise ''{0}'' deve ser um número inteiro.'),
+    (N'ES', N'err.bll.umbral.rango',
+        N'El umbral ''{0}'' debe estar entre {1} y {2}.',
+        N'El parámetro del análisis ''{0}'' debe estar entre {1} y {2}.'),
+    (N'EN', N'err.bll.umbral.rango',
+        N'The threshold ''{0}'' must be between {1} and {2}.',
+        N'The analysis parameter ''{0}'' must be between {1} and {2}.'),
+    (N'RU', N'err.bll.umbral.rango',
+        N'Порог «{0}» должен быть от {1} до {2}.',
+        N'Параметр анализа «{0}» должен быть от {1} до {2}.'),
+    (N'PT', N'err.bll.umbral.rango',
+        N'O limite ''{0}'' deve estar entre {1} e {2}.',
+        N'O parâmetro da análise ''{0}'' deve estar entre {1} e {2}.'),
+    (N'ES', N'glos.churn.decision',
+        N'Umbral: % de bajas alto (5 %) o suba de 2 pp → promoción de retención en el plan.',
+        N'Parámetro del análisis: % de bajas alto (5 %) o suba de 2 pp → promoción de retención en el plan.'),
+    (N'EN', N'glos.churn.decision',
+        N'Threshold: high churn (5 %) or a 2 pp rise → retention promotion on the plan.',
+        N'Analysis parameter: high churn (5 %) or a 2 pp rise → retention promotion on the plan.'),
+    (N'RU', N'glos.churn.decision',
+        N'Порог: доля отказов 5 % или рост на 2 п.п. → акция удержания по тарифу.',
+        N'Параметр анализа: доля отказов 5 % или рост на 2 п.п. → акция удержания по тарифу.'),
+    (N'PT', N'glos.churn.decision',
+        N'Limite: % de cancelamentos alto (5 %) ou aumento de 2 p.p. → promoção de retenção no plano.',
+        N'Parâmetro da análise: % de cancelamentos alto (5 %) ou aumento de 2 p.p. → promoção de retenção no plano.'),
+    (N'ES', N'rec.churn.motivo.nivel',
+        N'El % de bajas llegó al umbral de {0:0.#} %. La retención supuesta ({1:0.#} %) sale {2}.',
+        N'El % de bajas llegó al límite de {0:0.#} % de los parámetros del análisis. La retención supuesta ({1:0.#} %) sale {2}.'),
+    (N'EN', N'rec.churn.motivo.nivel',
+        N'The churn rate reached the {0:0.#} % threshold. The assumed retention ({1:0.#} %) comes {2}.',
+        N'The churn rate reached the {0:0.#} % limit of the analysis parameters. The assumed retention ({1:0.#} %) comes {2}.'),
+    (N'RU', N'rec.churn.motivo.nivel',
+        N'Доля отказов достигла порога {0:0.#} %. Допущение об удержании ({1:0.#} %) взято {2}.',
+        N'Доля отказов достигла предела {0:0.#} % из параметров анализа. Допущение об удержании ({1:0.#} %) взято {2}.'),
+    (N'PT', N'rec.churn.motivo.nivel',
+        N'O % de cancelamentos atingiu o limite de {0:0.#} %. A retenção suposta ({1:0.#} %) vem {2}.',
+        N'O % de cancelamentos atingiu o limite de {0:0.#} % dos parâmetros da análise. A retenção suposta ({1:0.#} %) vem {2}.'),
+    (N'ES', N'rec.churn.motivo.norentable',
+        N'Las bajas están por encima del umbral, pero con los supuestos actuales ninguna opción recupera su costo: revise los supuestos en el simulador antes de decidir.',
+        N'Las bajas están por encima del límite de los parámetros del análisis, pero con los supuestos actuales ninguna opción recupera su costo: revise los supuestos en el simulador antes de decidir.'),
+    (N'EN', N'rec.churn.motivo.norentable',
+        N'Churn is above the threshold, but with the current assumptions no option recovers its cost: review the assumptions in the simulator before deciding.',
+        N'Churn is above the limit of the analysis parameters, but with the current assumptions no option recovers its cost: review the assumptions in the simulator before deciding.'),
+    (N'RU', N'rec.churn.motivo.norentable',
+        N'Отказы выше порога, но при текущих допущениях ни один вариант не окупается: проверьте допущения в симуляторе перед решением.',
+        N'Отказы выше предела из параметров анализа, но при текущих допущениях ни один вариант не окупается: проверьте допущения в симуляторе перед решением.'),
+    (N'PT', N'rec.churn.motivo.norentable',
+        N'Os cancelamentos estão acima do limite, mas com as premissas atuais nenhuma opção recupera o custo: revise as premissas no simulador antes de decidir.',
+        N'Os cancelamentos estão acima do limite dos parâmetros da análise, mas com as premissas atuais nenhuma opção recupera o custo: revise as premissas no simulador antes de decidir.'),
+    (N'ES', N'cdc.cohorte.sinrec.umbral',
+        N'El % de bajas del plan {0} en el período analizado ({1}) no llega al umbral de {2:0.#} % ni subió {3:0.#} pp: el motor no generó la recomendación de bajas.',
+        N'El % de bajas del plan {0} en el período analizado ({1}) no llega al límite de {2:0.#} % de los parámetros del análisis ni subió {3:0.#} pp: no se generó la recomendación de bajas.'),
+    (N'EN', N'cdc.cohorte.sinrec.umbral',
+        N'The cancellation rate of the {0} plan in the analysed period ({1}) does not reach the {2:0.#} % threshold nor rose {3:0.#} pp: the engine did not generate the cancellation recommendation.',
+        N'The cancellation rate of the {0} plan in the analysed period ({1}) does not reach the {2:0.#} % limit of the analysis parameters nor rose {3:0.#} pp: the cancellation recommendation was not generated.'),
+    (N'RU', N'cdc.cohorte.sinrec.umbral',
+        N'Доля отказов тарифа {0} за анализируемый период ({1}) не достигает порога {2:0.#} % и не выросла на {3:0.#} п.п.: система не сформировала рекомендацию по отказам.',
+        N'Доля отказов тарифа {0} за анализируемый период ({1}) не достигает предела {2:0.#} % из параметров анализа и не выросла на {3:0.#} п.п.: рекомендация по отказам не сформирована.'),
+    (N'PT', N'cdc.cohorte.sinrec.umbral',
+        N'O % de cancelamentos do plano {0} no período analisado ({1}) não chega ao limite de {2:0.#} % nem subiu {3:0.#} pp: o motor não gerou a recomendação de cancelamentos.',
+        N'O % de cancelamentos do plano {0} no período analisado ({1}) não chega ao limite de {2:0.#} % dos parâmetros da análise nem subiu {3:0.#} pp: a recomendação de cancelamentos não foi gerada.'),
+    (N'ES', N'cdc.cohorte.tab',
+        N'1b. Cohortes',
+        N'1b. Permanencia de clientes'),
+    (N'EN', N'cdc.cohorte.tab',
+        N'1b. Cohorts',
+        N'1b. Customer retention'),
+    (N'RU', N'cdc.cohorte.tab',
+        N'1b. Когорты',
+        N'1b. Удержание клиентов'),
+    (N'PT', N'cdc.cohorte.tab',
+        N'1b. Coortes',
+        N'1b. Permanência de clientes'),
+    (N'ES', N'cdc.cohorte.btn.actuar',
+        N'Actuar sobre la peor cohorte',
+        N'Actuar sobre el grupo con menor permanencia'),
+    (N'EN', N'cdc.cohorte.btn.actuar',
+        N'Act on the worst cohort',
+        N'Act on the group with the lowest retention'),
+    (N'RU', N'cdc.cohorte.btn.actuar',
+        N'Действовать по худшей когорте',
+        N'Действовать по группе с худшим удержанием'),
+    (N'PT', N'cdc.cohorte.btn.actuar',
+        N'Agir sobre a pior coorte',
+        N'Agir sobre o grupo com menor permanência'),
+    (N'ES', N'cdc.cohorte.col.cohorte',
+        N'Cohorte (mes de alta)',
+        N'Grupo (mes de alta)'),
+    (N'EN', N'cdc.cohorte.col.cohorte',
+        N'Cohort (sign-up month)',
+        N'Group (sign-up month)'),
+    (N'RU', N'cdc.cohorte.col.cohorte',
+        N'Когорта (месяц подписки)',
+        N'Группа (месяц подписки)'),
+    (N'PT', N'cdc.cohorte.col.cohorte',
+        N'Coorte (mês de adesão)',
+        N'Grupo (mês de adesão)'),
+    (N'ES', N'cdc.cohorte.error',
+        N'No se pudo calcular el análisis de cohortes: vuelva a analizar.',
+        N'No se pudo calcular la permanencia de clientes: vuelva a analizar.'),
+    (N'EN', N'cdc.cohorte.error',
+        N'The cohort analysis could not be calculated: analyse again.',
+        N'The customer retention could not be calculated: analyse again.'),
+    (N'RU', N'cdc.cohorte.error',
+        N'Не удалось рассчитать когортный анализ: выполните анализ ещё раз.',
+        N'Не удалось рассчитать удержание клиентов: выполните анализ ещё раз.'),
+    (N'PT', N'cdc.cohorte.error',
+        N'Não foi possível calcular a análise de coortes: analise novamente.',
+        N'Não foi possível calcular a permanência de clientes: analise novamente.'),
+    (N'ES', N'cdc.cohorte.grafico.ejey',
+        N'% de la cohorte activo',
+        N'% del grupo activo'),
+    (N'EN', N'cdc.cohorte.grafico.ejey',
+        N'% of the cohort active',
+        N'% of the group active'),
+    (N'RU', N'cdc.cohorte.grafico.ejey',
+        N'% активных в когорте',
+        N'% активных в группе'),
+    (N'PT', N'cdc.cohorte.grafico.ejey',
+        N'% da coorte ativo',
+        N'% do grupo ativo'),
+    (N'ES', N'cdc.cohorte.grafico.peor',
+        N'Peor cohorte: {0:yyyy-MM}',
+        N'Menor permanencia: {0:yyyy-MM}'),
+    (N'EN', N'cdc.cohorte.grafico.peor',
+        N'Worst cohort: {0:yyyy-MM}',
+        N'Lowest retention: {0:yyyy-MM}'),
+    (N'RU', N'cdc.cohorte.grafico.peor',
+        N'Худшая когорта: {0:yyyy-MM}',
+        N'Худшее удержание: {0:yyyy-MM}'),
+    (N'PT', N'cdc.cohorte.grafico.peor',
+        N'Pior coorte: {0:yyyy-MM}',
+        N'Menor permanência: {0:yyyy-MM}'),
+    (N'ES', N'cdc.cohorte.grafico.promedio',
+        N'Promedio de las cohortes',
+        N'Promedio de los grupos'),
+    (N'EN', N'cdc.cohorte.grafico.promedio',
+        N'Average of the cohorts',
+        N'Average of the groups'),
+    (N'RU', N'cdc.cohorte.grafico.promedio',
+        N'Среднее по когортам',
+        N'Среднее по группам'),
+    (N'PT', N'cdc.cohorte.grafico.promedio',
+        N'Média das coortes',
+        N'Média dos grupos'),
+    (N'ES', N'cdc.cohorte.grafico.tippromedio',
+        N'{0}: {1:0.#} % (promedio de {2} cohorte(s), {3} cliente(s))',
+        N'{0}: {1:0.#} % (promedio de {2} grupo(s), {3} cliente(s))'),
+    (N'EN', N'cdc.cohorte.grafico.tippromedio',
+        N'{0}: {1:0.#} % (average of {2} cohort(s), {3} customer(s))',
+        N'{0}: {1:0.#} % (average of {2} group(s), {3} customer(s))'),
+    (N'RU', N'cdc.cohorte.grafico.tippromedio',
+        N'{0}: {1:0.#} % (среднее по {2} когорт(ам), {3} клиент(ов))',
+        N'{0}: {1:0.#} % (среднее по {2} групп(ам), {3} клиент(ов))'),
+    (N'PT', N'cdc.cohorte.grafico.tippromedio',
+        N'{0}: {1:0.#} % (média de {2} coorte(s), {3} cliente(s))',
+        N'{0}: {1:0.#} % (média de {2} grupo(s), {3} cliente(s))'),
+    (N'ES', N'cdc.cohorte.informe.regla',
+        N'Peor cohorte: la de menor retención en el mes de comparación (el mes {1} o, si todavía no hay datos, el último que completaron al menos 2 cohortes) entre las de {0} o más clientes; los meses en curso (*) no entran.',
+        N'Grupo con menor permanencia: el de menor retención en el mes de comparación (el mes {1} o, si todavía no hay datos, el último que completaron al menos 2 grupos) entre los de {0} o más clientes; los meses en curso (*) no entran.'),
+    (N'EN', N'cdc.cohorte.informe.regla',
+        N'Worst cohort: the one with the lowest retention in the comparison month (month {1} or, if there is no data yet, the last one completed by at least 2 cohorts) among those with {0} or more customers; months in progress (*) are not included.',
+        N'Group with the lowest retention: the one with the lowest retention in the comparison month (month {1} or, if there is no data yet, the last one completed by at least 2 groups) among those with {0} or more customers; months in progress (*) are not included.'),
+    (N'RU', N'cdc.cohorte.informe.regla',
+        N'Худшая когорта: с наименьшим удержанием в месяц сравнения (месяц {1} или, если данных ещё нет, последний, который завершили хотя бы 2 когорты) среди когорт от {0} клиентов; текущие месяцы (*) не учитываются.',
+        N'Группа с худшим удержанием: с наименьшим удержанием в месяц сравнения (месяц {1} или, если данных ещё нет, последний, который завершили хотя бы 2 группы) среди групп от {0} клиентов; текущие месяцы (*) не учитываются.'),
+    (N'PT', N'cdc.cohorte.informe.regla',
+        N'Pior coorte: a de menor retenção no mês de comparação (o mês {1} ou, se ainda não houver dados, o último completado por pelo menos 2 coortes) entre as de {0} ou mais clientes; os meses em curso (*) não entram.',
+        N'Grupo com menor permanência: o de menor retenção no mês de comparação (o mês {1} ou, se ainda não houver dados, o último completado por pelo menos 2 grupos) entre os de {0} ou mais clientes; os meses em curso (*) não entram.'),
+    (N'ES', N'cdc.cohorte.informe.titulo',
+        N'Retención por cohorte',
+        N'Permanencia de clientes'),
+    (N'EN', N'cdc.cohorte.informe.titulo',
+        N'Retention by cohort',
+        N'Customer retention'),
+    (N'RU', N'cdc.cohorte.informe.titulo',
+        N'Удержание по когортам',
+        N'Удержание клиентов'),
+    (N'PT', N'cdc.cohorte.informe.titulo',
+        N'Retenção por coorte',
+        N'Permanência de clientes'),
+    (N'ES', N'cdc.cohorte.leyenda.peor',
+        N'▶ peor cohorte (doble clic para actuar)',
+        N'▶ grupo con menor permanencia (doble clic para actuar)'),
+    (N'EN', N'cdc.cohorte.leyenda.peor',
+        N'▶ worst cohort (double-click to act)',
+        N'▶ group with the lowest retention (double-click to act)'),
+    (N'RU', N'cdc.cohorte.leyenda.peor',
+        N'▶ худшая когорта (двойной щелчок, чтобы действовать)',
+        N'▶ группа с худшим удержанием (двойной щелчок, чтобы действовать)'),
+    (N'PT', N'cdc.cohorte.leyenda.peor',
+        N'▶ pior coorte (duplo clique para agir)',
+        N'▶ grupo com menor permanência (duplo clique para agir)'),
+    (N'ES', N'cdc.cohorte.msg.recomendacion',
+        N'Recomendación de bajas del plan {0}: es el plan que más explica las bajas de la cohorte de {1:yyyy-MM}.',
+        N'Recomendación de bajas del plan {0}: es el plan que más explica las bajas de los clientes que se suscribieron en {1:yyyy-MM}.'),
+    (N'EN', N'cdc.cohorte.msg.recomendacion',
+        N'Cancellation recommendation for the {0} plan: it is the plan that best explains the cancellations of the {1:yyyy-MM} cohort.',
+        N'Cancellation recommendation for the {0} plan: it is the plan that best explains the cancellations of the customers who subscribed in {1:yyyy-MM}.'),
+    (N'RU', N'cdc.cohorte.msg.recomendacion',
+        N'Рекомендация по отказам для тарифа {0}: этот тариф больше всего объясняет отказы когорты {1:yyyy-MM}.',
+        N'Рекомендация по отказам для тарифа {0}: этот тариф больше всего объясняет отказы клиентов, подписавшихся в {1:yyyy-MM}.'),
+    (N'PT', N'cdc.cohorte.msg.recomendacion',
+        N'Recomendação de cancelamentos do plano {0}: é o plano que mais explica os cancelamentos da coorte de {1:yyyy-MM}.',
+        N'Recomendação de cancelamentos do plano {0}: é o plano que mais explica os cancelamentos dos clientes que assinaram em {1:yyyy-MM}.'),
+    (N'ES', N'cdc.cohorte.msg.simulador',
+        N'Simulador cargado con el plan {0} (peor cohorte: {1:yyyy-MM}): ajuste los supuestos para evaluar la retención.',
+        N'Simulador cargado con el plan {0} (menor permanencia: los suscriptos en {1:yyyy-MM}): ajuste los supuestos para evaluar la retención.'),
+    (N'EN', N'cdc.cohorte.msg.simulador',
+        N'Simulator loaded with the {0} plan (worst cohort: {1:yyyy-MM}): adjust the assumptions to assess retention.',
+        N'Simulator loaded with the {0} plan (lowest retention: customers who subscribed in {1:yyyy-MM}): adjust the assumptions to assess retention.'),
+    (N'RU', N'cdc.cohorte.msg.simulador',
+        N'Симулятор загружен с тарифом {0} (худшая когорта: {1:yyyy-MM}): настройте допущения, чтобы оценить удержание.',
+        N'Симулятор загружен с тарифом {0} (худшее удержание: подписавшиеся в {1:yyyy-MM}): настройте допущения, чтобы оценить удержание.'),
+    (N'PT', N'cdc.cohorte.msg.simulador',
+        N'Simulador carregado com o plano {0} (pior coorte: {1:yyyy-MM}): ajuste as premissas para avaliar a retenção.',
+        N'Simulador carregado com o plano {0} (menor permanência: os assinantes de {1:yyyy-MM}): ajuste as premissas para avaliar a retenção.'),
+    (N'ES', N'cdc.cohorte.peor',
+        N'La peor cohorte es la de {0:yyyy-MM} ({1} clientes): retiene el {2:0.#} % al mes {3}, contra el {4} del promedio. El plan {5} explica {6} de sus {7} baja(s).',
+        N'Los clientes que se suscribieron en {0:yyyy-MM} ({1} clientes) son el grupo con menor permanencia: retienen el {2:0.#} % al mes {3}, contra el {4} del promedio. El plan {5} explica {6} de sus {7} baja(s).'),
+    (N'EN', N'cdc.cohorte.peor',
+        N'The worst cohort is {0:yyyy-MM} ({1} customers): it retains {2:0.#} % at month {3}, against an average of {4}. The {5} plan explains {6} of its {7} cancellation(s).',
+        N'The customers who subscribed in {0:yyyy-MM} ({1} customers) are the group with the lowest retention: they retain {2:0.#} % at month {3}, against an average of {4}. The {5} plan explains {6} of its {7} cancellation(s).'),
+    (N'RU', N'cdc.cohorte.peor',
+        N'Худшая когорта — {0:yyyy-MM} ({1} клиентов): удерживает {2:0.#} % на месяц {3} при среднем {4}. Тариф {5} объясняет {6} из {7} отказ(ов).',
+        N'Клиенты, подписавшиеся в {0:yyyy-MM} ({1} клиентов), — группа с худшим удержанием: удерживается {2:0.#} % на месяц {3} при среднем {4}. Тариф {5} объясняет {6} из {7} отказ(ов).'),
+    (N'PT', N'cdc.cohorte.peor',
+        N'A pior coorte é a de {0:yyyy-MM} ({1} clientes): retém {2:0.#} % no mês {3}, contra {4} da média. O plano {5} explica {6} de seus {7} cancelamento(s).',
+        N'Os clientes que assinaram em {0:yyyy-MM} ({1} clientes) são o grupo com menor permanência: retêm {2:0.#} % no mês {3}, contra {4} da média. O plano {5} explica {6} de seus {7} cancelamento(s).'),
+    (N'ES', N'cdc.cohorte.peor.sinplan',
+        N'La peor cohorte es la de {0:yyyy-MM} ({1} clientes): retiene el {2:0.#} % al mes {3}, contra el {4} del promedio. No se pudo identificar el plan de sus bajas.',
+        N'Los clientes que se suscribieron en {0:yyyy-MM} ({1} clientes) son el grupo con menor permanencia: retienen el {2:0.#} % al mes {3}, contra el {4} del promedio. No se pudo identificar el plan de sus bajas.'),
+    (N'EN', N'cdc.cohorte.peor.sinplan',
+        N'The worst cohort is {0:yyyy-MM} ({1} customers): it retains {2:0.#} % at month {3}, against an average of {4}. The plan of its cancellations could not be identified.',
+        N'The customers who subscribed in {0:yyyy-MM} ({1} customers) are the group with the lowest retention: they retain {2:0.#} % at month {3}, against an average of {4}. The plan of its cancellations could not be identified.'),
+    (N'RU', N'cdc.cohorte.peor.sinplan',
+        N'Худшая когорта — {0:yyyy-MM} ({1} клиентов): удерживает {2:0.#} % на месяц {3} при среднем {4}. Не удалось определить тариф её отказов.',
+        N'Клиенты, подписавшиеся в {0:yyyy-MM} ({1} клиентов), — группа с худшим удержанием: удерживается {2:0.#} % на месяц {3} при среднем {4}. Не удалось определить тариф её отказов.'),
+    (N'PT', N'cdc.cohorte.peor.sinplan',
+        N'A pior coorte é a de {0:yyyy-MM} ({1} clientes): retém {2:0.#} % no mês {3}, contra {4} da média. Não foi possível identificar o plano de seus cancelamentos.',
+        N'Os clientes que assinaram em {0:yyyy-MM} ({1} clientes) são o grupo com menor permanência: retêm {2:0.#} % no mês {3}, contra {4} da média. Não foi possível identificar o plano de seus cancelamentos.'),
+    (N'ES', N'cdc.cohorte.sindatos',
+        N'No hay altas de suscriptores en los últimos 12 meses para armar cohortes.',
+        N'No hay altas de suscriptores en los últimos 12 meses para agrupar a los clientes por el mes en que se suscribieron.'),
+    (N'EN', N'cdc.cohorte.sindatos',
+        N'There are no subscriber sign-ups in the last 12 months to build cohorts.',
+        N'There are no subscriber sign-ups in the last 12 months to group customers by the month they subscribed.'),
+    (N'RU', N'cdc.cohorte.sindatos',
+        N'За последние 12 месяцев нет новых подписчиков, чтобы построить когорты.',
+        N'За последние 12 месяцев нет новых подписчиков, чтобы сгруппировать клиентов по месяцу подписки.'),
+    (N'PT', N'cdc.cohorte.sindatos',
+        N'Não há adesões de assinantes nos últimos 12 meses para montar coortes.',
+        N'Não há adesões de assinantes nos últimos 12 meses para agrupar os clientes pelo mês em que assinaram.'),
+    (N'ES', N'cdc.cohorte.sinmesescompletos',
+        N'Aún no hay meses completos para comparar: las cohortes están en su primer mes (*), que se ve en la grilla.',
+        N'Aún no hay meses completos para comparar: los grupos están en su primer mes (*), que se ve en la grilla.'),
+    (N'EN', N'cdc.cohorte.sinmesescompletos',
+        N'There are no complete months to compare yet: the cohorts are in their first month (*), shown in the grid.',
+        N'There are no complete months to compare yet: the groups are in their first month (*), shown in the grid.'),
+    (N'RU', N'cdc.cohorte.sinmesescompletos',
+        N'Пока нет полных месяцев для сравнения: когорты в своём первом месяце (*), он виден в таблице.',
+        N'Пока нет полных месяцев для сравнения: группы в своём первом месяце (*), он виден в таблице.'),
+    (N'PT', N'cdc.cohorte.sinmesescompletos',
+        N'Ainda não há meses completos para comparar: as coortes estão no primeiro mês (*), que aparece na grade.',
+        N'Ainda não há meses completos para comparar: os grupos estão no primeiro mês (*), que aparece na grade.'),
+    (N'ES', N'cdc.cohorte.sinpeor.pocas',
+        N'Para elegir la peor cohorte hacen falta al menos 2 cohortes de {0} o más clientes con un mes completo; todavía no las hay.',
+        N'Para elegir el grupo con menor permanencia hacen falta al menos 2 grupos de {0} o más clientes con un mes completo; todavía no los hay.'),
+    (N'EN', N'cdc.cohorte.sinpeor.pocas',
+        N'Choosing the worst cohort needs at least 2 cohorts of {0} or more customers with a complete month; there are none yet.',
+        N'Choosing the group with the lowest retention needs at least 2 groups of {0} or more customers with a complete month; there are none yet.'),
+    (N'RU', N'cdc.cohorte.sinpeor.pocas',
+        N'Чтобы выбрать худшую когорту, нужны хотя бы 2 когорты по {0} и более клиентов с полным месяцем; таких пока нет.',
+        N'Чтобы выбрать группу с худшим удержанием, нужны хотя бы 2 группы по {0} и более клиентов с полным месяцем; таких пока нет.'),
+    (N'PT', N'cdc.cohorte.sinpeor.pocas',
+        N'Para escolher a pior coorte são necessárias pelo menos 2 coortes de {0} ou mais clientes com um mês completo; ainda não há.',
+        N'Para escolher o grupo com menor permanência são necessários pelo menos 2 grupos de {0} ou mais clientes com um mês completo; ainda não há.'),
+    (N'ES', N'cdc.cohorte.sinpeor.sindatos',
+        N'No hay altas de suscriptores en los últimos 12 meses: no hay cohortes que comparar.',
+        N'No hay altas de suscriptores en los últimos 12 meses: no hay grupos que comparar.'),
+    (N'EN', N'cdc.cohorte.sinpeor.sindatos',
+        N'There are no subscriber sign-ups in the last 12 months: there are no cohorts to compare.',
+        N'There are no subscriber sign-ups in the last 12 months: there are no groups to compare.'),
+    (N'PT', N'cdc.cohorte.sinpeor.sindatos',
+        N'Não há adesões de assinantes nos últimos 12 meses: não há coortes para comparar.',
+        N'Não há adesões de assinantes nos últimos 12 meses: não há grupos para comparar.'),
+    (N'ES', N'cdc.cohorte.sinpeor.todas',
+        N'Todas las cohortes comparables retienen el 100 % al mes {0}: no hay una cohorte peor que las demás.',
+        N'Todos los grupos comparables retienen el 100 % al mes {0}: ninguno tiene menor permanencia que los demás.'),
+    (N'EN', N'cdc.cohorte.sinpeor.todas',
+        N'All comparable cohorts retain 100 % at month {0}: no cohort is worse than the rest.',
+        N'All comparable groups retain 100 % at month {0}: none has lower retention than the rest.'),
+    (N'RU', N'cdc.cohorte.sinpeor.todas',
+        N'Все сравнимые когорты удерживают 100 % на месяц {0}: худшей когорты нет.',
+        N'Все сравнимые группы удерживают 100 % на месяц {0}: худшей группы нет.'),
+    (N'PT', N'cdc.cohorte.sinpeor.todas',
+        N'Todas as coortes comparáveis retêm 100 % no mês {0}: nenhuma coorte é pior que as demais.',
+        N'Todos os grupos comparáveis retêm 100 % no mês {0}: nenhum tem menor permanência que os demais.'),
+    (N'ES', N'cdc.cohorte.sinrec.sinplan',
+        N'No se pudo identificar el plan que explica las bajas de la cohorte: no hay una recomendación de bajas a la cual ir.',
+        N'No se pudo identificar el plan que explica las bajas del grupo: no hay una recomendación de bajas a la cual ir.'),
+    (N'EN', N'cdc.cohorte.sinrec.sinplan',
+        N'The plan that explains the cohort''s cancellations could not be identified: there is no cancellation recommendation to go to.',
+        N'The plan that explains the group''s cancellations could not be identified: there is no cancellation recommendation to go to.'),
+    (N'RU', N'cdc.cohorte.sinrec.sinplan',
+        N'Не удалось определить тариф, объясняющий отказы когорты: перейти к рекомендации по отказам нельзя.',
+        N'Не удалось определить тариф, объясняющий отказы группы: перейти к рекомендации по отказам нельзя.'),
+    (N'PT', N'cdc.cohorte.sinrec.sinplan',
+        N'Não foi possível identificar o plano que explica os cancelamentos da coorte: não há recomendação de cancelamentos para abrir.',
+        N'Não foi possível identificar o plano que explica os cancelamentos do grupo: não há recomendação de cancelamentos para abrir.'),
+    (N'ES', N'cdc.cohorte.tip',
+        N'Cohorte {0:yyyy-MM}, mes {1}: {2} de {3} cliente(s) activos ({4:0.#} %)',
+        N'Suscriptos en {0:yyyy-MM}, mes {1}: {2} de {3} cliente(s) activos ({4:0.#} %)'),
+    (N'EN', N'cdc.cohorte.tip',
+        N'Cohort {0:yyyy-MM}, month {1}: {2} of {3} customer(s) active ({4:0.#} %)',
+        N'Subscribed in {0:yyyy-MM}, month {1}: {2} of {3} customer(s) active ({4:0.#} %)'),
+    (N'RU', N'cdc.cohorte.tip',
+        N'Когорта {0:yyyy-MM}, месяц {1}: активны {2} из {3} клиент(ов) ({4:0.#} %)',
+        N'Подписавшиеся в {0:yyyy-MM}, месяц {1}: активны {2} из {3} клиент(ов) ({4:0.#} %)'),
+    (N'PT', N'cdc.cohorte.tip',
+        N'Coorte {0:yyyy-MM}, mês {1}: {2} de {3} cliente(s) ativos ({4:0.#} %)',
+        N'Assinantes de {0:yyyy-MM}, mês {1}: {2} de {3} cliente(s) ativos ({4:0.#} %)'),
+    (N'ES', N'cdc.cohorte.tip.actuar',
+        N'Lleva a la recomendación de bajas del plan que más explica la peor cohorte (o, si no la hay, al Simulador). También con doble clic en su fila.',
+        N'Lleva a la recomendación de bajas del plan que más explica las bajas del grupo con menor permanencia (o, si no la hay, al Simulador). También con doble clic en su fila.'),
+    (N'EN', N'cdc.cohorte.tip.actuar',
+        N'Takes you to the cancellation recommendation for the plan that best explains the worst cohort (or, if there is none, to the Simulator). Also by double-clicking its row.',
+        N'Takes you to the cancellation recommendation for the plan that best explains the cancellations of the group with the lowest retention (or, if there is none, to the Simulator). Also by double-clicking its row.'),
+    (N'RU', N'cdc.cohorte.tip.actuar',
+        N'Переходит к рекомендации по отказам для тарифа, который больше всего объясняет худшую когорту (а если её нет — к симулятору). Также двойным щелчком по её строке.',
+        N'Переходит к рекомендации по отказам для тарифа, который больше всего объясняет отказы группы с худшим удержанием (а если её нет — к симулятору). Также двойным щелчком по её строке.'),
+    (N'PT', N'cdc.cohorte.tip.actuar',
+        N'Leva à recomendação de cancelamentos do plano que mais explica a pior coorte (ou, se não houver, ao Simulador). Também com duplo clique na sua linha.',
+        N'Leva à recomendação de cancelamentos do plano que mais explica os cancelamentos do grupo com menor permanência (ou, se não houver, ao Simulador). Também com duplo clique na sua linha.'),
+    (N'ES', N'cdc.cohorte.tip.chica',
+        N'Cohorte de menos de {0} clientes: se muestra, pero no compite por la peor cohorte (sería ruido).',
+        N'Grupo de menos de {0} clientes: se muestra, pero no compite por la menor permanencia (sería ruido).'),
+    (N'EN', N'cdc.cohorte.tip.chica',
+        N'Cohort with fewer than {0} customers: it is shown, but does not compete for worst cohort (it would be noise).',
+        N'Group with fewer than {0} customers: it is shown, but does not compete for the lowest retention (it would be noise).'),
+    (N'RU', N'cdc.cohorte.tip.chica',
+        N'Когорта меньше {0} клиентов: показывается, но не участвует в выборе худшей когорты (это был бы шум).',
+        N'Группа меньше {0} клиентов: показывается, но не участвует в выборе худшего удержания (это был бы шум).'),
+    (N'PT', N'cdc.cohorte.tip.chica',
+        N'Coorte com menos de {0} clientes: é exibida, mas não concorre a pior coorte (seria ruído).',
+        N'Grupo com menos de {0} clientes: é exibido, mas não concorre à menor permanência (seria ruído).'),
+    (N'ES', N'glos.cohorte.nombre',
+        N'Retención por cohorte',
+        N'Permanencia de clientes'),
+    (N'EN', N'glos.cohorte.nombre',
+        N'Retention by cohort',
+        N'Customer retention'),
+    (N'RU', N'glos.cohorte.nombre',
+        N'Удержание по когортам',
+        N'Удержание клиентов'),
+    (N'PT', N'glos.cohorte.nombre',
+        N'Retenção por coorte',
+        N'Permanência de clientes'),
+    (N'ES', N'glos.cohorte.formula',
+        N'Clientes de la cohorte (mismo mes de alta) sin baja registrada al cierre del mes k desde el alta / clientes de la cohorte × 100 (Mes 0 = el mes del alta). Pausas, vencimientos y suspensiones no son bajas, igual que en el % de bajas; el mes en curso se marca con * y no entra en el promedio. Fuente: Contratacion (primer pago), HistorialRenovacion (Resultado = Baja).',
+        N'Clientes agrupados por el mes en que se suscribieron: los del grupo sin baja registrada al cierre del mes k desde el alta / clientes del grupo × 100 (Mes 0 = el mes del alta). Pausas, vencimientos y suspensiones no son bajas, igual que en el % de bajas; el mes en curso se marca con * y no entra en el promedio. Fuente: Contratacion (primer pago), HistorialRenovacion (Resultado = Baja).'),
+    (N'EN', N'glos.cohorte.formula',
+        N'Cohort customers (same sign-up month) with no recorded cancellation at the end of month k since sign-up / cohort customers × 100 (Month 0 = the sign-up month). Pauses, expirations and suspensions are not cancellations, as in the cancellation rate; the month in progress is marked with * and is not included in the average. Source: Contratacion (first payment), HistorialRenovacion (Resultado = Baja).',
+        N'Customers grouped by the month they subscribed: those in the group with no recorded cancellation at the end of month k since sign-up / customers in the group × 100 (Month 0 = the sign-up month). Pauses, expirations and suspensions are not cancellations, as in the cancellation rate; the month in progress is marked with * and is not included in the average. Source: Contratacion (first payment), HistorialRenovacion (Resultado = Baja).'),
+    (N'RU', N'glos.cohorte.formula',
+        N'Клиенты когорты (один месяц подписки) без зарегистрированного отказа на конец месяца k после подписки / клиенты когорты × 100 (Месяц 0 = месяц подписки). Паузы, просрочки и приостановки не считаются отказами, как и в доле отказов; текущий месяц отмечается * и не входит в среднее. Источник: Contratacion (первый платёж), HistorialRenovacion (Resultado = Baja).',
+        N'Клиенты, сгруппированные по месяцу подписки: клиенты группы без зарегистрированного отказа на конец месяца k после подписки / клиенты группы × 100 (Месяц 0 = месяц подписки). Паузы, просрочки и приостановки не считаются отказами, как и в доле отказов; текущий месяц отмечается * и не входит в среднее. Источник: Contratacion (первый платёж), HistorialRenovacion (Resultado = Baja).'),
+    (N'PT', N'glos.cohorte.formula',
+        N'Clientes da coorte (mesmo mês de adesão) sem cancelamento registrado no fechamento do mês k desde a adesão / clientes da coorte × 100 (Mês 0 = o mês da adesão). Pausas, vencimentos e suspensões não são cancelamentos, como no % de cancelamentos; o mês em curso é marcado com * e não entra na média. Fonte: Contratacion (primeiro pagamento), HistorialRenovacion (Resultado = Baja).',
+        N'Clientes agrupados pelo mês em que assinaram: os do grupo sem cancelamento registrado no fechamento do mês k desde a adesão / clientes do grupo × 100 (Mês 0 = o mês da adesão). Pausas, vencimentos e suspensões não são cancelamentos, como no % de cancelamentos; o mês em curso é marcado com * e não entra na média. Fonte: Contratacion (primeiro pagamento), HistorialRenovacion (Resultado = Baja).'),
+    (N'ES', N'glos.cohorte.decision',
+        N'Peor cohorte: la de menor retención al mes 3 (o al último mes que completaron al menos 2 cohortes) entre las de 4 o más clientes; el plan que más explica sus bajas lleva a su recomendación de bajas o al Simulador.',
+        N'Grupo con menor permanencia: el de menor retención al mes 3 (o al último mes que completaron al menos 2 grupos) entre los de 4 o más clientes; el plan que más explica sus bajas lleva a su recomendación de bajas o al Simulador.'),
+    (N'EN', N'glos.cohorte.decision',
+        N'Worst cohort: the one with the lowest retention at month 3 (or at the last month completed by at least 2 cohorts) among those with 4 or more customers; the plan that best explains its cancellations leads to its cancellation recommendation or to the Simulator.',
+        N'Group with the lowest retention: the one with the lowest retention at month 3 (or at the last month completed by at least 2 groups) among those with 4 or more customers; the plan that best explains its cancellations leads to its cancellation recommendation or to the Simulator.'),
+    (N'RU', N'glos.cohorte.decision',
+        N'Худшая когорта: с наименьшим удержанием на месяц 3 (или на последний месяц, который завершили хотя бы 2 когорты) среди когорт от 4 клиентов; тариф, больше всего объясняющий её отказы, ведёт к его рекомендации по отказам или к симулятору.',
+        N'Группа с худшим удержанием: с наименьшим удержанием на месяц 3 (или на последний месяц, который завершили хотя бы 2 группы) среди групп от 4 клиентов; тариф, больше всего объясняющий её отказы, ведёт к его рекомендации по отказам или к симулятору.'),
+    (N'PT', N'glos.cohorte.decision',
+        N'Pior coorte: a de menor retenção no mês 3 (ou no último mês completado por pelo menos 2 coortes) entre as de 4 ou mais clientes; o plano que mais explica seus cancelamentos leva à sua recomendação de cancelamentos ou ao Simulador.',
+        N'Grupo com menor permanência: o de menor retenção no mês 3 (ou no último mês completado por pelo menos 2 grupos) entre os de 4 ou mais clientes; o plano que mais explica seus cancelamentos leva à sua recomendação de cancelamentos ou ao Simulador.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @Textos21z16b f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Parámetros del análisis, permanencia de clientes y ayudas: ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z16: Centro de decisiones 1.6.1 (textos, constancia de la decisión) verificada.';
+GO
+-- ============================================================
+-- WardrobeFlow: 21z17. DATOS DE DEMOSTRACIÓN DE LA SERIALIZACIÓN (1.6.1): VERSIONES Y CONSTANCIAS
+-- ------------------------------------------------------------
+-- Para que Versiones de usuario (Memento, CU09/CU10-SIS) y la Constancia de la decisión (PN03) tengan
+-- qué exportar, importar y restaurar desde la instalación. dbo.SembrarDemoSerializacion:
+--   · HistorialUsuario: 2 a 4 versiones por usuario de demo (admin, deposito, auditor, gcomercial,
+--     ginventario, logistico, caja, admcomercial, contable), con fechas escalonadas relativas a hoy y
+--     el mismo formato que guarda BLL.VersionUsuario (BE.Usuario.CrearMemento: ClaveSnap vacía,
+--     EstadoSnap = no bloqueado, Detalle como Usuario.DescribirCambios / Desbloquear / CambiarRol).
+--     La última versión de cada usuario es su estado actual. SOLO para el usuario que no tiene ninguna
+--     versión (no pisa un historial real). El vendedor ya trae las suyas (paso 9c de la demo).
+--     HistorialUsuario no lleva dígito verificador: no hay DVH ni DVV que recalcular.
+--   · DecisionComercial.Constancia: la constancia de 3 decisiones de la demo (la pospuesta, la descartada
+--     y la campaña de renovación aceptada y ejecutada). El XML se generó con el código de la aplicación
+--     (BLL.Inteligencia.ConstanciasDecision.Armar + Serializar, con los indicadores y los parámetros del
+--     análisis de la demo) y acá solo se le ponen el Id, las fechas, el título, la acción y el impacto de
+--     cada decisión. La ejecutada hace 107 días (bajas del plan Básico) queda SIN constancia a propósito:
+--     muestra el caso «decisión anterior a la 1.6.1». Solo si la decisión no tiene constancia.
+-- dbo.RestablecerDatosDemo (21z3b) también lo llama al final, así «Restablecer datos de demo» y
+-- BD/Reset_Datos_Demo.sql dejan los mismos datos. Idempotente.
+-- ============================================================
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+IF OBJECT_ID('dbo.SembrarDemoSerializacion', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.SembrarDemoSerializacion;
+GO
+CREATE PROCEDURE dbo.SembrarDemoSerializacion
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @ahora DATETIME = GETDATE();
+
+    -- ── Versiones de usuario ──
+    IF OBJECT_ID('HistorialUsuario', 'U') IS NOT NULL
+    BEGIN
+        -- NULL = el valor actual del usuario (la versión más nueva de cada uno es su estado de hoy).
+        DECLARE @Versiones TABLE (Username NVARCHAR(100) NOT NULL, Dias INT NOT NULL, Detalle NVARCHAR(500) NOT NULL,
+                                  UsernameSnap NVARCHAR(100) NULL, NombreSnap NVARCHAR(100) NULL, ApellidoSnap NVARCHAR(100) NULL,
+                                  FechaNacSnap DATE NULL, EmailSnap NVARCHAR(200) NULL, Bloqueado BIT NOT NULL, Intentos INT NOT NULL);
+        INSERT INTO @Versiones VALUES
+            (N'admin',        150, N'Alta de usuario (estado administrativo inicial).', NULL, NULL, N'Sistemas', NULL, NULL, 0, 0),
+            (N'admin',        120, N'Apellido: ''Sistemas'' → ''Sistema''', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'deposito',     140, N'Alta de usuario (estado administrativo inicial).', NULL, NULL, NULL, NULL, N'operaciones@wardrobeflow.com', 0, 0),
+            (N'deposito',      95, N'Email: ''operaciones@wardrobeflow.com'' → ''deposito@wardrobeflow.com''', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'deposito',      30, N'Snapshot antes de desbloqueo por ''admin''.', NULL, NULL, NULL, NULL, NULL, 1, 3),
+            (N'auditor',      130, N'Alta de usuario (estado administrativo inicial).', NULL, NULL, N'Diaz', NULL, NULL, 0, 0),
+            (N'auditor',      100, N'Apellido: ''Diaz'' → ''Díaz''', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'gcomercial',   160, N'Alta de usuario (estado administrativo inicial).', NULL, N'Gabi', NULL, NULL, N'gabi.moran@wardrobeflow.com', 0, 0),
+            (N'gcomercial',   125, N'Nombre: ''Gabi'' → ''Gabriel''', NULL, NULL, NULL, NULL, N'gabi.moran@wardrobeflow.com', 0, 0),
+            (N'gcomercial',   110, N'Email: ''gabi.moran@wardrobeflow.com'' → ''gcomercial@wardrobeflow.com''', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'gcomercial',    60, N'Cambio de rol: ''Vendedor'' → ''GerenteComercial''.', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'ginventario',  135, N'Alta de usuario (estado administrativo inicial).', NULL, NULL, NULL, '1986-07-03', NULL, 0, 0),
+            (N'ginventario',   90, N'Fecha nac.: ''1986-07-03'' → ''1986-07-30''', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'logistico',    120, N'Alta de usuario (estado administrativo inicial).', NULL, NULL, NULL, NULL, N'lgomez@wardrobeflow.com', 0, 0),
+            (N'logistico',     70, N'Email: ''lgomez@wardrobeflow.com'' → ''logistico@wardrobeflow.com''', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'logistico',     12, N'Snapshot antes de desbloqueo por ''admin''.', NULL, NULL, NULL, NULL, NULL, 1, 3),
+            (N'caja',         115, N'Alta de usuario (estado administrativo inicial).', NULL, NULL, N'Ibañez', NULL, NULL, 0, 0),
+            (N'caja',          80, N'Apellido: ''Ibañez'' → ''Ibáñez''', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'admcomercial', 110, N'Alta de usuario (estado administrativo inicial).', NULL, NULL, NULL, NULL, N'arios@wardrobeflow.com', 0, 0),
+            (N'admcomercial',  75, N'Email: ''arios@wardrobeflow.com'' → ''admcomercial@wardrobeflow.com''', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'admcomercial',  40, N'Cambio de rol: ''Vendedor'' → ''AdministracionComercial''.', NULL, NULL, NULL, NULL, NULL, 0, 0),
+            (N'contable',     105, N'Alta de usuario (estado administrativo inicial).', NULL, N'Carlos A.', NULL, NULL, NULL, 0, 0),
+            (N'contable',      85, N'Nombre: ''Carlos A.'' → ''Carlos''', NULL, NULL, NULL, NULL, NULL, 0, 0);
+
+        INSERT INTO HistorialUsuario (IdUsuario, Fecha, Actor, Detalle, UsernameSnap, NombreSnap, ApellidoSnap,
+                                      FechaNacSnap, EmailSnap, ClaveSnap, EstadoSnap, IntentosSnap)
+        SELECT u.IdUsuario, DATEADD(MINUTE, 9 * 60 + v.Dias % 7 * 37, CAST(CAST(DATEADD(DAY, -v.Dias, @ahora) AS DATE) AS DATETIME)),
+               N'admin', v.Detalle,
+               ISNULL(v.UsernameSnap, u.Username), ISNULL(v.NombreSnap, u.Nombre), ISNULL(v.ApellidoSnap, u.Apellido),
+               ISNULL(v.FechaNacSnap, u.FechaNacimiento), ISNULL(v.EmailSnap, u.Email),
+               N'', CASE WHEN v.Bloqueado = 1 THEN 0 ELSE 1 END, v.Intentos
+        FROM @Versiones v
+        JOIN Usuario u ON u.Username = v.Username
+        WHERE NOT EXISTS (SELECT 1 FROM HistorialUsuario h WHERE h.IdUsuario = u.IdUsuario);
+        IF @@ROWCOUNT > 0 PRINT 'Versiones de usuario de demostración cargadas.';
+    END
+
+    -- ── Constancias de decisión (XML generado con BLL.Inteligencia.ConstanciasDecision) ──
+    IF OBJECT_ID('DecisionComercial', 'U') IS NOT NULL AND COL_LENGTH('DecisionComercial', 'Constancia') IS NOT NULL
+    BEGIN
+        DECLARE @uGer INT = (SELECT TOP 1 IdUsuario FROM Usuario WHERE Username = N'gcomercial');
+        DECLARE @Constancias TABLE (Caso NVARCHAR(20) NOT NULL PRIMARY KEY, Xml NVARCHAR(MAX) NOT NULL);
+        INSERT INTO @Constancias (Caso, Xml) VALUES
+            (N'pospuesta', N'<?xml version="1.0" encoding="utf-8"?>
+<ConstanciaDecisionWardrobeFlow xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
+  <IdDecision>999999</IdDecision>
+  <Fecha>2000-01-01T00:00:00</Fecha>
+  <Username>gcomercial</Username>
+  <NombreUsuario>Gabriel Morán</NombreUsuario>
+  <Accion>Pospuesta</Accion>
+  <Motivo>Se retoma después del cierre de mes.</Motivo>
+  <PospuestaHasta>2000-01-02T00:00:00</PospuestaHasta>
+  <Recomendacion>
+    <Clave>Renovaciones</Clave>
+    <Titulo>Gestionar la renovación de los clientes con la suscripción por vencer o vencida</Titulo>
+    <Regla>Renovaciones</Regla>
+    <Prioridad>Media</Prioridad>
+    <Confianza>Media</Confianza>
+    <Diagnostico>Clientes con la suscripción por vencer o vencida hace poco: conviene gestionar el cobro antes de perderlos.</Diagnostico>
+  </Recomendacion>
+  <OpcionElegida>
+    <Descripcion>Campaña de renovación: exportar los contactos de los clientes para llamarlos o escribirles antes de perderlos</Descripcion>
+    <Accion>ExportarContactos</Accion>
+    <ImpactoEstimado>999999.99</ImpactoEstimado>
+    <Formula>Suma de las cuotas de los clientes por vencer × recupero por gestión de cobro (Parámetros del análisis)</Formula>
+  </OpcionElegida>
+  <Alternativas>
+    <Opcion>
+      <Descripcion>No hacer nada: esperar a que los clientes renueven solos</Descripcion>
+      <Accion>ExportarContactos</Accion>
+      <ImpactoEstimado>0</ImpactoEstimado>
+    </Opcion>
+  </Alternativas>
+  <Periodo>
+    <Desde>2000-01-03T00:00:00</Desde>
+    <Hasta>2000-01-04T00:00:00</Hasta>
+    <IdPlan xsi:nil="true" />
+    <Plan>Todos los planes</Plan>
+  </Periodo>
+  <Indicadores>
+    <Indicador>
+      <Clave>mrr</Clave>
+      <Nombre>Ingreso recurrente mensual (MRR)</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>659000.00</Valor>
+      <Anterior>495000.00</Anterior>
+      <Variacion>164000.00</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>churn</Clave>
+      <Nombre>% de bajas</Nombre>
+      <Unidad>Porcentaje</Unidad>
+      <Valor>16.67</Valor>
+      <Anterior>33.33</Anterior>
+      <Variacion>-16.66</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>riesgo</Clave>
+      <Nombre>Clientes en riesgo</Nombre>
+      <Unidad>Cantidad</Unidad>
+      <Valor>29</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>ingresoriesgo</Clave>
+      <Nombre>Ingreso en riesgo</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>394000.00</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>descontado</Clave>
+      <Nombre>Descontado por promociones</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>152400.00</Valor>
+      <Anterior>8400.00</Anterior>
+      <Variacion>144000.00</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>ocupacion</Clave>
+      <Nombre>Ocupación del stock</Nombre>
+      <Unidad>Porcentaje</Unidad>
+      <Valor>41.38</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>ticket</Clave>
+      <Nombre>Ticket promedio</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>13929.25</Valor>
+      <Anterior>14154.46</Anterior>
+      <Variacion>-225.21</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>ingresos</Clave>
+      <Nombre>Ingresos cobrados</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>2047600.00</Valor>
+      <Anterior>1429600.00</Anterior>
+      <Variacion>618000.00</Variacion>
+    </Indicador>
+  </Indicadores>
+  <ParametrosDelAnalisis>
+    <Parametro>
+      <Clave>ChurnAltoPct</Clave>
+      <Nombre>% de bajas alto</Nombre>
+      <Valor>5</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>SubidaChurnPp</Clave>
+      <Nombre>Suba de bajas (pp)</Nombre>
+      <Valor>2</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DescuentoBasePct</Clave>
+      <Nombre>Descuento base (%)</Nombre>
+      <Valor>10</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DescuentoMaximoPct</Clave>
+      <Nombre>Descuento máximo (%)</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>TasaRetencionDefecto</Clave>
+      <Nombre>Retención esperada por defecto (%)</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>HorizonteMeses</Clave>
+      <Nombre>Meses que paga un cliente retenido</Nombre>
+      <Valor>6</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RoiMinimoPct</Clave>
+      <Nombre>ROI mínimo (%)</Nombre>
+      <Valor>20</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>MargenSeguridadPp</Clave>
+      <Nombre>Margen de seguridad (pp)</Nombre>
+      <Valor>10</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasPorVencer</Clave>
+      <Nombre>Días para vencer</Nombre>
+      <Valor>7</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>TasaRecuperoCobroPct</Clave>
+      <Nombre>Recupero por gestión de cobro (%)</Nombre>
+      <Valor>60</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>EscasezMinimo</Clave>
+      <Nombre>Stock mínimo por categoría y talle</Nombre>
+      <Valor>3</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DemandaEscasez</Clave>
+      <Nombre>Pedidos que indican demanda</Nombre>
+      <Valor>2</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasSinRotacion</Clave>
+      <Nombre>Días sin pedidos</Nombre>
+      <Valor>60</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>MinPrendasLiquidar</Clave>
+      <Nombre>Mínimo de prendas para liquidar</Nombre>
+      <Valor>3</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RecuperoLiquidacionPct</Clave>
+      <Nombre>Recupero de una liquidación (%)</Nombre>
+      <Valor>40</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RendimientoMinimoPct</Clave>
+      <Nombre>Rendimiento mínimo de una promoción (%)</Nombre>
+      <Valor>50</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasMinimosEvaluacion</Clave>
+      <Nombre>Días mínimos para evaluar una promoción</Nombre>
+      <Valor>14</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasAvisoVencimientoPromo</Clave>
+      <Nombre>Días de aviso antes del vencimiento</Nombre>
+      <Valor>15</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>ConversionUpgradePct</Clave>
+      <Nombre>Conversión de upgrade (%)</Nombre>
+      <Valor>20</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasSilencioDescarte</Clave>
+      <Nombre>Días que se oculta una recomendación descartada</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+  </ParametrosDelAnalisis>
+  <Supuestos>
+    <Supuesto>Fórmula de «Campaña de renovación: exportar los contactos de los clientes para llamarlos o escribirles antes de perderlos»: Suma de las cuotas de los clientes por vencer × recupero por gestión de cobro (Parámetros del análisis)</Supuesto>
+    <Supuesto>Parámetro del análisis «% de bajas alto» = 5</Supuesto>
+    <Supuesto>Parámetro del análisis «Suba de bajas (pp)» = 2</Supuesto>
+    <Supuesto>Parámetro del análisis «Descuento base (%)» = 10</Supuesto>
+    <Supuesto>Parámetro del análisis «Descuento máximo (%)» = 30</Supuesto>
+    <Supuesto>Parámetro del análisis «Retención esperada por defecto (%)» = 30</Supuesto>
+    <Supuesto>Parámetro del análisis «Meses que paga un cliente retenido» = 6</Supuesto>
+    <Supuesto>Parámetro del análisis «ROI mínimo (%)» = 20</Supuesto>
+    <Supuesto>Parámetro del análisis «Margen de seguridad (pp)» = 10</Supuesto>
+    <Supuesto>Parámetro del análisis «Días para vencer» = 7</Supuesto>
+    <Supuesto>Parámetro del análisis «Recupero por gestión de cobro (%)» = 60</Supuesto>
+    <Supuesto>Parámetro del análisis «Stock mínimo por categoría y talle» = 3</Supuesto>
+    <Supuesto>Parámetro del análisis «Pedidos que indican demanda» = 2</Supuesto>
+    <Supuesto>Parámetro del análisis «Días sin pedidos» = 60</Supuesto>
+    <Supuesto>Parámetro del análisis «Mínimo de prendas para liquidar» = 3</Supuesto>
+    <Supuesto>Parámetro del análisis «Recupero de una liquidación (%)» = 40</Supuesto>
+    <Supuesto>Parámetro del análisis «Rendimiento mínimo de una promoción (%)» = 50</Supuesto>
+    <Supuesto>Parámetro del análisis «Días mínimos para evaluar una promoción» = 14</Supuesto>
+    <Supuesto>Parámetro del análisis «Días de aviso antes del vencimiento» = 15</Supuesto>
+    <Supuesto>Parámetro del análisis «Conversión de upgrade (%)» = 20</Supuesto>
+    <Supuesto>Parámetro del análisis «Días que se oculta una recomendación descartada» = 30</Supuesto>
+  </Supuestos>
+  <Advertencias />
+</ConstanciaDecisionWardrobeFlow>'),
+            (N'descartada', N'<?xml version="1.0" encoding="utf-8"?>
+<ConstanciaDecisionWardrobeFlow xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
+  <IdDecision>999999</IdDecision>
+  <Fecha>2000-01-01T00:00:00</Fecha>
+  <Username>gcomercial</Username>
+  <NombreUsuario>Gabriel Morán</NombreUsuario>
+  <Accion>Descartada</Accion>
+  <Motivo>Se esperaba el cambio de temporada antes de liquidar.</Motivo>
+  <PospuestaHasta xsi:nil="true" />
+  <Recomendacion>
+    <Clave>BajaRotacion</Clave>
+    <Titulo>Liquidar o dar de baja las prendas sin rotación</Titulo>
+    <Regla>BajaRotacion</Regla>
+    <Prioridad>Media</Prioridad>
+    <Confianza>Media</Confianza>
+    <Diagnostico>Prendas disponibles sin pedidos en el período y con más de 60 días en el catálogo inmovilizaban capital.</Diagnostico>
+  </Recomendacion>
+  <OpcionElegida>
+    <Descripcion>Dar de baja las prendas para liquidarlas (pasan de Disponible a Baja)</Descripcion>
+    <Accion>DarDeBajaPrendas</Accion>
+    <ImpactoEstimado>999999.99</ImpactoEstimado>
+    <Formula>Valor de reposición de las prendas sin rotación × recupero de una liquidación (Parámetros del análisis)</Formula>
+  </OpcionElegida>
+  <Alternativas>
+    <Opcion>
+      <Descripcion>Mandar las prendas a revisión</Descripcion>
+      <Accion>EnviarAMantenimiento</Accion>
+      <ImpactoEstimado>0</ImpactoEstimado>
+    </Opcion>
+  </Alternativas>
+  <Periodo>
+    <Desde>2000-01-03T00:00:00</Desde>
+    <Hasta>2000-01-04T00:00:00</Hasta>
+    <IdPlan xsi:nil="true" />
+    <Plan>Todos los planes</Plan>
+  </Periodo>
+  <Indicadores>
+    <Indicador>
+      <Clave>mrr</Clave>
+      <Nombre>Ingreso recurrente mensual (MRR)</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>659000.00</Valor>
+      <Anterior>495000.00</Anterior>
+      <Variacion>164000.00</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>churn</Clave>
+      <Nombre>% de bajas</Nombre>
+      <Unidad>Porcentaje</Unidad>
+      <Valor>16.67</Valor>
+      <Anterior>33.33</Anterior>
+      <Variacion>-16.66</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>riesgo</Clave>
+      <Nombre>Clientes en riesgo</Nombre>
+      <Unidad>Cantidad</Unidad>
+      <Valor>29</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>ingresoriesgo</Clave>
+      <Nombre>Ingreso en riesgo</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>394000.00</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>descontado</Clave>
+      <Nombre>Descontado por promociones</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>152400.00</Valor>
+      <Anterior>8400.00</Anterior>
+      <Variacion>144000.00</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>ocupacion</Clave>
+      <Nombre>Ocupación del stock</Nombre>
+      <Unidad>Porcentaje</Unidad>
+      <Valor>41.38</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>ticket</Clave>
+      <Nombre>Ticket promedio</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>13929.25</Valor>
+      <Anterior>14154.46</Anterior>
+      <Variacion>-225.21</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>ingresos</Clave>
+      <Nombre>Ingresos cobrados</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>2047600.00</Valor>
+      <Anterior>1429600.00</Anterior>
+      <Variacion>618000.00</Variacion>
+    </Indicador>
+  </Indicadores>
+  <ParametrosDelAnalisis>
+    <Parametro>
+      <Clave>ChurnAltoPct</Clave>
+      <Nombre>% de bajas alto</Nombre>
+      <Valor>5</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>SubidaChurnPp</Clave>
+      <Nombre>Suba de bajas (pp)</Nombre>
+      <Valor>2</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DescuentoBasePct</Clave>
+      <Nombre>Descuento base (%)</Nombre>
+      <Valor>10</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DescuentoMaximoPct</Clave>
+      <Nombre>Descuento máximo (%)</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>TasaRetencionDefecto</Clave>
+      <Nombre>Retención esperada por defecto (%)</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>HorizonteMeses</Clave>
+      <Nombre>Meses que paga un cliente retenido</Nombre>
+      <Valor>6</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RoiMinimoPct</Clave>
+      <Nombre>ROI mínimo (%)</Nombre>
+      <Valor>20</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>MargenSeguridadPp</Clave>
+      <Nombre>Margen de seguridad (pp)</Nombre>
+      <Valor>10</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasPorVencer</Clave>
+      <Nombre>Días para vencer</Nombre>
+      <Valor>7</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>TasaRecuperoCobroPct</Clave>
+      <Nombre>Recupero por gestión de cobro (%)</Nombre>
+      <Valor>60</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>EscasezMinimo</Clave>
+      <Nombre>Stock mínimo por categoría y talle</Nombre>
+      <Valor>3</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DemandaEscasez</Clave>
+      <Nombre>Pedidos que indican demanda</Nombre>
+      <Valor>2</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasSinRotacion</Clave>
+      <Nombre>Días sin pedidos</Nombre>
+      <Valor>60</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>MinPrendasLiquidar</Clave>
+      <Nombre>Mínimo de prendas para liquidar</Nombre>
+      <Valor>3</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RecuperoLiquidacionPct</Clave>
+      <Nombre>Recupero de una liquidación (%)</Nombre>
+      <Valor>40</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RendimientoMinimoPct</Clave>
+      <Nombre>Rendimiento mínimo de una promoción (%)</Nombre>
+      <Valor>50</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasMinimosEvaluacion</Clave>
+      <Nombre>Días mínimos para evaluar una promoción</Nombre>
+      <Valor>14</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasAvisoVencimientoPromo</Clave>
+      <Nombre>Días de aviso antes del vencimiento</Nombre>
+      <Valor>15</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>ConversionUpgradePct</Clave>
+      <Nombre>Conversión de upgrade (%)</Nombre>
+      <Valor>20</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasSilencioDescarte</Clave>
+      <Nombre>Días que se oculta una recomendación descartada</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+  </ParametrosDelAnalisis>
+  <Supuestos>
+    <Supuesto>Fórmula de «Dar de baja las prendas para liquidarlas (pasan de Disponible a Baja)»: Valor de reposición de las prendas sin rotación × recupero de una liquidación (Parámetros del análisis)</Supuesto>
+    <Supuesto>Parámetro del análisis «% de bajas alto» = 5</Supuesto>
+    <Supuesto>Parámetro del análisis «Suba de bajas (pp)» = 2</Supuesto>
+    <Supuesto>Parámetro del análisis «Descuento base (%)» = 10</Supuesto>
+    <Supuesto>Parámetro del análisis «Descuento máximo (%)» = 30</Supuesto>
+    <Supuesto>Parámetro del análisis «Retención esperada por defecto (%)» = 30</Supuesto>
+    <Supuesto>Parámetro del análisis «Meses que paga un cliente retenido» = 6</Supuesto>
+    <Supuesto>Parámetro del análisis «ROI mínimo (%)» = 20</Supuesto>
+    <Supuesto>Parámetro del análisis «Margen de seguridad (pp)» = 10</Supuesto>
+    <Supuesto>Parámetro del análisis «Días para vencer» = 7</Supuesto>
+    <Supuesto>Parámetro del análisis «Recupero por gestión de cobro (%)» = 60</Supuesto>
+    <Supuesto>Parámetro del análisis «Stock mínimo por categoría y talle» = 3</Supuesto>
+    <Supuesto>Parámetro del análisis «Pedidos que indican demanda» = 2</Supuesto>
+    <Supuesto>Parámetro del análisis «Días sin pedidos» = 60</Supuesto>
+    <Supuesto>Parámetro del análisis «Mínimo de prendas para liquidar» = 3</Supuesto>
+    <Supuesto>Parámetro del análisis «Recupero de una liquidación (%)» = 40</Supuesto>
+    <Supuesto>Parámetro del análisis «Rendimiento mínimo de una promoción (%)» = 50</Supuesto>
+    <Supuesto>Parámetro del análisis «Días mínimos para evaluar una promoción» = 14</Supuesto>
+    <Supuesto>Parámetro del análisis «Días de aviso antes del vencimiento» = 15</Supuesto>
+    <Supuesto>Parámetro del análisis «Conversión de upgrade (%)» = 20</Supuesto>
+    <Supuesto>Parámetro del análisis «Días que se oculta una recomendación descartada» = 30</Supuesto>
+  </Supuestos>
+  <Advertencias />
+</ConstanciaDecisionWardrobeFlow>'),
+            (N'aceptada', N'<?xml version="1.0" encoding="utf-8"?>
+<ConstanciaDecisionWardrobeFlow xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
+  <IdDecision>999999</IdDecision>
+  <Fecha>2000-01-01T00:00:00</Fecha>
+  <Username>gcomercial</Username>
+  <NombreUsuario>Gabriel Morán</NombreUsuario>
+  <Accion>Aceptada</Accion>
+  <PospuestaHasta xsi:nil="true" />
+  <Recomendacion>
+    <Clave>Renovaciones</Clave>
+    <Titulo>@@TITULO@@</Titulo>
+    <Regla>Renovaciones</Regla>
+    <Prioridad>Media</Prioridad>
+    <Confianza>Media</Confianza>
+    <Diagnostico>Suscripciones por vencer en los próximos 7 días: conviene gestionar el cobro antes de perderlos.</Diagnostico>
+  </Recomendacion>
+  <OpcionElegida>
+    <Descripcion>@@ACCION@@</Descripcion>
+    <Accion>ExportarContactos</Accion>
+    <ImpactoEstimado>999999.99</ImpactoEstimado>
+    <Formula>Suma de las cuotas de los contactados × 60 % de respuesta esperada</Formula>
+  </OpcionElegida>
+  <Alternativas>
+    <Opcion>
+      <Descripcion>No hacer nada: esperar a que los clientes renueven solos</Descripcion>
+      <Accion>ExportarContactos</Accion>
+      <ImpactoEstimado>0</ImpactoEstimado>
+    </Opcion>
+  </Alternativas>
+  <Periodo>
+    <Desde>2000-01-03T00:00:00</Desde>
+    <Hasta>2000-01-04T00:00:00</Hasta>
+    <IdPlan xsi:nil="true" />
+    <Plan>Todos los planes</Plan>
+  </Periodo>
+  <Indicadores>
+    <Indicador>
+      <Clave>mrr</Clave>
+      <Nombre>Ingreso recurrente mensual (MRR)</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>659000.00</Valor>
+      <Anterior>495000.00</Anterior>
+      <Variacion>164000.00</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>churn</Clave>
+      <Nombre>% de bajas</Nombre>
+      <Unidad>Porcentaje</Unidad>
+      <Valor>16.67</Valor>
+      <Anterior>33.33</Anterior>
+      <Variacion>-16.66</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>riesgo</Clave>
+      <Nombre>Clientes en riesgo</Nombre>
+      <Unidad>Cantidad</Unidad>
+      <Valor>29</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>ingresoriesgo</Clave>
+      <Nombre>Ingreso en riesgo</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>394000.00</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>descontado</Clave>
+      <Nombre>Descontado por promociones</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>152400.00</Valor>
+      <Anterior>8400.00</Anterior>
+      <Variacion>144000.00</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>ocupacion</Clave>
+      <Nombre>Ocupación del stock</Nombre>
+      <Unidad>Porcentaje</Unidad>
+      <Valor>41.38</Valor>
+      <Anterior xsi:nil="true" />
+      <Variacion xsi:nil="true" />
+    </Indicador>
+    <Indicador>
+      <Clave>ticket</Clave>
+      <Nombre>Ticket promedio</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>13929.25</Valor>
+      <Anterior>14154.46</Anterior>
+      <Variacion>-225.21</Variacion>
+    </Indicador>
+    <Indicador>
+      <Clave>ingresos</Clave>
+      <Nombre>Ingresos cobrados</Nombre>
+      <Unidad>Moneda</Unidad>
+      <Valor>2047600.00</Valor>
+      <Anterior>1429600.00</Anterior>
+      <Variacion>618000.00</Variacion>
+    </Indicador>
+  </Indicadores>
+  <ParametrosDelAnalisis>
+    <Parametro>
+      <Clave>ChurnAltoPct</Clave>
+      <Nombre>% de bajas alto</Nombre>
+      <Valor>5</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>SubidaChurnPp</Clave>
+      <Nombre>Suba de bajas (pp)</Nombre>
+      <Valor>2</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DescuentoBasePct</Clave>
+      <Nombre>Descuento base (%)</Nombre>
+      <Valor>10</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DescuentoMaximoPct</Clave>
+      <Nombre>Descuento máximo (%)</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>TasaRetencionDefecto</Clave>
+      <Nombre>Retención esperada por defecto (%)</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>HorizonteMeses</Clave>
+      <Nombre>Meses que paga un cliente retenido</Nombre>
+      <Valor>6</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RoiMinimoPct</Clave>
+      <Nombre>ROI mínimo (%)</Nombre>
+      <Valor>20</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>MargenSeguridadPp</Clave>
+      <Nombre>Margen de seguridad (pp)</Nombre>
+      <Valor>10</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasPorVencer</Clave>
+      <Nombre>Días para vencer</Nombre>
+      <Valor>7</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>TasaRecuperoCobroPct</Clave>
+      <Nombre>Recupero por gestión de cobro (%)</Nombre>
+      <Valor>60</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>EscasezMinimo</Clave>
+      <Nombre>Stock mínimo por categoría y talle</Nombre>
+      <Valor>3</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DemandaEscasez</Clave>
+      <Nombre>Pedidos que indican demanda</Nombre>
+      <Valor>2</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasSinRotacion</Clave>
+      <Nombre>Días sin pedidos</Nombre>
+      <Valor>60</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>MinPrendasLiquidar</Clave>
+      <Nombre>Mínimo de prendas para liquidar</Nombre>
+      <Valor>3</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RecuperoLiquidacionPct</Clave>
+      <Nombre>Recupero de una liquidación (%)</Nombre>
+      <Valor>40</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>RendimientoMinimoPct</Clave>
+      <Nombre>Rendimiento mínimo de una promoción (%)</Nombre>
+      <Valor>50</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasMinimosEvaluacion</Clave>
+      <Nombre>Días mínimos para evaluar una promoción</Nombre>
+      <Valor>14</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasAvisoVencimientoPromo</Clave>
+      <Nombre>Días de aviso antes del vencimiento</Nombre>
+      <Valor>15</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>ConversionUpgradePct</Clave>
+      <Nombre>Conversión de upgrade (%)</Nombre>
+      <Valor>20</Valor>
+    </Parametro>
+    <Parametro>
+      <Clave>DiasSilencioDescarte</Clave>
+      <Nombre>Días que se oculta una recomendación descartada</Nombre>
+      <Valor>30</Valor>
+    </Parametro>
+  </ParametrosDelAnalisis>
+  <Supuestos>
+    <Supuesto>Fórmula de «@@ACCION@@»: Suma de las cuotas de los contactados × 60 % de respuesta esperada</Supuesto>
+    <Supuesto>Parámetro del análisis «% de bajas alto» = 5</Supuesto>
+    <Supuesto>Parámetro del análisis «Suba de bajas (pp)» = 2</Supuesto>
+    <Supuesto>Parámetro del análisis «Descuento base (%)» = 10</Supuesto>
+    <Supuesto>Parámetro del análisis «Descuento máximo (%)» = 30</Supuesto>
+    <Supuesto>Parámetro del análisis «Retención esperada por defecto (%)» = 30</Supuesto>
+    <Supuesto>Parámetro del análisis «Meses que paga un cliente retenido» = 6</Supuesto>
+    <Supuesto>Parámetro del análisis «ROI mínimo (%)» = 20</Supuesto>
+    <Supuesto>Parámetro del análisis «Margen de seguridad (pp)» = 10</Supuesto>
+    <Supuesto>Parámetro del análisis «Días para vencer» = 7</Supuesto>
+    <Supuesto>Parámetro del análisis «Recupero por gestión de cobro (%)» = 60</Supuesto>
+    <Supuesto>Parámetro del análisis «Stock mínimo por categoría y talle» = 3</Supuesto>
+    <Supuesto>Parámetro del análisis «Pedidos que indican demanda» = 2</Supuesto>
+    <Supuesto>Parámetro del análisis «Días sin pedidos» = 60</Supuesto>
+    <Supuesto>Parámetro del análisis «Mínimo de prendas para liquidar» = 3</Supuesto>
+    <Supuesto>Parámetro del análisis «Recupero de una liquidación (%)» = 40</Supuesto>
+    <Supuesto>Parámetro del análisis «Rendimiento mínimo de una promoción (%)» = 50</Supuesto>
+    <Supuesto>Parámetro del análisis «Días mínimos para evaluar una promoción» = 14</Supuesto>
+    <Supuesto>Parámetro del análisis «Días de aviso antes del vencimiento» = 15</Supuesto>
+    <Supuesto>Parámetro del análisis «Conversión de upgrade (%)» = 20</Supuesto>
+    <Supuesto>Parámetro del análisis «Días que se oculta una recomendación descartada» = 30</Supuesto>
+  </Supuestos>
+  <Advertencias />
+</ConstanciaDecisionWardrobeFlow>');
+
+        ;WITH Objetivo AS (
+            SELECT d.IdDecision, d.Fecha, d.PospuestaHasta, d.Titulo, d.AccionElegida, d.ImpactoEstimado,
+                   CASE WHEN d.Estado = 3 AND d.ClaveRecomendacion = N'Renovaciones' AND d.Motivo = N'Se retoma después del cierre de mes.' THEN N'pospuesta'
+                        WHEN d.Estado = 2 AND d.ClaveRecomendacion = N'BajaRotacion' AND d.Motivo = N'Se esperaba el cambio de temporada antes de liquidar.' THEN N'descartada'
+                        WHEN d.Estado = 4 AND d.ClaveRecomendacion = N'Renovaciones'
+                             AND d.Titulo LIKE N'Gestionar la renovación de % cliente(s)'
+                             AND d.AccionElegida LIKE N'Campaña de renovación: exportar los contactos de los % cliente(s) para llamarlos o escribirles antes de perderlos' THEN N'aceptada' END AS Caso
+            FROM DecisionComercial d
+            WHERE d.Constancia IS NULL AND d.IdUsuario = @uGer
+        )
+        UPDATE d SET Constancia =
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(c.Xml,
+                N'<IdDecision>999999</IdDecision>', N'<IdDecision>' + CAST(o.IdDecision AS NVARCHAR(10)) + N'</IdDecision>'),
+                N'<Fecha>2000-01-01T00:00:00</Fecha>', N'<Fecha>' + CONVERT(NCHAR(19), o.Fecha, 126) + N'</Fecha>'),
+                N'<PospuestaHasta>2000-01-02T00:00:00</PospuestaHasta>',
+                N'<PospuestaHasta>' + ISNULL(CONVERT(NCHAR(19), CAST(o.PospuestaHasta AS DATETIME), 126), N'') + N'</PospuestaHasta>'),
+                N'<Desde>2000-01-03T00:00:00</Desde>', N'<Desde>' + CONVERT(NCHAR(19), CAST(DATEADD(DAY, -89, CAST(o.Fecha AS DATE)) AS DATETIME), 126) + N'</Desde>'),
+                N'<Hasta>2000-01-04T00:00:00</Hasta>', N'<Hasta>' + CONVERT(NCHAR(19), CAST(CAST(o.Fecha AS DATE) AS DATETIME), 126) + N'</Hasta>'),
+                N'<ImpactoEstimado>999999.99</ImpactoEstimado>', N'<ImpactoEstimado>' + CONVERT(NVARCHAR(30), o.ImpactoEstimado) + N'</ImpactoEstimado>'),
+                N'@@TITULO@@', REPLACE(REPLACE(REPLACE(o.Titulo, N'&', N'&amp;'), N'<', N'&lt;'), N'>', N'&gt;')),
+                N'@@ACCION@@', REPLACE(REPLACE(REPLACE(ISNULL(o.AccionElegida, N''), N'&', N'&amp;'), N'<', N'&lt;'), N'>', N'&gt;'))
+        FROM DecisionComercial d
+        JOIN Objetivo o ON o.IdDecision = d.IdDecision
+        JOIN @Constancias c ON c.Caso = o.Caso;
+        IF @@ROWCOUNT > 0 PRINT 'Constancias de decisión de demostración cargadas.';
+    END
+END
+GO
+EXEC dbo.SembrarDemoSerializacion;
+GO
+PRINT 'Sección 21z17: datos de demostración de la serialización verificados.';
+GO
+-- ============================================================
+-- WardrobeFlow: 21z18. TEXTOS DE FÁBRICA SIN RAYA LARGA (1.6.1)
+-- ------------------------------------------------------------
+-- Los textos de fábrica (traducciones.tsv) dejaron de usar la raya larga: se reemplazó por dos
+-- puntos, coma, punto y coma o paréntesis según el contexto, en los cuatro idiomas (incluye los
+-- textos de ayuda F1 y de la guía de primer uso guardados en la base).
+-- Las claves ya existen en una base instalada: se actualizan SOLO si siguen con el texto de fábrica
+-- anterior (una edición hecha en Idiomas se respeta). Idempotente.
+-- Tabla generada a partir de la diferencia del .tsv: 297 texto(s).
+-- ============================================================
+IF OBJECT_ID('Traduccion') IS NOT NULL AND OBJECT_ID('Control') IS NOT NULL AND OBJECT_ID('Idioma') IS NOT NULL
+BEGIN
+    DECLARE @Textos21z18 TABLE (Codigo VARCHAR(5) COLLATE DATABASE_DEFAULT NOT NULL, Clave NVARCHAR(200) COLLATE DATABASE_DEFAULT NOT NULL,
+                                TextoAnterior NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL, TextoNuevo NVARCHAR(1000) COLLATE DATABASE_DEFAULT NOT NULL);
+    INSERT INTO @Textos21z18 (Codigo, Clave, TextoAnterior, TextoNuevo) VALUES
+    (N'ES', N'idiomas.dlg.nuevo.codigo',
+        N'Código (ej: FR, IT, PT) — máx. 5:',
+        N'Código (ej: FR, IT, PT), máx. 5:'),
+    (N'ES', N'idiomas.ok.creado',
+        N'Idioma ''{0}'' creado (inactivo — actívelo cuando cargue sus traducciones).',
+        N'Idioma ''{0}'' creado como inactivo. Actívelo cuando cargue sus traducciones.'),
+    (N'ES', N'frm.bitacora',
+        N'Auditoría — Bitácoras del Sistema',
+        N'Auditoría: Bitácoras del Sistema'),
+    (N'ES', N'frm.historial',
+        N'Historial de Cambios — Pedido',
+        N'Historial de Cambios: Pedido'),
+    (N'ES', N'combo.hist.todas',
+        N'— Todas —',
+        N'(Todas)'),
+    (N'ES', N'combo.cli.sinplan',
+        N'— Sin plan —',
+        N'(Sin plan)'),
+    (N'ES', N'paso2.texto',
+        N'Paso 2 de 2 — Seleccionar Prendas',
+        N'Paso 2 de 2: Seleccionar Prendas'),
+    (N'ES', N'msg.ped.reactivado',
+        N'Pedido #{0} reactivado — volvió a Pendiente.',
+        N'Pedido #{0} reactivado: volvió a Pendiente.'),
+    (N'ES', N'msg.ped.devolucion',
+        N'Devolución registrada — {0} prenda(s) pasan a En limpieza.',
+        N'Devolución registrada: {0} prenda(s) pasan a En limpieza.'),
+    (N'ES', N'lbl.ped.seleccionado',
+        N'Pedido #{0} — {1} — {2}',
+        N'Pedido #{0}: {1}, {2}'),
+    (N'ES', N'lbl.cambioest.info',
+        N'Prenda: {0}  —  Estado actual: {1}',
+        N'Prenda: {0}; Estado actual: {1}'),
+    (N'ES', N'notif.msgbox.titulo',
+        N'Notificación — Pedido #{0}',
+        N'Notificación: Pedido #{0}'),
+    (N'ES', N'frm.gestorpermisos',
+        N'Gestor de Perfiles — Permisos',
+        N'Gestor de Perfiles: Permisos'),
+    (N'ES', N'lbl.explorador.descripcion',
+        N'Estructura organizacional de WardrobeFlow — Solo lectura',
+        N'Estructura organizacional de WardrobeFlow (solo lectura)'),
+    (N'ES', N'lbl.explorador.leyenda',
+        N'Familia (nodo compuesto — Área o Rol)    Patente (hoja — permiso atómico)',
+        N'Familia (nodo compuesto, Área o Rol)    Patente (hoja, permiso atómico)'),
+    (N'ES', N'frm.reportejornada',
+        N'Reporte de Jornada — WardrobeFlow',
+        N'WardrobeFlow: Reporte de Jornada'),
+    (N'ES', N'bit.pdf.titulosistema',
+        N'Bitácora del Sistema — WardrobeFlow',
+        N'WardrobeFlow: Bitácora del Sistema'),
+    (N'ES', N'bit.pdf.titulonegocio',
+        N'Bitácora de Negocio — WardrobeFlow',
+        N'WardrobeFlow: Bitácora de Negocio'),
+    (N'ES', N'bit.pdf.pagina',
+        N'WardrobeFlow — Página {0}',
+        N'WardrobeFlow: Página {0}'),
+    (N'ES', N'dash.aviso.vencido',
+        N'Hace {0} día(s) sin backup — recordatorio cada {1} días.',
+        N'Hace {0} día(s) sin backup (recordatorio cada {1} días).'),
+    (N'ES', N'err.cli.errorplanes',
+        N'— Error al cargar planes —',
+        N'(Error al cargar planes)'),
+    (N'ES', N'lbl.ped.res.parcial',
+        N'El plan ''{0}'' permite {1}. Está eligiendo {2} de {3} posibles — puede agregar más.',
+        N'El plan ''{0}'' permite {1}. Está eligiendo {2} de {3} posibles. Puede agregar más.'),
+    (N'ES', N'err.bll.listaespera.prenda_no_enuso',
+        N'''{0}'' está {1} — no hace falta anotarse, ya se puede pedir directamente.',
+        N'''{0}'' está {1}: no hace falta anotarse, ya se puede pedir directamente.'),
+    (N'ES', N'err.bll.listaespera.ya_resuelta',
+        N'Esta anotación ya está {0} — no se puede cancelar.',
+        N'Esta anotación ya está {0} y no se puede cancelar.'),
+    (N'ES', N'diag.tip.fallo.titulo',
+        N'Verificación FALLIDA — tabla {0}',
+        N'Verificación FALLIDA: tabla {0}'),
+    (N'ES', N'diag.tabla.dvinvalido',
+        N'DV inválido — use «Recalcular Todo»',
+        N'DV inválido: use «Recalcular Todo»'),
+    (N'EN', N'idiomas.dlg.nuevo.codigo',
+        N'Code (e.g.: FR, IT, PT) — max. 5:',
+        N'Code (e.g.: FR, IT, PT), max. 5:'),
+    (N'EN', N'idiomas.ok.creado',
+        N'Language ''{0}'' created (inactive — activate it once you load its translations).',
+        N'Language ''{0}'' created as inactive. Activate it once you load its translations.'),
+    (N'EN', N'frm.login',
+        N'WardrobeFlow — Login',
+        N'WardrobeFlow: Login'),
+    (N'EN', N'combo.hist.todas',
+        N'— All —',
+        N'(All)'),
+    (N'EN', N'combo.cli.sinplan',
+        N'— No plan —',
+        N'(No plan)'),
+    (N'EN', N'paso2.texto',
+        N'Step 2 of 2 — Select Garments',
+        N'Step 2 of 2: Select Garments'),
+    (N'EN', N'msg.ped.reactivado',
+        N'Order #{0} reactivated — back to Pending.',
+        N'Order #{0} reactivated: back to Pending.'),
+    (N'EN', N'msg.ped.devolucion',
+        N'Return registered — {0} garment(s) sent to Cleaning.',
+        N'Return registered: {0} garment(s) sent to Cleaning.'),
+    (N'EN', N'lbl.ped.seleccionado',
+        N'Order #{0} — {1} — {2}',
+        N'Order #{0}: {1}, {2}'),
+    (N'EN', N'lbl.cambioest.info',
+        N'Garment: {0}  —  Current status: {1}',
+        N'Garment: {0}; Current status: {1}'),
+    (N'EN', N'notif.msgbox.titulo',
+        N'Notification — Order #{0}',
+        N'Notification: Order #{0}'),
+    (N'EN', N'lbl.explorador.descripcion',
+        N'WardrobeFlow organizational structure — Read only',
+        N'WardrobeFlow organizational structure (read only)'),
+    (N'EN', N'lbl.explorador.leyenda',
+        N'Family (composite node — Area or Role)    Patent (leaf — atomic permission)',
+        N'Family (composite node, Area or Role)    Patent (leaf, atomic permission)'),
+    (N'EN', N'frm.reportejornada',
+        N'Daily Report — WardrobeFlow',
+        N'WardrobeFlow: Daily Report'),
+    (N'EN', N'bit.pdf.titulosistema',
+        N'System Log — WardrobeFlow',
+        N'WardrobeFlow: System Log'),
+    (N'EN', N'bit.pdf.titulonegocio',
+        N'Business Log — WardrobeFlow',
+        N'WardrobeFlow: Business Log'),
+    (N'EN', N'bit.pdf.pagina',
+        N'WardrobeFlow — Page {0}',
+        N'WardrobeFlow: Page {0}'),
+    (N'EN', N'dash.aviso.vencido',
+        N'{0} day(s) without backup — reminder every {1} days.',
+        N'{0} day(s) without backup (reminder every {1} days).'),
+    (N'EN', N'err.cli.errorplanes',
+        N'— Error loading plans —',
+        N'(Error loading plans)'),
+    (N'EN', N'lbl.ped.res.parcial',
+        N'Plan ''{0}'' allows {1}. You are choosing {2} of {3} available — you can add more.',
+        N'Plan ''{0}'' allows {1}. You are choosing {2} of {3} available. You can add more.'),
+    (N'EN', N'err.bll.listaespera.prenda_no_enuso',
+        N'''{0}'' is {1} — no need to wait, it can already be ordered directly.',
+        N'''{0}'' is {1}: no need to wait, it can already be ordered directly.'),
+    (N'EN', N'err.bll.listaespera.ya_resuelta',
+        N'This entry is already {0} — it cannot be cancelled.',
+        N'This entry is already {0} and cannot be cancelled.'),
+    (N'EN', N'diag.tip.fallo.titulo',
+        N'Verification FAILED — table {0}',
+        N'Verification FAILED: table {0}'),
+    (N'EN', N'diag.tabla.dvinvalido',
+        N'Invalid CD — use “Recompute All”',
+        N'Invalid CD: use “Recompute All”'),
+    (N'RU', N'err.bll.prenda.transicion_enuso',
+        N'Состояние вещи, находящейся в использовании, обновляется автоматически при обработке заказов.' + NCHAR(10) + N'Единственное ручное исключение — сообщить о её потере (PN04, модуль Выполненных заказов).',
+        N'Состояние вещи, находящейся в использовании, обновляется автоматически при обработке заказов.' + NCHAR(10) + N'Единственное ручное исключение: сообщить о её потере (PN04, модуль Выполненных заказов).'),
+    (N'RU', N'help.permisos.rol',
+        N'Роль — профиль, назначаемый пользователю. Может содержать права, семейства и другие роли (роль в роли).',
+        N'Роль: профиль, назначаемый пользователю. Может содержать права, семейства и другие роли (роль в роли).'),
+    (N'RU', N'idiomas.dlg.nuevo.codigo',
+        N'Код (напр.: FR, IT, PT) — макс. 5:',
+        N'Код (напр.: FR, IT, PT), макс. 5:'),
+    (N'RU', N'idiomas.ok.creado',
+        N'Язык «{0}» создан (неактивен — активируйте его после загрузки переводов).',
+        N'Язык «{0}» создан как неактивный. Активируйте его после загрузки переводов.'),
+    (N'RU', N'frm.login',
+        N'WardrobeFlow — Вход',
+        N'WardrobeFlow: Вход'),
+    (N'RU', N'frm.bitacora',
+        N'Аудит — Журналы системы',
+        N'Аудит: Журналы системы'),
+    (N'RU', N'lbl.ped.seleccionado',
+        N'Заказ #{0} — {1} — {2}',
+        N'Заказ #{0}: {1}, {2}'),
+    (N'RU', N'combo.hist.todas',
+        N'— Все —',
+        N'(Все)'),
+    (N'RU', N'combo.cli.sinplan',
+        N'— Без плана —',
+        N'(Без плана)'),
+    (N'RU', N'paso2.texto',
+        N'Шаг 2 из 2 — Выбрать одежду',
+        N'Шаг 2 из 2: Выбрать одежду'),
+    (N'RU', N'msg.ped.reactivado',
+        N'Заказ #{0} реактивирован — статус: Ожидание.',
+        N'Заказ #{0} реактивирован, статус: Ожидание.'),
+    (N'RU', N'msg.ped.devolucion',
+        N'Возврат зарегистрирован — {0} вещей отправлено на чистку.',
+        N'Возврат зарегистрирован: {0} вещей отправлено на чистку.'),
+    (N'RU', N'lbl.cambioest.info',
+        N'Вещь: {0}  —  Текущий статус: {1}',
+        N'Вещь: {0}; Текущий статус: {1}'),
+    (N'RU', N'notif.msgbox.titulo',
+        N'Уведомление — Заказ #{0}',
+        N'Уведомление: Заказ #{0}'),
+    (N'RU', N'frm.gestorpermisos',
+        N'Менеджер профилей — права',
+        N'Менеджер профилей: права'),
+    (N'RU', N'lbl.explorador.descripcion',
+        N'Организационная структура WardrobeFlow — Только чтение',
+        N'Организационная структура WardrobeFlow (только чтение)'),
+    (N'RU', N'lbl.explorador.leyenda',
+        N'Семья (составной узел — Область или Роль)    Патент (лист — атомарное разрешение)',
+        N'Семья (составной узел, Область или Роль)    Патент (лист, атомарное разрешение)'),
+    (N'RU', N'frm.reportejornada',
+        N'Отчёт за день — WardrobeFlow',
+        N'WardrobeFlow: Отчёт за день'),
+    (N'RU', N'bit.pdf.titulosistema',
+        N'Системный журнал — WardrobeFlow',
+        N'WardrobeFlow: Системный журнал'),
+    (N'RU', N'bit.pdf.titulonegocio',
+        N'Бизнес-журнал — WardrobeFlow',
+        N'WardrobeFlow: Бизнес-журнал'),
+    (N'RU', N'bit.pdf.pagina',
+        N'WardrobeFlow — Страница {0}',
+        N'WardrobeFlow: Страница {0}'),
+    (N'RU', N'dash.aviso.vencido',
+        N'{0} дней без резервной копии — напоминание каждые {1} дней.',
+        N'{0} дней без резервной копии (напоминание каждые {1} дней).'),
+    (N'RU', N'err.cli.errorplanes',
+        N'— Ошибка загрузки планов —',
+        N'(Ошибка загрузки планов)'),
+    (N'RU', N'lbl.ped.res.parcial',
+        N'План ''{0}'' допускает {1}. Вы выбираете {2} из {3} — можно добавить ещё.',
+        N'План ''{0}'' допускает {1}. Вы выбираете {2} из {3}. Можно добавить ещё.'),
+    (N'RU', N'err.bll.listaespera.prenda_no_enuso',
+        N'''{0}'' сейчас {1} — не нужно вставать в очередь, можно заказать напрямую.',
+        N'''{0}'' сейчас {1}: не нужно вставать в очередь, можно заказать напрямую.'),
+    (N'RU', N'err.bll.listaespera.ya_resuelta',
+        N'Эта запись уже {0} — отменить нельзя.',
+        N'Эта запись уже {0}, отменить её нельзя.'),
+    (N'RU', N'diag.tip.fallo.titulo',
+        N'Проверка НЕ ПРОЙДЕНА — таблица {0}',
+        N'Проверка НЕ ПРОЙДЕНА: таблица {0}'),
+    (N'RU', N'diag.tabla.dvinvalido',
+        N'Неверный КЦ — нажмите «Пересчитать всё»',
+        N'Неверный КЦ: нажмите «Пересчитать всё»'),
+    (N'PT', N'idiomas.dlg.nuevo.codigo',
+        N'Código (ex.: FR, IT, PT) — máx. 5:',
+        N'Código (ex.: FR, IT, PT), máx. 5:'),
+    (N'PT', N'idiomas.ok.creado',
+        N'Idioma ''{0}'' criado (inativo — ative-o quando carregar suas traduções).',
+        N'Idioma ''{0}'' criado como inativo. Ative-o quando carregar suas traduções.'),
+    (N'PT', N'diag.tip.fallo.titulo',
+        N'Verificação FALHOU — tabela {0}',
+        N'Verificação FALHOU: tabela {0}'),
+    (N'PT', N'diag.tabla.dvinvalido',
+        N'DV inválido — use «Recalcular Tudo»',
+        N'DV inválido: use «Recalcular Tudo»'),
+    (N'PT', N'frm.login',
+        N'WardrobeFlow — Login',
+        N'WardrobeFlow: Login'),
+    (N'PT', N'frm.bitacora',
+        N'Auditoria — Registros do Sistema',
+        N'Auditoria: Registros do Sistema'),
+    (N'PT', N'combo.hist.todas',
+        N'— Todas —',
+        N'(Todas)'),
+    (N'PT', N'combo.cli.sinplan',
+        N'— Sem plano —',
+        N'(Sem plano)'),
+    (N'PT', N'paso2.texto',
+        N'Passo 2 de 2 — Selecionar Roupas',
+        N'Passo 2 de 2: Selecionar Roupas'),
+    (N'PT', N'msg.ped.reactivado',
+        N'Pedido #{0} reativado — voltou a Pendente.',
+        N'Pedido #{0} reativado: voltou a Pendente.'),
+    (N'PT', N'msg.ped.devolucion',
+        N'Devolução registrada — {0} roupa(s) vão para Limpeza.',
+        N'Devolução registrada: {0} roupa(s) vão para Limpeza.'),
+    (N'PT', N'lbl.ped.seleccionado',
+        N'Pedido #{0} — {1} — {2}',
+        N'Pedido #{0}: {1}, {2}'),
+    (N'PT', N'lbl.cambioest.info',
+        N'Roupa: {0}  —  Estado atual: {1}',
+        N'Roupa: {0}; Estado atual: {1}'),
+    (N'PT', N'notif.msgbox.titulo',
+        N'Notificação — Pedido #{0}',
+        N'Notificação: Pedido #{0}'),
+    (N'PT', N'frm.gestorpermisos',
+        N'Gerenciador de Perfis — Permissões',
+        N'Gerenciador de Perfis: Permissões'),
+    (N'PT', N'lbl.explorador.descripcion',
+        N'Estrutura organizacional do WardrobeFlow — Somente leitura',
+        N'Estrutura organizacional do WardrobeFlow (somente leitura)'),
+    (N'PT', N'lbl.explorador.leyenda',
+        N'Família (nó composto — Área ou Papel)    Patente (folha — permissão atômica)',
+        N'Família (nó composto, Área ou Papel)    Patente (folha, permissão atômica)'),
+    (N'PT', N'frm.reportejornada',
+        N'Relatório de Jornada — WardrobeFlow',
+        N'WardrobeFlow: Relatório de Jornada'),
+    (N'PT', N'bit.pdf.titulosistema',
+        N'Registro do Sistema — WardrobeFlow',
+        N'WardrobeFlow: Registro do Sistema'),
+    (N'PT', N'bit.pdf.titulonegocio',
+        N'Registro de Negócio — WardrobeFlow',
+        N'WardrobeFlow: Registro de Negócio'),
+    (N'PT', N'bit.pdf.pagina',
+        N'WardrobeFlow — Página {0}',
+        N'WardrobeFlow: Página {0}'),
+    (N'PT', N'dash.aviso.vencido',
+        N'Há {0} dia(s) sem backup — lembrete a cada {1} dias.',
+        N'Há {0} dia(s) sem backup (lembrete a cada {1} dias).'),
+    (N'PT', N'err.cli.errorplanes',
+        N'— Erro ao carregar planos —',
+        N'(Erro ao carregar planos)'),
+    (N'PT', N'lbl.ped.res.parcial',
+        N'O plano ''{0}'' permite {1}. Você está escolhendo {2} de {3} possíveis — pode adicionar mais.',
+        N'O plano ''{0}'' permite {1}. Você está escolhendo {2} de {3} possíveis. Pode adicionar mais.'),
+    (N'PT', N'err.bll.listaespera.prenda_no_enuso',
+        N'''{0}'' está {1} — não é necessário entrar na lista, já pode ser pedida diretamente.',
+        N'''{0}'' está {1}: não é necessário entrar na lista, já pode ser pedida diretamente.'),
+    (N'PT', N'err.bll.listaespera.ya_resuelta',
+        N'Este registro já está {0} — não é possível cancelar.',
+        N'Este registro já está {0} e não pode ser cancelado.'),
+    (N'ES', N'dash.logistica.subtitulo',
+        N'WardrobeFlow  —  Logística',
+        N'WardrobeFlow: Logística'),
+    (N'ES', N'dash.deposito.subtitulo',
+        N'WardrobeFlow  —  Depósito',
+        N'WardrobeFlow: Depósito'),
+    (N'ES', N'dash.vendedor.subtitulo',
+        N'WardrobeFlow  —  Ventas',
+        N'WardrobeFlow: Ventas'),
+    (N'EN', N'dash.logistica.subtitulo',
+        N'WardrobeFlow  —  Logistics',
+        N'WardrobeFlow: Logistics'),
+    (N'EN', N'dash.deposito.subtitulo',
+        N'WardrobeFlow  —  Warehouse',
+        N'WardrobeFlow: Warehouse'),
+    (N'EN', N'dash.vendedor.subtitulo',
+        N'WardrobeFlow  —  Sales',
+        N'WardrobeFlow: Sales'),
+    (N'PT', N'dash.logistica.subtitulo',
+        N'WardrobeFlow  —  Logística',
+        N'WardrobeFlow: Logística'),
+    (N'PT', N'dash.deposito.subtitulo',
+        N'WardrobeFlow  —  Depósito',
+        N'WardrobeFlow: Depósito'),
+    (N'PT', N'dash.vendedor.subtitulo',
+        N'WardrobeFlow  —  Vendas',
+        N'WardrobeFlow: Vendas'),
+    (N'RU', N'dash.logistica.subtitulo',
+        N'WardrobeFlow — Логистика',
+        N'WardrobeFlow: Логистика'),
+    (N'RU', N'dash.deposito.subtitulo',
+        N'WardrobeFlow — Склад',
+        N'WardrobeFlow: Склад'),
+    (N'RU', N'dash.vendedor.subtitulo',
+        N'WardrobeFlow — Продажи',
+        N'WardrobeFlow: Продажи'),
+    (N'ES', N'diag.sinfilas',
+        N'Todo íntegro — no hay filas con problemas de integridad.',
+        N'Todo íntegro: no hay filas con problemas de integridad.'),
+    (N'EN', N'diag.sinfilas',
+        N'All consistent — no rows with integrity problems.',
+        N'All consistent: no rows with integrity problems.'),
+    (N'RU', N'diag.sinfilas',
+        N'Всё в порядке — нет строк с проблемами целостности.',
+        N'Всё в порядке: нет строк с проблемами целостности.'),
+    (N'PT', N'diag.sinfilas',
+        N'Tudo íntegro — não há linhas com problemas de integridade.',
+        N'Tudo íntegro: não há linhas com problemas de integridade.'),
+    (N'RU', N'rec.conf.reparar',
+        N'Восстановить таблицу Usuario до законных значений из зеркала?' + NCHAR(10) + N'' + NCHAR(10) + N'Изменённые строки будут отменены, а внешние вставки — удалены.',
+        N'Восстановить таблицу Usuario до законных значений из зеркала?' + NCHAR(10) + N'' + NCHAR(10) + N'Изменённые строки будут отменены, а внешние вставки удалены.'),
+    (N'ES', N'renov.estado.resumen',
+        N'Plan actual: {0} — Vencimiento: {1} ({2})',
+        N'Plan actual: {0}; Vencimiento: {1} ({2})'),
+    (N'ES', N'renov.msg.baja_conprendas',
+        N'Suscripción dada de baja. El cliente no podrá generar nuevos pedidos. Tiene {0} prenda(s) en uso — solicitar la devolución.',
+        N'Suscripción dada de baja. El cliente no podrá generar nuevos pedidos. Tiene {0} prenda(s) en uso; solicite su devolución.'),
+    (N'ES', N'cobro.estado.resumen',
+        N'Plan: {0} — Vencimiento: {1}' + NCHAR(10) + N'Estado de pago: {2}',
+        N'Plan: {0}; Vencimiento: {1}' + NCHAR(10) + N'Estado de pago: {2}'),
+    (N'EN', N'renov.estado.resumen',
+        N'Current plan: {0} — Expiration: {1} ({2})',
+        N'Current plan: {0}; Expiration: {1} ({2})'),
+    (N'EN', N'renov.msg.baja_conprendas',
+        N'Subscription cancelled. The customer won''t be able to place new orders. They have {0} garment(s) in use — request the return.',
+        N'Subscription cancelled. The customer won''t be able to place new orders. They have {0} garment(s) in use; request their return.'),
+    (N'EN', N'cobro.estado.resumen',
+        N'Plan: {0} — Expiration: {1}' + NCHAR(10) + N'Payment status: {2}',
+        N'Plan: {0}; Expiration: {1}' + NCHAR(10) + N'Payment status: {2}'),
+    (N'RU', N'renov.estado.resumen',
+        N'Текущий план: {0} — Срок действия: {1} ({2})',
+        N'Текущий план: {0}; Срок действия: {1} ({2})'),
+    (N'RU', N'renov.msg.baja_conprendas',
+        N'Подписка отменена. Клиент не сможет оформлять новые заказы. У него {0} вещь(ей) в использовании — запросите возврат.',
+        N'Подписка отменена. Клиент не сможет оформлять новые заказы. У него {0} вещь(ей) в использовании; запросите возврат.'),
+    (N'RU', N'cobro.estado.resumen',
+        N'План: {0} — Срок действия: {1}' + NCHAR(10) + N'Статус оплаты: {2}',
+        N'План: {0}; Срок действия: {1}' + NCHAR(10) + N'Статус оплаты: {2}'),
+    (N'PT', N'renov.estado.resumen',
+        N'Plano atual: {0} — Vencimento: {1} ({2})',
+        N'Plano atual: {0}; Vencimento: {1} ({2})'),
+    (N'PT', N'renov.msg.baja_conprendas',
+        N'Assinatura cancelada. O cliente não poderá fazer novos pedidos. Ele tem {0} peça(s) em uso — solicite a devolução.',
+        N'Assinatura cancelada. O cliente não poderá fazer novos pedidos. Ele tem {0} peça(s) em uso; solicite a devolução.'),
+    (N'PT', N'cobro.estado.resumen',
+        N'Plano: {0} — Vencimento: {1}' + NCHAR(10) + N'Status de pagamento: {2}',
+        N'Plano: {0}; Vencimento: {1}' + NCHAR(10) + N'Status de pagamento: {2}'),
+    (N'ES', N'rotacion.motivo.bajademanda',
+        N'{0} no registra pedidos en {1} día(s) desde su alta — candidata a baja.',
+        N'{0} no registra pedidos en {1} día(s) desde su alta: candidata a baja.'),
+    (N'ES', N'rotacion.motivo.altademanda',
+        N'{0} fue pedida {1} veces — candidata a reposición en su categoría.',
+        N'{0} fue pedida {1} veces: candidata a reposición en su categoría.'),
+    (N'EN', N'rotacion.motivo.bajademanda',
+        N'{0} has had no orders in {1} day(s) since it was added — a candidate for retirement.',
+        N'{0} has had no orders in {1} day(s) since it was added: a candidate for retirement.'),
+    (N'EN', N'rotacion.motivo.altademanda',
+        N'{0} was ordered {1} times — a candidate for restocking in its category.',
+        N'{0} was ordered {1} times: a candidate for restocking in its category.'),
+    (N'RU', N'rotacion.motivo.bajademanda',
+        N'{0} не заказывали {1} дн. с момента добавления — кандидат на списание.',
+        N'{0} не заказывали {1} дн. с момента добавления: кандидат на списание.'),
+    (N'RU', N'rotacion.motivo.altademanda',
+        N'{0} заказывали {1} раз(а) — кандидат на пополнение в своей категории.',
+        N'{0} заказывали {1} раз(а): кандидат на пополнение в своей категории.'),
+    (N'PT', N'rotacion.motivo.bajademanda',
+        N'{0} não registra pedidos há {1} dia(s) desde seu cadastro — candidata a baixa.',
+        N'{0} não registra pedidos há {1} dia(s) desde seu cadastro: candidata a baixa.'),
+    (N'PT', N'rotacion.motivo.altademanda',
+        N'{0} foi pedida {1} vezes — candidata a reposição em sua categoria.',
+        N'{0} foi pedida {1} vezes: candidata a reposição em sua categoria.'),
+    (N'ES', N'mant.analisis.motivo.cantidad',
+        N'{0} lleva {1} mantenimientos — cantidad excesiva.',
+        N'{0} lleva {1} mantenimientos: cantidad excesiva.'),
+    (N'ES', N'mant.analisis.motivo.duracion',
+        N'{0} tiene un promedio de {1:F1} día(s) por mantenimiento — duración excesiva.',
+        N'{0} tiene un promedio de {1:F1} día(s) por mantenimiento: duración excesiva.'),
+    (N'EN', N'mant.analisis.motivo.cantidad',
+        N'{0} has had {1} maintenance cycles — excessive count.',
+        N'{0} has had {1} maintenance cycles: excessive count.'),
+    (N'EN', N'mant.analisis.motivo.duracion',
+        N'{0} averages {1:F1} day(s) per maintenance cycle — excessive duration.',
+        N'{0} averages {1:F1} day(s) per maintenance cycle: excessive duration.'),
+    (N'RU', N'mant.analisis.motivo.cantidad',
+        N'{0}: {1} обслуживани(й) — чрезмерное количество.',
+        N'{0}: {1} обслуживани(й), чрезмерное количество.'),
+    (N'RU', N'mant.analisis.motivo.duracion',
+        N'{0}: в среднем {1:F1} дн. на обслуживание — чрезмерная длительность.',
+        N'{0}: в среднем {1:F1} дн. на обслуживание, чрезмерная длительность.'),
+    (N'PT', N'mant.analisis.motivo.cantidad',
+        N'{0} teve {1} manutenções — quantidade excessiva.',
+        N'{0} teve {1} manutenções: quantidade excessiva.'),
+    (N'PT', N'mant.analisis.motivo.duracion',
+        N'{0} tem média de {1:F1} dia(s) por manutenção — duração excessiva.',
+        N'{0} tem média de {1:F1} dia(s) por manutenção: duração excessiva.'),
+    (N'ES', N'combo.cli.sinreferente',
+        N'— Ninguno —',
+        N'(Ninguno)'),
+    (N'ES', N'msg.cargoprenda.registrado',
+        N'Cargo de {0:C2} registrado — se sumará al próximo cobro de {1}.',
+        N'Cargo de {0:C2} registrado. Se sumará al próximo cobro de {1}.'),
+    (N'EN', N'combo.cli.sinreferente',
+        N'— None —',
+        N'(None)'),
+    (N'EN', N'msg.cargoprenda.registrado',
+        N'Charge of {0:C2} registered — it will be added to {1}''s next payment.',
+        N'Charge of {0:C2} registered. It will be added to {1}''s next payment.'),
+    (N'RU', N'combo.cli.sinreferente',
+        N'— Никем —',
+        N'(Никем)'),
+    (N'RU', N'msg.cargoprenda.registrado',
+        N'Штраф на сумму {0:C2} зарегистрирован — будет добавлен к следующему платежу {1}.',
+        N'Штраф на сумму {0:C2} зарегистрирован. Он будет добавлен к следующему платежу {1}.'),
+    (N'PT', N'combo.cli.sinreferente',
+        N'— Nenhum —',
+        N'(Nenhum)'),
+    (N'PT', N'msg.cargoprenda.registrado',
+        N'Cobrança de {0:C2} registrada — será somada à próxima cobrança de {1}.',
+        N'Cobrança de {0:C2} registrada. Será somada à próxima cobrança de {1}.'),
+    (N'ES', N'msg.insp.baja_ok',
+        N'''{0}'' dada de baja — cargo de {1:C2} registrado.',
+        N'''{0}'' dada de baja. Se registró un cargo de {1:C2}.'),
+    (N'EN', N'msg.insp.baja_ok',
+        N'''{0}'' retired — charge of {1:C2} recorded.',
+        N'''{0}'' retired. A charge of {1:C2} was recorded.'),
+    (N'RU', N'msg.insp.baja_ok',
+        N'''{0}'' списана — зарегистрирован платёж на {1:C2}.',
+        N'''{0}'' списана. Зарегистрирован платёж на {1:C2}.'),
+    (N'PT', N'msg.insp.baja_ok',
+        N'''{0}'' baixada — cobrança de {1:C2} registrada.',
+        N'''{0}'' baixada. Foi registrada uma cobrança de {1:C2}.'),
+    (N'ES', N'msg.ped.perdida_ok',
+        N'''{0}'' reportada como perdida — cargo de {1:C2} registrado.',
+        N'''{0}'' reportada como perdida. Se registró un cargo de {1:C2}.'),
+    (N'EN', N'msg.ped.perdida_ok',
+        N'''{0}'' reported as lost — charge of {1:C2} recorded.',
+        N'''{0}'' reported as lost. A charge of {1:C2} was recorded.'),
+    (N'RU', N'msg.ped.perdida_ok',
+        N'''{0}'' отмечена как утерянная — зарегистрирован платёж на {1:C2}.',
+        N'''{0}'' отмечена как утерянная. Зарегистрирован платёж на {1:C2}.'),
+    (N'PT', N'msg.ped.perdida_ok',
+        N'''{0}'' reportada como perdida — cobrança de {1:C2} registrada.',
+        N'''{0}'' reportada como perdida. Foi registrada uma cobrança de {1:C2}.'),
+    (N'ES', N'paso1.identificar',
+        N'Paso 1 de 2 — Identificar al cliente',
+        N'Paso 1 de 2: Identificar al cliente'),
+    (N'ES', N'lbl.ped.ficha',
+        N'Cliente: {0}  —  DNI {1}' + NCHAR(10) + N'Plan: {2} (hasta {3} prendas)  —  Vence: {4}' + NCHAR(10) + N'Prendas en uso: {5}  —  Último pedido: {6}' + NCHAR(10) + N'Método de pago: {7}  —  Alta: {8}',
+        N'Cliente: {0}; DNI {1}' + NCHAR(10) + N'Plan: {2} (hasta {3} prendas); Vence: {4}' + NCHAR(10) + N'Prendas en uso: {5}; Último pedido: {6}' + NCHAR(10) + N'Método de pago: {7}; Alta: {8}'),
+    (N'ES', N'dlg.desistir.pedido',
+        N'Motivo del desistimiento — Pedido #{0} ({1}):',
+        N'Motivo del desistimiento del pedido #{0} ({1}):'),
+    (N'ES', N'lbl.cs.planilla',
+        N'Planilla de control de existencias — seleccione un pedido de la cola',
+        N'Planilla de control de existencias: seleccione un pedido de la cola'),
+    (N'ES', N'lbl.cs.planilla.pedido',
+        N'Planilla de control — Pedido #{0} — {1} — ¿Selección disponible? {2}',
+        N'Planilla de control: Pedido #{0}, {1}. ¿Selección disponible? {2}'),
+    (N'ES', N'lbl.contr.intentos.titulo',
+        N'Intentos de cobro — Contratación #{0}',
+        N'Intentos de cobro: Contratación #{0}'),
+    (N'ES', N'doc.contr.planlinea',
+        N'• {0}: {1:C2} por mes — hasta {2} prenda(s) en simultáneo',
+        N'• {0}: {1:C2} por mes, hasta {2} prenda(s) en simultáneo'),
+    (N'ES', N'lbl.contr.ficha',
+        N'Cliente: {0}  —  DNI {1}' + NCHAR(10) + N'Plan actual: {2}  —  Vence: {3}  —  Prendas en uso: {4}',
+        N'Cliente: {0}; DNI {1}' + NCHAR(10) + N'Plan actual: {2}; Vence: {3}; Prendas en uso: {4}'),
+    (N'EN', N'paso1.identificar',
+        N'Step 1 of 2 — Identify the customer',
+        N'Step 1 of 2: Identify the customer'),
+    (N'EN', N'lbl.ped.ficha',
+        N'Customer: {0}  —  ID {1}' + NCHAR(10) + N'Plan: {2} (up to {3} garments)  —  Expires: {4}' + NCHAR(10) + N'Garments in use: {5}  —  Last order: {6}' + NCHAR(10) + N'Payment method: {7}  —  Joined: {8}',
+        N'Customer: {0}; ID {1}' + NCHAR(10) + N'Plan: {2} (up to {3} garments); Expires: {4}' + NCHAR(10) + N'Garments in use: {5}; Last order: {6}' + NCHAR(10) + N'Payment method: {7}; Joined: {8}'),
+    (N'EN', N'dlg.desistir.pedido',
+        N'Withdrawal reason — Order #{0} ({1}):',
+        N'Withdrawal reason for order #{0} ({1}):'),
+    (N'EN', N'lbl.cs.planilla',
+        N'Stock control sheet — select an order from the queue',
+        N'Stock control sheet: select an order from the queue'),
+    (N'EN', N'lbl.cs.planilla.pedido',
+        N'Control sheet — Order #{0} — {1} — Selection available? {2}',
+        N'Control sheet: Order #{0}, {1}. Selection available? {2}'),
+    (N'EN', N'lbl.contr.intentos.titulo',
+        N'Payment attempts — Contract #{0}',
+        N'Payment attempts: Contract #{0}'),
+    (N'EN', N'doc.contr.planlinea',
+        N'• {0}: {1:C2} per month — up to {2} garment(s) at a time',
+        N'• {0}: {1:C2} per month, up to {2} garment(s) at a time'),
+    (N'EN', N'lbl.contr.ficha',
+        N'Customer: {0}  —  ID {1}' + NCHAR(10) + N'Current plan: {2}  —  Expires: {3}  —  Garments in use: {4}',
+        N'Customer: {0}; ID {1}' + NCHAR(10) + N'Current plan: {2}; Expires: {3}; Garments in use: {4}'),
+    (N'RU', N'paso1.identificar',
+        N'Шаг 1 из 2 — Идентифицировать клиента',
+        N'Шаг 1 из 2: Идентифицировать клиента'),
+    (N'RU', N'lbl.ped.ficha',
+        N'Клиент: {0}  —  Документ {1}' + NCHAR(10) + N'План: {2} (до {3} вещей)  —  Истекает: {4}' + NCHAR(10) + N'Вещей в пользовании: {5}  —  Последний заказ: {6}' + NCHAR(10) + N'Способ оплаты: {7}  —  Регистрация: {8}',
+        N'Клиент: {0}; Документ {1}' + NCHAR(10) + N'План: {2} (до {3} вещей); Истекает: {4}' + NCHAR(10) + N'Вещей в пользовании: {5}; Последний заказ: {6}' + NCHAR(10) + N'Способ оплаты: {7}; Регистрация: {8}'),
+    (N'RU', N'dlg.desistir.pedido',
+        N'Причина отказа — заказ №{0} ({1}):',
+        N'Причина отказа от заказа №{0} ({1}):'),
+    (N'RU', N'lbl.cs.planilla',
+        N'Лист контроля запасов — выберите заказ из очереди',
+        N'Лист контроля запасов: выберите заказ из очереди'),
+    (N'RU', N'lbl.cs.planilla.pedido',
+        N'Лист контроля — заказ №{0} — {1} — Выбор в наличии? {2}',
+        N'Лист контроля: заказ №{0}, {1}. Выбор в наличии? {2}'),
+    (N'RU', N'err.bll.pedido.restaurar_no_permitido',
+        N'Операция ''{0}'' — часть формирования заказа (контроль запасов) и не может быть отменена из истории.',
+        N'Операция ''{0}'' является частью формирования заказа (контроль запасов) и не может быть отменена из истории.'),
+    (N'RU', N'lbl.contr.intentos.titulo',
+        N'Попытки оплаты — договор №{0}',
+        N'Попытки оплаты: договор №{0}'),
+    (N'RU', N'doc.contr.planlinea',
+        N'• {0}: {1:C2} в месяц — до {2} вещ. одновременно',
+        N'• {0}: {1:C2} в месяц, до {2} вещ. одновременно'),
+    (N'RU', N'lbl.contr.ficha',
+        N'Клиент: {0}  —  Документ {1}' + NCHAR(10) + N'Текущий план: {2}  —  Истекает: {3}  —  Вещей в пользовании: {4}',
+        N'Клиент: {0}; Документ {1}' + NCHAR(10) + N'Текущий план: {2}; Истекает: {3}; Вещей в пользовании: {4}'),
+    (N'PT', N'paso1.identificar',
+        N'Passo 1 de 2 — Identificar o cliente',
+        N'Passo 1 de 2: Identificar o cliente'),
+    (N'PT', N'lbl.ped.ficha',
+        N'Cliente: {0}  —  Documento {1}' + NCHAR(10) + N'Plano: {2} (até {3} peças)  —  Vence: {4}' + NCHAR(10) + N'Peças em uso: {5}  —  Último pedido: {6}' + NCHAR(10) + N'Forma de pagamento: {7}  —  Cadastro: {8}',
+        N'Cliente: {0}; Documento {1}' + NCHAR(10) + N'Plano: {2} (até {3} peças); Vence: {4}' + NCHAR(10) + N'Peças em uso: {5}; Último pedido: {6}' + NCHAR(10) + N'Forma de pagamento: {7}; Cadastro: {8}'),
+    (N'PT', N'dlg.desistir.pedido',
+        N'Motivo da desistência — Pedido #{0} ({1}):',
+        N'Motivo da desistência do pedido #{0} ({1}):'),
+    (N'PT', N'lbl.cs.planilla',
+        N'Planilha de controle de estoque — selecione um pedido da fila',
+        N'Planilha de controle de estoque: selecione um pedido da fila'),
+    (N'PT', N'lbl.cs.planilla.pedido',
+        N'Planilha de controle — Pedido #{0} — {1} — Seleção disponível? {2}',
+        N'Planilha de controle: Pedido #{0}, {1}. Seleção disponível? {2}'),
+    (N'PT', N'lbl.contr.intentos.titulo',
+        N'Tentativas de cobrança — Contratação #{0}',
+        N'Tentativas de cobrança: Contratação #{0}'),
+    (N'PT', N'doc.contr.planlinea',
+        N'• {0}: {1:C2} por mês — até {2} peça(s) simultâneas',
+        N'• {0}: {1:C2} por mês, até {2} peça(s) simultâneas'),
+    (N'PT', N'lbl.contr.ficha',
+        N'Cliente: {0}  —  Documento {1}' + NCHAR(10) + N'Plano atual: {2}  —  Vence: {3}  —  Peças em uso: {4}',
+        N'Cliente: {0}; Documento {1}' + NCHAR(10) + N'Plano atual: {2}; Vence: {3}; Peças em uso: {4}'),
+    (N'ES', N'lbl.promo.historial.titulo',
+        N'Historial de estados — Promoción #{0}',
+        N'Historial de estados: Promoción #{0}'),
+    (N'ES', N'promo.analisis.titulo',
+        N'Análisis de margen e impacto — Promoción #{0} ''{1}''',
+        N'Análisis de margen e impacto: Promoción #{0} ''{1}'''),
+    (N'ES', N'promo.analisis.margen',
+        N'Margen estimado: {0:C2} — Impacto: {1}',
+        N'Margen estimado: {0:C2}; Impacto: {1}'),
+    (N'ES', N'doc.promo.abandonolinea',
+        N'   • {0}: {1} cliente(s) en riesgo — {2:C2} de ingreso mensual en riesgo',
+        N'   • {0}: {1} cliente(s) en riesgo, {2:C2} de ingreso mensual en riesgo'),
+    (N'ES', N'doc.promo.aprobada',
+        N'APROBADA — la promoción queda Vigente.',
+        N'APROBADA: la promoción queda Vigente.'),
+    (N'ES', N'doc.promo.rechazada',
+        N'RECHAZADA — vuelve a Administración para reformularla o darla de baja.',
+        N'RECHAZADA: vuelve a Administración para reformularla o darla de baja.'),
+    (N'EN', N'lbl.promo.historial.titulo',
+        N'Status history — Promotion #{0}',
+        N'Status history: Promotion #{0}'),
+    (N'EN', N'promo.analisis.titulo',
+        N'Margin and impact analysis — Promotion #{0} ''{1}''',
+        N'Margin and impact analysis: Promotion #{0} ''{1}'''),
+    (N'EN', N'promo.analisis.margen',
+        N'Estimated margin: {0:C2} — Impact: {1}',
+        N'Estimated margin: {0:C2}; Impact: {1}'),
+    (N'EN', N'doc.promo.abandonolinea',
+        N'   • {0}: {1} customer(s) at risk — {2:C2} of monthly revenue at risk',
+        N'   • {0}: {1} customer(s) at risk, {2:C2} of monthly revenue at risk'),
+    (N'EN', N'doc.promo.aprobada',
+        N'APPROVED — the promotion becomes Active.',
+        N'APPROVED: the promotion becomes Active.'),
+    (N'EN', N'doc.promo.rechazada',
+        N'REJECTED — it goes back to Administration to be reformulated or withdrawn.',
+        N'REJECTED: it goes back to Administration to be reformulated or withdrawn.'),
+    (N'RU', N'lbl.promo.historial.titulo',
+        N'История статусов — акция №{0}',
+        N'История статусов: акция №{0}'),
+    (N'RU', N'promo.analisis.titulo',
+        N'Анализ маржи и влияния — акция №{0} ''{1}''',
+        N'Анализ маржи и влияния: акция №{0} ''{1}'''),
+    (N'RU', N'promo.analisis.margen',
+        N'Ожидаемая маржа: {0:C2} — Влияние: {1}',
+        N'Ожидаемая маржа: {0:C2}; Влияние: {1}'),
+    (N'RU', N'doc.promo.abandonolinea',
+        N'   • {0}: клиентов в зоне риска: {1} — под угрозой {2:C2} ежемесячного дохода',
+        N'   • {0}: клиентов в зоне риска: {1}; под угрозой {2:C2} ежемесячного дохода'),
+    (N'RU', N'doc.promo.rotacionlinea',
+        N'   • {0}: низкий спрос — {1}, высокий спрос — {2}',
+        N'   • {0}: низкий спрос: {1}; высокий спрос: {2}'),
+    (N'RU', N'doc.promo.aprobada',
+        N'ОДОБРЕНО — акция начинает действовать.',
+        N'ОДОБРЕНО: акция начинает действовать.'),
+    (N'RU', N'doc.promo.rechazada',
+        N'ОТКЛОНЕНО — возвращается в администрацию для переформулирования или снятия.',
+        N'ОТКЛОНЕНО: возвращается в администрацию для переформулирования или снятия.'),
+    (N'PT', N'lbl.promo.historial.titulo',
+        N'Histórico de estados — Promoção #{0}',
+        N'Histórico de estados: Promoção #{0}'),
+    (N'PT', N'promo.analisis.titulo',
+        N'Análise de margem e impacto — Promoção #{0} ''{1}''',
+        N'Análise de margem e impacto: Promoção #{0} ''{1}'''),
+    (N'PT', N'promo.analisis.margen',
+        N'Margem estimada: {0:C2} — Impacto: {1}',
+        N'Margem estimada: {0:C2}; Impacto: {1}'),
+    (N'PT', N'doc.promo.abandonolinea',
+        N'   • {0}: {1} cliente(s) em risco — {2:C2} de receita mensal em risco',
+        N'   • {0}: {1} cliente(s) em risco, {2:C2} de receita mensal em risco'),
+    (N'PT', N'doc.promo.aprobada',
+        N'APROVADA — a promoção fica Vigente.',
+        N'APROVADA: a promoção fica Vigente.'),
+    (N'PT', N'doc.promo.rechazada',
+        N'REJEITADA — volta à Administração para ser reformulada ou baixada.',
+        N'REJEITADA: volta à Administração para ser reformulada ou baixada.'),
+    (N'ES', N'lbl.contr.cuotas.detalle',
+        N'{0} cuota(s) de {1:C2} — recargo {2:C2} — total a abonar {3:C2}',
+        N'{0} cuota(s) de {1:C2}, recargo {2:C2}, total a abonar {3:C2}'),
+    (N'ES', N'doc.contr.cuotas.detalle',
+        N'Tarjeta de crédito en {0} cuota(s) de {1:C2} — recargo {2:C2} — total a abonar {3:C2}',
+        N'Tarjeta de crédito en {0} cuota(s) de {1:C2}, recargo {2:C2}, total a abonar {3:C2}'),
+    (N'ES', N'doc.contr.cuotas.plan',
+        N'Cuotas: {0}  —  recargo por financiación {1:0.##} %: {2:C2}',
+        N'Cuotas: {0}; recargo por financiación {1:0.##} %: {2:C2}'),
+    (N'ES', N'doc.contr.cuotas.opcion',
+        N'   {0} cuota(s) de {1:C2}  —  recargo {2:0.##} %  —  total {3:C2}',
+        N'   {0} cuota(s) de {1:C2}, recargo {2:0.##} %, total {3:C2}'),
+    (N'EN', N'lbl.contr.cuotas.detalle',
+        N'{0} installment(s) of {1:C2} — surcharge {2:C2} — total to pay {3:C2}',
+        N'{0} installment(s) of {1:C2}, surcharge {2:C2}, total to pay {3:C2}'),
+    (N'EN', N'doc.contr.cuotas.detalle',
+        N'Credit card in {0} installment(s) of {1:C2} — surcharge {2:C2} — total to pay {3:C2}',
+        N'Credit card in {0} installment(s) of {1:C2}, surcharge {2:C2}, total to pay {3:C2}'),
+    (N'EN', N'doc.contr.cuotas.plan',
+        N'Installments: {0}  —  financing surcharge {1:0.##} %: {2:C2}',
+        N'Installments: {0}; financing surcharge {1:0.##} %: {2:C2}'),
+    (N'EN', N'doc.contr.cuotas.opcion',
+        N'   {0} installment(s) of {1:C2}  —  surcharge {2:0.##} %  —  total {3:C2}',
+        N'   {0} installment(s) of {1:C2}, surcharge {2:0.##} %, total {3:C2}'),
+    (N'RU', N'lbl.contr.cuotas.detalle',
+        N'{0} платеж(ей) по {1:C2} — наценка {2:C2} — итого к оплате {3:C2}',
+        N'{0} платеж(ей) по {1:C2}, наценка {2:C2}, итого к оплате {3:C2}'),
+    (N'RU', N'doc.contr.cuotas.detalle',
+        N'Кредитная карта: {0} платеж(ей) по {1:C2} — наценка {2:C2} — итого к оплате {3:C2}',
+        N'Кредитная карта: {0} платеж(ей) по {1:C2}, наценка {2:C2}, итого к оплате {3:C2}'),
+    (N'RU', N'doc.contr.cuotas.plan',
+        N'Платежей: {0}  —  наценка за рассрочку {1:0.##} %: {2:C2}',
+        N'Платежей: {0}; наценка за рассрочку {1:0.##} %: {2:C2}'),
+    (N'RU', N'doc.contr.cuotas.opcion',
+        N'   {0} платеж(ей) по {1:C2}  —  наценка {2:0.##} %  —  итого {3:C2}',
+        N'   {0} платеж(ей) по {1:C2}, наценка {2:0.##} %, итого {3:C2}'),
+    (N'PT', N'lbl.contr.cuotas.detalle',
+        N'{0} parcela(s) de {1:C2} — acréscimo {2:C2} — total a pagar {3:C2}',
+        N'{0} parcela(s) de {1:C2}, acréscimo {2:C2}, total a pagar {3:C2}'),
+    (N'PT', N'doc.contr.cuotas.detalle',
+        N'Cartão de crédito em {0} parcela(s) de {1:C2} — acréscimo {2:C2} — total a pagar {3:C2}',
+        N'Cartão de crédito em {0} parcela(s) de {1:C2}, acréscimo {2:C2}, total a pagar {3:C2}'),
+    (N'PT', N'doc.contr.cuotas.plan',
+        N'Parcelas: {0}  —  acréscimo de financiamento {1:0.##} %: {2:C2}',
+        N'Parcelas: {0}; acréscimo de financiamento {1:0.##} %: {2:C2}'),
+    (N'PT', N'doc.contr.cuotas.opcion',
+        N'   {0} parcela(s) de {1:C2}  —  acréscimo {2:0.##} %  —  total {3:C2}',
+        N'   {0} parcela(s) de {1:C2}, acréscimo {2:0.##} %, total {3:C2}'),
+    (N'RU', N'msg.ped.formalizado.doc',
+        N'Заказ №{0} оформлен и ожидает отправки. Подтверждение для клиента — в меню «Документы».',
+        N'Заказ №{0} оформлен и ожидает отправки. Подтверждение для клиента находится в меню «Документы».'),
+    (N'ES', N'doc.promo.impactolinea',
+        N'   • {0} ({1}): {2} cobro(s) — {3:C2} descontados — {4:C2} cobrados',
+        N'   • {0} ({1}): {2} cobro(s), {3:C2} descontados, {4:C2} cobrados'),
+    (N'EN', N'doc.promo.impactolinea',
+        N'   • {0} ({1}): {2} charge(s) — {3:C2} discounted — {4:C2} charged',
+        N'   • {0} ({1}): {2} charge(s), {3:C2} discounted, {4:C2} charged'),
+    (N'RU', N'doc.promo.impactolinea',
+        N'   • {0} ({1}): {2} оплат(а) — скидок на {3:C2} — получено {4:C2}',
+        N'   • {0} ({1}): {2} оплат(а), скидок на {3:C2}, получено {4:C2}'),
+    (N'PT', N'doc.promo.impactolinea',
+        N'   • {0} ({1}): {2} cobrança(s) — {3:C2} descontados — {4:C2} cobrados',
+        N'   • {0} ({1}): {2} cobrança(s), {3:C2} descontados, {4:C2} cobrados'),
+    (N'ES', N'rotacion.motivo.bajademanda.periodo',
+        N'{0} no registra pedidos desde el {1:d} — candidata a baja.',
+        N'{0} no registra pedidos desde el {1:d}: candidata a baja.'),
+    (N'EN', N'rotacion.motivo.bajademanda.periodo',
+        N'{0} has no orders since {1:d} — candidate for removal.',
+        N'{0} has no orders since {1:d}: candidate for removal.'),
+    (N'RU', N'rotacion.motivo.bajademanda.periodo',
+        N'{0}: нет заказов с {1:d} — кандидат на списание.',
+        N'{0}: нет заказов с {1:d}, кандидат на списание.'),
+    (N'PT', N'rotacion.motivo.bajademanda.periodo',
+        N'{0} não tem pedidos desde {1:d} — candidata a baixa.',
+        N'{0} não tem pedidos desde {1:d}: candidata a baixa.'),
+    (N'ES', N'lbl.errxml.origen.archivo',
+        N'Archivo importado: {0} — {1} error(es)',
+        N'Archivo importado: {0} ({1} error(es))'),
+    (N'EN', N'lbl.errxml.origen.archivo',
+        N'Imported file: {0} — {1} error(s)',
+        N'Imported file: {0} ({1} error(s))'),
+    (N'RU', N'lbl.errxml.origen.archivo',
+        N'Импортированный файл: {0} — ошибок: {1}',
+        N'Импортированный файл: {0} (ошибок: {1})'),
+    (N'PT', N'lbl.errxml.origen.archivo',
+        N'Arquivo importado: {0} — {1} erro(s)',
+        N'Arquivo importado: {0} ({1} erro(s))'),
+    (N'RU', N'ayuda.General',
+        N'WardrobeFlow управляет арендой одежды по подписке.' + NCHAR(10) + N'' + NCHAR(10) + N'• В меню видны только разрешённые для вашей роли пункты.' + NCHAR(10) + N'• На любом экране F1 (или Сеанс › Справка) открывает справку по этому экрану.' + NCHAR(10) + N'• Сообщения о результате появляются в нижней строке экрана (зелёный — успех, красный — ошибка).' + NCHAR(10) + N'• В подтверждениях необратимых действий по умолчанию выбрано «Нет».' + NCHAR(10) + N'• В «Мой профиль» можно сменить язык, шрифт, тему и формат даты.' + NCHAR(10) + N'' + NCHAR(10) + N'Основные процессы:' + NCHAR(10) + N'• PN01 Оформление заказа: продавец (Заказы) и склад (Контроль наличия).' + NCHAR(10) + N'• PN02 Продажа подписки: продавец (Новая подписка) и касса (Оплата подписок).' + NCHAR(10) + N'• PN03 Акции: руководство предлагает, коммерческий отдел создаёт, бухгалтерия утверждает.' + NCHAR(10) + N'• PN04 Возвраты: склад проверяет возвращённые вещи и оформляет утерянные.' + NCHAR(10) + N'• PN02 Продления: касса принимает оплату продлений (Оплата продлений).',
+        N'WardrobeFlow управляет арендой одежды по подписке.' + NCHAR(10) + N'' + NCHAR(10) + N'• В меню видны только разрешённые для вашей роли пункты.' + NCHAR(10) + N'• На любом экране F1 (или Сеанс › Справка) открывает справку по этому экрану.' + NCHAR(10) + N'• Сообщения о результате появляются в нижней строке экрана (зелёный: успех, красный: ошибка).' + NCHAR(10) + N'• В подтверждениях необратимых действий по умолчанию выбрано «Нет».' + NCHAR(10) + N'• В «Мой профиль» можно сменить язык, шрифт, тему и формат даты.' + NCHAR(10) + N'' + NCHAR(10) + N'Основные процессы:' + NCHAR(10) + N'• PN01 Оформление заказа: продавец (Заказы) и склад (Контроль наличия).' + NCHAR(10) + N'• PN02 Продажа подписки: продавец (Новая подписка) и касса (Оплата подписок).' + NCHAR(10) + N'• PN03 Акции: руководство предлагает, коммерческий отдел создаёт, бухгалтерия утверждает.' + NCHAR(10) + N'• PN04 Возвраты: склад проверяет возвращённые вещи и оформляет утерянные.' + NCHAR(10) + N'• PN02 Продления: касса принимает оплату продлений (Оплата продлений).'),
+    (N'RU', N'ayuda.NuevaContratacionForm',
+        N'1. Найдите клиента по номеру документа или имени. Если его нет — «Зарегистрировать клиента».' + NCHAR(10) + N'2. Выберите тариф и периодичность (месяц, квартал или год): показывается сумма к оплате с учётом скидки и неоплаченных сборов.' + NCHAR(10) + N'3. «Зарегистрировать»: подписка ожидает оплаты, пока её не примет касса.' + NCHAR(10) + N'' + NCHAR(10) + N'• При переходе на более дорогой тариф при действующем текущий новый действует с сегодняшнего дня, неиспользованные дни вычитаются.' + NCHAR(10) + N'• На такой же или более дешёвый тариф переходят по окончании оплаченного периода.' + NCHAR(10) + N'• Если клиент отказывается: «Записать отказ» (с причиной).',
+        N'1. Найдите клиента по номеру документа или имени. Если его нет, нажмите «Зарегистрировать клиента».' + NCHAR(10) + N'2. Выберите тариф и периодичность (месяц, квартал или год): показывается сумма к оплате с учётом скидки и неоплаченных сборов.' + NCHAR(10) + N'3. «Зарегистрировать»: подписка ожидает оплаты, пока её не примет касса.' + NCHAR(10) + N'' + NCHAR(10) + N'• При переходе на более дорогой тариф при действующем текущий новый действует с сегодняшнего дня, неиспользованные дни вычитаются.' + NCHAR(10) + N'• На такой же или более дешёвый тариф переходят по окончании оплаченного периода.' + NCHAR(10) + N'• Если клиент отказывается: «Записать отказ» (с причиной).'),
+    (N'RU', N'ayuda.ContratacionesPendientesForm',
+        N'Очередь подписок, ожидающих оплаты.' + NCHAR(10) + N'' + NCHAR(10) + N'• Выберите способ оплаты (с кредитной картой — рассрочку) и «Принять оплату»: выдаётся квитанция, и подписка активируется. В сумму входят неоплаченные сборы клиента за повреждение или потерю.' + NCHAR(10) + N'• Неудачная попытка: фиксируется с причиной; после третьей подписка отменяется.' + NCHAR(10) + N'• «Аннулировать»: отменяет подписку без оплаты (клиент передумал или ошибка ввода), с причиной.' + NCHAR(10) + N'• Оформивший подписку не может принять её оплату (кроме администратора).' + NCHAR(10) + N'• В режиме завершённых можно повторно распечатать квитанцию и справки.',
+        N'Очередь подписок, ожидающих оплаты.' + NCHAR(10) + N'' + NCHAR(10) + N'• Выберите способ оплаты (для кредитной карты также рассрочку) и «Принять оплату»: выдаётся квитанция, и подписка активируется. В сумму входят неоплаченные сборы клиента за повреждение или потерю.' + NCHAR(10) + N'• Неудачная попытка: фиксируется с причиной; после третьей подписка отменяется.' + NCHAR(10) + N'• «Аннулировать»: отменяет подписку без оплаты (клиент передумал или ошибка ввода), с причиной.' + NCHAR(10) + N'• Оформивший подписку не может принять её оплату (кроме администратора).' + NCHAR(10) + N'• В режиме завершённых можно повторно распечатать квитанцию и справки.'),
+    (N'RU', N'ayuda.CobroSuscripcionForm',
+        N'Регулярный приём оплаты истёкших или скоро истекающих подписок.' + NCHAR(10) + N'' + NCHAR(10) + N'• Выберите клиента и периодичность: показывается сумма к оплате (период − скидка + сборы за повреждение или потерю).' + NCHAR(10) + N'• «Оплачено»: укажите способ оплаты; выдаётся квитанция, подписка продлевается.' + NCHAR(10) + N'• Неудачная оплата: клиент получает льготный период, а если уже был в нём — приостанавливается.',
+        N'Регулярный приём оплаты истёкших или скоро истекающих подписок.' + NCHAR(10) + N'' + NCHAR(10) + N'• Выберите клиента и периодичность: показывается сумма к оплате (период − скидка + сборы за повреждение или потерю).' + NCHAR(10) + N'• «Оплачено»: укажите способ оплаты; выдаётся квитанция, подписка продлевается.' + NCHAR(10) + N'• Неудачная оплата: клиент получает льготный период, а если уже был в нём, подписка приостанавливается.'),
+    (N'RU', N'ayuda.Prendas',
+        N'Создание, редактирование и смена статуса вещей.' + NCHAR(10) + N'' + NCHAR(10) + N'• Вещь, отправленную в чистку на складе, можно вернуть в доступные или списать без сбора.' + NCHAR(10) + N'• Вещи, возвращённые клиентом, обрабатываются в «Проверке возврата», а невозвращённые — через «Сообщить о потере» в «Выполненных заказах».',
+        N'Создание, редактирование и смена статуса вещей.' + NCHAR(10) + N'' + NCHAR(10) + N'• Вещь, отправленную в чистку на складе, можно вернуть в доступные или списать без сбора.' + NCHAR(10) + N'• Вещи, возвращённые клиентом, обрабатываются в «Проверке возврата», а невозвращённые оформляются через «Сообщить о потере» в «Выполненных заказах».'),
+    (N'RU', N'ayuda.PromocionesAdministracionForm',
+        N'• Предложения: создать акцию по предложению или отклонить его (с причиной).' + NCHAR(10) + N'• Ожидающие запросы на отмену: рассмотрите каждый запрос отдела продаж и дайте ответ; если вы согласны, акция снимается, если нет — остаётся действующей.' + NCHAR(10) + N'• Акции: создать (всегда для тарифа), переработать отклонённые бухгалтерией или снять действующую либо отклонённую (с причиной).' + NCHAR(10) + N'• Печать ▾: карточка, заключение, запрос на отмену, ответ на запрос и справка о снятии.' + NCHAR(10) + N'Дата окончания не может быть в прошлом.',
+        N'• Предложения: создать акцию по предложению или отклонить его (с причиной).' + NCHAR(10) + N'• Ожидающие запросы на отмену: рассмотрите каждый запрос отдела продаж и дайте ответ; если вы согласны, акция снимается, если нет, она остаётся действующей.' + NCHAR(10) + N'• Акции: создать (всегда для тарифа), переработать отклонённые бухгалтерией или снять действующую либо отклонённую (с причиной).' + NCHAR(10) + N'• Печать ▾: карточка, заключение, запрос на отмену, ответ на запрос и справка о снятии.' + NCHAR(10) + N'Дата окончания не может быть в прошлом.'),
+    (N'RU', N'lbl.contr.programado',
+        N'Такой же или более дешёвый тариф: текущий действует до {0:d}, новый — с этого дня.',
+        N'Такой же или более дешёвый тариф: текущий действует до {0:d}, а новый начинает действовать с этого дня.'),
+    (N'RU', N'conf.contr.cobro.programado',
+        N'Такой же или более дешёвый тариф: текущий действует до {0:d}, новый — с этого дня.',
+        N'Такой же или более дешёвый тариф: текущий действует до {0:d}, а новый начинает действовать с этого дня.'),
+    (N'RU', N'doc.contr.programado',
+        N'Переход на такой же или более дешёвый тариф: текущий действует до {0:d}; новый — с этого дня.',
+        N'Переход на такой же или более дешёвый тариф: текущий действует до {0:d}; новый начинает действовать с этого дня.'),
+    (N'ES', N'est.entregado.enpoder',
+        N'Entregado — en poder del cliente ({0} días)',
+        N'Entregado, en poder del cliente ({0} días)'),
+    (N'EN', N'est.entregado.enpoder',
+        N'Delivered — with the customer ({0} days)',
+        N'Delivered, with the customer ({0} days)'),
+    (N'RU', N'est.entregado.enpoder',
+        N'Доставлен — у клиента ({0} дн.)',
+        N'Доставлен, у клиента ({0} дн.)'),
+    (N'PT', N'est.entregado.enpoder',
+        N'Entregue — em poder do cliente ({0} dias)',
+        N'Entregue, em poder do cliente ({0} dias)'),
+    (N'ES', N'doc.promo.resultado.promo',
+        N'   • {0} ({1}) — plan {2} — vigencia {3:d} al {4:d} ({5} día(s)); antes: {6:d} al {7:d}',
+        N'   • {0} ({1}): plan {2}, vigencia {3:d} al {4:d} ({5} día(s)); antes: {6:d} al {7:d}'),
+    (N'EN', N'doc.promo.resultado.promo',
+        N'   • {0} ({1}) — plan {2} — active {3:d} to {4:d} ({5} day(s)); before: {6:d} to {7:d}',
+        N'   • {0} ({1}): plan {2}, active {3:d} to {4:d} ({5} day(s)); before: {6:d} to {7:d}'),
+    (N'RU', N'doc.promo.resultado.promo',
+        N'   • {0} ({1}) — тариф {2} — действует с {3:d} по {4:d} ({5} дн.); до этого: с {6:d} по {7:d}',
+        N'   • {0} ({1}): тариф {2}, действует с {3:d} по {4:d} ({5} дн.); до этого: с {6:d} по {7:d}'),
+    (N'PT', N'doc.promo.resultado.promo',
+        N'   • {0} ({1}) — plano {2} — vigência {3:d} a {4:d} ({5} dia(s)); antes: {6:d} a {7:d}',
+        N'   • {0} ({1}): plano {2}, vigência {3:d} a {4:d} ({5} dia(s)); antes: {6:d} a {7:d}'),
+    (N'RU', N'ayuda.ReporteNegocioForm',
+        N'Отчёты для принятия решений. Каждый находится в меню своей роли и виден только пользователям с соответствующим разрешением.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Если у отчёта есть фильтр, выберите его: критерий риска («Анализ оттока»), минимальный порог («Дефицит запасов») или клиента («Рекомендации одежды»).' + NCHAR(10) + N'2. «Сформировать»: результат показывается в таблице, сводка — над ней.' + NCHAR(10) + N'3. «Экспорт в PDF» (файл сохраняется и открывается) или «Сохранить как .CSV».' + NCHAR(10) + N'' + NCHAR(10) + N'• Продажи (коммерческое руководство): «Анализ оттока» и «Продажи по продавцам».' + NCHAR(10) + N'• Склад (руководство склада): «Оборот одежды», «Сроки обслуживания» и «Дефицит запасов».' + NCHAR(10) + N'• Продажи (продавец): «Рекомендации одежды».',
+        N'Отчёты для принятия решений. Каждый находится в меню своей роли и виден только пользователям с соответствующим разрешением.' + NCHAR(10) + N'' + NCHAR(10) + N'1. Если у отчёта есть фильтр, выберите его: критерий риска («Анализ оттока»), минимальный порог («Дефицит запасов») или клиента («Рекомендации одежды»).' + NCHAR(10) + N'2. «Сформировать»: результат показывается в таблице, а сводка над ней.' + NCHAR(10) + N'3. «Экспорт в PDF» (файл сохраняется и открывается) или «Сохранить как .CSV».' + NCHAR(10) + N'' + NCHAR(10) + N'• Продажи (коммерческое руководство): «Анализ оттока» и «Продажи по продавцам».' + NCHAR(10) + N'• Склад (руководство склада): «Оборот одежды», «Сроки обслуживания» и «Дефицит запасов».' + NCHAR(10) + N'• Продажи (продавец): «Рекомендации одежды».'),
+    (N'ES', N'lbl.ver.origen.archivo',
+        N'Versiones importadas de ''{0}'' — usuario ''{1}'' (ID {2}), exportadas el {3} en el equipo {4}. Elija una y presione Restaurar.',
+        N'Versiones importadas de ''{0}'': usuario ''{1}'' (ID {2}), exportadas el {3} en el equipo {4}. Elija una y presione Restaurar.'),
+    (N'EN', N'lbl.ver.origen.archivo',
+        N'Versions imported from ''{0}'' — user ''{1}'' (ID {2}), exported on {3} on computer {4}. Choose one and press Restore.',
+        N'Versions imported from ''{0}'': user ''{1}'' (ID {2}), exported on {3} on computer {4}. Choose one and press Restore.'),
+    (N'RU', N'lbl.ver.origen.archivo',
+        N'Версии, импортированные из «{0}» — пользователь «{1}» (ID {2}), экспортированы {3} на компьютере {4}. Выберите версию и нажмите «Восстановить».',
+        N'Версии, импортированные из «{0}»: пользователь «{1}» (ID {2}), экспортированы {3} на компьютере {4}. Выберите версию и нажмите «Восстановить».'),
+    (N'PT', N'lbl.ver.origen.archivo',
+        N'Versões importadas de ''{0}'' — usuário ''{1}'' (ID {2}), exportadas em {3} no computador {4}. Escolha uma e pressione Restaurar.',
+        N'Versões importadas de ''{0}'': usuário ''{1}'' (ID {2}), exportadas em {3} no computador {4}. Escolha uma e pressione Restaurar.'),
+    (N'RU', N'cdc.cohorte.explicacion',
+        N'Как читать: каждая строка объединяет клиентов по месяцу подписки, а каждый столбец показывает, какой % из них остаётся активным (без отказа) через k месяцев после подписки; Месяц 0 — месяц подписки, * отмечает ещё не закончившийся месяц.',
+        N'Как читать: каждая строка объединяет клиентов по месяцу подписки, а каждый столбец показывает, какой % из них остаётся активным (без отказа) через k месяцев после подписки; Месяц 0 означает месяц подписки, * отмечает ещё не закончившийся месяц.'),
+    (N'RU', N'cdc.cohorte.tip.actuar',
+        N'Переходит к рекомендации по отказам для тарифа, который больше всего объясняет отказы группы с худшим удержанием (а если её нет — к симулятору). Также двойным щелчком по её строке.',
+        N'Переходит к рекомендации по отказам для тарифа, который больше всего объясняет отказы группы с худшим удержанием (а если её нет, к симулятору). Также двойным щелчком по её строке.'),
+    (N'RU', N'cdc.cohorte.peor',
+        N'Клиенты, подписавшиеся в {0:yyyy-MM} ({1} клиентов), — группа с худшим удержанием: удерживается {2:0.#} % на месяц {3} при среднем {4}. Тариф {5} объясняет {6} из {7} отказ(ов).',
+        N'Клиенты, подписавшиеся в {0:yyyy-MM} ({1} клиентов) составляют группу с худшим удержанием: удерживается {2:0.#} % на месяц {3} при среднем {4}. Тариф {5} объясняет {6} из {7} отказ(ов).'),
+    (N'RU', N'cdc.cohorte.peor.sinplan',
+        N'Клиенты, подписавшиеся в {0:yyyy-MM} ({1} клиентов), — группа с худшим удержанием: удерживается {2:0.#} % на месяц {3} при среднем {4}. Не удалось определить тариф её отказов.',
+        N'Клиенты, подписавшиеся в {0:yyyy-MM} ({1} клиентов) составляют группу с худшим удержанием: удерживается {2:0.#} % на месяц {3} при среднем {4}. Не удалось определить тариф её отказов.'),
+    (N'ES', N'cdc.informe.titulo',
+        N'Informe ejecutivo — Inteligencia comercial',
+        N'Informe ejecutivo: Inteligencia comercial'),
+    (N'EN', N'cdc.informe.titulo',
+        N'Executive report — Business intelligence',
+        N'Executive report: Business intelligence'),
+    (N'RU', N'cdc.informe.titulo',
+        N'Отчёт для руководства — коммерческая аналитика',
+        N'Отчёт для руководства: коммерческая аналитика'),
+    (N'PT', N'cdc.informe.titulo',
+        N'Relatório executivo — Inteligência comercial',
+        N'Relatório executivo: Inteligência comercial'),
+    (N'RU', N'med.ver.bajorendimiento',
+        N'Прирост {0:0.#} п.п. — лишь {1:0} % от ожидаемого ({2:0.#} %): акцию лучше отменить.',
+        N'Прирост {0:0.#} п.п., лишь {1:0} % от ожидаемого ({2:0.#} %): акцию лучше отменить.'),
+    (N'RU', N'cdc.msg.contactos',
+        N'Решение №{0} выполнено: выгружено контактов — {1}. История покажет, сколько из них продлят подписку или сменят тариф.',
+        N'Решение №{0} выполнено, выгружено контактов: {1}. История покажет, сколько из них продлят подписку или сменят тариф.'),
+    (N'RU', N'cdc.msg.prendas',
+        N'Решение №{0} выполнено: вещей переведено в «{2}» — {1}.',
+        N'Решение №{0} выполнено, вещей переведено в «{2}»: {1}.'),
+    (N'RU', N'cdc.msg.prendasparcial',
+        N'Решение №{0} выполнено: изменено вещей — {1}, не изменено — {2} ({3}).',
+        N'Решение №{0} выполнено. Изменено вещей: {1}, не изменено: {2} ({3}).'),
+    (N'RU', N'glos.metaavance.decision',
+        N'Чем больше, тем лучше: от 100 % — выполнена. Чем меньше, тем лучше: до 100 % — выполнена.',
+        N'Чем больше, тем лучше: при 100 % и выше цель выполнена. Чем меньше, тем лучше: при 100 % и ниже цель выполнена.'),
+    (N'RU', N'glos.metaproyeccion.formula',
+        N'Значение на сегодня + наклон × оставшиеся дни месяца; наклон — из линейной регрессии методом наименьших квадратов (той же, что для тенденции) по значению показателя на конец каждого прошедшего дня. В последний день месяца — фактическое значение. С 7-го дня месяца; загрузка — снимок на сегодня и не прогнозируется.',
+        N'Значение на сегодня + наклон × оставшиеся дни месяца; наклон берётся из линейной регрессии методом наименьших квадратов (той же, что для тенденции) по значению показателя на конец каждого прошедшего дня. В последний день месяца берётся фактическое значение. С 7-го дня месяца; загрузка является снимком на сегодня и не прогнозируется.'),
+    (N'RU', N'ux.guia.gerenteinventario.2',
+        N'Начните с раздела Склад: там ваши отчёты Оборот одежды, Сроки обслуживания и Дефицит запасов. Повседневная работа — в разделах Склад и Продажи → Выполненные заказы.',
+        N'Начните с раздела Склад: там ваши отчёты Оборот одежды, Сроки обслуживания и Дефицит запасов. Повседневная работа ведётся в разделах Склад и Продажи → Выполненные заказы.'),
+    (N'RU', N'ux.hint.Clientes',
+        N'Найдите клиента по имени или номеру документа. Кнопка «+ Новый клиент» регистрирует клиента, «Изменить» — исправляет его данные.',
+        N'Найдите клиента по имени или номеру документа. Кнопка «+ Новый клиент» регистрирует клиента, а «Изменить» исправляет его данные.'),
+    (N'RU', N'ux.hint.ControlStockForm',
+        N'Выберите самый старый заказ в очереди: если какой-то вещи нет — «Сообщить о недостаче»; если все на месте — подтвердите и отложите вещи.',
+        N'Выберите самый старый заказ в очереди: если какой-то вещи нет, нажмите «Сообщить о недостаче»; если все на месте, подтвердите и отложите вещи.'),
+    (N'RU', N'ux.hint.PedidosRealizados',
+        N'Выберите заказ и переведите его по этапам: «Отправить», «Отметить доставленным», а когда вещи вернутся — «Зарегистрировать возврат».',
+        N'Выберите заказ и переведите его по этапам: «Отправить», «Отметить доставленным», а когда вещи вернутся, «Зарегистрировать возврат».'),
+    (N'RU', N'ux.hint.ContratacionesPendientesForm',
+        N'Выберите договор в очереди, укажите способ оплаты и нажмите «Оплатить»; если платёж отклонён — «Неудачная попытка».',
+        N'Выберите договор в очереди, укажите способ оплаты и нажмите «Оплатить»; если платёж отклонён, нажмите «Неудачная попытка».'),
+    (N'RU', N'tip.Bitacora.btnUltimosDias',
+        N'Показывает события за указанное число последних дней (0 — все).',
+        N'Показывает события за указанное число последних дней (0, все).'),
+    (N'RU', N'tip.Bitacora.btnNegUltimosDias',
+        N'Показывает события за указанное число последних дней (0 — все).',
+        N'Показывает события за указанное число последних дней (0, все).'),
+    (N'RU', N'num.invalido.formato',
+        N'Некорректное число: используйте запятую для дробной части, а точку — только для разделения тысяч группами по три цифры (например, 21.600,50).',
+        N'Некорректное число: используйте запятую для дробной части, а точку используйте только для разделения тысяч группами по три цифры (например, 21.600,50).'),
+    (N'RU', N'ayuda.CambioEstadoDialog',
+        N'Вручную меняет статус вещи на складе. Предлагаются только допустимые переходы между статусами «Доступна», «В чистке» и «Списана».' + NCHAR(10) + N'' + NCHAR(10) + N'• Вещь «В использовании» изменить нельзя: она закреплена за клиентом.' + NCHAR(10) + N'• Вещи, возвращенные клиентом, обрабатываются в Осмотре возврата, а невозвращенные — через «Сообщить о потере» в Оформленных заказах.' + NCHAR(10) + N'• Списанную вещь нельзя вернуть в работу.',
+        N'Вручную меняет статус вещи на складе. Предлагаются только допустимые переходы между статусами «Доступна», «В чистке» и «Списана».' + NCHAR(10) + N'' + NCHAR(10) + N'• Вещь «В использовании» изменить нельзя: она закреплена за клиентом.' + NCHAR(10) + N'• Вещи, возвращенные клиентом, обрабатываются в Осмотре возврата, а невозвращенные оформляются через «Сообщить о потере» в Оформленных заказах.' + NCHAR(10) + N'• Списанную вещь нельзя вернуть в работу.');
+
+    UPDATE t SET t.Texto = f.TextoNuevo
+    FROM Traduccion t
+    JOIN Control c ON c.IdControl = t.IdControl
+    JOIN Idioma  i ON i.IdIdioma  = t.IdIdioma
+    JOIN @Textos21z18 f ON f.Clave = c.Clave AND f.Codigo = i.Codigo
+    WHERE t.Texto COLLATE Latin1_General_BIN2 = f.TextoAnterior COLLATE Latin1_General_BIN2; -- exacto: no pisa ediciones
+    PRINT CONCAT('Textos de fábrica sin raya larga: ', @@ROWCOUNT, ' traducción(es) actualizada(s).');
+END
+GO
+PRINT 'Sección 21z18: textos de fábrica sin raya larga verificados.';
+GO
+-- ============================================================
+-- WardrobeFlow: 22. DÍGITOS VERIFICADORES: FORMATO 2 Y MIGRACIÓN ÚNICA
 -- ------------------------------------------------------------
 -- Formato 2 de los dígitos verificadores (DAL.DigitoVerificador.FormatoActual = 2):
 --   • Usuario  también protege Activo, RequiereCambioClave, CantidadBloqueos y FechaBloqueo.
@@ -6814,5 +9187,5 @@ BEGIN
     PRINT 'Dígitos verificadores: inicialización todavía pendiente (la hace la app en el próximo arranque).';
 END
 ELSE
-    PRINT 'Dígitos verificadores: formato 2 ya aplicado — sin cambios.';
+    PRINT 'Dígitos verificadores: formato 2 ya aplicado, sin cambios.';
 GO

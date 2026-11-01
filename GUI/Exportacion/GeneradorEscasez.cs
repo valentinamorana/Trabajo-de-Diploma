@@ -1,6 +1,6 @@
 namespace GUI.Exportacion
 {
-    /// <summary>Patrón Factory Method — creador de exportadores para la Detección de Escasez de Stock (PdN12).</summary>
+    /// <summary>Patrón Factory Method: creador de exportadores para la Detección de Escasez de Stock (PdN12).</summary>
     public class GeneradorEscasez : GeneradorReporte
     {
         private const string Origen = "Escasez de Stock";

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BLL.Interfaces
 {
     /// <summary>
-    /// Lista de Espera de prendas (mejora opcional, no requerida por la cátedra —
+    /// Lista de Espera de prendas (mejora opcional, no requerida por la cátedra:
     /// inspirada en el TP de un compañero). Un cliente se anota por una prenda EnUso;
     /// al liberarse, queda reservada para él durante una ventana de tiempo.
     /// </summary>
@@ -23,7 +23,7 @@ namespace BLL.Interfaces
         void NotificarSiCorresponde(int idPrenda);
 
         // True si la prenda está reservada por Lista de Espera para un cliente distinto
-        // al indicado — bloquea la asignación en BLL.Pedido.
+        // al indicado: bloquea la asignación en BLL.Pedido.
         bool EstaReservadaParaOtro(int idPrenda, int idClienteSolicitante);
 
         // Si esta prenda estaba reservada para este cliente, cierra el ciclo (Convertida).

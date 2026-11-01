@@ -6,12 +6,12 @@ using System.Diagnostics;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Bitácora.
+    /// Capa de Acceso a Datos: Bitácora.
     /// Opera sobre la tabla [Bitacora] de WardrobeFlowDB.
     /// </summary>
     public class Bitacora : BaseDAL
     {
-        // Inserta un registro de auditoría. Id es identity — lo genera la BD.
+        // Inserta un registro de auditoría. Id es identity: lo genera la BD.
         public void Registrar(BE.Bitacora registro)
         {
             SqlParameter[] parametros = new SqlParameter[]

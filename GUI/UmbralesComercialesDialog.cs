@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// PN03 — Umbrales del motor de recomendaciones (Centro de decisiones comerciales): cada valor con su
+    /// PN03: Umbrales del motor de recomendaciones (Centro de decisiones comerciales): cada valor con su
     /// rango, el de fábrica y la explicación de qué decisión dispara. La validación (rango, enteros,
     /// coherencia entre umbrales) y el guardado en ParametroSistema son de BLL.Inteligencia.UmbralesComerciales.
     /// </summary>
@@ -46,16 +46,16 @@ namespace GUI
 
         private void Traducir(Idioma idioma)
         {
-            Text = Tr("cdc.umbrales.titulo", "Umbrales del motor de recomendaciones");
+            Text = Tr("cdc.umbrales.titulo", "Parámetros del análisis");
             lblTitulo.Text = Text;
-            lblInfo.Text = Tr("cdc.umbrales.info", "Edite la columna Valor. Cada umbral decide cuándo el motor propone una acción; los cambios rigen desde el próximo análisis.");
-            colNombre.HeaderText = Tr("cdc.col.umbral", "Umbral");
+            lblInfo.Text = Tr("cdc.umbrales.info", "Edite la columna Valor. Cada parámetro decide cuándo el análisis propone una acción; los cambios rigen desde el próximo análisis.");
+            colNombre.HeaderText = Tr("cdc.col.umbral", "Parámetro");
             colValor.HeaderText = Tr("cdc.col.valor", "Valor");
             colRango.HeaderText = Tr("cdc.col.rango", "Rango");
-            colDefecto.HeaderText = Tr("cdc.col.defecto", "De fábrica");
+            colDefecto.HeaderText = Tr("cdc.col.defecto", "Predeterminado");
             colExplicacion.HeaderText = Tr("cdc.col.explicacion", "Qué decide");
             btnGuardar.Text = Tr("cdc.umbrales.guardar", "Guardar");
-            btnRestablecer.Text = Tr("cdc.umbrales.restablecer", "Restablecer valores de fábrica");
+            btnRestablecer.Text = Tr("cdc.umbrales.restablecer", "Restablecer valores predeterminados");
             btnCancelar.Text = Tr("btn.cancelar", "Cancelar");
         }
 

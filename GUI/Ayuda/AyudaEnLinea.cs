@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI.Ayuda
 {
     /// <summary>
-    /// D02 — Ayuda en línea: F1 en cualquier pantalla (FormBase o el Menú) abre la ayuda de esa
+    /// D02: Ayuda en línea: F1 en cualquier pantalla (FormBase o el Menú) abre la ayuda de esa
     /// pantalla. El texto se busca en las traducciones ("ayuda.&lt;Pantalla&gt;" y
     /// "ayuda.&lt;Pantalla&gt;.titulo", así se puede traducir) y, si no está, se usa el texto en
     /// español de este catálogo. Las pantallas sin texto propio muestran la ayuda general.
@@ -203,7 +203,10 @@ namespace GUI.Ayuda
                 "• Importar versiones…: lee un archivo exportado (XML o JSON), verifica su formato y que pertenezca a un usuario existente, y muestra sus versiones marcadas como \"importada\". Elija una y presione Restaurar: se aplican los mismos controles que en una restauración normal."),
 
             ["AlertasForm"] = new TemaAyuda("Alertas",
-                "Avisos que necesitan atención según su rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular."),
+                "Avisos que necesitan atención según su rol: suscripciones vencidas o por vencer, pedidos esperando control de stock o con faltantes, prendas en limpieza, contrataciones pendientes de pago, integridad de datos y copias de seguridad. Actualizar las vuelve a calcular.\n" +
+                "\n" +
+                "• Marcar como leída (o Marcar todas como leídas): la alerta deja de contar en «Alertas (N)» del menú mientras su situación no cambie; si cambia la cantidad o el valor, vuelve a aparecer como nueva.\n" +
+                "• Mostrar también las leídas: las lista atenuadas, con la opción de marcarlas como no leídas."),
 
             ["ListaEsperaForm"] = new TemaAyuda("Lista de espera",
                 "Clientes anotados para una prenda que hoy está en uso. Cuando la prenda vuelve a estar disponible, se reserva para el primero de la lista durante 48 horas. Si la prenda se da de baja por daño o pérdida, las anotaciones se cancelan."),
@@ -222,21 +225,27 @@ namespace GUI.Ayuda
             ["CentroDecisionesForm"] = new TemaAyuda("Centro de decisiones comerciales (Gerencia, PN03)",
                 "Inteligencia comercial y promociones: analizar → recomendar/decidir → simular → aplicar → medir.\n" +
                 "\n" +
-                "1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados.\n" +
-                "1b. Cohortes: retención por mes de alta y peor cohorte.\n" +
-                "2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo: sugiere, extiende o pide la baja de una promoción, exporta los contactos de una campaña (se mide después), genera la orden de compra o da de baja / manda a revisión prendas. Descartar pide motivo; Posponer la oculta N días.\n" +
-                "3. Historial: impacto estimado contra el real.\n" +
+                "1. Analizar: período y plan; indicadores contra el período anterior (▲/▼) y gráficos con 3 meses proyectados. ↻ Actualizar vuelve a analizar.\n" +
+                "1b. Permanencia de clientes: clientes agrupados por el mes en que se suscribieron, qué % sigue activo y el grupo que menos permanece.\n" +
+                "2. Recomendaciones: qué pasa, por qué, qué hacer y su impacto. Aceptar y ejecutar siempre hace algo (promoción, contactos, orden de compra o prendas). Descartar pide motivo; Posponer la oculta N días. Simular esta opción: solo opciones de promoción.\n" +
+                "3. Historial: impacto estimado contra el real. Ver constancia: lo que se vio al decidir (XML o JSON).\n" +
                 "4. Simulador: ¿qué pasa si…? y hasta 3 escenarios.\n" +
                 "5. Medir resultado: veredicto por promoción.\n" +
-                "Metas: objetivo mensual por indicador con real, proyección y semáforo; en riesgo, sube la prioridad de lo que la mueve y se avisa al iniciar sesión.\n" +
+                "Metas: objetivo mensual con real, proyección y semáforo.\n" +
                 "\n" +
-                "Umbrales: lo que dispara cada regla. Informe ejecutivo: PDF con todo."),
+                "Parámetros del análisis: los valores con que se decide qué recomendar. Informe ejecutivo: PDF con todo."),
 
-            ["UmbralesComercialesDialog"] = new TemaAyuda("Umbrales del motor de recomendaciones",
-                "Cada umbral decide cuándo el motor del Centro de decisiones propone una acción. Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.\n" +
+            ["UmbralesComercialesDialog"] = new TemaAyuda("Parámetros del análisis",
+                "Cada parámetro del análisis decide cuándo el Centro de decisiones propone una acción (por ejemplo, el abandono a partir del cual se sugiere una promoción). Edite la columna Valor (dentro del rango indicado) y pulse Guardar; los cambios rigen desde el próximo análisis y quedan en la bitácora.\n" +
                 "\n" +
-                "• Restablecer valores de fábrica: vuelve a los valores por defecto (sin guardar todavía).\n" +
+                "• Restablecer valores predeterminados: vuelve a los valores predeterminados (sin guardar todavía).\n" +
                 "• El descuento máximo no puede ser menor que el base."),
+
+            ["ConstanciaDecisionForm"] = new TemaAyuda("Constancia de la decisión (PN03)",
+                "Lo que se vio al aceptar, descartar o posponer una recomendación: la recomendación, la opción elegida y las alternativas, el período y el plan, los indicadores, los parámetros del análisis, los supuestos y las advertencias. Queda guardada en el sistema y no se puede editar.\n" +
+                "\n" +
+                "• Exportar XML/JSON…: el formato lo decide la extensión del archivo.\n" +
+                "• Abierta desde un archivo, se compara campo por campo con la registrada: ✔ coincide, ✖ fue modificado (con los campos que difieren) o sin registro en este sistema."),
 
             ["ReporteJornadaForm"] = new TemaAyuda("Reporte de jornada",
                 "Resumen de una jornada: eventos de negocio del día, prendas disponibles, clientes y días sin copia de seguridad.\n" +
@@ -442,7 +451,7 @@ namespace GUI.Ayuda
 
             using (var dlg = new AyudaDialog())
             {
-                dlg.Mostrar(Tr("ayuda.ventana", "Ayuda") + " — " + titulo, titulo, texto, Tr("btn.cerrar", "Cerrar"));
+                dlg.Mostrar(Tr("ayuda.ventana", "Ayuda") + ": " + titulo, titulo, texto, Tr("btn.cerrar", "Cerrar"));
                 dlg.ShowDialog(propietario);
             }
         }

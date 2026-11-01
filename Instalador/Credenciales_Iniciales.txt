@@ -1,4 +1,4 @@
-WardrobeFlow — Credenciales iniciales (usuarios semilla) — SOLO PARA LA DEMO
+WardrobeFlow: Credenciales iniciales (usuarios semilla), SOLO PARA LA DEMO
 ==============================================================================
 
 ATENCIÓN: este archivo es SOLO PARA LA DEMOSTRACIÓN ACADÉMICA. Las cuentas y
@@ -75,7 +75,7 @@ relativas al día en que se cargó (o restableció) la demo.
                                                      vencer); Tomas (pausada)
   Clientes                             admin         Gustavo DadoDeBaja NO aparece (baja lógica);
                                                      clientes sin plan por baja de suscripción
-  PN03 Sugerir Promoción / Analítica   gcomercial    2 sugerencias pendientes, 1 evaluada y 1
+  PN03 Sugerir Promoción (Centro)     gcomercial    2 sugerencias pendientes, 1 evaluada y 1
                                                      descartada; abandono por plan (el Básico
                                                      concentra las bajas del último mes); impacto
                                                      y resultado de las promociones Vencida y
@@ -84,8 +84,10 @@ relativas al día en que se cargó (o restableció) la demo.
                                                      comerciales: 6 meses de cobros, altas y bajas
                                                      por plan, pedidos y stock (tendencia creciente
                                                      con el pico de bajas del Básico en los últimos
-                                                     2 meses). Pestañas: 1. Analizar, 1b. Cohortes
-                                                     (retención por mes de alta), 2. Recomendaciones
+                                                     2 meses). Pestañas: 1. Analizar (con
+                                                     "↻ Actualizar"), 1b. Permanencia de clientes
+                                                     (clientes agrupados por el mes en que se
+                                                     suscribieron), 2. Recomendaciones
                                                      (aceptar / descartar / posponer y ejecutar la
                                                      acción), 3. Historial de decisiones (las 4
                                                      sembradas, estimado vs real), 4. Simulador,
@@ -101,10 +103,10 @@ relativas al día en que se cargó (o restableció) la demo.
                                                      Dada de baja y Vencida
   PN03 Revisión Contable               contable      "PROMO ParaDictaminar Premium -15%"
   PN03 Promociones Vigentes            vendedor      pedir la baja de una vigente
-  Ventas por vendedor (Analítica)      gcomercial    3 vendedores (Morana, Herrera, Sosa) con
+  Ventas por vendedor (menú Ventas)    gcomercial    3 vendedores (Morana, Herrera, Sosa) con
                                                      entregados y cancelados
   Rotación / Mantenimiento / Escasez   ginventario   alta demanda: Vestido Negro M (6 pedidos) y
-  (Analítica)                                        Saco Gris M (5); sin rotación: los 3
+  (menú Inventario)                                  Saco Gris M (5); sin rotación: los 3
                                                      sweaters; mantenimiento: Vestido Negro M
                                                      (6 limpiezas, ~6,7 días), Tapado Camel L
   Recomendación de Prendas             vendedor      Juan PedidoFeliz o Camila Rodríguez
@@ -132,10 +134,25 @@ relativas al día en que se cargó (o restableció) la demo.
   Gestión de Idiomas / Perfiles y      admin         idiomas ES/EN/PT/RU; roles y patentes
   Permisos / Usuarios
   Diagnóstico de Integridad            admin         DVH/DVV de todas las tablas protegidas
-  Historial de Cambios (usuarios) y    admin         usuario "vendedor": 2 versiones precargadas
-  serialización a XML/JSON                           (email anterior y actual). Exportar
+  Historial de Cambios (usuarios) y    admin         todos los usuarios de demo tienen 2 a 4
+  serialización a XML/JSON                           versiones precargadas (alta, cambio de email,
+                                                     nombre, apellido o fecha de nacimiento,
+                                                     cambio de rol, bloqueo antes del desbloqueo);
+                                                     "vendedor": email anterior y actual. Exportar
                                                      versiones…, Importar versiones… y
                                                      restaurar la versión importada
+  Constancia de la decisión (XML/JSON) gcomercial    Centro de decisiones → 3. Historial: la
+                                                     Pospuesta, la Descartada y la campaña de
+                                                     renovación tienen constancia ("Ver
+                                                     constancia", "Exportar XML/JSON…"); la
+                                                     Ejecutada de bajas del Básico no (decisión
+                                                     anterior a la 1.6.1). "Abrir constancia desde
+                                                     archivo…" con el archivo exportado: coincide;
+                                                     editando un número del archivo: «fue
+                                                     modificado» y qué campo cambió
+  Alertas                              cualquiera    "Marcar como leída" / "Marcar todas como
+                                                     leídas": el aviso "Alertas (N)" del menú deja
+                                                     de contarlas hasta que cambie la situación
   Errores serializados (XML/JSON)      auditor       Bitácora del Sistema > "Errores (XML/JSON)":
                                                      6 errores de ejemplo de esta PC. Importar
                                                      XML/JSON… > errores_PC-DEPOSITO_ejemplo
@@ -182,11 +199,13 @@ aproximados (pueden variar un poco según el día).
                           Básico y Premium), stock por categoría, prendas más y
                           menos pedidas y la tendencia de 6 meses con su
                           proyección de 3.
-  1b. Cohortes .......... 6 cohortes comparables con distinta retención. La peor
-                          es la de hace unos 5 meses (13 clientes: retiene ~69 %
-                          al mes 3 contra ~85 % del promedio) y la explica el
-                          plan Básico. "Actuar sobre la peor cohorte" lleva a la
-                          recomendación de bajas del Básico.
+  1b. Permanencia de clientes  6 grupos de clientes (agrupados por el mes en que
+                          se suscribieron) con distinta retención. El de menor
+                          permanencia es el de hace unos 5 meses (13 clientes:
+                          retiene ~69 % al mes 3 contra ~85 % del promedio) y lo
+                          explica el plan Básico. "Actuar sobre el grupo con
+                          menor permanencia" lleva a la recomendación de bajas
+                          del Básico.
   2. Recomendaciones .... "Bajas altas en el plan Básico" (33 % de bajas, 10
                           clientes en riesgo): la opción ganadora es una
                           promoción de retención del 30 % durante 60 días →
@@ -206,7 +225,14 @@ aproximados (pueden variar un poco según el día).
                           renovación en medición (4 de 5 contactados ya
                           renovaron; cierra en 10 días), la Pospuesta y la
                           Descartada con su motivo. "Registrar resultado real"
-                          propone el valor que midió el sistema.
+                          propone el valor que midió el sistema. "Ver
+                          constancia" (todas menos la Ejecutada de bajas del
+                          Básico) muestra lo que se vio al decidir y se exporta
+                          a XML/JSON; "Abrir constancia desde archivo…" la
+                          verifica contra la base.
+  Parámetros del análisis  (antes «Umbrales») los valores con los que el análisis
+                          decide qué recomendar; "Restablecer valores
+                          predeterminados".
   5. Medir resultado .... Mantener "PROMO Vencida Basico -15%" (+33 pp de
                           retención), Extender "PROMO Vigente Estandar -10%"
                           (cumple y vence en 10 días) y Dar de baja "PROMO

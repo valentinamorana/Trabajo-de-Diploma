@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// PdN5 — Renovación de suscripción. El Vendedor/Gerencia contacta al cliente por
+    /// PdN5: Renovación de suscripción. El Vendedor/Gerencia contacta al cliente por
     /// fuera del sistema (teléfono/WhatsApp/mail) y carga acá la decisión tomada; el
     /// patrón Chain of Responsibility (BLL.Manejadores) resuelve el resto.
     /// </summary>
@@ -167,7 +167,7 @@ namespace GUI
 
         // Muestra el estado de un cliente puntual. BtnProcesar_Click/BtnReanudar_Click le pasan el
         // objeto RECIÉN releído (y mutado en el lugar por la cadena de Manejadores) tras la acción,
-        // en vez de que esta vuelva a leer cmbCliente.SelectedItem — que seguiría apuntando al
+        // en vez de que esta vuelva a leer cmbCliente.SelectedItem: que seguiría apuntando al
         // ClienteItem cacheado ANTES de la acción, mostrando el estado/vencimiento anterior aunque
         // la operación ya se haya aplicado y persistido correctamente.
         private void MostrarEstadoActual(BE.Cliente c)
@@ -187,10 +187,10 @@ namespace GUI
                 case BE.EstadoVencimiento.ProximaAVencer: estado = Tr("renov.estado.porvencer", "próxima a vencer"); break;
                 default:                                  estado = Tr("renov.estado.vigente",   "vigente");          break;
             }
-            lblEstadoActual.Text = Tr("renov.estado.resumen", "Plan actual: {0} — Vencimiento: {1} ({2})",
+            lblEstadoActual.Text = Tr("renov.estado.resumen", "Plan actual: {0}; Vencimiento: {1} ({2})",
                 new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estado });
             if (c.EstaPausada)
-                lblEstadoActual.Text += " — " + Tr("renov.estado.pausadahasta", "pausada hasta {0}",
+                lblEstadoActual.Text += "; " + Tr("renov.estado.pausadahasta", "pausada hasta {0}",
                     new object[] { c.FechaPausaHasta.Value.ToString("d") });
 
             btnReanudar.Enabled = c.EstaPausada;
@@ -217,7 +217,7 @@ namespace GUI
 
             var modalidad = (BE.Builders.ModalidadCobro)cmbModalidad.SelectedItem;
 
-            // Confirmación antes de procesar — antes se ejecutaba sin ninguna, incluida la opción
+            // Confirmación antes de procesar: antes se ejecutaba sin ninguna, incluida la opción
             // "Dar de baja" (irreversible desde esta pantalla), a diferencia del resto de las
             // pantallas de Suscripciones/Promociones que sí confirman acciones sensibles.
             bool esBaja = decision == BLL.Manejadores.DecisionRenovacion.Baja;
@@ -239,7 +239,7 @@ namespace GUI
                 lblResultado.Text = Tr(resultado.Clave, resultado.Mensaje, resultado.Args);
 
                 // Recarga la lista completa (no solo el estado del cliente actual): la acción
-                // recién procesada puede haber sacado a este cliente — o metido a otros — de la
+                // recién procesada puede haber sacado a este cliente (o metido a otros) de la
                 // lista de elegibles para la decisión marcada (ej. ya no está próximo a vencer
                 // tras renovar). Sin esto, un segundo clic en "Procesar" sobre el mismo cliente
                 // reproducía el mismo rechazo confuso que este filtro buscaba evitar.

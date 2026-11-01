@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio para PN03 — Evaluar y aplicar promociones comerciales.
+    /// Lógica de negocio para PN03: Evaluar y aplicar promociones comerciales.
     ///
     /// Cada método público corresponde a una actividad del diagrama de actividad aprobado de PN03
     /// (carriles Gerencia, Administración, Contabilidad y Vendedor) y cada decisión tiene su guarda:
@@ -221,7 +221,7 @@ namespace BLL
                 Historial(0, null, BE.EstadoPromocion.EnRevisionContable, idUsuario, observacion));
             promocion.IdPromocion = idNuevo;
 
-            bitacora.Registrar(modulo, $"Alta Promoción #{idNuevo}: {promocion.Nombre} — {observacion}", BE.Criticidad.Media);
+            bitacora.Registrar(modulo, $"Alta Promoción #{idNuevo}: {promocion.Nombre}, {observacion}", BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
                 $"Promoción #{idNuevo} '{promocion.Nombre}' registrada, pendiente de revisión contable");
             return idNuevo;
@@ -400,7 +400,7 @@ namespace BLL
             promocion.Estado = BE.EstadoPromocion.DadaDeBaja;
             promocion.MotivoBaja = null;   // las solicitudes pendientes quedaron atendidas
 
-            bitacora.Registrar(modulo, $"Dar de baja Promoción #{promocion.IdPromocion}: {promocion.Nombre} — Motivo: {motivo}",
+            bitacora.Registrar(modulo, $"Dar de baja Promoción #{promocion.IdPromocion}: {promocion.Nombre}; Motivo: {motivo}",
                 BE.Criticidad.Media);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Cancelacion,
                 $"Promoción #{promocion.IdPromocion} '{promocion.Nombre}' dada de baja por Administración: {motivo}");
@@ -492,7 +492,7 @@ namespace BLL
             solicitud.IdUsuarioResuelve = atendida.IdUsuarioResuelve;
             solicitud.FechaResolucion = atendida.FechaResolucion;
 
-            bitacora.Registrar(modulo, $"Atender solicitud de baja #{solicitud.IdSolicitud} (Promoción #{solicitud.IdPromocion}): sigue vigente — {texto}",
+            bitacora.Registrar(modulo, $"Atender solicitud de baja #{solicitud.IdSolicitud} (Promoción #{solicitud.IdPromocion}): sigue vigente, {texto}",
                 BE.Criticidad.Baja);
             bitacoraNeg.Registrar(BE.TipoEventoNegocio.Venta,
                 $"Administración atendió la solicitud de baja #{solicitud.IdSolicitud}: la Promoción #{solicitud.IdPromocion} sigue Vigente. {texto}");

@@ -20,12 +20,12 @@ namespace Tests.Fakes
     /// </summary>
     public class FakePermisoDAL : IPermisoDAL
     {
-        // Si se setea, ObtenerArbol() devuelve este árbol en vez del fijo de arriba —
+        // Si se setea, ObtenerArbol() devuelve este árbol en vez del fijo de arriba:
         // usado por los tests de escritura, que necesitan controlar la forma del árbol.
         public List<BE.Componente> ArbolPersonalizado { get; set; }
 
         public Dictionary<string, int> IdsPorRol { get; set; } = new Dictionary<string, int>();
-        // Hijos DIRECTOS configurables por id de padre — usado por ObtenerIdsDirectosDelRol
+        // Hijos DIRECTOS configurables por id de padre: usado por ObtenerIdsDirectosDelRol
         // (BLL.Familia) para saber qué tiene HOY un rol antes de comparar contra una selección
         // propuesta (guard anti-autoescalación). Sin configurar, se comporta como antes (vacío).
         public Dictionary<int, List<int>> HijosPorIdPadre { get; set; } = new Dictionary<int, List<int>>();

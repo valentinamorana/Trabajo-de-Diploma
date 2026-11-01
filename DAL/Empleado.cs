@@ -6,16 +6,16 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Empleado.
+    /// Capa de Acceso a Datos: Empleado.
     /// Opera sobre la tabla [Empleado] de WardrobeFlowDB.
     /// Incluye JOIN opcional con [Usuario] para mostrar el username asociado.
     /// </summary>
     public class Empleado : BaseDAL<BE.Empleado>, Interfaces.IEmpleadoDAL
     {
-        // T07 — Definición del Dígito Verificador de esta tabla (fuente única).
+        // T07: Definición del Dígito Verificador de esta tabla (fuente única).
         public const  string   DV_Tabla    = "Empleado";
         public const  string   DV_Pk       = "IdEmpleado";
-        // Formato 2: también IdUsuario — el vínculo empleado↔usuario decide quién figura como
+        // Formato 2: también IdUsuario; el vínculo empleado↔usuario decide quién figura como
         // vendedor o cajero de cada operación (separación de funciones).
         public static readonly string[] DV_Columnas = { "Nombre", "Apellido", "DNI", "Email", "Puesto", "Legajo", "IdUsuario" };
 
@@ -25,7 +25,7 @@ namespace DAL
         public void ActualizarDV(int idEmpleado)
             => new DigitoVerificador().ActualizarFila(DV_Tabla, DV_Pk, DV_Columnas, idEmpleado);
 
-        // T07 — Para escrituras de Empleado hechas por OTRO DAL dentro de su transacción (por ejemplo
+        // T07: Para escrituras de Empleado hechas por OTRO DAL dentro de su transacción (por ejemplo
         // DAL.Usuario.EliminarFisico, que desvincula los empleados del usuario): recalcula el DVH de
         // las filas y el DVV antes del commit. El caller tiene que haber tomado el bloqueo del DV con
         // BloquearDVEnTx ANTES de escribir Empleado (si no, puede trabarse con otro recálculo).

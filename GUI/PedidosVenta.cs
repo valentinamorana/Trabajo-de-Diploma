@@ -8,7 +8,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — Módulo de Pedidos de Venta.
+    /// Capa de Presentación: Módulo de Pedidos de Venta.
     ///
     /// Permite al Vendedor:
     ///   Ver todos los pedidos realizados con su estado actual
@@ -33,7 +33,7 @@ namespace GUI
 
         private List<BE.Pedido> _pedidos = new List<BE.Pedido>();
 
-        // Idioma activo — se actualiza en Traducir() para usarlo en EstadoLabel() y ColorearFilasPedidos()
+        // Idioma activo: se actualiza en Traducir() para usarlo en EstadoLabel() y ColorearFilasPedidos()
         private Idioma _idioma = GestorIdioma.IdiomaActual;
 
         // "Documentos ▾": los documentos del pedido se imprimen a pedido, no tras cada acción.
@@ -44,7 +44,7 @@ namespace GUI
             InitializeComponent();
             menuDocumentos = new MenuDocumentosPedido(pedidoBLL, new BLL.Cliente(), ObtenerPedidoSeleccionado,
                 () => this.Text, this, ex => MostrarError(ex), (k, f) => Tr(k, f));
-            // Estilo de grilla compartido (encabezado rosa, filas alternadas) — EstiloFormulario.
+            // Estilo de grilla compartido (encabezado rosa, filas alternadas): EstiloFormulario.
             Estilos.EstiloFormulario.Grilla(dgvPedidos);
             Estilos.EstiloFormulario.Grilla(dgvDetallePrendas);
         }
@@ -132,8 +132,8 @@ namespace GUI
                         p.NombreEmpleado,
                         p.CantidadPrendas,
                         EstadoLabel(p.Estado),
-                        p.FechaDespacho.HasValue ? p.FechaDespacho.Value.ToString("d") : "—",
-                        p.FechaEntrega.HasValue  ? p.FechaEntrega.Value.ToString("d")  : "—",
+                        p.FechaDespacho.HasValue ? p.FechaDespacho.Value.ToString("d") : "-",
+                        p.FechaEntrega.HasValue  ? p.FechaEntrega.Value.ToString("d")  : "-",
                         p.MotivoCancelacion ?? p.MotivoDesistimiento ?? "",
                         (int)p.Estado);
                 }
@@ -229,7 +229,7 @@ namespace GUI
             CargarDetallePrendas(pedido.IdPedido);
 
             string motivoLabel = Tr("lbl.motivo", "Motivo:");
-            lblDetalleTitulo.Text = Tr("lbl.ped.seleccionado", "Pedido #{0} — {1} — {2}",
+            lblDetalleTitulo.Text = Tr("lbl.ped.seleccionado", "Pedido #{0}: {1}, {2}",
                 new object[] { pedido.IdPedido, pedido.NombreCliente, EstadoLabel(pedido.Estado) }) +
                 (!string.IsNullOrEmpty(pedido.MotivoCancelacion ?? pedido.MotivoDesistimiento)
                     ? $"  |  {motivoLabel} {pedido.MotivoCancelacion ?? pedido.MotivoDesistimiento}" : "");
@@ -266,8 +266,8 @@ namespace GUI
                 tabla.Columns.Add(Tr("col.prenda.estado",    "Estado"),    typeof(string));
 
                 foreach (var p in pedidoCompleto.Prendas)
-                    tabla.Rows.Add(p.Nombre, p.Categoria ?? "—",
-                        p.Talle ?? "—", p.Color ?? "—", EstadoPrendaLabel(p.Estado));
+                    tabla.Rows.Add(p.Nombre, p.Categoria ?? "-",
+                        p.Talle ?? "-", p.Color ?? "-", EstadoPrendaLabel(p.Estado));
 
                 dgvDetallePrendas.DataSource = tabla;
             }
@@ -328,7 +328,7 @@ namespace GUI
 
             // Pedir motivo de cancelación con un dialog inline
             string motivo = PedirTexto(
-                $"{Tr("dlg.cancelped.titulo", "Motivo de Cancelación")} — Pedido #{pedido.IdPedido} ({pedido.NombreCliente}):",
+                $"{Tr("dlg.cancelped.titulo", "Motivo de Cancelación")}: Pedido #{pedido.IdPedido} ({pedido.NombreCliente}):",
                 Tr("dlg.cancelped.titulo", "Motivo de Cancelación"));
 
             if (string.IsNullOrWhiteSpace(motivo))
@@ -349,7 +349,7 @@ namespace GUI
             try
             {
                 // Patrón Command (PdN3): la GUI arma el pedido de cancelación y se lo entrega
-                // al invocador — no decide nada, solo empaqueta la petición. La decisión y la
+                // al invocador: no decide nada, solo empaqueta la petición. La decisión y la
                 // ejecución real siguen 100% en BLL.Pedido.Cancelar, adentro del Command.
                 _invocador.TomarOrden(new BLL.Comandos.CancelacionCommand(pedidoBLL, pedido, this.Text, motivo));
                 _invocador.ProcesarOrdenes();
@@ -415,7 +415,7 @@ namespace GUI
 
         private string EstadoLabel(BE.EstadoPedido estado) => EstadosPedido.Etiqueta(estado);
 
-        // ── PN01 — acciones del Vendedor sobre el armado del pedido ──────────
+        // ── PN01: acciones del Vendedor sobre el armado del pedido ──────────
 
         // Relee el pedido desde la base (la grilla puede estar desactualizada si Depósito u otra
         // sesión ya lo movió). Null si ya no existe.
@@ -480,7 +480,7 @@ namespace GUI
             if (pedido == null) return;
 
             string motivo = PedirTexto(
-                string.Format(Tr("dlg.desistir.pedido", "Motivo del desistimiento — Pedido #{0} ({1}):"),
+                string.Format(Tr("dlg.desistir.pedido", "Motivo del desistimiento del pedido #{0} ({1}):"),
                     pedido.IdPedido, pedido.NombreCliente),
                 Tr("dlg.desistir.titulo", "Asentar desistimiento"));
             if (string.IsNullOrWhiteSpace(motivo))

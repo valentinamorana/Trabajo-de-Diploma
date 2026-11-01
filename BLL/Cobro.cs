@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL
 {
     /// <summary>
-    /// Lógica de negocio — Cobro de suscripción (PdN6). Arma y expone la cadena de
+    /// Lógica de negocio: Cobro de suscripción (PdN6). Arma y expone la cadena de
     /// manejadores (Chain of Responsibility) que resuelve si un cobro se confirma
     /// (y renueva la vigencia), entra en período de gracia, o suspende nuevos pedidos.
     /// </summary>
@@ -30,7 +30,7 @@ namespace BLL
             this.dalCargoPrenda = dalCargoPrenda ?? throw new ArgumentNullException(nameof(dalCargoPrenda));
             this.dalPromocion = dalPromocion;
 
-            // Arma la cadena de cola a cabeza, con sentencias sueltas — igual que el
+            // Arma la cadena de cola a cabeza, con sentencias sueltas: igual que el
             // Program.cs del ejemplo de cátedra (director.AgregarSiguiente(directorGeneral);
             // gerente.AgregarSiguiente(director); comprador.AgregarSiguiente(gerente);).
             var detectar  = new Manejadores.DetectarCobroHandler();
@@ -48,7 +48,7 @@ namespace BLL
             string modulo, BE.Cliente cliente, Manejadores.DecisionCobro decision,
             BE.Builders.ModalidadCobro modalidad, int? idMedioPago = null)
         {
-            // N01 — El cobro recurrente de la suscripción lo registra CAJA (decisión del proceso:
+            // N01: El cobro recurrente de la suscripción lo registra CAJA (decisión del proceso:
             // quien vende no cobra). Se gobierna por la patente de edición de Caja; la de
             // mnuCobroSuscripcion solo controla que el ítem de menú/pantalla sea visible.
             PermisosAccion.Exigir(BE.Patentes.CajaEditar, BE.Patentes.Caja);
@@ -68,7 +68,7 @@ namespace BLL
                     "{0} tiene una contratación pendiente de pago: la suscripción se define cuando Caja la cobre o la cancele.",
                     cliente.NombreCompleto);
 
-            // N01 — como en PN02, un cobro exitoso registra con qué medio pagó el cliente.
+            // N01: como en PN02, un cobro exitoso registra con qué medio pagó el cliente.
             if (decision == Manejadores.DecisionCobro.Cobrado)
             {
                 if (!idMedioPago.HasValue)
@@ -92,12 +92,12 @@ namespace BLL
             var resultado = cadena.Procesar(contexto);
 
             bitacora.Registrar(modulo,
-                $"Cobro Cliente ID {cliente.IdCliente} ({cliente.NombreCompleto}): {resultado.Estado} — {resultado.Mensaje}",
+                $"Cobro Cliente ID {cliente.IdCliente} ({cliente.NombreCompleto}): {resultado.Estado}, {resultado.Mensaje}",
                 resultado.Estado == BE.EstadoCobro.Pendiente ? BE.Criticidad.Baja : BE.Criticidad.Media);
 
             if (resultado.Estado != BE.EstadoCobro.Pendiente)
                 bitacoraNeg.Registrar(BE.TipoEventoNegocio.CobroSuscripcion,
-                    $"Cobro de suscripción: {cliente.NombreCompleto} — {resultado.Estado} — {resultado.Mensaje}",
+                    $"Cobro de suscripción: {cliente.NombreCompleto}, {resultado.Estado}, {resultado.Mensaje}",
                     idCliente: cliente.IdCliente);
 
             return resultado;

@@ -208,7 +208,7 @@ namespace GUI
             this.lblDetalleContenido.Name      = "lblDetalleContenido";
             this.lblDetalleContenido.TabIndex  = 1;
 
-            // btnAnotarEspera — Lista de Espera (mejora opcional, no requerida por la
+            // btnAnotarEspera: Lista de Espera (mejora opcional, no requerida por la
             // cátedra, ver README): anotar un cliente para esta prenda EnUso.
             this.btnAnotarEspera.Left      = 760;
             this.btnAnotarEspera.Top       = 18;

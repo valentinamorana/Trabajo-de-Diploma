@@ -2,7 +2,7 @@ using System;
 
 namespace BE
 {
-    /// <summary>PdN10 — Fila del reporte de Análisis de Abandono: un cliente que la
+    /// <summary>PdN10: Fila del reporte de Análisis de Abandono: un cliente que la
     /// estrategia activa marcó en riesgo, con el motivo ya resuelto.</summary>
     public class ClienteEnRiesgo
     {
@@ -17,7 +17,7 @@ namespace BE
         /// <summary>Nombre de la estrategia que lo marcó (BLL.Estrategias.EstrategiaRiesgo.ToString()).</summary>
         public string Estrategia { get; set; }
 
-        /// <summary>Motivo ya formateado en español — fallback si Clave no está en el corpus.</summary>
+        /// <summary>Motivo ya formateado en español: fallback si Clave no está en el corpus.</summary>
         public string Motivo { get; set; }
 
         /// <summary>Clave de traducción (Servicios.Multiidioma) para mostrar el motivo en el idioma activo.</summary>

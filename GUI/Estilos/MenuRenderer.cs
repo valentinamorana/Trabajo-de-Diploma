@@ -9,7 +9,7 @@ namespace GUI.Estilos
     /// <summary>
     /// Renderer visual del menú principal (GUI.Menu). En vez del MenuStrip plano por
     /// defecto de WinForms, cada ítem de primer nivel se pinta como un "chip" redondeado
-    /// con fondo propio por área funcional — separados entre sí por el propio fondo rosa
+    /// con fondo propio por área funcional: separados entre sí por el propio fondo rosa
     /// de la barra (vía Margin en cada ítem, ver Menu.AplicarEstiloMenu), así se leen como
     /// botones independientes en vez de una fila continua.
     ///
@@ -18,7 +18,7 @@ namespace GUI.Estilos
     /// un resaltado redondeado suave al pasar el mouse. Los separadores se dibujan como
     /// 3 puntos centrados en vez de la línea clásica.
     ///
-    /// Pura presentación (colores/formas de GDI+) — no hay decisiones de negocio acá.
+    /// Pura presentación (colores/formas de GDI+): no hay decisiones de negocio acá.
     /// </summary>
     public class MenuRenderer : ToolStripProfessionalRenderer
     {
@@ -26,7 +26,7 @@ namespace GUI.Estilos
         private static readonly Color ResaltadoDropdown = Tema.RosaPalido;
         private static readonly Color ColorResaltoSistema = Tema.FondoInfo;
 
-        // Paleta por Name del ítem de primer nivel — un color por área funcional. Los
+        // Paleta por Name del ítem de primer nivel: un color por área funcional. Los
         // ítems que ya gestionan su propio texto dinámicamente (Sesión/Alertas) reciben
         // un fondo neutro/oscuro acorde para que ese texto siga siendo legible.
         private static readonly Dictionary<string, Color> _paleta =
@@ -50,7 +50,7 @@ namespace GUI.Estilos
             Math.Max(0, c.R - cantidad), Math.Max(0, c.G - cantidad), Math.Max(0, c.B - cantidad));
 
         // Busca el color de categoría subiendo por la cadena de OwnerItem hasta encontrar
-        // un ítem de primer nivel conocido — así un ítem dentro de un submenú anidado
+        // un ítem de primer nivel conocido: así un ítem dentro de un submenú anidado
         // (ej. "Administración de Usuarios" dentro de Usuarios ▸ dentro de Administrar) hereda el
         // color de "Administrar", no un default genérico.
         private static Color ColorCategoria(ToolStripItem item)
@@ -87,7 +87,7 @@ namespace GUI.Estilos
 
             // ── Ítem dentro de un dropdown: fondo blanco + franja de acento a la izquierda ──
             // Excepción: los 3 ítems de "Sistema" (grpSistema) traen su propio BackColor
-            // celeste desde el Designer (resalte distintivo ya existente) — se respeta en
+            // celeste desde el Designer (resalte distintivo ya existente): se respeta en
             // vez de taparlo con blanco, para no perder esa señal visual.
             var rectItem = new Rectangle(Point.Empty, item.Size);
             Color fondoDropdown = item.BackColor.ToArgb() == ColorResaltoSistema.ToArgb()
@@ -133,7 +133,7 @@ namespace GUI.Estilos
         {
             // La barra en sí mantiene el color de marca fijado en el Designer (menuStrip1);
             // los dropdown quedan blancos, sin el degradé celeste del renderer profesional
-            // default — cada ítem pinta su propio fondo en OnRenderMenuItemBackground.
+            // default: cada ítem pinta su propio fondo en OnRenderMenuItemBackground.
             Color fondo = e.ToolStrip is MenuStrip ? e.ToolStrip.BackColor : Color.White;
             using (var br = new SolidBrush(fondo))
                 e.Graphics.FillRectangle(br, e.AffectedBounds);

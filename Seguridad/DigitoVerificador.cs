@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Seguridad
 {
     /// <summary>
-    /// T07 Dígitos Verificadores — algoritmo robusto (DVH + DVV).
+    /// T07 Dígitos Verificadores: algoritmo robusto (DVH + DVV).
     ///
     /// Vive en Seguridad porque no depende de ninguna otra capa del sistema,
     /// lo que permite que tanto DAL como BLL la usen sin crear dependencias circulares.
@@ -14,7 +14,7 @@ namespace Seguridad
     ///   DVV: suma ponderada de DVH × posición-de-fila, módulo primo grande.
     ///        Detecta inserción, eliminación o reordenamiento de filas.
     ///
-    /// MÓDULO: 999_983 (primo) — ~100.000× más resistente a colisiones que mod 10.
+    /// MÓDULO: 999_983 (primo); ~100.000× más resistente a colisiones que mod 10.
     ///   Con mod 10 → 10 posibles DVH.
     ///   Con mod 999.983 → hasta 999.983 posibles DVH.
     ///

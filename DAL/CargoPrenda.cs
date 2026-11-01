@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 
 namespace DAL
 {
-    /// <summary>Acceso a datos de la tabla [CargoPrenda] (cargo por daño/pérdida — Bloque 1).</summary>
+    /// <summary>Acceso a datos de la tabla [CargoPrenda] (cargo por daño/pérdida: Bloque 1).</summary>
     public class CargoPrenda : BaseDAL<BE.CargoPrenda>, Interfaces.ICargoPrendaDAL
     {
         private const string SELECT_BASE =
@@ -73,7 +73,7 @@ namespace DAL
         }
 
         // Igual que MarcarCobrado individual, pero para todos los cargos Pendientes que
-        // ProcesarPagoHandler suma a un mismo cobro — sobre la transacción ya abierta por
+        // ProcesarPagoHandler suma a un mismo cobro: sobre la transacción ya abierta por
         // DAL.Cliente.EjecutarTransaccion, junto con el INSERT de HistorialCobro (ver DAL.Cobro.AltaEnTx).
         public bool MarcarCobradosEnTx(SqlConnection conexion, SqlTransaction tx, List<int> idsCargo, DateTime fechaCobro)
         {

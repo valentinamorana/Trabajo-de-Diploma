@@ -46,7 +46,7 @@ namespace GUI
             this.btnGenerar.UseVisualStyleBackColor = true;
             this.btnGenerar.Click += new System.EventHandler(this.BtnGenerar_Click);
 
-            // ── pnlFiltros — filtros propios del reporte (criterio, umbral, cliente); vacío si no tiene ──
+            // ── pnlFiltros: filtros propios del reporte (criterio, umbral, cliente); vacío si no tiene ──
             this.pnlFiltros.Anchor   = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.pnlFiltros.Location = new Point(15, 40);
             this.pnlFiltros.Name     = "pnlFiltros";

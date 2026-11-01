@@ -57,7 +57,7 @@ namespace GUI
             this.lblUsuarioCap.Tag       = "perfil.usuario";
             this.lblUsuarioCap.Text      = "Usuario:";
 
-            // ── lblUsuarioVal — el texto final (username) se completa en el constructor ─
+            // ── lblUsuarioVal: el texto final (username) se completa en el constructor ─
             this.lblUsuarioVal.AutoSize = true;
             this.lblUsuarioVal.Font     = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblUsuarioVal.Location = new System.Drawing.Point(170, 52);
@@ -73,7 +73,7 @@ namespace GUI
             this.lblPerfilCap.Tag       = "perfil.perfil";
             this.lblPerfilCap.Text      = "Perfil / Rol:";
 
-            // ── lblPerfilVal — el texto final (perfil) se completa en el constructor ─
+            // ── lblPerfilVal: el texto final (perfil) se completa en el constructor ─
             this.lblPerfilVal.AutoSize = true;
             this.lblPerfilVal.Font     = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblPerfilVal.Location = new System.Drawing.Point(170, 76);
@@ -90,7 +90,7 @@ namespace GUI
             this.lblSeccion.Tag       = "perfil.seccion";
             this.lblSeccion.Text      = "Preferencias";
 
-            // ── lblIdiomaCap / cmbIdioma — Items se cargan en vivo desde BD ─────
+            // ── lblIdiomaCap / cmbIdioma: Items se cargan en vivo desde BD ─────
             this.lblIdiomaCap.AutoSize  = true;
             this.lblIdiomaCap.ForeColor = System.Drawing.Color.FromArgb(90, 90, 100);
             this.lblIdiomaCap.Location  = new System.Drawing.Point(24, 141);

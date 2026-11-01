@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace BE
 {
     /// <summary>
-    /// A02 Serialización — raíz del archivo (XML o JSON) con el historial de versiones (Mementos) de
+    /// A02 Serialización: raíz del archivo (XML o JSON) con el historial de versiones (Mementos) de
     /// UN usuario. Lo arma y lo valida BLL.VersionUsuario (Exportar / Importar) y lo escribe/lee el
     /// serializador del formato elegido (Servicios.Serializacion.SerializadorXml / SerializadorJson).
     /// Desde un archivo importado se puede restaurar al usuario a una de sus versiones con el mismo

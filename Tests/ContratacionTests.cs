@@ -9,7 +9,7 @@ using Tests.Fakes;
 namespace Tests
 {
     /// <summary>
-    /// BLL.Contratacion — PN02 (Comercialización de la suscripción), una prueba por rama del
+    /// BLL.Contratacion: PN02 (Comercialización de la suscripción), una prueba por rama del
     /// diagrama de actividad aprobado. Carril Vendedor: Identificar cliente, Presentar planes,
     /// Asentar desistimiento, ¿Contratación válida? y Registrar contratación. Carril Caja:
     /// Confirmar cobro → Emitir comprobante → Activar suscripción (vía el doble
@@ -460,7 +460,7 @@ namespace Tests
         public void ConfirmarCobro_ContratacionInexistente_LanzaInexistente_SinTocarElDAL()
         {
             // Revalida contra el estado FRESCO de la BD (dalContratacion.ObtenerPorId), no el
-            // objeto que trae el caller — cubre el caso de que otra sesión de Caja ya la haya
+            // objeto que trae el caller: cubre el caso de que otra sesión de Caja ya la haya
             // cobrado/eliminado en el ínterin. ContratacionPorId queda null (default del Fake).
             LoginComoAdministrador();
             var ctx = new Contexto();

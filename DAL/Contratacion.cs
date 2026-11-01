@@ -6,12 +6,12 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — Contratacion (PN02, Comercialización de la suscripción).
+    /// Capa de Acceso a Datos: Contratacion (PN02, Comercialización de la suscripción).
     /// Tablas: Contratacion, ContratacionIntentoPago, MedioPago y DesistimientoContratacion.
     /// </summary>
     public class Contratacion : BaseDAL, Interfaces.IContratacionDAL
     {
-        // T07 — Dígito Verificador (formato 2): la contratación tiene el dinero cobrado, quién
+        // T07: Dígito Verificador (formato 2): la contratación tiene el dinero cobrado, quién
         // vendió y quién cobró. Una alteración por SQL (por ejemplo del importe o de IdCaja)
         // queda detectada por la verificación de integridad.
         public const  string   DV_Tabla    = "Contratacion";
@@ -24,7 +24,7 @@ namespace DAL
             "IdReferenteAcreditado", "IdPlanCuotas", "RecargoCuotas", "CreditoCambioPlan", "MotivoAnulacion"
         };
 
-        // T07 — Cada escritura recalcula el DVH de la fila y el DVV en la MISMA transacción, con el
+        // T07: Cada escritura recalcula el DVH de la fila y el DVV en la MISMA transacción, con el
         // bloqueo del DV tomado antes de escribir (DigitoVerificador.EscribirConDV). Si el recálculo
         // falla se revierte también la escritura: antes el DV se recalculaba después del commit y su
         // error se tragaba, y el arranque marcaba la base como manipulada.

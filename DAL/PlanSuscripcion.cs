@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// Capa de Acceso a Datos — PlanSuscripcion.
+    /// Capa de Acceso a Datos: PlanSuscripcion.
     /// Opera sobre la tabla [PlanSuscripcion] de WardrobeFlowDB.
     /// </summary>
     public class PlanSuscripcion : BaseDAL<BE.PlanSuscripcion>, Interfaces.IPlanSuscripcionDAL
@@ -32,7 +32,7 @@ namespace DAL
             return lista;
         }
 
-        // Devuelve todos los planes (activos e inactivos) — para administración.
+        // Devuelve todos los planes (activos e inactivos): para administración.
         public override List<BE.PlanSuscripcion> ObtenerTodos()
         {
             var lista = new List<BE.PlanSuscripcion>();

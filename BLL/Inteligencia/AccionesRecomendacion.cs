@@ -5,7 +5,7 @@ using System.Linq;
 namespace BLL.Inteligencia
 {
     /// <summary>
-    /// PN03 «Aplicar» — Qué exige y qué hace cada acción de una recomendación aceptada. Toda opción del motor
+    /// PN03 «Aplicar»: Qué exige y qué hace cada acción de una recomendación aceptada. Toda opción del motor
     /// ejecuta una operación que el sistema ya tiene; acá se decide (pura, probada) qué patente de edición
     /// pide además de la del Centro de decisiones y a qué estado lleva las prendas.
     /// </summary>

@@ -123,7 +123,7 @@ namespace BLL
             dalTraduccion.GuardarTraduccion(idControl, idIdioma, texto.Trim());
         }
 
-        // ── Controles (textos traducibles del sistema) — T05 ─────────────────────
+        // ── Controles (textos traducibles del sistema): T05 ─────────────────────
 
         // Todos los controles traducibles, para el grid de Controles del FormIdiomas.
         public List<BE.Control> ObtenerControles()

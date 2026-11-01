@@ -4,7 +4,7 @@ using System.Linq;
 namespace BLL.Inteligencia.Reglas
 {
     /// <summary>
-    /// PN03 «Recomendar / decidir» — Patrón STRATEGY: cada regla de negocio del motor es una estrategia
+    /// PN03 «Recomendar / decidir»: Patrón STRATEGY: cada regla de negocio del motor es una estrategia
     /// intercambiable que mira el contexto comercial y devuelve cero o más recomendaciones. El motor
     /// (BLL.Inteligencia.MotorRecomendaciones) las recorre todas, como una cadena de evaluadores
     /// independientes: agregar una regla es agregar una clase, sin tocar las demás. Cada regla es pura

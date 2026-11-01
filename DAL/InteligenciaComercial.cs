@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 namespace DAL
 {
     /// <summary>
-    /// PN03 «Inteligencia comercial» — lecturas crudas para el Centro de decisiones comerciales.
+    /// PN03 «Inteligencia comercial»: lecturas crudas para el Centro de decisiones comerciales.
     /// Cada consulta trae filas sin calcular nada: MRR, % de bajas, proyecciones y reglas los resuelve
     /// BLL.Inteligencia (testeable con un doble de <see cref="Interfaces.IInteligenciaComercialDAL"/>).
     /// Los umbrales del motor se guardan en ParametroSistema con el prefijo "Comercial.".

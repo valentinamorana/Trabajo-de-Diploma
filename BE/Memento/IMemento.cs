@@ -3,7 +3,7 @@ using System;
 namespace BE.Memento
 {
     /// <summary>
-    /// Patrón MEMENTO — rol "Memento".
+    /// Patrón MEMENTO: rol "Memento".
     ///
     /// Cápsula que guarda una "foto" del estado interno de un Originator.
     /// El estado concreto es opaco para el Caretaker: este solo accede a los

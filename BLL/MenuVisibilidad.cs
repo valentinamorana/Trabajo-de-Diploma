@@ -6,12 +6,12 @@ namespace BLL
 {
     /// <summary>
     /// Lógica PURA de qué ítems del menú principal quedan visibles según las patentes
-    /// efectivas del usuario — extraída de GUI.Menu.AplicarPermisos para poder testearla
+    /// efectivas del usuario: extraída de GUI.Menu.AplicarPermisos para poder testearla
     /// sin instanciar la UI (WinForms exige STA y no tiene sentido levantar un Form solo
     /// para verificar una decisión de datos). Mismo criterio de separación que
     /// BLL.PanelAlertas.EvaluarAlertas: la DECISIÓN vive acá (testeable, sin BD ni UI),
     /// GUI.Menu.AplicarPermisos solo APLICA el resultado a los ToolStripMenuItem reales
-    /// buscándolos por su .Name — esta clase es la ÚNICA fuente de verdad del mapeo
+    /// buscándolos por su .Name: esta clase es la ÚNICA fuente de verdad del mapeo
     /// patente → ítem de menú; si Menu.cs y esta clase difieren, es un bug.
     /// </summary>
     public static class MenuVisibilidad
@@ -26,22 +26,22 @@ namespace BLL
             ("cobroSuscripcionToolStripMenuItem",      "mnuCobroSuscripcion"),
             ("pedidosVentaToolStripMenuItem",          "mnuPedidosVenta"),
             ("pedidosRealizadosToolStripMenuItem",     "mnuPedidosRealizados"),
-            // PN02 — Comercialización de la suscripción. Nueva Contratación la ve quien ya
+            // PN02: Comercialización de la suscripción. Nueva Contratación la ve quien ya
             // gestiona Clientes (Venta); Contrataciones Pendientes es exclusivo del rol Caja.
             ("nuevaContratacionToolStripMenuItem",      "mnuClientes"),
             ("contratacionesPendientesToolStripMenuItem", "mnuCaja"),
-            // PN03 — Inteligencia comercial y promociones. El Centro de decisiones comerciales es de
-            // Gerencia: lo gobierna la misma patente que Sugerir Promoción (no hace falta una nueva).
+            // PN03: Inteligencia comercial y promociones. El Centro de decisiones comerciales es de
+            // Gerencia: lo gobierna la patente de Gerencia (mnuSugerenciaPromocion). «Sugerir Promoción»
+            // ya no tiene ítem propio: se abre desde el Centro (aceptar una recomendación o proponer un escenario).
             ("centroDecisionesToolStripMenuItem",              "mnuSugerenciaPromocion"),
-            ("sugerirPromocionToolStripMenuItem",              "mnuSugerenciaPromocion"),
             ("gestionPromocionesToolStripMenuItem",             "mnuPromocionesAdmin"),
             ("revisionContablePromocionesToolStripMenuItem",    "mnuPromocionesContable"),
             ("promocionesVigentesToolStripMenuItem",            "mnuPromocionesVigentes"),
-            // PN01 — Control de Stock (Depósito = carril "Controlador de Stock" del diagrama).
+            // PN01: Control de Stock (Depósito = carril "Controlador de Stock" del diagrama).
             ("controlStockToolStripMenuItem",          "mnuControlStock"),
-            // PN04 — Inspección de Devolución (Depósito = rol Deposito).
+            // PN04: Inspección de Devolución (Depósito = rol Deposito).
             ("inspeccionDevolucionToolStripMenuItem",  "mnuInspeccionDevolucion"),
-            // Mejora opcional (no requerida por la cátedra) — ver README.
+            // Mejora opcional (no requerida por la cátedra): ver README.
             ("listaEsperaToolStripMenuItem",           "mnuListaEspera"),
             // Bloque "Administrar" + "Sistema": todo gobernado por la patente de gestión.
             ("usuariosToolStripMenuItem",              "mnuUsuarios"),
@@ -107,15 +107,15 @@ namespace BLL
                 "pedidosVentaToolStripMenuItem", "pedidosRealizadosToolStripMenuItem", "recomendacionPrendasToolStripMenuItem",
                 "analisisAbandonoToolStripMenuItem", "ventasVendedorToolStripMenuItem"
             }),
-            // PN02 — rol Caja, separado de Vendedor.
+            // PN02: rol Caja, separado de Vendedor.
             // El cobro recurrente (N01) también es de Caja: quien vende no cobra.
             ("cajaToolStripMenuItem", new[] { "contratacionesPendientesToolStripMenuItem", "cobroSuscripcionToolStripMenuItem" }),
-            // PN03 — Gerencia (GerenteComercial), Administración y Contabilidad (roles nuevos)
+            // PN03: Gerencia (GerenteComercial), Administración y Contabilidad (roles nuevos)
             // y Vendedor conviven en un mismo grupo de menú; cada hoja sigue gobernada por su
             // propia patente, el grupo solo se muestra si alguna es visible.
             ("promocionesToolStripMenuItem", new[]
             {
-                "centroDecisionesToolStripMenuItem", "sugerirPromocionToolStripMenuItem", "gestionPromocionesToolStripMenuItem",
+                "centroDecisionesToolStripMenuItem", "gestionPromocionesToolStripMenuItem",
                 "revisionContablePromocionesToolStripMenuItem", "promocionesVigentesToolStripMenuItem"
             }),
             // "Analítica" se partió en dos menúes de primer nivel (antes eran 9 ítems en un

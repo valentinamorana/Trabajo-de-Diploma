@@ -62,7 +62,7 @@ namespace BLL.Inteligencia.Reglas
                         intensivos.Count, plan.Nombre, plan.LimitePrendas, superior.Nombre, superior.LimitePrendas, diferencia),
                     Motivo = T("rec.upgrade.motivo",
                         "Quien usa todo su cupo valora el servicio: es el cliente más propenso a pagar por más prendas."),
-                    Detalle = intensivos.Select(c => $"{c.NombreCompleto} — {c.Email} — {c.PrendasEnUso}/{plan.LimitePrendas}").ToList()
+                    Detalle = intensivos.Select(c => $"{c.NombreCompleto}: {c.Email}, {c.PrendasEnUso}/{plan.LimitePrendas}").ToList()
                 };
                 ElegirMejorOpcion(rec,
                     Opcion(T("rec.upgrade.opcion", "Exportar los contactos y ofrecerles el plan {0}", superior.Nombre),

@@ -3,7 +3,7 @@ using System.Linq;
 namespace BE
 {
     /// <summary>
-    /// PN03 — Texto que arma la BLL (diagnóstico, motivo, interpretación de un KPI) y que la GUI
+    /// PN03: Texto que arma la BLL (diagnóstico, motivo, interpretación de un KPI) y que la GUI
     /// muestra en el idioma activo: clave de traducción + texto en español (fallback) + argumentos
     /// para string.Format. Mismo criterio que ClienteEnRiesgo.Clave/Motivo/Args, pero en un objeto
     /// para poder anidarlo (un argumento puede ser otro TextoTraducible, por ejemplo el nombre de

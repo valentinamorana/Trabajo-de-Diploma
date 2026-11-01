@@ -228,7 +228,7 @@ namespace BLL.Inteligencia
             if (matriz.Cohortes.Count == 0)
             {
                 matriz.MotivoSinPeor = new BE.TextoTraducible("cdc.cohorte.sinpeor.sindatos",
-                    "No hay altas de suscriptores en los últimos 12 meses: no hay cohortes que comparar.");
+                    "No hay altas de suscriptores en los últimos 12 meses: no hay grupos que comparar.");
                 return;
             }
             int kMax = Math.Min(matriz.MesComparacion, matriz.MaximoDesplazamiento);
@@ -239,7 +239,7 @@ namespace BLL.Inteligencia
             if (kComparacion < 0)
             {
                 matriz.MotivoSinPeor = new BE.TextoTraducible("cdc.cohorte.sinpeor.pocas",
-                    "Para elegir la peor cohorte hacen falta al menos 2 cohortes de {0} o más clientes con un mes completo; todavía no las hay.",
+                    "Para elegir el grupo con menor permanencia hacen falta al menos 2 grupos de {0} o más clientes con un mes completo; todavía no los hay.",
                     matriz.MinimoClientes);
                 return;
             }
@@ -255,7 +255,7 @@ namespace BLL.Inteligencia
             if (celda.Activos >= peor.Tamanio)
             {
                 matriz.MotivoSinPeor = new BE.TextoTraducible("cdc.cohorte.sinpeor.todas",
-                    "Todas las cohortes comparables retienen el 100 % al mes {0}: no hay una cohorte peor que las demás.", kComparacion);
+                    "Todos los grupos comparables retienen el 100 % al mes {0}: ninguno tiene menor permanencia que los demás.", kComparacion);
                 return;
             }
 
@@ -292,10 +292,10 @@ namespace BLL.Inteligencia
                 : new BE.TextoTraducible("cdc.cohorte.sindato", "sin dato");
             if (p.IdPlan == null)
                 return new BE.TextoTraducible("cdc.cohorte.peor.sinplan",
-                    "La peor cohorte es la de {0:yyyy-MM} ({1} clientes): retiene el {2:0.#} % al mes {3}, contra el {4} del promedio. No se pudo identificar el plan de sus bajas.",
+                    "Los clientes que se suscribieron en {0:yyyy-MM} ({1} clientes) son el grupo con menor permanencia: retienen el {2:0.#} % al mes {3}, contra el {4} del promedio. No se pudo identificar el plan de sus bajas.",
                     p.Mes, p.Tamanio, p.Retencion, p.Desplazamiento, promedio);
             return new BE.TextoTraducible("cdc.cohorte.peor",
-                "La peor cohorte es la de {0:yyyy-MM} ({1} clientes): retiene el {2:0.#} % al mes {3}, contra el {4} del promedio. El plan {5} explica {6} de sus {7} baja(s).",
+                "Los clientes que se suscribieron en {0:yyyy-MM} ({1} clientes) son el grupo con menor permanencia: retienen el {2:0.#} % al mes {3}, contra el {4} del promedio. El plan {5} explica {6} de sus {7} baja(s).",
                 p.Mes, p.Tamanio, p.Retencion, p.Desplazamiento, promedio, p.NombrePlan, p.BajasDelPlan, p.Bajas);
         }
 
@@ -322,7 +322,7 @@ namespace BLL.Inteligencia
         {
             if (peor?.IdPlan == null)
                 return new BE.TextoTraducible("cdc.cohorte.sinrec.sinplan",
-                    "No se pudo identificar el plan que explica las bajas de la cohorte: no hay una recomendación de bajas a la cual ir.");
+                    "No se pudo identificar el plan que explica las bajas del grupo: no hay una recomendación de bajas a la cual ir.");
             var plan = ctx?.Planes?.FirstOrDefault(x => x.IdPlan == peor.IdPlan.Value);
             if (plan == null || plan.Precio <= 0)
                 return new BE.TextoTraducible("cdc.cohorte.sinrec.fueraanalisis",
@@ -340,7 +340,7 @@ namespace BLL.Inteligencia
                     "El plan {0} no tenía clientes al inicio del período analizado: no hay un % de bajas con el que el motor pueda evaluarlo.",
                     plan.Nombre);
             return new BE.TextoTraducible("cdc.cohorte.sinrec.umbral",
-                "El % de bajas del plan {0} en el período analizado ({1}) no llega al umbral de {2:0.#} % ni subió {3:0.#} pp: el motor no generó la recomendación de bajas.",
+                "El % de bajas del plan {0} en el período analizado ({1}) no llega al límite de {2:0.#} % de los parámetros del análisis ni subió {3:0.#} pp: no se generó la recomendación de bajas.",
                 plan.Nombre, plan.Churn.Value.ToString("0.#") + " %",
                 CatalogoUmbrales.Valor(ctx, CatalogoUmbrales.ChurnAltoPct), CatalogoUmbrales.Valor(ctx, CatalogoUmbrales.SubidaChurnPp));
         }

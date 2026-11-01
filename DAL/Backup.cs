@@ -154,7 +154,7 @@ namespace DAL
             }
         }
 
-        // RNF-02 — Verifica que un archivo .bak sea un backup VÁLIDO y no esté corrupto,
+        // RNF-02: Verifica que un archivo .bak sea un backup VÁLIDO y no esté corrupto,
         // usando RESTORE VERIFYONLY (chequea integridad del conjunto de backup sin restaurar).
         // Lanza excepción si el backup es ilegible/corrupto. Se llama ANTES de cualquier restauración.
         public void VerificarBackup(string rutaArchivo)
@@ -183,7 +183,7 @@ namespace DAL
             }
         }
 
-        // RF-08 — Devuelve la fecha en que se completó el backup (BackupFinishDate del header),
+        // RF-08: Devuelve la fecha en que se completó el backup (BackupFinishDate del header),
         // para informar al administrador el alcance de la pérdida antes de restaurar.
         // Retorna null si no puede leerse el header.
         public DateTime? ObtenerFechaBackup(string rutaArchivo)
@@ -218,7 +218,7 @@ namespace DAL
             return null;
         }
 
-        // RF-08 — Cuenta, sobre la base de datos ACTUAL (en vivo), los registros con fecha
+        // RF-08: Cuenta, sobre la base de datos ACTUAL (en vivo), los registros con fecha
         // POSTERIOR a la del backup: son exactamente los que se perderían al restaurar.
         // Se recorren las tablas de negocio que llevan marca temporal. Cada tabla se cuenta
         // de forma independiente y tolerante a fallos (si una no existe en una BD legacy,
@@ -276,11 +276,11 @@ namespace DAL
             try
             {
                 // Copiar PRIMERO a una ubicación legible por la cuenta de SQL Server, y recién ahí
-                // verificar/restaurar. (La app puede leer el origen aunque SQL no — ej. %TEMP% del
+                // verificar/restaurar. (La app puede leer el origen aunque SQL no: ej. %TEMP% del
                 // usuario o Documentos. Antes se hacía VERIFYONLY sobre el origen → Access denied.)
                 File.Copy(rutaOrigen, rutaTemp, true);
 
-                // RNF-02 — No se restaura un backup corrupto: validar integridad de la copia accesible.
+                // RNF-02: No se restaura un backup corrupto: validar integridad de la copia accesible.
                 VerificarBackup(rutaTemp);
 
                 // El RESTORE va en TRY/CATCH: si falla (disco lleno, corrupción que VERIFYONLY no

@@ -7,7 +7,7 @@ using Servicios.Multiidioma;
 namespace GUI
 {
     /// <summary>
-    /// PdN6 — Cobro de suscripción. Caja intenta cobrar (fuera del sistema:
+    /// PdN6: Cobro de suscripción. Caja intenta cobrar (fuera del sistema:
     /// efectivo/transferencia, sin pasarela) y carga acá el resultado; el patrón Chain
     /// of Responsibility (BLL.Manejadores) resuelve el resto: confirma la renovación,
     /// aplica un período de gracia, o suspende nuevos pedidos.
@@ -41,7 +41,7 @@ namespace GUI
             CargarClientes();
         }
 
-        // N01 — medios de pago vigentes (el mismo catálogo que Caja usa en PN02).
+        // N01: medios de pago vigentes (el mismo catálogo que Caja usa en PN02).
         private void CargarMediosPago()
         {
             try
@@ -107,7 +107,7 @@ namespace GUI
             string estadoPago = c.EstaSuspendidoPorPago ? Tr("cobro.estado.suspendido", "SUSPENDIDO por falta de pago")
                                : c.EstaEnGracia          ? Tr("cobro.estado.engracia", "en gracia hasta {0:d}", new object[] { c.FechaLimiteGracia })
                                                           : Tr("cobro.estado.aldia", "al día");
-            lblEstadoActual.Text = Tr("cobro.estado.resumen", "Plan: {0} — Vencimiento: {1}\nEstado de pago: {2}",
+            lblEstadoActual.Text = Tr("cobro.estado.resumen", "Plan: {0}; Vencimiento: {1}\nEstado de pago: {2}",
                 new object[] { c.NombrePlan ?? Tr("susc.sinplan", "sin plan"), vencimiento, estadoPago });
 
             MostrarTotal();
@@ -161,7 +161,7 @@ namespace GUI
                 return;
             }
 
-            // Confirmación antes de procesar — antes se ejecutaba sin ninguna, en la pantalla que
+            // Confirmación antes de procesar: antes se ejecutaba sin ninguna, en la pantalla que
             // efectivamente mueve dinero (mismo criterio que ya aplican Planes/Promociones/
             // Contrataciones para acciones sensibles).
             string pregunta = Tr("conf.cobro.procesar.msg", "¿Procesar este cobro para {0}?", new object[] { item.Cliente.NombreCompleto });

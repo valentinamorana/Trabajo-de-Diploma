@@ -8,7 +8,7 @@ using Docs = GUI.Exportacion.DocumentosPromocion;
 namespace GUI
 {
     /// <summary>
-    /// Capa de Presentación — PN03, carril Administración del diagrama de actividad (rol
+    /// Capa de Presentación: PN03, carril Administración del diagrama de actividad (rol
     /// AdministracionComercial):
     ///   ¿Acepta la sugerencia? Sí: Crear promoción desde la sugerencia; No: Descartar sugerencia.
     ///   Crear promoción manual. ¿Reformular? Sí: Reformular; No: Dar de baja.
@@ -162,7 +162,7 @@ namespace GUI
                 foreach (var s in _sugerencias)
                     tabla.Rows.Add(s.IdSugerencia, Docs.AplicaA(s.IdPlan, s.NombrePlan),
                         Docs.Origen(s.OrigenMetrica), s.Motivo, Docs.Tipo(s.TipoDescuentoSugerido),
-                        s.BeneficioEstimado, s.NombreUsuarioAlta ?? "—");
+                        s.BeneficioEstimado, s.NombreUsuarioAlta ?? "-");
 
                 dgvSugerencias.DataSource = tabla;
                 if (dgvSugerencias.Columns.Contains("ID")) dgvSugerencias.Columns["ID"].Width = 44;
@@ -242,8 +242,8 @@ namespace GUI
                 tabla.Columns.Add("Fecha", typeof(string));
 
                 foreach (var s in _solicitudes)
-                    tabla.Rows.Add(s.IdSolicitud, $"#{s.IdPromocion} — {s.NombrePromocion}", s.Motivo,
-                        s.NombreUsuarioSolicita ?? "—", s.FechaSolicitud.ToString("g"));
+                    tabla.Rows.Add(s.IdSolicitud, $"#{s.IdPromocion}: {s.NombrePromocion}", s.Motivo,
+                        s.NombreUsuarioSolicita ?? "-", s.FechaSolicitud.ToString("g"));
 
                 dgvSolicitudes.DataSource = tabla;
                 if (dgvSolicitudes.Columns.Contains("ID")) dgvSolicitudes.Columns["ID"].Width = 44;
@@ -321,7 +321,7 @@ namespace GUI
                 foreach (var p in _promociones)
                     tabla.Rows.Add(p.IdPromocion, p.Nombre, Docs.AplicaA(p.IdPlan, p.NombrePlan),
                         Docs.Estado(p.Estado), $"{p.FechaInicio:d} - {p.FechaFin:d}",
-                        p.NombreUsuarioAlta ?? "—", p.MotivoBaja ?? "—");
+                        p.NombreUsuarioAlta ?? "-", p.MotivoBaja ?? "-");
 
                 dgvPromociones.DataSource = tabla;
                 if (dgvPromociones.Columns.Contains("ID")) dgvPromociones.Columns["ID"].Width = 44;
@@ -403,10 +403,10 @@ namespace GUI
             try
             {
                 var lineas = promocionBLL.ObtenerHistorial(p.IdPromocion).ConvertAll(h =>
-                    $"{h.Fecha:g} — {(h.EstadoAnterior.HasValue ? Docs.Estado(h.EstadoAnterior.Value) : "—")} → " +
-                    $"{Docs.Estado(h.EstadoNuevo)} ({h.NombreUsuario ?? "—"}){(string.IsNullOrWhiteSpace(h.Observacion) ? "" : ": " + h.Observacion)}");
-                MessageBox.Show(lineas.Count == 0 ? "—" : string.Join("\n", lineas),
-                    Tr("lbl.promo.historial.titulo", "Historial de estados — Promoción #{0}", new object[] { p.IdPromocion }),
+                    $"{h.Fecha:g}, {(h.EstadoAnterior.HasValue ? Docs.Estado(h.EstadoAnterior.Value) : "-")} → " +
+                    $"{Docs.Estado(h.EstadoNuevo)} ({h.NombreUsuario ?? "-"}){(string.IsNullOrWhiteSpace(h.Observacion) ? "" : ": " + h.Observacion)}");
+                MessageBox.Show(lineas.Count == 0 ? "-" : string.Join("\n", lineas),
+                    Tr("lbl.promo.historial.titulo", "Historial de estados: Promoción #{0}", new object[] { p.IdPromocion }),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex) { MostrarError(ex); }

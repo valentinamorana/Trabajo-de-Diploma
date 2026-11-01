@@ -186,7 +186,7 @@ namespace GUI
             this.btnExterno.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnExterno.Click    += new System.EventHandler(this.btnExterno_Click);
 
-            // ── btnInicial — RF-06, backup de instalación limpia ────────────────
+            // ── btnInicial: RF-06, backup de instalación limpia ────────────────
             this.btnInicial.BackColor = System.Drawing.Color.FromArgb(70, 110, 90);
             this.btnInicial.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnInicial.FlatAppearance.BorderSize = 0;
@@ -201,7 +201,7 @@ namespace GUI
             this.btnInicial.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnInicial.Click    += new System.EventHandler(this.btnInicial_Click);
 
-            // ── btnIntervalo — backup automático al iniciar sesión ───────────────
+            // ── btnIntervalo: backup automático al iniciar sesión ───────────────
             this.btnIntervalo.BackColor                         = System.Drawing.Color.FromArgb(230, 225, 230);
             this.btnIntervalo.FlatStyle                         = System.Windows.Forms.FlatStyle.Flat;
             this.btnIntervalo.FlatAppearance.BorderSize         = 0;
@@ -216,7 +216,7 @@ namespace GUI
             this.btnIntervalo.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnIntervalo.Click    += new System.EventHandler(this.btnIntervalo_Click);
 
-            // ── btnRestablecerDemo — borra los datos de negocio y recarga la demo ──
+            // ── btnRestablecerDemo: borra los datos de negocio y recarga la demo ──
             this.btnRestablecerDemo.BackColor                         = System.Drawing.Color.FromArgb(250, 235, 235);
             this.btnRestablecerDemo.FlatStyle                         = System.Windows.Forms.FlatStyle.Flat;
             this.btnRestablecerDemo.FlatAppearance.BorderSize         = 1;

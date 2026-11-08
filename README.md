@@ -6,6 +6,7 @@ Desarrollado en C# / .NET Framework 4.7.2 / Windows Forms / SQL Server.
 **Materia:** Trabajo de Diploma, UAI 2026
 **Autora:** Valentina Morana
 **Versión actual:** 1.6.1, instalador firmado en [GitHub Releases](https://github.com/valentinamorana/Trabajo-de-Diploma/releases/tag/v1.6.1) (tag `v1.6.1`)
+**Documento de la tesis:** [docs/tesis.pdf](docs/tesis.pdf) · **Diagramas UML:** [docs/diagramas](docs/diagramas) (ver [Documentación y diagramas](#documentación-y-diagramas))
 
 ---
 
@@ -56,6 +57,8 @@ GUI (WinForms MDI)
 
 La GUI nunca accede a DAL ni a Seguridad directamente. Toda la lógica de negocio y las validaciones viven en BLL. Los formularios solo capturan eventos, invocan BLL y muestran resultados.
 
+![Arquitectura: capas de la solución y sus dependencias](docs/diagramas/Global%20-%20Soluci%C3%B3n%20por%20capas/Arquitectura%20%E2%80%94%20capas%20de%20la%20soluci%C3%B3n%20y%20sus%20dependencias.png)
+
 ---
 
 ## Estructura del repositorio
@@ -69,10 +72,35 @@ Instalador/                               Script de Inno Setup, DbInstaller (cli
                                           y credenciales iniciales. El .exe se genera en
                                           Instalador/Salida/ y no se versiona: el instalador
                                           firmado se distribuye como GitHub Release
+docs/tesis.pdf                            Documento del Trabajo de Diploma (versión final 1.6.1)
+docs/diagramas/                           Diagramas UML exportados de Enterprise Architect, por proceso
 WardrobeFlow.slnx                         Solución de Visual Studio
 ```
 
-Los diagramas (casos de uso, clases, secuencia, actividad y DER) están en el modelo de Enterprise Architect (`.eapx`), que se mantiene fuera del repositorio (`*.eapx` está en `.gitignore`).
+---
+
+## Documentación y diagramas
+
+El documento completo del Trabajo de Diploma está en **[docs/tesis.pdf](docs/tesis.pdf)**. Los diagramas se exportaron del modelo de Enterprise Architect y están en [`docs/diagramas/`](docs/diagramas), una carpeta por proceso o módulo. Los diagramas muy grandes ("completo") están en PDF, que es vectorial y se puede ampliar sin perder nitidez; el resto, en PNG. El modelo `.eapx` (unos 100 MB) no se versiona (`*.eapx` está en `.gitignore`).
+
+| Carpeta | Qué contiene |
+|---------|--------------|
+| [PN01 Armar pedido de prendas](docs/diagramas/PN01%20-%20Armar%20pedido%20de%20prendas) | Actividad, casos de uso, modelo conceptual, clases, DER, patrón Command y 11 DSS |
+| [PN02 Comercialización de la suscripción](docs/diagramas/PN02%20-%20Comercializaci%C3%B3n%20de%20la%20suscripci%C3%B3n) | Actividad, casos de uso, modelo conceptual, clases (con Chain of Responsibility), DER, patrón Builder y 13 DSS |
+| [PN03 Evaluar promociones comerciales](docs/diagramas/PN03%20-%20Evaluar%20promociones%20comerciales) | Actividad, casos de uso, modelo conceptual, clases, DER, patrón Strategy y 25 DSS |
+| [PN04 Inspeccionar prendas devueltas](docs/diagramas/PN04%20-%20Inspeccionar%20prendas%20devueltas) | Actividad, casos de uso, modelo conceptual, clases, DER, patrón State y 2 DSS |
+| [Solución por capas](docs/diagramas/Global%20-%20Soluci%C3%B3n%20por%20capas) | Arquitectura y diagramas de clases de GUI, BLL, DAL, BE, Seguridad y Servicios |
+| [Modelo de datos](docs/diagramas/Global%20-%20Modelo%20de%20Datos) | Modelo de datos de negocio (clientes y cobros, pedidos e inventario, promociones) y de seguridad |
+| [Navegación MDI](docs/diagramas/Navegaci%C3%B3n%20MDI) | Menú principal, qué abre cada formulario y qué ve cada uno de los 10 roles |
+| [Instalador](docs/diagramas/Instalador) | Casos de uso y actividad de la instalación y la desinstalación |
+| [A02 Informe PDF](docs/diagramas/A02%20-%20Informe%20PDF%20(Factory%20Method)) | Patrón Factory Method para la exportación de reportes |
+| [A03 Serialización](docs/diagramas/A03%20-%20Serializaci%C3%B3n) | Casos de uso, clases y 3 DSS de la serialización XML y JSON |
+| [T02.1 Login](docs/diagramas/T02.1%20-%20Login) · [T02.2 Logout](docs/diagramas/T02.2%20-%20Logout) · [T04 Perfiles](docs/diagramas/T04%20-%20Gesti%C3%B3n%20de%20Perfiles) · [T05 Idiomas](docs/diagramas/T05%20-%20M%C3%BAltiples%20Idiomas) · [T06a Bitácora](docs/diagramas/T06a%20-%20Bit%C3%A1cora) · [T06b Control de cambios](docs/diagramas/T06b%20-%20Control%20de%20Cambios) · [T07 Dígitos verificadores](docs/diagramas/T07%20-%20D%C3%ADgitos%20Verificadores) · [T08 Backup](docs/diagramas/T08%20-%20Backup%20y%20Restauraci%C3%B3n) | Módulos técnicos: casos de uso, clases, DER y DSS de cada uno |
+
+| | |
+|---|---|
+| ![Modelo de datos: clientes, suscripción y cobros](docs/diagramas/Global%20-%20Modelo%20de%20Datos/Modelo%20de%20datos%20%E2%80%94%20Negocio%20-%20clientes%2C%20suscripci%C3%B3n%20y%20cobros.png) | ![Actividad: PN01 Armar pedido de prendas](docs/diagramas/PN01%20-%20Armar%20pedido%20de%20prendas/Actividad%20%E2%80%94%20PN01%20Armar%20pedido%20de%20prendas.png) |
+| ![Patrón State: ciclo de vida de una prenda](docs/diagramas/PN04%20-%20Inspeccionar%20prendas%20devueltas/Patr%C3%B3n%20State%20%E2%80%94%20Ciclo%20de%20vida%20de%20una%20prenda.png) | ![Navegación MDI: qué ve cada rol](docs/diagramas/Navegaci%C3%B3n%20MDI/MDI%20%E2%80%94%20Qu%C3%A9%20ve%20cada%20rol%20(matriz).png) |
 
 ---
 

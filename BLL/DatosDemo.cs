@@ -4,7 +4,7 @@ namespace BLL
 {
     /// <summary>
     /// "Restablecer datos de demo" (Administración → Backup): vuelve a dejar la base con los datos de
-    /// prueba de la instalación, con las fechas corridas a HOY, para la defensa. Pasos:
+    /// prueba de la instalación, con las fechas corridas a HOY,. Pasos:
     ///   1. Solo un Administrador con sesión vigente.
     ///   2. Backup de resguardo previo (.bak sin cifrar en la carpeta de backups; verifica antes la
     ///      integridad, RF-04). Si no se puede hacer, NO se restablece nada.

@@ -2,7 +2,7 @@ WardrobeFlow: Credenciales iniciales (usuarios semilla), SOLO PARA LA DEMO
 ==============================================================================
 
 ATENCIÓN: este archivo es SOLO PARA LA DEMOSTRACIÓN ACADÉMICA. Las cuentas y
-contraseñas de abajo son FIJAS a propósito, para la presentación y defensa del
+contraseñas de abajo son FIJAS a propósito, para la presentación del
 trabajo, y este archivo es público (lo puede leer cualquier usuario del
 equipo). En una implementación real hay que cambiar todas estas contraseñas
 en el primer uso: el Administrador entra en Administrar > Usuarios >
@@ -250,7 +250,7 @@ Guía de primer uso
 En el primer ingreso de cada usuario se abre "Bienvenido a WardrobeFlow" (5
 pasos para su rol) y vuelve a aparecer en cada ingreso hasta marcar "No volver
 a mostrar al iniciar sesión"; se reabre desde Sesión → Ver guía de inicio.
-Para que no aparezca durante la defensa, ejecute la aplicación con el
+Para que no aparezca, ejecute la aplicación con el
 parámetro /singuia (por ejemplo: GUI.exe /singuia).
 
 Después de actualizar desde 1.5.0 (paso obligatorio)
@@ -263,9 +263,9 @@ historia que usan el Centro de decisiones, las cohortes y el Informe ejecutivo
 (se ven pestañas vacías o incompletas). El instalador no la recarga solo
 porque borraría los datos cargados.
 
-Restablecer los datos de demo (antes de la defensa)
----------------------------------------------------
-Restablecer como máximo 2 días antes de la defensa: las fechas de la demo son
+Restablecer los datos de demo
+-----------------------------
+Usarla dentro de los 2 días siguientes a restablecerla: las fechas de la demo son
 relativas al día en que se cargan (la reserva de la lista de espera dura 48 h,
 "por vencer" es a 5 días, el pedido atrasado tiene 35 días...).
   - Desde la app: admin → Administrar → Sistema → Backup y Restauración →

@@ -333,7 +333,7 @@ namespace Tests
             {
                 string ruta = Ruta("constancia_editada" + ext);
                 bll.Exportar("Test", id, ruta);
-                // Demo de la defensa: se edita un número en el archivo (el impacto de la opción elegida).
+                // Demo: se edita un número en el archivo (el impacto de la opción elegida).
                 string texto = File.ReadAllText(ruta, Encoding.UTF8);
                 string editado = texto.Replace("12345.67", "99999.99");
                 Assert.AreNotEqual(texto, editado, ext + ": el número tenía que estar en el archivo.");

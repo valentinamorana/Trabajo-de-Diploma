@@ -152,4 +152,4 @@ La especificación completa de PN03 (reglas, fórmulas, umbrales configurables y
 - Backups manuales cifrados con AES-128 y verificados con HMAC-SHA256 (encrypt-then-MAC).
 - Manejo global de excepciones: el detalle técnico queda en la bitácora y el usuario ve un mensaje genérico.
 
-> Las cuentas de demostración del instalador tienen claves fijas, a propósito, para la defensa del trabajo. Un despliegue real debe cambiarlas. Ver la [referencia técnica](docs/referencia-tecnica.md#características-de-seguridad).
+> Las cuentas de demostración del instalador tienen claves fijas, a propósito. Un despliegue real debe cambiarlas. Ver la [referencia técnica](docs/referencia-tecnica.md#características-de-seguridad).

@@ -9,7 +9,7 @@
 -- PN03: cohortes, recomendaciones, decisiones, metas y promociones para medir; ver
 -- BD/00_Instalacion_Completa.sql, sección 21z3b).
 -- Usuarios, planes, permisos, traducciones y bitácora del sistema se conservan.
--- Restablecer como máximo 2 días antes de la defensa.
+-- Usarla dentro de los 2 días siguientes al restablecimiento (las fechas son relativas a hoy).
 --
 -- Uso (HACER UN BACKUP ANTES: se pierden los datos de negocio actuales):
 --   1. Ejecutar este script sobre WardrobeFlowDB.

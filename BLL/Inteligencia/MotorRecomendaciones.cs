@@ -14,7 +14,7 @@ namespace BLL.Inteligencia
     /// <see cref="ResultadoMotor.ReglasConError"/> y la pantalla lo avisa. Las reglas son puras: el motor no
     /// toca la base (el contexto lo arma BLL.Inteligencia.InteligenciaComercial).
     ///
-    /// Reglas por defecto (README, sección PN03): las 7 terminan en una acción ejecutable al aceptarlas.
+    /// Reglas por defecto (docs/referencia-tecnica.md, sección PN03): las 7 terminan en una acción ejecutable al aceptarlas.
     ///   ChurnPlan · Renovaciones · Escasez · BajaRotacion · Mantenimiento · RendimientoPromocion · UpgradePlan
     /// (Vendedores y OcupacionStock se retiraron: solo registraban la decisión, sin operación que ejecutar.)
     /// </summary>
